@@ -649,7 +649,7 @@ public final class SQLiteDatabase extends SQLiteClosable {
      * successful so far. Do not call setTransactionSuccessful before calling this. When this
      * returns a new transaction will have been created but not marked as successful.
      * @return true if the transaction was yielded
-     * @deprecated if the db is locked more than once (becuase of nested transactions) then the lock
+     * @deprecated if the db is locked more than once (because of nested transactions) then the lock
      *   will not be yielded. Use yieldIfContendedSafely instead.
      */
     @Deprecated
