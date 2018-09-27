@@ -44,6 +44,8 @@ public class SharedLogTest {
         final SharedLog logLevel2a = logTop.forSubComponent("twoA");
         final SharedLog logLevel2b = logTop.forSubComponent("twoB");
         logLevel2b.e("2b or not 2b");
+        logLevel2b.e("No exception", null);
+        logLevel2b.e("Wait, here's one", new Exception("Test"));
         logLevel2a.w("second post?");
 
         final SharedLog logLevel3 = logLevel2a.forSubComponent("three");
@@ -54,6 +56,9 @@ public class SharedLogTest {
         final String[] expected = {
             " - MARK first post!",
             " - [twoB] ERROR 2b or not 2b",
+            " - [twoB] ERROR No exception",
+            // No stacktrace in shared log, only in logcat
+            " - [twoB] ERROR Wait, here's one: Test",
             " - [twoA] WARN second post?",
             " - still logging",
             " - [twoA.three] 3 >> 2",
