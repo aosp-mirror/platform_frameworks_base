@@ -618,7 +618,8 @@ void VulkanManager::createBuffers(VulkanSurface* surface, VkFormat format, VkExt
         VulkanSurface::ImageInfo& imageInfo = surface->mImageInfos[i];
         imageInfo.mSurface = SkSurface::MakeFromBackendRenderTarget(
                 mRenderThread.getGrContext(), backendRT, kTopLeft_GrSurfaceOrigin,
-                kRGBA_8888_SkColorType, nullptr, &props);
+                surface->mColorMode == ColorMode::WideColorGamut ? kRGBA_F16_SkColorType
+                : kRGBA_8888_SkColorType, nullptr, &props);
     }
 
     SkASSERT(mCommandPool != VK_NULL_HANDLE);
@@ -733,24 +734,22 @@ bool VulkanManager::createSwapchain(VulkanSurface* surface) {
                     ? VK_COMPOSITE_ALPHA_INHERIT_BIT_KHR
                     : VK_COMPOSITE_ALPHA_OPAQUE_BIT_KHR;
 
-    // Pick our surface format. For now, just make sure it matches our sRGB request:
-    VkFormat surfaceFormat = VK_FORMAT_UNDEFINED;
+    VkFormat surfaceFormat = VK_FORMAT_R8G8B8A8_UNORM;
     VkColorSpaceKHR colorSpace = VK_COLORSPACE_SRGB_NONLINEAR_KHR;
-
-    bool wantSRGB = false;
-#ifdef ANDROID_ENABLE_LINEAR_BLENDING
-    wantSRGB = true;
-#endif
+    if (surface->mColorMode == ColorMode::WideColorGamut) {
+        surfaceFormat = VK_FORMAT_R16G16B16A16_SFLOAT;
+        colorSpace = VK_COLOR_SPACE_EXTENDED_SRGB_NONLINEAR_EXT;
+    }
+    bool foundSurfaceFormat = false;
     for (uint32_t i = 0; i < surfaceFormatCount; ++i) {
-        // We are assuming we can get either R8G8B8A8_UNORM or R8G8B8A8_SRGB
-        VkFormat desiredFormat = wantSRGB ? VK_FORMAT_R8G8B8A8_SRGB : VK_FORMAT_R8G8B8A8_UNORM;
-        if (desiredFormat == surfaceFormats[i].format) {
-            surfaceFormat = surfaceFormats[i].format;
-            colorSpace = surfaceFormats[i].colorSpace;
+        if (surfaceFormat == surfaceFormats[i].format
+                && colorSpace == surfaceFormats[i].colorSpace) {
+            foundSurfaceFormat = true;
+            break;
         }
     }
 
-    if (VK_FORMAT_UNDEFINED == surfaceFormat) {
+    if (!foundSurfaceFormat) {
         return false;
     }
 
@@ -812,14 +811,14 @@ bool VulkanManager::createSwapchain(VulkanSurface* surface) {
     return true;
 }
 
-VulkanSurface* VulkanManager::createSurface(ANativeWindow* window) {
+VulkanSurface* VulkanManager::createSurface(ANativeWindow* window, ColorMode colorMode) {
     initialize();
 
     if (!window) {
         return nullptr;
     }
 
-    VulkanSurface* surface = new VulkanSurface();
+    VulkanSurface* surface = new VulkanSurface(colorMode);
 
     VkAndroidSurfaceCreateInfoKHR surfaceCreateInfo;
     memset(&surfaceCreateInfo, 0, sizeof(VkAndroidSurfaceCreateInfoKHR));
