@@ -48,7 +48,6 @@ import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_PLACING_SU
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_WILL_PLACE_SURFACES;
 import static com.android.server.wm.WindowManagerService.WINDOWS_FREEZING_SCREENS_NONE;
 import static com.android.server.wm.WindowManagerService.logSurface;
-import static com.android.server.wm.WindowSurfacePlacer.SET_FORCE_HIDING_CHANGED;
 import static com.android.server.wm.WindowSurfacePlacer.SET_ORIENTATION_CHANGE_COMPLETE;
 import static com.android.server.wm.WindowSurfacePlacer.SET_UPDATE_ROTATION;
 import static com.android.server.wm.WindowSurfacePlacer.SET_WALLPAPER_ACTION_PENDING;
@@ -91,7 +90,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
     private static final int SET_SCREEN_BRIGHTNESS_OVERRIDE = 1;
     private static final int SET_USER_ACTIVITY_TIMEOUT = 2;
 
-    private boolean mWallpaperForceHidingChanged = false;
     private Object mLastWindowFreezeSource = null;
     private Session mHoldScreen = null;
     private float mScreenBrightness = -1;
@@ -626,18 +624,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
             recentsAnimationController.checkAnimationReady(mWallpaperController);
         }
 
-        if (mWallpaperForceHidingChanged && defaultDisplay.pendingLayoutChanges == 0
-                && !mService.mAppTransition.isReady()) {
-            // At this point, there was a window with a wallpaper that was force hiding other
-            // windows behind it, but now it is going away. This may be simple -- just animate away
-            // the wallpaper and its window -- or it may be hard -- the wallpaper now needs to be
-            // shown behind something that was hidden.
-            defaultDisplay.pendingLayoutChanges |= FINISH_LAYOUT_REDO_LAYOUT;
-            if (DEBUG_LAYOUT_REPEATS) surfacePlacer.debugLayoutRepeats(
-                    "after animateAwayWallpaperLocked", defaultDisplay.pendingLayoutChanges);
-        }
-        mWallpaperForceHidingChanged = false;
-
         if (mWallpaperMayChange) {
             if (DEBUG_WALLPAPER_LIGHT) Slog.v(TAG, "Wallpaper may change!  Adjusting");
             defaultDisplay.pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
@@ -959,10 +945,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
         }
         if ((bulkUpdateParams & SET_WALLPAPER_MAY_CHANGE) != 0) {
             mWallpaperMayChange = true;
-            doRequest = true;
-        }
-        if ((bulkUpdateParams & SET_FORCE_HIDING_CHANGED) != 0) {
-            mWallpaperForceHidingChanged = true;
             doRequest = true;
         }
         if ((bulkUpdateParams & SET_ORIENTATION_CHANGE_COMPLETE) == 0) {
