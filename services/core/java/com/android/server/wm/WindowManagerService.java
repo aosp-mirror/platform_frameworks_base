@@ -227,6 +227,7 @@ import android.view.WindowManagerGlobal;
 import android.view.WindowManagerPolicyConstants.PointerEventListener;
 
 import com.android.internal.R;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.internal.policy.IShortcutService;
@@ -2712,6 +2713,11 @@ public class WindowManagerService extends IWindowManager.Stub
             mAppTransition.updateBooster();
             mRecentsAnimationController.initialize(targetActivityType, recentTaskIds);
         }
+    }
+
+    @VisibleForTesting
+    void setRecentsAnimationController(RecentsAnimationController controller) {
+        mRecentsAnimationController = controller;
     }
 
     public RecentsAnimationController getRecentsAnimationController() {
