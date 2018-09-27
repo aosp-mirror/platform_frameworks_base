@@ -209,7 +209,7 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
 
     public SurfaceView(Context context, AttributeSet attrs, int defStyleAttr, int defStyleRes) {
         super(context, attrs, defStyleAttr, defStyleRes);
-        mRenderNode.requestPositionUpdates(this);
+        mRenderNode.requestPositionUpdates(mPositionListener);
 
         setWillNotDraw(true);
     }
@@ -826,81 +826,80 @@ public class SurfaceView extends View implements ViewRootImpl.WindowStoppedCallb
 
     private Rect mRTLastReportedPosition = new Rect();
 
-    /**
-     * Called by native by a Rendering Worker thread to update the window position
-     * @hide
-     */
-    @UnsupportedAppUsage
-    public final void updateSurfacePosition_renderWorker(long frameNumber,
-            int left, int top, int right, int bottom) {
-        if (mSurfaceControl == null) {
-            return;
-        }
+    private RenderNode.PositionUpdateListener mPositionListener =
+            new RenderNode.PositionUpdateListener() {
 
-        // TODO: This is teensy bit racey in that a brand new SurfaceView moving on
-        // its 2nd frame if RenderThread is running slowly could potentially see
-        // this as false, enter the branch, get pre-empted, then this comes along
-        // and reports a new position, then the UI thread resumes and reports
-        // its position. This could therefore be de-sync'd in that interval, but
-        // the synchronization would violate the rule that RT must never block
-        // on the UI thread which would open up potential deadlocks. The risk of
-        // a single-frame desync is therefore preferable for now.
-        mRtHandlingPositionUpdates = true;
-        if (mRTLastReportedPosition.left == left
-                && mRTLastReportedPosition.top == top
-                && mRTLastReportedPosition.right == right
-                && mRTLastReportedPosition.bottom == bottom) {
-            return;
-        }
-        try {
-            if (DEBUG) {
-                Log.d(TAG, String.format("%d updateSurfacePosition RenderWorker, frameNr = %d, " +
-                        "postion = [%d, %d, %d, %d]", System.identityHashCode(this),
-                        frameNumber, left, top, right, bottom));
+        @Override
+        public void positionChanged(long frameNumber, int left, int top, int right, int bottom) {
+            if (mSurfaceControl == null) {
+                return;
             }
-            mRTLastReportedPosition.set(left, top, right, bottom);
-            setParentSpaceRectangle(mRTLastReportedPosition, frameNumber);
-            // Now overwrite mRTLastReportedPosition with our values
-        } catch (Exception ex) {
-            Log.e(TAG, "Exception from repositionChild", ex);
-        }
-    }
 
-    /**
-     * Called by native on RenderThread to notify that the view is no longer in the
-     * draw tree. UI thread is blocked at this point.
-     * @hide
-     */
-    @UnsupportedAppUsage
-    public final void surfacePositionLost_uiRtSync(long frameNumber) {
-        if (DEBUG) {
-            Log.d(TAG, String.format("%d windowPositionLost, frameNr = %d",
-                    System.identityHashCode(this), frameNumber));
+            // TODO: This is teensy bit racey in that a brand new SurfaceView moving on
+            // its 2nd frame if RenderThread is running slowly could potentially see
+            // this as false, enter the branch, get pre-empted, then this comes along
+            // and reports a new position, then the UI thread resumes and reports
+            // its position. This could therefore be de-sync'd in that interval, but
+            // the synchronization would violate the rule that RT must never block
+            // on the UI thread which would open up potential deadlocks. The risk of
+            // a single-frame desync is therefore preferable for now.
+            mRtHandlingPositionUpdates = true;
+            if (mRTLastReportedPosition.left == left
+                    && mRTLastReportedPosition.top == top
+                    && mRTLastReportedPosition.right == right
+                    && mRTLastReportedPosition.bottom == bottom) {
+                return;
+            }
+            try {
+                if (DEBUG) {
+                    Log.d(TAG, String.format(
+                            "%d updateSurfacePosition RenderWorker, frameNr = %d, "
+                                    + "postion = [%d, %d, %d, %d]",
+                            System.identityHashCode(this), frameNumber,
+                            left, top, right, bottom));
+                }
+                mRTLastReportedPosition.set(left, top, right, bottom);
+                setParentSpaceRectangle(mRTLastReportedPosition, frameNumber);
+                // Now overwrite mRTLastReportedPosition with our values
+            } catch (Exception ex) {
+                Log.e(TAG, "Exception from repositionChild", ex);
+            }
         }
-        mRTLastReportedPosition.setEmpty();
 
-        if (mSurfaceControl == null) {
-            return;
-        }
-        if (mRtHandlingPositionUpdates) {
-            mRtHandlingPositionUpdates = false;
-            // This callback will happen while the UI thread is blocked, so we can
-            // safely access other member variables at this time.
-            // So do what the UI thread would have done if RT wasn't handling position
-            // updates.
-            if (!mScreenRect.isEmpty() && !mScreenRect.equals(mRTLastReportedPosition)) {
-                try {
-                    if (DEBUG) Log.d(TAG, String.format("%d updateSurfacePosition, " +
-                            "postion = [%d, %d, %d, %d]", System.identityHashCode(this),
-                            mScreenRect.left, mScreenRect.top,
-                            mScreenRect.right, mScreenRect.bottom));
-                    setParentSpaceRectangle(mScreenRect, frameNumber);
-                } catch (Exception ex) {
-                    Log.e(TAG, "Exception configuring surface", ex);
+        @Override
+        public void positionLost(long frameNumber) {
+            if (DEBUG) {
+                Log.d(TAG, String.format("%d windowPositionLost, frameNr = %d",
+                        System.identityHashCode(this), frameNumber));
+            }
+            mRTLastReportedPosition.setEmpty();
+
+            if (mSurfaceControl == null) {
+                return;
+            }
+            if (mRtHandlingPositionUpdates) {
+                mRtHandlingPositionUpdates = false;
+                // This callback will happen while the UI thread is blocked, so we can
+                // safely access other member variables at this time.
+                // So do what the UI thread would have done if RT wasn't handling position
+                // updates.
+                if (!mScreenRect.isEmpty() && !mScreenRect.equals(mRTLastReportedPosition)) {
+                    try {
+                        if (DEBUG) {
+                            Log.d(TAG, String.format("%d updateSurfacePosition, "
+                                            + "postion = [%d, %d, %d, %d]",
+                                    System.identityHashCode(this),
+                                    mScreenRect.left, mScreenRect.top,
+                                    mScreenRect.right, mScreenRect.bottom));
+                        }
+                        setParentSpaceRectangle(mScreenRect, frameNumber);
+                    } catch (Exception ex) {
+                        Log.e(TAG, "Exception configuring surface", ex);
+                    }
                 }
             }
         }
-    }
+    };
 
     private SurfaceHolder.Callback[] getSurfaceCallbacks() {
         SurfaceHolder.Callback callbacks[];

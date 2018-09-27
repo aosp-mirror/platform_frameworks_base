@@ -19,6 +19,7 @@ package android.view;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
+import android.graphics.BaseRecordingCanvas;
 import android.graphics.Bitmap;
 import android.graphics.CanvasProperty;
 import android.graphics.Paint;
@@ -35,7 +36,7 @@ import dalvik.annotation.optimization.FastNative;
  *
  * @hide
  */
-public final class DisplayListCanvas extends RecordingCanvas {
+public final class DisplayListCanvas extends BaseRecordingCanvas {
     // The recording canvas pool should be large enough to handle a deeply nested
     // view hierarchy because display lists are generated recursively.
     private static final int POOL_LIMIT = 25;

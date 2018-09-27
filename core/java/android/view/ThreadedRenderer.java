@@ -25,7 +25,6 @@ import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.graphics.drawable.AnimatedVectorDrawable;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
@@ -914,8 +913,7 @@ public final class ThreadedRenderer {
         nRegisterAnimatingRenderNode(mRootNode.mNativeRenderNode, animator.mNativeRenderNode);
     }
 
-    void registerVectorDrawableAnimator(
-        AnimatedVectorDrawable.VectorDrawableAnimatorRT animator) {
+    void registerVectorDrawableAnimator(NativeVectorDrawableAnimator animator) {
         nRegisterVectorDrawableAnimator(mRootNode.mNativeRenderNode,
                 animator.getAnimatorNativePtr());
     }
