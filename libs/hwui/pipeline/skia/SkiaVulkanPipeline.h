@@ -43,8 +43,6 @@ public:
     void onStop() override;
     bool isSurfaceReady() override;
     bool isContextReady() override;
-    SkColorType getSurfaceColorType() const override;
-    sk_sp<SkColorSpace> getSurfaceColorSpace() override;
 
     static void invokeFunctor(const renderthread::RenderThread& thread, Functor* functor);
     static sk_sp<Bitmap> allocateHardwareBitmap(renderthread::RenderThread& thread,

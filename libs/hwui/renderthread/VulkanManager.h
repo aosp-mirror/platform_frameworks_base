@@ -118,10 +118,6 @@ public:
     // Creates a fence that is signaled, when all the pending Vulkan commands are flushed.
     status_t createReleaseFence(sp<Fence>& nativeFence);
 
-    // TODO(b/115636873): Handle composition preference.
-    SkColorType getSurfaceColorType() const { return SkColorType::kN32_SkColorType; }
-    sk_sp<SkColorSpace> getSurfaceColorSpace() { return SkColorSpace::MakeSRGB(); }
-
 private:
     friend class RenderThread;
 

@@ -17,7 +17,6 @@
 #define DEVICEINFO_H
 
 #include <ui/DisplayInfo.h>
-#include <ui/GraphicTypes.h>
 
 #include "utils/Macros.h"
 
@@ -37,9 +36,6 @@ public:
     // this value is only valid after the GPU has been initialized and there is a valid graphics
     // context or if you are using the HWUI_NULL_GPU
     int maxTextureSize() const;
-
-    ui::Dataspace getTargetDataSpace() const { return mTargetDataSpace; }
-    ui::PixelFormat getTargetPixelFormat() const { return mTargetPixelFormat; }
     const DisplayInfo& displayInfo() const { return mDisplayInfo; }
 
 private:
@@ -50,10 +46,6 @@ private:
 
     int mMaxTextureSize;
     DisplayInfo mDisplayInfo;
-
-    // TODO(lpy) Replace below with android_ prefix types.
-    ui::Dataspace mTargetDataSpace;
-    ui::PixelFormat mTargetPixelFormat;
 };
 
 } /* namespace uirenderer */

@@ -386,7 +386,7 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, clip_replace) {
 RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, context_lost) {
     auto pipeline = std::make_unique<SkiaOpenGLPipeline>(renderThread);
     EXPECT_FALSE(pipeline->isSurfaceReady());
-    EXPECT_TRUE(pipeline->setSurface((Surface*)0x01, SwapBehavior::kSwap_default, ColorMode::Legacy));
+    EXPECT_TRUE(pipeline->setSurface((Surface*)0x01, SwapBehavior::kSwap_default, ColorMode::SRGB));
     EXPECT_TRUE(pipeline->isSurfaceReady());
     renderThread.destroyGlContext();
     EXPECT_FALSE(pipeline->isSurfaceReady());
