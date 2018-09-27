@@ -368,10 +368,12 @@ public class RemoteViews implements Parcelable, Filter {
                 // TODO: Unregister this handler if PendingIntent.FLAG_ONE_SHOT?
                 Context context = view.getContext();
                 ActivityOptions opts = getActivityOptions(context);
+                // The NEW_TASK flags are applied through the activity options and not as a part of
+                // the call to startIntentSender() to ensure that they are consistently applied to
+                // both mutable and immutable PendingIntents.
                 context.startIntentSender(
                         pendingIntent.getIntentSender(), fillInIntent,
-                        Intent.FLAG_ACTIVITY_NEW_TASK,
-                        Intent.FLAG_ACTIVITY_NEW_TASK, 0, opts.toBundle());
+                        0, 0, 0, opts.toBundle());
             } catch (IntentSender.SendIntentException e) {
                 android.util.Log.e(LOG_TAG, "Cannot send pending intent: ", e);
                 return false;
@@ -399,10 +401,15 @@ public class RemoteViews implements Parcelable, Filter {
                 windowAnimationStyle.recycle();
 
                 if (enterAnimationId != 0) {
-                    return ActivityOptions.makeCustomAnimation(context, enterAnimationId, 0);
+                    final ActivityOptions opts = ActivityOptions.makeCustomAnimation(context,
+                            enterAnimationId, 0);
+                    opts.setPendingIntentLaunchFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                    return opts;
                 }
             }
-            return ActivityOptions.makeBasic();
+            final ActivityOptions opts = ActivityOptions.makeBasic();
+            opts.setPendingIntentLaunchFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            return opts;
         }
     }
 
