@@ -627,6 +627,13 @@ public class AudioService extends IAudioService.Stub
     // If absolute volume is supported in AVRCP device
     private boolean mAvrcpAbsVolSupported = false;
 
+    // Pre-scale for Bluetooth Absolute Volume
+    private float[] mPrescaleAbsoluteVolume = new float[] {
+        0.5f,    // Pre-scale for index 1
+        0.7f,    // Pre-scale for index 2
+        0.85f,   // Pre-scale for index 3
+    };
+
     private static Long mLastDeviceConnectMsgTime = new Long(0);
 
     private NotificationManager mNm;
@@ -878,6 +885,23 @@ public class AudioService extends IAudioService.Stub
         mUserManagerInternal.addUserRestrictionsListener(mUserRestrictionsListener);
 
         mRecordMonitor.initMonitor();
+
+        final float[] preScale = new float[3];
+        preScale[0] = mContext.getResources().getFraction(
+                com.android.internal.R.fraction.config_prescaleAbsoluteVolume_index1,
+                1, 1);
+        preScale[1] = mContext.getResources().getFraction(
+                com.android.internal.R.fraction.config_prescaleAbsoluteVolume_index2,
+                1, 1);
+        preScale[2] = mContext.getResources().getFraction(
+                com.android.internal.R.fraction.config_prescaleAbsoluteVolume_index3,
+                1, 1);
+        for (int i = 0; i < preScale.length; i++) {
+            if (0.0f <= preScale[i] && preScale[i] <= 1.0f) {
+                mPrescaleAbsoluteVolume[i] = preScale[i];
+            }
+        }
+
     }
 
     public void systemReady() {
@@ -4879,18 +4903,12 @@ public class AudioService extends IAudioService.Stub
             if (index == 0) {
                 // 0% for volume 0
                 index = 0;
-            } else if (index == 1) {
-                // 50% for volume 1
-                index = (int)(mIndexMax * 0.5) /10;
-            } else if (index == 2) {
-                // 70% for volume 2
-                index = (int)(mIndexMax * 0.70) /10;
-            } else if (index == 3) {
-                // 85% for volume 3
-                index = (int)(mIndexMax * 0.85) /10;
+            } else if (index > 0 && index <= 3) {
+                // Pre-scale for volume steps 1 2 and 3
+                index = (int) (mIndexMax * mPrescaleAbsoluteVolume[index - 1]) / 10;
             } else {
                 // otherwise, full gain
-                index = (mIndexMax + 5)/10;
+                index = (mIndexMax + 5) / 10;
             }
             return index;
         }

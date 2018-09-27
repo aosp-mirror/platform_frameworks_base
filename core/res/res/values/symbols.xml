@@ -3393,4 +3393,9 @@
 
   <java-symbol type="integer" name="config_defaultHapticFeedbackIntensity" />
   <java-symbol type="integer" name="config_defaultNotificationVibrationIntensity" />
+
+  <!-- For Bluetooth AbsoluteVolume -->
+  <java-symbol type="fraction" name="config_prescaleAbsoluteVolume_index1" />
+  <java-symbol type="fraction" name="config_prescaleAbsoluteVolume_index2" />
+  <java-symbol type="fraction" name="config_prescaleAbsoluteVolume_index3" />
 </resources>
