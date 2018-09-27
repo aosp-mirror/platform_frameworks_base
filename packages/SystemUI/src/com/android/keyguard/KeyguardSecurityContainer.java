@@ -340,12 +340,11 @@ public class KeyguardSecurityContainer extends FrameLayout implements KeyguardSe
                 case SimPuk:
                     // Shortcut for SIM PIN/PUK to go to directly to user's security screen or home
                     SecurityMode securityMode = mSecurityModel.getSecurityMode(targetUserId);
-                    if (securityMode != SecurityMode.None
-                            || !mLockPatternUtils.isLockScreenDisabled(
+                    if (securityMode == SecurityMode.None || mLockPatternUtils.isLockScreenDisabled(
                             KeyguardUpdateMonitor.getCurrentUser())) {
-                        showSecurityScreen(securityMode);
-                    } else {
                         finish = true;
+                    } else {
+                        showSecurityScreen(securityMode);
                     }
                     break;
 
