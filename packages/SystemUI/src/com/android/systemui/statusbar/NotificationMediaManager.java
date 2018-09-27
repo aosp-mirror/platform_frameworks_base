@@ -256,9 +256,9 @@ public class NotificationMediaManager implements Dumpable {
 
     private boolean isMediaNotification(NotificationData.Entry entry) {
         // TODO: confirm that there's a valid media key
-        return entry.getExpandedContentView() != null &&
-                entry.getExpandedContentView()
-                        .findViewById(com.android.internal.R.id.media_actions) != null;
+        return entry.row.getExpandedContentView() != null
+                && entry.row.getExpandedContentView().findViewById(
+                        com.android.internal.R.id.media_actions) != null;
     }
 
     private void clearCurrentMediaNotificationSession() {

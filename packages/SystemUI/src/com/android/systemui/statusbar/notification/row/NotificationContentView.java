@@ -517,6 +517,14 @@ public class NotificationContentView extends FrameLayout {
             removeView(mAmbientChild);
         }
         if (child == null) {
+            mAmbientChild = null;
+            mAmbientWrapper = null;
+            if (mVisibleType == VISIBLE_TYPE_AMBIENT) {
+                mVisibleType = VISIBLE_TYPE_CONTRACTED;
+            }
+            if (mTransformationStartVisibleType == VISIBLE_TYPE_AMBIENT) {
+                mTransformationStartVisibleType = UNDEFINED;
+            }
             return;
         }
         addView(child);

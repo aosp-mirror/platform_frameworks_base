@@ -18,8 +18,14 @@ package com.android.systemui.statusbar.notification.row;
 
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 
+import static com.android.systemui.statusbar.notification.row.NotificationInflater
+        .FLAG_REINFLATE_ALL;
+import static com.android.systemui.statusbar.notification.row.NotificationInflater
+        .FLAG_REINFLATE_HEADS_UP_VIEW;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -131,6 +137,26 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
         ExpandableNotificationRow row = spy(mNotificationTestHelper.createRow());
         row.setDark(true, false, 0);
         verify(row).updateShelfIconColor();
+    }
+
+    @Test
+    public void testHeadsUpViewShouldBeFreedWhenNotHeadsUp() throws Exception {
+        ExpandableNotificationRow row = mNotificationTestHelper.createRow(FLAG_REINFLATE_ALL);
+        row.setHeadsUp(true);
+
+        row.setHeadsUp(false);
+
+        assertNull(row.getPrivateLayout().getHeadsUpChild());
+    }
+
+    @Test
+    public void testAmbientViewShouldBeFreedWhenNotPulsing() throws Exception {
+        ExpandableNotificationRow row = mNotificationTestHelper.createRow(FLAG_REINFLATE_ALL);
+        row.setAmbientPulsing(true);
+
+        row.setAmbientPulsing(false);
+
+        assertNull(row.getShowingLayout().getAmbientChild());
     }
 
     @Test
