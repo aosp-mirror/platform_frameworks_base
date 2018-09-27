@@ -103,16 +103,12 @@
     <string name="camera_label" msgid="7261107956054836961">"բացել ֆոտոխցիկը"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"Ընտրել առաջադրանքի նոր դասավորություն"</string>
     <string name="cancel" msgid="6442560571259935130">"Չեղարկել"</string>
-    <!-- no translation found for accessibility_biometric_dialog_help_area (8953787076940186847) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_confirm (6468457350041712674) -->
-    <skip />
+    <string name="accessibility_biometric_dialog_help_area" msgid="8953787076940186847">"Օգնության հաղորդագրության դաշտ"</string>
+    <string name="biometric_dialog_confirm" msgid="6468457350041712674">"Հաստատել"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Հպեք մատնահետքերի սկաներին"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Մատնահետքի պատկերակ"</string>
-    <!-- no translation found for face_dialog_looking_for_face (7049276266074494689) -->
-    <skip />
-    <!-- no translation found for accessibility_face_dialog_face_icon (2658119009870383490) -->
-    <skip />
+    <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"Դեմքի ճանաչում…"</string>
+    <string name="accessibility_face_dialog_face_icon" msgid="2658119009870383490">"Դեմքի պատկերակ"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Համատեղելիության խոշորացման կոճակը:"</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Դիտափոխել փոքրից ավելի մեծ էկրան:"</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth-ը միացված է:"</string>
@@ -588,12 +584,12 @@
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Թեժ կետ"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"Աշխատանքային պրոֆիլ"</string>
     <string name="tuner_warning_title" msgid="7094689930793031682">"Զվարճանք մեկ՝ որոշակի մարդու համար"</string>
-    <string name="tuner_warning" msgid="8730648121973575701">"Համակարգի ՕՄ-ի ընդունիչը հնարավորություն է տալիս հարմարեցնել Android-ի օգտատիրոջ միջերեսը: Այս փորձնական գործառույթները կարող են հետագա թողարկումների մեջ փոփոխվել, խափանվել կամ ընդհանրապես չհայտնվել: Եթե շարունակում եք, զգուշացեք:"</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"Համակարգի ՕՄ-ի կարգավորիչը հնարավորություն է տալիս հարմարեցնել Android-ի օգտատիրոջ միջերեսը: Այս փորձնական գործառույթները կարող են հետագա թողարկումների մեջ փոփոխվել, խափանվել կամ ընդհանրապես չհայտնվել: Եթե շարունակում եք, զգուշացեք:"</string>
     <string name="tuner_persistent_warning" msgid="8597333795565621795">"Այս փորձնական գործառույթները կարող են հետագա թողարկումների մեջ փոփոխվել, խափանվել կամ ընդհանրապես չհայտնվել: Եթե շարունակում եք, զգուշացեք:"</string>
     <string name="got_it" msgid="2239653834387972602">"Եղավ"</string>
-    <string name="tuner_toast" msgid="603429811084428439">"Համակարգի ՕՄ-ի ընդունիչը ավելացվել է կարգավորումներին"</string>
+    <string name="tuner_toast" msgid="603429811084428439">"Համակարգի ՕՄ-ի կարգավորիչը ավելացվել է կարգավորումներին"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"Հեռացնել կարգավորումներից"</string>
-    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Հեռացնե՞լ Համակարգի ՕՄ-ի ընդունիչը կարգավորումներից և չօգտվել այլևս նրա գործառույթներից:"</string>
+    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Հեռացնե՞լ Համակարգի ՕՄ-ի կարգավորիչը կարգավորումներից և չօգտվել այլևս նրա գործառույթներից:"</string>
     <string name="activity_not_found" msgid="348423244327799974">"Հավելվածը տեղադրված չէ սարքի վրա"</string>
     <string name="clock_seconds" msgid="7689554147579179507">"Ցույց տալ ժամացույցի վայրկյանները"</string>
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Ցույց տալ ժամացույցի վայրկյանները կարգավիճակի տողում: Կարող է ազդել մարտկոցի աշխատանքի ժամանակի վրա:"</string>
@@ -829,9 +825,11 @@
     <string name="notification_channel_storage" msgid="3077205683020695313">"Տարածք"</string>
     <string name="notification_channel_hints" msgid="7323870212489152689">"Հուշումներ"</string>
     <string name="instant_apps" msgid="6647570248119804907">"Ակնթարթային հավելվածներ"</string>
-    <string name="instant_apps_message" msgid="8116608994995104836">"Ակնթարթային հավելվածները տեղադրում չեն պահանջում։"</string>
+    <string name="instant_apps_title" msgid="8738419517367449783">"<xliff:g id="APP">%1$s</xliff:g> հավելվածն աշխատում է"</string>
+    <string name="instant_apps_message" msgid="1183313016396018086">"Հավելվածը բացվել է առանց տեղադրման։"</string>
+    <string name="instant_apps_message_with_help" msgid="6179830437630729747">"Հավելվածը բացվել է առանց տեղադրման։ Հպեք՝ ավելին իմանալու համար։"</string>
     <string name="app_info" msgid="6856026610594615344">"Հավելվածի տվյալներ"</string>
-    <string name="go_to_web" msgid="2650669128861626071">"Անցնել դիտարկիչ"</string>
+    <string name="go_to_web" msgid="1106022723459948514">"Բացեք համացանցում"</string>
     <string name="mobile_data" msgid="7094582042819250762">"Բջջային ինտերնետ"</string>
     <string name="mobile_data_text_format" msgid="3526214522670876454">"<xliff:g id="ID_1">%1$s</xliff:g> — <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"Wi-Fi-ն անջատված է"</string>

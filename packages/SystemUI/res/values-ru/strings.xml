@@ -105,16 +105,12 @@
     <string name="camera_label" msgid="7261107956054836961">"Открыть камеру."</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"Выберите другой макет"</string>
     <string name="cancel" msgid="6442560571259935130">"Отмена"</string>
-    <!-- no translation found for accessibility_biometric_dialog_help_area (8953787076940186847) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_confirm (6468457350041712674) -->
-    <skip />
+    <string name="accessibility_biometric_dialog_help_area" msgid="8953787076940186847">"Справочное сообщение"</string>
+    <string name="biometric_dialog_confirm" msgid="6468457350041712674">"Подтвердить"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"Прикоснитесь к сканеру отпечатков пальцев."</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"Значок отпечатка пальца"</string>
-    <!-- no translation found for face_dialog_looking_for_face (7049276266074494689) -->
-    <skip />
-    <!-- no translation found for accessibility_face_dialog_face_icon (2658119009870383490) -->
-    <skip />
+    <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"Поиск лица…"</string>
+    <string name="accessibility_face_dialog_face_icon" msgid="2658119009870383490">"Значок лица"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"Кнопка масштабирования (режим совместимости)"</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"Уменьшение изображения для увеличения свободного места на экране."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"Bluetooth-соединение установлено."</string>
@@ -843,9 +839,11 @@
     <string name="notification_channel_storage" msgid="3077205683020695313">"Хранилище"</string>
     <string name="notification_channel_hints" msgid="7323870212489152689">"Подсказки"</string>
     <string name="instant_apps" msgid="6647570248119804907">"Приложения с мгновенным запуском"</string>
-    <string name="instant_apps_message" msgid="8116608994995104836">"Приложения с мгновенным запуском не требуется устанавливать."</string>
+    <string name="instant_apps_title" msgid="8738419517367449783">"<xliff:g id="APP">%1$s</xliff:g> уже здесь!"</string>
+    <string name="instant_apps_message" msgid="1183313016396018086">"Приложение готово к работе, установка не требуется."</string>
+    <string name="instant_apps_message_with_help" msgid="6179830437630729747">"Приложение готово к работе, установка не требуется. Нажмите, чтобы узнать больше."</string>
     <string name="app_info" msgid="6856026610594615344">"О приложении"</string>
-    <string name="go_to_web" msgid="2650669128861626071">"Перейти в браузер"</string>
+    <string name="go_to_web" msgid="1106022723459948514">"Перейти в браузер"</string>
     <string name="mobile_data" msgid="7094582042819250762">"Моб. Интернет"</string>
     <string name="mobile_data_text_format" msgid="3526214522670876454">"<xliff:g id="ID_1">%1$s</xliff:g> – <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"Модуль Wi-Fi отключен"</string>

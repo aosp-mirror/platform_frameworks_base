@@ -103,16 +103,12 @@
     <string name="camera_label" msgid="7261107956054836961">"કૅમેરો ખોલો"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"નવું કાર્ય લેઆઉટ પસંદ કરો"</string>
     <string name="cancel" msgid="6442560571259935130">"રદ કરો"</string>
-    <!-- no translation found for accessibility_biometric_dialog_help_area (8953787076940186847) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_confirm (6468457350041712674) -->
-    <skip />
+    <string name="accessibility_biometric_dialog_help_area" msgid="8953787076940186847">"સહાય સંદેશનું ક્ષેત્ર"</string>
+    <string name="biometric_dialog_confirm" msgid="6468457350041712674">"કન્ફર્મ કરો"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"ફિંગરપ્રિન્ટના સેન્સરને સ્પર્શ કરો"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"ફિંગરપ્રિન્ટનું આઇકન"</string>
-    <!-- no translation found for face_dialog_looking_for_face (7049276266074494689) -->
-    <skip />
-    <!-- no translation found for accessibility_face_dialog_face_icon (2658119009870383490) -->
-    <skip />
+    <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"તમારા માટે શોધી રહ્યાં છે..."</string>
+    <string name="accessibility_face_dialog_face_icon" msgid="2658119009870383490">"ચહેરા આઇકન"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"સુસંગતતા ઝૂમ બટન."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"નાનીથી મોટી સ્ક્રીન પર ઝૂમ કરો."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"બ્લૂટૂથ કનેક્ટ થયું."</string>
@@ -829,9 +825,14 @@
     <string name="notification_channel_storage" msgid="3077205683020695313">"સ્ટોરેજ"</string>
     <string name="notification_channel_hints" msgid="7323870212489152689">"હિન્ટ"</string>
     <string name="instant_apps" msgid="6647570248119804907">"ઝટપટ ઍપ્લિકેશનો"</string>
-    <string name="instant_apps_message" msgid="8116608994995104836">"ઝટપટ ઍપ્લિકેશનો માટે ઇન્સ્ટૉલેશનની જરૂર નથી."</string>
+    <!-- no translation found for instant_apps_title (8738419517367449783) -->
+    <skip />
+    <!-- no translation found for instant_apps_message (1183313016396018086) -->
+    <skip />
+    <!-- no translation found for instant_apps_message_with_help (6179830437630729747) -->
+    <skip />
     <string name="app_info" msgid="6856026610594615344">"ઍપ્લિકેશન માહિતી"</string>
-    <string name="go_to_web" msgid="2650669128861626071">"બ્રાઉઝર પર જાઓ"</string>
+    <string name="go_to_web" msgid="1106022723459948514">"વેબ પર જાઓ"</string>
     <string name="mobile_data" msgid="7094582042819250762">"મોબાઇલ ડેટા"</string>
     <string name="mobile_data_text_format" msgid="3526214522670876454">"<xliff:g id="ID_1">%1$s</xliff:g> — <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"વાઇ-ફાઇ બંધ છે"</string>
