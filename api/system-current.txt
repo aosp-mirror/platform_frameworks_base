@@ -5258,6 +5258,7 @@ package android.telephony {
     method public deprecated boolean getDataEnabled(int);
     method public boolean getEmergencyCallbackMode();
     method public java.lang.String getIsimDomain();
+    method public int getPreferredNetworkType(int);
     method public int getSimApplicationState();
     method public int getSimCardState();
     method public java.util.List<android.telephony.TelephonyHistogram> getTelephonyHistograms();
@@ -5298,6 +5299,29 @@ package android.telephony {
     field public static final java.lang.String EXTRA_SIM_STATE = "android.telephony.extra.SIM_STATE";
     field public static final java.lang.String EXTRA_VISUAL_VOICEMAIL_ENABLED_BY_USER_BOOL = "android.telephony.extra.VISUAL_VOICEMAIL_ENABLED_BY_USER_BOOL";
     field public static final java.lang.String EXTRA_VOICEMAIL_SCRAMBLED_PIN_STRING = "android.telephony.extra.VOICEMAIL_SCRAMBLED_PIN_STRING";
+    field public static final int NETWORK_MODE_CDMA_EVDO = 4; // 0x4
+    field public static final int NETWORK_MODE_CDMA_NO_EVDO = 5; // 0x5
+    field public static final int NETWORK_MODE_EVDO_NO_CDMA = 6; // 0x6
+    field public static final int NETWORK_MODE_GLOBAL = 7; // 0x7
+    field public static final int NETWORK_MODE_GSM_ONLY = 1; // 0x1
+    field public static final int NETWORK_MODE_GSM_UMTS = 3; // 0x3
+    field public static final int NETWORK_MODE_LTE_CDMA_EVDO = 8; // 0x8
+    field public static final int NETWORK_MODE_LTE_CDMA_EVDO_GSM_WCDMA = 10; // 0xa
+    field public static final int NETWORK_MODE_LTE_GSM_WCDMA = 9; // 0x9
+    field public static final int NETWORK_MODE_LTE_ONLY = 11; // 0xb
+    field public static final int NETWORK_MODE_LTE_TDSCDMA = 15; // 0xf
+    field public static final int NETWORK_MODE_LTE_TDSCDMA_CDMA_EVDO_GSM_WCDMA = 22; // 0x16
+    field public static final int NETWORK_MODE_LTE_TDSCDMA_GSM = 17; // 0x11
+    field public static final int NETWORK_MODE_LTE_TDSCDMA_GSM_WCDMA = 20; // 0x14
+    field public static final int NETWORK_MODE_LTE_TDSCDMA_WCDMA = 19; // 0x13
+    field public static final int NETWORK_MODE_LTE_WCDMA = 12; // 0xc
+    field public static final int NETWORK_MODE_TDSCDMA_CDMA_EVDO_GSM_WCDMA = 21; // 0x15
+    field public static final int NETWORK_MODE_TDSCDMA_GSM = 16; // 0x10
+    field public static final int NETWORK_MODE_TDSCDMA_GSM_WCDMA = 18; // 0x12
+    field public static final int NETWORK_MODE_TDSCDMA_ONLY = 13; // 0xd
+    field public static final int NETWORK_MODE_TDSCDMA_WCDMA = 14; // 0xe
+    field public static final int NETWORK_MODE_WCDMA_ONLY = 2; // 0x2
+    field public static final int NETWORK_MODE_WCDMA_PREF = 0; // 0x0
     field public static final int SIM_ACTIVATION_STATE_ACTIVATED = 2; // 0x2
     field public static final int SIM_ACTIVATION_STATE_ACTIVATING = 1; // 0x1
     field public static final int SIM_ACTIVATION_STATE_DEACTIVATED = 3; // 0x3
