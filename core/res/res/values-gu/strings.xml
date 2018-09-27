@@ -528,10 +528,8 @@
   </string-array>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"ઓળખાયેલ નથી"</string>
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"ફિંગરપ્રિન્ટ પ્રમાણિત કરી"</string>
-    <!-- no translation found for face_authenticated_no_confirmation_required (4018680978348659031) -->
-    <skip />
-    <!-- no translation found for face_authenticated_confirmation_required (8778347003507633610) -->
-    <skip />
+    <string name="face_authenticated_no_confirmation_required" msgid="4018680978348659031">"ચહેરા પ્રમાણિત"</string>
+    <string name="face_authenticated_confirmation_required" msgid="8778347003507633610">"ચહેરા પ્રમાણિત, કૃપા કરીને કન્ફર્મ કરો"</string>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"ફિંગરપ્રિન્ટ હાર્ડવેર ઉપલબ્ધ નથી."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"ફિંગરપ્રિન્ટ સંગ્રહિત કરી શકાતી નથી. કૃપા કરીને અસ્તિત્વમાંની ફિંગરપ્રિન્ટ દૂર કરો."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"ફિંગરપ્રિન્ટનો સમય બાહ્ય થયો. ફરી પ્રયાસ કરો."</string>
@@ -568,8 +566,7 @@
     <string name="face_error_timeout" msgid="4014326147867150054">"ચહેરા માટેનો સમય સમાપ્ત થયો. ફરી પ્રયાસ કરો."</string>
     <string name="face_error_no_space" msgid="8224993703466381314">"ચહેરો સંગ્રહિત કરી શકાશે નહીં."</string>
     <string name="face_error_canceled" msgid="283945501061931023">"ચહેરા સંબંધિત કાર્યવાહી રદ કરવામાં આવી છે."</string>
-    <!-- no translation found for face_error_user_canceled (8943921120862164539) -->
-    <skip />
+    <string name="face_error_user_canceled" msgid="8943921120862164539">"વપરાશકર્તાએ ચહેરા પ્રમાણીકરણ રદ કર્યુ."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"ઘણા બધા પ્રયત્નો. થોડા સમય પછી ફરી પ્રયાસ કરો."</string>
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"ઘણા બધા પ્રયત્નો. ચહેરાનું પ્રમાણીકરણ બંધ કરવામાં આવ્યું છે."</string>
     <string name="face_error_unable_to_process" msgid="238761109287767270">"ફરી પ્રયાસ કરો."</string>

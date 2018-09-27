@@ -528,10 +528,8 @@
   </string-array>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"No s\'ha reconegut"</string>
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"L\'empremta digital s\'ha autenticat"</string>
-    <!-- no translation found for face_authenticated_no_confirmation_required (4018680978348659031) -->
-    <skip />
-    <!-- no translation found for face_authenticated_confirmation_required (8778347003507633610) -->
-    <skip />
+    <string name="face_authenticated_no_confirmation_required" msgid="4018680978348659031">"Cara autenticada"</string>
+    <string name="face_authenticated_confirmation_required" msgid="8778347003507633610">"Cara autenticada; prem el botó per confirmar"</string>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"El maquinari per a empremtes digitals no està disponible."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"L\'empremta digital no es pot desar. Suprimeix-ne una."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"S\'ha esgotat el temps d\'espera per a l\'empremta digital. Torna-ho a provar."</string>
@@ -568,8 +566,7 @@
     <string name="face_error_timeout" msgid="4014326147867150054">"S\'ha esgotat el temps d\'espera. Torna-ho a provar."</string>
     <string name="face_error_no_space" msgid="8224993703466381314">"La cara no es pot desar."</string>
     <string name="face_error_canceled" msgid="283945501061931023">"S\'ha cancel·lat el reconeixement facial."</string>
-    <!-- no translation found for face_error_user_canceled (8943921120862164539) -->
-    <skip />
+    <string name="face_error_user_canceled" msgid="8943921120862164539">"Autenticació facial cancel·lada per l\'usuari."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"Massa intents. Torna-ho a provar més tard."</string>
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"Massa intents. Autenticació facial desactivada."</string>
     <string name="face_error_unable_to_process" msgid="238761109287767270">"Torna-ho a provar."</string>
@@ -814,8 +811,8 @@
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"Falta la targeta SIM o no es pot llegir. Insereix-ne una."</string>
     <string name="lockscreen_permanent_disabled_sim_message_short" msgid="5096149665138916184">"Targeta SIM no utilitzable."</string>
     <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"La targeta SIM està desactivada permanentment.\n Contacta amb el teu proveïdor de serveis sense fil per obtenir-ne una altra."</string>
-    <string name="lockscreen_transport_prev_description" msgid="6300840251218161534">"Ruta anterior"</string>
-    <string name="lockscreen_transport_next_description" msgid="573285210424377338">"Ruta següent"</string>
+    <string name="lockscreen_transport_prev_description" msgid="6300840251218161534">"Pista anterior"</string>
+    <string name="lockscreen_transport_next_description" msgid="573285210424377338">"Pista següent"</string>
     <string name="lockscreen_transport_pause_description" msgid="3980308465056173363">"Posa en pausa"</string>
     <string name="lockscreen_transport_play_description" msgid="1901258823643886401">"Reprodueix"</string>
     <string name="lockscreen_transport_stop_description" msgid="5907083260651210034">"Atura"</string>

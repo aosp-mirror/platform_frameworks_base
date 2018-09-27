@@ -534,10 +534,8 @@
   </string-array>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"Не распазнана"</string>
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"Адбітак пальца распазнаны"</string>
-    <!-- no translation found for face_authenticated_no_confirmation_required (4018680978348659031) -->
-    <skip />
-    <!-- no translation found for face_authenticated_confirmation_required (8778347003507633610) -->
-    <skip />
+    <string name="face_authenticated_no_confirmation_required" msgid="4018680978348659031">"Твар распазнаны"</string>
+    <string name="face_authenticated_confirmation_required" msgid="8778347003507633610">"Твар распазнаны. Націсніце, каб пацвердзіць"</string>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Апаратныя сродкі адбіткаў пальцаў недаступныя."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Адбіткі пальцаў нельга захаваць. Выдаліце існы адбітак."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Час чакання адбіткаў пальцаў выйшаў. Паспрабуйце яшчэ раз."</string>
@@ -574,8 +572,7 @@
     <string name="face_error_timeout" msgid="4014326147867150054">"Час чакання твару выйшаў. Паўтарыце спробу."</string>
     <string name="face_error_no_space" msgid="8224993703466381314">"Не ўдалося захаваць твар."</string>
     <string name="face_error_canceled" msgid="283945501061931023">"Распазнаванне твару скасавана."</string>
-    <!-- no translation found for face_error_user_canceled (8943921120862164539) -->
-    <skip />
+    <string name="face_error_user_canceled" msgid="8943921120862164539">"Распазнаванне твару скасавана карыстальнікам."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"Занадта шмат спроб. Паўтарыце спробу пазней."</string>
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"Занадта шмат спроб. Аўтэнтыфікацыя твару адключана"</string>
     <string name="face_error_unable_to_process" msgid="238761109287767270">"Паўтарыце спробу."</string>

@@ -528,10 +528,8 @@
   </string-array>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"شناسایی نشد"</string>
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"اثر انگشت احراز هویت شد"</string>
-    <!-- no translation found for face_authenticated_no_confirmation_required (4018680978348659031) -->
-    <skip />
-    <!-- no translation found for face_authenticated_confirmation_required (8778347003507633610) -->
-    <skip />
+    <string name="face_authenticated_no_confirmation_required" msgid="4018680978348659031">"چهره احراز هویت شد"</string>
+    <string name="face_authenticated_confirmation_required" msgid="8778347003507633610">"چهره احراز هویت شد، لطفاً تأیید را فشار دهید"</string>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"سخت‌افزار اثرانگشت در دسترس نیست."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"ذخیره اثر انگشت ممکن نیست. لطفاً یک اثر انگشت موجود را حذف کنید."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"مهلت زمانی ثبت اثر انگشت به پایان رسید. دوباره امتحان کنید."</string>
@@ -568,8 +566,7 @@
     <string name="face_error_timeout" msgid="4014326147867150054">"مهلت زمانی شناسایی چهره تمام شد. دوباره امتحان کنید"</string>
     <string name="face_error_no_space" msgid="8224993703466381314">"نمی‌توان چهره را ذخیره کرد."</string>
     <string name="face_error_canceled" msgid="283945501061931023">"عملیات شناسایی چهره لغو شد."</string>
-    <!-- no translation found for face_error_user_canceled (8943921120862164539) -->
-    <skip />
+    <string name="face_error_user_canceled" msgid="8943921120862164539">"احراز هویت چهره توسط کاربر لغو شد."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"تعداد زیادی تلاش ناموفق. بعداً دوباره امتحان کنید."</string>
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"چندین تلاش ناموفق. احراز هویت با چهره غیرفعال شد."</string>
     <string name="face_error_unable_to_process" msgid="238761109287767270">"دوباره امتحان کنید."</string>
@@ -900,7 +897,7 @@
     <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"ماندن در این صفحه"</string>
     <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nمطمئنید می‌خواهید این صفحه را ترک کنید؟"</string>
     <string name="save_password_label" msgid="6860261758665825069">"تأیید"</string>
-    <string name="double_tap_toast" msgid="4595046515400268881">"نکته: برای بزرگ‌نمایی و کوچک‌نمایی، دو بار ضربه بزنید."</string>
+    <string name="double_tap_toast" msgid="4595046515400268881">"نکته: برای نزدیک‌نمایی و دورنمایی، دو بار ضربه بزنید."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"تکمیل خودکار"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"راه‌اندازی تکمیل خودکار"</string>
     <string name="autofill_window_title" msgid="4107745526909284887">"تکمیل خودکار با <xliff:g id="SERVICENAME">%1$s</xliff:g>"</string>

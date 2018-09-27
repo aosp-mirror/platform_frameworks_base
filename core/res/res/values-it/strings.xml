@@ -528,10 +528,8 @@
   </string-array>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"Non riconosciuto"</string>
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"Impronta digitale autenticata"</string>
-    <!-- no translation found for face_authenticated_no_confirmation_required (4018680978348659031) -->
-    <skip />
-    <!-- no translation found for face_authenticated_confirmation_required (8778347003507633610) -->
-    <skip />
+    <string name="face_authenticated_no_confirmation_required" msgid="4018680978348659031">"Volto autenticato"</string>
+    <string name="face_authenticated_confirmation_required" msgid="8778347003507633610">"Volto autenticato, premi Conferma"</string>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Hardware per l\'impronta digitale non disponibile."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Impossibile memorizzare l\'impronta digitale. Rimuovi un\'impronta esistente."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Timeout impronta digitale. Riprova."</string>
@@ -568,8 +566,7 @@
     <string name="face_error_timeout" msgid="4014326147867150054">"Timeout operazione associata al volto. Riprova."</string>
     <string name="face_error_no_space" msgid="8224993703466381314">"Il volto non può essere memorizzato."</string>
     <string name="face_error_canceled" msgid="283945501061931023">"Operazione associata al volto annullata."</string>
-    <!-- no translation found for face_error_user_canceled (8943921120862164539) -->
-    <skip />
+    <string name="face_error_user_canceled" msgid="8943921120862164539">"Autenticazione del volto annullata dall\'utente."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"Troppi tentativi. Riprova più tardi."</string>
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"Troppi tentativi. Autenticazione disattivata."</string>
     <string name="face_error_unable_to_process" msgid="238761109287767270">"Riprova."</string>

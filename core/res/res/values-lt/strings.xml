@@ -534,10 +534,8 @@
   </string-array>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"Neatpažinta"</string>
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"Kontrolinis kodas autentifikuotas"</string>
-    <!-- no translation found for face_authenticated_no_confirmation_required (4018680978348659031) -->
-    <skip />
-    <!-- no translation found for face_authenticated_confirmation_required (8778347003507633610) -->
-    <skip />
+    <string name="face_authenticated_no_confirmation_required" msgid="4018680978348659031">"Veidas autentifikuotas"</string>
+    <string name="face_authenticated_confirmation_required" msgid="8778347003507633610">"Veidas autentifikuotas, paspauskite patvirtinimo mygtuką"</string>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Kontrolinio kodo aparatinė įranga nepasiekiama."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Negalima išsaugoti kontrolinio kodo. Pašalinkite esamą kontrolinį kodą."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Baigėsi kontrolinio kodo nustatymo skirtasis laikas. Bandykite dar kartą."</string>
@@ -574,8 +572,7 @@
     <string name="face_error_timeout" msgid="4014326147867150054">"Baigėsi veido atpaž. skirt. laik. Band. dar kartą."</string>
     <string name="face_error_no_space" msgid="8224993703466381314">"Nepavyko išsaugoti veido duomenų."</string>
     <string name="face_error_canceled" msgid="283945501061931023">"Veido atpažinimo operacija atšaukta."</string>
-    <!-- no translation found for face_error_user_canceled (8943921120862164539) -->
-    <skip />
+    <string name="face_error_user_canceled" msgid="8943921120862164539">"Veido autentifikavimą atšaukė naudotojas."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"Per daug bandymų. Vėliau bandykite dar kartą."</string>
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"Per daug bandymų. Veido autentifik. išjungtas."</string>
     <string name="face_error_unable_to_process" msgid="238761109287767270">"Bandykite dar kartą."</string>

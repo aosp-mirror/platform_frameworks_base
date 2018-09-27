@@ -423,11 +423,11 @@
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"alterar as suas definições de áudio"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Permite que a aplicação modifique definições de áudio globais, tais como o volume e qual o altifalante utilizado para a saída de som."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"gravar áudio"</string>
-    <string name="permdesc_recordAudio" msgid="4245930455135321433">"Esta aplicação pode gravar áudio através do microfone a qualquer momento."</string>
+    <string name="permdesc_recordAudio" msgid="4245930455135321433">"Esta aplicação pode gravar áudio através do microfone em qualquer altura."</string>
     <string name="permlab_sim_communication" msgid="2935852302216852065">"enviar comandos para o SIM"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Permite que a aplicação envie comandos para o SIM. Esta ação é muito perigosa."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"tirar fotos e vídeos"</string>
-    <string name="permdesc_camera" msgid="5392231870049240670">"Esta aplicação pode tirar fotos e gravar vídeos através da câmara a qualquer momento."</string>
+    <string name="permdesc_camera" msgid="5392231870049240670">"Esta aplicação pode tirar fotos e gravar vídeos através da câmara em qualquer altura."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"controlar vibração"</string>
     <string name="permdesc_vibrate" msgid="6284989245902300945">"Permite à aplicação controlar o vibrador."</string>
     <string name="permlab_callPhone" msgid="3925836347681847954">"marcar números de telefone diretamente"</string>
@@ -528,10 +528,8 @@
   </string-array>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"Não reconhecido."</string>
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"A impressão digital foi autenticada."</string>
-    <!-- no translation found for face_authenticated_no_confirmation_required (4018680978348659031) -->
-    <skip />
-    <!-- no translation found for face_authenticated_confirmation_required (8778347003507633610) -->
-    <skip />
+    <string name="face_authenticated_no_confirmation_required" msgid="4018680978348659031">"Rosto autenticado."</string>
+    <string name="face_authenticated_confirmation_required" msgid="8778347003507633610">"Rosto autenticado. Prima Confirmar."</string>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Hardware de impressão digital não disponível."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Não é possível armazenar a impressão digital. Remova uma impressão digital existente."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Foi atingido o limite de tempo da impressão digital. Tente novamente."</string>
@@ -568,8 +566,7 @@
     <string name="face_error_timeout" msgid="4014326147867150054">"Limite de tempo de rosto atingido. Tente novamente."</string>
     <string name="face_error_no_space" msgid="8224993703466381314">"Não é possível armazenar o rosto."</string>
     <string name="face_error_canceled" msgid="283945501061931023">"Operação de rosto cancelada."</string>
-    <!-- no translation found for face_error_user_canceled (8943921120862164539) -->
-    <skip />
+    <string name="face_error_user_canceled" msgid="8943921120862164539">"Autenticação facial cancelada pelo utilizador."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"Demasiadas tentativas. Tente novamente mais tarde."</string>
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"Demasiadas tentativas. Autenticação facial desativada."</string>
     <string name="face_error_unable_to_process" msgid="238761109287767270">"Tente novamente."</string>
