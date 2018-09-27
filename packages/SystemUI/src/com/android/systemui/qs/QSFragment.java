@@ -365,7 +365,11 @@ public class QSFragment extends Fragment implements QS, CommandQueue.Callbacks {
                 .setListener(new AnimatorListenerAdapter() {
                     @Override
                     public void onAnimationEnd(Animator animation) {
-                        getView().animate().setListener(null);
+                        if (getView() != null) {
+                            // The view could be destroyed before the animation completes when
+                            // switching users.
+                            getView().animate().setListener(null);
+                        }
                         mHeaderAnimating = false;
                         updateQsState();
                     }
