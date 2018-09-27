@@ -230,10 +230,7 @@ final class UiModeManagerService extends SystemService {
                 || pm.hasSystemFeature(PackageManager.FEATURE_LEANBACK);
         mWatch = pm.hasSystemFeature(PackageManager.FEATURE_WATCH);
 
-        final int defaultNightMode = res.getInteger(
-                com.android.internal.R.integer.config_defaultNightMode);
-        mNightMode = Settings.Secure.getInt(context.getContentResolver(),
-                Settings.Secure.UI_NIGHT_MODE, defaultNightMode);
+        updateNightModeFromSettings(context, res, UserHandle.getCallingUserId());
 
         // Update the initial, static configurations.
         SystemServerInitThreadPool.get().submit(() -> {
@@ -245,6 +242,29 @@ final class UiModeManagerService extends SystemService {
         }, TAG + ".onStart");
         publishBinderService(Context.UI_MODE_SERVICE, mService);
         publishLocalService(UiModeManagerInternal.class, mLocalService);
+
+        IntentFilter filter = new IntentFilter();
+        filter.addAction(Intent.ACTION_USER_SWITCHED);
+        context.registerReceiver(new UserSwitchedReceiver(), filter, null, mHandler);
+    }
+
+    /**
+     * Updates the night mode setting in Settings.Global and returns if the value was successfully
+     * changed.
+     * @param context A valid context
+     * @param res A valid resource object
+     * @param userId The user to update the setting for
+     * @return True if the new value is different from the old value. False otherwise.
+     */
+    private boolean updateNightModeFromSettings(Context context, Resources res, int userId) {
+        final int defaultNightMode = res.getInteger(
+                com.android.internal.R.integer.config_defaultNightMode);
+        int oldNightMode = mNightMode;
+        mNightMode = Settings.Secure.getIntForUser(context.getContentResolver(),
+                Settings.Secure.UI_NIGHT_MODE, defaultNightMode, userId);
+
+        // false if night mode stayed the same, true otherwise.
+        return !(oldNightMode == mNightMode);
     }
 
     private final IUiModeManager.Stub mService = new IUiModeManager.Stub() {
@@ -315,12 +335,13 @@ final class UiModeManagerService extends SystemService {
                     throw new IllegalArgumentException("Unknown mode: " + mode);
             }
 
+            final int user = UserHandle.getCallingUserId();
             final long ident = Binder.clearCallingIdentity();
             try {
                 synchronized (mLock) {
                     if (mNightMode != mode) {
-                        Settings.Secure.putInt(getContext().getContentResolver(),
-                                Settings.Secure.UI_NIGHT_MODE, mode);
+                        Settings.Secure.putIntForUser(getContext().getContentResolver(),
+                                Settings.Secure.UI_NIGHT_MODE, mode, user);
                         mNightMode = mode;
                         updateLocked(0, 0);
                     }
@@ -857,6 +878,20 @@ final class UiModeManagerService extends SystemService {
                         + "; isIt=" + isIt);
                 }
                 return isIt;
+            }
+        }
+    }
+
+    private final class UserSwitchedReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            synchronized (mLock) {
+                final int currentId = intent.getIntExtra(
+                        Intent.EXTRA_USER_HANDLE, UserHandle.USER_SYSTEM);
+                // only update if the value is actually changed
+                if (updateNightModeFromSettings(context, context.getResources(), currentId)) {
+                    updateLocked(0, 0);
+                }
             }
         }
     }
