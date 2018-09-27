@@ -239,7 +239,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.StringWriter;
+import java.lang.ref.WeakReference;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Locale;
 
@@ -276,6 +278,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     UriGrantsManagerInternal mUgmInternal;
     private PackageManagerInternal mPmInternal;
     private ActivityTaskManagerInternal mInternal;
+    PendingIntentController mPendingIntentController;
     /* Global service lock used by the package the owns this service. */
     Object mGlobalLock;
     ActivityStackSupervisor mStackSupervisor;
@@ -628,6 +631,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         final File systemDir = SystemServiceManager.ensureSystemDir();
         mAppWarnings = new AppWarnings(this, mUiContext, mH, mUiHandler, systemDir);
         mCompatModePackages = new CompatModePackages(this, systemDir, mH);
+        mPendingIntentController = mAm.mPendingIntentController;
 
         mTempConfig.setToDefaults();
         mTempConfig.setLocales(LocaleList.getDefault());
@@ -5019,6 +5023,39 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     }
 
+    IIntentSender getIntentSenderLocked(int type, String packageName, int callingUid, int userId,
+            IBinder token, String resultWho, int requestCode, Intent[] intents,
+            String[] resolvedTypes, int flags, Bundle bOptions) {
+
+        ActivityRecord activity = null;
+        if (type == ActivityManager.INTENT_SENDER_ACTIVITY_RESULT) {
+            activity = ActivityRecord.isInStackLocked(token);
+            if (activity == null) {
+                Slog.w(TAG, "Failed createPendingResult: activity " + token + " not in any stack");
+                return null;
+            }
+            if (activity.finishing) {
+                Slog.w(TAG, "Failed createPendingResult: activity " + activity + " is finishing");
+                return null;
+            }
+        }
+
+        final PendingIntentRecord rec = mPendingIntentController.getIntentSender(type, packageName,
+                callingUid, userId, token, resultWho, requestCode, intents, resolvedTypes, flags,
+                bOptions);
+        final boolean noCreate = (flags & PendingIntent.FLAG_NO_CREATE) != 0;
+        if (noCreate) {
+            return rec;
+        }
+        if (type == ActivityManager.INTENT_SENDER_ACTIVITY_RESULT) {
+            if (activity.pendingResults == null) {
+                activity.pendingResults = new HashSet<>();
+            }
+            activity.pendingResults.add(rec.ref);
+        }
+        return rec;
+    }
+
     // TODO(b/111541062): Update app time tracking to make it aware of multiple resumed activities
     private void startTimeTrackingFocusedActivityLocked() {
         final ActivityRecord resumedActivity = mStackSupervisor.getTopResumedActivity();
@@ -5306,6 +5343,31 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                         intents, resolvedTypes, null /* resultTo */,
                         SafeActivityOptions.fromBundle(bOptions), userId,
                         false /* validateIncomingUser */, null /* originatingPendingIntent */);
+            }
+        }
+
+        @Override
+        public int startActivitiesInPackage(int uid, String callingPackage, Intent[] intents,
+                String[] resolvedTypes, IBinder resultTo, SafeActivityOptions options, int userId,
+                boolean validateIncomingUser, PendingIntentRecord originatingPendingIntent) {
+            synchronized (mGlobalLock) {
+                return getActivityStartController().startActivitiesInPackage(uid, callingPackage,
+                        intents, resolvedTypes, resultTo, options, userId, validateIncomingUser,
+                        originatingPendingIntent);
+            }
+        }
+
+        @Override
+        public int startActivityInPackage(int uid, int realCallingPid, int realCallingUid,
+                String callingPackage, Intent intent, String resolvedType, IBinder resultTo,
+                String resultWho, int requestCode, int startFlags, SafeActivityOptions options,
+                int userId, TaskRecord inTask, String reason, boolean validateIncomingUser,
+                PendingIntentRecord originatingPendingIntent) {
+            synchronized (mGlobalLock) {
+                return getActivityStartController().startActivityInPackage(uid, realCallingPid,
+                        realCallingUid, callingPackage, intent, resolvedType, resultTo, resultWho,
+                        requestCode, startFlags, options, userId, inTask, reason,
+                        validateIncomingUser, originatingPendingIntent);
             }
         }
 
@@ -5683,6 +5745,40 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                             mStackSupervisor.getDisplayOverrideConfiguration(displayId));
                 }
             });
+        }
+
+        @Override
+        public void sendActivityResult(int callingUid, IBinder activityToken, String resultWho,
+                int requestCode, int resultCode, Intent data) {
+            synchronized (mGlobalLock) {
+                final ActivityRecord r = ActivityRecord.isInStackLocked(activityToken);
+                if (r != null && r.getStack() != null) {
+                    r.getStack().sendActivityResultLocked(callingUid, r, resultWho, requestCode,
+                            resultCode, data);
+                }
+            }
+        }
+
+        @Override
+        public void clearPendingResultForActivity(IBinder activityToken,
+                WeakReference<PendingIntentRecord> pir) {
+            synchronized (mGlobalLock) {
+                final ActivityRecord r = ActivityRecord.isInStackLocked(activityToken);
+                if (r != null && r.pendingResults != null) {
+                    r.pendingResults.remove(pir);
+                }
+            }
+        }
+
+        @Override
+        public IIntentSender getIntentSender(int type, String packageName,
+                int callingUid, int userId, IBinder token, String resultWho,
+                int requestCode, Intent[] intents, String[] resolvedTypes, int flags,
+                Bundle bOptions) {
+            synchronized (mGlobalLock) {
+                return getIntentSenderLocked(type, packageName, callingUid, userId, token,
+                        resultWho, requestCode, intents, resolvedTypes, flags, bOptions);
+            }
         }
     }
 }

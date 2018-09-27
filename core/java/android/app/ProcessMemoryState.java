@@ -32,10 +32,11 @@ public final class ProcessMemoryState implements Parcelable {
     public final long rssInBytes;
     public final long cacheInBytes;
     public final long swapInBytes;
+    public final long rssHighWatermarkInBytes;
 
     public ProcessMemoryState(int uid, String processName, int oomScore, long pgfault,
                               long pgmajfault, long rssInBytes, long cacheInBytes,
-                              long swapInBytes) {
+                              long swapInBytes, long rssHighWatermarkInBytes) {
         this.uid = uid;
         this.processName = processName;
         this.oomScore = oomScore;
@@ -44,6 +45,7 @@ public final class ProcessMemoryState implements Parcelable {
         this.rssInBytes = rssInBytes;
         this.cacheInBytes = cacheInBytes;
         this.swapInBytes = swapInBytes;
+        this.rssHighWatermarkInBytes = rssHighWatermarkInBytes;
     }
 
     private ProcessMemoryState(Parcel in) {
@@ -55,6 +57,7 @@ public final class ProcessMemoryState implements Parcelable {
         rssInBytes = in.readLong();
         cacheInBytes = in.readLong();
         swapInBytes = in.readLong();
+        rssHighWatermarkInBytes = in.readLong();
     }
 
     public static final Creator<ProcessMemoryState> CREATOR = new Creator<ProcessMemoryState>() {
@@ -84,5 +87,6 @@ public final class ProcessMemoryState implements Parcelable {
         parcel.writeLong(rssInBytes);
         parcel.writeLong(cacheInBytes);
         parcel.writeLong(swapInBytes);
+        parcel.writeLong(rssHighWatermarkInBytes);
     }
 }

@@ -890,6 +890,8 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
         mRemoved = true;
 
         releaseSelfIfNeeded();
+
+        mSupervisor.getKeyguardController().onDisplayRemoved(mDisplayId);
     }
 
     private void releaseSelfIfNeeded() {

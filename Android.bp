@@ -706,7 +706,6 @@ java_defaults {
 
     // Loaded with System.loadLibrary by android.view.textclassifier
     required: [
-        "libtextclassifier",
         "libmedia2_jni",
     ],
 
@@ -810,12 +809,16 @@ gensrcs {
 java_library {
     name: "ext",
     installable: true,
-    no_framework_libs: true,
+    sdk_version: "core_current",
     static_libs: [
         "libphonenumber-platform",
         "nist-sip",
         "tagsoup",
         "rappor",
+        "libtextclassifier-java",
+    ],
+    required: [
+        "libtextclassifier",
     ],
     dxflags: ["--core-library"],
 }

@@ -104,7 +104,7 @@ public class MapProfile implements LocalBluetoothProfile {
                 BluetoothProfile.MAP);
     }
 
-    public boolean isConnectable() {
+    public boolean accessProfileEnabled() {
         return true;
     }
 

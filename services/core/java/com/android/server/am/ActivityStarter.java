@@ -783,7 +783,7 @@ class ActivityStarter {
         if (aInfo != null) {
             if (mService.getPackageManagerInternalLocked().isPermissionsReviewRequired(
                     aInfo.packageName, userId)) {
-                IIntentSender target = mService.mAm.getIntentSenderLocked(
+                IIntentSender target = mService.getIntentSenderLocked(
                         ActivityManager.INTENT_SENDER_ACTIVITY, callingPackage,
                         callingUid, userId, null, null, 0, new Intent[]{intent},
                         new String[]{resolvedType}, PendingIntent.FLAG_CANCEL_CURRENT
@@ -1096,7 +1096,7 @@ class ActivityStarter {
                             }
                         }
 
-                        IIntentSender target = mService.mAm.getIntentSenderLocked(
+                        IIntentSender target = mService.getIntentSenderLocked(
                                 ActivityManager.INTENT_SENDER_ACTIVITY, "android",
                                 appCallingUid, userId, null, null, 0, new Intent[] { intent },
                                 new String[] { resolvedType }, PendingIntent.FLAG_CANCEL_CURRENT

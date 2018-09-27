@@ -2828,7 +2828,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 // Assumes it's safe to show starting windows of launched apps while
                 // the keyguard is being hidden. This is okay because starting windows never show
                 // secret information.
-                if (mKeyguardOccluded) {
+                // TODO(b/113840485): Occluded may not only happen on default display
+                if (displayId == DEFAULT_DISPLAY && mKeyguardOccluded) {
                     windowFlags |= FLAG_SHOW_WHEN_LOCKED;
                 }
             }

@@ -370,22 +370,31 @@ public class WindowStateTests extends WindowTestsBase {
         final SurfaceControl.Transaction t = mock(SurfaceControl.Transaction.class);
 
         app.mHasSurface = true;
-        app.mToken.mSurfaceControl = mock(SurfaceControl.class);
+        app.mSurfaceControl = mock(SurfaceControl.class);
         try {
             app.getFrameLw().set(10, 20, 60, 80);
+            app.updateSurfacePosition(t);
 
             app.seamlesslyRotateIfAllowed(t, ROTATION_0, ROTATION_90, true);
 
             assertTrue(app.mSeamlesslyRotated);
+
+            // Verify we un-rotate the window state surface.
             Matrix matrix = new Matrix();
             // Un-rotate 90 deg
             matrix.setRotate(270);
             // Translate it back to origin
             matrix.postTranslate(0, mDisplayInfo.logicalWidth);
-            verify(t).setMatrix(eq(app.mToken.mSurfaceControl), eq(matrix), any(float[].class));
+            verify(t).setMatrix(eq(app.mSurfaceControl), eq(matrix), any(float[].class));
+
+            // Verify we update the position as well.
+            float[] currentSurfacePos = {app.mLastSurfacePosition.x, app.mLastSurfacePosition.y};
+            matrix.mapPoints(currentSurfacePos);
+            verify(t).setPosition(eq(app.mSurfaceControl), eq(currentSurfacePos[0]),
+                    eq(currentSurfacePos[1]));
         } finally {
+            app.mSurfaceControl = null;
             app.mHasSurface = false;
-            app.mToken.mSurfaceControl = null;
         }
     }
 

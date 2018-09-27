@@ -96,7 +96,7 @@ final class A2dpSinkProfile implements LocalBluetoothProfile {
                 BluetoothProfile.A2DP_SINK);
     }
 
-    public boolean isConnectable() {
+    public boolean accessProfileEnabled() {
         return true;
     }
 

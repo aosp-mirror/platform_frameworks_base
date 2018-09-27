@@ -169,7 +169,7 @@ const std::map<int, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
           new ResourceHealthManagerPuller(android::util::BATTERY_VOLTAGE)}},
         // process_memory_state
         {android::util::PROCESS_MEMORY_STATE,
-         {{4, 5, 6, 7, 8},
+         {{4, 5, 6, 7, 8, 9},
           {2, 3},
           1 * NS_PER_SEC,
           new StatsCompanionServicePuller(android::util::PROCESS_MEMORY_STATE)}},

@@ -26,9 +26,9 @@ import android.bluetooth.BluetoothDevice;
 public interface LocalBluetoothProfile {
 
     /**
-     * Returns true if the user can initiate a connection, false otherwise.
+     * Return {@code true} if the user can initiate a connection for this profile in UI.
      */
-    boolean isConnectable();
+    boolean accessProfileEnabled();
 
     /**
      * Returns true if the user can enable auto connection for this profile.

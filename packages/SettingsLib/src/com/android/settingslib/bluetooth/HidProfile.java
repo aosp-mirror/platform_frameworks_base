@@ -93,7 +93,7 @@ public class HidProfile implements LocalBluetoothProfile {
                 BluetoothProfile.HID_HOST);
     }
 
-    public boolean isConnectable() {
+    public boolean accessProfileEnabled() {
         return true;
     }
 

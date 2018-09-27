@@ -22,6 +22,7 @@ import android.app.AppProtoEnums;
 import android.app.IActivityManager;
 import android.app.IApplicationThread;
 import android.content.ComponentName;
+import android.content.IIntentSender;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.res.CompatibilityInfo;
@@ -32,8 +33,12 @@ import android.service.voice.IVoiceInteractionSession;
 import android.util.SparseIntArray;
 
 import com.android.internal.app.IVoiceInteractor;
+import com.android.server.am.PendingIntentRecord;
+import com.android.server.am.SafeActivityOptions;
+import com.android.server.am.TaskRecord;
 import com.android.server.am.WindowProcessController;
 
+import java.lang.ref.WeakReference;
 import java.util.List;
 
 /**
@@ -178,6 +183,27 @@ public abstract class ActivityTaskManagerInternal {
             int userId, Intent[] intents, Bundle bOptions);
 
     /**
+     * Start intents as a package.
+     *
+     * @param uid Make a call as if this UID did.
+     * @param callingPackage Make a call as if this package did.
+     * @param intents Intents to start.
+     * @param userId Start the intents on this user.
+     * @param validateIncomingUser Set true to skip checking {@code userId} with the calling UID.
+     * @param originatingPendingIntent PendingIntentRecord that originated this activity start or
+     *        null if not originated by PendingIntent
+     */
+    public abstract int startActivitiesInPackage(int uid, String callingPackage, Intent[] intents,
+            String[] resolvedTypes, IBinder resultTo, SafeActivityOptions options, int userId,
+            boolean validateIncomingUser, PendingIntentRecord originatingPendingIntent);
+
+    public abstract int startActivityInPackage(int uid, int realCallingPid, int realCallingUid,
+            String callingPackage, Intent intent, String resolvedType, IBinder resultTo,
+            String resultWho, int requestCode, int startFlags, SafeActivityOptions options,
+            int userId, TaskRecord inTask, String reason, boolean validateIncomingUser,
+            PendingIntentRecord originatingPendingIntent);
+
+    /**
      * Start activity {@code intent} without calling user-id check.
      *
      * - DO NOT call it with the calling UID cleared.
@@ -297,4 +323,13 @@ public abstract class ActivityTaskManagerInternal {
      * @param displayId The ID of the display showing the IME.
      */
     public abstract void onImeWindowSetOnDisplay(int pid, int displayId);
+
+    public abstract void sendActivityResult(int callingUid, IBinder activityToken,
+            String resultWho, int requestCode, int resultCode, Intent data);
+    public abstract void clearPendingResultForActivity(
+            IBinder activityToken, WeakReference<PendingIntentRecord> pir);
+    public abstract IIntentSender getIntentSender(int type, String packageName,
+            int callingUid, int userId, IBinder token, String resultWho,
+            int requestCode, Intent[] intents, String[] resolvedTypes, int flags,
+            Bundle bOptions);
 }

@@ -16,6 +16,8 @@
 
 package android.telephony;
 
+import static android.content.Context.TELECOM_SERVICE;
+
 import static com.android.internal.util.Preconditions.checkNotNull;
 
 import android.annotation.IntDef;
@@ -4372,7 +4374,7 @@ public class TelephonyManager {
     * @hide
     */
     private ITelecomService getTelecomService() {
-        return ITelecomService.Stub.asInterface(ServiceManager.getService(Context.TELECOM_SERVICE));
+        return ITelecomService.Stub.asInterface(ServiceManager.getService(TELECOM_SERVICE));
     }
 
     private ITelephonyRegistry getTelephonyRegistry() {
@@ -5402,7 +5404,19 @@ public class TelephonyManager {
         }
     }
 
-    // ICC SIM Application Types
+    /**
+     * UICC SIM Application Types
+     * @hide
+     */
+    @IntDef(prefix = { "APPTYPE_" }, value = {
+            APPTYPE_SIM,
+            APPTYPE_USIM,
+            APPTYPE_RUIM,
+            APPTYPE_CSIM,
+            APPTYPE_ISIM
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface UiccAppType{}
     /** UICC application type is SIM */
     public static final int APPTYPE_SIM = PhoneConstants.APPTYPE_SIM;
     /** UICC application type is USIM */
@@ -5413,6 +5427,7 @@ public class TelephonyManager {
     public static final int APPTYPE_CSIM = PhoneConstants.APPTYPE_CSIM;
     /** UICC application type is ISIM */
     public static final int APPTYPE_ISIM = PhoneConstants.APPTYPE_ISIM;
+
     // authContext (parameter P2) when doing UICC challenge,
     // per 3GPP TS 31.102 (Section 7.1.2)
     /** Authentication type for UICC challenge is EAP SIM. See RFC 4186 for details. */
@@ -5679,6 +5694,202 @@ public class TelephonyManager {
         }
     }
 
+    /** @hide */
+    @IntDef(prefix = { "NETWORK_MODE_" }, value = {
+            NETWORK_MODE_WCDMA_PREF,
+            NETWORK_MODE_GSM_ONLY,
+            NETWORK_MODE_WCDMA_ONLY,
+            NETWORK_MODE_GSM_UMTS,
+            NETWORK_MODE_CDMA_EVDO,
+            NETWORK_MODE_CDMA_NO_EVDO,
+            NETWORK_MODE_EVDO_NO_CDMA,
+            NETWORK_MODE_GLOBAL,
+            NETWORK_MODE_LTE_CDMA_EVDO,
+            NETWORK_MODE_LTE_GSM_WCDMA,
+            NETWORK_MODE_LTE_CDMA_EVDO_GSM_WCDMA,
+            NETWORK_MODE_LTE_ONLY,
+            NETWORK_MODE_LTE_WCDMA,
+            NETWORK_MODE_TDSCDMA_ONLY,
+            NETWORK_MODE_TDSCDMA_WCDMA,
+            NETWORK_MODE_LTE_TDSCDMA,
+            NETWORK_MODE_TDSCDMA_GSM,
+            NETWORK_MODE_LTE_TDSCDMA_GSM,
+            NETWORK_MODE_TDSCDMA_GSM_WCDMA,
+            NETWORK_MODE_LTE_TDSCDMA_WCDMA,
+            NETWORK_MODE_LTE_TDSCDMA_GSM_WCDMA,
+            NETWORK_MODE_TDSCDMA_CDMA_EVDO_GSM_WCDMA,
+            NETWORK_MODE_LTE_TDSCDMA_CDMA_EVDO_GSM_WCDMA
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface PrefNetworkMode{}
+
+    /**
+     * preferred network mode is GSM/WCDMA (WCDMA preferred).
+     * @hide
+     */
+    @SystemApi
+    public static final int NETWORK_MODE_WCDMA_PREF = RILConstants.NETWORK_MODE_WCDMA_PREF;
+
+    /**
+     * preferred network mode is GSM only.
+     * @hide
+     */
+    @SystemApi
+    public static final int NETWORK_MODE_GSM_ONLY = RILConstants.NETWORK_MODE_GSM_ONLY;
+
+    /**
+     * preferred network mode is WCDMA only.
+     * @hide
+     */
+    @SystemApi
+    public static final int NETWORK_MODE_WCDMA_ONLY = RILConstants.NETWORK_MODE_WCDMA_ONLY;
+
+    /**
+     * preferred network mode is GSM/WCDMA (auto mode, according to PRL).
+     * @hide
+     */
+    @SystemApi
+    public static final int NETWORK_MODE_GSM_UMTS = RILConstants.NETWORK_MODE_GSM_UMTS;
+
+    /**
+     * preferred network mode is CDMA and EvDo (auto mode, according to PRL).
+     * @hide
+     */
+    @SystemApi
+    public static final int NETWORK_MODE_CDMA_EVDO = RILConstants.NETWORK_MODE_CDMA;
+
+    /**
+     * preferred network mode is CDMA only.
+     * @hide
+     */
+    @SystemApi
+    public static final int NETWORK_MODE_CDMA_NO_EVDO = RILConstants.NETWORK_MODE_CDMA_NO_EVDO;
+
+    /**
+     * preferred network mode is EvDo only.
+     * @hide
+     */
+    @SystemApi
+    public static final int NETWORK_MODE_EVDO_NO_CDMA = RILConstants.NETWORK_MODE_EVDO_NO_CDMA;
+
+    /**
+     * preferred network mode is GSM/WCDMA, CDMA, and EvDo (auto mode, according to PRL).
+     * @hide
+     */
+    @SystemApi
+    public static final int NETWORK_MODE_GLOBAL = RILConstants.NETWORK_MODE_GLOBAL;
+
+    /**
+     * preferred network mode is LTE, CDMA and EvDo.
+     * @hide
+     */
+    @SystemApi
+    public static final int NETWORK_MODE_LTE_CDMA_EVDO = RILConstants.NETWORK_MODE_LTE_CDMA_EVDO;
+
+    /**
+     * preferred network mode is LTE, GSM/WCDMA.
+     * @hide
+     */
+    @SystemApi
+    public static final int NETWORK_MODE_LTE_GSM_WCDMA = RILConstants.NETWORK_MODE_LTE_GSM_WCDMA;
+
+    /**
+     * preferred network mode is LTE, CDMA, EvDo, GSM/WCDMA.
+     * @hide
+     */
+    @SystemApi
+    public static final int NETWORK_MODE_LTE_CDMA_EVDO_GSM_WCDMA =
+            RILConstants.NETWORK_MODE_LTE_CDMA_EVDO_GSM_WCDMA;
+
+    /**
+     * preferred network mode is LTE Only.
+     * @hide
+     */
+    @SystemApi
+    public static final int NETWORK_MODE_LTE_ONLY = RILConstants.NETWORK_MODE_LTE_ONLY;
+
+    /**
+     * preferred network mode is LTE/WCDMA.
+     * @hide
+     */
+    @SystemApi
+    public static final int NETWORK_MODE_LTE_WCDMA = RILConstants.NETWORK_MODE_LTE_WCDMA;
+
+    /**
+     * preferred network mode is TD-SCDMA only.
+     * @hide
+     */
+    @SystemApi
+    public static final int NETWORK_MODE_TDSCDMA_ONLY = RILConstants.NETWORK_MODE_TDSCDMA_ONLY;
+
+    /**
+     * preferred network mode is TD-SCDMA and WCDMA.
+     * @hide
+     */
+    @SystemApi
+    public static final int NETWORK_MODE_TDSCDMA_WCDMA = RILConstants.NETWORK_MODE_TDSCDMA_WCDMA;
+
+    /**
+     * preferred network mode is TD-SCDMA and LTE.
+     * @hide
+     */
+    @SystemApi
+    public static final int NETWORK_MODE_LTE_TDSCDMA = RILConstants.NETWORK_MODE_LTE_TDSCDMA;
+
+    /**
+     * preferred network mode is TD-SCDMA and GSM.
+     * @hide
+     */
+    @SystemApi
+    public static final int NETWORK_MODE_TDSCDMA_GSM = RILConstants.NETWORK_MODE_TDSCDMA_GSM;
+
+    /**
+     * preferred network mode is TD-SCDMA,GSM and LTE.
+     * @hide
+     */
+    @SystemApi
+    public static final int NETWORK_MODE_LTE_TDSCDMA_GSM =
+            RILConstants.NETWORK_MODE_LTE_TDSCDMA_GSM;
+
+    /**
+     * preferred network mode is TD-SCDMA, GSM/WCDMA.
+     * @hide
+     */
+    @SystemApi
+    public static final int NETWORK_MODE_TDSCDMA_GSM_WCDMA =
+            RILConstants.NETWORK_MODE_TDSCDMA_GSM_WCDMA;
+
+    /**
+     * preferred network mode is TD-SCDMA, WCDMA and LTE.
+     * @hide
+     */
+    @SystemApi
+    public static final int NETWORK_MODE_LTE_TDSCDMA_WCDMA =
+            RILConstants.NETWORK_MODE_LTE_TDSCDMA_WCDMA;
+
+    /**
+     * preferred network mode is TD-SCDMA, GSM/WCDMA and LTE.
+     * @hide
+     */
+    @SystemApi
+    public static final int NETWORK_MODE_LTE_TDSCDMA_GSM_WCDMA =
+            RILConstants.NETWORK_MODE_LTE_TDSCDMA_GSM_WCDMA;
+
+    /**
+     * preferred network mode is TD-SCDMA,EvDo,CDMA,GSM/WCDMA.
+     * @hide
+     */
+    @SystemApi
+    public static final int NETWORK_MODE_TDSCDMA_CDMA_EVDO_GSM_WCDMA =
+            RILConstants.NETWORK_MODE_TDSCDMA_CDMA_EVDO_GSM_WCDMA;
+    /**
+     * preferred network mode is TD-SCDMA/LTE/GSM/WCDMA, CDMA, and EvDo.
+     * @hide
+     */
+    @SystemApi
+    public static final int NETWORK_MODE_LTE_TDSCDMA_CDMA_EVDO_GSM_WCDMA =
+            RILConstants.NETWORK_MODE_LTE_TDSCDMA_CDMA_EVDO_GSM_WCDMA;
+
     /**
      * Get the preferred network type.
      * Used for device configuration by some CDMA operators.
@@ -5687,11 +5898,12 @@ public class TelephonyManager {
      * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the calling
      * app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
-     * @return the preferred network type, defined in RILConstants.java.
+     * @return the preferred network type.
      * @hide
      */
-    @UnsupportedAppUsage
-    public int getPreferredNetworkType(int subId) {
+    @RequiresPermission((android.Manifest.permission.MODIFY_PHONE_STATE))
+    @SystemApi
+    public @PrefNetworkMode int getPreferredNetworkType(int subId) {
         try {
             ITelephony telephony = getITelephony();
             if (telephony != null)
@@ -6273,7 +6485,7 @@ public class TelephonyManager {
     }
 
     /**
-     * @deprecated Use {@link android.telecom.TelecomManager#endCall()} instead.
+     * @removed Use {@link android.telecom.TelecomManager#endCall()} instead.
      * @hide
      * @removed
      */
@@ -6285,7 +6497,7 @@ public class TelephonyManager {
     }
 
     /**
-     * @deprecated Use {@link android.telecom.TelecomManager#acceptRingingCall} instead
+     * @removed Use {@link android.telecom.TelecomManager#acceptRingingCall} instead
      * @hide
      * @removed
      */
@@ -6293,26 +6505,22 @@ public class TelephonyManager {
     @SystemApi
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
     public void answerRingingCall() {
-
+        // No-op
     }
 
     /**
-     * @deprecated Use {@link android.telecom.TelecomManager#silenceRinger} instead
+     * @removed Use {@link android.telecom.TelecomManager#silenceRinger} instead
      * @hide
      */
     @Deprecated
     @SystemApi
     @SuppressLint("Doclava125")
     public void silenceRinger() {
-        try {
-            getTelecomService().silenceRinger(getOpPackageName());
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error calling ITelecomService#silenceRinger", e);
-        }
+        // No-op
     }
 
     /**
-     * @deprecated Use {@link android.telecom.TelecomManager#isInCall} instead
+     * @removed Use {@link android.telecom.TelecomManager#isInCall} instead
      * @hide
      */
     @Deprecated
@@ -6322,18 +6530,11 @@ public class TelephonyManager {
             android.Manifest.permission.READ_PHONE_STATE
     })
     public boolean isOffhook() {
-        try {
-            ITelephony telephony = getITelephony();
-            if (telephony != null)
-                return telephony.isOffhook(getOpPackageName());
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error calling ITelephony#isOffhook", e);
-        }
         return false;
     }
 
     /**
-     * @deprecated Use {@link android.telecom.TelecomManager#isRinging} instead
+     * @removed Use {@link android.telecom.TelecomManager#isRinging} instead
      * @hide
      */
     @Deprecated
@@ -6343,18 +6544,11 @@ public class TelephonyManager {
             android.Manifest.permission.READ_PHONE_STATE
     })
     public boolean isRinging() {
-        try {
-            ITelephony telephony = getITelephony();
-            if (telephony != null)
-                return telephony.isRinging(getOpPackageName());
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error calling ITelephony#isRinging", e);
-        }
         return false;
     }
 
     /**
-     * @deprecated Use {@link android.telecom.TelecomManager#isInCall} instead
+     * @removed Use {@link android.telecom.TelecomManager#isInCall} instead
      * @hide
      */
     @Deprecated
@@ -6364,13 +6558,6 @@ public class TelephonyManager {
             android.Manifest.permission.READ_PHONE_STATE
     })
     public boolean isIdle() {
-        try {
-            ITelephony telephony = getITelephony();
-            if (telephony != null)
-                return telephony.isIdle(getOpPackageName());
-        } catch (RemoteException e) {
-            Log.e(TAG, "Error calling ITelephony#isIdle", e);
-        }
         return true;
     }
 
@@ -7856,26 +8043,23 @@ public class TelephonyManager {
     }
 
     /**
-     * Return the application ID for the app type like {@link APPTYPE_CSIM}.
+     * Return the application ID for the uicc application type like {@link #APPTYPE_CSIM}.
+     * All uicc applications are uniquely identified by application ID. See ETSI 102.221 and 101.220
+     * <p>Requires Permission:
+     *   {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE}
      *
-     * Requires that the calling app has READ_PRIVILEGED_PHONE_STATE permission
-     *
-     * @param appType the uicc app type like {@link APPTYPE_CSIM}
-     * @return Application ID for specificied app type or null if no uicc or error.
+     * @param appType the uicc app type.
+     * @return Application ID for specified app type or {@code null} if no uicc or error.
      * @hide
      */
-    public String getAidForAppType(int appType) {
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public String getAidForAppType(@UiccAppType int appType) {
         return getAidForAppType(getSubId(), appType);
     }
 
     /**
-     * Return the application ID for the app type like {@link APPTYPE_CSIM}.
-     *
-     * Requires that the calling app has READ_PRIVILEGED_PHONE_STATE permission
-     *
-     * @param subId the subscription ID that this request applies to.
-     * @param appType the uicc app type, like {@link APPTYPE_CSIM}
-     * @return Application ID for specificied app type or null if no uicc or error.
+     * same as {@link #getAidForAppType(int)}
      * @hide
      */
     public String getAidForAppType(int subId, int appType) {

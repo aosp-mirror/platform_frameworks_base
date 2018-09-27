@@ -130,6 +130,13 @@ message KeyguardControllerProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
     optional bool keyguard_showing = 1;
+    repeated KeyguardOccludedProto keyguard_occluded_states= 2;
+}
+
+message KeyguardOccludedProto {
+    option (.android.msg_privacy).dest = DEST_AUTOMATIC;
+
+    optional int32 display_id = 1;
     optional bool keyguard_occluded = 2;
 }
 

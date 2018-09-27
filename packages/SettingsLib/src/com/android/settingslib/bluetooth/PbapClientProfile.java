@@ -107,7 +107,7 @@ public final class PbapClientProfile implements LocalBluetoothProfile {
                 new PbapClientServiceListener(), BluetoothProfile.PBAP_CLIENT);
     }
 
-    public boolean isConnectable() {
+    public boolean accessProfileEnabled() {
         return true;
     }
 

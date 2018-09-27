@@ -594,6 +594,8 @@ public abstract class Connection extends Conferenceable {
      * {@link Call#EVENT_REQUEST_HANDOVER} that the handover from this {@link Connection} has
      * successfully completed.
      * @hide
+     * @deprecated Use {@link Call#handoverTo(PhoneAccountHandle, int, Bundle)} and its associated
+     * APIs instead.
      */
     public static final String EVENT_HANDOVER_COMPLETE =
             "android.telecom.event.HANDOVER_COMPLETE";
@@ -603,6 +605,8 @@ public abstract class Connection extends Conferenceable {
      * {@link Call#EVENT_REQUEST_HANDOVER} that the handover from this {@link Connection} has failed
      * to complete.
      * @hide
+     * @deprecated Use {@link Call#handoverTo(PhoneAccountHandle, int, Bundle)} and its associated
+     * APIs instead.
      */
     public static final String EVENT_HANDOVER_FAILED =
             "android.telecom.event.HANDOVER_FAILED";
