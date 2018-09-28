@@ -16004,7 +16004,8 @@ public class PackageManagerService extends IPackageManager.Stub
             }
             if (apkPath != null) {
                 final VerityUtils.SetupResult result =
-                        VerityUtils.generateApkVeritySetupData(apkPath);
+                        VerityUtils.generateApkVeritySetupData(apkPath, null /* signaturePath */,
+                                true /* skipSigningBlock */);
                 if (result.isOk()) {
                     if (Build.IS_DEBUGGABLE) Slog.i(TAG, "Enabling apk verity to " + apkPath);
                     FileDescriptor fd = result.getUnownedFileDescriptor();
