@@ -454,17 +454,6 @@ final class Settings {
         return mPackages.get(name);
     }
 
-    public BasePermission getPermission(@NonNull String permName) {
-        synchronized (mLock) {
-            return getPermissionLocked(permName);
-        }
-    }
-
-    @GuardedBy("mLock")
-    BasePermission getPermissionLocked(@NonNull String permName) {
-        return mPermissions.get(permName);
-    }
-
     void setInstallStatus(String pkgName, final int status) {
         PackageSetting p = mPackages.get(pkgName);
         if(p != null) {
