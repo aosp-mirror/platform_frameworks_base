@@ -73,6 +73,9 @@ public class GestureLauncherServiceTest {
     private static final int IGNORED_ACTION = 13;
     private static final int IGNORED_CODE = 1999;
     private static final int IGNORED_REPEAT = 42;
+    private static final int IGNORED_META_STATE = 0;
+    private static final int IGNORED_DEVICE_ID = 0;
+    private static final int IGNORED_SCANCODE = 0;
 
     private @Mock Context mContext;
     private @Mock Resources mResources;
@@ -366,6 +369,50 @@ public class GestureLauncherServiceTest {
         List<Integer> tapCounts = tapCountCaptor.getAllValues();
         assertEquals(1, tapCounts.get(0).intValue());
         assertEquals(2, tapCounts.get(1).intValue());
+    }
+
+    @Test
+    public void testInterceptPowerKeyDown_longpress() {
+        withCameraDoubleTapPowerEnableConfigValue(true);
+        withCameraDoubleTapPowerDisableSettingValue(0);
+        mGestureLauncherService.updateCameraDoubleTapPowerEnabled();
+        withUserSetupCompleteValue(true);
+
+        long eventTime = INITIAL_EVENT_TIME_MILLIS;
+        KeyEvent keyEvent = new KeyEvent(IGNORED_DOWN_TIME, eventTime, IGNORED_ACTION, IGNORED_CODE,
+                IGNORED_REPEAT);
+        boolean interactive = true;
+        MutableBoolean outLaunched = new MutableBoolean(true);
+        boolean intercepted = mGestureLauncherService.interceptPowerKeyDown(keyEvent, interactive,
+                outLaunched);
+        assertFalse(intercepted);
+        assertFalse(outLaunched.value);
+
+        final long interval = GestureLauncherService.CAMERA_POWER_DOUBLE_TAP_MAX_TIME_MS - 1;
+        eventTime += interval;
+        keyEvent = new KeyEvent(IGNORED_DOWN_TIME, eventTime, IGNORED_ACTION, IGNORED_CODE,
+                IGNORED_REPEAT, IGNORED_META_STATE, IGNORED_DEVICE_ID, IGNORED_SCANCODE,
+                KeyEvent.FLAG_LONG_PRESS);
+        outLaunched.value = false;
+        intercepted = mGestureLauncherService.interceptPowerKeyDown(keyEvent, interactive,
+                outLaunched);
+        assertFalse(intercepted);
+        assertFalse(outLaunched.value);
+
+        verify(mMetricsLogger, never())
+                .action(eq(MetricsEvent.ACTION_DOUBLE_TAP_POWER_CAMERA_GESTURE), anyInt());
+
+        final ArgumentCaptor<Integer> intervalCaptor = ArgumentCaptor.forClass(Integer.class);
+        verify(mMetricsLogger, times(1)).histogram(
+                eq("power_double_tap_interval"), intervalCaptor.capture());
+        List<Integer> intervals = intervalCaptor.getAllValues();
+        assertEquals((int) INITIAL_EVENT_TIME_MILLIS, intervals.get(0).intValue());
+
+        final ArgumentCaptor<Integer> tapCountCaptor = ArgumentCaptor.forClass(Integer.class);
+        verify(mMetricsLogger, times(1)).histogram(
+                eq("power_consecutive_short_tap_count"), tapCountCaptor.capture());
+        List<Integer> tapCounts = tapCountCaptor.getAllValues();
+        assertEquals(1, tapCounts.get(0).intValue());
     }
 
     @Test
