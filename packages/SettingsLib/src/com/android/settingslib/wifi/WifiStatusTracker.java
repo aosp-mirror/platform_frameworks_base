@@ -163,6 +163,12 @@ public class WifiStatusTracker extends ConnectivityManager.NetworkCallback {
                 ? null : AccessPoint.getSpeedLabel(mContext, scoredNetwork, rssi);
     }
 
+    /** Refresh the status label on Locale changed. */
+    public void refreshLocale() {
+        updateStatusLabel();
+        mCallback.run();
+    }
+
     private String getValidSsid(WifiInfo info) {
         String ssid = info.getSSID();
         if (ssid != null && !WifiSsid.NONE.equals(ssid)) {
