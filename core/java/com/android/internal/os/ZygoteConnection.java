@@ -241,7 +241,8 @@ class ZygoteConnection {
         pid = Zygote.forkAndSpecialize(parsedArgs.uid, parsedArgs.gid, parsedArgs.gids,
                 parsedArgs.runtimeFlags, rlimits, parsedArgs.mountExternal, parsedArgs.seInfo,
                 parsedArgs.niceName, fdsToClose, fdsToIgnore, parsedArgs.startChildZygote,
-                parsedArgs.instructionSet, parsedArgs.appDataDir, parsedArgs.packageName);
+                parsedArgs.instructionSet, parsedArgs.appDataDir, parsedArgs.packageName,
+                parsedArgs.packagesForUid, parsedArgs.visibleVolIds);
 
         try {
             if (pid == 0) {
@@ -431,6 +432,12 @@ class ZygoteConnection {
 
         /** from --package-name */
         String packageName;
+
+        /** from --packages-for-uid */
+        String[] packagesForUid;
+
+        /** from --visible-vols */
+        String[] visibleVolIds;
 
         /**
          * Any args after and including the first non-option arg
@@ -687,6 +694,10 @@ class ZygoteConnection {
                         throw new IllegalArgumentException("Duplicate arg specified");
                     }
                     packageName = arg.substring(arg.indexOf('=') + 1);
+                } else if (arg.startsWith("--packages-for-uid=")) {
+                    packagesForUid = arg.substring(arg.indexOf('=') + 1).split(",");
+                } else if (arg.startsWith("--visible-vols=")) {
+                    visibleVolIds = arg.substring(arg.indexOf('=') + 1).split(",");
                 } else {
                     break;
                 }

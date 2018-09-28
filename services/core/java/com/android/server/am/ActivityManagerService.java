@@ -368,7 +368,6 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
-import java.lang.ref.WeakReference;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -3538,6 +3537,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             String seInfo, String requiredAbi, String instructionSet, String invokeWith,
             long startTime) {
         try {
+            final String[] packageNames = mContext.getPackageManager().getPackagesForUid(uid);
+            final String[] visibleVolIds = LocalServices.getService(StorageManagerInternal.class)
+                    .getVisibleVolumesForUser(UserHandle.getUserId(uid));
             Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "Start proc: " +
                     app.processName);
             checkTime(startTime, "startProcess: asking zygote to start proc");
@@ -3547,12 +3549,14 @@ public class ActivityManagerService extends IActivityManager.Stub
                         app.processName, uid, uid, gids, runtimeFlags, mountExternal,
                         app.info.targetSdkVersion, seInfo, requiredAbi, instructionSet,
                         app.info.dataDir, null, app.info.packageName,
+                        packageNames, visibleVolIds,
                         new String[] {PROC_START_SEQ_IDENT + app.startSeq});
             } else {
                 startResult = Process.start(entryPoint,
                         app.processName, uid, uid, gids, runtimeFlags, mountExternal,
                         app.info.targetSdkVersion, seInfo, requiredAbi, instructionSet,
                         app.info.dataDir, invokeWith, app.info.packageName,
+                        packageNames, visibleVolIds,
                         new String[] {PROC_START_SEQ_IDENT + app.startSeq});
             }
             checkTime(startTime, "startProcess: returned from zygote!");
