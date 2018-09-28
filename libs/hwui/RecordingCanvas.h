@@ -110,7 +110,7 @@ private:
     void drawImageRect(sk_sp<const SkImage>, const SkRect*, const SkRect&, const SkPaint*,
                        SkCanvas::SrcRectConstraint, BitmapPalette palette);
     void drawImageLattice(sk_sp<const SkImage>, const SkCanvas::Lattice&, const SkRect&,
-                          const SkPaint*);
+                          const SkPaint*, BitmapPalette);
 
     void drawPatch(const SkPoint[12], const SkColor[4], const SkPoint[4], SkBlendMode,
                    const SkPaint&);
@@ -185,11 +185,13 @@ public:
     void onDrawBitmapRect(const SkBitmap&, const SkRect*, const SkRect&, const SkPaint*,
                           SrcRectConstraint) override;
 
-    void drawImage(const sk_sp<SkImage>& image, SkScalar left, SkScalar top,
-                   const SkPaint* paint, BitmapPalette pallete);
+    void drawImage(const sk_sp<SkImage>& image, SkScalar left, SkScalar top, const SkPaint* paint,
+                   BitmapPalette pallete);
 
     void drawImageRect(const sk_sp<SkImage>& image, const SkRect& src, const SkRect& dst,
                        const SkPaint* paint, SrcRectConstraint constraint, BitmapPalette palette);
+    void drawImageLattice(const sk_sp<SkImage>& image, const Lattice& lattice, const SkRect& dst,
+                          const SkPaint* paint, BitmapPalette palette);
 
     void onDrawImage(const SkImage*, SkScalar, SkScalar, const SkPaint*) override;
     void onDrawImageLattice(const SkImage*, const Lattice&, const SkRect&, const SkPaint*) override;

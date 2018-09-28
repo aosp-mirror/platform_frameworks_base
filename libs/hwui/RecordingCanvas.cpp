@@ -23,6 +23,7 @@
 #include "SkDrawShadowInfo.h"
 #include "SkImage.h"
 #include "SkImageFilter.h"
+#include "SkLatticeIter.h"
 #include "SkMath.h"
 #include "SkPicture.h"
 #include "SkRSXform.h"
@@ -280,7 +281,8 @@ struct DrawPicture final : Op {
 
 struct DrawImage final : Op {
     static const auto kType = Type::DrawImage;
-    DrawImage(sk_sp<const SkImage>&& image, SkScalar x, SkScalar y, const SkPaint* paint, BitmapPalette palette)
+    DrawImage(sk_sp<const SkImage>&& image, SkScalar x, SkScalar y, const SkPaint* paint,
+              BitmapPalette palette)
             : image(std::move(image)), x(x), y(y), palette(palette) {
         if (paint) {
             this->paint = *paint;
@@ -312,7 +314,8 @@ struct DrawImageNine final : Op {
 struct DrawImageRect final : Op {
     static const auto kType = Type::DrawImageRect;
     DrawImageRect(sk_sp<const SkImage>&& image, const SkRect* src, const SkRect& dst,
-                  const SkPaint* paint, SkCanvas::SrcRectConstraint constraint, BitmapPalette palette)
+                  const SkPaint* paint, SkCanvas::SrcRectConstraint constraint,
+                  BitmapPalette palette)
             : image(std::move(image)), dst(dst), constraint(constraint), palette(palette) {
         this->src = src ? *src : SkRect::MakeIWH(this->image->width(), this->image->height());
         if (paint) {
@@ -331,8 +334,14 @@ struct DrawImageRect final : Op {
 struct DrawImageLattice final : Op {
     static const auto kType = Type::DrawImageLattice;
     DrawImageLattice(sk_sp<const SkImage>&& image, int xs, int ys, int fs, const SkIRect& src,
-                     const SkRect& dst, const SkPaint* paint)
-            : image(std::move(image)), xs(xs), ys(ys), fs(fs), src(src), dst(dst) {
+                     const SkRect& dst, const SkPaint* paint, BitmapPalette palette)
+            : image(std::move(image))
+            , xs(xs)
+            , ys(ys)
+            , fs(fs)
+            , src(src)
+            , dst(dst)
+            , palette(palette) {
         if (paint) {
             this->paint = *paint;
         }
@@ -342,6 +351,7 @@ struct DrawImageLattice final : Op {
     SkIRect src;
     SkRect dst;
     SkPaint paint;
+    BitmapPalette palette;
     void draw(SkCanvas* c, const SkMatrix&) const {
         auto xdivs = pod<int>(this, 0), ydivs = pod<int>(this, xs * sizeof(int));
         auto colors = (0 == fs) ? nullptr : pod<SkColor>(this, (xs + ys) * sizeof(int));
@@ -511,16 +521,13 @@ struct DrawVectorDrawable final : Op {
         tree->getPaintFor(&paint, tree->stagingProperties());
     }
 
-    void draw(SkCanvas* canvas, const SkMatrix&) const {
-        mRoot->draw(canvas, mBounds, paint);
-    }
+    void draw(SkCanvas* canvas, const SkMatrix&) const { mRoot->draw(canvas, mBounds, paint); }
 
     sp<VectorDrawableRoot> mRoot;
     SkRect mBounds;
     SkPaint paint;
     BitmapPalette palette;
 };
-
 }
 
 template <typename T, typename... Args>
@@ -647,14 +654,15 @@ void DisplayListData::drawImageRect(sk_sp<const SkImage> image, const SkRect* sr
     this->push<DrawImageRect>(0, std::move(image), src, dst, paint, constraint, palette);
 }
 void DisplayListData::drawImageLattice(sk_sp<const SkImage> image, const SkCanvas::Lattice& lattice,
-                                       const SkRect& dst, const SkPaint* paint) {
+                                       const SkRect& dst, const SkPaint* paint,
+                                       BitmapPalette palette) {
     int xs = lattice.fXCount, ys = lattice.fYCount;
     int fs = lattice.fRectTypes ? (xs + 1) * (ys + 1) : 0;
     size_t bytes = (xs + ys) * sizeof(int) + fs * sizeof(SkCanvas::Lattice::RectType) +
                    fs * sizeof(SkColor);
     SkASSERT(lattice.fBounds);
     void* pod = this->push<DrawImageLattice>(bytes, std::move(image), xs, ys, fs, *lattice.fBounds,
-                                             dst, paint);
+                                             dst, paint, palette);
     copy_v(pod, lattice.fXDivs, xs, lattice.fYDivs, ys, lattice.fColors, fs, lattice.fRectTypes,
            fs);
 }
@@ -779,22 +787,26 @@ constexpr bool has_palette = std::experimental::is_detected_v<has_palette_helper
 
 template <class T>
 constexpr color_transform_fn colorTransformForOp() {
-    if constexpr(has_paint<T> && has_palette<T>) {
-        // It's a bitmap
-        return [](const void* opRaw, ColorTransform transform) {
-            // TODO: We should be const. Or not. Or just use a different map
-            // Unclear, but this is the quick fix
-            const T* op = reinterpret_cast<const T*>(opRaw);
-            transformPaint(transform, const_cast<SkPaint*>(&(op->paint)), op->palette);
-        };
-    } else if constexpr(has_paint<T>) {
-        return [](const void* opRaw, ColorTransform transform) {
-            // TODO: We should be const. Or not. Or just use a different map
-            // Unclear, but this is the quick fix
-            const T* op = reinterpret_cast<const T*>(opRaw);
-            transformPaint(transform, const_cast<SkPaint*>(&(op->paint)));
-        };
-    } else {
+    if
+        constexpr(has_paint<T> && has_palette<T>) {
+            // It's a bitmap
+            return [](const void* opRaw, ColorTransform transform) {
+                // TODO: We should be const. Or not. Or just use a different map
+                // Unclear, but this is the quick fix
+                const T* op = reinterpret_cast<const T*>(opRaw);
+                transformPaint(transform, const_cast<SkPaint*>(&(op->paint)), op->palette);
+            };
+        }
+    else if
+        constexpr(has_paint<T>) {
+            return [](const void* opRaw, ColorTransform transform) {
+                // TODO: We should be const. Or not. Or just use a different map
+                // Unclear, but this is the quick fix
+                const T* op = reinterpret_cast<const T*>(opRaw);
+                transformPaint(transform, const_cast<SkPaint*>(&(op->paint)));
+            };
+        }
+    else {
         return nullptr;
     }
 }
@@ -931,11 +943,12 @@ void RecordingCanvas::onDrawBitmapNine(const SkBitmap& bm, const SkIRect& center
 }
 void RecordingCanvas::onDrawBitmapRect(const SkBitmap& bm, const SkRect* src, const SkRect& dst,
                                        const SkPaint* paint, SrcRectConstraint constraint) {
-    fDL->drawImageRect(SkImage::MakeFromBitmap(bm), src, dst, paint, constraint, BitmapPalette::Unknown);
+    fDL->drawImageRect(SkImage::MakeFromBitmap(bm), src, dst, paint, constraint,
+                       BitmapPalette::Unknown);
 }
 void RecordingCanvas::onDrawBitmapLattice(const SkBitmap& bm, const SkCanvas::Lattice& lattice,
                                           const SkRect& dst, const SkPaint* paint) {
-    fDL->drawImageLattice(SkImage::MakeFromBitmap(bm), lattice, dst, paint);
+    fDL->drawImageLattice(SkImage::MakeFromBitmap(bm), lattice, dst, paint, BitmapPalette::Unknown);
 }
 
 void RecordingCanvas::drawImage(const sk_sp<SkImage>& image, SkScalar x, SkScalar y,
@@ -943,9 +956,32 @@ void RecordingCanvas::drawImage(const sk_sp<SkImage>& image, SkScalar x, SkScala
     fDL->drawImage(image, x, y, paint, palette);
 }
 
-void RecordingCanvas::drawImageRect(const sk_sp<SkImage>& image, const SkRect& src, const SkRect& dst,
-                   const SkPaint* paint, SrcRectConstraint constraint, BitmapPalette palette) {
+void RecordingCanvas::drawImageRect(const sk_sp<SkImage>& image, const SkRect& src,
+                                    const SkRect& dst, const SkPaint* paint,
+                                    SrcRectConstraint constraint, BitmapPalette palette) {
     fDL->drawImageRect(image, &src, dst, paint, constraint, palette);
+}
+
+void RecordingCanvas::drawImageLattice(const sk_sp<SkImage>& image, const Lattice& lattice,
+                                       const SkRect& dst, const SkPaint* paint,
+                                       BitmapPalette palette) {
+    if (!image || dst.isEmpty()) {
+        return;
+    }
+
+    SkIRect bounds;
+    Lattice latticePlusBounds = lattice;
+    if (!latticePlusBounds.fBounds) {
+        bounds = SkIRect::MakeWH(image->width(), image->height());
+        latticePlusBounds.fBounds = &bounds;
+    }
+
+    if (SkLatticeIter::Valid(image->width(), image->height(), latticePlusBounds)) {
+        fDL->drawImageLattice(image, latticePlusBounds, dst, paint, palette);
+    } else {
+        fDL->drawImageRect(image, nullptr, dst, paint, SrcRectConstraint::kFast_SrcRectConstraint,
+                           palette);
+    }
 }
 
 void RecordingCanvas::onDrawImage(const SkImage* img, SkScalar x, SkScalar y,
@@ -962,7 +998,7 @@ void RecordingCanvas::onDrawImageRect(const SkImage* img, const SkRect* src, con
 }
 void RecordingCanvas::onDrawImageLattice(const SkImage* img, const SkCanvas::Lattice& lattice,
                                          const SkRect& dst, const SkPaint* paint) {
-    fDL->drawImageLattice(sk_ref_sp(img), lattice, dst, paint);
+    fDL->drawImageLattice(sk_ref_sp(img), lattice, dst, paint, BitmapPalette::Unknown);
 }
 
 void RecordingCanvas::onDrawPatch(const SkPoint cubics[12], const SkColor colors[4],
@@ -975,8 +1011,8 @@ void RecordingCanvas::onDrawPoints(SkCanvas::PointMode mode, size_t count, const
     fDL->drawPoints(mode, count, pts, paint);
 }
 void RecordingCanvas::onDrawVerticesObject(const SkVertices* vertices,
-                                          const SkVertices::Bone bones[], int boneCount,
-                                          SkBlendMode mode, const SkPaint& paint) {
+                                           const SkVertices::Bone bones[], int boneCount,
+                                           SkBlendMode mode, const SkPaint& paint) {
     fDL->drawVertices(vertices, bones, boneCount, mode, paint);
 }
 void RecordingCanvas::onDrawAtlas(const SkImage* atlas, const SkRSXform xforms[],
