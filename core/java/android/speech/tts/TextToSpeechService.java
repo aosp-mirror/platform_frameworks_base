@@ -1112,7 +1112,6 @@ public abstract class TextToSpeechService extends Service {
 
         @Override
         protected void playImpl() {
-            dispatchOnStart();
             super.playImpl();
             try {
               mFileOutputStream.close();
