@@ -1476,6 +1476,20 @@ public class ConnectivityService extends IConnectivityManager.Stub
     };
 
     /**
+     * Ensures that the system cannot call a particular method.
+     */
+    private boolean disallowedBecauseSystemCaller() {
+        // TODO: start throwing a SecurityException when GnssLocationProvider stops calling
+        // requestRouteToHost.
+        if (isSystem(Binder.getCallingUid())) {
+            log("This method exists only for app backwards compatibility"
+                    + " and must not be called by system services.");
+            return true;
+        }
+        return false;
+    }
+
+    /**
      * Ensure that a network route exists to deliver traffic to the specified
      * host via the specified network interface.
      * @param networkType the type of the network over which traffic to the
@@ -1486,6 +1500,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
      */
     @Override
     public boolean requestRouteToHostAddress(int networkType, byte[] hostAddress) {
+        if (disallowedBecauseSystemCaller()) {
+            return false;
+        }
         enforceChangePermission();
         if (mProtectedNetworks.contains(networkType)) {
             enforceConnectivityInternalPermission();

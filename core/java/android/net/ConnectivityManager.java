@@ -26,7 +26,6 @@ import android.annotation.UnsupportedAppUsage;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.Intent;
-import android.content.pm.PackageManager;
 import android.os.Binder;
 import android.os.Build.VERSION_CODES;
 import android.os.Bundle;
@@ -3801,8 +3800,9 @@ public class ConnectivityManager {
 
     private void unsupportedStartingFrom(int version) {
         if (Process.myUid() == Process.SYSTEM_UID) {
-            // The getApplicationInfo() call we make below is not supported in system context, and
-            // we want to allow the system to use these APIs anyway.
+            // The getApplicationInfo() call we make below is not supported in system context. Let
+            // the call through here, and rely on the fact that ConnectivityService will refuse to
+            // allow the system to use these APIs anyway.
             return;
         }
 
@@ -3819,11 +3819,6 @@ public class ConnectivityManager {
     // functions by accessing ConnectivityService directly. However, it should be clear that doing
     // so is unsupported and may break in the future. http://b/22728205
     private void checkLegacyRoutingApiAccess() {
-        if (mContext.checkCallingOrSelfPermission("com.android.permission.INJECT_OMADM_SETTINGS")
-                == PackageManager.PERMISSION_GRANTED) {
-            return;
-        }
-
         unsupportedStartingFrom(VERSION_CODES.M);
     }
 
