@@ -518,8 +518,6 @@ public class PackageManagerService extends IPackageManager.Stub {
     /** Special library name that skips shared libraries check during compilation. */
     private static final String SKIP_SHARED_LIBRARY_CHECK = "&";
 
-    private static final int PROTECTION_MASK_BASE = 0xf;
-
     final ServiceThread mHandlerThread;
 
     final PackageHandler mHandler;
@@ -4136,11 +4134,6 @@ public class PackageManagerService extends IPackageManager.Stub {
 
     @Override
     public void revokeRuntimePermission(String packageName, String name, int userId) {
-        revokeRuntimePermission(packageName, name, userId, mSettings.getPermission(name));
-    }
-
-    private void revokeRuntimePermission(String packageName, String name, int userId,
-            BasePermission bp) {
         if (!sUserManager.exists(userId)) {
             Log.e(TAG, "No such user:" + userId);
             return;
@@ -4161,6 +4154,8 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (pkg == null) {
                 throw new IllegalArgumentException("Unknown package: " + packageName);
             }
+
+            final BasePermission bp = mSettings.mPermissions.get(name);
             if (bp == null) {
                 throw new IllegalArgumentException("Unknown permission: " + name);
             }
@@ -4277,8 +4272,7 @@ public class PackageManagerService extends IPackageManager.Stub {
                                         oldPermissionGroupName, "to", newPermissionGroupName);
 
                                 try {
-                                    revokeRuntimePermission(packageName, permissionName, userId,
-                                           mSettings.getPermission(permissionName));
+                                    revokeRuntimePermission(packageName, permissionName, userId);
                                 } catch (IllegalArgumentException e) {
                                     Slog.e(TAG, "Could not revoke " + permissionName + " from "
                                             + packageName, e);
@@ -9836,10 +9830,7 @@ public class PackageManagerService extends IPackageManager.Stub {
             if (DEBUG_REMOVE) Log.d(TAG, "  Activities: " + r);
         }
 
-        final ArrayList<String> allPackageNames = new ArrayList<>(mPackages.keySet());
-
         N = pkg.permissions.size();
-        List<BasePermission> bps = new ArrayList<BasePermission>(N);
         r = null;
         for (i=0; i<N; i++) {
             PackageParser.Permission p = pkg.permissions.get(i);
@@ -9848,10 +9839,6 @@ public class PackageManagerService extends IPackageManager.Stub {
                 bp = mSettings.mPermissionTrees.get(p.info.name);
             }
             if (bp != null && bp.perm == p) {
-                if (((p.info.protectionLevel & PROTECTION_MASK_BASE) &
-                        PermissionInfo.PROTECTION_DANGEROUS) != 0) {
-                    bps.add(bp);
-                }
                 bp.perm = null;
                 if (DEBUG_REMOVE && chatty) {
                     if (r == null) {
@@ -9869,44 +9856,6 @@ public class PackageManagerService extends IPackageManager.Stub {
                 }
             }
         }
-
-        AsyncTask.execute(() -> {
-            final int numRemovedPermissions = bps.size();
-            for (int permissionNum = 0; permissionNum < numRemovedPermissions; permissionNum++) {
-                final int[] userIds = sUserManager.getUserIds();
-                final int numUserIds = userIds.length;
-
-                final int numPackages = allPackageNames.size();
-                for (int packageNum = 0; packageNum < numPackages; packageNum++) {
-                    final String packageName = allPackageNames.get(packageNum);
-                    final PackageManagerInternal packageManagerInt =
-                            LocalServices.getService(PackageManagerInternal.class);
-                    final ApplicationInfo applicationInfo = packageManagerInt.getApplicationInfo(
-                            packageName, UserHandle.USER_SYSTEM);
-                    if (applicationInfo != null
-                            && applicationInfo.targetSdkVersion < Build.VERSION_CODES.M) {
-                        continue;
-                    }
-                    for (int userIdNum = 0; userIdNum < numUserIds; userIdNum++) {
-                        final int userId = userIds[userIdNum];
-                        final String permissionName = bps.get(permissionNum).name;
-                        if (checkPermission(permissionName, packageName,
-                                userId) == PackageManager.PERMISSION_GRANTED) {
-                            try {
-                                revokeRuntimePermission(packageName,
-                                        permissionName,
-                                        userId,
-                                        bps.get(permissionNum));
-                            } catch (IllegalArgumentException e) {
-                                Slog.e(TAG, "Could not revoke " + permissionName + " from "
-                                        + packageName, e);
-                            }
-                        }
-                    }
-                }
-            }
-        });
-
         if (r != null) {
             if (DEBUG_REMOVE) Log.d(TAG, "  Permissions: " + r);
         }
