@@ -113,10 +113,10 @@ public class DozeSensors {
                         true /* reports touch coordinates */,
                         true /* touchscreen */),
                 new TriggerSensor(
-                        findSensorWithType(config.reachSensorType()),
-                        Settings.Secure.DOZE_REACH_GESTURE,
+                        findSensorWithType(config.wakeLockScreenSensorType()),
+                        Settings.Secure.DOZE_WAKE_LOCK_SCREEN_GESTURE,
                         true /* configured */,
-                        DozeLog.PULSE_REASON_SENSOR_REACH,
+                        DozeLog.PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN,
                         false /* reports touch coordinates */,
                         false /* touchscreen */),
                 new WakeScreenSensor(),
