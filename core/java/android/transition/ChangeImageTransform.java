@@ -97,22 +97,13 @@ public class ChangeImageTransform extends Transition {
         values.put(PROPNAME_BOUNDS, bounds);
         Matrix matrix;
         ImageView.ScaleType scaleType = imageView.getScaleType();
-        if (scaleType == ImageView.ScaleType.FIT_XY) {
-            matrix = imageView.getImageMatrix();
-            if (!matrix.isIdentity()) {
-                matrix = new Matrix(matrix);
-            } else {
-                int drawableWidth = drawable.getIntrinsicWidth();
-                int drawableHeight = drawable.getIntrinsicHeight();
-                if (drawableWidth > 0 && drawableHeight > 0) {
-                    float scaleX = ((float) bounds.width()) / drawableWidth;
-                    float scaleY = ((float) bounds.height()) / drawableHeight;
-                    matrix = new Matrix();
-                    matrix.setScale(scaleX, scaleY);
-                } else {
-                    matrix = null;
-                }
-            }
+        int drawableWidth = drawable.getIntrinsicWidth();
+        int drawableHeight = drawable.getIntrinsicHeight();
+        if (scaleType == ImageView.ScaleType.FIT_XY && drawableWidth > 0 && drawableHeight > 0) {
+            float scaleX = ((float) bounds.width()) / drawableWidth;
+            float scaleY = ((float) bounds.height()) / drawableHeight;
+            matrix = new Matrix();
+            matrix.setScale(scaleX, scaleY);
         } else {
             matrix = new Matrix(imageView.getImageMatrix());
         }
@@ -152,17 +143,13 @@ public class ChangeImageTransform extends Transition {
         }
         Rect startBounds = (Rect) startValues.values.get(PROPNAME_BOUNDS);
         Rect endBounds = (Rect) endValues.values.get(PROPNAME_BOUNDS);
-        if (startBounds == null || endBounds == null) {
+        Matrix startMatrix = (Matrix) startValues.values.get(PROPNAME_MATRIX);
+        Matrix endMatrix = (Matrix) endValues.values.get(PROPNAME_MATRIX);
+        if (startBounds == null || endBounds == null || startMatrix == null || endMatrix == null) {
             return null;
         }
 
-        Matrix startMatrix = (Matrix) startValues.values.get(PROPNAME_MATRIX);
-        Matrix endMatrix = (Matrix) endValues.values.get(PROPNAME_MATRIX);
-
-        boolean matricesEqual = (startMatrix == null && endMatrix == null) ||
-                (startMatrix != null && startMatrix.equals(endMatrix));
-
-        if (startBounds.equals(endBounds) && matricesEqual) {
+        if (startBounds.equals(endBounds) && startMatrix.equals(endMatrix)) {
             return null;
         }
 
@@ -172,15 +159,9 @@ public class ChangeImageTransform extends Transition {
         int drawableHeight = drawable.getIntrinsicHeight();
 
         ObjectAnimator animator;
-        if (drawableWidth == 0 || drawableHeight == 0) {
+        if (drawableWidth <= 0 || drawableHeight <= 0) {
             animator = createNullAnimator(imageView);
         } else {
-            if (startMatrix == null) {
-                startMatrix = Matrix.IDENTITY_MATRIX;
-            }
-            if (endMatrix == null) {
-                endMatrix = Matrix.IDENTITY_MATRIX;
-            }
             ANIMATED_TRANSFORM_PROPERTY.set(imageView, startMatrix);
             animator = createMatrixAnimator(imageView, startMatrix, endMatrix);
         }
@@ -189,7 +170,7 @@ public class ChangeImageTransform extends Transition {
 
     private ObjectAnimator createNullAnimator(ImageView imageView) {
         return ObjectAnimator.ofObject(imageView, ANIMATED_TRANSFORM_PROPERTY,
-                NULL_MATRIX_EVALUATOR, null, null);
+                NULL_MATRIX_EVALUATOR, Matrix.IDENTITY_MATRIX, Matrix.IDENTITY_MATRIX);
     }
 
     private ObjectAnimator createMatrixAnimator(final ImageView imageView, Matrix startMatrix,

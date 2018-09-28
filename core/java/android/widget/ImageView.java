@@ -1338,7 +1338,9 @@ public class ImageView extends View {
             return;
         }
         if (matrix == null) {
-            mDrawable.setBounds(0, 0, getWidth(), getHeight());
+            final int vwidth = getWidth() - mPaddingLeft - mPaddingRight;
+            final int vheight = getHeight() - mPaddingTop - mPaddingBottom;
+            mDrawable.setBounds(0, 0, vwidth, vheight);
         } else {
             mDrawable.setBounds(0, 0, mDrawableWidth, mDrawableHeight);
             if (mDrawMatrix == null) {
