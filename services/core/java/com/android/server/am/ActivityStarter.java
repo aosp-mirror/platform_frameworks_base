@@ -1606,12 +1606,17 @@ class ActivityStarter {
         mVoiceSession = voiceSession;
         mVoiceInteractor = voiceInteractor;
 
-        mPreferredDisplayId = getPreferedDisplayId(mSourceRecord, mStartActivity, options);
-
         mLaunchParams.reset();
 
         mSupervisor.getLaunchParamsController().calculate(inTask, null /*layout*/, r, sourceRecord,
                 options, mLaunchParams);
+
+        if (mLaunchParams.hasPreferredDisplay()) {
+            mPreferredDisplayId = mLaunchParams.mPreferredDisplayId;
+        } else {
+            mPreferredDisplayId = DEFAULT_DISPLAY;
+        }
+        ensureValidPreferredDisplayId(r);
 
         mLaunchMode = r.launchMode;
 
@@ -1702,6 +1707,24 @@ class ActivityStarter {
         }
 
         mNoAnimation = (mLaunchFlags & FLAG_ACTIVITY_NO_ANIMATION) != 0;
+    }
+
+    /**
+     * Ensure preferred display ID matches the starting activity.
+     */
+    private void ensureValidPreferredDisplayId(ActivityRecord startingActivity) {
+        // Check if the Activity is a VR activity. If so, the activity should be launched in
+        // main display.
+        if (startingActivity != null && startingActivity.requestedVrComponent != null) {
+            mPreferredDisplayId = DEFAULT_DISPLAY;
+        }
+
+        // Get the virtual display ID from ActivityStackManagerService. If that's set we should
+        // always use that.
+        final int displayId = mService.mVr2dDisplayId;
+        if (displayId != INVALID_DISPLAY) {
+            mPreferredDisplayId = displayId;
+        }
     }
 
     private void sendNewTaskResultRequestIfNeeded() {
@@ -1880,44 +1903,6 @@ class ActivityStarter {
         }
 
         return intentActivity;
-    }
-
-    /**
-     * Returns the ID of the display to use for a new activity. If the device is in VR mode,
-     * then return the Vr mode's virtual display ID. If not,  if the activity was started with
-     * a launchDisplayId, use that. Otherwise, if the source activity has a explicit display ID
-     * set, use that to launch the activity.
-     */
-    private int getPreferedDisplayId(
-            ActivityRecord sourceRecord, ActivityRecord startingActivity, ActivityOptions options) {
-        // Check if the Activity is a VR activity. If so, the activity should be launched in
-        // main display.
-        if (startingActivity != null && startingActivity.requestedVrComponent != null) {
-            return DEFAULT_DISPLAY;
-        }
-
-        // Get the virtual display id from ActivityManagerService.
-        int displayId = mService.mVr2dDisplayId;
-        if (displayId != INVALID_DISPLAY) {
-            if (DEBUG_STACK) {
-                Slog.d(TAG, "getSourceDisplayId :" + displayId);
-            }
-            return displayId;
-        }
-
-        // If the caller requested a display, prefer that display.
-        final int launchDisplayId =
-                (options != null) ? options.getLaunchDisplayId() : INVALID_DISPLAY;
-        if (launchDisplayId != INVALID_DISPLAY) {
-            return launchDisplayId;
-        }
-
-        displayId = sourceRecord != null ? sourceRecord.getDisplayId() : INVALID_DISPLAY;
-        // If the activity has a displayId set explicitly, launch it on the same displayId.
-        if (displayId != INVALID_DISPLAY) {
-            return displayId;
-        }
-        return DEFAULT_DISPLAY;
     }
 
     /**
