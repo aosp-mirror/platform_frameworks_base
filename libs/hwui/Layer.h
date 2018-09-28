@@ -72,7 +72,7 @@ public:
 
     inline int getAlpha() const { return alpha; }
 
-    inline SkBlendMode getMode() const { return mode; }
+    virtual SkBlendMode getMode() const { return mode; }
 
     inline SkColorFilter* getColorFilter() const { return mColorFilter.get(); }
 
@@ -99,6 +99,11 @@ protected:
           SkBlendMode mode);
 
     RenderState& mRenderState;
+
+    /**
+     * Blending mode of the layer.
+     */
+    SkBlendMode mode;
 
 private:
     void buildColorSpaceWithFilter();
@@ -129,11 +134,6 @@ private:
      * Opacity of the layer.
      */
     int alpha;
-
-    /**
-     * Blending mode of the layer.
-     */
-    SkBlendMode mode;
 
     /**
      * Optional texture coordinates transform.

@@ -27,10 +27,10 @@ Layer::Layer(RenderState& renderState, Api api, sk_sp<SkColorFilter> colorFilter
              SkBlendMode mode)
         : GpuMemoryTracker(GpuObjectType::Layer)
         , mRenderState(renderState)
+        , mode(mode)
         , mApi(api)
         , mColorFilter(colorFilter)
-        , alpha(alpha)
-        , mode(mode) {
+        , alpha(alpha) {
     // TODO: This is a violation of Android's typical ref counting, but it
     // preserves the old inc/dec ref locations. This should be changed...
     incStrong(nullptr);
