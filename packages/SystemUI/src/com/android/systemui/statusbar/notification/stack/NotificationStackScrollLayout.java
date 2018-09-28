@@ -5654,19 +5654,21 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         @Override
         public boolean onDraggedDown(View startingChild, int dragLengthY) {
             if (mStatusBarState == StatusBarState.KEYGUARD
-                    && hasActiveNotifications() && (!mStatusBar.isDozing()
-                    || mStatusBar.isPulsing())) {
+                    && hasActiveNotifications()) {
                 mLockscreenGestureLogger.write(
                         MetricsEvent.ACTION_LS_SHADE,
                         (int) (dragLengthY / mDisplayMetrics.density),
                         0 /* velocityDp - N/A */);
 
-                // We have notifications, go to locked shade.
-                mStatusBar.goToLockedShade(startingChild);
-                if (startingChild instanceof ExpandableNotificationRow) {
-                    ExpandableNotificationRow row = (ExpandableNotificationRow) startingChild;
-                    row.onExpandedByGesture(true /* drag down is always an open */);
+                if (mNotificationPanel.onDraggedDown() || startingChild != null) {
+                    // We have notifications, go to locked shade.
+                    mStatusBar.goToLockedShade(startingChild);
+                    if (startingChild instanceof ExpandableNotificationRow) {
+                        ExpandableNotificationRow row = (ExpandableNotificationRow) startingChild;
+                        row.onExpandedByGesture(true /* drag down is always an open */);
+                    }
                 }
+
                 return true;
             } else {
                 // abort gesture.

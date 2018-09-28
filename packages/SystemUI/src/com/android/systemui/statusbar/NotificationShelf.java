@@ -793,7 +793,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
     private void setOpenedAmount(float openedAmount) {
         mNoAnimationsInThisFrame = openedAmount == 1.0f && mOpenedAmount == 0.0f;
         mOpenedAmount = openedAmount;
-        if (!mAmbientState.isPanelFullWidth()) {
+        if (!mAmbientState.isPanelFullWidth() || mAmbientState.isDark()) {
             // We don't do a transformation at all, lets just assume we are fully opened
             openedAmount = 1.0f;
         }
