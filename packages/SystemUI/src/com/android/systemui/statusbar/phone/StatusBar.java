@@ -2156,7 +2156,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     @Override
-    public void animateExpandSettingsPanel(String subPanel) {
+    public void animateExpandSettingsPanel(@Nullable String subPanel) {
         if (SPEW) Log.d(TAG, "animateExpand: mExpandedVisible=" + mExpandedVisible);
         if (!panelsEnabled()) {
             return;
@@ -2164,7 +2164,6 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         // Settings are not available in setup
         if (!mUserSetup) return;
-
 
         if (subPanel != null) {
             mQSPanel.openDetails(subPanel);

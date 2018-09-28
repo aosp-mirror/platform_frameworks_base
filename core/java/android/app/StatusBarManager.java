@@ -17,6 +17,7 @@
 package android.app;
 
 import android.annotation.IntDef;
+import android.annotation.Nullable;
 import android.annotation.SystemService;
 import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
@@ -208,10 +209,11 @@ public class StatusBarManager {
     }
 
     /**
-     * Expand the settings panel and open a subPanel, pass null to just open the settings panel.
+     * Expand the settings panel and open a subPanel. If the subpanel is null or does not have a
+     * corresponding tile, the QS panel is simply expanded
      */
     @UnsupportedAppUsage
-    public void expandSettingsPanel(String subPanel) {
+    public void expandSettingsPanel(@Nullable String subPanel) {
         try {
             final IStatusBarService svc = getService();
             if (svc != null) {
