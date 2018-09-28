@@ -86,8 +86,9 @@ public class SubscriptionManager {
     /** @hide */
     public static final int INVALID_PHONE_INDEX = -1;
 
-    /** Indicates invalid sim slot. This can be returned by {@link #getSlotIndex(int)}. */
-    public static final int INVALID_SIM_SLOT_INDEX = -2;
+    /** An invalid slot identifier */
+    /** @hide */
+    public static final int INVALID_SIM_SLOT_INDEX = -1;
 
     /** Indicates the caller wants the default sub id. */
     /** @hide */
@@ -138,8 +139,9 @@ public class SubscriptionManager {
     /** @hide */
     public static final String SIM_SLOT_INDEX = "sim_id";
 
-    /** Indicates SIM is not inserted. This can be returned by {@link #getSlotIndex(int)}. */
-    public static final int SIM_NOT_INSERTED = -3;
+    /** SIM is not inserted */
+    /** @hide */
+    public static final int SIM_NOT_INSERTED = -1;
 
     /**
      * TelephonyProvider column name for user displayed name.
@@ -1262,22 +1264,16 @@ public class SubscriptionManager {
 
     /**
      * Get slotIndex associated with the subscription.
-     *
-     * @param subscriptionId the unique SubscriptionInfo index in database
-     * @return slotIndex as a positive integer or a negative value,
-     * <ol>
-     * <li>{@link #INVALID_SUBSCRIPTION_ID} if the supplied subscriptionId is invalid </li>
-     * <li>{@link #SIM_NOT_INSERTED} if sim is not inserted </li>
-     * <li>{@link #INVALID_SIM_SLOT_INDEX} if the supplied subscriptionId doesn't have an
-     *     associated slot index </li>
-     * </ol>
+     * @return slotIndex as a positive integer or a negative value if an error either
+     * SIM_NOT_INSERTED or < 0 if an invalid slot index
+     * @hide
      */
-    public static int getSlotIndex(int subscriptionId) {
-        if (!isValidSubscriptionId(subscriptionId)) {
+    @UnsupportedAppUsage
+    public static int getSlotIndex(int subId) {
+        if (!isValidSubscriptionId(subId)) {
             if (DBG) {
-                logd("[getSlotIndex]- supplied subscriptionId is invalid. ");
+                logd("[getSlotIndex]- fail");
             }
-            return INVALID_SUBSCRIPTION_ID;
         }
 
         int result = INVALID_SIM_SLOT_INDEX;
@@ -1285,7 +1281,7 @@ public class SubscriptionManager {
         try {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
             if (iSub != null) {
-                result = iSub.getSlotIndex(subscriptionId);
+                result = iSub.getSlotIndex(subId);
             }
         } catch (RemoteException ex) {
             // ignore it
