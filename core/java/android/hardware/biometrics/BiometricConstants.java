@@ -34,6 +34,13 @@ public interface BiometricConstants {
     //
 
     /**
+     * This was not added here since it would update BiometricPrompt API. But, is used in
+     * BiometricManager.
+     * @hide
+     */
+    int BIOMETRIC_ERROR_NONE = 0;
+
+    /**
      * The hardware is unavailable. Try again later.
      */
     int BIOMETRIC_ERROR_HW_UNAVAILABLE = 1;

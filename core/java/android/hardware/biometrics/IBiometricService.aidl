@@ -37,6 +37,6 @@ interface IBiometricService {
     // Cancel authentication for the given sessionId
     void cancelAuthentication(IBinder token, String opPackageName);
 
-    // Returns true if the user has at least one enrolled biometric.
-    boolean hasEnrolledBiometrics(String opPackageName);
+    // Checks if biometrics can be used.
+    int canAuthenticate(String opPackageName);
 }

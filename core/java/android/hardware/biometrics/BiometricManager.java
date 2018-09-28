@@ -21,11 +21,29 @@ import static android.Manifest.permission.USE_BIOMETRIC;
 import android.annotation.RequiresPermission;
 import android.content.Context;
 import android.os.RemoteException;
+import android.util.Slog;
 
 /**
  * A class that contains biometric utilities. For authentication, see {@link BiometricPrompt}.
  */
 public class BiometricManager {
+
+    private static final String TAG = "BiometricManager";
+
+    /**
+     * No error detected.
+     */
+    public static final int ERROR_NONE = BiometricConstants.BIOMETRIC_ERROR_NONE;
+
+    /**
+     * The hardware is unavailable. Try again later.
+     */
+    public static final int ERROR_UNAVAILABLE = BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE;
+
+    /**
+     * The user does not have any biometrics enrolled.
+     */
+    public static final int ERROR_NO_BIOMETRICS = BiometricConstants.BIOMETRIC_ERROR_NO_BIOMETRICS;
 
     private final Context mContext;
     private final IBiometricService mService;
@@ -41,16 +59,24 @@ public class BiometricManager {
     }
 
     /**
-     * Determine if there is at least one biometric enrolled.
+     * Determine if biometrics can be used. In other words, determine if {@link BiometricPrompt}
+     * can be expected to be shown (hardware available, templates enrolled, user-enabled).
      *
-     * @return true if at least one biometric is enrolled, false otherwise
+     * @return Returns {@link #ERROR_NO_BIOMETRICS} if the user does not have any enrolled, or
+     *     {@link #ERROR_UNAVAILABLE} if none are currently supported/enabled. Returns
+     *     {@link #ERROR_NONE} if a biometric can currently be used (enrolled and available).
      */
     @RequiresPermission(USE_BIOMETRIC)
-    public boolean hasEnrolledBiometrics() {
-        try {
-            return mService.hasEnrolledBiometrics(mContext.getOpPackageName());
-        } catch (RemoteException e) {
-            return false;
+    public int canAuthenticate() {
+        if (mService != null) {
+            try {
+                return mService.canAuthenticate(mContext.getOpPackageName());
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        } else {
+            Slog.w(TAG, "hasEnrolledBiometrics(): Service not connected");
+            return ERROR_UNAVAILABLE;
         }
     }
 }
