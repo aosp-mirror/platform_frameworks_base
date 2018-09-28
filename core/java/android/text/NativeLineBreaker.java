@@ -21,6 +21,7 @@ import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.Px;
 
 import dalvik.annotation.optimization.CriticalNative;
 import dalvik.annotation.optimization.FastNative;
@@ -258,16 +259,91 @@ public class NativeLineBreaker {
     /**
      * A result object of a line breaking
      */
-    public static class LineBreaks {
-        public int breakCount;
-        private static final int INITIAL_SIZE = 16;
-        public int[] breaks = new int[INITIAL_SIZE];
-        public float[] widths = new float[INITIAL_SIZE];
-        public float[] ascents = new float[INITIAL_SIZE];
-        public float[] descents = new float[INITIAL_SIZE];
-        // TODO: Introduce Hyphenator for explaining the meaning of flags.
-        public int[] flags = new int[INITIAL_SIZE];
-        // breaks, widths, and flags should all have the same length
+    public static class Result {
+        // Following two contstant must be synced with minikin's line breaker.
+        private static final int TAB_MASK = 0x20000000;
+        private static final int HYPHEN_MASK = 0xFF;
+
+        private static final NativeAllocationRegistry sRegistry = new NativeAllocationRegistry(
+                Result.class.getClassLoader(), nGetReleaseResultFunc(), 32);
+        private final long mPtr;
+
+        private Result(long ptr) {
+            mPtr = ptr;
+            sRegistry.registerNativeAllocation(this, mPtr);
+        }
+
+        /**
+         * Returns a number of line count.
+         *
+         * @return number of lines
+         */
+        public @IntRange(from = 0) int getLineCount() {
+            return nGetLineCount(mPtr);
+        }
+
+        /**
+         * Returns a break offset of the line.
+         *
+         * @param lineIndex an index of the line.
+         * @return the break offset.
+         */
+        public @IntRange(from = 0) int getLineBreakOffset(@IntRange(from = 0) int lineIndex) {
+            return nGetLineBreakOffset(mPtr, lineIndex);
+        }
+
+        /**
+         * Returns a width of the line in pixels.
+         *
+         * @param lineIndex an index of the line.
+         * @return a width of the line in pixexls
+         */
+        public @Px float getLineWidth(@IntRange(from = 0) int lineIndex) {
+            return nGetLineWidth(mPtr, lineIndex);
+        }
+
+        /**
+         * Returns an entier font ascent of the line in pixels.
+         *
+         * @param lineIndex an index of the line.
+         * @return an entier font ascent of the line in pixels.
+         */
+        public @Px float getLineAscent(@IntRange(from = 0) int lineIndex) {
+            return nGetLineAscent(mPtr, lineIndex);
+        }
+
+        /**
+         * Returns an entier font descent of the line in pixels.
+         *
+         * @param lineIndex an index of the line.
+         * @return an entier font descent of the line in pixels.
+         */
+        public @Px float getLineDescent(@IntRange(from = 0) int lineIndex) {
+            return nGetLineDescent(mPtr, lineIndex);
+        }
+
+        /**
+         * Returns true if the line has a TAB character.
+         *
+         * @param lineIndex an index of the line.
+         * @return true if the line has a TAB character
+         */
+        public boolean hasLineTab(int lineIndex) {
+            return (nGetLineFlag(mPtr, lineIndex) & TAB_MASK) != 0;
+        }
+
+        /**
+         * Returns a packed packed hyphen edit for the line.
+         *
+         * @param lineIndex an index of the line.
+         * @return a packed hyphen edit for the line.
+         * @see android.text.Hyphenator#unpackStartHyphenEdit(int)
+         * @see android.text.Hyphenator#unpackEndHyphenEdit(int)
+         * @see android.text.Hyphenator#packHyphenEdit(int,int)
+         */
+        public int getLineHyphenEdit(int lineIndex) {
+            return (nGetLineFlag(mPtr, lineIndex) & HYPHEN_MASK);
+        }
     }
 
     private static final NativeAllocationRegistry sRegistry = new NativeAllocationRegistry(
@@ -294,14 +370,12 @@ public class NativeLineBreaker {
      * @param measuredPara a result of the text measurement
      * @param constraints for a single paragraph
      * @param lineNumber a line number of this paragraph
-     * @param out object to set line break information for the given paragraph
      */
-    public void computeLineBreaks(
+    public Result computeLineBreaks(
             @NonNull NativeMeasuredParagraph measuredPara,
             @NonNull ParagraphConstraints constraints,
-            @IntRange(from = 0) int lineNumber,
-            @NonNull LineBreaks out) {
-        out.breakCount = nComputeLineBreaks(
+            @IntRange(from = 0) int lineNumber) {
+        return new Result(nComputeLineBreaks(
                 mNativePtr,
 
                 // Inputs
@@ -313,17 +387,7 @@ public class NativeLineBreaker {
                 constraints.mWidth,
                 constraints.mVariableTabStops,
                 constraints.mDefaultTabStop,
-                lineNumber,
-
-                // Outputs
-                out,
-                out.breaks.length,
-                out.breaks,
-                out.widths,
-                out.ascents,
-                out.descents,
-                out.flags);
-
+                lineNumber));
     }
 
     @FastNative
@@ -341,7 +405,7 @@ public class NativeLineBreaker {
     // arrays do not have to be resized
     // The individual character widths will be returned in charWidths. The length of
     // charWidths must be at least the length of the text.
-    private static native int nComputeLineBreaks(
+    private static native long nComputeLineBreaks(
             /* non zero */ long nativePtr,
 
             // Inputs
@@ -353,14 +417,21 @@ public class NativeLineBreaker {
             @FloatRange(from = 0.0f) float restWidth,
             @Nullable int[] variableTabStops,
             int defaultTabStop,
-            @IntRange(from = 0) int indentsOffset,
+            @IntRange(from = 0) int indentsOffset);
 
-            // Outputs
-            @NonNull LineBreaks recycle,
-            @IntRange(from  = 0) int recycleLength,
-            @NonNull int[] recycleBreaks,
-            @NonNull float[] recycleWidths,
-            @NonNull float[] recycleAscents,
-            @NonNull float[] recycleDescents,
-            @NonNull int[] recycleFlags);
+    // Result accessors
+    @CriticalNative
+    private static native int nGetLineCount(long ptr);
+    @CriticalNative
+    private static native int nGetLineBreakOffset(long ptr, int idx);
+    @CriticalNative
+    private static native float nGetLineWidth(long ptr, int idx);
+    @CriticalNative
+    private static native float nGetLineAscent(long ptr, int idx);
+    @CriticalNative
+    private static native float nGetLineDescent(long ptr, int idx);
+    @CriticalNative
+    private static native int nGetLineFlag(long ptr, int idx);
+    @CriticalNative
+    private static native long nGetReleaseResultFunc();
 }
