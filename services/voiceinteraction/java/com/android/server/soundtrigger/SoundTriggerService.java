@@ -434,40 +434,6 @@ public class SoundTriggerService extends SystemService {
             }
             return mSoundTriggerHelper.isRecognitionRequested(parcelUuid.getUuid());
         }
-
-        @Override
-        public SoundTrigger.RecognitionEvent getModelState(ParcelUuid soundModelId) {
-            enforceCallingPermission(Manifest.permission.MANAGE_SOUND_TRIGGER);
-            if (!isInitialized()) return null;
-            if (DEBUG) {
-                Slog.i(TAG, "getModelState(): id = " + soundModelId);
-            }
-
-            synchronized (mLock) {
-                SoundModel soundModel = mLoadedModels.get(soundModelId.getUuid());
-                if (soundModel == null) {
-                    Slog.e(TAG, soundModelId + " is not loaded");
-                    return null;
-                }
-                SoundTrigger.RecognitionEvent ret = null;
-                switch (soundModel.type) {
-                    case SoundModel.TYPE_KEYPHRASE:
-                        ret = mSoundTriggerHelper.getKeyphraseModelState(soundModel.uuid);
-                        break;
-                    case SoundModel.TYPE_GENERIC_SOUND:
-                        ret = mSoundTriggerHelper.getGenericModelState(soundModel.uuid);
-                        break;
-                    default:
-                        Slog.e(TAG, "Unknown model type");
-                        break;
-                }
-                if (ret == null) {
-                    Slog.e(TAG, "Failed to get model state");
-                }
-
-                return ret;
-            }
-        }
     }
 
     /**
