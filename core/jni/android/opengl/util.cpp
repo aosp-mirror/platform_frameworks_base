@@ -622,13 +622,17 @@ void util_multiplyMV(JNIEnv *env, jclass clazz,
 
 // ---------------------------------------------------------------------------
 
+// The internal format is no longer the same as pixel format, per Table 2 in
+// https://www.khronos.org/registry/OpenGL-Refpages/es3.1/html/glTexImage2D.xhtml
 static int checkInternalFormat(SkColorType colorType, int internalformat,
     int type)
 {
     switch(colorType) {
         case kN32_SkColorType:
             return (type == GL_UNSIGNED_BYTE &&
-                internalformat == GL_RGBA) ? 0 : -1;
+                    internalformat == GL_RGBA) ||
+                (type == GL_UNSIGNED_BYTE &&
+                 internalformat == GL_SRGB8_ALPHA8) ? 0 : -1;
         case kAlpha_8_SkColorType:
             return (type == GL_UNSIGNED_BYTE &&
                 internalformat == GL_ALPHA) ? 0 : -1;
