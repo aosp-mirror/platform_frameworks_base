@@ -2113,8 +2113,8 @@
     <!-- Type of the long press sensor. Empty if long press is not supported. -->
     <string name="config_dozeLongPressSensorType" translatable="false"></string>
 
-    <!-- Type of the reach sensor. Empty if reach is not supported. -->
-    <string name="config_dozeReachSensorType" translatable="false"></string>
+    <!-- Type of sensor that wakes up the lock screen. Empty if not supported. -->
+    <string name="config_dozeWakeLockScreenSensorType" translatable="false"></string>
 
     <!-- Type of the wake up sensor. Empty if not supported. -->
     <string name="config_dozeWakeScreenSensorType" translatable="false"></string>

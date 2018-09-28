@@ -128,7 +128,7 @@ public class DozeTriggers implements DozeMachine.Part {
         boolean isDoubleTap = pulseReason == DozeLog.PULSE_REASON_SENSOR_DOUBLE_TAP;
         boolean isPickup = pulseReason == DozeLog.PULSE_REASON_SENSOR_PICKUP;
         boolean isLongPress = pulseReason == DozeLog.PULSE_REASON_SENSOR_LONG_PRESS;
-        boolean isReach = pulseReason == DozeLog.PULSE_REASON_SENSOR_REACH;
+        boolean isWakeLockScreen = pulseReason == DozeLog.PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN;
 
         if (isLongPress) {
             requestPulse(pulseReason, sensorPerformedProxCheck);
@@ -141,7 +141,7 @@ public class DozeTriggers implements DozeMachine.Part {
                 if (isDoubleTap) {
                     mDozeHost.onDoubleTap(screenX, screenY);
                     mMachine.wakeUp();
-                } else if (isPickup || isReach) {
+                } else if (isPickup || isWakeLockScreen) {
                     mMachine.wakeUp();
                 } else {
                     mDozeHost.extendPulse();
@@ -156,8 +156,8 @@ public class DozeTriggers implements DozeMachine.Part {
             final boolean withinVibrationThreshold =
                     timeSinceNotification < mDozeParameters.getPickupVibrationThreshold();
             DozeLog.tracePickupWakeUp(mContext, withinVibrationThreshold);
-        } else if (isReach) {
-            DozeLog.traceReachWakeUp();
+        } else if (isWakeLockScreen) {
+            DozeLog.traceWakeLockScreenWakeUp();
         }
     }
 
