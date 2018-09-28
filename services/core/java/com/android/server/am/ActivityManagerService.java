@@ -4219,7 +4219,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     private final void handleAppDiedLocked(ProcessRecord app,
             boolean restarting, boolean allowRestart) {
         int pid = app.pid;
-        final boolean clearLaunchStartTime = !restarting && app.removed && app.foregroundActivities;
         boolean kept = cleanUpApplicationRecordLocked(app, restarting, allowRestart, -1,
                 false /*replacingPid*/);
         if (!kept && !restarting) {
@@ -4260,18 +4259,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             mWindowManager.continueSurfaceLayout();
         }
 
-        // TODO (b/67683350)
-        // When an app process is removed, activities from the process may be relaunched. In the
-        // case of forceStopPackageLocked the activities are finished before any window is drawn,
-        // and the launch time is not cleared. This will be incorrectly used to calculate launch
-        // time for the next launched activity launched in the same windowing mode.
-        if (clearLaunchStartTime) {
-            final LaunchTimeTracker.Entry entry = mStackSupervisor
-                    .getLaunchTimeTracker().getEntry(mStackSupervisor.getWindowingMode());
-            if (entry != null) {
-                entry.mLaunchStartTime = 0;
-            }
-        }
     }
 
     private final int getLRURecordIndexForAppLocked(IApplicationThread thread) {
