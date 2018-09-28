@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.internal.backup;
+package com.android.localtransport;
 
 import android.app.backup.BackupAgent;
 import android.app.backup.BackupDataInput;
@@ -26,7 +26,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
-import android.os.Environment;
 import android.os.ParcelFileDescriptor;
 import android.system.ErrnoException;
 import android.system.Os;
@@ -56,7 +55,7 @@ public class LocalTransport extends BackupTransport {
     private static final boolean DEBUG = false;
 
     private static final String TRANSPORT_DIR_NAME
-            = "com.android.internal.backup.LocalTransport";
+            = "com.android.localtransport.LocalTransport";
 
     private static final String TRANSPORT_DESTINATION_STRING
             = "Backing up to debug-only private cache";
@@ -75,10 +74,10 @@ public class LocalTransport extends BackupTransport {
     private static final long KEY_VALUE_BACKUP_SIZE_QUOTA = 5 * 1024 * 1024;
 
     private Context mContext;
-    private File mDataDir = new File(Environment.getDownloadCacheDirectory(), "backup");
-    private File mCurrentSetDir = new File(mDataDir, Long.toString(CURRENT_SET_TOKEN));
-    private File mCurrentSetIncrementalDir = new File(mCurrentSetDir, INCREMENTAL_DIR);
-    private File mCurrentSetFullDir = new File(mCurrentSetDir, FULL_DATA_DIR);
+    private File mDataDir;
+    private File mCurrentSetDir;
+    private File mCurrentSetIncrementalDir;
+    private File mCurrentSetFullDir;
 
     private PackageInfo[] mRestorePackages = null;
     private int mRestorePackage = -1;  // Index into mRestorePackages
@@ -101,6 +100,11 @@ public class LocalTransport extends BackupTransport {
     private final LocalTransportParameters mParameters;
 
     private void makeDataDirs() {
+        mDataDir = mContext.getFilesDir();
+        mCurrentSetDir = new File(mDataDir, Long.toString(CURRENT_SET_TOKEN));
+        mCurrentSetIncrementalDir = new File(mCurrentSetDir, INCREMENTAL_DIR);
+        mCurrentSetFullDir = new File(mCurrentSetDir, FULL_DATA_DIR);
+
         mCurrentSetDir.mkdirs();
         mCurrentSetFullDir.mkdir();
         mCurrentSetIncrementalDir.mkdir();
