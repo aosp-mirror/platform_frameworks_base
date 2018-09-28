@@ -61,18 +61,6 @@ DisplayInfo QueryDisplayInfo() {
     return displayInfo;
 }
 
-void QueryCompositionPreference(ui::Dataspace* dataSpace,
-                                ui::PixelFormat* pixelFormat) {
-    if (Properties::isolatedProcess) {
-        *dataSpace = ui::Dataspace::V0_SRGB;
-        *pixelFormat = ui::PixelFormat::RGBA_8888;
-    }
-
-    status_t status =
-            SurfaceComposerClient::getCompositionPreference(dataSpace, pixelFormat);
-    LOG_ALWAYS_FATAL_IF(status, "Failed to get composition preference, error %d", status);
-}
-
 DeviceInfo::DeviceInfo() {
 #if HWUI_NULL_GPU
         mMaxTextureSize = NULL_GPU_MAX_TEXTURE_SIZE;
@@ -80,7 +68,6 @@ DeviceInfo::DeviceInfo() {
         mMaxTextureSize = -1;
 #endif
     mDisplayInfo = QueryDisplayInfo();
-    QueryCompositionPreference(&mTargetDataSpace, &mTargetPixelFormat);
 }
 
 int DeviceInfo::maxTextureSize() const {

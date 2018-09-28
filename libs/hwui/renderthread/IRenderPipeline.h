@@ -43,15 +43,8 @@ namespace renderthread {
 enum class MakeCurrentResult { AlreadyCurrent, Failed, Succeeded };
 
 enum class ColorMode {
-    // Legacy means HWUI will produce buffer with whatever platform prefers
-    // HWUI to produce, however, HWUI doesn't accurately convert color from
-    // source color space to destination color space, instead HWUI will take
-    // the pixel value directly and interpret it destination color space.
-    Legacy,
-    // DisplayColorGamut means HWUI will produce buffer with whatever platform
-    // prefers HWUI to produce and accurately convert color from source color
-    // space to destination color space.
-    DisplayColorGamut,
+    // SRGB means HWUI will produce buffer in SRGB color space.
+    SRGB,
     // WideColorGamut means HWUI would support rendering scRGB non-linear into
     // a signed buffer with enough range to support the wide color gamut of the
     // display.

@@ -115,11 +115,7 @@ static constexpr float EOCF(float srgb) {
 // returns true for sRGB, gamma 2.2 and Display P3 for instance
 bool transferFunctionCloseToSRGB(const SkColorSpace* colorSpace);
 
-SkColorType PixelFormatToColorType(android_pixel_format pixelFormat);
-
 android::PixelFormat ColorTypeToPixelFormat(SkColorType colorType);
-
-SkColorSpace::Gamut DataSpaceToColorGamut(android_dataspace dataSpace);
 
 sk_sp<SkColorSpace> DataSpaceToColorSpace(android_dataspace dataspace);
 

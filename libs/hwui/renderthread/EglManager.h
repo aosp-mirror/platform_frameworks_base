@@ -78,9 +78,6 @@ public:
     // Depending on installed extensions, the result is either Android native fence or EGL fence.
     status_t createReleaseFence(bool useFenceSync, EGLSyncKHR* eglFence, sp<Fence>& nativeFence);
 
-    SkColorType getSurfaceColorType() const { return mSurfaceColorType; }
-    sk_sp<SkColorSpace> getSurfaceColorSpace() { return mSurfaceColorSpace; }
-
 private:
 
     void initExtensions();
@@ -95,9 +92,6 @@ private:
     EGLContext mEglContext;
     EGLSurface mPBufferSurface;
     EGLSurface mCurrentSurface;
-    SkColorSpace::Gamut mSurfaceColorGamut;
-    SkColorType mSurfaceColorType;
-    sk_sp<SkColorSpace> mSurfaceColorSpace;
 
     enum class SwapBehavior {
         Discard,

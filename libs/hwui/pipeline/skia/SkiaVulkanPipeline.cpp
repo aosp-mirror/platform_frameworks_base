@@ -137,14 +137,6 @@ bool SkiaVulkanPipeline::isContextReady() {
     return CC_LIKELY(mVkManager.hasVkContext());
 }
 
-SkColorType SkiaVulkanPipeline::getSurfaceColorType() const {
-    return mVkManager.getSurfaceColorType();
-}
-
-sk_sp<SkColorSpace> SkiaVulkanPipeline::getSurfaceColorSpace() {
-    return mVkManager.getSurfaceColorSpace();
-}
-
 void SkiaVulkanPipeline::invokeFunctor(const RenderThread& thread, Functor* functor) {
     VkFunctorDrawable::vkInvokeFunctor(functor);
 }
