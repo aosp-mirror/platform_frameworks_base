@@ -44,6 +44,7 @@ public class GraphicsEnvironment {
     private static final boolean DEBUG = false;
     private static final String TAG = "GraphicsEnvironment";
     private static final String PROPERTY_GFX_DRIVER = "ro.gfx.driver.0";
+    private static final String ANGLE_PACKAGE_NAME = "com.android.angle";
 
     private ClassLoader mClassLoader;
     private String mLayerPath;
@@ -54,6 +55,7 @@ public class GraphicsEnvironment {
      */
     public void setup(Context context) {
         setupGpuLayers(context);
+        setupAngle(context);
         chooseDriver(context);
     }
 
@@ -128,6 +130,52 @@ public class GraphicsEnvironment {
         layerPaths += mLayerPath;
 
         setLayerPaths(mClassLoader, layerPaths);
+    }
+
+    /**
+     * Selectively enable ANGLE for applications
+     */
+    private static void setupAngle(Context context) {
+
+        String angleEnabledApp =
+                Settings.Global.getString(context.getContentResolver(),
+                                          Settings.Global.ANGLE_ENABLED_APP);
+
+        String packageName = context.getPackageName();
+
+        // Only provide an ANGLE namespace if the package name matches setting
+        if ((angleEnabledApp != null && packageName != null)
+                && (!angleEnabledApp.isEmpty() && !packageName.isEmpty())
+                && angleEnabledApp.equals(packageName)) {
+
+            if (DEBUG) Log.v(TAG, "ANGLE enabled for " + packageName);
+
+            ApplicationInfo angleInfo;
+
+            try {
+                angleInfo = context.getPackageManager().getApplicationInfo(ANGLE_PACKAGE_NAME,
+                    PackageManager.MATCH_SYSTEM_ONLY);
+            } catch (PackageManager.NameNotFoundException e) {
+                Log.w(TAG, "ANGLE package '" + ANGLE_PACKAGE_NAME + "' not installed");
+                return;
+            }
+
+            String abi = chooseAbi(angleInfo);
+
+            // Build a path that includes installed native libs and APK
+            StringBuilder sb = new StringBuilder();
+            sb.append(angleInfo.nativeLibraryDir)
+                .append(File.pathSeparator)
+                .append(angleInfo.sourceDir)
+                .append("!/lib/")
+                .append(abi);
+            String paths = sb.toString();
+
+            if (DEBUG) Log.v(TAG, "ANGLE package libs: " + paths);
+
+            // Providing any path will trigger namespace creation
+            setAnglePath(paths);
+        }
     }
 
     /**
@@ -218,4 +266,5 @@ public class GraphicsEnvironment {
     private static native void setLayerPaths(ClassLoader classLoader, String layerPaths);
     private static native void setDebugLayers(String layers);
     private static native void setDriverPath(String path);
+    private static native void setAnglePath(String path);
 }
