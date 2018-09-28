@@ -545,6 +545,7 @@ package android.telephony {
   }
 
   public class TelephonyManager {
+    method public deprecated java.util.List<android.telephony.NeighboringCellInfo> getNeighboringCellInfo();
     method public deprecated android.telephony.NetworkScan requestNetworkScan(android.telephony.NetworkScanRequest, android.telephony.TelephonyScanManager.NetworkScanCallback);
   }
 
