@@ -58,7 +58,6 @@ import android.content.pm.UserInfo;
 import android.content.res.AssetManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.opengl.GLES10;
@@ -735,7 +734,6 @@ final class ActivityManagerShellCommand extends ShellCommand {
             return -1;
         }
 
-        ;
         if (!mInterface.stopBinderTrackingAndDump(fd)) {
             err.println("STOP TRACE FAILED.");
             return -1;
@@ -2024,19 +2022,20 @@ final class ActivityManagerShellCommand extends ShellCommand {
     }
 
     private void writeDeviceConfig(ProtoOutputStream protoOutputStream, long fieldId,
-            PrintWriter pw, Configuration config, DisplayManager dm) {
-        Point stableSize = dm.getStableDisplaySize();
+            PrintWriter pw, Configuration config, DisplayMetrics displayMetrics) {
         long token = -1;
         if (protoOutputStream != null) {
             token = protoOutputStream.start(fieldId);
-            protoOutputStream.write(DeviceConfigurationProto.STABLE_SCREEN_WIDTH_PX, stableSize.x);
-            protoOutputStream.write(DeviceConfigurationProto.STABLE_SCREEN_HEIGHT_PX, stableSize.y);
+            protoOutputStream.write(DeviceConfigurationProto.STABLE_SCREEN_WIDTH_PX,
+                    displayMetrics.widthPixels);
+            protoOutputStream.write(DeviceConfigurationProto.STABLE_SCREEN_HEIGHT_PX,
+                    displayMetrics.heightPixels);
             protoOutputStream.write(DeviceConfigurationProto.STABLE_DENSITY_DPI,
                     DisplayMetrics.DENSITY_DEVICE_STABLE);
         }
         if (pw != null) {
-            pw.print("stable-width-px: "); pw.println(stableSize.x);
-            pw.print("stable-height-px: "); pw.println(stableSize.y);
+            pw.print("stable-width-px: "); pw.println(displayMetrics.widthPixels);
+            pw.print("stable-height-px: "); pw.println(displayMetrics.heightPixels);
             pw.print("stable-density-dpi: "); pw.println(DisplayMetrics.DENSITY_DEVICE_STABLE);
         }
 
@@ -2125,11 +2124,12 @@ final class ActivityManagerShellCommand extends ShellCommand {
 
     int runGetConfig(PrintWriter pw) throws RemoteException {
         int days = -1;
+        int displayId = Display.DEFAULT_DISPLAY;
         boolean asProto = false;
         boolean inclDevice = false;
 
         String opt;
-        while ((opt=getNextOption()) != null) {
+        while ((opt = getNextOption()) != null) {
             if (opt.equals("--days")) {
                 days = Integer.parseInt(getNextArgRequired());
                 if (days <= 0) {
@@ -2139,6 +2139,11 @@ final class ActivityManagerShellCommand extends ShellCommand {
                 asProto = true;
             } else if (opt.equals("--device")) {
                 inclDevice = true;
+            } else if (opt.equals("--display")) {
+                displayId = Integer.parseInt(getNextArgRequired());
+                if (displayId < 0) {
+                    throw new IllegalArgumentException("--display must be a non-negative integer");
+                }
             } else {
                 getErrPrintWriter().println("Error: Unknown option: " + opt);
                 return -1;
@@ -2152,7 +2157,13 @@ final class ActivityManagerShellCommand extends ShellCommand {
         }
 
         DisplayManager dm = mInternal.mContext.getSystemService(DisplayManager.class);
-        Display display = dm.getDisplay(Display.DEFAULT_DISPLAY);
+        Display display = dm.getDisplay(displayId);
+
+        if (display == null) {
+            getErrPrintWriter().println("Error: Display does not exist: " + displayId);
+            return -1;
+        }
+
         DisplayMetrics metrics = new DisplayMetrics();
         display.getMetrics(metrics);
 
@@ -2160,15 +2171,14 @@ final class ActivityManagerShellCommand extends ShellCommand {
             final ProtoOutputStream proto = new ProtoOutputStream(getOutFileDescriptor());
             config.writeResConfigToProto(proto, GlobalConfigurationProto.RESOURCES, metrics);
             if (inclDevice) {
-                writeDeviceConfig(proto, GlobalConfigurationProto.DEVICE, null, config, dm);
+                writeDeviceConfig(proto, GlobalConfigurationProto.DEVICE, null, config, metrics);
             }
             proto.flush();
-
         } else {
             pw.println("config: " + Configuration.resourceQualifierString(config, metrics));
             pw.println("abi: " + TextUtils.join(",", Build.SUPPORTED_ABIS));
             if (inclDevice) {
-                writeDeviceConfig(null, -1, pw, config, dm);
+                writeDeviceConfig(null, -1, pw, config, metrics);
             }
 
             if (days >= 0) {
@@ -3023,11 +3033,13 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      Gets the process state of an app given its <UID>.");
             pw.println("  attach-agent <PROCESS> <FILE>");
             pw.println("    Attach an agent to the specified <PROCESS>, which may be either a process name or a PID.");
-            pw.println("  get-config [--days N] [--device] [--proto]");
+            pw.println("  get-config [--days N] [--device] [--proto] [--display <DISPLAY_ID>]");
             pw.println("      Retrieve the configuration and any recent configurations of the device.");
             pw.println("      --days: also return last N days of configurations that have been seen.");
             pw.println("      --device: also output global device configuration info.");
             pw.println("      --proto: return result as a proto; does not include --days info.");
+            pw.println("      --display: Specify for which display to run the command; if not ");
+            pw.println("          specified then run for the default display.");
             pw.println("  supports-multiwindow");
             pw.println("      Returns true if the device supports multiwindow.");
             pw.println("  supports-split-screen-multi-window");
