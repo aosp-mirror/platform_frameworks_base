@@ -79,6 +79,7 @@ import static org.mockito.Mockito.when;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
+import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
@@ -248,7 +249,7 @@ public class ConnectivityServiceTest {
         @Spy private Resources mResources;
         private final LinkedBlockingQueue<Intent> mStartedActivities = new LinkedBlockingQueue<>();
 
-        MockContext(Context base) {
+        MockContext(Context base, ContentProvider settingsProvider) {
             super(base);
 
             mResources = spy(base.getResources());
@@ -260,7 +261,7 @@ public class ConnectivityServiceTest {
                     });
 
             mContentResolver = new MockContentResolver();
-            mContentResolver.addProvider(Settings.AUTHORITY, new FakeSettingsProvider());
+            mContentResolver.addProvider(Settings.AUTHORITY, settingsProvider);
         }
 
         @Override
@@ -1048,7 +1049,9 @@ public class ConnectivityServiceTest {
             Looper.prepare();
         }
 
-        mServiceContext = new MockContext(InstrumentationRegistry.getContext());
+        FakeSettingsProvider.clearSettingsProvider();
+        mServiceContext = new MockContext(InstrumentationRegistry.getContext(),
+                new FakeSettingsProvider());
         LocalServices.removeServiceForTest(NetworkPolicyManagerInternal.class);
         LocalServices.addService(
                 NetworkPolicyManagerInternal.class, mock(NetworkPolicyManagerInternal.class));
@@ -1086,6 +1089,7 @@ public class ConnectivityServiceTest {
             mEthernetNetworkAgent.disconnect();
             mEthernetNetworkAgent = null;
         }
+        FakeSettingsProvider.clearSettingsProvider();
     }
 
     private static int transportToLegacyType(int transport) {
