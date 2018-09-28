@@ -14639,9 +14639,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * Recomputes the matrix if necessary.
      *
      * @return True if the transform matrix is the identity matrix, false otherwise.
+     * @hide
      */
     @UnsupportedAppUsage
-    final boolean hasIdentityMatrix() {
+    public final boolean hasIdentityMatrix() {
         return mRenderNode.hasIdentityMatrix();
     }
 
