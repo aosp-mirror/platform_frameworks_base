@@ -524,6 +524,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     private boolean mIsOccluded;
     private boolean mWereIconsJustHidden;
     private boolean mBouncerWasShowingWhenHidden;
+    private boolean mIsCollapsingToShowActivityOverLockscreen;
 
     // Notifies StatusBarKeyguardViewManager every time the keyguard transition is over,
     // this animation is tied to the scrim for historic reasons.
@@ -2232,7 +2233,11 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         runPostCollapseRunnables();
         setInteracting(StatusBarManager.WINDOW_STATUS_BAR, false);
-        showBouncerIfKeyguard();
+        if (!mIsCollapsingToShowActivityOverLockscreen) {
+            showBouncerIfKeyguard();
+        } else if (DEBUG) {
+            Log.d(TAG, "Not showing bouncer due to activity showing over lockscreen");
+        }
         recomputeDisableFlags(mNotificationPanel.hideStatusBarIconsWhenExpanded() /* animate */);
 
         // Trimming will happen later if Keyguard is showing - doing it here might cause a jank in
@@ -4743,7 +4748,11 @@ public class StatusBar extends SystemUI implements DemoMode,
                 && PreviewInflater.wouldLaunchResolverActivity(mContext, intent.getIntent(),
                 mLockscreenUserManager.getCurrentUserId());
         final boolean wasOccluded = mIsOccluded;
-        dismissKeyguardThenExecute(() -> {
+        boolean showOverLockscreen = mStatusBarKeyguardViewManager.isShowing()
+                && PreviewInflater.wouldShowOverLockscreen(mContext,
+                intent.getIntent(),
+                mLockscreenUserManager.getCurrentUserId());
+        OnDismissAction postKeyguardAction = () -> {
             // TODO: Some of this code may be able to move to NotificationEntryManager.
             if (mHeadsUpManager != null && mHeadsUpManager.isAlerting(notificationKey)) {
                 // Release the HUN notification to the shade.
@@ -4851,9 +4860,14 @@ public class StatusBar extends SystemUI implements DemoMode,
                     // Automatically remove all notifications that we may have kept around longer
                     removeNotification(sbn);
                 }
+
+                mIsCollapsingToShowActivityOverLockscreen = false;
             };
 
-            if (mStatusBarKeyguardViewManager.isShowing()
+            if (showOverLockscreen) {
+                addPostCollapseAction(runnable);
+                collapsePanel(true /* animate */);
+            } else if (mStatusBarKeyguardViewManager.isShowing()
                     && mStatusBarKeyguardViewManager.isOccluded()) {
                 mStatusBarKeyguardViewManager.addAfterKeyguardGoneRunnable(runnable);
                 collapsePanel(true /* animate */);
@@ -4862,7 +4876,13 @@ public class StatusBar extends SystemUI implements DemoMode,
             }
 
             return !mNotificationPanel.isFullyCollapsed();
-        }, afterKeyguardGone);
+        };
+        if (showOverLockscreen) {
+            mIsCollapsingToShowActivityOverLockscreen = true;
+            postKeyguardAction.onDismiss();
+        } else {
+            dismissKeyguardThenExecute(postKeyguardAction, afterKeyguardGone);
+        }
     }
 
     private void collapseOnMainThread() {
@@ -4879,7 +4899,10 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     public void collapsePanel(boolean animate) {
         if (animate) {
-            collapsePanel();
+            boolean willCollapse = collapsePanel();
+            if (!willCollapse) {
+                runPostCollapseRunnables();
+            }
         } else if (!isPresenterFullyCollapsed()) {
             instantCollapseNotificationPanel();
             visibilityChanged(false);
