@@ -8474,7 +8474,7 @@ public class PackageManagerService extends IPackageManager.Stub
     private boolean canSkipFullApkVerification(String apkPath) {
         final byte[] rootHashObserved;
         try {
-            rootHashObserved = VerityUtils.generateFsverityRootHash(apkPath);
+            rootHashObserved = VerityUtils.generateApkVerityRootHash(apkPath);
             if (rootHashObserved == null) {
                 return false;  // APK does not contain Merkle tree root hash.
             }
@@ -16010,7 +16010,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     if (Build.IS_DEBUGGABLE) Slog.i(TAG, "Enabling apk verity to " + apkPath);
                     FileDescriptor fd = result.getUnownedFileDescriptor();
                     try {
-                        final byte[] signedRootHash = VerityUtils.generateFsverityRootHash(apkPath);
+                        final byte[] signedRootHash =
+                                VerityUtils.generateApkVerityRootHash(apkPath);
                         mInstaller.installApkVerity(apkPath, fd, result.getContentSize());
                         mInstaller.assertFsverityRootHashMatches(apkPath, signedRootHash);
                     } catch (InstallerException | IOException | DigestException |

@@ -26,9 +26,9 @@ import android.system.Os;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.apk.ApkSignatureVerifier;
-import android.util.apk.ApkVerityBuilder;
 import android.util.apk.ByteBufferFactory;
 import android.util.apk.SignatureNotFoundException;
+import android.util.apk.VerityBuilder;
 
 import libcore.util.HexEncoding;
 
@@ -115,9 +115,9 @@ abstract public class VerityUtils {
     }
 
     /**
-     * {@see ApkSignatureVerifier#generateFsverityRootHash(String)}.
+     * {@see ApkSignatureVerifier#generateApkVerityRootHash(String)}.
      */
-    public static byte[] generateFsverityRootHash(@NonNull String apkPath)
+    public static byte[] generateApkVerityRootHash(@NonNull String apkPath)
             throws NoSuchAlgorithmException, DigestException, IOException {
         return ApkSignatureVerifier.generateApkVerityRootHash(apkPath);
     }
@@ -146,7 +146,7 @@ abstract public class VerityUtils {
             throws IOException, SignatureNotFoundException, SecurityException, DigestException,
                    NoSuchAlgorithmException {
         try (RandomAccessFile file = new RandomAccessFile(filePath, "r")) {
-            ApkVerityBuilder.ApkVerityResult result = ApkVerityBuilder.generateFsVerityTree(
+            VerityBuilder.VerityResult result = VerityBuilder.generateFsVerityTree(
                     file, trackedBufferFactory);
 
             ByteBuffer buffer = result.verityData;
