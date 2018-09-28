@@ -39,6 +39,7 @@ import android.os.Looper;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.util.Slog;
 
 import com.android.internal.R;
@@ -156,9 +157,18 @@ public class BiometricService extends SystemService {
                     } else if (mCurrentModality == BIOMETRIC_IRIS) {
                         Slog.w(TAG, "Unsupported modality");
                     } else if (mCurrentModality == BIOMETRIC_FACE) {
-                        mFaceService.authenticateFromService(true /* requireConfirmation */, token,
-                                sessionId, userId, receiver, flags, opPackageName, bundle,
-                                dialogReceiver, callingUid, callingPid, callingUserId);
+                        // If the user disabled face for apps, return ERROR_HW_UNAVAILABLE
+                        if (isFaceEnabledForApps()) {
+                            receiver.onError(0 /* deviceId */,
+                                    BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE,
+                                    FaceManager.getErrorString(getContext(),
+                                            BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE,
+                                            0 /* vendorCode */));
+                        } else {
+                            mFaceService.authenticateFromService(true /* requireConfirmation */,
+                                    token, sessionId, userId, receiver, flags, opPackageName,
+                                    bundle, dialogReceiver, callingUid, callingPid, callingUserId);
+                        }
                     } else {
                         Slog.w(TAG, "Unsupported modality");
                     }
@@ -166,6 +176,15 @@ public class BiometricService extends SystemService {
                     Slog.e(TAG, "Unable to start authentication", e);
                 }
             });
+        }
+
+        private boolean isFaceEnabledForApps() {
+            // TODO: maybe cache this and eliminate duplicated code with KeyguardUpdateMonitor
+            return Settings.Secure.getIntForUser(
+                    getContext().getContentResolver(),
+                    Settings.Secure.FACE_UNLOCK_APP_ENABLED,
+                    1 /* default */,
+                    UserHandle.USER_CURRENT) == 0;
         }
 
         @Override // Binder call
