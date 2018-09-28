@@ -124,7 +124,8 @@ public interface InputMethod {
      * @hide
      */
     @MainThread
-    public void updateInputMethodDisplay(int displayId);
+    default void updateInputMethodDisplay(int displayId) {
+    }
 
     /**
      * Bind a new application environment in to the input method, so that it
