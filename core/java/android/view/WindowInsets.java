@@ -141,17 +141,13 @@ public final class WindowInsets {
      * @deprecated use {@link #getSystemWindowInsets()} instead.
      */
     @Deprecated
+    @NonNull
     public Rect getSystemWindowInsetsAsRect() {
         if (mTempRect == null) {
             mTempRect = new Rect();
         }
-        if (mSystemWindowInsets != null) {
-            mTempRect.set(mSystemWindowInsets.left, mSystemWindowInsets.top,
-                    mSystemWindowInsets.right, mSystemWindowInsets.bottom);
-        } else {
-            // If there were no system window insets, this is just empty.
-            mTempRect.setEmpty();
-        }
+        mTempRect.set(mSystemWindowInsets.left, mSystemWindowInsets.top,
+                mSystemWindowInsets.right, mSystemWindowInsets.bottom);
         return mTempRect;
     }
 
@@ -332,6 +328,7 @@ public final class WindowInsets {
      *
      * @return A modified copy of this WindowInsets
      */
+    @NonNull
     public WindowInsets consumeDisplayCutout() {
         return new WindowInsets(mSystemWindowInsetsConsumed ? null : mSystemWindowInsets,
                 mWindowDecorInsetsConsumed ? null : mWindowDecorInsets,
@@ -378,6 +375,7 @@ public final class WindowInsets {
      *
      * @return A modified copy of this WindowInsets
      */
+    @NonNull
     public WindowInsets consumeSystemWindowInsets() {
         return new WindowInsets(null /* systemWindowInsets */,
                 mWindowDecorInsetsConsumed ? null : mWindowDecorInsets,
@@ -404,6 +402,7 @@ public final class WindowInsets {
      *             {@link Builder#setSystemWindowInsets(Insets)} instead.
      */
     @Deprecated
+    @NonNull
     public WindowInsets replaceSystemWindowInsets(int left, int top, int right, int bottom) {
         // Compat edge case: what should this do if the insets have already been consumed?
         // On platforms prior to Q, the behavior was to override the insets with non-zero values,
@@ -431,6 +430,7 @@ public final class WindowInsets {
      *             {@link Builder#setSystemWindowInsets(Insets)} instead.
      */
     @Deprecated
+    @NonNull
     public WindowInsets replaceSystemWindowInsets(Rect systemWindowInsets) {
         return replaceSystemWindowInsets(systemWindowInsets.left, systemWindowInsets.top,
                 systemWindowInsets.right, systemWindowInsets.bottom);
@@ -439,6 +439,7 @@ public final class WindowInsets {
     /**
      * @hide
      */
+    @NonNull
     public WindowInsets consumeWindowDecorInsets() {
         return new WindowInsets(mSystemWindowInsetsConsumed ? null : mSystemWindowInsets,
                 null /* windowDecorInsets */,
@@ -544,6 +545,7 @@ public final class WindowInsets {
      *
      * @return A modified copy of this WindowInsets
      */
+    @NonNull
     public WindowInsets consumeStableInsets() {
         return new WindowInsets(mSystemWindowInsetsConsumed ? null : mSystemWindowInsets,
                 mWindowDecorInsetsConsumed ? null : mWindowDecorInsets,
@@ -577,6 +579,7 @@ public final class WindowInsets {
      * @hide
      */
     @Deprecated
+    @NonNull
     public WindowInsets inset(Rect r) {
         return inset(r.left, r.top, r.right, r.bottom);
     }
@@ -587,6 +590,7 @@ public final class WindowInsets {
      * @see #inset(int, int, int, int)
      * @hide
      */
+    @NonNull
     public WindowInsets inset(Insets insets) {
         return inset(insets.left, insets.top, insets.right, insets.bottom);
     }
