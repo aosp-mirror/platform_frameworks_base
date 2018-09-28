@@ -234,9 +234,11 @@ static int write_stats_log_cpp(FILE *out, const Atoms &atoms,
                     }
                 }
             } else if (*arg == JAVA_TYPE_KEY_VALUE_PAIR) {
-                fprintf(out, ", const std::map<int, int64_t>& arg%d_1, "
-                             "const std::map<int, char const*>& arg%d_2, "
-                             "const std::map<int, float>& arg%d_3", argIndex, argIndex, argIndex);
+                fprintf(out, ", const std::map<int, int32_t>& arg%d_1, "
+                             "const std::map<int, int64_t>& arg%d_2, "
+                             "const std::map<int, char const*>& arg%d_3, "
+                             "const std::map<int, float>& arg%d_4",
+                             argIndex, argIndex, argIndex, argIndex);
             } else {
                 fprintf(out, ", %s arg%d", cpp_type_name(*arg), argIndex);
             }
@@ -302,6 +304,13 @@ static int write_stats_log_cpp(FILE *out, const Atoms &atoms,
                     fprintf(out, "         event.end();\n");
                     fprintf(out, "    }\n");
 
+                    fprintf(out, "    for (const auto& it : arg%d_4) {\n", argIndex);
+                    fprintf(out, "         event.begin();\n");
+                    fprintf(out, "         event << it.first;\n");
+                    fprintf(out, "         event << it.second;\n");
+                    fprintf(out, "         event.end();\n");
+                    fprintf(out, "    }\n");
+
                     fprintf(out, "    event.end();\n\n");
             } else {
                 if (*arg == JAVA_TYPE_STRING) {
@@ -344,9 +353,11 @@ static int write_stats_log_cpp(FILE *out, const Atoms &atoms,
                    }
                }
            } else if (*arg == JAVA_TYPE_KEY_VALUE_PAIR) {
-                fprintf(out, ", const std::map<int, int64_t>& arg%d_1, "
-                             "const std::map<int, char const*>& arg%d_2, "
-                             "const std::map<int, float>& arg%d_3", argIndex, argIndex, argIndex);
+                fprintf(out, ", const std::map<int, int32_t>& arg%d_1, "
+                             "const std::map<int, int64_t>& arg%d_2, "
+                             "const std::map<int, char const*>& arg%d_3, "
+                             "const std::map<int, float>& arg%d_4",
+                             argIndex, argIndex, argIndex, argIndex);
            } else {
                fprintf(out, ", %s arg%d", cpp_type_name(*arg), argIndex);
            }
@@ -374,7 +385,8 @@ static int write_stats_log_cpp(FILE *out, const Atoms &atoms,
                    }
                }
            } else  if (*arg == JAVA_TYPE_KEY_VALUE_PAIR) {
-                fprintf(out, ", arg%d_1, arg%d_2, arg%d_3", argIndex, argIndex, argIndex);
+                fprintf(out, ", arg%d_1, arg%d_2, arg%d_3, arg%d_4",
+                        argIndex, argIndex, argIndex, argIndex);
            } else {
                fprintf(out, ", arg%d", argIndex);
            }
@@ -529,10 +541,14 @@ static void write_cpp_usage(
                 }
             }
         } else if (field->javaType == JAVA_TYPE_KEY_VALUE_PAIR) {
-            fprintf(out, ", const std::map<int, int64_t>& %s_int"
+            fprintf(out, ", const std::map<int, int32_t>& %s_int"
+                         ", const std::map<int, int64_t>& %s_long"
                          ", const std::map<int, char const*>& %s_str"
                          ", const std::map<int, float>& %s_float",
-                         field->name.c_str(), field->name.c_str(), field->name.c_str());
+                         field->name.c_str(),
+                         field->name.c_str(),
+                         field->name.c_str(),
+                         field->name.c_str());
         } else {
             fprintf(out, ", %s %s", cpp_type_name(field->javaType), field->name.c_str());
         }
@@ -561,9 +577,11 @@ static void write_cpp_method_header(
                     }
                 }
             } else if (*arg == JAVA_TYPE_KEY_VALUE_PAIR) {
-                fprintf(out, ", const std::map<int, int64_t>& arg%d_1, "
-                             "const std::map<int, char const*>& arg%d_2, "
-                             "const std::map<int, float>& arg%d_3", argIndex, argIndex, argIndex);
+                fprintf(out, ", const std::map<int, int32_t>& arg%d_1, "
+                             "const std::map<int, int64_t>& arg%d_2, "
+                             "const std::map<int, char const*>& arg%d_3, "
+                             "const std::map<int, float>& arg%d_4",
+                             argIndex, argIndex, argIndex, argIndex);
             } else {
                 fprintf(out, ", %s arg%d", cpp_type_name(*arg), argIndex);
             }
@@ -976,6 +994,7 @@ jni_function_signature(const vector<java_type_t>& signature, const AtomDecl &att
 }
 
 static void write_key_value_map_jni(FILE* out) {
+   fprintf(out, "    std::map<int, int32_t> int32_t_map;\n");
    fprintf(out, "    std::map<int, int64_t> int64_t_map;\n");
    fprintf(out, "    std::map<int, float> float_map;\n");
    fprintf(out, "    std::map<int, char const*> string_map;\n\n");
@@ -989,9 +1008,11 @@ static void write_key_value_map_jni(FILE* out) {
 
    fprintf(out, "    std::vector<std::unique_ptr<ScopedUtfChars>> scoped_ufs;\n\n");
 
+   fprintf(out, "    jclass jint_class = env->FindClass(\"java/lang/Integer\");\n");
    fprintf(out, "    jclass jlong_class = env->FindClass(\"java/lang/Long\");\n");
    fprintf(out, "    jclass jfloat_class = env->FindClass(\"java/lang/Float\");\n");
    fprintf(out, "    jclass jstring_class = env->FindClass(\"java/lang/String\");\n");
+   fprintf(out, "    jmethodID jget_int_method = env->GetMethodID(jint_class, \"intValue\", \"()I\");\n");
    fprintf(out, "    jmethodID jget_long_method = env->GetMethodID(jlong_class, \"longValue\", \"()J\");\n");
    fprintf(out, "    jmethodID jget_float_method = env->GetMethodID(jfloat_class, \"floatValue\", \"()F\");\n\n");
 
@@ -1000,7 +1021,9 @@ static void write_key_value_map_jni(FILE* out) {
    fprintf(out, "        jint key = env->CallIntMethod(value_map, jget_key_method, i);\n");
    fprintf(out, "        jobject jvalue_obj = env->CallObjectMethod(value_map, jget_value_method, i);\n");
    fprintf(out, "        if (jvalue_obj == NULL) { continue; }\n");
-   fprintf(out, "        if (env->IsInstanceOf(jvalue_obj, jlong_class)) {\n");
+   fprintf(out, "        if (env->IsInstanceOf(jvalue_obj, jint_class)) {\n");
+   fprintf(out, "            int32_t_map[key] = env->CallIntMethod(jvalue_obj, jget_int_method);\n");
+   fprintf(out, "        } else if (env->IsInstanceOf(jvalue_obj, jlong_class)) {\n");
    fprintf(out, "            int64_t_map[key] = env->CallLongMethod(jvalue_obj, jget_long_method);\n");
    fprintf(out, "        } else if (env->IsInstanceOf(jvalue_obj, jfloat_class)) {\n");
    fprintf(out, "            float_map[key] = env->CallFloatMethod(jvalue_obj, jget_float_method);\n");
@@ -1129,7 +1152,7 @@ write_stats_log_jni(FILE* out, const string& java_method_name, const string& cpp
                     }
                 }
             } else if (*arg == JAVA_TYPE_KEY_VALUE_PAIR) {
-                fprintf(out, ", int64_t_map, string_map, float_map");
+                fprintf(out, ", int32_t_map, int64_t_map, string_map, float_map");
             } else {
                 const char *argName = (*arg == JAVA_TYPE_STRING) ? "str" : "arg";
                 fprintf(out, ", (%s)%s%d", cpp_type_name(*arg), argName, argIndex);

@@ -92,7 +92,8 @@ LogEvent::LogEvent(int32_t tagId, int64_t wallClockTimestampNs, int64_t elapsedT
 
 LogEvent::LogEvent(int32_t tagId, int64_t wallClockTimestampNs, int64_t elapsedTimestampNs,
                    int32_t uid,
-                   const std::map<int32_t, int64_t>& int_map,
+                   const std::map<int32_t, int32_t>& int_map,
+                   const std::map<int32_t, int64_t>& long_map,
                    const std::map<int32_t, std::string>& string_map,
                    const std::map<int32_t, float>& float_map) {
     mLogdTimestampNs = wallClockTimestampNs;
@@ -113,7 +114,7 @@ LogEvent::LogEvent(int32_t tagId, int64_t wallClockTimestampNs, int64_t elapsedT
         pos[1]++;
     }
 
-    for (const auto&itr : string_map) {
+    for (const auto&itr : long_map) {
         pos[2] = 1;
         mValues.push_back(FieldValue(Field(mTagId, pos, 2 /* depth */), Value(itr.first)));
         pos[2] = 3;
@@ -122,10 +123,19 @@ LogEvent::LogEvent(int32_t tagId, int64_t wallClockTimestampNs, int64_t elapsedT
         pos[1]++;
     }
 
-    for (const auto&itr : float_map) {
+    for (const auto&itr : string_map) {
         pos[2] = 1;
         mValues.push_back(FieldValue(Field(mTagId, pos, 2 /* depth */), Value(itr.first)));
         pos[2] = 4;
+        mValues.push_back(FieldValue(Field(mTagId, pos, 2 /* depth */), Value(itr.second)));
+        mValues.back().mField.decorateLastPos(2);
+        pos[1]++;
+    }
+
+    for (const auto&itr : float_map) {
+        pos[2] = 1;
+        mValues.push_back(FieldValue(Field(mTagId, pos, 2 /* depth */), Value(itr.first)));
+        pos[2] = 5;
         mValues.push_back(FieldValue(Field(mTagId, pos, 2 /* depth */), Value(itr.second)));
         mValues.back().mField.decorateLastPos(2);
         pos[1]++;
@@ -215,7 +225,8 @@ bool LogEvent::write(float value) {
 
 
 
-bool LogEvent::writeKeyValuePairs(const std::map<int32_t, int64_t>& int_map,
+bool LogEvent::writeKeyValuePairs(const std::map<int32_t, int32_t>& int_map,
+                                  const std::map<int32_t, int64_t>& long_map,
                                   const std::map<int32_t, std::string>& string_map,
                                   const std::map<int32_t, float>& float_map) {
     if (mContext) {
@@ -223,6 +234,17 @@ bool LogEvent::writeKeyValuePairs(const std::map<int32_t, int64_t>& int_map,
             return false;
          }
          for (const auto& itr : int_map) {
+             if (android_log_write_list_begin(mContext) < 0) {
+                return false;
+             }
+             write(itr.first);
+             write(itr.second);
+             if (android_log_write_list_end(mContext) < 0) {
+                return false;
+             }
+         }
+
+         for (const auto& itr : long_map) {
              if (android_log_write_list_begin(mContext) < 0) {
                 return false;
              }

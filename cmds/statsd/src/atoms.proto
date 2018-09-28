@@ -200,9 +200,10 @@ message AttributionNode {
 message KeyValuePair {
     optional int32 key = 1;
     oneof value {
-        int64 value_int = 2;
-        string value_str = 3;
-        float value_float = 4;
+        int32 value_int = 2;
+        int64 value_long = 3;
+        string value_str = 4;
+        float value_float = 5;
     }
 }
 
