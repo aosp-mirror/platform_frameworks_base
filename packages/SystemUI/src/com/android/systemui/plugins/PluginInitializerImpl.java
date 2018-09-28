@@ -18,6 +18,7 @@ import android.content.Context;
 import android.os.Looper;
 
 import com.android.systemui.Dependency;
+import com.android.systemui.shared.plugins.PluginEnabler;
 import com.android.systemui.shared.plugins.PluginInitializer;
 import com.android.systemui.R;
 
@@ -43,5 +44,9 @@ public class PluginInitializerImpl implements PluginInitializer {
     @Override
     public String[] getWhitelistedPlugins(Context context) {
         return context.getResources().getStringArray(R.array.config_pluginWhitelist);
+    }
+
+    public PluginEnabler getPluginEnabler(Context context) {
+        return new PluginEnablerImpl(context);
     }
 }

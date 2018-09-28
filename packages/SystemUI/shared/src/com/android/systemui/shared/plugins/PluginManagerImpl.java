@@ -41,12 +41,11 @@ import android.widget.Toast;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
-
 import com.android.systemui.plugins.Plugin;
 import com.android.systemui.plugins.PluginListener;
+import com.android.systemui.plugins.annotations.ProvidesInterface;
 import com.android.systemui.shared.plugins.PluginInstanceManager.PluginContextWrapper;
 import com.android.systemui.shared.plugins.PluginInstanceManager.PluginInfo;
-import com.android.systemui.plugins.annotations.ProvidesInterface;
 
 import dalvik.system.PathClassLoader;
 
@@ -74,6 +73,7 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
     private final PluginInstanceManagerFactory mFactory;
     private final boolean isDebuggable;
     private final PluginPrefs mPluginPrefs;
+    private final PluginEnabler mPluginEnabler;
     private ClassLoaderFilter mParentClassLoader;
     private boolean mListening;
     private boolean mHasOneShot;
@@ -94,6 +94,7 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
         isDebuggable = debuggable;
         mWhitelistedPlugins.addAll(Arrays.asList(initializer.getWhitelistedPlugins(mContext)));
         mPluginPrefs = new PluginPrefs(mContext);
+        mPluginEnabler = initializer.getPluginEnabler(mContext);
 
         PluginExceptionHandler uncaughtExceptionHandler = new PluginExceptionHandler(
                 defaultHandler);
@@ -107,6 +108,10 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
 
     public String[] getWhitelistedPlugins() {
         return mWhitelistedPlugins.toArray(new String[0]);
+    }
+
+    public PluginEnabler getPluginEnabler() {
+        return mPluginEnabler;
     }
 
     public <T extends Plugin> T getOneShotPlugin(Class<T> cls) {
@@ -202,9 +207,7 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
             Uri uri = intent.getData();
             ComponentName component = ComponentName.unflattenFromString(
                     uri.toString().substring(10));
-            mContext.getPackageManager().setComponentEnabledSetting(component,
-                    PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
-                    PackageManager.DONT_KILL_APP);
+            getPluginEnabler().setEnabled(component, false);
             mContext.getSystemService(NotificationManager.class).cancel(component.getClassName(),
                     SystemMessage.NOTE_PLUGIN);
         } else {

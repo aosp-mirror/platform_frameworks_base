@@ -14,23 +14,12 @@
 
 package com.android.systemui.shared.plugins;
 
-import android.annotation.Nullable;
-import android.content.Context;
-import android.os.Looper;
+import android.content.ComponentName;
 
 /**
- * Provides necessary components for initializing {@link PluginManagerImpl}.
+ * Enables and disables plugins.
  */
-public interface PluginInitializer {
-
-    Looper getBgLooper();
-
-    /**
-     * This Runnable is run on the bg looper during initialization of {@link PluginManagerImpl}.
-     */
-    @Nullable Runnable getBgInitCallback();
-
-    String[] getWhitelistedPlugins(Context context);
-
-    PluginEnabler getPluginEnabler(Context context);
+public interface PluginEnabler {
+    void setEnabled(ComponentName component, boolean enabled);
+    boolean isEnabled(ComponentName component);
 }
