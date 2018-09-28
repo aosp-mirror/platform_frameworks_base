@@ -539,6 +539,8 @@ public abstract class CameraMetadata<TKey> {
      * <li>{@link android.graphics.ImageFormat#PRIVATE } will be reprocessable into both
      *   {@link android.graphics.ImageFormat#YUV_420_888 } and
      *   {@link android.graphics.ImageFormat#JPEG } formats.</li>
+     * <li>For a MONOCHROME camera supporting Y8 format, {@link android.graphics.ImageFormat#PRIVATE } will be reprocessable into
+     *   {@link android.graphics.ImageFormat#Y8 }.</li>
      * <li>The maximum available resolution for PRIVATE streams
      *   (both input/output) will match the maximum available
      *   resolution of JPEG streams.</li>
@@ -612,7 +614,7 @@ public abstract class CameraMetadata<TKey> {
      * then the list of resolutions for YUV_420_888 from {@link android.hardware.camera2.params.StreamConfigurationMap#getOutputSizes } contains at
      * least one resolution &gt;= 8 megapixels, with a minimum frame duration of &lt;= 1/20
      * s.</p>
-     * <p>If the device supports the {@link android.graphics.ImageFormat#RAW10 }, {@link android.graphics.ImageFormat#RAW12 }, then those can also be
+     * <p>If the device supports the {@link android.graphics.ImageFormat#RAW10 }, {@link android.graphics.ImageFormat#RAW12 }, {@link android.graphics.ImageFormat#Y8 }, then those can also be
      * captured at the same rate as the maximum-size YUV_420_888 resolution is.</p>
      * <p>If the device supports the PRIVATE_REPROCESSING capability, then the same guarantees
      * as for the YUV_420_888 format also apply to the {@link android.graphics.ImageFormat#PRIVATE } format.</p>
@@ -646,6 +648,8 @@ public abstract class CameraMetadata<TKey> {
      *   {@link android.graphics.ImageFormat#YUV_420_888 } and {@link android.graphics.ImageFormat#JPEG } formats.</li>
      * <li>The maximum available resolution for {@link android.graphics.ImageFormat#YUV_420_888 } streams (both input/output) will match the
      *   maximum available resolution of {@link android.graphics.ImageFormat#JPEG } streams.</li>
+     * <li>For a MONOCHROME camera with Y8 format support, all the requirements mentioned
+     *   above for YUV_420_888 apply for Y8 format as well.</li>
      * <li>Static metadata {@link CameraCharacteristics#REPROCESS_MAX_CAPTURE_STALL android.reprocess.maxCaptureStall}.</li>
      * <li>Only the below controls are effective for reprocessing requests and will be present
      *   in capture results. The reprocess requests are from the original capture results
@@ -692,8 +696,8 @@ public abstract class CameraMetadata<TKey> {
      * <li>The {@link CameraCharacteristics#DEPTH_DEPTH_IS_EXCLUSIVE android.depth.depthIsExclusive} entry is listed by this device.</li>
      * <li>As of Android P, the {@link CameraCharacteristics#LENS_POSE_REFERENCE android.lens.poseReference} entry is listed by this device.</li>
      * <li>A LIMITED camera with only the DEPTH_OUTPUT capability does not have to support
-     *   normal YUV_420_888, JPEG, and PRIV-format outputs. It only has to support the DEPTH16
-     *   format.</li>
+     *   normal YUV_420_888, Y8, JPEG, and PRIV-format outputs. It only has to support the
+     *   DEPTH16 format.</li>
      * </ul>
      * <p>Generally, depth output operates at a slower frame rate than standard color capture,
      * so the DEPTH16 and DEPTH_POINT_CLOUD formats will commonly have a stall duration that
@@ -877,6 +881,10 @@ public abstract class CameraMetadata<TKey> {
     /**
      * <p>The camera device is a monochrome camera that doesn't contain a color filter array,
      * and the pixel values on U and V planes are all 128.</p>
+     * <p>A MONOCHROME camera must support the guaranteed stream combinations required for
+     * its device level and capabilities. Additionally, if the monochrome camera device
+     * supports Y8 format, all mandatory stream combination requirements related to {@link android.graphics.ImageFormat#YUV_420_888 YUV_420_888} apply
+     * to {@link android.graphics.ImageFormat#Y8 Y8} as well.</p>
      * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
      */
     public static final int REQUEST_AVAILABLE_CAPABILITIES_MONOCHROME = 12;

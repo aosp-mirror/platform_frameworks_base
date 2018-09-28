@@ -16,8 +16,6 @@
 
 package android.graphics;
 
-import android.annotation.UnsupportedAppUsage;
-
 public class ImageFormat {
     /*
      * these constants are chosen to be binary compatible with their previous
@@ -92,20 +90,21 @@ public class ImageFormat {
      * </ul>
      * </p>
      *
-     * <pre> y_size = stride * height </pre>
+     * <pre> size = stride * height </pre>
      *
      * <p>For example, the {@link android.media.Image} object can provide data
-     * in this format from a {@link android.hardware.camera2.CameraDevice}
-     * through a {@link android.media.ImageReader} object if this format is
-     * supported by {@link android.hardware.camera2.CameraDevice}.</p>
+     * in this format from a {@link android.hardware.camera2.CameraDevice} (if
+     * supported) through a {@link android.media.ImageReader} object. The
+     * {@link android.media.Image#getPlanes() Image#getPlanes()} will return a
+     * single plane containing the pixel data. The pixel stride is always 1 in
+     * {@link android.media.Image.Plane#getPixelStride()}, and the
+     * {@link android.media.Image.Plane#getRowStride()} describes the vertical
+     * neighboring pixel distance (in bytes) between adjacent rows.</p>
      *
      * @see android.media.Image
      * @see android.media.ImageReader
      * @see android.hardware.camera2.CameraDevice
-     *
-     * @hide
      */
-    @UnsupportedAppUsage
     public static final int Y8 = 0x20203859;
 
     /**
@@ -787,6 +786,7 @@ public class ImageFormat {
             case DEPTH_POINT_CLOUD:
             case PRIVATE:
             case RAW_DEPTH:
+            case Y8:
                 return true;
         }
 

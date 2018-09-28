@@ -1583,7 +1583,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *   {@link android.graphics.ImageFormat#RAW12 RAW12}.</li>
      * <li>Processed (but not-stalling): any non-RAW format without a stall duration.  Typically
      *   {@link android.graphics.ImageFormat#YUV_420_888 YUV_420_888},
-     *   {@link android.graphics.ImageFormat#NV21 NV21}, or {@link android.graphics.ImageFormat#YV12 YV12}.</li>
+     *   {@link android.graphics.ImageFormat#NV21 NV21}, {@link android.graphics.ImageFormat#YV12 YV12}, or {@link android.graphics.ImageFormat#Y8 Y8} .</li>
      * </ul>
      * <p><b>Range of valid values:</b><br></p>
      * <p>For processed (and stalling) format streams, &gt;= 1.</p>
@@ -1646,6 +1646,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <li>{@link android.graphics.ImageFormat#NV21 NV21}</li>
      * <li>{@link android.graphics.ImageFormat#YV12 YV12}</li>
      * <li>Implementation-defined formats, i.e. {@link android.hardware.camera2.params.StreamConfigurationMap#isOutputSupportedFor(Class) }</li>
+     * <li>{@link android.graphics.ImageFormat#Y8 Y8}</li>
      * </ul>
      * <p>For full guarantees, query {@link android.hardware.camera2.params.StreamConfigurationMap#getOutputStallDuration } with a
      * processed format -- it will return 0 for a non-stalling stream.</p>
@@ -2122,6 +2123,35 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * or output will never hurt maximum frame rate (i.e.  {@link android.hardware.camera2.params.StreamConfigurationMap#getOutputStallDuration getOutputStallDuration(ImageFormat.PRIVATE, size)} is always 0),</p>
      * <p>Attempting to configure an input stream with output streams not
      * listed as available in this map is not valid.</p>
+     * <p>Additionally, if the camera device is MONOCHROME with Y8 support, it will also support
+     * the following map of formats if its dependent capability
+     * ({@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities}) is supported:</p>
+     * <table>
+     * <thead>
+     * <tr>
+     * <th align="left">Input Format</th>
+     * <th align="left">Output Format</th>
+     * <th align="left">Capability</th>
+     * </tr>
+     * </thead>
+     * <tbody>
+     * <tr>
+     * <td align="left">{@link android.graphics.ImageFormat#PRIVATE }</td>
+     * <td align="left">{@link android.graphics.ImageFormat#Y8 }</td>
+     * <td align="left">PRIVATE_REPROCESSING</td>
+     * </tr>
+     * <tr>
+     * <td align="left">{@link android.graphics.ImageFormat#Y8 }</td>
+     * <td align="left">{@link android.graphics.ImageFormat#JPEG }</td>
+     * <td align="left">YUV_REPROCESSING</td>
+     * </tr>
+     * <tr>
+     * <td align="left">{@link android.graphics.ImageFormat#Y8 }</td>
+     * <td align="left">{@link android.graphics.ImageFormat#Y8 }</td>
+     * <td align="left">YUV_REPROCESSING</td>
+     * </tr>
+     * </tbody>
+     * </table>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      *
      * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
@@ -2297,6 +2327,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <li>{@link android.graphics.ImageFormat#YUV_420_888 }</li>
      * <li>{@link android.graphics.ImageFormat#RAW10 }</li>
      * <li>{@link android.graphics.ImageFormat#RAW12 }</li>
+     * <li>{@link android.graphics.ImageFormat#Y8 }</li>
      * </ul>
      * <p>All other formats may or may not have an allowed stall duration on
      * a per-capability basis; refer to {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities}
