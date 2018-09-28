@@ -348,7 +348,6 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
          * @hide
          */
         public AuthenticationResult(CryptoObject crypto) {
-            // For compatibility, this extends from common base class as FingerprintManager does.
             // Identifier and userId is not used for BiometricPrompt.
             super(crypto, null /* identifier */, 0 /* userId */);
         }
@@ -410,8 +409,8 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
     }
 
     /**
-     * This call warms up the fingerprint hardware, displays a system-provided dialog, and starts
-     * scanning for a fingerprint. It terminates when {@link
+     * This call warms up the biometric hardware, displays a system-provided dialog, and starts
+     * scanning for a biometric. It terminates when {@link
      * AuthenticationCallback#onAuthenticationError(int, CharSequence)} is called, when {@link
      * AuthenticationCallback#onAuthenticationSucceeded( AuthenticationResult)}, or when the user
      * dismisses the system-provided dialog, at which point the crypto object becomes invalid. This
@@ -453,8 +452,8 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
     }
 
     /**
-     * This call warms up the fingerprint hardware, displays a system-provided dialog, and starts
-     * scanning for a fingerprint. It terminates when {@link
+     * This call warms up the biometric hardware, displays a system-provided dialog, and starts
+     * scanning for a biometric. It terminates when {@link
      * AuthenticationCallback#onAuthenticationError(int, CharSequence)} is called, when {@link
      * AuthenticationCallback#onAuthenticationSucceeded( AuthenticationResult)} is called, or when
      * the user dismisses the system-provided dialog.  This operation can be canceled by using the
