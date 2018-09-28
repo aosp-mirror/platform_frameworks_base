@@ -291,14 +291,6 @@ public final class PermissionsState {
     }
 
     /**
-     * Returns whether the state has any known request for the given permission name,
-     * whether or not it has been granted.
-     */
-    public boolean hasRequestedPermission(String name) {
-        return mPermissions != null && (mPermissions.get(name) != null);
-    }
-
-    /**
      * Gets all permissions for a given device user id regardless if they
      * are install time or runtime permissions.
      *
