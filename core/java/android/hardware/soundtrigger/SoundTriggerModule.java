@@ -20,7 +20,6 @@ import android.annotation.UnsupportedAppUsage;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
-
 import java.lang.ref.WeakReference;
 
 /**
@@ -132,14 +131,6 @@ public class SoundTriggerModule {
     @UnsupportedAppUsage
     public native int stopRecognition(int soundModelHandle);
 
-    /**
-     * Get the current state of a {@link SoundTrigger.SoundModel}
-     * @param soundModelHandle The sound model handle indicating which model's state to return
-     * @return - {@link SoundTrigger#RecognitionEvent} in case of success
-     *         - null in case of an error or if not supported
-     */
-    public native SoundTrigger.RecognitionEvent getModelState(int soundModelHandle);
-
     private class NativeEventHandlerDelegate {
         private final Handler mHandler;
 
@@ -216,3 +207,4 @@ public class SoundTriggerModule {
         }
     }
 }
+
