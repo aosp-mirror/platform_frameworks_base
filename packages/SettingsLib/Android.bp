@@ -15,6 +15,7 @@ android_library {
         "SettingsLibHelpUtils",
         "SettingsLibRestrictedLockUtils",
         "SettingsLibAppPreference",
+        "SettingsLibSearchWidget",
     ],
 
     // ANDROIDMK TRANSLATION ERROR: unsupported assignment to LOCAL_SHARED_JAVA_LIBRARIES
