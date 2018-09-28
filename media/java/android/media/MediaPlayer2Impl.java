@@ -36,8 +36,6 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.os.PersistableBundle;
 import android.os.PowerManager;
 import android.os.Process;
@@ -335,19 +333,14 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                     final String msg = "Cannot set AudioAttributes to null";
                     throw new IllegalArgumentException(msg);
                 }
-                Parcel pattributes = Parcel.obtain();
-                attributes.writeToParcel(pattributes, AudioAttributes.FLATTEN_TAGS);
-                setParameter(KEY_PARAMETER_AUDIO_ATTRIBUTES, pattributes);
-                pattributes.recycle();
+                setParameter(KEY_PARAMETER_AUDIO_ATTRIBUTES, attributes);
             }
         });
     }
 
     @Override
     public @NonNull AudioAttributes getAudioAttributes() {
-        Parcel pattributes = getParameter(KEY_PARAMETER_AUDIO_ATTRIBUTES);
-        AudioAttributes attributes = AudioAttributes.CREATOR.createFromParcel(pattributes);
-        pattributes.recycle();
+        AudioAttributes attributes = (AudioAttributes) getParameter(KEY_PARAMETER_AUDIO_ATTRIBUTES);
         return attributes;
     }
 
@@ -1588,9 +1581,9 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
      * @param value value of the parameter to be set.
      * @return true if the parameter is set successfully, false otherwise
      */
-    private native boolean setParameter(int key, Parcel value);
+    private native boolean setParameter(int key, Object value);
 
-    private native Parcel getParameter(int key);
+    private native Object getParameter(int key);
 
 
     /**
@@ -3689,7 +3682,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                       supportedSchemes[i]);
             }
 
-            Log.v(TAG, "DrmInfoImpl() Parcel psshsize: " + pssh.length +
+            Log.v(TAG, "DrmInfoImpl() psshsize: " + pssh.length +
                   " supportedDRMsCount: " + supportedDRMsCount);
         }
 
