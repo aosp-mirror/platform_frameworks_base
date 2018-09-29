@@ -19,6 +19,7 @@
 //#define LOG_NDEBUG 0
 
 #include <android/hardware/power/1.1/IPower.h>
+#include <android/system/suspend/1.0/ISystemSuspend.h>
 #include <nativehelper/JNIHelp.h>
 #include "jni.h"
 
@@ -35,7 +36,7 @@
 #include <utils/Log.h>
 #include <hardware/power.h>
 #include <hardware_legacy/power.h>
-#include <suspend/autosuspend.h>
+#include <hidl/ServiceManagement.h>
 
 #include "com_android_server_power_PowerManagerService.h"
 
@@ -44,6 +45,9 @@ using android::hardware::Void;
 using android::hardware::power::V1_0::PowerHint;
 using android::hardware::power::V1_0::Feature;
 using android::String8;
+using android::system::suspend::V1_0::ISystemSuspend;
+using android::system::suspend::V1_0::IWakeLock;
+using android::system::suspend::V1_0::WakeLockType;
 using IPowerV1_1 = android::hardware::power::V1_1::IPower;
 using IPowerV1_0 = android::hardware::power::V1_0::IPower;
 
@@ -171,6 +175,46 @@ void android_server_PowerManagerService_userActivity(nsecs_t eventTime, int32_t 
     }
 }
 
+static sp<ISystemSuspend> gSuspendHal = nullptr;
+static sp<IWakeLock> gSuspendBlocker = nullptr;
+static std::mutex gSuspendMutex;
+
+// Assume SystemSuspend HAL is always alive.
+// TODO: Force device to restart if SystemSuspend HAL dies.
+sp<ISystemSuspend> getSuspendHal() {
+    static std::once_flag suspendHalFlag;
+    std::call_once(suspendHalFlag, [](){
+        ::android::hardware::details::waitForHwService(ISystemSuspend::descriptor, "default");
+        gSuspendHal = ISystemSuspend::getService();
+        assert(gSuspendHal != nullptr);
+    });
+    return gSuspendHal;
+}
+
+void enableAutoSuspend() {
+    static bool enabled = false;
+
+    std::lock_guard<std::mutex> lock(gSuspendMutex);
+    if (!enabled) {
+        sp<ISystemSuspend> suspendHal = getSuspendHal();
+        suspendHal->enableAutosuspend();
+        enabled = true;
+    }
+    if (gSuspendBlocker) {
+        gSuspendBlocker->release();
+        gSuspendBlocker.clear();
+    }
+}
+
+void disableAutoSuspend() {
+    std::lock_guard<std::mutex> lock(gSuspendMutex);
+    if (!gSuspendBlocker) {
+        sp<ISystemSuspend> suspendHal = getSuspendHal();
+        gSuspendBlocker = suspendHal->acquireWakeLock(WakeLockType::PARTIAL,
+                "PowerManager.SuspendLockout");
+    }
+}
+
 // ----------------------------------------------------------------------------
 
 static void nativeInit(JNIEnv* env, jobject obj) {
@@ -207,13 +251,13 @@ static void nativeSetInteractive(JNIEnv* /* env */, jclass /* clazz */, jboolean
 static void nativeSetAutoSuspend(JNIEnv* /* env */, jclass /* clazz */, jboolean enable) {
     if (enable) {
         android::base::Timer t;
-        autosuspend_enable();
+        enableAutoSuspend();
         if (t.duration() > 100ms) {
             ALOGD("Excessive delay in autosuspend_enable() while turning screen off");
         }
     } else {
         android::base::Timer t;
-        autosuspend_disable();
+        disableAutoSuspend();
         if (t.duration() > 100ms) {
             ALOGD("Excessive delay in autosuspend_disable() while turning screen on");
         }
