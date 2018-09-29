@@ -16,54 +16,55 @@
 
 package com.android.settingslib.net;
 
-import java.util.List;
-import java.util.concurrent.TimeUnit;
-
 /**
- * Data structure representing usage data in a billing cycle.
+ * Base data structure representing usage data in a billing cycle.
  */
 public class NetworkCycleData {
-    public static final long BUCKET_DURATION_MS = TimeUnit.DAYS.toMillis(1);
-    public long startTime;
-    public long endTime;
-    public long totalUsage;
-    public List<NetworkCycleData> usageBuckets;
 
-    private NetworkCycleData(Builder builder) {
-        startTime = builder.mStart;
-        endTime = builder.mEnd;
-        totalUsage = builder.mTotalUsage;
-        usageBuckets = builder.mUsageBuckets;
+    private long mStartTime;
+    private long mEndTime;
+    private long mTotalUsage;
+
+    protected NetworkCycleData() {
+    }
+
+    public long getStartTime() {
+        return mStartTime;
+    }
+
+    public long getEndTime() {
+        return mEndTime;
+    }
+
+    public long getTotalUsage() {
+        return mTotalUsage;
     }
 
     public static class Builder {
-        private long mStart;
-        private long mEnd;
-        private long mTotalUsage;
-        private List<NetworkCycleData> mUsageBuckets;
+
+        private NetworkCycleData mObject = new NetworkCycleData();
 
         public Builder setStartTime(long start) {
-            mStart = start;
+            getObject().mStartTime = start;
             return this;
         }
 
         public Builder setEndTime(long end) {
-            mEnd = end;
+            getObject().mEndTime = end;
             return this;
         }
 
         public Builder setTotalUsage(long total) {
-            mTotalUsage = total;
+            getObject().mTotalUsage = total;
             return this;
         }
 
-        public Builder setUsageBuckets(List<NetworkCycleData> buckets) {
-            mUsageBuckets = buckets;
-            return this;
+        protected NetworkCycleData getObject() {
+            return mObject;
         }
 
         public NetworkCycleData build() {
-            return new NetworkCycleData(this);
+            return getObject();
         }
     }
 }

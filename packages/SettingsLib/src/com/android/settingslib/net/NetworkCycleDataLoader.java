@@ -32,32 +32,28 @@ import android.net.TrafficStats;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.text.format.DateUtils;
-import android.util.Log;
 import android.util.Pair;
 
 import java.time.ZonedDateTime;
-import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.List;
 
-import androidx.annotation.NonNull;
 import androidx.annotation.VisibleForTesting;
 import androidx.loader.content.AsyncTaskLoader;
 
 /**
  * Loader for network data usage history. It returns a list of usage data per billing cycle.
  */
-public class NetworkCycleDataLoader extends AsyncTaskLoader<List<NetworkCycleData>> {
-    private static final String TAG = "CycleDataSummaryLoader";
-    private final NetworkStatsManager mNetworkStatsManager;
-    private final String mSubId;
-    private final int mNetworkType;
+public abstract class NetworkCycleDataLoader<D> extends AsyncTaskLoader<D> {
+    private static final String TAG = "NetworkCycleDataLoader";
+    protected final NetworkStatsManager mNetworkStatsManager;
+    protected final String mSubId;
+    protected final int mNetworkType;
     private final NetworkPolicy mPolicy;
     private final NetworkTemplate mNetworkTemplate;
     @VisibleForTesting
     final INetworkStatsService mNetworkStatsService;
 
-    private NetworkCycleDataLoader(Builder builder) {
+    protected NetworkCycleDataLoader(Builder<?> builder) {
         super(builder.mContext);
         mPolicy = builder.mPolicy;
         mSubId = builder.mSubId;
@@ -75,21 +71,25 @@ public class NetworkCycleDataLoader extends AsyncTaskLoader<List<NetworkCycleDat
         forceLoad();
     }
 
-    @Override
-    public List<NetworkCycleData> loadInBackground() {
+    public D loadInBackground() {
         if (mPolicy == null) {
-            return loadFourWeeksData();
+            loadFourWeeksData();
+        } else {
+            loadPolicyData();
         }
-        final List<NetworkCycleData> data = new ArrayList<>();
-        final Iterator<Pair<ZonedDateTime, ZonedDateTime>> iterator = NetworkPolicyManager
-            .cycleIterator(mPolicy);
+        return getCycleUsage();
+    }
+
+    @VisibleForTesting
+    void loadPolicyData() {
+        final Iterator<Pair<ZonedDateTime, ZonedDateTime>> iterator =
+            NetworkPolicyManager.cycleIterator(mPolicy);
         while (iterator.hasNext()) {
             final Pair<ZonedDateTime, ZonedDateTime> cycle = iterator.next();
             final long cycleStart = cycle.first.toInstant().toEpochMilli();
             final long cycleEnd = cycle.second.toInstant().toEpochMilli();
-            getUsage(cycleStart, cycleEnd, data);
+            recordUsage(cycleStart, cycleEnd);
         }
-        return data;
     }
 
     @Override
@@ -105,8 +105,7 @@ public class NetworkCycleDataLoader extends AsyncTaskLoader<List<NetworkCycleDat
     }
 
     @VisibleForTesting
-    List<NetworkCycleData> loadFourWeeksData() {
-        final List<NetworkCycleData> data = new ArrayList<>();
+    void loadFourWeeksData() {
         try {
             final INetworkStatsSession networkSession = mNetworkStatsService.openSession();
             final NetworkStatsHistory networkHistory = networkSession.getHistoryForNetwork(
@@ -117,7 +116,7 @@ public class NetworkCycleDataLoader extends AsyncTaskLoader<List<NetworkCycleDat
             long cycleEnd = historyEnd;
             while (cycleEnd > historyStart) {
                 final long cycleStart = cycleEnd - (DateUtils.WEEK_IN_MILLIS * 4);
-                getUsage(cycleStart, cycleEnd, data);
+                recordUsage(cycleStart, cycleEnd);
                 cycleEnd = cycleStart;
             }
 
@@ -125,29 +124,23 @@ public class NetworkCycleDataLoader extends AsyncTaskLoader<List<NetworkCycleDat
         } catch (RemoteException e) {
             throw new RuntimeException(e);
         }
-        return data;
     }
 
     @VisibleForTesting
-    void getUsage(long start, long end, @NonNull List<NetworkCycleData> data) {
-        try {
-            final NetworkStats stats = mNetworkStatsManager.querySummary(
-                mNetworkType, mSubId, start, end);
-            final long total = getTotalUsage(stats);
-            if (total > 0L) {
-                data.add(new NetworkCycleData.Builder()
-                    .setStartTime(start)
-                    .setEndTime(end)
-                    .setTotalUsage(total)
-                    .setUsageBuckets(getUsageBuckets(start, end))
-                    .build());
+    abstract void recordUsage(long start, long end);
+
+    abstract D getCycleUsage();
+
+    public static Builder<?> builder(Context context) {
+        return new Builder<NetworkCycleDataLoader>(context) {
+            @Override
+            public NetworkCycleDataLoader build() {
+                return null;
             }
-        } catch (RemoteException e) {
-            Log.e(TAG, "Exception querying network detail.", e);
-        }
+        };
     }
 
-    private long getTotalUsage(NetworkStats stats) {
+    protected long getTotalUsage(NetworkStats stats) {
         long bytes = 0L;
         if (stats != null) {
             final NetworkStats.Bucket bucket = new NetworkStats.Bucket();
@@ -159,61 +152,38 @@ public class NetworkCycleDataLoader extends AsyncTaskLoader<List<NetworkCycleDat
         return bytes;
     }
 
-    private List<NetworkCycleData> getUsageBuckets(long start, long end) {
-        final List<NetworkCycleData> data = new ArrayList<>();
-        long bucketStart = start;
-        long bucketEnd = start + NetworkCycleData.BUCKET_DURATION_MS;
-        while (bucketEnd <= end) {
-            long usage = 0L;
-            try {
-                final NetworkStats stats = mNetworkStatsManager.querySummary(
-                    mNetworkType, mSubId, bucketStart, bucketEnd);
-                usage = getTotalUsage(stats);
-            } catch (RemoteException e) {
-                Log.e(TAG, "Exception querying network detail.", e);
-            }
-            data.add(new NetworkCycleData.Builder()
-                .setStartTime(bucketStart).setEndTime(bucketEnd).setTotalUsage(usage).build());
-            bucketStart = bucketEnd;
-            bucketEnd += NetworkCycleData.BUCKET_DURATION_MS;
-        }
-        return data;
-    }
-
-    public static class Builder {
+    public static abstract class Builder<T extends NetworkCycleDataLoader> {
         private final Context mContext;
         private NetworkPolicy mPolicy;
         private String mSubId;
         private int mNetworkType;
         private NetworkTemplate mNetworkTemplate;
 
-        public Builder(Context context) {
+        public Builder (Context context) {
             mContext = context;
         }
 
-        public Builder setNetworkPolicy(NetworkPolicy policy) {
+        public Builder<T> setNetworkPolicy(NetworkPolicy policy) {
             mPolicy = policy;
             return this;
         }
 
-        public Builder setSubscriberId(String subId) {
+        public Builder<T> setSubscriberId(String subId) {
             mSubId = subId;
             return this;
         }
 
-        public Builder setNetworkType(int networkType) {
+        public Builder<T> setNetworkType(int networkType) {
             mNetworkType = networkType;
             return this;
         }
 
-        public Builder setNetworkTemplate(NetworkTemplate template) {
+        public Builder<T> setNetworkTemplate(NetworkTemplate template) {
             mNetworkTemplate = template;
             return this;
         }
 
-        public NetworkCycleDataLoader build() {
-            return new NetworkCycleDataLoader(this);
-        }
+        public abstract T build();
     }
 
 }

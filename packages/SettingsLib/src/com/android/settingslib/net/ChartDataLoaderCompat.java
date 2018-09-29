@@ -37,7 +37,8 @@ import com.android.settingslib.AppItem;
 /**
  * Loader for historical chart data for both network and UID details.
  *
- * Deprecated in favor of {@link NetworkCycleDataLoader}
+ * Deprecated in favor of {@link NetworkCycleChartDataLoader} and
+ * {@link NetworkCycleDataForUidLoader}
  *
  * @deprecated
  */
