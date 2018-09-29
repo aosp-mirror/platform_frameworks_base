@@ -448,17 +448,6 @@ final class Settings {
         mBackupStoppedPackagesFilename = new File(mSystemDir, "packages-stopped-backup.xml");
     }
 
-    public @Nullable BasePermission getPermission(@NonNull String permName) {
-        synchronized (mLock) {
-            return getPermissionLocked(permName);
-        }
-    }
-
-    @GuardedBy("mLock")
-    @Nullable BasePermission getPermissionLocked(@NonNull String permName) {
-        return mPermissions.get(permName);
-    }
-
     PackageSetting getPackageLPr(String pkgName) {
         return mPackages.get(pkgName);
     }
