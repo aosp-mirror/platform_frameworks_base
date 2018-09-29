@@ -30,6 +30,8 @@
 
 #include <android/hardware/power/1.0/IPower.h>
 #include <android/hardware/power/1.1/IPower.h>
+#include <android/system/suspend/1.0/ISystemSuspend.h>
+#include <android/system/suspend/1.0/ISystemSuspendCallback.h>
 #include <android_runtime/AndroidRuntime.h>
 #include <jni.h>
 
@@ -39,7 +41,6 @@
 #include <log/log.h>
 #include <utils/misc.h>
 #include <utils/Log.h>
-#include <suspend/autosuspend.h>
 
 using android::hardware::Return;
 using android::hardware::Void;
@@ -49,6 +50,8 @@ using android::hardware::power::V1_0::Status;
 using android::hardware::power::V1_1::PowerStateSubsystem;
 using android::hardware::power::V1_1::PowerStateSubsystemSleepState;
 using android::hardware::hidl_vec;
+using android::system::suspend::V1_0::ISystemSuspend;
+using android::system::suspend::V1_0::ISystemSuspendCallback;
 using IPowerV1_1 = android::hardware::power::V1_1::IPower;
 using IPowerV1_0 = android::hardware::power::V1_0::IPower;
 
@@ -63,6 +66,7 @@ static sem_t wakeup_sem;
 extern sp<IPowerV1_0> getPowerHalV1_0();
 extern sp<IPowerV1_1> getPowerHalV1_1();
 extern bool processPowerHalReturn(const Return<void> &ret, const char* functionName);
+extern sp<ISystemSuspend> getSuspendHal();
 
 // Java methods used in getLowPowerStats
 static jmethodID jgetAndUpdatePlatformState = NULL;
@@ -70,16 +74,19 @@ static jmethodID jgetSubsystem = NULL;
 static jmethodID jputVoter = NULL;
 static jmethodID jputState = NULL;
 
-static void wakeup_callback(bool success)
-{
-    ALOGV("In wakeup_callback: %s", success ? "resumed from suspend" : "suspend aborted");
-    int ret = sem_post(&wakeup_sem);
-    if (ret < 0) {
-        char buf[80];
-        strerror_r(errno, buf, sizeof(buf));
-        ALOGE("Error posting wakeup sem: %s\n", buf);
+class WakeupCallback : public ISystemSuspendCallback {
+public:
+    Return<void> notifyWakeup(bool success) override {
+        ALOGV("In wakeup_callback: %s", success ? "resumed from suspend" : "suspend aborted");
+        int ret = sem_post(&wakeup_sem);
+        if (ret < 0) {
+            char buf[80];
+            strerror_r(errno, buf, sizeof(buf));
+            ALOGE("Error posting wakeup sem: %s\n", buf);
+        }
+        return Void();
     }
-}
+};
 
 static jint nativeWaitWakeup(JNIEnv *env, jobject clazz, jobject outBuf)
 {
@@ -101,11 +108,14 @@ static jint nativeWaitWakeup(JNIEnv *env, jobject clazz, jobject outBuf)
             return -1;
         }
         ALOGV("Registering callback...");
-        autosuspend_set_wakeup_callback(&wakeup_callback);
+        sp<ISystemSuspend> suspendHal = getSuspendHal();
+        suspendHal->registerCallback(new WakeupCallback());
     }
 
     // Wait for wakeup.
     ALOGV("Waiting for wakeup...");
+    // TODO(b/116747600): device can suspend and wakeup after sem_wait() finishes and before wakeup
+    // reason is recorded, i.e. BatteryStats might occasionally miss wakeup events.
     int ret = sem_wait(&wakeup_sem);
     if (ret < 0) {
         char buf[80];
