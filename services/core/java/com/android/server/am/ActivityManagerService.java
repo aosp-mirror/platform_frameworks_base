@@ -10301,6 +10301,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         synchronized (this) {
             sb.append("Process: ").append(processName).append("\n");
             sb.append("PID: ").append(process.pid).append("\n");
+            sb.append("UID: ").append(process.uid).append("\n");
             int flags = process.info.flags;
             IPackageManager pm = AppGlobals.getPackageManager();
             sb.append("Flags: 0x").append(Integer.toHexString(flags)).append("\n");
