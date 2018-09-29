@@ -1206,7 +1206,8 @@ public class ApnSetting implements Parcelable {
 
     /** @hide */
     public static int getMvnoTypeIntFromString(String mvnoType) {
-        Integer mvnoTypeInt = MVNO_TYPE_STRING_MAP.get(mvnoType);
+        String mvnoTypeString = TextUtils.isEmpty(mvnoType) ? mvnoType : mvnoType.toLowerCase();
+        Integer mvnoTypeInt = MVNO_TYPE_STRING_MAP.get(mvnoTypeString);
         return  mvnoTypeInt == null ? UNSPECIFIED_INT : mvnoTypeInt;
     }
 
