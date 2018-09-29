@@ -56,11 +56,11 @@ public class SparseArray<E> implements Cloneable {
     private static final Object DELETED = new Object();
     private boolean mGarbage = false;
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 28) // Use keyAt(int)
     private int[] mKeys;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 28) // Use valueAt(int), setValueAt(int, E)
     private Object[] mValues;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 28) // Use size()
     private int mSize;
 
     /**

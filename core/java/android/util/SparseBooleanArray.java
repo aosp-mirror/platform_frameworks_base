@@ -185,7 +185,9 @@ public class SparseBooleanArray implements Cloneable {
         return mValues[index];
     }
 
-    /** @hide */
+    /**
+     * Directly set the value at a particular index.
+     */
     public void setValueAt(int index, boolean value) {
         mValues[index] = value;
     }
@@ -304,10 +306,10 @@ public class SparseBooleanArray implements Cloneable {
         return buffer.toString();
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 28) // Use keyAt(int)
     private int[] mKeys;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 28) // Use valueAt(int), setValueAt(int, boolean)
     private boolean[] mValues;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 28) // Use size()
     private int mSize;
 }
