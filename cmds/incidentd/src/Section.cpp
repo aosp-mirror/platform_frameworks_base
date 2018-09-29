@@ -425,7 +425,19 @@ WorkerThreadSection::WorkerThreadSection(int id, const int64_t timeoutMs, bool u
 
 WorkerThreadSection::~WorkerThreadSection() {}
 
+void sigpipe_handler(int signum) {
+    if (signum == SIGPIPE) {
+        ALOGE("Wrote to a broken pipe\n");
+    } else {
+        ALOGE("Received unexpected signal: %d\n", signum);
+    }
+}
+
 static void* worker_thread_func(void* cookie) {
+    // Don't crash the service if we write to a closed pipe (which can happen if
+    // dumping times out).
+    signal(SIGPIPE, sigpipe_handler);
+
     WorkerThreadData* data = (WorkerThreadData*)cookie;
     status_t err = data->section->BlockingCall(data->pipe.writeFd().get());
 
@@ -506,6 +518,7 @@ status_t WorkerThreadSection::Execute(ReportRequestSet* requests) const {
             }
         }
     }
+
     write_section_stats(requests->sectionStats(this->id), buffer);
     if (timedOut || buffer.timedOut()) {
         ALOGW("WorkerThreadSection '%s' timed out", this->name.string());
@@ -813,7 +826,10 @@ status_t LogSection::BlockingCall(int pipeWriteFd) const {
         }
     }
     gLastLogsRetrieved[mLogID] = lastTimestamp;
-    proto.flush(pipeWriteFd);
+    if (!proto.flush(pipeWriteFd) && errno == EPIPE) {
+        ALOGE("[%s] wrote to a broken pipe\n", this->name.string());
+        return EPIPE;
+    }
     return NO_ERROR;
 }
 
@@ -915,7 +931,7 @@ status_t TombstoneSection::BlockingCall(int pipeWriteFd) const {
             break;
         }
         if (cStatus != NO_ERROR) {
-            ALOGE("TombstoneSection '%s' child had an issue: %s\n", this->name.string(), strerror(-cStatus));
+            ALOGE("[%s] child had an issue: %s\n", this->name.string(), strerror(-cStatus));
         }
 
         auto dump = std::make_unique<char[]>(buffer.size());
@@ -934,7 +950,13 @@ status_t TombstoneSection::BlockingCall(int pipeWriteFd) const {
         dumpPipe.readFd().reset();
     }
 
-    proto.flush(pipeWriteFd);
+    if (!proto.flush(pipeWriteFd) && errno == EPIPE) {
+        ALOGE("[%s] wrote to a broken pipe\n", this->name.string());
+        if (err != NO_ERROR) {
+            return EPIPE;
+        }
+    }
+
     return err;
 }
 
