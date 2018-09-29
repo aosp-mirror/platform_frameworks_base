@@ -1125,4 +1125,7 @@
 
     <!-- time label for event have that happened very recently [CHAR LIMIT=60] -->
     <string name="time_unit_just_now">Just now</string>
+
+    <!-- The notice header of Third-party licenses. not translatable -->
+    <string name="notice_header" translatable="false"></string>
 </resources>
