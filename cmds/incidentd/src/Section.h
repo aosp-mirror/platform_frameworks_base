@@ -173,7 +173,7 @@ private:
  */
 class TombstoneSection : public WorkerThreadSection {
 public:
-    TombstoneSection(int id, const char* type, int64_t timeoutMs = 30000 /* 30 seconds */);
+    TombstoneSection(int id, const char* type, int64_t timeoutMs = 120000 /* 2 minutes */);
     virtual ~TombstoneSection();
 
     virtual status_t BlockingCall(int pipeWriteFd) const;
