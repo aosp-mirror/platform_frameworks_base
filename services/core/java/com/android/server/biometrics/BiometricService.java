@@ -17,13 +17,20 @@
 package com.android.server.biometrics;
 
 import static android.Manifest.permission.USE_BIOMETRIC;
+import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
 import static android.Manifest.permission.USE_FINGERPRINT;
 
+import android.app.ActivityManager;
 import android.app.AppOpsManager;
+import android.app.UserSwitchObserver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.database.ContentObserver;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
+import android.hardware.biometrics.BiometricSourceType;
+import android.hardware.biometrics.IBiometricEnabledOnKeyguardCallback;
 import android.hardware.biometrics.IBiometricPromptReceiver;
 import android.hardware.biometrics.IBiometricService;
 import android.hardware.biometrics.IBiometricServiceReceiver;
@@ -31,8 +38,10 @@ import android.hardware.face.FaceManager;
 import android.hardware.face.IFaceService;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.IFingerprintService;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.DeadObjectException;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -47,6 +56,7 @@ import com.android.internal.R;
 import com.android.server.SystemService;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * System service that arbitrates the modality for BiometricPrompt to use.
@@ -88,6 +98,8 @@ public class BiometricService extends SystemService {
     private final boolean mHasFeatureFingerprint;
     private final boolean mHasFeatureIris;
     private final boolean mHasFeatureFace;
+    private final SettingObserver mSettingObserver;
+    private final List<EnabledOnKeyguardCallback> mEnabledOnKeyguardCallbacks;
 
     private IFingerprintService mFingerprintService;
     private IFaceService mFaceService;
@@ -118,6 +130,107 @@ public class BiometricService extends SystemService {
 
         BiometricAuthenticator getAuthenticator() {
             return mAuthenticator;
+        }
+    }
+
+    private final class SettingObserver extends ContentObserver {
+        private final Uri FACE_UNLOCK_KEYGUARD_ENABLED =
+                Settings.Secure.getUriFor(Settings.Secure.FACE_UNLOCK_KEYGUARD_ENABLED);
+        private final Uri FACE_UNLOCK_APP_ENABLED =
+                Settings.Secure.getUriFor(Settings.Secure.FACE_UNLOCK_APP_ENABLED);
+
+        private final ContentResolver mContentResolver;
+        private boolean mFaceEnabledOnKeyguard;
+        private boolean mFaceEnabledForApps;
+
+        /**
+         * Creates a content observer.
+         *
+         * @param handler The handler to run {@link #onChange} on, or null if none.
+         */
+        SettingObserver(Handler handler) {
+            super(handler);
+            mContentResolver = getContext().getContentResolver();
+            updateContentObserver();
+        }
+
+        void updateContentObserver() {
+            mContentResolver.unregisterContentObserver(this);
+            mContentResolver.registerContentObserver(FACE_UNLOCK_KEYGUARD_ENABLED,
+                    false /* notifyForDescendents */,
+                    this /* observer */,
+                    UserHandle.USER_CURRENT);
+            mContentResolver.registerContentObserver(FACE_UNLOCK_APP_ENABLED,
+                    false /* notifyForDescendents */,
+                    this /* observer */,
+                    UserHandle.USER_CURRENT);
+
+            // Update the value immediately
+            onChange(true /* selfChange */, FACE_UNLOCK_KEYGUARD_ENABLED);
+            onChange(true /* selfChange */, FACE_UNLOCK_APP_ENABLED);
+        }
+
+        @Override
+        public void onChange(boolean selfChange, Uri uri) {
+            if (FACE_UNLOCK_KEYGUARD_ENABLED.equals(uri)) {
+                mFaceEnabledOnKeyguard =
+                        Settings.Secure.getIntForUser(
+                                mContentResolver,
+                                Settings.Secure.FACE_UNLOCK_KEYGUARD_ENABLED,
+                                1 /* default */,
+                                UserHandle.USER_CURRENT) != 0;
+
+                List<EnabledOnKeyguardCallback> callbacks = mEnabledOnKeyguardCallbacks;
+                for (int i = 0; i < callbacks.size(); i++) {
+                    callbacks.get(i).notify(BiometricSourceType.FACE, mFaceEnabledOnKeyguard);
+                }
+            } else if (FACE_UNLOCK_APP_ENABLED.equals(uri)) {
+                mFaceEnabledForApps =
+                        Settings.Secure.getIntForUser(
+                                mContentResolver,
+                                Settings.Secure.FACE_UNLOCK_APP_ENABLED,
+                                1 /* default */,
+                                UserHandle.USER_CURRENT) != 0;
+            }
+        }
+
+        boolean getFaceEnabledOnKeyguard() {
+            return mFaceEnabledOnKeyguard;
+        }
+
+        boolean getFaceEnabledForApps() {
+            return mFaceEnabledForApps;
+        }
+    }
+
+    private final class EnabledOnKeyguardCallback implements IBinder.DeathRecipient {
+
+        private final IBiometricEnabledOnKeyguardCallback mCallback;
+
+        EnabledOnKeyguardCallback(IBiometricEnabledOnKeyguardCallback callback) {
+            mCallback = callback;
+            try {
+                mCallback.asBinder().linkToDeath(EnabledOnKeyguardCallback.this, 0);
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Unable to linkToDeath", e);
+            }
+        }
+
+        void notify(BiometricSourceType sourceType, boolean enabled) {
+            try {
+                mCallback.onChanged(sourceType, enabled);
+            } catch (DeadObjectException e) {
+                Slog.w(TAG, "Death while invoking notify", e);
+                mEnabledOnKeyguardCallbacks.remove(this);
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Failed to invoke onChanged", e);
+            }
+        }
+
+        @Override
+        public void binderDied() {
+            Slog.e(TAG, "Enabled callback binder died");
+            mEnabledOnKeyguardCallbacks.remove(this);
         }
     }
 
@@ -248,6 +361,19 @@ public class BiometricService extends SystemService {
             }
             return error;
         }
+
+        @Override
+        public void registerEnabledOnKeyguardCallback(IBiometricEnabledOnKeyguardCallback callback)
+                throws RemoteException {
+            checkInternalPermission();
+            mEnabledOnKeyguardCallbacks.add(new EnabledOnKeyguardCallback(callback));
+            try {
+                callback.onChanged(BiometricSourceType.FACE,
+                        mSettingObserver.getFaceEnabledOnKeyguard());
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Remote exception", e);
+            }
+        }
     }
 
     private void checkAppOp(String opPackageName, int callingUid) {
@@ -256,6 +382,11 @@ public class BiometricService extends SystemService {
             Slog.w(TAG, "Rejecting " + opPackageName + "; permission denied");
             throw new SecurityException("Permission denied");
         }
+    }
+
+    private void checkInternalPermission() {
+        getContext().enforceCallingPermission(USE_BIOMETRIC_INTERNAL,
+                "Must have MANAGE_BIOMETRIC permission");
     }
 
     private void checkPermission() {
@@ -280,11 +411,26 @@ public class BiometricService extends SystemService {
 
         mAppOps = context.getSystemService(AppOpsManager.class);
         mHandler = new Handler(Looper.getMainLooper());
+        mEnabledOnKeyguardCallbacks = new ArrayList<>();
+        mSettingObserver = new SettingObserver(mHandler);
 
         final PackageManager pm = context.getPackageManager();
         mHasFeatureFingerprint = pm.hasSystemFeature(PackageManager.FEATURE_FINGERPRINT);
         mHasFeatureIris = pm.hasSystemFeature(PackageManager.FEATURE_IRIS);
         mHasFeatureFace = pm.hasSystemFeature(PackageManager.FEATURE_FACE);
+
+        try {
+            ActivityManager.getService().registerUserSwitchObserver(
+                    new UserSwitchObserver() {
+                        @Override
+                        public void onUserSwitchComplete(int newUserId) {
+                            mSettingObserver.updateContentObserver();
+                        }
+                    }, BiometricService.class.getName()
+            );
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Failed to register user switch observer", e);
+        }
     }
 
     @Override
@@ -309,15 +455,6 @@ public class BiometricService extends SystemService {
         }
 
         publishBinderService(Context.BIOMETRIC_SERVICE, new BiometricPromptServiceWrapper());
-    }
-
-    private boolean isFaceEnabledForApps() {
-        // TODO: maybe cache this and eliminate duplicated code with KeyguardUpdateMonitor
-        return Settings.Secure.getIntForUser(
-                getContext().getContentResolver(),
-                Settings.Secure.FACE_UNLOCK_APP_ENABLED,
-                1 /* default */,
-                UserHandle.USER_CURRENT) == 1;
     }
 
     /**
@@ -389,7 +526,7 @@ public class BiometricService extends SystemService {
             case BIOMETRIC_IRIS:
                 return true;
             case BIOMETRIC_FACE:
-                return isFaceEnabledForApps();
+                return mSettingObserver.getFaceEnabledForApps();
             default:
                 Slog.w(TAG, "Unsupported modality: " + modality);
                 return false;

@@ -17,6 +17,7 @@
 package android.hardware.biometrics;
 
 import static android.Manifest.permission.USE_BIOMETRIC;
+import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
 
 import android.annotation.RequiresPermission;
 import android.content.Context;
@@ -77,6 +78,24 @@ public class BiometricManager {
         } else {
             Slog.w(TAG, "hasEnrolledBiometrics(): Service not connected");
             return ERROR_UNAVAILABLE;
+        }
+    }
+
+    /**
+     * Listens for changes to biometric eligibility on keyguard from user settings.
+     * @param callback
+     * @hide
+     */
+    @RequiresPermission(USE_BIOMETRIC_INTERNAL)
+    public void registerEnabledOnKeyguardCallback(IBiometricEnabledOnKeyguardCallback callback) {
+        if (mService != null) {
+            try {
+                mService.registerEnabledOnKeyguardCallback(callback);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        } else {
+            Slog.w(TAG, "registerEnabledOnKeyguardCallback(): Service not connected");
         }
     }
 }

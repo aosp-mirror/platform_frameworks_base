@@ -13,12 +13,14 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
 package android.hardware.biometrics;
 
+import android.hardware.biometrics.BiometricSourceType;
+
 /**
- * Communication channel from the BiometricPrompt (SysUI) back to AuthenticationClient.
  * @hide
  */
-oneway interface IBiometricPromptReceiver {
-    void onDialogDismissed(int reason);
+oneway interface IBiometricEnabledOnKeyguardCallback {
+    void onChanged(in BiometricSourceType type, boolean enabled);
 }

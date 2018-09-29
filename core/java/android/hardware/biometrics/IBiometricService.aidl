@@ -17,6 +17,7 @@
 package android.hardware.biometrics;
 
 import android.os.Bundle;
+import android.hardware.biometrics.IBiometricEnabledOnKeyguardCallback;
 import android.hardware.biometrics.IBiometricPromptReceiver;
 import android.hardware.biometrics.IBiometricServiceReceiver;
 
@@ -39,4 +40,7 @@ interface IBiometricService {
 
     // Checks if biometrics can be used.
     int canAuthenticate(String opPackageName);
+
+    // Register callback for when keyguard biometric eligibility changes.
+    void registerEnabledOnKeyguardCallback(IBiometricEnabledOnKeyguardCallback callback);
 }
