@@ -271,6 +271,14 @@ public class CarrierConfigManager {
             KEY_HIDE_CARRIER_NETWORK_SETTINGS_BOOL = "hide_carrier_network_settings_bool";
 
     /**
+     * Do only allow auto selection in Advanced Network Settings when in home network.
+     * Manual selection is allowed when in roaming network.
+     * @hide
+     */
+    public static final String
+            KEY_ONLY_AUTO_SELECT_IN_HOME_NETWORK_BOOL = "only_auto_select_in_home_network";
+
+    /**
      * Control whether users receive a simplified network settings UI and improved network
      * selection.
      */
@@ -2181,6 +2189,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_ENABLE_DIALER_KEY_VIBRATION_BOOL, true);
         sDefaults.putBoolean(KEY_HAS_IN_CALL_NOISE_SUPPRESSION_BOOL, false);
         sDefaults.putBoolean(KEY_HIDE_CARRIER_NETWORK_SETTINGS_BOOL, false);
+        sDefaults.putBoolean(KEY_ONLY_AUTO_SELECT_IN_HOME_NETWORK_BOOL, false);
         sDefaults.putBoolean(KEY_SIMPLIFIED_NETWORK_SETTINGS_BOOL, false);
         sDefaults.putBoolean(KEY_HIDE_SIM_LOCK_SETTINGS_BOOL, false);
 
