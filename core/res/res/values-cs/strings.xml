@@ -69,8 +69,8 @@
     </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
-    <string name="ClipMmi" msgid="6952821216480289285">"Příchozí identifikace volajícího"</string>
-    <string name="ClirMmi" msgid="7784673673446833091">"Odchozí identifikace volajícího"</string>
+    <string name="ClipMmi" msgid="6952821216480289285">"Příchozí ID volajícího"</string>
+    <string name="ClirMmi" msgid="7784673673446833091">"Odchozí ID volajícího"</string>
     <string name="ColpMmi" msgid="3065121483740183974">"ID připojené linky"</string>
     <string name="ColrMmi" msgid="4996540314421889589">"Omezení ID připojené linky"</string>
     <string name="CfMmi" msgid="5123218989141573515">"Přesměrování hovorů"</string>
@@ -84,12 +84,12 @@
     <string name="RuacMmi" msgid="7827887459138308886">"Odmítnutí nevyžádaných obtěžujících hovorů"</string>
     <string name="CndMmi" msgid="3116446237081575808">"Doručení volaného čísla"</string>
     <string name="DndMmi" msgid="1265478932418334331">"Nerušit"</string>
-    <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"Ve výchozím nastavení je identifikace volajícího omezena. Příští hovor: Omezeno"</string>
-    <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"Ve výchozím nastavení je identifikace volajícího omezena. Příští hovor: Neomezeno"</string>
-    <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"Ve výchozím nastavení není identifikace volajícího omezena. Příští hovor: Omezeno"</string>
-    <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"Ve výchozím nastavení není identifikace volajícího omezena. Příští hovor: Neomezeno"</string>
+    <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"Ve výchozím nastavení je funkce ID volajícího omezena. Příští hovor: Omezeno"</string>
+    <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"Ve výchozím nastavení je funkce ID volajícího omezena. Příští hovor: Neomezeno"</string>
+    <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"Ve výchozím nastavení není funkce ID volajícího omezena. Příští hovor: Omezeno"</string>
+    <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"Ve výchozím nastavení není funkce ID volajícího omezena. Příští hovor: Neomezeno"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Služba není zřízena."</string>
-    <string name="CLIRPermanent" msgid="3377371145926835671">"Nastavení identifikace volajícího nesmíte měnit."</string>
+    <string name="CLIRPermanent" msgid="3377371145926835671">"Nastavení ID volajícího nesmíte měnit."</string>
     <string name="RestrictedOnData" msgid="8653794784690065540">"Datová služba je zablokována."</string>
     <string name="RestrictedOnEmergency" msgid="6581163779072833665">"Tísňová linka je zablokována."</string>
     <string name="RestrictedOnNormal" msgid="4953867011389750673">"Hlasová služba je zablokována."</string>
@@ -1681,7 +1681,7 @@
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g> / <xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Sbalit"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"Nerušit"</string>
-    <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"Období klidu"</string>
+    <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"Doba klidu"</string>
     <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"Večer v pracovním týdnu"</string>
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Víkend"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Událost"</string>

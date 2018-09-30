@@ -124,14 +124,14 @@
     <string name="roamingTextSearching" msgid="8360141885972279963">"Buscando servizo"</string>
     <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Chamadas por wifi"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="2254967670088539682">"Para facer chamadas e enviar mensaxes a través da wifi, primeiro pídelle ao teu operador que configure este servizo. A continuación, activa de novo as chamadas wifi en Configuración."</item>
+    <item msgid="2254967670088539682">"Para facer chamadas e enviar mensaxes a través da wifi, primeiro pídelle ao teu operador que configure este servizo. A continuación, activa de novo as chamadas por wifi en Configuración."</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="6177300162212449033">"Rexístrate co teu operador"</item>
   </string-array>
   <string-array name="wfcSpnFormats">
     <item msgid="6830082633573257149">"%s"</item>
-    <item msgid="4397097370387921767">"Chamadas wifi de %s"</item>
+    <item msgid="4397097370387921767">"Chamadas por wifi de %s"</item>
   </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Desactivado"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wifi preferida"</string>
@@ -260,7 +260,7 @@
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Teléfono"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"facer e xestionar chamadas telefónicas"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Sensores corporais"</string>
-    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"acceder aos datos do sensor sobre as túas constantes vitais"</string>
+    <string name="permgroupdesc_sensors" msgid="7147968539346634043">"acceder aos datos dos sensores sobre as túas constantes vitais"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Recuperar contido da ventá"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Inspecciona o contido dunha ventá coa que estás interactuando."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Activar a exploración táctil"</string>

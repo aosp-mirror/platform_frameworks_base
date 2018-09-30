@@ -34,7 +34,7 @@
     <string name="durationHourMinutes" msgid="9029176248692041549">"<xliff:g id="HOURS">%1$d</xliff:g> uur <xliff:g id="MINUTES">%2$d</xliff:g> min."</string>
     <string name="durationHourMinute" msgid="2741677355177402539">"<xliff:g id="HOURS">%1$d</xliff:g> uur <xliff:g id="MINUTES">%2$d</xliff:g> min."</string>
     <string name="durationMinutes" msgid="3134226679883579347">"<xliff:g id="MINUTES">%1$d</xliff:g> minuten"</string>
-    <string name="durationMinute" msgid="7155301744174623818">"<xliff:g id="MINUTES">%1$d</xliff:g> min."</string>
+    <string name="durationMinute" msgid="7155301744174623818">"<xliff:g id="MINUTES">%1$d</xliff:g> min"</string>
     <string name="durationMinuteSeconds" msgid="1424656185379003751">"<xliff:g id="MINUTES">%1$d</xliff:g> min <xliff:g id="SECONDS">%2$d</xliff:g> sec"</string>
     <string name="durationMinuteSecond" msgid="3989228718067466680">"<xliff:g id="MINUTES">%1$d</xliff:g> min <xliff:g id="SECONDS">%2$d</xliff:g> sec"</string>
     <string name="durationSeconds" msgid="8050088505238241405">"<xliff:g id="SECONDS">%1$d</xliff:g> seconden"</string>
@@ -1050,7 +1050,7 @@
     <string name="volume_music_hint_silent_ringtone_selected" msgid="8310739960973156272">"Stille beltoon ingesteld"</string>
     <string name="volume_call" msgid="3941680041282788711">"Volume inkomend gesprek"</string>
     <string name="volume_bluetooth_call" msgid="2002891926351151534">"Volume tijdens gesprek in Bluetooth-modus"</string>
-    <string name="volume_alarm" msgid="1985191616042689100">"Alarmvolume"</string>
+    <string name="volume_alarm" msgid="1985191616042689100">"Wekkervolume"</string>
     <string name="volume_notification" msgid="2422265656744276715">"Meldingsvolume"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"Volume"</string>
     <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"Bluetooth-volume"</string>

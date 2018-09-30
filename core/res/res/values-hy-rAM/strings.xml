@@ -986,7 +986,7 @@
     <string name="whichImageCaptureApplication" msgid="3680261417470652882">"Լուսանկարել այս հավելվածի օգնությամբ"</string>
     <string name="whichImageCaptureApplicationNamed" msgid="8619384150737825003">"Լուսանկարել %1$s հավելվածի օգնությամբ"</string>
     <string name="whichImageCaptureApplicationLabel" msgid="6390303445371527066">"Լուսանկարել"</string>
-    <string name="alwaysUse" msgid="4583018368000610438">"Օգտագործել լռելյայն այս գործողության համար:"</string>
+    <string name="alwaysUse" msgid="4583018368000610438">"Օգտագործել ըստ կանխադրման այս գործողության համար:"</string>
     <string name="use_a_different_app" msgid="8134926230585710243">"Օգտագործել այլ հավելված"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Մաքրել լռելյայնը Համակարգի կարգավորումներ &gt; Ծրագրեր &gt;Ներբեռնված էջից:"</string>
     <string name="chooseActivity" msgid="7486876147751803333">"Ընտրել գործողություն"</string>

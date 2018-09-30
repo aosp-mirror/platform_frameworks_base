@@ -42,7 +42,7 @@
     <string name="untitled" msgid="4638956954852782576">"&lt;ခေါင်းစဉ်မဲ့&gt;"</string>
     <string name="emptyPhoneNumber" msgid="7694063042079676517">"(ဖုန်းနံပါတ်မရှိပါ)"</string>
     <string name="unknownName" msgid="6867811765370350269">"မသိရ"</string>
-    <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"အသံစာပို့စနစ်"</string>
+    <string name="defaultVoiceMailAlphaTag" msgid="2660020990097733077">"အသံမေးလ်"</string>
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"ဆက်သွယ်မှုဆိုင်ရာပြသနာ သို့မဟုတ် မမှန်ကန်သောMMIကုတ်"</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"သတ်မှတ်ခေါ်ဆိုနိုင်သောနံပါတ်များထံသာ ကန့်သတ်ထားသည်"</string>

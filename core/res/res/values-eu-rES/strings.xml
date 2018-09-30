@@ -70,7 +70,7 @@
     <string name="ClipMmi" msgid="6952821216480289285">"Sarrerako deien identifikazio-zerbitzua"</string>
     <string name="ClirMmi" msgid="7784673673446833091">"Irteerako deien identifikazio-zerbitzua"</string>
     <string name="ColpMmi" msgid="3065121483740183974">"Konektatutako linearen IDa"</string>
-    <string name="ColrMmi" msgid="4996540314421889589">"Konektatutako linearen ID murrizketa"</string>
+    <string name="ColrMmi" msgid="4996540314421889589">"Konektatutako linearen ID murriztapena"</string>
     <string name="CfMmi" msgid="5123218989141573515">"Dei-desbideratzea"</string>
     <string name="CwMmi" msgid="9129678056795016867">"Deia zain"</string>
     <string name="BaMmi" msgid="455193067926770581">"Deien debekuak"</string>
@@ -311,7 +311,7 @@
     <string name="permdesc_enableCarMode" msgid="4853187425751419467">"Auto modua gaitzea baimentzen die aplikazioei."</string>
     <string name="permlab_killBackgroundProcesses" msgid="3914026687420177202">"itxi beste aplikazioak"</string>
     <string name="permdesc_killBackgroundProcesses" msgid="4593353235959733119">"Beste aplikazioen atzeko planoko prozesuak amaitzeko baimena ematen die aplikazioei. Horrela, agian aplikazio batzuk exekutatzeari utziko zaio."</string>
-    <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"beste aplikazioen gainean marraztea"</string>
+    <string name="permlab_systemAlertWindow" msgid="3543347980839518613">"erakutsi beste aplikazioen gainean"</string>
     <string name="permdesc_systemAlertWindow" msgid="8584678381972820118">"Beste aplikazioen edo erabiltzaile-interfazearen zatien gainean marrazteko baimena ematen die aplikazioei. Horrela, aplikazioen interfazearen erabilera oztopa dezake, edo beste aplikazioetan ikusten ari zarela usten duzuna alda dezakete."</string>
     <string name="permlab_persistentActivity" msgid="8841113627955563938">"izan aplikazioa beti abian"</string>
     <string name="permdesc_persistentActivity" product="tablet" msgid="8525189272329086137">"Beren zati batzuk memoria modu iraunkorrean ezartzeko baimena ematen die aplikazioei. Horrela, beste aplikazioek erabilgarri duten memoria murritz daiteke eta tableta motel daiteke."</string>
@@ -997,7 +997,7 @@
     <string name="aerr_application_repeated" msgid="3146328699537439573">"Behin eta berriz gelditzen ari da <xliff:g id="APPLICATION">%1$s</xliff:g>"</string>
     <string name="aerr_process_repeated" msgid="6235302956890402259">"Behin eta berriz gelditzen ari da <xliff:g id="PROCESS">%1$s</xliff:g>"</string>
     <string name="aerr_restart" msgid="7581308074153624475">"Ireki aplikazioa berriro"</string>
-    <string name="aerr_report" msgid="5371800241488400617">"Bidali iritzia"</string>
+    <string name="aerr_report" msgid="5371800241488400617">"Bidali oharrak"</string>
     <string name="aerr_close" msgid="2991640326563991340">"Itxi"</string>
     <string name="aerr_mute" msgid="1974781923723235953">"Ezkutatu gailua berrabiarazi arte"</string>
     <string name="aerr_wait" msgid="3199956902437040261">"Itxaron"</string>

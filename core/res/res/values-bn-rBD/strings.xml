@@ -999,7 +999,7 @@
     <string name="aerr_restart" msgid="7581308074153624475">"অ্যাপ্লিকেশানটিকে আবার খুলুন"</string>
     <string name="aerr_report" msgid="5371800241488400617">"মতামত জানান"</string>
     <string name="aerr_close" msgid="2991640326563991340">"বন্ধ করুন"</string>
-    <string name="aerr_mute" msgid="1974781923723235953">"ডিভাইসটি পুনরায় আরম্ভ না হওয়া পর্যন্ত নিঃশব্দ করুন"</string>
+    <string name="aerr_mute" msgid="1974781923723235953">"ডিভাইসটি পুনরায় আরম্ভ না হওয়া পর্যন্ত মিউট করুন"</string>
     <string name="aerr_wait" msgid="3199956902437040261">"অপেক্ষা করুন"</string>
     <string name="aerr_close_app" msgid="3269334853724920302">"অ্যাপ্লিকেশান বন্ধ করুন"</string>
     <string name="anr_title" msgid="4351948481459135709"></string>
@@ -1615,7 +1615,7 @@
     <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"সপ্তাহান্তের রাত্রি"</string>
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"সপ্তাহান্ত"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"ইভেন্ট"</string>
-    <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> দ্বারা নিঃশব্দ করা হয়েছে"</string>
+    <string name="muted_by" msgid="6147073845094180001">"<xliff:g id="THIRD_PARTY">%1$s</xliff:g> দ্বারা মিউট করা হয়েছে"</string>
     <string name="system_error_wipe_data" msgid="6608165524785354962">"আপনার ডিভাইসে একটি অভ্যন্তরীন সমস্যা হয়েছে, এবং আপনি যতক্ষণ না পর্যন্ত এটিকে ফ্যাক্টরি ডেটা রিসেট করছেন ততক্ষণ এটি ঠিকভাবে কাজ নাও করতে পারে৷"</string>
     <string name="system_error_manufacturer" msgid="8086872414744210668">"আপনার ডিভাইসে একটি অভ্যন্তরীন সমস্যা হয়েছে৷ বিস্তারিত জানার জন্য প্রস্তুতকারকের সাথে যোগাযোগ করুন৷"</string>
     <string name="stk_cc_ussd_to_dial" msgid="5202342984749947872">"USSD অনুরোধটিকে ডায়াল অনুরোধে রুপান্তরিত করা হয়েছে৷"</string>

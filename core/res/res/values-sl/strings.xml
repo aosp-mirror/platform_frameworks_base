@@ -136,7 +136,7 @@
     <item msgid="4397097370387921767">"Klicanje prek Wi-Fi-ja (%s)"</item>
   </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Izklopljeno"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Prednostno – Wi-Fi"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Prednostno Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Prednostno – mobilno omrežje"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Samo Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: ni posredovano"</string>
