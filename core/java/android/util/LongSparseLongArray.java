@@ -46,11 +46,11 @@ import libcore.util.EmptyArray;
  * @hide
  */
 public class LongSparseLongArray implements Cloneable {
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 28) // The type isn't even public.
     private long[] mKeys;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 28) // The type isn't even public.
     private long[] mValues;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 28) // The type isn't even public.
     private int mSize;
 
     /**
