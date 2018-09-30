@@ -102,7 +102,7 @@
     <string name="bluetooth_pairing_accept" msgid="6163520056536604875">"Koppelen"</string>
     <string name="bluetooth_pairing_accept_all_caps" msgid="6061699265220789149">"KOPPELEN"</string>
     <string name="bluetooth_pairing_decline" msgid="4185420413578948140">"Annuleren"</string>
-    <string name="bluetooth_pairing_will_share_phonebook" msgid="4982239145676394429">"Koppelen verleent toegang tot je contacten en oproepgeschiedenis wanneer de apparaten zijn verbonden."</string>
+    <string name="bluetooth_pairing_will_share_phonebook" msgid="4982239145676394429">"Koppelen verleent toegang tot je contacten en gespreksgeschiedenis wanneer de apparaten zijn verbonden."</string>
     <string name="bluetooth_pairing_error_message" msgid="3748157733635947087">"Kan niet koppelen aan <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
     <string name="bluetooth_pairing_pin_error_message" msgid="8337234855188925274">"Kan niet koppelen aan <xliff:g id="DEVICE_NAME">%1$s</xliff:g> vanwege een onjuiste pincode of toegangscode."</string>
     <string name="bluetooth_pairing_device_down_error_message" msgid="7870998403045801381">"Kan niet communiceren met <xliff:g id="DEVICE_NAME">%1$s</xliff:g>."</string>
@@ -373,10 +373,10 @@
     <string name="power_remaining_duration_only_enhanced" msgid="4189311599812296592">"Ongeveer <xliff:g id="TIME_REMAINING">%1$s</xliff:g> resterend op basis van je gebruik"</string>
     <string name="power_discharging_duration_enhanced" msgid="1992003260664804080">"Ongeveer <xliff:g id="TIME_REMAINING">%1$s</xliff:g> resterend op basis van je gebruik (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_duration_only_short" msgid="3463575350656389957">"<xliff:g id="TIME_REMAINING">%1$s</xliff:g> resterend"</string>
-    <string name="power_discharge_by_enhanced" msgid="2095821536747992464">"Is nog genoeg voor ongeveer <xliff:g id="TIME">%1$s</xliff:g> op basis van je gebruik (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"Is nog genoeg voor ongeveer <xliff:g id="TIME">%1$s</xliff:g> op basis van je gebruik"</string>
-    <string name="power_discharge_by" msgid="6453537733650125582">"Is nog genoeg voor ongeveer <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
-    <string name="power_discharge_by_only" msgid="107616694963545745">"Is nog genoeg voor ongeveer <xliff:g id="TIME">%1$s</xliff:g>"</string>
+    <string name="power_discharge_by_enhanced" msgid="2095821536747992464">"Is nog genoeg tot ongeveer <xliff:g id="TIME">%1$s</xliff:g> op basis van je gebruik (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_discharge_by_only_enhanced" msgid="2175151772952365149">"Is nog genoeg tot ongeveer <xliff:g id="TIME">%1$s</xliff:g> op basis van je gebruik"</string>
+    <string name="power_discharge_by" msgid="6453537733650125582">"Is nog genoeg tot ongeveer <xliff:g id="TIME">%1$s</xliff:g> (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
+    <string name="power_discharge_by_only" msgid="107616694963545745">"Is nog genoeg tot ongeveer <xliff:g id="TIME">%1$s</xliff:g>"</string>
     <string name="power_remaining_less_than_duration_only" msgid="5996752448813295329">"Minder dan <xliff:g id="THRESHOLD">%1$s</xliff:g> resterend"</string>
     <string name="power_remaining_less_than_duration" msgid="5751885147712659423">"Minder dan <xliff:g id="THRESHOLD">%1$s</xliff:g> resterend (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
     <string name="power_remaining_more_than_subtext" msgid="3176771815132876675">"Meer dan <xliff:g id="TIME_REMAINING">%1$s</xliff:g> resterend (<xliff:g id="LEVEL">%2$s</xliff:g>)"</string>
@@ -417,7 +417,7 @@
     <string name="screen_zoom_summary_very_large" msgid="7108563375663670067">"Groter"</string>
     <string name="screen_zoom_summary_extremely_large" msgid="7427320168263276227">"Grootst"</string>
     <string name="screen_zoom_summary_custom" msgid="5611979864124160447">"Aangepast (<xliff:g id="DENSITYDPI">%d</xliff:g>)"</string>
-    <string name="help_feedback_label" msgid="6815040660801785649">"Help en feedback"</string>
+    <string name="help_feedback_label" msgid="6815040660801785649">"Hulp en feedback"</string>
     <string name="content_description_menu_button" msgid="8182594799812351266">"Menu"</string>
     <string name="retail_demo_reset_message" msgid="118771671364131297">"Geef wachtwoord op om terug te zetten op fabrieksinstellingen in demomodus"</string>
     <string name="retail_demo_reset_next" msgid="8356731459226304963">"Volgende"</string>
