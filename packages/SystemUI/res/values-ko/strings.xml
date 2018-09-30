@@ -374,13 +374,13 @@
     <string name="accessibility_multi_user_switch_quick_contact" msgid="3020367729287990475">"프로필 표시"</string>
     <string name="user_add_user" msgid="5110251524486079492">"사용자 추가"</string>
     <string name="user_new_user_name" msgid="426540612051178753">"새 사용자"</string>
-    <string name="guest_nickname" msgid="8059989128963789678">"손님"</string>
+    <string name="guest_nickname" msgid="8059989128963789678">"게스트"</string>
     <string name="guest_new_guest" msgid="600537543078847803">"게스트 추가"</string>
-    <string name="guest_exit_guest" msgid="7187359342030096885">"손님 삭제"</string>
-    <string name="guest_exit_guest_dialog_title" msgid="8480693520521766688">"손님을 삭제하시겠습니까?"</string>
+    <string name="guest_exit_guest" msgid="7187359342030096885">"게스트 삭제"</string>
+    <string name="guest_exit_guest_dialog_title" msgid="8480693520521766688">"게스트를 삭제하시겠습니까?"</string>
     <string name="guest_exit_guest_dialog_message" msgid="4155503224769676625">"이 세션에 있는 모든 앱과 데이터가 삭제됩니다."</string>
     <string name="guest_exit_guest_dialog_remove" msgid="7402231963862520531">"삭제"</string>
-    <string name="guest_wipe_session_title" msgid="6419439912885956132">"손님 세션 다시 시작"</string>
+    <string name="guest_wipe_session_title" msgid="6419439912885956132">"게스트 세션 다시 시작"</string>
     <string name="guest_wipe_session_message" msgid="8476238178270112811">"세션을 계속 진행하시겠습니까?"</string>
     <string name="guest_wipe_session_wipe" msgid="5065558566939858884">"다시 시작"</string>
     <string name="guest_wipe_session_dontwipe" msgid="1401113462524894716">"예, 계속합니다."</string>

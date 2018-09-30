@@ -31,7 +31,7 @@
     </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"কোনো বিজ্ঞপ্তি নেই"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"চলতে-থাকা"</string>
-    <string name="status_bar_latest_events_title" msgid="6594767438577593172">"বিজ্ঞপ্তিগুলি"</string>
+    <string name="status_bar_latest_events_title" msgid="6594767438577593172">"বিজ্ঞপ্তি"</string>
     <string name="battery_low_title" msgid="6456385927409742437">"ব্যাটারি কম"</string>
     <string name="battery_low_percent_format" msgid="2900940511201380775">"<xliff:g id="PERCENTAGE">%s</xliff:g> অবশিষ্ট আছে"</string>
     <string name="battery_low_percent_format_saver_started" msgid="6859235584035338833">"<xliff:g id="PERCENTAGE">%s</xliff:g> অবশিষ্ট আছে৷ ব্যাটারি সাশ্রয়কারী চালু আছে৷"</string>
@@ -45,9 +45,9 @@
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"সেটিংস"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"ওয়াই-ফাই"</string>
     <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"অটো-রোটেট স্ক্রিন"</string>
-    <string name="status_bar_settings_mute_label" msgid="554682549917429396">"নিঃশব্দ করুন"</string>
+    <string name="status_bar_settings_mute_label" msgid="554682549917429396">"মিউট করুন"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"স্বতঃ"</string>
-    <string name="status_bar_settings_notifications" msgid="397146176280905137">"বিজ্ঞপ্তিগুলি"</string>
+    <string name="status_bar_settings_notifications" msgid="397146176280905137">"বিজ্ঞপ্তি"</string>
     <string name="bluetooth_tethered" msgid="7094101612161133267">"ব্লুটুথ টিথার করা হয়েছে"</string>
     <string name="status_bar_input_method_settings_configure_input_methods" msgid="3504292471512317827">"ইনপুট পদ্ধতিগুলি সেট আপ করুন"</string>
     <string name="status_bar_use_physical_keyboard" msgid="7551903084416057810">"ফিজিক্যাল কীবোর্ড"</string>
@@ -162,7 +162,7 @@
     <string name="accessibility_battery_level" msgid="7451474187113371965">"<xliff:g id="NUMBER">%d</xliff:g> শতাংশ ব্যাটারি রয়েছে৷"</string>
     <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"ব্যাটারি চার্জ হচ্ছে, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> শতাংশ৷"</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"সিস্টেম সেটিংস৷"</string>
-    <string name="accessibility_notifications_button" msgid="4498000369779421892">"বিজ্ঞপ্তিগুলি৷"</string>
+    <string name="accessibility_notifications_button" msgid="4498000369779421892">"বিজ্ঞপ্তি৷"</string>
     <string name="accessibility_remove_notification" msgid="3603099514902182350">"বিজ্ঞপ্তি সাফ করুন৷"</string>
     <string name="accessibility_gps_enabled" msgid="3511469499240123019">"GPS সক্ষম করা হয়েছে৷"</string>
     <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"GPS অর্জন করা হচ্ছে৷"</string>
@@ -309,7 +309,7 @@
     <string name="quick_settings_connecting" msgid="47623027419264404">"সংযুক্ত হচ্ছে..."</string>
     <string name="quick_settings_tethering_label" msgid="7153452060448575549">"টিথারিং"</string>
     <string name="quick_settings_hotspot_label" msgid="6046917934974004879">"হটস্পট"</string>
-    <string name="quick_settings_notifications_label" msgid="4818156442169154523">"বিজ্ঞপ্তিগুলি"</string>
+    <string name="quick_settings_notifications_label" msgid="4818156442169154523">"বিজ্ঞপ্তি"</string>
     <string name="quick_settings_flashlight_label" msgid="2133093497691661546">"ফ্ল্যাশলাইট"</string>
     <string name="quick_settings_cellular_detail_title" msgid="8575062783675171695">"সেলুলার ডেটা"</string>
     <string name="quick_settings_cellular_detail_data_usage" msgid="1964260360259312002">"ডেটার ব্যবহার"</string>
@@ -456,8 +456,8 @@
     <item msgid="6761963760295549099"></item>
   </string-array>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"%1$s। সশব্দ করতে আলতো চাপুন।"</string>
-    <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s। কম্পন এ সেট করতে আলতো চাপুন। অ্যাক্সেসযোগ্যতার পরিষেবাগুলিকে নিঃশব্দ করা হতে পারে।"</string>
-    <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s। নিঃশব্দ করতে আলতো চাপুন। অ্যাক্সেসযোগ্যতার পরিষেবাগুলিকে নিঃশব্দ করা হতে পারে।"</string>
+    <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"%1$s। কম্পন এ সেট করতে আলতো চাপুন। অ্যাক্সেসযোগ্যতার পরিষেবাগুলিকে মিউট করা হতে পারে।"</string>
+    <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s। মিউট করতে আলতো চাপুন। অ্যাক্সেসযোগ্যতার পরিষেবাগুলিকে মিউট করা হতে পারে।"</string>
     <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"%s ভলিউম নিয়ন্ত্রণগুলি দেখানো হয়েছে৷ খারিজ করতে উপরের দিকে সোয়াইপ করুন৷"</string>
     <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"ভলিউম নিয়ন্ত্রণগুলি লুকানো রয়েছে"</string>
     <string name="system_ui_tuner" msgid="708224127392452018">"সিস্টেম UI টিউনার"</string>
@@ -477,7 +477,7 @@
     <string name="broadcast_tile" msgid="3894036511763289383">"সম্প্রচার টাইল"</string>
     <string name="zen_alarm_warning_indef" msgid="3482966345578319605">"তার আগে আপনি এটিকে বন্ধ না করা পর্যন্ত আপনি পরবর্তী <xliff:g id="WHEN">%1$s</xliff:g> অ্যালার্ম শুনতে পাবেন না"</string>
     <string name="zen_alarm_warning" msgid="444533119582244293">"আপনি আপনার পরবর্তী <xliff:g id="WHEN">%1$s</xliff:g> অ্যালার্ম শুনতে পাবেন না"</string>
-    <string name="alarm_template" msgid="3980063409350522735">"<xliff:g id="WHEN">%1$s</xliff:g> -টায়"</string>
+    <string name="alarm_template" msgid="3980063409350522735">"<xliff:g id="WHEN">%1$s</xliff:g>"</string>
     <string name="alarm_template_far" msgid="4242179982586714810">"<xliff:g id="WHEN">%1$s</xliff:g> -তে"</string>
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"দ্রুত সেটিংস, <xliff:g id="TITLE">%s</xliff:g>৷"</string>
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"হটস্পট"</string>
@@ -557,7 +557,7 @@
     <string name="keyboard_shortcut_group_system_home" msgid="3054369431319891965">"হোম"</string>
     <string name="keyboard_shortcut_group_system_recents" msgid="3154851905021926744">"সাম্প্রতিকগুলি"</string>
     <string name="keyboard_shortcut_group_system_back" msgid="2207004531216446378">"পিছনে"</string>
-    <string name="keyboard_shortcut_group_system_notifications" msgid="8366964080041773224">"বিজ্ঞপ্তিগুলি"</string>
+    <string name="keyboard_shortcut_group_system_notifications" msgid="8366964080041773224">"বিজ্ঞপ্তি"</string>
     <string name="keyboard_shortcut_group_system_shortcuts_helper" msgid="4892255911160332762">"কীবোর্ড শর্টকাট"</string>
     <string name="keyboard_shortcut_group_system_switch_input" msgid="2334164096341310324">"ইনপুট পদ্ধতি পাল্টান"</string>
     <string name="keyboard_shortcut_group_applications" msgid="9129465955073449206">"অ্যাপ্লিকেশানগুলি"</string>

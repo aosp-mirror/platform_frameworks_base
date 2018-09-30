@@ -319,7 +319,7 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"<xliff:g id="DATA_LIMIT">%s</xliff:g> ਸੀਮਾ"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"<xliff:g id="DATA_LIMIT">%s</xliff:g> ਚਿਤਾਵਨੀ"</string>
     <string name="quick_settings_work_mode_label" msgid="6244915274350490429">"ਕੰਮ ਮੋਡ"</string>
-    <string name="quick_settings_night_display_label" msgid="3577098011487644395">"ਰਾਤਰੀ ਲਾਈਟ"</string>
+    <string name="quick_settings_night_display_label" msgid="3577098011487644395">"ਰਾਤ ਦੀ ਰੋਸ਼ਨੀ"</string>
     <string name="quick_settings_night_display_summary_on" msgid="1814901757887526769">"ਰਾਤਰੀ ਲਾਈਟ ਚਾਲੂ ਹੈ, ਬੰਦ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ"</string>
     <string name="quick_settings_night_display_summary_off" msgid="7892102914128777905">"ਰਾਤਰੀ ਲਾਈਟ ਬੰਦ ਹੈ, ਚਾਲੂ ਕਰਨ ਲਈ ਟੈਪ ਕਰੋ"</string>
     <string name="recents_empty_message" msgid="808480104164008572">"ਕੋਈ ਹਾਲੀਆ ਆਈਟਮਾਂ ਨਹੀਂ"</string>
