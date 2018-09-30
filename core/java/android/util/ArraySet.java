@@ -71,15 +71,15 @@ public final class ArraySet<E> implements Collection<E>, Set<E> {
     static int sTwiceBaseCacheSize;
 
     final boolean mIdentityHashCode;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 28) // Hashes are an implementation detail. Use public API.
     int[] mHashes;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 28) // Storage is an implementation detail. Use public API.
     Object[] mArray;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 28) // Use size()
     int mSize;
     MapCollections<E, E> mCollections;
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 28) // Hashes are an implementation detail. Use indexOfKey(Object).
     private int indexOf(Object key, int hash) {
         final int N = mSize;
 
@@ -118,7 +118,7 @@ public final class ArraySet<E> implements Collection<E>, Set<E> {
         return ~end;
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 28) // Use indexOf(null)
     private int indexOfNull() {
         final int N = mSize;
 
@@ -157,7 +157,7 @@ public final class ArraySet<E> implements Collection<E>, Set<E> {
         return ~end;
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 28) // Allocations are an implementation detail.
     private void allocArrays(final int size) {
         if (size == (BASE_SIZE * 2)) {
             synchronized (ArraySet.class) {
@@ -215,7 +215,7 @@ public final class ArraySet<E> implements Collection<E>, Set<E> {
         mArray = new Object[size];
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 28) // Allocations are an implementation detail.
     private static void freeArrays(final int[] hashes, final Object[] array, final int size) {
         if (hashes.length == (BASE_SIZE * 2)) {
             synchronized (ArraySet.class) {
@@ -289,9 +289,10 @@ public final class ArraySet<E> implements Collection<E>, Set<E> {
         }
     }
 
-    /** {@hide} */
-    @UnsupportedAppUsage
-    public ArraySet(Collection<E> set) {
+    /**
+     * Create a new ArraySet with items from the given collection.
+     */
+    public ArraySet(Collection<? extends E> set) {
         this();
         if (set != null) {
             addAll(set);

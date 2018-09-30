@@ -32,6 +32,7 @@ import android.os.Handler;
 import android.os.IPowerManager;
 import android.os.Looper;
 import android.os.PowerManager;
+import android.service.dreams.IDreamManager;
 import android.support.test.annotation.UiThreadTest;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
@@ -39,7 +40,6 @@ import android.support.test.runner.AndroidJUnit4;
 import com.android.systemui.ExpandHelper;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.recents.misc.SystemServicesProxy;
 import com.android.systemui.statusbar.EmptyShadeView;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.NotificationPresenter;
@@ -91,7 +91,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
     @Mock private NotificationData mNotificationData;
     @Mock private NotificationRemoteInputManager mRemoteInputManager;
     @Mock private RemoteInputController mRemoteInputController;
-    @Mock private SystemServicesProxy mSystemServicesProxy;
+    @Mock private IDreamManager mDreamManager;
     private PowerManager mPowerManager;
     private TestableNotificationEntryManager mEntryManager;
 
@@ -111,7 +111,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         mPowerManager = new PowerManager(mContext, powerManagerService,
                 Handler.createAsync(Looper.myLooper()));
 
-        mEntryManager = new TestableNotificationEntryManager(mSystemServicesProxy, mPowerManager,
+        mEntryManager = new TestableNotificationEntryManager(mDreamManager, mPowerManager,
                 mContext);
         mEntryManager.setUpForTest(mock(NotificationPresenter.class), null, null, mHeadsUpManager,
                 mNotificationData);

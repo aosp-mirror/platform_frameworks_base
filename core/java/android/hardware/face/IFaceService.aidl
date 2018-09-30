@@ -66,10 +66,10 @@ interface IFaceService {
     boolean isHardwareDetected(long deviceId, String opPackageName);
 
     // Get a pre-enrollment authentication token
-    long preEnroll(IBinder token);
+    long generateChallenge(IBinder token);
 
     // Finish an enrollment sequence and invalidate the authentication token
-    int postEnroll(IBinder token);
+    int revokeChallenge(IBinder token);
 
     // Determine if a user has at least one enrolled face
     boolean hasEnrolledFaces(int userId, String opPackageName);
@@ -94,4 +94,8 @@ interface IFaceService {
 
     // Enumerate all faces
     void enumerate(IBinder token, int userId, IFaceServiceReceiver receiver);
+
+    int setRequireAttention(boolean requireAttention, in byte [] token);
+
+    boolean getRequireAttention(in byte [] token);
 }

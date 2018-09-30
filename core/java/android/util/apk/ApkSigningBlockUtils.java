@@ -332,7 +332,7 @@ final class ApkSigningBlockUtils {
         try {
             byte[] expectedRootHash = parseVerityDigestAndVerifySourceLength(expectedDigest,
                     apk.length(), signatureInfo);
-            ApkVerityBuilder.ApkVerityResult verity = ApkVerityBuilder.generateApkVerityTree(apk,
+            VerityBuilder.VerityResult verity = VerityBuilder.generateApkVerityTree(apk,
                     signatureInfo, new ByteBufferFactory() {
                         @Override
                         public ByteBuffer create(int capacity) {

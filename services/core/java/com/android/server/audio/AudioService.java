@@ -4685,7 +4685,9 @@ public class AudioService extends IAudioService.Stub
     @Override
     public void setHearingAidDeviceConnectionState(BluetoothDevice device, int state)
     {
-        Log.i(TAG, "setBluetoothHearingAidDeviceConnectionState");
+        mDeviceLogger.log((new AudioEventLogger.StringEvent(
+                "setHearingAidDeviceConnectionState state=" + state
+                        + " addr=" + device.getAddress())).printLog(TAG));
 
         setBluetoothHearingAidDeviceConnectionState(
                 device, state,  false /* suppressNoisyIntent */, AudioSystem.DEVICE_NONE);
@@ -4723,12 +4725,12 @@ public class AudioService extends IAudioService.Stub
     public int setBluetoothA2dpDeviceConnectionStateSuppressNoisyIntent(BluetoothDevice device,
                 int state, int profile, boolean suppressNoisyIntent, int a2dpVolume)
     {
-        mDeviceLogger.log(new AudioEventLogger.StringEvent(
+        mDeviceLogger.log((new AudioEventLogger.StringEvent(
                 "setBluetoothA2dpDeviceConnectionStateSuppressNoisyIntent state=" + state
                 // only querying address as this is the only readily available field on the device
                 + " addr=" + device.getAddress()
                 + " prof=" + profile + " supprNoisy=" + suppressNoisyIntent
-                + " vol=" + a2dpVolume));
+                + " vol=" + a2dpVolume)).printLog(TAG));
         if (mAudioHandler.hasMessages(MSG_SET_A2DP_SINK_CONNECTION_STATE, device)) {
             mDeviceLogger.log(new AudioEventLogger.StringEvent("A2DP connection state ignored"));
             return 0;
@@ -5888,6 +5890,8 @@ public class AudioService extends IAudioService.Stub
     }
 
     private void onSendBecomingNoisyIntent() {
+        mDeviceLogger.log((new AudioEventLogger.StringEvent(
+                "broadcast ACTION_AUDIO_BECOMING_NOISY")).printLog(TAG));
         sendBroadcastToAll(new Intent(AudioManager.ACTION_AUDIO_BECOMING_NOISY));
     }
 
@@ -7253,7 +7257,7 @@ public class AudioService extends IAudioService.Stub
     // - wired: logged before onSetWiredDeviceConnectionState() is executed
     // - A2DP: logged at reception of method call
     final private AudioEventLogger mDeviceLogger = new AudioEventLogger(
-            LOG_NB_EVENTS_DEVICE_CONNECTION, "wired/A2DP device connection");
+            LOG_NB_EVENTS_DEVICE_CONNECTION, "wired/A2DP/hearing aid device connection");
 
     final private AudioEventLogger mForceUseLogger = new AudioEventLogger(
             LOG_NB_EVENTS_FORCE_USE,

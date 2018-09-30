@@ -73,7 +73,7 @@ public class SettingsValidatorsTest {
     @Test
     public void testComponentNameValidator() {
         assertTrue(SettingsValidators.COMPONENT_NAME_VALIDATOR.validate(
-                "android/com.android.internal.backup.LocalTransport"));
+                "com.android.localtransport/.LocalTransport"));
         assertFalse(SettingsValidators.COMPONENT_NAME_VALIDATOR.validate("rectangle"));
     }
 
@@ -90,7 +90,7 @@ public class SettingsValidatorsTest {
     @Test
     public void testNullableComponentNameValidator_onValidComponentName_returnsTrue() {
         assertTrue(SettingsValidators.NULLABLE_COMPONENT_NAME_VALIDATOR.validate(
-                "android/com.android.internal.backup.LocalTransport"));
+                "com.android.localtransport/.LocalTransport"));
     }
 
     @Test
@@ -185,7 +185,7 @@ public class SettingsValidatorsTest {
     @Test
     public void testComponentNameListValidator() {
         Validator v = new SettingsValidators.ComponentNameListValidator(",");
-        assertTrue(v.validate("android/com.android.internal.backup.LocalTransport,"
+        assertTrue(v.validate("com.android.localtransport/.LocalTransport,"
                 + "com.google.android.gms/.backup.migrate.service.D2dTransport"));
         assertFalse(v.validate("com.google.5android,android"));
     }
@@ -200,7 +200,7 @@ public class SettingsValidatorsTest {
     @Test
     public void testPackageNameListValidator() {
         Validator v = new SettingsValidators.PackageNameListValidator(",");
-        assertTrue(v.validate("com.android.internal.backup.LocalTransport,com.google.android.gms"));
+        assertTrue(v.validate("com.android.localtransport.LocalTransport,com.google.android.gms"));
         assertFalse(v.validate("5com.android.internal.backup.LocalTransport,android"));
     }
 

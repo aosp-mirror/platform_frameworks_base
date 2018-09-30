@@ -32,7 +32,11 @@ import android.os.Parcelable;
 /**
  * Represents the neighboring cell information, including
  * Received Signal Strength and Cell ID location.
+ *
+ * @deprecated This class should not be used by anyone targeting SDK level 29 (Q) or higher.
+ *      Instead callers should use {@Link android.telephony.CellInfo}.
  */
+@Deprecated
 public class NeighboringCellInfo implements Parcelable
 {
     /**

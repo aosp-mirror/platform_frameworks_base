@@ -48,9 +48,9 @@ public class TransportData {
 
     public static TransportData localTransport() {
         return new TransportData(
-                "android/com.android.internal.backup.LocalTransport",
-                "android/com.android.internal.backup.LocalTransportService",
-                "com.android.internal.backup.LocalTransport",
+                "com.android.localtransport/.LocalTransport",
+                "com.android.localtransport/.LocalTransportService",
+                "com.android.localtransport.LocalTransport",
                 null,
                 "Backing up to debug-only private cache",
                 null,

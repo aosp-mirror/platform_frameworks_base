@@ -47,6 +47,7 @@ import android.os.IStatsManager;
 import android.os.IStoraged;
 import android.os.IThermalEventListener;
 import android.os.IThermalService;
+import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
 import android.os.Process;
 import android.os.RemoteException;
@@ -63,10 +64,13 @@ import android.os.storage.StorageManager;
 import android.telephony.ModemActivityInfo;
 import android.telephony.TelephonyManager;
 import android.util.ArrayMap;
+import android.util.Log;
 import android.util.Slog;
 import android.util.StatsLog;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.app.procstats.IProcessStats;
+import com.android.internal.app.procstats.ProcessStats;
 import com.android.internal.net.NetworkStatsFactory;
 import com.android.internal.os.BinderCallsStats.ExportedCallStat;
 import com.android.internal.os.KernelCpuSpeedReader;
@@ -82,6 +86,7 @@ import com.android.internal.util.DumpUtils;
 import com.android.server.BinderCallsStatsService;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
+import com.android.server.SystemServiceManager;
 import com.android.server.storage.DiskStatsFileLogger;
 import com.android.server.storage.DiskStatsLoggingService;
 
@@ -95,6 +100,7 @@ import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -123,7 +129,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     public static final String CONFIG_DIR = "/data/misc/stats-service";
 
     static final String TAG = "StatsCompanionService";
-    static final boolean DEBUG = true;
+    static final boolean DEBUG = false;
 
     public static final int CODE_DATA_BROADCAST = 1;
     public static final int CODE_SUBSCRIBER_BROADCAST = 1;
@@ -174,12 +180,14 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             new KernelUidCpuClusterTimeReader();
 
     private static IThermalService sThermalService;
+    private File mBaseDir =
+            new File(SystemServiceManager.ensureSystemDir(), "stats_companion");
 
     public StatsCompanionService(Context context) {
         super();
         mContext = context;
         mAlarmManager = (AlarmManager) mContext.getSystemService(Context.ALARM_SERVICE);
-
+        mBaseDir.mkdirs();
         mAppUpdateReceiver = new AppUpdateReceiver();
         mUserUpdateReceiver = new BroadcastReceiver() {
             @Override
@@ -1245,6 +1253,86 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         Binder.restoreCallingIdentity(token);
     }
 
+    long mLastProcStatsHighWaterMark = readProcStatsHighWaterMark();
+
+    private long readProcStatsHighWaterMark() {
+        try {
+            File[] files = mBaseDir.listFiles();
+            if (files == null || files.length == 0) {
+                return 0;
+            }
+            if (files.length > 1) {
+                Log.e(TAG, "Only 1 file expected for high water mark. Found " + files.length);
+            }
+            return Long.valueOf(files[0].getName());
+        } catch (SecurityException e) {
+            Log.e(TAG, "Failed to get procstats high watermark file.", e);
+        } catch (NumberFormatException e) {
+            Log.e(TAG, "Failed to parse file name.", e);
+        }
+        return 0;
+    }
+
+    private IProcessStats mProcessStats =
+            IProcessStats.Stub.asInterface(ServiceManager.getService(ProcessStats.SERVICE_NAME));
+
+    private void pullProcessStats(
+            int tagId, long elapsedNanos, long wallClockNanos,
+            List<StatsLogEventWrapper> pulledData) {
+        try {
+            List<ParcelFileDescriptor> statsFiles = new ArrayList<>();
+            long highWaterMark = mProcessStats.getCommittedStats(
+                    mLastProcStatsHighWaterMark, ProcessStats.REPORT_ALL, true, statsFiles);
+            if (statsFiles.size() != 1) {
+                return;
+            }
+            InputStream stream = new ParcelFileDescriptor.AutoCloseInputStream(statsFiles.get(0));
+            int[] len = new int[1];
+            byte[] stats = readFully(stream, len);
+            StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
+            e.writeStorage(Arrays.copyOf(stats, len[0]));
+            pulledData.add(e);
+            new File(mBaseDir.getAbsolutePath() + "/" + mLastProcStatsHighWaterMark).delete();
+            mLastProcStatsHighWaterMark = highWaterMark;
+            new File(
+                    mBaseDir.getAbsolutePath() + "/" + mLastProcStatsHighWaterMark).createNewFile();
+        } catch (IOException e) {
+            Log.e(TAG, "Getting procstats failed: ", e);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Getting procstats failed: ", e);
+        } catch (SecurityException e) {
+            Log.e(TAG, "Getting procstats failed: ", e);
+        }
+    }
+
+    static byte[] readFully(InputStream stream, int[] outLen) throws IOException {
+        int pos = 0;
+        final int initialAvail = stream.available();
+        byte[] data = new byte[initialAvail > 0 ? (initialAvail + 1) : 16384];
+        while (true) {
+            int amt = stream.read(data, pos, data.length - pos);
+            if (DEBUG) {
+                Slog.i(TAG, "Read " + amt + " bytes at " + pos + " of avail " + data.length);
+            }
+            if (amt < 0) {
+                if (DEBUG) {
+                    Slog.i(TAG, "**** FINISHED READING: pos=" + pos + " len=" + data.length);
+                }
+                outLen[0] = pos;
+                return data;
+            }
+            pos += amt;
+            if (pos >= data.length) {
+                byte[] newData = new byte[pos + 16384];
+                if (DEBUG) {
+                    Slog.i(TAG, "Copying " + pos + " bytes to new array len " + newData.length);
+                }
+                System.arraycopy(data, 0, newData, 0, pos);
+                data = newData;
+            }
+        }
+    }
+
     /**
      * Pulls various data.
      */
@@ -1358,6 +1446,10 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                 pullNumFingerprints(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
+            case StatsLog.PROC_STATS: {
+                pullProcessStats(tagId, elapsedNanos, wallClockNanos, ret);
+                break;
+            }
             default:
                 Slog.w(TAG, "No such tagId data as " + tagId);
                 return null;
@@ -1368,13 +1460,13 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     @Override // Binder call
     public void statsdReady() {
         enforceCallingPermission();
-        if (DEBUG) Slog.d(TAG, "learned that statsdReady");
+        if (DEBUG) {
+            Slog.d(TAG, "learned that statsdReady");
+        }
         sayHiToStatsd(); // tell statsd that we're ready too and link to it
-        mContext.sendBroadcastAsUser(
-                new Intent(StatsManager.ACTION_STATSD_STARTED)
+        mContext.sendBroadcastAsUser(new Intent(StatsManager.ACTION_STATSD_STARTED)
                         .addFlags(Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND),
-                UserHandle.SYSTEM,
-                android.Manifest.permission.DUMP);
+                UserHandle.SYSTEM, android.Manifest.permission.DUMP);
     }
 
     @Override

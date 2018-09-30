@@ -26,13 +26,13 @@ import android.util.SparseArray;
 
 import com.android.systemui.EventLogConstants;
 import com.android.systemui.EventLogTags;
+import com.android.systemui.pip.phone.ForegroundThread;
 import com.android.systemui.recents.events.EventBus;
 import com.android.systemui.recents.events.activity.DockedFirstAnimationFrameEvent;
 import com.android.systemui.recents.events.activity.DockedTopTaskEvent;
 import com.android.systemui.recents.events.activity.RecentsActivityStartingEvent;
 import com.android.systemui.recents.events.component.SetWaitingForTransitionStartEvent;
 import com.android.systemui.recents.events.ui.RecentsDrawnEvent;
-import com.android.systemui.recents.misc.ForegroundThread;
 
 /**
  * An implementation of the system user's Recents interface to be called remotely by secondary
@@ -99,8 +99,8 @@ public class RecentsSystemUser extends IRecentsSystemUserCallbacks.Stub {
     }
 
     @Override
-    public void sendDockingTopTaskEvent(int dragMode, Rect initialRect) throws RemoteException {
-        EventBus.getDefault().post(new DockedTopTaskEvent(dragMode, initialRect));
+    public void sendDockingTopTaskEvent(Rect initialRect) throws RemoteException {
+        EventBus.getDefault().post(new DockedTopTaskEvent(initialRect));
     }
 
     @Override

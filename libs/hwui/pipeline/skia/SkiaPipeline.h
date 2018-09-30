@@ -48,6 +48,9 @@ public:
     bool createOrUpdateLayer(RenderNode* node, const DamageAccumulator& damageAccumulator,
                              ErrorHandler* errorHandler) override;
 
+    SkColorType getSurfaceColorType() const { return mSurfaceColorType; }
+    sk_sp<SkColorSpace> getSurfaceColorSpace() override { return mSurfaceColorSpace; }
+
     void renderFrame(const LayerUpdateQueue& layers, const SkRect& clip,
                      const std::vector<sp<RenderNode>>& nodes, bool opaque,
                      const Rect& contentDrawBounds, sk_sp<SkSurface> surface);
@@ -106,6 +109,8 @@ protected:
     void dumpResourceCacheUsage() const;
 
     renderthread::RenderThread& mRenderThread;
+    SkColorType mSurfaceColorType;
+    sk_sp<SkColorSpace> mSurfaceColorSpace;
 
 private:
     void renderFrameImpl(const LayerUpdateQueue& layers, const SkRect& clip,

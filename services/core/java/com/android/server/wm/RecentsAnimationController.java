@@ -20,8 +20,8 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.view.RemoteAnimationTarget.MODE_CLOSING;
+import static android.view.RemoteAnimationTarget.MODE_OPENING;
 import static android.view.WindowManager.INPUT_CONSUMER_RECENTS_ANIMATION;
-
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 import static com.android.server.wm.ActivityTaskManagerInternal.APP_TRANSITION_RECENTS_ANIM;
 import static com.android.server.wm.AnimationAdapterProto.REMOTE;
@@ -48,16 +48,13 @@ import android.view.IRecentsAnimationRunner;
 import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
-
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.LocalServices;
 import com.android.server.input.InputWindowHandle;
 import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
 import com.android.server.wm.utils.InsetUtils;
-
 import com.google.android.collect.Sets;
-
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
@@ -93,6 +90,7 @@ public class RecentsAnimationController implements DeathRecipient {
 
     // The recents component app token that is shown behind the visibile tasks
     private AppWindowToken mTargetAppToken;
+    private int mTargetActivityType;
     private Rect mMinimizedHomeBounds = new Rect();
 
     // We start the RecentsAnimationController in a pending-start state since we need to wait for
@@ -259,23 +257,37 @@ public class RecentsAnimationController implements DeathRecipient {
         mDisplayId = displayId;
     }
 
+    public void initialize(int targetActivityType, SparseBooleanArray recentTaskIds) {
+        initialize(mService.mRoot.getDisplayContent(mDisplayId), targetActivityType, recentTaskIds);
+    }
+
     /**
      * Initializes the recents animation controller. This is a separate call from the constructor
      * because it may call cancelAnimation() which needs to properly clean up the controller
      * in the window manager.
      */
-    public void initialize(int targetActivityType, SparseBooleanArray recentTaskIds) {
-        // Make leashes for each of the visible tasks and add it to the recents animation to be
-        // started
-        final DisplayContent dc = mService.mRoot.getDisplayContent(mDisplayId);
+    @VisibleForTesting
+    void initialize(DisplayContent dc, int targetActivityType, SparseBooleanArray recentTaskIds) {
+        mTargetActivityType = targetActivityType;
+
+        // Make leashes for each of the visible/target tasks and add it to the recents animation to
+        // be started
         final ArrayList<Task> visibleTasks = dc.getVisibleTasks();
+        final TaskStack targetStack = dc.getStack(WINDOWING_MODE_UNDEFINED, targetActivityType);
+        if (targetStack != null) {
+            for (int i = targetStack.getChildCount() - 1; i >= 0; i--) {
+                final Task t = targetStack.getChildAt(i);
+                if (!visibleTasks.contains(t)) {
+                    visibleTasks.add(t);
+                }
+            }
+        }
         final int taskCount = visibleTasks.size();
         for (int i = 0; i < taskCount; i++) {
             final Task task = visibleTasks.get(i);
             final WindowConfiguration config = task.getWindowConfiguration();
             if (config.tasksAreFloating()
-                    || config.getWindowingMode() == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
-                    || config.getActivityType() == targetActivityType) {
+                    || config.getWindowingMode() == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
                 continue;
             }
             addAnimation(task, !recentTaskIds.get(task.mTaskId));
@@ -586,7 +598,10 @@ public class RecentsAnimationController implements DeathRecipient {
             final Rect insets = new Rect();
             mainWindow.getContentInsets(insets);
             InsetUtils.addInsets(insets, mainWindow.mAppToken.getLetterboxInsets());
-            mTarget = new RemoteAnimationTarget(mTask.mTaskId, MODE_CLOSING, mCapturedLeash,
+            final int mode = topApp.getActivityType() == mTargetActivityType
+                    ? MODE_OPENING
+                    : MODE_CLOSING;
+            mTarget = new RemoteAnimationTarget(mTask.mTaskId, mode, mCapturedLeash,
                     !topApp.fillsParent(), mainWindow.mWinAnimator.mLastClipRect,
                     insets, mTask.getPrefixOrderIndex(), mPosition, mBounds,
                     mTask.getWindowConfiguration(), mIsRecentTaskInvisible);

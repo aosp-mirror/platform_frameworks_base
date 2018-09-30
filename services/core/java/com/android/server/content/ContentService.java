@@ -1226,7 +1226,7 @@ public final class ContentService extends IContentService.Stub {
 
         if (userId == UserHandle.USER_ALL) {
             mContext.enforceCallingOrSelfPermission(
-                    Manifest.permission.INTERACT_ACROSS_USERS_FULL, TAG);
+                    Manifest.permission.INTERACT_ACROSS_USERS_FULL, "No access to " + uri);
         } else if (userId < 0) {
             throw new IllegalArgumentException("Invalid user: " + userId);
         } else if (userId != UserHandle.getCallingUserId()) {
@@ -1247,7 +1247,7 @@ public final class ContentService extends IContentService.Stub {
                             ? (Manifest.permission.INTERACT_ACROSS_USERS_FULL + " or " +
                                     Manifest.permission.INTERACT_ACROSS_USERS)
                             : Manifest.permission.INTERACT_ACROSS_USERS_FULL;
-                    throw new SecurityException(TAG + "Neither user " + uid
+                    throw new SecurityException("No access to " + uri + ": neither user " + uid
                             + " nor current process has " + permissions);
                 }
             }

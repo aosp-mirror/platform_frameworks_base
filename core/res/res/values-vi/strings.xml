@@ -528,10 +528,8 @@
   </string-array>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"Không nhận dạng được"</string>
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"Đã xác thực vân tay"</string>
-    <!-- no translation found for face_authenticated_no_confirmation_required (4018680978348659031) -->
-    <skip />
-    <!-- no translation found for face_authenticated_confirmation_required (8778347003507633610) -->
-    <skip />
+    <string name="face_authenticated_no_confirmation_required" msgid="4018680978348659031">"Đã xác thực khuôn mặt"</string>
+    <string name="face_authenticated_confirmation_required" msgid="8778347003507633610">"Đã xác thực khuôn mặt, vui lòng nhấn để xác nhận"</string>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Phần cứng vân tay không khả dụng."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Không thể lưu vân tay. Vui lòng xóa vân tay hiện có."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Đã hết thời gian chờ vân tay. Hãy thử lại."</string>
@@ -568,8 +566,7 @@
     <string name="face_error_timeout" msgid="4014326147867150054">"Đã hết thời gian chờ khuôn mặt. Hãy thử lại."</string>
     <string name="face_error_no_space" msgid="8224993703466381314">"Không thể lưu khuôn mặt."</string>
     <string name="face_error_canceled" msgid="283945501061931023">"Đã hủy thao tác dùng khuôn mặt."</string>
-    <!-- no translation found for face_error_user_canceled (8943921120862164539) -->
-    <skip />
+    <string name="face_error_user_canceled" msgid="8943921120862164539">"Người dùng đã hủy thao tác xác thực khuôn mặt."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"Bạn đã thử quá nhiều lần. Hãy thử lại sau."</string>
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"Đã thử quá nhiều lần. Đã tắt xác thực khuôn mặt."</string>
     <string name="face_error_unable_to_process" msgid="238761109287767270">"Hãy thử lại."</string>

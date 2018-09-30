@@ -144,8 +144,7 @@ void CanvasContext::setSurface(sp<Surface>&& surface) {
 
     mNativeSurface = std::move(surface);
 
-    // TODO(b/111436479) Introduce a way for app to specify DisplayColorGamut mode.
-    ColorMode colorMode = mWideColorGamut ? ColorMode::WideColorGamut : ColorMode::Legacy;
+    ColorMode colorMode = mWideColorGamut ? ColorMode::WideColorGamut : ColorMode::SRGB;
     bool hasSurface = mRenderPipeline->setSurface(mNativeSurface.get(), mSwapBehavior, colorMode);
 
     mFrameNumber = -1;

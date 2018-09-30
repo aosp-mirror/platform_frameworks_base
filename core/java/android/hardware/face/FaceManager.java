@@ -244,17 +244,17 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
     }
 
     /**
-     * Requests a pre-enrollment auth token to tie enrollment to the confirmation of
+     * Requests an auth token to tie sensitive operations to the confirmation of
      * existing device credentials (e.g. pin/pattern/password).
      *
      * @hide
      */
     @RequiresPermission(MANAGE_BIOMETRIC)
-    public long preEnroll() {
+    public long generateChallenge() {
         long result = 0;
         if (mService != null) {
             try {
-                result = mService.preEnroll(mToken);
+                result = mService.generateChallenge(mToken);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -263,16 +263,46 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
     }
 
     /**
-     * Finishes enrollment and cancels the current auth token.
+     * Invalidates the current auth token.
      *
      * @hide
      */
     @RequiresPermission(MANAGE_BIOMETRIC)
-    public int postEnroll() {
+    public int revokeChallenge() {
         int result = 0;
         if (mService != null) {
             try {
-                result = mService.postEnroll(mToken);
+                result = mService.revokeChallenge(mToken);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+        return result;
+    }
+
+    /**
+     * @hide
+     */
+    @RequiresPermission(MANAGE_BIOMETRIC)
+    public void setRequireAttention(boolean requireAttention, byte[] token) {
+        if (mService != null) {
+            try {
+                mService.setRequireAttention(requireAttention, token);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * @hide
+     */
+    @RequiresPermission(MANAGE_BIOMETRIC)
+    public boolean getRequireAttention(byte[] token) {
+        boolean result = true;
+        if (mService != null) {
+            try {
+                mService.getRequireAttention(token);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }

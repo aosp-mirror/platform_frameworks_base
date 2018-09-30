@@ -410,7 +410,7 @@ public class ApkSignatureSchemeV2Verifier {
                    NoSuchAlgorithmException {
         try (RandomAccessFile apk = new RandomAccessFile(apkPath, "r")) {
             SignatureInfo signatureInfo = findSignature(apk);
-            return ApkVerityBuilder.generateApkVerity(apkPath, bufferFactory, signatureInfo);
+            return VerityBuilder.generateApkVerity(apkPath, bufferFactory, signatureInfo);
         }
     }
 
@@ -423,7 +423,7 @@ public class ApkSignatureSchemeV2Verifier {
             if (vSigner.verityRootHash == null) {
                 return null;
             }
-            return ApkVerityBuilder.generateApkVerityRootHash(
+            return VerityBuilder.generateApkVerityRootHash(
                     apk, ByteBuffer.wrap(vSigner.verityRootHash), signatureInfo);
         }
     }

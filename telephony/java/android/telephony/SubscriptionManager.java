@@ -2153,7 +2153,12 @@ public class SubscriptionManager {
 
     /**
      * Set preferred default data.
-     * Set on which slot default data will be on.
+     * Set on which slot most cellular data will be on.
+     * It's also usually what we set up internet connection on.
+     *
+     * PreferredData overwrites user setting of default data subscription. And it's used
+     * by ANAS or carrier apps to switch primary and CBRS subscription dynamically in multi-SIM
+     * devices.
      *
      * @param slotId which slot is preferred to for cellular data.
      * @hide

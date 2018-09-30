@@ -256,7 +256,7 @@ public class QSFragment extends Fragment implements QS, CommandQueue.Callbacks {
     public void setExpanded(boolean expanded) {
         if (DEBUG) Log.d(TAG, "setExpanded " + expanded);
         mQsExpanded = expanded;
-        mQSPanel.setListening(mListening && mQsExpanded);
+        mQSPanel.setListening(mListening, mQsExpanded);
         updateQsState();
     }
 
@@ -287,8 +287,7 @@ public class QSFragment extends Fragment implements QS, CommandQueue.Callbacks {
         mListening = listening;
         mHeader.setListening(listening);
         mFooter.setListening(listening);
-        mQSPanel.setListening(mListening && mQsExpanded);
-        mQSPanel.getFooter().setListening(listening);
+        mQSPanel.setListening(mListening, mQsExpanded);
     }
 
     @Override
@@ -365,7 +364,11 @@ public class QSFragment extends Fragment implements QS, CommandQueue.Callbacks {
                 .setListener(new AnimatorListenerAdapter() {
                     @Override
                     public void onAnimationEnd(Animator animation) {
-                        getView().animate().setListener(null);
+                        if (getView() != null) {
+                            // The view could be destroyed before the animation completes when
+                            // switching users.
+                            getView().animate().setListener(null);
+                        }
                         mHeaderAnimating = false;
                         updateQsState();
                     }

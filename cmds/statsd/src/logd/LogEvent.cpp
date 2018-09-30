@@ -92,7 +92,8 @@ LogEvent::LogEvent(int32_t tagId, int64_t wallClockTimestampNs, int64_t elapsedT
 
 LogEvent::LogEvent(int32_t tagId, int64_t wallClockTimestampNs, int64_t elapsedTimestampNs,
                    int32_t uid,
-                   const std::map<int32_t, int64_t>& int_map,
+                   const std::map<int32_t, int32_t>& int_map,
+                   const std::map<int32_t, int64_t>& long_map,
                    const std::map<int32_t, std::string>& string_map,
                    const std::map<int32_t, float>& float_map) {
     mLogdTimestampNs = wallClockTimestampNs;
@@ -113,7 +114,7 @@ LogEvent::LogEvent(int32_t tagId, int64_t wallClockTimestampNs, int64_t elapsedT
         pos[1]++;
     }
 
-    for (const auto&itr : string_map) {
+    for (const auto&itr : long_map) {
         pos[2] = 1;
         mValues.push_back(FieldValue(Field(mTagId, pos, 2 /* depth */), Value(itr.first)));
         pos[2] = 3;
@@ -122,7 +123,7 @@ LogEvent::LogEvent(int32_t tagId, int64_t wallClockTimestampNs, int64_t elapsedT
         pos[1]++;
     }
 
-    for (const auto&itr : float_map) {
+    for (const auto&itr : string_map) {
         pos[2] = 1;
         mValues.push_back(FieldValue(Field(mTagId, pos, 2 /* depth */), Value(itr.first)));
         pos[2] = 4;
@@ -130,9 +131,139 @@ LogEvent::LogEvent(int32_t tagId, int64_t wallClockTimestampNs, int64_t elapsedT
         mValues.back().mField.decorateLastPos(2);
         pos[1]++;
     }
+
+    for (const auto&itr : float_map) {
+        pos[2] = 1;
+        mValues.push_back(FieldValue(Field(mTagId, pos, 2 /* depth */), Value(itr.first)));
+        pos[2] = 5;
+        mValues.push_back(FieldValue(Field(mTagId, pos, 2 /* depth */), Value(itr.second)));
+        mValues.back().mField.decorateLastPos(2);
+        pos[1]++;
+    }
     if (!mValues.empty()) {
         mValues.back().mField.decorateLastPos(1);
         mValues.at(mValues.size() - 2).mField.decorateLastPos(1);
+    }
+}
+
+LogEvent::LogEvent(int64_t wallClockTimestampNs, int64_t elapsedTimestampNs,
+                   const SpeakerImpedance& speakerImpedance) {
+    mLogdTimestampNs = wallClockTimestampNs;
+    mElapsedTimestampNs = elapsedTimestampNs;
+    mTagId = android::util::SPEAKER_IMPEDANCE_REPORTED;
+
+    mValues.push_back(
+            FieldValue(Field(mTagId, getSimpleField(1)), Value(speakerImpedance.speakerLocation)));
+    mValues.push_back(
+            FieldValue(Field(mTagId, getSimpleField(2)), Value(speakerImpedance.milliOhms)));
+    if (!mValues.empty()) {
+        mValues.back().mField.decorateLastPos(1);
+    }
+}
+
+LogEvent::LogEvent(int64_t wallClockTimestampNs, int64_t elapsedTimestampNs,
+                   const HardwareFailed& hardwareFailed) {
+    mLogdTimestampNs = wallClockTimestampNs;
+    mElapsedTimestampNs = elapsedTimestampNs;
+    mTagId = android::util::HARDWARE_FAILED;
+
+    mValues.push_back(FieldValue(Field(mTagId, getSimpleField(1)),
+                                 Value(int32_t(hardwareFailed.hardwareType))));
+    mValues.push_back(
+            FieldValue(Field(mTagId, getSimpleField(2)), Value(hardwareFailed.hardwareLocation)));
+    mValues.push_back(
+            FieldValue(Field(mTagId, getSimpleField(3)), Value(int32_t(hardwareFailed.errorCode))));
+    if (!mValues.empty()) {
+        mValues.back().mField.decorateLastPos(1);
+    }
+}
+
+LogEvent::LogEvent(int64_t wallClockTimestampNs, int64_t elapsedTimestampNs,
+                   const PhysicalDropDetected& physicalDropDetected) {
+    mLogdTimestampNs = wallClockTimestampNs;
+    mElapsedTimestampNs = elapsedTimestampNs;
+    mTagId = android::util::PHYSICAL_DROP_DETECTED;
+
+    mValues.push_back(FieldValue(Field(mTagId, getSimpleField(1)),
+                                 Value(int32_t(physicalDropDetected.confidencePctg))));
+    mValues.push_back(
+            FieldValue(Field(mTagId, getSimpleField(2)), Value(physicalDropDetected.accelPeak)));
+    mValues.push_back(FieldValue(Field(mTagId, getSimpleField(3)),
+                                 Value(physicalDropDetected.freefallDuration)));
+    if (!mValues.empty()) {
+        mValues.back().mField.decorateLastPos(1);
+    }
+}
+
+LogEvent::LogEvent(int64_t wallClockTimestampNs, int64_t elapsedTimestampNs,
+                   const ChargeCycles& chargeCycles) {
+    mLogdTimestampNs = wallClockTimestampNs;
+    mElapsedTimestampNs = elapsedTimestampNs;
+    mTagId = android::util::CHARGE_CYCLES_REPORTED;
+
+    for (size_t i = 0; i < chargeCycles.cycleBucket.size(); i++) {
+        mValues.push_back(FieldValue(Field(mTagId, getSimpleField(i + 1)),
+                                     Value(chargeCycles.cycleBucket[i])));
+    }
+
+    if (!mValues.empty()) {
+        mValues.back().mField.decorateLastPos(1);
+    }
+}
+
+LogEvent::LogEvent(int64_t wallClockTimestampNs, int64_t elapsedTimestampNs,
+                   const BatteryHealthSnapshotArgs& batteryHealthSnapshotArgs) {
+    mLogdTimestampNs = wallClockTimestampNs;
+    mElapsedTimestampNs = elapsedTimestampNs;
+    mTagId = android::util::BATTERY_HEALTH_SNAPSHOT;
+
+    mValues.push_back(FieldValue(Field(mTagId, getSimpleField(1)),
+                                 Value(int32_t(batteryHealthSnapshotArgs.type))));
+    mValues.push_back(FieldValue(Field(mTagId, getSimpleField(2)),
+                                 Value(batteryHealthSnapshotArgs.temperatureDeciC)));
+    mValues.push_back(FieldValue(Field(mTagId, getSimpleField(3)),
+                                 Value(batteryHealthSnapshotArgs.voltageMicroV)));
+    mValues.push_back(FieldValue(Field(mTagId, getSimpleField(4)),
+                                 Value(batteryHealthSnapshotArgs.currentMicroA)));
+    mValues.push_back(FieldValue(Field(mTagId, getSimpleField(5)),
+                                 Value(batteryHealthSnapshotArgs.openCircuitVoltageMicroV)));
+    mValues.push_back(FieldValue(Field(mTagId, getSimpleField(6)),
+                                 Value(batteryHealthSnapshotArgs.resistanceMicroOhm)));
+    mValues.push_back(FieldValue(Field(mTagId, getSimpleField(7)),
+                                 Value(batteryHealthSnapshotArgs.levelPercent)));
+
+    if (!mValues.empty()) {
+        mValues.back().mField.decorateLastPos(1);
+    }
+}
+
+LogEvent::LogEvent(int64_t wallClockTimestampNs, int64_t elapsedTimestampNs, const SlowIo& slowIo) {
+    mLogdTimestampNs = wallClockTimestampNs;
+    mElapsedTimestampNs = elapsedTimestampNs;
+    mTagId = android::util::SLOW_IO;
+
+    int pos[] = {1};
+    mValues.push_back(
+            FieldValue(Field(mTagId, getSimpleField(1)), Value(int32_t(slowIo.operation))));
+    pos[0]++;
+    mValues.push_back(FieldValue(Field(mTagId, getSimpleField(2)), Value(slowIo.count)));
+
+    if (!mValues.empty()) {
+        mValues.back().mField.decorateLastPos(1);
+    }
+}
+
+LogEvent::LogEvent(int64_t wallClockTimestampNs, int64_t elapsedTimestampNs,
+                   const BatteryCausedShutdown& batteryCausedShutdown) {
+    mLogdTimestampNs = wallClockTimestampNs;
+    mElapsedTimestampNs = elapsedTimestampNs;
+    mTagId = android::util::BATTERY_CAUSED_SHUTDOWN;
+
+    mValues.push_back(FieldValue(Field(mTagId, getSimpleField(1)),
+                                 Value(batteryCausedShutdown.voltageMicroV)));
+
+    if (!mValues.empty()) {
+        mValues.back().mField.decorateLastPos(1);
     }
 }
 
@@ -213,9 +344,8 @@ bool LogEvent::write(float value) {
     return false;
 }
 
-
-
-bool LogEvent::writeKeyValuePairs(const std::map<int32_t, int64_t>& int_map,
+bool LogEvent::writeKeyValuePairs(const std::map<int32_t, int32_t>& int_map,
+                                  const std::map<int32_t, int64_t>& long_map,
                                   const std::map<int32_t, std::string>& string_map,
                                   const std::map<int32_t, float>& float_map) {
     if (mContext) {
@@ -223,6 +353,17 @@ bool LogEvent::writeKeyValuePairs(const std::map<int32_t, int64_t>& int_map,
             return false;
          }
          for (const auto& itr : int_map) {
+             if (android_log_write_list_begin(mContext) < 0) {
+                return false;
+             }
+             write(itr.first);
+             write(itr.second);
+             if (android_log_write_list_end(mContext) < 0) {
+                return false;
+             }
+         }
+
+         for (const auto& itr : long_map) {
              if (android_log_write_list_begin(mContext) < 0) {
                 return false;
              }

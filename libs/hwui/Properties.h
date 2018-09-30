@@ -192,6 +192,8 @@ enum DebugLevel {
 
 #define PROPERTY_FORCE_DARK "debug.hwui.force_dark"
 
+#define PROPERTY_ENABLE_FORCE_DARK "debug.hwui.force_dark_enabled"
+
 ///////////////////////////////////////////////////////////////////////////////
 // Misc
 ///////////////////////////////////////////////////////////////////////////////
@@ -266,6 +268,7 @@ public:
 
     static bool skpCaptureEnabled;
     static bool forceDarkMode;
+    static bool enableForceDarkSupport;
 
     // For experimentation b/68769804
     ANDROID_API static bool enableRTAnimations;

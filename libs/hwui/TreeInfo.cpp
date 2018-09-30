@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 The Android Open Source Project
+ * Copyright (C) 2018 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -11,15 +11,19 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
-package com.android.systemui.stackdivider.events;
+#include "TreeInfo.h"
 
-import com.android.systemui.recents.events.EventBus;
+#include "renderthread/CanvasContext.h"
 
-/**
- * Sent when the divider isn't draging anymore.
- */
-public class StoppedDragingEvent extends EventBus.Event {
-}
+namespace android::uirenderer {
+
+TreeInfo::TreeInfo(TraversalMode mode, renderthread::CanvasContext& canvasContext)
+        : mode(mode)
+        , prepareTextures(mode == MODE_FULL)
+        , canvasContext(canvasContext)
+        , disableForceDark(canvasContext.useForceDark() ? 0 : 1) {}
+
+}  // namespace android::uirenderer

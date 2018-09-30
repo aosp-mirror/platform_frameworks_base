@@ -46,11 +46,11 @@ import libcore.util.EmptyArray;
  * order in the case of <code>valueAt(int)</code>.</p>
  */
 public class SparseIntArray implements Cloneable {
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 28) // Use keyAt(int)
     private int[] mKeys;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 28) // Use valueAt(int), setValueAt(int, int)
     private int[] mValues;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = 28) // Use size()
     private int mSize;
 
     /**
@@ -191,7 +191,6 @@ public class SparseIntArray implements Cloneable {
 
     /**
      * Directly set the value at a particular index.
-     * @hide
      */
     public void setValueAt(int index, int value) {
         mValues[index] = value;

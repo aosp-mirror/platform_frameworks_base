@@ -47,7 +47,7 @@
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"تنظیمات"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
     <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"چرخش خودکار صفحه"</string>
-    <string name="status_bar_settings_mute_label" msgid="554682549917429396">"بی‌صدا"</string>
+    <string name="status_bar_settings_mute_label" msgid="554682549917429396">"صامت"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"خودکار"</string>
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"اعلان‌ها"</string>
     <string name="bluetooth_tethered" msgid="7094101612161133267">"اتصال اینترنتی با بلوتوث تلفن همراه"</string>
@@ -103,16 +103,12 @@
     <string name="camera_label" msgid="7261107956054836961">"باز کردن دوربین"</string>
     <string name="recents_caption_resize" msgid="3517056471774958200">"انتخاب طرح‌بندی جدید کار"</string>
     <string name="cancel" msgid="6442560571259935130">"لغو"</string>
-    <!-- no translation found for accessibility_biometric_dialog_help_area (8953787076940186847) -->
-    <skip />
-    <!-- no translation found for biometric_dialog_confirm (6468457350041712674) -->
-    <skip />
+    <string name="accessibility_biometric_dialog_help_area" msgid="8953787076940186847">"بخش پیام راهنما"</string>
+    <string name="biometric_dialog_confirm" msgid="6468457350041712674">"تأیید"</string>
     <string name="fingerprint_dialog_touch_sensor" msgid="8511557690663181761">"حسگر اثر انگشت را لمس کنید"</string>
     <string name="accessibility_fingerprint_dialog_fingerprint_icon" msgid="3125122495414253226">"نماد اثر انگشت"</string>
-    <!-- no translation found for face_dialog_looking_for_face (7049276266074494689) -->
-    <skip />
-    <!-- no translation found for accessibility_face_dialog_face_icon (2658119009870383490) -->
-    <skip />
+    <string name="face_dialog_looking_for_face" msgid="7049276266074494689">"درحال جستجوی شما…"</string>
+    <string name="accessibility_face_dialog_face_icon" msgid="2658119009870383490">"نماد چهره"</string>
     <string name="accessibility_compatibility_zoom_button" msgid="8461115318742350699">"دکمه بزرگ‌نمایی سازگار."</string>
     <string name="accessibility_compatibility_zoom_example" msgid="4220687294564945780">"بزرگ‌نمایی از صفحه‌های کوچک تا بزرگ."</string>
     <string name="accessibility_bluetooth_connected" msgid="2707027633242983370">"بلوتوث متصل است."</string>
@@ -545,14 +541,14 @@
     <string name="ring_toggle_title" msgid="3281244519428819576">"تماس‌ها"</string>
     <string name="volume_ringer_status_normal" msgid="4273142424125855384">"زنگ زدن"</string>
     <string name="volume_ringer_status_vibrate" msgid="1825615171021346557">"لرزش"</string>
-    <string name="volume_ringer_status_silent" msgid="6896394161022916369">"بی‌صدا"</string>
+    <string name="volume_ringer_status_silent" msgid="6896394161022916369">"صامت"</string>
     <string name="qs_status_phone_vibrate" msgid="204362991135761679">"تلفن در حالت لرزش است"</string>
     <string name="qs_status_phone_muted" msgid="5437668875879171548">"تلفن بی‌صدا است"</string>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"‏%1$s. برای باصدا کردن ضربه بزنید."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"‏%1$s. برای تنظیم روی لرزش ضربه بزنید. ممکن است سرویس‌های دسترس‌پذیری بی‌صدا شوند."</string>
-    <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"‏%1$s. برای بی‌صدا کردن ضربه بزنید. ممکن است سرویس‌های دسترس‌پذیری بی‌صدا شوند."</string>
+    <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"‏%1$s. برای صامت کردن ضربه بزنید. ممکن است سرویس‌های دسترس‌پذیری صامت شود."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"‏%1$s. برای تنظیم روی لرزش، ضربه بزنید."</string>
-    <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"‏%1$s. برای بی‌صدا کردن ضربه بزنید."</string>
+    <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"‏%1$s. برای صامت کردن ضربه بزنید."</string>
     <string name="volume_ringer_hint_mute" msgid="9199811307292269601">"صامت کردن"</string>
     <string name="volume_ringer_hint_unmute" msgid="6602880133293060368">"باصدا کردن"</string>
     <string name="volume_ringer_hint_vibrate" msgid="4036802135666515202">"لرزش"</string>
@@ -829,9 +825,11 @@
     <string name="notification_channel_storage" msgid="3077205683020695313">"فضای ذخیره‌سازی"</string>
     <string name="notification_channel_hints" msgid="7323870212489152689">"نکات"</string>
     <string name="instant_apps" msgid="6647570248119804907">"برنامه‌های فوری"</string>
-    <string name="instant_apps_message" msgid="8116608994995104836">"برنامه‌های فوری نیاز به نصب ندارند."</string>
+    <string name="instant_apps_title" msgid="8738419517367449783">"<xliff:g id="APP">%1$s</xliff:g> درحال اجرا"</string>
+    <string name="instant_apps_message" msgid="1183313016396018086">"برنامه بدون نصب شدن باز شد."</string>
+    <string name="instant_apps_message_with_help" msgid="6179830437630729747">"برنامه بدون نصب شدن باز شد. برای اطلاعات بیشتر ضربه بزنید."</string>
     <string name="app_info" msgid="6856026610594615344">"اطلاعات برنامه"</string>
-    <string name="go_to_web" msgid="2650669128861626071">"رفتن به مرورگر"</string>
+    <string name="go_to_web" msgid="1106022723459948514">"رفتن به وب"</string>
     <string name="mobile_data" msgid="7094582042819250762">"داده تلفن همراه"</string>
     <string name="mobile_data_text_format" msgid="3526214522670876454">"<xliff:g id="ID_1">%1$s</xliff:g> — <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"‏Wi-Fi خاموش است"</string>

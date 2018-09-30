@@ -123,8 +123,7 @@ bool SkiaVulkanPipeline::setSurface(Surface* surface, SwapBehavior swapBehavior,
     }
 
     if (surface) {
-        // TODO: handle color mode
-        mVkSurface = mVkManager.createSurface(surface);
+        mVkSurface = mVkManager.createSurface(surface, colorMode);
     }
 
     return mVkSurface != nullptr;
@@ -136,14 +135,6 @@ bool SkiaVulkanPipeline::isSurfaceReady() {
 
 bool SkiaVulkanPipeline::isContextReady() {
     return CC_LIKELY(mVkManager.hasVkContext());
-}
-
-SkColorType SkiaVulkanPipeline::getSurfaceColorType() const {
-    return mVkManager.getSurfaceColorType();
-}
-
-sk_sp<SkColorSpace> SkiaVulkanPipeline::getSurfaceColorSpace() {
-    return mVkManager.getSurfaceColorSpace();
 }
 
 void SkiaVulkanPipeline::invokeFunctor(const RenderThread& thread, Functor* functor) {

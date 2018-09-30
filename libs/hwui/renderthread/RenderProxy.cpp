@@ -298,6 +298,12 @@ void RenderProxy::removeFrameMetricsObserver(FrameMetricsObserver* observerPtr) 
     });
 }
 
+void RenderProxy::setForceDark(bool enable) {
+    mRenderThread.queue().post([this, enable]() {
+        mContext->setForceDark(enable);
+    });
+}
+
 int RenderProxy::copySurfaceInto(sp<Surface>& surface, int left, int top, int right, int bottom,
                                  SkBitmap* bitmap) {
     auto& thread = RenderThread::getInstance();

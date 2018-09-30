@@ -528,10 +528,8 @@
   </string-array>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"Ei tuvastatud"</string>
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"Sõrmejälg autenditi"</string>
-    <!-- no translation found for face_authenticated_no_confirmation_required (4018680978348659031) -->
-    <skip />
-    <!-- no translation found for face_authenticated_confirmation_required (8778347003507633610) -->
-    <skip />
+    <string name="face_authenticated_no_confirmation_required" msgid="4018680978348659031">"Nägu on autenditud"</string>
+    <string name="face_authenticated_confirmation_required" msgid="8778347003507633610">"Nägu on autenditud, vajutage käsku Kinnita"</string>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Sõrmejälje riistvara pole saadaval."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Sõrmejälge ei saa salvestada. Eemaldage olemasolev sõrmejälg."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Sõrmejälje riistvara taimeri ajalõpp. Proovige uuesti."</string>
@@ -568,8 +566,7 @@
     <string name="face_error_timeout" msgid="4014326147867150054">"Näotuvastuse taimeri ajalõpp. Proovige uuesti."</string>
     <string name="face_error_no_space" msgid="8224993703466381314">"Nägu ei saa salvestada."</string>
     <string name="face_error_canceled" msgid="283945501061931023">"Näotuvastuse toiming tühistati."</string>
-    <!-- no translation found for face_error_user_canceled (8943921120862164539) -->
-    <skip />
+    <string name="face_error_user_canceled" msgid="8943921120862164539">"Kasutaja tühistas näo autentimise."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"Liiga palju katseid. Proovige hiljem uuesti."</string>
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"Liiga palju katseid. Näotuvastus on keelatud."</string>
     <string name="face_error_unable_to_process" msgid="238761109287767270">"Proovige uuesti."</string>

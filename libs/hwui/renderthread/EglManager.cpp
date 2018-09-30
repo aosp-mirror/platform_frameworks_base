@@ -126,17 +126,6 @@ void EglManager::initialize() {
     createContext();
     createPBufferSurface();
     makeCurrent(mPBufferSurface, nullptr, /* force */ true);
-
-    mSurfaceColorGamut = DataSpaceToColorGamut(
-        static_cast<android_dataspace>(DeviceInfo::get()->getTargetDataSpace()));
-
-    LOG_ALWAYS_FATAL_IF(mSurfaceColorGamut == SkColorSpace::kDCIP3_D65_Gamut &&
-                        !EglExtensions.displayP3, "EGL doesn't support Display P3.");
-
-    mSurfaceColorType = PixelFormatToColorType(
-        static_cast<android_pixel_format>(DeviceInfo::get()->getTargetPixelFormat()));
-    mSurfaceColorSpace = DataSpaceToColorSpace(
-        static_cast<android_dataspace>(DeviceInfo::get()->getTargetDataSpace()));
 }
 
 void EglManager::initExtensions() {
@@ -309,21 +298,13 @@ EGLSurface EglManager::createSurface(EGLNativeWindowType window, ColorMode color
         if (wideColorGamut) {
             attribs[1] = EGL_GL_COLORSPACE_SCRGB_LINEAR_EXT;
         } else {
-            if (mSurfaceColorGamut == SkColorSpace::kDCIP3_D65_Gamut) {
-                attribs[1] = EGL_GL_COLORSPACE_DISPLAY_P3_EXT;
-            } else {
-                attribs[1] = EGL_GL_COLORSPACE_SRGB_KHR;
-            }
+            attribs[1] = EGL_GL_COLORSPACE_SRGB_KHR;
         }
 #else
         if (wideColorGamut) {
             attribs[1] = EGL_GL_COLORSPACE_SCRGB_EXT;
         } else {
-            if (mSurfaceColorGamut == SkColorSpace::kDCIP3_D65_Gamut) {
-                attribs[1] = EGL_GL_COLORSPACE_DISPLAY_P3_EXT;
-            } else {
-                attribs[1] = EGL_GL_COLORSPACE_LINEAR_KHR;
-            }
+            attribs[1] = EGL_GL_COLORSPACE_LINEAR_KHR;
         }
 #endif
     }

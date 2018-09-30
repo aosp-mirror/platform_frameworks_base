@@ -528,10 +528,8 @@
   </string-array>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"인식할 수 없음"</string>
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"지문이 인증됨"</string>
-    <!-- no translation found for face_authenticated_no_confirmation_required (4018680978348659031) -->
-    <skip />
-    <!-- no translation found for face_authenticated_confirmation_required (8778347003507633610) -->
-    <skip />
+    <string name="face_authenticated_no_confirmation_required" msgid="4018680978348659031">"얼굴이 인증되었습니다"</string>
+    <string name="face_authenticated_confirmation_required" msgid="8778347003507633610">"얼굴이 인증되었습니다. 확인을 누르세요"</string>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"지문 인식 하드웨어를 사용할 수 없습니다."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"지문을 저장할 수 없습니다. 기존 지문을 삭제하세요."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"지문 인식 시간이 초과되었습니다. 다시 시도하세요."</string>
@@ -568,8 +566,7 @@
     <string name="face_error_timeout" msgid="4014326147867150054">"얼굴 인식 시간이 초과되었습니다. 다시 시도하세요."</string>
     <string name="face_error_no_space" msgid="8224993703466381314">"얼굴을 저장할 수 없습니다."</string>
     <string name="face_error_canceled" msgid="283945501061931023">"얼굴 인식 작업이 취소되었습니다."</string>
-    <!-- no translation found for face_error_user_canceled (8943921120862164539) -->
-    <skip />
+    <string name="face_error_user_canceled" msgid="8943921120862164539">"사용자가 얼굴 인증을 취소했습니다."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"시도 횟수가 너무 많습니다. 나중에 다시 시도하세요."</string>
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"시도 횟수가 너무 많아 얼굴 인증이 사용 중지되었습니다."</string>
     <string name="face_error_unable_to_process" msgid="238761109287767270">"다시 시도해 보세요."</string>

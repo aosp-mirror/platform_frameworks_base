@@ -41,17 +41,6 @@
 
 namespace android {
 
-struct JLineBreaksID {
-    jfieldID breaks;
-    jfieldID widths;
-    jfieldID ascents;
-    jfieldID descents;
-    jfieldID flags;
-};
-
-static jclass gLineBreaks_class;
-static JLineBreaksID gLineBreaks_fieldID;
-
 static inline std::vector<float> jintArrayToFloatVector(JNIEnv* env, jintArray javaArray) {
     if (javaArray == nullptr) {
          return std::vector<float>();
@@ -85,34 +74,7 @@ static jlong nGetReleaseFunc() {
     return reinterpret_cast<jlong>(nFinish);
 }
 
-static void recycleCopy(JNIEnv* env, jobject recycle, jintArray recycleBreaks,
-                        jfloatArray recycleWidths, jfloatArray recycleAscents,
-                        jfloatArray recycleDescents, jintArray recycleFlags,
-                        jint recycleLength, const minikin::LineBreakResult& result) {
-    const size_t nBreaks = result.breakPoints.size();
-    if ((size_t)recycleLength < nBreaks) {
-        // have to reallocate buffers
-        recycleBreaks = env->NewIntArray(nBreaks);
-        recycleWidths = env->NewFloatArray(nBreaks);
-        recycleAscents = env->NewFloatArray(nBreaks);
-        recycleDescents = env->NewFloatArray(nBreaks);
-        recycleFlags = env->NewIntArray(nBreaks);
-
-        env->SetObjectField(recycle, gLineBreaks_fieldID.breaks, recycleBreaks);
-        env->SetObjectField(recycle, gLineBreaks_fieldID.widths, recycleWidths);
-        env->SetObjectField(recycle, gLineBreaks_fieldID.ascents, recycleAscents);
-        env->SetObjectField(recycle, gLineBreaks_fieldID.descents, recycleDescents);
-        env->SetObjectField(recycle, gLineBreaks_fieldID.flags, recycleFlags);
-    }
-    // copy data
-    env->SetIntArrayRegion(recycleBreaks, 0, nBreaks, result.breakPoints.data());
-    env->SetFloatArrayRegion(recycleWidths, 0, nBreaks, result.widths.data());
-    env->SetFloatArrayRegion(recycleAscents, 0, nBreaks, result.ascents.data());
-    env->SetFloatArrayRegion(recycleDescents, 0, nBreaks, result.descents.data());
-    env->SetIntArrayRegion(recycleFlags, 0, nBreaks, result.flags.data());
-}
-
-static jint nComputeLineBreaks(JNIEnv* env, jclass, jlong nativePtr,
+static jlong nComputeLineBreaks(JNIEnv* env, jclass, jlong nativePtr,
         // Inputs
         jcharArray javaText,
         jlong measuredTextPtr,
@@ -122,18 +84,7 @@ static jint nComputeLineBreaks(JNIEnv* env, jclass, jlong nativePtr,
         jfloat restWidth,
         jintArray variableTabStops,
         jint defaultTabStop,
-        jint indentsOffset,
-
-        // Outputs
-        jobject recycle,
-        jint recycleLength,
-        jintArray recycleBreaks,
-        jfloatArray recycleWidths,
-        jfloatArray recycleAscents,
-        jfloatArray recycleDescents,
-        jintArray recycleFlags,
-        jfloatArray charWidths) {
-
+        jint indentsOffset) {
     minikin::android::StaticLayoutNative* builder = toNative(nativePtr);
 
     ScopedCharArrayRO text(env, javaText);
@@ -141,14 +92,44 @@ static jint nComputeLineBreaks(JNIEnv* env, jclass, jlong nativePtr,
 
     minikin::U16StringPiece u16Text(text.get(), length);
     minikin::MeasuredText* measuredText = reinterpret_cast<minikin::MeasuredText*>(measuredTextPtr);
-    minikin::LineBreakResult result = builder->computeBreaks(
-            u16Text, *measuredText, firstWidth, firstWidthLineCount, restWidth, indentsOffset,
-            tabStops.get(), tabStops.size(), defaultTabStop);
 
-    recycleCopy(env, recycle, recycleBreaks, recycleWidths, recycleAscents, recycleDescents,
-            recycleFlags, recycleLength, result);
+    std::unique_ptr<minikin::LineBreakResult> result =
+          std::make_unique<minikin::LineBreakResult>(builder->computeBreaks(
+                u16Text, *measuredText, firstWidth, firstWidthLineCount, restWidth, indentsOffset,
+                tabStops.get(), tabStops.size(), defaultTabStop));
+    return reinterpret_cast<jlong>(result.release());
+}
 
-    return static_cast<jint>(result.breakPoints.size());
+static jint nGetLineCount(jlong ptr) {
+    return reinterpret_cast<minikin::LineBreakResult*>(ptr)->breakPoints.size();
+}
+
+static jint nGetLineBreakOffset(jlong ptr, jint i) {
+    return reinterpret_cast<minikin::LineBreakResult*>(ptr)->breakPoints[i];
+}
+
+static jfloat nGetLineWidth(jlong ptr, jint i) {
+    return reinterpret_cast<minikin::LineBreakResult*>(ptr)->widths[i];
+}
+
+static jfloat nGetLineAscent(jlong ptr, jint i) {
+    return reinterpret_cast<minikin::LineBreakResult*>(ptr)->ascents[i];
+}
+
+static jfloat nGetLineDescent(jlong ptr, jint i) {
+    return reinterpret_cast<minikin::LineBreakResult*>(ptr)->descents[i];
+}
+
+static jint nGetLineFlag(jlong ptr, jint i) {
+    return reinterpret_cast<minikin::LineBreakResult*>(ptr)->flags[i];
+}
+
+static void nReleaseResult(jlong ptr) {
+    delete reinterpret_cast<minikin::LineBreakResult*>(ptr);
+}
+
+static jlong nGetReleaseResultFunc() {
+    return reinterpret_cast<jlong>(nReleaseResult);
 }
 
 static const JNINativeMethod gMethods[] = {
@@ -166,8 +147,6 @@ static const JNINativeMethod gMethods[] = {
     // Regular JNI
     {"nComputeLineBreaks", "("
         "J"  // nativePtr
-
-        // Inputs
         "[C"  // text
         "J"  // MeasuredParagraph ptr.
         "I"  // length
@@ -177,31 +156,20 @@ static const JNINativeMethod gMethods[] = {
         "[I"  // variableTabStops
         "I"  // defaultTabStop
         "I"  // indentsOffset
+        ")J", (void*) nComputeLineBreaks},
 
-        // Outputs
-        "Landroid/text/NativeLineBreaker$LineBreaks;"  // recycle
-        "I"  // recycleLength
-        "[I"  // recycleBreaks
-        "[F"  // recycleWidths
-        "[F"  // recycleAscents
-        "[F"  // recycleDescents
-        "[I"  // recycleFlags
-        ")I", (void*) nComputeLineBreaks}
+    // Result accessors, CriticalNatives
+    {"nGetLineCount", "(J)I", (void*)nGetLineCount},
+    {"nGetLineBreakOffset", "(JI)I", (void*)nGetLineBreakOffset},
+    {"nGetLineWidth", "(JI)F", (void*)nGetLineWidth},
+    {"nGetLineAscent", "(JI)F", (void*)nGetLineAscent},
+    {"nGetLineDescent", "(JI)F", (void*)nGetLineDescent},
+    {"nGetLineFlag", "(JI)I", (void*)nGetLineFlag},
+    {"nGetReleaseResultFunc", "()J", (void*)nGetReleaseResultFunc},
 };
 
-int register_android_text_LineBreaker(JNIEnv* env)
-{
-    gLineBreaks_class = MakeGlobalRefOrDie(env,
-            FindClassOrDie(env, "android/text/NativeLineBreaker$LineBreaks"));
-
-    gLineBreaks_fieldID.breaks = GetFieldIDOrDie(env, gLineBreaks_class, "breaks", "[I");
-    gLineBreaks_fieldID.widths = GetFieldIDOrDie(env, gLineBreaks_class, "widths", "[F");
-    gLineBreaks_fieldID.ascents = GetFieldIDOrDie(env, gLineBreaks_class, "ascents", "[F");
-    gLineBreaks_fieldID.descents = GetFieldIDOrDie(env, gLineBreaks_class, "descents", "[F");
-    gLineBreaks_fieldID.flags = GetFieldIDOrDie(env, gLineBreaks_class, "flags", "[I");
-
-    return RegisterMethodsOrDie(env, "android/text/NativeLineBreaker",
-                                gMethods, NELEM(gMethods));
+int register_android_text_LineBreaker(JNIEnv* env) {
+    return RegisterMethodsOrDie(env, "android/text/NativeLineBreaker", gMethods, NELEM(gMethods));
 }
 
 }

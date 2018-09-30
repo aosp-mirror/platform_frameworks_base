@@ -151,6 +151,25 @@ public class WindowManagerWrapper {
         }
     }
 
+    public void setPipVisibility(final boolean visible) {
+        try {
+            WindowManagerGlobal.getWindowManagerService().setPipVisibility(visible);
+        } catch (RemoteException e) {
+            Log.e(TAG, "Unable to reach window manager", e);
+        }
+    }
+
+    /**
+     * @return whether there is a soft nav bar.
+     */
+    public boolean hasSoftNavigationBar() {
+        try {
+            return WindowManagerGlobal.getWindowManagerService().hasNavigationBar();
+        } catch (RemoteException e) {
+            return false;
+        }
+    }
+
     /**
      * @return The side of the screen where navigation bar is positioned.
      * @see #NAV_BAR_POS_RIGHT

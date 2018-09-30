@@ -4864,7 +4864,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         setOverScrollMode(OVER_SCROLL_IF_CONTENT_SCROLLS);
         mUserPaddingStart = UNDEFINED_PADDING;
         mUserPaddingEnd = UNDEFINED_PADDING;
-        mRenderNode = RenderNode.create(getClass().getName(), this);
+        mRenderNode = RenderNode.create(getClass().getName(), new ViewAnimationHostBridge(this));
 
         if (!sCompatibilityDone && context != null) {
             final int targetSdkVersion = context.getApplicationInfo().targetSdkVersion;
@@ -5732,7 +5732,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @UnsupportedAppUsage
     View() {
         mResources = null;
-        mRenderNode = RenderNode.create(getClass().getName(), this);
+        mRenderNode = RenderNode.create(getClass().getName(), new ViewAnimationHostBridge(this));
     }
 
     final boolean debugDraw() {
@@ -15255,6 +15255,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * a value of 'true' will not override any 'false' value in its parent chain nor will
      * it prevent any 'false' in any of its children.
      *
+     * The default behavior of force dark is also influenced by the Theme's
+     * {@link android.R.styleable#Theme_isLightTheme isLightTheme} attribute.
+     * If a theme is isLightTheme="false", then force dark is globally disabled for that theme.
+     *
      * @param allow Whether or not to allow force dark.
      *
      * @hide
@@ -20600,7 +20604,8 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     private RenderNode getDrawableRenderNode(Drawable drawable, RenderNode renderNode) {
         if (renderNode == null) {
-            renderNode = RenderNode.create(drawable.getClass().getName(), this);
+            renderNode = RenderNode.create(drawable.getClass().getName(),
+                    new ViewAnimationHostBridge(this));
             renderNode.setUsageHint(RenderNode.USAGE_BACKGROUND);
         }
 

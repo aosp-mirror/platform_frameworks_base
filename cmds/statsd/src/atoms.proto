@@ -138,6 +138,9 @@ message Atom {
         FingerprintAuthenticated fingerprint_authenticated = 88;
         FingerprintErrorOccurred fingerprint_error_occurred = 89;
         Notification notification = 90;
+        BatteryHealthSnapshot battery_health_snapshot = 91;
+        SlowIo slow_io = 92;
+        BatteryCausedShutdown battery_caused_shutdown = 93;
     }
 
     // Pulled events will start at field 10000.
@@ -200,9 +203,10 @@ message AttributionNode {
 message KeyValuePair {
     optional int32 key = 1;
     oneof value {
-        int64 value_int = 2;
-        string value_str = 3;
-        float value_float = 4;
+        int32 value_int = 2;
+        int64 value_long = 3;
+        string value_str = 4;
+        float value_float = 5;
     }
 }
 
@@ -769,6 +773,9 @@ message WakeupAlarmOccurred {
 
     // Name of the wakeup alarm.
     optional string tag = 2;
+
+    // Name of source package (for historical reasons, since BatteryStats tracked it).
+    optional string package_name = 3;
 }
 
 /**
@@ -1306,6 +1313,68 @@ message ChargeCyclesReported {
     optional int32 cycle_bucket_6 = 6;
     optional int32 cycle_bucket_7 = 7;
     optional int32 cycle_bucket_8 = 8;
+}
+
+/**
+ * Log battery health snapshot.
+ *
+ * Resistance, Voltage, Open Circuit Voltage, Temperature, and Charge Level
+ * are snapshotted periodically over 24hrs.
+ */
+message BatteryHealthSnapshot {
+    enum BatterySnapshotType {
+        UNKNOWN = 0;
+        MIN_TEMP = 1;         // Snapshot at min batt temp over 24hrs.
+        MAX_TEMP = 2;         // Snapshot at max batt temp over 24hrs.
+        MIN_RESISTANCE = 3;   // Snapshot at min batt resistance over 24hrs.
+        MAX_RESISTANCE = 4;   // Snapshot at max batt resistance over 24hrs.
+        MIN_VOLTAGE = 5;      // Snapshot at min batt voltage over 24hrs.
+        MAX_VOLTAGE = 6;      // Snapshot at max batt voltage over 24hrs.
+        MIN_CURRENT = 7;      // Snapshot at min batt current over 24hrs.
+        MAX_CURRENT = 8;      // Snapshot at max batt current over 24hrs.
+        MIN_BATT_LEVEL = 9;   // Snapshot at min battery level (SoC) over 24hrs.
+        MAX_BATT_LEVEL = 10;  // Snapshot at max battery level (SoC) over 24hrs.
+        AVG_RESISTANCE = 11;  // Snapshot at average battery resistance over 24hrs.
+    }
+    optional BatterySnapshotType type = 1;
+    // Temperature, in 1/10ths of degree C.
+    optional int32 temperature_deci_celcius = 2;
+    // Voltage Battery Voltage, in microVolts.
+    optional int32 voltage_micro_volt = 3;
+    // Current Battery current, in microAmps.
+    optional int32 current_micro_amps = 4;
+    // OpenCircuitVoltage Battery Open Circuit Voltage, in microVolts.
+    optional int32 open_circuit_micro_volt = 5;
+    // Resistance Battery Resistance, in microOhms.
+    optional int32 resistance_micro_ohm = 6;
+    // Level Battery Level, as % of full.
+    optional int32 level_percent = 7;
+}
+
+/**
+ * Log slow I/O operations on the primary storage.
+ */
+message SlowIo {
+    // Classifications of IO Operations.
+    enum IoOperation {
+        UNKNOWN = 0;
+        READ = 1;
+        WRITE = 2;
+        UNMAP = 3;
+        SYNC = 4;
+    }
+    optional IoOperation operation = 1;
+
+    // The number of slow IO operations of this type over 24 hours.
+    optional int32 count = 2;
+}
+
+/**
+ * Log battery caused shutdown with the last recorded voltage.
+ */
+message BatteryCausedShutdown {
+    // The last recorded battery voltage prior to shutdown.
+    optional int32 last_recorded_micro_volt = 1;
 }
 
 /**

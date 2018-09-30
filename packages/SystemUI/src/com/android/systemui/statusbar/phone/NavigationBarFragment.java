@@ -35,6 +35,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.annotation.IdRes;
 import android.annotation.Nullable;
+import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
 import android.app.Fragment;
 import android.app.IActivityManager;
@@ -88,8 +89,8 @@ import com.android.systemui.assist.AssistManager;
 import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.fragments.FragmentHostManager.FragmentListener;
 import com.android.systemui.recents.Recents;
-import com.android.systemui.recents.misc.SysUiTaskStackChangeListener;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
+import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.CommandQueue.Callbacks;
@@ -284,7 +285,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
         mNavigationBarView = (NavigationBarView) view;
 
         mNavigationBarView.setDisabledFlags(mDisabledFlags1);
-        mNavigationBarView.setComponents(mRecents, mDivider, mStatusBar.getPanel());
+        mNavigationBarView.setComponents(mStatusBar.getPanel());
         mNavigationBarView.setOnVerticalChangedListener(this::onVerticalChanged);
         mNavigationBarView.setOnTouchListener(this::onNavigationTouch);
         if (savedInstanceState != null) {
@@ -946,7 +947,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
     private boolean onLongPressRecents() {
         if (mRecents == null || !ActivityTaskManager.supportsMultiWindow(getContext())
                 || !mDivider.getView().getSnapAlgorithm().isSplitScreenFeasible()
-                || Recents.getConfiguration().isLowRamDevice
+                || ActivityManager.isLowRamDeviceStatic()
                 // If we are connected to the overview service, then disable the recents button
                 || mOverviewProxyService.getProxy() != null) {
             return false;
@@ -1110,7 +1111,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
         }
     };
 
-    class TaskStackListenerImpl extends SysUiTaskStackChangeListener {
+    class TaskStackListenerImpl extends TaskStackChangeListener {
         // Invalidate any rotation suggestion on task change or activity orientation change
         // Note: all callbacks happen on main thread
 

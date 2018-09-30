@@ -16,6 +16,7 @@
 
 package com.android.server.wm;
 
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.view.Display.DEFAULT_DISPLAY;
@@ -24,6 +25,8 @@ import static com.android.server.wm.RecentsAnimationController.REORDER_KEEP_IN_P
 import static com.android.server.wm.RecentsAnimationController.REORDER_MOVE_TO_ORIGINAL_POSITION;
 
 import static org.junit.Assert.fail;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.verify;
@@ -33,6 +36,7 @@ import static org.mockito.Mockito.when;
 import android.os.Binder;
 import android.os.IInterface;
 import android.platform.test.annotations.Presubmit;
+import android.util.SparseBooleanArray;
 import android.view.IRecentsAnimationRunner;
 import android.view.SurfaceControl;
 
@@ -107,6 +111,24 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         } catch (Exception e) {
             fail("Unexpected failure when canceling animation after finishing it");
         }
+    }
+
+    @Test
+    public void testIncludedApps_expectTargetAndVisible() throws Exception {
+        sWm.setRecentsAnimationController(mController);
+        final AppWindowToken homeAppWindow = createAppWindowToken(mDisplayContent,
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME);
+        final AppWindowToken appWindow = createAppWindowToken(mDisplayContent,
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
+        final AppWindowToken hiddenAppWindow = createAppWindowToken(mDisplayContent,
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
+        hiddenAppWindow.setHidden(true);
+        mController.initialize(mDisplayContent, ACTIVITY_TYPE_HOME, new SparseBooleanArray());
+
+        // Ensure that we are animating the target activity as well
+        assertTrue(mController.isAnimatingTask(homeAppWindow.getTask()));
+        assertTrue(mController.isAnimatingTask(appWindow.getTask()));
+        assertFalse(mController.isAnimatingTask(hiddenAppWindow.getTask()));
     }
 
     private static void verifyNoMoreInteractionsExceptAsBinder(IInterface binder) {

@@ -941,7 +941,6 @@
          Requesting this by itself is not sufficient to give you
          location access.
          <p>Protection level: dangerous
-         @hide
     -->
     <permission android:name="android.permission.ACCESS_BACKGROUND_LOCATION"
         android:permissionGroup="android.permission-group.LOCATION"
@@ -4144,6 +4143,10 @@
     <permission android:name="android.permission.MONITOR_DEFAULT_SMS_PACKAGE"
         android:protectionLevel="signature" />
 
+    <!-- A subclass of {@link android.app.SmsAppService} must be protected with this permission. -->
+    <permission android:name="android.permission.BIND_SMS_APP_SERVICE"
+        android:protectionLevel="signature" />
+
     <application android:process="system"
                  android:persistent="true"
                  android:hasCode="false"
@@ -4458,14 +4461,6 @@
         <service android:name="android.hardware.location.GeofenceHardwareService"
             android:permission="android.permission.LOCATION_HARDWARE"
             android:exported="false" />
-
-        <service android:name="com.android.internal.backup.LocalTransportService"
-                android:permission="android.permission.CONFIRM_FULL_BACKUP"
-                android:exported="false">
-            <intent-filter>
-                <action android:name="android.backup.TRANSPORT_HOST" />
-            </intent-filter>
-        </service>
 
         <service android:name="com.android.server.MountServiceIdler"
                  android:exported="true"

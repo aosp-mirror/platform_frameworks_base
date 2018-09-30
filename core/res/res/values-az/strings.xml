@@ -528,10 +528,8 @@
   </string-array>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"Tanınmır"</string>
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"Barmaq izi doğrulandı"</string>
-    <!-- no translation found for face_authenticated_no_confirmation_required (4018680978348659031) -->
-    <skip />
-    <!-- no translation found for face_authenticated_confirmation_required (8778347003507633610) -->
-    <skip />
+    <string name="face_authenticated_no_confirmation_required" msgid="4018680978348659031">"Üz doğrulandı"</string>
+    <string name="face_authenticated_confirmation_required" msgid="8778347003507633610">"Üz təsdiq edildi, təsdiq düyməsinə basın"</string>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Barmaq izi üçün avadanlıq yoxdur."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Barmaq izi saxlana bilməz. Lütfən, mövcud barmaq izini silin."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Barmaq izinin vaxtı başa çatdı. Yenidən cəhd edin."</string>
@@ -568,8 +566,7 @@
     <string name="face_error_timeout" msgid="4014326147867150054">"Üz proqramı taymerinin vaxtı bitdi. Yenidən cəhd edin."</string>
     <string name="face_error_no_space" msgid="8224993703466381314">"Üz bərpa edilmədi."</string>
     <string name="face_error_canceled" msgid="283945501061931023">"Üz əməliyyatı ləğv edildi."</string>
-    <!-- no translation found for face_error_user_canceled (8943921120862164539) -->
-    <skip />
+    <string name="face_error_user_canceled" msgid="8943921120862164539">"Üz dorğulaması istifadəçi tərəfindən ləğv edildi."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"Həddindən çox cəhd. Sonraya saxlayın."</string>
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"Həddindən çox cəhd. Üz identifikasiyası deaktiv edildi."</string>
     <string name="face_error_unable_to_process" msgid="238761109287767270">"Yenidən cəhd edin."</string>

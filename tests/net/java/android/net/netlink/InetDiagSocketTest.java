@@ -69,17 +69,12 @@ public class InetDiagSocketTest {
     private ConnectivityManager mCm;
     private Context mContext;
     private final static int SOCKET_TIMEOUT_MS = 100;
-    private boolean mInetDiagUdpEnabled;
 
     @Before
     public void setUp() throws Exception {
         Instrumentation instrumentation = InstrumentationRegistry.getInstrumentation();
         mContext = instrumentation.getTargetContext();
         mCm = (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
-        int expectedUid = Process.myUid();
-        UdpConnection udp = new UdpConnection("127.0.0.1", "127.0.0.2");
-        int uid = mCm.getConnectionOwnerUid(udp.protocol, udp.local, udp.remote);
-        mInetDiagUdpEnabled = (uid == expectedUid);
     }
 
     private class Connection {
@@ -186,11 +181,6 @@ public class InetDiagSocketTest {
         checkConnectionOwnerUid(tcp.protocol, new InetSocketAddress(0), tcp.remote, false);
         checkConnectionOwnerUid(tcp.protocol, tcp.local, new InetSocketAddress(0), false);
         tcp.close();
-
-        /**
-         * TODO: STOPSHIP: Always test for UDP, do not allow opt-out.
-         */
-        if (!mInetDiagUdpEnabled) return;
 
         /**
          * For UDP connections, either a complete match {protocol, local, remote} or a

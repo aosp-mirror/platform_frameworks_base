@@ -28,11 +28,10 @@ import android.text.PrecomputedText;
 import android.text.SpannableString;
 import android.text.SpannedString;
 import android.text.TextUtils;
-import android.view.RecordingCanvas;
 
 /**
  * This class is a base class for Canvas's drawing operations. Any modifications here
- * should be accompanied by a similar modification to {@link RecordingCanvas}.
+ * should be accompanied by a similar modification to {@link BaseRecordingCanvas}.
  *
  * The purpose of this class is to minimize the cost of deciding between regular JNI
  * and @FastNative JNI to just the virtual call that Canvas already has.

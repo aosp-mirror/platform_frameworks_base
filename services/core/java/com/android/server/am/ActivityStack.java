@@ -2450,13 +2450,24 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         if (shouldSleepOrShutDownActivities()
                 && mLastPausedActivity == next
                 && mStackSupervisor.allPausedActivitiesComplete()) {
-            // Make sure we have executed any pending transitions, since there
-            // should be nothing left to do at this point.
-            executeAppTransition(options);
-            if (DEBUG_STATES) Slog.d(TAG_STATES,
-                    "resumeTopActivityLocked: Going to sleep and all paused");
-            if (DEBUG_STACK) mStackSupervisor.validateTopActivitiesLocked();
-            return false;
+            // If the current top activity may be able to occlude keyguard but the occluded state
+            // has not been set, update visibility and check again if we should continue to resume.
+            boolean nothingToResume = true;
+            if (!mService.mShuttingDown && !mTopActivityOccludesKeyguard
+                    && next.canShowWhenLocked()) {
+                ensureActivitiesVisibleLocked(null /* starting */, 0 /* configChanges */,
+                        !PRESERVE_WINDOWS);
+                nothingToResume = shouldSleepActivities();
+            }
+            if (nothingToResume) {
+                // Make sure we have executed any pending transitions, since there
+                // should be nothing left to do at this point.
+                executeAppTransition(options);
+                if (DEBUG_STATES) Slog.d(TAG_STATES,
+                        "resumeTopActivityLocked: Going to sleep and all paused");
+                if (DEBUG_STACK) mStackSupervisor.validateTopActivitiesLocked();
+                return false;
+            }
         }
 
         // Make sure that the user who owns this activity is started.  If not,

@@ -25,7 +25,6 @@ import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Point;
 import android.graphics.Rect;
-import android.graphics.drawable.AnimatedVectorDrawable;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
@@ -914,8 +913,7 @@ public final class ThreadedRenderer {
         nRegisterAnimatingRenderNode(mRootNode.mNativeRenderNode, animator.mNativeRenderNode);
     }
 
-    void registerVectorDrawableAnimator(
-        AnimatedVectorDrawable.VectorDrawableAnimatorRT animator) {
+    void registerVectorDrawableAnimator(NativeVectorDrawableAnimator animator) {
         nRegisterVectorDrawableAnimator(mRootNode.mNativeRenderNode,
                 animator.getAnimatorNativePtr());
     }
@@ -974,6 +972,25 @@ public final class ThreadedRenderer {
         } finally {
             super.finalize();
         }
+    }
+
+    /** The root of everything */
+    public @NonNull RenderNode getRootNode() {
+        return mRootNode;
+    }
+
+    private boolean mForceDark = false;
+
+    /**
+     * Whether or not the force-dark feature should be used for this renderer.
+     */
+    public boolean setForceDark(boolean enable) {
+        if (mForceDark != enable) {
+            mForceDark = enable;
+            nSetForceDark(mNativeProxy, enable);
+            return true;
+        }
+        return false;
     }
 
     /**
@@ -1255,4 +1272,5 @@ public final class ThreadedRenderer {
     private static native void nSetIsolatedProcess(boolean enabled);
     private static native void nSetContextPriority(int priority);
     private static native void nAllocateBuffers(long nativeProxy, Surface window);
+    private static native void nSetForceDark(long nativeProxy, boolean enabled);
 }

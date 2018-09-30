@@ -28,6 +28,11 @@ void setDriverPath(JNIEnv* env, jobject clazz, jstring path) {
     android::GraphicsEnv::getInstance().setDriverPath(pathChars.c_str());
 }
 
+void setAnglePath(JNIEnv* env, jobject clazz, jstring path) {
+    ScopedUtfChars pathChars(env, path);
+    android::GraphicsEnv::getInstance().setAnglePath(pathChars.c_str());
+}
+
 void setLayerPaths_native(JNIEnv* env, jobject clazz, jobject classLoader, jstring layerPaths) {
     android::NativeLoaderNamespace* appNamespace = android::FindNativeLoaderNamespaceByClassLoader(
         env, classLoader);
@@ -44,6 +49,7 @@ void setDebugLayers_native(JNIEnv* env, jobject clazz, jstring layers) {
 
 const JNINativeMethod g_methods[] = {
     { "setDriverPath", "(Ljava/lang/String;)V", reinterpret_cast<void*>(setDriverPath) },
+    { "setAnglePath", "(Ljava/lang/String;)V", reinterpret_cast<void*>(setAnglePath) },
     { "setLayerPaths", "(Ljava/lang/ClassLoader;Ljava/lang/String;)V", reinterpret_cast<void*>(setLayerPaths_native) },
     { "setDebugLayers", "(Ljava/lang/String;)V", reinterpret_cast<void*>(setDebugLayers_native) },
 };

@@ -528,10 +528,8 @@
   </string-array>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"認識されませんでした"</string>
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"指紋認証を完了しました"</string>
-    <!-- no translation found for face_authenticated_no_confirmation_required (4018680978348659031) -->
-    <skip />
-    <!-- no translation found for face_authenticated_confirmation_required (8778347003507633610) -->
-    <skip />
+    <string name="face_authenticated_no_confirmation_required" msgid="4018680978348659031">"顔を認証しました"</string>
+    <string name="face_authenticated_confirmation_required" msgid="8778347003507633610">"顔を認証しました。[確認] を押してください"</string>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"指紋ハードウェアは使用できません。"</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"指紋を保存できません。既存の指紋を削除してください。"</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"指紋の読み取りがタイムアウトになりました。もう一度お試しください。"</string>
@@ -568,8 +566,7 @@
     <string name="face_error_timeout" msgid="4014326147867150054">"読み取りのタイムアウトです。もう一度お試しください。"</string>
     <string name="face_error_no_space" msgid="8224993703466381314">"顔の情報を保存できません。"</string>
     <string name="face_error_canceled" msgid="283945501061931023">"顔の操作をキャンセルしました。"</string>
-    <!-- no translation found for face_error_user_canceled (8943921120862164539) -->
-    <skip />
+    <string name="face_error_user_canceled" msgid="8943921120862164539">"顔の認証がユーザーによりキャンセルされました。"</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"試行回数の上限です。後でもう一度お試しください。"</string>
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"試行回数の上限です。顔認証は無効になりました。"</string>
     <string name="face_error_unable_to_process" msgid="238761109287767270">"もう一度お試しください。"</string>

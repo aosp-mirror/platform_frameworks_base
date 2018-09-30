@@ -25,6 +25,7 @@
 #include <binder/IServiceManager.h>
 #include <binder/ProcessState.h>
 #include <binder/Status.h>
+#include <hidl/HidlTransportSupport.h>
 #include <utils/Looper.h>
 #include <utils/StrongPointer.h>
 
@@ -56,12 +57,21 @@ int main(int /*argc*/, char** /*argv*/) {
     ps->giveThreadPoolName();
     IPCThreadState::self()->disableBackgroundScheduling(true);
 
+    ::android::hardware::configureRpcThreadpool(1 /*threads*/, false /*willJoin*/);
+
     // Create the service
     sp<StatsService> service = new StatsService(looper);
     if (defaultServiceManager()->addService(String16("stats"), service) != 0) {
-        ALOGE("Failed to add service");
+        ALOGE("Failed to add service as AIDL service");
         return -1;
     }
+
+    auto ret = service->registerAsService();
+    if (ret != ::android::OK) {
+        ALOGE("Failed to add service as HIDL service");
+        return 1; // or handle error
+    }
+
     service->sayHiToStatsCompanion();
 
     service->Startup();

@@ -42,10 +42,8 @@ import android.view.MagnificationSpec;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Builder;
 import android.view.SurfaceSession;
-
 import com.android.internal.util.ToBooleanFunction;
 import com.android.server.wm.SurfaceAnimator.Animatable;
-
 import java.io.PrintWriter;
 import java.util.Comparator;
 import java.util.LinkedList;
@@ -71,7 +69,8 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
     /**
      * Animation layer that is reserved for {@link WindowConfiguration#ACTIVITY_TYPE_HOME}
-     * activities that happens below all {@link TaskStack}s.
+     * activities and all activities that are being controlled by the recents animation. This
+     * layer is generally below all {@link TaskStack}s.
      */
     static final int ANIMATION_LAYER_HOME = 2;
 

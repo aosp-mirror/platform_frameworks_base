@@ -531,10 +531,8 @@
   </string-array>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"Nu este recunoscut"</string>
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"Amprentă autentificată"</string>
-    <!-- no translation found for face_authenticated_no_confirmation_required (4018680978348659031) -->
-    <skip />
-    <!-- no translation found for face_authenticated_confirmation_required (8778347003507633610) -->
-    <skip />
+    <string name="face_authenticated_no_confirmation_required" msgid="4018680978348659031">"Chip autentificat"</string>
+    <string name="face_authenticated_confirmation_required" msgid="8778347003507633610">"Chip autentificat, apăsați Confirmați"</string>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Hardware-ul pentru amprentă nu este disponibil."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Amprenta nu poate fi stocată. Eliminați o amprentă existentă."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Timpul pentru amprentare a expirat. Încercați din nou."</string>
@@ -571,8 +569,7 @@
     <string name="face_error_timeout" msgid="4014326147867150054">"Timpul pentru reunoaștere facială a expirat. Încercați din nou."</string>
     <string name="face_error_no_space" msgid="8224993703466381314">"Chipul nu poate fi stocat."</string>
     <string name="face_error_canceled" msgid="283945501061931023">"Operațiunea privind chipul a fost anulată."</string>
-    <!-- no translation found for face_error_user_canceled (8943921120862164539) -->
-    <skip />
+    <string name="face_error_user_canceled" msgid="8943921120862164539">"Autentificarea chipului anulată de utilizator."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"Prea multe încercări. Reîncercați mai târziu."</string>
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"Prea multe încercări. Autentificarea facială este dezactivată."</string>
     <string name="face_error_unable_to_process" msgid="238761109287767270">"Încercați din nou."</string>

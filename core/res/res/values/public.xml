@@ -2912,6 +2912,7 @@
         <!-- @hide For use by platform and tools only. Developers should not specify this value. -->
         <public name="usesNonSdkApi" />
         <public name="minimumUiTimeout" />
+        <public name="isLightTheme" />
     </public-group>
 
     <public-group type="drawable" first-id="0x010800b4">

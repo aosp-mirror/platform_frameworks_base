@@ -528,10 +528,8 @@
   </string-array>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"Ez da ezagutu"</string>
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"Autentifikatu da hatz-marka"</string>
-    <!-- no translation found for face_authenticated_no_confirmation_required (4018680978348659031) -->
-    <skip />
-    <!-- no translation found for face_authenticated_confirmation_required (8778347003507633610) -->
-    <skip />
+    <string name="face_authenticated_no_confirmation_required" msgid="4018680978348659031">"Autentifikatu da aurpegia"</string>
+    <string name="face_authenticated_confirmation_required" msgid="8778347003507633610">"Autentifikatu da aurpegia; sakatu Berretsi"</string>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Hatz-markaren hardwarea ez dago erabilgarri."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Ezin da gorde hatz-marka digitala. Kendu lehendik gordeta duzunetako bat."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Hatz-marka digitalak prozesatzeko denbora-muga gainditu da. Saiatu berriro."</string>
@@ -568,8 +566,7 @@
     <string name="face_error_timeout" msgid="4014326147867150054">"Gainditu da aurpegiak prozesatzeko denbora-muga. Saiatu berriro."</string>
     <string name="face_error_no_space" msgid="8224993703466381314">"Ezin da gorde aurpegia."</string>
     <string name="face_error_canceled" msgid="283945501061931023">"Utzi da aurpegiaren bidezko eragiketa."</string>
-    <!-- no translation found for face_error_user_canceled (8943921120862164539) -->
-    <skip />
+    <string name="face_error_user_canceled" msgid="8943921120862164539">"Erabiltzaileak utzi du aurpegi-autentifikazioa."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"Saiakera gehiegi egin dituzu. Saiatu berriro geroago."</string>
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"Saiakera gehiegi egin dituzu. Desgaitu egin da autentifikazioa."</string>
     <string name="face_error_unable_to_process" msgid="238761109287767270">"Saiatu berriro."</string>
@@ -1139,7 +1136,7 @@
     <string name="aerr_application_repeated" msgid="3146328699537439573">"Behin eta berriz gelditzen ari da <xliff:g id="APPLICATION">%1$s</xliff:g>"</string>
     <string name="aerr_process_repeated" msgid="6235302956890402259">"Behin eta berriz gelditzen ari da <xliff:g id="PROCESS">%1$s</xliff:g>"</string>
     <string name="aerr_restart" msgid="7581308074153624475">"Ireki aplikazioa berriro"</string>
-    <string name="aerr_report" msgid="5371800241488400617">"Bidali iritzia"</string>
+    <string name="aerr_report" msgid="5371800241488400617">"Bidali oharrak"</string>
     <string name="aerr_close" msgid="2991640326563991340">"Itxi"</string>
     <string name="aerr_mute" msgid="1974781923723235953">"Ezkutatu gailua berrabiarazi arte"</string>
     <string name="aerr_wait" msgid="3199956902437040261">"Itxaron"</string>

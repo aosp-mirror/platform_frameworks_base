@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.systemui.recents.misc;
+package com.android.systemui.pip.phone;
 
 import android.os.Handler;
 import android.os.HandlerThread;

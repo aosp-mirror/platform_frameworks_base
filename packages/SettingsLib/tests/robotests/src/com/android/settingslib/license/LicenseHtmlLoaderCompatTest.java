@@ -142,7 +142,7 @@ public class LicenseHtmlLoaderCompatTest {
         }
 
         @Implementation
-        static boolean generateHtmlFile(List<File> xmlFiles, File htmlFile) {
+        static boolean generateHtmlFile(Context context, List<File> xmlFiles, File htmlFile) {
             return sGenerateHtmlFileSucceeded;
         }
     }

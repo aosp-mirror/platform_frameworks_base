@@ -51,6 +51,7 @@ import android.util.Property;
 import android.util.TimeUtils;
 import android.view.Choreographer;
 import android.view.DisplayListCanvas;
+import android.view.NativeVectorDrawableAnimator;
 import android.view.RenderNode;
 import android.view.RenderNodeAnimatorSetHelper;
 import android.view.View;
@@ -1231,7 +1232,8 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
     /**
      * @hide
      */
-    public static class VectorDrawableAnimatorRT implements VectorDrawableAnimator {
+    public static class VectorDrawableAnimatorRT implements VectorDrawableAnimator,
+            NativeVectorDrawableAnimator {
         private static final int START_ANIMATION = 1;
         private static final int REVERSE_ANIMATION = 2;
         private static final int RESET_ANIMATION = 3;
@@ -1704,6 +1706,7 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
             }
         }
 
+        @Override
         public long getAnimatorNativePtr() {
             return mSetPtr;
         }

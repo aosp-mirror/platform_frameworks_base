@@ -31,8 +31,7 @@ oneway interface IRecentsNonSystemUserCallbacks {
     void hideRecents(boolean triggeredFromAltTab, boolean triggeredFromHomeKey);
     void toggleRecents(int recentsGrowTarget);
     void onConfigurationChanged();
-    void splitPrimaryTask(int topTaskId, int dragMode, int stackCreateMode,
-            in Rect initialBounds);
+    void splitPrimaryTask(int topTaskId, int stackCreateMode, in Rect initialBounds);
     void onDraggingInRecents(float distanceFromTop);
     void onDraggingInRecentsEnded(float velocity);
     void showCurrentUserToast(int msgResId, int msgLength);

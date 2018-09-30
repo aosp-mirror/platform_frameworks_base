@@ -992,6 +992,60 @@ Status StatsService::sendAppBreadcrumbAtom(int32_t label, int32_t state) {
     return Status::ok();
 }
 
+hardware::Return<void> StatsService::reportSpeakerImpedance(
+        const SpeakerImpedance& speakerImpedance) {
+    LogEvent event(getWallClockSec() * NS_PER_SEC, getElapsedRealtimeNs(), speakerImpedance);
+    mProcessor->OnLogEvent(&event);
+
+    return hardware::Void();
+}
+
+hardware::Return<void> StatsService::reportHardwareFailed(const HardwareFailed& hardwareFailed) {
+    LogEvent event(getWallClockSec() * NS_PER_SEC, getElapsedRealtimeNs(), hardwareFailed);
+    mProcessor->OnLogEvent(&event);
+
+    return hardware::Void();
+}
+
+hardware::Return<void> StatsService::reportPhysicalDropDetected(
+        const PhysicalDropDetected& physicalDropDetected) {
+    LogEvent event(getWallClockSec() * NS_PER_SEC, getElapsedRealtimeNs(), physicalDropDetected);
+    mProcessor->OnLogEvent(&event);
+
+    return hardware::Void();
+}
+
+hardware::Return<void> StatsService::reportChargeCycles(const ChargeCycles& chargeCycles) {
+    LogEvent event(getWallClockSec() * NS_PER_SEC, getElapsedRealtimeNs(), chargeCycles);
+    mProcessor->OnLogEvent(&event);
+
+    return hardware::Void();
+}
+
+hardware::Return<void> StatsService::reportBatteryHealthSnapshot(
+        const BatteryHealthSnapshotArgs& batteryHealthSnapshotArgs) {
+    LogEvent event(getWallClockSec() * NS_PER_SEC, getElapsedRealtimeNs(),
+                   batteryHealthSnapshotArgs);
+    mProcessor->OnLogEvent(&event);
+
+    return hardware::Void();
+}
+
+hardware::Return<void> StatsService::reportSlowIo(const SlowIo& slowIo) {
+    LogEvent event(getWallClockSec() * NS_PER_SEC, getElapsedRealtimeNs(), slowIo);
+    mProcessor->OnLogEvent(&event);
+
+    return hardware::Void();
+}
+
+hardware::Return<void> StatsService::reportBatteryCausedShutdown(
+        const BatteryCausedShutdown& batteryCausedShutdown) {
+    LogEvent event(getWallClockSec() * NS_PER_SEC, getElapsedRealtimeNs(), batteryCausedShutdown);
+    mProcessor->OnLogEvent(&event);
+
+    return hardware::Void();
+}
+
 void StatsService::binderDied(const wp <IBinder>& who) {
     ALOGW("statscompanion service died");
     StatsdStats::getInstance().noteSystemServerRestart(getWallClockSec());

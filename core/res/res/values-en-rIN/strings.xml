@@ -528,10 +528,8 @@
   </string-array>
     <string name="biometric_not_recognized" msgid="5770511773560736082">"Not recognised"</string>
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"Fingerprint authenticated"</string>
-    <!-- no translation found for face_authenticated_no_confirmation_required (4018680978348659031) -->
-    <skip />
-    <!-- no translation found for face_authenticated_confirmation_required (8778347003507633610) -->
-    <skip />
+    <string name="face_authenticated_no_confirmation_required" msgid="4018680978348659031">"Face authenticated"</string>
+    <string name="face_authenticated_confirmation_required" msgid="8778347003507633610">"Face authenticated. Please press confirm"</string>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Fingerprint hardware not available."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Fingerprint can\'t be stored. Please remove an existing fingerprint."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Fingerprint timeout reached. Try again."</string>
@@ -568,8 +566,7 @@
     <string name="face_error_timeout" msgid="4014326147867150054">"Face time out reached. Try again."</string>
     <string name="face_error_no_space" msgid="8224993703466381314">"Face can’t be stored."</string>
     <string name="face_error_canceled" msgid="283945501061931023">"Face operation cancelled."</string>
-    <!-- no translation found for face_error_user_canceled (8943921120862164539) -->
-    <skip />
+    <string name="face_error_user_canceled" msgid="8943921120862164539">"Face authentication cancelled by user."</string>
     <string name="face_error_lockout" msgid="3407426963155388504">"Too many attempts. Try again later."</string>
     <string name="face_error_lockout_permanent" msgid="8198354656746088890">"Too many attempts. Facial authentication disabled."</string>
     <string name="face_error_unable_to_process" msgid="238761109287767270">"Try again."</string>

@@ -167,6 +167,12 @@ bool SkiaOpenGLPipeline::setSurface(Surface* surface, SwapBehavior swapBehavior,
         mEglSurface = mEglManager.createSurface(surface, colorMode);
     }
 
+    if (colorMode == ColorMode::SRGB) {
+        mSurfaceColorType = SkColorType::kN32_SkColorType;
+    } else if (colorMode == ColorMode::WideColorGamut) {
+        mSurfaceColorType = SkColorType::kRGBA_F16_SkColorType;
+    }
+
     if (mEglSurface != EGL_NO_SURFACE) {
         const bool preserveBuffer = (swapBehavior != SwapBehavior::kSwap_discardBuffer);
         mBufferPreserved = mEglManager.setPreserveBuffer(mEglSurface, preserveBuffer);
@@ -182,14 +188,6 @@ bool SkiaOpenGLPipeline::isSurfaceReady() {
 
 bool SkiaOpenGLPipeline::isContextReady() {
     return CC_LIKELY(mEglManager.hasEglContext());
-}
-
-SkColorType SkiaOpenGLPipeline::getSurfaceColorType() const {
-    return mEglManager.getSurfaceColorType();
-}
-
-sk_sp<SkColorSpace> SkiaOpenGLPipeline::getSurfaceColorSpace() {
-    return mEglManager.getSurfaceColorSpace();
 }
 
 void SkiaOpenGLPipeline::invokeFunctor(const RenderThread& thread, Functor* functor) {

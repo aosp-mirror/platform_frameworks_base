@@ -473,8 +473,8 @@ static void android_view_RenderNode_endAllAnimators(JNIEnv* env, jobject clazz,
 // SurfaceView position callback
 // ----------------------------------------------------------------------------
 
-jmethodID gSurfaceViewPositionUpdateMethod;
-jmethodID gSurfaceViewPositionLostMethod;
+jmethodID gPositionListener_PositionChangedMethod;
+jmethodID gPositionListener_PositionLostMethod;
 
 static void android_view_RenderNode_requestPositionUpdates(JNIEnv* env, jobject,
         jlong renderNodePtr, jobject surfaceview) {
@@ -531,7 +531,7 @@ static void android_view_RenderNode_requestPositionUpdates(JNIEnv* env, jobject,
                 return;
             }
 
-            env->CallVoidMethod(localref, gSurfaceViewPositionLostMethod,
+            env->CallVoidMethod(localref, gPositionListener_PositionLostMethod,
                     info ? info->canvasContext.getFrameNumber() : 0);
             env->DeleteLocalRef(localref);
         }
@@ -555,7 +555,7 @@ static void android_view_RenderNode_requestPositionUpdates(JNIEnv* env, jobject,
                 env->DeleteWeakGlobalRef(mWeakRef);
                 mWeakRef = nullptr;
             } else {
-                env->CallVoidMethod(localref, gSurfaceViewPositionUpdateMethod,
+                env->CallVoidMethod(localref, gPositionListener_PositionChangedMethod,
                         frameNumber, left, top, right, bottom);
                 env->DeleteLocalRef(localref);
             }
@@ -588,7 +588,7 @@ static const JNINativeMethod gMethods[] = {
     { "nGetDebugSize",         "(J)I",    (void*) android_view_RenderNode_getDebugSize },
     { "nAddAnimator",              "(JJ)V", (void*) android_view_RenderNode_addAnimator },
     { "nEndAllAnimators",          "(J)V", (void*) android_view_RenderNode_endAllAnimators },
-    { "nRequestPositionUpdates",   "(JLandroid/view/SurfaceView;)V", (void*) android_view_RenderNode_requestPositionUpdates },
+    { "nRequestPositionUpdates",   "(JLandroid/view/RenderNode$PositionUpdateListener;)V", (void*) android_view_RenderNode_requestPositionUpdates },
     { "nSetDisplayList",       "(JJ)V",   (void*) android_view_RenderNode_setDisplayList },
 
 
@@ -677,11 +677,11 @@ static const JNINativeMethod gMethods[] = {
 };
 
 int register_android_view_RenderNode(JNIEnv* env) {
-    jclass clazz = FindClassOrDie(env, "android/view/SurfaceView");
-    gSurfaceViewPositionUpdateMethod = GetMethodIDOrDie(env, clazz,
-            "updateSurfacePosition_renderWorker", "(JIIII)V");
-    gSurfaceViewPositionLostMethod = GetMethodIDOrDie(env, clazz,
-            "surfacePositionLost_uiRtSync", "(J)V");
+    jclass clazz = FindClassOrDie(env, "android/view/RenderNode$PositionUpdateListener");
+    gPositionListener_PositionChangedMethod = GetMethodIDOrDie(env, clazz,
+            "positionChanged", "(JIIII)V");
+    gPositionListener_PositionLostMethod = GetMethodIDOrDie(env, clazz,
+            "positionLost", "(J)V");
     return RegisterMethodsOrDie(env, kClassPathName, gMethods, NELEM(gMethods));
 }
 

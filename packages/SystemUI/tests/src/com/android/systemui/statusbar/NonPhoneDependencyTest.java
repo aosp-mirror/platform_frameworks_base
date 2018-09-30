@@ -79,13 +79,14 @@ public class NonPhoneDependencyTest extends SysuiTestCase {
                 Dependency.get(NotificationLockscreenUserManager.class);
         NotificationViewHierarchyManager viewHierarchyManager =
                 Dependency.get(NotificationViewHierarchyManager.class);
+        NotificationGroupManager groupManager = Dependency.get(NotificationGroupManager.class);
 
         when(mPresenter.getNotificationLockscreenUserManager()).thenReturn(lockscreenUserManager);
-        when(mPresenter.getGroupManager()).thenReturn(
-                Dependency.get(NotificationGroupManager.class));
+        when(mPresenter.getGroupManager()).thenReturn(groupManager);
 
         entryManager.setUpWithPresenter(mPresenter, mListContainer, mEntryManagerCallback,
                 mHeadsUpManager);
+        groupManager.setHeadsUpManager(mHeadsUpManager);
         gutsManager.setUpWithPresenter(mPresenter, mListContainer, mCheckSaveListener,
                 mOnClickListener);
         notificationLogger.setUpWithEntryManager(entryManager, mListContainer);
