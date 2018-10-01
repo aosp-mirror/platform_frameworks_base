@@ -2808,20 +2808,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 }
             }
 
-            // TODO: remove this code once we know that the Slog.wtf is never hit.
-            //
-            // Find all networks that are satisfying this request and remove the request
-            // from their request lists.
-            // TODO - it's my understanding that for a request there is only a single
-            // network satisfying it, so this loop is wasteful
-            for (NetworkAgentInfo otherNai : mNetworkAgentInfos.values()) {
-                if (otherNai.isSatisfyingRequest(nri.request.requestId) && otherNai != nai) {
-                    Slog.wtf(TAG, "Request " + nri.request + " satisfied by " +
-                            otherNai.name() + ", but mNetworkAgentInfos says " +
-                            (nai != null ? nai.name() : "null"));
-                }
-            }
-
             // Maintain the illusion.  When this request arrived, we might have pretended
             // that a network connected to serve it, even though the network was already
             // connected.  Now that this request has gone away, we might have to pretend
