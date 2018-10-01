@@ -475,6 +475,18 @@ public class UpstreamNetworkMonitorTest {
         assertPrefixSet(local, EXCLUDES, wifiLinkPrefixes);
         assertPrefixSet(local, INCLUDES, cellLinkPrefixes);
         assertPrefixSet(local, INCLUDES, dunLinkPrefixes);
+
+        // [5] Pretend mobile disconnected.
+        cellAgent.fakeDisconnect();
+        local = mUNM.getLocalPrefixes();
+        assertPrefixSet(local, EXCLUDES, wifiLinkPrefixes);
+        assertPrefixSet(local, EXCLUDES, cellLinkPrefixes);
+        assertPrefixSet(local, INCLUDES, dunLinkPrefixes);
+
+        // [6] Pretend DUN disconnected.
+        dunAgent.fakeDisconnect();
+        local = mUNM.getLocalPrefixes();
+        assertTrue(local.isEmpty());
     }
 
     private void assertSatisfiesLegacyType(int legacyType, NetworkState ns) {
