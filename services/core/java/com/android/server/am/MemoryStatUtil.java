@@ -38,6 +38,7 @@ import java.util.regex.Pattern;
  */
 final class MemoryStatUtil {
     static final int BYTES_IN_KILOBYTE = 1024;
+    static final int PAGE_SIZE = 4096;
 
     private static final String TAG = TAG_WITH_CLASS_NAME ? "MemoryStatUtil" : TAG_AM;
 
@@ -68,7 +69,7 @@ final class MemoryStatUtil {
 
     private static final int PGFAULT_INDEX = 9;
     private static final int PGMAJFAULT_INDEX = 11;
-    private static final int RSS_IN_BYTES_INDEX = 23;
+    private static final int RSS_IN_PAGES_INDEX = 23;
 
     private MemoryStatUtil() {}
 
@@ -146,15 +147,15 @@ final class MemoryStatUtil {
         final MemoryStat memoryStat = new MemoryStat();
         Matcher m;
         m = PGFAULT.matcher(memoryStatContents);
-        memoryStat.pgfault = m.find() ? Long.valueOf(m.group(1)) : 0;
+        memoryStat.pgfault = m.find() ? Long.parseLong(m.group(1)) : 0;
         m = PGMAJFAULT.matcher(memoryStatContents);
-        memoryStat.pgmajfault = m.find() ? Long.valueOf(m.group(1)) : 0;
+        memoryStat.pgmajfault = m.find() ? Long.parseLong(m.group(1)) : 0;
         m = RSS_IN_BYTES.matcher(memoryStatContents);
-        memoryStat.rssInBytes = m.find() ? Long.valueOf(m.group(1)) : 0;
+        memoryStat.rssInBytes = m.find() ? Long.parseLong(m.group(1)) : 0;
         m = CACHE_IN_BYTES.matcher(memoryStatContents);
-        memoryStat.cacheInBytes = m.find() ? Long.valueOf(m.group(1)) : 0;
+        memoryStat.cacheInBytes = m.find() ? Long.parseLong(m.group(1)) : 0;
         m = SWAP_IN_BYTES.matcher(memoryStatContents);
-        memoryStat.swapInBytes = m.find() ? Long.valueOf(m.group(1)) : 0;
+        memoryStat.swapInBytes = m.find() ? Long.parseLong(m.group(1)) : 0;
         return memoryStat;
     }
 
@@ -163,7 +164,12 @@ final class MemoryStatUtil {
         if (memoryMaxUsageContents == null || memoryMaxUsageContents.isEmpty()) {
             return 0;
         }
-        return Long.valueOf(memoryMaxUsageContents);
+        try {
+            return Long.parseLong(memoryMaxUsageContents);
+        } catch (NumberFormatException e) {
+            Slog.e(TAG, "Failed to parse value", e);
+            return 0;
+        }
     }
 
     /**
@@ -181,11 +187,16 @@ final class MemoryStatUtil {
             return null;
         }
 
-        final MemoryStat memoryStat = new MemoryStat();
-        memoryStat.pgfault = Long.valueOf(splits[PGFAULT_INDEX]);
-        memoryStat.pgmajfault = Long.valueOf(splits[PGMAJFAULT_INDEX]);
-        memoryStat.rssInBytes = Long.valueOf(splits[RSS_IN_BYTES_INDEX]);
-        return memoryStat;
+        try {
+            final MemoryStat memoryStat = new MemoryStat();
+            memoryStat.pgfault = Long.parseLong(splits[PGFAULT_INDEX]);
+            memoryStat.pgmajfault = Long.parseLong(splits[PGMAJFAULT_INDEX]);
+            memoryStat.rssInBytes = Long.parseLong(splits[RSS_IN_PAGES_INDEX]) * PAGE_SIZE;
+            return memoryStat;
+        } catch (NumberFormatException e) {
+            Slog.e(TAG, "Failed to parse value", e);
+            return null;
+        }
     }
 
     /**
@@ -199,7 +210,7 @@ final class MemoryStatUtil {
         }
         Matcher m = RSS_HIGH_WATERMARK_IN_BYTES.matcher(procStatusContents);
         // Convert value read from /proc/pid/status from kilobytes to bytes.
-        return m.find() ? Long.valueOf(m.group(1)) * BYTES_IN_KILOBYTE : 0;
+        return m.find() ? Long.parseLong(m.group(1)) * BYTES_IN_KILOBYTE : 0;
     }
 
     /**
