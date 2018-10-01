@@ -30,8 +30,6 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
 
-import java.util.concurrent.atomic.AtomicBoolean;
-
 /**
  * A class that acts as a broker for the ContextHubClient, which handles messaging and life-cycle
  * notification callbacks. This class implements the IContextHubClient object, and the implemented
@@ -69,14 +67,15 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
     private final short mHostEndPointId;
 
     /*
-     * The remote callback interface for this client.
+     * The remote callback interface for this client. This will be set to null whenever the
+     * client connection is closed (either explicitly or via binder death).
      */
-    private final IContextHubClientCallback mCallbackInterface;
+    private IContextHubClientCallback mCallbackInterface = null;
 
     /*
-     * false if the connection has been closed by the client, true otherwise.
+     * True if the client is still registered with the Context Hub Service, false otherwise.
      */
-    private final AtomicBoolean mConnectionOpen = new AtomicBoolean(true);
+    private boolean mRegistered = true;
 
     /*
      * Internal interface used to invoke client callbacks.
@@ -102,8 +101,10 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
      *
      * @throws RemoteException if the client has already died
      */
-    /* package */ void attachDeathRecipient() throws RemoteException {
-        mCallbackInterface.asBinder().linkToDeath(this, 0 /* flags */);
+    /* package */ synchronized void attachDeathRecipient() throws RemoteException {
+        if (mCallbackInterface != null) {
+            mCallbackInterface.asBinder().linkToDeath(this, 0 /* flags */);
+        }
     }
 
     /**
@@ -118,9 +119,13 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
         ContextHubServiceUtil.checkPermissions(mContext);
 
         int result;
-        if (mConnectionOpen.get()) {
-            ContextHubMsg messageToNanoApp = ContextHubServiceUtil.createHidlContextHubMessage(
-                    mHostEndPointId, message);
+        IContextHubClientCallback callback = null;
+        synchronized (this) {
+            callback = mCallbackInterface;
+        }
+        if (callback != null) {
+            ContextHubMsg messageToNanoApp =
+                    ContextHubServiceUtil.createHidlContextHubMessage(mHostEndPointId, message);
 
             int contextHubId = mAttachedContextHubInfo.getId();
             try {
@@ -139,22 +144,22 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
     }
 
     /**
-     * @param intent the intent to register
-     * @param nanoAppId the ID of the nanoapp to send events for
+     * @param pendingIntent the intent to register
+     * @param nanoAppId     the ID of the nanoapp to send events for
      * @return true on success, false otherwise
      */
     @Override
-    public boolean registerIntent(PendingIntent intent, long nanoAppId) {
+    public boolean registerIntent(PendingIntent pendingIntent, long nanoAppId) {
         // TODO: Implement this
         return false;
     }
 
     /**
-     * @param intent the intent to unregister
+     * @param pendingIntent the intent to unregister
      * @return true on success, false otherwise
      */
     @Override
-    public boolean unregisterIntent(PendingIntent intent) {
+    public boolean unregisterIntent(PendingIntent pendingIntent) {
         // TODO: Implement this
         return false;
     }
@@ -164,8 +169,15 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
      */
     @Override
     public void close() {
-        if (mConnectionOpen.getAndSet(false)) {
-            mClientManager.unregisterClient(mHostEndPointId);
+        synchronized (this) {
+            if (mCallbackInterface != null) {
+                mCallbackInterface.asBinder().unlinkToDeath(this, 0 /* flags */);
+                mCallbackInterface = null;
+            }
+            if (mRegistered) {
+                mClientManager.unregisterClient(mHostEndPointId);
+                mRegistered = false;
+            }
         }
     }
 
@@ -197,7 +209,7 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
      * @param message the message that came from a nanoapp
      */
     /* package */ void sendMessageToClient(NanoAppMessage message) {
-        invokeCallbackConcurrent(callback -> callback.onMessageFromNanoApp(message));
+        invokeCallback(callback -> callback.onMessageFromNanoApp(message));
     }
 
     /**
@@ -206,7 +218,7 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
      * @param nanoAppId the ID of the nanoapp that was loaded.
      */
     /* package */ void onNanoAppLoaded(long nanoAppId) {
-        invokeCallbackConcurrent(callback -> callback.onNanoAppLoaded(nanoAppId));
+        invokeCallback(callback -> callback.onNanoAppLoaded(nanoAppId));
     }
 
     /**
@@ -215,14 +227,14 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
      * @param nanoAppId the ID of the nanoapp that was unloaded.
      */
     /* package */ void onNanoAppUnloaded(long nanoAppId) {
-        invokeCallbackConcurrent(callback -> callback.onNanoAppUnloaded(nanoAppId));
+        invokeCallback(callback -> callback.onNanoAppUnloaded(nanoAppId));
     }
 
     /**
      * Notifies the client of a hub reset event if the connection is open.
      */
     /* package */ void onHubReset() {
-        invokeCallbackConcurrent(callback -> callback.onHubReset());
+        invokeCallback(callback -> callback.onHubReset());
     }
 
     /**
@@ -232,7 +244,7 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
      * @param abortCode the nanoapp specific abort code
      */
     /* package */ void onNanoAppAborted(long nanoAppId, int abortCode) {
-        invokeCallbackConcurrent(callback -> callback.onNanoAppAborted(nanoAppId, abortCode));
+        invokeCallback(callback -> callback.onNanoAppAborted(nanoAppId, abortCode));
     }
 
     /**
@@ -240,8 +252,8 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
      *
      * @param consumer the consumer specifying the callback to invoke
      */
-    private void invokeCallbackConcurrent(CallbackConsumer consumer) {
-        if (mConnectionOpen.get()) {
+    private synchronized void invokeCallback(CallbackConsumer consumer) {
+        if (mCallbackInterface != null) {
             try {
                 consumer.accept(mCallbackInterface);
             } catch (RemoteException e) {
