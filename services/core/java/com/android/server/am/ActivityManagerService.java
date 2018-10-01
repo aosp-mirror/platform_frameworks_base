@@ -368,7 +368,6 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
-import java.lang.ref.WeakReference;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -7637,7 +7636,23 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             }
 
-            boolean providerRunning = cpr != null && cpr.proc != null && !cpr.proc.killed;
+            boolean providerRunning = false;
+
+            if (cpr != null && cpr.proc != null) {
+                providerRunning = !cpr.proc.killed;
+
+                // Note if killedByAm is also set, this means the provider process has just been
+                // killed by AM (in ProcessRecord.kill()), but appDiedLocked() hasn't been called
+                // yet. So we need to call appDiedLocked() here and let it clean up.
+                // (See the commit message on I2c4ba1e87c2d47f2013befff10c49b3dc337a9a7 to see
+                // how to test this case.)
+                if (cpr.proc.killed && cpr.proc.killedByAm) {
+                    checkTime(startTime, "getContentProviderImpl: before appDied (killedByAm)");
+                    appDiedLocked(cpr.proc);
+                    checkTime(startTime, "getContentProviderImpl: after appDied (killedByAm)");
+                }
+            }
+
             if (providerRunning) {
                 cpi = cpr.info;
                 String msg;
