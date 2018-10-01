@@ -58,7 +58,6 @@ import com.android.internal.util.Preconditions;
 import dalvik.system.CloseGuard;
 
 import libcore.io.IoBridge;
-import libcore.io.Streams;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -3947,7 +3946,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                     connection.setReadTimeout(TIMEOUT_MS);
 
                     connection.connect();
-                    response = Streams.readFully(connection.getInputStream());
+                    response = readInputStreamFully(connection.getInputStream());
 
                     Log.v(TAG, "HandleProvisioninig: Thread run: response " +
                             response.length + " " + response);
@@ -4027,6 +4026,29 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
             finished = true;
         }   // run()
 
+        /**
+         * Returns a byte[] containing the remainder of 'in', closing it when done.
+         */
+        private byte[] readInputStreamFully(InputStream in) throws IOException {
+            try {
+                return readInputStreamFullyNoClose(in);
+            } finally {
+                in.close();
+            }
+        }
+
+        /**
+         * Returns a byte[] containing the remainder of 'in'.
+         */
+        private byte[] readInputStreamFullyNoClose(InputStream in) throws IOException {
+            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+            byte[] buffer = new byte[1024];
+            int count;
+            while ((count = in.read(buffer)) != -1) {
+                bytes.write(buffer, 0, count);
+            }
+            return bytes.toByteArray();
+        }
     }   // ProvisioningThread
 
     private int HandleProvisioninig(UUID uuid) {
