@@ -264,7 +264,7 @@
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"Тынчымды алба"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"Шашылыш эскертмелер гана"</string>
-    <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Ойготкучтар гана"</string>
+    <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"Ойготкуч гана"</string>
     <string name="quick_settings_dnd_none_label" msgid="5025477807123029478">"Тымтырс"</string>
     <string name="quick_settings_bluetooth_label" msgid="6304190285170721401">"Bluetooth"</string>
     <string name="quick_settings_bluetooth_multiple_devices_label" msgid="3912245565613684735">"Bluetooth (<xliff:g id="NUMBER">%d</xliff:g> түзмөк)"</string>
@@ -282,7 +282,7 @@
     <string name="quick_settings_location_off_label" msgid="7464544086507331459">"Жайгашытрууну өчүрүү"</string>
     <string name="quick_settings_media_device_label" msgid="1302906836372603762">"Медиа түзмөгү"</string>
     <string name="quick_settings_rssi_label" msgid="7725671335550695589">"RSSI"</string>
-    <string name="quick_settings_rssi_emergency_only" msgid="2713774041672886750">"Куткаруучуларга чалуу гана"</string>
+    <string name="quick_settings_rssi_emergency_only" msgid="2713774041672886750">"Өзгөчө кырдаалда гана чалууга болот"</string>
     <string name="quick_settings_settings_label" msgid="5326556592578065401">"Жөндөөлөр"</string>
     <string name="quick_settings_time_label" msgid="4635969182239736408">"Убакыт"</string>
     <string name="quick_settings_user_label" msgid="5238995632130897840">"Мен"</string>
@@ -359,7 +359,7 @@
     <string name="interruption_level_none_with_warning" msgid="5114872171614161084">"Толук жымжырттык талап кылынат. Бул экрандагыны окугучтарды да тынчтандырат."</string>
     <string name="interruption_level_none" msgid="6000083681244492992">"Тымтырс"</string>
     <string name="interruption_level_priority" msgid="6426766465363855505">"Шашылыш эскертмелер гана"</string>
-    <string name="interruption_level_alarms" msgid="5226306993448328896">"Ойготкучтар гана"</string>
+    <string name="interruption_level_alarms" msgid="5226306993448328896">"Ойготкуч гана"</string>
     <string name="interruption_level_none_twoline" msgid="3957581548190765889">"Тым-\nтырс"</string>
     <string name="interruption_level_priority_twoline" msgid="1564715335217164124">"Артыкчылыктуу\nгана"</string>
     <string name="interruption_level_alarms_twoline" msgid="3266909566410106146">"Ойготкучтар\nгана"</string>

@@ -58,8 +58,8 @@
     <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"Այս USB լրասարքի հետ ոչ մի հավելված չի աշխատում: Իմացեք ավելին այս լրասարքի մասին <xliff:g id="URL">%1$s</xliff:g>-ում"</string>
     <string name="title_usb_accessory" msgid="4966265263465181372">"USB լրասարք"</string>
     <string name="label_view" msgid="6304565553218192990">"Դիտել"</string>
-    <string name="always_use_device" msgid="1450287437017315906">"Օգտագործել լռելյայն այս USB սարքի համար"</string>
-    <string name="always_use_accessory" msgid="1210954576979621596">"Օգտագործել լռելյայն այս USB լրասարքի համար"</string>
+    <string name="always_use_device" msgid="1450287437017315906">"Օգտագործել ըստ կանխադրման այս USB սարքի համար"</string>
+    <string name="always_use_accessory" msgid="1210954576979621596">"Օգտագործել ըստ կանխադրման այս USB լրասարքի համար"</string>
     <string name="usb_debugging_title" msgid="4513918393387141949">"Թույլատրե՞լ USB-ի կարգաբերումը:"</string>
     <string name="usb_debugging_message" msgid="2220143855912376496">"Համակարգչի RSA-ի բանալի մատնահետքն է`\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Միշտ թույլատրել այս համակարգչից"</string>
@@ -483,12 +483,12 @@
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Թեժ կետ"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"Աշխատանքային պրոֆիլ"</string>
     <string name="tuner_warning_title" msgid="7094689930793031682">"Զվարճանք մեկ՝ որոշակի մարդու համար"</string>
-    <string name="tuner_warning" msgid="8730648121973575701">"Համակարգի ՕՄ-ի ընդունիչը հնարավորություն է տալիս հարմարեցնել Android-ի օգտատիրոջ միջերեսը: Այս փորձնական գործառույթները կարող են հետագա թողարկումների մեջ փոփոխվել, խափանվել կամ ընդհանրապես չհայտնվել: Եթե շարունակում եք, զգուշացեք:"</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"Համակարգի ՕՄ-ի կարգավորիչը հնարավորություն է տալիս հարմարեցնել Android-ի օգտատիրոջ միջերեսը: Այս փորձնական գործառույթները կարող են հետագա թողարկումների մեջ փոփոխվել, խափանվել կամ ընդհանրապես չհայտնվել: Եթե շարունակում եք, զգուշացեք:"</string>
     <string name="tuner_persistent_warning" msgid="8597333795565621795">"Այս փորձնական գործառույթները կարող են հետագա թողարկումների մեջ փոփոխվել, խափանվել կամ ընդհանրապես չհայտնվել: Եթե շարունակում եք, զգուշացեք:"</string>
     <string name="got_it" msgid="2239653834387972602">"Եղավ"</string>
-    <string name="tuner_toast" msgid="603429811084428439">"Համակարգի ՕՄ-ի ընդունիչը ավելացվել է կարգավորումներին"</string>
+    <string name="tuner_toast" msgid="603429811084428439">"Համակարգի ՕՄ-ի կարգավորիչը ավելացվել է կարգավորումներին"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"Հեռացնել կարգավորումներից"</string>
-    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Հեռացնե՞լ Համակարգի ՕՄ-ի ընդունիչը կարգավորումներից և չօգտվել այլևս նրա գործառույթներից:"</string>
+    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"Հեռացնե՞լ Համակարգի ՕՄ-ի կարգավորիչը կարգավորումներից և չօգտվել այլևս նրա գործառույթներից:"</string>
     <string name="activity_not_found" msgid="348423244327799974">"Հավելվածը տեղադրված չէ սարքի վրա"</string>
     <string name="clock_seconds" msgid="7689554147579179507">"Ցույց տալ ժամացույցի վայրկյանները"</string>
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Ցույց տալ ժամացույցի վայրկյանները կարգավիճակի տողում: Կարող է ազդել մարտկոցի աշխատանքի ժամանակի վրա:"</string>

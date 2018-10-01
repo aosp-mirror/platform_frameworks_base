@@ -321,9 +321,9 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"上限: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"警告: 上限は<xliff:g id="DATA_LIMIT">%s</xliff:g>です"</string>
     <string name="quick_settings_work_mode_label" msgid="6244915274350490429">"Work モード"</string>
-    <string name="quick_settings_night_display_label" msgid="3577098011487644395">"読書灯"</string>
-    <string name="quick_settings_night_display_summary_on" msgid="1814901757887526769">"読書灯 ON: タップすると OFF になります"</string>
-    <string name="quick_settings_night_display_summary_off" msgid="7892102914128777905">"読書灯 OFF: タップすると ON になります"</string>
+    <string name="quick_settings_night_display_label" msgid="3577098011487644395">"夜間モード"</string>
+    <string name="quick_settings_night_display_summary_on" msgid="1814901757887526769">"夜間モード ON: タップすると OFF になります"</string>
+    <string name="quick_settings_night_display_summary_off" msgid="7892102914128777905">"夜間モード OFF: タップすると ON になります"</string>
     <string name="recents_empty_message" msgid="808480104164008572">"最近のタスクはありません"</string>
     <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"すべてのタスクを消去しました"</string>
     <string name="recents_app_info_button_label" msgid="2890317189376000030">"アプリ情報"</string>

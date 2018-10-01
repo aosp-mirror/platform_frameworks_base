@@ -19,7 +19,7 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_label" msgid="7164937344850004466">"IU del sistema"</string>
+    <string name="app_label" msgid="7164937344850004466">"UI del sistema"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Borrar"</string>
     <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Quitar de la lista"</string>
     <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Información de la aplicación"</string>
@@ -462,7 +462,7 @@
     <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"%1$s. Toca para silenciar. Los servicios de accesibilidad pueden silenciarse."</string>
     <string name="volume_dialog_accessibility_shown_message" msgid="1834631467074259998">"%s controles de volumen mostrados. Desliza el dedo hacia arriba para rechazar."</string>
     <string name="volume_dialog_accessibility_dismissed_message" msgid="51543526013711399">"Controles de volumen ocultos"</string>
-    <string name="system_ui_tuner" msgid="708224127392452018">"Configurador de IU del sistema"</string>
+    <string name="system_ui_tuner" msgid="708224127392452018">"Configurador de UI del sistema"</string>
     <string name="show_battery_percentage" msgid="5444136600512968798">"Mostrar porcentaje de batería insertado"</string>
     <string name="show_battery_percentage_summary" msgid="3215025775576786037">"Mostrar el porcentaje del nivel de batería en el icono de la barra de estado cuando no se esté cargando"</string>
     <string name="quick_settings" msgid="10042998191725428">"Ajustes rápidos"</string>
@@ -485,12 +485,12 @@
     <string name="accessibility_status_bar_hotspot" msgid="4099381329956402865">"Zona Wi-Fi"</string>
     <string name="accessibility_managed_profile" msgid="6613641363112584120">"Perfil de trabajo"</string>
     <string name="tuner_warning_title" msgid="7094689930793031682">"Diversión solo para algunos"</string>
-    <string name="tuner_warning" msgid="8730648121973575701">"El configurador de IU del sistema te ofrece otras formas de modificar y personalizar la interfaz de usuario de Android. Estas funciones experimentales pueden cambiar, fallar o desaparecer en futuras versiones. Te recomendamos que tengas cuidado."</string>
+    <string name="tuner_warning" msgid="8730648121973575701">"El configurador de UI del sistema te ofrece otras formas de modificar y personalizar la interfaz de usuario de Android. Estas funciones experimentales pueden cambiar, fallar o desaparecer en futuras versiones. Te recomendamos que tengas cuidado."</string>
     <string name="tuner_persistent_warning" msgid="8597333795565621795">"Estas funciones experimentales pueden cambiar, fallar o desaparecer en futuras versiones. Te recomendamos que tengas cuidado."</string>
     <string name="got_it" msgid="2239653834387972602">"Entendido"</string>
-    <string name="tuner_toast" msgid="603429811084428439">"¡Enhorabuena! El configurador de IU del sistema se ha añadido a Ajustes"</string>
+    <string name="tuner_toast" msgid="603429811084428439">"¡Enhorabuena! El configurador de UI del sistema se ha añadido a Ajustes"</string>
     <string name="remove_from_settings" msgid="8389591916603406378">"Quitar de Ajustes"</string>
-    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"¿Quitar el configurador de IU del sistema de Ajustes y dejar de utilizar sus funciones?"</string>
+    <string name="remove_from_settings_prompt" msgid="6069085993355887748">"¿Quitar el configurador de UI del sistema de Ajustes y dejar de utilizar sus funciones?"</string>
     <string name="activity_not_found" msgid="348423244327799974">"La aplicación no está instalada en tu dispositivo"</string>
     <string name="clock_seconds" msgid="7689554147579179507">"Mostrar los segundos del reloj"</string>
     <string name="clock_seconds_desc" msgid="6282693067130470675">"Muestra los segundos del reloj en la barra de estado. Puede afectar a la duración de la batería."</string>

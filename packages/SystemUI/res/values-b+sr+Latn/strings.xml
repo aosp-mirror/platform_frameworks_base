@@ -341,7 +341,7 @@
   </string-array>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Napunjena je"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"Punjenje"</string>
-    <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g> dok se ne napuni"</string>
+    <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"<xliff:g id="CHARGING_TIME">%s</xliff:g> do kraja punjenja"</string>
     <string name="expanded_header_battery_not_charging" msgid="4798147152367049732">"Ne puni se"</string>
     <string name="ssl_ca_cert_warning" msgid="9005954106902053641">"Mreža se možda\nnadgleda"</string>
     <string name="description_target_search" msgid="3091587249776033139">"Pretraga"</string>
