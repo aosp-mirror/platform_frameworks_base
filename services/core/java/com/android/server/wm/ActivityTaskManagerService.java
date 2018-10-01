@@ -6296,8 +6296,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                             FLAG_ACTIVITY_TASK_ON_HOME);
                     ActivityOptions activityOptions = options != null
                             ? new ActivityOptions(options) : ActivityOptions.makeBasic();
-                    activityOptions.setLaunchTaskId(
-                            mStackSupervisor.getDefaultDisplayHomeActivity().getTask().taskId);
+                    final ActivityRecord homeActivity =
+                            mStackSupervisor.getDefaultDisplayHomeActivity();
+                    if (homeActivity != null) {
+                        activityOptions.setLaunchTaskId(homeActivity.getTask().taskId);
+                    }
                     mContext.startActivityAsUser(intent, activityOptions.toBundle(),
                             UserHandle.CURRENT);
                 } finally {

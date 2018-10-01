@@ -2611,8 +2611,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     }
 
     ActivityRecord getDefaultDisplayHomeActivityForUser(int userId) {
-        getActivityDisplay(DEFAULT_DISPLAY).getHomeActivityForUser(userId);
-        return null;
+        return getActivityDisplay(DEFAULT_DISPLAY).getHomeActivityForUser(userId);
     }
 
     void resizeStackLocked(ActivityStack stack, Rect bounds, Rect tempTaskBounds,
