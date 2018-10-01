@@ -23,6 +23,7 @@ import android.graphics.Canvas;
 import android.graphics.Paint;
 import android.graphics.Path;
 import android.graphics.Rect;
+import android.graphics.text.LineBreaker;
 import android.text.method.TextKeyListener;
 import android.text.style.AlignmentSpan;
 import android.text.style.LeadingMarginSpan;
@@ -50,9 +51,9 @@ import java.util.Arrays;
 public abstract class Layout {
     /** @hide */
     @IntDef(prefix = { "BREAK_STRATEGY_" }, value = {
-            NativeLineBreaker.BREAK_STRATEGY_SIMPLE,
-            NativeLineBreaker.BREAK_STRATEGY_HIGH_QUALITY,
-            NativeLineBreaker.BREAK_STRATEGY_BALANCED
+            LineBreaker.BREAK_STRATEGY_SIMPLE,
+            LineBreaker.BREAK_STRATEGY_HIGH_QUALITY,
+            LineBreaker.BREAK_STRATEGY_BALANCED
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface BreakStrategy {}
@@ -63,20 +64,19 @@ public abstract class Layout {
      * before it (which yields a more consistent user experience when editing), but layout may not
      * be the highest quality.
      */
-    public static final int BREAK_STRATEGY_SIMPLE = NativeLineBreaker.BREAK_STRATEGY_SIMPLE;
+    public static final int BREAK_STRATEGY_SIMPLE = LineBreaker.BREAK_STRATEGY_SIMPLE;
 
     /**
      * Value for break strategy indicating high quality line breaking, including automatic
      * hyphenation and doing whole-paragraph optimization of line breaks.
      */
-    public static final int BREAK_STRATEGY_HIGH_QUALITY =
-            NativeLineBreaker.BREAK_STRATEGY_HIGH_QUALITY;
+    public static final int BREAK_STRATEGY_HIGH_QUALITY = LineBreaker.BREAK_STRATEGY_HIGH_QUALITY;
 
     /**
      * Value for break strategy indicating balanced line breaking. The breaks are chosen to
      * make all lines as close to the same length as possible, including automatic hyphenation.
      */
-    public static final int BREAK_STRATEGY_BALANCED = NativeLineBreaker.BREAK_STRATEGY_BALANCED;
+    public static final int BREAK_STRATEGY_BALANCED = LineBreaker.BREAK_STRATEGY_BALANCED;
 
     /** @hide */
     @IntDef(prefix = { "HYPHENATION_FREQUENCY_" }, value = {
@@ -94,32 +94,29 @@ public abstract class Layout {
      * layout and there is otherwise no valid break. Soft hyphens are ignored and will not be used
      * as suggestions for potential line breaks.
      */
-    public static final int HYPHENATION_FREQUENCY_NONE =
-            NativeLineBreaker.HYPHENATION_FREQUENCY_NONE;
+    public static final int HYPHENATION_FREQUENCY_NONE = LineBreaker.HYPHENATION_FREQUENCY_NONE;
 
     /**
      * Value for hyphenation frequency indicating a light amount of automatic hyphenation, which
      * is a conservative default. Useful for informal cases, such as short sentences or chat
      * messages.
      */
-    public static final int HYPHENATION_FREQUENCY_NORMAL =
-            NativeLineBreaker.HYPHENATION_FREQUENCY_NORMAL;
+    public static final int HYPHENATION_FREQUENCY_NORMAL = LineBreaker.HYPHENATION_FREQUENCY_NORMAL;
 
     /**
      * Value for hyphenation frequency indicating the full amount of automatic hyphenation, typical
      * in typography. Useful for running text and where it's important to put the maximum amount of
      * text in a screen with limited space.
      */
-    public static final int HYPHENATION_FREQUENCY_FULL =
-            NativeLineBreaker.HYPHENATION_FREQUENCY_FULL;
+    public static final int HYPHENATION_FREQUENCY_FULL = LineBreaker.HYPHENATION_FREQUENCY_FULL;
 
     private static final ParagraphStyle[] NO_PARA_SPANS =
         ArrayUtils.emptyArray(ParagraphStyle.class);
 
     /** @hide */
     @IntDef(prefix = { "JUSTIFICATION_MODE_" }, value = {
-            NativeLineBreaker.JUSTIFICATION_MODE_NONE,
-            NativeLineBreaker.JUSTIFICATION_MODE_INTER_WORD
+            LineBreaker.JUSTIFICATION_MODE_NONE,
+            LineBreaker.JUSTIFICATION_MODE_INTER_WORD
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface JustificationMode {}
@@ -127,13 +124,13 @@ public abstract class Layout {
     /**
      * Value for justification mode indicating no justification.
      */
-    public static final int JUSTIFICATION_MODE_NONE = NativeLineBreaker.JUSTIFICATION_MODE_NONE;
+    public static final int JUSTIFICATION_MODE_NONE = LineBreaker.JUSTIFICATION_MODE_NONE;
 
     /**
      * Value for justification mode indicating the text is justified by stretching word spacing.
      */
     public static final int JUSTIFICATION_MODE_INTER_WORD =
-            NativeLineBreaker.JUSTIFICATION_MODE_INTER_WORD;
+            LineBreaker.JUSTIFICATION_MODE_INTER_WORD;
 
     /*
      * Line spacing multiplier for default line spacing.

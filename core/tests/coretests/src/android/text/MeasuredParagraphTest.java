@@ -73,7 +73,7 @@ public class MeasuredParagraphTest {
         assertEquals(0, mt.getWidths().size());
         assertEquals(0, mt.getSpanEndCache().size());
         assertEquals(0, mt.getFontMetrics().size());
-        assertNull(mt.getNativeMeasuredParagraph());
+        assertNull(mt.getMeasuredText());
 
         // Recycle it
         MeasuredParagraph mt2 = MeasuredParagraph.buildForBidi("_VVV_", 1, 4, RTL, mt);
@@ -85,7 +85,7 @@ public class MeasuredParagraphTest {
         assertEquals(0, mt2.getWidths().size());
         assertEquals(0, mt2.getSpanEndCache().size());
         assertEquals(0, mt2.getFontMetrics().size());
-        assertNull(mt.getNativeMeasuredParagraph());
+        assertNull(mt.getMeasuredText());
 
         mt2.recycle();
     }
@@ -107,7 +107,7 @@ public class MeasuredParagraphTest {
         assertEquals(10, mt.getWidths().get(2), 0);
         assertEquals(0, mt.getSpanEndCache().size());
         assertEquals(0, mt.getFontMetrics().size());
-        assertNull(mt.getNativeMeasuredParagraph());
+        assertNull(mt.getMeasuredText());
 
         // Recycle it
         MeasuredParagraph mt2 =
@@ -124,7 +124,7 @@ public class MeasuredParagraphTest {
         assertEquals(5, mt2.getWidths().get(2), 0);
         assertEquals(0, mt2.getSpanEndCache().size());
         assertEquals(0, mt2.getFontMetrics().size());
-        assertNull(mt.getNativeMeasuredParagraph());
+        assertNull(mt.getMeasuredText());
 
         mt2.recycle();
     }
@@ -144,7 +144,7 @@ public class MeasuredParagraphTest {
         assertEquals(1, mt.getSpanEndCache().size());
         assertEquals(3, mt.getSpanEndCache().get(0));
         assertNotEquals(0, mt.getFontMetrics().size());
-        assertNotNull(mt.getNativeMeasuredParagraph());
+        assertNotNull(mt.getMeasuredText());
 
         // Recycle it
         MeasuredParagraph mt2 =
@@ -159,7 +159,7 @@ public class MeasuredParagraphTest {
         assertEquals(1, mt2.getSpanEndCache().size());
         assertEquals(4, mt2.getSpanEndCache().get(0));
         assertNotEquals(0, mt2.getFontMetrics().size());
-        assertNotNull(mt.getNativeMeasuredParagraph());
+        assertNotNull(mt.getMeasuredText());
 
         mt2.recycle();
     }
