@@ -1423,7 +1423,7 @@
              at {@link android.view.inputmethod.InputConnection#performEditorAction(int)
              InputConnection.performEditorAction(int)}.
              <p>Corresponds to
-             {@link android.view.inputmethod.EditorInfo#IME_FLAG_NO_FULLSCREEN}. -->
+             {@link android.view.inputmethod.EditorInfo#IME_FLAG_NAVIGATE_PREVIOUS}. -->
         <flag name="flagNavigatePrevious" value="0x4000000" />
         <!-- Used to specify that there is something
              interesting that a forward navigation can focus on. This is like using
