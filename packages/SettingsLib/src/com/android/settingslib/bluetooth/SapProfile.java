@@ -36,12 +36,10 @@ import java.util.List;
  */
 final class SapProfile implements LocalBluetoothProfile {
     private static final String TAG = "SapProfile";
-    private static boolean V = true;
 
     private BluetoothSap mService;
     private boolean mIsProfileReady;
 
-    private final LocalBluetoothAdapter mLocalAdapter;
     private final CachedBluetoothDeviceManager mDeviceManager;
     private final LocalBluetoothProfileManager mProfileManager;
 
@@ -59,7 +57,7 @@ final class SapProfile implements LocalBluetoothProfile {
             implements BluetoothProfile.ServiceListener {
 
         public void onServiceConnected(int profile, BluetoothProfile proxy) {
-            if (V) Log.d(TAG,"Bluetooth service connected");
+            Log.d(TAG, "Bluetooth service connected, profile:" + profile);
             mService = (BluetoothSap) proxy;
             // We just bound to the service, so refresh the UI for any connected SAP devices.
             List<BluetoothDevice> deviceList = mService.getConnectedDevices();
@@ -81,7 +79,7 @@ final class SapProfile implements LocalBluetoothProfile {
         }
 
         public void onServiceDisconnected(int profile) {
-            if (V) Log.d(TAG,"Bluetooth service disconnected");
+            Log.d(TAG, "Bluetooth service disconnected, profile:" + profile);
             mProfileManager.callServiceDisconnectedListeners();
             mIsProfileReady=false;
         }
@@ -96,13 +94,11 @@ final class SapProfile implements LocalBluetoothProfile {
         return BluetoothProfile.SAP;
     }
 
-    SapProfile(Context context, LocalBluetoothAdapter adapter,
-            CachedBluetoothDeviceManager deviceManager,
+    SapProfile(Context context, CachedBluetoothDeviceManager deviceManager,
             LocalBluetoothProfileManager profileManager) {
-        mLocalAdapter = adapter;
         mDeviceManager = deviceManager;
         mProfileManager = profileManager;
-        mLocalAdapter.getProfileProxy(context, new SapServiceListener(),
+        BluetoothAdapter.getDefaultAdapter().getProfileProxy(context, new SapServiceListener(),
                 BluetoothProfile.SAP);
     }
 
@@ -115,50 +111,47 @@ final class SapProfile implements LocalBluetoothProfile {
     }
 
     public boolean connect(BluetoothDevice device) {
-        if (mService == null) return false;
-        List<BluetoothDevice> sinks = mService.getConnectedDevices();
-        if (sinks != null) {
-            for (BluetoothDevice sink : sinks) {
-                mService.disconnect(sink);
-            }
+        if (mService == null) {
+            return false;
         }
         return mService.connect(device);
     }
 
     public boolean disconnect(BluetoothDevice device) {
-        if (mService == null) return false;
-        List<BluetoothDevice> deviceList = mService.getConnectedDevices();
-        if (!deviceList.isEmpty() && deviceList.get(0).equals(device)) {
-            if (mService.getPriority(device) > BluetoothProfile.PRIORITY_ON) {
-                mService.setPriority(device, BluetoothProfile.PRIORITY_ON);
-            }
-            return mService.disconnect(device);
-        } else {
+        if (mService == null) {
             return false;
         }
+        if (mService.getPriority(device) > BluetoothProfile.PRIORITY_ON) {
+            mService.setPriority(device, BluetoothProfile.PRIORITY_ON);
+        }
+        return mService.disconnect(device);
     }
 
     public int getConnectionStatus(BluetoothDevice device) {
-        if (mService == null) return BluetoothProfile.STATE_DISCONNECTED;
-        List<BluetoothDevice> deviceList = mService.getConnectedDevices();
-
-        return !deviceList.isEmpty() && deviceList.get(0).equals(device)
-                ? mService.getConnectionState(device)
-                : BluetoothProfile.STATE_DISCONNECTED;
+        if (mService == null) {
+            return BluetoothProfile.STATE_DISCONNECTED;
+        }
+        return mService.getConnectionState(device);
     }
 
     public boolean isPreferred(BluetoothDevice device) {
-        if (mService == null) return false;
+        if (mService == null) {
+            return false;
+        }
         return mService.getPriority(device) > BluetoothProfile.PRIORITY_OFF;
     }
 
     public int getPreferred(BluetoothDevice device) {
-        if (mService == null) return BluetoothProfile.PRIORITY_OFF;
+        if (mService == null) {
+            return BluetoothProfile.PRIORITY_OFF;
+        }
         return mService.getPriority(device);
     }
 
     public void setPreferred(BluetoothDevice device, boolean preferred) {
-        if (mService == null) return;
+        if (mService == null) {
+            return;
+        }
         if (preferred) {
             if (mService.getPriority(device) < BluetoothProfile.PRIORITY_ON) {
                 mService.setPriority(device, BluetoothProfile.PRIORITY_ON);
@@ -169,7 +162,9 @@ final class SapProfile implements LocalBluetoothProfile {
     }
 
     public List<BluetoothDevice> getConnectedDevices() {
-        if (mService == null) return new ArrayList<BluetoothDevice>(0);
+        if (mService == null) {
+            return new ArrayList<BluetoothDevice>(0);
+        }
         return mService.getDevicesMatchingConnectionStates(
               new int[] {BluetoothProfile.STATE_CONNECTED,
                          BluetoothProfile.STATE_CONNECTING,
@@ -207,11 +202,11 @@ final class SapProfile implements LocalBluetoothProfile {
     }
 
     protected void finalize() {
-        if (V) Log.d(TAG, "finalize()");
+        Log.d(TAG, "finalize()");
         if (mService != null) {
             try {
                 BluetoothAdapter.getDefaultAdapter().closeProfileProxy(BluetoothProfile.SAP,
-                                                                       mService);
+                        mService);
                 mService = null;
             }catch (Throwable t) {
                 Log.w(TAG, "Error cleaning up SAP proxy", t);
