@@ -4732,7 +4732,8 @@ public class NotificationManagerService extends SystemService {
                     if (notification.getSmallIcon() != null) {
                         StatusBarNotification oldSbn = (old != null) ? old.sbn : null;
                         mListeners.notifyPostedLocked(r, old);
-                        if (oldSbn == null || !Objects.equals(oldSbn.getGroup(), n.getGroup())) {
+                        if ((oldSbn == null || !Objects.equals(oldSbn.getGroup(), n.getGroup()))
+                                && !isCritical(r)) {
                             mHandler.post(new Runnable() {
                                 @Override
                                 public void run() {
@@ -4899,6 +4900,19 @@ public class NotificationManagerService extends SystemService {
         }
 
         return false;
+    }
+
+    /**
+     * Check if the notification is classified as critical.
+     *
+     * @param record the record to test for criticality
+     * @return {@code true} if notification is considered critical
+     *
+     * @see CriticalNotificationExtractor for criteria
+     */
+    private boolean isCritical(NotificationRecord record) {
+        // 0 is the most critical
+        return record.getCriticality() < CriticalNotificationExtractor.NORMAL;
     }
 
     /**
