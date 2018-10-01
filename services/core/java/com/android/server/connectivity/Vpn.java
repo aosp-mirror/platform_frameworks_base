@@ -163,8 +163,8 @@ public class Vpn {
     // TODO: create separate trackers for each unique VPN to support
     // automated reconnection
 
-    private Context mContext;
-    private NetworkInfo mNetworkInfo;
+    private final Context mContext;
+    private final NetworkInfo mNetworkInfo;
     private String mPackage;
     private int mOwnerUID;
     private String mInterface;
