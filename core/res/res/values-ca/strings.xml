@@ -214,7 +214,7 @@
     <string name="global_actions" product="default" msgid="2406416831541615258">"Opcions del telèfon"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Bloqueig de pantalla"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Apaga"</string>
-    <string name="global_action_emergency" msgid="7112311161137421166">"Emergències"</string>
+    <string name="global_action_emergency" msgid="7112311161137421166">"Emergència"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Informe d\'error"</string>
     <string name="bugreport_title" msgid="2667494803742548533">"Crea informe d\'errors"</string>
     <string name="bugreport_message" msgid="398447048750350456">"Es recopilarà informació sobre l\'estat actual del dispositiu i se t\'enviarà per correu electrònic. Passaran uns quants minuts des de l\'inici de l\'informe d\'errors fins al seu enviament, per la qual cosa et recomanem que tinguis paciència."</string>
@@ -258,7 +258,7 @@
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Càmera"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"fer fotos i vídeos"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telèfon"</string>
-    <string name="permgroupdesc_phone" msgid="6234224354060641055">"fer i gestionar trucades telefòniques"</string>
+    <string name="permgroupdesc_phone" msgid="6234224354060641055">"fer i gestionar trucades"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Sensors corporals"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"accedir a les dades del sensor sobre els signes vitals"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Recuperar el contingut de la finestra"</string>
@@ -689,8 +689,8 @@
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"Falta la targeta SIM o no es pot llegir. Insereix-ne una."</string>
     <string name="lockscreen_permanent_disabled_sim_message_short" msgid="5096149665138916184">"Targeta SIM no utilitzable."</string>
     <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"La targeta SIM està desactivada permanentment.\n Contacta amb el teu proveïdor de serveis sense fil per obtenir-ne una altra."</string>
-    <string name="lockscreen_transport_prev_description" msgid="6300840251218161534">"Ruta anterior"</string>
-    <string name="lockscreen_transport_next_description" msgid="573285210424377338">"Ruta següent"</string>
+    <string name="lockscreen_transport_prev_description" msgid="6300840251218161534">"Pista anterior"</string>
+    <string name="lockscreen_transport_next_description" msgid="573285210424377338">"Pista següent"</string>
     <string name="lockscreen_transport_pause_description" msgid="3980308465056173363">"Posa en pausa"</string>
     <string name="lockscreen_transport_play_description" msgid="1901258823643886401">"Reprodueix"</string>
     <string name="lockscreen_transport_stop_description" msgid="5907083260651210034">"Atura"</string>
@@ -989,7 +989,7 @@
     <string name="alwaysUse" msgid="4583018368000610438">"Utilitza-ho de manera predeterminada per a aquesta acció."</string>
     <string name="use_a_different_app" msgid="8134926230585710243">"Fes servir una altra aplicació"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Esborra els paràmetres predeterminats a Configuració del sistema &gt; Aplicacions &gt; Baixades."</string>
-    <string name="chooseActivity" msgid="7486876147751803333">"Tria una acció"</string>
+    <string name="chooseActivity" msgid="7486876147751803333">"Selecciona una acció"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"Tria una aplicació per al dispositiu USB"</string>
     <string name="noApplications" msgid="2991814273936504689">"No hi ha cap aplicació que pugui dur a terme aquesta acció."</string>
     <string name="aerr_application" msgid="250320989337856518">"S\'ha aturat <xliff:g id="APPLICATION">%1$s</xliff:g>"</string>

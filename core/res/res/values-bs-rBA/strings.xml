@@ -72,7 +72,7 @@
     <string name="ClirMmi" msgid="7784673673446833091">"ID odlaznog poziva"</string>
     <string name="ColpMmi" msgid="3065121483740183974">"Identifikacija povezane linije"</string>
     <string name="ColrMmi" msgid="4996540314421889589">"Ograničenje identifikacije povezane linije"</string>
-    <string name="CfMmi" msgid="5123218989141573515">"Preusmjeravanje poziva"</string>
+    <string name="CfMmi" msgid="5123218989141573515">"Prosljeđivanje poziva"</string>
     <string name="CwMmi" msgid="9129678056795016867">"Poziv na čekanju"</string>
     <string name="BaMmi" msgid="455193067926770581">"Zabrana poziva"</string>
     <string name="PwdMmi" msgid="7043715687905254199">"Promjena lozinke"</string>
@@ -97,10 +97,10 @@
     <string name="RestrictedOnVoiceData" msgid="996636487106171320">"Blokirane su govorne usluge i usluge prijenosa podataka."</string>
     <string name="RestrictedOnVoiceSms" msgid="1888588152792023873">"Blokirane su govorne/SMS usluge."</string>
     <string name="RestrictedOnAll" msgid="5643028264466092821">"Blokirane su sve govorne i SMS usluge te usluge prijenosa podataka."</string>
-    <string name="peerTtyModeFull" msgid="6165351790010341421">"Ravnopravni uređaj zatražio TTY PUNI način rada"</string>
-    <string name="peerTtyModeHco" msgid="5728602160669216784">"Ravnopravni uređaj zatražio TTY HCO način rada"</string>
-    <string name="peerTtyModeVco" msgid="1742404978686538049">"Ravnopravni uređaj zatražio TTY VCO način rada"</string>
-    <string name="peerTtyModeOff" msgid="3280819717850602205">"Ravnopravni uređaj zatražio TTY ISKLJUČENI način rada"</string>
+    <string name="peerTtyModeFull" msgid="6165351790010341421">"Ravnopravni uređaj zatražio načina rada TTY FULL"</string>
+    <string name="peerTtyModeHco" msgid="5728602160669216784">"Ravnopravni uređaj zatražio načina rada TTY HCO"</string>
+    <string name="peerTtyModeVco" msgid="1742404978686538049">"Ravnopravni uređaj zatražio načina rada TTY VCO"</string>
+    <string name="peerTtyModeOff" msgid="3280819717850602205">"Ravnopravni uređaj zatražio načina rada TTY OFF"</string>
     <string name="serviceClassVoice" msgid="1258393812335258019">"Govorna"</string>
     <string name="serviceClassData" msgid="872456782077937893">"Podatke"</string>
     <string name="serviceClassFAX" msgid="5566624998840486475">"Faks"</string>
@@ -123,16 +123,16 @@
     <string name="roamingText11" msgid="4154476854426920970">"Oznaka da je uređaj u roamingu uključena"</string>
     <string name="roamingText12" msgid="1189071119992726320">"Oznaka da je uređaj u roamingu ugašena"</string>
     <string name="roamingTextSearching" msgid="8360141885972279963">"Traženje usluge"</string>
-    <string name="wfcRegErrorTitle" msgid="2301376280632110664">"WiFi pozivanje"</string>
+    <string name="wfcRegErrorTitle" msgid="2301376280632110664">"Pozivanje putem WiFi-ja"</string>
   <string-array name="wfcOperatorErrorAlertMessages">
-    <item msgid="2254967670088539682">"Da biste pozivali i slali poruke preko WiFi-ja, prvo zatražite od operatera da postavi tu uslugu. Potom u Postavkama ponovo uključite WiFi pozivanje."</item>
+    <item msgid="2254967670088539682">"Da biste pozivali i slali poruke preko WiFi-ja, prvo zatražite od operatera da postavi tu uslugu. Potom u Postavkama ponovo uključite pozivanje putem WiFi-ja."</item>
   </string-array>
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="6177300162212449033">"Registrirajte se kod svog operatera"</item>
   </string-array>
   <string-array name="wfcSpnFormats">
     <item msgid="6830082633573257149">"%s"</item>
-    <item msgid="4397097370387921767">"WiFi pozivanje preko operatera %s"</item>
+    <item msgid="4397097370387921767">"Pozivanje putem WiFi-ja preko operatera %s"</item>
   </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Isključeno"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Preferira se WiFi"</string>

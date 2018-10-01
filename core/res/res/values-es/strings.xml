@@ -71,7 +71,7 @@
     <string name="ClirMmi" msgid="7784673673446833091">"ID de emisor de llamada saliente"</string>
     <string name="ColpMmi" msgid="3065121483740183974">"ID de línea conectada"</string>
     <string name="ColrMmi" msgid="4996540314421889589">"Restricción de ID de línea conectada"</string>
-    <string name="CfMmi" msgid="5123218989141573515">"Desvío de llamada"</string>
+    <string name="CfMmi" msgid="5123218989141573515">"Desvío de llamadas"</string>
     <string name="CwMmi" msgid="9129678056795016867">"Llamada en espera"</string>
     <string name="BaMmi" msgid="455193067926770581">"Bloqueo de llamada"</string>
     <string name="PwdMmi" msgid="7043715687905254199">"Cambio de contraseña"</string>
@@ -134,7 +134,7 @@
     <item msgid="4397097370387921767">"Llamadas Wi-Fi de %s"</item>
   </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Desactivado"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Preferir Wi-Fi"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Dar preferencia a Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="5920549484600758786">"Preferir datos móviles"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Solo conexión Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: No desviada"</string>
@@ -997,7 +997,7 @@
     <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> sigue sin funcionar"</string>
     <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> sigue sin funcionar"</string>
     <string name="aerr_restart" msgid="7581308074153624475">"Volver a abrir la aplicación"</string>
-    <string name="aerr_report" msgid="5371800241488400617">"Enviar sugerencias"</string>
+    <string name="aerr_report" msgid="5371800241488400617">"Enviar comentarios"</string>
     <string name="aerr_close" msgid="2991640326563991340">"Cerrar"</string>
     <string name="aerr_mute" msgid="1974781923723235953">"Silenciar hasta que se reinicie el dispositivo"</string>
     <string name="aerr_wait" msgid="3199956902437040261">"Esperar"</string>

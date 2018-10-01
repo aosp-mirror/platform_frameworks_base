@@ -1172,7 +1172,7 @@
     <string name="ext_media_unmountable_notification_title" msgid="8295123366236989588">"Mémoire de stockage \"<xliff:g id="NAME">%s</xliff:g>\" corrompue"</string>
     <string name="ext_media_unmountable_notification_message" msgid="2343202057122495773">"La mémoire de stockage \"<xliff:g id="NAME">%s</xliff:g>\" est corrompue. Appuyez ici pour la réparer."</string>
     <string name="ext_media_unsupported_notification_title" msgid="3797642322958803257">"<xliff:g id="NAME">%s</xliff:g> non compatible"</string>
-    <string name="ext_media_unsupported_notification_message" msgid="6121601473787888589">"Cet appareil n\'est pas compatible avec la mémoire de stockage \"<xliff:g id="NAME">%s</xliff:g>\". Appuyez ici pour le configurer dans un format accepté."</string>
+    <string name="ext_media_unsupported_notification_message" msgid="6121601473787888589">"Cet appareil n\'est pas compatible avec le support \"<xliff:g id="NAME">%s</xliff:g>\". Appuyez ici pour le configurer dans un format accepté."</string>
     <string name="ext_media_badremoval_notification_title" msgid="3206248947375505416">"Retrait inattendu de mémoire \"<xliff:g id="NAME">%s</xliff:g>\""</string>
     <string name="ext_media_badremoval_notification_message" msgid="380176703346946313">"Désinstallez la mémoire de stockage \"<xliff:g id="NAME">%s</xliff:g>\" avant de la retirer pour éviter toute perte de données."</string>
     <string name="ext_media_nomedia_notification_title" msgid="1704840188641749091">"Mémoire de stockage \"<xliff:g id="NAME">%s</xliff:g>\" retirée"</string>

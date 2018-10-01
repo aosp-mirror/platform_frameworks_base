@@ -773,7 +773,7 @@
     <string name="js_dialog_before_unload_negative_button" msgid="5614861293026099715">"ماندن در این صفحه"</string>
     <string name="js_dialog_before_unload" msgid="3468816357095378590">"<xliff:g id="MESSAGE">%s</xliff:g>\n\nمطمئنید می‌خواهید این صفحه را ترک کنید؟"</string>
     <string name="save_password_label" msgid="6860261758665825069">"تأیید"</string>
-    <string name="double_tap_toast" msgid="4595046515400268881">"نکته: برای بزرگ‌نمایی و کوچک‌نمایی، دو بار ضربه بزنید."</string>
+    <string name="double_tap_toast" msgid="4595046515400268881">"نکته: برای نزدیک‌نمایی و دورنمایی، دو بار ضربه بزنید."</string>
     <string name="autofill_this_form" msgid="4616758841157816676">"تکمیل خودکار"</string>
     <string name="setup_autofill" msgid="7103495070180590814">"راه‌اندازی تکمیل خودکار"</string>
     <string name="autofill_address_name_separator" msgid="6350145154779706772">" "</string>
@@ -946,7 +946,7 @@
     <string name="copyUrl" msgid="2538211579596067402">"‏کپی URL"</string>
     <string name="selectTextMode" msgid="1018691815143165326">"انتخاب متن"</string>
     <string name="undo" msgid="7905788502491742328">"لغو"</string>
-    <string name="redo" msgid="7759464876566803888">"انجام مجدد"</string>
+    <string name="redo" msgid="7759464876566803888">"بازانجام"</string>
     <string name="textSelectionCABTitle" msgid="5236850394370820357">"انتخاب متن"</string>
     <string name="addToDictionary" msgid="4352161534510057874">"افزودن به واژه‌نامه"</string>
     <string name="deleteText" msgid="6979668428458199034">"حذف"</string>
@@ -1256,7 +1256,7 @@
     <string name="tethered_notification_message" msgid="2113628520792055377">"برای راه‌اندازی ضربه بزنید."</string>
     <string name="back_button_label" msgid="2300470004503343439">"برگشت"</string>
     <string name="next_button_label" msgid="1080555104677992408">"بعدی"</string>
-    <string name="skip_button_label" msgid="1275362299471631819">"پرش"</string>
+    <string name="skip_button_label" msgid="1275362299471631819">"رد شدن"</string>
     <string name="no_matches" msgid="8129421908915840737">"مورد منطبقی موجود نیست"</string>
     <string name="find_on_page" msgid="1946799233822820384">"یافتن در صفحه"</string>
     <plurals name="matches_found" formatted="false" msgid="1210884353962081884">

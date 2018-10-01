@@ -607,7 +607,7 @@
     <string name="phoneTypeTtyTdd" msgid="8606514378585000044">"TTY TDD"</string>
     <string name="phoneTypeWorkMobile" msgid="1311426989184065709">"कार्य मोबाईल"</string>
     <string name="phoneTypeWorkPager" msgid="649938731231157056">"कार्य पेजर"</string>
-    <string name="phoneTypeAssistant" msgid="5596772636128562884">"साहाय्यक"</string>
+    <string name="phoneTypeAssistant" msgid="5596772636128562884">"असिस्टंट"</string>
     <string name="phoneTypeMms" msgid="7254492275502768992">"MMS"</string>
     <string name="eventTypeCustom" msgid="7837586198458073404">"कस्टम"</string>
     <string name="eventTypeBirthday" msgid="2813379844211390740">"वाढदिवस"</string>
@@ -640,7 +640,7 @@
     <string name="orgTypeOther" msgid="3951781131570124082">"अन्य"</string>
     <string name="orgTypeCustom" msgid="225523415372088322">"कस्टम"</string>
     <string name="relationTypeCustom" msgid="3542403679827297300">"कस्टम"</string>
-    <string name="relationTypeAssistant" msgid="6274334825195379076">"साहाय्यक"</string>
+    <string name="relationTypeAssistant" msgid="6274334825195379076">"असिस्टंट"</string>
     <string name="relationTypeBrother" msgid="8757913506784067713">"भाऊ"</string>
     <string name="relationTypeChild" msgid="1890746277276881626">"मूल"</string>
     <string name="relationTypeDomesticPartner" msgid="6904807112121122133">"घरातील जोडीदार"</string>
@@ -1677,5 +1677,5 @@
     <string name="audit_safemode_notification" msgid="6416076898350685856">"हे डिव्हाइस निर्बंधांशिवाय वापरण्यासाठी फॅक्टरी रीसेट करा"</string>
     <string name="audit_safemode_notification_details" msgid="1860601176690176413">"अधिक जाणून घेण्यासाठी स्पर्श करा."</string>
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"<xliff:g id="LABEL">%1$s</xliff:g> अक्षम केले"</string>
-    <string name="conference_call" msgid="3751093130790472426">"परिषद कॉल"</string>
+    <string name="conference_call" msgid="3751093130790472426">"कॉन्फरन्स कॉल"</string>
 </resources>
