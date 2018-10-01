@@ -2397,6 +2397,9 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         mUserController = new UserController(this);
 
+        mPendingIntentController = new PendingIntentController(
+                mHandlerThread.getLooper(), mUserController);
+
         GL_ES_VERSION = SystemProperties.getInt("ro.opengles.version",
             ConfigurationInfo.GL_ES_VERSION_UNDEFINED);
 
@@ -2411,9 +2414,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         mActivityTaskManager.setActivityManagerService(this);
         mAtmInternal = LocalServices.getService(ActivityTaskManagerInternal.class);
         mStackSupervisor = mActivityTaskManager.mStackSupervisor;
-
-        mPendingIntentController = new PendingIntentController(
-                mHandlerThread.getLooper(), mUserController);
 
         mProcessCpuThread = new Thread("CpuTracker") {
             @Override
