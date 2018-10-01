@@ -151,6 +151,7 @@
 
     <uses-permission android:name="android.permission.CONTROL_KEYGUARD" />
     <uses-permission android:name="android.permission.SUSPEND_APPS" />
+    <uses-permission android:name="android.permission.READ_CLIPBOARD_IN_BACKGROUND" />
 
     <application android:label="@string/app_label"
                  android:defaultToDeviceProtectedStorage="true"

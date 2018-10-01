@@ -4147,6 +4147,11 @@
     <permission android:name="android.permission.BIND_SMS_APP_SERVICE"
         android:protectionLevel="signature" />
 
+    <!-- @hide Permission that allows background clipboard access.
+         <p>Not for use by third-party applications. -->
+    <permission android:name="android.permission.READ_CLIPBOARD_IN_BACKGROUND"
+        android:protectionLevel="signature" />
+
     <application android:process="system"
                  android:persistent="true"
                  android:hasCode="false"

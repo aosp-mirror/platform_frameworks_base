@@ -629,6 +629,11 @@ public class ClipboardService extends SystemService {
         if (mAppOps.noteOp(op, callingUid, callingPackage) != AppOpsManager.MODE_ALLOWED) {
             return false;
         }
+        // Shell can access the clipboard for testing purposes.
+        if (mPm.checkPermission(android.Manifest.permission.READ_CLIPBOARD_IN_BACKGROUND,
+                    callingPackage) == PackageManager.PERMISSION_GRANTED) {
+            return true;
+        }
         // The default IME is always allowed to access the clipboard.
         String defaultIme = Settings.Secure.getStringForUser(getContext().getContentResolver(),
                 Settings.Secure.DEFAULT_INPUT_METHOD, UserHandle.getUserId(callingUid));
