@@ -20,6 +20,7 @@ import android.view.View;
 
 import com.android.systemui.plugins.Plugin;
 import com.android.systemui.plugins.annotations.ProvidesInterface;
+import java.io.PrintWriter;
 
 @ProvidesInterface(action = NavGesture.ACTION, version = NavGesture.VERSION)
 public interface NavGesture extends Plugin {
@@ -46,6 +47,8 @@ public interface NavGesture extends Plugin {
         public void onNavigationButtonLongPress(View v);
 
         public default void destroy() { }
+
+        public default void dump(PrintWriter pw) { }
     }
 
 }
