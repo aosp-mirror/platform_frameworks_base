@@ -78,7 +78,6 @@ public abstract class BiometricServiceBase extends SystemService
 
     protected static final boolean DEBUG = true;
 
-    private static final boolean CLEANUP_UNKNOWN_TEMPLATES = true;
     private static final String KEY_LOCKOUT_RESET_USER = "lockout_reset_user";
     private static final int MSG_USER_SWITCHING = 10;
     private static final long CANCEL_TIMEOUT_LIMIT = 3000; // max wait for onCancel() from HAL,in ms
@@ -89,6 +88,7 @@ public abstract class BiometricServiceBase extends SystemService
     private final PowerManager mPowerManager;
     private final UserManager mUserManager;
     private final MetricsLogger mMetricsLogger;
+    private final boolean mCleanupUnusedFingerprints;
     private final boolean mPostResetRunnableForAllClients;
     private final BiometricTaskStackListener mTaskStackListener = new BiometricTaskStackListener();
     private final ResetClientStateRunnable mResetClientState = new ResetClientStateRunnable();
@@ -663,6 +663,8 @@ public abstract class BiometricServiceBase extends SystemService
         mPowerManager = mContext.getSystemService(PowerManager.class);
         mUserManager = UserManager.get(mContext);
         mMetricsLogger = new MetricsLogger();
+        mCleanupUnusedFingerprints = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_cleanupUnusedFingerprints);
         mPostResetRunnableForAllClients = mContext.getResources().getBoolean(
                 com.android.internal.R.bool
                         .config_fingerprintPostResetRunnableForAllClients);
@@ -1248,7 +1250,7 @@ public abstract class BiometricServiceBase extends SystemService
      * @param userId
      */
     protected void doTemplateCleanupForUser(int userId) {
-        if (CLEANUP_UNKNOWN_TEMPLATES) {
+        if (mCleanupUnusedFingerprints) {
             enumerateUser(userId);
         }
     }
