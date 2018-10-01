@@ -22,6 +22,7 @@ import static android.net.NetworkStatsHistory.FIELD_TX_BYTES;
 import android.app.usage.NetworkStats;
 import android.app.usage.NetworkStatsManager;
 import android.content.Context;
+import android.net.ConnectivityManager;
 import android.net.INetworkStatsService;
 import android.net.INetworkStatsSession;
 import android.net.NetworkPolicy;
@@ -33,6 +34,8 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.text.format.DateUtils;
 import android.util.Pair;
+
+import com.android.settingslib.NetworkPolicyEditor;
 
 import java.time.ZonedDateTime;
 import java.util.Iterator;
@@ -55,7 +58,6 @@ public abstract class NetworkCycleDataLoader<D> extends AsyncTaskLoader<D> {
 
     protected NetworkCycleDataLoader(Builder<?> builder) {
         super(builder.mContext);
-        mPolicy = builder.mPolicy;
         mSubId = builder.mSubId;
         mNetworkType = builder.mNetworkType;
         mNetworkTemplate = builder.mNetworkTemplate;
@@ -63,6 +65,10 @@ public abstract class NetworkCycleDataLoader<D> extends AsyncTaskLoader<D> {
             builder.mContext.getSystemService(Context.NETWORK_STATS_SERVICE);
         mNetworkStatsService = INetworkStatsService.Stub.asInterface(
             ServiceManager.getService(Context.NETWORK_STATS_SERVICE));
+        final NetworkPolicyEditor policyEditor =
+            new NetworkPolicyEditor(NetworkPolicyManager.from(builder.mContext));
+        policyEditor.read();
+        mPolicy = policyEditor.getPolicy(mNetworkTemplate);
     }
 
     @Override
@@ -115,7 +121,8 @@ public abstract class NetworkCycleDataLoader<D> extends AsyncTaskLoader<D> {
 
             long cycleEnd = historyEnd;
             while (cycleEnd > historyStart) {
-                final long cycleStart = cycleEnd - (DateUtils.WEEK_IN_MILLIS * 4);
+                final long cycleStart = Math.max(
+                    historyStart, cycleEnd - (DateUtils.WEEK_IN_MILLIS * 4));
                 recordUsage(cycleStart, cycleEnd);
                 cycleEnd = cycleStart;
             }
@@ -154,7 +161,6 @@ public abstract class NetworkCycleDataLoader<D> extends AsyncTaskLoader<D> {
 
     public static abstract class Builder<T extends NetworkCycleDataLoader> {
         private final Context mContext;
-        private NetworkPolicy mPolicy;
         private String mSubId;
         private int mNetworkType;
         private NetworkTemplate mNetworkTemplate;
@@ -163,27 +169,38 @@ public abstract class NetworkCycleDataLoader<D> extends AsyncTaskLoader<D> {
             mContext = context;
         }
 
-        public Builder<T> setNetworkPolicy(NetworkPolicy policy) {
-            mPolicy = policy;
-            return this;
-        }
-
         public Builder<T> setSubscriberId(String subId) {
             mSubId = subId;
             return this;
         }
 
-        public Builder<T> setNetworkType(int networkType) {
-            mNetworkType = networkType;
-            return this;
-        }
-
         public Builder<T> setNetworkTemplate(NetworkTemplate template) {
             mNetworkTemplate = template;
+            setNetworkType();
             return this;
         }
 
         public abstract T build();
+
+        private void setNetworkType() {
+            if (mNetworkTemplate != null) {
+                final int matchRule = mNetworkTemplate.getMatchRule();
+                switch (matchRule) {
+                    case NetworkTemplate.MATCH_MOBILE:
+                    case NetworkTemplate.MATCH_MOBILE_WILDCARD:
+                        mNetworkType = ConnectivityManager.TYPE_MOBILE;
+                        break;
+                    case NetworkTemplate.MATCH_WIFI:
+                        mNetworkType = ConnectivityManager.TYPE_WIFI;
+                        break;
+                    case NetworkTemplate.MATCH_ETHERNET:
+                        mNetworkType = ConnectivityManager.TYPE_ETHERNET;
+                        break;
+                    default:
+                        mNetworkType = ConnectivityManager.TYPE_MOBILE;
+                }
+            }
+        }
     }
 
 }
