@@ -529,7 +529,7 @@
     <string name="biometric_not_recognized" msgid="5770511773560736082">"Tanınmadı"</string>
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"Parmak izi kimlik doğrulaması yapıldı"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="4018680978348659031">"Yüz kimliği doğrulandı"</string>
-    <string name="face_authenticated_confirmation_required" msgid="8778347003507633610">"Yüz kimliği doğrulandı, lütfen doğrula\'ya basın"</string>
+    <string name="face_authenticated_confirmation_required" msgid="8778347003507633610">"Yüz kimliği doğrulandı, lütfen onayla\'ya basın"</string>
     <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Parmak izi donanımı kullanılamıyor."</string>
     <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Parmak izi depolanamıyor. Lütfen mevcut parmak izlerinden birini kaldırın."</string>
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Parmak izi için zaman aşımı oluştu. Tekrar deneyin."</string>
