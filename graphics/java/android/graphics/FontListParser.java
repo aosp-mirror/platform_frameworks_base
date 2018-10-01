@@ -40,17 +40,25 @@ public class FontListParser {
     /* Parse fallback list (no names) */
     @UnsupportedAppUsage
     public static FontConfig parse(InputStream in) throws XmlPullParserException, IOException {
+        return parse(in, "/system/fonts");
+    }
+
+    /**
+     * Parse the fonts.xml
+     */
+    public static FontConfig parse(InputStream in, String fontDir)
+            throws XmlPullParserException, IOException {
         try {
             XmlPullParser parser = Xml.newPullParser();
             parser.setInput(in, null);
             parser.nextTag();
-            return readFamilies(parser);
+            return readFamilies(parser, fontDir);
         } finally {
             in.close();
         }
     }
 
-    private static FontConfig readFamilies(XmlPullParser parser)
+    private static FontConfig readFamilies(XmlPullParser parser, String fontDir)
             throws XmlPullParserException, IOException {
         List<FontConfig.Family> families = new ArrayList<>();
         List<FontConfig.Alias> aliases = new ArrayList<>();
@@ -60,7 +68,7 @@ public class FontListParser {
             if (parser.getEventType() != XmlPullParser.START_TAG) continue;
             String tag = parser.getName();
             if (tag.equals("family")) {
-                families.add(readFamily(parser));
+                families.add(readFamily(parser, fontDir));
             } else if (tag.equals("alias")) {
                 aliases.add(readAlias(parser));
             } else {
@@ -71,7 +79,10 @@ public class FontListParser {
                 aliases.toArray(new FontConfig.Alias[aliases.size()]));
     }
 
-    private static FontConfig.Family readFamily(XmlPullParser parser)
+    /**
+     * Reads a family element
+     */
+    public static FontConfig.Family readFamily(XmlPullParser parser, String fontDir)
             throws XmlPullParserException, IOException {
         final String name = parser.getAttributeValue(null, "name");
         final String lang = parser.getAttributeValue("", "lang");
@@ -81,7 +92,7 @@ public class FontListParser {
             if (parser.getEventType() != XmlPullParser.START_TAG) continue;
             final String tag = parser.getName();
             if (tag.equals("font")) {
-                fonts.add(readFont(parser));
+                fonts.add(readFont(parser, fontDir));
             } else {
                 skip(parser);
             }
@@ -102,7 +113,7 @@ public class FontListParser {
     private static final Pattern FILENAME_WHITESPACE_PATTERN =
             Pattern.compile("^[ \\n\\r\\t]+|[ \\n\\r\\t]+$");
 
-    private static FontConfig.Font readFont(XmlPullParser parser)
+    private static FontConfig.Font readFont(XmlPullParser parser, String fontDir)
             throws XmlPullParserException, IOException {
         String indexStr = parser.getAttributeValue(null, "index");
         int index = indexStr == null ? 0 : Integer.parseInt(indexStr);
@@ -125,7 +136,7 @@ public class FontListParser {
             }
         }
         String sanitizedName = FILENAME_WHITESPACE_PATTERN.matcher(filename).replaceAll("");
-        return new FontConfig.Font(sanitizedName, index, axes.toArray(
+        return new FontConfig.Font(fontDir + sanitizedName, index, axes.toArray(
                 new FontVariationAxis[axes.size()]), weight, isItalic, fallbackFor);
     }
 
@@ -137,7 +148,10 @@ public class FontListParser {
         return new FontVariationAxis(tagStr, Float.parseFloat(styleValueStr));
     }
 
-    private static FontConfig.Alias readAlias(XmlPullParser parser)
+    /**
+     * Reads alias elements
+     */
+    public static FontConfig.Alias readAlias(XmlPullParser parser)
             throws XmlPullParserException, IOException {
         String name = parser.getAttributeValue(null, "name");
         String toName = parser.getAttributeValue(null, "to");
@@ -152,7 +166,10 @@ public class FontListParser {
         return new FontConfig.Alias(name, toName, weight);
     }
 
-    private static void skip(XmlPullParser parser) throws XmlPullParserException, IOException {
+    /**
+     * Skip until next element
+     */
+    public static void skip(XmlPullParser parser) throws XmlPullParserException, IOException {
         int depth = 1;
         while (depth > 0) {
             switch (parser.next()) {
