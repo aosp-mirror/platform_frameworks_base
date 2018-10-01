@@ -1268,15 +1268,18 @@ public class TelephonyManager {
      * Returns the unique device ID, for example, the IMEI for GSM and the MEID
      * or ESN for CDMA phones. Return null if device ID is not available.
      *
-     * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
-     * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     * <p>Requires Permission: READ_PRIVILEGED_PHONE_STATE or for the calling package to be the
+     * device or profile owner. The profile owner is an app that owns a managed profile on the
+     * device; for more details see <a href="https://developer.android.com/work/managed-profiles">
+     * Work profiles</a>. Profile owner access is deprecated and will be removed in a future
+     * release.
      *
      * @deprecated Use (@link getImei} which returns IMEI for GSM or (@link getMeid} which returns
      * MEID for CDMA.
      */
     @Deprecated
-    @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
-    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
+    @SuppressAutoDoc // No support for device / profile owner.
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public String getDeviceId() {
         try {
             ITelephony telephony = getITelephony();
@@ -1294,8 +1297,11 @@ public class TelephonyManager {
      * Returns the unique device ID of a subscription, for example, the IMEI for
      * GSM and the MEID for CDMA phones. Return null if device ID is not available.
      *
-     * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
-     * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     * <p>Requires Permission: READ_PRIVILEGED_PHONE_STATE or for the calling package to be the
+     * device or profile owner. The profile owner is an app that owns a managed profile on the
+     * device; for more details see <a href="https://developer.android.com/work/managed-profiles">
+     * Work profiles</a>. Profile owner access is deprecated and will be removed in a future
+     * release.
      *
      * @param slotIndex of which deviceID is returned
      *
@@ -1303,8 +1309,8 @@ public class TelephonyManager {
      * MEID for CDMA.
      */
     @Deprecated
-    @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
-    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
+    @SuppressAutoDoc // No support for device / profile owner.
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public String getDeviceId(int slotIndex) {
         // FIXME this assumes phoneId == slotIndex
         try {
@@ -1323,11 +1329,14 @@ public class TelephonyManager {
      * Returns the IMEI (International Mobile Equipment Identity). Return null if IMEI is not
      * available.
      *
-     * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
-     * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     * <p>Requires Permission: READ_PRIVILEGED_PHONE_STATE or for the calling package to be the
+     * device or profile owner. The profile owner is an app that owns a managed profile on the
+     * device; for more details see <a href="https://developer.android.com/work/managed-profiles">
+     * Work profiles</a>. Profile owner access is deprecated and will be removed in a future
+     * release.
      */
-    @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
-    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
+    @SuppressAutoDoc // No support for device / profile owner.
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public String getImei() {
         return getImei(getSlotIndex());
     }
@@ -1336,13 +1345,16 @@ public class TelephonyManager {
      * Returns the IMEI (International Mobile Equipment Identity). Return null if IMEI is not
      * available.
      *
-     * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
-     * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     * <p>Requires Permission: READ_PRIVILEGED_PHONE_STATE or for the calling package to be the
+     * device or profile owner. The profile owner is an app that owns a managed profile on the
+     * device; for more details see <a href="https://developer.android.com/work/managed-profiles">
+     * Work profiles</a>. Profile owner access is deprecated and will be removed in a future
+     * release.
      *
      * @param slotIndex of which IMEI is returned
      */
-    @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
-    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
+    @SuppressAutoDoc // No support for device / profile owner.
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public String getImei(int slotIndex) {
         ITelephony telephony = getITelephony();
         if (telephony == null) return null;
@@ -1386,11 +1398,14 @@ public class TelephonyManager {
     /**
      * Returns the MEID (Mobile Equipment Identifier). Return null if MEID is not available.
      *
-     * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
-     * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     * <p>Requires Permission: READ_PRIVILEGED_PHONE_STATE or for the calling package to be the
+     * device or profile owner. The profile owner is an app that owns a managed profile on the
+     * device; for more details see <a href="https://developer.android.com/work/managed-profiles">
+     * Work profiles</a>. Profile owner access is deprecated and will be removed in a future
+     * release.
      */
-    @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
-    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
+    @SuppressAutoDoc // No support for device / profile owner.
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public String getMeid() {
         return getMeid(getSlotIndex());
     }
@@ -1398,13 +1413,16 @@ public class TelephonyManager {
     /**
      * Returns the MEID (Mobile Equipment Identifier). Return null if MEID is not available.
      *
-     * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
-     * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     * <p>Requires Permission: READ_PRIVILEGED_PHONE_STATE or for the calling package to be the
+     * device or profile owner. The profile owner is an app that owns a managed profile on the
+     * device; for more details see <a href="https://developer.android.com/work/managed-profiles">
+     * Work profiles</a>. Profile owner access is deprecated and will be removed in a future
+     * release.
      *
      * @param slotIndex of which MEID is returned
      */
-    @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
-    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
+    @SuppressAutoDoc // No support for device / profile owner.
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public String getMeid(int slotIndex) {
         ITelephony telephony = getITelephony();
         if (telephony == null) return null;
@@ -2888,11 +2906,15 @@ public class TelephonyManager {
      * Returns the serial number of the SIM, if applicable. Return null if it is
      * unavailable.
      *
-     * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
-     * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     * <p>Requires Permission: READ_PRIVILEGED_PHONE_STATE, for the calling app to be the device or
+     * profile owner, or that the calling app has carrier privileges (see {@link
+     * #hasCarrierPrivileges}). The profile owner is an app that owns a managed profile on the
+     * device; for more details see <a href="https://developer.android.com/work/managed-profiles">
+     * Work profiles</a>. Profile owner access is deprecated and will be removed in a future
+     * release.
      */
     @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
-    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public String getSimSerialNumber() {
          return getSimSerialNumber(getSubId());
     }
@@ -2900,11 +2922,18 @@ public class TelephonyManager {
     /**
      * Returns the serial number for the given subscription, if applicable. Return null if it is
      * unavailable.
-     * <p>
+     *
+     * <p>Requires Permission: READ_PRIVILEGED_PHONE_STATE, for the calling app to be the device or
+     * profile owner, or that the calling app has carrier privileges (see {@link
+     * #hasCarrierPrivileges}). The profile owner is an app that owns a managed profile on the
+     * device; for more details see <a href="https://developer.android.com/work/managed-profiles">
+     * Work profiles</a>. Profile owner access is deprecated and will be removed in a future
+     * release.
+     *
      * @param subId for which Sim Serial number is returned
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     @UnsupportedAppUsage
     public String getSimSerialNumber(int subId) {
         try {
@@ -3039,11 +3068,15 @@ public class TelephonyManager {
      * Returns the unique subscriber ID, for example, the IMSI for a GSM phone.
      * Return null if it is unavailable.
      *
-     * <p>Requires Permission: {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
-     * or that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     * <p>Requires Permission: READ_PRIVILEGED_PHONE_STATE, for the calling app to be the device or
+     * profile owner, or that the calling app has carrier privileges (see {@link
+     * #hasCarrierPrivileges}). The profile owner is an app that owns a managed profile on the
+     * device; for more details see <a href="https://developer.android.com/work/managed-profiles">
+     * Work profiles</a>. Profile owner access is deprecated and will be removed in a future
+     * release.
      */
     @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
-    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public String getSubscriberId() {
         return getSubscriberId(getSubId());
     }
@@ -3053,10 +3086,17 @@ public class TelephonyManager {
      * for a subscription.
      * Return null if it is unavailable.
      *
+     * <p>Requires Permission: READ_PRIVILEGED_PHONE_STATE, for the calling app to be the device or
+     * profile owner, or that the calling app has carrier privileges (see {@link
+     * #hasCarrierPrivileges}). The profile owner is an app that owns a managed profile on the
+     * device; for more details see <a href="https://developer.android.com/work/managed-profiles">
+     * Work profiles</a>. Profile owner access is deprecated and will be removed in a future
+     * release.
+     *
      * @param subId whose subscriber id is returned
      * @hide
      */
-    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     @UnsupportedAppUsage
     public String getSubscriberId(int subId) {
         try {

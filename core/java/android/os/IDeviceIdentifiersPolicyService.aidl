@@ -21,4 +21,5 @@ package android.os;
  */
 interface IDeviceIdentifiersPolicyService {
     String getSerial();
+    String getSerialForPackage(in String callingPackage);
 }

@@ -5703,6 +5703,37 @@ public class DevicePolicyManager {
     }
 
     /**
+     * Returns whether the specified package can read the device identifiers.
+     *
+     * @param packageName The package name of the app to check for device identifier access.
+     * @return whether the package can read the device identifiers.
+     *
+     * @hide
+     */
+    public boolean checkDeviceIdentifierAccess(String packageName) {
+        return checkDeviceIdentifierAccessAsUser(packageName, myUserId());
+    }
+
+    /**
+     * @hide
+     */
+    @RequiresPermission(value = android.Manifest.permission.MANAGE_USERS, conditional = true)
+    public boolean checkDeviceIdentifierAccessAsUser(String packageName, int userId) {
+        throwIfParentInstance("checkDeviceIdentifierAccessAsUser");
+        if (packageName == null) {
+            return false;
+        }
+        if (mService != null) {
+            try {
+                return mService.checkDeviceIdentifierAccess(packageName, userId);
+            } catch (RemoteException re) {
+                throw re.rethrowFromSystemServer();
+            }
+        }
+        return false;
+    }
+
+    /**
      * Called by a profile owner or device owner to set a default activity that the system selects
      * to handle intents that match the given {@link IntentFilter}. This activity will remain the
      * default intent handler even if the set of potential event handlers for the intent filter

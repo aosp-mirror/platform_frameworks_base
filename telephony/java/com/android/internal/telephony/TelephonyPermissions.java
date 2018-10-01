@@ -19,11 +19,16 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 
 import android.Manifest;
 import android.app.AppOpsManager;
+import android.app.admin.DevicePolicyManager;
 import android.content.Context;
+import android.content.pm.ApplicationInfo;
+import android.content.pm.PackageManager;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.os.UserHandle;
 import android.telephony.Rlog;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
@@ -132,6 +137,169 @@ public final class TelephonyPermissions {
         AppOpsManager appOps = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
         return appOps.noteOp(AppOpsManager.OP_READ_PHONE_STATE, uid, callingPackage) ==
                 AppOpsManager.MODE_ALLOWED;
+    }
+
+    /**
+     * Check whether the caller (or self, if not processing an IPC) can read device identifiers.
+     *
+     * <p>This method behaves in one of the following ways:
+     * <ul>
+     *   <li>return true: if the caller has the READ_PRIVILEGED_PHONE_STATE permission or the
+     *       calling package passes a DevicePolicyManager Device Owner / Profile Owner device
+     *       identifier access check,
+     *   <li>throw SecurityException: if the caller does not meet any of the requirements and is
+     *       targeting Q or is targeting pre-Q and does not have the READ_PHONE_STATE permission.
+     *   <li>return false: if the caller is targeting pre-Q and does have the READ_PHONE_STATE
+     *       permission. In this case the caller would expect to have access to the device
+     *       identifiers so false is returned instead of throwing a SecurityException to indicate
+     *       the calling function should return dummy data.
+     * </ul>
+     */
+    public static boolean checkCallingOrSelfReadDeviceIdentifiers(Context context,
+            String callingPackage, String message) {
+        return checkCallingOrSelfReadDeviceIdentifiers(context,
+                SubscriptionManager.INVALID_SUBSCRIPTION_ID, callingPackage, message);
+    }
+
+    /**
+     * Check whether the caller (or self, if not processing an IPC) can read device identifiers.
+     *
+     * <p>This method behaves in one of the following ways:
+     * <ul>
+     *   <li>return true: if the caller has the READ_PRIVILEGED_PHONE_STATE permission or the
+     *       calling package passes a DevicePolicyManager Device Owner / Profile Owner device
+     *       identifier access check,
+     *   <li>throw SecurityException: if the caller does not meet any of the requirements and is
+     *       targeting Q or is targeting pre-Q and does not have the READ_PHONE_STATE permission
+     *       or carrier privileges.
+     *   <li>return false: if the caller is targeting pre-Q and does have the READ_PHONE_STATE
+     *       permission or carrier privileges. In this case the caller would expect to have access
+     *       to the device identifiers so false is returned instead of throwing a SecurityException
+     *       to indicate the calling function should return dummy data.
+     * </ul>
+     */
+    public static boolean checkCallingOrSelfReadDeviceIdentifiers(Context context, int subId,
+            String callingPackage, String message) {
+        int pid = Binder.getCallingPid();
+        int uid = Binder.getCallingUid();
+        // if the device identifier check completes successfully then grant access.
+        if (checkReadDeviceIdentifiers(context, pid, uid, callingPackage)) {
+            return true;
+        }
+        // else the calling package is not authorized to access the device identifiers; call
+        // a central method to report the failure based on the target SDK and if the calling package
+        // has the READ_PHONE_STATE permission or carrier privileges that were previously required
+        // to access the identifiers.
+        return reportAccessDeniedToReadIdentifiers(context, subId, pid, uid, callingPackage,
+                message);
+    }
+
+    /**
+     * Check whether the caller (or self, if not processing an IPC) can read subscriber identifiers.
+     *
+     * <p>This method behaves in one of the following ways:
+     * <ul>
+     *   <li>return true: if the caller has the READ_PRIVILEGED_PHONE_STATE permission, the calling
+     *       package passes a DevicePolicyManager Device Owner / Profile Owner device identifier
+     *       access check, or the calling package has carrier privleges.
+     *   <li>throw SecurityException: if the caller does not meet any of the requirements and is
+     *       targeting Q or is targeting pre-Q and does not have the READ_PHONE_STATE permission.
+     *   <li>return false: if the caller is targeting pre-Q and does have the READ_PHONE_STATE
+     *       permission. In this case the caller would expect to have access to the device
+     *       identifiers so false is returned instead of throwing a SecurityException to indicate
+     *       the calling function should return dummy data.
+     * </ul>
+     */
+    public static boolean checkCallingOrSelfReadSubscriberIdentifiers(Context context, int subId,
+            String callingPackage, String message) {
+        int pid = Binder.getCallingPid();
+        int uid = Binder.getCallingUid();
+        // if the device identifiers can be read then grant access to the subscriber identifiers
+        if (checkReadDeviceIdentifiers(context, pid, uid, callingPackage)) {
+            return true;
+        }
+        // If the calling package has carrier privileges then allow access to the subscriber
+        // identifiers.
+        if (SubscriptionManager.isValidSubscriptionId(subId) && getCarrierPrivilegeStatus(
+                TELEPHONY_SUPPLIER, subId, uid)
+                == TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS) {
+            return true;
+        }
+        return reportAccessDeniedToReadIdentifiers(context, subId, pid, uid, callingPackage,
+                message);
+    }
+
+    /**
+     * Checks whether the app with the given pid/uid can read device identifiers.
+     *
+     * @returns true if the caller has the READ_PRIVILEGED_PHONE_STATE permission or the calling
+     * package passes a DevicePolicyManager Device Owner / Profile Owner device identifier access
+     * check.
+     */
+    private static boolean checkReadDeviceIdentifiers(Context context, int pid, int uid,
+            String callingPackage) {
+        // Allow system and root access to the device identifiers.
+        final int appId = UserHandle.getAppId(uid);
+        if (appId == Process.SYSTEM_UID || appId == Process.ROOT_UID) {
+            return true;
+        }
+        // Allow access to packages that have the READ_PRIVILEGED_PHONE_STATE permission.
+        if (context.checkPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, pid,
+                uid) == PackageManager.PERMISSION_GRANTED) {
+            return true;
+        }
+        // if the calling package is null then return now as there's no way to perform the
+        // DevicePolicyManager device / profile owner checks.
+        if (callingPackage == null) {
+            return false;
+        }
+        // Allow access to a device / profile owner app.
+        DevicePolicyManager devicePolicyManager = (DevicePolicyManager) context.getSystemService(
+                Context.DEVICE_POLICY_SERVICE);
+        if (devicePolicyManager != null && devicePolicyManager.checkDeviceIdentifierAccessAsUser(
+                callingPackage, Binder.getCallingUserHandle().getIdentifier())) {
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * Reports a failure when the app with the given pid/uid cannot access the requested identifier.
+     *
+     * @returns false if the caller is targeting pre-Q and does have the READ_PHONE_STATE
+     * permission or carrier privileges.
+     * @throws SecurityException if the caller does not meet any of the requirements for the
+     *                           requested identifier and is targeting Q or is targeting pre-Q
+     *                           and does not have the READ_PHONE_STATE permission or carrier
+     *                           privileges.
+     */
+    private static boolean reportAccessDeniedToReadIdentifiers(Context context, int subId, int pid,
+            int uid, String callingPackage, String message) {
+        if (callingPackage != null) {
+            try {
+                // if the target SDK is pre-Q then check if the calling package would have
+                // previously had access to device identifiers.
+                ApplicationInfo callingPackageInfo = context.getPackageManager().getApplicationInfo(
+                        callingPackage, 0);
+                if (callingPackageInfo != null
+                        && callingPackageInfo.targetSdkVersion < Build.VERSION_CODES.Q) {
+                    if (context.checkPermission(android.Manifest.permission.READ_PHONE_STATE, pid,
+                            uid) == PackageManager.PERMISSION_GRANTED) {
+                        return false;
+                    }
+                    if (SubscriptionManager.isValidSubscriptionId(subId)
+                            && getCarrierPrivilegeStatus(TELEPHONY_SUPPLIER, subId, uid)
+                            == TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS) {
+                        return false;
+                    }
+                }
+            } catch (PackageManager.NameNotFoundException e) {
+                // If the application info for the calling package could not be found then default
+                // to throwing the SecurityException.
+            }
+        }
+        throw new SecurityException(message + ": The user " + uid + " does not have the "
+                + "READ_PRIVILEGED_PHONE_STATE permission to access the device identifiers");
     }
 
     /**
