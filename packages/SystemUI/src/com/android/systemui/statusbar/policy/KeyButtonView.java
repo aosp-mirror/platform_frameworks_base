@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.policy;
 
+import static android.view.Display.INVALID_DISPLAY;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_CLICK;
 import static android.view.accessibility.AccessibilityNodeInfo.ACTION_LONG_CLICK;
 
@@ -33,6 +34,7 @@ import android.os.Bundle;
 import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.util.TypedValue;
+import android.view.Display;
 import android.view.HapticFeedbackConstants;
 import android.view.InputDevice;
 import android.view.KeyCharacterMap;
@@ -307,6 +309,14 @@ public class KeyButtonView extends ImageView implements ButtonInterface {
                 0, KeyCharacterMap.VIRTUAL_KEYBOARD, 0,
                 flags | KeyEvent.FLAG_FROM_SYSTEM | KeyEvent.FLAG_VIRTUAL_HARD_KEY,
                 InputDevice.SOURCE_KEYBOARD);
+        //Make KeyEvent work on multi-display environment
+        if (getDisplay() != null) {
+            final int displayId = getDisplay().getDisplayId();
+
+            if (displayId != INVALID_DISPLAY) {
+                ev.setDisplayId(displayId);
+            }
+        }
         InputManager.getInstance().injectInputEvent(ev,
                 InputManager.INJECT_INPUT_EVENT_MODE_ASYNC);
     }
