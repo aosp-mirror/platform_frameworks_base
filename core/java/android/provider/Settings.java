@@ -9604,8 +9604,7 @@ public final class Settings {
          * Use the old dnsmasq DHCP server for tethering instead of the framework implementation.
          *
          * Integer values are interpreted as boolean, and the absence of an explicit setting
-         * is interpreted as |true|.
-         * TODO: make the default |false|
+         * is interpreted as |false|.
          * @hide
          */
         public static final String TETHER_ENABLE_LEGACY_DHCP_SERVER =
