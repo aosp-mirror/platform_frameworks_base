@@ -113,12 +113,12 @@ void ShellSubscriber::onLogEvent(const LogEvent& event) {
 
     for (const auto& matcher : mPushedMatchers) {
         if (matchesSimple(*mUidMap, matcher, event)) {
+            event.ToProto(mProto);
             // First write the payload size.
             size_t bufferSize = mProto.size();
             write(mOutput, &bufferSize, sizeof(bufferSize));
 
             // Then write the payload.
-            event.ToProto(mProto);
             mProto.flush(mOutput);
             mProto.clear();
             break;
