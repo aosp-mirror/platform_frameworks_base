@@ -138,8 +138,13 @@ public class ContextHubClient implements Closeable {
      */
     @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
     public boolean registerIntent(@NonNull PendingIntent intent, long nanoAppId) {
-        // TODO: Implement this
-        return false;
+        Preconditions.checkNotNull(intent, "PendingIntent cannot be null");
+
+        try {
+            return mClientProxy.registerIntent(intent, nanoAppId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
@@ -152,8 +157,13 @@ public class ContextHubClient implements Closeable {
      */
     @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
     public boolean unregisterIntent(@NonNull PendingIntent intent) {
-        // TODO: Implement this
-        return false;
+        Preconditions.checkNotNull(intent, "PendingIntent cannot be null");
+
+        try {
+            return mClientProxy.unregisterIntent(intent);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
