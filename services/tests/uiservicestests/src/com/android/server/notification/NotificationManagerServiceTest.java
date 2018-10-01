@@ -2192,6 +2192,26 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
+    public void testDontAutogroupIfCritical() throws Exception {
+        NotificationRecord r = generateNotificationRecord(mTestNotificationChannel, 0, null, false);
+        r.setCriticality(CriticalNotificationExtractor.CRITICAL_LOW);
+        mService.addEnqueuedNotification(r);
+        NotificationManagerService.PostNotificationRunnable runnable =
+                mService.new PostNotificationRunnable(r.getKey());
+        runnable.run();
+
+        r = generateNotificationRecord(mTestNotificationChannel, 1, null, false);
+        r.setCriticality(CriticalNotificationExtractor.CRITICAL);
+        runnable = mService.new PostNotificationRunnable(r.getKey());
+        mService.addEnqueuedNotification(r);
+
+        runnable.run();
+        waitForIdle();
+
+        verify(mGroupHelper, never()).onNotificationPosted(any(), anyBoolean());
+    }
+
+    @Test
     public void testNoFakeColorizedPermission() throws Exception {
         when(mPackageManagerClient.checkPermission(any(), any())).thenReturn(PERMISSION_DENIED);
         Notification.Builder nb = new Notification.Builder(mContext,
