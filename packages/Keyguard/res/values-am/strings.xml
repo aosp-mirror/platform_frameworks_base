@@ -44,7 +44,7 @@
     <string name="keyguard_permanent_disabled_sim_message_short" msgid="8340813989586622356">"የማይሰራ ሲም ካርድ።"</string>
     <string name="keyguard_permanent_disabled_sim_instructions" msgid="5892940909699723544">"ሲም ካርድዎ እስከመጨረሻው ተሰናክሏል።\n ሌላ ሲም ካርድ ለማግኘት ከገመድ አልባ አገልግሎት አቅራቢዎ ጋር ይገናኙ።"</string>
     <string name="keyguard_sim_locked_message" msgid="6875773413306380902">"ሲም ካርድ ተዘግቷል።"</string>
-    <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"ሲም ካርድ በፒዩኬ ተዘግቷል።"</string>
+    <string name="keyguard_sim_puk_locked_message" msgid="3747232467471801633">"ሲም ካርድ በPUK ተዘግቷል።"</string>
     <string name="keyguard_sim_unlock_progress_dialog_message" msgid="7975221805033614426">"ሲም ካርዱን በመክፈት ላይ…"</string>
     <string name="keyguard_accessibility_pin_area" msgid="7903959476607833485">"የፒን አካባቢ"</string>
     <string name="keyguard_accessibility_sim_pin_area" msgid="3887780775111719336">"የሲም ፒን አካባቢ"</string>
@@ -63,7 +63,7 @@
     <string name="kg_pin_instructions" msgid="2377242233495111557">"ፒን ያስገቡ"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"የይለፍ ቃል ያስገቡ"</string>
     <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"ሲም አሁን ተሰናክሏል። ለመቀጠል የPUK ኮድ ያስገቡ። ለዝርዝር ድምጸ ተያያዥ ሞደምን ያግኙ።"</string>
-    <string name="kg_puk_enter_puk_hint_multi" msgid="363822494559783025">"ሲም «<xliff:g id="CARRIER">%1$s</xliff:g>» አሁን ተሰናክሏል። ለመቀጠል የፒዩኬ ኮድ ያስገቡ። ዝርዝር መረጃን ለማግኘት የተንቀሳቃሽ ስልክ አገልግሎት አቅራቢውን ያነጋግሩ።"</string>
+    <string name="kg_puk_enter_puk_hint_multi" msgid="363822494559783025">"ሲም «<xliff:g id="CARRIER">%1$s</xliff:g>» አሁን ተሰናክሏል። ለመቀጠል የPUK ኮድ ያስገቡ። ዝርዝር መረጃን ለማግኘት የተንቀሳቃሽ ስልክ አገልግሎት አቅራቢውን ያነጋግሩ።"</string>
     <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"የተፈለገውን የፒን ኮድ ያስገቡ"</string>
     <string name="kg_enter_confirm_pin_hint" msgid="325676184762529976">"የተፈለገውን የፒን ኮድ ያረጋግጡ"</string>
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"ሲም ካርዱን በመክፈት ላይ…"</string>
