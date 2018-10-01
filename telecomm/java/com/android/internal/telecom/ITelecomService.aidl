@@ -256,6 +256,21 @@ interface ITelecomService {
     boolean setDefaultDialer(in String packageName);
 
     /**
+     * @see TelecomServiceImpl#requestChangeDefaultCallScreeningApp
+     */
+    void requestChangeDefaultCallScreeningApp(in ComponentName componentNamem, String callingPackage);
+
+    /**
+     * @see TelecomServiceImpl#isDefaultCallScreeningApp
+     */
+    boolean isDefaultCallScreeningApp(in ComponentName componentName);
+
+    /**
+     * @see TelecomServiceImpl#setDefaultCallScreeningApp
+     */
+    void setDefaultCallScreeningApp(in ComponentName componentName);
+
+    /**
     * @see TelecomServiceImpl#createManageBlockedNumbersIntent
     **/
     Intent createManageBlockedNumbersIntent();
