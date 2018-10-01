@@ -57,6 +57,7 @@ import android.net.ConnectivityManager;
 import android.net.ConnectivityManager.PacketKeepalive;
 import android.net.IConnectivityManager;
 import android.net.IIpConnectivityMetrics;
+import android.net.INetd;
 import android.net.INetdEventCallback;
 import android.net.INetworkManagementEventObserver;
 import android.net.INetworkPolicyListener;
@@ -88,6 +89,7 @@ import android.net.metrics.IpConnectivityLog;
 import android.net.metrics.NetworkEvent;
 import android.net.netlink.InetDiagMessage;
 import android.net.util.MultinetworkPolicyTracker;
+import android.net.util.NetdService;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -260,6 +262,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private int mDefaultInetConditionPublished = 0;
 
     private INetworkManagementService mNMS;
+    private INetd mNetd;
     private INetworkStatsService mStatsService;
     private INetworkPolicyManager mPolicyManager;
     private NetworkPolicyManagerInternal mPolicyManagerInternal;
@@ -767,6 +770,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 "missing NetworkPolicyManagerInternal");
         mProxyTracker = new ProxyTracker(context, mHandler, EVENT_PROXY_HAS_CHANGED);
 
+        mNetd = NetdService.getInstance();
         mKeyStore = KeyStore.getInstance();
         mTelephonyManager = (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
 
@@ -4686,9 +4690,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
         final String prefix = "iface:" + iface;
         try {
             if (add) {
-                mNMS.getNetdService().wakeupAddInterface(iface, prefix, mark, mask);
+                mNetd.wakeupAddInterface(iface, prefix, mark, mask);
             } else {
-                mNMS.getNetdService().wakeupDelInterface(iface, prefix, mark, mask);
+                mNetd.wakeupDelInterface(iface, prefix, mark, mask);
             }
         } catch (Exception e) {
             loge("Exception modifying wakeup packet monitoring: " + e);
