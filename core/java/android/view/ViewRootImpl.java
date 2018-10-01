@@ -1096,15 +1096,21 @@ public final class ViewRootImpl implements ViewParent,
     private void updateForceDarkMode() {
         if (mAttachInfo.mThreadedRenderer == null) return;
 
-        boolean nightMode = getNightMode() == Configuration.UI_MODE_NIGHT_YES;
-        TypedArray a = mContext.obtainStyledAttributes(R.styleable.Theme);
-        boolean isLightTheme = a.getBoolean(R.styleable.Theme_isLightTheme, false);
-        a.recycle();
+        boolean useAutoDark = getNightMode() == Configuration.UI_MODE_NIGHT_YES;
 
-        boolean changed = mAttachInfo.mThreadedRenderer.setForceDark(nightMode);
-        changed |= mAttachInfo.mThreadedRenderer.getRootNode().setAllowForceDark(isLightTheme);
+        // Allow debug.hwui.force_dark to override the target SDK check
+        if (useAutoDark && !SystemProperties.getBoolean("debug.hwui.force_dark", false)) {
+            useAutoDark = mContext.getApplicationInfo().targetSdkVersion >= Build.VERSION_CODES.Q;
+        }
 
-        if (changed) {
+        if (useAutoDark) {
+            TypedArray a = mContext.obtainStyledAttributes(R.styleable.Theme);
+            useAutoDark = a.getBoolean(R.styleable.Theme_isLightTheme, true)
+                    && a.getBoolean(R.styleable.Theme_forceDarkAllowed, true);
+            a.recycle();
+        }
+
+        if (mAttachInfo.mThreadedRenderer.setForceDark(useAutoDark)) {
             // TODO: Don't require regenerating all display lists to apply this setting
             invalidateWorld(mView);
         }
