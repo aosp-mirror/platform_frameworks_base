@@ -12,7 +12,9 @@
  * permissions and limitations under the License.
  */
 
-package com.android.systemui.plugins;
+package com.android.systemui.shared.plugins;
+
+import android.util.ArrayMap;
 
 import com.android.systemui.plugins.annotations.Dependencies;
 import com.android.systemui.plugins.annotations.DependsOn;
@@ -20,7 +22,7 @@ import com.android.systemui.plugins.annotations.ProvidesInterface;
 import com.android.systemui.plugins.annotations.Requirements;
 import com.android.systemui.plugins.annotations.Requires;
 
-import android.util.ArrayMap;
+import java.util.function.BiConsumer;
 
 public class VersionInfo {
 
@@ -73,25 +75,32 @@ public class VersionInfo {
     }
 
     public void checkVersion(VersionInfo plugin) throws InvalidVersionException {
-        ArrayMap<Class<?>, Version> versions = new ArrayMap<>(mVersions);
-        plugin.mVersions.forEach((aClass, version) -> {
-            Version v = versions.remove(aClass);
-            if (v == null) {
-                v = createVersion(aClass);
-            }
-            if (v == null) {
-                throw new InvalidVersionException(aClass.getSimpleName()
-                        + " does not provide an interface", false);
-            }
-            if (v.mVersion != version.mVersion) {
-                throw new InvalidVersionException(aClass, v.mVersion < version.mVersion, v.mVersion,
-                        version.mVersion);
+        final ArrayMap<Class<?>, Version> versions = new ArrayMap<>(mVersions);
+        plugin.mVersions.forEach(new BiConsumer<Class<?>, Version>() {
+            @Override
+            public void accept(Class<?> aClass, Version version) {
+                Version v = versions.remove(aClass);
+                if (v == null) {
+                    v = VersionInfo.this.createVersion(aClass);
+                }
+                if (v == null) {
+                    throw new InvalidVersionException(aClass.getSimpleName()
+                            + " does not provide an interface", false);
+                }
+                if (v.mVersion != version.mVersion) {
+                    throw new InvalidVersionException(aClass, v.mVersion < version.mVersion,
+                            v.mVersion,
+                            version.mVersion);
+                }
             }
         });
-        versions.forEach((aClass, version) -> {
-            if (version.mRequired) {
-                throw new InvalidVersionException("Missing required dependency "
-                        + aClass.getSimpleName(), false);
+        versions.forEach(new BiConsumer<Class<?>, Version>() {
+            @Override
+            public void accept(Class<?> aClass, Version version) {
+                if (version.mRequired) {
+                    throw new InvalidVersionException("Missing required dependency "
+                            + aClass.getSimpleName(), false);
+                }
             }
         });
     }

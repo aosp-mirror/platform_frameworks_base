@@ -39,9 +39,10 @@ import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.plugins.PluginInitializerImpl;
 import com.android.systemui.plugins.PluginDependencyProvider;
-import com.android.systemui.plugins.PluginManager;
-import com.android.systemui.plugins.PluginManagerImpl;
+import com.android.systemui.shared.plugins.PluginManager;
+import com.android.systemui.shared.plugins.PluginManagerImpl;
 import com.android.systemui.plugins.VolumeDialogController;
 import com.android.systemui.power.EnhancedEstimates;
 import com.android.systemui.power.EnhancedEstimatesImpl;
@@ -236,7 +237,7 @@ public class Dependency extends SystemUI {
                 new DeviceProvisionedControllerImpl(mContext));
 
         mProviders.put(PluginManager.class, () ->
-                new PluginManagerImpl(mContext));
+                new PluginManagerImpl(mContext, new PluginInitializerImpl()));
 
         mProviders.put(AssistManager.class, () ->
                 new AssistManager(getDependency(DeviceProvisionedController.class), mContext));

@@ -12,10 +12,12 @@
  * permissions and limitations under the License.
  */
 
-package com.android.systemui.plugins;
+package com.android.systemui.shared.plugins;
 
 import android.text.TextUtils;
 
+import com.android.systemui.plugins.Plugin;
+import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.plugins.annotations.ProvidesInterface;
 
 public interface PluginManager {
@@ -40,14 +42,17 @@ public interface PluginManager {
 
     <T> boolean dependsOn(Plugin p, Class<T> cls);
 
-    static <P> String getAction(Class<P> cls) {
-        ProvidesInterface info = cls.getDeclaredAnnotation(ProvidesInterface.class);
-        if (info == null) {
-            throw new RuntimeException(cls + " doesn't provide an interface");
+    class Helper {
+        public static <P> String getAction(Class<P> cls) {
+            ProvidesInterface info = cls.getDeclaredAnnotation(ProvidesInterface.class);
+            if (info == null) {
+                throw new RuntimeException(cls + " doesn't provide an interface");
+            }
+            if (TextUtils.isEmpty(info.action())) {
+                throw new RuntimeException(cls + " doesn't provide an action");
+            }
+            return info.action();
         }
-        if (TextUtils.isEmpty(info.action())) {
-            throw new RuntimeException(cls + " doesn't provide an action");
-        }
-        return info.action();
     }
+
 }

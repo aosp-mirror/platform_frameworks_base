@@ -72,7 +72,7 @@ import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingManager;
 import com.android.systemui.plugins.PluginListener;
-import com.android.systemui.plugins.PluginManager;
+import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin.MenuItem;
 import com.android.systemui.statusbar.notification.NotificationData;

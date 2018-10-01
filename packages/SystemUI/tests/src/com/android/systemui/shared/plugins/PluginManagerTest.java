@@ -11,7 +11,7 @@
  * KIND, either express or implied. See the License for the specific language governing
  * permissions and limitations under the License.
  */
-package com.android.systemui.plugins;
+package com.android.systemui.shared.plugins;
 
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
@@ -27,6 +27,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.net.Uri;
+import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -35,9 +36,12 @@ import android.testing.TestableLooper.RunWithLooper;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.systemui.Dependency;
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.plugins.PluginInstanceManager.PluginInfo;
-import com.android.systemui.plugins.PluginManagerImpl.PluginInstanceManagerFactory;
+import com.android.systemui.plugins.Plugin;
+import com.android.systemui.plugins.PluginInitializerImpl;
+import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.plugins.annotations.ProvidesInterface;
+import com.android.systemui.shared.plugins.PluginInstanceManager.PluginInfo;
+import com.android.systemui.shared.plugins.PluginManagerImpl.PluginInstanceManagerFactory;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -74,8 +78,14 @@ public class PluginManagerTest extends SysuiTestCase {
         when(mMockFactory.createPluginInstanceManager(Mockito.any(), Mockito.any(), Mockito.any(),
                 Mockito.anyBoolean(), Mockito.any(), Mockito.any(), Mockito.any()))
                 .thenReturn(mMockPluginInstance);
-        mPluginManager = new PluginManagerImpl(getContext(), mMockFactory, true, new String[0],
-                mMockExceptionHandler);
+
+        mPluginManager = new PluginManagerImpl(getContext(), mMockFactory, true,
+                mMockExceptionHandler, new PluginInitializerImpl() {
+            @Override
+            public String[] getWhitelistedPlugins(Context context) {
+                return new String[0];
+            }
+        });
         resetExceptionHandler();
         mMockListener = mock(PluginListener.class);
     }
@@ -109,7 +119,12 @@ public class PluginManagerTest extends SysuiTestCase {
     @RunWithLooper(setAsMainLooper = true)
     public void testNonDebuggable_noWhitelist() {
         mPluginManager = new PluginManagerImpl(getContext(), mMockFactory, false,
-                new String[0], mMockExceptionHandler);
+                mMockExceptionHandler, new PluginInitializerImpl() {
+            @Override
+            public String[] getWhitelistedPlugins(Context context) {
+                return new String[0];
+            }
+        });
         resetExceptionHandler();
 
         mPluginManager.addPluginListener("myAction", mMockListener, TestPlugin.class);
@@ -121,7 +136,12 @@ public class PluginManagerTest extends SysuiTestCase {
     @RunWithLooper(setAsMainLooper = true)
     public void testNonDebuggable_whitelistedPkg() {
         mPluginManager = new PluginManagerImpl(getContext(), mMockFactory, false,
-                new String[] {WHITELISTED_PACKAGE}, mMockExceptionHandler);
+                mMockExceptionHandler, new PluginInitializerImpl() {
+            @Override
+            public String[] getWhitelistedPlugins(Context context) {
+                return new String[] {WHITELISTED_PACKAGE};
+            }
+        });
         resetExceptionHandler();
 
         mPluginManager.addPluginListener("myAction", mMockListener, TestPlugin.class);

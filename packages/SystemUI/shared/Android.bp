@@ -20,6 +20,10 @@ android_library {
         "src/**/I*.aidl",
     ],
 
+    static_libs: [
+        "SystemUIPluginLib"
+    ],
+
     // Enforce that the library is build agains java 7 so that there are
     // no compatibility issues with launcher
     java_version: "1.7",

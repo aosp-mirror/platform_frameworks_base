@@ -22,7 +22,7 @@ import android.util.ArrayMap;
 import com.android.systemui.Dependency;
 import com.android.systemui.plugins.Plugin;
 import com.android.systemui.plugins.PluginListener;
-import com.android.systemui.plugins.PluginManager;
+import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
@@ -71,7 +71,7 @@ public class ExtensionControllerImpl implements ExtensionController {
 
         @Override
         public <P extends T> ExtensionController.ExtensionBuilder<T> withPlugin(Class<P> cls) {
-            return withPlugin(cls, PluginManager.getAction(cls));
+            return withPlugin(cls, PluginManager.Helper.getAction(cls));
         }
 
         @Override

@@ -37,7 +37,7 @@ import com.android.systemui.Dependency;
 import com.android.systemui.OverviewProxyService;
 import com.android.systemui.R;
 import com.android.systemui.plugins.PluginListener;
-import com.android.systemui.plugins.PluginManager;
+import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.plugins.statusbar.phone.NavBarButtonProvider;
 import com.android.systemui.statusbar.phone.ReverseLinearLayout.ReverseRelativeLayout;
 import com.android.systemui.statusbar.policy.KeyButtonView;

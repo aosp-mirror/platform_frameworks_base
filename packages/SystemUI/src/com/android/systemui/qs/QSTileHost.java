@@ -31,7 +31,7 @@ import android.util.Log;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.plugins.PluginListener;
-import com.android.systemui.plugins.PluginManager;
+import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.plugins.qs.QSFactory;
 import com.android.systemui.plugins.qs.QSTileView;
 import com.android.systemui.plugins.qs.QSTile;
