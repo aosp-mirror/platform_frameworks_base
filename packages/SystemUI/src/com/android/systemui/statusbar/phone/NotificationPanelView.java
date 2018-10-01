@@ -2521,8 +2521,8 @@ public class NotificationPanelView extends PanelView implements
     @Override
     public void setHeadsUpManager(HeadsUpManagerPhone headsUpManager) {
         super.setHeadsUpManager(headsUpManager);
-        mHeadsUpTouchHelper = new HeadsUpTouchHelper(headsUpManager, mNotificationStackScroller,
-                this);
+        mHeadsUpTouchHelper = new HeadsUpTouchHelper(headsUpManager,
+                mNotificationStackScroller.getHeadsUpCallback(), this);
     }
 
     public void setTrackedHeadsUp(ExpandableNotificationRow pickedChild) {

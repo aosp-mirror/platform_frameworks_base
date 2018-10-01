@@ -17,11 +17,11 @@
 package com.android.systemui.statusbar.phone;
 
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.os.SystemClock;
-import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.view.MotionEvent;
@@ -31,6 +31,7 @@ import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.DragDownHelper;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -43,11 +44,14 @@ public class StatusBarWindowViewTest extends SysuiTestCase {
     private StatusBarWindowView mView;
     private StatusBar mStatusBar;
     private DragDownHelper mDragDownHelper;
+    private NotificationStackScrollLayout mStackScrollLayout;
 
     @Before
     public void setUp() {
         mDependency.injectMockDependency(StatusBarStateController.class);
-        mView = new StatusBarWindowView(getContext(), null);
+        mView = spy(new StatusBarWindowView(getContext(), null));
+        mStackScrollLayout = mock(NotificationStackScrollLayout.class);
+        when(mView.getStackScrollLayout()).thenReturn(mStackScrollLayout);
         mStatusBar = mock(StatusBar.class);
         mView.setService(mStatusBar);
         mDragDownHelper = mock(DragDownHelper.class);

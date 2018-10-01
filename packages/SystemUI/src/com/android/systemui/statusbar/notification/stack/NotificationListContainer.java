@@ -22,6 +22,7 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
+import com.android.systemui.statusbar.notification.VisibilityLocationProvider;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.NotificationData;
@@ -31,7 +32,8 @@ import com.android.systemui.statusbar.notification.logging.NotificationLogger;
  * Interface representing the entity that contains notifications. It can have
  * notification views added and removed from it, and will manage displaying them to the user.
  */
-public interface NotificationListContainer {
+public interface NotificationListContainer extends ExpandableView.OnHeightChangedListener,
+        VisibilityLocationProvider {
 
     /**
      * Called when a child is being transferred.
@@ -128,14 +130,6 @@ public interface NotificationListContainer {
     ViewGroup getViewParentForNotification(NotificationData.Entry entry);
 
     /**
-     * Called when the height of an expandable view changes.
-     *
-     * @param view view whose height changed
-     * @param animate whether this change should be animated
-     */
-    void onHeightChanged(ExpandableView view, boolean animate);
-
-    /**
      * Resets the currently exposed menu view.
      *
      * @param animate whether to animate the closing/change of menu view
@@ -158,13 +152,6 @@ public interface NotificationListContainer {
      */
     void cleanUpViewState(View view);
 
-    /**
-     * Returns whether an ExpandableNotificationRow is in a visible location or not.
-     *
-     * @param row
-     * @return true if row is in a visible location
-     */
-    boolean isInVisibleLocation(ExpandableNotificationRow row);
 
     /**
      * Sets a listener to listen for changes in notification locations.

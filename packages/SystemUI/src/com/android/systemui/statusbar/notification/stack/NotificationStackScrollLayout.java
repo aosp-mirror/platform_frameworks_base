@@ -25,6 +25,8 @@ import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.animation.TimeAnimator;
 import android.animation.ValueAnimator;
+import android.animation.ValueAnimator.AnimatorUpdateListener;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.WallpaperManager;
 import android.content.Context;
@@ -42,10 +44,6 @@ import android.os.Bundle;
 import android.os.ServiceManager;
 import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
-
-import androidx.annotation.NonNull;
-import androidx.annotation.VisibleForTesting;
-import androidx.core.graphics.ColorUtils;
 
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
@@ -69,6 +67,8 @@ import android.view.animation.Interpolator;
 import android.widget.OverScroller;
 import android.widget.ScrollView;
 
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.graphics.ColorUtils;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.statusbar.IStatusBarService;
@@ -84,6 +84,7 @@ import com.android.systemui.classifier.FalsingManager;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin.MenuItem;
+import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin.OnMenuEventListener;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.DragDownHelper.DragDownCallback;
@@ -117,7 +118,7 @@ import com.android.systemui.statusbar.notification.VisibilityLocationProvider;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
-import com.android.systemui.statusbar.phone.HeadsUpManagerPhone.AnimationStateHandler;
+import com.android.systemui.statusbar.phone.HeadsUpTouchHelper;
 import com.android.systemui.statusbar.phone.LockscreenGestureLogger;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.NotificationGroupManager.OnGroupChangeListener;
@@ -142,10 +143,8 @@ import java.util.function.BiConsumer;
 /**
  * A layout which handles a dynamic amount of notifications and presents them in a scrollable stack.
  */
-public class NotificationStackScrollLayout extends ViewGroup
-        implements ExpandHelper.Callback, ScrollAdapter, OnHeightChangedListener,
-        OnGroupChangeListener, VisibilityLocationProvider, NotificationListContainer,
-        ConfigurationListener, DragDownCallback, AnimationStateHandler, Dumpable {
+public class NotificationStackScrollLayout extends ViewGroup implements ScrollAdapter,
+        NotificationListContainer, ConfigurationListener, Dumpable {
 
     public static final float BACKGROUND_ALPHA_DIMMED = 0.7f;
     private static final String TAG = "StackScroller";
@@ -160,7 +159,6 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     private ExpandHelper mExpandHelper;
     private final NotificationSwipeHelper mSwipeHelper;
-    private boolean mSwipingInProgress;
     private int mCurrentStackHeight = Integer.MAX_VALUE;
     private final Paint mBackgroundPaint = new Paint();
     private final boolean mShouldDrawNotificationBackground;
@@ -344,7 +342,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     private float mDimAmount;
     private ValueAnimator mDimAnimator;
     private ArrayList<ExpandableView> mTmpSortedChildren = new ArrayList<>();
-    private Animator.AnimatorListener mDimEndListener = new AnimatorListenerAdapter() {
+    private final Animator.AnimatorListener mDimEndListener = new AnimatorListenerAdapter() {
         @Override
         public void onAnimationEnd(Animator animation) {
             mDimAnimator = null;
@@ -485,12 +483,12 @@ public class NotificationStackScrollLayout extends ViewGroup
         mBgColor = context.getColor(R.color.notification_shade_background_color);
         int minHeight = res.getDimensionPixelSize(R.dimen.notification_min_height);
         int maxHeight = res.getDimensionPixelSize(R.dimen.notification_max_height);
-        mExpandHelper = new ExpandHelper(getContext(), this,
+        mExpandHelper = new ExpandHelper(getContext(), mExpandHelperCallback,
                 minHeight, maxHeight);
         mExpandHelper.setEventSource(this);
         mExpandHelper.setScrollAdapter(this);
-        mSwipeHelper = new NotificationSwipeHelper(SwipeHelper.X, new SwipeHelperCallback(),
-                getContext(), new NotificationMenuListener());
+        mSwipeHelper = new NotificationSwipeHelper(SwipeHelper.X, mNotificationCallback,
+                getContext(), mMenuEventListener);
         mStackScrollAlgorithm = createStackScrollAlgorithm(context);
         initView(context);
         mFalsingManager = FalsingManager.getInstance(context);
@@ -530,7 +528,7 @@ public class NotificationStackScrollLayout extends ViewGroup
 
         inflateEmptyShadeView();
         inflateFooterView();
-        mVisualStabilityManager.setVisibilityLocationProvider(this);
+        mVisualStabilityManager.setVisibilityLocationProvider(this::isInVisibleLocation);
         setLongPressListener(mEntryManager.getNotificationLongClicker());
     }
 
@@ -589,7 +587,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         return false;
     }
 
-  @ShadeViewRefactor(RefactorComponent.INPUT)
+  @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
   public RemoteInputController.Delegate createDelegate() {
         return new RemoteInputController.Delegate() {
             public void setRemoteInputActive(NotificationData.Entry entry,
@@ -628,7 +626,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     @Override
-    @ShadeViewRefactor(RefactorComponent.INPUT)
+    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public NotificationSwipeActionHelper getSwipeActionHelper() {
         return mSwipeHelper;
     }
@@ -1245,11 +1243,6 @@ public class NotificationStackScrollLayout extends ViewGroup
         return firstChild != null ? firstChild.getMinHeight() : mCollapsedSize;
     }
 
-    @ShadeViewRefactor(RefactorComponent.INPUT)
-    public void setLongPressListener(ExpandableNotificationRow.LongPressListener listener) {
-        mLongPressListener = listener;
-    }
-
     @ShadeViewRefactor(RefactorComponent.ADAPTER)
     public void setQsContainer(ViewGroup qsContainer) {
         mQsContainer = qsContainer;
@@ -1273,7 +1266,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         return false;
     }
 
-    @ShadeViewRefactor(RefactorComponent.INPUT)
+    @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     public ExpandableView getClosestChildAtRawPosition(float touchX, float touchY) {
         getLocationOnScreen(mTempInt2);
         float localTouchY = touchY - mTempInt2[1];
@@ -1303,16 +1296,8 @@ public class NotificationStackScrollLayout extends ViewGroup
         return closestChild;
     }
 
-    @Override
-    @ShadeViewRefactor(RefactorComponent.INPUT)
-    public ExpandableView getChildAtRawPosition(float touchX, float touchY) {
-        getLocationOnScreen(mTempInt2);
-        return getChildAtPosition(touchX - mTempInt2[0], touchY - mTempInt2[1]);
-    }
-
-    @Override
-    @ShadeViewRefactor(RefactorComponent.INPUT)
-    public ExpandableView getChildAtPosition(float touchX, float touchY) {
+    @ShadeViewRefactor(RefactorComponent.COORDINATOR)
+    private ExpandableView getChildAtPosition(float touchX, float touchY) {
         return getChildAtPosition(touchX, touchY, true /* requireMinHeight */);
 
     }
@@ -1325,7 +1310,7 @@ public class NotificationStackScrollLayout extends ViewGroup
      * @param requireMinHeight Whether a minimum height is required for a child to be returned.
      * @return the child at the given location.
      */
-    @ShadeViewRefactor(RefactorComponent.INPUT)
+    @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     private ExpandableView getChildAtPosition(float touchX, float touchY,
             boolean requireMinHeight) {
         // find the view under the pointer, accounting for GONE views
@@ -1365,71 +1350,9 @@ public class NotificationStackScrollLayout extends ViewGroup
         return null;
     }
 
-    @Override
-    @ShadeViewRefactor(RefactorComponent.ADAPTER)
-    public boolean canChildBeExpanded(View v) {
-        return v instanceof ExpandableNotificationRow
-                && ((ExpandableNotificationRow) v).isExpandable()
-                && !((ExpandableNotificationRow) v).areGutsExposed()
-                && (mIsExpanded || !((ExpandableNotificationRow) v).isPinned());
-    }
-
-    /* Only ever called as a consequence of an expansion gesture in the shade. */
-    @Override
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
-    public void setUserExpandedChild(View v, boolean userExpanded) {
-        if (v instanceof ExpandableNotificationRow) {
-            ExpandableNotificationRow row = (ExpandableNotificationRow) v;
-            if (userExpanded && onKeyguard()) {
-                // Due to a race when locking the screen while touching, a notification may be
-                // expanded even after we went back to keyguard. An example of this happens if
-                // you click in the empty space while expanding a group.
-
-                // We also need to un-user lock it here, since otherwise the content height
-                // calculated might be wrong. We also can't invert the two calls since
-                // un-userlocking it will trigger a layout switch in the content view.
-                row.setUserLocked(false);
-                updateContentHeight();
-                notifyHeightChangeListener(row);
-                return;
-            }
-            row.setUserExpanded(userExpanded, true /* allowChildrenExpansion */);
-            row.onExpandedByGesture(userExpanded);
-        }
-    }
-
-    @Override
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
-    public void setExpansionCancelled(View v) {
-        if (v instanceof ExpandableNotificationRow) {
-            ((ExpandableNotificationRow) v).setGroupExpansionChanging(false);
-        }
-    }
-
-    @Override
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
-    public void setUserLockedChild(View v, boolean userLocked) {
-        if (v instanceof ExpandableNotificationRow) {
-            ((ExpandableNotificationRow) v).setUserLocked(userLocked);
-        }
-        cancelLongPress();
-        requestDisallowInterceptTouchEvent(true);
-    }
-
-    @Override
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
-    public void expansionStateChanged(boolean isExpanding) {
-        mExpandingNotification = isExpanding;
-        if (!mExpandedInThisMotion) {
-            mMaxScrollAfterExpand = mOwnScrollY;
-            mExpandedInThisMotion = true;
-        }
-    }
-
-    @Override
-    @ShadeViewRefactor(RefactorComponent.COORDINATOR)
-    public int getMaxExpandHeight(ExpandableView view) {
-        return view.getMaxContentHeight();
+    private ExpandableView getChildAtRawPosition(float touchX, float touchY) {
+        getLocationOnScreen(mTempInt2);
+        return getChildAtPosition(touchX - mTempInt2[0], touchY - mTempInt2[1]);
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
@@ -1526,14 +1449,6 @@ public class NotificationStackScrollLayout extends ViewGroup
         return mStatusBarState == StatusBarState.KEYGUARD;
     }
 
-    @ShadeViewRefactor(RefactorComponent.INPUT)
-    private void setSwipingInProgress(boolean isSwiped) {
-        mSwipingInProgress = isSwiped;
-        if (isSwiped) {
-            requestDisallowInterceptTouchEvent(true);
-        }
-    }
-
     @Override
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     protected void onConfigurationChanged(Configuration newConfig) {
@@ -1567,249 +1482,6 @@ public class NotificationStackScrollLayout extends ViewGroup
         return this;
     }
 
-    @Override
-    @ShadeViewRefactor(RefactorComponent.INPUT)
-    public boolean onTouchEvent(MotionEvent ev) {
-        boolean isCancelOrUp = ev.getActionMasked() == MotionEvent.ACTION_CANCEL
-                || ev.getActionMasked() == MotionEvent.ACTION_UP;
-        handleEmptySpaceClick(ev);
-        boolean expandWantsIt = false;
-        if (mIsExpanded && !mSwipingInProgress && !mOnlyScrollingInThisMotion) {
-            if (isCancelOrUp) {
-                mExpandHelper.onlyObserveMovements(false);
-            }
-            boolean wasExpandingBefore = mExpandingNotification;
-            expandWantsIt = mExpandHelper.onTouchEvent(ev);
-            if (mExpandedInThisMotion && !mExpandingNotification && wasExpandingBefore
-                    && !mDisallowScrollingInThisMotion) {
-                dispatchDownEventToScroller(ev);
-            }
-        }
-        boolean scrollerWantsIt = false;
-        if (mIsExpanded && !mSwipingInProgress && !mExpandingNotification
-                && !mDisallowScrollingInThisMotion) {
-            scrollerWantsIt = onScrollTouch(ev);
-        }
-        boolean horizontalSwipeWantsIt = false;
-        if (!mIsBeingDragged
-                && !mExpandingNotification
-                && !mExpandedInThisMotion
-                && !mOnlyScrollingInThisMotion
-                && !mDisallowDismissInThisMotion) {
-            horizontalSwipeWantsIt = mSwipeHelper.onTouchEvent(ev);
-        }
-
-        // Check if we need to clear any snooze leavebehinds
-        NotificationGuts guts = mNotificationGutsManager.getExposedGuts();
-        if (guts != null && !NotificationSwipeHelper.isTouchInView(ev, guts)
-                && guts.getGutsContent() instanceof NotificationSnooze) {
-            NotificationSnooze ns = (NotificationSnooze) guts.getGutsContent();
-            if ((ns.isExpanded() && isCancelOrUp)
-                    || (!horizontalSwipeWantsIt && scrollerWantsIt)) {
-                // If the leavebehind is expanded we clear it on the next up event, otherwise we
-                // clear it on the next non-horizontal swipe or expand event.
-                checkSnoozeLeavebehind();
-            }
-        }
-        if (ev.getActionMasked() == MotionEvent.ACTION_UP) {
-            mCheckForLeavebehind = true;
-        }
-        return horizontalSwipeWantsIt || scrollerWantsIt || expandWantsIt || super.onTouchEvent(ev);
-    }
-
-    @ShadeViewRefactor(RefactorComponent.INPUT)
-    private void dispatchDownEventToScroller(MotionEvent ev) {
-        MotionEvent downEvent = MotionEvent.obtain(ev);
-        downEvent.setAction(MotionEvent.ACTION_DOWN);
-        onScrollTouch(downEvent);
-        downEvent.recycle();
-    }
-
-    @Override
-    @ShadeViewRefactor(RefactorComponent.INPUT)
-    public boolean onGenericMotionEvent(MotionEvent event) {
-        if (!isScrollingEnabled() || !mIsExpanded || mSwipingInProgress || mExpandingNotification
-                || mDisallowScrollingInThisMotion) {
-            return false;
-        }
-        if ((event.getSource() & InputDevice.SOURCE_CLASS_POINTER) != 0) {
-            switch (event.getAction()) {
-                case MotionEvent.ACTION_SCROLL: {
-                    if (!mIsBeingDragged) {
-                        final float vscroll = event.getAxisValue(MotionEvent.AXIS_VSCROLL);
-                        if (vscroll != 0) {
-                            final int delta = (int) (vscroll * getVerticalScrollFactor());
-                            final int range = getScrollRange();
-                            int oldScrollY = mOwnScrollY;
-                            int newScrollY = oldScrollY - delta;
-                            if (newScrollY < 0) {
-                                newScrollY = 0;
-                            } else if (newScrollY > range) {
-                                newScrollY = range;
-                            }
-                            if (newScrollY != oldScrollY) {
-                                setOwnScrollY(newScrollY);
-                                return true;
-                            }
-                        }
-                    }
-                }
-            }
-        }
-        return super.onGenericMotionEvent(event);
-    }
-
-    @ShadeViewRefactor(RefactorComponent.INPUT)
-    private boolean onScrollTouch(MotionEvent ev) {
-        if (!isScrollingEnabled()) {
-            return false;
-        }
-        if (isInsideQsContainer(ev) && !mIsBeingDragged) {
-            return false;
-        }
-        mForcedScroll = null;
-        initVelocityTrackerIfNotExists();
-        mVelocityTracker.addMovement(ev);
-
-        final int action = ev.getAction();
-
-        switch (action & MotionEvent.ACTION_MASK) {
-            case MotionEvent.ACTION_DOWN: {
-                if (getChildCount() == 0 || !isInContentBounds(ev)) {
-                    return false;
-                }
-                boolean isBeingDragged = !mScroller.isFinished();
-                setIsBeingDragged(isBeingDragged);
-                /*
-                 * If being flinged and user touches, stop the fling. isFinished
-                 * will be false if being flinged.
-                 */
-                if (!mScroller.isFinished()) {
-                    mScroller.forceFinished(true);
-                }
-
-                // Remember where the motion event started
-                mLastMotionY = (int) ev.getY();
-                mDownX = (int) ev.getX();
-                mActivePointerId = ev.getPointerId(0);
-                break;
-            }
-            case MotionEvent.ACTION_MOVE:
-                final int activePointerIndex = ev.findPointerIndex(mActivePointerId);
-                if (activePointerIndex == -1) {
-                    Log.e(TAG, "Invalid pointerId=" + mActivePointerId + " in onTouchEvent");
-                    break;
-                }
-
-                final int y = (int) ev.getY(activePointerIndex);
-                final int x = (int) ev.getX(activePointerIndex);
-                int deltaY = mLastMotionY - y;
-                final int xDiff = Math.abs(x - mDownX);
-                final int yDiff = Math.abs(deltaY);
-                if (!mIsBeingDragged && yDiff > mTouchSlop && yDiff > xDiff) {
-                    setIsBeingDragged(true);
-                    if (deltaY > 0) {
-                        deltaY -= mTouchSlop;
-                    } else {
-                        deltaY += mTouchSlop;
-                    }
-                }
-                if (mIsBeingDragged) {
-                    // Scroll to follow the motion event
-                    mLastMotionY = y;
-                    int range = getScrollRange();
-                    if (mExpandedInThisMotion) {
-                        range = Math.min(range, mMaxScrollAfterExpand);
-                    }
-
-                    float scrollAmount;
-                    if (deltaY < 0) {
-                        scrollAmount = overScrollDown(deltaY);
-                    } else {
-                        scrollAmount = overScrollUp(deltaY, range);
-                    }
-
-                    // Calling customOverScrollBy will call onCustomOverScrolled, which
-                    // sets the scrolling if applicable.
-                    if (scrollAmount != 0.0f) {
-                        // The scrolling motion could not be compensated with the
-                        // existing overScroll, we have to scroll the view
-                        customOverScrollBy((int) scrollAmount, mOwnScrollY,
-                                range, getHeight() / 2);
-                        // If we're scrolling, leavebehinds should be dismissed
-                        checkSnoozeLeavebehind();
-                    }
-                }
-                break;
-            case MotionEvent.ACTION_UP:
-                if (mIsBeingDragged) {
-                    final VelocityTracker velocityTracker = mVelocityTracker;
-                    velocityTracker.computeCurrentVelocity(1000, mMaximumVelocity);
-                    int initialVelocity = (int) velocityTracker.getYVelocity(mActivePointerId);
-
-                    if (shouldOverScrollFling(initialVelocity)) {
-                        onOverScrollFling(true, initialVelocity);
-                    } else {
-                        if (getChildCount() > 0) {
-                            if ((Math.abs(initialVelocity) > mMinimumVelocity)) {
-                                float currentOverScrollTop = getCurrentOverScrollAmount(true);
-                                if (currentOverScrollTop == 0.0f || initialVelocity > 0) {
-                                    fling(-initialVelocity);
-                                } else {
-                                    onOverScrollFling(false, initialVelocity);
-                                }
-                            } else {
-                                if (mScroller.springBack(mScrollX, mOwnScrollY, 0, 0, 0,
-                                        getScrollRange())) {
-                                    animateScroll();
-                                }
-                            }
-                        }
-                    }
-                    mActivePointerId = INVALID_POINTER;
-                    endDrag();
-                }
-
-                break;
-            case MotionEvent.ACTION_CANCEL:
-                if (mIsBeingDragged && getChildCount() > 0) {
-                    if (mScroller.springBack(mScrollX, mOwnScrollY, 0, 0, 0, getScrollRange())) {
-                        animateScroll();
-                    }
-                    mActivePointerId = INVALID_POINTER;
-                    endDrag();
-                }
-                break;
-            case MotionEvent.ACTION_POINTER_DOWN: {
-                final int index = ev.getActionIndex();
-                mLastMotionY = (int) ev.getY(index);
-                mDownX = (int) ev.getX(index);
-                mActivePointerId = ev.getPointerId(index);
-                break;
-            }
-            case MotionEvent.ACTION_POINTER_UP:
-                onSecondaryPointerUp(ev);
-                mLastMotionY = (int) ev.getY(ev.findPointerIndex(mActivePointerId));
-                mDownX = (int) ev.getX(ev.findPointerIndex(mActivePointerId));
-                break;
-        }
-        return true;
-    }
-
-    @ShadeViewRefactor(RefactorComponent.INPUT)
-    protected boolean isInsideQsContainer(MotionEvent ev) {
-        return ev.getY() < mQsContainer.getBottom();
-    }
-
-    @ShadeViewRefactor(RefactorComponent.INPUT)
-    private void onOverScrollFling(boolean open, int initialVelocity) {
-        if (mOverscrollTopChangedListener != null) {
-            mOverscrollTopChangedListener.flingTopOverscroll(initialVelocity, open);
-        }
-        mDontReportNextOverScroll = true;
-        setOverScrollAmount(0.0f, true, false);
-    }
-
     /**
      * Perform a scroll upwards and adapt the overscroll amounts accordingly
      *
@@ -1817,7 +1489,7 @@ public class NotificationStackScrollLayout extends ViewGroup
      * @return The amount of scrolling to be performed by the scroller,
      * not handled by the overScroll amount.
      */
-    @ShadeViewRefactor(RefactorComponent.INPUT)
+    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     private float overScrollUp(int deltaY, int range) {
         deltaY = Math.max(deltaY, 0);
         float currentTopAmount = getCurrentOverScrollAmount(true);
@@ -1874,24 +1546,6 @@ public class NotificationStackScrollLayout extends ViewGroup
             scrollAmount = 0.0f;
         }
         return scrollAmount;
-    }
-
-    @ShadeViewRefactor(RefactorComponent.INPUT)
-    private void onSecondaryPointerUp(MotionEvent ev) {
-        final int pointerIndex = (ev.getAction() & MotionEvent.ACTION_POINTER_INDEX_MASK) >>
-                MotionEvent.ACTION_POINTER_INDEX_SHIFT;
-        final int pointerId = ev.getPointerId(pointerIndex);
-        if (pointerId == mActivePointerId) {
-            // This was our active pointer going up. Choose a new
-            // active pointer and adjust accordingly.
-            // TODO: Make this decision more intelligent.
-            final int newPointerIndex = pointerIndex == 0 ? 1 : 0;
-            mLastMotionY = (int) ev.getY(newPointerIndex);
-            mActivePointerId = ev.getPointerId(newPointerIndex);
-            if (mVelocityTracker != null) {
-                mVelocityTracker.clear();
-            }
-        }
     }
 
     @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
@@ -2636,7 +2290,7 @@ public class NotificationStackScrollLayout extends ViewGroup
      *                  numbers mean that the finger/cursor is moving down the screen,
      *                  which means we want to scroll towards the top.
      */
-    @ShadeViewRefactor(RefactorComponent.INPUT)
+    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     protected void fling(int velocityY) {
         if (getChildCount() > 0) {
             int scrollRange = getScrollRange();
@@ -2674,7 +2328,7 @@ public class NotificationStackScrollLayout extends ViewGroup
      * @return Whether a fling performed on the top overscroll edge lead to the expanded
      * overScroll view (i.e QS).
      */
-    @ShadeViewRefactor(RefactorComponent.INPUT)
+    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     private boolean shouldOverScrollFling(int initialVelocity) {
         float topOverScroll = getCurrentOverScrollAmount(true);
         return mScrolledToTopOnFirstDown
@@ -2757,7 +2411,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         return Math.max(desiredPadding, mIntrinsicPadding);
     }
 
-    @ShadeViewRefactor(RefactorComponent.INPUT)
+    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     private float getRubberBandFactor(boolean onTop) {
         if (!onTop) {
             return RUBBER_BAND_FACTOR_NORMAL;
@@ -2777,99 +2431,13 @@ public class NotificationStackScrollLayout extends ViewGroup
      * rubberbanded, false if it is technically an overscroll but rather a motion to expand the
      * overscroll view (e.g. expand QS).
      */
-    @ShadeViewRefactor(RefactorComponent.INPUT)
+    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     private boolean isRubberbanded(boolean onTop) {
         return !onTop || mExpandedInThisMotion || mIsExpansionChanging || mPanelTracking
                 || !mScrolledToTopOnFirstDown;
     }
 
-    @ShadeViewRefactor(RefactorComponent.INPUT)
-    private void endDrag() {
-        setIsBeingDragged(false);
 
-        recycleVelocityTracker();
-
-        if (getCurrentOverScrollAmount(true /* onTop */) > 0) {
-            setOverScrollAmount(0, true /* onTop */, true /* animate */);
-        }
-        if (getCurrentOverScrollAmount(false /* onTop */) > 0) {
-            setOverScrollAmount(0, false /* onTop */, true /* animate */);
-        }
-    }
-
-    @ShadeViewRefactor(RefactorComponent.INPUT)
-    private void transformTouchEvent(MotionEvent ev, View sourceView, View targetView) {
-        ev.offsetLocation(sourceView.getX(), sourceView.getY());
-        ev.offsetLocation(-targetView.getX(), -targetView.getY());
-    }
-
-    @Override
-    @ShadeViewRefactor(RefactorComponent.INPUT)
-    public boolean onInterceptTouchEvent(MotionEvent ev) {
-        initDownStates(ev);
-        handleEmptySpaceClick(ev);
-        boolean expandWantsIt = false;
-        if (!mSwipingInProgress && !mOnlyScrollingInThisMotion) {
-            expandWantsIt = mExpandHelper.onInterceptTouchEvent(ev);
-        }
-        boolean scrollWantsIt = false;
-        if (!mSwipingInProgress && !mExpandingNotification) {
-            scrollWantsIt = onInterceptTouchEventScroll(ev);
-        }
-        boolean swipeWantsIt = false;
-        if (!mIsBeingDragged
-                && !mExpandingNotification
-                && !mExpandedInThisMotion
-                && !mOnlyScrollingInThisMotion
-                && !mDisallowDismissInThisMotion) {
-            swipeWantsIt = mSwipeHelper.onInterceptTouchEvent(ev);
-        }
-        // Check if we need to clear any snooze leavebehinds
-        boolean isUp = ev.getActionMasked() == MotionEvent.ACTION_UP;
-        NotificationGuts guts = mNotificationGutsManager.getExposedGuts();
-        if (!NotificationSwipeHelper.isTouchInView(ev, guts) && isUp && !swipeWantsIt &&
-                !expandWantsIt && !scrollWantsIt) {
-            mCheckForLeavebehind = false;
-            mNotificationGutsManager.closeAndSaveGuts(true /* removeLeavebehind */,
-                    false /* force */, false /* removeControls */, -1 /* x */, -1 /* y */,
-                    false /* resetMenu */);
-        }
-        if (ev.getActionMasked() == MotionEvent.ACTION_UP) {
-            mCheckForLeavebehind = true;
-        }
-        return swipeWantsIt || scrollWantsIt || expandWantsIt || super.onInterceptTouchEvent(ev);
-    }
-
-    @ShadeViewRefactor(RefactorComponent.INPUT)
-    private void handleEmptySpaceClick(MotionEvent ev) {
-        switch (ev.getActionMasked()) {
-            case MotionEvent.ACTION_MOVE:
-                if (mTouchIsClick && (Math.abs(ev.getY() - mInitialTouchY) > mTouchSlop
-                        || Math.abs(ev.getX() - mInitialTouchX) > mTouchSlop)) {
-                    mTouchIsClick = false;
-                }
-                break;
-            case MotionEvent.ACTION_UP:
-                if (mStatusBarState != StatusBarState.KEYGUARD && mTouchIsClick &&
-                        isBelowLastNotification(mInitialTouchX, mInitialTouchY)) {
-                    mOnEmptySpaceClickListener.onEmptySpaceClicked(mInitialTouchX, mInitialTouchY);
-                }
-                break;
-        }
-    }
-
-    @ShadeViewRefactor(RefactorComponent.INPUT)
-    private void initDownStates(MotionEvent ev) {
-        if (ev.getAction() == MotionEvent.ACTION_DOWN) {
-            mExpandedInThisMotion = false;
-            mOnlyScrollingInThisMotion = !mScroller.isFinished();
-            mDisallowScrollingInThisMotion = false;
-            mDisallowDismissInThisMotion = false;
-            mTouchIsClick = true;
-            mInitialTouchX = ev.getX();
-            mInitialTouchY = ev.getY();
-        }
-    }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void setChildTransferInProgress(boolean childTransferInProgress) {
@@ -2894,15 +2462,6 @@ public class NotificationStackScrollLayout extends ViewGroup
             mSwipeHelper.clearTranslatingParentView();
         }
         mCurrentStackScrollState.removeViewStateForView(child);
-    }
-
-    @Override
-    @ShadeViewRefactor(RefactorComponent.INPUT)
-    public void requestDisallowInterceptTouchEvent(boolean disallowIntercept) {
-        super.requestDisallowInterceptTouchEvent(disallowIntercept);
-        if (disallowIntercept) {
-            cancelLongPress();
-        }
     }
 
     @ShadeViewRefactor(RefactorComponent.COORDINATOR)
@@ -3600,6 +3159,385 @@ public class NotificationStackScrollLayout extends ViewGroup
         mGoToFullShadeNeedsAnimation = false;
     }
 
+    @ShadeViewRefactor(RefactorComponent.LAYOUT_ALGORITHM)
+    protected StackScrollAlgorithm createStackScrollAlgorithm(Context context) {
+        return new StackScrollAlgorithm(context);
+    }
+
+    /**
+     * @return Whether a y coordinate is inside the content.
+     */
+    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
+    public boolean isInContentBounds(float y) {
+        return y < getHeight() - getEmptyBottomMargin();
+    }
+
+    @ShadeViewRefactor(RefactorComponent.INPUT)
+    public void setLongPressListener(ExpandableNotificationRow.LongPressListener listener) {
+        mLongPressListener = listener;
+    }
+
+    @Override
+    @ShadeViewRefactor(RefactorComponent.INPUT)
+    public boolean onTouchEvent(MotionEvent ev) {
+        boolean isCancelOrUp = ev.getActionMasked() == MotionEvent.ACTION_CANCEL
+                || ev.getActionMasked() == MotionEvent.ACTION_UP;
+        handleEmptySpaceClick(ev);
+        boolean expandWantsIt = false;
+        boolean swipingInProgress = mSwipeHelper.isSwipingInProgress();
+        if (mIsExpanded && !swipingInProgress && !mOnlyScrollingInThisMotion) {
+            if (isCancelOrUp) {
+                mExpandHelper.onlyObserveMovements(false);
+            }
+            boolean wasExpandingBefore = mExpandingNotification;
+            expandWantsIt = mExpandHelper.onTouchEvent(ev);
+            if (mExpandedInThisMotion && !mExpandingNotification && wasExpandingBefore
+                    && !mDisallowScrollingInThisMotion) {
+                dispatchDownEventToScroller(ev);
+            }
+        }
+        boolean scrollerWantsIt = false;
+        if (mIsExpanded && !swipingInProgress && !mExpandingNotification
+                && !mDisallowScrollingInThisMotion) {
+            scrollerWantsIt = onScrollTouch(ev);
+        }
+        boolean horizontalSwipeWantsIt = false;
+        if (!mIsBeingDragged
+                && !mExpandingNotification
+                && !mExpandedInThisMotion
+                && !mOnlyScrollingInThisMotion
+                && !mDisallowDismissInThisMotion) {
+            horizontalSwipeWantsIt = mSwipeHelper.onTouchEvent(ev);
+        }
+
+        // Check if we need to clear any snooze leavebehinds
+        NotificationGuts guts = mNotificationGutsManager.getExposedGuts();
+        if (guts != null && !NotificationSwipeHelper.isTouchInView(ev, guts)
+                && guts.getGutsContent() instanceof NotificationSnooze) {
+            NotificationSnooze ns = (NotificationSnooze) guts.getGutsContent();
+            if ((ns.isExpanded() && isCancelOrUp)
+                    || (!horizontalSwipeWantsIt && scrollerWantsIt)) {
+                // If the leavebehind is expanded we clear it on the next up event, otherwise we
+                // clear it on the next non-horizontal swipe or expand event.
+                checkSnoozeLeavebehind();
+            }
+        }
+        if (ev.getActionMasked() == MotionEvent.ACTION_UP) {
+            mCheckForLeavebehind = true;
+        }
+        return horizontalSwipeWantsIt || scrollerWantsIt || expandWantsIt || super.onTouchEvent(ev);
+    }
+
+    @ShadeViewRefactor(RefactorComponent.INPUT)
+    private void dispatchDownEventToScroller(MotionEvent ev) {
+        MotionEvent downEvent = MotionEvent.obtain(ev);
+        downEvent.setAction(MotionEvent.ACTION_DOWN);
+        onScrollTouch(downEvent);
+        downEvent.recycle();
+    }
+
+    @Override
+    @ShadeViewRefactor(RefactorComponent.INPUT)
+    public boolean onGenericMotionEvent(MotionEvent event) {
+        if (!isScrollingEnabled() || !mIsExpanded || mSwipeHelper.isSwipingInProgress() || mExpandingNotification
+                || mDisallowScrollingInThisMotion) {
+            return false;
+        }
+        if ((event.getSource() & InputDevice.SOURCE_CLASS_POINTER) != 0) {
+            switch (event.getAction()) {
+                case MotionEvent.ACTION_SCROLL: {
+                    if (!mIsBeingDragged) {
+                        final float vscroll = event.getAxisValue(MotionEvent.AXIS_VSCROLL);
+                        if (vscroll != 0) {
+                            final int delta = (int) (vscroll * getVerticalScrollFactor());
+                            final int range = getScrollRange();
+                            int oldScrollY = mOwnScrollY;
+                            int newScrollY = oldScrollY - delta;
+                            if (newScrollY < 0) {
+                                newScrollY = 0;
+                            } else if (newScrollY > range) {
+                                newScrollY = range;
+                            }
+                            if (newScrollY != oldScrollY) {
+                                setOwnScrollY(newScrollY);
+                                return true;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+        return super.onGenericMotionEvent(event);
+    }
+
+    @ShadeViewRefactor(RefactorComponent.INPUT)
+    private boolean onScrollTouch(MotionEvent ev) {
+        if (!isScrollingEnabled()) {
+            return false;
+        }
+        if (isInsideQsContainer(ev) && !mIsBeingDragged) {
+            return false;
+        }
+        mForcedScroll = null;
+        initVelocityTrackerIfNotExists();
+        mVelocityTracker.addMovement(ev);
+
+        final int action = ev.getAction();
+
+        switch (action & MotionEvent.ACTION_MASK) {
+            case MotionEvent.ACTION_DOWN: {
+                if (getChildCount() == 0 || !isInContentBounds(ev)) {
+                    return false;
+                }
+                boolean isBeingDragged = !mScroller.isFinished();
+                setIsBeingDragged(isBeingDragged);
+                /*
+                 * If being flinged and user touches, stop the fling. isFinished
+                 * will be false if being flinged.
+                 */
+                if (!mScroller.isFinished()) {
+                    mScroller.forceFinished(true);
+                }
+
+                // Remember where the motion event started
+                mLastMotionY = (int) ev.getY();
+                mDownX = (int) ev.getX();
+                mActivePointerId = ev.getPointerId(0);
+                break;
+            }
+            case MotionEvent.ACTION_MOVE:
+                final int activePointerIndex = ev.findPointerIndex(mActivePointerId);
+                if (activePointerIndex == -1) {
+                    Log.e(TAG, "Invalid pointerId=" + mActivePointerId + " in onTouchEvent");
+                    break;
+                }
+
+                final int y = (int) ev.getY(activePointerIndex);
+                final int x = (int) ev.getX(activePointerIndex);
+                int deltaY = mLastMotionY - y;
+                final int xDiff = Math.abs(x - mDownX);
+                final int yDiff = Math.abs(deltaY);
+                if (!mIsBeingDragged && yDiff > mTouchSlop && yDiff > xDiff) {
+                    setIsBeingDragged(true);
+                    if (deltaY > 0) {
+                        deltaY -= mTouchSlop;
+                    } else {
+                        deltaY += mTouchSlop;
+                    }
+                }
+                if (mIsBeingDragged) {
+                    // Scroll to follow the motion event
+                    mLastMotionY = y;
+                    int range = getScrollRange();
+                    if (mExpandedInThisMotion) {
+                        range = Math.min(range, mMaxScrollAfterExpand);
+                    }
+
+                    float scrollAmount;
+                    if (deltaY < 0) {
+                        scrollAmount = overScrollDown(deltaY);
+                    } else {
+                        scrollAmount = overScrollUp(deltaY, range);
+                    }
+
+                    // Calling customOverScrollBy will call onCustomOverScrolled, which
+                    // sets the scrolling if applicable.
+                    if (scrollAmount != 0.0f) {
+                        // The scrolling motion could not be compensated with the
+                        // existing overScroll, we have to scroll the view
+                        customOverScrollBy((int) scrollAmount, mOwnScrollY,
+                                range, getHeight() / 2);
+                        // If we're scrolling, leavebehinds should be dismissed
+                        checkSnoozeLeavebehind();
+                    }
+                }
+                break;
+            case MotionEvent.ACTION_UP:
+                if (mIsBeingDragged) {
+                    final VelocityTracker velocityTracker = mVelocityTracker;
+                    velocityTracker.computeCurrentVelocity(1000, mMaximumVelocity);
+                    int initialVelocity = (int) velocityTracker.getYVelocity(mActivePointerId);
+
+                    if (shouldOverScrollFling(initialVelocity)) {
+                        onOverScrollFling(true, initialVelocity);
+                    } else {
+                        if (getChildCount() > 0) {
+                            if ((Math.abs(initialVelocity) > mMinimumVelocity)) {
+                                float currentOverScrollTop = getCurrentOverScrollAmount(true);
+                                if (currentOverScrollTop == 0.0f || initialVelocity > 0) {
+                                    fling(-initialVelocity);
+                                } else {
+                                    onOverScrollFling(false, initialVelocity);
+                                }
+                            } else {
+                                if (mScroller.springBack(mScrollX, mOwnScrollY, 0, 0, 0,
+                                        getScrollRange())) {
+                                    animateScroll();
+                                }
+                            }
+                        }
+                    }
+                    mActivePointerId = INVALID_POINTER;
+                    endDrag();
+                }
+
+                break;
+            case MotionEvent.ACTION_CANCEL:
+                if (mIsBeingDragged && getChildCount() > 0) {
+                    if (mScroller.springBack(mScrollX, mOwnScrollY, 0, 0, 0, getScrollRange())) {
+                        animateScroll();
+                    }
+                    mActivePointerId = INVALID_POINTER;
+                    endDrag();
+                }
+                break;
+            case MotionEvent.ACTION_POINTER_DOWN: {
+                final int index = ev.getActionIndex();
+                mLastMotionY = (int) ev.getY(index);
+                mDownX = (int) ev.getX(index);
+                mActivePointerId = ev.getPointerId(index);
+                break;
+            }
+            case MotionEvent.ACTION_POINTER_UP:
+                onSecondaryPointerUp(ev);
+                mLastMotionY = (int) ev.getY(ev.findPointerIndex(mActivePointerId));
+                mDownX = (int) ev.getX(ev.findPointerIndex(mActivePointerId));
+                break;
+        }
+        return true;
+    }
+
+    @ShadeViewRefactor(RefactorComponent.INPUT)
+    protected boolean isInsideQsContainer(MotionEvent ev) {
+        return ev.getY() < mQsContainer.getBottom();
+    }
+
+    @ShadeViewRefactor(RefactorComponent.INPUT)
+    private void onOverScrollFling(boolean open, int initialVelocity) {
+        if (mOverscrollTopChangedListener != null) {
+            mOverscrollTopChangedListener.flingTopOverscroll(initialVelocity, open);
+        }
+        mDontReportNextOverScroll = true;
+        setOverScrollAmount(0.0f, true, false);
+    }
+
+
+    @ShadeViewRefactor(RefactorComponent.INPUT)
+    private void onSecondaryPointerUp(MotionEvent ev) {
+        final int pointerIndex = (ev.getAction() & MotionEvent.ACTION_POINTER_INDEX_MASK) >>
+                MotionEvent.ACTION_POINTER_INDEX_SHIFT;
+        final int pointerId = ev.getPointerId(pointerIndex);
+        if (pointerId == mActivePointerId) {
+            // This was our active pointer going up. Choose a new
+            // active pointer and adjust accordingly.
+            // TODO: Make this decision more intelligent.
+            final int newPointerIndex = pointerIndex == 0 ? 1 : 0;
+            mLastMotionY = (int) ev.getY(newPointerIndex);
+            mActivePointerId = ev.getPointerId(newPointerIndex);
+            if (mVelocityTracker != null) {
+                mVelocityTracker.clear();
+            }
+        }
+    }
+
+    @ShadeViewRefactor(RefactorComponent.INPUT)
+    private void endDrag() {
+        setIsBeingDragged(false);
+
+        recycleVelocityTracker();
+
+        if (getCurrentOverScrollAmount(true /* onTop */) > 0) {
+            setOverScrollAmount(0, true /* onTop */, true /* animate */);
+        }
+        if (getCurrentOverScrollAmount(false /* onTop */) > 0) {
+            setOverScrollAmount(0, false /* onTop */, true /* animate */);
+        }
+    }
+
+    @ShadeViewRefactor(RefactorComponent.INPUT)
+    private void transformTouchEvent(MotionEvent ev, View sourceView, View targetView) {
+        ev.offsetLocation(sourceView.getX(), sourceView.getY());
+        ev.offsetLocation(-targetView.getX(), -targetView.getY());
+    }
+
+    @Override
+    @ShadeViewRefactor(RefactorComponent.INPUT)
+    public boolean onInterceptTouchEvent(MotionEvent ev) {
+        initDownStates(ev);
+        handleEmptySpaceClick(ev);
+        boolean expandWantsIt = false;
+        boolean swipingInProgress = mSwipeHelper.isSwipingInProgress();
+        if (!swipingInProgress && !mOnlyScrollingInThisMotion) {
+            expandWantsIt = mExpandHelper.onInterceptTouchEvent(ev);
+        }
+        boolean scrollWantsIt = false;
+        if (!swipingInProgress && !mExpandingNotification) {
+            scrollWantsIt = onInterceptTouchEventScroll(ev);
+        }
+        boolean swipeWantsIt = false;
+        if (!mIsBeingDragged
+                && !mExpandingNotification
+                && !mExpandedInThisMotion
+                && !mOnlyScrollingInThisMotion
+                && !mDisallowDismissInThisMotion) {
+            swipeWantsIt = mSwipeHelper.onInterceptTouchEvent(ev);
+        }
+        // Check if we need to clear any snooze leavebehinds
+        boolean isUp = ev.getActionMasked() == MotionEvent.ACTION_UP;
+        NotificationGuts guts = mNotificationGutsManager.getExposedGuts();
+        if (!NotificationSwipeHelper.isTouchInView(ev, guts) && isUp && !swipeWantsIt &&
+                !expandWantsIt && !scrollWantsIt) {
+            mCheckForLeavebehind = false;
+            mNotificationGutsManager.closeAndSaveGuts(true /* removeLeavebehind */,
+                    false /* force */, false /* removeControls */, -1 /* x */, -1 /* y */,
+                    false /* resetMenu */);
+        }
+        if (ev.getActionMasked() == MotionEvent.ACTION_UP) {
+            mCheckForLeavebehind = true;
+        }
+        return swipeWantsIt || scrollWantsIt || expandWantsIt || super.onInterceptTouchEvent(ev);
+    }
+
+    @ShadeViewRefactor(RefactorComponent.INPUT)
+    private void handleEmptySpaceClick(MotionEvent ev) {
+        switch (ev.getActionMasked()) {
+            case MotionEvent.ACTION_MOVE:
+                if (mTouchIsClick && (Math.abs(ev.getY() - mInitialTouchY) > mTouchSlop
+                        || Math.abs(ev.getX() - mInitialTouchX) > mTouchSlop)) {
+                    mTouchIsClick = false;
+                }
+                break;
+            case MotionEvent.ACTION_UP:
+                if (mStatusBarState != StatusBarState.KEYGUARD && mTouchIsClick &&
+                        isBelowLastNotification(mInitialTouchX, mInitialTouchY)) {
+                    mOnEmptySpaceClickListener.onEmptySpaceClicked(mInitialTouchX, mInitialTouchY);
+                }
+                break;
+        }
+    }
+
+    @ShadeViewRefactor(RefactorComponent.INPUT)
+    private void initDownStates(MotionEvent ev) {
+        if (ev.getAction() == MotionEvent.ACTION_DOWN) {
+            mExpandedInThisMotion = false;
+            mOnlyScrollingInThisMotion = !mScroller.isFinished();
+            mDisallowScrollingInThisMotion = false;
+            mDisallowDismissInThisMotion = false;
+            mTouchIsClick = true;
+            mInitialTouchX = ev.getX();
+            mInitialTouchY = ev.getY();
+        }
+    }
+
+    @Override
+    @ShadeViewRefactor(RefactorComponent.INPUT)
+    public void requestDisallowInterceptTouchEvent(boolean disallowIntercept) {
+        super.requestDisallowInterceptTouchEvent(disallowIntercept);
+        if (disallowIntercept) {
+            cancelLongPress();
+        }
+    }
+
     @ShadeViewRefactor(RefactorComponent.INPUT)
     private boolean onInterceptTouchEventScroll(MotionEvent ev) {
         if (!isScrollingEnabled()) {
@@ -3710,11 +3648,6 @@ public class NotificationStackScrollLayout extends ViewGroup
         return mIsBeingDragged;
     }
 
-    @ShadeViewRefactor(RefactorComponent.LAYOUT_ALGORITHM)
-    protected StackScrollAlgorithm createStackScrollAlgorithm(Context context) {
-        return new StackScrollAlgorithm(context);
-    }
-
     /**
      * @return Whether the specified motion event is actually happening over the content.
      */
@@ -3723,13 +3656,6 @@ public class NotificationStackScrollLayout extends ViewGroup
         return isInContentBounds(event.getY());
     }
 
-    /**
-     * @return Whether a y coordinate is inside the content.
-     */
-    @ShadeViewRefactor(RefactorComponent.INPUT)
-    public boolean isInContentBounds(float y) {
-        return y < getHeight() - getEmptyBottomMargin();
-    }
 
     @VisibleForTesting
     @ShadeViewRefactor(RefactorComponent.INPUT)
@@ -3738,6 +3664,83 @@ public class NotificationStackScrollLayout extends ViewGroup
         if (isDragged) {
             requestDisallowInterceptTouchEvent(true);
             cancelLongPress();
+            resetExposedMenuView(true /* animate */, true /* force */);
+        }
+    }
+
+    @ShadeViewRefactor(RefactorComponent.INPUT)
+    public void requestDisallowLongPress() {
+        cancelLongPress();
+    }
+
+    @ShadeViewRefactor(RefactorComponent.INPUT)
+    public void requestDisallowDismiss() {
+        mDisallowDismissInThisMotion = true;
+    }
+
+    @ShadeViewRefactor(RefactorComponent.INPUT)
+    public void cancelLongPress() {
+        mSwipeHelper.cancelLongPress();
+    }
+
+    @ShadeViewRefactor(RefactorComponent.INPUT)
+    public void setOnEmptySpaceClickListener(OnEmptySpaceClickListener listener) {
+        mOnEmptySpaceClickListener = listener;
+    }
+
+    /** @hide */
+    @Override
+    @ShadeViewRefactor(RefactorComponent.INPUT)
+    public boolean performAccessibilityActionInternal(int action, Bundle arguments) {
+        if (super.performAccessibilityActionInternal(action, arguments)) {
+            return true;
+        }
+        if (!isEnabled()) {
+            return false;
+        }
+        int direction = -1;
+        switch (action) {
+            case AccessibilityNodeInfo.ACTION_SCROLL_FORWARD:
+                // fall through
+            case android.R.id.accessibilityActionScrollDown:
+                direction = 1;
+                // fall through
+            case AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD:
+                // fall through
+            case android.R.id.accessibilityActionScrollUp:
+                final int viewportHeight = getHeight() - mPaddingBottom - mTopPadding - mPaddingTop
+                        - mShelf.getIntrinsicHeight();
+                final int targetScrollY = Math.max(0,
+                        Math.min(mOwnScrollY + direction * viewportHeight, getScrollRange()));
+                if (targetScrollY != mOwnScrollY) {
+                    mScroller.startScroll(mScrollX, mOwnScrollY, 0, targetScrollY - mOwnScrollY);
+                    animateScroll();
+                    return true;
+                }
+                break;
+        }
+        return false;
+    }
+
+    @ShadeViewRefactor(RefactorComponent.INPUT)
+    public void closeControlsIfOutsideTouch(MotionEvent ev) {
+        NotificationGuts guts = mNotificationGutsManager.getExposedGuts();
+        NotificationMenuRowPlugin menuRow = mSwipeHelper.getCurrentMenuRow();
+        View translatingParentView = mSwipeHelper.getTranslatingParentView();
+        View view = null;
+        if (guts != null && !guts.getGutsContent().isLeavebehind()) {
+            // Only close visible guts if they're not a leavebehind.
+            view = guts;
+        } else if (menuRow != null && menuRow.isMenuVisible()
+                && translatingParentView != null) {
+            // Checking menu
+            view = translatingParentView;
+        }
+        if (view != null && !NotificationSwipeHelper.isTouchInView(ev, view)) {
+            // Touch was outside visible guts / menu notification, close what's visible
+            mNotificationGutsManager.closeAndSaveGuts(false /* removeLeavebehind */,
+                    false /* force */, true /* removeControls */, -1 /* x */, -1 /* y */,
+                    false /* resetMenu */);
             resetExposedMenuView(true /* animate */, true /* force */);
         }
     }
@@ -3758,21 +3761,6 @@ public class NotificationStackScrollLayout extends ViewGroup
         if (mForcedScroll == child) {
             mForcedScroll = null;
         }
-    }
-
-    @ShadeViewRefactor(RefactorComponent.INPUT)
-    public void requestDisallowLongPress() {
-        cancelLongPress();
-    }
-
-    @ShadeViewRefactor(RefactorComponent.INPUT)
-    public void requestDisallowDismiss() {
-        mDisallowDismissInThisMotion = true;
-    }
-
-    @ShadeViewRefactor(RefactorComponent.INPUT)
-    public void cancelLongPress() {
-        mSwipeHelper.cancelLongPress();
     }
 
     @Override
@@ -3916,7 +3904,6 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     @Override
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     public void onHeightChanged(ExpandableView view, boolean needsAnimation) {
         updateContentHeight();
         updateScrollPositionOnExpandInBottom(view);
@@ -3936,7 +3923,6 @@ public class NotificationStackScrollLayout extends ViewGroup
     }
 
     @Override
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void onReset(ExpandableView view) {
         updateAnimationState(view);
         updateChronometerForChild(view);
@@ -3969,13 +3955,8 @@ public class NotificationStackScrollLayout extends ViewGroup
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void setOnHeightChangedListener(
-            ExpandableView.OnHeightChangedListener mOnHeightChangedListener) {
-        this.mOnHeightChangedListener = mOnHeightChangedListener;
-    }
-
-    @ShadeViewRefactor(RefactorComponent.INPUT)
-    public void setOnEmptySpaceClickListener(OnEmptySpaceClickListener listener) {
-        mOnEmptySpaceClickListener = listener;
+            ExpandableView.OnHeightChangedListener onHeightChangedListener) {
+        this.mOnHeightChangedListener = onHeightChangedListener;
     }
 
     @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
@@ -4465,7 +4446,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void setGroupManager(NotificationGroupManager groupManager) {
         this.mGroupManager = groupManager;
-        mGroupManager.setOnGroupChangeListener(this);
+        mGroupManager.setOnGroupChangeListener(mOnGroupChangeListener);
     }
 
     @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
@@ -4508,33 +4489,6 @@ public class NotificationStackScrollLayout extends ViewGroup
         return touchY > mTopPadding + mStackTranslation;
     }
 
-    @Override
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
-    public void onGroupExpansionChanged(ExpandableNotificationRow changedRow, boolean expanded) {
-        boolean animated = !mGroupExpandedForMeasure && mAnimationsEnabled
-                && (mIsExpanded || changedRow.isPinned());
-        if (animated) {
-            mExpandedGroupView = changedRow;
-            mNeedsAnimation = true;
-        }
-        changedRow.setChildrenExpanded(expanded, animated);
-        if (!mGroupExpandedForMeasure) {
-            onHeightChanged(changedRow, false /* needsAnimation */);
-        }
-        runAfterAnimationFinished(new Runnable() {
-            @Override
-            public void run() {
-                changedRow.onFinishedExpansionChange();
-            }
-        });
-    }
-
-    @Override
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
-    public void onGroupCreatedFromChildren(NotificationGroupManager.NotificationGroup group) {
-        mStatusBar.requestNotificationUpdate();
-    }
-
     /** @hide */
     @Override
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
@@ -4565,46 +4519,6 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
         // Talkback only listenes to scroll events of certain classes, let's make us a scrollview
         info.setClassName(ScrollView.class.getName());
-    }
-
-    /** @hide */
-    @Override
-    @ShadeViewRefactor(RefactorComponent.INPUT)
-    public boolean performAccessibilityActionInternal(int action, Bundle arguments) {
-        if (super.performAccessibilityActionInternal(action, arguments)) {
-            return true;
-        }
-        if (!isEnabled()) {
-            return false;
-        }
-        int direction = -1;
-        switch (action) {
-            case AccessibilityNodeInfo.ACTION_SCROLL_FORWARD:
-                // fall through
-            case android.R.id.accessibilityActionScrollDown:
-                direction = 1;
-                // fall through
-            case AccessibilityNodeInfo.ACTION_SCROLL_BACKWARD:
-                // fall through
-            case android.R.id.accessibilityActionScrollUp:
-                final int viewportHeight = getHeight() - mPaddingBottom - mTopPadding - mPaddingTop
-                        - mShelf.getIntrinsicHeight();
-                final int targetScrollY = Math.max(0,
-                        Math.min(mOwnScrollY + direction * viewportHeight, getScrollRange()));
-                if (targetScrollY != mOwnScrollY) {
-                    mScroller.startScroll(mScrollX, mOwnScrollY, 0, targetScrollY - mOwnScrollY);
-                    animateScroll();
-                    return true;
-                }
-                break;
-        }
-        return false;
-    }
-
-    @Override
-    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
-    public void onGroupsChanged() {
-        mStatusBar.requestNotificationUpdate();
     }
 
     @ShadeViewRefactor(RefactorComponent.COORDINATOR)
@@ -4649,7 +4563,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     public void setHeadsUpManager(HeadsUpManagerPhone headsUpManager) {
         mHeadsUpManager = headsUpManager;
         mHeadsUpManager.addListener(mRoundnessManager);
-        mHeadsUpManager.setAnimationStateHandler(this);
+        mHeadsUpManager.setAnimationStateHandler(this::setHeadsUpGoingAwayAnimationsAllowed);
     }
 
     @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
@@ -5168,67 +5082,7 @@ public class NotificationStackScrollLayout extends ViewGroup
         return !mEntryManager.getNotificationData().getActiveNotifications().isEmpty();
     }
 
-    // ---------------------- DragDownHelper.OnDragDownListener ------------------------------------
-
-
-    /* Only ever called as a consequence of a lockscreen expansion gesture. */
-    @Override
-    @ShadeViewRefactor(RefactorComponent.INPUT)
-    public boolean onDraggedDown(View startingChild, int dragLengthY) {
-        if (mStatusBarState == StatusBarState.KEYGUARD
-                && hasActiveNotifications() && (!mStatusBar.isDozing() || mStatusBar.isPulsing())) {
-            mLockscreenGestureLogger.write(
-                    MetricsEvent.ACTION_LS_SHADE,
-                    (int) (dragLengthY / mDisplayMetrics.density),
-                    0 /* velocityDp - N/A */);
-
-            // We have notifications, go to locked shade.
-            mStatusBar.goToLockedShade(startingChild);
-            if (startingChild instanceof ExpandableNotificationRow) {
-                ExpandableNotificationRow row = (ExpandableNotificationRow) startingChild;
-                row.onExpandedByGesture(true /* drag down is always an open */);
-            }
-            return true;
-        } else {
-            // abort gesture.
-            return false;
-        }
-    }
-
-    @Override
-    @ShadeViewRefactor(RefactorComponent.INPUT)
-    public void onDragDownReset() {
-        setDimmed(true /* dimmed */, true /* animated */);
-        resetScrollPosition();
-        resetCheckSnoozeLeavebehind();
-    }
-
-    @Override
-    @ShadeViewRefactor(RefactorComponent.INPUT)
-    public void onCrossedThreshold(boolean above) {
-        setDimmed(!above /* dimmed */, true /* animate */);
-    }
-
-    @Override
-    @ShadeViewRefactor(RefactorComponent.INPUT)
-    public void onTouchSlopExceeded() {
-        cancelLongPress();
-        checkSnoozeLeavebehind();
-    }
-
-    @Override
-    @ShadeViewRefactor(RefactorComponent.INPUT)
-    public void setEmptyDragAmount(float amount) {
-        mNotificationPanel.setEmptyDragAmount(amount);
-    }
-
-    @Override
-    @ShadeViewRefactor(RefactorComponent.INPUT)
-    public boolean isFalsingCheckNeeded() {
-        return mStatusBarState == StatusBarState.KEYGUARD;
-    }
-
-    @ShadeViewRefactor(RefactorComponent.INPUT)
+    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void updateSpeedBumpIndex() {
         int speedBumpIndex = 0;
         int currentIndex = 0;
@@ -5267,30 +5121,6 @@ public class NotificationStackScrollLayout extends ViewGroup
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void resetExposedMenuView(boolean animate, boolean force) {
         mSwipeHelper.resetExposedMenuView(animate, force);
-    }
-
-
-    @ShadeViewRefactor(RefactorComponent.INPUT)
-    public void closeControlsIfOutsideTouch(MotionEvent ev) {
-        NotificationGuts guts = mNotificationGutsManager.getExposedGuts();
-        NotificationMenuRowPlugin menuRow = mSwipeHelper.getCurrentMenuRow();
-        View translatingParentView = mSwipeHelper.getTranslatingParentView();
-        View view = null;
-        if (guts != null && !guts.getGutsContent().isLeavebehind()) {
-            // Only close visible guts if they're not a leavebehind.
-            view = guts;
-        } else if (menuRow != null && menuRow.isMenuVisible()
-                && translatingParentView != null) {
-            // Checking menu
-            view = translatingParentView;
-        }
-        if (view != null && !NotificationSwipeHelper.isTouchInView(ev, view)) {
-            // Touch was outside visible guts / menu notification, close what's visible
-            mNotificationGutsManager.closeAndSaveGuts(false /* removeLeavebehind */,
-                    false /* force */, true /* removeControls */, -1 /* x */, -1 /* y */,
-                    false /* resetMenu */);
-            resetExposedMenuView(true /* animate */, true /* force */);
-        }
     }
 
     @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
@@ -5614,9 +5444,9 @@ public class NotificationStackScrollLayout extends ViewGroup
       }
     };
 
-    class NotificationMenuListener implements NotificationMenuRowPlugin.OnMenuEventListener {
+    @ShadeViewRefactor(RefactorComponent.INPUT)
+    private final OnMenuEventListener mMenuEventListener = new OnMenuEventListener() {
         @Override
-        @ShadeViewRefactor(RefactorComponent.INPUT)
         public void onMenuClicked(View view, int x, int y, MenuItem item) {
             if (mLongPressListener == null) {
                 return;
@@ -5630,7 +5460,6 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
 
         @Override
-        @ShadeViewRefactor(RefactorComponent.INPUT)
         public void onMenuReset(View row) {
             View translatingParentView = mSwipeHelper.getTranslatingParentView();
             if (translatingParentView != null && row == translatingParentView) {
@@ -5640,7 +5469,6 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
 
         @Override
-        @ShadeViewRefactor(RefactorComponent.INPUT)
         public void onMenuShown(View row) {
             if (row instanceof ExpandableNotificationRow) {
                 MetricsLogger.action(mContext, MetricsEvent.ACTION_REVEAL_GEAR,
@@ -5649,9 +5477,11 @@ public class NotificationStackScrollLayout extends ViewGroup
             }
             mSwipeHelper.onMenuShown(row);
         }
-    }
+    };
 
-    class SwipeHelperCallback implements NotificationSwipeHelper.NotificationCallback {
+    @ShadeViewRefactor(RefactorComponent.INPUT)
+    private final NotificationSwipeHelper.NotificationCallback mNotificationCallback =
+            new NotificationSwipeHelper.NotificationCallback() {
         @Override
         public void onDismiss() {
             mNotificationGutsManager.closeAndSaveGuts(true /* removeLeavebehind */,
@@ -5671,10 +5501,8 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
 
         @Override
-        @ShadeViewRefactor(RefactorComponent.INPUT)
         public void onDragCancelled(View v) {
             mFalsingManager.onNotificatonStopDismissing();
-            setSwipingInProgress(false);
         }
 
         /**
@@ -5682,7 +5510,6 @@ public class NotificationStackScrollLayout extends ViewGroup
          * re-invoking dismiss logic in case the notification has not made its way out yet).
          */
         @Override
-        @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
         public void onChildDismissed(View view) {
             ExpandableNotificationRow row = (ExpandableNotificationRow) view;
             if (!row.isDismissed()) {
@@ -5701,7 +5528,6 @@ public class NotificationStackScrollLayout extends ViewGroup
          * @param view view (e.g. notification) to dismiss from the layout
          */
 
-        @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
         public void handleChildViewDismissed(View view) {
             if (mDismissAllInProgress) {
                 return;
@@ -5709,7 +5535,6 @@ public class NotificationStackScrollLayout extends ViewGroup
 
             boolean isBlockingHelperShown = false;
 
-            setSwipingInProgress(false);
             if (mDragAnimPendingChildren.contains(view)) {
                 // We start the swipe and finish it in the same frame; we don't want a drag
                 // animation.
@@ -5743,13 +5568,11 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
 
         @Override
-        @ShadeViewRefactor(RefactorComponent.INPUT)
         public boolean isAntiFalsingNeeded() {
             return onKeyguard();
         }
 
         @Override
-        @ShadeViewRefactor(RefactorComponent.INPUT)
         public View getChildAtPosition(MotionEvent ev) {
             View child = NotificationStackScrollLayout.this.getChildAtPosition(ev.getX(),
                     ev.getY());
@@ -5772,10 +5595,8 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
 
         @Override
-        @ShadeViewRefactor(RefactorComponent.INPUT)
         public void onBeginDrag(View v) {
             mFalsingManager.onNotificatonStartDismissing();
-            setSwipingInProgress(true);
             mAmbientState.onBeginDrag(v);
             updateContinuousShadowDrawing();
             if (mAnimationsEnabled && (mIsExpanded || !isPinnedHeadsUp(v))) {
@@ -5786,7 +5607,6 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
 
         @Override
-        @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
         public void onChildSnappedBack(View animView, float targetLeft) {
             mAmbientState.onDragFinished(animView);
             updateContinuousShadowDrawing();
@@ -5808,7 +5628,6 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
 
         @Override
-        @ShadeViewRefactor(RefactorComponent.INPUT)
         public boolean updateSwipeProgress(View animView, boolean dismissable,
                 float swipeProgress) {
             // Returning true prevents alpha fading.
@@ -5816,7 +5635,6 @@ public class NotificationStackScrollLayout extends ViewGroup
         }
 
         @Override
-        @ShadeViewRefactor(RefactorComponent.INPUT)
         public float getFalsingThresholdFactor() {
             return mStatusBar.isWakeUpComingFromTouch() ? 1.5f : 1.0f;
         }
@@ -5825,5 +5643,197 @@ public class NotificationStackScrollLayout extends ViewGroup
         public boolean canChildBeDismissed(View v) {
             return NotificationStackScrollLayout.this.canChildBeDismissed(v);
         }
+    };
+
+    // ---------------------- DragDownHelper.OnDragDownListener ------------------------------------
+
+    @ShadeViewRefactor(RefactorComponent.INPUT)
+    private final DragDownCallback mDragDownCallback = new DragDownCallback() {
+
+        /* Only ever called as a consequence of a lockscreen expansion gesture. */
+        @Override
+        public boolean onDraggedDown(View startingChild, int dragLengthY) {
+            if (mStatusBarState == StatusBarState.KEYGUARD
+                    && hasActiveNotifications() && (!mStatusBar.isDozing()
+                    || mStatusBar.isPulsing())) {
+                mLockscreenGestureLogger.write(
+                        MetricsEvent.ACTION_LS_SHADE,
+                        (int) (dragLengthY / mDisplayMetrics.density),
+                        0 /* velocityDp - N/A */);
+
+                // We have notifications, go to locked shade.
+                mStatusBar.goToLockedShade(startingChild);
+                if (startingChild instanceof ExpandableNotificationRow) {
+                    ExpandableNotificationRow row = (ExpandableNotificationRow) startingChild;
+                    row.onExpandedByGesture(true /* drag down is always an open */);
+                }
+                return true;
+            } else {
+                // abort gesture.
+                return false;
+            }
+        }
+
+        @Override
+        public void onDragDownReset() {
+            setDimmed(true /* dimmed */, true /* animated */);
+            resetScrollPosition();
+            resetCheckSnoozeLeavebehind();
+        }
+
+        @Override
+        public void onCrossedThreshold(boolean above) {
+            setDimmed(!above /* dimmed */, true /* animate */);
+        }
+
+        @Override
+        public void onTouchSlopExceeded() {
+            cancelLongPress();
+            checkSnoozeLeavebehind();
+        }
+
+        @Override
+        public void setEmptyDragAmount(float amount) {
+            mNotificationPanel.setEmptyDragAmount(amount);
+        }
+
+        @Override
+        public boolean isFalsingCheckNeeded() {
+            return mStatusBarState == StatusBarState.KEYGUARD;
+        }
+    };
+
+    public DragDownCallback getDragDownCallback() { return mDragDownCallback; }
+
+    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
+    private final HeadsUpTouchHelper.Callback mHeadsUpCallback = new HeadsUpTouchHelper.Callback() {
+        @Override
+        public ExpandableView getChildAtRawPosition(float touchX, float touchY) {
+            return NotificationStackScrollLayout.this.getChildAtRawPosition(touchX, touchY);
+        }
+
+        @Override
+        public boolean isExpanded() {
+            return mIsExpanded;
+        }
+
+        @Override
+        public Context getContext() {
+            return mContext;
+        }
+    };
+
+    public HeadsUpTouchHelper.Callback getHeadsUpCallback() { return mHeadsUpCallback; }
+
+
+    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
+    private final OnGroupChangeListener mOnGroupChangeListener = new OnGroupChangeListener() {
+        @Override
+        public void onGroupExpansionChanged(ExpandableNotificationRow changedRow, boolean expanded) {
+            boolean animated = !mGroupExpandedForMeasure && mAnimationsEnabled
+                    && (mIsExpanded || changedRow.isPinned());
+            if (animated) {
+                mExpandedGroupView = changedRow;
+                mNeedsAnimation = true;
+            }
+            changedRow.setChildrenExpanded(expanded, animated);
+            if (!mGroupExpandedForMeasure) {
+                onHeightChanged(changedRow, false /* needsAnimation */);
+            }
+            runAfterAnimationFinished(new Runnable() {
+                @Override
+                public void run() {
+                    changedRow.onFinishedExpansionChange();
+                }
+            });
+        }
+
+        @Override
+        public void onGroupCreatedFromChildren(NotificationGroupManager.NotificationGroup group) {
+            mStatusBar.requestNotificationUpdate();
+        }
+
+        @Override
+        public void onGroupsChanged() {
+            mStatusBar.requestNotificationUpdate();
+        }
+    };
+
+    @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
+    private ExpandHelper.Callback mExpandHelperCallback = new ExpandHelper.Callback() {
+        @Override
+        public ExpandableView getChildAtPosition(float touchX, float touchY) {
+            return NotificationStackScrollLayout.this.getChildAtPosition(touchX, touchY);
+        }
+
+        @Override
+        public ExpandableView getChildAtRawPosition(float touchX, float touchY) {
+            return NotificationStackScrollLayout.this.getChildAtRawPosition(touchX, touchY);
+        }
+
+        @Override
+        public boolean canChildBeExpanded(View v) {
+            return v instanceof ExpandableNotificationRow
+                    && ((ExpandableNotificationRow) v).isExpandable()
+                    && !((ExpandableNotificationRow) v).areGutsExposed()
+                    && (mIsExpanded || !((ExpandableNotificationRow) v).isPinned());
+        }
+
+        /* Only ever called as a consequence of an expansion gesture in the shade. */
+        @Override
+        public void setUserExpandedChild(View v, boolean userExpanded) {
+            if (v instanceof ExpandableNotificationRow) {
+                ExpandableNotificationRow row = (ExpandableNotificationRow) v;
+                if (userExpanded && onKeyguard()) {
+                    // Due to a race when locking the screen while touching, a notification may be
+                    // expanded even after we went back to keyguard. An example of this happens if
+                    // you click in the empty space while expanding a group.
+
+                    // We also need to un-user lock it here, since otherwise the content height
+                    // calculated might be wrong. We also can't invert the two calls since
+                    // un-userlocking it will trigger a layout switch in the content view.
+                    row.setUserLocked(false);
+                    updateContentHeight();
+                    notifyHeightChangeListener(row);
+                    return;
+                }
+                row.setUserExpanded(userExpanded, true /* allowChildrenExpansion */);
+                row.onExpandedByGesture(userExpanded);
+            }
+        }
+
+        @Override
+        public void setExpansionCancelled(View v) {
+            if (v instanceof ExpandableNotificationRow) {
+                ((ExpandableNotificationRow) v).setGroupExpansionChanging(false);
+            }
+        }
+
+        @Override
+        public void setUserLockedChild(View v, boolean userLocked) {
+            if (v instanceof ExpandableNotificationRow) {
+                ((ExpandableNotificationRow) v).setUserLocked(userLocked);
+            }
+            cancelLongPress();
+            requestDisallowInterceptTouchEvent(true);
+        }
+
+        @Override
+        public void expansionStateChanged(boolean isExpanding) {
+            mExpandingNotification = isExpanding;
+            if (!mExpandedInThisMotion) {
+                mMaxScrollAfterExpand = mOwnScrollY;
+                mExpandedInThisMotion = true;
+            }
+        }
+
+        @Override
+        public int getMaxExpandHeight(ExpandableView view) {
+            return view.getMaxContentHeight();
+        }
+    };
+
+    public ExpandHelper.Callback getExpandHelperCallback() {
+        return mExpandHelperCallback;
     }
 }
