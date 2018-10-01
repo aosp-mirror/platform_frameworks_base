@@ -243,7 +243,7 @@ public class BatterySaverController implements BatterySaverPolicyListener {
     }
 
     /**
-     * Called by {@link PowerManagerService} to update the battery saver stete.
+     * Called by {@link PowerManagerService} to update the battery saver state.
      */
     public void enableBatterySaver(boolean enable, int reason) {
         synchronized (mLock) {
@@ -290,8 +290,8 @@ public class BatterySaverController implements BatterySaverPolicyListener {
      * This method is called only in the following cases:
      * - When battery saver becomes activated.
      * - When battery saver becomes deactivated.
-     * - When battery saver is on the interactive state changes.
-     * - When battery saver is on the battery saver policy changes.
+     * - When battery saver is on and the interactive state changes.
+     * - When battery saver is on and the battery saver policy changes.
      */
     void handleBatterySaverStateChanged(boolean sendBroadcast, int reason) {
         final LowPowerModeListener[] listeners;
