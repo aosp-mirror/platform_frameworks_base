@@ -27,6 +27,7 @@ import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.content.pm.ParceledListSlice;
 import android.database.ContentObserver;
 import android.media.AudioAttributes.AttributeUsage;
@@ -41,9 +42,9 @@ import android.os.RemoteException;
 import android.os.UserManager;
 import android.provider.Settings;
 import android.util.ArrayMap;
+import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
-import android.util.SparseArray;
 import com.android.internal.app.IAppOpsActiveCallback;
 import com.android.internal.app.IAppOpsCallback;
 import com.android.internal.app.IAppOpsNotedCallback;
@@ -60,8 +61,8 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
-import java.util.concurrent.atomic.AtomicInteger;
 import java.util.concurrent.Executor;
+import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 
 /**
@@ -1489,7 +1490,7 @@ public class AppOpsManager {
             AppOpsManager.MODE_ALLOWED, // READ_ICC_SMS
             AppOpsManager.MODE_ALLOWED, // WRITE_ICC_SMS
             AppOpsManager.MODE_DEFAULT, // WRITE_SETTINGS
-            AppOpsManager.MODE_DEFAULT, // SYSTEM_ALERT_WINDOW
+            getSystemAlertWindowDefault(), // SYSTEM_ALERT_WINDOW
             AppOpsManager.MODE_ALLOWED, // ACCESS_NOTIFICATIONS
             AppOpsManager.MODE_ALLOWED, // CAMERA
             AppOpsManager.MODE_ALLOWED, // RECORD_AUDIO
@@ -4806,5 +4807,22 @@ public class AppOpsManager {
                 return "UNKNOWN";
             }
         }
+    }
+
+    private static int getSystemAlertWindowDefault() {
+        final Context context = ActivityThread.currentApplication();
+        if (context == null) {
+            return AppOpsManager.MODE_DEFAULT;
+        }
+
+        // system alert window is disable on low ram phones starting from Q
+        final PackageManager pm = context.getPackageManager();
+        // TVs are constantly plugged in and has less concern for memory/power
+        if (ActivityManager.isLowRamDeviceStatic()
+                && !pm.hasSystemFeature(PackageManager.FEATURE_LEANBACK, 0)) {
+            return AppOpsManager.MODE_IGNORED;
+        }
+
+        return AppOpsManager.MODE_DEFAULT;
     }
 }
