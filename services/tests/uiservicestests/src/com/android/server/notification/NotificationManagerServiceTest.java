@@ -500,8 +500,9 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         NotificationChannel channel = new NotificationChannel("id", "name",
                 IMPORTANCE_HIGH);
         NotificationRecord r = generateNotificationRecord(channel);
-        assertTrue(mService.isBlocked(r, mUsageStats));
-        verify(mUsageStats, times(1)).registerSuspendedByAdmin(eq(r));
+
+        // isBlocked is only used for user blocking, not app suspension
+        assertFalse(mService.isBlocked(r, mUsageStats));
     }
 
     @Test
