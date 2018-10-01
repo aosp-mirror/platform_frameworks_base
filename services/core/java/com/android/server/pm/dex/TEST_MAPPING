@@ -1,0 +1,22 @@
+{
+  "presubmit": [
+    {
+      "name": "DexLoggerTests"
+    },
+    {
+      "name": "DexManagerTests"
+    },
+    {
+      "name": "DexoptOptionsTests"
+    },
+    {
+      "name": "DexoptUtilsTest"
+    },
+    {
+      "name": "PackageDexUsageTests"
+    },
+    {
+      "name": "DexLoggerIntegrationTests"
+    }
+  ]
+}
