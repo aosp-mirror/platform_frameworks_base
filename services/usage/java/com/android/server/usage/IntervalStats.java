@@ -24,7 +24,9 @@ import android.app.usage.UsageStats;
 import android.content.res.Configuration;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.proto.ProtoInputStream;
 
+import java.io.IOException;
 import java.util.List;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -46,7 +48,7 @@ public class IntervalStats {
     // keep hundreds of strings that have the same contents. We will read the string
     // and only keep it if it's not in the cache. The GC will take care of the
     // strings that had identical copies in the cache.
-    private final ArraySet<String> mStringCache = new ArraySet<>();
+    public final ArraySet<String> mStringCache = new ArraySet<>();
 
     public static final class EventTracker {
         public long curStartTime;
@@ -129,6 +131,90 @@ public class IntervalStats {
         return event;
     }
 
+    /**
+     * Builds a UsageEvents.Event from a proto, but does not add it internally.
+     * Built here to take advantage of the cached String Refs
+     */
+    UsageEvents.Event buildEvent(ProtoInputStream parser, List<String> stringPool)
+            throws IOException {
+        final UsageEvents.Event event = new UsageEvents.Event();
+        while (true) {
+            switch (parser.nextField()) {
+                case (int) IntervalStatsProto.Event.PACKAGE:
+                    event.mPackage = getCachedStringRef(
+                            parser.readString(IntervalStatsProto.Event.PACKAGE));
+                    break;
+                case (int) IntervalStatsProto.Event.PACKAGE_INDEX:
+                    event.mPackage = getCachedStringRef(stringPool.get(
+                            parser.readInt(IntervalStatsProto.Event.PACKAGE_INDEX) - 1));
+                    break;
+                case (int) IntervalStatsProto.Event.CLASS:
+                    event.mClass = getCachedStringRef(
+                            parser.readString(IntervalStatsProto.Event.CLASS));
+                    break;
+                case (int) IntervalStatsProto.Event.CLASS_INDEX:
+                    event.mClass = getCachedStringRef(stringPool.get(
+                            parser.readInt(IntervalStatsProto.Event.CLASS_INDEX) - 1));
+                    break;
+                case (int) IntervalStatsProto.Event.TIME_MS:
+                    event.mTimeStamp = beginTime + parser.readLong(
+                            IntervalStatsProto.Event.TIME_MS);
+                    break;
+                case (int) IntervalStatsProto.Event.FLAGS:
+                    event.mFlags = parser.readInt(IntervalStatsProto.Event.FLAGS);
+                    break;
+                case (int) IntervalStatsProto.Event.TYPE:
+                    event.mEventType = parser.readInt(IntervalStatsProto.Event.TYPE);
+                    break;
+                case (int) IntervalStatsProto.Event.CONFIG:
+                    event.mConfiguration = new Configuration();
+                    event.mConfiguration.readFromProto(parser, IntervalStatsProto.Event.CONFIG);
+                    break;
+                case (int) IntervalStatsProto.Event.SHORTCUT_ID:
+                    event.mShortcutId = parser.readString(
+                            IntervalStatsProto.Event.SHORTCUT_ID).intern();
+                    break;
+                case (int) IntervalStatsProto.Event.STANDBY_BUCKET:
+                    event.mBucketAndReason = parser.readInt(
+                            IntervalStatsProto.Event.STANDBY_BUCKET);
+                    break;
+                case (int) IntervalStatsProto.Event.NOTIFICATION_CHANNEL:
+                    event.mNotificationChannelId = parser.readString(
+                            IntervalStatsProto.Event.NOTIFICATION_CHANNEL);
+                    break;
+                case (int) IntervalStatsProto.Event.NOTIFICATION_CHANNEL_INDEX:
+                    event.mNotificationChannelId = getCachedStringRef(stringPool.get(
+                            parser.readInt(IntervalStatsProto.Event.NOTIFICATION_CHANNEL_INDEX)
+                                    - 1));
+                    break;
+                case ProtoInputStream.NO_MORE_FIELDS:
+                    // Handle default values for certain events types
+                    switch (event.mEventType) {
+                        case UsageEvents.Event.CONFIGURATION_CHANGE:
+                            if (event.mConfiguration == null) {
+                                event.mConfiguration = new Configuration();
+                            }
+                            break;
+                        case UsageEvents.Event.SHORTCUT_INVOCATION:
+                            if (event.mShortcutId == null) {
+                                event.mShortcutId = "";
+                            }
+                            break;
+                        case UsageEvents.Event.NOTIFICATION_INTERRUPTION:
+                            if (event.mNotificationChannelId == null) {
+                                event.mNotificationChannelId = "";
+                            }
+                            break;
+                    }
+                    if (event.mTimeStamp == 0) {
+                        //mTimestamp not set, assume default value 0 plus beginTime
+                        event.mTimeStamp = beginTime;
+                    }
+                    return event;
+            }
+        }
+    }
+
     private boolean isStatefulEvent(int eventType) {
         switch (eventType) {
             case UsageEvents.Event.MOVE_TO_FOREGROUND:
@@ -143,8 +229,6 @@ public class IntervalStats {
     /**
      * Returns whether the event type is one caused by user visible
      * interaction. Excludes those that are internally generated.
-     * @param eventType
-     * @return
      */
     private boolean isUserVisibleEvent(int eventType) {
         return eventType != UsageEvents.Event.SYSTEM_INTERACTION
@@ -182,6 +266,25 @@ public class IntervalStats {
         }
 
         endTime = timeStamp;
+    }
+
+    /**
+     * @hide
+     */
+    @VisibleForTesting
+    public void addEvent(UsageEvents.Event event) {
+        if (events == null) {
+            events = new EventList();
+        }
+        // Cache common use strings
+        event.mPackage = getCachedStringRef(event.mPackage);
+        if (event.mClass != null) {
+            event.mClass = getCachedStringRef(event.mClass);
+        }
+        if (event.mEventType == UsageEvents.Event.NOTIFICATION_INTERRUPTION) {
+            event.mNotificationChannelId = getCachedStringRef(event.mNotificationChannelId);
+        }
+        events.insert(event);
     }
 
     void updateChooserCounts(String packageName, String category, String action) {
