@@ -213,6 +213,8 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     private PhoneCapability mPhoneCapability = null;
 
+    private int mPreferredDataSubId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
+
     private final LocalLog mLocalLog = new LocalLog(100);
 
     private PreciseDataConnectionState mPreciseDataConnectionState =
@@ -748,6 +750,13 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     if ((events & PhoneStateListener.LISTEN_PHONE_CAPABILITY_CHANGE) != 0) {
                         try {
                             r.callback.onPhoneCapabilityChanged(mPhoneCapability);
+                        } catch (RemoteException ex) {
+                            remove(r.binder);
+                        }
+                    }
+                    if ((events & PhoneStateListener.LISTEN_PREFERRED_DATA_SUBID_CHANGE) != 0) {
+                        try {
+                            r.callback.onPreferredDataSubIdChanged(mPreferredDataSubId);
                         } catch (RemoteException ex) {
                             remove(r.binder);
                         }
@@ -1573,6 +1582,31 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
     }
 
+    public void notifyPreferredDataSubIdChanged(int preferredSubId) {
+        if (!checkNotifyPermission("notifyPreferredDataSubIdChanged()")) {
+            return;
+        }
+
+        if (VDBG) {
+            log("notifyPreferredDataSubIdChanged: preferredSubId=" + preferredSubId);
+        }
+
+        synchronized (mRecords) {
+            mPreferredDataSubId = preferredSubId;
+
+            for (Record r : mRecords) {
+                if (r.matchPhoneStateListenerEvent(
+                        PhoneStateListener.LISTEN_PREFERRED_DATA_SUBID_CHANGE)) {
+                    try {
+                        r.callback.onPreferredDataSubIdChanged(preferredSubId);
+                    } catch (RemoteException ex) {
+                        mRemoveList.add(r.binder);
+                    }
+                }
+            }
+            handleRemoveListLocked();
+        }
+    }
 
     @Override
     public void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
@@ -1610,6 +1644,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             pw.println("mBackgroundCallState=" + mBackgroundCallState);
             pw.println("mVoLteServiceState=" + mVoLteServiceState);
             pw.println("mPhoneCapability=" + mPhoneCapability);
+            pw.println("mPreferredDataSubId=" + mPreferredDataSubId);
 
             pw.decreaseIndent();
 
