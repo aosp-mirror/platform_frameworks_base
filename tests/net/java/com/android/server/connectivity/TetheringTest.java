@@ -33,6 +33,7 @@ import static android.net.wifi.WifiManager.EXTRA_WIFI_AP_INTERFACE_NAME;
 import static android.net.wifi.WifiManager.EXTRA_WIFI_AP_MODE;
 import static android.net.wifi.WifiManager.EXTRA_WIFI_AP_STATE;
 import static android.net.wifi.WifiManager.WIFI_AP_STATE_ENABLED;
+import static android.provider.Settings.Global.TETHER_ENABLE_LEGACY_DHCP_SERVER;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -75,6 +76,8 @@ import android.net.NetworkRequest;
 import android.net.NetworkState;
 import android.net.NetworkUtils;
 import android.net.RouteInfo;
+import android.net.dhcp.DhcpServer;
+import android.net.dhcp.DhcpServingParams;
 import android.net.ip.IpServer;
 import android.net.ip.RouterAdvertisementDaemon;
 import android.net.util.InterfaceParams;
@@ -85,6 +88,7 @@ import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.INetworkManagementService;
+import android.os.Looper;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
 import android.os.test.TestLooper;
@@ -146,6 +150,7 @@ public class TetheringTest {
     @Mock private UpstreamNetworkMonitor mUpstreamNetworkMonitor;
     @Mock private IPv6TetheringCoordinator mIPv6TetheringCoordinator;
     @Mock private RouterAdvertisementDaemon mRouterAdvertisementDaemon;
+    @Mock private DhcpServer mDhcpServer;
     @Mock private INetd mNetd;
 
     private final MockTetheringDependencies mTetheringDependencies =
@@ -240,6 +245,12 @@ public class TetheringTest {
                 public INetd getNetdService() {
                     return mNetd;
                 }
+
+                @Override
+                public DhcpServer makeDhcpServer(Looper looper, InterfaceParams iface,
+                        DhcpServingParams params, SharedLog log) {
+                    return mDhcpServer;
+                }
             };
         }
 
@@ -333,6 +344,7 @@ public class TetheringTest {
         mServiceContext = new MockContext(mContext);
         mContentResolver = new MockContentResolver(mServiceContext);
         mContentResolver.addProvider(Settings.AUTHORITY, new FakeSettingsProvider());
+        Settings.Global.putInt(mContentResolver, TETHER_ENABLE_LEGACY_DHCP_SERVER, 0);
         mIntents = new Vector<>();
         mBroadcastReceiver = new BroadcastReceiver() {
             @Override
@@ -343,10 +355,14 @@ public class TetheringTest {
         mServiceContext.registerReceiver(mBroadcastReceiver,
                 new IntentFilter(ACTION_TETHER_STATE_CHANGED));
         mTetheringDependencies.reset();
-        mTethering = new Tethering(mServiceContext, mNMService, mStatsService, mPolicyManager,
-                                   mLooper.getLooper(), mSystemProperties,
-                                   mTetheringDependencies);
+        mTethering = makeTethering();
         verify(mNMService).registerTetheringStatsProvider(any(), anyString());
+    }
+
+    private Tethering makeTethering() {
+        return new Tethering(mServiceContext, mNMService, mStatsService, mPolicyManager,
+                mLooper.getLooper(), mSystemProperties,
+                mTetheringDependencies);
     }
 
     @After
@@ -597,6 +613,18 @@ public class TetheringTest {
 
         sendIPv6TetherUpdates(upstreamState);
         verify(mRouterAdvertisementDaemon, never()).buildNewRa(any(), notNull());
+        verify(mDhcpServer, times(1)).start();
+    }
+
+    @Test
+    public void workingMobileUsbTethering_IPv4LegacyDhcp() {
+        Settings.Global.putInt(mContentResolver, TETHER_ENABLE_LEGACY_DHCP_SERVER, 1);
+        mTethering = makeTethering();
+        final NetworkState upstreamState = buildMobileIPv4UpstreamState();
+        runUsbTethering(upstreamState);
+        sendIPv6TetherUpdates(upstreamState);
+
+        verify(mDhcpServer, never()).start();
     }
 
     @Test
@@ -620,6 +648,7 @@ public class TetheringTest {
         verify(mNMService, times(1)).enableNat(TEST_USB_IFNAME, TEST_MOBILE_IFNAME);
         verify(mNMService, times(1)).startInterfaceForwarding(TEST_USB_IFNAME, TEST_MOBILE_IFNAME);
         verify(mRouterAdvertisementDaemon, times(1)).start();
+        verify(mDhcpServer, times(1)).start();
 
         sendIPv6TetherUpdates(upstreamState);
         verify(mRouterAdvertisementDaemon, times(1)).buildNewRa(any(), notNull());
@@ -633,6 +662,7 @@ public class TetheringTest {
 
         verify(mNMService, times(1)).enableNat(TEST_USB_IFNAME, TEST_XLAT_MOBILE_IFNAME);
         verify(mNMService, times(1)).enableNat(TEST_USB_IFNAME, TEST_MOBILE_IFNAME);
+        verify(mDhcpServer, times(1)).start();
         verify(mNMService, times(1)).startInterfaceForwarding(TEST_USB_IFNAME, TEST_MOBILE_IFNAME);
         verify(mNMService, times(1)).startInterfaceForwarding(TEST_USB_IFNAME,
                 TEST_XLAT_MOBILE_IFNAME);
@@ -649,6 +679,7 @@ public class TetheringTest {
         runUsbTethering(upstreamState);
 
         verify(mNMService, times(1)).enableNat(TEST_USB_IFNAME, TEST_MOBILE_IFNAME);
+        verify(mDhcpServer, times(1)).start();
         verify(mNMService, times(1)).startInterfaceForwarding(TEST_USB_IFNAME, TEST_MOBILE_IFNAME);
 
         // Then 464xlat comes up
@@ -671,6 +702,8 @@ public class TetheringTest {
         // Forwarding was not re-added for v6 (still times(1))
         verify(mNMService, times(1)).enableNat(TEST_USB_IFNAME, TEST_MOBILE_IFNAME);
         verify(mNMService, times(1)).startInterfaceForwarding(TEST_USB_IFNAME, TEST_MOBILE_IFNAME);
+        // DHCP not restarted on downstream (still times(1))
+        verify(mDhcpServer, times(1)).start();
     }
 
     @Test

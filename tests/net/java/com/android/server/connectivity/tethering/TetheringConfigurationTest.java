@@ -225,13 +225,4 @@ public class TetheringConfigurationTest {
         final TetheringConfiguration cfg = new TetheringConfiguration(mMockContext, mLog);
         assertFalse(cfg.enableLegacyDhcpServer);
     }
-
-    @Test
-    public void testNewDhcpServerDefault() {
-        Settings.Global.putString(mContentResolver, TETHER_ENABLE_LEGACY_DHCP_SERVER, null);
-
-        final TetheringConfiguration cfg = new TetheringConfiguration(mMockContext, mLog);
-        // TODO: change to false when new server is promoted to default
-        assertTrue(cfg.enableLegacyDhcpServer);
-    }
 }
