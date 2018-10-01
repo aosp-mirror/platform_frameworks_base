@@ -160,8 +160,9 @@ public class MediaScanner implements AutoCloseable {
 
     public static final String SCANNED_BUILD_PREFS_NAME = "MediaScanBuild";
     public static final String LAST_INTERNAL_SCAN_FINGERPRINT = "lastScanFingerprint";
-    private static final String SYSTEM_SOUNDS_DIR = "/system/media/audio";
-    private static final String PRODUCT_SOUNDS_DIR = "/product/media/audio";
+    private static final String SYSTEM_SOUNDS_DIR = Environment.getRootDirectory() + "/media/audio";
+    private static final String OEM_SOUNDS_DIR = Environment.getOemDirectory() + "/media/audio";
+    private static final String PRODUCT_SOUNDS_DIR = Environment.getProductDirectory() + "/media/audio";
     private static String sLastInternalScanFingerprint;
 
     private static final String[] ID3_GENRES = {
@@ -1193,6 +1194,9 @@ public class MediaScanner implements AutoCloseable {
         if (path.startsWith(SYSTEM_SOUNDS_DIR + ALARMS_DIR)
                 || path.startsWith(SYSTEM_SOUNDS_DIR + RINGTONES_DIR)
                 || path.startsWith(SYSTEM_SOUNDS_DIR + NOTIFICATIONS_DIR)
+                || path.startsWith(OEM_SOUNDS_DIR + ALARMS_DIR)
+                || path.startsWith(OEM_SOUNDS_DIR + RINGTONES_DIR)
+                || path.startsWith(OEM_SOUNDS_DIR + NOTIFICATIONS_DIR)
                 || path.startsWith(PRODUCT_SOUNDS_DIR + ALARMS_DIR)
                 || path.startsWith(PRODUCT_SOUNDS_DIR + RINGTONES_DIR)
                 || path.startsWith(PRODUCT_SOUNDS_DIR + NOTIFICATIONS_DIR)) {
