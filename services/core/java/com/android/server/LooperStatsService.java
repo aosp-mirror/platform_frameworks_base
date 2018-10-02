@@ -129,7 +129,12 @@ public class LooperStatsService extends Binder {
     }
 
     private void setSamplingInterval(int samplingInterval) {
-        mStats.setSamplingInterval(samplingInterval);
+        if (samplingInterval > 0) {
+            mStats.setSamplingInterval(samplingInterval);
+        } else {
+            Slog.w(TAG, "Ignored invalid sampling interval (value must be positive): "
+                    + samplingInterval);
+        }
     }
 
     /**
