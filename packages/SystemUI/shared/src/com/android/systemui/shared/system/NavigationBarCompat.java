@@ -24,8 +24,6 @@ import android.util.DisplayMetrics;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
-import sun.misc.Resource;
-
 public class NavigationBarCompat {
     /**
      * Touch slopes and thresholds for quick step operations. Drag slop is the point where the
