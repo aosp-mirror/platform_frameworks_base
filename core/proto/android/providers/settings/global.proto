@@ -332,6 +332,18 @@ message GlobalSettingsProto {
     }
     optional Dropbox dropbox = 46;
 
+    message DynamicPowerSavings {
+        option (android.msg_privacy).dest = DEST_EXPLICIT;
+
+        // When to auto disable interventions that were triggered due to
+        // {@link #DYNAMIC_POWER_SAVINGS_ENABLED}. Value is a percentage indicating
+        // a battery level.
+        optional SettingProto disable_threshold = 1 [ (android.privacy).dest = DEST_AUTOMATIC];
+        // Whether dynamic power savings based behaviors should be running or not.
+        optional SettingProto enabled = 2 [ (android.privacy).dest = DEST_AUTOMATIC];
+    }
+    optional DynamicPowerSavings dynamic_power_savings = 143;
+
     message Emergency {
         option (android.msg_privacy).dest = DEST_EXPLICIT;
 
@@ -491,6 +503,9 @@ message GlobalSettingsProto {
         // The max value for {@link #LOW_POWER_MODE_TRIGGER_LEVEL}. If this setting
         // is not set or the value is 0, the default max will be used.
         optional SettingProto trigger_level_max = 3 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        // Whether automatic battery saver mode is controlled via percentage,
+        // {@link #DYNAMIC_POWER_SAVINGS_ENABLED} or disabled.
+        optional SettingProto automatic_power_saver_mode = 4 [ (android.privacy).dest = DEST_AUTOMATIC];
     }
     optional LowPowerMode low_power_mode = 70;
 
@@ -972,5 +987,5 @@ message GlobalSettingsProto {
 
     // Please insert fields in alphabetical order and group them into messages
     // if possible (to avoid reaching the method limit).
-    // Next tag = 143;
+    // Next tag = 144;
 }

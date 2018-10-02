@@ -11811,14 +11811,93 @@ public final class Settings {
 
         /**
          * Battery level [1-100] at which low power mode automatically turns on.
-         * If 0, it will not automatically turn on.
+         * Pre-Q If 0, it will not automatically turn on. Q and newer it will only automatically
+         * turn on if the {@link #AUTOMATIC_POWER_SAVER_MODE} setting is also set to
+         * {@link #AUTOMATIC_POWER_SAVER_MODE_PERCENTAGE}.
+         *
+         * @see #AUTOMATIC_POWER_SAVER_MODE
          * @hide
          */
         public static final String LOW_POWER_MODE_TRIGGER_LEVEL = "low_power_trigger_level";
 
+
         private static final Validator LOW_POWER_MODE_TRIGGER_LEVEL_VALIDATOR =
                 new SettingsValidators.InclusiveIntegerRangeValidator(0, 100);
 
+        /**
+         * Indicates automatic battery saver toggling by the system will be based on battery level.
+         *
+         *  @hide
+         */
+        public static final int AUTOMATIC_POWER_SAVER_MODE_PERCENTAGE = 0;
+
+        /**
+         * Indicates automatic battery saver toggling by the system will be based on
+         * {@link #DYNAMIC_POWER_SAVINGS_ENABLED} and
+         * {@link #DYNAMIC_POWER_SAVINGS_DISABLE_THRESHOLD}.
+         *
+         * @see #DYNAMIC_POWER_SAVINGS_ENABLED
+         *
+         *  @hide
+         */
+        public static final int AUTOMATIC_POWER_SAVER_MODE_DYNAMIC = 1;
+
+        /** @hide */
+        @Retention(RetentionPolicy.SOURCE)
+        @IntDef(value = {
+            AUTOMATIC_POWER_SAVER_MODE_PERCENTAGE,
+            AUTOMATIC_POWER_SAVER_MODE_DYNAMIC
+
+        })
+        public @interface AutoPowerSaverMode{}
+
+        /**
+         * Whether battery saver is currently set to trigger based on percentage, dynamic power
+         * savings trigger, or none. See {@link AutoPowerSaverMode} for accepted values.
+         *
+         *  @hide
+         */
+        public static final String AUTOMATIC_POWER_SAVER_MODE = "automatic_power_saver_mode";
+
+        private static final Validator AUTOMATIC_POWER_SAVER_MODE_VALIDATOR =
+                new SettingsValidators.DiscreteValueValidator(new String[] {"0", "1"});
+
+        /**
+         * The percentage the system should consider itself safe at if the dynamic power savings was
+         * previously enabled and it enacted measures to reduce power consumption. Value is
+         * an integer representing a battery level.
+         *
+         * <p>This value is used to set an explicit stopping point for dynamic power savings
+         * functionality so that the {@link #DYNAMIC_POWER_SAVINGS_ENABLED} setting remains a signal
+         * for the system rather than becoming an on/off switch itself.
+         * @hide
+         */
+        public static final String DYNAMIC_POWER_SAVINGS_DISABLE_THRESHOLD =
+                "dynamic_power_savings_disable_threshold";
+
+        /**
+         * A signal to the system which an app can update which indicates that
+         * the user will be in a battery critical situation in the near future.
+         * Only apps with the {@link android.Manifest.permission.POWER_SAVER} permission may modify
+         * this setting.
+         *
+         * <p>When enabled, the system may enact various measures for reducing power consumption in
+         * order to help ensure that the user will make it to their next charging point. The most
+         * visible of these will be the automatic enabling of battery saver if the user has set
+         * {@link #AUTOMATIC_POWER_SAVER_MODE} to {@link #AUTOMATIC_POWER_SAVER_MODE_DYNAMIC}. Note
+         * that this is NOT an on/off switch for all these features, but rather a hint for the
+         * system to consider enacting these power saving features, some of which have additional
+         * logic around when to activate based on this signal.
+         *
+         * <p>Supported values:
+         * <ul>
+         * <li>0 = Disabled
+         * <li>1 = Enabled
+         * </ul>
+         * @see #DYNAMIC_POWER_SAVINGS_DISABLE_THRESHOLD
+         * @hide
+         */
+        public static final String DYNAMIC_POWER_SAVINGS_ENABLED = "dynamic_power_savings_enabled";
 
         /**
          * The max value for {@link #LOW_POWER_MODE_TRIGGER_LEVEL}. If this setting is not set
@@ -12742,6 +12821,7 @@ public final class Settings {
             VALIDATORS.put(LOW_POWER_MODE_TRIGGER_LEVEL, LOW_POWER_MODE_TRIGGER_LEVEL_VALIDATOR);
             VALIDATORS.put(LOW_POWER_MODE_TRIGGER_LEVEL_MAX,
                     LOW_POWER_MODE_TRIGGER_LEVEL_VALIDATOR);
+            VALIDATORS.put(AUTOMATIC_POWER_SAVER_MODE, AUTOMATIC_POWER_SAVER_MODE_VALIDATOR);
             VALIDATORS.put(BLUETOOTH_ON, BLUETOOTH_ON_VALIDATOR);
             VALIDATORS.put(PRIVATE_DNS_MODE, PRIVATE_DNS_MODE_VALIDATOR);
             VALIDATORS.put(PRIVATE_DNS_SPECIFIER, PRIVATE_DNS_SPECIFIER_VALIDATOR);

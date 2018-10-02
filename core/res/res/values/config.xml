@@ -3531,6 +3531,9 @@
     <!-- Whether or not battery saver should be "sticky" when manually enabled. -->
     <bool name="config_batterySaverStickyBehaviourDisabled">false</bool>
 
+    <!-- Config flag to track default disable threshold for Dynamic power savings enabled battery saver. -->
+    <integer name="config_dynamicPowerSavingsDefaultDisableThreshold">80</integer>
+
     <!-- Model of potentially misprovisioned devices. If none is specified in an overlay, an
          empty string is passed in. -->
     <string name="config_misprovisionedDeviceModel" translatable="false"></string>
