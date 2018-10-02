@@ -73,6 +73,10 @@ public class WifiSignalController extends
         return new WifiState();
     }
 
+    void refreshLocale() {
+        mWifiTracker.refreshLocale();
+    }
+
     @Override
     public void notifyListeners(SignalCallback callback) {
         // only show wifi in the cluster if connected or if wifi-only
