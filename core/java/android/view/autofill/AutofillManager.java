@@ -803,10 +803,6 @@ public final class AutofillManager {
                 return true;
             }
         }
-        if (sVerbose) {
-            Log.v(TAG, "not ignoring notifyViewEntered(flags=" + flags + ", view=" + id
-                    + ", state " + getStateAsStringLocked() + ", enteredIds=" + mEnteredIds);
-        }
         return false;
     }
 
@@ -845,6 +841,9 @@ public final class AutofillManager {
         ensureServiceClientAddedIfNeededLocked();
 
         if (!mEnabled) {
+            if (sVerbose) {
+                Log.v(TAG, "ignoring notifyViewEntered(" + id + "): disabled");
+            }
             if (mCallback != null) {
                 callback = mCallback;
             }
@@ -995,6 +994,9 @@ public final class AutofillManager {
         ensureServiceClientAddedIfNeededLocked();
 
         if (!mEnabled) {
+            if (sVerbose) {
+                Log.v(TAG, "ignoring notifyViewEntered(" + id + "): disabled");
+            }
             if (mCallback != null) {
                 callback = mCallback;
             }
