@@ -4536,7 +4536,6 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int REPORT_LOSING_FOCUS = 3;
         public static final int WINDOW_FREEZE_TIMEOUT = 11;
 
-        public static final int APP_TRANSITION_TIMEOUT = 13;
         public static final int PERSIST_ANIMATION_SCALE = 14;
         public static final int FORCE_GC = 15;
         public static final int ENABLE_SCREEN = 16;
@@ -4548,7 +4547,6 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int BOOT_TIMEOUT = 23;
         public static final int WAITING_FOR_DRAWN_TIMEOUT = 24;
         public static final int SHOW_STRICT_MODE_VIOLATION = 25;
-        public static final int DO_ANIMATION_CALLBACK = 26;
 
         public static final int CLIENT_FREEZE_TIMEOUT = 30;
         public static final int NOTIFY_ACTIVITY_DRAWN = 32;
@@ -4664,21 +4662,6 @@ public class WindowManagerService extends IWindowManager.Stub
                     final DisplayContent displayContent = (DisplayContent) msg.obj;
                     synchronized (mWindowMap) {
                         displayContent.onWindowFreezeTimeout();
-                    }
-                    break;
-                }
-
-                case APP_TRANSITION_TIMEOUT: {
-                    synchronized (mWindowMap) {
-                        if (mAppTransition.isTransitionSet() || !mOpeningApps.isEmpty()
-                                    || !mClosingApps.isEmpty()) {
-                            if (DEBUG_APP_TRANSITIONS) Slog.v(TAG_WM, "*** APP TRANSITION TIMEOUT."
-                                    + " isTransitionSet()=" + mAppTransition.isTransitionSet()
-                                    + " mOpeningApps.size()=" + mOpeningApps.size()
-                                    + " mClosingApps.size()=" + mClosingApps.size());
-                            mAppTransition.setTimeout();
-                            mWindowPlacerLocked.performSurfacePlacement();
-                        }
                     }
                     break;
                 }
@@ -4832,14 +4815,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
                 case SHOW_EMULATOR_DISPLAY_OVERLAY: {
                     showEmulatorDisplayOverlay();
-                    break;
-                }
-
-                case DO_ANIMATION_CALLBACK: {
-                    try {
-                        ((IRemoteCallback)msg.obj).sendResult(null);
-                    } catch (RemoteException e) {
-                    }
                     break;
                 }
 

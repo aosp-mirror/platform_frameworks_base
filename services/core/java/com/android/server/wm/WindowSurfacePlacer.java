@@ -69,7 +69,6 @@ import android.view.WindowManager.TransitionType;
 import android.view.animation.Animation;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.server.wm.WindowManagerService.H;
 
 import java.io.PrintWriter;
 import java.util.function.Predicate;
@@ -258,7 +257,7 @@ class WindowSurfacePlacer {
         mService.mSkipAppTransitionAnimation = false;
         mService.mNoAnimationNotifyOnTransitionFinished.clear();
 
-        mService.mH.removeMessages(H.APP_TRANSITION_TIMEOUT);
+        mService.mAppTransition.removeAppTransitionTimeoutCallbacks();
 
         final DisplayContent displayContent = mService.getDefaultDisplayContentLocked();
 
