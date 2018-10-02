@@ -1023,4 +1023,7 @@
     <!-- How much we expand the touchable region of the status bar below the notch to catch touches
          that just start below the notch. -->
     <dimen name="display_cutout_touchable_region_size">12dp</dimen>
+
+    <!-- Top padding for overheat alarm dialog message of content -->
+    <dimen name="overheat_alarm_dialog_padding_top">18dp</dimen>
 </resources>
