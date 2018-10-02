@@ -3448,17 +3448,14 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testResolveNotificationUid_sameAppWrongPkg() throws Exception {
+    public void testResolveNotificationUid_sameAppDiffPackage() throws Exception {
         ApplicationInfo info = new ApplicationInfo();
         info.uid = Binder.getCallingUid();
-        when(mPackageManager.getApplicationInfo(anyString(), anyInt(), anyInt())).thenReturn(info);
+        when(mPackageManager.getApplicationInfo(anyString(), anyInt(), eq(0))).thenReturn(info);
 
-        try {
-            mService.resolveNotificationUid("caller", "other", info.uid, 0);
-            fail("Incorrect pkg didn't throw security exception");
-        } catch (SecurityException e) {
-            // yay
-        }
+        int actualUid = mService.resolveNotificationUid("caller", "callerAlso", info.uid, 0);
+
+        assertEquals(info.uid, actualUid);
     }
 
     @Test
