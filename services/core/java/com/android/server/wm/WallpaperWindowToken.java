@@ -138,7 +138,7 @@ class WallpaperWindowToken extends WindowToken {
             wallpaper.dispatchWallpaperVisibility(visible);
 
             if (DEBUG_LAYERS || DEBUG_WALLPAPER_LIGHT) Slog.v(TAG, "adjustWallpaper win "
-                    + wallpaper + " anim layer: " + wallpaper.mWinAnimator.mAnimLayer);
+                    + wallpaper);
         }
     }
 

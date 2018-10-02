@@ -120,13 +120,11 @@ class WallpaperController {
         }
 
         mFindResults.resetTopWallpaper = true;
-        if (w != winAnimator.mWindowDetachedWallpaper && w.mAppToken != null) {
+        if (w.mAppToken != null && w.mAppToken.isHidden() && !w.mAppToken.isSelfAnimating()) {
+
             // If this window's app token is hidden and not animating, it is of no interest to us.
-            if (w.mAppToken.isHidden() && !w.mAppToken.isSelfAnimating()) {
-                if (DEBUG_WALLPAPER) Slog.v(TAG,
-                        "Skipping hidden and not animating token: " + w);
-                return false;
-            }
+            if (DEBUG_WALLPAPER) Slog.v(TAG, "Skipping hidden and not animating token: " + w);
+            return false;
         }
         if (DEBUG_WALLPAPER) Slog.v(TAG, "Win " + w + ": isOnScreen=" + w.isOnScreen()
                 + " mDrawState=" + w.mWinAnimator.mDrawState);
@@ -177,7 +175,7 @@ class WallpaperController {
                 && (mWallpaperTarget == w || w.isDrawFinishedLw())) {
             if (DEBUG_WALLPAPER) Slog.v(TAG, "Found wallpaper target: " + w);
             mFindResults.setWallpaperTarget(w);
-            if (w == mWallpaperTarget && w.mWinAnimator.isAnimationSet()) {
+            if (w == mWallpaperTarget && w.isAnimating()) {
                 // The current wallpaper target is animating, so we'll look behind it for
                 // another possible target and figure out what is going on later.
                 if (DEBUG_WALLPAPER) Slog.v(TAG,
@@ -185,10 +183,6 @@ class WallpaperController {
             }
             // Found a target! End search.
             return true;
-        } else if (w == winAnimator.mWindowDetachedWallpaper) {
-            if (DEBUG_WALLPAPER_LIGHT) Slog.v(TAG,
-                    "Found animating detached wallpaper target win: " + w);
-            mFindResults.setUseTopWallpaperAsTarget(true);
         }
         return false;
     };
@@ -243,7 +237,7 @@ class WallpaperController {
     }
 
     boolean isWallpaperTargetAnimating() {
-        return mWallpaperTarget != null && mWallpaperTarget.mWinAnimator.isAnimationSet()
+        return mWallpaperTarget != null && mWallpaperTarget.isAnimating()
                 && (mWallpaperTarget.mAppToken == null
                         || !mWallpaperTarget.mAppToken.isWaitingForTransitionStart());
     }

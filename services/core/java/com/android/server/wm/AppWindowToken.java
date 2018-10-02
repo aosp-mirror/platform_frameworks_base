@@ -1632,17 +1632,6 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         return null;
     }
 
-    int getLowestAnimLayer() {
-        for (int i = 0; i < mChildren.size(); i++) {
-            final WindowState w = mChildren.get(i);
-            if (w.mRemoved) {
-                continue;
-            }
-            return w.mWinAnimator.mAnimLayer;
-        }
-        return Integer.MAX_VALUE;
-    }
-
     WindowState getHighestAnimLayerWindow(WindowState currentTarget) {
         WindowState candidate = null;
         for (int i = mChildren.indexOf(currentTarget); i >= 0; i--) {
@@ -1650,8 +1639,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
             if (w.mRemoved) {
                 continue;
             }
-            if (candidate == null || w.mWinAnimator.mAnimLayer >
-                    candidate.mWinAnimator.mAnimLayer) {
+            if (candidate == null) {
                 candidate = w;
             }
         }

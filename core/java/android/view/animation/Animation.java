@@ -203,11 +203,6 @@ public abstract class Animation implements Cloneable {
      */
     private float mScaleFactor = 1f;
 
-    /**
-     * Don't animate the wallpaper.
-     */
-    private boolean mDetachWallpaper = false;
-
     private boolean mShowWallpaper;
 
     private boolean mMore = true;
@@ -667,9 +662,10 @@ public abstract class Animation implements Cloneable {
      *
      * @param detachWallpaper true if the wallpaper should be detached from the animation
      * @attr ref android.R.styleable#Animation_detachWallpaper
+     *
+     * @deprecated All window animations are running with detached wallpaper.
      */
     public void setDetachWallpaper(boolean detachWallpaper) {
-        mDetachWallpaper = detachWallpaper;
     }
 
     /**
@@ -793,9 +789,11 @@ public abstract class Animation implements Cloneable {
     /**
      * Return value of {@link #setDetachWallpaper(boolean)}.
      * @attr ref android.R.styleable#Animation_detachWallpaper
+     *
+     * @deprecated All window animations are running with detached wallpaper.
      */
     public boolean getDetachWallpaper() {
-        return mDetachWallpaper;
+        return false;
     }
 
     /**

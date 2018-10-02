@@ -2209,7 +2209,7 @@ public class WindowManagerService extends IWindowManager.Stub
         if (win.isWinVisibleLw() && winAnimator.applyAnimationLocked(transit, false)) {
             focusMayChange = isDefaultDisplay;
             win.mAnimatingExit = true;
-        } else if (win.mWinAnimator.isAnimationSet()) {
+        } else if (win.isAnimating()) {
             // Currently in a hide animation... turn this into
             // an exit.
             win.mAnimatingExit = true;
@@ -5574,11 +5574,7 @@ public class WindowManagerService extends IWindowManager.Stub
 
                 if (mode != UPDATE_FOCUS_WILL_ASSIGN_LAYERS
                         && mode != UPDATE_FOCUS_WILL_PLACE_SURFACES) {
-                    final int prevImeAnimLayer =
-                            displayContent.mInputMethodWindow.mWinAnimator.mAnimLayer;
                     displayContent.assignWindowLayers(false /* setLayoutNeeded */);
-                    imWindowChanged |= prevImeAnimLayer
-                            != displayContent.mInputMethodWindow.mWinAnimator.mAnimLayer;
                 }
             }
 

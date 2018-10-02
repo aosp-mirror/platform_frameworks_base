@@ -163,7 +163,7 @@ class WindowToken extends WindowContainer<WindowState> {
 
         for (int i = 0; i < count; i++) {
             final WindowState win = mChildren.get(i);
-            if (win.mWinAnimator.isAnimationSet()) {
+            if (win.isAnimating()) {
                 delayed = true;
             }
             changed |= win.onSetAppExiting();
@@ -233,18 +233,6 @@ class WindowToken extends WindowContainer<WindowState> {
         }
 
         return false;
-    }
-
-    int getHighestAnimLayer() {
-        int highest = -1;
-        for (int j = 0; j < mChildren.size(); j++) {
-            final WindowState w = mChildren.get(j);
-            final int wLayer = w.getHighestAnimLayer();
-            if (wLayer > highest) {
-                highest = wLayer;
-            }
-        }
-        return highest;
     }
 
     AppWindowToken asAppWindowToken() {

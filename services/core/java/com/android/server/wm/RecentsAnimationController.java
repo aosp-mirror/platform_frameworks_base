@@ -609,11 +609,6 @@ public class RecentsAnimationController implements DeathRecipient {
         }
 
         @Override
-        public boolean getDetachWallpaper() {
-            return false;
-        }
-
-        @Override
         public boolean getShowWallpaper() {
             return false;
         }
