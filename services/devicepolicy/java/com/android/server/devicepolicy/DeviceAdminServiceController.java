@@ -18,27 +18,23 @@ package com.android.server.devicepolicy;
 import android.Manifest.permission;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.admin.DeviceAdminService;
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.IDeviceAdminService;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.Intent;
-import android.content.pm.ParceledListSlice;
-import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.RemoteException;
-import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.BackgroundThread;
 import com.android.server.am.PersistentConnection;
+import com.android.server.appbinding.AppBindingUtils;
 
 import java.io.PrintWriter;
-import java.util.List;
 
 /**
  * Manages connections to persistent services in owner packages.
@@ -74,6 +70,11 @@ public class DeviceAdminServiceController {
         }
 
         @Override
+        protected int getBindFlags() {
+            return Context.BIND_FOREGROUND_SERVICE;
+        }
+
+        @Override
         protected IDeviceAdminService asInterface(IBinder binder) {
             return IDeviceAdminService.Stub.asInterface(binder);
         }
@@ -100,40 +101,14 @@ public class DeviceAdminServiceController {
      */
     @Nullable
     private ServiceInfo findService(@NonNull String packageName, int userId) {
-        final Intent intent = new Intent(DevicePolicyManager.ACTION_DEVICE_ADMIN_SERVICE);
-        intent.setPackage(packageName);
-
-        try {
-            final ParceledListSlice<ResolveInfo> pls = mInjector.getIPackageManager()
-                    .queryIntentServices(intent, null, /* flags=*/ 0, userId);
-            if (pls == null) {
-                return null;
-            }
-            final List<ResolveInfo> list = pls.getList();
-            if (list.size() == 0) {
-                return null;
-            }
-            // Note if multiple services are found, that's an error, even if only one of them
-            // is exported.
-            if (list.size() > 1) {
-                Log.e(TAG, "More than one DeviceAdminService's found in package "
-                        + packageName
-                        + ".  They'll all be ignored.");
-                return null;
-            }
-            final ServiceInfo si = list.get(0).serviceInfo;
-
-            if (!permission.BIND_DEVICE_ADMIN.equals(si.permission)) {
-                Log.e(TAG, "DeviceAdminService "
-                        + si.getComponentName().flattenToShortString()
-                        + " must be protected with " + permission.BIND_DEVICE_ADMIN
-                        + ".");
-                return null;
-            }
-            return si;
-        } catch (RemoteException e) {
-        }
-        return null;
+        return AppBindingUtils.findService(
+                packageName,
+                userId,
+                DevicePolicyManager.ACTION_DEVICE_ADMIN_SERVICE,
+                permission.BIND_DEVICE_ADMIN,
+                DeviceAdminService.class,
+                mInjector.getIPackageManager(),
+                new StringBuilder() /* ignore error message */);
     }
 
     /**

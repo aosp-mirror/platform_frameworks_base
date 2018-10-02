@@ -56,6 +56,11 @@ public class PersistentConnectionTest extends AndroidTestCase {
         }
 
         @Override
+        protected int getBindFlags() {
+            return Context.BIND_FOREGROUND_SERVICE;
+        }
+
+        @Override
         protected IDeviceAdminService asInterface(IBinder binder) {
             return (IDeviceAdminService) binder;
         }

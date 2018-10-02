@@ -10821,6 +10821,12 @@ public final class Settings {
                 = "activity_starts_logging_enabled";
 
         /**
+         * @hide
+         * @see com.android.server.appbinding.AppBindingConstants
+         */
+        public static final String APP_BINDING_CONSTANTS = "app_binding_constants";
+
+        /**
          * App ops specific settings.
          * This is encoded as a key=value list, separated by commas. Ex:
          *
