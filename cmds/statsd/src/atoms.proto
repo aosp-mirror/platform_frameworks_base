@@ -2556,8 +2556,7 @@ message LooperStats {
     // recorded_message_count.
     //
     // If recorded_message_count is different than message_count, it means data
-    // collection has been sampled. All the fields below will be sampled in this
-    // case.
+    // collection has been sampled. The fields below will be sampled in this case.
     optional int64 recorded_message_count = 7;
 
     // Total latency of all processed messages.
@@ -2573,6 +2572,32 @@ message LooperStats {
 
     // True if the screen was interactive PowerManager#isInteractive at the end of the call.
     optional bool screen_interactive = 10;
+
+    // Max recorded CPU usage of all processed messages.
+    optional int64 recorded_max_cpu_micros = 11;
+
+    // Max recorded latency of all processed messages.
+    optional int64 recorded_max_latency_micros = 12;
+
+    // Total number of messages we tracked the dispatching delay for. If we
+    // collected data for all the messages, message_count will be equal to
+    // recorded_delay_message_count.
+    //
+    // If recorded_delay_message_count is different than message_count, it means data
+    // collection has been sampled or/and not all messages specified the target dispatch time.
+    // The fields below will be sampled in this case.
+    optional int64 recorded_delay_message_count = 13;
+
+    // Total dispatching delay of all processed messages.
+    // Calculated as a difference between the target dispatching time (Message.when)
+    // and the actual dispatching time.
+    // Average can be computed using recorded_total_delay_millis / recorded_delay_message_count.
+    optional int64 recorded_total_delay_millis = 14;
+
+    // Max dispatching delay of all processed messages.
+    // Calculated as a difference between the target dispatching time (Message.when)
+    // and the actual dispatching time.
+    optional int64 recorded_max_delay_millis = 15;
 }
 
 /**
