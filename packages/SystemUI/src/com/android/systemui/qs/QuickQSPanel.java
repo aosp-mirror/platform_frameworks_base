@@ -253,7 +253,8 @@ public class QuickQSPanel extends QSPanel {
 
             final int availableWidth = getMeasuredWidth() - getPaddingStart() - getPaddingEnd();
             final int leftoverWithespace = availableWidth - maxTiles * mCellWidth;
-            final int smallestHorizontalMarginNeeded = leftoverWithespace / (maxTiles - 1);
+            final int smallestHorizontalMarginNeeded;
+            smallestHorizontalMarginNeeded = leftoverWithespace / Math.max(1, maxTiles - 1);
 
             if (smallestHorizontalMarginNeeded > 0){
                 mCellMarginHorizontal = smallestHorizontalMarginNeeded;
