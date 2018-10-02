@@ -733,7 +733,11 @@ public class NotificationPanelView extends PanelView implements
             mQsExpandImmediate = true;
             mNotificationStackScroller.setShouldShowShelfOnly(true);
         }
-        expand(true /* animate */);
+        if (isFullyCollapsed()){
+            expand(true /* animate */);
+        } else {
+            flingSettings(0 /* velocity */, FLING_EXPAND);
+        }
     }
 
     public void expandWithoutQs() {
