@@ -990,6 +990,8 @@ public class Process {
     /** @hide */
     public static final int PROC_TAB_TERM = (int)'\t';
     /** @hide */
+    public static final int PROC_NEWLINE_TERM = (int) '\n';
+    /** @hide */
     public static final int PROC_COMBINE = 0x100;
     /** @hide */
     public static final int PROC_PARENS = 0x200;
@@ -1009,7 +1011,8 @@ public class Process {
      *
      * <p>The format is a list of integers, where every integer describes a variable in the file. It
      * specifies how the variable is syntactically terminated (e.g. {@link Process#PROC_SPACE_TERM},
-     * {@link Process#PROC_TAB_TERM}, {@link Process#PROC_ZERO_TERM}).
+     * {@link Process#PROC_TAB_TERM}, {@link Process#PROC_ZERO_TERM}, {@link
+     * Process#PROC_NEWLINE_TERM}).
      *
      * <p>If the variable should be parsed and returned to the caller, the termination type should
      * be binary OR'd with the type of output (e.g. {@link Process#PROC_OUT_STRING}, {@link
