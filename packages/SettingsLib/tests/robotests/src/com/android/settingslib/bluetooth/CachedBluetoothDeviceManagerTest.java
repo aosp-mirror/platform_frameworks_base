@@ -835,4 +835,20 @@ public class CachedBluetoothDeviceManagerTest {
         assertThat(cachedDevice2.isActiveDevice(BluetoothProfile.HEADSET)).isFalse();
         assertThat(cachedDevice2.isActiveDevice(BluetoothProfile.HEARING_AID)).isFalse();
     }
+
+    /**
+     * Test to verify getHearingAidOtherDevice() for hearing aid devices with same HiSyncId.
+     */
+    @Test
+    public void testGetHearingAidOtherDevice_bothHearingAidsPaired_returnsOtherDevice() {
+        mCachedDevice1.setHiSyncId(HISYNCID1);
+        mCachedDevice2.setHiSyncId(HISYNCID1);
+        mCachedDeviceManager.mCachedDevices.add(mCachedDevice1);
+        mCachedDeviceManager.mHearingAidDevicesNotAddedInCache.add(mCachedDevice2);
+        doAnswer((invocation) -> DEVICE_SUMMARY_1).when(mCachedDevice1).getConnectionSummary();
+        doAnswer((invocation) -> DEVICE_SUMMARY_2).when(mCachedDevice2).getConnectionSummary();
+
+        assertThat(mCachedDeviceManager.getHearingAidOtherDevice(mCachedDevice1, HISYNCID1))
+            .isEqualTo(mCachedDevice2);
+    }
 }
