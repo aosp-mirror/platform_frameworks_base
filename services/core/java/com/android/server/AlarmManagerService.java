@@ -142,6 +142,8 @@ class AlarmManagerService extends SystemService {
     static final boolean RECORD_DEVICE_IDLE_ALARMS = false;
     static final String TIMEZONE_PROPERTY = "persist.sys.timezone";
 
+    static final int TICK_HISTORY_DEPTH = 10;
+
     // Indices into the APP_STANDBY_MIN_DELAYS and KEYS_APP_STANDBY_DELAY arrays
     static final int ACTIVE_INDEX = 0;
     static final int WORKING_INDEX = 1;
@@ -176,21 +178,25 @@ class AlarmManagerService extends SystemService {
     private long mNextNonWakeUpSetAt;
     private long mLastWakeup;
     private long mLastTrigger;
+
     private long mLastTickSet;
-    private long mLastTickIssued; // elapsed
     private long mLastTickReceived;
     private long mLastTickAdded;
     private long mLastTickRemoved;
+    // ring buffer of recent TIME_TICK issuance, in the elapsed timebase
+    private final long[] mTickHistory = new long[TICK_HISTORY_DEPTH];
+    private int mNextTickHistory;
+
     private final Injector mInjector;
     int mBroadcastRefCount = 0;
     PowerManager.WakeLock mWakeLock;
-    boolean mLastWakeLockUnimportantForLogging;
     ArrayList<Alarm> mPendingNonWakeupAlarms = new ArrayList<>();
     ArrayList<InFlight> mInFlight = new ArrayList<>();
     AlarmHandler mHandler;
     ClockReceiver mClockReceiver;
     final DeliveryTracker mDeliveryTracker = new DeliveryTracker();
-    PendingIntent mTimeTickSender;
+    Intent mTimeTickIntent;
+    IAlarmListener mTimeTickTrigger;
     PendingIntent mDateChangeSender;
     Random mRandom;
     boolean mInteractive = true;
@@ -509,7 +515,7 @@ class AlarmManagerService extends SystemService {
             end = clampPositive(seed.maxWhenElapsed);
             flags = seed.flags;
             alarms.add(seed);
-            if (seed.operation == mTimeTickSender) {
+            if (seed.listener == mTimeTickTrigger) {
                 mLastTickAdded = mInjector.getCurrentTimeMillis();
             }
         }
@@ -534,7 +540,7 @@ class AlarmManagerService extends SystemService {
                 index = 0 - index - 1;
             }
             alarms.add(index, alarm);
-            if (alarm.operation == mTimeTickSender) {
+            if (alarm.listener == mTimeTickTrigger) {
                 mLastTickAdded = mInjector.getCurrentTimeMillis();
             }
             if (DEBUG_BATCH) {
@@ -572,7 +578,7 @@ class AlarmManagerService extends SystemService {
                     if (alarm.alarmClock != null) {
                         mNextAlarmClockMayChange = true;
                     }
-                    if (alarm.operation == mTimeTickSender) {
+                    if (alarm.listener == mTimeTickTrigger) {
                         mLastTickRemoved = mInjector.getCurrentTimeMillis();
                     }
                 } else {
@@ -690,8 +696,7 @@ class AlarmManagerService extends SystemService {
             Alarm a = alarms.get(i);
 
             final int alarmPrio;
-            if (a.operation != null
-                    && Intent.ACTION_TIME_TICK.equals(a.operation.getIntent().getAction())) {
+            if (a.listener == mTimeTickTrigger) {
                 alarmPrio = PRIO_TICK;
             } else if (a.wakeup) {
                 alarmPrio = PRIO_WAKEUP;
@@ -823,7 +828,7 @@ class AlarmManagerService extends SystemService {
         }
         final int batchSize = alarms.size();
         for (int j = 0; j < batchSize; j++) {
-            if (alarms.get(j).operation == mTimeTickSender) {
+            if (alarms.get(j).listener == mTimeTickTrigger) {
                 return true;
             }
         }
@@ -1111,10 +1116,7 @@ class AlarmManagerService extends SystemService {
         updateNextAlarmClockLocked();
 
         // And send a TIME_TICK right now, since it is important to get the UI updated.
-        try {
-            mTimeTickSender.send();
-        } catch (PendingIntent.CanceledException e) {
-        }
+        mHandler.post(() ->  getContext().sendBroadcastAsUser(mTimeTickIntent, UserHandle.ALL));
     }
 
     static final class InFlight {
@@ -1312,12 +1314,36 @@ class AlarmManagerService extends SystemService {
             }
             mWakeLock = mInjector.getAlarmWakeLock();
 
-            mTimeTickSender = PendingIntent.getBroadcastAsUser(getContext(), 0,
-                    new Intent(Intent.ACTION_TIME_TICK).addFlags(
-                            Intent.FLAG_RECEIVER_REGISTERED_ONLY
-                                    | Intent.FLAG_RECEIVER_FOREGROUND
-                                    | Intent.FLAG_RECEIVER_VISIBLE_TO_INSTANT_APPS), 0,
-                    UserHandle.ALL);
+            mTimeTickIntent = new Intent(Intent.ACTION_TIME_TICK).addFlags(
+                    Intent.FLAG_RECEIVER_REGISTERED_ONLY
+                    | Intent.FLAG_RECEIVER_FOREGROUND
+                    | Intent.FLAG_RECEIVER_VISIBLE_TO_INSTANT_APPS);
+
+            mTimeTickTrigger = new IAlarmListener.Stub() {
+                @Override
+                public void doAlarm(final IAlarmCompleteListener callback) throws RemoteException {
+                    if (DEBUG_BATCH) {
+                        Slog.v(TAG, "Received TIME_TICK alarm; rescheduling");
+                    }
+
+                    // Via handler because dispatch invokes this within its lock.  OnAlarmListener
+                    // takes care of this automatically, but we're using the direct internal
+                    // interface here rather than that client-side wrapper infrastructure.
+                    mHandler.post(() -> {
+                        getContext().sendBroadcastAsUser(mTimeTickIntent, UserHandle.ALL);
+
+                        try {
+                            callback.alarmComplete(this);
+                        } catch (RemoteException e) { /* local method call */ }
+                    });
+
+                    synchronized (mLock) {
+                        mLastTickReceived = mInjector.getCurrentTimeMillis();
+                    }
+                    mClockReceiver.scheduleTimeTickEvent();
+                }
+            };
+
             Intent intent = new Intent(Intent.ACTION_DATE_CHANGED);
             intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING
                     | Intent.FLAG_RECEIVER_VISIBLE_TO_INSTANT_APPS);
@@ -1438,12 +1464,9 @@ class AlarmManagerService extends SystemService {
         }
     }
 
-    void removeImpl(PendingIntent operation) {
-        if (operation == null) {
-            return;
-        }
+    void removeImpl(PendingIntent operation, IAlarmListener listener) {
         synchronized (mLock) {
-            removeLocked(operation, null);
+            removeLocked(operation, listener);
         }
     }
 
@@ -1887,9 +1910,9 @@ class AlarmManagerService extends SystemService {
             pw.println("  App Standby Parole: " + mAppStandbyParole);
             pw.println();
 
-            final long nowRTC = mInjector.getCurrentTimeMillis();
             final long nowELAPSED = mInjector.getElapsedRealtime();
             final long nowUPTIME = SystemClock.uptimeMillis();
+            final long nowRTC = mInjector.getCurrentTimeMillis();
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
 
             pw.print("  nowRTC="); pw.print(nowRTC);
@@ -1899,12 +1922,26 @@ class AlarmManagerService extends SystemService {
             pw.print("  mLastTimeChangeClockTime="); pw.print(mLastTimeChangeClockTime);
             pw.print("="); pw.println(sdf.format(new Date(mLastTimeChangeClockTime)));
             pw.print("  mLastTimeChangeRealtime="); pw.println(mLastTimeChangeRealtime);
-            pw.print("  mLastTickIssued=");
-            pw.println(sdf.format(new Date(nowRTC - (nowELAPSED - mLastTickIssued))));
             pw.print("  mLastTickReceived="); pw.println(sdf.format(new Date(mLastTickReceived)));
             pw.print("  mLastTickSet="); pw.println(sdf.format(new Date(mLastTickSet)));
             pw.print("  mLastTickAdded="); pw.println(sdf.format(new Date(mLastTickAdded)));
             pw.print("  mLastTickRemoved="); pw.println(sdf.format(new Date(mLastTickRemoved)));
+
+            if (RECORD_ALARMS_IN_HISTORY) {
+                pw.println();
+                pw.println("  Recent TIME_TICK history:");
+                int i = mNextTickHistory;
+                do {
+                    i--;
+                    if (i < 0) i = TICK_HISTORY_DEPTH - 1;
+                    final long time = mTickHistory[i];
+                    pw.print("    ");
+                    pw.println((time > 0)
+                            ? sdf.format(new Date(nowRTC - (nowELAPSED - time)))
+                            : "-");
+                } while (i != mNextTickHistory);
+                pw.println();
+            }
 
             SystemServiceManager ssm = LocalServices.getService(SystemServiceManager.class);
             if (ssm != null) {
@@ -3640,8 +3677,8 @@ class AlarmManagerService extends SystemService {
                         }
                         // StatsLog requires currentTimeMillis(), which == nowRTC to within usecs.
                         StatsLog.write(StatsLog.WALL_CLOCK_TIME_SHIFTED, nowRTC);
-                        removeImpl(mTimeTickSender);
-                        removeImpl(mDateChangeSender);
+                        removeImpl(null, mTimeTickTrigger);
+                        removeImpl(mDateChangeSender, null);
                         rebatchAllAlarms();
                         mClockReceiver.scheduleTimeTickEvent();
                         mClockReceiver.scheduleDateChangedEvent();
@@ -3764,14 +3801,8 @@ class AlarmManagerService extends SystemService {
     void setWakelockWorkSource(PendingIntent pi, WorkSource ws, int type, String tag,
             int knownUid, boolean first) {
         try {
-            final boolean unimportant = pi == mTimeTickSender;
-            mWakeLock.setUnimportantForLogging(unimportant);
-            if (first || mLastWakeLockUnimportantForLogging) {
-                mWakeLock.setHistoryTag(tag);
-            } else {
-                mWakeLock.setHistoryTag(null);
-            }
-            mLastWakeLockUnimportantForLogging = unimportant;
+            mWakeLock.setHistoryTag(first ? tag : null);
+
             if (ws != null) {
                 mWakeLock.setWorkSource(ws);
                 return;
@@ -3828,7 +3859,7 @@ class AlarmManagerService extends SystemService {
                             if (alarm.repeatInterval > 0) {
                                 // This IntentSender is no longer valid, but this
                                 // is a repeating alarm, so toss the hoser.
-                                removeImpl(alarm.operation);
+                                removeImpl(alarm.operation, null);
                             }
                         }
                     }
@@ -3886,22 +3917,13 @@ class AlarmManagerService extends SystemService {
     class ClockReceiver extends BroadcastReceiver {
         public ClockReceiver() {
             IntentFilter filter = new IntentFilter();
-            filter.addAction(Intent.ACTION_TIME_TICK);
             filter.addAction(Intent.ACTION_DATE_CHANGED);
             getContext().registerReceiver(this, filter);
         }
 
         @Override
         public void onReceive(Context context, Intent intent) {
-            if (intent.getAction().equals(Intent.ACTION_TIME_TICK)) {
-                if (DEBUG_BATCH) {
-                    Slog.v(TAG, "Received TIME_TICK alarm; rescheduling");
-                }
-                synchronized (mLock) {
-                    mLastTickReceived = mInjector.getCurrentTimeMillis();
-                }
-                scheduleTimeTickEvent();
-            } else if (intent.getAction().equals(Intent.ACTION_DATE_CHANGED)) {
+            if (intent.getAction().equals(Intent.ACTION_DATE_CHANGED)) {
                 // Since the kernel does not keep track of DST, we need to
                 // reset the TZ information at the beginning of each day
                 // based off of the current Zone gmt offset + userspace tracked
@@ -3923,7 +3945,7 @@ class AlarmManagerService extends SystemService {
 
             final WorkSource workSource = null; // Let system take blame for time tick events.
             setImpl(ELAPSED_REALTIME, mInjector.getElapsedRealtime() + tickEventDelay, 0,
-                    0, mTimeTickSender, null, null, AlarmManager.FLAG_STANDALONE, workSource,
+                    0, null, mTimeTickTrigger, null, AlarmManager.FLAG_STANDALONE, workSource,
                     null, Process.myUid(), "android");
 
             // Finally, remember when we set the tick alarm
@@ -4333,10 +4355,6 @@ class AlarmManagerService extends SystemService {
                 // PendingIntent alarm
                 mSendCount++;
 
-                if (alarm.priorityClass.priority == PRIO_TICK) {
-                    mLastTickIssued = nowELAPSED;
-                }
-
                 try {
                     alarm.operation.send(getContext(), 0,
                             mBackgroundIntent.putExtra(
@@ -4344,13 +4362,10 @@ class AlarmManagerService extends SystemService {
                                     mDeliveryTracker, mHandler, null,
                                     allowWhileIdle ? mIdleOptions : null);
                 } catch (PendingIntent.CanceledException e) {
-                    if (alarm.operation == mTimeTickSender) {
-                        Slog.wtf(TAG, "mTimeTickSender canceled");
-                    }
                     if (alarm.repeatInterval > 0) {
                         // This IntentSender is no longer valid, but this
                         // is a repeating alarm, so toss it
-                        removeImpl(alarm.operation);
+                        removeImpl(alarm.operation, null);
                     }
                     // No actual delivery was possible, so the delivery tracker's
                     // 'finished' callback won't be invoked.  We also don't need
@@ -4362,6 +4377,16 @@ class AlarmManagerService extends SystemService {
             } else {
                 // Direct listener callback alarm
                 mListenerCount++;
+
+                if (RECORD_ALARMS_IN_HISTORY) {
+                    if (alarm.listener == mTimeTickTrigger) {
+                        mTickHistory[mNextTickHistory++] = nowELAPSED;
+                        if (mNextTickHistory >= TICK_HISTORY_DEPTH) {
+                            mNextTickHistory = 0;
+                        }
+                    }
+                }
+
                 try {
                     if (DEBUG_LISTENER_CALLBACK) {
                         Slog.v(TAG, "Alarm to uid=" + alarm.uid
