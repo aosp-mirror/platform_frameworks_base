@@ -708,6 +708,10 @@ package android.os {
     method public void removeSyncBarrier(int);
   }
 
+  public final class PowerManager {
+    method public boolean setPowerSaveMode(boolean);
+  }
+
   public class Process {
     method public static final int getThreadScheduler(int) throws java.lang.IllegalArgumentException;
   }

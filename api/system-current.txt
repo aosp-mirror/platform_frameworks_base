@@ -128,6 +128,7 @@ package android {
     field public static final java.lang.String PEERS_MAC_ADDRESS = "android.permission.PEERS_MAC_ADDRESS";
     field public static final java.lang.String PERFORM_CDMA_PROVISIONING = "android.permission.PERFORM_CDMA_PROVISIONING";
     field public static final java.lang.String PERFORM_SIM_ACTIVATION = "android.permission.PERFORM_SIM_ACTIVATION";
+    field public static final java.lang.String POWER_SAVER = "android.permission.POWER_SAVER";
     field public static final java.lang.String PROVIDE_RESOLVER_RANKER_SERVICE = "android.permission.PROVIDE_RESOLVER_RANKER_SERVICE";
     field public static final java.lang.String PROVIDE_TRUST_AGENT = "android.permission.PROVIDE_TRUST_AGENT";
     field public static final java.lang.String QUERY_TIME_ZONE_RULES = "android.permission.QUERY_TIME_ZONE_RULES";
@@ -3995,6 +3996,7 @@ package android.os {
   }
 
   public final class PowerManager {
+    method public boolean setPowerSaveMode(boolean);
     method public void userActivity(long, int, int);
     field public static final int USER_ACTIVITY_EVENT_ACCESSIBILITY = 3; // 0x3
     field public static final int USER_ACTIVITY_EVENT_BUTTON = 1; // 0x1
