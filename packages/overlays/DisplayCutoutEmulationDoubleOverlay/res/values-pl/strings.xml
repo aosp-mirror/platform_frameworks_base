@@ -17,5 +17,5 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="display_cutout_emulation_overlay" msgid="5659433562878674546">"Podwójne wycięcie w ekranie"</string>
+    <string name="display_cutout_emulation_overlay" msgid="5323179900047630217">"Wycięcie podwójne"</string>
 </resources>

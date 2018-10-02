@@ -1126,7 +1126,7 @@ class WindowStateAnimator {
 
         setSurfaceBoundariesLocked(recoveringMemory);
 
-        if (mIsWallpaper && !mWin.mWallpaperVisible) {
+        if (mIsWallpaper && !w.mWallpaperVisible) {
             // Wallpaper is no longer visible and there is no wp target => hide it.
             hide("prepareSurfaceLocked");
         } else if (w.isParentWindowHidden() || !w.isOnScreen()) {
@@ -1185,11 +1185,18 @@ class WindowStateAnimator {
                         if (mIsWallpaper) {
                             w.dispatchWallpaperVisibility(true);
                         }
-                        // This draw means the difference between unique content and mirroring.
-                        // Run another pass through performLayout to set mHasContent in the
-                        // LogicalDisplay.
-                        mAnimator.setPendingLayoutChanges(w.getDisplayId(),
-                                FINISH_LAYOUT_REDO_ANIM);
+                        if (!w.getDisplayContent().getLastHasContent()) {
+                            // This draw means the difference between unique content and mirroring.
+                            // Run another pass through performLayout to set mHasContent in the
+                            // LogicalDisplay.
+                            mAnimator.setPendingLayoutChanges(w.getDisplayId(),
+                                    FINISH_LAYOUT_REDO_ANIM);
+                            if (DEBUG_LAYOUT_REPEATS) {
+                                mService.mWindowPlacerLocked.debugLayoutRepeats(
+                                        "showSurfaceRobustlyLocked " + w,
+                                        mAnimator.getPendingLayoutChanges(w.getDisplayId()));
+                            }
+                        }
                     } else {
                         w.setOrientationChanging(false);
                     }

@@ -123,6 +123,14 @@ public class LocalBluetoothProfileManager {
 
         ParcelUuid[] uuids = adapter.getUuids();
 
+        List<Integer> supportedList = mLocalAdapter.getSupportedProfiles();
+        if (supportedList.contains(BluetoothProfile.HEARING_AID)) {
+            mHearingAidProfile = new HearingAidProfile(mContext, mLocalAdapter, mDeviceManager,
+                                                       this);
+            addProfile(mHearingAidProfile, HearingAidProfile.NAME,
+                       BluetoothHearingAid.ACTION_CONNECTION_STATE_CHANGED);
+        }
+
         // uuids may be null if Bluetooth is turned off
         if (uuids != null) {
             updateLocalProfiles(uuids);
@@ -159,13 +167,6 @@ public class LocalBluetoothProfileManager {
         addProfile(mPbapProfile, PbapServerProfile.NAME,
              BluetoothPbap.ACTION_CONNECTION_STATE_CHANGED);
 
-        List<Integer> supportedList = mLocalAdapter.getSupportedProfiles();
-        if (supportedList.contains(BluetoothProfile.HEARING_AID)) {
-            mHearingAidProfile = new HearingAidProfile(mContext, mLocalAdapter, mDeviceManager,
-                                                       this);
-            addProfile(mHearingAidProfile, HearingAidProfile.NAME,
-                       BluetoothHearingAid.ACTION_CONNECTION_STATE_CHANGED);
-        }
         if (DEBUG) Log.d(TAG, "LocalBluetoothProfileManager construction complete");
     }
 
@@ -360,9 +361,10 @@ public class LocalBluetoothProfileManager {
                 Log.i(TAG, "Failed to connect " + mProfile + " device");
             }
 
-            if (getHearingAidProfile() != null &&
-                mProfile instanceof HearingAidProfile &&
-                (newState == BluetoothProfile.STATE_CONNECTED)) {
+            boolean isHearingAidProfile = (getHearingAidProfile() != null) &&
+                (mProfile instanceof HearingAidProfile);
+
+            if (isHearingAidProfile && (newState == BluetoothProfile.STATE_CONNECTED)) {
                 // Check if the HiSyncID has being initialized
                 if (cachedDevice.getHiSyncId() == BluetoothHearingAid.HI_SYNC_ID_INVALID) {
 
@@ -375,10 +377,22 @@ public class LocalBluetoothProfileManager {
                 }
             }
 
-            mEventManager.dispatchProfileConnectionStateChanged(cachedDevice, newState,
-                    mProfile.getProfileId());
             cachedDevice.onProfileStateChanged(mProfile, newState);
             cachedDevice.refresh();
+
+            if (isHearingAidProfile) {
+                CachedBluetoothDevice otherDevice =
+                    mDeviceManager.getHearingAidOtherDevice(cachedDevice, cachedDevice.getHiSyncId());
+                if (otherDevice != null) {
+                    if (DEBUG) {
+                        Log.d(TAG, "Refreshing other hearing aid=" + otherDevice
+                               + ", newState=" + newState);
+                    }
+                    otherDevice.refresh();
+                }
+            }
+            mEventManager.dispatchProfileConnectionStateChanged(cachedDevice, newState,
+                    mProfile.getProfileId());
         }
     }
 

@@ -335,7 +335,7 @@ import java.util.Vector;
  *
  * <table border="0" cellspacing="0" cellpadding="0">
  * <tr><td>Method Name </p></td>
- *     <td>Valid Sates </p></td>
+ *     <td>Valid States </p></td>
  *     <td>Invalid States </p></td>
  *     <td>Comments </p></td></tr>
  * <tr><td>attachAuxEffect </p></td>

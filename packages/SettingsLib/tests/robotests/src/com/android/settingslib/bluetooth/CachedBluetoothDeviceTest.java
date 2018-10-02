@@ -28,6 +28,7 @@ import static org.robolectric.Shadows.shadowOf;
 
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothDevice;
+import android.bluetooth.BluetoothHearingAid;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.media.AudioManager;
@@ -571,5 +572,56 @@ public class CachedBluetoothDeviceTest {
                 thenReturn(BluetoothProfile.STATE_DISCONNECTING);
 
         assertThat(mCachedDevice.isHfpDevice()).isFalse();
+    }
+
+    @Test
+    public void isConnectedHearingAidDevice_connected_returnTrue() {
+        when(mProfileManager.getHearingAidProfile()).thenReturn(mHearingAidProfile);
+        when(mHearingAidProfile.getConnectionStatus(mDevice)).
+                thenReturn(BluetoothProfile.STATE_CONNECTED);
+
+        assertThat(mCachedDevice.isConnectedHearingAidDevice()).isTrue();
+    }
+
+    @Test
+    public void isConnectedHearingAidDevice_disconnected_returnFalse() {
+        when(mProfileManager.getHearingAidProfile()).thenReturn(mHearingAidProfile);
+        when(mHearingAidProfile.getConnectionStatus(mDevice)).
+                thenReturn(BluetoothProfile.STATE_DISCONNECTED);
+
+        assertThat(mCachedDevice.isConnectedHearingAidDevice()).isFalse();
+    }
+
+    @Test
+    public void isConnectedHfpDevice_profileIsNull_returnFalse() {
+        when(mProfileManager.getHeadsetProfile()).thenReturn(null);
+
+        assertThat(mCachedDevice.isHfpDevice()).isFalse();
+    }
+
+    @Test
+    public void isConnectedA2dpDevice_profileIsNull_returnFalse() {
+        when(mProfileManager.getA2dpProfile()).thenReturn(null);
+
+        assertThat(mCachedDevice.isA2dpDevice()).isFalse();
+    }
+
+    @Test
+    public void isConnectedHearingAidDevice_profileIsNull_returnFalse() {
+        when(mProfileManager.getHearingAidProfile()).thenReturn(null);
+
+        assertThat(mCachedDevice.isConnectedHearingAidDevice()).isFalse();
+    }
+
+    @Test
+    public void testIsHearingAidDevice_isHearingAidDevice() {
+        mCachedDevice.setHiSyncId(0x1234);
+        assertThat(mCachedDevice.isHearingAidDevice()).isTrue();
+    }
+
+    @Test
+    public void testIsHearingAidDevice_isNotHearingAidDevice() {
+        mCachedDevice.setHiSyncId(BluetoothHearingAid.HI_SYNC_ID_INVALID);
+        assertThat(mCachedDevice.isHearingAidDevice()).isFalse();
     }
 }

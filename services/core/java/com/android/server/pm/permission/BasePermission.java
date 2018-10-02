@@ -39,7 +39,6 @@ import android.util.Slog;
 
 import com.android.server.pm.DumpState;
 import com.android.server.pm.PackageManagerService;
-import com.android.server.pm.PackageSetting;
 import com.android.server.pm.PackageSettingBase;
 
 import org.xmlpull.v1.XmlPullParser;
@@ -375,10 +374,8 @@ public final class BasePermission {
     }
 
     public void enforceDeclaredUsedAndRuntimeOrDevelopment(PackageParser.Package pkg) {
-        final PackageSetting pkgSetting = (PackageSetting) pkg.mExtras;
-        final PermissionsState permsState = pkgSetting.getPermissionsState();
         int index = pkg.requestedPermissions.indexOf(name);
-        if (!permsState.hasRequestedPermission(name) && index == -1) {
+        if (index == -1) {
             throw new SecurityException("Package " + pkg.packageName
                     + " has not requested permission " + name);
         }
