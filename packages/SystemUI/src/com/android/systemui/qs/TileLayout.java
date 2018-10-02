@@ -103,8 +103,7 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
         // it will show all its tiles. In this case, the tiles have to be entered before the
         // container is measured. Any change in the tiles, should trigger a remeasure.
         final int numTiles = mRecords.size();
-        final int width = MeasureSpec.getSize(widthMeasureSpec)
-                - getPaddingStart() - getPaddingEnd();
+        final int width = MeasureSpec.getSize(widthMeasureSpec);
         final int heightMode = MeasureSpec.getMode(heightMeasureSpec);
         if (heightMode == MeasureSpec.UNSPECIFIED) {
             mRows = (numTiles + mColumns - 1) / mColumns;
