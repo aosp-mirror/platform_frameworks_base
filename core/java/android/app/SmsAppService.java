@@ -24,21 +24,42 @@ import android.os.IBinder;
  * it so that the process is always running, which allows the app to have a persistent connection
  * to the server.
  *
- * <p>The service must have {@link android.telephony.TelephonyManager#ACTION_SMS_APP_SERVICE}
+ * <p>The service must have an {@link android.telephony.TelephonyManager#ACTION_SMS_APP_SERVICE}
  * action in the intent handler, and be protected with
  * {@link android.Manifest.permission#BIND_SMS_APP_SERVICE}. However the service does not have to
  * be exported.
  *
- * <p>Apps can use
+ * <p>The service must be associated with a non-main process, meaning it must have an
+ * {@code android:process} tag in its manifest entry.
+ *
+ * <p>An app can use
  * {@link android.content.pm.PackageManager#setComponentEnabledSetting(ComponentName, int, int)}
- * to disable/enable the service. Apps should use it to disable the service when it no longer needs
- * to be running.
+ * to disable or enable the service. An app should use it to disable the service when it no longer
+ * needs to be running.
  *
  * <p>When the owner process crashes, the service will be re-bound automatically after a
  * back-off.
  *
  * <p>Note the process may still be killed if the system is under heavy memory pressure, in which
  * case the process will be re-started later.
+ *
+ * <p>Example: First, define a subclass in the application:
+ * <pre>
+ * public class MySmsAppService extends SmsAppService {
+ * }
+ * </pre>
+ * Then, declare it in its {@code AndroidManifest.xml}:
+ * <pre>
+ * &lt;service
+ *    android:name=".MySmsAppService"
+ *    android:exported="false"
+ *    android:process=":persistent"
+ *    android:permission="android.permission.BIND_SMS_APP_SERVICE"&gt;
+ *    &lt;intent-filter&gt;
+ *        &lt;action android:name="android.telephony.action.SMS_APP_SERVICE" /&gt;
+ *    &lt;/intent-filter&gt;
+ * &lt;/service&gt;
+ * </pre>
  */
 public class SmsAppService extends Service {
     private final ISmsAppService mImpl;

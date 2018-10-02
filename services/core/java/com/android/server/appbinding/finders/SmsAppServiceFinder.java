@@ -26,12 +26,15 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.content.pm.ServiceInfo;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.UserHandle;
 import android.telephony.TelephonyManager;
+import android.text.TextUtils;
 
 import com.android.internal.telephony.SmsApplication;
+import com.android.server.appbinding.AppBindingConstants;
 
 import java.util.function.BiConsumer;
 
@@ -82,6 +85,22 @@ public class SmsAppServiceFinder extends AppServiceFinder<SmsAppService, ISmsApp
         final IntentFilter filter = new IntentFilter(ACTION_DEFAULT_SMS_PACKAGE_CHANGED_INTERNAL);
         mContext.registerReceiverAsUser(mSmsAppChangedWatcher, UserHandle.ALL, filter,
                 /* permission= */ null, mHandler);
+    }
+
+    @Override
+    protected String validateService(ServiceInfo service) {
+        final String packageName = service.packageName;
+        final String process = service.processName;
+
+        if (process == null || TextUtils.equals(packageName, process)) {
+            return "Service must not run on the main process";
+        }
+        return null; // Null means accept this service.
+    }
+
+    @Override
+    public int getBindFlags(AppBindingConstants constants) {
+        return constants.SMS_APP_BIND_FLAGS;
     }
 
     private final BroadcastReceiver mSmsAppChangedWatcher = new BroadcastReceiver() {
