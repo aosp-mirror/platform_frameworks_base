@@ -77,5 +77,13 @@ void Layer::postDecStrong() {
     mRenderState.postDecStrong(this);
 }
 
+SkBlendMode Layer::getMode() const {
+    if (mBlend || mode != SkBlendMode::kSrcOver) {
+        return mode;
+    } else {
+        return SkBlendMode::kSrc;
+    }
+}
+
 };  // namespace uirenderer
 };  // namespace android
