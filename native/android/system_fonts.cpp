@@ -43,6 +43,9 @@ using XmlDocUniquePtr = std::unique_ptr<xmlDoc, XmlDocDeleter>;
 struct ASystemFontIterator {
     XmlDocUniquePtr mXmlDoc;
     xmlNode* mFontNode;
+
+    // The OEM customization XML.
+    XmlDocUniquePtr mCustomizationXmlDoc;
 };
 
 struct ASystemFont {
@@ -93,29 +96,30 @@ xmlNode* nextSibling(xmlNode* node, const xmlChar* tag) {
     return nullptr;
 }
 
-void copyFont(ASystemFontIterator* ite, ASystemFont* out) {
+void copyFont(const XmlDocUniquePtr& xmlDoc, xmlNode* fontNode, ASystemFont* out,
+              const std::string& pathPrefix) {
     const xmlChar* LOCALE_ATTR_NAME = BAD_CAST("lang");
     XmlCharUniquePtr filePathStr(
-            xmlNodeListGetString(ite->mXmlDoc.get(), ite->mFontNode->xmlChildrenNode, 1));
-    out->mFilePath = "/system/fonts/" + xmlTrim(
+            xmlNodeListGetString(xmlDoc.get(), fontNode->xmlChildrenNode, 1));
+    out->mFilePath = pathPrefix + xmlTrim(
             std::string(filePathStr.get(), filePathStr.get() + xmlStrlen(filePathStr.get())));
 
     const xmlChar* WEIGHT_ATTR_NAME = BAD_CAST("weight");
-    XmlCharUniquePtr weightStr(xmlGetProp(ite->mFontNode, WEIGHT_ATTR_NAME));
+    XmlCharUniquePtr weightStr(xmlGetProp(fontNode, WEIGHT_ATTR_NAME));
     out->mWeight = weightStr ?
             strtol(reinterpret_cast<const char*>(weightStr.get()), nullptr, 10) : 400;
 
     const xmlChar* STYLE_ATTR_NAME = BAD_CAST("style");
     const xmlChar* ITALIC_ATTR_VALUE = BAD_CAST("italic");
-    XmlCharUniquePtr styleStr(xmlGetProp(ite->mFontNode, STYLE_ATTR_NAME));
+    XmlCharUniquePtr styleStr(xmlGetProp(fontNode, STYLE_ATTR_NAME));
     out->mItalic = styleStr ? xmlStrEqual(styleStr.get(), ITALIC_ATTR_VALUE) : false;
 
     const xmlChar* INDEX_ATTR_NAME = BAD_CAST("index");
-    XmlCharUniquePtr indexStr(xmlGetProp(ite->mFontNode, INDEX_ATTR_NAME));
+    XmlCharUniquePtr indexStr(xmlGetProp(fontNode, INDEX_ATTR_NAME));
     out->mCollectionIndex =  indexStr ?
             strtol(reinterpret_cast<const char*>(indexStr.get()), nullptr, 10) : 0;
 
-    XmlCharUniquePtr localeStr(xmlGetProp(ite->mXmlDoc->parent, LOCALE_ATTR_NAME));
+    XmlCharUniquePtr localeStr(xmlGetProp(xmlDoc->parent, LOCALE_ATTR_NAME));
     out->mLocale.reset(
             localeStr ? new std::string(reinterpret_cast<const char*>(localeStr.get())) : nullptr);
 
@@ -123,7 +127,7 @@ void copyFont(ASystemFontIterator* ite, ASystemFont* out) {
     const xmlChar* STYLEVALUE_ATTR_NAME = BAD_CAST("stylevalue");
     const xmlChar* AXIS_TAG = BAD_CAST("axis");
     out->mAxes.clear();
-    for (xmlNode* axis = firstElement(ite->mFontNode, AXIS_TAG); axis;
+    for (xmlNode* axis = firstElement(fontNode, AXIS_TAG); axis;
             axis = nextSibling(axis, AXIS_TAG)) {
         XmlCharUniquePtr tagStr(xmlGetProp(axis, TAG_ATTR_NAME));
         if (!tagStr || xmlStrlen(tagStr.get()) != 4) {
@@ -154,8 +158,8 @@ bool isFontFileAvailable(const std::string& filePath) {
     return S_ISREG(st.st_mode);
 }
 
-xmlNode* findFirstFontNode(xmlDoc* doc) {
-    xmlNode* familySet = xmlDocGetRootElement(doc);
+xmlNode* findFirstFontNode(const XmlDocUniquePtr& doc) {
+    xmlNode* familySet = xmlDocGetRootElement(doc.get());
     if (familySet == nullptr) {
         return nullptr;
     }
@@ -180,6 +184,7 @@ xmlNode* findFirstFontNode(xmlDoc* doc) {
 ASystemFontIterator* ASystemFontIterator_open() {
     std::unique_ptr<ASystemFontIterator> ite(new ASystemFontIterator());
     ite->mXmlDoc.reset(xmlReadFile("/system/etc/fonts.xml", nullptr, 0));
+    ite->mCustomizationXmlDoc.reset(xmlReadFile("/product/etc/fonts_customization.xml", nullptr, 0));
     return ite.release();
 }
 
@@ -187,45 +192,62 @@ void ASystemFontIterator_close(ASystemFontIterator* ite) {
     delete ite;
 }
 
-ASystemFont* ASystemFontIterator_next(ASystemFontIterator* ite) {
-    LOG_ALWAYS_FATAL_IF(ite == nullptr, "nullptr has passed as iterator argument");
-    if (ite->mFontNode == nullptr) {
-        if (ite->mXmlDoc == nullptr) {
+xmlNode* findNextFontNode(const XmlDocUniquePtr& xmlDoc, xmlNode* fontNode) {
+    if (fontNode == nullptr) {
+        if (!xmlDoc) {
             return nullptr;  // Already at the end.
         } else {
             // First time to query font.
-            ite->mFontNode = findFirstFontNode(ite->mXmlDoc.get());
-            if (ite->mFontNode == nullptr) {
-                ite->mXmlDoc.reset();
-                return nullptr;  // No font node found.
-            }
-            std::unique_ptr<ASystemFont> font = std::make_unique<ASystemFont>();
-            copyFont(ite, font.get());
-            return font.release();
+            return findFirstFontNode(xmlDoc);
         }
     } else {
-        xmlNode* nextNode = nextSibling(ite->mFontNode, FONT_TAG);
+        xmlNode* nextNode = nextSibling(fontNode, FONT_TAG);
         while (nextNode == nullptr) {
-            xmlNode* family = nextSibling(ite->mFontNode->parent, FAMILY_TAG);
+            xmlNode* family = nextSibling(fontNode->parent, FAMILY_TAG);
             if (family == nullptr) {
                 break;
             }
             nextNode = firstElement(family, FONT_TAG);
         }
-        ite->mFontNode = nextNode;
-        if (nextNode == nullptr) {
-            ite->mXmlDoc.reset();
-            return nullptr;
-        }
-
-        std::unique_ptr<ASystemFont> font = std::make_unique<ASystemFont>();
-        copyFont(ite, font.get());
-        if (!isFontFileAvailable(font->mFilePath)) {
-            // fonts.xml intentionally contains missing font configuration. Skip it.
-            return ASystemFontIterator_next(ite);
-        }
-        return font.release();
+        return nextNode;
     }
+}
+
+ASystemFont* ASystemFontIterator_next(ASystemFontIterator* ite) {
+    LOG_ALWAYS_FATAL_IF(ite == nullptr, "nullptr has passed as iterator argument");
+    if (ite->mXmlDoc) {
+        ite->mFontNode = findNextFontNode(ite->mXmlDoc, ite->mFontNode);
+        if (ite->mFontNode == nullptr) {
+            // Reached end of the XML file. Continue OEM customization.
+            ite->mXmlDoc.reset();
+            ite->mFontNode = nullptr;
+        } else {
+            std::unique_ptr<ASystemFont> font = std::make_unique<ASystemFont>();
+            copyFont(ite->mXmlDoc, ite->mFontNode, font.get(), "/system/fonts/");
+            if (!isFontFileAvailable(font->mFilePath)) {
+                return ASystemFontIterator_next(ite);
+            }
+            return font.release();
+        }
+    }
+    if (ite->mCustomizationXmlDoc) {
+        // TODO: Filter only customizationType="new-named-family"
+        ite->mFontNode = findNextFontNode(ite->mCustomizationXmlDoc, ite->mFontNode);
+        if (ite->mFontNode == nullptr) {
+            // Reached end of the XML file. Finishing
+            ite->mCustomizationXmlDoc.reset();
+            ite->mFontNode = nullptr;
+            return nullptr;
+        } else {
+            std::unique_ptr<ASystemFont> font = std::make_unique<ASystemFont>();
+            copyFont(ite->mCustomizationXmlDoc, ite->mFontNode, font.get(), "/product/fonts/");
+            if (!isFontFileAvailable(font->mFilePath)) {
+                return ASystemFontIterator_next(ite);
+            }
+            return font.release();
+        }
+    }
+    return nullptr;
 }
 
 void ASystemFont_close(ASystemFont* font) {
