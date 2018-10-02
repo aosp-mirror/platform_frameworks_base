@@ -1682,6 +1682,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         intent.putExtras(data);
         // Pass the subscription along with the intent.
         intent.putExtra(PhoneConstants.SUBSCRIPTION_KEY, subId);
+        intent.putExtra(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX, subId);
         intent.putExtra(PhoneConstants.SLOT_KEY, phoneId);
         mContext.sendStickyBroadcastAsUser(intent, UserHandle.ALL);
     }
@@ -1736,6 +1737,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         if (subId != SubscriptionManager.INVALID_SUBSCRIPTION_ID) {
             intent.setAction(PhoneConstants.ACTION_SUBSCRIPTION_PHONE_STATE_CHANGED);
             intent.putExtra(PhoneConstants.SUBSCRIPTION_KEY, subId);
+            intent.putExtra(SubscriptionManager.EXTRA_SUBSCRIPTION_INDEX, subId);
         }
         // If the phoneId is invalid, the broadcast is for overall call state.
         if (phoneId != SubscriptionManager.INVALID_PHONE_INDEX) {
