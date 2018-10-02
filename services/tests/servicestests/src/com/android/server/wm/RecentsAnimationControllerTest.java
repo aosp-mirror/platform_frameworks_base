@@ -40,6 +40,7 @@ import android.util.SparseBooleanArray;
 import android.view.IRecentsAnimationRunner;
 import android.view.SurfaceControl;
 
+import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
@@ -114,6 +115,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
     }
 
     @Test
+    @FlakyTest(bugId = 117117823)
     public void testIncludedApps_expectTargetAndVisible() throws Exception {
         sWm.setRecentsAnimationController(mController);
         final AppWindowToken homeAppWindow = createAppWindowToken(mDisplayContent,
