@@ -513,7 +513,7 @@ public class WifiConfiguration implements Parcelable {
     /**
      * @hide
      * Universal name for app creating the configuration
-     *    see {#link {@link PackageManager#getNameForUid(int)}
+     *    see {@link PackageManager#getNameForUid(int)}
      */
     @SystemApi
     public String creatorName;
@@ -521,7 +521,7 @@ public class WifiConfiguration implements Parcelable {
     /**
      * @hide
      * Universal name for app updating the configuration
-     *    see {#link {@link PackageManager#getNameForUid(int)}
+     *    see {@link PackageManager#getNameForUid(int)}
      */
     @SystemApi
     public String lastUpdateName;
