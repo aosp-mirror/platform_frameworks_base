@@ -16,10 +16,6 @@
 
 package com.android.server.pm;
 
-import com.google.android.collect.Sets;
-
-import com.android.internal.util.Preconditions;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
@@ -41,6 +37,10 @@ import android.telephony.SubscriptionManager;
 import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
+
+import com.android.internal.util.Preconditions;
+
+import com.google.android.collect.Sets;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlSerializer;
@@ -77,6 +77,7 @@ public class UserRestrictionsUtils {
             UserManager.DISALLOW_UNINSTALL_APPS,
             UserManager.DISALLOW_SHARE_LOCATION,
             UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES,
+            UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES_GLOBALLY,
             UserManager.DISALLOW_CONFIG_BLUETOOTH,
             UserManager.DISALLOW_BLUETOOTH,
             UserManager.DISALLOW_BLUETOOTH_SHARING,
@@ -211,7 +212,8 @@ public class UserRestrictionsUtils {
      */
     private static final Set<String> PROFILE_GLOBAL_RESTRICTIONS = Sets.newArraySet(
             UserManager.ENSURE_VERIFY_APPS,
-            UserManager.DISALLOW_AIRPLANE_MODE
+            UserManager.DISALLOW_AIRPLANE_MODE,
+            UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES_GLOBALLY
     );
 
     /**
@@ -517,13 +519,18 @@ public class UserRestrictionsUtils {
                                 userId);
                     }
                     break;
+                case UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES_GLOBALLY:
+                    setInstallMarketAppsRestriction(cr, userId, getNewUserRestrictionSetting(
+                            context, userId, UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES,
+                            newValue));
+                    break;
                 case UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES:
                     // Since Android O, the secure setting is not available to be changed by the
                     // user. Hence, when the restriction is cleared, we need to reset the state of
                     // the setting to its default value which is now 1.
-                    android.provider.Settings.Secure.putIntForUser(cr,
-                            android.provider.Settings.Secure.INSTALL_NON_MARKET_APPS,
-                            newValue ? 0 : 1, userId);
+                    setInstallMarketAppsRestriction(cr, userId, getNewUserRestrictionSetting(
+                            context, userId, UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES_GLOBALLY,
+                            newValue));
                     break;
                 case UserManager.DISALLOW_RUN_IN_BACKGROUND:
                     if (newValue) {
@@ -812,5 +819,17 @@ public class UserRestrictionsUtils {
             }
         }
         return false;
+    }
+
+    private static void setInstallMarketAppsRestriction(ContentResolver cr, int userId,
+            int settingValue) {
+        android.provider.Settings.Secure.putIntForUser(
+                cr, android.provider.Settings.Secure.INSTALL_NON_MARKET_APPS, settingValue, userId);
+    }
+
+    private static int getNewUserRestrictionSetting(Context context, int userId,
+                String userRestriction, boolean newValue) {
+        return (newValue || UserManager.get(context).hasUserRestriction(userRestriction,
+                UserHandle.of(userId))) ? 0 : 1;
     }
 }

@@ -23099,7 +23099,9 @@ public class PackageManagerService extends IPackageManager.Stub
                 return false;
             }
         }
-        if (sUserManager.hasUserRestriction(UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES, userId)) {
+        if (sUserManager.hasUserRestriction(UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES, userId)
+                  || sUserManager.hasUserRestriction(
+                        UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES_GLOBALLY, userId)) {
             return false;
         }
         if (mExternalSourcesPolicy != null) {
