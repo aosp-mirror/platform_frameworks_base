@@ -282,25 +282,45 @@ void RenderNode::syncDisplayList(TreeObserver& observer, TreeInfo* info) {
     mStagingDisplayList = nullptr;
     if (mDisplayList) {
         mDisplayList->syncContents();
+        handleForceDark(info);
+    }
+}
 
-        if (CC_UNLIKELY(info && !info->disableForceDark)) {
-            auto usage = usageHint();
-            if (mDisplayList->hasText()) {
-                usage = UsageHint::Foreground;
-            }
-            if (usage == UsageHint::Unknown) {
-                if (mDisplayList->mChildNodes.size() > 1) {
-                    usage = UsageHint::Background;
-                } else if (mDisplayList->mChildNodes.size() == 1 &&
-                           mDisplayList->mChildNodes.front().getRenderNode()->usageHint() !=
-                                   UsageHint::Background) {
-                    usage = UsageHint::Background;
-                }
-            }
-            mDisplayList->mDisplayList.applyColorTransform(
-                    usage == UsageHint::Background ? ColorTransform::Dark : ColorTransform::Light);
+void RenderNode::handleForceDark(android::uirenderer::TreeInfo *info) {
+    if (CC_LIKELY(!info || info->disableForceDark)) {
+        return;
+    }
+    auto usage = usageHint();
+    const auto& children = mDisplayList->mChildNodes;
+    if (mDisplayList->hasText()) {
+        usage = UsageHint::Foreground;
+    }
+    if (usage == UsageHint::Unknown) {
+        if (children.size() > 1) {
+            usage = UsageHint::Background;
+        } else if (children.size() == 1 &&
+                children.front().getRenderNode()->usageHint() !=
+                        UsageHint::Background) {
+            usage = UsageHint::Background;
         }
     }
+    if (children.size() > 1) {
+        // Crude overlap check
+        SkRect drawn = SkRect::MakeEmpty();
+        for (auto iter = children.rbegin(); iter != children.rend(); ++iter) {
+            const auto& child = iter->getRenderNode();
+            // We use stagingProperties here because we haven't yet sync'd the children
+            SkRect bounds = SkRect::MakeXYWH(child->stagingProperties().getX(), child->stagingProperties().getY(),
+                    child->stagingProperties().getWidth(), child->stagingProperties().getHeight());
+            if (bounds.contains(drawn)) {
+                // This contains everything drawn after it, so make it a background
+                child->setUsageHint(UsageHint::Background);
+            }
+            drawn.join(bounds);
+        }
+    }
+    mDisplayList->mDisplayList.applyColorTransform(
+            usage == UsageHint::Background ? ColorTransform::Dark : ColorTransform::Light);
 }
 
 void RenderNode::pushStagingDisplayListChanges(TreeObserver& observer, TreeInfo& info) {

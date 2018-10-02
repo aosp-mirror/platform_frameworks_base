@@ -245,8 +245,9 @@ void SkiaRecordingCanvas::drawNinePatch(Bitmap& bitmap, const Res_png_9patch& ch
     }
     sk_sp<SkColorFilter> colorFilter;
     sk_sp<SkImage> image = bitmap.makeImage(&colorFilter);
-    mRecorder.drawImageLattice(image.get(), lattice, dst,
-                               filterBitmap(std::move(filteredPaint), std::move(colorFilter)));
+    mRecorder.drawImageLattice(image, lattice, dst,
+                               filterBitmap(std::move(filteredPaint), std::move(colorFilter)),
+                               bitmap.palette());
     if (!bitmap.isImmutable() && image.get() && !image->unique() && !dst.isEmpty()) {
         mDisplayList->mMutableImages.push_back(image.get());
     }
