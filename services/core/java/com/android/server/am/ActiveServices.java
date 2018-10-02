@@ -1466,9 +1466,9 @@ public final class ActiveServices {
                     + ") when binding service " + service);
         }
 
-        ActivityRecord activity = null;
+        ActivityServiceConnectionsHolder<ConnectionRecord> activity = null;
         if (token != null) {
-            activity = ActivityRecord.isInStackLocked(token);
+            activity = mAm.mAtmInternal.getServiceConnectionsHolder(token);
             if (activity == null) {
                 Slog.w(TAG, "Binding with unknown activity: " + token);
                 return 0;
@@ -1644,10 +1644,7 @@ public final class ActiveServices {
             clist.add(c);
             b.connections.add(c);
             if (activity != null) {
-                if (activity.connections == null) {
-                    activity.connections = new HashSet<ConnectionRecord>();
-                }
-                activity.connections.add(c);
+                activity.addConnection(c);
             }
             b.client.connections.add(c);
             c.startAssociationIfNeeded();
@@ -2861,8 +2858,8 @@ public final class ActiveServices {
         smap.ensureNotStartingBackgroundLocked(r);
     }
 
-    void removeConnectionLocked(
-        ConnectionRecord c, ProcessRecord skipApp, ActivityRecord skipAct) {
+    void removeConnectionLocked(ConnectionRecord c, ProcessRecord skipApp,
+            ActivityServiceConnectionsHolder skipAct) {
         IBinder binder = c.conn.asBinder();
         AppBindRecord b = c.binding;
         ServiceRecord s = b.service;
@@ -2876,9 +2873,7 @@ public final class ActiveServices {
         b.connections.remove(c);
         c.stopAssociation();
         if (c.activity != null && c.activity != skipAct) {
-            if (c.activity.connections != null) {
-                c.activity.connections.remove(c);
-            }
+            c.activity.removeConnection(c);
         }
         if (b.client != skipApp) {
             b.client.connections.remove(c);

@@ -245,4 +245,6 @@ public abstract class ActivityManagerInternal {
     public abstract ComponentName startServiceInPackage(int uid, Intent service,
             String resolvedType, boolean fgRequired, String callingPackage, int userId)
             throws TransactionTooLargeException;
+
+    public abstract void disconnectActivityFromServices(Object connectionHolder);
 }

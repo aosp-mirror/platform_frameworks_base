@@ -5781,5 +5781,21 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                         resultWho, requestCode, intents, resolvedTypes, flags, bOptions);
             }
         }
+
+        @Override
+        public ActivityServiceConnectionsHolder getServiceConnectionsHolder(IBinder token) {
+            synchronized (mGlobalLock) {
+                final ActivityRecord r = ActivityRecord.isInStackLocked(token);
+                if (r == null) {
+                    return null;
+                }
+                if (r.mServiceConnectionsHolder == null) {
+                    r.mServiceConnectionsHolder = new ActivityServiceConnectionsHolder(
+                            ActivityTaskManagerService.this, r);
+                }
+
+                return r.mServiceConnectionsHolder;
+            }
+        }
     }
 }
