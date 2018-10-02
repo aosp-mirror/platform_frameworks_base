@@ -5657,7 +5657,7 @@ package android.telephony.ims {
     field public static final java.lang.String EXTRA_CODEC = "Codec";
     field public static final java.lang.String EXTRA_DIALSTRING = "dialstring";
     field public static final java.lang.String EXTRA_DISPLAY_TEXT = "DisplayText";
-    field public static final java.lang.String EXTRA_E_CALL = "e_call";
+    field public static final java.lang.String EXTRA_EMERGENCY_CALL = "e_call";
     field public static final java.lang.String EXTRA_IS_CALL_PULL = "CallPull";
     field public static final java.lang.String EXTRA_OI = "oi";
     field public static final java.lang.String EXTRA_OIR = "oir";
