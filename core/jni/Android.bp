@@ -232,6 +232,7 @@ cc_library_shared {
         "libseccomp_policy",
         "libgrallocusage",
         "libscrypt_static",
+        "libstatssocket",
     ],
 
     shared_libs: [

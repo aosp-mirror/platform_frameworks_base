@@ -56,6 +56,7 @@
 #include <utils/String8.h>
 #include <selinux/android.h>
 #include <seccomp_policy.h>
+#include <stats_event_list.h>
 #include <processgroup/processgroup.h>
 
 #include "core_jni_helpers.h"
@@ -853,6 +854,7 @@ static pid_t ForkCommon(JNIEnv* env, jstring java_se_name, bool is_system_server
   // Close any logging related FDs before we start evaluating the list of
   // file descriptors.
   __android_log_close();
+  stats_log_close();
 
   std::string error_msg;
 
