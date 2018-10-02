@@ -53,11 +53,11 @@ struct ConfigDescription : public android::ResTable_config {
   ConfigDescription();
   ConfigDescription(const android::ResTable_config& o);  // NOLINT(implicit)
   ConfigDescription(const ConfigDescription& o);
-  ConfigDescription(ConfigDescription&& o);
+  ConfigDescription(ConfigDescription&& o) noexcept;
 
   ConfigDescription& operator=(const android::ResTable_config& o);
   ConfigDescription& operator=(const ConfigDescription& o);
-  ConfigDescription& operator=(ConfigDescription&& o);
+  ConfigDescription& operator=(ConfigDescription&& o) noexcept;
 
   ConfigDescription CopyWithoutSdkVersion() const;
 
@@ -124,7 +124,7 @@ inline ConfigDescription::ConfigDescription(const ConfigDescription& o) {
   *static_cast<android::ResTable_config*>(this) = o;
 }
 
-inline ConfigDescription::ConfigDescription(ConfigDescription&& o) {
+inline ConfigDescription::ConfigDescription(ConfigDescription&& o) noexcept {
   *this = o;
 }
 
@@ -141,7 +141,7 @@ inline ConfigDescription& ConfigDescription::operator=(
   return *this;
 }
 
-inline ConfigDescription& ConfigDescription::operator=(ConfigDescription&& o) {
+inline ConfigDescription& ConfigDescription::operator=(ConfigDescription&& o) noexcept {
   *this = o;
   return *this;
 }
