@@ -1185,9 +1185,9 @@
         android:priority="700" />
 
     <!-- Required to be able to access the camera device.
-         <p>This will automatically enforce the <a
-         href="{@docRoot}guide/topics/manifest/uses-feature-element.html">
-         <uses-feature>}</a> manifest element for <em>all</em> camera features.
+         <p>This will automatically enforce the
+         <a href="{@docRoot}guide/topics/manifest/uses-feature-element.html">
+         uses-feature</a> manifest element for <em>all</em> camera features.
          If you do not require all camera features or can properly operate if a camera
          is not available, then you must modify your manifest as appropriate in order to
          install on devices that don't support all camera features.</p>

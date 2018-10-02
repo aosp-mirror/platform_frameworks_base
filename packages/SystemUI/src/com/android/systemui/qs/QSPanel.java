@@ -199,7 +199,11 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
 
     public void openDetails(String subPanel) {
         QSTile tile = getTile(subPanel);
-        showDetailAdapter(true, tile.getDetailAdapter(), new int[]{getWidth() / 2, 0});
+        // If there's no tile with that name (as defined in QSFactoryImpl or other QSFactory),
+        // QSFactory will not be able to create a tile and getTile will return null
+        if (tile != null) {
+            showDetailAdapter(true, tile.getDetailAdapter(), new int[]{getWidth() / 2, 0});
+        }
     }
 
     private QSTile getTile(String subPanel) {

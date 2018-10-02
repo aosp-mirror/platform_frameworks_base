@@ -36,8 +36,6 @@ import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Message;
-import android.os.Parcel;
-import android.os.Parcelable;
 import android.os.PersistableBundle;
 import android.os.PowerManager;
 import android.os.Process;
@@ -60,7 +58,6 @@ import com.android.internal.util.Preconditions;
 import dalvik.system.CloseGuard;
 
 import libcore.io.IoBridge;
-import libcore.io.Streams;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -335,19 +332,14 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                     final String msg = "Cannot set AudioAttributes to null";
                     throw new IllegalArgumentException(msg);
                 }
-                Parcel pattributes = Parcel.obtain();
-                attributes.writeToParcel(pattributes, AudioAttributes.FLATTEN_TAGS);
-                setParameter(KEY_PARAMETER_AUDIO_ATTRIBUTES, pattributes);
-                pattributes.recycle();
+                setParameter(KEY_PARAMETER_AUDIO_ATTRIBUTES, attributes);
             }
         });
     }
 
     @Override
     public @NonNull AudioAttributes getAudioAttributes() {
-        Parcel pattributes = getParameter(KEY_PARAMETER_AUDIO_ATTRIBUTES);
-        AudioAttributes attributes = AudioAttributes.CREATOR.createFromParcel(pattributes);
-        pattributes.recycle();
+        AudioAttributes attributes = (AudioAttributes) getParameter(KEY_PARAMETER_AUDIO_ATTRIBUTES);
         return attributes;
     }
 
@@ -1588,9 +1580,9 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
      * @param value value of the parameter to be set.
      * @return true if the parameter is set successfully, false otherwise
      */
-    private native boolean setParameter(int key, Parcel value);
+    private native boolean setParameter(int key, Object value);
 
-    private native Parcel getParameter(int key);
+    private native Object getParameter(int key);
 
 
     /**
@@ -3689,7 +3681,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                       supportedSchemes[i]);
             }
 
-            Log.v(TAG, "DrmInfoImpl() Parcel psshsize: " + pssh.length +
+            Log.v(TAG, "DrmInfoImpl() psshsize: " + pssh.length +
                   " supportedDRMsCount: " + supportedDRMsCount);
         }
 
@@ -3954,7 +3946,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                     connection.setReadTimeout(TIMEOUT_MS);
 
                     connection.connect();
-                    response = Streams.readFully(connection.getInputStream());
+                    response = readInputStreamFully(connection.getInputStream());
 
                     Log.v(TAG, "HandleProvisioninig: Thread run: response " +
                             response.length + " " + response);
@@ -4034,6 +4026,29 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
             finished = true;
         }   // run()
 
+        /**
+         * Returns a byte[] containing the remainder of 'in', closing it when done.
+         */
+        private byte[] readInputStreamFully(InputStream in) throws IOException {
+            try {
+                return readInputStreamFullyNoClose(in);
+            } finally {
+                in.close();
+            }
+        }
+
+        /**
+         * Returns a byte[] containing the remainder of 'in'.
+         */
+        private byte[] readInputStreamFullyNoClose(InputStream in) throws IOException {
+            ByteArrayOutputStream bytes = new ByteArrayOutputStream();
+            byte[] buffer = new byte[1024];
+            int count;
+            while ((count = in.read(buffer)) != -1) {
+                bytes.write(buffer, 0, count);
+            }
+            return bytes.toByteArray();
+        }
     }   // ProvisioningThread
 
     private int HandleProvisioninig(UUID uuid) {

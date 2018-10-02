@@ -34,11 +34,10 @@ import android.util.ArraySet;
 import android.view.View;
 
 import com.android.systemui.R;
-import com.android.systemui.plugins.PluginInstanceManager;
-import com.android.systemui.plugins.PluginManager;
-import com.android.systemui.plugins.PluginPrefs;
+import com.android.systemui.shared.plugins.PluginInstanceManager;
+import com.android.systemui.shared.plugins.PluginManager;
+import com.android.systemui.shared.plugins.PluginPrefs;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
 

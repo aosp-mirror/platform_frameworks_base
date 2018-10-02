@@ -40,7 +40,6 @@ import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemProperties;
-import androidx.annotation.ColorInt;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.SparseArray;
@@ -64,12 +63,11 @@ import com.android.systemui.R;
 import com.android.systemui.RecentsComponent;
 import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.plugins.PluginListener;
-import com.android.systemui.plugins.PluginManager;
+import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.plugins.statusbar.phone.NavGesture;
 import com.android.systemui.plugins.statusbar.phone.NavGesture.GestureHelper;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.recents.RecentsOnboarding;
-import com.android.systemui.shared.recents.IOverviewProxy;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.NavigationBarCompat;
 import com.android.systemui.shared.system.WindowManagerWrapper;
@@ -314,8 +312,8 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
     public void setComponents(NotificationPanelView panel) {
         mPanelView = panel;
-        if (mGestureHelper instanceof NavigationBarGestureHelper) {
-            ((NavigationBarGestureHelper) mGestureHelper).setComponents(this);
+        if (mGestureHelper instanceof QuickStepController) {
+            ((QuickStepController) mGestureHelper).setComponents(this);
         }
     }
 
@@ -1071,7 +1069,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
     @Override
     public void onPluginDisconnected(NavGesture plugin) {
-        NavigationBarGestureHelper defaultHelper = new NavigationBarGestureHelper(getContext());
+        QuickStepController defaultHelper = new QuickStepController(getContext());
         defaultHelper.setComponents(this);
         if (mGestureHelper != null) {
             mGestureHelper.destroy();
@@ -1117,6 +1115,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         pw.println("    }");
 
         mContextualButtonGroup.dump(pw);
+        mGestureHelper.dump(pw);
         mRecentsOnboarding.dump(pw);
     }
 

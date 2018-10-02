@@ -1030,6 +1030,14 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         assertEquals(1, mZenModeHelperSpy.mConditions.mSubscriptions.size());
     }
 
+    @Test
+    public void testEmptyDefaultRulesMap() {
+        ZenModeConfig config = new ZenModeConfig();
+        config.automaticRules = new ArrayMap<>();
+        mZenModeHelperSpy.mConfig = config;
+        mZenModeHelperSpy.updateDefaultZenRules(); // shouldn't throw null pointer
+    }
+
     private void setupZenConfig() {
         mZenModeHelperSpy.mZenMode = Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
         mZenModeHelperSpy.mConfig.allowAlarms = false;

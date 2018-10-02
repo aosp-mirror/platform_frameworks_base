@@ -135,7 +135,8 @@ public final class PermissionsState {
             final int userCount = other.mPermissionReviewRequired.size();
             for (int i = 0; i < userCount; i++) {
                 final boolean reviewRequired = other.mPermissionReviewRequired.valueAt(i);
-                mPermissionReviewRequired.put(i, reviewRequired);
+                mPermissionReviewRequired.put(other.mPermissionReviewRequired.keyAt(i),
+                        reviewRequired);
             }
         }
     }
