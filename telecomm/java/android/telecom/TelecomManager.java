@@ -1905,6 +1905,22 @@ public class TelecomManager {
         return false;
     }
 
+    /**
+     * Handles {@link Intent#ACTION_CALL} intents trampolined from UserCallActivity.
+     * @param intent The {@link Intent#ACTION_CALL} intent to handle.
+     * @hide
+     */
+    public void handleCallIntent(Intent intent) {
+        try {
+            if (isServiceConnected()) {
+                getTelecomService().handleCallIntent(intent);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "RemoteException handleCallIntent: " + e);
+        }
+
+    }
+
     private ITelecomService getTelecomService() {
         if (mTelecomServiceOverride != null) {
             return mTelecomServiceOverride;

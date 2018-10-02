@@ -284,4 +284,9 @@ interface ITelecomService {
      * @see TelecomServiceImpl#isInEmergencyCall
      */
     boolean isInEmergencyCall();
+
+    /**
+     * @see TelecomServiceImpl#handleCallIntent
+     */
+    void handleCallIntent(in Intent intent);
 }
