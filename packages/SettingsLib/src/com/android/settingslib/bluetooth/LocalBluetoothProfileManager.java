@@ -123,6 +123,14 @@ public class LocalBluetoothProfileManager {
 
         ParcelUuid[] uuids = adapter.getUuids();
 
+        List<Integer> supportedList = mLocalAdapter.getSupportedProfiles();
+        if (supportedList.contains(BluetoothProfile.HEARING_AID)) {
+            mHearingAidProfile = new HearingAidProfile(mContext, mLocalAdapter, mDeviceManager,
+                                                       this);
+            addProfile(mHearingAidProfile, HearingAidProfile.NAME,
+                       BluetoothHearingAid.ACTION_CONNECTION_STATE_CHANGED);
+        }
+
         // uuids may be null if Bluetooth is turned off
         if (uuids != null) {
             updateLocalProfiles(uuids);
@@ -159,13 +167,6 @@ public class LocalBluetoothProfileManager {
         addProfile(mPbapProfile, PbapServerProfile.NAME,
              BluetoothPbap.ACTION_CONNECTION_STATE_CHANGED);
 
-        List<Integer> supportedList = mLocalAdapter.getSupportedProfiles();
-        if (supportedList.contains(BluetoothProfile.HEARING_AID)) {
-            mHearingAidProfile = new HearingAidProfile(mContext, mLocalAdapter, mDeviceManager,
-                                                       this);
-            addProfile(mHearingAidProfile, HearingAidProfile.NAME,
-                       BluetoothHearingAid.ACTION_CONNECTION_STATE_CHANGED);
-        }
         if (DEBUG) Log.d(TAG, "LocalBluetoothProfileManager construction complete");
     }
 
