@@ -17,7 +17,6 @@
 package android.telephony;
 
 import static android.content.Context.TELECOM_SERVICE;
-
 import static com.android.internal.util.Preconditions.checkNotNull;
 
 import android.annotation.IntDef;
@@ -67,7 +66,7 @@ import com.android.ims.internal.IImsServiceFeatureCallback;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.telecom.ITelecomService;
 import com.android.internal.telephony.CellNetworkScanResult;
-import com.android.internal.telephony.IAnas;
+import com.android.internal.telephony.IAns;
 import com.android.internal.telephony.IPhoneSubInfo;
 import com.android.internal.telephony.ITelephony;
 import com.android.internal.telephony.ITelephonyRegistry;
@@ -4391,8 +4390,8 @@ public class TelephonyManager {
         return ITelephonyRegistry.Stub.asInterface(ServiceManager.getService("telephony.registry"));
     }
 
-    private IAnas getIAnas() {
-        return IAnas.Stub.asInterface(ServiceManager.getService("ianas"));
+    private IAns getIAns() {
+        return IAns.Stub.asInterface(ServiceManager.getService("ians"));
     }
 
     //
@@ -8579,10 +8578,10 @@ public class TelephonyManager {
     }
 
     /**
-     * Enable or disable AlternativeNetworkAccessService.
+     * Enable or disable AlternativeNetworkService.
      *
      * This method should be called to enable or disable
-     * AlternativeNetworkAccess service on the device.
+     * AlternativeNetwork service on the device.
      *
      * <p>
      * Requires Permission:
@@ -8593,25 +8592,25 @@ public class TelephonyManager {
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
-    public boolean setAlternativeNetworkAccessState(boolean enable) {
+    public boolean setAlternativeNetworkState(boolean enable) {
         String pkgForDebug = mContext != null ? mContext.getOpPackageName() : "<unknown>";
         boolean ret = false;
         try {
-            IAnas iAlternativeAccessService = getIAnas();
-            if (iAlternativeAccessService != null) {
-                ret = iAlternativeAccessService.setEnable(enable, pkgForDebug);
+            IAns iAlternativeNetworkService = getIAns();
+            if (iAlternativeNetworkService != null) {
+                ret = iAlternativeNetworkService.setEnable(enable, pkgForDebug);
             }
         } catch (RemoteException ex) {
-            Rlog.e(TAG, "enableAlternativeNetworkAccess RemoteException", ex);
+            Rlog.e(TAG, "enableAlternativeNetwork RemoteException", ex);
         }
 
         return ret;
     }
 
     /**
-     * is AlternativeNetworkAccessService enabled
+     * is AlternativeNetworkService enabled
      *
-     * This method should be called to determine if the AlternativeNetworkAccessService is
+     * This method should be called to determine if the AlternativeNetworkService is
      * enabled
      *
      * <p>
@@ -8620,17 +8619,17 @@ public class TelephonyManager {
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
-    public boolean isAlternativeNetworkAccessEnabled() {
+    public boolean isAlternativeNetworkEnabled() {
         String pkgForDebug = mContext != null ? mContext.getOpPackageName() : "<unknown>";
         boolean isEnabled = false;
 
         try {
-            IAnas iAlternativeAccessService = getIAnas();
-            if (iAlternativeAccessService != null) {
-                isEnabled = iAlternativeAccessService.isEnabled(pkgForDebug);
+            IAns iAlternativeNetworkService = getIAns();
+            if (iAlternativeNetworkService != null) {
+                isEnabled = iAlternativeNetworkService.isEnabled(pkgForDebug);
             }
         } catch (RemoteException ex) {
-            Rlog.e(TAG, "enableAlternativeNetworkAccess RemoteException", ex);
+            Rlog.e(TAG, "enableAlternativeNetwork RemoteException", ex);
         }
 
         return isEnabled;
