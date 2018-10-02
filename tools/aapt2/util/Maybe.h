@@ -46,7 +46,7 @@ class Maybe {
   template <typename U>
   Maybe(const Maybe<U>& rhs);  // NOLINT(implicit)
 
-  Maybe(Maybe&& rhs);
+  Maybe(Maybe&& rhs) noexcept;
 
   template <typename U>
   Maybe(Maybe<U>&& rhs);  // NOLINT(implicit)
@@ -56,7 +56,7 @@ class Maybe {
   template <typename U>
   Maybe& operator=(const Maybe<U>& rhs);
 
-  Maybe& operator=(Maybe&& rhs);
+  Maybe& operator=(Maybe&& rhs) noexcept;
 
   template <typename U>
   Maybe& operator=(Maybe<U>&& rhs);
@@ -134,7 +134,7 @@ Maybe<T>::Maybe(const Maybe<U>& rhs) : nothing_(rhs.nothing_) {
 }
 
 template <typename T>
-Maybe<T>::Maybe(Maybe&& rhs) : nothing_(rhs.nothing_) {
+Maybe<T>::Maybe(Maybe&& rhs) noexcept : nothing_(rhs.nothing_) {
   if (!rhs.nothing_) {
     rhs.nothing_ = true;
 
@@ -192,7 +192,7 @@ Maybe<T>& Maybe<T>::copy(const Maybe<U>& rhs) {
 }
 
 template <typename T>
-inline Maybe<T>& Maybe<T>::operator=(Maybe&& rhs) {
+inline Maybe<T>& Maybe<T>::operator=(Maybe&& rhs) noexcept {
   // Delegate to the actual assignment.
   return move(std::forward<Maybe<T>>(rhs));
 }
