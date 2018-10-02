@@ -61,6 +61,10 @@ public class GlobalActionsImpl implements GlobalActions, CommandQueue.Callbacks 
     @Override
     public void destroy() {
         SysUiServiceProvider.getComponent(mContext, CommandQueue.class).removeCallbacks(this);
+        if (mGlobalActions != null) {
+            mGlobalActions.destroy();
+            mGlobalActions = null;
+        }
     }
 
     @Override
