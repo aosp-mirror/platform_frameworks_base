@@ -43,7 +43,7 @@ import java.util.Random;
 /**
  * Test class for {@link KernelCpuProcReader}.
  *
- * $ atest FrameworksCoreTests:com.android.internal.os.KernelCpuProcReader
+ * $ atest FrameworksCoreTests:com.android.internal.os.KernelCpuProcReaderTest
  */
 @SmallTest
 @RunWith(AndroidJUnit4.class)
