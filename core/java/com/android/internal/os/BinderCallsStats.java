@@ -436,6 +436,12 @@ public class BinderCallsStats implements BinderInternal.Observer {
     }
 
     public void setSamplingInterval(int samplingInterval) {
+        if (samplingInterval <= 0) {
+            Slog.w(TAG, "Ignored invalid sampling interval (value must be positive): "
+                    + samplingInterval);
+            return;
+        }
+
         synchronized (mLock) {
             if (samplingInterval != mPeriodicSamplingInterval) {
                 mPeriodicSamplingInterval = samplingInterval;
