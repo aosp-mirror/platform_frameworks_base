@@ -1749,7 +1749,7 @@ public class Instrumentation {
     /**
      * Like {@link #execStartActivity(android.content.Context, android.os.IBinder,
      * android.os.IBinder, String, android.content.Intent, int, android.os.Bundle)},
-     * but for calls from a {#link Fragment}.
+     * but for calls from a {@link Fragment}.
      * 
      * @param who The Context from which the activity is being started.
      * @param contextThread The main thread of the Context from which the activity
