@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.app.AppGlobals;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -58,10 +59,11 @@ import java.util.function.Consumer;
  *
  * <p>As of android Q, we only use it for the default SMS app.
  *
- * TODO Unit tests
- * TODO How do we handle force stop??
- * TODO Change OOM adjustment to 200 or so
- * TODO Only allow it when the service is associated with a secondary process.
+ * Relevant tests:
+ * atest CtsAppBindingHostTestCases
+ *
+ * TODO Maybe handle force-stop differently. Right now we just get "binder died" and re-bind
+ * after a timeout. b/116813347
  */
 public class AppBindingService extends Binder {
     public static final String TAG = "AppBindingService";
@@ -91,17 +93,25 @@ public class AppBindingService extends Binder {
         public IPackageManager getIPackageManager() {
             return AppGlobals.getPackageManager();
         }
+
+        public String getGlobalSettingString(ContentResolver resolver, String key) {
+            return Settings.Global.getString(resolver, key);
+        }
     }
 
     /**
      * {@link SystemService} for this service.
      */
-    public static final class Lifecycle extends SystemService {
+    public static class Lifecycle extends SystemService {
         final AppBindingService mService;
 
         public Lifecycle(Context context) {
+            this(context, new Injector());
+        }
+
+        Lifecycle(Context context, Injector injector) {
             super(context);
-            mService = new AppBindingService(new Injector(), context);
+            mService = new AppBindingService(injector, context);
         }
 
         @Override
@@ -171,7 +181,6 @@ public class AppBindingService extends Binder {
         packageFilter.addAction(Intent.ACTION_PACKAGE_ADDED);
         packageFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
         packageFilter.addAction(Intent.ACTION_PACKAGE_CHANGED);
-        packageFilter.addAction(Intent.ACTION_PACKAGE_DATA_CLEARED);
         packageFilter.addDataScheme("package");
 
         packageFilter.setPriority(IntentFilter.SYSTEM_HIGH_PRIORITY);
@@ -197,7 +206,7 @@ public class AppBindingService extends Binder {
     };
 
     private void refreshConstants() {
-        final String newSetting = Settings.Global.getString(
+        final String newSetting = mInjector.getGlobalSettingString(
                 mContext.getContentResolver(), Global.APP_BINDING_CONSTANTS);
 
         synchronized (mLock) {
@@ -215,6 +224,9 @@ public class AppBindingService extends Binder {
     final BroadcastReceiver mPackageUserMonitor = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
+            if (DEBUG) {
+                Slog.d(TAG, "Broadcast received: " + intent);
+            }
             final int userId  = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL);
             if (userId == UserHandle.USER_NULL) {
                 Slog.w(TAG, "Intent broadcast does not contain user handle: " + intent);
@@ -454,14 +466,15 @@ public class AppBindingService extends Binder {
             super(TAG, context, handler, userId, componentName,
                     constants.SERVICE_RECONNECT_BACKOFF_SEC,
                     constants.SERVICE_RECONNECT_BACKOFF_INCREASE,
-                    constants.SERVICE_RECONNECT_MAX_BACKOFF_SEC);
+                    constants.SERVICE_RECONNECT_MAX_BACKOFF_SEC,
+                    constants.SERVICE_STABLE_CONNECTION_THRESHOLD_SEC);
             mFinder = finder;
             mConstants = constants;
         }
 
         @Override
         protected int getBindFlags() {
-            return Context.BIND_FOREGROUND_SERVICE;
+            return mFinder.getBindFlags(mConstants);
         }
 
         @Override
@@ -535,9 +548,21 @@ public class AppBindingService extends Binder {
                 pw.print(conn.isBound() ? "bound" : "not-bound");
                 pw.print(",");
                 pw.print(conn.isConnected() ? "connected" : "not-connected");
+                pw.print(",#con=");
+                pw.print(conn.getNumConnected());
+                pw.print(",#dis=");
+                pw.print(conn.getNumDisconnected());
+                pw.print(",#died=");
+                pw.print(conn.getNumBindingDied());
+                pw.print(",backoff=");
+                pw.print(conn.getNextBackoffMs());
                 pw.println();
             }
             forAllAppsLocked((app) -> app.dumpSimple(pw));
         }
+    }
+
+    AppBindingConstants getConstantsForTest() {
+        return mConstants;
     }
 }

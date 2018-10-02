@@ -66,7 +66,8 @@ public class DeviceAdminServiceController {
             super(TAG, mContext, mHandler, userId, componentName,
                     mConstants.DAS_DIED_SERVICE_RECONNECT_BACKOFF_SEC,
                     mConstants.DAS_DIED_SERVICE_RECONNECT_BACKOFF_INCREASE,
-                    mConstants.DAS_DIED_SERVICE_RECONNECT_MAX_BACKOFF_SEC);
+                    mConstants.DAS_DIED_SERVICE_RECONNECT_MAX_BACKOFF_SEC,
+                    mConstants.DAS_DIED_SERVICE_STABLE_CONNECTION_THRESHOLD_SEC);
         }
 
         @Override

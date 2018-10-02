@@ -24,10 +24,12 @@ import android.content.pm.ServiceInfo;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.IInterface;
+import android.util.Log;
 import android.util.Slog;
 import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.server.appbinding.AppBindingConstants;
 import com.android.server.appbinding.AppBindingService;
 import com.android.server.appbinding.AppBindingUtils;
 
@@ -51,13 +53,13 @@ public abstract class AppServiceFinder<TServiceType, TServiceInterfaceType exten
     private final Object mLock = new Object();
 
     @GuardedBy("mLock")
-    private final SparseArray<String> mTargetPackages = new SparseArray(1);
+    private final SparseArray<String> mTargetPackages = new SparseArray(4);
 
     @GuardedBy("mLock")
-    private final SparseArray<ServiceInfo> mTargetServices = new SparseArray(1);
+    private final SparseArray<ServiceInfo> mTargetServices = new SparseArray(4);
 
     @GuardedBy("mLock")
-    private final SparseArray<String> mLastMessages = new SparseArray(1);
+    private final SparseArray<String> mLastMessages = new SparseArray(4);
 
     public AppServiceFinder(Context context,
             BiConsumer<AppServiceFinder, Integer> listener,
@@ -80,6 +82,7 @@ public abstract class AppServiceFinder<TServiceType, TServiceInterfaceType exten
         synchronized (mLock) {
             mTargetPackages.delete(userId);
             mTargetServices.delete(userId);
+            mLastMessages.delete(userId);
         }
     }
 
@@ -91,6 +94,7 @@ public abstract class AppServiceFinder<TServiceType, TServiceInterfaceType exten
         synchronized (mLock) {
             mTargetPackages.put(userId, null);
             mTargetServices.put(userId, null);
+            mLastMessages.put(userId, null);
 
             final String targetPackage = getTargetPackage(userId);
             if (DEBUG) {
@@ -118,9 +122,16 @@ public abstract class AppServiceFinder<TServiceType, TServiceInterfaceType exten
                 final String message = errorMessage.toString();
                 mLastMessages.put(userId, message);
                 if (DEBUG) {
+                    // This log is optional because findService() already did Log.e().
                     Slog.w(TAG, getAppDescription() + " package " + targetPackage + " u" + userId
                             + " " + message);
                 }
+                return null;
+            }
+            final String error = validateService(service);
+            if (error != null) {
+                mLastMessages.put(userId, error);
+                Log.e(TAG, error);
                 return null;
             }
 
@@ -156,6 +167,17 @@ public abstract class AppServiceFinder<TServiceType, TServiceInterfaceType exten
     @NonNull
     protected abstract String getServicePermission();
 
+    /**
+     * Subclass can implement it to decide whether to accept a service (by returning null) or not
+     * (by returning an error message.)
+     */
+    protected String validateService(ServiceInfo service) {
+        return null;
+    }
+
+    /** Return the bind flags for this service. */
+    public abstract int getBindFlags(AppBindingConstants constants);
+
     /** Dumpsys support. */
     public void dump(String prefix, PrintWriter pw) {
         pw.print(prefix);
@@ -165,24 +187,25 @@ public abstract class AppServiceFinder<TServiceType, TServiceInterfaceType exten
 
         synchronized (mLock) {
             for (int i = 0; i < mTargetPackages.size(); i++) {
+                final int userId = mTargetPackages.keyAt(i);
                 pw.print(prefix);
                 pw.print("  User: ");
-                pw.print(mTargetPackages.keyAt(i));
+                pw.print(userId);
                 pw.println();
 
                 pw.print(prefix);
                 pw.print("    Package: ");
-                pw.print(mTargetPackages.valueAt(i));
+                pw.print(mTargetPackages.get(userId));
                 pw.println();
 
                 pw.print(prefix);
                 pw.print("    Service: ");
-                pw.print(mTargetServices.valueAt(i));
+                pw.print(mTargetServices.get(userId));
                 pw.println();
 
                 pw.print(prefix);
                 pw.print("    Message: ");
-                pw.print(mLastMessages.valueAt(i));
+                pw.print(mLastMessages.get(userId));
                 pw.println();
             }
         }
@@ -192,16 +215,17 @@ public abstract class AppServiceFinder<TServiceType, TServiceInterfaceType exten
     public void dumpSimple(PrintWriter pw) {
         synchronized (mLock) {
             for (int i = 0; i < mTargetPackages.size(); i++) {
+                final int userId = mTargetPackages.keyAt(i);
                 pw.print("finder,");
                 pw.print(getAppDescription());
                 pw.print(",");
-                pw.print(mTargetPackages.keyAt(i)); // User-id
+                pw.print(userId);
                 pw.print(",");
-                pw.print(mTargetPackages.valueAt(i));
+                pw.print(mTargetPackages.get(userId));
                 pw.print(",");
-                pw.print(mTargetServices.valueAt(i));
+                pw.print(mTargetServices.get(userId));
                 pw.print(",");
-                pw.print(mLastMessages.valueAt(i));
+                pw.print(mLastMessages.get(userId));
                 pw.println();
             }
         }

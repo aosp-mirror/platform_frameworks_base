@@ -15,6 +15,7 @@
  */
 package com.android.server.appbinding;
 
+import android.content.Context;
 import android.util.KeyValueListParser;
 import android.util.Slog;
 
@@ -24,7 +25,7 @@ import java.util.concurrent.TimeUnit;
 /**
  * Constants that are configurable via the global settings for {@link AppBindingService}.
  */
-class AppBindingConstants {
+public class AppBindingConstants {
     private static final String TAG = AppBindingService.TAG;
 
     private static final String SERVICE_RECONNECT_BACKOFF_SEC_KEY =
@@ -35,6 +36,12 @@ class AppBindingConstants {
 
     private static final String SERVICE_RECONNECT_MAX_BACKOFF_SEC_KEY =
             "service_reconnect_max_backoff_sec";
+
+    private static final String SERVICE_STABLE_CONNECTION_THRESHOLD_SEC_KEY =
+            "service_stable_connection_threshold_sec";
+
+    private static final String SMS_APP_BIND_FLAGS_KEY =
+            "sms_app_bind_flags";
 
     public final String sourceSettings;
 
@@ -54,6 +61,16 @@ class AppBindingConstants {
      */
     public final long SERVICE_RECONNECT_MAX_BACKOFF_SEC;
 
+    /**
+     * If a connection lasts more than this duration, we reset the re-connect back-off time.
+     */
+    public final long SERVICE_STABLE_CONNECTION_THRESHOLD_SEC;
+
+    /**
+     * Extra binding flags for SMS service.
+     */
+    public final int SMS_APP_BIND_FLAGS;
+
     private AppBindingConstants(String settings) {
         sourceSettings = settings;
 
@@ -67,13 +84,20 @@ class AppBindingConstants {
         }
 
         long serviceReconnectBackoffSec = parser.getLong(
-                SERVICE_RECONNECT_BACKOFF_SEC_KEY, TimeUnit.HOURS.toSeconds(1));
+                SERVICE_RECONNECT_BACKOFF_SEC_KEY, 10);
 
         double serviceReconnectBackoffIncrease = parser.getFloat(
                 SERVICE_RECONNECT_BACKOFF_INCREASE_KEY, 2f);
 
         long serviceReconnectMaxBackoffSec = parser.getLong(
-                SERVICE_RECONNECT_MAX_BACKOFF_SEC_KEY, TimeUnit.DAYS.toSeconds(1));
+                SERVICE_RECONNECT_MAX_BACKOFF_SEC_KEY, TimeUnit.HOURS.toSeconds(1));
+
+        int smsAppBindFlags = parser.getInt(
+                SMS_APP_BIND_FLAGS_KEY,
+                Context.BIND_NOT_VISIBLE | Context.BIND_FOREGROUND_SERVICE);
+
+        long serviceStableConnectionThresholdSec = parser.getLong(
+                SERVICE_STABLE_CONNECTION_THRESHOLD_SEC_KEY, TimeUnit.MINUTES.toSeconds(2));
 
         // Set minimum: 5 seconds.
         serviceReconnectBackoffSec = Math.max(5, serviceReconnectBackoffSec);
@@ -89,6 +113,8 @@ class AppBindingConstants {
         SERVICE_RECONNECT_BACKOFF_SEC = serviceReconnectBackoffSec;
         SERVICE_RECONNECT_BACKOFF_INCREASE = serviceReconnectBackoffIncrease;
         SERVICE_RECONNECT_MAX_BACKOFF_SEC = serviceReconnectMaxBackoffSec;
+        SERVICE_STABLE_CONNECTION_THRESHOLD_SEC = serviceStableConnectionThresholdSec;
+        SMS_APP_BIND_FLAGS = smsAppBindFlags;
     }
 
     /**
@@ -116,5 +142,13 @@ class AppBindingConstants {
         pw.print(prefix);
         pw.print("  SERVICE_RECONNECT_MAX_BACKOFF_SEC: ");
         pw.println(SERVICE_RECONNECT_MAX_BACKOFF_SEC);
+
+        pw.print(prefix);
+        pw.print("  SERVICE_STABLE_CONNECTION_THRESHOLD_SEC: ");
+        pw.println(SERVICE_STABLE_CONNECTION_THRESHOLD_SEC);
+
+        pw.print(prefix);
+        pw.print("  SMS_APP_BIND_FLAGS: 0x");
+        pw.println(Integer.toHexString(SMS_APP_BIND_FLAGS));
     }
 }

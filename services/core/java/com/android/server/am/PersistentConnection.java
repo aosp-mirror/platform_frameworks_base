@@ -59,6 +59,8 @@ import java.io.PrintWriter;
  * know what to do when the service component has gone missing, for example.  If the user of this
  * class wants to restore the connection, then it should call {@link #unbind()} and {@link #bind}
  * explicitly.
+ *
+ * atest ${ANDROID_BUILD_TOP}/frameworks/base/services/tests/mockingservicestests/src/com/android/server/am/PersistentConnectionTest.java
  */
 public abstract class PersistentConnection<T> {
     private final Object mLock = new Object();
@@ -76,6 +78,7 @@ public abstract class PersistentConnection<T> {
     private final long mRebindBackoffMs;
     private final double mRebindBackoffIncrease;
     private final long mRebindMaxBackoffMs;
+    private final long mResetBackoffDelay;
 
     private long mReconnectTime;
 
@@ -109,6 +112,9 @@ public abstract class PersistentConnection<T> {
     @GuardedBy("mLock")
     private int mNumBindingDied;
 
+    @GuardedBy("mLock")
+    private long mLastConnectedTime;
+
     private final ServiceConnection mServiceConnection = new ServiceConnection() {
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
@@ -127,7 +133,10 @@ public abstract class PersistentConnection<T> {
                 mNumConnected++;
 
                 mIsConnected = true;
+                mLastConnectedTime = injectUptimeMillis();
                 mService = asInterface(service);
+
+                scheduleStableCheckLocked();
             }
         }
 
@@ -140,6 +149,9 @@ public abstract class PersistentConnection<T> {
                 mNumDisconnected++;
 
                 cleanUpConnectionLocked();
+
+                // Note we won't increase the rebind timeout here, because we don't explicitly
+                // rebind in this case.
             }
         }
 
@@ -168,7 +180,8 @@ public abstract class PersistentConnection<T> {
 
     public PersistentConnection(@NonNull String tag, @NonNull Context context,
             @NonNull Handler handler, int userId, @NonNull ComponentName componentName,
-            long rebindBackoffSeconds, double rebindBackoffIncrease, long rebindMaxBackoffSeconds) {
+            long rebindBackoffSeconds, double rebindBackoffIncrease, long rebindMaxBackoffSeconds,
+            long resetBackoffDelay) {
         mTag = tag;
         mContext = context;
         mHandler = handler;
@@ -178,6 +191,7 @@ public abstract class PersistentConnection<T> {
         mRebindBackoffMs = rebindBackoffSeconds * 1000;
         mRebindBackoffIncrease = rebindBackoffIncrease;
         mRebindMaxBackoffMs = rebindMaxBackoffSeconds * 1000;
+        mResetBackoffDelay = resetBackoffDelay * 1000;
 
         mNextBackoffMs = mRebindBackoffMs;
     }
@@ -242,6 +256,42 @@ public abstract class PersistentConnection<T> {
         }
     }
 
+    /** Return the next back-off time */
+    public long getNextBackoffMs() {
+        synchronized (mLock) {
+            return mNextBackoffMs;
+        }
+    }
+
+    /** Return the number of times the connected callback called. */
+    public int getNumConnected() {
+        synchronized (mLock) {
+            return mNumConnected;
+        }
+    }
+
+    /** Return the number of times the disconnected callback called. */
+    public int getNumDisconnected() {
+        synchronized (mLock) {
+            return mNumDisconnected;
+        }
+    }
+
+    /** Return the number of times the binding died callback called. */
+    public int getNumBindingDied() {
+        synchronized (mLock) {
+            return mNumBindingDied;
+        }
+    }
+
+    @GuardedBy("mLock")
+    private void resetBackoffLocked() {
+        if (mNextBackoffMs != mRebindBackoffMs) {
+            mNextBackoffMs = mRebindBackoffMs;
+            Log.i(mTag, "Backoff reset to " + mNextBackoffMs);
+        }
+    }
+
     @GuardedBy("mLock")
     public final void bindInnerLocked(boolean resetBackoff) {
         unscheduleRebindLocked();
@@ -251,9 +301,10 @@ public abstract class PersistentConnection<T> {
         }
         mBound = true;
 
+        unscheduleStableCheckLocked();
+
         if (resetBackoff) {
-            // Note this is the only place we reset the backoff time.
-            mNextBackoffMs = mRebindBackoffMs;
+            resetBackoffLocked();
         }
 
         final Intent service = new Intent().setComponent(mComponentName);
@@ -287,6 +338,8 @@ public abstract class PersistentConnection<T> {
     private void cleanUpConnectionLocked() {
         mIsConnected = false;
         mService = null;
+
+        unscheduleStableCheckLocked();
     }
 
     /**
@@ -297,6 +350,7 @@ public abstract class PersistentConnection<T> {
             mShouldBeBound = false;
 
             unbindLocked();
+            unscheduleStableCheckLocked();
         }
     }
 
@@ -338,6 +392,33 @@ public abstract class PersistentConnection<T> {
         }
     }
 
+    private final Runnable mStableCheck = this::stableConnectionCheck;
+
+    private void stableConnectionCheck() {
+        synchronized (mLock) {
+            final long now = injectUptimeMillis();
+            final long timeRemaining = (mLastConnectedTime + mResetBackoffDelay) - now;
+            if (DEBUG) {
+                Log.d(mTag, "stableConnectionCheck: bound=" + mBound + " connected=" + mIsConnected
+                        + " remaining=" + timeRemaining);
+            }
+            if (mBound && mIsConnected && timeRemaining <= 0) {
+                resetBackoffLocked();
+            }
+        }
+    }
+
+    @GuardedBy("mLock")
+    private void unscheduleStableCheckLocked() {
+        injectRemoveCallbacks(mStableCheck);
+    }
+
+    @GuardedBy("mLock")
+    private void scheduleStableCheckLocked() {
+        unscheduleStableCheckLocked();
+        injectPostAtTime(mStableCheck, injectUptimeMillis() + mResetBackoffDelay);
+    }
+
     /** Must be implemented by a subclass to convert an {@link IBinder} to a stub. */
     protected abstract T asInterface(IBinder binder);
 
@@ -367,6 +448,10 @@ public abstract class PersistentConnection<T> {
             pw.print(mNumDisconnected);
             pw.print("  Died: ");
             pw.print(mNumBindingDied);
+            if (mIsConnected) {
+                pw.print("  Duration: ");
+                TimeUtils.formatDuration((injectUptimeMillis() - mLastConnectedTime), pw);
+            }
             pw.println();
         }
     }
@@ -404,6 +489,11 @@ public abstract class PersistentConnection<T> {
     @VisibleForTesting
     Runnable getBindForBackoffRunnableForTest() {
         return mBindForBackoffRunnable;
+    }
+
+    @VisibleForTesting
+    Runnable getStableCheckRunnableForTest() {
+        return mStableCheck;
     }
 
     @VisibleForTesting
