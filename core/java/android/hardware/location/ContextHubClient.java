@@ -18,6 +18,7 @@ package android.hardware.location;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
+import android.app.PendingIntent;
 import android.os.RemoteException;
 
 import com.android.internal.util.Preconditions;
@@ -97,6 +98,57 @@ public class ContextHubClient implements Closeable {
                 throw e.rethrowFromSystemServer();
             }
         }
+    }
+
+    /**
+     * Registers to receive persistent intents for a given nanoapp.
+     *
+     * This method should be used if the caller wants to receive notifications even after the
+     * process exits. The client must have an open connection with the Context Hub Service (i.e. it
+     * cannot have been closed through the {@link #close()} method). If registered successfully,
+     * intents will be delivered regarding events for the specified nanoapp from the attached
+     * Context Hub. Any unicast messages for this client will also be delivered. The intent will
+     * have an extra {@link #EXTRA_EVENT_TYPE} of type {@link ContextHubManager.Event}, which will
+     * contain the type of the event. See {@link ContextHubManager.Event} for description of each
+     * event type.
+     *
+     * When the intent is received, this client can be recreated through
+     * {@link ContextHubManager.createClient(PendingIntent, ContextHubInfo,
+     * ContextHubClientCallback, Exectutor)}. When recreated, the client can be treated as the
+     * same endpoint entity from a nanoapp's perspective, and can be continued to be used to send
+     * messages even if the original process has exited.
+     *
+     * Intents will be delivered until it is unregistered through
+     * {@link #unregisterIntent(PendingIntent)}. Note that the registration of this client will
+     * continued to be maintained at the Context Hub Service until
+     * {@link #unregisterIntent(PendingIntent)} is called for registered intents.
+     *
+     * See {@link ContextHubBroadcastReceiver} for a helper class to generate the
+     * {@link PendingIntent} through a {@link BroadcastReceiver}, and maps an {@link Intent} to a
+     * {@link ContextHubClientCallback}.
+     *
+     * @param intent    The PendingIntent to register for this client
+     * @param nanoAppId the unique ID of the nanoapp to receive events for
+     * @return true on success, false otherwise
+     *
+     * @hide
+     */
+    public boolean registerIntent(@NonNull PendingIntent intent, long nanoAppId) {
+        // TODO: Implement this
+        return false;
+    }
+
+    /**
+     * Unregisters an intent previously registered via {@link #registerIntent(PendingIntent, long)}.
+     * If this intent has not been registered for this client, this method returns false.
+     *
+     * @return true on success, false otherwise
+     *
+     * @hide
+     */
+    public boolean unregisterIntent(@NonNull PendingIntent intent) {
+        // TODO: Implement this
+        return false;
     }
 
     /**
