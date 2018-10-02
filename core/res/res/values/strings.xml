@@ -1185,6 +1185,15 @@
     <string name="permdesc_manageOwnCalls">Allows the app to route its calls through the system in
         order to improve the calling experience.</string>
 
+    <!-- Title of an application permission. When granted the app is allowed to be enabled as
+        a companion app. [CHAR LIMIT=NONE]-->
+    <string name="permlab_callCompanionApp">see and control calls through the system.</string>
+    <!-- Description of an application permission. When granted the app is allowed to be enabled as
+        a companion app. [CHAR LIMIT=NONE]-->
+    <string name="permdesc_callCompanionApp">Allows the app to see and control ongoing calls on the
+        device. This includes information such as call numbers for calls and the state of the
+        calls.</string>
+
     <!-- Title of an application permission.  When granted the user is giving access to a third
          party app to continue a call which originated in another app.  For example, the user
          could be in a voice call over their carrier's mobile network, and a third party video

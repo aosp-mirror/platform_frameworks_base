@@ -33,7 +33,6 @@ import android.os.Build;
 import android.os.Bundle;
 import android.os.RemoteException;
 import android.os.ServiceManager;
-import android.os.UserHandle;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
@@ -45,7 +44,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.concurrent.Executor;
 
 /**
  * Provides access to information about active calls and registration/call-management functionality.
@@ -477,6 +475,12 @@ public class TelecomManager {
             "android.telecom.extra.START_CALL_WITH_RTT";
 
     /**
+     * A boolean extra set to indicate whether an app is eligible to be bound to when there are
+     * ongoing calls on the device.
+     */
+    public static final String EXTRA_IS_ENABLED = "android.telecom.extra.IS_ENABLED";
+
+    /**
      * A boolean meta-data value indicating whether an {@link InCallService} implements an
      * in-call user interface. Dialer implementations (see {@link #getDefaultDialerPackage()}) which
      * would also like to replace the in-call interface should set this meta-data to {@code true} in
@@ -487,9 +491,7 @@ public class TelecomManager {
     /**
      * A boolean meta-data value indicating whether an {@link InCallService} implements an
      * in-call user interface to be used while the device is in car-mode (see
-     * {@link android.content.res.Configuration.UI_MODE_TYPE_CAR}).
-     *
-     * @hide
+     * {@link android.content.res.Configuration#UI_MODE_TYPE_CAR}).
      */
     public static final String METADATA_IN_CALL_SERVICE_CAR_MODE_UI =
             "android.telecom.IN_CALL_SERVICE_CAR_MODE_UI";
@@ -2041,7 +2043,6 @@ public class TelecomManager {
         } catch (RemoteException e) {
             Log.e(TAG, "RemoteException handleCallIntent: " + e);
         }
-
     }
 
     private ITelecomService getTelecomService() {
