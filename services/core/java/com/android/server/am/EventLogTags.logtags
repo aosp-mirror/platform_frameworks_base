@@ -87,9 +87,6 @@ option java_package com.android.server.am
 # User switched
 30041 am_switch_user (id|1|5)
 
-# Activity fully drawn time
-30042 am_activity_fully_drawn_time (User|1|5),(Token|1|5),(Component Name|3),(time|2|3)
-
 # Activity set to resumed
 30043 am_set_resumed_activity (User|1|5),(Component Name|3),(Reason|3)
 
