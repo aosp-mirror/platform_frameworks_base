@@ -887,7 +887,7 @@ public class TrampolineTest {
         }
 
         @Override
-        protected BackupManagerServiceInterface createBackupManagerService() {
+        protected BackupManagerService createBackupManagerService() {
             mCreateServiceCallsCount++;
             return sBackupManagerServiceMock;
         }

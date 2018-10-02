@@ -159,7 +159,7 @@ import java.util.Set;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.atomic.AtomicInteger;
 
-public class BackupManagerService implements BackupManagerServiceInterface {
+public class BackupManagerService {
 
     public static final String TAG = "BackupManagerService";
     public static final boolean DEBUG = true;
@@ -701,7 +701,6 @@ public class BackupManagerService implements BackupManagerServiceInterface {
     // Utility: build a new random integer token. The low bits are the ordinal of the
     // operation for near-time uniqueness, and the upper bits are random for app-
     // side unpredictability.
-    @Override
     public int generateRandomIntegerToken() {
         int token = mTokenGenerator.nextInt();
         if (token < 0) token = -token;
@@ -1108,12 +1107,10 @@ public class BackupManagerService implements BackupManagerServiceInterface {
         return array;
     }
 
-    @Override
     public boolean setBackupPassword(String currentPw, String newPw) {
         return mBackupPasswordManager.setBackupPassword(currentPw, newPw);
     }
 
-    @Override
     public boolean hasBackupPassword() {
         return mBackupPasswordManager.hasBackupPassword();
     }
@@ -1590,7 +1587,6 @@ public class BackupManagerService implements BackupManagerServiceInterface {
 
     // Get the restore-set token for the best-available restore set for this package:
     // the active set if possible, else the ancestral one.  Returns zero if none available.
-    @Override
     public long getAvailableRestoreToken(String packageName) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
                 "getAvailableRestoreToken");
@@ -1608,12 +1604,10 @@ public class BackupManagerService implements BackupManagerServiceInterface {
         return token;
     }
 
-    @Override
     public int requestBackup(String[] packages, IBackupObserver observer, int flags) {
         return requestBackup(packages, observer, null, flags);
     }
 
-    @Override
     public int requestBackup(String[] packages, IBackupObserver observer,
             IBackupManagerMonitor monitor, int flags) {
         mContext.enforceCallingPermission(android.Manifest.permission.BACKUP, "requestBackup");
@@ -1702,7 +1696,6 @@ public class BackupManagerService implements BackupManagerServiceInterface {
     }
 
     // Cancel all running backups.
-    @Override
     public void cancelBackups() {
         mContext.enforceCallingPermission(android.Manifest.permission.BACKUP, "cancelBackups");
         if (MORE_DEBUG) {
@@ -1732,7 +1725,6 @@ public class BackupManagerService implements BackupManagerServiceInterface {
         }
     }
 
-    @Override
     public void prepareOperationTimeout(int token, long interval, BackupRestoreTask callback,
             int operationType) {
         if (operationType != OP_TYPE_BACKUP_WAIT && operationType != OP_TYPE_RESTORE_WAIT) {
@@ -1790,7 +1782,6 @@ public class BackupManagerService implements BackupManagerServiceInterface {
     }
 
     // synchronous waiter case
-    @Override
     public boolean waitUntilOperationComplete(int token) {
         if (MORE_DEBUG) {
             Slog.i(TAG, "Blocking until operation complete for "
@@ -1895,7 +1886,6 @@ public class BackupManagerService implements BackupManagerServiceInterface {
     }
 
 
-    @Override
     public void tearDownAgentAndKill(ApplicationInfo app) {
         if (app == null) {
             // Null means the system package, so just quietly move on.  :)
@@ -2049,7 +2039,6 @@ public class BackupManagerService implements BackupManagerServiceInterface {
      * @return Whether ongoing work will continue.  The return value here will be passed
      * along as the return value to the scheduled job's onStartJob() callback.
      */
-    @Override
     public boolean beginFullBackup(FullBackupJob scheduledJob) {
         final long now = System.currentTimeMillis();
         final long fullBackupInterval;
@@ -2224,7 +2213,6 @@ public class BackupManagerService implements BackupManagerServiceInterface {
 
     // The job scheduler says our constraints don't hold any more,
     // so tear down any ongoing backup task right away.
-    @Override
     public void endFullBackup() {
         // offload the mRunningFullBackupTask.handleCancel() call to another thread,
         // as we might have to wait for mCancelLock
@@ -2331,7 +2319,6 @@ public class BackupManagerService implements BackupManagerServiceInterface {
 
     // ----- IBackupManager binder interface -----
 
-    @Override
     public void dataChanged(final String packageName) {
         final int callingUserHandle = UserHandle.getCallingUserId();
         if (callingUserHandle != UserHandle.USER_SYSTEM) {
@@ -2362,7 +2349,6 @@ public class BackupManagerService implements BackupManagerServiceInterface {
     }
 
     // Run an initialize operation for the given transport
-    @Override
     public void initializeTransports(String[] transportNames, IBackupObserver observer) {
         mContext.enforceCallingPermission(android.Manifest.permission.BACKUP,
                 "initializeTransport");
@@ -2382,7 +2368,6 @@ public class BackupManagerService implements BackupManagerServiceInterface {
     }
 
     // Clear the given package's backup data from the current transport
-    @Override
     public void clearBackupData(String transportName, String packageName) {
         if (DEBUG) Slog.v(TAG, "clearBackupData() of " + packageName + " on " + transportName);
         PackageInfo info;
@@ -2438,7 +2423,6 @@ public class BackupManagerService implements BackupManagerServiceInterface {
 
     // Run a backup pass immediately for any applications that have declared
     // that they have pending updates.
-    @Override
     public void backupNow() {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP, "backupNow");
 
@@ -2480,7 +2464,6 @@ public class BackupManagerService implements BackupManagerServiceInterface {
     //
     // This is the variant used by 'adb backup'; it requires on-screen confirmation
     // by the user because it can be used to offload data over untrusted USB.
-    @Override
     public void adbBackup(ParcelFileDescriptor fd, boolean includeApks, boolean includeObbs,
             boolean includeShared, boolean doWidgets, boolean doAllApps, boolean includeSystem,
             boolean compress, boolean doKeyValue, String[] pkgList) {
@@ -2558,7 +2541,6 @@ public class BackupManagerService implements BackupManagerServiceInterface {
         }
     }
 
-    @Override
     public void fullTransportBackup(String[] pkgNames) {
         mContext.enforceCallingPermission(android.Manifest.permission.BACKUP,
                 "fullTransportBackup");
@@ -2618,7 +2600,6 @@ public class BackupManagerService implements BackupManagerServiceInterface {
         }
     }
 
-    @Override
     public void adbRestore(ParcelFileDescriptor fd) {
         mContext.enforceCallingPermission(android.Manifest.permission.BACKUP, "adbRestore");
 
@@ -2719,7 +2700,6 @@ public class BackupManagerService implements BackupManagerServiceInterface {
 
     // Confirm that the previously-requested full backup/restore operation can proceed.  This
     // is used to require a user-facing disclosure about the operation.
-    @Override
     public void acknowledgeAdbBackupOrRestore(int token, boolean allow,
             String curPassword, String encPpassword, IFullBackupRestoreObserver observer) {
         if (DEBUG) {
@@ -2819,7 +2799,6 @@ public class BackupManagerService implements BackupManagerServiceInterface {
     }
 
     // Enable/disable backups
-    @Override
     public void setBackupEnabled(boolean enable) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
                 "setBackupEnabled");
@@ -2887,7 +2866,6 @@ public class BackupManagerService implements BackupManagerServiceInterface {
     }
 
     // Enable/disable automatic restore of app data at install time
-    @Override
     public void setAutoRestore(boolean doAutoRestore) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
                 "setAutoRestore");
@@ -2907,7 +2885,6 @@ public class BackupManagerService implements BackupManagerServiceInterface {
     }
 
     // Mark the backup service as having been provisioned
-    @Override
     public void setBackupProvisioned(boolean available) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
                 "setBackupProvisioned");
@@ -2917,7 +2894,6 @@ public class BackupManagerService implements BackupManagerServiceInterface {
     }
 
     // Report whether the backup mechanism is currently enabled
-    @Override
     public boolean isBackupEnabled() {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
                 "isBackupEnabled");
@@ -2925,7 +2901,6 @@ public class BackupManagerService implements BackupManagerServiceInterface {
     }
 
     // Report the name of the currently active transport
-    @Override
     public String getCurrentTransport() {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
                 "getCurrentTransport");
@@ -2938,7 +2913,6 @@ public class BackupManagerService implements BackupManagerServiceInterface {
      * Returns the {@link ComponentName} of the host service of the selected transport or {@code
      * null} if no transport selected or if the transport selected is not registered.
      */
-    @Override
     @Nullable
     public ComponentName getCurrentTransportComponent() {
         mContext.enforceCallingOrSelfPermission(
@@ -2954,7 +2928,6 @@ public class BackupManagerService implements BackupManagerServiceInterface {
     }
 
     // Report all known, available backup transports
-    @Override
     public String[] listAllTransports() {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
                 "listAllTransports");
@@ -2962,14 +2935,12 @@ public class BackupManagerService implements BackupManagerServiceInterface {
         return mTransportManager.getRegisteredTransportNames();
     }
 
-    @Override
     public ComponentName[] listAllTransportComponents() {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
                 "listAllTransportComponents");
         return mTransportManager.getRegisteredTransportComponents();
     }
 
-    @Override
     public String[] getTransportWhitelist() {
         // No permission check, intentionally.
         Set<ComponentName> whitelistedComponents = mTransportManager.getTransportWhitelist();
@@ -3006,7 +2977,6 @@ public class BackupManagerService implements BackupManagerServiceInterface {
      * @throws SecurityException If the UID of the calling process differs from the package UID of
      *     {@code transportComponent} or if the caller does NOT have BACKUP permission.
      */
-    @Override
     public void updateTransportAttributes(
             ComponentName transportComponent,
             String name,
@@ -3070,7 +3040,6 @@ public class BackupManagerService implements BackupManagerServiceInterface {
     }
 
     /** Selects transport {@code transportName} and returns previous selected transport. */
-    @Override
     @Deprecated
     @Nullable
     public String selectBackupTransport(String transportName) {
@@ -3089,7 +3058,6 @@ public class BackupManagerService implements BackupManagerServiceInterface {
         }
     }
 
-    @Override
     public void selectBackupTransportAsync(
             ComponentName transportComponent, ISelectBackupTransportCallback listener) {
         mContext.enforceCallingOrSelfPermission(
@@ -3161,7 +3129,6 @@ public class BackupManagerService implements BackupManagerServiceInterface {
     // Supply the configuration Intent for the given transport.  If the name is not one
     // of the available transports, or if the transport does not supply any configuration
     // UI, the method returns null.
-    @Override
     public Intent getConfigurationIntent(String transportName) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
                 "getConfigurationIntent");
@@ -3186,7 +3153,6 @@ public class BackupManagerService implements BackupManagerServiceInterface {
      * @param transportName The name of the registered transport.
      * @return The current destination string or null if the transport is not registered.
      */
-    @Override
     public String getDestinationString(String transportName) {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.BACKUP, "getDestinationString");
@@ -3204,7 +3170,6 @@ public class BackupManagerService implements BackupManagerServiceInterface {
     }
 
     // Supply the manage-data intent for the given transport.
-    @Override
     public Intent getDataManagementIntent(String transportName) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
                 "getDataManagementIntent");
@@ -3223,7 +3188,6 @@ public class BackupManagerService implements BackupManagerServiceInterface {
 
     // Supply the menu label for affordances that fire the manage-data intent
     // for the given transport.
-    @Override
     public String getDataManagementLabel(String transportName) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.BACKUP,
                 "getDataManagementLabel");
@@ -3242,7 +3206,6 @@ public class BackupManagerService implements BackupManagerServiceInterface {
 
     // Callback: a requested backup agent has been instantiated.  This should only
     // be called from the Activity Manager.
-    @Override
     public void agentConnected(String packageName, IBinder agentBinder) {
         synchronized (mAgentConnectLock) {
             if (Binder.getCallingUid() == Process.SYSTEM_UID) {
@@ -3261,7 +3224,6 @@ public class BackupManagerService implements BackupManagerServiceInterface {
     // Callback: a backup agent has failed to come up, or has unexpectedly quit.
     // If the agent failed to come up in the first place, the agentBinder argument
     // will be null.  This should only be called from the Activity Manager.
-    @Override
     public void agentDisconnected(String packageName) {
         // TODO: handle backup being interrupted
         synchronized (mAgentConnectLock) {
@@ -3278,7 +3240,6 @@ public class BackupManagerService implements BackupManagerServiceInterface {
 
     // An application being installed will need a restore pass, then the Package Manager
     // will need to be told when the restore is finished.
-    @Override
     public void restoreAtInstall(String packageName, int token) {
         if (Binder.getCallingUid() != Process.SYSTEM_UID) {
             Slog.w(TAG, "Non-system process uid=" + Binder.getCallingUid()
@@ -3364,7 +3325,6 @@ public class BackupManagerService implements BackupManagerServiceInterface {
     }
 
     // Hand off a restore session
-    @Override
     public IRestoreSession beginRestoreSession(String packageName, String transport) {
         if (DEBUG) {
             Slog.v(TAG, "beginRestoreSession: pkg=" + packageName
@@ -3430,7 +3390,6 @@ public class BackupManagerService implements BackupManagerServiceInterface {
 
     // Note that a currently-active backup agent has notified us that it has
     // completed the given outstanding asynchronous backup/restore operation.
-    @Override
     public void opComplete(int token, long result) {
         if (MORE_DEBUG) {
             Slog.v(TAG, "opComplete: " + Integer.toHexString(token) + " result=" + result);
@@ -3468,7 +3427,6 @@ public class BackupManagerService implements BackupManagerServiceInterface {
         }
     }
 
-    @Override
     public boolean isAppEligibleForBackup(String packageName) {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.BACKUP, "isAppEligibleForBackup");
@@ -3490,7 +3448,6 @@ public class BackupManagerService implements BackupManagerServiceInterface {
         }
     }
 
-    @Override
     public String[] filterAppsEligibleForBackup(String[] packages) {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.BACKUP, "filterAppsEligibleForBackup");
@@ -3517,7 +3474,6 @@ public class BackupManagerService implements BackupManagerServiceInterface {
         }
     }
 
-    @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (!DumpUtils.checkDumpAndUsageStatsPermission(mContext, TAG, pw)) return;
 
@@ -3667,7 +3623,6 @@ public class BackupManagerService implements BackupManagerServiceInterface {
     }
 
 
-    @Override
     public IBackupManager getBackupManagerBinder() {
         return mBackupManagerBinder;
     }
