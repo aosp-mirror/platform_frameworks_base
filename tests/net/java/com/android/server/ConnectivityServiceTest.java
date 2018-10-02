@@ -1070,13 +1070,13 @@ public class ConnectivityServiceTest {
 
         // Ensure that the default setting for Captive Portals is used for most tests
         setCaptivePortalMode(Settings.Global.CAPTIVE_PORTAL_MODE_PROMPT);
-        setMobileDataAlwaysOn(false);
+        setAlwaysOnNetworks(false);
         setPrivateDnsSettings(PRIVATE_DNS_MODE_OFF, "ignored.example.com");
     }
 
     @After
     public void tearDown() throws Exception {
-        setMobileDataAlwaysOn(false);
+        setAlwaysOnNetworks(false);
         if (mCellNetworkAgent != null) {
             mCellNetworkAgent.disconnect();
             mCellNetworkAgent = null;
@@ -2027,7 +2027,7 @@ public class ConnectivityServiceTest {
 
     @Test
     public void testNetworkGoesIntoBackgroundAfterLinger() {
-        setMobileDataAlwaysOn(true);
+        setAlwaysOnNetworks(true);
         NetworkRequest request = new NetworkRequest.Builder()
                 .clearCapabilities()
                 .build();
@@ -2772,10 +2772,10 @@ public class ConnectivityServiceTest {
         Settings.Global.putInt(cr, Settings.Global.CAPTIVE_PORTAL_MODE, mode);
     }
 
-    private void setMobileDataAlwaysOn(boolean enable) {
+    private void setAlwaysOnNetworks(boolean enable) {
         ContentResolver cr = mServiceContext.getContentResolver();
         Settings.Global.putInt(cr, Settings.Global.MOBILE_DATA_ALWAYS_ON, enable ? 1 : 0);
-        mService.updateMobileDataAlwaysOn();
+        mService.updateAlwaysOnNetworks();
         waitForIdle();
     }
 
@@ -2797,7 +2797,7 @@ public class ConnectivityServiceTest {
     public void testBackgroundNetworks() throws Exception {
         // Create a background request. We can't do this ourselves because ConnectivityService
         // doesn't have an API for it. So just turn on mobile data always on.
-        setMobileDataAlwaysOn(true);
+        setAlwaysOnNetworks(true);
         final NetworkRequest request = new NetworkRequest.Builder().build();
         final NetworkRequest fgRequest = new NetworkRequest.Builder()
                 .addCapability(NET_CAPABILITY_FOREGROUND).build();
@@ -2995,7 +2995,7 @@ public class ConnectivityServiceTest {
 
         // Turn on mobile data always on. The factory starts looking again.
         testFactory.expectAddRequests(1);
-        setMobileDataAlwaysOn(true);
+        setAlwaysOnNetworks(true);
         testFactory.waitForNetworkRequests(2);
         assertTrue(testFactory.getMyStartRequested());
 
@@ -3015,7 +3015,7 @@ public class ConnectivityServiceTest {
 
         // Turn off mobile data always on and expect the request to disappear...
         testFactory.expectRemoveRequests(1);
-        setMobileDataAlwaysOn(false);
+        setAlwaysOnNetworks(false);
         testFactory.waitForNetworkRequests(1);
 
         // ...  and cell data to be torn down.
