@@ -176,6 +176,10 @@ public class PhoneConstants {
 
     // FIXME: This is used to pass a subId via intents, we need to look at its usage, which is
     // FIXME: extensive, and see if this should be an array of all active subId's or ...?
+    /**
+     * @Deprecated use {@link android.telephony.SubscriptionManager#EXTRA_SUBSCRIPTION_INDEX}
+     * instead.
+     */
     public static final String SUBSCRIPTION_KEY  = "subscription";
 
     public static final String SUB_SETTING  = "subSettings";
