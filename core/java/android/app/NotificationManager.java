@@ -48,6 +48,7 @@ import android.util.proto.ProtoOutputStream;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -722,10 +723,15 @@ public class NotificationManager {
     public List<NotificationChannelGroup> getNotificationChannelGroups() {
         INotificationManager service = getService();
         try {
-            return service.getNotificationChannelGroups(mContext.getPackageName()).getList();
+            final ParceledListSlice<NotificationChannelGroup> parceledList =
+                    service.getNotificationChannelGroups(mContext.getPackageName());
+            if (parceledList != null) {
+                return parceledList.getList();
+            }
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+        return new ArrayList<>();
     }
 
     /**
