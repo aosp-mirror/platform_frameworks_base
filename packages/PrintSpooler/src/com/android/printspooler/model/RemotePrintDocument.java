@@ -218,8 +218,14 @@ public final class RemotePrintDocument {
             throw new IllegalStateException("Cannot update in state:" + stateToString(mState));
         }
 
-        // We schedule a layout if the constraints changed.
-        if (!mUpdateSpec.hasSameConstraints(attributes, preview)) {
+        /*
+         * We schedule a layout in two cases:
+         * - if the current command is canceling. In this case the mUpdateSpec will be marked as
+         *   stale once the command is done, hence we have to start from scratch
+         * - if the constraints changed we have a different document, hence start a new layout
+         */
+        if (mCurrentCommand != null && mCurrentCommand.isCanceling()
+                || !mUpdateSpec.hasSameConstraints(attributes, preview)) {
             willUpdate = true;
 
             // If there is a current command that is running we ask for a
