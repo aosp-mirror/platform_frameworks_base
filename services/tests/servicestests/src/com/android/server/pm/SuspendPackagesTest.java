@@ -33,6 +33,7 @@ import android.content.IntentFilter;
 import android.content.pm.IPackageManager;
 import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
+import android.content.pm.SuspendDialogInfo;
 import android.content.res.Resources;
 import android.os.BaseBundle;
 import android.os.Bundle;
@@ -152,7 +153,7 @@ public class SuspendPackagesTest {
         }
 
         void drainPendingBroadcasts() {
-            while (pollForIntent(5) != null);
+            while (pollForIntent(5) != null) ;
         }
 
         Intent receiveIntentFromApp() {
@@ -215,15 +216,15 @@ public class SuspendPackagesTest {
     }
 
     private void suspendTestPackage(PersistableBundle appExtras, PersistableBundle launcherExtras,
-            String dialogMessage) {
+            SuspendDialogInfo dialogInfo) {
         final String[] unchangedPackages = mPackageManager.setPackagesSuspended(
-                PACKAGES_TO_SUSPEND, true, appExtras, launcherExtras, dialogMessage);
+                PACKAGES_TO_SUSPEND, true, appExtras, launcherExtras, dialogInfo);
         assertTrue("setPackagesSuspended returned non-empty list", unchangedPackages.length == 0);
     }
 
     private void unsuspendTestPackage() {
         final String[] unchangedPackages = mPackageManager.setPackagesSuspended(
-                PACKAGES_TO_SUSPEND, false, null, null, null);
+                PACKAGES_TO_SUSPEND, false, null, null, (SuspendDialogInfo) null);
         assertTrue("setPackagesSuspended returned non-empty list", unchangedPackages.length == 0);
     }
 
@@ -318,7 +319,8 @@ public class SuspendPackagesTest {
     @Test
     public void testCannotSuspendSelf() {
         final String[] unchangedPkgs = mPackageManager.setPackagesSuspended(
-                new String[]{mContext.getOpPackageName()}, true, null, null, null);
+                new String[]{mContext.getOpPackageName()}, true, null, null,
+                (SuspendDialogInfo) null);
         assertTrue(unchangedPkgs.length == 1);
         assertEquals(mContext.getOpPackageName(), unchangedPkgs[0]);
     }
@@ -457,7 +459,8 @@ public class SuspendPackagesTest {
         mAppCommsReceiver.register(mReceiverHandler, ACTION_REPORT_MORE_DETAILS_ACTIVITY_STARTED,
                 ACTION_REPORT_TEST_ACTIVITY_STARTED);
         final String testMessage = "This is a test message to report suspension of %1$s";
-        suspendTestPackage(null, null, testMessage);
+        suspendTestPackage(null, null,
+                new SuspendDialogInfo.Builder().setMessage(testMessage).build());
         startTestAppActivity();
         assertNull("No broadcast was expected from app", mAppCommsReceiver.pollForIntent(2));
         assertNotNull("Given dialog message not shown", mUiDevice.wait(

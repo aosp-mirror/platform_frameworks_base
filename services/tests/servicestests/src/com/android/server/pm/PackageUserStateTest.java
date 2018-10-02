@@ -23,6 +23,7 @@ import static org.hamcrest.CoreMatchers.is;
 import static org.junit.Assert.assertThat;
 
 import android.content.pm.PackageUserState;
+import android.content.pm.SuspendDialogInfo;
 import android.os.PersistableBundle;
 import android.util.ArraySet;
 
@@ -37,7 +38,7 @@ import org.junit.runner.RunWith;
 public class PackageUserStateTest {
 
     @Test
-    public void testPackageUserState01()  {
+    public void testPackageUserState01() {
         final PackageUserState testUserState = new PackageUserState();
         PackageUserState oldUserState;
 
@@ -84,7 +85,7 @@ public class PackageUserStateTest {
     }
 
     @Test
-    public void testPackageUserState02()  {
+    public void testPackageUserState02() {
         final PackageUserState testUserState01 = new PackageUserState();
         PackageUserState oldUserState;
 
@@ -102,7 +103,7 @@ public class PackageUserStateTest {
     }
 
     @Test
-    public void testPackageUserState03()  {
+    public void testPackageUserState03() {
         final PackageUserState oldUserState = new PackageUserState();
 
         // only new user state has array defined; different
@@ -138,7 +139,7 @@ public class PackageUserStateTest {
     }
 
     @Test
-    public void testPackageUserState04()  {
+    public void testPackageUserState04() {
         final PackageUserState oldUserState = new PackageUserState();
 
         // only new user state has array defined; different
@@ -185,15 +186,19 @@ public class PackageUserStateTest {
         launcherExtras2.putString("name", "launcherExtras2");
         final String suspendingPackage1 = "package1";
         final String suspendingPackage2 = "package2";
-        final String dialogMessage1 = "dialogMessage1";
-        final String dialogMessage2 = "dialogMessage2";
+        final SuspendDialogInfo dialogInfo1 = new SuspendDialogInfo.Builder()
+                .setMessage("dialogMessage1")
+                .build();
+        final SuspendDialogInfo dialogInfo2 = new SuspendDialogInfo.Builder()
+                .setMessage("dialogMessage2")
+                .build();
 
         final PackageUserState testUserState1 = new PackageUserState();
         testUserState1.suspended = true;
         testUserState1.suspendedAppExtras = appExtras1;
         testUserState1.suspendedLauncherExtras = launcherExtras1;
         testUserState1.suspendingPackage = suspendingPackage1;
-        testUserState1.dialogMessage = dialogMessage1;
+        testUserState1.dialogInfo = dialogInfo1;
 
         PackageUserState testUserState2 = new PackageUserState(testUserState1);
         assertThat(testUserState1.equals(testUserState2), is(true));
@@ -209,14 +214,14 @@ public class PackageUserStateTest {
         assertThat(testUserState1.equals(testUserState2), is(false));
 
         testUserState2 = new PackageUserState(testUserState1);
-        testUserState2.dialogMessage = dialogMessage2;
+        testUserState2.dialogInfo = dialogInfo2;
         assertThat(testUserState1.equals(testUserState2), is(false));
 
         testUserState2 = new PackageUserState(testUserState1);
         testUserState2.suspended = testUserState1.suspended = false;
         // Everything is different but irrelevant if suspended is false
         testUserState2.suspendingPackage = suspendingPackage2;
-        testUserState2.dialogMessage = dialogMessage2;
+        testUserState2.dialogInfo = dialogInfo2;
         testUserState2.suspendedAppExtras = appExtras2;
         testUserState2.suspendedLauncherExtras = launcherExtras2;
         assertThat(testUserState1.equals(testUserState2), is(true));

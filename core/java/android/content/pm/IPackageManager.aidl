@@ -43,6 +43,7 @@ import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
+import android.content.pm.SuspendDialogInfo;
 import android.content.pm.UserInfo;
 import android.content.pm.VerifierDeviceIdentity;
 import android.content.pm.VersionedPackage;
@@ -273,7 +274,7 @@ interface IPackageManager {
 
     String[] setPackagesSuspendedAsUser(in String[] packageNames, boolean suspended,
             in PersistableBundle appExtras, in PersistableBundle launcherExtras,
-            String dialogMessage, String callingPackage, int userId);
+            in SuspendDialogInfo dialogInfo, String callingPackage, int userId);
 
     boolean isPackageSuspendedForUser(String packageName, int userId);
 

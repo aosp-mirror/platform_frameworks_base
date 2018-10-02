@@ -56,6 +56,7 @@ import android.content.pm.ParceledListSlice;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.ShortcutServiceInternal;
+import android.content.pm.SuspendDialogInfo;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
@@ -629,10 +630,10 @@ class AppWidgetServiceImpl extends IAppWidgetService.Stub implements WidgetBacku
                     onClickIntent = mDevicePolicyManagerInternal.createShowAdminSupportIntent(
                             providerUserId, true);
                 } else {
-                    final String dialogMessage = mPackageManagerInternal.getSuspendedDialogMessage(
-                            providerPackage, providerUserId);
+                    final SuspendDialogInfo dialogInfo = mPackageManagerInternal
+                            .getSuspendedDialogInfo(providerPackage, providerUserId);
                     onClickIntent = SuspendedAppActivity.createSuspendedAppInterceptIntent(
-                            providerPackage, suspendingPackage, dialogMessage, providerUserId);
+                            providerPackage, suspendingPackage, dialogInfo, providerUserId);
                 }
             } else if (provider.maskedByQuietProfile) {
                 showBadge = true;

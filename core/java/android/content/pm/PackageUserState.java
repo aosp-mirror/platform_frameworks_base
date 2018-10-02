@@ -33,6 +33,7 @@ import android.os.BaseBundle;
 import android.os.PersistableBundle;
 import android.util.ArraySet;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 
 import java.util.Arrays;
@@ -50,7 +51,7 @@ public class PackageUserState {
     public boolean hidden; // Is the app restricted by owner / admin
     public boolean suspended;
     public String suspendingPackage;
-    public String dialogMessage; // Message to show when a suspended package launch attempt is made
+    public SuspendDialogInfo dialogInfo;
     public PersistableBundle suspendedAppExtras;
     public PersistableBundle suspendedLauncherExtras;
     public boolean instantApp;
@@ -79,6 +80,7 @@ public class PackageUserState {
         installReason = PackageManager.INSTALL_REASON_UNKNOWN;
     }
 
+    @VisibleForTesting
     public PackageUserState(PackageUserState o) {
         ceDataInode = o.ceDataInode;
         installed = o.installed;
@@ -87,7 +89,7 @@ public class PackageUserState {
         hidden = o.hidden;
         suspended = o.suspended;
         suspendingPackage = o.suspendingPackage;
-        dialogMessage = o.dialogMessage;
+        dialogInfo = o.dialogInfo;
         suspendedAppExtras = o.suspendedAppExtras;
         suspendedLauncherExtras = o.suspendedLauncherExtras;
         instantApp = o.instantApp;
@@ -217,7 +219,7 @@ public class PackageUserState {
                     || !suspendingPackage.equals(oldState.suspendingPackage)) {
                 return false;
             }
-            if (!Objects.equals(dialogMessage, oldState.dialogMessage)) {
+            if (!Objects.equals(dialogInfo, oldState.dialogInfo)) {
                 return false;
             }
             if (!BaseBundle.kindofEquals(suspendedAppExtras,
