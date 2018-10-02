@@ -19,13 +19,13 @@ package com.android.server.display;
 import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_AUTO_MIRROR;
 import static android.hardware.display.DisplayManager
         .VIRTUAL_DISPLAY_FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD;
-import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_PRESENTATION;
-import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC;
-import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_SECURE;
-import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_SUPPORTS_TOUCH;
-import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_ROTATES_WITH_CONTENT;
 import static android.hardware.display.DisplayManager
         .VIRTUAL_DISPLAY_FLAG_DESTROY_CONTENT_ON_REMOVAL;
+import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_PRESENTATION;
+import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_PUBLIC;
+import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_ROTATES_WITH_CONTENT;
+import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_SECURE;
+import static android.hardware.display.DisplayManager.VIRTUAL_DISPLAY_FLAG_SUPPORTS_TOUCH;
 
 import android.content.Context;
 import android.hardware.display.IVirtualDisplayCallback;
@@ -33,10 +33,10 @@ import android.media.projection.IMediaProjection;
 import android.media.projection.IMediaProjectionCallback;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.SystemProperties;
 import android.os.IBinder.DeathRecipient;
 import android.os.Message;
 import android.os.RemoteException;
+import android.os.SystemProperties;
 import android.util.ArrayMap;
 import android.util.Slog;
 import android.view.Display;
@@ -60,7 +60,8 @@ public class VirtualDisplayAdapter extends DisplayAdapter {
     static final boolean DEBUG = false;
 
     // Unique id prefix for virtual displays
-    private static final String UNIQUE_ID_PREFIX = "virtual:";
+    @VisibleForTesting
+    static final String UNIQUE_ID_PREFIX = "virtual:";
 
     private final ArrayMap<IBinder, VirtualDisplayDevice> mVirtualDisplayDevices =
             new ArrayMap<IBinder, VirtualDisplayDevice>();

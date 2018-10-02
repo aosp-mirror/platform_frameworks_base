@@ -40,6 +40,7 @@ static struct {
     jfieldID deviceWidth;
     jfieldID deviceHeight;
     jfieldID uniqueId;
+    jfieldID type;
 } gDisplayViewportClassInfo;
 
 static struct {
@@ -63,6 +64,9 @@ status_t android_hardware_display_DisplayViewport_toNative(JNIEnv* env, jobject 
     if (uniqueId != nullptr) {
         viewport->uniqueId = ScopedUtfChars(env, uniqueId).c_str();
     }
+
+    viewport->type = static_cast<ViewportType>(env->GetIntField(viewportObj,
+                gDisplayViewportClassInfo.type));
 
     jobject logicalFrameObj =
             env->GetObjectField(viewportObj, gDisplayViewportClassInfo.logicalFrame);
@@ -107,6 +111,9 @@ int register_android_hardware_display_DisplayViewport(JNIEnv* env) {
 
     gDisplayViewportClassInfo.uniqueId = GetFieldIDOrDie(env,
             gDisplayViewportClassInfo.clazz, "uniqueId", "Ljava/lang/String;");
+
+    gDisplayViewportClassInfo.type = GetFieldIDOrDie(env,
+            gDisplayViewportClassInfo.clazz, "type", "I");
 
     clazz = FindClassOrDie(env, "android/graphics/Rect");
     gRectClassInfo.left = GetFieldIDOrDie(env, clazz, "left", "I");

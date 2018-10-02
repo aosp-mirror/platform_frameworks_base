@@ -16,9 +16,6 @@
 
 package com.android.server.input;
 
-import static android.hardware.display.DisplayViewport.VIEWPORT_INTERNAL;
-import static android.hardware.display.DisplayViewport.VIEWPORT_EXTERNAL;
-
 import android.annotation.NonNull;
 import android.app.IInputForwarder;
 import android.app.Notification;
@@ -188,13 +185,8 @@ public class InputManagerService extends IInputManager.Stub
     private static native long nativeInit(InputManagerService service,
             Context context, MessageQueue messageQueue);
     private static native void nativeStart(long ptr);
-    private static native void nativeSetVirtualDisplayViewports(long ptr,
+    private static native void nativeSetDisplayViewports(long ptr,
             DisplayViewport[] viewports);
-    private static native void nativeSetDisplayViewport(long ptr, int viewportType,
-            int displayId, int rotation,
-            int logicalLeft, int logicalTop, int logicalRight, int logicalBottom,
-            int physicalLeft, int physicalTop, int physicalRight, int physicalBottom,
-            int deviceWidth, int deviceHeight, String uniqueId);
 
     private static native int nativeGetScanCodeState(long ptr,
             int deviceId, int sourceMask, int scanCode);
@@ -409,31 +401,8 @@ public class InputManagerService extends IInputManager.Stub
         nativeReloadDeviceAliases(mPtr);
     }
 
-    private void setDisplayViewportsInternal(DisplayViewport defaultViewport,
-            DisplayViewport externalTouchViewport,
-            List<DisplayViewport> virtualTouchViewports) {
-        if (defaultViewport.valid) {
-            setDisplayViewport(VIEWPORT_INTERNAL, defaultViewport);
-        }
-
-        if (externalTouchViewport.valid) {
-            setDisplayViewport(VIEWPORT_EXTERNAL, externalTouchViewport);
-        } else if (defaultViewport.valid) {
-            setDisplayViewport(VIEWPORT_EXTERNAL, defaultViewport);
-        }
-
-        nativeSetVirtualDisplayViewports(mPtr,
-                virtualTouchViewports.toArray(new DisplayViewport[0]));
-    }
-
-    private void setDisplayViewport(int viewportType, DisplayViewport viewport) {
-        nativeSetDisplayViewport(mPtr, viewportType,
-                viewport.displayId, viewport.orientation,
-                viewport.logicalFrame.left, viewport.logicalFrame.top,
-                viewport.logicalFrame.right, viewport.logicalFrame.bottom,
-                viewport.physicalFrame.left, viewport.physicalFrame.top,
-                viewport.physicalFrame.right, viewport.physicalFrame.bottom,
-                viewport.deviceWidth, viewport.deviceHeight, viewport.uniqueId);
+    private void setDisplayViewportsInternal(List<DisplayViewport> viewports) {
+        nativeSetDisplayViewports(mPtr, viewports.toArray(new DisplayViewport[0]));
     }
 
     /**
@@ -2203,11 +2172,8 @@ public class InputManagerService extends IInputManager.Stub
 
     private final class LocalService extends InputManagerInternal {
         @Override
-        public void setDisplayViewports(DisplayViewport defaultViewport,
-                DisplayViewport externalTouchViewport,
-                List<DisplayViewport> virtualTouchViewports) {
-            setDisplayViewportsInternal(defaultViewport, externalTouchViewport,
-                    virtualTouchViewports);
+        public void setDisplayViewports(List<DisplayViewport> viewports) {
+            setDisplayViewportsInternal(viewports);
         }
 
         @Override
