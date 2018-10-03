@@ -176,6 +176,7 @@ private:
 
     VkPtr<PFN_vkDestroyInstance> mDestroyInstance;
     VkPtr<PFN_vkEnumeratePhysicalDevices> mEnumeratePhysicalDevices;
+    VkPtr<PFN_vkGetPhysicalDeviceProperties> mGetPhysicalDeviceProperties;
     VkPtr<PFN_vkGetPhysicalDeviceQueueFamilyProperties> mGetPhysicalDeviceQueueFamilyProperties;
     VkPtr<PFN_vkGetPhysicalDeviceFeatures2> mGetPhysicalDeviceFeatures2;
     VkPtr<PFN_vkCreateDevice> mCreateDevice;
