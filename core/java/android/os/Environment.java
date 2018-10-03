@@ -219,12 +219,11 @@ public class Environment {
      * services to store files relating to the user. This directory will be
      * automatically deleted when the user is removed.
      *
-     * @deprecated This directory is valid and still exists, but callers should
-     *             <em>strongly</em> consider switching to
-     *             {@link #getDataSystemCeDirectory(int)} which is protected
-     *             with user credentials or
-     *             {@link #getDataSystemDeDirectory(int)} which supports fast
-     *             user wipe.
+     * @deprecated This directory is valid and still exists, but but callers
+     *             should <em>strongly</em> consider switching to using either
+     *             {@link #getDataSystemCeDirectory(int)} or
+     *             {@link #getDataSystemDeDirectory(int)}, both of which support
+     *             fast user wipe.
      * @hide
      */
     @Deprecated
@@ -292,12 +291,42 @@ public class Environment {
         return buildPath(getDataDirectory(), "system_ce");
     }
 
-    /** {@hide} */
+    /**
+     * Return the "credential encrypted" system directory for a user. This is
+     * for use by system services to store files relating to the user. This
+     * directory supports fast user wipe, and will be automatically deleted when
+     * the user is removed.
+     * <p>
+     * Data stored under this path is "credential encrypted", which uses an
+     * encryption key that is entangled with user credentials, such as a PIN or
+     * password. The contents will only be available once the user has been
+     * unlocked, as reported by {@code SystemService.onUnlockUser()}.
+     * <p>
+     * New code should <em>strongly</em> prefer storing sensitive data in these
+     * credential encrypted areas.
+     *
+     * @hide
+     */
     public static File getDataSystemCeDirectory(int userId) {
         return buildPath(getDataDirectory(), "system_ce", String.valueOf(userId));
     }
 
-    /** {@hide} */
+    /**
+     * Return the "device encrypted" system directory for a user. This is for
+     * use by system services to store files relating to the user. This
+     * directory supports fast user wipe, and will be automatically deleted when
+     * the user is removed.
+     * <p>
+     * Data stored under this path is "device encrypted", which uses an
+     * encryption key that is tied to the physical device. The contents will
+     * only be available once the device has finished a {@code dm-verity}
+     * protected boot.
+     * <p>
+     * New code should <em>strongly</em> avoid storing sensitive data in these
+     * device encrypted areas.
+     *
+     * @hide
+     */
     public static File getDataSystemDeDirectory(int userId) {
         return buildPath(getDataDirectory(), "system_de", String.valueOf(userId));
     }
