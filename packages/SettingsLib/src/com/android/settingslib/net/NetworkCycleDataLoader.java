@@ -176,31 +176,11 @@ public abstract class NetworkCycleDataLoader<D> extends AsyncTaskLoader<D> {
 
         public Builder<T> setNetworkTemplate(NetworkTemplate template) {
             mNetworkTemplate = template;
-            setNetworkType();
+            mNetworkType = DataUsageController.getNetworkType(template);
             return this;
         }
 
         public abstract T build();
-
-        private void setNetworkType() {
-            if (mNetworkTemplate != null) {
-                final int matchRule = mNetworkTemplate.getMatchRule();
-                switch (matchRule) {
-                    case NetworkTemplate.MATCH_MOBILE:
-                    case NetworkTemplate.MATCH_MOBILE_WILDCARD:
-                        mNetworkType = ConnectivityManager.TYPE_MOBILE;
-                        break;
-                    case NetworkTemplate.MATCH_WIFI:
-                        mNetworkType = ConnectivityManager.TYPE_WIFI;
-                        break;
-                    case NetworkTemplate.MATCH_ETHERNET:
-                        mNetworkType = ConnectivityManager.TYPE_ETHERNET;
-                        break;
-                    default:
-                        mNetworkType = ConnectivityManager.TYPE_MOBILE;
-                }
-            }
-        }
     }
 
 }

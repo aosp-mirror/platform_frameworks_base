@@ -58,7 +58,7 @@ public class NetworkCycleChartDataLoaderTest {
     }
 
     @Test
-    public void recordUsage_shouldQueryNetworkSummary() throws RemoteException {
+    public void recordUsage_shouldQueryNetworkSummaryForDevice() throws RemoteException {
         final long end = System.currentTimeMillis();
         final long start = end - (DateUtils.WEEK_IN_MILLIS * 4);
         final int networkType = ConnectivityManager.TYPE_MOBILE;
@@ -68,6 +68,6 @@ public class NetworkCycleChartDataLoaderTest {
 
         mLoader.recordUsage(start, end);
 
-        verify(mNetworkStatsManager).querySummary(networkType, subId, start, end);
+        verify(mNetworkStatsManager).querySummaryForDevice(networkType, subId, start, end);
     }
 }
