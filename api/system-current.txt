@@ -5330,9 +5330,12 @@ package android.telephony {
   }
 
   public class ServiceState implements android.os.Parcelable {
+    method public android.telephony.NetworkRegistrationState getNetworkRegistrationState(int, int);
     method public java.util.List<android.telephony.NetworkRegistrationState> getNetworkRegistrationStates();
-    method public java.util.List<android.telephony.NetworkRegistrationState> getNetworkRegistrationStates(int);
-    method public android.telephony.NetworkRegistrationState getNetworkRegistrationStates(int, int);
+    method public deprecated java.util.List<android.telephony.NetworkRegistrationState> getNetworkRegistrationStates(int);
+    method public deprecated android.telephony.NetworkRegistrationState getNetworkRegistrationStates(int, int);
+    method public java.util.List<android.telephony.NetworkRegistrationState> getNetworkRegistrationStatesFromDomain(int);
+    method public java.util.List<android.telephony.NetworkRegistrationState> getNetworkRegistrationStatesFromTransportType(int);
   }
 
   public final class SmsManager {
