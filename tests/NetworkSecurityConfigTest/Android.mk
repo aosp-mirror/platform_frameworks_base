@@ -7,7 +7,6 @@ LOCAL_CERTIFICATE := platform
 
 LOCAL_JAVA_LIBRARIES := \
     android.test.runner \
-    bouncycastle \
     conscrypt \
     android.test.base \
 
