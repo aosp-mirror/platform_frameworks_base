@@ -195,7 +195,7 @@ public abstract class AuthenticationClient extends ClientMonitor {
             // ERROR_CANCELED message.
             return true;
         }
-        if (mBundle != null) {
+        if (mBundle != null && error != BiometricConstants.BIOMETRIC_ERROR_USER_CANCELED) {
             try {
                 mStatusBarService.onBiometricError(getErrorString(error, vendorCode));
             } catch (RemoteException e) {
