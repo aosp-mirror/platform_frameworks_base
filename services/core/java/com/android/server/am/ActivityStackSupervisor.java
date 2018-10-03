@@ -337,11 +337,6 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     /** The current user */
     int mCurrentUser;
 
-    /** If this is the same as mFocusedStack then the activity on the top of the focused stack has
-     * been resumed. If stacks are changing position this will hold the old stack until the new
-     * stack becomes resumed after which it will be set to mFocusedStack. */
-    private ActivityStack mLastFocusedStack;
-
     /** List of activities that are waiting for a new activity to become visible before completing
      * whatever operation they are supposed to do. */
     // TODO: Remove mActivitiesWaitingForVisibleActivity list and just remove activity from
@@ -692,8 +687,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
         final ActivityDisplay defaultDisplay = getDefaultDisplay();
 
-        mLastFocusedStack = defaultDisplay.getOrCreateStack(
-                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, ON_TOP);
+        defaultDisplay.getOrCreateStack(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, ON_TOP);
         positionChildAt(defaultDisplay, ActivityDisplay.POSITION_TOP);
     }
 
@@ -761,41 +755,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         return container.getWindowConfiguration().canReceiveKeys() || alwaysFocusable;
     }
 
-    ActivityStack getTopDisplayLastFocusedStack() {
-        return mLastFocusedStack;
-    }
-
     boolean isTopDisplayFocusedStack(ActivityStack stack) {
         return stack != null && stack == getTopDisplayFocusedStack();
-    }
-
-    /** NOTE: Should only be called from {@link ActivityStack#moveToFront} */
-    void setFocusStackUnchecked(String reason, ActivityStack focusCandidate) {
-        if (!focusCandidate.isFocusable()) {
-            // The focus candidate isn't focusable. Move focus to the top stack that is focusable.
-            focusCandidate = getNextFocusableStackLocked(focusCandidate, false /* ignoreCurrent */);
-            if (focusCandidate == null) {
-                Slog.w(TAG,
-                        "setFocusStackUnchecked: No focusable stack found, focus home as default");
-                focusCandidate = getDefaultDisplay().getHomeStack();
-            }
-        }
-
-        final ActivityStack currentFocusedStack = getTopDisplayFocusedStack();
-        if (currentFocusedStack != focusCandidate) {
-            mLastFocusedStack = currentFocusedStack;
-            // TODO(b/111541062): Update event log to include focus movements on all displays
-            EventLogTags.writeAmFocusedStack(
-                    mCurrentUser, focusCandidate == null ? -1 : focusCandidate.getStackId(),
-                    mLastFocusedStack == null ? -1 : mLastFocusedStack.getStackId(), reason);
-        }
-
-        final ActivityRecord r = topRunningActivityLocked();
-        if (mService.isBooting() || !mService.isBooted()) {
-            if (r != null && r.idle) {
-                checkFinishBootingLocked();
-            }
-        }
     }
 
     void moveRecentsStackToFront(String reason) {
@@ -1088,28 +1049,6 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         }
         // Send launch end powerhint when idle
         sendPowerHintForLaunchEndIfNeeded();
-        return true;
-    }
-
-    boolean allResumedActivitiesComplete() {
-        for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
-            final ActivityDisplay display = mActivityDisplays.get(displayNdx);
-            for (int stackNdx = display.getChildCount() - 1; stackNdx >= 0; --stackNdx) {
-                final ActivityStack stack = display.getChildAt(stackNdx);
-                if (isTopDisplayFocusedStack(stack)) {
-                    final ActivityRecord r = stack.getResumedActivity();
-                    if (r != null && !r.isState(RESUMED)) {
-                        return false;
-                    }
-                }
-            }
-        }
-        // TODO: Not sure if this should check if all Paused are complete too.
-        final ActivityStack focusedStack = getTopDisplayFocusedStack();
-        if (DEBUG_STACK) Slog.d(TAG_STACK,
-                "allResumedActivitiesComplete: mLastFocusedStack changing from="
-                        + mLastFocusedStack + " to=" + focusedStack);
-        mLastFocusedStack = focusedStack;
         return true;
     }
 
@@ -3673,7 +3612,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         if (isTopDisplayFocusedStack(stack)) {
             mService.updateUsageStats(r, true);
         }
-        if (allResumedActivitiesComplete()) {
+        if (stack.getDisplay().allResumedActivitiesComplete()) {
             ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
             mWindowManager.executeAppTransition();
             return true;
@@ -3983,8 +3922,6 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         pw.println("ActivityStackSupervisor state:");
         pw.print(prefix);
         pw.println("topDisplayFocusedStack=" + getTopDisplayFocusedStack());
-        pw.print(prefix);
-        pw.println("mLastFocusedStack=" + mLastFocusedStack);
         pw.print(prefix);
         pw.println("mCurTaskIdForUser=" + mCurTaskIdForUser);
         pw.print(prefix); pw.println("mUserStackInFront=" + mUserStackInFront);

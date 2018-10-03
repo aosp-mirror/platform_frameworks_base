@@ -1105,12 +1105,11 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             display.moveHomeStackToFront(reason + " returnToHome");
         }
 
-        display.positionChildAtTop(this, true /* includingParents */);
-        mStackSupervisor.setFocusStackUnchecked(reason, this);
-        if (task != null) {
+        final boolean movingTask = task != null;
+        display.positionChildAtTop(this, !movingTask /* includingParents */, reason);
+        if (movingTask) {
             // This also moves the entire hierarchy branch to top, including parents
-            insertTaskAtTop(task, null);
-            return;
+            insertTaskAtTop(task, null /* starting */);
         }
     }
 
@@ -1131,13 +1130,11 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             setWindowingMode(WINDOWING_MODE_UNDEFINED);
         }
 
-        getDisplay().positionChildAtBottom(this);
-        mStackSupervisor.setFocusStackUnchecked(reason, getDisplay().getTopStack());
+        getDisplay().positionChildAtBottom(this, reason);
         if (task != null) {
             // TODO(b/111541062): We probably don't want to change display z-order to bottom just
             // because one of its stacks moved to bottom.
             insertTaskAtBottom(task);
-            return;
         }
     }
 
@@ -2431,10 +2428,11 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         }
 
         next.delayedResume = false;
+        final ActivityDisplay display = getDisplay();
 
         // If the top activity is the resumed one, nothing to do.
         if (mResumedActivity == next && next.isState(RESUMED)
-                && mStackSupervisor.allResumedActivitiesComplete()) {
+                && display.allResumedActivitiesComplete()) {
             // Make sure we have executed any pending transitions, since there
             // should be nothing left to do at this point.
             executeAppTransition(options);
@@ -2500,7 +2498,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
 
         boolean lastResumedCanPip = false;
         ActivityRecord lastResumed = null;
-        final ActivityStack lastFocusedStack = mStackSupervisor.getTopDisplayLastFocusedStack();
+        final ActivityStack lastFocusedStack = display.getLastFocusedStack();
         if (lastFocusedStack != null && lastFocusedStack != this) {
             // So, why aren't we using prev here??? See the param comment on the method. prev doesn't
             // represent the last resumed activity. However, the last focus stack does if it isn't null.
@@ -2545,7 +2543,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             }
             return true;
         } else if (mResumedActivity == next && next.isState(RESUMED)
-                && mStackSupervisor.allResumedActivitiesComplete()) {
+                && display.allResumedActivitiesComplete()) {
             // It is possible for the activity to be resumed when we paused back stacks above if the
             // next activity doesn't have to wait for pause to complete.
             // So, nothing else to-do except:
@@ -2661,7 +2659,6 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
 
         mStackSupervisor.mNoAnimActivities.clear();
 
-        ActivityStack lastStack = mStackSupervisor.getTopDisplayLastFocusedStack();
         if (next.attachedToProcess()) {
             if (DEBUG_SWITCH) Slog.v(TAG_SWITCH, "Resume running: " + next
                     + " stopped=" + next.stopped + " visible=" + next.visible);
@@ -2673,10 +2670,10 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             // Launcher is already visible in this case. If we don't add it to opening
             // apps, maybeUpdateTransitToWallpaper() will fail to identify this as a
             // TRANSIT_WALLPAPER_OPEN animation, and run some funny animation.
-            final boolean lastActivityTranslucent = lastStack != null
-                    && (lastStack.inMultiWindowMode()
-                    || (lastStack.mLastPausedActivity != null
-                    && !lastStack.mLastPausedActivity.fullscreen));
+            final boolean lastActivityTranslucent = lastFocusedStack != null
+                    && (lastFocusedStack.inMultiWindowMode()
+                    || (lastFocusedStack.mLastPausedActivity != null
+                    && !lastFocusedStack.mLastPausedActivity.fullscreen));
 
             // The contained logic must be synchronized, since we are both changing the visibility
             // and updating the {@link Configuration}. {@link ActivityRecord#setVisibility} will
@@ -2693,7 +2690,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 next.startLaunchTickingLocked();
 
                 ActivityRecord lastResumedActivity =
-                        lastStack == null ? null :lastStack.mResumedActivity;
+                        lastFocusedStack == null ? null : lastFocusedStack.mResumedActivity;
                 final ActivityState lastState = next.getState();
 
                 mService.updateCpuStats();
@@ -2798,8 +2795,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                     Slog.i(TAG, "Restarting because process died: " + next);
                     if (!next.hasBeenLaunched) {
                         next.hasBeenLaunched = true;
-                    } else  if (SHOW_APP_STARTING_PREVIEW && lastStack != null
-                            && lastStack.isTopStackOnDisplay()) {
+                    } else  if (SHOW_APP_STARTING_PREVIEW && lastFocusedStack != null
+                            && lastFocusedStack.isTopStackOnDisplay()) {
                         next.showStartingWindow(null /* prev */, false /* newTask */,
                                 false /* taskSwitch */);
                     }
