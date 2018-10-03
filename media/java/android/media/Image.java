@@ -75,7 +75,7 @@ public abstract class Image implements AutoCloseable {
     /**
      * Get the format for this image. This format determines the number of
      * ByteBuffers needed to represent the image, and the general layout of the
-     * pixel data in each in ByteBuffer.
+     * pixel data in each ByteBuffer.
      *
      * <p>
      * The format is one of the values from
