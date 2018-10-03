@@ -30,6 +30,8 @@ import android.os.PersistableBundle;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 
+import dalvik.system.CloseGuard;
+
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.InputStream;
@@ -457,6 +459,8 @@ import java.util.concurrent.Executor;
 public abstract class MediaPlayer2 implements SubtitleController.Listener
                                             , AutoCloseable
                                             , AudioRouting {
+    private final CloseGuard mGuard = CloseGuard.get();
+
     /**
      * Create a MediaPlayer2 object.
      *
@@ -512,7 +516,9 @@ public abstract class MediaPlayer2 implements SubtitleController.Listener
      * @hide
      */
     // add hidden empty constructor so it doesn't show in SDK
-    public MediaPlayer2() { }
+    public MediaPlayer2() {
+        mGuard.open("close");
+    }
 
     /**
      * Returns a {@link MediaPlayerBase} implementation which runs based on
@@ -545,7 +551,22 @@ public abstract class MediaPlayer2 implements SubtitleController.Listener
      */
     // This is a synchronous call.
     @Override
-    public abstract void close();
+    public void close() {
+        synchronized (mGuard) {
+            mGuard.close();
+        }
+    }
+
+    // Have to declare protected for finalize() since it is protected
+    // in the base class Object.
+    @Override
+    protected void finalize() throws Throwable {
+        if (mGuard != null) {
+            mGuard.warnIfOpen();
+        }
+
+        close();
+    }
 
     /**
      * Starts or resumes playback. If playback had previously been paused,
