@@ -22,6 +22,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NA
 
 import android.annotation.Nullable;
 import android.os.FileUtils;
+import android.os.SystemProperties;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -37,6 +38,10 @@ import java.util.regex.Pattern;
  */
 final class MemoryStatUtil {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "MemoryStatUtil" : TAG_AM;
+
+    /** True if device has per-app memcg */
+    private static final Boolean DEVICE_HAS_PER_APP_MEMCG =
+            SystemProperties.getBoolean("ro.config.per_app_memcg", false);
 
     /** Path to check if device has memcg */
     private static final String MEMCG_TEST_PATH = "/dev/memcg/apps/memory.stat";
@@ -55,15 +60,12 @@ final class MemoryStatUtil {
     private static final int PGMAJFAULT_INDEX = 11;
     private static final int RSS_IN_BYTES_INDEX = 23;
 
-    /** True if device has memcg */
-    private static volatile Boolean sDeviceHasMemCg;
-
     private MemoryStatUtil() {}
 
     /**
      * Reads memory stat for a process.
      *
-     * Reads from memcg if available on device, else fallback to procfs.
+     * Reads from per-app memcg if available on device, else fallback to procfs.
      * Returns null if no stats can be read.
      */
     @Nullable
@@ -156,15 +158,10 @@ final class MemoryStatUtil {
     }
 
     /**
-     * Checks if memcg is available on device.
-     *
-     * Touches the filesystem to do the check.
+     * Returns whether per-app memcg is available on device.
      */
     static boolean hasMemcg() {
-        if (sDeviceHasMemCg == null) {
-            sDeviceHasMemCg = (new File(MEMCG_TEST_PATH)).exists();
-        }
-        return sDeviceHasMemCg;
+        return DEVICE_HAS_PER_APP_MEMCG;
     }
 
     static final class MemoryStat {
