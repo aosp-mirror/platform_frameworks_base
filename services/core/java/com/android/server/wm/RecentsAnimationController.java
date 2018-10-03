@@ -458,10 +458,9 @@ public class RecentsAnimationController implements DeathRecipient {
         mRunner = null;
         mCanceled = true;
 
-        // Clear associated input consumers
+        // Update the input windows after the animation is complete
         final InputMonitor inputMonitor =
                 mService.mRoot.getDisplayContent(mDisplayId).getInputMonitor();
-        inputMonitor.destroyInputConsumer(INPUT_CONSUMER_RECENTS_ANIMATION);
         inputMonitor.updateInputWindowsLw(true /*force*/);
 
         // We have deferred all notifications to the target app as a part of the recents animation,
@@ -494,6 +493,11 @@ public class RecentsAnimationController implements DeathRecipient {
     @Override
     public void binderDied() {
         cancelAnimation(REORDER_MOVE_TO_ORIGINAL_POSITION, "binderDied");
+
+        // Clear associated input consumers on runner death
+        final InputMonitor inputMonitor =
+                mService.mRoot.getDisplayContent(mDisplayId).getInputMonitor();
+        inputMonitor.destroyInputConsumer(INPUT_CONSUMER_RECENTS_ANIMATION);
     }
 
     void checkAnimationReady(WallpaperController wallpaperController) {
@@ -516,8 +520,14 @@ public class RecentsAnimationController implements DeathRecipient {
                 && isTargetOverWallpaper();
     }
 
-    boolean hasInputConsumerForApp(AppWindowToken appToken) {
-        return mInputConsumerEnabled && isAnimatingApp(appToken);
+    /**
+     * @return Whether to use the input consumer to override app input to route home/recents.
+     */
+    boolean shouldApplyInputConsumer(AppWindowToken appToken) {
+        // Only apply the input consumer if it is enabled, it is not the target (home/recents)
+        // being revealed with the transition, and we are actively animating the app as a part of
+        // the animation
+        return mInputConsumerEnabled && mTargetAppToken != appToken && isAnimatingApp(appToken);
     }
 
     boolean updateInputConsumerForApp(InputWindowHandle inputWindowHandle,
@@ -675,6 +685,7 @@ public class RecentsAnimationController implements DeathRecipient {
         final String innerPrefix = prefix + "  ";
         pw.print(prefix); pw.println(RecentsAnimationController.class.getSimpleName() + ":");
         pw.print(innerPrefix); pw.println("mPendingStart=" + mPendingStart);
+        pw.print(innerPrefix); pw.println("mPendingAnimations=" + mPendingAnimations.size());
         pw.print(innerPrefix); pw.println("mCanceled=" + mCanceled);
         pw.print(innerPrefix); pw.println("mInputConsumerEnabled=" + mInputConsumerEnabled);
         pw.print(innerPrefix); pw.println("mSplitScreenMinimized=" + mSplitScreenMinimized);
