@@ -19,11 +19,15 @@ import com.android.tradefed.device.DeviceNotAvailableException;
 import com.android.tradefed.device.ITestDevice;
 import com.android.tradefed.log.LogUtil.CLog;
 import com.android.tradefed.result.ByteArrayInputStreamSource;
-import com.android.tradefed.result.ITestInvocationListener;
 import com.android.tradefed.result.LogDataType;
-import com.android.tradefed.result.TestDescription;
+import com.android.tradefed.testtype.DeviceJUnit4ClassRunner;
+import com.android.tradefed.testtype.DeviceJUnit4ClassRunner.TestLogData;
+import com.android.tradefed.testtype.DeviceJUnit4ClassRunner.TestMetrics;
 import com.android.tradefed.testtype.IDeviceTest;
-import com.android.tradefed.testtype.IRemoteTest;
+
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -58,7 +62,12 @@ import java.util.Scanner;
  *   - memory usage of each native process (one measurement for each process)
  * </pre>
  */
-public class NativeProcessesMemoryTest implements IDeviceTest, IRemoteTest {
+@RunWith(DeviceJUnit4ClassRunner.class)
+public class NativeProcessesMemoryTest implements IDeviceTest {
+
+    @Rule public TestMetrics metrics = new TestMetrics();
+    @Rule public TestLogData logs = new TestLogData();
+
     // the dumpsys process comes and go as we run this test, changing pids, so ignore it
     private static final List<String> PROCESSES_TO_IGNORE = Arrays.asList("dumpsys");
 
@@ -68,38 +77,25 @@ public class NativeProcessesMemoryTest implements IDeviceTest, IRemoteTest {
     private static final String SEPARATOR = ",";
     private static final String LINE_SEPARATOR = "\\n";
 
-    // name of this test run, used for reporting
-    private static final String RUN_NAME = "NativeProcessesTest";
     // key used to report the number of native processes
     private static final String NUM_NATIVE_PROCESSES_KEY = "Num_native_processes";
 
-    private final Map<String, String> mNativeProcessToMemory = new HashMap<String, String>();
     // identity for summing over MemoryMetric
     private final MemoryMetric mZero = new MemoryMetric(0, 0, 0);
 
     private ITestDevice mTestDevice;
-    private ITestInvocationListener mListener;
 
-    public void run(ITestInvocationListener listener) throws DeviceNotAvailableException {
-        mListener = listener;
+    @Test
+    public void run() throws DeviceNotAvailableException {
         // showmap requires root, we enable it here for the rest of the test
-        mTestDevice.enableAdbRoot();
-
-        listener.testRunStarted(RUN_NAME, 1 /* testCount */);
-
-        TestDescription testDescription = new TestDescription(getClass().getName(), "run");
-        listener.testStarted(testDescription);
-
+        getDevice().enableAdbRoot();
         // process name -> list of pids with that name
         Map<String, List<String>> nativeProcesses = collectNativeProcesses();
         sampleAndLogAllProcesses(nativeProcesses);
 
         // want to also record the number of native processes
-        mNativeProcessToMemory.put(
+        metrics.addTestMetric(
                 NUM_NATIVE_PROCESSES_KEY, Integer.toString(nativeProcesses.size()));
-
-        listener.testEnded(testDescription, mNativeProcessToMemory);
-        listener.testRunEnded(0, new HashMap<String, String>());
     }
 
     /** Samples memory of all processes and logs the memory use. */
@@ -148,7 +144,7 @@ public class NativeProcessesMemoryTest implements IDeviceTest, IRemoteTest {
      */
     private Map<String, List<String>> collectNativeProcesses() throws DeviceNotAvailableException {
         HashMap<String, List<String>> nativeProcesses = new HashMap<>();
-        String memInfo = mTestDevice.executeShellCommand(DUMPSYS_MEMINFO_OOM_CMD);
+        String memInfo = getDevice().executeShellCommand(DUMPSYS_MEMINFO_OOM_CMD);
 
         for (String line : memInfo.split(LINE_SEPARATOR)) {
             String[] splits = line.split(SEPARATOR);
@@ -172,7 +168,7 @@ public class NativeProcessesMemoryTest implements IDeviceTest, IRemoteTest {
     private void logShowmap(String label, String showmap) {
         try (ByteArrayInputStreamSource source =
                 new ByteArrayInputStreamSource(showmap.getBytes())) {
-            mListener.testLog(label + "_showmap", LogDataType.TEXT, source);
+            logs.addTestLog(label + "_showmap", LogDataType.TEXT, source);
         }
     }
 
@@ -183,7 +179,7 @@ public class NativeProcessesMemoryTest implements IDeviceTest, IRemoteTest {
     private Optional<MemoryMetric> snapMemoryUsage(String processName, String pid)
             throws DeviceNotAvailableException {
         // TODO(zhin): copied from com.android.tests.sysmem.host.Metrics#sample(), extract?
-        String showmap = mTestDevice.executeShellCommand("showmap " + pid);
+        String showmap = getDevice().executeShellCommand("showmap " + pid);
         logShowmap(processName + "_" + pid, showmap);
 
         // CHECKSTYLE:OFF Generated code
@@ -214,9 +210,9 @@ public class NativeProcessesMemoryTest implements IDeviceTest, IRemoteTest {
 
     /** Logs a MemoryMetric of a process. */
     private void logMemoryMetric(String processName, MemoryMetric memoryMetric) {
-        mNativeProcessToMemory.put(processName + "_pss", Long.toString(memoryMetric.pss));
-        mNativeProcessToMemory.put(processName + "_rss", Long.toString(memoryMetric.rss));
-        mNativeProcessToMemory.put(processName + "_vss", Long.toString(memoryMetric.vss));
+        metrics.addTestMetric(processName + "_pss", Long.toString(memoryMetric.pss));
+        metrics.addTestMetric(processName + "_rss", Long.toString(memoryMetric.rss));
+        metrics.addTestMetric(processName + "_vss", Long.toString(memoryMetric.vss));
     }
 
     /** Container of memory numbers we want to log. */
