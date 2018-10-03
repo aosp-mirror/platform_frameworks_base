@@ -21,11 +21,10 @@ import android.annotation.SystemApi;
 import android.net.Uri;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
+import android.telephony.ims.ImsReasonInfo;
 import android.telephony.ims.aidl.IImsRegistration;
 import android.telephony.ims.aidl.IImsRegistrationCallback;
 import android.util.Log;
-
-import android.telephony.ims.ImsReasonInfo;
 
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -81,13 +80,14 @@ public class ImsRegistrationImplBase {
      * Callback class for receiving Registration callback events.
      * @hide
      */
-    public static class Callback {
+    public static class Callback extends IImsRegistrationCallback.Stub {
         /**
          * Notifies the framework when the IMS Provider is connected to the IMS network.
          *
          * @param imsRadioTech the radio access technology. Valid values are defined in
          * {@link ImsRegistrationTech}.
          */
+        @Override
         public void onRegistered(@ImsRegistrationTech int imsRadioTech) {
         }
 
@@ -97,6 +97,7 @@ public class ImsRegistrationImplBase {
          * @param imsRadioTech the radio access technology. Valid values are defined in
          * {@link ImsRegistrationTech}.
          */
+        @Override
         public void onRegistering(@ImsRegistrationTech int imsRadioTech) {
         }
 
@@ -105,6 +106,7 @@ public class ImsRegistrationImplBase {
          *
          * @param info the {@link ImsReasonInfo} associated with why registration was disconnected.
          */
+        @Override
         public void onDeregistered(ImsReasonInfo info) {
         }
 
@@ -115,6 +117,7 @@ public class ImsRegistrationImplBase {
          * @param imsRadioTech The {@link ImsRegistrationTech} type that has failed
          * @param info A {@link ImsReasonInfo} that identifies the reason for failure.
          */
+        @Override
         public void onTechnologyChangeFailed(@ImsRegistrationTech int imsRadioTech,
                 ImsReasonInfo info) {
         }
@@ -125,6 +128,7 @@ public class ImsRegistrationImplBase {
          * @param uris new array of subscriber {@link Uri}s that are associated with this IMS
          *         subscription.
          */
+        @Override
         public void onSubscriberAssociatedUriChanged(Uri[] uris) {
 
         }
