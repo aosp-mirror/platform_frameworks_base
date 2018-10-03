@@ -6,7 +6,9 @@ import android.animation.AnimatorSet;
 import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.content.Context;
+import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.os.Bundle;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -29,6 +31,7 @@ import java.util.Set;
 public class PagedTileLayout extends ViewPager implements QSTileLayout {
 
     private static final boolean DEBUG = false;
+    private static final String CURRENT_PAGE = "current_page";
 
     private static final String TAG = "PagedTileLayout";
     private static final int REVEAL_SCROLL_DURATION_MILLIS = 750;
@@ -54,6 +57,9 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
     private AnimatorSet mBounceAnimatorSet;
     private float mLastExpansion;
     private boolean mDistributeTiles = false;
+    private int mPageToRestore = -1;
+    private int mLayoutOrientation;
+    private int mLayoutDirection;
 
     public PagedTileLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -61,13 +67,37 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
         setAdapter(mAdapter);
         setOnPageChangeListener(mOnPageChangeListener);
         setCurrentItem(0, false);
+        mLayoutOrientation = getResources().getConfiguration().orientation;
+        mLayoutDirection = getLayoutDirection();
+    }
+
+    public void saveInstanceState(Bundle outState) {
+        outState.putInt(CURRENT_PAGE, getCurrentItem());
+    }
+
+    public void restoreInstanceState(Bundle savedInstanceState) {
+        // There's only 1 page at this point. We want to restore the correct page once the
+        // pages have been inflated
+        mPageToRestore = savedInstanceState.getInt(CURRENT_PAGE, -1);
+    }
+
+    @Override
+    protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        if (mLayoutOrientation != newConfig.orientation) {
+            mLayoutOrientation = newConfig.orientation;
+            setCurrentItem(0, false);
+        }
     }
 
     @Override
     public void onRtlPropertiesChanged(int layoutDirection) {
         super.onRtlPropertiesChanged(layoutDirection);
-        setAdapter(mAdapter);
-        setCurrentItem(0, false);
+        if (mLayoutDirection != layoutDirection) {
+            mLayoutDirection = layoutDirection;
+            setAdapter(mAdapter);
+            setCurrentItem(0, false);
+        }
     }
 
     @Override
@@ -218,7 +248,10 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
         mPageIndicator.setNumPages(mPages.size());
         setAdapter(mAdapter);
         mAdapter.notifyDataSetChanged();
-        setCurrentItem(0, false);
+        if (mPageToRestore != -1) {
+            setCurrentItem(mPageToRestore, false);
+            mPageToRestore = -1;
+        }
     }
 
     @Override
