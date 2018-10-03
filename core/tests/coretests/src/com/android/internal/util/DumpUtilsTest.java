@@ -15,8 +15,11 @@
  */
 package com.android.internal.util;
 
+import static com.android.internal.util.DumpUtils.CRITICAL_SECTION_COMPONENTS;
 import static com.android.internal.util.DumpUtils.filterRecord;
 import static com.android.internal.util.DumpUtils.isNonPlatformPackage;
+import static com.android.internal.util.DumpUtils.isPlatformCriticalPackage;
+import static com.android.internal.util.DumpUtils.isPlatformNonCriticalPackage;
 import static com.android.internal.util.DumpUtils.isPlatformPackage;
 
 import android.content.ComponentName;
@@ -25,7 +28,7 @@ import junit.framework.TestCase;
 
 /**
  * Run with:
- atest /android/pi-dev/frameworks/base/core/tests/coretests/src/com/android/internal/util/DumpTest.java
+ atest FrameworksCoreTests:DumpUtilsTest
  */
 public class DumpUtilsTest extends TestCase {
 
@@ -89,6 +92,32 @@ public class DumpUtilsTest extends TestCase {
         assertTrue(isNonPlatformPackage(wcn("com.google.def/abc")));
     }
 
+    public void testIsPlatformCriticalPackage() {
+        for (final ComponentName componentName : CRITICAL_SECTION_COMPONENTS) {
+            assertTrue(isPlatformCriticalPackage(() -> componentName));
+            assertTrue(isPlatformPackage(componentName));
+        }
+        assertFalse(isPlatformCriticalPackage(wcn("com.google.p/abc")));
+        assertFalse(isPlatformCriticalPackage(wcn("com.android.def/abc")));
+        assertFalse(isPlatformCriticalPackage(wcn("com.android.abc")));
+        assertFalse(isPlatformCriticalPackage(wcn("com.android")));
+        assertFalse(isPlatformCriticalPackage(wcn(null)));
+        assertFalse(isPlatformCriticalPackage(null));
+    }
+
+    public void testIsPlatformNonCriticalPackage() {
+        for (final ComponentName componentName : CRITICAL_SECTION_COMPONENTS) {
+            assertFalse(isPlatformNonCriticalPackage(() -> componentName));
+        }
+        assertTrue(isPlatformNonCriticalPackage(wcn("android/abc")));
+        assertTrue(isPlatformNonCriticalPackage(wcn("android.abc/abc")));
+        assertTrue(isPlatformNonCriticalPackage(wcn("com.android.def/abc")));
+
+        assertFalse(isPlatformNonCriticalPackage(wcn("com.google.def/abc")));
+        assertFalse(isPlatformNonCriticalPackage(wcn(null)));
+        assertFalse(isPlatformNonCriticalPackage(null));
+    }
+
     public void testFilterRecord() {
         assertFalse(filterRecord(null).test(wcn("com.google.p/abc")));
         assertFalse(filterRecord(null).test(wcn("com.android.p/abc")));
@@ -104,6 +133,19 @@ public class DumpUtilsTest extends TestCase {
         assertTrue(filterRecord("all-non-platform").test(wcn("com.google.p/abc")));
         assertFalse(filterRecord("all-non-platform").test(wcn("com.android.p/abc")));
         assertFalse(filterRecord("all-non-platform").test(wcn(null)));
+
+        for (final ComponentName componentName : CRITICAL_SECTION_COMPONENTS) {
+            assertTrue(filterRecord("all-platform-critical").test((() -> componentName)));
+            assertFalse(filterRecord("all-platform-non-critical").test((() -> componentName)));
+            assertTrue(filterRecord("all-platform").test((() -> componentName)));
+        }
+        assertFalse(filterRecord("all-platform-critical").test(wcn("com.google.p/abc")));
+        assertFalse(filterRecord("all-platform-critical").test(wcn("com.android.p/abc")));
+        assertFalse(filterRecord("all-platform-critical").test(wcn(null)));
+
+        assertTrue(filterRecord("all-platform-non-critical").test(wcn("com.android.p/abc")));
+        assertFalse(filterRecord("all-platform-non-critical").test(wcn("com.google.p/abc")));
+        assertFalse(filterRecord("all-platform-non-critical").test(wcn(null)));
 
         // Partial string match.
         assertTrue(filterRecord("abc").test(wcn("com.google.p/.abc")));
