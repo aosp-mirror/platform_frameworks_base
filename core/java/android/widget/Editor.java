@@ -101,6 +101,7 @@ import android.view.View.OnClickListener;
 import android.view.ViewConfiguration;
 import android.view.ViewGroup;
 import android.view.ViewGroup.LayoutParams;
+import android.view.ViewParent;
 import android.view.ViewTreeObserver;
 import android.view.WindowManager;
 import android.view.accessibility.AccessibilityNodeInfo;
@@ -4800,6 +4801,24 @@ public class Editor {
             return glyphHeight > magnifierContentHeight;
         }
 
+        private boolean viewIsMatrixTransformed() {
+            if (mMagnifierAnimator.mMagnifierIsShowing) {
+                // Do not check again when the magnifier is currently showing.
+                return false;
+            }
+            if (!mTextView.hasIdentityMatrix()) {
+                return true;
+            }
+            ViewParent viewParent = mTextView.getParent();
+            while (viewParent != null) {
+                if (viewParent instanceof View && !((View) viewParent).hasIdentityMatrix()) {
+                    return true;
+                }
+                viewParent = viewParent.getParent();
+            }
+            return false;
+        }
+
         /**
          * Computes the position where the magnifier should be shown, relative to
          * {@code mTextView}, and writes them to {@code showPosInView}. Also decides
@@ -4928,6 +4947,7 @@ public class Editor {
 
             final PointF showPosInView = new PointF();
             final boolean shouldShow = !tooLargeTextForMagnifier()
+                    && !viewIsMatrixTransformed()
                     && obtainMagnifierShowCoordinates(event, showPosInView);
             if (shouldShow) {
                 // Make the cursor visible and stop blinking.
