@@ -470,10 +470,10 @@ void Tree::drawStaging(Canvas* outCanvas) {
 void Tree::getPaintFor(SkPaint* outPaint, const TreeProperties &prop) const {
     // HWUI always draws VD with bilinear filtering.
     outPaint->setFilterQuality(kLow_SkFilterQuality);
-    if (prop.getRootAlpha() < 1.0f || prop.getColorFilter() != nullptr) {
+    if (prop.getColorFilter() != nullptr) {
         outPaint->setColorFilter(sk_ref_sp(prop.getColorFilter()));
-        outPaint->setAlpha(prop.getRootAlpha() * 255);
     }
+    outPaint->setAlpha(prop.getRootAlpha() * 255);
 }
 
 Bitmap& Tree::getBitmapUpdateIfDirty() {
