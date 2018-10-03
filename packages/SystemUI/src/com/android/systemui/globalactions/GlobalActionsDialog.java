@@ -90,6 +90,7 @@ import com.android.systemui.Interpolators;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.plugins.GlobalActions.GlobalActionsManager;
 import com.android.systemui.statusbar.phone.ScrimController;
+import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.util.EmergencyDialerConstants;
 import com.android.systemui.volume.SystemUIInterpolators.LogAccelerateInterpolator;
 
@@ -102,7 +103,8 @@ import java.util.List;
  * is provisioned.
  */
 class GlobalActionsDialog implements DialogInterface.OnDismissListener,
-        DialogInterface.OnClickListener, DialogInterface.OnShowListener {
+        DialogInterface.OnClickListener, DialogInterface.OnShowListener,
+        ConfigurationController.ConfigurationListener {
 
     static public final String SYSTEM_DIALOG_REASON_KEY = "reason";
     static public final String SYSTEM_DIALOG_REASON_GLOBAL_ACTIONS = "globalactions";
@@ -197,6 +199,8 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
         mEmergencyAffordanceManager = new EmergencyAffordanceManager(context);
         mScreenshotHelper = new ScreenshotHelper(context);
+
+        Dependency.get(ConfigurationController.class).addCallback(this);
     }
 
     /**
@@ -415,6 +419,15 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         int state = mLockPatternUtils.getStrongAuthForUser(userId);
         return (state == STRONG_AUTH_NOT_REQUIRED
                 || state == SOME_AUTH_REQUIRED_AFTER_USER_REQUEST);
+    }
+
+    @Override
+    public void onUiModeChanged() {
+        mContext.getTheme().applyStyle(mContext.getThemeResId(), true);
+    }
+
+    public void destroy() {
+        Dependency.get(ConfigurationController.class).removeCallback(this);
     }
 
     private final class PowerAction extends SinglePressAction implements LongPressAction {
