@@ -150,7 +150,7 @@ message Atom {
     }
 
     // Pulled events will start at field 10000.
-    // Next: 10037
+    // Next: 10038
     oneof pulled {
         WifiBytesTransfer wifi_bytes_transfer = 10000;
         WifiBytesTransferByFgBg wifi_bytes_transfer_by_fg_bg = 10001;
@@ -189,6 +189,7 @@ message Atom {
         ProcStats proc_stats_pkg_proc = 10034;
         ProcessCpuTime process_cpu_time = 10035;
         NativeProcessMemoryState native_process_memory_state = 10036;
+        CpuTimePerThreadFreq cpu_time_per_thread_freq = 10037;
     }
 
     // DO NOT USE field numbers above 100,000 in AOSP.
@@ -3120,4 +3121,30 @@ message ProcessCpuTime {
     optional int64 user_time_millis = 3;
     // Process cpu time in system space, cumulative from boot/process start
     optional int64 system_time_millis = 4;
+}
+
+/**
+ * Pulls the CPU usage for each thread.
+ *
+ * Read from /proc/$PID/task/$TID/time_in_state files.
+ *
+ * TODO(mishaw): This is an experimental atom. Issues with big/little CPU frequencies, and
+ * time_in_state files not being present on some phones, have not been addressed. These should be
+ * considered before a public release.
+ */
+message CpuTimePerThreadFreq {
+    // UID that owns the process.
+    optional int32 uid = 1 [(is_uid) = true];
+    // ID of the process.
+    optional uint32 process_id = 2;
+    // ID of the thread.
+    optional uint32 thread_id = 3;
+    // Name of the process taken from `/proc/$PID/cmdline`.
+    optional string process_name = 4;
+    // Name of the thread taken from `/proc/$PID/task/$TID/comm`
+    optional string thread_name = 5;
+    // What frequency the CPU was running at, in KHz
+    optional uint32 frequency_khz = 6;
+    // Time spent in frequency in milliseconds, since thread start.
+    optional uint32 time_millis = 7;
 }
