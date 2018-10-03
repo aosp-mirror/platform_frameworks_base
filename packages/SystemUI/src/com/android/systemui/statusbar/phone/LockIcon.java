@@ -51,7 +51,6 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
     private boolean mScreenOn;
     private boolean mLastScreenOn;
     private Drawable mUserAvatarIcon;
-    private TrustDrawable mTrustDrawable;
     private final UnlockMethodCache mUnlockMethodCache;
     private AccessibilityController mAccessibilityController;
     private boolean mHasFingerPrintIcon;
@@ -62,25 +61,7 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
 
     public LockIcon(Context context, AttributeSet attrs) {
         super(context, attrs);
-        mTrustDrawable = new TrustDrawable(context);
-        setBackground(mTrustDrawable);
         mUnlockMethodCache = UnlockMethodCache.getInstance(context);
-    }
-
-    @Override
-    protected void onVisibilityChanged(View changedView, int visibility) {
-        super.onVisibilityChanged(changedView, visibility);
-        if (isShown()) {
-            mTrustDrawable.start();
-        } else {
-            mTrustDrawable.stop();
-        }
-    }
-
-    @Override
-    protected void onDetachedFromWindow() {
-        super.onDetachedFromWindow();
-        mTrustDrawable.stop();
     }
 
     @Override
@@ -110,9 +91,6 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
         final int density = newConfig.densityDpi;
         if (density != mDensity) {
             mDensity = density;
-            mTrustDrawable.stop();
-            mTrustDrawable = new TrustDrawable(getContext());
-            setBackground(mTrustDrawable);
             update();
         }
     }
@@ -122,18 +100,9 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
     }
 
     public void update(boolean force) {
-        boolean visible = isShown()
-                && KeyguardUpdateMonitor.getInstance(mContext).isDeviceInteractive();
-        if (visible) {
-            mTrustDrawable.start();
-        } else {
-            mTrustDrawable.stop();
-        }
         int state = getState();
         boolean anyFingerprintIcon = state == STATE_FINGERPRINT || state == STATE_FINGERPRINT_ERROR;
         mHasFaceUnlockIcon = state == STATE_FACE_UNLOCK;
-        boolean useAdditionalPadding = anyFingerprintIcon;
-        boolean trustHidden = anyFingerprintIcon;
         if (state != mLastState || mDeviceInteractive != mLastDeviceInteractive
                 || mScreenOn != mLastScreenOn || force) {
             int iconAnimRes =
@@ -142,16 +111,10 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
             boolean isAnim = iconAnimRes != -1;
             if (iconAnimRes == R.drawable.lockscreen_fingerprint_draw_off_animation) {
                 anyFingerprintIcon = true;
-                useAdditionalPadding = true;
-                trustHidden = true;
             } else if (iconAnimRes == R.drawable.trusted_state_to_error_animation) {
                 anyFingerprintIcon = true;
-                useAdditionalPadding = false;
-                trustHidden = true;
             } else if (iconAnimRes == R.drawable.error_to_trustedstate_animation) {
                 anyFingerprintIcon = true;
-                useAdditionalPadding = false;
-                trustHidden = false;
             }
 
             Drawable icon;
@@ -166,20 +129,6 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
             final AnimatedVectorDrawable animation = icon instanceof AnimatedVectorDrawable
                     ? (AnimatedVectorDrawable) icon
                     : null;
-            int iconHeight = getResources().getDimensionPixelSize(
-                    R.dimen.keyguard_affordance_icon_height);
-            int iconWidth = getResources().getDimensionPixelSize(
-                    R.dimen.keyguard_affordance_icon_width);
-            if (!anyFingerprintIcon && (icon.getIntrinsicHeight() != iconHeight
-                    || icon.getIntrinsicWidth() != iconWidth)) {
-                icon = new IntrinsicSizeDrawable(icon, iconWidth, iconHeight);
-            }
-            setPaddingRelative(0, 0, 0, useAdditionalPadding
-                    ? getResources().getDimensionPixelSize(
-                    R.dimen.fingerprint_icon_additional_padding)
-                    : 0);
-            setRestingAlpha(
-                    anyFingerprintIcon ? 1f : KeyguardAffordanceHelper.SWIPE_RESTING_ALPHA_AMOUNT);
             setImageDrawable(icon, false);
             if (mHasFaceUnlockIcon) {
                 announceForAccessibility(getContext().getString(
@@ -204,9 +153,6 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
             mLastScreenOn = mScreenOn;
         }
 
-        // Hide trust circle when fingerprint is running.
-        boolean trustManaged = mUnlockMethodCache.isTrustManaged() && !trustHidden;
-        mTrustDrawable.setTrustManaged(trustManaged);
         updateClickability();
     }
 
@@ -250,26 +196,20 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
     private Drawable getIconForState(int state, boolean screenOn, boolean deviceInteractive) {
         int iconRes;
         switch (state) {
+            case STATE_FINGERPRINT:
             case STATE_LOCKED:
-                iconRes = R.drawable.ic_lock_24dp;
+                iconRes = R.drawable.ic_lock;
                 break;
             case STATE_LOCK_OPEN:
                 if (mUnlockMethodCache.isTrustManaged() && mUnlockMethodCache.isTrusted()
                     && mUserAvatarIcon != null) {
                     return mUserAvatarIcon;
                 } else {
-                    iconRes = R.drawable.ic_lock_open_24dp;
+                    iconRes = R.drawable.ic_lock_open;
                 }
                 break;
             case STATE_FACE_UNLOCK:
                 iconRes = R.drawable.ic_face_unlock;
-                break;
-            case STATE_FINGERPRINT:
-                // If screen is off and device asleep, use the draw on animation so the first frame
-                // gets drawn.
-                iconRes = screenOn && deviceInteractive
-                        ? R.drawable.ic_fingerprint
-                        : R.drawable.lockscreen_fingerprint_draw_on_animation;
                 break;
             case STATE_FINGERPRINT_ERROR:
                 iconRes = R.drawable.ic_fingerprint_error;
@@ -317,31 +257,6 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
             return STATE_FINGERPRINT;
         } else {
             return STATE_LOCKED;
-        }
-    }
-
-    /**
-     * A wrapper around another Drawable that overrides the intrinsic size.
-     */
-    private static class IntrinsicSizeDrawable extends InsetDrawable {
-
-        private final int mIntrinsicWidth;
-        private final int mIntrinsicHeight;
-
-        public IntrinsicSizeDrawable(Drawable drawable, int intrinsicWidth, int intrinsicHeight) {
-            super(drawable, 0);
-            mIntrinsicWidth = intrinsicWidth;
-            mIntrinsicHeight = intrinsicHeight;
-        }
-
-        @Override
-        public int getIntrinsicWidth() {
-            return mIntrinsicWidth;
-        }
-
-        @Override
-        public int getIntrinsicHeight() {
-            return mIntrinsicHeight;
         }
     }
 }
