@@ -2302,8 +2302,9 @@ public class NotificationManagerService extends SystemService {
         public ParceledListSlice<NotificationChannelGroup> getNotificationChannelGroups(
                 String pkg) {
             checkCallerIsSystemOrSameApp(pkg);
+
             return mRankingHelper.getNotificationChannelGroups(
-                    pkg, Binder.getCallingUid(), false, false);
+                    pkg, Binder.getCallingUid(), false, false, true);
         }
 
         @Override
@@ -2379,7 +2380,9 @@ public class NotificationManagerService extends SystemService {
         public ParceledListSlice<NotificationChannelGroup> getNotificationChannelGroupsForPackage(
                 String pkg, int uid, boolean includeDeleted) {
             checkCallerIsSystem();
-            return mRankingHelper.getNotificationChannelGroups(pkg, uid, includeDeleted, true);
+
+            return mRankingHelper.getNotificationChannelGroups(
+                    pkg, uid, includeDeleted, true, false);
         }
 
         @Override
