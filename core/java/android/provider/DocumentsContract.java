@@ -942,13 +942,26 @@ public final class DocumentsContract {
         return false;
     }
 
-    /** {@hide} */
+    /**
+     * Test if the given URI represents roots backed by {@link DocumentsProvider}.
+     *
+     * @see #buildRootsUri(String)
+     *
+     * {@hide}
+     */
+    public static boolean isRootsUri(Context context, @Nullable Uri uri) {
+        return isRootUri(context, uri, 1 /* pathSize */);
+    }
+
+    /**
+     * Test if the given URI represents specific root backed by {@link DocumentsProvider}.
+     *
+     * @see #buildRootUri(String, String)
+     *
+     * {@hide}
+     */
     public static boolean isRootUri(Context context, @Nullable Uri uri) {
-        if (isContentUri(uri) && isDocumentsProvider(context, uri.getAuthority())) {
-            final List<String> paths = uri.getPathSegments();
-            return (paths.size() == 2 && PATH_ROOT.equals(paths.get(0)));
-        }
-        return false;
+        return isRootUri(context, uri, 2 /* pathSize */);
     }
 
     /** {@hide} */
@@ -965,6 +978,14 @@ public final class DocumentsContract {
     public static boolean isTreeUri(Uri uri) {
         final List<String> paths = uri.getPathSegments();
         return (paths.size() >= 2 && PATH_TREE.equals(paths.get(0)));
+    }
+
+    private static boolean isRootUri(Context context, @Nullable Uri uri, int pathSize) {
+        if (isContentUri(uri) && isDocumentsProvider(context, uri.getAuthority())) {
+            final List<String> paths = uri.getPathSegments();
+            return (paths.size() == pathSize && PATH_ROOT.equals(paths.get(0)));
+        }
+        return false;
     }
 
     private static boolean isDocumentsProvider(Context context, String authority) {

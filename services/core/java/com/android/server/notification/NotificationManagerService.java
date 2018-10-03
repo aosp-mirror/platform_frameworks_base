@@ -4289,7 +4289,8 @@ public class NotificationManagerService extends SystemService {
         }
         // posted from app A on behalf of app A
         if (isCallerSameApp(targetPkg, callingUid, userId)
-                && TextUtils.equals(callingPkg, targetPkg)) {
+                && (TextUtils.equals(callingPkg, targetPkg)
+                || isCallerSameApp(callingPkg, callingUid, userId))) {
             return callingUid;
         }
 
@@ -4306,7 +4307,8 @@ public class NotificationManagerService extends SystemService {
             return targetUid;
         }
 
-        throw new SecurityException("Caller " + callingUid + " cannot post for pkg " + targetPkg);
+        throw new SecurityException("Caller " + callingPkg + ":" + callingUid
+                + " cannot post for pkg " + targetPkg + " in user " + userId);
     }
 
     /**
@@ -4326,7 +4328,7 @@ public class NotificationManagerService extends SystemService {
         if (!isSystemNotification && !isNotificationFromListener) {
             synchronized (mNotificationLock) {
                 if (mNotificationsByKey.get(r.sbn.getKey()) == null
-                        && isCallerInstantApp(pkg, callingUid, r.getUserId())) {
+                        && isCallerInstantApp(pkg, Binder.getCallingUid(), userId)) {
                     // Ephemeral apps have some special constraints for notifications.
                     // They are not allowed to create new notifications however they are allowed to
                     // update notifications created by the system (e.g. a foreground service
@@ -4732,7 +4734,8 @@ public class NotificationManagerService extends SystemService {
                     if (notification.getSmallIcon() != null) {
                         StatusBarNotification oldSbn = (old != null) ? old.sbn : null;
                         mListeners.notifyPostedLocked(r, old);
-                        if (oldSbn == null || !Objects.equals(oldSbn.getGroup(), n.getGroup())) {
+                        if ((oldSbn == null || !Objects.equals(oldSbn.getGroup(), n.getGroup()))
+                                && !isCritical(r)) {
                             mHandler.post(new Runnable() {
                                 @Override
                                 public void run() {
@@ -4899,6 +4902,19 @@ public class NotificationManagerService extends SystemService {
         }
 
         return false;
+    }
+
+    /**
+     * Check if the notification is classified as critical.
+     *
+     * @param record the record to test for criticality
+     * @return {@code true} if notification is considered critical
+     *
+     * @see CriticalNotificationExtractor for criteria
+     */
+    private boolean isCritical(NotificationRecord record) {
+        // 0 is the most critical
+        return record.getCriticality() < CriticalNotificationExtractor.NORMAL;
     }
 
     /**

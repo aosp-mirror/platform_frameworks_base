@@ -882,9 +882,6 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     private boolean mTextSetFromXmlOrResourceId = false;
     // Resource id used to set the text.
     private @StringRes int mTextId = ResourceId.ID_NULL;
-    // Last value used on AFM.notifyValueChanged(), used to optimize autofill workflow by avoiding
-    // calls when the value did not change
-    private CharSequence mLastValueSentToAutofillManager;
     //
     // End of autofill-related attributes
 
@@ -5884,7 +5881,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (needEditableForNotification) {
             sendAfterTextChanged((Editable) text);
         } else {
-            notifyAutoFillManagerAfterTextChangedIfNeeded();
+            notifyAutoFillManagerAfterTextChanged();
         }
 
         // SelectionModifierCursorController depends on textCanBeSelected, which depends on text
@@ -9933,33 +9930,23 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         // Always notify AutoFillManager - it will return right away if autofill is disabled.
-        notifyAutoFillManagerAfterTextChangedIfNeeded();
+        notifyAutoFillManagerAfterTextChanged();
 
         hideErrorIfUnchanged();
     }
 
-    private void notifyAutoFillManagerAfterTextChangedIfNeeded() {
+    private void notifyAutoFillManagerAfterTextChanged() {
         // It is important to not check whether the view is important for autofill
         // since the user can trigger autofill manually on not important views.
         if (!isAutofillable()) {
             return;
         }
         final AutofillManager afm = mContext.getSystemService(AutofillManager.class);
-        if (afm == null) {
-            return;
-        }
-
-        if (mLastValueSentToAutofillManager == null
-                || !mLastValueSentToAutofillManager.equals(mText)) {
+        if (afm != null) {
             if (android.view.autofill.Helper.sVerbose) {
-                Log.v(LOG_TAG, "notifying AFM after text changed");
+                Log.v(LOG_TAG, "notifyAutoFillManagerAfterTextChanged");
             }
             afm.notifyValueChanged(TextView.this);
-            mLastValueSentToAutofillManager = mText;
-        } else {
-            if (android.view.autofill.Helper.sVerbose) {
-                Log.v(LOG_TAG, "not notifying AFM on unchanged text");
-            }
         }
     }
 

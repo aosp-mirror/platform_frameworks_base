@@ -301,9 +301,10 @@ public class PowerUI extends SystemUI {
             // mark if we've already shown a warning this cycle. This will prevent the notification
             // trigger from spamming users by only showing low/critical warnings once per cycle
             if (hybridEnabled) {
-                if (mTimeRemaining < mEnhancedEstimates.getSevereWarningThreshold()
-                        || mBatteryLevel < mLowBatteryReminderLevels[1]) {
+                if (mTimeRemaining <= mEnhancedEstimates.getSevereWarningThreshold()
+                        || mBatteryLevel <= mLowBatteryReminderLevels[1]) {
                     mSevereWarningShownThisChargeCycle = true;
+                    mLowWarningShownThisChargeCycle = true;
                 } else {
                     mLowWarningShownThisChargeCycle = true;
                 }

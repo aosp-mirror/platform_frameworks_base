@@ -1364,7 +1364,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     @Override
     boolean hasContentToDisplay() {
         if (!mAppFreezing && isDrawnLw() && (mViewVisibility == View.VISIBLE
-                || (mWinAnimator.isAnimationSet() && !mService.mAppTransition.isTransitionSet()))) {
+                || (isAnimating() && !mService.mAppTransition.isTransitionSet()))) {
             return true;
         }
 
@@ -1443,9 +1443,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         final AppWindowToken atoken = mAppToken;
         if (atoken != null) {
             return ((!isParentWindowHidden() && !atoken.hiddenRequested)
-                    || mWinAnimator.isAnimationSet());
+                    || isAnimating());
         }
-        return !isParentWindowHidden() || mWinAnimator.isAnimationSet();
+        return !isParentWindowHidden() || isAnimating();
     }
 
     /**
@@ -1476,9 +1476,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (mToken.waitingToShow && mService.mAppTransition.isTransitionSet()) {
             return false;
         }
+        final boolean parentAndClientVisible = !isParentWindowHidden()
+                && mViewVisibility == View.VISIBLE && !mToken.isHidden();
         return mHasSurface && mPolicyVisibility && !mDestroying
-                && ((!isParentWindowHidden() && mViewVisibility == View.VISIBLE && !mToken.isHidden())
-                        || mWinAnimator.isAnimationSet());
+                && (parentAndClientVisible || isAnimating());
     }
 
     // TODO: Another visibility method that was added late in the release to minimize risk.
@@ -1508,7 +1509,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         final AppWindowToken atoken = mAppToken;
         return isDrawnLw() && mPolicyVisibility
                 && ((!isParentWindowHidden() && (atoken == null || !atoken.hiddenRequested))
-                        || mWinAnimator.isAnimationSet());
+                        || isAnimating());
     }
 
     /**
@@ -1562,7 +1563,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // to determine if it's occluding apps.
         return ((!mIsWallpaper && mAttrs.format == PixelFormat.OPAQUE)
                 || (mIsWallpaper && mWallpaperVisible))
-                && isDrawnLw() && !mWinAnimator.isAnimationSet();
+                && isDrawnLw() && !isAnimating();
     }
 
     @Override
@@ -1849,7 +1850,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     + " mRemoveOnExit=" + mRemoveOnExit
                     + " mHasSurface=" + mHasSurface
                     + " surfaceShowing=" + mWinAnimator.getShown()
-                    + " isAnimationSet=" + mWinAnimator.isAnimationSet()
+                    + " animating=" + isAnimating()
                     + " app-animation="
                     + (mAppToken != null ? mAppToken.isSelfAnimating() : "false")
                     + " mWillReplaceWindow=" + mWillReplaceWindow
@@ -1916,7 +1917,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                         mService.mAccessibilityController.onWindowTransitionLocked(this, transit);
                     }
                 }
-                final boolean isAnimating = mWinAnimator.isAnimationSet()
+                final boolean isAnimating = isAnimating()
                         && (mAppToken == null || !mAppToken.isWaitingForTransitionStart());
                 final boolean lastWindowIsStartingWindow = startingWindow && mAppToken != null
                         && mAppToken.isLastWindow(this);
@@ -2434,10 +2435,10 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         if (DEBUG_VISIBILITY) Slog.v(TAG, "Policy visibility true: " + this);
         if (doAnimation) {
             if (DEBUG_VISIBILITY) Slog.v(TAG, "doAnimation: mPolicyVisibility="
-                    + mPolicyVisibility + " isAnimationSet=" + mWinAnimator.isAnimationSet());
+                    + mPolicyVisibility + " animating=" + isAnimating());
             if (!mToken.okToAnimate()) {
                 doAnimation = false;
-            } else if (mPolicyVisibility && !mWinAnimator.isAnimationSet()) {
+            } else if (mPolicyVisibility && !isAnimating()) {
                 // Check for the case where we are currently visible and
                 // not animating; we do not want to do animation at such a
                 // point to become visible when we already are.
@@ -2476,7 +2477,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
         if (doAnimation) {
             mWinAnimator.applyAnimationLocked(TRANSIT_EXIT, false);
-            if (!mWinAnimator.isAnimationSet()) {
+            if (!isAnimating()) {
                 doAnimation = false;
             }
         }
@@ -3216,10 +3217,8 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     + " mWallpaperVisible=" + mWallpaperVisible);
         }
         if (dumpAll) {
-            pw.println(prefix + "mBaseLayer=" + mBaseLayer
-                    + " mSubLayer=" + mSubLayer
-                    + " mAnimLayer=" + mLayer + "=" + mWinAnimator.mAnimLayer
-                    + " mLastLayer=" + mWinAnimator.mLastLayer);
+            pw.print(prefix); pw.print("mBaseLayer="); pw.print(mBaseLayer);
+                    pw.print(" mSubLayer="); pw.print(mSubLayer);
         }
         if (dumpAll) {
             pw.println(prefix + "mToken=" + mToken);
@@ -3697,7 +3696,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                     + " tok.hiddenRequested="
                     + (mAppToken != null && mAppToken.hiddenRequested)
                     + " tok.hidden=" + (mAppToken != null && mAppToken.isHidden())
-                    + " animationSet=" + mWinAnimator.isAnimationSet()
+                    + " animating=" + isAnimating()
                     + " tok animating="
                     + (mAppToken != null && mAppToken.isSelfAnimating())
                     + " Callers=" + Debug.getCallers(4));
@@ -3747,18 +3746,6 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             }
         }
         return windowInfo;
-    }
-
-    int getHighestAnimLayer() {
-        int highest = mWinAnimator.mAnimLayer;
-        for (int i = mChildren.size() - 1; i >= 0; i--) {
-            final WindowState c = mChildren.get(i);
-            final int childLayer = c.getHighestAnimLayer();
-            if (childLayer > highest) {
-                highest = childLayer;
-            }
-        }
-        return highest;
     }
 
     @Override
@@ -4110,25 +4097,25 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
         if (DEBUG_VISIBILITY) {
             Slog.v(TAG, "Win " + this + ": isDrawn=" + isDrawnLw()
-                    + ", isAnimationSet=" + mWinAnimator.isAnimationSet());
+                    + ", animating=" + isAnimating());
             if (!isDrawnLw()) {
                 Slog.v(TAG, "Not displayed: s=" + mWinAnimator.mSurfaceController
                         + " pv=" + mPolicyVisibility
                         + " mDrawState=" + mWinAnimator.mDrawState
                         + " ph=" + isParentWindowHidden()
                         + " th=" + (mAppToken != null ? mAppToken.hiddenRequested : false)
-                        + " a=" + mWinAnimator.isAnimationSet());
+                        + " a=" + isAnimating());
             }
         }
 
         results.numInteresting++;
         if (isDrawnLw()) {
             results.numDrawn++;
-            if (!mWinAnimator.isAnimationSet()) {
+            if (!isAnimating()) {
                 results.numVisible++;
             }
             results.nowGone = false;
-        } else if (mWinAnimator.isAnimationSet()) {
+        } else if (isAnimating()) {
             results.nowGone = false;
         }
     }

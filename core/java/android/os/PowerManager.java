@@ -1154,10 +1154,15 @@ public final class PowerManager {
      *
      * @return True if the set was allowed.
      *
-     * @see #isPowerSaveMode()
-     *
      * @hide
+     * @see #isPowerSaveMode()
      */
+    @SystemApi
+    @TestApi
+    @RequiresPermission(anyOf = {
+            android.Manifest.permission.DEVICE_POWER,
+            android.Manifest.permission.POWER_SAVER
+    })
     public boolean setPowerSaveMode(boolean mode) {
         try {
             return mService.setPowerSaveMode(mode);

@@ -67,7 +67,7 @@ public:
 
     inline int getAlpha() const { return alpha; }
 
-    inline SkBlendMode getMode() const { return mode; }
+    SkBlendMode getMode() const;
 
     inline SkColorFilter* getColorFilter() const { return mColorFilter.get(); }
 

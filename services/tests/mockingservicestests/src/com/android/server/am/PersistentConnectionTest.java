@@ -43,6 +43,8 @@ import java.util.Collections;
 
 @SmallTest
 public class PersistentConnectionTest extends AndroidTestCase {
+    private static final String TAG = "PersistentConnectionTest";
+    
     private static class MyConnection extends PersistentConnection<IDeviceAdminService> {
         public long uptimeMillis = 12345;
 
@@ -50,9 +52,16 @@ public class PersistentConnectionTest extends AndroidTestCase {
 
         public MyConnection(String tag, Context context, Handler handler, int userId,
                 ComponentName componentName, long rebindBackoffSeconds,
-                double rebindBackoffIncrease, long rebindMaxBackoffSeconds) {
+                double rebindBackoffIncrease, long rebindMaxBackoffSeconds,
+                long resetBackoffDelay) {
             super(tag, context, handler, userId, componentName,
-                    rebindBackoffSeconds, rebindBackoffIncrease, rebindMaxBackoffSeconds);
+                    rebindBackoffSeconds, rebindBackoffIncrease, rebindMaxBackoffSeconds,
+                    resetBackoffDelay);
+        }
+
+        @Override
+        protected int getBindFlags() {
+            return Context.BIND_FOREGROUND_SERVICE;
         }
 
         @Override
@@ -108,10 +117,11 @@ public class PersistentConnectionTest extends AndroidTestCase {
         final ComponentName cn = ComponentName.unflattenFromString("a.b.c/def");
         final Handler handler = new Handler(Looper.getMainLooper());
 
-        final MyConnection conn = new MyConnection("tag", context, handler, userId, cn,
+        final MyConnection conn = new MyConnection(TAG, context, handler, userId, cn,
                 /* rebindBackoffSeconds= */ 5,
                 /* rebindBackoffIncrease= */ 1.5,
-                /* rebindMaxBackoffSeconds= */ 11);
+                /* rebindMaxBackoffSeconds= */ 11,
+                /* resetBackoffDelay= */ 999);
 
         assertFalse(conn.isBound());
         assertFalse(conn.isConnected());
@@ -310,10 +320,11 @@ public class PersistentConnectionTest extends AndroidTestCase {
         final ComponentName cn = ComponentName.unflattenFromString("a.b.c/def");
         final Handler handler = new Handler(Looper.getMainLooper());
 
-        final MyConnection conn = new MyConnection("tag", context, handler, userId, cn,
+        final MyConnection conn = new MyConnection(TAG, context, handler, userId, cn,
                 /* rebindBackoffSeconds= */ 5,
                 /* rebindBackoffIncrease= */ 1.5,
-                /* rebindMaxBackoffSeconds= */ 11);
+                /* rebindMaxBackoffSeconds= */ 11,
+                /* resetBackoffDelay= */ 999);
 
         when(context.bindServiceAsUser(any(Intent.class), any(ServiceConnection.class), anyInt(),
                 any(Handler.class), any(UserHandle.class)))
@@ -350,5 +361,79 @@ public class PersistentConnectionTest extends AndroidTestCase {
         // Should still not be bound.
         assertFalse(conn.isBound());
         assertFalse(conn.shouldBeBoundForTest());
+    }
+
+    public void testResetBackoff() {
+        final Context context = mock(Context.class);
+        final int userId = 11;
+        final ComponentName cn = ComponentName.unflattenFromString("a.b.c/def");
+        final Handler handler = new Handler(Looper.getMainLooper());
+
+        final MyConnection conn = new MyConnection(TAG, context, handler, userId, cn,
+                /* rebindBackoffSeconds= */ 5,
+                /* rebindBackoffIncrease= */ 1.5,
+                /* rebindMaxBackoffSeconds= */ 11,
+                /* resetBackoffDelay= */ 20);
+
+        when(context.bindServiceAsUser(any(Intent.class), any(ServiceConnection.class), anyInt(),
+                any(Handler.class), any(UserHandle.class)))
+                .thenReturn(true);
+
+        // Bind.
+        conn.bind();
+
+        assertTrue(conn.isBound());
+        assertTrue(conn.shouldBeBoundForTest());
+        assertFalse(conn.isRebindScheduled());
+
+        conn.elapse(1000);
+
+        // Then the binding is "died"...
+        conn.getServiceConnectionForTest().onBindingDied(cn);
+
+        assertFalse(conn.isBound());
+        assertTrue(conn.shouldBeBoundForTest());
+        assertFalse(conn.isConnected());
+        assertNull(conn.getServiceBinder());
+        assertTrue(conn.isRebindScheduled());
+
+        assertEquals(7500, conn.getNextBackoffMsForTest());
+
+        assertEquals(
+                Arrays.asList(Pair.create(conn.getBindForBackoffRunnableForTest(),
+                        conn.uptimeMillis + 5000)),
+                conn.scheduledRunnables);
+
+        // 5000 ms later...
+        conn.elapse(5000);
+
+        assertTrue(conn.isBound());
+        assertTrue(conn.shouldBeBoundForTest());
+        assertFalse(conn.isConnected());
+        assertNull(conn.getServiceBinder());
+        assertFalse(conn.isRebindScheduled());
+
+        assertEquals(7500, conn.getNextBackoffMsForTest());
+
+        // Connected.
+        conn.getServiceConnectionForTest().onServiceConnected(cn,
+                new IDeviceAdminService.Stub() {});
+
+        assertTrue(conn.isBound());
+        assertTrue(conn.shouldBeBoundForTest());
+        assertTrue(conn.isConnected());
+        assertNotNull(conn.getServiceBinder());
+        assertFalse(conn.isRebindScheduled());
+
+        assertEquals(7500, conn.getNextBackoffMsForTest());
+
+        assertEquals(
+                Arrays.asList(Pair.create(conn.getStableCheckRunnableForTest(),
+                        conn.uptimeMillis + 20000)),
+                conn.scheduledRunnables);
+
+        conn.elapse(20000);
+
+        assertEquals(5000, conn.getNextBackoffMsForTest());
     }
 }

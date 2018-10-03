@@ -228,7 +228,8 @@ LOCAL_SRC_FILES := \
     tests/e2e/Anomaly_count_e2e_test.cpp \
     tests/e2e/Anomaly_duration_sum_e2e_test.cpp \
     tests/e2e/ConfigTtl_e2e_test.cpp \
-    tests/e2e/PartialBucket_e2e_test.cpp
+    tests/e2e/PartialBucket_e2e_test.cpp \
+    tests/shell/ShellSubscriber_test.cpp
 
 LOCAL_STATIC_LIBRARIES := \
     $(statsd_common_static_libraries) \

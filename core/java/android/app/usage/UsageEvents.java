@@ -165,6 +165,12 @@ public final class UsageEvents implements Parcelable {
          */
         public static final int KEYGUARD_HIDDEN = 18;
 
+        /**
+         * Keep in sync with the greatest event type value.
+         * @hide
+         */
+        public static final int MAX_EVENT_TYPE = 18;
+
         /** @hide */
         public static final int FLAG_IS_PACKAGE_INSTANT_APP = 1 << 0;
 
@@ -174,6 +180,12 @@ public final class UsageEvents implements Parcelable {
         })
         @Retention(RetentionPolicy.SOURCE)
         public @interface EventFlags {}
+
+        /**
+         * Bitwise OR all valid flag constants to create this constant.
+         * @hide
+         */
+        public static final int VALID_FLAG_BITS = FLAG_IS_PACKAGE_INSTANT_APP;
 
         /**
          * {@hide}

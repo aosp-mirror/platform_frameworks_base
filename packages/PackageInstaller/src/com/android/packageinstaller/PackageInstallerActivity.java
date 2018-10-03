@@ -430,9 +430,14 @@ public class PackageInstallerActivity extends AlertActivity {
             // Check for unknown sources restriction
             final int unknownSourcesRestrictionSource = mUserManager.getUserRestrictionSource(
                     UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES, Process.myUserHandle());
-            if ((unknownSourcesRestrictionSource & UserManager.RESTRICTION_SOURCE_SYSTEM) != 0) {
+            final int unknownSourcesGlobalRestrictionSource = mUserManager.getUserRestrictionSource(
+                    UserManager.DISALLOW_INSTALL_UNKNOWN_SOURCES_GLOBALLY, Process.myUserHandle());
+            final int systemRestriction = UserManager.RESTRICTION_SOURCE_SYSTEM
+                    & (unknownSourcesRestrictionSource | unknownSourcesGlobalRestrictionSource);
+            if (systemRestriction != 0) {
                 showDialogInner(DLG_UNKNOWN_SOURCES_RESTRICTED_FOR_USER);
-            } else if (unknownSourcesRestrictionSource != UserManager.RESTRICTION_NOT_SET) {
+            } else if (unknownSourcesRestrictionSource != UserManager.RESTRICTION_NOT_SET
+                    || unknownSourcesGlobalRestrictionSource != UserManager.RESTRICTION_NOT_SET) {
                 startActivity(new Intent(Settings.ACTION_SHOW_ADMIN_SUPPORT_DETAILS));
                 finish();
             } else {

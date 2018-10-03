@@ -1103,6 +1103,9 @@ public class Typeface {
         }
 
         for (FontConfig.Alias alias : aliases) {
+            if (systemFontMap.containsKey(alias.getName())) {
+                continue; // If alias and named family are conflict, use named family.
+            }
             final Typeface base = systemFontMap.get(alias.getToName());
             final int weight = alias.getWeight();
             final Typeface newFace = weight == 400 ? base :

@@ -33,6 +33,11 @@ ZipFile::ZipFile(ZipArchiveHandle handle, const ZipEntry& entry,
     : zip_handle_(handle), zip_entry_(entry), source_(source) {}
 
 std::unique_ptr<IData> ZipFile::OpenAsData() {
+  // The file will fail to be mmaped if it is empty
+  if (zip_entry_.uncompressed_length == 0) {
+    return util::make_unique<EmptyData>();
+  }
+
   if (zip_entry_.method == kCompressStored) {
     int fd = GetFileDescriptor(zip_handle_);
 

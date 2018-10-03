@@ -58,6 +58,7 @@ LOCAL_JNI_SHARED_LIBRARIES := \
     libbacktrace \
     libbase \
     libbinder \
+    libbinderthreadstate \
     libc++ \
     libcutils \
     liblog \

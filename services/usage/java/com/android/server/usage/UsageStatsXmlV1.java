@@ -196,11 +196,7 @@ final class UsageStatsXmlV1 {
                 event.mNotificationChannelId = (channelId != null) ? channelId.intern() : null;
                 break;
         }
-
-        if (statsOut.events == null) {
-            statsOut.events = new EventList();
-        }
-        statsOut.events.insert(event);
+        statsOut.addEvent(event);
     }
 
     private static void writeUsageStats(XmlSerializer xml, final IntervalStats stats,

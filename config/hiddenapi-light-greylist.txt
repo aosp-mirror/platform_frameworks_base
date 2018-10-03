@@ -867,7 +867,6 @@ Landroid/os/PowerManager;->GO_TO_SLEEP_REASON_TIMEOUT:I
 Landroid/os/PowerManager;->isLightDeviceIdleMode()Z
 Landroid/os/PowerManager;->mHandler:Landroid/os/Handler;
 Landroid/os/PowerManager;->mService:Landroid/os/IPowerManager;
-Landroid/os/PowerManager;->setPowerSaveMode(Z)Z
 Landroid/os/PowerManager;->validateWakeLockParameters(ILjava/lang/String;)V
 Landroid/os/PowerManager;->wakeUp(JLjava/lang/String;)V
 Landroid/os/Process;->BLUETOOTH_UID:I

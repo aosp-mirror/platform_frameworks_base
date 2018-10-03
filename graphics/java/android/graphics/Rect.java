@@ -23,8 +23,11 @@ import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
+import android.util.proto.ProtoInputStream;
 import android.util.proto.ProtoOutputStream;
+import android.util.proto.WireTypeMismatchException;
 
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -229,6 +232,40 @@ public final class Rect implements Parcelable {
         protoOutputStream.write(RectProto.RIGHT, right);
         protoOutputStream.write(RectProto.BOTTOM, bottom);
         protoOutputStream.end(token);
+    }
+
+    /**
+     * Read from a protocol buffer input stream.
+     * Protocol buffer message definition at {@link android.graphics.RectProto}
+     *
+     * @param proto     Stream to read the Rect object from.
+     * @param fieldId   Field Id of the Rect as defined in the parent message
+     * @hide
+     */
+    public void readFromProto(@NonNull ProtoInputStream proto, long fieldId) throws IOException,
+            WireTypeMismatchException {
+        final long token = proto.start(fieldId);
+        try {
+            while (proto.nextField() != ProtoInputStream.NO_MORE_FIELDS) {
+                switch (proto.getFieldNumber()) {
+                    case (int) RectProto.LEFT:
+                        left = proto.readInt(RectProto.LEFT);
+                        break;
+                    case (int) RectProto.TOP:
+                        top = proto.readInt(RectProto.TOP);
+                        break;
+                    case (int) RectProto.RIGHT:
+                        right = proto.readInt(RectProto.RIGHT);
+                        break;
+                    case (int) RectProto.BOTTOM:
+                        bottom = proto.readInt(RectProto.BOTTOM);
+                        break;
+                }
+            }
+        } finally {
+            // Let caller handle any exceptions
+            proto.end(token);
+        }
     }
 
     /**

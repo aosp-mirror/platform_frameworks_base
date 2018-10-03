@@ -452,10 +452,12 @@ public class PackageParser {
         public final boolean use32bitAbi;
         public final boolean extractNativeLibs;
         public final boolean isolatedSplits;
+        public final boolean isSplitRequired;
 
         public ApkLite(String codePath, String packageName, String splitName,
                 boolean isFeatureSplit,
-                String configForSplit, String usesSplitName, int versionCode, int versionCodeMajor,
+                String configForSplit, String usesSplitName, boolean isSplitRequired,
+                int versionCode, int versionCodeMajor,
                 int revisionCode, int installLocation, List<VerifierInfo> verifiers,
                 SigningDetails signingDetails, boolean coreApp,
                 boolean debuggable, boolean multiArch, boolean use32bitAbi,
@@ -478,6 +480,7 @@ public class PackageParser {
             this.use32bitAbi = use32bitAbi;
             this.extractNativeLibs = extractNativeLibs;
             this.isolatedSplits = isolatedSplits;
+            this.isSplitRequired = isSplitRequired;
         }
 
         public long getLongVersionCode() {
@@ -1695,6 +1698,7 @@ public class PackageParser {
         boolean extractNativeLibs = true;
         boolean isolatedSplits = false;
         boolean isFeatureSplit = false;
+        boolean isSplitRequired = false;
         String configForSplit = null;
         String usesSplitName = null;
 
@@ -1717,6 +1721,8 @@ public class PackageParser {
                 configForSplit = attrs.getAttributeValue(i);
             } else if (attr.equals("isFeatureSplit")) {
                 isFeatureSplit = attrs.getAttributeBooleanValue(i, false);
+            } else if (attr.equals("isSplitRequired")) {
+                isSplitRequired = attrs.getAttributeBooleanValue(i, false);
             }
         }
 
@@ -1772,8 +1778,8 @@ public class PackageParser {
         }
 
         return new ApkLite(codePath, packageSplit.first, packageSplit.second, isFeatureSplit,
-                configForSplit, usesSplitName, versionCode, versionCodeMajor, revisionCode,
-                installLocation, verifiers, signingDetails, coreApp, debuggable,
+                configForSplit, usesSplitName, isSplitRequired, versionCode, versionCodeMajor,
+                revisionCode, installLocation, verifiers, signingDetails, coreApp, debuggable,
                 multiArch, use32bitAbi, extractNativeLibs, isolatedSplits);
     }
 

@@ -64,6 +64,8 @@
 #include "com_android_server_input_InputWindowHandle.h"
 #include "android_hardware_display_DisplayViewport.h"
 
+#include <vector>
+
 #define INDENT "  "
 
 using android::base::StringPrintf;
@@ -144,8 +146,8 @@ static inline const char* toString(bool value) {
 
 static jobject getInputApplicationHandleObjLocalRef(JNIEnv* env,
         const sp<InputApplicationHandle>& inputApplicationHandle) {
-    if (inputApplicationHandle == NULL) {
-        return NULL;
+    if (inputApplicationHandle == nullptr) {
+        return nullptr;
     }
     return static_cast<NativeInputApplicationHandle*>(inputApplicationHandle.get())->
             getInputApplicationHandleObjLocalRef(env);
@@ -153,8 +155,8 @@ static jobject getInputApplicationHandleObjLocalRef(JNIEnv* env,
 
 static jobject getInputWindowHandleObjLocalRef(JNIEnv* env,
         const sp<InputWindowHandle>& inputWindowHandle) {
-    if (inputWindowHandle == NULL) {
-        return NULL;
+    if (inputWindowHandle == nullptr) {
+        return nullptr;
     }
     return static_cast<NativeInputWindowHandle*>(inputWindowHandle.get())->
             getInputWindowHandleObjLocalRef(env);
@@ -182,6 +184,15 @@ static void loadSystemIconAsSprite(JNIEnv* env, jobject contextObj, int32_t styl
     loadSystemIconAsSpriteWithPointerIcon(env, contextObj, style, &pointerIcon, outSpriteIcon);
 }
 
+static void updatePointerControllerFromViewport(
+        sp<PointerController> controller, const DisplayViewport* const viewport) {
+    if (controller != nullptr && viewport != nullptr) {
+        const int32_t width = viewport->logicalRight - viewport->logicalLeft;
+        const int32_t height = viewport->logicalBottom - viewport->logicalTop;
+        controller->setDisplayViewport(width, height, viewport->orientation);
+    }
+}
+
 enum {
     WM_ACTION_PASS_TO_USER = 1,
 };
@@ -203,8 +214,7 @@ public:
 
     void dump(std::string& dump);
 
-    void setVirtualDisplayViewports(JNIEnv* env, jobjectArray viewportObjArray);
-    void setDisplayViewport(int32_t viewportType, const DisplayViewport& viewport);
+    void setDisplayViewports(JNIEnv* env, jobjectArray viewportObjArray);
 
     status_t registerInputChannel(JNIEnv* env, const sp<InputChannel>& inputChannel,
             const sp<InputWindowHandle>& inputWindowHandle, bool monitor);
@@ -277,9 +287,7 @@ private:
     Mutex mLock;
     struct Locked {
         // Display size information.
-        DisplayViewport internalViewport;
-        DisplayViewport externalViewport;
-        Vector<DisplayViewport> virtualViewports;
+        std::vector<DisplayViewport> viewports;
 
         // System UI visibility.
         int32_t systemUiVisibility;
@@ -304,7 +312,7 @@ private:
 
         // Input devices to be disabled
         SortedVector<int32_t> disabledInputDevices;
-    } mLocked;
+    } mLocked GUARDED_BY(mLock);
 
     std::atomic<bool> mInteractive;
 
@@ -384,8 +392,17 @@ bool NativeInputManager::checkAndClearExceptionFromCallback(JNIEnv* env, const c
     return false;
 }
 
-void NativeInputManager::setVirtualDisplayViewports(JNIEnv* env, jobjectArray viewportObjArray) {
-    Vector<DisplayViewport> viewports;
+static const DisplayViewport* findInternalViewport(const std::vector<DisplayViewport>& viewports) {
+    for (const DisplayViewport& v : viewports) {
+        if (v.type == ViewportType::VIEWPORT_INTERNAL) {
+            return &v;
+        }
+    }
+    return nullptr;
+}
+
+void NativeInputManager::setDisplayViewports(JNIEnv* env, jobjectArray viewportObjArray) {
+    std::vector<DisplayViewport> viewports;
 
     if (viewportObjArray) {
         jsize length = env->GetArrayLength(viewportObjArray);
@@ -397,55 +414,30 @@ void NativeInputManager::setVirtualDisplayViewports(JNIEnv* env, jobjectArray vi
 
             DisplayViewport viewport;
             android_hardware_display_DisplayViewport_toNative(env, viewportObj, &viewport);
-            ALOGI("Viewport [%d] to add: %s", (int) length, viewport.uniqueId.c_str());
-            viewports.push(viewport);
+            ALOGI("Viewport [%d] to add: %s", (int) i, viewport.uniqueId.c_str());
+            viewports.push_back(viewport);
 
             env->DeleteLocalRef(viewportObj);
         }
     }
 
+    const DisplayViewport* newInternalViewport = findInternalViewport(viewports);
     {
         AutoMutex _l(mLock);
-        mLocked.virtualViewports = viewports;
+        const DisplayViewport* oldInternalViewport = findInternalViewport(mLocked.viewports);
+        // Internal viewport has changed if there wasn't one earlier, and there is one now, or,
+        // if they are different.
+        const bool internalViewportChanged = (newInternalViewport != nullptr) &&
+                (oldInternalViewport == nullptr || (*newInternalViewport != *newInternalViewport));
+        if (internalViewportChanged) {
+            sp<PointerController> controller = mLocked.pointerController.promote();
+            updatePointerControllerFromViewport(controller, newInternalViewport);
+        }
+        mLocked.viewports = viewports;
     }
 
     mInputManager->getReader()->requestRefreshConfiguration(
             InputReaderConfiguration::CHANGE_DISPLAY_INFO);
-}
-
-void NativeInputManager::setDisplayViewport(int32_t type, const DisplayViewport& viewport) {
-    bool changed = false;
-    {
-        AutoMutex _l(mLock);
-
-        ViewportType viewportType = static_cast<ViewportType>(type);
-        DisplayViewport* v = NULL;
-        if (viewportType == ViewportType::VIEWPORT_EXTERNAL) {
-            v = &mLocked.externalViewport;
-        } else if (viewportType == ViewportType::VIEWPORT_INTERNAL) {
-            v = &mLocked.internalViewport;
-        }
-
-        if (v != NULL && *v != viewport) {
-            changed = true;
-            *v = viewport;
-
-            if (viewportType == ViewportType::VIEWPORT_INTERNAL) {
-                sp<PointerController> controller = mLocked.pointerController.promote();
-                if (controller != NULL) {
-                    controller->setDisplayViewport(
-                            viewport.logicalRight - viewport.logicalLeft,
-                            viewport.logicalBottom - viewport.logicalTop,
-                            viewport.orientation);
-                }
-            }
-        }
-    }
-
-    if (changed) {
-        mInputManager->getReader()->requestRefreshConfiguration(
-                InputReaderConfiguration::CHANGE_DISPLAY_INFO);
-    }
 }
 
 status_t NativeInputManager::registerInputChannel(JNIEnv* /* env */,
@@ -479,7 +471,7 @@ void NativeInputManager::getReaderConfiguration(InputReaderConfiguration* outCon
         jsize length = env->GetArrayLength(excludedDeviceNames);
         for (jsize i = 0; i < length; i++) {
             jstring item = jstring(env->GetObjectArrayElement(excludedDeviceNames, i));
-            const char* deviceNameChars = env->GetStringUTFChars(item, NULL);
+            const char* deviceNameChars = env->GetStringUTFChars(item, nullptr);
             outConfig->excludedDeviceNames.push_back(deviceNameChars);
             env->ReleaseStringUTFChars(item, deviceNameChars);
             env->DeleteLocalRef(item);
@@ -526,11 +518,7 @@ void NativeInputManager::getReaderConfiguration(InputReaderConfiguration* outCon
 
         outConfig->pointerCapture = mLocked.pointerCapture;
 
-        outConfig->setPhysicalDisplayViewport(ViewportType::VIEWPORT_INTERNAL,
-                mLocked.internalViewport);
-        outConfig->setPhysicalDisplayViewport(ViewportType::VIEWPORT_EXTERNAL,
-                mLocked.externalViewport);
-        outConfig->setVirtualDisplayViewports(mLocked.virtualViewports);
+        outConfig->setDisplayViewports(mLocked.viewports);
 
         outConfig->disabledDevices = mLocked.disabledInputDevices;
     } // release lock
@@ -541,25 +529,22 @@ sp<PointerControllerInterface> NativeInputManager::obtainPointerController(int32
     AutoMutex _l(mLock);
 
     sp<PointerController> controller = mLocked.pointerController.promote();
-    if (controller == NULL) {
+    if (controller == nullptr) {
         ensureSpriteControllerLocked();
 
         controller = new PointerController(this, mLooper, mLocked.spriteController);
         mLocked.pointerController = controller;
 
-        DisplayViewport& v = mLocked.internalViewport;
-        controller->setDisplayViewport(
-                v.logicalRight - v.logicalLeft,
-                v.logicalBottom - v.logicalTop,
-                v.orientation);
+        const DisplayViewport* internalViewport = findInternalViewport(mLocked.viewports);
+        updatePointerControllerFromViewport(controller, internalViewport);
 
         updateInactivityTimeoutLocked(controller);
     }
     return controller;
 }
 
-void NativeInputManager::ensureSpriteControllerLocked() {
-    if (mLocked.spriteController == NULL) {
+void NativeInputManager::ensureSpriteControllerLocked() REQUIRES(mLock) {
+    if (mLocked.spriteController == nullptr) {
         JNIEnv* env = jniEnv();
         jint layer = env->CallIntMethod(mServiceObj, gServiceClassInfo.getPointerLayer);
         if (checkAndClearExceptionFromCallback(env, "getPointerLayer")) {
@@ -575,7 +560,7 @@ void NativeInputManager::notifyInputDevicesChanged(const Vector<InputDeviceInfo>
 
     size_t count = inputDevices.size();
     jobjectArray inputDevicesObjArray = env->NewObjectArray(
-            count, gInputDeviceClassInfo.clazz, NULL);
+            count, gInputDeviceClassInfo.clazz, nullptr);
     if (inputDevicesObjArray) {
         bool error = false;
         for (size_t i = 0; i < count; i++) {
@@ -750,7 +735,7 @@ void NativeInputManager::setInputWindows(JNIEnv* env, jobjectArray windowHandleO
 
             sp<InputWindowHandle> windowHandle =
                     android_server_InputWindowHandle_getHandle(env, windowHandleObj);
-            if (windowHandle != NULL) {
+            if (windowHandle != nullptr) {
                 windowHandles.push(windowHandle);
             }
             env->DeleteLocalRef(windowHandleObj);
@@ -803,13 +788,14 @@ void NativeInputManager::setSystemUiVisibility(int32_t visibility) {
         mLocked.systemUiVisibility = visibility;
 
         sp<PointerController> controller = mLocked.pointerController.promote();
-        if (controller != NULL) {
+        if (controller != nullptr) {
             updateInactivityTimeoutLocked(controller);
         }
     }
 }
 
-void NativeInputManager::updateInactivityTimeoutLocked(const sp<PointerController>& controller) {
+void NativeInputManager::updateInactivityTimeoutLocked(const sp<PointerController>& controller)
+        REQUIRES(mLock) {
     bool lightsOut = mLocked.systemUiVisibility & ASYSTEM_UI_VISIBILITY_STATUS_BAR_HIDDEN;
     controller->setInactivityTimeout(lightsOut
             ? PointerController::INACTIVITY_TIMEOUT_SHORT
@@ -894,7 +880,7 @@ void NativeInputManager::reloadCalibration() {
 void NativeInputManager::setPointerIconType(int32_t iconId) {
     AutoMutex _l(mLock);
     sp<PointerController> controller = mLocked.pointerController.promote();
-    if (controller != NULL) {
+    if (controller != nullptr) {
         controller->updatePointerIcon(iconId);
     }
 }
@@ -902,7 +888,7 @@ void NativeInputManager::setPointerIconType(int32_t iconId) {
 void NativeInputManager::reloadPointerIcons() {
     AutoMutex _l(mLock);
     sp<PointerController> controller = mLocked.pointerController.promote();
-    if (controller != NULL) {
+    if (controller != nullptr) {
         controller->reloadPointerResources();
     }
 }
@@ -910,7 +896,7 @@ void NativeInputManager::reloadPointerIcons() {
 void NativeInputManager::setCustomPointerIcon(const SpriteIcon& icon) {
     AutoMutex _l(mLock);
     sp<PointerController> controller = mLocked.pointerController.promote();
-    if (controller != NULL) {
+    if (controller != nullptr) {
         controller->setCustomPointerIcon(icon);
     }
 }
@@ -1122,7 +1108,7 @@ bool NativeInputManager::dispatchUnhandledKey(const sp<InputWindowHandle>& input
                     gServiceClassInfo.dispatchUnhandledKey,
                     inputWindowHandleObj, keyEventObj, policyFlags);
             if (checkAndClearExceptionFromCallback(env, "dispatchUnhandledKey")) {
-                fallbackKeyEventObj = NULL;
+                fallbackKeyEventObj = nullptr;
             }
             android_view_KeyEvent_recycle(env, keyEventObj);
             env->DeleteLocalRef(keyEventObj);
@@ -1235,7 +1221,7 @@ int32_t NativeInputManager::getCustomPointerIconId() {
 static jlong nativeInit(JNIEnv* env, jclass /* clazz */,
         jobject serviceObj, jobject contextObj, jobject messageQueueObj) {
     sp<MessageQueue> messageQueue = android_os_MessageQueue_getMessageQueue(env, messageQueueObj);
-    if (messageQueue == NULL) {
+    if (messageQueue == nullptr) {
         jniThrowRuntimeException(env, "MessageQueue is not initialized.");
         return 0;
     }
@@ -1255,37 +1241,10 @@ static void nativeStart(JNIEnv* env, jclass /* clazz */, jlong ptr) {
     }
 }
 
-static void nativeSetVirtualDisplayViewports(JNIEnv* env, jclass /* clazz */, jlong ptr,
+static void nativeSetDisplayViewports(JNIEnv* env, jclass /* clazz */, jlong ptr,
         jobjectArray viewportObjArray) {
     NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
-    im->setVirtualDisplayViewports(env, viewportObjArray);
-}
-
-static void nativeSetDisplayViewport(JNIEnv* env, jclass /* clazz */, jlong ptr,
-        jint viewportType, jint displayId, jint orientation,
-        jint logicalLeft, jint logicalTop, jint logicalRight, jint logicalBottom,
-        jint physicalLeft, jint physicalTop, jint physicalRight, jint physicalBottom,
-        jint deviceWidth, jint deviceHeight, jstring uniqueId) {
-    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
-
-    DisplayViewport v;
-    v.displayId = displayId;
-    v.orientation = orientation;
-    v.logicalLeft = logicalLeft;
-    v.logicalTop = logicalTop;
-    v.logicalRight = logicalRight;
-    v.logicalBottom = logicalBottom;
-    v.physicalLeft = physicalLeft;
-    v.physicalTop = physicalTop;
-    v.physicalRight = physicalRight;
-    v.physicalBottom = physicalBottom;
-    v.deviceWidth = deviceWidth;
-    v.deviceHeight = deviceHeight;
-    if (uniqueId != nullptr) {
-        v.uniqueId = ScopedUtfChars(env, uniqueId).c_str();
-    }
-
-    im->setDisplayViewport(viewportType, v);
+    im->setDisplayViewports(env, viewportObjArray);
 }
 
 static jint nativeGetScanCodeState(JNIEnv* /* env */, jclass /* clazz */,
@@ -1316,8 +1275,8 @@ static jboolean nativeHasKeys(JNIEnv* env, jclass /* clazz */,
         jlong ptr, jint deviceId, jint sourceMask, jintArray keyCodes, jbooleanArray outFlags) {
     NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
 
-    int32_t* codes = env->GetIntArrayElements(keyCodes, NULL);
-    uint8_t* flags = env->GetBooleanArrayElements(outFlags, NULL);
+    int32_t* codes = env->GetIntArrayElements(keyCodes, nullptr);
+    uint8_t* flags = env->GetBooleanArrayElements(outFlags, nullptr);
     jsize numCodes = env->GetArrayLength(keyCodes);
     jboolean result;
     if (numCodes == env->GetArrayLength(keyCodes)) {
@@ -1356,7 +1315,7 @@ static void nativeRegisterInputChannel(JNIEnv* env, jclass /* clazz */,
 
     sp<InputChannel> inputChannel = android_view_InputChannel_getInputChannel(env,
             inputChannelObj);
-    if (inputChannel == NULL) {
+    if (inputChannel == nullptr) {
         throwInputChannelNotInitialized(env);
         return;
     }
@@ -1385,12 +1344,12 @@ static void nativeUnregisterInputChannel(JNIEnv* env, jclass /* clazz */,
 
     sp<InputChannel> inputChannel = android_view_InputChannel_getInputChannel(env,
             inputChannelObj);
-    if (inputChannel == NULL) {
+    if (inputChannel == nullptr) {
         throwInputChannelNotInitialized(env);
         return;
     }
 
-    android_view_InputChannel_setDisposeCallback(env, inputChannelObj, NULL, NULL);
+    android_view_InputChannel_setDisposeCallback(env, inputChannelObj, nullptr, nullptr);
 
     status_t status = im->unregisterInputChannel(env, inputChannel);
     if (status && status != BAD_VALUE) { // ignore already unregistered channel
@@ -1490,7 +1449,7 @@ static jboolean nativeTransferTouchFocus(JNIEnv* env,
     sp<InputChannel> toChannel =
             android_view_InputChannel_getInputChannel(env, toChannelObj);
 
-    if (fromChannel == NULL || toChannel == NULL) {
+    if (fromChannel == nullptr || toChannel == nullptr) {
         return JNI_FALSE;
     }
 
@@ -1543,7 +1502,7 @@ static void nativeVibrate(JNIEnv* env,
     }
 
     jlong* patternMillis = static_cast<jlong*>(env->GetPrimitiveArrayCritical(
-            patternObj, NULL));
+            patternObj, nullptr));
     nsecs_t pattern[patternSize];
     for (size_t i = 0; i < patternSize; i++) {
         pattern[i] = max(jlong(0), min(patternMillis[i],
@@ -1656,10 +1615,8 @@ static const JNINativeMethod gInputManagerMethods[] = {
             (void*) nativeInit },
     { "nativeStart", "(J)V",
             (void*) nativeStart },
-    { "nativeSetVirtualDisplayViewports", "(J[Landroid/hardware/display/DisplayViewport;)V",
-            (void*) nativeSetVirtualDisplayViewports },
-    { "nativeSetDisplayViewport", "(JIIIIIIIIIIIIILjava/lang/String;)V",
-            (void*) nativeSetDisplayViewport },
+    { "nativeSetDisplayViewports", "(J[Landroid/hardware/display/DisplayViewport;)V",
+            (void*) nativeSetDisplayViewports },
     { "nativeGetScanCodeState", "(JIII)I",
             (void*) nativeGetScanCodeState },
     { "nativeGetKeyCodeState", "(JIII)I",

@@ -36,10 +36,12 @@ public class NetworkCycleDataForUidLoader extends
 
     private final List<NetworkCycleDataForUid> mData;
     private final int mUid;
+    private final boolean mRetrieveDetail;
 
     private NetworkCycleDataForUidLoader(Builder builder) {
         super(builder);
         mUid = builder.mUid;
+        mRetrieveDetail = builder.mRetrieveDetail;
         mData = new ArrayList<NetworkCycleDataForUid>();
     }
 
@@ -50,13 +52,15 @@ public class NetworkCycleDataForUidLoader extends
                 mNetworkType, mSubId, start, end, mUid);
             final long total = getTotalUsage(stats);
             if (total > 0L) {
-                final long foreground = getForegroundUsage(start, end);
                 final NetworkCycleDataForUid.Builder builder = new NetworkCycleDataForUid.Builder();
-                builder.setBackgroundUsage(total - foreground)
-                    .setForegroundUsage(foreground)
-                    .setStartTime(start)
+                builder.setStartTime(start)
                     .setEndTime(end)
                     .setTotalUsage(total);
+                if (mRetrieveDetail) {
+                    final long foreground = getForegroundUsage(start, end);
+                    builder.setBackgroundUsage(total - foreground)
+                        .setForegroundUsage(foreground);
+                }
                 mData.add(builder.build());
             }
         } catch (Exception e) {
@@ -88,6 +92,7 @@ public class NetworkCycleDataForUidLoader extends
             extends NetworkCycleDataLoader.Builder<T> {
 
         private int mUid;
+        private boolean mRetrieveDetail = true;
 
         public Builder(Context context) {
             super(context);
@@ -95,6 +100,11 @@ public class NetworkCycleDataForUidLoader extends
 
         public Builder<T> setUid(int uid) {
             mUid = uid;
+            return this;
+        }
+
+        public Builder<T> setRetrieveDetail(boolean retrieveDetail) {
+            mRetrieveDetail = retrieveDetail;
             return this;
         }
     }

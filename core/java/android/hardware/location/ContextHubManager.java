@@ -16,12 +16,14 @@
 package android.hardware.location;
 
 import android.annotation.CallbackExecutor;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.os.Handler;
 import android.os.HandlerExecutor;
@@ -33,6 +35,8 @@ import android.util.Log;
 
 import com.android.internal.util.Preconditions;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.List;
 import java.util.concurrent.Executor;
 
@@ -48,6 +52,111 @@ import java.util.concurrent.Executor;
 @SystemService(Context.CONTEXTHUB_SERVICE)
 public final class ContextHubManager {
     private static final String TAG = "ContextHubManager";
+
+    /**
+     * An extra of type {@link ContextHubInfo} describing the source of the event.
+     *
+     * @hide
+     */
+    public static final String EXTRA_CONTEXT_HUB_INFO =
+            "android.hardware.location.extra.CONTEXT_HUB_INFO";
+
+    /**
+     * An extra of type {@link ContextHubManager.Event} describing the event type.
+     *
+     * @hide
+     */
+    public static final String EXTRA_EVENT_TYPE = "android.hardware.location.extra.EVENT_TYPE";
+
+    /**
+     * An extra of type long describing the ID of the nanoapp an event is for.
+     *
+     * @hide
+     */
+    public static final String EXTRA_NANOAPP_ID = "android.location.hardware.extra.NANOAPP_ID";
+
+    /**
+     * An extra of type int describing the nanoapp-specific abort code.
+     *
+     * @hide
+     */
+    public static final String EXTRA_NANOAPP_ABORT_CODE =
+            "android.location.hardware.extra.NANOAPP_ABORT_CODE";
+
+    /**
+     * An extra of type {@link NanoAppMessage} describing contents of a message from a nanoapp.
+     *
+     * @hide
+     */
+    public static final String EXTRA_MESSAGE = "android.location.hardware.extra.MESSAGE";
+
+    /**
+     * Constants describing the type of events from a Context Hub.
+     * {@hide}
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = { "EVENT_" }, value = {
+        EVENT_NANOAPP_LOADED,
+        EVENT_NANOAPP_UNLOADED,
+        EVENT_NANOAPP_ENABLED,
+        EVENT_NANOAPP_DISABLED,
+        EVENT_NANOAPP_ABORTED,
+        EVENT_NANOAPP_MESSAGE,
+        EVENT_HUB_RESET,
+    })
+    public @interface Event { }
+
+    /**
+     * An event describing that a nanoapp has been loaded. Contains the EXTRA_NANOAPP_ID extra.
+     *
+     * @hide
+     */
+    public static final int EVENT_NANOAPP_LOADED = 0;
+
+    /**
+     * An event describing that a nanoapp has been unloaded. Contains the EXTRA_NANOAPP_ID extra.
+     *
+     * @hide
+     */
+    public static final int EVENT_NANOAPP_UNLOADED = 1;
+
+    /**
+     * An event describing that a nanoapp has been enabled. Contains the EXTRA_NANOAPP_ID extra.
+     *
+     * @hide
+     */
+    public static final int EVENT_NANOAPP_ENABLED = 2;
+
+    /**
+     * An event describing that a nanoapp has been disabled. Contains the EXTRA_NANOAPP_ID extra.
+     *
+     * @hide
+     */
+    public static final int EVENT_NANOAPP_DISABLED = 3;
+
+    /**
+     * An event describing that a nanoapp has aborted. Contains the EXTRA_NANOAPP_ID and
+     * EXTRA_NANOAPP_ABORT_CODE extras.
+     *
+     * @hide
+     */
+    public static final int EVENT_NANOAPP_ABORTED = 4;
+
+    /**
+     * An event containing a message sent from a nanoapp. Contains the EXTRA_NANOAPP_ID and
+     * EXTRA_NANOAPP_MESSAGE extras.
+     *
+     * @hide
+     */
+    public static final int EVENT_NANOAPP_MESSAGE = 5;
+
+    /**
+     * An event describing that the Context Hub has reset.
+     *
+     * @hide
+     */
+    public static final int EVENT_HUB_RESET = 6;
+
 
     private final Looper mMainLooper;
     private final IContextHubService mService;
@@ -679,6 +788,57 @@ public final class ContextHubManager {
     @NonNull public ContextHubClient createClient(
             @NonNull ContextHubInfo hubInfo, @NonNull ContextHubClientCallback callback) {
         return createClient(hubInfo, callback, new HandlerExecutor(Handler.getMain()));
+    }
+
+    /**
+     * Creates a ContextHubClient based on an Intent received by the Context Hub Service.
+     *
+     * This method is intended to be used after receiving an Intent received as a result of
+     * {@link ContextHubClient.registerIntent(PendingIntent, long)}, and must have been created
+     * through {@link #createClient(ContextHubInfo, ContextHubClientCallback, Executor)} or
+     * equivalent at an earlier time.
+     *
+     * @param intent   the intent that is associated with a client
+     * @param hubInfo  the hub to attach this client to
+     * @param callback the notification callback to register
+     * @param executor the executor to invoke the callback
+     * @return the registered client object
+     *
+     * @throws IllegalArgumentException if hubInfo does not represent a valid hub, or the intent
+     *                                  was not associated with a client
+     * @throws IllegalStateException    if there were too many registered clients at the service
+     * @throws NullPointerException     if intent, hubInfo, callback, or executor is null
+     *
+     * @hide
+     */
+    @NonNull public ContextHubClient createClient(
+            @NonNull PendingIntent intent, @NonNull ContextHubInfo hubInfo,
+            @NonNull ContextHubClientCallback callback,
+            @NonNull @CallbackExecutor Executor executor) {
+        // TODO: Implement this
+        throw new UnsupportedOperationException("Not implemented yet");
+    }
+
+    /**
+     * Equivalent to {@link #createClient(Intent, ContextHubInfo, ContextHubClientCallback,
+     * Executor)} with the executor using the main thread's Looper.
+     *
+     * @param intent   the intent that is associated with a client
+     * @param hubInfo  the hub to attach this client to
+     * @param callback the notification callback to register
+     * @return the registered client object
+     *
+     * @throws IllegalArgumentException if hubInfo does not represent a valid hub, or the intent
+     *                                  was not associated with a client
+     * @throws IllegalStateException    if there were too many registered clients at the service
+     * @throws NullPointerException     if intent, hubInfo, or callback is null
+     *
+     * @hide
+     */
+    @NonNull public ContextHubClient createClient(
+            @NonNull PendingIntent intent, @NonNull ContextHubInfo hubInfo,
+            @NonNull ContextHubClientCallback callback) {
+        return createClient(intent, hubInfo, callback, new HandlerExecutor(Handler.getMain()));
     }
 
     /**

@@ -65,10 +65,12 @@ public class PowerUITest extends SysuiTestCase {
     private static final long ONE_HOUR_MILLIS = Duration.ofHours(1).toMillis();
     public static final int BELOW_WARNING_BUCKET = -1;
     public static final long BELOW_HYBRID_THRESHOLD = TimeUnit.HOURS.toMillis(2);
+    public static final long BELOW_SEVERE_HYBRID_THRESHOLD = TimeUnit.MINUTES.toMillis(30);
     public static final long ABOVE_HYBRID_THRESHOLD = TimeUnit.HOURS.toMillis(4);
     private static final long ABOVE_CHARGE_CYCLE_THRESHOLD = Duration.ofHours(8).toMillis();
     private static final int OLD_BATTERY_LEVEL_NINE = 9;
     private static final int OLD_BATTERY_LEVEL_10 = 10;
+    private static final long VERY_BELOW_SEVERE_HYBRID_THRESHOLD = TimeUnit.MINUTES.toMillis(15);
     private HardwarePropertiesManager mHardProps;
     private WarningsUI mMockWarnings;
     private PowerUI mPowerUI;
@@ -464,6 +466,35 @@ public class PowerUITest extends SysuiTestCase {
         latch.await(5, TimeUnit.SECONDS);
 
         verify(mMockWarnings, never()).dismissLowBatteryWarning();
+    }
+
+    @Test
+    public void testSevereWarning_countsAsLowAndSevere_WarningOnlyShownOnce() {
+        mPowerUI.start();
+        when(mEnhancedEstimates.isHybridNotificationEnabled()).thenReturn(true);
+        when(mEnhancedEstimates.getLowWarningThreshold()).thenReturn(PowerUI.THREE_HOURS_IN_MILLIS);
+        when(mEnhancedEstimates.getSevereWarningThreshold()).thenReturn(ONE_HOUR_MILLIS);
+        when(mEnhancedEstimates.getEstimate())
+                .thenReturn(new Estimate(BELOW_SEVERE_HYBRID_THRESHOLD, true));
+        mPowerUI.mBatteryStatus = BatteryManager.BATTERY_HEALTH_GOOD;
+
+        // reduce battery level to handle time based trigger -> level trigger interactions
+        mPowerUI.mBatteryLevel = 5;
+        boolean shouldShow =
+                mPowerUI.shouldShowLowBatteryWarning(UNPLUGGED, UNPLUGGED, ABOVE_WARNING_BUCKET,
+                        ABOVE_WARNING_BUCKET, BELOW_SEVERE_HYBRID_THRESHOLD,
+                        POWER_SAVER_OFF, BatteryManager.BATTERY_HEALTH_GOOD);
+        assertTrue(shouldShow);
+
+        // actually run the end to end since it handles changing the internal state.
+        mPowerUI.maybeShowBatteryWarning(OLD_BATTERY_LEVEL_10, UNPLUGGED, UNPLUGGED,
+                ABOVE_WARNING_BUCKET, ABOVE_WARNING_BUCKET);
+
+        shouldShow =
+                mPowerUI.shouldShowLowBatteryWarning(UNPLUGGED, UNPLUGGED, ABOVE_WARNING_BUCKET,
+                        ABOVE_WARNING_BUCKET, VERY_BELOW_SEVERE_HYBRID_THRESHOLD,
+                        POWER_SAVER_OFF, BatteryManager.BATTERY_HEALTH_GOOD);
+        assertFalse(shouldShow);
     }
 
     @Test

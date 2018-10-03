@@ -107,8 +107,6 @@ class WindowStateAnimator {
     private final WallpaperController mWallpaperControllerLocked;
 
     boolean mAnimationIsEntrance;
-    int mAnimLayer;
-    int mLastLayer;
 
     /**
      * Set when we have changed the size of the surface, to know that
@@ -135,7 +133,6 @@ class WindowStateAnimator {
     float mLastAlpha = 0;
 
     Rect mTmpClipRect = new Rect();
-    Rect mTmpFinalClipRect = new Rect();
     Rect mLastClipRect = new Rect();
     Rect mLastFinalClipRect = new Rect();
     Rect mTmpStackBounds = new Rect();
@@ -161,8 +158,6 @@ class WindowStateAnimator {
      * windows to make the callback to View.dispatchOnWindowShownCallback(). Set when the
      * window is first added or shown, cleared when the callback has been made. */
     boolean mEnteringAnimation;
-
-    private boolean mAnimationStartDelayed;
 
     private final SurfaceControl.Transaction mTmpTransaction = new SurfaceControl.Transaction();
 
@@ -253,13 +248,6 @@ class WindowStateAnimator {
         mWallpaperControllerLocked = mService.mRoot.mWallpaperController;
     }
 
-    /**
-     * Is the window or its container currently set to animate or currently animating?
-     */
-    boolean isAnimationSet() {
-        return mWin.isAnimating();
-    }
-
     void cancelExitAnimationForNextAnimationLocked() {
         if (DEBUG_ANIM) Slog.d(TAG,
                 "cancelExitAnimationForNextAnimationLocked: " + mWin);
@@ -275,10 +263,6 @@ class WindowStateAnimator {
                         + ", reportedVisible="
                         + (mWin.mAppToken != null ? mWin.mAppToken.reportedVisible : false));
 
-        if (mAnimator.mWindowDetachedWallpaper == mWin) {
-            mAnimator.mWindowDetachedWallpaper = null;
-        }
-
         mWin.checkPolicyVisibilityChange();
         final DisplayContent displayContent = mWin.getDisplayContent();
         if (mAttrType == LayoutParams.TYPE_STATUS_BAR && mWin.mPolicyVisibility) {
@@ -288,7 +272,6 @@ class WindowStateAnimator {
                 displayContent.setLayoutNeeded();
             }
         }
-
         mWin.onExitAnimationDone();
         final int displayId = mWin.getDisplayId();
         int pendingLayoutChanges = FINISH_LAYOUT_REDO_ANIM;
@@ -539,14 +522,13 @@ class WindowStateAnimator {
         }
 
         if (WindowManagerService.localLOGV) Slog.v(TAG, "Got surface: " + mSurfaceController
-                + ", set left=" + w.getFrameLw().left + " top=" + w.getFrameLw().top
-                + ", animLayer=" + mAnimLayer);
+                + ", set left=" + w.getFrameLw().left + " top=" + w.getFrameLw().top);
 
         if (SHOW_LIGHT_TRANSACTIONS) {
             Slog.i(TAG, ">>> OPEN TRANSACTION createSurfaceLocked");
             WindowManagerService.logSurface(w, "CREATE pos=("
                     + w.getFrameLw().left + "," + w.getFrameLw().top + ") ("
-                    + width + "x" + height + "), layer=" + mAnimLayer + " HIDE", false);
+                    + width + "x" + height + ")" + " HIDE", false);
         }
 
         mLastHidden = true;
@@ -1133,8 +1115,7 @@ class WindowStateAnimator {
                 if (DEBUG_ORIENTATION) Slog.v(TAG,
                         "Orientation change skips hidden " + w);
             }
-        } else if (mLastLayer != mAnimLayer
-                || mLastAlpha != mShownAlpha
+        } else if (mLastAlpha != mShownAlpha
                 || mLastDsDx != mDsDx
                 || mLastDtDx != mDtDx
                 || mLastDsDy != mDsDy
@@ -1144,7 +1125,6 @@ class WindowStateAnimator {
                 || mLastHidden) {
             displayed = true;
             mLastAlpha = mShownAlpha;
-            mLastLayer = mAnimLayer;
             mLastDsDx = mDsDx;
             mLastDtDx = mDtDx;
             mLastDsDy = mDsDy;
@@ -1153,7 +1133,7 @@ class WindowStateAnimator {
             w.mLastVScale = w.mVScale;
             if (SHOW_TRANSACTIONS) WindowManagerService.logSurface(w,
                     "controller=" + mSurfaceController +
-                    "alpha=" + mShownAlpha + " layer=" + mAnimLayer
+                    "alpha=" + mShownAlpha
                     + " matrix=[" + mDsDx + "*" + w.mHScale
                     + "," + mDtDx + "*" + w.mVScale
                     + "][" + mDtDy + "*" + w.mHScale
@@ -1197,7 +1177,7 @@ class WindowStateAnimator {
                 w.mToken.hasVisible = true;
             }
         } else {
-            if (DEBUG_ANIM && isAnimationSet()) {
+            if (DEBUG_ANIM && mWin.isAnimating()) {
                 Slog.v(TAG, "prepareSurface: No changes in animation for " + this);
             }
             displayed = true;
@@ -1407,7 +1387,7 @@ class WindowStateAnimator {
         }
 
         Trace.traceEnd(Trace.TRACE_TAG_WINDOW_MANAGER);
-        return isAnimationSet();
+        return mWin.isAnimating();
     }
 
     void writeToProto(ProtoOutputStream proto, long fieldId) {
@@ -1459,9 +1439,6 @@ class WindowStateAnimator {
                     pw.print(" mDtDx="); pw.print(mDtDx);
                     pw.print(" mDtDy="); pw.print(mDtDy);
                     pw.print(" mDsDy="); pw.println(mDsDy);
-        }
-        if (mAnimationStartDelayed) {
-            pw.print(prefix); pw.print("mAnimationStartDelayed="); pw.print(mAnimationStartDelayed);
         }
     }
 
@@ -1518,10 +1495,6 @@ class WindowStateAnimator {
             mSurfaceController.detachChildren();
         }
         mChildrenDetached = true;
-    }
-
-    int getLayer() {
-        return mLastLayer;
     }
 
     void setOffsetPositionForStackResize(boolean offsetPositionForStackResize) {

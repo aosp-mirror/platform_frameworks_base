@@ -1102,6 +1102,10 @@
          <p>The default value of this attribute is <code>false</code>. -->
     <attr name="isFeatureSplit" format="boolean" />
 
+    <!-- Flag to specify if this APK requires at least one split [either feature or
+         resource] to be present in order to function. Default value is false. -->
+    <attr name="isSplitRequired" format="boolean" />
+
     <!-- Extra options for an activity's UI. Applies to either the {@code <activity>} or
          {@code <application>} tag. If specified on the {@code <application>}
          tag these will be considered defaults for all activities in the
@@ -1422,6 +1426,7 @@
         <attr name="targetSandboxVersion" />
         <attr name="compileSdkVersion" />
         <attr name="compileSdkVersionCodename" />
+        <attr name="isSplitRequired" />
     </declare-styleable>
 
     <!-- The <code>application</code> tag describes application-level components

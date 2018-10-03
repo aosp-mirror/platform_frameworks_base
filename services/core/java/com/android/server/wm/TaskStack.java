@@ -1070,11 +1070,8 @@ public class TaskStack extends WindowContainer<Task> implements
     }
 
     void setAnimationBackground(WindowStateAnimator winAnimator, int color) {
-        int animLayer = winAnimator.mAnimLayer;
-        if (mAnimationBackgroundAnimator == null
-                || animLayer < mAnimationBackgroundAnimator.mAnimLayer) {
+        if (mAnimationBackgroundAnimator == null) {
             mAnimationBackgroundAnimator = winAnimator;
-            animLayer = mDisplayContent.getLayerForAnimationBackground(winAnimator);
             showAnimationSurface(((color >> 24) & 0xff) / 255f);
         }
     }

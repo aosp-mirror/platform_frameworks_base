@@ -16,6 +16,8 @@
 
 package com.android.server.display;
 
+import static com.android.server.display.VirtualDisplayAdapter.UNIQUE_ID_PREFIX;
+
 import android.content.Context;
 import android.hardware.display.BrightnessConfiguration;
 import android.hardware.display.Curve;
@@ -25,34 +27,47 @@ import android.hardware.display.IVirtualDisplayCallback;
 import android.hardware.input.InputManagerInternal;
 import android.os.Handler;
 import android.os.IBinder;
-import android.os.UserHandle;
-import android.test.AndroidTestCase;
-import android.test.suitebuilder.annotation.SmallTest;
+import android.view.Display;
+import android.view.DisplayInfo;
 import android.view.SurfaceControl;
+
+import androidx.test.runner.AndroidJUnit4;
+import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.SmallTest;
 
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.display.DisplayDeviceInfo;
 import com.android.server.display.DisplayManagerService.SyncRoot;
-import com.android.server.display.VirtualDisplayAdapter.SurfaceControlDisplayFactory;
 import com.android.server.lights.LightsManager;
 import com.android.server.wm.WindowManagerInternal;
 
+import org.junit.Before;
+import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
+import java.util.Arrays;
 import java.util.List;
 
-import static org.mockito.Matchers.any;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.mock;
 
 @SmallTest
-public class DisplayManagerServiceTest extends AndroidTestCase {
+@RunWith(AndroidJUnit4.class)
+public class DisplayManagerServiceTest {
     private static final int MSG_REGISTER_DEFAULT_DISPLAY_ADAPTERS = 1;
     private static final long SHORT_DEFAULT_DISPLAY_TIMEOUT_MILLIS = 10;
+
+    private Context mContext;
 
     private final DisplayManagerService.Injector mShortMockedInjector =
             new DisplayManagerService.Injector() {
@@ -86,8 +101,8 @@ public class DisplayManagerServiceTest extends AndroidTestCase {
     @Mock VirtualDisplayAdapter mMockVirtualDisplayAdapter;
     @Mock IBinder mMockDisplayToken;
 
-    @Override
-    protected void setUp() throws Exception {
+    @Before
+    public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
 
         LocalServices.removeServiceForTest(InputManagerInternal.class);
@@ -96,15 +111,12 @@ public class DisplayManagerServiceTest extends AndroidTestCase {
         LocalServices.addService(WindowManagerInternal.class, mMockWindowManagerInternal);
         LocalServices.removeServiceForTest(LightsManager.class);
         LocalServices.addService(LightsManager.class, mMockLightsManager);
-        super.setUp();
+
+        mContext = InstrumentationRegistry.getInstrumentation().getTargetContext();
     }
 
-    @Override
-    protected void tearDown() throws Exception {
-        super.tearDown();
-    }
-
-    public void testCreateVirtualDisplay_sentToInputManager() throws Exception {
+    @Test
+    public void testCreateVirtualDisplay_sentToInputManager() {
         DisplayManagerService displayManager =
                 new DisplayManagerService(mContext, mBasicInjector);
         registerDefaultDisplays(displayManager);
@@ -115,7 +127,7 @@ public class DisplayManagerServiceTest extends AndroidTestCase {
         DisplayManagerService.BinderService bs = displayManager.new BinderService();
 
         String uniqueId = "uniqueId --- Test";
-        String uniqueIdPrefix = "virtual:" + mContext.getPackageName() + ":";
+        String uniqueIdPrefix = UNIQUE_ID_PREFIX + mContext.getPackageName() + ":";
         int width = 600;
         int height = 800;
         int dpi = 320;
@@ -132,19 +144,113 @@ public class DisplayManagerServiceTest extends AndroidTestCase {
         // flush the handler
         displayManager.getDisplayHandler().runWithScissors(() -> {}, 0 /* now */);
 
-        ArgumentCaptor<List<DisplayViewport>> virtualViewportCaptor =
-                ArgumentCaptor.forClass(List.class);
-        verify(mMockInputManagerInternal).setDisplayViewports(
-                any(), any(), virtualViewportCaptor.capture());
+        ArgumentCaptor<List<DisplayViewport>> viewportCaptor = ArgumentCaptor.forClass(List.class);
+        verify(mMockInputManagerInternal).setDisplayViewports(viewportCaptor.capture());
+        List<DisplayViewport> viewports = viewportCaptor.getValue();
 
-        assertEquals(1, virtualViewportCaptor.getValue().size());
-        DisplayViewport dv = virtualViewportCaptor.getValue().get(0);
-        assertEquals(height, dv.deviceHeight);
-        assertEquals(width, dv.deviceWidth);
-        assertEquals(uniqueIdPrefix + uniqueId, dv.uniqueId);
-        assertEquals(displayId, dv.displayId);
+        // Expect to receive 3 viewports: internal, external, and virtual
+        assertEquals(3, viewports.size());
+
+        DisplayViewport virtualViewport = null;
+        DisplayViewport internalViewport = null;
+        DisplayViewport externalViewport = null;
+        for (int i = 0; i < viewports.size(); i++) {
+            DisplayViewport v = viewports.get(i);
+            switch (v.type) {
+                case DisplayViewport.VIEWPORT_INTERNAL: {
+                    internalViewport = v;
+                    break;
+                }
+                case DisplayViewport.VIEWPORT_EXTERNAL: {
+                    externalViewport = v;
+                    break;
+                }
+                case DisplayViewport.VIEWPORT_VIRTUAL: {
+                    virtualViewport = v;
+                    break;
+                }
+            }
+        }
+        // INTERNAL and EXTERNAL viewports get created upon access
+        assertNotNull(internalViewport);
+        assertNotNull(externalViewport);
+        assertNotNull(virtualViewport);
+
+        // INTERNAL and EXTERNAL
+        assertTrue(internalViewport.valid);
+        assertTrue(externalViewport.valid);
+
+        // VIRTUAL
+        assertEquals(height, virtualViewport.deviceHeight);
+        assertEquals(width, virtualViewport.deviceWidth);
+        assertEquals(uniqueIdPrefix + uniqueId, virtualViewport.uniqueId);
+        assertEquals(displayId, virtualViewport.displayId);
     }
 
+    @Test
+    public void testPhysicalViewports() {
+        DisplayManagerService displayManager =
+                new DisplayManagerService(mContext, mBasicInjector);
+        registerDefaultDisplays(displayManager);
+        displayManager.systemReady(false /* safeMode */, true /* onlyCore */);
+        displayManager.windowManagerAndInputReady();
+
+        // This is effectively the DisplayManager service published to ServiceManager.
+        DisplayManagerService.BinderService bs = displayManager.new BinderService();
+
+        when(mMockAppToken.asBinder()).thenReturn(mMockAppToken);
+
+        final int displayIds[] = bs.getDisplayIds();
+        assertEquals(1, displayIds.length);
+        final int displayId = displayIds[0];
+        DisplayInfo info = bs.getDisplayInfo(displayId);
+        assertEquals(info.type, Display.TYPE_BUILT_IN);
+
+        displayManager.performTraversalInternal(mock(SurfaceControl.Transaction.class));
+
+        // flush the handler
+        displayManager.getDisplayHandler().runWithScissors(() -> {}, 0 /* now */);
+
+        ArgumentCaptor<List<DisplayViewport>> viewportCaptor = ArgumentCaptor.forClass(List.class);
+        verify(mMockInputManagerInternal).setDisplayViewports(viewportCaptor.capture());
+        List<DisplayViewport> viewports = viewportCaptor.getValue();
+
+        // Expect to receive 2 viewports: 1 internal, 1 external
+        assertEquals(2, viewports.size());
+
+        DisplayViewport internalViewport = null;
+        DisplayViewport externalViewport = null;
+        for (int i = 0; i < viewports.size(); i++) {
+            DisplayViewport v = viewports.get(i);
+            switch (v.type) {
+                case DisplayViewport.VIEWPORT_INTERNAL: {
+                    internalViewport = v;
+                    break;
+                }
+                case DisplayViewport.VIEWPORT_EXTERNAL: {
+                    externalViewport = v;
+                    break;
+                }
+                default: {
+                    fail("Unexpected viewport type: " + DisplayViewport.typeToString(v.type));
+                    break;
+                }
+            }
+        }
+        // INTERNAL and EXTERNAL viewports get created upon access
+        assertNotNull(internalViewport);
+        assertNotNull(externalViewport);
+        assertTrue(internalViewport.valid);
+        assertEquals(displayId, internalViewport.displayId);
+
+        // To simplify comparison, override the type for external Viewport
+        // TODO (b/116850516) remove this
+        externalViewport.type = internalViewport.type;
+        assertEquals(internalViewport, externalViewport);
+        externalViewport.type = DisplayViewport.VIEWPORT_EXTERNAL; // undo the changes above
+    }
+
+    @Test
     public void testCreateVirtualDisplayRotatesWithContent() throws Exception {
         DisplayManagerService displayManager =
                 new DisplayManagerService(mContext, mBasicInjector);
@@ -178,6 +284,7 @@ public class DisplayManagerServiceTest extends AndroidTestCase {
     /**
      * Tests that the virtual display is created along-side the default display.
      */
+    @Test
     public void testStartVirtualDisplayWithDefaultDisplay_Succeeds() throws Exception {
         DisplayManagerService displayManager =
                 new DisplayManagerService(mContext, mShortMockedInjector);
@@ -188,6 +295,7 @@ public class DisplayManagerServiceTest extends AndroidTestCase {
     /**
      * Tests that we get a Runtime exception when we cannot initialize the default display.
      */
+    @Test
     public void testStartVirtualDisplayWithDefDisplay_NoDefaultDisplay() throws Exception {
         DisplayManagerService displayManager =
                 new DisplayManagerService(mContext, mShortMockedInjector);
@@ -206,6 +314,7 @@ public class DisplayManagerServiceTest extends AndroidTestCase {
     /**
      * Tests that we get a Runtime exception when we cannot initialize the virtual display.
      */
+    @Test
     public void testStartVirtualDisplayWithDefDisplay_NoVirtualDisplayAdapter() throws Exception {
         DisplayManagerService displayManager = new DisplayManagerService(mContext,
                 new DisplayManagerService.Injector() {
@@ -232,6 +341,7 @@ public class DisplayManagerServiceTest extends AndroidTestCase {
     /**
      * Tests that an exception is raised for too dark a brightness configuration.
      */
+    @Test
     public void testTooDarkBrightnessConfigurationThrowException() {
         DisplayManagerService displayManager =
                 new DisplayManagerService(mContext, mShortMockedInjector);
@@ -266,6 +376,7 @@ public class DisplayManagerServiceTest extends AndroidTestCase {
     /**
      * Tests that no exception is raised for not too dark a brightness configuration.
      */
+    @Test
     public void testBrightEnoughBrightnessConfigurationDoesNotThrowException() {
         DisplayManagerService displayManager =
                 new DisplayManagerService(mContext, mShortMockedInjector);
@@ -279,6 +390,7 @@ public class DisplayManagerServiceTest extends AndroidTestCase {
     /**
      * Tests that null brightness configurations are alright.
      */
+    @Test
     public void testNullBrightnessConfiguration() {
         DisplayManagerService displayManager =
                 new DisplayManagerService(mContext, mShortMockedInjector);

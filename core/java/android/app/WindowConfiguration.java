@@ -28,8 +28,12 @@ import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.proto.ProtoInputStream;
 import android.util.proto.ProtoOutputStream;
+import android.util.proto.WireTypeMismatchException;
 import android.view.DisplayInfo;
+
+import java.io.IOException;
 
 /**
  * Class that contains windowing configuration/state for other objects that contain windows directly
@@ -508,6 +512,38 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
         protoOutputStream.write(WINDOWING_MODE, mWindowingMode);
         protoOutputStream.write(ACTIVITY_TYPE, mActivityType);
         protoOutputStream.end(token);
+    }
+
+    /**
+     * Read from a protocol buffer input stream.
+     * Protocol buffer message definition at {@link android.app.WindowConfigurationProto}
+     *
+     * @param proto   Stream to read the WindowConfiguration object from.
+     * @param fieldId Field Id of the WindowConfiguration as defined in the parent message
+     * @hide
+     */
+    public void readFromProto(ProtoInputStream proto, long fieldId)
+            throws IOException, WireTypeMismatchException {
+        final long token = proto.start(fieldId);
+        try {
+            while (proto.nextField() != ProtoInputStream.NO_MORE_FIELDS) {
+                switch (proto.getFieldNumber()) {
+                    case (int) APP_BOUNDS:
+                        mAppBounds = new Rect();
+                        mAppBounds.readFromProto(proto, APP_BOUNDS);
+                        break;
+                    case (int) WINDOWING_MODE:
+                        mWindowingMode = proto.readInt(WINDOWING_MODE);
+                        break;
+                    case (int) ACTIVITY_TYPE:
+                        mActivityType = proto.readInt(ACTIVITY_TYPE);
+                        break;
+                }
+            }
+        } finally {
+            // Let caller handle any exceptions
+            proto.end(token);
+        }
     }
 
     /**

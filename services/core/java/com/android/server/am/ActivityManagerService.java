@@ -4202,7 +4202,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     private final void handleAppDiedLocked(ProcessRecord app,
             boolean restarting, boolean allowRestart) {
         int pid = app.pid;
-        final boolean clearLaunchStartTime = !restarting && app.removed && app.foregroundActivities;
         boolean kept = cleanUpApplicationRecordLocked(app, restarting, allowRestart, -1,
                 false /*replacingPid*/);
         if (!kept && !restarting) {
@@ -4243,18 +4242,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             mWindowManager.continueSurfaceLayout();
         }
 
-        // TODO (b/67683350)
-        // When an app process is removed, activities from the process may be relaunched. In the
-        // case of forceStopPackageLocked the activities are finished before any window is drawn,
-        // and the launch time is not cleared. This will be incorrectly used to calculate launch
-        // time for the next launched activity launched in the same windowing mode.
-        if (clearLaunchStartTime) {
-            final LaunchTimeTracker.Entry entry = mStackSupervisor
-                    .getLaunchTimeTracker().getEntry(mStackSupervisor.getWindowingMode());
-            if (entry != null) {
-                entry.mLaunchStartTime = 0;
-            }
-        }
     }
 
     private final int getLRURecordIndexForAppLocked(IApplicationThread thread) {
@@ -7641,7 +7628,23 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             }
 
-            boolean providerRunning = cpr != null && cpr.proc != null && !cpr.proc.killed;
+            boolean providerRunning = false;
+
+            if (cpr != null && cpr.proc != null) {
+                providerRunning = !cpr.proc.killed;
+
+                // Note if killedByAm is also set, this means the provider process has just been
+                // killed by AM (in ProcessRecord.kill()), but appDiedLocked() hasn't been called
+                // yet. So we need to call appDiedLocked() here and let it clean up.
+                // (See the commit message on I2c4ba1e87c2d47f2013befff10c49b3dc337a9a7 to see
+                // how to test this case.)
+                if (cpr.proc.killed && cpr.proc.killedByAm) {
+                    checkTime(startTime, "getContentProviderImpl: before appDied (killedByAm)");
+                    appDiedLocked(cpr.proc);
+                    checkTime(startTime, "getContentProviderImpl: after appDied (killedByAm)");
+                }
+            }
+
             if (providerRunning) {
                 cpi = cpr.info;
                 String msg;

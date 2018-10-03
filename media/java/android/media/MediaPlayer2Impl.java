@@ -3673,7 +3673,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
             supportedSchemes = new UUID[supportedDRMsCount];
             for (int i = 0; i < supportedDRMsCount; i++) {
                 byte[] uuid = new byte[16];
-                in.next().getBytesValue().copyTo(uuid, uuid.length);
+                in.next().getBytesValue().copyTo(uuid, 0);
 
                 supportedSchemes[i] = bytesToUUID(uuid);
 

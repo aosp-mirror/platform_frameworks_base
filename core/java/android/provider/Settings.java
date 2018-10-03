@@ -9253,6 +9253,19 @@ public final class Settings {
        public static final String MOBILE_DATA_ALWAYS_ON = "mobile_data_always_on";
 
         /**
+         * Whether the wifi data connection should remain active even when higher
+         * priority networks like Ethernet are active, to keep both networks.
+         * In the case where higher priority networks are connected, wifi will be
+         * unused unless an application explicitly requests to use it.
+         *
+         * See ConnectivityService for more info.
+         *
+         * (0 = disabled, 1 = enabled)
+         * @hide
+         */
+        public static final String WIFI_ALWAYS_REQUESTED = "wifi_always_requested";
+
+        /**
          * Size of the event buffer for IP connectivity metrics.
          * @hide
          */
@@ -10819,6 +10832,12 @@ public final class Settings {
          */
         public static final String ACTIVITY_STARTS_LOGGING_ENABLED
                 = "activity_starts_logging_enabled";
+
+        /**
+         * @hide
+         * @see com.android.server.appbinding.AppBindingConstants
+         */
+        public static final String APP_BINDING_CONSTANTS = "app_binding_constants";
 
         /**
          * App ops specific settings.

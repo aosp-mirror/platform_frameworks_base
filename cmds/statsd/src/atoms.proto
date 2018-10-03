@@ -178,6 +178,7 @@ message Atom {
         BatteryVoltage battery_voltage = 10030;
         NumFingerprints num_fingerprints = 10031;
         ProcStats proc_stats = 10029;
+        DiskIo disk_io = 10032;
     }
 
     // DO NOT USE field numbers above 100,000 in AOSP.
@@ -2620,6 +2621,30 @@ message CategorySize {
     // Uses System.currentTimeMillis(), which is wall clock time.
     optional int64 cache_time_millis = 3;
 }
+
+/**
+ * Pulls per uid I/O stats. The stats are cumulative since boot.
+ *
+ * Read/write bytes are I/O events from a storage device
+ * Read/write chars are data requested by read/write syscalls, and can be
+ *   satisfied by caching.
+ *
+ * Pulled from StatsCompanionService, which reads proc/uid_io/stats.
+ */
+message DiskIo {
+    optional int32 uid = 1 [(is_uid) = true];
+    optional int64 fg_chars_read = 2;
+    optional int64 fg_chars_write = 3;
+    optional int64 fg_bytes_read = 4;
+    optional int64 fg_bytes_write = 5;
+    optional int64 bg_chars_read = 6;
+    optional int64 bg_chars_write = 7;
+    optional int64 bg_bytes_read = 8;
+    optional int64 bg_bytes_write = 9;
+    optional int64 fg_fsync = 10;
+    optional int64 bg_fsync= 11;
+}
+
 
 /**
  * Pulls the number of fingerprints for each user.
