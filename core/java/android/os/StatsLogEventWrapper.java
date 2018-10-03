@@ -70,11 +70,17 @@ public final class StatsLogEventWrapper implements Parcelable {
                 }
             };
 
+    /**
+     * Write a int value.
+     */
     public void writeInt(int val) {
         mTypes.add(EVENT_TYPE_INT);
         mValues.add(val);
     }
 
+    /**
+     * Write a long value.
+     */
     public void writeLong(long val) {
         mTypes.add(EVENT_TYPE_LONG);
         mValues.add(val);
@@ -89,8 +95,19 @@ public final class StatsLogEventWrapper implements Parcelable {
         mValues.add(val == null ? "" : val);
     }
 
+    /**
+     * Write a float value.
+     */
     public void writeFloat(float val) {
         mTypes.add(EVENT_TYPE_FLOAT);
+        mValues.add(val);
+    }
+
+    /**
+     * Write a double value.
+     */
+    public void writeDouble(double val) {
+        mTypes.add(EVENT_TYPE_DOUBLE);
         mValues.add(val);
     }
 
@@ -102,6 +119,9 @@ public final class StatsLogEventWrapper implements Parcelable {
         mValues.add(val);
     }
 
+    /**
+     * Write a boolean value.
+     */
     public void writeBoolean(boolean val) {
         mTypes.add(EVENT_TYPE_INT);
         mValues.add(val ? 1 : 0);
@@ -133,6 +153,9 @@ public final class StatsLogEventWrapper implements Parcelable {
                     break;
                 case EVENT_TYPE_FLOAT:
                     out.writeFloat((float) mValues.get(i));
+                    break;
+                case EVENT_TYPE_DOUBLE:
+                    out.writeDouble((double) mValues.get(i));
                     break;
                 case EVENT_TYPE_STRING:
                     out.writeString((String) mValues.get(i));

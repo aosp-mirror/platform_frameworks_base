@@ -21,6 +21,7 @@ import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
+import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.XmlUtils;
@@ -500,5 +501,182 @@ public class PowerProfile {
     @UnsupportedAppUsage
     public double getBatteryCapacity() {
         return getAveragePower(POWER_BATTERY_CAPACITY);
+    }
+
+    /**
+     * Dump power constants into PowerProfileProto
+     */
+    public void writeToProto(ProtoOutputStream proto) {
+        // cpu.suspend
+        writePowerConstantToProto(proto, POWER_CPU_SUSPEND, PowerProfileProto.CPU_SUSPEND);
+
+        // cpu.idle
+        writePowerConstantToProto(proto, POWER_CPU_IDLE, PowerProfileProto.CPU_IDLE);
+
+        // cpu.active
+        writePowerConstantToProto(proto, POWER_CPU_ACTIVE, PowerProfileProto.CPU_ACTIVE);
+
+        // cpu.clusters.cores
+        // cpu.cluster_power.cluster
+        // cpu.core_speeds.cluster
+        // cpu.core_power.cluster
+        for (int cluster = 0; cluster < mCpuClusters.length; cluster++) {
+            final long token = proto.start(PowerProfileProto.CPU_CLUSTER);
+            proto.write(PowerProfileProto.CpuCluster.ID, cluster);
+            proto.write(PowerProfileProto.CpuCluster.CLUSTER_POWER,
+                    sPowerItemMap.get(mCpuClusters[cluster].clusterPowerKey));
+            proto.write(PowerProfileProto.CpuCluster.CORES, mCpuClusters[cluster].numCpus);
+            for (Double speed : sPowerArrayMap.get(mCpuClusters[cluster].freqKey)) {
+                proto.write(PowerProfileProto.CpuCluster.SPEED, speed);
+            }
+            for (Double corePower : sPowerArrayMap.get(mCpuClusters[cluster].corePowerKey)) {
+                proto.write(PowerProfileProto.CpuCluster.CORE_POWER, corePower);
+            }
+            proto.end(token);
+        }
+
+        // wifi.scan
+        writePowerConstantToProto(proto, POWER_WIFI_SCAN, PowerProfileProto.WIFI_SCAN);
+
+        // wifi.on
+        writePowerConstantToProto(proto, POWER_WIFI_ON, PowerProfileProto.WIFI_ON);
+
+        // wifi.active
+        writePowerConstantToProto(proto, POWER_WIFI_ACTIVE, PowerProfileProto.WIFI_ACTIVE);
+
+        // wifi.controller.idle
+        writePowerConstantToProto(proto, POWER_WIFI_CONTROLLER_IDLE,
+                PowerProfileProto.WIFI_CONTROLLER_IDLE);
+
+        // wifi.controller.rx
+        writePowerConstantToProto(proto, POWER_WIFI_CONTROLLER_RX,
+                PowerProfileProto.WIFI_CONTROLLER_RX);
+
+        // wifi.controller.tx
+        writePowerConstantToProto(proto, POWER_WIFI_CONTROLLER_TX,
+                PowerProfileProto.WIFI_CONTROLLER_TX);
+
+        // wifi.controller.tx_levels
+        writePowerConstantArrayToProto(proto, POWER_WIFI_CONTROLLER_TX_LEVELS,
+                PowerProfileProto.WIFI_CONTROLLER_TX_LEVELS);
+
+        // wifi.controller.voltage
+        writePowerConstantToProto(proto, POWER_WIFI_CONTROLLER_OPERATING_VOLTAGE,
+                PowerProfileProto.WIFI_CONTROLLER_OPERATING_VOLTAGE);
+
+        // bluetooth.controller.idle
+        writePowerConstantToProto(proto, POWER_BLUETOOTH_CONTROLLER_IDLE,
+                PowerProfileProto.BLUETOOTH_CONTROLLER_IDLE);
+
+        // bluetooth.controller.rx
+        writePowerConstantToProto(proto, POWER_BLUETOOTH_CONTROLLER_RX,
+                PowerProfileProto.BLUETOOTH_CONTROLLER_RX);
+
+        // bluetooth.controller.tx
+        writePowerConstantToProto(proto, POWER_BLUETOOTH_CONTROLLER_TX,
+                PowerProfileProto.BLUETOOTH_CONTROLLER_TX);
+
+        // bluetooth.controller.voltage
+        writePowerConstantToProto(proto, POWER_BLUETOOTH_CONTROLLER_OPERATING_VOLTAGE,
+                PowerProfileProto.BLUETOOTH_CONTROLLER_OPERATING_VOLTAGE);
+
+        // modem.controller.sleep
+        writePowerConstantToProto(proto, POWER_MODEM_CONTROLLER_SLEEP,
+                PowerProfileProto.MODEM_CONTROLLER_SLEEP);
+
+        // modem.controller.idle
+        writePowerConstantToProto(proto, POWER_MODEM_CONTROLLER_IDLE,
+                PowerProfileProto.MODEM_CONTROLLER_IDLE);
+
+        // modem.controller.rx
+        writePowerConstantToProto(proto, POWER_MODEM_CONTROLLER_RX,
+                PowerProfileProto.MODEM_CONTROLLER_RX);
+
+        // modem.controller.tx
+        writePowerConstantArrayToProto(proto, POWER_MODEM_CONTROLLER_TX,
+                PowerProfileProto.MODEM_CONTROLLER_TX);
+
+        // modem.controller.voltage
+        writePowerConstantToProto(proto, POWER_MODEM_CONTROLLER_OPERATING_VOLTAGE,
+                PowerProfileProto.MODEM_CONTROLLER_OPERATING_VOLTAGE);
+
+        // gps.on
+        writePowerConstantToProto(proto, POWER_GPS_ON, PowerProfileProto.GPS_ON);
+
+        // gps.signalqualitybased
+        writePowerConstantArrayToProto(proto, POWER_GPS_SIGNAL_QUALITY_BASED,
+                PowerProfileProto.GPS_SIGNAL_QUALITY_BASED);
+
+        // gps.voltage
+        writePowerConstantToProto(proto, POWER_GPS_OPERATING_VOLTAGE,
+                PowerProfileProto.GPS_OPERATING_VOLTAGE);
+
+        // bluetooth.on
+        writePowerConstantToProto(proto, POWER_BLUETOOTH_ON, PowerProfileProto.BLUETOOTH_ON);
+
+        // bluetooth.active
+        writePowerConstantToProto(proto, POWER_BLUETOOTH_ACTIVE,
+                PowerProfileProto.BLUETOOTH_ACTIVE);
+
+        // bluetooth.at
+        writePowerConstantToProto(proto, POWER_BLUETOOTH_AT_CMD,
+                PowerProfileProto.BLUETOOTH_AT_CMD);
+
+        // ambient.on
+        writePowerConstantToProto(proto, POWER_AMBIENT_DISPLAY, PowerProfileProto.AMBIENT_DISPLAY);
+
+        // screen.on
+        writePowerConstantToProto(proto, POWER_SCREEN_ON, PowerProfileProto.SCREEN_ON);
+
+        // radio.on
+        writePowerConstantToProto(proto, POWER_RADIO_ON, PowerProfileProto.RADIO_ON);
+
+        // radio.scanning
+        writePowerConstantToProto(proto, POWER_RADIO_SCANNING, PowerProfileProto.RADIO_SCANNING);
+
+        // radio.active
+        writePowerConstantToProto(proto, POWER_RADIO_ACTIVE, PowerProfileProto.RADIO_ACTIVE);
+
+        // screen.full
+        writePowerConstantToProto(proto, POWER_SCREEN_FULL, PowerProfileProto.SCREEN_FULL);
+
+        // audio
+        writePowerConstantToProto(proto, POWER_AUDIO, PowerProfileProto.AUDIO);
+
+        // video
+        writePowerConstantToProto(proto, POWER_VIDEO, PowerProfileProto.VIDEO);
+
+        // camera.flashlight
+        writePowerConstantToProto(proto, POWER_FLASHLIGHT, PowerProfileProto.FLASHLIGHT);
+
+        // memory.bandwidths
+        writePowerConstantToProto(proto, POWER_MEMORY, PowerProfileProto.MEMORY);
+
+        // camera.avg
+        writePowerConstantToProto(proto, POWER_CAMERA, PowerProfileProto.CAMERA);
+
+        // wifi.batchedscan
+        writePowerConstantToProto(proto, POWER_WIFI_BATCHED_SCAN,
+                PowerProfileProto.WIFI_BATCHED_SCAN);
+
+        // battery.capacity
+        writePowerConstantToProto(proto, POWER_BATTERY_CAPACITY,
+                PowerProfileProto.BATTERY_CAPACITY);
+    }
+
+    // Writes items in sPowerItemMap to proto if exists.
+    private void writePowerConstantToProto(ProtoOutputStream proto, String key, long fieldId) {
+        if (sPowerItemMap.containsKey(key)) {
+            proto.write(fieldId, sPowerItemMap.get(key));
+        }
+    }
+
+    // Writes items in sPowerArrayMap to proto if exists.
+    private void writePowerConstantArrayToProto(ProtoOutputStream proto, String key, long fieldId) {
+        if (sPowerArrayMap.containsKey(key)) {
+            for (Double d : sPowerArrayMap.get(key)) {
+                proto.write(fieldId, d);
+            }
+        }
     }
 }

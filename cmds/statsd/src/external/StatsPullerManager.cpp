@@ -217,6 +217,9 @@ const std::map<int, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
           {},
           3 * NS_PER_SEC,
           new StatsCompanionServicePuller(android::util::DISK_IO)}},
+        // PowerProfile constants for power model calculations.
+        {android::util::POWER_PROFILE,
+         {{}, {}, 1 * NS_PER_SEC, new StatsCompanionServicePuller(android::util::POWER_PROFILE)}},
 };
 
 StatsPullerManager::StatsPullerManager() : mNextPullTimeNs(NO_ALARM_UPDATE) {
