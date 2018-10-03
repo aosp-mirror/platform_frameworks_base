@@ -18,10 +18,20 @@
 
 #include <sstream>
 
+#include "android-base/stringprintf.h"
+
 #include "test/Test.h"
+
+using ::android::base::StringPrintf;
 
 namespace aapt {
 namespace file {
+
+#ifdef _WIN32
+constexpr const char sTestDirSep = '\\';
+#else
+constexpr const char sTestDirSep = '/';
+#endif
 
 class FilesTest : public ::testing::Test {
  public:
@@ -42,16 +52,16 @@ TEST_F(FilesTest, AppendPath) {
 }
 
 TEST_F(FilesTest, AppendPathWithLeadingOrTrailingSeparators) {
-  std::string base = "hello/";
+  std::string base = StringPrintf("hello%c", sTestDirSep);
   AppendPath(&base, "there");
   EXPECT_EQ(expected_path_, base);
 
   base = "hello";
-  AppendPath(&base, "/there");
+  AppendPath(&base, StringPrintf("%cthere", sTestDirSep));
   EXPECT_EQ(expected_path_, base);
 
-  base = "hello/";
-  AppendPath(&base, "/there");
+  base = StringPrintf("hello%c", sTestDirSep);
+  AppendPath(&base, StringPrintf("%cthere", sTestDirSep));
   EXPECT_EQ(expected_path_, base);
 }
 

@@ -38,6 +38,8 @@ using ::android::base::StringPrintf;
 namespace aapt {
 namespace ResourceUtils {
 
+constexpr int32_t kNonBreakingSpace = 0xa0;
+
 Maybe<ResourceName> ToResourceName(
     const android::ResTable::resource_name& name_in) {
   ResourceName name_out;
@@ -810,7 +812,7 @@ StringBuilder& StringBuilder::AppendText(const std::string& text, bool preserve_
   Utf8Iterator iter(text);
   while (iter.HasNext()) {
     char32_t codepoint = iter.Next();
-    if (!preserve_spaces && !quote_ && iswspace(codepoint)) {
+    if (!preserve_spaces && !quote_ && codepoint != kNonBreakingSpace && iswspace(codepoint)) {
       if (!last_codepoint_was_space_) {
         // Emit a space if it's the first.
         xml_string_.text += ' ';

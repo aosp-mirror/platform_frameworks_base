@@ -154,6 +154,13 @@ std::unique_ptr<IFileCollectionIterator> ZipFileCollection::Iterator() {
   return util::make_unique<ZipFileCollectionIterator>(this);
 }
 
+char ZipFileCollection::GetDirSeparator() {
+  // According to the zip file specification, section  4.4.17.1:
+  // "All slashes MUST be forward slashes '/' as opposed to backwards slashes '\' for compatibility
+  // with Amiga and UNIX file systems etc."
+  return '/';
+}
+
 ZipFileCollection::~ZipFileCollection() {
   if (handle_) {
     CloseArchive(handle_);

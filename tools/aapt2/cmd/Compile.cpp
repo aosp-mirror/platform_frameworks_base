@@ -73,9 +73,9 @@ struct ResourcePathData {
 };
 
 // Resource file paths are expected to look like: [--/res/]type[-config]/name
-static Maybe<ResourcePathData> ExtractResourcePathData(const std::string& path,
+static Maybe<ResourcePathData> ExtractResourcePathData(const std::string& path, const char dir_sep,
                                                        std::string* out_error) {
-  std::vector<std::string> parts = util::Split(path, file::sDirSep);
+  std::vector<std::string> parts = util::Split(path, dir_sep);
   if (parts.size() < 2) {
     if (out_error) *out_error = "bad resource path";
     return {};
@@ -656,7 +656,7 @@ int Compile(IAaptContext* context, io::IFileCollection* inputs, IArchiveWriter* 
     // Extract resource type information from the full path
     std::string err_str;
     ResourcePathData path_data;
-    if (auto maybe_path_data = ExtractResourcePathData(path, &err_str)) {
+    if (auto maybe_path_data = ExtractResourcePathData(path, inputs->GetDirSeparator(), &err_str)) {
       path_data = maybe_path_data.value();
     } else {
       context->GetDiagnostics()->Error(DiagMessage(file->GetSource()) << err_str);
@@ -731,7 +731,7 @@ int CompileCommand::Action(const std::vector<std::string>& args) {
   // Collect the resources files to compile
   if (options_.res_dir && options_.res_zip) {
     context.GetDiagnostics()->Error(DiagMessage()
-                                        << "only one of --dir and --zip can be specified");
+                                      << "only one of --dir and --zip can be specified");
     return 1;
   } else if (options_.res_dir) {
     if (!args.empty()) {
