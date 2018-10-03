@@ -5142,8 +5142,8 @@ package android.telephony {
     method public java.util.List<android.telephony.NetworkRegistrationState> getNetworkRegistrationStates();
     method public deprecated java.util.List<android.telephony.NetworkRegistrationState> getNetworkRegistrationStates(int);
     method public deprecated android.telephony.NetworkRegistrationState getNetworkRegistrationStates(int, int);
-    method public java.util.List<android.telephony.NetworkRegistrationState> getNetworkRegistrationStatesFromDomain(int);
-    method public java.util.List<android.telephony.NetworkRegistrationState> getNetworkRegistrationStatesFromTransportType(int);
+    method public java.util.List<android.telephony.NetworkRegistrationState> getNetworkRegistrationStatesForDomain(int);
+    method public java.util.List<android.telephony.NetworkRegistrationState> getNetworkRegistrationStatesForTransportType(int);
   }
 
   public final class SmsManager {
