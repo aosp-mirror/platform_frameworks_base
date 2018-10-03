@@ -84,9 +84,6 @@ public class BatterySaverPolicyTest extends AndroidTestCase {
     }
 
     @Mock
-    Handler mHandler;
-
-    @Mock
     MetricsLogger mMetricsLogger = mock(MetricsLogger.class);
 
     private BatterySaverPolicyForTest mBatterySaverPolicy;

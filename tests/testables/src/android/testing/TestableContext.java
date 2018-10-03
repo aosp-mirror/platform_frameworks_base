@@ -53,7 +53,7 @@ import org.junit.runners.model.Statement;
  * Like the following:</p>
  * <pre class="prettyprint">
  * &#064;Rule
- * private final TestableContext mContext = new TestableContext(InstrumentationRegister.getContext());
+ * public final TestableContext mContext = new TestableContext(InstrumentationRegister.getContext());
  * </pre>
  */
 public class TestableContext extends ContextWrapper implements TestRule {
