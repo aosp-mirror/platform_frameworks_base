@@ -208,13 +208,18 @@ public class SystemProperties {
                 return;
             }
             ArrayList<Runnable> callbacks = new ArrayList<Runnable>(sChangeCallbacks);
-            for (int i=0; i<callbacks.size(); i++) {
-                try {
-                    callbacks.get(i).run();
-                } catch (Throwable t) {
-                    Log.wtf(TAG, "Exception in SystemProperties change callback", t);
-                    // Ignore and try to go on.
+            final long token = Binder.clearCallingIdentity();
+            try {
+                for (int i = 0; i < callbacks.size(); i++) {
+                    try {
+                        callbacks.get(i).run();
+                    } catch (Throwable t) {
+                        Log.wtf(TAG, "Exception in SystemProperties change callback", t);
+                        // Ignore and try to go on.
+                    }
                 }
+            } finally {
+                Binder.restoreCallingIdentity(token);
             }
         }
     }
