@@ -79,7 +79,7 @@ import java.util.List;
  * and downgrades have taken place. The original file version denotes how to parse the file.
  */
 public class UsageStatsDatabase {
-    private static final int DEFAULT_CURRENT_VERSION = 4;
+    private static final int DEFAULT_CURRENT_VERSION = 3;
 
     // Current version of the backup schema
     static final int BACKUP_VERSION = 1;
@@ -856,6 +856,9 @@ public class UsageStatsDatabase {
             Slog.e(TAG, "UsageStatsDatabase", e);
             throw e;
         }
+        // If old version, don't bother sanity checking
+        if (version < 4) return;
+
         // STOPSHIP: b/111422946, b/115429334
         // Everything below this comment is sanity check against the new database version.
         // After the new version has soaked for some time the following should removed.
