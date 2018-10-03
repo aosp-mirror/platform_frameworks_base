@@ -183,7 +183,6 @@ public class AppMetadataBackupWriterTest {
                                 new Signature[] {new Signature("1234"), new Signature("5678")},
                                 SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
                                 null,
-                                null,
                                 null));
         File manifestFile = createFile(BACKUP_MANIFEST_FILENAME);
 

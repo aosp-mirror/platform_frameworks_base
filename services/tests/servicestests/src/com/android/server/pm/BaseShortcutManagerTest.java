@@ -1052,7 +1052,6 @@ public abstract class BaseShortcutManagerTest extends InstrumentationTestCase {
                         genSignatures(signatures),
                         PackageParser.SigningDetails.SignatureSchemeVersion.SIGNING_BLOCK_V3,
                         null,
-                        null,
                         null));
         return pi;
     }
