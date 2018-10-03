@@ -808,6 +808,13 @@ interface ITelephony {
      */
     boolean isDataEnabled(int subId);
 
+     /**
+     * Checks if manual network selection is allowed.
+     *
+     * @return {@code true} if manual network selection is allowed, otherwise return {@code false}.
+     */
+     boolean isManualNetworkSelectionAllowed(int subId);
+
     /**
      * Get P-CSCF address from PCO after data connection is established or modified.
      * @param apnType the apnType, "ims" for IMS APN, "emergency" for EMERGENCY APN
