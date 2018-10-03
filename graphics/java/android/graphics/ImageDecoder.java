@@ -59,6 +59,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.annotation.Retention;
 import java.nio.ByteBuffer;
+import java.util.concurrent.Callable;
 import java.util.concurrent.atomic.AtomicBoolean;
 
 /**
@@ -283,26 +284,7 @@ public final class ImageDecoder implements AutoCloseable {
 
                 return createFromStream(is, true, this);
             }
-
-            final FileDescriptor fd = assetFd.getFileDescriptor();
-            final long offset = assetFd.getStartOffset();
-
-            ImageDecoder decoder = null;
-            try {
-                try {
-                    Os.lseek(fd, offset, SEEK_SET);
-                    decoder = nCreate(fd, this);
-                } catch (ErrnoException e) {
-                    decoder = createFromStream(new FileInputStream(fd), true, this);
-                }
-            } finally {
-                if (decoder == null) {
-                    IoUtils.closeQuietly(assetFd);
-                } else {
-                    decoder.mAssetFd = assetFd;
-                }
-            }
-            return decoder;
+            return createFromAssetFileDescriptor(assetFd, this);
         }
     }
 
@@ -351,6 +333,30 @@ public final class ImageDecoder implements AutoCloseable {
             }
         }
 
+        return decoder;
+    }
+
+    @NonNull
+    private static ImageDecoder createFromAssetFileDescriptor(@NonNull AssetFileDescriptor assetFd,
+            Source source) throws IOException {
+        final FileDescriptor fd = assetFd.getFileDescriptor();
+        final long offset = assetFd.getStartOffset();
+
+        ImageDecoder decoder = null;
+        try {
+            try {
+                Os.lseek(fd, offset, SEEK_SET);
+                decoder = nCreate(fd, source);
+            } catch (ErrnoException e) {
+                decoder = createFromStream(new FileInputStream(fd), true, source);
+            }
+        } finally {
+            if (decoder == null) {
+                IoUtils.closeQuietly(assetFd);
+            } else {
+                decoder.mAssetFd = assetFd;
+            }
+        }
         return decoder;
     }
 
@@ -525,6 +531,29 @@ public final class ImageDecoder implements AutoCloseable {
         @Override
         public ImageDecoder createImageDecoder() throws IOException {
             return createFromFile(mFile, this);
+        }
+    }
+
+    private static class CallableSource extends Source {
+        CallableSource(@NonNull Callable<AssetFileDescriptor> callable) {
+            mCallable = callable;
+        }
+
+        private final Callable<AssetFileDescriptor> mCallable;
+
+        @Override
+        public ImageDecoder createImageDecoder() throws IOException {
+            AssetFileDescriptor assetFd = null;
+            try {
+                assetFd = mCallable.call();
+            } catch (Exception e) {
+                if (e instanceof IOException) {
+                    throw (IOException) e;
+                } else {
+                    throw new IOException(e);
+                }
+            }
+            return createFromAssetFileDescriptor(assetFd, this);
         }
     }
 
@@ -968,6 +997,27 @@ public final class ImageDecoder implements AutoCloseable {
     @NonNull
     public static Source createSource(@NonNull File file) {
         return new FileSource(file);
+    }
+
+    /**
+     * Create a new {@link Source Source} from a {@link Callable} that returns a
+     * new {@link AssetFileDescriptor} for each request. This provides control
+     * over how the {@link AssetFileDescriptor} is created, such as passing
+     * options into {@link ContentResolver#openTypedAssetFileDescriptor}, or
+     * enabling use of a {@link android.os.CancellationSignal}.
+     * <p>
+     * It's important for the given {@link Callable} to return a new, unique
+     * {@link AssetFileDescriptor} for each invocation, to support reuse of the
+     * returned {@link Source Source}.
+     *
+     * @return a new Source object, which can be passed to
+     *         {@link #decodeDrawable decodeDrawable} or {@link #decodeBitmap
+     *         decodeBitmap}.
+     */
+    @AnyThread
+    @NonNull
+    public static Source createSource(@NonNull Callable<AssetFileDescriptor> callable) {
+        return new CallableSource(callable);
     }
 
     /**
