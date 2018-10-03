@@ -3,7 +3,6 @@ java_library_static {
     srcs: ["java/**/*.java"],
 
     libs: [
-        "conscrypt",
         "services.core",
     ],
 }
