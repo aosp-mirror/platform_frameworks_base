@@ -1607,7 +1607,7 @@ public class ServiceState implements Parcelable {
     }
 
     /**
-     * Get the network registration states from transport type.
+     * Get the network registration states for the transport type.
      *
      * @param transportType The {@link AccessNetworkConstants.TransportType transport type}
      * @return List of {@link NetworkRegistrationState}
@@ -1618,18 +1618,18 @@ public class ServiceState implements Parcelable {
     @Deprecated
     @SystemApi
     public List<NetworkRegistrationState> getNetworkRegistrationStates(int transportType) {
-        return getNetworkRegistrationStatesFromTransportType(transportType);
+        return getNetworkRegistrationStatesForTransportType(transportType);
     }
 
     /**
-     * Get the network registration states from transport type.
+     * Get the network registration states for the transport type.
      *
      * @param transportType The {@link AccessNetworkConstants.TransportType transport type}
      * @return List of {@link NetworkRegistrationState}
      * @hide
      */
     @SystemApi
-    public List<NetworkRegistrationState> getNetworkRegistrationStatesFromTransportType(
+    public List<NetworkRegistrationState> getNetworkRegistrationStatesForTransportType(
             int transportType) {
         List<NetworkRegistrationState> list = new ArrayList<>();
 
@@ -1645,14 +1645,14 @@ public class ServiceState implements Parcelable {
     }
 
     /**
-     * Get the network registration states from network domain.
+     * Get the network registration states for the network domain.
      *
      * @param domain The network {@link NetworkRegistrationState.Domain domain}
      * @return List of {@link NetworkRegistrationState}
      * @hide
      */
     @SystemApi
-    public List<NetworkRegistrationState> getNetworkRegistrationStatesFromDomain(
+    public List<NetworkRegistrationState> getNetworkRegistrationStatesForDomain(
             @Domain int domain) {
         List<NetworkRegistrationState> list = new ArrayList<>();
 
@@ -1668,7 +1668,7 @@ public class ServiceState implements Parcelable {
     }
 
     /**
-     * Get the network registration state from transport type and network domain.
+     * Get the network registration state for the transport type and network domain.
      *
      * @param domain The network {@link NetworkRegistrationState.Domain domain}
      * @param transportType The {@link AccessNetworkConstants.TransportType transport type}
@@ -1685,7 +1685,7 @@ public class ServiceState implements Parcelable {
     }
 
     /**
-     * Get the network registration state from transport type and network domain.
+     * Get the network registration state for the transport type and network domain.
      *
      * @param domain The network {@link NetworkRegistrationState.Domain domain}
      * @param transportType The {@link AccessNetworkConstants.TransportType transport type}
