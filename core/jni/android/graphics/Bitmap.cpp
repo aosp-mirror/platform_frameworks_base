@@ -9,7 +9,6 @@
 #include "SkColor.h"
 #include "SkColorPriv.h"
 #include "SkColorSpace.h"
-#include "SkColorSpaceXform.h"
 #include "SkHalf.h"
 #include "SkMatrix44.h"
 #include "SkPM4f.h"
@@ -559,13 +558,10 @@ static jboolean Bitmap_compress(JNIEnv* env, jobject clazz, jlong bitmapHandle,
         if (!p3.tryAllocPixels(info)) {
             return JNI_FALSE;
         }
-        auto xform = SkColorSpaceXform::New(skbitmap.colorSpace(), info.colorSpace());
-        if (!xform) {
-            return JNI_FALSE;
-        }
-        if (!xform->apply(SkColorSpaceXform::kRGBA_8888_ColorFormat, p3.getPixels(),
-                          SkColorSpaceXform::kRGBA_F16_ColorFormat, skbitmap.getPixels(),
-                          info.width() * info.height(), kUnpremul_SkAlphaType)) {
+
+        SkPixmap pm;
+        SkAssertResult(p3.peekPixels(&pm));  // should always work if tryAllocPixels() did.
+        if (!skbitmap.readPixels(pm)) {
             return JNI_FALSE;
         }
         skbitmap = p3;
