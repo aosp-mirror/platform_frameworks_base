@@ -473,7 +473,7 @@ public class AudioRecord implements AudioRouting
      *                 .setSampleRate(32000)
      *                 .setChannelMask(AudioFormat.CHANNEL_IN_MONO)
      *                 .build())
-     *         .setBufferSize(2*minBuffSize)
+     *         .setBufferSizeInBytes(2*minBuffSize)
      *         .build();
      * </pre>
      * <p>
