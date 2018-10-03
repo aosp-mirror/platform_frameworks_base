@@ -50,7 +50,6 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.Display.TYPE_VIRTUAL;
 import static android.view.WindowManager.TRANSIT_DOCK_TASK_FROM_RECENTS;
-
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ALL;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_FOCUS;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_IDLE;
@@ -97,7 +96,6 @@ import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_WHITELISTED;
 import static com.android.server.am.TaskRecord.REPARENT_KEEP_STACK_AT_FRONT;
 import static com.android.server.am.TaskRecord.REPARENT_LEAVE_STACK_IN_PLACE;
 import static com.android.server.am.TaskRecord.REPARENT_MOVE_STACK_TO_FRONT;
-
 import static java.lang.Integer.MAX_VALUE;
 
 import android.Manifest;
@@ -132,6 +130,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.content.pm.UserInfo;
 import android.content.res.Configuration;
+import android.content.res.Resources;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManager.DisplayListener;
@@ -156,6 +155,7 @@ import android.provider.MediaStore;
 import android.service.voice.IVoiceInteractionSession;
 import android.util.ArrayMap;
 import android.util.ArraySet;
+import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.IntArray;
 import android.util.MergedConfiguration;
@@ -445,7 +445,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
     // The default minimal size that will be used if the activity doesn't specify its minimal size.
     // It will be calculated when the default display gets added.
-    int mDefaultMinSizeOfResizeableTask = -1;
+    int mDefaultMinSizeOfResizeableTaskDp = -1;
 
     // Whether tasks have moved and we need to rank the tasks before next OOM scoring
     private boolean mTaskLayersChanged = true;
@@ -689,8 +689,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 mDefaultDisplay = activityDisplay;
             }
             addChild(activityDisplay, ActivityDisplay.POSITION_TOP);
-            calculateDefaultMinimalSizeOfResizeableTasks(activityDisplay);
         }
+        calculateDefaultMinimalSizeOfResizeableTasks();
 
         final ActivityDisplay defaultDisplay = getDefaultDisplay();
         mHomeStack = mLastFocusedStack = defaultDisplay.getOrCreateStack(
@@ -4319,7 +4319,6 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         // The display hasn't been added to ActivityManager yet, create a new record now.
         activityDisplay = new ActivityDisplay(this, display);
         addChild(activityDisplay, ActivityDisplay.POSITION_BOTTOM);
-        calculateDefaultMinimalSizeOfResizeableTasks(activityDisplay);
         mWindowManager.onDisplayAdded(displayId);
         return activityDisplay;
     }
@@ -4337,10 +4336,13 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         mActivityDisplays.remove(activityDisplay);
     }
 
-    private void calculateDefaultMinimalSizeOfResizeableTasks(ActivityDisplay display) {
-        mDefaultMinSizeOfResizeableTask =
-                mService.mContext.getResources().getDimensionPixelSize(
-                        com.android.internal.R.dimen.default_minimal_size_resizable_task);
+    private void calculateDefaultMinimalSizeOfResizeableTasks() {
+        final Resources res = mService.mContext.getResources();
+        final float minimalSize = res.getDimension(
+                com.android.internal.R.dimen.default_minimal_size_resizable_task);
+        final DisplayMetrics dm = res.getDisplayMetrics();
+
+        mDefaultMinSizeOfResizeableTaskDp = (int) (minimalSize / dm.density);
     }
 
     private void handleDisplayRemoved(int displayId) {
