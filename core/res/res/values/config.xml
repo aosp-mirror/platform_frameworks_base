@@ -3550,4 +3550,7 @@
 
     <!-- Pre-scale volume at volume step 3 for Absolute Volume -->
     <fraction name="config_prescaleAbsoluteVolume_index3">85%</fraction>
+
+    <!-- Whether or not the "SMS app service" feature is enabled -->
+    <bool name="config_useSmsAppService">true</bool>
 </resources>

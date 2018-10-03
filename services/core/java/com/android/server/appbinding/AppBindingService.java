@@ -422,7 +422,7 @@ public class AppBindingService extends Binder {
                 unbindServicesLocked(userId, target, reasonForLog);
             }
 
-            final ServiceInfo service = app.findService(userId, mIPackageManager);
+            final ServiceInfo service = app.findService(userId, mIPackageManager, mConstants);
             if (service == null) {
                 continue;
             }
