@@ -29,6 +29,7 @@ import android.bluetooth.BluetoothMapClient;
 import android.bluetooth.BluetoothPan;
 import android.bluetooth.BluetoothPbap;
 import android.bluetooth.BluetoothPbapClient;
+import android.bluetooth.BluetoothSap;
 import android.bluetooth.BluetoothProfile;
 import android.bluetooth.BluetoothUuid;
 import android.content.Context;
@@ -98,6 +99,7 @@ public class LocalBluetoothProfileManager {
     private final boolean mUsePbapPce;
     private final boolean mUseMapClient;
     private HearingAidProfile mHearingAidProfile;
+    private SapProfile mSapProfile;
 
     /**
      * Mapping from profile name, e.g. "HEADSET" to profile object.
@@ -193,12 +195,14 @@ public class LocalBluetoothProfileManager {
         if (BluetoothUuid.isUuidPresent(uuids, BluetoothUuid.AudioSink)) {
             if (mA2dpSinkProfile == null) {
                 if(DEBUG) Log.d(TAG, "Adding local A2DP Sink profile");
-                mA2dpSinkProfile = new A2dpSinkProfile(mContext, mLocalAdapter, mDeviceManager, this);
+                mA2dpSinkProfile = new A2dpSinkProfile(mContext, mLocalAdapter,
+                        mDeviceManager, this);
                 addProfile(mA2dpSinkProfile, A2dpSinkProfile.NAME,
                         BluetoothA2dpSink.ACTION_CONNECTION_STATE_CHANGED);
             }
         } else if (mA2dpSinkProfile != null) {
-            Log.w(TAG, "Warning: A2DP Sink profile was previously added but the UUID is now missing.");
+            Log.w(TAG, "Warning: A2DP Sink profile was previously added but the "
+                    + "UUID is now missing.");
         }
 
         // Headset / Handsfree
@@ -214,7 +218,8 @@ public class LocalBluetoothProfileManager {
                         BluetoothHeadset.STATE_AUDIO_DISCONNECTED);
             }
         } else if (mHeadsetProfile != null) {
-            Log.w(TAG, "Warning: HEADSET profile was previously added but the UUID is now missing.");
+            Log.w(TAG, "Warning: HEADSET profile was previously added but the "
+                    + "UUID is now missing.");
         }
 
         // Headset HF
@@ -246,7 +251,8 @@ public class LocalBluetoothProfileManager {
             }
         } else if (mMapClientProfile != null) {
             Log.w(TAG,
-                    "Warning: MAP Client profile was previously added but the UUID is now missing.");
+                    "Warning: MAP Client profile was previously added but the "
+                            + "UUID is now missing.");
         } else {
             Log.d(TAG, "MAP Client Uuid not found.");
         }
@@ -263,7 +269,7 @@ public class LocalBluetoothProfileManager {
             Log.w(TAG, "Warning: OPP profile was previously added but the UUID is now missing.");
         }
 
-        //PBAP Client
+        // PBAP Client
         if (mUsePbapPce) {
             if (mPbapClientProfile == null) {
                 if(DEBUG) Log.d(TAG, "Adding local PBAP Client profile");
@@ -277,18 +283,27 @@ public class LocalBluetoothProfileManager {
                 "Warning: PBAP Client profile was previously added but the UUID is now missing.");
         }
 
-        //Hearing Aid Client
+        // Hearing Aid Client
         if (BluetoothUuid.isUuidPresent(uuids, BluetoothUuid.HearingAid)) {
             if (mHearingAidProfile == null) {
                 if(DEBUG) Log.d(TAG, "Adding local Hearing Aid profile");
-                mHearingAidProfile = new HearingAidProfile(mContext, mLocalAdapter, mDeviceManager, this);
+                mHearingAidProfile = new HearingAidProfile(mContext, mLocalAdapter,
+                        mDeviceManager, this);
                 addProfile(mHearingAidProfile, HearingAidProfile.NAME,
                         BluetoothHearingAid.ACTION_CONNECTION_STATE_CHANGED);
             }
         } else if (mHearingAidProfile != null) {
-            Log.w(TAG, "Warning: Hearing Aid profile was previously added but the UUID is now missing.");
+            Log.w(TAG, "Warning: Hearing Aid profile was previously added but the "
+                    + "UUID is now missing.");
         }
 
+        // SAP
+        if (mSapProfile == null && BluetoothUuid.isUuidPresent(uuids, BluetoothUuid.SAP)) {
+            Log.d(TAG, "Adding local SAP profile");
+            mSapProfile = new SapProfile(mContext, mLocalAdapter, mDeviceManager, this);
+            addProfile(mSapProfile, SapProfile.NAME,
+                BluetoothSap.ACTION_CONNECTION_STATE_CHANGED);
+        }
         mEventManager.registerProfileIntentReceiver();
 
         // There is no local SDP record for HID and Settings app doesn't control PBAP Server.
@@ -630,6 +645,11 @@ public class LocalBluetoothProfileManager {
             mHearingAidProfile != null) {
             profiles.add(mHearingAidProfile);
             removedProfiles.remove(mHearingAidProfile);
+        }
+
+        if (mSapProfile != null && BluetoothUuid.isUuidPresent(uuids, BluetoothUuid.SAP)) {
+            profiles.add(mSapProfile);
+            removedProfiles.remove(mSapProfile);
         }
 
         if (DEBUG) {
