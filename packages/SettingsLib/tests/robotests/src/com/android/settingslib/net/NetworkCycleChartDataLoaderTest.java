@@ -22,6 +22,8 @@ import static org.mockito.Mockito.when;
 import android.app.usage.NetworkStatsManager;
 import android.content.Context;
 import android.net.ConnectivityManager;
+import android.net.NetworkPolicy;
+import android.net.NetworkPolicyManager;
 import android.os.RemoteException;
 import android.text.format.DateUtils;
 
@@ -39,6 +41,8 @@ public class NetworkCycleChartDataLoaderTest {
     @Mock
     private NetworkStatsManager mNetworkStatsManager;
     @Mock
+    private NetworkPolicyManager mNetworkPolicyManager;
+    @Mock
     private Context mContext;
 
     private NetworkCycleChartDataLoader mLoader;
@@ -48,6 +52,9 @@ public class NetworkCycleChartDataLoaderTest {
         MockitoAnnotations.initMocks(this);
         when(mContext.getSystemService(Context.NETWORK_STATS_SERVICE))
             .thenReturn(mNetworkStatsManager);
+        when(mContext.getSystemService(Context.NETWORK_POLICY_SERVICE))
+            .thenReturn(mNetworkPolicyManager);
+        when(mNetworkPolicyManager.getNetworkPolicies()).thenReturn(new NetworkPolicy[0]);
     }
 
     @Test
@@ -57,7 +64,7 @@ public class NetworkCycleChartDataLoaderTest {
         final int networkType = ConnectivityManager.TYPE_MOBILE;
         final String subId = "TestSubscriber";
         mLoader = NetworkCycleChartDataLoader.builder(mContext)
-            .setNetworkType(networkType).setSubscriberId(subId).build();
+            .setSubscriberId(subId).build();
 
         mLoader.recordUsage(start, end);
 

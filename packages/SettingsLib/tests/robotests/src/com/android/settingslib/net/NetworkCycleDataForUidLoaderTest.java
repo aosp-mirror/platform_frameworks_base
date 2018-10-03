@@ -16,12 +16,21 @@
 
 package com.android.settingslib.net;
 
+import static android.app.usage.NetworkStats.Bucket.STATE_FOREGROUND;
+import static android.net.NetworkStats.TAG_NONE;
+
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.usage.NetworkStatsManager;
 import android.content.Context;
 import android.net.ConnectivityManager;
+import android.net.NetworkPolicy;
+import android.net.NetworkPolicyManager;
 import android.text.format.DateUtils;
 
 import com.android.settingslib.SettingsLibRobolectricTestRunner;
@@ -38,6 +47,8 @@ public class NetworkCycleDataForUidLoaderTest {
     @Mock
     private NetworkStatsManager mNetworkStatsManager;
     @Mock
+    private NetworkPolicyManager mNetworkPolicyManager;
+    @Mock
     private Context mContext;
 
     private NetworkCycleDataForUidLoader mLoader;
@@ -47,20 +58,42 @@ public class NetworkCycleDataForUidLoaderTest {
         MockitoAnnotations.initMocks(this);
         when(mContext.getSystemService(Context.NETWORK_STATS_SERVICE))
             .thenReturn(mNetworkStatsManager);
+        when(mContext.getSystemService(Context.NETWORK_POLICY_SERVICE))
+            .thenReturn(mNetworkPolicyManager);
+        when(mNetworkPolicyManager.getNetworkPolicies()).thenReturn(new NetworkPolicy[0]);
     }
 
     @Test
-    public void recordUsage_shouldQueryNetworkDetailsForUid() {
+    public void recordUsage_shouldQueryNetworkDetailsForUidAndForegroundState() {
         final long end = System.currentTimeMillis();
         final long start = end - (DateUtils.WEEK_IN_MILLIS * 4);
         final int networkType = ConnectivityManager.TYPE_MOBILE;
         final String subId = "TestSubscriber";
         final int uid = 1;
-        mLoader = NetworkCycleDataForUidLoader.builder(mContext)
-            .setUid(uid).setNetworkType(networkType).setSubscriberId(subId).build();
+        mLoader = spy(NetworkCycleDataForUidLoader.builder(mContext)
+            .setUid(uid).setSubscriberId(subId).build());
+        doReturn(1024L).when(mLoader).getTotalUsage(any());
 
         mLoader.recordUsage(start, end);
 
         verify(mNetworkStatsManager).queryDetailsForUid(networkType, subId, start, end, uid);
+        verify(mNetworkStatsManager).queryDetailsForUidTagState(
+            networkType, subId, start, end, uid, TAG_NONE, STATE_FOREGROUND);
+    }
+
+    @Test
+    public void recordUsage_retrieveDetailIsFalse_shouldNotQueryNetworkForegroundState() {
+        final long end = System.currentTimeMillis();
+        final long start = end - (DateUtils.WEEK_IN_MILLIS * 4);
+        final int networkType = ConnectivityManager.TYPE_MOBILE;
+        final String subId = "TestSubscriber";
+        final int uid = 1;
+        mLoader = spy(NetworkCycleDataForUidLoader.builder(mContext)
+            .setRetrieveDetail(false).setUid(uid).setSubscriberId(subId).build());
+        doReturn(1024L).when(mLoader).getTotalUsage(any());
+
+        mLoader.recordUsage(start, end);
+        verify(mNetworkStatsManager, never()).queryDetailsForUidTagState(
+            networkType, subId, start, end, uid, TAG_NONE, STATE_FOREGROUND);
     }
 }

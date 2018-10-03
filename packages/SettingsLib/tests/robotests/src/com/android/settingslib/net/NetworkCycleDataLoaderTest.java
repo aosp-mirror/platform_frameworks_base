@@ -30,6 +30,7 @@ import android.net.ConnectivityManager;
 import android.net.INetworkStatsService;
 import android.net.INetworkStatsSession;
 import android.net.NetworkPolicy;
+import android.net.NetworkPolicyManager;
 import android.net.NetworkStatsHistory;
 import android.net.NetworkTemplate;
 import android.os.RemoteException;
@@ -55,6 +56,8 @@ public class NetworkCycleDataLoaderTest {
     @Mock
     private NetworkStatsManager mNetworkStatsManager;
     @Mock
+    private NetworkPolicyManager mNetworkPolicyManager;
+    @Mock
     private Context mContext;
     @Mock
     private NetworkPolicy mPolicy;
@@ -62,9 +65,6 @@ public class NetworkCycleDataLoaderTest {
     private Iterator<Range<ZonedDateTime>> mIterator;
     @Mock
     private INetworkStatsService mNetworkStatsService;
-    @Mock
-    private NetworkCycleDataLoader.Builder mBuilder;
-
 
     private NetworkCycleDataTestLoader mLoader;
 
@@ -73,7 +73,10 @@ public class NetworkCycleDataLoaderTest {
         MockitoAnnotations.initMocks(this);
         when(mContext.getSystemService(Context.NETWORK_STATS_SERVICE))
             .thenReturn(mNetworkStatsManager);
+        when(mContext.getSystemService(Context.NETWORK_POLICY_SERVICE))
+            .thenReturn(mNetworkPolicyManager);
         when(mPolicy.cycleIterator()).thenReturn(mIterator);
+        when(mNetworkPolicyManager.getNetworkPolicies()).thenReturn(new NetworkPolicy[0]);
     }
 
     @Test
