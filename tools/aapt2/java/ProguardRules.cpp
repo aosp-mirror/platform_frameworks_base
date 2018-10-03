@@ -384,7 +384,7 @@ bool CollectProguardRules(IAaptContext* context_, xml::XmlResource* res, KeepSet
   return true;
 }
 
-void WriteKeepSet(const KeepSet& keep_set, OutputStream* out) {
+void WriteKeepSet(const KeepSet& keep_set, OutputStream* out, bool minimal_keep) {
   Printer printer(out);
   for (const auto& entry : keep_set.manifest_class_set_) {
     for (const UsageLocation& location : entry.second) {
@@ -406,15 +406,19 @@ void WriteKeepSet(const KeepSet& keep_set, OutputStream* out) {
         printer.Print("-if class **.R$layout { int ")
             .Print(JavaClassGenerator::TransformToFieldName(location.name.entry))
             .Println("; }");
-        printer.Print("-keep class ").Print(entry.first.name).Print(" { <init>(")
-            .Print(entry.first.signature).Println("); }");
+
+        printer.Print("-keep class ").Print(entry.first.name).Print(" { <init>(");
+        printer.Print((minimal_keep) ? entry.first.signature : "...");
+        printer.Println("); }");
       }
     } else {
       for (const UsageLocation& location : entry.second) {
         printer.Print("# Referenced at ").Println(location.source.to_string());
       }
-      printer.Print("-keep class ").Print(entry.first.name).Print(" { <init>(")
-          .Print(entry.first.signature).Println("); }");
+
+      printer.Print("-keep class ").Print(entry.first.name).Print(" { <init>(");
+      printer.Print((minimal_keep) ? entry.first.signature : "...");
+      printer.Println("); }");
     }
     printer.Println();
   }

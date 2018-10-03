@@ -49,6 +49,7 @@ struct LinkOptions {
   Maybe<std::string> generate_proguard_rules_path;
   Maybe<std::string> generate_main_dex_proguard_rules_path;
   bool generate_conditional_proguard_rules = false;
+  bool generate_minimal_proguard_rules = false;
   bool generate_non_final_ids = false;
   std::vector<std::string> javadoc_annotations;
   Maybe<std::string> private_symbols;
@@ -119,6 +120,9 @@ class LinkCommand : public Command {
     AddOptionalSwitch("--proguard-conditional-keep-rules",
         "Generate conditional Proguard keep rules.",
         &options_.generate_conditional_proguard_rules);
+    AddOptionalSwitch("--proguard-minimal-keep-rules",
+        "Generate a minimal set of Proguard keep rules.",
+        &options_.generate_minimal_proguard_rules);
     AddOptionalSwitch("--no-auto-version", "Disables automatic style and layout SDK versioning.",
         &options_.no_auto_version);
     AddOptionalSwitch("--no-version-vectors",
