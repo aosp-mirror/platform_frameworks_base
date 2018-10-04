@@ -1326,29 +1326,29 @@ class MetaData : public ManifestExtractor::Element {
  public:
   MetaData() = default;
   std::string name;
-  const std::string* value;
+  std::string value;
   const int* value_int;
-  const std::string* resource;
+  std::string resource;
   const int* resource_int;
 
   void Extract(xml::Element* element) override {
     name = GetAttributeStringDefault(FindAttribute(element, NAME_ATTR), "");
-    value = GetAttributeString(FindAttribute(element, VALUE_ATTR));
+    value = GetAttributeStringDefault(FindAttribute(element, VALUE_ATTR), "");
     value_int = GetAttributeInteger(FindAttribute(element, VALUE_ATTR));
-    resource = GetAttributeString(FindAttribute(element, RESOURCE_ATTR));
+    resource = GetAttributeStringDefault(FindAttribute(element, RESOURCE_ATTR), "");
     resource_int = GetAttributeInteger(FindAttribute(element, RESOURCE_ATTR));
   }
 
   void Print(text::Printer& printer) override {
     if (extractor()->options_.include_meta_data && !name.empty()) {
       printer.Print(StringPrintf("meta-data: name='%s' ", name.data()));
-      if (value) {
-        printer.Print(StringPrintf("value='%s' ", value->data()));
+      if (!value.empty()) {
+        printer.Print(StringPrintf("value='%s' ", value.data()));
       } else if (value_int) {
         printer.Print(StringPrintf("value='%d' ", *value_int));
       } else {
-        if (resource) {
-          printer.Print(StringPrintf("resource='%s' ", resource->data()));
+        if (!resource.empty()) {
+          printer.Print(StringPrintf("resource='%s' ", resource.data()));
         } else if (resource_int) {
           printer.Print(StringPrintf("resource='%d' ", *resource_int));
         }
@@ -1837,10 +1837,10 @@ bool ManifestExtractor::Dump(text::Printer& printer, IDiagnostics* diag) {
                   && offhost_apdu_action)) {
 
             // Attempt to load the resource file
-            if (!meta_data->resource) {
+            if (!meta_data->resource.empty()) {
               return;
             }
-            auto resource = apk->LoadXml(*meta_data->resource, diag);
+            auto resource = apk->LoadXml(meta_data->resource, diag);
             if (!resource) {
               return;
             }
