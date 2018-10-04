@@ -31,6 +31,7 @@ import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.net.InetAddress;
@@ -1205,7 +1206,8 @@ public class ApnSetting implements Parcelable {
 
     /** @hide */
     public static int getMvnoTypeIntFromString(String mvnoType) {
-        Integer mvnoTypeInt = MVNO_TYPE_STRING_MAP.get(mvnoType);
+        String mvnoTypeString = TextUtils.isEmpty(mvnoType) ? mvnoType : mvnoType.toLowerCase();
+        Integer mvnoTypeInt = MVNO_TYPE_STRING_MAP.get(mvnoTypeString);
         return  mvnoTypeInt == null ? UNSPECIFIED_INT : mvnoTypeInt;
     }
 
