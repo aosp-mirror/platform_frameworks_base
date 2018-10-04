@@ -25,7 +25,13 @@
         android:name="android.support.test.runner.AndroidJUnitRunner"
         android:targetPackage="com.google.android.startop.iorap.tests" />
 
-    <application>
+      <!--
+       'debuggable=true' is required to properly load mockito jvmti dependencies,
+         otherwise it gives the following error at runtime:
+
+       Openjdkjvmti plugin was loaded on a non-debuggable Runtime.
+       Plugin was loaded too late to change runtime state to DEBUGGABLE. -->
+    <application android:debuggable="true">
         <uses-library android:name="android.test.runner" />
     </application>
 </manifest>
