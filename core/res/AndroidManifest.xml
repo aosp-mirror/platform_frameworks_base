@@ -1827,6 +1827,13 @@
     <permission android:name="android.permission.BIND_SCREENING_SERVICE"
         android:protectionLevel="signature|privileged" />
 
+    <!-- Must be required by a {@link android.telecom.CallRedirectionService},
+         to ensure that only the system can bind to it.
+         <p>Protection level: signature|privileged
+    -->
+    <permission android:name="android.permission.BIND_CALL_REDIRECTION_SERVICE"
+                android:protectionLevel="signature|privileged" />
+
     <!-- Must be required by a {@link android.telecom.ConnectionService},
          to ensure that only the system can bind to it.
          @deprecated {@link android.telecom.ConnectionService}s should require
