@@ -69,6 +69,11 @@ public abstract class AppServiceFinder<TServiceType, TServiceInterfaceType exten
         mHandler = callbackHandler;
     }
 
+    /** Whether this service should really be enabled. */
+    protected boolean isEnabled(AppBindingConstants constants) {
+        return true;
+    }
+
     /** Human readable description of the type of apps; e.g. [Default SMS app] */
     @NonNull
     public abstract String getAppDescription();
@@ -90,11 +95,19 @@ public abstract class AppServiceFinder<TServiceType, TServiceInterfaceType exten
      * Find the target service from the target app on a given user.
      */
     @Nullable
-    public final ServiceInfo findService(int userId, IPackageManager ipm) {
+    public final ServiceInfo findService(int userId, IPackageManager ipm,
+            AppBindingConstants constants) {
         synchronized (mLock) {
             mTargetPackages.put(userId, null);
             mTargetServices.put(userId, null);
             mLastMessages.put(userId, null);
+
+            if (!isEnabled(constants)) {
+                final String message = "feature disabled";
+                mLastMessages.put(userId, message);
+                Slog.i(TAG, getAppDescription() + " " + message);
+                return null;
+            }
 
             final String targetPackage = getTargetPackage(userId);
             if (DEBUG) {
