@@ -33,6 +33,7 @@ import android.service.voice.IVoiceInteractionSession;
 import android.util.SparseIntArray;
 
 import com.android.internal.app.IVoiceInteractor;
+import com.android.server.am.ActivityServiceConnectionsHolder;
 import com.android.server.am.PendingIntentRecord;
 import com.android.server.am.SafeActivityOptions;
 import com.android.server.am.TaskRecord;
@@ -332,4 +333,7 @@ public abstract class ActivityTaskManagerInternal {
             int callingUid, int userId, IBinder token, String resultWho,
             int requestCode, Intent[] intents, String[] resolvedTypes, int flags,
             Bundle bOptions);
+
+    /** @return the service connection holder for a given activity token. */
+    public abstract ActivityServiceConnectionsHolder getServiceConnectionsHolder(IBinder token);
 }

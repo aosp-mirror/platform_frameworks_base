@@ -4230,15 +4230,11 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
      * Perform clean-up of service connections in an activity record.
      */
     private void cleanUpActivityServicesLocked(ActivityRecord r) {
-        // Throw away any services that have been bound by this activity.
-        if (r.connections != null) {
-            Iterator<ConnectionRecord> it = r.connections.iterator();
-            while (it.hasNext()) {
-                ConnectionRecord c = it.next();
-                mService.mAm.mServices.removeConnectionLocked(c, null, r);
-            }
-            r.connections = null;
+        if (r.mServiceConnectionsHolder == null) {
+            return;
         }
+        // Throw away any services that have been bound by this activity.
+        r.mServiceConnectionsHolder.disconnectActivityFromServices();
     }
 
     final void scheduleDestroyActivities(WindowProcessController owner, String reason) {

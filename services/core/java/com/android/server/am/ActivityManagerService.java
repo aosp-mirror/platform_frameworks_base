@@ -10606,9 +10606,13 @@ public class ActivityManagerService extends IActivityManager.Stub
                         currApp.importanceReasonImportance =
                                 ActivityManager.RunningAppProcessInfo.procStateToImportance(
                                         app.adjSourceProcState);
-                    } else if (app.adjSource instanceof ActivityRecord) {
-                        ActivityRecord r = (ActivityRecord)app.adjSource;
-                        if (r.app != null) currApp.importanceReasonPid = r.app.getPid();
+                    } else if (app.adjSource instanceof ActivityServiceConnectionsHolder) {
+                        ActivityServiceConnectionsHolder r =
+                                (ActivityServiceConnectionsHolder) app.adjSource;
+                        final int pid = r.getActivityPid();
+                        if (pid != -1) {
+                            currApp.importanceReasonPid = pid;
+                        }
                     }
                     if (app.adjTarget instanceof ComponentName) {
                         currApp.importanceReasonComponent = (ComponentName)app.adjTarget;
@@ -17783,10 +17787,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                     if ((cr.flags&Context.BIND_TREAT_LIKE_ACTIVITY) != 0) {
                         app.treatLikeActivity = true;
                     }
-                    final ActivityRecord a = cr.activity;
+                    final ActivityServiceConnectionsHolder a = cr.activity;
                     if ((cr.flags&Context.BIND_ADJUST_WITH_ACTIVITY) != 0) {
-                        if (a != null && adj > ProcessList.FOREGROUND_APP_ADJ && (a.visible
-                                || a.isState(ActivityState.RESUMED, ActivityState.PAUSING))) {
+                        if (a != null && adj > ProcessList.FOREGROUND_APP_ADJ
+                                && a.isActivityVisible()) {
                             adj = ProcessList.FOREGROUND_APP_ADJ;
                             if ((cr.flags&Context.BIND_NOT_FOREGROUND) == 0) {
                                 if ((cr.flags&Context.BIND_IMPORTANT) != 0) {
@@ -20899,6 +20903,16 @@ public class ActivityManagerService extends IActivityManager.Stub
                     Binder.restoreCallingIdentity(origId);
                 }
                 return res;
+            }
+        }
+
+        @Override
+        public void disconnectActivityFromServices(Object connectionHolder) {
+            synchronized(ActivityManagerService.this) {
+                final ActivityServiceConnectionsHolder c =
+                        (ActivityServiceConnectionsHolder) connectionHolder;
+                c.forEachConnection(cr -> mServices.removeConnectionLocked(
+                        (ConnectionRecord) cr, null, c));
             }
         }
     }
