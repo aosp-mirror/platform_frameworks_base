@@ -33,15 +33,15 @@ import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.PointF;
+import android.graphics.RecordingCanvas;
 import android.graphics.Rect;
+import android.graphics.RenderNode;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Message;
 import android.view.ContextThemeWrapper;
 import android.view.Display;
-import android.view.DisplayListCanvas;
 import android.view.PixelCopy;
-import android.view.RenderNode;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceHolder;
@@ -704,7 +704,7 @@ public final class Magnifier {
                     cornerRadius
             );
 
-            final DisplayListCanvas canvas = mRenderer.getRootNode().start(width, height);
+            final RecordingCanvas canvas = mRenderer.getRootNode().start(width, height);
             try {
                 canvas.insertReorderBarrier();
                 canvas.drawRenderNode(mBitmapRenderNode);
@@ -736,7 +736,7 @@ public final class Magnifier {
             bitmapRenderNode.setClipToOutline(true);
 
             // Create a dummy draw, which will be replaced later with real drawing.
-            final DisplayListCanvas canvas = bitmapRenderNode.start(mContentWidth, mContentHeight);
+            final RecordingCanvas canvas = bitmapRenderNode.start(mContentWidth, mContentHeight);
             try {
                 canvas.drawColor(0xFF00FF00);
             } finally {
@@ -817,7 +817,7 @@ public final class Magnifier {
                     return;
                 }
 
-                final DisplayListCanvas canvas =
+                final RecordingCanvas canvas =
                         mBitmapRenderNode.start(mContentWidth, mContentHeight);
                 try {
                     canvas.drawColor(Color.WHITE);

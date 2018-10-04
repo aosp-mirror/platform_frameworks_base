@@ -24,7 +24,9 @@ import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Point;
+import android.graphics.RecordingCanvas;
 import android.graphics.Rect;
+import android.graphics.RenderNode;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
@@ -693,7 +695,7 @@ public final class ThreadedRenderer {
         updateViewTreeDisplayList(view);
 
         if (mRootNodeNeedsUpdate || !mRootNode.isValid()) {
-            DisplayListCanvas canvas = mRootNode.start(mSurfaceWidth, mSurfaceHeight);
+            RecordingCanvas canvas = mRootNode.start(mSurfaceWidth, mSurfaceHeight);
             try {
                 final int saveCount = canvas.save();
                 canvas.translate(mInsetLeft, mInsetTop);
@@ -770,7 +772,7 @@ public final class ThreadedRenderer {
          *
          * @param canvas The Canvas used to render the view.
          */
-        void onPreDraw(DisplayListCanvas canvas);
+        void onPreDraw(RecordingCanvas canvas);
 
         /**
          * Invoked after a view is drawn by a threaded renderer.
@@ -778,7 +780,7 @@ public final class ThreadedRenderer {
          *
          * @param canvas The Canvas used to render the view.
          */
-        void onPostDraw(DisplayListCanvas canvas);
+        void onPostDraw(RecordingCanvas canvas);
     }
 
     /**

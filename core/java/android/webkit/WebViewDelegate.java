@@ -27,11 +27,11 @@ import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.res.Resources;
 import android.graphics.Canvas;
+import android.graphics.RecordingCanvas;
 import android.os.RemoteException;
 import android.os.SystemProperties;
 import android.os.Trace;
 import android.util.SparseArray;
-import android.view.DisplayListCanvas;
 import android.view.View;
 import android.view.ViewRootImpl;
 
@@ -107,12 +107,12 @@ public final class WebViewDelegate {
      * @throws IllegalArgumentException if the canvas is not hardware accelerated
      */
     public void callDrawGlFunction(Canvas canvas, long nativeDrawGLFunctor) {
-        if (!(canvas instanceof DisplayListCanvas)) {
+        if (!(canvas instanceof RecordingCanvas)) {
             // Canvas#isHardwareAccelerated() is only true for subclasses of HardwareCanvas.
             throw new IllegalArgumentException(canvas.getClass().getName()
                     + " is not a DisplayList canvas");
         }
-        ((DisplayListCanvas) canvas).drawGLFunctor2(nativeDrawGLFunctor, null);
+        ((RecordingCanvas) canvas).drawGLFunctor2(nativeDrawGLFunctor, null);
     }
 
     /**
@@ -129,12 +129,12 @@ public final class WebViewDelegate {
      */
     public void callDrawGlFunction(@NonNull Canvas canvas, long nativeDrawGLFunctor,
             @Nullable Runnable releasedRunnable) {
-        if (!(canvas instanceof DisplayListCanvas)) {
+        if (!(canvas instanceof RecordingCanvas)) {
             // Canvas#isHardwareAccelerated() is only true for subclasses of HardwareCanvas.
             throw new IllegalArgumentException(canvas.getClass().getName()
                     + " is not a DisplayList canvas");
         }
-        ((DisplayListCanvas) canvas).drawGLFunctor2(nativeDrawGLFunctor, releasedRunnable);
+        ((RecordingCanvas) canvas).drawGLFunctor2(nativeDrawGLFunctor, releasedRunnable);
     }
 
     /**

@@ -39,7 +39,9 @@ import android.graphics.Insets;
 import android.graphics.Outline;
 import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
+import android.graphics.RecordingCanvas;
 import android.graphics.Rect;
+import android.graphics.RenderNode;
 import android.os.Build;
 import android.util.ArrayMap;
 import android.util.AttributeSet;
@@ -50,9 +52,7 @@ import android.util.PathParser;
 import android.util.Property;
 import android.util.TimeUtils;
 import android.view.Choreographer;
-import android.view.DisplayListCanvas;
 import android.view.NativeVectorDrawableAnimator;
-import android.view.RenderNode;
 import android.view.RenderNodeAnimatorSetHelper;
 import android.view.View;
 
@@ -1542,11 +1542,11 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
         }
 
         /**
-         * Holds a weak reference to the target that was last seen (through the DisplayListCanvas
+         * Holds a weak reference to the target that was last seen (through the RecordingCanvas
          * in the last draw call), so that when animator set needs to start, we can add the animator
          * to the last seen RenderNode target and start right away.
          */
-        protected void recordLastSeenTarget(DisplayListCanvas canvas) {
+        protected void recordLastSeenTarget(RecordingCanvas canvas) {
             final RenderNode node = RenderNodeAnimatorSetHelper.getTarget(canvas);
             mLastSeenTarget = new WeakReference<RenderNode>(node);
             // Add the animator to the list of animators on every draw
@@ -1742,7 +1742,7 @@ public class AnimatedVectorDrawable extends Drawable implements Animatable2 {
         @Override
         public void onDraw(Canvas canvas) {
             if (canvas.isHardwareAccelerated()) {
-                recordLastSeenTarget((DisplayListCanvas) canvas);
+                recordLastSeenTarget((RecordingCanvas) canvas);
             }
         }
 

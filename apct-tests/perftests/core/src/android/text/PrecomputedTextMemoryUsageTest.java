@@ -16,32 +16,16 @@
 
 package android.text;
 
-import static android.text.TextDirectionHeuristics.LTR;
-
-import android.perftests.utils.BenchmarkState;
-import android.perftests.utils.PerfStatusReporter;
-
-import android.support.test.filters.LargeTest;
-import android.support.test.runner.AndroidJUnit4;
-
 import android.app.Activity;
 import android.os.Bundle;
 import android.support.test.InstrumentationRegistry;
-import android.content.res.ColorStateList;
-import android.graphics.Canvas;
-import android.graphics.Typeface;
-import android.text.Layout;
-import android.text.style.TextAppearanceSpan;
-import android.view.DisplayListCanvas;
-import android.view.RenderNode;
+import android.support.test.filters.LargeTest;
+import android.support.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
-import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
-import java.nio.CharBuffer;
-import java.util.Random;
 import java.util.Locale;
 
 @LargeTest

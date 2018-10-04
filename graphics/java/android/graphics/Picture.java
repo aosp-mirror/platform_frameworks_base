@@ -17,6 +17,7 @@
 package android.graphics;
 
 import android.annotation.UnsupportedAppUsage;
+
 import java.io.InputStream;
 import java.io.OutputStream;
 
@@ -216,7 +217,7 @@ public class Picture {
         public PictureCanvas(Picture pict, long nativeCanvas) {
             super(nativeCanvas);
             mPicture = pict;
-            // Disable bitmap density scaling. This matches DisplayListCanvas.
+            // Disable bitmap density scaling. This matches RecordingCanvas.
             mDensity = 0;
         }
 

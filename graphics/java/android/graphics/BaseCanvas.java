@@ -83,7 +83,7 @@ public abstract class BaseCanvas {
 
     // ---------------------------------------------------------------------------
     // Drawing methods
-    // These are also implemented in DisplayListCanvas so that we can
+    // These are also implemented in RecordingCanvas so that we can
     // selectively apply on them
     // Everything below here is copy/pasted from Canvas.java
     // The JNI registration is handled by android_view_Canvas.cpp

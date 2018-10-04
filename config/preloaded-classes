@@ -3226,7 +3226,7 @@ android.view.DisplayCutout$ParcelableWrapper$1
 android.view.DisplayEventReceiver
 android.view.DisplayInfo
 android.view.DisplayInfo$1
-android.view.DisplayListCanvas
+android.graphics.RecordingCanvas
 android.view.FallbackEventHandler
 android.view.FocusFinder
 android.view.FocusFinder$1
@@ -3304,8 +3304,8 @@ android.view.OrientationEventListener
 android.view.OrientationEventListener$SensorEventListenerImpl
 android.view.PointerIcon
 android.view.PointerIcon$1
-android.view.RenderNode
-android.view.RenderNode$NoImagePreloadHolder
+android.graphics.RenderNode
+android.graphics.RenderNode$NoImagePreloadHolder
 android.view.RenderNodeAnimator
 android.view.RenderNodeAnimator$1
 android.view.RenderNodeAnimatorSetHelper

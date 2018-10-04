@@ -23,7 +23,9 @@ import android.content.res.Resources;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Picture;
+import android.graphics.RecordingCanvas;
 import android.graphics.Rect;
+import android.graphics.RenderNode;
 import android.os.Debug;
 import android.os.Handler;
 import android.os.RemoteException;
@@ -601,7 +603,7 @@ public class ViewDebug {
         }
 
         if (view.isHardwareAccelerated()) {
-            DisplayListCanvas canvas = node.start(dm.widthPixels, dm.heightPixels);
+            RecordingCanvas canvas = node.start(dm.widthPixels, dm.heightPixels);
             try {
                 return profileViewOperation(view, () -> view.draw(canvas));
             } finally {
