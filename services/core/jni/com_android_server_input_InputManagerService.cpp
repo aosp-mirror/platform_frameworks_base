@@ -428,7 +428,7 @@ void NativeInputManager::setDisplayViewports(JNIEnv* env, jobjectArray viewportO
         // Internal viewport has changed if there wasn't one earlier, and there is one now, or,
         // if they are different.
         const bool internalViewportChanged = (newInternalViewport != nullptr) &&
-                (oldInternalViewport == nullptr || (*newInternalViewport != *newInternalViewport));
+                (oldInternalViewport == nullptr || (*oldInternalViewport != *newInternalViewport));
         if (internalViewportChanged) {
             sp<PointerController> controller = mLocked.pointerController.promote();
             updatePointerControllerFromViewport(controller, newInternalViewport);
