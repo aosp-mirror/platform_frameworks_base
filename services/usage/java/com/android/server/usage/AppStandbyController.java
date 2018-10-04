@@ -27,6 +27,8 @@ import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_ACTIVE_TIMEOU
 import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_EXEMPTED_SYNC_SCHEDULED_DOZE;
 import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_EXEMPTED_SYNC_SCHEDULED_NON_DOZE;
 import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_EXEMPTED_SYNC_START;
+import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_FOREGROUND_SERVICE_START;
+import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_FOREGROUND_SERVICE_STOP;
 import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_MOVE_TO_BACKGROUND;
 import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_MOVE_TO_FOREGROUND;
 import static android.app.usage.UsageStatsManager.REASON_SUB_USAGE_NOTIFICATION_SEEN;
@@ -844,6 +846,8 @@ public class AppStandbyController {
             // Inform listeners if necessary
             if ((event.mEventType == UsageEvents.Event.MOVE_TO_FOREGROUND
                     || event.mEventType == UsageEvents.Event.MOVE_TO_BACKGROUND
+                    || event.mEventType == UsageEvents.Event.FOREGROUND_SERVICE_START
+                    || event.mEventType == UsageEvents.Event.FOREGROUND_SERVICE_STOP
                     || event.mEventType == UsageEvents.Event.SYSTEM_INTERACTION
                     || event.mEventType == UsageEvents.Event.USER_INTERACTION
                     || event.mEventType == UsageEvents.Event.NOTIFICATION_SEEN
@@ -896,6 +900,10 @@ public class AppStandbyController {
         switch (eventType) {
             case UsageEvents.Event.MOVE_TO_FOREGROUND: return REASON_SUB_USAGE_MOVE_TO_FOREGROUND;
             case UsageEvents.Event.MOVE_TO_BACKGROUND: return REASON_SUB_USAGE_MOVE_TO_BACKGROUND;
+            case UsageEvents.Event.FOREGROUND_SERVICE_START:
+                return REASON_SUB_USAGE_FOREGROUND_SERVICE_START;
+            case UsageEvents.Event.FOREGROUND_SERVICE_STOP:
+                return REASON_SUB_USAGE_FOREGROUND_SERVICE_STOP;
             case UsageEvents.Event.SYSTEM_INTERACTION: return REASON_SUB_USAGE_SYSTEM_INTERACTION;
             case UsageEvents.Event.USER_INTERACTION: return REASON_SUB_USAGE_USER_INTERACTION;
             case UsageEvents.Event.NOTIFICATION_SEEN: return REASON_SUB_USAGE_NOTIFICATION_SEEN;

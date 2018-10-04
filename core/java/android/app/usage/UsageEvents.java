@@ -50,12 +50,20 @@ public final class UsageEvents implements Parcelable {
         public static final int NONE = 0;
 
         /**
-         * An event type denoting that a component moved to the foreground.
+         * An event type denoting that an {@link android.app.Activity} moved to the foreground.
+         * This event has a package name and class name associated with it and can be retrieved
+         * using {@link #getPackageName()} and {@link #getClassName()}.
+         * If a package has multiple activities, this event is reported for each activity that moves
+         * to foreground.
          */
         public static final int MOVE_TO_FOREGROUND = 1;
 
         /**
-         * An event type denoting that a component moved to the background.
+         * An event type denoting that an {@link android.app.Activity} moved to the background.
+         * This event has a package name and class name associated with it and can be retrieved
+         * using {@link #getPackageName()} and {@link #getClassName()}.
+         * If a package has multiple activities, this event is reported for each activity that moves
+         * to background.
          */
         public static final int MOVE_TO_BACKGROUND = 2;
 
@@ -166,10 +174,43 @@ public final class UsageEvents implements Parcelable {
         public static final int KEYGUARD_HIDDEN = 18;
 
         /**
+         * An event type denoting start of a foreground service.
+         * This event has a package name and class name associated with it and can be retrieved
+         * using {@link #getPackageName()} and {@link #getClassName()}.
+         * If a package has multiple foreground services, this event is reported for each service
+         * that is started.
+         */
+        public static final int FOREGROUND_SERVICE_START = 19;
+
+        /**
+         * An event type denoting stop of a foreground service.
+         * This event has a package name and class name associated with it and can be retrieved
+         * using {@link #getPackageName()} and {@link #getClassName()}.
+         * If a package has multiple foreground services, this event is reported for each service
+         * that is stopped.
+         */
+        public static final int FOREGROUND_SERVICE_STOP = 20;
+
+        /**
+         * An event type denoting that a foreground service is at started state at beginning of a
+         * time interval.
+         * This is effectively treated as a {@link #FOREGROUND_SERVICE_START}.
+         * {@hide}
+         */
+        public static final int CONTINUING_FOREGROUND_SERVICE = 21;
+
+        /**
+         * An event type denoting that a foreground service is at started state when the stats
+         * rolled-over at the end of a time interval.
+         * {@hide}
+         */
+        public static final int ROLLOVER_FOREGROUND_SERVICE = 22;
+
+        /**
          * Keep in sync with the greatest event type value.
          * @hide
          */
-        public static final int MAX_EVENT_TYPE = 18;
+        public static final int MAX_EVENT_TYPE = 22;
 
         /** @hide */
         public static final int FLAG_IS_PACKAGE_INSTANT_APP = 1 << 0;

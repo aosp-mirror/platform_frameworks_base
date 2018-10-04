@@ -15,18 +15,17 @@
  */
 package com.android.server.usage;
 
+import android.app.usage.ConfigurationStats;
+import android.app.usage.UsageEvents;
+import android.app.usage.UsageStats;
+import android.content.res.Configuration;
+import android.util.ArrayMap;
+
 import com.android.internal.util.XmlUtils;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
 import org.xmlpull.v1.XmlSerializer;
-
-import android.app.usage.ConfigurationStats;
-import android.app.usage.EventList;
-import android.app.usage.UsageEvents;
-import android.app.usage.UsageStats;
-import android.content.res.Configuration;
-import android.util.ArrayMap;
 
 import java.io.IOException;
 import java.net.ProtocolException;
@@ -61,6 +60,7 @@ final class UsageStatsXmlV1 {
     private static final String FLAGS_ATTR = "flags";
     private static final String CLASS_ATTR = "class";
     private static final String TOTAL_TIME_ACTIVE_ATTR = "timeActive";
+    private static final String TOTAL_TIME_SERVICE_USED_ATTR = "timeServiceUsed";
     private static final String COUNT_ATTR = "count";
     private static final String ACTIVE_ATTR = "active";
     private static final String LAST_EVENT_ATTR = "lastEvent";
@@ -69,9 +69,12 @@ final class UsageStatsXmlV1 {
     private static final String STANDBY_BUCKET_ATTR = "standbyBucket";
     private static final String APP_LAUNCH_COUNT_ATTR = "appLaunchCount";
     private static final String NOTIFICATION_CHANNEL_ATTR = "notificationChannel";
+    private static final String MAJOR_VERSION_ATTR = "majorVersion";
+    private static final String MINOR_VERSION_ATTR = "minorVersion";
 
     // Time attributes stored as an offset of the beginTime.
     private static final String LAST_TIME_ACTIVE_ATTR = "lastTimeActive";
+    private static final String LAST_TIME_SERVICE_USED_ATTR = "lastTimeServiceUsed";
     private static final String END_TIME_ATTR = "endTime";
     private static final String TIME_ATTR = "time";
 
@@ -86,9 +89,14 @@ final class UsageStatsXmlV1 {
         // Apply the offset to the beginTime to find the absolute time.
         stats.mLastTimeUsed = statsOut.beginTime + XmlUtils.readLongAttribute(
                 parser, LAST_TIME_ACTIVE_ATTR);
+        stats.mLastTimeForegroundServiceUsed = statsOut.beginTime + XmlUtils.readLongAttribute(
+                parser, LAST_TIME_SERVICE_USED_ATTR);
         stats.mTotalTimeInForeground = XmlUtils.readLongAttribute(parser, TOTAL_TIME_ACTIVE_ATTR);
+        stats.mTotalTimeForegroundServiceUsed = XmlUtils.readLongAttribute(parser,
+                TOTAL_TIME_SERVICE_USED_ATTR);
         stats.mLastEvent = XmlUtils.readIntAttribute(parser, LAST_EVENT_ATTR);
-        stats.mAppLaunchCount = XmlUtils.readIntAttribute(parser, APP_LAUNCH_COUNT_ATTR, 0);
+        stats.mAppLaunchCount = XmlUtils.readIntAttribute(parser, APP_LAUNCH_COUNT_ATTR,
+                0);
         int eventCode;
         while ((eventCode = parser.next()) != XmlPullParser.END_DOCUMENT) {
             final String tag = parser.getName();
@@ -206,9 +214,12 @@ final class UsageStatsXmlV1 {
         // Write the time offset.
         XmlUtils.writeLongAttribute(xml, LAST_TIME_ACTIVE_ATTR,
                 usageStats.mLastTimeUsed - stats.beginTime);
-
+        XmlUtils.writeLongAttribute(xml, LAST_TIME_SERVICE_USED_ATTR,
+                usageStats.mLastTimeForegroundServiceUsed - stats.beginTime);
         XmlUtils.writeStringAttribute(xml, PACKAGE_ATTR, usageStats.mPackageName);
         XmlUtils.writeLongAttribute(xml, TOTAL_TIME_ACTIVE_ATTR, usageStats.mTotalTimeInForeground);
+        XmlUtils.writeLongAttribute(xml, TOTAL_TIME_SERVICE_USED_ATTR,
+                usageStats.mTotalTimeForegroundServiceUsed);
         XmlUtils.writeIntAttribute(xml, LAST_EVENT_ATTR, usageStats.mLastEvent);
         if (usageStats.mAppLaunchCount > 0) {
             XmlUtils.writeIntAttribute(xml, APP_LAUNCH_COUNT_ATTR, usageStats.mAppLaunchCount);
@@ -339,6 +350,8 @@ final class UsageStatsXmlV1 {
         }
 
         statsOut.endTime = statsOut.beginTime + XmlUtils.readLongAttribute(parser, END_TIME_ATTR);
+        statsOut.majorVersion = XmlUtils.readIntAttribute(parser, MAJOR_VERSION_ATTR);
+        statsOut.minorVersion = XmlUtils.readIntAttribute(parser, MINOR_VERSION_ATTR);
 
         int eventCode;
         int outerDepth = parser.getDepth();
@@ -391,6 +404,8 @@ final class UsageStatsXmlV1 {
      */
     public static void write(XmlSerializer xml, IntervalStats stats) throws IOException {
         XmlUtils.writeLongAttribute(xml, END_TIME_ATTR, stats.endTime - stats.beginTime);
+        XmlUtils.writeIntAttribute(xml, MAJOR_VERSION_ATTR, stats.majorVersion);
+        XmlUtils.writeIntAttribute(xml, MINOR_VERSION_ATTR, stats.minorVersion);
 
         writeCountAndTime(xml, INTERACTIVE_TAG, stats.interactiveTracker.count,
                 stats.interactiveTracker.duration);
