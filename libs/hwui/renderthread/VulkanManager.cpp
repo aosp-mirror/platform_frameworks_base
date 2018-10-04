@@ -496,13 +496,11 @@ SkSurface* VulkanManager::getBackbufferSurface(VulkanSurface* surface) {
     // set up layout transfer from initial to color attachment
     VkImageLayout layout = surface->mImageInfos[backbuffer->mImageIndex].mImageLayout;
     SkASSERT(VK_IMAGE_LAYOUT_UNDEFINED == layout || VK_IMAGE_LAYOUT_PRESENT_SRC_KHR == layout);
-    VkPipelineStageFlags srcStageMask = (VK_IMAGE_LAYOUT_UNDEFINED == layout)
-                                                ? VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT
-                                                : VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+    VkPipelineStageFlags srcStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
     VkPipelineStageFlags dstStageMask = VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
-    VkAccessFlags srcAccessMask =
-            (VK_IMAGE_LAYOUT_UNDEFINED == layout) ? 0 : VK_ACCESS_MEMORY_READ_BIT;
-    VkAccessFlags dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
+    VkAccessFlags srcAccessMask = 0;
+    VkAccessFlags dstAccessMask = VK_ACCESS_COLOR_ATTACHMENT_READ_BIT |
+                                  VK_ACCESS_COLOR_ATTACHMENT_WRITE_BIT;
 
     VkImageMemoryBarrier imageMemoryBarrier = {
             VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,     // sType
@@ -761,16 +759,8 @@ bool VulkanManager::createSwapchain(VulkanSurface* surface) {
         return false;
     }
 
-    // If mailbox mode is available, use it, as it is the lowest-latency non-
-    // tearing mode. If not, fall back to FIFO which is always available.
+    // FIFO is always available and will match what we do on GL so just pick that here.
     VkPresentModeKHR mode = VK_PRESENT_MODE_FIFO_KHR;
-    for (uint32_t i = 0; i < presentModeCount; ++i) {
-        // use mailbox
-        if (VK_PRESENT_MODE_MAILBOX_KHR == presentModes[i]) {
-            mode = presentModes[i];
-            break;
-        }
-    }
 
     VkSwapchainCreateInfoKHR swapchainCreateInfo;
     memset(&swapchainCreateInfo, 0, sizeof(VkSwapchainCreateInfoKHR));
@@ -857,17 +847,19 @@ VulkanSurface* VulkanManager::createSurface(ANativeWindow* window, ColorMode col
 }
 
 // Helper to know which src stage flags we need to set when transitioning to the present layout
-static VkPipelineStageFlags layoutToPipelineStageFlags(const VkImageLayout layout) {
+static VkPipelineStageFlags layoutToPipelineSrcStageFlags(const VkImageLayout layout) {
     if (VK_IMAGE_LAYOUT_GENERAL == layout) {
         return VK_PIPELINE_STAGE_ALL_COMMANDS_BIT;
     } else if (VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL == layout ||
                VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL == layout) {
         return VK_PIPELINE_STAGE_TRANSFER_BIT;
-    } else if (VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL == layout ||
-               VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL == layout ||
-               VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL == layout ||
-               VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL == layout) {
-        return VK_PIPELINE_STAGE_ALL_GRAPHICS_BIT;
+    } else if (VK_IMAGE_LAYOUT_COLOR_ATTACHMENT_OPTIMAL == layout) {
+        return VK_PIPELINE_STAGE_COLOR_ATTACHMENT_OUTPUT_BIT;
+    } else if (VK_IMAGE_LAYOUT_DEPTH_STENCIL_ATTACHMENT_OPTIMAL == layout ||
+               VK_IMAGE_LAYOUT_DEPTH_STENCIL_READ_ONLY_OPTIMAL == layout) {
+        return VK_PIPELINE_STAGE_LATE_FRAGMENT_TESTS_BIT;
+    } else if (VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL == layout) {
+        return VK_PIPELINE_STAGE_FRAGMENT_SHADER_BIT;
     } else if (VK_IMAGE_LAYOUT_PREINITIALIZED == layout) {
         return VK_PIPELINE_STAGE_HOST_BIT;
     }
@@ -924,10 +916,10 @@ void VulkanManager::swapBuffers(VulkanSurface* surface) {
     // We need to transition the image to VK_IMAGE_LAYOUT_PRESENT_SRC_KHR and make sure that all
     // previous work is complete for before presenting. So we first add the necessary barrier here.
     VkImageLayout layout = imageInfo.fImageLayout;
-    VkPipelineStageFlags srcStageMask = layoutToPipelineStageFlags(layout);
+    VkPipelineStageFlags srcStageMask = layoutToPipelineSrcStageFlags(layout);
     VkPipelineStageFlags dstStageMask = VK_PIPELINE_STAGE_BOTTOM_OF_PIPE_BIT;
     VkAccessFlags srcAccessMask = layoutToSrcAccessMask(layout);
-    VkAccessFlags dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+    VkAccessFlags dstAccessMask = 0;
 
     VkImageMemoryBarrier imageMemoryBarrier = {
             VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER,     // sType
