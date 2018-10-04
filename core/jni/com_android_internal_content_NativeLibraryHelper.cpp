@@ -176,7 +176,6 @@ copyFileIfChanged(JNIEnv *env, void* arg, ZipFileRO* zipFile, ZipEntryRO zipEntr
     void** args = reinterpret_cast<void**>(arg);
     jstring* javaNativeLibPath = (jstring*) args[0];
     jboolean extractNativeLibs = *(jboolean*) args[1];
-    jboolean hasNativeBridge = *(jboolean*) args[2];
 
     ScopedUtfChars nativeLibPath(env, *javaNativeLibPath);
 
@@ -206,9 +205,7 @@ copyFileIfChanged(JNIEnv *env, void* arg, ZipFileRO* zipFile, ZipEntryRO zipEntr
             return INSTALL_FAILED_INVALID_APK;
         }
 
-        if (!hasNativeBridge) {
-          return INSTALL_SUCCEEDED;
-        }
+        return INSTALL_SUCCEEDED;
     }
 
     // Build local file path
@@ -489,9 +486,9 @@ static int findSupportedAbi(JNIEnv *env, jlong apkHandle, jobjectArray supported
 static jint
 com_android_internal_content_NativeLibraryHelper_copyNativeBinaries(JNIEnv *env, jclass clazz,
         jlong apkHandle, jstring javaNativeLibPath, jstring javaCpuAbi,
-        jboolean extractNativeLibs, jboolean hasNativeBridge, jboolean debuggable)
+        jboolean extractNativeLibs, jboolean debuggable)
 {
-    void* args[] = { &javaNativeLibPath, &extractNativeLibs, &hasNativeBridge };
+    void* args[] = { &javaNativeLibPath, &extractNativeLibs };
     return (jint) iterateOverNativeFiles(env, apkHandle, javaCpuAbi, debuggable,
             copyFileIfChanged, reinterpret_cast<void*>(args));
 }
@@ -597,7 +594,7 @@ static const JNINativeMethod gMethods[] = {
             "(J)V",
             (void *)com_android_internal_content_NativeLibraryHelper_close},
     {"nativeCopyNativeBinaries",
-            "(JLjava/lang/String;Ljava/lang/String;ZZZ)I",
+            "(JLjava/lang/String;Ljava/lang/String;ZZ)I",
             (void *)com_android_internal_content_NativeLibraryHelper_copyNativeBinaries},
     {"nativeSumNativeBinaries",
             "(JLjava/lang/String;Z)J",
