@@ -53,7 +53,6 @@ import android.widget.VideoView;
 
 import com.android.framework.protobuf.InvalidProtocolBufferException;
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.util.Preconditions;
 
 import libcore.io.IoBridge;
 
@@ -350,7 +349,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
         addTask(new Task(CALL_COMPLETED_SET_DATA_SOURCE, false) {
             @Override
             void process() throws IOException {
-                Preconditions.checkArgument(dsd != null, "the DataSourceDesc cannot be null");
+                checkArgument(dsd != null, "the DataSourceDesc cannot be null");
                 int state = getState();
                 if (state != PLAYER_STATE_ERROR && state != PLAYER_STATE_IDLE) {
                     throw new IllegalStateException("called in wrong state " + state);
@@ -376,7 +375,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
         addTask(new Task(CALL_COMPLETED_SET_NEXT_DATA_SOURCE, false) {
             @Override
             void process() {
-                Preconditions.checkArgument(dsd != null, "the DataSourceDesc cannot be null");
+                checkArgument(dsd != null, "the DataSourceDesc cannot be null");
                 synchronized (mSrcLock) {
                     mNextDSDs = new ArrayList<DataSourceDesc>(1);
                     mNextDSDs.add(dsd);
@@ -690,7 +689,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
 
     private void handleDataSource(boolean isCurrent, @NonNull DataSourceDesc dsd, long srcId)
             throws IOException {
-        Preconditions.checkNotNull(dsd, "the DataSourceDesc cannot be null");
+        checkArgument(dsd != null, "the DataSourceDesc cannot be null");
 
         switch (dsd.getType()) {
             case DataSourceDesc.TYPE_CALLBACK:
@@ -1290,7 +1289,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
         addTask(new Task(CALL_COMPLETED_SET_BUFFERING_PARAMS, false) {
             @Override
             void process() {
-                Preconditions.checkArgument(params != null, "the BufferingParams cannot be null");
+                checkArgument(params != null, "the BufferingParams cannot be null");
                 _setBufferingParams(params);
             }
         });
@@ -1354,7 +1353,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
         addTask(new Task(CALL_COMPLETED_SET_PLAYBACK_PARAMS, false) {
             @Override
             void process() {
-                Preconditions.checkArgument(params != null, "the PlaybackParams cannot be null");
+                checkArgument(params != null, "the PlaybackParams cannot be null");
                 _setPlaybackParams(params);
             }
         });
@@ -1387,7 +1386,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
         addTask(new Task(CALL_COMPLETED_SET_SYNC_PARAMS, false) {
             @Override
             void process() {
-                Preconditions.checkArgument(params != null, "the SyncParams cannot be null");
+                checkArgument(params != null, "the SyncParams cannot be null");
                 _setSyncParams(params);
             }
         });
@@ -3027,6 +3026,12 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
         }
     }
 
+    public static void checkArgument(boolean expression, String errorMessage) {
+        if (!expression) {
+            throw new IllegalArgumentException(errorMessage);
+        }
+    }
+
     private void sendEvent(final EventNotifier notifier) {
         synchronized (mEventCbLock) {
             try {
@@ -3803,7 +3808,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
 
     private native void _prepareDrm(@NonNull byte[] uuid, @NonNull byte[] drmSessionId);
 
-        // Modular DRM helpers
+    // Modular DRM helpers
 
     private void prepareDrm_createDrmStep(@NonNull UUID uuid)
             throws UnsupportedSchemeException {
