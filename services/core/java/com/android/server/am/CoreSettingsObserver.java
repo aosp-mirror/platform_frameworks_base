@@ -55,6 +55,7 @@ final class CoreSettingsObserver extends ContentObserver {
         // add other system settings here...
 
         sGlobalSettingToTypeMap.put(Settings.Global.DEBUG_VIEW_ATTRIBUTES, int.class);
+        sGlobalSettingToTypeMap.put(Settings.Global.ANGLE_ENABLED_APP, String.class);
         // add other global settings here...
     }
 
