@@ -25,6 +25,7 @@ import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
+import android.annotation.Nullable;
 import android.net.DhcpResults;
 import android.net.LinkAddress;
 import android.net.NetworkUtils;
@@ -37,6 +38,7 @@ import com.android.internal.util.HexDump;
 import java.io.ByteArrayOutputStream;
 import java.net.Inet4Address;
 import java.nio.ByteBuffer;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -56,6 +58,8 @@ public class DhcpPacketTest {
     private static final Inet4Address NETMASK = getPrefixMaskAsInet4Address(PREFIX_LENGTH);
     private static final Inet4Address BROADCAST_ADDR = getBroadcastAddress(
             SERVER_ADDR, PREFIX_LENGTH);
+    private static final String HOSTNAME = "testhostname";
+    private static final short MTU = 1500;
     // Use our own empty address instead of Inet4Address.ANY or INADDR_ANY to ensure that the code
     // doesn't use == instead of equals when comparing addresses.
     private static final Inet4Address ANY = (Inet4Address) v4Address("0.0.0.0");
@@ -960,7 +964,8 @@ public class DhcpPacketTest {
         assertTrue(msg, Arrays.equals(expected, actual));
     }
 
-    public void checkBuildOfferPacket(int leaseTimeSecs) throws Exception {
+    public void checkBuildOfferPacket(int leaseTimeSecs, @Nullable String hostname)
+            throws Exception {
         final int renewalTime = (int) (Integer.toUnsignedLong(leaseTimeSecs) / 2);
         final int rebindingTime = (int) (Integer.toUnsignedLong(leaseTimeSecs) * 875 / 1000);
         final int transactionId = 0xdeadbeef;
@@ -971,7 +976,8 @@ public class DhcpPacketTest {
                 CLIENT_MAC, leaseTimeSecs, NETMASK /* netMask */,
                 BROADCAST_ADDR /* bcAddr */, Collections.singletonList(SERVER_ADDR) /* gateways */,
                 Collections.singletonList(SERVER_ADDR) /* dnsServers */,
-                SERVER_ADDR /* dhcpServerIdentifier */, null /* domainName */, false /* metered */);
+                SERVER_ADDR /* dhcpServerIdentifier */, null /* domainName */, hostname,
+                false /* metered */, MTU);
 
         ByteArrayOutputStream bos = new ByteArrayOutputStream();
         // BOOTP headers
@@ -1027,12 +1033,22 @@ public class DhcpPacketTest {
         // Nameserver
         bos.write(new byte[] { (byte) 0x06, (byte) 0x04 });
         bos.write(SERVER_ADDR.getAddress());
+        // Hostname
+        if (hostname != null) {
+            bos.write(new byte[]{(byte) 0x0c, (byte) hostname.length()});
+            bos.write(hostname.getBytes(Charset.forName("US-ASCII")));
+        }
+        // MTU
+        bos.write(new byte[] { (byte) 0x1a, (byte) 0x02 });
+        bos.write(shortToByteArray(MTU));
         // End options.
         bos.write(0xff);
 
-        final byte[] expected = bos.toByteArray();
-        assertTrue((expected.length & 1) == 0);
+        if ((bos.size() & 1) != 0) {
+            bos.write(0x00);
+        }
 
+        final byte[] expected = bos.toByteArray();
         final byte[] actual = new byte[packet.limit()];
         packet.get(actual);
         final String msg = "Expected:\n  " + HexDump.dumpHexString(expected) +
@@ -1042,13 +1058,18 @@ public class DhcpPacketTest {
 
     @Test
     public void testOfferPacket() throws Exception {
-        checkBuildOfferPacket(3600);
-        checkBuildOfferPacket(Integer.MAX_VALUE);
-        checkBuildOfferPacket(0x80000000);
-        checkBuildOfferPacket(INFINITE_LEASE);
+        checkBuildOfferPacket(3600, HOSTNAME);
+        checkBuildOfferPacket(Integer.MAX_VALUE, HOSTNAME);
+        checkBuildOfferPacket(0x80000000, HOSTNAME);
+        checkBuildOfferPacket(INFINITE_LEASE, HOSTNAME);
+        checkBuildOfferPacket(3600, null);
     }
 
     private static byte[] intToByteArray(int val) {
         return ByteBuffer.allocate(4).putInt(val).array();
+    }
+
+    private static byte[] shortToByteArray(short val) {
+        return ByteBuffer.allocate(2).putShort(val).array();
     }
 }
