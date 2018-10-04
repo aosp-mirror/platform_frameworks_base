@@ -1008,6 +1008,10 @@ public class HdmiControlService extends SystemService {
         assertRunOnServiceThread();
 
         if (connected && !isTvDevice()) {
+            if (getPortInfo(portId).getType() == HdmiPortInfo.PORT_OUTPUT && isSwitchDevice()) {
+                initPortInfo();
+                HdmiLogger.debug("initPortInfo for switch device when onHotplug from tx.");
+            }
             ArrayList<HdmiCecLocalDevice> localDevices = new ArrayList<>();
             for (int type : mLocalDevices) {
                 if (type == HdmiDeviceInfo.DEVICE_PLAYBACK
@@ -2122,6 +2126,11 @@ public class HdmiControlService extends SystemService {
 
     boolean isPlaybackDevice() {
         return mLocalDevices.contains(HdmiDeviceInfo.DEVICE_PLAYBACK);
+    }
+
+    boolean isSwitchDevice() {
+        return SystemProperties.getBoolean(
+            Constants.PROPERTY_HDMI_IS_DEVICE_HDMI_CEC_SWITCH, false);
     }
 
     boolean isTvDeviceEnabled() {
