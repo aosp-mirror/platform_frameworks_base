@@ -107,6 +107,10 @@ public:
     virtual void drawRegion(const SkRegion& region, const SkPaint& paint) override;
     virtual void drawRoundRect(float left, float top, float right, float bottom, float rx, float ry,
                                const SkPaint& paint) override;
+
+   virtual void drawDoubleRoundRect(const SkRRect& outer, const SkRRect& inner,
+                               const SkPaint& paint) override;
+
     virtual void drawCircle(float x, float y, float radius, const SkPaint& paint) override;
     virtual void drawOval(float left, float top, float right, float bottom,
                           const SkPaint& paint) override;

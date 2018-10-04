@@ -273,6 +273,32 @@ static void drawRect(JNIEnv* env, jobject, jlong canvasHandle, jfloat left, jflo
     get_canvas(canvasHandle)->drawRect(left, top, right, bottom, *paint);
 }
 
+static void drawDoubleRoundRectXY(JNIEnv* env, jobject, jlong canvasHandle, jfloat outerLeft,
+                    jfloat outerTop, jfloat outerRight, jfloat outerBottom, jfloat outerRx,
+                    jfloat outerRy, jfloat innerLeft, jfloat innerTop, jfloat innerRight,
+                    jfloat innerBottom, jfloat innerRx, jfloat innerRy, jlong paintHandle) {
+    const Paint* paint = reinterpret_cast<Paint*>(paintHandle);
+    get_canvas(canvasHandle)->drawDoubleRoundRectXY(
+                    outerLeft, outerTop, outerRight, outerBottom, outerRx, outerRy,
+                    innerLeft, innerTop, innerRight, innerBottom, innerRx, innerRy, *paint);
+}
+
+static void drawDoubleRoundRectRadii(JNIEnv* env, jobject, jlong canvasHandle, jfloat outerLeft,
+                     jfloat outerTop, jfloat outerRight, jfloat outerBottom, jfloatArray jouterRadii,
+                     jfloat innerLeft, jfloat innerTop, jfloat innerRight,
+                     jfloat innerBottom, jfloatArray jinnerRadii, jlong paintHandle) {
+    const Paint* paint = reinterpret_cast<Paint*>(paintHandle);
+
+    float outerRadii[8];
+    float innerRadii[8];
+    env->GetFloatArrayRegion(jouterRadii, 0, 8, outerRadii);
+    env->GetFloatArrayRegion(jinnerRadii, 0, 8, innerRadii);
+    get_canvas(canvasHandle)->drawDoubleRoundRectRadii(
+                    outerLeft, outerTop, outerRight, outerBottom, outerRadii,
+                    innerLeft, innerTop, innerRight, innerBottom, innerRadii, *paint);
+
+}
+
 static void drawRegion(JNIEnv* env, jobject, jlong canvasHandle, jlong regionHandle,
                        jlong paintHandle) {
     const SkRegion* region = reinterpret_cast<SkRegion*>(regionHandle);
@@ -651,6 +677,8 @@ static const JNINativeMethod gDrawMethods[] = {
     {"nDrawRect","(JFFFFJ)V", (void*) CanvasJNI::drawRect},
     {"nDrawRegion", "(JJJ)V", (void*) CanvasJNI::drawRegion },
     {"nDrawRoundRect","(JFFFFFFJ)V", (void*) CanvasJNI::drawRoundRect},
+    {"nDrawDoubleRoundRect", "(JFFFFFFFFFFFFJ)V", (void*) CanvasJNI::drawDoubleRoundRectXY},
+    {"nDrawDoubleRoundRect", "(JFFFF[FFFFF[FJ)V", (void*) CanvasJNI::drawDoubleRoundRectRadii},
     {"nDrawCircle","(JFFFJ)V", (void*) CanvasJNI::drawCircle},
     {"nDrawOval","(JFFFFJ)V", (void*) CanvasJNI::drawOval},
     {"nDrawArc","(JFFFFFFZJ)V", (void*) CanvasJNI::drawArc},

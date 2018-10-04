@@ -1877,6 +1877,51 @@ public class Canvas extends BaseCanvas {
     }
 
     /**
+     * Draws a double rounded rectangle using the specified paint. The resultant round rect
+     * will be filled in the area defined between the outer and inner rectangular bounds if
+     * the {@link Paint} configured with {@link Paint.Style#FILL}.
+     * Otherwise if {@link Paint.Style#STROKE} is used, then 2 rounded rect strokes will
+     * be drawn at the outer and inner rounded rectangles
+     *
+     * @param outer The outer rectangular bounds of the roundRect to be drawn
+     * @param outerRx The x-radius of the oval used to round the corners on the outer rectangle
+     * @param outerRy The y-radius of the oval used to round the corners on the outer rectangle
+     * @param inner The inner rectangular bounds of the roundRect to be drawn
+     * @param innerRx The x-radius of the oval used to round the corners on the inner rectangle
+     * @param innerRy The y-radius of the oval used to round the corners on the outer rectangle
+     * @param paint The paint used to draw the double roundRect
+     */
+    @Override
+    public void drawDoubleRoundRect(@NonNull RectF outer, float outerRx, float outerRy,
+            @NonNull RectF inner, float innerRx, float innerRy, @NonNull Paint paint) {
+        super.drawDoubleRoundRect(outer, outerRx, outerRy, inner, innerRx, innerRy, paint);
+    }
+
+    /**
+     * Draws a double rounded rectangle using the specified paint. The resultant round rect
+     * will be filled in the area defined between the outer and inner rectangular bounds if
+     * the {@link Paint} configured with {@link Paint.Style#FILL}.
+     * Otherwise if {@link Paint.Style#STROKE} is used, then 2 rounded rect strokes will
+     * be drawn at the outer and inner rounded rectangles
+     *
+     * @param outer The outer rectangular bounds of the roundRect to be drawn
+     * @param outerRadii Array of 8 float representing the x, y corner radii for top left,
+     *                   top right, bottom right, bottom left corners respectively on the outer
+     *                   rounded rectangle
+     *
+     * @param inner The inner rectangular bounds of the roundRect to be drawn
+     * @param innerRadii Array of 8 float representing the x, y corner radii for top left,
+     *                   top right, bottom right, bottom left corners respectively on the
+     *                   outer rounded rectangle
+     * @param paint The paint used to draw the double roundRect
+     */
+    @Override
+    public void drawDoubleRoundRect(@NonNull RectF outer, float[] outerRadii,
+            @NonNull RectF inner, float[] innerRadii, @NonNull Paint paint) {
+        super.drawDoubleRoundRect(outer, outerRadii, inner, innerRadii, paint);
+    }
+
+    /**
      * Draw the text, with origin at (x,y), using the specified paint. The origin is interpreted
      * based on the Align setting in the paint.
      *
