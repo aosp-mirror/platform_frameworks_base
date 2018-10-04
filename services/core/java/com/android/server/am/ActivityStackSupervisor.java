@@ -42,6 +42,7 @@ import static android.app.WindowConfiguration.activityTypeToString;
 import static android.app.WindowConfiguration.windowingModeToString;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_INSTANCE;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TASK;
+import static android.content.pm.PackageManager.NOTIFY_PACKAGE_USE_ACTIVITY;
 import static android.content.pm.PackageManager.PERMISSION_DENIED;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.graphics.Rect.copyOrNull;
@@ -828,7 +829,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             moveFocusableActivityToTop(r, myReason);
             return resumeFocusedStacksTopActivitiesLocked(r.getStack(), prev, null);
         }
-        return mService.mAm.startHomeActivityLocked(mCurrentUser, myReason, displayId);
+        return mService.startHomeActivityLocked(mCurrentUser, myReason, displayId);
     }
 
     boolean canStartHomeOnDisplay(ActivityInfo homeActivity, int displayId) {
@@ -1526,8 +1527,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                     // Home process is the root process of the task.
                     mService.mHomeProcess = task.mActivities.get(0).app;
                 }
-                mService.mAm.notifyPackageUse(r.intent.getComponent().getPackageName(),
-                        PackageManager.NOTIFY_PACKAGE_USE_ACTIVITY);
+                mService.getPackageManagerInternalLocked().notifyPackageUse(
+                        r.intent.getComponent().getPackageName(), NOTIFY_PACKAGE_USE_ACTIVITY);
                 r.sleeping = false;
                 r.forceNewConfig = false;
                 mService.getAppWarningsLocked().onStartActivity(r);
@@ -1592,7 +1593,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 mService.getLifecycleManager().scheduleTransaction(clientTransaction);
 
                 if ((app.info.privateFlags & ApplicationInfo.PRIVATE_FLAG_CANT_SAVE_STATE) != 0
-                        && mService.mAm.mHasHeavyWeightFeature) {
+                        && mService.mHasHeavyWeightFeature) {
                     // This may be a heavy-weight process! Note that the package manager will ensure
                     // that only activity can run in the main process of the .apk, which is the only
                     // thing that will be considered heavy-weight.
@@ -1961,7 +1962,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
     private int getComponentRestrictionForCallingPackage(ActivityInfo activityInfo,
             String callingPackage, int callingPid, int callingUid, boolean ignoreTargetSecurity) {
-        if (!ignoreTargetSecurity && mService.mAm.checkComponentPermission(activityInfo.permission,
+        if (!ignoreTargetSecurity && mService.checkComponentPermission(activityInfo.permission,
                 callingPid, callingUid, activityInfo.applicationInfo.uid, activityInfo.exported)
                 == PERMISSION_DENIED) {
             return ACTIVITY_RESTRICTION_PERMISSION;
@@ -4279,7 +4280,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     private void handleDisplayAdded(int displayId) {
         synchronized (mService.mGlobalLock) {
             getActivityDisplayOrCreateLocked(displayId);
-            mService.mAm.startHomeActivityLocked(mCurrentUser, "displayAdded", displayId);
+            mService.startHomeActivityLocked(mCurrentUser, "displayAdded", displayId);
         }
     }
 

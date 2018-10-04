@@ -39,6 +39,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMAR
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+import static android.content.pm.ApplicationInfo.FLAG_FACTORY_TEST;
 import static android.content.pm.PackageManager.FEATURE_ACTIVITIES_ON_SECONDARY_DISPLAYS;
 import static android.content.pm.PackageManager.FEATURE_FREEFORM_WINDOW_MANAGEMENT;
 import static android.content.pm.PackageManager.FEATURE_PC;
@@ -46,6 +47,9 @@ import static android.content.pm.PackageManager.FEATURE_PICTURE_IN_PICTURE;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.content.res.Configuration.UI_MODE_TYPE_TELEVISION;
 import static android.os.Build.VERSION_CODES.N;
+import static android.os.FactoryTest.FACTORY_TEST_HIGH_LEVEL;
+import static android.os.FactoryTest.FACTORY_TEST_LOW_LEVEL;
+import static android.os.FactoryTest.FACTORY_TEST_OFF;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 import static android.provider.Settings.Global.ALWAYS_FINISH_ACTIVITIES;
@@ -86,7 +90,6 @@ import static com.android.server.am.ActivityManagerService.MY_PID;
 import static com.android.server.am.ActivityManagerService.SEND_LOCALE_TO_MOUNT_DAEMON_MSG;
 import static com.android.server.am.ActivityManagerService.STOCK_PM_FLAGS;
 import static com.android.server.am.ActivityManagerService.UPDATE_CONFIGURATION_MSG;
-import static com.android.server.am.ActivityManagerService.checkComponentPermission;
 import static com.android.server.am.ActivityManagerService.dumpStackTraces;
 import static com.android.server.am.ActivityStack.REMOVE_TASK_MODE_DESTROYING;
 import static com.android.server.am.ActivityStackSupervisor.DEFER_RESUME;
@@ -167,6 +170,7 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
+import android.os.FactoryTest;
 import android.os.FileUtils;
 import android.os.Handler;
 import android.os.IBinder;
@@ -293,6 +297,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     WindowProcessController mHomeProcess;
     /** The currently running heavy-weight process, if any. */
     WindowProcessController mHeavyWeightProcess = null;
+    boolean mHasHeavyWeightFeature;
     /**
      * This is the process holding the activity the user last visited that is in a different process
      * from the one they are currently in.
@@ -387,6 +392,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     IActivityController mController = null;
     boolean mControllerIsAMonkey = false;
+
+    final int mFactoryTest;
+
+    /** Used to control how we initialize the service. */
+    ComponentName mTopComponent;
+    String mTopAction = Intent.ACTION_MAIN;
+    String mTopData;
 
     /**
      * Used to retain an update lock when the foreground activity is in
@@ -524,11 +536,14 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     ActivityTaskManagerService(Context context) {
         mContext = context;
+        mFactoryTest = FactoryTest.getMode();
         mUiContext = ActivityThread.currentActivityThread().getSystemUiContext();
         mLifecycleManager = new ClientLifecycleManager();
     }
 
     void onSystemReady() {
+        mHasHeavyWeightFeature = mContext.getPackageManager().hasSystemFeature(
+                PackageManager.FEATURE_CANT_SAVE_STATE);
         mAssistUtils = new AssistUtils(mContext);
         mVrController.onSystemReady();
         mRecentTasks.onSystemReadyLocked();
@@ -2970,7 +2985,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     /** This can be called with or without the global lock held. */
-    void enforceCallerIsRecentsOrHasPermission(String permission, String func) {
+    private void enforceCallerIsRecentsOrHasPermission(String permission, String func) {
         if (!getRecentTasks().isCallerRecents(Binder.getCallingUid())) {
             mAmInternal.enforceCallingPermission(permission, func);
         }
@@ -2986,6 +3001,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             return PackageManager.PERMISSION_DENIED;
         }
         return checkComponentPermission(permission, pid, uid, -1, true);
+    }
+
+    public static int checkComponentPermission(String permission, int pid, int uid,
+            int owningUid, boolean exported) {
+        return ActivityManagerService.checkComponentPermission(
+                permission, pid, uid, owningUid, exported);
     }
 
     boolean isGetTasksAllowed(String caller, int callingPid, int callingUid) {
@@ -5155,6 +5176,103 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         return mAppWarnings;
     }
 
+    Intent getHomeIntent() {
+        Intent intent = new Intent(mTopAction, mTopData != null ? Uri.parse(mTopData) : null);
+        intent.setComponent(mTopComponent);
+        intent.addFlags(Intent.FLAG_DEBUG_TRIAGED_MISSING);
+        if (mFactoryTest != FactoryTest.FACTORY_TEST_LOW_LEVEL) {
+            intent.addCategory(Intent.CATEGORY_HOME);
+        }
+        return intent;
+    }
+
+    /**
+     * This starts home activity on displays that can have system decorations and only if the
+     * home activity can have multiple instances.
+     */
+    boolean startHomeActivityLocked(int userId, String reason, int displayId) {
+        if (mFactoryTest == FactoryTest.FACTORY_TEST_LOW_LEVEL && mTopAction == null) {
+            // We are running in factory test mode, but unable to find the factory test app, so just
+            // sit around displaying the error message and don't try to start anything.
+            return false;
+        }
+
+        final Intent intent = getHomeIntent();
+        ActivityInfo aInfo = resolveActivityInfo(intent, STOCK_PM_FLAGS, userId);
+        if (aInfo != null) {
+            intent.setComponent(new ComponentName(aInfo.applicationInfo.packageName, aInfo.name));
+            // Don't do this if the home app is currently being instrumented.
+            aInfo = new ActivityInfo(aInfo);
+            aInfo.applicationInfo = getAppInfoForUser(aInfo.applicationInfo, userId);
+            WindowProcessController app =
+                    getProcessController(aInfo.processName, aInfo.applicationInfo.uid);
+            if (app == null || !app.isInstrumenting()) {
+                intent.setFlags(intent.getFlags() | FLAG_ACTIVITY_NEW_TASK);
+                final int resolvedUserId = UserHandle.getUserId(aInfo.applicationInfo.uid);
+                // For ANR debugging to verify if the user activity is the one that actually
+                // launched.
+                final String myReason = reason + ":" + userId + ":" + resolvedUserId;
+                getActivityStartController().startHomeActivity(intent, aInfo, myReason, displayId);
+            }
+        } else {
+            Slog.wtf(TAG, "No home screen found for " + intent, new Throwable());
+        }
+
+        return true;
+    }
+
+    private ActivityInfo resolveActivityInfo(Intent intent, int flags, int userId) {
+        ActivityInfo ai = null;
+        final ComponentName comp = intent.getComponent();
+        try {
+            if (comp != null) {
+                // Factory test.
+                ai = AppGlobals.getPackageManager().getActivityInfo(comp, flags, userId);
+            } else {
+                ResolveInfo info = AppGlobals.getPackageManager().resolveIntent(
+                        intent,
+                        intent.resolveTypeIfNeeded(mContext.getContentResolver()),
+                        flags, userId);
+
+                if (info != null) {
+                    ai = info.activityInfo;
+                }
+            }
+        } catch (RemoteException e) {
+            // ignore
+        }
+
+        return ai;
+    }
+
+    ApplicationInfo getAppInfoForUser(ApplicationInfo info, int userId) {
+        if (info == null) return null;
+        ApplicationInfo newInfo = new ApplicationInfo(info);
+        newInfo.initForUser(userId);
+        return newInfo;
+    }
+
+    private WindowProcessController getProcessController(String processName, int uid) {
+        if (uid == SYSTEM_UID) {
+            // The system gets to run in any process. If there are multiple processes with the same
+            // uid, just pick the first (this should never happen).
+            final SparseArray<WindowProcessController> procs =
+                    mProcessNames.getMap().get(processName);
+            if (procs == null) return null;
+            final int procCount = procs.size();
+            for (int i = 0; i < procCount; i++) {
+                final int procUid = procs.keyAt(i);
+                if (UserHandle.isApp(procUid) || !UserHandle.isSameUser(procUid, uid)) {
+                    // Don't use an app process or different user process for system component.
+                    continue;
+                }
+                return procs.valueAt(i);
+            }
+        }
+
+        return mProcessNames.get(processName, uid);
+    }
+
     void logAppTooSlow(WindowProcessController app, long startTime, String msg) {
         if (true || Build.IS_USER) {
             return;
@@ -5793,6 +5911,75 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 }
 
                 return r.mServiceConnectionsHolder;
+            }
+        }
+
+        @Override
+        public Intent getHomeIntent() {
+            synchronized (mGlobalLock) {
+                return ActivityTaskManagerService.this.getHomeIntent();
+            }
+        }
+
+        @Override
+        public boolean startHomeActivity(int userId, String reason) {
+            synchronized (mGlobalLock) {
+                return startHomeActivityLocked(userId, reason, DEFAULT_DISPLAY);
+            }
+        }
+
+        @Override
+        public boolean isFactoryTestProcess(WindowProcessController wpc) {
+            synchronized (mGlobalLock) {
+                if (mFactoryTest == FACTORY_TEST_OFF) {
+                    return false;
+                }
+                if (mFactoryTest == FACTORY_TEST_LOW_LEVEL && mTopComponent != null
+                        && wpc.mName.equals(mTopComponent.getPackageName())) {
+                    return true;
+                }
+                return mFactoryTest == FACTORY_TEST_HIGH_LEVEL
+                        && (wpc.mInfo.flags & FLAG_FACTORY_TEST) != 0;
+            }
+        }
+
+        @Override
+        public void updateTopComponentForFactoryTest() {
+            synchronized (mGlobalLock) {
+                if (mFactoryTest != FACTORY_TEST_LOW_LEVEL) {
+                    return;
+                }
+                final ResolveInfo ri = mContext.getPackageManager()
+                        .resolveActivity(new Intent(Intent.ACTION_FACTORY_TEST), STOCK_PM_FLAGS);
+                final CharSequence errorMsg;
+                if (ri != null) {
+                    final ActivityInfo ai = ri.activityInfo;
+                    final ApplicationInfo app = ai.applicationInfo;
+                    if ((app.flags & ApplicationInfo.FLAG_SYSTEM) != 0) {
+                        mTopAction = Intent.ACTION_FACTORY_TEST;
+                        mTopData = null;
+                        mTopComponent = new ComponentName(app.packageName, ai.name);
+                        errorMsg = null;
+                    } else {
+                        errorMsg = mContext.getResources().getText(
+                                com.android.internal.R.string.factorytest_not_system);
+                    }
+                } else {
+                    errorMsg = mContext.getResources().getText(
+                            com.android.internal.R.string.factorytest_no_action);
+                }
+                if (errorMsg == null) {
+                    return;
+                }
+
+                mTopAction = null;
+                mTopData = null;
+                mTopComponent = null;
+                mUiHandler.post(() -> {
+                    Dialog d = new FactoryErrorDialog(mUiContext, errorMsg);
+                    d.show();
+                    mAm.ensureBootCompleted();
+                });
             }
         }
     }

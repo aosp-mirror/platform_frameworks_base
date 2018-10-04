@@ -755,7 +755,7 @@ class RecentTasks {
             boolean getTasksAllowed, boolean getDetailedTasks, int userId, int callingUid) {
         final boolean withExcluded = (flags & RECENT_WITH_EXCLUDED) != 0;
 
-        if (!mService.mAm.isUserRunning(userId, FLAG_AND_UNLOCKED)) {
+        if (!mService.mAmInternal.isUserRunning(userId, FLAG_AND_UNLOCKED)) {
             Slog.i(TAG, "user " + userId + " is still locked. Cannot load recents");
             return new ArrayList<>();
         }

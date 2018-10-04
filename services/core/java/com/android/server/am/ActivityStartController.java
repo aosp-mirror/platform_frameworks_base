@@ -21,6 +21,7 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 
+import static android.os.FactoryTest.FACTORY_TEST_LOW_LEVEL;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 
@@ -200,9 +201,8 @@ public class ActivityStartController {
         // version than the last one shown, and we are not running in
         // low-level factory test mode.
         final ContentResolver resolver = mService.mContext.getContentResolver();
-        if (mService.mAm.mFactoryTest != FactoryTest.FACTORY_TEST_LOW_LEVEL &&
-                Settings.Global.getInt(resolver,
-                        Settings.Global.DEVICE_PROVISIONED, 0) != 0) {
+        if (mService.mFactoryTest != FACTORY_TEST_LOW_LEVEL
+                && Settings.Global.getInt(resolver, Settings.Global.DEVICE_PROVISIONED, 0) != 0) {
             mService.mAm.setCheckedForSetup(true);
 
             // See if we should be showing the platform update setup UI.
