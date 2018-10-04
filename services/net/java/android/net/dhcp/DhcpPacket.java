@@ -1,5 +1,8 @@
 package android.net.dhcp;
 
+import static android.net.util.NetworkConstants.IPV4_MAX_MTU;
+import static android.net.util.NetworkConstants.IPV4_MIN_MTU;
+
 import android.annotation.Nullable;
 import android.net.DhcpResults;
 import android.net.LinkAddress;
@@ -381,6 +384,26 @@ public abstract class DhcpPacket {
     }
 
     /**
+     * Returns whether a parameter is included in the parameter request list option of this packet.
+     *
+     * <p>If there is no parameter request list option in the packet, false is returned.
+     *
+     * @param paramId ID of the parameter, such as {@link #DHCP_MTU} or {@link #DHCP_HOST_NAME}.
+     */
+    public boolean hasRequestedParam(byte paramId) {
+        if (mRequestedParams == null) {
+            return false;
+        }
+
+        for (byte reqParam : mRequestedParams) {
+            if (reqParam == paramId) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    /**
      * Creates a new L3 packet (including IP header) containing the
      * DHCP udp packet.  This method relies upon the delegated method
      * finishPacket() to insert the per-packet contents.
@@ -696,7 +719,11 @@ public abstract class DhcpPacket {
         addTlv(buf, DHCP_ROUTER, mGateways);
         addTlv(buf, DHCP_DNS_SERVER, mDnsServers);
         addTlv(buf, DHCP_DOMAIN_NAME, mDomainName);
+        addTlv(buf, DHCP_HOST_NAME, mHostName);
         addTlv(buf, DHCP_VENDOR_INFO, mVendorInfo);
+        if (mMtu != null && Short.toUnsignedInt(mMtu) >= IPV4_MIN_MTU) {
+            addTlv(buf, DHCP_MTU, mMtu);
+        }
     }
 
     /**
@@ -1259,7 +1286,8 @@ public abstract class DhcpPacket {
         boolean broadcast, Inet4Address serverIpAddr, Inet4Address relayIp,
         Inet4Address yourIp, byte[] mac, Integer timeout, Inet4Address netMask,
         Inet4Address bcAddr, List<Inet4Address> gateways, List<Inet4Address> dnsServers,
-        Inet4Address dhcpServerIdentifier, String domainName, boolean metered) {
+        Inet4Address dhcpServerIdentifier, String domainName, String hostname, boolean metered,
+        short mtu) {
         DhcpPacket pkt = new DhcpOfferPacket(
                 transactionId, (short) 0, broadcast, serverIpAddr, relayIp,
                 INADDR_ANY /* clientIp */, yourIp, mac);
@@ -1267,9 +1295,11 @@ public abstract class DhcpPacket {
         pkt.mDnsServers = dnsServers;
         pkt.mLeaseTime = timeout;
         pkt.mDomainName = domainName;
+        pkt.mHostName = hostname;
         pkt.mServerIdentifier = dhcpServerIdentifier;
         pkt.mSubnetMask = netMask;
         pkt.mBroadcastAddress = bcAddr;
+        pkt.mMtu = mtu;
         if (metered) {
             pkt.mVendorInfo = VENDOR_INFO_ANDROID_METERED;
         }
@@ -1283,7 +1313,8 @@ public abstract class DhcpPacket {
         boolean broadcast, Inet4Address serverIpAddr, Inet4Address relayIp, Inet4Address yourIp,
         Inet4Address requestClientIp, byte[] mac, Integer timeout, Inet4Address netMask,
         Inet4Address bcAddr, List<Inet4Address> gateways, List<Inet4Address> dnsServers,
-        Inet4Address dhcpServerIdentifier, String domainName, boolean metered) {
+        Inet4Address dhcpServerIdentifier, String domainName, String hostname, boolean metered,
+        short mtu) {
         DhcpPacket pkt = new DhcpAckPacket(
                 transactionId, (short) 0, broadcast, serverIpAddr, relayIp, requestClientIp, yourIp,
                 mac);
@@ -1291,9 +1322,11 @@ public abstract class DhcpPacket {
         pkt.mDnsServers = dnsServers;
         pkt.mLeaseTime = timeout;
         pkt.mDomainName = domainName;
+        pkt.mHostName = hostname;
         pkt.mSubnetMask = netMask;
         pkt.mServerIdentifier = dhcpServerIdentifier;
         pkt.mBroadcastAddress = bcAddr;
+        pkt.mMtu = mtu;
         if (metered) {
             pkt.mVendorInfo = VENDOR_INFO_ANDROID_METERED;
         }

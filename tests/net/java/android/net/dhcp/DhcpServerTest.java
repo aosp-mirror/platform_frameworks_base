@@ -17,6 +17,7 @@
 package android.net.dhcp;
 
 import static android.net.dhcp.DhcpPacket.DHCP_CLIENT;
+import static android.net.dhcp.DhcpPacket.DHCP_HOST_NAME;
 import static android.net.dhcp.DhcpPacket.ENCAP_BOOTP;
 import static android.net.dhcp.DhcpPacket.INADDR_ANY;
 import static android.net.dhcp.DhcpPacket.INADDR_BROADCAST;
@@ -87,6 +88,7 @@ public class DhcpServerTest {
             Arrays.asList(parseAddr("192.168.0.200"), parseAddr("192.168.0.201")));
     private static final long TEST_LEASE_TIME_SECS = 3600L;
     private static final int TEST_MTU = 1500;
+    private static final String TEST_HOSTNAME = "testhostname";
 
     private static final int TEST_TRANSACTION_ID = 123;
     private static final byte[] TEST_CLIENT_MAC_BYTES = new byte [] { 1, 2, 3, 4, 5, 6 };
@@ -96,7 +98,10 @@ public class DhcpServerTest {
     private static final long TEST_CLOCK_TIME = 1234L;
     private static final int TEST_LEASE_EXPTIME_SECS = 3600;
     private static final DhcpLease TEST_LEASE = new DhcpLease(null, TEST_CLIENT_MAC,
-            TEST_CLIENT_ADDR, TEST_LEASE_EXPTIME_SECS*1000L + TEST_CLOCK_TIME, null /* hostname */);
+            TEST_CLIENT_ADDR, TEST_LEASE_EXPTIME_SECS * 1000L + TEST_CLOCK_TIME,
+            null /* hostname */);
+    private static final DhcpLease TEST_LEASE_WITH_HOSTNAME = new DhcpLease(null, TEST_CLIENT_MAC,
+            TEST_CLIENT_ADDR, TEST_LEASE_EXPTIME_SECS * 1000L + TEST_CLOCK_TIME, TEST_HOSTNAME);
 
     @NonNull @Mock
     private Dependencies mDeps;
@@ -217,15 +222,17 @@ public class DhcpServerTest {
     public void testRequest_Selecting_Ack() throws Exception {
         when(mRepository.requestLease(isNull() /* clientId */, eq(TEST_CLIENT_MAC),
                 eq(INADDR_ANY) /* clientAddr */, eq(INADDR_ANY) /* relayAddr */,
-                eq(TEST_CLIENT_ADDR) /* reqAddr */, eq(true) /* sidSet */, isNull() /* hostname */))
-                .thenReturn(TEST_LEASE);
+                eq(TEST_CLIENT_ADDR) /* reqAddr */, eq(true) /* sidSet */, eq(TEST_HOSTNAME)))
+                .thenReturn(TEST_LEASE_WITH_HOSTNAME);
 
         final DhcpRequestPacket request = makeRequestSelectingPacket();
+        request.mHostName = TEST_HOSTNAME;
+        request.mRequestedParams = new byte[] { DHCP_HOST_NAME };
         mServer.processPacket(request, DHCP_CLIENT);
 
         assertResponseSentTo(TEST_CLIENT_ADDR);
         final DhcpAckPacket packet = assertAck(getPacket());
-        assertMatchesTestLease(packet);
+        assertMatchesTestLease(packet, TEST_HOSTNAME);
     }
 
     @Test
@@ -270,14 +277,18 @@ public class DhcpServerTest {
      *  - other request states (init-reboot/renewing/rebinding)
      */
 
-    private void assertMatchesTestLease(@NonNull DhcpPacket packet) {
+    private void assertMatchesTestLease(@NonNull DhcpPacket packet, @Nullable String hostname) {
         assertMatchesClient(packet);
         assertFalse(packet.hasExplicitClientId());
         assertEquals(TEST_SERVER_ADDR, packet.mServerIdentifier);
         assertEquals(TEST_CLIENT_ADDR, packet.mYourIp);
         assertNotNull(packet.mLeaseTime);
         assertEquals(TEST_LEASE_EXPTIME_SECS, (int) packet.mLeaseTime);
-        assertNull(packet.mHostName);
+        assertEquals(hostname, packet.mHostName);
+    }
+
+    private void assertMatchesTestLease(@NonNull DhcpPacket packet) {
+        assertMatchesTestLease(packet, null);
     }
 
     private void assertMatchesClient(@NonNull DhcpPacket packet) {
