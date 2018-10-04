@@ -73,6 +73,15 @@ public final class Insets {
     }
 
     /**
+     * Returns a Rect intance with the appropriate values.
+     *
+     * @hide
+     */
+    public @NonNull Rect toRect() {
+        return new Rect(left, top, right, bottom);
+    }
+
+    /**
      * Two Insets instances are equal iff they belong to the same class and their fields are
      * pairwise equal.
      *

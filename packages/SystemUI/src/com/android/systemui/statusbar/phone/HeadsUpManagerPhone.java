@@ -22,6 +22,8 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import androidx.collection.ArraySet;
+
+import android.graphics.Rect;
 import android.graphics.Region;
 import android.graphics.Region.Op;
 import android.util.Log;
@@ -324,11 +326,10 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
 
         // Expand touchable region such that we also catch touches that just start below the notch
         // area.
-        Region bounds = ScreenDecorations.DisplayCutoutView.boundsFromDirection(
-                cutout, Gravity.TOP);
-        bounds.translate(0, mDisplayCutoutTouchableRegionSize);
+        Rect bounds = new Rect();
+        ScreenDecorations.DisplayCutoutView.boundsFromDirection(cutout, Gravity.TOP, bounds);
+        bounds.offset(0, mDisplayCutoutTouchableRegionSize);
         region.op(bounds, Op.UNION);
-        bounds.recycle();
     }
 
     @Override

@@ -16,12 +16,12 @@
 
 package com.android.server.wm;
 
+import static android.view.DisplayCutout.BOUNDS_POSITION_TOP;
 import static android.view.DisplayCutout.fromBoundingRect;
 import static android.view.WindowManager.LayoutParams.FILL_PARENT;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertTrue;
 
 import android.app.ActivityManager.TaskDescription;
 import android.content.res.Configuration;
@@ -474,7 +474,8 @@ public class WindowFrameTests extends WindowTestsBase {
         final Rect pf = new Rect(0, 0, 1000, 2000);
         // Create a display cutout of size 50x50, aligned top-center
         final WmDisplayCutout cutout = WmDisplayCutout.computeSafeInsets(
-                fromBoundingRect(500, 0, 550, 50), pf.width(), pf.height());
+                fromBoundingRect(500, 0, 550, 50, BOUNDS_POSITION_TOP),
+                pf.width(), pf.height());
 
         final WindowFrames windowFrames = w.getWindowFrames();
         windowFrames.setFrames(pf, pf, pf, pf, pf, pf, pf, pf);
@@ -499,7 +500,8 @@ public class WindowFrameTests extends WindowTestsBase {
         final Rect pf = new Rect(0, -500, 1000, 1500);
         // Create a display cutout of size 50x50, aligned top-center
         final WmDisplayCutout cutout = WmDisplayCutout.computeSafeInsets(
-                fromBoundingRect(500, 0, 550, 50), pf.width(), pf.height());
+                fromBoundingRect(500, 0, 550, 50, BOUNDS_POSITION_TOP),
+                pf.width(), pf.height());
 
         final WindowFrames windowFrames = w.getWindowFrames();
         windowFrames.setFrames(pf, pf, pf, pf, pf, pf, pf, pf);

@@ -16,6 +16,10 @@
 
 package com.android.server.policy;
 
+import static android.view.DisplayCutout.BOUNDS_POSITION_BOTTOM;
+import static android.view.DisplayCutout.BOUNDS_POSITION_LEFT;
+import static android.view.DisplayCutout.BOUNDS_POSITION_RIGHT;
+import static android.view.DisplayCutout.BOUNDS_POSITION_TOP;
 import static android.view.Surface.ROTATION_0;
 import static android.view.Surface.ROTATION_180;
 import static android.view.Surface.ROTATION_270;
@@ -179,8 +183,25 @@ public class PhoneWindowManagerTestBase {
         transformPhysicalToLogicalCoordinates(rotation, DISPLAY_WIDTH, DISPLAY_HEIGHT, m);
         m.mapRect(rectF);
 
+        int pos = -1;
+        switch (rotation) {
+            case ROTATION_0:
+                pos = BOUNDS_POSITION_TOP;
+                break;
+            case ROTATION_90:
+                pos = BOUNDS_POSITION_LEFT;
+                break;
+            case ROTATION_180:
+                pos = BOUNDS_POSITION_BOTTOM;
+                break;
+            case ROTATION_270:
+                pos = BOUNDS_POSITION_RIGHT;
+                break;
+        }
+
+
         return DisplayCutout.fromBoundingRect((int) rectF.left, (int) rectF.top,
-                (int) rectF.right, (int) rectF.bottom);
+                (int) rectF.right, (int) rectF.bottom, pos);
     }
 
     static class TestContextWrapper extends ContextWrapper {
