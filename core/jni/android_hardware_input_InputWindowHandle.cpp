@@ -25,8 +25,8 @@
 #include <android/graphics/Region.h>
 #include <ui/Region.h>
 
-#include "com_android_server_input_InputWindowHandle.h"
-#include "com_android_server_input_InputApplicationHandle.h"
+#include "android_hardware_input_InputWindowHandle.h"
+#include "android_hardware_input_InputApplicationHandle.h"
 
 namespace android {
 

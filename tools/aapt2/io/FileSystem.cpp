@@ -128,5 +128,9 @@ std::unique_ptr<IFileCollectionIterator> FileCollection::Iterator() {
   return util::make_unique<FileCollectionIterator>(this);
 }
 
+char FileCollection::GetDirSeparator() {
+  return file::sDirSep;
+}
+
 }  // namespace io
 }  // namespace aapt

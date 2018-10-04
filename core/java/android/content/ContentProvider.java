@@ -2104,7 +2104,11 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
         // a source of security issues.
         final String encodedPath = uri.getEncodedPath();
         if (encodedPath != null && encodedPath.indexOf("//") != -1) {
-            return uri.buildUpon().encodedPath(encodedPath.replaceAll("//+", "/")).build();
+            final Uri normalized = uri.buildUpon()
+                    .encodedPath(encodedPath.replaceAll("//+", "/")).build();
+            Log.w(TAG, "Normalized " + uri + " to " + normalized
+                    + " to avoid possible security issues");
+            return normalized;
         } else {
             return uri;
         }

@@ -126,6 +126,12 @@ bool SkiaVulkanPipeline::setSurface(Surface* surface, SwapBehavior swapBehavior,
         mVkSurface = mVkManager.createSurface(surface, colorMode);
     }
 
+    if (colorMode == ColorMode::SRGB) {
+        mSurfaceColorType = SkColorType::kN32_SkColorType;
+    } else if (colorMode == ColorMode::WideColorGamut) {
+        mSurfaceColorType = SkColorType::kRGBA_F16_SkColorType;
+    }
+
     return mVkSurface != nullptr;
 }
 

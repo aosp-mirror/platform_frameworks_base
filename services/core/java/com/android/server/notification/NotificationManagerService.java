@@ -16,6 +16,7 @@
 
 package com.android.server.notification;
 
+import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND;
 import static android.app.Notification.FLAG_FOREGROUND_SERVICE;
 import static android.app.NotificationManager.ACTION_APP_BLOCK_STATE_CHANGED;
 import static android.app.NotificationManager.ACTION_NOTIFICATION_CHANNEL_BLOCK_STATE_CHANGED;
@@ -2001,7 +2002,8 @@ public class NotificationManagerService extends SystemService {
         return mInternalService;
     }
 
-    private final IBinder mService = new INotificationManager.Stub() {
+    @VisibleForTesting
+    final IBinder mService = new INotificationManager.Stub() {
         // Toasts
         // ============================================================================
 
@@ -2015,21 +2017,30 @@ public class NotificationManagerService extends SystemService {
             }
 
             if (pkg == null || callback == null) {
-                Slog.e(TAG, "Not doing toast. pkg=" + pkg + " callback=" + callback);
+                Slog.e(TAG, "Not enqueuing toast. pkg=" + pkg + " callback=" + callback);
                 return ;
             }
-            final boolean isSystemToast = isCallerSystemOrPhone() || ("android".equals(pkg));
-            final boolean isPackageSuspended =
-                    isPackageSuspendedForUser(pkg, Binder.getCallingUid());
 
-            if (ENABLE_BLOCKED_TOASTS && !isSystemToast &&
-                    (!areNotificationsEnabledForPackage(pkg, Binder.getCallingUid())
-                            || isPackageSuspended)) {
-                Slog.e(TAG, "Suppressing toast from package " + pkg
-                        + (isPackageSuspended
-                                ? " due to package suspended by administrator."
-                                : " by user request."));
-                return;
+            final int callingUid = Binder.getCallingUid();
+            final boolean isSystemToast = isCallerSystemOrPhone()
+                    || PackageManagerService.PLATFORM_PACKAGE_NAME.equals(pkg);
+            final boolean isPackageSuspended = isPackageSuspendedForUser(pkg, callingUid);
+            final boolean notificationsDisabledForPackage = !areNotificationsEnabledForPackage(pkg,
+                    callingUid);
+
+            long callingIdentity = Binder.clearCallingIdentity();
+            try {
+                final boolean appIsForeground = mActivityManager.getUidImportance(callingUid)
+                        == IMPORTANCE_FOREGROUND;
+                if (ENABLE_BLOCKED_TOASTS && !isSystemToast && ((notificationsDisabledForPackage
+                        && !appIsForeground) || isPackageSuspended)) {
+                    Slog.e(TAG, "Suppressing toast from package " + pkg
+                            + (isPackageSuspended ? " due to package suspended."
+                            : " by user request."));
+                    return;
+                }
+            } finally {
+                Binder.restoreCallingIdentity(callingIdentity);
             }
 
             synchronized (mToastQueue) {

@@ -45,7 +45,6 @@ import static android.content.pm.ActivityInfo.RESIZE_MODE_RESIZEABLE_VIA_SDK_VER
 import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 import static android.provider.Settings.Secure.USER_SETUP_COMPLETE;
 import static android.view.Display.DEFAULT_DISPLAY;
-
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ADD_REMOVE;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_LOCKTASK;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_RECENTS;
@@ -75,7 +74,6 @@ import static com.android.server.am.TaskRecordProto.ORIG_ACTIVITY;
 import static com.android.server.am.TaskRecordProto.REAL_ACTIVITY;
 import static com.android.server.am.TaskRecordProto.RESIZE_MODE;
 import static com.android.server.am.TaskRecordProto.STACK_ID;
-
 import static java.lang.Integer.MAX_VALUE;
 
 import android.annotation.IntDef;
@@ -1686,11 +1684,19 @@ public class TaskRecord extends ConfigurationContainer implements TaskWindowCont
         // so that the user can not render the task too small to manipulate. We don't need
         // to do this for the pinned stack as the bounds are controlled by the system.
         if (!inPinnedWindowingMode()) {
+            final int defaultMinSizeDp =
+                    mService.mStackSupervisor.mDefaultMinSizeOfResizeableTaskDp;
+            final ActivityDisplay display =
+                    mService.mStackSupervisor.getActivityDisplay(mStack.mDisplayId);
+            final float density =
+                    (float) display.getConfiguration().densityDpi / DisplayMetrics.DENSITY_DEFAULT;
+            final int defaultMinSize = (int) (defaultMinSizeDp * density);
+
             if (minWidth == INVALID_MIN_SIZE) {
-                minWidth = mService.mStackSupervisor.mDefaultMinSizeOfResizeableTask;
+                minWidth = defaultMinSize;
             }
             if (minHeight == INVALID_MIN_SIZE) {
-                minHeight = mService.mStackSupervisor.mDefaultMinSizeOfResizeableTask;
+                minHeight = defaultMinSize;
             }
         }
         final boolean adjustWidth = minWidth > bounds.width();

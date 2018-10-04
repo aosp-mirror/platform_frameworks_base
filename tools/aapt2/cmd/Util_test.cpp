@@ -16,12 +16,22 @@
 
 #include "Util.h"
 
+#include "android-base/stringprintf.h"
+
 #include "AppInfo.h"
 #include "split/TableSplitter.h"
 #include "test/Builders.h"
 #include "test/Test.h"
+#include "util/Files.h"
 
 namespace aapt {
+
+#ifdef _WIN32
+#define CREATE_PATH(path) android::base::StringPrintf(";%s", path)
+#else
+#define CREATE_PATH(path) android::base::StringPrintf(":%s", path)
+#endif
+
 #define EXPECT_CONFIG_EQ(constraints, config) \
     EXPECT_EQ(constraints.configs.size(), 1); \
     EXPECT_EQ(*constraints.configs.begin(), config); \
@@ -89,7 +99,7 @@ TEST (UtilTest, LongVersionCodeUndefined) {
 }
 
 
-TEST (UtilTest, ParseSplitParameter) {
+TEST (UtilTest, ParseSplitParameters) {
   IDiagnostics* diagnostics = test::ContextBuilder().Build().get()->GetDiagnostics();
   std::string path;
   SplitConstraints constraints;
@@ -98,14 +108,14 @@ TEST (UtilTest, ParseSplitParameter) {
   // ========== Test IMSI ==========
   // mcc: 'mcc[0-9]{3}'
   // mnc: 'mnc[0-9]{1,3}'
-  ASSERT_TRUE(ParseSplitParameter(":mcc310",
+  ASSERT_TRUE(ParseSplitParameter(CREATE_PATH("mcc310"),
                                   diagnostics, &path, &constraints));
   expected_configuration = test::ConfigDescriptionBuilder()
       .setMcc(0x0136)
       .Build();
   EXPECT_CONFIG_EQ(constraints, expected_configuration);
 
-  ASSERT_TRUE(ParseSplitParameter(":mcc310-mnc004",
+  ASSERT_TRUE(ParseSplitParameter(CREATE_PATH("mcc310-mnc004"),
                                   diagnostics, &path, &constraints));
   expected_configuration = test::ConfigDescriptionBuilder()
       .setMcc(0x0136)
@@ -113,7 +123,7 @@ TEST (UtilTest, ParseSplitParameter) {
       .Build();
   EXPECT_CONFIG_EQ(constraints, expected_configuration);
 
-  ASSERT_TRUE(ParseSplitParameter(":mcc310-mnc000",
+  ASSERT_TRUE(ParseSplitParameter(CREATE_PATH("mcc310-mnc000"),
                                   diagnostics, &path, &constraints));
   expected_configuration = test::ConfigDescriptionBuilder()
       .setMcc(0x0136)
@@ -124,14 +134,14 @@ TEST (UtilTest, ParseSplitParameter) {
   // ========== Test LOCALE ==========
   // locale: '[a-z]{2,3}(-r[a-z]{2})?'
   // locale: 'b+[a-z]{2,3}(+[a-z[0-9]]{2})?'
-  ASSERT_TRUE(ParseSplitParameter(":es",
+  ASSERT_TRUE(ParseSplitParameter(CREATE_PATH("es"),
                                   diagnostics, &path, &constraints));
   expected_configuration = test::ConfigDescriptionBuilder()
       .setLanguage(0x6573)
       .Build();
   EXPECT_CONFIG_EQ(constraints, expected_configuration);
 
-  ASSERT_TRUE(ParseSplitParameter(":fr-rCA",
+  ASSERT_TRUE(ParseSplitParameter(CREATE_PATH("fr-rCA"),
                                   diagnostics, &path, &constraints));
   expected_configuration = test::ConfigDescriptionBuilder()
       .setLanguage(0x6672)
@@ -139,7 +149,7 @@ TEST (UtilTest, ParseSplitParameter) {
       .Build();
   EXPECT_CONFIG_EQ(constraints, expected_configuration);
 
-  ASSERT_TRUE(ParseSplitParameter(":b+es+419",
+  ASSERT_TRUE(ParseSplitParameter(CREATE_PATH("b+es+419"),
                                   diagnostics, &path, &constraints));
   expected_configuration = test::ConfigDescriptionBuilder()
       .setLanguage(0x6573)
@@ -151,21 +161,21 @@ TEST (UtilTest, ParseSplitParameter) {
   // orientation: '(port|land|square)'
   // touchscreen: '(notouch|stylus|finger)'
   // density" '(anydpi|nodpi|ldpi|mdpi|tvdpi|hdpi|xhdpi|xxhdpi|xxxhdpi|[0-9]*dpi)'
-  ASSERT_TRUE(ParseSplitParameter(":square",
+  ASSERT_TRUE(ParseSplitParameter(CREATE_PATH("square"),
                                   diagnostics, &path, &constraints));
   expected_configuration = test::ConfigDescriptionBuilder()
       .setOrientation(0x03)
       .Build();
   EXPECT_CONFIG_EQ(constraints, expected_configuration);
 
-  ASSERT_TRUE(ParseSplitParameter(":stylus",
+  ASSERT_TRUE(ParseSplitParameter(CREATE_PATH("stylus"),
                                   diagnostics, &path, &constraints));
   expected_configuration = test::ConfigDescriptionBuilder()
       .setTouchscreen(0x02)
       .Build();
   EXPECT_CONFIG_EQ(constraints, expected_configuration);
 
-  ASSERT_TRUE(ParseSplitParameter(":xxxhdpi",
+  ASSERT_TRUE(ParseSplitParameter(CREATE_PATH("xxxhdpi"),
                                   diagnostics, &path, &constraints));
   expected_configuration = test::ConfigDescriptionBuilder()
       .setDensity(0x0280)
@@ -173,7 +183,7 @@ TEST (UtilTest, ParseSplitParameter) {
       .Build();
   EXPECT_CONFIG_EQ(constraints, expected_configuration);
 
-  ASSERT_TRUE(ParseSplitParameter(":land-xhdpi-finger",
+  ASSERT_TRUE(ParseSplitParameter(CREATE_PATH("land-xhdpi-finger"),
                                   diagnostics, &path, &constraints));
   expected_configuration = test::ConfigDescriptionBuilder()
       .setOrientation(0x02)
@@ -188,28 +198,28 @@ TEST (UtilTest, ParseSplitParameter) {
   // navigation: '(nonav|dpad|trackball|wheel)'
   // inputFlags: '(keysexposed|keyshidden|keyssoft)'
   // inputFlags: '(navexposed|navhidden)'
-  ASSERT_TRUE(ParseSplitParameter(":qwerty",
+  ASSERT_TRUE(ParseSplitParameter(CREATE_PATH("qwerty"),
                                   diagnostics, &path, &constraints));
   expected_configuration = test::ConfigDescriptionBuilder()
       .setKeyboard(0x02)
       .Build();
   EXPECT_CONFIG_EQ(constraints, expected_configuration);
 
-  ASSERT_TRUE(ParseSplitParameter(":dpad",
+  ASSERT_TRUE(ParseSplitParameter(CREATE_PATH("dpad"),
                                   diagnostics, &path, &constraints));
   expected_configuration = test::ConfigDescriptionBuilder()
       .setNavigation(0x02)
       .Build();
   EXPECT_CONFIG_EQ(constraints, expected_configuration);
 
-  ASSERT_TRUE(ParseSplitParameter(":keyssoft-navhidden",
+  ASSERT_TRUE(ParseSplitParameter(CREATE_PATH("keyssoft-navhidden"),
                                   diagnostics, &path, &constraints));
   expected_configuration = test::ConfigDescriptionBuilder()
       .setInputFlags(0x0B)
       .Build();
   EXPECT_CONFIG_EQ(constraints, expected_configuration);
 
-  ASSERT_TRUE(ParseSplitParameter(":keyshidden-nokeys-navexposed-trackball",
+  ASSERT_TRUE(ParseSplitParameter(CREATE_PATH("keyshidden-nokeys-navexposed-trackball"),
                                   diagnostics, &path, &constraints));
   expected_configuration = test::ConfigDescriptionBuilder()
       .setKeyboard(0x01)
@@ -220,7 +230,7 @@ TEST (UtilTest, ParseSplitParameter) {
 
   // ========== Test SCREEN_SIZE ==========
   // screenWidth/screenHeight: '[0-9]+x[0-9]+'
-  ASSERT_TRUE(ParseSplitParameter(":1920x1080",
+  ASSERT_TRUE(ParseSplitParameter(CREATE_PATH("1920x1080"),
                                   diagnostics, &path, &constraints));
   expected_configuration = test::ConfigDescriptionBuilder()
       .setScreenWidth(0x0780)
@@ -238,14 +248,14 @@ TEST (UtilTest, ParseSplitParameter) {
   // uiMode [type]: '(desk|car|television|appliance|watch|vrheadset)'
   // uiMode [night]: '(night|notnight)'
   // smallestScreenWidthDp: 'sw[0-9]dp'
-  ASSERT_TRUE(ParseSplitParameter(":ldrtl",
+  ASSERT_TRUE(ParseSplitParameter(CREATE_PATH("ldrtl"),
                                   diagnostics, &path, &constraints));
   expected_configuration = test::ConfigDescriptionBuilder()
       .setScreenLayout(0x80)
       .Build();
   EXPECT_CONFIG_EQ(constraints, expected_configuration);
 
-  ASSERT_TRUE(ParseSplitParameter(":small",
+  ASSERT_TRUE(ParseSplitParameter(CREATE_PATH("small"),
                                   diagnostics, &path, &constraints));
   expected_configuration = test::ConfigDescriptionBuilder()
       .setScreenLayout(0x01)
@@ -253,7 +263,7 @@ TEST (UtilTest, ParseSplitParameter) {
       .Build();
   EXPECT_CONFIG_EQ(constraints, expected_configuration);
 
-  ASSERT_TRUE(ParseSplitParameter(":notlong",
+  ASSERT_TRUE(ParseSplitParameter(CREATE_PATH("notlong"),
                                   diagnostics, &path, &constraints));
   expected_configuration = test::ConfigDescriptionBuilder()
       .setScreenLayout(0x10)
@@ -261,15 +271,15 @@ TEST (UtilTest, ParseSplitParameter) {
       .Build();
   EXPECT_CONFIG_EQ(constraints, expected_configuration);
 
-  ASSERT_TRUE(ParseSplitParameter(":ldltr-normal-long",
-                                  diagnostics, &path, &constraints));
+  ASSERT_TRUE(ParseSplitParameter(CREATE_PATH("ldltr-normal-long"),
+                                      diagnostics, &path, &constraints));
   expected_configuration = test::ConfigDescriptionBuilder()
       .setScreenLayout(0x62)
       .setSdkVersion(0x0004) // screenLayout (size|long) requires donut
       .Build();
   EXPECT_CONFIG_EQ(constraints, expected_configuration);
 
-  ASSERT_TRUE(ParseSplitParameter(":car",
+  ASSERT_TRUE(ParseSplitParameter(CREATE_PATH("car"),
                                   diagnostics, &path, &constraints));
   expected_configuration = test::ConfigDescriptionBuilder()
       .setUiMode(0x03)
@@ -277,7 +287,7 @@ TEST (UtilTest, ParseSplitParameter) {
       .Build();
   EXPECT_CONFIG_EQ(constraints, expected_configuration);
 
-  ASSERT_TRUE(ParseSplitParameter(":vrheadset",
+  ASSERT_TRUE(ParseSplitParameter(CREATE_PATH("vrheadset"),
                                   diagnostics, &path, &constraints));
   expected_configuration = test::ConfigDescriptionBuilder()
       .setUiMode(0x07)
@@ -285,7 +295,7 @@ TEST (UtilTest, ParseSplitParameter) {
       .Build();
   EXPECT_CONFIG_EQ(constraints, expected_configuration);
 
-  ASSERT_TRUE(ParseSplitParameter(":television-night",
+  ASSERT_TRUE(ParseSplitParameter(CREATE_PATH("television-night"),
                                   diagnostics, &path, &constraints));
   expected_configuration = test::ConfigDescriptionBuilder()
       .setUiMode(0x24)
@@ -293,7 +303,7 @@ TEST (UtilTest, ParseSplitParameter) {
       .Build();
   EXPECT_CONFIG_EQ(constraints, expected_configuration);
 
-  ASSERT_TRUE(ParseSplitParameter(":sw1920dp",
+  ASSERT_TRUE(ParseSplitParameter(CREATE_PATH("sw1920dp"),
                                   diagnostics, &path, &constraints));
   expected_configuration = test::ConfigDescriptionBuilder()
       .setSmallestScreenWidthDp(0x0780)
@@ -304,7 +314,7 @@ TEST (UtilTest, ParseSplitParameter) {
   // ========== Test SCREEN_SIZE_DP ==========
   // screenWidthDp: 'w[0-9]dp'
   // screenHeightDp: 'h[0-9]dp'
-  ASSERT_TRUE(ParseSplitParameter(":w1920dp",
+  ASSERT_TRUE(ParseSplitParameter(CREATE_PATH("w1920dp"),
                                   diagnostics, &path, &constraints));
   expected_configuration = test::ConfigDescriptionBuilder()
       .setScreenWidthDp(0x0780)
@@ -312,7 +322,7 @@ TEST (UtilTest, ParseSplitParameter) {
       .Build();
   EXPECT_CONFIG_EQ(constraints, expected_configuration);
 
-  ASSERT_TRUE(ParseSplitParameter(":h1080dp",
+  ASSERT_TRUE(ParseSplitParameter(CREATE_PATH("h1080dp"),
                                   diagnostics, &path, &constraints));
   expected_configuration = test::ConfigDescriptionBuilder()
       .setScreenHeightDp(0x0438)
@@ -324,7 +334,7 @@ TEST (UtilTest, ParseSplitParameter) {
   // screenLayout2: '(round|notround)'
   // colorMode: '(widecg|nowidecg)'
   // colorMode: '(highhdr|lowdr)'
-  ASSERT_TRUE(ParseSplitParameter(":round",
+  ASSERT_TRUE(ParseSplitParameter(CREATE_PATH("round"),
                                   diagnostics, &path, &constraints));
   expected_configuration = test::ConfigDescriptionBuilder()
       .setScreenLayout2(0x02)
@@ -332,7 +342,7 @@ TEST (UtilTest, ParseSplitParameter) {
       .Build();
   EXPECT_CONFIG_EQ(constraints, expected_configuration);
 
-  ASSERT_TRUE(ParseSplitParameter(":widecg-highdr",
+  ASSERT_TRUE(ParseSplitParameter(CREATE_PATH("widecg-highdr"),
                                   diagnostics, &path, &constraints));
   expected_configuration = test::ConfigDescriptionBuilder()
       .setColorMode(0x0A)
@@ -349,10 +359,10 @@ TEST (UtilTest, AdjustSplitConstraintsForMinSdk) {
   std::string path;
 
   test_constraints.push_back({});
-  ASSERT_TRUE(ParseSplitParameter(":v7",
+  ASSERT_TRUE(ParseSplitParameter(CREATE_PATH("v7"),
                                   diagnostics, &path, &test_constraints.back()));
   test_constraints.push_back({});
-  ASSERT_TRUE(ParseSplitParameter(":xhdpi",
+  ASSERT_TRUE(ParseSplitParameter(CREATE_PATH("xhdpi"),
                                   diagnostics, &path, &test_constraints.back()));
   EXPECT_EQ(test_constraints.size(), 2);
   EXPECT_EQ(test_constraints[0].name, "v7");

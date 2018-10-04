@@ -30,7 +30,6 @@ import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
 import static android.content.Intent.FLAG_ACTIVITY_MULTIPLE_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
-
 import static android.os.Process.SYSTEM_UID;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_RECENTS;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_RECENTS_TRIM_TASKS;
@@ -55,7 +54,6 @@ import android.content.pm.ParceledListSlice;
 import android.content.pm.UserInfo;
 import android.content.res.Resources;
 import android.graphics.Bitmap;
-import android.graphics.Rect;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.IBinder;
@@ -431,7 +429,7 @@ class RecentTasks {
     void onSystemReadyLocked() {
         loadRecentsComponent(mService.mContext.getResources());
         mTasks.clear();
-        mTaskPersister.startPersisting();
+        mTaskPersister.onSystemReady();
     }
 
     Bitmap getTaskDescriptionIcon(String path) {

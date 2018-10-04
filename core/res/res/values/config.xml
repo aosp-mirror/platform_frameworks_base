@@ -1527,7 +1527,7 @@
     <bool name="config_checkWallpaperAtBoot">true</bool>
 
     <!-- Class name of WallpaperManagerService. -->
-    <string name="config_wallpaperManagerServiceName">com.android.server.wallpaper.WallpaperManagerService</string>
+    <string name="config_wallpaperManagerServiceName" translatable="false">com.android.server.wallpaper.WallpaperManagerService</string>
 
     <!-- Enables the TimeZoneRuleManager service. This is the master switch for the updateable time
          zone update mechanism. -->

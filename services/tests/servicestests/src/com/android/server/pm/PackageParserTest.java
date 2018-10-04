@@ -504,7 +504,6 @@ public class PackageParserTest {
                         new Signature[] { new Signature(new byte[16]) },
                         2,
                         new ArraySet<>(),
-                        null,
                         null);
         pkg.mExtras = new Bundle();
         pkg.mRestrictedAccountType = "foo19";

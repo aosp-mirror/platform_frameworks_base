@@ -4184,9 +4184,9 @@
         row is full. The rowCount attribute may be used similarly in the vertical case.
         The default is horizontal. -->
         <attr name="orientation" />
-        <!-- The maxmimum number of rows to create when automatically positioning children. -->
+        <!-- The maximum number of rows to create when automatically positioning children. -->
         <attr name="rowCount" format="integer" />
-        <!-- The maxmimum number of columns to create when automatically positioning children. -->
+        <!-- The maximum number of columns to create when automatically positioning children. -->
         <attr name="columnCount" format="integer" />
         <!-- When set to true, tells GridLayout to use default margins when none are specified
         in a view's layout parameters.

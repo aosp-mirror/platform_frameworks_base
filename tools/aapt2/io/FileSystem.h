@@ -67,6 +67,7 @@ class FileCollection : public IFileCollection {
   IFile* InsertFile(const android::StringPiece& path);
   IFile* FindFile(const android::StringPiece& path) override;
   std::unique_ptr<IFileCollectionIterator> Iterator() override;
+  char GetDirSeparator() override;
 
  private:
   DISALLOW_COPY_AND_ASSIGN(FileCollection);

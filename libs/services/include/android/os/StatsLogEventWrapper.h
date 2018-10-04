@@ -58,6 +58,11 @@ struct StatsLogValue {
     type = FLOAT;
   }
 
+  StatsLogValue(double v) {
+    double_value = v;
+    type = DOUBLE;
+  }
+
   StatsLogValue(const std::string& v) {
     str_value = v;
     type = STRING;

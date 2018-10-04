@@ -55,8 +55,6 @@ import com.android.framework.protobuf.InvalidProtocolBufferException;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.Preconditions;
 
-import dalvik.system.CloseGuard;
-
 import libcore.io.IoBridge;
 
 import java.io.ByteArrayOutputStream;
@@ -79,7 +77,6 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
-import java.util.Set;
 import java.util.UUID;
 import java.util.Vector;
 import java.util.concurrent.Executor;
@@ -105,7 +102,6 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
     private boolean mScreenOnWhilePlaying;
     private boolean mStayAwake;
     private int mStreamType = AudioManager.USE_DEFAULT_STREAM_TYPE;
-    private final CloseGuard mGuard = CloseGuard.get();
 
     private final Object mSrcLock = new Object();
     //--- guarded by |mSrcLock| start
@@ -145,6 +141,9 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
     @GuardedBy("mTaskLock")
     private Task mCurrentTask;
 
+    @GuardedBy("this")
+    private boolean mReleased;
+
     /**
      * Default constructor.
      * <p>When done with the MediaPlayer2Impl, you should call  {@link #close()},
@@ -159,7 +158,6 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
 
         mTimeProvider = new TimeProvider(this);
         mOpenSubtitleSources = new Vector<InputStream>();
-        mGuard.open("close");
 
         /* Native setup requires a weak reference to our object.
          * It's easier to create it here than in C++.
@@ -197,9 +195,8 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
      */
     @Override
     public void close() {
-        synchronized (mGuard) {
-            release();
-        }
+        super.close();
+        release();
     }
 
     /**
@@ -2447,15 +2444,14 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
     // in the base class Object.
     @Override
     protected void finalize() throws Throwable {
-        if (mGuard != null) {
-            mGuard.warnIfOpen();
-        }
-
-        close();
+        super.finalize();
         native_finalize();
     }
 
-    private void release() {
+    private synchronized void release() {
+        if (mReleased) {
+            return;
+        }
         stayAwake(false);
         updateSurfaceScreenOn();
         synchronized (mEventCbLock) {
@@ -2478,6 +2474,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
         resetDrmState();
 
         _release();
+        mReleased = true;
     }
 
     private native void _release();

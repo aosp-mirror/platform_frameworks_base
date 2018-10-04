@@ -78,7 +78,7 @@ bool VulkanManager::setupDevice(GrVkExtensions& grExtensions, VkPhysicalDeviceFe
         0,                                  // applicationVersion
         "android framework",                // pEngineName
         0,                                  // engineVerison
-        VK_MAKE_VERSION(1, 0, 0),           // apiVersion
+        VK_MAKE_VERSION(1, 1, 0),           // apiVersion
     };
 
     std::vector<const char*> instanceExtensions;
@@ -133,6 +133,7 @@ bool VulkanManager::setupDevice(GrVkExtensions& grExtensions, VkPhysicalDeviceFe
 
     GET_INST_PROC(DestroyInstance);
     GET_INST_PROC(EnumeratePhysicalDevices);
+    GET_INST_PROC(GetPhysicalDeviceProperties);
     GET_INST_PROC(GetPhysicalDeviceQueueFamilyProperties);
     GET_INST_PROC(GetPhysicalDeviceFeatures2);
     GET_INST_PROC(CreateDevice);
@@ -160,6 +161,13 @@ bool VulkanManager::setupDevice(GrVkExtensions& grExtensions, VkPhysicalDeviceFe
     err = mEnumeratePhysicalDevices(mInstance, &gpuCount, &mPhysicalDevice);
     // VK_INCOMPLETE is returned when the count we provide is less than the total device count.
     if (err && VK_INCOMPLETE != err) {
+        this->destroy();
+        return false;
+    }
+
+    VkPhysicalDeviceProperties physDeviceProperties;
+    mGetPhysicalDeviceProperties(mPhysicalDevice, &physDeviceProperties);
+    if (physDeviceProperties.apiVersion < VK_MAKE_VERSION(1, 1, 0)) {
         this->destroy();
         return false;
     }

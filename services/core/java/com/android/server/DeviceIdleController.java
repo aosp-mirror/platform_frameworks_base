@@ -77,6 +77,7 @@ import android.util.TimeUtils;
 import android.util.Xml;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IBatteryStats;
 import com.android.internal.os.AtomicFile;
 import com.android.internal.os.BackgroundThread;
@@ -104,6 +105,8 @@ import java.util.Arrays;
 
 /**
  * Keeps track of device idleness and drives low power mode based on that.
+ *
+ * Test: atest com.android.server.DeviceIdleControllerTest
  */
 public class DeviceIdleController extends SystemService
         implements AnyMotionDetector.DeviceIdleCallback {
@@ -148,21 +151,29 @@ public class DeviceIdleController extends SystemService
     private boolean mScreenLocked;
 
     /** Device is currently active. */
-    private static final int STATE_ACTIVE = 0;
+    @VisibleForTesting
+    static final int STATE_ACTIVE = 0;
     /** Device is inactive (screen off, no motion) and we are waiting to for idle. */
-    private static final int STATE_INACTIVE = 1;
+    @VisibleForTesting
+    static final int STATE_INACTIVE = 1;
     /** Device is past the initial inactive period, and waiting for the next idle period. */
-    private static final int STATE_IDLE_PENDING = 2;
+    @VisibleForTesting
+    static final int STATE_IDLE_PENDING = 2;
     /** Device is currently sensing motion. */
-    private static final int STATE_SENSING = 3;
+    @VisibleForTesting
+    static final int STATE_SENSING = 3;
     /** Device is currently finding location (and may still be sensing). */
-    private static final int STATE_LOCATING = 4;
+    @VisibleForTesting
+    static final int STATE_LOCATING = 4;
     /** Device is in the idle state, trying to stay asleep as much as possible. */
-    private static final int STATE_IDLE = 5;
+    @VisibleForTesting
+    static final int STATE_IDLE = 5;
     /** Device is in the idle state, but temporarily out of idle to do regular maintenance. */
-    private static final int STATE_IDLE_MAINTENANCE = 6;
+    @VisibleForTesting
+    static final int STATE_IDLE_MAINTENANCE = 6;
 
-    private static String stateToString(int state) {
+    @VisibleForTesting
+    static String stateToString(int state) {
         switch (state) {
             case STATE_ACTIVE: return "ACTIVE";
             case STATE_INACTIVE: return "INACTIVE";
@@ -176,21 +187,30 @@ public class DeviceIdleController extends SystemService
     }
 
     /** Device is currently active. */
-    private static final int LIGHT_STATE_ACTIVE = 0;
+    @VisibleForTesting
+    static final int LIGHT_STATE_ACTIVE = 0;
     /** Device is inactive (screen off) and we are waiting to for the first light idle. */
-    private static final int LIGHT_STATE_INACTIVE = 1;
+    @VisibleForTesting
+    static final int LIGHT_STATE_INACTIVE = 1;
     /** Device is about to go idle for the first time, wait for current work to complete. */
-    private static final int LIGHT_STATE_PRE_IDLE = 3;
+    @VisibleForTesting
+    static final int LIGHT_STATE_PRE_IDLE = 3;
     /** Device is in the light idle state, trying to stay asleep as much as possible. */
-    private static final int LIGHT_STATE_IDLE = 4;
+    @VisibleForTesting
+    static final int LIGHT_STATE_IDLE = 4;
     /** Device is in the light idle state, we want to go in to idle maintenance but are
      * waiting for network connectivity before doing so. */
-    private static final int LIGHT_STATE_WAITING_FOR_NETWORK = 5;
+    @VisibleForTesting
+    static final int LIGHT_STATE_WAITING_FOR_NETWORK = 5;
     /** Device is in the light idle state, but temporarily out of idle to do regular maintenance. */
-    private static final int LIGHT_STATE_IDLE_MAINTENANCE = 6;
+    @VisibleForTesting
+    static final int LIGHT_STATE_IDLE_MAINTENANCE = 6;
     /** Device light idle state is overriden, now applying deep doze state. */
-    private static final int LIGHT_STATE_OVERRIDE = 7;
-    private static String lightStateToString(int state) {
+    @VisibleForTesting
+    static final int LIGHT_STATE_OVERRIDE = 7;
+
+    @VisibleForTesting
+    static String lightStateToString(int state) {
         switch (state) {
             case LIGHT_STATE_ACTIVE: return "ACTIVE";
             case LIGHT_STATE_INACTIVE: return "INACTIVE";
@@ -382,6 +402,8 @@ public class DeviceIdleController extends SystemService
         public void onAlarm() {
             if (mState == STATE_SENSING) {
                 synchronized (DeviceIdleController.this) {
+                    // Restart the device idle progression in case the device moved but the screen
+                    // didn't turn on.
                     becomeInactiveIfAppropriateLocked();
                 }
             }
@@ -422,10 +444,15 @@ public class DeviceIdleController extends SystemService
         }
     };
 
-    private final class MotionListener extends TriggerEventListener
+    @VisibleForTesting
+    final class MotionListener extends TriggerEventListener
             implements SensorEventListener {
 
         boolean active = false;
+
+        public boolean isActive() {
+            return active;
+        }
 
         @Override
         public void onTrigger(TriggerEvent event) {
@@ -472,7 +499,7 @@ public class DeviceIdleController extends SystemService
             active = false;
         }
     }
-    private final MotionListener mMotionListener = new MotionListener();
+    @VisibleForTesting final MotionListener mMotionListener = new MotionListener();
 
     private final LocationListener mGenericLocationListener = new LocationListener() {
         @Override
@@ -594,7 +621,7 @@ public class DeviceIdleController extends SystemService
         public float LIGHT_IDLE_FACTOR;
 
         /**
-         * This is the maximum time we will run in idle maintenence mode.
+         * This is the maximum time we will run in idle maintenance mode.
          * @see Settings.Global#DEVICE_IDLE_CONSTANTS
          * @see #KEY_LIGHT_MAX_IDLE_TIMEOUT
          */
@@ -1360,6 +1387,45 @@ public class DeviceIdleController extends SystemService
         }
     }
 
+    static class Injector {
+        private final Context mContext;
+
+        Injector(Context ctx) {
+            mContext = ctx;
+        }
+
+        AlarmManager getAlarmManager() {
+            return mContext.getSystemService(AlarmManager.class);
+        }
+
+        AnyMotionDetector getAnyMotionDetector(Handler handler, SensorManager sm,
+                AnyMotionDetector.DeviceIdleCallback callback, float angleThreshold) {
+            return new AnyMotionDetector(getPowerManager(), handler, sm, callback, angleThreshold);
+        }
+
+        AppStateTracker getAppStateTracker(Context ctx, Looper looper) {
+            return new AppStateTracker(ctx, looper);
+        }
+
+        ConnectivityService getConnectivityService() {
+            return (ConnectivityService) ServiceManager.getService(Context.CONNECTIVITY_SERVICE);
+        }
+
+        LocationManager getLocationManager() {
+            return mContext.getSystemService(LocationManager.class);
+        }
+
+        MyHandler getHandler(DeviceIdleController ctlr) {
+            return ctlr.new MyHandler(BackgroundThread.getHandler().getLooper());
+        }
+
+        PowerManager getPowerManager() {
+            return mContext.getSystemService(PowerManager.class);
+        }
+    }
+
+    private final Injector mInjector;
+
     private ActivityTaskManagerInternal.ScreenObserver mScreenObserver =
             new ActivityTaskManagerInternal.ScreenObserver() {
                 @Override
@@ -1373,12 +1439,17 @@ public class DeviceIdleController extends SystemService
                 }
             };
 
-    public DeviceIdleController(Context context) {
+    @VisibleForTesting DeviceIdleController(Context context, Injector injector) {
         super(context);
+        mInjector = injector;
         mConfigFile = new AtomicFile(new File(getSystemDir(), "deviceidle.xml"));
-        mHandler = new MyHandler(BackgroundThread.getHandler().getLooper());
-        mAppStateTracker = new AppStateTracker(context, FgThread.get().getLooper());
+        mHandler = mInjector.getHandler(this);
+        mAppStateTracker = mInjector.getAppStateTracker(context, FgThread.get().getLooper());
         LocalServices.addService(AppStateTracker.class, mAppStateTracker);
+    }
+
+    public DeviceIdleController(Context context) {
+        this(context, new Injector(context));
     }
 
     boolean isAppOnWhitelistInternal(int appid) {
@@ -1459,20 +1530,19 @@ public class DeviceIdleController extends SystemService
     public void onBootPhase(int phase) {
         if (phase == PHASE_SYSTEM_SERVICES_READY) {
             synchronized (this) {
-                mAlarmManager = (AlarmManager) getContext().getSystemService(Context.ALARM_SERVICE);
+                mAlarmManager = mInjector.getAlarmManager();
                 mBatteryStats = BatteryStatsService.getService();
                 mLocalActivityManager = getLocalService(ActivityManagerInternal.class);
                 mLocalActivityTaskManager = getLocalService(ActivityTaskManagerInternal.class);
                 mLocalPowerManager = getLocalService(PowerManagerInternal.class);
-                mPowerManager = getContext().getSystemService(PowerManager.class);
+                mPowerManager = mInjector.getPowerManager();
                 mActiveIdleWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
                         "deviceidle_maint");
                 mActiveIdleWakeLock.setReferenceCounted(false);
                 mGoingIdleWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
                         "deviceidle_going_idle");
                 mGoingIdleWakeLock.setReferenceCounted(true);
-                mConnectivityService = (ConnectivityService)ServiceManager.getService(
-                        Context.CONNECTIVITY_SERVICE);
+                mConnectivityService = mInjector.getConnectivityService();
                 mNetworkPolicyManager = INetworkPolicyManager.Stub.asInterface(
                         ServiceManager.getService(Context.NETWORK_POLICY_SERVICE));
                 mNetworkPolicyManagerInternal = getLocalService(NetworkPolicyManagerInternal.class);
@@ -1495,8 +1565,7 @@ public class DeviceIdleController extends SystemService
 
                 if (getContext().getResources().getBoolean(
                         com.android.internal.R.bool.config_autoPowerModePrefetchLocation)) {
-                    mLocationManager = (LocationManager) getContext().getSystemService(
-                            Context.LOCATION_SERVICE);
+                    mLocationManager = mInjector.getLocationManager();
                     mLocationRequest = new LocationRequest()
                         .setQuality(LocationRequest.ACCURACY_FINE)
                         .setInterval(0)
@@ -1506,9 +1575,8 @@ public class DeviceIdleController extends SystemService
 
                 float angleThreshold = getContext().getResources().getInteger(
                         com.android.internal.R.integer.config_autoPowerModeThresholdAngle) / 100f;
-                mAnyMotionDetector = new AnyMotionDetector(
-                        (PowerManager) getContext().getSystemService(Context.POWER_SERVICE),
-                        mHandler, mSensorManager, this, angleThreshold);
+                mAnyMotionDetector = mInjector.getAnyMotionDetector(mHandler, mSensorManager, this,
+                        angleThreshold);
 
                 mAppStateTracker.onSystemServicesReady();
 
@@ -2005,6 +2073,11 @@ public class DeviceIdleController extends SystemService
         }
     }
 
+    @VisibleForTesting
+    boolean isScreenOn() {
+        return mScreenOn;
+    }
+
     void updateInteractivityLocked() {
         // The interactivity state from the power manager tells us whether the display is
         // in a state that we need to keep things running so they will update at a normal
@@ -2022,6 +2095,11 @@ public class DeviceIdleController extends SystemService
                 becomeActiveLocked("screen", Process.myUid());
             }
         }
+    }
+
+    @VisibleForTesting
+    boolean isCharging() {
+        return mCharging;
     }
 
     void updateChargingLocked(boolean charging) {
@@ -2071,6 +2149,18 @@ public class DeviceIdleController extends SystemService
         }
     }
 
+    /** Must only be used in tests. */
+    @VisibleForTesting
+    void setDeepEnabledForTest(boolean enabled) {
+        mDeepEnabled = enabled;
+    }
+
+    /** Must only be used in tests. */
+    @VisibleForTesting
+    void setLightEnabledForTest(boolean enabled) {
+        mLightEnabled = enabled;
+    }
+
     void becomeInactiveIfAppropriateLocked() {
         if (DEBUG) Slog.d(TAG, "becomeInactiveIfAppropriateLocked()");
         if ((!mScreenOn && !mCharging) || mForceIdle) {
@@ -2093,7 +2183,7 @@ public class DeviceIdleController extends SystemService
         }
     }
 
-    void resetIdleManagementLocked() {
+    private void resetIdleManagementLocked() {
         mNextIdlePendingDelay = 0;
         mNextIdleDelay = 0;
         mNextLightIdleDelay = 0;
@@ -2104,7 +2194,7 @@ public class DeviceIdleController extends SystemService
         mAnyMotionDetector.stop();
     }
 
-    void resetLightIdleManagementLocked() {
+    private void resetLightIdleManagementLocked() {
         cancelLightAlarmLocked();
     }
 
@@ -2115,6 +2205,11 @@ public class DeviceIdleController extends SystemService
                 becomeActiveLocked("exit-force", Process.myUid());
             }
         }
+    }
+
+    @VisibleForTesting
+    int getLightState() {
+        return mLightState;
     }
 
     void stepLightIdleStateLocked(String reason) {
@@ -2200,6 +2295,18 @@ public class DeviceIdleController extends SystemService
         }
     }
 
+    /** Must only be used in tests. */
+    @VisibleForTesting
+    void setLocationManagerForTest(LocationManager lm) {
+        mLocationManager = lm;
+    }
+
+    @VisibleForTesting
+    int getState() {
+        return mState;
+    }
+
+    @VisibleForTesting
     void stepIdleStateLocked(String reason) {
         if (DEBUG) Slog.d(TAG, "stepIdleStateLocked: mState=" + mState);
         EventLogTags.writeDeviceIdleStep();
