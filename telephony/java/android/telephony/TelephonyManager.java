@@ -8381,6 +8381,29 @@ public class TelephonyManager {
     }
 
     /**
+     * Checks if manual network selection is allowed.
+     *
+     * <p>If this object has been created with {@link #createForSubscriptionId}, applies to the
+     * given subId. Otherwise, applies to {@link SubscriptionManager#getDefaultSubscriptionId()}.
+     *
+     * @return {@code true} if manual network selection is allowed, otherwise return {@code false}.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
+    public boolean isManualNetworkSelectionAllowed() {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.isManualNetworkSelectionAllowed(getSubId());
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#isManualNetworkSelectionAllowed", e);
+        }
+        return true;
+    }
+
+    /**
      * Get the most recently available signal strength information.
      *
      * Get the most recent SignalStrength information reported by the modem. Due
