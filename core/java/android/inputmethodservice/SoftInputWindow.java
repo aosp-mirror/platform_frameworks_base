@@ -103,9 +103,9 @@ public class SoftInputWindow extends Dialog {
     /**
      * Set which boundary of the screen the DockWindow sticks to.
      * 
-     * @param gravity The boundary of the screen to stick. See {#link
-     *        android.view.Gravity.LEFT}, {#link android.view.Gravity.TOP},
-     *        {#link android.view.Gravity.BOTTOM}, {#link
+     * @param gravity The boundary of the screen to stick. See {@link
+     *        android.view.Gravity.LEFT}, {@link android.view.Gravity.TOP},
+     *        {@link android.view.Gravity.BOTTOM}, {@link
      *        android.view.Gravity.RIGHT}.
      */
     public void setGravity(int gravity) {

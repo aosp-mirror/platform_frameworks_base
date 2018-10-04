@@ -46,7 +46,7 @@ public class NetworkMisc implements Parcelable {
 
     /**
      * Set if the user desires to use this network even if it is unvalidated. This field has meaning
-     * only if {#link explicitlySelected} is true. If it is, this field must also be set to the
+     * only if {@link explicitlySelected} is true. If it is, this field must also be set to the
      * appropriate value based on previous user choice.
      */
     public boolean acceptUnvalidated;
