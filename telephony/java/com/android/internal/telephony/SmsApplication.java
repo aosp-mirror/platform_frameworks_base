@@ -584,7 +584,8 @@ public final class SmsApplication {
 
         // We only make the change if the new package is valid
         PackageManager packageManager = context.getPackageManager();
-        Collection<SmsApplicationData> applications = getApplicationCollection(context);
+        Collection<SmsApplicationData> applications = getApplicationCollectionInternal(
+                context, userId);
         SmsApplicationData oldAppData = oldPackageName != null ?
                 getApplicationForPackage(applications, oldPackageName) : null;
         SmsApplicationData applicationData = getApplicationForPackage(applications, packageName);
