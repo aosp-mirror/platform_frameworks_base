@@ -15,10 +15,6 @@
  */
 package android.hardware.biometrics;
 
-import android.hardware.biometrics.BiometricSourceType;
-import android.os.Bundle;
-import android.os.UserHandle;
-
 /**
  * Communication channel from the BiometricService back to BiometricPrompt.
  * @hide
