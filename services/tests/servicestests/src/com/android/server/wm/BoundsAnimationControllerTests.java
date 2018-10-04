@@ -90,7 +90,7 @@ public class BoundsAnimationControllerTests extends WindowTestsBase {
         private AppTransitionListener mListener;
 
         MockAppTransition(Context context) {
-            super(context, null);
+            super(context, sWm);
         }
 
         @Override

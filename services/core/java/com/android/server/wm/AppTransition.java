@@ -77,6 +77,7 @@ import static com.android.server.wm.AppTransitionProto.APP_TRANSITION_STATE;
 import static com.android.server.wm.AppTransitionProto.LAST_USED_APP_TRANSITION;
 
 import android.annotation.DrawableRes;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.content.ComponentName;
@@ -93,6 +94,7 @@ import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Binder;
 import android.os.Debug;
+import android.os.Handler;
 import android.os.IBinder;
 import android.os.IRemoteCallback;
 import android.os.RemoteException;
@@ -120,8 +122,8 @@ import android.view.animation.TranslateAnimation;
 
 import com.android.internal.R;
 import com.android.internal.util.DumpUtils.Dump;
+import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.AttributeCache;
-import com.android.server.wm.WindowManagerService.H;
 import com.android.server.wm.animation.ClipRectLRAnimation;
 import com.android.server.wm.animation.ClipRectTBAnimation;
 import com.android.server.wm.animation.CurvedTranslateAnimation;
@@ -252,9 +254,13 @@ public class AppTransition implements Dump {
 
     private RemoteAnimationController mRemoteAnimationController;
 
+    final Handler mHandler;
+    final Runnable mHandleAppTransitionTimeoutRunnable = () -> handleAppTransitionTimeout();
+
     AppTransition(Context context, WindowManagerService service) {
         mContext = context;
         mService = service;
+        mHandler = new Handler(service.mH.getLooper());
         mLinearOutSlowInInterpolator = AnimationUtils.loadInterpolator(context,
                 com.android.internal.R.interpolator.linear_out_slow_in);
         mFastOutLinearInInterpolator = AnimationUtils.loadInterpolator(context,
@@ -1349,7 +1355,8 @@ public class AppTransition implements Dump {
 
                 @Override
                 public void onAnimationEnd(Animation animation) {
-                    mService.mH.obtainMessage(H.DO_ANIMATION_CALLBACK, callback).sendToTarget();
+                    mHandler.sendMessage(PooledLambda.obtainMessage(
+                            AppTransition::doAnimationCallback, callback));
                 }
 
                 @Override
@@ -1756,7 +1763,7 @@ public class AppTransition implements Dump {
 
     void postAnimationCallback() {
         if (mNextAppTransitionCallback != null) {
-            mService.mH.sendMessage(mService.mH.obtainMessage(H.DO_ANIMATION_CALLBACK,
+            mHandler.sendMessage(PooledLambda.obtainMessage(AppTransition::doAnimationCallback,
                     mNextAppTransitionCallback));
             mNextAppTransitionCallback = null;
         }
@@ -1869,7 +1876,7 @@ public class AppTransition implements Dump {
             clear();
             mNextAppTransitionType = NEXT_TRANSIT_TYPE_REMOTE;
             mRemoteAnimationController = new RemoteAnimationController(mService,
-                    remoteAnimationAdapter, mService.mH);
+                    remoteAnimationAdapter, mHandler);
         }
     }
 
@@ -2162,8 +2169,8 @@ public class AppTransition implements Dump {
         }
         boolean prepared = prepare();
         if (isTransitionSet()) {
-            mService.mH.removeMessages(H.APP_TRANSITION_TIMEOUT);
-            mService.mH.sendEmptyMessageDelayed(H.APP_TRANSITION_TIMEOUT, APP_TRANSITION_TIMEOUT_MS);
+            removeAppTransitionTimeoutCallbacks();
+            mHandler.postDelayed(mHandleAppTransitionTimeoutRunnable, APP_TRANSITION_TIMEOUT_MS);
         }
         return prepared;
     }
@@ -2207,5 +2214,33 @@ public class AppTransition implements Dump {
     private boolean shouldScaleDownThumbnailTransition(int uiMode, int orientation) {
         return mGridLayoutRecentsEnabled
                 || orientation == Configuration.ORIENTATION_PORTRAIT;
+    }
+
+    private void handleAppTransitionTimeout() {
+        synchronized (mService.mWindowMap) {
+            if (isTransitionSet() || !mService.mOpeningApps.isEmpty()
+                    || !mService.mClosingApps.isEmpty()) {
+                if (DEBUG_APP_TRANSITIONS) {
+                    Slog.v(TAG_WM, "*** APP TRANSITION TIMEOUT."
+                            + " isTransitionSet()="
+                            + mService.mAppTransition.isTransitionSet()
+                            + " mOpeningApps.size()=" + mService.mOpeningApps.size()
+                            + " mClosingApps.size()=" + mService.mClosingApps.size());
+                }
+                setTimeout();
+                mService.mWindowPlacerLocked.performSurfacePlacement();
+            }
+        }
+    }
+
+    private static void doAnimationCallback(@NonNull IRemoteCallback callback) {
+        try {
+            ((IRemoteCallback) callback).sendResult(null);
+        } catch (RemoteException e) {
+        }
+    }
+
+    void removeAppTransitionTimeoutCallbacks() {
+        mHandler.removeCallbacks(mHandleAppTransitionTimeoutRunnable);
     }
 }
