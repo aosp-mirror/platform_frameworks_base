@@ -1368,6 +1368,14 @@ public abstract class PackageManager {
      */
     public static final int INSTALL_FAILED_BAD_DEX_METADATA = -117;
 
+    /**
+     * Installation parse return code: this is passed in the
+     * {@link PackageInstaller#EXTRA_LEGACY_STATUS} if there is any signature problem.
+     *
+     * @hide
+     */
+    public static final int INSTALL_FAILED_BAD_SIGNATURE = -118;
+
     /** @hide */
     @IntDef(flag = true, prefix = { "DELETE_" }, value = {
             DELETE_KEEP_DATA,
@@ -6243,6 +6251,7 @@ public abstract class PackageManager {
             case INSTALL_FAILED_ABORTED: return "INSTALL_FAILED_ABORTED";
             case INSTALL_FAILED_BAD_DEX_METADATA: return "INSTALL_FAILED_BAD_DEX_METADATA";
             case INSTALL_FAILED_MISSING_SPLIT: return "INSTALL_FAILED_MISSING_SPLIT";
+            case INSTALL_FAILED_BAD_SIGNATURE: return "INSTALL_FAILED_BAD_SIGNATURE";
             default: return Integer.toString(status);
         }
     }
@@ -6288,6 +6297,7 @@ public abstract class PackageManager {
             case INSTALL_PARSE_FAILED_MANIFEST_MALFORMED: return PackageInstaller.STATUS_FAILURE_INVALID;
             case INSTALL_PARSE_FAILED_MANIFEST_EMPTY: return PackageInstaller.STATUS_FAILURE_INVALID;
             case INSTALL_FAILED_BAD_DEX_METADATA: return PackageInstaller.STATUS_FAILURE_INVALID;
+            case INSTALL_FAILED_BAD_SIGNATURE: return PackageInstaller.STATUS_FAILURE_INVALID;
             case INSTALL_FAILED_INTERNAL_ERROR: return PackageInstaller.STATUS_FAILURE;
             case INSTALL_FAILED_USER_RESTRICTED: return PackageInstaller.STATUS_FAILURE_INCOMPATIBLE;
             case INSTALL_FAILED_DUPLICATE_PERMISSION: return PackageInstaller.STATUS_FAILURE_CONFLICT;

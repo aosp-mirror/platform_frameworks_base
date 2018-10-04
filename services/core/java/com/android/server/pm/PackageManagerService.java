@@ -16552,44 +16552,11 @@ public class PackageManagerService extends IPackageManager.Stub
             throw new PrepareFailure(INSTALL_FAILED_INSUFFICIENT_STORAGE, "Failed rename");
         }
 
-        if (PackageManagerServiceUtils.isApkVerityEnabled()) {
-            String apkPath = null;
-            synchronized (mPackages) {
-                // Note that if the attacker managed to skip verify setup, for example by tampering
-                // with the package settings, upon reboot we will do full apk verification when
-                // verity is not detected.
-                final PackageSetting ps = mSettings.mPackages.get(pkgName);
-                if (ps != null && ps.isPrivileged()) {
-                    apkPath = pkg.baseCodePath;
-                }
-            }
-            if (apkPath != null) {
-                final VerityUtils.SetupResult result =
-                        VerityUtils.generateApkVeritySetupData(apkPath, null /* signaturePath */,
-                                true /* skipSigningBlock */);
-                if (result.isOk()) {
-                    if (Build.IS_DEBUGGABLE) Slog.i(TAG, "Enabling apk verity to " + apkPath);
-                    FileDescriptor fd = result.getUnownedFileDescriptor();
-                    try {
-                        final byte[] signedRootHash =
-                                VerityUtils.generateApkVerityRootHash(apkPath);
-                        mInstaller.installApkVerity(apkPath, fd, result.getContentSize());
-                        mInstaller.assertFsverityRootHashMatches(apkPath, signedRootHash);
-                    } catch (InstallerException | IOException | DigestException |
-                            NoSuchAlgorithmException e) {
-                        throw new PrepareFailure(INSTALL_FAILED_INTERNAL_ERROR,
-                                "Failed to set up verity: " + e);
-                    } finally {
-                        IoUtils.closeQuietly(fd);
-                    }
-                } else if (result.isFailed()) {
-                    throw new PrepareFailure(INSTALL_FAILED_INTERNAL_ERROR,
-                            "Failed to generate verity");
-                } else {
-                    // Do nothing if verity is skipped. Will fall back to full apk verification on
-                    // reboot.
-                }
-            }
+        try {
+            setUpFsVerityIfPossible(pkg);
+        } catch (InstallerException | IOException | DigestException | NoSuchAlgorithmException e) {
+            throw new PrepareFailure(INSTALL_FAILED_INTERNAL_ERROR,
+                    "Failed to set up verity: " + e);
         }
 
         if (!instantApp) {
@@ -16883,6 +16850,85 @@ public class PackageManagerService extends IPackageManager.Stub
         } finally {
             if (shouldCloseFreezerBeforeReturn) {
                 freezer.close();
+            }
+        }
+    }
+
+    /**
+     * Set up fs-verity for the given package if possible.  This requires a feature flag of system
+     * property to be enabled only if the kernel supports fs-verity.
+     *
+     * <p>When the feature flag is set to legacy mode, only APK is supported (with some experimental
+     * kernel patches). In normal mode, all file format can be supported.
+     */
+    private void setUpFsVerityIfPossible(PackageParser.Package pkg) throws InstallerException,
+            PrepareFailure, IOException, DigestException, NoSuchAlgorithmException {
+        if (!PackageManagerServiceUtils.isApkVerityEnabled()) {
+            return;
+        }
+        final boolean legacyMode = PackageManagerServiceUtils.isLegacyApkVerityMode();
+
+        // Collect files we care for fs-verity setup.
+        ArrayMap<String, String> fsverityCandidates = new ArrayMap<>();
+        if (legacyMode) {
+            synchronized (mPackages) {
+                final PackageSetting ps = mSettings.mPackages.get(pkg.packageName);
+                if (ps != null && ps.isPrivileged()) {
+                    fsverityCandidates.put(pkg.baseCodePath, null);
+                    if (pkg.splitCodePaths != null) {
+                        for (String splitPath : pkg.splitCodePaths) {
+                            fsverityCandidates.put(splitPath, null);
+                        }
+                    }
+                }
+            }
+        } else {
+            // NB: These files will become only accessible if the signing key is loaded in kernel's
+            // .fs-verity keyring.
+            fsverityCandidates.put(pkg.baseCodePath,
+                    VerityUtils.getFsveritySignatureFilePath(pkg.baseCodePath));
+
+            final String dmPath = DexMetadataHelper.buildDexMetadataPathForApk(pkg.baseCodePath);
+            if (new File(dmPath).exists()) {
+                fsverityCandidates.put(dmPath, VerityUtils.getFsveritySignatureFilePath(dmPath));
+            }
+
+            if (pkg.splitCodePaths != null) {
+                for (String path : pkg.splitCodePaths) {
+                    fsverityCandidates.put(path, VerityUtils.getFsveritySignatureFilePath(path));
+
+                    final String splitDmPath = DexMetadataHelper.buildDexMetadataPathForApk(path);
+                    if (new File(splitDmPath).exists()) {
+                        fsverityCandidates.put(splitDmPath,
+                                VerityUtils.getFsveritySignatureFilePath(splitDmPath));
+                    }
+                }
+            }
+        }
+
+        for (Map.Entry<String, String> entry : fsverityCandidates.entrySet()) {
+            final String filePath = entry.getKey();
+            final String signaturePath = entry.getValue();
+
+            final VerityUtils.SetupResult result = VerityUtils.generateApkVeritySetupData(
+                    filePath, signaturePath, legacyMode);
+            if (result.isOk()) {
+                if (Build.IS_DEBUGGABLE) Slog.i(TAG, "Enabling verity to " + filePath);
+                final FileDescriptor fd = result.getUnownedFileDescriptor();
+                try {
+                    mInstaller.installApkVerity(filePath, fd, result.getContentSize());
+
+                    // In legacy mode, fs-verity can only be enabled by process with CAP_SYS_ADMIN.
+                    if (legacyMode) {
+                        final byte[] rootHash = VerityUtils.generateApkVerityRootHash(filePath);
+                        mInstaller.assertFsverityRootHashMatches(filePath, rootHash);
+                    }
+                } finally {
+                    IoUtils.closeQuietly(fd);
+                }
+            } else if (result.isFailed()) {
+                throw new PrepareFailure(PackageManager.INSTALL_FAILED_BAD_SIGNATURE,
+                        "Failed to generate verity");
             }
         }
     }

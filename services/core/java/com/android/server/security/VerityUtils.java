@@ -30,6 +30,7 @@ import android.util.apk.VerityBuilder;
 
 import libcore.util.HexEncoding;
 
+import java.io.File;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.RandomAccessFile;
@@ -49,10 +50,26 @@ import sun.security.pkcs.PKCS7;
 abstract public class VerityUtils {
     private static final String TAG = "VerityUtils";
 
+    /**
+     * File extension of the signature file. For example, foo.apk.fsv_sig is the signature file of
+     * foo.apk.
+     */
+    public static final String FSVERITY_SIGNATURE_FILE_EXTENSION = ".fsv_sig";
+
     /** The maximum size of signature file.  This is just to avoid potential abuse. */
     private static final int MAX_SIGNATURE_FILE_SIZE_BYTES = 8192;
 
     private static final boolean DEBUG = false;
+
+    /** Returns true if the given file looks like containing an fs-verity signature. */
+    public static boolean isFsveritySignatureFile(File file) {
+        return file.getName().endsWith(FSVERITY_SIGNATURE_FILE_EXTENSION);
+    }
+
+    /** Returns the fs-verity signature file path of the given file. */
+    public static String getFsveritySignatureFilePath(String filePath) {
+        return filePath + FSVERITY_SIGNATURE_FILE_EXTENSION;
+    }
 
     /** Returns whether the file has fs-verity enabled. */
     public static boolean hasFsverity(@NonNull String filePath) {
