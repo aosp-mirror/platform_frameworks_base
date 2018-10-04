@@ -896,8 +896,8 @@ public class KeyEvent extends InputEvent implements Parcelable {
      * @deprecated No longer used by the input system.
      * {@link #getAction} value: multiple duplicate key events have
      * occurred in a row, or a complex string is being delivered.  If the
-     * key code is not {#link {@link #KEYCODE_UNKNOWN} then the
-     * {#link {@link #getRepeatCount()} method returns the number of times
+     * key code is not {@link #KEYCODE_UNKNOWN} then the
+     * {@link #getRepeatCount()} method returns the number of times
      * the given key code should be executed.
      * Otherwise, if the key code is {@link #KEYCODE_UNKNOWN}, then
      * this is a sequence of characters as returned by {@link #getCharacters}.
