@@ -116,6 +116,7 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
         super.onFinishInflate();
         mPages.add((TilePage) LayoutInflater.from(getContext())
                 .inflate(R.layout.qs_paged_page, this, false));
+        mAdapter.notifyDataSetChanged();
     }
 
     public void setPageIndicator(PageIndicator indicator) {
