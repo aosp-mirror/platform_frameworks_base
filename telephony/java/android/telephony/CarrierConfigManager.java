@@ -1633,9 +1633,19 @@ public class CarrierConfigManager {
      * When {@code false}, use default title for Enhanced 4G LTE Mode settings.
      * When {@code true}, use the variant.
      * @hide
+     * @deprecated use {@link #KEY_ENHANCED_4G_LTE_TITLE_VARIANT_INT}.
      */
+    @Deprecated
     public static final String KEY_ENHANCED_4G_LTE_TITLE_VARIANT_BOOL =
             "enhanced_4g_lte_title_variant_bool";
+
+    /**
+     * The index indicates the carrier specified title string of Enahnce 4G LTE Mode settings.
+     * Default value is 0, which indicates the default title string.
+     * @hide
+     */
+    public static final String KEY_ENHANCED_4G_LTE_TITLE_VARIANT_INT =
+            "enhanced_4g_lte_title_variant_int";
 
     /**
      * Indicates whether the carrier wants to notify the user when handover of an LTE video call to
@@ -2420,6 +2430,7 @@ public class CarrierConfigManager {
 
         sDefaults.putStringArray(KEY_IMS_REASONINFO_MAPPING_STRING_ARRAY, null);
         sDefaults.putBoolean(KEY_ENHANCED_4G_LTE_TITLE_VARIANT_BOOL, false);
+        sDefaults.putInt(KEY_ENHANCED_4G_LTE_TITLE_VARIANT_INT, 0);
         sDefaults.putBoolean(KEY_NOTIFY_VT_HANDOVER_TO_WIFI_FAILURE_BOOL, false);
         sDefaults.putStringArray(KEY_FILTERED_CNAP_NAMES_STRING_ARRAY, null);
         sDefaults.putBoolean(KEY_EDITABLE_WFC_ROAMING_MODE_BOOL, false);
