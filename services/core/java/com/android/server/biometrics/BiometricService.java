@@ -63,7 +63,7 @@ import java.util.List;
  */
 public class BiometricService extends SystemService {
 
-    private static final String TAG = "BiometricPromptService";
+    private static final String TAG = "BiometricService";
 
     /**
      * No biometric methods or nothing has been enrolled.
