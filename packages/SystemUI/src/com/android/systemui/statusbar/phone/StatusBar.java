@@ -2852,6 +2852,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 }
             }
             else if (Intent.ACTION_SCREEN_OFF.equals(action)) {
+                mStatusBarWindowController.setNotTouchable(false);
                 finishBarAnimations();
                 resetUserExpandedStates();
             }

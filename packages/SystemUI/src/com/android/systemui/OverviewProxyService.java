@@ -17,6 +17,10 @@
 package com.android.systemui;
 
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
+import static android.view.MotionEvent.ACTION_DOWN;
+import static android.view.MotionEvent.ACTION_UP;
+import static android.view.MotionEvent.ACTION_CANCEL;
+
 import static com.android.systemui.shared.system.NavigationBarCompat.FLAG_DISABLE_SWIPE_UP;
 import static com.android.systemui.shared.system.NavigationBarCompat.FLAG_SHOW_OVERVIEW_BUTTON;
 import static com.android.systemui.shared.system.NavigationBarCompat.InteractionType;
@@ -86,6 +90,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
     private boolean mIsEnabled;
     private int mCurrentBoundedUserId = -1;
     private float mBackButtonAlpha;
+    private MotionEvent mStatusBarGestureDownEvent;
 
     private ISystemUiProxy mSysUiProxy = new ISystemUiProxy.Stub() {
 
@@ -108,6 +113,9 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         }
 
         public void onStatusBarMotionEvent(MotionEvent event) {
+            if (!verifyCaller("onStatusBarMotionEvent")) {
+                return;
+            }
             long token = Binder.clearCallingIdentity();
             try {
                 // TODO move this logic to message queue
@@ -115,6 +123,16 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
                     StatusBar bar = SysUiServiceProvider.getComponent(mContext, StatusBar.class);
                     if (bar != null) {
                         bar.dispatchNotificationsPanelTouchEvent(event);
+
+                        int action = event.getActionMasked();
+                        if (action == ACTION_DOWN) {
+                            mStatusBarGestureDownEvent = MotionEvent.obtain(event);
+                        }
+                        if (action == ACTION_UP || action == ACTION_CANCEL) {
+                            mStatusBarGestureDownEvent.recycle();
+                            mStatusBarGestureDownEvent = null;
+                        }
+                        event.recycle();
                     }
                 });
             } finally {
@@ -298,7 +316,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
 
     // This is the death handler for the binder from the launcher service
     private final IBinder.DeathRecipient mOverviewServiceDeathRcpt
-            = this::startConnectionToCurrentUser;
+            = this::cleanupAfterDeath;
 
     public OverviewProxyService(Context context) {
         mContext = context;
@@ -326,6 +344,22 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
 
     public float getBackButtonAlpha() {
         return mBackButtonAlpha;
+    }
+
+    public void cleanupAfterDeath() {
+        if (mStatusBarGestureDownEvent != null) {
+            mHandler.post(()-> {
+                StatusBar bar = SysUiServiceProvider.getComponent(mContext, StatusBar.class);
+                if (bar != null) {
+                    System.out.println("MERONG dispatchNotificationPanelTouchEvent");
+                    mStatusBarGestureDownEvent.setAction(MotionEvent.ACTION_CANCEL);
+                    bar.dispatchNotificationsPanelTouchEvent(mStatusBarGestureDownEvent);
+                    mStatusBarGestureDownEvent.recycle();
+                    mStatusBarGestureDownEvent = null;
+                }
+            });
+        }
+        startConnectionToCurrentUser();
     }
 
     public void startConnectionToCurrentUser() {
