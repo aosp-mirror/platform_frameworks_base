@@ -38,6 +38,7 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.spy;
 
 import android.content.pm.ActivityInfo;
 import android.os.UserHandle;
@@ -71,8 +72,8 @@ public class ActivityStackTests extends ActivityTestsBase {
 
         setupActivityTaskManagerService();
         mDefaultDisplay = mSupervisor.getDefaultDisplay();
-        mStack = mDefaultDisplay.createStack(WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_STANDARD,
-                true /* onTop */);
+        mStack = spy(mDefaultDisplay.createStack(WINDOWING_MODE_UNDEFINED, ACTIVITY_TYPE_STANDARD,
+                true /* onTop */));
         mTask = new TaskBuilder(mSupervisor).setStack(mStack).build();
     }
 
@@ -720,7 +721,7 @@ public class ActivityStackTests extends ActivityTestsBase {
         doReturn(display).when(mSupervisor).getActivityDisplay(anyInt());
         doReturn(keyguardGoingAway).when(keyguardController).isKeyguardGoingAway();
         doReturn(displaySleeping).when(display).isSleeping();
-        doReturn(focusedStack ? mStack : null).when(mSupervisor).getTopDisplayFocusedStack();
+        doReturn(focusedStack).when(mStack).isFocusedStackOnDisplay();
 
         assertEquals(expected, mStack.shouldSleepActivities());
     }

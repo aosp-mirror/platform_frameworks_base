@@ -32,6 +32,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_VOICE_INTERACTION;
 
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
+import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
@@ -303,7 +304,8 @@ public class DisplayContentTests extends WindowTestsBase {
                 createTapEvent(dm0.widthPixels / 2, dm0.heightPixels / 2, false));
 
         // Check focus is on primary display.
-        assertEquals(sWm.mCurrentFocus, dc0.findFocusedWindow());
+        assertEquals(sWm.mRoot.getTopFocusedDisplayContent().mCurrentFocus,
+                dc0.findFocusedWindow());
 
         // Tap on secondary display
         DisplayMetrics dm1 = dc1.getDisplayMetrics();
@@ -313,7 +315,8 @@ public class DisplayContentTests extends WindowTestsBase {
                 createTapEvent(dm1.widthPixels / 2, dm1.heightPixels / 2, false));
 
         // Check focus is on secondary.
-        assertEquals(sWm.mCurrentFocus, dc1.findFocusedWindow());
+        assertEquals(sWm.mRoot.getTopFocusedDisplayContent().mCurrentFocus,
+                dc1.findFocusedWindow());
     }
 
     @Test
@@ -321,34 +324,29 @@ public class DisplayContentTests extends WindowTestsBase {
         // Create a focusable window and check that focus is calculated correctly
         final WindowState window1 =
                 createWindow(null, TYPE_BASE_APPLICATION, mDisplayContent, "window1");
-        assertEquals(window1, sWm.mRoot.computeFocusedWindow());
+        updateFocusedWindow();
+        assertTrue(window1.isFocused());
+        assertEquals(window1, sWm.mRoot.getTopFocusedDisplayContent().mCurrentFocus);
 
         // Check that a new display doesn't affect focus
         final DisplayContent dc = createNewDisplay();
-        assertEquals(window1, sWm.mRoot.computeFocusedWindow());
+        updateFocusedWindow();
+        assertTrue(window1.isFocused());
+        assertEquals(window1, sWm.mRoot.getTopFocusedDisplayContent().mCurrentFocus);
 
         // Add a window to the second display, and it should be focused
         final WindowState window2 = createWindow(null, TYPE_BASE_APPLICATION, dc, "window2");
-        assertEquals(window2, sWm.mRoot.computeFocusedWindow());
+        updateFocusedWindow();
+        assertTrue(window1.isFocused());
+        assertTrue(window2.isFocused());
+        assertEquals(window2, sWm.mRoot.getTopFocusedDisplayContent().mCurrentFocus);
 
         // Move the first window to the to including parents, and make sure focus is updated
         window1.getParent().positionChildAt(POSITION_TOP, window1, true);
-        assertEquals(window1, sWm.mRoot.computeFocusedWindow());
-    }
-
-    @Test
-    public void testKeyguard_preventsSecondaryDisplayFocus() throws Exception {
-        final WindowState keyguard = createWindow(null, TYPE_STATUS_BAR,
-                sWm.getDefaultDisplayContentLocked(), "keyguard");
-        assertEquals(keyguard, sWm.mRoot.computeFocusedWindow());
-
-        // Add a window to a second display, and it should be focused
-        final DisplayContent dc = createNewDisplay();
-        final WindowState win = createWindow(null, TYPE_BASE_APPLICATION, dc, "win");
-        assertEquals(win, sWm.mRoot.computeFocusedWindow());
-
-        mWmRule.getWindowManagerPolicy().keyguardShowingAndNotOccluded = true;
-        assertEquals(keyguard, sWm.mRoot.computeFocusedWindow());
+        updateFocusedWindow();
+        assertTrue(window1.isFocused());
+        assertTrue(window2.isFocused());
+        assertEquals(window1, sWm.mRoot.getTopFocusedDisplayContent().mCurrentFocus);
     }
 
     /**
@@ -588,6 +586,12 @@ public class DisplayContentTests extends WindowTestsBase {
         assertEquals(displayContent.mBaseDisplayWidth, expectedBaseWidth);
         assertEquals(displayContent.mBaseDisplayHeight, expectedBaseHeight);
         assertEquals(displayContent.mBaseDisplayDensity, expectedBaseDensity);
+    }
+
+    private void updateFocusedWindow() {
+        synchronized (sWm.mWindowMap) {
+            sWm.updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL, false);
+        }
     }
 
     /**

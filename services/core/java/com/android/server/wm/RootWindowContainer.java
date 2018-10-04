@@ -17,19 +17,20 @@
 package com.android.server.wm;
 
 import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_KEYGUARD;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_SUSTAINED_PERFORMANCE_MODE;
 import static android.view.WindowManager.LayoutParams.TYPE_DREAM;
 import static android.view.WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG;
 
-import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_ANIM;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_LAYOUT;
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 import static com.android.server.wm.RootWindowContainerProto.DISPLAYS;
 import static com.android.server.wm.RootWindowContainerProto.WINDOWS;
 import static com.android.server.wm.RootWindowContainerProto.WINDOW_CONTAINER;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_DISPLAY;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS_LIGHT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_KEEP_SCREEN_ON;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_LAYOUT_REPEATS;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_ORIENTATION;
@@ -41,9 +42,9 @@ import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_KEEP_SCREEN_ON;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
-import static com.android.server.wm.WindowManagerService.H.REPORT_LOSING_FOCUS;
 import static com.android.server.wm.WindowManagerService.H.SEND_NEW_CONFIGURATION;
 import static com.android.server.wm.WindowManagerService.H.WINDOW_FREEZE_TIMEOUT;
+import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_PLACING_SURFACES;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_WILL_PLACE_SURFACES;
 import static com.android.server.wm.WindowManagerService.WINDOWS_FREEZING_SCREENS_NONE;
@@ -124,6 +125,10 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
 
     private String mCloseSystemDialogsReason;
 
+    // The ID of the display which is responsible for receiving display-unspecified key and pointer
+    // events.
+    private int mTopFocusedDisplayId = INVALID_DISPLAY;
+
     // Only a seperate transaction until we seperate the apply surface changes
     // transaction from the global transaction.
     private final SurfaceControl.Transaction mDisplayTransaction = new SurfaceControl.Transaction();
@@ -153,23 +158,40 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
         mWallpaperController = new WallpaperController(mService);
     }
 
-    WindowState computeFocusedWindow() {
-        // While the keyguard is showing, we must focus anything besides the main display.
-        // Otherwise we risk input not going to the keyguard when the user expects it to.
-        final boolean forceDefaultDisplay = mService.isKeyguardShowingAndNotOccluded();
-
+    boolean updateFocusedWindowLocked(int mode, boolean updateInputWindows) {
+        boolean changed = false;
+        int topFocusedDisplayId = INVALID_DISPLAY;
         for (int i = mChildren.size() - 1; i >= 0; i--) {
             final DisplayContent dc = mChildren.get(i);
-            final WindowState win = dc.findFocusedWindow();
-            if (win != null) {
-                if (forceDefaultDisplay && !dc.isDefaultDisplay) {
-                    EventLog.writeEvent(0x534e4554, "71786287", win.mOwnerUid, "");
-                    continue;
-                }
-                return win;
+            changed |= dc.updateFocusedWindowLocked(mode, updateInputWindows,
+                    topFocusedDisplayId != INVALID_DISPLAY /* focusFound */);
+            if (topFocusedDisplayId == INVALID_DISPLAY && dc.mCurrentFocus != null) {
+                topFocusedDisplayId = dc.getDisplayId();
             }
         }
-        return null;
+        if (topFocusedDisplayId == INVALID_DISPLAY) {
+            topFocusedDisplayId = DEFAULT_DISPLAY;
+        }
+        if (mTopFocusedDisplayId != topFocusedDisplayId) {
+            mTopFocusedDisplayId = topFocusedDisplayId;
+            mService.mInputManager.setFocusedDisplay(topFocusedDisplayId);
+            if (DEBUG_FOCUS_LIGHT) Slog.v(TAG_WM, "New topFocusedDisplayId="
+                    + topFocusedDisplayId);
+        }
+        final WindowState topFocusedWindow = getTopFocusedDisplayContent().mCurrentFocus;
+        mService.mInputManager.setFocusedWindow(
+                topFocusedWindow != null ? topFocusedWindow.mInputWindowHandle : null);
+        return changed;
+    }
+
+    DisplayContent getTopFocusedDisplayContent() {
+        return getDisplayContent(mTopFocusedDisplayId == INVALID_DISPLAY
+                ? DEFAULT_DISPLAY : mTopFocusedDisplayId);
+    }
+
+    @Override
+    void onChildPositionChanged() {
+        mService.updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL, false /* updateInputWindows */);
     }
 
     DisplayContent getDisplayContent(int displayId) {
@@ -636,7 +658,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
             if (mService.updateFocusedWindowLocked(UPDATE_FOCUS_PLACING_SURFACES,
                     false /*updateInputWindows*/)) {
                 updateInputWindowsNeeded = true;
-                defaultDisplay.pendingLayoutChanges |= FINISH_LAYOUT_REDO_ANIM;
             }
         }
 
@@ -646,7 +667,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
                     defaultDisplay.pendingLayoutChanges);
         }
 
-        final ArraySet<DisplayContent> touchExcludeRegionUpdateDisplays = handleResizingWindows();
+        handleResizingWindows();
 
         if (DEBUG_ORIENTATION && mService.mDisplayFrozen) Slog.v(TAG,
                 "With display frozen, orientationChangeComplete=" + mOrientationChangeComplete);
@@ -765,17 +786,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
                 dc.getInputMonitor().updateInputWindowsLw(false /*force*/);
             });
         }
-        mService.setFocusTaskRegionLocked(null);
-        if (touchExcludeRegionUpdateDisplays != null) {
-            final DisplayContent focusedDc = mService.mFocusedApp != null
-                    ? mService.mFocusedApp.getDisplayContent() : null;
-            for (DisplayContent dc : touchExcludeRegionUpdateDisplays) {
-                // The focused DisplayContent was recalcuated in setFocusTaskRegionLocked
-                if (focusedDc != dc) {
-                    dc.setTouchExcludeRegion(null /* focusedTask */);
-                }
-            }
-        }
+        forAllDisplays(DisplayContent::updateTouchExcludeRegion);
 
         // Check to see if we are now in a state where the screen should
         // be enabled, because the window obscured flags have changed.
@@ -808,16 +819,10 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
                     mService.getDefaultDisplayRotation());
         }
 
-        boolean focusDisplayed = false;
-
         final int count = mChildren.size();
         for (int j = 0; j < count; ++j) {
             final DisplayContent dc = mChildren.get(j);
-            focusDisplayed |= dc.applySurfaceChangesTransaction(recoveringMemory);
-        }
-
-        if (focusDisplayed) {
-            mService.mH.sendEmptyMessage(REPORT_LOSING_FOCUS);
+            dc.applySurfaceChangesTransaction(recoveringMemory);
         }
 
         // Give the display manager a chance to adjust properties like display rotation if it needs
@@ -828,12 +833,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
 
     /**
      * Handles resizing windows during surface placement.
-     *
-     * @return A set of any DisplayContent whose touch exclude region needs to be recalculated due
-     *         to a tap-exclude window resizing, or null if no such DisplayContents were found.
      */
-    private ArraySet<DisplayContent> handleResizingWindows() {
-        ArraySet<DisplayContent> touchExcludeRegionUpdateSet = null;
+    private void handleResizingWindows() {
         for (int i = mService.mResizingWindows.size() - 1; i >= 0; i--) {
             WindowState win = mService.mResizingWindows.get(i);
             if (win.mAppFreezing) {
@@ -842,15 +843,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
             }
             win.reportResized();
             mService.mResizingWindows.remove(i);
-            if (WindowManagerService.excludeWindowTypeFromTapOutTask(win.mAttrs.type)) {
-                final DisplayContent dc = win.getDisplayContent();
-                if (touchExcludeRegionUpdateSet == null) {
-                    touchExcludeRegionUpdateSet = new ArraySet<>();
-                }
-                touchExcludeRegionUpdateSet.add(dc);
-            }
         }
-        return touchExcludeRegionUpdateSet;
     }
 
     /**
@@ -1002,6 +995,10 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
         } else {
             pw.println("  NO DISPLAY");
         }
+    }
+
+    void dumpTopFocusedDisplayId(PrintWriter pw) {
+        pw.print("  mTopFocusedDisplayId="); pw.println(mTopFocusedDisplayId);
     }
 
     void dumpLayoutNeededDisplayIds(PrintWriter pw) {

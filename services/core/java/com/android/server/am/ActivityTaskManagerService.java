@@ -4846,8 +4846,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         updateResumedAppTrace(r);
         mLastResumedActivity = r;
 
-        // TODO(b/111361570): Support multiple focused apps in WM
-        mWindowManager.setFocusedApp(r.appToken, true);
+        r.getDisplay().setFocusedApp(r, true);
 
         applyUpdateLockStateLocked(r);
         applyUpdateVrModeLocked(r);
