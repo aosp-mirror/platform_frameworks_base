@@ -168,6 +168,9 @@ public class ActivityTestsBase {
         // Makes sure the supervisor is using with the spy object.
         atm.mStackSupervisor.setService(atm);
         doReturn(mock(IPackageManager.class)).when(am).getPackageManager();
+        PackageManagerInternal mockPackageManager = mock(PackageManagerInternal.class);
+        doReturn(mockPackageManager).when(am).getPackageManagerInternalLocked();
+        doReturn(null).when(mockPackageManager).getDefaultHomeActivity(anyInt());
         doNothing().when(am).grantEphemeralAccessLocked(anyInt(), any(), anyInt(), anyInt());
         am.mWindowManager = prepareMockWindowManager();
         atm.setWindowManager(am.mWindowManager);
@@ -175,10 +178,9 @@ public class ActivityTestsBase {
         // Put a home stack on the default display, so that we'll always have something focusable.
         final TestActivityStackSupervisor supervisor =
                 (TestActivityStackSupervisor) atm.mStackSupervisor;
-        supervisor.mHomeStack = supervisor.mDisplay.createStack(WINDOWING_MODE_FULLSCREEN,
-                ACTIVITY_TYPE_HOME, ON_TOP);
+        supervisor.mDisplay.createStack(WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME, ON_TOP);
         final TaskRecord task = new TaskBuilder(atm.mStackSupervisor)
-                .setStack(supervisor.mHomeStack).build();
+                .setStack(supervisor.getDefaultDisplay().getHomeStack()).build();
         new ActivityBuilder(atm).setTask(task).build();
     }
 
@@ -447,9 +449,6 @@ public class ActivityTestsBase {
             final ActivityStackSupervisor supervisor = spy(createTestSupervisor());
             final KeyguardController keyguardController = mock(KeyguardController.class);
 
-            // No home stack is set.
-            doNothing().when(supervisor).moveHomeStackToFront(any());
-            doReturn(true).when(supervisor).moveHomeStackTaskToTop(any());
             // Invoked during {@link ActivityStack} creation.
             doNothing().when(supervisor).updateUIDsPresentOnDisplay();
             // Always keep things awake.

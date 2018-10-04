@@ -51,6 +51,7 @@ import android.annotation.Nullable;
 import android.app.ActivityOptions;
 import android.app.WindowConfiguration;
 import android.graphics.Point;
+import android.os.UserHandle;
 import android.util.IntArray;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
@@ -911,6 +912,13 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
         return mDisplayAccessUIDs;
     }
 
+    /**
+     * @see Display#FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS
+     */
+    boolean supportsSystemDecorations() {
+        return mDisplay.supportsSystemDecorations();
+    }
+
     private boolean shouldDestroyContentOnRemove() {
         return mDisplay.getRemoveMode() == REMOVE_MODE_DESTROY_CONTENT;
     }
@@ -983,6 +991,57 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
         final int insertIndex = stackIndex <= behindStackIndex
                 ? behindStackIndex - 1 : behindStackIndex;
         positionChildAt(stack, Math.max(0, insertIndex));
+    }
+
+    void moveHomeStackToFront(String reason) {
+        if (mHomeStack != null) {
+            mHomeStack.moveToFront(reason);
+        }
+    }
+
+    /** Returns true if the focus activity was adjusted to the home stack top activity. */
+    boolean moveHomeActivityToTop(String reason) {
+        final ActivityRecord top = getHomeActivity();
+        if (top == null) {
+            return false;
+        }
+        mSupervisor.moveFocusableActivityToTop(top, reason);
+        return true;
+    }
+
+    @Nullable
+    ActivityStack getHomeStack() {
+        return mHomeStack;
+    }
+
+    @Nullable
+    ActivityRecord getHomeActivity() {
+        return getHomeActivityForUser(mSupervisor.mCurrentUser);
+    }
+
+    @Nullable
+    ActivityRecord getHomeActivityForUser(int userId) {
+        if (mHomeStack == null) {
+            return null;
+        }
+
+        final ArrayList<TaskRecord> tasks = mHomeStack.getAllTasks();
+        for (int taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
+            final TaskRecord task = tasks.get(taskNdx);
+            if (!task.isActivityTypeHome()) {
+                continue;
+            }
+
+            final ArrayList<ActivityRecord> activities = task.mActivities;
+            for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
+                final ActivityRecord r = activities.get(activityNdx);
+                if (r.isActivityTypeHome()
+                        && ((userId == UserHandle.USER_ALL) || (r.userId == userId))) {
+                    return r;
+                }
+            }
+        }
+        return null;
     }
 
     boolean isSleeping() {

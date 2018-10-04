@@ -975,7 +975,8 @@ class ActivityStarter {
                             clearedTask);
                     break;
                 case WINDOWING_MODE_SPLIT_SCREEN_PRIMARY:
-                    final ActivityStack homeStack = mSupervisor.mHomeStack;
+                    final ActivityStack homeStack =
+                            startedActivityStack.getDisplay().getHomeStack();
                     if (homeStack != null && homeStack.shouldBeVisible(null /* starting */)) {
                         mService.mWindowManager.showRecentApps();
                     }
@@ -1280,6 +1281,15 @@ class ActivityStarter {
         setInitialState(r, options, inTask, doResume, startFlags, sourceRecord, voiceSession,
                 voiceInteractor);
 
+        // Do not start home activity if it cannot be launched on preferred display. We are not
+        // doing this in ActivityStackSupervisor#canPlaceEntityOnDisplay because it might
+        // fallback to launch on other displays.
+        if (r.isActivityTypeHome()
+                && !mSupervisor.canStartHomeOnDisplay(r.info, mPreferredDisplayId)) {
+            Slog.w(TAG, "Cannot launch home on display " + mPreferredDisplayId);
+            return START_CANCELED;
+        }
+
         computeLaunchingTaskFlags();
 
         computeSourceStack();
@@ -1430,7 +1440,11 @@ class ActivityStarter {
                 && top.userId == mStartActivity.userId
                 && top.attachedToProcess()
                 && ((mLaunchFlags & FLAG_ACTIVITY_SINGLE_TOP) != 0
-                || isLaunchModeOneOf(LAUNCH_SINGLE_TOP, LAUNCH_SINGLE_TASK));
+                || isLaunchModeOneOf(LAUNCH_SINGLE_TOP, LAUNCH_SINGLE_TASK))
+                // This allows home activity to automatically launch on secondary display when
+                // display added, if home was the top activity on default display, instead of
+                // sending new intent to the home activity on default display.
+                && (!top.isActivityTypeHome() || top.getDisplayId() == mPreferredDisplayId);
         if (dontStart) {
             // For paranoia, make sure we have correctly resumed the top activity.
             topStack.mLastPausedActivity = null;
@@ -1858,6 +1872,13 @@ class ActivityStarter {
                 intentActivity = mSupervisor.findTaskLocked(mStartActivity, mPreferredDisplayId);
             }
         }
+
+        if (mStartActivity.isActivityTypeHome() && intentActivity != null
+                && intentActivity.getDisplayId() != mPreferredDisplayId) {
+            // Do not reuse home activity on other displays.
+            intentActivity = null;
+        }
+
         return intentActivity;
     }
 

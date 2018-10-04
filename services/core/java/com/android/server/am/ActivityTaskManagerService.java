@@ -1692,8 +1692,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     return;
                 }
                 final ActivityRecord r = stack.topRunningActivityLocked();
-                if (mStackSupervisor.moveFocusableActivityStackToFrontLocked(
-                        r, "setFocusedStack")) {
+                if (mStackSupervisor.moveFocusableActivityToTop(r, "setFocusedStack")) {
                     mStackSupervisor.resumeFocusedStacksTopActivitiesLocked();
                 }
             }
@@ -1714,7 +1713,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     return;
                 }
                 final ActivityRecord r = task.topRunningActivityLocked();
-                if (mStackSupervisor.moveFocusableActivityStackToFrontLocked(r, "setFocusedTask")) {
+                if (mStackSupervisor.moveFocusableActivityToTop(r, "setFocusedTask")) {
                     mStackSupervisor.resumeFocusedStacksTopActivitiesLocked();
                 }
             }
@@ -5262,7 +5261,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         @Override
         public ComponentName getHomeActivityForUser(int userId) {
             synchronized (mGlobalLock) {
-                ActivityRecord homeActivity = mStackSupervisor.getHomeActivityForUser(userId);
+                ActivityRecord homeActivity =
+                        mStackSupervisor.getDefaultDisplayHomeActivityForUser(userId);
                 return homeActivity == null ? null : homeActivity.realActivity;
             }
         }
@@ -5436,8 +5436,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     throw new IllegalArgumentException(
                             "setFocusedActivity: No activity record matching token=" + token);
                 }
-                if (mStackSupervisor.moveFocusableActivityStackToFrontLocked(
-                        r, "setFocusedActivity")) {
+                if (mStackSupervisor.moveFocusableActivityToTop(r, "setFocusedActivity")) {
                     mStackSupervisor.resumeFocusedStacksTopActivitiesLocked();
                 }
             }
