@@ -761,6 +761,8 @@
     <string name="quick_settings_cast_device_default_description">Ready to cast</string>
     <!-- QuickSettings: Cast detail panel, text when there are no items [CHAR LIMIT=NONE] -->
     <string name="quick_settings_cast_detail_empty_text">No devices available</string>
+    <!-- QuickSettings: Cast unavailable, text when not connected to WiFi [CHAR LIMIT=NONE] -->
+    <string name="quick_settings_cast_no_wifi">Wi\u2011Fi not connected</string>
     <!-- QuickSettings: Brightness dialog title [CHAR LIMIT=NONE] -->
     <string name="quick_settings_brightness_dialog_title">Brightness</string>
     <!-- QuickSettings: Brightness dialog auto brightness button [CHAR LIMIT=NONE] -->
@@ -1998,6 +2000,9 @@
 
     <!-- accessibility label for quick settings items that open a details page [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_open_details">Open details.</string>
+
+    <!-- accessibility label for quick settings items that are currently disabled. Must have a reason [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_not_available">Unvailable due to <xliff:g name="reason" id="reason" example="Wifi not available">%s</xliff:g></string>
 
     <!-- accessibility label for quick settings items that open a details page [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_open_settings">Open <xliff:g name="page" example="Bluetooth">%s</xliff:g> settings.</string>
