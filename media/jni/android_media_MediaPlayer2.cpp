@@ -769,18 +769,6 @@ android_media_MediaPlayer2_seekTo(JNIEnv *env, jobject thiz, jlong msec, jint mo
                               NULL, NULL);
 }
 
-static void
-android_media_MediaPlayer2_notifyAt(JNIEnv *env, jobject thiz, jlong mediaTimeUs)
-{
-    sp<MediaPlayer2> mp = getMediaPlayer(env, thiz);
-    if (mp == NULL) {
-        jniThrowException(env, "java/lang/IllegalStateException", NULL);
-        return;
-    }
-    ALOGV("notifyAt: %lld", (long long)mediaTimeUs);
-    process_media_player_call( env, thiz, mp->notifyAt((int64_t)mediaTimeUs), NULL, NULL );
-}
-
 static jint
 android_media_MediaPlayer2_getState(JNIEnv *env, jobject thiz)
 {
@@ -1482,7 +1470,6 @@ static const JNINativeMethod gMethods[] = {
     {"_setSyncParams",     "(Landroid/media/SyncParams;)V",  (void *)android_media_MediaPlayer2_setSyncParams},
     {"getSyncParams",     "()Landroid/media/SyncParams;",   (void *)android_media_MediaPlayer2_getSyncParams},
     {"_seekTo",             "(JI)V",                            (void *)android_media_MediaPlayer2_seekTo},
-    {"_notifyAt",           "(J)V",                             (void *)android_media_MediaPlayer2_notifyAt},
     {"_pause",              "()V",                              (void *)android_media_MediaPlayer2_pause},
     {"isPlaying",           "()Z",                              (void *)android_media_MediaPlayer2_isPlaying},
     {"getCurrentPosition",  "()J",                              (void *)android_media_MediaPlayer2_getCurrentPosition},
