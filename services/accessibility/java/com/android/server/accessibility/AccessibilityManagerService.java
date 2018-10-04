@@ -2630,7 +2630,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         final List<Integer> outsideWindowsIds;
         final List<RemoteAccessibilityConnection> connectionList = new ArrayList<>();
         synchronized (mLock) {
-            outsideWindowsIds = mSecurityPolicy.getWatchOutsideTouchWindowId(targetWindowId);
+            outsideWindowsIds = mSecurityPolicy.getWatchOutsideTouchWindowIdLocked(targetWindowId);
             for (int i = 0; i < outsideWindowsIds.size(); i++) {
                 connectionList.add(getConnectionLocked(outsideWindowsIds.get(i)));
             }
@@ -3684,13 +3684,13 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             return mWindowInfoById.get(windowId);
         }
 
-        private List<Integer> getWatchOutsideTouchWindowId(int targetWindowId) {
-            if (mWindowInfoById != null && mHasWatchOutsideTouchWindow) {
+        private List<Integer> getWatchOutsideTouchWindowIdLocked(int targetWindowId) {
+            final WindowInfo targetWindow = mWindowInfoById.get(targetWindowId);
+            if (targetWindow != null && mWindowInfoById != null && mHasWatchOutsideTouchWindow) {
                 final List<Integer> outsideWindowsId = new ArrayList<>();
-                final WindowInfo targetWindow = mWindowInfoById.get(targetWindowId);
                 for (int i = 0; i < mWindowInfoById.size(); i++) {
                     WindowInfo window = mWindowInfoById.valueAt(i);
-                    if (window.layer < targetWindow.layer
+                    if (window != null && window.layer < targetWindow.layer
                             && window.hasFlagWatchOutsideTouch) {
                         outsideWindowsId.add(mWindowInfoById.keyAt(i));
                     }
