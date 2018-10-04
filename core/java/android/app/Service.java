@@ -21,13 +21,13 @@ import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
 import android.content.ComponentCallbacks2;
 import android.content.ComponentName;
-import android.content.Intent;
-import android.content.ContextWrapper;
 import android.content.Context;
+import android.content.ContextWrapper;
+import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.Build;
-import android.os.RemoteException;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.util.Log;
 
 import java.io.FileDescriptor;
@@ -391,7 +391,7 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
      * don't recreate until a future explicit call to
      * {@link Context#startService Context.startService(Intent)}.  The
      * service will not receive a {@link #onStartCommand(Intent, int, int)}
-     * call with a null Intent because it will not be re-started if there
+     * call with a null Intent because it will not be restarted if there
      * are no pending Intents to deliver.
      * 
      * <p>This mode makes sense for things that want to do some work as a
@@ -416,7 +416,7 @@ public abstract class Service extends ContextWrapper implements ComponentCallbac
      * redelivery until the service calls {@link #stopSelf(int)} with the
      * start ID provided to {@link #onStartCommand}.  The
      * service will not receive a {@link #onStartCommand(Intent, int, int)}
-     * call with a null Intent because it will will only be re-started if
+     * call with a null Intent because it will only be restarted if
      * it is not finished processing all Intents sent to it (and any such
      * pending events will be delivered at the point of restart).
      */
