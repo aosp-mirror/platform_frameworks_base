@@ -1151,6 +1151,28 @@
         android:protectionLevel="dangerous|instant"/>
 
     <!-- ====================================================================== -->
+    <!-- Permissions for activity recognition                        -->
+    <!-- ====================================================================== -->
+    <eat-comment />
+
+    <!-- Used for permissions that are associated with activity recognition.
+         TODO(zezeozue). STOPSHIP: Add icon -->
+    <permission-group android:name="android.permission-group.ACTIVITY_RECOGNITION"
+        android:label="@string/permgrouplab_activityRecognition"
+        android:description="@string/permgroupdesc_activityRecognition"
+        android:request="@string/permgrouprequest_activityRecognition"
+        android:priority="1000" />
+
+    <!-- Allows an application to recognize physical activity.
+         <p>Protection level: dangerous
+    -->
+    <permission android:name="android.permission.ACTIVITY_RECOGNITION"
+        android:permissionGroup="android.permission-group.ACTIVITY_RECOGNITION"
+        android:label="@string/permlab_activityRecognition"
+        android:description="@string/permdesc_activityRecognition"
+        android:protectionLevel="dangerous|instant" />
+
+    <!-- ====================================================================== -->
     <!-- Permissions for accessing the UCE Service                              -->
     <!-- ====================================================================== -->
 
