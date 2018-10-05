@@ -582,6 +582,9 @@ class PinnedStackController {
         pw.print(prefix + "  defaultBounds=");
         getDefaultBounds(INVALID_SNAP_FRACTION).printShortString(pw);
         pw.println();
+        pw.println(prefix + "  mDefaultMinSize=" + mDefaultMinSize);
+        pw.println(prefix + "  mDefaultStackGravity=" + mDefaultStackGravity);
+        pw.println(prefix + "  mDefaultAspectRatio=" + mDefaultAspectRatio);
         mService.getStackBounds(WINDOWING_MODE_PINNED, ACTIVITY_TYPE_STANDARD, mTmpRect);
         pw.print(prefix + "  movementBounds="); getMovementBounds(mTmpRect).printShortString(pw);
         pw.println();
@@ -591,6 +594,9 @@ class PinnedStackController {
         pw.println(prefix + "  mShelfHeight=" + mShelfHeight);
         pw.println(prefix + "  mReentrySnapFraction=" + mReentrySnapFraction);
         pw.println(prefix + "  mIsMinimized=" + mIsMinimized);
+        pw.println(prefix + "  mAspectRatio=" + mAspectRatio);
+        pw.println(prefix + "  mMinAspectRatio=" + mMinAspectRatio);
+        pw.println(prefix + "  mMaxAspectRatio=" + mMaxAspectRatio);
         if (mActions.isEmpty()) {
             pw.println(prefix + "  mActions=[]");
         } else {
@@ -602,7 +608,7 @@ class PinnedStackController {
             }
             pw.println(prefix + "  ]");
         }
-        pw.println(prefix + " mDisplayInfo=" + mDisplayInfo);
+        pw.println(prefix + "  mDisplayInfo=" + mDisplayInfo);
     }
 
     void writeToProto(ProtoOutputStream proto, long fieldId) {
