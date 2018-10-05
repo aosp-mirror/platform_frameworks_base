@@ -319,6 +319,29 @@ public class DisconnectCause {
      */
     public static final int IMS_SIP_ALTERNATE_EMERGENCY_CALL = 71;
 
+    /**
+     * Indicates that a new outgoing call cannot be placed because there is already an outgoing
+     * call dialing out.
+     */
+    public static final int ALREADY_DIALING = 72;
+
+    /**
+     * Indicates that a new outgoing call cannot be placed while there is a ringing call.
+     */
+    public static final int CANT_CALL_WHILE_RINGING = 73;
+
+    /**
+     * Indicates that a new outgoing call cannot be placed because calling has been disabled using
+     * the ro.telephony.disable-call system property.
+     */
+    public static final int CALLING_DISABLED = 74;
+
+    /**
+     * Indicates that a new outgoing call cannot be placed because there is currently an ongoing
+     * foreground and background call.
+     */
+    public static final int TOO_MANY_ONGOING_CALLS = 75;
+
     //*********************************************************************************************
     // When adding a disconnect type:
     // 1) Update toString() with the newly added disconnect type.
@@ -474,6 +497,14 @@ public class DisconnectCause {
             return "NORMAL_UNSPECIFIED";
         case IMS_SIP_ALTERNATE_EMERGENCY_CALL:
             return "IMS_SIP_ALTERNATE_EMERGENCY_CALL";
+        case ALREADY_DIALING:
+            return "ALREADY_DIALING";
+        case CANT_CALL_WHILE_RINGING:
+            return "CANT_CALL_WHILE_RINGING";
+        case CALLING_DISABLED:
+            return "CALLING_DISABLED";
+        case TOO_MANY_ONGOING_CALLS:
+            return "TOO_MANY_ONGOING_CALLS";
         default:
             return "INVALID: " + cause;
         }
