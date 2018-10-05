@@ -47,10 +47,10 @@ public class DozeConfigurationTest extends SysuiTestCase {
             return;
         }
 
-        Settings.Secure.putString(mContext.getContentResolver(), Settings.Secure.DOZE_ALWAYS_ON,
-                null);
+        Settings.Secure.putStringForUser(mContext.getContentResolver(),
+                Settings.Secure.DOZE_ALWAYS_ON, null, UserHandle.USER_CURRENT);
         boolean defaultValue = mContext.getResources()
                 .getBoolean(com.android.internal.R.bool.config_dozeAlwaysOnEnabled);
-        assertEquals(mDozeConfig.alwaysOnEnabled(UserHandle.USER_CURRENT), defaultValue);
+        assertEquals(defaultValue, mDozeConfig.alwaysOnEnabled(UserHandle.USER_CURRENT));
     }
 }
