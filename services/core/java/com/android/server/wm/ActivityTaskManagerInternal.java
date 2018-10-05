@@ -33,8 +33,8 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.service.voice.IVoiceInteractionSession;
 import android.util.SparseIntArray;
-
 import android.util.proto.ProtoOutputStream;
+
 import com.android.internal.app.IVoiceInteractor;
 import com.android.server.am.ActivityServiceConnectionsHolder;
 import com.android.server.am.PendingIntentRecord;
@@ -48,7 +48,6 @@ import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.Set;
-import java.util.function.Predicate;
 
 /**
  * Activity Task manager local system service interface.
@@ -348,6 +347,8 @@ public abstract class ActivityTaskManagerInternal {
     /** @return The intent used to launch the home activity. */
     public abstract Intent getHomeIntent();
     public abstract boolean startHomeActivity(int userId, String reason);
+    /** Start home activities on all displays that support system decorations. */
+    public abstract boolean startHomeOnAllDisplays(int userId, String reason);
     /** @return true if the given process is the factory test process. */
     public abstract boolean isFactoryTestProcess(WindowProcessController wpc);
     public abstract void updateTopComponentForFactoryTest();

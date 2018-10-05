@@ -39,14 +39,6 @@ import static org.mockito.Mockito.spy;
 
 import android.app.ActivityManagerInternal;
 import android.app.ActivityOptions;
-import android.content.pm.PackageManagerInternal;
-import com.android.server.uri.UriGrantsManagerInternal;
-import com.android.server.wm.ActivityTaskManagerInternal;
-import com.android.server.wm.DisplayWindowController;
-
-import org.junit.Rule;
-import org.mockito.invocation.InvocationOnMock;
-
 import android.app.IApplicationThread;
 import android.content.ComponentName;
 import android.content.Context;
@@ -54,6 +46,7 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
@@ -73,7 +66,10 @@ import com.android.internal.app.IVoiceInteractor;
 import com.android.server.AppOpsService;
 import com.android.server.AttributeCache;
 import com.android.server.ServiceThread;
+import com.android.server.uri.UriGrantsManagerInternal;
+import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.AppWindowContainerController;
+import com.android.server.wm.DisplayWindowController;
 import com.android.server.wm.PinnedStackWindowController;
 import com.android.server.wm.RootWindowContainerController;
 import com.android.server.wm.StackWindowController;
@@ -83,7 +79,9 @@ import com.android.server.wm.WindowTestUtils;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.mockito.MockitoAnnotations;
+import org.mockito.invocation.InvocationOnMock;
 
 import java.io.File;
 import java.util.List;
@@ -172,6 +170,7 @@ public class ActivityTestsBase {
         // Makes sure the supervisor is using with the spy object.
         atm.mStackSupervisor.setService(atm);
         doReturn(mock(IPackageManager.class)).when(am).getPackageManager();
+        doReturn(mock(IPackageManager.class)).when(atm).getPackageManager();
         PackageManagerInternal mockPackageManager = mock(PackageManagerInternal.class);
         doReturn(mockPackageManager).when(am).getPackageManagerInternalLocked();
         doReturn(null).when(mockPackageManager).getDefaultHomeActivity(anyInt());
@@ -419,6 +418,10 @@ public class ActivityTestsBase {
         private ActivityTaskManagerInternal mInternal;
         private PackageManagerInternal mPmInternal;
 
+        // ActivityStackSupervisor may be created more than once while setting up AMS and ATMS.
+        // We keep the reference in order to prevent creating it twice.
+        private ActivityStackSupervisor mTestStackSupervisor;
+
         TestActivityTaskManagerService(Context context) {
             super(context);
             mSupportsMultiWindow = true;
@@ -449,24 +452,27 @@ public class ActivityTestsBase {
 
         @Override
         final protected ActivityStackSupervisor createStackSupervisor() {
-            final ActivityStackSupervisor supervisor = spy(createTestSupervisor());
-            final KeyguardController keyguardController = mock(KeyguardController.class);
+            if (mTestStackSupervisor == null) {
+                final ActivityStackSupervisor supervisor = spy(createTestSupervisor());
+                final KeyguardController keyguardController = mock(KeyguardController.class);
 
-            // Invoked during {@link ActivityStack} creation.
-            doNothing().when(supervisor).updateUIDsPresentOnDisplay();
-            // Always keep things awake.
-            doReturn(true).when(supervisor).hasAwakeDisplay();
-            // Called when moving activity to pinned stack.
-            doNothing().when(supervisor).ensureActivitiesVisibleLocked(any(), anyInt(), anyBoolean());
-            // Do not schedule idle timeouts
-            doNothing().when(supervisor).scheduleIdleTimeoutLocked(any());
-            // unit test version does not handle launch wake lock
-            doNothing().when(supervisor).acquireLaunchWakelock();
-            doReturn(keyguardController).when(supervisor).getKeyguardController();
+                // Invoked during {@link ActivityStack} creation.
+                doNothing().when(supervisor).updateUIDsPresentOnDisplay();
+                // Always keep things awake.
+                doReturn(true).when(supervisor).hasAwakeDisplay();
+                // Called when moving activity to pinned stack.
+                doNothing().when(supervisor).ensureActivitiesVisibleLocked(any(), anyInt(),
+                        anyBoolean());
+                // Do not schedule idle timeouts
+                doNothing().when(supervisor).scheduleIdleTimeoutLocked(any());
+                // unit test version does not handle launch wake lock
+                doNothing().when(supervisor).acquireLaunchWakelock();
+                doReturn(keyguardController).when(supervisor).getKeyguardController();
 
-            supervisor.initialize();
-
-            return supervisor;
+                supervisor.initialize();
+                mTestStackSupervisor = supervisor;
+            }
+            return mTestStackSupervisor;
         }
 
         protected ActivityStackSupervisor createTestSupervisor() {

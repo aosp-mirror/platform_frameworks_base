@@ -44,6 +44,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECOND
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.app.WindowConfiguration.activityTypeToString;
 import static android.app.WindowConfiguration.windowingModeToString;
+import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_INSTANCE;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TASK;
 import static android.content.pm.PackageManager.NOTIFY_PACKAGE_USE_ACTIVITY;
@@ -115,8 +116,8 @@ import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityManager.StackInfo;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityOptions;
+import android.app.AppGlobals;
 import android.app.AppOpsManager;
-import android.app.IApplicationThread;
 import android.app.ProfilerInfo;
 import android.app.ResultInfo;
 import android.app.WaitResult;
@@ -146,6 +147,7 @@ import android.hardware.power.V1_0.PowerHint;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Debug;
+import android.os.FactoryTest;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -786,10 +788,24 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             r.moveFocusableActivityToTop(myReason);
             return resumeFocusedStacksTopActivitiesLocked(r.getStack(), prev, null);
         }
-        return mService.startHomeActivityLocked(mCurrentUser, myReason, displayId);
+        return startHomeOnDisplay(mCurrentUser, myReason, displayId);
     }
 
-    boolean canStartHomeOnDisplay(ActivityInfo homeActivity, int displayId) {
+    boolean canStartHomeOnDisplay(ActivityInfo homeInfo, int displayId) {
+        if (mService.mFactoryTest == FactoryTest.FACTORY_TEST_LOW_LEVEL
+                && mService.mTopAction == null) {
+            // We are running in factory test mode, but unable to find the factory test app, so
+            // just sit around displaying the error message and don't try to start anything.
+            return false;
+        }
+
+        final WindowProcessController app =
+                mService.getProcessController(homeInfo.processName, homeInfo.applicationInfo.uid);
+        if (app != null && app.isInstrumenting()) {
+            // Don't do this if the home app is currently being instrumented.
+            return false;
+        }
+
         if (displayId == DEFAULT_DISPLAY || (displayId != INVALID_DISPLAY
                 && displayId == mService.mVr2dDisplayId)) {
             // No restrictions to default display or vr 2d display.
@@ -802,8 +818,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             return false;
         }
 
-        final boolean supportMultipleInstance = homeActivity.launchMode != LAUNCH_SINGLE_TASK
-                && homeActivity.launchMode != LAUNCH_SINGLE_INSTANCE;
+        final boolean supportMultipleInstance = homeInfo.launchMode != LAUNCH_SINGLE_TASK
+                && homeInfo.launchMode != LAUNCH_SINGLE_INSTANCE;
         if (!supportMultipleInstance) {
             // Can't launch home on other displays if it requested to be single instance.
             return false;
@@ -1037,12 +1053,14 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
             final ActivityDisplay display = mActivityDisplays.get(displayNdx);
             for (int stackNdx = display.getChildCount() - 1; stackNdx >= 0; --stackNdx) {
+                // We cannot only check the top stack on each display since there might have
+                // always-on-top stacks (e.g. pinned stack).
                 final ActivityStack stack = display.getChildAt(stackNdx);
-                if (!isTopDisplayFocusedStack(stack) || stack.numActivities() == 0) {
+                if (stack.numActivities() == 0) {
                     continue;
                 }
                 final ActivityRecord resumedActivity = stack.getResumedActivity();
-                if (resumedActivity == null || !resumedActivity.idle) {
+                if (resumedActivity != null && !resumedActivity.idle) {
                     if (DEBUG_STATES) Slog.d(TAG_STATES, "allResumedActivitiesIdle: stack="
                              + stack.mStackId + " " + resumedActivity + " not idle");
                     return false;
@@ -1895,7 +1913,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     }
 
     /**
-     * Called when the frontmost task is idle.
+     * Called when all resumed tasks/stacks are idle.
      * @return the state of mService.mAm.mBooting before this was called.
      */
     @GuardedBy("mService")
@@ -1950,7 +1968,9 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             r.idle = true;
 
             //Slog.i(TAG, "IDLE: mBooted=" + mBooted + ", fromTimeout=" + fromTimeout);
-            if (isTopDisplayFocusedStack(r.getStack()) || fromTimeout) {
+
+            // Make sure we can finish booting when all resumed activities are idle.
+            if ((!mService.isBooted() && allResumedActivitiesIdle()) || fromTimeout) {
                 booting = checkFinishBootingLocked();
             }
 
@@ -4107,7 +4127,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         if (DEBUG_STACK) Slog.v(TAG, "Display added displayId=" + displayId);
         synchronized (mService.mGlobalLock) {
             getActivityDisplayOrCreateLocked(displayId);
-            mService.startHomeActivityLocked(mCurrentUser, "displayAdded", displayId);
+            startHomeOnDisplay(mCurrentUser, "displayAdded", displayId);
         }
     }
 
@@ -4183,6 +4203,76 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         activityDisplay = new ActivityDisplay(this, display);
         addChild(activityDisplay, ActivityDisplay.POSITION_BOTTOM);
         return activityDisplay;
+    }
+
+    boolean startHomeOnAllDisplays(int userId, String reason) {
+        boolean homeStarted = false;
+        for (int i = mActivityDisplays.size() - 1; i >= 0; i--) {
+            final int displayId = mActivityDisplays.get(i).mDisplayId;
+            homeStarted |= startHomeOnDisplay(userId, reason, displayId);
+        }
+        return homeStarted;
+    }
+
+    /**
+     * This starts home activity on displays that can have system decorations and only if the
+     * home activity can have multiple instances.
+     */
+    boolean startHomeOnDisplay(int userId, String reason, int displayId) {
+        final Intent homeIntent = mService.getHomeIntent();
+        final ActivityInfo aInfo = resolveHomeActivity(userId, homeIntent);
+        if (aInfo == null) {
+            return false;
+        }
+
+        if (!canStartHomeOnDisplay(aInfo, displayId)) {
+            return false;
+        }
+
+        // Update the reason for ANR debugging to verify if the user activity is the one that
+        // actually launched.
+        final String myReason = reason + ":" + userId + ":" + UserHandle.getUserId(
+                aInfo.applicationInfo.uid);
+        mService.getActivityStartController().startHomeActivity(homeIntent, aInfo, myReason,
+                displayId);
+        return true;
+    }
+
+    /**
+     * This resolves the home activity info and updates the home component of the given intent.
+     * @return the home activity info if any.
+     */
+    private ActivityInfo resolveHomeActivity(int userId, Intent homeIntent) {
+        final int flags = ActivityManagerService.STOCK_PM_FLAGS;
+        final ComponentName comp = homeIntent.getComponent();
+        ActivityInfo aInfo = null;
+        try {
+            if (comp != null) {
+                // Factory test.
+                aInfo = AppGlobals.getPackageManager().getActivityInfo(comp, flags, userId);
+            } else {
+                final String resolvedType =
+                        homeIntent.resolveTypeIfNeeded(mService.mContext.getContentResolver());
+                final ResolveInfo info = AppGlobals.getPackageManager()
+                        .resolveIntent(homeIntent, resolvedType, flags, userId);
+                if (info != null) {
+                    aInfo = info.activityInfo;
+                }
+            }
+        } catch (RemoteException e) {
+            // ignore
+        }
+
+        if (aInfo == null) {
+            Slog.wtf(TAG, "No home screen found for " + homeIntent, new Throwable());
+            return null;
+        }
+
+        homeIntent.setComponent(new ComponentName(aInfo.applicationInfo.packageName, aInfo.name));
+        aInfo = new ActivityInfo(aInfo);
+        aInfo.applicationInfo = mService.getAppInfoForUser(aInfo.applicationInfo, userId);
+        homeIntent.setFlags(homeIntent.getFlags() | FLAG_ACTIVITY_NEW_TASK);
+        return aInfo;
     }
 
     @VisibleForTesting
