@@ -47,7 +47,12 @@ public class BiometricManager {
      */
     public static final int ERROR_NO_BIOMETRICS = BiometricConstants.BIOMETRIC_ERROR_NO_BIOMETRICS;
 
-    @IntDef({ERROR_NONE, ERROR_UNAVAILABLE, ERROR_NO_BIOMETRICS})
+    /**
+     * There is no biometric hardware.
+     */
+    public static final int ERROR_NO_HARDWARE = BiometricConstants.BIOMETRIC_ERROR_HW_NOT_PRESENT;
+
+    @IntDef({ERROR_NONE, ERROR_UNAVAILABLE, ERROR_NO_BIOMETRICS, ERROR_NO_HARDWARE})
     @interface BiometricError {}
 
     private final Context mContext;
