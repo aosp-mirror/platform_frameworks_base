@@ -107,6 +107,124 @@ import java.util.Arrays;
  * Keeps track of device idleness and drives low power mode based on that.
  *
  * Test: atest com.android.server.DeviceIdleControllerTest
+ *
+ * Current idling state machine (as of Android 9 Pie). This can be visualized using Graphviz:
+
+   digraph {
+     subgraph deep {
+       label="deep";
+
+       STATE_ACTIVE [label="STATE_ACTIVE\nScreen on OR Charging OR Alarm going off soon"]
+       STATE_INACTIVE [label="STATE_INACTIVE\nScreen off AND Not charging"]
+       STATE_IDLE_PENDING [
+         label="STATE_IDLE_PENDING\nSignificant motion monitoring turned on"
+       ]
+       STATE_SENSING [label="STATE_SENSING\nMonitoring for ANY motion"]
+       STATE_LOCATING [
+         label="STATE_LOCATING\nRequesting location, motion monitoring still on"
+       ]
+       STATE_IDLE [
+         label="STATE_IDLE\nLocation and motion detection turned off\n"
+             + "Significant motion monitoring still on"
+       ]
+       STATE_IDLE_MAINTENANCE [label="STATE_IDLE_MAINTENANCE\n"]
+
+       STATE_ACTIVE -> STATE_INACTIVE [label="becomeInactiveIfAppropriateLocked()"]
+
+       STATE_INACTIVE -> STATE_ACTIVE [
+         label="handleMotionDetectedLocked(), becomeActiveLocked()"
+       ]
+       STATE_INACTIVE -> STATE_IDLE_PENDING [label="stepIdleStateLocked()"]
+
+       STATE_IDLE_PENDING -> STATE_ACTIVE [
+         label="handleMotionDetectedLocked(), becomeActiveLocked()"
+       ]
+       STATE_IDLE_PENDING -> STATE_SENSING [label="stepIdleStateLocked()"]
+
+       STATE_SENSING -> STATE_ACTIVE [
+         label="handleMotionDetectedLocked(), becomeActiveLocked()"
+       ]
+       STATE_SENSING -> STATE_LOCATING [label="stepIdleStateLocked()"]
+       STATE_SENSING -> STATE_IDLE [
+         label="stepIdleStateLocked()\n"
+             + "No Location Manager OR (no Network provider AND no GPS provider)"
+       ]
+
+       STATE_LOCATING -> STATE_ACTIVE [
+         label="handleMotionDetectedLocked(), becomeActiveLocked()"
+       ]
+       STATE_LOCATING -> STATE_IDLE [label="stepIdleStateLocked()"]
+
+       STATE_IDLE -> STATE_ACTIVE [label="handleMotionDetectedLocked(), becomeActiveLocked()"]
+       STATE_IDLE -> STATE_IDLE_MAINTENANCE [label="stepIdleStateLocked()"]
+
+       STATE_IDLE_MAINTENANCE -> STATE_ACTIVE [
+         label="handleMotionDetectedLocked(), becomeActiveLocked()"
+       ]
+       STATE_IDLE_MAINTENANCE -> STATE_IDLE [
+         label="stepIdleStateLocked(), exitMaintenanceEarlyIfNeededLocked()"
+       ]
+     }
+
+     subgraph light {
+       label="light"
+
+       LIGHT_STATE_ACTIVE [
+         label="LIGHT_STATE_ACTIVE\nScreen on OR Charging OR Alarm going off soon"
+       ]
+       LIGHT_STATE_INACTIVE [label="LIGHT_STATE_INACTIVE\nScreen off AND Not charging"]
+       LIGHT_STATE_PRE_IDLE [
+         label="LIGHT_STATE_PRE_IDLE\n"
+             + "Delay going into LIGHT_STATE_IDLE due to some running jobs or alarms"
+       ]
+       LIGHT_STATE_IDLE [label="LIGHT_STATE_IDLE\n"]
+       LIGHT_STATE_WAITING_FOR_NETWORK [
+         label="LIGHT_STATE_WAITING_FOR_NETWORK\n"
+             + "Coming out of LIGHT_STATE_IDLE, waiting for network"
+       ]
+       LIGHT_STATE_IDLE_MAINTENANCE [label="LIGHT_STATE_IDLE_MAINTENANCE\n"]
+       LIGHT_STATE_OVERRIDE [
+         label="LIGHT_STATE_OVERRIDE\nDevice in deep doze, light no longer changing states"
+       ]
+
+       LIGHT_STATE_ACTIVE -> LIGHT_STATE_INACTIVE [
+         label="becomeInactiveIfAppropriateLocked()"
+       ]
+       LIGHT_STATE_ACTIVE -> LIGHT_STATE_OVERRIDE [label="deep goes to STATE_IDLE"]
+
+       LIGHT_STATE_INACTIVE -> LIGHT_STATE_ACTIVE [label="becomeActiveLocked()"]
+       LIGHT_STATE_INACTIVE -> LIGHT_STATE_PRE_IDLE [label="active jobs"]
+       LIGHT_STATE_INACTIVE -> LIGHT_STATE_IDLE [label="no active jobs"]
+       LIGHT_STATE_INACTIVE -> LIGHT_STATE_OVERRIDE [label="deep goes to STATE_IDLE"]
+
+       LIGHT_STATE_PRE_IDLE -> LIGHT_STATE_ACTIVE [label="becomeActiveLocked()"]
+       LIGHT_STATE_PRE_IDLE -> LIGHT_STATE_IDLE [
+         label="stepLightIdleStateLocked(), exitMaintenanceEarlyIfNeededLocked()"
+       ]
+       LIGHT_STATE_PRE_IDLE -> LIGHT_STATE_OVERRIDE [label="deep goes to STATE_IDLE"]
+
+       LIGHT_STATE_IDLE -> LIGHT_STATE_ACTIVE [label="becomeActiveLocked()"]
+       LIGHT_STATE_IDLE -> LIGHT_STATE_WAITING_FOR_NETWORK [label="no network"]
+       LIGHT_STATE_IDLE -> LIGHT_STATE_IDLE_MAINTENANCE
+       LIGHT_STATE_IDLE -> LIGHT_STATE_OVERRIDE [label="deep goes to STATE_IDLE"]
+
+       LIGHT_STATE_WAITING_FOR_NETWORK -> LIGHT_STATE_ACTIVE [label="becomeActiveLocked()"]
+       LIGHT_STATE_WAITING_FOR_NETWORK -> LIGHT_STATE_IDLE_MAINTENANCE
+       LIGHT_STATE_WAITING_FOR_NETWORK -> LIGHT_STATE_OVERRIDE [
+         label="deep goes to STATE_IDLE"
+       ]
+
+       LIGHT_STATE_IDLE_MAINTENANCE -> LIGHT_STATE_ACTIVE [label="becomeActiveLocked()"]
+       LIGHT_STATE_IDLE_MAINTENANCE -> LIGHT_STATE_IDLE [
+         label="stepLightIdleStateLocked(), exitMaintenanceEarlyIfNeededLocked()"
+       ]
+       LIGHT_STATE_IDLE_MAINTENANCE -> LIGHT_STATE_OVERRIDE [label="deep goes to STATE_IDLE"]
+
+       LIGHT_STATE_OVERRIDE -> LIGHT_STATE_ACTIVE [
+         label="handleMotionDetectedLocked(), becomeActiveLocked()"
+       ]
+     }
+   }
  */
 public class DeviceIdleController extends SystemService
         implements AnyMotionDetector.DeviceIdleCallback {
