@@ -16,6 +16,8 @@
 
 package com.android.internal.app;
 
+import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
+
 import android.annotation.Nullable;
 import android.annotation.StringRes;
 import android.annotation.UiThread;
@@ -66,6 +68,7 @@ import android.widget.ImageView;
 import android.widget.ListView;
 import android.widget.TextView;
 import android.widget.Toast;
+
 import com.android.internal.R;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.content.PackageMonitor;
@@ -80,8 +83,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
-
-import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 
 /**
  * This activity is displayed when the system attempts to start an Intent for
@@ -288,6 +289,7 @@ public class ResolverActivity extends Activity {
         mTitle = title;
         mDefaultTitleResId = defaultTitleRes;
 
+        mIconFactory = IconDrawableFactory.newInstance(this, true);
         if (configureContentView(mIntents, initialIntents, rList)) {
             return;
         }
@@ -335,7 +337,6 @@ public class ResolverActivity extends Activity {
                 : MetricsProto.MetricsEvent.ACTION_SHOW_APP_DISAMBIG_NONE_FEATURED,
                 intent.getAction() + ":" + intent.getType() + ":"
                         + (categories != null ? Arrays.toString(categories.toArray()) : ""));
-        mIconFactory = IconDrawableFactory.newInstance(this, true);
     }
 
     @Override
