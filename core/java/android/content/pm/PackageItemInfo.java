@@ -16,10 +16,12 @@
 
 package android.content.pm;
 
-import static java.lang.annotation.RetentionPolicy.SOURCE;
+import static android.text.TextUtils.SAFE_STRING_FLAG_FIRST_LINE;
+import static android.text.TextUtils.SAFE_STRING_FLAG_SINGLE_LINE;
+import static android.text.TextUtils.SAFE_STRING_FLAG_TRIM;
+import static android.text.TextUtils.makeSafeForPresentation;
 
 import android.annotation.FloatRange;
-import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.content.res.XmlResourceParser;
@@ -27,17 +29,13 @@ import android.graphics.drawable.Drawable;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.UserHandle;
-import android.text.Html;
-import android.text.TextPaint;
 import android.text.TextUtils;
 import android.util.Printer;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.util.Preconditions;
 
-import java.lang.annotation.Retention;
 import java.text.Collator;
-import java.util.BitSet;
 import java.util.Comparator;
 
 /**
@@ -50,9 +48,6 @@ import java.util.Comparator;
  * in the implementation of Parcelable in subclasses.
  */
 public class PackageItemInfo {
-    private static final int LINE_FEED_CODE_POINT = 10;
-    private static final int NBSP_CODE_POINT = 160;
-
     /** The maximum length of a safe label, in characters */
     private static final int MAX_SAFE_LABEL_LENGTH = 50000;
 
@@ -60,45 +55,43 @@ public class PackageItemInfo {
     public static final float DEFAULT_MAX_LABEL_SIZE_PX = 500f;
 
     /**
-     * Flags for {@link #loadSafeLabel(PackageManager, float, int)}
-     *
-     * @hide
-     */
-    @Retention(SOURCE)
-    @IntDef(flag = true, prefix = "SAFE_LABEL_FLAG_",
-            value = {SAFE_LABEL_FLAG_TRIM, SAFE_LABEL_FLAG_SINGLE_LINE,
-                    SAFE_LABEL_FLAG_FIRST_LINE})
-    public @interface SafeLabelFlags {}
-
-    /**
      * Remove {@link Character#isWhitespace(int) whitespace} and non-breaking spaces from the edges
      * of the label.
      *
      * @see #loadSafeLabel(PackageManager, float, int)
+     *
+     * @deprecated Use {@link TextUtils#SAFE_STRING_FLAG_TRIM} instead
      * @hide
      */
+    @Deprecated
     @SystemApi
-    public static final int SAFE_LABEL_FLAG_TRIM = 0x1;
+    public static final int SAFE_LABEL_FLAG_TRIM = SAFE_STRING_FLAG_TRIM;
 
     /**
      * Force entire string into single line of text (no newlines). Cannot be set at the same time as
      * {@link #SAFE_LABEL_FLAG_FIRST_LINE}.
      *
      * @see #loadSafeLabel(PackageManager, float, int)
+     *
+     * @deprecated Use {@link TextUtils#SAFE_STRING_FLAG_SINGLE_LINE} instead
      * @hide
      */
+    @Deprecated
     @SystemApi
-    public static final int SAFE_LABEL_FLAG_SINGLE_LINE = 0x2;
+    public static final int SAFE_LABEL_FLAG_SINGLE_LINE = SAFE_STRING_FLAG_SINGLE_LINE;
 
     /**
      * Return only first line of text (truncate at first newline). Cannot be set at the same time as
      * {@link #SAFE_LABEL_FLAG_SINGLE_LINE}.
      *
      * @see #loadSafeLabel(PackageManager, float, int)
+     *
+     * @deprecated Use {@link TextUtils#SAFE_STRING_FLAG_FIRST_LINE} instead
      * @hide
      */
+    @Deprecated
     @SystemApi
-    public static final int SAFE_LABEL_FLAG_FIRST_LINE = 0x4;
+    public static final int SAFE_LABEL_FLAG_FIRST_LINE = SAFE_STRING_FLAG_FIRST_LINE;
 
     private static volatile boolean sForceSafeLabels = false;
 
@@ -199,8 +192,8 @@ public class PackageItemInfo {
      */
     public @NonNull CharSequence loadLabel(@NonNull PackageManager pm) {
         if (sForceSafeLabels) {
-            return loadSafeLabel(pm, DEFAULT_MAX_LABEL_SIZE_PX, SAFE_LABEL_FLAG_TRIM
-                    | SAFE_LABEL_FLAG_FIRST_LINE);
+            return loadSafeLabel(pm, DEFAULT_MAX_LABEL_SIZE_PX, SAFE_STRING_FLAG_TRIM
+                    | SAFE_STRING_FLAG_FIRST_LINE);
         } else {
             return loadUnsafeLabel(pm);
         }
@@ -223,16 +216,6 @@ public class PackageItemInfo {
         return packageName;
     }
 
-    private static boolean isNewline(int codePoint) {
-        int type = Character.getType(codePoint);
-        return type == Character.PARAGRAPH_SEPARATOR || type == Character.LINE_SEPARATOR
-                || codePoint == LINE_FEED_CODE_POINT;
-    }
-
-    private static boolean isWhiteSpace(int codePoint) {
-        return Character.isWhitespace(codePoint) || codePoint == NBSP_CODE_POINT;
-    }
-
     /**
      * @hide
      * @deprecated use loadSafeLabel(PackageManager, float, int) instead
@@ -240,209 +223,24 @@ public class PackageItemInfo {
     @SystemApi
     @Deprecated
     public @NonNull CharSequence loadSafeLabel(@NonNull PackageManager pm) {
-        return loadSafeLabel(pm, DEFAULT_MAX_LABEL_SIZE_PX, SAFE_LABEL_FLAG_TRIM
-                | SAFE_LABEL_FLAG_FIRST_LINE);
+        return loadSafeLabel(pm, DEFAULT_MAX_LABEL_SIZE_PX, SAFE_STRING_FLAG_TRIM
+                | SAFE_STRING_FLAG_FIRST_LINE);
     }
 
     /**
-     * A special string manipulation class. Just records removals and executes the when onString()
-     * is called.
-     */
-    private static class StringWithRemovedChars {
-        /** The original string */
-        private final String mOriginal;
-
-        /**
-         * One bit per char in string. If bit is set, character needs to be removed. If whole
-         * bit field is not initialized nothing needs to be removed.
-         */
-        private BitSet mRemovedChars;
-
-        StringWithRemovedChars(@NonNull String original) {
-            mOriginal = original;
-        }
-
-        /**
-         * Mark all chars in a range {@code [firstRemoved - firstNonRemoved[} (not including
-         * firstNonRemoved) as removed.
-         */
-        void removeRange(int firstRemoved, int firstNonRemoved) {
-            if (mRemovedChars == null) {
-                mRemovedChars = new BitSet(mOriginal.length());
-            }
-
-            mRemovedChars.set(firstRemoved, firstNonRemoved);
-        }
-
-        /**
-         * Remove all characters before {@code firstNonRemoved}.
-         */
-        void removeAllCharBefore(int firstNonRemoved) {
-            if (mRemovedChars == null) {
-                mRemovedChars = new BitSet(mOriginal.length());
-            }
-
-            mRemovedChars.set(0, firstNonRemoved);
-        }
-
-        /**
-         * Remove all characters after and including {@code firstRemoved}.
-         */
-        void removeAllCharAfter(int firstRemoved) {
-            if (mRemovedChars == null) {
-                mRemovedChars = new BitSet(mOriginal.length());
-            }
-
-            mRemovedChars.set(firstRemoved, mOriginal.length());
-        }
-
-        @Override
-        public String toString() {
-            // Common case, no chars removed
-            if (mRemovedChars == null) {
-                return mOriginal;
-            }
-
-            StringBuilder sb = new StringBuilder(mOriginal.length());
-            for (int i = 0; i < mOriginal.length(); i++) {
-                if (!mRemovedChars.get(i)) {
-                    sb.append(mOriginal.charAt(i));
-                }
-            }
-
-            return sb.toString();
-        }
-
-        /**
-         * Return length or the original string
-         */
-        int length() {
-            return mOriginal.length();
-        }
-
-        /**
-         * Return if a certain {@code offset} of the original string is removed
-         */
-        boolean isRemoved(int offset) {
-            return mRemovedChars != null && mRemovedChars.get(offset);
-        }
-
-        /**
-         * Return codePoint of original string at a certain {@code offset}
-         */
-        int codePointAt(int offset) {
-            return mOriginal.codePointAt(offset);
-        }
-    }
-
-    /**
-     * Load, clean up and truncate label before use.
+     * Calls {@link TextUtils#makeSafeForPresentation} for the label of this item.
      *
-     * <p>This method is meant to remove common mistakes and nefarious formatting from strings that
-     * are used in sensitive parts of the UI.
+     * <p>For parameters see {@link TextUtils#makeSafeForPresentation}.
      *
-     * <p>This method first treats the string like HTML and then ...
-     * <ul>
-     * <li>Removes new lines or truncates at first new line
-     * <li>Trims the white-space off the end
-     * <li>Truncates the string to a given length
-     * </ul>
-     * ... if specified.
-     *
-     * @param ellipsizeDip Assuming maximum length of the string (in dip), assuming font size 42.
-     *                     This is roughly 50 characters for {@code ellipsizeDip == 1000}.<br />
-     *                     Usually ellipsizing should be left to the view showing the string. If a
-     *                     string is used as an input to another string, it might be useful to
-     *                     control the length of the input string though. {@code 0} disables this
-     *                     feature.
-     * @return The safe label
      * @hide
-     */
+    */
     @SystemApi
     public @NonNull CharSequence loadSafeLabel(@NonNull PackageManager pm,
-            @FloatRange(from = 0) float ellipsizeDip, @SafeLabelFlags int flags) {
-        boolean onlyKeepFirstLine = ((flags & SAFE_LABEL_FLAG_FIRST_LINE) != 0);
-        boolean forceSingleLine = ((flags & SAFE_LABEL_FLAG_SINGLE_LINE) != 0);
-        boolean trim = ((flags & SAFE_LABEL_FLAG_TRIM) != 0);
-
+            @FloatRange(from = 0) float ellipsizeDip, @TextUtils.SafeStringFlags int flags) {
         Preconditions.checkNotNull(pm);
-        Preconditions.checkArgument(ellipsizeDip >= 0);
-        Preconditions.checkFlagsArgument(flags, SAFE_LABEL_FLAG_TRIM | SAFE_LABEL_FLAG_SINGLE_LINE
-                | SAFE_LABEL_FLAG_FIRST_LINE);
-        Preconditions.checkArgument(!(onlyKeepFirstLine && forceSingleLine),
-                "Cannot set SAFE_LABEL_FLAG_SINGLE_LINE and SAFE_LABEL_FLAG_FIRST_LINE at the same "
-                + "time");
 
-        // loadLabel() always returns non-null
-        String label = loadUnsafeLabel(pm).toString();
-
-        // Treat string as HTML. This
-        // - converts HTML symbols: e.g. &szlig; -> ß
-        // - applies some HTML tags: e.g. <br> -> \n
-        // - removes invalid characters such as \b
-        // - removes html styling, such as <b>
-        // - applies html formatting: e.g. a<p>b</p>c -> a\n\nb\n\nc
-        // - replaces some html tags by "object replacement" markers: <img> -> \ufffc
-        // - Removes leading white space
-        // - Removes all trailing white space beside a single space
-        // - Collapses double white space
-        StringWithRemovedChars labelStr = new StringWithRemovedChars(
-                Html.fromHtml(label).toString());
-
-        int firstNonWhiteSpace = -1;
-        int firstTrailingWhiteSpace = -1;
-
-        // Remove new lines (if requested) and control characters.
-        int labelLength = labelStr.length();
-        for (int offset = 0; offset < labelLength; ) {
-            int codePoint = labelStr.codePointAt(offset);
-            int type = Character.getType(codePoint);
-            int codePointLen = Character.charCount(codePoint);
-            boolean isNewline = isNewline(codePoint);
-
-            if (offset > MAX_SAFE_LABEL_LENGTH || onlyKeepFirstLine && isNewline) {
-                labelStr.removeAllCharAfter(offset);
-                break;
-            } else if (forceSingleLine && isNewline) {
-                labelStr.removeRange(offset, offset + codePointLen);
-            } else if (type == Character.CONTROL && !isNewline) {
-                labelStr.removeRange(offset, offset + codePointLen);
-            } else if (trim && !isWhiteSpace(codePoint)) {
-                // This is only executed if the code point is not removed
-                if (firstNonWhiteSpace == -1) {
-                    firstNonWhiteSpace = offset;
-                }
-                firstTrailingWhiteSpace = offset + codePointLen;
-            }
-
-            offset += codePointLen;
-        }
-
-        if (trim) {
-            // Remove leading and trailing white space
-            if (firstNonWhiteSpace == -1) {
-                // No non whitespace found, remove all
-                labelStr.removeAllCharAfter(0);
-            } else {
-                if (firstNonWhiteSpace > 0) {
-                    labelStr.removeAllCharBefore(firstNonWhiteSpace);
-                }
-                if (firstTrailingWhiteSpace < labelLength) {
-                    labelStr.removeAllCharAfter(firstTrailingWhiteSpace);
-                }
-            }
-        }
-
-        if (ellipsizeDip == 0) {
-            return labelStr.toString();
-        } else {
-            // Truncate
-            final TextPaint paint = new TextPaint();
-            paint.setTextSize(42);
-
-            return TextUtils.ellipsize(labelStr.toString(), paint, ellipsizeDip,
-                    TextUtils.TruncateAt.END);
-        }
+        return makeSafeForPresentation(loadUnsafeLabel(pm).toString(), MAX_SAFE_LABEL_LENGTH,
+                ellipsizeDip, flags);
     }
 
     /**
