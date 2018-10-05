@@ -160,7 +160,15 @@ public class ThumbnailUtils {
         MediaMetadataRetriever retriever = new MediaMetadataRetriever();
         try {
             retriever.setDataSource(filePath);
-            bitmap = retriever.getFrameAtTime(-1);
+            // First retrieve album art in metadata if set.
+            byte[] embeddedPicture = retriever.getEmbeddedPicture();
+            if (embeddedPicture != null && embeddedPicture.length > 0) {
+                bitmap = BitmapFactory.decodeByteArray(embeddedPicture, 0, embeddedPicture.length);
+            }
+            // Fall back to first frame of the video.
+            if (bitmap == null) {
+                bitmap = retriever.getFrameAtTime(-1);
+            }
         } catch (IllegalArgumentException ex) {
             // Assume this is a corrupt video file
         } catch (RuntimeException ex) {
