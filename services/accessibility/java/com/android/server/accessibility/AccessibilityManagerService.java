@@ -379,25 +379,20 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
             @Override
             public void onPackageUpdateFinished(String packageName, int uid) {
-                // Unbind all services from this package, and then update the user state to
-                // re-bind new versions of them.
+                // The package should already be removed from mBoundServices, and added into
+                // mBindingServices in binderDied() during updating. Remove services from  this
+                // package from mBindingServices, and then update the user state to re-bind new
+                // versions of them.
                 synchronized (mLock) {
                     final int userId = getChangingUserId();
                     if (userId != mCurrentUserId) {
                         return;
                     }
                     UserState userState = getUserStateLocked(userId);
-                    boolean unboundAService = false;
-                    for (int i = userState.mBoundServices.size() - 1; i >= 0; i--) {
-                        AccessibilityServiceConnection boundService =
-                                userState.mBoundServices.get(i);
-                        String servicePkg = boundService.mComponentName.getPackageName();
-                        if (servicePkg.equals(packageName)) {
-                            boundService.unbindLocked();
-                            unboundAService = true;
-                        }
-                    }
-                    if (unboundAService) {
+                    boolean reboundAService = userState.mBindingServices.removeIf(
+                            component -> component != null
+                                    && component.getPackageName().equals(packageName));
+                    if (reboundAService) {
                         onUserStateChangedLocked(userState);
                     }
                 }
@@ -419,6 +414,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                         String compPkg = comp.getPackageName();
                         if (compPkg.equals(packageName)) {
                             it.remove();
+                            userState.mBindingServices.remove(comp);
                             // Update the enabled services setting.
                             persistComponentNamesToSettingLocked(
                                     Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
@@ -457,6 +453,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                                     return true;
                                 }
                                 it.remove();
+                                userState.mBindingServices.remove(comp);
                                 persistComponentNamesToSettingLocked(
                                         Settings.Secure.ENABLED_ACCESSIBILITY_SERVICES,
                                         userState.mEnabledServices, userId);
