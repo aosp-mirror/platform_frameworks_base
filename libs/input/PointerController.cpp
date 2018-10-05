@@ -255,7 +255,7 @@ void PointerController::setPresentation(Presentation presentation) {
 
     if (presentation == PRESENTATION_POINTER && mLocked.additionalMouseResources.empty()) {
         mPolicy->loadAdditionalMouseResources(&mLocked.additionalMouseResources,
-                                              &mLocked.animationResources);
+                &mLocked.animationResources, mLocked.viewport.displayId);
     }
 
     if (mLocked.presentation != presentation) {
@@ -727,14 +727,14 @@ void PointerController::fadeOutAndReleaseAllSpotsLocked() {
 }
 
 void PointerController::loadResourcesLocked() REQUIRES(mLock) {
-    mPolicy->loadPointerResources(&mResources);
+    mPolicy->loadPointerResources(&mResources, mLocked.viewport.displayId);
 
     if (mLocked.presentation == PRESENTATION_POINTER) {
         mLocked.additionalMouseResources.clear();
         mLocked.animationResources.clear();
-        mPolicy->loadPointerIcon(&mLocked.pointerIcon);
+        mPolicy->loadPointerIcon(&mLocked.pointerIcon, mLocked.viewport.displayId);
         mPolicy->loadAdditionalMouseResources(&mLocked.additionalMouseResources,
-                                              &mLocked.animationResources);
+                &mLocked.animationResources, mLocked.viewport.displayId);
     }
 
     mLocked.pointerIconChanged = true;
