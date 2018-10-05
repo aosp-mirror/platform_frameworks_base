@@ -47,414 +47,190 @@ import java.util.concurrent.Executor;
 
 /**
  * @hide
- * MediaPlayer2 class can be used to control playback
- * of audio/video files and streams. An example on how to use the methods in
- * this class can be found in {@link android.widget.VideoView}.
+ *
+ * MediaPlayer2 class can be used to control playback of audio/video files and streams.
  *
  * <p>Topics covered here are:
  * <ol>
- * <li><a href="#StateDiagram">State Diagram</a>
- * <li><a href="#Valid_and_Invalid_States">Valid and Invalid States</a>
+ * <li><a href="#PlayerStates">Player states</a>
+ * <li><a href="#InvalidStates">Invalid method calls</a>
  * <li><a href="#Permissions">Permissions</a>
- * <li><a href="#Callbacks">Register informational and error callbacks</a>
+ * <li><a href="#Callbacks">Callbacks</a>
  * </ol>
  *
- * <div class="special reference">
- * <h3>Developer Guides</h3>
- * <p>For more information about how to use MediaPlayer2, read the
- * <a href="{@docRoot}guide/topics/media/mediaplayer.html">Media Playback</a> developer guide.</p>
- * </div>
  *
- * <a name="StateDiagram"></a>
- * <h3>State Diagram</h3>
+ * <h3 id="PlayerStates">Player states</h3>
  *
- * <p>Playback control of audio/video files and streams is managed as a state
- * machine. The following diagram shows the life cycle and the states of a
- * MediaPlayer2 object driven by the supported playback control operations.
- * The ovals represent the states a MediaPlayer2 object may reside
- * in. The arcs represent the playback control operations that drive the object
- * state transition. There are two types of arcs. The arcs with a single arrow
- * head represent synchronous method calls, while those with
- * a double arrow head represent asynchronous method calls.</p>
+ * <p>The playback control of audio/video files is managed as a state machine.</p>
+ * <p><div style="text-align:center;"><img src="../../../images/mediaplayer2_state_diagram.png"
+ *         alt="MediaPlayer2 State diagram"
+ *         border="0" /></div></p>
+ * <p>The MediaPlayer2 object has five states:</p>
+ * <ol>
+ *     <li><p>{@link #PLAYER_STATE_IDLE}: MediaPlayer2 is in the <strong>Idle</strong>
+ *         state after you create it using
+ *         {@link #create()}, or after calling {@link #reset()}.</p>
  *
- * <p><img src="../../../images/mediaplayer_state_diagram.gif"
- *         alt="MediaPlayer State diagram"
- *         border="0" /></p>
+ *         <p>While in this state, you should call
+ *         {@link #setDataSource(DataSourceDesc2) setDataSource()}. It is a good
+ *         programming practice to register an {@link EventCallback#onCallCompleted onCallCompleted}
+ *         <a href="#Callbacks">callback</a> and watch for {@link #CALL_STATUS_BAD_VALUE} and
+ *         {@link #CALL_STATUS_ERROR_IO}, which might be caused by <code>setDataSource</code>.
+ *         </p>
  *
- * <p>From this state diagram, one can see that a MediaPlayer2 object has the
- *    following states:</p>
+ *         <p>Calling {@link #prepare()} transfers a MediaPlayer2 object to
+ *         the <strong>Prepared</strong> state. Note
+ *         that {@link #prepare()} is asynchronous. When the preparation completes,
+ *         if you register an {@link EventCallback#onInfo onInfo} <a href="#Callbacks">callback</a>,
+ *         the player executes the callback
+ *         with {@link #MEDIA_INFO_PREPARED} and transitions to the
+ *         <strong>Prepared</strong> state.</p>
+ *         </li>
+ *
+ *     <li>{@link #PLAYER_STATE_PREPARED}: A MediaPlayer object must be in the
+ *         <strong>Prepared</strong> state before playback can be started for the first time.
+ *         While in this state, you can set player properties
+ *         such as audio/sound volume and looping by invoking the corresponding set methods.
+ *         Calling {@link #play()} transfers a MediaPlayer2 object to
+ *         the <strong>Playing</strong> state.
+ *      </li>
+ *
+ *     <li>{@link #PLAYER_STATE_PLAYING}:
+ *         <p>The player plays the data source while in this state.
+ *         If you register an {@link EventCallback#onInfo onInfo} <a href="#Callbacks">callback</a>,
+ *         the player regularly executes the callback with
+ *         {@link #MEDIA_INFO_BUFFERING_UPDATE}.
+ *         This allows applications to keep track of the buffering status
+ *         while streaming audio/video.</p>
+ *
+ *         <p> When the playback reaches the end of stream, the behavior depends on whether or
+ *         not you've enabled looping by calling {@link #loopCurrent(boolean) loopCurrent}:</p>
+ *         <ul>
+ *         <li>If the looping mode was set to <code>false</code>, the player will transfer
+ *         to the <strong>Paused</strong> state. If you registered an {@link EventCallback#onInfo
+ *         onInfo} <a href="#Callbacks">callback</a>
+ *         the player calls the callback with {@link #MEDIA_INFO_DATA_SOURCE_END} and enters
+ *         the <strong>Paused</strong> state.
+ *         </li>
+ *         <li>If the looping mode was set to <code>true</code>,
+ *         the MediaPlayer2 object remains in the <strong>Playing</strong> state and replays its
+ *         data source from the beginning.</li>
+ *         </ul>
+ *         </li>
+ *
+ *     <li>{@link #PLAYER_STATE_PAUSED}: Audio/video playback pauses while in this state.
+ *         Call {@link #play()} to resume playback from the position where it paused.</li>
+ *
+ *     <li>{@link #PLAYER_STATE_ERROR}: <p>In general, playback might fail due to various
+ *          reasons such as unsupported audio/video format, poorly interleaved
+ *          audio/video, resolution too high, streaming timeout, and others.
+ *          In addition, due to programming errors, a playback
+ *          control operation might be performed from an <a href="#InvalidStates">invalid state</a>.
+ *          In these cases the player transitions to the <strong>Error</strong> state.</p>
+ *
+ *          <p>If you register an {@link EventCallback#onError onError}}
+ *          <a href="#Callbacks">callback</a>,
+ *          the callback will be performed when entering the state. When programming errors happen,
+ *          such as calling {@link #prepare() prepare} and
+ *          {@link #setDataSource(DataSourceDesc) setDataSource} methods
+ *          from an <a href="#InvalidStates">invalid state</a>, the callback is called with
+ *          {@link #CALL_STATUS_INVALID_OPERATION}. The MediaPlayer2 object enters the
+ *          <strong>Error</strong> state whether or not a callback exists. </p>
+ *
+ *          <p>To recover from an error and reuse a MediaPlayer2 object that is in the <strong>
+ *          Error</strong> state,
+ *          call {@link #reset() reset}. The object will return to the <strong>Idle</strong>
+ *          state and all state information will be lost.</p>
+ *          </li>
+ * </ol>
+ *
+ * <p>You should follow these best practices when coding an app that uses MediaPlayer2:</p>
+ *
  * <ul>
- *     <li>When a MediaPlayer2 object is just created using <code>create</code> or
- *         after {@link #reset()} is called, it is in the <em>Idle</em> state; and after
- *         {@link #close()} is called, it is in the <em>End</em> state. Between these
- *         two states is the life cycle of the MediaPlayer2 object.
- *         <ul>
- *         <li> It is a programming error to invoke methods such
- *         as {@link #getCurrentPosition()},
- *         {@link #getDuration()}, {@link #getVideoHeight()},
- *         {@link #getVideoWidth()}, {@link #setAudioAttributes(AudioAttributes)},
- *         {@link #setPlayerVolume(float)}, {@link #pause()}, {@link #play()},
- *         {@link #seekTo(long, int)} or
- *         {@link #prepare()} in the <em>Idle</em> state.
- *         <li>It is also recommended that once
- *         a MediaPlayer2 object is no longer being used, call {@link #close()} immediately
- *         so that resources used by the internal player engine associated with the
- *         MediaPlayer2 object can be released immediately. Resource may include
- *         singleton resources such as hardware acceleration components and
- *         failure to call {@link #close()} may cause subsequent instances of
- *         MediaPlayer2 objects to fallback to software implementations or fail
- *         altogether. Once the MediaPlayer2
- *         object is in the <em>End</em> state, it can no longer be used and
- *         there is no way to bring it back to any other state. </li>
- *         <li>Furthermore,
- *         the MediaPlayer2 objects created using <code>new</code> is in the
- *         <em>Idle</em> state.
- *         </li>
- *         </ul>
- *         </li>
- *     <li>In general, some playback control operation may fail due to various
- *         reasons, such as unsupported audio/video format, poorly interleaved
- *         audio/video, resolution too high, streaming timeout, and the like.
- *         Thus, error reporting and recovery is an important concern under
- *         these circumstances. Sometimes, due to programming errors, invoking a playback
- *         control operation in an invalid state may also occur. Under all these
- *         error conditions, the internal player engine invokes a user supplied
- *         EventCallback.onError() method if an EventCallback has been
- *         registered beforehand via
- *         {@link #setEventCallback(Executor, EventCallback)}.
- *         <ul>
- *         <li>It is important to note that once an error occurs, the
- *         MediaPlayer2 object enters the <em>Error</em> state (except as noted
- *         above), even if an error listener has not been registered by the application.</li>
- *         <li>In order to reuse a MediaPlayer2 object that is in the <em>
- *         Error</em> state and recover from the error,
- *         {@link #reset()} can be called to restore the object to its <em>Idle</em>
- *         state.</li>
- *         <li>It is good programming practice to have your application
- *         register a OnErrorListener to look out for error notifications from
- *         the internal player engine.</li>
- *         <li>IllegalStateException is
- *         thrown to prevent programming errors such as calling
- *         {@link #prepare()}, {@link #setDataSource(DataSourceDesc)}
- *         methods in an invalid state. </li>
- *         </ul>
- *         </li>
- *     <li>Calling
- *         {@link #setDataSource(DataSourceDesc)} transfers a
- *         MediaPlayer2 object in the <em>Idle</em> state to the
- *         <em>Initialized</em> state.
- *         <ul>
- *         <li>An IllegalStateException is thrown if
- *         setDataSource() is called in any other state.</li>
- *         <li>It is good programming
- *         practice to always look out for <code>IllegalArgumentException</code>
- *         and <code>IOException</code> that may be thrown from
- *         <code>setDataSource</code>.</li>
- *         </ul>
- *         </li>
- *     <li>A MediaPlayer2 object must first enter the <em>Prepared</em> state
- *         before playback can be started.
- *         <ul>
- *         <li>There are an asynchronous way that the <em>Prepared</em> state can be reached:
- *         a call to {@link #prepare()} (asynchronous) which
- *         first transfers the object to the <em>Preparing</em> state after the
- *         call returns (which occurs almost right way) while the internal
- *         player engine continues working on the rest of preparation work
- *         until the preparation work completes. When the preparation completes,
- *         the internal player engine then calls a user supplied callback method,
- *         onInfo() of the EventCallback interface with {@link #MEDIA_INFO_PREPARED},
- *         if an EventCallback is registered beforehand via
- *         {@link #setEventCallback(Executor, EventCallback)}.</li>
- *         <li>It is important to note that
- *         the <em>Preparing</em> state is a transient state, and the behavior
- *         of calling any method with side effect while a MediaPlayer2 object is
- *         in the <em>Preparing</em> state is undefined.</li>
- *         <li>An IllegalStateException is
- *         thrown if {@link #prepare()} is called in
- *         any other state.</li>
- *         <li>While in the <em>Prepared</em> state, properties
- *         such as audio/sound volume, screenOnWhilePlaying, looping can be
- *         adjusted by invoking the corresponding set methods.</li>
- *         </ul>
- *         </li>
- *     <li>To start the playback, {@link #play()} must be called. After
- *         {@link #play()} returns successfully, the MediaPlayer2 object is in the
- *         <em>Started</em> state. {@link #getPlayerState()} can be called to test
- *         whether the MediaPlayer2 object is in the <em>Started</em> state.
- *         <ul>
- *         <li>While in the <em>Started</em> state, the internal player engine calls
- *         a user supplied callback method EventCallback.onInfo() with
- *         {@link #MEDIA_INFO_BUFFERING_UPDATE} if an EventCallback has been
- *         registered beforehand via
- *         {@link #setEventCallback(Executor, EventCallback)}.
- *         This callback allows applications to keep track of the buffering status
- *         while streaming audio/video.</li>
- *         <li>Calling {@link #play()} has not effect
- *         on a MediaPlayer2 object that is already in the <em>Started</em> state.</li>
- *         </ul>
- *         </li>
- *     <li>Playback can be paused and stopped, and the current playback position
- *         can be adjusted. Playback can be paused via {@link #pause()}. When the call to
- *         {@link #pause()} returns, the MediaPlayer2 object enters the
- *         <em>Paused</em> state. Note that the transition from the <em>Started</em>
- *         state to the <em>Paused</em> state and vice versa happens
- *         asynchronously in the player engine. It may take some time before
- *         the state is updated in calls to {@link #getPlayerState()}, and it can be
- *         a number of seconds in the case of streamed content.
- *         <ul>
- *         <li>Calling {@link #play()} to resume playback for a paused
- *         MediaPlayer2 object, and the resumed playback
- *         position is the same as where it was paused. When the call to
- *         {@link #play()} returns, the paused MediaPlayer2 object goes back to
- *         the <em>Started</em> state.</li>
- *         <li>Calling {@link #pause()} has no effect on
- *         a MediaPlayer2 object that is already in the <em>Paused</em> state.</li>
- *         </ul>
- *         </li>
- *     <li>The playback position can be adjusted with a call to
- *         {@link #seekTo(long, int)}.
- *         <ul>
- *         <li>Although the asynchronuous {@link #seekTo(long, int)}
- *         call returns right away, the actual seek operation may take a while to
- *         finish, especially for audio/video being streamed. When the actual
- *         seek operation completes, the internal player engine calls a user
- *         supplied EventCallback.onCallCompleted() with
- *         {@link #CALL_COMPLETED_SEEK_TO}
- *         if an EventCallback has been registered beforehand via
- *         {@link #setEventCallback(Executor, EventCallback)}.</li>
- *         <li>Please
- *         note that {@link #seekTo(long, int)} can also be called in the other states,
- *         such as <em>Prepared</em>, <em>Paused</em> and <em>PlaybackCompleted
- *         </em> state. When {@link #seekTo(long, int)} is called in those states,
- *         one video frame will be displayed if the stream has video and the requested
- *         position is valid.
- *         </li>
- *         <li>Furthermore, the actual current playback position
- *         can be retrieved with a call to {@link #getCurrentPosition()}, which
- *         is helpful for applications such as a Music player that need to keep
- *         track of the playback progress.</li>
- *         </ul>
- *         </li>
- *     <li>When the playback reaches the end of stream, the playback completes.
- *         <ul>
- *         <li>If current source is set to loop by {@link #loopCurrent(boolean)},
- *         the MediaPlayer2 object shall remain in the <em>Started</em> state.</li>
- *         <li>If the looping mode was set to <var>false
- *         </var>, the player engine calls a user supplied callback method,
- *         EventCallback.onCompletion(), if an EventCallback is
- *         registered beforehand via
- *         {@link #setEventCallback(Executor, EventCallback)}.
- *         The invoke of the callback signals that the object is now in the <em>
- *         PlaybackCompleted</em> state.</li>
- *         <li>While in the <em>PlaybackCompleted</em>
- *         state, calling {@link #play()} can restart the playback from the
- *         beginning of the audio/video source.</li>
+ *
+ * <li>Use <a href="#Callbacks">callbacks</a> to respond to state changes and errors.</li>
+ *
+ * <li>When  a MediaPlayer2 object is no longer being used, call {@link #close() close} as soon as
+ * possible to release the resources used by the internal player engine associated with the
+ * MediaPlayer2. Failure to call {@link #close() close} may cause subsequent instances of
+ * MediaPlayer2 objects to fallback to software implementations or fail altogether.
+ * You cannot use MediaPlayer2
+ * after you call {@link #close() close}. There is no way to bring it back to any other state.</li>
+ *
+ * <li>The current playback position can be retrieved with a call to
+ * {@link #getCurrentPosition() getCurrentPosition},
+ * which is helpful for applications such as a Music player that need to keep track of the playback
+ * progress.</li>
+ *
+ * <li>The playback position can be adjusted with a call to {@link #seekTo seekTo}. Although the
+ * asynchronous {@link #seekTo seekTo} call returns right away, the actual seek operation may take a
+ * while to finish, especially for audio/video being streamed. If you register an
+ * {@link EventCallback#onCallCompleted onCallCompleted} <a href="#Callbacks">callback</a>,
+ * the callback is
+ * called When the seek operation completes with {@link #CALL_COMPLETED_SEEK_TO}.</li>
+ *
+ * <li>You can call {@link #seekTo seekTo} from the <strong>Paused</strong> state.
+ * In this case, if you are playing a video stream and
+ * the requested position is valid  one video frame is displayed.</li>
+ *
  * </ul>
  *
+ * <h3 id="InvalidStates">Invalid method calls</h3>
  *
- * <a name="Valid_and_Invalid_States"></a>
- * <h3>Valid and invalid states</h3>
+ * <p>The only methods you safely call from the <strong>Error</strong> state are
+ * {@link #close() close},
+ * {@link #reset() reset},
+ * {@link #notifyWhenCommandLabelReached notifyWhenCommandLabelReached},
+ * {@link #clearPendingCommands() clearPendingCommands},
+ * {@link #setEventCallback setEventCallback},
+ * {@link #clearEventCallback() clearEventCallback}
+ * and {@link #getState() getState}.
+ * Any other methods might throw an exception, return meaningless data, or invoke a
+ * {@link EventCallback#onCallCompleted onCallCompleted} with an error code.</p>
+ *
+ * <p>Most methods can be called from any non-Error state. They will either perform their work or
+ * silently have no effect. The following table lists the methods that will invoke a
+ * {@link EventCallback#onCallCompleted onCallCompleted} with an error code
+ * or throw an exception when they are called from the associated invalid states.</p>
  *
  * <table border="0" cellspacing="0" cellpadding="0">
- * <tr><td>Method Name </p></td>
- *     <td>Valid Sates </p></td>
- *     <td>Invalid States </p></td>
- *     <td>Comments </p></td></tr>
- * <tr><td>attachAuxEffect </p></td>
- *     <td>{Initialized, Prepared, Started, Paused, Stopped, PlaybackCompleted} </p></td>
- *     <td>{Idle, Error} </p></td>
- *     <td>This method must be called after setDataSource.
- *     Calling it does not change the object state. </p></td></tr>
- * <tr><td>getAudioSessionId </p></td>
- *     <td>any </p></td>
- *     <td>{} </p></td>
- *     <td>This method can be called in any state and calling it does not change
- *         the object state. </p></td></tr>
- * <tr><td>getCurrentPosition </p></td>
- *     <td>{Idle, Initialized, Prepared, Started, Paused, Stopped,
- *         PlaybackCompleted} </p></td>
- *     <td>{Error}</p></td>
- *     <td>Successful invoke of this method in a valid state does not change the
- *         state. Calling this method in an invalid state transfers the object
- *         to the <em>Error</em> state. </p></td></tr>
- * <tr><td>getDuration </p></td>
- *     <td>{Prepared, Started, Paused, Stopped, PlaybackCompleted} </p></td>
- *     <td>{Idle, Initialized, Error} </p></td>
- *     <td>Successful invoke of this method in a valid state does not change the
- *         state. Calling this method in an invalid state transfers the object
- *         to the <em>Error</em> state. </p></td></tr>
- * <tr><td>getVideoHeight </p></td>
- *     <td>{Idle, Initialized, Prepared, Started, Paused, Stopped,
- *         PlaybackCompleted}</p></td>
- *     <td>{Error}</p></td>
- *     <td>Successful invoke of this method in a valid state does not change the
- *         state. Calling this method in an invalid state transfers the object
- *         to the <em>Error</em> state.  </p></td></tr>
- * <tr><td>getVideoWidth </p></td>
- *     <td>{Idle, Initialized, Prepared, Started, Paused, Stopped,
- *         PlaybackCompleted}</p></td>
- *     <td>{Error}</p></td>
- *     <td>Successful invoke of this method in a valid state does not change
- *         the state. Calling this method in an invalid state transfers the
- *         object to the <em>Error</em> state. </p></td></tr>
- * <tr><td>getPlayerState </p></td>
- *     <td>{Idle, Initialized, Prepared, Started, Paused, Stopped,
- *          PlaybackCompleted}</p></td>
- *     <td>{Error}</p></td>
- *     <td>Successful invoke of this method in a valid state does not change
- *         the state. Calling this method in an invalid state transfers the
- *         object to the <em>Error</em> state. </p></td></tr>
- * <tr><td>pause </p></td>
- *     <td>{Started, Paused, PlaybackCompleted}</p></td>
- *     <td>{Idle, Initialized, Prepared, Stopped, Error}</p></td>
- *     <td>Successful invoke of this method in a valid state transfers the
- *         object to the <em>Paused</em> state. Calling this method in an
- *         invalid state transfers the object to the <em>Error</em> state.</p></td></tr>
- * <tr><td>prepare </p></td>
- *     <td>{Initialized, Stopped} </p></td>
- *     <td>{Idle, Prepared, Started, Paused, PlaybackCompleted, Error} </p></td>
- *     <td>Successful invoke of this method in a valid state transfers the
- *         object to the <em>Preparing</em> state. Calling this method in an
- *         invalid state throws an IllegalStateException.</p></td></tr>
- * <tr><td>release </p></td>
- *     <td>any </p></td>
- *     <td>{} </p></td>
- *     <td>After {@link #close()}, the object is no longer available. </p></td></tr>
- * <tr><td>reset </p></td>
- *     <td>{Idle, Initialized, Prepared, Started, Paused, Stopped,
- *         PlaybackCompleted, Error}</p></td>
- *     <td>{}</p></td>
- *     <td>After {@link #reset()}, the object is like being just created.</p></td></tr>
- * <tr><td>seekTo </p></td>
- *     <td>{Prepared, Started, Paused, PlaybackCompleted} </p></td>
- *     <td>{Idle, Initialized, Stopped, Error}</p></td>
- *     <td>Successful invoke of this method in a valid state does not change
- *         the state. Calling this method in an invalid state transfers the
- *         object to the <em>Error</em> state. </p></td></tr>
- * <tr><td>setAudioAttributes </p></td>
- *     <td>{Idle, Initialized, Stopped, Prepared, Started, Paused,
- *          PlaybackCompleted}</p></td>
- *     <td>{Error}</p></td>
- *     <td>Successful invoke of this method does not change the state. In order for the
- *         target audio attributes type to become effective, this method must be called before
- *         prepare().</p></td></tr>
- * <tr><td>setAudioSessionId </p></td>
- *     <td>{Idle} </p></td>
- *     <td>{Initialized, Prepared, Started, Paused, Stopped, PlaybackCompleted,
- *          Error} </p></td>
- *     <td>This method must be called in idle state as the audio session ID must be known before
- *         calling setDataSource. Calling it does not change the object
- *         state. </p></td></tr>
- * <tr><td>setAudioStreamType (deprecated)</p></td>
- *     <td>{Idle, Initialized, Stopped, Prepared, Started, Paused,
- *          PlaybackCompleted}</p></td>
- *     <td>{Error}</p></td>
- *     <td>Successful invoke of this method does not change the state. In order for the
- *         target audio stream type to become effective, this method must be called before
- *         prepare().</p></td></tr>
- * <tr><td>setAuxEffectSendLevel </p></td>
- *     <td>any</p></td>
- *     <td>{} </p></td>
- *     <td>Calling this method does not change the object state. </p></td></tr>
- * <tr><td>setDataSource </p></td>
- *     <td>{Idle} </p></td>
- *     <td>{Initialized, Prepared, Started, Paused, Stopped, PlaybackCompleted,
- *          Error} </p></td>
- *     <td>Successful invoke of this method in a valid state transfers the
- *         object to the <em>Initialized</em> state. Calling this method in an
- *         invalid state throws an IllegalStateException.</p></td></tr>
- * <tr><td>setDisplay </p></td>
- *     <td>any </p></td>
- *     <td>{} </p></td>
- *     <td>This method can be called in any state and calling it does not change
- *         the object state. </p></td></tr>
- * <tr><td>setSurface </p></td>
- *     <td>any </p></td>
- *     <td>{} </p></td>
- *     <td>This method can be called in any state and calling it does not change
- *         the object state. </p></td></tr>
- * <tr><td>loopCurrent </p></td>
- *     <td>{Idle, Initialized, Stopped, Prepared, Started, Paused,
- *         PlaybackCompleted}</p></td>
- *     <td>{Error}</p></td>
- *     <td>Successful invoke of this method in a valid state does not change
- *         the state. Calling this method in an
- *         invalid state transfers the object to the <em>Error</em> state.</p></td></tr>
- * <tr><td>isLooping </p></td>
- *     <td>any </p></td>
- *     <td>{} </p></td>
- *     <td>This method can be called in any state and calling it does not change
- *         the object state. </p></td></tr>
- * <tr><td>setDrmEventCallback </p></td>
- *     <td>any </p></td>
- *     <td>{} </p></td>
- *     <td>This method can be called in any state and calling it does not change
- *         the object state. </p></td></tr>
- * <tr><td>setEventCallback </p></td>
- *     <td>any </p></td>
- *     <td>{} </p></td>
- *     <td>This method can be called in any state and calling it does not change
- *         the object state. </p></td></tr>
- * <tr><td>setPlaybackParams</p></td>
- *     <td>{Initialized, Prepared, Started, Paused, PlaybackCompleted, Error}</p></td>
- *     <td>{Idle, Stopped} </p></td>
- *     <td>This method will change state in some cases, depending on when it's called.
- *         </p></td></tr>
- * <tr><td>setPlayerVolume </p></td>
- *     <td>{Idle, Initialized, Stopped, Prepared, Started, Paused,
- *          PlaybackCompleted}</p></td>
- *     <td>{Error}</p></td>
- *     <td>Successful invoke of this method does not change the state.
- * <tr><td>play </p></td>
- *     <td>{Prepared, Started, Paused, PlaybackCompleted}</p></td>
- *     <td>{Idle, Initialized, Stopped, Error}</p></td>
- *     <td>Successful invoke of this method in a valid state transfers the
- *         object to the <em>Started</em> state. Calling this method in an
- *         invalid state transfers the object to the <em>Error</em> state.</p></td></tr>
- * <tr><td>stop </p></td>
- *     <td>{Prepared, Started, Stopped, Paused, PlaybackCompleted}</p></td>
- *     <td>{Idle, Initialized, Error}</p></td>
- *     <td>Successful invoke of this method in a valid state transfers the
- *         object to the <em>Stopped</em> state. Calling this method in an
- *         invalid state transfers the object to the <em>Error</em> state.</p></td></tr>
- * <tr><td>getTrackInfo </p></td>
- *     <td>{Prepared, Started, Stopped, Paused, PlaybackCompleted}</p></td>
- *     <td>{Idle, Initialized, Error}</p></td>
- *     <td>Successful invoke of this method does not change the state.</p></td></tr>
- * <tr><td>selectTrack </p></td>
- *     <td>{Prepared, Started, Stopped, Paused, PlaybackCompleted}</p></td>
- *     <td>{Idle, Initialized, Error}</p></td>
- *     <td>Successful invoke of this method does not change the state.</p></td></tr>
- * <tr><td>deselectTrack </p></td>
- *     <td>{Prepared, Started, Stopped, Paused, PlaybackCompleted}</p></td>
- *     <td>{Idle, Initialized, Error}</p></td>
- *     <td>Successful invoke of this method does not change the state.</p></td></tr>
+ * <tr><th>Method Name</th>
+ * <th>Invalid States</th></tr>
  *
+ * <tr><td>setDataSource</td> <td>{Prepared, Paused, Playing}</td></tr>
+ * <tr><td>prepare</td> <td>{Prepared, Paused, Playing}</td></tr>
+ * <tr><td>play</td> <td>{Idle}</td></tr>
+ * <tr><td>pause</td> <td>{Idle}</td></tr>
+ * <tr><td>seekTo</td> <td>{Idle}</td></tr>
+ * <tr><td>getCurrentPosition</td> <td>{Idle}</td></tr>
+ * <tr><td>getDuration</td> <td>{Idle}</td></tr>
+ * <tr><td>getBufferedPosition</td> <td>{Idle}</td></tr>
+ * <tr><td>getTrackInfo</td> <td>{Idle}</td></tr>
+ * <tr><td>getSelectedTrack</td> <td>{Idle}</td></tr>
+ * <tr><td>selectTrack</td> <td>{Idle}</td></tr>
+ * <tr><td>deselectTrack</td> <td>{Idle}</td></tr>
  * </table>
  *
- * <a name="Permissions"></a>
- * <h3>Permissions</h3>
- * <p>One may need to declare a corresponding WAKE_LOCK permission {@link
- * android.R.styleable#AndroidManifestUsesPermission &lt;uses-permission&gt;}
- * element.
- *
+ * <h3 id="Permissions">Permissions</h3>
  * <p>This class requires the {@link android.Manifest.permission#INTERNET} permission
  * when used with network-based content.
  *
- * <a name="Callbacks"></a>
- * <h3>Callbacks</h3>
- * <p>Applications may want to register for informational and error
- * events in order to be informed of some internal state update and
- * possible runtime errors during playback or streaming. Registration for
- * these events is done by properly setting the appropriate listeners (via calls
- * to
- * {@link #setEventCallback(Executor, EventCallback)},
- * {@link #setDrmEventCallback(Executor, DrmEventCallback)}).
- * In order to receive the respective callback
- * associated with these listeners, applications are required to create
- * MediaPlayer2 objects on a thread with its own Looper running (main UI
- * thread by default has a Looper running).
+ * <h3 id="Callbacks">Callbacks</h3>
+ * <p>Many errors do not result in a transition to the  <strong>Error</strong> state.
+ * It is good programming practice to register callback listeners using
+ * {@link #setEventCallback(Executor, EventCallback) setEventCallback} and
+ * {@link #setDrmEventCallback(Executor, DrmEventCallback) setDrmEventCallback}).
+ * You can receive a callback at any time and from any state.</p>
  *
+ * <p>If it's important for your app to respond to state changes (for instance, to update the
+ * controls on a transport UI), you should register an
+ * {@link EventCallback#onCallCompleted onCallCompleted} and
+ * detect state change commands by testing the <code>what</code> parameter for a callback from one
+ * of the state transition methods: {@link #CALL_COMPLETED_PREPARE}, {@link #CALL_COMPLETED_PLAY},
+ * and {@link #CALL_COMPLETED_PAUSE}.
+ * Then check the <code>status</code> parameter. The value {@link #CALL_STATUS_NO_ERROR} indicates a
+ * successful transition. Any other value will be an error. Call {@link #getState()} to
+ * determine the current state. </p>
  */
 public abstract class MediaPlayer2 implements SubtitleController.Listener
                                             , AutoCloseable
@@ -467,7 +243,6 @@ public abstract class MediaPlayer2 implements SubtitleController.Listener
      * @return A MediaPlayer2 object created
      */
     public static final MediaPlayer2 create() {
-        // TODO: load MediaUpdate APK
         return new MediaPlayer2Impl();
     }
 
