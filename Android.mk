@@ -111,6 +111,17 @@ $(INTERNAL_PLATFORM_HIDDENAPI_WHITELIST): \
 	$(call commit-change-for-toc,$(INTERNAL_PLATFORM_HIDDENAPI_DARK_GREYLIST))
 	$(call commit-change-for-toc,$(INTERNAL_PLATFORM_HIDDENAPI_BLACKLIST))
 
+$(INTERNAL_PLATFORM_HIDDENAPI_GREYLIST_METADATA): \
+    frameworks/base/tools/hiddenapi/merge_csv.py \
+    $(PRIVATE_METADATA_INPUTS)
+	frameworks/base/tools/hiddenapi/merge_csv.py $(PRIVATE_METADATA_INPUTS) > $@
+
+$(call dist-for-goals,droidcore,$(INTERNAL_PLATFORM_HIDDENAPI_WHITELIST))
+$(call dist-for-goals,droidcore,$(INTERNAL_PLATFORM_HIDDENAPI_LIGHT_GREYLIST))
+$(call dist-for-goals,droidcore,$(INTERNAL_PLATFORM_HIDDENAPI_DARK_GREYLIST))
+$(call dist-for-goals,droidcore,$(INTERNAL_PLATFORM_HIDDENAPI_BLACKLIST))
+$(call dist-for-goals,droidcore,$(INTERNAL_PLATFORM_HIDDENAPI_GREYLIST_METADATA))
+
 # Include subdirectory makefiles
 # ============================================================
 
