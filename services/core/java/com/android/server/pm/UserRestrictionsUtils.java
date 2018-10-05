@@ -127,7 +127,8 @@ public class UserRestrictionsUtils {
             UserManager.DISALLOW_SHARE_INTO_MANAGED_PROFILE,
             UserManager.DISALLOW_AMBIENT_DISPLAY,
             UserManager.DISALLOW_CONFIG_SCREEN_TIMEOUT,
-            UserManager.DISALLOW_PRINTING
+            UserManager.DISALLOW_PRINTING,
+            UserManager.DISALLOW_CONFIG_PRIVATE_DNS
     });
 
     /**
@@ -163,7 +164,8 @@ public class UserRestrictionsUtils {
      * User restrictions that cannot be set by profile owners. Applied to all users.
      */
     private static final Set<String> DEVICE_OWNER_ONLY_RESTRICTIONS = Sets.newArraySet(
-            UserManager.DISALLOW_USER_SWITCH
+            UserManager.DISALLOW_USER_SWITCH,
+            UserManager.DISALLOW_CONFIG_PRIVATE_DNS
     );
 
     /**
@@ -741,6 +743,10 @@ public class UserRestrictionsUtils {
                 restriction = UserManager.DISALLOW_CONFIG_SCREEN_TIMEOUT;
                 break;
 
+            case android.provider.Settings.Global.PRIVATE_DNS_MODE:
+            case android.provider.Settings.Global.PRIVATE_DNS_SPECIFIER:
+                restriction = UserManager.DISALLOW_CONFIG_PRIVATE_DNS;
+                break;
             default:
                 if (setting.startsWith(Settings.Global.DATA_ROAMING)) {
                     if ("0".equals(value)) {
