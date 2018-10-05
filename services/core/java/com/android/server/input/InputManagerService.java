@@ -64,18 +64,18 @@ import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
 import android.text.TextUtils;
 import android.util.Log;
+import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.util.Xml;
 import android.view.Display;
 import android.view.IInputFilter;
 import android.view.IInputFilterHost;
 import android.view.IWindow;
-import android.view.InputChannel;
 import android.view.InputApplicationHandle;
-import android.view.InputWindowHandle;
+import android.view.InputChannel;
 import android.view.InputDevice;
 import android.view.InputEvent;
+import android.view.InputWindowHandle;
 import android.view.KeyEvent;
 import android.view.PointerIcon;
 import android.view.Surface;
@@ -97,14 +97,13 @@ import com.android.server.policy.WindowManagerPolicy;
 import libcore.io.IoUtils;
 import libcore.io.Streams;
 
-import org.xmlpull.v1.XmlPullParser;
-
 import java.io.File;
 import java.io.FileDescriptor;
+import java.io.FileInputStream;
 import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -124,6 +123,7 @@ public class InputManagerService extends IInputManager.Stub
     static final boolean DEBUG = false;
 
     private static final String EXCLUDED_DEVICES_PATH = "etc/excluded-input-devices.xml";
+    private static final String PORT_ASSOCIATIONS_PATH = "etc/input-port-associations.xml";
 
     private static final int MSG_DELIVER_INPUT_DEVICES_CHANGED = 1;
     private static final int MSG_SWITCH_KEYBOARD_LAYOUT = 2;
@@ -1852,11 +1852,9 @@ public class InputManagerService extends IInputManager.Stub
     }
 
     // Native callback.
-    private String[] getExcludedDeviceNames() {
-        ArrayList<String> names = new ArrayList<String>();
-
+    private static String[] getExcludedDeviceNames() {
+        List<String> names = new ArrayList<>();
         // Read partner-provided list of excluded input devices
-        XmlPullParser parser = null;
         // Environment.getRootDirectory() is a fancy way of saying ANDROID_ROOT or "/system".
         final File[] baseDirs = {
             Environment.getRootDirectory(),
@@ -1864,33 +1862,52 @@ public class InputManagerService extends IInputManager.Stub
         };
         for (File baseDir: baseDirs) {
             File confFile = new File(baseDir, EXCLUDED_DEVICES_PATH);
-            FileReader confreader = null;
             try {
-                confreader = new FileReader(confFile);
-                parser = Xml.newPullParser();
-                parser.setInput(confreader);
-                XmlUtils.beginDocument(parser, "devices");
-
-                while (true) {
-                    XmlUtils.nextElement(parser);
-                    if (!"device".equals(parser.getName())) {
-                        break;
-                    }
-                    String name = parser.getAttributeValue(null, "name");
-                    if (name != null) {
-                        names.add(name);
-                    }
-                }
+                InputStream stream = new FileInputStream(confFile);
+                names.addAll(ConfigurationProcessor.processExcludedDeviceNames(stream));
             } catch (FileNotFoundException e) {
                 // It's ok if the file does not exist.
             } catch (Exception e) {
-                Slog.e(TAG, "Exception while parsing '" + confFile.getAbsolutePath() + "'", e);
-            } finally {
-                try { if (confreader != null) confreader.close(); } catch (IOException e) { }
+                Slog.e(TAG, "Could not parse '" + confFile.getAbsolutePath() + "'", e);
             }
         }
+        return names.toArray(new String[0]);
+    }
 
-        return names.toArray(new String[names.size()]);
+    /**
+     * Flatten a list of pairs into a list, with value positioned directly next to the key
+     * @return Flattened list
+     */
+    private static <T> List<T> flatten(@NonNull List<Pair<T, T>> pairs) {
+        List<T> list = new ArrayList<>(pairs.size() * 2);
+        for (Pair<T, T> pair : pairs) {
+            list.add(pair.first);
+            list.add(pair.second);
+        }
+        return list;
+    }
+
+    /**
+     * Ports are highly platform-specific, so only allow these to be specified in the vendor
+     * directory.
+     */
+    // Native callback
+    private static String[] getInputPortAssociations() {
+        File baseDir = Environment.getVendorDirectory();
+        File confFile = new File(baseDir, PORT_ASSOCIATIONS_PATH);
+
+        try {
+            InputStream stream = new FileInputStream(confFile);
+            List<Pair<String, String>> associations =
+                    ConfigurationProcessor.processInputPortAssociations(stream);
+            List<String> associationList = flatten(associations);
+            return associationList.toArray(new String[0]);
+        } catch (FileNotFoundException e) {
+            // Most of the time, file will not exist, which is expected.
+        } catch (Exception e) {
+            Slog.e(TAG, "Could not parse '" + confFile.getAbsolutePath() + "'", e);
+        }
+        return new String[0];
     }
 
     // Native callback.

@@ -32,6 +32,7 @@
 #include <atomic>
 #include <cinttypes>
 #include <limits.h>
+#include <android-base/parseint.h>
 #include <android-base/stringprintf.h>
 #include <android_runtime/AndroidRuntime.h>
 #include <android_runtime/Log.h>
@@ -71,6 +72,7 @@
 
 #define INDENT "  "
 
+using android::base::ParseUint;
 using android::base::StringPrintf;
 
 namespace android {
@@ -81,6 +83,7 @@ namespace android {
 static const float POINTER_SPEED_EXPONENT = 1.0f / 4;
 
 static struct {
+    jclass clazz;
     jmethodID notifyConfigurationChanged;
     jmethodID notifyInputDevicesChanged;
     jmethodID notifySwitch;
@@ -95,6 +98,7 @@ static struct {
     jmethodID checkInjectEventsPermission;
     jmethodID getVirtualKeyQuietTimeMillis;
     jmethodID getExcludedDeviceNames;
+    jmethodID getInputPortAssociations;
     jmethodID getKeyRepeatTimeout;
     jmethodID getKeyRepeatDelay;
     jmethodID getHoverTapTimeout;
@@ -182,6 +186,13 @@ static void updatePointerControllerFromViewport(
 enum {
     WM_ACTION_PASS_TO_USER = 1,
 };
+
+static std::string getStringElementFromJavaArray(JNIEnv* env, jobjectArray array, jsize index) {
+    jstring item = jstring(env->GetObjectArrayElement(array, index));
+    ScopedUtfChars chars(env, item);
+    std::string result(chars.c_str());
+    return result;
+}
 
 
 // --- NativeInputManager ---
@@ -452,18 +463,42 @@ void NativeInputManager::getReaderConfiguration(InputReaderConfiguration* outCon
     }
 
     outConfig->excludedDeviceNames.clear();
-    jobjectArray excludedDeviceNames = jobjectArray(env->CallObjectMethod(mServiceObj,
-            gServiceClassInfo.getExcludedDeviceNames));
+    jobjectArray excludedDeviceNames = jobjectArray(env->CallStaticObjectMethod(
+            gServiceClassInfo.clazz, gServiceClassInfo.getExcludedDeviceNames));
     if (!checkAndClearExceptionFromCallback(env, "getExcludedDeviceNames") && excludedDeviceNames) {
         jsize length = env->GetArrayLength(excludedDeviceNames);
         for (jsize i = 0; i < length; i++) {
-            jstring item = jstring(env->GetObjectArrayElement(excludedDeviceNames, i));
-            const char* deviceNameChars = env->GetStringUTFChars(item, nullptr);
-            outConfig->excludedDeviceNames.push_back(deviceNameChars);
-            env->ReleaseStringUTFChars(item, deviceNameChars);
-            env->DeleteLocalRef(item);
+            std::string deviceName = getStringElementFromJavaArray(env, excludedDeviceNames, i);
+            outConfig->excludedDeviceNames.push_back(deviceName);
         }
         env->DeleteLocalRef(excludedDeviceNames);
+    }
+
+    // Associations between input ports and display ports
+    // The java method packs the information in the following manner:
+    // Original data: [{'inputPort1': '1'}, {'inputPort2': '2'}]
+    // Received data: ['inputPort1', '1', 'inputPort2', '2']
+    // So we unpack accordingly here.
+    outConfig->portAssociations.clear();
+    jobjectArray portAssociations = jobjectArray(env->CallStaticObjectMethod(
+            gServiceClassInfo.clazz, gServiceClassInfo.getInputPortAssociations));
+    if (!checkAndClearExceptionFromCallback(env, "getInputPortAssociations") && portAssociations) {
+        jsize length = env->GetArrayLength(portAssociations);
+        for (jsize i = 0; i < length / 2; i++) {
+            std::string inputPort = getStringElementFromJavaArray(env, portAssociations, 2 * i);
+            std::string displayPortStr =
+                    getStringElementFromJavaArray(env, portAssociations, 2 * i + 1);
+            uint8_t displayPort;
+            // Should already have been validated earlier, but do it here for safety.
+            bool success = ParseUint(displayPortStr, &displayPort);
+            if (!success) {
+                ALOGE("Could not parse entry in port configuration file, received: %s",
+                    displayPortStr.c_str());
+                continue;
+            }
+            outConfig->portAssociations.insert({inputPort, displayPort});
+        }
+        env->DeleteLocalRef(portAssociations);
     }
 
     jint hoverTapTimeout = env->CallIntMethod(mServiceObj,
@@ -1697,6 +1732,10 @@ static const JNINativeMethod gInputManagerMethods[] = {
         var = env->GetMethodID(clazz, methodName, methodDescriptor); \
         LOG_FATAL_IF(! (var), "Unable to find method " methodName);
 
+#define GET_STATIC_METHOD_ID(var, clazz, methodName, methodDescriptor) \
+        var = env->GetStaticMethodID(clazz, methodName, methodDescriptor); \
+        LOG_FATAL_IF(! (var), "Unable to find static method " methodName);
+
 #define GET_FIELD_ID(var, clazz, fieldName, fieldDescriptor) \
         var = env->GetFieldID(clazz, fieldName, fieldDescriptor); \
         LOG_FATAL_IF(! (var), "Unable to find field " fieldName);
@@ -1711,6 +1750,7 @@ int register_android_server_InputManager(JNIEnv* env) {
 
     jclass clazz;
     FIND_CLASS(clazz, "com/android/server/input/InputManagerService");
+    gServiceClassInfo.clazz = clazz;
 
     GET_METHOD_ID(gServiceClassInfo.notifyConfigurationChanged, clazz,
             "notifyConfigurationChanged", "(J)V");
@@ -1754,8 +1794,11 @@ int register_android_server_InputManager(JNIEnv* env) {
     GET_METHOD_ID(gServiceClassInfo.getVirtualKeyQuietTimeMillis, clazz,
             "getVirtualKeyQuietTimeMillis", "()I");
 
-    GET_METHOD_ID(gServiceClassInfo.getExcludedDeviceNames, clazz,
+    GET_STATIC_METHOD_ID(gServiceClassInfo.getExcludedDeviceNames, clazz,
             "getExcludedDeviceNames", "()[Ljava/lang/String;");
+
+    GET_STATIC_METHOD_ID(gServiceClassInfo.getInputPortAssociations, clazz,
+            "getInputPortAssociations", "()[Ljava/lang/String;");
 
     GET_METHOD_ID(gServiceClassInfo.getKeyRepeatTimeout, clazz,
             "getKeyRepeatTimeout", "()I");
