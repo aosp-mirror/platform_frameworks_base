@@ -431,9 +431,11 @@ public class AppOpsManager {
     public static final int OP_BLUETOOTH_SCAN = 77;
     /** @hide Use the BiometricPrompt/BiometricManager APIs. */
     public static final int OP_USE_BIOMETRIC = 78;
+    /** @hide Physical activity recognition. */
+    public static final int OP_ACTIVITY_RECOGNITION = 79;
     /** @hide */
     @UnsupportedAppUsage
-    public static final int _NUM_OP = 79;
+    public static final int _NUM_OP = 80;
 
     /** Access to coarse location information. */
     public static final String OPSTR_COARSE_LOCATION = "android:coarse_location";
@@ -681,6 +683,9 @@ public class AppOpsManager {
     /** @hide Use the BiometricPrompt/BiometricManager APIs. */
     public static final String OPSTR_USE_BIOMETRIC = "android:use_biometric";
 
+    /** @hide Recognize physical activity. */
+    public static final String OPSTR_ACTIVITY_RECOGNITION = "android:activity_recognition";
+
     // Warning: If an permission is added here it also has to be added to
     // com.android.packageinstaller.permission.utils.EventLogger
     private static final int[] RUNTIME_AND_APPOP_PERMISSIONS_OPS = {
@@ -722,6 +727,8 @@ public class AppOpsManager {
             OP_CAMERA,
             // Body sensors
             OP_BODY_SENSORS,
+            // Activity recognition
+            OP_ACTIVITY_RECOGNITION,
 
             // APPOP PERMISSIONS
             OP_ACCESS_NOTIFICATIONS,
@@ -819,6 +826,7 @@ public class AppOpsManager {
             OP_START_FOREGROUND,                // START_FOREGROUND
             OP_COARSE_LOCATION,                 // BLUETOOTH_SCAN
             OP_USE_BIOMETRIC,                   // BIOMETRIC
+            OP_ACTIVITY_RECOGNITION,            // ACTIVITY_RECOGNITION
     };
 
     /**
@@ -904,6 +912,7 @@ public class AppOpsManager {
             OPSTR_START_FOREGROUND,
             OPSTR_BLUETOOTH_SCAN,
             OPSTR_USE_BIOMETRIC,
+            OPSTR_ACTIVITY_RECOGNITION,
     };
 
     /**
@@ -990,6 +999,7 @@ public class AppOpsManager {
             "START_FOREGROUND",
             "BLUETOOTH_SCAN",
             "USE_BIOMETRIC",
+            "ACTIVITY_RECOGNITION",
     };
 
     /**
@@ -1077,6 +1087,7 @@ public class AppOpsManager {
             Manifest.permission.FOREGROUND_SERVICE,
             null, // no permission for OP_BLUETOOTH_SCAN
             Manifest.permission.USE_BIOMETRIC,
+            Manifest.permission.ACTIVITY_RECOGNITION,
     };
 
     /**
@@ -1164,6 +1175,7 @@ public class AppOpsManager {
             null, // START_FOREGROUND
             null, // maybe should be UserManager.DISALLOW_SHARE_LOCATION, //BLUETOOTH_SCAN
             null, // USE_BIOMETRIC
+            null, // ACTIVITY_RECOGNITION
     };
 
     /**
@@ -1250,6 +1262,7 @@ public class AppOpsManager {
             false, // START_FOREGROUND
             true, // BLUETOOTH_SCAN
             false, // USE_BIOMETRIC
+            false, // ACTIVITY_RECOGNITION
     };
 
     /**
@@ -1335,6 +1348,7 @@ public class AppOpsManager {
             AppOpsManager.MODE_ALLOWED, // START_FOREGROUND
             AppOpsManager.MODE_ALLOWED, // BLUETOOTH_SCAN
             AppOpsManager.MODE_ALLOWED, // USE_BIOMETRIC
+            AppOpsManager.MODE_ALLOWED, // ACTIVITY_RECOGNITION
     };
 
     /**
@@ -1424,6 +1438,7 @@ public class AppOpsManager {
             false, // START_FOREGROUND
             false, // BLUETOOTH_SCAN
             false, // USE_BIOMETRIC
+            false, // ACTIVITY_RECOGNITION
     };
 
     /**
