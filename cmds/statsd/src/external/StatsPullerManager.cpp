@@ -211,6 +211,9 @@ const std::map<int, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
         // ProcStats.
         {android::util::PROC_STATS,
          {{}, {}, 1 * NS_PER_SEC, new StatsCompanionServicePuller(android::util::PROC_STATS)}},
+        // ProcStatsPkgProc.
+        {android::util::PROC_STATS_PKG_PROC,
+         {{}, {}, 1 * NS_PER_SEC, new StatsCompanionServicePuller(android::util::PROC_STATS_PKG_PROC)}},
         // Disk I/O stats per uid.
         {android::util::DISK_IO,
          {{2,3,4,5,6,7,8,9,10,11},
