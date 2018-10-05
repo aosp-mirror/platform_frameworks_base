@@ -7650,7 +7650,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                 // how to test this case.)
                 if (cpr.proc.killed && cpr.proc.killedByAm) {
                     checkTime(startTime, "getContentProviderImpl: before appDied (killedByAm)");
-                    appDiedLocked(cpr.proc);
+                    final long iden = Binder.clearCallingIdentity();
+                    try {
+                        appDiedLocked(cpr.proc);
+                    } finally {
+                        Binder.restoreCallingIdentity(iden);
+                    }
                     checkTime(startTime, "getContentProviderImpl: after appDied (killedByAm)");
                 }
             }
