@@ -1442,8 +1442,11 @@
          {@link #AndroidManifestService service},
          {@link #AndroidManifestReceiver receiver},
          {@link #AndroidManifestActivity activity},
-         {@link #AndroidManifestActivityAlias activity-alias}, and
-         {@link #AndroidManifestUsesLibrary uses-library}.  The application tag
+         {@link #AndroidManifestActivityAlias activity-alias},
+         {@link #AndroidManifestUsesLibrary uses-library},
+         {@link #AndroidManifestUsesStaticLibrary uses-static-library}, and
+         {@link #AndroidManifestUsesPackage uses-package}.
+         The application tag
          appears as a child of the root {@link #AndroidManifest manifest} tag in
          an application's manifest file. -->
     <declare-styleable name="AndroidManifestApplication" parent="AndroidManifest">
@@ -1877,10 +1880,33 @@
          library is singed with more than one certificate.
 
          <p>This appears as a child tag of the
-         {@link #AndroidManifestUsesStaticLibrary uses-static-library} tag. -->
+         {@link #AndroidManifestUsesStaticLibrary uses-static-library} or
+         {@link #AndroidManifestUsesPackage uses-package} tag. -->
     <declare-styleable name="AndroidManifestAdditionalCertificate" parent="AndroidManifestUsesStaticLibrary">
         <!-- The SHA-256 digest of the library signing certificate. -->
         <attr name="certDigest" />
+    </declare-styleable>
+
+    <!-- The <code>uses-package</code> specifies some kind of dependency on another
+         package.  It does not have any impact on the app's execution on the device,
+         but provides information about dependencies it has on other packages that need
+         to  be satisfied for it to run correctly.  That is, this is primarily for
+         installers to know what other apps need to be installed along with this one.
+
+         <p>This appears as a child tag of the
+         {@link #AndroidManifestApplication application} tag. -->
+    <declare-styleable name="AndroidManifestUsesPackage" parent="AndroidManifestApplication">
+        <!-- Required type of association with the package, for example "android.package.ad_service"
+             if it provides an advertising service. -->
+        <attr name="packageType" format="string" />
+        <!-- Required name of the package you use. -->
+        <attr name="name" />
+        <!-- Optional minimum version of the package that satisfies the dependency. -->
+        <attr name="version" />
+        <!-- Optional minimum major version of the package that satisfies the dependency. -->
+        <attr name="versionMajor" format="integer" />
+        <!-- Optional SHA-256 digest of the package signing certificate. -->
+        <attr name="certDigest" format="string" />
     </declare-styleable>
 
     <!-- The <code>supports-screens</code> specifies the screen dimensions an

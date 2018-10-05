@@ -2903,6 +2903,7 @@
   <eat-comment />
 
     <public-group type="attr" first-id="0x01010587">
+        <public name="packageType" />
         <public name="opticalInsetLeft" />
         <public name="opticalInsetTop" />
         <public name="opticalInsetRight" />
