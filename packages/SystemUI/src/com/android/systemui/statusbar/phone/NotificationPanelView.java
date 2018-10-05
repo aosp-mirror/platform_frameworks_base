@@ -124,8 +124,6 @@ public class NotificationPanelView extends PanelView implements
     private static final int CAP_HEIGHT = 1456;
     private static final int FONT_HEIGHT = 2163;
 
-    private static final float LOCK_ICON_ACTIVE_SCALE = 1.2f;
-
     static final String COUNTER_PANEL_OPEN = "panel_open";
     static final String COUNTER_PANEL_OPEN_QS = "panel_open_qs";
     private static final String COUNTER_PANEL_OPEN_PEEK = "panel_open_peek";
@@ -1784,13 +1782,9 @@ public class NotificationPanelView extends PanelView implements
             KeyguardAffordanceView lockIcon = mKeyguardBottomArea.getLockIcon();
             if (active && !mUnlockIconActive && mTracking) {
                 lockIcon.setImageAlpha(1.0f, true, 150, Interpolators.FAST_OUT_LINEAR_IN, null);
-                lockIcon.setImageScale(LOCK_ICON_ACTIVE_SCALE, true, 150,
-                        Interpolators.FAST_OUT_LINEAR_IN);
             } else if (!active && mUnlockIconActive && mTracking) {
                 lockIcon.setImageAlpha(lockIcon.getRestingAlpha(), true /* animate */,
                         150, Interpolators.FAST_OUT_LINEAR_IN, null);
-                lockIcon.setImageScale(1.0f, true, 150,
-                        Interpolators.FAST_OUT_LINEAR_IN);
             }
             mUnlockIconActive = active;
         }

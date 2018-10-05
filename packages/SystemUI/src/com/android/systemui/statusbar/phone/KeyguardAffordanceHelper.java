@@ -36,7 +36,6 @@ import com.android.systemui.statusbar.KeyguardAffordanceView;
  */
 public class KeyguardAffordanceHelper {
 
-    public static final float SWIPE_RESTING_ALPHA_AMOUNT = 0.5f;
     public static final long HINT_PHASE1_DURATION = 200;
     private static final long HINT_PHASE2_DURATION = 350;
     private static final float BACKGROUND_RADIUS_SCALE_FACTOR = 0.25f;

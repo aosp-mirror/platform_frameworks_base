@@ -76,7 +76,7 @@ public class KeyguardAffordanceView extends ImageView {
     private float mCircleStartRadius;
     private float mMaxCircleSize;
     private Animator mPreviewClipper;
-    private float mRestingAlpha = KeyguardAffordanceHelper.SWIPE_RESTING_ALPHA_AMOUNT;
+    private float mRestingAlpha = 1f;
     private boolean mSupportHardware;
     private boolean mFinishing;
     private boolean mLaunchingAffordance;

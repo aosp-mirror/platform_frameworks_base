@@ -88,7 +88,7 @@
         android:layout_width="@dimen/keyguard_affordance_width"
         android:layout_height="@dimen/keyguard_affordance_height"
         android:layout_gravity="bottom|center_horizontal"
-        android:src="@drawable/ic_lock_24dp"
+        android:src="@drawable/ic_lock"
         android:contentDescription="@string/accessibility_unlock_button"
         android:scaleType="center" />
 
