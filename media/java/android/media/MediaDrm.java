@@ -1202,7 +1202,6 @@ public final class MediaDrm implements AutoCloseable {
      * The maximum security level supported by the device. This is the default
      * security level when a session is opened.
      */
-    @SecurityLevel
     public static final int getMaxSecurityLevel() {
         return SECURITY_LEVEL_MAX;
     }
