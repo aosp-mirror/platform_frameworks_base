@@ -16,6 +16,8 @@
 
 package com.android.server.pm.dex;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.AppOpsManager;
 import android.content.Context;
@@ -57,8 +59,6 @@ import dalvik.system.DexFile;
 import dalvik.system.VMRuntime;
 
 import libcore.io.IoUtils;
-import libcore.util.NonNull;
-import libcore.util.Nullable;
 
 import java.io.File;
 import java.io.FileNotFoundException;
