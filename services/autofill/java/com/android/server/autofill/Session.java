@@ -400,7 +400,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
     @Nullable
     private AutofillValue findValueLocked(@NonNull AutofillId autofillId) {
         final AutofillValue value = findValueFromThisSessionOnlyLocked(autofillId);
-        if (value != null) return value;
+        if (value != null) {
+            return getSanitizedValue(createSanitizers(getSaveInfoLocked()), autofillId, value);
+        }
 
         // TODO(b/113281366): rather than explicitly look for previous session, it might be better
         // to merge the sessions when created (see note on mergePreviousSessionLocked())
@@ -415,7 +417,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 final AutofillValue previousValue = previousSession
                         .findValueFromThisSessionOnlyLocked(autofillId);
                 if (previousValue != null) {
-                    return previousValue;
+                    return getSanitizedValue(createSanitizers(previousSession.getSaveInfoLocked()),
+                            autofillId, previousValue);
                 }
             }
         }
