@@ -7,14 +7,9 @@
 #include "SkImageEncoder.h"
 #include "SkImageInfo.h"
 #include "SkColor.h"
-#include "SkColorPriv.h"
 #include "SkColorSpace.h"
-#include "SkHalf.h"
 #include "SkMatrix44.h"
-#include "SkPM4f.h"
-#include "SkPM4fPriv.h"
 #include "GraphicsJNI.h"
-#include "SkUnPreMultiply.h"
 #include "SkStream.h"
 
 #include <binder/Parcel.h>
