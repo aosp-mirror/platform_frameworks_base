@@ -377,11 +377,15 @@ final class SystemServiceRegistry {
                 return new DisplayManager(ctx.getOuterContext());
             }});
 
+        // InputMethodManager has its own cache strategy based on display id to support apps that
+        // still assume InputMethodManager is a per-process singleton and it's safe to directly
+        // access internal fields via reflection.  Hence directly use ServiceFetcher instead of
+        // StaticServiceFetcher/CachedServiceFetcher.
         registerService(Context.INPUT_METHOD_SERVICE, InputMethodManager.class,
-                new StaticServiceFetcher<InputMethodManager>() {
+                new ServiceFetcher<InputMethodManager>() {
             @Override
-            public InputMethodManager createService() {
-                return InputMethodManager.getInstanceInternal();
+            public InputMethodManager getService(ContextImpl ctx) {
+                return InputMethodManager.forContext(ctx);
             }});
 
         registerService(Context.TEXT_SERVICES_MANAGER_SERVICE, TextServicesManager.class,
