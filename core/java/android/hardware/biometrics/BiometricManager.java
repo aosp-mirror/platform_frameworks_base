@@ -19,6 +19,7 @@ package android.hardware.biometrics;
 import static android.Manifest.permission.USE_BIOMETRIC;
 import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
 
+import android.annotation.IntDef;
 import android.annotation.RequiresPermission;
 import android.content.Context;
 import android.os.RemoteException;
@@ -46,6 +47,9 @@ public class BiometricManager {
      */
     public static final int ERROR_NO_BIOMETRICS = BiometricConstants.BIOMETRIC_ERROR_NO_BIOMETRICS;
 
+    @IntDef({ERROR_NONE, ERROR_UNAVAILABLE, ERROR_NO_BIOMETRICS})
+    @interface BiometricError {}
+
     private final Context mContext;
     private final IBiometricService mService;
 
@@ -68,7 +72,7 @@ public class BiometricManager {
      *     {@link #ERROR_NONE} if a biometric can currently be used (enrolled and available).
      */
     @RequiresPermission(USE_BIOMETRIC)
-    public int canAuthenticate() {
+    public @BiometricError int canAuthenticate() {
         if (mService != null) {
             try {
                 return mService.canAuthenticate(mContext.getOpPackageName());
