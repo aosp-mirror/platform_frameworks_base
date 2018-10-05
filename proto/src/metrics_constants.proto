@@ -6482,6 +6482,16 @@ message MetricsEvent {
     // OS: Q
     FIELD_EMERGENCY_DIALER_SHORTCUT_TAPS_INTERVAL = 1567;
 
+    // OPEN: Power menu is opened
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: Q
+    POWER_MENU = 1568;
+
+    // ACTION: User tapped emergency dialer icon in the power menu.
+    // CATEGORY: GLOBAL_SYSTEM_UI
+    // OS: Q
+    ACTION_EMERGENCY_DIALER_FROM_POWER_MENU = 1569;
+
     // ---- End Q Constants, all Q constants go above this line ----
 
     // Add new aosp constants above this line.
