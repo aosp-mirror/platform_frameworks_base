@@ -121,6 +121,9 @@ public final class WifiNetworkSpecifier extends NetworkSpecifier implements Parc
         if (other == null || other instanceof MatchAllNetworkSpecifier) {
             return true;
         }
+        if (other instanceof WifiNetworkAgentSpecifier) {
+            return ((WifiNetworkAgentSpecifier) other).satisfiesNetworkSpecifier(this);
+        }
         // Specific requests are checked for equality although testing for equality of 2 patterns do
         // not make much sense!
         return equals(other);
