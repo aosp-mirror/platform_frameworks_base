@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.content.pm.ActivityInfo.FLAG_ALWAYS_FOCUSABLE;
@@ -31,6 +32,7 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.server.wm.ActivityStackSupervisor.ON_TOP;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -216,5 +218,62 @@ public class ActivityDisplayTests extends ActivityTestsBase {
     private static void assertTopRunningActivity(ActivityRecord top, ActivityDisplay display) {
         assertEquals(top, display.topRunningActivity());
         assertEquals(top, display.topRunningActivity(true /* considerKeyguardState */));
+    }
+
+    /**
+     * This test enforces that alwaysOnTop stack is placed at proper position.
+     */
+    @Test
+    public void testAlwaysOnTopStackLocation() {
+        final ActivityDisplay display = mSupervisor.getDefaultDisplay();
+        final ActivityStack alwaysOnTopStack = display.createStack(WINDOWING_MODE_FREEFORM,
+                ACTIVITY_TYPE_STANDARD, true /* onTop */);
+        final ActivityRecord activity = new ActivityBuilder(mService).setCreateTask(true)
+                .setStack(alwaysOnTopStack).build();
+        alwaysOnTopStack.setAlwaysOnTop(true);
+        display.positionChildAtTop(alwaysOnTopStack, false /* includingParents */);
+        assertTrue(alwaysOnTopStack.isAlwaysOnTop());
+        // Ensure always on top state is synced to the children of the stack.
+        assertTrue(alwaysOnTopStack.getTopActivity().isAlwaysOnTop());
+        assertEquals(alwaysOnTopStack, display.getTopStack());
+
+        final ActivityStack pinnedStack = display.createStack(
+                WINDOWING_MODE_PINNED, ACTIVITY_TYPE_STANDARD, true /* onTop */);
+        assertEquals(pinnedStack, display.getPinnedStack());
+        assertEquals(pinnedStack, display.getTopStack());
+
+        final ActivityStack anotherAlwaysOnTopStack = display.createStack(
+                WINDOWING_MODE_FREEFORM, ACTIVITY_TYPE_STANDARD, true /* onTop */);
+        anotherAlwaysOnTopStack.setAlwaysOnTop(true);
+        display.positionChildAtTop(anotherAlwaysOnTopStack, false /* includingParents */);
+        assertTrue(anotherAlwaysOnTopStack.isAlwaysOnTop());
+        int topPosition = display.getChildCount() - 1;
+        // Ensure the new alwaysOnTop stack is put below the pinned stack, but on top of the
+        // existing alwaysOnTop stack.
+        assertEquals(anotherAlwaysOnTopStack, display.getChildAt(topPosition - 1));
+
+        final ActivityStack nonAlwaysOnTopStack = display.createStack(
+                WINDOWING_MODE_FREEFORM, ACTIVITY_TYPE_STANDARD, true /* onTop */);
+        assertEquals(display, nonAlwaysOnTopStack.getDisplay());
+        topPosition = display.getChildCount() - 1;
+        // Ensure the non-alwaysOnTop stack is put below the three alwaysOnTop stacks, but above the
+        // existing other non-alwaysOnTop stacks.
+        assertEquals(nonAlwaysOnTopStack, display.getChildAt(topPosition - 3));
+
+        anotherAlwaysOnTopStack.setAlwaysOnTop(false);
+        display.positionChildAtTop(anotherAlwaysOnTopStack, false /* includingParents */);
+        assertFalse(anotherAlwaysOnTopStack.isAlwaysOnTop());
+        // Ensure, when always on top is turned off for a stack, the stack is put just below all
+        // other always on top stacks.
+        assertEquals(anotherAlwaysOnTopStack, display.getChildAt(topPosition - 2));
+        anotherAlwaysOnTopStack.setAlwaysOnTop(true);
+
+        // Ensure always on top state changes properly when windowing mode changes.
+        anotherAlwaysOnTopStack.setWindowingMode(WINDOWING_MODE_FULLSCREEN);
+        assertFalse(anotherAlwaysOnTopStack.isAlwaysOnTop());
+        assertEquals(anotherAlwaysOnTopStack, display.getChildAt(topPosition - 2));
+        anotherAlwaysOnTopStack.setWindowingMode(WINDOWING_MODE_FREEFORM);
+        assertTrue(anotherAlwaysOnTopStack.isAlwaysOnTop());
+        assertEquals(anotherAlwaysOnTopStack, display.getChildAt(topPosition - 1));
     }
 }

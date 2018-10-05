@@ -622,7 +622,9 @@ class ActivityTestsBase {
 
         @Override
         protected DisplayWindowController createWindowContainerController() {
-            return mock(DisplayWindowController.class);
+            DisplayWindowController out = mock(DisplayWindowController.class);
+            out.mContainer = WindowTestUtils.createTestDisplayContent();
+            return out;
         }
 
         void removeAllTasks() {
@@ -812,7 +814,10 @@ class ActivityTestsBase {
                     @Override
                     PinnedStackWindowController createStackWindowController(int displayId,
                             boolean onTop, Rect outBounds) {
-                        return mock(PinnedStackWindowController.class);
+                        PinnedStackWindowController controller =
+                                mock(PinnedStackWindowController.class);
+                        controller.mContainer = mock(TaskStack.class);
+                        return controller;
                     }
                 };
             } else {

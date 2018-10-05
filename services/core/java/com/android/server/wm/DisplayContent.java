@@ -1893,12 +1893,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         if (mPinnedStackControllerLocked != null && !hasPinnedStack()) {
             mPinnedStackControllerLocked.onDisplayInfoChanged(getDisplayInfo());
         }
-
-        // The display size information is heavily dependent on the resources in the current
-        // configuration, so we need to reconfigure it every time the configuration changes.
-        // See {@link #configureDisplayPolicy}...sigh...
-        mService.reconfigureDisplayLocked(this);
-
     }
 
     /**

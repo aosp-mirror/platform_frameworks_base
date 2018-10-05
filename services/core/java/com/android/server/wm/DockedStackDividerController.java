@@ -227,32 +227,30 @@ public class DockedStackDividerController {
         return DOCKED_INVALID;
     }
 
-    void getHomeStackBoundsInDockedMode(Rect outBounds) {
-        final DisplayInfo di = mDisplayContent.getDisplayInfo();
-        mService.mPolicy.getStableInsetsLw(di.rotation, di.logicalWidth, di.logicalHeight,
-                di.displayCutout, mTmpRect);
+    void getHomeStackBoundsInDockedMode(Configuration parentConfig, int dockSide, Rect outBounds) {
+        final DisplayCutout displayCutout = mDisplayContent.getDisplayInfo().displayCutout;
+        final int displayWidth = parentConfig.windowConfiguration.getBounds().width();
+        final int displayHeight = parentConfig.windowConfiguration.getBounds().height();
+        mService.mPolicy.getStableInsetsLw(parentConfig.windowConfiguration.getRotation(),
+                displayWidth, displayHeight, displayCutout, mTmpRect);
         int dividerSize = mDividerWindowWidth - 2 * mDividerInsets;
-        Configuration configuration = mDisplayContent.getConfiguration();
         // The offset in the left (landscape)/top (portrait) is calculated with the minimized
         // offset value with the divider size and any system insets in that direction.
-        if (configuration.orientation == Configuration.ORIENTATION_PORTRAIT) {
+        if (parentConfig.orientation == Configuration.ORIENTATION_PORTRAIT) {
             outBounds.set(0, mTaskHeightInMinimizedMode + dividerSize + mTmpRect.top,
-                    di.logicalWidth, di.logicalHeight);
+                    displayWidth, displayHeight);
         } else {
             // In landscape also inset the left/right side with the statusbar height to match the
             // minimized size height in portrait mode.
-            final TaskStack stack = mDisplayContent.getSplitScreenPrimaryStackIgnoringVisibility();
             final int primaryTaskWidth = mTaskHeightInMinimizedMode + dividerSize + mTmpRect.top;
             int left = mTmpRect.left;
-            int right = di.logicalWidth - mTmpRect.right;
-            if (stack != null) {
-                if (stack.getDockSide() == DOCKED_LEFT) {
-                    left += primaryTaskWidth;
-                } else if (stack.getDockSide() == DOCKED_RIGHT) {
-                    right -= primaryTaskWidth;
-                }
+            int right = displayWidth - mTmpRect.right;
+            if (dockSide == DOCKED_LEFT) {
+                left += primaryTaskWidth;
+            } else if (dockSide == DOCKED_RIGHT) {
+                right -= primaryTaskWidth;
             }
-            outBounds.set(left, 0, right, di.logicalHeight);
+            outBounds.set(left, 0, right, displayHeight);
         }
     }
 

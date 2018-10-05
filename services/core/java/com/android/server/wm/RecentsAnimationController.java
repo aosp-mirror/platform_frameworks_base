@@ -21,7 +21,9 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMAR
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.view.RemoteAnimationTarget.MODE_CLOSING;
 import static android.view.RemoteAnimationTarget.MODE_OPENING;
+import static android.view.WindowManager.DOCKED_INVALID;
 import static android.view.WindowManager.INPUT_CONSUMER_RECENTS_ANIMATION;
+
 import static com.android.server.policy.WindowManagerPolicy.FINISH_LAYOUT_REDO_WALLPAPER;
 import static com.android.server.wm.ActivityTaskManagerInternal.APP_TRANSITION_RECENTS_ANIM;
 import static com.android.server.wm.AnimationAdapterProto.REMOTE;
@@ -43,18 +45,21 @@ import android.util.Slog;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 import android.util.proto.ProtoOutputStream;
-import android.view.InputWindowHandle;
 import android.view.IRecentsAnimationController;
 import android.view.IRecentsAnimationRunner;
+import android.view.InputWindowHandle;
 import android.view.RemoteAnimationTarget;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
+
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.LocalServices;
 import com.android.server.inputmethod.InputMethodManagerInternal;
 import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
 import com.android.server.wm.utils.InsetUtils;
+
 import com.google.android.collect.Sets;
+
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
@@ -320,7 +325,11 @@ public class RecentsAnimationController implements DeathRecipient {
         }
 
         // Save the minimized home height
-        dc.getDockedDividerController().getHomeStackBoundsInDockedMode(mMinimizedHomeBounds);
+        final TaskStack dockedStack = dc.getSplitScreenPrimaryStackIgnoringVisibility();
+        dc.getDockedDividerController().getHomeStackBoundsInDockedMode(
+                dc.getConfiguration(),
+                dockedStack == null ? DOCKED_INVALID : dockedStack.getDockSide(),
+                mMinimizedHomeBounds);
 
         mService.mWindowPlacerLocked.performSurfacePlacement();
     }

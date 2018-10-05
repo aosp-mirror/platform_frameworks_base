@@ -452,13 +452,13 @@ public class TaskRecord extends ConfigurationContainer implements TaskWindowCont
     void removeWindowContainer() {
         mService.getLockTaskController().clearLockedTask(this);
         mWindowContainerController.removeContainer();
+        mWindowContainerController = null;
         if (!getWindowConfiguration().persistTaskBounds()) {
             // Reset current bounds for task whose bounds shouldn't be persisted so it uses
             // default configuration the next time it launches.
             updateOverrideConfiguration(null);
         }
         mService.getTaskChangeNotificationController().notifyTaskRemoved(taskId);
-        mWindowContainerController = null;
     }
 
     @Override
@@ -1265,7 +1265,6 @@ public class TaskRecord extends ConfigurationContainer implements TaskWindowCont
         }
 
         // Sync. with window manager
-        updateOverrideConfigurationFromLaunchBounds();
         final AppWindowContainerController appController = r.getWindowContainerController();
         if (appController != null) {
             // Only attempt to move in WM if the child has a controller. It is possible we haven't
