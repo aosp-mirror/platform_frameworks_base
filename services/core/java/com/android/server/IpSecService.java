@@ -19,6 +19,8 @@ package com.android.server;
 import static android.Manifest.permission.DUMP;
 import static android.net.IpSecManager.INVALID_RESOURCE_ID;
 import static android.system.OsConstants.AF_INET;
+import static android.system.OsConstants.AF_INET6;
+import static android.system.OsConstants.AF_UNSPEC;
 import static android.system.OsConstants.EINVAL;
 import static android.system.OsConstants.IPPROTO_UDP;
 import static android.system.OsConstants.SOCK_DGRAM;
@@ -63,6 +65,8 @@ import com.android.internal.util.Preconditions;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.net.Inet4Address;
+import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.net.UnknownHostException;
@@ -1426,6 +1430,17 @@ public class IpSecService extends IIpSecService.Stub {
                         + "or Encryption algorithms");
     }
 
+    private int getFamily(String inetAddress) {
+        int family = AF_UNSPEC;
+        InetAddress checkAddress = NetworkUtils.numericToInetAddress(inetAddress);
+        if (checkAddress instanceof Inet4Address) {
+            family = AF_INET;
+        } else if (checkAddress instanceof Inet6Address) {
+            family = AF_INET6;
+        }
+        return family;
+    }
+
     /**
      * Checks an IpSecConfig parcel to ensure that the contents are sane and throws an
      * IllegalArgumentException if they are not.
@@ -1478,6 +1493,26 @@ public class IpSecService extends IIpSecService.Stub {
 
         // Require a valid source address for all transforms.
         checkInetAddress(config.getSourceAddress());
+
+        // Check to ensure source and destination have the same address family.
+        String sourceAddress = config.getSourceAddress();
+        String destinationAddress = config.getDestinationAddress();
+        int sourceFamily = getFamily(sourceAddress);
+        int destinationFamily = getFamily(destinationAddress);
+        if (sourceFamily != destinationFamily) {
+            throw new IllegalArgumentException(
+                    "Source address ("
+                            + sourceAddress
+                            + ") and destination address ("
+                            + destinationAddress
+                            + ") have different address families.");
+        }
+
+        // Throw an error if UDP Encapsulation is not used in IPv4.
+        if (config.getEncapType() != IpSecTransform.ENCAP_NONE && sourceFamily != AF_INET) {
+            throw new IllegalArgumentException(
+                    "UDP Encapsulation is not supported for this address family");
+        }
 
         switch (config.getMode()) {
             case IpSecTransform.MODE_TRANSPORT:
