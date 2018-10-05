@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.app.slice.Slice;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -77,6 +78,7 @@ public final class WallpaperInfo implements Parcelable {
     final int mContextDescriptionResource;
     final boolean mShowMetadataInPreview;
     final boolean mSupportsAmbientMode;
+    final String mSettingsSliceUri;
 
     /**
      * Constructor.
@@ -118,7 +120,6 @@ public final class WallpaperInfo implements Parcelable {
                     com.android.internal.R.styleable.Wallpaper);
             mSettingsActivityName = sa.getString(
                     com.android.internal.R.styleable.Wallpaper_settingsActivity);
-
             mThumbnailResource = sa.getResourceId(
                     com.android.internal.R.styleable.Wallpaper_thumbnail,
                     -1);
@@ -140,6 +141,8 @@ public final class WallpaperInfo implements Parcelable {
             mSupportsAmbientMode = sa.getBoolean(
                     com.android.internal.R.styleable.Wallpaper_supportsAmbientMode,
                     false);
+            mSettingsSliceUri = sa.getString(
+                    com.android.internal.R.styleable.Wallpaper_settingsSliceUri);
 
             sa.recycle();
         } catch (NameNotFoundException e) {
@@ -159,6 +162,7 @@ public final class WallpaperInfo implements Parcelable {
         mContextDescriptionResource = source.readInt();
         mShowMetadataInPreview = source.readInt() != 0;
         mSupportsAmbientMode = source.readInt() != 0;
+        mSettingsSliceUri = source.readString();
         mService = ResolveInfo.CREATOR.createFromParcel(source);
     }
     
@@ -332,13 +336,28 @@ public final class WallpaperInfo implements Parcelable {
      * explicit {@link android.content.ComponentName}
      * composed of {@link #getPackageName} and the class name returned here.
      * 
-     * <p>A null will be returned if there is no settings activity associated
+     * <p>{@code null} will be returned if there is no settings activity associated
      * with the wallpaper.
      */
     public String getSettingsActivity() {
         return mSettingsActivityName;
     }
     
+    /**
+     * Returns an URI that provides a settings {@link Slice} for this wallpaper.
+     *
+     * <p>{@code null} will be returned if there is no settings Slice URI associated
+     * with the wallpaper.
+     *
+     * @return The URI.
+     */
+    public Uri getSettingsSliceUri() {
+        if (mSettingsSliceUri == null) {
+            return null;
+        }
+        return Uri.parse(mSettingsSliceUri);
+    }
+
     public void dump(Printer pw, String prefix) {
         pw.println(prefix + "Service:");
         mService.dump(pw, prefix + "  ");
@@ -367,6 +386,7 @@ public final class WallpaperInfo implements Parcelable {
         dest.writeInt(mContextDescriptionResource);
         dest.writeInt(mShowMetadataInPreview ? 1 : 0);
         dest.writeInt(mSupportsAmbientMode ? 1 : 0);
+        dest.writeString(mSettingsSliceUri);
         mService.writeToParcel(dest, flags);
     }
 

@@ -23,6 +23,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
+import android.net.Uri;
 import android.os.Parcel;
 import android.service.wallpaper.WallpaperService;
 import android.support.test.InstrumentationRegistry;
@@ -62,6 +63,32 @@ public class WallpaperInfoTest {
         WallpaperInfo fromParcel = WallpaperInfo.CREATOR.createFromParcel(parcel);
         assertTrue("supportsAmbientMode should have been restored from parcelable",
                 fromParcel.supportsAmbientMode());
+        parcel.recycle();
+    }
+
+    @Test
+    public void testGetSettingsSliceUri() throws Exception {
+        Context context = InstrumentationRegistry.getTargetContext();
+
+        Intent intent = new Intent(WallpaperService.SERVICE_INTERFACE);
+        intent.setPackage("com.android.internal.tests");
+        PackageManager pm = context.getPackageManager();
+        List<ResolveInfo> result = pm.queryIntentServices(intent, PackageManager.GET_META_DATA);
+        assertEquals(1, result.size());
+        ResolveInfo info = result.get(0);
+        WallpaperInfo wallpaperInfo = new WallpaperInfo(context, info);
+
+        // This expected Uri must be the same as that in livewallpaper.xml
+        Uri expectedUri = Uri.parse("content://com.android.internal.tests/slice");
+        Uri settingsUri = wallpaperInfo.getSettingsSliceUri();
+        assertEquals("The loaded URI should equal to the string in livewallpaper.xml",
+                0, expectedUri.compareTo(settingsUri));
+        Parcel parcel = Parcel.obtain();
+        wallpaperInfo.writeToParcel(parcel, 0 /* flags */);
+        parcel.setDataPosition(0);
+        WallpaperInfo fromParcel = WallpaperInfo.CREATOR.createFromParcel(parcel);
+        assertEquals("settingsSliceUri should be restorable from parcelable",
+                0, expectedUri.compareTo(fromParcel.getSettingsSliceUri()));
         parcel.recycle();
     }
 }
