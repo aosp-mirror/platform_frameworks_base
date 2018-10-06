@@ -216,7 +216,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
          * Called back to notify system that the client has changed
          * @param serviceInfoChanged True if the service's AccessibilityServiceInfo changed.
          */
-        void onClientChange(boolean serviceInfoChanged);
+        void onClientChangeLocked(boolean serviceInfoChanged);
 
         int getCurrentUserIdLocked();
 
@@ -363,7 +363,7 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
                 } else {
                     setDynamicallyConfigurableProperties(info);
                 }
-                mSystemSupport.onClientChange(true);
+                mSystemSupport.onClientChangeLocked(true);
             }
         } finally {
             Binder.restoreCallingIdentity(identity);

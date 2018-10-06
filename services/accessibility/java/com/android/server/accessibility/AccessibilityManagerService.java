@@ -254,7 +254,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
     private final UserManager mUserManager;
 
-    private final UiAutomationManager mUiAutomationManager = new UiAutomationManager();
+    private final UiAutomationManager mUiAutomationManager = new UiAutomationManager(mLock);
 
     private int mCurrentUserId = UserHandle.USER_SYSTEM;
 
@@ -833,7 +833,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
 
         synchronized (mLock) {
             mUiAutomationManager.registerUiTestAutomationServiceLocked(owner, serviceClient,
-                    mContext, accessibilityServiceInfo, sIdCounter++, mMainHandler, mLock,
+                    mContext, accessibilityServiceInfo, sIdCounter++, mMainHandler,
                     mSecurityPolicy, this, mWindowManagerService, mGlobalActionPerformer, flags);
             onUserStateChangedLocked(getCurrentUserStateLocked());
         }
@@ -2790,7 +2790,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     @Override
-    public void onClientChange(boolean serviceInfoChanged) {
+    public void onClientChangeLocked(boolean serviceInfoChanged) {
         AccessibilityManagerService.UserState userState = getUserStateLocked(mCurrentUserId);
         onUserStateChangedLocked(userState);
         if (serviceInfoChanged) {
