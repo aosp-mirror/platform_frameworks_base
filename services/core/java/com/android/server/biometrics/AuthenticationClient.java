@@ -232,6 +232,7 @@ public abstract class AuthenticationClient extends ClientMonitor {
     public boolean onAuthenticated(BiometricAuthenticator.Identifier identifier,
             boolean authenticated, ArrayList<Byte> token) {
         if (authenticated) {
+            mAlreadyDone = true;
             if (mRequireConfirmation) {
                 // Store the token so it can be sent to keystore after the user presses confirm
                 mEscrow = new TokenEscrow(identifier, token);

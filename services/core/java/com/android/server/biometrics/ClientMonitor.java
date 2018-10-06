@@ -63,6 +63,7 @@ public abstract class ClientMonitor implements IBinder.DeathRecipient {
     protected final Metrics mMetrics;
 
     protected boolean mAlreadyCancelled;
+    protected boolean mAlreadyDone;
 
     /**
      * @param context context of BiometricService
@@ -135,6 +136,11 @@ public abstract class ClientMonitor implements IBinder.DeathRecipient {
             int remaining);
     public abstract boolean onEnumerationResult(
             BiometricAuthenticator.Identifier identifier, int remaining);
+
+
+    public boolean isAlreadyDone() {
+        return mAlreadyDone;
+    }
 
     /**
      * Called when we get notification from the biometric's HAL that an image has been acquired.
