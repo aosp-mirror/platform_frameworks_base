@@ -260,7 +260,7 @@ public class BiometricService extends SystemService {
             final int callingUserId = UserHandle.getCallingUserId();
 
             mHandler.post(() -> {
-                final Pair<Integer, Integer> result = checkAndGetBiometricModality();
+                final Pair<Integer, Integer> result = checkAndGetBiometricModality(callingUserId);
                 final int modality = result.first;
                 final int error = result.second;
 
@@ -351,10 +351,11 @@ public class BiometricService extends SystemService {
             checkPermission();
             checkAppOp(opPackageName, Binder.getCallingUid());
 
+            final int userId = UserHandle.getCallingUserId();
             final long ident = Binder.clearCallingIdentity();
             int error;
             try {
-                final Pair<Integer, Integer> result = checkAndGetBiometricModality();
+                final Pair<Integer, Integer> result = checkAndGetBiometricModality(userId);
                 error = result.second;
             } finally {
                 Binder.restoreCallingIdentity(ident);
@@ -466,7 +467,7 @@ public class BiometricService extends SystemService {
      * {@link #BIOMETRIC_FINGERPRINT}, {@link #BIOMETRIC_IRIS}, {@link #BIOMETRIC_FACE}
      * and the error containing one of the {@link BiometricConstants} errors.
      */
-    private Pair<Integer, Integer> checkAndGetBiometricModality() {
+    private Pair<Integer, Integer> checkAndGetBiometricModality(int callingUid) {
         int modality = BIOMETRIC_NONE;
 
         // No biometric features, send error
@@ -495,9 +496,12 @@ public class BiometricService extends SystemService {
                     // order.
                     firstHwAvailable = modality;
                 }
-                if (authenticator.hasEnrolledTemplates()) {
+                if (authenticator.hasEnrolledTemplates(callingUid)) {
                     hasTemplatesEnrolled = true;
                     if (isEnabledForApp(modality)) {
+                        // TODO(b/110907543): When face settings (and other settings) have both a
+                        // user toggle as well as a work profile settings page, this needs to be
+                        // updated to reflect the correct setting.
                         enabledForApps = true;
                         break;
                     }

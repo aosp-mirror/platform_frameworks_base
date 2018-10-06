@@ -408,6 +408,7 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
     @RequiresPermission(allOf = {
             USE_BIOMETRIC_INTERNAL,
             INTERACT_ACROSS_USERS})
+    @Override
     public boolean hasEnrolledTemplates(int userId) {
         if (mService != null) {
             try {
