@@ -17,13 +17,13 @@
 package com.android.internal.telephony;
 
 
-interface IAnas {
+interface IAns {
 
     /**
-    * Enable or disable Alternative Network Access service.
+    * Enable or disable Alternative Network service.
     *
     * This method should be called to enable or disable
-    * AlternativeNetworkAccess service on the device.
+    * AlternativeNetwork service on the device.
     *
     * <p>
     * Requires Permission:
@@ -37,9 +37,9 @@ interface IAnas {
     boolean setEnable(boolean enable, String callingPackage);
 
     /**
-     * is Alternative Network Access service enabled
+     * is Alternative Network service enabled
      *
-     * This method should be called to determine if the Alternative Network Access service is enabled
+     * This method should be called to determine if the Alternative Network service is enabled
     *
     * <p>
     * Requires Permission:
