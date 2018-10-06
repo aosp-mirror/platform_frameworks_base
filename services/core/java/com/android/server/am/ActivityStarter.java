@@ -1076,7 +1076,7 @@ class ActivityStarter {
             if (aInfo != null &&
                     (aInfo.applicationInfo.privateFlags
                             & ApplicationInfo.PRIVATE_FLAG_CANT_SAVE_STATE) != 0 &&
-                    mService.mAm.mHasHeavyWeightFeature) {
+                    mService.mHasHeavyWeightFeature) {
                 // This may be a heavy-weight process!  Check to see if we already
                 // have another, different heavy-weight process running.
                 if (aInfo.processName.equals(aInfo.applicationInfo.packageName)) {

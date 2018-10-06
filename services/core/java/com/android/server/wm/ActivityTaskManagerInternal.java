@@ -336,4 +336,11 @@ public abstract class ActivityTaskManagerInternal {
 
     /** @return the service connection holder for a given activity token. */
     public abstract ActivityServiceConnectionsHolder getServiceConnectionsHolder(IBinder token);
+
+    /** @return The intent used to launch the home activity. */
+    public abstract Intent getHomeIntent();
+    public abstract boolean startHomeActivity(int userId, String reason);
+    /** @return true if the given process is the factory test process. */
+    public abstract boolean isFactoryTestProcess(WindowProcessController wpc);
+    public abstract void updateTopComponentForFactoryTest();
 }
