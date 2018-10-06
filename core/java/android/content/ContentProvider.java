@@ -18,6 +18,7 @@ package android.content;
 
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.app.AppOpsManager.MODE_ALLOWED;
+import static android.app.AppOpsManager.MODE_DEFAULT;
 import static android.app.AppOpsManager.MODE_ERRORED;
 import static android.app.AppOpsManager.MODE_IGNORED;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
@@ -569,11 +570,7 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
                 return mode;
             }
 
-            if (mReadOp != AppOpsManager.OP_NONE) {
-                return mAppOpsManager.noteProxyOp(mReadOp, callingPkg);
-            }
-
-            return AppOpsManager.MODE_ALLOWED;
+            return noteProxyOp(callingPkg, mReadOp);
         }
 
         private int enforceWritePermission(String callingPkg, Uri uri, IBinder callerToken)
@@ -583,8 +580,13 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
                 return mode;
             }
 
-            if (mWriteOp != AppOpsManager.OP_NONE) {
-                return mAppOpsManager.noteProxyOp(mWriteOp, callingPkg);
+            return noteProxyOp(callingPkg, mWriteOp);
+        }
+
+        private int noteProxyOp(String callingPkg, int op) {
+            if (op != AppOpsManager.OP_NONE) {
+                int mode = mAppOpsManager.noteProxyOp(op, callingPkg);
+                return mode == MODE_DEFAULT ? interpretDefaultAppOpMode(op) : mode;
             }
 
             return AppOpsManager.MODE_ALLOWED;
@@ -609,12 +611,17 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
             return MODE_ERRORED;
         }
 
-        final int permOp = AppOpsManager.permissionToOpCode(permission);
-        if (permOp != AppOpsManager.OP_NONE) {
-            return mTransport.mAppOpsManager.noteProxyOp(permOp, callingPkg);
-        }
+        return mTransport.noteProxyOp(callingPkg, AppOpsManager.permissionToOpCode(permission));
+    }
 
-        return MODE_ALLOWED;
+    /**
+     * Allows for custom interpretations of {@link AppOpsManager#MODE_DEFAULT} by individual
+     * content providers
+     *
+     * @hide
+     */
+    protected int interpretDefaultAppOpMode(int op) {
+        return MODE_IGNORED;
     }
 
     /** {@hide} */
