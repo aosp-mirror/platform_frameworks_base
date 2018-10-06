@@ -830,7 +830,7 @@ public class RankingHelper implements RankingConfig {
 
     @Override
     public ParceledListSlice<NotificationChannelGroup> getNotificationChannelGroups(String pkg,
-            int uid, boolean includeDeleted, boolean includeNonGrouped) {
+            int uid, boolean includeDeleted, boolean includeNonGrouped, boolean includeEmpty) {
         Preconditions.checkNotNull(pkg);
         Map<String, NotificationChannelGroup> groups = new ArrayMap<>();
         Record r = getRecord(pkg, uid);
@@ -860,6 +860,13 @@ public class RankingHelper implements RankingConfig {
         }
         if (includeNonGrouped && nonGrouped.getChannels().size() > 0) {
             groups.put(null, nonGrouped);
+        }
+        if (includeEmpty) {
+            for (NotificationChannelGroup group : r.groups.values()) {
+                if (!groups.containsKey(group.getId())) {
+                    groups.put(group.getId(), group);
+                }
+            }
         }
         return new ParceledListSlice<>(new ArrayList<>(groups.values()));
     }
@@ -1244,7 +1251,7 @@ public class RankingHelper implements RankingConfig {
     /**
      * Dump only the ban information as structured JSON for the stats collector.
      *
-     * This is intentionally redundant with {#link dumpJson} because the old
+     * This is intentionally redundant with {@link dumpJson} because the old
      * scraper will expect this format.
      *
      * @param filter
@@ -1288,7 +1295,7 @@ public class RankingHelper implements RankingConfig {
     /**
      * Dump only the channel information as structured JSON for the stats collector.
      *
-     * This is intentionally redundant with {#link dumpJson} because the old
+     * This is intentionally redundant with {@link dumpJson} because the old
      * scraper will expect this format.
      *
      * @param filter
