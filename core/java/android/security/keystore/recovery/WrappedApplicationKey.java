@@ -75,15 +75,6 @@ public final class WrappedApplicationKey implements Parcelable {
         }
 
         /**
-         * @deprecated AOSP does not associate keys with accounts. This may be done by system app.
-         * @removed
-         */
-        @Deprecated
-        public Builder setAccount(@NonNull byte[] account) {
-            throw new UnsupportedOperationException();
-        }
-
-        /**
          * Sets key material encrypted by recovery key.
          *
          * @param encryptedKeyMaterial The key material
@@ -131,15 +122,6 @@ public final class WrappedApplicationKey implements Parcelable {
     /** Key material encrypted by recovery key. */
     public @NonNull byte[] getEncryptedKeyMaterial() {
         return mEncryptedKeyMaterial;
-    }
-
-    /**
-     * @deprecated AOSP does not associate keys with accounts. This may be done by system app.
-     * @removed
-     */
-    @Deprecated
-    public @NonNull byte[] getAccount() {
-        throw new UnsupportedOperationException();
     }
 
     public static final Parcelable.Creator<WrappedApplicationKey> CREATOR =
