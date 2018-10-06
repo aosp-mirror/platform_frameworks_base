@@ -22,6 +22,8 @@ import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
@@ -120,41 +122,45 @@ public abstract class CellInfo implements Parcelable {
     // Observation time stamped as type in nanoseconds since boot
     private long mTimeStamp;
 
-    // Where time stamp gets recorded.
-    // Value of TIMESTAMP_TYPE_XXXX
-    private int mTimeStampType;
-
     /** @hide */
     protected CellInfo() {
         this.mRegistered = false;
-        this.mTimeStampType = TIMESTAMP_TYPE_UNKNOWN;
         this.mTimeStamp = Long.MAX_VALUE;
     }
 
     /** @hide */
     protected CellInfo(CellInfo ci) {
         this.mRegistered = ci.mRegistered;
-        this.mTimeStampType = ci.mTimeStampType;
         this.mTimeStamp = ci.mTimeStamp;
         this.mCellConnectionStatus = ci.mCellConnectionStatus;
     }
 
-    /** True if this cell is registered to the mobile network */
+    /**
+     * True if the phone is registered to a mobile network that provides service on this cell
+     * and this cell is being used or would be used for network signaling.
+     */
     public boolean isRegistered() {
         return mRegistered;
     }
+
     /** @hide */
     public void setRegistered(boolean registered) {
         mRegistered = registered;
     }
 
-    /** Approximate time of this cell information in nanos since boot */
+    /**
+     * Approximate time this cell information was received from the modem.
+     *
+     * @return a time stamp in nanos since boot.
+     */
     public long getTimeStamp() {
         return mTimeStamp;
     }
+
     /** @hide */
-    public void setTimeStamp(long timeStamp) {
-        mTimeStamp = timeStamp;
+    @VisibleForTesting
+    public void setTimeStamp(long ts) {
+        mTimeStamp = ts;
     }
 
     /** @hide */
@@ -184,31 +190,11 @@ public abstract class CellInfo implements Parcelable {
         mCellConnectionStatus = cellConnectionStatus;
     }
 
-    /**
-     * Where time stamp gets recorded.
-     * @return one of TIMESTAMP_TYPE_XXXX
-     *
-     * @hide
-     */
-    @UnsupportedAppUsage
-    public int getTimeStampType() {
-        return mTimeStampType;
-    }
-
-    /** @hide */
-    public void setTimeStampType(int timeStampType) {
-        if (timeStampType < TIMESTAMP_TYPE_UNKNOWN || timeStampType > TIMESTAMP_TYPE_JAVA_RIL) {
-            mTimeStampType = TIMESTAMP_TYPE_UNKNOWN;
-        } else {
-            mTimeStampType = timeStampType;
-        }
-    }
-
     @Override
     public int hashCode() {
         int primeNum = 31;
         return ((mRegistered ? 0 : 1) * primeNum) + ((int)(mTimeStamp / 1000) * primeNum)
-                + (mTimeStampType * primeNum) + (mCellConnectionStatus * primeNum);
+                + (mCellConnectionStatus * primeNum);
     }
 
     @Override
@@ -223,37 +209,17 @@ public abstract class CellInfo implements Parcelable {
             CellInfo o = (CellInfo) other;
             return mRegistered == o.mRegistered
                     && mTimeStamp == o.mTimeStamp
-                    && mTimeStampType == o.mTimeStampType
                     && mCellConnectionStatus == o.mCellConnectionStatus;
         } catch (ClassCastException e) {
             return false;
         }
     }
 
-    @UnsupportedAppUsage
-    private static String timeStampTypeToString(int type) {
-        switch (type) {
-            case 1:
-                return "antenna";
-            case 2:
-                return "modem";
-            case 3:
-                return "oem_ril";
-            case 4:
-                return "java_ril";
-            default:
-                return "unknown";
-        }
-    }
-
     @Override
     public String toString() {
         StringBuffer sb = new StringBuffer();
-        String timeStampType;
 
         sb.append("mRegistered=").append(mRegistered ? "YES" : "NO");
-        timeStampType = timeStampTypeToString(mTimeStampType);
-        sb.append(" mTimeStampType=").append(timeStampType);
         sb.append(" mTimeStamp=").append(mTimeStamp).append("ns");
         sb.append(" mCellConnectionStatus=").append(mCellConnectionStatus);
 
@@ -280,7 +246,6 @@ public abstract class CellInfo implements Parcelable {
     protected void writeToParcel(Parcel dest, int flags, int type) {
         dest.writeInt(type);
         dest.writeInt(mRegistered ? 1 : 0);
-        dest.writeInt(mTimeStampType);
         dest.writeLong(mTimeStamp);
         dest.writeInt(mCellConnectionStatus);
     }
@@ -292,7 +257,6 @@ public abstract class CellInfo implements Parcelable {
      */
     protected CellInfo(Parcel in) {
         mRegistered = (in.readInt() == 1) ? true : false;
-        mTimeStampType = in.readInt();
         mTimeStamp = in.readLong();
         mCellConnectionStatus = in.readInt();
     }
