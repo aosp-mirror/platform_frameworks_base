@@ -430,14 +430,25 @@ public abstract class WindowManagerInternal {
     public abstract boolean isUidFocused(int uid);
 
     /**
-     * Checks whether the specified process has IME focus or not.
+     * Checks whether the specified IME client has IME focus or not.
      *
      * @param uid UID of the process to be queried
      * @param pid PID of the process to be queried
-     * @return {@code true} if a process that is identified by {@code uid} and {@code pid} has IME
-     *         focus
+     * @param displayId Display ID reported from the client. Note that this method also verifies
+     *                  whether the specified process is allowed to access to this display or not
+     * @return {@code true} if the IME client specified with {@code uid}, {@code pid}, and
+     *         {@code displayId} has IME focus
      */
-    public abstract boolean isInputMethodClientFocus(int uid, int pid);
+    public abstract boolean isInputMethodClientFocus(int uid, int pid, int displayId);
+
+    /**
+     * Checks whether the given {@code uid} is allowed to use the given {@code displayId} or not.
+     *
+     * @param displayId Display ID to be checked
+     * @param uid UID to be checked.
+     * @return {@code true} if the given {@code uid} is allowed to use the given {@code displayId}
+     */
+    public abstract boolean isUidAllowedOnDisplay(int displayId, int uid);
 
     /**
      * Return the display Id for given window.
