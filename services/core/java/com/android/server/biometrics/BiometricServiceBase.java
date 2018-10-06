@@ -408,7 +408,8 @@ public abstract class BiometricServiceBase extends SystemService
                         mActivityTaskManager.getTasks(1);
                 if (!runningTasks.isEmpty()) {
                     final String topPackage = runningTasks.get(0).topActivity.getPackageName();
-                    if (!topPackage.contentEquals(currentClient)) {
+                    if (!topPackage.contentEquals(currentClient)
+                            && !mCurrentClient.isAlreadyDone()) {
                         Slog.e(getTag(), "Stopping background authentication, top: " + topPackage
                                 + " currentClient: " + currentClient);
                         mCurrentClient.stop(false /* initiatedByClient */);
