@@ -181,6 +181,7 @@ message Atom {
         NumFingerprints num_fingerprints = 10031;
         DiskIo disk_io = 10032;
         PowerProfile power_profile = 10033;
+        ProcStats proc_stats_pkg_proc = 10034;
     }
 
     // DO NOT USE field numbers above 100,000 in AOSP.

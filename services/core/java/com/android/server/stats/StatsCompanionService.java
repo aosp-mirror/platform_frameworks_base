@@ -1259,18 +1259,19 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         Binder.restoreCallingIdentity(token);
     }
 
-    long mLastProcStatsHighWaterMark = readProcStatsHighWaterMark();
-
-    private long readProcStatsHighWaterMark() {
+    // read high watermark for section
+    private long readProcStatsHighWaterMark(int section) {
         try {
-            File[] files = mBaseDir.listFiles();
+            File[] files = mBaseDir.listFiles((d, name) -> {
+                return name.toLowerCase().startsWith(String.valueOf(section) + '_');
+            });
             if (files == null || files.length == 0) {
                 return 0;
             }
             if (files.length > 1) {
                 Log.e(TAG, "Only 1 file expected for high water mark. Found " + files.length);
             }
-            return Long.valueOf(files[0].getName());
+            return Long.valueOf(files[0].getName().split("_")[1]);
         } catch (SecurityException e) {
             Log.e(TAG, "Failed to get procstats high watermark file.", e);
         } catch (NumberFormatException e) {
@@ -1282,13 +1283,13 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     private IProcessStats mProcessStats =
             IProcessStats.Stub.asInterface(ServiceManager.getService(ProcessStats.SERVICE_NAME));
 
-    private void pullProcessStats(
-            int tagId, long elapsedNanos, long wallClockNanos,
+    private void pullProcessStats(int section, int tagId, long elapsedNanos, long wallClockNanos,
             List<StatsLogEventWrapper> pulledData) {
         try {
+            long lastHighWaterMark = readProcStatsHighWaterMark(section);
             List<ParcelFileDescriptor> statsFiles = new ArrayList<>();
             long highWaterMark = mProcessStats.getCommittedStats(
-                    mLastProcStatsHighWaterMark, ProcessStats.REPORT_ALL, true, statsFiles);
+                    lastHighWaterMark, section, true, statsFiles);
             if (statsFiles.size() != 1) {
                 return;
             }
@@ -1298,10 +1299,10 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
             e.writeStorage(Arrays.copyOf(stats, len[0]));
             pulledData.add(e);
-            new File(mBaseDir.getAbsolutePath() + "/" + mLastProcStatsHighWaterMark).delete();
-            mLastProcStatsHighWaterMark = highWaterMark;
+            new File(mBaseDir.getAbsolutePath() + "/" + section + "_" + lastHighWaterMark).delete();
             new File(
-                    mBaseDir.getAbsolutePath() + "/" + mLastProcStatsHighWaterMark).createNewFile();
+                    mBaseDir.getAbsolutePath() + "/" + section + "_"
+                            + highWaterMark).createNewFile();
         } catch (IOException e) {
             Log.e(TAG, "Getting procstats failed: ", e);
         } catch (RemoteException e) {
@@ -1490,7 +1491,12 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                 break;
             }
             case StatsLog.PROC_STATS: {
-                pullProcessStats(tagId, elapsedNanos, wallClockNanos, ret);
+                pullProcessStats(ProcessStats.REPORT_ALL, tagId, elapsedNanos, wallClockNanos, ret);
+                break;
+            }
+            case StatsLog.PROC_STATS_PKG_PROC: {
+                pullProcessStats(ProcessStats.REPORT_PKG_PROC_STATS, tagId, elapsedNanos,
+                        wallClockNanos, ret);
                 break;
             }
             case StatsLog.DISK_IO: {
