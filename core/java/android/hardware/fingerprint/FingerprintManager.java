@@ -637,6 +637,14 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
     }
 
     /**
+     * @hide
+     */
+    @Override
+    public boolean hasEnrolledTemplates(int userId) {
+        return hasEnrolledFingerprints(userId);
+    }
+
+    /**
      * Determine if there is at least one fingerprint enrolled.
      *
      * @return true if at least one fingerprint is enrolled, false otherwise
