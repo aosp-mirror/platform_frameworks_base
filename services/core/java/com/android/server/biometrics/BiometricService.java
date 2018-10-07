@@ -239,7 +239,7 @@ public class BiometricService extends SystemService {
      * should not carry any state. The reality is we need to keep a tiny amount of state so that
      * cancelAuthentication() can go to the right place.
      */
-    private final class BiometricPromptServiceWrapper extends IBiometricService.Stub {
+    private final class BiometricServiceWrapper extends IBiometricService.Stub {
 
         @Override // Binder call
         public void authenticate(IBinder token, long sessionId, int userId,
@@ -363,7 +363,7 @@ public class BiometricService extends SystemService {
             return error;
         }
 
-        @Override
+        @Override // Binder call
         public void registerEnabledOnKeyguardCallback(IBiometricEnabledOnKeyguardCallback callback)
                 throws RemoteException {
             checkInternalPermission();
@@ -373,6 +373,19 @@ public class BiometricService extends SystemService {
                         mSettingObserver.getFaceEnabledOnKeyguard());
             } catch (RemoteException e) {
                 Slog.w(TAG, "Remote exception", e);
+            }
+        }
+
+        @Override // Binder call
+        public void setActiveUser(int userId) {
+            checkInternalPermission();
+            final long ident = Binder.clearCallingIdentity();
+            try {
+                for (int i = 0; i < mAuthenticators.size(); i++) {
+                    mAuthenticators.get(i).getAuthenticator().setActiveUser(userId);
+                }
+            } finally {
+                Binder.restoreCallingIdentity(ident);
             }
         }
     }
@@ -455,7 +468,7 @@ public class BiometricService extends SystemService {
             }
         }
 
-        publishBinderService(Context.BIOMETRIC_SERVICE, new BiometricPromptServiceWrapper());
+        publishBinderService(Context.BIOMETRIC_SERVICE, new BiometricServiceWrapper());
     }
 
     /**

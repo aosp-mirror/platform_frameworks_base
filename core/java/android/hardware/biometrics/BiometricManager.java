@@ -98,4 +98,22 @@ public class BiometricManager {
             Slog.w(TAG, "registerEnabledOnKeyguardCallback(): Service not connected");
         }
     }
+
+    /**
+     * Sets the active user.
+     * @hide
+     */
+    @RequiresPermission(USE_BIOMETRIC_INTERNAL)
+    public void setActiveUser(int userId) {
+        if (mService != null) {
+            try {
+                mService.setActiveUser(userId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        } else {
+            Slog.w(TAG, "setActiveUser(): Service not connected");
+        }
+    }
 }
+

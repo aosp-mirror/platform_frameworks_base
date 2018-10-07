@@ -43,4 +43,7 @@ interface IBiometricService {
 
     // Register callback for when keyguard biometric eligibility changes.
     void registerEnabledOnKeyguardCallback(IBiometricEnabledOnKeyguardCallback callback);
+
+    // Explicitly set the active user.
+    void setActiveUser(int userId);
 }
