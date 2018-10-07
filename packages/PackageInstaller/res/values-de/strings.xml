@@ -16,141 +16,76 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_name" msgid="2738748390251381682">"Paket-Installer"</string>
-    <string name="next" msgid="3057143178373252333">"Weiter"</string>
-    <string name="install" msgid="5896438203900042068">"Installieren"</string>
-    <string name="done" msgid="3889387558374211719">"Fertig"</string>
-    <string name="cancel" msgid="8360346460165114585">"Abbrechen"</string>
-    <string name="installing" msgid="8613631001631998372">"Wird installiert..."</string>
-    <string name="installing_app" msgid="4097935682329028894">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> wird installiert…"</string>
-    <string name="install_done" msgid="3682715442154357097">"App wurde installiert."</string>
-    <string name="install_confirm_question" msgid="7295206719219043890">"Möchtest du diese App installieren? Sie erhält dann folgende Berechtigungen:"</string>
-    <string name="install_confirm_question_no_perms" msgid="5918305641302873520">"Möchtest du diese App installieren? Sie benötigt keinen besonderen Zugriff."</string>
-    <string name="install_confirm_question_update" msgid="4624159567361487964">"Möchtest du ein Update für diese vorhandene App installieren? Deine vorhandenen Daten bleiben erhalten. Die aktualisierte App erhält Zugriff auf:"</string>
-    <string name="install_confirm_question_update_system" msgid="1302330093676416336">"Möchtest du ein Update für diese integrierte App installieren? Deine vorhandenen Daten bleiben erhalten. Die aktualisierte App erhält Zugriff auf:"</string>
-    <string name="install_confirm_question_update_no_perms" msgid="4885928136844618944">"Möchtest du ein Update für diese bestehende App installieren? Deine vorhandenen Daten bleiben erhalten. Die App benötigt keine besonderen Zugriffsrechte."</string>
-    <string name="install_confirm_question_update_system_no_perms" msgid="7676593512694724374">"Möchtest du ein Update für diese integrierte App installieren? Deine vorhandenen Daten bleiben erhalten. Die App benötigt keine besonderen Zugriffsrechte."</string>
-    <string name="install_failed" msgid="6579998651498970899">"App wurde nicht installiert."</string>
-    <string name="install_failed_blocked" msgid="1606870930588770025">"Die Installation des Pakets wurde blockiert."</string>
-    <string name="install_failed_conflict" msgid="5336045235168070954">"Die App wurde nicht installiert, da das Paket in Konflikt mit einem bestehenden Paket steht."</string>
-    <string name="install_failed_incompatible" product="tablet" msgid="6682387386242708974">"Die App wurde nicht installiert, da sie nicht mit deinem Tablet kompatibel ist."</string>
-    <string name="install_failed_incompatible" product="tv" msgid="3553367270510072729">"Diese App ist nicht mit deinem Fernseher kompatibel."</string>
-    <string name="install_failed_incompatible" product="default" msgid="7917996365659426872">"Die App wurde nicht installiert, da sie nicht mit deinem Smartphone kompatibel ist."</string>
-    <string name="install_failed_invalid_apk" msgid="269885385245534742">"Die App wurde nicht installiert, da das Paket offenbar ungültig ist."</string>
-    <string name="install_failed_msg" product="tablet" msgid="8368835262605608787">"<xliff:g id="APP_NAME">%1$s</xliff:g> konnte nicht auf deinem Tablet installiert werden."</string>
-    <string name="install_failed_msg" product="tv" msgid="3990457938384021566">"<xliff:g id="APP_NAME">%1$s</xliff:g> konnte nicht auf deinem Fernseher installiert werden."</string>
-    <string name="install_failed_msg" product="default" msgid="8554909560982962052">"<xliff:g id="APP_NAME">%1$s</xliff:g> konnte nicht auf deinem Telefon installiert werden."</string>
-    <string name="launch" msgid="4826921505917605463">"Öffnen"</string>
-    <string name="unknown_apps_admin_dlg_text" msgid="7488386758312008790">"Dein Administrator lässt keine Installationen von Apps aus unbekannten Quellen zu"</string>
-    <string name="unknown_apps_user_restriction_dlg_text" msgid="5785226253054083336">"Dieser Nutzer darf keine unbekannten Apps installieren"</string>
-    <string name="install_apps_user_restriction_dlg_text" msgid="5041150186260066212">"Dieser Nutzer darf keine Apps installieren"</string>
-    <string name="ok" msgid="3468756155452870475">"OK"</string>
-    <string name="manage_applications" msgid="4033876279091996596">"Apps verwalten"</string>
-    <string name="out_of_space_dlg_title" msgid="7843674437613797326">"Kein freier Speicher vorhanden"</string>
-    <string name="out_of_space_dlg_text" msgid="4774775404294282216">"<xliff:g id="APP_NAME">%1$s</xliff:g> konnte nicht installiert werden. Gib Speicherplatz frei und versuche es erneut."</string>
-    <string name="app_not_found_dlg_title" msgid="2692335460569505484">"App nicht gefunden"</string>
-    <string name="app_not_found_dlg_text" msgid="6107465056055095930">"Die App wurde nicht in der Liste der installierten Apps gefunden."</string>
-    <string name="user_is_not_allowed_dlg_title" msgid="118128026847201582">"Keine Berechtigung"</string>
-    <string name="user_is_not_allowed_dlg_text" msgid="739716827677987545">"Der aktuelle Nutzer ist nicht dazu berechtigt, diese Deinstallation auszuführen."</string>
-    <string name="generic_error_dlg_title" msgid="2684806600635296961">"Fehler"</string>
-    <string name="generic_error_dlg_text" msgid="4288738047825333954">"App konnte nicht deinstalliert werden."</string>
-    <string name="uninstall_application_title" msgid="1860074100811653963">"App deinstallieren"</string>
-    <string name="uninstall_update_title" msgid="4146940097553335390">"Update deinstallieren"</string>
-    <string name="uninstall_activity_text" msgid="6680688689803932550">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> gehört zu folgender App:"</string>
-    <string name="uninstall_application_text" msgid="6691975835951187030">"Möchtest du diese App deinstallieren?"</string>
-    <string name="uninstall_application_text_all_users" msgid="5574704453233525222">"Möchtest du diese App für "<b>"alle"</b>" Nutzer entfernen? Die App und alle zugehörigen Daten werden für "<b>"alle"</b>" Nutzer des Geräts entfernt."</string>
-    <string name="uninstall_application_text_user" msgid="8766882355635485733">"Möchtest du diese App für den Nutzer <xliff:g id="USERNAME">%1$s</xliff:g> deinstallieren?"</string>
-    <string name="uninstall_update_text" msgid="1394549691152728409">"Diese App durch die Werksversion ersetzen? Alle Daten werden entfernt."</string>
-    <string name="uninstall_update_text_multiuser" msgid="2083665452990861991">"Diese App durch die Werksversion ersetzen? Alle Daten werden entfernt. Dies betrifft alle Nutzer des Geräts, einschließlich Arbeitsprofilen."</string>
-    <string name="uninstalling_notification_channel" msgid="5698369661583525583">"Laufende Deinstallationen"</string>
-    <string name="uninstall_failure_notification_channel" msgid="8224276726364132314">"Fehlgeschlagene Deinstallationen"</string>
-    <string name="uninstalling" msgid="5556217435895938250">"Wird deinstalliert..."</string>
-    <string name="uninstalling_app" msgid="2773617614877719294">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> wird deinstalliert…"</string>
-    <string name="uninstall_done" msgid="3792487853420281888">"Deinstallation abgeschlossen"</string>
-    <string name="uninstall_done_app" msgid="775837862728680479">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> deinstalliert"</string>
-    <string name="uninstall_failed" msgid="631122574306299512">"Deinstallation fehlgeschlagen"</string>
-    <string name="uninstall_failed_app" msgid="945277834056527022">"Deinstallation von <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> fehlgeschlagen."</string>
-    <string name="uninstall_failed_device_policy_manager" msgid="2727361164694743362">"Aktive Apps zur Geräteverwaltung können nicht deinstalliert werden"</string>
-    <string name="uninstall_failed_device_policy_manager_of_user" msgid="2161462242935805756">"Die aktive App zur Geräteverwaltung kann nicht für <xliff:g id="USERNAME">%1$s</xliff:g> deinstalliert werden"</string>
-    <string name="uninstall_all_blocked_profile_owner" msgid="3544933038594382346">"Diese App wird für einige Nutzer oder Profile benötigt und wurde für andere deinstalliert"</string>
-    <string name="uninstall_blocked_profile_owner" msgid="6912141045528994954">"Diese App wird für dein Profil benötigt und kann nicht deinstalliert werden."</string>
-    <string name="uninstall_blocked_device_owner" msgid="7074175526413453063">"Die App wurde als obligatorisch festgelegt und kann nicht deinstalliert werden."</string>
-    <string name="manage_device_administrators" msgid="118178632652346535">"Apps zur Geräteverwaltung"</string>
-    <string name="manage_users" msgid="3125018886835668847">"Nutzer verwalten"</string>
-    <string name="uninstall_failed_msg" msgid="8969754702803951175">"<xliff:g id="APP_NAME">%1$s</xliff:g> konnte nicht deinstalliert werden."</string>
-    <string name="Parse_error_dlg_text" msgid="7623286983621067011">"Beim Parsen des Pakets ist ein Problem aufgetreten."</string>
-    <string name="newPerms" msgid="6039428254474104210">"Neu"</string>
-    <string name="allPerms" msgid="1024385515840703981">"Alle"</string>
-    <string name="privacyPerms" msgid="1850527049572617">"Datenschutz"</string>
-    <string name="devicePerms" msgid="6733560207731294504">"Gerätezugriff"</string>
-    <string name="no_new_perms" msgid="6657813692169565975">"Für dieses Update sind keine neuen Berechtigungen erforderlich."</string>
-    <string name="grant_dialog_button_deny" msgid="2176510645406614340">"Ablehnen"</string>
-    <string name="grant_dialog_button_more_info" msgid="2218220771432058426">"Weitere Informationen"</string>
-    <string name="grant_dialog_button_deny_anyway" msgid="847960499284125250">"Trotzdem ablehnen"</string>
-    <string name="current_permission_template" msgid="6378304249516652817">"<xliff:g id="CURRENT_PERMISSION_INDEX">%1$s</xliff:g> von <xliff:g id="PERMISSION_COUNT">%2$s</xliff:g>"</string>
-    <string name="permission_warning_template" msgid="7332275268559121742">"Zulassen, dass die App &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; <xliff:g id="ACTION">%2$s</xliff:g> darf?"</string>
-    <string name="permission_add_background_warning_template" msgid="5391175001698541141">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; immer erlauben zu <xliff:g id="ACTION">%2$s</xliff:g>?"</string>
-    <string name="allow_permission_foreground_only" msgid="1016389465002335286">"Nur während der App-Nutzung"</string>
-    <string name="allow_permission_always" msgid="7047379650123289823">"Immer"</string>
-    <string name="deny_permission_deny_and_dont_ask_again" msgid="8003202275002645629">"Ablehnen und nicht mehr fragen"</string>
-    <string name="permission_revoked_count" msgid="7386129423432613024">"<xliff:g id="COUNT">%1$d</xliff:g> deaktiviert"</string>
-    <string name="permission_revoked_all" msgid="8595742638132863678">"Alle deaktiviert"</string>
-    <string name="permission_revoked_none" msgid="2059511550181271342">"Keine deaktiviert"</string>
-    <string name="grant_dialog_button_allow" msgid="4616529495342337095">"Zulassen"</string>
-    <string name="app_permissions_breadcrumb" msgid="3390836200791539264">"Apps"</string>
-    <string name="app_permissions" msgid="3146758905824597178">"App-Berechtigungen"</string>
-    <string name="never_ask_again" msgid="1089938738199748687">"Nicht mehr fragen"</string>
-    <string name="no_permissions" msgid="3210542466245591574">"Keine Berechtigungen"</string>
-    <string name="additional_permissions" msgid="6667573114240111763">"Zusätzliche Berechtigungen"</string>
-    <string name="app_permissions_info_button_label" msgid="7789812060395257748">"App-Info öffnen"</string>
-    <plurals name="additional_permissions_more" formatted="false" msgid="945127158155064388">
-      <item quantity="other">Noch <xliff:g id="COUNT_1">%1$d</xliff:g></item>
-      <item quantity="one">Noch <xliff:g id="COUNT_0">%1$d</xliff:g></item>
-    </plurals>
-    <string name="old_sdk_deny_warning" msgid="3872277112584842615">"Diese App wurde für eine ältere Version von Android konzipiert. Wenn du keine Berechtigung erteilst, funktioniert die App möglicherweise nicht mehr ordnungsgemäß."</string>
-    <string name="default_permission_description" msgid="4992892207044156668">"Unbekannte Aktion durchführen"</string>
-    <string name="app_permissions_group_summary" msgid="4787239772223699263">"<xliff:g id="COUNT_0">%1$d</xliff:g> von <xliff:g id="COUNT_1">%2$d</xliff:g> Apps sind berechtigt."</string>
-    <string name="menu_show_system" msgid="6773743421743728921">"System-Apps anzeigen"</string>
-    <string name="menu_hide_system" msgid="7595471742649432977">"System ausblenden"</string>
-    <string name="no_apps" msgid="1965493419005012569">"Keine Apps"</string>
-    <string name="location_settings" msgid="1774875730854491297">"Standorteinstellungen"</string>
-    <string name="location_warning" msgid="8778701356292735971">"<xliff:g id="APP_NAME">%1$s</xliff:g> ist ein Anbieter von Standortdiensten für dieses Gerät. Die Berechtigungen für den Zugriff auf deinen Standort kannst du in den Standorteinstellungen ändern."</string>
-    <string name="system_warning" msgid="7103819124542305179">"Wenn du diese Berechtigung deaktivierst, funktionieren grundlegende Funktionen deines Geräts möglicherweise nicht mehr ordnungsgemäß."</string>
-    <string name="permission_summary_enforced_by_policy" msgid="3418617316188986205">"Von Richtlinien durchgesetzt"</string>
-    <string name="permission_summary_disabled_by_policy_background_only" msgid="160007162349980265">"Hintergrundzugriff aufgrund der Richtlinie deaktiviert"</string>
-    <string name="permission_summary_enabled_by_policy_background_only" msgid="4834971700297385342">"Hintergrundzugriff aufgrund der Richtlinie aktiviert"</string>
-    <string name="permission_summary_enabled_by_policy_foreground_only" msgid="5150061275247925588">"Vordergrundzugriff aufgrund der Richtlinie aktiviert"</string>
-    <string name="permission_summary_enforced_by_admin" msgid="1702707982488952544">"Durch den Administrator verwaltet"</string>
-    <!-- no translation found for background_access_chooser_dialog_choices:0 (7142769853837915143) -->
-    <!-- no translation found for background_access_chooser_dialog_choices:1 (7804653189249679164) -->
-    <!-- no translation found for background_access_chooser_dialog_choices:2 (1131794379787779680) -->
-    <string name="permission_access_always" msgid="5642491469836594184">"Immer"</string>
-    <string name="permission_access_only_foreground" msgid="6906814759741316041">"Nur während der App-Nutzung"</string>
-    <string name="permission_access_never" msgid="1258330706341318622">"Nie"</string>
-    <string name="loading" msgid="7811651799620593731">"Wird geladen…"</string>
-    <string name="all_permissions" msgid="5156669007784613042">"Alle Berechtigungen"</string>
-    <string name="other_permissions" msgid="2016192512386091933">"Andere App-Funktionen"</string>
-    <string name="permission_request_title" msgid="1204446718549121199">"Berechtigungsanfrage"</string>
-    <string name="screen_overlay_title" msgid="3021729846864038529">"Display-Overlay erkannt"</string>
-    <string name="screen_overlay_message" msgid="2141944461571677331">"Um diese Berechtigungseinstellung zu ändern, musst du zunächst das Display-Overlay über \"Einstellungen\" &gt; \"Apps\" deaktivieren."</string>
-    <string name="screen_overlay_button" msgid="4344544843349937743">"Einstellungen öffnen"</string>
-    <string name="wear_not_allowed_dlg_title" msgid="8104666773577525713">"Android Wear"</string>
-    <string name="wear_not_allowed_dlg_text" msgid="1322352525843583064">"Von Android Wear nicht unterstützte Aktionen installieren/deinstallieren."</string>
-    <string name="permission_review_title_template_install" msgid="6819338441305295479">"Worauf darf die App &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; zugreifen?"</string>
-    <string name="permission_review_title_template_update" msgid="8632233603161669426">"Die App &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; wurde aktualisiert. Worauf darf diese App zugreifen?"</string>
-    <string name="review_button_cancel" msgid="957906817733578877">"Abbrechen"</string>
-    <string name="review_button_continue" msgid="4809162078179371370">"Weiter"</string>
-    <string name="new_permissions_category" msgid="3213523410139204183">"Neue Berechtigungen"</string>
-    <string name="current_permissions_category" msgid="998210994450606094">"Aktuelle Berechtigungen"</string>
-    <string name="message_staging" msgid="6151794817691100003">"App wird vorbereitet…"</string>
-    <string name="app_name_unknown" msgid="8931522764510159105">"Unbekannt"</string>
-    <string name="untrusted_external_source_warning" product="tablet" msgid="1483151219938173935">"Aus Sicherheitsgründen kannst du auf dem Tablet keine unbekannten Apps aus dieser Quelle installieren."</string>
-    <string name="untrusted_external_source_warning" product="tv" msgid="5373768281884328560">"Aus Sicherheitsgründen kannst du auf dem Fernseher keine unbekannten Apps aus dieser Quelle installieren."</string>
-    <string name="untrusted_external_source_warning" product="default" msgid="2223486836232706553">"Aus Sicherheitsgründen kannst du auf dem Smartphone keine unbekannten Apps aus dieser Quelle installieren."</string>
-    <string name="anonymous_source_warning" product="default" msgid="7700263729981815614">"Unbekannte Apps können gefährlich für dein Smartphone und deine personenbezogenen Daten sein. Indem du diese App installierst, erklärst du dich damit einverstanden, dass du die Verantwortung für alle Schäden an deinem Smartphone und jegliche Datenverluste trägst, die aus der Verwendung dieser App entstehen können."</string>
-    <string name="anonymous_source_warning" product="tablet" msgid="8854462805499848630">"Unbekannte Apps können gefährlich für dein Tablet und deine personenbezogenen Daten sein. Indem du diese App installierst, erklärst du dich damit einverstanden, dass du die Verantwortung für alle Schäden an deinem Tablet und jegliche Datenverluste trägst, die aus der Verwendung dieser App entstehen können."</string>
-    <string name="anonymous_source_warning" product="tv" msgid="1291472686734385872">"Unbekannte Apps können gefährlich für deinen Fernseher und deine personenbezogenen Daten sein. Indem du diese App installierst, erklärst du dich damit einverstanden, dass du die Verantwortung für alle Schäden an deinem Fernseher und jegliche Datenverluste trägst, die aus der Verwendung dieser App entstehen können."</string>
-    <string name="anonymous_source_continue" msgid="2094381167954332292">"Weiter"</string>
-    <string name="external_sources_settings" msgid="8601453744517291632">"Einstellungen"</string>
-    <string name="wear_app_channel" msgid="6200840123672949356">"Wear-Apps installieren/deinstallieren"</string>
+    <string name="app_name" msgid="7488448184431507488">"Paketinstallation"</string>
+    <string name="install" msgid="711829760615509273">"Installieren"</string>
+    <string name="done" msgid="6632441120016885253">"Fertig"</string>
+    <string name="cancel" msgid="1018267193425558088">"Abbrechen"</string>
+    <string name="installing" msgid="4921993079741206516">"Wird installiert…"</string>
+    <string name="installing_app" msgid="1165095864863849422">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> wird installiert…"</string>
+    <string name="install_done" msgid="5987363587661783896">"App wurde installiert."</string>
+    <string name="install_confirm_question" msgid="8176284075816604590">"Möchtest du diese App installieren?"</string>
+    <string name="install_confirm_question_update" msgid="7942235418781274635">"Möchtest du ein Update dieser vorhandenen App installieren? Deine bisherigen Daten gehen dabei nicht verloren."</string>
+    <string name="install_confirm_question_update_system" msgid="4713001702777910263">"Möchtest du ein Update dieser integrierten App installieren? Deine bisherigen Daten gehen dabei nicht verloren."</string>
+    <string name="install_failed" msgid="5777824004474125469">"App wurde nicht installiert."</string>
+    <string name="install_failed_blocked" msgid="8512284352994752094">"Die Installation des Pakets wurde blockiert."</string>
+    <string name="install_failed_conflict" msgid="3493184212162521426">"Die App wurde nicht installiert, da das Paket in Konflikt mit einem bestehenden Paket steht."</string>
+    <string name="install_failed_incompatible" product="tablet" msgid="6019021440094927928">"Die App wurde nicht installiert, da sie nicht mit deinem Tablet kompatibel ist."</string>
+    <string name="install_failed_incompatible" product="tv" msgid="2890001324362291683">"Diese App ist nicht mit deinem Fernseher kompatibel."</string>
+    <string name="install_failed_incompatible" product="default" msgid="7254630419511645826">"Die App wurde nicht installiert, da sie nicht mit deinem Smartphone kompatibel ist."</string>
+    <string name="install_failed_invalid_apk" msgid="8581007676422623930">"Die App wurde nicht installiert, da das Paket offenbar ungültig ist."</string>
+    <string name="install_failed_msg" product="tablet" msgid="6298387264270562442">"<xliff:g id="APP_NAME">%1$s</xliff:g> konnte nicht auf deinem Tablet installiert werden."</string>
+    <string name="install_failed_msg" product="tv" msgid="1920009940048975221">"<xliff:g id="APP_NAME">%1$s</xliff:g> konnte nicht auf deinem Fernseher installiert werden."</string>
+    <string name="install_failed_msg" product="default" msgid="6484461562647915707">"<xliff:g id="APP_NAME">%1$s</xliff:g> konnte nicht auf deinem Smartphone installiert werden."</string>
+    <string name="launch" msgid="3952550563999890101">"Öffnen"</string>
+    <string name="unknown_apps_admin_dlg_text" msgid="4456572224020176095">"Dein Administrator lässt keine Installationen von Apps aus unbekannten Quellen zu"</string>
+    <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"Dieser Nutzer darf keine unbekannten Apps installieren"</string>
+    <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"Dieser Nutzer darf keine Apps installieren"</string>
+    <string name="ok" msgid="7871959885003339302">"OK"</string>
+    <string name="manage_applications" msgid="5400164782453975580">"Apps verwalten"</string>
+    <string name="out_of_space_dlg_title" msgid="4156690013884649502">"Kein freier Speicher vorhanden"</string>
+    <string name="out_of_space_dlg_text" msgid="8727714096031856231">"<xliff:g id="APP_NAME">%1$s</xliff:g> konnte nicht installiert werden. Gib Speicherplatz frei und versuche es noch einmal."</string>
+    <string name="app_not_found_dlg_title" msgid="5107924008597470285">"App nicht gefunden"</string>
+    <string name="app_not_found_dlg_text" msgid="5219983779377811611">"Die App wurde nicht in der Liste der installierten Apps gefunden."</string>
+    <string name="user_is_not_allowed_dlg_title" msgid="6915293433252210232">"Nicht zulässig"</string>
+    <string name="user_is_not_allowed_dlg_text" msgid="3468447791330611681">"Der aktuelle Nutzer ist nicht dazu berechtigt, diese Deinstallation auszuführen."</string>
+    <string name="generic_error_dlg_title" msgid="5863195085927067752">"Fehler"</string>
+    <string name="generic_error_dlg_text" msgid="5287861443265795232">"App konnte nicht deinstalliert werden."</string>
+    <string name="uninstall_application_title" msgid="4045420072401428123">"App deinstallieren"</string>
+    <string name="uninstall_update_title" msgid="824411791011583031">"Update deinstallieren"</string>
+    <string name="uninstall_activity_text" msgid="1928194674397770771">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> gehört zu folgender App:"</string>
+    <string name="uninstall_application_text" msgid="3816830743706143980">"Möchtest du diese App deinstallieren?"</string>
+    <string name="uninstall_application_text_all_users" msgid="575491774380227119">"Möchtest du diese App für "<b>"alle"</b>" Nutzer entfernen? Die App und alle zugehörigen Daten werden für "<b>"alle"</b>" Nutzer des Geräts entfernt."</string>
+    <string name="uninstall_application_text_user" msgid="498072714173920526">"Möchtest du diese App für den Nutzer <xliff:g id="USERNAME">%1$s</xliff:g> deinstallieren?"</string>
+    <string name="uninstall_update_text" msgid="863648314632448705">"Diese App durch die Werksversion ersetzen? Alle Daten werden entfernt."</string>
+    <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Diese App durch die Werksversion ersetzen? Alle Daten werden entfernt. Dies betrifft alle Nutzer des Geräts, einschließlich Arbeitsprofilen."</string>
+    <string name="uninstalling_notification_channel" msgid="840153394325714653">"Laufende Deinstallationen"</string>
+    <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Fehlgeschlagene Deinstallationen"</string>
+    <string name="uninstalling" msgid="8709566347688966845">"Wird deinstalliert..."</string>
+    <string name="uninstalling_app" msgid="8866082646836981397">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> wird deinstalliert…"</string>
+    <string name="uninstall_done" msgid="439354138387969269">"Deinstallation abgeschlossen."</string>
+    <string name="uninstall_done_app" msgid="4588850984473605768">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> deinstalliert"</string>
+    <string name="uninstall_failed" msgid="1847750968168364332">"Deinstallation fehlgeschlagen."</string>
+    <string name="uninstall_failed_app" msgid="5506028705017601412">"Deinstallation von <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> fehlgeschlagen."</string>
+    <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"Aktive Apps zur Geräteverwaltung können nicht deinstalliert werden"</string>
+    <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"Die aktive App zur Geräteverwaltung kann nicht für <xliff:g id="USERNAME">%1$s</xliff:g> deinstalliert werden"</string>
+    <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"Diese App wird für einige Nutzer oder Profile benötigt und wurde für andere deinstalliert"</string>
+    <string name="uninstall_blocked_profile_owner" msgid="6373897407002404848">"Diese App wird für dein Profil benötigt und kann nicht deinstalliert werden."</string>
+    <string name="uninstall_blocked_device_owner" msgid="6724602931761073901">"Die App wird unbedingt benötigt und kann nicht deinstalliert werden."</string>
+    <string name="manage_device_administrators" msgid="3092696419363842816">"Apps zur Geräteverwaltung verwalten"</string>
+    <string name="manage_users" msgid="1243995386982560813">"Nutzer verwalten"</string>
+    <string name="uninstall_failed_msg" msgid="2176744834786696012">"<xliff:g id="APP_NAME">%1$s</xliff:g> konnte nicht deinstalliert werden."</string>
+    <string name="Parse_error_dlg_text" msgid="1661404001063076789">"Beim Parsen des Pakets ist ein Problem aufgetreten."</string>
+    <string name="wear_not_allowed_dlg_title" msgid="8664785993465117517">"Android Wear"</string>
+    <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"Installations-/Deinstallationsaktion auf Android Wear nicht unterstützt."</string>
+    <string name="message_staging" msgid="8032722385658438567">"App wird vorbereitet…"</string>
+    <string name="app_name_unknown" msgid="6881210203354323926">"Unbekannt"</string>
+    <string name="untrusted_external_source_warning" product="tablet" msgid="6539403649459942547">"Aus Sicherheitsgründen kannst du auf dem Tablet keine unbekannten Apps aus dieser Quelle installieren."</string>
+    <string name="untrusted_external_source_warning" product="tv" msgid="1206648674551321364">"Aus Sicherheitsgründen kannst du auf dem Fernseher keine unbekannten Apps aus dieser Quelle installieren."</string>
+    <string name="untrusted_external_source_warning" product="default" msgid="7279739265754475165">"Aus Sicherheitsgründen kannst du auf dem Smartphone keine unbekannten Apps aus dieser Quelle installieren."</string>
+    <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"Unbekannte Apps können gefährlich für dein Smartphone und deine personenbezogenen Daten sein. Wenn du diese App installierst, erklärst du dich damit einverstanden, dass du die Verantwortung für alle Schäden an deinem Smartphone und jegliche Datenverluste trägst, die aus der Verwendung dieser App entstehen können."</string>
+    <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Unbekannte Apps können gefährlich für dein Tablet und deine personenbezogenen Daten sein. Wenn du diese App installierst, erklärst du dich damit einverstanden, dass du die Verantwortung für alle Schäden an deinem Tablet und jegliche Datenverluste trägst, die aus der Verwendung dieser App entstehen können."</string>
+    <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"Unbekannte Apps können gefährlich für deinen Fernseher und deine personenbezogenen Daten sein. Wenn du diese App installierst, erklärst du dich damit einverstanden, dass du die Verantwortung für alle Schäden an deinem Fernseher und jegliche Datenverluste trägst, die aus der Verwendung dieser App entstehen können."</string>
+    <string name="anonymous_source_continue" msgid="4375745439457209366">"Weiter"</string>
+    <string name="external_sources_settings" msgid="4046964413071713807">"Einstellungen"</string>
+    <string name="wear_app_channel" msgid="1960809674709107850">"Wear-Apps installieren/deinstallieren"</string>
 </resources>

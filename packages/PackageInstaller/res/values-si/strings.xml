@@ -16,141 +16,76 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_name" msgid="2738748390251381682">"පැකේජ ස්ථාපනකරු"</string>
-    <string name="next" msgid="3057143178373252333">"මීලඟ"</string>
-    <string name="install" msgid="5896438203900042068">"ස්ථාපනය"</string>
-    <string name="done" msgid="3889387558374211719">"හරි"</string>
-    <string name="cancel" msgid="8360346460165114585">"අවලංගු කරන්න"</string>
-    <string name="installing" msgid="8613631001631998372">"ස්ථාපනය කරමින්…"</string>
-    <string name="installing_app" msgid="4097935682329028894">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ස්ථාපනය කරමින්…"</string>
-    <string name="install_done" msgid="3682715442154357097">"යෙදුම ස්ථාපනය කරන ලදි."</string>
-    <string name="install_confirm_question" msgid="7295206719219043890">"ඔබට මෙම යෙදුම ස්ථාපනය කිරීමට අවශ්‍යද? පහත ඒවා වෙත එයට ප්‍රවේශය ලැබෙනු ඇත:"</string>
-    <string name="install_confirm_question_no_perms" msgid="5918305641302873520">"මෙම යෙදුම ස්ථාපනය කිරීමට ඔබට අවශ්‍යද? වෙනත් විශේෂ ප්‍රවේශයක් එයට අවශ්‍ය නොවෙයි."</string>
-    <string name="install_confirm_question_update" msgid="4624159567361487964">"දැනට පවතින මෙම යෙදුමට යාවත්කාලීනයක් ස්ථාපනය කිරීමට ඔබට අවශ්‍යද? ඔබගේ පවතින දත්ත නැති නොවේ. යාවත්කාලීන කළ යෙදුම පිවිසීම ලබා ගනී:"</string>
-    <string name="install_confirm_question_update_system" msgid="1302330093676416336">"ඔබට මෙම තිළැලි යෙදුමට යාවත්කාලීනය ස්ථාපනය කිරීමට අවශ්‍යද? ඔබගේ දැනට පවතින දත්ත නැති නොවේ. යාවත්කාලීන කරන ලද යෙදුම පහත සඳහා ප්‍රවේශය ලබාගනු ඇත:"</string>
-    <string name="install_confirm_question_update_no_perms" msgid="4885928136844618944">"මෙම පවතින යෙදුමට යාවත්කාලීනයක් ස්ථාපනය කිරීමට ඔබට අවශ්‍යද? ඔබගේ පවතින දත්ත නැති නොවේ. එයට විශේෂ ප්‍රවේශයක් අවශ්‍ය නොවේ."</string>
-    <string name="install_confirm_question_update_system_no_perms" msgid="7676593512694724374">"පවතින මෙම යෙදුමට යාවත්කාලීනයක් ස්ථාපනය කිරීමට ඔබට අවශ්‍යද? ඔබගේ පවතින දත්ත නැති නොවේ. එයට විශේෂ ප්‍රවේශයක් අවශ්‍ය නොවේ."</string>
-    <string name="install_failed" msgid="6579998651498970899">"යෙදුම ස්ථාපනය කරේ නැත."</string>
-    <string name="install_failed_blocked" msgid="1606870930588770025">"මෙම පැකේජය ස්ථාපනය කිරීම අවහිර කරන ලදි."</string>
-    <string name="install_failed_conflict" msgid="5336045235168070954">"පැකේජය දැනට පවතින පැකේජයක් සමග ගැටෙන නිසා යෙදුම ස්ථාපනය නොකරන ලදී."</string>
-    <string name="install_failed_incompatible" product="tablet" msgid="6682387386242708974">"යෙදුම ඔබේ ටැබ්ලට් පරිගණකය සමග නොගැළපෙන නිසා යෙදුම ස්ථාපනය නොකරන ලදී."</string>
-    <string name="install_failed_incompatible" product="tv" msgid="3553367270510072729">"මෙම යෙදුම ඔබගේ රූපවාහිනිය හා නොගැළපේ."</string>
-    <string name="install_failed_incompatible" product="default" msgid="7917996365659426872">"යෙදුම ඔබේ දුරකථනය සමග නොගැළපෙන නිසා යෙදුම ස්ථාපනය නොකරන ලදී."</string>
-    <string name="install_failed_invalid_apk" msgid="269885385245534742">"පැකේජය වලංගු නොවන බවක් පෙනෙන නිසා යෙදුම ස්ථාපනය නොකරන ලදී."</string>
-    <string name="install_failed_msg" product="tablet" msgid="8368835262605608787">"ඔබගේ ටැබ්ලටයේ <xliff:g id="APP_NAME">%1$s</xliff:g> ස්ථාපනය කළ නොහැක."</string>
-    <string name="install_failed_msg" product="tv" msgid="3990457938384021566">"<xliff:g id="APP_NAME">%1$s</xliff:g> මෙම රූපවාහිනියෙහි ස්ථාපනය කළ නොහැක."</string>
-    <string name="install_failed_msg" product="default" msgid="8554909560982962052">"<xliff:g id="APP_NAME">%1$s</xliff:g> දුරකථනයට ස්ථාපිත කිරීමට නොහැකි විය."</string>
-    <string name="launch" msgid="4826921505917605463">"විවෘත කරන්න"</string>
-    <string name="unknown_apps_admin_dlg_text" msgid="7488386758312008790">"නාඳුනන මූලයන් වෙතින් ලබාගත් යෙදුම් ස්ථාපනය කිරීමට ඔබගේ පරිපාලකයා ඉඩ නොදේ"</string>
-    <string name="unknown_apps_user_restriction_dlg_text" msgid="5785226253054083336">"මෙම පරිශීලකයා මඟින් නොදන්නා යෙදුම් ස්ථාපනය කළ නොහැක"</string>
-    <string name="install_apps_user_restriction_dlg_text" msgid="5041150186260066212">"මෙම පරිශීලකයාට යෙදුම් ස්ථාපනය කිරීමට අවසර නැත"</string>
-    <string name="ok" msgid="3468756155452870475">"හරි"</string>
-    <string name="manage_applications" msgid="4033876279091996596">"යෙදුම් කළමනාකරණය කරන්න"</string>
-    <string name="out_of_space_dlg_title" msgid="7843674437613797326">"ඉඩ නොමැත"</string>
-    <string name="out_of_space_dlg_text" msgid="4774775404294282216">"<xliff:g id="APP_NAME">%1$s</xliff:g> ස්ථාපිත කිරීමට නොහැකි විය. ඉඩ පොඩ්ඩක් නිදහස් කොට නැවත උත්සාහ කරන්න."</string>
-    <string name="app_not_found_dlg_title" msgid="2692335460569505484">"යෙදුම හමුවී නැත"</string>
-    <string name="app_not_found_dlg_text" msgid="6107465056055095930">"ස්ථාපිත යෙදුම් ලැයිස්තුවේ යෙදුම සොයා ගත නොහැකි විය."</string>
-    <string name="user_is_not_allowed_dlg_title" msgid="118128026847201582">"ඉඩ නොදෙයි"</string>
-    <string name="user_is_not_allowed_dlg_text" msgid="739716827677987545">"වත්මන් පරිශීලකයාට මෙම අස්ථාපනය සිදු කිරීමට ඉඩ නොදේ."</string>
-    <string name="generic_error_dlg_title" msgid="2684806600635296961">"දෝෂය"</string>
-    <string name="generic_error_dlg_text" msgid="4288738047825333954">"යෙදුම අස්ථාපනය කළ නොහැකි විය."</string>
-    <string name="uninstall_application_title" msgid="1860074100811653963">"යෙදුම අස්ථාපනය කරන්න"</string>
-    <string name="uninstall_update_title" msgid="4146940097553335390">"යාවත්කාලිනය අස්ථාපනය කරන්න"</string>
-    <string name="uninstall_activity_text" msgid="6680688689803932550">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> පහත යෙදුමේ කොටසකි:"</string>
-    <string name="uninstall_application_text" msgid="6691975835951187030">"ඔබට මෙම යෙදුම අස්ථාපනය කිරීමට අවශ්‍යද?"</string>
-    <string name="uninstall_application_text_all_users" msgid="5574704453233525222"><b>"සියලු"</b>" පරිශීලකයන්  සඳහා මෙම යෙදුම අස්ථාපනය කිරීමට ඔබට අවශ්‍යද? උපාංගයෙහි "<b>"සියලු"</b>" පරිශීලකයන් සඳහා යෙදුම සහ එහි දත්ත ඉවත්වනු ඇත."</string>
-    <string name="uninstall_application_text_user" msgid="8766882355635485733">"<xliff:g id="USERNAME">%1$s</xliff:g> පරිශීලකයා සඳහා මෙම යෙදුම අස්ථාපනය කිරීමට ඔබට අවශ්‍යයද?"</string>
-    <string name="uninstall_update_text" msgid="1394549691152728409">"මෙම යෙදුම කර්මාන්ත ශාලා අනුවාදයක් සමගින් ප්‍රතිස්ථාපනය කරන්නද? සියලු දත්ත ඉවත් කරනු ඇත."</string>
-    <string name="uninstall_update_text_multiuser" msgid="2083665452990861991">"මෙම යෙදුම කර්මාන්ත ශාලා අනුවාදයක් සමගින් ප්‍රතිස්ථාපනය කරන්නද? සියලු දත්ත ඉවත් කරනු ඇත. මෙය කාර්යාල පැතිකඩවල් සහිත අය ඇතුළුව, මෙම උපාංගයෙහි සියලු පරිශීලකයන් වෙත බලපානු ඇත."</string>
-    <string name="uninstalling_notification_channel" msgid="5698369661583525583">"අස්ථාපන ධාවනය කරමින්"</string>
-    <string name="uninstall_failure_notification_channel" msgid="8224276726364132314">"අසාර්ථක වූ අස්ථාපන"</string>
-    <string name="uninstalling" msgid="5556217435895938250">"අස්ථාපනය කරමින්…"</string>
-    <string name="uninstalling_app" msgid="2773617614877719294">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> අස්ථාපනය කරමින්…"</string>
-    <string name="uninstall_done" msgid="3792487853420281888">"අස්ථාපනය අවසන්."</string>
-    <string name="uninstall_done_app" msgid="775837862728680479">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> අස්ථාපනය කරන ලදී"</string>
-    <string name="uninstall_failed" msgid="631122574306299512">"අස්ථාපිත විම අසාර්ථකයි."</string>
-    <string name="uninstall_failed_app" msgid="945277834056527022">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> අස්ථාපනය කිරීම සාර්ථකයි."</string>
-    <string name="uninstall_failed_device_policy_manager" msgid="2727361164694743362">"ක්‍රියාකාරී උපාංගය පරිපාලක යෙදුම අස්ථාපනය කිරීමට නොහැක"</string>
-    <string name="uninstall_failed_device_policy_manager_of_user" msgid="2161462242935805756">"<xliff:g id="USERNAME">%1$s</xliff:g> සඳහා ක්‍රියාකාරී උපාංගය පරිපාලක යෙදුම අස්ථාපනය කිරීමට නොහැක"</string>
-    <string name="uninstall_all_blocked_profile_owner" msgid="3544933038594382346">"මෙම යෙදුම සමහර පරිශීලකයන්ට සහ පැතිකඩවල්වලට අවශ්‍ය අතර අනෙක් අයට අස්ථාපනය කරන ලදී"</string>
-    <string name="uninstall_blocked_profile_owner" msgid="6912141045528994954">"ඔබේ කාර්ය පැතිකඩ සඳහා මෙම යෙදුම අවශ්‍ය වන අතර අස්ථාපනය කළ නොහැකිය."</string>
-    <string name="uninstall_blocked_device_owner" msgid="7074175526413453063">"ඔබගේ උපාංගයේ පාලකයාට මෙම යෙදුම අවශ්‍ය වේ එම නිසා අස්ථාපනය කළ නොහැක."</string>
-    <string name="manage_device_administrators" msgid="118178632652346535">"උපාංග පරිපාලක යෙදුම් කළමනාකරණය කිරීම"</string>
-    <string name="manage_users" msgid="3125018886835668847">"පරිශීලකයන් කළමනාකරණය කරන්න"</string>
-    <string name="uninstall_failed_msg" msgid="8969754702803951175">"<xliff:g id="APP_NAME">%1$s</xliff:g> අස්ථාපනය කල නොහැක."</string>
-    <string name="Parse_error_dlg_text" msgid="7623286983621067011">"පැකේජය විග්‍රහ කිරීමේදී ගැටළුවක් ඇති විය."</string>
-    <string name="newPerms" msgid="6039428254474104210">"අලුත්"</string>
-    <string name="allPerms" msgid="1024385515840703981">"සියල්ල"</string>
-    <string name="privacyPerms" msgid="1850527049572617">"පෞද්ගලිකත්වය"</string>
-    <string name="devicePerms" msgid="6733560207731294504">"උපාංගය ප්‍රවේශය"</string>
-    <string name="no_new_perms" msgid="6657813692169565975">"මෙම යාවත්කාලිනයට අලුත් අවසරයන් අවශ්‍ය නොවේ."</string>
-    <string name="grant_dialog_button_deny" msgid="2176510645406614340">"ප්‍රතික්ෂේප කරන්න"</string>
-    <string name="grant_dialog_button_more_info" msgid="2218220771432058426">"වැඩිදුර තොරතුරු"</string>
-    <string name="grant_dialog_button_deny_anyway" msgid="847960499284125250">"කෙසේ වෙතත් ප්‍රතික්ෂේප කරන්න"</string>
-    <string name="current_permission_template" msgid="6378304249516652817">"<xliff:g id="PERMISSION_COUNT">%2$s</xliff:g> න් <xliff:g id="CURRENT_PERMISSION_INDEX">%1$s</xliff:g>"</string>
-    <string name="permission_warning_template" msgid="7332275268559121742">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ට <xliff:g id="ACTION">%2$s</xliff:g> වෙත ඉඩ දෙන්නද?"</string>
-    <string name="permission_add_background_warning_template" msgid="5391175001698541141">"සැම විට &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; හට <xliff:g id="ACTION">%2$s</xliff:g> වෙත ඉඩ දෙන්නද?"</string>
-    <string name="allow_permission_foreground_only" msgid="1016389465002335286">"යෙදුම භාවිතා කරන විට පමණි"</string>
-    <string name="allow_permission_always" msgid="7047379650123289823">"සැම විට"</string>
-    <string name="deny_permission_deny_and_dont_ask_again" msgid="8003202275002645629">"ප්‍රතික්ෂේප කරන්න, නැවත අසන්න එපා"</string>
-    <string name="permission_revoked_count" msgid="7386129423432613024">"<xliff:g id="COUNT">%1$d</xliff:g> අබලයි"</string>
-    <string name="permission_revoked_all" msgid="8595742638132863678">"සියල්ල අබලයි"</string>
-    <string name="permission_revoked_none" msgid="2059511550181271342">"කිසිවක් අබල නැත"</string>
-    <string name="grant_dialog_button_allow" msgid="4616529495342337095">"ඉඩ දෙන්න"</string>
-    <string name="app_permissions_breadcrumb" msgid="3390836200791539264">"යෙදුම්"</string>
-    <string name="app_permissions" msgid="3146758905824597178">"යෙදුම් අවසර"</string>
-    <string name="never_ask_again" msgid="1089938738199748687">"නැවත අසන්න එපා"</string>
-    <string name="no_permissions" msgid="3210542466245591574">"අවසර නොමැත"</string>
-    <string name="additional_permissions" msgid="6667573114240111763">"අතිරේක අවසර"</string>
-    <string name="app_permissions_info_button_label" msgid="7789812060395257748">"යෙදුම් තොරතුරු විවෘත කරන්න"</string>
-    <plurals name="additional_permissions_more" formatted="false" msgid="945127158155064388">
-      <item quantity="one">.තව <xliff:g id="COUNT_1">%1$d</xliff:g></item>
-      <item quantity="other">.තව <xliff:g id="COUNT_1">%1$d</xliff:g></item>
-    </plurals>
-    <string name="old_sdk_deny_warning" msgid="3872277112584842615">"මෙම යෙදුම නිර්මාණය කර ඇත්තේ Android වල පැරණි අනුවාදයකට වේ. අවසර නොදීම මඟින් එය බලාපොරොත්තු වන ආකාරයට වැඩ නොකිරීමට හැක."</string>
-    <string name="default_permission_description" msgid="4992892207044156668">"නොදන්නා ක්‍රියාවක් සිදු කරන්න"</string>
-    <string name="app_permissions_group_summary" msgid="4787239772223699263">"යෙදුම් <xliff:g id="COUNT_1">%2$d</xliff:g> න් <xliff:g id="COUNT_0">%1$d</xliff:g> කට ඉඩ දෙන ලදි"</string>
-    <string name="menu_show_system" msgid="6773743421743728921">"පද්ධතිය පෙන්වන්න"</string>
-    <string name="menu_hide_system" msgid="7595471742649432977">"පද්ධතිය සඟවන්න"</string>
-    <string name="no_apps" msgid="1965493419005012569">"යෙදුම් නොමැත"</string>
-    <string name="location_settings" msgid="1774875730854491297">"ස්ථාන සැකසීම්"</string>
-    <string name="location_warning" msgid="8778701356292735971">"<xliff:g id="APP_NAME">%1$s</xliff:g> මෙම උපාංගය සඳහා ස්ථාන සේවාවන් සපයන්නෙකු වේ. ස්ථාන ප්‍රවේශය ස්ථාන සැකසීම් වෙතින් වෙනස් කළ හැක."</string>
-    <string name="system_warning" msgid="7103819124542305179">"ඔබ මෙම අවසරය ප්‍රතික්ෂේප කරන්නේ නම්, සමහර යෙදුම් බලාපොරොත්තු පරිදි ක්‍රියා නොකරනු ඇත."</string>
-    <string name="permission_summary_enforced_by_policy" msgid="3418617316188986205">"ප්‍රතිපත්තිය මඟින් බලාත්මක කරයි"</string>
-    <string name="permission_summary_disabled_by_policy_background_only" msgid="160007162349980265">"පසුබිම් ප්‍රවේශය ප්‍රතිපත්තිය මගින් අබල කර ඇත"</string>
-    <string name="permission_summary_enabled_by_policy_background_only" msgid="4834971700297385342">"පසුබිම් ප්‍රවේශය ප්‍රතිපත්තිය මගින් සබල කර ඇත"</string>
-    <string name="permission_summary_enabled_by_policy_foreground_only" msgid="5150061275247925588">"පෙරබිම් ප්‍රවේශය ප්‍රතිපත්තිය මගින් සබල කර ඇත"</string>
-    <string name="permission_summary_enforced_by_admin" msgid="1702707982488952544">"පරිපාලක විසින් පාලනය කෙරේ"</string>
-    <!-- no translation found for background_access_chooser_dialog_choices:0 (7142769853837915143) -->
-    <!-- no translation found for background_access_chooser_dialog_choices:1 (7804653189249679164) -->
-    <!-- no translation found for background_access_chooser_dialog_choices:2 (1131794379787779680) -->
-    <string name="permission_access_always" msgid="5642491469836594184">"සැම විට"</string>
-    <string name="permission_access_only_foreground" msgid="6906814759741316041">"යෙදුම භාවිතා කරන විට පමණි"</string>
-    <string name="permission_access_never" msgid="1258330706341318622">"කිසි විටක නැත"</string>
-    <string name="loading" msgid="7811651799620593731">"පූරණය කරමින්…"</string>
-    <string name="all_permissions" msgid="5156669007784613042">"සියලු අවසර"</string>
-    <string name="other_permissions" msgid="2016192512386091933">"වෙනත් යෙදුම් හැකියාවන්"</string>
-    <string name="permission_request_title" msgid="1204446718549121199">"අවසර ඉල්ලීම"</string>
-    <string name="screen_overlay_title" msgid="3021729846864038529">"තිර උඩැතිරියක් අනාවරණය කරන ලදි"</string>
-    <string name="screen_overlay_message" msgid="2141944461571677331">"මෙම අවසර සැකසීම වෙනස් කිරීම සඳහා, ඔබට මුලින්ම සැකසීම් &gt; යෙදුම් වෙතින් තිර උඩැතිරිය අක්‍රිය කර යුතුයි"</string>
-    <string name="screen_overlay_button" msgid="4344544843349937743">"සැකසීම් විවෘත කරන්න"</string>
-    <string name="wear_not_allowed_dlg_title" msgid="8104666773577525713">"Android Wear"</string>
-    <string name="wear_not_allowed_dlg_text" msgid="1322352525843583064">"Wear මත ස්ථාපන/අස්ථාපනය ක්‍රියා සහාය දක්වන්නේ නැත."</string>
-    <string name="permission_review_title_template_install" msgid="6819338441305295479">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; හට පිවිසීමට ඉඩ දෙන දේ තෝරන්න"</string>
-    <string name="permission_review_title_template_update" msgid="8632233603161669426">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; යාවත්කාලීන කර ඇත. මෙම යෙදුමට පිවිසීමට ඉඩ දෙන දේ තෝරන්න."</string>
-    <string name="review_button_cancel" msgid="957906817733578877">"අවලංගු කරන්න"</string>
-    <string name="review_button_continue" msgid="4809162078179371370">"දිගටම කර ගෙන යන්න"</string>
-    <string name="new_permissions_category" msgid="3213523410139204183">"නව අවසර"</string>
-    <string name="current_permissions_category" msgid="998210994450606094">"වත්මන් අවසර"</string>
-    <string name="message_staging" msgid="6151794817691100003">"යෙදුම වේදිකාගත කරමින්..."</string>
-    <string name="app_name_unknown" msgid="8931522764510159105">"නොදනී"</string>
-    <string name="untrusted_external_source_warning" product="tablet" msgid="1483151219938173935">"ආරක්ෂාව සඳහා, ඔබගේ ටැබ්ලටය මෙම මුලාශ්‍රයෙන් ලබාගත් නොදන්නා යෙදුම් ස්ථාපනය කිරීමට අවසර නැත."</string>
-    <string name="untrusted_external_source_warning" product="tv" msgid="5373768281884328560">"ආරක්ෂාව සඳහා, ඔබගේ රූපවාහිනිය මෙම මුලාශ්‍රයෙන් ලබාගත් නොදන්නා යෙදුම් ස්ථාපනය කිරීමට අවසර නැත."</string>
-    <string name="untrusted_external_source_warning" product="default" msgid="2223486836232706553">"ආරක්ෂාව සඳහා, ඔබගේ දුරකථනය මෙම මුලාශ්‍රයෙන් ලබාගත් නොදන්නා යෙදුම් ස්ථාපනය කිරීමට අවසර නැත."</string>
-    <string name="anonymous_source_warning" product="default" msgid="7700263729981815614">"ඔබගේ දුරකථනය සහ පුද්ගලික දත්තවලට නොදන්නා යෙදුම් මඟින් තර්ජන එල්ල කිරීමේ හැකියාව වැඩිය. මෙම යෙදුම් ස්ථාපනය කිරීමෙන් සහ භාවිත කිරීමෙන් ඔබ ඔබේ දුරකථනය සඳහා සිදු වන යම් හානි හෝ එය භාවිත කිරීමේ ප්‍රතිඵලයක් ලෙස සිදු වන දත්ත හානි සඳහා ඔබ වගකිව යුතු බවට එකඟ වේ."</string>
-    <string name="anonymous_source_warning" product="tablet" msgid="8854462805499848630">"ඔබගේ ටැබ්ලට් පරිගණකය සහ පුද්ගලික දත්තවලට නොදන්නා යෙදුම් මඟින් තර්ජන එල්ල කිරීමේ හැකියාව වැඩිය. මෙම යෙදුම් ස්ථාපනය කිරීමෙන් සහ භාවිත කිරීමෙන් ඔබ ඔබේ ටැබ්ලට් පරිගණකය සඳහා සිදු වන යම් හානි හෝ එය භාවිත කිරීමේ ප්‍රතිඵලයක් ලෙස සිදු වන දත්ත හානි සඳහා ඔබ වගකිව යුතු බවට එකඟ වේ."</string>
-    <string name="anonymous_source_warning" product="tv" msgid="1291472686734385872">"ඔබගේ TV සහ පුද්ගලික දත්තවලට නොදන්නා යෙදුම් මඟින් තර්ජන එල්ල කිරීමේ හැකියාව වැඩිය. මෙම යෙදුම් ස්ථාපනය කිරීමෙන් සහ භාවිත කිරීමෙන් ඔබ ඔබේ TV සඳහා සිදු වන යම් හානි හෝ එය භාවිත කිරීමේ ප්‍රතිඵලයක් ලෙස සිදු වන දත්ත හානි සඳහා ඔබ වගකිව යුතු බවට එකඟ වේ."</string>
-    <string name="anonymous_source_continue" msgid="2094381167954332292">"දිගටම කරගෙන යන්න"</string>
-    <string name="external_sources_settings" msgid="8601453744517291632">"සැකසීම්"</string>
-    <string name="wear_app_channel" msgid="6200840123672949356">"Wear යෙදුම් ස්ථාපනය/අස්ථාපනය කරමින්"</string>
+    <string name="app_name" msgid="7488448184431507488">"පැකේජ ස්ථාපනකරු"</string>
+    <string name="install" msgid="711829760615509273">"ස්ථාපනය කරන්න"</string>
+    <string name="done" msgid="6632441120016885253">"කළා"</string>
+    <string name="cancel" msgid="1018267193425558088">"අවලංගු කරන්න"</string>
+    <string name="installing" msgid="4921993079741206516">"ස්ථාපනය කරමින්…"</string>
+    <string name="installing_app" msgid="1165095864863849422">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ස්ථාපනය කරමින්…"</string>
+    <string name="install_done" msgid="5987363587661783896">"යෙදුම ස්ථාපනය කර ඇත."</string>
+    <string name="install_confirm_question" msgid="8176284075816604590">"මෙම යෙදුම ස්ථාපනය කිරීමට ඔබට අවශ්‍යද?"</string>
+    <string name="install_confirm_question_update" msgid="7942235418781274635">"මෙම යෙදුම සඳහා යාවත්කාලීන ස්ථාපනය කිරීමට ඔබට අවශ්‍යද? ඔබගේ පවතින දත්ත නැති වනු ඇත."</string>
+    <string name="install_confirm_question_update_system" msgid="4713001702777910263">"මෙම ඇමිණූ යෙදුමට යාවත්කාලීන ස්ථාපනය කිරීමට ඔබට අවශ්‍යද? ඔබගේ පවතින දත්ත නැති වනු ඇත."</string>
+    <string name="install_failed" msgid="5777824004474125469">"යෙදුම ස්ථාපනය කර නැත."</string>
+    <string name="install_failed_blocked" msgid="8512284352994752094">"මෙම පැකේජය ස්ථාපනය කිරීම අවහිර කරන ලදි."</string>
+    <string name="install_failed_conflict" msgid="3493184212162521426">"පැකේජය දැනට පවතින පැකේජයක් සමග ගැටෙන නිසා යෙදුම ස්ථාපනය නොකරන ලදී."</string>
+    <string name="install_failed_incompatible" product="tablet" msgid="6019021440094927928">"යෙදුම ඔබේ ටැබ්ලට් පරිගණකය සමග නොගැළපෙන නිසා යෙදුම ස්ථාපනය නොකරන ලදී."</string>
+    <string name="install_failed_incompatible" product="tv" msgid="2890001324362291683">"මෙම යෙදුම ඔබගේ රූපවාහිනිය හා නොගැළපේ."</string>
+    <string name="install_failed_incompatible" product="default" msgid="7254630419511645826">"යෙදුම ඔබේ දුරකථනය සමග නොගැළපෙන නිසා යෙදුම ස්ථාපනය නොකරන ලදී."</string>
+    <string name="install_failed_invalid_apk" msgid="8581007676422623930">"පැකේජය වලංගු නොවන බවක් පෙනෙන නිසා යෙදුම ස්ථාපනය නොකරන ලදී."</string>
+    <string name="install_failed_msg" product="tablet" msgid="6298387264270562442">"ඔබගේ ටැබ්ලටයේ <xliff:g id="APP_NAME">%1$s</xliff:g> ස්ථාපනය කළ නොහැක."</string>
+    <string name="install_failed_msg" product="tv" msgid="1920009940048975221">"<xliff:g id="APP_NAME">%1$s</xliff:g> ඔබගේ රූපවාහිනියේ ස්ථාපනය කළ නොහැක."</string>
+    <string name="install_failed_msg" product="default" msgid="6484461562647915707">"<xliff:g id="APP_NAME">%1$s</xliff:g> දුරකථනයට ස්ථාපිත කිරීමට නොහැකි විය."</string>
+    <string name="launch" msgid="3952550563999890101">"විවෘතයි"</string>
+    <string name="unknown_apps_admin_dlg_text" msgid="4456572224020176095">"නාඳුනන මූලයන් වෙතින් ලබාගත් යෙදුම් ස්ථාපනය කිරීමට ඔබගේ පරිපාලකයා ඉඩ නොදේ"</string>
+    <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"මෙම පරිශීලකයා මඟින් නොදන්නා යෙදුම් ස්ථාපනය කළ නොහැක"</string>
+    <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"මෙම පරිශීලකයාට යෙදුම් ස්ථාපනය කිරීමට අවසර නැත"</string>
+    <string name="ok" msgid="7871959885003339302">"හරි"</string>
+    <string name="manage_applications" msgid="5400164782453975580">"යෙදුම් කළමනාකරණය කරන්න"</string>
+    <string name="out_of_space_dlg_title" msgid="4156690013884649502">"ඉඩ නොමැත"</string>
+    <string name="out_of_space_dlg_text" msgid="8727714096031856231">"<xliff:g id="APP_NAME">%1$s</xliff:g> ස්ථාපිත කිරීමට නොහැකි විය. ඉඩ පොඩ්ඩක් නිදහස් කොට නැවත උත්සාහ කරන්න."</string>
+    <string name="app_not_found_dlg_title" msgid="5107924008597470285">"යෙදුම හමුවී නැත"</string>
+    <string name="app_not_found_dlg_text" msgid="5219983779377811611">"ස්ථාපිත යෙදුම් ලැයිස්තුවේ යෙදුම සොයා ගත නොහැකි විය."</string>
+    <string name="user_is_not_allowed_dlg_title" msgid="6915293433252210232">"ඉඩ නොදේ"</string>
+    <string name="user_is_not_allowed_dlg_text" msgid="3468447791330611681">"වත්මන් පරිශීලකයාට මෙම අස්ථාපනය සිදු කිරීමට ඉඩ නොදේ."</string>
+    <string name="generic_error_dlg_title" msgid="5863195085927067752">"දෝෂය"</string>
+    <string name="generic_error_dlg_text" msgid="5287861443265795232">"යෙදුම අස්ථාපනය කළ නොහැකි විය."</string>
+    <string name="uninstall_application_title" msgid="4045420072401428123">"යෙදුම අස්ථාපනය කරන්න"</string>
+    <string name="uninstall_update_title" msgid="824411791011583031">"යාවත්කාලිනය අස්ථාපනය කරන්න"</string>
+    <string name="uninstall_activity_text" msgid="1928194674397770771">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> පහත යෙදුමේ කොටසකි:"</string>
+    <string name="uninstall_application_text" msgid="3816830743706143980">"ඔබට මෙම යෙදුම අස්ථාපනය කිරීමට අවශ්‍යද?"</string>
+    <string name="uninstall_application_text_all_users" msgid="575491774380227119"><b>"සියලු"</b>" පරිශීලකයන් සඳහා මෙම යෙදුම අස්ථාපනය කිරීමට ඔබට අවශ්‍යද? උපාංගයෙහි "<b>"සියලු"</b>" පරිශීලකයන් සඳහා යෙදුම සහ එහි දත්ත ඉවත්වනු ඇත."</string>
+    <string name="uninstall_application_text_user" msgid="498072714173920526">"<xliff:g id="USERNAME">%1$s</xliff:g> පරිශීලකයා සඳහා මෙම යෙදුම අස්ථාපනය කිරීමට ඔබට අවශ්‍යයද?"</string>
+    <string name="uninstall_update_text" msgid="863648314632448705">"මෙම යෙදුම කර්මාන්ත ශාලා අනුවාදයක් සමගින් ප්‍රතිස්ථාපනය කරන්නද? සියලු දත්ත ඉවත් කරනු ඇත."</string>
+    <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"මෙම යෙදුම කර්මාන්ත ශාලා අනුවාදයක් සමගින් ප්‍රතිස්ථාපනය කරන්නද? සියලු දත්ත ඉවත් කරනු ඇත. මෙය කාර්යාල පැතිකඩවල් සහිත අය ඇතුළුව, මෙම උපාංගයෙහි සියලු පරිශීලකයන් වෙත බලපානු ඇත."</string>
+    <string name="uninstalling_notification_channel" msgid="840153394325714653">"අස්ථාපන ධාවනය කරමින්"</string>
+    <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"අසාර්ථක වූ අස්ථාපන"</string>
+    <string name="uninstalling" msgid="8709566347688966845">"අස්ථාපනය කරමින්…"</string>
+    <string name="uninstalling_app" msgid="8866082646836981397">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> අස්ථාපනය කරමින්…"</string>
+    <string name="uninstall_done" msgid="439354138387969269">"අස්ථාපනය කිරීම අවසානයි."</string>
+    <string name="uninstall_done_app" msgid="4588850984473605768">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> අස්ථාපනය කරන ලදී"</string>
+    <string name="uninstall_failed" msgid="1847750968168364332">"අස්ථාපනය කිරිම අසාර්ථක විය."</string>
+    <string name="uninstall_failed_app" msgid="5506028705017601412">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> අස්ථාපනය කිරීම සාර්ථකයි."</string>
+    <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"ක්‍රියාකාරී උපාංගය පරිපාලක යෙදුම අස්ථාපනය කිරීමට නොහැක"</string>
+    <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"<xliff:g id="USERNAME">%1$s</xliff:g> සඳහා ක්‍රියාකාරී උපාංගය පරිපාලක යෙදුම අස්ථාපනය කිරීමට නොහැක"</string>
+    <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"මෙම යෙදුම සමහර පරිශීලකයන්ට සහ පැතිකඩවල්වලට අවශ්‍ය අතර අනෙක් අයට අස්ථාපනය කරන ලදී"</string>
+    <string name="uninstall_blocked_profile_owner" msgid="6373897407002404848">"ඔබේ කාර්ය පැතිකඩ සඳහා මෙම යෙදුම අවශ්‍ය වන අතර අස්ථාපනය කළ නොහැකිය."</string>
+    <string name="uninstall_blocked_device_owner" msgid="6724602931761073901">"ඔබගේ උපාංගයේ පාලකයාට මෙම යෙදුම අවශ්‍ය වේ එම නිසා අස්ථාපනය කළ නොහැක."</string>
+    <string name="manage_device_administrators" msgid="3092696419363842816">"උපාංග පරිපාලක යෙදුම් කළමනාකරණය කිරීම"</string>
+    <string name="manage_users" msgid="1243995386982560813">"පරිශීලකයන් කළමනාකරණය කරන්න"</string>
+    <string name="uninstall_failed_msg" msgid="2176744834786696012">"<xliff:g id="APP_NAME">%1$s</xliff:g> අස්ථාපනය කල නොහැක."</string>
+    <string name="Parse_error_dlg_text" msgid="1661404001063076789">"පැකේජය විග්‍රහ කිරීමේදී ගැටළුවක් ඇති විය."</string>
+    <string name="wear_not_allowed_dlg_title" msgid="8664785993465117517">"Android Wear"</string>
+    <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"Wear මත ස්ථාපන/අස්ථාපනය ක්‍රියා සහාය දක්වන්නේ නැත."</string>
+    <string name="message_staging" msgid="8032722385658438567">"යෙදුම වේදිකාගත කරමින්..."</string>
+    <string name="app_name_unknown" msgid="6881210203354323926">"නොදනී"</string>
+    <string name="untrusted_external_source_warning" product="tablet" msgid="6539403649459942547">"ආරක්ෂාව සඳහා, ඔබගේ ටැබ්ලටය මෙම මුලාශ්‍රයෙන් ලබාගත් නොදන්නා යෙදුම් ස්ථාපනය කිරීමට අවසර නැත."</string>
+    <string name="untrusted_external_source_warning" product="tv" msgid="1206648674551321364">"ආරක්ෂාව සඳහා, ඔබගේ රූපවාහිනිය මෙම මුලාශ්‍රයෙන් ලබාගත් නොදන්නා යෙදුම් ස්ථාපනය කිරීමට අවසර නැත."</string>
+    <string name="untrusted_external_source_warning" product="default" msgid="7279739265754475165">"ආරක්ෂාව සඳහා, ඔබගේ දුරකථනය මෙම මුලාශ්‍රයෙන් ලබාගත් නොදන්නා යෙදුම් ස්ථාපනය කිරීමට අවසර නැත."</string>
+    <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"ඔබගේ දුරකථනය සහ පුද්ගලික දත්තවලට නොදන්නා යෙදුම් මඟින් තර්ජන එල්ල කිරීමේ හැකියාව වැඩිය. මෙම යෙදුම් ස්ථාපනය කිරීමෙන් සහ භාවිත කිරීමෙන් ඔබ ඔබේ දුරකථනය සඳහා සිදු වන යම් හානි හෝ එය භාවිත කිරීමේ ප්‍රතිඵලයක් ලෙස සිදු වන දත්ත හානි සඳහා ඔබ වගකිව යුතු බවට එකඟ වේ."</string>
+    <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"ඔබගේ ටැබ්ලට් පරිගණකය සහ පුද්ගලික දත්තවලට නොදන්නා යෙදුම් මඟින් තර්ජන එල්ල කිරීමේ හැකියාව වැඩිය. මෙම යෙදුම් ස්ථාපනය කිරීමෙන් සහ භාවිත කිරීමෙන් ඔබ ඔබේ ටැබ්ලට් පරිගණකය සඳහා සිදු වන යම් හානි හෝ එය භාවිත කිරීමේ ප්‍රතිඵලයක් ලෙස සිදු වන දත්ත හානි සඳහා ඔබ වගකිව යුතු බවට එකඟ වේ."</string>
+    <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"ඔබගේ TV සහ පුද්ගලික දත්තවලට නොදන්නා යෙදුම් මඟින් තර්ජන එල්ල කිරීමේ හැකියාව වැඩිය. මෙම යෙදුම් ස්ථාපනය කිරීමෙන් සහ භාවිත කිරීමෙන් ඔබ ඔබේ TV සඳහා සිදු වන යම් හානි හෝ එය භාවිත කිරීමේ ප්‍රතිඵලයක් ලෙස සිදු වන දත්ත හානි සඳහා ඔබ වගකිව යුතු බවට එකඟ වේ."</string>
+    <string name="anonymous_source_continue" msgid="4375745439457209366">"ඉදිරියට යන්න"</string>
+    <string name="external_sources_settings" msgid="4046964413071713807">"සැකසීම්"</string>
+    <string name="wear_app_channel" msgid="1960809674709107850">"Wear යෙදුම් ස්ථාපනය/අස්ථාපනය කරමින්"</string>
 </resources>

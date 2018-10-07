@@ -16,141 +16,76 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_name" msgid="2738748390251381682">"Топтом орноткуч"</string>
-    <string name="next" msgid="3057143178373252333">"Кийинки"</string>
-    <string name="install" msgid="5896438203900042068">"Орнотуу"</string>
-    <string name="done" msgid="3889387558374211719">"Даяр"</string>
-    <string name="cancel" msgid="8360346460165114585">"Жокко чыгаруу"</string>
-    <string name="installing" msgid="8613631001631998372">"Орнотулууда…"</string>
-    <string name="installing_app" msgid="4097935682329028894">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> орнотулууда…"</string>
-    <string name="install_done" msgid="3682715442154357097">"Колдонмо орнотулду."</string>
-    <string name="install_confirm_question" msgid="7295206719219043890">"Бул колдонмону орнотоюн дегениңиз аныкпы? Ал кийинкилерге жетки алат:"</string>
-    <string name="install_confirm_question_no_perms" msgid="5918305641302873520">"Бул колдонмону орнотоюн дегениңиз аныкпы? Ал эч бир атайын жетки уруксаттарын талап кылбайт."</string>
-    <string name="install_confirm_question_update" msgid="4624159567361487964">"Учурда иштеп турган бул колдонмого жаңыртуу орнотоюн дегениңиз аныкпы? Сиздин сакталган берилиштериңиз өчүрүлбөйт. Жаңыртылган колдонмо кийинкилерге жетки алат:"</string>
-    <string name="install_confirm_question_update_system" msgid="1302330093676416336">"Бул камтылган колдонмого жаңыртуу орнотоюн дегениңиз аныкпы? Сиздин сакталган берилиштериңиз өчүрүлбөйт. Жаңыртылган колдонмо кийинкилерге жетки алат:"</string>
-    <string name="install_confirm_question_update_no_perms" msgid="4885928136844618944">"Учурда иштпе турган бул колдонмого жаңыртуу орнотоюн дегениңиз аныкпы? Сиздин сакталган берилиштериңиз өчүрүлбөйт. Ал эч бир атайын жетки уруксаттарын талап кылбайт."</string>
-    <string name="install_confirm_question_update_system_no_perms" msgid="7676593512694724374">"Бул камтылган колдонмого жаңыртуу орнотоюн дегениңиз аныкпы? Сиздин сакталган берилиштериңиз өчүрүлбөйт. Ал эч бир атайын жетки уруксаттарын  талап кылбайт."</string>
-    <string name="install_failed" msgid="6579998651498970899">"Колдонмо орнотулган жок."</string>
-    <string name="install_failed_blocked" msgid="1606870930588770025">"Топтом орнотуудан бөгөттөлгөн."</string>
-    <string name="install_failed_conflict" msgid="5336045235168070954">"Башка топтом менен дал келбегендиктен колдонмо орнотулган жок."</string>
-    <string name="install_failed_incompatible" product="tablet" msgid="6682387386242708974">"Бул колдонмо планшетиңизге шайкеш эмес болгондуктан колдонмо орнотулган жок."</string>
-    <string name="install_failed_incompatible" product="tv" msgid="3553367270510072729">"Бул колдонмо сыналгыңызга шайкеш келбейт."</string>
-    <string name="install_failed_incompatible" product="default" msgid="7917996365659426872">"Бул колдонмо телефонуңузга шайкеш эмес болгондуктан колдонмо орнотулган жок."</string>
-    <string name="install_failed_invalid_apk" msgid="269885385245534742">"Топтом катары орнотулбай калган колдонмо жараксыз окшойт."</string>
-    <string name="install_failed_msg" product="tablet" msgid="8368835262605608787">"<xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосун планшетиңизге орнотуу мүмкүн эмес."</string>
-    <string name="install_failed_msg" product="tv" msgid="3990457938384021566">"<xliff:g id="APP_NAME">%1$s</xliff:g> сыналгыңызга орнотулбай койду."</string>
-    <string name="install_failed_msg" product="default" msgid="8554909560982962052">"<xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосун телефонуңузга орнотуу мүмкүн эмес."</string>
-    <string name="launch" msgid="4826921505917605463">"Ачуу"</string>
-    <string name="unknown_apps_admin_dlg_text" msgid="7488386758312008790">"Администраторуңуз белгисиз булактардан алынган колдонмолордун орнотулушуна жол бербейт"</string>
-    <string name="unknown_apps_user_restriction_dlg_text" msgid="5785226253054083336">"Бул колдонуучу белгисиз колдонмолорду орното албайт"</string>
-    <string name="install_apps_user_restriction_dlg_text" msgid="5041150186260066212">"Бул колдонуучу колдонмолорду орното албайт"</string>
-    <string name="ok" msgid="3468756155452870475">"Жарайт"</string>
-    <string name="manage_applications" msgid="4033876279091996596">"Колдонмолорду башкаруу"</string>
-    <string name="out_of_space_dlg_title" msgid="7843674437613797326">"Бош орун жок"</string>
-    <string name="out_of_space_dlg_text" msgid="4774775404294282216">"<xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосун телефонуңузга орнотуу мүмкүн эмес. Орун бошотуп, кайталап орнотуп көрүңүз."</string>
-    <string name="app_not_found_dlg_title" msgid="2692335460569505484">"Колдонмо табылган жок"</string>
-    <string name="app_not_found_dlg_text" msgid="6107465056055095930">"Колдонмо орнотулган колдонмолор тизмегинен табылган жок."</string>
-    <string name="user_is_not_allowed_dlg_title" msgid="118128026847201582">"Тыюу салынган"</string>
-    <string name="user_is_not_allowed_dlg_text" msgid="739716827677987545">"Учурдагы колдонуучу колдонмону чыгарып сала албайт."</string>
-    <string name="generic_error_dlg_title" msgid="2684806600635296961">"Ката"</string>
-    <string name="generic_error_dlg_text" msgid="4288738047825333954">"Колдонмону чыгарып салуу мүмкүн болбой жатат."</string>
-    <string name="uninstall_application_title" msgid="1860074100811653963">"Колдонмону чечип салуу"</string>
-    <string name="uninstall_update_title" msgid="4146940097553335390">"Жаңыртууну чечип салуу"</string>
-    <string name="uninstall_activity_text" msgid="6680688689803932550">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> кийинки колдонмонун бөлүгү:"</string>
-    <string name="uninstall_application_text" msgid="6691975835951187030">"Бул колдонмону чечип салгыңыз келеби?"</string>
-    <string name="uninstall_application_text_all_users" msgid="5574704453233525222">"Бул колдонмо "<b>"бардык"</b>" колдонуучулардан алынып салынсынбы? Бул колдонмо жана анын берилиштери бул түзмөктүн "<b>"бардык"</b>" колдонуучуларынан алынат."</string>
-    <string name="uninstall_application_text_user" msgid="8766882355635485733">"Бул колдонмону <xliff:g id="USERNAME">%1$s</xliff:g> колдонуучусу үчүн орнотуудан чыгаргыңыз келеби?"</string>
-    <string name="uninstall_update_text" msgid="1394549691152728409">"Бул колдонмонун баштапкы версиясы орнотулсунбу? Бардык дайындар өчүп калат."</string>
-    <string name="uninstall_update_text_multiuser" msgid="2083665452990861991">"Бул колдонмонун баштапкы версиясы орнотулсунбу? Түзмөктөгү бардык профилдердин, ошондой эле жумушчу профилдин дайындары өчүп калат."</string>
-    <string name="uninstalling_notification_channel" msgid="5698369661583525583">"Чыгарылып салынууда"</string>
-    <string name="uninstall_failure_notification_channel" msgid="8224276726364132314">"Чыгарылып салынбай калгандар"</string>
-    <string name="uninstalling" msgid="5556217435895938250">"Чыгарылып салынууда…"</string>
-    <string name="uninstalling_app" msgid="2773617614877719294">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> колдонмосу чыгарылууда…"</string>
-    <string name="uninstall_done" msgid="3792487853420281888">"Чечилип бүттү."</string>
-    <string name="uninstall_done_app" msgid="775837862728680479">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> колдонмосу чыгарылды"</string>
-    <string name="uninstall_failed" msgid="631122574306299512">"Чечүү ийгиликсиз болду."</string>
-    <string name="uninstall_failed_app" msgid="945277834056527022">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> колдонмосун чыгарып салуу ишке ашкан жок."</string>
-    <string name="uninstall_failed_device_policy_manager" msgid="2727361164694743362">"Түзмөктү башкарган колдонмо иштеп жатканда аны чыгарып салууга болбойт"</string>
-    <string name="uninstall_failed_device_policy_manager_of_user" msgid="2161462242935805756">"<xliff:g id="USERNAME">%1$s</xliff:g> колдонуучусунун түзмөктү башкарган колдонмосу иштеп жатканда, аны чыгарып салууга болбойт"</string>
-    <string name="uninstall_all_blocked_profile_owner" msgid="3544933038594382346">"Колдонмо айрым колдонуучулар же профилдерге керек."</string>
-    <string name="uninstall_blocked_profile_owner" msgid="6912141045528994954">"Бул колдонмо профилиңизге керек жана аны чыгарып салуу мүмкүн эмес."</string>
-    <string name="uninstall_blocked_device_owner" msgid="7074175526413453063">"Бул колдонмо түзмөк администраторуңузга керектелет жана орнотуудан чыгаруу мүмкүн эмес."</string>
-    <string name="manage_device_administrators" msgid="118178632652346535">"Түзмөктү башкарган колдонмолорду көзөмөлдөө"</string>
-    <string name="manage_users" msgid="3125018886835668847">"Колдонуучуларды башкаруу"</string>
-    <string name="uninstall_failed_msg" msgid="8969754702803951175">"<xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосун чечип салуу мүмкүн эмес."</string>
-    <string name="Parse_error_dlg_text" msgid="7623286983621067011">"Таңгакты окууда маселе пайда болду."</string>
-    <string name="newPerms" msgid="6039428254474104210">"Жаңы"</string>
-    <string name="allPerms" msgid="1024385515840703981">"Бардыгы"</string>
-    <string name="privacyPerms" msgid="1850527049572617">"Купуялуулук"</string>
-    <string name="devicePerms" msgid="6733560207731294504">"Жетүү уруксаттары"</string>
-    <string name="no_new_perms" msgid="6657813692169565975">"Бул жаңыртуу жаңы уруксаттарды талап кылбайт."</string>
-    <string name="grant_dialog_button_deny" msgid="2176510645406614340">"Жок"</string>
-    <string name="grant_dialog_button_more_info" msgid="2218220771432058426">"Көбүрөөк маалымат"</string>
-    <string name="grant_dialog_button_deny_anyway" msgid="847960499284125250">"Баш тартуу"</string>
-    <string name="current_permission_template" msgid="6378304249516652817">"<xliff:g id="PERMISSION_COUNT">%2$s</xliff:g> ичинен <xliff:g id="CURRENT_PERMISSION_INDEX">%1$s</xliff:g>"</string>
-    <string name="permission_warning_template" msgid="7332275268559121742">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; колдонмосуна <xliff:g id="ACTION">%2$s</xliff:g> уруксат берилсинби?"</string>
-    <string name="permission_add_background_warning_template" msgid="5391175001698541141">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; колдонмосуна <xliff:g id="ACTION">%2$s</xliff:g> аракетине ар дайым уруксат берилсинби?"</string>
-    <string name="allow_permission_foreground_only" msgid="1016389465002335286">"Ушул колдонмодо иштегенде гана"</string>
-    <string name="allow_permission_always" msgid="7047379650123289823">"Ар дайым"</string>
-    <string name="deny_permission_deny_and_dont_ask_again" msgid="8003202275002645629">"Баш тартам жана экинчи суралбасын"</string>
-    <string name="permission_revoked_count" msgid="7386129423432613024">"<xliff:g id="COUNT">%1$d</xliff:g> өчүрүлгөн"</string>
-    <string name="permission_revoked_all" msgid="8595742638132863678">"баары өчүрүлгөн"</string>
-    <string name="permission_revoked_none" msgid="2059511550181271342">"эч бири өчүрүлгөн жок"</string>
-    <string name="grant_dialog_button_allow" msgid="4616529495342337095">"Уруксат берүү"</string>
-    <string name="app_permissions_breadcrumb" msgid="3390836200791539264">"Колдонмолор"</string>
-    <string name="app_permissions" msgid="3146758905824597178">"Колдонмо уруксаттары"</string>
-    <string name="never_ask_again" msgid="1089938738199748687">"Экинчи суралбасын"</string>
-    <string name="no_permissions" msgid="3210542466245591574">"Уруксаттар жок"</string>
-    <string name="additional_permissions" msgid="6667573114240111763">"Кошумча уруксаттар"</string>
-    <string name="app_permissions_info_button_label" msgid="7789812060395257748">"Колдонмо тууралуу маалыматты ачуу"</string>
-    <plurals name="additional_permissions_more" formatted="false" msgid="945127158155064388">
-      <item quantity="other">Дагы <xliff:g id="COUNT_1">%1$d</xliff:g></item>
-      <item quantity="one">Дагы <xliff:g id="COUNT_0">%1$d</xliff:g></item>
-    </plurals>
-    <string name="old_sdk_deny_warning" msgid="3872277112584842615">"Бул колдонмо эски Android версиясы үчүн түзүлгөн. Уруксат берилбесе, ал туура эмес иштеп калышы мүмкүн."</string>
-    <string name="default_permission_description" msgid="4992892207044156668">"белгисиз аракеттерди жасайт"</string>
-    <string name="app_permissions_group_summary" msgid="4787239772223699263">"<xliff:g id="COUNT_1">%2$d</xliff:g> колдонмонун ичинен <xliff:g id="COUNT_0">%1$d</xliff:g> уруксат берилген"</string>
-    <string name="menu_show_system" msgid="6773743421743728921">"Тутумду көрсөтүү"</string>
-    <string name="menu_hide_system" msgid="7595471742649432977">"Тутумдагы процесстерди жашыруу"</string>
-    <string name="no_apps" msgid="1965493419005012569">"Бир дагы колдонмо жок"</string>
-    <string name="location_settings" msgid="1774875730854491297">"Геолокация параметрлери"</string>
-    <string name="location_warning" msgid="8778701356292735971">"<xliff:g id="APP_NAME">%1$s</xliff:g> - бул түзмөктөгү жайгашкан жерди аныктоо кызматынын камсыздоочусу. Жайгашкан жерди көрүү мүмкүнчүлүгүн жайгашкан жерди аныктоо жөндөөлөрүнөн өзгөртсө болот."</string>
-    <string name="system_warning" msgid="7103819124542305179">"Эгер бул уруксатты четке каксаңыз, түзмөгүңүздүн негизги функциялары талаптагыдай иштебей калышы мүмкүн."</string>
-    <string name="permission_summary_enforced_by_policy" msgid="3418617316188986205">"Саясат тарабынан күчүнө киргизилген"</string>
-    <string name="permission_summary_disabled_by_policy_background_only" msgid="160007162349980265">"Фондук режимде колдонуу саясат тарабынан өчүрүлгөн"</string>
-    <string name="permission_summary_enabled_by_policy_background_only" msgid="4834971700297385342">"Фондук режимде колдонуу саясат тарабынан иштетилген"</string>
-    <string name="permission_summary_enabled_by_policy_foreground_only" msgid="5150061275247925588">"Активдүү режим саясат боюнча иштетилген"</string>
-    <string name="permission_summary_enforced_by_admin" msgid="1702707982488952544">"Администратор тарабынан көзөмөлдөнөт"</string>
-    <!-- no translation found for background_access_chooser_dialog_choices:0 (7142769853837915143) -->
-    <!-- no translation found for background_access_chooser_dialog_choices:1 (7804653189249679164) -->
-    <!-- no translation found for background_access_chooser_dialog_choices:2 (1131794379787779680) -->
-    <string name="permission_access_always" msgid="5642491469836594184">"Ар дайым"</string>
-    <string name="permission_access_only_foreground" msgid="6906814759741316041">"Ушул колдонмодо иштегенде гана"</string>
-    <string name="permission_access_never" msgid="1258330706341318622">"Эч качан"</string>
-    <string name="loading" msgid="7811651799620593731">"Жүктөлүүдө…"</string>
-    <string name="all_permissions" msgid="5156669007784613042">"Бардык уруксаттар"</string>
-    <string name="other_permissions" msgid="2016192512386091933">"Колдонмонун башка жөндөмдөрү"</string>
-    <string name="permission_request_title" msgid="1204446718549121199">"Уруксат суроо"</string>
-    <string name="screen_overlay_title" msgid="3021729846864038529">"Экран кабатталышы аныкталды"</string>
-    <string name="screen_overlay_message" msgid="2141944461571677331">"Бул уруксаттын жөндөөсүн өзгөртүү үчүн, адегенде Жөндөөлөр &gt; Колдонмолордон экрандын кабатталышын өчүрүңүз"</string>
-    <string name="screen_overlay_button" msgid="4344544843349937743">"Жөндөөлөрдү ачуу"</string>
-    <string name="wear_not_allowed_dlg_title" msgid="8104666773577525713">"Android Тагынма"</string>
-    <string name="wear_not_allowed_dlg_text" msgid="1322352525843583064">"Орнотуу/чыгарып салуу аракеттери Android Wear\'де колдоого алынбайт."</string>
-    <string name="permission_review_title_template_install" msgid="6819338441305295479">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; колдонмосу үчүн уруксаттарды тандаңыз"</string>
-    <string name="permission_review_title_template_update" msgid="8632233603161669426">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; жаңыртылды. Ал үчүн уруксаттарды тандаңыз."</string>
-    <string name="review_button_cancel" msgid="957906817733578877">"Жок"</string>
-    <string name="review_button_continue" msgid="4809162078179371370">"Улантуу"</string>
-    <string name="new_permissions_category" msgid="3213523410139204183">"Жаңы уруксаттар"</string>
-    <string name="current_permissions_category" msgid="998210994450606094">"Учурдагы уруксаттар"</string>
-    <string name="message_staging" msgid="6151794817691100003">"Күтө туруңуз…"</string>
-    <string name="app_name_unknown" msgid="8931522764510159105">"Белгисиз"</string>
-    <string name="untrusted_external_source_warning" product="tablet" msgid="1483151219938173935">"Коопсуздукту сактоо максатында, планшетиңизге бул булактан колдонмолорду орнотууга уруксат жок."</string>
-    <string name="untrusted_external_source_warning" product="tv" msgid="5373768281884328560">"Коопсуздукту сактоо максатында, сыналгыңызга бул булактан колдонмолорду орнотууга уруксат жок."</string>
-    <string name="untrusted_external_source_warning" product="default" msgid="2223486836232706553">"Коопсуздукту сактоо максатында, телефонуңузга бул булактан колдонмолорду орнотууга уруксат жок."</string>
-    <string name="anonymous_source_warning" product="default" msgid="7700263729981815614">"Телефонуңуз жана жеке дайындарыңыз белгисиз колдонмолордон зыян тартып калышы мүмкүн. Бул колдонмону орнотуп, аны пайдалануудан улам телефонуңузга кандайдыр бир зыян келтирилсе же дайындарыңызды жоготуп алсаңыз, өзүңүз жооптуу болосуз."</string>
-    <string name="anonymous_source_warning" product="tablet" msgid="8854462805499848630">"Планшетиңиз жана жеке дайындарыңыз белгисиз колдонмолордон зыян тартып калышы мүмкүн. Бул колдонмону орнотуп, аны пайдалануудан улам планшетиңизге кандайдыр бир зыян келтирилсе же дайындарыңызды жоготуп алсаңыз, өзүңүз жооптуу болосуз."</string>
-    <string name="anonymous_source_warning" product="tv" msgid="1291472686734385872">"TV жана жеке дайындарыңыз белгисиз колдонмолордон зыян тартып калышы мүмкүн. Бул колдонмону орнотуп, аны пайдалануудан улам TV\'ңизге кандайдыр бир зыян келтирилсе же дайындарыңызды жоготуп алсаңыз, өзүңүз жооптуу болосуз."</string>
-    <string name="anonymous_source_continue" msgid="2094381167954332292">"Улантуу"</string>
-    <string name="external_sources_settings" msgid="8601453744517291632">"Жөндөөлөр"</string>
-    <string name="wear_app_channel" msgid="6200840123672949356">"Тагынма колдонмолорду орнотуу/чыгаруу"</string>
+    <string name="app_name" msgid="7488448184431507488">"Топтомду орноткуч"</string>
+    <string name="install" msgid="711829760615509273">"Орнотуу"</string>
+    <string name="done" msgid="6632441120016885253">"Бүттү"</string>
+    <string name="cancel" msgid="1018267193425558088">"Жокко чыгаруу"</string>
+    <string name="installing" msgid="4921993079741206516">"Орнотулууда…"</string>
+    <string name="installing_app" msgid="1165095864863849422">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> орнотулууда…"</string>
+    <string name="install_done" msgid="5987363587661783896">"Колдонмо орнотулду."</string>
+    <string name="install_confirm_question" msgid="8176284075816604590">"Бул колдонмону орнотоюн деп жатасызбы?"</string>
+    <string name="install_confirm_question_update" msgid="7942235418781274635">"Учурдагы колдонмону жаңыртканы жатасызбы? Буга чейин сакталган дайындарыңыз өчүрүлбөйт."</string>
+    <string name="install_confirm_question_update_system" msgid="4713001702777910263">"Учурдагы алдын ала орнотулган колдонмону жаңыртканы жатасызбы? Буга чейин сакталган дайындарыңыз өчүрүлбөйт."</string>
+    <string name="install_failed" msgid="5777824004474125469">"Колдонмо орнотулган жок."</string>
+    <string name="install_failed_blocked" msgid="8512284352994752094">"Топтомду орнотууга болбойт."</string>
+    <string name="install_failed_conflict" msgid="3493184212162521426">"Башка топтом менен дал келбегендиктен колдонмо орнотулган жок."</string>
+    <string name="install_failed_incompatible" product="tablet" msgid="6019021440094927928">"Бул колдонмо планшетиңизге шайкеш болбогондуктан колдонмо орнотулган жок."</string>
+    <string name="install_failed_incompatible" product="tv" msgid="2890001324362291683">"Бул колдонмо сыналгыңызга шайкеш келбейт."</string>
+    <string name="install_failed_incompatible" product="default" msgid="7254630419511645826">"Бул колдонмо телефонуңузга шайкеш болбогондуктан колдонмо орнотулган жок."</string>
+    <string name="install_failed_invalid_apk" msgid="8581007676422623930">"Топтом катары орнотулбай калган колдонмо жараксыз окшойт."</string>
+    <string name="install_failed_msg" product="tablet" msgid="6298387264270562442">"<xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосу планшетиңизге орнотулбай койду."</string>
+    <string name="install_failed_msg" product="tv" msgid="1920009940048975221">"<xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосу сыналгыңызга орнотулбай койду."</string>
+    <string name="install_failed_msg" product="default" msgid="6484461562647915707">"<xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосу телефонуңузга орнотулбай койду."</string>
+    <string name="launch" msgid="3952550563999890101">"Ачуу"</string>
+    <string name="unknown_apps_admin_dlg_text" msgid="4456572224020176095">"Администраторуңуз белгисиз булактардан алынган колдонмолордун орнотулушуна жол бербейт"</string>
+    <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"Бул колдонуучу белгисиз колдонмолорду орното албайт"</string>
+    <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"Бул колдонуучу колдонмолорду орното албайт"</string>
+    <string name="ok" msgid="7871959885003339302">"ЖАРАЙТ"</string>
+    <string name="manage_applications" msgid="5400164782453975580">"Колд. башкаруу"</string>
+    <string name="out_of_space_dlg_title" msgid="4156690013884649502">"Бош орун жок"</string>
+    <string name="out_of_space_dlg_text" msgid="8727714096031856231">"<xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосун телефонуңузга орнотуу мүмкүн эмес. Орун бошотуп, кайталап орнотуп көрүңүз."</string>
+    <string name="app_not_found_dlg_title" msgid="5107924008597470285">"Колдонмо табылган жок"</string>
+    <string name="app_not_found_dlg_text" msgid="5219983779377811611">"Колдонмо орнотулган колдонмолордун тизмесинде табылган жок."</string>
+    <string name="user_is_not_allowed_dlg_title" msgid="6915293433252210232">"Тыюу салынган"</string>
+    <string name="user_is_not_allowed_dlg_text" msgid="3468447791330611681">"Учурдагы колдонуучу колдонмону чыгарып сала албайт."</string>
+    <string name="generic_error_dlg_title" msgid="5863195085927067752">"Ката"</string>
+    <string name="generic_error_dlg_text" msgid="5287861443265795232">"Колдонмону чыгарып салуу мүмкүн болбой жатат."</string>
+    <string name="uninstall_application_title" msgid="4045420072401428123">"Колдонмону чыгарып салуу"</string>
+    <string name="uninstall_update_title" msgid="824411791011583031">"Жаңыртууну чыгарып салуу"</string>
+    <string name="uninstall_activity_text" msgid="1928194674397770771">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> төмөнкү колдонмонун бөлүгү:"</string>
+    <string name="uninstall_application_text" msgid="3816830743706143980">"Бул колдонмону чыгарып саласызбы?"</string>
+    <string name="uninstall_application_text_all_users" msgid="575491774380227119">"Бул колдонмо "<b>"бардык"</b>" колдонуучулардан алынып салынсынбы? Бул колдонмо жана анын дайындары бул түзмөктүн "<b>"бардык"</b>" колдонуучуларынан өчүрүлөт."</string>
+    <string name="uninstall_application_text_user" msgid="498072714173920526">"Бул колдонмону <xliff:g id="USERNAME">%1$s</xliff:g> үчүн чыгарып саласызбы?"</string>
+    <string name="uninstall_update_text" msgid="863648314632448705">"Бул колдонмонун баштапкы версиясы орнотулсунбу? Бардык дайындар өчүп калат."</string>
+    <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Бул колдонмонун баштапкы версиясы орнотулсунбу? Түзмөктөгү бардык профилдердин, ошондой эле жумушчу профилдердин дайындары өчүп калат."</string>
+    <string name="uninstalling_notification_channel" msgid="840153394325714653">"Чыгарылып салынууда"</string>
+    <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Чыгарылып салынбай калгандар"</string>
+    <string name="uninstalling" msgid="8709566347688966845">"Чыгарылып салынууда…"</string>
+    <string name="uninstalling_app" msgid="8866082646836981397">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> чыгарылууда…"</string>
+    <string name="uninstall_done" msgid="439354138387969269">"Чыгарылып салынды."</string>
+    <string name="uninstall_done_app" msgid="4588850984473605768">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> чыгарылып салынды"</string>
+    <string name="uninstall_failed" msgid="1847750968168364332">"Чыгарылып салынган жок."</string>
+    <string name="uninstall_failed_app" msgid="5506028705017601412">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> чыгарылып салынган жок."</string>
+    <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"Түзмөктү башкарган колдонмо иштеп жатканда аны чыгарып салууга болбойт"</string>
+    <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"<xliff:g id="USERNAME">%1$s</xliff:g> колдонуучусунун түзмөктү башкарган колдонмосу иштеп жатканда, аны чыгарып салууга болбойт"</string>
+    <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"Колдонмо айрым колдонуучуларга же профилдерге керек. Ал башкалар үчүн чыгарылып салынган"</string>
+    <string name="uninstall_blocked_profile_owner" msgid="6373897407002404848">"Бул колдонмо профилиңизге керек жана аны чыгарып салуу мүмкүн эмес."</string>
+    <string name="uninstall_blocked_device_owner" msgid="6724602931761073901">"Бул колдонмо түзмөгүңүздүн администраторуна керек жана аны чыгарып салуу мүмкүн эмес."</string>
+    <string name="manage_device_administrators" msgid="3092696419363842816">"Түзмөктү башкарган колдонмолорду көзөмөлдөө"</string>
+    <string name="manage_users" msgid="1243995386982560813">"Колдонуучуларды башкаруу"</string>
+    <string name="uninstall_failed_msg" msgid="2176744834786696012">"<xliff:g id="APP_NAME">%1$s</xliff:g> колдонмосун чыгарып салуу мүмкүн эмес."</string>
+    <string name="Parse_error_dlg_text" msgid="1661404001063076789">"Таңгакты талдоодо маселе келип чыкты."</string>
+    <string name="wear_not_allowed_dlg_title" msgid="8664785993465117517">"Android Wear"</string>
+    <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"Орнотуу/чыгарып салуу аракеттери Android Wear\'де колдоого алынбайт."</string>
+    <string name="message_staging" msgid="8032722385658438567">"Күтө туруңуз…"</string>
+    <string name="app_name_unknown" msgid="6881210203354323926">"Белгисиз"</string>
+    <string name="untrusted_external_source_warning" product="tablet" msgid="6539403649459942547">"Коопсуздукту сактоо максатында, планшетиңизге бул булактан колдонмолорду орнотууга уруксат жок."</string>
+    <string name="untrusted_external_source_warning" product="tv" msgid="1206648674551321364">"Коопсуздукту сактоо максатында, сыналгыңызга бул булактан колдонмолорду орнотууга уруксат жок."</string>
+    <string name="untrusted_external_source_warning" product="default" msgid="7279739265754475165">"Коопсуздукту сактоо максатында, телефонуңузга бул булактан колдонмолорду орнотууга уруксат жок."</string>
+    <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"Телефонуңуз жана жеке дайындарыңыз белгисиз колдонмолордон зыян тартып калышы мүмкүн. Бул колдонмону орнотуп, аны пайдалануудан улам телефонуңузга кандайдыр бир зыян келтирилсе же дайындарыңызды жоготуп алсаңыз, өзүңүз жооптуу болосуз."</string>
+    <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Планшетиңиз жана жеке дайындарыңыз белгисиз колдонмолордон зыян тартып калышы мүмкүн. Бул колдонмону орнотуп, аны пайдалануудан улам планшетиңизге кандайдыр бир зыян келтирилсе же дайындарыңызды жоготуп алсаңыз, өзүңүз жооптуу болосуз."</string>
+    <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"Сыналгыңыз жана жеке дайындарыңыз белгисиз колдонмолордон зыян тартып калышы мүмкүн. Бул колдонмону орнотуп, аны пайдалануудан улам сыналгыңызга кандайдыр бир зыян келтирилсе же дайындарыңызды жоготуп алсаңыз, өзүңүз жооптуу болосуз."</string>
+    <string name="anonymous_source_continue" msgid="4375745439457209366">"Улантуу"</string>
+    <string name="external_sources_settings" msgid="4046964413071713807">"Жөндөөлөр"</string>
+    <string name="wear_app_channel" msgid="1960809674709107850">"Тагынма колдонмолорду орнотуу/чыгаруу"</string>
 </resources>
