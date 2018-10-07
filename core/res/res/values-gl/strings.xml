@@ -941,7 +941,7 @@
     <string name="menu_ctrl_shortcut_label" msgid="3917070091228880941">"Ctrl +"</string>
     <string name="menu_alt_shortcut_label" msgid="6249849492641218944">"Alt +"</string>
     <string name="menu_shift_shortcut_label" msgid="6773890288720306380">"Maiús +"</string>
-    <string name="menu_sym_shortcut_label" msgid="4019695553731017933">"Sim +"</string>
+    <string name="menu_sym_shortcut_label" msgid="4019695553731017933">"Sym +"</string>
     <string name="menu_function_shortcut_label" msgid="1984053777418162618">"Función +"</string>
     <string name="menu_space_shortcut_label" msgid="2410328639272162537">"espazo"</string>
     <string name="menu_enter_shortcut_label" msgid="2743362785111309668">"intro"</string>
