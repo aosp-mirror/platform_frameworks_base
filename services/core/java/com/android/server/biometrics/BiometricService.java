@@ -17,13 +17,20 @@
 package com.android.server.biometrics;
 
 import static android.Manifest.permission.USE_BIOMETRIC;
+import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
 import static android.Manifest.permission.USE_FINGERPRINT;
 
+import android.app.ActivityManager;
 import android.app.AppOpsManager;
+import android.app.UserSwitchObserver;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.content.pm.PackageManager;
+import android.database.ContentObserver;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
+import android.hardware.biometrics.BiometricSourceType;
+import android.hardware.biometrics.IBiometricEnabledOnKeyguardCallback;
 import android.hardware.biometrics.IBiometricPromptReceiver;
 import android.hardware.biometrics.IBiometricService;
 import android.hardware.biometrics.IBiometricServiceReceiver;
@@ -31,8 +38,10 @@ import android.hardware.face.FaceManager;
 import android.hardware.face.IFaceService;
 import android.hardware.fingerprint.FingerprintManager;
 import android.hardware.fingerprint.IFingerprintService;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.DeadObjectException;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -40,19 +49,21 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.util.Pair;
 import android.util.Slog;
 
 import com.android.internal.R;
 import com.android.server.SystemService;
 
 import java.util.ArrayList;
+import java.util.List;
 
 /**
  * System service that arbitrates the modality for BiometricPrompt to use.
  */
 public class BiometricService extends SystemService {
 
-    private static final String TAG = "BiometricPromptService";
+    private static final String TAG = "BiometricService";
 
     /**
      * No biometric methods or nothing has been enrolled.
@@ -87,6 +98,8 @@ public class BiometricService extends SystemService {
     private final boolean mHasFeatureFingerprint;
     private final boolean mHasFeatureIris;
     private final boolean mHasFeatureFace;
+    private final SettingObserver mSettingObserver;
+    private final List<EnabledOnKeyguardCallback> mEnabledOnKeyguardCallbacks;
 
     private IFingerprintService mFingerprintService;
     private IFaceService mFaceService;
@@ -120,6 +133,107 @@ public class BiometricService extends SystemService {
         }
     }
 
+    private final class SettingObserver extends ContentObserver {
+        private final Uri FACE_UNLOCK_KEYGUARD_ENABLED =
+                Settings.Secure.getUriFor(Settings.Secure.FACE_UNLOCK_KEYGUARD_ENABLED);
+        private final Uri FACE_UNLOCK_APP_ENABLED =
+                Settings.Secure.getUriFor(Settings.Secure.FACE_UNLOCK_APP_ENABLED);
+
+        private final ContentResolver mContentResolver;
+        private boolean mFaceEnabledOnKeyguard;
+        private boolean mFaceEnabledForApps;
+
+        /**
+         * Creates a content observer.
+         *
+         * @param handler The handler to run {@link #onChange} on, or null if none.
+         */
+        SettingObserver(Handler handler) {
+            super(handler);
+            mContentResolver = getContext().getContentResolver();
+            updateContentObserver();
+        }
+
+        void updateContentObserver() {
+            mContentResolver.unregisterContentObserver(this);
+            mContentResolver.registerContentObserver(FACE_UNLOCK_KEYGUARD_ENABLED,
+                    false /* notifyForDescendents */,
+                    this /* observer */,
+                    UserHandle.USER_CURRENT);
+            mContentResolver.registerContentObserver(FACE_UNLOCK_APP_ENABLED,
+                    false /* notifyForDescendents */,
+                    this /* observer */,
+                    UserHandle.USER_CURRENT);
+
+            // Update the value immediately
+            onChange(true /* selfChange */, FACE_UNLOCK_KEYGUARD_ENABLED);
+            onChange(true /* selfChange */, FACE_UNLOCK_APP_ENABLED);
+        }
+
+        @Override
+        public void onChange(boolean selfChange, Uri uri) {
+            if (FACE_UNLOCK_KEYGUARD_ENABLED.equals(uri)) {
+                mFaceEnabledOnKeyguard =
+                        Settings.Secure.getIntForUser(
+                                mContentResolver,
+                                Settings.Secure.FACE_UNLOCK_KEYGUARD_ENABLED,
+                                1 /* default */,
+                                UserHandle.USER_CURRENT) != 0;
+
+                List<EnabledOnKeyguardCallback> callbacks = mEnabledOnKeyguardCallbacks;
+                for (int i = 0; i < callbacks.size(); i++) {
+                    callbacks.get(i).notify(BiometricSourceType.FACE, mFaceEnabledOnKeyguard);
+                }
+            } else if (FACE_UNLOCK_APP_ENABLED.equals(uri)) {
+                mFaceEnabledForApps =
+                        Settings.Secure.getIntForUser(
+                                mContentResolver,
+                                Settings.Secure.FACE_UNLOCK_APP_ENABLED,
+                                1 /* default */,
+                                UserHandle.USER_CURRENT) != 0;
+            }
+        }
+
+        boolean getFaceEnabledOnKeyguard() {
+            return mFaceEnabledOnKeyguard;
+        }
+
+        boolean getFaceEnabledForApps() {
+            return mFaceEnabledForApps;
+        }
+    }
+
+    private final class EnabledOnKeyguardCallback implements IBinder.DeathRecipient {
+
+        private final IBiometricEnabledOnKeyguardCallback mCallback;
+
+        EnabledOnKeyguardCallback(IBiometricEnabledOnKeyguardCallback callback) {
+            mCallback = callback;
+            try {
+                mCallback.asBinder().linkToDeath(EnabledOnKeyguardCallback.this, 0);
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Unable to linkToDeath", e);
+            }
+        }
+
+        void notify(BiometricSourceType sourceType, boolean enabled) {
+            try {
+                mCallback.onChanged(sourceType, enabled);
+            } catch (DeadObjectException e) {
+                Slog.w(TAG, "Death while invoking notify", e);
+                mEnabledOnKeyguardCallbacks.remove(this);
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Failed to invoke onChanged", e);
+            }
+        }
+
+        @Override
+        public void binderDied() {
+            Slog.e(TAG, "Enabled callback binder died");
+            mEnabledOnKeyguardCallbacks.remove(this);
+        }
+    }
+
     /**
      * This is just a pass-through service that wraps Fingerprint, Iris, Face services. This service
      * should not carry any state. The reality is we need to keep a tiny amount of state so that
@@ -131,7 +245,7 @@ public class BiometricService extends SystemService {
         public void authenticate(IBinder token, long sessionId, int userId,
                 IBiometricServiceReceiver receiver, int flags, String opPackageName,
                 Bundle bundle, IBiometricPromptReceiver dialogReceiver) throws RemoteException {
-            // Check the USE_BIOMETRIC permission here. In the BiometricService, check do the
+            // Check the USE_BIOMETRIC permission here. In the BiometricServiceBase, check do the
             // AppOps and foreground check.
             checkPermission();
 
@@ -146,8 +260,38 @@ public class BiometricService extends SystemService {
             final int callingUserId = UserHandle.getCallingUserId();
 
             mHandler.post(() -> {
-                mCurrentModality = checkAndGetBiometricModality(receiver);
+                final Pair<Integer, Integer> result = checkAndGetBiometricModality(callingUserId);
+                final int modality = result.first;
+                final int error = result.second;
 
+                // Check for errors, notify callback, and return
+                if (error != BiometricConstants.BIOMETRIC_ERROR_NONE) {
+                    try {
+                        final String hardwareUnavailable =
+                                getContext().getString(R.string.biometric_error_hw_unavailable);
+                        switch (error) {
+                            case BiometricConstants.BIOMETRIC_ERROR_HW_NOT_PRESENT:
+                                receiver.onError(0 /* deviceId */, error, hardwareUnavailable);
+                                break;
+                            case BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE:
+                                receiver.onError(0 /* deviceId */, error, hardwareUnavailable);
+                                break;
+                            case BiometricConstants.BIOMETRIC_ERROR_NO_BIOMETRICS:
+                                receiver.onError(0 /* deviceId */, error,
+                                        getErrorString(modality, error, 0 /* vendorCode */));
+                                break;
+                            default:
+                                Slog.e(TAG, "Unhandled error");
+                                break;
+                        }
+                    } catch (RemoteException e) {
+                        Slog.e(TAG, "Unable to send error", e);
+                    }
+                    return;
+                }
+
+                // Actually start authentication
+                mCurrentModality = modality;
                 try {
                     // No polymorphism :(
                     if (mCurrentModality == BIOMETRIC_FINGERPRINT) {
@@ -157,18 +301,9 @@ public class BiometricService extends SystemService {
                     } else if (mCurrentModality == BIOMETRIC_IRIS) {
                         Slog.w(TAG, "Unsupported modality");
                     } else if (mCurrentModality == BIOMETRIC_FACE) {
-                        // If the user disabled face for apps, return ERROR_HW_UNAVAILABLE
-                        if (isFaceEnabledForApps()) {
-                            receiver.onError(0 /* deviceId */,
-                                    BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE,
-                                    FaceManager.getErrorString(getContext(),
-                                            BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE,
-                                            0 /* vendorCode */));
-                        } else {
-                            mFaceService.authenticateFromService(true /* requireConfirmation */,
-                                    token, sessionId, userId, receiver, flags, opPackageName,
-                                    bundle, dialogReceiver, callingUid, callingPid, callingUserId);
-                        }
+                        mFaceService.authenticateFromService(true /* requireConfirmation */,
+                                token, sessionId, userId, receiver, flags, opPackageName,
+                                bundle, dialogReceiver, callingUid, callingPid, callingUserId);
                     } else {
                         Slog.w(TAG, "Unsupported modality");
                     }
@@ -176,15 +311,6 @@ public class BiometricService extends SystemService {
                     Slog.e(TAG, "Unable to start authentication", e);
                 }
             });
-        }
-
-        private boolean isFaceEnabledForApps() {
-            // TODO: maybe cache this and eliminate duplicated code with KeyguardUpdateMonitor
-            return Settings.Secure.getIntForUser(
-                    getContext().getContentResolver(),
-                    Settings.Secure.FACE_UNLOCK_APP_ENABLED,
-                    1 /* default */,
-                    UserHandle.USER_CURRENT) == 0;
         }
 
         @Override // Binder call
@@ -221,31 +347,47 @@ public class BiometricService extends SystemService {
         }
 
         @Override // Binder call
-        public boolean hasEnrolledBiometrics(String opPackageName) {
+        public int canAuthenticate(String opPackageName) {
             checkPermission();
+            checkAppOp(opPackageName, Binder.getCallingUid());
 
-            if (mAppOps.noteOp(AppOpsManager.OP_USE_BIOMETRIC, Binder.getCallingUid(),
-                    opPackageName) != AppOpsManager.MODE_ALLOWED) {
-                Slog.w(TAG, "Rejecting " + opPackageName + "; permission denied");
-                throw new SecurityException("Permission denied");
-            }
-
+            final int userId = UserHandle.getCallingUserId();
             final long ident = Binder.clearCallingIdentity();
-            boolean hasEnrolled = false;
+            int error;
             try {
-                // Note: On devices with multi-modal authentication, the selection logic will need
-                // to be updated.
-                for (int i = 0; i < mAuthenticators.size(); i++) {
-                    if (mAuthenticators.get(i).getAuthenticator().hasEnrolledTemplates()) {
-                        hasEnrolled = true;
-                        break;
-                    }
-                }
+                final Pair<Integer, Integer> result = checkAndGetBiometricModality(userId);
+                error = result.second;
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
-            return hasEnrolled;
+            return error;
         }
+
+        @Override
+        public void registerEnabledOnKeyguardCallback(IBiometricEnabledOnKeyguardCallback callback)
+                throws RemoteException {
+            checkInternalPermission();
+            mEnabledOnKeyguardCallbacks.add(new EnabledOnKeyguardCallback(callback));
+            try {
+                callback.onChanged(BiometricSourceType.FACE,
+                        mSettingObserver.getFaceEnabledOnKeyguard());
+            } catch (RemoteException e) {
+                Slog.w(TAG, "Remote exception", e);
+            }
+        }
+    }
+
+    private void checkAppOp(String opPackageName, int callingUid) {
+        if (mAppOps.noteOp(AppOpsManager.OP_USE_BIOMETRIC, callingUid,
+                opPackageName) != AppOpsManager.MODE_ALLOWED) {
+            Slog.w(TAG, "Rejecting " + opPackageName + "; permission denied");
+            throw new SecurityException("Permission denied");
+        }
+    }
+
+    private void checkInternalPermission() {
+        getContext().enforceCallingPermission(USE_BIOMETRIC_INTERNAL,
+                "Must have MANAGE_BIOMETRIC permission");
     }
 
     private void checkPermission() {
@@ -270,11 +412,26 @@ public class BiometricService extends SystemService {
 
         mAppOps = context.getSystemService(AppOpsManager.class);
         mHandler = new Handler(Looper.getMainLooper());
+        mEnabledOnKeyguardCallbacks = new ArrayList<>();
+        mSettingObserver = new SettingObserver(mHandler);
 
         final PackageManager pm = context.getPackageManager();
         mHasFeatureFingerprint = pm.hasSystemFeature(PackageManager.FEATURE_FINGERPRINT);
         mHasFeatureIris = pm.hasSystemFeature(PackageManager.FEATURE_IRIS);
         mHasFeatureFace = pm.hasSystemFeature(PackageManager.FEATURE_FACE);
+
+        try {
+            ActivityManager.getService().registerUserSwitchObserver(
+                    new UserSwitchObserver() {
+                        @Override
+                        public void onUserSwitchComplete(int newUserId) {
+                            mSettingObserver.updateContentObserver();
+                        }
+                    }, BiometricService.class.getName()
+            );
+        } catch (RemoteException e) {
+            Slog.e(TAG, "Failed to register user switch observer", e);
+        }
     }
 
     @Override
@@ -305,65 +462,94 @@ public class BiometricService extends SystemService {
      * Checks if there are any available biometrics, and returns the modality. This method also
      * returns errors through the callback (no biometric feature, hardware not detected, no
      * templates enrolled, etc). This service must not start authentication if errors are sent.
+     *
+     * @Returns A pair [Modality, Error] with Modality being one of {@link #BIOMETRIC_NONE},
+     * {@link #BIOMETRIC_FINGERPRINT}, {@link #BIOMETRIC_IRIS}, {@link #BIOMETRIC_FACE}
+     * and the error containing one of the {@link BiometricConstants} errors.
      */
-    private int checkAndGetBiometricModality(IBiometricServiceReceiver receiver) {
+    private Pair<Integer, Integer> checkAndGetBiometricModality(int callingUid) {
         int modality = BIOMETRIC_NONE;
-        final String hardwareUnavailable =
-                getContext().getString(R.string.biometric_error_hw_unavailable);
 
         // No biometric features, send error
         if (mAuthenticators.isEmpty()) {
-            try {
-                receiver.onError(0 /* deviceId */,
-                        BiometricConstants.BIOMETRIC_ERROR_HW_NOT_PRESENT,
-                        hardwareUnavailable);
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Unable to send error", e);
-            }
-            return BIOMETRIC_NONE;
+            return new Pair<>(BIOMETRIC_NONE, BiometricConstants.BIOMETRIC_ERROR_HW_NOT_PRESENT);
         }
 
-        // Find first authenticator that's both detected and enrolled
+        // Assuming that authenticators are listed in priority-order, the rest of this function
+        // will go through and find the first authenticator that's available, enrolled, and enabled.
+        // The tricky part is returning the correct error. Error strings that are modality-specific
+        // should also respect the priority-order.
+
+        // Find first authenticator that's detected, enrolled, and enabled.
         boolean isHardwareDetected = false;
         boolean hasTemplatesEnrolled = false;
+        boolean enabledForApps = false;
+
+        int firstHwAvailable = BIOMETRIC_NONE;
         for (int i = 0; i < mAuthenticators.size(); i++) {
-            int featureId = mAuthenticators.get(i).getType();
+            modality = mAuthenticators.get(i).getType();
             BiometricAuthenticator authenticator = mAuthenticators.get(i).getAuthenticator();
             if (authenticator.isHardwareDetected()) {
                 isHardwareDetected = true;
-                if (authenticator.hasEnrolledTemplates()) {
+                if (firstHwAvailable == BIOMETRIC_NONE) {
+                    // Store the first one since we want to return the error in correct priority
+                    // order.
+                    firstHwAvailable = modality;
+                }
+                if (authenticator.hasEnrolledTemplates(callingUid)) {
                     hasTemplatesEnrolled = true;
-                    modality = featureId;
-                    break;
+                    if (isEnabledForApp(modality)) {
+                        // TODO(b/110907543): When face settings (and other settings) have both a
+                        // user toggle as well as a work profile settings page, this needs to be
+                        // updated to reflect the correct setting.
+                        enabledForApps = true;
+                        break;
+                    }
                 }
             }
         }
 
         // Check error conditions
         if (!isHardwareDetected) {
-            try {
-                receiver.onError(0 /* deviceId */,
-                        BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE,
-                        hardwareUnavailable);
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Unable to send error", e);
-            }
-            return BIOMETRIC_NONE;
-        }
-        if (!hasTemplatesEnrolled) {
-            try {
-                receiver.onError(0 /* deviceId */,
-                        BiometricConstants.BIOMETRIC_ERROR_NO_BIOMETRICS,
-                        FaceManager.getErrorString(getContext(),
-                                BiometricConstants.BIOMETRIC_ERROR_NO_BIOMETRICS,
-                                0 /* vendorCode */));
-            } catch (RemoteException e) {
-                Slog.e(TAG, "Unable to send error", e);
-            }
-            return BIOMETRIC_NONE;
+            return new Pair<>(BIOMETRIC_NONE, BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE);
+        } else if (!hasTemplatesEnrolled) {
+            // Return the modality here so the correct error string can be sent. This error is
+            // preferred over !enabledForApps
+            return new Pair<>(firstHwAvailable, BiometricConstants.BIOMETRIC_ERROR_NO_BIOMETRICS);
+        } else if (!enabledForApps) {
+            return new Pair<>(BIOMETRIC_NONE, BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE);
         }
 
-        return modality;
+        return new Pair<>(modality, BiometricConstants.BIOMETRIC_ERROR_NONE);
+    }
+
+    private boolean isEnabledForApp(int modality) {
+        switch(modality) {
+            case BIOMETRIC_FINGERPRINT:
+                return true;
+            case BIOMETRIC_IRIS:
+                return true;
+            case BIOMETRIC_FACE:
+                return mSettingObserver.getFaceEnabledForApps();
+            default:
+                Slog.w(TAG, "Unsupported modality: " + modality);
+                return false;
+        }
+    }
+
+    private String getErrorString(int type, int error, int vendorCode) {
+        switch (type) {
+            case BIOMETRIC_FINGERPRINT:
+                return FingerprintManager.getErrorString(getContext(), error, vendorCode);
+            case BIOMETRIC_IRIS:
+                Slog.w(TAG, "Modality not supported");
+                return null; // not supported
+            case BIOMETRIC_FACE:
+                return FaceManager.getErrorString(getContext(), error, vendorCode);
+            default:
+                Slog.w(TAG, "Unable to get error string for modality: " + type);
+                return null;
+        }
     }
 
     private BiometricAuthenticator getAuthenticator(int type) {

@@ -73,7 +73,7 @@ When compiling plugins there are a couple vital pieces required.
 1. They must be signed with the platform cert
 2. They must include SystemUIPluginLib in LOCAL_JAVA_LIBRARIES (NOT LOCAL_STATIC_JAVA_LIBRARIES)
 
-Basically just copy the [example file](/packages/SystemUI/plugin/ExamplePlugin/Android.mk).
+Basically just copy the [example blueprint file](/packages/SystemUI/plugin/ExamplePlugin/Android.bp).
 
 To declare a plugin, you add a service to your manifest.  Add an intent filter to match the action for the plugin, and set the name to point at the class that implements the plugin interface.
 

@@ -377,6 +377,24 @@ public class BaseRecordingCanvas extends Canvas {
     }
 
     @Override
+    public final void drawDoubleRoundRect(@NonNull RectF outer, float outerRx, float outerRy,
+            @NonNull RectF inner, float innerRx, float innerRy, @NonNull Paint paint) {
+        nDrawDoubleRoundRect(mNativeCanvasWrapper,
+                outer.left, outer.top, outer.right, outer.bottom, outerRx, outerRy,
+                inner.left, inner.top, inner.right, inner.bottom, innerRx, innerRy,
+                paint.getNativeInstance());
+    }
+
+    @Override
+    public final void drawDoubleRoundRect(@NonNull RectF outer, float[] outerRadii,
+            @NonNull RectF inner, float[] innerRadii, @NonNull Paint paint) {
+        nDrawDoubleRoundRect(mNativeCanvasWrapper,
+                outer.left, outer.top, outer.right, outer.bottom, outerRadii,
+                inner.left, inner.top, inner.right, inner.bottom, innerRadii,
+                paint.getNativeInstance());
+    }
+
+    @Override
     public final void drawText(@NonNull char[] text, int index, int count, float x, float y,
             @NonNull Paint paint) {
         if ((index | count | (index + count)
@@ -591,6 +609,18 @@ public class BaseRecordingCanvas extends Canvas {
     @FastNative
     private static native void nDrawRoundRect(long nativeCanvas, float left, float top, float right,
             float bottom, float rx, float ry, long nativePaint);
+
+    @FastNative
+    private static native void nDrawDoubleRoundRect(long nativeCanvas,
+            float outerLeft, float outerTop, float outerRight, float outerBottom,
+            float outerRx, float outerRy, float innerLeft, float innerTop, float innerRight,
+            float innerBottom, float innerRx, float innerRy, long nativePaint);
+
+    @FastNative
+    private static native void nDrawDoubleRoundRect(long nativeCanvas, float outerLeft,
+            float outerTop, float outerRight, float outerBottom, float[] outerRadii,
+            float innerLeft, float innerTop, float innerRight, float innerBottom,
+            float[] innerRadii, long nativePaint);
 
     @FastNative
     private static native void nDrawPath(long nativeCanvas, long nativePath, long nativePaint);

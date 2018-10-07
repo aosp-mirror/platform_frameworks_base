@@ -51,6 +51,7 @@ import android.annotation.Nullable;
 import android.app.ActivityOptions;
 import android.app.WindowConfiguration;
 import android.graphics.Point;
+import android.os.UserHandle;
 import android.util.IntArray;
 import android.util.Slog;
 import android.util.proto.ProtoOutputStream;
@@ -112,6 +113,13 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
      */
     private boolean mRemoved;
 
+    /**
+     * A focusable stack that is purposely to be positioned at the top. Although the stack may not
+     * have the topmost index, it is used as a preferred candidate to prevent being unable to resume
+     * target stack properly when there are other focusable always-on-top stacks.
+     */
+    private ActivityStack mPreferredTopFocusableStack;
+
     // Cached reference to some special stacks we tend to get a lot so we don't need to loop
     // through the list to find them.
     private ActivityStack mHomeStack = null;
@@ -164,6 +172,9 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
         if (DEBUG_STACK) Slog.v(TAG_STACK, "removeChild: detaching " + stack
                 + " from displayId=" + mDisplayId);
         mStacks.remove(stack);
+        if (mPreferredTopFocusableStack == stack) {
+            mPreferredTopFocusableStack = null;
+        }
         removeStackReferenceIfNeeded(stack);
         releaseSelfIfNeeded();
         mSupervisor.mService.updateSleepIfNeededLocked();
@@ -185,9 +196,21 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
     private void positionChildAt(ActivityStack stack, int position, boolean includingParents) {
         // TODO: Keep in sync with WindowContainer.positionChildAt(), once we change that to adjust
         //       the position internally, also update the logic here
-        mStacks.remove(stack);
+        final boolean wasContained = mStacks.remove(stack);
         final int insertPosition = getTopInsertPosition(stack, position);
         mStacks.add(insertPosition, stack);
+
+        // The insert position may be adjusted to non-top when there is always-on-top stack. Since
+        // the original position is preferred to be top, the stack should have higher priority when
+        // we are looking for top focusable stack. The condition {@code wasContained} restricts the
+        // preferred stack is set only when moving an existing stack to top instead of adding a new
+        // stack that may be too early (e.g. in the middle of launching or reparenting).
+        if (wasContained && position >= mStacks.size() - 1 && stack.isFocusableAndVisible()) {
+            mPreferredTopFocusableStack = stack;
+        } else if (mPreferredTopFocusableStack == stack) {
+            mPreferredTopFocusableStack = null;
+        }
+
         // Since positionChildAt() is called during the creation process of pinned stacks,
         // ActivityStack#getWindowContainerController() can be null. In this special case,
         // since DisplayContest#positionStackAt() is called in TaskStack#onConfigurationChanged(),
@@ -356,10 +379,18 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
                         this, stackId, mSupervisor, windowingMode, activityType, onTop);
     }
 
+    /**
+     * Get the preferred focusable stack in priority. If the preferred stack does not exist, find a
+     * focusable and visible stack from the top of stacks in this display.
+     */
     ActivityStack getFocusedStack() {
+        if (mPreferredTopFocusableStack != null) {
+            return mPreferredTopFocusableStack;
+        }
+
         for (int i = mStacks.size() - 1; i >= 0; --i) {
             final ActivityStack stack = mStacks.get(i);
-            if (stack.isFocusable() && stack.shouldBeVisible(null /* starting */)) {
+            if (stack.isFocusableAndVisible()) {
                 return stack;
             }
         }
@@ -381,7 +412,7 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
             if (ignoreCurrent && stack == currentFocus) {
                 continue;
             }
-            if (!stack.isFocusable() || !stack.shouldBeVisible(null)) {
+            if (!stack.isFocusableAndVisible()) {
                 continue;
             }
 
@@ -911,6 +942,13 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
         return mDisplayAccessUIDs;
     }
 
+    /**
+     * @see Display#FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS
+     */
+    boolean supportsSystemDecorations() {
+        return mDisplay.supportsSystemDecorations();
+    }
+
     private boolean shouldDestroyContentOnRemove() {
         return mDisplay.getRemoveMode() == REMOVE_MODE_DESTROY_CONTENT;
     }
@@ -918,6 +956,10 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
     boolean shouldSleep() {
         return (mStacks.isEmpty() || !mAllSleepTokens.isEmpty())
                 && (mSupervisor.mService.mRunningVoice == null);
+    }
+
+    void setFocusedApp(ActivityRecord r, boolean moveFocusNow) {
+        mWindowContainerController.setFocusedApp(r.appToken, moveFocusNow);
     }
 
     /**
@@ -981,6 +1023,57 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
         positionChildAt(stack, Math.max(0, insertIndex));
     }
 
+    void moveHomeStackToFront(String reason) {
+        if (mHomeStack != null) {
+            mHomeStack.moveToFront(reason);
+        }
+    }
+
+    /** Returns true if the focus activity was adjusted to the home stack top activity. */
+    boolean moveHomeActivityToTop(String reason) {
+        final ActivityRecord top = getHomeActivity();
+        if (top == null) {
+            return false;
+        }
+        mSupervisor.moveFocusableActivityToTop(top, reason);
+        return true;
+    }
+
+    @Nullable
+    ActivityStack getHomeStack() {
+        return mHomeStack;
+    }
+
+    @Nullable
+    ActivityRecord getHomeActivity() {
+        return getHomeActivityForUser(mSupervisor.mCurrentUser);
+    }
+
+    @Nullable
+    ActivityRecord getHomeActivityForUser(int userId) {
+        if (mHomeStack == null) {
+            return null;
+        }
+
+        final ArrayList<TaskRecord> tasks = mHomeStack.getAllTasks();
+        for (int taskNdx = tasks.size() - 1; taskNdx >= 0; --taskNdx) {
+            final TaskRecord task = tasks.get(taskNdx);
+            if (!task.isActivityTypeHome()) {
+                continue;
+            }
+
+            final ArrayList<ActivityRecord> activities = task.mActivities;
+            for (int activityNdx = activities.size() - 1; activityNdx >= 0; --activityNdx) {
+                final ActivityRecord r = activities.get(activityNdx);
+                if (r.isActivityTypeHome()
+                        && ((userId == UserHandle.USER_ALL) || (r.userId == userId))) {
+                    return r;
+                }
+            }
+        }
+        return null;
+    }
+
     boolean isSleeping() {
         return mSleeping;
     }
@@ -1041,6 +1134,9 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
         }
         if (mSplitScreenPrimaryStack != null) {
             pw.println(myPrefix + "mSplitScreenPrimaryStack=" + mSplitScreenPrimaryStack);
+        }
+        if (mPreferredTopFocusableStack != null) {
+            pw.println(myPrefix + "mPreferredTopFocusableStack=" + mPreferredTopFocusableStack);
         }
     }
 

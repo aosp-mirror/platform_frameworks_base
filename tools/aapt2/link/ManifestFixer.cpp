@@ -393,6 +393,10 @@ bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor,
   uses_static_library_action.Action(RequiredAndroidAttribute("certDigest"));
   uses_static_library_action["additional-certificate"];
 
+  xml::XmlNodeAction& uses_package_action = application_action["uses-package"];
+  uses_package_action.Action(RequiredNameIsJavaPackage);
+  uses_package_action["additional-certificate"];
+
   if (options_.debug_mode) {
     application_action.Action([&](xml::Element* el) -> bool {
       xml::Attribute *attr = el->FindOrCreateAttribute(xml::kSchemaAndroid, "debuggable");

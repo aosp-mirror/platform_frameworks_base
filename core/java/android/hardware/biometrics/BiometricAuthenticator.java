@@ -201,6 +201,10 @@ public interface BiometricAuthenticator {
         throw new UnsupportedOperationException("Stub!");
     }
 
+    default boolean hasEnrolledTemplates(int userId) {
+        throw new UnsupportedOperationException("Stub!");
+    }
+
     /**
      * This call warms up the hardware and starts scanning for valid biometrics. It terminates
      * when {@link AuthenticationCallback#onAuthenticationError(int,

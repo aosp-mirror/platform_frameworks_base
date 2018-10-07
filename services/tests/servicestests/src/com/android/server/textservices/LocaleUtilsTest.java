@@ -19,11 +19,17 @@ package com.android.server.textservices;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
+
 import org.junit.Test;
+import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
 import java.util.Locale;
 
+@SmallTest
+@RunWith(AndroidJUnit4.class)
 public class LocaleUtilsTest {
     private static final Locale LOCALE_EN = new Locale("en");
     private static final Locale LOCALE_EN_US = new Locale("en", "US");

@@ -42,6 +42,7 @@ import static android.content.pm.PackageManager.MATCH_UNINSTALLED_PACKAGES;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.net.NetworkPolicyManager.isProcStateAllowedWhileIdleOrPowerSaveMode;
 import static android.net.NetworkPolicyManager.isProcStateAllowedWhileOnRestrictBackground;
+import static android.os.FactoryTest.FACTORY_TEST_OFF;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_CRITICAL;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_HIGH;
 import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_NORMAL;
@@ -90,6 +91,7 @@ import static android.provider.Settings.Global.DEBUG_APP;
 import static android.provider.Settings.Global.NETWORK_ACCESS_TIMEOUT_MS;
 import static android.provider.Settings.Global.WAIT_FOR_DEBUGGER;
 import static android.text.format.DateUtils.DAY_IN_MILLIS;
+import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ALL;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ANR;
@@ -1067,17 +1069,10 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     final StringBuilder mStringBuilder = new StringBuilder(256);
 
-    /**
-     * Used to control how we initialize the service.
-     */
-    ComponentName mTopComponent;
-    String mTopAction = Intent.ACTION_MAIN;
-    String mTopData;
-
     volatile boolean mProcessesReady = false;
     volatile boolean mSystemReady = false;
     volatile boolean mOnBattery = false;
-    volatile int mFactoryTest;
+    final int mFactoryTest;
     volatile boolean mBooting = false;
 
     @GuardedBy("this") boolean mCallFinishBooting = false;
@@ -1410,7 +1405,6 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     static final int SHOW_ERROR_UI_MSG = 1;
     static final int SHOW_NOT_RESPONDING_UI_MSG = 2;
-    static final int SHOW_FACTORY_ERROR_UI_MSG = 3;
     static final int UPDATE_CONFIGURATION_MSG = 4;
     static final int GC_BACKGROUND_PROCESSES_MSG = 5;
     static final int WAIT_FOR_DEBUGGER_UI_MSG = 6;
@@ -1470,8 +1464,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     final HiddenApiSettings mHiddenApiBlacklist;
 
     PackageManagerInternal mPackageManagerInt;
-
-    boolean mHasHeavyWeightFeature;
 
     /**
      * Whether to force background check on all apps (for battery saver) or not.
@@ -1552,12 +1544,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                         res.set(0);
                     }
                 }
-                ensureBootCompleted();
-            } break;
-            case SHOW_FACTORY_ERROR_UI_MSG: {
-                Dialog d = new FactoryErrorDialog(
-                        mUiContext, msg.getData().getCharSequence("msg"));
-                d.show();
                 ensureBootCompleted();
             } break;
             case WAIT_FOR_DEBUGGER_UI_MSG: {
@@ -2330,6 +2316,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mProcStartHandlerThread = null;
         mProcStartHandler = null;
         mHiddenApiBlacklist = null;
+        mFactoryTest = FACTORY_TEST_OFF;
     }
 
     // Note: This method is invoked on the main thread but may need to attach various
@@ -3344,16 +3331,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (gids[1] == UserHandle.ERR_GID) gids[1] = gids[2];
             }
             checkTime(startTime, "startProcess: building args");
-            if (mFactoryTest != FactoryTest.FACTORY_TEST_OFF) {
-                if (mFactoryTest == FactoryTest.FACTORY_TEST_LOW_LEVEL
-                        && mTopComponent != null
-                        && app.processName.equals(mTopComponent.getPackageName())) {
-                    uid = 0;
-                }
-                if (mFactoryTest == FactoryTest.FACTORY_TEST_HIGH_LEVEL
-                        && (app.info.flags&ApplicationInfo.FLAG_FACTORY_TEST) != 0) {
-                    uid = 0;
-                }
+            if (mAtmInternal.isFactoryTestProcess(app.getWindowProcessController())) {
+                uid = 0;
             }
             int runtimeFlags = 0;
             if ((app.info.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0) {
@@ -3712,73 +3691,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 stats.noteActivityPausedLocked(uid);
             }
         }
-    }
-
-    Intent getHomeIntent() {
-        Intent intent = new Intent(mTopAction, mTopData != null ? Uri.parse(mTopData) : null);
-        intent.setComponent(mTopComponent);
-        intent.addFlags(Intent.FLAG_DEBUG_TRIAGED_MISSING);
-        if (mFactoryTest != FactoryTest.FACTORY_TEST_LOW_LEVEL) {
-            intent.addCategory(Intent.CATEGORY_HOME);
-        }
-        return intent;
-    }
-
-    boolean startHomeActivityLocked(int userId, String reason) {
-        if (mFactoryTest == FactoryTest.FACTORY_TEST_LOW_LEVEL
-                && mTopAction == null) {
-            // We are running in factory test mode, but unable to find
-            // the factory test app, so just sit around displaying the
-            // error message and don't try to start anything.
-            return false;
-        }
-        Intent intent = getHomeIntent();
-        ActivityInfo aInfo = resolveActivityInfo(intent, STOCK_PM_FLAGS, userId);
-        if (aInfo != null) {
-            intent.setComponent(new ComponentName(aInfo.applicationInfo.packageName, aInfo.name));
-            // Don't do this if the home app is currently being
-            // instrumented.
-            aInfo = new ActivityInfo(aInfo);
-            aInfo.applicationInfo = getAppInfoForUser(aInfo.applicationInfo, userId);
-            ProcessRecord app = getProcessRecordLocked(aInfo.processName,
-                    aInfo.applicationInfo.uid, true);
-            if (app == null || app.getActiveInstrumentation() == null) {
-                intent.setFlags(intent.getFlags() | FLAG_ACTIVITY_NEW_TASK);
-                final int resolvedUserId = UserHandle.getUserId(aInfo.applicationInfo.uid);
-                // For ANR debugging to verify if the user activity is the one that actually
-                // launched.
-                final String myReason = reason + ":" + userId + ":" + resolvedUserId;
-                mActivityTaskManager.getActivityStartController().startHomeActivity(intent, aInfo, myReason);
-            }
-        } else {
-            Slog.wtf(TAG, "No home screen found for " + intent, new Throwable());
-        }
-
-        return true;
-    }
-
-    private ActivityInfo resolveActivityInfo(Intent intent, int flags, int userId) {
-        ActivityInfo ai = null;
-        ComponentName comp = intent.getComponent();
-        try {
-            if (comp != null) {
-                // Factory test.
-                ai = AppGlobals.getPackageManager().getActivityInfo(comp, flags, userId);
-            } else {
-                ResolveInfo info = AppGlobals.getPackageManager().resolveIntent(
-                        intent,
-                        intent.resolveTypeIfNeeded(mContext.getContentResolver()),
-                        flags, userId);
-
-                if (info != null) {
-                    ai = info.activityInfo;
-                }
-            }
-        } catch (RemoteException e) {
-            // ignore
-        }
-
-        return ai;
     }
 
     boolean getCheckedForSetup() {
@@ -6712,7 +6624,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    static int checkComponentPermission(String permission, int pid, int uid,
+    public static int checkComponentPermission(String permission, int pid, int uid,
             int owningUid, boolean exported) {
         if (pid == MY_PID) {
             return PackageManager.PERMISSION_GRANTED;
@@ -8794,7 +8706,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     if (mActivityTaskManager.mKeyguardController.isKeyguardLocked()) {
                         // Showing launcher to avoid user entering credential twice.
                         final int currentUserId = mUserController.getCurrentUserId();
-                        startHomeActivityLocked(currentUserId, "notifyLockedProfile");
+                        mAtmInternal.startHomeActivity(currentUserId, "notifyLockedProfile");
                     }
                     mStackSupervisor.lockAllProfileTasks(userId);
                 }
@@ -8817,7 +8729,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         ? new ActivityOptions(options)
                         : ActivityOptions.makeBasic();
                 activityOptions.setLaunchTaskId(
-                        mStackSupervisor.getHomeActivity().getTask().taskId);
+                        mStackSupervisor.getDefaultDisplayHomeActivity().getTask().taskId);
                 mContext.startActivityAsUser(intent, activityOptions.toBundle(),
                         UserHandle.CURRENT);
             } finally {
@@ -9807,8 +9719,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 return;
             }
 
-            mHasHeavyWeightFeature = mContext.getPackageManager().hasSystemFeature(
-                    PackageManager.FEATURE_CANT_SAVE_STATE);
             mLocalDeviceIdleController
                     = LocalServices.getService(DeviceIdleController.LocalService.class);
             mActivityTaskManager.onSystemReady();
@@ -9853,44 +9763,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         Slog.i(TAG, "System now ready");
-        EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_AMS_READY,
-            SystemClock.uptimeMillis());
+        EventLog.writeEvent(EventLogTags.BOOT_PROGRESS_AMS_READY, SystemClock.uptimeMillis());
 
-        synchronized(this) {
-            // Make sure we have no pre-ready processes sitting around.
-
-            if (mFactoryTest == FactoryTest.FACTORY_TEST_LOW_LEVEL) {
-                ResolveInfo ri = mContext.getPackageManager()
-                        .resolveActivity(new Intent(Intent.ACTION_FACTORY_TEST),
-                                STOCK_PM_FLAGS);
-                CharSequence errorMsg = null;
-                if (ri != null) {
-                    ActivityInfo ai = ri.activityInfo;
-                    ApplicationInfo app = ai.applicationInfo;
-                    if ((app.flags&ApplicationInfo.FLAG_SYSTEM) != 0) {
-                        mTopAction = Intent.ACTION_FACTORY_TEST;
-                        mTopData = null;
-                        mTopComponent = new ComponentName(app.packageName,
-                                ai.name);
-                    } else {
-                        errorMsg = mContext.getResources().getText(
-                                com.android.internal.R.string.factorytest_not_system);
-                    }
-                } else {
-                    errorMsg = mContext.getResources().getText(
-                            com.android.internal.R.string.factorytest_no_action);
-                }
-                if (errorMsg != null) {
-                    mTopAction = null;
-                    mTopData = null;
-                    mTopComponent = null;
-                    Message msg = Message.obtain();
-                    msg.what = SHOW_FACTORY_ERROR_UI_MSG;
-                    msg.getData().putCharSequence("msg", errorMsg);
-                    mUiHandler.sendMessage(msg);
-                }
-            }
-        }
+        mAtmInternal.updateTopComponentForFactoryTest();
 
         retrieveSettings();
         final int currentUserId = mUserController.getCurrentUserId();
@@ -9936,7 +9811,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     throw e.rethrowAsRuntimeException();
                 }
             }
-            startHomeActivityLocked(currentUserId, "systemReady");
+            mAtmInternal.startHomeActivity(currentUserId, "systemReady");
 
             mAtmInternal.showSystemReadyErrorDialogsIfNeeded();
 
@@ -10596,9 +10471,13 @@ public class ActivityManagerService extends IActivityManager.Stub
                         currApp.importanceReasonImportance =
                                 ActivityManager.RunningAppProcessInfo.procStateToImportance(
                                         app.adjSourceProcState);
-                    } else if (app.adjSource instanceof ActivityRecord) {
-                        ActivityRecord r = (ActivityRecord)app.adjSource;
-                        if (r.app != null) currApp.importanceReasonPid = r.app.getPid();
+                    } else if (app.adjSource instanceof ActivityServiceConnectionsHolder) {
+                        ActivityServiceConnectionsHolder r =
+                                (ActivityServiceConnectionsHolder) app.adjSource;
+                        final int pid = r.getActivityPid();
+                        if (pid != -1) {
+                            currApp.importanceReasonPid = pid;
+                        }
                     }
                     if (app.adjTarget instanceof ComponentName) {
                         currApp.importanceReasonComponent = (ComponentName)app.adjTarget;
@@ -17773,10 +17652,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                     if ((cr.flags&Context.BIND_TREAT_LIKE_ACTIVITY) != 0) {
                         app.treatLikeActivity = true;
                     }
-                    final ActivityRecord a = cr.activity;
+                    final ActivityServiceConnectionsHolder a = cr.activity;
                     if ((cr.flags&Context.BIND_ADJUST_WITH_ACTIVITY) != 0) {
-                        if (a != null && adj > ProcessList.FOREGROUND_APP_ADJ && (a.visible
-                                || a.isState(ActivityState.RESUMED, ActivityState.PAUSING))) {
+                        if (a != null && adj > ProcessList.FOREGROUND_APP_ADJ
+                                && a.isActivityVisible()) {
                             adj = ProcessList.FOREGROUND_APP_ADJ;
                             if ((cr.flags&Context.BIND_NOT_FOREGROUND) == 0) {
                                 if ((cr.flags&Context.BIND_IMPORTANT) != 0) {
@@ -20807,13 +20686,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
-        public Intent getHomeIntent() {
-            synchronized (ActivityManagerService.this) {
-                return ActivityManagerService.this.getHomeIntent();
-            }
-        }
-
-        @Override
         public void scheduleAppGcs() {
             synchronized (ActivityManagerService.this) {
                 ActivityManagerService.this.scheduleAppGcsLocked();
@@ -20889,6 +20761,16 @@ public class ActivityManagerService extends IActivityManager.Stub
                     Binder.restoreCallingIdentity(origId);
                 }
                 return res;
+            }
+        }
+
+        @Override
+        public void disconnectActivityFromServices(Object connectionHolder) {
+            synchronized(ActivityManagerService.this) {
+                final ActivityServiceConnectionsHolder c =
+                        (ActivityServiceConnectionsHolder) connectionHolder;
+                c.forEachConnection(cr -> mServices.removeConnectionLocked(
+                        (ConnectionRecord) cr, null, c));
             }
         }
     }

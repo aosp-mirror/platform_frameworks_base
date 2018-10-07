@@ -212,11 +212,6 @@ public abstract class ActivityManagerInternal {
      */
     public abstract boolean shouldConfirmCredentials(int userId);
 
-    /**
-     * @return The intent used to launch the home activity.
-     */
-    public abstract Intent getHomeIntent();
-
     public abstract int[] getCurrentProfileIds();
     public abstract UserInfo getCurrentUser();
     public abstract void ensureNotSpecialUser(int userId);
@@ -245,4 +240,6 @@ public abstract class ActivityManagerInternal {
     public abstract ComponentName startServiceInPackage(int uid, Intent service,
             String resolvedType, boolean fgRequired, String callingPackage, int userId)
             throws TransactionTooLargeException;
+
+    public abstract void disconnectActivityFromServices(Object connectionHolder);
 }

@@ -18,7 +18,6 @@ package com.android.server.display;
 
 import android.graphics.Rect;
 import android.hardware.display.DisplayManagerInternal;
-import android.os.SystemProperties;
 import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.Surface;
@@ -255,6 +254,9 @@ final class LogicalDisplay {
             }
             if ((deviceInfo.flags & DisplayDeviceInfo.FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD) != 0) {
                 mBaseDisplayInfo.flags |= Display.FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD;
+            }
+            if ((deviceInfo.flags & DisplayDeviceInfo.FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS) != 0) {
+                mBaseDisplayInfo.flags |= Display.FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS;
             }
             Rect maskingInsets = getMaskingInsets(deviceInfo);
             int maskedWidth = deviceInfo.width - maskingInsets.left - maskingInsets.right;

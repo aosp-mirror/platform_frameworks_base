@@ -221,7 +221,8 @@ public:
     status_t unregisterInputChannel(JNIEnv* env, const sp<InputChannel>& inputChannel);
 
     void setInputWindows(JNIEnv* env, jobjectArray windowHandleObjArray, int32_t displayId);
-    void setFocusedApplication(JNIEnv* env, jobject applicationHandleObj);
+    void setFocusedApplication(JNIEnv* env, int32_t displayId, jobject applicationHandleObj);
+    void setFocusedDisplay(JNIEnv* env, int32_t displayId);
     void setInputDispatchMode(bool enabled, bool frozen);
     void setSystemUiVisibility(int32_t visibility);
     void setPointerSpeed(int32_t speed);
@@ -428,7 +429,7 @@ void NativeInputManager::setDisplayViewports(JNIEnv* env, jobjectArray viewportO
         // Internal viewport has changed if there wasn't one earlier, and there is one now, or,
         // if they are different.
         const bool internalViewportChanged = (newInternalViewport != nullptr) &&
-                (oldInternalViewport == nullptr || (*newInternalViewport != *newInternalViewport));
+                (oldInternalViewport == nullptr || (*oldInternalViewport != *newInternalViewport));
         if (internalViewportChanged) {
             sp<PointerController> controller = mLocked.pointerController.promote();
             updatePointerControllerFromViewport(controller, newInternalViewport);
@@ -771,10 +772,15 @@ void NativeInputManager::setInputWindows(JNIEnv* env, jobjectArray windowHandleO
     }
 }
 
-void NativeInputManager::setFocusedApplication(JNIEnv* env, jobject applicationHandleObj) {
+void NativeInputManager::setFocusedApplication(JNIEnv* env, int32_t displayId,
+        jobject applicationHandleObj) {
     sp<InputApplicationHandle> applicationHandle =
             android_server_InputApplicationHandle_getHandle(env, applicationHandleObj);
-    mInputManager->getDispatcher()->setFocusedApplication(applicationHandle);
+    mInputManager->getDispatcher()->setFocusedApplication(displayId, applicationHandle);
+}
+
+void NativeInputManager::setFocusedDisplay(JNIEnv* env, int32_t displayId) {
+    mInputManager->getDispatcher()->setFocusedDisplay(displayId);
 }
 
 void NativeInputManager::setInputDispatchMode(bool enabled, bool frozen) {
@@ -1413,10 +1419,17 @@ static void nativeSetInputWindows(JNIEnv* env, jclass /* clazz */,
 }
 
 static void nativeSetFocusedApplication(JNIEnv* env, jclass /* clazz */,
-        jlong ptr, jobject applicationHandleObj) {
+        jlong ptr, jint displayId, jobject applicationHandleObj) {
     NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
 
-    im->setFocusedApplication(env, applicationHandleObj);
+    im->setFocusedApplication(env, displayId, applicationHandleObj);
+}
+
+static void nativeSetFocusedDisplay(JNIEnv* env, jclass /* clazz */,
+        jlong ptr, jint displayId) {
+    NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
+
+    im->setFocusedDisplay(env, displayId);
 }
 
 static void nativeSetPointerCapture(JNIEnv* env, jclass /* clazz */, jlong ptr,
@@ -1638,8 +1651,10 @@ static const JNINativeMethod gInputManagerMethods[] = {
             (void*) nativeToggleCapsLock },
     { "nativeSetInputWindows", "(J[Lcom/android/server/input/InputWindowHandle;I)V",
             (void*) nativeSetInputWindows },
-    { "nativeSetFocusedApplication", "(JLcom/android/server/input/InputApplicationHandle;)V",
+    { "nativeSetFocusedApplication", "(JILcom/android/server/input/InputApplicationHandle;)V",
             (void*) nativeSetFocusedApplication },
+    { "nativeSetFocusedDisplay", "(JI)V",
+            (void*) nativeSetFocusedDisplay },
     { "nativeSetPointerCapture", "(JZ)V",
             (void*) nativeSetPointerCapture },
     { "nativeSetInputDispatchMode", "(JZZ)V",

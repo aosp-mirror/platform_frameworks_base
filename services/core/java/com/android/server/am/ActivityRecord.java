@@ -283,7 +283,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     ActivityOptions pendingOptions; // most recently given options
     ActivityOptions returningOptions; // options that are coming back via convertToTranslucent
     AppTimeTracker appTimeTracker; // set if we are tracking the time in this app/task/activity
-    HashSet<ConnectionRecord> connections; // All ConnectionRecord we hold
+    ActivityServiceConnectionsHolder mServiceConnectionsHolder; // Service connections.
     UriPermissionOwner uriPermissions; // current special URI access perms.
     WindowProcessController app;      // if non-null, hosting application
     private ActivityState mState;    // current state we are in
@@ -549,8 +549,8 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
                     pw.print(" configChangeFlags=");
                     pw.println(Integer.toHexString(configChangeFlags));
         }
-        if (connections != null) {
-            pw.print(prefix); pw.print("connections="); pw.println(connections);
+        if (mServiceConnectionsHolder != null) {
+            pw.print(prefix); pw.print("connections="); pw.println(mServiceConnectionsHolder);
         }
         if (info != null) {
             pw.println(prefix + "resizeMode=" + ActivityInfo.resizeModeToString(info.resizeMode));

@@ -327,7 +327,7 @@ TEST(LogEventTest, TestKeyValuePairsEvent) {
     EXPECT_EQ(33, item5.mValue.int_value);
 
     const FieldValue& item6 = event1.getValues()[6];
-    EXPECT_EQ(0x2020382, item6.mField.getField());
+    EXPECT_EQ(0x2020383, item6.mField.getField());
     EXPECT_EQ(Type::LONG, item6.mValue.getType());
     EXPECT_EQ(678L, item6.mValue.long_value);
 
@@ -337,7 +337,7 @@ TEST(LogEventTest, TestKeyValuePairsEvent) {
     EXPECT_EQ(44, item7.mValue.int_value);
 
     const FieldValue& item8 = event1.getValues()[8];
-    EXPECT_EQ(0x2020482, item8.mField.getField());
+    EXPECT_EQ(0x2020483, item8.mField.getField());
     EXPECT_EQ(Type::LONG, item8.mValue.getType());
     EXPECT_EQ(890L, item8.mValue.long_value);
 
@@ -347,7 +347,7 @@ TEST(LogEventTest, TestKeyValuePairsEvent) {
     EXPECT_EQ(1, item9.mValue.int_value);
 
     const FieldValue& item10 = event1.getValues()[10];
-    EXPECT_EQ(0x2020583, item10.mField.getField());
+    EXPECT_EQ(0x2020584, item10.mField.getField());
     EXPECT_EQ(Type::STRING, item10.mValue.getType());
     EXPECT_EQ("test2", item10.mValue.str_value);
 
@@ -357,7 +357,7 @@ TEST(LogEventTest, TestKeyValuePairsEvent) {
     EXPECT_EQ(2, item11.mValue.int_value);
 
     const FieldValue& item12 = event1.getValues()[12];
-    EXPECT_EQ(0x2020683, item12.mField.getField());
+    EXPECT_EQ(0x2020684, item12.mField.getField());
     EXPECT_EQ(Type::STRING, item12.mValue.getType());
     EXPECT_EQ("test1", item12.mValue.str_value);
 
@@ -367,7 +367,7 @@ TEST(LogEventTest, TestKeyValuePairsEvent) {
     EXPECT_EQ(111, item13.mValue.int_value);
 
     const FieldValue& item14 = event1.getValues()[14];
-    EXPECT_EQ(0x2020784, item14.mField.getField());
+    EXPECT_EQ(0x2020785, item14.mField.getField());
     EXPECT_EQ(Type::FLOAT, item14.mValue.getType());
     EXPECT_EQ(2.2f, item14.mValue.float_value);
 
@@ -377,7 +377,7 @@ TEST(LogEventTest, TestKeyValuePairsEvent) {
     EXPECT_EQ(222, item15.mValue.int_value);
 
     const FieldValue& item16 = event1.getValues()[16];
-    EXPECT_EQ(0x2028884, item16.mField.getField());
+    EXPECT_EQ(0x2028885, item16.mField.getField());
     EXPECT_EQ(Type::FLOAT, item16.mValue.getType());
     EXPECT_EQ(1.1f, item16.mValue.float_value);
 }

@@ -384,7 +384,7 @@ public final class BasePermission {
         }
         if (!isRuntime() && !isDevelopment()) {
             throw new SecurityException("Permission " + name
-                    + " is not a changeable permission type");
+                    + " requested by " + pkg.packageName + " is not a changeable permission type");
         }
     }
 

@@ -33,6 +33,7 @@ import android.service.voice.IVoiceInteractionSession;
 import android.util.SparseIntArray;
 
 import com.android.internal.app.IVoiceInteractor;
+import com.android.server.am.ActivityServiceConnectionsHolder;
 import com.android.server.am.PendingIntentRecord;
 import com.android.server.am.SafeActivityOptions;
 import com.android.server.am.TaskRecord;
@@ -332,4 +333,14 @@ public abstract class ActivityTaskManagerInternal {
             int callingUid, int userId, IBinder token, String resultWho,
             int requestCode, Intent[] intents, String[] resolvedTypes, int flags,
             Bundle bOptions);
+
+    /** @return the service connection holder for a given activity token. */
+    public abstract ActivityServiceConnectionsHolder getServiceConnectionsHolder(IBinder token);
+
+    /** @return The intent used to launch the home activity. */
+    public abstract Intent getHomeIntent();
+    public abstract boolean startHomeActivity(int userId, String reason);
+    /** @return true if the given process is the factory test process. */
+    public abstract boolean isFactoryTestProcess(WindowProcessController wpc);
+    public abstract void updateTopComponentForFactoryTest();
 }

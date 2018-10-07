@@ -49,6 +49,7 @@ import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 
+import android.graphics.Insets;
 import android.graphics.Matrix;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
@@ -404,8 +405,12 @@ public class WindowStateTests extends WindowTestsBase {
         WindowFrames wf = app.getWindowFrames();
         wf.mParentFrame.set(7, 10, 185, 380);
         wf.mDisplayFrame.set(wf.mParentFrame);
-        final DisplayCutout cutout = new DisplayCutout(new Rect(0, 15, 0, 22),
-                Arrays.asList(new Rect(95, 0, 105, 15), new Rect(95, 378, 105, 400)));
+        final DisplayCutout cutout = new DisplayCutout(
+                Insets.of(0, 15, 0, 22) /* safeInset */,
+                null /* boundLeft */,
+                new Rect(95, 0, 105, 15),
+                null /* boundRight */,
+                new Rect(95, 378, 105, 400));
         wf.setDisplayCutout(new WmDisplayCutout(cutout, new Size(200, 400)));
 
         app.computeFrameLw();

@@ -16,6 +16,8 @@
 
 #include "DumpManifest.h"
 
+#include <algorithm>
+
 #include "LoadedApk.h"
 #include "SdkConstants.h"
 #include "ValueVisitor.h"
@@ -70,10 +72,14 @@ enum {
   CATEGORY_ATTR = 0x010103e8,
   BANNER_ATTR = 0x10103f2,
   ISGAME_ATTR = 0x10103f4,
+  VERSION_ATTR = 0x01010519,
+  CERT_DIGEST_ATTR = 0x01010548,
   REQUIRED_FEATURE_ATTR = 0x1010557,
   REQUIRED_NOT_FEATURE_ATTR = 0x1010558,
   COMPILE_SDK_VERSION_ATTR = 0x01010572,
   COMPILE_SDK_VERSION_CODENAME_ATTR = 0x01010573,
+  VERSION_MAJOR_ATTR = 0x01010577,
+  PACKAGE_TYPE_ATTR = 0x01010587,
 };
 
 const std::string& kAndroidNamespace = "http://schemas.android.com/apk/res/android";
@@ -1318,6 +1324,70 @@ class UsesLibrary : public ManifestExtractor::Element {
   }
 };
 
+/** Represents <static-library> elements. **/
+class StaticLibrary : public ManifestExtractor::Element {
+ public:
+  StaticLibrary() = default;
+  std::string name;
+  int version;
+  int versionMajor;
+
+  void Extract(xml::Element* element) override {
+    auto parent_stack = extractor()->parent_stack();
+    if (parent_stack.size() > 0 && ElementCast<Application>(parent_stack[0])) {
+      name = GetAttributeStringDefault(FindAttribute(element, NAME_ATTR), "");
+      version = GetAttributeIntegerDefault(FindAttribute(element, VERSION_ATTR), 0);
+      versionMajor = GetAttributeIntegerDefault(FindAttribute(element, VERSION_MAJOR_ATTR), 0);
+    }
+  }
+
+  void Print(text::Printer& printer) override {
+    printer.Print(StringPrintf(
+      "static-library: name='%s' version='%d' versionMajor='%d'\n",
+      name.data(), version, versionMajor));
+  }
+};
+
+/** Represents <uses-static-library> elements. **/
+class UsesStaticLibrary : public ManifestExtractor::Element {
+ public:
+  UsesStaticLibrary() = default;
+  std::string name;
+  int version;
+  int versionMajor;
+  std::vector<std::string> certDigests;
+
+  void Extract(xml::Element* element) override {
+    auto parent_stack = extractor()->parent_stack();
+    if (parent_stack.size() > 0 && ElementCast<Application>(parent_stack[0])) {
+      name = GetAttributeStringDefault(FindAttribute(element, NAME_ATTR), "");
+      version = GetAttributeIntegerDefault(FindAttribute(element, VERSION_ATTR), 0);
+      versionMajor = GetAttributeIntegerDefault(FindAttribute(element, VERSION_MAJOR_ATTR), 0);
+      AddCertDigest(element);
+    }
+  }
+
+  void AddCertDigest(xml::Element* element) {
+    std::string digest = GetAttributeStringDefault(FindAttribute(element, CERT_DIGEST_ATTR), "");
+    // We allow ":" delimiters in the SHA declaration as this is the format
+    // emitted by the certtool making it easy for developers to copy/paste.
+    digest.erase(std::remove(digest.begin(), digest.end(), ':'), digest.end());
+    if (!digest.empty()) {
+      certDigests.push_back(digest);
+    }
+  }
+
+  void Print(text::Printer& printer) override {
+    printer.Print(StringPrintf(
+      "uses-static-library: name='%s' version='%d' versionMajor='%d'",
+      name.data(), version, versionMajor));
+    for (size_t i = 0; i < certDigests.size(); i++) {
+      printer.Print(StringPrintf(" certDigest='%s'", certDigests[i].data()));
+    }
+    printer.Print("\n");
+  }
+};
+
 /**
  * Represents <meta-data> elements. These tags are only printed when a flag is passed in to
  * explicitly enable meta data printing.
@@ -1326,29 +1396,29 @@ class MetaData : public ManifestExtractor::Element {
  public:
   MetaData() = default;
   std::string name;
-  const std::string* value;
+  std::string value;
   const int* value_int;
-  const std::string* resource;
+  std::string resource;
   const int* resource_int;
 
   void Extract(xml::Element* element) override {
     name = GetAttributeStringDefault(FindAttribute(element, NAME_ATTR), "");
-    value = GetAttributeString(FindAttribute(element, VALUE_ATTR));
+    value = GetAttributeStringDefault(FindAttribute(element, VALUE_ATTR), "");
     value_int = GetAttributeInteger(FindAttribute(element, VALUE_ATTR));
-    resource = GetAttributeString(FindAttribute(element, RESOURCE_ATTR));
+    resource = GetAttributeStringDefault(FindAttribute(element, RESOURCE_ATTR), "");
     resource_int = GetAttributeInteger(FindAttribute(element, RESOURCE_ATTR));
   }
 
   void Print(text::Printer& printer) override {
     if (extractor()->options_.include_meta_data && !name.empty()) {
       printer.Print(StringPrintf("meta-data: name='%s' ", name.data()));
-      if (value) {
-        printer.Print(StringPrintf("value='%s' ", value->data()));
+      if (!value.empty()) {
+        printer.Print(StringPrintf("value='%s' ", value.data()));
       } else if (value_int) {
         printer.Print(StringPrintf("value='%d' ", *value_int));
       } else {
-        if (resource) {
-          printer.Print(StringPrintf("resource='%s' ", resource->data()));
+        if (!resource.empty()) {
+          printer.Print(StringPrintf("resource='%s' ", resource.data()));
         } else if (resource_int) {
           printer.Print(StringPrintf("resource='%d' ", *resource_int));
         }
@@ -1544,15 +1614,65 @@ class PackageVerifier : public ManifestExtractor::Element {
 class UsesPackage : public ManifestExtractor::Element {
  public:
   UsesPackage() = default;
+  const std::string* packageType = nullptr;
   const std::string* name = nullptr;
+  int version;
+  int versionMajor;
+  std::vector<std::string> certDigests;
 
   void Extract(xml::Element* element) override {
-    name = GetAttributeString(FindAttribute(element, NAME_ATTR));
+    auto parent_stack = extractor()->parent_stack();
+    if (parent_stack.size() > 0 && ElementCast<Application>(parent_stack[0])) {
+      packageType = GetAttributeString(FindAttribute(element, PACKAGE_TYPE_ATTR));
+      name = GetAttributeString(FindAttribute(element, NAME_ATTR));
+      version = GetAttributeIntegerDefault(FindAttribute(element, VERSION_ATTR), 0);
+      versionMajor = GetAttributeIntegerDefault(FindAttribute(element, VERSION_MAJOR_ATTR), 0);
+      AddCertDigest(element);
+    }
+  }
+
+  void AddCertDigest(xml::Element* element) {
+    std::string digest = GetAttributeStringDefault(FindAttribute(element, CERT_DIGEST_ATTR), "");
+    // We allow ":" delimiters in the SHA declaration as this is the format
+    // emitted by the certtool making it easy for developers to copy/paste.
+    digest.erase(std::remove(digest.begin(), digest.end(), ':'), digest.end());
+    if (!digest.empty()) {
+      certDigests.push_back(digest);
+    }
   }
 
   void Print(text::Printer& printer) override {
     if (name) {
-      printer.Print(StringPrintf("uses-package:'%s'\n", name->data()));
+      if (packageType) {
+        printer.Print(StringPrintf(
+          "uses-typed-package: type='%s' name='%s' version='%d' versionMajor='%d'",
+          packageType->data(), name->data(), version, versionMajor));
+        for (size_t i = 0; i < certDigests.size(); i++) {
+          printer.Print(StringPrintf(" certDigest='%s'", certDigests[i].data()));
+        }
+        printer.Print("\n");
+      } else {
+        printer.Print(StringPrintf("uses-package:'%s'\n", name->data()));
+      }
+    }
+  }
+};
+
+/** Represents <additional-certificate> elements. **/
+class AdditionalCertificate : public ManifestExtractor::Element {
+ public:
+  AdditionalCertificate() = default;
+
+  void Extract(xml::Element* element) override {
+    auto parent_stack = extractor()->parent_stack();
+    if (parent_stack.size() > 0) {
+      if (ElementCast<UsesPackage>(parent_stack[0])) {
+        UsesPackage* uses = ElementCast<UsesPackage>(parent_stack[0]);
+        uses->AddCertDigest(element);
+      } else if (ElementCast<UsesStaticLibrary>(parent_stack[0])) {
+        UsesStaticLibrary* uses = ElementCast<UsesStaticLibrary>(parent_stack[0]);
+        uses->AddCertDigest(element);
+      }
     }
   }
 };
@@ -1837,10 +1957,10 @@ bool ManifestExtractor::Dump(text::Printer& printer, IDiagnostics* diag) {
                   && offhost_apdu_action)) {
 
             // Attempt to load the resource file
-            if (!meta_data->resource) {
+            if (!meta_data->resource.empty()) {
               return;
             }
-            auto resource = apk->LoadXml(*meta_data->resource, diag);
+            auto resource = apk->LoadXml(meta_data->resource, diag);
             if (!resource) {
               return;
             }
@@ -2065,6 +2185,9 @@ T* ElementCast(ManifestExtractor::Element* element) {
     {"uses-permission-sdk-23", std::is_base_of<UsesPermissionSdk23, T>::value},
     {"uses-library", std::is_base_of<UsesLibrary, T>::value},
     {"uses-package", std::is_base_of<UsesPackage, T>::value},
+    {"static-library", std::is_base_of<StaticLibrary, T>::value},
+    {"uses-static-library", std::is_base_of<UsesStaticLibrary, T>::value},
+    {"additional-certificate", std::is_base_of<AdditionalCertificate, T>::value},
     {"uses-sdk", std::is_base_of<UsesSdkBadging, T>::value},
   };
 
@@ -2110,7 +2233,10 @@ std::unique_ptr<ManifestExtractor::Element> ManifestExtractor::Element::Inflate(
     {"uses-permission", &CreateType<UsesPermission>},
     {"uses-permission-sdk-23", &CreateType<UsesPermissionSdk23>},
     {"uses-library", &CreateType<UsesLibrary>},
+    {"static-library", &CreateType<StaticLibrary>},
+    {"uses-static-library", &CreateType<UsesStaticLibrary>},
     {"uses-package", &CreateType<UsesPackage>},
+    {"additional-certificate", &CreateType<AdditionalCertificate>},
     {"uses-sdk", &CreateType<UsesSdkBadging>},
   };
 

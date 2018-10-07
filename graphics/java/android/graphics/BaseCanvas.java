@@ -376,6 +376,53 @@ public abstract class BaseCanvas {
         drawRoundRect(rect.left, rect.top, rect.right, rect.bottom, rx, ry, paint);
     }
 
+    /**
+     * Make lint happy.
+     * See {@link Canvas#drawDoubleRoundRect(RectF, float, float, RectF, float, float, Paint)}
+     */
+    public void drawDoubleRoundRect(@NonNull RectF outer, float outerRx, float outerRy,
+            @NonNull RectF inner, float innerRx, float innerRy, @NonNull Paint paint) {
+        throwIfHasHwBitmapInSwMode(paint);
+        float outerLeft = outer.left;
+        float outerTop = outer.top;
+        float outerRight = outer.right;
+        float outerBottom = outer.bottom;
+
+        float innerLeft = inner.left;
+        float innerTop = inner.top;
+        float innerRight = inner.right;
+        float innerBottom = inner.bottom;
+        nDrawDoubleRoundRect(mNativeCanvasWrapper, outerLeft, outerTop, outerRight, outerBottom,
+                outerRx, outerRy, innerLeft, innerTop, innerRight, innerBottom, innerRx, innerRy,
+                paint.getNativeInstance());
+    }
+
+    /**
+     * Make lint happy.
+     * See {@link Canvas#drawDoubleRoundRect(RectF, float[], RectF, float[], Paint)}
+     */
+    public void drawDoubleRoundRect(@NonNull RectF outer, float[] outerRadii,
+            @NonNull RectF inner, float[] innerRadii, @NonNull Paint paint) {
+        throwIfHasHwBitmapInSwMode(paint);
+        if (innerRadii == null || outerRadii == null
+                || innerRadii.length != 8 || outerRadii.length != 8) {
+            throw new IllegalArgumentException("Both inner and outer radii arrays must contain "
+                    + "exactly 8 values");
+        }
+        float outerLeft = outer.left;
+        float outerTop = outer.top;
+        float outerRight = outer.right;
+        float outerBottom = outer.bottom;
+
+        float innerLeft = inner.left;
+        float innerTop = inner.top;
+        float innerRight = inner.right;
+        float innerBottom = inner.bottom;
+        nDrawDoubleRoundRect(mNativeCanvasWrapper, outerLeft, outerTop, outerRight,
+                outerBottom, outerRadii, innerLeft, innerTop, innerRight, innerBottom, innerRadii,
+                paint.getNativeInstance());
+    }
+
     public void drawText(@NonNull char[] text, int index, int count, float x, float y,
             @NonNull Paint paint) {
         if ((index | count | (index + count) |
@@ -630,6 +677,16 @@ public abstract class BaseCanvas {
 
     private static native void nDrawRoundRect(long nativeCanvas, float left, float top, float right,
             float bottom, float rx, float ry, long nativePaint);
+
+    private static native void nDrawDoubleRoundRect(long nativeCanvas, float outerLeft,
+            float outerTop, float outerRight, float outerBottom, float outerRx, float outerRy,
+            float innerLeft, float innerTop, float innerRight, float innerBottom, float innerRx,
+            float innerRy, long nativePaint);
+
+    private static native void nDrawDoubleRoundRect(long nativeCanvas, float outerLeft,
+            float outerTop, float outerRight, float outerBottom, float[] outerRadii,
+            float innerLeft, float innerTop, float innerRight, float innerBottom,
+            float[] innerRadii, long nativePaint);
 
     private static native void nDrawPath(long nativeCanvas, long nativePath, long nativePaint);
 

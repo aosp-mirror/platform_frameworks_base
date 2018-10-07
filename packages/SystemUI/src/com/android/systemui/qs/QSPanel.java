@@ -25,6 +25,7 @@ import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.metrics.LogMaker;
+import android.os.Bundle;
 import android.os.Handler;
 import android.os.Message;
 import android.service.quicksettings.Tile;
@@ -666,6 +667,11 @@ public class QSPanel extends LinearLayout implements Tunable, Callback, Brightne
     }
 
     public interface QSTileLayout {
+
+        default void saveInstanceState(Bundle outState) {}
+
+        default void restoreInstanceState(Bundle savedInstanceState) {}
+
         void addTile(TileRecord tile);
 
         void removeTile(TileRecord tile);

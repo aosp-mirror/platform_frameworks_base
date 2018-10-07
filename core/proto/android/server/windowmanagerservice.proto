@@ -158,6 +158,7 @@ message DisplayContentProto {
     optional ScreenRotationAnimationProto screen_rotation_animation = 12;
     optional DisplayFramesProto display_frames = 13;
     optional int32 surface_size = 14;
+    optional string focused_app = 15;
 }
 
 /* represents DisplayFrames */

@@ -15,6 +15,8 @@ package com.android.systemui.statusbar.notification.stack;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertNotNull;
+import static junit.framework.Assert.assertNull;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -36,6 +38,7 @@ import android.service.dreams.IDreamManager;
 import android.support.test.annotation.UiThreadTest;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
+import android.view.View;
 
 import com.android.systemui.ExpandHelper;
 import com.android.systemui.R;
@@ -312,6 +315,36 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
         mStackScroller.onDensityOrFontScaleChanged();
         verify(mStackScroller).setFooterView(any());
         verify(mStackScroller).setEmptyShadeView(any());
+    }
+
+    @Test
+    @UiThreadTest
+    public void testSetIsBeingDraggedResetsExposedMenu() {
+        NotificationSwipeHelper swipeActionHelper =
+                (NotificationSwipeHelper) mStackScroller.getSwipeActionHelper();
+        swipeActionHelper.setExposedMenuView(new View(mContext));
+        mStackScroller.setIsBeingDragged(true);
+        assertNull(swipeActionHelper.getExposedMenuView());
+    }
+
+    @Test
+    @UiThreadTest
+    public void testPanelTrackingStartResetsExposedMenu() {
+        NotificationSwipeHelper swipeActionHelper =
+                (NotificationSwipeHelper) mStackScroller.getSwipeActionHelper();
+        swipeActionHelper.setExposedMenuView(new View(mContext));
+        mStackScroller.onPanelTrackingStarted();
+        assertNull(swipeActionHelper.getExposedMenuView());
+    }
+
+    @Test
+    @UiThreadTest
+    public void testDarkModeResetsExposedMenu() {
+        NotificationSwipeHelper swipeActionHelper =
+                (NotificationSwipeHelper) mStackScroller.getSwipeActionHelper();
+        swipeActionHelper.setExposedMenuView(new View(mContext));
+        mStackScroller.setDarkAmount(0.1f, 0.1f);
+        assertNull(swipeActionHelper.getExposedMenuView());
     }
 
     private void setBarStateForTest(int state) {

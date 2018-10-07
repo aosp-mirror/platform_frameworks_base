@@ -117,12 +117,14 @@ public final class ImsCallProfile implements Parcelable {
      * @hide
      */
     public static final String EXTRA_CONFERENCE = "conference";
+
     /**
      * Boolean extra property set on an {@link ImsCallProfile} to indicate that this call is an
      * emergency call.  The {@link ImsService} sets this on a call to indicate that the network has
      * identified the call as an emergency call.
      */
-    public static final String EXTRA_E_CALL = "e_call";
+    public static final String EXTRA_EMERGENCY_CALL = "e_call";
+
     /**
      * @hide
      */

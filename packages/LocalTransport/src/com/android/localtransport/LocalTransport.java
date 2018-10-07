@@ -95,7 +95,6 @@ public class LocalTransport extends BackupTransport {
     private long mFullBackupSize;
 
     private FileInputStream mCurFullRestoreStream;
-    private FileOutputStream mFullRestoreSocketStream;
     private byte[] mFullRestoreBuffer;
     private final LocalTransportParameters mParameters;
 
@@ -195,6 +194,15 @@ public class LocalTransport extends BackupTransport {
 
     @Override
     public int performBackup(PackageInfo packageInfo, ParcelFileDescriptor data, int flags) {
+        try {
+            return performBackupInternal(packageInfo, data, flags);
+        } finally {
+            IoUtils.closeQuietly(data);
+        }
+    }
+
+    private int performBackupInternal(
+            PackageInfo packageInfo, ParcelFileDescriptor data, int flags) {
         boolean isIncremental = (flags & FLAG_INCREMENTAL) != 0;
         boolean isNonIncremental = (flags & FLAG_NON_INCREMENTAL) != 0;
 
@@ -750,7 +758,6 @@ public class LocalTransport extends BackupTransport {
     private void resetFullRestoreState() {
         IoUtils.closeQuietly(mCurFullRestoreStream);
         mCurFullRestoreStream = null;
-        mFullRestoreSocketStream = null;
         mFullRestoreBuffer = null;
     }
 
@@ -795,9 +802,10 @@ public class LocalTransport extends BackupTransport {
                 Log.e(TAG, "Unable to read archive for " + name);
                 return TRANSPORT_PACKAGE_REJECTED;
             }
-            mFullRestoreSocketStream = new FileOutputStream(socket.getFileDescriptor());
             mFullRestoreBuffer = new byte[2*1024];
         }
+
+        FileOutputStream stream = new FileOutputStream(socket.getFileDescriptor());
 
         int nRead;
         try {
@@ -815,14 +823,12 @@ public class LocalTransport extends BackupTransport {
                 if (DEBUG) {
                     Log.i(TAG, "   delivering restore chunk: " + nRead);
                 }
-                mFullRestoreSocketStream.write(mFullRestoreBuffer, 0, nRead);
+                stream.write(mFullRestoreBuffer, 0, nRead);
             }
         } catch (IOException e) {
             return TRANSPORT_ERROR;  // Hard error accessing the file; shouldn't happen
         } finally {
-            // Most transports will need to explicitly close 'socket' here, but this transport
-            // is in the same process as the caller so it can leave it up to the backup manager
-            // to manage both socket fds.
+            IoUtils.closeQuietly(socket);
         }
 
         return nRead;

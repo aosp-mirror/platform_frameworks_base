@@ -35,7 +35,7 @@ import java.io.PrintWriter;
  */
 final class ConnectionRecord {
     final AppBindRecord binding;    // The application/service binding.
-    final ActivityRecord activity;  // If non-null, the owning activity.
+    final ActivityServiceConnectionsHolder<ConnectionRecord> activity;  // If non-null, the owning activity.
     final IServiceConnection conn;  // The client connection.
     final int flags;                // Binding options.
     final int clientLabel;          // String resource labeling this client.
@@ -85,13 +85,14 @@ final class ConnectionRecord {
     void dump(PrintWriter pw, String prefix) {
         pw.println(prefix + "binding=" + binding);
         if (activity != null) {
-            pw.println(prefix + "activity=" + activity);
+            activity.dump(pw, prefix);
         }
         pw.println(prefix + "conn=" + conn.asBinder()
                 + " flags=0x" + Integer.toHexString(flags));
     }
 
-    ConnectionRecord(AppBindRecord _binding, ActivityRecord _activity,
+    ConnectionRecord(AppBindRecord _binding,
+            ActivityServiceConnectionsHolder<ConnectionRecord> _activity,
             IServiceConnection _conn, int _flags,
             int _clientLabel, PendingIntent _clientIntent,
             int _clientUid, String _clientProcessName) {

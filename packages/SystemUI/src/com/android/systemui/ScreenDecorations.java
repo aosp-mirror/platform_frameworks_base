@@ -76,6 +76,9 @@ import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
 import com.android.systemui.util.leak.RotationUtils;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import androidx.annotation.VisibleForTesting;
 
 /**
@@ -107,6 +110,23 @@ public class ScreenDecorations extends SystemUI implements Tunable {
     private SecureSetting mColorInversionSetting;
     private boolean mPendingRotationChange;
     private Handler mHandler;
+
+    /**
+     * Converts a set of {@link Rect}s into a {@link Region}
+     *
+     * @hide
+     */
+    public static Region rectsToRegion(List<Rect> rects) {
+        Region result = Region.obtain();
+        if (rects != null) {
+            for (Rect r : rects) {
+                if (r != null && !r.isEmpty()) {
+                    result.op(r, Region.Op.UNION);
+                }
+            }
+        }
+        return result;
+    }
 
     @Override
     public void start() {
@@ -539,7 +559,7 @@ public class ScreenDecorations extends SystemUI implements Tunable {
 
         private final DisplayInfo mInfo = new DisplayInfo();
         private final Paint mPaint = new Paint();
-        private final Region mBounds = new Region();
+        private final List<Rect> mBounds = new ArrayList();
         private final Rect mBoundingRect = new Rect();
         private final Path mBoundingPath = new Path();
         private final int[] mLocation = new int[2];
@@ -629,12 +649,12 @@ public class ScreenDecorations extends SystemUI implements Tunable {
             mStart = isStart();
             requestLayout();
             getDisplay().getDisplayInfo(mInfo);
-            mBounds.setEmpty();
+            mBounds.clear();
             mBoundingRect.setEmpty();
             mBoundingPath.reset();
             int newVisible;
             if (shouldDrawCutout(getContext()) && hasCutout()) {
-                mBounds.set(mInfo.displayCutout.getBounds());
+                mBounds.addAll(mInfo.displayCutout.getBoundingRects());
                 localBounds(mBoundingRect);
                 updateBoundingPath();
                 invalidate();
@@ -713,32 +733,17 @@ public class ScreenDecorations extends SystemUI implements Tunable {
 
         public static void boundsFromDirection(DisplayCutout displayCutout, int gravity,
                 Rect out) {
-            Region bounds = boundsFromDirection(displayCutout, gravity);
-            out.set(bounds.getBounds());
-            bounds.recycle();
-        }
-
-        public static Region boundsFromDirection(DisplayCutout displayCutout, int gravity) {
-            Region bounds = displayCutout.getBounds();
             switch (gravity) {
                 case Gravity.TOP:
-                    bounds.op(0, 0, Integer.MAX_VALUE, displayCutout.getSafeInsetTop(),
-                            Region.Op.INTERSECT);
-                    break;
+                    out.set(displayCutout.getBoundingRectTop());
                 case Gravity.LEFT:
-                    bounds.op(0, 0, displayCutout.getSafeInsetLeft(), Integer.MAX_VALUE,
-                            Region.Op.INTERSECT);
-                    break;
+                    out.set(displayCutout.getBoundingRectLeft());
                 case Gravity.BOTTOM:
-                    bounds.op(0, displayCutout.getSafeInsetTop() + 1, Integer.MAX_VALUE,
-                            Integer.MAX_VALUE, Region.Op.INTERSECT);
-                    break;
+                    out.set(displayCutout.getBoundingRectBottom());
                 case Gravity.RIGHT:
-                    bounds.op(displayCutout.getSafeInsetLeft() + 1, 0, Integer.MAX_VALUE,
-                            Integer.MAX_VALUE, Region.Op.INTERSECT);
-                    break;
+                    out.set(displayCutout.getBoundingRectRight());
             }
-            return bounds;
+            out.setEmpty();
         }
 
         private void localBounds(Rect out) {
@@ -771,7 +776,8 @@ public class ScreenDecorations extends SystemUI implements Tunable {
             }
 
             View rootView = getRootView();
-            Region cutoutBounds = mInfo.displayCutout.getBounds();
+            Region cutoutBounds = rectsToRegion(
+                    mInfo.displayCutout.getBoundingRects());
 
             // Transform to window's coordinate space
             rootView.getLocationOnScreen(mLocation);

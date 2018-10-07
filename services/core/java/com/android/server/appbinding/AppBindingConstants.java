@@ -40,6 +40,9 @@ public class AppBindingConstants {
     private static final String SERVICE_STABLE_CONNECTION_THRESHOLD_SEC_KEY =
             "service_stable_connection_threshold_sec";
 
+    private static final String SMS_SERVICE_ENABLED_KEY =
+            "sms_service_enabled";
+
     private static final String SMS_APP_BIND_FLAGS_KEY =
             "sms_app_bind_flags";
 
@@ -67,6 +70,11 @@ public class AppBindingConstants {
     public final long SERVICE_STABLE_CONNECTION_THRESHOLD_SEC;
 
     /**
+     * Whether to actually bind to the default SMS app service. (Feature flag)
+     */
+    public final boolean SMS_SERVICE_ENABLED;
+
+    /**
      * Extra binding flags for SMS service.
      */
     public final int SMS_APP_BIND_FLAGS;
@@ -92,6 +100,8 @@ public class AppBindingConstants {
         long serviceReconnectMaxBackoffSec = parser.getLong(
                 SERVICE_RECONNECT_MAX_BACKOFF_SEC_KEY, TimeUnit.HOURS.toSeconds(1));
 
+        boolean smsServiceEnabled = parser.getBoolean(SMS_SERVICE_ENABLED_KEY, true);
+
         int smsAppBindFlags = parser.getInt(
                 SMS_APP_BIND_FLAGS_KEY,
                 Context.BIND_NOT_VISIBLE | Context.BIND_FOREGROUND_SERVICE);
@@ -114,6 +124,7 @@ public class AppBindingConstants {
         SERVICE_RECONNECT_BACKOFF_INCREASE = serviceReconnectBackoffIncrease;
         SERVICE_RECONNECT_MAX_BACKOFF_SEC = serviceReconnectMaxBackoffSec;
         SERVICE_STABLE_CONNECTION_THRESHOLD_SEC = serviceStableConnectionThresholdSec;
+        SMS_SERVICE_ENABLED = smsServiceEnabled;
         SMS_APP_BIND_FLAGS = smsAppBindFlags;
     }
 
@@ -129,7 +140,8 @@ public class AppBindingConstants {
      */
     public void dump(String prefix, PrintWriter pw) {
         pw.print(prefix);
-        pw.println("Constants:");
+        pw.print("Constants: ");
+        pw.println(sourceSettings);
 
         pw.print(prefix);
         pw.print("  SERVICE_RECONNECT_BACKOFF_SEC: ");
@@ -146,6 +158,10 @@ public class AppBindingConstants {
         pw.print(prefix);
         pw.print("  SERVICE_STABLE_CONNECTION_THRESHOLD_SEC: ");
         pw.println(SERVICE_STABLE_CONNECTION_THRESHOLD_SEC);
+
+        pw.print(prefix);
+        pw.print("  SMS_SERVICE_ENABLED: ");
+        pw.println(SMS_SERVICE_ENABLED);
 
         pw.print(prefix);
         pw.print("  SMS_APP_BIND_FLAGS: 0x");

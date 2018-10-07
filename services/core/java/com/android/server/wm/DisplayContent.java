@@ -70,6 +70,7 @@ import static com.android.server.wm.DisplayContentProto.DISPLAY_FRAMES;
 import static com.android.server.wm.DisplayContentProto.DISPLAY_INFO;
 import static com.android.server.wm.DisplayContentProto.DOCKED_STACK_DIVIDER_CONTROLLER;
 import static com.android.server.wm.DisplayContentProto.DPI;
+import static com.android.server.wm.DisplayContentProto.FOCUSED_APP;
 import static com.android.server.wm.DisplayContentProto.ID;
 import static com.android.server.wm.DisplayContentProto.IME_WINDOWS;
 import static com.android.server.wm.DisplayContentProto.PINNED_STACK_CONTROLLER;
@@ -98,12 +99,17 @@ import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.CUSTOM_SCREEN_ROTATION;
+import static com.android.server.wm.WindowManagerService.H.REPORT_FOCUS_CHANGE;
+import static com.android.server.wm.WindowManagerService.H.REPORT_LOSING_FOCUS;
 import static com.android.server.wm.WindowManagerService.H.SEND_NEW_CONFIGURATION;
 import static com.android.server.wm.WindowManagerService.H.UPDATE_DOCKED_STACK_DIVIDER;
 import static com.android.server.wm.WindowManagerService.H.WINDOW_HIDE_TIMEOUT;
 import static com.android.server.wm.WindowManagerService.LAYOUT_REPEAT_THRESHOLD;
 import static com.android.server.wm.WindowManagerService.MAX_ANIMATION_DURATION;
 import static com.android.server.wm.WindowManagerService.SEAMLESS_ROTATION_TIMEOUT_DURATION;
+import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_PLACING_SURFACES;
+import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_REMOVING_FOCUS;
+import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_WILL_ASSIGN_LAYERS;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_WILL_PLACE_SURFACES;
 import static com.android.server.wm.WindowManagerService.WINDOWS_FREEZING_SCREENS_ACTIVE;
 import static com.android.server.wm.WindowManagerService.WINDOWS_FREEZING_SCREENS_TIMEOUT;
@@ -114,7 +120,6 @@ import static com.android.server.wm.WindowState.RESIZE_HANDLE_WIDTH_IN_DP;
 import static com.android.server.wm.WindowStateAnimator.DRAW_PENDING;
 import static com.android.server.wm.WindowStateAnimator.READY_TO_SHOW;
 import static com.android.server.wm.WindowSurfacePlacer.SET_WALLPAPER_MAY_CHANGE;
-import static com.android.server.wm.utils.CoordinateTransforms.transformPhysicalToLogicalCoordinates;
 
 import android.annotation.CallSuper;
 import android.annotation.NonNull;
@@ -152,6 +157,7 @@ import android.view.SurfaceSession;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ToBooleanFunction;
 import com.android.server.policy.WindowManagerPolicy;
+import com.android.server.wm.utils.DisplayRotationUtil;
 import com.android.server.wm.utils.RotationCache;
 import com.android.server.wm.utils.WmDisplayCutout;
 
@@ -334,6 +340,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     private final Matrix mTmpMatrix = new Matrix();
     private final Region mTmpRegion = new Region();
 
+
     /** Used for handing back size of display */
     private final Rect mTmpBounds = new Rect();
 
@@ -369,6 +376,36 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     WallpaperController mWallpaperController;
 
     private final SurfaceSession mSession = new SurfaceSession();
+
+    /**
+     * Window that is currently interacting with the user. This window is responsible for receiving
+     * key events and pointer events from the user.
+     */
+    WindowState mCurrentFocus = null;
+
+    /**
+     * The last focused window that we've notified the client that the focus is changed.
+     */
+    WindowState mLastFocus = null;
+
+    /**
+     * Windows that have lost input focus and are waiting for the new focus window to be displayed
+     * before they are told about this.
+     */
+    ArrayList<WindowState> mLosingFocus = new ArrayList<>();
+
+    /**
+     * The foreground app of this display. Windows below this app cannot be the focused window. If
+     * the user taps on the area outside of the task of the focused app, we will notify AM about the
+     * new task the user wants to interact with.
+     */
+    AppWindowToken mFocusedApp = null;
+
+    /** Windows added since {@link #mCurrentFocus} was set to null. Used for ANR blaming. */
+    final ArrayList<WindowState> mWinAddedSinceNullFocus = new ArrayList<>();
+
+    /** Windows removed since {@link #mCurrentFocus} was set to null. Used for ANR blaming. */
+    final ArrayList<WindowState> mWinRemovedSinceNullFocus = new ArrayList<>();
 
     /**
      * We organize all top-level Surfaces in to the following layers.
@@ -411,6 +448,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
     /** Caches the value whether told display manager that we have content. */
     private boolean mLastHasContent;
+
+    private DisplayRotationUtil mRotationUtil = new DisplayRotationUtil();
 
     /**
      * The input method window for this display.
@@ -466,7 +505,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     };
 
     private final ToBooleanFunction<WindowState> mFindFocusedWindow = w -> {
-        final AppWindowToken focusedApp = mService.mFocusedApp;
+        final AppWindowToken focusedApp = mFocusedApp;
         if (DEBUG_FOCUS) Slog.v(TAG_WM, "Looking for focus: " + w
                 + ", flags=" + w.mAttrs.flags + ", canReceive=" + w.canReceiveKeys());
 
@@ -625,8 +664,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         final boolean obscuredChanged = w.mObscured !=
                 mTmpApplySurfaceChangesTransactionState.obscured;
         final RootWindowContainer root = mService.mRoot;
-        // Only used if default window
-        final boolean someoneLosingFocus = !mService.mLosingFocus.isEmpty();
 
         // Update effect.
         w.mObscured = mTmpApplySurfaceChangesTransactionState.obscured;
@@ -717,9 +754,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             }
         }
 
-        if (isDefaultDisplay && someoneLosingFocus && w == mService.mCurrentFocus
-                && w.isDisplayedLw()) {
-            mTmpApplySurfaceChangesTransactionState.focusDisplayed = true;
+        if (!mLosingFocus.isEmpty() && w.isFocused() && w.isDisplayedLw()) {
+            mService.mH.obtainMessage(REPORT_LOSING_FOCUS, this).sendToTarget();
         }
 
         w.updateResizingWindowIfNeeded();
@@ -1343,21 +1379,12 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                     cutout, mInitialDisplayWidth, mInitialDisplayHeight);
         }
         final boolean rotated = (rotation == ROTATION_90 || rotation == ROTATION_270);
-        final List<Rect> bounds = WmDisplayCutout.computeSafeInsets(
+        final Rect[] newBounds = mRotationUtil.getRotatedBounds(
+                WmDisplayCutout.computeSafeInsets(
                         cutout, mInitialDisplayWidth, mInitialDisplayHeight)
-                .getDisplayCutout().getBoundingRects();
-        transformPhysicalToLogicalCoordinates(rotation, mInitialDisplayWidth, mInitialDisplayHeight,
-                mTmpMatrix);
-        final Region region = Region.obtain();
-        for (int i = 0; i < bounds.size(); i++) {
-            final Rect rect = bounds.get(i);
-            final RectF rectF = new RectF(bounds.get(i));
-            mTmpMatrix.mapRect(rectF);
-            rectF.round(rect);
-            region.op(rect, Op.UNION);
-        }
-
-        return WmDisplayCutout.computeSafeInsets(DisplayCutout.fromBounds(region),
+                        .getDisplayCutout().getBoundingRectsAll(),
+                rotation, mInitialDisplayWidth, mInitialDisplayHeight);
+        return WmDisplayCutout.computeSafeInsets(DisplayCutout.fromBounds(newBounds),
                 rotated ? mInitialDisplayHeight : mInitialDisplayWidth,
                 rotated ? mInitialDisplayWidth : mInitialDisplayHeight);
     }
@@ -2070,22 +2097,22 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         return null;
     }
 
-    void setTouchExcludeRegion(Task focusedTask) {
-        // The provided task is the task on this display with focus, so if WindowManagerService's
-        // focused app is not on this display, focusedTask will be null.
+    void updateTouchExcludeRegion() {
+        final Task focusedTask = (mFocusedApp != null ? mFocusedApp.getTask() : null);
         if (focusedTask == null) {
             mTouchExcludeRegion.setEmpty();
         } else {
             mTouchExcludeRegion.set(mBaseDisplayRect);
             final int delta = dipToPixel(RESIZE_HANDLE_WIDTH_IN_DP, mDisplayMetrics);
             mTmpRect2.setEmpty();
-            for (int stackNdx = mTaskStackContainers.getChildCount() - 1; stackNdx >= 0; --stackNdx) {
+            for (int stackNdx = mTaskStackContainers.getChildCount() - 1; stackNdx >= 0;
+                    --stackNdx) {
                 final TaskStack stack = mTaskStackContainers.getChildAt(stackNdx);
                 stack.setTouchExcludeRegion(focusedTask, delta, mTouchExcludeRegion,
                         mDisplayFrames.mContent, mTmpRect2);
             }
             // If we removed the focused task above, add it back and only leave its
-            // outside touch area in the exclusion. TapDectector is not interested in
+            // outside touch area in the exclusion. TapDetector is not interested in
             // any touch inside the focused task itself.
             if (!mTmpRect2.isEmpty()) {
                 mTouchExcludeRegion.op(mTmpRect2, Region.Op.UNION);
@@ -2096,12 +2123,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             // events to be intercepted and used to change focus. This would likely cause a
             // disappearance of the input method.
             mInputMethodWindow.getTouchableRegion(mTmpRegion);
-            if (mInputMethodWindow.getDisplayId() == mDisplayId) {
-                mTouchExcludeRegion.op(mTmpRegion, Op.UNION);
-            } else {
-                // IME is on a different display, so we need to update its tap detector.
-                setTouchExcludeRegion(null /* focusedTask */);
-            }
+            mTouchExcludeRegion.op(mTmpRegion, Op.UNION);
         }
         for (int i = mTapExcludedWindows.size() - 1; i >= 0; i--) {
             final WindowState win = mTapExcludedWindows.get(i);
@@ -2372,6 +2394,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
         mDisplayFrames.writeToProto(proto, DISPLAY_FRAMES);
         proto.write(SURFACE_SIZE, mSurfaceSize);
+        if (mFocusedApp != null) {
+            mFocusedApp.writeNameToProto(proto, FOCUSED_APP);
+        }
         proto.end(token);
     }
 
@@ -2411,6 +2436,27 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         pw.print(prefix); pw.print("mLayoutSeq="); pw.println(mLayoutSeq);
         pw.print(prefix);
         pw.print("mDeferredRotationPauseCount="); pw.println(mDeferredRotationPauseCount);
+
+        pw.print("  mCurrentFocus="); pw.println(mCurrentFocus);
+        if (mLastFocus != mCurrentFocus) {
+            pw.print("  mLastFocus="); pw.println(mLastFocus);
+        }
+        if (mLosingFocus.size() > 0) {
+            pw.println();
+            pw.println("  Windows losing focus:");
+            for (int i = mLosingFocus.size() - 1; i >= 0; i--) {
+                final WindowState w = mLosingFocus.get(i);
+                pw.print("  Losing #"); pw.print(i); pw.print(' ');
+                pw.print(w);
+                if (dumpAll) {
+                    pw.println(":");
+                    w.dump(pw, "    ", true);
+                } else {
+                    pw.println();
+                }
+            }
+        }
+        pw.print("  mFocusedApp="); pw.println(mFocusedApp);
 
         pw.println();
         pw.println(prefix + "Application tokens in top down Z order:");
@@ -2541,6 +2587,132 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             return null;
         }
         return mTmpWindow;
+    }
+
+
+    /**
+     * Update the focused window and make some adjustments if the focus has changed.
+     *
+     * @param mode Indicates the situation we are in. Possible modes are:
+     *             {@link WindowManagerService#UPDATE_FOCUS_NORMAL},
+     *             {@link WindowManagerService#UPDATE_FOCUS_PLACING_SURFACES},
+     *             {@link WindowManagerService#UPDATE_FOCUS_WILL_PLACE_SURFACES},
+     *             {@link WindowManagerService#UPDATE_FOCUS_REMOVING_FOCUS}
+     * @param updateInputWindows Whether to sync the window information to the input module.
+     * @return {@code true} if the focused window has changed.
+     */
+    boolean updateFocusedWindowLocked(int mode, boolean updateInputWindows, boolean focusFound) {
+        final WindowState newFocus = findFocusedWindow();
+        if (mCurrentFocus == newFocus) {
+            return false;
+        }
+        mService.mH.obtainMessage(REPORT_FOCUS_CHANGE, this).sendToTarget();
+        boolean imWindowChanged = false;
+        // TODO (b/111080190): Multi-Session IME
+        if (!focusFound) {
+            final WindowState imWindow = mInputMethodWindow;
+            if (imWindow != null) {
+                final WindowState prevTarget = mService.mInputMethodTarget;
+
+                final WindowState newTarget = computeImeTarget(true /* updateImeTarget*/);
+                imWindowChanged = prevTarget != newTarget;
+
+                if (mode != UPDATE_FOCUS_WILL_ASSIGN_LAYERS
+                        && mode != UPDATE_FOCUS_WILL_PLACE_SURFACES) {
+                    assignWindowLayers(false /* setLayoutNeeded */);
+                }
+            }
+        }
+
+        if (imWindowChanged) {
+            mService.mWindowsChanged = true;
+            setLayoutNeeded();
+        }
+
+        if (DEBUG_FOCUS_LIGHT || mService.localLOGV) Slog.v(TAG_WM, "Changing focus from "
+                + mCurrentFocus + " to " + newFocus + " displayId=" + getDisplayId()
+                + " Callers=" + Debug.getCallers(4));
+        final WindowState oldFocus = mCurrentFocus;
+        mCurrentFocus = newFocus;
+        mLosingFocus.remove(newFocus);
+
+        if (newFocus != null) {
+            mWinAddedSinceNullFocus.clear();
+            mWinRemovedSinceNullFocus.clear();
+
+            if (newFocus.canReceiveKeys()) {
+                // Displaying a window implicitly causes dispatching to be unpaused.
+                // This is to protect against bugs if someone pauses dispatching but
+                // forgets to resume.
+                newFocus.mToken.paused = false;
+            }
+        }
+
+        // System UI is only shown on the default display.
+        int focusChanged = isDefaultDisplay
+                ? mService.mPolicy.focusChangedLw(oldFocus, newFocus) : 0;
+
+        if (imWindowChanged && oldFocus != mInputMethodWindow) {
+            // Focus of the input method window changed. Perform layout if needed.
+            if (mode == UPDATE_FOCUS_PLACING_SURFACES) {
+                performLayout(true /*initial*/,  updateInputWindows);
+                focusChanged &= ~FINISH_LAYOUT_REDO_LAYOUT;
+            } else if (mode == UPDATE_FOCUS_WILL_PLACE_SURFACES) {
+                // Client will do the layout, but we need to assign layers
+                // for handleNewWindowLocked() below.
+                assignWindowLayers(false /* setLayoutNeeded */);
+            }
+        }
+
+        if ((focusChanged & FINISH_LAYOUT_REDO_LAYOUT) != 0) {
+            // The change in focus caused us to need to do a layout.  Okay.
+            setLayoutNeeded();
+            if (mode == UPDATE_FOCUS_PLACING_SURFACES) {
+                performLayout(true /*initial*/, updateInputWindows);
+            } else if (mode == UPDATE_FOCUS_REMOVING_FOCUS) {
+                mService.mRoot.performSurfacePlacement(false);
+            }
+        }
+
+        if (mode != UPDATE_FOCUS_WILL_ASSIGN_LAYERS) {
+            // If we defer assigning layers, then the caller is responsible for doing this part.
+            getInputMonitor().setInputFocusLw(newFocus, updateInputWindows);
+        }
+
+        adjustForImeIfNeeded();
+
+        // We may need to schedule some toast windows to be removed. The toasts for an app that
+        // does not have input focus are removed within a timeout to prevent apps to redress
+        // other apps' UI.
+        scheduleToastWindowsTimeoutIfNeededLocked(oldFocus, newFocus);
+
+        if (mode == UPDATE_FOCUS_PLACING_SURFACES) {
+            pendingLayoutChanges |= FINISH_LAYOUT_REDO_ANIM;
+        }
+        return true;
+    }
+
+    /**
+     * Set the new focused app to this display.
+     *
+     * @param newFocus the new focused AppWindowToken.
+     * @return true if the focused app is changed.
+     */
+    boolean setFocusedApp(AppWindowToken newFocus) {
+        if (newFocus != null) {
+            final DisplayContent appDisplay = newFocus.getDisplayContent();
+            if (appDisplay != this) {
+                throw new IllegalStateException(newFocus + " is not on " + getName()
+                        + " but " + ((appDisplay != null) ? appDisplay.getName() : "none"));
+            }
+        }
+        if (mFocusedApp == newFocus) {
+            return false;
+        }
+        mFocusedApp = newFocus;
+        getInputMonitor().setFocusedAppLw(newFocus);
+        updateTouchExcludeRegion();
+        return true;
     }
 
     /** Updates the layer assignment of windows on this display. */
@@ -2906,8 +3078,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         if (DEBUG_INPUT_METHOD) {
             Slog.i(TAG_WM, "Desired input method target: " + imFocus);
-            Slog.i(TAG_WM, "Current focus: " + mService.mCurrentFocus);
-            Slog.i(TAG_WM, "Last focus: " + mService.mLastFocus);
+            Slog.i(TAG_WM, "Current focus: " + mCurrentFocus + " displayId=" + mDisplayId);
+            Slog.i(TAG_WM, "Last focus: " + mLastFocus + " displayId=" + mDisplayId);
         }
 
         if (DEBUG_INPUT_METHOD) {
@@ -2975,7 +3147,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     // TODO: Super crazy long method that should be broken down...
-    boolean applySurfaceChangesTransaction(boolean recoveringMemory) {
+    void applySurfaceChangesTransaction(boolean recoveringMemory) {
 
         final int dw = mDisplayInfo.logicalWidth;
         final int dh = mDisplayInfo.logicalHeight;
@@ -3059,8 +3231,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             // can now be shown.
             atoken.updateAllDrawn();
         }
-
-        return mTmpApplySurfaceChangesTransactionState.focusDisplayed;
     }
 
     private void updateBounds() {
@@ -3314,7 +3484,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         boolean displayHasContent;
         boolean obscured;
         boolean syswin;
-        boolean focusDisplayed;
         float preferredRefreshRate;
         int preferredModeId;
 
@@ -3322,7 +3491,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             displayHasContent = false;
             obscured = false;
             syswin = false;
-            focusDisplayed = false;
             preferredRefreshRate = 0;
             preferredModeId = 0;
         }

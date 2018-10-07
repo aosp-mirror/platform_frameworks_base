@@ -255,6 +255,7 @@ class WindowToken extends WindowContainer<WindowState> {
         super.removeImmediately();
     }
 
+    @Override
     void onDisplayChanged(DisplayContent dc) {
         dc.reParentWindowToken(this);
         mDisplayContent = dc;

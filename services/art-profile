@@ -2254,8 +2254,8 @@ HPLcom/android/server/wm/DisplayContent;->lambda$new$7(Lcom/android/server/wm/Di
 HPLcom/android/server/wm/DisplayContent;->lambda$new$8(Lcom/android/server/wm/DisplayContent;Lcom/android/server/wm/WindowState;)V
 HPLcom/android/server/wm/DisplayContent;->prepareSurfaces()V
 HPLcom/android/server/wm/DisplayContent;->resetAnimationBackgroundAnimator()V
-HPLcom/android/server/wm/DisplayContent;->setTouchExcludeRegion(Lcom/android/server/wm/Task;)V
 HPLcom/android/server/wm/DisplayContent;->skipTraverseChild(Lcom/android/server/wm/WindowContainer;)Z
+HPLcom/android/server/wm/DisplayContent;->updateTouchExcludeRegion()V
 HPLcom/android/server/wm/DockedStackDividerController;->isResizing()Z
 HPLcom/android/server/wm/DragDropController;->dragDropActiveLocked()Z
 HPLcom/android/server/wm/InputMonitor$UpdateInputForAllWindowsConsumer;->accept(Lcom/android/server/wm/WindowState;)V

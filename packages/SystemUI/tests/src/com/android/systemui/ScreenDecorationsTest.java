@@ -16,6 +16,7 @@ package com.android.systemui;
 
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY;
 
+import  static com.android.systemui.ScreenDecorations.rectsToRegion;
 import static com.android.systemui.tuner.TunablePadding.FLAG_END;
 import static com.android.systemui.tuner.TunablePadding.FLAG_START;
 
@@ -35,6 +36,7 @@ import static org.mockito.Mockito.when;
 
 import android.app.Fragment;
 import android.content.res.Configuration;
+import android.graphics.Rect;
 import android.os.Handler;
 import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
@@ -57,6 +59,8 @@ import com.android.systemui.tuner.TunerService;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+
+import java.util.Collections;
 
 @RunWithLooper
 @RunWith(AndroidTestingRunner.class)
@@ -240,4 +244,11 @@ public class ScreenDecorationsTest extends SysuiTestCase {
         mScreenDecorations.onConfigurationChanged(null);
         assertEquals(mScreenDecorations.mRoundedDefault, 5);
     }
+
+    @Test
+    public void testBoundingRectsToRegion() throws Exception {
+        Rect rect = new Rect(1, 2, 3, 4);
+        assertThat(rectsToRegion(Collections.singletonList(rect)).getBounds(), is(rect));
+    }
+
 }

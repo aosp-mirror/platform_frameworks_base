@@ -33,10 +33,12 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -232,6 +234,7 @@ public class ActivityStackSupervisorTests extends ActivityTestsBase {
         doReturn(displaySleeping).when(display).isSleeping();
         doReturn(keyguardShowing).when(keyguard).isKeyguardOrAodShowing(anyInt());
 
+        doReturn(isFocusedStack).when(stack).isFocusedStackOnDisplay();
         doReturn(isFocusedStack ? stack : null).when(display).getFocusedStack();
         mSupervisor.applySleepTokensLocked(true);
         verify(stack, times(expectWakeFromSleep ? 1 : 0)).awakeFromSleepingLocked();
@@ -401,5 +404,33 @@ public class ActivityStackSupervisorTests extends ActivityTestsBase {
         // Verify dock stack & its task bounds if is equal as resized result.
         assertEquals(primaryStack.getBounds(), STACK_SIZE);
         assertEquals(task.getBounds(), TASK_SIZE);
+    }
+
+    /**
+     * Verify if a stack is not at the topmost position, it should be able to resume its activity if
+     * the stack is the top focused.
+     */
+    @Test
+    public void testResumeActivityWhenNonTopmostStackIsTopFocused() throws Exception {
+        // Create a stack at bottom.
+        final ActivityDisplay display = mSupervisor.getDefaultDisplay();
+        final ActivityStack targetStack = spy(display.createStack(WINDOWING_MODE_FULLSCREEN,
+                ACTIVITY_TYPE_STANDARD, false /* onTop */));
+        final TaskRecord task = new TaskBuilder(mSupervisor).setStack(targetStack).build();
+        final ActivityRecord activity = new ActivityBuilder(mService).setTask(task).build();
+        display.positionChildAtBottom(targetStack);
+
+        // Assume the stack is not at the topmost position (e.g. behind always-on-top stacks) but it
+        // is the current top focused stack.
+        assertFalse(targetStack.isTopStackOnDisplay());
+        doReturn(targetStack).when(mSupervisor).getTopDisplayFocusedStack();
+
+        // Use the stack as target to resume.
+        mSupervisor.resumeFocusedStacksTopActivitiesLocked(
+                targetStack, activity, null /* targetOptions */);
+
+        // Verify the target stack should resume its activity.
+        verify(targetStack, times(1)).resumeTopActivityUncheckedLocked(
+                eq(activity), eq(null /* targetOptions */));
     }
 }

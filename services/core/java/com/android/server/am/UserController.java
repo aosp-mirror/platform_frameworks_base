@@ -2178,9 +2178,7 @@ class UserController implements Handler.Callback {
         }
 
         protected void startHomeActivity(int userId, String reason) {
-            synchronized (mService) {
-                mService.startHomeActivityLocked(userId, reason);
-            }
+            mService.mAtmInternal.startHomeActivity(userId, reason);
         }
 
         void startUserWidgets(int userId) {

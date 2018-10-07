@@ -83,16 +83,6 @@ public class WindowManagerPermissionTests extends TestCase {
         }
 
         try {
-            mWm.setFocusedApp(null, false);
-            fail("IWindowManager.setFocusedApp did not throw SecurityException as"
-                    + " expected");
-        } catch (SecurityException e) {
-            // expected
-        } catch (RemoteException e) {
-            fail("Unexpected remote exception");
-        }
-
-        try {
             mWm.prepareAppTransition(0, false);
             fail("IWindowManager.prepareAppTransition did not throw SecurityException as"
                     + " expected");

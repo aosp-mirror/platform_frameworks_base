@@ -64,7 +64,7 @@ public class PowerManagerTest extends AndroidTestCase {
 
         // TODO: Some sort of functional test (maybe not in the unit test here?)
         // that confirms that things are really happening e.g. screen power, keyboard power.
-}
+    }
 
     /**
      * Confirm that we can't create dysfunctional wakelocks.
@@ -82,6 +82,25 @@ public class PowerManagerTest extends AndroidTestCase {
             return;
         }
         fail("Bad WakeLock flag was not caught.");
+    }
+
+    /**
+     * Ensure that we can have work sources with work chains when uid is not set directly on work
+     * source, and that this doesn't crash system server.
+     *
+     * @throws Exception
+     */
+    @SmallTest
+    public void testWakeLockWithWorkChains() throws Exception {
+        PowerManager.WakeLock wakeLock = mPm.newWakeLock(
+                PowerManager.SCREEN_DIM_WAKE_LOCK | PowerManager.ACQUIRE_CAUSES_WAKEUP,
+                "TEST_LOCK");
+        WorkSource workSource = new WorkSource();
+        WorkSource.WorkChain workChain = workSource.createWorkChain();
+        workChain.addNode(1000, "test");
+        wakeLock.setWorkSource(workSource);
+
+        doTestWakeLock(wakeLock);
     }
 
     /**

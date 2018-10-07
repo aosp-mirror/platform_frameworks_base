@@ -110,6 +110,13 @@ final class DisplayDeviceInfo {
     public static final int FLAG_MASK_DISPLAY_CUTOUT = 1 << 11;
 
     /**
+     * Flag: This flag identifies secondary displays that should show system decorations, such as
+     * status bar, navigation bar, home activity or IME.
+     * @hide
+     */
+    public static final int FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS = 1 << 12;
+
+    /**
      * Touch attachment: Display does not receive touch.
      */
     public static final int TOUCH_NONE = 0;

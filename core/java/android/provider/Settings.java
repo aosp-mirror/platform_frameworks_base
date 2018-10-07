@@ -12342,6 +12342,18 @@ public final class Settings {
                 "location_global_kill_switch";
 
         /**
+         * If set to 1, app cannot request read sms permission unless it's the default sms handler.
+         *
+         * STOPSHIP: Remove this once we ship with the restriction enabled.
+         *
+         * @hide
+         */
+        @SystemApi
+        @TestApi
+        public static final String SMS_ACCESS_RESTRICTION_ENABLED =
+                "sms_access_restriction_enabled";
+
+        /**
          * If set to 1, SettingsProvider's restoreAnyVersion="true" attribute will be ignored
          * and restoring to lower version of platform API will be skipped.
          *

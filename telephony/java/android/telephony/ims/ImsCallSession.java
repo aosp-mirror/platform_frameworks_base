@@ -16,21 +16,15 @@
 
 package android.telephony.ims;
 
-import android.annotation.CallbackExecutor;
-import android.annotation.NonNull;
-import android.annotation.SystemApi;
 import android.os.Message;
 import android.os.RemoteException;
 import android.telephony.ims.aidl.IImsCallSessionListener;
-
-import java.util.Objects;
-import java.util.concurrent.Executor;
-
-import android.telephony.ims.stub.ImsCallSessionImplBase;
 import android.util.Log;
 
 import com.android.ims.internal.IImsCallSession;
 import com.android.ims.internal.IImsVideoCallProvider;
+
+import java.util.Objects;
 
 /**
  * Provides the call initiation/termination, and media exchange between two IMS endpoints.
@@ -42,7 +36,8 @@ public class ImsCallSession {
     private static final String TAG = "ImsCallSession";
 
     /**
-     * Defines IMS call session state. Please use {@link ImsCallSessionImplBase.State} definition.
+     * Defines IMS call session state. Please use
+     * {@link android.telephony.ims.stub.ImsCallSessionImplBase.State} definition.
      * This is kept around for capability reasons.
      */
     public static class State {
@@ -1027,9 +1022,9 @@ public class ImsCallSession {
     }
 
     /**
-     * Sends RTT Upgrade request
+     * Sends RTT Upgrade or downgrade request
      *
-     * @param to   : expected profile
+     * @param to Profile with the RTT flag set to the desired value
      */
     public void sendRttModifyRequest(ImsCallProfile to) {
         if (mClosed) {

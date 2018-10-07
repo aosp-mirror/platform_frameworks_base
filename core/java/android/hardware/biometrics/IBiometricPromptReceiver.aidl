@@ -15,9 +15,6 @@
  */
 package android.hardware.biometrics;
 
-import android.os.Bundle;
-import android.os.UserHandle;
-
 /**
  * Communication channel from the BiometricPrompt (SysUI) back to AuthenticationClient.
  * @hide

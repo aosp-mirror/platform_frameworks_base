@@ -499,12 +499,6 @@ public class WindowManagerService extends IWindowManager.Stub
     final ArrayList<WindowState> mDestroyPreservedSurface = new ArrayList<>();
 
     /**
-     * Windows that have lost input focus and are waiting for the new
-     * focus window to be displayed before they are told about this.
-     */
-    ArrayList<WindowState> mLosingFocus = new ArrayList<>();
-
-    /**
      * This is set when we have run out of memory, and will either be an empty
      * list or contain windows that need to be force removed.
      */
@@ -639,14 +633,6 @@ public class WindowManagerService extends IWindowManager.Stub
      */
     final Handler mAnimationHandler = new Handler(AnimationThread.getHandler().getLooper());
 
-    WindowState mCurrentFocus = null;
-    WindowState mLastFocus = null;
-
-    /** Windows added since {@link #mCurrentFocus} was set to null. Used for ANR blaming. */
-    private final ArrayList<WindowState> mWinAddedSinceNullFocus = new ArrayList<>();
-    /** Windows removed since {@link #mCurrentFocus} was set to null. Used for ANR blaming. */
-    private final ArrayList<WindowState> mWinRemovedSinceNullFocus = new ArrayList<>();
-
     /** This just indicates the window the input method is on top of, not
      * necessarily the window its input is going to. */
     WindowState mInputMethodTarget = null;
@@ -720,9 +706,6 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
     }
-
-    // TODO: Move to RootWindowContainer
-    AppWindowToken mFocusedApp = null;
 
     PowerManager mPowerManager;
     PowerManagerInternal mPowerManagerInternal;
@@ -1371,8 +1354,8 @@ public class WindowManagerService extends IWindowManager.Stub
                 // the screen after the activity goes away.
                 if (addToastWindowRequiresToken
                         || (attrs.flags & LayoutParams.FLAG_NOT_FOCUSABLE) == 0
-                        || mCurrentFocus == null
-                        || mCurrentFocus.mOwnerUid != callingUid) {
+                        || displayContent.mCurrentFocus == null
+                        || displayContent.mCurrentFocus.mOwnerUid != callingUid) {
                     mH.sendMessageDelayed(
                             mH.obtainMessage(H.WINDOW_HIDE_TIMEOUT, win),
                             win.mAttrs.hideTimeoutMilliseconds);
@@ -1382,8 +1365,8 @@ public class WindowManagerService extends IWindowManager.Stub
             // From now on, no exceptions or errors allowed!
 
             res = WindowManagerGlobal.ADD_OKAY;
-            if (mCurrentFocus == null) {
-                mWinAddedSinceNullFocus.add(win);
+            if (displayContent.mCurrentFocus == null) {
+                displayContent.mWinAddedSinceNullFocus.add(win);
             }
 
             if (excludeWindowTypeFromTapOutTask(type)) {
@@ -1504,7 +1487,7 @@ public class WindowManagerService extends IWindowManager.Stub
             win.getParent().assignChildLayers();
 
             if (focusChanged) {
-                displayContent.getInputMonitor().setInputFocusLw(mCurrentFocus,
+                displayContent.getInputMonitor().setInputFocusLw(displayContent.mCurrentFocus,
                         false /*updateInputWindows*/);
             }
             displayContent.getInputMonitor().updateInputWindowsLw(false /*force*/);
@@ -1679,8 +1662,9 @@ public class WindowManagerService extends IWindowManager.Stub
 
         win.resetAppOpsState();
 
-        if (mCurrentFocus == null) {
-            mWinRemovedSinceNullFocus.add(win);
+        final DisplayContent dc = win.getDisplayContent();
+        if (dc.mCurrentFocus == null) {
+            dc.mWinRemovedSinceNullFocus.add(win);
         }
         mPendingRemove.remove(win);
         mResizingWindows.remove(win);
@@ -1716,7 +1700,6 @@ public class WindowManagerService extends IWindowManager.Stub
             atoken.postWindowRemoveStartingWindowCleanup(win);
         }
 
-        final DisplayContent dc = win.getDisplayContent();
         if (win.mAttrs.type == TYPE_WALLPAPER) {
             dc.mWallpaperController.clearLastWallpaperTimeoutTime();
             dc.pendingLayoutChanges |= FINISH_LAYOUT_REDO_WALLPAPER;
@@ -1978,9 +1961,9 @@ public class WindowManagerService extends IWindowManager.Stub
             boolean imMayMove = (flagChanges & (FLAG_ALT_FOCUSABLE_IM | FLAG_NOT_FOCUSABLE)) != 0
                     || becameVisible;
             final boolean isDefaultDisplay = win.isDefaultDisplay();
-            boolean focusMayChange = isDefaultDisplay && (win.mViewVisibility != viewVisibility
+            boolean focusMayChange = win.mViewVisibility != viewVisibility
                     || ((flagChanges & FLAG_NOT_FOCUSABLE) != 0)
-                    || (!win.mRelayoutCalled));
+                    || (!win.mRelayoutCalled);
 
             boolean wallpaperMayMove = win.mViewVisibility != viewVisibility
                     && (win.mAttrs.flags & FLAG_SHOW_WALLPAPER) != 0;
@@ -2025,8 +2008,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
                 result |= RELAYOUT_RES_SURFACE_CHANGED;
                 if (!win.mWillReplaceWindow) {
-                    focusMayChange = tryStartExitingAnimation(win, winAnimator, isDefaultDisplay,
-                            focusMayChange);
+                    focusMayChange = tryStartExitingAnimation(win, winAnimator, focusMayChange);
                 }
             }
 
@@ -2051,7 +2033,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     return 0;
                 }
                 if ((result & WindowManagerGlobal.RELAYOUT_RES_FIRST_TIME) != 0) {
-                    focusMayChange = isDefaultDisplay;
+                    focusMayChange = true;
                 }
                 final DisplayContent displayContent = win.getDisplayContent();
                 if (win.mAttrs.type == TYPE_INPUT_METHOD
@@ -2199,7 +2181,7 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     private boolean tryStartExitingAnimation(WindowState win, WindowStateAnimator winAnimator,
-            boolean isDefaultDisplay, boolean focusMayChange) {
+            boolean focusMayChange) {
         // Try starting an animation; if there isn't one, we
         // can destroy the surface right away.
         int transit = WindowManagerPolicy.TRANSIT_EXIT;
@@ -2207,7 +2189,7 @@ public class WindowManagerService extends IWindowManager.Stub
             transit = WindowManagerPolicy.TRANSIT_PREVIEW_DONE;
         }
         if (win.isWinVisibleLw() && winAnimator.applyAnimationLocked(transit, false)) {
-            focusMayChange = isDefaultDisplay;
+            focusMayChange = true;
             win.mAnimatingExit = true;
         } else if (win.isAnimating()) {
             // Currently in a hide animation... turn this into
@@ -2501,57 +2483,6 @@ public class WindowManagerService extends IWindowManager.Stub
             }
 
             return mRoot.setDisplayOverrideConfigurationIfNeeded(overrideConfig, displayId);
-        }
-    }
-
-    void setFocusTaskRegionLocked(AppWindowToken previousFocus) {
-        final Task focusedTask = mFocusedApp != null ? mFocusedApp.getTask() : null;
-        final Task previousTask = previousFocus != null ? previousFocus.getTask() : null;
-        final DisplayContent focusedDisplayContent =
-                focusedTask != null ? focusedTask.getDisplayContent() : null;
-        final DisplayContent previousDisplayContent =
-                previousTask != null ? previousTask.getDisplayContent() : null;
-        if (previousDisplayContent != null && previousDisplayContent != focusedDisplayContent) {
-            previousDisplayContent.setTouchExcludeRegion(null);
-        }
-        if (focusedDisplayContent != null) {
-            focusedDisplayContent.setTouchExcludeRegion(focusedTask);
-        }
-    }
-
-    @Override
-    public void setFocusedApp(IBinder token, boolean moveFocusNow) {
-        if (!checkCallingPermission(MANAGE_APP_TOKENS, "setFocusedApp()")) {
-            throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
-        }
-
-        synchronized(mWindowMap) {
-            final AppWindowToken newFocus;
-            if (token == null) {
-                if (DEBUG_FOCUS_LIGHT) Slog.v(TAG_WM, "Clearing focused app, was " + mFocusedApp);
-                newFocus = null;
-            } else {
-                newFocus = mRoot.getAppWindowToken(token);
-                if (newFocus == null) {
-                    Slog.w(TAG_WM, "Attempted to set focus to non-existing app token: " + token);
-                }
-                if (DEBUG_FOCUS_LIGHT) Slog.v(TAG_WM, "Set focused app to: " + newFocus
-                        + " old focus=" + mFocusedApp + " moveFocusNow=" + moveFocusNow);
-            }
-
-            final boolean changed = mFocusedApp != newFocus;
-            if (changed) {
-                AppWindowToken prev = mFocusedApp;
-                mFocusedApp = newFocus;
-                mFocusedApp.getDisplayContent().getInputMonitor().setFocusedAppLw(newFocus);
-                setFocusTaskRegionLocked(prev);
-            }
-
-            if (moveFocusNow && changed) {
-                final long origId = Binder.clearCallingIdentity();
-                updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL, true /*updateInputWindows*/);
-                Binder.restoreCallingIdentity(origId);
-            }
         }
     }
 
@@ -4395,7 +4326,8 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     private WindowState getFocusedWindowLocked() {
-        return mCurrentFocus;
+        // Return the focused window in the focused display.
+        return mRoot.getTopFocusedDisplayContent().mCurrentFocus;
     }
 
     TaskStack getImeFocusStackLocked() {
@@ -4403,8 +4335,11 @@ public class WindowManagerService extends IWindowManager.Stub
         // Also don't use mInputMethodTarget's stack, because some window with FLAG_NOT_FOCUSABLE
         // and FLAG_ALT_FOCUSABLE_IM flags both set might be set to IME target so they're moved
         // to make room for IME, but the window is not the focused window that's taking input.
-        return (mFocusedApp != null && mFocusedApp.getTask() != null) ?
-                mFocusedApp.getTask().mStack : null;
+        // TODO (b/111080190): Consider the case of multiple IMEs on multi-display.
+        final DisplayContent topFocusedDisplay = mRoot.getTopFocusedDisplayContent();
+        final AppWindowToken focusedApp = topFocusedDisplay.mFocusedApp;
+        return (focusedApp != null && focusedApp.getTask() != null)
+                ? focusedApp.getTask().mStack : null;
     }
 
     public boolean detectSafeMode() {
@@ -4542,7 +4477,6 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int REPORT_LOSING_FOCUS = 3;
         public static final int WINDOW_FREEZE_TIMEOUT = 11;
 
-        public static final int APP_TRANSITION_TIMEOUT = 13;
         public static final int PERSIST_ANIMATION_SCALE = 14;
         public static final int FORCE_GC = 15;
         public static final int ENABLE_SCREEN = 16;
@@ -4554,7 +4488,6 @@ public class WindowManagerService extends IWindowManager.Stub
         public static final int BOOT_TIMEOUT = 23;
         public static final int WAITING_FOR_DRAWN_TIMEOUT = 24;
         public static final int SHOW_STRICT_MODE_VIOLATION = 25;
-        public static final int DO_ANIMATION_CALLBACK = 26;
 
         public static final int CLIENT_FREEZE_TIMEOUT = 30;
         public static final int NOTIFY_ACTIVITY_DRAWN = 32;
@@ -4601,6 +4534,7 @@ public class WindowManagerService extends IWindowManager.Stub
             }
             switch (msg.what) {
                 case REPORT_FOCUS_CHANGE: {
+                    final DisplayContent displayContent = (DisplayContent) msg.obj;
                     WindowState lastFocus;
                     WindowState newFocus;
 
@@ -4608,24 +4542,22 @@ public class WindowManagerService extends IWindowManager.Stub
 
                     synchronized(mWindowMap) {
                         // TODO(multidisplay): Accessibility supported only of default desiplay.
-                        if (mAccessibilityController != null && getDefaultDisplayContentLocked()
-                                .getDisplayId() == DEFAULT_DISPLAY) {
+                        if (mAccessibilityController != null && displayContent.isDefaultDisplay) {
                             accessibilityController = mAccessibilityController;
                         }
 
-                        lastFocus = mLastFocus;
-                        newFocus = mCurrentFocus;
+                        lastFocus = displayContent.mLastFocus;
+                        newFocus = displayContent.mCurrentFocus;
                         if (lastFocus == newFocus) {
                             // Focus is not changing, so nothing to do.
                             return;
                         }
-                        mLastFocus = newFocus;
+                        displayContent.mLastFocus = newFocus;
                         if (DEBUG_FOCUS_LIGHT) Slog.i(TAG_WM, "Focus moving from " + lastFocus +
-                                " to " + newFocus);
-                        if (newFocus != null && lastFocus != null
-                                && !newFocus.isDisplayedLw()) {
-                            //Slog.i(TAG_WM, "Delaying loss of focus...");
-                            mLosingFocus.add(lastFocus);
+                                " to " + newFocus + " displayId=" + displayContent.getDisplayId());
+                        if (newFocus != null && lastFocus != null && !newFocus.isDisplayedLw()) {
+                            if (DEBUG_FOCUS_LIGHT) Slog.i(TAG_WM, "Delaying loss of focus...");
+                            displayContent.mLosingFocus.add(lastFocus);
                             lastFocus = null;
                         }
                     }
@@ -4636,8 +4568,6 @@ public class WindowManagerService extends IWindowManager.Stub
                         accessibilityController.onWindowFocusChangedNotLocked();
                     }
 
-                    //System.out.println("Changing focus from " + lastFocus
-                    //                   + " to " + newFocus);
                     if (newFocus != null) {
                         if (DEBUG_FOCUS_LIGHT) Slog.i(TAG_WM, "Gaining focus: " + newFocus);
                         newFocus.reportFocusChangedSerialized(true, mInTouchMode);
@@ -4651,15 +4581,16 @@ public class WindowManagerService extends IWindowManager.Stub
                 } break;
 
                 case REPORT_LOSING_FOCUS: {
+                    final DisplayContent displayContent = (DisplayContent) msg.obj;
                     ArrayList<WindowState> losers;
 
                     synchronized(mWindowMap) {
-                        losers = mLosingFocus;
-                        mLosingFocus = new ArrayList<WindowState>();
+                        losers = displayContent.mLosingFocus;
+                        displayContent.mLosingFocus = new ArrayList<>();
                     }
 
                     final int N = losers.size();
-                    for (int i=0; i<N; i++) {
+                    for (int i = 0; i < N; i++) {
                         if (DEBUG_FOCUS_LIGHT) Slog.i(TAG_WM, "Losing delayed focus: " +
                                 losers.get(i));
                         losers.get(i).reportFocusChangedSerialized(false, mInTouchMode);
@@ -4670,21 +4601,6 @@ public class WindowManagerService extends IWindowManager.Stub
                     final DisplayContent displayContent = (DisplayContent) msg.obj;
                     synchronized (mWindowMap) {
                         displayContent.onWindowFreezeTimeout();
-                    }
-                    break;
-                }
-
-                case APP_TRANSITION_TIMEOUT: {
-                    synchronized (mWindowMap) {
-                        if (mAppTransition.isTransitionSet() || !mOpeningApps.isEmpty()
-                                    || !mClosingApps.isEmpty()) {
-                            if (DEBUG_APP_TRANSITIONS) Slog.v(TAG_WM, "*** APP TRANSITION TIMEOUT."
-                                    + " isTransitionSet()=" + mAppTransition.isTransitionSet()
-                                    + " mOpeningApps.size()=" + mOpeningApps.size()
-                                    + " mClosingApps.size()=" + mClosingApps.size());
-                            mAppTransition.setTimeout();
-                            mWindowPlacerLocked.performSurfacePlacement();
-                        }
                     }
                     break;
                 }
@@ -4838,14 +4754,6 @@ public class WindowManagerService extends IWindowManager.Stub
 
                 case SHOW_EMULATOR_DISPLAY_OVERLAY: {
                     showEmulatorDisplayOverlay();
-                    break;
-                }
-
-                case DO_ANIMATION_CALLBACK: {
-                    try {
-                        ((IRemoteCallback)msg.obj).sendResult(null);
-                    } catch (RemoteException e) {
-                    }
                     break;
                 }
 
@@ -5553,89 +5461,11 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    // TODO: Move to DisplayContent
     boolean updateFocusedWindowLocked(int mode, boolean updateInputWindows) {
-        WindowState newFocus = mRoot.computeFocusedWindow();
-        if (mCurrentFocus != newFocus) {
-            Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "wmUpdateFocus");
-            // This check makes sure that we don't already have the focus
-            // change message pending.
-            mH.removeMessages(H.REPORT_FOCUS_CHANGE);
-            mH.sendEmptyMessage(H.REPORT_FOCUS_CHANGE);
-            final DisplayContent displayContent = (newFocus != null) ? newFocus.getDisplayContent()
-                    : getDefaultDisplayContentLocked();
-            boolean imWindowChanged = false;
-            if (displayContent.mInputMethodWindow != null) {
-                final WindowState prevTarget = mInputMethodTarget;
-
-                final WindowState newTarget =
-                        displayContent.computeImeTarget(true /* updateImeTarget*/);
-                imWindowChanged = prevTarget != newTarget;
-
-                if (mode != UPDATE_FOCUS_WILL_ASSIGN_LAYERS
-                        && mode != UPDATE_FOCUS_WILL_PLACE_SURFACES) {
-                    displayContent.assignWindowLayers(false /* setLayoutNeeded */);
-                }
-            }
-
-            if (imWindowChanged) {
-                mWindowsChanged = true;
-                displayContent.setLayoutNeeded();
-                newFocus = mRoot.computeFocusedWindow();
-            }
-
-            if (DEBUG_FOCUS_LIGHT || localLOGV) Slog.v(TAG_WM, "Changing focus from " +
-                    mCurrentFocus + " to " + newFocus + " Callers=" + Debug.getCallers(4));
-            final WindowState oldFocus = mCurrentFocus;
-            mCurrentFocus = newFocus;
-            mLosingFocus.remove(newFocus);
-
-            if (mCurrentFocus != null) {
-                mWinAddedSinceNullFocus.clear();
-                mWinRemovedSinceNullFocus.clear();
-            }
-
-            int focusChanged = mPolicy.focusChangedLw(oldFocus, newFocus);
-
-            if (imWindowChanged && oldFocus != displayContent.mInputMethodWindow) {
-                // Focus of the input method window changed. Perform layout if needed.
-                if (mode == UPDATE_FOCUS_PLACING_SURFACES) {
-                    displayContent.performLayout(true /*initial*/,  updateInputWindows);
-                    focusChanged &= ~FINISH_LAYOUT_REDO_LAYOUT;
-                } else if (mode == UPDATE_FOCUS_WILL_PLACE_SURFACES) {
-                    // Client will do the layout, but we need to assign layers
-                    // for handleNewWindowLocked() below.
-                    displayContent.assignWindowLayers(false /* setLayoutNeeded */);
-                }
-            }
-
-            if ((focusChanged & FINISH_LAYOUT_REDO_LAYOUT) != 0) {
-                // The change in focus caused us to need to do a layout.  Okay.
-                displayContent.setLayoutNeeded();
-                if (mode == UPDATE_FOCUS_PLACING_SURFACES) {
-                    displayContent.performLayout(true /*initial*/, updateInputWindows);
-                } else if (mode == UPDATE_FOCUS_REMOVING_FOCUS) {
-                    mRoot.performSurfacePlacement(false);
-                }
-            }
-
-            if (mode != UPDATE_FOCUS_WILL_ASSIGN_LAYERS) {
-                // If we defer assigning layers, then the caller is responsible for
-                // doing this part.
-                displayContent.getInputMonitor().setInputFocusLw(mCurrentFocus, updateInputWindows);
-            }
-
-            displayContent.adjustForImeIfNeeded();
-
-            // We may need to schedule some toast windows to be removed. The toasts for an app that
-            // does not have input focus are removed within a timeout to prevent apps to redress
-            // other apps' UI.
-            displayContent.scheduleToastWindowsTimeoutIfNeededLocked(oldFocus, newFocus);
-
-            Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
-            return true;
-        }
-        return false;
+        Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "wmUpdateFocus");
+        boolean changed = mRoot.updateFocusedWindowLocked(mode, updateInputWindows);
+        Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
+        return changed;
     }
 
     void startFreezingDisplayLocked(int exitAnim, int enterAnim) {
@@ -6197,11 +6027,12 @@ public class WindowManagerService extends IWindowManager.Stub
     void writeToProtoLocked(ProtoOutputStream proto, boolean trim) {
         mPolicy.writeToProto(proto, POLICY);
         mRoot.writeToProto(proto, ROOT_WINDOW_CONTAINER, trim);
-        if (mCurrentFocus != null) {
-            mCurrentFocus.writeIdentifierToProto(proto, FOCUSED_WINDOW);
+        final DisplayContent topFocusedDisplayContent = mRoot.getTopFocusedDisplayContent();
+        if (topFocusedDisplayContent.mCurrentFocus != null) {
+            topFocusedDisplayContent.mCurrentFocus.writeIdentifierToProto(proto, FOCUSED_WINDOW);
         }
-        if (mFocusedApp != null) {
-            mFocusedApp.writeNameToProto(proto, FOCUSED_APP);
+        if (topFocusedDisplayContent.mFocusedApp != null) {
+            topFocusedDisplayContent.mFocusedApp.writeNameToProto(proto, FOCUSED_APP);
         }
         final WindowState imeWindow = mRoot.getCurrentInputMethodWindow();
         if (imeWindow != null) {
@@ -6299,23 +6130,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 }
             }
         }
-        if (mLosingFocus.size() > 0) {
-            pw.println();
-            pw.println("  Windows losing focus:");
-            for (int i=mLosingFocus.size()-1; i>=0; i--) {
-                WindowState w = mLosingFocus.get(i);
-                if (windows == null || windows.contains(w)) {
-                    pw.print("  Losing #"); pw.print(i); pw.print(' ');
-                            pw.print(w);
-                    if (dumpAll) {
-                        pw.println(":");
-                        w.dump(pw, "    ", true);
-                    } else {
-                        pw.println();
-                    }
-                }
-            }
-        }
         if (mResizingWindows.size() > 0) {
             pw.println();
             pw.println("  Windows waiting to resize:");
@@ -6344,11 +6158,7 @@ public class WindowManagerService extends IWindowManager.Stub
         pw.println();
         pw.print("  mGlobalConfiguration="); pw.println(mRoot.getConfiguration());
         pw.print("  mHasPermanentDpad="); pw.println(mHasPermanentDpad);
-        pw.print("  mCurrentFocus="); pw.println(mCurrentFocus);
-        if (mLastFocus != mCurrentFocus) {
-            pw.print("  mLastFocus="); pw.println(mLastFocus);
-        }
-        pw.print("  mFocusedApp="); pw.println(mFocusedApp);
+        mRoot.dumpTopFocusedDisplayId(pw);
         if (mInputMethodTarget != null) {
             pw.print("  mInputMethodTarget="); pw.println(mInputMethodTarget);
         }
@@ -6479,11 +6289,17 @@ public class WindowManagerService extends IWindowManager.Stub
         if (reason != null) {
             pw.println("  Reason: " + reason);
         }
-        if (!mWinAddedSinceNullFocus.isEmpty()) {
-            pw.println("  Windows added since null focus: " + mWinAddedSinceNullFocus);
-        }
-        if (!mWinRemovedSinceNullFocus.isEmpty()) {
-            pw.println("  Windows removed since null focus: " + mWinRemovedSinceNullFocus);
+        for (int i = mRoot.getChildCount() - 1; i >= 0; i--) {
+            final DisplayContent dc = mRoot.getChildAt(i);
+            final int displayId = dc.getDisplayId();
+            if (!dc.mWinAddedSinceNullFocus.isEmpty()) {
+                pw.println("  Windows added in display #" + displayId + " since null focus: "
+                        + dc.mWinAddedSinceNullFocus);
+            }
+            if (!dc.mWinRemovedSinceNullFocus.isEmpty()) {
+                pw.println("  Windows removed in display #" + displayId + " since null focus: "
+                        + dc.mWinRemovedSinceNullFocus);
+            }
         }
         pw.println();
         dumpWindowsNoHeaderLocked(pw, true, null);
@@ -6818,9 +6634,9 @@ public class WindowManagerService extends IWindowManager.Stub
     @Override
     public void setDockedStackDividerTouchRegion(Rect touchRegion) {
         synchronized (mWindowMap) {
-            getDefaultDisplayContentLocked().getDockedDividerController()
-                    .setTouchRegion(touchRegion);
-            setFocusTaskRegionLocked(null);
+            final DisplayContent dc = getDefaultDisplayContentLocked();
+            dc.getDockedDividerController().setTouchRegion(touchRegion);
+            dc.updateTouchExcludeRegion();
         }
     }
 
@@ -7373,21 +7189,32 @@ public class WindowManagerService extends IWindowManager.Stub
         @Override
         public boolean isUidFocused(int uid) {
             synchronized (mWindowMap) {
-                return mCurrentFocus != null ? uid == mCurrentFocus.getOwningUid() : false;
+                for (int i = mRoot.getChildCount() - 1; i >= 0; i--) {
+                    final DisplayContent displayContent = mRoot.getChildAt(i);
+                    if (displayContent.mCurrentFocus != null
+                            && uid == displayContent.mCurrentFocus.getOwningUid()) {
+                        return true;
+                    }
+                }
+                return false;
             }
         }
 
         @Override
-        public boolean isInputMethodClientFocus(int uid, int pid) {
+        public boolean isInputMethodClientFocus(int uid, int pid, int displayId) {
+            if (displayId == Display.INVALID_DISPLAY) {
+                return false;
+            }
             synchronized (mWindowMap) {
-                // Check all displays if any input method window has focus.
-                for (int i = mRoot.mChildren.size() - 1; i >= 0; --i) {
-                    final DisplayContent displayContent = mRoot.mChildren.get(i);
-                    if (displayContent.isInputMethodClientFocus(uid, pid)) {
-                        return true;
-                    }
+                final DisplayContent displayContent = mRoot.getTopFocusedDisplayContent();
+                if (displayContent == null
+                        || displayContent.getDisplayId() != displayId
+                        || !displayContent.hasAccess(uid)) {
+                    return false;
                 }
-
+                if (displayContent.isInputMethodClientFocus(uid, pid)) {
+                    return true;
+                }
                 // Okay, how about this...  what is the current focus?
                 // It seems in some cases we may not have moved the IM
                 // target window, such as when it was in a pop-up window,
@@ -7396,12 +7223,27 @@ public class WindowManagerService extends IWindowManager.Stub
                 // press home.  Sometimes the IME won't go down.)
                 // Would be nice to fix this more correctly, but it's
                 // way at the end of a release, and this should be good enough.
-                if (mCurrentFocus != null && mCurrentFocus.mSession.mUid == uid
-                        && mCurrentFocus.mSession.mPid == pid) {
+                final WindowState currentFocus = displayContent.mCurrentFocus;
+                if (currentFocus != null && currentFocus.mSession.mUid == uid
+                        && currentFocus.mSession.mPid == pid) {
                     return true;
                 }
             }
             return false;
+        }
+
+        @Override
+        public boolean isUidAllowedOnDisplay(int displayId, int uid) {
+            if (displayId == Display.DEFAULT_DISPLAY) {
+                return true;
+            }
+            if (displayId == Display.INVALID_DISPLAY) {
+                return false;
+            }
+            synchronized (mWindowMap) {
+                final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
+                return displayContent != null && displayContent.hasAccess(uid);
+            }
         }
 
         @Override

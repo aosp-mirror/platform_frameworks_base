@@ -1043,7 +1043,8 @@ final class AccessibilityController {
                 // Do not send the windows if there is no current focus as
                 // the window manager is still looking for where to put it.
                 // We will do the work when we get a focus change callback.
-                if (mService.mCurrentFocus == null) {
+                // TODO(b/112273690): Support multiple displays
+                if (mService.getDefaultDisplayContentLocked().mCurrentFocus == null) {
                     return;
                 }
 

@@ -76,7 +76,7 @@ public class RegionInterceptingFrameLayout extends FrameLayout {
                 continue;
             }
 
-            internalInsetsInfo.touchableRegion.op(riv.getInterceptRegion(), Op.UNION);
+            internalInsetsInfo.touchableRegion.op(unionRegion, Op.UNION);
         }
     };
 

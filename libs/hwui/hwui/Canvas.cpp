@@ -178,6 +178,41 @@ void Canvas::drawText(const uint16_t* text, int textSize, int start, int count, 
     MinikinUtils::forFontRun(layout, &paint, f);
 }
 
+void Canvas::drawDoubleRoundRectXY(float outerLeft, float outerTop, float outerRight,
+                            float outerBottom, float outerRx, float outerRy, float innerLeft,
+                            float innerTop, float innerRight, float innerBottom, float innerRx,
+                            float innerRy, const SkPaint& paint) {
+    if (CC_UNLIKELY(paint.nothingToDraw())) return;
+    SkRect outer = SkRect::MakeLTRB(outerLeft, outerTop, outerRight, outerBottom);
+    SkRect inner = SkRect::MakeLTRB(innerLeft, innerTop, innerRight, innerBottom);
+
+    SkRRect outerRRect;
+    outerRRect.setRectXY(outer, outerRx, outerRy);
+
+    SkRRect innerRRect;
+    innerRRect.setRectXY(inner, innerRx, innerRy);
+    drawDoubleRoundRect(outerRRect, innerRRect, paint);
+}
+
+void Canvas::drawDoubleRoundRectRadii(float outerLeft, float outerTop, float outerRight,
+                            float outerBottom, const float* outerRadii, float innerLeft,
+                            float innerTop, float innerRight, float innerBottom,
+                            const float* innerRadii, const SkPaint& paint) {
+    static_assert(sizeof(SkVector) == sizeof(float) * 2);
+    if (CC_UNLIKELY(paint.nothingToDraw())) return;
+    SkRect outer = SkRect::MakeLTRB(outerLeft, outerTop, outerRight, outerBottom);
+    SkRect inner = SkRect::MakeLTRB(innerLeft, innerTop, innerRight, innerBottom);
+
+    SkRRect outerRRect;
+    const SkVector* outerSkVector = reinterpret_cast<const SkVector*>(outerRadii);
+    outerRRect.setRectRadii(outer, outerSkVector);
+
+    SkRRect innerRRect;
+    const SkVector* innerSkVector = reinterpret_cast<const SkVector*>(innerRadii);
+    innerRRect.setRectRadii(inner, innerSkVector);
+    drawDoubleRoundRect(outerRRect, innerRRect, paint);
+}
+
 class DrawTextOnPathFunctor {
 public:
     DrawTextOnPathFunctor(const minikin::Layout& layout, Canvas* canvas, float hOffset,

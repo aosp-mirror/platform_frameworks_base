@@ -356,6 +356,12 @@ public class GestureLauncherService extends SystemService {
 
     public boolean interceptPowerKeyDown(KeyEvent event, boolean interactive,
             MutableBoolean outLaunched) {
+        if (event.isLongPress()) {
+            // Long presses are sent as a second key down. If the long press threshold is set lower
+            // than the double tap of sequence interval thresholds, this could cause false double
+            // taps or consecutive taps, so we want to ignore the long press event.
+            return false;
+        }
         boolean launched = false;
         boolean intercept = false;
         long powerTapInterval;

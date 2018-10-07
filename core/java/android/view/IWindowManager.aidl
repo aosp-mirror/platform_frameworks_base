@@ -87,7 +87,6 @@ interface IWindowManager
     void setEventDispatching(boolean enabled);
     void addWindowToken(IBinder token, int type, int displayId);
     void removeWindowToken(IBinder token, int displayId);
-    void setFocusedApp(IBinder token, boolean moveFocusNow);
     void prepareAppTransition(int transit, boolean alwaysKeepCurrent);
     int getPendingAppTransition();
     void overridePendingAppTransition(String packageName, int enterAnim, int exitAnim,

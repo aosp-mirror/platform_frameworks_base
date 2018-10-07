@@ -103,6 +103,9 @@ public class QSFragment extends Fragment implements QS, CommandQueue.Callbacks {
             setListening(savedInstanceState.getBoolean(EXTRA_LISTENING));
             setEditLocation(view);
             mQSCustomizer.restoreInstanceState(savedInstanceState);
+            if (mQsExpanded) {
+                mQSPanel.getTileLayout().restoreInstanceState(savedInstanceState);
+            }
         }
         SysUiServiceProvider.getComponent(getContext(), CommandQueue.class).addCallbacks(this);
     }
@@ -127,6 +130,9 @@ public class QSFragment extends Fragment implements QS, CommandQueue.Callbacks {
         outState.putBoolean(EXTRA_EXPANDED, mQsExpanded);
         outState.putBoolean(EXTRA_LISTENING, mListening);
         mQSCustomizer.saveInstanceState(outState);
+        if (mQsExpanded) {
+            mQSPanel.getTileLayout().saveInstanceState(outState);
+        }
     }
 
     @VisibleForTesting

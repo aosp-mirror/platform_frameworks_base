@@ -426,6 +426,10 @@ public class AmbientState {
         return mDarkAmount == 1;
     }
 
+    public boolean isDarkAtAll() {
+        return mDarkAmount != 0;
+    }
+
     public void setDarkTopPadding(int darkTopPadding) {
         mDarkTopPadding = darkTopPadding;
     }

@@ -18,11 +18,19 @@ package com.android.server.wm.utils;
 
 
 import static android.view.DisplayCutout.NO_CUTOUT;
+import static android.view.DisplayCutout.BOUNDS_POSITION_BOTTOM;
+import static android.view.DisplayCutout.BOUNDS_POSITION_LEFT;
+import static android.view.DisplayCutout.BOUNDS_POSITION_RIGHT;
+import static android.view.DisplayCutout.BOUNDS_POSITION_TOP;
 import static android.view.DisplayCutout.fromBoundingRect;
 
+import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertThat;
 
+
+import android.graphics.Insets;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 import android.util.Size;
@@ -45,15 +53,17 @@ import java.util.Arrays;
 @SmallTest
 @Presubmit
 public class WmDisplayCutoutTest {
+    private static final Rect ZERO_RECT = new Rect();
 
     private final DisplayCutout mCutoutTop = new DisplayCutout(
-            new Rect(0, 100, 0, 0),
-            Arrays.asList(new Rect(50, 0, 75, 100)));
+            Insets.of(0, 100, 0, 0),
+            null /* boundLeft */, new Rect(50, 0, 75, 100) /* boundTop */,
+            null /* boundRight */, null /* boundBottom */);
 
     @Test
     public void calculateRelativeTo_top() {
         WmDisplayCutout cutout = WmDisplayCutout.computeSafeInsets(
-                fromBoundingRect(0, 0, 100, 20), 200, 400)
+                fromBoundingRect(0, 0, 100, 20, BOUNDS_POSITION_TOP), 200, 400)
                 .calculateRelativeTo(new Rect(5, 5, 95, 195));
 
         assertEquals(new Rect(0, 15, 0, 0), cutout.getDisplayCutout().getSafeInsets());
@@ -62,7 +72,7 @@ public class WmDisplayCutoutTest {
     @Test
     public void calculateRelativeTo_left() {
         WmDisplayCutout cutout = WmDisplayCutout.computeSafeInsets(
-                fromBoundingRect(0, 0, 20, 100), 400, 200)
+                fromBoundingRect(0, 0, 20, 100, BOUNDS_POSITION_LEFT), 400, 200)
                 .calculateRelativeTo(new Rect(5, 5, 195, 95));
 
         assertEquals(new Rect(15, 0, 0, 0), cutout.getDisplayCutout().getSafeInsets());
@@ -71,7 +81,7 @@ public class WmDisplayCutoutTest {
     @Test
     public void calculateRelativeTo_bottom() {
         WmDisplayCutout cutout = WmDisplayCutout.computeSafeInsets(
-                fromBoundingRect(0, 180, 100, 200), 100, 200)
+                fromBoundingRect(0, 180, 100, 200, BOUNDS_POSITION_BOTTOM), 100, 200)
                 .calculateRelativeTo(new Rect(5, 5, 95, 195));
 
         assertEquals(new Rect(0, 0, 0, 15), cutout.getDisplayCutout().getSafeInsets());
@@ -80,7 +90,7 @@ public class WmDisplayCutoutTest {
     @Test
     public void calculateRelativeTo_right() {
         WmDisplayCutout cutout = WmDisplayCutout.computeSafeInsets(
-                fromBoundingRect(180, 0, 200, 100), 200, 100)
+                fromBoundingRect(180, 0, 200, 100, BOUNDS_POSITION_RIGHT), 200, 100)
                 .calculateRelativeTo(new Rect(5, 5, 195, 95));
 
         assertEquals(new Rect(0, 0, 15, 0), cutout.getDisplayCutout().getSafeInsets());
@@ -89,16 +99,17 @@ public class WmDisplayCutoutTest {
     @Test
     public void calculateRelativeTo_bounds() {
         WmDisplayCutout cutout = WmDisplayCutout.computeSafeInsets(
-                fromBoundingRect(0, 0, 100, 20), 200, 400)
+                fromBoundingRect(0, 0, 100, 20, BOUNDS_POSITION_TOP), 200, 400)
                 .calculateRelativeTo(new Rect(5, 10, 95, 180));
 
-        assertEquals(new Rect(-5, -10, 95, 10), cutout.getDisplayCutout().getBounds().getBounds());
+        assertThat(cutout.getDisplayCutout().getBoundingRectTop(),
+                equalTo(new Rect(-5, -10, 95, 10)));
     }
 
     @Test
     public void computeSafeInsets_top() {
         WmDisplayCutout cutout = WmDisplayCutout.computeSafeInsets(
-                fromBoundingRect(0, 0, 100, 20), 200, 400);
+                fromBoundingRect(0, 0, 100, 20, BOUNDS_POSITION_TOP), 200, 400);
 
         assertEquals(new Rect(0, 20, 0, 0), cutout.getDisplayCutout().getSafeInsets());
     }
@@ -106,7 +117,7 @@ public class WmDisplayCutoutTest {
     @Test
     public void computeSafeInsets_left() {
         WmDisplayCutout cutout = WmDisplayCutout.computeSafeInsets(
-                fromBoundingRect(0, 0, 20, 100), 400, 200);
+                fromBoundingRect(0, 0, 20, 100, BOUNDS_POSITION_LEFT), 400, 200);
 
         assertEquals(new Rect(20, 0, 0, 0), cutout.getDisplayCutout().getSafeInsets());
     }
@@ -114,7 +125,7 @@ public class WmDisplayCutoutTest {
     @Test
     public void computeSafeInsets_bottom() {
         WmDisplayCutout cutout = WmDisplayCutout.computeSafeInsets(
-                fromBoundingRect(0, 180, 100, 200), 100, 200);
+                fromBoundingRect(0, 180, 100, 200, BOUNDS_POSITION_BOTTOM), 100, 200);
 
         assertEquals(new Rect(0, 0, 0, 20), cutout.getDisplayCutout().getSafeInsets());
     }
@@ -122,7 +133,7 @@ public class WmDisplayCutoutTest {
     @Test
     public void computeSafeInsets_right() {
         WmDisplayCutout cutout = WmDisplayCutout.computeSafeInsets(
-                fromBoundingRect(180, 0, 200, 100), 200, 100);
+                fromBoundingRect(180, 0, 200, 100, BOUNDS_POSITION_RIGHT), 200, 100);
 
         assertEquals(new Rect(0, 0, 20, 0), cutout.getDisplayCutout().getSafeInsets());
     }
@@ -132,8 +143,7 @@ public class WmDisplayCutoutTest {
         DisplayCutout cutout = WmDisplayCutout.computeSafeInsets(mCutoutTop, 1000,
                 2000).getDisplayCutout();
 
-        assertEquals(mCutoutTop.getBounds().getBounds(),
-                cutout.getBounds().getBounds());
+        assertEquals(mCutoutTop.getBoundingRects(), cutout.getBoundingRects());
     }
 
     @Test

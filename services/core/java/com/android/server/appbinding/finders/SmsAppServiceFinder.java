@@ -32,7 +32,9 @@ import android.os.IBinder;
 import android.os.UserHandle;
 import android.telephony.TelephonyManager;
 import android.text.TextUtils;
+import android.util.Slog;
 
+import com.android.internal.R;
 import com.android.internal.telephony.SmsApplication;
 import com.android.server.appbinding.AppBindingConstants;
 
@@ -46,6 +48,12 @@ public class SmsAppServiceFinder extends AppServiceFinder<SmsAppService, ISmsApp
             BiConsumer<AppServiceFinder, Integer> listener,
             Handler callbackHandler) {
         super(context, listener, callbackHandler);
+    }
+
+    @Override
+    protected boolean isEnabled(AppBindingConstants constants) {
+        return constants.SMS_SERVICE_ENABLED
+                && mContext.getResources().getBoolean(R.bool.config_useSmsAppService);
     }
 
     @Override
@@ -77,7 +85,13 @@ public class SmsAppServiceFinder extends AppServiceFinder<SmsAppService, ISmsApp
     public String getTargetPackage(int userId) {
         final ComponentName cn = SmsApplication.getDefaultSmsApplicationAsUser(
                 mContext, /* updateIfNeeded= */ true, userId);
-        return cn == null ? null : cn.getPackageName();
+        String ret = cn == null ? null : cn.getPackageName();
+
+        if (DEBUG) {
+            Slog.d(TAG, "getTargetPackage()=" + ret);
+        }
+
+        return ret;
     }
 
     @Override

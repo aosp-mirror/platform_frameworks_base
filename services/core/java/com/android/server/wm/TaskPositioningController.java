@@ -131,9 +131,9 @@ class TaskPositioningController {
         // of the app, it may not have focus since there might be other windows
         // on top (eg. a dialog window).
         WindowState transferFocusFromWin = win;
-        if (mService.mCurrentFocus != null && mService.mCurrentFocus != win
-                && mService.mCurrentFocus.mAppToken == win.mAppToken) {
-            transferFocusFromWin = mService.mCurrentFocus;
+        if (displayContent.mCurrentFocus != null && displayContent.mCurrentFocus != win
+                && displayContent.mCurrentFocus.mAppToken == win.mAppToken) {
+            transferFocusFromWin = displayContent.mCurrentFocus;
         }
         if (!mInputManager.transferTouchFocus(
                 transferFocusFromWin.mInputChannel, mTaskPositioner.mServerChannel)) {

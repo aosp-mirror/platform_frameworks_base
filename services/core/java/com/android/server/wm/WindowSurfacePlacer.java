@@ -69,7 +69,6 @@ import android.view.WindowManager.TransitionType;
 import android.view.animation.Animation;
 
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.server.wm.WindowManagerService.H;
 
 import java.io.PrintWriter;
 import java.util.function.Predicate;
@@ -252,7 +251,7 @@ class WindowSurfacePlacer {
         mService.mSkipAppTransitionAnimation = false;
         mService.mNoAnimationNotifyOnTransitionFinished.clear();
 
-        mService.mH.removeMessages(H.APP_TRANSITION_TIMEOUT);
+        mService.mAppTransition.removeAppTransitionTimeoutCallbacks();
 
         final DisplayContent displayContent = mService.getDefaultDisplayContentLocked();
 
@@ -763,6 +762,7 @@ class WindowSurfacePlacer {
 
     private void processApplicationsAnimatingInPlace(int transit) {
         if (transit == TRANSIT_TASK_IN_PLACE) {
+            // TODO (b/111362605): non-default-display transition.
             // Find the focused window
             final WindowState win = mService.getDefaultDisplayContentLocked().findFocusedWindow();
             if (win != null) {

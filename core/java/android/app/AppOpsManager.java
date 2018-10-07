@@ -1256,85 +1256,85 @@ public class AppOpsManager {
      * This specifies the default mode for each operation.
      */
     private static int[] sOpDefaultMode = new int[] {
-            AppOpsManager.MODE_ALLOWED,
-            AppOpsManager.MODE_ALLOWED,
-            AppOpsManager.MODE_ALLOWED,
-            AppOpsManager.MODE_ALLOWED,
-            AppOpsManager.MODE_ALLOWED,
-            AppOpsManager.MODE_ALLOWED,
-            AppOpsManager.MODE_ALLOWED,
-            AppOpsManager.MODE_ALLOWED,
-            AppOpsManager.MODE_ALLOWED,
-            AppOpsManager.MODE_ALLOWED,
-            AppOpsManager.MODE_ALLOWED,
-            AppOpsManager.MODE_ALLOWED,
-            AppOpsManager.MODE_ALLOWED,
-            AppOpsManager.MODE_ALLOWED,
-            AppOpsManager.MODE_ALLOWED,
-            AppOpsManager.MODE_IGNORED, // OP_WRITE_SMS
-            AppOpsManager.MODE_ALLOWED,
-            AppOpsManager.MODE_ALLOWED,
-            AppOpsManager.MODE_ALLOWED,
-            AppOpsManager.MODE_ALLOWED,
-            AppOpsManager.MODE_ALLOWED,
-            AppOpsManager.MODE_ALLOWED,
-            AppOpsManager.MODE_ALLOWED,
-            AppOpsManager.MODE_DEFAULT, // OP_WRITE_SETTINGS
-            AppOpsManager.MODE_DEFAULT, // OP_SYSTEM_ALERT_WINDOW
-            AppOpsManager.MODE_ALLOWED,
-            AppOpsManager.MODE_ALLOWED,
-            AppOpsManager.MODE_ALLOWED,
-            AppOpsManager.MODE_ALLOWED,
-            AppOpsManager.MODE_ALLOWED,
-            AppOpsManager.MODE_ALLOWED,
-            AppOpsManager.MODE_ALLOWED,
-            AppOpsManager.MODE_ALLOWED,
-            AppOpsManager.MODE_ALLOWED,
-            AppOpsManager.MODE_ALLOWED,
-            AppOpsManager.MODE_ALLOWED,
-            AppOpsManager.MODE_ALLOWED,
-            AppOpsManager.MODE_ALLOWED,
-            AppOpsManager.MODE_ALLOWED,
-            AppOpsManager.MODE_ALLOWED,
-            AppOpsManager.MODE_ALLOWED,
-            AppOpsManager.MODE_ALLOWED,
-            AppOpsManager.MODE_ALLOWED,
-            AppOpsManager.MODE_DEFAULT, // OP_GET_USAGE_STATS
-            AppOpsManager.MODE_ALLOWED,
-            AppOpsManager.MODE_ALLOWED,
-            AppOpsManager.MODE_IGNORED, // OP_PROJECT_MEDIA
-            AppOpsManager.MODE_IGNORED, // OP_ACTIVATE_VPN
-            AppOpsManager.MODE_ALLOWED,
-            AppOpsManager.MODE_ALLOWED,
-            AppOpsManager.MODE_ALLOWED,
-            AppOpsManager.MODE_ALLOWED,
-            AppOpsManager.MODE_ALLOWED,
-            AppOpsManager.MODE_ALLOWED,
-            AppOpsManager.MODE_ALLOWED,
-            AppOpsManager.MODE_ALLOWED,
-            AppOpsManager.MODE_ALLOWED,
-            AppOpsManager.MODE_ALLOWED,
-            AppOpsManager.MODE_ERRORED,  // OP_MOCK_LOCATION
-            AppOpsManager.MODE_ALLOWED,
-            AppOpsManager.MODE_ALLOWED,
-            AppOpsManager.MODE_ALLOWED,  // OP_TURN_ON_SCREEN
-            AppOpsManager.MODE_ALLOWED,
-            AppOpsManager.MODE_ALLOWED,  // OP_RUN_IN_BACKGROUND
-            AppOpsManager.MODE_ALLOWED,  // OP_AUDIO_ACCESSIBILITY_VOLUME
-            AppOpsManager.MODE_ALLOWED,
-            AppOpsManager.MODE_DEFAULT,  // OP_REQUEST_INSTALL_PACKAGES
-            AppOpsManager.MODE_ALLOWED,  // OP_PICTURE_IN_PICTURE
-            AppOpsManager.MODE_DEFAULT,  // OP_INSTANT_APP_START_FOREGROUND
-            AppOpsManager.MODE_ALLOWED,  // ANSWER_PHONE_CALLS
-            AppOpsManager.MODE_ALLOWED,  // OP_RUN_ANY_IN_BACKGROUND
-            AppOpsManager.MODE_ALLOWED,  // OP_CHANGE_WIFI_STATE
-            AppOpsManager.MODE_ALLOWED,  // REQUEST_DELETE_PACKAGES
-            AppOpsManager.MODE_ALLOWED,  // OP_BIND_ACCESSIBILITY_SERVICE
-            AppOpsManager.MODE_ALLOWED,  // ACCEPT_HANDOVER
-            AppOpsManager.MODE_ERRORED,  // MANAGE_IPSEC_TUNNELS
-            AppOpsManager.MODE_ALLOWED,  // OP_START_FOREGROUND
-            AppOpsManager.MODE_ALLOWED,  // OP_BLUETOOTH_SCAN
-            AppOpsManager.MODE_ALLOWED,  // USE_BIOMETRIC
+            AppOpsManager.MODE_ALLOWED, // COARSE_LOCATION
+            AppOpsManager.MODE_ALLOWED, // FINE_LOCATION
+            AppOpsManager.MODE_ALLOWED, // GPS
+            AppOpsManager.MODE_ALLOWED, // VIBRATE
+            AppOpsManager.MODE_ALLOWED, // READ_CONTACTS
+            AppOpsManager.MODE_ALLOWED, // WRITE_CONTACTS
+            AppOpsManager.MODE_ALLOWED, // READ_CALL_LOG
+            AppOpsManager.MODE_ALLOWED, // WRITE_CALL_LOG
+            AppOpsManager.MODE_ALLOWED, // READ_CALENDAR
+            AppOpsManager.MODE_ALLOWED, // WRITE_CALENDAR
+            AppOpsManager.MODE_ALLOWED, // WIFI_SCAN
+            AppOpsManager.MODE_ALLOWED, // POST_NOTIFICATION
+            AppOpsManager.MODE_ALLOWED, // NEIGHBORING_CELLS
+            AppOpsManager.MODE_ALLOWED, // CALL_PHONE
+            AppOpsManager.MODE_DEFAULT, // READ_SMS
+            AppOpsManager.MODE_DEFAULT, // WRITE_SMS
+            AppOpsManager.MODE_DEFAULT, // RECEIVE_SMS
+            AppOpsManager.MODE_ALLOWED, // RECEIVE_EMERGENCY_BROADCAST
+            AppOpsManager.MODE_ALLOWED, // RECEIVE_MMS
+            AppOpsManager.MODE_DEFAULT, // RECEIVE_WAP_PUSH
+            AppOpsManager.MODE_DEFAULT, // SEND_SMS
+            AppOpsManager.MODE_ALLOWED, // READ_ICC_SMS
+            AppOpsManager.MODE_ALLOWED, // WRITE_ICC_SMS
+            AppOpsManager.MODE_DEFAULT, // WRITE_SETTINGS
+            AppOpsManager.MODE_DEFAULT, // SYSTEM_ALERT_WINDOW
+            AppOpsManager.MODE_ALLOWED, // ACCESS_NOTIFICATIONS
+            AppOpsManager.MODE_ALLOWED, // CAMERA
+            AppOpsManager.MODE_ALLOWED, // RECORD_AUDIO
+            AppOpsManager.MODE_ALLOWED, // PLAY_AUDIO
+            AppOpsManager.MODE_ALLOWED, // READ_CLIPBOARD
+            AppOpsManager.MODE_ALLOWED, // WRITE_CLIPBOARD
+            AppOpsManager.MODE_ALLOWED, // TAKE_MEDIA_BUTTONS
+            AppOpsManager.MODE_ALLOWED, // TAKE_AUDIO_FOCUS
+            AppOpsManager.MODE_ALLOWED, // AUDIO_MASTER_VOLUME
+            AppOpsManager.MODE_ALLOWED, // AUDIO_VOICE_VOLUME
+            AppOpsManager.MODE_ALLOWED, // AUDIO_RING_VOLUME
+            AppOpsManager.MODE_ALLOWED, // AUDIO_MEDIA_VOLUME
+            AppOpsManager.MODE_ALLOWED, // AUDIO_ALARM_VOLUME
+            AppOpsManager.MODE_ALLOWED, // AUDIO_NOTIFICATION_VOLUME
+            AppOpsManager.MODE_ALLOWED, // AUDIO_BLUETOOTH_VOLUME
+            AppOpsManager.MODE_ALLOWED, // WAKE_LOCK
+            AppOpsManager.MODE_ALLOWED, // MONITOR_LOCATION
+            AppOpsManager.MODE_ALLOWED, // MONITOR_HIGH_POWER_LOCATION
+            AppOpsManager.MODE_DEFAULT, // GET_USAGE_STATS
+            AppOpsManager.MODE_ALLOWED, // MUTE_MICROPHONE
+            AppOpsManager.MODE_ALLOWED, // TOAST_WINDOW
+            AppOpsManager.MODE_IGNORED, // PROJECT_MEDIA
+            AppOpsManager.MODE_IGNORED, // ACTIVATE_VPN
+            AppOpsManager.MODE_ALLOWED, // WRITE_WALLPAPER
+            AppOpsManager.MODE_ALLOWED, // ASSIST_STRUCTURE
+            AppOpsManager.MODE_ALLOWED, // ASSIST_SCREENSHOT
+            AppOpsManager.MODE_ALLOWED, // READ_PHONE_STATE
+            AppOpsManager.MODE_ALLOWED, // ADD_VOICEMAIL
+            AppOpsManager.MODE_ALLOWED, // USE_SIP
+            AppOpsManager.MODE_ALLOWED, // PROCESS_OUTGOING_CALLS
+            AppOpsManager.MODE_ALLOWED, // USE_FINGERPRINT
+            AppOpsManager.MODE_ALLOWED, // BODY_SENSORS
+            AppOpsManager.MODE_DEFAULT, // READ_CELL_BROADCASTS
+            AppOpsManager.MODE_ERRORED, // MOCK_LOCATION
+            AppOpsManager.MODE_ALLOWED, // READ_EXTERNAL_STORAGE
+            AppOpsManager.MODE_ALLOWED, // WRITE_EXTERNAL_STORAGE
+            AppOpsManager.MODE_ALLOWED, // TURN_SCREEN_ON
+            AppOpsManager.MODE_ALLOWED, // GET_ACCOUNTS
+            AppOpsManager.MODE_ALLOWED, // RUN_IN_BACKGROUND
+            AppOpsManager.MODE_ALLOWED, // AUDIO_ACCESSIBILITY_VOLUME
+            AppOpsManager.MODE_ALLOWED, // READ_PHONE_NUMBERS
+            AppOpsManager.MODE_DEFAULT, // REQUEST_INSTALL_PACKAGES
+            AppOpsManager.MODE_ALLOWED, // PICTURE_IN_PICTURE
+            AppOpsManager.MODE_DEFAULT, // INSTANT_APP_START_FOREGROUND
+            AppOpsManager.MODE_ALLOWED, // ANSWER_PHONE_CALLS
+            AppOpsManager.MODE_ALLOWED, // RUN_ANY_IN_BACKGROUND
+            AppOpsManager.MODE_ALLOWED, // CHANGE_WIFI_STATE
+            AppOpsManager.MODE_ALLOWED, // REQUEST_DELETE_PACKAGES
+            AppOpsManager.MODE_ALLOWED, // BIND_ACCESSIBILITY_SERVICE
+            AppOpsManager.MODE_ALLOWED, // ACCEPT_HANDOVER
+            AppOpsManager.MODE_ERRORED, // MANAGE_IPSEC_TUNNELS
+            AppOpsManager.MODE_ALLOWED, // START_FOREGROUND
+            AppOpsManager.MODE_ALLOWED, // BLUETOOTH_SCAN
+            AppOpsManager.MODE_ALLOWED, // USE_BIOMETRIC
     };
 
     /**
@@ -1345,80 +1345,80 @@ public class AppOpsManager {
      * for whichever app is selected as the current SMS app).
      */
     private static boolean[] sOpDisableReset = new boolean[] {
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            true,      // OP_WRITE_SMS
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false,
-            false, // OP_AUDIO_ACCESSIBILITY_VOLUME
-            false,
-            false, // OP_REQUEST_INSTALL_PACKAGES
-            false, // OP_PICTURE_IN_PICTURE
-            false,
+            false, // COARSE_LOCATION
+            false, // FINE_LOCATION
+            false, // GPS
+            false, // VIBRATE
+            false, // READ_CONTACTS
+            false, // WRITE_CONTACTS
+            false, // READ_CALL_LOG
+            false, // WRITE_CALL_LOG
+            false, // READ_CALENDAR
+            false, // WRITE_CALENDAR
+            false, // WIFI_SCAN
+            false, // POST_NOTIFICATION
+            false, // NEIGHBORING_CELLS
+            false, // CALL_PHONE
+            true, // READ_SMS
+            true, // WRITE_SMS
+            true, // RECEIVE_SMS
+            false, // RECEIVE_EMERGENCY_BROADCAST
+            false, // RECEIVE_MMS
+            true, // RECEIVE_WAP_PUSH
+            true, // SEND_SMS
+            false, // READ_ICC_SMS
+            false, // WRITE_ICC_SMS
+            false, // WRITE_SETTINGS
+            false, // SYSTEM_ALERT_WINDOW
+            false, // ACCESS_NOTIFICATIONS
+            false, // CAMERA
+            false, // RECORD_AUDIO
+            false, // PLAY_AUDIO
+            false, // READ_CLIPBOARD
+            false, // WRITE_CLIPBOARD
+            false, // TAKE_MEDIA_BUTTONS
+            false, // TAKE_AUDIO_FOCUS
+            false, // AUDIO_MASTER_VOLUME
+            false, // AUDIO_VOICE_VOLUME
+            false, // AUDIO_RING_VOLUME
+            false, // AUDIO_MEDIA_VOLUME
+            false, // AUDIO_ALARM_VOLUME
+            false, // AUDIO_NOTIFICATION_VOLUME
+            false, // AUDIO_BLUETOOTH_VOLUME
+            false, // WAKE_LOCK
+            false, // MONITOR_LOCATION
+            false, // MONITOR_HIGH_POWER_LOCATION
+            false, // GET_USAGE_STATS
+            false, // MUTE_MICROPHONE
+            false, // TOAST_WINDOW
+            false, // PROJECT_MEDIA
+            false, // ACTIVATE_VPN
+            false, // WRITE_WALLPAPER
+            false, // ASSIST_STRUCTURE
+            false, // ASSIST_SCREENSHOT
+            false, // READ_PHONE_STATE
+            false, // ADD_VOICEMAIL
+            false, // USE_SIP
+            false, // PROCESS_OUTGOING_CALLS
+            false, // USE_FINGERPRINT
+            false, // BODY_SENSORS
+            true, // READ_CELL_BROADCASTS
+            false, // MOCK_LOCATION
+            false, // READ_EXTERNAL_STORAGE
+            false, // WRITE_EXTERNAL_STORAGE
+            false, // TURN_SCREEN_ON
+            false, // GET_ACCOUNTS
+            false, // RUN_IN_BACKGROUND
+            false, // AUDIO_ACCESSIBILITY_VOLUME
+            false, // READ_PHONE_NUMBERS
+            false, // REQUEST_INSTALL_PACKAGES
+            false, // PICTURE_IN_PICTURE
+            false, // INSTANT_APP_START_FOREGROUND
             false, // ANSWER_PHONE_CALLS
-            false, // OP_RUN_ANY_IN_BACKGROUND
-            false, // OP_CHANGE_WIFI_STATE
-            false, // OP_REQUEST_DELETE_PACKAGES
-            false, // OP_BIND_ACCESSIBILITY_SERVICE
+            false, // RUN_ANY_IN_BACKGROUND
+            false, // CHANGE_WIFI_STATE
+            false, // REQUEST_DELETE_PACKAGES
+            false, // BIND_ACCESSIBILITY_SERVICE
             false, // ACCEPT_HANDOVER
             false, // MANAGE_IPSEC_TUNNELS
             false, // START_FOREGROUND
@@ -1957,6 +1957,7 @@ public class AppOpsManager {
      * @hide
      */
     @SystemApi
+    @TestApi
     @RequiresPermission(android.Manifest.permission.MANAGE_APP_OPS_MODES)
     public void setUidMode(String appOp, int uid, int mode) {
         try {

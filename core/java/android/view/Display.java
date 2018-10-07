@@ -221,6 +221,18 @@ public final class Display {
     public static final int FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD = 1 << 5;
 
     /**
+     * Display flag: Indicates that the display should show system decorations.
+     * <p>
+     * This flag identifies secondary displays that should show system decorations, such as status
+     * bar, navigation bar, home activity or IME.
+     * </p>
+     *
+     * @see #supportsSystemDecorations
+     * @hide
+     */
+    public static final int FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS = 1 << 6;
+
+    /**
      * Display flag: Indicates that the contents of the display should not be scaled
      * to fit the physical screen dimensions.  Used for development only to emulate
      * devices with smaller physicals screens while preserving density.
@@ -871,6 +883,16 @@ public final class Display {
      */
     public int getRemoveMode() {
         return mDisplayInfo.removeMode;
+    }
+
+    /**
+     * Returns whether this display should support showing system decorations.
+     *
+     * @see #FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS
+     * @hide
+     */
+    public boolean supportsSystemDecorations() {
+        return (mDisplayInfo.flags & FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS) != 0;
     }
 
     /**

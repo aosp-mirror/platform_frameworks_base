@@ -25,7 +25,6 @@ import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.animation.TimeAnimator;
 import android.animation.ValueAnimator;
-import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.annotation.Nullable;
 import android.app.WallpaperManager;
 import android.content.Context;
@@ -40,7 +39,6 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.ServiceManager;
 import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
@@ -82,7 +80,6 @@ import com.android.systemui.ExpandHelper;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.SwipeHelper;
-import com.android.systemui.SwipeHelper.Callback;
 import com.android.systemui.classifier.FalsingManager;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
@@ -3734,12 +3731,14 @@ public class NotificationStackScrollLayout extends ViewGroup
         return y < getHeight() - getEmptyBottomMargin();
     }
 
+    @VisibleForTesting
     @ShadeViewRefactor(RefactorComponent.INPUT)
-    private void setIsBeingDragged(boolean isDragged) {
+    void setIsBeingDragged(boolean isDragged) {
         mIsBeingDragged = isDragged;
         if (isDragged) {
             requestDisallowInterceptTouchEvent(true);
             cancelLongPress();
+            resetExposedMenuView(true /* animate */, true /* force */);
         }
     }
 
@@ -3869,6 +3868,7 @@ public class NotificationStackScrollLayout extends ViewGroup
     public void onPanelTrackingStarted() {
         mPanelTracking = true;
         mAmbientState.setPanelTracking(true);
+        resetExposedMenuView(true /* animate */, true /* force */);
     }
 
     @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
@@ -4271,8 +4271,10 @@ public class NotificationStackScrollLayout extends ViewGroup
         mLinearDarkAmount = linearDarkAmount;
         mInterpolatedDarkAmount = interpolatedDarkAmount;
         boolean wasFullyDark = mAmbientState.isFullyDark();
+        boolean wasDarkAtAll = mAmbientState.isDarkAtAll();
         mAmbientState.setDarkAmount(interpolatedDarkAmount);
         boolean nowFullyDark = mAmbientState.isFullyDark();
+        boolean nowDarkAtAll = mAmbientState.isDarkAtAll();
         if (nowFullyDark != wasFullyDark) {
             updateContentHeight();
             DozeParameters dozeParameters = DozeParameters.getInstance(mContext);
@@ -4282,6 +4284,9 @@ public class NotificationStackScrollLayout extends ViewGroup
             if (mIconAreaController != null) {
                 mIconAreaController.setFullyDark(nowFullyDark);
             }
+        }
+        if (!wasDarkAtAll && nowDarkAtAll) {
+            resetExposedMenuView(true /* animate */, true /* animate */);
         }
         updateAlgorithmHeightAndPadding();
         updateBackgroundDimming();
