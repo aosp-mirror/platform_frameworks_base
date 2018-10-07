@@ -1519,7 +1519,7 @@
     <string name="activitychooserview_choose_application" msgid="2125168057199941199">"Odaberite aplikaciju"</string>
     <string name="activitychooserview_choose_application_error" msgid="8624618365481126668">"Aplikacija <xliff:g id="APPLICATION_NAME">%s</xliff:g> se ne može pokrenuti."</string>
     <string name="shareactionprovider_share_with" msgid="806688056141131819">"Podijeliti sa"</string>
-    <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Dijeli koristeći aplikaciju <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
+    <string name="shareactionprovider_share_with_application" msgid="5627411384638389738">"Dijeli pomoću aplikacije <xliff:g id="APPLICATION_NAME">%s</xliff:g>"</string>
     <string name="content_description_sliding_handle" msgid="415975056159262248">"Klizni regulator. Dodirnite &amp; držite."</string>
     <string name="description_target_unlock_tablet" msgid="3833195335629795055">"Prevucite za otključavanje ekrana."</string>
     <string name="action_bar_home_description" msgid="5293600496601490216">"Vratite se na početnu stranicu"</string>
