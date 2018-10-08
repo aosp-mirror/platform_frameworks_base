@@ -25,15 +25,13 @@ import android.content.pm.ResolveInfo;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.Settings;
-import androidx.preference.PreferenceFragment;
-import androidx.preference.SwitchPreference;
-import androidx.preference.PreferenceScreen;
-import androidx.preference.PreferenceViewHolder;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.view.View;
 
 import com.android.systemui.R;
+import com.android.systemui.plugins.PluginEnablerImpl;
+import com.android.systemui.shared.plugins.PluginEnabler;
 import com.android.systemui.shared.plugins.PluginInstanceManager;
 import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.shared.plugins.PluginPrefs;
@@ -41,12 +39,18 @@ import com.android.systemui.shared.plugins.PluginPrefs;
 import java.util.List;
 import java.util.Set;
 
+import androidx.preference.PreferenceFragment;
+import androidx.preference.PreferenceScreen;
+import androidx.preference.PreferenceViewHolder;
+import androidx.preference.SwitchPreference;
+
 public class PluginFragment extends PreferenceFragment {
 
     public static final String ACTION_PLUGIN_SETTINGS
             = "com.android.systemui.action.PLUGIN_SETTINGS";
 
     private PluginPrefs mPluginPrefs;
+    private PluginEnabler mPluginEnabler;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -68,6 +72,7 @@ public class PluginFragment extends PreferenceFragment {
 
     @Override
     public void onCreatePreferences(Bundle savedInstanceState, String rootKey) {
+        mPluginEnabler = new PluginEnablerImpl(getContext());
         loadPrefs();
     }
 
@@ -98,7 +103,7 @@ public class PluginFragment extends PreferenceFragment {
                 PackageManager.MATCH_DISABLED_COMPONENTS | PackageManager.GET_SERVICES);
         apps.forEach(app -> {
             if (!plugins.containsKey(app.packageName)) return;
-            SwitchPreference pref = new PluginPreference(prefContext, app);
+            SwitchPreference pref = new PluginPreference(prefContext, app, mPluginEnabler);
             pref.setSummary("Plugins: " + toString(plugins.get(app.packageName)));
             screen.addPreference(pref);
         });
@@ -139,15 +144,16 @@ public class PluginFragment extends PreferenceFragment {
     private static class PluginPreference extends SwitchPreference {
         private final boolean mHasSettings;
         private final PackageInfo mInfo;
-        private final PackageManager mPm;
+        private final PluginEnabler mPluginEnabler;
 
-        public PluginPreference(Context prefContext, PackageInfo info) {
+        public PluginPreference(Context prefContext, PackageInfo info, PluginEnabler pluginEnabler) {
             super(prefContext);
-            mPm = prefContext.getPackageManager();
-            mHasSettings = mPm.resolveActivity(new Intent(ACTION_PLUGIN_SETTINGS)
+            PackageManager pm = prefContext.getPackageManager();
+            mHasSettings = pm.resolveActivity(new Intent(ACTION_PLUGIN_SETTINGS)
                     .setPackage(info.packageName), 0) != null;
             mInfo = info;
-            setTitle(info.applicationInfo.loadLabel(mPm));
+            mPluginEnabler = pluginEnabler;
+            setTitle(info.applicationInfo.loadLabel(pm));
             setChecked(isPluginEnabled());
             setWidgetLayoutResource(R.layout.tuner_widget_settings_switch);
         }
@@ -156,8 +162,7 @@ public class PluginFragment extends PreferenceFragment {
             for (int i = 0; i < mInfo.services.length; i++) {
                 ComponentName componentName = new ComponentName(mInfo.packageName,
                         mInfo.services[i].name);
-                if (mPm.getComponentEnabledSetting(componentName)
-                        == PackageManager.COMPONENT_ENABLED_STATE_DISABLED) {
+                if (!mPluginEnabler.isEnabled(componentName)) {
                     return false;
                 }
             }
@@ -165,17 +170,14 @@ public class PluginFragment extends PreferenceFragment {
         }
 
         @Override
-        protected boolean persistBoolean(boolean value) {
-            final int desiredState = value ? PackageManager.COMPONENT_ENABLED_STATE_ENABLED
-                    : PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
+        protected boolean persistBoolean(boolean isEnabled) {
             boolean shouldSendBroadcast = false;
             for (int i = 0; i < mInfo.services.length; i++) {
                 ComponentName componentName = new ComponentName(mInfo.packageName,
                         mInfo.services[i].name);
 
-                if (mPm.getComponentEnabledSetting(componentName) != desiredState) {
-                    mPm.setComponentEnabledSetting(componentName, desiredState,
-                            PackageManager.DONT_KILL_APP);
+                if (mPluginEnabler.isEnabled(componentName) != isEnabled) {
+                    mPluginEnabler.setEnabled(componentName, isEnabled);
                     shouldSendBroadcast = true;
                 }
             }

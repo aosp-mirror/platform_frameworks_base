@@ -28,6 +28,7 @@ import static org.mockito.Mockito.when;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.Plugin;
+import com.android.systemui.plugins.PluginEnablerImpl;
 import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.shared.plugins.PluginInstanceManager.PluginInfo;
 import com.android.systemui.shared.plugins.VersionInfo.InvalidVersionException;
@@ -88,6 +89,7 @@ public class PluginInstanceManagerTest extends SysuiTestCase {
         mMockManager = mock(PluginManagerImpl.class);
         when(mMockManager.getClassLoader(any(), any()))
                 .thenReturn(getClass().getClassLoader());
+        when(mMockManager.getPluginEnabler()).thenReturn(new PluginEnablerImpl(mMockPm));
         mMockVersionInfo = mock(VersionInfo.class);
         mPluginInstanceManager = new PluginInstanceManager(mContextWrapper, mMockPm, "myAction",
                 mMockListener, true, mHandlerThread.getLooper(), mMockVersionInfo,
