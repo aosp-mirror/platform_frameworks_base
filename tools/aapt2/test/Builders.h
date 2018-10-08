@@ -20,6 +20,7 @@
 #include <memory>
 
 #include "android-base/macros.h"
+#include "androidfw/ConfigDescription.h"
 
 #include "Resource.h"
 #include "ResourceTable.h"
@@ -40,7 +41,8 @@ class ResourceTableBuilder {
 
   ResourceTableBuilder& SetPackageId(const android::StringPiece& package_name, uint8_t id);
   ResourceTableBuilder& AddSimple(const android::StringPiece& name, const ResourceId& id = {});
-  ResourceTableBuilder& AddSimple(const android::StringPiece& name, const ConfigDescription& config,
+  ResourceTableBuilder& AddSimple(const android::StringPiece& name,
+                                  const android::ConfigDescription& config,
                                   const ResourceId& id = {});
   ResourceTableBuilder& AddReference(const android::StringPiece& name,
                                      const android::StringPiece& ref);
@@ -51,7 +53,8 @@ class ResourceTableBuilder {
   ResourceTableBuilder& AddString(const android::StringPiece& name, const ResourceId& id,
                                   const android::StringPiece& str);
   ResourceTableBuilder& AddString(const android::StringPiece& name, const ResourceId& id,
-                                  const ConfigDescription& config, const android::StringPiece& str);
+                                  const android::ConfigDescription& config,
+                                  const android::StringPiece& str);
   ResourceTableBuilder& AddFileReference(const android::StringPiece& name,
                                          const android::StringPiece& path,
                                          io::IFile* file = nullptr);
@@ -60,12 +63,13 @@ class ResourceTableBuilder {
                                          io::IFile* file = nullptr);
   ResourceTableBuilder& AddFileReference(const android::StringPiece& name,
                                          const android::StringPiece& path,
-                                         const ConfigDescription& config,
+                                         const android::ConfigDescription& config,
                                          io::IFile* file = nullptr);
   ResourceTableBuilder& AddValue(const android::StringPiece& name, std::unique_ptr<Value> value);
   ResourceTableBuilder& AddValue(const android::StringPiece& name, const ResourceId& id,
                                  std::unique_ptr<Value> value);
-  ResourceTableBuilder& AddValue(const android::StringPiece& name, const ConfigDescription& config,
+  ResourceTableBuilder& AddValue(const android::StringPiece& name,
+                                 const android::ConfigDescription& config,
                                  const ResourceId& id, std::unique_ptr<Value> value);
   ResourceTableBuilder& SetSymbolState(const android::StringPiece& name, const ResourceId& id,
                                        Visibility::Level level, bool allow_new = false);
@@ -163,8 +167,8 @@ class ArtifactBuilder {
   ArtifactBuilder& SetName(const std::string& name);
   ArtifactBuilder& SetVersion(int version);
   ArtifactBuilder& AddAbi(configuration::Abi abi);
-  ArtifactBuilder& AddDensity(const ConfigDescription& density);
-  ArtifactBuilder& AddLocale(const ConfigDescription& locale);
+  ArtifactBuilder& AddDensity(const android::ConfigDescription& density);
+  ArtifactBuilder& AddLocale(const android::ConfigDescription& locale);
   ArtifactBuilder& SetAndroidSdk(int min_sdk);
   configuration::OutputArtifact Build();
 
@@ -302,12 +306,12 @@ class ConfigDescriptionBuilder {
     config_.screenConfigPad2 = screenConfigPad2;
     return *this;
   }
-  ConfigDescription Build() {
+  android::ConfigDescription Build() {
     return config_;
   }
 
  private:
-  ConfigDescription config_;
+  android::ConfigDescription config_;
 };
 
 }  // namespace test

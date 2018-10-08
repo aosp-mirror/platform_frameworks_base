@@ -22,6 +22,7 @@
 #include "android-base/file.h"
 #include "android-base/stringprintf.h"
 
+#include "androidfw/ConfigDescription.h"
 #include "androidfw/ResourceTypes.h"
 #include "androidfw/StringPiece.h"
 
@@ -47,6 +48,7 @@
 
 using ::aapt::configuration::Abi;
 using ::aapt::configuration::OutputArtifact;
+using ::android::ConfigDescription;
 using ::android::ResTable_config;
 using ::android::StringPiece;
 using ::android::base::ReadFileToString;

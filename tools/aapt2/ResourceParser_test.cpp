@@ -29,6 +29,7 @@
 using ::aapt::io::StringInputStream;
 using ::aapt::test::StrValueEq;
 using ::aapt::test::ValueEq;
+using ::android::ConfigDescription;
 using ::android::Res_value;
 using ::android::ResTable_map;
 using ::android::StringPiece;

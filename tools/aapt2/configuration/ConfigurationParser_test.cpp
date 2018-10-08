@@ -26,6 +26,8 @@
 #include "test/Test.h"
 #include "xml/XmlDom.h"
 
+using ::android::ConfigDescription;
+
 namespace aapt {
 
 namespace configuration {

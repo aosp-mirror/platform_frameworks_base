@@ -20,6 +20,7 @@
 #include "format/proto/ProtoDeserialize.h"
 #include "test/Test.h"
 
+using ::android::ConfigDescription;
 using ::android::StringPiece;
 using ::testing::Eq;
 using ::testing::IsEmpty;

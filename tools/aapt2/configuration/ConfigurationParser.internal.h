@@ -17,6 +17,8 @@
 #ifndef AAPT2_CONFIGURATIONPARSER_INTERNAL_H
 #define AAPT2_CONFIGURATIONPARSER_INTERNAL_H
 
+#include "androidfw/ConfigDescription.h"
+
 #include "configuration/ConfigurationParser.h"
 
 #include <algorithm>
@@ -148,8 +150,8 @@ struct PostProcessingConfiguration {
   Maybe<std::string> artifact_format;
 
   Group<Abi> abi_groups;
-  Group<ConfigDescription> screen_density_groups;
-  Group<ConfigDescription> locale_groups;
+  Group<android::ConfigDescription> screen_density_groups;
+  Group<android::ConfigDescription> locale_groups;
   Group<DeviceFeature> device_feature_groups;
   Group<GlTexture> gl_texture_groups;
   Entry<AndroidSdk> android_sdks;
