@@ -4201,8 +4201,8 @@ package android.permission {
   }
 
   public static final class PermissionManager.SplitPermissionInfo {
-    method public java.lang.String[] getNewPermissions();
-    method public java.lang.String getRootPermission();
+    method public java.util.List<java.lang.String> getNewPermissions();
+    method public java.lang.String getSplitPermission();
     method public int getTargetSdk();
   }
 

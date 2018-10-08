@@ -2440,17 +2440,17 @@ public class PackageParser {
         }
 
 
-        final int NS = PermissionManager.SPLIT_PERMISSIONS.length;
+        final int NS = PermissionManager.SPLIT_PERMISSIONS.size();
         for (int is=0; is<NS; is++) {
             final PermissionManager.SplitPermissionInfo spi =
-                    PermissionManager.SPLIT_PERMISSIONS[is];
+                    PermissionManager.SPLIT_PERMISSIONS.get(is);
             if (pkg.applicationInfo.targetSdkVersion >= spi.getTargetSdk()
-                    || !pkg.requestedPermissions.contains(spi.getRootPermission())) {
+                    || !pkg.requestedPermissions.contains(spi.getSplitPermission())) {
                 continue;
             }
-            final String[] newPerms = spi.getNewPermissions();
-            for (int in = 0; in < newPerms.length; in++) {
-                final String perm = newPerms[in];
+            final List<String> newPerms = spi.getNewPermissions();
+            for (int in = 0; in < newPerms.size(); in++) {
+                final String perm = newPerms.get(in);
                 if (!pkg.requestedPermissions.contains(perm)) {
                     pkg.requestedPermissions.add(perm);
                 }

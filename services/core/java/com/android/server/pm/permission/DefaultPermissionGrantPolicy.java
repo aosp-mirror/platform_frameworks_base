@@ -1033,8 +1033,8 @@ public final class DefaultPermissionGrantPolicy {
 
             if (applicationInfo != null
                     && applicationInfo.targetSdkVersion < splitPerm.getTargetSdk()
-                    && permissionsWithoutSplits.contains(splitPerm.getRootPermission())) {
-                Collections.addAll(permissions, splitPerm.getNewPermissions());
+                    && permissionsWithoutSplits.contains(splitPerm.getSplitPermission())) {
+                permissions.addAll(splitPerm.getNewPermissions());
             }
         }
 

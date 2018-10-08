@@ -2919,7 +2919,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 for (int splitPermNum = 0; splitPermNum < numSplitPerms; splitPermNum++) {
                     final PermissionManager.SplitPermissionInfo splitPerm =
                             splitPermissions.get(splitPermNum);
-                    final String rootPerm = splitPerm.getRootPermission();
+                    final String rootPerm = splitPerm.getSplitPermission();
 
                     if (preUpgradeSdkVersion >= splitPerm.getTargetSdk()) {
                         continue;
@@ -2941,11 +2941,11 @@ public class PackageManagerService extends IPackageManager.Stub
                             continue;
                         }
 
-                        final String[] newPerms = splitPerm.getNewPermissions();
+                        final List<String> newPerms = splitPerm.getNewPermissions();
 
-                        final int numNewPerms = newPerms.length;
+                        final int numNewPerms = newPerms.size();
                         for (int newPermNum = 0; newPermNum < numNewPerms; newPermNum++) {
-                            final String newPerm = newPerms[newPermNum];
+                            final String newPerm = newPerms.get(newPermNum);
                             if (checkPermission(newPerm, pkgName, userId) == PERMISSION_GRANTED) {
                                 continue;
                             }
