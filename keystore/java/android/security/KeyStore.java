@@ -77,6 +77,7 @@ public class KeyStore {
     public static final int VALUE_CORRUPTED = 8;
     public static final int UNDEFINED_ACTION = 9;
     public static final int WRONG_PASSWORD = 10;
+    public static final int KEY_ALREADY_EXISTS = 16;
     public static final int CANNOT_ATTEST_IDS = -66;
     public static final int HARDWARE_TYPE_UNAVAILABLE = -68;
 
@@ -236,7 +237,12 @@ public class KeyStore {
             if (value == null) {
                 value = new byte[0];
             }
-            return mBinder.insert(key, value, uid, flags);
+            int error = mBinder.insert(key, value, uid, flags);
+            if (error == KEY_ALREADY_EXISTS) {
+                mBinder.del(key, uid);
+                error = mBinder.insert(key, value, uid, flags);
+            }
+            return error;
         } catch (RemoteException e) {
             Log.w(TAG, "Cannot connect to keystore", e);
             return SYSTEM_ERROR;
@@ -446,7 +452,12 @@ public class KeyStore {
         try {
             entropy = entropy != null ? entropy : new byte[0];
             args = args != null ? args : new KeymasterArguments();
-            return mBinder.generateKey(alias, args, entropy, uid, flags, outCharacteristics);
+            int error = mBinder.generateKey(alias, args, entropy, uid, flags, outCharacteristics);
+            if (error == KEY_ALREADY_EXISTS) {
+                mBinder.del(alias, uid);
+                error = mBinder.generateKey(alias, args, entropy, uid, flags, outCharacteristics);
+            }
+            return error;
         } catch (RemoteException e) {
             Log.w(TAG, "Cannot connect to keystore", e);
             return SYSTEM_ERROR;
@@ -478,8 +489,14 @@ public class KeyStore {
     public int importKey(String alias, KeymasterArguments args, int format, byte[] keyData,
             int uid, int flags, KeyCharacteristics outCharacteristics) {
         try {
-            return mBinder.importKey(alias, args, format, keyData, uid, flags,
+            int error = mBinder.importKey(alias, args, format, keyData, uid, flags,
                     outCharacteristics);
+            if (error == KEY_ALREADY_EXISTS) {
+                mBinder.del(alias, uid);
+                error = mBinder.importKey(alias, args, format, keyData, uid, flags,
+                        outCharacteristics);
+            }
+            return error;
         } catch (RemoteException e) {
             Log.w(TAG, "Cannot connect to keystore", e);
             return SYSTEM_ERROR;
@@ -555,8 +572,14 @@ public class KeyStore {
             byte[] maskingKey, KeymasterArguments args, long rootSid, long fingerprintSid, int uid,
             KeyCharacteristics outCharacteristics) {
         try {
-            return mBinder.importWrappedKey(wrappedKeyAlias, wrappedKey, wrappingKeyAlias,
+            int error = mBinder.importWrappedKey(wrappedKeyAlias, wrappedKey, wrappingKeyAlias,
                     maskingKey, args, rootSid, fingerprintSid, outCharacteristics);
+            if (error == KEY_ALREADY_EXISTS) {
+                mBinder.del(wrappedKeyAlias, -1);
+                error = mBinder.importWrappedKey(wrappedKeyAlias, wrappedKey, wrappingKeyAlias,
+                        maskingKey, args, rootSid, fingerprintSid, outCharacteristics);
+            }
+            return error;
         } catch (RemoteException e) {
             Log.w(TAG, "Cannot connect to keystore", e);
             return SYSTEM_ERROR;
