@@ -226,25 +226,50 @@ interface IWindowManager
     int getPreferredOptionsPanelGravity(int displayId);
 
     /**
-     * Lock the device orientation to the specified rotation, or to the
-     * current rotation if -1.  Sensor input will be ignored until
-     * thawRotation() is called.
-     * @hide
+     * Equivalent to calling {@link #freezeDisplayRotation(int, int)} with {@link
+     * android.view.Display#DEFAULT_DISPLAY} and given rotation.
      */
     void freezeRotation(int rotation);
 
     /**
-     * Release the orientation lock imposed by freezeRotation().
-     * @hide
+     * Equivalent to calling {@link #thawDisplayRotation(int)} with {@link
+     * android.view.Display#DEFAULT_DISPLAY}.
      */
     void thawRotation();
 
     /**
-     * Gets whether the rotation is frozen.
-     *
-     * @return Whether the rotation is frozen.
+     * Equivelant to call {@link #isDisplayRotationFrozen(int)} with {@link
+     * android.view.Display#DEFAULT_DISPLAY}.
      */
     boolean isRotationFrozen();
+
+    /**
+     * Lock the display orientation to the specified rotation, or to the current
+     * rotation if -1. Sensor input will be ignored until thawRotation() is called.
+     *
+     * @param displayId the ID of display which rotation should be frozen.
+     * @param rotation one of {@link android.view.Surface#ROTATION_0},
+     *        {@link android.view.Surface#ROTATION_90}, {@link android.view.Surface#ROTATION_180},
+     *        {@link android.view.Surface#ROTATION_270} or -1 to freeze it to current rotation.
+     * @hide
+     */
+    void freezeDisplayRotation(int displayId, int rotation);
+
+    /**
+     * Release the orientation lock imposed by freezeRotation() on the display.
+     *
+     * @param displayId the ID of display which rotation should be thawed.
+     * @hide
+     */
+    void thawDisplayRotation(int displayId);
+
+    /**
+     * Gets whether the rotation is frozen on the display.
+     *
+     * @param displayId the ID of display which frozen is needed.
+     * @return Whether the rotation is frozen.
+     */
+    boolean isDisplayRotationFrozen(int displayId);
 
     /**
      * Screenshot the current wallpaper layer, including the whole screen.

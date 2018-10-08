@@ -26,6 +26,7 @@ import android.os.UserHandle;
 import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.IWindowManager;
+import android.view.Surface;
 
 import java.io.PrintWriter;
 import java.util.regex.Matcher;
@@ -73,6 +74,8 @@ public class WindowManagerShellCommand extends ShellCommand {
                     // trace files can be written.
                     return mInternal.mWindowTracing.onShellCommand(this,
                             getNextArgRequired());
+                case "set-user-rotation":
+                    return runSetDisplayUserRotation(pw);
                 default:
                     return handleDefaultCommands(cmd);
             }
@@ -262,6 +265,36 @@ public class WindowManagerShellCommand extends ShellCommand {
         return Integer.parseInt(s);
     }
 
+    private int runSetDisplayUserRotation(PrintWriter pw) {
+        final String lockMode = getNextArgRequired();
+
+        int displayId = Display.DEFAULT_DISPLAY;
+        String arg = getNextArg();
+        if ("-d".equals(arg)) {
+            displayId = Integer.parseInt(getNextArgRequired());
+            arg = getNextArg();
+        }
+
+        if ("free".equals(lockMode)) {
+            mInternal.thawDisplayRotation(displayId);
+            return 0;
+        }
+
+        if (!lockMode.equals("lock")) {
+            getErrPrintWriter().println("Error: lock mode needs to be either free or lock.");
+            return -1;
+        }
+
+        try {
+            final int rotation = arg != null ? Integer.parseInt(arg) : Surface.ROTATION_0;
+            mInternal.freezeDisplayRotation(displayId, rotation);
+            return 0;
+        } catch (IllegalArgumentException e) {
+            getErrPrintWriter().println("Error: " + e.getMessage());
+            return -1;
+        }
+    }
+
     @Override
     public void onHelp() {
         PrintWriter pw = getOutPrintWriter();
@@ -279,6 +312,8 @@ public class WindowManagerShellCommand extends ShellCommand {
         pw.println("    Set display scaling mode.");
         pw.println("  dismiss-keyguard");
         pw.println("    Dismiss the keyguard, prompting user for auth if necessary.");
+        pw.println("  set-user-rotation [free|lock] [-d DISPLAY_ID] [rotation]");
+        pw.println("    Set user rotation mode and user rotation.");
         if (!IS_USER) {
             pw.println("  tracing (start | stop)");
             pw.println("    Start or stop window tracing.");

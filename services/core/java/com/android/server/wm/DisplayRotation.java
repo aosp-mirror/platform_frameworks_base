@@ -55,6 +55,7 @@ public class DisplayRotation {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "DisplayRotation" : TAG_WM;
 
     private final WindowManagerService mService;
+    private final DisplayContent mDisplayContent;
     private final DisplayPolicy mDisplayPolicy;
     private final Context mContext;
     private final Object mLock;
@@ -106,6 +107,7 @@ public class DisplayRotation {
     DisplayRotation(WindowManagerService service, DisplayContent displayContent,
             DisplayPolicy displayPolicy, Context context, Object lock) {
         mService = service;
+        mDisplayContent = displayContent;
         mDisplayPolicy = displayPolicy;
         mContext = context;
         mLock = lock;
@@ -223,6 +225,70 @@ public class DisplayRotation {
                 updateOrientationListenerLw();
             }
         }
+    }
+
+    void restoreUserRotation(int userRotationMode, int userRotation) {
+        if (userRotationMode != WindowManagerPolicy.USER_ROTATION_FREE
+                && userRotationMode != WindowManagerPolicy.USER_ROTATION_LOCKED) {
+            Slog.w(TAG, "Trying to restore an invalid user rotation mode " + userRotationMode
+                    + " for " + mDisplayContent);
+            userRotationMode = WindowManagerPolicy.USER_ROTATION_FREE;
+        }
+        if (userRotation < Surface.ROTATION_0 || userRotation > Surface.ROTATION_270) {
+            Slog.w(TAG, "Trying to restore an invalid user rotation " + userRotation
+                    + " for " + mDisplayContent);
+            userRotation = Surface.ROTATION_0;
+        }
+        mUserRotationMode = userRotationMode;
+        mUserRotation = userRotation;
+    }
+
+    private void setUserRotation(int userRotationMode, int userRotation) {
+        if (isDefaultDisplay) {
+            // We'll be notified via settings listener, so we don't need to update internal values.
+            final ContentResolver res = mContext.getContentResolver();
+            final int accelerometerRotation =
+                    userRotationMode == WindowManagerPolicy.USER_ROTATION_LOCKED ? 0 : 1;
+            Settings.System.putIntForUser(res, Settings.System.ACCELEROMETER_ROTATION,
+                    accelerometerRotation, UserHandle.USER_CURRENT);
+            Settings.System.putIntForUser(res, Settings.System.USER_ROTATION, userRotation,
+                    UserHandle.USER_CURRENT);
+            return;
+        }
+
+        boolean changed = false;
+        if (mUserRotationMode != userRotationMode) {
+            mUserRotationMode = userRotationMode;
+            changed = true;
+        }
+        if (mUserRotation != userRotation) {
+            mUserRotation = userRotation;
+            changed = true;
+        }
+        mService.mDisplaySettings.setUserRotation(mDisplayContent, userRotationMode, userRotation);
+        if (changed) {
+            mService.updateRotation(true /* alwaysSendConfiguration */,
+                    false /* forceRelayout */);
+            mService.mDisplaySettings.writeSettingsLocked();
+        }
+    }
+
+    void freezeRotation(int rotation) {
+        rotation = (rotation == -1) ? mDisplayContent.getRotation() : rotation;
+        setUserRotation(WindowManagerPolicy.USER_ROTATION_LOCKED, rotation);
+    }
+
+    void thawRotation() {
+        setUserRotation(WindowManagerPolicy.USER_ROTATION_FREE, mUserRotation);
+    }
+
+    boolean isRotationFrozen() {
+        if (!isDefaultDisplay) {
+            return mUserRotationMode == WindowManagerPolicy.USER_ROTATION_LOCKED;
+        }
+
+        return Settings.System.getIntForUser(mContext.getContentResolver(),
+                Settings.System.ACCELEROMETER_ROTATION, 0, UserHandle.USER_CURRENT) == 0;
     }
 
     /** @return true if com.android.internal.R.bool#config_forceDefaultOrientation is true. */
@@ -381,9 +447,6 @@ public class DisplayRotation {
      * @param orientation An orientation constant, such as
      * {@link android.content.pm.ActivityInfo#SCREEN_ORIENTATION_LANDSCAPE}.
      * @param lastRotation The most recently used rotation.
-     * @param defaultDisplay Flag indicating whether the rotation is computed for the default
-     *                       display. Currently for all non-default displays sensors, docking mode,
-     *                       rotation lock and other factors are ignored.
      * @return The surface rotation to use.
      */
     int rotationForOrientation(int orientation, int lastRotation) {
@@ -418,8 +481,8 @@ public class DisplayRotation {
         final int preferredRotation;
         if (!isDefaultDisplay) {
             // For secondary displays we ignore things like displays sensors, docking mode and
-            // rotation lock, and always prefer a default rotation.
-            preferredRotation = Surface.ROTATION_0;
+            // rotation lock, and always prefer user rotation.
+            preferredRotation = mUserRotation;
         } else if (lidState == LID_OPEN && mLidOpenRotation >= 0) {
             // Ignore sensor when lid switch is open and rotation is forced.
             preferredRotation = mLidOpenRotation;

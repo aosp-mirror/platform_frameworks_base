@@ -6860,37 +6860,6 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     }
 
     @Override
-    public int getUserRotationMode() {
-        return Settings.System.getIntForUser(mContext.getContentResolver(),
-                Settings.System.ACCELEROMETER_ROTATION, 0, UserHandle.USER_CURRENT) != 0 ?
-                        WindowManagerPolicy.USER_ROTATION_FREE :
-                                WindowManagerPolicy.USER_ROTATION_LOCKED;
-    }
-
-    // User rotation: to be used when all else fails in assigning an orientation to the device
-    @Override
-    public void setUserRotationMode(int mode, int rot) {
-        ContentResolver res = mContext.getContentResolver();
-
-        // mUserRotationMode and mUserRotation will be assigned by the content observer
-        if (mode == WindowManagerPolicy.USER_ROTATION_LOCKED) {
-            Settings.System.putIntForUser(res,
-                    Settings.System.USER_ROTATION,
-                    rot,
-                    UserHandle.USER_CURRENT);
-            Settings.System.putIntForUser(res,
-                    Settings.System.ACCELEROMETER_ROTATION,
-                    0,
-                    UserHandle.USER_CURRENT);
-        } else {
-            Settings.System.putIntForUser(res,
-                    Settings.System.ACCELEROMETER_ROTATION,
-                    1,
-                    UserHandle.USER_CURRENT);
-        }
-    }
-
-    @Override
     public void setSafeMode(boolean safeMode) {
         mSafeMode = safeMode;
         if (safeMode) {
