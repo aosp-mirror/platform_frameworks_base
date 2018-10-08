@@ -105,13 +105,11 @@ public class PackageItemInfo {
     /**
      * Always use {@link #loadSafeLabel safe labels} when calling {@link #loadLabel}.
      *
-     * @param forceSafeLabels {@code true} to enforce safe labels
-     *
      * @hide
      */
     @SystemApi
-    public static void setForceSafeLabels(boolean forceSafeLabels) {
-        sForceSafeLabels = forceSafeLabels;
+    public static void forceSafeLabels() {
+        sForceSafeLabels = true;
     }
 
     /**
