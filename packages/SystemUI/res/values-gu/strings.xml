@@ -442,7 +442,8 @@
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> તમારી સ્ક્રીન પર જે પ્રદર્શિત થાય છે તે દરેક વસ્તુને કેપ્ચર કરવાનું પ્રારંભ કરશે."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"ફરીથી બતાવશો નહીં"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"બધુ સાફ કરો"</string>
-    <string name="manage_notifications_text" msgid="8035284146227267681">"સૂચનાઓને મેનેજ કરો"</string>
+    <!-- no translation found for manage_notifications_text (2386728145475108753) -->
+    <skip />
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"ખલેલ પાડશો નહીં દ્વારા થોભાવેલ નોટિફિકેશન"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"હવે પ્રારંભ કરો"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"કોઈ સૂચનાઓ નથી"</string>
@@ -825,12 +826,9 @@
     <string name="notification_channel_storage" msgid="3077205683020695313">"સ્ટોરેજ"</string>
     <string name="notification_channel_hints" msgid="7323870212489152689">"હિન્ટ"</string>
     <string name="instant_apps" msgid="6647570248119804907">"ઝટપટ ઍપ્લિકેશનો"</string>
-    <!-- no translation found for instant_apps_title (8738419517367449783) -->
-    <skip />
-    <!-- no translation found for instant_apps_message (1183313016396018086) -->
-    <skip />
-    <!-- no translation found for instant_apps_message_with_help (6179830437630729747) -->
-    <skip />
+    <string name="instant_apps_title" msgid="8738419517367449783">"<xliff:g id="APP">%1$s</xliff:g> ચાલી રહી છે"</string>
+    <string name="instant_apps_message" msgid="1183313016396018086">"ઍપ ઇન્સ્ટૉલ કર્યા વિના ખુલી જાય છે."</string>
+    <string name="instant_apps_message_with_help" msgid="6179830437630729747">"ઍપ ઇન્સ્ટૉલ કર્યા વિના ખુલી જાય છે. વધુ જાણવા માટે ટૅપ કરો."</string>
     <string name="app_info" msgid="6856026610594615344">"ઍપ્લિકેશન માહિતી"</string>
     <string name="go_to_web" msgid="1106022723459948514">"વેબ પર જાઓ"</string>
     <string name="mobile_data" msgid="7094582042819250762">"મોબાઇલ ડેટા"</string>
