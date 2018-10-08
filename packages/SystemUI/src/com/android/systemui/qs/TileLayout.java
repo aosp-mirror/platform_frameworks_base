@@ -104,11 +104,13 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
         // container is measured. Any change in the tiles, should trigger a remeasure.
         final int numTiles = mRecords.size();
         final int width = MeasureSpec.getSize(widthMeasureSpec);
+        final int availableWidth = width - getPaddingStart() - getPaddingEnd();
         final int heightMode = MeasureSpec.getMode(heightMeasureSpec);
         if (heightMode == MeasureSpec.UNSPECIFIED) {
             mRows = (numTiles + mColumns - 1) / mColumns;
         }
-        mCellWidth = (width - mSidePadding * 2 - (mCellMarginHorizontal * mColumns)) / mColumns;
+        mCellWidth =
+                (availableWidth - mSidePadding * 2 - (mCellMarginHorizontal * mColumns)) / mColumns;
 
         // Measure each QS tile.
         View previousView = this;
@@ -124,7 +126,7 @@ public class TileLayout extends ViewGroup implements QSTileLayout {
                 (mRows != 0 ? (mCellMarginTop - mCellMarginVertical) : 0);
         if (height < 0) height = 0;
 
-        setMeasuredDimension(width, height);
+        setMeasuredDimension(width + getPaddingStart() + getPaddingEnd(), height);
     }
 
     /**
