@@ -539,7 +539,8 @@ public class UsbDeviceManager implements ActivityManagerInternal.ScreenObserver 
             // We do not show the USB notification if the primary volume supports mass storage.
             // The legacy mass storage UI will be used instead.
             final StorageManager storageManager = StorageManager.from(mContext);
-            final StorageVolume primary = storageManager.getPrimaryVolume();
+            final StorageVolume primary =
+                    storageManager != null ? storageManager.getPrimaryVolume() : null;
 
             boolean massStorageSupported = primary != null && primary.allowMassStorage();
             mUseUsbNotification = !massStorageSupported && mContext.getResources().getBoolean(
