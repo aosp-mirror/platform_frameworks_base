@@ -2380,10 +2380,12 @@ public class LocationManager {
     }
 
     /**
+     * Return the package that implements the {@link #NETWORK_PROVIDER} functionality.
+     *
      * @hide
      */
     @SystemApi
-    public String getNetworkProviderPackage() {
+    public @Nullable String getNetworkProviderPackage() {
         try {
             return mService.getNetworkProviderPackage();
         } catch (RemoteException e) {
