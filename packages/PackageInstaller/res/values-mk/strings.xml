@@ -16,141 +16,76 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_name" msgid="2738748390251381682">"Инсталатор на пакет"</string>
-    <string name="next" msgid="3057143178373252333">"Следно"</string>
-    <string name="install" msgid="5896438203900042068">"Инсталирај"</string>
-    <string name="done" msgid="3889387558374211719">"Готово"</string>
-    <string name="cancel" msgid="8360346460165114585">"Откажи"</string>
-    <string name="installing" msgid="8613631001631998372">"Се инсталира..."</string>
-    <string name="installing_app" msgid="4097935682329028894">"Се инсталира <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
-    <string name="install_done" msgid="3682715442154357097">"Апликацијата е инсталирана."</string>
-    <string name="install_confirm_question" msgid="7295206719219043890">"Дали сакате да ја инсталирате оваа апликација? Ќе добие пристап до:"</string>
-    <string name="install_confirm_question_no_perms" msgid="5918305641302873520">"Дали сакате да ја инсталирате оваа апликација? Не бара никаков посебен пристап."</string>
-    <string name="install_confirm_question_update" msgid="4624159567361487964">"Дали сакате да инсталирате надградба на оваа постоечка апликација? Вашите постоечки податоци нема да се изгубат. Ажурираната апликација ќе добие пристап до:"</string>
-    <string name="install_confirm_question_update_system" msgid="1302330093676416336">"Дали сакате да инсталирате надградба на оваа вградена апликација? Вашите постоечки податоци нема да се изгубат. Ажурираната апликација ќе добие пристап до:"</string>
-    <string name="install_confirm_question_update_no_perms" msgid="4885928136844618944">"Дали сакате да инсталирате надградба на оваа постоечка апликација? Вашите постоечки податоци нема да се изгубат. Таа не бара никаков посебен пристап."</string>
-    <string name="install_confirm_question_update_system_no_perms" msgid="7676593512694724374">"Дали сакате да инсталирате надградба на оваа вградена апликација? Вашите постоечки податоци нема да се изгубат. Таа не бара никаков посебен пристап."</string>
-    <string name="install_failed" msgid="6579998651498970899">"Апликацијата не е инсталирана."</string>
-    <string name="install_failed_blocked" msgid="1606870930588770025">"Инсталирањето на пакетот е блокирано."</string>
-    <string name="install_failed_conflict" msgid="5336045235168070954">"Апликација што не е инсталирана како пакет е во конфликт со постоен пакет."</string>
-    <string name="install_failed_incompatible" product="tablet" msgid="6682387386242708974">"Апликација што не е инсталирана како апликација не е компатибилна со вашиот таблет."</string>
-    <string name="install_failed_incompatible" product="tv" msgid="3553367270510072729">"Оваа апликација не е компатибилна со вашиот телевизор."</string>
-    <string name="install_failed_incompatible" product="default" msgid="7917996365659426872">"Апликација што не е инсталирана како апликација не е компатибилна со вашиот телефон."</string>
-    <string name="install_failed_invalid_apk" msgid="269885385245534742">"Апликација што не е инсталирана како пакет се чини дека е неважечка."</string>
-    <string name="install_failed_msg" product="tablet" msgid="8368835262605608787">"<xliff:g id="APP_NAME">%1$s</xliff:g> не можеше да се инсталира на вашиот таблет."</string>
-    <string name="install_failed_msg" product="tv" msgid="3990457938384021566">"<xliff:g id="APP_NAME">%1$s</xliff:g> не може да се инсталира на вашиот телевизор."</string>
-    <string name="install_failed_msg" product="default" msgid="8554909560982962052">"<xliff:g id="APP_NAME">%1$s</xliff:g> не можеше да се инсталира на вашиот телефон."</string>
-    <string name="launch" msgid="4826921505917605463">"Отвори"</string>
-    <string name="unknown_apps_admin_dlg_text" msgid="7488386758312008790">"Вашиот администратор не дозволува инсталација на апликации добиени од непознати извори"</string>
-    <string name="unknown_apps_user_restriction_dlg_text" msgid="5785226253054083336">"Корисников не може да инсталира непознати апликации"</string>
-    <string name="install_apps_user_restriction_dlg_text" msgid="5041150186260066212">"На корисников не му е дозволено да инсталира апликации"</string>
-    <string name="ok" msgid="3468756155452870475">"Во ред"</string>
-    <string name="manage_applications" msgid="4033876279091996596">"Управувај со апликации"</string>
-    <string name="out_of_space_dlg_title" msgid="7843674437613797326">"Нема простор"</string>
-    <string name="out_of_space_dlg_text" msgid="4774775404294282216">"<xliff:g id="APP_NAME">%1$s</xliff:g> не можеше да се инсталира. Ослободете простор и обидете се повторно."</string>
-    <string name="app_not_found_dlg_title" msgid="2692335460569505484">"Апликацијата не е пронајдена"</string>
-    <string name="app_not_found_dlg_text" msgid="6107465056055095930">"Апликацијата не е пронајдена во списокот инсталирани апликации."</string>
-    <string name="user_is_not_allowed_dlg_title" msgid="118128026847201582">"Не е дозволено"</string>
-    <string name="user_is_not_allowed_dlg_text" msgid="739716827677987545">"Тековниот корисник нема дозвола да ја изведе деинсталацијава."</string>
-    <string name="generic_error_dlg_title" msgid="2684806600635296961">"Грешка"</string>
-    <string name="generic_error_dlg_text" msgid="4288738047825333954">"Не можеше да се деинсталира апликацијата."</string>
-    <string name="uninstall_application_title" msgid="1860074100811653963">"Деинсталирај апликација"</string>
-    <string name="uninstall_update_title" msgid="4146940097553335390">"Деинсталирај ажурирање"</string>
-    <string name="uninstall_activity_text" msgid="6680688689803932550">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> е дел од следната апликација:"</string>
-    <string name="uninstall_application_text" msgid="6691975835951187030">"Дали сакате да ја деинсталирате оваа апликација?"</string>
-    <string name="uninstall_application_text_all_users" msgid="5574704453233525222">"Дали сакате да ја деинсталирате оваа апликација за "<b>"сите"</b>" корисници? Апликацијата и нејзините податоци ќе се отстранат од "<b>"сите"</b>" корисници на уредот."</string>
-    <string name="uninstall_application_text_user" msgid="8766882355635485733">"Дали сакате да ја деинсталирате апликацијава за корисникот <xliff:g id="USERNAME">%1$s</xliff:g>?"</string>
-    <string name="uninstall_update_text" msgid="1394549691152728409">"Сакате да ја замените оваа апликација со фабричката верзија? Сите податоци ќе се отстранат."</string>
-    <string name="uninstall_update_text_multiuser" msgid="2083665452990861991">"Сакате да ја замените оваа апликација со фабричката верзија? Сите податоци ќе се отстранат. Тоа важи за сите корисници на овој уред, вклучувајќи ги и тие со работни профили."</string>
-    <string name="uninstalling_notification_channel" msgid="5698369661583525583">"Деинсталации во тек"</string>
-    <string name="uninstall_failure_notification_channel" msgid="8224276726364132314">"Неуспешни деинсталации"</string>
-    <string name="uninstalling" msgid="5556217435895938250">"Се деинсталира..."</string>
-    <string name="uninstalling_app" msgid="2773617614877719294">"Се деинсталира <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
-    <string name="uninstall_done" msgid="3792487853420281888">"Деинсталирањето заврши."</string>
-    <string name="uninstall_done_app" msgid="775837862728680479">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> е деинсталиран"</string>
-    <string name="uninstall_failed" msgid="631122574306299512">"Деинсталирањето е неуспешно."</string>
-    <string name="uninstall_failed_app" msgid="945277834056527022">"Деинсталирањето на <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> е неуспешно."</string>
-    <string name="uninstall_failed_device_policy_manager" msgid="2727361164694743362">"Не може да се деинсталира активна апликација на администраторот на уредот"</string>
-    <string name="uninstall_failed_device_policy_manager_of_user" msgid="2161462242935805756">"Не може да се деинсталира активна апликација на администраторот на уредот за <xliff:g id="USERNAME">%1$s</xliff:g>"</string>
-    <string name="uninstall_all_blocked_profile_owner" msgid="3544933038594382346">"Апликацијата е неопходна за некои корисници или профили, а за другите е деинсталирана"</string>
-    <string name="uninstall_blocked_profile_owner" msgid="6912141045528994954">"Апликацијата е потребна за вашиот профил и не може да се деинсталира."</string>
-    <string name="uninstall_blocked_device_owner" msgid="7074175526413453063">"Апликацијата ја бара администраторот на вашиот уред и не може да се деинсталира."</string>
-    <string name="manage_device_administrators" msgid="118178632652346535">"Управувај со аплик. за администраторот на уредот"</string>
-    <string name="manage_users" msgid="3125018886835668847">"Управувај со корисници"</string>
-    <string name="uninstall_failed_msg" msgid="8969754702803951175">"<xliff:g id="APP_NAME">%1$s</xliff:g> не може да се деинсталира."</string>
-    <string name="Parse_error_dlg_text" msgid="7623286983621067011">"Настана проблем при разложување на пакетот."</string>
-    <string name="newPerms" msgid="6039428254474104210">"Ново"</string>
-    <string name="allPerms" msgid="1024385515840703981">"Сè"</string>
-    <string name="privacyPerms" msgid="1850527049572617">"Приватност"</string>
-    <string name="devicePerms" msgid="6733560207731294504">"Пристап кон уредот"</string>
-    <string name="no_new_perms" msgid="6657813692169565975">"Ова ажурирање не бара нови дозволи."</string>
-    <string name="grant_dialog_button_deny" msgid="2176510645406614340">"Одбиј"</string>
-    <string name="grant_dialog_button_more_info" msgid="2218220771432058426">"Повеќе информации"</string>
-    <string name="grant_dialog_button_deny_anyway" msgid="847960499284125250">"Сепак одбиј"</string>
-    <string name="current_permission_template" msgid="6378304249516652817">"<xliff:g id="CURRENT_PERMISSION_INDEX">%1$s</xliff:g> од <xliff:g id="PERMISSION_COUNT">%2$s</xliff:g>"</string>
-    <string name="permission_warning_template" msgid="7332275268559121742">"Дозволете &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; да <xliff:g id="ACTION">%2$s</xliff:g>?"</string>
-    <string name="permission_add_background_warning_template" msgid="5391175001698541141">"Дали секогаш да се дозволи &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; да <xliff:g id="ACTION">%2$s</xliff:g>?"</string>
-    <string name="allow_permission_foreground_only" msgid="1016389465002335286">"Само додека се користи апликацијата"</string>
-    <string name="allow_permission_always" msgid="7047379650123289823">"Секогаш"</string>
-    <string name="deny_permission_deny_and_dont_ask_again" msgid="8003202275002645629">"Одбиј и не прашувај повторно"</string>
-    <string name="permission_revoked_count" msgid="7386129423432613024">"Оневозможени се <xliff:g id="COUNT">%1$d</xliff:g>"</string>
-    <string name="permission_revoked_all" msgid="8595742638132863678">"сите се оневозможени"</string>
-    <string name="permission_revoked_none" msgid="2059511550181271342">"ниедна не е оневозможена"</string>
-    <string name="grant_dialog_button_allow" msgid="4616529495342337095">"Овозможи"</string>
-    <string name="app_permissions_breadcrumb" msgid="3390836200791539264">"Апликации"</string>
-    <string name="app_permissions" msgid="3146758905824597178">"Дозволи за апликацијата"</string>
-    <string name="never_ask_again" msgid="1089938738199748687">"Не прашувај повторно"</string>
-    <string name="no_permissions" msgid="3210542466245591574">"Нема дозволи"</string>
-    <string name="additional_permissions" msgid="6667573114240111763">"Дополнителни дозволи"</string>
-    <string name="app_permissions_info_button_label" msgid="7789812060395257748">"Отвора информации за апликација"</string>
-    <plurals name="additional_permissions_more" formatted="false" msgid="945127158155064388">
-      <item quantity="one">Уште <xliff:g id="COUNT_1">%1$d</xliff:g></item>
-      <item quantity="other">Уште <xliff:g id="COUNT_1">%1$d</xliff:g></item>
-    </plurals>
-    <string name="old_sdk_deny_warning" msgid="3872277112584842615">"Оваа апликација е дизајнирана за постара верзија на Android. Одбивањето на дозволата може да предизвика веќе да не функционира како што треба."</string>
-    <string name="default_permission_description" msgid="4992892207044156668">"изврши непознато дејство"</string>
-    <string name="app_permissions_group_summary" msgid="4787239772223699263">"Дозволени се <xliff:g id="COUNT_0">%1$d</xliff:g> од <xliff:g id="COUNT_1">%2$d</xliff:g> апликации"</string>
-    <string name="menu_show_system" msgid="6773743421743728921">"Прикажи систем"</string>
-    <string name="menu_hide_system" msgid="7595471742649432977">"Сокриј систем"</string>
-    <string name="no_apps" msgid="1965493419005012569">"Нема апликации"</string>
-    <string name="location_settings" msgid="1774875730854491297">"Поставки за локација"</string>
-    <string name="location_warning" msgid="8778701356292735971">"<xliff:g id="APP_NAME">%1$s</xliff:g> е давател на услуги според локација за овој уред. Пристапот до локацијата може да се смени од Поставките за локација."</string>
-    <string name="system_warning" msgid="7103819124542305179">"Ако ја одбиете оваа дозвола, основните функции на вашиот уред можеби веќе нема да функционираат како што треба."</string>
-    <string name="permission_summary_enforced_by_policy" msgid="3418617316188986205">"Наложено од политиката"</string>
-    <string name="permission_summary_disabled_by_policy_background_only" msgid="160007162349980265">"Пристапот од заднина е оневозможен со правилото"</string>
-    <string name="permission_summary_enabled_by_policy_background_only" msgid="4834971700297385342">"Пристапот од заднина е овозможен со правилото"</string>
-    <string name="permission_summary_enabled_by_policy_foreground_only" msgid="5150061275247925588">"Пристапот од преден план е овозможен со правилото"</string>
-    <string name="permission_summary_enforced_by_admin" msgid="1702707982488952544">"Контролирано од администраторот"</string>
-    <!-- no translation found for background_access_chooser_dialog_choices:0 (7142769853837915143) -->
-    <!-- no translation found for background_access_chooser_dialog_choices:1 (7804653189249679164) -->
-    <!-- no translation found for background_access_chooser_dialog_choices:2 (1131794379787779680) -->
-    <string name="permission_access_always" msgid="5642491469836594184">"Секогаш"</string>
-    <string name="permission_access_only_foreground" msgid="6906814759741316041">"Само додека се користи аплик."</string>
-    <string name="permission_access_never" msgid="1258330706341318622">"Никогаш"</string>
-    <string name="loading" msgid="7811651799620593731">"Се вчитува..."</string>
-    <string name="all_permissions" msgid="5156669007784613042">"Сите дозволи"</string>
-    <string name="other_permissions" msgid="2016192512386091933">"Други можности на апликацијата"</string>
-    <string name="permission_request_title" msgid="1204446718549121199">"Барање дозвола"</string>
-    <string name="screen_overlay_title" msgid="3021729846864038529">"Откривме преклопување на екранот"</string>
-    <string name="screen_overlay_message" msgid="2141944461571677331">"За да ја измените оваа поставка за дозвола, прво мора да го исклучите преклопувањето на екранот од Поставки &gt; Апликации"</string>
-    <string name="screen_overlay_button" msgid="4344544843349937743">"Отвори поставки"</string>
-    <string name="wear_not_allowed_dlg_title" msgid="8104666773577525713">"Android Wear"</string>
-    <string name="wear_not_allowed_dlg_text" msgid="1322352525843583064">"Дејствата инсталирај/деинсталирај не се поддржани на Wear."</string>
-    <string name="permission_review_title_template_install" msgid="6819338441305295479">"Изберете што да ѝ се овозможи на &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; за пристап"</string>
-    <string name="permission_review_title_template_update" msgid="8632233603161669426">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; е ажурирана. Изберете што да ѝ се овозможи на оваа апликација за пристап."</string>
-    <string name="review_button_cancel" msgid="957906817733578877">"Откажи"</string>
-    <string name="review_button_continue" msgid="4809162078179371370">"Продолжи"</string>
-    <string name="new_permissions_category" msgid="3213523410139204183">"Нови дозволи"</string>
-    <string name="current_permissions_category" msgid="998210994450606094">"Тековни дозволи"</string>
-    <string name="message_staging" msgid="6151794817691100003">"Апликацијата се поставува…"</string>
-    <string name="app_name_unknown" msgid="8931522764510159105">"Непознато"</string>
-    <string name="untrusted_external_source_warning" product="tablet" msgid="1483151219938173935">"За ваша безбедност, таблетот нема дозвола за инсталирање непознати апликации од изворов."</string>
-    <string name="untrusted_external_source_warning" product="tv" msgid="5373768281884328560">"За ваша безбедност, телевизорот нема дозвола за инсталирање непознати апликации од изворов."</string>
-    <string name="untrusted_external_source_warning" product="default" msgid="2223486836232706553">"За ваша безбедност, телефонот нема дозвола за инсталирање непознати апликации од изворов."</string>
-    <string name="anonymous_source_warning" product="default" msgid="7700263729981815614">"Телефонот и личните податоци се поподложни на напади од непознати апликации. Ако ја инсталирате апликацијава, се согласувате дека сте одговорни за каква било штета на телефонот или губењето податоци што може да произлезат од нејзиното користење."</string>
-    <string name="anonymous_source_warning" product="tablet" msgid="8854462805499848630">"Таблетот и личните податоци се поподложни на напади од непознати апликации. Ако ја инсталирате апликацијава, се согласувате дека сте одговорни за каква било штета на таблетот или губењето податоци што може да произлезат од нејзиното користење."</string>
-    <string name="anonymous_source_warning" product="tv" msgid="1291472686734385872">"Телевизорот и личните податоци се поподложни на напади од непознати апликации. Ако ја инсталирате апликацијава, се согласувате дека сте одговорни за каква било штета на телевизорот или губењето податоци што може да произлезат од нејзиното користење."</string>
-    <string name="anonymous_source_continue" msgid="2094381167954332292">"Продолжи"</string>
-    <string name="external_sources_settings" msgid="8601453744517291632">"Поставки"</string>
-    <string name="wear_app_channel" msgid="6200840123672949356">"Се инсталираат/деинсталираат аплик. Wear"</string>
+    <string name="app_name" msgid="7488448184431507488">"Инсталатор на пакет"</string>
+    <string name="install" msgid="711829760615509273">"Инсталирај"</string>
+    <string name="done" msgid="6632441120016885253">"Готово"</string>
+    <string name="cancel" msgid="1018267193425558088">"Откажи"</string>
+    <string name="installing" msgid="4921993079741206516">"Се инсталира…"</string>
+    <string name="installing_app" msgid="1165095864863849422">"Се инсталира <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
+    <string name="install_done" msgid="5987363587661783896">"Апликацијата е инсталирана."</string>
+    <string name="install_confirm_question" msgid="8176284075816604590">"Дали сакате да ја инсталирате апликацијава?"</string>
+    <string name="install_confirm_question_update" msgid="7942235418781274635">"Дали сакате да инсталирате ажурирање на оваа постоечка апликација? Постоечките податоци нема да се изгубат."</string>
+    <string name="install_confirm_question_update_system" msgid="4713001702777910263">"Дали сакате да инсталирате ажурирање на оваа вградена апликација? Постоечките податоци нема да се изгубат."</string>
+    <string name="install_failed" msgid="5777824004474125469">"Апликацијата не е инсталирана."</string>
+    <string name="install_failed_blocked" msgid="8512284352994752094">"Инсталирањето на пакетот е блокирано."</string>
+    <string name="install_failed_conflict" msgid="3493184212162521426">"Апликација што не е инсталирана како пакет е во конфликт со постоечки пакет."</string>
+    <string name="install_failed_incompatible" product="tablet" msgid="6019021440094927928">"Апликација што не е инсталирана како апликација не е компатибилна со вашиот таблет."</string>
+    <string name="install_failed_incompatible" product="tv" msgid="2890001324362291683">"Оваа апликација не е компатибилна со вашиот телевизор."</string>
+    <string name="install_failed_incompatible" product="default" msgid="7254630419511645826">"Апликација што не е инсталирана како апликација не е компатибилна со вашиот телефон."</string>
+    <string name="install_failed_invalid_apk" msgid="8581007676422623930">"Апликација што не е инсталирана како пакет се чини дека е неважечка."</string>
+    <string name="install_failed_msg" product="tablet" msgid="6298387264270562442">"<xliff:g id="APP_NAME">%1$s</xliff:g> не можеше да се инсталира на вашиот таблет."</string>
+    <string name="install_failed_msg" product="tv" msgid="1920009940048975221">"<xliff:g id="APP_NAME">%1$s</xliff:g> не можеше да се инсталира на вашиот телевизор."</string>
+    <string name="install_failed_msg" product="default" msgid="6484461562647915707">"<xliff:g id="APP_NAME">%1$s</xliff:g> не можеше да се инсталира на вашиот телефон."</string>
+    <string name="launch" msgid="3952550563999890101">"Отвори"</string>
+    <string name="unknown_apps_admin_dlg_text" msgid="4456572224020176095">"Вашиот администратор не дозволува инсталација на апликации добиени од непознати извори"</string>
+    <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"Корисников не може да инсталира непознати апликации"</string>
+    <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"На корисников не му е дозволено да инсталира апликации"</string>
+    <string name="ok" msgid="7871959885003339302">"Во ред"</string>
+    <string name="manage_applications" msgid="5400164782453975580">"Управување со апликациите"</string>
+    <string name="out_of_space_dlg_title" msgid="4156690013884649502">"Нема простор"</string>
+    <string name="out_of_space_dlg_text" msgid="8727714096031856231">"<xliff:g id="APP_NAME">%1$s</xliff:g> не можеше да се инсталира. Ослободете простор и обидете се повторно."</string>
+    <string name="app_not_found_dlg_title" msgid="5107924008597470285">"Апликацијата не е најдена"</string>
+    <string name="app_not_found_dlg_text" msgid="5219983779377811611">"Апликацијата не е пронајдена во списокот инсталирани апликации."</string>
+    <string name="user_is_not_allowed_dlg_title" msgid="6915293433252210232">"Не е дозволено"</string>
+    <string name="user_is_not_allowed_dlg_text" msgid="3468447791330611681">"Тековниот корисник нема дозвола да ја изведе деинсталацијава."</string>
+    <string name="generic_error_dlg_title" msgid="5863195085927067752">"Грешка"</string>
+    <string name="generic_error_dlg_text" msgid="5287861443265795232">"Не можеше да се деинсталира апликацијата."</string>
+    <string name="uninstall_application_title" msgid="4045420072401428123">"Деинсталирај ја апликацијата"</string>
+    <string name="uninstall_update_title" msgid="824411791011583031">"Деинсталирајте ажурирање"</string>
+    <string name="uninstall_activity_text" msgid="1928194674397770771">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> е дел од следната апликација:"</string>
+    <string name="uninstall_application_text" msgid="3816830743706143980">"Дали сакате да ја деинсталирате оваа апликација?"</string>
+    <string name="uninstall_application_text_all_users" msgid="575491774380227119">"Дали сакате да ја деинсталирате оваа апликација за "<b>"сите"</b>" корисници? Апликацијата и нејзините податоци ќе се отстранат од "<b>"сите"</b>" корисници на уредот."</string>
+    <string name="uninstall_application_text_user" msgid="498072714173920526">"Дали сакате да ја деинсталирате апликацијава за корисникот <xliff:g id="USERNAME">%1$s</xliff:g>?"</string>
+    <string name="uninstall_update_text" msgid="863648314632448705">"Сакате да ја замените оваа апликација со фабричката верзија? Сите податоци ќе се отстранат."</string>
+    <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Сакате да ја замените оваа апликација со фабричката верзија? Сите податоци ќе се отстранат. Тоа важи за сите корисници на овој уред, вклучувајќи ги и тие со работни профили."</string>
+    <string name="uninstalling_notification_channel" msgid="840153394325714653">"Деинсталации во тек"</string>
+    <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Неуспешни деинсталации"</string>
+    <string name="uninstalling" msgid="8709566347688966845">"Се деинсталира…"</string>
+    <string name="uninstalling_app" msgid="8866082646836981397">"Се деинсталира <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
+    <string name="uninstall_done" msgid="439354138387969269">"Деинсталирањето заврши."</string>
+    <string name="uninstall_done_app" msgid="4588850984473605768">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> е деинсталиран"</string>
+    <string name="uninstall_failed" msgid="1847750968168364332">"Деинсталирањето е неуспешно."</string>
+    <string name="uninstall_failed_app" msgid="5506028705017601412">"Деинсталирањето на <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> е неуспешно."</string>
+    <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"Не може да се деинсталира активна апликација на администраторот на уредот"</string>
+    <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"Не може да се деинсталира активна апликација на администраторот на уредот за <xliff:g id="USERNAME">%1$s</xliff:g>"</string>
+    <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"Апликацијата е неопходна за некои корисници или профили, а за другите е деинсталирана"</string>
+    <string name="uninstall_blocked_profile_owner" msgid="6373897407002404848">"Апликацијата е потребна за вашиот профил и не може да се деинсталира."</string>
+    <string name="uninstall_blocked_device_owner" msgid="6724602931761073901">"Апликацијата е неопходна за администраторот на вашиот уред и не може да се деинсталира."</string>
+    <string name="manage_device_administrators" msgid="3092696419363842816">"Управувај со аплик. за администраторот на уредот"</string>
+    <string name="manage_users" msgid="1243995386982560813">"Управувај со корисници"</string>
+    <string name="uninstall_failed_msg" msgid="2176744834786696012">"<xliff:g id="APP_NAME">%1$s</xliff:g> не може да се деинсталира."</string>
+    <string name="Parse_error_dlg_text" msgid="1661404001063076789">"Настана проблем при анализирањето на пакетот."</string>
+    <string name="wear_not_allowed_dlg_title" msgid="8664785993465117517">"Android Wear"</string>
+    <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"Дејствата „Инсталирај/деинсталирај“ не се поддржани на Wear."</string>
+    <string name="message_staging" msgid="8032722385658438567">"Апликацијата се поставува…"</string>
+    <string name="app_name_unknown" msgid="6881210203354323926">"Непозната"</string>
+    <string name="untrusted_external_source_warning" product="tablet" msgid="6539403649459942547">"За ваша безбедност, таблетот нема дозвола за инсталирање непознати апликации од изворов."</string>
+    <string name="untrusted_external_source_warning" product="tv" msgid="1206648674551321364">"За ваша безбедност, телевизорот нема дозвола за инсталирање непознати апликации од изворов."</string>
+    <string name="untrusted_external_source_warning" product="default" msgid="7279739265754475165">"За ваша безбедност, телефонот нема дозвола за инсталирање непознати апликации од изворов."</string>
+    <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"Телефонот и личните податоци се поподложни на напади од непознати апликации. Ако ја инсталирате апликацијава, се согласувате дека сте одговорни за каква било штета на телефонот или губењето податоци што може да произлезат од нејзиното користење."</string>
+    <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Таблетот и личните податоци се поподложни на напади од непознати апликации. Ако ја инсталирате апликацијава, се согласувате дека сте одговорни за каква било штета на таблетот или губењето податоци што може да произлезат од нејзиното користење."</string>
+    <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"Телевизорот и личните податоци се поподложни на напади од непознати апликации. Ако ја инсталирате апликацијава, се согласувате дека сте одговорни за каква било штета на телевизорот или губењето податоци што може да произлезат од нејзиното користење."</string>
+    <string name="anonymous_source_continue" msgid="4375745439457209366">"Продолжи"</string>
+    <string name="external_sources_settings" msgid="4046964413071713807">"Поставки"</string>
+    <string name="wear_app_channel" msgid="1960809674709107850">"Се инсталираат/деинсталираат аплик. Wear"</string>
 </resources>

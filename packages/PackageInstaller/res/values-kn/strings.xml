@@ -16,141 +16,76 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_name" msgid="2738748390251381682">"ಪ್ಯಾಕೇಜ್ ಸ್ಥಾಪಕ"</string>
-    <string name="next" msgid="3057143178373252333">"ಮುಂದೆ"</string>
-    <string name="install" msgid="5896438203900042068">"ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಿ"</string>
-    <string name="done" msgid="3889387558374211719">"ಮುಗಿದಿದೆ"</string>
-    <string name="cancel" msgid="8360346460165114585">"ರದ್ದುಮಾಡಿ"</string>
-    <string name="installing" msgid="8613631001631998372">"ಸ್ಥಾಪಿಸಲಾಗುತ್ತಿದೆ…"</string>
-    <string name="installing_app" msgid="4097935682329028894">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ಅನ್ನು ಸ್ಥಾಪಿಸಲಾಗುತ್ತಿದೆ…"</string>
-    <string name="install_done" msgid="3682715442154357097">"ಅಪ್ಲಿಕೇಶನ್ ಸ್ಥಾಪಿಸಲಾಗಿದೆ."</string>
-    <string name="install_confirm_question" msgid="7295206719219043890">"ನೀವು ಈ ಅಪ್ಲಿಕೇಶನ್ ಸ್ಥಾಪಿಸಲು ಬಯಸುವಿರಾ? ಇದು ಇಲ್ಲಿಗೆ ಪ್ರವೇಶ ಪಡೆದುಕೊಳ್ಳುತ್ತದೆ:"</string>
-    <string name="install_confirm_question_no_perms" msgid="5918305641302873520">"ನೀವು ಈ ಅಪ್ಲಿಕೇಶನ್ ಸ್ಥಾಪಿಸಲು ಬಯಸುವಿರಾ? ಇದಕ್ಕೆ ಯಾವುದೇ ವಿಶೇಷ ಪ್ರವೇಶದ ಅಗತ್ಯವಿಲ್ಲ."</string>
-    <string name="install_confirm_question_update" msgid="4624159567361487964">"ನೀವು ಈ ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ ಅಪ್ಲಿಕೇಶನ್‍ನ ಅಪ್‌ಡೇಟ್‌‌ ಆದ ಅಪ್ಲಿಕೇಶನ್ ಸ್ಥಾಪಿಸಲು ಬಯಸುವಿರಾ? ಈಗಿರುವ ನಿಮ್ಮ ಡೇಟಾ ಕಳೆದು ಹೋಗುವುದಿಲ್ಲ. ಅಪ್‌ಡೇಟ್‌‌ ಆದ ಅಪ್ಲಿಕೇಶನ್ ಇಲ್ಲಿಗೆ ಪ್ರವೇಶ ಪಡೆದುಕೊಳ್ಳುತ್ತದೆ:"</string>
-    <string name="install_confirm_question_update_system" msgid="1302330093676416336">"ನೀವು ಈ ಬಿಲ್ಟ್-ಇನ್-ಅಪ್ಲಿಕೇಶನ್‌ನ ಅಪ್‌ಡೇಟ್‌‌ ಆದ ಅಪ್ಲಿಕೇಶನ್ ಸ್ಥಾಪಿಸಿಕೊಳ್ಳಲು ಬಯಸುವಿರಾ? ಈಗಿರುವ ನಿಮ್ಮ ಡೇಟಾ ಕಳೆದು ಹೋಗುವುದಿಲ್ಲ. ಅಪ್‌ಡೇಟ್‌‌ ಆದ ಅಪ್ಲಿಕೇಶನ್ ಇಲ್ಲಿಗೆ ಪ್ರವೇಶ ಪಡೆದುಕೊಳ್ಳುತ್ತದೆ:"</string>
-    <string name="install_confirm_question_update_no_perms" msgid="4885928136844618944">"ನೀವು ಈ ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ ಅಪ್ಲಿಕೇಶನ್‍ನ ಅಪ್‌ಡೇಟ್‌‌ ಆದ ಅಪ್ಲಿಕೇಶನ್ ಸ್ಥಾಪಿಸಲು ಬಯಸುವಿರಾ? ಈಗಿರುವ ನಿಮ್ಮ ಡೇಟಾ ಕಳೆದು ಹೋಗುವುದಿಲ್ಲ. ಇದಕ್ಕೆ ಯಾವುದೇ ವಿಶೇಷ ಪ್ರವೇಶದ ಅಗತ್ಯವಿಲ್ಲ."</string>
-    <string name="install_confirm_question_update_system_no_perms" msgid="7676593512694724374">"ನೀವು ಈ ಬಿಲ್ಟ್-ಇನ್-ಅಪ್ಲಿಕೇಶನ್‌ನ ಅಪ್‌ಡೇಟ್‌‌ ಆದ ಅಪ್ಲಿಕೇಶನ್ ಸ್ಥಾಪಿಸಿಕೊಳ್ಳಲು ಬಯಸುವಿರಾ? ಈಗಿರುವ ನಿಮ್ಮ ಡೇಟಾ ಕಳೆದು ಹೋಗುವುದಿಲ್ಲ. ಇದಕ್ಕೆ ಯಾವುದೇ ವಿಶೇಷ ಪ್ರವೇಶದ ಅಗತ್ಯವಿಲ್ಲ."</string>
-    <string name="install_failed" msgid="6579998651498970899">"ಅಪ್ಲಿಕೇಶನ್ ಸ್ಥಾಪಿಸಲಾಗಿಲ್ಲ."</string>
-    <string name="install_failed_blocked" msgid="1606870930588770025">"ಸ್ಥಾಪಿಸುವಿಕೆಯಿಂದ ಪ್ಯಾಕೇಜ್‌ ಅನ್ನು ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ."</string>
-    <string name="install_failed_conflict" msgid="5336045235168070954">"ಪ್ಯಾಕೇಜ್‌ನಂತೆ ಸ್ಥಾಪಿತವಾಗದಿರುವ ಅಪ್ಲಿಕೇಶನ್ ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ ಪ್ಯಾಕೇಜ್ ಜೊತೆಗೆ ಸಂಘರ್ಷವಾಗುತ್ತದೆ."</string>
-    <string name="install_failed_incompatible" product="tablet" msgid="6682387386242708974">"ಅಪ್ಲಿಕೇಶನ್‌ನಂತೆ ಸ್ಥಾಪಿತವಾಗದಿರುವ ಅಪ್ಲಿಕೇಶನ್ ನಿಮ್ಮ ಟ್ಯಾಬ್ಲೆಟ್ ಜೊತೆಗೆ ಹೊಂದಾಣಿಕೆಯಾಗುವುದಿಲ್ಲ."</string>
-    <string name="install_failed_incompatible" product="tv" msgid="3553367270510072729">"ಈ ಅಪ್ಲಿಕೇಶನ್ ನಿಮ್ಮ ಟಿವಿ ಜೊತೆ ಹೊಂದಾಣಿಕೆಯಾಗುವುದಿಲ್ಲ."</string>
-    <string name="install_failed_incompatible" product="default" msgid="7917996365659426872">"ಅಪ್ಲಿಕೇಶನ್‌ನಂತೆ ಸ್ಥಾಪಿತವಾಗದಿರುವ ಅಪ್ಲಿಕೇಶನ್ ನಿಮ್ಮ ಫೋನ್ ಜೊತೆಗೆ ಹೊಂದಾಣಿಕೆಯಾಗುವುದಿಲ್ಲ."</string>
-    <string name="install_failed_invalid_apk" msgid="269885385245534742">"ಪ್ಯಾಕೇಜ್‌ನಂತೆ ಸ್ಥಾಪಿತವಾಗದಿರುವ ಅಪ್ಲಿಕೇಶನ್ ಅಮಾನ್ಯವಾಗಿರುವಂತೆ ತೋರುತ್ತದೆ."</string>
-    <string name="install_failed_msg" product="tablet" msgid="8368835262605608787">"ನಿಮ್ಮ ಟ್ಯಾಬ್ಲೆಟ್‌ನಲ್ಲಿ <xliff:g id="APP_NAME">%1$s</xliff:g> ಸ್ಥಾಪಿಸಲು ಸಾಧ್ಯವಾಗುವುದಿಲ್ಲ."</string>
-    <string name="install_failed_msg" product="tv" msgid="3990457938384021566">"<xliff:g id="APP_NAME">%1$s</xliff:g> ಅನ್ನು ನಿಮ್ಮ ಟಿವಿಗೆ ಸ್ಥಾಪಿಸಲಾಗುವುದಿಲ್ಲ."</string>
-    <string name="install_failed_msg" product="default" msgid="8554909560982962052">"ನಿಮ್ಮ ಫೋನ್‌ನಲ್ಲಿ <xliff:g id="APP_NAME">%1$s</xliff:g> ಸ್ಥಾಪಿಸಲು ಸಾಧ್ಯವಾಗುವುದಿಲ್ಲ."</string>
-    <string name="launch" msgid="4826921505917605463">"ತೆರೆ"</string>
-    <string name="unknown_apps_admin_dlg_text" msgid="7488386758312008790">"ನಿಮ್ಮ ನಿರ್ವಾಹಕರು ಅಪರಿಚಿತ ಮೂಲಗಳ ಅಪ್ಲಿಕೇಶನ್‌ಗಳ ಸ್ಥಾಪನೆಯನ್ನು ಅನುಮತಿಸುವುದಿಲ್ಲ"</string>
-    <string name="unknown_apps_user_restriction_dlg_text" msgid="5785226253054083336">"ಈ ಬಳಕೆದಾರರು ಅಪರಿಚಿತ ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ಸ್ಥಾಪಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
-    <string name="install_apps_user_restriction_dlg_text" msgid="5041150186260066212">"ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ಸ್ಥಾಪಿಸಲು ಈ ಬಳಕೆದಾರರನ್ನು ಅನುಮತಿಸಲಾಗುವುದಿಲ್ಲ"</string>
-    <string name="ok" msgid="3468756155452870475">"ಸರಿ"</string>
-    <string name="manage_applications" msgid="4033876279091996596">"ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ನಿರ್ವಹಿಸಿ"</string>
-    <string name="out_of_space_dlg_title" msgid="7843674437613797326">"ಖಾಲಿ ಇಲ್ಲ"</string>
-    <string name="out_of_space_dlg_text" msgid="4774775404294282216">"<xliff:g id="APP_NAME">%1$s</xliff:g> ಅನ್ನು ಸ್ಥಾಪಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ. ಕೊಂಚ ಸ್ಥಳವನ್ನು ಖಾಲಿ ಮಾಡಿ. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
-    <string name="app_not_found_dlg_title" msgid="2692335460569505484">"ಅಪ್ಲಿಕೇಶನ್ ಕಂಡುಬಂದಿಲ್ಲ"</string>
-    <string name="app_not_found_dlg_text" msgid="6107465056055095930">"ಸ್ಥಾಪಿಸಲಾಗಿರುವ ಅಪ್ಲಿಕೇಶನ್‍ಗಳ ಪಟ್ಟಿಯಲ್ಲಿ ಅಪ್ಲಿಕೇಶನ್ ಕಂಡುಬಂದಿಲ್ಲ."</string>
-    <string name="user_is_not_allowed_dlg_title" msgid="118128026847201582">"ಅನುಮತಿಸಲಾಗುವುದಿಲ್ಲ"</string>
-    <string name="user_is_not_allowed_dlg_text" msgid="739716827677987545">"ಈ ಅಸ್ಥಾಪಿಸುವಿಕೆಯನ್ನು ಪ್ರಸ್ತುತ ಬಳಕೆದಾರರಿಗೆ ನಿರ್ವಹಿಸಲು ಅನುಮತಿಸಲಾಗುವುದಿಲ್ಲ."</string>
-    <string name="generic_error_dlg_title" msgid="2684806600635296961">"ದೋಷ"</string>
-    <string name="generic_error_dlg_text" msgid="4288738047825333954">"ಅಪ್ಲಿಕೇಶನ್ ಅಸ್ಥಾಪಿಸಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ."</string>
-    <string name="uninstall_application_title" msgid="1860074100811653963">"ಅಪ್ಲಿಕೇಶನ್ ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಿ"</string>
-    <string name="uninstall_update_title" msgid="4146940097553335390">"ನವೀಕರಣವನ್ನು ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಿ"</string>
-    <string name="uninstall_activity_text" msgid="6680688689803932550">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> ಎಂಬುದು ಕೆಳಗಿನ ಅಪ್ಲಿಕೇಶನ್‌ನ ಭಾಗವಾಗಿದೆ:"</string>
-    <string name="uninstall_application_text" msgid="6691975835951187030">"ನೀವು ಈ ಅಪ್ಲಿಕೇಶನ್ ಅನ್ನು ಅಸ್ಥಾಪಿಸಲು ಬಯಸುವಿರಾ?"</string>
-    <string name="uninstall_application_text_all_users" msgid="5574704453233525222">"ನೀವು "<b>"ಎಲ್ಲಾ"</b>" ಬಳಕೆದಾರರಿಗೂ ಈ ಅಪ್ಲಿಕೇಶನ್ ಅನ್ನು ಅಸ್ಥಾಪಿಸಲು ಬಯಸುವಿರಾ? ಸಾಧನದಲ್ಲಿನ "<b>"ಎಲ್ಲಾ"</b>" ಬಳಕೆದಾರರಿಂದ ಅಪ್ಲಿಕೇಶನ್ ಮತ್ತು ಅದರ ಡೇಟಾವನ್ನು ತೆಗೆದುಹಾಕಲಾಗುವುದು."</string>
-    <string name="uninstall_application_text_user" msgid="8766882355635485733">"<xliff:g id="USERNAME">%1$s</xliff:g> ಬಳಕೆದಾರರಿಗೆ ಈ ಅಪ್ಲಿಕೇಶನ್‌ ಅನ್ನು ಅಸ್ಥಾಪಿಸಲು ನೀವು ಬಯಸುವಿರಾ?"</string>
-    <string name="uninstall_update_text" msgid="1394549691152728409">"ಈ ಅಪ್ಲಿಕೇಶನ್ ಬದಲಿಗೆ ಫ್ಯಾಕ್ಟರಿ ಆವೃತ್ತಿಯನ್ನು ಬದಲಾಯಿಸುವುದೇ? ಎಲ್ಲಾ ಡೇಟಾ ತೆಗೆದುಹಾಕಲಾಗುತ್ತದೆ."</string>
-    <string name="uninstall_update_text_multiuser" msgid="2083665452990861991">"ಈ ಅಪ್ಲಿಕೇಶನ್ ಬದಲಿಗೆ ಫ್ಯಾಕ್ಟರಿ ಆವೃತ್ತಿಯನ್ನು ಬದಲಾಯಿಸುವುದೇ? ಎಲ್ಲಾ ಡೇಟಾ ತೆಗೆದುಹಾಕಲಾಗುತ್ತದೆ. ಕೆಲಸದ ಪ್ರೊಫೈಲ್‌ಗಳನ್ನು ಹೊಂದಿರುವವುಗಳನ್ನು ಒಳಗೊಂಡಂತೆ ಈ ಸಾಧನದ ಎಲ್ಲಾ ಬಳಕೆದಾರರಿಗೆ ಇದು ಪರಿಣಾಮ ಬೀರುತ್ತದೆ."</string>
-    <string name="uninstalling_notification_channel" msgid="5698369661583525583">"ಚಾಲನೆಯಲ್ಲಿರುವ ಅಸ್ಥಾಪನೆಗಳು"</string>
-    <string name="uninstall_failure_notification_channel" msgid="8224276726364132314">"ವಿಫಲಗೊಂಡ ಅಸ್ಥಾಪನೆಗಳು"</string>
-    <string name="uninstalling" msgid="5556217435895938250">"ಅಸ್ಥಾಪಿಸಲಾಗುತ್ತಿದೆ…"</string>
-    <string name="uninstalling_app" msgid="2773617614877719294">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ಅಸ್ಥಾಪಿಸಲಾಗುತ್ತಿದೆ…"</string>
-    <string name="uninstall_done" msgid="3792487853420281888">"ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್ ಪೂರ್ಣಗೊಂಡಿದೆ."</string>
-    <string name="uninstall_done_app" msgid="775837862728680479">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ಅಸ್ಥಾಪಿಸಲಾಗಿದೆ"</string>
-    <string name="uninstall_failed" msgid="631122574306299512">"ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್ ವಿಫಲವಾಗಿದೆ."</string>
-    <string name="uninstall_failed_app" msgid="945277834056527022">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ಅಸ್ಥಾಪಿಸುವಿಕೆ ಯಶಸ್ವಿಯಾಗಲಿಲ್ಲ."</string>
-    <string name="uninstall_failed_device_policy_manager" msgid="2727361164694743362">"ಸಕ್ರಿಯ ಸಾಧನ ನಿರ್ವಹಣೆ ಅಪ್ಲಿಕೇಶನ್ ಅಸ್ಥಾಪಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
-    <string name="uninstall_failed_device_policy_manager_of_user" msgid="2161462242935805756">"<xliff:g id="USERNAME">%1$s</xliff:g> ಗಾಗಿ ಸಕ್ರಿಯ ಸಾಧನ ನಿರ್ವಹಣೆ ಅಪ್ಲಿಕೇಶನ್ ಅಸ್ಥಾಪಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
-    <string name="uninstall_all_blocked_profile_owner" msgid="3544933038594382346">"ಕೆಲವು ಬಳಕೆದಾರರು ಅಥವಾ ಪ್ರೊಫೈಲ್‌ಗಳಿಗೆ ಈ ಅಪ್ಲಿಕೇಶನ್ ಅಗತ್ಯವಿರುತ್ತದೆ ಮತ್ತು ಇತರರಿಗೆ ಅಸ್ಥಾಪಿಸಲಾಗಿದೆ"</string>
-    <string name="uninstall_blocked_profile_owner" msgid="6912141045528994954">"ಈ ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ನಿಮ್ಮ ಪ್ರೊಫೈಲ್‌‌ನ ಅಗತ್ಯವಿದೆ ಮತ್ತು ಅಸ್ಥಾಪಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ."</string>
-    <string name="uninstall_blocked_device_owner" msgid="7074175526413453063">"ಈ ಅಪ್ಲಿಕೇಶನ್ ನಿಮ್ಮ ಸಾಧನ ನಿರ್ವಾಹಕರಿಗೆ ಅಗತ್ಯವಿದೆ ಮತ್ತು ಅಸ್ಥಾಪಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ."</string>
-    <string name="manage_device_administrators" msgid="118178632652346535">"ಸಾಧನದ ನಿರ್ವಹಣೆ ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ನಿರ್ವಹಿಸಿ"</string>
-    <string name="manage_users" msgid="3125018886835668847">"ಬಳಕೆದಾರರನ್ನು ನಿರ್ವಹಿಸಿ"</string>
-    <string name="uninstall_failed_msg" msgid="8969754702803951175">"<xliff:g id="APP_NAME">%1$s</xliff:g> ಅನ್ನು ಅಸ್ಥಾಪಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ."</string>
-    <string name="Parse_error_dlg_text" msgid="7623286983621067011">"ಪ್ಯಾಕೇಜ್ ಪಾರ್ಸ್ ಮಾಡುವಲ್ಲಿ ಸಮಸ್ಯೆ ಕಂಡುಬಂದಿದೆ."</string>
-    <string name="newPerms" msgid="6039428254474104210">"ಹೊಸತು"</string>
-    <string name="allPerms" msgid="1024385515840703981">"ಎಲ್ಲಾ"</string>
-    <string name="privacyPerms" msgid="1850527049572617">"ಗೌಪ್ಯತೆ"</string>
-    <string name="devicePerms" msgid="6733560207731294504">"ಸಾಧನ ಪ್ರವೇಶ"</string>
-    <string name="no_new_perms" msgid="6657813692169565975">"ಈ ನವೀಕರಣಕ್ಕೆ ಯಾವುದೇ ಹೊಸ ಅನುಮತಿಗಳ ಅಗತ್ಯವಿಲ್ಲ."</string>
-    <string name="grant_dialog_button_deny" msgid="2176510645406614340">"ನಿರಾಕರಿಸಿ"</string>
-    <string name="grant_dialog_button_more_info" msgid="2218220771432058426">"ಇನ್ನಷ್ಟು ಮಾಹಿತಿ"</string>
-    <string name="grant_dialog_button_deny_anyway" msgid="847960499284125250">"ಹೇಗಾದರೂ ನಿರಾಕರಿಸಿ"</string>
-    <string name="current_permission_template" msgid="6378304249516652817">"<xliff:g id="PERMISSION_COUNT">%2$s</xliff:g> ರಲ್ಲಿ <xliff:g id="CURRENT_PERMISSION_INDEX">%1$s</xliff:g>"</string>
-    <string name="permission_warning_template" msgid="7332275268559121742">"<xliff:g id="ACTION">%2$s</xliff:g> <xliff:g id="APP_NAME">%1$s</xliff:g> ಅನ್ನು ಅನುಮತಿಸುವುದೇ?"</string>
-    <string name="permission_add_background_warning_template" msgid="5391175001698541141">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; to <xliff:g id="ACTION">%2$s</xliff:g> ಅನ್ನು ಯಾವಾಗಲೂ ಅನುಮತಿಸುವುದೇ?"</string>
-    <string name="allow_permission_foreground_only" msgid="1016389465002335286">"ಅಪ್ಲಿಕೇಶನ್ ಬಳಸುವಾಗ ಮಾತ್ರ"</string>
-    <string name="allow_permission_always" msgid="7047379650123289823">"ಯಾವಾಗಲೂ"</string>
-    <string name="deny_permission_deny_and_dont_ask_again" msgid="8003202275002645629">"ನಿರಾಕರಿಸಿ ಹಾಗೂ ಮತ್ತೊಮ್ಮೆ ಕೇಳಬೇಡ"</string>
-    <string name="permission_revoked_count" msgid="7386129423432613024">"<xliff:g id="COUNT">%1$d</xliff:g> ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ"</string>
-    <string name="permission_revoked_all" msgid="8595742638132863678">"ಎಲ್ಲಾ ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ"</string>
-    <string name="permission_revoked_none" msgid="2059511550181271342">"ಯಾವುದನ್ನೂ ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿಲ್ಲ"</string>
-    <string name="grant_dialog_button_allow" msgid="4616529495342337095">"ಅನುಮತಿಸಿ"</string>
-    <string name="app_permissions_breadcrumb" msgid="3390836200791539264">"ಅಪ್ಲಿಕೇಶನ್‌ಗಳು"</string>
-    <string name="app_permissions" msgid="3146758905824597178">"ಅಪ್ಲಿಕೇಶನ್ ಅನುಮತಿಗಳು"</string>
-    <string name="never_ask_again" msgid="1089938738199748687">"ಮತ್ತೆ ಕೇಳಬೇಡಿ"</string>
-    <string name="no_permissions" msgid="3210542466245591574">"ಯಾವುದೇ ಅನುಮತಿಗಳಿಲ್ಲ"</string>
-    <string name="additional_permissions" msgid="6667573114240111763">"ಹೆಚ್ಚುವರಿ ಅನುಮತಿಗಳು"</string>
-    <string name="app_permissions_info_button_label" msgid="7789812060395257748">"ಅಪ್ಲಿಕೇಶನ್ ಮಾಹಿತಿಯನ್ನು ತೆರೆಯಿರಿ"</string>
-    <plurals name="additional_permissions_more" formatted="false" msgid="945127158155064388">
-      <item quantity="one"><xliff:g id="COUNT_1">%1$d</xliff:g> ಇನ್ನಷ್ಟು</item>
-      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ಇನ್ನಷ್ಟು</item>
-    </plurals>
-    <string name="old_sdk_deny_warning" msgid="3872277112584842615">"ಈ ಅಪ್ಲಿಕೇಶನ್ Android ನ ಹಳೆಯ ಆವೃತ್ತಿಗೆ ವಿನ್ಯಾಸಗೊಳಿಸಲಾಗಿತ್ತು. ಅನುಮತಿ ನಿರಾಕರಿಸುವಿಕೆ ಇನ್ನು ಮುಂದೆ ಉದ್ದೇಶಿಸಲ್ಪಟ್ಟಂತೆ ಕಾರ್ಯನಿರ್ವಹಿಸದೆ ಇರುವುದಕ್ಕೆ ಇದು ಕಾರಣವಾಗಬಹುದು."</string>
-    <string name="default_permission_description" msgid="4992892207044156668">"ಅಪರಿಚಿತ ಕ್ರಿಯೆಯನ್ನು ಮಾಡಿ"</string>
-    <string name="app_permissions_group_summary" msgid="4787239772223699263">"<xliff:g id="COUNT_1">%2$d</xliff:g> ರಲ್ಲಿ <xliff:g id="COUNT_0">%1$d</xliff:g> ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ಅನುಮತಿಸಲಾಗಿದೆ"</string>
-    <string name="menu_show_system" msgid="6773743421743728921">"ಸಿಸ್ಟಂ ತೋರಿಸು"</string>
-    <string name="menu_hide_system" msgid="7595471742649432977">"ಸಿಸ್ಟಂ ಮರೆಮಾಡು"</string>
-    <string name="no_apps" msgid="1965493419005012569">"ಅಪ್ಲಿಕೇಶನ್‌ಗಳು ಇಲ್ಲ"</string>
-    <string name="location_settings" msgid="1774875730854491297">"ಸ್ಥಳ ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
-    <string name="location_warning" msgid="8778701356292735971">"<xliff:g id="APP_NAME">%1$s</xliff:g> ಅಪ್ಲಿಕೇಶನ್ ಈ ಸಾಧನಕ್ಕೆ ಸ್ಥಳ ಸೇವೆಗಳನ್ನು ಒದಗಿಸುತ್ತದೆ. ಸ್ಥಳ ಪ್ರವೇಶವನ್ನು ಸ್ಥಳ ಸೆಟ್ಟಿಂಗ್‌ಗಳಿಂದ ಮಾರ್ಪಡಿಸಬಹುದು."</string>
-    <string name="system_warning" msgid="7103819124542305179">"ನೀವು ಈ ಅನುಮತಿಯನ್ನು ನಿರಾಕರಿಸಿದರೆ, ಇನ್ನು ಮುಂದೆ ನಿಮ್ಮ ಸಾಧನದ ಮೂಲ ವೈಶಿಷ್ಟ್ಯಗಳು ಉದ್ದೇಶಿದಂತೆ ಕಾರ್ಯನಿರ್ವಹಿಸದಿರಬಹುದು."</string>
-    <string name="permission_summary_enforced_by_policy" msgid="3418617316188986205">"ನೀತಿಯ ಮೂಲಕ ಜಾರಿಗೊಳಿಸಲಾಗಿದೆ"</string>
-    <string name="permission_summary_disabled_by_policy_background_only" msgid="160007162349980265">"ನೀತಿಯ ಮೂಲಕ ಹಿನ್ನೆಲೆ ಪ್ರವೇಶವನ್ನು ನಿಷ್ಕ್ರಿಯಗೊಳಿಸಲಾಗಿದೆ"</string>
-    <string name="permission_summary_enabled_by_policy_background_only" msgid="4834971700297385342">"ನೀತಿ ಮೂಲಕ ಹಿನ್ನೆಲೆ ಪ್ರವೇಶವನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಲಾದ"</string>
-    <string name="permission_summary_enabled_by_policy_foreground_only" msgid="5150061275247925588">"ನೀತಿ ಮೂಲಕ ಮುನ್ನೆಲೆ ಪ್ರವೇಶವನ್ನು ಸಕ್ರಿಯಗೊಳಿಸಲಾದ"</string>
-    <string name="permission_summary_enforced_by_admin" msgid="1702707982488952544">"ನಿರ್ವಾಹಕರ ಮೂಲಕ ನಿಯಂತ್ರಿಸಲಾಗಿದೆ"</string>
-    <!-- no translation found for background_access_chooser_dialog_choices:0 (7142769853837915143) -->
-    <!-- no translation found for background_access_chooser_dialog_choices:1 (7804653189249679164) -->
-    <!-- no translation found for background_access_chooser_dialog_choices:2 (1131794379787779680) -->
-    <string name="permission_access_always" msgid="5642491469836594184">"ಯಾವಾಗಲೂ"</string>
-    <string name="permission_access_only_foreground" msgid="6906814759741316041">"ಅಪ್ಲಿಕೇಶನ್ ಬಳಸುವಾಗ ಮಾತ್ರ"</string>
-    <string name="permission_access_never" msgid="1258330706341318622">"ಎಂದೂ ಇಲ್ಲ"</string>
-    <string name="loading" msgid="7811651799620593731">"ಲೋಡ್ ಆಗುತ್ತಿದೆ..."</string>
-    <string name="all_permissions" msgid="5156669007784613042">"ಎಲ್ಲ ಅನುಮತಿಗಳು"</string>
-    <string name="other_permissions" msgid="2016192512386091933">"ಇತರ ಅಪ್ಲಿಕೇಶನ್ ಸಾಮರ್ಥ್ಯಗಳು"</string>
-    <string name="permission_request_title" msgid="1204446718549121199">"ಅನುಮತಿ ವಿನಂತಿ"</string>
-    <string name="screen_overlay_title" msgid="3021729846864038529">"ಪರದೆ ಆವರಿಕೊಳ್ಳುವಿಕೆಯನ್ನು ಪತ್ತೆಹಚ್ಚಲಾಗಿದೆ"</string>
-    <string name="screen_overlay_message" msgid="2141944461571677331">"ಈ ಅನುಮತಿ ಸೆಟ್ಟಿಂಗ್ ಬದಲಾಯಿಸಲು, ನೀವು ಮೊದಲು ಸೆಟ್ಟಿಂಗ್‌ಗಳು &gt; ಅಪ್ಲಿಕೇಶನ್‌ಗಳಿಂದ ಪರದೆ ಆವರಿಸಿಕೊಳ್ಳುವಿಕೆಯನ್ನು ಆಫ್ ಮಾಡಬೇಕು"</string>
-    <string name="screen_overlay_button" msgid="4344544843349937743">"ಸೆಟ್ಟಿಂಗ್‍ಗಳನ್ನು ತೆರೆಯಿರಿ"</string>
-    <string name="wear_not_allowed_dlg_title" msgid="8104666773577525713">"Android Wear"</string>
-    <string name="wear_not_allowed_dlg_text" msgid="1322352525843583064">"Wear ನಲ್ಲಿ ಸ್ಥಾಪಿಸುವಿಕೆ/ಅಸ್ಥಾಪಿಸುವಿಕೆ ಕ್ರಿಯೆಗಳು ಬೆಂಬಲಿತವಾಗಿಲ್ಲ."</string>
-    <string name="permission_review_title_template_install" msgid="6819338441305295479">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ಗೆ ಪ್ರವೇಶಿಸಲು ಯಾವುದನ್ನು ಅನುಮತಿಸಬೇಕು ಎಂಬುದನ್ನು ಆರಿಸಿಕೊಳ್ಳಿ"</string>
-    <string name="permission_review_title_template_update" msgid="8632233603161669426">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ಅನ್ನು ಅಪ್‌ಡೇಟ್ ಮಾಡಲಾಗಿದೆ. ಈ ಅಪ್ಲಿಕೇಶನ್‌ಗೆ ಪ್ರವೇಶಿಸಲು ಯಾವುದನ್ನು ಅನುಮತಿಸಬೇಕು ಎಂಬುದನ್ನು ಆರಿಸಿಕೊಳ್ಳಿ."</string>
-    <string name="review_button_cancel" msgid="957906817733578877">"ರದ್ದುಮಾಡಿ"</string>
-    <string name="review_button_continue" msgid="4809162078179371370">"ಮುಂದುವರಿಸು"</string>
-    <string name="new_permissions_category" msgid="3213523410139204183">"ಹೊಸ ಅನುಮತಿಗಳು"</string>
-    <string name="current_permissions_category" msgid="998210994450606094">"ಪ್ರಸ್ತುತ ಅನುಮತಿಗಳು"</string>
-    <string name="message_staging" msgid="6151794817691100003">"ಸ್ಥಾಪಿಸಲು ಸಿದ್ಧವಿರುವ ಅಪ್ಲಿಕೇಶನ್…"</string>
-    <string name="app_name_unknown" msgid="8931522764510159105">"ಅಪರಿಚಿತ"</string>
-    <string name="untrusted_external_source_warning" product="tablet" msgid="1483151219938173935">"ನಿಮ್ಮ ಸುರಕ್ಷತೆಯ ದೃಷ್ಟಿಯಿಂದ, ಈ ಮೂಲದಿಂದ ಬಂದಿರುವ ಅಪರಿಚಿತ ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ಸ್ಥಾಪಿಸಲು ನಿಮ್ಮ ಟ್ಯಾಬ್ಲೆಟ್‌ಗೆ ಅನುಮತಿಯಿಲ್ಲ."</string>
-    <string name="untrusted_external_source_warning" product="tv" msgid="5373768281884328560">"ನಿಮ್ಮ ಸುರಕ್ಷತೆಯ ದೃಷ್ಟಿಯಿಂದ, ಅಪರಿಚಿತ ಮೂಲಗಳಿಂದ ಪಡೆದುಕೊಳ್ಳುವ ಅಪ್ಲಿಕೇಶನ್‍‍ಗಳನ್ನು ನಿಮ್ಮ ಟಿವಿಯು ಸ್ಥಾಪಿಸದಂತೆ ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ."</string>
-    <string name="untrusted_external_source_warning" product="default" msgid="2223486836232706553">"ನಿಮ್ಮ ಸುರಕ್ಷತೆಯ ದೃಷ್ಟಿಯಿಂದ, ಈ ಮೂಲದಿಂದ ಬಂದಿರುವ ಅಪರಿಚಿತ ಅಪ್ಲಿಕೇಶನ್‌ಗಳನ್ನು ಸ್ಥಾಪಿಸಲು ನಿಮ್ಮ ಫೋನ್‌ಗೆ ಅನುಮತಿಯಿಲ್ಲ."</string>
-    <string name="anonymous_source_warning" product="default" msgid="7700263729981815614">"ನಿಮ್ಮ ಫೋನ್ ಹಾಗೂ ವೈಯಕ್ತಿಕ ಡೇಟಾ, ಅಪರಿಚಿತ ಅಪ್ಲಿಕೇಶನ್‌ಗಳ ದಾಳಿಗೆ ತುತ್ತಾಗುವ ಸಾಧ್ಯತೆ ಹೆಚ್ಚಾಗಿದೆ. ಈ ಅಪ್ಲಿಕೇಶನ್ ಅನ್ನು ಸ್ಥಾಪಿಸುವ ಮೂಲಕ, ನಿಮ್ಮ ಫೋನ್‌ಗೆ ಯಾವುದೇ ಹಾನಿ ಉಂಟಾದರೆ ಅಥವಾ ಅದರ ಬಳಕೆಯಿಂದ ಡೇಟಾ ನಷ್ಟವಾದರೆ, ಅದಕ್ಕೆ ನೀವೇ ಜವಾಬ್ದಾರರು ಎನ್ನುವುದನ್ನು ಒಪ್ಪಿಕೊಳ್ಳುತ್ತೀರಿ."</string>
-    <string name="anonymous_source_warning" product="tablet" msgid="8854462805499848630">"ನಿಮ್ಮ ಟ್ಯಾಬ್ಲೆಟ್ ಹಾಗೂ ವೈಯಕ್ತಿಕ ಡೇಟಾ, ಅಪರಿಚಿತ ಅಪ್ಲಿಕೇಶನ್‌ಗಳ ದಾಳಿಗೆ ತುತ್ತಾಗುವ ಸಾಧ್ಯತೆ ಹೆಚ್ಚಾಗಿದೆ. ಈ ಅಪ್ಲಿಕೇಶನ್ ಅನ್ನು ಸ್ಥಾಪಿಸುವ ಮೂಲಕ, ನಿಮ್ಮ ಫೋನ್‌ಗೆ ಯಾವುದೇ ಹಾನಿ ಉಂಟಾದರೆ ಅಥವಾ ಅದರ ಬಳಕೆಯಿಂದ ಡೇಟಾ ನಷ್ಟವಾದರೆ, ಅದಕ್ಕೆ ನೀವೇ ಜವಾಬ್ದಾರರು ಎನ್ನುವುದನ್ನು ಒಪ್ಪಿಕೊಳ್ಳುತ್ತೀರಿ."</string>
-    <string name="anonymous_source_warning" product="tv" msgid="1291472686734385872">"ನಿಮ್ಮ ಟಿವಿ ಹಾಗೂ ವೈಯಕ್ತಿಕ ಡೇಟಾ, ಅಪರಿಚಿತ ಅಪ್ಲಿಕೇಶನ್‌ಗಳ ದಾಳಿಗೆ ತುತ್ತಾಗುವ ಸಾಧ್ಯತೆ ಹೆಚ್ಚಾಗಿದೆ. ಈ ಅಪ್ಲಿಕೇಶನ್‌ ಅನ್ನು ಸ್ಥಾಪಿಸುವ ಮೂಲಕ, ನಿಮ್ಮ ಟಿವಿಗೆ ಯಾವುದೇ ಹಾನಿ ಉಂಟಾದರೆ ಅಥವಾ ಅದರ ಬಳಕೆಯಿಂದ ಡೇಟಾ ನಷ್ಟವಾದರೆ, ಅದಕ್ಕೆ ನೀವೇ ಜವಾಬ್ದಾರರು ಎನ್ನುವುದನ್ನು ಒಪ್ಪಿಕೊಳ್ಳುತ್ತೀರಿ."</string>
-    <string name="anonymous_source_continue" msgid="2094381167954332292">"ಮುಂದುವರಿಸಿ"</string>
-    <string name="external_sources_settings" msgid="8601453744517291632">"ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
-    <string name="wear_app_channel" msgid="6200840123672949356">"wear ಅಪ್ಲಿಕೇಶನ್‌ ಸ್ಥಾಪಿಸಲಾಗುತ್ತಿದೆ/ಅಸ್ಥಾಪಿಸಲಾಗುತ್ತಿದೆ"</string>
+    <string name="app_name" msgid="7488448184431507488">"ಪ್ಯಾಕೇಜ್ ಇನ್‌ಸ್ಟಾಲರ್‌‌"</string>
+    <string name="install" msgid="711829760615509273">"ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಿ"</string>
+    <string name="done" msgid="6632441120016885253">"ಮುಗಿದಿದೆ"</string>
+    <string name="cancel" msgid="1018267193425558088">"ರದ್ದುಮಾಡಿ"</string>
+    <string name="installing" msgid="4921993079741206516">"ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲಾಗುತ್ತಿದೆ..."</string>
+    <string name="installing_app" msgid="1165095864863849422">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ಅನ್ನು ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲಾಗುತ್ತಿದೆ..."</string>
+    <string name="install_done" msgid="5987363587661783896">"ಆ್ಯಪ್‌ ಅನ್ನು ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲಾಗಿದೆ."</string>
+    <string name="install_confirm_question" msgid="8176284075816604590">"ನೀವು ಈ ಆ್ಯಪ್‌ ಅನ್ನು ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲು ಬಯಸುವಿರಾ?"</string>
+    <string name="install_confirm_question_update" msgid="7942235418781274635">"ನೀವು ಈ ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ ಆ್ಯಪ್‌ನ ಅಪ್‌ಡೇಟ್‌‌ ಆದ ಆ್ಯಪ್‌ ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಿಕೊಳ್ಳಲು ಬಯಸುವಿರಾ? ಈಗಿರುವ ನಿಮ್ಮ ಡೇಟಾ ಕಳೆದು ಹೋಗುವುದಿಲ್ಲ."</string>
+    <string name="install_confirm_question_update_system" msgid="4713001702777910263">"ನೀವು ಈ ಅಂತನಿರ್ಮಿತ ಆ್ಯಪ್‌ನ ಅಪ್‌ಡೇಟ್‌‌ ಆದ ಆ್ಯಪ್‌ ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಿಕೊಳ್ಳಲು ಬಯಸುವಿರಾ? ಈಗಿರುವ ನಿಮ್ಮ ಡೇಟಾ ಕಳೆದು ಹೋಗುವುದಿಲ್ಲ. ಇದಕ್ಕೆ ಯಾವುದೇ ವಿಶೇಷ ಪ್ರವೇಶದ ಅಗತ್ಯವಿಲ್ಲ."</string>
+    <string name="install_failed" msgid="5777824004474125469">"ಆ್ಯಪ್‌ ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲಾಗಿಲ್ಲ."</string>
+    <string name="install_failed_blocked" msgid="8512284352994752094">"ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡುವ ಪ್ಯಾಕೇಜ್‌ ಅನ್ನು ನಿರ್ಬಂಧಿಸಲಾಗಿದೆ."</string>
+    <string name="install_failed_conflict" msgid="3493184212162521426">"ಪ್ಯಾಕೇಜ್‌ನಂತೆ ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲಾಗಿರುವ ಆ್ಯಪ್‌ ಅಸ್ತಿತ್ವದಲ್ಲಿರುವ ಪ್ಯಾಕೇಜ್ ಜೊತೆಗೆ ಸಂಘರ್ಷವಾಗುತ್ತದೆ."</string>
+    <string name="install_failed_incompatible" product="tablet" msgid="6019021440094927928">"ಆ್ಯಪ್‌ನಂತೆ ಇನ್‌ಸ್ಟಾಲ್‌ ಆಗದಿರುವ ಆ್ಯಪ್‌ ನಿಮ್ಮ ಟ್ಯಾಬ್ಲೆಟ್ ಜೊತೆಗೆ ಹೊಂದಾಣಿಕೆಯಾಗುವುದಿಲ್ಲ."</string>
+    <string name="install_failed_incompatible" product="tv" msgid="2890001324362291683">"ಈ ಆ್ಯಪ್‌ ನಿಮ್ಮ ಟಿವಿ ಜೊತೆ ಹೊಂದಾಣಿಕೆಯಾಗುವುದಿಲ್ಲ."</string>
+    <string name="install_failed_incompatible" product="default" msgid="7254630419511645826">"ಆ್ಯಪ್‌ನಂತೆ ಇನ್‌ಸ್ಟಾಲ್‌ ಆಗದಿರುವ ಆ್ಯಪ್‌ ನಿಮ್ಮ ಫೋನ್ ಜೊತೆಗೆ ಹೊಂದಾಣಿಕೆಯಾಗುವುದಿಲ್ಲ."</string>
+    <string name="install_failed_invalid_apk" msgid="8581007676422623930">"ಪ್ಯಾಕೇಜ್‌ನಂತೆ ಇನ್‌ಸ್ಟಾಲ್‌ ಆಗದಿರುವ ಆ್ಯಪ್‌ ಅಮಾನ್ಯವಾಗಿರುವಂತೆ ತೋರುತ್ತದೆ."</string>
+    <string name="install_failed_msg" product="tablet" msgid="6298387264270562442">"ನಿಮ್ಮ ಟ್ಯಾಬ್ಲೆಟ್‌ನಲ್ಲಿ <xliff:g id="APP_NAME">%1$s</xliff:g> ಅನ್ನು ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ."</string>
+    <string name="install_failed_msg" product="tv" msgid="1920009940048975221">"<xliff:g id="APP_NAME">%1$s</xliff:g> ಅನ್ನು ನಿಮ್ಮ ಟಿವಿಗೆ ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ."</string>
+    <string name="install_failed_msg" product="default" msgid="6484461562647915707">"ನಿಮ್ಮ ಫೋನ್‌ನಲ್ಲಿ <xliff:g id="APP_NAME">%1$s</xliff:g> ಅನ್ನು ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ."</string>
+    <string name="launch" msgid="3952550563999890101">"ತೆರೆಯಿರಿ"</string>
+    <string name="unknown_apps_admin_dlg_text" msgid="4456572224020176095">"ನಿಮ್ಮ ನಿರ್ವಾಹಕರು ಅಪರಿಚಿತ ಮೂಲಗಳ ಆ್ಯಪ್‌ಗಳ ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡುವಿಕೆಯನ್ನು ಅನುಮತಿಸುವುದಿಲ್ಲ"</string>
+    <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"ಈ ಬಳಕೆದಾರರು ಅಪರಿಚಿತ ಆ್ಯಪ್‌ಗಳನ್ನು ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
+    <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"ಆ್ಯಪ್‌ಗಳನ್ನು ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲು ಈ ಬಳಕೆದಾರರನ್ನು ಅನುಮತಿಸಲಾಗುವುದಿಲ್ಲ"</string>
+    <string name="ok" msgid="7871959885003339302">"ಸರಿ"</string>
+    <string name="manage_applications" msgid="5400164782453975580">"ಆ್ಯಪ್ ನಿರ್ವಹಿಸಿ"</string>
+    <string name="out_of_space_dlg_title" msgid="4156690013884649502">"ಸಂಗ್ರಹಣೆ ಖಾಲಿ ಇಲ್ಲ"</string>
+    <string name="out_of_space_dlg_text" msgid="8727714096031856231">"<xliff:g id="APP_NAME">%1$s</xliff:g> ಅನ್ನು ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ. ಕೊಂಚ ಸ್ಥಳವನ್ನು ಖಾಲಿ ಮಾಡಿ. ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ."</string>
+    <string name="app_not_found_dlg_title" msgid="5107924008597470285">"ಯಾವುದೇ ಆ್ಯಪ್ ಕಂಡುಬಂದಿಲ್ಲ"</string>
+    <string name="app_not_found_dlg_text" msgid="5219983779377811611">"ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಿರುವ ಆ್ಯಪ್‌ಗಳ ಪಟ್ಟಿಯಲ್ಲಿ ಯಾವುದೇ ಆ್ಯಪ್‌ ಕಂಡುಬಂದಿಲ್ಲ."</string>
+    <string name="user_is_not_allowed_dlg_title" msgid="6915293433252210232">"ಅನುಮತಿಸಲಾಗುವುದಿಲ್ಲ"</string>
+    <string name="user_is_not_allowed_dlg_text" msgid="3468447791330611681">"ಈ ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡುವಿಕೆಯನ್ನು ಪ್ರಸ್ತುತ ಬಳಕೆದಾರರಿಗೆ ನಿರ್ವಹಿಸಲು ಅನುಮತಿಸಲಾಗುವುದಿಲ್ಲ."</string>
+    <string name="generic_error_dlg_title" msgid="5863195085927067752">"ದೋಷ"</string>
+    <string name="generic_error_dlg_text" msgid="5287861443265795232">"ಆ್ಯಪ್‌ ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ."</string>
+    <string name="uninstall_application_title" msgid="4045420072401428123">"ಆ್ಯಪ್‌ ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಿ"</string>
+    <string name="uninstall_update_title" msgid="824411791011583031">"ಅಪ್‌ಡೇಟ್‌ ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಿ"</string>
+    <string name="uninstall_activity_text" msgid="1928194674397770771">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> ಎಂಬುದು ಕೆಳಗಿನ ಆ್ಯಪ್‌ನ ಭಾಗವಾಗಿದೆ:"</string>
+    <string name="uninstall_application_text" msgid="3816830743706143980">"ನೀವು ಈ ಆ್ಯಪ್‌ ಅನ್ನು ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲು ಬಯಸುವಿರಾ?"</string>
+    <string name="uninstall_application_text_all_users" msgid="575491774380227119">"ನೀವು "<b>"ಎಲ್ಲಾ"</b>" ಬಳಕೆದಾರರಿಗೂ ಈ ಆ್ಯಪ್‌ ಅನ್ನು ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲು ಬಯಸುವಿರಾ? ಸಾಧನದಲ್ಲಿನ "<b>"ಎಲ್ಲಾ"</b>" ಬಳಕೆದಾರರಿಂದ ಆ್ಯಪ್‌ ಮತ್ತು ಅದರ ಡೇಟಾವನ್ನು ತೆಗೆದುಹಾಕಲಾಗುವುದು."</string>
+    <string name="uninstall_application_text_user" msgid="498072714173920526">"<xliff:g id="USERNAME">%1$s</xliff:g> ಬಳಕೆದಾರರಿಗೆ ಈ ಆ್ಯಪ್‌ ಅನ್ನು ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲು ನೀವು ಬಯಸುವಿರಾ?"</string>
+    <string name="uninstall_update_text" msgid="863648314632448705">"ಈ ಆ್ಯಪ್‌ ಬದಲಿಗೆ ಫ್ಯಾಕ್ಟರಿ ಆವೃತ್ತಿಯನ್ನು ಬದಲಾಯಿಸುವುದೇ? ಎಲ್ಲಾ ಡೇಟಾ ತೆಗೆದುಹಾಕಲಾಗುತ್ತದೆ."</string>
+    <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"ಈ ಆ್ಯಪ್‌ ಬದಲಿಗೆ ಫ್ಯಾಕ್ಟರಿ ಆವೃತ್ತಿಯನ್ನು ಬದಲಾಯಿಸುವುದೇ? ಎಲ್ಲಾ ಡೇಟಾ ತೆಗೆದುಹಾಕಲಾಗುತ್ತದೆ. ಕೆಲಸದ ಪ್ರೊಫೈಲ್‌ಗಳನ್ನು ಹೊಂದಿರುವವುಗಳನ್ನು ಒಳಗೊಂಡಂತೆ ಈ ಸಾಧನದ ಎಲ್ಲಾ ಬಳಕೆದಾರರಿಗೆ ಇದು ಪರಿಣಾಮ ಬೀರುತ್ತದೆ."</string>
+    <string name="uninstalling_notification_channel" msgid="840153394325714653">"ಚಾಲನೆಯಲ್ಲಿರುವ ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್‌ಗಳು"</string>
+    <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"ವಿಫಲಗೊಂಡ ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್‌ಗಳು"</string>
+    <string name="uninstalling" msgid="8709566347688966845">"ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲಾಗುತ್ತಿದೆ..."</string>
+    <string name="uninstalling_app" msgid="8866082646836981397">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ಅನ್ನು ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲಾಗುತ್ತಿದೆ..."</string>
+    <string name="uninstall_done" msgid="439354138387969269">"ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್ ಪೂರ್ಣಗೊಂಡಿದೆ."</string>
+    <string name="uninstall_done_app" msgid="4588850984473605768">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲಾಗಿದೆ"</string>
+    <string name="uninstall_failed" msgid="1847750968168364332">"ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್ ವಿಫಲವಾಗಿದೆ."</string>
+    <string name="uninstall_failed_app" msgid="5506028705017601412">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡುವಿಕೆ ಯಶಸ್ವಿಯಾಗಿಲ್ಲ."</string>
+    <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"ಸಕ್ರಿಯ ಸಾಧನ ನಿರ್ವಹಣೆ ಆ್ಯಪ್‌ ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
+    <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"<xliff:g id="USERNAME">%1$s</xliff:g> ಗಾಗಿ ಸಕ್ರಿಯ ಸಾಧನ ನಿರ್ವಹಣೆ ಆ್ಯಪ್‌ ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
+    <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"ಕೆಲವು ಬಳಕೆದಾರರು ಅಥವಾ ಪ್ರೊಫೈಲ್‌ಗಳಿಗೆ ಈ ಆಪ್‌ ಅಗತ್ಯ ಮತ್ತು ಇತರರ ಸಾಧನದಿಂದ ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲಾಗಿದೆ"</string>
+    <string name="uninstall_blocked_profile_owner" msgid="6373897407002404848">"ಈ ಆ್ಯಪ್‌ಗೆ ನಿಮ್ಮ ಪ್ರೊಫೈಲ್‌‌ನ ಅಗತ್ಯವಿದೆ ಮತ್ತು ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ."</string>
+    <string name="uninstall_blocked_device_owner" msgid="6724602931761073901">"ಈ ಆ್ಯಪ್‌ ನಿಮ್ಮ ಸಾಧನ ನಿರ್ವಾಹಕರಿಗೆ ಅಗತ್ಯವಿದೆ ಮತ್ತು ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ."</string>
+    <string name="manage_device_administrators" msgid="3092696419363842816">"ಸಾಧನದ ನಿರ್ವಹಣೆ ಆ್ಯಪ್‌ಗಳನ್ನು ನಿರ್ವಹಿಸಿ"</string>
+    <string name="manage_users" msgid="1243995386982560813">"ಬಳಕೆದಾರರನ್ನು ನಿರ್ವಹಿಸಿ"</string>
+    <string name="uninstall_failed_msg" msgid="2176744834786696012">"<xliff:g id="APP_NAME">%1$s</xliff:g> ಅನ್ನು ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ."</string>
+    <string name="Parse_error_dlg_text" msgid="1661404001063076789">"ಪ್ಯಾಕೇಜ್ ಪಾರ್ಸ್ ಮಾಡುವಲ್ಲಿ ಸಮಸ್ಯೆ ಕಂಡುಬಂದಿದೆ."</string>
+    <string name="wear_not_allowed_dlg_title" msgid="8664785993465117517">"Android Wear"</string>
+    <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"Wear ನಲ್ಲಿ ಇನ್‌ಸ್ಟಾಲ್/ಅನ್ಇನ್‌ಸ್ಟಾಲ್ ಕ್ರಿಯೆಗಳು ಬೆಂಬಲಿತವಾಗಿಲ್ಲ."</string>
+    <string name="message_staging" msgid="8032722385658438567">"ಇನ್‌ಸ್ಟಾಲ್ ಮಾಡಲು ಸಿದ್ಧವಿರುವ ಆ್ಯಪ್…"</string>
+    <string name="app_name_unknown" msgid="6881210203354323926">"ಅಪರಿಚಿತ"</string>
+    <string name="untrusted_external_source_warning" product="tablet" msgid="6539403649459942547">"ನಿಮ್ಮ ಸುರಕ್ಷತೆಯ ದೃಷ್ಟಿಯಿಂದ, ಈ ಮೂಲದಿಂದ ಬಂದಿರುವ ಅಪರಿಚಿತ ಆ್ಯಪ್‌ಗಳನ್ನು ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲು ನಿಮ್ಮ ಟ್ಯಾಬ್ಲೆಟ್‌ಗೆ ಅನುಮತಿಯಿಲ್ಲ."</string>
+    <string name="untrusted_external_source_warning" product="tv" msgid="1206648674551321364">"ನಿಮ್ಮ ಸುರಕ್ಷತೆಯ ದೃಷ್ಟಿಯಿಂದ, ಅಪರಿಚಿತ ಮೂಲಗಳಿಂದ ಪಡೆದುಕೊಳ್ಳುವ ಆ್ಯಪ್‌‍‍ಗಳನ್ನು ನಿಮ್ಮ ಟಿವಿಯಲ್ಲಿ ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲು ಅನುಮತಿಯಿಲ್ಲ."</string>
+    <string name="untrusted_external_source_warning" product="default" msgid="7279739265754475165">"ನಿಮ್ಮ ಸುರಕ್ಷತೆಯ ದೃಷ್ಟಿಯಿಂದ, ಈ ಮೂಲದಿಂದ ಬಂದಿರುವ ಅಪರಿಚಿತ ಆ್ಯಪ್‌ಗಳನ್ನು ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲು ನಿಮ್ಮ ಫೋನ್‌ಗೆ ಅನುಮತಿಯಿಲ್ಲ."</string>
+    <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"ನಿಮ್ಮ ಫೋನ್ ಹಾಗೂ ವೈಯಕ್ತಿಕ ಡೇಟಾ, ಅಪರಿಚಿತ ಆ್ಯಪ್‌ಗಳ ದಾಳಿಗೆ ತುತ್ತಾಗುವ ಸಾಧ್ಯತೆ ಹೆಚ್ಚಾಗಿದೆ. ಈ ಆ್ಯಪ್‌ ಅನ್ನು ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡುವ ಮೂಲಕ, ನಿಮ್ಮ ಫೋನ್‌ಗೆ ಯಾವುದೇ ಹಾನಿ ಉಂಟಾದರೆ ಅಥವಾ ಅದರ ಬಳಕೆಯಿಂದ ಡೇಟಾ ನಷ್ಟವಾದರೆ, ಅದಕ್ಕೆ ನೀವೇ ಜವಾಬ್ದಾರರು ಎನ್ನುವುದನ್ನು ಒಪ್ಪಿಕೊಳ್ಳುತ್ತೀರಿ."</string>
+    <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"ನಿಮ್ಮ ಟ್ಯಾಬ್ಲೆಟ್ ಹಾಗೂ ವೈಯಕ್ತಿಕ ಡೇಟಾ, ಅಪರಿಚಿತ ಆ್ಯಪ್‌ಗಳ ದಾಳಿಗೆ ತುತ್ತಾಗುವ ಸಾಧ್ಯತೆ ಹೆಚ್ಚಾಗಿದೆ. ಈ ಆ್ಯಪ್‌ ಅನ್ನು ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡುವ ಮೂಲಕ, ನಿಮ್ಮ ಫೋನ್‌ಗೆ ಯಾವುದೇ ಹಾನಿ ಉಂಟಾದರೆ ಅಥವಾ ಅದರ ಬಳಕೆಯಿಂದ ಡೇಟಾ ನಷ್ಟವಾದರೆ, ಅದಕ್ಕೆ ನೀವೇ ಜವಾಬ್ದಾರರು ಎನ್ನುವುದನ್ನು ಒಪ್ಪಿಕೊಳ್ಳುತ್ತೀರಿ."</string>
+    <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"ನಿಮ್ಮ ಟಿವಿ ಹಾಗೂ ವೈಯಕ್ತಿಕ ಡೇಟಾ, ಅಪರಿಚಿತ ಆ್ಯಪ್‌ಗಳ ದಾಳಿಗೆ ತುತ್ತಾಗುವ ಸಾಧ್ಯತೆ ಹೆಚ್ಚಾಗಿದೆ. ಈ ಆ್ಯಪ್‌ ಅನ್ನು ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡುವ ಮೂಲಕ, ನಿಮ್ಮ ಟಿವಿಗೆ ಯಾವುದೇ ಹಾನಿ ಉಂಟಾದರೆ ಅಥವಾ ಅದರ ಬಳಕೆಯಿಂದ ಡೇಟಾ ನಷ್ಟವಾದರೆ, ಅದಕ್ಕೆ ನೀವೇ ಜವಾಬ್ದಾರರು ಎನ್ನುವುದನ್ನು ಒಪ್ಪಿಕೊಳ್ಳುತ್ತೀರಿ."</string>
+    <string name="anonymous_source_continue" msgid="4375745439457209366">"ಮುಂದುವರಿಸಿ"</string>
+    <string name="external_sources_settings" msgid="4046964413071713807">"ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
+    <string name="wear_app_channel" msgid="1960809674709107850">"wear ಆ್ಯಪ್‌ಗಳನ್ನು ಇನ್‌ಸ್ಟಾಲ್‌/ಅನ್‌ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡಲಾಗುತ್ತಿದೆ"</string>
 </resources>

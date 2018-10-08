@@ -16,141 +16,76 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_name" msgid="2738748390251381682">"Instaluesi i paketës"</string>
-    <string name="next" msgid="3057143178373252333">"Përpara"</string>
-    <string name="install" msgid="5896438203900042068">"Instalo"</string>
-    <string name="done" msgid="3889387558374211719">"U krye!"</string>
-    <string name="cancel" msgid="8360346460165114585">"Anulo"</string>
-    <string name="installing" msgid="8613631001631998372">"Po instalon…"</string>
-    <string name="installing_app" msgid="4097935682329028894">"Po instalon <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
-    <string name="install_done" msgid="3682715442154357097">"Aplikacioni u instalua."</string>
-    <string name="install_confirm_question" msgid="7295206719219043890">"Dëshiron ta instalosh këtë aplikacion? Ai do të ketë qasje në:"</string>
-    <string name="install_confirm_question_no_perms" msgid="5918305641302873520">"Dëshiron ta instalosh këtë aplikacion? Nuk kërkon ndonjë qasje të veçantë."</string>
-    <string name="install_confirm_question_update" msgid="4624159567361487964">"Dëshiron të instalosh një përditësim në këtë aplikacion ekzistues? Të dhënat e tua ekzistuese nuk do të humbin. Aplikacioni i përditësuar do të ketë qasje në:"</string>
-    <string name="install_confirm_question_update_system" msgid="1302330093676416336">"Dëshiron të instalosh një përditësim në këtë aplikacion të integruar? Të dhënat e tua ekzistuese nuk do të humbin. Aplikacioni i përditësuar do të ketë qasje në:"</string>
-    <string name="install_confirm_question_update_no_perms" msgid="4885928136844618944">"Dëshiron të instalosh një përditësim të këtij aplikacioni ekzistues? Të dhënat e tua ekzistuese nuk do të humbasin. Aplikacioni nuk kërkon ndonjë qasje të veçantë."</string>
-    <string name="install_confirm_question_update_system_no_perms" msgid="7676593512694724374">"Dëshiron të instalosh një përditësim të këtij aplikacioni ekzistues? Të dhënat e tua ekzistuese nuk do të humbasin. Aplikacioni nuk kërkon ndonjë qasje të veçantë."</string>
-    <string name="install_failed" msgid="6579998651498970899">"Aplikacioni nuk u instalua."</string>
-    <string name="install_failed_blocked" msgid="1606870930588770025">"Instalimi paketës u bllokua."</string>
-    <string name="install_failed_conflict" msgid="5336045235168070954">"Aplikacioni nuk u instalua pasi paketa është në konflikt me një paketë ekzistuese."</string>
-    <string name="install_failed_incompatible" product="tablet" msgid="6682387386242708974">"Aplikacioni nuk u instalua pasi nuk është i përputhet me tabletin tënd."</string>
-    <string name="install_failed_incompatible" product="tv" msgid="3553367270510072729">"Ky aplikacion është i papërshtatshëm me televizorin tënd."</string>
-    <string name="install_failed_incompatible" product="default" msgid="7917996365659426872">"Aplikacioni nuk u instalua pasi nuk përputhet me telefonin tënd."</string>
-    <string name="install_failed_invalid_apk" msgid="269885385245534742">"Aplikacioni nuk u instalua pasi paketa duket se nuk është e vlefshme."</string>
-    <string name="install_failed_msg" product="tablet" msgid="8368835262605608787">"<xliff:g id="APP_NAME">%1$s</xliff:g> nuk mund të instalohej në tablet."</string>
-    <string name="install_failed_msg" product="tv" msgid="3990457938384021566">"<xliff:g id="APP_NAME">%1$s</xliff:g> nuk mund të instalohej në televizor."</string>
-    <string name="install_failed_msg" product="default" msgid="8554909560982962052">"<xliff:g id="APP_NAME">%1$s</xliff:g> nuk mundi të instalohej në telefon."</string>
-    <string name="launch" msgid="4826921505917605463">"Hap"</string>
-    <string name="unknown_apps_admin_dlg_text" msgid="7488386758312008790">"Administratori nuk lejon instalimin e aplikacioneve nga burime të panjohura."</string>
-    <string name="unknown_apps_user_restriction_dlg_text" msgid="5785226253054083336">"Aplikacionet e panjohura nuk mund të instalohen nga ky përdorues"</string>
-    <string name="install_apps_user_restriction_dlg_text" msgid="5041150186260066212">"Ky përdorues nuk lejohet të instalojë aplikacione"</string>
-    <string name="ok" msgid="3468756155452870475">"Në rregull"</string>
-    <string name="manage_applications" msgid="4033876279091996596">"Menaxho aplikacionet"</string>
-    <string name="out_of_space_dlg_title" msgid="7843674437613797326">"Nuk ka hapësirë"</string>
-    <string name="out_of_space_dlg_text" msgid="4774775404294282216">"<xliff:g id="APP_NAME">%1$s</xliff:g> nuk mund të instalohej. Liro pak hapësirë dhe provo përsëri."</string>
-    <string name="app_not_found_dlg_title" msgid="2692335460569505484">"Aplikacioni nuk u gjet"</string>
-    <string name="app_not_found_dlg_text" msgid="6107465056055095930">"Aplikacioni nuk u gjet në listën e aplikacioneve të instaluara."</string>
-    <string name="user_is_not_allowed_dlg_title" msgid="118128026847201582">"Nuk lejohet"</string>
-    <string name="user_is_not_allowed_dlg_text" msgid="739716827677987545">"Përdoruesi aktual nuk lejohet të kryejë këtë çinstalim."</string>
-    <string name="generic_error_dlg_title" msgid="2684806600635296961">"Gabim"</string>
-    <string name="generic_error_dlg_text" msgid="4288738047825333954">"Aplikacioni nuk mund të instalohej."</string>
-    <string name="uninstall_application_title" msgid="1860074100811653963">"Çinstalo aplikacionin"</string>
-    <string name="uninstall_update_title" msgid="4146940097553335390">"Çinstalo përditësimin"</string>
-    <string name="uninstall_activity_text" msgid="6680688689803932550">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> është pjesë e aplikacionit të mëposhtëm:"</string>
-    <string name="uninstall_application_text" msgid="6691975835951187030">"Dëshiron ta çinstalosh këtë aplikacion?"</string>
-    <string name="uninstall_application_text_all_users" msgid="5574704453233525222">"Dëshiron ta çinstalosh këtë aplikacion për "<b>"të gjithë"</b>" përdoruesit? Aplikacioni dhe të dhënat e tij do të hiqen nga "<b>"të gjithë"</b>" përdoruesit e pajisjes."</string>
-    <string name="uninstall_application_text_user" msgid="8766882355635485733">"Dëshiron ta çinstalosh këtë aplikacion për përdoruesin <xliff:g id="USERNAME">%1$s</xliff:g>?"</string>
-    <string name="uninstall_update_text" msgid="1394549691152728409">"Të zëvendësohet ky aplikacion me versionin e fabrikës? Të gjitha të dhënat do të hiqen."</string>
-    <string name="uninstall_update_text_multiuser" msgid="2083665452990861991">"Të zëvendësohet ky aplikacion me versionin e fabrikës? Të gjitha të dhënat do të hiqen. Kjo ndikon te të gjithë përdoruesit e kësaj pajisjeje, duke përfshirë ata me profile të punës."</string>
-    <string name="uninstalling_notification_channel" msgid="5698369661583525583">"Çinstalimet në ekzekutim"</string>
-    <string name="uninstall_failure_notification_channel" msgid="8224276726364132314">"Çinstalimet e dështuara"</string>
-    <string name="uninstalling" msgid="5556217435895938250">"Po e çinstalon…"</string>
-    <string name="uninstalling_app" msgid="2773617614877719294">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> po çinstalohet…"</string>
-    <string name="uninstall_done" msgid="3792487853420281888">"Çinstalimi përfundoi."</string>
-    <string name="uninstall_done_app" msgid="775837862728680479">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> u çinstalua"</string>
-    <string name="uninstall_failed" msgid="631122574306299512">"Çinstalimi nuk pati sukses."</string>
-    <string name="uninstall_failed_app" msgid="945277834056527022">"Çinstalimi i <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> nuk u krye me sukses."</string>
-    <string name="uninstall_failed_device_policy_manager" msgid="2727361164694743362">"Nuk mund të çinstalohet aplikacioni aktiv i administratorit të pajisjes"</string>
-    <string name="uninstall_failed_device_policy_manager_of_user" msgid="2161462242935805756">"Nuk mund të çinstalohet aplikacioni aktiv i administratorit të pajisjes për <xliff:g id="USERNAME">%1$s</xliff:g>"</string>
-    <string name="uninstall_all_blocked_profile_owner" msgid="3544933038594382346">"Ky aplikacion kërkohet për disa përdorues ose profile dhe është çinstaluar për të tjerët"</string>
-    <string name="uninstall_blocked_profile_owner" msgid="6912141045528994954">"Ky aplikacion nevojitet për profilin tënd dhe nuk mund të çinstalohet."</string>
-    <string name="uninstall_blocked_device_owner" msgid="7074175526413453063">"Ky aplikacion kërkohet nga administratori i pajisjes dhe nuk mund të çinstalohet."</string>
-    <string name="manage_device_administrators" msgid="118178632652346535">"Menaxho aplikacionet e administratorit të pajisjes"</string>
-    <string name="manage_users" msgid="3125018886835668847">"Menaxho përdoruesit"</string>
-    <string name="uninstall_failed_msg" msgid="8969754702803951175">"<xliff:g id="APP_NAME">%1$s</xliff:g> nuk mundi të çinstalohej."</string>
-    <string name="Parse_error_dlg_text" msgid="7623286983621067011">"Kishte një problem me analizimin e paketës."</string>
-    <string name="newPerms" msgid="6039428254474104210">"E re"</string>
-    <string name="allPerms" msgid="1024385515840703981">"Të gjitha"</string>
-    <string name="privacyPerms" msgid="1850527049572617">"Privatësia"</string>
-    <string name="devicePerms" msgid="6733560207731294504">"Qasja në pajisje"</string>
-    <string name="no_new_perms" msgid="6657813692169565975">"Ky përditësim nuk kërkon leje të reja."</string>
-    <string name="grant_dialog_button_deny" msgid="2176510645406614340">"Refuzo"</string>
-    <string name="grant_dialog_button_more_info" msgid="2218220771432058426">"Informacione të tjera"</string>
-    <string name="grant_dialog_button_deny_anyway" msgid="847960499284125250">"Refuzo sidoqoftë"</string>
-    <string name="current_permission_template" msgid="6378304249516652817">"<xliff:g id="CURRENT_PERMISSION_INDEX">%1$s</xliff:g> nga <xliff:g id="PERMISSION_COUNT">%2$s</xliff:g>"</string>
-    <string name="permission_warning_template" msgid="7332275268559121742">"Të lejohet &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; që të <xliff:g id="ACTION">%2$s</xliff:g>?"</string>
-    <string name="permission_add_background_warning_template" msgid="5391175001698541141">"Të lejohet gjithmonë &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; që <xliff:g id="ACTION">%2$s</xliff:g>?"</string>
-    <string name="allow_permission_foreground_only" msgid="1016389465002335286">"Vetëm gjatë përdorimit të aplikacionit"</string>
-    <string name="allow_permission_always" msgid="7047379650123289823">"Gjithmonë"</string>
-    <string name="deny_permission_deny_and_dont_ask_again" msgid="8003202275002645629">"Refuzo dhe mos pyet përsëri"</string>
-    <string name="permission_revoked_count" msgid="7386129423432613024">"<xliff:g id="COUNT">%1$d</xliff:g> të çaktivizuara"</string>
-    <string name="permission_revoked_all" msgid="8595742638132863678">"të gjitha të çaktivizuara"</string>
-    <string name="permission_revoked_none" msgid="2059511550181271342">"asnjë e çaktivizuar"</string>
-    <string name="grant_dialog_button_allow" msgid="4616529495342337095">"Lejo"</string>
-    <string name="app_permissions_breadcrumb" msgid="3390836200791539264">"Aplikacionet"</string>
-    <string name="app_permissions" msgid="3146758905824597178">"Lejet e aplikacionit"</string>
-    <string name="never_ask_again" msgid="1089938738199748687">"Mos pyet përsëri"</string>
-    <string name="no_permissions" msgid="3210542466245591574">"Nuk ka leje"</string>
-    <string name="additional_permissions" msgid="6667573114240111763">"Lejet shtesë"</string>
-    <string name="app_permissions_info_button_label" msgid="7789812060395257748">"Hap informacionet e aplikacionit"</string>
-    <plurals name="additional_permissions_more" formatted="false" msgid="945127158155064388">
-      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> të tjera</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> të tjera</item>
-    </plurals>
-    <string name="old_sdk_deny_warning" msgid="3872277112584842615">"Ky aplikacion është projektuar për një version më të vjetër të Android. Refuzimi i lejeve mund të shkaktojë që ai të mos funksionojë më siç duhet."</string>
-    <string name="default_permission_description" msgid="4992892207044156668">"kryej një veprim të panjohur"</string>
-    <string name="app_permissions_group_summary" msgid="4787239772223699263">"<xliff:g id="COUNT_0">%1$d</xliff:g> aplikacione nga <xliff:g id="COUNT_1">%2$d</xliff:g> të tilla u lejuan"</string>
-    <string name="menu_show_system" msgid="6773743421743728921">"Shfaq sistemin"</string>
-    <string name="menu_hide_system" msgid="7595471742649432977">"Fshih sistemin"</string>
-    <string name="no_apps" msgid="1965493419005012569">"Asnjë aplikacion"</string>
-    <string name="location_settings" msgid="1774875730854491297">"Cilësimet e vendndodhjeve"</string>
-    <string name="location_warning" msgid="8778701356292735971">"<xliff:g id="APP_NAME">%1$s</xliff:g> është një ofrues i shërbimeve të vendndodhjes për këtë pajisje. Qasja e vendndodhjes mund të modifikohet nga cilësimet e vendndodhjes."</string>
-    <string name="system_warning" msgid="7103819124542305179">"Nëse e refuzon këtë leje, funksionet bazë të pajisjes tënde mund të mos funksionojnë më siç pritet."</string>
-    <string name="permission_summary_enforced_by_policy" msgid="3418617316188986205">"Zbatuar nga politika"</string>
-    <string name="permission_summary_disabled_by_policy_background_only" msgid="160007162349980265">"Qasja në sfond është e çaktivizuar sipas politikës"</string>
-    <string name="permission_summary_enabled_by_policy_background_only" msgid="4834971700297385342">"Qasja në sfond është e aktivizuar sipas politikës"</string>
-    <string name="permission_summary_enabled_by_policy_foreground_only" msgid="5150061275247925588">"Qasja në planin e parë është e aktivizuar sipas politikës"</string>
-    <string name="permission_summary_enforced_by_admin" msgid="1702707982488952544">"Kontrolluar nga administratori"</string>
-    <!-- no translation found for background_access_chooser_dialog_choices:0 (7142769853837915143) -->
-    <!-- no translation found for background_access_chooser_dialog_choices:1 (7804653189249679164) -->
-    <!-- no translation found for background_access_chooser_dialog_choices:2 (1131794379787779680) -->
-    <string name="permission_access_always" msgid="5642491469836594184">"Gjithmonë"</string>
-    <string name="permission_access_only_foreground" msgid="6906814759741316041">"Vetëm gjatë përdorimit të aplikacionit"</string>
-    <string name="permission_access_never" msgid="1258330706341318622">"Asnjëherë"</string>
-    <string name="loading" msgid="7811651799620593731">"Po ngarkon..."</string>
-    <string name="all_permissions" msgid="5156669007784613042">"Të gjitha lejet"</string>
-    <string name="other_permissions" msgid="2016192512386091933">"Kapacitete të tjera të aplikacionit"</string>
-    <string name="permission_request_title" msgid="1204446718549121199">"Kërkesa e lejes"</string>
-    <string name="screen_overlay_title" msgid="3021729846864038529">"Mbivendosja e ekranit u zbulua"</string>
-    <string name="screen_overlay_message" msgid="2141944461571677331">"Për të ndryshuar këtë cilësim të lejes, në fillim duhet të çaktivizosh mbivendosjen e ekranit nga Cilësimet &gt; Aplikacionet"</string>
-    <string name="screen_overlay_button" msgid="4344544843349937743">"Hap cilësimet"</string>
-    <string name="wear_not_allowed_dlg_title" msgid="8104666773577525713">"Teknologjia \"Android\" që vishet"</string>
-    <string name="wear_not_allowed_dlg_text" msgid="1322352525843583064">"Instalo/çinstalo veprimet që nuk mbështeten në teknologjinë që vishet."</string>
-    <string name="permission_review_title_template_install" msgid="6819338441305295479">"Zgjidh se ku do të lejohet të ketë qasje &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;"</string>
-    <string name="permission_review_title_template_update" msgid="8632233603161669426">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; është përditësuar. Zgjidh se ku do të lejohet të ketë qasje ky aplikacion."</string>
-    <string name="review_button_cancel" msgid="957906817733578877">"Anulo"</string>
-    <string name="review_button_continue" msgid="4809162078179371370">"Vazhdo"</string>
-    <string name="new_permissions_category" msgid="3213523410139204183">"Lejet e reja"</string>
-    <string name="current_permissions_category" msgid="998210994450606094">"Lejet aktuale"</string>
-    <string name="message_staging" msgid="6151794817691100003">"Po vihet në përdorim aplikacioni..."</string>
-    <string name="app_name_unknown" msgid="8931522764510159105">"E panjohur"</string>
-    <string name="untrusted_external_source_warning" product="tablet" msgid="1483151219938173935">"Për sigurinë tënde, tableti yt nuk lejohet të instalojë aplikacione të panjohura nga ky burim."</string>
-    <string name="untrusted_external_source_warning" product="tv" msgid="5373768281884328560">"Për sigurinë tënde, televizori yt nuk lejohet të instalojë aplikacione të panjohura nga ky burim."</string>
-    <string name="untrusted_external_source_warning" product="default" msgid="2223486836232706553">"Për sigurinë tënde, telefoni yt nuk lejohet të instalojë aplikacione të panjohura nga ky burim."</string>
-    <string name="anonymous_source_warning" product="default" msgid="7700263729981815614">"Telefoni dhe të dhënat e tua personale janë më të cenueshme për t\'u sulmuar nga aplikacione të panjohura. Duke instaluar këtë aplikacion, ti pranon se je përgjegjës për çdo dëm ndaj telefonit tënd ose çdo humbje të dhënash që mund të rezultojë nga përdorimi i tij."</string>
-    <string name="anonymous_source_warning" product="tablet" msgid="8854462805499848630">"Tableti dhe të dhënat e tua personale janë më të cenueshme për t\'u sulmuar nga aplikacione të panjohura. Duke instaluar këtë aplikacion, ti pranon se je përgjegjës për çdo dëm ndaj tabletit tënd ose çdo humbje të dhënash që mund të rezultojë nga përdorimi i tij."</string>
-    <string name="anonymous_source_warning" product="tv" msgid="1291472686734385872">"Televizori dhe të dhënat e tua personale janë më të cenueshme për t\'u sulmuar nga aplikacione të panjohura. Duke instaluar këtë aplikacion, ti pranon se je përgjegjës për çdo dëm ndaj televizorit tënd ose çdo humbje të dhënash që mund të rezultojë nga përdorimi i tij."</string>
-    <string name="anonymous_source_continue" msgid="2094381167954332292">"Vazhdo"</string>
-    <string name="external_sources_settings" msgid="8601453744517291632">"Cilësimet"</string>
-    <string name="wear_app_channel" msgid="6200840123672949356">"Instalimi/çinstalimi i aplikacioneve të \"Wear\""</string>
+    <string name="app_name" msgid="7488448184431507488">"Instaluesi i paketës"</string>
+    <string name="install" msgid="711829760615509273">"Instalo"</string>
+    <string name="done" msgid="6632441120016885253">"U krye"</string>
+    <string name="cancel" msgid="1018267193425558088">"Anulo"</string>
+    <string name="installing" msgid="4921993079741206516">"Po instalohet…"</string>
+    <string name="installing_app" msgid="1165095864863849422">"Po instalohet <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
+    <string name="install_done" msgid="5987363587661783896">"Aplikacioni u instalua."</string>
+    <string name="install_confirm_question" msgid="8176284075816604590">"Dëshiron ta instalosh këtë aplikacion?"</string>
+    <string name="install_confirm_question_update" msgid="7942235418781274635">"Dëshiron të instalosh një përditësim të këtij aplikacioni ekzistues? Të dhënat e tua ekzistuese nuk do të humbasin."</string>
+    <string name="install_confirm_question_update_system" msgid="4713001702777910263">"Dëshiron të instalosh një përditësim të këtij aplikacioni ekzistues? Të dhënat e tua ekzistuese nuk do të humbasin."</string>
+    <string name="install_failed" msgid="5777824004474125469">"Aplikacioni nuk u instalua."</string>
+    <string name="install_failed_blocked" msgid="8512284352994752094">"Instalimi paketës u bllokua."</string>
+    <string name="install_failed_conflict" msgid="3493184212162521426">"Aplikacioni nuk u instalua pasi paketa është në konflikt me një paketë ekzistuese."</string>
+    <string name="install_failed_incompatible" product="tablet" msgid="6019021440094927928">"Aplikacioni nuk u instalua pasi nuk është i përputhet me tabletin tënd."</string>
+    <string name="install_failed_incompatible" product="tv" msgid="2890001324362291683">"Ky aplikacion është i papërshtatshëm me televizorin tënd."</string>
+    <string name="install_failed_incompatible" product="default" msgid="7254630419511645826">"Aplikacioni nuk u instalua pasi nuk përputhet me telefonin tënd."</string>
+    <string name="install_failed_invalid_apk" msgid="8581007676422623930">"Aplikacioni nuk u instalua pasi paketa duket se nuk është e vlefshme."</string>
+    <string name="install_failed_msg" product="tablet" msgid="6298387264270562442">"<xliff:g id="APP_NAME">%1$s</xliff:g> nuk mund të instalohej në tablet."</string>
+    <string name="install_failed_msg" product="tv" msgid="1920009940048975221">"<xliff:g id="APP_NAME">%1$s</xliff:g> nuk mund të instalohej në televizor."</string>
+    <string name="install_failed_msg" product="default" msgid="6484461562647915707">"<xliff:g id="APP_NAME">%1$s</xliff:g> nuk mund të instalohej në telefon."</string>
+    <string name="launch" msgid="3952550563999890101">"Hap"</string>
+    <string name="unknown_apps_admin_dlg_text" msgid="4456572224020176095">"Administratori nuk lejon instalimin e aplikacioneve nga burime të panjohura."</string>
+    <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"Aplikacionet e panjohura nuk mund të instalohen nga ky përdorues"</string>
+    <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"Ky përdorues nuk lejohet të instalojë aplikacione"</string>
+    <string name="ok" msgid="7871959885003339302">"Në rregull"</string>
+    <string name="manage_applications" msgid="5400164782453975580">"Menaxho aplikacionet"</string>
+    <string name="out_of_space_dlg_title" msgid="4156690013884649502">"Nuk ka hapësirë"</string>
+    <string name="out_of_space_dlg_text" msgid="8727714096031856231">"<xliff:g id="APP_NAME">%1$s</xliff:g> nuk mund të instalohej. Liro pak hapësirë dhe provo përsëri."</string>
+    <string name="app_not_found_dlg_title" msgid="5107924008597470285">"Aplikacioni nuk u gjet"</string>
+    <string name="app_not_found_dlg_text" msgid="5219983779377811611">"Aplikacioni nuk u gjet në listën e aplikacioneve të instaluara."</string>
+    <string name="user_is_not_allowed_dlg_title" msgid="6915293433252210232">"Nuk lejohet"</string>
+    <string name="user_is_not_allowed_dlg_text" msgid="3468447791330611681">"Përdoruesi aktual nuk lejohet të kryejë këtë çinstalim."</string>
+    <string name="generic_error_dlg_title" msgid="5863195085927067752">"Gabim"</string>
+    <string name="generic_error_dlg_text" msgid="5287861443265795232">"Aplikacioni nuk mund të instalohej."</string>
+    <string name="uninstall_application_title" msgid="4045420072401428123">"Çinstalo aplikacionin"</string>
+    <string name="uninstall_update_title" msgid="824411791011583031">"Çinstalo përditësimin"</string>
+    <string name="uninstall_activity_text" msgid="1928194674397770771">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> është pjesë e aplikacionit të mëposhtëm:"</string>
+    <string name="uninstall_application_text" msgid="3816830743706143980">"Dëshiron ta çinstalosh këtë aplikacion?"</string>
+    <string name="uninstall_application_text_all_users" msgid="575491774380227119">"Dëshiron ta çinstalosh këtë aplikacion për "<b>"të gjithë"</b>" përdoruesit? Aplikacioni dhe të dhënat e tij do të hiqen nga "<b>"të gjithë"</b>" përdoruesit e pajisjes."</string>
+    <string name="uninstall_application_text_user" msgid="498072714173920526">"Dëshiron ta çinstalosh këtë aplikacion për përdoruesin <xliff:g id="USERNAME">%1$s</xliff:g>?"</string>
+    <string name="uninstall_update_text" msgid="863648314632448705">"Të zëvendësohet ky aplikacion me versionin e fabrikës? Të gjitha të dhënat do të hiqen."</string>
+    <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Të zëvendësohet ky aplikacion me versionin e fabrikës? Të gjitha të dhënat do të hiqen. Kjo ndikon te të gjithë përdoruesit e kësaj pajisjeje, duke përfshirë ata me profile të punës."</string>
+    <string name="uninstalling_notification_channel" msgid="840153394325714653">"Çinstalimet në ekzekutim"</string>
+    <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Çinstalimet e dështuara"</string>
+    <string name="uninstalling" msgid="8709566347688966845">"Po çinstalohet…"</string>
+    <string name="uninstalling_app" msgid="8866082646836981397">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> po çinstalohet…"</string>
+    <string name="uninstall_done" msgid="439354138387969269">"Çinstalimi përfundoi."</string>
+    <string name="uninstall_done_app" msgid="4588850984473605768">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> u çinstalua"</string>
+    <string name="uninstall_failed" msgid="1847750968168364332">"Çinstalimi nuk pati sukses."</string>
+    <string name="uninstall_failed_app" msgid="5506028705017601412">"Çinstalimi i <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> nuk u krye me sukses."</string>
+    <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"Nuk mund të çinstalohet aplikacioni aktiv i administratorit të pajisjes"</string>
+    <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"Nuk mund të çinstalohet aplikacioni aktiv i administratorit të pajisjes për <xliff:g id="USERNAME">%1$s</xliff:g>"</string>
+    <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"Ky aplikacion kërkohet për disa përdorues ose profile dhe është çinstaluar për të tjerët"</string>
+    <string name="uninstall_blocked_profile_owner" msgid="6373897407002404848">"Ky aplikacion nevojitet për profilin tënd dhe nuk mund të çinstalohet."</string>
+    <string name="uninstall_blocked_device_owner" msgid="6724602931761073901">"Ky aplikacion kërkohet nga administratori i pajisjes dhe nuk mund të çinstalohet."</string>
+    <string name="manage_device_administrators" msgid="3092696419363842816">"Menaxho aplikacionet e administratorit të pajisjes"</string>
+    <string name="manage_users" msgid="1243995386982560813">"Menaxho përdoruesit"</string>
+    <string name="uninstall_failed_msg" msgid="2176744834786696012">"<xliff:g id="APP_NAME">%1$s</xliff:g> nuk mund të çinstalohej."</string>
+    <string name="Parse_error_dlg_text" msgid="1661404001063076789">"Kishte një problem me analizimin e paketës."</string>
+    <string name="wear_not_allowed_dlg_title" msgid="8664785993465117517">"Android Wear"</string>
+    <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"Instalo/çinstalo veprimet që nuk mbështeten në Wear."</string>
+    <string name="message_staging" msgid="8032722385658438567">"Po vihet në përdorim aplikacioni..."</string>
+    <string name="app_name_unknown" msgid="6881210203354323926">"I panjohur"</string>
+    <string name="untrusted_external_source_warning" product="tablet" msgid="6539403649459942547">"Për sigurinë tënde, tableti yt nuk lejohet të instalojë aplikacione të panjohura nga ky burim."</string>
+    <string name="untrusted_external_source_warning" product="tv" msgid="1206648674551321364">"Për sigurinë tënde, televizori yt nuk lejohet të instalojë aplikacione të panjohura nga ky burim."</string>
+    <string name="untrusted_external_source_warning" product="default" msgid="7279739265754475165">"Për sigurinë tënde, telefoni yt nuk lejohet të instalojë aplikacione të panjohura nga ky burim."</string>
+    <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"Telefoni dhe të dhënat e tua personale janë më të cenueshme për t\'u sulmuar nga aplikacione të panjohura. Duke instaluar këtë aplikacion, ti pranon se je përgjegjës për çdo dëm ndaj telefonit tënd ose çdo humbje të dhënash që mund të rezultojë nga përdorimi i tij."</string>
+    <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"Tableti dhe të dhënat e tua personale janë më të cenueshme për t\'u sulmuar nga aplikacione të panjohura. Duke instaluar këtë aplikacion, ti pranon se je përgjegjës për çdo dëm ndaj tabletit tënd ose çdo humbje të dhënash që mund të rezultojë nga përdorimi i tij."</string>
+    <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"Televizori dhe të dhënat e tua personale janë më të cenueshme për t\'u sulmuar nga aplikacione të panjohura. Duke instaluar këtë aplikacion, ti pranon se je përgjegjës për çdo dëm ndaj televizorit tënd ose çdo humbje të dhënash që mund të rezultojë nga përdorimi i tij."</string>
+    <string name="anonymous_source_continue" msgid="4375745439457209366">"Vazhdo"</string>
+    <string name="external_sources_settings" msgid="4046964413071713807">"Cilësimet"</string>
+    <string name="wear_app_channel" msgid="1960809674709107850">"Instalimi/çinstalimi i aplikacioneve të Wear"</string>
 </resources>
