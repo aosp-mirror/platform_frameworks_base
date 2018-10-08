@@ -172,7 +172,6 @@ public class QSFragment extends Fragment implements QS, CommandQueue.Callbacks {
     }
 
     private void setEditLocation(View view) {
-        Log.w(TAG, "I'm changing the location of the button!!!");
         View edit = view.findViewById(android.R.id.edit);
         int[] loc = edit.getLocationOnScreen();
         int x = loc[0] + edit.getWidth() / 2;
