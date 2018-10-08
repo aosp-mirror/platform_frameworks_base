@@ -1132,9 +1132,9 @@
     <string name="permdesc_accessCoarseLocation" product="default">This app can get your location based on network sources such as cell towers and Wi-Fi networks. These location services must be turned on and available on your phone for the app to be able to use them.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permlab_accessBackgroundLocation">access precise location in the background</string>
+    <string name="permlab_accessBackgroundLocation">access location in the background</string>
     <!-- Description of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
-    <string name="permdesc_accessBackgroundLocation">This app can get your exact location any time it is in the background. These location services must be turned on and available on your phone for the app to be able to use them. This may increase battery consumption.</string>
+    <string name="permdesc_accessBackgroundLocation">If this is granted additionally to the approximate or precise location access the app can access the location while running in the background.</string>
 
     <!-- Title of an application permission, listed so the user can choose whether they want to allow the application to do this. -->
     <string name="permlab_modifyAudioSettings">change your audio settings</string>
