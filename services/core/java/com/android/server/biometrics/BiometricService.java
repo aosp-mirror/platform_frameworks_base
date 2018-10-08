@@ -29,6 +29,7 @@ import android.content.pm.PackageManager;
 import android.database.ContentObserver;
 import android.hardware.biometrics.BiometricAuthenticator;
 import android.hardware.biometrics.BiometricConstants;
+import android.hardware.biometrics.BiometricPrompt;
 import android.hardware.biometrics.BiometricSourceType;
 import android.hardware.biometrics.IBiometricEnabledOnKeyguardCallback;
 import android.hardware.biometrics.IBiometricPromptReceiver;
@@ -255,6 +256,12 @@ public class BiometricService extends SystemService {
                 return;
             }
 
+            // Check the usage of this in system server. Need to remove this check if it becomes
+            // a public API.
+            if (bundle.getBoolean(BiometricPrompt.KEY_USE_DEFAULT_TITLE, false)) {
+                checkInternalPermission();
+            }
+
             final int callingUid = Binder.getCallingUid();
             final int callingPid = Binder.getCallingPid();
             final int callingUserId = UserHandle.getCallingUserId();
@@ -400,7 +407,7 @@ public class BiometricService extends SystemService {
 
     private void checkInternalPermission() {
         getContext().enforceCallingPermission(USE_BIOMETRIC_INTERNAL,
-                "Must have MANAGE_BIOMETRIC permission");
+                "Must have USE_BIOMETRIC_INTERNAL permission");
     }
 
     private void checkPermission() {

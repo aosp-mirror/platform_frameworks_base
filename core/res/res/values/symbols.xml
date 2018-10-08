@@ -2394,6 +2394,7 @@
   <java-symbol type="string" name="config_keyguardComponent" />
 
   <!-- Biometric messages -->
+  <java-symbol type="string" name="biometric_dialog_default_title" />
   <java-symbol type="string" name="biometric_error_hw_unavailable" />
   <java-symbol type="string" name="biometric_not_recognized" />
 

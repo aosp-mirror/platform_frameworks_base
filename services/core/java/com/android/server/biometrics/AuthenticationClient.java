@@ -27,6 +27,7 @@ import android.os.IBinder;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.security.KeyStore;
+import android.text.TextUtils;
 import android.util.Slog;
 
 import com.android.internal.statusbar.IStatusBarService;
@@ -203,6 +204,16 @@ public abstract class AuthenticationClient extends ClientMonitor {
             }
         }
         return super.onError(deviceId, error, vendorCode);
+    }
+
+    public void setTitleIfEmpty(CharSequence title) {
+        if (TextUtils.isEmpty(mBundle.getCharSequence(BiometricPrompt.KEY_TITLE))) {
+            mBundle.putCharSequence(BiometricPrompt.KEY_TITLE, title);
+        }
+    }
+
+    public boolean isBiometricPrompt() {
+        return mBundle != null;
     }
 
     private void notifyClientAuthenticationSucceeded(BiometricAuthenticator.Identifier identifier)
