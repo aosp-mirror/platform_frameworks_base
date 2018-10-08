@@ -1473,12 +1473,13 @@ public final class Settings {
      * <p> If an user action is disabled by policy, this dialog can be triggered to let
      * the user know about this.
      * <p>
-     * Input: Nothing.
+     * Input: {@link Intent#EXTRA_USER}: The user of the admin.
      * <p>
      * Output: Nothing.
      *
      * @hide
      */
+    // Intent#EXTRA_USER_ID can also be used
     @SystemApi
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_SHOW_ADMIN_SUPPORT_DETAILS
