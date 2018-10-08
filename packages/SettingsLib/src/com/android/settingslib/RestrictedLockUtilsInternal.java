@@ -164,6 +164,17 @@ public class RestrictedLockUtilsInternal extends RestrictedLockUtils {
     }
 
     /**
+     * @return the UserHandle for a userId. Return null for USER_NULL
+     */
+    private static UserHandle getUserHandleOf(@UserIdInt int userId) {
+        if (userId == UserHandle.USER_NULL) {
+            return null;
+        } else {
+            return UserHandle.of(userId);
+        }
+    }
+
+    /**
      * Filter a set of device admins based on a predicate {@code check}. This is equivalent to
      * {@code admins.stream().filter(check).map(x → new EnforcedAdmin(admin, userId)} except it's
      * returning a zero/one/many-type thing.
@@ -183,11 +194,13 @@ public class RestrictedLockUtilsInternal extends RestrictedLockUtils {
         if (admins == null) {
             return null;
         }
+
+        final UserHandle user = getUserHandleOf(userId);
         EnforcedAdmin enforcedAdmin = null;
         for (ComponentName admin : admins) {
             if (check.isEnforcing(dpm, admin, userId)) {
                 if (enforcedAdmin == null) {
-                    enforcedAdmin = new EnforcedAdmin(admin, userId);
+                    enforcedAdmin = new EnforcedAdmin(admin, user);
                 } else {
                     return EnforcedAdmin.MULTIPLE_ENFORCED_ADMIN;
                 }
@@ -211,7 +224,7 @@ public class RestrictedLockUtilsInternal extends RestrictedLockUtils {
         IPackageManager ipm = AppGlobals.getPackageManager();
         try {
             if (ipm.getBlockUninstallForUser(packageName, userId)) {
-                return getProfileOrDeviceOwner(context, userId);
+                return getProfileOrDeviceOwner(context, getUserHandleOf(userId));
             }
         } catch (RemoteException e) {
             // Nothing to do
@@ -230,7 +243,7 @@ public class RestrictedLockUtilsInternal extends RestrictedLockUtils {
         IPackageManager ipm = AppGlobals.getPackageManager();
         try {
             if (ipm.isPackageSuspendedForUser(packageName, userId)) {
-                return getProfileOrDeviceOwner(context, userId);
+                return getProfileOrDeviceOwner(context, getUserHandleOf(userId));
             }
         } catch (RemoteException | IllegalArgumentException e) {
             // Nothing to do
@@ -245,14 +258,15 @@ public class RestrictedLockUtilsInternal extends RestrictedLockUtils {
         if (dpm == null) {
             return null;
         }
-        EnforcedAdmin admin = getProfileOrDeviceOwner(context, userId);
+        EnforcedAdmin admin = getProfileOrDeviceOwner(context, getUserHandleOf(userId));
         boolean permitted = true;
         if (admin != null) {
             permitted = dpm.isInputMethodPermittedByAdmin(admin.component,
                     packageName, userId);
         }
         int managedProfileId = getManagedProfileId(context, userId);
-        EnforcedAdmin profileAdmin = getProfileOrDeviceOwner(context, managedProfileId);
+        EnforcedAdmin profileAdmin = getProfileOrDeviceOwner(context,
+                getUserHandleOf(managedProfileId));
         boolean permittedByProfileAdmin = true;
         if (profileAdmin != null) {
             permittedByProfileAdmin = dpm.isInputMethodPermittedByAdmin(profileAdmin.component,
@@ -298,14 +312,15 @@ public class RestrictedLockUtilsInternal extends RestrictedLockUtils {
         if (dpm == null) {
             return null;
         }
-        EnforcedAdmin admin = getProfileOrDeviceOwner(context, userId);
+        EnforcedAdmin admin = getProfileOrDeviceOwner(context, getUserHandleOf(userId));
         boolean permitted = true;
         if (admin != null) {
             permitted = dpm.isAccessibilityServicePermittedByAdmin(admin.component,
                     packageName, userId);
         }
         int managedProfileId = getManagedProfileId(context, userId);
-        EnforcedAdmin profileAdmin = getProfileOrDeviceOwner(context, managedProfileId);
+        EnforcedAdmin profileAdmin = getProfileOrDeviceOwner(context,
+                getUserHandleOf(managedProfileId));
         boolean permittedByProfileAdmin = true;
         if (profileAdmin != null) {
             permittedByProfileAdmin = dpm.isAccessibilityServicePermittedByAdmin(
@@ -365,7 +380,7 @@ public class RestrictedLockUtilsInternal extends RestrictedLockUtils {
         if (!isAccountTypeDisabled) {
             return null;
         }
-        return getProfileOrDeviceOwner(context, userId);
+        return getProfileOrDeviceOwner(context, getUserHandleOf(userId));
     }
 
     /**
@@ -377,7 +392,8 @@ public class RestrictedLockUtilsInternal extends RestrictedLockUtils {
      */
     public static EnforcedAdmin checkIfMeteredDataRestricted(Context context,
             String packageName, int userId) {
-        final EnforcedAdmin enforcedAdmin = getProfileOrDeviceOwner(context, userId);
+        final EnforcedAdmin enforcedAdmin = getProfileOrDeviceOwner(context,
+                getUserHandleOf(userId));
         if (enforcedAdmin == null) {
             return null;
         }
@@ -402,7 +418,7 @@ public class RestrictedLockUtilsInternal extends RestrictedLockUtils {
             return null;
         }
         ComponentName adminComponent = dpm.getDeviceOwnerComponentOnCallingUser();
-        return new EnforcedAdmin(adminComponent, UserHandle.myUserId());
+        return new EnforcedAdmin(adminComponent, getUserHandleOf(UserHandle.myUserId()));
     }
 
     /**
@@ -434,10 +450,11 @@ public class RestrictedLockUtilsInternal extends RestrictedLockUtils {
                 return null;
             }
             EnforcedAdmin enforcedAdmin = null;
+            final UserHandle user = getUserHandleOf(userId);
             for (ComponentName admin : admins) {
                 if (check.isEnforcing(dpm, admin, userId)) {
                     if (enforcedAdmin == null) {
-                        enforcedAdmin = new EnforcedAdmin(admin, userId);
+                        enforcedAdmin = new EnforcedAdmin(admin, user);
                     } else {
                         return EnforcedAdmin.MULTIPLE_ENFORCED_ADMIN;
                     }
@@ -488,13 +505,14 @@ public class RestrictedLockUtilsInternal extends RestrictedLockUtils {
             if (admins == null) {
                 continue;
             }
+            final UserHandle user = getUserHandleOf(userInfo.id);
             final boolean isSeparateProfileChallengeEnabled =
                     sProxy.isSeparateProfileChallengeEnabled(lockPatternUtils, userInfo.id);
             for (ComponentName admin : admins) {
                 if (!isSeparateProfileChallengeEnabled) {
                     if (check.isEnforcing(dpm, admin, userInfo.id)) {
                         if (enforcedAdmin == null) {
-                            enforcedAdmin = new EnforcedAdmin(admin, userInfo.id);
+                            enforcedAdmin = new EnforcedAdmin(admin, user);
                         } else {
                             return EnforcedAdmin.MULTIPLE_ENFORCED_ADMIN;
                         }
@@ -511,7 +529,7 @@ public class RestrictedLockUtilsInternal extends RestrictedLockUtils {
                     DevicePolicyManager parentDpm = sProxy.getParentProfileInstance(dpm, userInfo);
                     if (check.isEnforcing(parentDpm, admin, userInfo.id)) {
                         if (enforcedAdmin == null) {
-                            enforcedAdmin = new EnforcedAdmin(admin, userInfo.id);
+                            enforcedAdmin = new EnforcedAdmin(admin, user);
                         } else {
                             return EnforcedAdmin.MULTIPLE_ENFORCED_ADMIN;
                         }
@@ -535,7 +553,7 @@ public class RestrictedLockUtilsInternal extends RestrictedLockUtils {
         ComponentName adminComponent = dpm.getDeviceOwnerComponentOnAnyUser();
         if (adminComponent != null) {
             return new EnforcedAdmin(
-                    adminComponent, enforcedRestriction, dpm.getDeviceOwnerUserId());
+                    adminComponent, enforcedRestriction, dpm.getDeviceOwnerUser());
         }
         return null;
     }
@@ -556,7 +574,7 @@ public class RestrictedLockUtilsInternal extends RestrictedLockUtils {
         }
         ComponentName adminComponent = dpm.getProfileOwnerAsUser(userId);
         if (adminComponent != null) {
-            return new EnforcedAdmin(adminComponent, enforcedRestriction, userId);
+            return new EnforcedAdmin(adminComponent, enforcedRestriction, getUserHandleOf(userId));
         }
         return null;
     }
