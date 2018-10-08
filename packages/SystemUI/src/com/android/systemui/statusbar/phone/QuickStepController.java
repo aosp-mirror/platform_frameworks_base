@@ -42,7 +42,7 @@ import android.hardware.input.InputManager;
 import android.os.Handler;
 import android.os.RemoteException;
 import android.os.SystemClock;
-import android.os.SystemProperties;
+import android.provider.Settings;
 import android.util.FloatProperty;
 import android.util.Log;
 import android.util.Slog;
@@ -77,10 +77,11 @@ public class QuickStepController implements GestureHelper {
     private static final float GRADIENT_WIDTH = .75f;
 
     /** Experiment to swipe home button left to execute a back key press */
-    private static final String PULL_HOME_GO_BACK_PROP = "persist.quickstepcontroller.homegoesback";
-    private static final String HIDE_BACK_BUTTON_PROP = "persist.quickstepcontroller.hideback";
+    private static final String PULL_HOME_GO_BACK_PROP = "quickstepcontroller_homegoesback";
+    private static final String HIDE_BACK_BUTTON_PROP = "quickstepcontroller_hideback";
     private static final String BACK_AFTER_END_PROP
-            = "persist.quickstepcontroller.homegoesbackwhenend";
+            = "quickstepcontroller_homegoesbackwhenend";
+    private static final String NAVBAR_EXPERIMENTS_DISABLED = "navbarexperiments_disabled";
     private static final long BACK_BUTTON_FADE_OUT_ALPHA = 60;
     private static final long BACK_BUTTON_FADE_IN_ALPHA = 150;
     private static final long BACK_GESTURE_POLL_TIMEOUT = 1000;
@@ -123,14 +124,6 @@ public class QuickStepController implements GestureHelper {
     private final Matrix mTransformGlobalMatrix = new Matrix();
     private final Matrix mTransformLocalMatrix = new Matrix();
     private final Paint mTrackPaint = new Paint();
-
-    public static boolean swipeHomeGoBackGestureEnabled() {
-        return SystemProperties.getBoolean(PULL_HOME_GO_BACK_PROP, false);
-    }
-    public static boolean shouldhideBackButton() {
-        return swipeHomeGoBackGestureEnabled()
-            && SystemProperties.getBoolean(HIDE_BACK_BUTTON_PROP, false);
-    }
 
     private final FloatProperty<QuickStepController> mTrackAlphaProperty =
             new FloatProperty<QuickStepController>("TrackAlpha") {
@@ -211,7 +204,7 @@ public class QuickStepController implements GestureHelper {
     public void setComponents(NavigationBarView navigationBarView) {
         mNavigationBarView = navigationBarView;
 
-        mNavigationBarView.getBackButton().setVisibility(shouldhideBackButton()
+        mNavigationBarView.getBackButton().setVisibility(shouldhideBackButton(mContext)
                 ? View.GONE
                 : View.VISIBLE);
     }
@@ -344,7 +337,7 @@ public class QuickStepController implements GestureHelper {
                     // Passing the drag slop then touch slop will start quick step
                     if (allowDrag) {
                         startQuickScrub();
-                    } else if (swipeHomeGoBackGestureEnabled()
+                    } else if (swipeHomeGoBackGestureEnabled(mContext)
                             && mNavigationBarView.getDownHitTarget() == HIT_TARGET_HOME
                             && mDragPositive ? pos < touchDown : pos > touchDown) {
                         startBackGesture();
@@ -607,10 +600,9 @@ public class QuickStepController implements GestureHelper {
         if (!mBackGestureActive) {
             mBackGestureActive = true;
             mNavigationBarView.getHomeButton().abortCurrentGesture();
-            final boolean runBackMidGesture
-                    = !SystemProperties.getBoolean(BACK_AFTER_END_PROP, false);
+            final boolean runBackMidGesture = !shouldExecuteBackOnUp(mContext);
             if (mCanPerformBack) {
-                if (!shouldhideBackButton()) {
+                if (!shouldhideBackButton(mContext)) {
                     mNavigationBarView.getBackButton().setAlpha(0 /* alpha */, true /* animate */,
                             BACK_BUTTON_FADE_OUT_ALPHA);
                 }
@@ -638,11 +630,11 @@ public class QuickStepController implements GestureHelper {
                 mHomeAnimator.translationX(0);
             }
             mHomeAnimator.start();
-            if (!shouldhideBackButton()) {
+            if (!shouldhideBackButton(mContext)) {
                 mNavigationBarView.getBackButton().setAlpha(
                         mOverviewEventSender.getBackButtonAlpha(), true /* animate */);
             }
-            if (SystemProperties.getBoolean(BACK_AFTER_END_PROP, false)) {
+            if (shouldExecuteBackOnUp(mContext)) {
                 performBack();
             }
         }
@@ -709,7 +701,8 @@ public class QuickStepController implements GestureHelper {
     }
 
     private boolean canPerformHomeBackGesture() {
-        return swipeHomeGoBackGestureEnabled() && mOverviewEventSender.getBackButtonAlpha() > 0;
+        return swipeHomeGoBackGestureEnabled(mContext)
+                && mOverviewEventSender.getBackButtonAlpha() > 0;
     }
 
     private void performBack() {
@@ -745,5 +738,24 @@ public class QuickStepController implements GestureHelper {
             event.transform(mTransformLocalMatrix);
         }
         return false;
+    }
+
+    private static boolean getBoolGlobalSetting(Context context, String key) {
+        return Settings.Global.getInt(context.getContentResolver(), key, 0) != 0;
+    }
+
+    public static boolean swipeHomeGoBackGestureEnabled(Context context) {
+        return !getBoolGlobalSetting(context, NAVBAR_EXPERIMENTS_DISABLED)
+            && getBoolGlobalSetting(context, PULL_HOME_GO_BACK_PROP);
+    }
+
+    public static boolean shouldhideBackButton(Context context) {
+        return swipeHomeGoBackGestureEnabled(context)
+            && getBoolGlobalSetting(context, HIDE_BACK_BUTTON_PROP);
+    }
+
+    public static boolean shouldExecuteBackOnUp(Context context) {
+        return !getBoolGlobalSetting(context, NAVBAR_EXPERIMENTS_DISABLED)
+            && getBoolGlobalSetting(context, BACK_AFTER_END_PROP);
     }
 }
