@@ -49,7 +49,7 @@ struct JAudioPresentationInfo {
             }
 
             constructID = env->GetMethodID(clazz, "<init>",
-                                "(IILjava/util/Map;Ljava/lang/String;IZZZ)V");
+                                "(IILandroid/icu/util/ULocale;IZZZLjava/util/Map;)V");
             env->DeleteLocalRef(lclazz);
 
             // list objects
@@ -104,21 +104,26 @@ struct JAudioPresentationInfo {
                 // don't expose private keys (starting with android._)
                 continue;
             }
-
             jobject valueObj = NULL;
-
             AString val;
             CHECK(msg->findString(key, &val));
-
             valueObj = env->NewStringUTF(val.c_str());
-
             if (valueObj != NULL) {
-                jstring keyObj = env->NewStringUTF(key);
-
-                env->CallObjectMethod(hashMap, hashMapPutID, keyObj, valueObj);
-
-                env->DeleteLocalRef(keyObj); keyObj = NULL;
+                ScopedLocalRef<jclass> localeClazz(env, env->FindClass("android/icu/util/ULocale"));
+                if (localeClazz.get() == NULL) {
+                    return -EINVAL;
+                }
+                jmethodID localeConstructID =
+                        env->GetMethodID(localeClazz.get(), "<init>", "(Ljava/lang/String;)V");
+                if (localeConstructID == NULL) {
+                    return -EINVAL;
+                }
+                jstring jLanguage = env->NewStringUTF(key);
+                jobject jLocale = env->NewObject(localeClazz.get(), localeConstructID, jLanguage);
+                env->CallObjectMethod(hashMap, hashMapPutID, jLocale, valueObj);
+                env->DeleteLocalRef(jLocale); jLocale = NULL;
                 env->DeleteLocalRef(valueObj); valueObj = NULL;
+                env->DeleteLocalRef(jLanguage); jLanguage = NULL;
             }
         }
 
@@ -142,26 +147,36 @@ struct JAudioPresentationInfo {
             if (ConvertMessageToMap(env, labelMessage, &jLabelObject) != OK) {
                 return NULL;
             }
-            jstring jLanguage = env->NewStringUTF(ap->mLanguage.string());
-
+            ScopedLocalRef<jclass> localeClazz(env, env->FindClass("android/icu/util/ULocale"));
+            if (localeClazz.get() == NULL) {
+                return NULL;
+            }
+            jmethodID localeConstructID =
+                    env->GetMethodID(localeClazz.get(), "<init>", "(Ljava/lang/String;)V");
+            if (localeConstructID == NULL) {
+                return NULL;
+            }
+            jstring jLanguage = env->NewStringUTF(ap->mLanguage.c_str());
+            jobject jLocale = env->NewObject(localeClazz.get(), localeConstructID, jLanguage);
             jobject jValueObj = env->NewObject(fields.clazz, fields.constructID,
                                 static_cast<jint>(ap->mPresentationId),
                                 static_cast<jint>(ap->mProgramId),
-                                jLabelObject,
-                                jLanguage,
+                                jLocale,
                                 static_cast<jint>(ap->mMasteringIndication),
                                 static_cast<jboolean>((ap->mAudioDescriptionAvailable == 1) ?
                                     1 : 0),
                                 static_cast<jboolean>((ap->mSpokenSubtitlesAvailable == 1) ?
                                     1 : 0),
                                 static_cast<jboolean>((ap->mDialogueEnhancementAvailable == 1) ?
-                                    1 : 0));
+                                    1 : 0),
+                                jLabelObject);
             if (jValueObj == NULL) {
                 env->DeleteLocalRef(jLanguage); jLanguage = NULL;
                 return NULL;
             }
 
             env->CallBooleanMethod(list, fields.listAddId, jValueObj);
+            env->DeleteLocalRef(jLocale); jLocale = NULL;
             env->DeleteLocalRef(jValueObj); jValueObj = NULL;
             env->DeleteLocalRef(jLanguage); jLanguage = NULL;
         }
