@@ -16,141 +16,76 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_name" msgid="2738748390251381682">"ໂຕຕິດຕັ້ງແພັກເກດ"</string>
-    <string name="next" msgid="3057143178373252333">"ຕໍ່ໄປ"</string>
-    <string name="install" msgid="5896438203900042068">"ຕິດຕັ້ງ"</string>
-    <string name="done" msgid="3889387558374211719">"ແລ້ວໆ"</string>
-    <string name="cancel" msgid="8360346460165114585">"ຍົກເລີກ"</string>
-    <string name="installing" msgid="8613631001631998372">"ກຳລັງຕິດຕັ້ງ…"</string>
-    <string name="installing_app" msgid="4097935682329028894">"ກຳລັງຕິດຕັ້ງ <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
-    <string name="install_done" msgid="3682715442154357097">"ຕິດຕັ້ງແອັບຯແລ້ວ."</string>
-    <string name="install_confirm_question" msgid="7295206719219043890">"ທ່ານຕ້ອງການຕິດຕັ້ງແອັບພລິເຄຊັນນີ້ບໍ່? ມັນຈະໄດ້ສິດການເຂົ້າເຖິງ:"</string>
-    <string name="install_confirm_question_no_perms" msgid="5918305641302873520">"ທ່ານ​ຕ້ອງ​ການ​ຕິດ​ຕັ້ງ​ແອັບພລິເຄຊັນນີ້ບໍ່​? ມັນ​ບໍ່​ຕ້ອງໃຊ້ສິດທິການ​ເຂົ້າ​ເຖິງ​​ພິ​ເສດໃດໆ."</string>
-    <string name="install_confirm_question_update" msgid="4624159567361487964">"ທ່ານຕ້ອງການຕິດຕັ້ງອັບເດດໃສ່ແອັບພລິເຄຊັນນີ້ບໍ່? ຂໍ້ມູນຂອງທ່ານທີ່ມີຢູ່ກ່ອນແລ້ວຈະຍັງຄົງຢູ່ຄືເກົ່າ. ແອັບພລິເຄຊັນທີ່ຜ່ານການອັບເດດຈະສາມາດເຂົ້າເຖິງ:"</string>
-    <string name="install_confirm_question_update_system" msgid="1302330093676416336">"ທ່ານຕ້ອງການທີ່ຈະຕິດຕັ້ງຊຸດອັບເດດສຳລັບແອັບຯນີ້ບໍ່? ຂໍ້ມູນທີ່ທ່ານມີຢູ່ຈະບໍ່ສູນຫາຍ. ການອັບເດດແອັບພລິເຄຊັນນີ້ຈະສາມາດເຂົ້າເຖິງ:"</string>
-    <string name="install_confirm_question_update_no_perms" msgid="4885928136844618944">"ທ່ານຕ້ອງການຕິດຕັ້ງອັບເດດໃສ່ແອັບພລິເຄຊັນນີ້ບໍ່? ຂໍ້ມູນຂອງທ່ານທີ່ມີຢູ່ກ່ອນແລ້ວຈະຍັງຄົງຢູ່ຄືເກົ່າ. ມັນບໍ່ຕ້ອງການສິດເຂົ້າເຖິງພິເສດໃດໆ."</string>
-    <string name="install_confirm_question_update_system_no_perms" msgid="7676593512694724374">"ທ່ານຕ້ອງການຕິດຕັ້ງອັບເດດໃສ່ແອັບພລິເຄຊັນທີ່ມີມານຳນີ້ບໍ່? ຂໍ້ມູນຂອງທ່ານທີ່ມີຢູ່ກ່ອນແລ້ວຈະຍັງຄົງຢູ່ຄືເກົ່າ. ມັນບໍ່ຕ້ອງການສິດເຂົ້າເຖິງພິເສດໃດໆເລີຍ."</string>
-    <string name="install_failed" msgid="6579998651498970899">"ບໍ່ໄດ້ຕິດຕັ້ງແອັບຯເທື່ອ."</string>
-    <string name="install_failed_blocked" msgid="1606870930588770025">"ແພັກ​ເກດ​ຖືກບ​ລັອກ​ບໍ່​ໃຫ້​ໄດ້​ຮັບ​ການ​ຕິດ​ຕັ້ງ"</string>
-    <string name="install_failed_conflict" msgid="5336045235168070954">"App not installed as package conflicts with an existing package."</string>
-    <string name="install_failed_incompatible" product="tablet" msgid="6682387386242708974">"App not installed as app isn\'t compatible with your tablet."</string>
-    <string name="install_failed_incompatible" product="tv" msgid="3553367270510072729">"ແອັບ​ນີ້​ບໍ່​ເຂົ້າ​ກັນ​ໄດ້​ກັບໂທລະພາບຂອງ​ທ່ານ."</string>
-    <string name="install_failed_incompatible" product="default" msgid="7917996365659426872">"App not installed as app isn\'t compatible with your phone."</string>
-    <string name="install_failed_invalid_apk" msgid="269885385245534742">"App not installed as package appears to be invalid."</string>
-    <string name="install_failed_msg" product="tablet" msgid="8368835262605608787">"ບໍ່ສາມາດຕິດຕັ້ງ <xliff:g id="APP_NAME">%1$s</xliff:g> ໃສ່ແທັບເລັດຂອງທ່ານໄດ້."</string>
-    <string name="install_failed_msg" product="tv" msgid="3990457938384021566">"<xliff:g id="APP_NAME">%1$s</xliff:g> ບໍ່​ສາ​ມາດ​ຕິດ​ຕັ້ງ​ໃສ່ໂທລະພາບຂອງ​ທ່ານ​ໄດ້."</string>
-    <string name="install_failed_msg" product="default" msgid="8554909560982962052">"ບໍ່​ສາ​ມາດ​ຕິດ​ຕັ້ງ​ <xliff:g id="APP_NAME">%1$s</xliff:g> ໃນໂທລະສັບຂອງທ່ານໄດ້."</string>
-    <string name="launch" msgid="4826921505917605463">"ເປີດ"</string>
-    <string name="unknown_apps_admin_dlg_text" msgid="7488386758312008790">"ຜູ້ເບິ່ງແຍງລະບົບຂອງທ່ານບໍ່ອະນຸຍາດໃຫ້ຕິດຕັ້ງແອັບທີ່ໄດ້ມາຈາກແຫຼ່ງທີ່ບໍ່ຮູ້ຈັກ"</string>
-    <string name="unknown_apps_user_restriction_dlg_text" msgid="5785226253054083336">"ຜູ້ໃຊ້ນີ້ບໍ່ສາມາດຕິດຕັ້ງແອັບທີ່ບໍ່ຮູ້ຈັກໄດ້"</string>
-    <string name="install_apps_user_restriction_dlg_text" msgid="5041150186260066212">"ຜູ້ໃຊ້ນີ້ບໍ່ໄດ້ຮັບອະນຸຍາດໃຫ້ຕິດຕັ້ງແອັບໄດ້"</string>
-    <string name="ok" msgid="3468756155452870475">"ຕົກລົງ"</string>
-    <string name="manage_applications" msgid="4033876279091996596">"ຈັດການແອັບຯ"</string>
-    <string name="out_of_space_dlg_title" msgid="7843674437613797326">"ພື້ນທີ່ຫວ່າງບໍ່ພຽງພໍ"</string>
-    <string name="out_of_space_dlg_text" msgid="4774775404294282216">"ບໍ່ສາມາດຕິດຕັ້ງ <xliff:g id="APP_NAME">%1$s</xliff:g> ໄດ້. ກະລຸນາລຶບຂໍ້ມູນທີ່ບໍ່ຈຳເປັນອອກ ເພື່ອໃຫ້ມີບ່ອນຈັດເກັບຂໍ້ມູນຫວ່າງເພີ່ມຂຶ້ນ ແລ້ວລອງໃໝ່ອີກຄັ້ງ."</string>
-    <string name="app_not_found_dlg_title" msgid="2692335460569505484">"ບໍ່ພົບເຫັນແອັບຯ"</string>
-    <string name="app_not_found_dlg_text" msgid="6107465056055095930">"ບໍ່ພົບແອັບຯໃນລາຍການຂອງແອັບຯທີ່ຕິດຕັ້ງແລ້ວ."</string>
-    <string name="user_is_not_allowed_dlg_title" msgid="118128026847201582">"ບໍ່ອະນຸຍາດແລ້ວ"</string>
-    <string name="user_is_not_allowed_dlg_text" msgid="739716827677987545">"ຜູ້ໃຊ້ປັດຈຸບັນບໍ່ໄດ້ຮັບອະນຸຍາດໃຫ້ຖອນການຕິດຕັ້ງນີ້ໄດ້."</string>
-    <string name="generic_error_dlg_title" msgid="2684806600635296961">"ຜິດພາດ"</string>
-    <string name="generic_error_dlg_text" msgid="4288738047825333954">"ບໍ່ສາມາດຖອນການຕິດຕັ້ງແອັບໄດ້."</string>
-    <string name="uninstall_application_title" msgid="1860074100811653963">"ຖອນ​ການ​ຕິດ​ຕັ້ງແອັບຯ"</string>
-    <string name="uninstall_update_title" msgid="4146940097553335390">"ຖອນ​ການ​ຕິດ​ຕັ້ງ​ອັບເດດ"</string>
-    <string name="uninstall_activity_text" msgid="6680688689803932550">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> ແມ່ນ​ສ່ວນ​ນຶ່ງ​ຂອງແອັບຯຂ້າງລຸ່ມ:"</string>
-    <string name="uninstall_application_text" msgid="6691975835951187030">"ທ່ານຕ້ອງການຖອນການຕິດຕັ້ງແອັບຯນີ້ບໍ່?"</string>
-    <string name="uninstall_application_text_all_users" msgid="5574704453233525222">"ທ່ານຕ້ອງການທີ່ຈະຖອນການຕິດຕັ້ງແອັບຯນີ້ ສຳລັງຜູ່ໃຊ້"<b>"ທຸກຄົນ"</b>"ບໍ່? ແອັບພລິເຄຊັນ ແລະຂໍ້ມູນຂອງມັນຈະຖືກລຶບອອກ ຈາກຜູ່ໃຊ້"<b>"ທັງໝົດ"</b>"ໃນອຸປະກອນນີ້."</string>
-    <string name="uninstall_application_text_user" msgid="8766882355635485733">"ທ່ານ​ຕ້ອງ​ການ​ຖອນ​ການ​ຕິດ​ຕັ້ງ​ແອັບຯ​ນີ້​ສຳ​ລັບ​ຜູ່​ໃຊ້ <xliff:g id="USERNAME">%1$s</xliff:g> ບໍ່?"</string>
-    <string name="uninstall_update_text" msgid="1394549691152728409">"ແທນທີ່ແອັບນີ້ດ້ວຍເວີຊັນທີ່ມາຈາກໂຮງງານບໍ? ຂໍ້ມູນທັງໝົດຈະຖືກລຶບອອກ."</string>
-    <string name="uninstall_update_text_multiuser" msgid="2083665452990861991">"ແທນທີ່ແອັບນີ້ດ້ວຍເວີຊັນທີ່ມາຈາກໂຮງງານບໍ? ຂໍ້ມູນທັງໝົດຈະຖືກລຶບອອກ ເຊິ່ງມີຜົນກັບຜູ້ໃຊ້ອຸປະກອນນີ້ທຸກຄົນ ຮວມທັງຄົນທີ່ມີໂປຣໄຟລ໌ບ່ອນເຮັດວຽກນຳ."</string>
-    <string name="uninstalling_notification_channel" msgid="5698369661583525583">"ກຳລັງຖອນການຕິດຕັ້ງ"</string>
-    <string name="uninstall_failure_notification_channel" msgid="8224276726364132314">"ຖອນການຕິດຕັ້ງບໍ່ສຳເລັດ"</string>
-    <string name="uninstalling" msgid="5556217435895938250">"ກຳລັງຖອນການຕິດຕັ້ງ..."</string>
-    <string name="uninstalling_app" msgid="2773617614877719294">"ກຳລັງຖອນການຕິດຕັ້ງ <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
-    <string name="uninstall_done" msgid="3792487853420281888">"ຖອນການຕິດຕັ້ງສຳເລັດແລ້ວ."</string>
-    <string name="uninstall_done_app" msgid="775837862728680479">"ຖອນການຕິດຕັ້ງ <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ແລ້ວ"</string>
-    <string name="uninstall_failed" msgid="631122574306299512">"ການຖອນການຕິດຕັ້ງບໍ່ສຳເລັດ."</string>
-    <string name="uninstall_failed_app" msgid="945277834056527022">"ຖອນການຕິດຕັ້ງ <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ບໍ່ສຳເລັດ."</string>
-    <string name="uninstall_failed_device_policy_manager" msgid="2727361164694743362">"ບໍ່ສາມາດຖອນການຕິດຕັ້ງແອັບອຸປະກອນທີ່ເຮັດວຽກຢູ່ໄດ້"</string>
-    <string name="uninstall_failed_device_policy_manager_of_user" msgid="2161462242935805756">"ບໍ່ສາມາດຖອນການຕິດຕັ້ງແອັບຜູ້ເບິ່ງແຍງລະບົບທີ່ເຮັດວຽກຢູ່ສຳລັບ <xliff:g id="USERNAME">%1$s</xliff:g> ໄດ້"</string>
-    <string name="uninstall_all_blocked_profile_owner" msgid="3544933038594382346">"ແອັບນີ້ຈຳເປັນສຳລັບບາງຜູ້ໃຊ້ ຫຼື ບາງໂປຣໄຟລ໌ ແລະ ຖືກຖອນການຕິດຕັ້ງສຳລັບຄົນອື່ນແລ້ວ"</string>
-    <string name="uninstall_blocked_profile_owner" msgid="6912141045528994954">"ແອັບນີ້ຈຳເປັນຕ້ອງໃຊ້ກັບໂປຣໄຟລ໌ຂອງທ່ານ ແລະ ບໍ່ສາມາດຖອນການຕິດຕັ້ງໄດ້."</string>
-    <string name="uninstall_blocked_device_owner" msgid="7074175526413453063">"​ແອັບຯ​ນີ້​ຕ້ອງ​ໃຊ້​ໂດຍ​ຜູ່​ເບິ່ງ​ແຍງ​ລະ​ບົບ​ຂອງ​ທ່ານ ແລະ​ບໍ່​ສາ​ມາດ​ຖອນ​ການ​ຕິດ​ຕັ້ງ​ໄດ້."</string>
-    <string name="manage_device_administrators" msgid="118178632652346535">"ຈັດການແອັບຜູ້ເບິ່ງແຍງອຸປະກອນ"</string>
-    <string name="manage_users" msgid="3125018886835668847">"ຈັດການຜູ້ໃຊ້"</string>
-    <string name="uninstall_failed_msg" msgid="8969754702803951175">"<xliff:g id="APP_NAME">%1$s</xliff:g> ບໍ່ສາມາດຖອນອອກໄດ້."</string>
-    <string name="Parse_error_dlg_text" msgid="7623286983621067011">"ເກີດບັນຫາໃນການວິເຄາະແພັກເກດ."</string>
-    <string name="newPerms" msgid="6039428254474104210">"ໃໝ່"</string>
-    <string name="allPerms" msgid="1024385515840703981">"ທັງໝົດ"</string>
-    <string name="privacyPerms" msgid="1850527049572617">"ຄວາມ​ເປັນ​ສ່ວນ​ຕົວ"</string>
-    <string name="devicePerms" msgid="6733560207731294504">"ການເຂົ້າເຖິງອຸປະກອນ"</string>
-    <string name="no_new_perms" msgid="6657813692169565975">"ອັບເດດນີ້ບໍ່ຕ້ອງການການອະນຸຍາດໃໝ່."</string>
-    <string name="grant_dialog_button_deny" msgid="2176510645406614340">"ປະຕິເສດ"</string>
-    <string name="grant_dialog_button_more_info" msgid="2218220771432058426">"ຂໍ້ມູນເພີ່ມເຕີມ"</string>
-    <string name="grant_dialog_button_deny_anyway" msgid="847960499284125250">"ຢືນຢັນປະຕິເສດ"</string>
-    <string name="current_permission_template" msgid="6378304249516652817">"<xliff:g id="CURRENT_PERMISSION_INDEX">%1$s</xliff:g> ໃນ <xliff:g id="PERMISSION_COUNT">%2$s</xliff:g>"</string>
-    <string name="permission_warning_template" msgid="7332275268559121742">"ອະນຸຍາດໃຫ້ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ສາມາດ <xliff:g id="ACTION">%2$s</xliff:g> ບໍ?"</string>
-    <string name="permission_add_background_warning_template" msgid="5391175001698541141">"ອະນຸຍາດ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ໃຫ້ໃຊ້ <xliff:g id="ACTION">%2$s</xliff:g> ໄດ້ທຸກເທື່ອບໍ?"</string>
-    <string name="allow_permission_foreground_only" msgid="1016389465002335286">"ໃນເວລາໃຊ້ແອັບເທົ່ານັ້ນ"</string>
-    <string name="allow_permission_always" msgid="7047379650123289823">"ທຸກເທື່ອ"</string>
-    <string name="deny_permission_deny_and_dont_ask_again" msgid="8003202275002645629">"ປະຕິເສດ ແລະ ຢ່າຖາມອີກ"</string>
-    <string name="permission_revoked_count" msgid="7386129423432613024">"ປິດໄວ້ <xliff:g id="COUNT">%1$d</xliff:g> ສິດອະນຸຍາດແລ້ວ"</string>
-    <string name="permission_revoked_all" msgid="8595742638132863678">"ປິດໄວ້ທັງໝົດແລ້ວ"</string>
-    <string name="permission_revoked_none" msgid="2059511550181271342">"ບໍ່ມີອັນໃດປິດການນຳໃຊ້ໄວ້"</string>
-    <string name="grant_dialog_button_allow" msgid="4616529495342337095">"ອະນຸຍາດ"</string>
-    <string name="app_permissions_breadcrumb" msgid="3390836200791539264">"ແອັບ"</string>
-    <string name="app_permissions" msgid="3146758905824597178">"ການ​ອະ​ນຸ​ຍາດ​ແອັບ"</string>
-    <string name="never_ask_again" msgid="1089938738199748687">"ບໍ່ຕ້ອງຖາມອີກ"</string>
-    <string name="no_permissions" msgid="3210542466245591574">"​ບໍ່​ມີການ​ອະ​ນຸ​ຍາດ​"</string>
-    <string name="additional_permissions" msgid="6667573114240111763">"ການ​ອະ​ນຸ​ຍາດ​​ເພີ່ມ​ເຕີມ"</string>
-    <string name="app_permissions_info_button_label" msgid="7789812060395257748">"ເປີດຂໍ້ມູນແອັບ"</string>
-    <plurals name="additional_permissions_more" formatted="false" msgid="945127158155064388">
-      <item quantity="other"><xliff:g id="COUNT_1">%1$d</xliff:g> ເພີ່ມ​ເຕີມ</item>
-      <item quantity="one"><xliff:g id="COUNT_0">%1$d</xliff:g> ເພີ່ມ​ເຕີມ</item>
-    </plurals>
-    <string name="old_sdk_deny_warning" msgid="3872277112584842615">"ແອັບ​ນີ້​ຖືກ​ອອກ​ແບບ​ມາ​ສຳ​ລັບ Android ເວີ​ຊັນ​ເກົ່າ. ການ​ປະ​ຕິ​ເສດ​ການ​ອະ​ນຸ​ຍາດ​ອາດ​ຈະ​ເຮັດ​ໃຫ້​ມັນ​ບໍ່​ເຮັດ​ວຽກ​ຕາມ​ຕ້ອງ​ການ​ໄດ້​ອີກ."</string>
-    <string name="default_permission_description" msgid="4992892207044156668">"ເຮັດ​ການ​ດຳ​ເນີນ​ການ​ທີ່​ບໍ່​ຮູ້​ຈັກ"</string>
-    <string name="app_permissions_group_summary" msgid="4787239772223699263">"<xliff:g id="COUNT_0">%1$d</xliff:g> ໃນ <xliff:g id="COUNT_1">%2$d</xliff:g> ແອັບ​ໄດ້​ຮັບ​ອະ​ນຸ​ຍາດ​ແລ້ວ"</string>
-    <string name="menu_show_system" msgid="6773743421743728921">"ສະແດງລະບົບ"</string>
-    <string name="menu_hide_system" msgid="7595471742649432977">"ເຊື່ອງ​ລະ​ບົບ"</string>
-    <string name="no_apps" msgid="1965493419005012569">"ບໍ່ມີແອັບ"</string>
-    <string name="location_settings" msgid="1774875730854491297">"ການຕັ້ງຄ່າ​ທີ່​ຕັ້ງ"</string>
-    <string name="location_warning" msgid="8778701356292735971">"<xliff:g id="APP_NAME">%1$s</xliff:g> ແມ່ນ​ຜູ້​ໃຫ້​ບໍ​ລິ​ການ​ເລື່ອງ​ການ​ບໍ​ລິ​ການ​ທີ່​ຕັ້ງ​ສຳ​ລັບ​ອຸ​ປະ​ກອນ​ນີ້. ການ​ເຂົ້າ​ເຖິງ​ທີ່​ຕັ້ງ​ແມ່ນ​ສາ​ມາດ​ດັດ​ແປງ​ໄດ້​ຈາກ​ການ​ຕັ້ງ​ຄ່າ​ທີ່​ຕັ້ງ."</string>
-    <string name="system_warning" msgid="7103819124542305179">"ຖ້າ​ທ່ານ​ປະ​ຕິ​ເສດ​ການ​ອະ​ນຸ​ຍາດ​ນີ້, ຄຸນສົມບັດໃຊ້ງານ​ພື້ນ​ຖານ​ຂອງ​ອຸ​ປະ​ກອນ​ຂອງ​ທ່ານ​ອາດ​ຈະ​ບໍ່​ເຮັດ​ໜ້າ​ທີ່​ຕາມທີ່ກຳນົດໄວ້."</string>
-    <string name="permission_summary_enforced_by_policy" msgid="3418617316188986205">"ບັງ​ຄັບ​ໃຊ້​ຕາມ​ນະ​ໂຍ​ບາຍ​ແລ້ວ"</string>
-    <string name="permission_summary_disabled_by_policy_background_only" msgid="160007162349980265">"ປິດນຳໃຊ້ການເຂົ້າເຖິງໃນພື້ນຫຼັງຕາມນະໂຍບາຍແລ້ວ"</string>
-    <string name="permission_summary_enabled_by_policy_background_only" msgid="4834971700297385342">"ເປີດນຳໃຊ້ການເຂົ້າເຖິງໃນພື້ນຫຼັງຕາມນະໂຍບາຍແລ້ວ"</string>
-    <string name="permission_summary_enabled_by_policy_foreground_only" msgid="5150061275247925588">"ເປີດນຳໃຊ້ການເຂົ້າເຖິງໃນພື້ນໜ້າຕາມນະໂຍບາຍແລ້ວ"</string>
-    <string name="permission_summary_enforced_by_admin" msgid="1702707982488952544">"ຄວບຄຸມໂດຍຜູ້ເບິ່ງແຍງລະບົບ"</string>
-    <!-- no translation found for background_access_chooser_dialog_choices:0 (7142769853837915143) -->
-    <!-- no translation found for background_access_chooser_dialog_choices:1 (7804653189249679164) -->
-    <!-- no translation found for background_access_chooser_dialog_choices:2 (1131794379787779680) -->
-    <string name="permission_access_always" msgid="5642491469836594184">"ທຸກເທື່ອ"</string>
-    <string name="permission_access_only_foreground" msgid="6906814759741316041">"ໃນເວລາໃຊ້ແອັບເທົ່ານັ້ນ"</string>
-    <string name="permission_access_never" msgid="1258330706341318622">"ບໍ່ເລີຍ"</string>
-    <string name="loading" msgid="7811651799620593731">"ກຳລັງ​ໂຫລດ..."</string>
-    <string name="all_permissions" msgid="5156669007784613042">"ທຸກ​ການ​ອະ​ນຸ​ຍາດ"</string>
-    <string name="other_permissions" msgid="2016192512386091933">"ຄວາມ​​ສາ​ມາດ​​ອື່ນຂອງແອັບ"</string>
-    <string name="permission_request_title" msgid="1204446718549121199">"ການຮ້ອງຂໍການອະນຸຍາດ"</string>
-    <string name="screen_overlay_title" msgid="3021729846864038529">"ກວດ​ພົບ​ການ​ວາງ​ຊ້ອນ​ໜ້າ​ຈໍ​ແລ້ວ"</string>
-    <string name="screen_overlay_message" msgid="2141944461571677331">"ເພື່ອ​ປ່ຽນ​ແປງ​ການ​ຕັ້ງ​ຄ່າ​ການ​ອະ​ນຸ​ຍາດ​ນີ້, ກ່ອນ​ອື່ນ​ໝົດ​ທ່ານ​ຕ້ອງ​ປິດ​ການ​ວາງ​ຊ້ອນ​ໜ້າ​ຈໍ​ຈາກ​ແອັບ​ການ​ຕັ້ງ​ຄ່າ"</string>
-    <string name="screen_overlay_button" msgid="4344544843349937743">"ເປີດການຕັ້ງຄ່າ"</string>
-    <string name="wear_not_allowed_dlg_title" msgid="8104666773577525713">"Android Wear"</string>
-    <string name="wear_not_allowed_dlg_text" msgid="1322352525843583064">"ຕິດຕັ້ງ/ຖອນຕິດຕັ້ງ ຄຳສັ່ງທີ່ບໍ່ຮອງຮັບຢູ່ໃນ Wear."</string>
-    <string name="permission_review_title_template_install" msgid="6819338441305295479">"ເລືອກວ່າຈະອະນຸຍາດໃຫ້ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ເຂົ້າເຖິງຫຍັງໄດ້ແດ່"</string>
-    <string name="permission_review_title_template_update" msgid="8632233603161669426">"ອັບເດດ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ແລ້ວ. ກະລຸນາເລືອກວ່າຈະໃຫ້ແອັບນີ້ເຂົ້າເຖິງຫຍັງໄດ້ແດ່."</string>
-    <string name="review_button_cancel" msgid="957906817733578877">"​ຍົກ​ເລີກ"</string>
-    <string name="review_button_continue" msgid="4809162078179371370">"​ສືບ​ຕໍ່"</string>
-    <string name="new_permissions_category" msgid="3213523410139204183">"ການ​ອະ​ນຸ​ຍາດ​ໃໝ່"</string>
-    <string name="current_permissions_category" msgid="998210994450606094">"ການ​ອະນຸຍາດ​ປັດຈຸ​ບັນ"</string>
-    <string name="message_staging" msgid="6151794817691100003">"ກຳລັງຮຽງແອັບ…"</string>
-    <string name="app_name_unknown" msgid="8931522764510159105">"ບໍ່ຮູ້ຈັກ"</string>
-    <string name="untrusted_external_source_warning" product="tablet" msgid="1483151219938173935">"ເພື່ອຄວາມປອດໄພຂອງທ່ານ, ແທັບເລັດຂອງທ່ານບໍ່ສາມາດຕິດຕັ້ງແອັບຈາກແຫລ່ງຂໍ້ມູນນີ້ໄດ້."</string>
-    <string name="untrusted_external_source_warning" product="tv" msgid="5373768281884328560">"ເພື່ອຄວາມປອດໄພຂອງທ່ານ, ໂທລະທັດຂອງທ່ານບໍ່ສາມາດຕິດຕັ້ງແອັບຈາກແຫລ່ງຂໍ້ມູນນີ້ໄດ້."</string>
-    <string name="untrusted_external_source_warning" product="default" msgid="2223486836232706553">"ເພື່ອຄວາມປອດໄພຂອງທ່ານ, ໂທລະສັບຂອງທ່ານບໍ່ສາມາດຕິດຕັ້ງແອັບຈາກແຫລ່ງຂໍ້ມູນນີ້ໄດ້."</string>
-    <string name="anonymous_source_warning" product="default" msgid="7700263729981815614">"ໂທລະສັບ ແລະ ຂໍ້ມູນສ່ວນຕົວຂອງທ່ານອາດຖືກໂຈມຕີໄດ້ໂດຍແອັບທີ່ບໍ່ຮູ້ຈັກ. ໂດຍການຕິດຕັ້ງແອັບນີ້, ແມ່ນທ່ານຍອມຮັບວ່າທ່ານຈະຮັບຜິດຊອບຕໍ່ຄວາມເສຍຫາຍໃດໆກໍຕາມທີ່ເກີດຂຶ້ນຕໍ່ໂທລະທັດຂອງທ່ານ ຫຼື ການສູນເສຍຂໍ້ມູນທີ່ອາດເກີດຈາກການນຳໃຊ້ມັນ."</string>
-    <string name="anonymous_source_warning" product="tablet" msgid="8854462805499848630">"ແທັບເລັດ ແລະ ຂໍ້ມູນສ່ວນຕົວຂອງທ່ານອາດຖືກໂຈມຕີໄດ້ໂດຍແອັບທີ່ບໍ່ຮູ້ຈັກ. ໂດຍການຕິດຕັ້ງແອັບນີ້, ແມ່ນທ່ານຍອມຮັບວ່າທ່ານຈະຮັບຜິດຊອບຕໍ່ຄວາມເສຍຫາຍໃດໆກໍຕາມທີ່ເກີດຂຶ້ນຕໍ່ໂທລະທັດຂອງທ່ານ ຫຼື ການສູນເສຍຂໍ້ມູນທີ່ອາດເກີດຈາກການນຳໃຊ້ມັນ."</string>
-    <string name="anonymous_source_warning" product="tv" msgid="1291472686734385872">"ໂທລະທັດ ແລະ ຂໍ້ມູນສ່ວນຕົວຂອງທ່ານອາດຖືກໂຈມຕີໄດ້ໂດຍແອັບທີ່ບໍ່ຮູ້ຈັກ. ໂດຍການຕິດຕັ້ງແອັບນີ້, ແມ່ນທ່ານຍອມຮັບວ່າທ່ານຈະຮັບຜິດຊອບຕໍ່ຄວາມເສຍຫາຍໃດໆກໍຕາມທີ່ເກີດຂຶ້ນຕໍ່ໂທລະທັດຂອງທ່ານ ຫຼື ການສູນເສຍຂໍ້ມູນທີ່ອາດເກີດຈາກການນຳໃຊ້ມັນ."</string>
-    <string name="anonymous_source_continue" msgid="2094381167954332292">"ດຳເນີນການຕໍ່"</string>
-    <string name="external_sources_settings" msgid="8601453744517291632">"ການຕັ້ງຄ່າ"</string>
-    <string name="wear_app_channel" msgid="6200840123672949356">"ກຳລັງຕິດຕັ້ງ/ຖອດຖອນແອັບ Wear"</string>
+    <string name="app_name" msgid="7488448184431507488">"ຕົວຕິດຕັ້ງແພັກເກດ"</string>
+    <string name="install" msgid="711829760615509273">"ຕິດຕັ້ງ"</string>
+    <string name="done" msgid="6632441120016885253">"ແລ້ວໆ"</string>
+    <string name="cancel" msgid="1018267193425558088">"ຍົກເລີກ"</string>
+    <string name="installing" msgid="4921993079741206516">"ກຳລັງຕິດຕັ້ງ…"</string>
+    <string name="installing_app" msgid="1165095864863849422">"ກຳລັງຕິດຕັ້ງ <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
+    <string name="install_done" msgid="5987363587661783896">"ຕິດຕັ້ງແອັບແລ້ວ."</string>
+    <string name="install_confirm_question" msgid="8176284075816604590">"ທ່ານ​ຕ້ອງ​ການ​ຕິດ​ຕັ້ງ​ແອັບພລິເຄຊັນນີ້​ບໍ່?"</string>
+    <string name="install_confirm_question_update" msgid="7942235418781274635">"ທ່ານຕ້ອງການຕິດຕັ້ງອັບເດດຫາແອັບພລິເຄຊັນທີ່ມີຢູ່ກ່ອນແລ້ວນີ້ບໍ່? ຂໍ້ມູນເກົ່າຂອງທ່ານຈະບໍ່ເສຍໄປໃສ."</string>
+    <string name="install_confirm_question_update_system" msgid="4713001702777910263">"ທ່ານຕ້ອງການຕິດຕັ້ງອັບເດດໃສ່ແອັບພລິເຄຊັນແບບມີມາໃນຕົວນີ້ບໍ່? ຂໍ້ມູນເກົ່າຂອງທ່ານຈະບໍ່ເສຍໄປໃສ."</string>
+    <string name="install_failed" msgid="5777824004474125469">"ບໍ່ໄດ້ຕິດຕັ້ງແອັບເທື່ອ."</string>
+    <string name="install_failed_blocked" msgid="8512284352994752094">"ແພັກ​ເກດ​ຖືກບ​ລັອກ​ບໍ່​ໃຫ້​ໄດ້​ຮັບ​ການ​ຕິດ​ຕັ້ງ."</string>
+    <string name="install_failed_conflict" msgid="3493184212162521426">"ບໍ່ໄດ້ຕິດຕັ້ງແອັບເນື່ອງຈາກແພັກເກດຂັດແຍ່ງກັບແພັກເກດທີ່ມີຢູ່ກ່ອນແລ້ວ."</string>
+    <string name="install_failed_incompatible" product="tablet" msgid="6019021440094927928">"ບໍ່ໄດ້ຕິດຕັ້ງແອັບເນື່ອງຈາກແອັບບໍ່ສາມາດໃຊ້ຮ່ວມກັບແທັບເລັດຂອງທ່ານໄດ້."</string>
+    <string name="install_failed_incompatible" product="tv" msgid="2890001324362291683">"ແອັບນີ້ໃຊ້ຮ່ວມກັບໂທລະທັດຂອງທ່ານບໍ່ໄດ້."</string>
+    <string name="install_failed_incompatible" product="default" msgid="7254630419511645826">"ບໍ່ໄດ້ຕິດຕັ້ງແອັບເນື່ອງຈາກແອັບບໍ່ສາມາດໃຊ້ຮ່ວມກັບໂທລະສັບຂອງທ່ານໄດ້."</string>
+    <string name="install_failed_invalid_apk" msgid="8581007676422623930">"ບໍ່ໄດ້ຕິດຕັ້ງແອັບເນື່ອງຈາກແພັກເກດບໍ່ຖືກຕ້ອງ."</string>
+    <string name="install_failed_msg" product="tablet" msgid="6298387264270562442">"ບໍ່ສາມາດຕິດຕັ້ງ <xliff:g id="APP_NAME">%1$s</xliff:g> ຢູ່ແທັບເລັດຂອງທ່ານໄດ້."</string>
+    <string name="install_failed_msg" product="tv" msgid="1920009940048975221">"ບໍ່ສາມາດຕິດຕັ້ງ <xliff:g id="APP_NAME">%1$s</xliff:g> ຢູ່ໂທລະທັດຂອງທ່ານໄດ້."</string>
+    <string name="install_failed_msg" product="default" msgid="6484461562647915707">"ບໍ່​ສາ​ມາດ​ຕິດ​ຕັ້ງ​ <xliff:g id="APP_NAME">%1$s</xliff:g> ຢູ່ໂທລະສັບຂອງທ່ານໄດ້."</string>
+    <string name="launch" msgid="3952550563999890101">"ເປີດ"</string>
+    <string name="unknown_apps_admin_dlg_text" msgid="4456572224020176095">"ຜູ້ເບິ່ງແຍງລະບົບຂອງທ່ານບໍ່ອະນຸຍາດໃຫ້ຕິດຕັ້ງແອັບທີ່ໄດ້ມາຈາກແຫຼ່ງທີ່ບໍ່ຮູ້ຈັກ"</string>
+    <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"ຜູ້ໃຊ້ນີ້ບໍ່ສາມາດຕິດຕັ້ງແອັບທີ່ບໍ່ຮູ້ຈັກໄດ້"</string>
+    <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"ຜູ້ໃຊ້ນີ້ບໍ່ໄດ້ຮັບອະນຸຍາດໃຫ້ຕິດຕັ້ງແອັບໄດ້"</string>
+    <string name="ok" msgid="7871959885003339302">"ຕົກລົງ"</string>
+    <string name="manage_applications" msgid="5400164782453975580">"ຈັດການແອັບ"</string>
+    <string name="out_of_space_dlg_title" msgid="4156690013884649502">"ພື້ນທີ່ຫວ່າງບໍ່ພຽງພໍ"</string>
+    <string name="out_of_space_dlg_text" msgid="8727714096031856231">"ບໍ່ສາມາດຕິດຕັ້ງ <xliff:g id="APP_NAME">%1$s</xliff:g> ໄດ້. ກະລຸນາລຶບຂໍ້ມູນທີ່ບໍ່ຈຳເປັນອອກເພື່ອໃຫ້ມີບ່ອນຈັດເກັບຂໍ້ມູນຫວ່າງເພີ່ມຂຶ້ນ ແລ້ວລອງໃໝ່ອີກຄັ້ງ."</string>
+    <string name="app_not_found_dlg_title" msgid="5107924008597470285">"ບໍ່ພົບແອັບ"</string>
+    <string name="app_not_found_dlg_text" msgid="5219983779377811611">"ບໍ່ພົບແອັບໃນລາຍການຂອງແອັບທີ່ຕິດຕັ້ງແລ້ວ."</string>
+    <string name="user_is_not_allowed_dlg_title" msgid="6915293433252210232">"ບໍ່ອະນຸຍາດແລ້ວ"</string>
+    <string name="user_is_not_allowed_dlg_text" msgid="3468447791330611681">"ຜູ້ໃຊ້ປັດຈຸບັນບໍ່ໄດ້ຮັບອະນຸຍາດໃຫ້ຖອນການຕິດຕັ້ງນີ້ໄດ້."</string>
+    <string name="generic_error_dlg_title" msgid="5863195085927067752">"ຜິດພາດ"</string>
+    <string name="generic_error_dlg_text" msgid="5287861443265795232">"ບໍ່ສາມາດຖອນການຕິດຕັ້ງແອັບໄດ້."</string>
+    <string name="uninstall_application_title" msgid="4045420072401428123">"ຖອນຕິດຕັ້ງແອັບ"</string>
+    <string name="uninstall_update_title" msgid="824411791011583031">"ຖອນການຕິດຕັ້ງອັບເດດ"</string>
+    <string name="uninstall_activity_text" msgid="1928194674397770771">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> ແມ່ນ​ສ່ວນ​ໜຶ່ງຂອງແອັບຕໍ່ໄປນີ້:"</string>
+    <string name="uninstall_application_text" msgid="3816830743706143980">"ທ່ານຕ້ອງການຖອນການຕິດຕັ້ງແອັບນີ້ບໍ່?"</string>
+    <string name="uninstall_application_text_all_users" msgid="575491774380227119">"ທ່ານຕ້ອງການທີ່ຈະຖອນການຕິດຕັ້ງແອັບນີ້ສຳລັງຜູ້ໃຊ້"<b>"ທຸກຄົນ"</b>"ບໍ່? ແອັບພລິເຄຊັນ ແລະ ຂໍ້ມູນຂອງມັນຈະຖືກລຶບອອກຈາກຜູ້ໃຊ້"<b>"ທັງໝົດ"</b>"ໃນອຸປະກອນນີ້."</string>
+    <string name="uninstall_application_text_user" msgid="498072714173920526">"ທ່ານ​ຕ້ອງ​ການ​ຖອນ​ການ​ຕິດ​ຕັ້ງ​ແອັບ​ນີ້​ສຳ​ລັບ​ຜູ້​ໃຊ້ <xliff:g id="USERNAME">%1$s</xliff:g> ບໍ່?"</string>
+    <string name="uninstall_update_text" msgid="863648314632448705">"ແທນທີ່ແອັບນີ້ດ້ວຍເວີຊັນທີ່ມາຈາກໂຮງງານບໍ? ຂໍ້ມູນທັງໝົດຈະຖືກລຶບອອກ."</string>
+    <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"ແທນທີ່ແອັບນີ້ດ້ວຍເວີຊັນທີ່ມາຈາກໂຮງງານບໍ? ຂໍ້ມູນທັງໝົດຈະຖືກລຶບອອກ ເຊິ່ງມີຜົນກັບຜູ້ໃຊ້ອຸປະກອນນີ້ທຸກຄົນ ຮວມທັງຄົນທີ່ມີໂປຣໄຟລ໌ບ່ອນເຮັດວຽກນຳ."</string>
+    <string name="uninstalling_notification_channel" msgid="840153394325714653">"ກຳລັງຖອນການຕິດຕັ້ງ"</string>
+    <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"ຖອນການຕິດຕັ້ງບໍ່ສຳເລັດ"</string>
+    <string name="uninstalling" msgid="8709566347688966845">"ກຳລັງຖອນການຕິດຕັ້ງ..."</string>
+    <string name="uninstalling_app" msgid="8866082646836981397">"ກຳລັງຖອນການຕິດຕັ້ງ <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>…"</string>
+    <string name="uninstall_done" msgid="439354138387969269">"ຖອນການຕິດຕັ້ງສຳເລັດແລ້ວ."</string>
+    <string name="uninstall_done_app" msgid="4588850984473605768">"ຖອນການຕິດຕັ້ງ <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ແລ້ວ"</string>
+    <string name="uninstall_failed" msgid="1847750968168364332">"ຖອນການຕິດຕັ້ງບໍ່ສຳເລັດ."</string>
+    <string name="uninstall_failed_app" msgid="5506028705017601412">"ຖອນການຕິດຕັ້ງ <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ບໍ່ສຳເລັດ."</string>
+    <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"ບໍ່ສາມາດຖອນການຕິດຕັ້ງແອັບອຸປະກອນທີ່ເຮັດວຽກຢູ່ໄດ້"</string>
+    <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"ບໍ່ສາມາດຖອນການຕິດຕັ້ງແອັບຜູ້ເບິ່ງແຍງລະບົບທີ່ເຮັດວຽກຢູ່ສຳລັບ <xliff:g id="USERNAME">%1$s</xliff:g> ໄດ້"</string>
+    <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"ແອັບນີ້ຈຳເປັນສຳລັບບາງຜູ້ໃຊ້ ຫຼື ບາງໂປຣໄຟລ໌ ແລະ ຖືກຖອນການຕິດຕັ້ງສຳລັບຄົນອື່ນແລ້ວ"</string>
+    <string name="uninstall_blocked_profile_owner" msgid="6373897407002404848">"ແອັບນີ້ຈຳເປັນຕ້ອງໃຊ້ກັບໂປຣໄຟລ໌ຂອງທ່ານ ແລະ ບໍ່ສາມາດຖອນການຕິດຕັ້ງໄດ້."</string>
+    <string name="uninstall_blocked_device_owner" msgid="6724602931761073901">"​ແອັບ​ນີ້​ຕ້ອງ​ໃຊ້​ໂດຍ​ຜູ້​ເບິ່ງ​ແຍງ​ລະ​ບົບ​ຂອງ​ທ່ານ ແລະ​ ບໍ່​ສາ​ມາດ​ຖອນ​ການ​ຕິດ​ຕັ້ງ​ໄດ້."</string>
+    <string name="manage_device_administrators" msgid="3092696419363842816">"ຈັດການແອັບຜູ້ເບິ່ງແຍງອຸປະກອນ"</string>
+    <string name="manage_users" msgid="1243995386982560813">"ຈັດການຜູ້ໃຊ້"</string>
+    <string name="uninstall_failed_msg" msgid="2176744834786696012">"<xliff:g id="APP_NAME">%1$s</xliff:g> ບໍ່ສາມາດຖອນອອກໄດ້."</string>
+    <string name="Parse_error_dlg_text" msgid="1661404001063076789">"ເກີດບັນຫາໃນການແຍກວິເຄາະແພັກເກດ."</string>
+    <string name="wear_not_allowed_dlg_title" msgid="8664785993465117517">"Android Wear"</string>
+    <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"ຕິດຕັ້ງ/ຖອນການຕິດຕັ້ງ ຄຳສັ່ງທີ່ບໍ່ຮອງຮັບຢູ່ Wear."</string>
+    <string name="message_staging" msgid="8032722385658438567">"ກຳລັງຮຽງແອັບ…"</string>
+    <string name="app_name_unknown" msgid="6881210203354323926">"ບໍ່ຮູ້ຈັກ"</string>
+    <string name="untrusted_external_source_warning" product="tablet" msgid="6539403649459942547">"ເພື່ອຄວາມປອດໄພຂອງທ່ານ, ແທັບເລັດຂອງທ່ານບໍ່ສາມາດຕິດຕັ້ງແອັບຈາກແຫລ່ງຂໍ້ມູນນີ້ໄດ້."</string>
+    <string name="untrusted_external_source_warning" product="tv" msgid="1206648674551321364">"ເພື່ອຄວາມປອດໄພຂອງທ່ານ, ໂທລະທັດຂອງທ່ານບໍ່ສາມາດຕິດຕັ້ງແອັບຈາກແຫລ່ງຂໍ້ມູນນີ້ໄດ້."</string>
+    <string name="untrusted_external_source_warning" product="default" msgid="7279739265754475165">"ເພື່ອຄວາມປອດໄພຂອງທ່ານ, ໂທລະສັບຂອງທ່ານບໍ່ສາມາດຕິດຕັ້ງແອັບຈາກແຫລ່ງຂໍ້ມູນນີ້ໄດ້."</string>
+    <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"ໂທລະສັບ ແລະ ຂໍ້ມູນສ່ວນຕົວຂອງທ່ານອາດຖືກໂຈມຕີໄດ້ໂດຍແອັບທີ່ບໍ່ຮູ້ຈັກ. ໂດຍການຕິດຕັ້ງແອັບນີ້, ແມ່ນທ່ານຍອມຮັບວ່າທ່ານຈະຮັບຜິດຊອບຕໍ່ຄວາມເສຍຫາຍໃດໆກໍຕາມທີ່ເກີດຂຶ້ນຕໍ່ໂທລະທັດຂອງທ່ານ ຫຼື ການສູນເສຍຂໍ້ມູນທີ່ອາດເກີດຈາກການນຳໃຊ້ມັນ."</string>
+    <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"ແທັບເລັດ ແລະ ຂໍ້ມູນສ່ວນຕົວຂອງທ່ານອາດຖືກໂຈມຕີໄດ້ໂດຍແອັບທີ່ບໍ່ຮູ້ຈັກ. ໂດຍການຕິດຕັ້ງແອັບນີ້, ແມ່ນທ່ານຍອມຮັບວ່າທ່ານຈະຮັບຜິດຊອບຕໍ່ຄວາມເສຍຫາຍໃດໆກໍຕາມທີ່ເກີດຂຶ້ນຕໍ່ໂທລະທັດຂອງທ່ານ ຫຼື ການສູນເສຍຂໍ້ມູນທີ່ອາດເກີດຈາກການນຳໃຊ້ມັນ."</string>
+    <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"ໂທລະທັດ ແລະ ຂໍ້ມູນສ່ວນຕົວຂອງທ່ານອາດຖືກໂຈມຕີໄດ້ໂດຍແອັບທີ່ບໍ່ຮູ້ຈັກ. ໂດຍການຕິດຕັ້ງແອັບນີ້, ແມ່ນທ່ານຍອມຮັບວ່າທ່ານຈະຮັບຜິດຊອບຕໍ່ຄວາມເສຍຫາຍໃດໆກໍຕາມທີ່ເກີດຂຶ້ນຕໍ່ໂທລະທັດຂອງທ່ານ ຫຼື ການສູນເສຍຂໍ້ມູນທີ່ອາດເກີດຈາກການນຳໃຊ້ມັນ."</string>
+    <string name="anonymous_source_continue" msgid="4375745439457209366">"ສືບຕໍ່"</string>
+    <string name="external_sources_settings" msgid="4046964413071713807">"ການຕັ້ງຄ່າ"</string>
+    <string name="wear_app_channel" msgid="1960809674709107850">"ການຕິດຕັ້ງ/ຖອນການຕິດຕັ້ງແອັບ Wear"</string>
 </resources>

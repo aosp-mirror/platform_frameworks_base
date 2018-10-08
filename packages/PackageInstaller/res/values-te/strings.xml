@@ -16,141 +16,76 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="app_name" msgid="2738748390251381682">"ప్యాకేజీ ఇన్‌స్టాలర్"</string>
-    <string name="next" msgid="3057143178373252333">"తర్వాత"</string>
-    <string name="install" msgid="5896438203900042068">"ఇన్‌స్టాల్ చేయండి"</string>
-    <string name="done" msgid="3889387558374211719">"పూర్తయింది"</string>
-    <string name="cancel" msgid="8360346460165114585">"రద్దు చేయి"</string>
-    <string name="installing" msgid="8613631001631998372">"ఇన్‌స్టాల్ చేస్తోంది…"</string>
-    <string name="installing_app" msgid="4097935682329028894">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>ని ఇన్‌స్టాల్ చేస్తోంది…"</string>
-    <string name="install_done" msgid="3682715442154357097">"యాప్ ఇన్‌స్టాల్ చేయబడింది."</string>
-    <string name="install_confirm_question" msgid="7295206719219043890">"మీరు ఈ అనువర్తనాన్ని ఇన్‌స్టాల్ చేయాలనుకుంటున్నారా? ఇది వీటికి ప్రాప్యతను పొందుతుంది:"</string>
-    <string name="install_confirm_question_no_perms" msgid="5918305641302873520">"మీరు ఈ యాప్‌ను ఇన్‌స్టాల్ చేయాలనుకుంటున్నారా? దీనికి ఎటువంటి ప్రత్యేక యాక్సెస్ అవసరం లేదు."</string>
-    <string name="install_confirm_question_update" msgid="4624159567361487964">"మీరు ఈ ప్రస్తుత యాప్‌నకు అప్‌డేట్‌ను ఇన్‌స్టాల్ చేయాలనుకుంటున్నారా? మీ ప్రస్తుత డేటాను కోల్పోవడం సంభవించదు. అప్‌డేట్ చేసిన యాప్ వీటికి యాక్సెస్‌ను పొందుతుంది:"</string>
-    <string name="install_confirm_question_update_system" msgid="1302330093676416336">"మీరు ఈ అంతర్నిర్మిత యాప్‌నకు అప్‌డేట్‌ను ఇన్‌స్టాల్ చేయాలనుకుంటున్నారా? మీ ప్రస్తుత డేటాను కోల్పోవడం సంభవించదు. అప్‌డేట్ చేసిన యాప్ వీటికి యాక్సెస్  పొందుతుంది:"</string>
-    <string name="install_confirm_question_update_no_perms" msgid="4885928136844618944">"మీరు ఈ ప్రస్తుత యాప్‌కు అప్‌డేట్‌ను ఇన్‌స్టాల్ చేయాలనుకుంటున్నారా? మీ ప్రస్తుత డేటాను కోల్పోవడం సంభవించదు. దీనికి ఎటువంటి ప్రత్యేక యాక్సెస్ అవసరం లేదు."</string>
-    <string name="install_confirm_question_update_system_no_perms" msgid="7676593512694724374">"మీరు ఈ అంతర్నిర్మిత యాప్‌కు అప్‌డేట్‌ను ఇన్‌స్టాల్ చేయాలనుకుంటున్నారా? మీ ప్రస్తుత డేటాను కోల్పోవడం సంభవించదు. దీనికి ఎటువంటి ప్రత్యేక యాక్సెస్ అవసరం లేదు."</string>
-    <string name="install_failed" msgid="6579998651498970899">"యాప్ ఇన్‌స్టాల్ చేయబడలేదు."</string>
-    <string name="install_failed_blocked" msgid="1606870930588770025">"ప్యాకేజీ ఇన్‌స్టాల్ కాకుండా బ్లాక్ చేయబడింది."</string>
-    <string name="install_failed_conflict" msgid="5336045235168070954">"ప్యాకేజీ ఇప్పటికే ఉన్న ప్యాకేజీకి వైరుధ్యంగా ఉన్నందున యాప్ ఇన్‌స్టాల్ చేయబడలేదు."</string>
-    <string name="install_failed_incompatible" product="tablet" msgid="6682387386242708974">"యాప్ మీ టాబ్లెట్‌కు అనుకూలంగా లేని కారణంగా ఇన్‌స్టాల్ చేయబడలేదు."</string>
-    <string name="install_failed_incompatible" product="tv" msgid="3553367270510072729">"ఈ యాప్ మీ టీవీకి అనుకూలంగా లేదు."</string>
-    <string name="install_failed_incompatible" product="default" msgid="7917996365659426872">"యాప్ మీ ఫోన్‌కు అనుకూలంగా లేని కారణంగా ఇన్‌స్టాల్ చేయబడలేదు."</string>
-    <string name="install_failed_invalid_apk" msgid="269885385245534742">"ప్యాకేజీ చెల్లుబాటు కాని విధంగా ఉన్నందున యాప్ ఇన్‌స్టాల్ చేయబడలేదు."</string>
-    <string name="install_failed_msg" product="tablet" msgid="8368835262605608787">"<xliff:g id="APP_NAME">%1$s</xliff:g>ను మీ టాబ్లెట్‌లో ఇన్‌స్టాల్ చేయడం సాధ్యపడలేదు."</string>
-    <string name="install_failed_msg" product="tv" msgid="3990457938384021566">"<xliff:g id="APP_NAME">%1$s</xliff:g>ని మీ టీవీలో ఇన్‌స్టాల్ చేయడం సాధ్యపడలేదు."</string>
-    <string name="install_failed_msg" product="default" msgid="8554909560982962052">"<xliff:g id="APP_NAME">%1$s</xliff:g>ను మీ ఫోన్‌లో ఇన్‌స్టాల్ చేయడం సాధ్యపడలేదు."</string>
-    <string name="launch" msgid="4826921505917605463">"తెరవండి"</string>
-    <string name="unknown_apps_admin_dlg_text" msgid="7488386758312008790">"మీ నిర్వాహకులు తెలియని మూలాల నుండి పొందిన అనువర్తనాల ఇన్‌స్టాలేషన్‌ను అనుమతించరు"</string>
-    <string name="unknown_apps_user_restriction_dlg_text" msgid="5785226253054083336">"తెలియని అనువర్తనాలను ఈ వినియోగదారు ఇన్‌స్టాల్ చేయలేరు"</string>
-    <string name="install_apps_user_restriction_dlg_text" msgid="5041150186260066212">"యాప్‌లను ఇన్‌స్టాల్ చేయడానికి ఈ వినియోగదారుకు అనుమతి లేదు"</string>
-    <string name="ok" msgid="3468756155452870475">"సరే"</string>
-    <string name="manage_applications" msgid="4033876279091996596">"అనువర్తనాలను నిర్వహించండి"</string>
-    <string name="out_of_space_dlg_title" msgid="7843674437613797326">"ఖాళీ లేదు"</string>
-    <string name="out_of_space_dlg_text" msgid="4774775404294282216">"<xliff:g id="APP_NAME">%1$s</xliff:g>ని ఇన్‌స్టాల్ చేయడం సాధ్యపడలేదు. కొంత స్థలాన్ని ఖాళీ చేసి మళ్లీ ప్రయత్నించండి."</string>
-    <string name="app_not_found_dlg_title" msgid="2692335460569505484">"యాప్ కనుగొనబడలేదు"</string>
-    <string name="app_not_found_dlg_text" msgid="6107465056055095930">"ఇన్‌స్టాల్ చేసిన యాప్‌ల జాబితాలో యాప్‌ కనుగొనబడలేదు."</string>
-    <string name="user_is_not_allowed_dlg_title" msgid="118128026847201582">"అనుమతించబడలేదు"</string>
-    <string name="user_is_not_allowed_dlg_text" msgid="739716827677987545">"ప్రస్తుత వినియోగదారు ఈ అన్ఇన్‌స్టాలేషన్ చేసేందుకు అనుమతి లేదు."</string>
-    <string name="generic_error_dlg_title" msgid="2684806600635296961">"ఎర్రర్"</string>
-    <string name="generic_error_dlg_text" msgid="4288738047825333954">"అనువర్తనాన్ని అన్ఇన్‌స్టాల్ చేయడం సాధ్యపడదు."</string>
-    <string name="uninstall_application_title" msgid="1860074100811653963">"యాప్‌ను అన్‌ఇన్‌స్టాల్ చేయండి"</string>
-    <string name="uninstall_update_title" msgid="4146940097553335390">"నవీకరణను అన్‌ఇన్‌స్టాల్ చేయండి"</string>
-    <string name="uninstall_activity_text" msgid="6680688689803932550">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> అనేది క్రింది యాప్‌లో ఒక భాగం:"</string>
-    <string name="uninstall_application_text" msgid="6691975835951187030">"మీరు ఈ యాప్‌ను అన్‌ఇన్‌స్టాల్ చేయాలనుకుంటున్నారా?"</string>
-    <string name="uninstall_application_text_all_users" msgid="5574704453233525222">"మీరు ఈ యాప్‌ను "<b>"మొత్తం"</b>" వినియోగదారులకు అన్‌ఇన్‌స్టాల్ చేయాలనుకుంటున్నారా? యాప్ మరియు దీని డేటా డివైజ్‌లోని "<b>"మొత్తం"</b>" వినియోగదారుల నుండి తీసివేయబడుతుంది."</string>
-    <string name="uninstall_application_text_user" msgid="8766882355635485733">"మీరు వినియోగదారు <xliff:g id="USERNAME">%1$s</xliff:g> కోసం ఈ అనువర్తనాన్ని అన్‌ఇన్‌స్టాల్ చేయాలనుకుంటున్నారా?"</string>
-    <string name="uninstall_update_text" msgid="1394549691152728409">"ఈ అనువర్తనాన్ని ఫ్యాక్టరీ సంస్కరణతో భర్తీ చేయాలా? మొత్తం డేటా తీసివేయబడుతుంది."</string>
-    <string name="uninstall_update_text_multiuser" msgid="2083665452990861991">"ఈ అనువర్తనాన్ని ఫ్యాక్టరీ సంస్కరణతో భర్తీ చేయాలా? మొత్తం డేటా తీసివేయబడుతుంది. దీని ప్రభావం కార్యాలయ ప్రొఫైల్‌లు కలిగి ఉన్నవారితో సహా ఈ పరికర వినియోగదారులందరిపై ఉంటుంది."</string>
-    <string name="uninstalling_notification_channel" msgid="5698369661583525583">"అమల్లో ఉన్న అన్‌ఇన్‌స్టాల్‌లు"</string>
-    <string name="uninstall_failure_notification_channel" msgid="8224276726364132314">"విఫలమైన అన్‌ఇన్‌స్టాల్‌లు"</string>
-    <string name="uninstalling" msgid="5556217435895938250">"అన్‌ఇన్‌స్టాల్ చేస్తోంది…"</string>
-    <string name="uninstalling_app" msgid="2773617614877719294">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>ని అన్ఇన్‌స్టాల్ చేస్తోంది…"</string>
-    <string name="uninstall_done" msgid="3792487853420281888">"అన్‌ఇన్‌స్టాల్ చేయడం ముగిసింది."</string>
-    <string name="uninstall_done_app" msgid="775837862728680479">"అన్ఇన్‌స్టాల్ చేసిన <xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>"</string>
-    <string name="uninstall_failed" msgid="631122574306299512">"అన్‌ఇన్‌స్టాల్ చేయడం విజయవంతం కాలేదు."</string>
-    <string name="uninstall_failed_app" msgid="945277834056527022">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> అన్ఇన్‌స్టాల్ చేయడంలో విఫలమైంది."</string>
-    <string name="uninstall_failed_device_policy_manager" msgid="2727361164694743362">"సక్రియ పరికర నిర్వాహక అనువర్తనాన్ని అన్ఇన్‌స్టాల్ చేయడం సాధ్యపడదు"</string>
-    <string name="uninstall_failed_device_policy_manager_of_user" msgid="2161462242935805756">"<xliff:g id="USERNAME">%1$s</xliff:g> కోసం సక్రియ పరికర నిర్వాహక అనువర్తనాన్ని అన్ఇన్‌స్టాల్ చేయడం సాధ్యపడదు"</string>
-    <string name="uninstall_all_blocked_profile_owner" msgid="3544933038594382346">"ఈ యాప్ కొందరు వినియోగదారులకు లేదా కొన్ని ప్రొఫైల్‌లకు అవసరం, ఇతరులకు అన్‌ఇన్‌స్టాల్ చేయబడింది"</string>
-    <string name="uninstall_blocked_profile_owner" msgid="6912141045528994954">"మీ ప్రొఫైల్ కోసం ఈ యాప్ అవసరం మరియు దీన్ని అన్ఇన్‌స్టాల్ చేయలేరు."</string>
-    <string name="uninstall_blocked_device_owner" msgid="7074175526413453063">"మీ డివైజ్ నిర్వాహకుడికి ఈ యాప్ అవసరం, అందువల్ల దీన్ని అన్‌ఇన్‌స్టాల్ చేయడం కుదరదు."</string>
-    <string name="manage_device_administrators" msgid="118178632652346535">"పరికర నిర్వాహక అనువర్తనాలను నిర్వహించు"</string>
-    <string name="manage_users" msgid="3125018886835668847">"వినియోగదారులను నిర్వహించు"</string>
-    <string name="uninstall_failed_msg" msgid="8969754702803951175">"<xliff:g id="APP_NAME">%1$s</xliff:g>ని అన్‌ఇన్‌స్టాల్ చేయడం సాధ్యపడలేదు."</string>
-    <string name="Parse_error_dlg_text" msgid="7623286983621067011">"ప్యాకేజీని అన్వయించడంలో సమస్య ఏర్పడింది."</string>
-    <string name="newPerms" msgid="6039428254474104210">"కొత్తవి"</string>
-    <string name="allPerms" msgid="1024385515840703981">"అన్నీ"</string>
-    <string name="privacyPerms" msgid="1850527049572617">"గోప్యత"</string>
-    <string name="devicePerms" msgid="6733560207731294504">"పరికరం యాక్సెస్"</string>
-    <string name="no_new_perms" msgid="6657813692169565975">"ఈ నవీకరణకు కొత్త అనుమతులు అవసరం లేదు."</string>
-    <string name="grant_dialog_button_deny" msgid="2176510645406614340">"తిరస్కరించు"</string>
-    <string name="grant_dialog_button_more_info" msgid="2218220771432058426">"మరింత సమాచారం"</string>
-    <string name="grant_dialog_button_deny_anyway" msgid="847960499284125250">"ఏదేమైనా నిరాకరించు"</string>
-    <string name="current_permission_template" msgid="6378304249516652817">"<xliff:g id="PERMISSION_COUNT">%2$s</xliff:g>లో <xliff:g id="CURRENT_PERMISSION_INDEX">%1$s</xliff:g>"</string>
-    <string name="permission_warning_template" msgid="7332275268559121742">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ని <xliff:g id="ACTION">%2$s</xliff:g> అనుమతించాలా?"</string>
-    <string name="permission_add_background_warning_template" msgid="5391175001698541141">"<xliff:g id="ACTION">%2$s</xliff:g> చేయడానికి &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ను ఎల్లప్పుడూ అనుమతించాలా?"</string>
-    <string name="allow_permission_foreground_only" msgid="1016389465002335286">"యాప్‌ను ఉపయోగిస్తున్నప్పుడు మాత్రమే"</string>
-    <string name="allow_permission_always" msgid="7047379650123289823">"ఎల్లప్పుడూ"</string>
-    <string name="deny_permission_deny_and_dont_ask_again" msgid="8003202275002645629">"నిరాకరించు, మళ్లీ అడగవద్దు"</string>
-    <string name="permission_revoked_count" msgid="7386129423432613024">"<xliff:g id="COUNT">%1$d</xliff:g> నిలిపివేయబడ్డాయి"</string>
-    <string name="permission_revoked_all" msgid="8595742638132863678">"అన్నీ నిలిపివేయబడ్డాయి"</string>
-    <string name="permission_revoked_none" msgid="2059511550181271342">"ఏవీ నిలిపివేయబడలేదు"</string>
-    <string name="grant_dialog_button_allow" msgid="4616529495342337095">"అనుమతించు"</string>
-    <string name="app_permissions_breadcrumb" msgid="3390836200791539264">"యాప్‌లు"</string>
-    <string name="app_permissions" msgid="3146758905824597178">"యాప్ అనుమతులు"</string>
-    <string name="never_ask_again" msgid="1089938738199748687">"మళ్లీ అడగవద్దు"</string>
-    <string name="no_permissions" msgid="3210542466245591574">"అనుమతులు లేవు"</string>
-    <string name="additional_permissions" msgid="6667573114240111763">"అదనపు అనుమతులు"</string>
-    <string name="app_permissions_info_button_label" msgid="7789812060395257748">"యాప్ సమాచారాన్ని తెరుస్తుంది"</string>
-    <plurals name="additional_permissions_more" formatted="false" msgid="945127158155064388">
-      <item quantity="other">మరో <xliff:g id="COUNT_1">%1$d</xliff:g></item>
-      <item quantity="one">మరో <xliff:g id="COUNT_0">%1$d</xliff:g></item>
-    </plurals>
-    <string name="old_sdk_deny_warning" msgid="3872277112584842615">"ఈ యాప్ పాత Android వెర్షన్ కోసం రూపొందించబడింది. అనుమతిని నిరాకరించినట్లయితే ఇది ఇకపై ఉద్దేశించిన రీతిలో పని చేయకపోవచ్చు."</string>
-    <string name="default_permission_description" msgid="4992892207044156668">"తెలియని చర్యను చేస్తుంది"</string>
-    <string name="app_permissions_group_summary" msgid="4787239772223699263">"<xliff:g id="COUNT_1">%2$d</xliff:g>లో <xliff:g id="COUNT_0">%1$d</xliff:g> యాప్‌లు అనుమతించబడ్డాయి"</string>
-    <string name="menu_show_system" msgid="6773743421743728921">"సిస్టమ్‌ను చూపు"</string>
-    <string name="menu_hide_system" msgid="7595471742649432977">"సిస్టమ్‌ను దాచు"</string>
-    <string name="no_apps" msgid="1965493419005012569">"అనువర్తనాలు లేవు"</string>
-    <string name="location_settings" msgid="1774875730854491297">"స్థాన సెట్టింగ్‌లు"</string>
-    <string name="location_warning" msgid="8778701356292735971">"ఈ పరికరం కోసం స్థాన సేవల ప్రదాత <xliff:g id="APP_NAME">%1$s</xliff:g>. స్థాన సెట్టింగ్‌ల నుండి స్థాన ప్రాప్యతను సవరించవచ్చు."</string>
-    <string name="system_warning" msgid="7103819124542305179">"మీరు ఈ అనుమతిని నిరాకరిస్తే, మీ పరికర ప్రాథమిక లక్షణాలు ఇకపై ఉద్దేశించిన రీతిలో పని చేయకపోవచ్చు."</string>
-    <string name="permission_summary_enforced_by_policy" msgid="3418617316188986205">"విధానం ద్వారా అమలు చేయబడింది"</string>
-    <string name="permission_summary_disabled_by_policy_background_only" msgid="160007162349980265">"విధానం ద్వారా నేపథ్య యాక్సెస్ నిలిపివేయబడింది"</string>
-    <string name="permission_summary_enabled_by_policy_background_only" msgid="4834971700297385342">"విధానం ద్వారా నేపథ్య యాక్సెస్ ప్రారంభించబడింది"</string>
-    <string name="permission_summary_enabled_by_policy_foreground_only" msgid="5150061275247925588">"విధానం ద్వారా ముందుభాగం యాక్సెస్ ప్రారంభించబడింది"</string>
-    <string name="permission_summary_enforced_by_admin" msgid="1702707982488952544">"నిర్వాహకుల నియంత్రణలో ఉంటాయి"</string>
-    <!-- no translation found for background_access_chooser_dialog_choices:0 (7142769853837915143) -->
-    <!-- no translation found for background_access_chooser_dialog_choices:1 (7804653189249679164) -->
-    <!-- no translation found for background_access_chooser_dialog_choices:2 (1131794379787779680) -->
-    <string name="permission_access_always" msgid="5642491469836594184">"ఎల్లప్పుడూ"</string>
-    <string name="permission_access_only_foreground" msgid="6906814759741316041">"యాప్‌ను ఉపయోగిస్తున్నప్పుడు మాత్రమే"</string>
-    <string name="permission_access_never" msgid="1258330706341318622">"ఎన్నడూ వద్దు"</string>
-    <string name="loading" msgid="7811651799620593731">"లోడ్ అవుతోంది..."</string>
-    <string name="all_permissions" msgid="5156669007784613042">"అన్ని అనుమతులు"</string>
-    <string name="other_permissions" msgid="2016192512386091933">"ఇతర అనువర్తన సామర్థ్యాలు"</string>
-    <string name="permission_request_title" msgid="1204446718549121199">"అనుమతి అభ్యర్థన"</string>
-    <string name="screen_overlay_title" msgid="3021729846864038529">"స్క్రీన్ అతివ్యాప్తి గుర్తించబడింది"</string>
-    <string name="screen_overlay_message" msgid="2141944461571677331">"ఈ అనుమతి సెట్టింగ్‌ను మార్చడానికి, మీరు ముందుగా సెట్టింగ్‌లు &gt; అనువర్తనాల నుండి స్క్రీన్ అతివ్యాప్తిని ఆఫ్ చేయాలి"</string>
-    <string name="screen_overlay_button" msgid="4344544843349937743">"సెట్టింగ్‌లను తెరువు"</string>
-    <string name="wear_not_allowed_dlg_title" msgid="8104666773577525713">"Android వేర్"</string>
-    <string name="wear_not_allowed_dlg_text" msgid="1322352525843583064">"Wearలో ఇన్‌స్టాల్/అన్ఇన్‌స్టాల్ చర్యలకు మద్దతు లేదు."</string>
-    <string name="permission_review_title_template_install" msgid="6819338441305295479">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; యాక్సెస్ చేయడానికి అనుమతించాల్సిన వాటిని ఎంచుకోండి"</string>
-    <string name="permission_review_title_template_update" msgid="8632233603161669426">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; అప్‌డేట్ చేయబడింది. ఈ యాప్ యాక్సెస్ చేయడానికి అనుమతించాల్సిన వాటిని ఎంచుకోండి."</string>
-    <string name="review_button_cancel" msgid="957906817733578877">"రద్దు చేయి"</string>
-    <string name="review_button_continue" msgid="4809162078179371370">"కొనసాగించు"</string>
-    <string name="new_permissions_category" msgid="3213523410139204183">"కొత్త అనుమతులు"</string>
-    <string name="current_permissions_category" msgid="998210994450606094">"ప్రస్తుత అనుమతులు"</string>
-    <string name="message_staging" msgid="6151794817691100003">"అనువర్తనాన్ని అందిస్తోంది…"</string>
-    <string name="app_name_unknown" msgid="8931522764510159105">"తెలియదు"</string>
-    <string name="untrusted_external_source_warning" product="tablet" msgid="1483151219938173935">"మీకు భద్రతను అందించడం కోసం, ఈ మూలం నుండి తెలియని యాప్‌లను ఇన్‌స్టాల్ చేయడానికి మీ టాబ్లెట్ అనుమతించబడదు."</string>
-    <string name="untrusted_external_source_warning" product="tv" msgid="5373768281884328560">"మీకు భద్రతను అందించడం కోసం, ఈ మూలం నుండి తెలియని యాప్‌లను ఇన్‌స్టాల్ చేయడానికి మీ TV అనుమతించబడదు."</string>
-    <string name="untrusted_external_source_warning" product="default" msgid="2223486836232706553">"మీకు భద్రతను అందించడం కోసం, ఈ మూలం నుండి తెలియని యాప్‌లను ఇన్‌స్టాల్ చేయడానికి మీ ఫోన్ అనుమతించబడదు."</string>
-    <string name="anonymous_source_warning" product="default" msgid="7700263729981815614">"మీ ఫోన్ మరియు వ్యక్తిగత డేటా తెలియని మూలాల్లోని అనువర్తనాల ద్వారా దాడికి గురి కావడానికి ఎక్కువ అవకాశం ఉంటుంది. ఈ అనువర్తనాన్ని ఇన్‌స్టాల్ చేయడం ద్వారా, ఈ అనువర్తనాన్ని ఉపయోగించడం వలన మీ ఫోన్‌కు సంభవించే ఏదైనా నష్టానికి లేదా కోల్పోయే డేటాకి బాధ్యత వహించడానికి మీరు అంగీకరిస్తున్నారు."</string>
-    <string name="anonymous_source_warning" product="tablet" msgid="8854462805499848630">"మీ టాబ్లెట్ మరియు వ్యక్తిగత డేటా తెలియని మూలాల్లోని అనువర్తనాల ద్వారా దాడికి గురి కావడానికి ఎక్కువ అవకాశం ఉంటుంది. ఈ అనువర్తనాన్ని ఇన్‌స్టాల్ చేయడం ద్వారా, ఈ అనువర్తనాన్ని ఉపయోగించడం ద్వారా మీ టాబ్లెట్‌కు సంభవించే ఏదైనా నష్టానికి లేదా కోల్పోయే డేటాకి బాధ్యత వహించడానికి మీరు అంగీకరిస్తున్నారు."</string>
-    <string name="anonymous_source_warning" product="tv" msgid="1291472686734385872">"మీ TV మరియు వ్యక్తిగత డేటా తెలియని మూలాల్లోని అనువర్తనాల ద్వారా దాడికి గురి కావడానికి ఎక్కువ అవకాశం ఉంటుంది. ఈ అనువర్తనాన్ని ఇన్‌స్టాల్ చేయడం ద్వారా, ఈ అనువర్తనాన్ని ఉపయోగించడం ద్వారా మీ TVకి సంభవించే ఏదైనా నష్టానికి లేదా కోల్పోయే డేటాకి బాధ్యత వహించడానికి మీరు అంగీకరిస్తున్నారు."</string>
-    <string name="anonymous_source_continue" msgid="2094381167954332292">"కొనసాగించు"</string>
-    <string name="external_sources_settings" msgid="8601453744517291632">"సెట్టింగ్‌లు"</string>
-    <string name="wear_app_channel" msgid="6200840123672949356">"వేర్ ఆప్‌లను ఇన్‌స్టాల్/అన్‌ఇన్‌స్టాల్ చేస్తోంది"</string>
+    <string name="app_name" msgid="7488448184431507488">"ప్యాకేజీ ఇన్‌స్టాలర్"</string>
+    <string name="install" msgid="711829760615509273">"ఇన్‌స్టాల్ చేయి"</string>
+    <string name="done" msgid="6632441120016885253">"పూర్తయింది"</string>
+    <string name="cancel" msgid="1018267193425558088">"రద్దు చేయి"</string>
+    <string name="installing" msgid="4921993079741206516">"ఇన్‌స్టాల్ చేస్తోంది…"</string>
+    <string name="installing_app" msgid="1165095864863849422">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>ని ఇన్‌స్టాల్ చేస్తోంది…"</string>
+    <string name="install_done" msgid="5987363587661783896">"యాప్ ఇన్‌స్టాల్ చేయబడింది."</string>
+    <string name="install_confirm_question" msgid="8176284075816604590">"మీరు ఈ అప్లికేషన్‌ను ఇన్‌స్టాల్ చేయాలనుకుంటున్నారా?"</string>
+    <string name="install_confirm_question_update" msgid="7942235418781274635">"మీరు ఇప్పటికే ఉన్న ఈ అప్లికేషన్‌కు అప్‌డేట్‌ను ఇన్‌స్టాల్ చేయాలనుకుంటున్నారా? ఇప్పటికే ఉన్న మీ డేటాను కోల్పోవడం సంభవించదు."</string>
+    <string name="install_confirm_question_update_system" msgid="4713001702777910263">"మీరు ఈ అంతర్నిర్మిత అప్లికేషన్‌కు అప్‌డేట్‌ను ఇన్‌స్టాల్ చేయాలనుకుంటున్నారా? ఇప్పటికే ఉన్న మీ డేటాను కోల్పోవడం సంభవించదు."</string>
+    <string name="install_failed" msgid="5777824004474125469">"యాప్ ఇన్‌స్టాల్ చేయబడలేదు."</string>
+    <string name="install_failed_blocked" msgid="8512284352994752094">"ప్యాకేజీ ఇన్‌స్టాల్ కాకుండా బ్లాక్ చేయబడింది."</string>
+    <string name="install_failed_conflict" msgid="3493184212162521426">"ప్యాకేజీ, అలాగే ఇప్పటికే ఉన్న ప్యాకేజీ మధ్య వైరుధ్యం ఉన్నందున యాప్ ఇన్‌స్టాల్ చేయబడలేదు."</string>
+    <string name="install_failed_incompatible" product="tablet" msgid="6019021440094927928">"యాప్ మీ టాబ్లెట్‌కు అనుకూలంగా లేని కారణంగా ఇన్‌స్టాల్ చేయబడలేదు."</string>
+    <string name="install_failed_incompatible" product="tv" msgid="2890001324362291683">"ఈ యాప్ మీ టీవీకి అనుకూలంగా లేదు."</string>
+    <string name="install_failed_incompatible" product="default" msgid="7254630419511645826">"యాప్ మీ ఫోన్‌కు అనుకూలంగా లేని కారణంగా ఇన్‌స్టాల్ చేయబడలేదు."</string>
+    <string name="install_failed_invalid_apk" msgid="8581007676422623930">"ప్యాకేజీ చెల్లుబాటు కానట్లు ఉన్నందున యాప్ ఇన్‌స్టాల్ చేయబడలేదు."</string>
+    <string name="install_failed_msg" product="tablet" msgid="6298387264270562442">"మీ టాబ్లెట్‌లో <xliff:g id="APP_NAME">%1$s</xliff:g>ని ఇన్‌స్టాల్ చేయడం సాధ్యపడలేదు."</string>
+    <string name="install_failed_msg" product="tv" msgid="1920009940048975221">"మీ టీవీలో <xliff:g id="APP_NAME">%1$s</xliff:g>ని ఇన్‌స్టాల్ చేయడం సాధ్యపడలేదు."</string>
+    <string name="install_failed_msg" product="default" msgid="6484461562647915707">"మీ ఫోన్‌లో <xliff:g id="APP_NAME">%1$s</xliff:g>ని ఇన్‌స్టాల్ చేయడం సాధ్యపడలేదు."</string>
+    <string name="launch" msgid="3952550563999890101">"తెరువు"</string>
+    <string name="unknown_apps_admin_dlg_text" msgid="4456572224020176095">"మీ నిర్వాహకులు తెలియని మూలాల నుండి పొందిన యాప్‌ల ఇన్‌స్టాలేషన్‌ను అనుమతించరు"</string>
+    <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"ఈ వినియోగదారు తెలియని యాప్‌లను ఇన్‌స్టాల్ చేయలేరు"</string>
+    <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"యాప్‌లను ఇన్‌స్టాల్ చేయడానికి ఈ వినియోగదారుకు అనుమతి లేదు"</string>
+    <string name="ok" msgid="7871959885003339302">"సరే"</string>
+    <string name="manage_applications" msgid="5400164782453975580">"యాప్‌లను నిర్వహించండి"</string>
+    <string name="out_of_space_dlg_title" msgid="4156690013884649502">"ఖాళీ లేదు"</string>
+    <string name="out_of_space_dlg_text" msgid="8727714096031856231">"<xliff:g id="APP_NAME">%1$s</xliff:g>ని ఇన్‌స్టాల్ చేయడం సాధ్యపడలేదు. కొంత స్థలాన్ని ఖాళీ చేసి మళ్లీ ప్రయత్నించండి."</string>
+    <string name="app_not_found_dlg_title" msgid="5107924008597470285">"యాప్ కనుగొనబడలేదు"</string>
+    <string name="app_not_found_dlg_text" msgid="5219983779377811611">"ఇన్‌స్టాల్ చేసిన యాప్‌ల జాబితాలో యాప్ కనుగొనబడలేదు."</string>
+    <string name="user_is_not_allowed_dlg_title" msgid="6915293433252210232">"అనుమతించబడలేదు"</string>
+    <string name="user_is_not_allowed_dlg_text" msgid="3468447791330611681">"ప్రస్తుత వినియోగదారు ఈ అన్ఇన్‌స్టాలేషన్ చేసేందుకు అనుమతించబడరు."</string>
+    <string name="generic_error_dlg_title" msgid="5863195085927067752">"లోపం"</string>
+    <string name="generic_error_dlg_text" msgid="5287861443265795232">"యాప్‌ను అన్ఇన్‌స్టాల్ చేయడం సాధ్యపడలేదు."</string>
+    <string name="uninstall_application_title" msgid="4045420072401428123">"యాప్‌ను అన్‌ఇన్‌స్టాల్ చేయి"</string>
+    <string name="uninstall_update_title" msgid="824411791011583031">"అప్‌డేట్ అన్‌ఇన్‌స్టాల్ చేయి"</string>
+    <string name="uninstall_activity_text" msgid="1928194674397770771">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> అనేది క్రింది యాప్‌లో ఒక భాగం:"</string>
+    <string name="uninstall_application_text" msgid="3816830743706143980">"మీరు ఈ యాప్‌ను అన్‌ఇన్‌స్టాల్ చేయాలనుకుంటున్నారా?"</string>
+    <string name="uninstall_application_text_all_users" msgid="575491774380227119">"మీరు ఈ యాప్‌ను "<b>"అందరు"</b>" వినియోగదారులకు అన్‌ఇన్‌స్టాల్ చేయాలనుకుంటున్నారా? అప్లికేషన్, దాని డేటా పరికరంలోని "<b>"అందరు"</b>" వినియోగదారుల నుండి తీసివేయబడుతుంది."</string>
+    <string name="uninstall_application_text_user" msgid="498072714173920526">"మీరు వినియోగదారు <xliff:g id="USERNAME">%1$s</xliff:g> కోసం ఈ యాప్‌ను అన్‌ఇన్‌స్టాల్ చేయాలనుకుంటున్నారా?"</string>
+    <string name="uninstall_update_text" msgid="863648314632448705">"ఈ యాప్‌ను ఫ్యాక్టరీ వెర్షన్‌తో భర్తీ చేయాలా? మొత్తం డేటా తీసివేయబడుతుంది."</string>
+    <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"ఈ యాప్‌ను ఫ్యాక్టరీ వెర్షన్‌తో భర్తీ చేయాలా? మొత్తం డేటా తీసివేయబడుతుంది. దీని ప్రభావం కార్యాలయ ప్రొఫైల్‌లు కలిగి ఉన్నవారితో సహా ఈ పరికర వినియోగదారులందరిపై ఉంటుంది."</string>
+    <string name="uninstalling_notification_channel" msgid="840153394325714653">"అన్ఇన్‌స్టాల్ చేయబడుతున్నవి"</string>
+    <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"విఫలమైన అన్‌ఇన్‌స్టాల్‌లు"</string>
+    <string name="uninstalling" msgid="8709566347688966845">"అన్ఇన్‌స్టాల్ చేస్తోంది…"</string>
+    <string name="uninstalling_app" msgid="8866082646836981397">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g>ని అన్ఇన్‌స్టాల్ చేస్తోంది…"</string>
+    <string name="uninstall_done" msgid="439354138387969269">"అన్‌ఇన్‌స్టాల్ చేయడం ముగిసింది."</string>
+    <string name="uninstall_done_app" msgid="4588850984473605768">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> అన్ఇన్‌స్టాల్ చేయబడింది"</string>
+    <string name="uninstall_failed" msgid="1847750968168364332">"అన్ఇన్‌స్టాల్ చేయడం విజయవంతం కాలేదు."</string>
+    <string name="uninstall_failed_app" msgid="5506028705017601412">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> అన్ఇన్‌స్టాల్ చేయడంలో విఫలమైంది."</string>
+    <string name="uninstall_failed_device_policy_manager" msgid="785293813665540305">"యాక్టివ్ పరికర నిర్వాహక యాప్‌ను అన్ఇన్‌స్టాల్ చేయడం సాధ్యపడదు"</string>
+    <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"<xliff:g id="USERNAME">%1$s</xliff:g> కోసం యాక్టివ్ పరికర నిర్వాహక యాప్‌ను అన్ఇన్‌స్టాల్ చేయడం సాధ్యపడదు"</string>
+    <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"ఈ యాప్ కొందరు వినియోగదారులకు లేదా కొన్ని ప్రొఫైల్‌లకు అవసరం, ఇతరులకు అన్‌ఇన్‌స్టాల్ చేయబడింది"</string>
+    <string name="uninstall_blocked_profile_owner" msgid="6373897407002404848">"మీ ప్రొఫైల్ కోసం ఈ యాప్ అవసరం, అందువల్ల దీన్ని అన్ఇన్‌స్టాల్ చేయడం కుదరదు."</string>
+    <string name="uninstall_blocked_device_owner" msgid="6724602931761073901">"మీ పరికర నిర్వాహకులకు ఈ యాప్ అవసరం, అందువల్ల దీన్ని అన్‌ఇన్‌స్టాల్ చేయడం కుదరదు."</string>
+    <string name="manage_device_administrators" msgid="3092696419363842816">"పరికర నిర్వాహక యాప్‌లను నిర్వహించు"</string>
+    <string name="manage_users" msgid="1243995386982560813">"వినియోగదారులను నిర్వహించు"</string>
+    <string name="uninstall_failed_msg" msgid="2176744834786696012">"<xliff:g id="APP_NAME">%1$s</xliff:g>ని అన్‌ఇన్‌స్టాల్ చేయడం సాధ్యపడలేదు."</string>
+    <string name="Parse_error_dlg_text" msgid="1661404001063076789">"ప్యాకేజీని అన్వయించడంలో సమస్య ఏర్పడింది."</string>
+    <string name="wear_not_allowed_dlg_title" msgid="8664785993465117517">"Android Wear"</string>
+    <string name="wear_not_allowed_dlg_text" msgid="704615521550939237">"Wearలో ఇన్‌స్టాల్/అన్ఇన్‌స్టాల్ చర్యలకు మద్దతు లేదు."</string>
+    <string name="message_staging" msgid="8032722385658438567">"యాప్‌ను సిద్ధం చేస్తుంది…"</string>
+    <string name="app_name_unknown" msgid="6881210203354323926">"తెలియదు"</string>
+    <string name="untrusted_external_source_warning" product="tablet" msgid="6539403649459942547">"మీ భద్రత దృష్ట్యా, ఈ మూలం నుండి తెలియని యాప్‌లను ఇన్‌స్టాల్ చేయడానికి మీ టాబ్లెట్ అనుమతించబడదు."</string>
+    <string name="untrusted_external_source_warning" product="tv" msgid="1206648674551321364">"మీ భద్రత దృష్ట్యా, ఈ మూలం నుండి తెలియని యాప్‌లను ఇన్‌స్టాల్ చేయడానికి మీ టీవీ అనుమతించబడదు."</string>
+    <string name="untrusted_external_source_warning" product="default" msgid="7279739265754475165">"మీ భద్రత దృష్ట్యా, ఈ మూలం నుండి తెలియని యాప్‌లను ఇన్‌స్టాల్ చేయడానికి మీ ఫోన్ అనుమతించబడదు."</string>
+    <string name="anonymous_source_warning" product="default" msgid="2784902545920822500">"మీ ఫోన్ మరియు వ్యక్తిగత డేటాపై తెలియని యాప్‌లు దాడి చేయడానికి ఎక్కువ అవకాశం ఉంది. మీరు ఈ యాప్‌ను ఇన్‌స్టాల్ చేయడం ద్వారా, దీనిని ఉపయోగించడం వలన మీ ఫోన్‌కు ఏదైనా హాని జరిగినా లేదా డేటా కోల్పోయినా బాధ్యత మీదేనని అంగీకరిస్తున్నారు."</string>
+    <string name="anonymous_source_warning" product="tablet" msgid="3939101621438855516">"మీ టాబ్లెట్ మరియు వ్యక్తిగత డేటాపై తెలియని యాప్‌లు దాడి చేయడానికి ఎక్కువ అవకాశం ఉంది. మీరు ఈ యాప్‌ను ఇన్‌స్టాల్ చేయడం ద్వారా, దీనిని ఉపయోగించడం వలన మీ టాబ్లెట్‌కు ఏదైనా హాని జరిగినా లేదా డేటా కోల్పోయినా బాధ్యత మీదేనని అంగీకరిస్తున్నారు."</string>
+    <string name="anonymous_source_warning" product="tv" msgid="5599483539528168566">"మీ టీవీ మరియు వ్యక్తిగత డేటాపై తెలియని యాప్‌లు దాడి చేయడానికి ఎక్కువ అవకాశం ఉంది. మీరు ఈ యాప్‌ను ఇన్‌స్టాల్ చేయడం ద్వారా, దీనిని ఉపయోగించడం వలన మీ టీవీకి ఏదైనా హాని జరిగినా లేదా డేటా కోల్పోయినా బాధ్యత మీదేనని అంగీకరిస్తున్నారు."</string>
+    <string name="anonymous_source_continue" msgid="4375745439457209366">"కొనసాగించు"</string>
+    <string name="external_sources_settings" msgid="4046964413071713807">"సెట్టింగ్‌లు"</string>
+    <string name="wear_app_channel" msgid="1960809674709107850">"Wear యాప్‌లను ఇన్‌స్టాల్/అన్‌ఇన్‌స్టాల్ చేస్తోంది"</string>
 </resources>

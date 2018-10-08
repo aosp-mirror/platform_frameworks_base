@@ -518,8 +518,7 @@
     <string name="permdesc_imagesWrite" msgid="7073662756617474375">"इससे ऐप्लिकेशन को आपके फ़ोटो संग्रह में बदलाव करने की मंज़ूरी दी जाती है."</string>
     <string name="permlab_mediaLocation" msgid="8675148183726247864">"अपने मीडिया संग्रह से जगह की जानकारी एक्सेस करने की अनुमति दें"</string>
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"इससे ऐप्लिकेशन को आपके मीडिया संग्रह से जगह की जानकारी एक्सेस करने की अनुमति दी जाती है."</string>
-    <!-- no translation found for biometric_error_hw_unavailable (645781226537551036) -->
-    <skip />
+    <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"बायोमेट्रिक हार्डवेयर उपलब्ध नहीं है"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"आंशिक फ़िंगरप्रिंट की पहचान की गई. कृपया पुनः प्रयास करें."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"फ़िंगरप्रिंट संसाधित नहीं हो सका. कृपया पुन: प्रयास करें."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"फ़िंगरप्रिंट सेंसर गंदा है. कृपया साफ़ करें और फिर कोशिश करें."</string>
@@ -527,8 +526,7 @@
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"उंगली बहुत धीरे चलाई गई. कृपया फिर से कोशिश करें."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
-    <!-- no translation found for biometric_not_recognized (5770511773560736082) -->
-    <skip />
+    <string name="biometric_not_recognized" msgid="5770511773560736082">"पहचान नहीं हो पाई"</string>
     <string name="fingerprint_authenticated" msgid="5309333983002526448">"फ़िंगरप्रिंट की पुष्टि हो गई"</string>
     <string name="face_authenticated_no_confirmation_required" msgid="4018680978348659031">"चेहरे की पहचान की गई"</string>
     <string name="face_authenticated_confirmation_required" msgid="8778347003507633610">"चेहरे की पहचान की गई, कृपया पुष्टि बटन दबाएं"</string>
