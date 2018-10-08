@@ -171,8 +171,7 @@ public class NativeLibraryHelper {
             boolean debuggable);
 
     private native static int nativeCopyNativeBinaries(long handle, String sharedLibraryPath,
-            String abiToCopy, boolean extractNativeLibs, boolean hasNativeBridge,
-            boolean debuggable);
+            String abiToCopy, boolean extractNativeLibs, boolean debuggable);
 
     private static long sumNativeBinaries(Handle handle, String abi) {
         long sum = 0;
@@ -193,7 +192,7 @@ public class NativeLibraryHelper {
     public static int copyNativeBinaries(Handle handle, File sharedLibraryDir, String abi) {
         for (long apkHandle : handle.apkHandles) {
             int res = nativeCopyNativeBinaries(apkHandle, sharedLibraryDir.getPath(), abi,
-                    handle.extractNativeLibs, HAS_NATIVE_BRIDGE, handle.debuggable);
+                    handle.extractNativeLibs, handle.debuggable);
             if (res != INSTALL_SUCCEEDED) {
                 return res;
             }
@@ -447,9 +446,6 @@ public class NativeLibraryHelper {
 
     // We don't care about the other return values for now.
     private static final int BITCODE_PRESENT = 1;
-
-    private static final boolean HAS_NATIVE_BRIDGE =
-            !"0".equals(SystemProperties.get("ro.dalvik.vm.native.bridge", "0"));
 
     private static native int hasRenderscriptBitcode(long apkHandle);
 
