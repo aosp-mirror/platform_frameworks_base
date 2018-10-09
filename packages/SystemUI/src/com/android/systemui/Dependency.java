@@ -178,7 +178,8 @@ public class Dependency extends SystemUI {
                 getDependency(ActivityStarter.class));
 
         mProviders.put(AsyncSensorManager.class, () ->
-                new AsyncSensorManager(mContext.getSystemService(SensorManager.class)));
+                new AsyncSensorManager(mContext.getSystemService(SensorManager.class),
+                        getDependency(PluginManager.class)));
 
         mProviders.put(BluetoothController.class, () ->
                 new BluetoothControllerImpl(mContext, getDependency(BG_LOOPER)));

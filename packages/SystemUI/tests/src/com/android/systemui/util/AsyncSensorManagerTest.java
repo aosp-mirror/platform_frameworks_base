@@ -18,6 +18,7 @@ package com.android.systemui.util;
 
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -28,6 +29,8 @@ import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.plugins.SensorManagerPlugin;
+import com.android.systemui.shared.plugins.PluginManager;
 import com.android.systemui.utils.hardware.FakeSensorManager;
 
 import org.junit.Before;
@@ -42,9 +45,11 @@ public class AsyncSensorManagerTest extends SysuiTestCase {
     private FakeSensorManager mFakeSensorManager;
     private SensorEventListener mListener;
     private FakeSensorManager.MockProximitySensor mSensor;
+    private PluginManager mPluginManager;
 
     @Before
     public void setUp() throws Exception {
+        mPluginManager = mock(PluginManager.class);
         mFakeSensorManager = new FakeSensorManager(mContext);
         mAsyncSensorManager = new TestableAsyncSensorManager(mFakeSensorManager);
         mSensor = mFakeSensorManager.getMockProximitySensor();
@@ -86,9 +91,15 @@ public class AsyncSensorManagerTest extends SysuiTestCase {
         verifyNoMoreInteractions(mListener);
     }
 
+    @Test
+    public void registersPlugin_whenLoaded() {
+        verify(mPluginManager).addPluginListener(eq(mAsyncSensorManager),
+                eq(SensorManagerPlugin.class), eq(true) /* allowMultiple */);
+    }
+
     private class TestableAsyncSensorManager extends AsyncSensorManager {
         public TestableAsyncSensorManager(SensorManager sensorManager) {
-            super(sensorManager);
+            super(sensorManager, mPluginManager);
         }
 
         public void waitUntilRequestsCompleted() {
