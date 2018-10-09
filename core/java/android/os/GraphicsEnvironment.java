@@ -54,9 +54,9 @@ public class GraphicsEnvironment {
     /**
      * Set up GraphicsEnvironment
      */
-    public void setup(Context context) {
+    public void setup(Context context, Bundle coreSettings) {
         setupGpuLayers(context);
-        setupAngle(context);
+        setupAngle(context, coreSettings);
         chooseDriver(context);
     }
 
@@ -135,11 +135,10 @@ public class GraphicsEnvironment {
     /**
      * Pass ANGLE details down to trigger enable logic
      */
-    private static void setupAngle(Context context) {
+    private static void setupAngle(Context context, Bundle coreSettings) {
 
         String angleEnabledApp =
-                Settings.Global.getString(context.getContentResolver(),
-                                          Settings.Global.ANGLE_ENABLED_APP);
+                coreSettings.getString(Settings.Global.ANGLE_ENABLED_APP);
 
         String packageName = context.getPackageName();
 
