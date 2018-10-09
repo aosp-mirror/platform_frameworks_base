@@ -573,7 +573,6 @@ Landroid/net/IConnectivityManager;->getTetherableWifiRegexs()[Ljava/lang/String;
 Landroid/net/IConnectivityManager;->getTetheredIfaces()[Ljava/lang/String;
 Landroid/net/IConnectivityManager;->getTetheringErroredIfaces()[Ljava/lang/String;
 Landroid/net/IConnectivityManager;->reportInetCondition(II)V
-Landroid/net/IConnectivityManager;->setAirplaneMode(Z)V
 Landroid/net/IConnectivityManager;->startLegacyVpn(Lcom/android/internal/net/VpnProfile;)V
 Landroid/net/INetworkManagementEventObserver$Stub;-><init>()V
 Landroid/net/INetworkPolicyListener$Stub;-><init>()V
