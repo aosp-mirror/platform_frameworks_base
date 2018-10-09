@@ -23,6 +23,7 @@ import android.content.res.TypedArray;
 import android.graphics.LeakyTypefaceStorage;
 import android.graphics.Typeface;
 import android.graphics.fonts.Font;
+import android.os.LocaleList;
 import android.os.Parcel;
 import android.text.ParcelableSpan;
 import android.text.TextPaint;
@@ -66,6 +67,7 @@ public class TextAppearanceSpan extends MetricAffectingSpan implements Parcelabl
     private final Typeface mTypeface;
 
     private final int mTextFontWeight;
+    private final LocaleList mTextLocales;
 
     private final float mShadowRadius;
     private final float mShadowDx;
@@ -149,6 +151,19 @@ public class TextAppearanceSpan extends MetricAffectingSpan implements Parcelabl
         mTextFontWeight = a.getInt(com.android.internal.R.styleable
                 .TextAppearance_textFontWeight, -1);
 
+        final String localeString = a.getString(com.android.internal.R.styleable
+                .TextAppearance_textLocale);
+        if (localeString != null) {
+            LocaleList localeList = LocaleList.forLanguageTags(localeString);
+            if (!localeList.isEmpty()) {
+                mTextLocales = localeList;
+            } else {
+                mTextLocales = null;
+            }
+        } else {
+            mTextLocales = null;
+        }
+
         mShadowRadius = a.getFloat(com.android.internal.R.styleable
                 .TextAppearance_shadowRadius, 0.0f);
         mShadowDx = a.getFloat(com.android.internal.R.styleable
@@ -201,6 +216,7 @@ public class TextAppearanceSpan extends MetricAffectingSpan implements Parcelabl
         mTypeface = null;
 
         mTextFontWeight = -1;
+        mTextLocales = null;
 
         mShadowRadius = 0.0f;
         mShadowDx = 0.0f;
@@ -233,6 +249,7 @@ public class TextAppearanceSpan extends MetricAffectingSpan implements Parcelabl
         mTypeface = LeakyTypefaceStorage.readTypefaceFromParcel(src);
 
         mTextFontWeight = src.readInt();
+        mTextLocales = src.readParcelable(LocaleList.class.getClassLoader());
 
         mShadowRadius = src.readFloat();
         mShadowDx = src.readFloat();
@@ -285,6 +302,7 @@ public class TextAppearanceSpan extends MetricAffectingSpan implements Parcelabl
         LeakyTypefaceStorage.writeTypefaceToParcel(mTypeface, dest);
 
         dest.writeInt(mTextFontWeight);
+        dest.writeParcelable(mTextLocales, flags);
 
         dest.writeFloat(mShadowRadius);
         dest.writeFloat(mShadowDx);
@@ -346,6 +364,15 @@ public class TextAppearanceSpan extends MetricAffectingSpan implements Parcelabl
      */
     public int getTextFontWeight() {
         return mTextFontWeight;
+    }
+
+    /**
+     * Returns the {@link android.os.LocaleList} specified by this span, or <code>null</code>
+     * if it does not specify one.
+     */
+    @Nullable
+    public LocaleList getTextLocales() {
+        return mTextLocales;
     }
 
     /**
@@ -485,6 +512,10 @@ public class TextAppearanceSpan extends MetricAffectingSpan implements Parcelabl
 
         if (mTextSize > 0) {
             ds.setTextSize(mTextSize);
+        }
+
+        if (mTextLocales != null) {
+            ds.setTextLocales(mTextLocales);
         }
 
         if (mHasElegantTextHeight) {
