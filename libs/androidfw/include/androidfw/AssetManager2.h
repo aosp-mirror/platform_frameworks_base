@@ -96,7 +96,12 @@ class AssetManager2 {
   // Only pass invalidate_caches=false when it is known that the structure
   // change in ApkAssets is due to a safe addition of resources with completely
   // new resource IDs.
-  bool SetApkAssets(const std::vector<const ApkAssets*>& apk_assets, bool invalidate_caches = true);
+  //
+  // Only pass in filter_incompatible_configs=false when you want to load all
+  // configurations (including incompatible ones) such as when constructing an
+  // idmap.
+  bool SetApkAssets(const std::vector<const ApkAssets*>& apk_assets, bool invalidate_caches = true,
+          bool filter_incompatible_configs = true);
 
   inline const std::vector<const ApkAssets*> GetApkAssets() const {
     return apk_assets_;
@@ -274,7 +279,7 @@ class AssetManager2 {
 
   // Triggers the re-construction of lists of types that match the set configuration.
   // This should always be called when mutating the AssetManager's configuration or ApkAssets set.
-  void RebuildFilterList();
+  void RebuildFilterList(bool filter_incompatible_configs = true);
 
   // AssetManager2::GetBag(resid) wraps this function to track which resource ids have already
   // been seen while traversing bag parents.
