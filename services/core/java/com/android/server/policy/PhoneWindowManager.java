@@ -6046,6 +6046,19 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             }
         }
 
+        // Intercept the Accessibility keychord (CTRL + ALT + Z) for keyboard users.
+        if (mAccessibilityShortcutController.isAccessibilityShortcutAvailable(isKeyguardLocked())) {
+            switch (keyCode) {
+                case KeyEvent.KEYCODE_Z: {
+                    if (down && event.isCtrlPressed() && event.isAltPressed()) {
+                        mHandler.sendMessage(mHandler.obtainMessage(MSG_ACCESSIBILITY_SHORTCUT));
+                        result &= ~ACTION_PASS_TO_USER;
+                    }
+                    break;
+                }
+            }
+        }
+
         if (useHapticFeedback) {
             performHapticFeedbackLw(null, HapticFeedbackConstants.VIRTUAL_KEY, false,
                     "Virtual Key - Press");
