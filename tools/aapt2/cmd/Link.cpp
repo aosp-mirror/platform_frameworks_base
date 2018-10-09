@@ -24,13 +24,13 @@
 #include "android-base/errors.h"
 #include "android-base/file.h"
 #include "android-base/stringprintf.h"
+#include "androidfw/Locale.h"
 #include "androidfw/StringPiece.h"
 
 #include "AppInfo.h"
 #include "Debug.h"
 #include "Flags.h"
 #include "LoadedApk.h"
-#include "Locale.h"
 #include "NameMangler.h"
 #include "ResourceUtils.h"
 #include "ResourceValues.h"
@@ -68,6 +68,7 @@
 #include "xml/XmlDom.h"
 
 using ::aapt::io::FileInputStream;
+using ::android::ConfigDescription;
 using ::android::StringPiece;
 using ::android::base::StringPrintf;
 

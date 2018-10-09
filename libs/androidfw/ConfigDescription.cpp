@@ -14,22 +14,16 @@
  * limitations under the License.
  */
 
-#include "ConfigDescription.h"
+#include "androidfw/ConfigDescription.h"
+#include "androidfw/Locale.h"
+#include "androidfw/ResourceTypes.h"
+#include "androidfw/StringPiece.h"
+#include "androidfw/Util.h"
 
 #include <string>
 #include <vector>
 
-#include "androidfw/ResourceTypes.h"
-#include "androidfw/StringPiece.h"
-
-#include "Locale.h"
-#include "SdkConstants.h"
-#include "util/Util.h"
-
-using android::ResTable_config;
-using android::StringPiece;
-
-namespace aapt {
+namespace android {
 
 static const char* kWildcardName = "any";
 
@@ -883,7 +877,7 @@ std::string ConfigDescription::GetBcp47LanguageTag(bool canonicalize) const {
 }
 
 std::string ConfigDescription::to_string() const {
-  const android::String8 str = toString();
+  const String8 str = toString();
   return std::string(str.string(), str.size());
 }
 
@@ -996,4 +990,4 @@ bool ConfigDescription::IsCompatibleWith(const ConfigDescription& o) const {
   return !ConflictsWith(o) && !Dominates(o) && !o.Dominates(*this);
 }
 
-}  // namespace aapt
+}  // namespace android
