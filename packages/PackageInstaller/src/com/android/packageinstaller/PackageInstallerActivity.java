@@ -16,7 +16,7 @@
 */
 package com.android.packageinstaller;
 
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
+import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
 
 import android.Manifest;
 import android.annotation.NonNull;
@@ -281,7 +281,7 @@ public class PackageInstallerActivity extends AlertActivity {
 
     @Override
     protected void onCreate(Bundle icicle) {
-        getWindow().addPrivateFlags(PRIVATE_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS);
+        getWindow().addSystemFlags(SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS);
 
         super.onCreate(null);
 

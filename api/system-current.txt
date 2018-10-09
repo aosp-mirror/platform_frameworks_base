@@ -6654,7 +6654,7 @@ package android.util {
 package android.view {
 
   public abstract class Window {
-    method public void addPrivateFlags(int);
+    method public void addSystemFlags(int);
   }
 
   public abstract interface WindowManager implements android.view.ViewManager {
@@ -6664,7 +6664,10 @@ package android.view {
   public static class WindowManager.LayoutParams extends android.view.ViewGroup.LayoutParams implements android.os.Parcelable {
     method public final long getUserActivityTimeout();
     method public final void setUserActivityTimeout(long);
-    field public static final int PRIVATE_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS = 524288; // 0x80000
+    field public static final int SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS = 524288; // 0x80000
+  }
+
+  public static abstract class WindowManager.LayoutParams.SystemFlags implements java.lang.annotation.Annotation {
   }
 
 }

@@ -173,9 +173,9 @@ public class StatusBarWindowController implements Callback, Dumpable, Configurat
         }
 
         if (state.dozing) {
-            mLpChanged.privateFlags |= LayoutParams.PRIVATE_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
+            mLpChanged.privateFlags |= LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
         } else {
-            mLpChanged.privateFlags &= ~LayoutParams.PRIVATE_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
+            mLpChanged.privateFlags &= ~LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
         }
     }
 

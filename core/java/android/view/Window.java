@@ -1085,6 +1085,19 @@ public abstract class Window {
      *
      * <p>Refer to the individual flags for the permissions needed.
      *
+     * @param flags The flag bits to add.
+     *
+     * @hide
+     */
+    public void addPrivateFlags(int flags) {
+        setPrivateFlags(flags, flags);
+    }
+
+    /**
+     * Add system flag bits.
+     *
+     * <p>Refer to the individual flags for the permissions needed.
+     *
      * <p>Note: Only for updateable system components (aka. mainline modules)
      *
      * @param flags The flag bits to add.
@@ -1092,8 +1105,8 @@ public abstract class Window {
      * @hide
      */
     @SystemApi
-    public void addPrivateFlags(int flags) {
-        setPrivateFlags(flags, flags);
+    public void addSystemFlags(@WindowManager.LayoutParams.SystemFlags int flags) {
+        addPrivateFlags(flags);
     }
 
     /**
