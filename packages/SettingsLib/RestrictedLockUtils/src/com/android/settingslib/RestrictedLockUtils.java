@@ -91,13 +91,7 @@ public class RestrictedLockUtils {
 
     public static boolean isCurrentUserOrProfile(Context context, int userId) {
         UserManager um = context.getSystemService(UserManager.class);
-        int[] userIds = um.getProfileIds(UserHandle.myUserId(), true);
-        for (int i = 0; i < userIds.length; i++) {
-            if (userIds[i] == userId) {
-                return true;
-            }
-        }
-        return false;
+        return um.getUserProfiles().contains(UserHandle.of(userId));
     }
 
     public static class EnforcedAdmin {
