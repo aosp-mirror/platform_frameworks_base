@@ -24045,7 +24045,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
          * @param outShadowSize A {@link android.graphics.Point} containing the width and height
          * of the shadow image. Your application must set {@link android.graphics.Point#x} to the
          * desired width and must set {@link android.graphics.Point#y} to the desired height of the
-         * image.
+         * image. Since Android P, the width and height must be positive values.
          *
          * @param outShadowTouchPoint A {@link android.graphics.Point} for the position within the
          * shadow image that should be underneath the touch point during the drag and drop
