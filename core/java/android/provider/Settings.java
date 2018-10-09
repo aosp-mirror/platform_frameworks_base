@@ -6038,6 +6038,7 @@ public final class Settings {
          * shortcut. Must be its flattened {@link ComponentName}.
          * @hide
          */
+        @TestApi
         public static final String ACCESSIBILITY_SHORTCUT_TARGET_SERVICE =
                 "accessibility_shortcut_target_service";
 

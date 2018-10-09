@@ -960,6 +960,7 @@ package android.provider {
 
   public static final class Settings.Secure extends android.provider.Settings.NameValueTable {
     field public static final java.lang.String ACCESSIBILITY_DISPLAY_MAGNIFICATION_ENABLED = "accessibility_display_magnification_enabled";
+    field public static final java.lang.String ACCESSIBILITY_SHORTCUT_TARGET_SERVICE = "accessibility_shortcut_target_service";
     field public static final java.lang.String AUTOFILL_FEATURE_FIELD_CLASSIFICATION = "autofill_field_classification";
     field public static final java.lang.String AUTOFILL_SERVICE = "autofill_service";
     field public static final java.lang.String AUTOFILL_USER_DATA_MAX_CATEGORY_COUNT = "autofill_user_data_max_category_count";
@@ -1610,6 +1611,17 @@ package android.view {
 }
 
 package android.view.accessibility {
+
+  public final class AccessibilityManager {
+    method public void addAccessibilityServicesStateChangeListener(android.view.accessibility.AccessibilityManager.AccessibilityServicesStateChangeListener, android.os.Handler);
+    method public java.lang.String getAccessibilityShortcutService();
+    method public void performAccessibilityShortcut();
+    method public void removeAccessibilityServicesStateChangeListener(android.view.accessibility.AccessibilityManager.AccessibilityServicesStateChangeListener);
+  }
+
+  public static abstract interface AccessibilityManager.AccessibilityServicesStateChangeListener {
+    method public abstract void onAccessibilityServicesStateChanged(android.view.accessibility.AccessibilityManager);
+  }
 
   public class AccessibilityNodeInfo implements android.os.Parcelable {
     method public static void setNumInstancesInUseCounter(java.util.concurrent.atomic.AtomicInteger);
