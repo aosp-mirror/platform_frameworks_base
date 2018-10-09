@@ -17,10 +17,12 @@
 package com.android.systemui.statusbar.notification.row;
 
 import static com.android.systemui.statusbar.notification.ActivityLaunchAnimator.ExpandAnimationParameters;
+import static com.android.systemui.statusbar.notification.row.NotificationContentView.VISIBLE_TYPE_AMBIENT;
+import static com.android.systemui.statusbar.notification.row.NotificationContentView.VISIBLE_TYPE_HEADSUP;
 import static com.android.systemui.statusbar.notification.row.NotificationInflater
-        .FLAG_REINFLATE_AMBIENT_VIEW;
+        .FLAG_CONTENT_VIEW_AMBIENT;
 import static com.android.systemui.statusbar.notification.row.NotificationInflater
-        .FLAG_REINFLATE_HEADS_UP_VIEW;
+        .FLAG_CONTENT_VIEW_HEADS_UP;
 import static com.android.systemui.statusbar.notification.row.NotificationInflater.InflationCallback;
 
 import android.animation.Animator;
@@ -454,6 +456,33 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     /**
+     * Marks a content view as freeable, setting it so that future inflations do not reinflate
+     * and ensuring that the view is freed when it is safe to remove.
+     *
+     * @param inflationFlag flag corresponding to the content view to be freed
+     */
+    public void freeContentViewWhenSafe(@InflationFlag int inflationFlag) {
+        // View should not be reinflated in the future
+        updateInflationFlag(inflationFlag, false);
+        Runnable freeViewRunnable = () ->
+                mNotificationInflater.freeNotificationView(inflationFlag);
+        switch (inflationFlag) {
+            case FLAG_CONTENT_VIEW_HEADS_UP:
+                getPrivateLayout().performWhenContentInactive(VISIBLE_TYPE_HEADSUP,
+                        freeViewRunnable);
+                break;
+            case FLAG_CONTENT_VIEW_AMBIENT:
+                getPrivateLayout().performWhenContentInactive(VISIBLE_TYPE_AMBIENT,
+                        freeViewRunnable);
+                getPublicLayout().performWhenContentInactive(VISIBLE_TYPE_AMBIENT,
+                        freeViewRunnable);
+                break;
+            default:
+                break;
+        }
+    }
+
+    /**
      * Update whether or not a content view should be inflated.
      *
      * @param flag the flag corresponding to the content view
@@ -607,7 +636,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             headsUpHeight = mMaxHeadsUpHeight;
         }
         NotificationViewWrapper headsUpWrapper = layout.getVisibleWrapper(
-                NotificationContentView.VISIBLE_TYPE_HEADSUP);
+                VISIBLE_TYPE_HEADSUP);
         if (headsUpWrapper != null) {
             headsUpHeight = Math.max(headsUpHeight, headsUpWrapper.getMinLayoutHeight());
         }
@@ -642,12 +671,8 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         if (isHeadsUp) {
             mMustStayOnScreen = true;
             setAboveShelf(true);
-        } else {
-            if (isAboveShelf() != wasAboveShelf) {
-                mAboveShelfChangedListener.onAboveShelfStateChanged(!wasAboveShelf);
-            }
-            updateInflationFlag(FLAG_REINFLATE_HEADS_UP_VIEW, false);
-            mNotificationInflater.freeNotificationView(FLAG_REINFLATE_HEADS_UP_VIEW);
+        } else if (isAboveShelf() != wasAboveShelf) {
+            mAboveShelfChangedListener.onAboveShelfStateChanged(!wasAboveShelf);
         }
     }
 
@@ -657,10 +682,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     public void setAmbientPulsing(boolean isAmbientPulsing) {
         mIsAmbientPulsing = isAmbientPulsing;
-        if (!isAmbientPulsing) {
-            updateInflationFlag(FLAG_REINFLATE_AMBIENT_VIEW, false);
-            mNotificationInflater.freeNotificationView(FLAG_REINFLATE_AMBIENT_VIEW);
-        }
     }
 
     public void setGroupManager(NotificationGroupManager groupManager) {

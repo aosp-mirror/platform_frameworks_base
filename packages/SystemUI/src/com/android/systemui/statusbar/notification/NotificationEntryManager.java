@@ -19,9 +19,9 @@ import static com.android.systemui.statusbar.NotificationRemoteInputManager.ENAB
 import static com.android.systemui.statusbar.NotificationRemoteInputManager
         .FORCE_REMOTE_INPUT_HISTORY;
 import static com.android.systemui.statusbar.notification.row.NotificationInflater
-        .FLAG_REINFLATE_AMBIENT_VIEW;
+        .FLAG_CONTENT_VIEW_AMBIENT;
 import static com.android.systemui.statusbar.notification.row.NotificationInflater
-        .FLAG_REINFLATE_HEADS_UP_VIEW;
+        .FLAG_CONTENT_VIEW_HEADS_UP;
 
 import android.annotation.Nullable;
 import android.app.Notification;
@@ -458,7 +458,7 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
      */
     private void showAlertingView(NotificationData.Entry entry,
             @InflationFlag int inflatedFlags) {
-        if ((inflatedFlags & FLAG_REINFLATE_HEADS_UP_VIEW) != 0) {
+        if ((inflatedFlags & FLAG_CONTENT_VIEW_HEADS_UP) != 0) {
             // Possible for shouldHeadsUp to change between the inflation starting and ending.
             // If it does and we no longer need to heads up, we should free the view.
             if (shouldHeadsUp(entry)) {
@@ -466,14 +466,14 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
                 // Mark as seen immediately
                 setNotificationShown(entry.notification);
             } else {
-                entry.row.updateInflationFlag(FLAG_REINFLATE_HEADS_UP_VIEW, false);
+                entry.row.freeContentViewWhenSafe(FLAG_CONTENT_VIEW_HEADS_UP);
             }
         }
-        if ((inflatedFlags & FLAG_REINFLATE_AMBIENT_VIEW) != 0) {
+        if ((inflatedFlags & FLAG_CONTENT_VIEW_AMBIENT) != 0) {
             if (shouldPulse(entry)) {
                 mAmbientPulseManager.showNotification(entry);
             } else {
-                entry.row.updateInflationFlag(FLAG_REINFLATE_AMBIENT_VIEW, false);
+                entry.row.freeContentViewWhenSafe(FLAG_CONTENT_VIEW_AMBIENT);
             }
         }
     }
@@ -666,8 +666,8 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
         row.setSmartActions(entry.smartActions);
         row.setEntry(entry);
 
-        row.updateInflationFlag(FLAG_REINFLATE_HEADS_UP_VIEW, shouldHeadsUp(entry));
-        row.updateInflationFlag(FLAG_REINFLATE_AMBIENT_VIEW, shouldPulse(entry));
+        row.updateInflationFlag(FLAG_CONTENT_VIEW_HEADS_UP, shouldHeadsUp(entry));
+        row.updateInflationFlag(FLAG_CONTENT_VIEW_AMBIENT, shouldPulse(entry));
         row.inflateViews();
     }
 

@@ -18,9 +18,6 @@ package com.android.systemui.statusbar;
 
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 
-import static com.android.systemui.statusbar.notification.row.NotificationInflater
-        .FLAG_REINFLATE_ALL;
-
 import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.Instrumentation;
@@ -190,7 +187,8 @@ public class NotificationTestHelper {
                 .setSmallIcon(R.drawable.ic_person)
                 .setContentTitle("Title")
                 .setContentText("Text")
-                .setPublicVersion(publicVersion);
+                .setPublicVersion(publicVersion)
+                .setStyle(new Notification.BigTextStyle().bigText("Big Text"));
         if (isGroupSummary) {
             notificationBuilder.setGroupSummary(true);
         }

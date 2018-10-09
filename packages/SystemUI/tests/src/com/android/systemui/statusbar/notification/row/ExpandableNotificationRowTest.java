@@ -18,13 +18,12 @@ package com.android.systemui.statusbar.notification.row;
 
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 
-import static com.android.systemui.statusbar.notification.row.NotificationInflater
-        .FLAG_REINFLATE_ALL;
-import static com.android.systemui.statusbar.notification.row.NotificationInflater
-        .FLAG_REINFLATE_HEADS_UP_VIEW;
+import static com.android.systemui.statusbar.notification.row.NotificationInflater.FLAG_CONTENT_VIEW_ALL;
+import static com.android.systemui.statusbar.notification.row.NotificationInflater.FLAG_CONTENT_VIEW_HEADS_UP;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -41,6 +40,7 @@ import android.app.AppOpsManager;
 import android.app.NotificationChannel;
 import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 import android.util.ArraySet;
 import android.view.NotificationHeaderView;
@@ -140,23 +140,12 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
     }
 
     @Test
-    public void testHeadsUpViewShouldBeFreedWhenNotHeadsUp() throws Exception {
-        ExpandableNotificationRow row = mNotificationTestHelper.createRow(FLAG_REINFLATE_ALL);
-        row.setHeadsUp(true);
+    public void testFreeContentViewWhenSafe() throws Exception {
+        ExpandableNotificationRow row = mNotificationTestHelper.createRow(FLAG_CONTENT_VIEW_ALL);
 
-        row.setHeadsUp(false);
+        row.freeContentViewWhenSafe(FLAG_CONTENT_VIEW_HEADS_UP);
 
         assertNull(row.getPrivateLayout().getHeadsUpChild());
-    }
-
-    @Test
-    public void testAmbientViewShouldBeFreedWhenNotPulsing() throws Exception {
-        ExpandableNotificationRow row = mNotificationTestHelper.createRow(FLAG_REINFLATE_ALL);
-        row.setAmbientPulsing(true);
-
-        row.setAmbientPulsing(false);
-
-        assertNull(row.getShowingLayout().getAmbientChild());
     }
 
     @Test

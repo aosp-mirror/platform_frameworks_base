@@ -16,6 +16,9 @@
 
 package com.android.systemui.statusbar.notification.row;
 
+import static com.android.systemui.statusbar.notification.row.NotificationContentView.VISIBLE_TYPE_AMBIENT;
+import static com.android.systemui.statusbar.notification.row.NotificationContentView.VISIBLE_TYPE_HEADSUP;
+
 import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.app.Notification;
@@ -59,54 +62,54 @@ public class NotificationInflater {
 
     @Retention(RetentionPolicy.SOURCE)
     @IntDef(flag = true,
-            prefix = {"FLAG_REINFLATE_"},
+            prefix = {"FLAG_CONTENT_VIEW_"},
             value = {
-                FLAG_REINFLATE_CONTENT_VIEW,
-                FLAG_REINFLATE_EXPANDED_VIEW,
-                FLAG_REINFLATE_HEADS_UP_VIEW,
-                FLAG_REINFLATE_AMBIENT_VIEW,
-                FLAG_REINFLATE_PUBLIC_VIEW,
-                FLAG_REINFLATE_ALL})
+                FLAG_CONTENT_VIEW_CONTRACTED,
+                FLAG_CONTENT_VIEW_EXPANDED,
+                FLAG_CONTENT_VIEW_HEADS_UP,
+                FLAG_CONTENT_VIEW_AMBIENT,
+                FLAG_CONTENT_VIEW_PUBLIC,
+                FLAG_CONTENT_VIEW_ALL})
     public @interface InflationFlag {}
     /**
      * The default, contracted view.  Seen when the shade is pulled down and in the lock screen
      * if there is no worry about content sensitivity.
      */
-    public static final int FLAG_REINFLATE_CONTENT_VIEW = 1;
+    public static final int FLAG_CONTENT_VIEW_CONTRACTED = 1;
 
     /**
      * The expanded view.  Seen when the user expands a notification.
      */
-    public static final int FLAG_REINFLATE_EXPANDED_VIEW = 1 << 1;
+    public static final int FLAG_CONTENT_VIEW_EXPANDED = 1 << 1;
 
     /**
      * The heads up view.  Seen when a high priority notification peeks in from the top.
      */
-    public static final int FLAG_REINFLATE_HEADS_UP_VIEW = 1 << 2;
+    public static final int FLAG_CONTENT_VIEW_HEADS_UP = 1 << 2;
 
     /**
      * The ambient view.  Seen when a high priority notification is received and the phone
      * is dozing.
      */
-    public static final int FLAG_REINFLATE_AMBIENT_VIEW = 1 << 3;
+    public static final int FLAG_CONTENT_VIEW_AMBIENT = 1 << 3;
 
     /**
      * The public view.  This is a version of the contracted view that hides sensitive
      * information and is used on the lock screen if we determine that the notification's
      * content should be hidden.
      */
-    public static final int FLAG_REINFLATE_PUBLIC_VIEW = 1 << 4;
+    public static final int FLAG_CONTENT_VIEW_PUBLIC = 1 << 4;
 
-    public static final int FLAG_REINFLATE_ALL = ~0;
+    public static final int FLAG_CONTENT_VIEW_ALL = ~0;
 
     /**
      * Content views that must be inflated at all times.
      */
     @InflationFlag
     private static final int REQUIRED_INFLATION_FLAGS =
-            FLAG_REINFLATE_CONTENT_VIEW
-            | FLAG_REINFLATE_EXPANDED_VIEW
-            | FLAG_REINFLATE_PUBLIC_VIEW;
+            FLAG_CONTENT_VIEW_CONTRACTED
+            | FLAG_CONTENT_VIEW_EXPANDED
+            | FLAG_CONTENT_VIEW_PUBLIC;
 
     /**
      * The set of content views to inflate.
@@ -144,7 +147,7 @@ public class NotificationInflater {
         if (childInGroup != mIsChildInGroup) {
             mIsChildInGroup = childInGroup;
             if (mIsLowPriority) {
-                int flags = FLAG_REINFLATE_CONTENT_VIEW | FLAG_REINFLATE_EXPANDED_VIEW;
+                int flags = FLAG_CONTENT_VIEW_CONTRACTED | FLAG_CONTENT_VIEW_EXPANDED;
                 inflateNotificationViews(flags);
             }
         }
@@ -172,7 +175,7 @@ public class NotificationInflater {
             if (mRow.getEntry() == null) {
                 return;
             }
-            inflateNotificationViews(FLAG_REINFLATE_AMBIENT_VIEW);
+            inflateNotificationViews(FLAG_CONTENT_VIEW_AMBIENT);
         }
     }
 
@@ -252,23 +255,41 @@ public class NotificationInflater {
     }
 
     /**
-     * Frees the content view associated with the inflation flag.
+     * Frees the content view associated with the inflation flag.  Will only succeed if the
+     * view is safe to remove.
      *
      * @param inflateFlag the flag corresponding to the content view which should be freed
      */
     public void freeNotificationView(@InflationFlag int inflateFlag) {
+        if ((mInflationFlags & inflateFlag) != 0) {
+            // The view should still be inflated.
+            return;
+        }
         switch (inflateFlag) {
-            case FLAG_REINFLATE_HEADS_UP_VIEW:
-                mRow.getPrivateLayout().setHeadsUpChild(null);
-                mCachedContentViews.remove(FLAG_REINFLATE_HEADS_UP_VIEW);
+            case FLAG_CONTENT_VIEW_HEADS_UP:
+                if (mRow.getPrivateLayout().isContentViewInactive(VISIBLE_TYPE_HEADSUP)) {
+                    mRow.getPrivateLayout().setHeadsUpChild(null);
+                    mCachedContentViews.remove(FLAG_CONTENT_VIEW_HEADS_UP);
+                }
                 break;
-            case FLAG_REINFLATE_AMBIENT_VIEW:
-                mRow.getShowingLayout().setAmbientChild(null);
-                mCachedContentViews.remove(FLAG_REINFLATE_AMBIENT_VIEW);
+            case FLAG_CONTENT_VIEW_AMBIENT:
+                boolean privateSafeToRemove = mRow.getPrivateLayout().isContentViewInactive(
+                        VISIBLE_TYPE_AMBIENT);
+                boolean publicSafeToRemove = mRow.getPublicLayout().isContentViewInactive(
+                        VISIBLE_TYPE_AMBIENT);
+                if (privateSafeToRemove) {
+                    mRow.getPrivateLayout().setAmbientChild(null);
+                }
+                if (publicSafeToRemove) {
+                    mRow.getPublicLayout().setAmbientChild(null);
+                }
+                if (privateSafeToRemove && publicSafeToRemove) {
+                    mCachedContentViews.remove(FLAG_CONTENT_VIEW_AMBIENT);
+                }
                 break;
-            case FLAG_REINFLATE_CONTENT_VIEW:
-            case FLAG_REINFLATE_EXPANDED_VIEW:
-            case FLAG_REINFLATE_PUBLIC_VIEW:
+            case FLAG_CONTENT_VIEW_CONTRACTED:
+            case FLAG_CONTENT_VIEW_EXPANDED:
+            case FLAG_CONTENT_VIEW_PUBLIC:
             default:
                 break;
         }
@@ -280,23 +301,23 @@ public class NotificationInflater {
             Context packageContext) {
         InflationProgress result = new InflationProgress();
         isLowPriority = isLowPriority && !isChildInGroup;
-        if ((reInflateFlags & FLAG_REINFLATE_CONTENT_VIEW) != 0) {
+        if ((reInflateFlags & FLAG_CONTENT_VIEW_CONTRACTED) != 0) {
             result.newContentView = createContentView(builder, isLowPriority, usesIncreasedHeight);
         }
 
-        if ((reInflateFlags & FLAG_REINFLATE_EXPANDED_VIEW) != 0) {
+        if ((reInflateFlags & FLAG_CONTENT_VIEW_EXPANDED) != 0) {
             result.newExpandedView = createExpandedView(builder, isLowPriority);
         }
 
-        if ((reInflateFlags & FLAG_REINFLATE_HEADS_UP_VIEW) != 0) {
+        if ((reInflateFlags & FLAG_CONTENT_VIEW_HEADS_UP) != 0) {
             result.newHeadsUpView = builder.createHeadsUpContentView(usesIncreasedHeadsUpHeight);
         }
 
-        if ((reInflateFlags & FLAG_REINFLATE_PUBLIC_VIEW) != 0) {
+        if ((reInflateFlags & FLAG_CONTENT_VIEW_PUBLIC) != 0) {
             result.newPublicView = builder.makePublicContentView();
         }
 
-        if ((reInflateFlags & FLAG_REINFLATE_AMBIENT_VIEW) != 0) {
+        if ((reInflateFlags & FLAG_CONTENT_VIEW_AMBIENT) != 0) {
             result.newAmbientView = redactAmbient ? builder.makePublicAmbientNotification()
                     : builder.makeAmbientNotification();
         }
@@ -316,11 +337,11 @@ public class NotificationInflater {
         NotificationContentView publicLayout = row.getPublicLayout();
         final HashMap<Integer, CancellationSignal> runningInflations = new HashMap<>();
 
-        int flag = FLAG_REINFLATE_CONTENT_VIEW;
+        int flag = FLAG_CONTENT_VIEW_CONTRACTED;
         if ((reInflateFlags & flag) != 0) {
             boolean isNewView =
                     !canReapplyRemoteView(result.newContentView,
-                            cachedContentViews.get(FLAG_REINFLATE_CONTENT_VIEW));
+                            cachedContentViews.get(FLAG_CONTENT_VIEW_CONTRACTED));
             ApplyCallback applyCallback = new ApplyCallback() {
                 @Override
                 public void setResultView(View v) {
@@ -339,12 +360,12 @@ public class NotificationInflater {
                     runningInflations, applyCallback);
         }
 
-        flag = FLAG_REINFLATE_EXPANDED_VIEW;
+        flag = FLAG_CONTENT_VIEW_EXPANDED;
         if ((reInflateFlags & flag) != 0) {
             if (result.newExpandedView != null) {
                 boolean isNewView =
                         !canReapplyRemoteView(result.newExpandedView,
-                                cachedContentViews.get(FLAG_REINFLATE_EXPANDED_VIEW));
+                                cachedContentViews.get(FLAG_CONTENT_VIEW_EXPANDED));
                 ApplyCallback applyCallback = new ApplyCallback() {
                     @Override
                     public void setResultView(View v) {
@@ -365,12 +386,12 @@ public class NotificationInflater {
             }
         }
 
-        flag = FLAG_REINFLATE_HEADS_UP_VIEW;
+        flag = FLAG_CONTENT_VIEW_HEADS_UP;
         if ((reInflateFlags & flag) != 0) {
             if (result.newHeadsUpView != null) {
                 boolean isNewView =
                         !canReapplyRemoteView(result.newHeadsUpView,
-                                cachedContentViews.get(FLAG_REINFLATE_HEADS_UP_VIEW));
+                                cachedContentViews.get(FLAG_CONTENT_VIEW_HEADS_UP));
                 ApplyCallback applyCallback = new ApplyCallback() {
                     @Override
                     public void setResultView(View v) {
@@ -386,16 +407,16 @@ public class NotificationInflater {
                         redactAmbient, isNewView, remoteViewClickHandler, callback,
                         privateLayout, privateLayout.getHeadsUpChild(),
                         privateLayout.getVisibleWrapper(
-                                NotificationContentView.VISIBLE_TYPE_HEADSUP), runningInflations,
+                                VISIBLE_TYPE_HEADSUP), runningInflations,
                         applyCallback);
             }
         }
 
-        flag = FLAG_REINFLATE_PUBLIC_VIEW;
+        flag = FLAG_CONTENT_VIEW_PUBLIC;
         if ((reInflateFlags & flag) != 0) {
             boolean isNewView =
                     !canReapplyRemoteView(result.newPublicView,
-                            cachedContentViews.get(FLAG_REINFLATE_PUBLIC_VIEW));
+                            cachedContentViews.get(FLAG_CONTENT_VIEW_PUBLIC));
             ApplyCallback applyCallback = new ApplyCallback() {
                 @Override
                 public void setResultView(View v) {
@@ -414,12 +435,12 @@ public class NotificationInflater {
                     runningInflations, applyCallback);
         }
 
-        flag = FLAG_REINFLATE_AMBIENT_VIEW;
+        flag = FLAG_CONTENT_VIEW_AMBIENT;
         if ((reInflateFlags & flag) != 0) {
             NotificationContentView newParent = redactAmbient ? publicLayout : privateLayout;
             boolean isNewView = (!canReapplyAmbient(row, redactAmbient)
                     || !canReapplyRemoteView(result.newAmbientView,
-                            cachedContentViews.get(FLAG_REINFLATE_AMBIENT_VIEW)));
+                            cachedContentViews.get(FLAG_CONTENT_VIEW_AMBIENT)));
             ApplyCallback applyCallback = new ApplyCallback() {
                 @Override
                 public void setResultView(View v) {
@@ -570,40 +591,40 @@ public class NotificationInflater {
         NotificationContentView privateLayout = row.getPrivateLayout();
         NotificationContentView publicLayout = row.getPublicLayout();
         if (runningInflations.isEmpty()) {
-            if ((reInflateFlags & FLAG_REINFLATE_CONTENT_VIEW) != 0) {
+            if ((reInflateFlags & FLAG_CONTENT_VIEW_CONTRACTED) != 0) {
                 if (result.inflatedContentView != null) {
                     privateLayout.setContractedChild(result.inflatedContentView);
                 }
-                cachedContentViews.put(FLAG_REINFLATE_CONTENT_VIEW, result.newContentView);
+                cachedContentViews.put(FLAG_CONTENT_VIEW_CONTRACTED, result.newContentView);
             }
 
-            if ((reInflateFlags & FLAG_REINFLATE_EXPANDED_VIEW) != 0) {
+            if ((reInflateFlags & FLAG_CONTENT_VIEW_EXPANDED) != 0) {
                 if (result.inflatedExpandedView != null) {
                     privateLayout.setExpandedChild(result.inflatedExpandedView);
                 } else if (result.newExpandedView == null) {
                     privateLayout.setExpandedChild(null);
                 }
-                cachedContentViews.put(FLAG_REINFLATE_EXPANDED_VIEW, result.newExpandedView);
+                cachedContentViews.put(FLAG_CONTENT_VIEW_EXPANDED, result.newExpandedView);
                 row.setExpandable(result.newExpandedView != null);
             }
 
-            if ((reInflateFlags & FLAG_REINFLATE_HEADS_UP_VIEW) != 0) {
+            if ((reInflateFlags & FLAG_CONTENT_VIEW_HEADS_UP) != 0) {
                 if (result.inflatedHeadsUpView != null) {
                     privateLayout.setHeadsUpChild(result.inflatedHeadsUpView);
                 } else if (result.newHeadsUpView == null) {
                     privateLayout.setHeadsUpChild(null);
                 }
-                cachedContentViews.put(FLAG_REINFLATE_HEADS_UP_VIEW, result.newHeadsUpView);
+                cachedContentViews.put(FLAG_CONTENT_VIEW_HEADS_UP, result.newHeadsUpView);
             }
 
-            if ((reInflateFlags & FLAG_REINFLATE_PUBLIC_VIEW) != 0) {
+            if ((reInflateFlags & FLAG_CONTENT_VIEW_PUBLIC) != 0) {
                 if (result.inflatedPublicView != null) {
                     publicLayout.setContractedChild(result.inflatedPublicView);
                 }
-                cachedContentViews.put(FLAG_REINFLATE_PUBLIC_VIEW, result.newPublicView);
+                cachedContentViews.put(FLAG_CONTENT_VIEW_PUBLIC, result.newPublicView);
             }
 
-            if ((reInflateFlags & FLAG_REINFLATE_AMBIENT_VIEW) != 0) {
+            if ((reInflateFlags & FLAG_CONTENT_VIEW_AMBIENT) != 0) {
                 if (result.inflatedAmbientView != null) {
                     NotificationContentView newParent = redactAmbient
                             ? publicLayout : privateLayout;
@@ -612,7 +633,7 @@ public class NotificationInflater {
                     newParent.setAmbientChild(result.inflatedAmbientView);
                     otherParent.setAmbientChild(null);
                 }
-                cachedContentViews.put(FLAG_REINFLATE_AMBIENT_VIEW, result.newAmbientView);
+                cachedContentViews.put(FLAG_CONTENT_VIEW_AMBIENT, result.newAmbientView);
             }
             entry.headsUpStatusBarText = result.headsUpStatusBarText;
             entry.headsUpStatusBarTextPublic = result.headsUpStatusBarTextPublic;
