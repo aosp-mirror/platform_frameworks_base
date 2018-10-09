@@ -2936,7 +2936,7 @@ public class Activity extends ContextThemeWrapper
     /**
      * Use with {@link #setDefaultKeyMode} to specify that unhandled keystrokes
      * will start an application-defined search.  (If the application or activity does not
-     * actually define a search, the the keys will be ignored.)
+     * actually define a search, the keys will be ignored.)
      *
      * <p>See {@link android.app.SearchManager android.app.SearchManager} for more details.
      *
@@ -3236,7 +3236,7 @@ public class Activity extends ContextThemeWrapper
      * interacted with the device in some way while your activity is running.
      * This callback and {@link #onUserLeaveHint} are intended to help
      * activities manage status bar notifications intelligently; specifically,
-     * for helping activities determine the proper time to cancel a notfication.
+     * for helping activities determine the proper time to cancel a notification.
      *
      * <p>All calls to your activity's {@link #onUserLeaveHint} callback will
      * be accompanied by calls to {@link #onUserInteraction}.  This
@@ -7875,7 +7875,7 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * Specifies whether an {@link Activity} should be shown on top of the the lock screen whenever
+     * Specifies whether an {@link Activity} should be shown on top of the lock screen whenever
      * the lockscreen is up and the activity is resumed. Normally an activity will be transitioned
      * to the stopped state if it is started while the lockscreen is up, but with this flag set the
      * activity will remain in the resumed state visible on-top of the lock screen. This value can

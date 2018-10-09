@@ -1479,7 +1479,7 @@ public class ActivityOptions {
     }
 
     /**
-     * Ask the the system track that time the user spends in the app being launched, and
+     * Ask the system track that time the user spends in the app being launched, and
      * report it back once done.  The report will be sent to the given receiver, with
      * the extras {@link #EXTRA_USAGE_TIME_REPORT} and {@link #EXTRA_USAGE_TIME_REPORT_PACKAGES}
      * filled in.

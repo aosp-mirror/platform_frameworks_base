@@ -3305,7 +3305,7 @@ public class DevicePolicyManager {
      * restrictions on the parent profile.
      *
      * @param admin The name of the admin component to check, or {@code null} to aggregate
-     *         accross all participating admins.
+     *         across all participating admins.
      * @return The timeout in milliseconds or 0 if not configured for the provided admin.
      */
     public long getRequiredStrongAuthTimeout(@Nullable ComponentName admin) {

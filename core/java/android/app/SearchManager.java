@@ -169,7 +169,7 @@ public class SearchManager
      * Intent extra data key: Use this key with Intent.ACTION_SEARCH and
      * {@link android.content.Intent#getStringExtra content.Intent.getStringExtra()}
      * to obtain the action message that was defined for a particular search action key and/or
-     * suggestion.  It will be null if the search was launched by typing "enter", touched the the
+     * suggestion.  It will be null if the search was launched by typing "enter", touching the
      * "GO" button, or other means not involving any action key.
      */
     public final static String ACTION_MSG = "action_msg";
@@ -404,7 +404,7 @@ public class SearchManager
      * Column name for suggestions cursor. <i>Optional.</i>  If your content is rentable, you
      * should provide this column to specify the displayable string representation of the rental
      * price of your content including the currency and the amount. If it's free, you should
-     * provide localized string to specify that it's free. This column can be ommitted if the
+     * provide localized string to specify that it's free. This column can be omitted if the
      * content is not applicable to rent.
      */
     public final static String SUGGEST_COLUMN_RENTAL_PRICE = "suggest_rental_price";
@@ -579,7 +579,7 @@ public class SearchManager
      *
      * @param initialQuery A search string can be pre-entered here, but this
      * is typically null or empty.
-     * @param selectInitialQuery If true, the intial query will be preselected, which means that
+     * @param selectInitialQuery If true, the initial query will be preselected, which means that
      * any further typing will replace it.  This is useful for cases where an entire pre-formed
      * query is being inserted.  If false, the selection point will be placed at the end of the
      * inserted query.  This is useful when the inserted query is text that the user entered,
