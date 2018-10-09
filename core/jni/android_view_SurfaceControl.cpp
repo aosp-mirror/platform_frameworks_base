@@ -339,6 +339,17 @@ static void nativeSetMatrix(JNIEnv* env, jclass clazz, jlong transactionObj,
     transaction->setMatrix(ctrl, dsdx, dtdx, dtdy, dsdy);
 }
 
+static void nativeSetColorTransform(JNIEnv* env, jclass clazz, jlong transactionObj,
+        jlong nativeObject, jfloatArray fMatrix, jfloatArray fTranslation) {
+    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
+    SurfaceControl* const surfaceControl = reinterpret_cast<SurfaceControl*>(nativeObject);
+    float* floatMatrix = env->GetFloatArrayElements(fMatrix, 0);
+    mat3 matrix(static_cast<float const*>(floatMatrix));
+    float* floatTranslation = env->GetFloatArrayElements(fTranslation, 0);
+    vec3 translation(floatTranslation[0], floatTranslation[1], floatTranslation[2]);
+    transaction->setColorTransform(surfaceControl, matrix, translation);
+}
+
 static void nativeSetWindowCrop(JNIEnv* env, jclass clazz, jlong transactionObj,
         jlong nativeObject,
         jint l, jint t, jint r, jint b) {
@@ -849,6 +860,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetColor },
     {"nativeSetMatrix", "(JJFFFF)V",
             (void*)nativeSetMatrix },
+    {"nativeSetColorTransform", "(JJ[F[F)V",
+            (void*)nativeSetColorTransform },
     {"nativeSetFlags", "(JJII)V",
             (void*)nativeSetFlags },
     {"nativeSetWindowCrop", "(JJIIII)V",
