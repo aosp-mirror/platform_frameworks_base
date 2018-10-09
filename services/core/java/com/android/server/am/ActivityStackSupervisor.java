@@ -53,8 +53,8 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.Display.TYPE_VIRTUAL;
 import static android.view.WindowManager.TRANSIT_DOCK_TASK_FROM_RECENTS;
+
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ALL;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_FOCUS;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_IDLE;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PAUSE;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_RECENTS;
@@ -63,7 +63,6 @@ import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_STACK;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_STATES;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_SWITCH;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_TASKS;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_FOCUS;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_IDLE;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_PAUSE;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_RECENTS;
@@ -99,6 +98,7 @@ import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_WHITELISTED;
 import static com.android.server.am.TaskRecord.REPARENT_KEEP_STACK_AT_FRONT;
 import static com.android.server.am.TaskRecord.REPARENT_LEAVE_STACK_IN_PLACE;
 import static com.android.server.am.TaskRecord.REPARENT_MOVE_STACK_TO_FRONT;
+
 import static java.lang.Integer.MAX_VALUE;
 
 import android.Manifest;
@@ -199,7 +199,6 @@ import java.util.Set;
 public class ActivityStackSupervisor extends ConfigurationContainer implements DisplayListener,
         RecentTasks.Callbacks, RootWindowContainerListener {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityStackSupervisor" : TAG_AM;
-    private static final String TAG_FOCUS = TAG + POSTFIX_FOCUS;
     private static final String TAG_IDLE = TAG + POSTFIX_IDLE;
     private static final String TAG_PAUSE = TAG + POSTFIX_PAUSE;
     private static final String TAG_RECENTS = TAG + POSTFIX_RECENTS;
@@ -783,7 +782,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
         // Only resume home activity if isn't finishing.
         if (r != null && !r.finishing) {
-            moveFocusableActivityToTop(r, myReason);
+            r.moveFocusableActivityToTop(myReason);
             return resumeFocusedStacksTopActivitiesLocked(r.getStack(), prev, null);
         }
         return mService.startHomeActivityLocked(mCurrentUser, myReason, displayId);
@@ -3357,41 +3356,6 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         resumeFocusedStacksTopActivitiesLocked();
 
         mService.getTaskChangeNotificationController().notifyActivityPinned(r);
-    }
-
-    /** Move activity with its stack to front and make the stack focused. */
-    // TODO(b/111363427): Move this method to ActivityRecord.
-    boolean moveFocusableActivityToTop(ActivityRecord r, String reason) {
-        if (r == null || !r.isFocusable()) {
-            if (DEBUG_FOCUS) Slog.d(TAG_FOCUS,
-                    "moveActivityStackToFront: unfocusable r=" + r);
-            return false;
-        }
-
-        final TaskRecord task = r.getTask();
-        final ActivityStack stack = r.getStack();
-        if (stack == null) {
-            Slog.w(TAG, "moveActivityStackToFront: invalid task or stack: r="
-                    + r + " task=" + task);
-            return false;
-        }
-
-        if (r == getTopResumedActivity()) {
-            if (DEBUG_FOCUS) Slog.d(TAG_FOCUS,
-                    "moveActivityStackToFront: already on top, r=" + r);
-            return false;
-        }
-
-        if (DEBUG_FOCUS) Slog.d(TAG_FOCUS,
-                "moveActivityStackToFront: r=" + r);
-
-        stack.moveToFront(reason, task);
-        // Report top activity change to tracking services and WM
-        if (r == getTopResumedActivity()) {
-            // TODO(b/111361570): Support multiple focused apps in WM
-            mService.setResumedActivityUncheckLocked(r, reason);
-        }
-        return true;
     }
 
     ActivityRecord findTaskLocked(ActivityRecord r, int preferredDisplayId) {
