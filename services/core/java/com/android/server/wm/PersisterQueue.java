@@ -130,6 +130,30 @@ class PersisterQueue {
         return null;
     }
 
+    /**
+     *
+     * @param item
+     * @param flush
+     * @param <T>
+     */
+    synchronized <T extends WriteQueueItem> void updateLastOrAddItem(T item, boolean flush) {
+        final T itemToUpdate = findLastItem(item::matches, (Class<T>) item.getClass());
+        if (itemToUpdate == null) {
+            addItem(item, flush);
+        } else {
+            itemToUpdate.updateFrom(item);
+        }
+
+        yieldIfQueueTooDeep();
+    }
+
+    /**
+     * Removes all items with which given predicate returns {@code true}.
+     *
+     * @param predicate the predicate
+     * @param clazz
+     * @param <T>
+     */
     synchronized <T extends WriteQueueItem> void removeItems(Predicate<T> predicate,
             Class<T> clazz) {
         for (int i = mWriteQueue.size() - 1; i >= 0; --i) {
@@ -230,8 +254,14 @@ class PersisterQueue {
         item.process();
     }
 
-    interface WriteQueueItem {
+    interface WriteQueueItem<T extends WriteQueueItem<T>> {
         void process();
+
+        default void updateFrom(T item) {}
+
+        default boolean matches(T item) {
+            return false;
+        }
     }
 
     interface Listener {

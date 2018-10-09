@@ -40,6 +40,7 @@ import java.util.List;
  */
 class LaunchParamsController {
     private final ActivityTaskManagerService mService;
+    private final LaunchParamsPersister mPersister;
     private final List<LaunchParamsModifier> mModifiers = new ArrayList<>();
 
     // Temporary {@link LaunchParams} for internal calculations. This is kept separate from
@@ -49,8 +50,9 @@ class LaunchParamsController {
     private final LaunchParams mTmpCurrent = new LaunchParams();
     private final LaunchParams mTmpResult = new LaunchParams();
 
-    LaunchParamsController(ActivityTaskManagerService service) {
-       mService = service;
+    LaunchParamsController(ActivityTaskManagerService service, LaunchParamsPersister persister) {
+        mService = service;
+        mPersister = persister;
     }
 
     /**
@@ -74,6 +76,10 @@ class LaunchParamsController {
     void calculate(TaskRecord task, WindowLayout layout, ActivityRecord activity,
                    ActivityRecord source, ActivityOptions options, LaunchParams result) {
         result.reset();
+
+        if (task != null || activity != null) {
+            mPersister.getLaunchParams(task, activity, result);
+        }
 
         // We start at the last registered {@link LaunchParamsModifier} as this represents
         // The modifier closest to the product level. Moving back through the list moves closer to
@@ -139,12 +145,20 @@ class LaunchParamsController {
                 task.getStack().setWindowingMode(mTmpParams.mWindowingMode);
             }
 
-            if (!mTmpParams.mBounds.isEmpty()) {
-                task.updateOverrideConfiguration(mTmpParams.mBounds);
-                return true;
-            } else {
+            if (mTmpParams.mBounds.isEmpty()) {
                 return false;
             }
+
+            if (task.getStack().inFreeformWindowingMode()) {
+                // Only set bounds if it's in freeform mode.
+                task.updateOverrideConfiguration(mTmpParams.mBounds);
+                return true;
+            }
+
+            // Setting last non-fullscreen bounds to the bounds so next time the task enters
+            // freeform windowing mode it can be in this bounds.
+            task.setLastNonFullscreenBounds(mTmpParams.mBounds);
+            return false;
         } finally {
             mService.mWindowManager.continueSurfaceLayout();
         }

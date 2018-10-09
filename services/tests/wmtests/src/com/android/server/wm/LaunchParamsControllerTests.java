@@ -17,6 +17,8 @@
 package com.android.server.wm;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 
@@ -37,8 +39,12 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
 import android.app.ActivityOptions;
+import android.content.ComponentName;
 import android.content.pm.ActivityInfo.WindowLayout;
+import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
+import android.util.ArrayMap;
+import android.util.SparseArray;
 
 import androidx.test.filters.MediumTest;
 
@@ -47,6 +53,8 @@ import com.android.server.wm.LaunchParamsController.LaunchParamsModifier;
 
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.Map;
 
 /**
  * Tests for exercising {@link LaunchParamsController}.
@@ -58,11 +66,13 @@ import org.junit.Test;
 @Presubmit
 public class LaunchParamsControllerTests extends ActivityTestsBase {
     private LaunchParamsController mController;
+    private TestLaunchParamsPersister mPersister;
 
     @Before
     public void setUp() throws Exception {
         mService = createActivityTaskManagerService();
-        mController = new LaunchParamsController(mService);
+        mPersister = new TestLaunchParamsPersister();
+        mController = new LaunchParamsController(mService, mPersister);
     }
 
     /**
@@ -83,6 +93,31 @@ public class LaunchParamsControllerTests extends ActivityTestsBase {
                 new LaunchParams());
         verify(positioner, times(1)).onCalculate(eq(record.getTask()), eq(layout), eq(record),
                 eq(source), eq(options), any(), any());
+    }
+
+    /**
+     * Makes sure controller passes stored params to modifiers.
+     */
+    @Test
+    public void testStoredParamsRecovery() {
+        final LaunchParamsModifier positioner = mock(LaunchParamsModifier.class);
+        mController.registerModifier(positioner);
+
+        final ComponentName name = new ComponentName("com.android.foo", ".BarActivity");
+        final int userId = 0;
+        final ActivityRecord activity = new ActivityBuilder(mService).setComponent(name)
+                .setUid(userId).build();
+        final LaunchParams expected = new LaunchParams();
+        expected.mPreferredDisplayId = 3;
+        expected.mWindowingMode = WINDOWING_MODE_PINNED;
+        expected.mBounds.set(200, 300, 400, 500);
+
+        mPersister.putLaunchParams(userId, name, expected);
+
+        mController.calculate(activity.getTask(), null /*layout*/, activity, null /*source*/,
+                null /*options*/, new LaunchParams());
+        verify(positioner, times(1)).onCalculate(any(), any(), any(), any(), any(), eq(expected),
+                any());
     }
 
     /**
@@ -254,6 +289,53 @@ public class LaunchParamsControllerTests extends ActivityTestsBase {
         assertEquals(windowingMode, afterWindowMode);
     }
 
+    /**
+     * Ensures that {@link LaunchParamsModifier} requests specifying bounds during
+     * layout are honored if window is in freeform.
+     */
+    @Test
+    public void testLayoutTaskBoundsChangeFreeformWindow() {
+        final Rect expected = new Rect(10, 20, 30, 40);
+
+        final LaunchParams params = new LaunchParams();
+        params.mWindowingMode = WINDOWING_MODE_FREEFORM;
+        params.mBounds.set(expected);
+        final InstrumentedPositioner positioner = new InstrumentedPositioner(RESULT_DONE, params);
+        final TaskRecord task = new TaskBuilder(mService.mStackSupervisor).build();
+
+        mController.registerModifier(positioner);
+
+        assertNotEquals(expected, task.getBounds());
+
+        mController.layoutTask(task, null /* windowLayout */);
+
+        assertEquals(expected, task.getBounds());
+    }
+
+    /**
+     * Ensures that {@link LaunchParamsModifier} requests specifying bounds during
+     * layout are set to last non-fullscreen bounds.
+     */
+    @Test
+    public void testLayoutTaskBoundsChangeFixedWindow() {
+        final Rect expected = new Rect(10, 20, 30, 40);
+
+        final LaunchParams params = new LaunchParams();
+        params.mWindowingMode = WINDOWING_MODE_FULLSCREEN;
+        params.mBounds.set(expected);
+        final InstrumentedPositioner positioner = new InstrumentedPositioner(RESULT_DONE, params);
+        final TaskRecord task = new TaskBuilder(mService.mStackSupervisor).build();
+
+        mController.registerModifier(positioner);
+
+        assertNotEquals(expected, task.getBounds());
+
+        mController.layoutTask(task, null /* windowLayout */);
+
+        assertNotEquals(expected, task.getBounds());
+        assertEquals(expected, task.mLastNonFullscreenBounds);
+    }
+
     public static class InstrumentedPositioner implements LaunchParamsModifier {
 
         private final int mReturnVal;
@@ -274,6 +356,75 @@ public class LaunchParamsControllerTests extends ActivityTestsBase {
 
         LaunchParams getLaunchParams() {
             return mParams;
+        }
+    }
+
+    /**
+     * Test double for {@link LaunchParamsPersister}. This class only manages an in-memory storage
+     * of a mapping from user ID and component name to launch params.
+     */
+    static class TestLaunchParamsPersister extends LaunchParamsPersister {
+
+        private final SparseArray<Map<ComponentName, LaunchParams>> mMap =
+                new SparseArray<>();
+        private final LaunchParams mTmpParams = new LaunchParams();
+
+        TestLaunchParamsPersister() {
+            super(null, null, null);
+        }
+
+        void putLaunchParams(int userId, ComponentName name, LaunchParams params) {
+            Map<ComponentName, LaunchParams> map = mMap.get(userId);
+            if (map == null) {
+                map = new ArrayMap<>();
+                mMap.put(userId, map);
+            }
+
+            LaunchParams paramRecord = map.get(name);
+            if (paramRecord == null) {
+                paramRecord = new LaunchParams();
+                map.put(name, params);
+            }
+
+            paramRecord.set(params);
+        }
+
+        @Override
+        void onUnlockUser(int userId) {
+            if (mMap.get(userId) == null) {
+                mMap.put(userId, new ArrayMap<>());
+            }
+        }
+
+        @Override
+        void saveTask(TaskRecord task) {
+            final int userId = task.userId;
+            final ComponentName realActivity = task.realActivity;
+            mTmpParams.mPreferredDisplayId = task.getStack().mDisplayId;
+            mTmpParams.mWindowingMode = task.getWindowingMode();
+            if (task.mLastNonFullscreenBounds != null) {
+                mTmpParams.mBounds.set(task.mLastNonFullscreenBounds);
+            } else {
+                mTmpParams.mBounds.setEmpty();
+            }
+            putLaunchParams(userId, realActivity, mTmpParams);
+        }
+
+        @Override
+        void getLaunchParams(TaskRecord task, ActivityRecord activity, LaunchParams params) {
+            final int userId = task != null ? task.userId : activity.userId;
+            final ComponentName name = task != null ? task.realActivity : activity.realActivity;
+
+            params.reset();
+            final Map<ComponentName, LaunchParams> map = mMap.get(userId);
+            if (map == null) {
+                return;
+            }
+
+            final LaunchParams paramsRecord = map.get(name);
+            if (paramsRecord != null) {
+                params.set(paramsRecord);
+            }
         }
     }
 }

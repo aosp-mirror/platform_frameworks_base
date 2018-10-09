@@ -5184,12 +5184,14 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
 
     /**
      * Removes the input task from this stack.
+     *
      * @param task to remove.
      * @param reason for removal.
      * @param mode task removal mode. Either {@link #REMOVE_TASK_MODE_DESTROYING},
      *             {@link #REMOVE_TASK_MODE_MOVING}, {@link #REMOVE_TASK_MODE_MOVING_TO_TOP}.
      */
     void removeTask(TaskRecord task, String reason, int mode) {
+        // TODO(b/119259346): Move some logic below to TaskRecord. See bug for more context.
         for (ActivityRecord record : task.mActivities) {
             onActivityRemovedFromStack(record);
         }
@@ -5204,6 +5206,9 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         updateTaskMovement(task, true);
 
         if (mode == REMOVE_TASK_MODE_DESTROYING && task.mActivities.isEmpty()) {
+            // This task is going away, so save the last state if necessary.
+            task.saveLaunchingStateIfNeeded();
+
             // TODO: VI what about activity?
             final boolean isVoiceSession = task.voiceSession != null;
             if (isVoiceSession) {

@@ -174,6 +174,7 @@ import android.util.SparseIntArray;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 import android.view.Display;
+import android.view.DisplayInfo;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -327,6 +328,9 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     WindowManagerService mWindowManager;
     DisplayManager mDisplayManager;
 
+     /** Common synchronization logic used to save things to disks. */
+    PersisterQueue mPersisterQueue;
+    LaunchParamsPersister mLaunchParamsPersister;
     private LaunchParamsController mLaunchParamsController;
 
     /**
@@ -631,10 +635,16 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         mActivityMetricsLogger = new ActivityMetricsLogger(this, mService.mContext, mHandler.getLooper());
         mKeyguardController = new KeyguardController(mService, this);
 
-        mLaunchParamsController = new LaunchParamsController(mService);
+        mPersisterQueue = new PersisterQueue();
+        mLaunchParamsPersister = new LaunchParamsPersister(mPersisterQueue, this);
+        mLaunchParamsController = new LaunchParamsController(mService, mLaunchParamsPersister);
         mLaunchParamsController.registerDefaultModifiers(this);
     }
 
+    void onSystemReady() {
+        mPersisterQueue.startPersisting();
+        mLaunchParamsPersister.onSystemReady();
+    }
 
     public ActivityMetricsLogger getActivityMetricsLogger() {
         return mActivityMetricsLogger;
@@ -4231,6 +4241,25 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         activityDisplay = new ActivityDisplay(this, display);
         addChild(activityDisplay, ActivityDisplay.POSITION_BOTTOM);
         return activityDisplay;
+    }
+
+    /**
+     * Get an existing instance of {@link ActivityDisplay} that has the given uniqueId. Unique ID is
+     * defined in {@link DisplayInfo#uniqueId}.
+     *
+     * @param uniqueId the unique ID of the display
+     * @return the {@link ActivityDisplay} or {@code null} if nothing is found.
+     */
+    ActivityDisplay getActivityDisplay(String uniqueId) {
+        for (int i = mActivityDisplays.size() - 1; i >= 0; --i) {
+            final ActivityDisplay display = mActivityDisplays.get(i);
+            final boolean isValid = display.mDisplay.isValid();
+            if (isValid && display.mDisplay.getUniqueId().equals(uniqueId)) {
+                return display;
+            }
+        }
+
+        return null;
     }
 
     boolean startHomeOnAllDisplays(int userId, String reason) {

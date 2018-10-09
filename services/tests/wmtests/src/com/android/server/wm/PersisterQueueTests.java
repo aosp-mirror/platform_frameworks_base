@@ -185,7 +185,7 @@ public class PersisterQueueTests implements PersisterQueue.Listener {
                 mLatch.await(PRE_TASK_DELAY_MS + TIMEOUT_ALLOWANCE, TimeUnit.MILLISECONDS));
         assertEquals("Target didn't process all items.", 2, mItemCount.get());
         processDuration = SystemClock.uptimeMillis() - dispatchTime;
-        assertTrue("Target didn't wait enough time before processing item."
+        assertTrue("Target didn't wait enough time before processing item. Process time: "
                         + processDuration + "ms pre task delay: "
                         + PRE_TASK_DELAY_MS + "ms",
                 processDuration >= PRE_TASK_DELAY_MS);
@@ -246,6 +246,39 @@ public class PersisterQueueTests implements PersisterQueue.Listener {
     }
 
     @Test
+    public void testUpdateLastOrAddItemUpdatesMatchedItem() throws Exception {
+        mLatch = new CountDownLatch(1);
+        final MatchingTestItem scheduledItem = new MatchingTestItem(true);
+        final MatchingTestItem expected = new MatchingTestItem(true);
+        synchronized (mTarget) {
+            mTarget.addItem(scheduledItem, false);
+            mTarget.updateLastOrAddItem(expected, false);
+        }
+
+        assertSame(expected, scheduledItem.mUpdateFromItem);
+        assertTrue("Target didn't call callback enough times.",
+                mLatch.await(PRE_TASK_DELAY_MS + TIMEOUT_ALLOWANCE, TimeUnit.MILLISECONDS));
+        assertEquals("Target didn't process item.", 1, mItemCount.get());
+    }
+
+    @Test
+    public void testUpdateLastOrAddItemUpdatesAddItemWhenNoMatch() throws Exception {
+        mLatch = new CountDownLatch(2);
+        final MatchingTestItem scheduledItem = new MatchingTestItem(false);
+        final MatchingTestItem expected = new MatchingTestItem(true);
+        synchronized (mTarget) {
+            mTarget.addItem(scheduledItem, false);
+            mTarget.updateLastOrAddItem(expected, false);
+        }
+
+        assertNull(scheduledItem.mUpdateFromItem);
+        assertTrue("Target didn't call callback enough times.",
+                mLatch.await(PRE_TASK_DELAY_MS + INTER_WRITE_DELAY_MS + TIMEOUT_ALLOWANCE,
+                        TimeUnit.MILLISECONDS));
+        assertEquals("Target didn't process item.", 2, mItemCount.get());
+    }
+
+    @Test
     public void testRemoveItemsRemoveMatchedItem() throws Exception {
         mLatch = new CountDownLatch(1);
         synchronized (mTarget) {
@@ -283,18 +316,30 @@ public class PersisterQueueTests implements PersisterQueue.Listener {
         mSetUpLatch.countDown();
     }
 
-    private class TestItem implements PersisterQueue.WriteQueueItem {
+    private class TestItem<T extends TestItem<T>> implements PersisterQueue.WriteQueueItem<T> {
         @Override
         public void process() {
             mItemCount.getAndIncrement();
         }
     }
 
-    private class MatchingTestItem extends TestItem {
+    private class MatchingTestItem extends TestItem<MatchingTestItem> {
         private boolean mMatching;
+
+        private MatchingTestItem mUpdateFromItem;
 
         private MatchingTestItem(boolean matching) {
             mMatching = matching;
+        }
+
+        @Override
+        public boolean matches(MatchingTestItem item) {
+            return item.mMatching;
+        }
+
+        @Override
+        public void updateFrom(MatchingTestItem item) {
+            mUpdateFromItem = item;
         }
     }
 }
