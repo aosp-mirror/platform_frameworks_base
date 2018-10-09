@@ -14,8 +14,8 @@
  * limitations under the License.
  */
 
-#ifndef AAPT_LOCALE_VALUE_H
-#define AAPT_LOCALE_VALUE_H
+#ifndef ANDROIDFW_LOCALE_VALUE_H
+#define ANDROIDFW_LOCALE_VALUE_H
 
 #include <string>
 #include <vector>
@@ -23,7 +23,7 @@
 #include "androidfw/ResourceTypes.h"
 #include "androidfw/StringPiece.h"
 
-namespace aapt {
+namespace android {
 
 /**
  * A convenience class to build and parse locales.
@@ -112,6 +112,6 @@ bool LocaleValue::operator>(const LocaleValue& o) const {
   return compare(o) > 0;
 }
 
-}  // namespace aapt
+}  // namespace android
 
-#endif  // AAPT_LOCALE_VALUE_H
+#endif  // ANDROIDFW_LOCALE_VALUE_H

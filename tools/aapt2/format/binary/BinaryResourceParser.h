@@ -20,6 +20,7 @@
 #include <string>
 
 #include "android-base/macros.h"
+#include "androidfw/ConfigDescription.h"
 #include "androidfw/ResourceTypes.h"
 
 #include "ResourceTable.h"
@@ -54,22 +55,28 @@ class BinaryResourceParser {
   bool ParseType(const ResourceTablePackage* package, const android::ResChunk_header* chunk);
   bool ParseLibrary(const android::ResChunk_header* chunk);
 
-  std::unique_ptr<Item> ParseValue(const ResourceNameRef& name, const ConfigDescription& config,
+  std::unique_ptr<Item> ParseValue(const ResourceNameRef& name,
+                                   const android::ConfigDescription& config,
                                    const android::Res_value& value);
 
-  std::unique_ptr<Value> ParseMapEntry(const ResourceNameRef& name, const ConfigDescription& config,
+  std::unique_ptr<Value> ParseMapEntry(const ResourceNameRef& name,
+                                       const android::ConfigDescription& config,
                                        const android::ResTable_map_entry* map);
 
-  std::unique_ptr<Style> ParseStyle(const ResourceNameRef& name, const ConfigDescription& config,
+  std::unique_ptr<Style> ParseStyle(const ResourceNameRef& name,
+                                    const android::ConfigDescription& config,
                                     const android::ResTable_map_entry* map);
 
-  std::unique_ptr<Attribute> ParseAttr(const ResourceNameRef& name, const ConfigDescription& config,
+  std::unique_ptr<Attribute> ParseAttr(const ResourceNameRef& name,
+                                       const android::ConfigDescription& config,
                                        const android::ResTable_map_entry* map);
 
-  std::unique_ptr<Array> ParseArray(const ResourceNameRef& name, const ConfigDescription& config,
+  std::unique_ptr<Array> ParseArray(const ResourceNameRef& name,
+                                    const android::ConfigDescription& config,
                                     const android::ResTable_map_entry* map);
 
-  std::unique_ptr<Plural> ParsePlural(const ResourceNameRef& name, const ConfigDescription& config,
+  std::unique_ptr<Plural> ParsePlural(const ResourceNameRef& name,
+                                      const android::ConfigDescription& config,
                                       const android::ResTable_map_entry* map);
 
   /**

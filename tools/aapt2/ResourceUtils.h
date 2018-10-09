@@ -20,6 +20,7 @@
 #include <functional>
 #include <memory>
 
+#include "androidfw/ConfigDescription.h"
 #include "androidfw/ResourceTypes.h"
 #include "androidfw/StringPiece.h"
 
@@ -219,7 +220,8 @@ std::string BuildResourceFileName(const ResourceFile& res_file,
 
 // Parses the binary form of a resource value. `type` is used as a hint to know when a value is
 // an ID versus a False boolean value, etc. `config` is for sorting strings in the string pool.
-std::unique_ptr<Item> ParseBinaryResValue(const ResourceType& type, const ConfigDescription& config,
+std::unique_ptr<Item> ParseBinaryResValue(const ResourceType& type,
+                                          const android::ConfigDescription& config,
                                           const android::ResStringPool& src_pool,
                                           const android::Res_value& res_value,
                                           StringPool* dst_pool);

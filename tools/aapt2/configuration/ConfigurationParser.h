@@ -22,7 +22,8 @@
 #include <unordered_map>
 #include <vector>
 
-#include "ConfigDescription.h"
+#include "androidfw/ConfigDescription.h"
+
 #include "Diagnostics.h"
 #include "util/Maybe.h"
 
@@ -109,8 +110,8 @@ struct OutputArtifact {
   std::string name;
   int version;
   std::vector<Abi> abis;
-  std::vector<ConfigDescription> screen_densities;
-  std::vector<ConfigDescription> locales;
+  std::vector<android::ConfigDescription> screen_densities;
+  std::vector<android::ConfigDescription> locales;
   Maybe<AndroidSdk> android_sdk;
   std::vector<DeviceFeature> features;
   std::vector<GlTexture> textures;

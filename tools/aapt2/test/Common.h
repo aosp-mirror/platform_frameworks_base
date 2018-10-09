@@ -21,11 +21,11 @@
 
 #include "android-base/logging.h"
 #include "android-base/macros.h"
+#include "androidfw/ConfigDescription.h"
 #include "androidfw/StringPiece.h"
 #include "gmock/gmock.h"
 #include "gtest/gtest.h"
 
-#include "ConfigDescription.h"
 #include "Debug.h"
 #include "ResourceTable.h"
 #include "ResourceUtils.h"
@@ -45,15 +45,15 @@ inline ResourceName ParseNameOrDie(const android::StringPiece& str) {
   return ref.ToResourceName();
 }
 
-inline ConfigDescription ParseConfigOrDie(const android::StringPiece& str) {
-  ConfigDescription config;
-  CHECK(ConfigDescription::Parse(str, &config)) << "invalid configuration: " << str;
+inline android::ConfigDescription ParseConfigOrDie(const android::StringPiece& str) {
+    android::ConfigDescription config;
+  CHECK(android::ConfigDescription::Parse(str, &config)) << "invalid configuration: " << str;
   return config;
 }
 
 template <typename T = Value>
 T* GetValueForConfigAndProduct(ResourceTable* table, const android::StringPiece& res_name,
-                               const ConfigDescription& config,
+                               const android::ConfigDescription& config,
                                const android::StringPiece& product) {
   Maybe<ResourceTable::SearchResult> result = table->FindResource(ParseNameOrDie(res_name));
   if (result) {
@@ -68,12 +68,12 @@ T* GetValueForConfigAndProduct(ResourceTable* table, const android::StringPiece&
 template <>
 Value* GetValueForConfigAndProduct<Value>(ResourceTable* table,
                                           const android::StringPiece& res_name,
-                                          const ConfigDescription& config,
+                                          const android::ConfigDescription& config,
                                           const android::StringPiece& product);
 
 template <typename T = Value>
 T* GetValueForConfig(ResourceTable* table, const android::StringPiece& res_name,
-                     const ConfigDescription& config) {
+                     const android::ConfigDescription& config) {
   return GetValueForConfigAndProduct<T>(table, res_name, config, {});
 }
 
