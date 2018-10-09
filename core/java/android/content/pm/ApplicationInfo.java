@@ -234,7 +234,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
     
     /**
      * Value for {@link #flags}: true when the application knows how to
-     * accomodate different screen densities.  Corresponds to
+     * accommodate different screen densities.  Corresponds to
      * {@link android.R.styleable#AndroidManifestSupportsScreens_anyDensity
      * android:anyDensity}.
      */
