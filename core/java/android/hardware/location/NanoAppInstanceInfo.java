@@ -24,7 +24,7 @@ import android.os.Parcelable;
 import libcore.util.EmptyArray;
 
 /**
- * Describes an instance of a nanoapp, used by the internal state manged by ContextHubService.
+ * Describes an instance of a nanoapp, used by the internal state managed by ContextHubService.
  *
  * TODO(b/69270990) Remove this class once the old API is deprecated.
  *
