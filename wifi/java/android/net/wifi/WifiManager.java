@@ -1212,6 +1212,243 @@ public class WifiManager {
     }
 
     /**
+     * Interface for indicating user selection from the list of networks presented in the
+     * {@link NetworkRequestMatchCallback#onMatch(List)}.
+     *
+     * The platform will implement this callback and pass it along with the
+     * {@link NetworkRequestMatchCallback#onUserSelectionCallbackRegistration(
+     * NetworkRequestUserSelectionCallback)}. The UI component handling
+     * {@link NetworkRequestMatchCallback} will invoke {@link #select(WifiConfiguration)} or
+     * {@link #reject()} to return the user's selection back to the platform via this callback.
+     * @hide
+     */
+    @SystemApi
+    public interface NetworkRequestUserSelectionCallback {
+        /**
+         * User selected this network to connect to.
+         * @param wifiConfiguration WifiConfiguration object corresponding to the network
+         *                          user selected.
+         */
+        void select(@NonNull WifiConfiguration wifiConfiguration);
+
+        /**
+         * User rejected the app's request.
+         */
+        void reject();
+    }
+
+    /**
+     * Interface for network request callback. Should be implemented by applications and passed when
+     * calling {@link #registerNetworkRequestMatchCallback(NetworkRequestMatchCallback, Handler)}.
+     *
+     * This is meant to be implemented by a UI component to present the user with a list of networks
+     * matching the app's request. The user is allowed to pick one of these networks to connect to
+     * or reject the request by the app.
+     * @hide
+     */
+    @SystemApi
+    public interface NetworkRequestMatchCallback {
+        /**
+         * Invoked to register a callback to be invoked to convey user selection. The callback
+         * object paased in this method is to be invoked by the UI component after the service sends
+         * a list of matching scan networks using {@link #onMatch(List)} and user picks a network
+         * from that list.
+         *
+         * @param userSelectionCallback Callback object to send back the user selection.
+         */
+        void onUserSelectionCallbackRegistration(
+                @NonNull NetworkRequestUserSelectionCallback userSelectionCallback);
+
+        /**
+         * Invoked when a network request initiated by an app matches some networks in scan results.
+         * This may be invoked multiple times for a single network request as the platform finds new
+         * networks in scan results.
+         *
+         * @param wifiConfigurations List of {@link WifiConfiguration} objects corresponding to the
+         *                           networks matching the request.
+         */
+        void onMatch(@NonNull List<WifiConfiguration> wifiConfigurations);
+
+        /**
+         * Invoked on a successful connection with the network that the user selected
+         * via {@link NetworkRequestUserSelectionCallback}.
+         *
+         * @param wifiConfiguration WifiConfiguration object corresponding to the network that the
+         *                          user selected.
+         */
+        void onUserSelectionConnectSuccess(@NonNull WifiConfiguration wifiConfiguration);
+
+        /**
+         * Invoked on failure to establish connection with the network that the user selected
+         * via {@link NetworkRequestUserSelectionCallback}.
+         *
+         * @param wifiConfiguration WifiConfiguration object corresponding to the network
+         *                          user selected.
+         */
+        void onUserSelectionConnectFailure(@NonNull WifiConfiguration wifiConfiguration);
+    }
+
+    /**
+     * Callback proxy for NetworkRequestUserSelectionCallback objects.
+     * @hide
+     */
+    private class NetworkRequestUserSelectionCallbackProxy implements
+            NetworkRequestUserSelectionCallback {
+        private final INetworkRequestUserSelectionCallback mCallback;
+
+        NetworkRequestUserSelectionCallbackProxy(
+                INetworkRequestUserSelectionCallback callback) {
+            mCallback = callback;
+        }
+
+        @Override
+        public void select(@NonNull WifiConfiguration wifiConfiguration) {
+            if (mVerboseLoggingEnabled) {
+                Log.v(TAG, "NetworkRequestUserSelectionCallbackProxy: select "
+                        + "wificonfiguration: " + wifiConfiguration);
+            }
+            try {
+                mCallback.select(wifiConfiguration);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Failed to invoke onSelected", e);
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        @Override
+        public void reject() {
+            if (mVerboseLoggingEnabled) {
+                Log.v(TAG, "NetworkRequestUserSelectionCallbackProxy: reject");
+            }
+            try {
+                mCallback.reject();
+            } catch (RemoteException e) {
+                Log.e(TAG, "Failed to invoke onRejected", e);
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Callback proxy for NetworkRequestMatchCallback objects.
+     * @hide
+     */
+    private class NetworkRequestMatchCallbackProxy extends INetworkRequestMatchCallback.Stub {
+        private final Handler mHandler;
+        private final NetworkRequestMatchCallback mCallback;
+
+        NetworkRequestMatchCallbackProxy(Looper looper, NetworkRequestMatchCallback callback) {
+            mHandler = new Handler(looper);
+            mCallback = callback;
+        }
+
+        @Override
+        public void onUserSelectionCallbackRegistration(
+                INetworkRequestUserSelectionCallback userSelectionCallback) {
+            if (mVerboseLoggingEnabled) {
+                Log.v(TAG, "NetworkRequestMatchCallbackProxy: "
+                        + "onUserSelectionCallbackRegistration callback: " + userSelectionCallback);
+            }
+            mHandler.post(() -> {
+                mCallback.onUserSelectionCallbackRegistration(
+                        new NetworkRequestUserSelectionCallbackProxy(userSelectionCallback));
+            });
+        }
+
+        @Override
+        public void onMatch(List<WifiConfiguration> wifiConfigurations) {
+            if (mVerboseLoggingEnabled) {
+                Log.v(TAG, "NetworkRequestMatchCallbackProxy: onMatch wificonfigurations: "
+                        + wifiConfigurations);
+            }
+            mHandler.post(() -> {
+                mCallback.onMatch(wifiConfigurations);
+            });
+        }
+
+        @Override
+        public void onUserSelectionConnectSuccess(WifiConfiguration wifiConfiguration) {
+            if (mVerboseLoggingEnabled) {
+                Log.v(TAG, "NetworkRequestMatchCallbackProxy: onUserSelectionConnectSuccess "
+                        + " wificonfiguration: " + wifiConfiguration);
+            }
+            mHandler.post(() -> {
+                mCallback.onUserSelectionConnectSuccess(wifiConfiguration);
+            });
+        }
+
+        @Override
+        public void onUserSelectionConnectFailure(WifiConfiguration wifiConfiguration) {
+            if (mVerboseLoggingEnabled) {
+                Log.v(TAG, "NetworkRequestMatchCallbackProxy: onUserSelectionConnectFailure"
+                        + " wificonfiguration: " + wifiConfiguration);
+            }
+            mHandler.post(() -> {
+                mCallback.onUserSelectionConnectFailure(wifiConfiguration);
+            });
+        }
+    }
+
+    /**
+     * Registers a callback for NetworkRequest matches. See {@link NetworkRequestMatchCallback}.
+     * Caller can unregister a previously registered callback using
+     * {@link #unregisterNetworkRequestMatchCallback(NetworkRequestMatchCallback)}
+     * <p>
+     * Applications should have the
+     * {@link android.Manifest.permission#NETWORK_SETTINGS} permission. Callers
+     * without the permission will trigger a {@link java.lang.SecurityException}.
+     * <p>
+     *
+     * @param callback Callback for network match events
+     * @param handler  The Handler on whose thread to execute the callbacks of the {@code callback}
+     *                 object. If null, then the application's main thread will be used.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
+    public void registerNetworkRequestMatchCallback(@NonNull NetworkRequestMatchCallback callback,
+                                                    @Nullable Handler handler) {
+        if (callback == null) throw new IllegalArgumentException("callback cannot be null");
+        Log.v(TAG, "registerNetworkRequestMatchCallback: callback=" + callback
+                + ", handler=" + handler);
+
+        Looper looper = (handler == null) ? mContext.getMainLooper() : handler.getLooper();
+        Binder binder = new Binder();
+        try {
+            mService.registerNetworkRequestMatchCallback(
+                    binder, new NetworkRequestMatchCallbackProxy(looper, callback),
+                    callback.hashCode());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Unregisters a callback for NetworkRequest matches. See {@link NetworkRequestMatchCallback}.
+     * <p>
+     * Applications should have the
+     * {@link android.Manifest.permission#NETWORK_SETTINGS} permission. Callers
+     * without the permission will trigger a {@link java.lang.SecurityException}.
+     * <p>
+     *
+     * @param callback Callback for network match events
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
+    public void unregisterNetworkRequestMatchCallback(
+            @NonNull NetworkRequestMatchCallback callback) {
+        if (callback == null) throw new IllegalArgumentException("callback cannot be null");
+        Log.v(TAG, "unregisterNetworkRequestMatchCallback: callback=" + callback);
+
+        try {
+            mService.unregisterNetworkRequestMatchCallback(callback.hashCode());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
      * Provide a list of network suggestions to the device. See {@link WifiNetworkSuggestion}
      * for a detailed explanation of the parameters.
      *<p>

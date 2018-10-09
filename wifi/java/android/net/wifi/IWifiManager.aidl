@@ -25,6 +25,7 @@ import android.net.wifi.hotspot2.IProvisioningCallback;
 
 import android.net.DhcpInfo;
 import android.net.Network;
+import android.net.wifi.INetworkRequestMatchCallback;
 import android.net.wifi.ISoftApCallback;
 import android.net.wifi.ITrafficStateCallback;
 import android.net.wifi.PasspointManagementObjectDefinition;
@@ -185,5 +186,9 @@ interface IWifiManager
     void registerTrafficStateCallback(in IBinder binder, in ITrafficStateCallback callback, int callbackIdentifier);
 
     void unregisterTrafficStateCallback(int callbackIdentifier);
+
+    void registerNetworkRequestMatchCallback(in IBinder binder, in INetworkRequestMatchCallback callback, int callbackIdentifier);
+
+    void unregisterNetworkRequestMatchCallback(int callbackIdentifier);
 }
 
