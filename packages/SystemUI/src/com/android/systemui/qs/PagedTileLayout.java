@@ -8,6 +8,7 @@ import android.animation.PropertyValuesHolder;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.graphics.Rect;
 import android.os.Bundle;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -60,6 +61,7 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
     private int mPageToRestore = -1;
     private int mLayoutOrientation;
     private int mLayoutDirection;
+    private int mHorizontalClipBound;
 
     public PagedTileLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -260,8 +262,8 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
         // Update bottom padding, useful for removing extra space once the panel page indicator is
         // hidden.
         Resources res = getContext().getResources();
-        final int sidePadding = res.getDimensionPixelSize(R.dimen.notification_side_paddings);
-        setPadding(sidePadding, 0, sidePadding,
+        mHorizontalClipBound = res.getDimensionPixelSize(R.dimen.notification_side_paddings);
+        setPadding(0, 0, 0,
                 getContext().getResources().getDimensionPixelSize(
                         R.dimen.qs_paged_tile_layout_padding_bottom));
         boolean changed = false;
@@ -273,6 +275,13 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
             requestLayout();
         }
         return changed;
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int l, int t, int r, int b) {
+        super.onLayout(changed, l, t, r, b);
+        Rect clipBounds = new Rect(mHorizontalClipBound, 0, (r-l) - mHorizontalClipBound, b - t);
+        setClipBounds(clipBounds);
     }
 
     @Override
@@ -411,6 +420,14 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
 
         public int maxTiles() {
             return mColumns * mRows;
+        }
+
+        @Override
+        public boolean updateResources() {
+            final int sidePadding = getContext().getResources().getDimensionPixelSize(
+                    R.dimen.notification_side_paddings);
+            setPadding(sidePadding, 0, sidePadding, 0);
+            return super.updateResources();
         }
     }
 
