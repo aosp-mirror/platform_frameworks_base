@@ -16,29 +16,29 @@ package com.android.systemui.plugins;
 
 import android.content.Context;
 import android.os.Looper;
+import android.util.Log;
 
 import com.android.systemui.Dependency;
+import com.android.systemui.R;
 import com.android.systemui.shared.plugins.PluginEnabler;
 import com.android.systemui.shared.plugins.PluginInitializer;
-import com.android.systemui.R;
+import com.android.systemui.shared.plugins.PluginManagerImpl;
 
 public class PluginInitializerImpl implements PluginInitializer {
+
+    private boolean mWtfsSet;
+
     @Override
     public Looper getBgLooper() {
         return Dependency.get(Dependency.BG_LOOPER);
     }
 
     @Override
-    public Runnable getBgInitCallback() {
-        return new Runnable() {
-            @Override
-            public void run() {
-                // Plugin dependencies that don't have another good home can go here, but
-                // dependencies that have better places to init can happen elsewhere.
-                Dependency.get(PluginDependencyProvider.class)
-                        .allowPluginDependency(ActivityStarter.class);
-            }
-        };
+    public void onPluginManagerInit() {
+        // Plugin dependencies that don't have another good home can go here, but
+        // dependencies that have better places to init can happen elsewhere.
+        Dependency.get(PluginDependencyProvider.class)
+                .allowPluginDependency(ActivityStarter.class);
     }
 
     @Override
@@ -48,5 +48,19 @@ public class PluginInitializerImpl implements PluginInitializer {
 
     public PluginEnabler getPluginEnabler(Context context) {
         return new PluginEnablerImpl(context);
+    }
+
+    @Override
+    public void handleWtfs() {
+        if (!mWtfsSet) {
+            mWtfsSet = true;
+            Log.setWtfHandler(new Log.TerribleFailureHandler() {
+                @Override
+                public void onTerribleFailure(String tag, Log.TerribleFailure what,
+                        boolean system) {
+                    throw new PluginManagerImpl.CrashWhilePluginActiveException(what);
+                }
+            });
+        }
     }
 }
