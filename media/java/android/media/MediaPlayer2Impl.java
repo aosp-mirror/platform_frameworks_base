@@ -93,6 +93,8 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
 
     private final static String TAG = "MediaPlayer2Impl";
 
+    private Context mContext;
+
     private long mNativeContext; // accessed by native methods
     private long mNativeSurfaceTexture;  // accessed by native methods
     private int mListenerContext; // accessed by native methods
@@ -149,7 +151,8 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
      * to free the resources. If not released, too many MediaPlayer2Impl instances may
      * result in an exception.</p>
      */
-    public MediaPlayer2Impl() {
+    public MediaPlayer2Impl(Context context) {
+        mContext = context;
         mHandlerThread = new HandlerThread("MediaPlayer2TaskThread");
         mHandlerThread.start();
         Looper looper = mHandlerThread.getLooper();

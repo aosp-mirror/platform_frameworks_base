@@ -242,8 +242,8 @@ public abstract class MediaPlayer2 implements SubtitleController.Listener
      *
      * @return A MediaPlayer2 object created
      */
-    public static final MediaPlayer2 create() {
-        return new MediaPlayer2Impl();
+    public static final MediaPlayer2 create(Context context) {
+        return new MediaPlayer2Impl(context);
     }
 
     private static final String[] decodeMediaPlayer2Uri(String location) {
