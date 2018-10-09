@@ -265,7 +265,8 @@ public class DisplayRotation {
             mUserRotation = userRotation;
             changed = true;
         }
-        mService.mDisplaySettings.setUserRotation(mDisplayContent, userRotationMode, userRotation);
+        mService.mDisplayWindowSettings.setUserRotation(mDisplayContent, userRotationMode,
+                userRotation);
         if (changed) {
             mService.updateRotation(true /* alwaysSendConfiguration */,
                     false /* forceRelayout */);

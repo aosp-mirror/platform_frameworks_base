@@ -217,7 +217,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
 
         if (DEBUG_DISPLAY) Slog.v(TAG_WM, "Adding display=" + display);
 
-        mService.mDisplaySettings.applySettingsToDisplayLocked(dc);
+        mService.mDisplayWindowSettings.applySettingsToDisplayLocked(dc);
 
         if (mService.mDisplayManagerInternal != null) {
             mService.mDisplayManagerInternal.setDisplayInfoOverrideFromWindowManager(

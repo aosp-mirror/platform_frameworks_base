@@ -1636,6 +1636,12 @@ package android.view {
     method public boolean unregisterFrameCommitCallback(java.lang.Runnable);
   }
 
+  public abstract interface WindowManager implements android.view.ViewManager {
+    method public abstract void setShouldShowIme(int, boolean);
+    method public abstract void setShouldShowWithInsecureKeyguard(int, boolean);
+    method public abstract void setShouldShowSystemDecors(int, boolean);
+  }
+
   public static class WindowManager.LayoutParams extends android.view.ViewGroup.LayoutParams implements android.os.Parcelable {
     field public static final int ACCESSIBILITY_TITLE_CHANGED = 33554432; // 0x2000000
     field public static final int PRIVATE_FLAG_NO_MOVE_ANIMATION = 64; // 0x40

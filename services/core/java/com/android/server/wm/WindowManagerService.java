@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import static android.Manifest.permission.CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS;
+import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
 import static android.Manifest.permission.MANAGE_APP_TOKENS;
 import static android.Manifest.permission.READ_FRAME_BUFFER;
 import static android.Manifest.permission.REGISTER_WINDOW_MANAGER_LISTENERS;
@@ -62,6 +63,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 import static android.view.WindowManager.LayoutParams.TYPE_TOAST;
 import static android.view.WindowManager.LayoutParams.TYPE_VOICE_INTERACTION;
 import static android.view.WindowManager.LayoutParams.TYPE_WALLPAPER;
+import static android.view.WindowManager.REMOVE_CONTENT_MODE_UNDEFINED;
 import static android.view.WindowManagerGlobal.RELAYOUT_DEFER_SURFACE_DESTROY;
 import static android.view.WindowManagerGlobal.RELAYOUT_RES_SURFACE_CHANGED;
 
@@ -118,6 +120,7 @@ import android.app.AppOpsManager;
 import android.app.IActivityManager;
 import android.app.IActivityTaskManager;
 import android.app.IAssistDataReceiver;
+import android.app.WindowConfiguration;
 import android.app.admin.DevicePolicyCache;
 import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
@@ -215,6 +218,7 @@ import android.view.View;
 import android.view.WindowContentFrameStats;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
+import android.view.WindowManager.RemoveContentMode;
 import android.view.WindowManager.TransitionType;
 import android.view.WindowManagerGlobal;
 import android.view.WindowManagerPolicyConstants.PointerEventListener;
@@ -428,7 +432,7 @@ public class WindowManagerService extends IWindowManager.Stub
     final AppOpsManager mAppOps;
     final PackageManagerInternal mPmInternal;
 
-    final DisplaySettings mDisplaySettings;
+    final DisplayWindowSettings mDisplayWindowSettings;
 
     /** If the system should display notifications for apps displaying an alert window. */
     boolean mShowAlertWindowNotifications = true;
@@ -914,7 +918,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 com.android.internal.R.bool.config_disableTransitionAnimation);
         mInputManager = inputManager; // Must be before createDisplayContentLocked.
         mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
-        mDisplaySettings = new DisplaySettings(this);
+        mDisplayWindowSettings = new DisplayWindowSettings(this);
 
         mPolicy = policy;
         mAnimator = new WindowAnimator(this);
@@ -5091,7 +5095,7 @@ public class WindowManagerService extends IWindowManager.Stub
         displayInfo.overscanRight = right;
         displayInfo.overscanBottom = bottom;
 
-        mDisplaySettings.setOverscanLocked(displayInfo, left, top, right, bottom);
+        mDisplayWindowSettings.setOverscanLocked(displayInfo, left, top, right, bottom);
 
         reconfigureDisplayLocked(displayContent);
     }
@@ -6611,6 +6615,193 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         } finally {
             Binder.restoreCallingIdentity(token);
+        }
+    }
+
+    @Override
+    public int getWindowingMode(int displayId) {
+        if (!checkCallingPermission(INTERNAL_SYSTEM_WINDOW, "getWindowingMode()")) {
+            throw new SecurityException("Requires INTERNAL_SYSTEM_WINDOW permission");
+        }
+
+        synchronized (mGlobalLock) {
+            final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
+            if (displayContent == null) {
+                Slog.w(TAG_WM, "Attempted to get windowing mode of a display that does not exist: "
+                        + displayId);
+                return WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+            }
+            return mDisplayWindowSettings.getWindowingModeLocked(displayContent);
+        }
+    }
+
+    @Override
+    public void setWindowingMode(int displayId, int mode) {
+        if (!checkCallingPermission(INTERNAL_SYSTEM_WINDOW, "setWindowingMode()")) {
+            throw new SecurityException("Requires INTERNAL_SYSTEM_WINDOW permission");
+        }
+
+        synchronized (mGlobalLock) {
+            final DisplayContent displayContent = getDisplayContentOrCreate(displayId, null);
+            if (displayContent == null) {
+                Slog.w(TAG_WM, "Attempted to set windowing mode to a display that does not exist: "
+                        + displayId);
+                return;
+            }
+
+            mDisplayWindowSettings.setWindowingModeLocked(displayContent, mode);
+
+            reconfigureDisplayLocked(displayContent);
+        }
+    }
+
+    @Override
+    public @RemoveContentMode int getRemoveContentMode(int displayId) {
+        if (!checkCallingPermission(INTERNAL_SYSTEM_WINDOW, "getRemoveContentMode()")) {
+            throw new SecurityException("Requires INTERNAL_SYSTEM_WINDOW permission");
+        }
+
+        synchronized (mGlobalLock) {
+            final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
+            if (displayContent == null) {
+                Slog.w(TAG_WM, "Attempted to get remove mode of a display that does not exist: "
+                        + displayId);
+                return REMOVE_CONTENT_MODE_UNDEFINED;
+            }
+            return mDisplayWindowSettings.getRemoveContentModeLocked(displayContent);
+        }
+    }
+
+    @Override
+    public void setRemoveContentMode(int displayId, @RemoveContentMode int mode) {
+        if (!checkCallingPermission(INTERNAL_SYSTEM_WINDOW, "setRemoveContentMode()")) {
+            throw new SecurityException("Requires INTERNAL_SYSTEM_WINDOW permission");
+        }
+
+        synchronized (mGlobalLock) {
+            final DisplayContent displayContent = getDisplayContentOrCreate(displayId, null);
+            if (displayContent == null) {
+                Slog.w(TAG_WM, "Attempted to set remove mode to a display that does not exist: "
+                        + displayId);
+                return;
+            }
+
+            mDisplayWindowSettings.setRemoveContentModeLocked(displayContent, mode);
+
+            reconfigureDisplayLocked(displayContent);
+        }
+    }
+
+    @Override
+    public boolean shouldShowWithInsecureKeyguard(int displayId) {
+        if (!checkCallingPermission(INTERNAL_SYSTEM_WINDOW, "shouldShowWithInsecureKeyguard()")) {
+            throw new SecurityException("Requires INTERNAL_SYSTEM_WINDOW permission");
+        }
+
+        synchronized (mGlobalLock) {
+            final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
+            if (displayContent == null) {
+                Slog.w(TAG_WM, "Attempted to get flag of a display that does not exist: "
+                        + displayId);
+                return false;
+            }
+            return mDisplayWindowSettings.shouldShowWithInsecureKeyguardLocked(displayContent);
+        }
+    }
+
+    @Override
+    public void setShouldShowWithInsecureKeyguard(int displayId, boolean shouldShow) {
+        if (!checkCallingPermission(INTERNAL_SYSTEM_WINDOW,
+                "setShouldShowWithInsecureKeyguard()")) {
+            throw new SecurityException("Requires INTERNAL_SYSTEM_WINDOW permission");
+        }
+
+        synchronized (mGlobalLock) {
+            final DisplayContent displayContent = getDisplayContentOrCreate(displayId, null);
+            if (displayContent == null) {
+                Slog.w(TAG_WM, "Attempted to set flag to a display that does not exist: "
+                        + displayId);
+                return;
+            }
+
+            mDisplayWindowSettings.setShouldShowWithInsecureKeyguardLocked(displayContent,
+                    shouldShow);
+
+            reconfigureDisplayLocked(displayContent);
+        }
+    }
+
+    @Override
+    public boolean shouldShowSystemDecors(int displayId) {
+        if (!checkCallingPermission(INTERNAL_SYSTEM_WINDOW, "shouldShowSystemDecors()")) {
+            throw new SecurityException("Requires INTERNAL_SYSTEM_WINDOW permission");
+        }
+
+        synchronized (mGlobalLock) {
+            final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
+            if (displayContent == null) {
+                Slog.w(TAG_WM, "Attempted to get system decors flag of a display that does "
+                        + "not exist: " + displayId);
+                return false;
+            }
+            return mDisplayWindowSettings.shouldShowSystemDecorsLocked(displayContent);
+        }
+    }
+
+    @Override
+    public void setShouldShowSystemDecors(int displayId, boolean shouldShow) {
+        if (!checkCallingPermission(INTERNAL_SYSTEM_WINDOW, "setShouldShowSystemDecors()")) {
+            throw new SecurityException("Requires INTERNAL_SYSTEM_WINDOW permission");
+        }
+
+        synchronized (mGlobalLock) {
+            final DisplayContent displayContent = getDisplayContentOrCreate(displayId, null);
+            if (displayContent == null) {
+                Slog.w(TAG_WM, "Attempted to set system decors flag to a display that does "
+                        + "not exist: " + displayId);
+                return;
+            }
+
+            mDisplayWindowSettings.setShouldShowSystemDecorsLocked(displayContent, shouldShow);
+
+            reconfigureDisplayLocked(displayContent);
+        }
+    }
+
+    @Override
+    public boolean shouldShowIme(int displayId) {
+        if (!checkCallingPermission(INTERNAL_SYSTEM_WINDOW, "shouldShowIme()")) {
+            throw new SecurityException("Requires INTERNAL_SYSTEM_WINDOW permission");
+        }
+
+        synchronized (mGlobalLock) {
+            final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
+            if (displayContent == null) {
+                Slog.w(TAG_WM, "Attempted to get IME flag of a display that does not exist: "
+                        + displayId);
+                return false;
+            }
+            return mDisplayWindowSettings.shouldShowImeLocked(displayContent);
+        }
+    }
+
+    @Override
+    public void setShouldShowIme(int displayId, boolean shouldShow) {
+        if (!checkCallingPermission(INTERNAL_SYSTEM_WINDOW, "setShouldShowIme()")) {
+            throw new SecurityException("Requires INTERNAL_SYSTEM_WINDOW permission");
+        }
+
+        synchronized (mGlobalLock) {
+            final DisplayContent displayContent = getDisplayContentOrCreate(displayId, null);
+            if (displayContent == null) {
+                Slog.w(TAG_WM, "Attempted to set IME flag to a display that does not exist: "
+                        + displayId);
+                return;
+            }
+
+            mDisplayWindowSettings.setShouldShowImeLocked(displayContent, shouldShow);
+
+            reconfigureDisplayLocked(displayContent);
         }
     }
 

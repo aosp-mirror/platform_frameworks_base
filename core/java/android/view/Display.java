@@ -218,6 +218,7 @@ public final class Display {
      * @see #getFlags
      * @hide
      */
+    // TODO (b/114338689): Remove the flag and use IWindowManager#shouldShowWithInsecureKeyguard
     public static final int FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD = 1 << 5;
 
     /**
@@ -230,6 +231,7 @@ public final class Display {
      * @see #supportsSystemDecorations
      * @hide
      */
+    // TODO (b/114338689): Remove the flag and use IWindowManager#setShouldShowSystemDecors
     public static final int FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS = 1 << 6;
 
     /**
@@ -384,6 +386,7 @@ public final class Display {
      *
      * @hide
      */
+    // TODO (b/114338689): Remove the flag and use WindowManager#REMOVE_CONTENT_MODE_MOVE_TO_PRIMARY
     public static final int REMOVE_MODE_MOVE_CONTENT_TO_PRIMARY = 0;
     /**
      * Indicates that when display is removed, all its stacks and tasks will be removed, all
@@ -391,6 +394,7 @@ public final class Display {
      *
      * @hide
      */
+    // TODO (b/114338689): Remove the flag and use WindowManager#REMOVE_CONTENT_MODE_DESTROY
     public static final int REMOVE_MODE_DESTROY_CONTENT = 1;
 
     /**
@@ -881,6 +885,7 @@ public final class Display {
      * @see #REMOVE_MODE_MOVE_CONTENT_TO_PRIMARY
      * @see #REMOVE_MODE_DESTROY_CONTENT
      */
+    // TODO (b/114338689): Remove the method and use IWindowManager#getRemoveContentMode
     public int getRemoveMode() {
         return mDisplayInfo.removeMode;
     }
@@ -891,6 +896,7 @@ public final class Display {
      * @see #FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS
      * @hide
      */
+    // TODO (b/114338689): Remove the method and use IWindowManager#shouldShowSystemDecors
     public boolean supportsSystemDecorations() {
         return (mDisplayInfo.flags & FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS) != 0;
     }

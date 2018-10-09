@@ -315,6 +315,36 @@ public interface WindowManager extends ViewManager {
     @interface TransitionFlags {}
 
     /**
+     * Remove content mode: Indicates remove content mode is currently not defined.
+     * @hide
+     */
+    int REMOVE_CONTENT_MODE_UNDEFINED = 0;
+
+    /**
+     * Remove content mode: Indicates that when display is removed, all its activities will be moved
+     * to the primary display and the topmost activity should become focused.
+     * @hide
+     */
+    int REMOVE_CONTENT_MODE_MOVE_TO_PRIMARY = 1;
+
+    /**
+     * Remove content mode: Indicates that when display is removed, all its stacks and tasks will be
+     * removed, all activities will be destroyed according to the usual lifecycle.
+     * @hide
+     */
+    int REMOVE_CONTENT_MODE_DESTROY = 2;
+
+    /**
+     * @hide
+     */
+    @IntDef(prefix = { "REMOVE_CONTENT_MODE_" }, value = {
+            REMOVE_CONTENT_MODE_UNDEFINED,
+            REMOVE_CONTENT_MODE_MOVE_TO_PRIMARY,
+            REMOVE_CONTENT_MODE_DESTROY,
+    })
+    @interface RemoveContentMode {}
+
+    /**
      * Exception that is thrown when trying to add view whose
      * {@link LayoutParams} {@link LayoutParams#token}
      * is invalid.
@@ -421,6 +451,47 @@ public interface WindowManager extends ViewManager {
     @SystemApi
     @RequiresPermission(android.Manifest.permission.RESTRICTED_VR_ACCESS)
     public Region getCurrentImeTouchRegion();
+
+    /**
+     * Sets that the display should show its content when non-secure keyguard is shown.
+     *
+     * @param displayId Display ID.
+     * @param shouldShow Indicates that the display should show its content when non-secure keyguard
+     *                  is shown.
+     * @see KeyguardManager#isDeviceSecure()
+     * @see KeyguardManager#isDeviceLocked()
+     * @hide
+     */
+    @TestApi
+    default void setShouldShowWithInsecureKeyguard(int displayId, boolean shouldShow) {
+    }
+
+    /**
+     * Sets that the display should show system decors.
+     * <p>
+     * System decors include status bar, navigation bar, launcher.
+     * </p>
+     *
+     * @param displayId The id of the display.
+     * @param shouldShow Indicates that the display should show system decors.
+     * @hide
+     */
+    @TestApi
+    default void setShouldShowSystemDecors(int displayId, boolean shouldShow) {
+    }
+
+    /**
+     * Sets that the display should show IME.
+     *
+     * @param displayId Display ID.
+     * @param shouldShow Indicates that the display should show IME.
+     * @see KeyguardManager#isDeviceSecure()
+     * @see KeyguardManager#isDeviceLocked()
+     * @hide
+     */
+    @TestApi
+    default void setShouldShowIme(int displayId, boolean shouldShow) {
+    }
 
     public static class LayoutParams extends ViewGroup.LayoutParams implements Parcelable {
         /**
