@@ -37,6 +37,7 @@ import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.systemui.Dependency;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.Plugin;
+import com.android.systemui.plugins.PluginEnablerImpl;
 import com.android.systemui.plugins.PluginInitializerImpl;
 import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.plugins.annotations.ProvidesInterface;
@@ -62,6 +63,7 @@ public class PluginManagerTest extends SysuiTestCase {
     private PluginInstanceManager mMockPluginInstance;
     private PluginManagerImpl mPluginManager;
     private PluginListener mMockListener;
+    private PackageManager mMockPackageManager;
 
     private UncaughtExceptionHandler mRealExceptionHandler;
     private UncaughtExceptionHandler mMockExceptionHandler;
@@ -79,11 +81,17 @@ public class PluginManagerTest extends SysuiTestCase {
                 Mockito.anyBoolean(), Mockito.any(), Mockito.any(), Mockito.any()))
                 .thenReturn(mMockPluginInstance);
 
+        mMockPackageManager = mock(PackageManager.class);
         mPluginManager = new PluginManagerImpl(getContext(), mMockFactory, true,
                 mMockExceptionHandler, new PluginInitializerImpl() {
             @Override
             public String[] getWhitelistedPlugins(Context context) {
                 return new String[0];
+            }
+
+            @Override
+            public PluginEnabler getPluginEnabler(Context context) {
+                return new PluginEnablerImpl(mMockPackageManager);
             }
         });
         resetExceptionHandler();
@@ -182,9 +190,8 @@ public class PluginManagerTest extends SysuiTestCase {
     @Test
     public void testDisableIntent() {
         NotificationManager nm = mock(NotificationManager.class);
-        PackageManager pm = mock(PackageManager.class);
         mContext.addMockSystemService(Context.NOTIFICATION_SERVICE, nm);
-        mContext.setMockPackageManager(pm);
+        mContext.setMockPackageManager(mMockPackageManager);
 
         ComponentName testComponent = new ComponentName(getContext().getPackageName(),
                 PluginManagerTest.class.getName());
@@ -192,7 +199,7 @@ public class PluginManagerTest extends SysuiTestCase {
         intent.setData(Uri.parse("package://" + testComponent.flattenToString()));
         mPluginManager.onReceive(mContext, intent);
         verify(nm).cancel(eq(testComponent.getClassName()), eq(SystemMessage.NOTE_PLUGIN));
-        verify(pm).setComponentEnabledSetting(eq(testComponent),
+        verify(mMockPackageManager).setComponentEnabledSetting(eq(testComponent),
                 eq(PackageManager.COMPONENT_ENABLED_STATE_DISABLED),
                 eq(PackageManager.DONT_KILL_APP));
     }

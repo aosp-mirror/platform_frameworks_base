@@ -43,6 +43,7 @@ import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_TASKS;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_STACK;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.am.ActivityStack.ActivityState.RESUMED;
 import static com.android.server.am.ActivityStackSupervisor.FindTaskResult;
 import static com.android.server.am.ActivityStackSupervisor.TAG_STATES;
 import static com.android.server.am.ActivityStackSupervisor.TAG_TASKS;
@@ -120,6 +121,13 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
      */
     private ActivityStack mPreferredTopFocusableStack;
 
+    /**
+     * If this is the same as {@link #getFocusedStack} then the activity on the top of the focused
+     * stack has been resumed. If stacks are changing position this will hold the old stack until
+     * the new stack becomes resumed after which it will be set to current focused stack.
+     */
+    private ActivityStack mLastFocusedStack;
+
     // Cached reference to some special stacks we tend to get a lot so we don't need to loop
     // through the list to find them.
     private ActivityStack mHomeStack = null;
@@ -182,20 +190,33 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
     }
 
     void positionChildAtTop(ActivityStack stack, boolean includingParents) {
-        positionChildAt(stack, mStacks.size(), includingParents);
+        positionChildAtTop(stack, includingParents, null /* updateLastFocusedStackReason */);
+    }
+
+    void positionChildAtTop(ActivityStack stack, boolean includingParents,
+            String updateLastFocusedStackReason) {
+        positionChildAt(stack, mStacks.size(), includingParents, updateLastFocusedStackReason);
     }
 
     void positionChildAtBottom(ActivityStack stack) {
-        positionChildAt(stack, 0, false /* includingParents */);
+        positionChildAtBottom(stack, null /* updateLastFocusedStackReason */);
+    }
+
+    void positionChildAtBottom(ActivityStack stack, String updateLastFocusedStackReason) {
+        positionChildAt(stack, 0, false /* includingParents */, updateLastFocusedStackReason);
     }
 
     private void positionChildAt(ActivityStack stack, int position) {
-        positionChildAt(stack, position, false /* includingParents */);
+        positionChildAt(stack, position, false /* includingParents */,
+                null /* updateLastFocusedStackReason */);
     }
 
-    private void positionChildAt(ActivityStack stack, int position, boolean includingParents) {
+    private void positionChildAt(ActivityStack stack, int position, boolean includingParents,
+            String updateLastFocusedStackReason) {
         // TODO: Keep in sync with WindowContainer.positionChildAt(), once we change that to adjust
         //       the position internally, also update the logic here
+        final ActivityStack prevFocusedStack = updateLastFocusedStackReason != null
+                ? getFocusedStack() : null;
         final boolean wasContained = mStacks.remove(stack);
         final int insertPosition = getTopInsertPosition(stack, position);
         mStacks.add(insertPosition, stack);
@@ -209,6 +230,17 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
             mPreferredTopFocusableStack = stack;
         } else if (mPreferredTopFocusableStack == stack) {
             mPreferredTopFocusableStack = null;
+        }
+
+        if (updateLastFocusedStackReason != null) {
+            final ActivityStack currentFocusedStack = getFocusedStack();
+            if (currentFocusedStack != prevFocusedStack) {
+                mLastFocusedStack = prevFocusedStack;
+                EventLogTags.writeAmFocusedStack(mSupervisor.mCurrentUser, mDisplayId,
+                        currentFocusedStack == null ? -1 : currentFocusedStack.getStackId(),
+                        mLastFocusedStack == null ? -1 : mLastFocusedStack.getStackId(),
+                        updateLastFocusedStackReason);
+            }
         }
 
         // Since positionChildAt() is called during the creation process of pinned stacks,
@@ -456,6 +488,26 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
             }
         }
         return resumedActivity;
+    }
+
+    ActivityStack getLastFocusedStack() {
+        return mLastFocusedStack;
+    }
+
+    boolean allResumedActivitiesComplete() {
+        for (int stackNdx = mStacks.size() - 1; stackNdx >= 0; --stackNdx) {
+            final ActivityRecord r = mStacks.get(stackNdx).getResumedActivity();
+            if (r != null && !r.isState(RESUMED)) {
+                return false;
+            }
+        }
+        final ActivityStack currentFocusedStack = getFocusedStack();
+        if (DEBUG_STACK) {
+            Slog.d(TAG_STACK, "allResumedActivitiesComplete: mLastFocusedStack changing from="
+                    + mLastFocusedStack + " to=" + currentFocusedStack);
+        }
+        mLastFocusedStack = currentFocusedStack;
+        return true;
     }
 
     /**
@@ -1137,6 +1189,9 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
         }
         if (mPreferredTopFocusableStack != null) {
             pw.println(myPrefix + "mPreferredTopFocusableStack=" + mPreferredTopFocusableStack);
+        }
+        if (mLastFocusedStack != null) {
+            pw.println(myPrefix + "mLastFocusedStack=" + mLastFocusedStack);
         }
     }
 

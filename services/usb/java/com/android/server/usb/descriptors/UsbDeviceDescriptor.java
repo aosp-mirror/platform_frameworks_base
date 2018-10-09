@@ -135,7 +135,7 @@ public final class UsbDeviceDescriptor extends UsbDescriptor {
     /**
      * @hide
      */
-    public UsbDevice toAndroid(UsbDescriptorParser parser) {
+    public UsbDevice.Builder toAndroid(UsbDescriptorParser parser) {
         if (DEBUG) {
             Log.d(TAG, "toAndroid()");
         }
@@ -152,16 +152,14 @@ public final class UsbDeviceDescriptor extends UsbDescriptor {
             Log.d(TAG, "  versionString:" + versionString + " serialStr:" + serialStr);
         }
 
-        UsbDevice device = new UsbDevice(parser.getDeviceAddr(), mVendorID, mProductID,
-                mDevClass, mDevSubClass,
-                mProtocol, mfgName, prodName,
-                versionString, serialStr);
         UsbConfiguration[] configs = new UsbConfiguration[mConfigDescriptors.size()];
         Log.d(TAG, "  " + configs.length + " configs");
         for (int index = 0; index < mConfigDescriptors.size(); index++) {
             configs[index] = mConfigDescriptors.get(index).toAndroid(parser);
         }
-        device.setConfigurations(configs);
+        UsbDevice.Builder device = new UsbDevice.Builder(parser.getDeviceAddr(), mVendorID,
+                mProductID, mDevClass, mDevSubClass, mProtocol, mfgName, prodName, versionString,
+                configs, serialStr);
 
         return device;
     }

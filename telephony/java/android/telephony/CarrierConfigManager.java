@@ -2143,6 +2143,46 @@ public class CarrierConfigManager {
     public static final String KEY_SHOW_CALL_BLOCKING_DISABLED_NOTIFICATION_ALWAYS_BOOL =
             "show_call_blocking_disabled_notification_always_bool";
 
+    /**
+     * Some carriers only support SS over UT via INTERNET PDN.
+     * When mobile data is OFF or data roaming OFF during roaming,
+     * UI should block the call forwarding operation and notify the user
+     * that the function only works if data is available.
+     * @hide
+     */
+    public static final String KEY_CALL_FORWARDING_OVER_UT_WARNING_BOOL =
+            "call_forwarding_over_ut_warning_bool";
+
+    /**
+     * Some carriers only support SS over UT via INTERNET PDN.
+     * When mobile data is OFF or data roaming OFF during roaming,
+     * UI should block the call barring operation and notify the user
+     * that the function only works if data is available.
+     * @hide
+     */
+    public static final String KEY_CALL_BARRING_OVER_UT_WARNING_BOOL =
+            "call_barring_over_ut_warning_bool";
+
+    /**
+     * Some carriers only support SS over UT via INTERNET PDN.
+     * When mobile data is OFF or data roaming OFF during roaming,
+     * UI should block the caller id operation and notify the user
+     * that the function only works if data is available.
+     * @hide
+     */
+    public static final String KEY_CALLER_ID_OVER_UT_WARNING_BOOL =
+            "caller_id_over_ut_warning_bool";
+
+    /**
+     * Some carriers only support SS over UT via INTERNET PDN.
+     * When mobile data is OFF or data roaming OFF during roaming,
+     * UI should block the call waiting operation and notify the user
+     * that the function only works if data is available.
+     * @hide
+     */
+    public static final String KEY_CALL_WAITING_OVER_UT_WARNING_BOOL =
+            "call_waiting_over_ut_warning_bool";
+
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
 
@@ -2484,6 +2524,10 @@ public class CarrierConfigManager {
         sDefaults.putString(KEY_WCDMA_DEFAULT_SIGNAL_STRENGTH_MEASUREMENT_STRING, "");
         sDefaults.putBoolean(KEY_CONFIG_SHOW_ORIG_DIAL_STRING_FOR_CDMA_BOOL, false);
         sDefaults.putBoolean(KEY_SHOW_CALL_BLOCKING_DISABLED_NOTIFICATION_ALWAYS_BOOL, false);
+        sDefaults.putBoolean(KEY_CALL_FORWARDING_OVER_UT_WARNING_BOOL, false);
+        sDefaults.putBoolean(KEY_CALL_BARRING_OVER_UT_WARNING_BOOL, false);
+        sDefaults.putBoolean(KEY_CALLER_ID_OVER_UT_WARNING_BOOL, false);
+        sDefaults.putBoolean(KEY_CALL_WAITING_OVER_UT_WARNING_BOOL, false);
     }
 
     /**

@@ -20,9 +20,9 @@
 #include <memory>
 
 #include "android-base/macros.h"
+#include "androidfw/ConfigDescription.h"
 #include "androidfw/StringPiece.h"
 
-#include "ConfigDescription.h"
 #include "Diagnostics.h"
 #include "ResourceTable.h"
 #include "ResourceValues.h"
@@ -57,7 +57,7 @@ struct ResourceParserOptions {
 class ResourceParser {
  public:
   ResourceParser(IDiagnostics* diag, ResourceTable* table, const Source& source,
-                 const ConfigDescription& config,
+                 const android::ConfigDescription& config,
                  const ResourceParserOptions& options = {});
   bool Parse(xml::XmlPullParser* parser);
 
@@ -114,7 +114,7 @@ class ResourceParser {
   IDiagnostics* diag_;
   ResourceTable* table_;
   Source source_;
-  ConfigDescription config_;
+  android::ConfigDescription config_;
   ResourceParserOptions options_;
 };
 

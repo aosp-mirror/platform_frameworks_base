@@ -18,9 +18,9 @@
 #define AAPT_FORMAT_PROTO_PROTODESERIALIZE_H
 
 #include "android-base/macros.h"
+#include "androidfw/ConfigDescription.h"
 #include "androidfw/ResourceTypes.h"
 
-#include "ConfigDescription.h"
 #include "Configuration.pb.h"
 #include "ResourceTable.h"
 #include "ResourceValues.h"
@@ -34,14 +34,15 @@ namespace aapt {
 
 std::unique_ptr<Value> DeserializeValueFromPb(const pb::Value& pb_value,
                                               const android::ResStringPool& src_pool,
-                                              const ConfigDescription& config,
+                                              const android::ConfigDescription& config,
                                               StringPool* value_pool, io::IFileCollection* files,
                                               std::string* out_error);
 
 std::unique_ptr<Item> DeserializeItemFromPb(const pb::Item& pb_item,
                                             const android::ResStringPool& src_pool,
-                                            const ConfigDescription& config, StringPool* value_pool,
-                                            io::IFileCollection* files, std::string* out_error);
+                                            const android::ConfigDescription& config,
+                                            StringPool* value_pool, io::IFileCollection* files,
+                                            std::string* out_error);
 
 std::unique_ptr<xml::XmlResource> DeserializeXmlResourceFromPb(const pb::XmlNode& pb_node,
                                                                std::string* out_error);
@@ -49,8 +50,8 @@ std::unique_ptr<xml::XmlResource> DeserializeXmlResourceFromPb(const pb::XmlNode
 bool DeserializeXmlFromPb(const pb::XmlNode& pb_node, xml::Element* out_el, StringPool* value_pool,
                           std::string* out_error);
 
-bool DeserializeConfigFromPb(const pb::Configuration& pb_config, ConfigDescription* out_config,
-                             std::string* out_error);
+bool DeserializeConfigFromPb(const pb::Configuration& pb_config,
+                             android::ConfigDescription* out_config, std::string* out_error);
 
 // Optional io::IFileCollection used to lookup references to files in the ResourceTable.
 bool DeserializeTableFromPb(const pb::ResourceTable& pb_table, io::IFileCollection* files,

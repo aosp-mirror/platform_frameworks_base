@@ -49,7 +49,7 @@ import org.mockito.MockitoAnnotations;
 public class UiAutomationManagerTest {
     static final int SERVICE_ID = 42;
 
-    final UiAutomationManager mUiAutomationManager = new UiAutomationManager();
+    final UiAutomationManager mUiAutomationManager = new UiAutomationManager(new Object());
 
     MessageCapturingHandler mMessageCapturingHandler;
 
@@ -158,13 +158,13 @@ public class UiAutomationManagerTest {
         verify(mMockOwner).linkToDeath(captor.capture(), anyInt());
         captor.getValue().binderDied();
         mMessageCapturingHandler.sendAllMessages();
-        verify(mMockSystemSupport).onClientChange(false);
+        verify(mMockSystemSupport).onClientChangeLocked(false);
     }
 
     private void register(int flags) {
         mUiAutomationManager.registerUiTestAutomationServiceLocked(mMockOwner,
                 mMockAccessibilityServiceClient, mMockContext, mMockServiceInfo, SERVICE_ID,
-                mMessageCapturingHandler, new Object(), mMockSecurityPolicy, mMockSystemSupport,
+                mMessageCapturingHandler, mMockSecurityPolicy, mMockSystemSupport,
                 mMockWindowManagerInternal, mMockGlobalActionPerformer, flags);
     }
 

@@ -14,6 +14,7 @@
 
 package com.android.systemui.shared.plugins;
 
+import android.annotation.Nullable;
 import android.content.Context;
 import android.os.Looper;
 
@@ -26,9 +27,10 @@ public interface PluginInitializer {
 
     /**
      * This Runnable is run on the bg looper during initialization of {@link PluginManagerImpl}.
-     * It can be null.
      */
-    Runnable getBgInitCallback();
+    @Nullable Runnable getBgInitCallback();
 
     String[] getWhitelistedPlugins(Context context);
+
+    PluginEnabler getPluginEnabler(Context context);
 }

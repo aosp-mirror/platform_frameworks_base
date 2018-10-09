@@ -26,7 +26,10 @@
 #include "process/IResourceTableConsumer.h"
 #include "xml/XmlDom.h"
 
+#include "androidfw/ConfigDescription.h"
+
 using ::android::base::StringPrintf;
+using ::android::ConfigDescription;
 
 namespace aapt {
 

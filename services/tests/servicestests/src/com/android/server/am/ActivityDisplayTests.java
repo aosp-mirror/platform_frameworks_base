@@ -23,6 +23,7 @@ import static android.content.pm.ActivityInfo.FLAG_ALWAYS_FOCUSABLE;
 
 import static com.android.server.am.ActivityStackSupervisor.ON_TOP;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import android.platform.test.annotations.Presubmit;
@@ -50,6 +51,24 @@ public class ActivityDisplayTests extends ActivityTestsBase {
     public void setUp() throws Exception {
         super.setUp();
         setupActivityTaskManagerService();
+    }
+
+    @Test
+    public void testLastFocusedStackIsUpdatedWhenMovingStack() {
+        // Create a stack at bottom.
+        final ActivityDisplay display = mSupervisor.getDefaultDisplay();
+        final ActivityStack stack = display.createStack(
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, !ON_TOP);
+        final ActivityStack prevFocusedStack = display.getFocusedStack();
+
+        stack.moveToFront("moveStackToFront");
+        // After moving the stack to front, the previous focused should be the last focused.
+        assertTrue(stack.isFocusedStackOnDisplay());
+        assertEquals(prevFocusedStack, display.getLastFocusedStack());
+
+        stack.moveToBack("moveStackToBack", null /* task */);
+        // After moving the stack to back, the stack should be the last focused.
+        assertEquals(stack, display.getLastFocusedStack());
     }
 
     /**

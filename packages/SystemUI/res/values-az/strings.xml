@@ -442,7 +442,7 @@
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> ekranınızda olan hər şeyin şəklini çəkəcək."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Daha göstərmə"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Hamısını silin"</string>
-    <string name="manage_notifications_text" msgid="8035284146227267681">"Bildirişləri idarə edin"</string>
+    <string name="manage_notifications_text" msgid="2386728145475108753">"İdarə edin"</string>
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"Bildirişlər \"Narahat Etməyin\" rejimi tərəfindən dayandırıldı"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"İndi başlayın"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"Heç bir bildiriş yoxdur"</string>

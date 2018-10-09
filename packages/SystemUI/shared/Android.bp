@@ -21,10 +21,10 @@ android_library {
     ],
 
     static_libs: [
-        "SystemUIPluginLib"
+        "PluginCoreLib"
     ],
 
-    // Enforce that the library is build agains java 7 so that there are
+    // Enforce that the library is built against java 7 so that there are
     // no compatibility issues with launcher
     java_version: "1.7",
 }

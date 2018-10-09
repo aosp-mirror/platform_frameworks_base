@@ -594,7 +594,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         // Always disable recents when alternate car mode UI is active.
         boolean disableRecent = mUseCarModeUi || !isOverviewEnabled();
 
-        boolean disableBack = QuickStepController.shouldhideBackButton()
+        boolean disableBack = QuickStepController.shouldhideBackButton(getContext())
                 || (((mDisabledFlags & View.STATUS_BAR_DISABLE_BACK) != 0) && !useAltBack);
 
         // When screen pinning, don't hide back and home when connected service or back and

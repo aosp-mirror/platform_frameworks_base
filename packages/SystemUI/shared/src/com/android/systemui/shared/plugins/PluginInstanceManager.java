@@ -159,10 +159,8 @@ public class PluginInstanceManager<T extends Plugin> {
         // plugin, if the plugin causing a crash cannot be identified, they are all disabled
         // assuming one of them must be bad.
         Log.w(TAG, "Disabling plugin " + info.mPackage + "/" + info.mClass);
-        mPm.setComponentEnabledSetting(
-                new ComponentName(info.mPackage, info.mClass),
-                PackageManager.COMPONENT_ENABLED_STATE_DISABLED,
-                PackageManager.DONT_KILL_APP);
+        mManager.getPluginEnabler().setEnabled(new ComponentName(info.mPackage, info.mClass),
+                false);
     }
 
     public <T> boolean dependsOn(Plugin p, Class<T> cls) {
@@ -280,8 +278,7 @@ public class PluginInstanceManager<T extends Plugin> {
             if (pkgName != null) {
                 intent.setPackage(pkgName);
             }
-            List<ResolveInfo> result =
-                    mPm.queryIntentServices(intent, 0);
+            List<ResolveInfo> result = mPm.queryIntentServices(intent, 0);
             if (DEBUG) Log.d(TAG, "Found " + result.size() + " plugins");
             if (result.size() > 1 && !mAllowMultiple) {
                 // TODO: Show warning.
@@ -304,6 +301,10 @@ public class PluginInstanceManager<T extends Plugin> {
             if (!isDebuggable && !mWhitelistedPlugins.contains(component.getPackageName())) {
                 // Never ever ever allow these on production builds, they are only for prototyping.
                 Log.w(TAG, "Plugin cannot be loaded on production build: " + component);
+                return null;
+            }
+            if (!mManager.getPluginEnabler().isEnabled(component)) {
+                if (DEBUG) Log.d(TAG, "Plugin is not enabled, aborting load: " + component);
                 return null;
             }
             String pkg = component.getPackageName();

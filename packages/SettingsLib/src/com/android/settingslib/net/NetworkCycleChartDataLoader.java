@@ -43,9 +43,9 @@ public class NetworkCycleChartDataLoader
     @Override
     void recordUsage(long start, long end) {
         try {
-            final NetworkStats stats = mNetworkStatsManager.querySummary(
+            final NetworkStats.Bucket bucket = mNetworkStatsManager.querySummaryForDevice(
                 mNetworkType, mSubId, start, end);
-            final long total = getTotalUsage(stats);
+            final long total = bucket == null ? 0L : bucket.getRxBytes() + bucket.getTxBytes();
             if (total > 0L) {
                 final NetworkCycleChartData.Builder builder = new NetworkCycleChartData.Builder();
                 builder.setUsageBuckets(getUsageBuckets(start, end))
@@ -80,9 +80,11 @@ public class NetworkCycleChartDataLoader
         while (bucketEnd <= end) {
             long usage = 0L;
             try {
-                final NetworkStats stats = mNetworkStatsManager.querySummary(
+                final NetworkStats.Bucket bucket = mNetworkStatsManager.querySummaryForDevice(
                     mNetworkType, mSubId, bucketStart, bucketEnd);
-                usage = getTotalUsage(stats);
+                if (bucket != null) {
+                    usage = bucket.getRxBytes() + bucket.getTxBytes();
+                }
             } catch (RemoteException e) {
                 Log.e(TAG, "Exception querying network detail.", e);
             }
