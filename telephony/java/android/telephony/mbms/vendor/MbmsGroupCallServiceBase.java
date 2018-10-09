@@ -115,15 +115,16 @@ public class MbmsGroupCallServiceBase extends Service {
         }
 
         @Override
-        public void updateGroupCall(int subscriptionId, long tmgi, int[] saiArray,
-                int[] frequencyArray) {
+        public void updateGroupCall(int subscriptionId, long tmgi, List saiList,
+                List frequencyList) {
             MbmsGroupCallServiceBase.this.updateGroupCall(
-                    subscriptionId, tmgi, saiArray, frequencyArray);
+                    subscriptionId, tmgi, saiList, frequencyList);
         }
 
         @Override
-        public int startGroupCall(final int subscriptionId, final long tmgi, final int[] saiArray,
-                final int[] frequencyArray, final IGroupCallCallback callback)
+        public int startGroupCall(final int subscriptionId, final long tmgi,
+                final List saiList,
+                final List frequencyList, final IGroupCallCallback callback)
                 throws RemoteException {
             if (callback == null) {
                 throw new NullPointerException("Callback must not be null");
@@ -132,7 +133,7 @@ public class MbmsGroupCallServiceBase extends Service {
             final int uid = Binder.getCallingUid();
 
             int result = MbmsGroupCallServiceBase.this.startGroupCall(
-                    subscriptionId, tmgi, saiArray, frequencyArray, new GroupCallCallback() {
+                    subscriptionId, tmgi, saiList, frequencyList, new GroupCallCallback() {
                         @Override
                         public void onError(final int errorCode, final String message) {
                             try {
@@ -209,13 +210,13 @@ public class MbmsGroupCallServiceBase extends Service {
      *
      * @param subscriptionId The subscription id to use.
      * @param tmgi The TMGI, an identifier for the group call.
-     * @param saiArray An array of SAIs for the group call.
-     * @param frequencyArray An array of frequencies for the group call.
+     * @param saiList A list of SAIs for the group call.
+     * @param frequencyList A list of frequencies for the group call.
      * @param callback The callback object on which the app wishes to receive updates.
      * @return Any error in {@link MbmsErrors.GeneralErrors}
      */
-    public int startGroupCall(int subscriptionId, long tmgi, int[] saiArray, int[] frequencyArray,
-            GroupCallCallback callback) {
+    public int startGroupCall(int subscriptionId, long tmgi, List<Integer> saiList,
+            List<Integer> frequencyList, GroupCallCallback callback) {
         throw new UnsupportedOperationException("Not implemented");
     }
 
@@ -237,11 +238,11 @@ public class MbmsGroupCallServiceBase extends Service {
     /**
      * Called when the app receives new SAI and frequency information for the group call identified
      * by {@code tmgi}.
-     * @param saiArray New array of SAIs that the call is available on.
-     * @param frequencyArray New array of frequencies that the call is available on.
+     * @param saiList New list of SAIs that the call is available on.
+     * @param frequencyList New list of frequencies that the call is available on.
      */
-    public void updateGroupCall(int subscriptionId, long tmgi, int[] saiArray,
-            int[] frequencyArray) {
+    public void updateGroupCall(int subscriptionId, long tmgi, List<Integer> saiList,
+            List<Integer> frequencyList) {
         throw new UnsupportedOperationException("Not implemented");
     }
 
