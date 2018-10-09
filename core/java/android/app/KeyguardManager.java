@@ -561,7 +561,7 @@ public class KeyguardManager {
      * This will, if the keyguard is secure, bring up the unlock screen of
      * the keyguard.
      *
-     * @param callback Let's you know whether the operation was succesful and
+     * @param callback Lets you know whether the operation was successful and
      *   it is safe to launch anything that would normally be considered safe
      *   once the user has gotten past the keyguard.
      */
