@@ -6155,7 +6155,12 @@ public class AccountManagerService
 
             final int uid;
             try {
-                uid = mPackageManager.getPackageUidAsUser(packageName, userId);
+                long identityToken = clearCallingIdentity();
+                try {
+                    uid = mPackageManager.getPackageUidAsUser(packageName, userId);
+                } finally {
+                    restoreCallingIdentity(identityToken);
+                }
             } catch (NameNotFoundException e) {
                 Slog.e(TAG, "Unknown package " + packageName);
                 return;
