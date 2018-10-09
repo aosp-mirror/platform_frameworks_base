@@ -852,13 +852,12 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         }
     }
 
-    ActivityRecord(ActivityTaskManagerService _service, ProcessRecord _caller, int _launchedFromPid,
-            int _launchedFromUid, String _launchedFromPackage, Intent _intent, String _resolvedType,
-            ActivityInfo aInfo, Configuration _configuration,
-            ActivityRecord _resultTo, String _resultWho, int _reqCode,
-            boolean _componentSpecified, boolean _rootVoiceInteraction,
-            ActivityStackSupervisor supervisor, ActivityOptions options,
-            ActivityRecord sourceRecord) {
+    ActivityRecord(ActivityTaskManagerService _service, WindowProcessController _caller,
+            int _launchedFromPid, int _launchedFromUid, String _launchedFromPackage, Intent _intent,
+            String _resolvedType, ActivityInfo aInfo, Configuration _configuration,
+            ActivityRecord _resultTo, String _resultWho, int _reqCode, boolean _componentSpecified,
+            boolean _rootVoiceInteraction, ActivityStackSupervisor supervisor,
+            ActivityOptions options, ActivityRecord sourceRecord) {
         service = _service;
         appToken = new Token(this, _intent);
         info = aInfo;
@@ -928,8 +927,8 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         }
         if ((aInfo.flags & FLAG_MULTIPROCESS) != 0 && _caller != null
                 && (aInfo.applicationInfo.uid == SYSTEM_UID
-                    || aInfo.applicationInfo.uid == _caller.info.uid)) {
-            processName = _caller.processName;
+                    || aInfo.applicationInfo.uid == _caller.mInfo.uid)) {
+            processName = _caller.mName;
         } else {
             processName = aInfo.processName;
         }
@@ -1783,7 +1782,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             }
             setVisible(true);
             sleeping = false;
-            app.setPendingUiClean(true);
+            app.postPendingUiCleanMsg(true);
             if (reportToClient) {
                 makeClientVisible();
             } else {

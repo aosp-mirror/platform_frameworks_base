@@ -48,6 +48,7 @@ import static org.mockito.ArgumentMatchers.anyObject;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -206,11 +207,11 @@ public class ActivityStarterTests extends ActivityTestsBase {
         prepareStarter(launchFlags);
         final IApplicationThread caller = mock(IApplicationThread.class);
 
-        // If no caller app, return {@code null} {@link ProcessRecord}.
-        final ProcessRecord record = containsConditions(preconditions, PRECONDITION_NO_CALLER_APP)
-                ? null : new ProcessRecord(service.mAm, mock(ApplicationInfo.class), null, 0, null);
-
-        doReturn(record).when(service.mAm).getRecordForAppLocked(anyObject());
+        final WindowProcessController wpc =
+                containsConditions(preconditions, PRECONDITION_NO_CALLER_APP)
+                ? null : new WindowProcessController(
+                        service, mock(ApplicationInfo.class),null, 0, -1, null, null, null);
+        doReturn(wpc).when(service).getProcessController(anyObject());
 
         final Intent intent = new Intent();
         intent.setFlags(launchFlags);
@@ -354,10 +355,12 @@ public class ActivityStarterTests extends ActivityTestsBase {
                 invocation -> {
                     throw new RuntimeException("Not stubbed");
                 });
-        doReturn(mockPackageManager).when(mService.mAm).getPackageManagerInternalLocked();
+        doReturn(mockPackageManager).when(mService).getPackageManagerInternalLocked();
 
         // Never review permissions
         doReturn(false).when(mockPackageManager).isPermissionsReviewRequired(any(), anyInt());
+        doNothing().when(mockPackageManager).grantEphemeralAccess(
+                anyInt(), any(), anyInt(), anyInt());
 
         final Intent intent = new Intent();
         intent.addFlags(launchFlags);
@@ -510,7 +513,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
      */
     @Test
     public void testActivityStartsLogging_noLoggingWhenDisabled() {
-        doReturn(false).when(mService.mAm).isActivityStartsLoggingEnabled();
+        doReturn(false).when(mService).isActivityStartsLoggingEnabled();
         doReturn(mActivityMetricsLogger).when(mService.mStackSupervisor).getActivityMetricsLogger();
 
         ActivityStarter starter = prepareStarter(FLAG_ACTIVITY_NEW_TASK);
@@ -528,7 +531,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
     @Test
     public void testActivityStartsLogging_logsWhenEnabled() {
         // note: conveniently this package doesn't have any activity visible
-        doReturn(true).when(mService.mAm).isActivityStartsLoggingEnabled();
+        doReturn(true).when(mService).isActivityStartsLoggingEnabled();
         doReturn(mActivityMetricsLogger).when(mService.mStackSupervisor).getActivityMetricsLogger();
 
         ActivityStarter starter = prepareStarter(FLAG_ACTIVITY_NEW_TASK)

@@ -91,6 +91,8 @@ public class ActivityStartController {
 
     private final PendingRemoteAnimationRegistry mPendingRemoteAnimationRegistry;
 
+    boolean mCheckedForSetup = false;
+
     private final class StartHandler extends Handler {
         public StartHandler(Looper looper) {
             super(looper, null, true);
@@ -193,7 +195,7 @@ public class ActivityStartController {
      */
     void startSetupActivity() {
         // Only do this once per boot.
-        if (mService.mAm.getCheckedForSetup()) {
+        if (mCheckedForSetup) {
             return;
         }
 
@@ -203,7 +205,7 @@ public class ActivityStartController {
         final ContentResolver resolver = mService.mContext.getContentResolver();
         if (mService.mFactoryTest != FACTORY_TEST_LOW_LEVEL
                 && Settings.Global.getInt(resolver, Settings.Global.DEVICE_PROVISIONED, 0) != 0) {
-            mService.mAm.setCheckedForSetup(true);
+            mCheckedForSetup = true;
 
             // See if we should be showing the platform update setup UI.
             final Intent intent = new Intent(Intent.ACTION_UPGRADE_SETUP);
@@ -357,7 +359,7 @@ public class ActivityStartController {
                             null, userId, ActivityStarter.computeResolveFilterUid(
                                     callingUid, realCallingUid, UserHandle.USER_NULL));
                     // TODO: New, check if this is correct
-                    aInfo = mService.mAm.getActivityInfoForUser(aInfo, userId);
+                    aInfo = mService.mAmInternal.getActivityInfoForUser(aInfo, userId);
 
                     if (aInfo != null &&
                             (aInfo.applicationInfo.privateFlags

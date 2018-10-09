@@ -741,7 +741,7 @@ class ActivityMetricsLogger {
         Log.i(TAG, sb.toString());
     }
 
-    void logActivityStart(Intent intent, ProcessRecord callerApp, ActivityRecord r,
+    void logActivityStart(Intent intent, WindowProcessController callerApp, ActivityRecord r,
             int callingUid, String callingPackage, int callingUidProcState,
             boolean callingUidHasAnyVisibleWindow,
             int realCallingUid, int realCallingUidProcState,
@@ -776,31 +776,31 @@ class ActivityMetricsLogger {
         builder.addTaggedData(FIELD_COMING_FROM_PENDING_INTENT, comingFromPendingIntent ? 1 : 0);
         builder.addTaggedData(FIELD_INTENT_ACTION, intent.getAction());
         if (callerApp != null) {
-            builder.addTaggedData(FIELD_PROCESS_RECORD_PROCESS_NAME, callerApp.processName);
+            builder.addTaggedData(FIELD_PROCESS_RECORD_PROCESS_NAME, callerApp.mName);
             builder.addTaggedData(FIELD_PROCESS_RECORD_CUR_PROC_STATE,
-                    processStateAmToProto(callerApp.curProcState));
+                    processStateAmToProto(callerApp.getCurrentProcState()));
             builder.addTaggedData(FIELD_PROCESS_RECORD_HAS_CLIENT_ACTIVITIES,
-                    callerApp.hasClientActivities ? 1 : 0);
+                    callerApp.hasClientActivities() ? 1 : 0);
             builder.addTaggedData(FIELD_PROCESS_RECORD_HAS_FOREGROUND_SERVICES,
                     callerApp.hasForegroundServices() ? 1 : 0);
             builder.addTaggedData(FIELD_PROCESS_RECORD_HAS_FOREGROUND_ACTIVITIES,
-                    callerApp.foregroundActivities ? 1 : 0);
-            builder.addTaggedData(FIELD_PROCESS_RECORD_HAS_TOP_UI, callerApp.hasTopUi ? 1 : 0);
+                    callerApp.hasForegroundActivities() ? 1 : 0);
+            builder.addTaggedData(FIELD_PROCESS_RECORD_HAS_TOP_UI, callerApp.hasTopUi() ? 1 : 0);
             builder.addTaggedData(FIELD_PROCESS_RECORD_HAS_OVERLAY_UI,
-                    callerApp.hasOverlayUi ? 1 : 0);
+                    callerApp.hasOverlayUi() ? 1 : 0);
             builder.addTaggedData(FIELD_PROCESS_RECORD_PENDING_UI_CLEAN,
-                    callerApp.pendingUiClean ? 1 : 0);
-            if (callerApp.interactionEventTime != 0) {
+                    callerApp.hasPendingUiClean() ? 1 : 0);
+            if (callerApp.getInteractionEventTime() != 0) {
                 builder.addTaggedData(FIELD_PROCESS_RECORD_MILLIS_SINCE_LAST_INTERACTION_EVENT,
-                        (nowElapsed - callerApp.interactionEventTime));
+                        (nowElapsed - callerApp.getInteractionEventTime()));
             }
-            if (callerApp.fgInteractionTime != 0) {
+            if (callerApp.getFgInteractionTime() != 0) {
                 builder.addTaggedData(FIELD_PROCESS_RECORD_MILLIS_SINCE_FG_INTERACTION,
-                        (nowElapsed - callerApp.fgInteractionTime));
+                        (nowElapsed - callerApp.getFgInteractionTime()));
             }
-            if (callerApp.whenUnimportant != 0) {
+            if (callerApp.getWhenUnimportant() != 0) {
                 builder.addTaggedData(FIELD_PROCESS_RECORD_MILLIS_SINCE_UNIMPORTANT,
-                        (nowUptime - callerApp.whenUnimportant));
+                        (nowUptime - callerApp.getWhenUnimportant()));
             }
         }
         builder.addTaggedData(FIELD_ACTIVITY_RECORD_LAUNCH_MODE, r.info.launchMode);

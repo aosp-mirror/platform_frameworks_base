@@ -321,16 +321,16 @@ public final class CompatModePackages {
             ActivityRecord starting = stack.restartPackage(packageName);
 
             // Tell all processes that loaded this package about the change.
-            for (int i = mService.mAm.mLruProcesses.size() - 1; i >= 0; i--) {
-                final ProcessRecord app = mService.mAm.mLruProcesses.get(i);
-                if (!app.pkgList.containsKey(packageName)) {
+            for (int i = mService.mPidMap.size() - 1; i >= 0; i--) {
+                final WindowProcessController app = mService.mPidMap.valueAt(i);
+                if (!app.mPkgList.contains(packageName)) {
                     continue;
                 }
                 try {
-                    if (app.thread != null) {
+                    if (app.hasThread()) {
                         if (DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION, "Sending to proc "
-                                + app.processName + " new compat " + ci);
-                        app.thread.updatePackageCompatibilityInfo(packageName, ci);
+                                + app.mName + " new compat " + ci);
+                        app.getThread().updatePackageCompatibilityInfo(packageName, ci);
                     }
                 } catch (Exception e) {
                 }

@@ -1487,7 +1487,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 }
 
                 app.hasShownUi = true;
-                app.pendingUiClean = true;
+                app.setPendingUiClean(true);
                 app.forceProcessStateUpTo(mService.mTopProcessState);
                 // Because we could be starting an Activity in the system process this may not go
                 // across a Binder interface which would create a new Configuration. Consequently
@@ -1717,24 +1717,25 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             sendHint = noResumedActivities || allFocusedProcessesDiffer;
         }
 
-        if (sendHint && mService.mAm.mLocalPowerManager != null) {
-            mService.mAm.mLocalPowerManager.powerHint(PowerHint.LAUNCH, 1);
+        if (sendHint && mService.mPowerManagerInternal != null) {
+            mService.mPowerManagerInternal.powerHint(PowerHint.LAUNCH, 1);
             mPowerHintSent = true;
         }
     }
 
     void sendPowerHintForLaunchEndIfNeeded() {
         // Trigger launch power hint if activity is launched
-        if (mPowerHintSent && mService.mAm.mLocalPowerManager != null) {
-            mService.mAm.mLocalPowerManager.powerHint(PowerHint.LAUNCH, 0);
+        if (mPowerHintSent && mService.mPowerManagerInternal != null) {
+            mService.mPowerManagerInternal.powerHint(PowerHint.LAUNCH, 0);
             mPowerHintSent = false;
         }
     }
 
-    boolean checkStartAnyActivityPermission(Intent intent, ActivityInfo aInfo,
-            String resultWho, int requestCode, int callingPid, int callingUid,
-            String callingPackage, boolean ignoreTargetSecurity, boolean launchingInTask,
-            ProcessRecord callerApp, ActivityRecord resultRecord, ActivityStack resultStack) {
+    boolean checkStartAnyActivityPermission(Intent intent, ActivityInfo aInfo, String resultWho,
+            int requestCode, int callingPid, int callingUid, String callingPackage,
+            boolean ignoreTargetSecurity, boolean launchingInTask,
+            WindowProcessController callerApp, ActivityRecord resultRecord,
+            ActivityStack resultStack) {
         final boolean isCallerRecents = mService.getRecentTasks() != null
                 && mService.getRecentTasks().isCallerRecents(callingUid);
         final int startAnyPerm = mService.checkPermission(START_ANY_ACTIVITY, callingPid,
@@ -3072,7 +3073,9 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         }
 
         // Find any running services associated with this app and stop if needed.
-        mService.mAm.mServices.cleanUpRemovedTaskLocked(tr, component, new Intent(tr.getBaseIntent()));
+        final Message msg = PooledLambda.obtainMessage(ActivityManagerInternal::cleanUpServices,
+                mService.mAmInternal, tr.userId, component, new Intent(tr.getBaseIntent()));
+        mService.mH.sendMessage(msg);
 
         if (!killProcess) {
             return;
@@ -3422,7 +3425,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                     throw new IllegalStateException("Calling must be system uid");
                 }
                 mLaunchingActivity.release();
-                mService.mAm.mHandler.removeMessages(LAUNCH_TIMEOUT_MSG);
+                mHandler.removeMessages(LAUNCH_TIMEOUT_MSG);
             }
         }
 

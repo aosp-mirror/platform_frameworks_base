@@ -87,6 +87,8 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     private volatile IApplicationThread mThread;
     // Currently desired scheduling class
     private volatile int mCurSchedGroup;
+    // Currently computed process state
+    private volatile int mCurProcState = PROCESS_STATE_NONEXISTENT;
     // Last reported process state;
     private volatile int mRepProcState = PROCESS_STATE_NONEXISTENT;
     // are we in the process of crashing?
@@ -99,6 +101,28 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     private volatile String mRequiredAbi;
     // Running any services that are foreground?
     private volatile boolean mHasForegroundServices;
+    // Running any activities that are foreground?
+    private volatile boolean mHasForegroundActivities;
+    // Are there any client services with activities?
+    private volatile boolean mHasClientActivities;
+    // Is this process currently showing a non-activity UI that the user is interacting with?
+    // E.g. The status bar when it is expanded, but not when it is minimized. When true the process
+    // will be set to use the ProcessList#SCHED_GROUP_TOP_APP scheduling group to boost performance.
+    private volatile boolean mHasTopUi;
+    // Is the process currently showing a non-activity UI that overlays on-top of activity UIs on
+    // screen. E.g. display a window of type
+    // android.view.WindowManager.LayoutParams#TYPE_APPLICATION_OVERLAY When true the process will
+    // oom adj score will be set to ProcessList#PERCEPTIBLE_APP_ADJ at minimum to reduce the chance
+    // of the process getting killed.
+    private volatile boolean mHasOverlayUi;
+    // Want to clean up resources from showing UI?
+    private volatile boolean mPendingUiClean;
+    // The time we sent the last interaction event
+    private volatile long mInteractionEventTime;
+    // When we became foreground for interaction purposes
+    private volatile long mFgInteractionTime;
+    // When (uptime) the process last became unimportant
+    private volatile long mWhenUnimportant;
     // was app launched for debugging?
     private volatile boolean mDebugging;
     // Active instrumentation running in process?
@@ -161,6 +185,14 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         return mCurSchedGroup;
     }
 
+    public void setCurrentProcState(int curProcState) {
+        mCurProcState = curProcState;
+    }
+
+    int getCurrentProcState() {
+        return mCurProcState;
+    }
+
     public void setReportedProcState(int repProcState) {
         mRepProcState = repProcState;
     }
@@ -199,6 +231,78 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
 
     boolean hasForegroundServices() {
         return mHasForegroundServices;
+    }
+
+    public void setHasForegroundActivities(boolean hasForegroundActivities) {
+        mHasForegroundActivities = hasForegroundActivities;
+    }
+
+    boolean hasForegroundActivities() {
+        return mHasForegroundActivities;
+    }
+
+    public void setHasClientActivities(boolean hasClientActivities) {
+        mHasClientActivities = hasClientActivities;
+    }
+
+    boolean hasClientActivities() {
+        return mHasClientActivities;
+    }
+
+    public void setHasTopUi(boolean hasTopUi) {
+        mHasTopUi = hasTopUi;
+    }
+
+    boolean hasTopUi() {
+        return mHasTopUi;
+    }
+
+    public void setHasOverlayUi(boolean hasOverlayUi) {
+        mHasOverlayUi = hasOverlayUi;
+    }
+
+    boolean hasOverlayUi() {
+        return mHasOverlayUi;
+    }
+
+    public void setPendingUiClean(boolean hasPendingUiClean) {
+        mPendingUiClean = hasPendingUiClean;
+    }
+
+    boolean hasPendingUiClean() {
+        return mPendingUiClean;
+    }
+
+    void postPendingUiCleanMsg(boolean pendingUiClean) {
+        if (mListener == null) return;
+        // Posting on handler so WM lock isn't held when we call into AM.
+        final Message m = PooledLambda.obtainMessage(
+                WindowProcessListener::setPendingUiClean, mListener, pendingUiClean);
+        mAtm.mH.sendMessage(m);
+    }
+
+    public void setInteractionEventTime(long interactionEventTime) {
+        mInteractionEventTime = interactionEventTime;
+    }
+
+    long getInteractionEventTime() {
+        return mInteractionEventTime;
+    }
+
+    public void setFgInteractionTime(long fgInteractionTime) {
+        mFgInteractionTime = fgInteractionTime;
+    }
+
+    long getFgInteractionTime() {
+        return mFgInteractionTime;
+    }
+
+    public void setWhenUnimportant(long whenUnimportant) {
+        mWhenUnimportant = whenUnimportant;
+    }
+
+    long getWhenUnimportant() {
+        return mWhenUnimportant;
     }
 
     public void setRequiredAbi(String requiredAbi) {
@@ -530,14 +634,6 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         // Posting on handler so WM lock isn't held when we call into AM.
         mAtm.mH.sendMessage(PooledLambda.obtainMessage(
                 WindowProcessListener::updateServiceConnectionActivities, mListener));
-    }
-
-    void setPendingUiClean(boolean pendingUiClean) {
-        if (mListener == null) return;
-        // Posting on handler so WM lock isn't held when we call into AM.
-        final Message m = PooledLambda.obtainMessage(
-                WindowProcessListener::setPendingUiClean, mListener, pendingUiClean);
-        mAtm.mH.sendMessage(m);
     }
 
     void setPendingUiCleanAndForceProcessStateUpTo(int newState) {
