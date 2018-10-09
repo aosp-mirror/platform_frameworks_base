@@ -436,4 +436,12 @@ public class LogMaker {
         }
         return true;
     }
+
+    /**
+     * @return entries containing key value pairs.
+     * @hide
+     */
+    public SparseArray<Object> getEntries() {
+        return entries;
+    }
 }
