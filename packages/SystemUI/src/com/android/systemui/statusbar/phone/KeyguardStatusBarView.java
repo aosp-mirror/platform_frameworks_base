@@ -347,6 +347,7 @@ public class KeyguardStatusBarView extends RelativeLayout
         mIconManager = new TintedIconManager(findViewById(R.id.statusIcons));
         Dependency.get(StatusBarIconController.class).addIconGroup(mIconManager);
         onThemeChanged();
+        updateDozeState();
     }
 
     @Override
@@ -514,8 +515,7 @@ public class KeyguardStatusBarView extends RelativeLayout
     private void updateDozeState() {
         float alpha = 1f - mDarkAmount;
         int visibility = alpha != 0f ? VISIBLE : INVISIBLE;
-        mCarrierLabel.setAlpha(alpha);
-        mCarrierLabel.setVisibility(visibility);
+        mCarrierLabel.setAlpha(alpha * alpha);
         mStatusIconContainer.setAlpha(alpha);
         mStatusIconContainer.setVisibility(visibility);
 

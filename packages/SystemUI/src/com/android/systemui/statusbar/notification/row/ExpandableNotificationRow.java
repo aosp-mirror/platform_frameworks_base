@@ -82,7 +82,6 @@ import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin.MenuItem;
 import com.android.systemui.shared.plugins.PluginManager;
-import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.notification.AboveShelfChangedListener;
@@ -1501,7 +1500,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     private void updateIconVisibilities() {
         boolean visible = isChildInGroup()
-                || (isBelowSpeedBump() && !NotificationShelf.SHOW_AMBIENT_ICONS)
+                || isBelowSpeedBump()
                 || mIconsVisible;
         for (NotificationContentView l : mLayouts) {
             l.setIconsVisible(visible);

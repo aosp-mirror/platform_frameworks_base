@@ -43,13 +43,13 @@ import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
-import com.android.systemui.statusbar.phone.NotificationIconContainer;
 import com.android.systemui.statusbar.notification.stack.AmbientState;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
 import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.StackScrollState;
 import com.android.systemui.statusbar.notification.stack.ViewState;
+import com.android.systemui.statusbar.phone.NotificationIconContainer;
 
 /**
  * A notification shelf view that is placed inside the notification scroller. It manages the
@@ -58,7 +58,6 @@ import com.android.systemui.statusbar.notification.stack.ViewState;
 public class NotificationShelf extends ActivatableNotificationView implements
         View.OnLayoutChangeListener {
 
-    public static final boolean SHOW_AMBIENT_ICONS = true;
     private static final boolean USE_ANIMATIONS_WHEN_OPENING =
             SystemProperties.getBoolean("debug.icon_opening_animations", true);
     private static final boolean ICON_ANMATIONS_WHILE_SCROLLING
@@ -174,21 +173,6 @@ public class NotificationShelf extends ActivatableNotificationView implements
         mDark = dark;
         mShelfIcons.setDark(dark, fade, delay);
         updateInteractiveness();
-    }
-
-    public void fadeInTranslating() {
-        mShelfIcons.setTranslationY(-mShelfAppearTranslation);
-        mShelfIcons.setAlpha(0);
-        mShelfIcons.animate()
-                .setInterpolator(Interpolators.DECELERATE_QUINT)
-                .translationY(0)
-                .setDuration(SHELF_IN_TRANSLATION_DURATION)
-                .start();
-        mShelfIcons.animate()
-                .alpha(1)
-                .setInterpolator(Interpolators.LINEAR)
-                .setDuration(SHELF_IN_TRANSLATION_DURATION)
-                .start();
     }
 
     @Override
@@ -417,18 +401,16 @@ public class NotificationShelf extends ActivatableNotificationView implements
         float maxTop = row.getTranslationY();
         StatusBarIconView icon = row.getEntry().expandedIcon;
         float shelfIconPosition = getTranslationY() + icon.getTop() + icon.getTranslationY();
-        if (shelfIconPosition < maxTop && !mAmbientState.isDark()) {
+        if (shelfIconPosition < maxTop) {
             int top = (int) (maxTop - shelfIconPosition);
             Rect clipRect = new Rect(0, top, icon.getWidth(), Math.max(top, icon.getHeight()));
             icon.setClipBounds(clipRect);
-        } else {
-            icon.setClipBounds(null);
         }
     }
 
     private void updateContinuousClipping(final ExpandableNotificationRow row) {
         StatusBarIconView icon = row.getEntry().expandedIcon;
-        boolean needsContinuousClipping = ViewState.isAnimatingY(icon) && !mAmbientState.isDark();
+        boolean needsContinuousClipping = ViewState.isAnimatingY(icon);
         boolean isContinuousClipping = icon.getTag(TAG_CONTINUOUS_CLIPPING) != null;
         if (needsContinuousClipping && !isContinuousClipping) {
             final ViewTreeObserver observer = icon.getViewTreeObserver();
@@ -619,9 +601,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
             iconState.translateContent = false;
         }
         float transitionAmount;
-        if (mAmbientState.getDarkAmount() > 0 && !row.isInShelf()) {
-            transitionAmount = mAmbientState.isFullyDark() ? 1 : 0;
-        } else if (isLastChild || !USE_ANIMATIONS_WHEN_OPENING || iconState.useFullTransitionAmount
+        if (isLastChild || !USE_ANIMATIONS_WHEN_OPENING || iconState.useFullTransitionAmount
                 || iconState.useLinearTransitionAmount) {
             transitionAmount = iconTransitionAmount;
         } else {

@@ -1,5 +1,7 @@
 package com.android.systemui.statusbar.phone;
 
+import static com.android.systemui.doze.util.BurnInHelperKt.getBurnInOffset;
+
 import android.app.NotificationManager;
 import android.content.Context;
 import android.content.res.Resources;
@@ -15,6 +17,7 @@ import androidx.collection.ArrayMap;
 
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.util.ContrastColorUtil;
+import com.android.internal.widget.ViewClippingUtil;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.NotificationShelf;
@@ -66,6 +69,22 @@ public class NotificationIconAreaController implements DarkReceiver {
     private Context mContext;
     private boolean mFullyDark;
     private boolean mShowLowPriority;
+
+    /**
+     * Ratio representing being awake or in ambient mode, where 1 is dark and 0 awake.
+     */
+    private float mDarkAmount;
+    /**
+     * Maximum translation to avoid burn in.
+     */
+    private int mBurnInOffset;
+    /**
+     * Height of the keyguard status bar (not the one after unlocking.)
+     */
+    private int mKeyguardStatusBarHeight;
+
+    private final ViewClippingUtil.ClippingParameters mClippingParameters =
+            view -> view instanceof StatusBarWindowView;
 
     public NotificationIconAreaController(Context context, StatusBar statusBar) {
         mStatusBar = statusBar;
@@ -123,6 +142,9 @@ public class NotificationIconAreaController implements DarkReceiver {
         Resources res = context.getResources();
         mIconSize = res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_icon_size);
         mIconHPadding = res.getDimensionPixelSize(R.dimen.status_bar_icon_padding);
+        mBurnInOffset = res.getDimensionPixelSize(R.dimen.default_burn_in_prevention_offset);
+        mKeyguardStatusBarHeight = res
+                .getDimensionPixelSize(R.dimen.status_bar_header_height_keyguard);
     }
 
     /**
@@ -206,7 +228,7 @@ public class NotificationIconAreaController implements DarkReceiver {
 
     private void updateShelfIcons() {
         updateIconsForLayout(entry -> entry.expandedIcon, mShelfIcons,
-                NotificationShelf.SHOW_AMBIENT_ICONS, !mFullyDark /* showLowPriority */,
+                false /* showAmbient */, !mFullyDark /* showLowPriority */,
                 false /* hideDismissed */, mFullyDark /* hideRepliedMessages */);
     }
 
@@ -351,9 +373,22 @@ public class NotificationIconAreaController implements DarkReceiver {
         v.setDecorColor(mIconTint);
     }
 
-    public void setFullyDark(boolean fullyDark) {
-        mFullyDark = fullyDark;
-        updateShelfIcons();
+    /**
+     * Dark amount, from 0 to 1, representing being awake or in AOD.
+     */
+    public void setDarkAmount(float darkAmount) {
+        mDarkAmount = darkAmount;
+        if (darkAmount == 0 || darkAmount == 1) {
+            ViewClippingUtil.setClippingDeactivated(mNotificationIcons, darkAmount != 0,
+                    mClippingParameters);
+        }
+        dozeTimeTick();
+
+        boolean fullyDark = darkAmount == 1f;
+        if (mFullyDark != fullyDark) {
+            mFullyDark = fullyDark;
+            updateShelfIcons();
+        }
     }
 
     public void setDark(boolean dark) {
@@ -367,5 +402,16 @@ public class NotificationIconAreaController implements DarkReceiver {
 
     public void setIsolatedIconLocation(Rect iconDrawingRect, boolean requireStateUpdate) {
         mNotificationIcons.setIsolatedIconLocation(iconDrawingRect, requireStateUpdate);
+    }
+
+    /**
+     * Moves icons whenever the device wakes up in AOD, to avoid burn in.
+     */
+    public void dozeTimeTick() {
+        int yOffset = (mKeyguardStatusBarHeight - getHeight()) / 2;
+        int translationX = getBurnInOffset(mBurnInOffset, true /* xAxis */);
+        int translationY = getBurnInOffset(mBurnInOffset, false /* xAxis */) + yOffset;
+        mNotificationIcons.setTranslationX(translationX * mDarkAmount);
+        mNotificationIcons.setTranslationY(translationY * mDarkAmount);
     }
 }

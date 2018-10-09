@@ -844,7 +844,7 @@
     <dimen name="burn_in_prevention_offset_y">50dp</dimen>
 
     <!-- The maximum offset in either direction that icons move to prevent burn-in on AOD. -->
-    <dimen name="default_burn_in_prevention_offset">5dp</dimen>
+    <dimen name="default_burn_in_prevention_offset">15dp</dimen>
 
     <dimen name="corner_size">8dp</dimen>
     <dimen name="top_padding">0dp</dimen>
