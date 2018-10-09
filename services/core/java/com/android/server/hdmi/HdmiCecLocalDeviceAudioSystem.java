@@ -407,8 +407,8 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
         HdmiLogger.debug(
                 "System Audio Mode change[old:%b new:%b]",
                 mSystemAudioActivated, newSystemAudioMode);
-        // Wake up device if System Audio Control is turned on but device is still on standby
-        if (newSystemAudioMode && mService.isPowerStandbyOrTransient()) {
+        // Wake up device if System Audio Control is turned on
+        if (newSystemAudioMode) {
             mService.wakeUp();
         }
         setSystemAudioMode(newSystemAudioMode);
@@ -575,10 +575,8 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
             mService.maySendFeatureAbortCommand(message, Constants.ABORT_REFUSED);
             return;
         }
-        // Wake up device if it is still on standby
-        if (mService.isPowerStandbyOrTransient()) {
-            mService.wakeUp();
-        }
+        // Wake up device
+        mService.wakeUp();
         // Check if TV supports System Audio Control.
         // Handle broadcasting setSystemAudioMode on or aborting message on callback.
         queryTvSystemAudioModeSupport(new TvSystemAudioModeSupportedCallback() {
@@ -635,9 +633,7 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
             return;
         }
         // Wake up if the current device if ready to route.
-        if (mService.isPowerStandbyOrTransient()) {
-            mService.wakeUp();
-        }
+        mService.wakeUp();
         if (portId == Constants.CEC_SWITCH_HOME && mService.isPlaybackDevice()) {
             switchToHomeTvInput();
         } else if (portId == Constants.CEC_SWITCH_ARC) {

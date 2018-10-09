@@ -73,7 +73,7 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
         assertRunOnServiceThread();
         mCecMessageCache.flushAll();
         // We'll not clear mIsActiveSource on the hotplug event to pass CETC 11.2.2-2 ~ 3.
-        if (mService.isPowerStandbyOrTransient()) {
+        if (connected) {
             mService.wakeUp();
         }
     }
@@ -204,10 +204,8 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
         if (!mIsActiveSource) {
             return;
         }
-        // Wake up the device if the power is in standby mode
-        if (mService.isPowerStandbyOrTransient()) {
-            mService.wakeUp();
-        }
+        // Wake up the device
+        mService.wakeUp();
         return;
     }
 
