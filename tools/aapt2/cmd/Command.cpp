@@ -93,9 +93,13 @@ void Command::AddOptionalSwitch(const StringPiece& name,
   flags_.push_back(Flag{name.to_string(), description.to_string(), func, false, 0, false});
 }
 
-void Command::AddOptionalSubcommand(std::unique_ptr<Command>&& subcommand) {
+void Command::AddOptionalSubcommand(std::unique_ptr<Command>&& subcommand, bool experimental) {
   subcommand->fullname_ = name_ + " " + subcommand->name_;
-  subcommands_.push_back(std::move(subcommand));
+  if (experimental) {
+    experimental_subcommands_.push_back(std::move(subcommand));
+  } else {
+    subcommands_.push_back(std::move(subcommand));
+  }
 }
 
 void Command::SetDescription(const android::StringPiece& description) {
@@ -162,12 +166,18 @@ int Command::Execute(const std::vector<android::StringPiece>& args, std::ostream
   for (size_t i = 0; i < args.size(); i++) {
     StringPiece arg = args[i];
     if (*(arg.data()) != '-') {
-      // Continue parsing as the sub command if the first argument matches one of the subcommands
+      // Continue parsing as the subcommand if the first argument matches one of the subcommands
       if (i == 0) {
         for (auto& subcommand : subcommands_) {
           if (arg == subcommand->name_ || arg==subcommand->short_name_) {
             return subcommand->Execute(
                 std::vector<android::StringPiece>(args.begin() + 1, args.end()), out_error);
+          }
+        }
+        for (auto& subcommand : experimental_subcommands_) {
+          if (arg == subcommand->name_ || arg==subcommand->short_name_) {
+            return subcommand->Execute(
+              std::vector<android::StringPiece>(args.begin() + 1, args.end()), out_error);
           }
         }
       }
