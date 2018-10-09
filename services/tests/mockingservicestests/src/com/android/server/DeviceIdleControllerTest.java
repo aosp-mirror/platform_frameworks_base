@@ -51,6 +51,7 @@ import static org.mockito.ArgumentMatchers.anyString;
 import android.app.ActivityManagerInternal;
 import android.app.AlarmManager;
 import android.app.IActivityManager;
+import android.content.ContentResolver;
 import android.content.Context;
 import android.hardware.SensorManager;
 import android.location.LocationManager;
@@ -59,6 +60,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.PowerManager;
 import android.os.PowerManagerInternal;
+import android.os.SystemClock;
 
 import androidx.test.runner.AndroidJUnit4;
 
@@ -84,15 +86,17 @@ public class DeviceIdleControllerTest {
 
     private MockitoSession mMockingSession;
     @Mock
-    private PowerManager mPowerManager;
-    @Mock
-    private PowerManager.WakeLock mWakeLock;
-    @Mock
     private AlarmManager mAlarmManager;
+    @Mock
+    private DeviceIdleController.Constants mConstants;
+    @Mock
+    private IActivityManager mIActivityManager;
     @Mock
     private LocationManager mLocationManager;
     @Mock
-    private IActivityManager mIActivityManager;
+    private PowerManager mPowerManager;
+    @Mock
+    private PowerManager.WakeLock mWakeLock;
 
     class InjectorForTest extends DeviceIdleController.Injector {
 
@@ -122,12 +126,18 @@ public class DeviceIdleControllerTest {
         }
 
         @Override
+        DeviceIdleController.Constants getConstants(DeviceIdleController controller, Handler handler,
+                ContentResolver resolver) {
+            return mConstants;
+        }
+
+        @Override
         LocationManager getLocationManager() {
             return mLocationManager;
         }
 
         @Override
-        DeviceIdleController.MyHandler getHandler(DeviceIdleController ctlr) {
+        DeviceIdleController.MyHandler getHandler(DeviceIdleController controller) {
             return mock(DeviceIdleController.MyHandler.class);
         }
 
@@ -452,6 +462,514 @@ public class DeviceIdleControllerTest {
         verifyStateConditions(STATE_IDLE_MAINTENANCE);
     }
 
+    @Test
+    public void testExitMaintenanceEarlyIfNeededLocked_deep_noActiveOps() {
+        mDeviceIdleController.setJobsActive(false);
+        mDeviceIdleController.setAlarmsActive(false);
+        mDeviceIdleController.setActiveIdleOpsForTest(0);
+
+        // This method should only change things if in IDLE_MAINTENANCE or PRE_IDLE states.
+
+        enterDeepState(STATE_ACTIVE);
+        mDeviceIdleController.exitMaintenanceEarlyIfNeededLocked();
+        verifyStateConditions(STATE_ACTIVE);
+
+        enterDeepState(STATE_INACTIVE);
+        mDeviceIdleController.exitMaintenanceEarlyIfNeededLocked();
+        verifyStateConditions(STATE_INACTIVE);
+
+        enterDeepState(STATE_IDLE_PENDING);
+        mDeviceIdleController.exitMaintenanceEarlyIfNeededLocked();
+        verifyStateConditions(STATE_IDLE_PENDING);
+
+        enterDeepState(STATE_SENSING);
+        mDeviceIdleController.exitMaintenanceEarlyIfNeededLocked();
+        verifyStateConditions(STATE_SENSING);
+
+        enterDeepState(STATE_LOCATING);
+        mDeviceIdleController.exitMaintenanceEarlyIfNeededLocked();
+        verifyStateConditions(STATE_LOCATING);
+
+        enterDeepState(STATE_IDLE);
+        mDeviceIdleController.exitMaintenanceEarlyIfNeededLocked();
+        verifyStateConditions(STATE_IDLE);
+
+        enterDeepState(STATE_IDLE_MAINTENANCE);
+        // Going into IDLE_MAINTENANCE increments the active idle op count.
+        mDeviceIdleController.setActiveIdleOpsForTest(0);
+        mDeviceIdleController.exitMaintenanceEarlyIfNeededLocked();
+        verifyStateConditions(STATE_IDLE);
+    }
+
+    @Test
+    public void testExitMaintenanceEarlyIfNeededLocked_deep_activeJobs() {
+        mDeviceIdleController.setJobsActive(true);
+        mDeviceIdleController.setAlarmsActive(false);
+        mDeviceIdleController.setActiveIdleOpsForTest(0);
+
+        // This method should only change things if in IDLE_MAINTENANCE or PRE_IDLE states.
+
+        enterDeepState(STATE_ACTIVE);
+        mDeviceIdleController.exitMaintenanceEarlyIfNeededLocked();
+        verifyStateConditions(STATE_ACTIVE);
+
+        enterDeepState(STATE_INACTIVE);
+        mDeviceIdleController.exitMaintenanceEarlyIfNeededLocked();
+        verifyStateConditions(STATE_INACTIVE);
+
+        enterDeepState(STATE_IDLE_PENDING);
+        mDeviceIdleController.exitMaintenanceEarlyIfNeededLocked();
+        verifyStateConditions(STATE_IDLE_PENDING);
+
+        enterDeepState(STATE_SENSING);
+        mDeviceIdleController.exitMaintenanceEarlyIfNeededLocked();
+        verifyStateConditions(STATE_SENSING);
+
+        enterDeepState(STATE_LOCATING);
+        mDeviceIdleController.exitMaintenanceEarlyIfNeededLocked();
+        verifyStateConditions(STATE_LOCATING);
+
+        enterDeepState(STATE_IDLE);
+        mDeviceIdleController.exitMaintenanceEarlyIfNeededLocked();
+        verifyStateConditions(STATE_IDLE);
+
+        enterDeepState(STATE_IDLE_MAINTENANCE);
+        mDeviceIdleController.exitMaintenanceEarlyIfNeededLocked();
+        verifyStateConditions(STATE_IDLE_MAINTENANCE);
+    }
+
+    @Test
+    public void testExitMaintenanceEarlyIfNeededLocked_deep_activeAlarms() {
+        mDeviceIdleController.setJobsActive(false);
+        mDeviceIdleController.setAlarmsActive(true);
+        mDeviceIdleController.setActiveIdleOpsForTest(0);
+
+        // This method should only change things if in IDLE_MAINTENANCE or PRE_IDLE states.
+
+        enterDeepState(STATE_ACTIVE);
+        mDeviceIdleController.exitMaintenanceEarlyIfNeededLocked();
+        verifyStateConditions(STATE_ACTIVE);
+
+        enterDeepState(STATE_INACTIVE);
+        mDeviceIdleController.exitMaintenanceEarlyIfNeededLocked();
+        verifyStateConditions(STATE_INACTIVE);
+
+        enterDeepState(STATE_IDLE_PENDING);
+        mDeviceIdleController.exitMaintenanceEarlyIfNeededLocked();
+        verifyStateConditions(STATE_IDLE_PENDING);
+
+        enterDeepState(STATE_SENSING);
+        mDeviceIdleController.exitMaintenanceEarlyIfNeededLocked();
+        verifyStateConditions(STATE_SENSING);
+
+        enterDeepState(STATE_LOCATING);
+        mDeviceIdleController.exitMaintenanceEarlyIfNeededLocked();
+        verifyStateConditions(STATE_LOCATING);
+
+        enterDeepState(STATE_IDLE);
+        mDeviceIdleController.exitMaintenanceEarlyIfNeededLocked();
+        verifyStateConditions(STATE_IDLE);
+
+        enterDeepState(STATE_IDLE_MAINTENANCE);
+        mDeviceIdleController.exitMaintenanceEarlyIfNeededLocked();
+        verifyStateConditions(STATE_IDLE_MAINTENANCE);
+    }
+
+    @Test
+    public void testExitMaintenanceEarlyIfNeededLocked_deep_activeOps() {
+        mDeviceIdleController.setJobsActive(false);
+        mDeviceIdleController.setAlarmsActive(false);
+        mDeviceIdleController.setActiveIdleOpsForTest(1);
+
+        // This method should only change things if in IDLE_MAINTENANCE or PRE_IDLE states.
+
+        enterDeepState(STATE_ACTIVE);
+        mDeviceIdleController.exitMaintenanceEarlyIfNeededLocked();
+        verifyStateConditions(STATE_ACTIVE);
+
+        enterDeepState(STATE_INACTIVE);
+        mDeviceIdleController.exitMaintenanceEarlyIfNeededLocked();
+        verifyStateConditions(STATE_INACTIVE);
+
+        enterDeepState(STATE_IDLE_PENDING);
+        mDeviceIdleController.exitMaintenanceEarlyIfNeededLocked();
+        verifyStateConditions(STATE_IDLE_PENDING);
+
+        enterDeepState(STATE_SENSING);
+        mDeviceIdleController.exitMaintenanceEarlyIfNeededLocked();
+        verifyStateConditions(STATE_SENSING);
+
+        enterDeepState(STATE_LOCATING);
+        mDeviceIdleController.exitMaintenanceEarlyIfNeededLocked();
+        verifyStateConditions(STATE_LOCATING);
+
+        enterDeepState(STATE_IDLE);
+        mDeviceIdleController.exitMaintenanceEarlyIfNeededLocked();
+        verifyStateConditions(STATE_IDLE);
+
+        enterDeepState(STATE_IDLE_MAINTENANCE);
+        mDeviceIdleController.exitMaintenanceEarlyIfNeededLocked();
+        verifyStateConditions(STATE_IDLE_MAINTENANCE);
+    }
+
+    @Test
+    public void testExitMaintenanceEarlyIfNeededLocked_light_noActiveOps() {
+        mDeviceIdleController.setJobsActive(false);
+        mDeviceIdleController.setAlarmsActive(false);
+        mDeviceIdleController.setActiveIdleOpsForTest(0);
+
+        // This method should only change things if in IDLE_MAINTENANCE or PRE_IDLE states.
+
+        enterLightState(LIGHT_STATE_ACTIVE);
+        mDeviceIdleController.exitMaintenanceEarlyIfNeededLocked();
+        verifyLightStateConditions(LIGHT_STATE_ACTIVE);
+
+        enterLightState(LIGHT_STATE_INACTIVE);
+        mDeviceIdleController.exitMaintenanceEarlyIfNeededLocked();
+        verifyLightStateConditions(LIGHT_STATE_INACTIVE);
+
+        enterLightState(LIGHT_STATE_PRE_IDLE);
+        mDeviceIdleController.exitMaintenanceEarlyIfNeededLocked();
+        verifyLightStateConditions(LIGHT_STATE_IDLE);
+
+        enterLightState(LIGHT_STATE_IDLE);
+        mDeviceIdleController.exitMaintenanceEarlyIfNeededLocked();
+        verifyLightStateConditions(LIGHT_STATE_IDLE);
+
+        enterLightState(LIGHT_STATE_WAITING_FOR_NETWORK);
+        mDeviceIdleController.exitMaintenanceEarlyIfNeededLocked();
+        verifyLightStateConditions(LIGHT_STATE_WAITING_FOR_NETWORK);
+
+        enterLightState(LIGHT_STATE_IDLE_MAINTENANCE);
+        // Going into IDLE_MAINTENANCE increments the active idle op count.
+        mDeviceIdleController.setActiveIdleOpsForTest(0);
+        mDeviceIdleController.exitMaintenanceEarlyIfNeededLocked();
+        verifyLightStateConditions(LIGHT_STATE_IDLE);
+
+        enterLightState(LIGHT_STATE_OVERRIDE);
+        mDeviceIdleController.exitMaintenanceEarlyIfNeededLocked();
+        verifyLightStateConditions(LIGHT_STATE_OVERRIDE);
+    }
+
+    @Test
+    public void testExitMaintenanceEarlyIfNeededLocked_light_activeJobs() {
+        mDeviceIdleController.setJobsActive(true);
+        mDeviceIdleController.setAlarmsActive(false);
+        mDeviceIdleController.setActiveIdleOpsForTest(0);
+
+        // This method should only change things if in IDLE_MAINTENANCE or PRE_IDLE states.
+
+        enterLightState(LIGHT_STATE_ACTIVE);
+        mDeviceIdleController.exitMaintenanceEarlyIfNeededLocked();
+        verifyLightStateConditions(LIGHT_STATE_ACTIVE);
+
+        enterLightState(LIGHT_STATE_INACTIVE);
+        mDeviceIdleController.exitMaintenanceEarlyIfNeededLocked();
+        verifyLightStateConditions(LIGHT_STATE_INACTIVE);
+
+        enterLightState(LIGHT_STATE_PRE_IDLE);
+        mDeviceIdleController.exitMaintenanceEarlyIfNeededLocked();
+        verifyLightStateConditions(LIGHT_STATE_PRE_IDLE);
+
+        enterLightState(LIGHT_STATE_IDLE);
+        mDeviceIdleController.exitMaintenanceEarlyIfNeededLocked();
+        verifyLightStateConditions(LIGHT_STATE_IDLE);
+
+        enterLightState(LIGHT_STATE_WAITING_FOR_NETWORK);
+        mDeviceIdleController.exitMaintenanceEarlyIfNeededLocked();
+        verifyLightStateConditions(LIGHT_STATE_WAITING_FOR_NETWORK);
+
+        enterLightState(LIGHT_STATE_IDLE_MAINTENANCE);
+        mDeviceIdleController.exitMaintenanceEarlyIfNeededLocked();
+        verifyLightStateConditions(LIGHT_STATE_IDLE_MAINTENANCE);
+
+        enterLightState(LIGHT_STATE_OVERRIDE);
+        mDeviceIdleController.exitMaintenanceEarlyIfNeededLocked();
+        verifyLightStateConditions(LIGHT_STATE_OVERRIDE);
+    }
+
+    @Test
+    public void testExitMaintenanceEarlyIfNeededLocked_light_activeAlarms() {
+        mDeviceIdleController.setJobsActive(false);
+        mDeviceIdleController.setAlarmsActive(true);
+        mDeviceIdleController.setActiveIdleOpsForTest(0);
+
+        // This method should only change things if in IDLE_MAINTENANCE or PRE_IDLE states.
+
+        enterLightState(LIGHT_STATE_ACTIVE);
+        mDeviceIdleController.exitMaintenanceEarlyIfNeededLocked();
+        verifyLightStateConditions(LIGHT_STATE_ACTIVE);
+
+        enterLightState(LIGHT_STATE_INACTIVE);
+        mDeviceIdleController.exitMaintenanceEarlyIfNeededLocked();
+        verifyLightStateConditions(LIGHT_STATE_INACTIVE);
+
+        enterLightState(LIGHT_STATE_PRE_IDLE);
+        mDeviceIdleController.exitMaintenanceEarlyIfNeededLocked();
+        verifyLightStateConditions(LIGHT_STATE_PRE_IDLE);
+
+        enterLightState(LIGHT_STATE_IDLE);
+        mDeviceIdleController.exitMaintenanceEarlyIfNeededLocked();
+        verifyLightStateConditions(LIGHT_STATE_IDLE);
+
+        enterLightState(LIGHT_STATE_WAITING_FOR_NETWORK);
+        mDeviceIdleController.exitMaintenanceEarlyIfNeededLocked();
+        verifyLightStateConditions(LIGHT_STATE_WAITING_FOR_NETWORK);
+
+        enterLightState(LIGHT_STATE_IDLE_MAINTENANCE);
+        mDeviceIdleController.exitMaintenanceEarlyIfNeededLocked();
+        verifyLightStateConditions(LIGHT_STATE_IDLE_MAINTENANCE);
+
+        enterLightState(LIGHT_STATE_OVERRIDE);
+        mDeviceIdleController.exitMaintenanceEarlyIfNeededLocked();
+        verifyLightStateConditions(LIGHT_STATE_OVERRIDE);
+    }
+
+    @Test
+    public void testExitMaintenanceEarlyIfNeededLocked_light_activeOps() {
+        mDeviceIdleController.setJobsActive(false);
+        mDeviceIdleController.setAlarmsActive(false);
+        mDeviceIdleController.setActiveIdleOpsForTest(1);
+
+        // This method should only change things if in IDLE_MAINTENANCE or PRE_IDLE states.
+
+        enterLightState(LIGHT_STATE_ACTIVE);
+        mDeviceIdleController.exitMaintenanceEarlyIfNeededLocked();
+        verifyLightStateConditions(LIGHT_STATE_ACTIVE);
+
+        enterLightState(LIGHT_STATE_INACTIVE);
+        mDeviceIdleController.exitMaintenanceEarlyIfNeededLocked();
+        verifyLightStateConditions(LIGHT_STATE_INACTIVE);
+
+        enterLightState(LIGHT_STATE_PRE_IDLE);
+        mDeviceIdleController.exitMaintenanceEarlyIfNeededLocked();
+        verifyLightStateConditions(LIGHT_STATE_PRE_IDLE);
+
+        enterLightState(LIGHT_STATE_IDLE);
+        mDeviceIdleController.exitMaintenanceEarlyIfNeededLocked();
+        verifyLightStateConditions(LIGHT_STATE_IDLE);
+
+        enterLightState(LIGHT_STATE_WAITING_FOR_NETWORK);
+        mDeviceIdleController.exitMaintenanceEarlyIfNeededLocked();
+        verifyLightStateConditions(LIGHT_STATE_WAITING_FOR_NETWORK);
+
+        enterLightState(LIGHT_STATE_IDLE_MAINTENANCE);
+        mDeviceIdleController.exitMaintenanceEarlyIfNeededLocked();
+        verifyLightStateConditions(LIGHT_STATE_IDLE_MAINTENANCE);
+
+        enterLightState(LIGHT_STATE_OVERRIDE);
+        mDeviceIdleController.exitMaintenanceEarlyIfNeededLocked();
+        verifyLightStateConditions(LIGHT_STATE_OVERRIDE);
+    }
+
+    @Test
+    public void testHandleMotionDetectedLocked_deep() {
+        enterDeepState(STATE_ACTIVE);
+        mDeviceIdleController.handleMotionDetectedLocked(50, "test");
+        verifyStateConditions(STATE_ACTIVE);
+
+        // Anything that wasn't ACTIVE before motion detection should end up in the INACTIVE state.
+
+        enterDeepState(STATE_INACTIVE);
+        mDeviceIdleController.handleMotionDetectedLocked(50, "test");
+        verifyStateConditions(STATE_INACTIVE);
+
+        enterDeepState(STATE_IDLE_PENDING);
+        mDeviceIdleController.handleMotionDetectedLocked(50, "test");
+        verifyStateConditions(STATE_INACTIVE);
+
+        enterDeepState(STATE_SENSING);
+        mDeviceIdleController.handleMotionDetectedLocked(50, "test");
+        verifyStateConditions(STATE_INACTIVE);
+
+        enterDeepState(STATE_LOCATING);
+        mDeviceIdleController.handleMotionDetectedLocked(50, "test");
+        verifyStateConditions(STATE_INACTIVE);
+
+        enterDeepState(STATE_IDLE);
+        mDeviceIdleController.handleMotionDetectedLocked(50, "test");
+        verifyStateConditions(STATE_INACTIVE);
+
+        enterDeepState(STATE_IDLE_MAINTENANCE);
+        mDeviceIdleController.handleMotionDetectedLocked(50, "test");
+        verifyStateConditions(STATE_INACTIVE);
+    }
+
+    @Test
+    public void testHandleMotionDetectedLocked_light() {
+        enterLightState(LIGHT_STATE_ACTIVE);
+        mDeviceIdleController.handleMotionDetectedLocked(50, "test");
+        verifyLightStateConditions(LIGHT_STATE_ACTIVE);
+
+        // Motion shouldn't affect light idle, so LIGHT states should stay as they were except for
+        // OVERRIDE. OVERRIDE means deep was active, so if motion was detected,
+        // LIGHT_STATE_OVERRIDE should end up as LIGHT_STATE_INACTIVE.
+
+        enterLightState(LIGHT_STATE_INACTIVE);
+        mDeviceIdleController.handleMotionDetectedLocked(50, "test");
+        verifyLightStateConditions(LIGHT_STATE_INACTIVE);
+
+        enterLightState(LIGHT_STATE_PRE_IDLE);
+        mDeviceIdleController.handleMotionDetectedLocked(50, "test");
+        verifyLightStateConditions(LIGHT_STATE_PRE_IDLE);
+
+        enterLightState(LIGHT_STATE_IDLE);
+        mDeviceIdleController.handleMotionDetectedLocked(50, "test");
+        verifyLightStateConditions(LIGHT_STATE_IDLE);
+
+        enterLightState(LIGHT_STATE_WAITING_FOR_NETWORK);
+        mDeviceIdleController.handleMotionDetectedLocked(50, "test");
+        verifyLightStateConditions(LIGHT_STATE_WAITING_FOR_NETWORK);
+
+        enterLightState(LIGHT_STATE_IDLE_MAINTENANCE);
+        mDeviceIdleController.handleMotionDetectedLocked(50, "test");
+        verifyLightStateConditions(LIGHT_STATE_IDLE_MAINTENANCE);
+
+        enterLightState(LIGHT_STATE_OVERRIDE);
+        mDeviceIdleController.handleMotionDetectedLocked(50, "test");
+        verifyLightStateConditions(LIGHT_STATE_INACTIVE);
+    }
+
+    @Test
+    public void testbecomeActiveLocked_deep() {
+        // becomeActiveLocked should put everything into ACTIVE.
+
+        enterDeepState(STATE_ACTIVE);
+        mDeviceIdleController.becomeActiveLocked("test", 1000);
+        verifyStateConditions(STATE_ACTIVE);
+
+        enterDeepState(STATE_INACTIVE);
+        mDeviceIdleController.becomeActiveLocked("test", 1000);
+        verifyStateConditions(STATE_ACTIVE);
+
+        enterDeepState(STATE_IDLE_PENDING);
+        mDeviceIdleController.becomeActiveLocked("test", 1000);
+        verifyStateConditions(STATE_ACTIVE);
+
+        enterDeepState(STATE_SENSING);
+        mDeviceIdleController.becomeActiveLocked("test", 1000);
+        verifyStateConditions(STATE_ACTIVE);
+
+        enterDeepState(STATE_LOCATING);
+        mDeviceIdleController.becomeActiveLocked("test", 1000);
+        verifyStateConditions(STATE_ACTIVE);
+
+        enterDeepState(STATE_IDLE);
+        mDeviceIdleController.becomeActiveLocked("test", 1000);
+        verifyStateConditions(STATE_ACTIVE);
+
+        enterDeepState(STATE_IDLE_MAINTENANCE);
+        mDeviceIdleController.becomeActiveLocked("test", 1000);
+        verifyStateConditions(STATE_ACTIVE);
+    }
+
+    @Test
+    public void testbecomeActiveLocked_light() {
+        // becomeActiveLocked should put everything into ACTIVE.
+
+        enterLightState(LIGHT_STATE_ACTIVE);
+        mDeviceIdleController.becomeActiveLocked("test", 1000);
+        verifyLightStateConditions(LIGHT_STATE_ACTIVE);
+
+        enterLightState(LIGHT_STATE_INACTIVE);
+        mDeviceIdleController.becomeActiveLocked("test", 1000);
+        verifyLightStateConditions(LIGHT_STATE_ACTIVE);
+
+        enterLightState(LIGHT_STATE_PRE_IDLE);
+        mDeviceIdleController.becomeActiveLocked("test", 1000);
+        verifyLightStateConditions(LIGHT_STATE_ACTIVE);
+
+        enterLightState(LIGHT_STATE_IDLE);
+        mDeviceIdleController.becomeActiveLocked("test", 1000);
+        verifyLightStateConditions(LIGHT_STATE_ACTIVE);
+
+        enterLightState(LIGHT_STATE_WAITING_FOR_NETWORK);
+        mDeviceIdleController.becomeActiveLocked("test", 1000);
+        verifyLightStateConditions(LIGHT_STATE_ACTIVE);
+
+        enterLightState(LIGHT_STATE_IDLE_MAINTENANCE);
+        mDeviceIdleController.becomeActiveLocked("test", 1000);
+        verifyLightStateConditions(LIGHT_STATE_ACTIVE);
+
+        enterLightState(LIGHT_STATE_OVERRIDE);
+        mDeviceIdleController.becomeActiveLocked("test", 1000);
+        verifyLightStateConditions(LIGHT_STATE_ACTIVE);
+    }
+
+    private void enterDeepState(int state) {
+        switch (state) {
+            case STATE_ACTIVE:
+                setScreenOn(true);
+                mDeviceIdleController.becomeActiveLocked("testing", 0);
+                break;
+            case STATE_LOCATING:
+                doReturn(mock(LocationProvider.class)).when(mLocationManager).getProvider(
+                        anyString());
+                // Fallthrough to step loop.
+            case STATE_IDLE_PENDING:
+            case STATE_SENSING:
+            case STATE_IDLE:
+            case STATE_IDLE_MAINTENANCE:
+                // Make sure the controller doesn't think there's a wake-from-idle alarm coming
+                // soon.
+                doReturn(Long.MAX_VALUE).when(mAlarmManager).getNextWakeFromIdleTime();
+            case STATE_INACTIVE:
+                setScreenOn(false);
+                setChargingOn(false);
+                mDeviceIdleController.becomeInactiveIfAppropriateLocked();
+                //fail(stateToString(mDeviceIdleController.getState()));
+                int count = 0;
+                while (mDeviceIdleController.getState() != state) {
+                    // Stepping through each state ensures that the proper features are turned
+                    // on/off.
+                    mDeviceIdleController.stepIdleStateLocked("testing");
+                    count++;
+                    if (count > 10) {
+                        fail(stateToString(mDeviceIdleController.getState()));
+                    }
+                }
+                break;
+            default:
+                fail("Unknown deep state " + stateToString(state));
+        }
+    }
+
+    private void enterLightState(int lightState) {
+        switch (lightState) {
+            case LIGHT_STATE_ACTIVE:
+                setScreenOn(true);
+                mDeviceIdleController.becomeActiveLocked("testing", 0);
+                break;
+            case LIGHT_STATE_INACTIVE:
+            case LIGHT_STATE_IDLE:
+            case LIGHT_STATE_IDLE_MAINTENANCE:
+                setScreenOn(false);
+                setChargingOn(false);
+                int count = 0;
+                mDeviceIdleController.becomeInactiveIfAppropriateLocked();
+                while (mDeviceIdleController.getLightState() != lightState) {
+                    // Stepping through each state ensures that the proper features are turned
+                    // on/off.
+                    mDeviceIdleController.stepLightIdleStateLocked("testing");
+
+                    count++;
+                    if (count > 10) {
+                        fail(lightStateToString(mDeviceIdleController.getLightState()));
+                    }
+                }
+                break;
+            case LIGHT_STATE_PRE_IDLE:
+            case LIGHT_STATE_WAITING_FOR_NETWORK:
+            case LIGHT_STATE_OVERRIDE:
+                setScreenOn(false);
+                setChargingOn(false);
+                mDeviceIdleController.setLightStateForTest(lightState);
+                break;
+            default:
+                fail("Unknown light state " + lightStateToString(lightState));
+        }
+    }
+
     private void setChargingOn(boolean on) {
         mDeviceIdleController.updateChargingLocked(on);
     }
@@ -525,7 +1043,10 @@ public class DeviceIdleControllerTest {
         switch (expectedLightState) {
             case LIGHT_STATE_ACTIVE:
                 assertTrue(
-                        mDeviceIdleController.isCharging() || mDeviceIdleController.isScreenOn());
+                        mDeviceIdleController.isCharging() || mDeviceIdleController.isScreenOn()
+                                // Or there's an alarm coming up soon.
+                                || SystemClock.elapsedRealtime() + mConstants.MIN_TIME_TO_ALARM
+                                > mAlarmManager.getNextWakeFromIdleTime());
                 break;
             case LIGHT_STATE_INACTIVE:
             case LIGHT_STATE_PRE_IDLE:
