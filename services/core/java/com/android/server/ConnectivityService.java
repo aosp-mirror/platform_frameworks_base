@@ -1679,6 +1679,16 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 "ConnectivityService");
     }
 
+    private void enforceAnyPermissionOf(String... permissions) {
+        for (String permission : permissions) {
+            if (mContext.checkCallingOrSelfPermission(permission) == PERMISSION_GRANTED) {
+                return;
+            }
+        }
+        throw new SecurityException(
+            "Requires one of the following permissions: " + String.join(", ", permissions) + ".");
+    }
+
     private void enforceInternetPermission() {
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.INTERNET,
@@ -1721,6 +1731,13 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.CONNECTIVITY_INTERNAL,
                 "ConnectivityService");
+    }
+
+    private void enforceNetworkStackSettingsOrSetup() {
+        enforceAnyPermissionOf(
+            android.Manifest.permission.NETWORK_SETTINGS,
+            android.Manifest.permission.NETWORK_SETUP_WIZARD,
+            android.Manifest.permission.NETWORK_STACK);
     }
 
     private boolean checkNetworkStackPermission() {
@@ -4008,7 +4025,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     @Override
     public void setAirplaneMode(boolean enable) {
-        enforceConnectivityInternalPermission();
+        enforceNetworkStackSettingsOrSetup();
         final long ident = Binder.clearCallingIdentity();
         try {
             final ContentResolver cr = mContext.getContentResolver();
