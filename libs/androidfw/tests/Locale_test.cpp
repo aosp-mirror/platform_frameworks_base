@@ -14,15 +14,14 @@
  * limitations under the License.
  */
 
-#include "Locale.h"
+#include "androidfw/Locale.h"
+#include "androidfw/Util.h"
 
 #include <string>
 
 #include "gtest/gtest.h"
 
-#include "util/Util.h"
-
-namespace aapt {
+namespace android {
 
 static ::testing::AssertionResult TestLanguage(const char* input,
                                                const char* lang) {
@@ -93,4 +92,4 @@ TEST(ConfigDescriptionTest, ParseLanguage) {
   EXPECT_TRUE(TestLanguageRegion("fr-rCA", "fr", "CA"));
 }
 
-}  // namespace aapt
+}  // namespace android

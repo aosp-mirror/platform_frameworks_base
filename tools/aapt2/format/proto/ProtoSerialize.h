@@ -18,8 +18,8 @@
 #define AAPT_FORMAT_PROTO_PROTOSERIALIZE_H
 
 #include "android-base/macros.h"
+#include "androidfw/ConfigDescription.h"
 
-#include "ConfigDescription.h"
 #include "Configuration.pb.h"
 #include "ResourceTable.h"
 #include "ResourceValues.h"
@@ -49,7 +49,7 @@ void SerializeXmlResourceToPb(const xml::XmlResource& resource, pb::XmlNode* out
 void SerializeStringPoolToPb(const StringPool& pool, pb::StringPool* out_pb_pool, IDiagnostics* diag);
 
 // Serializes a ConfigDescription into its protobuf representation.
-void SerializeConfig(const ConfigDescription& config, pb::Configuration* out_pb_config);
+void SerializeConfig(const android::ConfigDescription& config, pb::Configuration* out_pb_config);
 
 // Serializes a ResourceTable into its protobuf representation.
 void SerializeTableToPb(const ResourceTable& table, pb::ResourceTable* out_table, IDiagnostics* diag);

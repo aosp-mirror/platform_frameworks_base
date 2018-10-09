@@ -19,6 +19,7 @@
 
 #include <cstdlib>
 #include <memory>
+#include <vector>
 
 #include "android-base/macros.h"
 
@@ -115,6 +116,8 @@ std::u16string Utf8ToUtf16(const StringPiece& utf8);
 
 // Converts a UTF-16 string to a UTF-8 string.
 std::string Utf16ToUtf8(const StringPiece16& utf16);
+
+std::vector<std::string> SplitAndLowercase(const android::StringPiece& str, char sep);
 
 }  // namespace util
 }  // namespace android

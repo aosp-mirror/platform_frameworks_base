@@ -34,6 +34,7 @@
 
 using ::aapt::ResourceUtils::StringBuilder;
 using ::aapt::text::Utf8Iterator;
+using ::android::ConfigDescription;
 using ::android::StringPiece;
 
 namespace aapt {

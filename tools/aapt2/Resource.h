@@ -24,10 +24,10 @@
 #include <tuple>
 #include <vector>
 
+#include "androidfw/ConfigDescription.h"
 #include "androidfw/StringPiece.h"
 #include "utils/JenkinsHash.h"
 
-#include "ConfigDescription.h"
 #include "Source.h"
 
 namespace aapt {
@@ -171,7 +171,7 @@ struct ResourceFile {
   ResourceName name;
 
   // Configuration
-  ConfigDescription config;
+  android::ConfigDescription config;
 
   // Type
   Type type;
@@ -189,7 +189,7 @@ struct ResourceFile {
  */
 struct ResourceKey {
   ResourceName name;
-  ConfigDescription config;
+  android::ConfigDescription config;
 };
 
 bool operator<(const ResourceKey& a, const ResourceKey& b);
@@ -201,16 +201,16 @@ bool operator<(const ResourceKey& a, const ResourceKey& b);
  */
 struct ResourceKeyRef {
   ResourceNameRef name;
-  ConfigDescription config;
+  android::ConfigDescription config;
 
   ResourceKeyRef() = default;
-  ResourceKeyRef(const ResourceNameRef& n, const ConfigDescription& c)
+  ResourceKeyRef(const ResourceNameRef& n, const android::ConfigDescription& c)
       : name(n), config(c) {}
 
   /**
    * Prevent taking a reference to a temporary. This is bad.
    */
-  ResourceKeyRef(ResourceName&& n, const ConfigDescription& c) = delete;
+  ResourceKeyRef(ResourceName&& n, const android::ConfigDescription& c) = delete;
 };
 
 bool operator<(const ResourceKeyRef& a, const ResourceKeyRef& b);
