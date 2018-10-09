@@ -105,6 +105,7 @@ struct LinkOptions {
   bool no_version_vectors = false;
   bool no_version_transitions = false;
   bool no_resource_deduping = false;
+  bool no_resource_removal = false;
   bool no_xml_namespaces = false;
   bool do_not_compress_anything = false;
   std::unordered_set<std::string> extensions_to_not_compress;
@@ -1806,10 +1807,12 @@ class LinkCommand {
 
     // Before we process anything, remove the resources whose default values don't exist.
     // We want to force any references to these to fail the build.
-    if (!NoDefaultResourceRemover{}.Consume(context_, &final_table_)) {
-      context_->GetDiagnostics()->Error(DiagMessage()
-                                        << "failed removing resources with no defaults");
-      return 1;
+    if (!options_.no_resource_removal) {
+      if (!NoDefaultResourceRemover{}.Consume(context_, &final_table_)) {
+        context_->GetDiagnostics()->Error(DiagMessage()
+                                          << "failed removing resources with no defaults");
+        return 1;
+      }
     }
 
     ReferenceLinker linker;
@@ -2084,6 +2087,10 @@ int Link(const std::vector<StringPiece>& args, IDiagnostics* diagnostics) {
                           "Disables automatic deduping of resources with\n"
                           "identical values across compatible configurations.",
                           &options.no_resource_deduping)
+          .OptionalSwitch("--no-resource-removal",
+                          "Disables automatic removal of resources without defaults. Use this only\n"
+                          "when building runtime resource overlay packages.",
+                          &options.no_resource_removal)
           .OptionalSwitch("--enable-sparse-encoding",
                           "Enables encoding sparse entries using a binary search tree.\n"
                           "This decreases APK size at the cost of resource retrieval performance.",
