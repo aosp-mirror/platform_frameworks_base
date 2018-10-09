@@ -200,7 +200,9 @@ public abstract class BiometricDialogView extends LinearLayout {
         mLastState = STATE_NONE;
         updateState(STATE_AUTHENTICATING);
 
-        title.setText(mBundle.getCharSequence(BiometricPrompt.KEY_TITLE));
+        CharSequence titleText = mBundle.getCharSequence(BiometricPrompt.KEY_TITLE);
+
+        title.setText(titleText);
         title.setSelected(true);
 
         positive.setVisibility(View.INVISIBLE);

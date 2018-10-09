@@ -16,6 +16,7 @@
 
 package com.android.server.biometrics;
 
+import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND;
 import static android.app.ActivityManager.RunningAppProcessInfo.IMPORTANCE_FOREGROUND_SERVICE;
 
 import android.app.ActivityManager;
@@ -55,6 +56,7 @@ import android.util.Slog;
 import android.util.SparseBooleanArray;
 import android.util.SparseIntArray;
 
+import com.android.internal.R;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.server.SystemService;
@@ -704,6 +706,30 @@ public abstract class BiometricServiceBase extends SystemService
         }
 
         mHandler.post(() -> {
+            if (client.isBiometricPrompt()) {
+                try {
+                    final List<ActivityManager.RunningAppProcessInfo> procs =
+                            ActivityManager.getService().getRunningAppProcesses();
+                    for (int i = 0; i < procs.size(); i++) {
+                        final ActivityManager.RunningAppProcessInfo info = procs.get(i);
+                        if (info.uid == callingUid && info.importance == IMPORTANCE_FOREGROUND) {
+                            PackageManager pm = getContext().getPackageManager();
+                            final CharSequence label = pm.getApplicationLabel(
+                                    pm.getApplicationInfo(info.processName,
+                                            PackageManager.GET_META_DATA));
+                            final String title = getContext()
+                                    .getString(R.string.biometric_dialog_default_title, label);
+                            client.setTitleIfEmpty(title);
+                            break;
+                        }
+                    }
+                } catch (RemoteException e) {
+                    Slog.e(getTag(), "Unable to get application name", e);
+                } catch (PackageManager.NameNotFoundException e) {
+                    Slog.e(getTag(), "Unable to get application name", e);
+                }
+            }
+
             mMetricsLogger.histogram(getMetrics().tagAuthToken(), opId != 0L ? 1 : 0);
 
             // Get performance stats object for this user.
