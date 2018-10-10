@@ -80,8 +80,10 @@ import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
+import java.util.Map;
 import libcore.util.EmptyArray;
 
 /**
@@ -92,6 +94,31 @@ public final class HdmiControlService extends SystemService {
     private static final String TAG = "HdmiControlService";
     private final Locale HONG_KONG = new Locale("zh", "HK");
     private final Locale MACAU = new Locale("zh", "MO");
+
+    private static final Map<String, String> mTerminologyToBibliographicMap;
+    static {
+        mTerminologyToBibliographicMap = new HashMap<>();
+        // NOTE: (TERMINOLOGY_CODE, BIBLIOGRAPHIC_CODE)
+        mTerminologyToBibliographicMap.put("sqi", "alb"); // Albanian
+        mTerminologyToBibliographicMap.put("hye", "arm"); // Armenian
+        mTerminologyToBibliographicMap.put("eus", "baq"); // Basque
+        mTerminologyToBibliographicMap.put("mya", "bur"); // Burmese
+        mTerminologyToBibliographicMap.put("ces", "cze"); // Czech
+        mTerminologyToBibliographicMap.put("nld", "dut"); // Dutch
+        mTerminologyToBibliographicMap.put("kat", "geo"); // Georgian
+        mTerminologyToBibliographicMap.put("deu", "ger"); // German
+        mTerminologyToBibliographicMap.put("ell", "gre"); // Greek
+        mTerminologyToBibliographicMap.put("fra", "fre"); // French
+        mTerminologyToBibliographicMap.put("isl", "ice"); // Icelandic
+        mTerminologyToBibliographicMap.put("mkd", "mac"); // Macedonian
+        mTerminologyToBibliographicMap.put("mri", "mao"); // Maori
+        mTerminologyToBibliographicMap.put("msa", "may"); // Malay
+        mTerminologyToBibliographicMap.put("fas", "per"); // Persian
+        mTerminologyToBibliographicMap.put("ron", "rum"); // Romanian
+        mTerminologyToBibliographicMap.put("slk", "slo"); // Slovak
+        mTerminologyToBibliographicMap.put("bod", "tib"); // Tibetan
+        mTerminologyToBibliographicMap.put("cym", "wel"); // Welsh
+    }
 
     static final String PERMISSION = "android.permission.HDMI_CEC";
 
@@ -176,7 +203,18 @@ public final class HdmiControlService extends SystemService {
                 // Chinese used in Taiwan/Hong Kong/Macau.
                 return "chi";
             } else {
-                return locale.getISO3Language();
+                String language = locale.getISO3Language();
+
+                // locale.getISO3Language() returns terminology code and need to
+                // send it as bibliographic code instead since the Bibliographic
+                // codes of ISO/FDIS 639-2 shall be used.
+                // NOTE: Chinese also has terminology/bibliographic code "zho" and "chi"
+                // But, as it depends on the locale, is not handled here.
+                if (mTerminologyToBibliographicMap.containsKey(language)) {
+                    language = mTerminologyToBibliographicMap.get(language);
+                }
+
+                return language;
             }
         }
     }
