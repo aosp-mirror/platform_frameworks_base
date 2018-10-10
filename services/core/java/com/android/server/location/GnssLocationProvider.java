@@ -254,6 +254,9 @@ public class GnssLocationProvider implements LocationProviderInterface, InjectNt
     private static final long LOCATION_UPDATE_MIN_TIME_INTERVAL_MILLIS = 1000;
     // Default update duration in milliseconds for REQUEST_LOCATION.
     private static final long LOCATION_UPDATE_DURATION_MILLIS = 10 * 1000;
+    // Default time limit in milliseconds for the ConnectivityManager to find a suitable
+    // network with SUPL connectivity or report an error.
+    private static final int SUPL_NETWORK_REQUEST_TIMEOUT_MILLIS = 10 * 1000;
 
     /** simpler wrapper for ProviderRequest + Worksource */
     private static class GpsRequest {
@@ -539,13 +542,22 @@ public class GnssLocationProvider implements LocationProviderInterface, InjectNt
             new ConnectivityManager.NetworkCallback() {
                 @Override
                 public void onAvailable(Network network) {
+                    if (DEBUG) Log.d(TAG, "SUPL network connection available.");
                     // Specific to a change to a SUPL enabled network becoming ready
                     sendMessage(UPDATE_NETWORK_STATE, 0 /*arg*/, network);
                 }
 
                 @Override
                 public void onLost(Network network) {
+                    Log.i(TAG, "SUPL network connection lost.");
                     releaseSuplConnection(GPS_RELEASE_AGPS_DATA_CONN);
+                }
+
+                @Override
+                public void onUnavailable() {
+                    Log.i(TAG, "SUPL network connection request timed out.");
+                    // Could not setup the connection to the network in the specified time duration.
+                    releaseSuplConnection(GPS_AGPS_DATA_CONN_FAILED);
                 }
             };
 
@@ -953,7 +965,8 @@ public class GnssLocationProvider implements LocationProviderInterface, InjectNt
         NetworkRequest request = requestBuilder.build();
         mConnMgr.requestNetwork(
                 request,
-                mSuplConnectivityCallback);
+                mSuplConnectivityCallback,
+                SUPL_NETWORK_REQUEST_TIMEOUT_MILLIS);
     }
 
     private void handleReleaseSuplConnection(int agpsDataConnStatus) {
@@ -2796,4 +2809,3 @@ public class GnssLocationProvider implements LocationProviderInterface, InjectNt
 
     private static native boolean native_set_satellite_blacklist(int[] constellations, int[] svIds);
 }
-
