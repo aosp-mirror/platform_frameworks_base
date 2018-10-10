@@ -3521,7 +3521,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         Typeface mFontTypeface = null;
         boolean mFontFamilyExplicit = false;
         int mTypefaceIndex = -1;
-        int mStyleIndex = -1;
+        int mTextStyle = 0;
         int mFontWeight = -1;
         boolean mAllCaps = false;
         int mShadowColor = 0;
@@ -3547,7 +3547,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     + "    mFontTypeface:" + mFontTypeface + "\n"
                     + "    mFontFamilyExplicit:" + mFontFamilyExplicit + "\n"
                     + "    mTypefaceIndex:" + mTypefaceIndex + "\n"
-                    + "    mStyleIndex:" + mStyleIndex + "\n"
+                    + "    mTextStyle:" + mTextStyle + "\n"
                     + "    mFontWeight:" + mFontWeight + "\n"
                     + "    mAllCaps:" + mAllCaps + "\n"
                     + "    mShadowColor:" + mShadowColor + "\n"
@@ -3672,7 +3672,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     attributes.mFontFamilyExplicit = true;
                     break;
                 case com.android.internal.R.styleable.TextAppearance_textStyle:
-                    attributes.mStyleIndex = appearance.getInt(attr, attributes.mStyleIndex);
+                    attributes.mTextStyle = appearance.getInt(attr, attributes.mTextStyle);
                     break;
                 case com.android.internal.R.styleable.TextAppearance_textFontWeight:
                     attributes.mFontWeight = appearance.getInt(attr, attributes.mFontWeight);
@@ -3742,7 +3742,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             attributes.mFontFamily = null;
         }
         setTypefaceFromAttrs(attributes.mFontTypeface, attributes.mFontFamily,
-                attributes.mTypefaceIndex, attributes.mStyleIndex, attributes.mFontWeight);
+                attributes.mTypefaceIndex, attributes.mTextStyle, attributes.mFontWeight);
 
         if (attributes.mShadowColor != 0) {
             setShadowLayer(attributes.mShadowRadius, attributes.mShadowDx, attributes.mShadowDy,
