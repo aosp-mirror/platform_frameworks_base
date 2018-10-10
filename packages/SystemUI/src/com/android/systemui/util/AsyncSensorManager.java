@@ -16,6 +16,7 @@
 
 package com.android.systemui.util;
 
+import android.content.Context;
 import android.hardware.HardwareBuffer;
 import android.hardware.Sensor;
 import android.hardware.SensorAdditionalInfo;
@@ -30,7 +31,11 @@ import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.Preconditions;
+import com.android.systemui.plugins.PluginListener;
+import com.android.systemui.plugins.SensorManagerPlugin;
+import com.android.systemui.shared.plugins.PluginManager;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -40,7 +45,8 @@ import java.util.List;
  * without blocking. Note that this means registering listeners now always appears successful even
  * if it is not.
  */
-public class AsyncSensorManager extends SensorManager {
+public class AsyncSensorManager extends SensorManager
+        implements PluginListener<SensorManagerPlugin> {
 
     private static final String TAG = "AsyncSensorManager";
 
@@ -48,12 +54,15 @@ public class AsyncSensorManager extends SensorManager {
     private final List<Sensor> mSensorCache;
     private final HandlerThread mHandlerThread = new HandlerThread("async_sensor");
     @VisibleForTesting final Handler mHandler;
+    private final List<SensorManagerPlugin> mPlugins;
 
-    public AsyncSensorManager(SensorManager inner) {
+    public AsyncSensorManager(SensorManager inner, PluginManager pluginManager) {
         mInner = inner;
         mHandlerThread.start();
         mHandler = new Handler(mHandlerThread.getLooper());
         mSensorCache = mInner.getSensorList(Sensor.TYPE_ALL);
+        mPlugins = new ArrayList<>();
+        pluginManager.addPluginListener(this, SensorManagerPlugin.class, true /* allowMultiple */);
     }
 
     @Override
@@ -63,7 +72,7 @@ public class AsyncSensorManager extends SensorManager {
 
     @Override
     protected List<Sensor> getFullDynamicSensorList() {
-        return mInner.getDynamicSensorList(Sensor.TYPE_ALL);
+        return mInner.getSensorList(Sensor.TYPE_ALL);
     }
 
     @Override
@@ -132,6 +141,32 @@ public class AsyncSensorManager extends SensorManager {
         return true;
     }
 
+    /**
+     * Requests for all sensors that match the given type from all plugins.
+     * @param sensor
+     * @param listener
+     */
+    public void requestPluginTriggerSensor(SensorManagerPlugin.Sensor sensor,
+            SensorManagerPlugin.TriggerEventListener listener) {
+        if (mPlugins.isEmpty()) {
+            Log.w(TAG, "No plugins registered");
+        }
+        mHandler.post(() -> {
+            for (int i = 0; i < mPlugins.size(); i++) {
+                mPlugins.get(i).registerTriggerEvent(sensor, listener);
+            }
+        });
+    }
+
+    public void cancelPluginTriggerSensor(SensorManagerPlugin.Sensor sensor,
+            SensorManagerPlugin.TriggerEventListener listener) {
+        mHandler.post(() -> {
+            for (int i = 0; i < mPlugins.size(); i++) {
+                mPlugins.get(i).unregisterTriggerEvent(sensor, listener);
+            }
+        });
+    }
+
     @Override
     protected boolean initDataInjectionImpl(boolean enable) {
         throw new UnsupportedOperationException("not implemented");
@@ -158,5 +193,15 @@ public class AsyncSensorManager extends SensorManager {
                 mInner.unregisterListener(listener, sensor);
             }
         });
+    }
+
+    @Override
+    public void onPluginConnected(SensorManagerPlugin plugin, Context pluginContext) {
+        mPlugins.add(plugin);
+    }
+
+    @Override
+    public void onPluginDisconnected(SensorManagerPlugin plugin) {
+        mPlugins.remove(plugin);
     }
 }
