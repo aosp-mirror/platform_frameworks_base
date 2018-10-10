@@ -19,6 +19,7 @@ package android.content.pm;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.PackageManager.ApplicationInfoFlags;
@@ -203,6 +204,29 @@ public abstract class PackageManagerInternal {
      */
     public abstract PackageInfo getPackageInfo(String packageName,
             @PackageInfoFlags int flags, int filterCallingUid, int userId);
+
+    /**
+     * Return a List of all application packages that are installed on the
+     * device, for a specific user. If flag GET_UNINSTALLED_PACKAGES has been
+     * set, a list of all applications including those deleted with
+     * {@code DONT_DELETE_DATA} (partially installed apps with data directory)
+     * will be returned.
+     *
+     * @param flags Additional option flags to modify the data returned.
+     * @param userId The user for whom the installed applications are to be
+     *            listed
+     * @param callingUid The uid of the original caller app
+     * @return A List of ApplicationInfo objects, one for each installed
+     *         application. In the unlikely case there are no installed
+     *         packages, an empty list is returned. If flag
+     *         {@code MATCH_UNINSTALLED_PACKAGES} is set, the application
+     *         information is retrieved from the list of uninstalled
+     *         applications (which includes installed applications as well as
+     *         applications with data directory i.e. applications which had been
+     *         deleted with {@code DONT_DELETE_DATA} flag set).
+     */
+    public abstract List<ApplicationInfo> getInstalledApplications(
+            @ApplicationInfoFlags int flags, @UserIdInt int userId, int callingUid);
 
     /**
      * Retrieve launcher extras for a suspended package provided to the system in
