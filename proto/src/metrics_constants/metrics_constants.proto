@@ -6549,6 +6549,21 @@ message MetricsEvent {
     // Subtype: The importance of a notification has been changed
     ADJUSTMENT_KEY_IMPORTANCE = 1580;
 
+    // OPEN: Settings > Network & internet > Mobile network > Choose network
+    // CATEGORY: SETTINGS
+    // OS: Q
+    MOBILE_NETWORK_SELECT = 1581;
+
+    // OPEN: Settings > Network & internet > Mobile network > Mobile Data > Dialog
+    // CATEGORY: SETTINGS
+    // OS: Q
+    MOBILE_DATA_DIALOG = 1582;
+
+    // OPEN: Settings > Network & internet > Mobile network > Data roaming > Dialog
+    // CATEGORY: SETTINGS
+    // OS: Q
+    MOBILE_ROAMING_DIALOG = 1583;
+
     // ---- End Q Constants, all Q constants go above this line ----
 
     // Add new aosp constants above this line.
