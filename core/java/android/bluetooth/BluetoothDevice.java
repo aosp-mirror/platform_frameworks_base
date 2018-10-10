@@ -654,7 +654,7 @@ public final class BluetoothDevice implements Parcelable {
     public static final int ACCESS_REJECTED = 2;
 
     /**
-     * No preferrence of physical transport for GATT connections to remote dual-mode devices
+     * No preference of physical transport for GATT connections to remote dual-mode devices
      */
     public static final int TRANSPORT_AUTO = 0;
 
