@@ -252,6 +252,7 @@ bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor,
   xml::XmlNodeAction component_action;
   component_action.Action(RequiredNameIsJavaClassName);
   component_action["intent-filter"] = intent_filter_action;
+  component_action["preferred"] = intent_filter_action;
   component_action["meta-data"] = meta_data_action;
 
   // Manifest actions.
@@ -402,6 +403,8 @@ bool ManifestFixer::BuildRules(xml::XmlActionExecutor* executor,
   application_action["provider"] = component_action;
   application_action["provider"]["grant-uri-permission"];
   application_action["provider"]["path-permission"];
+
+  manifest_action["package"] = manifest_action;
 
   return true;
 }
