@@ -230,42 +230,29 @@ public class UsbService extends IUsbManager.Stub {
         }
     }
 
-    /**
-     * Check if the calling user is in the same profile group as the {@link #mCurrentUserId
-     * current user}.
-     *
-     * @return Iff the caller is in the current user's profile group
-     */
-    @GuardedBy("mLock")
-    private boolean isCallerInCurrentUserProfileGroupLocked() {
-        int userIdInt = UserHandle.getCallingUserId();
-
-        long ident = clearCallingIdentity();
-        try {
-            return mUserManager.isSameProfileGroup(userIdInt, mCurrentUserId);
-        } finally {
-            restoreCallingIdentity(ident);
-        }
-    }
-
     /* Opens the specified USB device (host mode) */
     @Override
     public ParcelFileDescriptor openDevice(String deviceName, String packageName) {
         ParcelFileDescriptor fd = null;
 
         if (mHostManager != null) {
-            synchronized (mLock) {
-                if (deviceName != null) {
-                    int userIdInt = UserHandle.getCallingUserId();
-                    boolean isCurrentUser = isCallerInCurrentUserProfileGroupLocked();
+            if (deviceName != null) {
+                int uid = Binder.getCallingUid();
+                int user = UserHandle.getUserId(uid);
 
-                    if (isCurrentUser) {
-                        fd = mHostManager.openDevice(deviceName, getSettingsForUser(userIdInt),
-                                packageName, Binder.getCallingUid());
-                    } else {
-                        Slog.w(TAG, "Cannot open " + deviceName + " for user " + userIdInt +
-                               " as user is not active.");
+                long ident = clearCallingIdentity();
+                try {
+                    synchronized (mLock) {
+                        if (mUserManager.isSameProfileGroup(user, mCurrentUserId)) {
+                            fd = mHostManager.openDevice(deviceName, getSettingsForUser(user),
+                                    packageName, uid);
+                        } else {
+                            Slog.w(TAG, "Cannot open " + deviceName + " for user " + user
+                                    + " as user is not active.");
+                        }
                     }
+                } finally {
+                    restoreCallingIdentity(ident);
                 }
             }
         }
@@ -287,17 +274,22 @@ public class UsbService extends IUsbManager.Stub {
     @Override
     public ParcelFileDescriptor openAccessory(UsbAccessory accessory) {
         if (mDeviceManager != null) {
-            int userIdInt = UserHandle.getCallingUserId();
+            int uid = Binder.getCallingUid();
+            int user = UserHandle.getUserId(uid);
 
-            synchronized (mLock) {
-                boolean isCurrentUser = isCallerInCurrentUserProfileGroupLocked();
-
-                if (isCurrentUser) {
-                    return mDeviceManager.openAccessory(accessory, getSettingsForUser(userIdInt));
-                } else {
-                    Slog.w(TAG, "Cannot open " + accessory + " for user " + userIdInt +
-                            " as user is not active.");
+            long ident = clearCallingIdentity();
+            try {
+                synchronized (mLock) {
+                    if (mUserManager.isSameProfileGroup(user, mCurrentUserId)) {
+                        return mDeviceManager.openAccessory(accessory, getSettingsForUser(user),
+                                uid);
+                    } else {
+                        Slog.w(TAG, "Cannot open " + accessory + " for user " + user
+                                + " as user is not active.");
+                    }
                 }
+            } finally {
+                restoreCallingIdentity(ident);
             }
         }
 
