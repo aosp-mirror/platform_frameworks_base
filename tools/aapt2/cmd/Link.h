@@ -59,6 +59,7 @@ struct LinkOptions {
   bool no_version_vectors = false;
   bool no_version_transitions = false;
   bool no_resource_deduping = false;
+  bool no_resource_removal = false;
   bool no_xml_namespaces = false;
   bool do_not_compress_anything = false;
   std::unordered_set<std::string> extensions_to_not_compress;
@@ -136,6 +137,9 @@ class LinkCommand : public Command {
     AddOptionalSwitch("--no-resource-deduping", "Disables automatic deduping of resources with\n"
             "identical values across compatible configurations.",
         &options_.no_resource_deduping);
+    AddOptionalSwitch("--no-resource-removal", "Disables automatic removal of resources without\n"
+            "defaults. Use this only when building runtime resource overlay packages.",
+        &options_.no_resource_removal);
     AddOptionalSwitch("--enable-sparse-encoding",
         "This decreases APK size at the cost of resource retrieval performance.",
         &options_.table_flattener_options.use_sparse_entries);

@@ -317,6 +317,7 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
      * @hide
      */
     @RequiresPermission(MANAGE_BIOMETRIC)
+    @Override
     public void setActiveUser(int userId) {
         if (mService != null) {
             try {

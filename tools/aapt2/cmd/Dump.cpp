@@ -125,9 +125,6 @@ class DumpContext : public IAaptContext {
 
 }  // namespace
 
-// Use a smaller buffer so that there is less latency for dumping to stdout.
-constexpr size_t kStdOutBufferSize = 1024u;
-
 int DumpAPCCommand::Action(const std::vector<std::string>& args) {
   DumpContext context;
   DebugPrintTableOptions print_options;
@@ -135,41 +132,41 @@ int DumpAPCCommand::Action(const std::vector<std::string>& args) {
   print_options.show_values = !no_values_;
 
   if (args.size() < 1) {
-    diag_->Error(DiagMessage() << "No dump container specified.");
+    diag_->Error(DiagMessage() << "No dump container specified");
     return 1;
   }
 
-  io::FileOutputStream fout(STDOUT_FILENO, kStdOutBufferSize);
-  Printer printer(&fout);
-
+  bool error = false;
   for (auto container : args) {
     io::FileInputStream input(container);
     if (input.HadError()) {
       context.GetDiagnostics()->Error(DiagMessage(container)
-                                          << "failed to open file: " << input.GetError());
-      return false;
+                                      << "failed to open file: " << input.GetError());
+      error = true;
+      continue;
     }
 
     // Try as a compiled file.
     ContainerReader reader(&input);
     if (reader.HadError()) {
       context.GetDiagnostics()->Error(DiagMessage(container)
-                                           << "failed to read container: " << reader.GetError());
-      return false;
+                                      << "failed to read container: " << reader.GetError());
+      error = true;
+      continue;
     }
 
-    printer.Println("AAPT2 Container (APC)");
+    printer_->Println("AAPT2 Container (APC)");
     ContainerReaderEntry* entry;
     std::string error;
     while ((entry = reader.Next()) != nullptr) {
       if (entry->Type() == ContainerEntryType::kResTable) {
-        printer.Println("kResTable");
+        printer_->Println("kResTable");
 
         pb::ResourceTable pb_table;
         if (!entry->GetResTable(&pb_table)) {
           context.GetDiagnostics()->Error(DiagMessage(container)
-                                               << "failed to parse proto table: "
-                                               << entry->GetError());
+                                          << "failed to parse proto table: " << entry->GetError());
+          error = true;
           continue;
         }
 
@@ -177,65 +174,61 @@ int DumpAPCCommand::Action(const std::vector<std::string>& args) {
         error.clear();
         if (!DeserializeTableFromPb(pb_table, nullptr /*files*/, &table, &error)) {
           context.GetDiagnostics()->Error(DiagMessage(container)
-                                               << "failed to parse table: " << error);
+                                          << "failed to parse table: " << error);
+          error = true;
           continue;
         }
 
-        printer.Indent();
-        Debug::PrintTable(table, print_options, &printer);
-        printer.Undent();
+        printer_->Indent();
+        Debug::PrintTable(table, print_options, printer_);
+        printer_->Undent();
       } else if (entry->Type() == ContainerEntryType::kResFile) {
-        printer.Println("kResFile");
+        printer_->Println("kResFile");
         pb::internal::CompiledFile pb_compiled_file;
         off64_t offset;
         size_t length;
         if (!entry->GetResFileOffsets(&pb_compiled_file, &offset, &length)) {
-          context.GetDiagnostics()->Error(
-              DiagMessage(container) << "failed to parse compiled proto file: "
-                                     << entry->GetError());
+          context.GetDiagnostics()->Error(DiagMessage(container)
+                                          << "failed to parse compiled proto file: "
+                                          << entry->GetError());
+          error = true;
           continue;
         }
 
         ResourceFile file;
         if (!DeserializeCompiledFileFromPb(pb_compiled_file, &file, &error)) {
           context.GetDiagnostics()->Warn(DiagMessage(container)
-                                              << "failed to parse compiled file: " << error);
+                                         << "failed to parse compiled file: " << error);
+          error = true;
           continue;
         }
 
-        printer.Indent();
-        DumpCompiledFile(file, Source(container), offset, length, &printer);
-        printer.Undent();
+        printer_->Indent();
+        DumpCompiledFile(file, Source(container), offset, length, printer_);
+        printer_->Undent();
       }
     }
   }
 
-  return 0;
+  return (error) ? 1 : 0;
 }
 
-int DumpConfigsCommand::Action(const std::vector<std::string>& args) {
-  if (args.size() < 1) {
-    diag_->Error(DiagMessage() << "No dump apk specified.");
-    return 1;
-  }
+int DumpBadgerCommand::Action(const std::vector<std::string>& args) {
+  printer_->Print(StringPrintf("%s", kBadgerData));
+  printer_->Print("Did you mean \"aapt2 dump badging\"?\n");
+  return 1;
+}
 
-  auto loaded_apk = LoadedApk::LoadApkFromPath(args[0], diag_);
-  if (!loaded_apk) {
-    return 1;
-  }
-
-  ResourceTable* table = loaded_apk->GetResourceTable();
+int DumpConfigsCommand::Dump(LoadedApk* apk) {
+  ResourceTable* table = apk->GetResourceTable();
   if (!table) {
-    diag_->Error(DiagMessage() << "Failed to retrieve resource table.");
+    GetDiagnostics()->Error(DiagMessage() << "Failed to retrieve resource table");
     return 1;
   }
-
-  io::FileOutputStream fout(STDOUT_FILENO, kStdOutBufferSize);
-  Printer printer(&fout);
 
   // Comparison function used to order configurations
   auto compare = [](android::ConfigDescription c1, android::ConfigDescription c2) -> bool {
-      return c1.compare(c2) < 0;
+    return c1.compare(c2) < 0;
   };
 
   // Insert the configurations into a set in order to keep every configuarion seen
@@ -252,132 +245,93 @@ int DumpConfigsCommand::Action(const std::vector<std::string>& args) {
 
   // Print the configurations in order
   for (auto& config : configs) {
-    printer.Print(StringPrintf("%s\n", config.to_string().data()));
+    GetPrinter()->Print(StringPrintf("%s\n", config.to_string().data()));
   }
-
   return 0;
 }
 
-int DumpStringsCommand::Action(const std::vector<std::string>& args) {
-  DumpContext context;
-  if (args.size() < 1) {
-    diag_->Error(DiagMessage() << "No dump apk specified.");
+int DumpPackageNameCommand::Dump(LoadedApk* apk) {
+  Maybe<std::string> package_name = GetPackageName(apk);
+  if (!package_name) {
     return 1;
   }
 
-  io::FileOutputStream fout(STDOUT_FILENO, kStdOutBufferSize);
-  Printer printer(&fout);
-
-  for (auto apk : args) {
-    auto loaded_apk = LoadedApk::LoadApkFromPath(apk, diag_);
-    if (!loaded_apk) {
-      return 1;
-    }
-
-    ResourceTable* table = loaded_apk->GetResourceTable();
-    if (!table) {
-      diag_->Error(DiagMessage() << "Failed to retrieve resource table.");
-      return 1;
-    }
-
-    // Load the run-time xml string pool using the flattened data
-    BigBuffer buffer(4096);
-    StringPool::FlattenUtf8(&buffer, table->string_pool, context.GetDiagnostics());
-    auto data = buffer.to_string();
-    android::ResStringPool pool(data.data(), data.size(), false);
-    Debug::DumpResStringPool(&pool, &printer);
-  }
-
+  GetPrinter()->Println(package_name.value());
   return 0;
 }
 
-int DumpTableCommand::Action(const std::vector<std::string>& args) {
-  if (args.size() < 1) {
-    diag_->Error(DiagMessage() << "No dump apk specified.");
+int DumpStringsCommand::Dump(LoadedApk* apk) {
+  ResourceTable* table = apk->GetResourceTable();
+  if (!table) {
+    GetDiagnostics()->Error(DiagMessage() << "Failed to retrieve resource table");
     return 1;
   }
 
-  io::FileOutputStream fout(STDOUT_FILENO, kStdOutBufferSize);
-  Printer printer(&fout);
+  // Load the run-time xml string pool using the flattened data
+  BigBuffer buffer(4096);
+  StringPool::FlattenUtf8(&buffer, table->string_pool, GetDiagnostics());
+  auto data = buffer.to_string();
+  android::ResStringPool pool(data.data(), data.size(), false);
+  Debug::DumpResStringPool(&pool, GetPrinter());
+  return 0;
+}
+
+int DumpStyleParentCommand::Dump(LoadedApk* apk) {
+  Maybe<std::string> package_name = GetPackageName(apk);
+  if (!package_name) {
+    return 1;
+  }
+
+  const auto target_style = ResourceName(package_name.value(), ResourceType::kStyle, style_);
+  const auto table = apk->GetResourceTable();
+
+  if (!table) {
+    GetDiagnostics()->Error(DiagMessage() << "Failed to retrieve resource table");
+    return 1;
+  }
+
+  Maybe<ResourceTable::SearchResult> target = table->FindResource(target_style);
+  if (!target) {
+    GetDiagnostics()->Error(
+        DiagMessage() << "Target style \"" << target_style.entry << "\" does not exist");
+    return 1;
+  }
+
+  Debug::PrintStyleGraph(table, target_style);
+  return 0;
+}
+
+int DumpTableCommand::Dump(LoadedApk* apk) {
+  if (apk->GetApkFormat() == ApkFormat::kProto) {
+    GetPrinter()->Println("Proto APK");
+  } else {
+    GetPrinter()->Println("Binary APK");
+  }
+
+  ResourceTable* table = apk->GetResourceTable();
+  if (!table) {
+    GetDiagnostics()->Error(DiagMessage() << "Failed to retrieve resource table");
+    return 1;
+  }
 
   DebugPrintTableOptions print_options;
   print_options.show_sources = true;
   print_options.show_values = !no_values_;
-
-  for (auto apk : args) {
-    auto loaded_apk = LoadedApk::LoadApkFromPath(apk, diag_);
-    if (!loaded_apk) {
-      return 1;
-    }
-
-    if (loaded_apk->GetApkFormat() == ApkFormat::kProto) {
-      printer.Println("Proto APK");
-    } else {
-      printer.Println("Binary APK");
-    }
-
-    ResourceTable* table = loaded_apk->GetResourceTable();
-    if (!table) {
-      diag_->Error(DiagMessage() << "Failed to retrieve resource table.");
-      return 1;
-    }
-
-    Debug::PrintTable(*table, print_options, &printer);
-  }
-
+  Debug::PrintTable(*table, print_options, GetPrinter());
   return 0;
 }
 
-int DumpXmlTreeCommand::Action(const std::vector<std::string>& args) {
-  if (args.size() < 1) {
-    diag_->Error(DiagMessage() << "No dump apk specified");
-    return 1;
-  }
-
-  auto loaded_apk = LoadedApk::LoadApkFromPath(args[0], diag_);
-  if (!loaded_apk) {
-    return 1;
-  }
-
-  io::FileOutputStream fout(STDOUT_FILENO, kStdOutBufferSize);
-  Printer printer(&fout);
-
-  // Dump the xml tree of every passed in file
-  for (auto file : files_) {
-    auto xml = loaded_apk->LoadXml(file, diag_);
-    if (!xml) {
-      return 1;
-    }
-
-    Debug::DumpXml(*xml, &printer);
-  }
-
-  return 0;
-}
-
-int DumpXmlStringsCommand::Action(const std::vector<std::string>& args) {
+int DumpXmlStringsCommand::Dump(LoadedApk* apk) {
   DumpContext context;
-  if (args.size() < 1) {
-    diag_->Error(DiagMessage() << "No dump apk specified.");
-    return 1;
-  }
-
-  auto loaded_apk = LoadedApk::LoadApkFromPath(args[0], diag_);
-  if (!loaded_apk) {
-    return 1;
-  }
-
-  io::FileOutputStream fout(STDOUT_FILENO, kStdOutBufferSize);
-  Printer printer(&fout);
-
-  // Dump the xml strings of every passed in file
+  bool error = false;
   for (auto xml_file : files_) {
     android::ResXMLTree tree;
 
-    if (loaded_apk->GetApkFormat() == ApkFormat::kProto) {
-      auto xml = loaded_apk->LoadXml(xml_file, diag_);
+    if (apk->GetApkFormat() == ApkFormat::kProto) {
+      auto xml = apk->LoadXml(xml_file, GetDiagnostics());
       if (!xml) {
-        return 1;
+        error = true;
+        continue;
       }
 
       // Flatten the xml document to get a binary representation of the proto xml file
@@ -386,76 +340,208 @@ int DumpXmlStringsCommand::Action(const std::vector<std::string>& args) {
       options.keep_raw_values = true;
       XmlFlattener flattener(&buffer, options);
       if (!flattener.Consume(&context, xml.get())) {
-        return 1;
+        error = true;
+        continue;
       }
 
       // Load the run-time xml tree using the flattened data
       std::string data = buffer.to_string();
       tree.setTo(data.data(), data.size(), /** copyData */ true);
 
-    } else if (loaded_apk->GetApkFormat() == ApkFormat::kBinary) {
-      io::IFile* file = loaded_apk->GetFileCollection()->FindFile(xml_file);
+    } else if (apk->GetApkFormat() == ApkFormat::kBinary) {
+      io::IFile* file = apk->GetFileCollection()->FindFile(xml_file);
       if (!file) {
-        diag_->Error(DiagMessage(xml_file) << "file '" << xml_file << "' not found in APK");
-        return 1;
+        GetDiagnostics()->Error(DiagMessage(xml_file)
+                                << "File '" << xml_file << "' not found in APK");
+        error = true;
+        continue;
       }
 
       std::unique_ptr<io::IData> data = file->OpenAsData();
       if (!data) {
-        diag_->Error(DiagMessage() << "failed to open file");
-        return 1;
+        GetDiagnostics()->Error(DiagMessage() << "Failed to open " << xml_file);
+        error = true;
+        continue;
       }
 
       // Load the run-time xml tree from the file data
       tree.setTo(data->data(), data->size(), /** copyData */ true);
+    } else {
+      GetDiagnostics()->Error(DiagMessage(apk->GetSource()) << "Unknown APK format");
+      error = true;
+      continue;
     }
 
-    Debug::DumpResStringPool(&tree.getStrings(), &printer);
+    Debug::DumpResStringPool(&tree.getStrings(), GetPrinter());
   }
+  return (error) ? 1 : 0;
+}
 
+int DumpXmlTreeCommand::Dump(LoadedApk* apk) {
+  for (auto file : files_) {
+    auto xml = apk->LoadXml(file, GetDiagnostics());
+    if (!xml) {
+      return 1;
+    }
+    Debug::DumpXml(*xml, GetPrinter());
+  }
   return 0;
 }
 
-int DumpPackageNameCommand::Action(const std::vector<std::string>& args) {
-  if (args.size() < 1) {
-    diag_->Error(DiagMessage() << "No dump apk specified.");
-    return 1;
-  }
-
-  auto loaded_apk = LoadedApk::LoadApkFromPath(args[0], diag_);
-  if (!loaded_apk) {
-    return 1;
-  }
-
-  io::FileOutputStream fout(STDOUT_FILENO, kStdOutBufferSize);
-  Printer printer(&fout);
-
-  xml::Element* manifest_el = loaded_apk->GetManifest()->root.get();
-  if (!manifest_el) {
-    diag_->Error(DiagMessage() << "No AndroidManifest.");
-    return 1;
-  }
-
-  xml::Attribute* attr = manifest_el->FindAttribute({}, "package");
-  if (!attr) {
-    diag_->Error(DiagMessage() << "No package name.");
-    return 1;
-  }
-  printer.Println(StringPrintf("%s", attr->value.c_str()));
-
-  return 0;
-}
-
-/** Preform no action because a subcommand is required. */
-int DumpCommand::Action(const std::vector<std::string>& args) {
-  if (args.size() == 0) {
-    diag_->Error(DiagMessage() << "no subcommand specified");
-  } else {
-    diag_->Error(DiagMessage() << "unknown subcommand '" << args[0] << "'");
-  }
-
-  Usage(&std::cerr);
-  return 1;
-}
+const char DumpBadgerCommand::kBadgerData[2925] = {
+    32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,
+    32,  32,  32,  32,  32,  32,  95,  46,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,
+    32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,
+    32,  32,  32,  32,  32,  32,  32,  10,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,
+    32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  61,  63,  86,  35,  40,  46,  46,
+    95,  95,  95,  95,  97,  97,  44,  32,  46,  124, 42,  33,  83,  62,  32,  32,  32,  32,  32,
+    32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  10,  32,  32,  32,
+    32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,
+    32,  32,  58,  46,  58,  59,  61,  59,  61,  81,  81,  81,  81,  66,  96,  61,  61,  58,  46,
+    46,  46,  58,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,
+    32,  32,  32,  32,  10,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,
+    32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  46,  61,  59,  59,  59,  58,  106, 81,  81,
+    81,  81,  102, 59,  61,  59,  59,  61,  61,  61,  58,  46,  32,  32,  32,  32,  32,  32,  32,
+    32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  10,  32,  32,  32,  32,  32,  32,
+    32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,
+    61,  59,  59,  59,  58,  109, 81,  81,  81,  81,  61,  59,  59,  59,  59,  59,  58,  59,  59,
+    46,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,
+    32,  10,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,
+    32,  32,  32,  32,  32,  32,  32,  46,  61,  59,  59,  59,  60,  81,  81,  81,  81,  87,  58,
+    59,  59,  59,  59,  59,  59,  61,  119, 44,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,
+    32,  32,  32,  32,  32,  32,  32,  32,  32,  10,  32,  32,  32,  32,  32,  32,  32,  32,  32,
+    32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  46,  47,  61,  59,  59,
+    58,  100, 81,  81,  81,  81,  35,  58,  59,  59,  59,  59,  59,  58,  121, 81,  91,  32,  32,
+    32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  10,  32,
+    32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,
+    32,  32,  32,  46,  109, 58,  59,  59,  61,  81,  81,  81,  81,  81,  109, 58,  59,  59,  59,
+    59,  61,  109, 81,  81,  76,  46,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,
+    32,  32,  32,  32,  32,  32,  10,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,
+    32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  41,  87,  59,  61,  59,  41,  81,  81,
+    81,  81,  81,  81,  59,  61,  59,  59,  58,  109, 81,  81,  87,  39,  46,  32,  32,  32,  32,
+    32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  10,  32,  32,  32,  32,
+    32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,
+    60,  81,  91,  59,  59,  61,  81,  81,  81,  81,  81,  87,  43,  59,  58,  59,  60,  81,  81,
+    81,  76,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,
+    32,  32,  32,  10,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,
+    32,  32,  32,  32,  32,  32,  32,  32,  32,  52,  91,  58,  45,  59,  87,  81,  81,  81,  81,
+    70,  58,  58,  58,  59,  106, 81,  81,  81,  91,  32,  32,  32,  32,  32,  32,  32,  32,  32,
+    32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  10,  32,  32,  32,  32,  32,  32,  32,
+    32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  93,  40,
+    32,  46,  59,  100, 81,  81,  81,  81,  40,  58,  46,  46,  58,  100, 81,  81,  68,  32,  32,
+    32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,
+    10,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  46,  46,  46,  32,  46,
+    46,  46,  32,  46,  32,  46,  45,  91,  59,  61,  58,  109, 81,  81,  81,  87,  46,  58,  61,
+    59,  60,  81,  81,  80,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,
+    32,  32,  32,  32,  32,  32,  32,  32,  10,  32,  32,  32,  32,  32,  32,  32,  32,  46,  46,
+    61,  59,  61,  61,  61,  59,  61,  61,  59,  59,  59,  58,  58,  46,  46,  41,  58,  59,  58,
+    81,  81,  81,  81,  69,  58,  59,  59,  60,  81,  81,  68,  32,  32,  32,  32,  32,  32,  32,
+    32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  10,  32,  32,
+    32,  32,  32,  32,  58,  59,  61,  59,  59,  59,  59,  59,  59,  59,  59,  59,  59,  59,  59,
+    59,  59,  61,  61,  46,  61,  59,  93,  81,  81,  81,  81,  107, 58,  59,  58,  109, 87,  68,
+    96,  32,  32,  32,  46,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,
+    32,  32,  32,  32,  32,  10,  32,  32,  32,  46,  60,  61,  61,  59,  59,  59,  59,  59,  59,
+    59,  59,  59,  59,  59,  59,  59,  59,  59,  59,  59,  58,  58,  58,  115, 109, 68,  41,  36,
+    81,  109, 46,  61,  61,  81,  69,  96,  46,  58,  58,  46,  58,  46,  46,  32,  32,  32,  32,
+    32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  10,  46,  32,  95,  81,  67,
+    61,  61,  58,  59,  59,  59,  59,  59,  59,  59,  59,  59,  59,  59,  59,  59,  59,  59,  59,
+    59,  59,  58,  68,  39,  61,  105, 61,  63,  81,  119, 58,  106, 80,  32,  58,  61,  59,  59,
+    61,  59,  61,  59,  61,  46,  95,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,
+    32,  32,  10,  32,  32,  36,  81,  109, 105, 59,  61,  59,  59,  59,  59,  59,  59,  59,  59,
+    59,  59,  59,  59,  59,  59,  59,  59,  59,  59,  46,  58,  37,  73,  108, 108, 62,  52,  81,
+    109, 34,  32,  61,  59,  59,  59,  59,  59,  59,  59,  59,  59,  61,  59,  61,  61,  46,  46,
+    32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  10,  32,  46,  45,  57,  101, 43,  43,  61,
+    61,  59,  59,  59,  59,  59,  59,  61,  59,  59,  59,  59,  59,  59,  59,  59,  59,  58,  97,
+    46,  61,  108, 62,  126, 58,  106, 80,  96,  46,  61,  61,  59,  59,  59,  59,  59,  59,  59,
+    59,  59,  59,  59,  59,  59,  61,  61,  97,  103, 97,  32,  32,  32,  32,  32,  32,  32,  10,
+    32,  32,  32,  32,  45,  46,  32,  46,  32,  32,  32,  32,  32,  32,  32,  32,  45,  45,  45,
+    58,  59,  59,  59,  59,  61,  119, 81,  97,  124, 105, 124, 124, 39,  126, 95,  119, 58,  61,
+    58,  59,  59,  59,  59,  59,  59,  59,  59,  59,  59,  59,  59,  59,  59,  61,  119, 81,  81,
+    99,  32,  32,  32,  32,  32,  32,  10,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,
+    32,  32,  32,  32,  32,  32,  32,  32,  32,  58,  59,  59,  58,  106, 81,  81,  81,  109, 119,
+    119, 119, 109, 109, 81,  81,  122, 58,  59,  59,  59,  59,  59,  59,  59,  59,  59,  59,  59,
+    59,  59,  59,  58,  115, 81,  87,  81,  102, 32,  32,  32,  32,  32,  32,  10,  32,  32,  32,
+    32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  61,  58,
+    59,  61,  81,  81,  81,  81,  81,  81,  87,  87,  81,  81,  81,  81,  81,  58,  59,  59,  59,
+    59,  59,  59,  59,  59,  58,  45,  45,  45,  59,  59,  59,  41,  87,  66,  33,  32,  32,  32,
+    32,  32,  32,  32,  10,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,
+    32,  32,  32,  32,  32,  32,  58,  59,  59,  93,  81,  81,  81,  81,  81,  81,  81,  81,  81,
+    81,  81,  81,  81,  40,  58,  59,  59,  59,  58,  45,  32,  46,  32,  32,  32,  32,  32,  46,
+    32,  126, 96,  32,  32,  32,  32,  32,  32,  32,  32,  32,  10,  32,  32,  32,  32,  32,  32,
+    32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  58,  61,  59,  58,  81,
+    81,  81,  81,  81,  81,  81,  81,  81,  81,  81,  81,  81,  40,  58,  59,  59,  59,  58,  32,
+    32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,
+    32,  10,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,
+    32,  32,  32,  58,  59,  59,  58,  81,  81,  81,  81,  81,  81,  81,  81,  81,  81,  81,  81,
+    81,  40,  58,  59,  59,  59,  46,  46,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,
+    32,  32,  32,  32,  32,  32,  32,  32,  32,  10,  32,  32,  32,  32,  32,  32,  32,  32,  32,
+    32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  58,  61,  59,  60,  81,  81,  81,  81,
+    81,  81,  81,  81,  81,  81,  81,  81,  81,  59,  61,  59,  59,  61,  32,  32,  32,  32,  32,
+    32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  10,  32,
+    32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,
+    58,  59,  59,  93,  81,  81,  81,  81,  81,  81,  81,  81,  81,  81,  81,  81,  81,  40,  59,
+    59,  59,  59,  32,  46,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,
+    32,  32,  32,  32,  32,  32,  10,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,
+    32,  32,  32,  32,  32,  32,  32,  32,  58,  61,  58,  106, 81,  81,  81,  81,  81,  81,  81,
+    81,  81,  81,  81,  81,  81,  76,  58,  59,  59,  59,  32,  46,  32,  32,  32,  32,  32,  32,
+    32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  10,  32,  32,  32,  32,
+    32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  61,  58,  58,
+    81,  81,  81,  81,  81,  81,  81,  81,  81,  81,  81,  81,  81,  87,  58,  59,  59,  59,  59,
+    32,  46,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,
+    32,  32,  32,  10,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,
+    32,  32,  32,  32,  32,  58,  59,  61,  41,  81,  81,  81,  81,  81,  81,  81,  81,  81,  81,
+    81,  81,  87,  59,  61,  58,  59,  59,  46,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,
+    32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  10,  32,  32,  32,  32,  32,  32,  32,
+    32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  58,  61,  58,  61,  81,  81,
+    81,  81,  81,  81,  81,  81,  81,  81,  81,  81,  107, 58,  59,  59,  59,  59,  58,  32,  32,
+    32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,
+    10,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,
+    32,  32,  58,  59,  59,  58,  51,  81,  81,  81,  81,  81,  81,  81,  81,  81,  81,  102, 94,
+    59,  59,  59,  59,  59,  61,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,
+    32,  32,  32,  32,  32,  32,  32,  32,  10,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,
+    32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  58,  61,  59,  59,  59,  43,  63,  36,  81,
+    81,  81,  87,  64,  86,  102, 58,  59,  59,  59,  59,  59,  59,  59,  46,  32,  32,  32,  32,
+    32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  10,  32,  32,
+    32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  46,  61,
+    59,  59,  59,  59,  59,  59,  59,  43,  33,  58,  126, 126, 58,  59,  59,  59,  59,  59,  59,
+    59,  59,  59,  59,  32,  46,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,
+    32,  32,  32,  32,  32,  10,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,
+    32,  32,  32,  32,  32,  46,  61,  59,  59,  59,  58,  45,  58,  61,  59,  58,  58,  58,  61,
+    59,  59,  59,  59,  59,  59,  59,  59,  59,  59,  59,  59,  58,  32,  46,  32,  32,  32,  32,
+    32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  10,  32,  32,  32,  32,  32,
+    32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  46,  61,  59,  59,  59,  59,  59,
+    58,  95,  32,  45,  61,  59,  61,  59,  59,  59,  59,  59,  59,  59,  45,  58,  59,  59,  59,
+    59,  61,  58,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,
+    32,  32,  10,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,
+    32,  58,  61,  59,  59,  59,  59,  59,  61,  59,  61,  46,  46,  32,  45,  45,  45,  59,  58,
+    45,  45,  46,  58,  59,  59,  59,  59,  59,  59,  61,  46,  32,  32,  32,  32,  32,  32,  32,
+    32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  10,  32,  32,  32,  32,  32,  32,  32,  32,
+    32,  32,  32,  32,  32,  32,  32,  32,  46,  58,  59,  59,  59,  59,  59,  59,  59,  59,  59,
+    61,  59,  46,  32,  32,  46,  32,  46,  32,  58,  61,  59,  59,  59,  59,  59,  59,  59,  59,
+    32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  10,
+    32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  45,
+    59,  59,  59,  59,  59,  59,  59,  59,  58,  32,  32,  32,  32,  32,  32,  32,  32,  32,  61,
+    59,  59,  59,  59,  59,  59,  59,  58,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,
+    32,  32,  32,  32,  32,  32,  32,  10,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,
+    32,  32,  32,  32,  32,  32,  32,  46,  61,  59,  59,  59,  59,  59,  59,  59,  32,  46,  32,
+    32,  32,  32,  32,  32,  61,  46,  61,  59,  59,  59,  59,  59,  59,  58,  32,  32,  32,  32,
+    32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  10,  32,  32,  32,
+    32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  61,  59,  59,  59,
+    59,  59,  59,  59,  59,  32,  46,  32,  32,  32,  32,  32,  32,  32,  46,  61,  58,  59,  59,
+    59,  59,  59,  58,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,
+    32,  32,  32,  32,  10,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,
+    32,  32,  32,  32,  58,  59,  59,  59,  59,  59,  59,  59,  59,  46,  46,  32,  32,  32,  32,
+    32,  32,  32,  61,  59,  59,  59,  59,  59,  59,  59,  45,  32,  32,  32,  32,  32,  32,  32,
+    32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  10,  32,  32,  32,  32,  32,  32,
+    32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  46,  32,  45,  61,  59,  59,  59,  59,
+    59,  58,  32,  46,  32,  32,  32,  32,  32,  32,  32,  58,  59,  59,  59,  59,  59,  58,  45,
+    32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,
+    32,  10,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,
+    32,  32,  32,  32,  45,  45,  45,  45,  32,  46,  32,  32,  32,  32,  32,  32,  32,  32,  32,
+    32,  45,  61,  59,  58,  45,  45,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,
+    32,  32,  32,  32,  32,  32,  32,  32,  32,  10,  32,  32,  32,  32,  32,  32,  32,  32,  32,
+    32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,
+    32,  32,  32,  32,  32,  32,  32,  32,  32,  46,  32,  32,  46,  32,  32,  32,  32,  32,  32,
+    32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  32,  10};
 
 }  // namespace aapt

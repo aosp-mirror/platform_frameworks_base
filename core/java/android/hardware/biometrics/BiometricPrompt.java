@@ -17,6 +17,7 @@
 package android.hardware.biometrics;
 
 import static android.Manifest.permission.USE_BIOMETRIC;
+import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
 
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
@@ -52,6 +53,10 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
      * @hide
      */
     public static final String KEY_TITLE = "title";
+    /**
+     * @hide
+     */
+    public static final String KEY_USE_DEFAULT_TITLE = "use_default_title";
     /**
      * @hide
      */
@@ -131,6 +136,17 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         }
 
         /**
+         * For internal use currently. Only takes effect if title is null/empty. Shows a default
+         * modality-specific title.
+         * @hide
+         */
+        @RequiresPermission(USE_BIOMETRIC_INTERNAL)
+        public Builder setUseDefaultTitle() {
+            mBundle.putBoolean(KEY_USE_DEFAULT_TITLE, true);
+            return this;
+        }
+
+        /**
          * Optional: Set the subtitle to display.
          * @param subtitle
          * @return
@@ -206,8 +222,9 @@ public class BiometricPrompt implements BiometricAuthenticator, BiometricConstan
         public BiometricPrompt build() {
             final CharSequence title = mBundle.getCharSequence(KEY_TITLE);
             final CharSequence negative = mBundle.getCharSequence(KEY_NEGATIVE_TEXT);
+            final boolean useDefaultTitle = mBundle.getBoolean(KEY_USE_DEFAULT_TITLE);
 
-            if (TextUtils.isEmpty(title)) {
+            if (TextUtils.isEmpty(title) && !useDefaultTitle) {
                 throw new IllegalArgumentException("Title must be set and non-empty");
             } else if (TextUtils.isEmpty(negative)) {
                 throw new IllegalArgumentException("Negative text must be set and non-empty");

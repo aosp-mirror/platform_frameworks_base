@@ -106,6 +106,9 @@ public class InstallStart extends Activity {
 
             if (packageUri != null && (packageUri.getScheme().equals(ContentResolver.SCHEME_FILE)
                     || packageUri.getScheme().equals(ContentResolver.SCHEME_CONTENT))) {
+                // [IMPORTANT] This path is deprecated, but should still work. Only necessary
+                // features should be added.
+
                 // Copy file to prevent it from being changed underneath this process
                 nextActivity.setClass(this, InstallStaging.class);
             } else if (packageUri != null && packageUri.getScheme().equals(

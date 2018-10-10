@@ -23,6 +23,6 @@ public class PackageInstallerApplication extends Application {
     @Override
     public void onCreate() {
         super.onCreate();
-        PackageItemInfo.setForceSafeLabels(true);
+        PackageItemInfo.forceSafeLabels();
     }
 }

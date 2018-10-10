@@ -201,7 +201,18 @@ public interface BiometricAuthenticator {
         throw new UnsupportedOperationException("Stub!");
     }
 
+    /**
+     * @return true if the user has enrolled templates for this biometric.
+     */
     default boolean hasEnrolledTemplates(int userId) {
+        throw new UnsupportedOperationException("Stub!");
+    }
+
+    /**
+     * Sets the active user. This is meant to be used to select the current profile
+     * to allow separate templates for work profile.
+     */
+    default void setActiveUser(int userId) {
         throw new UnsupportedOperationException("Stub!");
     }
 

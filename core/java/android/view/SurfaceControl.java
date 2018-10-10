@@ -97,6 +97,8 @@ public class SurfaceControl implements Parcelable {
     private static native void nativeSetMatrix(long transactionObj, long nativeObject,
             float dsdx, float dtdx,
             float dtdy, float dsdy);
+    private static native void nativeSetColorTransform(long transactionObj, long nativeObject,
+            float[] matrix, float[] translation);
     private static native void nativeSetColor(long transactionObj, long nativeObject, float[] color);
     private static native void nativeSetFlags(long transactionObj, long nativeObject,
             int flags, int mask);
@@ -945,6 +947,18 @@ public class SurfaceControl implements Parcelable {
         }
     }
 
+    /**
+     * Sets the color transform for the Surface.
+     * @param matrix A float array with 9 values represents a 3x3 transform matrix
+     * @param translation A float array with 3 values represents a translation vector
+     */
+    public void setColorTransform(@Size(9) float[] matrix, @Size(3) float[] translation) {
+        checkNotReleased();
+        synchronized (SurfaceControl.class) {
+            sGlobalTransaction.setColorTransform(this, matrix, translation);
+        }
+    }
+
     public void setWindowCrop(Rect crop) {
         checkNotReleased();
         synchronized (SurfaceControl.class) {
@@ -1435,6 +1449,18 @@ public class SurfaceControl implements Parcelable {
             setMatrix(sc, float9[MSCALE_X], float9[MSKEW_Y],
                     float9[MSKEW_X], float9[MSCALE_Y]);
             setPosition(sc, float9[MTRANS_X], float9[MTRANS_Y]);
+            return this;
+        }
+
+        /**
+         * Sets the color transform for the Surface.
+         * @param matrix A float array with 9 values represents a 3x3 transform matrix
+         * @param translation A float array with 3 values represents a translation vector
+         */
+        public Transaction setColorTransform(SurfaceControl sc, @Size(9) float[] matrix,
+                @Size(3) float[] translation) {
+            sc.checkNotReleased();
+            nativeSetColorTransform(mNativeObject, sc.mNativeObject, matrix, translation);
             return this;
         }
 

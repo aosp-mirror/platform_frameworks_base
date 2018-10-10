@@ -36,6 +36,7 @@
 #include "cmd/Dump.h"
 #include "cmd/Link.h"
 #include "cmd/Optimize.h"
+#include "io/FileStream.h"
 #include "util/Files.h"
 #include "util/Util.h"
 
@@ -68,10 +69,11 @@ class VersionCommand : public Command {
 /** The main entry point of AAPT. */
 class MainCommand : public Command {
  public:
-  explicit MainCommand(IDiagnostics* diagnostics) : Command("aapt2"), diagnostics_(diagnostics) {
+  explicit MainCommand(text::Printer* printer, IDiagnostics* diagnostics)
+      : Command("aapt2"), diagnostics_(diagnostics) {
     AddOptionalSubcommand(util::make_unique<CompileCommand>(diagnostics));
     AddOptionalSubcommand(util::make_unique<LinkCommand>(diagnostics));
-    AddOptionalSubcommand(util::make_unique<DumpCommand>(diagnostics));
+    AddOptionalSubcommand(util::make_unique<DumpCommand>(printer, diagnostics));
     AddOptionalSubcommand(util::make_unique<DiffCommand>());
     AddOptionalSubcommand(util::make_unique<OptimizeCommand>());
     AddOptionalSubcommand(util::make_unique<ConvertCommand>());
@@ -101,13 +103,14 @@ class MainCommand : public Command {
  */
 class DaemonCommand : public Command {
  public:
-  explicit DaemonCommand(IDiagnostics* diagnostics) : Command("daemon", "m"),
-                                                      diagnostics_(diagnostics) {
+  explicit DaemonCommand(io::FileOutputStream* out, IDiagnostics* diagnostics)
+      : Command("daemon", "m"), out_(out), diagnostics_(diagnostics) {
     SetDescription("Runs aapt in daemon mode. Each subsequent line is a single parameter to the\n"
         "command. The end of an invocation is signaled by providing an empty line.");
   }
 
   int Action(const std::vector<std::string>& /* args */) override {
+    text::Printer printer(out_);
     std::cout << "Ready" << std::endl;
 
     while (true) {
@@ -132,7 +135,9 @@ class DaemonCommand : public Command {
 
       std::vector<StringPiece> args;
       args.insert(args.end(), raw_args.begin(), raw_args.end());
-      if (MainCommand(diagnostics_).Execute(args, &std::cerr) != 0) {
+      int result = MainCommand(&printer, diagnostics_).Execute(args, &std::cerr);
+      out_->Flush();
+      if (result != 0) {
         std::cerr << "Error" << std::endl;
       }
       std::cerr << "Done" << std::endl;
@@ -143,6 +148,7 @@ class DaemonCommand : public Command {
   }
 
  private:
+  io::FileOutputStream* out_;
   IDiagnostics* diagnostics_;
 };
 
@@ -159,11 +165,17 @@ int MainImpl(int argc, char** argv) {
     args.push_back(argv[i]);
   }
 
-  // Add the daemon subcommand here so it cannot be called while executing the daemon
-  aapt::StdErrDiagnostics diagnostics;
-  auto main_command = new aapt::MainCommand(&diagnostics);
-  main_command->AddOptionalSubcommand(aapt::util::make_unique<aapt::DaemonCommand>(&diagnostics));
+  // Use a smaller buffer so that there is less latency for printing to stdout.
+  constexpr size_t kStdOutBufferSize = 1024u;
+  aapt::io::FileOutputStream fout(STDOUT_FILENO, kStdOutBufferSize);
+  aapt::text::Printer printer(&fout);
 
+  aapt::StdErrDiagnostics diagnostics;
+  auto main_command = new aapt::MainCommand(&printer, &diagnostics);
+
+  // Add the daemon subcommand here so it cannot be called while executing the daemon
+  main_command->AddOptionalSubcommand(
+      aapt::util::make_unique<aapt::DaemonCommand>(&fout, &diagnostics));
   return main_command->Execute(args, &std::cerr);
 }
 

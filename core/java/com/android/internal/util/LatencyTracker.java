@@ -101,7 +101,7 @@ public class LatencyTracker {
 
     public static LatencyTracker getInstance(Context context) {
         if (sLatencyTracker == null) {
-            sLatencyTracker = new LatencyTracker(context);
+            sLatencyTracker = new LatencyTracker(context.getApplicationContext());
         }
         return sLatencyTracker;
     }

@@ -521,6 +521,7 @@ public class FingerprintManager implements BiometricAuthenticator, BiometricFing
      * @hide
      */
     @RequiresPermission(MANAGE_FINGERPRINT)
+    @Override
     public void setActiveUser(int userId) {
         if (mService != null) try {
             mService.setActiveUser(userId);

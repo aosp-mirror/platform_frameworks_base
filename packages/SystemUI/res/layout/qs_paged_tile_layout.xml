@@ -21,18 +21,5 @@
     android:layout_height="wrap_content"
     android:layout_weight="1"
     android:clipChildren="true"
-    android:clipToPadding="true"
-    android:paddingStart="@dimen/notification_side_paddings"
-    android:paddingEnd="@dimen/notification_side_paddings"
     android:paddingBottom="@dimen/qs_paged_tile_layout_padding_bottom">
-
-
-    <FrameLayout
-        android:id="@+id/page_decor"
-        android:layout_width="wrap_content"
-        android:layout_height="48dp"
-        android:layout_gravity="bottom">
-
-    </FrameLayout>
-
 </com.android.systemui.qs.PagedTileLayout>

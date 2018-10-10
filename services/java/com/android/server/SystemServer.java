@@ -359,7 +359,7 @@ public final class SystemServer {
             // The system server should never make non-oneway calls
             Binder.setWarnOnBlocking(true);
             // The system server should always load safe labels
-            PackageItemInfo.setForceSafeLabels(true);
+            PackageItemInfo.forceSafeLabels();
 
             // Default to FULL within the system server.
             SQLiteGlobal.sDefaultSyncMode = SQLiteGlobal.SYNC_MODE_FULL;

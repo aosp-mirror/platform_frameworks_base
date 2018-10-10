@@ -473,6 +473,15 @@ public class ZenModeConfig implements Parcelable {
         }
     }
 
+    private static Long tryParseLong(String value, Long defValue) {
+        if (TextUtils.isEmpty(value)) return defValue;
+        try {
+            return Long.parseLong(value);
+        } catch (NumberFormatException e) {
+            return defValue;
+        }
+    }
+
     public static ZenModeConfig readXml(XmlPullParser parser)
             throws XmlPullParserException, IOException {
         int type = parser.getEventType();
@@ -1288,7 +1297,9 @@ public class ZenModeConfig implements Parcelable {
                 .authority(SYSTEM_AUTHORITY)
                 .appendPath(EVENT_PATH)
                 .appendQueryParameter("userId", Long.toString(event.userId))
-                .appendQueryParameter("calendar", event.calendar != null ? event.calendar : "")
+                .appendQueryParameter("calendar", event.calName != null ? event.calName : "")
+                .appendQueryParameter("calendarId", event.calendarId != null
+                        ? event.calendarId.toString() : "")
                 .appendQueryParameter("reply", Integer.toString(event.reply))
                 .build();
     }
@@ -1306,10 +1317,11 @@ public class ZenModeConfig implements Parcelable {
         if (!isEvent) return null;
         final EventInfo rt = new EventInfo();
         rt.userId = tryParseInt(conditionId.getQueryParameter("userId"), UserHandle.USER_NULL);
-        rt.calendar = conditionId.getQueryParameter("calendar");
-        if (TextUtils.isEmpty(rt.calendar) || tryParseLong(rt.calendar, -1L) != -1L) {
-            rt.calendar = null;
+        rt.calName = conditionId.getQueryParameter("calendar");
+        if (TextUtils.isEmpty(rt.calName)) {
+            rt.calName = null;
         }
+        rt.calendarId = tryParseLong(conditionId.getQueryParameter("calendarId"), null);
         rt.reply = tryParseInt(conditionId.getQueryParameter("reply"), 0);
         return rt;
     }
@@ -1324,12 +1336,13 @@ public class ZenModeConfig implements Parcelable {
         public static final int REPLY_YES = 2;
 
         public int userId = UserHandle.USER_NULL;  // USER_NULL = unspecified - use current user
-        public String calendar;  // CalendarContract.Calendars.OWNER_ACCOUNT, or null for any
+        public String calName;  // CalendarContract.Calendars.DISPLAY_NAME, or null for any
+        public Long calendarId; // Calendars._ID, or null if restored from < Q calendar
         public int reply;
 
         @Override
         public int hashCode() {
-            return 0;
+            return Objects.hash(userId, calName, calendarId, reply);
         }
 
         @Override
@@ -1337,15 +1350,17 @@ public class ZenModeConfig implements Parcelable {
             if (!(o instanceof EventInfo)) return false;
             final EventInfo other = (EventInfo) o;
             return userId == other.userId
-                    && Objects.equals(calendar, other.calendar)
-                    && reply == other.reply;
+                    && Objects.equals(calName, other.calName)
+                    && reply == other.reply
+                    && Objects.equals(calendarId, other.calendarId);
         }
 
         public EventInfo copy() {
             final EventInfo rt = new EventInfo();
             rt.userId = userId;
-            rt.calendar = calendar;
+            rt.calName = calName;
             rt.reply = reply;
+            rt.calendarId = calendarId;
             return rt;
         }
 

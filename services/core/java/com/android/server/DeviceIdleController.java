@@ -666,7 +666,8 @@ public class DeviceIdleController extends SystemService
      * global Settings. Any access to this class or its fields should be done while
      * holding the DeviceIdleController lock.
      */
-    private final class Constants extends ContentObserver {
+    @VisibleForTesting
+    final class Constants extends ContentObserver {
         // Key names stored in the settings value.
         private static final String KEY_LIGHT_IDLE_AFTER_INACTIVE_TIMEOUT
                 = "light_after_inactive_to";
@@ -1529,12 +1530,17 @@ public class DeviceIdleController extends SystemService
             return (ConnectivityService) ServiceManager.getService(Context.CONNECTIVITY_SERVICE);
         }
 
+        Constants getConstants(DeviceIdleController controller, Handler handler,
+                ContentResolver resolver) {
+            return controller.new Constants(handler, resolver);
+        }
+
         LocationManager getLocationManager() {
             return mContext.getSystemService(LocationManager.class);
         }
 
-        MyHandler getHandler(DeviceIdleController ctlr) {
-            return ctlr.new MyHandler(BackgroundThread.getHandler().getLooper());
+        MyHandler getHandler(DeviceIdleController controller) {
+            return controller.new MyHandler(BackgroundThread.getHandler().getLooper());
         }
 
         PowerManager getPowerManager() {
@@ -1623,7 +1629,7 @@ public class DeviceIdleController extends SystemService
                 }
             }
 
-            mConstants = new Constants(mHandler, getContext().getContentResolver());
+            mConstants = mInjector.getConstants(this, mHandler, getContext().getContentResolver());
 
             readConfigFileLocked();
             updateWhitelistAppIdsLocked();
@@ -2325,6 +2331,16 @@ public class DeviceIdleController extends SystemService
         }
     }
 
+    /**
+     * Must only be used in tests.
+     *
+     * This sets the state value directly and thus doesn't trigger any behavioral changes.
+     */
+    @VisibleForTesting
+    void setLightStateForTest(int lightState) {
+        mLightState = lightState;
+    }
+
     @VisibleForTesting
     int getLightState() {
         return mLightState;
@@ -2554,6 +2570,12 @@ public class DeviceIdleController extends SystemService
                 mActiveIdleWakeLock.release();
             }
         }
+    }
+
+    /** Must only be used in tests. */
+    @VisibleForTesting
+    void setActiveIdleOpsForTest(int count) {
+        mActiveIdleOpCount = count;
     }
 
     void setJobsActive(boolean active) {

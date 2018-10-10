@@ -163,7 +163,6 @@ import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.Set;
@@ -1681,13 +1680,16 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         if (prev != null) {
             prev.resumeKeyDispatchingLocked();
 
-            final long diff = prev.app.getCpuTime() - prev.cpuTimeAtResume;
-            if (prev.hasProcess() && prev.cpuTimeAtResume > 0 && diff > 0) {
-                final Runnable r = PooledLambda.obtainRunnable(
-                        ActivityManagerInternal::updateForegroundTimeIfOnBattery,
-                        mService.mAmInternal, prev.info.packageName, prev.info.applicationInfo.uid,
-                        diff);
-                mService.mH.post(r);
+            if (prev.hasProcess() && prev.cpuTimeAtResume > 0) {
+                final long diff = prev.app.getCpuTime() - prev.cpuTimeAtResume;
+                if (diff > 0) {
+                    final Runnable r = PooledLambda.obtainRunnable(
+                            ActivityManagerInternal::updateForegroundTimeIfOnBattery,
+                            mService.mAmInternal, prev.info.packageName,
+                            prev.info.applicationInfo.uid,
+                            diff);
+                    mService.mH.post(r);
+                }
             }
             prev.cpuTimeAtResume = 0; // reset it
         }
