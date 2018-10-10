@@ -5141,6 +5141,7 @@ public abstract class PackageManager {
      * @param packageName The name of the package to query
      * @throws IllegalArgumentException if the given package name is not installed
      */
+    @Nullable
     public abstract String getInstallerPackageName(String packageName);
 
     /**
