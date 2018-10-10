@@ -57,7 +57,7 @@ public class ServiceState implements Parcelable {
      * Normal operation condition, the phone is registered
      * with an operator either in home network or in roaming.
      */
-    public static final int STATE_IN_SERVICE = 0;
+    public static final int STATE_IN_SERVICE = TelephonyProtoEnums.SERVICE_STATE_IN_SERVICE; // 0
 
     /**
      * Phone is not registered with any operator, the phone
@@ -65,17 +65,19 @@ public class ServiceState implements Parcelable {
      * searching to registration at all, or registration is denied, or radio
      * signal is not available.
      */
-    public static final int STATE_OUT_OF_SERVICE = 1;
+    public static final int STATE_OUT_OF_SERVICE =
+            TelephonyProtoEnums.SERVICE_STATE_OUT_OF_SERVICE;  // 1
 
     /**
      * The phone is registered and locked.  Only emergency numbers are allowed. {@more}
      */
-    public static final int STATE_EMERGENCY_ONLY = 2;
+    public static final int STATE_EMERGENCY_ONLY =
+            TelephonyProtoEnums.SERVICE_STATE_EMERGENCY_ONLY;  // 2
 
     /**
      * Radio of telephony is explicitly powered off.
      */
-    public static final int STATE_POWER_OFF = 3;
+    public static final int STATE_POWER_OFF = TelephonyProtoEnums.SERVICE_STATE_POWER_OFF;  // 3
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
