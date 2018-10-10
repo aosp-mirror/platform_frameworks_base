@@ -22,6 +22,7 @@ import static android.app.StatusBarManager.WINDOW_STATE_HIDDEN;
 import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
 import static android.app.StatusBarManager.windowStateToString;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY;
+import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_ASLEEP;
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_AWAKE;
@@ -70,6 +71,8 @@ import android.content.res.Resources;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
+import android.hardware.display.DisplayManager;
+import android.hardware.display.DisplayManager.DisplayListener;
 import android.media.AudioAttributes;
 import android.metrics.LogMaker;
 import android.net.Uri;
@@ -96,6 +99,7 @@ import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
+import android.util.SparseArray;
 import android.view.Display;
 import android.view.IWindowManager;
 import android.view.KeyEvent;
@@ -558,8 +562,37 @@ public class StatusBar extends SystemUI implements DemoMode,
                 }
             };
 
+    protected DisplayManager mDisplayManager;
+
     private NavigationBarFragment mNavigationBar;
     private View mNavigationBarView;
+
+    /** A displayId - nav bar mapping */
+    private SparseArray<NavigationBarFragment> mExternalNavigationBarMap = new SparseArray<>();
+
+    // TODO(b/115978725): Move it to DisplayNavigationBarController
+    private final DisplayListener mDisplayListener = new DisplayListener() {
+        @Override
+        public void onDisplayAdded(int displayId) {
+            final Display display = mDisplayManager.getDisplay(displayId);
+            addExternalNavigationBar(display);
+        }
+
+        @Override
+        public void onDisplayRemoved(int displayId) {
+            final NavigationBarFragment navBar = mExternalNavigationBarMap.get(displayId);
+            if (navBar != null) {
+                final View navigationView = navBar.getView().getRootView();
+                WindowManagerGlobal.getInstance().removeView(navigationView, true);
+                mExternalNavigationBarMap.remove(displayId);
+            }
+        }
+
+        @Override
+        public void onDisplayChanged(int displayId) {
+        }
+    };
+
     private HeadsUpAppearanceController mHeadsUpAppearanceController;
     private boolean mVibrateOnOpening;
     private VibratorHelper mVibratorHelper;
@@ -618,6 +651,9 @@ public class StatusBar extends SystemUI implements DemoMode,
         mDisplay = mWindowManager.getDefaultDisplay();
         updateDisplaySize();
 
+        // get display service to detect display status
+        mDisplayManager = (DisplayManager) mContext.getSystemService(Context.DISPLAY_SERVICE);
+
         Resources res = mContext.getResources();
         mVibrateOnOpening = mContext.getResources().getBoolean(
                 R.bool.config_vibrateOnIconAnimation);
@@ -660,6 +696,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             // If the system process isn't there we're doomed anyway.
         }
 
+        mDisplayManager.registerDisplayListener(mDisplayListener, mHandler);
         createAndAddWindows();
 
         // Make sure we always have the most current wallpaper info.
@@ -864,6 +901,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             }
         });
 
+        // TODO(115978725): Support light bar controller on external nav bars.
         mLightBarController = Dependency.get(LightBarController.class);
         if (mNavigationBar != null) {
             mNavigationBar.setLightBarController(mLightBarController);
@@ -1047,6 +1085,33 @@ public class StatusBar extends SystemUI implements DemoMode,
             }
             mNavigationBar.setCurrentSysuiVisibility(mSystemUiVisibility);
         });
+
+        // Add external navigation bars if more than one displays exist.
+        final Display[] displays = mDisplayManager.getDisplays();
+        for (Display display : displays) {
+            addExternalNavigationBar(display);
+        }
+    }
+
+    /**
+     * Add a phone navigation bar on an external display if the display supports system decorations.
+     *
+     * @param display the display to add navigation bar on
+     */
+    protected void addExternalNavigationBar(Display display) {
+        if (display == null || display.getDisplayId() == DEFAULT_DISPLAY
+                || !display.supportsSystemDecorations()) {
+            return;
+        }
+
+        final int displayId = display.getDisplayId();
+        final Context externalDisplayContext = mContext.createDisplayContext(display);
+        NavigationBarFragment.create(externalDisplayContext,
+                (tag, fragment) -> {
+                    final NavigationBarFragment navBar = (NavigationBarFragment) fragment;
+                    navBar.setCurrentSysuiVisibility(mSystemUiVisibility);
+                    mExternalNavigationBarMap.append(displayId, navBar);
+                });
     }
 
     /**
@@ -2065,6 +2130,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
     }
 
+    // TODO(115978725): Support auto hide on external nav bars.
     void touchAutoHide() {
         // update transient bar autohide
         if (mStatusBarMode == MODE_SEMI_TRANSPARENT || (mNavigationBar != null
@@ -2104,6 +2170,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 : MODE_OPAQUE;
     }
 
+    // TODO(115978725): Support animations on external nav bars.
     void checkBarModes() {
         if (mDemoMode) return;
         if (mStatusBarView != null) checkBarMode(mStatusBarMode, mStatusBarWindowState,
@@ -2123,6 +2190,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         transitions.transitionTo(mode, anim);
     }
 
+    // TODO(115978725): Support animations on external nav bars.
     private void finishBarAnimations() {
         if (mStatusBarView != null) {
             mStatusBarView.getBarTransitions().finishAnimations();
@@ -2856,6 +2924,16 @@ public class StatusBar extends SystemUI implements DemoMode,
             mWindowManager.removeViewImmediate(mNavigationBarView);
             mNavigationBarView = null;
         }
+        mDisplayManager.unregisterDisplayListener(mDisplayListener);
+        if (mExternalNavigationBarMap.size() > 0) {
+            for (int i = 0; i < mExternalNavigationBarMap.size(); i++) {
+                final View navigationWindow = mExternalNavigationBarMap.valueAt(i)
+                        .getView().getRootView();
+                WindowManagerGlobal.getInstance()
+                        .removeView(navigationWindow, true /* immediate */);
+            }
+            mExternalNavigationBarMap.clear();
+        }
         mContext.unregisterReceiver(mBroadcastReceiver);
         mContext.unregisterReceiver(mDemoReceiver);
         mAssistManager.destroy();
@@ -2924,6 +3002,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                     "transparent".equals(mode) ? MODE_TRANSPARENT :
                     "warning".equals(mode) ? MODE_WARNING :
                     -1;
+            // TODO(115978725): Support external nav bar transitions
             if (barMode != -1) {
                 boolean animate = true;
                 if (mStatusBarView != null) {
@@ -3157,6 +3236,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mDraggedDownRow = null;
             }
 
+            // TODO(115978725): Support animations on external nav bars.
             // Disable layout transitions in navbar for this transition because the load is just
             // too heavy for the CPU and GPU on any device.
             if (mNavigationBar != null) {
@@ -4425,6 +4505,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
     // End Extra BaseStatusBarMethods.
 
+    // TODO(115978725): Handle dimming for external nav bars
     private final Runnable mAutoDim = () -> {
         if (mNavigationBar != null) {
             mNavigationBar.getBarTransitions().setAutoDim(true);
