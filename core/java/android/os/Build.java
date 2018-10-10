@@ -18,8 +18,10 @@ package android.os;
 
 import android.Manifest;
 import android.annotation.RequiresPermission;
+import android.annotation.SuppressAutoDoc;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
+import android.app.ActivityThread;
 import android.app.Application;
 import android.content.Context;
 import android.text.TextUtils;
@@ -127,14 +129,21 @@ public class Build {
      * <a href="/training/articles/security-key-attestation.html">key attestation</a> to obtain
      * proof of the device's original identifiers.
      *
+     * <p>Requires Permission: READ_PRIVILEGED_PHONE_STATE or for the calling package to be the
+     * device or profile owner. Profile owner access is deprecated and will be removed in a future
+     * release.
+     *
      * @return The serial number if specified.
      */
-    @RequiresPermission(Manifest.permission.READ_PHONE_STATE)
+    @SuppressAutoDoc // No support for device / profile owner.
+    @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
     public static String getSerial() {
         IDeviceIdentifiersPolicyService service = IDeviceIdentifiersPolicyService.Stub
                 .asInterface(ServiceManager.getService(Context.DEVICE_IDENTIFIERS_SERVICE));
         try {
-            return service.getSerial();
+            Application application = ActivityThread.currentApplication();
+            String callingPackage = application != null ? application.getPackageName() : null;
+            return service.getSerialForPackage(callingPackage);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
         }

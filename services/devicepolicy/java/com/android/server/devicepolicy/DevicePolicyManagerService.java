@@ -7861,6 +7861,21 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
         return getApplicationLabel(profileOwner.getPackageName(), userHandle);
     }
 
+    @Override
+    public boolean checkDeviceIdentifierAccess(String packageName, int userHandle) {
+        // Allow access to the device owner.
+        ComponentName deviceOwner = getDeviceOwnerComponent(true);
+        if (deviceOwner != null && deviceOwner.getPackageName().equals(packageName)) {
+            return true;
+        }
+        // Allow access to the profile owner for the specified user.
+        ComponentName profileOwner = getProfileOwnerAsUser(userHandle);
+        if (profileOwner != null && profileOwner.getPackageName().equals(packageName)) {
+            return true;
+        }
+        return false;
+    }
+
     /**
      * Canonical name for a given package.
      */

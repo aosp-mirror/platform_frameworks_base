@@ -153,6 +153,8 @@ interface IDevicePolicyManager {
     void clearProfileOwner(in ComponentName who);
     boolean hasUserSetupCompleted();
 
+    boolean checkDeviceIdentifierAccess(in String packageName, int userHandle);
+
     void setDeviceOwnerLockScreenInfo(in ComponentName who, CharSequence deviceOwnerInfo);
     CharSequence getDeviceOwnerLockScreenInfo();
 

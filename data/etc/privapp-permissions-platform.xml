@@ -323,6 +323,7 @@ applications that come with the platform
         <permission name="android.permission.PACKAGE_USAGE_STATS" />
         <permission name="android.permission.READ_FRAME_BUFFER"/>
         <permission name="android.permission.READ_LOWPAN_CREDENTIAL"/>
+        <permission name="android.permission.READ_PRIVILEGED_PHONE_STATE"/>
         <permission name="android.permission.REAL_GET_TASKS"/>
         <permission name="android.permission.REGISTER_CALL_PROVIDER"/>
         <permission name="android.permission.REGISTER_CONNECTION_MANAGER"/>
