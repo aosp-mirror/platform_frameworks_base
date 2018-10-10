@@ -32,9 +32,6 @@ import android.view.SurfaceHolder;
 
 import dalvik.system.CloseGuard;
 
-import java.io.FileDescriptor;
-import java.io.IOException;
-import java.io.InputStream;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
@@ -232,8 +229,7 @@ import java.util.concurrent.Executor;
  * successful transition. Any other value will be an error. Call {@link #getState()} to
  * determine the current state. </p>
  */
-public abstract class MediaPlayer2 implements SubtitleController.Listener
-                                            , AutoCloseable
+public abstract class MediaPlayer2 implements AutoCloseable
                                             , AudioRouting {
     private final CloseGuard mGuard = CloseGuard.get();
 
@@ -1081,16 +1077,6 @@ public abstract class MediaPlayer2 implements SubtitleController.Listener
     public abstract void reset();
 
     /**
-     * Set up a timer for {@link #TimeProvider}. {@link #TimeProvider} will be
-     * notified when the presentation time reaches (becomes greater than or equal to)
-     * the value specified.
-     *
-     * @param mediaTimeUs presentation time to get timed event callback at
-     * @hide
-     */
-    public void notifyAt(long mediaTimeUs) { }
-
-    /**
      * Checks whether the MediaPlayer2 is looping or non-looping.
      *
      * @return true if the MediaPlayer2 is currently looping, false otherwise
@@ -1237,95 +1223,6 @@ public abstract class MediaPlayer2 implements SubtitleController.Listener
      */
     public static final String MEDIA_MIMETYPE_TEXT_CEA_708 = "text/cea-708";
 
-    /** @hide */
-    public void setSubtitleAnchor(
-            SubtitleController controller,
-            SubtitleController.Anchor anchor) { }
-
-    /** @hide */
-    @Override
-    public void onSubtitleTrackSelected(SubtitleTrack track) { }
-
-    /** @hide */
-    public void addSubtitleSource(InputStream is, MediaFormat format) { }
-
-    /* TODO: Limit the total number of external timed text source to a reasonable number.
-     */
-    /**
-     * Adds an external timed text source file.
-     *
-     * Currently supported format is SubRip with the file extension .srt, case insensitive.
-     * Note that a single external timed text source may contain multiple tracks in it.
-     * One can find the total number of available tracks using {@link #getTrackInfo()} to see what
-     * additional tracks become available after this method call.
-     *
-     * @param path The file path of external timed text source file.
-     * @param mimeType The mime type of the file. Must be one of the mime types listed above.
-     * @throws IOException if the file cannot be accessed or is corrupted.
-     * @throws IllegalArgumentException if the mimeType is not supported.
-     * @throws IllegalStateException if called in an invalid state.
-     * @hide
-     */
-    public void addTimedTextSource(String path, String mimeType) throws IOException { }
-
-    /**
-     * Adds an external timed text source file (Uri).
-     *
-     * Currently supported format is SubRip with the file extension .srt, case insensitive.
-     * Note that a single external timed text source may contain multiple tracks in it.
-     * One can find the total number of available tracks using {@link #getTrackInfo()} to see what
-     * additional tracks become available after this method call.
-     *
-     * @param context the Context to use when resolving the Uri
-     * @param uri the Content URI of the data you want to play
-     * @param mimeType The mime type of the file. Must be one of the mime types listed above.
-     * @throws IOException if the file cannot be accessed or is corrupted.
-     * @throws IllegalArgumentException if the mimeType is not supported.
-     * @throws IllegalStateException if called in an invalid state.
-     * @hide
-     */
-    public void addTimedTextSource(Context context, Uri uri, String mimeType) throws IOException { }
-
-    /**
-     * Adds an external timed text source file (FileDescriptor).
-     *
-     * It is the caller's responsibility to close the file descriptor.
-     * It is safe to do so as soon as this call returns.
-     *
-     * Currently supported format is SubRip. Note that a single external timed text source may
-     * contain multiple tracks in it. One can find the total number of available tracks
-     * using {@link #getTrackInfo()} to see what additional tracks become available
-     * after this method call.
-     *
-     * @param fd the FileDescriptor for the file you want to play
-     * @param mimeType The mime type of the file. Must be one of the mime types listed above.
-     * @throws IllegalArgumentException if the mimeType is not supported.
-     * @throws IllegalStateException if called in an invalid state.
-     * @hide
-     */
-    public void addTimedTextSource(FileDescriptor fd, String mimeType) { }
-
-    /**
-     * Adds an external timed text file (FileDescriptor).
-     *
-     * It is the caller's responsibility to close the file descriptor.
-     * It is safe to do so as soon as this call returns.
-     *
-     * Currently supported format is SubRip. Note that a single external timed text source may
-     * contain multiple tracks in it. One can find the total number of available tracks
-     * using {@link #getTrackInfo()} to see what additional tracks become available
-     * after this method call.
-     *
-     * @param fd the FileDescriptor for the file you want to play
-     * @param offset the offset into the file where the data to be played starts, in bytes
-     * @param length the length in bytes of the data to be played
-     * @param mime The mime type of the file. Must be one of the mime types listed above.
-     * @throws IllegalArgumentException if the mimeType is not supported.
-     * @throws IllegalStateException if called in an invalid state.
-     * @hide
-     */
-    public abstract void addTimedTextSource(FileDescriptor fd, long offset, long length, String mime);
-
     /**
      * Returns the index of the audio, video, or subtitle track currently selected for playback,
      * The return value is an index into the array returned by {@link #getTrackInfo()}, and can
@@ -1392,11 +1289,6 @@ public abstract class MediaPlayer2 implements SubtitleController.Listener
      */
     // This is an asynchronous call.
     public abstract void deselectTrack(int index);
-
-    /** @hide */
-    public MediaTimeProvider getMediaTimeProvider() {
-        return null;
-    }
 
     /**
      * Interface definition for callbacks to be invoked when the player has the corresponding
@@ -1679,12 +1571,6 @@ public abstract class MediaPlayer2 implements SubtitleController.Listener
      */
     public static final int MEDIA_INFO_METADATA_UPDATE = 802;
 
-    /** A new set of external-only metadata is available.  Used by
-     *  JAVA framework to avoid triggering track scanning.
-     * @hide
-     */
-    public static final int MEDIA_INFO_EXTERNAL_METADATA_UPDATE = 803;
-
     /** Informs that audio is not playing. Note that playback of the video
      * is not interrupted.
      * @see EventCallback#onInfo
@@ -1733,7 +1619,6 @@ public abstract class MediaPlayer2 implements SubtitleController.Listener
             MEDIA_INFO_BAD_INTERLEAVING,
             MEDIA_INFO_NOT_SEEKABLE,
             MEDIA_INFO_METADATA_UPDATE,
-            MEDIA_INFO_EXTERNAL_METADATA_UPDATE,
             MEDIA_INFO_AUDIO_NOT_PLAYING,
             MEDIA_INFO_VIDEO_NOT_PLAYING,
             MEDIA_INFO_TIMED_TEXT_ERROR,
