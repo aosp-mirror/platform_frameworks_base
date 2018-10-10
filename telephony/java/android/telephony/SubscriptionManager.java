@@ -2185,9 +2185,10 @@ public class SubscriptionManager {
      *  Provide all available user downloaded profiles on phone which are used only for
      *  opportunistic data.
      *  @param slotIndex slot on which the profiles are queried from.
+     *  @return the list of opportunistic subscription info. If none exists, an empty list. 
      */
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
-    public List<SubscriptionInfo> getOpportunisticSubscriptions(int slotIndex) {
+    public @NonNull List<SubscriptionInfo> getOpportunisticSubscriptions(int slotIndex) {
         String pkgForDebug = mContext != null ? mContext.getOpPackageName() : "<unknown>";
         List<SubscriptionInfo> subInfoList = null;
 
