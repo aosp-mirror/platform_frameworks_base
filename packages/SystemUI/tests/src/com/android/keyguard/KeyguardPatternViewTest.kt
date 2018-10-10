@@ -46,9 +46,9 @@ class KeyguardPatternViewTest : SysuiTestCase() {
     }
 
     @Test
-    fun onResume_clearsTextField() {
+    fun onPause_clearsTextField() {
         mSecurityMessage.setMessage("an old message")
-        mKeyguardPatternView.onResume(KeyguardSecurityView.SCREEN_ON)
+        mKeyguardPatternView.onPause()
         assertThat(mSecurityMessage.text).isEqualTo("")
     }
 }

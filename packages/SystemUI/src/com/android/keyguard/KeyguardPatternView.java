@@ -373,11 +373,11 @@ public class KeyguardPatternView extends LinearLayout implements KeyguardSecurit
             mPendingLockCheck.cancel(false);
             mPendingLockCheck = null;
         }
+        displayDefaultSecurityMessage();
     }
 
     @Override
     public void onResume(int reason) {
-        displayDefaultSecurityMessage();
     }
 
     @Override
