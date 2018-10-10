@@ -24,6 +24,7 @@
 #include "DamageAccumulator.h"
 #include "IContextFactory.h"
 #include "SkiaCanvas.h"
+#include "pipeline/skia/SkiaUtils.h"
 #include "pipeline/skia/SkiaDisplayList.h"
 #include "pipeline/skia/SkiaOpenGLPipeline.h"
 #include "pipeline/skia/SkiaRecordingCanvas.h"
@@ -41,7 +42,7 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, renderFrame) {
                 redCanvas.drawColor(SK_ColorRED, SkBlendMode::kSrcOver);
             });
     LayerUpdateQueue layerUpdateQueue;
-    SkRect dirty = SkRect::MakeLargest();
+    SkRect dirty = SkRectMakeLargest();
     std::vector<sp<RenderNode>> renderNodes;
     renderNodes.push_back(redNode);
     bool opaque = true;
@@ -62,7 +63,7 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, testOnPrepareTree) {
             });
 
     LayerUpdateQueue layerUpdateQueue;
-    SkRect dirty = SkRect::MakeLargest();
+    SkRect dirty = SkRectMakeLargest();
     std::vector<sp<RenderNode>> renderNodes;
     renderNodes.push_back(redNode);
     bool opaque = true;
@@ -97,7 +98,7 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, renderFrameCheckOpaque) {
                 bottomHalfGreenCanvas.drawRect(0, 1, 2, 2, greenPaint);
             });
     LayerUpdateQueue layerUpdateQueue;
-    SkRect dirty = SkRect::MakeLargest();
+    SkRect dirty = SkRectMakeLargest();
     std::vector<sp<RenderNode>> renderNodes;
     renderNodes.push_back(halfGreenNode);
     android::uirenderer::Rect contentDrawBounds(0, 0, 2, 2);
@@ -160,7 +161,7 @@ RENDERTHREAD_SKIA_PIPELINE_TEST(SkiaPipeline, renderLayer) {
 
     // attach both layers to the update queue
     LayerUpdateQueue layerUpdateQueue;
-    SkRect dirty = SkRect::MakeLargest();
+    SkRect dirty = SkRectMakeLargest();
     layerUpdateQueue.enqueueLayerWithDamage(redNode.get(), dirty);
     layerUpdateQueue.enqueueLayerWithDamage(blueNode.get(), SkRect::MakeWH(2, 1));
     ASSERT_EQ(layerUpdateQueue.entries().size(), 2UL);
