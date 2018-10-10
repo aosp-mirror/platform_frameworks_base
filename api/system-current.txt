@@ -3565,7 +3565,7 @@ package android.net.wifi {
     field public byte id;
   }
 
-  public class WifiConfiguration implements android.os.Parcelable {
+  public deprecated class WifiConfiguration implements android.os.Parcelable {
     method public boolean hasNoInternetAccess();
     method public boolean isEphemeral();
     method public boolean isNoInternetAccessExpected();

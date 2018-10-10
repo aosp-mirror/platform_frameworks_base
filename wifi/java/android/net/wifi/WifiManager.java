@@ -31,14 +31,11 @@ import android.content.pm.ParceledListSlice;
 import android.net.ConnectivityManager;
 import android.net.DhcpInfo;
 import android.net.Network;
-import android.net.NetworkCapabilities;
-import android.net.NetworkRequest;
 import android.net.wifi.hotspot2.IProvisioningCallback;
 import android.net.wifi.hotspot2.OsuProvider;
 import android.net.wifi.hotspot2.PasspointConfiguration;
 import android.net.wifi.hotspot2.ProvisioningCallback;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -53,7 +50,6 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.AsyncChannel;
 import com.android.internal.util.Protocol;
-import com.android.server.net.NetworkPinner;
 
 import dalvik.system.CloseGuard;
 
@@ -1036,7 +1032,17 @@ public class WifiManager {
      * </ul>
      * @return a list of network configurations in the form of a list
      * of {@link WifiConfiguration} objects.
+     *
+     * @deprecated
+     * a) See {@link WifiNetworkConfigBuilder#buildNetworkSpecifier()} for new
+     * mechanism to trigger connection to a Wi-Fi network.
+     * b) See {@link #addNetworkSuggestions(List, PendingIntent)},
+     * {@link #removeNetworkSuggestions(List)} for new API to add Wi-Fi networks for consideration
+     * when auto-connecting to wifi.
+     * <b>Compatibility Note:</b> For applications targeting
+     * {@link android.os.Build.VERSION_CODES#Q} or above, this API will always return an empty list.
      */
+    @Deprecated
     public List<WifiConfiguration> getConfiguredNetworks() {
         try {
             ParceledListSlice<WifiConfiguration> parceledList =
@@ -1136,7 +1142,17 @@ public class WifiManager {
      * @return the ID of the newly created network description. This is used in
      *         other operations to specified the network to be acted upon.
      *         Returns {@code -1} on failure.
+     *
+     * @deprecated
+     * a) See {@link WifiNetworkConfigBuilder#buildNetworkSpecifier()} for new
+     * mechanism to trigger connection to a Wi-Fi network.
+     * b) See {@link #addNetworkSuggestions(List, PendingIntent)},
+     * {@link #removeNetworkSuggestions(List)} for new API to add Wi-Fi networks for consideration
+     * when auto-connecting to wifi.
+     * <b>Compatibility Note:</b> For applications targeting
+     * {@link android.os.Build.VERSION_CODES#Q} or above, this API will always return {@code -1}.
      */
+    @Deprecated
     public int addNetwork(WifiConfiguration config) {
         if (config == null) {
             return -1;
@@ -1161,7 +1177,17 @@ public class WifiManager {
      *         Returns {@code -1} on failure, including when the {@code networkId}
      *         field of the {@code WifiConfiguration} does not refer to an
      *         existing network.
+     *
+     * @deprecated
+     * a) See {@link WifiNetworkConfigBuilder#buildNetworkSpecifier()} for new
+     * mechanism to trigger connection to a Wi-Fi network.
+     * b) See {@link #addNetworkSuggestions(List, PendingIntent)},
+     * {@link #removeNetworkSuggestions(List)} for new API to add Wi-Fi networks for consideration
+     * when auto-connecting to wifi.
+     * <b>Compatibility Note:</b> For applications targeting
+     * {@link android.os.Build.VERSION_CODES#Q} or above, this API will always return {@code -1}.
      */
+    @Deprecated
     public int updateNetwork(WifiConfiguration config) {
         if (config == null || config.networkId < 0) {
             return -1;
@@ -1359,7 +1385,17 @@ public class WifiManager {
      * @param netId the ID of the network as returned by {@link #addNetwork} or {@link
      *        #getConfiguredNetworks}.
      * @return {@code true} if the operation succeeded
+     *
+     * @deprecated
+     * a) See {@link WifiNetworkConfigBuilder#buildNetworkSpecifier()} for new
+     * mechanism to trigger connection to a Wi-Fi network.
+     * b) See {@link #addNetworkSuggestions(List, PendingIntent)},
+     * {@link #removeNetworkSuggestions(List)} for new API to add Wi-Fi networks for consideration
+     * when auto-connecting to wifi.
+     * <b>Compatibility Note:</b> For applications targeting
+     * {@link android.os.Build.VERSION_CODES#Q} or above, this API will always return false.
      */
+    @Deprecated
     public boolean removeNetwork(int netId) {
         try {
             return mService.removeNetwork(netId, mContext.getOpPackageName());
@@ -1374,10 +1410,8 @@ public class WifiManager {
      * network is initiated. This may result in the asynchronous delivery
      * of state change events.
      * <p>
-     * <b>Note:</b> If an application's target SDK version is
-     * {@link android.os.Build.VERSION_CODES#LOLLIPOP} or newer, network
-     * communication may not use Wi-Fi even if Wi-Fi is connected; traffic may
-     * instead be sent through another network, such as cellular data,
+     * <b>Note:</b> Network communication may not use Wi-Fi even if Wi-Fi is connected;
+     * traffic may instead be sent through another network, such as cellular data,
      * Bluetooth tethering, or Ethernet. For example, traffic will never use a
      * Wi-Fi network that does not provide Internet access (e.g. a wireless
      * printer), if another network that does offer Internet access (e.g.
@@ -1395,29 +1429,24 @@ public class WifiManager {
      * @param attemptConnect The way to select a particular network to connect to is specify
      *        {@code true} for this parameter.
      * @return {@code true} if the operation succeeded
+     *
+     * @deprecated
+     * a) See {@link WifiNetworkConfigBuilder#buildNetworkSpecifier()} for new
+     * mechanism to trigger connection to a Wi-Fi network.
+     * b) See {@link #addNetworkSuggestions(List, PendingIntent)},
+     * {@link #removeNetworkSuggestions(List)} for new API to add Wi-Fi networks for consideration
+     * when auto-connecting to wifi.
+     * <b>Compatibility Note:</b> For applications targeting
+     * {@link android.os.Build.VERSION_CODES#Q} or above, this API will always return false.
      */
+    @Deprecated
     public boolean enableNetwork(int netId, boolean attemptConnect) {
-        final boolean pin = attemptConnect && mTargetSdkVersion < Build.VERSION_CODES.LOLLIPOP;
-        if (pin) {
-            NetworkRequest request = new NetworkRequest.Builder()
-                    .clearCapabilities()
-                    .addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN)
-                    .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
-                    .build();
-            NetworkPinner.pin(mContext, request);
-        }
-
         boolean success;
         try {
             success = mService.enableNetwork(netId, attemptConnect, mContext.getOpPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
-
-        if (pin && !success) {
-            NetworkPinner.unpin();
-        }
-
         return success;
     }
 
@@ -1432,7 +1461,17 @@ public class WifiManager {
      * @param netId the ID of the network as returned by {@link #addNetwork} or {@link
      *        #getConfiguredNetworks}.
      * @return {@code true} if the operation succeeded
+     *
+     * @deprecated
+     * a) See {@link WifiNetworkConfigBuilder#buildNetworkSpecifier()} for new
+     * mechanism to trigger connection to a Wi-Fi network.
+     * b) See {@link #addNetworkSuggestions(List, PendingIntent)},
+     * {@link #removeNetworkSuggestions(List)} for new API to add Wi-Fi networks for consideration
+     * when auto-connecting to wifi.
+     * <b>Compatibility Note:</b> For applications targeting
+     * {@link android.os.Build.VERSION_CODES#Q} or above, this API will always return false.
      */
+    @Deprecated
     public boolean disableNetwork(int netId) {
         try {
             return mService.disableNetwork(netId, mContext.getOpPackageName());
@@ -1445,7 +1484,17 @@ public class WifiManager {
      * Disassociate from the currently active access point. This may result
      * in the asynchronous delivery of state change events.
      * @return {@code true} if the operation succeeded
+     *
+     * @deprecated
+     * a) See {@link WifiNetworkConfigBuilder#buildNetworkSpecifier()} for new
+     * mechanism to trigger connection to a Wi-Fi network.
+     * b) See {@link #addNetworkSuggestions(List, PendingIntent)},
+     * {@link #removeNetworkSuggestions(List)} for new API to add Wi-Fi networks for consideration
+     * when auto-connecting to wifi.
+     * <b>Compatibility Note:</b> For applications targeting
+     * {@link android.os.Build.VERSION_CODES#Q} or above, this API will always return false.
      */
+    @Deprecated
     public boolean disconnect() {
         try {
             mService.disconnect(mContext.getOpPackageName());
@@ -1460,7 +1509,17 @@ public class WifiManager {
      * disconnected. This may result in the asynchronous delivery of state
      * change events.
      * @return {@code true} if the operation succeeded
+     *
+     * @deprecated
+     * a) See {@link WifiNetworkConfigBuilder#buildNetworkSpecifier()} for new
+     * mechanism to trigger connection to a Wi-Fi network.
+     * b) See {@link #addNetworkSuggestions(List, PendingIntent)},
+     * {@link #removeNetworkSuggestions(List)} for new API to add Wi-Fi networks for consideration
+     * when auto-connecting to wifi.
+     * <b>Compatibility Note:</b> For applications targeting
+     * {@link android.os.Build.VERSION_CODES#Q} or above, this API will always return false.
      */
+    @Deprecated
     public boolean reconnect() {
         try {
             mService.reconnect(mContext.getOpPackageName());
@@ -1475,7 +1534,17 @@ public class WifiManager {
      * connected. This may result in the asynchronous delivery of state
      * change events.
      * @return {@code true} if the operation succeeded
+     *
+     * @deprecated
+     * a) See {@link WifiNetworkConfigBuilder#buildNetworkSpecifier()} for new
+     * mechanism to trigger connection to a Wi-Fi network.
+     * b) See {@link #addNetworkSuggestions(List, PendingIntent)},
+     * {@link #removeNetworkSuggestions(List)} for new API to add Wi-Fi networks for consideration
+     * when auto-connecting to wifi.
+     * <b>Compatibility Note:</b> For applications targeting
+     * {@link android.os.Build.VERSION_CODES#Q} or above, this API will always return false.
      */
+    @Deprecated
     public boolean reassociate() {
         try {
             mService.reassociate(mContext.getOpPackageName());
@@ -1881,7 +1950,12 @@ public class WifiManager {
      * @return {@code false} if the request cannot be satisfied; {@code true} indicates that wifi is
      *         either already in the requested state, or in progress toward the requested state.
      * @throws  {@link java.lang.SecurityException} if the caller is missing required permissions.
+     *
+     * @deprecated Starting with Build.VERSION_CODES#Q, applications are not allowed to
+     * enable/disable Wi-Fi regardless of application's target SDK. This API will have no effect
+     * and will always return false.
      */
+    @Deprecated
     public boolean setWifiEnabled(boolean enabled) {
         try {
             return mService.setWifiEnabled(mContext.getOpPackageName(), enabled);
