@@ -74,6 +74,7 @@ public class AssistStructure implements Parcelable {
     ComponentName mActivityComponent;
     private boolean mIsHomeActivity;
     private int mFlags;
+    private int mAutofillFlags;
 
     final ArrayList<WindowNode> mWindowNodes = new ArrayList<>();
 
@@ -197,6 +198,7 @@ public class AssistStructure implements Parcelable {
             mWriteStructure = as.waitForReady();
             ComponentName.writeToParcel(as.mActivityComponent, out);
             out.writeInt(as.mFlags);
+            out.writeInt(as.mAutofillFlags);
             out.writeLong(as.mAcquisitionStartTime);
             out.writeLong(as.mAcquisitionEndTime);
             mNumWindows = as.mWindowNodes.size();
@@ -352,6 +354,7 @@ public class AssistStructure implements Parcelable {
             fetchData();
             mActivityComponent = ComponentName.readFromParcel(mCurParcel);
             mFlags = mCurParcel.readInt();
+            mAutofillFlags = mCurParcel.readInt();
             mAcquisitionStartTime = mCurParcel.readLong();
             mAcquisitionEndTime = mCurParcel.readLong();
             final int N = mCurParcel.readInt();
@@ -625,8 +628,6 @@ public class AssistStructure implements Parcelable {
         String mIdType;
         String mIdEntry;
 
-        // TODO(b/37567426): once we have more flags, it might be better to store the individual
-        // fields (viewId and childId) of the field.
         AutofillId mAutofillId;
         @View.AutofillType int mAutofillType = View.AUTOFILL_TYPE_NONE;
         @Nullable String[] mAutofillHints;
@@ -669,11 +670,6 @@ public class AssistStructure implements Parcelable {
         static final int FLAGS_CONTEXT_CLICKABLE = 0x00004000;
         static final int FLAGS_OPAQUE = 0x00008000;
 
-        // TODO(b/37567426): autofill data is made of many fields and ideally we should verify
-        // one-by-one to optimize what's sent over, but there isn't enough flag bits for that, we'd
-        // need to create a 'flags2' or 'autoFillFlags' field and add these flags there.
-        // So, to keep thinkg simpler for now, let's just use on flag for all of them...
-        static final int FLAGS_HAS_AUTOFILL_DATA = 0x80000000;
         static final int FLAGS_HAS_MATRIX = 0x40000000;
         static final int FLAGS_HAS_ALPHA = 0x20000000;
         static final int FLAGS_HAS_ELEVATION = 0x10000000;
@@ -690,7 +686,20 @@ public class AssistStructure implements Parcelable {
         static final int FLAGS_HAS_LOCALE_LIST = 0x00010000;
         static final int FLAGS_ALL_CONTROL = 0xfff00000;
 
+        static final int AUTOFILL_FLAGS_HAS_AUTOFILL_VIEW_ID =         0x001;
+        static final int AUTOFILL_FLAGS_HAS_AUTOFILL_VIRTUAL_VIEW_ID = 0x002;
+        static final int AUTOFILL_FLAGS_HAS_AUTOFILL_VALUE =           0x004;
+        static final int AUTOFILL_FLAGS_HAS_AUTOFILL_TYPE =            0x008;
+        static final int AUTOFILL_FLAGS_HAS_AUTOFILL_HINTS =           0x010;
+        static final int AUTOFILL_FLAGS_HAS_AUTOFILL_OPTIONS =         0x020;
+        static final int AUTOFILL_FLAGS_HAS_HTML_INFO =                0x040;
+        static final int AUTOFILL_FLAGS_HAS_TEXT_ID_ENTRY =            0x080;
+        static final int AUTOFILL_FLAGS_HAS_MIN_TEXT_EMS =             0x100;
+        static final int AUTOFILL_FLAGS_HAS_MAX_TEXT_EMS =             0x200;
+        static final int AUTOFILL_FLAGS_HAS_MAX_TEXT_LENGTH =          0x400;
+
         int mFlags;
+        int mAutofillFlags;
 
         String mClassName;
         CharSequence mContentDescription;
@@ -714,6 +723,8 @@ public class AssistStructure implements Parcelable {
             mClassName = preader.readString();
             mFlags = in.readInt();
             final int flags = mFlags;
+            mAutofillFlags = in.readInt();
+            final int autofillFlags = mAutofillFlags;
             if ((flags&FLAGS_HAS_ID) != 0) {
                 mId = in.readInt();
                 if (mId != View.NO_ID) {
@@ -725,22 +736,45 @@ public class AssistStructure implements Parcelable {
                 }
             }
 
-            if ((flags&FLAGS_HAS_AUTOFILL_DATA) != 0) {
+            if (autofillFlags != 0) {
                 mSanitized = in.readInt() == 1;
-                mAutofillId = in.readParcelable(null);
-                mAutofillType = in.readInt();
-                mAutofillHints = in.readStringArray();
-                mAutofillValue = in.readParcelable(null);
-                mAutofillOptions = in.readCharSequenceArray();
-                final Parcelable p = in.readParcelable(null);
-                if (p instanceof HtmlInfo) {
-                    mHtmlInfo = (HtmlInfo) p;
-                }
-                mMinEms = in.readInt();
-                mMaxEms = in.readInt();
-                mMaxLength = in.readInt();
-                mTextIdEntry = preader.readString();
                 mImportantForAutofill = in.readInt();
+
+                if ((autofillFlags & AUTOFILL_FLAGS_HAS_AUTOFILL_VIEW_ID) != 0) {
+                    int autofillViewId = in.readInt();
+                    if ((autofillFlags & AUTOFILL_FLAGS_HAS_AUTOFILL_VIRTUAL_VIEW_ID) != 0) {
+                        mAutofillId = new AutofillId(autofillViewId, in.readInt());
+                    } else {
+                        mAutofillId = new AutofillId(autofillViewId);
+                    }
+                }
+                if ((autofillFlags & AUTOFILL_FLAGS_HAS_AUTOFILL_TYPE) != 0) {
+                    mAutofillType = in.readInt();
+                }
+                if ((autofillFlags & AUTOFILL_FLAGS_HAS_AUTOFILL_HINTS) != 0) {
+                    mAutofillHints = in.readStringArray();
+                }
+                if ((autofillFlags & AUTOFILL_FLAGS_HAS_AUTOFILL_VALUE) != 0) {
+                    mAutofillValue = in.readParcelable(null);
+                }
+                if ((autofillFlags & AUTOFILL_FLAGS_HAS_AUTOFILL_OPTIONS) != 0) {
+                    mAutofillOptions = in.readCharSequenceArray();
+                }
+                if ((autofillFlags & AUTOFILL_FLAGS_HAS_HTML_INFO) != 0) {
+                    mHtmlInfo = in.readParcelable(null);
+                }
+                if ((autofillFlags & AUTOFILL_FLAGS_HAS_MIN_TEXT_EMS) != 0) {
+                    mMinEms = in.readInt();
+                }
+                if ((autofillFlags & AUTOFILL_FLAGS_HAS_MAX_TEXT_EMS) != 0) {
+                    mMaxEms = in.readInt();
+                }
+                if ((autofillFlags & AUTOFILL_FLAGS_HAS_MAX_TEXT_LENGTH) != 0) {
+                    mMaxLength = in.readInt();
+                }
+                if ((autofillFlags & AUTOFILL_FLAGS_HAS_TEXT_ID_ENTRY) != 0) {
+                    mTextIdEntry = preader.readString();
+                }
             }
             if ((flags&FLAGS_HAS_LARGE_COORDS) != 0) {
                 mX = in.readInt();
@@ -808,12 +842,10 @@ public class AssistStructure implements Parcelable {
             boolean writeSensitive = true;
 
             int flags = mFlags & ~FLAGS_ALL_CONTROL;
+            int autofillFlags = 0;
 
             if (mId != View.NO_ID) {
                 flags |= FLAGS_HAS_ID;
-            }
-            if (mAutofillId != null) {
-                flags |= FLAGS_HAS_AUTOFILL_DATA;
             }
             if ((mX&~0x7fff) != 0 || (mY&~0x7fff) != 0
                     || (mWidth&~0x7fff) != 0 | (mHeight&~0x7fff) != 0) {
@@ -855,11 +887,44 @@ public class AssistStructure implements Parcelable {
             if (mChildren != null) {
                 flags |= FLAGS_HAS_CHILDREN;
             }
+            if (mAutofillId != null) {
+                autofillFlags |= AUTOFILL_FLAGS_HAS_AUTOFILL_VIEW_ID;
+                if (mAutofillId.isVirtual()) {
+                    autofillFlags |= AUTOFILL_FLAGS_HAS_AUTOFILL_VIRTUAL_VIEW_ID;
+                }
+            }
+            if (mAutofillValue != null) {
+                autofillFlags |= AUTOFILL_FLAGS_HAS_AUTOFILL_VALUE;
+            }
+            if (mAutofillType != View.AUTOFILL_TYPE_NONE) {
+                autofillFlags |= AUTOFILL_FLAGS_HAS_AUTOFILL_TYPE;
+            }
+            if (mAutofillHints != null) {
+                autofillFlags |= AUTOFILL_FLAGS_HAS_AUTOFILL_HINTS;
+            }
+            if (mAutofillOptions != null) {
+                autofillFlags |= AUTOFILL_FLAGS_HAS_AUTOFILL_OPTIONS;
+            }
+            if (mHtmlInfo instanceof Parcelable) {
+                autofillFlags |= AUTOFILL_FLAGS_HAS_HTML_INFO;
+            }
+            if (mMinEms > -1) {
+                autofillFlags |= AUTOFILL_FLAGS_HAS_MIN_TEXT_EMS;
+            }
+            if (mMaxEms > -1) {
+                autofillFlags |= AUTOFILL_FLAGS_HAS_MAX_TEXT_EMS;
+            }
+            if (mMaxLength > -1) {
+                autofillFlags |= AUTOFILL_FLAGS_HAS_MAX_TEXT_LENGTH;
+            }
+            if (mTextIdEntry != null) {
+                autofillFlags |= AUTOFILL_FLAGS_HAS_TEXT_ID_ENTRY;
+            }
 
             pwriter.writeString(mClassName);
 
             int writtenFlags = flags;
-            if ((flags&FLAGS_HAS_AUTOFILL_DATA) != 0 && (mSanitized || !sanitizeOnWrite)) {
+            if (autofillFlags != 0 && (mSanitized || !sanitizeOnWrite)) {
                 // Remove 'checked' from sanitized autofill request.
                 writtenFlags = flags & ~FLAGS_CHECKED;
             }
@@ -872,6 +937,7 @@ public class AssistStructure implements Parcelable {
             }
 
             out.writeInt(writtenFlags);
+            out.writeInt(autofillFlags);
             if ((flags&FLAGS_HAS_ID) != 0) {
                 out.writeInt(mId);
                 if (mId != View.NO_ID) {
@@ -883,32 +949,51 @@ public class AssistStructure implements Parcelable {
                 }
             }
 
-            if ((flags&FLAGS_HAS_AUTOFILL_DATA) != 0) {
-                writeSensitive = mSanitized || !sanitizeOnWrite;
+            if (autofillFlags != 0) {
                 out.writeInt(mSanitized ? 1 : 0);
-                out.writeParcelable(mAutofillId, 0);
-                out.writeInt(mAutofillType);
-                out.writeStringArray(mAutofillHints);
-                final AutofillValue sanitizedValue;
-                if (writeSensitive) {
-                    sanitizedValue = mAutofillValue;
-                } else if (mAutofillOverlay != null && mAutofillOverlay.value != null) {
-                    sanitizedValue = mAutofillOverlay.value;
-                } else {
-                    sanitizedValue = null;
-                }
-                out.writeParcelable(sanitizedValue,  0);
-                out.writeCharSequenceArray(mAutofillOptions);
-                if (mHtmlInfo instanceof Parcelable) {
-                    out.writeParcelable((Parcelable) mHtmlInfo, 0);
-                } else {
-                    out.writeParcelable(null, 0);
-                }
-                out.writeInt(mMinEms);
-                out.writeInt(mMaxEms);
-                out.writeInt(mMaxLength);
-                pwriter.writeString(mTextIdEntry);
                 out.writeInt(mImportantForAutofill);
+                writeSensitive = mSanitized || !sanitizeOnWrite;
+                if ((autofillFlags & AUTOFILL_FLAGS_HAS_AUTOFILL_VIEW_ID) != 0) {
+                    out.writeInt(mAutofillId.getViewId());
+                    if ((autofillFlags & AUTOFILL_FLAGS_HAS_AUTOFILL_VIRTUAL_VIEW_ID) != 0) {
+                        out.writeInt(mAutofillId.getVirtualChildId());
+                    }
+                }
+                if ((autofillFlags & AUTOFILL_FLAGS_HAS_AUTOFILL_TYPE) != 0) {
+                    out.writeInt(mAutofillType);
+                }
+                if ((autofillFlags & AUTOFILL_FLAGS_HAS_AUTOFILL_HINTS) != 0) {
+                    out.writeStringArray(mAutofillHints);
+                }
+                if ((autofillFlags & AUTOFILL_FLAGS_HAS_AUTOFILL_VALUE) != 0) {
+                    final AutofillValue sanitizedValue;
+                    if (writeSensitive) {
+                        sanitizedValue = mAutofillValue;
+                    } else if (mAutofillOverlay != null && mAutofillOverlay.value != null) {
+                        sanitizedValue = mAutofillOverlay.value;
+                    } else {
+                        sanitizedValue = null;
+                    }
+                    out.writeParcelable(sanitizedValue, 0);
+                }
+                if ((autofillFlags & AUTOFILL_FLAGS_HAS_AUTOFILL_OPTIONS) != 0) {
+                    out.writeCharSequenceArray(mAutofillOptions);
+                }
+                if ((autofillFlags & AUTOFILL_FLAGS_HAS_HTML_INFO) != 0) {
+                    out.writeParcelable((Parcelable) mHtmlInfo, 0);
+                }
+                if ((autofillFlags & AUTOFILL_FLAGS_HAS_MIN_TEXT_EMS) != 0) {
+                    out.writeInt(mMinEms);
+                }
+                if ((autofillFlags & AUTOFILL_FLAGS_HAS_MAX_TEXT_EMS) != 0) {
+                    out.writeInt(mMaxEms);
+                }
+                if ((autofillFlags & AUTOFILL_FLAGS_HAS_MAX_TEXT_LENGTH) != 0) {
+                    out.writeInt(mMaxLength);
+                }
+                if ((autofillFlags & AUTOFILL_FLAGS_HAS_TEXT_ID_ENTRY) != 0) {
+                    pwriter.writeString(mTextIdEntry);
+                }
             }
             if ((flags&FLAGS_HAS_LARGE_COORDS) != 0) {
                 out.writeInt(mX);
