@@ -25,6 +25,7 @@ import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.UnsupportedAppUsage;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
 import android.net.ConnectivityManager;
@@ -1182,6 +1183,65 @@ public class WifiManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Provide a list of network suggestions to the device. See {@link WifiNetworkSuggestion}
+     * for a detailed explanation of the parameters.
+     *<p>
+     * When the device decides to connect to one of the provided network suggestions, platform fires
+     * the associated {@code pendingIntent} if
+     * {@link WifiNetworkSuggestion#isAppInteractionRequired} is {@code true} and the
+     * provided {@code pendingIntent} is non-null.
+     *<p>
+     * Registration of a non-null pending intent {@code pendingIntent} requires
+     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION ACCESS_COARSE_LOCATION} or
+     * {@link android.Manifest.permission#ACCESS_FINE_LOCATION ACCESS_FINE_LOCATION} permission.
+     *<p>
+     * NOTE:
+     * <li> These networks are just a suggestion to the platform. The platform will ultimately
+     * decide on which network the device connects to. </li>
+     * <li> When an app is uninstalled, all its suggested networks are discarded. If the device is
+     * currently connected to a suggested network which is being removed then the device will
+     * disconnect from that network.</li>
+     * <li> No in-place modification of existing suggestions are allowed. Apps are expected to
+     * remove suggestions using {@link #removeNetworkSuggestions(List)} and then add the modified
+     * suggestion back using this API.</li>
+     *
+     * @param networkSuggestions List of network suggestions provided by the app.
+     * @param pendingIntent Pending intent to be fired post connection for networks. These will be
+     *                      fired only when connecting to a network which has the
+     *                      {@link WifiNetworkSuggestion#isAppInteractionRequired} flag set.
+     *                      Pending intent must hold a foreground service, else will be rejected.
+     *                      (i.e {@link PendingIntent#isForegroundService()} should return true)
+     * @return true on success, false if any of the suggestions match (See
+     * {@link WifiNetworkSuggestion#equals(Object)} any previously provided suggestions by the app.
+     * @throws {@link SecurityException} if the caller is missing required permissions.
+     */
+    public boolean addNetworkSuggestions(
+            @NonNull List<WifiNetworkSuggestion> networkSuggestions,
+            @Nullable PendingIntent pendingIntent) {
+        // TODO(b/115504887): Implementation
+        return false;
+    }
+
+
+    /**
+     * Remove a subset of or all of networks from previously provided suggestions by the app to the
+     * device.
+     * See {@link WifiNetworkSuggestion} for a detailed explanation of the parameters.
+     * See {@link WifiNetworkSuggestion#equals(Object)} for the equivalence evaluation used.
+     *
+     * @param networkSuggestions List of network suggestions to be removed. Pass an empty list
+     *                           to remove all the previous suggestions provided by the app.
+     * @return true on success, false if any of the suggestions do not match any suggestions
+     * previously provided by the app. Any matching suggestions are removed from the device and
+     * will not be considered for any further connection attempts.
+     */
+    public boolean removeNetworkSuggestions(
+            @NonNull List<WifiNetworkSuggestion> networkSuggestions) {
+        // TODO(b/115504887): Implementation
+        return false;
     }
 
     /**

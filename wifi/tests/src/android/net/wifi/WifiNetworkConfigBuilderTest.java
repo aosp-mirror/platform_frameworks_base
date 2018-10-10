@@ -21,6 +21,7 @@ import static android.os.PatternMatcher.PATTERN_PREFIX;
 import static android.os.PatternMatcher.PATTERN_SIMPLE_GLOB;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import android.net.MacAddress;
@@ -261,6 +262,19 @@ public class WifiNetworkConfigBuilderTest {
 
     /**
      * Ensure {@link WifiNetworkConfigBuilder#buildNetworkSpecifier()} throws an exception
+     * when SSID pattern is set for hidden network.
+     */
+    @Test(expected = IllegalStateException.class)
+    public void testWifiNetworkSpecifierBuilderWithBssidMatchPatternForHiddenNetwork() {
+        new WifiNetworkConfigBuilder()
+                .setBssidPattern(MacAddress.fromString(TEST_BSSID_OUI_BASE_ADDRESS),
+                        MacAddress.fromString(TEST_BSSID_OUI_MASK))
+                .setIsHiddenSsid()
+                .buildNetworkSpecifier();
+    }
+
+    /**
+     * Ensure {@link WifiNetworkConfigBuilder#buildNetworkSpecifier()} throws an exception
      * when both {@link WifiNetworkConfigBuilder#setPskPassphrase(String)} and
      * {@link WifiNetworkConfigBuilder#setEnterpriseConfig(WifiEnterpriseConfig)} are invoked.
      */
@@ -287,14 +301,181 @@ public class WifiNetworkConfigBuilderTest {
 
     /**
      * Ensure {@link WifiNetworkConfigBuilder#buildNetworkSpecifier()} throws an exception
-     * when SSID pattern is set for hidden network.
+     * when {@link WifiNetworkConfigBuilder#setIsAppInteractionRequired()} is set.
      */
     @Test(expected = IllegalStateException.class)
-    public void testWifiNetworkSpecifierBuilderWithBssidMatchPatternForHiddenNetwork() {
+    public void testWifiNetworkSpecifierBuilderWithRequiredAppInteraction() {
         new WifiNetworkConfigBuilder()
-                .setBssidPattern(MacAddress.fromString(TEST_BSSID_OUI_BASE_ADDRESS),
-                        MacAddress.fromString(TEST_BSSID_OUI_MASK))
-                .setIsHiddenSsid()
+                .setSsidPattern(new PatternMatcher(TEST_SSID, PATTERN_LITERAL))
+                .setIsAppInteractionRequired()
                 .buildNetworkSpecifier();
+    }
+
+    /**
+     * Ensure {@link WifiNetworkConfigBuilder#buildNetworkSpecifier()} throws an exception
+     * when {@link WifiNetworkConfigBuilder#setIsUserInteractionRequired()} is set.
+     */
+    @Test(expected = IllegalStateException.class)
+    public void testWifiNetworkSpecifierBuilderWithRequiredUserInteraction() {
+        new WifiNetworkConfigBuilder()
+                .setSsidPattern(new PatternMatcher(TEST_SSID, PATTERN_LITERAL))
+                .setIsUserInteractionRequired()
+                .buildNetworkSpecifier();
+    }
+
+    /**
+     * Ensure {@link WifiNetworkConfigBuilder#buildNetworkSpecifier()} throws an exception
+     * when {@link WifiNetworkConfigBuilder#setPriority(int)} is set.
+     */
+    @Test(expected = IllegalStateException.class)
+    public void testWifiNetworkSpecifierBuilderWithSetPriority() {
+        new WifiNetworkConfigBuilder()
+                .setSsidPattern(new PatternMatcher(TEST_SSID, PATTERN_LITERAL))
+                .setPriority(4)
+                .buildNetworkSpecifier();
+    }
+
+    /**
+     * Ensure {@link WifiNetworkConfigBuilder#buildNetworkSpecifier()} throws an exception
+     * when {@link WifiNetworkConfigBuilder#setIsMetered()} is set.
+     */
+    @Test(expected = IllegalStateException.class)
+    public void testWifiNetworkSpecifierBuilderWithMetered() {
+        new WifiNetworkConfigBuilder()
+                .setSsidPattern(new PatternMatcher(TEST_SSID, PATTERN_LITERAL))
+                .setIsMetered()
+                .buildNetworkSpecifier();
+    }
+
+    /**
+     * Validate correctness of WifiNetworkSuggestion object created by
+     * {@link WifiNetworkConfigBuilder#buildNetworkSuggestion()} for Open network which requires
+     * app interaction.
+     */
+    @Test
+    public void testWifiNetworkSuggestionBuilderForOpenNetworkWithReqAppInteraction() {
+        WifiNetworkSuggestion suggestion = new WifiNetworkConfigBuilder()
+                .setSsid(TEST_SSID)
+                .setIsAppInteractionRequired()
+                .buildNetworkSuggestion();
+
+        assertEquals("\"" + TEST_SSID + "\"", suggestion.wifiConfiguration.SSID);
+        assertTrue(suggestion.wifiConfiguration.allowedKeyManagement
+                .get(WifiConfiguration.KeyMgmt.NONE));
+        assertTrue(suggestion.isAppInteractionRequired);
+        assertFalse(suggestion.isUserInteractionRequired);
+        assertEquals(WifiConfiguration.METERED_OVERRIDE_NONE,
+                suggestion.wifiConfiguration.meteredOverride);
+        assertEquals(-1, suggestion.wifiConfiguration.priority);
+    }
+
+    /**
+     * Validate correctness of WifiNetworkSuggestion object created by
+     * {@link WifiNetworkConfigBuilder#buildNetworkSuggestion()} for WPA_EAP network which requires
+     * app interaction and has a priority of zero set.
+     */
+    @Test
+    public void testWifiNetworkSuggestionBuilderForWpaEapNetworkWithPriorityAndReqAppInteraction() {
+        WifiNetworkSuggestion suggestion = new WifiNetworkConfigBuilder()
+                .setSsid(TEST_SSID)
+                .setPskPassphrase(TEST_PRESHARED_KEY)
+                .setIsAppInteractionRequired()
+                .setPriority(0)
+                .buildNetworkSuggestion();
+
+        assertEquals("\"" + TEST_SSID + "\"", suggestion.wifiConfiguration.SSID);
+        assertTrue(suggestion.wifiConfiguration.allowedKeyManagement
+                .get(WifiConfiguration.KeyMgmt.WPA_PSK));
+        assertEquals("\"" + TEST_PRESHARED_KEY + "\"",
+                suggestion.wifiConfiguration.preSharedKey);
+        assertTrue(suggestion.isAppInteractionRequired);
+        assertFalse(suggestion.isUserInteractionRequired);
+        assertEquals(WifiConfiguration.METERED_OVERRIDE_NONE,
+                suggestion.wifiConfiguration.meteredOverride);
+        assertEquals(0, suggestion.wifiConfiguration.priority);
+    }
+
+    /**
+     * Validate correctness of WifiNetworkSuggestion object created by
+     * {@link WifiNetworkConfigBuilder#buildNetworkSuggestion()} for WPA_PSK network which requires
+     * user interaction and is metered.
+     */
+    @Test
+    public void testWifiNetworkSuggestionBuilderForWpaPskNetworkWithMeteredAndReqUserInteraction() {
+        WifiNetworkSuggestion suggestion = new WifiNetworkConfigBuilder()
+                .setSsid(TEST_SSID)
+                .setPskPassphrase(TEST_PRESHARED_KEY)
+                .setIsUserInteractionRequired()
+                .setIsMetered()
+                .buildNetworkSuggestion();
+
+        assertEquals("\"" + TEST_SSID + "\"", suggestion.wifiConfiguration.SSID);
+        assertTrue(suggestion.wifiConfiguration.allowedKeyManagement
+                .get(WifiConfiguration.KeyMgmt.WPA_PSK));
+        assertEquals("\"" + TEST_PRESHARED_KEY + "\"",
+                suggestion.wifiConfiguration.preSharedKey);
+        assertFalse(suggestion.isAppInteractionRequired);
+        assertTrue(suggestion.isUserInteractionRequired);
+        assertEquals(WifiConfiguration.METERED_OVERRIDE_METERED,
+                suggestion.wifiConfiguration.meteredOverride);
+        assertEquals(-1, suggestion.wifiConfiguration.priority);
+    }
+
+    /**
+     * Ensure {@link WifiNetworkConfigBuilder#buildNetworkSuggestion()} throws an exception
+     * when {@link WifiNetworkConfigBuilder#setSsidPattern(PatternMatcher)} is set.
+     */
+    @Test(expected = IllegalStateException.class)
+    public void testWifiNetworkSuggestionBuilderWithSsidPattern() {
+        new WifiNetworkConfigBuilder()
+                .setSsidPattern(new PatternMatcher(TEST_SSID, PATTERN_PREFIX))
+                .buildNetworkSuggestion();
+    }
+
+    /**
+     * Ensure {@link WifiNetworkConfigBuilder#buildNetworkSuggestion()} throws an exception
+     * when {@link WifiNetworkConfigBuilder#setBssid(MacAddress)} is set.
+     */
+    @Test(expected = IllegalStateException.class)
+    public void testWifiNetworkSuggestionBuilderWithBssidPattern() {
+        new WifiNetworkConfigBuilder()
+                .setSsid(TEST_SSID)
+                .setBssidPattern(MacAddress.fromString(TEST_BSSID),
+                        MacAddress.fromString(TEST_BSSID))
+                .buildNetworkSuggestion();
+    }
+
+    /**
+     * Ensure {@link WifiNetworkConfigBuilder#buildNetworkSuggestion()} throws an exception
+     * when {@link WifiNetworkConfigBuilder#setBssidPattern(MacAddress, MacAddress)} is set.
+     */
+    @Test(expected = IllegalStateException.class)
+    public void testWifiNetworkSuggestionBuilderWithBssid() {
+        new WifiNetworkConfigBuilder()
+                .setSsid(TEST_SSID)
+                .setBssid(MacAddress.fromString(TEST_BSSID))
+                .buildNetworkSuggestion();
+    }
+
+    /**
+     * Ensure {@link WifiNetworkConfigBuilder#buildNetworkSuggestion()} throws an exception
+     * when {@link WifiNetworkConfigBuilder#setSsid(String)} is not set.
+     */
+    @Test(expected = IllegalStateException.class)
+    public void testWifiNetworkSuggestionBuilderWithNoSsid() {
+        new WifiNetworkConfigBuilder()
+                .buildNetworkSuggestion();
+    }
+
+    /**
+     * Ensure {@link WifiNetworkConfigBuilder#setPriority(int)} throws an exception
+     * when the value is negative.
+     */
+    @Test(expected = IllegalArgumentException.class)
+    public void testWifiNetworkSuggestionBuilderWithInvalidPriority() {
+        new WifiNetworkConfigBuilder()
+                .setSsid(TEST_SSID)
+                .setPriority(-1)
+                .buildNetworkSuggestion();
     }
 }

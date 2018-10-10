@@ -20,6 +20,7 @@ import static com.android.internal.util.Preconditions.checkNotNull;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.app.PendingIntent;
 import android.net.MacAddress;
 import android.net.NetworkRequest;
 import android.net.NetworkSpecifier;
@@ -30,11 +31,14 @@ import android.util.Pair;
 
 import java.nio.charset.CharsetEncoder;
 import java.nio.charset.StandardCharsets;
+import java.util.List;
 
 /**
  * WifiNetworkConfigBuilder to use for creating Wi-Fi network configuration.
  * <li>See {@link #buildNetworkSpecifier()} for creating a network specifier to use in
  * {@link NetworkRequest}.</li>
+ * <li>See {@link #buildNetworkSuggestion()} for creating a network suggestion to use in
+ * {@link WifiManager#addNetworkSuggestions(List, PendingIntent)}.</li>
  */
 public class WifiNetworkConfigBuilder {
     private static final String MATCH_ALL_SSID_PATTERN_PATH = ".*";
@@ -45,6 +49,7 @@ public class WifiNetworkConfigBuilder {
             new Pair(MacAddress.ALL_ZEROS_ADDRESS, MacAddress.ALL_ZEROS_ADDRESS);
     private static final MacAddress MATCH_EXACT_BSSID_PATTERN_MASK =
             MacAddress.BROADCAST_ADDRESS;
+    private static final int UNASSIGNED_PRIORITY = -1;
 
     /**
      * SSID pattern match specified by the app.
@@ -69,6 +74,23 @@ public class WifiNetworkConfigBuilder {
      * SSID-specific probe request must be used for scans.
      */
     private boolean mIsHiddenSSID;
+    /**
+     * Whether app needs to log in to captive portal to obtain Internet access.
+     */
+    private boolean mIsAppInteractionRequired;
+    /**
+     * Whether user needs to log in to captive portal to obtain Internet access.
+     */
+    private boolean mIsUserInteractionRequired;
+    /**
+     * Whether this network is metered or not.
+     */
+    private boolean mIsMetered;
+    /**
+     * Priority of this network among other network suggestions provided by the app.
+     * The lower the number, the higher the priority (i.e value of 0 = highest priority).
+     */
+    private int mPriority;
 
     public WifiNetworkConfigBuilder() {
         mSsidPatternMatcher = null;
@@ -76,6 +98,10 @@ public class WifiNetworkConfigBuilder {
         mPskPassphrase = null;
         mEnterpriseConfig = null;
         mIsHiddenSSID = false;
+        mIsAppInteractionRequired = false;
+        mIsUserInteractionRequired = false;
+        mIsMetered = false;
+        mPriority = UNASSIGNED_PRIORITY;
     }
 
     /**
@@ -103,6 +129,8 @@ public class WifiNetworkConfigBuilder {
      * {@link #buildNetworkSpecifier}, sets the SSID to use for filtering networks from scan
      * results. Will only match networks whose SSID is identical to the UTF-8 encoding of the
      * specified value.</li>
+     * <li>For network suggestions ({@link WifiNetworkSuggestion}), built using
+     * {@link #buildNetworkSuggestion()}, sets the SSID for the network.</li>
      * <li>Overrides any previous value set using {@link #setSsid(String)} or
      * {@link #setSsidPattern(PatternMatcher)}.</li>
      *
@@ -195,7 +223,7 @@ public class WifiNetworkConfigBuilder {
     }
 
     /**
-     * Whether this represents a hidden network.
+     * Specifies whether this represents a hidden network.
      * <p>
      * <li>For network requests (see {@link NetworkSpecifier}), built using
      * {@link #buildNetworkSpecifier}, setting this disallows the usage of
@@ -208,6 +236,77 @@ public class WifiNetworkConfigBuilder {
      */
     public WifiNetworkConfigBuilder setIsHiddenSsid() {
         mIsHiddenSSID = true;
+        return this;
+    }
+
+    /**
+     * Specifies whether the app needs to log in to a captive portal to obtain Internet access.
+     * <p>
+     * This will dictate if the associated pending intent in
+     * {@link WifiManager#addNetworkSuggestions(List, PendingIntent)} will be sent after
+     * successfully connecting to the network.
+     * Use this for captive portal type networks where the app needs to authenticate the user
+     * before the device can access the network.
+     * This setting will be ignored if the {@code PendingIntent} used to add this network
+     * suggestion is null.
+     * <p>
+     * <li>Only allowed for creating network suggestion, i.e {@link #buildNetworkSuggestion()}.</li>
+     * <li>If not set, defaults to false (i.e no app interaction required).</li>
+     *
+     * @return Instance of {@link WifiNetworkConfigBuilder} to enable chaining of the builder
+     * method.
+     */
+    public WifiNetworkConfigBuilder setIsAppInteractionRequired() {
+        mIsAppInteractionRequired = true;
+        return this;
+    }
+
+    /**
+     * Specifies whether the user needs to log in to a captive portal to obtain Internet access.
+     * <p>
+     * <li>Only allowed for creating network suggestion, i.e {@link #buildNetworkSuggestion()}.</li>
+     * <li>If not set, defaults to false (i.e no user interaction required).</li>
+     *
+     * @return Instance of {@link WifiNetworkConfigBuilder} to enable chaining of the builder
+     * method.
+     */
+    public WifiNetworkConfigBuilder setIsUserInteractionRequired() {
+        mIsUserInteractionRequired = true;
+        return this;
+    }
+
+    /**
+     * Specify the priority of this network among other network suggestions provided by the same app
+     * (priorities have no impact on suggestions by different apps). The lower the number, the
+     * higher the priority (i.e value of 0 = highest priority).
+     * <p>
+     * <li>Only allowed for creating network suggestion, i.e {@link #buildNetworkSuggestion()}.</li>
+     * <li>If not set, defaults to -1 (i.e unassigned priority).</li>
+     *
+     * @param priority Integer number representing the priority among suggestions by the app.
+     * @return Instance of {@link WifiNetworkConfigBuilder} to enable chaining of the builder
+     * method.
+     * @throws IllegalArgumentException if the priority value is negative.
+     */
+    public WifiNetworkConfigBuilder setPriority(int priority) {
+        if (priority < 0) {
+            throw new IllegalArgumentException("Invalid priority value " + priority);
+        }
+        mPriority = priority;
+        return this;
+    }
+
+    /**
+     * Specifies whether this network is metered.
+     * <p>
+     * <li>Only allowed for creating network suggestion, i.e {@link #buildNetworkSuggestion()}.</li>
+     * <li>If not set, defaults to false (i.e not metered).</li>
+     *
+     * @return Instance of {@link WifiNetworkConfigBuilder} to enable chaining of the builder
+     * method.
+     */
+    public WifiNetworkConfigBuilder setIsMetered() {
+        mIsMetered = true;
         return this;
     }
 
@@ -260,6 +359,10 @@ public class WifiNetworkConfigBuilder {
         }
         wifiConfiguration.enterpriseConfig = mEnterpriseConfig;
         wifiConfiguration.hiddenSSID = mIsHiddenSSID;
+        wifiConfiguration.priority = mPriority;
+        wifiConfiguration.meteredOverride =
+                mIsMetered ? WifiConfiguration.METERED_OVERRIDE_METERED
+                           : WifiConfiguration.METERED_OVERRIDE_NONE;
         return wifiConfiguration;
     }
 
@@ -358,9 +461,15 @@ public class WifiNetworkConfigBuilder {
             throw new IllegalStateException("setSsid should also be invoked when "
                     + "setIsHiddenSsid is invoked for network specifier");
         }
+        if (mIsAppInteractionRequired || mIsUserInteractionRequired
+                || mPriority != -1 || mIsMetered) {
+            throw new IllegalStateException("none of setIsAppInteractionRequired/"
+                    + "setIsUserInteractionRequired/setPriority/setIsMetered are allowed for "
+                    + "specifier");
+        }
         if (!TextUtils.isEmpty(mPskPassphrase) && mEnterpriseConfig != null) {
-            throw new IllegalStateException("only one of setPskPassphrase or setEnterpriseConfig "
-                    + "can be invoked for network specifier");
+            throw new IllegalStateException("only one of setPreSharedKey or setEnterpriseConfig can"
+                    + " be invoked for network specifier");
         }
 
         return new WifiNetworkSpecifier(
@@ -368,5 +477,35 @@ public class WifiNetworkConfigBuilder {
                 mBssidPatternMatcher,
                 buildWifiConfiguration(),
                 Process.myUid());
+    }
+
+    /**
+     * Create a network suggestion object use in
+     * {@link WifiManager#addNetworkSuggestions(List, PendingIntent)}.
+     * See {@link WifiNetworkSuggestion}.
+     *
+     * @return Instance of {@link WifiNetworkSuggestion}.
+     * @throws IllegalStateException on invalid params set.
+     */
+    public WifiNetworkSuggestion buildNetworkSuggestion() {
+        if (mSsidPatternMatcher == null) {
+            throw new IllegalStateException("setSsid should be invoked for suggestion");
+        }
+        if (mSsidPatternMatcher.getType() != PatternMatcher.PATTERN_LITERAL
+                || mBssidPatternMatcher != null) {
+            throw new IllegalStateException("none of setSsidPattern/setBssidPattern/setBssid are"
+                    + " allowed for suggestion");
+        }
+        if (!TextUtils.isEmpty(mPskPassphrase) && mEnterpriseConfig != null) {
+            throw new IllegalStateException("only one of setPreSharedKey or setEnterpriseConfig can"
+                    + "be invoked for suggestion");
+        }
+
+        return new WifiNetworkSuggestion(
+                buildWifiConfiguration(),
+                mIsAppInteractionRequired,
+                mIsUserInteractionRequired,
+                Process.myUid());
+
     }
 }
