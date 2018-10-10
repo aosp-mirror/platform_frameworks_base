@@ -1,19 +1,12 @@
 {
   "presubmit": [
     {
-      "name": "DexLoggerTests"
-    },
-    {
-      "name": "DexManagerTests"
-    },
-    {
-      "name": "DexoptOptionsTests"
-    },
-    {
-      "name": "DexoptUtilsTest"
-    },
-    {
-      "name": "PackageDexUsageTests"
+      "name": "FrameworksServicesTests",
+      "options": [
+        {
+          "include-filter": "com.android.server.pm.dex"
+        }
+      ]
     },
     {
       "name": "DexLoggerIntegrationTests"
