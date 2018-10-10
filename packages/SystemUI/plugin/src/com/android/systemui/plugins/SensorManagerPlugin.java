@@ -16,6 +16,9 @@
 
 package com.android.systemui.plugins;
 
+import android.hardware.Sensor;
+import android.hardware.TriggerEventListener;
+
 import com.android.systemui.plugins.annotations.ProvidesInterface;
 
 /**
@@ -28,10 +31,12 @@ public interface SensorManagerPlugin extends Plugin {
     int VERSION = 1;
 
     /**
-     * Registers for trigger events from the sensor. The client will receive trigger events until
-     * {@link #unregisterTriggerEvent(Sensor, TriggerEventListener)} is called.
+     * Registers for trigger events from the sensor. Trigger events are one-shot and need to
+     * re-registered in order for them to be fired again.
      * @param sensor
      * @param listener
+     * @see android.hardware.SensorManager#requestTriggerSensor(
+     *     android.hardware.TriggerEventListener, android.hardware.Sensor)
      */
     void registerTriggerEvent(Sensor sensor, TriggerEventListener listener);
 
