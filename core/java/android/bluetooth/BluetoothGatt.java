@@ -1281,7 +1281,7 @@ public final class BluetoothGatt implements BluetoothProfile {
      * <p>After all characteristics have been queued up and verified,
      * {@link #executeReliableWrite} will execute all writes. If a characteristic
      * was not written correctly, calling {@link #abortReliableWrite} will
-     * cancel the current transaction without commiting any values on the
+     * cancel the current transaction without committing any values on the
      * remote device.
      *
      * <p>Requires {@link android.Manifest.permission#BLUETOOTH} permission.
