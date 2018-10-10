@@ -561,6 +561,7 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         }
         mDarkAmount = darkAmount;
         mIndicationArea.setAlpha(1f - darkAmount);
+        mLockIcon.setDarkAmount(darkAmount);
     }
 
     private static boolean isSuccessfulLaunch(int result) {
