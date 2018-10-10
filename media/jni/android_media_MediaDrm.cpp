@@ -161,6 +161,12 @@ struct SecurityLevels {
     jint kSecurityLevelHwSecureAll;
 } gSecurityLevels;
 
+struct OfflineLicenseState {
+    jint kOfflineLicenseStateUsable;
+    jint kOfflineLicenseStateInactive;
+    jint kOfflineLicenseStateUnknown;
+} gOfflineLicenseStates;
+
 
 struct fields_t {
     jfieldID context;
@@ -740,6 +746,15 @@ static void android_media_MediaDrm_native_init(JNIEnv *env) {
     GET_STATIC_FIELD_ID(field, clazz, "SECURITY_LEVEL_HW_SECURE_ALL", "I");
     gSecurityLevels.kSecurityLevelHwSecureAll = env->GetStaticIntField(clazz, field);
 
+    GET_STATIC_FIELD_ID(field, clazz, "OFFLINE_LICENSE_USABLE", "I");
+    gOfflineLicenseStates.kOfflineLicenseStateUsable = env->GetStaticIntField(clazz, field);
+    GET_STATIC_FIELD_ID(field, clazz, "OFFLINE_LICENSE_INACTIVE", "I");
+    gOfflineLicenseStates.kOfflineLicenseStateInactive = env->GetStaticIntField(clazz, field);
+    GET_STATIC_FIELD_ID(field, clazz, "OFFLINE_LICENSE_STATE_UNKNOWN", "I");
+    gOfflineLicenseStates.kOfflineLicenseStateUnknown = env->GetStaticIntField(clazz, field);
+
+    GET_STATIC_FIELD_ID(field, clazz, "SECURITY_LEVEL_HW_SECURE_CRYPTO", "I");
+
     jmethodID getMaxSecurityLevel;
     GET_STATIC_METHOD_ID(getMaxSecurityLevel, clazz, "getMaxSecurityLevel", "()I");
     gSecurityLevels.kSecurityLevelMax = env->CallStaticIntMethod(clazz, getMaxSecurityLevel);
@@ -890,9 +905,7 @@ static jbyteArray android_media_MediaDrm_openSession(
         JNIEnv *env, jobject thiz, jint jlevel) {
     sp<IDrm> drm = GetDrm(env, thiz);
 
-    if (drm == NULL) {
-        jniThrowException(env, "java/lang/IllegalStateException",
-                          "MediaDrm obj is null");
+    if (!CheckDrm(env, drm)) {
         return NULL;
     }
 
@@ -1070,6 +1083,10 @@ static void android_media_MediaDrm_removeKeys(
     JNIEnv *env, jobject thiz, jbyteArray jkeysetId) {
     sp<IDrm> drm = GetDrm(env, thiz);
 
+    if (!CheckDrm(env, drm)) {
+        return;
+    }
+
     if (jkeysetId == NULL) {
         jniThrowException(env, "java/lang/IllegalArgumentException",
                           "keySetId is null");
@@ -1231,9 +1248,7 @@ static jobject android_media_MediaDrm_getSecureStopIds(
     JNIEnv *env, jobject thiz) {
     sp<IDrm> drm = GetDrm(env, thiz);
 
-    if (drm == NULL) {
-        jniThrowException(env, "java/lang/IllegalStateException",
-                          "MediaDrm obj is null");
+    if (!CheckDrm(env, drm)) {
         return NULL;
     }
 
@@ -1286,9 +1301,7 @@ static void android_media_MediaDrm_removeSecureStop(
         JNIEnv *env, jobject thiz, jbyteArray ssid) {
     sp<IDrm> drm = GetDrm(env, thiz);
 
-    if (drm == NULL) {
-        jniThrowException(env, "java/lang/IllegalStateException",
-                          "MediaDrm obj is null");
+    if (!CheckDrm(env, drm)) {
         return;
     }
 
@@ -1437,6 +1450,65 @@ static jint android_media_MediaDrm_getSecurityLevel(JNIEnv *env,
     }
 }
 
+static jobject android_media_MediaDrm_getOfflineLicenseKeySetIds(
+    JNIEnv *env, jobject thiz) {
+    sp<IDrm> drm = GetDrm(env, thiz);
+
+    if (!CheckDrm(env, drm)) {
+        return NULL;
+    }
+
+    List<Vector<uint8_t> > keySetIds;
+
+    status_t err = drm->getOfflineLicenseKeySetIds(keySetIds);
+
+    if (throwExceptionAsNecessary(env, err, "Failed to get offline key set Ids")) {
+        return NULL;
+    }
+
+    return ListOfVectorsToArrayListOfByteArray(env, keySetIds);
+}
+
+static void android_media_MediaDrm_removeOfflineLicense(
+        JNIEnv *env, jobject thiz, jbyteArray keySetId) {
+    sp<IDrm> drm = GetDrm(env, thiz);
+
+    if (!CheckDrm(env, drm)) {
+        return;
+    }
+
+    status_t err = drm->removeOfflineLicense(JByteArrayToVector(env, keySetId));
+
+    throwExceptionAsNecessary(env, err, "Failed to remove offline license");
+}
+
+static jint android_media_MediaDrm_getOfflineLicenseState(JNIEnv *env,
+        jobject thiz, jbyteArray jkeySetId) {
+    sp<IDrm> drm = GetDrm(env, thiz);
+
+    if (!CheckDrm(env, drm)) {
+        return gOfflineLicenseStates.kOfflineLicenseStateUnknown;
+    }
+
+    Vector<uint8_t> keySetId(JByteArrayToVector(env, jkeySetId));
+
+    DrmPlugin::OfflineLicenseState state = DrmPlugin::kOfflineLicenseStateUnknown;
+
+    status_t err = drm->getOfflineLicenseState(keySetId, &state);
+
+    if (throwExceptionAsNecessary(env, err, "Failed to get offline license state")) {
+        return gOfflineLicenseStates.kOfflineLicenseStateUnknown;
+    }
+
+    switch(state) {
+    case DrmPlugin::kOfflineLicenseStateUsable:
+        return gOfflineLicenseStates.kOfflineLicenseStateUsable;
+    case DrmPlugin::kOfflineLicenseStateInactive:
+        return gOfflineLicenseStates.kOfflineLicenseStateInactive;
+    default:
+        return gOfflineLicenseStates.kOfflineLicenseStateUnknown;
+    }
+}
 
 static jstring android_media_MediaDrm_getPropertyString(
     JNIEnv *env, jobject thiz, jstring jname) {
@@ -1718,9 +1790,8 @@ static jobject
 android_media_MediaDrm_native_getMetrics(JNIEnv *env, jobject thiz)
 {
     sp<IDrm> drm = GetDrm(env, thiz);
-    if (drm == NULL ) {
-        jniThrowException(env, "java/lang/IllegalStateException",
-                          "MediaDrm obj is null");
+
+    if (!CheckDrm(env, drm)) {
         return NULL;
     }
 
@@ -1838,6 +1909,15 @@ static const JNINativeMethod gMethods[] = {
 
     { "getSecurityLevel", "([B)I",
       (void *)android_media_MediaDrm_getSecurityLevel },
+
+    { "removeOfflineLicense", "([B)V",
+      (void *)android_media_MediaDrm_removeOfflineLicense },
+
+    { "getOfflineLicenseKeySetIds", "()Ljava/util/List;",
+      (void *)android_media_MediaDrm_getOfflineLicenseKeySetIds },
+
+    { "getOfflineLicenseState", "([B)I",
+      (void *)android_media_MediaDrm_getOfflineLicenseState },
 
     { "getPropertyString", "(Ljava/lang/String;)Ljava/lang/String;",
       (void *)android_media_MediaDrm_getPropertyString },
