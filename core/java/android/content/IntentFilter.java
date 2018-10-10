@@ -475,7 +475,7 @@ public class IntentFilter implements Parcelable {
     /**
      * Modify priority of this filter.  This only affects receiver filters.
      * The priority of activity filters are set in XML and cannot be changed
-     * programatically. The default priority is 0. Positive values will be
+     * programmatically. The default priority is 0. Positive values will be
      * before the default, lower values will be after it. Applications should
      * use a value that is larger than {@link #SYSTEM_LOW_PRIORITY} and
      * smaller than {@link #SYSTEM_HIGH_PRIORITY} .

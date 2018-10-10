@@ -56,7 +56,7 @@ public abstract class AdvertisingSetCallback {
     /**
      * Callback triggered in response to {@link BluetoothLeAdvertiser#startAdvertisingSet}
      * indicating result of the operation. If status is ADVERTISE_SUCCESS, then advertisingSet
-     * contains the started set and it is advertising. If error occured, advertisingSet is
+     * contains the started set and it is advertising. If error occurred, advertisingSet is
      * null, and status will be set to proper error code.
      *
      * @param advertisingSet The advertising set that was started or null if error.
