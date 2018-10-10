@@ -26,6 +26,7 @@ import android.service.notification.StatusBarNotification;
 import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.Pair;
 import android.view.MotionEvent;
 import android.view.NotificationHeaderView;
 import android.view.View;
@@ -40,12 +41,12 @@ import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.ContrastColorUtil;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
-import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.TransformableView;
-import com.android.systemui.statusbar.notification.row.wrapper.NotificationCustomViewWrapper;
+import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.NotificationUtils;
+import com.android.systemui.statusbar.notification.row.wrapper.NotificationCustomViewWrapper;
 import com.android.systemui.statusbar.notification.row.wrapper.NotificationViewWrapper;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.policy.RemoteInputView;
@@ -1188,6 +1189,7 @@ public class NotificationContentView extends FrameLayout {
         updateSingleLineView();
         updateAmbientSingleLineView();
     }
+
     private void updateSingleLineView() {
         if (mIsChildInGroup) {
             boolean isNewView = mSingleLineView == null;
@@ -1223,53 +1225,44 @@ public class NotificationContentView extends FrameLayout {
             return;
         }
 
-        boolean enableSmartReplies = (mSmartReplyConstants.isEnabled()
+        Notification notification = entry.notification.getNotification();
+
+        Pair<RemoteInput, Notification.Action> remoteInputActionPair =
+                entry.notification.getNotification().findRemoteInputActionPair(false /*freeform */);
+        Pair<RemoteInput, Notification.Action> freeformRemoteInputActionPair =
+                notification.findRemoteInputActionPair(true /*freeform */);
+
+        boolean enableAppGeneratedSmartReplies = (mSmartReplyConstants.isEnabled()
                 && (!mSmartReplyConstants.requiresTargetingP()
-                    || entry.targetSdk >= Build.VERSION_CODES.P));
+                || entry.targetSdk >= Build.VERSION_CODES.P));
 
-        boolean hasRemoteInput = false;
         RemoteInput remoteInputWithChoices = null;
-        PendingIntent pendingIntentWithChoices = null;
+        PendingIntent pendingIntentWithChoices= null;
         CharSequence[] choices = null;
-
-        Notification.Action[] actions = entry.notification.getNotification().actions;
-        if (actions != null) {
-            for (Notification.Action a : actions) {
-                if (a.getRemoteInputs() == null) {
-                    continue;
-                }
-                for (RemoteInput ri : a.getRemoteInputs()) {
-                    boolean showRemoteInputView = ri.getAllowFreeFormInput();
-                    boolean showSmartReplyView = enableSmartReplies
-                            && (ArrayUtils.isEmpty(ri.getChoices())
-                            || (showRemoteInputView && !ArrayUtils.isEmpty(entry.smartReplies)));
-                    if (showRemoteInputView) {
-                        hasRemoteInput = true;
-                    }
-                    if (showSmartReplyView) {
-                        remoteInputWithChoices = ri;
-                        pendingIntentWithChoices = a.actionIntent;
-                        if (!ArrayUtils.isEmpty(ri.getChoices())) {
-                            choices = ri.getChoices();
-                        } else {
-                            choices = entry.smartReplies;
-                        }
-                    }
-                    if (showRemoteInputView || showSmartReplyView) {
-                        break;
-                    }
-                }
-            }
+        if (enableAppGeneratedSmartReplies
+                && remoteInputActionPair != null
+                && !ArrayUtils.isEmpty(remoteInputActionPair.first.getChoices())) {
+            // app generated smart replies
+            remoteInputWithChoices = remoteInputActionPair.first;
+            pendingIntentWithChoices = remoteInputActionPair.second.actionIntent;
+            choices = remoteInputActionPair.first.getChoices();
+        } else if (!ArrayUtils.isEmpty(entry.smartReplies)
+                && freeformRemoteInputActionPair != null
+                && freeformRemoteInputActionPair.second.getAllowGeneratedReplies()) {
+            // system generated smart replies
+            remoteInputWithChoices = freeformRemoteInputActionPair.first;
+            pendingIntentWithChoices = freeformRemoteInputActionPair.second.actionIntent;
+            choices = entry.smartReplies;
         }
 
-        applyRemoteInput(entry, hasRemoteInput);
+        applyRemoteInput(entry, freeformRemoteInputActionPair != null);
         applySmartReplyView(remoteInputWithChoices, pendingIntentWithChoices, entry, choices);
     }
 
-    private void applyRemoteInput(NotificationData.Entry entry, boolean hasRemoteInput) {
+    private void applyRemoteInput(NotificationData.Entry entry, boolean hasFreeformRemoteInput) {
         View bigContentView = mExpandedChild;
         if (bigContentView != null) {
-            mExpandedRemoteInput = applyRemoteInput(bigContentView, entry, hasRemoteInput,
+            mExpandedRemoteInput = applyRemoteInput(bigContentView, entry, hasFreeformRemoteInput,
                     mPreviousExpandedRemoteInputIntent, mCachedExpandedRemoteInput,
                     mExpandedWrapper);
         } else {
@@ -1284,7 +1277,8 @@ public class NotificationContentView extends FrameLayout {
 
         View headsUpContentView = mHeadsUpChild;
         if (headsUpContentView != null) {
-            mHeadsUpRemoteInput = applyRemoteInput(headsUpContentView, entry, hasRemoteInput,
+            mHeadsUpRemoteInput = applyRemoteInput(
+                    headsUpContentView, entry, hasFreeformRemoteInput,
                     mPreviousHeadsUpRemoteInputIntent, mCachedHeadsUpRemoteInput, mHeadsUpWrapper);
         } else {
             mHeadsUpRemoteInput = null;
@@ -1370,8 +1364,8 @@ public class NotificationContentView extends FrameLayout {
             mExpandedSmartReplyView =
                     applySmartReplyView(mExpandedChild, remoteInput, pendingIntent, entry, choices);
             if (mExpandedSmartReplyView != null && remoteInput != null
-                    && remoteInput.getChoices() != null && remoteInput.getChoices().length > 0) {
-                mSmartReplyController.smartRepliesAdded(entry, remoteInput.getChoices().length);
+                    && choices != null && choices.length > 0) {
+                mSmartReplyController.smartRepliesAdded(entry, choices.length);
             }
         }
     }
