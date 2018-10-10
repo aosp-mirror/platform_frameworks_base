@@ -50,7 +50,6 @@ import android.hardware.usb.gadget.V1_0.Status;
 import android.hidl.manager.V1_0.IServiceManager;
 import android.hidl.manager.V1_0.IServiceNotification;
 import android.os.BatteryManager;
-import android.os.Binder;
 import android.os.Environment;
 import android.os.FileUtils;
 import android.os.Handler;
@@ -1982,9 +1981,10 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
      * opens the currently attached USB accessory.
      *
      * @param accessory accessory to be openened.
+     * @param uid Uid of the caller
      */
     public ParcelFileDescriptor openAccessory(UsbAccessory accessory,
-            UsbUserSettingsManager settings) {
+            UsbUserSettingsManager settings, int uid) {
         UsbAccessory currentAccessory = mHandler.getCurrentAccessory();
         if (currentAccessory == null) {
             throw new IllegalArgumentException("no accessory attached");
@@ -1995,7 +1995,7 @@ public class UsbDeviceManager implements ActivityTaskManagerInternal.ScreenObser
                     + currentAccessory;
             throw new IllegalArgumentException(error);
         }
-        settings.checkPermission(accessory, Binder.getCallingUid());
+        settings.checkPermission(accessory, uid);
         return nativeOpenAccessory();
     }
 
