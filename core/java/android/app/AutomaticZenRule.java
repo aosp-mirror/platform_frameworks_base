@@ -151,7 +151,7 @@ public final class AutomaticZenRule implements Parcelable {
      * Gets the zen policy.
      */
     public ZenPolicy getZenPolicy() {
-        return this.mZenPolicy.copy();
+        return mZenPolicy == null ? null : this.mZenPolicy.copy();
     }
 
     /**

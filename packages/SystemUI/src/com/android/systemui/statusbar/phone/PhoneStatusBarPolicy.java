@@ -57,6 +57,7 @@ import android.text.format.DateFormat;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.Pair;
+
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.telephony.IccCardConstants;
 import com.android.internal.telephony.TelephonyIntents;
@@ -391,7 +392,7 @@ public class PhoneStatusBarPolicy implements Callback, Callbacks,
             zenDescription = mContext.getString(R.string.interruption_level_priority);
         }
 
-        if (!ZenModeConfig.isZenOverridingRinger(zen, mZenController.getConfig())) {
+        if (!ZenModeConfig.isZenOverridingRinger(zen, mZenController.getConsolidatedPolicy())) {
             if (audioManager.getRingerModeInternal() == AudioManager.RINGER_MODE_VIBRATE) {
                 volumeVisible = true;
                 volumeIconId = R.drawable.stat_sys_ringer_vibrate;

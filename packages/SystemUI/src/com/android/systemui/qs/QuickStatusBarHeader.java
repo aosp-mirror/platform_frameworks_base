@@ -33,18 +33,18 @@ import android.media.AudioManager;
 import android.os.Handler;
 import android.provider.AlarmClock;
 import android.service.notification.ZenModeConfig;
-import android.widget.FrameLayout;
-import androidx.annotation.VisibleForTesting;
 import android.text.format.DateUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Pair;
 import android.view.View;
 import android.view.WindowInsets;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
+import androidx.annotation.VisibleForTesting;
 
 import com.android.settingslib.Utils;
 import com.android.systemui.BatteryMeterView;
@@ -56,8 +56,8 @@ import com.android.systemui.qs.QSDetail.Callback;
 import com.android.systemui.statusbar.phone.PhoneStatusBarView;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarIconController.TintedIconManager;
-import com.android.systemui.statusbar.policy.Clock;
 import com.android.systemui.statusbar.phone.StatusIconContainer;
+import com.android.systemui.statusbar.policy.Clock;
 import com.android.systemui.statusbar.policy.DarkIconDispatcher;
 import com.android.systemui.statusbar.policy.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.statusbar.policy.DateView;
@@ -205,7 +205,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements
 
         boolean ringerVisible = false;
         if (!ZenModeConfig.isZenOverridingRinger(mZenController.getZen(),
-                mZenController.getConfig())) {
+                mZenController.getConsolidatedPolicy())) {
             if (mRingerMode == AudioManager.RINGER_MODE_VIBRATE) {
                 mRingerModeIcon.setImageResource(R.drawable.stat_sys_ringer_vibrate);
                 mRingerModeTextView.setText(R.string.qs_status_phone_vibrate);

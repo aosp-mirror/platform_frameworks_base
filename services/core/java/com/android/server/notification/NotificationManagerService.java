@@ -3399,6 +3399,16 @@ public class NotificationManagerService extends SystemService {
             }
         }
 
+        @Override
+        public Policy getConsolidatedNotificationPolicy() {
+            final long identity = Binder.clearCallingIdentity();
+            try {
+                return mZenModeHelper.getConsolidatedNotificationPolicy();
+            } finally {
+                Binder.restoreCallingIdentity(identity);
+            }
+        }
+
         /**
          * Sets the notification policy.  Apps that target API levels below
          * {@link android.os.Build.VERSION_CODES#P} cannot change user-designated values to
@@ -4660,7 +4670,6 @@ public class NotificationManagerService extends SystemService {
                 }
 
                 mRankingHelper.extractSignals(r);
-
                 // tell the assistant service about the notification
                 if (mAssistants.isEnabled()) {
                     mAssistants.onNotificationEnqueued(r);
@@ -5570,7 +5579,7 @@ public class NotificationManagerService extends SystemService {
         record.setIntercepted(mZenModeHelper.shouldIntercept(record));
         if (record.isIntercepted()) {
             record.setSuppressedVisualEffects(
-                    mZenModeHelper.getNotificationPolicy().suppressedVisualEffects);
+                    mZenModeHelper.getConsolidatedNotificationPolicy().suppressedVisualEffects);
         } else {
             record.setSuppressedVisualEffects(0);
         }

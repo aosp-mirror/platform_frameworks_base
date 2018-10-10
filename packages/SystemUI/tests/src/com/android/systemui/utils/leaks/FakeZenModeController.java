@@ -14,6 +14,7 @@
 
 package com.android.systemui.utils.leaks;
 
+import android.app.NotificationManager;
 import android.content.ComponentName;
 import android.net.Uri;
 import android.service.notification.ZenModeConfig;
@@ -45,6 +46,11 @@ public class FakeZenModeController extends BaseLeakChecker<Callback> implements 
 
     @Override
     public ZenModeConfig getConfig() {
+        return null;
+    }
+
+    @Override
+    public NotificationManager.Policy getConsolidatedPolicy() {
         return null;
     }
 

@@ -69,6 +69,7 @@ public class ZenModeControllerImpl extends CurrentUserTracker
     private ZenModeConfig mConfig;
     private int mZenMode;
     private long mZenUpdateTime;
+    private NotificationManager.Policy mConsolidatedNotificationPolicy;
 
     public ZenModeControllerImpl(Context context, Handler handler) {
         super(context);
@@ -91,6 +92,7 @@ public class ZenModeControllerImpl extends CurrentUserTracker
         updateZenMode(mModeSetting.getValue());
         mConfigSetting.setListening(true);
         updateZenModeConfig();
+        updateConsolidatedNotificationPolicy();
         mAlarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
         mSetupObserver = new SetupObserver(handler);
         mSetupObserver.register();
@@ -150,6 +152,11 @@ public class ZenModeControllerImpl extends CurrentUserTracker
     @Override
     public ZenModeConfig getConfig() {
         return mConfig;
+    }
+
+    @Override
+    public NotificationManager.Policy getConsolidatedPolicy() {
+        return mConsolidatedNotificationPolicy;
     }
 
     @Override
@@ -217,6 +224,12 @@ public class ZenModeControllerImpl extends CurrentUserTracker
         }
     }
 
+    private void fireConsolidatedPolicyChanged(NotificationManager.Policy policy) {
+        synchronized (mCallbacksLock) {
+            Utils.safeForeach(mCallbacks, c -> c.onConsolidatedPolicyChanged(policy));
+        }
+    }
+
     @VisibleForTesting
     protected void fireConfigChanged(ZenModeConfig config) {
         synchronized (mCallbacksLock) {
@@ -231,6 +244,16 @@ public class ZenModeControllerImpl extends CurrentUserTracker
     }
 
     @VisibleForTesting
+    protected void updateConsolidatedNotificationPolicy() {
+        final NotificationManager.Policy policy = mNoMan.getConsolidatedNotificationPolicy();
+        if (!Objects.equals(policy, mConsolidatedNotificationPolicy)) {
+            mConsolidatedNotificationPolicy = policy;
+            fireConsolidatedPolicyChanged(policy);
+        }
+    }
+
+
+    @VisibleForTesting
     protected void updateZenModeConfig() {
         final ZenModeConfig config = mNoMan.getZenModeConfig();
         if (Objects.equals(config, mConfig)) return;
@@ -238,9 +261,19 @@ public class ZenModeControllerImpl extends CurrentUserTracker
         mConfig = config;
         mZenUpdateTime = System.currentTimeMillis();
         fireConfigChanged(config);
+
         final ZenRule newRule = config != null ? config.manualRule : null;
-        if (Objects.equals(oldRule, newRule)) return;
-        fireManualRuleChanged(newRule);
+        if (!Objects.equals(oldRule, newRule)) {
+            fireManualRuleChanged(newRule);
+        }
+
+        final NotificationManager.Policy consolidatedPolicy =
+                mNoMan.getConsolidatedNotificationPolicy();
+        if (!Objects.equals(consolidatedPolicy, mConsolidatedNotificationPolicy)) {
+            mConsolidatedNotificationPolicy = consolidatedPolicy;
+            fireConsolidatedPolicyChanged(consolidatedPolicy);
+        }
+
     }
 
     private final BroadcastReceiver mReceiver = new BroadcastReceiver() {
@@ -260,6 +293,7 @@ public class ZenModeControllerImpl extends CurrentUserTracker
         pw.println("ZenModeControllerImpl:");
         pw.println("  mZenMode=" + mZenMode);
         pw.println("  mConfig=" + mConfig);
+        pw.println("  mConsolidatedNotificationPolicy=" + mConsolidatedNotificationPolicy);
         pw.println("  mZenUpdateTime=" + DateFormat.format("MM-dd HH:mm:ss", mZenUpdateTime));
     }
 
