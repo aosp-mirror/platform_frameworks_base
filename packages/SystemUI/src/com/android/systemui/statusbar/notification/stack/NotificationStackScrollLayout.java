@@ -4844,7 +4844,7 @@ public class NotificationStackScrollLayout extends ViewGroup
             activatedChild.makeInactive(false /* animate */);
         }
         updateFooter();
-        updateChildren();
+        requestChildrenUpdate();
         onUpdateRowStates();
 
         mEntryManager.updateNotifications();
