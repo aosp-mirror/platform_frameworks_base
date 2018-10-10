@@ -57,17 +57,6 @@ cc_library_static {
         "frameworks/native/services",
         "system/gatekeeper/include",
     ],
-
-    product_variables: {
-        arc: {
-            cflags: [
-                "-DUSE_ARC",
-            ],
-            srcs: [
-                "com_android_server_ArcVideoService.cpp",
-            ],
-        }
-    }
 }
 
 cc_defaults {
@@ -142,7 +131,6 @@ cc_defaults {
             shared_libs: [
                 "libarcbridge",
                 "libarcbridgeservice",
-                "libarcvideobridge",
                 "libchrome",
                 "libmojo",
             ],
