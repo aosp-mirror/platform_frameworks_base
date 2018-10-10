@@ -60,11 +60,11 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
     private short mRssi;
 
     private final List<LocalBluetoothProfile> mProfiles =
-            new ArrayList<LocalBluetoothProfile>();
+            Collections.synchronizedList(new ArrayList<>());
 
     // List of profiles that were previously in mProfiles, but have been removed
     private final List<LocalBluetoothProfile> mRemovedProfiles =
-            new ArrayList<LocalBluetoothProfile>();
+            Collections.synchronizedList(new ArrayList<>());
 
     // Device supports PANU but not NAP: remove PanProfile after device disconnects from NAP
     private boolean mLocalNapRoleConnected;
