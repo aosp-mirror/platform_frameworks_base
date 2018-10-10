@@ -19,16 +19,54 @@ package com.android.packageinstaller;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.net.Uri;
+import android.util.Log;
 
 /**
  * Receive new app installed broadcast and notify user new app installed.
  */
 public class PackageInstalledReceiver extends BroadcastReceiver {
+    private static final String TAG = PackageInstalledReceiver.class.getSimpleName();
 
-    private static final String TAG = "PackageInstalledReceiver";
+    private static final boolean DEBUG = false;
+    private static final boolean APP_INSTALLED_NOTIFICATION_ENABLED = false;
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        // TODO: Add logic to handle new app installed.
+        if (!APP_INSTALLED_NOTIFICATION_ENABLED) {
+            return;
+        }
+
+        String action = intent.getAction();
+
+        if (DEBUG) {
+            Log.i(TAG, "Received action: " + action);
+        }
+
+        if (Intent.ACTION_PACKAGE_ADDED.equals(action)) {
+            Uri packageUri = intent.getData();
+            if (packageUri == null) {
+                return;
+            }
+
+            String packageName = packageUri.getSchemeSpecificPart();
+            if (packageName == null) {
+                Log.e(TAG, "No package name");
+                return;
+            }
+
+            if (intent.getBooleanExtra(Intent.EXTRA_REPLACING, false)) {
+                if (DEBUG) {
+                    Log.i(TAG, "Not new app, skip it: " + packageName);
+                }
+                return;
+            }
+
+            // TODO: Make sure the installer information here is accurate
+            String installer =
+                    context.getPackageManager().getInstallerPackageName(packageName);
+            new PackageInstalledNotificationUtils(context, installer,
+                    packageName).postAppInstalledNotification();
+        }
     }
 }
