@@ -696,7 +696,7 @@ abstract public class ManagedServices {
             for (int i = 0; i < userIds.size(); i++) {
                 final int userId = userIds.get(i);
                 if (enabled) {
-                    if (isPackageOrComponentAllowed(component.toString(), userId)
+                    if (isPackageOrComponentAllowed(component.flattenToString(), userId)
                             || isPackageOrComponentAllowed(component.getPackageName(), userId)) {
                         registerServiceLocked(component, userId);
                     } else {
