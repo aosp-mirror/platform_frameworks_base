@@ -72,7 +72,8 @@ public class AmbientDisplayConfiguration {
     }
 
     public boolean wakeLockScreenGestureAvailable() {
-        return !TextUtils.isEmpty(wakeLockScreenSensorType());
+        return mContext.getResources()
+                .getBoolean(R.bool.config_dozeWakeLockScreenSensorAvailable);
     }
 
     public boolean wakeScreenGestureEnabled(int user) {
@@ -90,10 +91,6 @@ public class AmbientDisplayConfiguration {
 
     public String longPressSensorType() {
         return mContext.getResources().getString(R.string.config_dozeLongPressSensorType);
-    }
-
-    public String wakeLockScreenSensorType() {
-        return mContext.getResources().getString(R.string.config_dozeWakeLockScreenSensorType);
     }
 
     public String wakeScreenSensorType() {
