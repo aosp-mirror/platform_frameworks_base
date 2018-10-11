@@ -6843,6 +6843,60 @@ public class TelephonyManager {
     }
 
     /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"RADIO_POWER_"},
+            value = {RADIO_POWER_OFF,
+                    RADIO_POWER_ON,
+                    RADIO_POWER_UNAVAILABLE,
+            })
+    public @interface RadioPowerState {}
+
+    /**
+     * Radio explicitly powered off (e.g, airplane mode).
+     * @hide
+     */
+    @SystemApi
+    public static final int RADIO_POWER_OFF = 0;
+
+    /**
+     * Radio power is on.
+     * @hide
+     */
+    @SystemApi
+    public static final int RADIO_POWER_ON = 1;
+
+    /**
+     * Radio power unavailable (eg, modem resetting or not booted).
+     * @hide
+     */
+    @SystemApi
+    public static final int RADIO_POWER_UNAVAILABLE = 2;
+
+    /**
+     * @return current modem radio state.
+     *
+     * <p>Requires permission: {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE} or
+     * {@link android.Manifest.permission#READ_PHONE_STATE} or that the calling
+     * app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     *
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(anyOf = {android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE,
+            android.Manifest.permission.READ_PHONE_STATE})
+    public @RadioPowerState int getRadioPowerState() {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.getRadioPowerState(getSlotIndex(), mContext.getOpPackageName());
+            }
+        } catch (RemoteException ex) {
+            // This could happen if binder process crashes.
+        }
+        return RADIO_POWER_UNAVAILABLE;
+    }
+
+    /** @hide */
     @SystemApi
     @SuppressLint("Doclava125")
     public void updateServiceLocation() {

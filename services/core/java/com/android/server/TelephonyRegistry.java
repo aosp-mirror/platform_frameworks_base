@@ -211,6 +211,9 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     private PhoneCapability mPhoneCapability = null;
 
+    @TelephonyManager.RadioPowerState
+    private int mRadioPowerState = TelephonyManager.RADIO_POWER_UNAVAILABLE;
+
     private final LocalLog mLocalLog = new LocalLog(100);
 
     private PreciseDataConnectionState mPreciseDataConnectionState =
@@ -745,6 +748,13 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     if ((events & PhoneStateListener.LISTEN_PHONE_CAPABILITY_CHANGE) != 0) {
                         try {
                             r.callback.onPhoneCapabilityChanged(mPhoneCapability);
+                        } catch (RemoteException ex) {
+                            remove(r.binder);
+                        }
+                    }
+                    if ((events & PhoneStateListener.LISTEN_RADIO_POWER_STATE_CHANGED) != 0) {
+                        try {
+                            r.callback.onRadioPowerStateChanged(mRadioPowerState);
                         } catch (RemoteException ex) {
                             remove(r.binder);
                         }
@@ -1570,6 +1580,32 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
     }
 
+    public void notifyRadioPowerStateChanged(@TelephonyManager.RadioPowerState int state) {
+        if (!checkNotifyPermission("notifyRadioPowerStateChanged()")) {
+            return;
+        }
+
+        if (VDBG) {
+            log("notifyRadioPowerStateChanged: state= " + state);
+        }
+
+        synchronized (mRecords) {
+            mRadioPowerState = state;
+
+            for (Record r : mRecords) {
+                if (r.matchPhoneStateListenerEvent(
+                        PhoneStateListener.LISTEN_RADIO_POWER_STATE_CHANGED)) {
+                    try {
+                        r.callback.onRadioPowerStateChanged(state);
+                    } catch (RemoteException ex) {
+                        mRemoveList.add(r.binder);
+                    }
+                }
+            }
+            handleRemoveListLocked();
+        }
+    }
+
 
     @Override
     public void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
@@ -1607,6 +1643,7 @@ class TelephonyRegistry extends ITelephonyRegistry.Stub {
             pw.println("mBackgroundCallState=" + mBackgroundCallState);
             pw.println("mVoLteServiceState=" + mVoLteServiceState);
             pw.println("mPhoneCapability=" + mPhoneCapability);
+            pw.println("mRadioPowerState=" + mRadioPowerState);
 
             pw.decreaseIndent();
 
