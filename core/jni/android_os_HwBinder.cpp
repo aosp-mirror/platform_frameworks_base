@@ -269,28 +269,17 @@ static void JHwBinder_native_registerService(
     }
 
     sp<hardware::IBinder> binder = JHwBinder::GetNativeBinder(env, thiz);
-
-    /* TODO(b/33440494) this is not right */
     sp<hidl::base::V1_0::IBase> base = new hidl::base::V1_0::BpHwBase(binder);
 
-    auto manager = hardware::defaultServiceManager();
-
-    if (manager == nullptr) {
-        LOG(ERROR) << "Could not get hwservicemanager.";
-        signalExceptionForError(env, UNKNOWN_ERROR, true /* canThrowRemoteException */);
-        return;
-    }
-
-    Return<bool> ret = manager->add(str.c_str(), base);
-
-    bool ok = ret.isOk() && ret;
+    bool ok = hardware::details::registerAsServiceInternal(base, str.c_str()) == OK;
 
     if (ok) {
         LOG(INFO) << "HwBinder: Starting thread pool for " << str.c_str();
         ::android::hardware::ProcessState::self()->startThreadPool();
     }
 
-    signalExceptionForError(env, (ok ? OK : UNKNOWN_ERROR), true /* canThrowRemoteException */);
+    // avoiding richer error exceptions to stick with legacy behavior
+    signalExceptionForError(env, (ok ? OK : UNKNOWN_ERROR), true /*canThrowRemoteException*/);
 }
 
 static jobject JHwBinder_native_getService(
