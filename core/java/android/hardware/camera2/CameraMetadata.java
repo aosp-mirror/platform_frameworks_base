@@ -2090,7 +2090,7 @@ public abstract class CameraMetadata<TKey> {
 
     /**
      * <p>Optimized for dim settings where the main light source
-     * is a flame.</p>
+     * is a candle.</p>
      * @see CaptureRequest#CONTROL_SCENE_MODE
      */
     public static final int CONTROL_SCENE_MODE_CANDLELIGHT = 15;
