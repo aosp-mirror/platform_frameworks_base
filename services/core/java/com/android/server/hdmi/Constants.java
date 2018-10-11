@@ -343,14 +343,6 @@ final class Constants {
     static final String PROPERTY_HDMI_CEC_NEVER_ASSIGN_LOGICAL_ADDRESSES =
             "ro.hdmi.property_hdmi_cec_never_assign_logical_addresses";
 
-    /**
-     * Property to indicate if the current device is a cec switch device.
-     *
-     * <p> Default is false.
-     */
-    static final String PROPERTY_HDMI_IS_DEVICE_HDMI_CEC_SWITCH =
-            "ro.hdmi.property_is_device_hdmi_cec_switch";
-
     // Set to false to allow playback device to go to suspend mode even
     // when it's an active source. True by default.
     static final String PROPERTY_KEEP_AWAKE = "persist.sys.hdmi.keep_awake";

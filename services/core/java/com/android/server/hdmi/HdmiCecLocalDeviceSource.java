@@ -16,6 +16,8 @@
 
 package com.android.server.hdmi;
 
+import static com.android.internal.os.RoSystemProperties.PROPERTY_HDMI_IS_DEVICE_HDMI_CEC_SWITCH;
+
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.IHdmiControlCallback;
 import android.os.SystemProperties;
@@ -42,7 +44,7 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
     // Device has cec switch functionality or not.
     // Default is false.
     protected boolean mIsSwitchDevice = SystemProperties.getBoolean(
-            Constants.PROPERTY_HDMI_IS_DEVICE_HDMI_CEC_SWITCH, false);
+            PROPERTY_HDMI_IS_DEVICE_HDMI_CEC_SWITCH, false);
 
     // Routing port number used for Routing Control.
     // This records the default routing port or the previous valid routing port.

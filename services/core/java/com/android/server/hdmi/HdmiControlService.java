@@ -19,6 +19,7 @@ package com.android.server.hdmi;
 import static android.hardware.hdmi.HdmiControlManager.DEVICE_EVENT_ADD_DEVICE;
 import static android.hardware.hdmi.HdmiControlManager.DEVICE_EVENT_REMOVE_DEVICE;
 
+import static com.android.internal.os.RoSystemProperties.PROPERTY_HDMI_IS_DEVICE_HDMI_CEC_SWITCH;
 import static com.android.server.hdmi.Constants.DISABLED;
 import static com.android.server.hdmi.Constants.ENABLED;
 import static com.android.server.hdmi.Constants.OPTION_MHL_ENABLE;
@@ -2130,7 +2131,7 @@ public class HdmiControlService extends SystemService {
 
     boolean isSwitchDevice() {
         return SystemProperties.getBoolean(
-            Constants.PROPERTY_HDMI_IS_DEVICE_HDMI_CEC_SWITCH, false);
+            PROPERTY_HDMI_IS_DEVICE_HDMI_CEC_SWITCH, false);
     }
 
     boolean isTvDeviceEnabled() {
