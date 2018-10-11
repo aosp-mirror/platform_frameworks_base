@@ -14255,9 +14255,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             }
 
             if (mParent instanceof ViewGroup) {
-                ((ViewGroup) mParent).onChildVisibilityChanged(this,
-                        (changed & VISIBILITY_MASK), newVisibility);
-                ((View) mParent).invalidate(true);
+                ViewGroup parent = (ViewGroup) mParent;
+                parent.onChildVisibilityChanged(this, (changed & VISIBILITY_MASK),
+                        newVisibility);
+                parent.invalidate(true);
             } else if (mParent != null) {
                 mParent.invalidateChild(this, null);
             }
