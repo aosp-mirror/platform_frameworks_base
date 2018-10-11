@@ -397,7 +397,19 @@ public final class Call {
         public static final int PROPERTY_WIFI = 0x00000008;
 
         /**
-         * Call is using high definition audio.
+         * When set, the UI should indicate to the user that a call is using high definition
+         * audio.
+         * <p>
+         * The underlying {@link ConnectionService} is responsible for reporting this
+         * property.  It is important to note that this property is not intended to report the
+         * actual audio codec being used for a Call, but whether the call should be indicated
+         * to the user as high definition.
+         * <p>
+         * The Android Telephony stack reports this property for calls based on a number
+         * of factors, including which audio codec is used and whether a call is using an HD
+         * codec end-to-end.  Some mobile operators choose to suppress display of an HD indication,
+         * and in these cases this property will not be set for a call even if the underlying audio
+         * codec is in fact "high definition".
          */
         public static final int PROPERTY_HIGH_DEF_AUDIO = 0x00000010;
 
