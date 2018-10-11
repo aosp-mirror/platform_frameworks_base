@@ -2861,6 +2861,7 @@ Ljavax/net/ssl/SSLServerSocketFactory;->defaultServerSocketFactory:Ljavax/net/ss
 Ljavax/net/ssl/SSLSocketFactory;->createSocket(Ljava/net/Socket;Ljava/io/InputStream;Z)Ljava/net/Socket;
 Ljavax/net/ssl/SSLSocketFactory;->defaultSocketFactory:Ljavax/net/ssl/SSLSocketFactory;
 Llibcore/icu/ICU;->addLikelySubtags(Ljava/util/Locale;)Ljava/util/Locale;
+Llibcore/io/Libcore;->os:Llibcore/io/Os;
 Llibcore/io/Memory;->peekByte(J)B
 Llibcore/io/Memory;->peekByteArray(J[BII)V
 Llibcore/io/Memory;->peekInt(JZ)I
