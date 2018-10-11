@@ -89,10 +89,9 @@ public class BluetoothDeviceLayerDrawableTest {
         BluetoothDeviceLayerDrawable twinDrawable =
                 (BluetoothDeviceLayerDrawable) drawable.getConstantState().newDrawable();
 
-        assertThat(twinDrawable.getDrawable(0)).isEqualTo(drawable.getDrawable(0));
-        assertThat(twinDrawable.getDrawable(1)).isEqualTo(drawable.getDrawable(1));
-        assertThat(twinDrawable.getLayerInsetTop(1)).isEqualTo(
-                drawable.getLayerInsetTop(1));
+        assertThat(twinDrawable.getDrawable(0)).isNotNull();
+        assertThat(twinDrawable.getDrawable(1)).isNotNull();
+        assertThat(twinDrawable.getLayerInsetTop(1)).isEqualTo(drawable.getLayerInsetTop(1));
     }
 
     @Test

@@ -16,6 +16,7 @@
 
 package com.android.settingslib.testutils.shadow;
 
+import android.annotation.UserIdInt;
 import android.content.Context;
 import android.content.pm.UserInfo;
 import android.os.UserManager;
@@ -29,37 +30,21 @@ import org.robolectric.shadow.api.Shadow;
 import java.util.ArrayList;
 import java.util.List;
 
-@Implements(value = UserManager.class, inheritImplementationMethods = true)
+@Implements(value = UserManager.class)
 public class ShadowUserManager extends org.robolectric.shadows.ShadowUserManager {
 
-    private boolean mAdminUser;
-
-    public void setIsAdminUser(boolean isAdminUser) {
-        mAdminUser = isAdminUser;
-    }
-
-    @Resetter
-    public void reset() {
-        mAdminUser = false;
-    }
-
     @Implementation
-    public boolean isAdminUser() {
-        return mAdminUser;
-    }
-
-    @Implementation
-    public static UserManager get(Context context) {
+    protected static UserManager get(Context context) {
         return (UserManager) context.getSystemService(Context.USER_SERVICE);
     }
 
     @Implementation
-    public int[] getProfileIdsWithDisabled(int userId) {
-        return new int[] { 0 };
+    protected int[] getProfileIdsWithDisabled(int userId) {
+        return new int[]{0};
     }
 
     @Implementation
-    public List<UserInfo> getProfiles() {
+    protected List<UserInfo> getProfiles() {
         UserInfo userInfo = new UserInfo();
         userInfo.id = 0;
         List<UserInfo> userInfos = new ArrayList<>();
@@ -67,8 +52,9 @@ public class ShadowUserManager extends org.robolectric.shadows.ShadowUserManager
         return userInfos;
     }
 
-    public static ShadowUserManager getShadow() {
-        return (ShadowUserManager) Shadow.extract(
-                RuntimeEnvironment.application.getSystemService(UserManager.class));
+    @Implementation
+    protected List<UserInfo> getProfiles(@UserIdInt int userHandle) {
+        return getProfiles();
     }
+
 }
