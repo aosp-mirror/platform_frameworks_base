@@ -494,19 +494,20 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
             invokeCallback(callback, HdmiControlManager.RESULT_SUCCESS);
             return;
         }
-        getActiveSource().invalidate();
         if (!mService.isControlEnabled()) {
+            setRoutingPort(portId);
             setLocalActivePort(portId);
             invokeCallback(callback, HdmiControlManager.RESULT_INCORRECT_MODE);
             return;
         }
-        int oldPath = getLocalActivePort() != Constants.CEC_SWITCH_HOME
-                ? getActivePathOnSwitchFromActivePortId(getLocalActivePort())
+        int oldPath = getRoutingPort() != Constants.CEC_SWITCH_HOME
+                ? mService.portIdToPath(getRoutingPort())
                 : getDeviceInfo().getPhysicalAddress();
-        int newPath = getActivePathOnSwitchFromActivePortId(portId);
+        int newPath = mService.portIdToPath(portId);
         if (oldPath == newPath) {
             return;
         }
+        setRoutingPort(portId);
         setLocalActivePort(portId);
         HdmiCecMessage routingChange =
                 HdmiCecMessageBuilder.buildRoutingChange(mAddress, oldPath, newPath);
