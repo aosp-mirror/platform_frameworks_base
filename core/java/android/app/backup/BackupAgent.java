@@ -29,6 +29,7 @@ import android.os.Looper;
 import android.os.ParcelFileDescriptor;
 import android.os.Process;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
@@ -219,6 +220,18 @@ public abstract class BackupAgent extends ContextWrapper {
      * <p>
      */
     public void onCreate() {
+    }
+
+    /**
+     * Provided as a convenience for agent implementations that need an opportunity
+     * to do one-time initialization before the actual backup or restore operation
+     * is begun with information about the calling user.
+     * <p>
+     *
+     * @hide
+     */
+    public void onCreate(UserHandle user) {
+        onCreate();
     }
 
     /**
