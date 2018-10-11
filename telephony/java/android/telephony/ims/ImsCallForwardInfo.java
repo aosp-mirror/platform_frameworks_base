@@ -16,10 +16,15 @@
 
 package android.telephony.ims;
 
+import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Provides the call forward information for the supplementary service configuration.
@@ -28,39 +33,120 @@ import android.os.Parcelable;
  */
 @SystemApi
 public final class ImsCallForwardInfo implements Parcelable {
-    // Refer to ImsUtInterface#CDIV_CF_XXX
-    /** @hide */
-    // TODO: Make private, do not modify this field directly, use getter.
+
+    /**
+     * CDIV (Communication Diversion, 3GPP TS 24.604) call forwarding reason for unconditional call
+     * forwarding. See TC 27.007
+     */
+    public static final int CDIV_CF_REASON_UNCONDITIONAL = 0;
+
+    /**
+     * CDIV (Communication Diversion, 3GPP TS 24.604) call forwarding reason for call forwarding
+     * when the user is busy.
+     */
+    public static final int CDIV_CF_REASON_BUSY = 1;
+
+    /**
+     * CDIV (Communication Diversion, 3GPP TS 24.604) call forwarding reason for call forwarding
+     * when there is no reply from the user.
+     */
+    public static final int CDIV_CF_REASON_NO_REPLY = 2;
+
+    /**
+     * CDIV (Communication Diversion, 3GPP TS 24.604) call forwarding reason for call forwarding
+     * when the user is not reachable.
+     */
+    public static final int CDIV_CF_REASON_NOT_REACHABLE = 3;
+
+    /**
+     * CDIV (Communication Diversion, 3GPP TS 24.604) call forwarding reason for setting all call
+     * forwarding reasons simultaneously (i.e. unconditional, busy, no reply, and not reachable).
+     */
+    public static final int CDIV_CF_REASON_ALL = 4;
+
+    /**
+     * CDIV (Communication Diversion, 3GPP TS 24.604) call forwarding reason for setting all
+     * conditional call forwarding reasons simultaneously (i.e. if busy, if no reply, and if not
+     * reachable).
+     */
+    public static final int CDIV_CF_REASON_ALL_CONDITIONAL = 5;
+
+    /**
+     * CDIV (Communication Diversion) IMS only call forwarding reason for call forwarding when the
+     * user is not logged in.
+     */
+    public static final int CDIV_CF_REASON_NOT_LOGGED_IN = 6;
+
+    /**@hide*/
+    @IntDef(prefix = {"CDIV_CF_REASON_"}, value = {
+            CDIV_CF_REASON_UNCONDITIONAL,
+            CDIV_CF_REASON_BUSY,
+            CDIV_CF_REASON_NO_REPLY,
+            CDIV_CF_REASON_NOT_REACHABLE,
+            CDIV_CF_REASON_ALL,
+            CDIV_CF_REASON_ALL_CONDITIONAL,
+            CDIV_CF_REASON_NOT_LOGGED_IN})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface CallForwardReasons{}
+
+    /**
+     * Call forwarding is not active for any service class.
+     */
+    public static final int STATUS_NOT_ACTIVE = 0;
+
+    /**
+     * Call forwarding is active for one or more service classes.
+     */
+    public static final int STATUS_ACTIVE = 1;
+
+    /**@hide*/
+    @IntDef(prefix = {"STATUS_"}, value = {
+            STATUS_NOT_ACTIVE,
+            STATUS_ACTIVE})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface CallForwardStatus{}
+
+    /**
+     * The address defined in {@link #getNumber()} is in an unknown format.
+     *
+     * See TS 27.007, section 7.11 for more information.
+     */
+    public static final int TYPE_OF_ADDRESS_UNKNOWN = 0x81;
+    /**
+     * The address defined in {@link #getNumber()} is in E.164 international format, which includes
+     * international access code "+".
+     *
+     * See TS 27.007, section 7.11 for more information.
+     */
+    public static final int TYPE_OF_ADDRESS_INTERNATIONAL = 0x91;
+
+    /**@hide*/
+    @IntDef(prefix = {"TYPE_OF_ADDRESS_"}, value = {
+            TYPE_OF_ADDRESS_INTERNATIONAL,
+            TYPE_OF_ADDRESS_UNKNOWN})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface TypeOfAddress{}
+
+    /**@hide*/
     @UnsupportedAppUsage
-    public int mCondition;
-    // 0: disabled, 1: enabled
+    public @CallForwardReasons int mCondition;
     /** @hide */
-    // TODO: Make private, do not modify this field directly, use getter.
     @UnsupportedAppUsage
-    public int mStatus;
-    // 0x91: International, 0x81: Unknown
+    public @CallForwardStatus int mStatus;
     /** @hide */
-    // TODO: Make private, do not modify this field directly, use getter.
     @UnsupportedAppUsage
-    public int mToA;
-    // Service class
+    public @TypeOfAddress int mToA;
     /** @hide */
-    // TODO: Make private, do not modify this field directly, use getter.
     @UnsupportedAppUsage
-    public int mServiceClass;
-    // Number (it will not include the "sip" or "tel" URI scheme)
+    public @ImsSsData.ServiceClassFlags int mServiceClass;
     /** @hide */
-    // TODO: Make private, do not modify this field directly, use getter.
     @UnsupportedAppUsage
     public String mNumber;
-    // No reply timer for CF
     /** @hide */
-    // TODO: Make private, do not modify this field directly, use getter.
     @UnsupportedAppUsage
     public int mTimeSeconds;
 
     /** @hide */
-    // TODO: Will be removed in the future, use public constructor instead.
     @UnsupportedAppUsage
     public ImsCallForwardInfo() {
     }
@@ -68,9 +154,10 @@ public final class ImsCallForwardInfo implements Parcelable {
     /**
      * IMS Call Forward Information.
      */
-    public ImsCallForwardInfo(int condition, int status, int toA, int serviceClass, String number,
-            int replyTimerSec) {
-        mCondition = condition;
+    public ImsCallForwardInfo(@CallForwardReasons int reason, @CallForwardStatus int status,
+            @TypeOfAddress int toA, @ImsSsData.ServiceClassFlags int serviceClass,
+            @NonNull String number, int replyTimerSec) {
+        mCondition = reason;
         mStatus = status;
         mToA = toA;
         mServiceClass = serviceClass;
@@ -130,26 +217,47 @@ public final class ImsCallForwardInfo implements Parcelable {
         }
     };
 
-    public int getCondition() {
+    /**
+     * @return the condition of call forwarding for the service classes specified.
+     */
+    public @CallForwardReasons int getCondition() {
         return mCondition;
     }
 
-    public int getStatus() {
+    /**
+     * @return The call forwarding status.
+     */
+    public @CallForwardStatus int getStatus() {
         return mStatus;
     }
 
-    public int getToA() {
+    /**
+     * @return the type of address (ToA) for the number.
+     * @see #getNumber()
+     */
+    public @TypeOfAddress int getToA() {
         return mToA;
     }
 
-    public int getServiceClass() {
+    /**
+     * @return a bitfield containing the service classes that are enabled for call forwarding.
+     */
+    public @ImsSsData.ServiceClassFlags int getServiceClass() {
         return mServiceClass;
     }
 
+    /**
+     * @return the call forwarding number associated with call forwarding, with a number type
+     * defined by {@link #getToA()}.
+     */
     public String getNumber() {
         return mNumber;
     }
 
+    /**
+     * @return the number in seconds to wait before the call is forwarded for call forwarding
+     * condition {@link #CDIV_CF_REASON_NO_REPLY}
+     */
     public int getTimeSeconds() {
         return mTimeSeconds;
     }
