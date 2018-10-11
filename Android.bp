@@ -835,7 +835,6 @@ java_library_host {
         "cmds/statsd/src/**/*.proto",
         "core/proto/**/*.proto",
         "libs/incident/proto/**/*.proto",
-        "proto/src/stats_enums.proto",
     ],
     proto: {
         include_dirs: ["external/protobuf/src"],
@@ -873,7 +872,6 @@ java_library {
     srcs: [
         "core/proto/**/*.proto",
         "libs/incident/proto/android/os/**/*.proto",
-        "proto/src/stats_enums.proto",
     ],
     // Protos have lots of MissingOverride and similar.
     errorprone: {
@@ -899,7 +897,6 @@ cc_library {
     srcs: [
         "core/proto/**/*.proto",
         "libs/incident/**/*.proto",
-        "proto/src/stats_enums.proto",
     ],
 
     target: {

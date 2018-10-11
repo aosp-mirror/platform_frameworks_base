@@ -16,8 +16,7 @@
 
 syntax = "proto2";
 
-package android.os.statsd;
-option java_package = "com.android.os";
+package android.stats;
 option java_outer_classname = "StatsEnums";
 
 enum EventType {
