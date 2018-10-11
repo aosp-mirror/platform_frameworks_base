@@ -186,6 +186,8 @@
   <java-symbol type="id" name="action0" />
   <java-symbol type="id" name="action1" />
   <java-symbol type="id" name="action2" />
+  <java-symbol type="id" name="action3" />
+  <java-symbol type="id" name="action4" />
   <java-symbol type="id" name="big_picture" />
   <java-symbol type="id" name="big_text" />
   <java-symbol type="id" name="chronometer" />

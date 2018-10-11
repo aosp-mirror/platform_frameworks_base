@@ -59,7 +59,26 @@
             android:orientation="horizontal"
             android:layoutDirection="ltr"
             style="@style/NotificationMediaActionContainer" >
-            <!-- media buttons will be added here -->
+            <include
+                layout="@layout/notification_material_media_action"
+                android:id="@+id/action0"
+            />
+            <include
+                layout="@layout/notification_material_media_action"
+                android:id="@+id/action1"
+            />
+            <include
+                layout="@layout/notification_material_media_action"
+                android:id="@+id/action2"
+            />
+            <include
+                layout="@layout/notification_material_media_action"
+                android:id="@+id/action3"
+            />
+            <include
+                layout="@layout/notification_material_media_action"
+                android:id="@+id/action4"
+            />
         </LinearLayout>
     </LinearLayout>
 </com.android.internal.widget.MediaNotificationView>
