@@ -18,6 +18,7 @@ package com.android.internal.widget;
 
 import android.annotation.AttrRes;
 import android.annotation.Nullable;
+import android.annotation.UnsupportedAppUsage;
 import android.annotation.StyleRes;
 import android.content.Context;
 import android.graphics.drawable.Drawable;
@@ -50,6 +51,7 @@ public class AlertDialogLayout extends LinearLayout {
         super(context);
     }
 
+    @UnsupportedAppUsage
     public AlertDialogLayout(@Nullable Context context, @Nullable AttributeSet attrs) {
         super(context, attrs);
     }
