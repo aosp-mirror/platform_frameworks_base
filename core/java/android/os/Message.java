@@ -382,7 +382,7 @@ public final class Message implements Parcelable {
      * the <em>target</em> {@link Handler} that is receiving this Message to
      * dispatch it.  If
      * not set, the message will be dispatched to the receiving Handler's
-     * {@link Handler#handleMessage(Message Handler.handleMessage())}.
+     * {@link Handler#handleMessage(Message)}.
      */
     public Runnable getCallback() {
         return callback;
