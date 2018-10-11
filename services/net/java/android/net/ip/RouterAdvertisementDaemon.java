@@ -28,7 +28,6 @@ import android.net.TrafficStats;
 import android.net.util.InterfaceParams;
 import android.system.ErrnoException;
 import android.system.Os;
-import android.system.StructGroupReq;
 import android.system.StructTimeval;
 import android.util.Log;
 
