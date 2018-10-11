@@ -423,7 +423,7 @@ public class DozeSensors {
     }
 
     /**
-     * A Sensor that is injected via plugin, for better ContextHub interface.
+     * A Sensor that is injected via plugin.
      */
     private class PluginTriggerSensor extends TriggerSensor {
 

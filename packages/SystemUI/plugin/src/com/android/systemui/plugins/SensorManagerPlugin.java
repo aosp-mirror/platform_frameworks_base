@@ -67,9 +67,25 @@ public interface SensorManagerPlugin extends Plugin {
 
     class TriggerEvent {
         Sensor mSensor;
+        int mVendorType;
 
-        public TriggerEvent(Sensor sensor) {
+        /**
+         * Creates a trigger event
+         * @param sensor The type of sensor, e.g. TYPE_WAKE_LOCK_SCREEN
+         * @param vendorType The vendor type, which should be unique for each type of sensor,
+         *                   e.g. SINGLE_TAP = 1, DOUBLE_TAP = 2, etc.
+         */
+        public TriggerEvent(Sensor sensor, int vendorType) {
             mSensor = sensor;
+            mVendorType = vendorType;
+        }
+
+        public Sensor getSensor() {
+            return mSensor;
+        }
+
+        public int getVendorType() {
+            return mVendorType;
         }
     }
 }
