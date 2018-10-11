@@ -18,8 +18,8 @@ package com.android.settingslib.applications;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Matchers.anyInt;
+import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
@@ -72,7 +72,7 @@ public class DefaultAppInfoTest {
     @Test
     public void initInfoWithActivityInfo_shouldLoadInfo() {
         mPackageItemInfo.packageName = "test";
-        mInfo = new DefaultAppInfo(mContext, mPackageManager, mPackageItemInfo);
+        mInfo = new DefaultAppInfo(mContext, mPackageManager, 0 /* uid */, mPackageItemInfo);
         mInfo.loadLabel();
         Drawable icon = mInfo.loadIcon();
 
