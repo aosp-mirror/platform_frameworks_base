@@ -121,6 +121,7 @@ final class CoreSettingsObserver extends ContentObserver {
                 value = Settings.Global.getString(context.getContentResolver(), setting);
             }
             if (value == null) {
+                snapshot.remove(setting);
                 continue;
             }
             Class<?> type = entry.getValue();
