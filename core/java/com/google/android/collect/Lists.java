@@ -16,6 +16,7 @@
 
 package com.google.android.collect;
 
+import android.annotation.UnsupportedAppUsage;
 import java.util.ArrayList;
 import java.util.Collections;
 
@@ -33,6 +34,7 @@ public class Lists {
      *
      * @return a newly-created, initially-empty {@code ArrayList}
      */
+    @UnsupportedAppUsage
     public static <E> ArrayList<E> newArrayList() {
         return new ArrayList<E>();
     }
