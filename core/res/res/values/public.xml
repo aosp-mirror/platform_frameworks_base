@@ -2930,17 +2930,17 @@
 
     <public-group type="string" first-id="0x0104001b">
         <!-- @hide @SystemApi -->
-        <public name="config_help_package_name_key" />
+        <public name="config_helpPackageNameKey" />
         <!-- @hide @SystemApi -->
-        <public name="config_help_package_name_value" />
+        <public name="config_helpPackageNameValue" />
         <!-- @hide @SystemApi -->
-        <public name="config_help_intent_extra_key" />
+        <public name="config_helpIntentExtraKey" />
         <!-- @hide @SystemApi -->
-        <public name="config_help_intent_name_key" />
+        <public name="config_helpIntentNameKey" />
         <!-- @hide @SystemApi -->
-        <public name="config_feedback_intent_extra_key" />
+        <public name="config_feedbackIntentExtraKey" />
         <!-- @hide @SystemApi -->
-        <public name="config_feedback_intent_name_key" />
+        <public name="config_feedbackIntentNameKey" />
     </public-group>
 
     <public-group type="bool" first-id="0x01110000">
@@ -2950,7 +2950,7 @@
 
     <public-group type="dimen" first-id="0x01050007">
         <!-- @hide @SystemApi -->
-        <public name="config_restricted_icon_size" />
+        <public name="config_restrictedIconSize" />
     </public-group>
 
   <!-- ===============================================================

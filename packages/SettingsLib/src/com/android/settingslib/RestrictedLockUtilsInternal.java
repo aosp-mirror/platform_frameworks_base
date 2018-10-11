@@ -58,7 +58,7 @@ public class RestrictedLockUtilsInternal extends RestrictedLockUtils {
     public static Drawable getRestrictedPadlock(Context context) {
         Drawable restrictedPadlock = context.getDrawable(android.R.drawable.ic_info);
         final int iconSize = context.getResources().getDimensionPixelSize(
-                android.R.dimen.config_restricted_icon_size);
+                android.R.dimen.config_restrictedIconSize);
 
         TypedArray ta = context.obtainStyledAttributes(new int[]{android.R.attr.colorAccent});
         int colorAccent = ta.getColor(0, 0);
