@@ -224,7 +224,7 @@ public class ClipData implements Parcelable {
          * Create an Item consisting of a single block of (possibly styled) text,
          * with an alternative HTML formatted representation.  You <em>must</em>
          * supply a plain text representation in addition to HTML text; coercion
-         * will not be done from HTML formated text into plain text.
+         * will not be done from HTML formatted text into plain text.
          */
         public Item(CharSequence text, String htmlText) {
             mText = text;
@@ -268,7 +268,7 @@ public class ClipData implements Parcelable {
          * Create a complex Item, containing multiple representations of
          * text, HTML text, Intent, and/or URI.  If providing HTML text, you
          * <em>must</em> supply a plain text representation as well; coercion
-         * will not be done from HTML formated text into plain text.
+         * will not be done from HTML formatted text into plain text.
          */
         public Item(CharSequence text, String htmlText, Intent intent, Uri uri) {
             if (htmlText != null && text == null) {
