@@ -71,10 +71,10 @@ static inline audio_format_t audioFormatToNative(int audioFormat)
         return AUDIO_FORMAT_AAC_HE_V1;
     case ENCODING_AAC_HE_V2:
         return AUDIO_FORMAT_AAC_HE_V2;
-    case ENCODING_DOLBY_TRUEHD:
-        return AUDIO_FORMAT_DOLBY_TRUEHD;
     case ENCODING_IEC61937:
         return AUDIO_FORMAT_IEC61937;
+    case ENCODING_DOLBY_TRUEHD:
+        return AUDIO_FORMAT_DOLBY_TRUEHD;
     case ENCODING_AAC_ELD:
         return AUDIO_FORMAT_AAC_ELD;
     case ENCODING_AAC_XHE:

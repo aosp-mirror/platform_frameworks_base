@@ -311,6 +311,8 @@ public final class AudioFormat implements Parcelable {
                 return "ENCODING_AAC_XHE";
             case ENCODING_AC4:
                 return "ENCODING_AC4";
+            case ENCODING_E_AC3_JOC:
+                return "ENCODING_E_AC3_JOC";
             default :
                 return "invalid encoding " + enc;
         }
@@ -518,12 +520,11 @@ public final class AudioFormat implements Parcelable {
     public static boolean isValidEncoding(int audioFormat)
     {
         switch (audioFormat) {
-        case ENCODING_PCM_8BIT:
         case ENCODING_PCM_16BIT:
+        case ENCODING_PCM_8BIT:
         case ENCODING_PCM_FLOAT:
         case ENCODING_AC3:
         case ENCODING_E_AC3:
-        case ENCODING_E_AC3_JOC:
         case ENCODING_DTS:
         case ENCODING_DTS_HD:
         case ENCODING_MP3:
@@ -531,9 +532,11 @@ public final class AudioFormat implements Parcelable {
         case ENCODING_AAC_HE_V1:
         case ENCODING_AAC_HE_V2:
         case ENCODING_IEC61937:
+        case ENCODING_DOLBY_TRUEHD:
         case ENCODING_AAC_ELD:
         case ENCODING_AAC_XHE:
         case ENCODING_AC4:
+        case ENCODING_E_AC3_JOC:
             return true;
         default:
             return false;
@@ -544,22 +547,23 @@ public final class AudioFormat implements Parcelable {
     public static boolean isPublicEncoding(int audioFormat)
     {
         switch (audioFormat) {
-        case ENCODING_PCM_8BIT:
         case ENCODING_PCM_16BIT:
+        case ENCODING_PCM_8BIT:
         case ENCODING_PCM_FLOAT:
         case ENCODING_AC3:
         case ENCODING_E_AC3:
-        case ENCODING_E_AC3_JOC:
         case ENCODING_DTS:
         case ENCODING_DTS_HD:
-        case ENCODING_IEC61937:
         case ENCODING_MP3:
         case ENCODING_AAC_LC:
         case ENCODING_AAC_HE_V1:
         case ENCODING_AAC_HE_V2:
+        case ENCODING_IEC61937:
+        case ENCODING_DOLBY_TRUEHD:
         case ENCODING_AAC_ELD:
         case ENCODING_AAC_XHE:
         case ENCODING_AC4:
+        case ENCODING_E_AC3_JOC:
             return true;
         default:
             return false;
@@ -571,14 +575,13 @@ public final class AudioFormat implements Parcelable {
     public static boolean isEncodingLinearPcm(int audioFormat)
     {
         switch (audioFormat) {
-        case ENCODING_PCM_8BIT:
         case ENCODING_PCM_16BIT:
+        case ENCODING_PCM_8BIT:
         case ENCODING_PCM_FLOAT:
         case ENCODING_DEFAULT:
             return true;
         case ENCODING_AC3:
         case ENCODING_E_AC3:
-        case ENCODING_E_AC3_JOC:
         case ENCODING_DTS:
         case ENCODING_DTS_HD:
         case ENCODING_MP3:
@@ -586,9 +589,11 @@ public final class AudioFormat implements Parcelable {
         case ENCODING_AAC_HE_V1:
         case ENCODING_AAC_HE_V2:
         case ENCODING_IEC61937: // wrapped in PCM but compressed
+        case ENCODING_DOLBY_TRUEHD:
         case ENCODING_AAC_ELD:
         case ENCODING_AAC_XHE:
         case ENCODING_AC4:
+        case ENCODING_E_AC3_JOC:
             return false;
         case ENCODING_INVALID:
         default:
@@ -600,24 +605,25 @@ public final class AudioFormat implements Parcelable {
     public static boolean isEncodingLinearFrames(int audioFormat)
     {
         switch (audioFormat) {
-        case ENCODING_PCM_8BIT:
         case ENCODING_PCM_16BIT:
+        case ENCODING_PCM_8BIT:
         case ENCODING_PCM_FLOAT:
         case ENCODING_IEC61937: // same size as stereo PCM
         case ENCODING_DEFAULT:
             return true;
         case ENCODING_AC3:
         case ENCODING_E_AC3:
-        case ENCODING_E_AC3_JOC:
         case ENCODING_DTS:
         case ENCODING_DTS_HD:
         case ENCODING_MP3:
         case ENCODING_AAC_LC:
         case ENCODING_AAC_HE_V1:
         case ENCODING_AAC_HE_V2:
+        case ENCODING_DOLBY_TRUEHD:
         case ENCODING_AAC_ELD:
         case ENCODING_AAC_XHE:
         case ENCODING_AC4:
+        case ENCODING_E_AC3_JOC:
             return false;
         case ENCODING_INVALID:
         default:
@@ -844,22 +850,23 @@ public final class AudioFormat implements Parcelable {
                 case ENCODING_DEFAULT:
                     mEncoding = ENCODING_PCM_16BIT;
                     break;
-                case ENCODING_PCM_8BIT:
                 case ENCODING_PCM_16BIT:
+                case ENCODING_PCM_8BIT:
                 case ENCODING_PCM_FLOAT:
                 case ENCODING_AC3:
                 case ENCODING_E_AC3:
-                case ENCODING_E_AC3_JOC:
                 case ENCODING_DTS:
                 case ENCODING_DTS_HD:
-                case ENCODING_IEC61937:
                 case ENCODING_MP3:
                 case ENCODING_AAC_LC:
                 case ENCODING_AAC_HE_V1:
                 case ENCODING_AAC_HE_V2:
+                case ENCODING_IEC61937:
+                case ENCODING_DOLBY_TRUEHD:
                 case ENCODING_AAC_ELD:
                 case ENCODING_AAC_XHE:
                 case ENCODING_AC4:
+                case ENCODING_E_AC3_JOC:
                     mEncoding = encoding;
                     break;
                 case ENCODING_INVALID:
@@ -1060,22 +1067,23 @@ public final class AudioFormat implements Parcelable {
     /** @hide */
     @IntDef(flag = false, prefix = "ENCODING", value = {
         ENCODING_DEFAULT,
-        ENCODING_PCM_8BIT,
         ENCODING_PCM_16BIT,
+        ENCODING_PCM_8BIT,
         ENCODING_PCM_FLOAT,
         ENCODING_AC3,
         ENCODING_E_AC3,
-        ENCODING_E_AC3_JOC,
         ENCODING_DTS,
         ENCODING_DTS_HD,
         ENCODING_MP3,
-        ENCODING_IEC61937,
+        ENCODING_AAC_LC,
         ENCODING_AAC_HE_V1,
         ENCODING_AAC_HE_V2,
-        ENCODING_AAC_LC,
+        ENCODING_IEC61937,
+        ENCODING_DOLBY_TRUEHD,
         ENCODING_AAC_ELD,
         ENCODING_AAC_XHE,
-        ENCODING_AC4 }
+        ENCODING_AC4,
+        ENCODING_E_AC3_JOC }
     )
     @Retention(RetentionPolicy.SOURCE)
     public @interface Encoding {}
@@ -1088,8 +1096,8 @@ public final class AudioFormat implements Parcelable {
             ENCODING_DTS_HD,
             ENCODING_AAC_LC,
             ENCODING_DOLBY_TRUEHD,
-            ENCODING_E_AC3_JOC,
             ENCODING_AC4,
+            ENCODING_E_AC3_JOC,
     };
 
     /** @hide */
@@ -1100,8 +1108,8 @@ public final class AudioFormat implements Parcelable {
             ENCODING_DTS_HD,
             ENCODING_AAC_LC,
             ENCODING_DOLBY_TRUEHD,
-            ENCODING_E_AC3_JOC,
-            ENCODING_AC4 }
+            ENCODING_AC4,
+            ENCODING_E_AC3_JOC }
     )
     @Retention(RetentionPolicy.SOURCE)
     public @interface SurroundSoundEncoding {}
@@ -1129,10 +1137,10 @@ public final class AudioFormat implements Parcelable {
                 return "AAC";
             case ENCODING_DOLBY_TRUEHD:
                 return "Dolby TrueHD";
-            case ENCODING_E_AC3_JOC:
-                return "Dolby Atmos in Dolby Digital Plus";
             case ENCODING_AC4:
                 return "Dolby AC-4";
+            case ENCODING_E_AC3_JOC:
+                return "Dolby Atmos in Dolby Digital Plus";
             default:
                 return "Unknown surround sound format";
         }
