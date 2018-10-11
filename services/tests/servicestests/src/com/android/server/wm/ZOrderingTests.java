@@ -32,36 +32,35 @@ import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR_SUB_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_SYSTEM_OVERLAY;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import android.platform.test.annotations.Presubmit;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 
-import androidx.test.filters.FlakyTest;
-import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
-
 import org.junit.After;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import java.util.HashMap;
 import java.util.LinkedList;
+
+import androidx.test.filters.FlakyTest;
+import androidx.test.filters.SmallTest;
 
 /**
  * Tests for the {@link WindowLayersController} class.
  *
  * Build/Install/Run:
- *  bit FrameworksServicesTests:com.android.server.wm.ZOrderingTests
+ *  atest FrameworksServicesTests:com.android.server.wm.ZOrderingTests
  */
 @SmallTest
 @FlakyTest(bugId = 74078662)
 @Presubmit
-@RunWith(AndroidJUnit4.class)
 public class ZOrderingTests extends WindowTestsBase {
 
     private class LayerRecordingTransaction extends SurfaceControl.Transaction {
-        HashMap<SurfaceControl, Integer> mLayersForControl = new HashMap();
-        HashMap<SurfaceControl, SurfaceControl> mRelativeLayersForControl = new HashMap();
+        HashMap<SurfaceControl, Integer> mLayersForControl = new HashMap<>();
+        HashMap<SurfaceControl, SurfaceControl> mRelativeLayersForControl = new HashMap<>();
 
         @Override
         public SurfaceControl.Transaction setLayer(SurfaceControl sc, int layer) {
@@ -86,11 +85,11 @@ public class ZOrderingTests extends WindowTestsBase {
         private SurfaceControl getRelativeLayer(SurfaceControl sc) {
             return mRelativeLayersForControl.get(sc);
         }
-    };
+    }
 
     // We have WM use our Hierarchy recording subclass of SurfaceControl.Builder
     // such that we can keep track of the parents of Surfaces as they are constructed.
-    private HashMap<SurfaceControl, SurfaceControl> mParentFor = new HashMap();
+    private HashMap<SurfaceControl, SurfaceControl> mParentFor = new HashMap<>();
 
     private class HierarchyRecorder extends SurfaceControl.Builder {
         SurfaceControl mPendingParent;
@@ -109,13 +108,13 @@ public class ZOrderingTests extends WindowTestsBase {
             mPendingParent = null;
             return sc;
         }
-    };
+    }
 
     class HierarchyRecordingBuilderFactory implements SurfaceBuilderFactory {
         public SurfaceControl.Builder make(SurfaceSession s) {
             return new HierarchyRecorder(s);
         }
-    };
+    }
 
     private LayerRecordingTransaction mTransaction;
 
@@ -136,7 +135,7 @@ public class ZOrderingTests extends WindowTestsBase {
     }
 
     LinkedList<SurfaceControl> getAncestors(LayerRecordingTransaction t, SurfaceControl sc) {
-        LinkedList<SurfaceControl> p = new LinkedList();
+        LinkedList<SurfaceControl> p = new LinkedList<>();
         SurfaceControl current = sc;
         do {
             p.addLast(current);
@@ -153,7 +152,7 @@ public class ZOrderingTests extends WindowTestsBase {
 
 
     void assertZOrderGreaterThan(LayerRecordingTransaction t, SurfaceControl left,
-            SurfaceControl right) throws Exception {
+            SurfaceControl right) {
         final LinkedList<SurfaceControl> leftParentChain = getAncestors(t, left);
         final LinkedList<SurfaceControl> rightParentChain = getAncestors(t, right);
 
@@ -168,16 +167,15 @@ public class ZOrderingTests extends WindowTestsBase {
         }
 
         if (rightTop == null) { // right is the parent of left.
-            assertGreaterThan(t.getLayer(leftTop), 0);
+            assertThat(t.getLayer(leftTop)).isGreaterThan(0);
         } else if (leftTop == null) { // left is the parent of right.
-            assertGreaterThan(0, t.getLayer(rightTop));
+            assertThat(t.getLayer(rightTop)).isLessThan(0);
         } else {
-            assertGreaterThan(t.getLayer(leftTop),
-                    t.getLayer(rightTop));
+            assertThat(t.getLayer(leftTop)).isGreaterThan(t.getLayer(rightTop));
         }
     }
 
-    void assertWindowHigher(WindowState left, WindowState right) throws Exception {
+    void assertWindowHigher(WindowState left, WindowState right) {
         assertZOrderGreaterThan(mTransaction, left.getSurfaceControl(), right.getSurfaceControl());
     }
 
@@ -186,7 +184,7 @@ public class ZOrderingTests extends WindowTestsBase {
     }
 
     @Test
-    public void testAssignWindowLayers_ForImeWithNoTarget() throws Exception {
+    public void testAssignWindowLayers_ForImeWithNoTarget() {
         sWm.mInputMethodTarget = null;
         mDisplayContent.assignChildLayers(mTransaction);
 
@@ -203,7 +201,7 @@ public class ZOrderingTests extends WindowTestsBase {
     }
 
     @Test
-    public void testAssignWindowLayers_ForImeWithAppTarget() throws Exception {
+    public void testAssignWindowLayers_ForImeWithAppTarget() {
         final WindowState imeAppTarget = createWindow("imeAppTarget");
         sWm.mInputMethodTarget = imeAppTarget;
 
@@ -222,7 +220,7 @@ public class ZOrderingTests extends WindowTestsBase {
     }
 
     @Test
-    public void testAssignWindowLayers_ForImeWithAppTargetWithChildWindows() throws Exception {
+    public void testAssignWindowLayers_ForImeWithAppTargetWithChildWindows() {
         final WindowState imeAppTarget = createWindow("imeAppTarget");
         final WindowState imeAppTargetChildAboveWindow = createWindow(imeAppTarget,
                 TYPE_APPLICATION_ATTACHED_DIALOG, imeAppTarget.mToken,
@@ -248,7 +246,7 @@ public class ZOrderingTests extends WindowTestsBase {
     }
 
     @Test
-    public void testAssignWindowLayers_ForImeWithAppTargetAndAppAbove() throws Exception {
+    public void testAssignWindowLayers_ForImeWithAppTargetAndAppAbove() {
         final WindowState appBelowImeTarget = createWindow("appBelowImeTarget");
         final WindowState imeAppTarget = createWindow("imeAppTarget");
         final WindowState appAboveImeTarget = createWindow("appAboveImeTarget");
@@ -271,7 +269,7 @@ public class ZOrderingTests extends WindowTestsBase {
     }
 
     @Test
-    public void testAssignWindowLayers_ForImeNonAppImeTarget() throws Exception {
+    public void testAssignWindowLayers_ForImeNonAppImeTarget() {
         final WindowState imeSystemOverlayTarget = createWindow(null, TYPE_SYSTEM_OVERLAY,
                 mDisplayContent, "imeSystemOverlayTarget",
                 true /* ownerCanAddInternalSystemWindow */);
@@ -298,7 +296,7 @@ public class ZOrderingTests extends WindowTestsBase {
     }
 
     @Test
-    public void testAssignWindowLayers_ForStatusBarImeTarget() throws Exception {
+    public void testAssignWindowLayers_ForStatusBarImeTarget() {
         sWm.mInputMethodTarget = mStatusBarWindow;
         mDisplayContent.assignChildLayers(mTransaction);
 
@@ -312,7 +310,7 @@ public class ZOrderingTests extends WindowTestsBase {
     }
 
     @Test
-    public void testStackLayers() throws Exception {
+    public void testStackLayers() {
         final WindowState anyWindow1 = createWindow("anyWindow");
         final WindowState pinnedStackWindow = createWindowOnStack(null, WINDOWING_MODE_PINNED,
                 ACTIVITY_TYPE_STANDARD, TYPE_BASE_APPLICATION, mDisplayContent,
@@ -342,7 +340,7 @@ public class ZOrderingTests extends WindowTestsBase {
     }
 
     @Test
-    public void testAssignWindowLayers_ForSysUiPanels() throws Exception {
+    public void testAssignWindowLayers_ForSysUiPanels() {
         final WindowState navBarPanel =
                 createWindow(null, TYPE_NAVIGATION_BAR_PANEL, mDisplayContent, "NavBarPanel");
         final WindowState statusBarPanel =
@@ -359,7 +357,7 @@ public class ZOrderingTests extends WindowTestsBase {
     }
 
     @Test
-    public void testAssignWindowLayers_ForNegativelyZOrderedSubtype() throws Exception {
+    public void testAssignWindowLayers_ForNegativelyZOrderedSubtype() {
         // TODO(b/70040778): We should aim to eliminate the last user of TYPE_APPLICATION_MEDIA
         // then we can drop all negative layering on the windowing side.
 
@@ -376,7 +374,7 @@ public class ZOrderingTests extends WindowTestsBase {
     }
 
     @Test
-    public void testDockedDividerPosition() throws Exception {
+    public void testDockedDividerPosition() {
         final WindowState pinnedStackWindow = createWindowOnStack(null, WINDOWING_MODE_PINNED,
                 ACTIVITY_TYPE_STANDARD, TYPE_BASE_APPLICATION, mDisplayContent,
                 "pinnedStackWindow");
