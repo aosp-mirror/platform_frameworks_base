@@ -706,6 +706,7 @@ java_defaults {
         "android.hardware.radio-V1.0-java",
         "android.hardware.radio-V1.3-java",
         "android.hardware.usb.gadget-V1.0-java",
+        "netd_aidl_interface-java",
     ],
 
     // Loaded with System.loadLibrary by android.view.textclassifier

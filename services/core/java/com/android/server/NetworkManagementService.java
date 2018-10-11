@@ -57,6 +57,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.INetd;
+import android.net.TetherStatsParcel;
 import android.net.INetworkManagementEventObserver;
 import android.net.ITetheringStatsProvider;
 import android.net.InterfaceConfiguration;
@@ -1844,31 +1845,30 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                 return new NetworkStats(SystemClock.elapsedRealtime(), 0);
             }
 
-            final PersistableBundle bundle;
+            final TetherStatsParcel[] tetherStatsVec;
             try {
-                bundle = mNetdService.tetherGetStats();
+                tetherStatsVec = mNetdService.tetherGetStats();
             } catch (RemoteException | ServiceSpecificException e) {
                 throw new IllegalStateException("problem parsing tethering stats: ", e);
             }
 
             final NetworkStats stats = new NetworkStats(SystemClock.elapsedRealtime(),
-                    bundle.size());
+                tetherStatsVec.length);
             final NetworkStats.Entry entry = new NetworkStats.Entry();
 
-            for (String iface : bundle.keySet()) {
-                long[] statsArray = bundle.getLongArray(iface);
+            for (TetherStatsParcel tetherStats : tetherStatsVec) {
                 try {
-                    entry.iface = iface;
+                    entry.iface = tetherStats.iface;
                     entry.uid = UID_TETHERING;
                     entry.set = SET_DEFAULT;
                     entry.tag = TAG_NONE;
-                    entry.rxBytes   = statsArray[INetd.TETHER_STATS_RX_BYTES];
-                    entry.rxPackets = statsArray[INetd.TETHER_STATS_RX_PACKETS];
-                    entry.txBytes   = statsArray[INetd.TETHER_STATS_TX_BYTES];
-                    entry.txPackets = statsArray[INetd.TETHER_STATS_TX_PACKETS];
+                    entry.rxBytes   = tetherStats.rxBytes;
+                    entry.rxPackets = tetherStats.rxPackets;
+                    entry.txBytes   = tetherStats.txBytes;
+                    entry.txPackets = tetherStats.txPackets;
                     stats.combineValues(entry);
                 } catch (ArrayIndexOutOfBoundsException e) {
-                    throw new IllegalStateException("invalid tethering stats for " + iface, e);
+                    throw new IllegalStateException("invalid tethering stats " + e);
                 }
             }
 
