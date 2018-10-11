@@ -63,7 +63,8 @@ LOCAL_JNI_SHARED_LIBRARIES := \
     libunwindstack \
     libutilscallstack \
     libziparchive \
-    libz
+    libz \
+    netd_aidl_interface-cpp
 
 LOCAL_ADDITIONAL_DEPENDENCIES := $(LOCAL_PATH)/Android.mk
 
@@ -92,7 +93,8 @@ LOCAL_SHARED_LIBRARIES := \
   liblog \
   libcutils \
   libnativehelper \
-  libnetdaidl
+  libnetdaidl \
+  netd_aidl_interface-cpp
 
 LOCAL_STATIC_LIBRARIES := \
   libpcap \
