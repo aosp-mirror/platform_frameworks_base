@@ -60,6 +60,7 @@ import android.telephony.ims.aidl.IImsMmTelFeature;
 import android.telephony.ims.aidl.IImsRcsFeature;
 import android.telephony.ims.aidl.IImsRegistration;
 import android.telephony.ims.stub.ImsRegistrationImplBase;
+import android.text.TextUtils;
 import android.util.Log;
 
 import com.android.ims.internal.IImsServiceFeatureCallback;
@@ -5402,7 +5403,7 @@ public class TelephonyManager {
     @UnsupportedAppUsage
     public static String getTelephonyProperty(String property, String defaultVal) {
         String propVal = SystemProperties.get(property);
-        return propVal == null ? defaultVal : propVal;
+        return TextUtils.isEmpty(propVal) ? defaultVal : propVal;
     }
 
     /** @hide */
