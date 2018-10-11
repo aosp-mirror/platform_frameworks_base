@@ -5330,6 +5330,7 @@ public class BatteryStatsImpl extends BatteryStats {
                 if (DEBUG_HISTORY) Slog.v(TAG, "Phone started scanning to: "
                         + Integer.toHexString(mHistoryCur.states));
                 mPhoneSignalScanningTimer.startRunningLocked(elapsedRealtime);
+                StatsLog.write(StatsLog.PHONE_SERVICE_STATE_CHANGED, state, simState, strengthBin);
             }
         }
 
@@ -5341,6 +5342,7 @@ public class BatteryStatsImpl extends BatteryStats {
                         + Integer.toHexString(mHistoryCur.states));
                 newHistory = true;
                 mPhoneSignalScanningTimer.stopRunningLocked(elapsedRealtime);
+                StatsLog.write(StatsLog.PHONE_SERVICE_STATE_CHANGED, state, simState, strengthBin);
             }
         }
 

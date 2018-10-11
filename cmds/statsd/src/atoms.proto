@@ -129,6 +129,8 @@ message Atom {
         AppCrashOccurred app_crash_occurred = 78;
         ANROccurred anr_occurred = 79;
         WTFOccurred wtf_occurred = 80;
+        PhoneServiceStateChanged phone_service_state_changed = 94;
+        PhoneStateChanged phone_state_changed = 95;
         LowMemReported low_mem_reported = 81;
         GenericAtom generic_atom = 82;
         KeyValuePairsAtom key_value_pairs_atom = 83;
@@ -1404,6 +1406,33 @@ message DaveyOccurred {
 message PhoneSignalStrengthChanged {
     // Signal strength, from frameworks/base/core/proto/android/telephony/enums.proto.
     optional android.telephony.SignalStrengthEnum signal_strength = 1;
+}
+
+
+/**
+ * Logs when the phone state, sim state or signal strength changes
+ *
+ * Logged from:
+ *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+message PhoneServiceStateChanged {
+    optional android.telephony.ServiceStateEnum state = 1;
+    optional android.telephony.SimStateEnum sim_state = 2;
+    optional android.telephony.SignalStrengthEnum signal_strength = 3;
+}
+
+/**
+ * Logs when the phone becomes on or off.
+ *
+ * Logged from:
+ *   frameworks/base/core/java/com/android/internal/os/TelephonyRegistry.java
+ */
+message PhoneStateChanged {
+    enum State {
+        OFF = 0;
+        ON = 1;
+    }
+    optional State state = 1;
 }
 
 /**

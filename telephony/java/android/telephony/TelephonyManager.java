@@ -2446,39 +2446,46 @@ public class TelephonyManager {
      *
      * These are the ordinal value of IccCardConstants.State.
      */
-    public static final int SIM_STATE_UNKNOWN = 0;
+
+    public static final int SIM_STATE_UNKNOWN = TelephonyProtoEnums.SIM_STATE_UNKNOWN;  // 0
     /** SIM card state: no SIM card is available in the device */
-    public static final int SIM_STATE_ABSENT = 1;
+    public static final int SIM_STATE_ABSENT = TelephonyProtoEnums.SIM_STATE_ABSENT;  // 1
     /** SIM card state: Locked: requires the user's SIM PIN to unlock */
-    public static final int SIM_STATE_PIN_REQUIRED = 2;
+    public static final int SIM_STATE_PIN_REQUIRED =
+            TelephonyProtoEnums.SIM_STATE_PIN_REQUIRED;  // 2
     /** SIM card state: Locked: requires the user's SIM PUK to unlock */
-    public static final int SIM_STATE_PUK_REQUIRED = 3;
+    public static final int SIM_STATE_PUK_REQUIRED =
+            TelephonyProtoEnums.SIM_STATE_PUK_REQUIRED;  // 3
     /** SIM card state: Locked: requires a network PIN to unlock */
-    public static final int SIM_STATE_NETWORK_LOCKED = 4;
+    public static final int SIM_STATE_NETWORK_LOCKED =
+            TelephonyProtoEnums.SIM_STATE_NETWORK_LOCKED;  // 4
     /** SIM card state: Ready */
-    public static final int SIM_STATE_READY = 5;
+    public static final int SIM_STATE_READY = TelephonyProtoEnums.SIM_STATE_READY;  // 5
     /** SIM card state: SIM Card is NOT READY */
-    public static final int SIM_STATE_NOT_READY = 6;
+    public static final int SIM_STATE_NOT_READY = TelephonyProtoEnums.SIM_STATE_NOT_READY;  // 6
     /** SIM card state: SIM Card Error, permanently disabled */
-    public static final int SIM_STATE_PERM_DISABLED = 7;
+    public static final int SIM_STATE_PERM_DISABLED =
+            TelephonyProtoEnums.SIM_STATE_PERM_DISABLED;  // 7
     /** SIM card state: SIM Card Error, present but faulty */
-    public static final int SIM_STATE_CARD_IO_ERROR = 8;
+    public static final int SIM_STATE_CARD_IO_ERROR =
+            TelephonyProtoEnums.SIM_STATE_CARD_IO_ERROR;  // 8
     /** SIM card state: SIM Card restricted, present but not usable due to
      * carrier restrictions.
      */
-    public static final int SIM_STATE_CARD_RESTRICTED = 9;
+    public static final int SIM_STATE_CARD_RESTRICTED =
+            TelephonyProtoEnums.SIM_STATE_CARD_RESTRICTED;  // 9
     /**
      * SIM card state: Loaded: SIM card applications have been loaded
      * @hide
      */
     @SystemApi
-    public static final int SIM_STATE_LOADED = 10;
+    public static final int SIM_STATE_LOADED = TelephonyProtoEnums.SIM_STATE_LOADED;  // 10
     /**
      * SIM card state: SIM Card is present
      * @hide
      */
     @SystemApi
-    public static final int SIM_STATE_PRESENT = 11;
+    public static final int SIM_STATE_PRESENT = TelephonyProtoEnums.SIM_STATE_PRESENT;  // 11
 
     /**
      * Extra included in {@link #ACTION_SIM_CARD_STATE_CHANGED} and
