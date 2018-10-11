@@ -109,12 +109,12 @@
     <!-- France: 5 digits, free: 3xxxx, premium [4-8]xxxx, plus EU:
          http://clients.txtnation.com/entries/161972-france-premium-sms-short-code-requirements,
          visual voicemail code for Orange: 21101 -->
-    <shortcode country="fr" premium="[4-8]\\d{4}" free="3\\d{4}|116\\d{3}|21101|20366" />
+    <shortcode country="fr" premium="[4-8]\\d{4}" free="3\\d{4}|116\\d{3}|21101|20366|555|2051" />
 
     <!-- United Kingdom (Great Britain): 4-6 digits, common codes [5-8]xxxx, plus EU:
          http://www.short-codes.com/media/Co-regulatoryCodeofPracticeforcommonshortcodes170206.pdf,
          visual voicemail code for EE: 887 -->
-    <shortcode country="gb" pattern="\\d{4,6}" premium="[5-8]\\d{4}" free="116\\d{3}|2020|35890|61002|61202|887|83669|34664|40406|60174|7726|37726" />
+    <shortcode country="gb" pattern="\\d{4,6}" premium="[5-8]\\d{4}" free="116\\d{3}|2020|35890|61002|61202|887|83669|34664|40406|60174|7726|37726|88555|9017|9018" />
 
     <!-- Georgia: 4 digits, known premium codes listed -->
     <shortcode country="ge" pattern="\\d{4}" premium="801[234]|888[239]" />
@@ -189,11 +189,14 @@
     <!-- The Netherlands, 4 digits, known premium codes listed, plus EU -->
     <shortcode country="nl" pattern="\\d{4}" premium="4466|5040" free="116\\d{3}|2223|6225|2223" />
 
+    <!-- Nigeria -->
+    <shortcode country="ng" pattern="\\d{1,5}" free="2441" />
+
     <!-- Norway: 4-5 digits (not confirmed), known premium codes listed -->
     <shortcode country="no" pattern="\\d{4,5}" premium="2201|222[67]" free="2171" />
 
     <!-- New Zealand: 3-4 digits, known premium codes listed -->
-    <shortcode country="nz" pattern="\\d{3,4}" premium="3903|8995|4679" free="3067|3068|4053" />
+    <shortcode country="nz" pattern="\\d{3,4}" premium="3903|8995|4679" free="1737|2141|3067|3068|3110|4006|4053|4061|4062|4202|4300|4334|4412|4575|5626|8006|8681" />
 
     <!-- Peru: 4-5 digits (not confirmed), known premium codes listed -->
     <shortcode country="pe" pattern="\\d{4,5}" free="9963" />
@@ -209,7 +212,7 @@
 
     <!-- Portugal: 5 digits, plus EU:
          http://clients.txtnation.com/entries/158326-portugal-premium-sms-short-code-regulations -->
-    <shortcode country="pt" premium="6[1289]\\d{3}" free="116\\d{3}|1262" />
+    <shortcode country="pt" premium="6[1289]\\d{3}" free="116\\d{3}|1262|12666" />
 
     <!-- Qatar: 1-5 digits (standard system default, not country specific) -->
     <shortcode country="qa" pattern="\\d{1,5}" free="92451" />
