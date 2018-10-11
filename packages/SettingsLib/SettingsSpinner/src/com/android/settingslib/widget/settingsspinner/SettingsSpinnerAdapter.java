@@ -24,7 +24,7 @@ import android.widget.ArrayAdapter;
 /**
  * An ArrayAdapter which was used by {@link SettingsSpinner} with settings style.
  */
-public class SettingsSpinnerAdapter<CharSequence> extends ArrayAdapter {
+public class SettingsSpinnerAdapter<T> extends ArrayAdapter<T> {
 
     /**
      * Constructs a new SettingsSpinnerAdapter with the given context.
