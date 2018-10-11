@@ -167,7 +167,34 @@ public class ProxyTracker {
                 mGlobalProxy = proxyProperties;
             }
         }
+        loadDeprecatedGlobalHttpProxy();
         // TODO : shouldn't this function call mPacManager.setCurrentProxyScriptUrl ?
+    }
+
+    /**
+     * Read the global proxy from the deprecated Settings.Global.HTTP_PROXY setting and apply it.
+     */
+    public void loadDeprecatedGlobalHttpProxy() {
+        final String proxy = Settings.Global.getString(mContext.getContentResolver(),
+                Settings.Global.HTTP_PROXY);
+        if (!TextUtils.isEmpty(proxy)) {
+            String data[] = proxy.split(":");
+            if (data.length == 0) {
+                return;
+            }
+
+            final String proxyHost = data[0];
+            int proxyPort = 8080;
+            if (data.length > 1) {
+                try {
+                    proxyPort = Integer.parseInt(data[1]);
+                } catch (NumberFormatException e) {
+                    return;
+                }
+            }
+            final ProxyInfo p = new ProxyInfo(proxyHost, proxyPort, "");
+            setGlobalProxy(p);
+        }
     }
 
     /**
