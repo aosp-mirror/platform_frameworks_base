@@ -17,7 +17,6 @@
 package com.android.egg.paint
 
 import android.content.Context
-import android.content.res.Resources
 import android.graphics.*
 import android.provider.Settings
 import android.util.AttributeSet
@@ -26,7 +25,6 @@ import android.view.MotionEvent
 import android.view.View
 import android.view.WindowInsets
 import java.util.concurrent.TimeUnit
-import android.util.Log
 import android.provider.Settings.System
 
 import org.json.JSONObject
@@ -86,11 +84,11 @@ public class Painting : View, SpotFilter.Plotter {
         }
 
     var bitmap: Bitmap? = null
-    var paperColor : Int = 0xFFFFFFFF.toInt()
+    var paperColor: Int = 0xFFFFFFFF.toInt()
 
     private var _paintCanvas: Canvas? = null
     private val _bitmapLock = Object()
-    
+
     private var _drawPaint = Paint(Paint.ANTI_ALIAS_FLAG)
     private var _lastX = 0f
     private var _lastY = 0f
@@ -113,7 +111,9 @@ public class Painting : View, SpotFilter.Plotter {
                         FADE_TO_BLACK_CF
 
                 synchronized(_bitmapLock) {
-                    c.drawBitmap(bitmap, 0f, 0f, pt)
+                    bitmap?.let {
+                        c.drawBitmap(bitmap!!, 0f, 0f, pt)
+                    }
                 }
                 invalidate()
             }
@@ -122,18 +122,22 @@ public class Painting : View, SpotFilter.Plotter {
     }
 
     constructor(context: Context) : super(context) {
-        init(null, 0)
+        init()
     }
 
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs) {
-        init(attrs, 0)
+        init()
     }
 
-    constructor(context: Context, attrs: AttributeSet, defStyle: Int) : super(context, attrs, defStyle) {
-        init(attrs, defStyle)
+    constructor(
+        context: Context,
+        attrs: AttributeSet,
+        defStyle: Int
+    ) : super(context, attrs, defStyle) {
+        init()
     }
 
-    private fun init(attrs: AttributeSet?, defStyle: Int) {
+    private fun init() {
         loadDevicePressureData()
     }
 
@@ -264,7 +268,7 @@ public class Painting : View, SpotFilter.Plotter {
         super.onDraw(canvas)
 
         bitmap?.let {
-            canvas.drawBitmap(bitmap, 0f, 0f, _drawPaint);
+            canvas.drawBitmap(bitmap!!, 0f, 0f, _drawPaint)
         }
     }
 
@@ -330,8 +334,8 @@ public class Painting : View, SpotFilter.Plotter {
                 }
                 if (bits.width != oldBits.height || bits.height != oldBits.width) {
                     matrix.postScale(
-                            bits.width.toFloat()/oldBits.height,
-                            bits.height.toFloat()/oldBits.width)
+                            bits.width.toFloat() / oldBits.height,
+                            bits.height.toFloat() / oldBits.width)
                 }
                 c.matrix = matrix
             }
@@ -350,9 +354,10 @@ public class Painting : View, SpotFilter.Plotter {
         val invertPaint = Paint()
         invertPaint.colorFilter = INVERT_CF
         synchronized(_bitmapLock) {
-            _paintCanvas?.drawBitmap(bitmap, 0f, 0f, invertPaint)
+            bitmap?.let {
+                _paintCanvas?.drawBitmap(bitmap!!, 0f, 0f, invertPaint)
+            }
         }
         invalidate()
     }
 }
-
