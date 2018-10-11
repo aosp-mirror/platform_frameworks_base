@@ -1581,7 +1581,6 @@ filegroup {
         "core/java/org/apache/http/params/CoreConnectionPNames.java",
         "core/java/org/apache/http/params/HttpConnectionParams.java",
         "core/java/org/apache/http/params/HttpParams.java",
-        "core/java/android/net/http/HttpResponseCache.java",
         "core/java/android/net/http/SslCertificate.java",
         "core/java/android/net/http/SslError.java",
         "core/java/com/android/internal/util/HexDump.java",
