@@ -1087,7 +1087,7 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
         if (top == null) {
             return false;
         }
-        mSupervisor.moveFocusableActivityToTop(top, reason);
+        top.moveFocusableActivityToTop(reason);
         return true;
     }
 

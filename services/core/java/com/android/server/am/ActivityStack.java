@@ -3450,8 +3450,10 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         final String myReason = reason + " adjustFocus";
 
         if (next == r) {
-            mStackSupervisor.moveFocusableActivityToTop(mStackSupervisor.topRunningActivityLocked(),
-                    myReason);
+            final ActivityRecord top = mStackSupervisor.topRunningActivityLocked();
+            if (top != null) {
+                top.moveFocusableActivityToTop(myReason);
+            }
             return;
         }
 
@@ -4662,7 +4664,9 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
 
             // Set focus to the top running activity of this stack.
             final ActivityRecord r = topRunningActivityLocked();
-            mStackSupervisor.moveFocusableActivityToTop(r, reason);
+            if (r != null) {
+                r.moveFocusableActivityToTop(reason);
+            }
 
             if (DEBUG_TRANSITION) Slog.v(TAG_TRANSITION, "Prepare to front transition: task=" + tr);
             if (noAnimation) {
