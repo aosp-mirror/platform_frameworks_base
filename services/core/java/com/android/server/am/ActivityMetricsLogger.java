@@ -110,7 +110,7 @@ import com.android.server.LocalServices;
  * data for Tron, logcat, event logs and {@link android.app.WaitResult}.
  *
  * Tests:
- * atest SystemMetricsFunctionalTests
+ * atest CtsActivityManagerDeviceTestCases:ActivityMetricsLoggerTests
  */
 class ActivityMetricsLogger {
 
@@ -351,18 +351,24 @@ class ActivityMetricsLogger {
                 + " processRunning=" + processRunning
                 + " processSwitch=" + processSwitch);
 
-        // If we are already in an existing transition, only update the activity name, but not the
-        // other attributes.
         final int windowingMode = launchedActivity != null
                 ? launchedActivity.getWindowingMode()
                 : WINDOWING_MODE_UNDEFINED;
-
+        final WindowingModeTransitionInfo info = mWindowingModeTransitionInfo.get(windowingMode);
         if (mCurrentTransitionStartTime == INVALID_START_TIME) {
+            // No transition is active ignore this launch.
             return;
         }
 
-        final WindowingModeTransitionInfo info = mWindowingModeTransitionInfo.get(windowingMode);
+        if (launchedActivity != null && launchedActivity.nowVisible) {
+            // Launched activity is already visible. We cannot measure windows drawn delay.
+            reset(true /* abort */, info);
+            return;
+        }
+
         if (launchedActivity != null && info != null) {
+            // If we are already in an existing transition, only update the activity name, but not
+            // the other attributes.
             info.launchedActivity = launchedActivity;
             return;
         }
@@ -371,7 +377,6 @@ class ActivityMetricsLogger {
                 mWindowingModeTransitionInfo.size() > 0 && info == null;
         if ((!isLoggableResultCode(resultCode) || launchedActivity == null || !processSwitch
                 || windowingMode == WINDOWING_MODE_UNDEFINED) && !otherWindowModesLaunching) {
-
             // Failed to launch or it was not a process switch, so we don't care about the timing.
             reset(true /* abort */, info);
             return;
