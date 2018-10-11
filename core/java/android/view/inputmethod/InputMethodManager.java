@@ -48,7 +48,6 @@ import android.util.Pools.SimplePool;
 import android.util.PrintWriterPrinter;
 import android.util.Printer;
 import android.util.SparseArray;
-import android.view.Display;
 import android.view.InputChannel;
 import android.view.InputEvent;
 import android.view.InputEventSender;
@@ -266,7 +265,7 @@ public final class InputMethodManager {
      * @hide
      */
     public static void ensureDefaultInstanceForDefaultDisplayIfNecessary() {
-        forContextInternal(Display.DEFAULT_DISPLAY, Looper.getMainLooper());
+        getInstanceInternal();
     }
 
     private static final Object sLock = new Object();
@@ -278,17 +277,6 @@ public final class InputMethodManager {
     @GuardedBy("sLock")
     @UnsupportedAppUsage
     static InputMethodManager sInstance;
-
-    /**
-     * Global map between display to {@link InputMethodManager}.
-     *
-     * <p>Currently this map works like a so-called leaky singleton.  Once an instance is registered
-     * for the associated display ID, that instance will never be garbage collected.</p>
-     *
-     * <p>TODO(Bug 116699479): Implement instance clean up mechanism.</p>
-     */
-    @GuardedBy("sLock")
-    private static final SparseArray<InputMethodManager> sInstanceMap = new SparseArray<>();
 
     /**
      * @hide Flag for IInputMethodManager.windowGainedFocus: a view in
@@ -346,8 +334,6 @@ public final class InputMethodManager {
 
     // Our generic input connection if the current target does not have its own.
     final IInputContext mIInputContext;
-
-    private final int mDisplayId;
 
     /**
      * True if this input method client is active, initially false.
@@ -464,29 +450,6 @@ public final class InputMethodManager {
     private static boolean isAutofillUIShowing(View servedView) {
         AutofillManager afm = servedView.getContext().getSystemService(AutofillManager.class);
         return afm != null && afm.isAutofillUiShowing();
-    }
-
-    /**
-     * Checks the consistency between {@link InputMethodManager} state and {@link View} state.
-     *
-     * @param view {@link View} to be checked
-     * @return {@code true} if {@code view} is not {@code null} and there is a {@link Context}
-     *         mismatch between {@link InputMethodManager} and {@code view}
-     */
-    private boolean shouldDispatchToViewContext(@Nullable View view) {
-        if (view == null) {
-            return false;
-        }
-        final int viewDisplayId = getDisplayId(view.getContext());
-        if (viewDisplayId != mDisplayId) {
-            Log.w(TAG, "b/117267690: Context mismatch found. view=" + view + " belongs to"
-                    + " displayId=" + viewDisplayId
-                    + " but InputMethodManager belongs to displayId=" + mDisplayId
-                    + ". Use the right InputMethodManager instance to avoid performance overhead.",
-                    new Throwable());
-            return true;
-        }
-        return false;
     }
 
     private static boolean canStartInput(View servedView) {
@@ -770,57 +733,33 @@ public final class InputMethodManager {
                 });
     }
 
-    InputMethodManager(int displayId, Looper looper) throws ServiceNotFoundException {
+    InputMethodManager(Looper looper) throws ServiceNotFoundException {
         mService = getIInputMethodManager();
         mMainLooper = looper;
         mH = new H(looper);
-        mDisplayId = displayId;
         mIInputContext = new ControlledInputConnectionWrapper(looper,
                 mDummyInputConnection, this);
     }
 
-    private static int getDisplayId(Context context) {
-        final Display display = context.getDisplay();
-        return display != null ? display.getDisplayId() : Display.DEFAULT_DISPLAY;
-    }
-
     /**
-     * Retrieve an instance for the given {@link Context}, creating it if it doesn't already exist.
+     * Retrieve the global {@link InputMethodManager} instance, creating it if it doesn't already
+     * exist.
      *
-     * @param context {@link Context} for which IME APIs need to work
-     * @return {@link InputMethodManager} instance
+     * @return global {@link InputMethodManager} instance
      * @hide
      */
-    @Nullable
-    public static InputMethodManager forContext(Context context) {
-        final int displayId = getDisplayId(context);
-        // For better backward compatibility, we always use Looper.getMainLooper() for the default
-        // display case.
-        final Looper looper = displayId == Display.DEFAULT_DISPLAY
-                ? Looper.getMainLooper() : context.getMainLooper();
-        return forContextInternal(displayId, looper);
-    }
-
-    @Nullable
-    private static InputMethodManager forContextInternal(int displayId, Looper looper) {
-        final boolean isDefaultDisplay = displayId == Display.DEFAULT_DISPLAY;
+    public static InputMethodManager getInstanceInternal() {
         synchronized (sLock) {
-            InputMethodManager instance = sInstanceMap.get(displayId);
-            if (instance != null) {
-                return instance;
+            if (sInstance == null) {
+                try {
+                    final InputMethodManager imm = new InputMethodManager(Looper.getMainLooper());
+                    imm.mService.addClient(imm.mClient, imm.mIInputContext);
+                    sInstance = imm;
+                } catch (ServiceNotFoundException | RemoteException e) {
+                    throw new IllegalStateException(e);
+                }
             }
-            try {
-                instance = new InputMethodManager(displayId, looper);
-                instance.mService.addClient(instance.mClient, instance.mIInputContext, displayId);
-            } catch (ServiceNotFoundException | RemoteException e) {
-                throw new IllegalStateException(e);
-            }
-            // For backward compatibility, store the instance also to sInstance for default display.
-            if (sInstance == null && isDefaultDisplay) {
-                sInstance = instance;
-            }
-            sInstanceMap.put(displayId, instance);
-            return instance;
+            return sInstance;
         }
     }
 
@@ -977,11 +916,6 @@ public final class InputMethodManager {
      * input method.
      */
     public boolean isActive(View view) {
-        // Re-dispatch if there is a context mismatch.
-        if (shouldDispatchToViewContext(view)) {
-            return view.getContext().getSystemService(InputMethodManager.class).isActive(view);
-        }
-
         checkFocus();
         synchronized (mH) {
             return (mServedView == view
@@ -1072,13 +1006,6 @@ public final class InputMethodManager {
     }
 
     public void displayCompletions(View view, CompletionInfo[] completions) {
-        // Re-dispatch if there is a context mismatch.
-        if (shouldDispatchToViewContext(view)) {
-            view.getContext().getSystemService(InputMethodManager.class)
-                    .displayCompletions(view, completions);
-            return;
-        }
-
         checkFocus();
         synchronized (mH) {
             if (mServedView != view && (mServedView == null
@@ -1097,13 +1024,6 @@ public final class InputMethodManager {
     }
 
     public void updateExtractedText(View view, int token, ExtractedText text) {
-        // Re-dispatch if there is a context mismatch.
-        if (shouldDispatchToViewContext(view)) {
-            view.getContext().getSystemService(InputMethodManager.class)
-                    .updateExtractedText(view, token, text);
-            return;
-        }
-
         checkFocus();
         synchronized (mH) {
             if (mServedView != view && (mServedView == null
@@ -1145,12 +1065,6 @@ public final class InputMethodManager {
      * 0 or have the {@link #SHOW_IMPLICIT} bit set.
      */
     public boolean showSoftInput(View view, int flags) {
-        // Re-dispatch if there is a context mismatch.
-        if (shouldDispatchToViewContext(view)) {
-            return view.getContext().getSystemService(InputMethodManager.class)
-                    .showSoftInput(view, flags);
-        }
-
         return showSoftInput(view, flags, null);
     }
 
@@ -1213,12 +1127,6 @@ public final class InputMethodManager {
      * {@link #RESULT_HIDDEN}.
      */
     public boolean showSoftInput(View view, int flags, ResultReceiver resultReceiver) {
-        // Re-dispatch if there is a context mismatch.
-        if (shouldDispatchToViewContext(view)) {
-            return view.getContext().getSystemService(InputMethodManager.class)
-                    .showSoftInput(view, flags, resultReceiver);
-        }
-
         checkFocus();
         synchronized (mH) {
             if (mServedView != view && (mServedView == null
@@ -1382,12 +1290,6 @@ public final class InputMethodManager {
      * @param view The view whose text has changed.
      */
     public void restartInput(View view) {
-        // Re-dispatch if there is a context mismatch.
-        if (shouldDispatchToViewContext(view)) {
-            view.getContext().getSystemService(InputMethodManager.class).restartInput(view);
-            return;
-        }
-
         checkFocus();
         synchronized (mH) {
             if (mServedView != view && (mServedView == null
@@ -1812,13 +1714,6 @@ public final class InputMethodManager {
      */
     public void updateSelection(View view, int selStart, int selEnd,
             int candidatesStart, int candidatesEnd) {
-        // Re-dispatch if there is a context mismatch.
-        if (shouldDispatchToViewContext(view)) {
-            view.getContext().getSystemService(InputMethodManager.class)
-                    .updateSelection(view, selStart, selEnd, candidatesStart, candidatesEnd);
-            return;
-        }
-
         checkFocus();
         synchronized (mH) {
             if ((mServedView != view && (mServedView == null
@@ -1856,12 +1751,6 @@ public final class InputMethodManager {
      * Notify the event when the user tapped or clicked the text view.
      */
     public void viewClicked(View view) {
-        // Re-dispatch if there is a context mismatch.
-        if (shouldDispatchToViewContext(view)) {
-            view.getContext().getSystemService(InputMethodManager.class).viewClicked(view);
-            return;
-        }
-
         final boolean focusChanged = mServedView != mNextServedView;
         checkFocus();
         synchronized (mH) {
@@ -1926,13 +1815,6 @@ public final class InputMethodManager {
      */
     @Deprecated
     public void updateCursor(View view, int left, int top, int right, int bottom) {
-        // Re-dispatch if there is a context mismatch.
-        if (shouldDispatchToViewContext(view)) {
-            view.getContext().getSystemService(InputMethodManager.class)
-                    .updateCursor(view, left, top, right, bottom);
-            return;
-        }
-
         checkFocus();
         synchronized (mH) {
             if ((mServedView != view && (mServedView == null
@@ -1964,13 +1846,6 @@ public final class InputMethodManager {
         if (view == null || cursorAnchorInfo == null) {
             return;
         }
-        // Re-dispatch if there is a context mismatch.
-        if (shouldDispatchToViewContext(view)) {
-            view.getContext().getSystemService(InputMethodManager.class)
-                    .updateCursorAnchorInfo(view, cursorAnchorInfo);
-            return;
-        }
-
         checkFocus();
         synchronized (mH) {
             if ((mServedView != view &&
@@ -2016,13 +1891,6 @@ public final class InputMethodManager {
      * @param data Any data to include with the command.
      */
     public void sendAppPrivateCommand(View view, String action, Bundle data) {
-        // Re-dispatch if there is a context mismatch.
-        if (shouldDispatchToViewContext(view)) {
-            view.getContext().getSystemService(InputMethodManager.class)
-                    .sendAppPrivateCommand(view, action, data);
-            return;
-        }
-
         checkFocus();
         synchronized (mH) {
             if ((mServedView != view && (mServedView == null
@@ -2194,13 +2062,6 @@ public final class InputMethodManager {
      */
     public void dispatchKeyEventFromInputMethod(@Nullable View targetView,
             @NonNull KeyEvent event) {
-        // Re-dispatch if there is a context mismatch.
-        if (shouldDispatchToViewContext(targetView)) {
-            targetView.getContext().getSystemService(InputMethodManager.class)
-                    .dispatchKeyEventFromInputMethod(targetView, event);
-            return;
-        }
-
         synchronized (mH) {
             ViewRootImpl viewRootImpl = targetView != null ? targetView.getViewRootImpl() : null;
             if (viewRootImpl == null) {
@@ -2690,7 +2551,6 @@ public final class InputMethodManager {
         sb.append(",windowFocus=" + view.hasWindowFocus());
         sb.append(",autofillUiShowing=" + isAutofillUIShowing(view));
         sb.append(",window=" + view.getWindowToken());
-        sb.append(",displayId=" + getDisplayId(view.getContext()));
         sb.append(",temporaryDetach=" + view.isTemporarilyDetached());
         return sb.toString();
     }

@@ -31,8 +31,7 @@ import com.android.internal.view.IInputMethodClient;
  * applications.
  */
 interface IInputMethodManager {
-    void addClient(in IInputMethodClient client, in IInputContext inputContext,
-            int untrustedDisplayId);
+    void addClient(in IInputMethodClient client, in IInputContext inputContext);
 
     // TODO: Use ParceledListSlice instead
     List<InputMethodInfo> getInputMethodList();
