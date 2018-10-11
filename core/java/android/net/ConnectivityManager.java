@@ -2728,7 +2728,7 @@ public class ConnectivityManager {
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.CONNECTIVITY_INTERNAL)
-    @UnsupportedAppUsage
+    @SystemApi
     public void setAirplaneMode(boolean enable) {
         try {
             mService.setAirplaneMode(enable);
