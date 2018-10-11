@@ -133,6 +133,7 @@ public class ContextHubClient implements Closeable {
      *
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
     public boolean registerIntent(@NonNull PendingIntent intent, long nanoAppId) {
         // TODO: Implement this
         return false;
@@ -146,6 +147,7 @@ public class ContextHubClient implements Closeable {
      *
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
     public boolean unregisterIntent(@NonNull PendingIntent intent) {
         // TODO: Implement this
         return false;
