@@ -26,7 +26,6 @@ import android.content.Context;
 import android.content.res.AssetFileDescriptor;
 import android.graphics.SurfaceTexture;
 import android.graphics.Rect;
-import android.media.MediaPlayer2Proto;
 import android.media.MediaPlayer2Proto.PlayerMessage;
 import android.media.MediaPlayer2Proto.Value;
 import android.media.SubtitleController.Anchor;
@@ -757,49 +756,44 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
             return;
         }
 
-        if (ContentResolver.SCHEME_CONTENT.equals(scheme)
-                && Settings.AUTHORITY.equals(authority)) {
-            // Try cached ringtone first since the actual provider may not be
-            // encryption aware, or it may be stored on CE media storage
-            final int type = RingtoneManager.getDefaultType(uri);
-            final Uri cacheUri = RingtoneManager.getCacheForType(type, context.getUserId());
-            final Uri actualUri = RingtoneManager.getActualDefaultRingtoneUri(context, type);
-            if (attemptDataSource(isCurrent, srcId, resolver, cacheUri)) {
-                return;
-            }
-            if (attemptDataSource(isCurrent, srcId, resolver, actualUri)) {
-                return;
-            }
-            handleDataSource(isCurrent, srcId, uri.toString(), headers, cookies);
-        } else {
-            // Try requested Uri locally first, or fallback to media server
-            if (attemptDataSource(isCurrent, srcId, resolver, uri)) {
-                return;
-            }
-            handleDataSource(isCurrent, srcId, uri.toString(), headers, cookies);
-        }
-    }
-
-    private boolean attemptDataSource(
-            boolean isCurrent, long srcId, ContentResolver resolver, Uri uri) {
-        try (AssetFileDescriptor afd = resolver.openAssetFileDescriptor(uri, "r")) {
-            if (afd.getDeclaredLength() < 0) {
-                handleDataSource(isCurrent,
-                                 srcId,
-                                 afd.getFileDescriptor(),
-                                 0,
-                                 DataSourceDesc.LONG_MAX);
+        AssetFileDescriptor afd = null;
+        try {
+            // Try requested Uri locally first
+            if (ContentResolver.SCHEME_CONTENT.equals(scheme)
+                    && Settings.AUTHORITY.equals(authority)) {
+                afd = RingtoneManager.openDefaultRingtoneUri(context, uri);
             } else {
-                handleDataSource(isCurrent,
-                                 srcId,
-                                 afd.getFileDescriptor(),
-                                 afd.getStartOffset(),
-                                 afd.getDeclaredLength());
+                afd = resolver.openAssetFileDescriptor(uri, "r");
             }
-            return true;
+            if (afd != null) {
+                handleDataSource(isCurrent, srcId, afd);
+                return;
+            }
         } catch (NullPointerException | SecurityException | IOException ex) {
             Log.w(TAG, "Couldn't open " + uri + ": " + ex);
-            return false;
+            // Fallback to media server
+        } finally {
+            if (afd != null) {
+                afd.close();
+            }
+        }
+        handleDataSource(isCurrent, srcId, uri.toString(), headers, cookies);
+    }
+
+    private void handleDataSource(boolean isCurrent, long srcId, AssetFileDescriptor afd)
+            throws IOException {
+        if (afd.getDeclaredLength() < 0) {
+            handleDataSource(isCurrent,
+                    srcId,
+                    afd.getFileDescriptor(),
+                    0,
+                    DataSourceDesc.LONG_MAX);
+        } else {
+            handleDataSource(isCurrent,
+                    srcId,
+                    afd.getFileDescriptor(),
+                    afd.getStartOffset(),
+                    afd.getDeclaredLength());
         }
     }
 
