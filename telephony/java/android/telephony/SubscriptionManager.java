@@ -32,12 +32,14 @@ import android.annotation.SystemService;
 import android.annotation.UnsupportedAppUsage;
 import android.app.BroadcastOptions;
 import android.app.PendingIntent;
+import android.app.job.JobService;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.database.ContentObserver;
 import android.net.INetworkPolicyManager;
 import android.net.NetworkCapabilities;
 import android.net.Uri;
@@ -115,6 +117,52 @@ public class SubscriptionManager {
     /** @hide */
     @UnsupportedAppUsage
     public static final Uri CONTENT_URI = Uri.parse("content://telephony/siminfo");
+
+
+    /**
+     * Generates a content {@link Uri} used to receive updates on simInfo change
+     * on the given subscriptionId
+     * @param subscriptionId the subscriptionId to receive updates on
+     * @return the Uri used to observe carrier identity changes
+     * @hide
+     */
+    public static Uri getUriForSubscriptionId(int subscriptionId) {
+        return Uri.withAppendedPath(CONTENT_URI, String.valueOf(subscriptionId));
+    }
+
+    /**
+     * A content {@link Uri} used to receive updates on wfc enabled user setting.
+     * <p>
+     * Use this {@link Uri} with a {@link ContentObserver} to be notified of changes to the
+     * subscription wfc enabled {@link SubscriptionManager#WFC_IMS_ENABLED}
+     * while your app is running. You can also use a {@link JobService} to ensure your app
+     * is notified of changes to the {@link Uri} even when it is not running.
+     * Note, however, that using a {@link JobService} does not guarantee timely delivery of
+     * updates to the {@link Uri}.
+     * To be notified of changes to a specific subId, append subId to the URI
+     * {@link Uri#withAppendedPath(Uri, String)}.
+     * @hide
+     */
+    @SystemApi
+    public static final Uri WFC_ENABLED_CONTENT_URI = Uri.withAppendedPath(CONTENT_URI, "wfc");
+
+    /**
+     * A content {@link Uri} used to receive updates on enhanced 4g user setting.
+     * <p>
+     * Use this {@link Uri} with a {@link ContentObserver} to be notified of changes to the
+     * subscription enhanced 4G enabled {@link SubscriptionManager#ENHANCED_4G_MODE_ENABLED}
+     * while your app is running. You can also use a {@link JobService} to ensure your app
+     * is notified of changes to the {@link Uri} even when it is not running.
+     * Note, however, that using a {@link JobService} does not guarantee timely delivery of
+     * updates to the {@link Uri}.
+     * To be notified of changes to a specific subId, append subId to the URI
+     * {@link Uri#withAppendedPath(Uri, String)}.
+     * @hide
+     */
+    @SystemApi
+    public static final Uri ENHANCED_4G_ENABLED_CONTENT_URI = Uri.withAppendedPath(
+            CONTENT_URI, "enhanced_4g");
+
 
     /**
      * TelephonyProvider unique key column name is the subscription id.
