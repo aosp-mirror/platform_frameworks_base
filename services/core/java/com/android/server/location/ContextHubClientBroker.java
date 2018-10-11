@@ -147,12 +147,9 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
     /**
      * Invoked when the underlying binder of this broker has died at the client process.
      */
+    @Override
     public void binderDied() {
-        try {
-            IContextHubClient.Stub.asInterface(this).close();
-        } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException while closing client on death", e);
-        }
+        close();
     }
 
     /**
