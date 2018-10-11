@@ -19,7 +19,6 @@ package android.media;
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.ActivityThread;
 import android.content.ContentProvider;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -29,8 +28,6 @@ import android.graphics.Rect;
 import android.media.MediaPlayer2Proto;
 import android.media.MediaPlayer2Proto.PlayerMessage;
 import android.media.MediaPlayer2Proto.Value;
-import android.media.SubtitleController.Anchor;
-import android.media.SubtitleTrack.RenderingWidget;
 import android.net.Uri;
 import android.os.Handler;
 import android.os.HandlerThread;
@@ -38,23 +35,17 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.PersistableBundle;
 import android.os.PowerManager;
-import android.os.Process;
 import android.os.SystemProperties;
 import android.provider.Settings;
-import android.system.ErrnoException;
-import android.system.Os;
-import android.system.OsConstants;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Pair;
 import android.view.Surface;
 import android.view.SurfaceHolder;
-import android.widget.VideoView;
 
 import com.android.framework.protobuf.InvalidProtocolBufferException;
 import com.android.internal.annotations.GuardedBy;
 
-import libcore.io.IoBridge;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -69,15 +60,12 @@ import java.net.URL;
 import java.nio.ByteOrder;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.BitSet;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
-import java.util.Scanner;
 import java.util.UUID;
-import java.util.Vector;
 import java.util.concurrent.Executor;
 import java.util.concurrent.RejectedExecutionException;
 import java.util.concurrent.atomic.AtomicInteger;
@@ -92,6 +80,8 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
     }
 
     private final static String TAG = "MediaPlayer2Impl";
+
+    private Context mContext;
 
     private long mNativeContext; // accessed by native methods
     private long mNativeSurfaceTexture;  // accessed by native methods
@@ -149,14 +139,12 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
      * to free the resources. If not released, too many MediaPlayer2Impl instances may
      * result in an exception.</p>
      */
-    public MediaPlayer2Impl() {
+    public MediaPlayer2Impl(Context context) {
+        mContext = context;
         mHandlerThread = new HandlerThread("MediaPlayer2TaskThread");
         mHandlerThread.start();
         Looper looper = mHandlerThread.getLooper();
         mTaskHandler = new TaskHandler(this, looper);
-
-        mTimeProvider = new TimeProvider(this);
-        mOpenSubtitleSources = new Vector<InputStream>();
 
         /* Native setup requires a weak reference to our object.
          * It's easier to create it here than in C++.
@@ -1503,24 +1491,6 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
      */
     @Override
     public void reset() {
-        mSelectedSubtitleTrackIndex = -1;
-        synchronized(mOpenSubtitleSources) {
-            for (final InputStream is: mOpenSubtitleSources) {
-                try {
-                    is.close();
-                } catch (IOException e) {
-                }
-            }
-            mOpenSubtitleSources.clear();
-        }
-        if (mSubtitleController != null) {
-            mSubtitleController.reset();
-        }
-        if (mTimeProvider != null) {
-            mTimeProvider.close();
-            mTimeProvider = null;
-        }
-
         synchronized (mEventCbLock) {
             mEventCallbackRecords.clear();
         }
@@ -1543,30 +1513,10 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
             mTaskHandler.removeCallbacksAndMessages(null);
         }
 
-        synchronized (mIndexTrackPairs) {
-            mIndexTrackPairs.clear();
-            mInbandTrackIndices.clear();
-        };
-
         resetDrmState();
     }
 
     private native void _reset();
-
-    /**
-     * Set up a timer for {@link #TimeProvider}. {@link #TimeProvider} will be
-     * notified when the presentation time reaches (becomes greater than or equal to)
-     * the value specified.
-     *
-     * @param mediaTimeUs presentation time to get timed event callback at
-     * @hide
-     */
-    @Override
-    public void notifyAt(long mediaTimeUs) {
-        _notifyAt(mediaTimeUs);
-    }
-
-    private native void _notifyAt(long mediaTimeUs);
 
     // Keep KEY_PARAMETER_* in sync with include/media/mediaplayer2.h
     private final static int KEY_PARAMETER_AUDIO_ATTRIBUTES = 1400;
@@ -1781,16 +1731,6 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
         }
     };
 
-    // We would like domain specific classes with more informative names than the `first` and `second`
-    // in generic Pair, but we would also like to avoid creating new/trivial classes. As a compromise
-    // we document the meanings of `first` and `second` here:
-    //
-    // Pair.first - inband track index; non-null iff representing an inband track.
-    // Pair.second - a SubtitleTrack registered with mSubtitleController; non-null iff representing
-    //               an inband subtitle track or any out-of-band track (subtitle or timedtext).
-    private Vector<Pair<Integer, SubtitleTrack>> mIndexTrackPairs = new Vector<>();
-    private BitSet mInbandTrackIndices = new BitSet();
-
     /**
      * Returns a List of track information.
      *
@@ -1802,21 +1742,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
     @Override
     public List<TrackInfo> getTrackInfo() {
         TrackInfoImpl trackInfo[] = getInbandTrackInfoImpl();
-        // add out-of-band tracks
-        synchronized (mIndexTrackPairs) {
-            TrackInfoImpl allTrackInfo[] = new TrackInfoImpl[mIndexTrackPairs.size()];
-            for (int i = 0; i < allTrackInfo.length; i++) {
-                Pair<Integer, SubtitleTrack> p = mIndexTrackPairs.get(i);
-                if (p.first != null) {
-                    // inband track
-                    allTrackInfo[i] = trackInfo[p.first];
-                } else {
-                    SubtitleTrack track = p.second;
-                    allTrackInfo[i] = new TrackInfoImpl(track.getTrackType(), track.getFormat());
-                }
-            }
-            return Arrays.asList(allTrackInfo);
-        }
+        return Arrays.asList(trackInfo);
     }
 
     private TrackInfoImpl[] getInbandTrackInfoImpl() throws IllegalStateException {
@@ -1849,419 +1775,6 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
         return false;
     }
 
-    private SubtitleController mSubtitleController;
-
-    /** @hide */
-    @Override
-    public void setSubtitleAnchor(
-            SubtitleController controller,
-            SubtitleController.Anchor anchor) {
-        // TODO: create SubtitleController in MediaPlayer2
-        mSubtitleController = controller;
-        mSubtitleController.setAnchor(anchor);
-    }
-
-    /**
-     * The private version of setSubtitleAnchor is used internally to set mSubtitleController if
-     * necessary when clients don't provide their own SubtitleControllers using the public version
-     * {@link #setSubtitleAnchor(SubtitleController, Anchor)} (e.g. {@link VideoView} provides one).
-     */
-    private synchronized void setSubtitleAnchor() {
-        if ((mSubtitleController == null) && (ActivityThread.currentApplication() != null)) {
-            final HandlerThread thread = new HandlerThread("SetSubtitleAnchorThread");
-            thread.start();
-            Handler handler = new Handler(thread.getLooper());
-            handler.post(new Runnable() {
-                @Override
-                public void run() {
-                    Context context = ActivityThread.currentApplication();
-                    mSubtitleController = new SubtitleController(context, mTimeProvider, MediaPlayer2Impl.this);
-                    mSubtitleController.setAnchor(new Anchor() {
-                        @Override
-                        public void setSubtitleWidget(RenderingWidget subtitleWidget) {
-                        }
-
-                        @Override
-                        public Looper getSubtitleLooper() {
-                            return Looper.getMainLooper();
-                        }
-                    });
-                    thread.getLooper().quitSafely();
-                }
-            });
-            try {
-                thread.join();
-            } catch (InterruptedException e) {
-                Thread.currentThread().interrupt();
-                Log.w(TAG, "failed to join SetSubtitleAnchorThread");
-            }
-        }
-    }
-
-    private int mSelectedSubtitleTrackIndex = -1;
-    private Vector<InputStream> mOpenSubtitleSources;
-
-    private EventCallback mSubtitleDataCallback = new EventCallback() {
-        @Override
-        public void onSubtitleData(MediaPlayer2 mp, DataSourceDesc dsd, SubtitleData data) {
-            int index = data.getTrackIndex();
-            synchronized (mIndexTrackPairs) {
-                for (Pair<Integer, SubtitleTrack> p : mIndexTrackPairs) {
-                    if (p.first != null && p.first == index && p.second != null) {
-                        // inband subtitle track that owns data
-                        SubtitleTrack track = p.second;
-                        track.onData(data);
-                    }
-                }
-            }
-        }
-    };
-
-    /** @hide */
-    @Override
-    public void onSubtitleTrackSelected(SubtitleTrack track) {
-        if (mSelectedSubtitleTrackIndex >= 0) {
-            try {
-                selectOrDeselectInbandTrack(mSelectedSubtitleTrackIndex, false);
-            } catch (IllegalStateException e) {
-            }
-            mSelectedSubtitleTrackIndex = -1;
-        }
-        unregisterEventCallback(mSubtitleDataCallback);
-        if (track == null) {
-            return;
-        }
-
-        synchronized (mIndexTrackPairs) {
-            for (Pair<Integer, SubtitleTrack> p : mIndexTrackPairs) {
-                if (p.first != null && p.second == track) {
-                    // inband subtitle track that is selected
-                    mSelectedSubtitleTrackIndex = p.first;
-                    break;
-                }
-            }
-        }
-
-        if (mSelectedSubtitleTrackIndex >= 0) {
-            try {
-                selectOrDeselectInbandTrack(mSelectedSubtitleTrackIndex, true);
-            } catch (IllegalStateException e) {
-            }
-            final Executor executor = (runnable) -> mTaskHandler.post(runnable);
-            registerEventCallback(executor, mSubtitleDataCallback);
-        }
-        // no need to select out-of-band tracks
-    }
-
-    /** @hide */
-    @Override
-    public void addSubtitleSource(InputStream is, MediaFormat format)
-            throws IllegalStateException
-    {
-        final InputStream fIs = is;
-        final MediaFormat fFormat = format;
-
-        if (is != null) {
-            // Ensure all input streams are closed.  It is also a handy
-            // way to implement timeouts in the future.
-            synchronized(mOpenSubtitleSources) {
-                mOpenSubtitleSources.add(is);
-            }
-        } else {
-            Log.w(TAG, "addSubtitleSource called with null InputStream");
-        }
-
-        getMediaTimeProvider();
-
-        // process each subtitle in its own thread
-        final HandlerThread thread = new HandlerThread("SubtitleReadThread",
-              Process.THREAD_PRIORITY_BACKGROUND + Process.THREAD_PRIORITY_MORE_FAVORABLE);
-        thread.start();
-        Handler handler = new Handler(thread.getLooper());
-        handler.post(new Runnable() {
-            private int addTrack() {
-                if (fIs == null || mSubtitleController == null) {
-                    return MEDIA_INFO_UNSUPPORTED_SUBTITLE;
-                }
-
-                SubtitleTrack track = mSubtitleController.addTrack(fFormat);
-                if (track == null) {
-                    return MEDIA_INFO_UNSUPPORTED_SUBTITLE;
-                }
-
-                // TODO: do the conversion in the subtitle track
-                Scanner scanner = new Scanner(fIs, "UTF-8");
-                String contents = scanner.useDelimiter("\\A").next();
-                synchronized(mOpenSubtitleSources) {
-                    mOpenSubtitleSources.remove(fIs);
-                }
-                scanner.close();
-                synchronized (mIndexTrackPairs) {
-                    mIndexTrackPairs.add(Pair.<Integer, SubtitleTrack>create(null, track));
-                }
-                Handler h = mTimeProvider.mEventHandler;
-                int what = TimeProvider.NOTIFY;
-                int arg1 = TimeProvider.NOTIFY_TRACK_DATA;
-                Pair<SubtitleTrack, byte[]> trackData = Pair.create(track, contents.getBytes());
-                Message m = h.obtainMessage(what, arg1, 0, trackData);
-                h.sendMessage(m);
-                return MEDIA_INFO_EXTERNAL_METADATA_UPDATE;
-            }
-
-            public void run() {
-                int res = addTrack();
-                if (mTaskHandler != null) {
-                    Message m = mTaskHandler.obtainMessage(MEDIA_INFO, res, 0, null);
-                    mTaskHandler.sendMessage(m);
-                }
-                thread.getLooper().quitSafely();
-            }
-        });
-    }
-
-    private void scanInternalSubtitleTracks() {
-        setSubtitleAnchor();
-
-        populateInbandTracks();
-
-        if (mSubtitleController != null) {
-            mSubtitleController.selectDefaultTrack();
-        }
-    }
-
-    private void populateInbandTracks() {
-        TrackInfoImpl[] tracks = getInbandTrackInfoImpl();
-        synchronized (mIndexTrackPairs) {
-            for (int i = 0; i < tracks.length; i++) {
-                if (mInbandTrackIndices.get(i)) {
-                    continue;
-                } else {
-                    mInbandTrackIndices.set(i);
-                }
-
-                // newly appeared inband track
-                if (tracks[i].getTrackType() == TrackInfo.MEDIA_TRACK_TYPE_SUBTITLE) {
-                    SubtitleTrack track = mSubtitleController.addTrack(
-                            tracks[i].getFormat());
-                    mIndexTrackPairs.add(Pair.create(i, track));
-                } else {
-                    mIndexTrackPairs.add(Pair.<Integer, SubtitleTrack>create(i, null));
-                }
-            }
-        }
-    }
-
-    /* TODO: Limit the total number of external timed text source to a reasonable number.
-     */
-    /**
-     * Adds an external timed text source file.
-     *
-     * Currently supported format is SubRip with the file extension .srt, case insensitive.
-     * Note that a single external timed text source may contain multiple tracks in it.
-     * One can find the total number of available tracks using {@link #getTrackInfo()} to see what
-     * additional tracks become available after this method call.
-     *
-     * @param path The file path of external timed text source file.
-     * @param mimeType The mime type of the file. Must be one of the mime types listed above.
-     * @throws IOException if the file cannot be accessed or is corrupted.
-     * @throws IllegalArgumentException if the mimeType is not supported.
-     * @throws IllegalStateException if called in an invalid state.
-     * @hide
-     */
-    @Override
-    public void addTimedTextSource(String path, String mimeType)
-            throws IOException {
-        if (!availableMimeTypeForExternalSource(mimeType)) {
-            final String msg = "Illegal mimeType for timed text source: " + mimeType;
-            throw new IllegalArgumentException(msg);
-        }
-
-        File file = new File(path);
-        if (file.exists()) {
-            FileInputStream is = new FileInputStream(file);
-            FileDescriptor fd = is.getFD();
-            addTimedTextSource(fd, mimeType);
-            is.close();
-        } else {
-            // We do not support the case where the path is not a file.
-            throw new IOException(path);
-        }
-    }
-
-
-    /**
-     * Adds an external timed text source file (Uri).
-     *
-     * Currently supported format is SubRip with the file extension .srt, case insensitive.
-     * Note that a single external timed text source may contain multiple tracks in it.
-     * One can find the total number of available tracks using {@link #getTrackInfo()} to see what
-     * additional tracks become available after this method call.
-     *
-     * @param context the Context to use when resolving the Uri
-     * @param uri the Content URI of the data you want to play
-     * @param mimeType The mime type of the file. Must be one of the mime types listed above.
-     * @throws IOException if the file cannot be accessed or is corrupted.
-     * @throws IllegalArgumentException if the mimeType is not supported.
-     * @throws IllegalStateException if called in an invalid state.
-     * @hide
-     */
-    @Override
-    public void addTimedTextSource(Context context, Uri uri, String mimeType)
-            throws IOException {
-        String scheme = uri.getScheme();
-        if(scheme == null || scheme.equals("file")) {
-            addTimedTextSource(uri.getPath(), mimeType);
-            return;
-        }
-
-        AssetFileDescriptor fd = null;
-        try {
-            ContentResolver resolver = context.getContentResolver();
-            fd = resolver.openAssetFileDescriptor(uri, "r");
-            if (fd == null) {
-                return;
-            }
-            addTimedTextSource(fd.getFileDescriptor(), mimeType);
-            return;
-        } catch (SecurityException ex) {
-        } catch (IOException ex) {
-        } finally {
-            if (fd != null) {
-                fd.close();
-            }
-        }
-    }
-
-    /**
-     * Adds an external timed text source file (FileDescriptor).
-     *
-     * It is the caller's responsibility to close the file descriptor.
-     * It is safe to do so as soon as this call returns.
-     *
-     * Currently supported format is SubRip. Note that a single external timed text source may
-     * contain multiple tracks in it. One can find the total number of available tracks
-     * using {@link #getTrackInfo()} to see what additional tracks become available
-     * after this method call.
-     *
-     * @param fd the FileDescriptor for the file you want to play
-     * @param mimeType The mime type of the file. Must be one of the mime types listed above.
-     * @throws IllegalArgumentException if the mimeType is not supported.
-     * @throws IllegalStateException if called in an invalid state.
-     * @hide
-     */
-    @Override
-    public void addTimedTextSource(FileDescriptor fd, String mimeType) {
-        // intentionally less than LONG_MAX
-        addTimedTextSource(fd, 0, 0x7ffffffffffffffL, mimeType);
-    }
-
-    /**
-     * Adds an external timed text file (FileDescriptor).
-     *
-     * It is the caller's responsibility to close the file descriptor.
-     * It is safe to do so as soon as this call returns.
-     *
-     * Currently supported format is SubRip. Note that a single external timed text source may
-     * contain multiple tracks in it. One can find the total number of available tracks
-     * using {@link #getTrackInfo()} to see what additional tracks become available
-     * after this method call.
-     *
-     * @param fd the FileDescriptor for the file you want to play
-     * @param offset the offset into the file where the data to be played starts, in bytes
-     * @param length the length in bytes of the data to be played
-     * @param mime The mime type of the file. Must be one of the mime types listed above.
-     * @throws IllegalArgumentException if the mimeType is not supported.
-     * @throws IllegalStateException if called in an invalid state.
-     * @hide
-     */
-    @Override
-    public void addTimedTextSource(FileDescriptor fd, long offset, long length, String mime) {
-        if (!availableMimeTypeForExternalSource(mime)) {
-            throw new IllegalArgumentException("Illegal mimeType for timed text source: " + mime);
-        }
-
-        final FileDescriptor dupedFd;
-        try {
-            dupedFd = Os.dup(fd);
-        } catch (ErrnoException ex) {
-            Log.e(TAG, ex.getMessage(), ex);
-            throw new RuntimeException(ex);
-        }
-
-        final MediaFormat fFormat = new MediaFormat();
-        fFormat.setString(MediaFormat.KEY_MIME, mime);
-        fFormat.setInteger(MediaFormat.KEY_IS_TIMED_TEXT, 1);
-
-        // A MediaPlayer2 created by a VideoView should already have its mSubtitleController set.
-        if (mSubtitleController == null) {
-            setSubtitleAnchor();
-        }
-
-        if (!mSubtitleController.hasRendererFor(fFormat)) {
-            // test and add not atomic
-            Context context = ActivityThread.currentApplication();
-            mSubtitleController.registerRenderer(new SRTRenderer(context, mTaskHandler));
-        }
-        final SubtitleTrack track = mSubtitleController.addTrack(fFormat);
-        synchronized (mIndexTrackPairs) {
-            mIndexTrackPairs.add(Pair.<Integer, SubtitleTrack>create(null, track));
-        }
-
-        getMediaTimeProvider();
-
-        final long offset2 = offset;
-        final long length2 = length;
-        final HandlerThread thread = new HandlerThread(
-                "TimedTextReadThread",
-                Process.THREAD_PRIORITY_BACKGROUND + Process.THREAD_PRIORITY_MORE_FAVORABLE);
-        thread.start();
-        Handler handler = new Handler(thread.getLooper());
-        handler.post(new Runnable() {
-            private int addTrack() {
-                final ByteArrayOutputStream bos = new ByteArrayOutputStream();
-                try {
-                    Os.lseek(dupedFd, offset2, OsConstants.SEEK_SET);
-                    byte[] buffer = new byte[4096];
-                    for (long total = 0; total < length2;) {
-                        int bytesToRead = (int) Math.min(buffer.length, length2 - total);
-                        int bytes = IoBridge.read(dupedFd, buffer, 0, bytesToRead);
-                        if (bytes < 0) {
-                            break;
-                        } else {
-                            bos.write(buffer, 0, bytes);
-                            total += bytes;
-                        }
-                    }
-                    Handler h = mTimeProvider.mEventHandler;
-                    int what = TimeProvider.NOTIFY;
-                    int arg1 = TimeProvider.NOTIFY_TRACK_DATA;
-                    Pair<SubtitleTrack, byte[]> trackData = Pair.create(track, bos.toByteArray());
-                    Message m = h.obtainMessage(what, arg1, 0, trackData);
-                    h.sendMessage(m);
-                    return MEDIA_INFO_EXTERNAL_METADATA_UPDATE;
-                } catch (Exception e) {
-                    Log.e(TAG, e.getMessage(), e);
-                    return MEDIA_INFO_TIMED_TEXT_ERROR;
-                } finally {
-                    try {
-                        Os.close(dupedFd);
-                    } catch (ErrnoException e) {
-                        Log.e(TAG, e.getMessage(), e);
-                    }
-                }
-            }
-
-            public void run() {
-                int res = addTrack();
-                if (mTaskHandler != null) {
-                    Message m = mTaskHandler.obtainMessage(MEDIA_INFO, res, 0, null);
-                    mTaskHandler.sendMessage(m);
-                }
-                thread.getLooper().quitSafely();
-            }
-        });
-    }
-
     /**
      * Returns the index of the audio, video, or subtitle track currently selected for playback,
      * The return value is an index into the array returned by {@link #getTrackInfo()}, and can
@@ -2281,22 +1794,6 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
      */
     @Override
     public int getSelectedTrack(int trackType) {
-        if (mSubtitleController != null
-                && (trackType == TrackInfo.MEDIA_TRACK_TYPE_SUBTITLE
-                || trackType == TrackInfo.MEDIA_TRACK_TYPE_TIMEDTEXT)) {
-            SubtitleTrack subtitleTrack = mSubtitleController.getSelectedTrack();
-            if (subtitleTrack != null) {
-                synchronized (mIndexTrackPairs) {
-                    for (int i = 0; i < mIndexTrackPairs.size(); i++) {
-                        Pair<Integer, SubtitleTrack> p = mIndexTrackPairs.get(i);
-                        if (p.second == subtitleTrack && subtitleTrack.getTrackType() == trackType) {
-                            return i;
-                        }
-                    }
-                }
-            }
-        }
-
         PlayerMessage request = PlayerMessage.newBuilder()
                 .addValues(Value.newBuilder().setInt32Value(INVOKE_ID_GET_SELECTED_TRACK))
                 .addValues(Value.newBuilder().setInt32Value(trackType))
@@ -2305,16 +1802,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
         if (response == null) {
             return -1;
         }
-        int inbandTrackIndex = response.getValues(0).getInt32Value();
-        synchronized (mIndexTrackPairs) {
-            for (int i = 0; i < mIndexTrackPairs.size(); i++) {
-                Pair<Integer, SubtitleTrack> p = mIndexTrackPairs.get(i);
-                if (p.first != null && p.first == inbandTrackIndex) {
-                    return i;
-                }
-            }
-        }
-        return -1;
+        return response.getValues(0).getInt32Value();
     }
 
     /**
@@ -2381,56 +1869,6 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
 
     private void selectOrDeselectTrack(int index, boolean select)
             throws IllegalStateException {
-        // handle subtitle track through subtitle controller
-        populateInbandTracks();
-
-        Pair<Integer,SubtitleTrack> p = null;
-        try {
-            p = mIndexTrackPairs.get(index);
-        } catch (ArrayIndexOutOfBoundsException e) {
-            // ignore bad index
-            return;
-        }
-
-        SubtitleTrack track = p.second;
-        if (track == null) {
-            // inband (de)select
-            selectOrDeselectInbandTrack(p.first, select);
-            return;
-        }
-
-        if (mSubtitleController == null) {
-            return;
-        }
-
-        if (!select) {
-            // out-of-band deselect
-            if (mSubtitleController.getSelectedTrack() == track) {
-                mSubtitleController.selectTrack(null);
-            } else {
-                Log.w(TAG, "trying to deselect track that was not selected");
-            }
-            return;
-        }
-
-        // out-of-band select
-        if (track.getTrackType() == TrackInfo.MEDIA_TRACK_TYPE_TIMEDTEXT) {
-            int ttIndex = getSelectedTrack(TrackInfo.MEDIA_TRACK_TYPE_TIMEDTEXT);
-            synchronized (mIndexTrackPairs) {
-                if (ttIndex >= 0 && ttIndex < mIndexTrackPairs.size()) {
-                    Pair<Integer,SubtitleTrack> p2 = mIndexTrackPairs.get(ttIndex);
-                    if (p2.first != null && p2.second == null) {
-                        // deselect inband counterpart
-                        selectOrDeselectInbandTrack(p2.first, false);
-                    }
-                }
-            }
-        }
-        mSubtitleController.selectTrack(track);
-    }
-
-    private void selectOrDeselectInbandTrack(int index, boolean select)
-            throws IllegalStateException {
         PlayerMessage request = PlayerMessage.newBuilder()
                 .addValues(Value.newBuilder().setInt32Value(
                             select? INVOKE_ID_SELECT_TRACK: INVOKE_ID_DESELECT_TRACK))
@@ -2459,10 +1897,6 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
         if (mHandlerThread != null) {
             mHandlerThread.quitSafely();
             mHandlerThread = null;
-        }
-        if (mTimeProvider != null) {
-            mTimeProvider.close();
-            mTimeProvider = null;
         }
 
         // Modular DRM clean up
@@ -2499,17 +1933,6 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
     private static final int MEDIA_META_DATA = 202;
     private static final int MEDIA_DRM_INFO = 210;
     private static final int MEDIA_AUDIO_ROUTING_CHANGED = 10000;
-
-    private TimeProvider mTimeProvider;
-
-    /** @hide */
-    @Override
-    public MediaTimeProvider getMediaTimeProvider() {
-        if (mTimeProvider == null) {
-            mTimeProvider = new TimeProvider(this);
-        }
-        return mTimeProvider;
-    }
 
     private class TaskHandler extends Handler {
         private MediaPlayer2Impl mMediaPlayer;
@@ -2550,17 +1973,6 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
             switch(msg.what) {
             case MEDIA_PREPARED:
             {
-                try {
-                    scanInternalSubtitleTracks();
-                } catch (RuntimeException e) {
-                    // send error message instead of crashing;
-                    // send error message instead of inlining a call to onError
-                    // to avoid code duplication.
-                    Message msg2 = obtainMessage(
-                            MEDIA_ERROR, MEDIA_ERROR_UNKNOWN, MEDIA_ERROR_UNSUPPORTED, null);
-                    sendMessage(msg2);
-                }
-
                 if (dsd != null) {
                     sendEvent(new EventNotifier() {
                         @Override
@@ -2656,21 +2068,13 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
             }
 
             case MEDIA_STOPPED:
-            {
-                TimeProvider timeProvider = mTimeProvider;
-                if (timeProvider != null) {
-                    timeProvider.onStopped();
-                }
-                break;
-            }
-
             case MEDIA_STARTED:
             case MEDIA_PAUSED:
+            case MEDIA_SKIPPED:
+            case MEDIA_NOTIFY_TIME:
             {
-                TimeProvider timeProvider = mTimeProvider;
-                if (timeProvider != null) {
-                    timeProvider.onPaused(msg.what == MEDIA_PAUSED);
-                }
+                // Do nothing. The client should have enough information with
+                // {@link EventCallback#onMediaTimeDiscontinuity}.
                 break;
             }
 
@@ -2705,15 +2109,6 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                         mCurrentTask = null;
                         processPendingTask_l();
                     }
-                }
-            }
-                // fall through
-
-            case MEDIA_SKIPPED:
-            {
-                TimeProvider timeProvider = mTimeProvider;
-                if (timeProvider != null) {
-                    timeProvider.onSeekComplete(mMediaPlayer);
                 }
                 return;
             }
@@ -2759,33 +2154,6 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                     case MEDIA_INFO_VIDEO_TRACK_LAGGING:
                         Log.i(TAG, "Info (" + msg.arg1 + "," + msg.arg2 + ")");
                         break;
-
-                    case MEDIA_INFO_METADATA_UPDATE:
-                        try {
-                            scanInternalSubtitleTracks();
-                        } catch (RuntimeException e) {
-                            Message msg2 = obtainMessage(
-                                    MEDIA_ERROR, MEDIA_ERROR_UNKNOWN, MEDIA_ERROR_UNSUPPORTED,
-                                    null);
-                            sendMessage(msg2);
-                        }
-                        // fall through
-
-                    case MEDIA_INFO_EXTERNAL_METADATA_UPDATE:
-                        msg.arg1 = MEDIA_INFO_METADATA_UPDATE;
-                        // update default track selection
-                        if (mSubtitleController != null) {
-                            mSubtitleController.selectDefaultTrack();
-                        }
-                        break;
-
-                    case MEDIA_INFO_BUFFERING_START:
-                    case MEDIA_INFO_BUFFERING_END:
-                        TimeProvider timeProvider = mTimeProvider;
-                        if (timeProvider != null) {
-                            timeProvider.onBuffering(msg.arg1 == MEDIA_INFO_BUFFERING_START);
-                        }
-                        break;
                 }
 
                 sendEvent(new EventNotifier() {
@@ -2803,15 +2171,6 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                 }
 
                 // No real default action so far.
-                return;
-            }
-
-            case MEDIA_NOTIFY_TIME:
-            {
-                TimeProvider timeProvider = mTimeProvider;
-                if (timeProvider != null) {
-                    timeProvider.onNotifyTime();
-                }
                 return;
             }
 
@@ -4238,396 +3597,6 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                 }
             }
             return new TimedText(textChars, textBounds);
-        }
-    }
-
-    /** @hide */
-    static class TimeProvider implements MediaTimeProvider {
-        private static final String TAG = "MTP";
-        private static final long MAX_NS_WITHOUT_POSITION_CHECK = 5000000000L;
-        private static final long MAX_EARLY_CALLBACK_US = 1000;
-        private static final long TIME_ADJUSTMENT_RATE = 2;  /* meaning 1/2 */
-        private long mLastTimeUs = 0;
-        private MediaPlayer2Impl mPlayer;
-        private boolean mPaused = true;
-        private boolean mStopped = true;
-        private boolean mBuffering;
-        private long mLastReportedTime;
-        // since we are expecting only a handful listeners per stream, there is
-        // no need for log(N) search performance
-        private MediaTimeProvider.OnMediaTimeListener mListeners[];
-        private long mTimes[];
-        private EventHandler mEventHandler;
-        private boolean mRefresh = false;
-        private boolean mPausing = false;
-        private boolean mSeeking = false;
-        private static final int NOTIFY = 1;
-        private static final int NOTIFY_TIME = 0;
-        private static final int NOTIFY_STOP = 2;
-        private static final int NOTIFY_SEEK = 3;
-        private static final int NOTIFY_TRACK_DATA = 4;
-        private HandlerThread mHandlerThread;
-
-        /** @hide */
-        public boolean DEBUG = false;
-
-        public TimeProvider(MediaPlayer2Impl mp) {
-            mPlayer = mp;
-            try {
-                getCurrentTimeUs(true, false);
-            } catch (IllegalStateException e) {
-                // we assume starting position
-                mRefresh = true;
-            }
-
-            Looper looper;
-            if ((looper = Looper.myLooper()) == null &&
-                (looper = Looper.getMainLooper()) == null) {
-                // Create our own looper here in case MP was created without one
-                mHandlerThread = new HandlerThread("MediaPlayer2MTPEventThread",
-                      Process.THREAD_PRIORITY_FOREGROUND);
-                mHandlerThread.start();
-                looper = mHandlerThread.getLooper();
-            }
-            mEventHandler = new EventHandler(looper);
-
-            mListeners = new MediaTimeProvider.OnMediaTimeListener[0];
-            mTimes = new long[0];
-            mLastTimeUs = 0;
-        }
-
-        private void scheduleNotification(int type, long delayUs) {
-            // ignore time notifications until seek is handled
-            if (mSeeking && type == NOTIFY_TIME) {
-                return;
-            }
-
-            if (DEBUG) Log.v(TAG, "scheduleNotification " + type + " in " + delayUs);
-            mEventHandler.removeMessages(NOTIFY);
-            Message msg = mEventHandler.obtainMessage(NOTIFY, type, 0);
-            mEventHandler.sendMessageDelayed(msg, (int) (delayUs / 1000));
-        }
-
-        /** @hide */
-        public void close() {
-            mEventHandler.removeMessages(NOTIFY);
-            if (mHandlerThread != null) {
-                mHandlerThread.quitSafely();
-                mHandlerThread = null;
-            }
-        }
-
-        /** @hide */
-        protected void finalize() {
-            if (mHandlerThread != null) {
-                mHandlerThread.quitSafely();
-            }
-        }
-
-        /** @hide */
-        public void onNotifyTime() {
-            synchronized (this) {
-                if (DEBUG) Log.d(TAG, "onNotifyTime: ");
-                scheduleNotification(NOTIFY_TIME, 0 /* delay */);
-            }
-        }
-
-        /** @hide */
-        public void onPaused(boolean paused) {
-            synchronized(this) {
-                if (DEBUG) Log.d(TAG, "onPaused: " + paused);
-                if (mStopped) { // handle as seek if we were stopped
-                    mStopped = false;
-                    mSeeking = true;
-                    scheduleNotification(NOTIFY_SEEK, 0 /* delay */);
-                } else {
-                    mPausing = paused;  // special handling if player disappeared
-                    mSeeking = false;
-                    scheduleNotification(NOTIFY_TIME, 0 /* delay */);
-                }
-            }
-        }
-
-        /** @hide */
-        public void onBuffering(boolean buffering) {
-            synchronized (this) {
-                if (DEBUG) Log.d(TAG, "onBuffering: " + buffering);
-                mBuffering = buffering;
-                scheduleNotification(NOTIFY_TIME, 0 /* delay */);
-            }
-        }
-
-        /** @hide */
-        public void onStopped() {
-            synchronized(this) {
-                if (DEBUG) Log.d(TAG, "onStopped");
-                mPaused = true;
-                mStopped = true;
-                mSeeking = false;
-                mBuffering = false;
-                scheduleNotification(NOTIFY_STOP, 0 /* delay */);
-            }
-        }
-
-        /** @hide */
-        public void onSeekComplete(MediaPlayer2Impl mp) {
-            synchronized(this) {
-                mStopped = false;
-                mSeeking = true;
-                scheduleNotification(NOTIFY_SEEK, 0 /* delay */);
-            }
-        }
-
-        /** @hide */
-        public void onNewPlayer() {
-            if (mRefresh) {
-                synchronized(this) {
-                    mStopped = false;
-                    mSeeking = true;
-                    mBuffering = false;
-                    scheduleNotification(NOTIFY_SEEK, 0 /* delay */);
-                }
-            }
-        }
-
-        private synchronized void notifySeek() {
-            mSeeking = false;
-            try {
-                long timeUs = getCurrentTimeUs(true, false);
-                if (DEBUG) Log.d(TAG, "onSeekComplete at " + timeUs);
-
-                for (MediaTimeProvider.OnMediaTimeListener listener: mListeners) {
-                    if (listener == null) {
-                        break;
-                    }
-                    listener.onSeek(timeUs);
-                }
-            } catch (IllegalStateException e) {
-                // we should not be there, but at least signal pause
-                if (DEBUG) Log.d(TAG, "onSeekComplete but no player");
-                mPausing = true;  // special handling if player disappeared
-                notifyTimedEvent(false /* refreshTime */);
-            }
-        }
-
-        private synchronized void notifyTrackData(Pair<SubtitleTrack, byte[]> trackData) {
-            SubtitleTrack track = trackData.first;
-            byte[] data = trackData.second;
-            track.onData(data, true /* eos */, ~0 /* runID: keep forever */);
-        }
-
-        private synchronized void notifyStop() {
-            for (MediaTimeProvider.OnMediaTimeListener listener: mListeners) {
-                if (listener == null) {
-                    break;
-                }
-                listener.onStop();
-            }
-        }
-
-        private int registerListener(MediaTimeProvider.OnMediaTimeListener listener) {
-            int i = 0;
-            for (; i < mListeners.length; i++) {
-                if (mListeners[i] == listener || mListeners[i] == null) {
-                    break;
-                }
-            }
-
-            // new listener
-            if (i >= mListeners.length) {
-                MediaTimeProvider.OnMediaTimeListener[] newListeners =
-                    new MediaTimeProvider.OnMediaTimeListener[i + 1];
-                long[] newTimes = new long[i + 1];
-                System.arraycopy(mListeners, 0, newListeners, 0, mListeners.length);
-                System.arraycopy(mTimes, 0, newTimes, 0, mTimes.length);
-                mListeners = newListeners;
-                mTimes = newTimes;
-            }
-
-            if (mListeners[i] == null) {
-                mListeners[i] = listener;
-                mTimes[i] = MediaTimeProvider.NO_TIME;
-            }
-            return i;
-        }
-
-        public void notifyAt(
-                long timeUs, MediaTimeProvider.OnMediaTimeListener listener) {
-            synchronized(this) {
-                if (DEBUG) Log.d(TAG, "notifyAt " + timeUs);
-                mTimes[registerListener(listener)] = timeUs;
-                scheduleNotification(NOTIFY_TIME, 0 /* delay */);
-            }
-        }
-
-        public void scheduleUpdate(MediaTimeProvider.OnMediaTimeListener listener) {
-            synchronized(this) {
-                if (DEBUG) Log.d(TAG, "scheduleUpdate");
-                int i = registerListener(listener);
-
-                if (!mStopped) {
-                    mTimes[i] = 0;
-                    scheduleNotification(NOTIFY_TIME, 0 /* delay */);
-                }
-            }
-        }
-
-        public void cancelNotifications(
-                MediaTimeProvider.OnMediaTimeListener listener) {
-            synchronized(this) {
-                int i = 0;
-                for (; i < mListeners.length; i++) {
-                    if (mListeners[i] == listener) {
-                        System.arraycopy(mListeners, i + 1,
-                                mListeners, i, mListeners.length - i - 1);
-                        System.arraycopy(mTimes, i + 1,
-                                mTimes, i, mTimes.length - i - 1);
-                        mListeners[mListeners.length - 1] = null;
-                        mTimes[mTimes.length - 1] = NO_TIME;
-                        break;
-                    } else if (mListeners[i] == null) {
-                        break;
-                    }
-                }
-
-                scheduleNotification(NOTIFY_TIME, 0 /* delay */);
-            }
-        }
-
-        private synchronized void notifyTimedEvent(boolean refreshTime) {
-            // figure out next callback
-            long nowUs;
-            try {
-                nowUs = getCurrentTimeUs(refreshTime, true);
-            } catch (IllegalStateException e) {
-                // assume we paused until new player arrives
-                mRefresh = true;
-                mPausing = true; // this ensures that call succeeds
-                nowUs = getCurrentTimeUs(refreshTime, true);
-            }
-            long nextTimeUs = nowUs;
-
-            if (mSeeking) {
-                // skip timed-event notifications until seek is complete
-                return;
-            }
-
-            if (DEBUG) {
-                StringBuilder sb = new StringBuilder();
-                sb.append("notifyTimedEvent(").append(mLastTimeUs).append(" -> ")
-                        .append(nowUs).append(") from {");
-                boolean first = true;
-                for (long time: mTimes) {
-                    if (time == NO_TIME) {
-                        continue;
-                    }
-                    if (!first) sb.append(", ");
-                    sb.append(time);
-                    first = false;
-                }
-                sb.append("}");
-                Log.d(TAG, sb.toString());
-            }
-
-            Vector<MediaTimeProvider.OnMediaTimeListener> activatedListeners =
-                new Vector<MediaTimeProvider.OnMediaTimeListener>();
-            for (int ix = 0; ix < mTimes.length; ix++) {
-                if (mListeners[ix] == null) {
-                    break;
-                }
-                if (mTimes[ix] <= NO_TIME) {
-                    // ignore, unless we were stopped
-                } else if (mTimes[ix] <= nowUs + MAX_EARLY_CALLBACK_US) {
-                    activatedListeners.add(mListeners[ix]);
-                    if (DEBUG) Log.d(TAG, "removed");
-                    mTimes[ix] = NO_TIME;
-                } else if (nextTimeUs == nowUs || mTimes[ix] < nextTimeUs) {
-                    nextTimeUs = mTimes[ix];
-                }
-            }
-
-            if (nextTimeUs > nowUs && !mPaused) {
-                // schedule callback at nextTimeUs
-                if (DEBUG) Log.d(TAG, "scheduling for " + nextTimeUs + " and " + nowUs);
-                mPlayer.notifyAt(nextTimeUs);
-            } else {
-                mEventHandler.removeMessages(NOTIFY);
-                // no more callbacks
-            }
-
-            for (MediaTimeProvider.OnMediaTimeListener listener: activatedListeners) {
-                listener.onTimedEvent(nowUs);
-            }
-        }
-
-        public long getCurrentTimeUs(boolean refreshTime, boolean monotonic)
-                throws IllegalStateException {
-            synchronized (this) {
-                // we always refresh the time when the paused-state changes, because
-                // we expect to have received the pause-change event delayed.
-                if (mPaused && !refreshTime) {
-                    return mLastReportedTime;
-                }
-
-                try {
-                    mLastTimeUs = mPlayer.getCurrentPosition() * 1000L;
-                    mPaused = !mPlayer.isPlaying() || mBuffering;
-                    if (DEBUG) Log.v(TAG, (mPaused ? "paused" : "playing") + " at " + mLastTimeUs);
-                } catch (IllegalStateException e) {
-                    if (mPausing) {
-                        // if we were pausing, get last estimated timestamp
-                        mPausing = false;
-                        if (!monotonic || mLastReportedTime < mLastTimeUs) {
-                            mLastReportedTime = mLastTimeUs;
-                        }
-                        mPaused = true;
-                        if (DEBUG) Log.d(TAG, "illegal state, but pausing: estimating at " + mLastReportedTime);
-                        return mLastReportedTime;
-                    }
-                    // TODO get time when prepared
-                    throw e;
-                }
-                if (monotonic && mLastTimeUs < mLastReportedTime) {
-                    /* have to adjust time */
-                    if (mLastReportedTime - mLastTimeUs > 1000000) {
-                        // schedule seeked event if time jumped significantly
-                        // TODO: do this properly by introducing an exception
-                        mStopped = false;
-                        mSeeking = true;
-                        scheduleNotification(NOTIFY_SEEK, 0 /* delay */);
-                    }
-                } else {
-                    mLastReportedTime = mLastTimeUs;
-                }
-
-                return mLastReportedTime;
-            }
-        }
-
-        private class EventHandler extends Handler {
-            public EventHandler(Looper looper) {
-                super(looper);
-            }
-
-            @Override
-            public void handleMessage(Message msg) {
-                if (msg.what == NOTIFY) {
-                    switch (msg.arg1) {
-                    case NOTIFY_TIME:
-                        notifyTimedEvent(true /* refreshTime */);
-                        break;
-                    case NOTIFY_STOP:
-                        notifyStop();
-                        break;
-                    case NOTIFY_SEEK:
-                        notifySeek();
-                        break;
-                    case NOTIFY_TRACK_DATA:
-                        notifyTrackData((Pair<SubtitleTrack, byte[]>)msg.obj);
-                        break;
-                    }
-                }
-            }
         }
     }
 

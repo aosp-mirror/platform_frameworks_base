@@ -74,11 +74,11 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
     private final boolean isDebuggable;
     private final PluginPrefs mPluginPrefs;
     private final PluginEnabler mPluginEnabler;
+    private final PluginInitializer mPluginInitializer;
     private ClassLoaderFilter mParentClassLoader;
     private boolean mListening;
     private boolean mHasOneShot;
     private Looper mLooper;
-    private boolean mWtfsSet;
 
     public PluginManagerImpl(Context context, PluginInitializer initializer) {
         this(context, new PluginInstanceManagerFactory(), Build.IS_DEBUGGABLE,
@@ -87,7 +87,7 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
 
     @VisibleForTesting
     PluginManagerImpl(Context context, PluginInstanceManagerFactory factory, boolean debuggable,
-            UncaughtExceptionHandler defaultHandler, PluginInitializer initializer) {
+            UncaughtExceptionHandler defaultHandler, final PluginInitializer initializer) {
         mContext = context;
         mFactory = factory;
         mLooper = initializer.getBgLooper();
@@ -95,15 +95,18 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
         mWhitelistedPlugins.addAll(Arrays.asList(initializer.getWhitelistedPlugins(mContext)));
         mPluginPrefs = new PluginPrefs(mContext);
         mPluginEnabler = initializer.getPluginEnabler(mContext);
+        mPluginInitializer = initializer;
 
         PluginExceptionHandler uncaughtExceptionHandler = new PluginExceptionHandler(
                 defaultHandler);
         Thread.setUncaughtExceptionPreHandler(uncaughtExceptionHandler);
 
-        Runnable bgRunnable = initializer.getBgInitCallback();
-        if (bgRunnable != null) {
-            new Handler(mLooper).post(bgRunnable);
-        }
+        new Handler(mLooper).post(new Runnable() {
+            @Override
+            public void run() {
+                initializer.onPluginManagerInit();
+            }
+        });
     }
 
     public String[] getWhitelistedPlugins() {
@@ -299,16 +302,7 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
     }
 
     public void handleWtfs() {
-        if (!mWtfsSet) {
-            mWtfsSet = true;
-            Log.setWtfHandler(new Log.TerribleFailureHandler() {
-                @Override
-                public void onTerribleFailure(String tag, Log.TerribleFailure what,
-                        boolean system) {
-                    throw new CrashWhilePluginActiveException(what);
-                }
-            });
-        }
+        mPluginInitializer.handleWtfs();
     }
 
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
@@ -391,7 +385,7 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
         }
     }
 
-    private class CrashWhilePluginActiveException extends RuntimeException {
+    public static class CrashWhilePluginActiveException extends RuntimeException {
         public CrashWhilePluginActiveException(Throwable throwable) {
             super(throwable);
         }

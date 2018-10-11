@@ -5224,13 +5224,30 @@ public class DevicePolicyManager {
     }
 
     /**
-     * @return ID of the user who runs device owner, or {@link UserHandle#USER_NULL} if there's
-     * no device owner.
+     * @return Handle of the user who runs device owner, or {@code null} if there's no device owner.
      *
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
     @SystemApi
+    public @Nullable UserHandle getDeviceOwnerUser() {
+        if (mService != null) {
+            try {
+                int userId = mService.getDeviceOwnerUserId();
+
+                if (userId != UserHandle.USER_NULL) {
+                    return UserHandle.of(userId);
+                }
+            } catch (RemoteException re) {
+                throw re.rethrowFromSystemServer();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * @hide
+     */
     public int getDeviceOwnerUserId() {
         if (mService != null) {
             try {
@@ -5653,6 +5670,20 @@ public class DevicePolicyManager {
     @RequiresPermission(value = android.Manifest.permission.INTERACT_ACROSS_USERS,
             conditional = true)
     @SystemApi
+    public @Nullable ComponentName getProfileOwnerAsUser(@NonNull UserHandle user) {
+        if (mService != null) {
+            try {
+                return mService.getProfileOwnerAsUser(user.getIdentifier());
+            } catch (RemoteException re) {
+                throw re.rethrowFromSystemServer();
+            }
+        }
+        return null;
+    }
+
+    /**
+     * @hide
+     */
     public @Nullable ComponentName getProfileOwnerAsUser(final int userId) {
         if (mService != null) {
             try {
@@ -5700,6 +5731,37 @@ public class DevicePolicyManager {
             }
         }
         return null;
+    }
+
+    /**
+     * Returns whether the specified package can read the device identifiers.
+     *
+     * @param packageName The package name of the app to check for device identifier access.
+     * @return whether the package can read the device identifiers.
+     *
+     * @hide
+     */
+    public boolean checkDeviceIdentifierAccess(String packageName) {
+        return checkDeviceIdentifierAccessAsUser(packageName, myUserId());
+    }
+
+    /**
+     * @hide
+     */
+    @RequiresPermission(value = android.Manifest.permission.MANAGE_USERS, conditional = true)
+    public boolean checkDeviceIdentifierAccessAsUser(String packageName, int userId) {
+        throwIfParentInstance("checkDeviceIdentifierAccessAsUser");
+        if (packageName == null) {
+            return false;
+        }
+        if (mService != null) {
+            try {
+                return mService.checkDeviceIdentifierAccess(packageName, userId);
+            } catch (RemoteException re) {
+                throw re.rethrowFromSystemServer();
+            }
+        }
+        return false;
     }
 
     /**

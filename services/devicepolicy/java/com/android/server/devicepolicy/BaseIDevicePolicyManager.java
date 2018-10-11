@@ -66,4 +66,9 @@ abstract class BaseIDevicePolicyManager extends IDevicePolicyManager.Stub {
     public long forceSecurityLogs() {
         return 0;
     }
+
+    @Override
+    public boolean checkDeviceIdentifierAccess(String packageName, int userHandle) {
+        return false;
+    }
 }

@@ -156,7 +156,7 @@ public class RestrictedLockUtilsTest {
         final EnforcedAdmin enforcedAdmin = RestrictedLockUtilsInternal
                 .checkIfKeyguardFeaturesDisabled(mContext, KEYGUARD_DISABLE_FINGERPRINT, mUserId);
 
-        assertThat(enforcedAdmin).isEqualTo(new EnforcedAdmin(mAdmin1, mUserId));
+        assertThat(enforcedAdmin).isEqualTo(new EnforcedAdmin(mAdmin1, UserHandle.of(mUserId)));
     }
 
     @Test
@@ -189,12 +189,12 @@ public class RestrictedLockUtilsTest {
         // Querying the parent should return the policy, since it affects the parent.
         EnforcedAdmin parent = RestrictedLockUtilsInternal.checkIfKeyguardFeaturesDisabled(
                 mContext, KEYGUARD_DISABLE_FINGERPRINT, mUserId);
-        assertThat(parent).isEqualTo(new EnforcedAdmin(mAdmin2, mProfileId));
+        assertThat(parent).isEqualTo(new EnforcedAdmin(mAdmin2, UserHandle.of(mProfileId)));
 
         // Querying the child should return that too.
         EnforcedAdmin profile = RestrictedLockUtilsInternal.checkIfKeyguardFeaturesDisabled(
                 mContext, KEYGUARD_DISABLE_FINGERPRINT, mProfileId);
-        assertThat(profile).isEqualTo(new EnforcedAdmin(mAdmin2, mProfileId));
+        assertThat(profile).isEqualTo(new EnforcedAdmin(mAdmin2, UserHandle.of(mProfileId)));
 
         // Querying for some unrelated feature should return nothing. Nothing!
         assertThat(RestrictedLockUtilsInternal.checkIfKeyguardFeaturesDisabled(
@@ -224,7 +224,7 @@ public class RestrictedLockUtilsTest {
         // Querying the child should still return the policy.
         EnforcedAdmin profile = RestrictedLockUtilsInternal.checkIfKeyguardFeaturesDisabled(
                 mContext, KEYGUARD_DISABLE_UNREDACTED_NOTIFICATIONS, mProfileId);
-        assertThat(profile).isEqualTo(new EnforcedAdmin(mAdmin2, mProfileId));
+        assertThat(profile).isEqualTo(new EnforcedAdmin(mAdmin2, UserHandle.of(mProfileId)));
     }
 
     @Test
@@ -251,7 +251,7 @@ public class RestrictedLockUtilsTest {
         // Querying the child should still return the policy.
         EnforcedAdmin profile = RestrictedLockUtilsInternal.checkIfKeyguardFeaturesDisabled(
                 mContext, KEYGUARD_DISABLE_FINGERPRINT, mProfileId);
-        assertThat(profile).isEqualTo(new EnforcedAdmin(mAdmin2, mProfileId));
+        assertThat(profile).isEqualTo(new EnforcedAdmin(mAdmin2, UserHandle.of(mProfileId)));
     }
 
     /**
@@ -278,7 +278,7 @@ public class RestrictedLockUtilsTest {
         // Parent should get the policy.
         EnforcedAdmin parent = RestrictedLockUtilsInternal.checkIfKeyguardFeaturesDisabled(
                 mContext, KEYGUARD_DISABLE_FINGERPRINT, mUserId);
-        assertThat(parent).isEqualTo(new EnforcedAdmin(mAdmin2, mProfileId));
+        assertThat(parent).isEqualTo(new EnforcedAdmin(mAdmin2, UserHandle.of(mProfileId)));
 
         // Profile should not get the policy.
         EnforcedAdmin profile = RestrictedLockUtilsInternal.checkIfKeyguardFeaturesDisabled(

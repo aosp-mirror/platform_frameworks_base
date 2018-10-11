@@ -146,6 +146,14 @@ public class PreviewInflater {
                 == null;
     }
 
+    public static boolean wouldShowOverLockscreen(Context ctx, Intent intent, int currentUserId) {
+        ActivityInfo targetActivityInfo = getTargetActivityInfo(ctx, intent, currentUserId,
+                false /* onlyDirectBootAware */);
+        return targetActivityInfo != null
+                && (targetActivityInfo.flags & (ActivityInfo.FLAG_SHOW_WHEN_LOCKED
+                | ActivityInfo.FLAG_SHOW_FOR_ALL_USERS)) > 0;
+    }
+
     /**
      * @param onlyDirectBootAware a boolean indicating whether the matched activity packages must
      *                            be direct boot aware when in direct boot mode if false, all

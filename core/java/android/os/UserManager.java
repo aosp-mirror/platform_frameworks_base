@@ -268,7 +268,7 @@ public class UserManager {
     public static final String DISALLOW_INSTALL_UNKNOWN_SOURCES = "no_install_unknown_sources";
 
     /**
-     * This restriction is a device-wide version of {@link DISALLOW_INSTALL_UNKNOWN_SOURCES}.
+     * This restriction is a device-wide version of {@link #DISALLOW_INSTALL_UNKNOWN_SOURCES}.
      *
      * Specifies if all users on the device are disallowed from enabling the
      * "Unknown Sources" setting, that allows installation of apps from unknown sources.

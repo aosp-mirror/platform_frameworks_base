@@ -940,6 +940,7 @@ public class PackageManagerService extends IPackageManager.Stub
     private UserManagerInternal mUserManagerInternal;
     private ActivityManagerInternal mActivityManagerInternal;
     private ActivityTaskManagerInternal mActivityTaskManagerInternal;
+    private StorageManagerInternal mStorageManagerInternal;
 
     private DeviceIdleController.LocalService mDeviceIdleController;
 
@@ -4596,6 +4597,13 @@ public class PackageManagerService extends IPackageManager.Stub
                     LocalServices.getService(DeviceIdleController.LocalService.class);
         }
         return mDeviceIdleController;
+    }
+
+    private StorageManagerInternal getStorageManagerInternal() {
+        if (mStorageManagerInternal == null) {
+            mStorageManagerInternal = LocalServices.getService(StorageManagerInternal.class);
+        }
+        return mStorageManagerInternal;
     }
 
     /**
@@ -9504,6 +9512,30 @@ public class PackageManagerService extends IPackageManager.Stub
                         ceDataInode);
             } catch (InstallerException e) {
                 Slog.w(TAG, String.valueOf(e));
+            }
+            // If this package doesn't have a sharedUserId or there are no other packages
+            // present with same sharedUserId, then delete the sandbox data too.
+            try {
+                final SharedUserSetting sharedUserSetting = mSettings.getSharedUserLPw(
+                        pkg.mSharedUserId, 0 /* pkgFlags */,
+                        0 /* pkgPrivateFlags */, false /* create */);
+                boolean deleteSandboxData = true;
+                if (sharedUserSetting != null && sharedUserSetting.packages != null) {
+                    for (int i = sharedUserSetting.packages.size() - 1; i >= 0; --i) {
+                        final PackageSetting packageSetting = sharedUserSetting.packages.valueAt(i);
+                        if (!packageSetting.name.equals(pkg.packageName)
+                                && packageSetting.readUserState(realUserId).isAvailable(
+                                        MATCH_UNINSTALLED_PACKAGES)) {
+                            deleteSandboxData = false;
+                            break;
+                        }
+                    }
+                }
+                if (deleteSandboxData) {
+                    getStorageManagerInternal().destroySandboxForApp(pkg.packageName, realUserId);
+                }
+            } catch (PackageManagerException e) {
+                // Should not happen
             }
             mDexManager.notifyPackageDataDestroyed(pkg.packageName, userId);
         }
@@ -19820,9 +19852,7 @@ public class PackageManagerService extends IPackageManager.Stub
         mDexManager.systemReady();
         mPackageDexOptimizer.systemReady();
 
-        StorageManagerInternal storageManagerInternal = LocalServices.getService(
-                StorageManagerInternal.class);
-        storageManagerInternal.addExternalStoragePolicy(
+        getStorageManagerInternal().addExternalStoragePolicy(
                 new StorageManagerInternal.ExternalStorageMountPolicy() {
             @Override
             public int getMountMode(int uid, String packageName) {
@@ -21215,10 +21245,8 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         prepareAppDataContentsLeafLIF(pkg, userId, flags);
-        final StorageManagerInternal storageManagerInternal
-                = LocalServices.getService(StorageManagerInternal.class);
-        if (storageManagerInternal != null) {
-            storageManagerInternal.mountExternalStorageForApp(
+        if (getStorageManagerInternal() != null) {
+            getStorageManagerInternal().prepareSandboxForApp(
                     pkg.packageName, appId, pkg.mSharedUserId, userId);
         }
     }

@@ -15,7 +15,9 @@
  */
 package android.app.assist;
 
+import static android.view.View.AUTOFILL_TYPE_TEXT;
 import static android.view.View.IMPORTANT_FOR_AUTOFILL_AUTO;
+import static android.view.View.IMPORTANT_FOR_AUTOFILL_YES;
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -27,7 +29,9 @@ import android.os.SystemClock;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.rule.ActivityTestRule;
 import android.support.test.runner.AndroidJUnit4;
+import android.text.InputFilter;
 import android.util.Log;
+import android.view.autofill.AutofillId;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.LinearLayout;
@@ -67,6 +71,16 @@ public class AssistStructureTest {
     private static final String BIG_STRING = repeat(BIG_VIEW_CHAR, BIG_VIEW_SIZE);
     // Cannot be much big because it could hang test due to blocking GC
     private static final int NUMBER_SMALL_VIEWS = 10_000;
+
+    // Autofill field constants
+    private static final AutofillId AUTOFILL_ID = new AutofillId(2);
+    private static final String AUTOFILL_HINTS = "hints";
+    private static final int MIN_TEXT_EMS = 5;
+    private static final int MAX_TEXT_EMS = 17;
+    private static final int MAX_TEXT_LENGTH = 23;
+
+    // ViewNodeBuilder structure for editing autofill fields
+    private AssistStructure.ViewNodeBuilder mBuilder;
 
     private EmptyLayoutActivity mActivity;
 
@@ -211,6 +225,12 @@ public class AssistStructureTest {
     private EditText newSmallView() {
         EditText view = new EditText(mContext);
         view.setText("I AM GROOT");
+        view.setMinEms(MIN_TEXT_EMS);
+        view.setMaxEms(MAX_TEXT_EMS);
+        view.setAutofillId(AUTOFILL_ID);
+        view.setAutofillHints(AUTOFILL_HINTS);
+        view.setFilters(new InputFilter[] { new InputFilter.LengthFilter(MAX_TEXT_LENGTH) });
+        view.setImportantForAutofill(IMPORTANT_FOR_AUTOFILL_YES);
         return view;
     }
 
@@ -220,6 +240,16 @@ public class AssistStructureTest {
         assertThat(view.getIdEntry()).isNull();
         assertThat(view.getAutofillId()).isNotNull();
         assertThat(view.getText().toString()).isEqualTo("I AM GROOT");
+
+        assertThat(view.getAutofillType()).isEqualTo(AUTOFILL_TYPE_TEXT);
+
+        // fields controlled by mAutofillFlag
+        assertThat(view.getAutofillId().getViewId()).isEqualTo(2);
+        assertThat(view.getAutofillHints()[0]).isEqualTo(AUTOFILL_HINTS);
+        assertThat(view.getMinTextEms()).isEqualTo(MIN_TEXT_EMS);
+        assertThat(view.getMaxTextEms()).isEqualTo(MAX_TEXT_EMS);
+        assertThat(view.getMaxTextLength()).isEqualTo(MAX_TEXT_LENGTH);
+        assertThat(view.getImportantForAutofill()).isEqualTo(IMPORTANT_FOR_AUTOFILL_YES);
     }
 
     private EditText newBigView() {

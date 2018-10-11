@@ -228,4 +228,14 @@
     <!-- Label for the notification channel containing notifications for embedded app operations [CHAR LIMIT=40] -->
     <string name="wear_app_channel">Installing/uninstalling wear apps</string>
 
+    <!-- Description for the app installer notification channel [CHAR LIMIT=40] -->
+    <string name="app_installed_notification_channel_description">App installed notification</string>
+
+    <!-- Notification message shown in status bar when an application is successfully installed.
+         [CHAR LIMIT=30] -->
+    <string name="notification_installation_success_message">Successfully installed</string>
+
+    <!-- Notification shown in status bar when an application is successfully installed.
+         [CHAR LIMIT=50] -->
+    <string name="notification_installation_success_status">Successfully installed \u201c<xliff:g id="appname" example="Package Installer">%1$s</xliff:g>\u201d</string>
 </resources>

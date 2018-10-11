@@ -61,6 +61,7 @@ cc_defaults {
     shared_libs: [
         "liblog",
         "libcutils",
+        "libstatslog",
         "libutils",
         "libEGL",
         "libGLESv2",

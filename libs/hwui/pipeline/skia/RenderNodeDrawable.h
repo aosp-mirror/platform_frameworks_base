@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include "SkiaUtils.h"
+
 #include <SkCanvas.h>
 #include <SkDrawable.h>
 #include <SkMatrix.h>
@@ -89,7 +91,7 @@ protected:
     virtual SkRect onGetBounds() override {
         // We don't want to enable a record time quick reject because the properties
         // of the RenderNode may be updated on subsequent frames.
-        return SkRect::MakeLargest();
+        return SkRectMakeLargest();
     }
     /**
      * This function draws into a canvas as forceDraw, but does nothing if the render node has a

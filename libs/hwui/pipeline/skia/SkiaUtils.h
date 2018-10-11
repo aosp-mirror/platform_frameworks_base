@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2016 The Android Open Source Project
+ * Copyright (C) 2018 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,12 +14,15 @@
  * limitations under the License.
  */
 
-package android.os;
+#pragma once
 
-/**
- * @hide
- */
-interface IDeviceIdentifiersPolicyService {
-    String getSerial();
-    String getSerialForPackage(in String callingPackage);
-}
+#include <SkRect.h>
+
+namespace android {
+
+static inline SkRect SkRectMakeLargest() {
+    const SkScalar v = SK_ScalarMax;
+    return { -v, -v, v, v };
+};
+
+} /* namespace android */

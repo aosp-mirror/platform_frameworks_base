@@ -18,13 +18,14 @@ package com.android.systemui.statusbar.phone;
 
 import android.content.Context;
 import android.content.res.Configuration;
+import android.graphics.Color;
+import android.graphics.PorterDuff;
 import android.graphics.drawable.AnimatedVectorDrawable;
 import android.graphics.drawable.Drawable;
-import android.graphics.drawable.InsetDrawable;
 import android.util.AttributeSet;
-import android.view.View;
 import android.view.accessibility.AccessibilityNodeInfo;
 
+import com.android.internal.graphics.ColorUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.KeyguardAffordanceView;
@@ -58,6 +59,7 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
     private int mDensity;
 
     private final Runnable mDrawOffTimeout = () -> update(true /* forceUpdate */);
+    private float mDarkAmount;
 
     public LockIcon(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -130,6 +132,7 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
                     ? (AnimatedVectorDrawable) icon
                     : null;
             setImageDrawable(icon, false);
+            updateDarkTint();
             if (mHasFaceUnlockIcon) {
                 announceForAccessibility(getContext().getString(
                     R.string.accessibility_scanning_face));
@@ -258,5 +261,16 @@ public class LockIcon extends KeyguardAffordanceView implements OnUserInfoChange
         } else {
             return STATE_LOCKED;
         }
+    }
+
+    public void setDarkAmount(float darkAmount) {
+        mDarkAmount = darkAmount;
+        updateDarkTint();
+    }
+
+    private void updateDarkTint() {
+        Drawable drawable = getDrawable().mutate();
+        int color = ColorUtils.blendARGB(Color.TRANSPARENT, Color.WHITE, mDarkAmount);
+        drawable.setColorFilter(color, PorterDuff.Mode.SRC_ATOP);
     }
 }

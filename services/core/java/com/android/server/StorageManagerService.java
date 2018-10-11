@@ -3754,7 +3754,7 @@ class StorageManagerService extends IStorageManager.Stub
         }
 
         @Override
-        public void mountExternalStorageForApp(String packageName, int appId, String sharedUserId,
+        public void prepareSandboxForApp(String packageName, int appId, String sharedUserId,
                 int userId) {
             final String sandboxId;
             synchronized (mPackagesLock) {
@@ -3771,7 +3771,41 @@ class StorageManagerService extends IStorageManager.Stub
             }
 
             try {
-                mVold.mountExternalStorageForApp(packageName, appId, sandboxId, userId);
+                mVold.prepareSandboxForApp(packageName, appId, sandboxId, userId);
+            } catch (Exception e) {
+                Slog.wtf(TAG, e);
+            }
+        }
+
+        @Override
+        public void destroySandboxForApp(String packageName, int userId) {
+            if (!ENABLE_ISOLATED_STORAGE) {
+                return;
+            }
+            final int appId;
+            final String sandboxId;
+            synchronized (mPackagesLock) {
+                final ArraySet<String> userPackages = getAvailablePackagesForUserPL(userId);
+                userPackages.remove(packageName);
+                appId = mAppIds.get(packageName);
+                sandboxId = mSandboxIds.get(appId);
+
+                // If the package is not uninstalled in any other users, remove appId and sandboxId
+                // corresponding to it from the internal state.
+                boolean installedInAnyUser = false;
+                for (int i = mPackages.size() - 1; i >= 0; --i) {
+                    if (mPackages.valueAt(i).contains(packageName)) {
+                        installedInAnyUser = true;
+                        break;
+                    }
+                }
+                if (!installedInAnyUser) {
+                    mAppIds.remove(packageName);
+                    mSandboxIds.remove(appId);
+                }
+            }
+            try {
+                mVold.destroySandboxForApp(packageName, appId, sandboxId, userId);
             } catch (Exception e) {
                 Slog.wtf(TAG, e);
             }
