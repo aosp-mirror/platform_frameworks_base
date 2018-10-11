@@ -40,27 +40,25 @@ import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.view.View;
 
-import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
-
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.LocalServices;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
+import androidx.test.filters.SmallTest;
+
 /**
  * Tests for the {@link DragDropController} class.
  *
- * atest FrameworksServicesTests:com.android.server.wm.DragDropControllerTests
+ * Build/Install/Run:
+ *  atest FrameworksServicesTests:com.android.server.wm.DragDropControllerTests
  */
 @SmallTest
-@RunWith(AndroidJUnit4.class)
 @Presubmit
 public class DragDropControllerTests extends WindowTestsBase {
     private static final int TIMEOUT_MS = 3000;
@@ -109,6 +107,7 @@ public class DragDropControllerTests extends WindowTestsBase {
         return window;
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         final UserManagerInternal userManager = mock(UserManagerInternal.class);
@@ -127,6 +126,7 @@ public class DragDropControllerTests extends WindowTestsBase {
         }
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         LocalServices.removeServiceForTest(UserManagerInternal.class);
@@ -139,25 +139,25 @@ public class DragDropControllerTests extends WindowTestsBase {
                 mTarget.cancelDragAndDrop(mToken);
             }
             latch = new CountDownLatch(1);
-            mTarget.setOnClosedCallbackLocked(() -> {
-                latch.countDown();
-            });
+            mTarget.setOnClosedCallbackLocked(latch::countDown);
         }
         assertTrue(latch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
+
+        super.tearDown();
     }
 
     @Test
-    public void testDragFlow() throws Exception {
+    public void testDragFlow() {
         dragFlow(0, ClipData.newPlainText("label", "Test"), 0, 0);
     }
 
     @Test
-    public void testPerformDrag_NullDataWithGrantUri() throws Exception {
+    public void testPerformDrag_NullDataWithGrantUri() {
         dragFlow(View.DRAG_FLAG_GLOBAL | View.DRAG_FLAG_GLOBAL_URI_READ, null, 0, 0);
     }
 
     @Test
-    public void testPerformDrag_NullDataToOtherUser() throws Exception {
+    public void testPerformDrag_NullDataToOtherUser() {
         final WindowState otherUsersWindow =
                 createDropTargetWindow("Other user's window", 1 * UserHandle.PER_USER_RANGE);
         doReturn(otherUsersWindow).when(mDisplayContent).getTouchableWinAtPointLocked(10, 10);

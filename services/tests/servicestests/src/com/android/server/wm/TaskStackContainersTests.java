@@ -25,30 +25,29 @@ import static org.junit.Assert.assertTrue;
 
 import android.platform.test.annotations.Presubmit;
 
-import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
+
+import androidx.test.filters.SmallTest;
 
 /**
  * Tests for the {@link DisplayContent.TaskStackContainers} container in {@link DisplayContent}.
  *
  * Build/Install/Run:
- *  bit FrameworksServicesTests:com.android.server.wm.TaskStackContainersTests
+ *  atest FrameworksServicesTests:com.android.server.wm.TaskStackContainersTests
  */
 @SmallTest
 @Presubmit
-@RunWith(AndroidJUnit4.class)
 public class TaskStackContainersTests extends WindowTestsBase {
 
     private TaskStack mPinnedStack;
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
+
         mPinnedStack = createStackControllerOnStackOnDisplay(
                 WINDOWING_MODE_PINNED, ACTIVITY_TYPE_STANDARD, mDisplayContent).mContainer;
         // Stack should contain visible app window to be considered visible.
@@ -60,9 +59,12 @@ public class TaskStackContainersTests extends WindowTestsBase {
         assertTrue(mPinnedStack.isVisible());
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         mPinnedStack.removeImmediately();
+
+        super.tearDown();
     }
 
     @Test

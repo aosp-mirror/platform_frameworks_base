@@ -29,13 +29,13 @@ import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.os.UserManager;
 
-import androidx.test.InstrumentationRegistry;
-
 import org.junit.After;
 import org.junit.Before;
 import org.junit.BeforeClass;
 
 import java.io.File;
+
+import androidx.test.InstrumentationRegistry;
 
 /**
  * Base class for tests that use a {@link TaskSnapshotPersister}.
@@ -54,9 +54,11 @@ class TaskSnapshotPersisterTestBase extends WindowTestsBase {
         sFilesDir = InstrumentationRegistry.getContext().getFilesDir();
     }
 
+    @Override
     @Before
     public void setUp() throws Exception {
         super.setUp();
+
         final UserManager um = UserManager.get(InstrumentationRegistry.getContext());
         mTestUserId = um.getUserHandle();
         mPersister = new TaskSnapshotPersister(userId -> sFilesDir);
@@ -64,9 +66,12 @@ class TaskSnapshotPersisterTestBase extends WindowTestsBase {
         mPersister.start();
     }
 
+    @Override
     @After
     public void tearDown() throws Exception {
         cleanDirectory();
+
+        super.tearDown();
     }
 
     private void cleanDirectory() {
