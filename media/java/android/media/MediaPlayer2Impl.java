@@ -3620,6 +3620,17 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                         && getState() == PLAYER_STATE_ERROR) {
                     status = CALL_STATUS_INVALID_OPERATION;
                 } else {
+                    if (mMediaCallType == CALL_COMPLETED_SEEK_TO) {
+                        synchronized (mTaskLock) {
+                            if (!mPendingTasks.isEmpty()) {
+                                Task nextTask = mPendingTasks.get(0);
+                                if (nextTask.mMediaCallType == mMediaCallType) {
+                                    throw new CommandSkippedException(
+                                            "consecutive seekTo is skipped except last one");
+                                }
+                            }
+                        }
+                    }
                     process();
                 }
             } catch (IllegalStateException e) {
