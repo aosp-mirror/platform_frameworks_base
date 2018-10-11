@@ -1455,6 +1455,10 @@ class AlarmManagerService extends SystemService {
         TimeZone.setDefault(null);
 
         if (timeZoneWasChanged) {
+            // Don't wait for broadcasts to update our midnight alarm
+            mClockReceiver.scheduleDateChangedEvent();
+
+            // And now let everyone else know
             Intent intent = new Intent(Intent.ACTION_TIMEZONE_CHANGED);
             intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING
                     | Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND
