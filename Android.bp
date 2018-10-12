@@ -1076,6 +1076,7 @@ framework_docs_args = "-android -manifest $(location core/res/AndroidManifest.xm
      "-federationapi SupportLib $(location current/support-api.txt) "
 
 framework_docs_only_args = " -android -manifest $(location core/res/AndroidManifest.xml) " +
+     "-werror -lerror -hide 111 -hide 113 -hide 125 -hide 126 -hide 127 -hide 128 " +
      "-overview $(location core/java/overview.html) " +
      // Federate Support Library references against local API file.
      "-federate SupportLib https://developer.android.com " +
@@ -1161,7 +1162,8 @@ stubs_defaults {
 
 doc_defaults {
     name: "framework-docs-default",
-    libs: framework_docs_only_libs,
+    libs: framework_docs_only_libs +
+         ["stub-annotations"],
     html_dirs: [
         "docs/html",
     ],
