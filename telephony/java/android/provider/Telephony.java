@@ -3213,7 +3213,6 @@ public final class Telephony {
             values.put(CDMA_ERI_ICON_INDEX, state.getCdmaEriIconIndex());
             values.put(CDMA_ERI_ICON_MODE, state.getCdmaEriIconMode());
             values.put(IS_EMERGENCY_ONLY, state.isEmergencyOnly());
-            values.put(IS_DATA_ROAMING_FROM_REGISTRATION, state.getDataRoamingFromRegistration());
             values.put(IS_USING_CARRIER_AGGREGATION, state.isUsingCarrierAggregation());
             return values;
         }
