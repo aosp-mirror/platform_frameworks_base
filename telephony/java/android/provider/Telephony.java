@@ -18,6 +18,7 @@ package android.provider;
 
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.app.job.JobService;
@@ -2813,100 +2814,131 @@ public final class Telephony {
         public static final String SUBSCRIPTION_ID = "sub_id";
 
         /**
-         * The profile_id to which the APN saved in modem
+         * The profile_id to which the APN saved in modem.
          * <p>Type: INTEGER</p>
          *@hide
          */
         public static final String PROFILE_ID = "profile_id";
 
         /**
-         * Is the apn setting to be set in modem
-         * <P>Type: INTEGER (boolean)</P>
+         * If set to {@code true}, then the APN setting will persist to the modem.
+         * <p>Type: INTEGER (boolean)</p>
          *@hide
          */
+        @SystemApi
         public static final String MODEM_COGNITIVE = "modem_cognitive";
 
         /**
-         * The max connections of this apn
+         * The max connections of this APN.
          * <p>Type: INTEGER</p>
          *@hide
          */
+        @SystemApi
         public static final String MAX_CONNS = "max_conns";
 
         /**
-         * The wait time for retry of the apn
+         * The wait time for retry of the APN.
          * <p>Type: INTEGER</p>
          *@hide
          */
+        @SystemApi
         public static final String WAIT_TIME = "wait_time";
 
         /**
-         * The time to limit max connection for the apn
+         * The time to limit max connection for the APN.
          * <p>Type: INTEGER</p>
          *@hide
          */
+        @SystemApi
         public static final String MAX_CONNS_TIME = "max_conns_time";
 
         /**
-         * The MTU size of the mobile interface to  which the APN connected
+         * The MTU(Maxinum transmit unit) size of the mobile interface to which the APN connected.
          * <p>Type: INTEGER </p>
          * @hide
          */
+        @SystemApi
         public static final String MTU = "mtu";
 
         /**
-         * Is this APN added/edited/deleted by a user or carrier?
+         * APN edit status. APN could be added/edited/deleted by a user or carrier.
          * <p>Type: INTEGER </p>
          * @hide
          */
+        @SystemApi
         public static final String EDITED = "edited";
 
         /**
-         * Is this APN visible to the user?
-         * <p>Type: INTEGER (boolean) </p>
+         * {@code true} if this APN visible to the user, {@code false} otherwise.
+         * <p>Type: INTEGER (boolean)</p>
          * @hide
          */
+        @SystemApi
         public static final String USER_VISIBLE = "user_visible";
 
         /**
-         * Is the user allowed to edit this APN?
-         * <p>Type: INTEGER (boolean) </p>
+         * {@code true} if the user allowed to edit this APN, {@code false} otherwise.
+         * <p>Type: INTEGER (boolean)</p>
          * @hide
          */
+        @SystemApi
         public static final String USER_EDITABLE = "user_editable";
 
         /**
-         * Following are possible values for the EDITED field
+         * {@link #EDITED APN edit status} indicates that this APN has not been edited or fails to
+         * edit.
+         * <p>Type: INTEGER </p>
          * @hide
          */
+        @SystemApi
         public static final int UNEDITED = 0;
+
         /**
-         *  @hide
+         * {@link #EDITED APN edit status} indicates that this APN has been edited by users.
+         * <p>Type: INTEGER </p>
+         * @hide
          */
+        @SystemApi
         public static final int USER_EDITED = 1;
+
         /**
-         *  @hide
+         * {@link #EDITED APN edit status} indicates that this APN has been deleted by users.
+         * <p>Type: INTEGER </p>
+         * @hide
          */
+        @SystemApi
         public static final int USER_DELETED = 2;
+
         /**
-         * DELETED_BUT_PRESENT is an intermediate value used to indicate that an entry deleted
-         * by the user is still present in the new APN database and therefore must remain tagged
-         * as user deleted rather than completely removed from the database
+         * {@link #EDITED APN edit status} is an intermediate value used to indicate that an entry
+         * deleted by the user is still present in the new APN database and therefore must remain
+         * tagged as user deleted rather than completely removed from the database.
          * @hide
          */
         public static final int USER_DELETED_BUT_PRESENT_IN_XML = 3;
+
         /**
-         *  @hide
+         * {@link #EDITED APN edit status} indicates that this APN has been edited by carriers.
+         * <p>Type: INTEGER </p>
+         * @hide
          */
+        @SystemApi
         public static final int CARRIER_EDITED = 4;
+
         /**
-         * CARRIER_DELETED values are currently not used as there is no usecase. If they are used,
+         * {@link #EDITED APN edit status} indicates that this APN has been deleted by carriers.
+         * CARRIER_DELETED values are currently not used as there is no use case. If they are used,
          * delete() will have to change accordingly. Currently it is hardcoded to USER_DELETED.
+         * <p>Type: INTEGER </p>
          * @hide
          */
         public static final int CARRIER_DELETED = 5;
+
         /**
-         *  @hide
+         * {@link #EDITED APN edit status} is an intermediate value used to indicate that an entry
+         * deleted by the carrier is still present in the new APN database and therefore must remain
+         * tagged as user deleted rather than completely removed from the database.
+         * @hide
          */
         public static final int CARRIER_DELETED_BUT_PRESENT_IN_XML = 6;
 
@@ -2935,16 +2967,20 @@ public final class Telephony {
          * The APN set id. When the user manually selects an APN or the framework sets an APN as
          * preferred, all APNs with the same set id as the selected APN should be prioritized over
          * APNs in other sets.
+         * <p>Type: INTEGER</p>
          * @hide
          */
+        @SystemApi
         public static final String APN_SET_ID = "apn_set_id";
 
         /**
-         * Possible value for the APN_SET_ID field. By default APNs will not belong to a set. If the
-         * user manually selects an APN with no set set, there is no need to prioritize any specific
-         * APN set ids.
+         * Possible value for the{@link #APN_SET_ID} field. By default APNs will not belong to a
+         * set. If the user manually selects an APN with no set set, there is no need to prioritize
+         * any specific APN set ids.
+         * <p>Type: INTEGER</p>
          * @hide
          */
+        @SystemApi
         public static final int NO_SET_SET = 0;
 
     }
