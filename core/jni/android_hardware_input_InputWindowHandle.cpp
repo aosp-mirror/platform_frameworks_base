@@ -26,6 +26,7 @@
 
 #include "android_hardware_input_InputWindowHandle.h"
 #include "android_hardware_input_InputApplicationHandle.h"
+#include "android_util_Binder.h"
 
 namespace android {
 
@@ -60,9 +61,7 @@ static Mutex gHandleMutex;
 
 // --- NativeInputWindowHandle ---
 
-NativeInputWindowHandle::NativeInputWindowHandle(
-        const sp<InputApplicationHandle>& inputApplicationHandle, jweak objWeak) :
-        InputWindowHandle(inputApplicationHandle),
+NativeInputWindowHandle::NativeInputWindowHandle(jweak objWeak) :
         mObjWeak(objWeak) {
 }
 
@@ -153,6 +152,18 @@ bool NativeInputWindowHandle::updateInfo() {
     mInfo.displayId = env->GetIntField(obj,
             gInputWindowHandleClassInfo.displayId);
 
+    jobject inputApplicationHandleObj = env->GetObjectField(obj,
+            gInputWindowHandleClassInfo.inputApplicationHandle);
+    if (inputApplicationHandleObj) {
+        sp<InputApplicationHandle> inputApplicationHandle =
+            android_server_InputApplicationHandle_getHandle(env, inputApplicationHandleObj);
+        if (inputApplicationHandle != nullptr) {
+            inputApplicationHandle->updateInfo();
+            mInfo.applicationInfo = *(inputApplicationHandle->getInfo());
+        }
+        env->DeleteLocalRef(inputApplicationHandleObj);
+    }
+
     env->DeleteLocalRef(obj);
     return true;
 }
@@ -173,14 +184,8 @@ sp<NativeInputWindowHandle> android_server_InputWindowHandle_getHandle(
     if (ptr) {
         handle = reinterpret_cast<NativeInputWindowHandle*>(ptr);
     } else {
-        jobject inputApplicationHandleObj = env->GetObjectField(inputWindowHandleObj,
-                gInputWindowHandleClassInfo.inputApplicationHandle);
-        sp<InputApplicationHandle> inputApplicationHandle =
-                android_server_InputApplicationHandle_getHandle(env, inputApplicationHandleObj);
-        env->DeleteLocalRef(inputApplicationHandleObj);
-
         jweak objWeak = env->NewWeakGlobalRef(inputWindowHandleObj);
-        handle = new NativeInputWindowHandle(inputApplicationHandle, objWeak);
+        handle = new NativeInputWindowHandle(objWeak);
         handle->incStrong((void*)android_server_InputWindowHandle_getHandle);
         env->SetLongField(inputWindowHandleObj, gInputWindowHandleClassInfo.ptr,
                 reinterpret_cast<jlong>(handle));

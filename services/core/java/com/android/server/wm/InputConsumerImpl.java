@@ -17,6 +17,7 @@
 package com.android.server.wm;
 
 import android.graphics.Rect;
+import android.os.Binder;
 import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
@@ -64,7 +65,7 @@ class InputConsumerImpl implements IBinder.DeathRecipient {
         }
         mService.mInputManager.registerInputChannel(mServerChannel, null);
 
-        mApplicationHandle = new InputApplicationHandle(null);
+        mApplicationHandle = new InputApplicationHandle(new Binder());
         mApplicationHandle.name = name;
         mApplicationHandle.dispatchingTimeoutNanos =
                 WindowManagerService.DEFAULT_INPUT_DISPATCHING_TIMEOUT_NANOS;

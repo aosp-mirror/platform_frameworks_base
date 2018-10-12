@@ -26,8 +26,7 @@ namespace android {
 
 class NativeInputWindowHandle : public InputWindowHandle {
 public:
-    NativeInputWindowHandle(const sp<InputApplicationHandle>& inputApplicationHandle,
-            jweak objWeak);
+    NativeInputWindowHandle(jweak objWeak);
     virtual ~NativeInputWindowHandle();
 
     jobject getInputWindowHandleObjLocalRef(JNIEnv* env);

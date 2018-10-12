@@ -36,6 +36,7 @@ import android.graphics.Rect;
 import android.graphics.Point;
 import android.hardware.input.InputManager;
 import android.os.Build;
+import android.os.Binder;
 import android.os.IBinder;
 import android.os.Process;
 import android.os.RemoteException;
@@ -260,7 +261,7 @@ class DragState {
             mInputEventReceiver = new DragInputEventReceiver(mClientChannel,
                     mService.mH.getLooper(), mDragDropController);
 
-            mDragApplicationHandle = new InputApplicationHandle(null);
+            mDragApplicationHandle = new InputApplicationHandle(new Binder());
             mDragApplicationHandle.name = "drag";
             mDragApplicationHandle.dispatchingTimeoutNanos =
                     WindowManagerService.DEFAULT_INPUT_DISPATCHING_TIMEOUT_NANOS;
