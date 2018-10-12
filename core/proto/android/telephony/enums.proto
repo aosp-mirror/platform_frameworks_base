@@ -61,3 +61,64 @@ enum SignalStrengthEnum {
     SIGNAL_STRENGTH_GOOD = 3;
     SIGNAL_STRENGTH_GREAT = 4;
 }
+
+
+enum ServiceStateEnum {
+    /**
+     * Normal operation condition, the phone is registered
+     * with an operator either in home network or in roaming.
+     */
+    SERVICE_STATE_IN_SERVICE = 0;
+
+    /**
+     * Phone is not registered with any operator, the phone
+     * can be currently searching a new operator to register to, or not
+     * searching to registration at all, or registration is denied, or radio
+     * signal is not available.
+     */
+    SERVICE_STATE_OUT_OF_SERVICE = 1;
+
+    /**
+     * The phone is registered and locked.  Only emergency numbers are allowed. {@more}
+     */
+    SERVICE_STATE_EMERGENCY_ONLY = 2;
+
+    /**
+     * Radio of telephony is explicitly powered off.
+     */
+    SERVICE_STATE_POWER_OFF = 3;
+}
+
+enum SimStateEnum {
+    SIM_STATE_UNKNOWN = 0;
+    /** SIM card state: no SIM card is available in the device */
+    SIM_STATE_ABSENT = 1;
+    /** SIM card state: Locked: requires the user's SIM PIN to unlock */
+    SIM_STATE_PIN_REQUIRED = 2;
+    /** SIM card state: Locked: requires the user's SIM PUK to unlock */
+    SIM_STATE_PUK_REQUIRED = 3;
+    /** SIM card state: Locked: requires a network PIN to unlock */
+    SIM_STATE_NETWORK_LOCKED = 4;
+    /** SIM card state: Ready */
+    SIM_STATE_READY = 5;
+    /** SIM card state: SIM Card is NOT READY */
+    SIM_STATE_NOT_READY = 6;
+    /** SIM card state: SIM Card Error, permanently disabled */
+    SIM_STATE_PERM_DISABLED = 7;
+    /** SIM card state: SIM Card Error, present but faulty */
+    SIM_STATE_CARD_IO_ERROR = 8;
+    /** SIM card state: SIM Card restricted, present but not usable due to
+     * carrier restrictions.
+     */
+    SIM_STATE_CARD_RESTRICTED = 9;
+    /**
+     * SIM card state: Loaded: SIM card applications have been loaded
+     * @hide
+     */
+    SIM_STATE_LOADED = 10;
+    /**
+     * SIM card state: SIM Card is present
+     * @hide
+     */
+    SIM_STATE_PRESENT = 11;
+}

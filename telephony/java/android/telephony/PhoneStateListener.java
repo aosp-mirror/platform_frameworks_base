@@ -23,6 +23,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.telephony.IPhoneStateListener;
 
 import java.lang.ref.WeakReference;
@@ -778,8 +779,12 @@ public class PhoneStateListener {
         }
     }
 
+    /**
+     * @hide
+     */
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PACKAGE)
     @UnsupportedAppUsage
-    IPhoneStateListener callback = new IPhoneStateListenerStub(this);
+    public final IPhoneStateListener callback = new IPhoneStateListenerStub(this);
 
     private void log(String s) {
         Rlog.d(LOG_TAG, s);
