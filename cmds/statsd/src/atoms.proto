@@ -143,6 +143,7 @@ message Atom {
         BatteryCausedShutdown battery_caused_shutdown = 93;
         PhoneServiceStateChanged phone_service_state_changed = 94;
         PhoneStateChanged phone_state_changed = 95;
+        UserRestrictionChanged user_restriction_changed = 96;
     }
 
     // Pulled events will start at field 10000.
@@ -3048,4 +3049,18 @@ message ProcessCpuTime {
     optional int64 user_time_millis = 3;
     // Process cpu time in system space, cumulative from boot/process start
     optional int64 system_time_millis = 4;
+}
+
+/**
+ * Logs when a user restriction was added or removed.
+ *
+ * Logged from:
+ *   frameworks/base/services/devicepolicy/java/com/android/server/devicepolicy/DevicePolicyManagerService.java
+ */
+message UserRestrictionChanged {
+    // The raw string of the user restriction as defined in UserManager.
+    // Allowed values are defined in UserRestrictionsUtils#USER_RESTRICTIONS.
+    optional string restriction = 1;
+    // Whether the restriction is enabled or disabled.
+    optional bool enabled = 2;
 }
