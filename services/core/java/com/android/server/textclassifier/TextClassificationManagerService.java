@@ -28,7 +28,6 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import android.provider.Settings;
 import android.service.textclassifier.ITextClassificationCallback;
 import android.service.textclassifier.ITextClassifierService;
 import android.service.textclassifier.ITextLinksCallback;
@@ -41,7 +40,6 @@ import android.view.textclassifier.TextClassification;
 import android.view.textclassifier.TextClassificationContext;
 import android.view.textclassifier.TextClassificationManager;
 import android.view.textclassifier.TextClassificationSessionId;
-import android.view.textclassifier.TextClassifier;
 import android.view.textclassifier.TextLinks;
 import android.view.textclassifier.TextSelection;
 
@@ -275,6 +273,20 @@ public final class TextClassificationManagerService extends ITextClassifierServi
         IndentingPrintWriter pw = new IndentingPrintWriter(fout, "  ");
         TextClassificationManager tcm = mContext.getSystemService(TextClassificationManager.class);
         tcm.dump(pw);
+
+        pw.printPair("context", mContext); pw.println();
+        synchronized (mLock) {
+            int size = mUserStates.size();
+            pw.print("Number user states: "); pw.println(size);
+            if (size > 0) {
+                for (int i = 0; i < size; i++) {
+                    pw.increaseIndent();
+                    UserState userState = mUserStates.valueAt(i);
+                    pw.print(i); pw.print(":"); userState.dump(pw); pw.println();
+                    pw.decreaseIndent();
+                }
+            }
+        }
     }
 
     private static final class PendingRequest implements IBinder.DeathRecipient {
@@ -429,6 +441,15 @@ public final class TextClassificationManagerService extends ITextClassifierServi
                 Binder.restoreCallingIdentity(identity);
             }
             return willBind;
+        }
+
+        private void dump(IndentingPrintWriter pw) {
+            pw.printPair("context", mContext);
+            pw.printPair("userId", mUserId);
+            synchronized (mLock) {
+                pw.printPair("binding", mBinding);
+                pw.printPair("numberRequests", mPendingRequests.size());
+            }
         }
 
         private final class TextClassifierServiceConnection implements ServiceConnection {

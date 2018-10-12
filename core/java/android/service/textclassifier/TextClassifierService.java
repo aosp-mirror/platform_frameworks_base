@@ -405,8 +405,8 @@ public abstract class TextClassifierService extends Service {
                 PackageManager.MATCH_SYSTEM_ONLY);
 
         if ((ri == null) || (ri.serviceInfo == null)) {
-            Slog.w(LOG_TAG, String.format("Package or service not found in package %s",
-                    packageName));
+            Slog.w(LOG_TAG, String.format("Package or service not found in package %s for user %d",
+                    packageName, context.getUserId()));
             return null;
         }
         final ServiceInfo si = ri.serviceInfo;
