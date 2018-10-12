@@ -57,7 +57,7 @@ public final class DeviceIdentifiersPolicyService extends SystemService {
             // should use the getSerialForPackage method with the calling package specified.
             if (!TelephonyPermissions.checkCallingOrSelfReadDeviceIdentifiers(mContext,
                     /* callingPackage */ null, "getSerial")) {
-                return null;
+                return Build.UNKNOWN;
             }
             return SystemProperties.get("ro.serialno", Build.UNKNOWN);
         }
@@ -66,7 +66,7 @@ public final class DeviceIdentifiersPolicyService extends SystemService {
         public @Nullable String getSerialForPackage(String callingPackage) throws RemoteException {
             if (!TelephonyPermissions.checkCallingOrSelfReadDeviceIdentifiers(mContext,
                     callingPackage, "getSerial")) {
-                return null;
+                return Build.UNKNOWN;
             }
             return SystemProperties.get("ro.serialno", Build.UNKNOWN);
         }
