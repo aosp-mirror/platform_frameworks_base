@@ -309,4 +309,22 @@ public class ProxyTracker {
             }
         }
     }
+
+    /**
+     * Enable or disable the default proxy.
+     *
+     * This sets the flag for enabling/disabling the default proxy and sends the broadcast
+     * if applicable.
+     * @param enabled whether the default proxy should be enabled.
+     */
+    public void setDefaultProxyEnabled(final boolean enabled) {
+        synchronized (mProxyLock) {
+            if (mDefaultProxyDisabled == enabled) {
+                mDefaultProxyDisabled = !enabled;
+                if (mGlobalProxy == null && mDefaultProxy != null) {
+                    sendProxyBroadcast(enabled ? mDefaultProxy : null);
+                }
+            }
+        }
+    }
 }
