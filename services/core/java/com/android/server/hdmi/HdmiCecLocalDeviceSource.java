@@ -19,6 +19,7 @@ package com.android.server.hdmi;
 import static com.android.internal.os.RoSystemProperties.PROPERTY_HDMI_IS_DEVICE_HDMI_CEC_SWITCH;
 
 import android.hardware.hdmi.HdmiControlManager;
+import android.hardware.hdmi.HdmiPortInfo;
 import android.hardware.hdmi.IHdmiControlCallback;
 import android.os.SystemProperties;
 import android.util.Slog;
@@ -73,7 +74,9 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
     @ServiceThreadOnly
     void onHotplug(int portId, boolean connected) {
         assertRunOnServiceThread();
-        mCecMessageCache.flushAll();
+        if (mService.getPortInfo(portId).getType() == HdmiPortInfo.PORT_OUTPUT) {
+            mCecMessageCache.flushAll();
+        }
         // We'll not clear mIsActiveSource on the hotplug event to pass CETC 11.2.2-2 ~ 3.
         if (connected) {
             mService.wakeUp();

@@ -1008,8 +1008,9 @@ public class HdmiControlService extends SystemService {
     void onHotplug(int portId, boolean connected) {
         assertRunOnServiceThread();
 
-        if (connected && !isTvDevice()) {
-            if (getPortInfo(portId).getType() == HdmiPortInfo.PORT_OUTPUT && isSwitchDevice()) {
+        if (connected && !isTvDevice()
+                && getPortInfo(portId).getType() == HdmiPortInfo.PORT_OUTPUT) {
+            if (isSwitchDevice()) {
                 initPortInfo();
                 HdmiLogger.debug("initPortInfo for switch device when onHotplug from tx.");
             }

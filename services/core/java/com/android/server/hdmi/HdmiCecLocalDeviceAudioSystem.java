@@ -23,6 +23,7 @@ import android.annotation.Nullable;
 import android.content.Intent;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.HdmiDeviceInfo;
+import android.hardware.hdmi.HdmiPortInfo;
 import android.hardware.hdmi.IHdmiControlCallback;
 import android.media.AudioDeviceInfo;
 import android.media.AudioManager;
@@ -177,6 +178,24 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
 
     private void invokeDeviceEventListener(HdmiDeviceInfo info, int status) {
         mService.invokeDeviceEventListeners(info, status);
+    }
+
+    @Override
+    @ServiceThreadOnly
+    void onHotplug(int portId, boolean connected) {
+        assertRunOnServiceThread();
+        if (connected) {
+            mService.wakeUp();
+        }
+        if (mService.getPortInfo(portId).getType() == HdmiPortInfo.PORT_OUTPUT) {
+            mCecMessageCache.flushAll();
+        } else {
+            if (connected) {
+                // TODO(amyjojo): start the device discovery action
+            } else {
+                // TODO(amyjojo): remove device from mDeviceInfo
+            }
+        }
     }
 
     @Override
