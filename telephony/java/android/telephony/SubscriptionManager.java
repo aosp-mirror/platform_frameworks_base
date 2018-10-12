@@ -1650,7 +1650,7 @@ public class SubscriptionManager {
      * Check if the subscription ID is usable.
      *
      * A usable subscription ID has a valid value except some special values such as
-     * {@link DEFAULT_SUBSCRIPTION_ID}. It can be used for subscription functions.
+     * {@link #DEFAULT_SUBSCRIPTION_ID}. It can be used for subscription functions.
      *
      * @param subscriptionId the subscription ID
      * @return {@code true} if the subscription ID is usable; {@code false} otherwise.
