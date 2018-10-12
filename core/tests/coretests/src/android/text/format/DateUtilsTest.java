@@ -117,7 +117,7 @@ public class DateUtilsTest {
     @Test
     public void testFormatSameDayTime() {
         // This test assumes a default DateFormat.is24Hour setting.
-        DateFormat.is24Hour = null;
+        DateFormat.set24HourTimePref(null);
         Date date = new Date(109, 0, 19, 3, 30, 15);
         long fixedTime = date.getTime();
 
