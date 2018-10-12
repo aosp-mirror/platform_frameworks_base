@@ -7,7 +7,6 @@ LOCAL_CERTIFICATE := platform
 
 LOCAL_JAVA_LIBRARIES := \
     android.test.runner \
-    conscrypt \
     android.test.base \
 
 LOCAL_STATIC_JAVA_LIBRARIES := junit
