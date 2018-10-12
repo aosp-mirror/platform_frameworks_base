@@ -217,6 +217,7 @@ LOCAL_SRC_FILES := \
     tests/metrics/metrics_test_helper.cpp \
     tests/statsd_test_util.cpp \
     tests/e2e/WakelockDuration_e2e_test.cpp \
+    tests/e2e/MetricActivation_e2e_test.cpp \
     tests/e2e/MetricConditionLink_e2e_test.cpp \
     tests/e2e/Alarm_e2e_test.cpp \
     tests/e2e/Attribution_e2e_test.cpp \

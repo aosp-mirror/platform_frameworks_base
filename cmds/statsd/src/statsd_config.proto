@@ -347,6 +347,17 @@ message Subscription {
   optional float probability_of_informing = 7 [default = 1.1];
 }
 
+message EventActivation {
+  optional int64 atom_matcher_id = 1;
+  optional int64 ttl_seconds = 2;
+}
+
+message MetricActivation {
+  optional int64 metric_id = 1;
+
+  repeated EventActivation event_activation = 2;
+}
+
 message StatsdConfig {
   optional int64 id = 1;
 
@@ -383,6 +394,8 @@ message StatsdConfig {
   optional int64 ttl_in_seconds = 15;
 
   optional bool hash_strings_in_metric_report = 16 [default = true];
+
+  repeated MetricActivation metric_activation = 17;
 
   // Field number 1000 is reserved for later use.
   reserved 1000;

@@ -219,6 +219,7 @@ private:
 
     FRIEND_TEST(AlarmE2eTest, TestMultipleAlarms);
     FRIEND_TEST(ConfigTtlE2eTest, TestCountMetric);
+    FRIEND_TEST(MetricActivationE2eTest, TestCountMetric);
 };
 
 }  // namespace statsd

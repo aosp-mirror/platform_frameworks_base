@@ -282,13 +282,17 @@ TEST(MetricsManagerTest, TestGoodConfig) {
     unordered_map<int, std::vector<int>> conditionToMetricMap;
     unordered_map<int, std::vector<int>> trackerToMetricMap;
     unordered_map<int, std::vector<int>> trackerToConditionMap;
+    unordered_map<int, std::vector<int>> lifeSpanEventTrackerToMetricMap;
+    vector<int> metricsWithLifeSpan;
     std::set<int64_t> noReportMetricIds;
 
     EXPECT_TRUE(initStatsdConfig(kConfigKey, config, uidMap, pullerManager, anomalyAlarmMonitor,
                                  periodicAlarmMonitor, timeBaseSec, timeBaseSec, allTagIds,
                                  allAtomMatchers, allConditionTrackers, allMetricProducers,
                                  allAnomalyTrackers, allAlarmTrackers, conditionToMetricMap,
-                                 trackerToMetricMap, trackerToConditionMap, noReportMetricIds));
+                                 trackerToMetricMap, trackerToConditionMap,
+                                 lifeSpanEventTrackerToMetricMap, metricsWithLifeSpan,
+                                 noReportMetricIds));
     EXPECT_EQ(1u, allMetricProducers.size());
     EXPECT_EQ(1u, allAnomalyTrackers.size());
     EXPECT_EQ(1u, noReportMetricIds.size());
@@ -309,13 +313,17 @@ TEST(MetricsManagerTest, TestDimensionMetricsWithMultiTags) {
     unordered_map<int, std::vector<int>> conditionToMetricMap;
     unordered_map<int, std::vector<int>> trackerToMetricMap;
     unordered_map<int, std::vector<int>> trackerToConditionMap;
+    unordered_map<int, std::vector<int>> lifeSpanEventTrackerToMetricMap;
+    vector<int> metricsWithLifeSpan;
     std::set<int64_t> noReportMetricIds;
 
     EXPECT_FALSE(initStatsdConfig(kConfigKey, config, uidMap, pullerManager, anomalyAlarmMonitor,
                                   periodicAlarmMonitor, timeBaseSec, timeBaseSec, allTagIds,
                                   allAtomMatchers, allConditionTrackers, allMetricProducers,
                                   allAnomalyTrackers, allAlarmTrackers, conditionToMetricMap,
-                                  trackerToMetricMap, trackerToConditionMap, noReportMetricIds));
+                                  trackerToMetricMap, trackerToConditionMap,
+                                  lifeSpanEventTrackerToMetricMap, metricsWithLifeSpan,
+                                  noReportMetricIds));
 }
 
 TEST(MetricsManagerTest, TestCircleLogMatcherDependency) {
@@ -333,13 +341,17 @@ TEST(MetricsManagerTest, TestCircleLogMatcherDependency) {
     unordered_map<int, std::vector<int>> conditionToMetricMap;
     unordered_map<int, std::vector<int>> trackerToMetricMap;
     unordered_map<int, std::vector<int>> trackerToConditionMap;
+    unordered_map<int, std::vector<int>> lifeSpanEventTrackerToMetricMap;
+    vector<int> metricsWithLifeSpan;
     std::set<int64_t> noReportMetricIds;
 
     EXPECT_FALSE(initStatsdConfig(kConfigKey, config, uidMap, pullerManager, anomalyAlarmMonitor,
                                   periodicAlarmMonitor, timeBaseSec, timeBaseSec, allTagIds,
                                   allAtomMatchers, allConditionTrackers, allMetricProducers,
                                   allAnomalyTrackers, allAlarmTrackers, conditionToMetricMap,
-                                  trackerToMetricMap, trackerToConditionMap, noReportMetricIds));
+                                  trackerToMetricMap, trackerToConditionMap,
+                                  lifeSpanEventTrackerToMetricMap, metricsWithLifeSpan,
+                                  noReportMetricIds));
 }
 
 TEST(MetricsManagerTest, TestMissingMatchers) {
@@ -357,12 +369,16 @@ TEST(MetricsManagerTest, TestMissingMatchers) {
     unordered_map<int, std::vector<int>> conditionToMetricMap;
     unordered_map<int, std::vector<int>> trackerToMetricMap;
     unordered_map<int, std::vector<int>> trackerToConditionMap;
+    unordered_map<int, std::vector<int>> lifeSpanEventTrackerToMetricMap;
+    vector<int> metricsWithLifeSpan;
     std::set<int64_t> noReportMetricIds;
     EXPECT_FALSE(initStatsdConfig(kConfigKey, config, uidMap, pullerManager, anomalyAlarmMonitor,
                                   periodicAlarmMonitor, timeBaseSec, timeBaseSec, allTagIds,
                                   allAtomMatchers, allConditionTrackers, allMetricProducers,
                                   allAnomalyTrackers, allAlarmTrackers, conditionToMetricMap,
-                                  trackerToMetricMap, trackerToConditionMap, noReportMetricIds));
+                                  trackerToMetricMap, trackerToConditionMap,
+                                  lifeSpanEventTrackerToMetricMap, metricsWithLifeSpan,
+                                  noReportMetricIds));
 }
 
 TEST(MetricsManagerTest, TestMissingPredicate) {
@@ -380,12 +396,16 @@ TEST(MetricsManagerTest, TestMissingPredicate) {
     unordered_map<int, std::vector<int>> conditionToMetricMap;
     unordered_map<int, std::vector<int>> trackerToMetricMap;
     unordered_map<int, std::vector<int>> trackerToConditionMap;
+    unordered_map<int, std::vector<int>> lifeSpanEventTrackerToMetricMap;
+    vector<int> metricsWithLifeSpan;
     std::set<int64_t> noReportMetricIds;
     EXPECT_FALSE(initStatsdConfig(kConfigKey, config, uidMap, pullerManager, anomalyAlarmMonitor,
                                   periodicAlarmMonitor, timeBaseSec, timeBaseSec, allTagIds,
                                   allAtomMatchers, allConditionTrackers, allMetricProducers,
                                   allAnomalyTrackers, allAlarmTrackers, conditionToMetricMap,
-                                  trackerToMetricMap, trackerToConditionMap, noReportMetricIds));
+                                  trackerToMetricMap, trackerToConditionMap,
+                                  lifeSpanEventTrackerToMetricMap, metricsWithLifeSpan,
+                                  noReportMetricIds));
 }
 
 TEST(MetricsManagerTest, TestCirclePredicateDependency) {
@@ -403,13 +423,17 @@ TEST(MetricsManagerTest, TestCirclePredicateDependency) {
     unordered_map<int, std::vector<int>> conditionToMetricMap;
     unordered_map<int, std::vector<int>> trackerToMetricMap;
     unordered_map<int, std::vector<int>> trackerToConditionMap;
+    unordered_map<int, std::vector<int>> lifeSpanEventTrackerToMetricMap;
+    vector<int> metricsWithLifeSpan;
     std::set<int64_t> noReportMetricIds;
 
     EXPECT_FALSE(initStatsdConfig(kConfigKey, config, uidMap, pullerManager, anomalyAlarmMonitor,
                                   periodicAlarmMonitor, timeBaseSec, timeBaseSec, allTagIds,
                                   allAtomMatchers, allConditionTrackers, allMetricProducers,
                                   allAnomalyTrackers, allAlarmTrackers, conditionToMetricMap,
-                                  trackerToMetricMap, trackerToConditionMap, noReportMetricIds));
+                                  trackerToMetricMap, trackerToConditionMap,
+                                  lifeSpanEventTrackerToMetricMap, metricsWithLifeSpan,
+                                  noReportMetricIds));
 }
 
 TEST(MetricsManagerTest, testAlertWithUnknownMetric) {
@@ -427,13 +451,17 @@ TEST(MetricsManagerTest, testAlertWithUnknownMetric) {
     unordered_map<int, std::vector<int>> conditionToMetricMap;
     unordered_map<int, std::vector<int>> trackerToMetricMap;
     unordered_map<int, std::vector<int>> trackerToConditionMap;
+    unordered_map<int, std::vector<int>> lifeSpanEventTrackerToMetricMap;
+    vector<int> metricsWithLifeSpan;
     std::set<int64_t> noReportMetricIds;
 
     EXPECT_FALSE(initStatsdConfig(kConfigKey, config, uidMap, pullerManager, anomalyAlarmMonitor,
                                   periodicAlarmMonitor, timeBaseSec, timeBaseSec, allTagIds,
                                   allAtomMatchers, allConditionTrackers, allMetricProducers,
                                   allAnomalyTrackers, allAlarmTrackers, conditionToMetricMap,
-                                  trackerToMetricMap, trackerToConditionMap, noReportMetricIds));
+                                  trackerToMetricMap, trackerToConditionMap,
+                                  lifeSpanEventTrackerToMetricMap, metricsWithLifeSpan,
+                                  noReportMetricIds));
 }
 
 #else

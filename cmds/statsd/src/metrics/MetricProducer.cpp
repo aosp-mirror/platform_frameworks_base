@@ -64,8 +64,54 @@ void MetricProducer::onMatchedLogEventLocked(const size_t matcherIndex, const Lo
         onMatchedLogEventInternalLocked(
                 matcherIndex, metricKey, conditionKey, condition, event);
     }
+}
 
- }
+bool MetricProducer::evaluateActiveStateLocked(int64_t elapsedTimestampNs) {
+    bool isActive = mEventActivationMap.empty();
+    for (auto& it : mEventActivationMap) {
+        if (it.second.state == ActivationState::kActive &&
+            elapsedTimestampNs > it.second.ttl_ns + it.second.activation_ns) {
+            it.second.state = ActivationState::kNotActive;
+        }
+        if (it.second.state == ActivationState::kActive) {
+            isActive = true;
+        }
+    }
+    return isActive;
+}
+
+void MetricProducer::flushIfExpire(int64_t elapsedTimestampNs) {
+    std::lock_guard<std::mutex> lock(mMutex);
+    if (!mIsActive) {
+        return;
+    }
+    mIsActive = evaluateActiveStateLocked(elapsedTimestampNs);
+    if (!mIsActive) {
+        flushLocked(elapsedTimestampNs);
+    }
+}
+
+void MetricProducer::addActivation(int activationTrackerIndex, int64_t ttl_seconds) {
+    std::lock_guard<std::mutex> lock(mMutex);
+    // When a metric producer does not depend on any activation, its mIsActive is true.
+    // Therefor, if this is the 1st activation, mIsActive will turn to false. Otherwise it does not
+    // change.
+    if  (mEventActivationMap.empty()) {
+        mIsActive = false;
+    }
+    mEventActivationMap[activationTrackerIndex].ttl_ns = ttl_seconds * NS_PER_SEC;
+}
+
+void MetricProducer::activateLocked(int activationTrackerIndex, int64_t elapsedTimestampNs) {
+    auto it = mEventActivationMap.find(activationTrackerIndex);
+    if (it == mEventActivationMap.end()) {
+        return;
+    }
+    it->second.activation_ns = elapsedTimestampNs;
+    it->second.state = ActivationState::kActive;
+    mIsActive = true;
+}
+
 
 }  // namespace statsd
 }  // namespace os

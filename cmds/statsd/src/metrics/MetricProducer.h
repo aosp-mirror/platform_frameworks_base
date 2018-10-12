@@ -34,6 +34,17 @@ namespace android {
 namespace os {
 namespace statsd {
 
+// If the metric has no activation requirement, it will be active once the metric producer is
+// created.
+// If the metric needs to be activated by atoms, the metric producer will start
+// with kNotActive state, turn to kActive when the activation event arrives, become kNotActive
+// when it reaches the duration limit (timebomb). If the activation event arrives again before
+// or after it expires, the event producer will be re-activated and ttl will be reset.
+enum ActivationState {
+    kNotActive = 0,
+    kActive = 1,
+};
+
 // A MetricProducer is responsible for compute one single metrics, creating stats log report, and
 // writing the report to dropbox. MetricProducers should respond to package changes as required in
 // PackageInfoListener, but if none of the metrics are slicing by package name, then the update can
@@ -54,7 +65,8 @@ public:
           mContainANYPositionInDimensionsInWhat(false),
           mSliceByPositionALL(false),
           mSameConditionDimensionsInTracker(false),
-          mHasLinksToAllConditionDimensionsInTracker(false) {
+          mHasLinksToAllConditionDimensionsInTracker(false),
+          mIsActive(true) {
     }
 
     virtual ~MetricProducer(){};
@@ -93,17 +105,23 @@ public:
     // Consume the parsed stats log entry that already matched the "what" of the metric.
     void onMatchedLogEvent(const size_t matcherIndex, const LogEvent& event) {
         std::lock_guard<std::mutex> lock(mMutex);
-        onMatchedLogEventLocked(matcherIndex, event);
+        if (mIsActive) {
+            onMatchedLogEventLocked(matcherIndex, event);
+        }
     }
 
     void onConditionChanged(const bool condition, const int64_t eventTime) {
         std::lock_guard<std::mutex> lock(mMutex);
-        onConditionChangedLocked(condition, eventTime);
+        if (mIsActive) {
+            onConditionChangedLocked(condition, eventTime);
+        }
     }
 
     void onSlicedConditionMayChange(bool overallCondition, const int64_t eventTime) {
         std::lock_guard<std::mutex> lock(mMutex);
-        onSlicedConditionMayChangeLocked(overallCondition, eventTime);
+        if (mIsActive) {
+            onSlicedConditionMayChangeLocked(overallCondition, eventTime);
+        }
     }
 
     bool isConditionSliced() const {
@@ -177,6 +195,15 @@ public:
         return mCurrentBucketNum;
     }
 
+    void activate(int activationTrackerIndex, int64_t elapsedTimestampNs) {
+        std::lock_guard<std::mutex> lock(mMutex);
+        activateLocked(activationTrackerIndex, elapsedTimestampNs);
+    }
+
+    void addActivation(int activationTrackerIndex, int64_t ttl_seconds);
+
+    void flushIfExpire(int64_t elapsedTimestampNs);
+
 protected:
     virtual void onConditionChangedLocked(const bool condition, const int64_t eventTime) = 0;
     virtual void onSlicedConditionMayChangeLocked(bool overallCondition,
@@ -189,6 +216,10 @@ protected:
     virtual size_t byteSizeLocked() const = 0;
     virtual void dumpStatesLocked(FILE* out, bool verbose) const = 0;
 
+    bool evaluateActiveStateLocked(int64_t elapsedTimestampNs);
+
+    void activateLocked(int activationTrackerIndex, int64_t elapsedTimestampNs);
+
     /**
      * Flushes the current bucket if the eventTime is after the current bucket's end time. This will
        also flush the current partial bucket in memory.
@@ -198,9 +229,9 @@ protected:
     /**
      * Flushes all the data including the current partial bucket.
      */
-    virtual void flushLocked(const int64_t& eventTime) {
-        flushIfNeededLocked(eventTime);
-        flushCurrentBucketLocked(eventTime);
+    virtual void flushLocked(const int64_t& eventTimeNs) {
+        flushIfNeededLocked(eventTimeNs);
+        flushCurrentBucketLocked(eventTimeNs);
     };
 
     /**
@@ -295,6 +326,21 @@ protected:
     virtual void onMatchedLogEventLocked(const size_t matcherIndex, const LogEvent& event);
 
     mutable std::mutex mMutex;
+
+    struct Activation {
+        Activation() : ttl_ns(0), activation_ns(0), state(ActivationState::kNotActive)  {}
+
+        int64_t ttl_ns;
+        int64_t activation_ns;
+        ActivationState state;
+    };
+    // When the metric producer has multiple activations, these activations are ORed to determine
+    // whether the metric producer is ready to generate metrics.
+    std::unordered_map<int, Activation> mEventActivationMap;
+
+    bool mIsActive;
+
+    FRIEND_TEST(MetricActivationE2eTest, TestCountMetric);
 };
 
 }  // namespace statsd
