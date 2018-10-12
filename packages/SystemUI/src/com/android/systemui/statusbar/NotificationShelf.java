@@ -435,7 +435,9 @@ public class NotificationShelf extends ActivatableNotificationView implements
                         public boolean onPreDraw() {
                             boolean animatingY = ViewState.isAnimatingY(icon);
                             if (!animatingY) {
-                                observer.removeOnPreDrawListener(this);
+                                if (observer.isAlive()) {
+                                    observer.removeOnPreDrawListener(this);
+                                }
                                 icon.setTag(TAG_CONTINUOUS_CLIPPING, null);
                                 return true;
                             }
@@ -452,7 +454,9 @@ public class NotificationShelf extends ActivatableNotificationView implements
                 @Override
                 public void onViewDetachedFromWindow(View v) {
                     if (v == icon) {
-                        observer.removeOnPreDrawListener(predrawListener);
+                        if (observer.isAlive()) {
+                            observer.removeOnPreDrawListener(predrawListener);
+                        }
                         icon.setTag(TAG_CONTINUOUS_CLIPPING, null);
                     }
                 }
