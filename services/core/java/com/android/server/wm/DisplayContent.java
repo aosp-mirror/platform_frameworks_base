@@ -92,7 +92,6 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_SCREENSHOT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_SCREEN_ON;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STACK;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_TOKEN_MOVEMENT;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WALLPAPER;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WALLPAPER_LIGHT;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_STACK_CRAWLS;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
@@ -119,7 +118,6 @@ import static com.android.server.wm.WindowManagerService.logSurface;
 import static com.android.server.wm.WindowState.RESIZE_HANDLE_WIDTH_IN_DP;
 import static com.android.server.wm.WindowStateAnimator.DRAW_PENDING;
 import static com.android.server.wm.WindowStateAnimator.READY_TO_SHOW;
-import static com.android.server.wm.WindowSurfacePlacer.SET_WALLPAPER_MAY_CHANGE;
 
 import android.annotation.CallSuper;
 import android.annotation.NonNull;
@@ -2065,9 +2063,25 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         layoutAndAssignWindowLayersIfNeeded();
     }
 
-    int taskIdFromPoint(int x, int y) {
+    /**
+     * Used to obtain task ID when user taps on coordinate (x, y) in this display, and outside
+     * current task in focus.
+     *
+     * This returns the task ID of the foremost task at (x, y) if the task is not home. Otherwise it
+     * returns -1.
+     *
+     * @param x horizontal coordinate of the tap position
+     * @param y vertical coordinate of the tap position
+     * @return the task ID if a non-home task is found; -1 if not
+     */
+    int taskForTapOutside(int x, int y) {
         for (int stackNdx = mTaskStackContainers.getChildCount() - 1; stackNdx >= 0; --stackNdx) {
             final TaskStack stack = mTaskStackContainers.getChildAt(stackNdx);
+            if (stack.isActivityTypeHome()) {
+                // We skip not only home stack, but also everything behind home because user can't
+                // see them.
+                break;
+            }
             final int taskId = stack.taskIdFromPoint(x, y);
             if (taskId != -1) {
                 return taskId;
