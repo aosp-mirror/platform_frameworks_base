@@ -9147,6 +9147,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                 pw.println("-------------------------------------------------------------------------------");
             }
             dumpBinderProxies(pw);
+            pw.println();
+            if (dumpAll) {
+                pw.println("-------------------------------------------------------------------------------");
+            }
+            dumpLmkLocked(pw);
         }
     }
 
@@ -9336,6 +9341,10 @@ public class ActivityManagerService extends IActivityManager.Stub
             } else if ("oom".equals(cmd) || "o".equals(cmd)) {
                 synchronized (this) {
                     dumpOomLocked(fd, pw, args, opti, true);
+                }
+            } else if ("lmk".equals(cmd)) {
+                synchronized (this) {
+                    dumpLmkLocked(pw);
                 }
             } else if ("permissions".equals(cmd) || "perm".equals(cmd)) {
                 synchronized (this) {
@@ -10369,6 +10378,37 @@ public class ActivityManagerService extends IActivityManager.Stub
         mAtmInternal.dumpForOom(pw);
 
         return true;
+    }
+
+    private boolean reportLmkKillAtOrBelow(PrintWriter pw, int oom_adj) {
+        Integer cnt = ProcessList.getLmkdKillCount(0, oom_adj);
+        if (cnt != null) {
+            pw.println("    kills at or below oom_adj " + oom_adj + ": " + cnt);
+            return true;
+        }
+        return false;
+    }
+
+    boolean dumpLmkLocked(PrintWriter pw) {
+        pw.println("ACTIVITY MANAGER LMK KILLS (dumpsys activity lmk)");
+        Integer cnt = ProcessList.getLmkdKillCount(ProcessList.UNKNOWN_ADJ,
+                ProcessList.UNKNOWN_ADJ);
+        if (cnt == null) {
+            return false;
+        }
+        pw.println("  Total number of kills: " + cnt);
+
+        return reportLmkKillAtOrBelow(pw, ProcessList.CACHED_APP_MAX_ADJ) &&
+            reportLmkKillAtOrBelow(pw, ProcessList.CACHED_APP_MIN_ADJ) &&
+            reportLmkKillAtOrBelow(pw, ProcessList.SERVICE_B_ADJ) &&
+            reportLmkKillAtOrBelow(pw, ProcessList.PREVIOUS_APP_ADJ) &&
+            reportLmkKillAtOrBelow(pw, ProcessList.HOME_APP_ADJ) &&
+            reportLmkKillAtOrBelow(pw, ProcessList.SERVICE_ADJ) &&
+            reportLmkKillAtOrBelow(pw, ProcessList.HEAVY_WEIGHT_APP_ADJ) &&
+            reportLmkKillAtOrBelow(pw, ProcessList.BACKUP_APP_ADJ) &&
+            reportLmkKillAtOrBelow(pw, ProcessList.PERCEPTIBLE_APP_ADJ) &&
+            reportLmkKillAtOrBelow(pw, ProcessList.VISIBLE_APP_ADJ) &&
+            reportLmkKillAtOrBelow(pw, ProcessList.FOREGROUND_APP_ADJ);
     }
 
     /**
