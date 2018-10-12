@@ -109,14 +109,28 @@ public class LooperStatsService extends Binder {
                 "max_latency_micros",
                 "total_cpu_micros",
                 "max_cpu_micros",
+                "recorded_delay_message_count",
+                "total_delay_millis",
+                "max_delay_millis",
                 "exception_count"));
         pw.println(header);
         for (LooperStats.ExportedEntry entry : entries) {
-            pw.printf("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n", entry.workSourceUid,
-                    entry.threadName, entry.handlerClassName, entry.messageName,
-                    entry.isInteractive, entry.messageCount, entry.recordedMessageCount,
-                    entry.totalLatencyMicros, entry.maxLatencyMicros, entry.cpuUsageMicros,
-                    entry.maxCpuUsageMicros, entry.exceptionCount);
+            pw.printf("%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s,%s\n",
+                    entry.workSourceUid,
+                    entry.threadName,
+                    entry.handlerClassName,
+                    entry.messageName,
+                    entry.isInteractive,
+                    entry.messageCount,
+                    entry.recordedMessageCount,
+                    entry.totalLatencyMicros,
+                    entry.maxLatencyMicros,
+                    entry.cpuUsageMicros,
+                    entry.maxCpuUsageMicros,
+                    entry.recordedDelayMessageCount,
+                    entry.delayMillis,
+                    entry.maxDelayMillis,
+                    entry.exceptionCount);
         }
     }
 
