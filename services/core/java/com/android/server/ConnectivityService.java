@@ -5513,15 +5513,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
             if (networkAgent.isVPN()) {
                 // Temporarily disable the default proxy (not global).
-                synchronized (mProxyTracker.mProxyLock) {
-                    if (!mProxyTracker.mDefaultProxyDisabled) {
-                        mProxyTracker.mDefaultProxyDisabled = true;
-                        if (mProxyTracker.mGlobalProxy == null
-                                && mProxyTracker.mDefaultProxy != null) {
-                            mProxyTracker.sendProxyBroadcast(null);
-                        }
-                    }
-                }
+                mProxyTracker.setDefaultProxyEnabled(false);
                 // TODO: support proxy per network.
             }
 
@@ -5543,15 +5535,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         } else if (state == NetworkInfo.State.DISCONNECTED) {
             networkAgent.asyncChannel.disconnect();
             if (networkAgent.isVPN()) {
-                synchronized (mProxyTracker.mProxyLock) {
-                    if (mProxyTracker.mDefaultProxyDisabled) {
-                        mProxyTracker.mDefaultProxyDisabled = false;
-                        if (mProxyTracker.mGlobalProxy == null
-                                && mProxyTracker.mDefaultProxy != null) {
-                            mProxyTracker.sendProxyBroadcast(mProxyTracker.mDefaultProxy);
-                        }
-                    }
-                }
+                mProxyTracker.setDefaultProxyEnabled(true);
                 updateUids(networkAgent, networkAgent.networkCapabilities, null);
             }
             disconnectAndDestroyNetwork(networkAgent);
