@@ -39,7 +39,8 @@ enum DumpReportReason {
     GET_DATA_CALLED = 4,
     ADB_DUMP = 5,
     CONFIG_RESET = 6,
-    STATSCOMPANION_DIED = 7
+    STATSCOMPANION_DIED = 7,
+    TERMINATION_SIGNAL_RECEIVED = 8
 };
 
 class StatsLogProcessor : public ConfigListener {

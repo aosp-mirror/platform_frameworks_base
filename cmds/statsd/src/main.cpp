@@ -46,6 +46,27 @@ struct log_reader_thread_data {
     sp<StatsService> service;
 };
 
+
+sp<StatsService> gStatsService = nullptr;
+
+void sigHandler(int sig) {
+    if (gStatsService != nullptr) {
+        gStatsService->Terminate();
+    }
+}
+
+void registerSigHandler()
+{
+    struct sigaction sa;
+    sigemptyset(&sa.sa_mask);
+    sa.sa_flags = 0;
+    sa.sa_handler = sigHandler;
+    sigaction(SIGHUP, &sa, nullptr);
+    sigaction(SIGINT, &sa, nullptr);
+    sigaction(SIGQUIT, &sa, nullptr);
+    sigaction(SIGTERM, &sa, nullptr);
+}
+
 int main(int /*argc*/, char** /*argv*/) {
     // Set up the looper
     sp<Looper> looper(Looper::prepare(0 /* opts */));
@@ -60,23 +81,25 @@ int main(int /*argc*/, char** /*argv*/) {
     ::android::hardware::configureRpcThreadpool(1 /*threads*/, false /*willJoin*/);
 
     // Create the service
-    sp<StatsService> service = new StatsService(looper);
-    if (defaultServiceManager()->addService(String16("stats"), service) != 0) {
+    gStatsService = new StatsService(looper);
+    if (defaultServiceManager()->addService(String16("stats"), gStatsService) != 0) {
         ALOGE("Failed to add service as AIDL service");
         return -1;
     }
 
-    auto ret = service->registerAsService();
+    auto ret = gStatsService->registerAsService();
     if (ret != ::android::OK) {
         ALOGE("Failed to add service as HIDL service");
         return 1; // or handle error
     }
 
-    service->sayHiToStatsCompanion();
+    registerSigHandler();
 
-    service->Startup();
+    gStatsService->sayHiToStatsCompanion();
 
-    sp<StatsSocketListener> socketListener = new StatsSocketListener(service);
+    gStatsService->Startup();
+
+    sp<StatsSocketListener> socketListener = new StatsSocketListener(gStatsService);
 
         ALOGI("using statsd socket");
         // Backlog and /proc/sys/net/unix/max_dgram_qlen set to large value
