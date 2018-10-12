@@ -512,7 +512,9 @@ message SystemPropertiesProto {
         optional int32  vts_coverage = 43;
         optional string zygote = 44;
 
-        // Next Tag: 45
+        optional string gfx_driver_whitelist_0 = 45;
+
+        // Next Tag: 46
     }
     optional Ro ro = 21;
 
