@@ -84,6 +84,11 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         }
 
         @Override
+        public void onStartingToHide() {
+            updateStates();
+        }
+
+        @Override
         public void onFullyHidden() {
             updateStates();
         }
