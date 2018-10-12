@@ -170,13 +170,17 @@ public class KeyguardBouncerTest extends SysuiTestCase {
         mBouncer.ensureView();
         mBouncer.setExpansion(0.5f);
 
-        mBouncer.setExpansion(1);
+        mBouncer.setExpansion(KeyguardBouncer.EXPANSION_HIDDEN);
         verify(mFalsingManager).onBouncerHidden();
         verify(mExpansionCallback).onFullyHidden();
 
-        mBouncer.setExpansion(0);
+        mBouncer.setExpansion(KeyguardBouncer.EXPANSION_VISIBLE);
         verify(mFalsingManager).onBouncerShown();
         verify(mExpansionCallback).onFullyShown();
+
+        verify(mExpansionCallback, never()).onStartingToHide();
+        mBouncer.setExpansion(0.9f);
+        verify(mExpansionCallback).onStartingToHide();
     }
 
     @Test

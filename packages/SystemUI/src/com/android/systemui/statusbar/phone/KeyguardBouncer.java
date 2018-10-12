@@ -361,6 +361,8 @@ public class KeyguardBouncer {
         } else if (fraction == EXPANSION_HIDDEN && oldExpansion != EXPANSION_HIDDEN) {
             onFullyHidden();
             mExpansionCallback.onFullyHidden();
+        } else if (fraction != EXPANSION_VISIBLE && oldExpansion == EXPANSION_VISIBLE) {
+            mExpansionCallback.onStartingToHide();
         }
     }
 
@@ -481,6 +483,7 @@ public class KeyguardBouncer {
 
     public interface BouncerExpansionCallback {
         void onFullyShown();
+        void onStartingToHide();
         void onFullyHidden();
     }
 }
