@@ -51,6 +51,7 @@ import android.content.pm.UserInfo;
 import android.graphics.Bitmap;
 import android.net.ProxyInfo;
 import android.net.Uri;
+import android.os.Binder;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
@@ -5756,7 +5757,8 @@ public class DevicePolicyManager {
         }
         if (mService != null) {
             try {
-                return mService.checkDeviceIdentifierAccess(packageName, userId);
+                return mService.checkDeviceIdentifierAccess(packageName, userId,
+                        Binder.getCallingPid(), Binder.getCallingUid());
             } catch (RemoteException re) {
                 throw re.rethrowFromSystemServer();
             }

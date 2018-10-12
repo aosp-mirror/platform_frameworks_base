@@ -130,9 +130,9 @@ public class Build {
      * <a href="/training/articles/security-key-attestation.html">key attestation</a> to obtain
      * proof of the device's original identifiers.
      *
-     * <p>Requires Permission: READ_PRIVILEGED_PHONE_STATE or for the calling package to be the
-     * device or profile owner. Profile owner access is deprecated and will be removed in a future
-     * release.
+     * <p>Requires Permission: READ_PRIVILEGED_PHONE_STATE, or for the calling package to be the
+     * device or profile owner and have the READ_PHONE_STATE permission. Profile owner access is
+     * deprecated and will be removed in a future release.
      *
      * @return The serial number if specified.
      */
