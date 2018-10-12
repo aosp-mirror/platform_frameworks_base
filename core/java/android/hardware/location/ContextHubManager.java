@@ -749,6 +749,7 @@ public final class ContextHubManager {
      *
      * @see ContextHubClientCallback
      */
+    @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
     @NonNull public ContextHubClient createClient(
             @NonNull ContextHubInfo hubInfo, @NonNull ContextHubClientCallback callback,
             @NonNull @CallbackExecutor Executor executor) {
@@ -785,6 +786,7 @@ public final class ContextHubManager {
      *
      * @see ContextHubClientCallback
      */
+    @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
     @NonNull public ContextHubClient createClient(
             @NonNull ContextHubInfo hubInfo, @NonNull ContextHubClientCallback callback) {
         return createClient(hubInfo, callback, new HandlerExecutor(Handler.getMain()));
@@ -811,6 +813,7 @@ public final class ContextHubManager {
      *
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
     @NonNull public ContextHubClient createClient(
             @NonNull PendingIntent intent, @NonNull ContextHubInfo hubInfo,
             @NonNull ContextHubClientCallback callback,
@@ -835,6 +838,7 @@ public final class ContextHubManager {
      *
      * @hide
      */
+    @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
     @NonNull public ContextHubClient createClient(
             @NonNull PendingIntent intent, @NonNull ContextHubInfo hubInfo,
             @NonNull ContextHubClientCallback callback) {
