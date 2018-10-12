@@ -5097,6 +5097,7 @@ package android.telephony {
     method public int getRejectCause();
     method public int getTransportType();
     method public boolean isEmergencyEnabled();
+    method public boolean isRoaming();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.telephony.NetworkRegistrationState> CREATOR;
     field public static final int DOMAIN_CS = 1; // 0x1
