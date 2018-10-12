@@ -771,7 +771,9 @@ public class Binder implements IBinder {
         final boolean tracingEnabled = Binder.isTracingEnabled();
         try {
             if (tracingEnabled) {
-                Trace.traceBegin(Trace.TRACE_TAG_ALWAYS, getClass().getName() + ":" + code);
+                final String transactionName = getTransactionName(code);
+                Trace.traceBegin(Trace.TRACE_TAG_ALWAYS, getClass().getName() + ":"
+                        + (transactionName != null ? transactionName : code));
             }
             ThreadLocalWorkSourceUid.set(Binder.getCallingUid());
             res = onTransact(code, data, reply, flags);
