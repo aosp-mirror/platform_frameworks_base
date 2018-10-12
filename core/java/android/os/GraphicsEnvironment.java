@@ -55,7 +55,7 @@ public class GraphicsEnvironment {
      * Set up GraphicsEnvironment
      */
     public void setup(Context context, Bundle coreSettings) {
-        setupGpuLayers(context, coreSettings);
+        setupGpuLayers(context);
         setupAngle(context, coreSettings);
         chooseDriver(context);
     }
@@ -81,54 +81,27 @@ public class GraphicsEnvironment {
     }
 
     /**
-     * Return the debug layer app's on-disk and in-APK lib directories
-     */
-    private static String getDebugLayerAppPaths(Context context, String app) {
-        ApplicationInfo appInfo;
-        try {
-            appInfo = context.getPackageManager().getApplicationInfo(
-                    app, PackageManager.MATCH_ALL);
-        } catch (PackageManager.NameNotFoundException e) {
-            Log.w(TAG, "Debug layer app '" + app + "' not installed");
-
-            return null;
-        }
-
-        String abi = chooseAbi(appInfo);
-
-        StringBuilder sb = new StringBuilder();
-        sb.append(appInfo.nativeLibraryDir)
-            .append(File.pathSeparator);
-        sb.append(appInfo.sourceDir)
-            .append("!/lib/")
-            .append(abi);
-        String paths = sb.toString();
-
-        if (DEBUG) Log.v(TAG, "Debug layer app libs: " + paths);
-
-        return paths;
-    }
-
-    /**
      * Set up layer search paths for all apps
      * If debuggable, check for additional debug settings
      */
-    private void setupGpuLayers(Context context, Bundle coreSettings) {
+    private void setupGpuLayers(Context context) {
 
         String layerPaths = "";
 
         // Only enable additional debug functionality if the following conditions are met:
-        // 1. App is debuggable or device is rooted
+        // 1. App is debuggable
         // 2. ENABLE_GPU_DEBUG_LAYERS is true
         // 3. Package name is equal to GPU_DEBUG_APP
 
-        if (isDebuggable(context) || (getCanLoadSystemLibraries() == 1)) {
+        if (isDebuggable(context)) {
 
-            int enable = coreSettings.getInt(Settings.Global.ENABLE_GPU_DEBUG_LAYERS, 0);
+            int enable = Settings.Global.getInt(context.getContentResolver(),
+                                                Settings.Global.ENABLE_GPU_DEBUG_LAYERS, 0);
 
             if (enable != 0) {
 
-                String gpuDebugApp = coreSettings.getString(Settings.Global.GPU_DEBUG_APP);
+                String gpuDebugApp = Settings.Global.getString(context.getContentResolver(),
+                                                               Settings.Global.GPU_DEBUG_APP);
 
                 String packageName = context.getPackageName();
 
@@ -142,22 +115,8 @@ public class GraphicsEnvironment {
                     // the layers specified by the app.
                     layerPaths = mDebugLayerPath + ":";
 
-
-                    // If there is a debug layer app specified, add its path.
-                    String gpuDebugLayerApp =
-                            coreSettings.getString(Settings.Global.GPU_DEBUG_LAYER_APP);
-
-                    if (gpuDebugLayerApp != null && !gpuDebugLayerApp.isEmpty()) {
-                        Log.i(TAG, "GPU debug layer app: " + gpuDebugLayerApp);
-                        String paths = getDebugLayerAppPaths(context, gpuDebugLayerApp);
-                        if (paths != null) {
-                            // Append the path so files placed in the app's base directory will
-                            // override the external path
-                            layerPaths += paths + ":";
-                        }
-                    }
-
-                    String layers = coreSettings.getString(Settings.Global.GPU_DEBUG_LAYERS);
+                    String layers = Settings.Global.getString(context.getContentResolver(),
+                                                              Settings.Global.GPU_DEBUG_LAYERS);
 
                     Log.i(TAG, "Debug layer list: " + layers);
                     if (layers != null && !layers.isEmpty()) {
@@ -331,7 +290,6 @@ public class GraphicsEnvironment {
         return null;
     }
 
-    private static native int getCanLoadSystemLibraries();
     private static native void setLayerPaths(ClassLoader classLoader, String layerPaths);
     private static native void setDebugLayers(String layers);
     private static native void setDriverPath(String path);

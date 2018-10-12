@@ -11631,12 +11631,6 @@ public final class Settings {
         public static final String GPU_DEBUG_LAYERS = "gpu_debug_layers";
 
         /**
-         * Addition app for GPU layer discovery
-         * @hide
-         */
-        public static final String GPU_DEBUG_LAYER_APP = "gpu_debug_layer_app";
-
-        /**
          * Control whether the process CPU usage meter should be shown.
          *
          * @deprecated This functionality is no longer available as of
