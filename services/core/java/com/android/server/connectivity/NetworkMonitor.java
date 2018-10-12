@@ -1031,6 +1031,11 @@ public class NetworkMonitor extends StateMachine {
                 result.isPortal() /* isCaptivePortal */,
                 startTime, endTime);
 
+        log("isCaptivePortal: isSuccessful()=" + result.isSuccessful() +
+                " isPortal()=" + result.isPortal() +
+                " RedirectUrl=" + result.redirectUrl +
+                " StartTime=" + startTime + " EndTime=" + endTime);
+
         return result;
     }
 
