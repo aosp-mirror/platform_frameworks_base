@@ -2525,9 +2525,7 @@ public abstract class ColorSpace {
                     gamma == 1.0 ? DoubleUnaryOperator.identity() :
                             x -> Math.pow(x < 0.0 ? 0.0 : x, gamma),
                     min, max, id);
-            mTransferParameters = gamma == 1.0 ?
-                    new TransferParameters(0.0, 0.0, 1.0, 1.0 + Math.ulp(1.0f), gamma) :
-                    new TransferParameters(1.0, 0.0, 0.0, 0.0, gamma);
+            mTransferParameters = new TransferParameters(1.0, 0.0, 0.0, 0.0, gamma);
         }
 
         /**
