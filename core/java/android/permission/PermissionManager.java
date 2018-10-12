@@ -25,7 +25,9 @@ import android.content.Context;
 import com.android.internal.annotations.Immutable;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 
 /**
  * System level service for accessing the permission capabilities of the platform.
@@ -40,26 +42,28 @@ public final class PermissionManager {
      *
      * @hide
      */
-    public static final SplitPermissionInfo[] SPLIT_PERMISSIONS = new SplitPermissionInfo[]{
+    public static final List<SplitPermissionInfo> SPLIT_PERMISSIONS = Arrays.asList(
             // READ_EXTERNAL_STORAGE is always required when an app requests
             // WRITE_EXTERNAL_STORAGE, because we can't have an app that has
             // write access without read access.  The hack here with the target
             // target SDK version ensures that this grant is always done.
             new SplitPermissionInfo(android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                    new String[]{android.Manifest.permission.READ_EXTERNAL_STORAGE},
+                    Collections.singletonList(android.Manifest.permission.READ_EXTERNAL_STORAGE),
                     android.os.Build.VERSION_CODES.CUR_DEVELOPMENT + 1),
             new SplitPermissionInfo(android.Manifest.permission.READ_CONTACTS,
-                    new String[]{android.Manifest.permission.READ_CALL_LOG},
+                    Collections.singletonList(android.Manifest.permission.READ_CALL_LOG),
                     android.os.Build.VERSION_CODES.JELLY_BEAN),
             new SplitPermissionInfo(android.Manifest.permission.WRITE_CONTACTS,
-                    new String[]{android.Manifest.permission.WRITE_CALL_LOG},
+                    Collections.singletonList(android.Manifest.permission.WRITE_CALL_LOG),
                     android.os.Build.VERSION_CODES.JELLY_BEAN),
             new SplitPermissionInfo(Manifest.permission.ACCESS_FINE_LOCATION,
-                    new String[]{android.Manifest.permission.ACCESS_BACKGROUND_LOCATION},
+                    Collections.singletonList(
+                            android.Manifest.permission.ACCESS_BACKGROUND_LOCATION),
                     android.os.Build.VERSION_CODES.P0),
             new SplitPermissionInfo(Manifest.permission.ACCESS_COARSE_LOCATION,
-                    new String[]{android.Manifest.permission.ACCESS_BACKGROUND_LOCATION},
-                    android.os.Build.VERSION_CODES.P0)};
+                    Collections.singletonList(
+                            android.Manifest.permission.ACCESS_BACKGROUND_LOCATION),
+                    android.os.Build.VERSION_CODES.P0));
 
     private final @NonNull Context mContext;
 
@@ -74,7 +78,7 @@ public final class PermissionManager {
     }
 
     /**
-     * Get list of permissions that have been split into more granular or dependent permissions.
+     * Get set of permissions that have been split into more granular or dependent permissions.
      *
      * <p>E.g. before {@link android.os.Build.VERSION_CODES#P0} an app that was granted
      * {@link Manifest.permission#ACCESS_COARSE_LOCATION} could access he location while it was in
@@ -82,7 +86,7 @@ public final class PermissionManager {
      * the location permission only grants location access while the app is in foreground. This
      * would break apps that target before {@link android.os.Build.VERSION_CODES#P0}. Hence whenever
      * such an old app asks for a location permission (i.e. the
-     * {@link SplitPermissionInfo#getRootPermission()}), then the
+     * {@link SplitPermissionInfo#getSplitPermission()}), then the
      * {@link Manifest.permission#ACCESS_BACKGROUND_LOCATION} permission (inside
      * {@{@link SplitPermissionInfo#getNewPermissions}) is added.
      *
@@ -91,8 +95,9 @@ public final class PermissionManager {
      *
      * @return All permissions that are split.
      */
-    public @NonNull List<SplitPermissionInfo> getSplitPermissions() {
-        return Arrays.asList(SPLIT_PERMISSIONS);
+    public @NonNull
+    List<SplitPermissionInfo> getSplitPermissions() {
+        return SPLIT_PERMISSIONS;
     }
 
     /**
@@ -101,21 +106,35 @@ public final class PermissionManager {
      */
     @Immutable
     public static final class SplitPermissionInfo {
-        private final @NonNull String mRootPerm;
-        private final @NonNull String[] mNewPerms;
+        private final @NonNull String mSplitPerm;
+        private final @NonNull List<String> mNewPerms;
         private final int mTargetSdk;
+
+        @Override
+        public boolean equals(Object o) {
+            if (this == o) return true;
+            if (o == null || getClass() != o.getClass()) return false;
+            SplitPermissionInfo that = (SplitPermissionInfo) o;
+            return mTargetSdk == that.mTargetSdk
+                    && Objects.equals(mSplitPerm, that.mSplitPerm);
+        }
+
+        @Override
+        public int hashCode() {
+            return Objects.hash(mSplitPerm, mTargetSdk);
+        }
 
         /**
          * Get the permission that is split.
          */
-        public @NonNull String getRootPermission() {
-            return mRootPerm;
+        public @NonNull String getSplitPermission() {
+            return mSplitPerm;
         }
 
         /**
          * Get the permissions that are added.
          */
-        public @NonNull String[] getNewPermissions() {
+        public @NonNull List<String> getNewPermissions() {
             return mNewPerms;
         }
 
@@ -126,9 +145,9 @@ public final class PermissionManager {
             return mTargetSdk;
         }
 
-        private SplitPermissionInfo(@NonNull String rootPerm, @NonNull String[] newPerms,
+        private SplitPermissionInfo(@NonNull String rootPerm, @NonNull List<String> newPerms,
                 int targetSdk) {
-            mRootPerm = rootPerm;
+            mSplitPerm = rootPerm;
             mNewPerms = newPerms;
             mTargetSdk = targetSdk;
         }
