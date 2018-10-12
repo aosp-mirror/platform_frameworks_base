@@ -71,7 +71,7 @@ class InputConsumerImpl implements IBinder.DeathRecipient {
 
         mWindowHandle = new InputWindowHandle(mApplicationHandle, null, displayId);
         mWindowHandle.name = name;
-        mWindowHandle.inputChannel = mServerChannel;
+        mWindowHandle.token = mServerChannel.getToken();
         mWindowHandle.layoutParamsType = WindowManager.LayoutParams.TYPE_INPUT_CONSUMER;
         mWindowHandle.layer = getLayerLw(mWindowHandle.layoutParamsType);
         mWindowHandle.layoutParamsFlags = 0;

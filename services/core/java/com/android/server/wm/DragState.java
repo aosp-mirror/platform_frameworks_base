@@ -268,7 +268,7 @@ class DragState {
             mDragWindowHandle = new InputWindowHandle(mDragApplicationHandle, null,
                     display.getDisplayId());
             mDragWindowHandle.name = "drag";
-            mDragWindowHandle.inputChannel = mServerChannel;
+            mDragWindowHandle.token = mServerChannel.getToken();
             mDragWindowHandle.layer = getDragLayerLocked();
             mDragWindowHandle.layoutParamsFlags = 0;
             mDragWindowHandle.layoutParamsType = WindowManager.LayoutParams.TYPE_DRAG;

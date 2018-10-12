@@ -269,7 +269,7 @@ class TaskPositioner {
         mDragWindowHandle = new InputWindowHandle(mDragApplicationHandle, null,
                 display.getDisplayId());
         mDragWindowHandle.name = TAG;
-        mDragWindowHandle.inputChannel = mServerChannel;
+        mDragWindowHandle.token = mServerChannel.getToken();
         mDragWindowHandle.layer = mService.getDragLayerLocked();
         mDragWindowHandle.layoutParamsFlags = 0;
         mDragWindowHandle.layoutParamsType = WindowManager.LayoutParams.TYPE_DRAG;

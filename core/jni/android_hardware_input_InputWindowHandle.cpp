@@ -21,7 +21,6 @@
 #include <android_runtime/AndroidRuntime.h>
 #include <utils/threads.h>
 
-#include <android_view_InputChannel.h>
 #include <android/graphics/Region.h>
 #include <ui/Region.h>
 
@@ -33,7 +32,7 @@ namespace android {
 static struct {
     jfieldID ptr;
     jfieldID inputApplicationHandle;
-    jfieldID inputChannel;
+    jfieldID token;
     jfieldID name;
     jfieldID layoutParamsFlags;
     jfieldID layoutParamsType;
@@ -86,13 +85,12 @@ bool NativeInputWindowHandle::updateInfo() {
 
     mInfo.touchableRegion.clear();
 
-    jobject inputChannelObj = env->GetObjectField(obj,
-            gInputWindowHandleClassInfo.inputChannel);
-    if (inputChannelObj) {
-        mInfo.inputChannel = android_view_InputChannel_getInputChannel(env, inputChannelObj);
-        env->DeleteLocalRef(inputChannelObj);
+    jobject tokenObj = env->GetObjectField(obj,
+            gInputWindowHandleClassInfo.token);
+    if (tokenObj) {
+        mInfo.token = ibinderForJavaObject(env, tokenObj);
     } else {
-        mInfo.inputChannel.clear();
+        mInfo.token.clear();
     }
 
     jstring nameObj = jstring(env->GetObjectField(obj,
@@ -236,8 +234,8 @@ int register_android_server_InputWindowHandle(JNIEnv* env) {
             clazz,
             "inputApplicationHandle", "Landroid/view/InputApplicationHandle;");
 
-    GET_FIELD_ID(gInputWindowHandleClassInfo.inputChannel, clazz,
-            "inputChannel", "Landroid/view/InputChannel;");
+    GET_FIELD_ID(gInputWindowHandleClassInfo.token, clazz,
+            "token", "Landroid/os/IBinder;");
 
     GET_FIELD_ID(gInputWindowHandleClassInfo.name, clazz,
             "name", "Ljava/lang/String;");

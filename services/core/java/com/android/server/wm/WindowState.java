@@ -2037,7 +2037,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         InputChannel[] inputChannels = InputChannel.openInputChannelPair(name);
         mInputChannel = inputChannels[0];
         mClientChannel = inputChannels[1];
-        mInputWindowHandle.inputChannel = inputChannels[0];
+        mInputWindowHandle.token = mClient.asBinder();
         if (outInputChannel != null) {
             mClientChannel.transferTo(outInputChannel);
             mClientChannel.dispose();
@@ -2068,7 +2068,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             mClientChannel.dispose();
             mClientChannel = null;
         }
-        mInputWindowHandle.inputChannel = null;
+        mInputWindowHandle.token = null;
     }
 
     /** Returns true if the replacement window was removed. */
