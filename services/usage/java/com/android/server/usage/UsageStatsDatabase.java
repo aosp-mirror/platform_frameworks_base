@@ -75,14 +75,14 @@ import java.util.List;
  * directory should be deserialized.
  */
 public class UsageStatsDatabase {
-    private static final int DEFAULT_CURRENT_VERSION = 3;
+    private static final int DEFAULT_CURRENT_VERSION = 4;
     /**
      * Current version of the backup schema
      *
      * @hide
      */
     @VisibleForTesting
-    public static final int BACKUP_VERSION = 1;
+    public static final int BACKUP_VERSION = 4;
 
     // Key under which the payload blob is stored
     // same as UsageStatsBackupHelper.KEY_USAGE_STATS
