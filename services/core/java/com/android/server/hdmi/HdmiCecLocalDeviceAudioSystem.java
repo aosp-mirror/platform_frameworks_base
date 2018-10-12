@@ -71,6 +71,10 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
     // processing.
     private final HashMap<Integer, String> mTvInputs = new HashMap<>();
 
+    // Map-like container of all cec devices.
+    // device id is used as key of container.
+    private final SparseArray<HdmiDeviceInfo> mDeviceInfos = new SparseArray<>();
+
     protected HdmiCecLocalDeviceAudioSystem(HdmiControlService service) {
         super(service, HdmiDeviceInfo.DEVICE_AUDIO_SYSTEM);
         mSystemAudioControlFeatureEnabled = true;
@@ -84,6 +88,95 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
                 "com.droidlogic.tvinput/.services.Hdmi2InputService/HW6");
         mTvInputs.put(Constants.CEC_SWITCH_HDMI3,
                 "com.droidlogic.tvinput/.services.Hdmi3InputService/HW7");
+    }
+
+    /**
+     * Called when a device is newly added or a new device is detected or
+     * existing device is updated.
+     *
+     * @param info device info of a new device.
+     */
+    @ServiceThreadOnly
+    final void addCecDevice(HdmiDeviceInfo info) {
+        assertRunOnServiceThread();
+        HdmiDeviceInfo old = addDeviceInfo(info);
+        if (info.getLogicalAddress() == mAddress) {
+            // The addition of the device itself should not be notified.
+            return;
+        }
+        if (old == null) {
+            invokeDeviceEventListener(info, HdmiControlManager.DEVICE_EVENT_ADD_DEVICE);
+        } else if (!old.equals(info)) {
+            invokeDeviceEventListener(old, HdmiControlManager.DEVICE_EVENT_REMOVE_DEVICE);
+            invokeDeviceEventListener(info, HdmiControlManager.DEVICE_EVENT_ADD_DEVICE);
+        }
+    }
+
+    /**
+     * Called when a device is removed or removal of device is detected.
+     *
+     * @param address a logical address of a device to be removed
+     */
+    @ServiceThreadOnly
+    final void removeCecDevice(int address) {
+        assertRunOnServiceThread();
+        HdmiDeviceInfo info = removeDeviceInfo(HdmiDeviceInfo.idForCecDevice(address));
+
+        mCecMessageCache.flushMessagesFrom(address);
+        invokeDeviceEventListener(info, HdmiControlManager.DEVICE_EVENT_REMOVE_DEVICE);
+    }
+
+    /**
+     * Add a new {@link HdmiDeviceInfo}. It returns old device info which has the same
+     * logical address as new device info's.
+     *
+     * @param deviceInfo a new {@link HdmiDeviceInfo} to be added.
+     * @return {@code null} if it is new device. Otherwise, returns old {@HdmiDeviceInfo}
+     *         that has the same logical address as new one has.
+     */
+    @ServiceThreadOnly
+    private HdmiDeviceInfo addDeviceInfo(HdmiDeviceInfo deviceInfo) {
+        assertRunOnServiceThread();
+        HdmiDeviceInfo oldDeviceInfo = getCecDeviceInfo(deviceInfo.getLogicalAddress());
+        if (oldDeviceInfo != null) {
+            removeDeviceInfo(deviceInfo.getId());
+        }
+        mDeviceInfos.append(deviceInfo.getId(), deviceInfo);
+        return oldDeviceInfo;
+    }
+
+    /**
+     * Remove a device info corresponding to the given {@code logicalAddress}.
+     * It returns removed {@link HdmiDeviceInfo} if exists.
+     *
+     * @param id id of device to be removed
+     * @return removed {@link HdmiDeviceInfo} it exists. Otherwise, returns {@code null}
+     */
+    @ServiceThreadOnly
+    private HdmiDeviceInfo removeDeviceInfo(int id) {
+        assertRunOnServiceThread();
+        HdmiDeviceInfo deviceInfo = mDeviceInfos.get(id);
+        if (deviceInfo != null) {
+            mDeviceInfos.remove(id);
+        }
+        return deviceInfo;
+    }
+
+    /**
+     * Return a {@link HdmiDeviceInfo} corresponding to the given {@code logicalAddress}.
+     *
+     * @param logicalAddress logical address of the device to be retrieved
+     * @return {@link HdmiDeviceInfo} matched with the given {@code logicalAddress}.
+     *         Returns null if no logical address matched
+     */
+    @ServiceThreadOnly
+    HdmiDeviceInfo getCecDeviceInfo(int logicalAddress) {
+        assertRunOnServiceThread();
+        return mDeviceInfos.get(HdmiDeviceInfo.idForCecDevice(logicalAddress));
+    }
+
+    private void invokeDeviceEventListener(HdmiDeviceInfo info, int status) {
+        mService.invokeDeviceEventListeners(info, status);
     }
 
     @Override
