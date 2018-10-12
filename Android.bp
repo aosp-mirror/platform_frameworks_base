@@ -669,9 +669,6 @@ java_defaults {
 
     no_framework_libs: true,
     libs: [
-        "conscrypt",
-        "okhttp",
-        "bouncycastle",
         "ext",
     ],
 
@@ -1083,8 +1080,6 @@ framework_docs_only_args = " -android -manifest $(location core/res/AndroidManif
      "-federationapi SupportLib $(location current/support-api.txt) "
 
 framework_docs_only_libs = [
-    "conscrypt",
-    "bouncycastle",
     "voip-common",
     "android.test.mock",
     "android-support-annotations",
