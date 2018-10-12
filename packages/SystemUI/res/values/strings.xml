@@ -2238,4 +2238,39 @@
          app for debugging. Will not be seen by users. [CHAR LIMIT=20] -->
     <string name="heap_dump_tile_name">Dump SysUI Heap</string>
 
+    <!-- Content description for ongoing privacy chip. Use with a single app [CHAR LIMIT=NONE]-->
+    <string name="ongoing_privacy_chip_content_single_app"><xliff:g id="app" example="Example App">%1$s</xliff:g> is using your <xliff:g id="types_list" example="camera, location">%2$s</xliff:g>.</string>
+
+    <!-- Content description for ongoing privacy chip. Use with multiple apps [CHAR LIMIT=NONE]-->
+    <string name="ongoing_privacy_chip_content_multiple_apps">Applications are using your <xliff:g id="types_list" example="camera, location">%s</xliff:g>.</string>
+
+    <!-- Action on Ongoing Privacy Dialog to open application [CHAR LIMIT=10]-->
+    <string name="ongoing_privacy_dialog_open_app">Open app</string>
+
+    <!-- Action on Ongoing Privacy Dialog to dismiss [CHAR LIMIT=10]-->
+    <string name="ongoing_privacy_dialog_cancel">Cancel</string>
+
+    <!-- Action on Ongoing Privacy Dialog to dismiss [CHAR LIMIT=10]-->
+    <string name="ongoing_privacy_dialog_okay">Okay</string>
+
+    <!-- Action on Ongoing Privacy Dialog to open privacy hub [CHAR LIMIT=10]-->
+    <string name="ongoing_privacy_dialog_open_settings">Settings</string>
+
+    <!-- Text for item in Ongoing Privacy Dialog when only one app is using a particular type of app op [CHAR LIMIT=NONE] -->
+    <string name="ongoing_privacy_dialog_app_item"><xliff:g id="app" example="Example App">%1$s</xliff:g> is using your <xliff:g id="type" example="camera">%2$s</xliff:g> for the last <xliff:g id="time" example="3">%3$d</xliff:g> min</string>
+
+    <!-- Text for item in Ongoing Privacy Dialog when only multiple apps are using a particular type of app op [CHAR LIMIT=NONE] -->
+    <string name="ongoing_privacy_dialog_apps_item"><xliff:g id="apps" example="Camera, Phone">%1$s</xliff:g> are using your <xliff:g id="type" example="camera">%2$s</xliff:g></string>
+
+    <!-- Text for Ongoing Privacy Dialog when a single app is using app ops [CHAR LIMIT=NONE] -->
+    <string name="ongoing_privacy_dialog_single_app"><xliff:g id="app" example="Example App">%1$s</xliff:g> is using your <xliff:g id="types_list" example="camera, location">%2$s</xliff:g></string>
+
+    <!-- Text for camera app op [CHAR LIMIT=12]-->
+    <string name="privacy_type_camera">camera</string>
+
+    <!-- Text for location app op [CHAR LIMIT=12]-->
+    <string name="privacy_type_location">location</string>
+
+    <!-- Text for microphone app op [CHAR LIMIT=12]-->
+    <string name="privacy_type_microphone">microphone</string>
 </resources>
