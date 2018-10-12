@@ -1269,29 +1269,47 @@ public abstract class Layout {
      * scrolling on the specified line.
      */
     public float getLineLeft(int line) {
-        int dir = getParagraphDirection(line);
-        Alignment align = getParagraphAlignment(line);
+        final int dir = getParagraphDirection(line);
+        final Alignment align = getParagraphAlignment(line);
 
-        if (align == Alignment.ALIGN_LEFT) {
-            return 0;
-        } else if (align == Alignment.ALIGN_NORMAL) {
-            if (dir == DIR_RIGHT_TO_LEFT)
-                return getParagraphRight(line) - getLineMax(line);
-            else
-                return 0;
-        } else if (align == Alignment.ALIGN_RIGHT) {
-            return mWidth - getLineMax(line);
-        } else if (align == Alignment.ALIGN_OPPOSITE) {
-            if (dir == DIR_RIGHT_TO_LEFT)
-                return 0;
-            else
+        // First convert combinations of alignment and direction settings to
+        // three basic cases: ALIGN_LEFT, ALIGN_RIGHT and ALIGN_CENTER.
+        // For unexpected cases, it will fallback to ALIGN_LEFT.
+        final Alignment resultAlign;
+        switch(align) {
+            case ALIGN_NORMAL:
+                resultAlign =
+                        dir == DIR_RIGHT_TO_LEFT ? Alignment.ALIGN_RIGHT : Alignment.ALIGN_LEFT;
+                break;
+            case ALIGN_OPPOSITE:
+                resultAlign =
+                        dir == DIR_RIGHT_TO_LEFT ? Alignment.ALIGN_LEFT : Alignment.ALIGN_RIGHT;
+                break;
+            case ALIGN_CENTER:
+                resultAlign = Alignment.ALIGN_CENTER;
+                break;
+            case ALIGN_RIGHT:
+                resultAlign = Alignment.ALIGN_RIGHT;
+                break;
+            default: /* align == Alignment.ALIGN_LEFT */
+                resultAlign = Alignment.ALIGN_LEFT;
+        }
+
+        // Here we must use getLineMax() to do the computation, because it maybe overridden by
+        // derived class. And also note that line max equals the width of the text in that line
+        // plus the leading margin.
+        switch (resultAlign) {
+            case ALIGN_CENTER:
+                final int left = getParagraphLeft(line);
+                final float max = getLineMax(line);
+                // This computation only works when mWidth equals leadingMargin plus
+                // the width of text in this line. If this condition doesn't meet anymore,
+                // please change here too.
+                return (float) Math.floor(left + (mWidth - max) / 2);
+            case ALIGN_RIGHT:
                 return mWidth - getLineMax(line);
-        } else { /* align == Alignment.ALIGN_CENTER */
-            int left = getParagraphLeft(line);
-            int right = getParagraphRight(line);
-            int max = ((int) getLineMax(line)) & ~1;
-
-            return left + ((right - left) - max) / 2;
+            default: /* resultAlign == Alignment.ALIGN_LEFT */
+                return 0;
         }
     }
 
@@ -1300,29 +1318,40 @@ public abstract class Layout {
      * scrolling on the specified line.
      */
     public float getLineRight(int line) {
-        int dir = getParagraphDirection(line);
-        Alignment align = getParagraphAlignment(line);
+        final int dir = getParagraphDirection(line);
+        final Alignment align = getParagraphAlignment(line);
 
-        if (align == Alignment.ALIGN_LEFT) {
-            return getParagraphLeft(line) + getLineMax(line);
-        } else if (align == Alignment.ALIGN_NORMAL) {
-            if (dir == DIR_RIGHT_TO_LEFT)
+        final Alignment resultAlign;
+        switch(align) {
+            case ALIGN_NORMAL:
+                resultAlign =
+                        dir == DIR_RIGHT_TO_LEFT ? Alignment.ALIGN_RIGHT : Alignment.ALIGN_LEFT;
+                break;
+            case ALIGN_OPPOSITE:
+                resultAlign =
+                        dir == DIR_RIGHT_TO_LEFT ? Alignment.ALIGN_LEFT : Alignment.ALIGN_RIGHT;
+                break;
+            case ALIGN_CENTER:
+                resultAlign = Alignment.ALIGN_CENTER;
+                break;
+            case ALIGN_RIGHT:
+                resultAlign = Alignment.ALIGN_RIGHT;
+                break;
+            default: /* align == Alignment.ALIGN_LEFT */
+                resultAlign = Alignment.ALIGN_LEFT;
+        }
+
+        switch (resultAlign) {
+            case ALIGN_CENTER:
+                final int right = getParagraphRight(line);
+                final float max = getLineMax(line);
+                // This computation only works when mWidth equals leadingMargin plus width of the
+                // text in this line. If this condition doesn't meet anymore, please change here.
+                return (float) Math.ceil(right - (mWidth - max) / 2);
+            case ALIGN_RIGHT:
                 return mWidth;
-            else
-                return getParagraphLeft(line) + getLineMax(line);
-        } else if (align == Alignment.ALIGN_RIGHT) {
-            return mWidth;
-        } else if (align == Alignment.ALIGN_OPPOSITE) {
-            if (dir == DIR_RIGHT_TO_LEFT)
+            default: /* resultAlign == Alignment.ALIGN_LEFT */
                 return getLineMax(line);
-            else
-                return mWidth;
-        } else { /* align == Alignment.ALIGN_CENTER */
-            int left = getParagraphLeft(line);
-            int right = getParagraphRight(line);
-            int max = ((int) getLineMax(line)) & ~1;
-
-            return right - ((right - left) - max) / 2;
         }
     }
 
@@ -1671,7 +1700,7 @@ public abstract class Layout {
      * Return the vertical position of the baseline of the specified line.
      */
     public final int getLineBaseline(int line) {
-        // getLineTop(line+1) == getLineTop(line)
+        // getLineTop(line+1) == getLineBottom(line)
         return getLineTop(line+1) - getLineDescent(line);
     }
 
