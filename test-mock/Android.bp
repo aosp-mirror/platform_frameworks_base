@@ -26,5 +26,6 @@ java_sdk_library {
     ],
 
     srcs_lib_whitelist_pkgs: ["android"],
+    metalava_enabled: false,
     compile_dex: true,
 }

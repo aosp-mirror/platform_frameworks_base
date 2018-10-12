@@ -18,4 +18,5 @@ java_sdk_library {
     name: "com.android.location.provider",
     srcs: ["java/**/*.java"],
     api_packages: ["com.android.location.provider"],
+    metalava_enabled: false,
 }
