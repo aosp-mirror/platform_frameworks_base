@@ -54,6 +54,7 @@ public class HeadsUpAppearanceControllerTest extends SysuiTestCase {
     private ExpandableNotificationRow mFirst;
     private HeadsUpStatusBarView mHeadsUpStatusBarView;
     private HeadsUpManagerPhone mHeadsUpManager;
+    private View mOperatorNameView;
 
     @Before
     public void setUp() throws Exception {
@@ -63,13 +64,15 @@ public class HeadsUpAppearanceControllerTest extends SysuiTestCase {
         mHeadsUpStatusBarView = new HeadsUpStatusBarView(mContext, mock(View.class),
                 mock(TextView.class));
         mHeadsUpManager = mock(HeadsUpManagerPhone.class);
+        mOperatorNameView = new View(mContext);
         mHeadsUpAppearanceController = new HeadsUpAppearanceController(
                 mock(NotificationIconAreaController.class),
                 mHeadsUpManager,
                 mHeadsUpStatusBarView,
                 mStackScroller,
                 mPanelView,
-                new View(mContext));
+                new View(mContext),
+                mOperatorNameView);
         mHeadsUpAppearanceController.setExpandedHeight(0.0f, 0.0f);
     }
 
@@ -116,6 +119,22 @@ public class HeadsUpAppearanceControllerTest extends SysuiTestCase {
     }
 
     @Test
+    public void testOperatorNameViewUpdated() {
+        mHeadsUpAppearanceController.setAnimationsEnabled(false);
+
+        mFirst.setPinned(true);
+        when(mHeadsUpManager.hasPinnedHeadsUp()).thenReturn(true);
+        when(mHeadsUpManager.getTopEntry()).thenReturn(mFirst.getEntry());
+        mHeadsUpAppearanceController.onHeadsUpPinned(mFirst);
+        Assert.assertEquals(View.INVISIBLE, mOperatorNameView.getVisibility());
+
+        mFirst.setPinned(false);
+        when(mHeadsUpManager.hasPinnedHeadsUp()).thenReturn(false);
+        mHeadsUpAppearanceController.onHeadsUpUnPinned(mFirst);
+        Assert.assertEquals(View.VISIBLE, mOperatorNameView.getVisibility());
+    }
+
+    @Test
     public void testHeaderReadFromOldController() {
         mHeadsUpAppearanceController.setExpandedHeight(1.0f, 1.0f);
 
@@ -125,6 +144,7 @@ public class HeadsUpAppearanceControllerTest extends SysuiTestCase {
                 mHeadsUpStatusBarView,
                 mStackScroller,
                 mPanelView,
+                new View(mContext),
                 new View(mContext));
         newController.readFrom(mHeadsUpAppearanceController);
 
