@@ -798,11 +798,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
 
     @Override
     public boolean setPreferredDevice(AudioDeviceInfo deviceInfo) {
-        if (deviceInfo != null && !deviceInfo.isSink()) {
-            return false;
-        }
-        int preferredDeviceId = deviceInfo != null ? deviceInfo.getId() : 0;
-        boolean status = native_setOutputDevice(preferredDeviceId);
+        boolean status = native_setPreferredDevice(deviceInfo);
         if (status == true) {
             synchronized (this) {
                 mPreferredDevice = deviceInfo;
@@ -819,20 +815,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
     }
 
     @Override
-    public AudioDeviceInfo getRoutedDevice() {
-        int deviceId = native_getRoutedDeviceId();
-        if (deviceId == 0) {
-            return null;
-        }
-        AudioDeviceInfo[] devices =
-                AudioManager.getDevicesStatic(AudioManager.GET_DEVICES_OUTPUTS);
-        for (int i = 0; i < devices.length; i++) {
-            if (devices[i].getId() == deviceId) {
-                return devices[i];
-            }
-        }
-        return null;
-    }
+    public native AudioDeviceInfo getRoutedDevice();
 
     @Override
     public void addOnRoutingChangedListener(AudioRouting.OnRoutingChangedListener listener,
@@ -852,8 +835,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
         native_removeDeviceCallback(listener);
     }
 
-    private native final boolean native_setOutputDevice(int deviceId);
-    private native final int native_getRoutedDeviceId();
+    private native boolean native_setPreferredDevice(AudioDeviceInfo device);
     private native void native_addDeviceCallback(RoutingDelegate rd);
     private native void native_removeDeviceCallback(
             AudioRouting.OnRoutingChangedListener listener);
@@ -2771,34 +2753,6 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
             throw e;
         }
 
-    }
-
-    // Called from the native side
-    @SuppressWarnings("unused")
-    private static boolean setAudioOutputDeviceById(AudioTrack track, int deviceId) {
-        if (track == null) {
-            return false;
-        }
-
-        if (deviceId == 0) {
-            // Use default routing.
-            track.setPreferredDevice(null);
-            return true;
-        }
-
-        // TODO: Unhide AudioManager.getDevicesStatic.
-        AudioDeviceInfo[] outputDevices =
-                AudioManager.getDevicesStatic(AudioManager.GET_DEVICES_OUTPUTS);
-
-        boolean success = false;
-        for (AudioDeviceInfo device : outputDevices) {
-            if (device.getId() == deviceId) {
-                track.setPreferredDevice(device);
-                success = true;
-                break;
-            }
-        }
-        return success;
     }
 
     // Instantiated from the native side
