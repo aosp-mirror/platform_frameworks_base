@@ -1408,5 +1408,13 @@ public class ActivityInfo extends ComponentInfo implements Parcelable {
          * @attr ref android.R.styleable#AndroidManifestLayout_minHeight
          */
         public final int minHeight;
+
+        /**
+         * Returns if this {@link WindowLayout} has specified bounds.
+         * @hide
+         */
+        public boolean hasSpecifiedSize() {
+            return width >= 0 || height >= 0 || widthFraction >= 0 || heightFraction >= 0;
+        }
     }
 }

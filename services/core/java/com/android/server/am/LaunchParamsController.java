@@ -16,6 +16,13 @@
 
 package com.android.server.am;
 
+import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+import static android.view.Display.INVALID_DISPLAY;
+
+import static com.android.server.am.LaunchParamsController.LaunchParamsModifier.RESULT_CONTINUE;
+import static com.android.server.am.LaunchParamsController.LaunchParamsModifier.RESULT_DONE;
+import static com.android.server.am.LaunchParamsController.LaunchParamsModifier.RESULT_SKIP;
+
 import android.annotation.IntDef;
 import android.app.ActivityOptions;
 import android.content.pm.ActivityInfo.WindowLayout;
@@ -25,13 +32,6 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
-
-import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
-import static android.view.Display.INVALID_DISPLAY;
-
-import static com.android.server.am.LaunchParamsController.LaunchParamsModifier.RESULT_CONTINUE;
-import static com.android.server.am.LaunchParamsController.LaunchParamsModifier.RESULT_DONE;
-import static com.android.server.am.LaunchParamsController.LaunchParamsModifier.RESULT_SKIP;
 
 /**
  * {@link LaunchParamsController} calculates the {@link LaunchParams} by coordinating between
@@ -58,11 +58,7 @@ class LaunchParamsController {
      */
     void registerDefaultModifiers(ActivityStackSupervisor supervisor) {
         // {@link TaskLaunchParamsModifier} handles window layout preferences.
-        registerModifier(new TaskLaunchParamsModifier());
-
-        // {@link ActivityLaunchParamsModifier} is the most specific modifier and thus should be
-        // registered last (applied first) out of the defaults.
-        registerModifier(new ActivityLaunchParamsModifier(supervisor));
+        registerModifier(new TaskLaunchParamsModifier(supervisor));
     }
 
     /**
@@ -226,27 +222,41 @@ class LaunchParamsController {
         @IntDef({RESULT_SKIP, RESULT_DONE, RESULT_CONTINUE})
         @interface Result {}
 
-        // Returned when the modifier does not want to influence the bounds calculation
+        /** Returned when the modifier does not want to influence the bounds calculation */
         int RESULT_SKIP = 0;
-        // Returned when the modifier has changed the bounds and would like its results to be the
-        // final bounds applied.
+        /**
+         * Returned when the modifier has changed the bounds and would like its results to be the
+         * final bounds applied.
+         */
         int RESULT_DONE = 1;
-        // Returned when the modifier has changed the bounds but is okay with other modifiers
-        // influencing the bounds.
+        /**
+         * Returned when the modifier has changed the bounds but is okay with other modifiers
+         * influencing the bounds.
+         */
         int RESULT_CONTINUE = 2;
 
         /**
-         * Called when asked to calculate {@link LaunchParams}.
-         * @param task            The {@link TaskRecord} currently being positioned.
-         * @param layout          The specified {@link WindowLayout}.
-         * @param activity        The {@link ActivityRecord} currently being positioned.
-         * @param source          The {@link ActivityRecord} activity was started from.
-         * @param options         The {@link ActivityOptions} specified for the activity.
-         * @param currentParams   The current {@link LaunchParams}. This can differ from the initial
-         *                        params as it represents the modified params up to this point.
-         * @param outParams       The resulting {@link LaunchParams} after all calculations.
-         * @return                A {@link Result} representing the result of the
-         *                        {@link LaunchParams} calculation.
+         * Returns the launch params that the provided activity launch params should be overridden
+         * to. {@link LaunchParamsModifier} can use this for various purposes, including: 1)
+         * Providing default bounds if the launch bounds have not been provided. 2) Repositioning
+         * the task so it doesn't get placed over an existing task. 3) Resizing the task so that its
+         * dimensions match the activity's requested orientation.
+         *
+         * @param task          Can be: 1) the target task in which the source activity wants to
+         *                      launch the target activity; 2) a newly created task that Android
+         *                      gives a chance to override its launching bounds; 3) {@code null} if
+         *                      this is called to override an activity's launching bounds.
+         * @param layout        Desired layout when activity is first launched.
+         * @param activity      Activity that is being started. This can be {@code null} on
+         *                      re-parenting an activity to a new task (e.g. for
+         *                      Picture-In-Picture). Tasks being created because an activity was
+         *                      launched should have this be non-null.
+         * @param source        the Activity that launched a new task. Could be {@code null}.
+         * @param options       {@link ActivityOptions} used to start the activity with.
+         * @param currentParams launching params after the process of last {@link
+         *                      LaunchParamsModifier}.
+         * @param outParams     the result params to be set.
+         * @return see {@link LaunchParamsModifier.Result}
          */
         @Result
         int onCalculate(TaskRecord task, WindowLayout layout, ActivityRecord activity,

@@ -227,7 +227,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     }
 
     @Override
-    protected ConfigurationContainer getChildAt(int index) {
+    protected TaskRecord getChildAt(int index) {
         return mTaskHistory.get(index);
     }
 
