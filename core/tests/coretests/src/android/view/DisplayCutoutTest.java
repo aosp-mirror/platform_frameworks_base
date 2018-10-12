@@ -103,6 +103,18 @@ public class DisplayCutoutTest {
                 equalTo(new Rect[]{ZERO_RECT, boundTop, ZERO_RECT, boundBottom}));
     }
 
+    @Test
+    public void testExtractBoundsFromList_nullBoundingRects() {
+        Rect safeInsets = new Rect(0, 0, 0, 0);
+        assertThat(extractBoundsFromList(safeInsets, null /* boundingRects */),
+                equalTo(new Rect[]{ZERO_RECT, ZERO_RECT, ZERO_RECT, ZERO_RECT}));
+    }
+
+    @Test
+    public void testExtractBoundsFromList_nullSafeInsets() {
+        assertThat(extractBoundsFromList(null /* safeInsets */, Collections.emptyList()),
+                equalTo(new Rect[]{ZERO_RECT, ZERO_RECT, ZERO_RECT, ZERO_RECT}));
+    }
 
     @Test
     public void hasCutout() throws Exception {

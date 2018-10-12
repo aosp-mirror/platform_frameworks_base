@@ -245,9 +245,8 @@ public final class DisplayCutout {
      *                   passed, it's treated as an empty rectangle (0,0)-(0,0).
      */
     // TODO(b/73953958): @VisibleForTesting(visibility = PRIVATE)
-    public DisplayCutout(
-            Insets safeInsets, @Nullable Rect boundLeft, @Nullable Rect boundTop,
-            @Nullable Rect boundRight, @Nullable Rect boundBottom) {
+    public DisplayCutout(@NonNull Insets safeInsets, @Nullable Rect boundLeft,
+            @Nullable Rect boundTop, @Nullable Rect boundRight, @Nullable Rect boundBottom) {
         this(safeInsets.toRect(), boundLeft, boundTop, boundRight, boundBottom, true);
     }
 
@@ -262,7 +261,7 @@ public final class DisplayCutout {
      */
     // TODO(b/73953958): @VisibleForTesting(visibility = PRIVATE)
     @Deprecated
-    public DisplayCutout(Rect safeInsets, List<Rect> boundingRects) {
+    public DisplayCutout(@Nullable Rect safeInsets, @Nullable List<Rect> boundingRects) {
         this(safeInsets, extractBoundsFromList(safeInsets, boundingRects),
                 true /* copyArguments */);
     }
@@ -313,18 +312,20 @@ public final class DisplayCutout {
         for (int i = 0; i < sortedBounds.length; ++i) {
             sortedBounds[i] = ZERO_RECT;
         }
-        for (Rect bound : boundingRects) {
-            // There will be at most one non-functional area per short edge of the device, and none
-            // on the long edges, so either safeInsets.right or safeInsets.bottom must be 0.
-            // TODO(b/117199965): Refine the logic to handle edge cases.
-            if (bound.left == 0) {
-                sortedBounds[BOUNDS_POSITION_LEFT] = bound;
-            } else if (bound.top == 0) {
-                sortedBounds[BOUNDS_POSITION_TOP] = bound;
-            } else if (safeInsets.right > 0) {
-                sortedBounds[BOUNDS_POSITION_RIGHT] = bound;
-            } else if (safeInsets.bottom > 0) {
-                sortedBounds[BOUNDS_POSITION_BOTTOM] = bound;
+        if (safeInsets != null && boundingRects != null) {
+            for (Rect bound : boundingRects) {
+                // There is at most one non-functional area per short edge of the device, but none
+                // on the long edges, so either safeInsets.right or safeInsets.bottom must be 0.
+                // TODO(b/117199965): Refine the logic to handle edge cases.
+                if (bound.left == 0) {
+                    sortedBounds[BOUNDS_POSITION_LEFT] = bound;
+                } else if (bound.top == 0) {
+                    sortedBounds[BOUNDS_POSITION_TOP] = bound;
+                } else if (safeInsets.right > 0) {
+                    sortedBounds[BOUNDS_POSITION_RIGHT] = bound;
+                } else if (safeInsets.bottom > 0) {
+                    sortedBounds[BOUNDS_POSITION_BOTTOM] = bound;
+                }
             }
         }
         return sortedBounds;
@@ -389,6 +390,7 @@ public final class DisplayCutout {
      * @return a list of bounding {@code Rect}s, one for each display cutout area. No empty Rect is
      * returned.
      */
+    @NonNull
     public List<Rect> getBoundingRects() {
         List<Rect> result = new ArrayList<>();
         for (Rect bound : getBoundingRectsAll()) {
