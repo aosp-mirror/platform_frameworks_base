@@ -16,6 +16,10 @@
 
 #include "hash.h"
 
+#ifndef FALLTHROUGH_INTENDED
+#define FALLTHROUGH_INTENDED [[fallthrough]]
+#endif
+
 namespace android {
 namespace os {
 namespace statsd {
@@ -67,8 +71,10 @@ uint32_t Hash32(const char *data, size_t n, uint32_t seed) {
   switch (n) {
     case 3:
       h ^= ByteAs32(data[2]) << 16;
+      FALLTHROUGH_INTENDED;
     case 2:
       h ^= ByteAs32(data[1]) << 8;
+      FALLTHROUGH_INTENDED;
     case 1:
       h ^= ByteAs32(data[0]);
       h *= m;
@@ -104,16 +110,22 @@ uint64_t Hash64(const char* data, size_t n, uint64_t seed) {
   switch (n) {
     case 7:
       h ^= ByteAs64(data[6]) << 48;
+      FALLTHROUGH_INTENDED;
     case 6:
       h ^= ByteAs64(data[5]) << 40;
+      FALLTHROUGH_INTENDED;
     case 5:
       h ^= ByteAs64(data[4]) << 32;
+      FALLTHROUGH_INTENDED;
     case 4:
       h ^= ByteAs64(data[3]) << 24;
+      FALLTHROUGH_INTENDED;
     case 3:
       h ^= ByteAs64(data[2]) << 16;
+      FALLTHROUGH_INTENDED;
     case 2:
       h ^= ByteAs64(data[1]) << 8;
+      FALLTHROUGH_INTENDED;
     case 1:
       h ^= ByteAs64(data[0]);
       h *= m;
