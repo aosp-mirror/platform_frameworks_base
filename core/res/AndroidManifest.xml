@@ -138,7 +138,6 @@
     <protected-broadcast android:name="android.bluetooth.device.action.MAS_INSTANCE" />
     <protected-broadcast android:name="android.bluetooth.device.action.ALIAS_CHANGED" />
     <protected-broadcast android:name="android.bluetooth.device.action.FOUND" />
-    <protected-broadcast android:name="android.bluetooth.device.action.DISAPPEARED" />
     <protected-broadcast android:name="android.bluetooth.device.action.CLASS_CHANGED" />
     <protected-broadcast android:name="android.bluetooth.device.action.ACL_CONNECTED" />
     <protected-broadcast android:name="android.bluetooth.device.action.ACL_DISCONNECT_REQUESTED" />
