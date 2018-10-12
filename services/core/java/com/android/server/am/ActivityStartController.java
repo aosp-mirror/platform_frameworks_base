@@ -22,8 +22,8 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 
 import static android.os.FactoryTest.FACTORY_TEST_LOW_LEVEL;
-import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
-import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.TAG_ATM;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 
 import android.app.ActivityOptions;
 import android.app.IApplicationThread;
@@ -65,7 +65,7 @@ import java.util.List;
  * through the pending activity list, and recording home activity launches.
  */
 public class ActivityStartController {
-    private static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityStartController" : TAG_AM;
+    private static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityStartController" : TAG_ATM;
 
     private static final int DO_PENDING_ACTIVITY_LAUNCHES_MSG = 1;
 

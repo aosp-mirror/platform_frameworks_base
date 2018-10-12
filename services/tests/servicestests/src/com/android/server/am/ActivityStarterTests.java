@@ -37,7 +37,7 @@ import static android.content.Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TASK;
 
 import static com.android.server.am.ActivityDisplay.POSITION_BOTTOM;
-import static com.android.server.am.ActivityManagerService.ANIMATE;
+import static com.android.server.am.ActivityTaskManagerService.ANIMATE;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;

@@ -28,10 +28,10 @@ import static android.os.UserHandle.USER_CURRENT;
 import static android.telecom.TelecomManager.EMERGENCY_DIALER_COMPONENT;
 import static android.view.Display.DEFAULT_DISPLAY;
 
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_LOCKTASK;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_LOCKTASK;
-import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
-import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_LOCKTASK;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_LOCKTASK;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.TAG_ATM;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_DONT_LOCK;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_LAUNCHABLE;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_LAUNCHABLE_PRIV;
@@ -84,7 +84,7 @@ import java.util.Arrays;
  * @see Activity#stopLockTask()
  */
 public class LockTaskController {
-    private static final String TAG = TAG_WITH_CLASS_NAME ? "LockTaskController" : TAG_AM;
+    private static final String TAG = TAG_WITH_CLASS_NAME ? "LockTaskController" : TAG_ATM;
     private static final String TAG_LOCKTASK = TAG + POSTFIX_LOCKTASK;
 
     @VisibleForTesting
