@@ -32,7 +32,6 @@ import android.system.Os;
 import android.system.StructTimeval;
 import android.util.Log;
 import libcore.io.IoUtils;
-import libcore.io.Libcore;
 
 import java.io.FileDescriptor;
 import java.io.InterruptedIOException;
