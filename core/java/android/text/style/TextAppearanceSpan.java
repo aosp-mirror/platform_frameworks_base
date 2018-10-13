@@ -29,8 +29,33 @@ import android.text.TextPaint;
 import android.text.TextUtils;
 
 /**
- * Sets the text color, size, style, and typeface to match a TextAppearance
- * resource.
+ * Sets the text appearance using the given
+ * {@link android.R.styleable#TextAppearance TextAppearance} attributes.
+ * By default {@link TextAppearanceSpan} only changes the specified attributes in XML.
+ * {@link android.R.styleable#TextAppearance_textColorHighlight textColorHighlight},
+ * {@link android.R.styleable#TextAppearance_textColorHint textColorHint},
+ * {@link android.R.styleable#TextAppearance_textAllCaps textAllCaps} and
+ * {@link android.R.styleable#TextAppearance_fallbackLineSpacing fallbackLineSpacing}
+ * are not supported by {@link TextAppearanceSpan}.
+ *
+ * {@see android.widget.TextView#setTextAppearance(int)}
+ *
+ * @attr ref android.R.styleable#TextAppearance_fontFamily
+ * @attr ref android.R.styleable#TextAppearance_textColor
+ * @attr ref android.R.styleable#TextAppearance_textColorLink
+ * @attr ref android.R.styleable#TextAppearance_textFontWeight
+ * @attr ref android.R.styleable#TextAppearance_textSize
+ * @attr ref android.R.styleable#TextAppearance_textStyle
+ * @attr ref android.R.styleable#TextAppearance_typeface
+ * @attr ref android.R.styleable#TextAppearance_shadowColor
+ * @attr ref android.R.styleable#TextAppearance_shadowDx
+ * @attr ref android.R.styleable#TextAppearance_shadowDy
+ * @attr ref android.R.styleable#TextAppearance_shadowRadius
+ * @attr ref android.R.styleable#TextAppearance_elegantTextHeight
+ * @attr ref android.R.styleable#TextAppearance_letterSpacing
+ * @attr ref android.R.styleable#TextAppearance_fontFeatureSettings
+ * @attr ref android.R.styleable#TextAppearance_fontVariationSettings
+ *
  */
 public class TextAppearanceSpan extends MetricAffectingSpan implements ParcelableSpan {
     private final String mFamilyName;
