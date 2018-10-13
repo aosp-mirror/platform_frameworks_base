@@ -88,8 +88,7 @@ public class SubscriptionManager {
     /** @hide */
     public static final int INVALID_PHONE_INDEX = -1;
 
-    /** An invalid slot identifier */
-    /** @hide */
+    /** Indicates invalid sim slot. This can be returned by {@link #getSlotIndex(int)}. */
     public static final int INVALID_SIM_SLOT_INDEX = -1;
 
     /** Indicates the default subscription ID in Telephony. */
@@ -1310,15 +1309,15 @@ public class SubscriptionManager {
 
     /**
      * Get slotIndex associated with the subscription.
-     * @return slotIndex as a positive integer or a negative value if an error either
-     * SIM_NOT_INSERTED or < 0 if an invalid slot index
-     * @hide
+     *
+     * @param subscriptionId the unique SubscriptionInfo index in database
+     * @return slotIndex as a positive integer or {@link #INVALID_SIM_SLOT_INDEX} if the supplied
+     * subscriptionId doesn't have an associated slot index.
      */
-    @UnsupportedAppUsage
-    public static int getSlotIndex(int subId) {
-        if (!isValidSubscriptionId(subId)) {
+    public static int getSlotIndex(int subscriptionId) {
+        if (!isValidSubscriptionId(subscriptionId)) {
             if (DBG) {
-                logd("[getSlotIndex]- fail");
+                logd("[getSlotIndex]- supplied subscriptionId is invalid.");
             }
         }
 
@@ -1327,7 +1326,7 @@ public class SubscriptionManager {
         try {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
             if (iSub != null) {
-                result = iSub.getSlotIndex(subId);
+                result = iSub.getSlotIndex(subscriptionId);
             }
         } catch (RemoteException ex) {
             // ignore it
