@@ -507,14 +507,14 @@ class ActivityMetricsLogger {
     /**
      * Notifies the tracker that we called immediately before we call bindApplication on the client.
      *
-     * @param app The client into which we'll call bindApplication.
+     * @param appInfo The client into which we'll call bindApplication.
      */
-    void notifyBindApplication(ProcessRecord app) {
+    void notifyBindApplication(ApplicationInfo appInfo) {
         for (int i = mWindowingModeTransitionInfo.size() - 1; i >= 0; i--) {
             final WindowingModeTransitionInfo info = mWindowingModeTransitionInfo.valueAt(i);
 
             // App isn't attached to record yet, so match with info.
-            if (info.launchedActivity.appInfo == app.info) {
+            if (info.launchedActivity.appInfo == appInfo) {
                 info.bindApplicationDelayMs = calculateCurrentDelay();
             }
         }

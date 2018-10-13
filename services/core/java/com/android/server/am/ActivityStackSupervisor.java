@@ -994,8 +994,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         return candidateTaskId;
     }
 
-    boolean attachApplicationLocked(ProcessRecord app) throws RemoteException {
-        final String processName = app.processName;
+    boolean attachApplicationLocked(WindowProcessController app) throws RemoteException {
+        final String processName = app.mName;
         boolean didSomething = false;
         for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
             final ActivityDisplay display = mActivityDisplays.get(displayNdx);
@@ -1009,10 +1009,10 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 final int size = mTmpActivityList.size();
                 for (int i = 0; i < size; i++) {
                     final ActivityRecord activity = mTmpActivityList.get(i);
-                    if (activity.app == null && app.uid == activity.info.applicationInfo.uid
+                    if (activity.app == null && app.mUid == activity.info.applicationInfo.uid
                             && processName.equals(activity.processName)) {
                         try {
-                            if (realStartActivityLocked(activity, app,
+                            if (realStartActivityLocked(activity, (ProcessRecord) app.mOwner,
                                     top == activity /* andResume */, true /* checkConfig */)) {
                                 didSomething = true;
                             }

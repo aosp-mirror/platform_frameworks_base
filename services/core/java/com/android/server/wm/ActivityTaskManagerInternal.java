@@ -18,6 +18,7 @@ package com.android.server.wm;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.UserIdInt;
 import android.app.AppProtoEnums;
 import android.app.IActivityManager;
 import android.app.IApplicationThread;
@@ -28,19 +29,26 @@ import android.content.pm.ApplicationInfo;
 import android.content.res.CompatibilityInfo;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.os.SystemClock;
 import android.service.voice.IVoiceInteractionSession;
 import android.util.SparseIntArray;
 
+import android.util.proto.ProtoOutputStream;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.server.am.ActivityServiceConnectionsHolder;
 import com.android.server.am.PendingIntentRecord;
 import com.android.server.am.SafeActivityOptions;
 import com.android.server.am.TaskRecord;
+import com.android.server.am.UserState;
 import com.android.server.am.WindowProcessController;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
 import java.util.List;
+import java.util.Set;
+import java.util.function.Predicate;
 
 /**
  * Activity Task manager local system service interface.
@@ -313,6 +321,7 @@ public abstract class ActivityTaskManagerInternal {
     public abstract void onPackageDataCleared(String name);
     public abstract void onPackageUninstalled(String name);
     public abstract void onPackageAdded(String name, boolean replacing);
+    public abstract void onPackageReplaced(ApplicationInfo aInfo);
 
     public abstract CompatibilityInfo compatibilityInfoForPackage(ApplicationInfo ai);
 
@@ -343,4 +352,83 @@ public abstract class ActivityTaskManagerInternal {
     /** @return true if the given process is the factory test process. */
     public abstract boolean isFactoryTestProcess(WindowProcessController wpc);
     public abstract void updateTopComponentForFactoryTest();
+    public abstract void handleAppDied(WindowProcessController wpc, boolean restarting,
+            Runnable finishInstrumentationCallback);
+    public abstract void closeSystemDialogs(String reason);
+
+    /** Removes all components (e.g. activities, recents, ...) belonging to a disabled package. */
+    public abstract void cleanupDisabledPackageComponents(
+            String packageName, Set<String> disabledClasses, int userId, boolean booted);
+
+    /** Called whenever AM force stops a package. */
+    public abstract boolean onForceStopPackage(String packageName, boolean doit,
+            boolean evenPersistent, int userId);
+    /**
+     * Resumes all top activities in the system if they aren't resumed already.
+     * @param scheduleIdle If the idle message should be schedule after the top activities are
+     *                     resumed.
+     */
+    public abstract void resumeTopActivities(boolean scheduleIdle);
+
+    /** Called by AM just before it binds to an application process. */
+    public abstract void preBindApplication(WindowProcessController wpc);
+
+    /** Called by AM when an application process attaches. */
+    public abstract boolean attachApplication(WindowProcessController wpc) throws RemoteException;
+
+    /** @see IActivityManager#notifyLockedProfile(int) */
+    public abstract void notifyLockedProfile(@UserIdInt int userId, int currentUserId);
+
+    /** @see IActivityManager#startConfirmDeviceCredentialIntent(Intent, Bundle) */
+    public abstract void startConfirmDeviceCredentialIntent(Intent intent, Bundle options);
+
+    /** Writes current activity states to the proto stream. */
+    public abstract void writeActivitiesToProto(ProtoOutputStream proto);
+
+    /**
+     * Saves the current activity manager state and includes the saved state in the next dump of
+     * activity manager.
+     */
+    public abstract void saveANRState(String reason);
+
+    /** Clears the previously saved activity manager ANR state. */
+    public abstract void clearSavedANRState();
+
+    /** Dump the current state based on the command. */
+    public abstract void dump(String cmd, FileDescriptor fd, PrintWriter pw, String[] args,
+            int opti, boolean dumpAll, boolean dumpClient, String dumpPackage);
+
+    /** Dump the current state for inclusion in process dump. */
+    public abstract boolean dumpForProcesses(FileDescriptor fd, PrintWriter pw, boolean dumpAll,
+            String dumpPackage, int dumpAppId, boolean needSep, boolean testPssMode,
+            int wakefulness);
+
+    /** Writes the current window process states to the proto stream. */
+    public abstract void writeProcessesToProto(ProtoOutputStream proto, String dumpPackage);
+
+    /** Dump the current activities state. */
+    public abstract boolean dumpActivity(FileDescriptor fd, PrintWriter pw, String name,
+            String[] args, int opti, boolean dumpAll, boolean dumpVisibleStacksOnly,
+            boolean dumpFocusedStackOnly);
+
+    /** @return true if it the activity management system is okay with GC running now. */
+    public abstract boolean canGcNow();
+
+    /** @return the process for the top-most resumed activity in the system. */
+    public abstract WindowProcessController getTopApp();
+
+    /** Generate oom-score-adjustment rank for all tasks in the system based on z-order. */
+    public abstract void rankTaskLayersIfNeeded();
+
+    /** Destroy all activities. */
+    public abstract void scheduleDestroyAllActivities(String reason);
+
+    /** Remove user association with activities. */
+    public abstract void removeUser(int userId);
+
+    /** Switch current focused user for activities. */
+    public abstract boolean switchUser(int userId, UserState userState);
+
+    /** Called whenever an app crashes. */
+    public abstract void onHandleAppCrash(WindowProcessController wpc);
 }

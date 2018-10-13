@@ -546,6 +546,11 @@ public class ActivityTestsBase {
         ActivityDisplay getDefaultDisplay() {
             return mDisplay;
         }
+
+        @Override
+        void setWindowManager(WindowManagerService wm) {
+            mWindowManager = wm;
+        }
     }
 
     protected static class TestActivityDisplay extends ActivityDisplay {

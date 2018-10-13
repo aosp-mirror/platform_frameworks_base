@@ -124,17 +124,6 @@ public abstract class ActivityManagerInternal {
     public abstract void notifyNetworkPolicyRulesUpdated(int uid, long procStateSeq);
 
     /**
-     * Saves the current activity manager state and includes the saved state in the next dump of
-     * activity manager.
-     */
-    public abstract void saveANRState(String reason);
-
-    /**
-     * Clears the previously saved activity manager ANR state.
-     */
-    public abstract void clearSavedANRState();
-
-    /**
      * @return true if runtime was restarted, false if it's normal boot
      */
     public abstract boolean isRuntimeRestarted();
@@ -196,9 +185,6 @@ public abstract class ActivityManagerInternal {
 
     /** Trims memory usage in the system by removing/stopping unused application processes. */
     public abstract void trimApplications();
-
-    /** Closes all system dialogs. */
-    public abstract void closeSystemDialogs(String reason);
 
     /** Kill the processes in the list due to their tasks been removed. */
     public abstract void killProcessesForRemovedTask(ArrayList<Object> procsToKill);
