@@ -29,7 +29,6 @@ import android.util.Slog;
 import com.android.internal.util.FastPrintWriter;
 
 import libcore.io.IoUtils;
-import libcore.io.Libcore;
 
 import java.io.File;
 import java.io.FileInputStream;
