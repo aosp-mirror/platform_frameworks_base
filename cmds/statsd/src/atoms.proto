@@ -274,7 +274,7 @@ message ThermalThrottlingStateChanged {
  */
 message ScreenStateChanged {
     // New screen state, from frameworks/base/core/proto/android/view/enums.proto.
-    optional android.view.DisplayStateEnum state = 1 [(stateFieldOption).option = EXCLUSIVE];
+    optional android.view.DisplayStateEnum state = 1 [(state_field_option).option = EXCLUSIVE];
 }
 
 /**
@@ -285,10 +285,10 @@ message ScreenStateChanged {
  *   frameworks/base/services/core/java/com/android/server/am/BatteryStatsService.java
  */
 message UidProcessStateChanged {
-    optional int32 uid = 1 [(stateFieldOption).option = PRIMARY, (is_uid) = true];
+    optional int32 uid = 1 [(state_field_option).option = PRIMARY, (is_uid) = true];
 
     // The state, from frameworks/base/core/proto/android/app/enums.proto.
-    optional android.app.ProcessStateEnum state = 2 [(stateFieldOption).option = EXCLUSIVE];
+    optional android.app.ProcessStateEnum state = 2 [(state_field_option).option = EXCLUSIVE];
 }
 
 /**
@@ -320,7 +320,7 @@ message ActivityManagerSleepStateChanged {
         ASLEEP = 1;
         AWAKE = 2;
     }
-    optional State state = 1 [(stateFieldOption).option = EXCLUSIVE];
+    optional State state = 1 [(state_field_option).option = EXCLUSIVE];
 }
 
 /**
@@ -339,7 +339,7 @@ message MemoryFactorStateChanged {
         CRITICAL = 4;   // critical memory.
 
     }
-    optional State factor = 1 [(stateFieldOption).option = EXCLUSIVE];
+    optional State factor = 1 [(state_field_option).option = EXCLUSIVE];
 }
 
 /**
@@ -1940,7 +1940,7 @@ message LmkKillOccurred {
  */
 message AppDied {
     // timestamp(elapsedRealtime) of record creation
-    optional uint64 timestamp_millis = 1 [(stateFieldOption).option = EXCLUSIVE];
+    optional uint64 timestamp_millis = 1 [(state_field_option).option = EXCLUSIVE];
 }
 
 /**
