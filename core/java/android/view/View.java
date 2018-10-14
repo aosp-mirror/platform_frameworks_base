@@ -7315,17 +7315,16 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         // Here we check whether we still need the default focus highlight, and switch it on/off.
         switchDefaultFocusHighlight();
 
-        InputMethodManager imm = getContext().getSystemService(InputMethodManager.class);
         if (!gainFocus) {
             if (isPressed()) {
                 setPressed(false);
             }
-            if (imm != null && mAttachInfo != null && mAttachInfo.mHasWindowFocus) {
-                imm.focusOut(this);
+            if (mAttachInfo != null && mAttachInfo.mHasWindowFocus) {
+                notifyFocusChangeToInputMethodManager(false /* hasFocus */);
             }
             onFocusLost();
-        } else if (imm != null && mAttachInfo != null && mAttachInfo.mHasWindowFocus) {
-            imm.focusIn(this);
+        } else if (mAttachInfo != null && mAttachInfo.mHasWindowFocus) {
+            notifyFocusChangeToInputMethodManager(true /* hasFocus */);
         }
 
         invalidate(true);
@@ -7339,6 +7338,26 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
 
         notifyEnterOrExitForAutoFillIfNeeded(gainFocus);
+    }
+
+    /**
+     * Notify {@link InputMethodManager} about the focus change of the {@link View}.
+     *
+     * <p>Does nothing when {@link InputMethodManager} is not available.</p>
+     *
+     * @param hasFocus {@code true} when the {@link View} is being focused.
+     */
+    private void notifyFocusChangeToInputMethodManager(boolean hasFocus) {
+        final InputMethodManager imm =
+                getContext().getSystemService(InputMethodManager.class);
+        if (imm == null) {
+            return;
+        }
+        if (hasFocus) {
+            imm.focusIn(this);
+        } else {
+            imm.focusOut(this);
+        }
     }
 
     /** @hide */
@@ -12485,7 +12504,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         mPrivateFlags3 &= ~PFLAG3_TEMPORARY_DETACH;
         onFinishTemporaryDetach();
         if (hasWindowFocus() && hasFocus()) {
-            getContext().getSystemService(InputMethodManager.class).focusIn(this);
+            notifyFocusChangeToInputMethodManager(true /* hasFocus */);
         }
         notifyEnterOrExitForAutoFillIfNeeded(true);
     }
@@ -12876,20 +12895,19 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *        focus, false otherwise.
      */
     public void onWindowFocusChanged(boolean hasWindowFocus) {
-        InputMethodManager imm = getContext().getSystemService(InputMethodManager.class);
         if (!hasWindowFocus) {
             if (isPressed()) {
                 setPressed(false);
             }
             mPrivateFlags3 &= ~PFLAG3_FINGER_DOWN;
-            if (imm != null && (mPrivateFlags & PFLAG_FOCUSED) != 0) {
-                imm.focusOut(this);
+            if ((mPrivateFlags & PFLAG_FOCUSED) != 0) {
+                notifyFocusChangeToInputMethodManager(false /* hasFocus */);
             }
             removeLongPressCallback();
             removeTapCallback();
             onFocusLost();
-        } else if (imm != null && (mPrivateFlags & PFLAG_FOCUSED) != 0) {
-            imm.focusIn(this);
+        } else if ((mPrivateFlags & PFLAG_FOCUSED) != 0) {
+            notifyFocusChangeToInputMethodManager(true /* hasFocus */);
         }
 
         refreshDrawableState();
@@ -17981,10 +17999,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         rebuildOutline();
 
         if (isFocused()) {
-            InputMethodManager imm = getContext().getSystemService(InputMethodManager.class);
-            if (imm != null) {
-                imm.focusIn(this);
-            }
+            notifyFocusChangeToInputMethodManager(true /* hasFocus */);
         }
     }
 
