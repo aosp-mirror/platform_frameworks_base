@@ -5054,7 +5054,7 @@ public final class ActivityThread extends ClientTransactionHandler {
     private void performConfigurationChangedForActivity(ActivityClientRecord r,
             Configuration newBaseConfig) {
         performConfigurationChangedForActivity(r, newBaseConfig,
-                r.activity.getDisplay().getDisplayId(), false /* movedToDifferentDisplay */);
+                r.activity.getDisplayId(), false /* movedToDifferentDisplay */);
     }
 
     /**
@@ -5406,7 +5406,7 @@ public final class ActivityThread extends ClientTransactionHandler {
             return;
         }
         final boolean movedToDifferentDisplay = displayId != INVALID_DISPLAY
-                && displayId != r.activity.getDisplay().getDisplayId();
+                && displayId != r.activity.getDisplayId();
 
         // Perform updates.
         r.overrideConfig = overrideConfig;

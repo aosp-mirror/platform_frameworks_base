@@ -334,7 +334,7 @@ public class ScreenDecorWindowTests {
         final Activity activity = mInstrumentation.startActivitySync(intent, options.toBundle());
         waitForIdle();
 
-        assertEquals(displayId, activity.getDisplay().getDisplayId());
+        assertEquals(displayId, activity.getDisplayId());
         return activity;
     }
 

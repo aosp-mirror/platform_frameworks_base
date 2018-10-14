@@ -4982,6 +4982,14 @@ public abstract class Context {
     public abstract Display getDisplay();
 
     /**
+     * Gets the display ID.
+     *
+     * @return display ID associated with this {@link Context}.
+     * @hide
+     */
+    public abstract int getDisplayId();
+
+    /**
      * @hide
      */
     public abstract void updateDisplay(int displayId);
