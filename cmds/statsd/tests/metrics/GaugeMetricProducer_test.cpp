@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "src/matchers/SimpleLogMatchingTracker.h"
 #include "src/metrics/GaugeMetricProducer.h"
 #include "src/stats_log_util.h"
 #include "logd/LogEvent.h"
@@ -40,6 +41,8 @@ namespace statsd {
 const ConfigKey kConfigKey(0, 12345);
 const int tagId = 1;
 const int64_t metricId = 123;
+const int64_t atomMatcherId = 678;
+const int logEventMatcherIndex = 0;
 const int64_t bucketStartTimeNs = 10 * NS_PER_SEC;
 const int64_t bucketSizeNs = TimeUnitToBucketSizeInMillis(ONE_MINUTE) * 1000000LL;
 const int64_t bucket2StartTimeNs = bucketStartTimeNs + bucketSizeNs;
@@ -61,11 +64,19 @@ TEST(GaugeMetricProducerTest, TestFirstBucket) {
     gaugeFieldMatcher->add_child()->set_field(3);
 
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
+
+    UidMap uidMap;
+    SimpleAtomMatcher atomMatcher;
+    atomMatcher.set_atom_id(tagId);
+    sp<EventMatcherWizard> eventMatcherWizard = new EventMatcherWizard({
+        new SimpleLogMatchingTracker(atomMatcherId, logEventMatcherIndex, atomMatcher, uidMap)});
+
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
 
     // statsd started long ago.
     // The metric starts in the middle of the bucket
     GaugeMetricProducer gaugeProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, wizard,
+                                      logEventMatcherIndex, eventMatcherWizard,
                                       -1, -1, tagId, 5, 600 * NS_PER_SEC + NS_PER_SEC / 2,
                                       pullerManager);
 
@@ -86,6 +97,12 @@ TEST(GaugeMetricProducerTest, TestPulledEventsNoCondition) {
 
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
 
+    UidMap uidMap;
+    SimpleAtomMatcher atomMatcher;
+    atomMatcher.set_atom_id(tagId);
+    sp<EventMatcherWizard> eventMatcherWizard = new EventMatcherWizard({
+        new SimpleLogMatchingTracker(atomMatcherId, logEventMatcherIndex, atomMatcher, uidMap)});
+
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
     EXPECT_CALL(*pullerManager, RegisterReceiver(tagId, _, _, _)).WillOnce(Return());
     EXPECT_CALL(*pullerManager, UnRegisterReceiver(tagId, _)).WillOnce(Return());
@@ -103,6 +120,7 @@ TEST(GaugeMetricProducerTest, TestPulledEventsNoCondition) {
             }));
 
     GaugeMetricProducer gaugeProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, wizard,
+                                      logEventMatcherIndex, eventMatcherWizard,
                                       tagId, -1, tagId, bucketStartTimeNs, bucketStartTimeNs,
                                       pullerManager);
 
@@ -178,7 +196,15 @@ TEST(GaugeMetricProducerTest, TestPushedEventsWithUpgrade) {
     alert.set_num_buckets(100);
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
+
+    UidMap uidMap;
+    SimpleAtomMatcher atomMatcher;
+    atomMatcher.set_atom_id(tagId);
+    sp<EventMatcherWizard> eventMatcherWizard = new EventMatcherWizard({
+        new SimpleLogMatchingTracker(atomMatcherId, logEventMatcherIndex, atomMatcher, uidMap)});
+
     GaugeMetricProducer gaugeProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, wizard,
+                                      logEventMatcherIndex, eventMatcherWizard,
                                       -1 /* -1 means no pulling */, -1, tagId, bucketStartTimeNs,
                                       bucketStartTimeNs, pullerManager);
 
@@ -246,6 +272,12 @@ TEST(GaugeMetricProducerTest, TestPulledWithUpgrade) {
 
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
 
+    UidMap uidMap;
+    SimpleAtomMatcher atomMatcher;
+    atomMatcher.set_atom_id(tagId);
+    sp<EventMatcherWizard> eventMatcherWizard = new EventMatcherWizard({
+        new SimpleLogMatchingTracker(atomMatcherId, logEventMatcherIndex, atomMatcher, uidMap)});
+
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
     EXPECT_CALL(*pullerManager, RegisterReceiver(tagId, _, _, _)).WillOnce(Return());
     EXPECT_CALL(*pullerManager, UnRegisterReceiver(tagId, _)).WillOnce(Return());
@@ -263,6 +295,7 @@ TEST(GaugeMetricProducerTest, TestPulledWithUpgrade) {
             }));
 
     GaugeMetricProducer gaugeProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, wizard,
+                                      logEventMatcherIndex, eventMatcherWizard,
                                       tagId, -1, tagId, bucketStartTimeNs, bucketStartTimeNs,
                                       pullerManager);
 
@@ -315,6 +348,12 @@ TEST(GaugeMetricProducerTest, TestPulledEventsWithCondition) {
 
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
 
+    UidMap uidMap;
+    SimpleAtomMatcher atomMatcher;
+    atomMatcher.set_atom_id(tagId);
+    sp<EventMatcherWizard> eventMatcherWizard = new EventMatcherWizard({
+        new SimpleLogMatchingTracker(atomMatcherId, logEventMatcherIndex, atomMatcher, uidMap)});
+
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
     EXPECT_CALL(*pullerManager, RegisterReceiver(tagId, _, _, _)).WillOnce(Return());
     EXPECT_CALL(*pullerManager, UnRegisterReceiver(tagId, _)).WillOnce(Return());
@@ -330,7 +369,8 @@ TEST(GaugeMetricProducerTest, TestPulledEventsWithCondition) {
                 return true;
             }));
 
-    GaugeMetricProducer gaugeProducer(kConfigKey, metric, 1, wizard, tagId, -1, tagId,
+    GaugeMetricProducer gaugeProducer(kConfigKey, metric, 1, wizard,
+                                      logEventMatcherIndex, eventMatcherWizard, tagId, -1, tagId,
                                       bucketStartTimeNs, bucketStartTimeNs, pullerManager);
 
     gaugeProducer.onConditionChanged(true, bucketStartTimeNs + 8);
@@ -388,6 +428,12 @@ TEST(GaugeMetricProducerTest, TestPulledEventsWithSlicedCondition) {
     dim->set_field(conditionTag);
     dim->add_child()->set_field(1);
 
+    UidMap uidMap;
+    SimpleAtomMatcher atomMatcher;
+    atomMatcher.set_atom_id(tagId);
+    sp<EventMatcherWizard> eventMatcherWizard = new EventMatcherWizard({
+        new SimpleLogMatchingTracker(atomMatcherId, logEventMatcherIndex, atomMatcher, uidMap)});
+
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     EXPECT_CALL(*wizard, query(_, _, _, _, _, _))
             .WillRepeatedly(
@@ -420,7 +466,8 @@ TEST(GaugeMetricProducerTest, TestPulledEventsWithSlicedCondition) {
                 return true;
             }));
 
-    GaugeMetricProducer gaugeProducer(kConfigKey, metric, 1, wizard, tagId, -1, tagId,
+    GaugeMetricProducer gaugeProducer(kConfigKey, metric, 1, wizard,
+                                      logEventMatcherIndex, eventMatcherWizard, tagId, -1, tagId,
                                       bucketStartTimeNs, bucketStartTimeNs, pullerManager);
 
     gaugeProducer.onSlicedConditionMayChange(true, bucketStartTimeNs + 8);
@@ -463,7 +510,15 @@ TEST(GaugeMetricProducerTest, TestPulledEventsAnomalyDetection) {
     auto gaugeFieldMatcher = metric.mutable_gauge_fields_filter()->mutable_fields();
     gaugeFieldMatcher->set_field(tagId);
     gaugeFieldMatcher->add_child()->set_field(2);
+
+    UidMap uidMap;
+    SimpleAtomMatcher atomMatcher;
+    atomMatcher.set_atom_id(tagId);
+    sp<EventMatcherWizard> eventMatcherWizard = new EventMatcherWizard({
+        new SimpleLogMatchingTracker(atomMatcherId, logEventMatcherIndex, atomMatcher, uidMap)});
+
     GaugeMetricProducer gaugeProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, wizard,
+                                      logEventMatcherIndex, eventMatcherWizard,
                                       tagId, -1, tagId, bucketStartTimeNs, bucketStartTimeNs,
                                       pullerManager);
 
@@ -542,6 +597,12 @@ TEST(GaugeMetricProducerTest, TestPullOnTrigger) {
 
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
 
+    UidMap uidMap;
+    SimpleAtomMatcher atomMatcher;
+    atomMatcher.set_atom_id(tagId);
+    sp<EventMatcherWizard> eventMatcherWizard = new EventMatcherWizard({
+        new SimpleLogMatchingTracker(atomMatcherId, logEventMatcherIndex, atomMatcher, uidMap)});
+
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
     EXPECT_CALL(*pullerManager, Pull(tagId, _, _))
             .WillOnce(Invoke([](int tagId, int64_t timeNs,
@@ -574,6 +635,7 @@ TEST(GaugeMetricProducerTest, TestPullOnTrigger) {
 
     int triggerId = 5;
     GaugeMetricProducer gaugeProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, wizard,
+                                      logEventMatcherIndex, eventMatcherWizard,
                                       tagId, triggerId, tagId, bucketStartTimeNs, bucketStartTimeNs,
                                       pullerManager);
 
@@ -632,6 +694,12 @@ TEST(GaugeMetricProducerTest, TestRemoveDimensionInOutput) {
 
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
 
+    UidMap uidMap;
+    SimpleAtomMatcher atomMatcher;
+    atomMatcher.set_atom_id(tagId);
+    sp<EventMatcherWizard> eventMatcherWizard = new EventMatcherWizard({
+        new SimpleLogMatchingTracker(atomMatcherId, logEventMatcherIndex, atomMatcher, uidMap)});
+
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
     EXPECT_CALL(*pullerManager, Pull(tagId, _, _))
             .WillOnce(Invoke([](int tagId, int64_t timeNs,
@@ -667,6 +735,7 @@ TEST(GaugeMetricProducerTest, TestRemoveDimensionInOutput) {
 
     int triggerId = 5;
     GaugeMetricProducer gaugeProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, wizard,
+                                      logEventMatcherIndex, eventMatcherWizard,
                                       tagId, triggerId, tagId, bucketStartTimeNs, bucketStartTimeNs,
                                       pullerManager);
 
