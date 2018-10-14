@@ -736,14 +736,19 @@ public class ScreenDecorations extends SystemUI implements Tunable {
             switch (gravity) {
                 case Gravity.TOP:
                     out.set(displayCutout.getBoundingRectTop());
+                    break;
                 case Gravity.LEFT:
                     out.set(displayCutout.getBoundingRectLeft());
+                    break;
                 case Gravity.BOTTOM:
                     out.set(displayCutout.getBoundingRectBottom());
+                    break;
                 case Gravity.RIGHT:
                     out.set(displayCutout.getBoundingRectRight());
+                    break;
+                default:
+                    out.setEmpty();
             }
-            out.setEmpty();
         }
 
         private void localBounds(Rect out) {

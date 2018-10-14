@@ -251,7 +251,7 @@ int collate_atom(const Descriptor *atom, AtomDecl *atomDecl,
     }
     atomDecl->fields.push_back(atField);
 
-    if (field->options().GetExtension(os::statsd::stateFieldOption).option() ==
+    if (field->options().GetExtension(os::statsd::state_field_option).option() ==
         os::statsd::StateField::PRIMARY) {
         if (javaType == JAVA_TYPE_UNKNOWN ||
             javaType == JAVA_TYPE_ATTRIBUTION_CHAIN ||
@@ -261,7 +261,7 @@ int collate_atom(const Descriptor *atom, AtomDecl *atomDecl,
         atomDecl->primaryFields.push_back(it->first);
     }
 
-    if (field->options().GetExtension(os::statsd::stateFieldOption).option() ==
+    if (field->options().GetExtension(os::statsd::state_field_option).option() ==
         os::statsd::StateField::EXCLUSIVE) {
         if (javaType == JAVA_TYPE_UNKNOWN ||
             javaType == JAVA_TYPE_ATTRIBUTION_CHAIN ||

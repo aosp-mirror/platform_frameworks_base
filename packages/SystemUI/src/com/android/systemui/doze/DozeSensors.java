@@ -16,6 +16,8 @@
 
 package com.android.systemui.doze;
 
+import static com.android.systemui.plugins.SensorManagerPlugin.Sensor.TYPE_WAKE_LOCK_SCREEN;
+
 import android.annotation.AnyThread;
 import android.app.ActivityManager;
 import android.app.AlarmManager;
@@ -39,8 +41,10 @@ import android.util.Log;
 import com.android.internal.hardware.AmbientDisplayConfiguration;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
+import com.android.systemui.plugins.SensorManagerPlugin;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.util.AlarmTimeout;
+import com.android.systemui.util.AsyncSensorManager;
 import com.android.systemui.util.wakelock.WakeLock;
 
 import java.io.PrintWriter;
@@ -112,8 +116,8 @@ public class DozeSensors {
                         DozeLog.PULSE_REASON_SENSOR_LONG_PRESS,
                         true /* reports touch coordinates */,
                         true /* touchscreen */),
-                new TriggerSensor(
-                        findSensorWithType(config.wakeLockScreenSensorType()),
+                new PluginTriggerSensor(
+                        new SensorManagerPlugin.Sensor(TYPE_WAKE_LOCK_SCREEN),
                         Settings.Secure.DOZE_WAKE_LOCK_SCREEN_GESTURE,
                         true /* configured */,
                         DozeLog.PULSE_REASON_SENSOR_WAKE_LOCK_SCREEN,
@@ -375,7 +379,7 @@ public class DozeSensors {
             mHandler.post(mWakeLock.wrap(() -> {
                 if (DEBUG) Log.d(TAG, "onTrigger: " + triggerEventToString(event));
                 boolean sensorPerformsProxCheck = false;
-                if (mSensor.getType() == Sensor.TYPE_PICK_UP_GESTURE) {
+                if (mSensor != null && mSensor.getType() == Sensor.TYPE_PICK_UP_GESTURE) {
                     int subType = (int) event.values[0];
                     MetricsLogger.action(
                             mContext, MetricsProto.MetricsEvent.ACTION_AMBIENT_GESTURE,
@@ -416,6 +420,49 @@ public class DozeSensors {
             }
             return sb.append(']').toString();
         }
+    }
+
+    /**
+     * A Sensor that is injected via plugin.
+     */
+    private class PluginTriggerSensor extends TriggerSensor {
+
+        private final SensorManagerPlugin.Sensor mPluginSensor;
+        private final SensorManagerPlugin.TriggerEventListener mTriggerEventListener = (event) -> {
+            onTrigger(null);
+        };
+
+        PluginTriggerSensor(SensorManagerPlugin.Sensor sensor, String setting, boolean configured,
+                int pulseReason, boolean reportsTouchCoordinates, boolean requiresTouchscreen) {
+            super(null, setting, configured, pulseReason, reportsTouchCoordinates,
+                    requiresTouchscreen);
+            mPluginSensor = sensor;
+        }
+
+        @Override
+        public void updateListener() {
+            if (!mConfigured) return;
+            AsyncSensorManager asyncSensorManager = (AsyncSensorManager) mSensorManager;
+            if (mRequested && !mDisabled && enabledBySetting() && !mRegistered) {
+                asyncSensorManager.requestPluginTriggerSensor(mPluginSensor, mTriggerEventListener);
+                mRegistered = true;
+                if (DEBUG) Log.d(TAG, "requestPluginTriggerSensor");
+            } else if (mRegistered) {
+                asyncSensorManager.cancelPluginTriggerSensor(mPluginSensor, mTriggerEventListener);
+                mRegistered = false;
+                if (DEBUG) Log.d(TAG, "cancelPluginTriggerSensor");
+            }
+        }
+
+        @Override
+        public String toString() {
+            return new StringBuilder("{mRegistered=").append(mRegistered)
+                    .append(", mRequested=").append(mRequested)
+                    .append(", mDisabled=").append(mDisabled)
+                    .append(", mConfigured=").append(mConfigured)
+                    .append(", mSensor=").append(mPluginSensor).append("}").toString();
+        }
+
     }
 
     private class WakeScreenSensor extends TriggerSensor {

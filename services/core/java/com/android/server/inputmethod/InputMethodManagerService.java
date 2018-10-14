@@ -421,7 +421,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         final IInputContext inputContext;
         final int uid;
         final int pid;
-        final int selfReportedDisplayId;
         final InputBinding binding;
         final ClientDeathRecipient clientDeathRecipient;
 
@@ -431,18 +430,16 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         @Override
         public String toString() {
             return "ClientState{" + Integer.toHexString(
-                    System.identityHashCode(this)) + " uid=" + uid
-                    + " pid=" + pid + " displayId=" + selfReportedDisplayId + "}";
+                    System.identityHashCode(this)) + " uid " + uid
+                    + " pid " + pid + "}";
         }
 
         ClientState(IInputMethodClient _client, IInputContext _inputContext,
-                int _uid, int _pid, int _selfReportedDisplayId,
-                ClientDeathRecipient _clientDeathRecipient) {
+                int _uid, int _pid, ClientDeathRecipient _clientDeathRecipient) {
             client = _client;
             inputContext = _inputContext;
             uid = _uid;
             pid = _pid;
-            selfReportedDisplayId = _selfReportedDisplayId;
             binding = new InputBinding(null, inputContext.asBinder(), uid, pid);
             clientDeathRecipient = _clientDeathRecipient;
         }
@@ -1748,21 +1745,15 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
      *               process
      * @param inputContext communication channel for the dummy
      *                     {@link android.view.inputmethod.InputConnection}
-     * @param selfReportedDisplayId self-reported display ID to which the client is associated.
-     *                              Whether the client is still allowed to access to this display
-     *                              or not needs to be evaluated every time the client interacts
-     *                              with the display
      */
     @Override
-    public void addClient(IInputMethodClient client, IInputContext inputContext,
-            int selfReportedDisplayId) {
+    public void addClient(IInputMethodClient client, IInputContext inputContext) {
         final int callerUid = Binder.getCallingUid();
         final int callerPid = Binder.getCallingPid();
         synchronized (mMethodMap) {
             // TODO: Optimize this linear search.
             for (ClientState state : mClients.values()) {
-                if (state.uid == callerUid && state.pid == callerPid
-                        && state.selfReportedDisplayId == selfReportedDisplayId) {
+                if (state.uid == callerUid && state.pid == callerPid) {
                     throw new SecurityException("uid=" + callerUid + "/pid=" + callerPid
                             + " is already registered");
                 }
@@ -1773,23 +1764,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             } catch (RemoteException e) {
                 throw new IllegalStateException(e);
             }
-            // We cannot fully avoid race conditions where the client UID already lost the access to
-            // the given self-reported display ID, even if the client is not maliciously reporting
-            // a fake display ID. Unconditionally returning SecurityException just because the
-            // client doesn't pass display ID verification can cause many test failures hence not an
-            // option right now.  At the same time
-            //    context.getSystemService(InputMethodManager.class)
-            // is expected to return a valid non-null instance at any time if we do not choose to
-            // have the client crash.  Thus we do not verify the display ID at all here.  Instead we
-            // later check the display ID every time the client needs to interact with the specified
-            // display.
-            mClients.put(client.asBinder(), new ClientState(client, inputContext, callerUid,
-                    callerPid, selfReportedDisplayId, deathRecipient));
+            mClients.put(client.asBinder(),
+                    new ClientState(client, inputContext, callerUid, callerPid, deathRecipient));
         }
-    }
-
-    private boolean verifyDisplayId(ClientState cs) {
-        return mWindowManagerInternal.isUidAllowedOnDisplay(cs.selfReportedDisplayId, cs.uid);
     }
 
     void removeClient(IInputMethodClient client) {
@@ -1941,9 +1918,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         mCurAttribute = attribute;
 
         // Check if the input method is changing.
-        // We expect the caller has already verified that the client is allowed to access this
-        // display ID.
-        final int displayId = mCurFocusedWindowClient.selfReportedDisplayId;
+        final int displayId = mWindowManagerInternal.getDisplayIdForWindow(
+                mCurFocusedWindow);
         if (mCurId != null && mCurId.equals(mCurMethodId) && displayId == mCurTokenDisplayId) {
             if (cs.curSession != null) {
                 // Fast case: if we are already connected to the input method,
@@ -2008,11 +1984,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 com.android.internal.R.string.input_method_binding_label);
         mCurIntent.putExtra(Intent.EXTRA_CLIENT_INTENT, PendingIntent.getActivity(
                 mContext, 0, new Intent(Settings.ACTION_INPUT_METHOD_SETTINGS), 0));
-        if (!verifyDisplayId(mCurFocusedWindowClient)) {
-            // Wait, the client no longer has access to the display.
-            return InputBindResult.INVALID_DISPLAY_ID;
-        }
-        final int displayId = mCurFocusedWindowClient.selfReportedDisplayId;
+        final int displayId = mWindowManagerInternal.getDisplayIdForWindow(mCurFocusedWindow);
         mCurTokenDisplayId = (displayId != INVALID_DISPLAY) ? displayId : DEFAULT_DISPLAY;
 
         if (bindCurrentInputMethodServiceLocked(mCurIntent, this, IME_CONNECTION_BIND_FLAGS)) {
@@ -2612,8 +2584,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     if (cs == null) {
                         throw new IllegalArgumentException("unknown client " + client.asBinder());
                     }
-                    if (!mWindowManagerInternal.isInputMethodClientFocus(cs.uid, cs.pid,
-                            cs.selfReportedDisplayId)) {
+                    if (!mWindowManagerInternal.isInputMethodClientFocus(cs.uid, cs.pid)) {
                         Slog.w(TAG, "Ignoring showSoftInput of uid " + uid + ": " + client);
                         return false;
                     }
@@ -2697,8 +2668,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     if (cs == null) {
                         throw new IllegalArgumentException("unknown client " + client.asBinder());
                     }
-                    if (!mWindowManagerInternal.isInputMethodClientFocus(cs.uid, cs.pid,
-                            cs.selfReportedDisplayId)) {
+                    if (!mWindowManagerInternal.isInputMethodClientFocus(cs.uid, cs.pid)) {
                         if (DEBUG) {
                             Slog.w(TAG, "Ignoring hideSoftInput of uid " + uid + ": " + client);
                         }
@@ -2797,8 +2767,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         InputBindResult res = null;
         long ident = Binder.clearCallingIdentity();
         try {
-            final int windowDisplayId =
-                    mWindowManagerInternal.getDisplayIdForWindow(windowToken);
             synchronized (mMethodMap) {
                 if (DEBUG) Slog.v(TAG, "startInputOrWindowGainedFocusInternal: reason="
                         + InputMethodClient.getStartInputReason(startInputReason)
@@ -2817,15 +2785,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     throw new IllegalArgumentException("unknown client "
                             + client.asBinder());
                 }
-                if (cs.selfReportedDisplayId != windowDisplayId) {
-                    Slog.e(TAG, "startInputOrWindowGainedFocusInternal: display ID mismatch."
-                            + " from client:" + cs.selfReportedDisplayId
-                            + " from window:" + windowDisplayId);
-                    return InputBindResult.DISPLAY_ID_MISMATCH;
-                }
 
-                if (!mWindowManagerInternal.isInputMethodClientFocus(cs.uid, cs.pid,
-                        cs.selfReportedDisplayId)) {
+                if (!mWindowManagerInternal.isInputMethodClientFocus(cs.uid, cs.pid)) {
                     // Check with the window manager to make sure this client actually
                     // has a window with focus.  If not, reject.  This is thread safe
                     // because if the focus changes some time before or after, the
@@ -2897,9 +2858,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                                 // If focused display changed, we should unbind current method
                                 // to make app window in previous display relayout after Ime
                                 // window token removed.
-                                // Note that we can trust client's display ID as long as it matches
-                                // to the display ID obtained from the window.
-                                if (cs.selfReportedDisplayId != mCurTokenDisplayId) {
+                                final int newFocusDisplayId =
+                                        mWindowManagerInternal.getDisplayIdForWindow(windowToken);
+                                if (newFocusDisplayId != mCurTokenDisplayId) {
                                     unbindCurrentMethodLocked();
                                 }
                             }
@@ -2997,7 +2958,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     private boolean canShowInputMethodPickerLocked(IInputMethodClient client) {
-        // TODO(yukawa): multi-display support.
         final int uid = Binder.getCallingUid();
         if (UserHandle.getAppId(uid) == Process.SYSTEM_UID) {
             return true;
@@ -3074,7 +3034,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     @Override
     public void showInputMethodAndSubtypeEnablerFromClient(
             IInputMethodClient client, String inputMethodId) {
-        // TODO(yukawa): Should we verify the display ID?
         if (!calledFromValidUser()) {
             return;
         }
@@ -3270,7 +3229,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
      */
     @Override
     public int getInputMethodWindowVisibleHeight() {
-        // TODO(yukawa): Should we verify the display ID?
         return mWindowManagerInternal.getInputMethodWindowVisibleHeight(mCurTokenDisplayId);
     }
 

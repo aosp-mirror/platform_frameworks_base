@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
+import android.content.Intent;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -57,7 +58,7 @@ public class ServiceState implements Parcelable {
      * Normal operation condition, the phone is registered
      * with an operator either in home network or in roaming.
      */
-    public static final int STATE_IN_SERVICE = 0;
+    public static final int STATE_IN_SERVICE = TelephonyProtoEnums.SERVICE_STATE_IN_SERVICE; // 0
 
     /**
      * Phone is not registered with any operator, the phone
@@ -65,17 +66,19 @@ public class ServiceState implements Parcelable {
      * searching to registration at all, or registration is denied, or radio
      * signal is not available.
      */
-    public static final int STATE_OUT_OF_SERVICE = 1;
+    public static final int STATE_OUT_OF_SERVICE =
+            TelephonyProtoEnums.SERVICE_STATE_OUT_OF_SERVICE;  // 1
 
     /**
      * The phone is registered and locked.  Only emergency numbers are allowed. {@more}
      */
-    public static final int STATE_EMERGENCY_ONLY = 2;
+    public static final int STATE_EMERGENCY_ONLY =
+            TelephonyProtoEnums.SERVICE_STATE_EMERGENCY_ONLY;  // 2
 
     /**
      * Radio of telephony is explicitly powered off.
      */
-    public static final int STATE_POWER_OFF = 3;
+    public static final int STATE_POWER_OFF = TelephonyProtoEnums.SERVICE_STATE_POWER_OFF;  // 3
 
     /** @hide */
     @Retention(RetentionPolicy.SOURCE)
@@ -198,6 +201,15 @@ public class ServiceState implements Parcelable {
     private int mVoiceRegState = STATE_OUT_OF_SERVICE;
     private int mDataRegState = STATE_OUT_OF_SERVICE;
 
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = { "ROAMING_TYPE_" }, value = {
+            ROAMING_TYPE_NOT_ROAMING,
+            ROAMING_TYPE_UNKNOWN,
+            ROAMING_TYPE_DOMESTIC,
+            ROAMING_TYPE_INTERNATIONAL
+    })
+    public @interface RoamingType {}
     /**
      * Roaming type
      * HOME : in home network
@@ -228,8 +240,6 @@ public class ServiceState implements Parcelable {
      */
     public static final int UNKNOWN_ID = -1;
 
-    private int mVoiceRoamingType;
-    private int mDataRoamingType;
     private String mVoiceOperatorAlphaLong;
     private String mVoiceOperatorAlphaShort;
     private String mVoiceOperatorNumeric;
@@ -258,8 +268,6 @@ public class ServiceState implements Parcelable {
     private int mCdmaEriIconIndex;
     @UnsupportedAppUsage
     private int mCdmaEriIconMode;
-
-    private boolean mIsDataRoamingFromRegistration;
 
     @UnsupportedAppUsage
     private boolean mIsUsingCarrierAggregation;
@@ -332,8 +340,6 @@ public class ServiceState implements Parcelable {
     protected void copyFrom(ServiceState s) {
         mVoiceRegState = s.mVoiceRegState;
         mDataRegState = s.mDataRegState;
-        mVoiceRoamingType = s.mVoiceRoamingType;
-        mDataRoamingType = s.mDataRoamingType;
         mVoiceOperatorAlphaLong = s.mVoiceOperatorAlphaLong;
         mVoiceOperatorAlphaShort = s.mVoiceOperatorAlphaShort;
         mVoiceOperatorNumeric = s.mVoiceOperatorNumeric;
@@ -351,7 +357,6 @@ public class ServiceState implements Parcelable {
         mCdmaEriIconIndex = s.mCdmaEriIconIndex;
         mCdmaEriIconMode = s.mCdmaEriIconMode;
         mIsEmergencyOnly = s.mIsEmergencyOnly;
-        mIsDataRoamingFromRegistration = s.mIsDataRoamingFromRegistration;
         mIsUsingCarrierAggregation = s.mIsUsingCarrierAggregation;
         mChannelNumber = s.mChannelNumber;
         mCellBandwidths = s.mCellBandwidths == null ? null :
@@ -367,8 +372,6 @@ public class ServiceState implements Parcelable {
     public ServiceState(Parcel in) {
         mVoiceRegState = in.readInt();
         mDataRegState = in.readInt();
-        mVoiceRoamingType = in.readInt();
-        mDataRoamingType = in.readInt();
         mVoiceOperatorAlphaLong = in.readString();
         mVoiceOperatorAlphaShort = in.readString();
         mVoiceOperatorNumeric = in.readString();
@@ -386,7 +389,6 @@ public class ServiceState implements Parcelable {
         mCdmaEriIconIndex = in.readInt();
         mCdmaEriIconMode = in.readInt();
         mIsEmergencyOnly = in.readInt() != 0;
-        mIsDataRoamingFromRegistration = in.readInt() != 0;
         mIsUsingCarrierAggregation = in.readInt() != 0;
         mLteEarfcnRsrpBoost = in.readInt();
         mNetworkRegistrationStates = new ArrayList<>();
@@ -398,8 +400,6 @@ public class ServiceState implements Parcelable {
     public void writeToParcel(Parcel out, int flags) {
         out.writeInt(mVoiceRegState);
         out.writeInt(mDataRegState);
-        out.writeInt(mVoiceRoamingType);
-        out.writeInt(mDataRoamingType);
         out.writeString(mVoiceOperatorAlphaLong);
         out.writeString(mVoiceOperatorAlphaShort);
         out.writeString(mVoiceOperatorNumeric);
@@ -417,7 +417,6 @@ public class ServiceState implements Parcelable {
         out.writeInt(mCdmaEriIconIndex);
         out.writeInt(mCdmaEriIconMode);
         out.writeInt(mIsEmergencyOnly ? 1 : 0);
-        out.writeInt(mIsDataRoamingFromRegistration ? 1 : 0);
         out.writeInt(mIsUsingCarrierAggregation ? 1 : 0);
         out.writeInt(mLteEarfcnRsrpBoost);
         out.writeList(mNetworkRegistrationStates);
@@ -535,17 +534,21 @@ public class ServiceState implements Parcelable {
      */
     @UnsupportedAppUsage
     public boolean getVoiceRoaming() {
-        return mVoiceRoamingType != ROAMING_TYPE_NOT_ROAMING;
+        return getVoiceRoamingType() != ROAMING_TYPE_NOT_ROAMING;
     }
-
     /**
      * Get current voice network roaming type
      * @return roaming type
      * @hide
      */
     @UnsupportedAppUsage
-    public int getVoiceRoamingType() {
-        return mVoiceRoamingType;
+    public @RoamingType int getVoiceRoamingType() {
+        final NetworkRegistrationState regState = getNetworkRegistrationState(
+                NetworkRegistrationState.DOMAIN_CS, AccessNetworkConstants.TransportType.WWAN);
+        if (regState != null) {
+            return regState.getRoamingType();
+        }
+        return ROAMING_TYPE_NOT_ROAMING;
     }
 
     /**
@@ -555,19 +558,7 @@ public class ServiceState implements Parcelable {
      */
     @UnsupportedAppUsage
     public boolean getDataRoaming() {
-        return mDataRoamingType != ROAMING_TYPE_NOT_ROAMING;
-    }
-
-    /**
-     * Set whether data network registration state is roaming
-     *
-     * This should only be set to the roaming value received
-     * once the data registration phase has completed.
-     * @hide
-     */
-    @UnsupportedAppUsage
-    public void setDataRoamingFromRegistration(boolean dataRoaming) {
-        mIsDataRoamingFromRegistration = dataRoaming;
+        return getDataRoamingType() != ROAMING_TYPE_NOT_ROAMING;
     }
 
     /**
@@ -576,7 +567,12 @@ public class ServiceState implements Parcelable {
      * @hide
      */
     public boolean getDataRoamingFromRegistration() {
-        return mIsDataRoamingFromRegistration;
+        final NetworkRegistrationState regState = getNetworkRegistrationState(
+                NetworkRegistrationState.DOMAIN_PS, AccessNetworkConstants.TransportType.WWAN);
+        if (regState != null) {
+            return (regState.getRegState() == NetworkRegistrationState.REG_STATE_ROAMING);
+        }
+        return false;
     }
 
     /**
@@ -585,8 +581,13 @@ public class ServiceState implements Parcelable {
      * @hide
      */
     @UnsupportedAppUsage
-    public int getDataRoamingType() {
-        return mDataRoamingType;
+    public @RoamingType int getDataRoamingType() {
+        final NetworkRegistrationState regState = getNetworkRegistrationState(
+                NetworkRegistrationState.DOMAIN_PS, AccessNetworkConstants.TransportType.WWAN);
+        if (regState != null) {
+            return regState.getRoamingType();
+        }
+        return ROAMING_TYPE_NOT_ROAMING;
     }
 
     /**
@@ -759,8 +760,6 @@ public class ServiceState implements Parcelable {
         return Objects.hash(
                 mVoiceRegState,
                 mDataRegState,
-                mVoiceRoamingType,
-                mDataRoamingType,
                 mChannelNumber,
                 mCellBandwidths,
                 mVoiceOperatorAlphaLong,
@@ -780,7 +779,6 @@ public class ServiceState implements Parcelable {
                 mCdmaEriIconIndex,
                 mCdmaEriIconMode,
                 mIsEmergencyOnly,
-                mIsDataRoamingFromRegistration,
                 mIsUsingCarrierAggregation,
                 mLteEarfcnRsrpBoost,
                 mNetworkRegistrationStates);
@@ -794,8 +792,6 @@ public class ServiceState implements Parcelable {
         return (mVoiceRegState == s.mVoiceRegState
                 && mDataRegState == s.mDataRegState
                 && mIsManualNetworkSelection == s.mIsManualNetworkSelection
-                && mVoiceRoamingType == s.mVoiceRoamingType
-                && mDataRoamingType == s.mDataRoamingType
                 && mChannelNumber == s.mChannelNumber
                 && Arrays.equals(mCellBandwidths, s.mCellBandwidths)
                 && equalsHandlesNulls(mVoiceOperatorAlphaLong, s.mVoiceOperatorAlphaLong)
@@ -813,7 +809,6 @@ public class ServiceState implements Parcelable {
                 && equalsHandlesNulls(mCdmaDefaultRoamingIndicator,
                         s.mCdmaDefaultRoamingIndicator)
                 && mIsEmergencyOnly == s.mIsEmergencyOnly
-                && mIsDataRoamingFromRegistration == s.mIsDataRoamingFromRegistration
                 && mIsUsingCarrierAggregation == s.mIsUsingCarrierAggregation)
                 && (mNetworkRegistrationStates == null ? s.mNetworkRegistrationStates == null :
                         s.mNetworkRegistrationStates != null &&
@@ -933,8 +928,6 @@ public class ServiceState implements Parcelable {
             .append(", mChannelNumber=").append(mChannelNumber)
             .append(", duplexMode()=").append(getDuplexMode())
             .append(", mCellBandwidths=").append(Arrays.toString(mCellBandwidths))
-            .append(", mVoiceRoamingType=").append(getRoamingLogString(mVoiceRoamingType))
-            .append(", mDataRoamingType=").append(getRoamingLogString(mDataRoamingType))
             .append(", mVoiceOperatorAlphaLong=").append(mVoiceOperatorAlphaLong)
             .append(", mVoiceOperatorAlphaShort=").append(mVoiceOperatorAlphaShort)
             .append(", mDataOperatorAlphaLong=").append(mDataOperatorAlphaLong)
@@ -951,7 +944,6 @@ public class ServiceState implements Parcelable {
             .append(", mCdmaRoamingIndicator=").append(mCdmaRoamingIndicator)
             .append(", mCdmaDefaultRoamingIndicator=").append(mCdmaDefaultRoamingIndicator)
             .append(", mIsEmergencyOnly=").append(mIsEmergencyOnly)
-            .append(", mIsDataRoamingFromRegistration=").append(mIsDataRoamingFromRegistration)
             .append(", mIsUsingCarrierAggregation=").append(mIsUsingCarrierAggregation)
             .append(", mLteEarfcnRsrpBoost=").append(mLteEarfcnRsrpBoost)
             .append(", mNetworkRegistrationStates=").append(mNetworkRegistrationStates)
@@ -962,8 +954,6 @@ public class ServiceState implements Parcelable {
         if (DBG) Rlog.d(LOG_TAG, "[ServiceState] setNullState=" + state);
         mVoiceRegState = state;
         mDataRegState = state;
-        mVoiceRoamingType = ROAMING_TYPE_NOT_ROAMING;
-        mDataRoamingType = ROAMING_TYPE_NOT_ROAMING;
         mChannelNumber = -1;
         mCellBandwidths = new int[0];
         mVoiceOperatorAlphaLong = null;
@@ -983,7 +973,6 @@ public class ServiceState implements Parcelable {
         mCdmaEriIconIndex = -1;
         mCdmaEriIconMode = -1;
         mIsEmergencyOnly = false;
-        mIsDataRoamingFromRegistration = false;
         mIsUsingCarrierAggregation = false;
         mLteEarfcnRsrpBoost = 0;
         mNetworkRegistrationStates = new ArrayList<>();
@@ -1029,32 +1018,50 @@ public class ServiceState implements Parcelable {
     }
 
     public void setRoaming(boolean roaming) {
-        mVoiceRoamingType = (roaming ? ROAMING_TYPE_UNKNOWN : ROAMING_TYPE_NOT_ROAMING);
-        mDataRoamingType = mVoiceRoamingType;
+        setVoiceRoaming(roaming);
+        setDataRoaming(roaming);
     }
 
     /** @hide */
     @UnsupportedAppUsage
     public void setVoiceRoaming(boolean roaming) {
-        mVoiceRoamingType = (roaming ? ROAMING_TYPE_UNKNOWN : ROAMING_TYPE_NOT_ROAMING);
+        setVoiceRoamingType(roaming ? ROAMING_TYPE_UNKNOWN : ROAMING_TYPE_NOT_ROAMING);
     }
 
     /** @hide */
     @UnsupportedAppUsage
-    public void setVoiceRoamingType(int type) {
-        mVoiceRoamingType = type;
+    public void setVoiceRoamingType(@RoamingType int type) {
+        NetworkRegistrationState regState = getNetworkRegistrationState(
+                NetworkRegistrationState.DOMAIN_CS, AccessNetworkConstants.TransportType.WWAN);
+        if (regState == null) {
+            regState = new NetworkRegistrationState(
+                    NetworkRegistrationState.DOMAIN_CS, AccessNetworkConstants.TransportType.WWAN,
+                    ServiceState.ROAMING_TYPE_NOT_ROAMING, TelephonyManager.NETWORK_TYPE_UNKNOWN, 0,
+                    false, null, null);
+            addNetworkRegistrationState(regState);
+        }
+        regState.setRoamingType(type);
     }
 
     /** @hide */
     @UnsupportedAppUsage
     public void setDataRoaming(boolean dataRoaming) {
-        mDataRoamingType = (dataRoaming ? ROAMING_TYPE_UNKNOWN : ROAMING_TYPE_NOT_ROAMING);
+        setDataRoamingType(dataRoaming ? ROAMING_TYPE_UNKNOWN : ROAMING_TYPE_NOT_ROAMING);
     }
 
     /** @hide */
     @UnsupportedAppUsage
-    public void setDataRoamingType(int type) {
-        mDataRoamingType = type;
+    public void setDataRoamingType(@RoamingType int type) {
+        NetworkRegistrationState regState = getNetworkRegistrationState(
+                NetworkRegistrationState.DOMAIN_PS, AccessNetworkConstants.TransportType.WWAN);
+        if (regState == null) {
+            regState = new NetworkRegistrationState(
+                    NetworkRegistrationState.DOMAIN_PS, AccessNetworkConstants.TransportType.WWAN,
+                    ServiceState.ROAMING_TYPE_NOT_ROAMING, TelephonyManager.NETWORK_TYPE_UNKNOWN, 0,
+                    false, null, null);
+            addNetworkRegistrationState(regState);
+        }
+        regState.setRoamingType(type);
     }
 
     /**
@@ -1166,30 +1173,10 @@ public class ServiceState implements Parcelable {
      */
     @UnsupportedAppUsage
     private void setFromNotifierBundle(Bundle m) {
-        mVoiceRegState = m.getInt("voiceRegState");
-        mDataRegState = m.getInt("dataRegState");
-        mVoiceRoamingType = m.getInt("voiceRoamingType");
-        mDataRoamingType = m.getInt("dataRoamingType");
-        mVoiceOperatorAlphaLong = m.getString("operator-alpha-long");
-        mVoiceOperatorAlphaShort = m.getString("operator-alpha-short");
-        mVoiceOperatorNumeric = m.getString("operator-numeric");
-        mDataOperatorAlphaLong = m.getString("data-operator-alpha-long");
-        mDataOperatorAlphaShort = m.getString("data-operator-alpha-short");
-        mDataOperatorNumeric = m.getString("data-operator-numeric");
-        mIsManualNetworkSelection = m.getBoolean("manual");
-        mRilVoiceRadioTechnology = m.getInt("radioTechnology");
-        mRilDataRadioTechnology = m.getInt("dataRadioTechnology");
-        mCssIndicator = m.getBoolean("cssIndicator");
-        mNetworkId = m.getInt("networkId");
-        mSystemId = m.getInt("systemId");
-        mCdmaRoamingIndicator = m.getInt("cdmaRoamingIndicator");
-        mCdmaDefaultRoamingIndicator = m.getInt("cdmaDefaultRoamingIndicator");
-        mIsEmergencyOnly = m.getBoolean("emergencyOnly");
-        mIsDataRoamingFromRegistration = m.getBoolean("isDataRoamingFromRegistration");
-        mIsUsingCarrierAggregation = m.getBoolean("isUsingCarrierAggregation");
-        mLteEarfcnRsrpBoost = m.getInt("LteEarfcnRsrpBoost");
-        mChannelNumber = m.getInt("ChannelNumber");
-        mCellBandwidths = m.getIntArray("CellBandwidths");
+        ServiceState ssFromBundle = m.getParcelable(Intent.EXTRA_SERVICE_STATE);
+        if (ssFromBundle != null) {
+            copyFrom(ssFromBundle);
+        }
     }
 
     /**
@@ -1200,10 +1187,13 @@ public class ServiceState implements Parcelable {
      */
     @UnsupportedAppUsage
     public void fillInNotifierBundle(Bundle m) {
+        m.putParcelable(Intent.EXTRA_SERVICE_STATE, this);
+        // serviceState already consists of below entries.
+        // for backward compatibility, we continue fill in below entries.
         m.putInt("voiceRegState", mVoiceRegState);
         m.putInt("dataRegState", mDataRegState);
-        m.putInt("voiceRoamingType", mVoiceRoamingType);
-        m.putInt("dataRoamingType", mDataRoamingType);
+        m.putInt("dataRoamingType", getDataRoamingType());
+        m.putInt("voiceRoamingType", getVoiceRoamingType());
         m.putString("operator-alpha-long", mVoiceOperatorAlphaLong);
         m.putString("operator-alpha-short", mVoiceOperatorAlphaShort);
         m.putString("operator-numeric", mVoiceOperatorNumeric);
@@ -1219,7 +1209,7 @@ public class ServiceState implements Parcelable {
         m.putInt("cdmaRoamingIndicator", mCdmaRoamingIndicator);
         m.putInt("cdmaDefaultRoamingIndicator", mCdmaDefaultRoamingIndicator);
         m.putBoolean("emergencyOnly", mIsEmergencyOnly);
-        m.putBoolean("isDataRoamingFromRegistration", mIsDataRoamingFromRegistration);
+        m.putBoolean("isDataRoamingFromRegistration", getDataRoamingFromRegistration());
         m.putBoolean("isUsingCarrierAggregation", mIsUsingCarrierAggregation);
         m.putInt("LteEarfcnRsrpBoost", mLteEarfcnRsrpBoost);
         m.putInt("ChannelNumber", mChannelNumber);

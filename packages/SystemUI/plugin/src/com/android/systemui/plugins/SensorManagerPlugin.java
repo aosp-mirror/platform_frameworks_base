@@ -16,6 +16,9 @@
 
 package com.android.systemui.plugins;
 
+import android.hardware.Sensor;
+import android.hardware.TriggerEventListener;
+
 import com.android.systemui.plugins.annotations.ProvidesInterface;
 
 /**
@@ -28,10 +31,12 @@ public interface SensorManagerPlugin extends Plugin {
     int VERSION = 1;
 
     /**
-     * Registers for trigger events from the sensor. The client will receive trigger events until
-     * {@link #unregisterTriggerEvent(Sensor, TriggerEventListener)} is called.
+     * Registers for trigger events from the sensor. Trigger events are one-shot and need to
+     * re-registered in order for them to be fired again.
      * @param sensor
      * @param listener
+     * @see android.hardware.SensorManager#requestTriggerSensor(
+     *     android.hardware.TriggerEventListener, android.hardware.Sensor)
      */
     void registerTriggerEvent(Sensor sensor, TriggerEventListener listener);
 
@@ -62,9 +67,25 @@ public interface SensorManagerPlugin extends Plugin {
 
     class TriggerEvent {
         Sensor mSensor;
+        int mVendorType;
 
-        public TriggerEvent(Sensor sensor) {
+        /**
+         * Creates a trigger event
+         * @param sensor The type of sensor, e.g. TYPE_WAKE_LOCK_SCREEN
+         * @param vendorType The vendor type, which should be unique for each type of sensor,
+         *                   e.g. SINGLE_TAP = 1, DOUBLE_TAP = 2, etc.
+         */
+        public TriggerEvent(Sensor sensor, int vendorType) {
             mSensor = sensor;
+            mVendorType = vendorType;
+        }
+
+        public Sensor getSensor() {
+            return mSensor;
+        }
+
+        public int getVendorType() {
+            return mVendorType;
         }
     }
 }

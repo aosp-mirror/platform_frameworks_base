@@ -491,6 +491,10 @@ public class CarStatusBar extends StatusBar implements
     @Override
     public void onStateChanged(int newState) {
         super.onStateChanged(newState);
+        if (mFullscreenUserSwitcher == null) {
+            return; // Not using the full screen user switcher.
+        }
+
         if (newState == StatusBarState.FULLSCREEN_USER_SWITCHER) {
             if (!mFullscreenUserSwitcher.isVisible()) {
                 // Current execution path continues to set state after this, thus we deffer the

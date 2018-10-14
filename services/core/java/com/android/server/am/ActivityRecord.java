@@ -84,11 +84,13 @@ import static android.os.Process.SYSTEM_UID;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_LEFT;
 
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_CONFIGURATION;
+import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_FOCUS;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_SAVED_STATE;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_STATES;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_SWITCH;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_VISIBILITY;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_CONFIGURATION;
+import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_FOCUS;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_SAVED_STATE;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_STATES;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_SWITCH;
@@ -215,6 +217,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     private static final String TAG_STATES = TAG + POSTFIX_STATES;
     private static final String TAG_SWITCH = TAG + POSTFIX_SWITCH;
     private static final String TAG_VISIBILITY = TAG + POSTFIX_VISIBILITY;
+    private static final String TAG_FOCUS = TAG + POSTFIX_FOCUS;
     // TODO(b/67864419): Remove once recents component is overridden
     private static final String LEGACY_RECENTS_PACKAGE_NAME = "com.android.systemui.recents";
 
@@ -1348,6 +1351,42 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         return (info.flags & FLAG_ALWAYS_FOCUSABLE) != 0;
     }
 
+    /** Move activity with its stack to front and make the stack focused. */
+    boolean moveFocusableActivityToTop(String reason) {
+        if (!isFocusable()) {
+            if (DEBUG_FOCUS) {
+                Slog.d(TAG_FOCUS, "moveActivityStackToFront: unfocusable activity=" + this);
+            }
+            return false;
+        }
+
+        final TaskRecord task = getTask();
+        final ActivityStack stack = getStack();
+        if (stack == null) {
+            Slog.w(TAG, "moveActivityStackToFront: invalid task or stack: activity="
+                    + this + " task=" + task);
+            return false;
+        }
+
+        if (mStackSupervisor.getTopResumedActivity() == this) {
+            if (DEBUG_FOCUS) {
+                Slog.d(TAG_FOCUS, "moveActivityStackToFront: already on top, activity=" + this);
+            }
+            return false;
+        }
+
+        if (DEBUG_FOCUS) {
+            Slog.d(TAG_FOCUS, "moveActivityStackToFront: activity=" + this);
+        }
+
+        stack.moveToFront(reason, task);
+        // Report top activity change to tracking services and WM
+        if (mStackSupervisor.getTopResumedActivity() == this) {
+            // TODO(b/111361570): Support multiple focused apps in WM
+            service.setResumedActivityUncheckLocked(this, reason);
+        }
+        return true;
+    }
 
     /**
      * @return true if the activity contains windows that have

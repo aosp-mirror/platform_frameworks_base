@@ -523,7 +523,6 @@ Landroid/net/IConnectivityManager;->getTetherableWifiRegexs()[Ljava/lang/String;
 Landroid/net/IConnectivityManager;->getTetheredIfaces()[Ljava/lang/String;
 Landroid/net/IConnectivityManager;->getTetheringErroredIfaces()[Ljava/lang/String;
 Landroid/net/IConnectivityManager;->reportInetCondition(II)V
-Landroid/net/IConnectivityManager;->setAirplaneMode(Z)V
 Landroid/net/IConnectivityManager;->startLegacyVpn(Lcom/android/internal/net/VpnProfile;)V
 Landroid/net/INetworkManagementEventObserver$Stub;-><init>()V
 Landroid/net/INetworkPolicyListener$Stub;-><init>()V
@@ -2216,6 +2215,7 @@ Lcom/android/org/conscrypt/OpenSSLKey;->fromPrivateKey(Ljava/security/PrivateKey
 Lcom/android/org/conscrypt/OpenSSLKey;->getNativeRef()Lcom/android/org/conscrypt/NativeRef$EVP_PKEY;
 Lcom/android/org/conscrypt/OpenSSLKey;->getPublicKey()Ljava/security/PublicKey;
 Lcom/android/org/conscrypt/OpenSSLProvider;-><init>()V
+Lcom/android/org/conscrypt/OpenSSLRandom;-><init>()V
 Lcom/android/org/conscrypt/OpenSSLSocketImpl;->getAlpnSelectedProtocol()[B
 Lcom/android/org/conscrypt/OpenSSLSocketImpl;->getChannelId()[B
 Lcom/android/org/conscrypt/OpenSSLSocketImpl;->getHostname()Ljava/lang/String;
@@ -2791,6 +2791,7 @@ Ljavax/net/ssl/SSLServerSocketFactory;->defaultServerSocketFactory:Ljavax/net/ss
 Ljavax/net/ssl/SSLSocketFactory;->createSocket(Ljava/net/Socket;Ljava/io/InputStream;Z)Ljava/net/Socket;
 Ljavax/net/ssl/SSLSocketFactory;->defaultSocketFactory:Ljavax/net/ssl/SSLSocketFactory;
 Llibcore/icu/ICU;->addLikelySubtags(Ljava/util/Locale;)Ljava/util/Locale;
+Llibcore/io/Libcore;->os:Llibcore/io/Os;
 Llibcore/io/Memory;->peekByte(J)B
 Llibcore/io/Memory;->peekByteArray(J[BII)V
 Llibcore/io/Memory;->peekInt(JZ)I

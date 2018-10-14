@@ -218,7 +218,6 @@ applications that come with the platform
         <permission name="android.permission.ACCESS_MTP"/>
         <permission name="android.permission.INTERACT_ACROSS_USERS"/>
         <permission name="android.permission.MANAGE_USERS"/>
-        <permission name="android.permission.READ_PRIVILEGED_PHONE_STATE"/>
         <permission name="android.permission.USE_RESERVED_DISK"/>
         <permission name="android.permission.WRITE_MEDIA_STORAGE"/>
     </privapp-permissions>
@@ -326,6 +325,7 @@ applications that come with the platform
         <permission name="android.permission.READ_LOWPAN_CREDENTIAL"/>
         <permission name="android.permission.READ_PRIVILEGED_PHONE_STATE"/>
         <permission name="android.permission.REAL_GET_TASKS"/>
+        <permission name="android.permission.READ_PRIVILEGED_PHONE_STATE"/>
         <permission name="android.permission.REGISTER_CALL_PROVIDER"/>
         <permission name="android.permission.REGISTER_CONNECTION_MANAGER"/>
         <permission name="android.permission.REGISTER_SIM_SUBSCRIPTION"/>

@@ -26,12 +26,11 @@ import "frameworks/base/core/proto/android/app/job/enums.proto";
 import "frameworks/base/core/proto/android/bluetooth/enums.proto";
 import "frameworks/base/core/proto/android/os/enums.proto";
 import "frameworks/base/core/proto/android/server/enums.proto";
+import "frameworks/base/core/proto/android/service/procstats_enum.proto";
+import "frameworks/base/core/proto/android/stats/enums.proto";
 import "frameworks/base/core/proto/android/telecomm/enums.proto";
 import "frameworks/base/core/proto/android/telephony/enums.proto";
 import "frameworks/base/core/proto/android/view/enums.proto";
-import "frameworks/base/proto/src/stats_enums.proto";
-import "frameworks/base/core/proto/android/service/procstats.proto";
-import "frameworks/base/core/proto/android/internal/powerprofile.proto";
 
 /**
  * The master atom class. This message defines all of the available
@@ -142,6 +141,8 @@ message Atom {
         BatteryHealthSnapshot battery_health_snapshot = 91;
         SlowIo slow_io = 92;
         BatteryCausedShutdown battery_caused_shutdown = 93;
+        PhoneServiceStateChanged phone_service_state_changed = 94;
+        PhoneStateChanged phone_state_changed = 95;
     }
 
     // Pulled events will start at field 10000.
@@ -273,7 +274,7 @@ message ThermalThrottlingStateChanged {
  */
 message ScreenStateChanged {
     // New screen state, from frameworks/base/core/proto/android/view/enums.proto.
-    optional android.view.DisplayStateEnum state = 1 [(stateFieldOption).option = EXCLUSIVE];
+    optional android.view.DisplayStateEnum state = 1 [(state_field_option).option = EXCLUSIVE];
 }
 
 /**
@@ -284,10 +285,10 @@ message ScreenStateChanged {
  *   frameworks/base/services/core/java/com/android/server/am/BatteryStatsService.java
  */
 message UidProcessStateChanged {
-    optional int32 uid = 1 [(stateFieldOption).option = PRIMARY, (is_uid) = true];
+    optional int32 uid = 1 [(state_field_option).option = PRIMARY, (is_uid) = true];
 
     // The state, from frameworks/base/core/proto/android/app/enums.proto.
-    optional android.app.ProcessStateEnum state = 2 [(stateFieldOption).option = EXCLUSIVE];
+    optional android.app.ProcessStateEnum state = 2 [(state_field_option).option = EXCLUSIVE];
 }
 
 /**
@@ -319,7 +320,7 @@ message ActivityManagerSleepStateChanged {
         ASLEEP = 1;
         AWAKE = 2;
     }
-    optional State state = 1 [(stateFieldOption).option = EXCLUSIVE];
+    optional State state = 1 [(state_field_option).option = EXCLUSIVE];
 }
 
 /**
@@ -338,7 +339,7 @@ message MemoryFactorStateChanged {
         CRITICAL = 4;   // critical memory.
 
     }
-    optional State factor = 1 [(stateFieldOption).option = EXCLUSIVE];
+    optional State factor = 1 [(state_field_option).option = EXCLUSIVE];
 }
 
 /**
@@ -1406,6 +1407,33 @@ message PhoneSignalStrengthChanged {
     optional android.telephony.SignalStrengthEnum signal_strength = 1;
 }
 
+
+/**
+ * Logs when the phone state, sim state or signal strength changes
+ *
+ * Logged from:
+ *   frameworks/base/core/java/com/android/internal/os/BatteryStatsImpl.java
+ */
+message PhoneServiceStateChanged {
+    optional android.telephony.ServiceStateEnum state = 1;
+    optional android.telephony.SimStateEnum sim_state = 2;
+    optional android.telephony.SignalStrengthEnum signal_strength = 3;
+}
+
+/**
+ * Logs when the phone becomes on or off.
+ *
+ * Logged from:
+ *   frameworks/base/core/java/com/android/internal/os/TelephonyRegistry.java
+ */
+message PhoneStateChanged {
+    enum State {
+        OFF = 0;
+        ON = 1;
+    }
+    optional State state = 1;
+}
+
 /**
  * Logs that a setting was updated.
  * Logged from:
@@ -1912,7 +1940,7 @@ message LmkKillOccurred {
  */
 message AppDied {
     // timestamp(elapsedRealtime) of record creation
-    optional uint64 timestamp_millis = 1 [(stateFieldOption).option = EXCLUSIVE];
+    optional uint64 timestamp_millis = 1 [(state_field_option).option = EXCLUSIVE];
 }
 
 /**
@@ -1923,7 +1951,7 @@ message GenericAtom {
     optional int32 uid = 1 [(is_uid) = true];
 
     // An event_id indicates the type of event.
-    optional android.os.statsd.EventType event_id = 2;
+    optional android.stats.EventType event_id = 2;
 }
 
 /**
@@ -2662,11 +2690,288 @@ message NumFingerprints {
     optional int32 num_fingerprints = 2;
 }
 
+message AggStats {
+    optional int64 min = 1;
+
+    optional int64 average = 2;
+
+    optional int64 max = 3;
+}
+
+message ProcessStatsStateProto {
+    optional android.service.procstats.ScreenState screen_state = 1;
+
+    optional android.service.procstats.MemoryState memory_state = 2;
+
+    // this enum list is from frameworks/base/core/java/com/android/internal/app/procstats/ProcessStats.java
+    // and not frameworks/base/core/java/android/app/ActivityManager.java
+    optional android.service.procstats.ProcessState process_state = 3;
+
+    // Millisecond uptime duration spent in this state
+    optional int64 duration_ms = 4;
+
+    // Millisecond elapsed realtime duration spent in this state
+    optional int64 realtime_duration_ms = 9;
+
+    // # of samples taken
+    optional int32 sample_size = 5;
+
+    // PSS is memory reserved for this process
+    optional AggStats pss = 6;
+
+    // USS is memory shared between processes, divided evenly for accounting
+    optional AggStats uss = 7;
+
+    // RSS is memory resident for this process
+    optional AggStats rss = 8;
+}
+
+// Next Tag: 7
+message ProcessStatsProto {
+    // Name of process.
+    optional string process = 1;
+
+    // Uid of the process.
+    optional int32 uid = 2;
+
+    // Information about how often kills occurred
+    message Kill {
+        // Count of excessive CPU kills
+        optional int32 cpu = 1;
+
+        // Count of kills when cached
+        optional int32 cached = 2;
+
+        // PSS stats during cached kill
+        optional AggStats cached_pss = 3;
+    }
+    optional Kill kill = 3;
+
+    // Time and memory spent in various states.
+    repeated ProcessStatsStateProto states = 5;
+
+    // Total time process has been running...  screen_state, memory_state, and process_state
+    // will not be set.
+    optional ProcessStatsStateProto total_running_state = 6;
+}
+
+message PackageServiceOperationStatsProto {
+    // Operate enum: Started, Foreground, Bound, Executing
+    optional android.service.procstats.ServiceOperationState operation = 1;
+
+    // Number of times the service was in this operation.
+    optional int32 count = 2;
+
+    // Information about a state the service can be in.
+    message StateStats {
+        // Screen state enum.
+        optional android.service.procstats.ScreenState screen_state = 1;
+        // Memory state enum.
+        optional android.service.procstats.MemoryState memory_state = 2;
+
+        // duration in milliseconds.
+        optional int64 duration_ms = 3;
+        // Millisecond elapsed realtime duration spent in this state
+        optional int64 realtime_duration_ms = 4;
+    }
+    repeated StateStats state_stats = 3;
+}
+
+message PackageServiceStatsProto {
+    // Name of service component.
+    optional string service_name = 1;
+
+    // The operation stats.
+    // The package_name, package_uid, package_version, service_name will not be set to save space.
+    repeated PackageServiceOperationStatsProto operation_stats = 2;
+}
+
+message PackageAssociationSourceProcessStatsProto {
+    // Uid of the process.
+    optional int32 process_uid = 1;
+    // Process name.
+    optional string process_name = 2;
+
+    // Total count of the times this association appeared.
+    optional int32 total_count = 3;
+
+    // Millisecond uptime total duration this association was around.
+    optional int64 total_duration_ms = 4;
+
+    // Total count of the times this association became actively impacting its target process.
+    optional int32 active_count = 5;
+
+    // Information on one source in this association.
+    message StateStats {
+        // Process state enum.
+        optional android.service.procstats.ProcessState process_state = 1;
+        // Millisecond uptime duration spent in this state
+        optional int64 duration_ms = 2;
+        // Millisecond elapsed realtime duration spent in this state
+        optional int64 realtime_duration_ms = 3;
+    }
+    repeated StateStats active_state_stats = 6;
+}
+
+message PackageAssociationProcessStatsProto {
+    // Name of the target component.
+    optional string component_name = 1;
+    // Information on one source in this association.
+    repeated PackageAssociationSourceProcessStatsProto sources = 2;
+}
+
+
+message ProcessStatsPackageProto {
+    // Name of package.
+    optional string package = 1;
+
+    // Uid of the package.
+    optional int32 uid = 2;
+
+    // Version of the package.
+    optional int64 version = 3;
+
+    // Stats for each process running with the package loaded in to it.
+    repeated ProcessStatsProto process_stats = 4;
+
+    // Stats for each of the package's services.
+    repeated PackageServiceStatsProto service_stats = 5;
+
+    // Stats for each association with the package.
+    repeated PackageAssociationProcessStatsProto association_stats = 6;
+}
+
+message ProcessStatsSectionProto {
+    // Elapsed realtime at start of report.
+    optional int64 start_realtime_ms = 1;
+
+    // Elapsed realtime at end of report.
+    optional int64 end_realtime_ms = 2;
+
+    // CPU uptime at start of report.
+    optional int64 start_uptime_ms = 3;
+
+    // CPU uptime at end of report.
+    optional int64 end_uptime_ms = 4;
+
+    // System runtime library. e.g. "libdvm.so", "libart.so".
+    optional string runtime = 5;
+
+    // whether kernel reports swapped pss.
+    optional bool has_swapped_pss = 6;
+
+    // Data completeness. e.g. "complete", "partial", shutdown", or "sysprops".
+    enum Status {
+        STATUS_UNKNOWN = 0;
+        STATUS_COMPLETE = 1;
+        STATUS_PARTIAL = 2;
+        STATUS_SHUTDOWN = 3;
+        STATUS_SYSPROPS = 4;
+    }
+    repeated Status status = 7;
+
+    // Stats for each process.
+    repeated ProcessStatsProto process_stats = 8;
+
+    // Stats for each package.
+    repeated ProcessStatsPackageProto package_stats = 9;
+}
+
 /**
  * Pulled from ProcessStatsService.java
  */
 message ProcStats {
-    optional android.service.procstats.ProcessStatsSectionProto proc_stats_section = 1;
+    optional ProcessStatsSectionProto proc_stats_section = 1;
+}
+
+message PowerProfileProto {
+    optional double cpu_suspend = 1;
+
+    optional double cpu_idle = 2;
+
+    optional double cpu_active = 3;
+
+    message CpuCluster {
+        optional int32 id = 1;
+        optional double cluster_power = 2;
+        optional int32 cores = 3;
+        repeated int64 speed = 4;
+        repeated double core_power = 5;
+    }
+
+    repeated CpuCluster cpu_cluster = 40;
+
+    optional double wifi_scan = 4;
+
+    optional double wifi_on = 5;
+
+    optional double wifi_active = 6;
+
+    optional double wifi_controller_idle = 7;
+
+    optional double wifi_controller_rx = 8;
+
+    optional double wifi_controller_tx = 9;
+
+    repeated double wifi_controller_tx_levels = 10;
+
+    optional double wifi_controller_operating_voltage = 11;
+
+    optional double bluetooth_controller_idle = 12;
+
+    optional double bluetooth_controller_rx = 13;
+
+    optional double bluetooth_controller_tx = 14;
+
+    optional double bluetooth_controller_operating_voltage = 15;
+
+    optional double modem_controller_sleep = 16;
+
+    optional double modem_controller_idle = 17;
+
+    optional double modem_controller_rx = 18;
+
+    repeated double modem_controller_tx = 19;
+
+    optional double modem_controller_operating_voltage = 20;
+
+    optional double gps_on = 21;
+
+    repeated double gps_signal_quality_based = 22;
+
+    optional double gps_operating_voltage = 23;
+
+    optional double bluetooth_on = 24;
+
+    optional double bluetooth_active = 25;
+
+    optional double bluetooth_at_cmd = 26;
+
+    optional double ambient_display = 27;
+
+    optional double screen_on = 28;
+
+    optional double radio_on = 29;
+
+    optional double radio_scanning = 30;
+
+    optional double radio_active = 31;
+
+    optional double screen_full = 32;
+
+    optional double audio = 33;
+
+    optional double video = 34;
+
+    optional double flashlight = 35;
+
+    optional double memory = 36;
+
+    optional double camera = 37;
+
+    optional double wifi_batched_scan = 38;
+
+    optional double battery_capacity = 39;
 }
 
 /**
@@ -2674,5 +2979,5 @@ message ProcStats {
  * Pulled from PowerProfile.java
  */
 message PowerProfile {
-    optional com.android.internal.os.PowerProfileProto power_profile_proto = 1;
+    optional PowerProfileProto power_profile = 1;
 }

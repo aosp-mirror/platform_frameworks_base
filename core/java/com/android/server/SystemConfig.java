@@ -331,13 +331,11 @@ public class SystemConfig {
         readPermissions(Environment.buildPath(
                 Environment.getOemDirectory(), "etc", "permissions"), oemPermissionFlag);
 
-        // Allow Product to customize system configs around libs, features, permissions and apps
-        int productPermissionFlag = ALLOW_LIBS | ALLOW_FEATURES | ALLOW_PERMISSIONS |
-                ALLOW_APP_CONFIGS | ALLOW_PRIVAPP_PERMISSIONS;
+        // Allow Product to customize all system configs
         readPermissions(Environment.buildPath(
-                Environment.getProductDirectory(), "etc", "sysconfig"), productPermissionFlag);
+                Environment.getProductDirectory(), "etc", "sysconfig"), ALLOW_ALL);
         readPermissions(Environment.buildPath(
-                Environment.getProductDirectory(), "etc", "permissions"), productPermissionFlag);
+                Environment.getProductDirectory(), "etc", "permissions"), ALLOW_ALL);
 
         // Allow /product_services to customize system configs around libs, features, permissions
         // and apps.

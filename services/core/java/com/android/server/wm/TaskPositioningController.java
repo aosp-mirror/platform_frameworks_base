@@ -88,7 +88,7 @@ class TaskPositioningController {
                     }
                     taskId = task.mTaskId;
                 } else {
-                    taskId = displayContent.taskIdFromPoint(x, y);
+                    taskId = displayContent.taskForTapOutside(x, y);
                 }
             }
             if (taskId >= 0) {

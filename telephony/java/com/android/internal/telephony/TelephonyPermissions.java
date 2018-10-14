@@ -32,6 +32,7 @@ import android.os.UserHandle;
 import android.telephony.Rlog;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
+import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 
@@ -42,6 +43,10 @@ public final class TelephonyPermissions {
     private static final String LOG_TAG = "TelephonyPermissions";
 
     private static final boolean DBG = false;
+
+    // When set to true this flag will treat all apps that fail the device identifier check as
+    // though they are targeting pre-Q and return dummy data instead of throwing a SecurityException
+    private static final boolean RELAX_DEVICE_IDENTIFIER_CHECK = true;
 
     private static final Supplier<ITelephony> TELEPHONY_SUPPLIER = () ->
             ITelephony.Stub.asInterface(ServiceManager.getService(Context.TELEPHONY_SERVICE));
@@ -275,31 +280,41 @@ public final class TelephonyPermissions {
      */
     private static boolean reportAccessDeniedToReadIdentifiers(Context context, int subId, int pid,
             int uid, String callingPackage, String message) {
-        if (callingPackage != null) {
-            try {
-                // if the target SDK is pre-Q then check if the calling package would have
-                // previously had access to device identifiers.
-                ApplicationInfo callingPackageInfo = context.getPackageManager().getApplicationInfo(
-                        callingPackage, 0);
-                if (callingPackageInfo != null
-                        && callingPackageInfo.targetSdkVersion < Build.VERSION_CODES.Q) {
-                    if (context.checkPermission(android.Manifest.permission.READ_PHONE_STATE, pid,
-                            uid) == PackageManager.PERMISSION_GRANTED) {
-                        return false;
+        // if the device identifier check is relaxed then just return false to return dummy data to
+        // the caller instead of throwing a SecurityException for apps targeting Q+.
+        if (RELAX_DEVICE_IDENTIFIER_CHECK) {
+            Log.wtf(LOG_TAG,
+                    "reportAccessDeniedToReadIdentifiers:" + callingPackage + ":" + message);
+            return false;
+        } else {
+            if (callingPackage != null) {
+                try {
+                    // if the target SDK is pre-Q then check if the calling package would have
+                    // previously had access to device identifiers.
+                    ApplicationInfo callingPackageInfo =
+                            context.getPackageManager().getApplicationInfo(
+                                    callingPackage, 0);
+                    if (callingPackageInfo != null
+                            && callingPackageInfo.targetSdkVersion < Build.VERSION_CODES.Q) {
+                        if (context.checkPermission(android.Manifest.permission.READ_PHONE_STATE,
+                                pid,
+                                uid) == PackageManager.PERMISSION_GRANTED) {
+                            return false;
+                        }
+                        if (SubscriptionManager.isValidSubscriptionId(subId)
+                                && getCarrierPrivilegeStatus(TELEPHONY_SUPPLIER, subId, uid)
+                                == TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS) {
+                            return false;
+                        }
                     }
-                    if (SubscriptionManager.isValidSubscriptionId(subId)
-                            && getCarrierPrivilegeStatus(TELEPHONY_SUPPLIER, subId, uid)
-                            == TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS) {
-                        return false;
-                    }
+                } catch (PackageManager.NameNotFoundException e) {
+                    // If the application info for the calling package could not be found then
+                    // default to throwing the SecurityException.
                 }
-            } catch (PackageManager.NameNotFoundException e) {
-                // If the application info for the calling package could not be found then default
-                // to throwing the SecurityException.
             }
+            throw new SecurityException(message + ": The user " + uid + " does not have the "
+                    + "READ_PRIVILEGED_PHONE_STATE permission to access the device identifiers");
         }
-        throw new SecurityException(message + ": The user " + uid + " does not have the "
-                + "READ_PRIVILEGED_PHONE_STATE permission to access the device identifiers");
     }
 
     /**

@@ -119,6 +119,7 @@ package android {
     field public static final java.lang.String MOUNT_FORMAT_FILESYSTEMS = "android.permission.MOUNT_FORMAT_FILESYSTEMS";
     field public static final java.lang.String MOUNT_UNMOUNT_FILESYSTEMS = "android.permission.MOUNT_UNMOUNT_FILESYSTEMS";
     field public static final java.lang.String MOVE_PACKAGE = "android.permission.MOVE_PACKAGE";
+    field public static final java.lang.String NETWORK_SETUP_WIZARD = "android.permission.NETWORK_SETUP_WIZARD";
     field public static final java.lang.String NOTIFICATION_DURING_SETUP = "android.permission.NOTIFICATION_DURING_SETUP";
     field public static final java.lang.String NOTIFY_TV_INPUTS = "android.permission.NOTIFY_TV_INPUTS";
     field public static final java.lang.String OBSERVE_APP_USAGE = "android.permission.OBSERVE_APP_USAGE";
@@ -1276,14 +1277,6 @@ package android.content.pm.permission {
     method public boolean isStandard();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.content.pm.permission.RuntimePermissionPresentationInfo> CREATOR;
-  }
-
-}
-
-package android.graphics.drawable {
-
-  public final class Icon implements android.os.Parcelable {
-    method public static android.graphics.drawable.Icon createWithResource(android.content.res.Resources, int);
   }
 
 }
@@ -3189,6 +3182,7 @@ package android.net {
   public class ConnectivityManager {
     method public java.lang.String getCaptivePortalServerUrl();
     method public boolean isTetheringSupported();
+    method public void setAirplaneMode(boolean);
     method public void startTethering(int, boolean, android.net.ConnectivityManager.OnStartTetheringCallback);
     method public void startTethering(int, boolean, android.net.ConnectivityManager.OnStartTetheringCallback, android.os.Handler);
     method public void stopTethering(int);
@@ -4201,8 +4195,8 @@ package android.permission {
   }
 
   public static final class PermissionManager.SplitPermissionInfo {
-    method public java.lang.String[] getNewPermissions();
-    method public java.lang.String getRootPermission();
+    method public java.util.List<java.lang.String> getNewPermissions();
+    method public java.lang.String getSplitPermission();
     method public int getTargetSdk();
   }
 
@@ -5287,6 +5281,7 @@ package android.telephony {
     method public int getRejectCause();
     method public int getTransportType();
     method public boolean isEmergencyEnabled();
+    method public boolean isRoaming();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.telephony.NetworkRegistrationState> CREATOR;
     field public static final int DOMAIN_CS = 1; // 0x1
@@ -5374,6 +5369,8 @@ package android.telephony {
     method public void setSubscriptionPlans(int, java.util.List<android.telephony.SubscriptionPlan>);
     field public static final java.lang.String ACTION_MANAGE_SUBSCRIPTION_PLANS = "android.telephony.action.MANAGE_SUBSCRIPTION_PLANS";
     field public static final java.lang.String ACTION_REFRESH_SUBSCRIPTION_PLANS = "android.telephony.action.REFRESH_SUBSCRIPTION_PLANS";
+    field public static final android.net.Uri ENHANCED_4G_ENABLED_CONTENT_URI;
+    field public static final android.net.Uri WFC_ENABLED_CONTENT_URI;
   }
 
   public final class SubscriptionPlan implements android.os.Parcelable {

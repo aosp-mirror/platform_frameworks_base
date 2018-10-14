@@ -1707,7 +1707,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     return;
                 }
                 final ActivityRecord r = stack.topRunningActivityLocked();
-                if (mStackSupervisor.moveFocusableActivityToTop(r, "setFocusedStack")) {
+                if (r != null && r.moveFocusableActivityToTop("setFocusedStack")) {
                     mStackSupervisor.resumeFocusedStacksTopActivitiesLocked();
                 }
             }
@@ -1728,7 +1728,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     return;
                 }
                 final ActivityRecord r = task.topRunningActivityLocked();
-                if (mStackSupervisor.moveFocusableActivityToTop(r, "setFocusedTask")) {
+                if (r != null && r.moveFocusableActivityToTop("setFocusedTask")) {
                     mStackSupervisor.resumeFocusedStacksTopActivitiesLocked();
                 }
             }
@@ -5554,7 +5554,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     throw new IllegalArgumentException(
                             "setFocusedActivity: No activity record matching token=" + token);
                 }
-                if (mStackSupervisor.moveFocusableActivityToTop(r, "setFocusedActivity")) {
+                if (r.moveFocusableActivityToTop("setFocusedActivity")) {
                     mStackSupervisor.resumeFocusedStacksTopActivitiesLocked();
                 }
             }

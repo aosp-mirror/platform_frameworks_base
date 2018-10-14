@@ -76,6 +76,13 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
      */
     private final AtomicBoolean mConnectionOpen = new AtomicBoolean(true);
 
+    /*
+     * Internal interface used to invoke client callbacks.
+     */
+    private interface CallbackConsumer {
+        void accept(IContextHubClientCallback callback) throws RemoteException;
+    }
+
     /* package */ ContextHubClientBroker(
             Context context, IContexthub contextHubProxy, ContextHubClientManager clientManager,
             int contextHubId, short hostEndPointId, IContextHubClientCallback callback) {
@@ -140,12 +147,9 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
     /**
      * Invoked when the underlying binder of this broker has died at the client process.
      */
+    @Override
     public void binderDied() {
-        try {
-            IContextHubClient.Stub.asInterface(this).close();
-        } catch (RemoteException e) {
-            Log.e(TAG, "RemoteException while closing client on death", e);
-        }
+        close();
     }
 
     /**
@@ -168,14 +172,7 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
      * @param message the message that came from a nanoapp
      */
     /* package */ void sendMessageToClient(NanoAppMessage message) {
-        if (mConnectionOpen.get()) {
-            try {
-                mCallbackInterface.onMessageFromNanoApp(message);
-            } catch (RemoteException e) {
-                Log.e(TAG, "RemoteException while sending message to client (host endpoint ID = "
-                        + mHostEndPointId + ")", e);
-            }
-        }
+        invokeCallbackConcurrent(callback -> callback.onMessageFromNanoApp(message));
     }
 
     /**
@@ -184,14 +181,7 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
      * @param nanoAppId the ID of the nanoapp that was loaded.
      */
     /* package */ void onNanoAppLoaded(long nanoAppId) {
-        if (mConnectionOpen.get()) {
-            try {
-                mCallbackInterface.onNanoAppLoaded(nanoAppId);
-            } catch (RemoteException e) {
-                Log.e(TAG, "RemoteException while calling onNanoAppLoaded on client"
-                        + " (host endpoint ID = " + mHostEndPointId + ")", e);
-            }
-        }
+        invokeCallbackConcurrent(callback -> callback.onNanoAppLoaded(nanoAppId));
     }
 
     /**
@@ -200,28 +190,14 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
      * @param nanoAppId the ID of the nanoapp that was unloaded.
      */
     /* package */ void onNanoAppUnloaded(long nanoAppId) {
-        if (mConnectionOpen.get()) {
-            try {
-                mCallbackInterface.onNanoAppUnloaded(nanoAppId);
-            } catch (RemoteException e) {
-                Log.e(TAG, "RemoteException while calling onNanoAppUnloaded on client"
-                        + " (host endpoint ID = " + mHostEndPointId + ")", e);
-            }
-        }
+        invokeCallbackConcurrent(callback -> callback.onNanoAppUnloaded(nanoAppId));
     }
 
     /**
      * Notifies the client of a hub reset event if the connection is open.
      */
     /* package */ void onHubReset() {
-        if (mConnectionOpen.get()) {
-            try {
-                mCallbackInterface.onHubReset();
-            } catch (RemoteException e) {
-                Log.e(TAG, "RemoteException while calling onHubReset on client" +
-                        " (host endpoint ID = " + mHostEndPointId + ")", e);
-            }
-        }
+        invokeCallbackConcurrent(callback -> callback.onHubReset());
     }
 
     /**
@@ -231,12 +207,21 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
      * @param abortCode the nanoapp specific abort code
      */
     /* package */ void onNanoAppAborted(long nanoAppId, int abortCode) {
+        invokeCallbackConcurrent(callback -> callback.onNanoAppAborted(nanoAppId, abortCode));
+    }
+
+    /**
+     * Helper function to invoke a specified client callback, if the connection is open.
+     *
+     * @param consumer the consumer specifying the callback to invoke
+     */
+    private void invokeCallbackConcurrent(CallbackConsumer consumer) {
         if (mConnectionOpen.get()) {
             try {
-                mCallbackInterface.onNanoAppAborted(nanoAppId, abortCode);
+                consumer.accept(mCallbackInterface);
             } catch (RemoteException e) {
-                Log.e(TAG, "RemoteException while calling onNanoAppAborted on client"
-                        + " (host endpoint ID = " + mHostEndPointId + ")", e);
+                Log.e(TAG, "RemoteException while invoking client callback (host endpoint ID = "
+                        + mHostEndPointId + ")", e);
             }
         }
     }

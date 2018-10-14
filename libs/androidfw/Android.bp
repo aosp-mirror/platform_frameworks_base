@@ -50,6 +50,7 @@ cc_library {
         "LocaleData.cpp",
         "misc.cpp",
         "ObbFile.cpp",
+        "PosixUtils.cpp",
         "ResourceTypes.cpp",
         "ResourceUtils.cpp",
         "StreamingZipInflater.cpp",
@@ -157,6 +158,7 @@ cc_test {
             srcs: [
                 "tests/BackupData_test.cpp",
                 "tests/ObbFile_test.cpp",
+                "tests/PosixUtils_test.cpp",
             ],
             shared_libs: common_test_libs + ["libui"],
         },

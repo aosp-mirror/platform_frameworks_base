@@ -35,7 +35,7 @@ message PowerProfileProto {
         repeated double core_power = 5;
     }
 
-    repeated CpuCluster cpu_cluster = 41;
+    repeated CpuCluster cpu_cluster = 40;
 
     optional double wifi_scan = 4;
 
@@ -85,27 +85,27 @@ message PowerProfileProto {
 
     optional double ambient_display = 27;
 
-    optional double screen_on = 29;
+    optional double screen_on = 28;
 
-    optional double radio_on = 30;
+    optional double radio_on = 29;
 
-    optional double radio_scanning = 31;
+    optional double radio_scanning = 30;
 
-    optional double radio_active = 32;
+    optional double radio_active = 31;
 
-    optional double screen_full = 33;
+    optional double screen_full = 32;
 
-    optional double audio = 34;
+    optional double audio = 33;
 
-    optional double video = 35;
+    optional double video = 34;
 
-    optional double flashlight = 36;
+    optional double flashlight = 35;
 
-    optional double memory = 37;
+    optional double memory = 36;
 
-    optional double camera = 38;
+    optional double camera = 37;
 
-    optional double wifi_batched_scan = 39;
+    optional double wifi_batched_scan = 38;
 
-    optional double battery_capacity = 40;
+    optional double battery_capacity = 39;
 }

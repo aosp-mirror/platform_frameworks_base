@@ -48,7 +48,6 @@ import android.provider.DocumentsContract.Document;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.runner.AndroidJUnit4;
 
-import libcore.io.IoUtils;
 import libcore.io.Streams;
 
 import com.google.android.collect.Sets;
@@ -95,7 +94,7 @@ public class FileUtilsTest {
 
     @After
     public void tearDown() throws Exception {
-        IoUtils.deleteContents(mDir);
+        FileUtils.deleteContents(mDir);
         FileUtils.deleteContents(mTarget);
     }
 

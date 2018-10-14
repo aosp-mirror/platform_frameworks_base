@@ -46,7 +46,7 @@ class IApkSerializer {
   IApkSerializer(IAaptContext* context, const Source& source) : context_(context), source_(source) {}
 
   virtual bool SerializeXml(const xml::XmlResource* xml, const std::string& path, bool utf16,
-                            IArchiveWriter* writer) = 0;
+                            IArchiveWriter* writer, uint32_t compression_flags) = 0;
   virtual bool SerializeTable(ResourceTable* table, IArchiveWriter* writer) = 0;
   virtual bool SerializeFile(FileReference* file, IArchiveWriter* writer) = 0;
 
@@ -59,7 +59,10 @@ class IApkSerializer {
 
 bool ConvertApk(IAaptContext* context, unique_ptr<LoadedApk> apk, IApkSerializer* serializer,
                 IArchiveWriter* writer) {
-  if (!serializer->SerializeXml(apk->GetManifest(), kAndroidManifestPath, true /*utf16*/, writer)) {
+  io::IFile* manifest = apk->GetFileCollection()->FindFile(kAndroidManifestPath);
+  if (!serializer->SerializeXml(apk->GetManifest(), kAndroidManifestPath, true /*utf16*/, writer,
+                                (manifest != nullptr && manifest->WasCompressed())
+                                    ? ArchiveEntry::kCompress : 0u)) {
     context->GetDiagnostics()->Error(DiagMessage(apk->GetSource())
                                      << "failed to serialize AndroidManifest.xml");
     return false;
@@ -133,7 +136,7 @@ class BinaryApkSerializer : public IApkSerializer {
       : IApkSerializer(context, source), tableFlattenerOptions_(options) {}
 
   bool SerializeXml(const xml::XmlResource* xml, const std::string& path, bool utf16,
-                    IArchiveWriter* writer) override {
+                    IArchiveWriter* writer, uint32_t compression_flags) override {
     BigBuffer buffer(4096);
     XmlFlattenerOptions options = {};
     options.use_utf16 = utf16;
@@ -144,8 +147,7 @@ class BinaryApkSerializer : public IApkSerializer {
     }
 
     io::BigBufferInputStream input_stream(&buffer);
-    return io::CopyInputStreamToArchive(context_, &input_stream, path, ArchiveEntry::kCompress,
-                                        writer);
+    return io::CopyInputStreamToArchive(context_, &input_stream, path, compression_flags, writer);
   }
 
   bool SerializeTable(ResourceTable* table, IArchiveWriter* writer) override {
@@ -186,7 +188,8 @@ class BinaryApkSerializer : public IApkSerializer {
         return false;
       }
 
-      if (!SerializeXml(xml.get(), *file->path, false /*utf16*/, writer)) {
+      if (!SerializeXml(xml.get(), *file->path, false /*utf16*/, writer,
+                        file->file->WasCompressed() ? ArchiveEntry::kCompress : 0u)) {
         context_->GetDiagnostics()->Error(DiagMessage(source_)
                                           << "failed to serialize to binary XML: " << *file->path);
         return false;
@@ -216,10 +219,10 @@ class ProtoApkSerializer : public IApkSerializer {
       : IApkSerializer(context, source) {}
 
   bool SerializeXml(const xml::XmlResource* xml, const std::string& path, bool utf16,
-                    IArchiveWriter* writer) override {
+                    IArchiveWriter* writer, uint32_t compression_flags) override {
     pb::XmlNode pb_node;
     SerializeXmlResourceToPb(*xml, &pb_node);
-    return io::CopyProtoToArchive(context_, &pb_node, path, ArchiveEntry::kCompress, writer);
+    return io::CopyProtoToArchive(context_, &pb_node, path, compression_flags, writer);
   }
 
   bool SerializeTable(ResourceTable* table, IArchiveWriter* writer) override {
@@ -246,7 +249,8 @@ class ProtoApkSerializer : public IApkSerializer {
         return false;
       }
 
-      if (!SerializeXml(xml.get(), *file->path, false /*utf16*/, writer)) {
+      if (!SerializeXml(xml.get(), *file->path, false /*utf16*/, writer,
+                        file->file->WasCompressed() ? ArchiveEntry::kCompress : 0u)) {
         context_->GetDiagnostics()->Error(DiagMessage(source_)
                                           << "failed to serialize to proto XML: " << *file->path);
         return false;

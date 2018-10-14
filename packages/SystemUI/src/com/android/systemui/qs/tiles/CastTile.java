@@ -46,6 +46,7 @@ import com.android.systemui.statusbar.phone.SystemUIDialog;
 import com.android.systemui.statusbar.policy.CastController;
 import com.android.systemui.statusbar.policy.CastController.CastDevice;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
+import com.android.systemui.statusbar.policy.NetworkController;
 
 import java.util.LinkedHashMap;
 import java.util.Set;
@@ -58,16 +59,18 @@ public class CastTile extends QSTileImpl<BooleanState> {
     private final CastController mController;
     private final CastDetailAdapter mDetailAdapter;
     private final KeyguardMonitor mKeyguard;
+    private final NetworkController mNetworkController;
     private final Callback mCallback = new Callback();
     private final ActivityStarter mActivityStarter;
     private Dialog mDialog;
-    private boolean mRegistered;
+    private boolean mWifiConnected;
 
     public CastTile(QSHost host) {
         super(host);
         mController = Dependency.get(CastController.class);
         mDetailAdapter = new CastDetailAdapter();
         mKeyguard = Dependency.get(KeyguardMonitor.class);
+        mNetworkController = Dependency.get(NetworkController.class);
         mActivityStarter = Dependency.get(ActivityStarter.class);
     }
 
@@ -87,10 +90,12 @@ public class CastTile extends QSTileImpl<BooleanState> {
         if (listening) {
             mController.addCallback(mCallback);
             mKeyguard.addCallback(mCallback);
+            mNetworkController.addCallback(mSignalCallback);
         } else {
             mController.setDiscovering(false);
             mController.removeCallback(mCallback);
             mKeyguard.removeCallback(mCallback);
+            mNetworkController.removeCallback(mSignalCallback);
         }
     }
 
@@ -112,6 +117,9 @@ public class CastTile extends QSTileImpl<BooleanState> {
 
     @Override
     protected void handleClick() {
+        if (getState().state == Tile.STATE_UNAVAILABLE) {
+            return;
+        }
         if (mKeyguard.isSecure() && !mKeyguard.canSkipBouncer()) {
             mActivityStarter.postQSRunnableDismissingKeyguard(() -> {
                 showDetail(true);
@@ -164,13 +172,22 @@ public class CastTile extends QSTileImpl<BooleanState> {
         if (!state.value && connecting) {
             state.label = mContext.getString(R.string.quick_settings_connecting);
         }
-        state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
         state.icon = ResourceIcon.get(state.value ? R.drawable.ic_qs_cast_on
                 : R.drawable.ic_qs_cast_off);
+        if (mWifiConnected) {
+            state.state = state.value ? Tile.STATE_ACTIVE : Tile.STATE_INACTIVE;
+            state.secondaryLabel = "";
+            state.contentDescription = state.contentDescription + ","
+                    + mContext.getString(R.string.accessibility_quick_settings_open_details);
+            state.expandedAccessibilityClassName = Button.class.getName();
+        } else {
+            state.state = Tile.STATE_UNAVAILABLE;
+            String noWifi = mContext.getString(R.string.quick_settings_cast_no_wifi);
+            state.secondaryLabel = noWifi;
+            state.contentDescription = state.contentDescription + ", " + mContext.getString(
+                    R.string.accessibility_quick_settings_not_available, noWifi);
+        }
         mDetailAdapter.updateItems(devices);
-        state.expandedAccessibilityClassName = Button.class.getName();
-        state.contentDescription = state.contentDescription + ","
-                + mContext.getString(R.string.accessibility_quick_settings_open_details);
     }
 
     @Override
@@ -191,6 +208,22 @@ public class CastTile extends QSTileImpl<BooleanState> {
         return device.name != null ? device.name
                 : mContext.getString(R.string.quick_settings_cast_device_default_name);
     }
+
+    private final NetworkController.SignalCallback mSignalCallback =
+            new NetworkController.SignalCallback() {
+                @Override
+                public void setWifiIndicators(boolean enabled,
+                        NetworkController.IconState statusIcon,
+                        NetworkController.IconState qsIcon, boolean activityIn, boolean activityOut,
+                        String description, boolean isTransient, String statusLabel) {
+                    // statusIcon.visible has the connected status information
+                    boolean enabledAndConnected = enabled && qsIcon.visible;
+                    if (enabledAndConnected != mWifiConnected) {
+                        mWifiConnected = enabledAndConnected;
+                        refreshState();
+                    }
+                }
+            };
 
     private final class Callback implements CastController.Callback, KeyguardMonitor.Callback {
         @Override

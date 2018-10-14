@@ -519,7 +519,14 @@ public class KeyguardStatusBarView extends RelativeLayout
         mStatusIconContainer.setAlpha(alpha);
         mStatusIconContainer.setVisibility(visibility);
 
-        mSystemIconsContainer.setTranslationX(-mCurrentBurnInOffsetX * mDarkAmount);
+        float iconsX = -mCurrentBurnInOffsetX;
+        if (mMultiUserSwitch.getVisibility() == VISIBLE) {
+            // Squared alpha to add a nice easing curve and avoid overlap during animation.
+            mMultiUserAvatar.setAlpha(alpha * alpha);
+            iconsX += mMultiUserAvatar.getPaddingLeft() + mMultiUserAvatar.getWidth()
+                    + mMultiUserAvatar.getPaddingRight();
+        }
+        mSystemIconsContainer.setTranslationX(iconsX * mDarkAmount);
         mSystemIconsContainer.setTranslationY(mCurrentBurnInOffsetY * mDarkAmount);
         updateIconsAndTextColors();
     }

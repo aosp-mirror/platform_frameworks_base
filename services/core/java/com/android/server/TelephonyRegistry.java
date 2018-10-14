@@ -49,6 +49,7 @@ import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
 import android.telephony.VoLteServiceState;
 import android.util.LocalLog;
+import android.util.StatsLog;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.app.IBatteryStats;
@@ -1719,8 +1720,12 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         try {
             if (state == TelephonyManager.CALL_STATE_IDLE) {
                 mBatteryStats.notePhoneOff();
+                StatsLog.write(StatsLog.PHONE_STATE_CHANGED,
+                        StatsLog.PHONE_STATE_CHANGED__STATE__OFF);
             } else {
                 mBatteryStats.notePhoneOn();
+                StatsLog.write(StatsLog.PHONE_STATE_CHANGED,
+                        StatsLog.PHONE_STATE_CHANGED__STATE__ON);
             }
         } catch (RemoteException e) {
             /* The remote entity disappeared, we can safely ignore the exception. */

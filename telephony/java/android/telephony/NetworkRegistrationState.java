@@ -95,6 +95,13 @@ public class NetworkRegistrationState implements Parcelable {
     @RegState
     private final int mRegState;
 
+    /**
+     * Save the {@link ServiceState.RoamingType roaming type}. it can be overridden roaming type
+     * from resource overlay or carrier config.
+     */
+    @ServiceState.RoamingType
+    private int mRoamingType;
+
     private final int mAccessNetworkTechnology;
 
     private final int mRejectCause;
@@ -140,6 +147,8 @@ public class NetworkRegistrationState implements Parcelable {
         mDomain = domain;
         mTransportType = transportType;
         mRegState = regState;
+        mRoamingType = (regState == REG_STATE_ROAMING)
+                ? ServiceState.ROAMING_TYPE_UNKNOWN : ServiceState.ROAMING_TYPE_NOT_ROAMING;
         mAccessNetworkTechnology = accessNetworkTechnology;
         mRejectCause = rejectCause;
         mAvailableServices = availableServices;
@@ -182,6 +191,7 @@ public class NetworkRegistrationState implements Parcelable {
         mDomain = source.readInt();
         mTransportType = source.readInt();
         mRegState = source.readInt();
+        mRoamingType = source.readInt();
         mAccessNetworkTechnology = source.readInt();
         mRejectCause = source.readInt();
         mEmergencyOnly = source.readBoolean();
@@ -208,6 +218,31 @@ public class NetworkRegistrationState implements Parcelable {
      */
     public @RegState int getRegState() {
         return mRegState;
+    }
+
+    /**
+     * @return {@code true} if registered on roaming network, {@code false} otherwise.
+     */
+    public boolean isRoaming() {
+        return mRoamingType != ServiceState.ROAMING_TYPE_NOT_ROAMING;
+    }
+
+    /**
+     * Set {@link ServiceState.RoamingType roaming type}. This could override
+     * roaming type based on resource overlay or carrier config.
+     * @hide
+     */
+    public void setRoamingType(@ServiceState.RoamingType int roamingType) {
+        mRoamingType = roamingType;
+    }
+
+    /**
+     * @return {@link ServiceState.RoamingType roaming type}. This could return
+     * overridden roaming type based on resource overlay or carrier config.
+     * @hide
+     */
+    public @ServiceState.RoamingType int getRoamingType() {
+        return mRoamingType;
     }
 
     /**
@@ -280,6 +315,7 @@ public class NetworkRegistrationState implements Parcelable {
                 .append(" domain=").append((mDomain == DOMAIN_CS) ? "CS" : "PS")
                 .append("transportType=").append(mTransportType)
                 .append(" regState=").append(regStateToString(mRegState))
+                .append(" roamingType=").append(mRoamingType)
                 .append(" accessNetworkTechnology=")
                 .append(TelephonyManager.getNetworkTypeName(mAccessNetworkTechnology))
                 .append(" rejectCause=").append(mRejectCause)
@@ -293,9 +329,9 @@ public class NetworkRegistrationState implements Parcelable {
 
     @Override
     public int hashCode() {
-        return Objects.hash(mDomain, mTransportType, mRegState, mAccessNetworkTechnology,
-                mRejectCause, mEmergencyOnly, mAvailableServices, mCellIdentity,
-                mVoiceSpecificStates, mDataSpecificStates);
+        return Objects.hash(mDomain, mTransportType, mRegState, mRoamingType,
+                mAccessNetworkTechnology, mRejectCause, mEmergencyOnly, mAvailableServices,
+                mCellIdentity, mVoiceSpecificStates, mDataSpecificStates);
     }
 
     @Override
@@ -310,6 +346,7 @@ public class NetworkRegistrationState implements Parcelable {
         return mDomain == other.mDomain
                 && mTransportType == other.mTransportType
                 && mRegState == other.mRegState
+                && mRoamingType == other.mRoamingType
                 && mAccessNetworkTechnology == other.mAccessNetworkTechnology
                 && mRejectCause == other.mRejectCause
                 && mEmergencyOnly == other.mEmergencyOnly
@@ -325,6 +362,7 @@ public class NetworkRegistrationState implements Parcelable {
         dest.writeInt(mDomain);
         dest.writeInt(mTransportType);
         dest.writeInt(mRegState);
+        dest.writeInt(mRoamingType);
         dest.writeInt(mAccessNetworkTechnology);
         dest.writeInt(mRejectCause);
         dest.writeBoolean(mEmergencyOnly);

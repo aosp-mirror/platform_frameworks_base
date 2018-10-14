@@ -3955,6 +3955,12 @@ public class Intent implements Parcelable, Cloneable {
     public static final String EXTRA_LTE_EARFCN_RSRP_BOOST = "LteEarfcnRsrpBoost";
 
     /**
+     * An parcelable extra used with {@link #ACTION_SERVICE_STATE} representing the service state.
+     * @hide
+     */
+    public static final String EXTRA_SERVICE_STATE = "android.intent.extra.SERVICE_STATE";
+
+    /**
      * The name of the extra used to define the text to be processed, as a
      * CharSequence. Note that this may be a styled CharSequence, so you must use
      * {@link Bundle#getCharSequence(String) Bundle.getCharSequence()} to retrieve it.
@@ -5523,7 +5529,7 @@ public class Intent implements Parcelable, Cloneable {
     /**
      * If set and this intent is being used to launch a new activity from an
      * existing one, then the reply target of the existing activity will be
-     * transfered to the new activity.  This way the new activity can call
+     * transferred to the new activity.  This way, the new activity can call
      * {@link android.app.Activity#setResult} and have that result sent back to
      * the reply target of the original activity.
      */

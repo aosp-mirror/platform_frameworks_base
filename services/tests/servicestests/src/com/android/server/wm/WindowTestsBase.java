@@ -48,17 +48,16 @@ import android.view.DisplayInfo;
 import android.view.IWindow;
 import android.view.WindowManager;
 
-import androidx.test.InstrumentationRegistry;
-
 import com.android.server.AttributeCache;
 
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 
 import java.util.HashSet;
 import java.util.LinkedList;
+
+import androidx.test.InstrumentationRegistry;
 
 /**
  * Common base class for window manager unit test classes.
@@ -194,14 +193,6 @@ class WindowTestsBase {
         }
     }
 
-    /**
-     * @return A SurfaceBuilderFactory to inject in to the WindowManagerService during
-     *         set-up (or null).
-     */
-    SurfaceBuilderFactory getSurfaceBuilderFactory() {
-        return null;
-    }
-
     private WindowState createCommonWindow(WindowState parent, int type, String name) {
         synchronized (sWm.mWindowMap) {
             final WindowState win = createWindow(parent, type, name);
@@ -210,16 +201,6 @@ class WindowTestsBase {
             win.mAttrs.flags |= FLAG_NOT_FOCUSABLE;
             return win;
         }
-    }
-
-    /** Asserts that the first entry is greater than the second entry. */
-    void assertGreaterThan(int first, int second) throws Exception {
-        Assert.assertTrue("Excepted " + first + " to be greater than " + second, first > second);
-    }
-
-    /** Asserts that the first entry is greater than the second entry. */
-    void assertLessThan(int first, int second) throws Exception {
-        Assert.assertTrue("Excepted " + first + " to be less than " + second, first < second);
     }
 
     /**

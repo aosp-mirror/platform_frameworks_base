@@ -107,20 +107,6 @@ public final class BluetoothDevice implements Parcelable {
             "android.bluetooth.device.action.FOUND";
 
     /**
-     * Broadcast Action: Remote device disappeared.
-     * <p>Sent when a remote device that was found in the last discovery is not
-     * found in the current discovery.
-     * <p>Always contains the extra field {@link #EXTRA_DEVICE}.
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} to receive.
-     *
-     * @hide
-     */
-    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
-    @UnsupportedAppUsage
-    public static final String ACTION_DISAPPEARED =
-            "android.bluetooth.device.action.DISAPPEARED";
-
-    /**
      * Broadcast Action: Bluetooth class of a remote device has changed.
      * <p>Always contains the extra fields {@link #EXTRA_DEVICE} and {@link
      * #EXTRA_CLASS}.
@@ -654,7 +640,7 @@ public final class BluetoothDevice implements Parcelable {
     public static final int ACCESS_REJECTED = 2;
 
     /**
-     * No preferrence of physical transport for GATT connections to remote dual-mode devices
+     * No preference of physical transport for GATT connections to remote dual-mode devices
      */
     public static final int TRANSPORT_AUTO = 0;
 
@@ -1971,9 +1957,7 @@ public final class BluetoothDevice implements Parcelable {
      * <p>The remote device will be authenticated and communication on this socket will be
      * encrypted.
      * <p> Use this socket if an authenticated socket link is possible. Authentication refers
-     * to the authentication of the link key to prevent man-in-the-middle type of attacks. When a
-     * secure socket connection is not possible, use {@link createInsecureLeL2capCocSocket(int,
-     * int)}.
+     * to the authentication of the link key to prevent man-in-the-middle type of attacks.
      *
      * @param psm dynamic PSM value from remote device
      * @return a CoC #BluetoothSocket ready for an outgoing connection

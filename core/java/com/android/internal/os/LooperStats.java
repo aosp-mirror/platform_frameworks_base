@@ -66,6 +66,7 @@ public class LooperStats implements Looper.Observer {
             session = session == null ? new DispatchSession() : session;
             session.startTimeMicro = getElapsedRealtimeMicro();
             session.cpuStartMicro = getThreadTimeMicro();
+            session.systemUptimeMillis = getSystemUptimeMillis();
             return session;
         }
 
@@ -85,12 +86,18 @@ public class LooperStats implements Looper.Observer {
                 entry.messageCount++;
                 if (session != DispatchSession.NOT_SAMPLED) {
                     entry.recordedMessageCount++;
-                    long latency = getElapsedRealtimeMicro() - session.startTimeMicro;
-                    long cpuUsage = getThreadTimeMicro() - session.cpuStartMicro;
+                    final long latency = getElapsedRealtimeMicro() - session.startTimeMicro;
+                    final long cpuUsage = getThreadTimeMicro() - session.cpuStartMicro;
                     entry.totalLatencyMicro += latency;
                     entry.maxLatencyMicro = Math.max(entry.maxLatencyMicro, latency);
                     entry.cpuUsageMicro += cpuUsage;
                     entry.maxCpuUsageMicro = Math.max(entry.maxCpuUsageMicro, cpuUsage);
+                    if (msg.getWhen() > 0) {
+                        final long delay = Math.max(0L, session.systemUptimeMillis - msg.getWhen());
+                        entry.delayMillis += delay;
+                        entry.maxDelayMillis = Math.max(entry.maxDelayMillis, delay);
+                        entry.recordedDelayMessageCount++;
+                    }
                 }
             }
         }
@@ -206,6 +213,10 @@ public class LooperStats implements Looper.Observer {
         return SystemClock.elapsedRealtimeNanos() / 1000;
     }
 
+    protected long getSystemUptimeMillis() {
+        return SystemClock.uptimeMillis();
+    }
+
     protected boolean shouldCollectDetailedData() {
         return ThreadLocalRandom.current().nextInt() % mSamplingInterval == 0;
     }
@@ -214,6 +225,7 @@ public class LooperStats implements Looper.Observer {
         static final DispatchSession NOT_SAMPLED = new DispatchSession();
         public long startTimeMicro;
         public long cpuStartMicro;
+        public long systemUptimeMillis;
     }
 
     private static class Entry {
@@ -228,6 +240,9 @@ public class LooperStats implements Looper.Observer {
         public long maxLatencyMicro;
         public long cpuUsageMicro;
         public long maxCpuUsageMicro;
+        public long recordedDelayMessageCount;
+        public long delayMillis;
+        public long maxDelayMillis;
 
         Entry(Message msg, boolean isInteractive) {
             this.workSourceUid = msg.workSourceUid;
@@ -251,6 +266,9 @@ public class LooperStats implements Looper.Observer {
             maxLatencyMicro = 0;
             cpuUsageMicro = 0;
             maxCpuUsageMicro = 0;
+            delayMillis = 0;
+            maxDelayMillis = 0;
+            recordedDelayMessageCount = 0;
         }
 
         static int idFor(Message msg, boolean isInteractive) {
@@ -281,6 +299,9 @@ public class LooperStats implements Looper.Observer {
         public final long maxLatencyMicros;
         public final long cpuUsageMicros;
         public final long maxCpuUsageMicros;
+        public final long maxDelayMillis;
+        public final long delayMillis;
+        public final long recordedDelayMessageCount;
 
         ExportedEntry(Entry entry) {
             this.workSourceUid = entry.workSourceUid;
@@ -301,6 +322,9 @@ public class LooperStats implements Looper.Observer {
             this.maxLatencyMicros = entry.maxLatencyMicro;
             this.cpuUsageMicros = entry.cpuUsageMicro;
             this.maxCpuUsageMicros = entry.maxCpuUsageMicro;
+            this.delayMillis = entry.delayMillis;
+            this.maxDelayMillis = entry.maxDelayMillis;
+            this.recordedDelayMessageCount = entry.recordedDelayMessageCount;
         }
     }
 }

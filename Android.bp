@@ -614,6 +614,7 @@ java_defaults {
         ":netd_aidl",
         ":vold_aidl",
         ":installd_aidl",
+        ":dumpstate_aidl",
 
         "lowpan/java/android/net/lowpan/ILowpanEnergyScanCallback.aidl",
         "lowpan/java/android/net/lowpan/ILowpanNetScanCallback.aidl",
@@ -660,6 +661,7 @@ java_defaults {
         include_dirs: [
             "system/update_engine/binder_bindings",
             "frameworks/native/aidl/binder",
+            "frameworks/native/cmds/dumpstate/binder",
             "frameworks/av/camera/aidl",
             "frameworks/av/media/libaudioclient/aidl",
             "frameworks/native/aidl/gui",
@@ -682,9 +684,6 @@ java_defaults {
 
     no_framework_libs: true,
     libs: [
-        "conscrypt",
-        "okhttp",
-        "bouncycastle",
         "ext",
     ],
 
@@ -706,6 +705,7 @@ java_defaults {
         "android.hardware.radio-V1.0-java",
         "android.hardware.radio-V1.3-java",
         "android.hardware.usb.gadget-V1.0-java",
+        "netd_aidl_interface-java",
     ],
 
     // Loaded with System.loadLibrary by android.view.textclassifier
@@ -835,7 +835,6 @@ java_library_host {
         "cmds/statsd/src/**/*.proto",
         "core/proto/**/*.proto",
         "libs/incident/proto/**/*.proto",
-        "proto/src/stats_enums.proto",
     ],
     proto: {
         include_dirs: ["external/protobuf/src"],
@@ -873,7 +872,6 @@ java_library {
     srcs: [
         "core/proto/**/*.proto",
         "libs/incident/proto/android/os/**/*.proto",
-        "proto/src/stats_enums.proto",
     ],
     // Protos have lots of MissingOverride and similar.
     errorprone: {
@@ -899,7 +897,6 @@ cc_library {
     srcs: [
         "core/proto/**/*.proto",
         "libs/incident/**/*.proto",
-        "proto/src/stats_enums.proto",
     ],
 
     target: {
@@ -1096,14 +1093,13 @@ framework_docs_args = "-android -manifest $(location core/res/AndroidManifest.xm
      "-federationapi SupportLib $(location current/support-api.txt) "
 
 framework_docs_only_args = " -android -manifest $(location core/res/AndroidManifest.xml) " +
+     "-werror -lerror -hide 111 -hide 113 -hide 125 -hide 126 -hide 127 -hide 128 " +
      "-overview $(location core/java/overview.html) " +
      // Federate Support Library references against local API file.
      "-federate SupportLib https://developer.android.com " +
      "-federationapi SupportLib $(location current/support-api.txt) "
 
 framework_docs_only_libs = [
-    "conscrypt",
-    "bouncycastle",
     "voip-common",
     "android.test.mock",
     "android-support-annotations",
@@ -1183,7 +1179,8 @@ stubs_defaults {
 
 doc_defaults {
     name: "framework-docs-default",
-    libs: framework_docs_only_libs,
+    libs: framework_docs_only_libs +
+         ["stub-annotations"],
     html_dirs: [
         "docs/html",
     ],
@@ -1580,7 +1577,6 @@ filegroup {
         "core/java/org/apache/http/params/CoreConnectionPNames.java",
         "core/java/org/apache/http/params/HttpConnectionParams.java",
         "core/java/org/apache/http/params/HttpParams.java",
-        "core/java/android/net/http/HttpResponseCache.java",
         "core/java/android/net/http/SslCertificate.java",
         "core/java/android/net/http/SslError.java",
         "core/java/com/android/internal/util/HexDump.java",

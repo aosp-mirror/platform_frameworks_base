@@ -21,7 +21,6 @@ import android.annotation.DrawableRes;
 import android.annotation.IdRes;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
-import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -570,7 +569,7 @@ public final class Icon implements Parcelable {
      * Version of createWithResource that takes Resources. Do not use.
      * @hide
      */
-    @SystemApi
+    @UnsupportedAppUsage
     public static Icon createWithResource(Resources res, @DrawableRes int resId) {
         if (res == null) {
             throw new IllegalArgumentException("Resource must not be null.");
