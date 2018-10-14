@@ -85,6 +85,7 @@ import com.android.internal.os.KernelWakelockReader;
 import com.android.internal.os.KernelWakelockStats;
 import com.android.internal.os.LooperStats;
 import com.android.internal.os.PowerProfile;
+import com.android.internal.os.ProcessCpuTracker;
 import com.android.internal.os.StoragedUidIoStatsReader;
 import com.android.internal.util.DumpUtils;
 import com.android.server.BinderCallsStatsService;
@@ -164,11 +165,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     private final KernelWakelockStats mTmpWakelockStats = new KernelWakelockStats();
     private IWifiManager mWifiManager = null;
     private TelephonyManager mTelephony = null;
-    private final StatFs mStatFsData = new StatFs(Environment.getDataDirectory().getAbsolutePath());
-    private final StatFs mStatFsSystem =
-            new StatFs(Environment.getRootDirectory().getAbsolutePath());
-    private final StatFs mStatFsTemp =
-            new StatFs(Environment.getDownloadCacheDirectory().getAbsolutePath());
     @GuardedBy("sStatsdLock")
     private final HashSet<Long> mDeathTimeMillis = new HashSet<>();
     @GuardedBy("sStatsdLock")
@@ -188,6 +184,8 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     private static IThermalService sThermalService;
     private File mBaseDir =
             new File(SystemServiceManager.ensureSystemDir(), "stats_companion");
+    @GuardedBy("this")
+    ProcessCpuTracker mProcessCpuTracker = null;
 
     public StatsCompanionService(Context context) {
         super();
@@ -756,7 +754,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     private void pullBluetoothBytesTransfer(
             int tagId, long elapsedNanos, long wallClockNanos,
             List<StatsLogEventWrapper> pulledData) {
-        BluetoothActivityEnergyInfo info = pullBluetoothData();
+        BluetoothActivityEnergyInfo info = fetchBluetoothData();
         if (info.getUidTraffic() != null) {
             for (UidTraffic traffic : info.getUidTraffic()) {
                 StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos,
@@ -868,9 +866,12 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             int tagId, long elapsedNanos, long wallClockNanos,
             List<StatsLogEventWrapper> pulledData) {
         long token = Binder.clearCallingIdentity();
-        if (mWifiManager == null) {
-            mWifiManager =
-                    IWifiManager.Stub.asInterface(ServiceManager.getService(Context.WIFI_SERVICE));
+        synchronized (this) {
+            if (mWifiManager == null) {
+                mWifiManager =
+                        IWifiManager.Stub.asInterface(
+                                ServiceManager.getService(Context.WIFI_SERVICE));
+            }
         }
         if (mWifiManager != null) {
             try {
@@ -900,8 +901,10 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             int tagId, long elapsedNanos, long wallClockNanos,
             List<StatsLogEventWrapper> pulledData) {
         long token = Binder.clearCallingIdentity();
-        if (mTelephony == null) {
-            mTelephony = TelephonyManager.from(mContext);
+        synchronized (this) {
+            if (mTelephony == null) {
+                mTelephony = TelephonyManager.from(mContext);
+            }
         }
         if (mTelephony != null) {
             SynchronousResultReceiver modemReceiver = new SynchronousResultReceiver("telephony");
@@ -925,7 +928,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     private void pullBluetoothActivityInfo(
             int tagId, long elapsedNanos, long wallClockNanos,
             List<StatsLogEventWrapper> pulledData) {
-        BluetoothActivityEnergyInfo info = pullBluetoothData();
+        BluetoothActivityEnergyInfo info = fetchBluetoothData();
         StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
         e.writeLong(info.getTimeStamp());
         e.writeInt(info.getBluetoothStackState());
@@ -936,7 +939,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         pulledData.add(e);
     }
 
-    private synchronized BluetoothActivityEnergyInfo pullBluetoothData() {
+    private synchronized BluetoothActivityEnergyInfo fetchBluetoothData() {
         final BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
         if (adapter != null) {
             SynchronousResultReceiver bluetoothReceiver = new SynchronousResultReceiver(
@@ -1290,30 +1293,35 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
 
     private void pullProcessStats(int section, int tagId, long elapsedNanos, long wallClockNanos,
             List<StatsLogEventWrapper> pulledData) {
-        try {
-            long lastHighWaterMark = readProcStatsHighWaterMark(section);
-            List<ParcelFileDescriptor> statsFiles = new ArrayList<>();
-            long highWaterMark = mProcessStats.getCommittedStats(
-                    lastHighWaterMark, section, true, statsFiles);
-            if (statsFiles.size() != 1) {
-                return;
+        synchronized (this) {
+            try {
+                long lastHighWaterMark = readProcStatsHighWaterMark(section);
+                List<ParcelFileDescriptor> statsFiles = new ArrayList<>();
+                long highWaterMark = mProcessStats.getCommittedStats(
+                        lastHighWaterMark, section, true, statsFiles);
+                if (statsFiles.size() != 1) {
+                    return;
+                }
+                InputStream stream = new ParcelFileDescriptor.AutoCloseInputStream(
+                        statsFiles.get(0));
+                int[] len = new int[1];
+                byte[] stats = readFully(stream, len);
+                StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos,
+                        wallClockNanos);
+                e.writeStorage(Arrays.copyOf(stats, len[0]));
+                pulledData.add(e);
+                new File(mBaseDir.getAbsolutePath() + "/" + section + "_"
+                        + lastHighWaterMark).delete();
+                new File(
+                        mBaseDir.getAbsolutePath() + "/" + section + "_"
+                                + highWaterMark).createNewFile();
+            } catch (IOException e) {
+                Log.e(TAG, "Getting procstats failed: ", e);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Getting procstats failed: ", e);
+            } catch (SecurityException e) {
+                Log.e(TAG, "Getting procstats failed: ", e);
             }
-            InputStream stream = new ParcelFileDescriptor.AutoCloseInputStream(statsFiles.get(0));
-            int[] len = new int[1];
-            byte[] stats = readFully(stream, len);
-            StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
-            e.writeStorage(Arrays.copyOf(stats, len[0]));
-            pulledData.add(e);
-            new File(mBaseDir.getAbsolutePath() + "/" + section + "_" + lastHighWaterMark).delete();
-            new File(
-                    mBaseDir.getAbsolutePath() + "/" + section + "_"
-                            + highWaterMark).createNewFile();
-        } catch (IOException e) {
-            Log.e(TAG, "Getting procstats failed: ", e);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Getting procstats failed: ", e);
-        } catch (SecurityException e) {
-            Log.e(TAG, "Getting procstats failed: ", e);
         }
     }
 
@@ -1382,12 +1390,34 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         });
     }
 
+    private void pullProcessCpuTime(int tagId, long elapsedNanos, final long wallClockNanos,
+            List<StatsLogEventWrapper> pulledData) {
+        synchronized (this) {
+            if (mProcessCpuTracker == null) {
+                mProcessCpuTracker = new ProcessCpuTracker(false);
+                mProcessCpuTracker.init();
+            }
+            mProcessCpuTracker.update();
+            for (int i = 0; i < mProcessCpuTracker.countStats(); i++) {
+                ProcessCpuTracker.Stats st = mProcessCpuTracker.getStats(i);
+                StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos,
+                        wallClockNanos);
+                e.writeInt(st.uid);
+                e.writeString(st.name);
+                e.writeLong(st.base_utime);
+                e.writeLong(st.base_stime);
+                pulledData.add(e);
+            }
+        }
+    }
+
     /**
      * Pulls various data.
      */
     @Override // Binder call
     public StatsLogEventWrapper[] pullData(int tagId) {
         enforceCallingPermission();
+
         if (DEBUG) {
             Slog.d(TAG, "Pulling " + tagId);
         }
@@ -1496,7 +1526,8 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                 break;
             }
             case StatsLog.PROC_STATS: {
-                pullProcessStats(ProcessStats.REPORT_ALL, tagId, elapsedNanos, wallClockNanos, ret);
+                pullProcessStats(ProcessStats.REPORT_ALL, tagId, elapsedNanos, wallClockNanos,
+                        ret);
                 break;
             }
             case StatsLog.PROC_STATS_PKG_PROC: {
@@ -1510,6 +1541,10 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             }
             case StatsLog.POWER_PROFILE: {
                 pullPowerProfile(tagId, elapsedNanos, wallClockNanos, ret);
+                break;
+            }
+            case StatsLog.PROCESS_CPU_TIME: {
+                pullProcessCpuTime(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
             default:
