@@ -6937,6 +6937,16 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
+        public void setForcedDisplaySize(int displayId, int width, int height) {
+            WindowManagerService.this.setForcedDisplaySize(displayId, width, height);
+        }
+
+        @Override
+        public void clearForcedDisplaySize(int displayId) {
+            WindowManagerService.this.clearForcedDisplaySize(displayId);
+        }
+
+        @Override
         public void addWindowToken(IBinder token, int type, int displayId) {
             WindowManagerService.this.addWindowToken(token, type, displayId);
         }

@@ -374,6 +374,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     SearchManager mSearchManager;
     AccessibilityManager mAccessibilityManager;
     BurnInProtectionHelper mBurnInProtectionHelper;
+    private DisplayFoldController mDisplayFoldController;
     AppOpsManager mAppOpsManager;
     private ScreenshotHelper mScreenshotHelper;
     private boolean mHasFeatureWatch;
@@ -471,6 +472,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
     int mLidNavigationAccessibility;
     boolean mLidControlsScreenLock;
     boolean mLidControlsSleep;
+    private boolean mLidControlsDisplayFold;
     int mShortPressOnPowerBehavior;
     int mLongPressOnPowerBehavior;
     int mVeryLongPressOnPowerBehavior;
@@ -1794,6 +1796,8 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 com.android.internal.R.bool.config_lidControlsScreenLock);
         mLidControlsSleep = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_lidControlsSleep);
+        mLidControlsDisplayFold = mContext.getResources().getBoolean(
+                com.android.internal.R.bool.config_lidControlsDisplayFold);
 
         mAllowTheaterModeWakeFromKey = mContext.getResources().getBoolean(
                 com.android.internal.R.bool.config_allowTheaterModeWakeFromKey);
@@ -1849,6 +1853,13 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                 com.android.internal.R.bool.config_perDisplayFocusEnabled);
 
         readConfigurationDependentBehaviors();
+
+        if (mLidControlsDisplayFold) {
+            mDisplayFoldController = DisplayFoldController.create(DEFAULT_DISPLAY);
+        } else if (SystemProperties.getBoolean("persist.debug.force_foldable", false)) {
+            mDisplayFoldController = DisplayFoldController.createWithProxSensor(context,
+                    DEFAULT_DISPLAY);
+        }
 
         mAccessibilityManager = (AccessibilityManager) context.getSystemService(
                 Context.ACCESSIBILITY_SERVICE);
@@ -4972,7 +4983,9 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     private void applyLidSwitchState() {
         final int lidState = mDefaultDisplayPolicy.getLidState();
-        if (lidState == LID_CLOSED && mLidControlsSleep) {
+        if (mLidControlsDisplayFold && mDisplayFoldController != null) {
+            mDisplayFoldController.setDeviceFolded(lidState == LID_CLOSED);
+        } else if (lidState == LID_CLOSED && mLidControlsSleep) {
             goToSleep(SystemClock.uptimeMillis(), PowerManager.GO_TO_SLEEP_REASON_LID_SWITCH,
                     PowerManager.GO_TO_SLEEP_FLAG_NO_DOZE);
         } else if (lidState == LID_CLOSED && mLidControlsScreenLock) {
