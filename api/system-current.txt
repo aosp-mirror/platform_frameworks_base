@@ -1151,7 +1151,8 @@ package android.content.pm {
     method public abstract void revokeRuntimePermission(java.lang.String, java.lang.String, android.os.UserHandle);
     method public abstract boolean setDefaultBrowserPackageNameAsUser(java.lang.String, int);
     method public void setHarmfulAppWarning(java.lang.String, java.lang.CharSequence);
-    method public java.lang.String[] setPackagesSuspended(java.lang.String[], boolean, android.os.PersistableBundle, android.os.PersistableBundle, java.lang.String);
+    method public deprecated java.lang.String[] setPackagesSuspended(java.lang.String[], boolean, android.os.PersistableBundle, android.os.PersistableBundle, java.lang.String);
+    method public java.lang.String[] setPackagesSuspended(java.lang.String[], boolean, android.os.PersistableBundle, android.os.PersistableBundle, android.content.pm.SuspendDialogInfo);
     method public abstract void setUpdateAvailable(java.lang.String, boolean);
     method public abstract boolean updateIntentVerificationStatusAsUser(java.lang.String, int, int);
     method public abstract void updatePermissionFlags(java.lang.String, java.lang.String, int, int, android.os.UserHandle);
@@ -1243,6 +1244,22 @@ package android.content.pm {
     field public static final int PROTECTION_FLAG_SYSTEM_TEXT_CLASSIFIER = 65536; // 0x10000
     field public java.lang.String backgroundPermission;
     field public int requestRes;
+  }
+
+  public final class SuspendDialogInfo implements android.os.Parcelable {
+    method public int describeContents();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.content.pm.SuspendDialogInfo> CREATOR;
+  }
+
+  public static final class SuspendDialogInfo.Builder {
+    ctor public SuspendDialogInfo.Builder();
+    method public android.content.pm.SuspendDialogInfo build();
+    method public android.content.pm.SuspendDialogInfo.Builder setIcon(int);
+    method public android.content.pm.SuspendDialogInfo.Builder setMessage(java.lang.String);
+    method public android.content.pm.SuspendDialogInfo.Builder setMessage(int);
+    method public android.content.pm.SuspendDialogInfo.Builder setNeutralButtonText(int);
+    method public android.content.pm.SuspendDialogInfo.Builder setTitle(int);
   }
 
 }

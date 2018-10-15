@@ -51,6 +51,7 @@ import android.content.pm.ParceledListSlice;
 import android.content.pm.PermissionGroupInfo;
 import android.content.pm.PermissionInfo;
 import android.content.pm.ResolveInfo;
+import android.content.pm.SuspendDialogInfo;
 import android.content.pm.UserInfo;
 import android.content.pm.VersionedPackage;
 import android.content.pm.dex.ArtManager;
@@ -1701,9 +1702,18 @@ class PackageManagerShellCommand extends ShellCommand {
         }
         final String callingPackage =
                 (Binder.getCallingUid() == Process.ROOT_UID) ? "root" : "com.android.shell";
+
+        final SuspendDialogInfo info;
+        if (!TextUtils.isEmpty(dialogMessage)) {
+            info = new SuspendDialogInfo.Builder()
+                    .setMessage(dialogMessage)
+                    .build();
+        } else {
+            info = null;
+        }
         try {
             mInterface.setPackagesSuspendedAsUser(new String[]{packageName}, suspendedState,
-                    appExtras, launcherExtras, dialogMessage, callingPackage, userId);
+                    appExtras, launcherExtras, info, callingPackage, userId);
             pw.println("Package " + packageName + " new suspended state: "
                     + mInterface.isPackageSuspendedForUser(packageName, userId));
             return 0;

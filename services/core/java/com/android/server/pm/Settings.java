@@ -49,6 +49,7 @@ import android.content.pm.PackageUserState;
 import android.content.pm.PermissionInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.Signature;
+import android.content.pm.SuspendDialogInfo;
 import android.content.pm.UserInfo;
 import android.content.pm.VerifierDeviceIdentity;
 import android.net.Uri;
@@ -203,6 +204,7 @@ public final class Settings {
     private static final String TAG_DEFAULT_BROWSER = "default-browser";
     private static final String TAG_DEFAULT_DIALER = "default-dialer";
     private static final String TAG_VERSION = "version";
+    private static final String TAG_SUSPENDED_DIALOG_INFO = "suspended-dialog-info";
     private static final String TAG_SUSPENDED_APP_EXTRAS = "suspended-app-extras";
     private static final String TAG_SUSPENDED_LAUNCHER_EXTRAS = "suspended-launcher-extras";
 
@@ -222,6 +224,10 @@ public final class Settings {
     private static final String ATTR_HIDDEN = "hidden";
     private static final String ATTR_SUSPENDED = "suspended";
     private static final String ATTR_SUSPENDING_PACKAGE = "suspending-package";
+    /**
+     * @deprecated Legacy attribute, kept only for upgrading from P builds.
+     */
+    @Deprecated
     private static final String ATTR_SUSPEND_DIALOG_MESSAGE = "suspend_dialog_message";
     // Legacy, uninstall blocks are stored separately.
     @Deprecated
@@ -730,7 +736,7 @@ public final class Settings {
                                 false /*hidden*/,
                                 false /*suspended*/,
                                 null /*suspendingPackage*/,
-                                null /*dialogMessage*/,
+                                null /*dialogInfo*/,
                                 null /*suspendedAppExtras*/,
                                 null /*suspendedLauncherExtras*/,
                                 instantApp,
@@ -1620,7 +1626,7 @@ public final class Settings {
                                 false /*hidden*/,
                                 false /*suspended*/,
                                 null /*suspendingPackage*/,
-                                null /*dialogMessage*/,
+                                null /*dialogInfo*/,
                                 null /*suspendedAppExtras*/,
                                 null /*suspendedLauncherExtras*/,
                                 false /*instantApp*/,
@@ -1730,6 +1736,7 @@ public final class Settings {
                     ArraySet<String> disabledComponents = null;
                     PersistableBundle suspendedAppExtras = null;
                     PersistableBundle suspendedLauncherExtras = null;
+                    SuspendDialogInfo suspendDialogInfo = null;
 
                     int packageDepth = parser.getDepth();
                     while ((type=parser.next()) != XmlPullParser.END_DOCUMENT
@@ -1752,20 +1759,28 @@ public final class Settings {
                             case TAG_SUSPENDED_LAUNCHER_EXTRAS:
                                 suspendedLauncherExtras = PersistableBundle.restoreFromXml(parser);
                                 break;
+                            case TAG_SUSPENDED_DIALOG_INFO:
+                                suspendDialogInfo = SuspendDialogInfo.restoreFromXml(parser);
+                                break;
                             default:
                                 Slog.wtf(TAG, "Unknown tag " + parser.getName() + " under tag "
                                         + TAG_PACKAGE);
                         }
+                    }
+                    if (suspendDialogInfo == null && !TextUtils.isEmpty(dialogMessage)) {
+                        suspendDialogInfo = new SuspendDialogInfo.Builder()
+                                .setMessage(dialogMessage)
+                                .build();
                     }
 
                     if (blockUninstall) {
                         setBlockUninstallLPw(userId, name, true);
                     }
                     ps.setUserState(userId, ceDataInode, enabled, installed, stopped, notLaunched,
-                            hidden, suspended, suspendingPackage, dialogMessage, suspendedAppExtras,
-                            suspendedLauncherExtras, instantApp, virtualPreload, enabledCaller,
-                            enabledComponents, disabledComponents, verifState, linkGeneration,
-                            installReason, harmfulAppWarning);
+                            hidden, suspended, suspendingPackage, suspendDialogInfo,
+                            suspendedAppExtras, suspendedLauncherExtras, instantApp, virtualPreload,
+                            enabledCaller, enabledComponents, disabledComponents, verifState,
+                            linkGeneration, installReason, harmfulAppWarning);
                 } else if (tagName.equals("preferred-activities")) {
                     readPreferredActivitiesLPw(parser, userId);
                 } else if (tagName.equals(TAG_PERSISTENT_PREFERRED_ACTIVITIES)) {
@@ -2076,9 +2091,10 @@ public final class Settings {
                         serializer.attribute(null, ATTR_SUSPENDING_PACKAGE,
                                 ustate.suspendingPackage);
                     }
-                    if (ustate.dialogMessage != null) {
-                        serializer.attribute(null, ATTR_SUSPEND_DIALOG_MESSAGE,
-                                ustate.dialogMessage);
+                    if (ustate.dialogInfo != null) {
+                        serializer.startTag(null, TAG_SUSPENDED_DIALOG_INFO);
+                        ustate.dialogInfo.saveToXml(serializer);
+                        serializer.endTag(null, TAG_SUSPENDED_DIALOG_INFO);
                     }
                     if (ustate.suspendedAppExtras != null) {
                         serializer.startTag(null, TAG_SUSPENDED_APP_EXTRAS);
@@ -4737,8 +4753,8 @@ public final class Settings {
                 final PackageUserState pus = ps.readUserState(user.id);
                 pw.print(" suspendingPackage=");
                 pw.print(pus.suspendingPackage);
-                pw.print(" dialogMessage=");
-                pw.print(pus.dialogMessage);
+                pw.print(" dialogInfo=");
+                pw.print(pus.dialogInfo);
             }
             pw.print(" stopped=");
             pw.print(ps.getStopped(user.id));

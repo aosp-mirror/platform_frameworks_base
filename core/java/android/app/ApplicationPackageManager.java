@@ -55,6 +55,7 @@ import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.content.pm.ServiceInfo;
 import android.content.pm.SharedLibraryInfo;
+import android.content.pm.SuspendDialogInfo;
 import android.content.pm.VerifierDeviceIdentity;
 import android.content.pm.VersionedPackage;
 import android.content.pm.dex.ArtManager;
@@ -85,6 +86,7 @@ import android.system.ErrnoException;
 import android.system.Os;
 import android.system.OsConstants;
 import android.system.StructStat;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.IconDrawableFactory;
 import android.util.LauncherIcons;
@@ -2255,9 +2257,19 @@ public class ApplicationPackageManager extends PackageManager {
     public String[] setPackagesSuspended(String[] packageNames, boolean suspended,
             PersistableBundle appExtras, PersistableBundle launcherExtras,
             String dialogMessage) {
+        final SuspendDialogInfo dialogInfo = !TextUtils.isEmpty(dialogMessage)
+                ? new SuspendDialogInfo.Builder().setMessage(dialogMessage).build()
+                : null;
+        return setPackagesSuspended(packageNames, suspended, appExtras, launcherExtras, dialogInfo);
+    }
+
+    @Override
+    public String[] setPackagesSuspended(String[] packageNames, boolean suspended,
+            PersistableBundle appExtras, PersistableBundle launcherExtras,
+            SuspendDialogInfo dialogInfo) {
         try {
             return mPM.setPackagesSuspendedAsUser(packageNames, suspended, appExtras,
-                    launcherExtras, dialogMessage, mContext.getOpPackageName(),
+                    launcherExtras, dialogInfo, mContext.getOpPackageName(),
                     getUserId());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();

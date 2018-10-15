@@ -267,14 +267,15 @@ public abstract class PackageManagerInternal {
     public abstract String getSuspendingPackage(String suspendedPackage, int userId);
 
     /**
-     * Get the dialog message to be shown to the user when they try to launch a suspended
-     * application.
+     * Get the information describing the dialog to be shown to the user when they try to launch a
+     * suspended application.
      *
      * @param suspendedPackage The package that has been suspended.
      * @param userId The user for which to check.
-     * @return The dialog message to be shown to the user.
+     * @return A {@link SuspendDialogInfo} object describing the dialog to be shown.
      */
-    public abstract String getSuspendedDialogMessage(String suspendedPackage, int userId);
+    @Nullable
+    public abstract SuspendDialogInfo getSuspendedDialogInfo(String suspendedPackage, int userId);
 
     /**
      * Do a straight uid lookup for the given package/application in the given user.

@@ -35,6 +35,7 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManagerInternal;
+import android.content.pm.SuspendDialogInfo;
 import android.content.pm.UserInfo;
 import android.os.UserHandle;
 import android.os.UserManager;
@@ -165,17 +166,20 @@ public class ActivityStartInterceptorTest {
     public void testSuspendedPackage() {
         mAInfo.applicationInfo.flags = FLAG_SUSPENDED;
         final String suspendingPackage = "com.test.suspending.package";
-        final String dialogMessage = "Test Message";
+        final SuspendDialogInfo dialogInfo = new SuspendDialogInfo.Builder()
+                .setMessage("Test Message")
+                .setIcon(0x11110001)
+                .build();
         when(mPackageManagerInternal.getSuspendingPackage(TEST_PACKAGE_NAME, TEST_USER_ID))
                 .thenReturn(suspendingPackage);
-        when(mPackageManagerInternal.getSuspendedDialogMessage(TEST_PACKAGE_NAME, TEST_USER_ID))
-                .thenReturn(dialogMessage);
+        when(mPackageManagerInternal.getSuspendedDialogInfo(TEST_PACKAGE_NAME, TEST_USER_ID))
+                .thenReturn(dialogInfo);
         // THEN calling intercept returns true
         assertTrue(mInterceptor.intercept(null, null, mAInfo, null, null, 0, 0, null));
 
         // Check intent parameters
-        assertEquals(dialogMessage,
-                mInterceptor.mIntent.getStringExtra(SuspendedAppActivity.EXTRA_DIALOG_MESSAGE));
+        assertEquals(dialogInfo,
+                mInterceptor.mIntent.getParcelableExtra(SuspendedAppActivity.EXTRA_DIALOG_INFO));
         assertEquals(suspendingPackage,
                 mInterceptor.mIntent.getStringExtra(SuspendedAppActivity.EXTRA_SUSPENDING_PACKAGE));
         assertEquals(TEST_PACKAGE_NAME,

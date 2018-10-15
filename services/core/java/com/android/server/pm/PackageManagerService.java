@@ -188,6 +188,7 @@ import android.content.pm.SELinuxUtil;
 import android.content.pm.ServiceInfo;
 import android.content.pm.SharedLibraryInfo;
 import android.content.pm.Signature;
+import android.content.pm.SuspendDialogInfo;
 import android.content.pm.UserInfo;
 import android.content.pm.VerifierDeviceIdentity;
 import android.content.pm.VerifierInfo;
@@ -12716,8 +12717,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
     @Override
     public String[] setPackagesSuspendedAsUser(String[] packageNames, boolean suspended,
-            PersistableBundle appExtras, PersistableBundle launcherExtras, String dialogMessage,
-            String callingPackage, int userId) {
+            PersistableBundle appExtras, PersistableBundle launcherExtras,
+            SuspendDialogInfo dialogInfo, String callingPackage, int userId) {
         mContext.enforceCallingOrSelfPermission(android.Manifest.permission.SUSPEND_APPS,
                 "setPackagesSuspendedAsUser");
 
@@ -12762,7 +12763,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         unactionedPackages.add(packageName);
                         continue;
                     }
-                    pkgSetting.setSuspended(suspended, callingPackage, dialogMessage, appExtras,
+                    pkgSetting.setSuspended(suspended, callingPackage, dialogInfo, appExtras,
                             launcherExtras, userId);
                     changedPackagesList.add(packageName);
                     changedUids.add(UserHandle.getUid(userId, pkgSetting.appId));
@@ -17816,7 +17817,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     false /*hidden*/,
                     false /*suspended*/,
                     null /*suspendingPackage*/,
-                    null /*dialogMessage*/,
+                    null /*dialogInfo*/,
                     null /*suspendedAppExtras*/,
                     null /*suspendedLauncherExtras*/,
                     false /*instantApp*/,
@@ -22585,10 +22586,10 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         @Override
-        public String getSuspendedDialogMessage(String suspendedPackage, int userId) {
+        public SuspendDialogInfo getSuspendedDialogInfo(String suspendedPackage, int userId) {
             synchronized (mPackages) {
                 final PackageSetting ps = mSettings.mPackages.get(suspendedPackage);
-                return (ps != null) ? ps.readUserState(userId).dialogMessage : null;
+                return (ps != null) ? ps.readUserState(userId).dialogInfo : null;
             }
         }
 
