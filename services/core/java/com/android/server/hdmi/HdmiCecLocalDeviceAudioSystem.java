@@ -30,12 +30,15 @@ import android.media.AudioManager;
 import android.media.AudioSystem;
 import android.media.tv.TvContract;
 import android.os.SystemProperties;
+import android.util.Slog;
+import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.hdmi.Constants.AudioCodec;
 import com.android.server.hdmi.HdmiAnnotations.ServiceThreadOnly;
 
+import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
 
 /**
@@ -101,8 +104,9 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
     final void addCecDevice(HdmiDeviceInfo info) {
         assertRunOnServiceThread();
         HdmiDeviceInfo old = addDeviceInfo(info);
-        if (info.getLogicalAddress() == mAddress) {
+        if (info.getPhysicalAddress() == mService.getPhysicalAddress()) {
             // The addition of the device itself should not be notified.
+            // Note that different logical address could still be the same local device.
             return;
         }
         if (old == null) {
@@ -128,7 +132,24 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
     }
 
     /**
-     * Add a new {@link HdmiDeviceInfo}. It returns old device info which has the same
+     * Called when a device is updated.
+     *
+     * @param info device info of the updating device.
+     */
+    @ServiceThreadOnly
+    final void updateCecDevice(HdmiDeviceInfo info) {
+        assertRunOnServiceThread();
+        HdmiDeviceInfo old = addDeviceInfo(info);
+
+        if (old == null) {
+            invokeDeviceEventListener(info, HdmiControlManager.DEVICE_EVENT_ADD_DEVICE);
+        } else if (!old.equals(info)) {
+            invokeDeviceEventListener(info, HdmiControlManager.DEVICE_EVENT_UPDATE_DEVICE);
+        }
+    }
+
+    /**
+    * Add a new {@link HdmiDeviceInfo}. It returns old device info which has the same
      * logical address as new device info's.
      *
      * @param deviceInfo a new {@link HdmiDeviceInfo} to be added.
@@ -136,7 +157,8 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
      *         that has the same logical address as new one has.
      */
     @ServiceThreadOnly
-    private HdmiDeviceInfo addDeviceInfo(HdmiDeviceInfo deviceInfo) {
+    @VisibleForTesting
+    protected HdmiDeviceInfo addDeviceInfo(HdmiDeviceInfo deviceInfo) {
         assertRunOnServiceThread();
         HdmiDeviceInfo oldDeviceInfo = getCecDeviceInfo(deviceInfo.getLogicalAddress());
         if (oldDeviceInfo != null) {
@@ -260,6 +282,71 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
         assertRunOnServiceThread();
         SystemProperties.set(
                 Constants.PROPERTY_PREFERRED_ADDRESS_AUDIO_SYSTEM, String.valueOf(addr));
+    }
+
+    @Override
+    @ServiceThreadOnly
+    protected boolean handleReportPhysicalAddress(HdmiCecMessage message) {
+        assertRunOnServiceThread();
+        int path = HdmiUtils.twoBytesToInt(message.getParams());
+        int address = message.getSource();
+        int type = message.getParams()[2];
+
+        // Ignore if [Device Discovery Action] is going on.
+        if (hasAction(DeviceDiscoveryAction.class)) {
+            Slog.i(TAG, "Ignored while Device Discovery Action is in progress: " + message);
+            return true;
+        }
+
+        // Update the device info with TIF, note that the same device info could have added in
+        // device discovery and we do not want to override it with default OSD name. Therefore we
+        // need the following check to skip redundant device info updating.
+        HdmiDeviceInfo oldDevice = getCecDeviceInfo(address);
+        if (oldDevice == null || oldDevice.getPhysicalAddress() != path) {
+            addCecDevice(new HdmiDeviceInfo(
+                    address, path, mService.pathToPortId(path), type,
+                    Constants.UNKNOWN_VENDOR_ID, HdmiUtils.getDefaultDeviceName(address)));
+            // if we are adding a new device info, send out a give osd name command
+            // to update the name of the device in TIF
+            mService.sendCecCommand(
+                    HdmiCecMessageBuilder.buildGiveOsdNameCommand(mAddress, address));
+            return true;
+        }
+
+        Slog.w(TAG, "Device info exists. Not updating on Physical Address.");
+        return true;
+    }
+
+    @Override
+    @ServiceThreadOnly
+    protected boolean handleSetOsdName(HdmiCecMessage message) {
+        int source = message.getSource();
+        String osdName;
+        HdmiDeviceInfo deviceInfo = getCecDeviceInfo(source);
+        // If the device is not in device list, ignore it.
+        if (deviceInfo == null) {
+            Slog.i(TAG, "No source device info for <Set Osd Name>." + message);
+            return true;
+        }
+        try {
+            osdName = new String(message.getParams(), "US-ASCII");
+        } catch (UnsupportedEncodingException e) {
+            Slog.e(TAG, "Invalid <Set Osd Name> request:" + message, e);
+            return true;
+        }
+
+        if (deviceInfo.getDisplayName().equals(osdName)) {
+            Slog.d(TAG, "Ignore incoming <Set Osd Name> having same osd name:" + message);
+            return true;
+        }
+
+        Slog.d(TAG, "Updating device OSD name from "
+                + deviceInfo.getDisplayName()
+                + " to " + osdName);
+        updateCecDevice(new HdmiDeviceInfo(deviceInfo.getLogicalAddress(),
+                deviceInfo.getPhysicalAddress(), deviceInfo.getPortId(),
+                deviceInfo.getDeviceType(), deviceInfo.getVendorId(), osdName));
+        return true;
     }
 
     @Override
