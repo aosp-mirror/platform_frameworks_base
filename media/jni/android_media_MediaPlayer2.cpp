@@ -974,15 +974,15 @@ android_media_MediaPlayer2_isLooping(JNIEnv *env, jobject thiz)
 }
 
 static void
-android_media_MediaPlayer2_setVolume(JNIEnv *env, jobject thiz, jfloat leftVolume, jfloat rightVolume)
+android_media_MediaPlayer2_setVolume(JNIEnv *env, jobject thiz, jfloat volume)
 {
-    ALOGV("setVolume: left %f  right %f", (float) leftVolume, (float) rightVolume);
+    ALOGV("setVolume: volume %f", (float) volume);
     sp<MediaPlayer2> mp = getMediaPlayer(env, thiz);
     if (mp == NULL ) {
         jniThrowException(env, "java/lang/IllegalStateException", NULL);
         return;
     }
-    process_media_player_call( env, thiz, mp->setVolume((float) leftVolume, (float) rightVolume), NULL, NULL );
+    process_media_player_call( env, thiz, mp->setVolume((float) volume), NULL, NULL );
 }
 
 static jbyteArray
@@ -1481,7 +1481,7 @@ static const JNINativeMethod gMethods[] = {
     {"getParameter",        "(I)Ljava/lang/Object;",           (void *)android_media_MediaPlayer2_getParameter},
     {"setLooping",          "(Z)V",                             (void *)android_media_MediaPlayer2_setLooping},
     {"isLooping",           "()Z",                              (void *)android_media_MediaPlayer2_isLooping},
-    {"_setVolume",          "(FF)V",                            (void *)android_media_MediaPlayer2_setVolume},
+    {"_setVolume",          "(F)V",                             (void *)android_media_MediaPlayer2_setVolume},
     {"_invoke",             "([B)[B",                           (void *)android_media_MediaPlayer2_invoke},
     {"native_init",         "()V",                              (void *)android_media_MediaPlayer2_native_init},
     {"native_setup",        "(Ljava/lang/Object;)V",            (void *)android_media_MediaPlayer2_native_setup},
