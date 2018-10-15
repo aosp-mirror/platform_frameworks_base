@@ -708,8 +708,6 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
             } else {
                 throw TaskException.create();
             }
-        } finally {
-            mBlankStateFile.delete();
         }
         checkAgentResult(packageInfo, agentResult);
     }
@@ -1037,8 +1035,13 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
 
     private void cleanUpAgent(@StateTransaction int stateTransaction) {
         applyStateTransaction(stateTransaction);
-        mBackupDataFile.delete();
+        if (mBackupDataFile != null) {
+            mBackupDataFile.delete();
+        }
         mBlankStateFile.delete();
+        mSavedStateFile = null;
+        mBackupDataFile = null;
+        mNewStateFile = null;
         tryCloseFileDescriptor(mSavedState, "old state");
         tryCloseFileDescriptor(mBackupData, "backup data");
         tryCloseFileDescriptor(mNewState, "new state");
@@ -1059,7 +1062,9 @@ public class KeyValueBackupTask implements BackupRestoreTask, Runnable {
                 mNewStateFile.renameTo(mSavedStateFile);
                 break;
             case StateTransaction.DISCARD_NEW:
-                mNewStateFile.delete();
+                if (mNewStateFile != null) {
+                    mNewStateFile.delete();
+                }
                 break;
             case StateTransaction.DISCARD_ALL:
                 mSavedStateFile.delete();
