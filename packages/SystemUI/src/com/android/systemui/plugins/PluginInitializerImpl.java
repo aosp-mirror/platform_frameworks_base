@@ -26,6 +26,10 @@ import com.android.systemui.shared.plugins.PluginManagerImpl;
 
 public class PluginInitializerImpl implements PluginInitializer {
 
+    /**
+     * True if WTFs should lead to crashes
+     */
+    private static final boolean WTFS_SHOULD_CRASH = false;
     private boolean mWtfsSet;
 
     @Override
@@ -52,7 +56,7 @@ public class PluginInitializerImpl implements PluginInitializer {
 
     @Override
     public void handleWtfs() {
-        if (!mWtfsSet) {
+        if (WTFS_SHOULD_CRASH && !mWtfsSet) {
             mWtfsSet = true;
             Log.setWtfHandler(new Log.TerribleFailureHandler() {
                 @Override
