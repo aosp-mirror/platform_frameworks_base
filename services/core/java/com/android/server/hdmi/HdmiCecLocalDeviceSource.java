@@ -122,6 +122,7 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
             setActiveSource(activeSource);
         }
         setIsActiveSource(physicalAddress == mService.getPhysicalAddress());
+        updateDevicePowerStatus(logicalAddress, HdmiControlManager.POWER_STATUS_ON);
         switchInputOnReceivingNewActivePath(physicalAddress);
         return true;
     }
@@ -187,6 +188,13 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
     // Source device with Switch functionality should implement this method.
     // TODO(): decide which type will handle the routing when multi device type is supported
     protected void handleRoutingChangeAndInformation(int physicalAddress, HdmiCecMessage message) {
+        // do nothing
+    }
+
+    // Update the power status of the devices connected to the current device.
+    // This only works if the current device is a switch and keeps tracking the device info
+    // of the device connected to it.
+    protected void updateDevicePowerStatus(int logicalAddress, int newPowerStatus) {
         // do nothing
     }
 

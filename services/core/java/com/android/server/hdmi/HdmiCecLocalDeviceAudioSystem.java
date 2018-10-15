@@ -96,7 +96,7 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
 
     /**
      * Called when a device is newly added or a new device is detected or
-     * existing device is updated.
+     * an existing device is updated.
      *
      * @param info device info of a new device.
      */
@@ -314,6 +314,13 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
         }
 
         Slog.w(TAG, "Device info exists. Not updating on Physical Address.");
+        return true;
+    }
+
+    @Override
+    protected boolean handleReportPowerStatus(HdmiCecMessage command) {
+        int newStatus = command.getParams()[0] & 0xFF;
+        updateDevicePowerStatus(command.getSource(), newStatus);
         return true;
     }
 
@@ -920,5 +927,23 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
         mService.sendCecCommand(HdmiCecMessageBuilder.buildRoutingInformation(
                 mAddress, routingInformationPath));
         routeToInputFromPortId(getRoutingPort());
+    }
+
+    protected void updateDevicePowerStatus(int logicalAddress, int newPowerStatus) {
+        HdmiDeviceInfo info = getCecDeviceInfo(logicalAddress);
+        if (info == null) {
+            Slog.w(TAG, "Can not update power status of non-existing device:" + logicalAddress);
+            return;
+        }
+
+        if (info.getDevicePowerStatus() == newPowerStatus) {
+            return;
+        }
+
+        HdmiDeviceInfo newInfo = HdmiUtils.cloneHdmiDeviceInfo(info, newPowerStatus);
+        // addDeviceInfo replaces old device info with new one if exists.
+        addDeviceInfo(newInfo);
+
+        invokeDeviceEventListener(newInfo, HdmiControlManager.DEVICE_EVENT_UPDATE_DEVICE);
     }
 }
