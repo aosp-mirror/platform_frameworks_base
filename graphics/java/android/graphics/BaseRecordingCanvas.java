@@ -520,7 +520,7 @@ public class BaseRecordingCanvas extends Canvas {
                             contextStart - paraStart,
                             contextEnd - contextStart,
                             x, y, isRtl, paint.getNativeInstance(),
-                            mp.getNativeMeasuredParagraph().getNativePtr());
+                            mp.getMeasuredText().getNativePtr());
                     return;
                 }
             }
