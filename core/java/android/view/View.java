@@ -24173,7 +24173,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      *     </ul>
      * @return {@code true} if the method completes successfully, or
      * {@code false} if it fails anywhere. Returning {@code false} means the system was unable to
-     * do a drag, and so no drag operation is in progress.
+     * do a drag because of another ongoing operation or some other reasons.
      */
     public final boolean startDragAndDrop(ClipData data, DragShadowBuilder shadowBuilder,
             Object myLocalState, int flags) {
@@ -24216,51 +24216,51 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             Log.d(VIEW_LOG_TAG, "drag shadow: width=" + shadowSize.x + " height=" + shadowSize.y
                     + " shadowX=" + shadowTouchPoint.x + " shadowY=" + shadowTouchPoint.y);
         }
-        if (mAttachInfo.mDragSurface != null) {
-            mAttachInfo.mDragSurface.release();
-        }
-        mAttachInfo.mDragSurface = new Surface();
-        mAttachInfo.mDragToken = null;
 
         final ViewRootImpl root = mAttachInfo.mViewRootImpl;
         final SurfaceSession session = new SurfaceSession(root.mSurface);
-        final SurfaceControl surface = new SurfaceControl.Builder(session)
+        final SurfaceControl surfaceControl = new SurfaceControl.Builder(session)
                 .setName("drag surface")
                 .setSize(shadowSize.x, shadowSize.y)
                 .setFormat(PixelFormat.TRANSLUCENT)
                 .build();
+        final Surface surface = new Surface();
+        surface.copyFrom(surfaceControl);
+        IBinder token = null;
         try {
-            mAttachInfo.mDragSurface.copyFrom(surface);
-            final Canvas canvas = mAttachInfo.mDragSurface.lockCanvas(null);
+            final Canvas canvas = surface.lockCanvas(null);
             try {
                 canvas.drawColor(0, PorterDuff.Mode.CLEAR);
                 shadowBuilder.onDrawShadow(canvas);
             } finally {
-                mAttachInfo.mDragSurface.unlockCanvasAndPost(canvas);
+                surface.unlockCanvasAndPost(canvas);
             }
-
-            // Cache the local state object for delivery with DragEvents
-            root.setLocalDragState(myLocalState);
 
             // repurpose 'shadowSize' for the last touch point
             root.getLastTouchPoint(shadowSize);
 
-            mAttachInfo.mDragToken = mAttachInfo.mSession.performDrag(
-                    mAttachInfo.mWindow, flags, surface, root.getLastTouchSource(),
+            token = mAttachInfo.mSession.performDrag(
+                    mAttachInfo.mWindow, flags, surfaceControl, root.getLastTouchSource(),
                     shadowSize.x, shadowSize.y, shadowTouchPoint.x, shadowTouchPoint.y, data);
             if (ViewDebug.DEBUG_DRAG) {
-                Log.d(VIEW_LOG_TAG, "performDrag returned " + mAttachInfo.mDragToken);
+                Log.d(VIEW_LOG_TAG, "performDrag returned " + token);
             }
-
-            return mAttachInfo.mDragToken != null;
+            if (token != null) {
+                if (mAttachInfo.mDragSurface != null) {
+                    mAttachInfo.mDragSurface.release();
+                }
+                mAttachInfo.mDragSurface = surface;
+                mAttachInfo.mDragToken = token;
+                // Cache the local state object for delivery with DragEvents
+                root.setLocalDragState(myLocalState);
+            }
+            return token != null;
         } catch (Exception e) {
             Log.e(VIEW_LOG_TAG, "Unable to initiate drag", e);
             return false;
         } finally {
-            if (mAttachInfo.mDragToken == null) {
-                mAttachInfo.mDragSurface.destroy();
-                mAttachInfo.mDragSurface = null;
-                root.setLocalDragState(null);
+            if (token == null) {
+                surface.destroy();
             }
             session.kill();
         }
