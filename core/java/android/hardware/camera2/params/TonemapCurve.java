@@ -34,6 +34,10 @@ import java.util.Arrays;
  * use as the tonemapping/contrast/gamma curve when {@link CaptureRequest#TONEMAP_MODE} is
  * set to {@link CameraMetadata#TONEMAP_MODE_CONTRAST_CURVE}.</p>
  *
+ * <p>For a camera device with
+ * {@link android.hardware.camera2.CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES_MONOCHROME
+ * MONOCHROME} capability, all 3 channels will contain the same set of control points.
+ *
  * <p>The total number of points {@code (Pin, Pout)} for each color channel can be no more than
  * {@link CameraCharacteristics#TONEMAP_MAX_CURVE_POINTS}.</p>
  *

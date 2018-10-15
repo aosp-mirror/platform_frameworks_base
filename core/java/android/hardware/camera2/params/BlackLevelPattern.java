@@ -16,13 +16,17 @@
 
 package android.hardware.camera2.params;
 
-import java.util.Arrays;
-
 import static com.android.internal.util.Preconditions.checkNotNull;
+
+import java.util.Arrays;
 
 /**
  * Immutable class to store a 4-element vector of integers corresponding to a 2x2 pattern
  * of color channel offsets used for the black level offsets of each color channel.
+ *
+ * For a camera device with
+ * {@link android.hardware.camera2.CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES_MONOCHROME
+ * MONOCHROME} capability, all 4 elements of the pattern will have the same value.
  */
 public final class BlackLevelPattern {
 
@@ -131,6 +135,12 @@ public final class BlackLevelPattern {
      * black level offset of a color channel. The values are in the same order as channels listed
      * for the CFA layout key (see
      * {@link android.hardware.camera2.CameraCharacteristics#SENSOR_INFO_COLOR_FILTER_ARRANGEMENT}).
+     * </p>
+     *
+     * <p>A {@link
+     * android.hardware.camera2.CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES_MONOCHROME
+     * MONOCHROME} camera only has one channel. As a result, the returned string will contain 4
+     * identical values.
      * </p>
      *
      * @return string representation of {@link BlackLevelPattern}
