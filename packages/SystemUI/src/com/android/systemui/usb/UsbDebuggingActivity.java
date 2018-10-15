@@ -54,7 +54,7 @@ public class UsbDebuggingActivity extends AlertActivity
     @Override
     public void onCreate(Bundle icicle) {
         Window window = getWindow();
-        window.addPrivateFlags(WindowManager.LayoutParams.PRIVATE_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS);
+        window.addSystemFlags(WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS);
         window.setType(WindowManager.LayoutParams.TYPE_SYSTEM_DIALOG);
 
         super.onCreate(icicle);

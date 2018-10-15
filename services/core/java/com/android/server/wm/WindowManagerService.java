@@ -45,8 +45,8 @@ import static android.view.WindowManager.LayoutParams.INPUT_FEATURE_NO_INPUT_CHA
 import static android.view.WindowManager.LayoutParams.LAST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.LAST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_COMPATIBLE_WINDOW;
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY;
+import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
 import static android.view.WindowManager.LayoutParams.TYPE_ACCESSIBILITY_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 import static android.view.WindowManager.LayoutParams.TYPE_DOCK_DIVIDER;
@@ -1928,7 +1928,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     mAccessibilityController.onSomeWindowResizedOrMovedLocked();
                 }
 
-                if ((flagChanges & PRIVATE_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS) != 0) {
+                if ((flagChanges & SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS) != 0) {
                     updateNonSystemOverlayWindowsVisibilityIfNeeded(
                             win, win.mWinAnimator.getShown());
                 }

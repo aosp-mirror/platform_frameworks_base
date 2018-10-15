@@ -16,7 +16,7 @@
 
 package com.android.systemui.media;
 
-import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
+import static android.view.WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
 
 import android.app.Activity;
 import android.app.AlertDialog;
@@ -151,7 +151,7 @@ public class MediaProjectionPermissionActivity extends Activity
         ((CheckBox) mDialog.findViewById(R.id.remember)).setOnCheckedChangeListener(this);
         final Window w = mDialog.getWindow();
         w.setType(WindowManager.LayoutParams.TYPE_SYSTEM_ALERT);
-        w.addPrivateFlags(PRIVATE_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS);
+        w.addSystemFlags(SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS);
 
         mDialog.show();
     }

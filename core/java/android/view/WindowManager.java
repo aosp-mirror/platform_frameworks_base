@@ -1670,7 +1670,7 @@ public interface WindowManager extends ViewManager {
          */
         @SystemApi
         @RequiresPermission(permission.HIDE_NON_SYSTEM_OVERLAY_WINDOWS)
-        public static final int PRIVATE_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS = 0x00080000;
+        public static final int SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS = 0x00080000;
 
         /**
          * Indicates that this window is the rounded corners overlay present on some
@@ -1706,6 +1706,18 @@ public interface WindowManager extends ViewManager {
          * @hide
          */
         public static final int PRIVATE_FLAG_STATUS_FORCE_SHOW_NAVIGATION = 0x00800000;
+
+        /**
+         * An internal annotation for flags that can be specified to {@link #softInputMode}.
+         *
+         * @hide
+         */
+        @SystemApi
+        @Retention(RetentionPolicy.SOURCE)
+        @IntDef(flag = true, prefix = { "SYSTEM_FLAG_" }, value = {
+                SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS,
+        })
+        public @interface SystemFlags {}
 
         /**
          * Control flags that are private to the platform.
@@ -1781,8 +1793,8 @@ public interface WindowManager extends ViewManager {
                         equals = PRIVATE_FLAG_SUSTAINED_PERFORMANCE_MODE,
                         name = "SUSTAINED_PERFORMANCE_MODE"),
                 @ViewDebug.FlagToString(
-                        mask = PRIVATE_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS,
-                        equals = PRIVATE_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS,
+                        mask = SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS,
+                        equals = SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS,
                         name = "HIDE_NON_SYSTEM_OVERLAY_WINDOWS"),
                 @ViewDebug.FlagToString(
                         mask = PRIVATE_FLAG_IS_ROUNDED_CORNERS_OVERLAY,
