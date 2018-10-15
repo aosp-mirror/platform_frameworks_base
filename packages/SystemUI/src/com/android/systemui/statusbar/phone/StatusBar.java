@@ -586,7 +586,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         mNotificationLogger = Dependency.get(NotificationLogger.class);
         mRemoteInputManager = Dependency.get(NotificationRemoteInputManager.class);
         mNotificationListener =  Dependency.get(NotificationListener.class);
-        mGroupManager = Dependency.get(NotificationGroupManager.class);
         mNetworkController = Dependency.get(NetworkController.class);
         mUserSwitcherController = Dependency.get(UserSwitcherController.class);
         mScreenLifecycle = Dependency.get(ScreenLifecycle.class);
@@ -1096,6 +1095,9 @@ public class StatusBar extends SystemUI implements DemoMode,
     @Override
     public void onThemeChanged() {
         // Recreate Indication controller because internal references changed
+        if (mKeyguardIndicationController != null) {
+            mKeyguardIndicationController.destroy();
+        }
         mKeyguardIndicationController =
                 SystemUIFactory.getInstance().createKeyguardIndicationController(mContext,
                         mStatusBarWindow.findViewById(R.id.keyguard_indication_area),
@@ -1104,7 +1106,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         mKeyguardIndicationController
                 .setStatusBarKeyguardViewManager(mStatusBarKeyguardViewManager);
         mKeyguardIndicationController.setVisible(mState == StatusBarState.KEYGUARD);
-        mKeyguardIndicationController.setDozing(mDozing);
         if (mStatusBarKeyguardViewManager != null) {
             mStatusBarKeyguardViewManager.onThemeChanged();
         }
@@ -3247,12 +3248,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         boolean animate = (!mDozing && mDozeServiceHost.shouldAnimateWakeup())
                 || (mDozing && mDozeServiceHost.shouldAnimateScreenOff() && sleepingFromKeyguard);
 
-        mDozeScrimController.setDozing(mDozing);
-        mKeyguardIndicationController.setDozing(mDozing);
         mNotificationPanel.setDozing(mDozing, animate, mWakeUpTouchLocation,
                 mDozeServiceHost.wasPassivelyInterrupted());
-        mNotificationLogger.setDozing(mDozing);
-        mGroupManager.setDozing(mDozing);
         updateQsExpansionEnabled();
         Trace.endSection();
     }
@@ -3441,13 +3438,6 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         updateQsExpansionEnabled();
         mKeyguardViewMediator.setAodShowing(mDozing);
-
-        //TODO: make these folks listeners of StatusBarStateController.onDozingChanged
-        mStatusBarWindowController.setDozing(mDozing);
-        mStatusBarKeyguardViewManager.setDozing(mDozing);
-        if (mAmbientIndicationContainer instanceof DozeReceiver) {
-            ((DozeReceiver) mAmbientIndicationContainer).setDozing(mDozing);
-        }
 
         mEntryManager.updateNotifications();
         updateDozingState();

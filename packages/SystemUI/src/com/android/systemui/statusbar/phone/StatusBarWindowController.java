@@ -76,7 +76,6 @@ public class StatusBarWindowController implements Callback, Dumpable, Configurat
     private final State mCurrentState = new State();
     private OtherwisedCollapsedListener mListener;
 
-    private final StateListener mStateListener = this::setStatusBarState;
     private final SysuiColorExtractor mColorExtractor = Dependency.get(SysuiColorExtractor.class);
 
     public StatusBarWindowController(Context context) {
@@ -563,6 +562,18 @@ public class StatusBarWindowController implements Callback, Dumpable, Configurat
             return result.toString();
         }
     }
+
+    private final StateListener mStateListener = new StateListener() {
+        @Override
+        public void onStateChanged(int newState) {
+            setStatusBarState(newState);
+        }
+
+        @Override
+        public void onDozingChanged(boolean isDozing) {
+            setDozing(isDozing);
+        }
+    };
 
     /**
      * Custom listener to pipe data back to plugins about whether or not the status bar would be

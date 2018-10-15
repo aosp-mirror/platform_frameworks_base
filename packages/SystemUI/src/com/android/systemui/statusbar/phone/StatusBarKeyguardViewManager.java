@@ -59,7 +59,8 @@ import java.util.ArrayList;
  * which is in turn, reported to this class by the current
  * {@link com.android.keyguard.KeyguardViewBase}.
  */
-public class StatusBarKeyguardViewManager implements RemoteInputController.Callback {
+public class StatusBarKeyguardViewManager implements RemoteInputController.Callback,
+        StatusBarStateController.StateListener {
 
     // When hiding the Keyguard with timing supplied from WindowManager, better be early than late.
     private static final long HIDE_TIMING_CORRECTION_MS = - 16 * 3;
@@ -150,6 +151,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         mLockPatternUtils = lockPatternUtils;
         mStatusBarWindowController = Dependency.get(StatusBarWindowController.class);
         KeyguardUpdateMonitor.getInstance(context).registerCallback(mUpdateMonitorCallback);
+        Dependency.get(StatusBarStateController.class).addListener(this);
     }
 
     public void registerStatusBar(StatusBar statusBar,
@@ -334,7 +336,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         updateStates();
     }
 
-    public void setDozing(boolean dozing) {
+    private void setDozing(boolean dozing) {
         if (mDozing != dozing) {
             mDozing = dozing;
             if (dozing || mBouncer.needsFullscreenBouncer() || mOccluded) {
@@ -779,6 +781,16 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         if (mBouncer != null) {
             mBouncer.dump(pw);
         }
+    }
+
+    @Override
+    public void onStateChanged(int newState) {
+        // Nothing
+    }
+
+    @Override
+    public void onDozingChanged(boolean isDozing) {
+        setDozing(isDozing);
     }
 
     private static class DismissWithActionRequest {
