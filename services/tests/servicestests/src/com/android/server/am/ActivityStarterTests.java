@@ -37,6 +37,7 @@ import static android.content.Intent.FLAG_ACTIVITY_RESET_TASK_IF_NEEDED;
 import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TASK;
 
 import static com.android.server.am.ActivityDisplay.POSITION_BOTTOM;
+import static com.android.server.am.ActivityDisplay.POSITION_TOP;
 import static com.android.server.am.ActivityTaskManagerService.ANIMATE;
 
 import static org.junit.Assert.assertEquals;
@@ -562,23 +563,13 @@ public class ActivityStarterTests extends ActivityTestsBase {
                 false /* mockGetLaunchStack */);
 
         // Create a secondary display at bottom.
-        final TestActivityDisplay secondaryDisplay = spy(addNewActivityDisplayAt(POSITION_BOTTOM));
+        final TestActivityDisplay secondaryDisplay = spy(createNewActivityDisplay());
+        mSupervisor.addChild(secondaryDisplay, POSITION_BOTTOM);
         final ActivityStack stack = secondaryDisplay.createStack(WINDOWING_MODE_FULLSCREEN,
                 ACTIVITY_TYPE_STANDARD, true /* onTop */);
 
         // Create an activity record on the top of secondary display.
-        final ComponentName componentName = ComponentName.createRelative(
-                DEFAULT_COMPONENT_PACKAGE_NAME,
-                DEFAULT_COMPONENT_PACKAGE_NAME + ".ReusableActivity");
-        final TaskRecord taskRecord = new TaskBuilder(mSupervisor)
-                .setComponent(componentName)
-                .setStack(stack)
-                .build();
-        final ActivityRecord topActivityOnSecondaryDisplay = new ActivityBuilder(mService)
-                .setComponent(componentName)
-                .setLaunchMode(LAUNCH_SINGLE_TASK)
-                .setTask(taskRecord)
-                .build();
+        final ActivityRecord topActivityOnSecondaryDisplay = createSingleTaskActivityOn(stack);
 
         // Put an activity on default display as the top focused activity.
         new ActivityBuilder(mService).setCreateTask(true).build();
@@ -597,6 +588,59 @@ public class ActivityStarterTests extends ActivityTestsBase {
 
         // Ensure secondary display only creates one stack.
         verify(secondaryDisplay, times(1)).createStack(anyInt(), anyInt(), anyBoolean());
+    }
+
+    /**
+     * This test ensures that when starting an existing non-top single task activity on secondary
+     * display which is the top focused display, it should bring the task to front without creating
+     * unused stack.
+     */
+    @Test
+    public void testBringTaskToFrontOnSecondaryDisplay() {
+        final ActivityStarter starter = prepareStarter(FLAG_ACTIVITY_NEW_TASK,
+                false /* mockGetLaunchStack */);
+
+        // Create a secondary display with an activity.
+        final TestActivityDisplay secondaryDisplay = spy(createNewActivityDisplay());
+        mSupervisor.addChild(secondaryDisplay, POSITION_TOP);
+        final ActivityRecord singleTaskActivity = createSingleTaskActivityOn(
+                secondaryDisplay.createStack(WINDOWING_MODE_FULLSCREEN,
+                        ACTIVITY_TYPE_STANDARD, false /* onTop */));
+
+        // Create another activity on top of the secondary display.
+        final ActivityStack topStack = secondaryDisplay.createStack(WINDOWING_MODE_FULLSCREEN,
+                ACTIVITY_TYPE_STANDARD, true /* onTop */);
+        final TaskRecord topTask = new TaskBuilder(mSupervisor).setStack(topStack).build();
+        new ActivityBuilder(mService).setTask(topTask).build();
+
+        // Start activity with the same intent as {@code singleTaskActivity} on secondary display.
+        final ActivityOptions options = ActivityOptions.makeBasic()
+                .setLaunchDisplayId(secondaryDisplay.mDisplayId);
+        final int result = starter.setReason("testBringTaskToFrontOnSecondaryDisplay")
+                .setIntent(singleTaskActivity.intent)
+                .setActivityOptions(options.toBundle())
+                .execute();
+
+        // Ensure result is moving existing task to front.
+        assertEquals(START_TASK_TO_FRONT, result);
+
+        // Ensure secondary display only creates two stacks.
+        verify(secondaryDisplay, times(2)).createStack(anyInt(), anyInt(), anyBoolean());
+    }
+
+    private ActivityRecord createSingleTaskActivityOn(ActivityStack stack) {
+        final ComponentName componentName = ComponentName.createRelative(
+                DEFAULT_COMPONENT_PACKAGE_NAME,
+                DEFAULT_COMPONENT_PACKAGE_NAME + ".SingleTaskActivity");
+        final TaskRecord taskRecord = new TaskBuilder(mSupervisor)
+                .setComponent(componentName)
+                .setStack(stack)
+                .build();
+        return new ActivityBuilder(mService)
+                .setComponent(componentName)
+                .setLaunchMode(LAUNCH_SINGLE_TASK)
+                .setTask(taskRecord)
+                .build();
     }
 
     /**
