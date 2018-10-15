@@ -141,7 +141,6 @@ import android.app.WindowConfiguration;
 import android.app.admin.DevicePolicyCache;
 import android.app.assist.AssistContent;
 import android.app.assist.AssistStructure;
-import android.app.servertransaction.ConfigurationChangeItem;
 import android.app.usage.UsageEvents;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
@@ -4525,19 +4524,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             mAm.mHandler.sendMessage(msg);
         }
 
-        // TODO: Consider using mPidMap to update configurations for processes.
-        for (int i = mAm.mLruProcesses.size() - 1; i >= 0; i--) {
-            ProcessRecord app = mAm.mLruProcesses.get(i);
-            try {
-                if (app.thread != null) {
-                    if (DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION, "Sending to proc "
-                            + app.processName + " new config " + configCopy);
-                    getLifecycleManager().scheduleTransaction(app.thread,
-                            ConfigurationChangeItem.obtain(configCopy));
-                }
-            } catch (Exception e) {
-                Slog.e(TAG_CONFIGURATION, "Failed to schedule configuration change", e);
+        for (int i = mPidMap.size() - 1; i >= 0; i--) {
+            WindowProcessController app = mPidMap.get(mPidMap.keyAt(i));
+            if (DEBUG_CONFIGURATION) {
+                Slog.v(TAG_CONFIGURATION, "Update process config of "
+                        + app.mName + " to new config " + configCopy);
             }
+            app.onConfigurationChanged(configCopy);
         }
 
         Intent intent = new Intent(Intent.ACTION_CONFIGURATION_CHANGED);
