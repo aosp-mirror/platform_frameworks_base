@@ -17,7 +17,7 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="prompt" msgid="3183836924226407828">"Verbindungsanfrage"</string>
-    <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g> möchte eine VPN-Verbindung herstellen, über die der Netzwerkverkehr überwacht werden kann. Lasse die Verbindung nur zu, wenn die App vertrauenswürdig ist. &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; wird oben am Display angezeigt, wenn VPN aktiv ist."</string>
+    <string name="warning" msgid="809658604548412033">"<xliff:g id="APP">%s</xliff:g> möchte eine VPN-Verbindung herstellen, über die der Netzwerkverkehr überwacht werden kann. Lass die Verbindung nur zu, wenn die App vertrauenswürdig ist. &lt;br /&gt; &lt;br /&gt; &lt;img src=vpn_icon /&gt; wird oben am Display angezeigt, wenn VPN aktiv ist."</string>
     <string name="legacy_title" msgid="192936250066580964">"VPN ist verbunden"</string>
     <string name="session" msgid="6470628549473641030">"Sitzung:"</string>
     <string name="duration" msgid="3584782459928719435">"Dauer:"</string>
