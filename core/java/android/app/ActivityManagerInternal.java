@@ -244,4 +244,10 @@ public abstract class ActivityManagerInternal {
     public abstract void updateOomLevelsForDisplay(int displayId);
     public abstract boolean isActivityStartsLoggingEnabled();
     public abstract void reportCurKeyguardUsageEvent(boolean keyguardShowing);
+
+    /** Input dispatch timeout to a window, start the ANR process. */
+    public abstract long inputDispatchingTimedOut(int pid, boolean aboveSystem, String reason);
+    public abstract boolean inputDispatchingTimedOut(Object proc, String activityShortComponentName,
+            ApplicationInfo aInfo, String parentShortComponentName, Object parentProc,
+            boolean aboveSystem, String reason);
 }

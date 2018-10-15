@@ -125,7 +125,7 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
         } else if (windowState != null) {
             // Notify the activity manager about the timeout and let it decide whether
             // to abort dispatching or keep waiting.
-            long timeout = mService.mAtmInternal.inputDispatchingTimedOut(
+            long timeout = mService.mAmInternal.inputDispatchingTimedOut(
                     windowState.mSession.mPid, aboveSystem, reason);
             if (timeout >= 0) {
                 // The activity manager declined to abort dispatching.

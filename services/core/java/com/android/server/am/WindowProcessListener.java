@@ -16,6 +16,9 @@
 
 package com.android.server.am;
 
+import android.content.pm.ApplicationInfo;
+import android.util.proto.ProtoOutputStream;
+
 /**
  * Interface used by the owner/creator of a process that owns windows to listen to changes from the
  * WM side.
@@ -47,4 +50,6 @@ public interface WindowProcessListener {
 
     /** Returns the total time (in milliseconds) spent executing in both user and system code. */
     long getCpuTime();
+
+    void writeToProto(ProtoOutputStream proto, long fieldId);
 }

@@ -2114,12 +2114,16 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             windowFromSameProcessAsActivity =
                     !hasProcess() || app.getPid() == windowPid || windowPid == -1;
         }
+
         if (windowFromSameProcessAsActivity) {
-            return service.inputDispatchingTimedOut(anrApp, anrActivity, this, false, reason);
+            return service.mAmInternal.inputDispatchingTimedOut(anrApp.mOwner,
+                    anrActivity.shortComponentName, anrActivity.appInfo, shortComponentName,
+                    app, false, reason);
         } else {
             // In this case another process added windows using this activity token. So, we call the
             // generic service input dispatch timed out method so that the right process is blamed.
-            return service.inputDispatchingTimedOut(windowPid, false /* aboveSystem */, reason) < 0;
+            return service.mAmInternal.inputDispatchingTimedOut(
+                    windowPid, false /* aboveSystem */, reason) < 0;
         }
     }
 
