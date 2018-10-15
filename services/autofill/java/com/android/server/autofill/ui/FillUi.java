@@ -19,25 +19,22 @@ import static com.android.server.autofill.Helper.paramsToString;
 import static com.android.server.autofill.Helper.sDebug;
 import static com.android.server.autofill.Helper.sFullScreenMode;
 import static com.android.server.autofill.Helper.sVerbose;
-import static com.android.server.autofill.Helper.sVisibleDatasetsMaxCount;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.PendingIntent;
 import android.content.Context;
-import android.graphics.drawable.Drawable;
-import android.view.ContextThemeWrapper;
-import android.content.Intent;
 import android.content.IntentSender;
 import android.content.pm.PackageManager;
 import android.graphics.Point;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.service.autofill.Dataset;
 import android.service.autofill.Dataset.DatasetFieldFilter;
 import android.service.autofill.FillResponse;
 import android.text.TextUtils;
 import android.util.Slog;
 import android.util.TypedValue;
+import android.view.ContextThemeWrapper;
 import android.view.KeyEvent;
 import android.view.LayoutInflater;
 import android.view.View;
@@ -60,6 +57,7 @@ import android.widget.TextView;
 
 import com.android.internal.R;
 import com.android.server.UiThread;
+import com.android.server.autofill.AutofillManagerService;
 import com.android.server.autofill.Helper;
 
 import java.io.PrintWriter;
@@ -193,8 +191,8 @@ final class FillUi {
             }
         });
 
-        if (sVisibleDatasetsMaxCount > 0) {
-            mVisibleDatasetsMaxCount = sVisibleDatasetsMaxCount;
+        if (AutofillManagerService.getVisibleDatasetsMaxCount() > 0) {
+            mVisibleDatasetsMaxCount = AutofillManagerService.getVisibleDatasetsMaxCount();
             if (sVerbose) {
                 Slog.v(TAG, "overriding maximum visible datasets to " + mVisibleDatasetsMaxCount);
             }
