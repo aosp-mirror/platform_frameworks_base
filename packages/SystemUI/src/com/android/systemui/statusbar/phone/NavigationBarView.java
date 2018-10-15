@@ -1100,10 +1100,11 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
                         visibilityToString(getCurrentView().getVisibility()),
                         getCurrentView().getAlpha()));
 
-        pw.println(String.format("      disabled=0x%08x vertical=%s menu=%s",
+        pw.println(String.format("      disabled=0x%08x vertical=%s menu=%s darkIntensity=%.2f",
                         mDisabledFlags,
                         mVertical ? "true" : "false",
-                        getMenuButton().isVisible() ? "true" : "false"));
+                        getMenuButton().isVisible() ? "true" : "false",
+                        getLightTransitionsController().getCurrentDarkIntensity()));
 
         dumpButton(pw, "back", getBackButton());
         dumpButton(pw, "home", getHomeButton());
