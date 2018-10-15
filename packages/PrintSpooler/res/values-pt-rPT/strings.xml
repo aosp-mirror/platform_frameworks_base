@@ -103,7 +103,7 @@
     <item msgid="3199660090246166812">"Horizontal"</item>
   </string-array>
     <string name="print_write_error_message" msgid="5787642615179572543">"Não foi possível gravar no ficheiro"</string>
-    <string name="print_error_default_message" msgid="8602678405502922346">"Lamentamos, mas isso não funcionou. Tente novam."</string>
+    <string name="print_error_default_message" msgid="8602678405502922346">"Lamentamos, mas isso não funcionou. Tente novamente."</string>
     <string name="print_error_retry" msgid="1426421728784259538">"Tentar novamente"</string>
     <string name="print_error_printer_unavailable" msgid="8985614415253203381">"Esta impressora não está atualmente disponível."</string>
     <string name="print_cannot_load_page" msgid="6179560924492912009">"Não é possível apresentar a pré-visualização"</string>

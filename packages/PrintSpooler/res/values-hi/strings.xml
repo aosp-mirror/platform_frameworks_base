@@ -47,7 +47,7 @@
     <string name="savetopdf_button" msgid="2976186791686924743">"पीडीएफ़ में सेव करें"</string>
     <string name="print_options_expanded" msgid="6944679157471691859">"प्रिंट विकल्पों को विस्तृत किया गया"</string>
     <string name="print_options_collapsed" msgid="7455930445670414332">"प्रिंट विकल्पों को संक्षिप्त किया गया"</string>
-    <string name="search" msgid="5421724265322228497">"सर्च करें"</string>
+    <string name="search" msgid="5421724265322228497">"खोजें"</string>
     <string name="all_printers_label" msgid="3178848870161526399">"सभी प्रिंटर"</string>
     <string name="add_print_service_label" msgid="5356702546188981940">"सेवा जोड़ें"</string>
     <string name="print_search_box_shown_utterance" msgid="7967404953901376090">"सर्च बॉक्स दिखाई दे रहा है"</string>
