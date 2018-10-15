@@ -230,14 +230,14 @@ class ActivityMetricsLogger {
             launchedActivityLaunchToken = launchedActivity.info.launchToken;
             launchedActivityAppRecordRequiredAbi = launchedActivity.app == null
                     ? null
-                    : info.launchedActivity.app.getRequiredAbi();
+                    : launchedActivity.app.getRequiredAbi();
             reason = info.reason;
             startingWindowDelayMs = info.startingWindowDelayMs;
             bindApplicationDelayMs = info.bindApplicationDelayMs;
             windowsDrawnDelayMs = info.windowsDrawnDelayMs;
             type = getTransitionType(info);
-            processRecord = findProcessForActivity(info.launchedActivity);
-            processName = info.launchedActivity.processName;
+            processRecord = findProcessForActivity(launchedActivity);
+            processName = launchedActivity.processName;
             userId = launchedActivity.userId;
             launchedActivityShortComponentName = launchedActivity.shortComponentName;
             activityRecordIdHashCode = System.identityHashCode(launchedActivity);
