@@ -49,11 +49,6 @@
         android:paddingEnd="@dimen/status_bar_padding_end"
         android:orientation="horizontal"
         >
-        <ViewStub
-            android:id="@+id/operator_name"
-            android:layout_width="wrap_content"
-            android:layout_height="match_parent"
-            android:layout="@layout/operator_name" />
         <FrameLayout
             android:layout_height="match_parent"
             android:layout_width="0dp"
@@ -70,6 +65,12 @@
                 android:layout_width="match_parent"
                 android:clipChildren="false"
             >
+                <ViewStub
+                    android:id="@+id/operator_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="match_parent"
+                    android:layout="@layout/operator_name" />
+
                 <com.android.systemui.statusbar.policy.Clock
                     android:id="@+id/clock"
                     android:layout_width="wrap_content"
