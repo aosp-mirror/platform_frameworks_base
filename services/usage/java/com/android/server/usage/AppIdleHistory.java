@@ -320,14 +320,7 @@ public class AppIdleHistory {
         ArrayMap<String, AppUsageHistory> userHistory = getUserHistory(userId);
         AppUsageHistory appUsageHistory =
                 getPackageHistory(userHistory, packageName, elapsedRealtime, true);
-        if (appUsageHistory == null) {
-            return false; // Default to not idle
-        } else {
-            return appUsageHistory.currentBucket >= STANDBY_BUCKET_RARE;
-            // Whether or not it's passed will now be externally calculated and the
-            // bucket will be pushed to the history using setAppStandbyBucket()
-            //return hasPassedThresholds(appUsageHistory, elapsedRealtime);
-        }
+        return appUsageHistory.currentBucket >= STANDBY_BUCKET_RARE;
     }
 
     public AppUsageHistory getAppUsageHistory(String packageName, int userId,
@@ -404,17 +397,19 @@ public class AppIdleHistory {
     public long getTimeSinceLastJobRun(String packageName, int userId, long elapsedRealtime) {
         ArrayMap<String, AppUsageHistory> userHistory = getUserHistory(userId);
         AppUsageHistory appUsageHistory =
-                getPackageHistory(userHistory, packageName, elapsedRealtime, true);
+                getPackageHistory(userHistory, packageName, elapsedRealtime, false);
         // Don't adjust the default, else it'll wrap around to a positive value
-        if (appUsageHistory.lastJobRunTime == Long.MIN_VALUE) return Long.MAX_VALUE;
+        if (appUsageHistory == null || appUsageHistory.lastJobRunTime == Long.MIN_VALUE) {
+            return Long.MAX_VALUE;
+        }
         return getElapsedTime(elapsedRealtime) - appUsageHistory.lastJobRunTime;
     }
 
     public int getAppStandbyBucket(String packageName, int userId, long elapsedRealtime) {
         ArrayMap<String, AppUsageHistory> userHistory = getUserHistory(userId);
         AppUsageHistory appUsageHistory =
-                getPackageHistory(userHistory, packageName, elapsedRealtime, true);
-        return appUsageHistory.currentBucket;
+                getPackageHistory(userHistory, packageName, elapsedRealtime, false);
+        return appUsageHistory == null ? STANDBY_BUCKET_NEVER : appUsageHistory.currentBucket;
     }
 
     public ArrayList<AppStandbyInfo> getAppStandbyBuckets(int userId, boolean appIdleEnabled) {
