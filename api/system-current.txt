@@ -4130,7 +4130,6 @@ package android.os {
 
   public class UserManager {
     method public void clearSeedAccountData();
-    method public int[] getProfileIds(int, boolean);
     method public java.lang.String getSeedAccountName();
     method public android.os.PersistableBundle getSeedAccountOptions();
     method public java.lang.String getSeedAccountType();
