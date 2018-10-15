@@ -1004,6 +1004,23 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
     }
 
+    private void pullNativeProcessMemoryState(
+            int tagId, long elapsedNanos, long wallClockNanos,
+            List<StatsLogEventWrapper> pulledData) {
+        List<ProcessMemoryState> processMemoryStates = LocalServices.getService(
+                ActivityManagerInternal.class).getMemoryStateForNativeProcesses();
+        for (ProcessMemoryState processMemoryState : processMemoryStates) {
+            StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
+            e.writeInt(processMemoryState.uid);
+            e.writeString(processMemoryState.processName);
+            e.writeLong(processMemoryState.pgfault);
+            e.writeLong(processMemoryState.pgmajfault);
+            e.writeLong(processMemoryState.rssInBytes);
+            e.writeLong(processMemoryState.rssHighWatermarkInBytes);
+            pulledData.add(e);
+        }
+    }
+
     private void pullBinderCallsStats(
             int tagId, long elapsedNanos, long wallClockNanos,
             List<StatsLogEventWrapper> pulledData) {
@@ -1507,6 +1524,10 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             }
             case StatsLog.PROCESS_MEMORY_STATE: {
                 pullProcessMemoryState(tagId, elapsedNanos, wallClockNanos, ret);
+                break;
+            }
+            case StatsLog.NATIVE_PROCESS_MEMORY_STATE: {
+                pullNativeProcessMemoryState(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
             case StatsLog.BINDER_CALLS: {

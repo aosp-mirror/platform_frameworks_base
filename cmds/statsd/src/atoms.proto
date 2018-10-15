@@ -146,7 +146,7 @@ message Atom {
     }
 
     // Pulled events will start at field 10000.
-    // Next: 10025
+    // Next: 10037
     oneof pulled {
         WifiBytesTransfer wifi_bytes_transfer = 10000;
         WifiBytesTransferByFgBg wifi_bytes_transfer_by_fg_bg = 10001;
@@ -184,6 +184,7 @@ message Atom {
         PowerProfile power_profile = 10033;
         ProcStats proc_stats_pkg_proc = 10034;
         ProcessCpuTime process_cpu_time = 10035;
+        NativeProcessMemoryState native_process_memory_state = 10036;
     }
 
     // DO NOT USE field numbers above 100,000 in AOSP.
@@ -2342,6 +2343,31 @@ message ProcessMemoryState {
     // Peak RSS usage of the process. Value is read from the VmHWM field in /proc/PID/status or
     // from memory.max_usage_in_bytes under /dev/memcg if the device uses per-app memory cgroups.
     optional int64 rss_high_watermark_in_bytes = 9;
+}
+
+/*
+ * Logs the memory stats for a native process (from procfs).
+ */
+message NativeProcessMemoryState {
+  // The uid if available. -1 means not available.
+  optional int32 uid = 1 [(is_uid) = true];
+
+  // The process name.
+  optional string process_name = 2;
+
+  // # of page-faults
+  optional int64 pgfault = 3;
+
+  // # of major page-faults
+  optional int64 pgmajfault = 4;
+
+  // RSS
+  optional int64 rss_in_bytes = 5;
+
+  // RSS high watermark.
+  // Peak RSS usage of the process. Value is read from the VmHWM field in /proc/PID/status or
+  // from memory.max_usage_in_bytes under /dev/memcg if the device uses per-app memory cgroups.
+  optional int64 rss_high_watermark_in_bytes = 6;
 }
 
 /*

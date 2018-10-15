@@ -72,7 +72,9 @@ import static android.os.Process.THREAD_GROUP_TOP_APP;
 import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
 import static android.os.Process.THREAD_PRIORITY_FOREGROUND;
 import static android.os.Process.getFreeMemory;
+import static android.os.Process.getPidsForCommands;
 import static android.os.Process.getTotalMemory;
+import static android.os.Process.getUidForPid;
 import static android.os.Process.isThreadInProcess;
 import static android.os.Process.killProcess;
 import static android.os.Process.killProcessQuiet;
@@ -138,8 +140,11 @@ import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_UID_OBSER
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.ActivityStackSupervisor.PRESERVE_WINDOWS;
+import static com.android.server.am.MemoryStatUtil.MEMORY_STAT_INTERESTING_NATIVE_PROCESSES;
 import static com.android.server.am.MemoryStatUtil.hasMemcg;
+import static com.android.server.am.MemoryStatUtil.readCmdlineFromProcfs;
 import static com.android.server.am.MemoryStatUtil.readMemoryStatFromFilesystem;
+import static com.android.server.am.MemoryStatUtil.readMemoryStatFromProcfs;
 
 import android.Manifest;
 import android.Manifest.permission;
@@ -20493,6 +20498,28 @@ public class ActivityManagerService extends IActivityManager.Stub
                                     memoryStat.rssHighWatermarkInBytes);
                     processMemoryStates.add(processMemoryState);
                 }
+            }
+            return processMemoryStates;
+        }
+
+        @Override
+        public List<ProcessMemoryState> getMemoryStateForNativeProcesses() {
+            List<ProcessMemoryState> processMemoryStates = new ArrayList<>();
+            int[] pids = getPidsForCommands(MEMORY_STAT_INTERESTING_NATIVE_PROCESSES);
+            for (int i = 0; i < pids.length; i++) {
+                int pid = pids[i];
+                MemoryStat memoryStat = readMemoryStatFromProcfs(pid);
+                if (memoryStat == null) {
+                    continue;
+                }
+                int uid = getUidForPid(pid);
+                String processName = readCmdlineFromProcfs(pid);
+                int oomScore = -1; // Unused, not included in the NativeProcessMemoryState atom.
+                ProcessMemoryState processMemoryState = new ProcessMemoryState(uid, processName,
+                        oomScore, memoryStat.pgfault, memoryStat.pgmajfault,
+                        memoryStat.rssInBytes, memoryStat.cacheInBytes, memoryStat.swapInBytes,
+                        memoryStat.rssHighWatermarkInBytes);
+                processMemoryStates.add(processMemoryState);
             }
             return processMemoryStates;
         }

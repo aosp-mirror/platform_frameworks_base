@@ -166,8 +166,17 @@ public abstract class ActivityManagerInternal {
 
     /**
      * Returns a list that contains the memory stats for currently running processes.
+     *
+     * Only processes managed by ActivityManagerService are included.
      */
     public abstract List<ProcessMemoryState> getMemoryStateForProcesses();
+
+    /**
+     * Returns a list that contains the memory stats for monitored native processes.
+     *
+     * The list of the monitored processes is defined in MemoryStatUtil class.
+     */
+    public abstract List<ProcessMemoryState> getMemoryStateForNativeProcesses();
 
     /**
      * Checks to see if the calling pid is allowed to handle the user. Returns adjusted user id as
