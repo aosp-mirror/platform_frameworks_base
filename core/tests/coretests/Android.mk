@@ -47,7 +47,6 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
 
 LOCAL_JAVA_LIBRARIES := \
     android.test.runner \
-    conscrypt \
     telephony-common \
     org.apache.http.legacy \
     android.test.base \
