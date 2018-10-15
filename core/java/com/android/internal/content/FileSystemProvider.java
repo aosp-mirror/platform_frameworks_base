@@ -389,14 +389,18 @@ public abstract class FileSystemProvider extends DocumentsProvider {
      * @param query the search condition used to match file names
      * @param projection projection of the returned cursor
      * @param exclusion absolute file paths to exclude from result
-     * @return cursor containing search result
+     * @param queryArgs the query arguments for search
+     * @return cursor containing search result. Include
+     *         {@link ContentResolver#EXTRA_HONORED_ARGS} in {@link Cursor}
+     *         extras {@link Bundle} when any QUERY_ARG_* value was honored
+     *         during the preparation of the results.
      * @throws FileNotFoundException when root folder doesn't exist or search fails
+     *
+     * @see ContentResolver#EXTRA_HONORED_ARGS
      */
     protected final Cursor querySearchDocuments(
-            File folder, String query, String[] projection, Set<String> exclusion)
+            File folder, String[] projection, Set<String> exclusion, Bundle queryArgs)
             throws FileNotFoundException {
-
-        query = query.toLowerCase();
         final MatrixCursor result = new MatrixCursor(resolveProjection(projection));
         final LinkedList<File> pending = new LinkedList<>();
         pending.add(folder);
@@ -407,10 +411,17 @@ public abstract class FileSystemProvider extends DocumentsProvider {
                     pending.add(child);
                 }
             }
-            if (file.getName().toLowerCase().contains(query)
-                    && !exclusion.contains(file.getAbsolutePath())) {
+            if (!exclusion.contains(file.getAbsolutePath()) && matchSearchQueryArguments(file,
+                    queryArgs)) {
                 includeFile(result, null, file);
             }
+        }
+
+        final String[] handledQueryArgs = DocumentsContract.getHandledQueryArguments(queryArgs);
+        if (handledQueryArgs.length > 0) {
+            final Bundle extras = new Bundle();
+            extras.putStringArray(ContentResolver.EXTRA_HONORED_ARGS, handledQueryArgs);
+            result.setExtras(extras);
         }
         return result;
     }
@@ -455,6 +466,34 @@ public abstract class FileSystemProvider extends DocumentsProvider {
                 throw new FileNotFoundException("Failed to open for writing: " + e);
             }
         }
+    }
+
+    /**
+     * Test if the file matches the query arguments.
+     *
+     * @param file the file to test
+     * @param queryArgs the query arguments
+     */
+    private boolean matchSearchQueryArguments(File file, Bundle queryArgs) {
+        if (file == null) {
+            return false;
+        }
+
+        final String fileMimeType;
+        final String fileName = file.getName();
+
+        if (file.isDirectory()) {
+            fileMimeType = DocumentsContract.Document.MIME_TYPE_DIR;
+        } else {
+            int dotPos = fileName.lastIndexOf('.');
+            if (dotPos < 0) {
+                return false;
+            }
+            final String extension = fileName.substring(dotPos + 1);
+            fileMimeType = MimeTypeMap.getSingleton().getMimeTypeFromExtension(extension);
+        }
+        return DocumentsContract.matchSearchQueryArguments(queryArgs, fileName, fileMimeType,
+                file.lastModified(), file.length());
     }
 
     private void scanFile(File visibleFile) {
