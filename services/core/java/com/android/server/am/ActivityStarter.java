@@ -1608,8 +1608,8 @@ class ActivityStarter {
 
         mLaunchParams.reset();
 
-        mSupervisor.getLaunchParamsController().calculate(inTask, null /*layout*/, r, sourceRecord,
-                options, mLaunchParams);
+        mSupervisor.getLaunchParamsController().calculate(inTask, r.info.windowLayout, r,
+                sourceRecord, options, mLaunchParams);
 
         if (mLaunchParams.hasPreferredDisplay()) {
             mPreferredDisplayId = mLaunchParams.mPreferredDisplayId;
