@@ -3270,12 +3270,12 @@
   <java-symbol type="integer" name="default_data_warning_level_mb" />
   <java-symbol type="bool" name="config_useVideoPauseWorkaround" />
   <java-symbol type="bool" name="config_sendPackageName" />
-  <java-symbol type="string" name="config_help_package_name_key" />
-  <java-symbol type="string" name="config_help_package_name_value" />
-  <java-symbol type="string" name="config_help_intent_extra_key" />
-  <java-symbol type="string" name="config_help_intent_name_key" />
-  <java-symbol type="string" name="config_feedback_intent_extra_key" />
-  <java-symbol type="string" name="config_feedback_intent_name_key" />
+  <java-symbol type="string" name="config_helpPackageNameKey" />
+  <java-symbol type="string" name="config_helpPackageNameValue" />
+  <java-symbol type="string" name="config_helpIntentExtraKey" />
+  <java-symbol type="string" name="config_helpIntentNameKey" />
+  <java-symbol type="string" name="config_feedbackIntentExtraKey" />
+  <java-symbol type="string" name="config_feedbackIntentNameKey" />
 
   <java-symbol type="array" name="config_hideWhenDisabled_packageNames" />
 

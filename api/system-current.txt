@@ -222,7 +222,7 @@ package android {
   }
 
   public static final class R.dimen {
-    field public static final int config_restricted_icon_size = 17104903; // 0x1050007
+    field public static final int config_restrictedIconSize = 17104903; // 0x1050007
   }
 
   public static final class R.drawable {
@@ -235,12 +235,12 @@ package android {
   }
 
   public static final class R.string {
-    field public static final int config_feedback_intent_extra_key = 17039391; // 0x104001f
-    field public static final int config_feedback_intent_name_key = 17039392; // 0x1040020
-    field public static final int config_help_intent_extra_key = 17039389; // 0x104001d
-    field public static final int config_help_intent_name_key = 17039390; // 0x104001e
-    field public static final int config_help_package_name_key = 17039387; // 0x104001b
-    field public static final int config_help_package_name_value = 17039388; // 0x104001c
+    field public static final int config_feedbackIntentExtraKey = 17039391; // 0x104001f
+    field public static final int config_feedbackIntentNameKey = 17039392; // 0x1040020
+    field public static final int config_helpIntentExtraKey = 17039389; // 0x104001d
+    field public static final int config_helpIntentNameKey = 17039390; // 0x104001e
+    field public static final int config_helpPackageNameKey = 17039387; // 0x104001b
+    field public static final int config_helpPackageNameValue = 17039388; // 0x104001c
   }
 
   public static final class R.style {

@@ -3367,22 +3367,22 @@
     <bool name="config_sendPackageName">false</bool>
 
     <!-- Name for the set of keys associating package names -->
-    <string name="config_help_package_name_key" translatable="false"></string>
+    <string name="config_helpPackageNameKey" translatable="false"></string>
 
     <!-- Name for the set of values of package names -->
-    <string name="config_help_package_name_value" translatable="false"></string>
+    <string name="config_helpPackageNameValue" translatable="false"></string>
 
     <!-- Intent key for the package name keys -->
-    <string name="config_help_intent_extra_key" translatable="false"></string>
+    <string name="config_helpIntentExtraKey" translatable="false"></string>
 
     <!-- Intent key for package name values -->
-    <string name="config_help_intent_name_key" translatable="false"></string>
+    <string name="config_helpIntentNameKey" translatable="false"></string>
 
     <!-- Intent key for the package name keys -->
-    <string name="config_feedback_intent_extra_key" translatable="false"></string>
+    <string name="config_feedbackIntentExtraKey" translatable="false"></string>
 
     <!-- Intent key for package name values -->
-    <string name="config_feedback_intent_name_key" translatable="false"></string>
+    <string name="config_feedbackIntentNameKey" translatable="false"></string>
 
     <!-- The apps that need to be hidden when they are disabled -->
     <string-array name="config_hideWhenDisabled_packageNames"></string-array>
@@ -3487,7 +3487,7 @@
     <string name="config_headlineFontFamilyMedium">@string/font_family_button_material</string>
 
     <!-- Size of icon shown beside a preference locked by admin -->
-    <dimen name="config_restricted_icon_size">@dimen/restricted_icon_size_material</dimen>
+    <dimen name="config_restrictedIconSize">@dimen/restricted_icon_size_material</dimen>
 
     <string translatable="false" name="config_batterySaverDeviceSpecificConfig"></string>
 
