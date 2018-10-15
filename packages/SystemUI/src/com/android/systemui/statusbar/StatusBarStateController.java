@@ -22,6 +22,7 @@ import android.annotation.IntDef;
 import android.util.ArraySet;
 import android.util.Log;
 import com.android.internal.annotations.GuardedBy;
+import com.android.systemui.statusbar.phone.StatusBar;
 import java.lang.annotation.Retention;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -39,6 +40,7 @@ public class StatusBarStateController {
             = (o1, o2) -> Integer.compare(o1.rank, o2.rank);
 
     private final ArrayList<RankedListener> mListeners = new ArrayList<>();
+    private boolean mIsDozing;
     private int mState;
     private int mLastState;
     private boolean mLeaveOpenOnKeyguardHide;
@@ -57,6 +59,11 @@ public class StatusBarStateController {
         return mState;
     }
 
+    /**
+     * Update the status bar state
+     * @param state see {@link StatusBarState} for valid options
+     * @return {@code true} if the state changed, else {@code false}
+     */
     public boolean setState(int state) {
         if (state > MAX_STATE || state < MIN_STATE) {
             throw new IllegalArgumentException("Invalid state " + state);
@@ -76,6 +83,32 @@ public class StatusBarStateController {
 
             for (RankedListener rl : new ArrayList<>(mListeners)) {
                 rl.listener.onStatePostChange();
+            }
+        }
+
+        return true;
+    }
+
+    public boolean isDozing() {
+        return mIsDozing;
+    }
+
+    /**
+     * Update the dozing state from {@link StatusBar}'s perspective
+     * @param isDozing well, are we dozing?
+     * @return {@code true} if the state changed, else {@code false}
+     */
+    @SuppressWarnings("UnusedReturnValue")
+    public boolean setIsDozing(boolean isDozing) {
+        if (mIsDozing == isDozing) {
+            return false;
+        }
+
+        mIsDozing = isDozing;
+
+        synchronized (mListeners) {
+            for (RankedListener rl : new ArrayList<>(mListeners)) {
+                rl.listener.onDozingChanged(isDozing);
             }
         }
 
@@ -144,16 +177,6 @@ public class StatusBarStateController {
         return StatusBarState.toShortString(state);
     }
 
-    public interface StateListener {
-        public default void onStatePreChange(int oldState, int newState) {
-        }
-
-        public default void onStatePostChange() {
-        }
-
-        public void onStateChanged(int newState);
-    }
-
     private class RankedListener {
         private final StateListener listener;
         private final int rank;
@@ -162,5 +185,41 @@ public class StatusBarStateController {
             listener = l;
             rank = r;
         }
+    }
+
+    /**
+     * Listener for StatusBarState updates
+     */
+    public interface StateListener {
+
+        /**
+         * Callback before the new state is applied, for those who need to preempt the change
+         * @param oldState state before the change
+         * @param newState new state to be applied in {@link #onStateChanged}
+         */
+        public default void onStatePreChange(int oldState, int newState) {
+        }
+
+        /**
+         * Callback after all listeners have had a chance to update based on the state change
+         */
+        public default void onStatePostChange() {
+        }
+
+        /**
+         * Required callback. Get the new state and do what you will with it. Keep in mind that
+         * other listeners are typically unordered and don't rely on your work being done before
+         * other peers
+         *
+         * Only called if the state is actually different
+         * @param newState the new {@link StatusBarState}
+         */
+        public void onStateChanged(int newState);
+
+        /**
+         * Callback to be notified when Dozing changes. Dozing is stored separately from state.
+         * @param isDozing {@code true} if dozing according to {@link StatusBar}
+         */
+        public default void onDozingChanged(boolean isDozing) {}
     }
 }
