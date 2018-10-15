@@ -47,6 +47,7 @@ import android.annotation.Nullable;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityTaskManager;
+import android.app.AppDetailsActivity;
 import android.content.ComponentName;
 import android.content.Intent;
 import android.content.IntentFilter;
@@ -3882,6 +3883,11 @@ public class PackageParser {
             }
         }
 
+        // Add a hidden app detail activity which forwards user to App Details page.
+        Activity a = generateAppDetailsHiddenActivity(owner, flags, outError,
+                owner.baseHardwareAccelerated);
+        owner.activities.add(a);
+
         if (hasActivityOrder) {
             Collections.sort(owner.activities, (a1, a2) -> Integer.compare(a2.order, a1.order));
         }
@@ -4121,9 +4127,14 @@ public class PackageParser {
                 return false;
             }
         } else {
-            outInfo.name
+            String outInfoName
                 = buildClassName(owner.applicationInfo.packageName, name, outError);
-            if (outInfo.name == null) {
+            if (AppDetailsActivity.class.getName().equals(outInfoName)) {
+                outError[0] = tag + " invalid android:name";
+                return false;
+            }
+            outInfo.name = outInfoName;
+            if (outInfoName == null) {
                 return false;
             }
         }
@@ -4160,6 +4171,45 @@ public class PackageParser {
         outInfo.packageName = owner.packageName;
 
         return true;
+    }
+
+    /**
+     * Generate activity object that forwards user to App Details page automatically.
+     * This activity should be invisible to user and user should not know or see it.
+     */
+    private @NonNull PackageParser.Activity generateAppDetailsHiddenActivity(
+            PackageParser.Package owner, int flags, String[] outError,
+            boolean hardwareAccelerated) {
+
+        // Build custom App Details activity info instead of parsing it from xml
+        Activity a = new Activity(owner, AppDetailsActivity.class.getName(), new ActivityInfo());
+        a.owner = owner;
+        a.setPackageName(owner.packageName);
+
+        a.info.theme = 0;
+        a.info.exported = true;
+        a.info.name = AppDetailsActivity.class.getName();
+        a.info.processName = owner.applicationInfo.processName;
+        a.info.uiOptions = a.info.applicationInfo.uiOptions;
+        a.info.taskAffinity = buildTaskAffinityName(owner.packageName, owner.packageName,
+                ":app_details", outError);
+        a.info.enabled = true;
+        a.info.launchMode = ActivityInfo.LAUNCH_MULTIPLE;
+        a.info.documentLaunchMode = ActivityInfo.DOCUMENT_LAUNCH_NONE;
+        a.info.maxRecents = ActivityTaskManager.getDefaultAppRecentsLimitStatic();
+        a.info.configChanges = getActivityConfigChanges(0, 0);
+        a.info.softInputMode = 0;
+        a.info.persistableMode = ActivityInfo.PERSIST_NEVER;
+        a.info.screenOrientation = SCREEN_ORIENTATION_UNSPECIFIED;
+        a.info.resizeMode = RESIZE_MODE_FORCE_RESIZEABLE;
+        a.info.lockTaskLaunchMode = 0;
+        a.info.encryptionAware = a.info.directBootAware = false;
+        a.info.rotationAnimation = ROTATION_ANIMATION_UNSPECIFIED;
+        a.info.colorMode = ActivityInfo.COLOR_MODE_DEFAULT;
+        if (hardwareAccelerated) {
+            a.info.flags |= ActivityInfo.FLAG_HARDWARE_ACCELERATED;
+        }
+        return a;
     }
 
     private Activity parseActivity(Package owner, Resources res,
@@ -7132,10 +7182,16 @@ public class PackageParser {
         ComponentName componentName;
         String componentShortName;
 
-        public Component(Package _owner) {
-            owner = _owner;
-            intents = null;
-            className = null;
+        public Component(Package owner, ArrayList<II> intents, String className) {
+            this.owner = owner;
+            this.intents = intents;
+            this.className = className;
+        }
+
+        public Component(Package owner) {
+            this.owner = owner;
+            this.intents = null;
+            this.className = null;
         }
 
         public Component(final ParsePackageItemArgs args, final PackageItemInfo outInfo) {
@@ -7598,6 +7654,13 @@ public class PackageParser {
 
         private boolean hasMaxAspectRatio() {
             return mHasMaxAspectRatio;
+        }
+
+        // To construct custom activity which does not exist in manifest
+        Activity(final Package owner, final String className, final ActivityInfo info) {
+            super(owner, new ArrayList<>(0), className);
+            this.info = info;
+            this.info.applicationInfo = owner.applicationInfo;
         }
 
         public Activity(final ParseComponentArgs args, final ActivityInfo _info) {

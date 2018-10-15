@@ -20,6 +20,7 @@ import android.annotation.NonNull;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
+import android.app.AppDetailsActivity;
 import android.app.AppGlobals;
 import android.app.IApplicationThread;
 import android.app.PendingIntent;
@@ -65,7 +66,9 @@ import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.wm.ActivityTaskManagerInternal;
 
+import java.util.ArrayList;
 import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -74,6 +77,7 @@ import java.util.List;
  */
 public class LauncherAppsService extends SystemService {
 
+    private static final boolean SHOW_HIDDEN_APP_ENABLED = false;
     private final LauncherAppsImpl mLauncherAppsImpl;
 
     public LauncherAppsService(Context context) {
@@ -281,15 +285,84 @@ public class LauncherAppsService extends SystemService {
             }
         }
 
+        private ResolveInfo getHiddenAppActivityInfo(String packageName, int callingUid,
+                UserHandle user) {
+            Intent intent = new Intent();
+            intent.setComponent(new ComponentName(packageName, AppDetailsActivity.class.getName()));
+            final PackageManagerInternal pmInt =
+                    LocalServices.getService(PackageManagerInternal.class);
+            List<ResolveInfo> apps = pmInt.queryIntentActivities(intent,
+                    PackageManager.MATCH_DIRECT_BOOT_AWARE
+                            | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
+                    callingUid, user.getIdentifier());
+            if (apps.size() > 0) {
+                return apps.get(0);
+            }
+            return null;
+        }
+
         @Override
         public ParceledListSlice<ResolveInfo> getLauncherActivities(String callingPackage,
-                String packageName, UserHandle user)
-                throws RemoteException {
-            return queryActivitiesForUser(callingPackage,
+                String packageName, UserHandle user) throws RemoteException {
+            ParceledListSlice<ResolveInfo> launcherActivities = queryActivitiesForUser(
+                    callingPackage,
                     new Intent(Intent.ACTION_MAIN)
                             .addCategory(Intent.CATEGORY_LAUNCHER)
                             .setPackage(packageName),
                     user);
+            if (!SHOW_HIDDEN_APP_ENABLED) {
+                return launcherActivities;
+            }
+
+            final int callingUid = injectBinderCallingUid();
+            final ArrayList<ResolveInfo> result = new ArrayList<>(launcherActivities.getList());
+            if (packageName != null) {
+                // If target package has launcher activities, then return those launcher
+                // activities. Otherwise, return hidden activity that forwards user to app
+                // details page.
+                if (result.size() > 0) {
+                    return launcherActivities;
+                }
+                ResolveInfo info = getHiddenAppActivityInfo(packageName, callingUid, user);
+                if (info != null) {
+                    result.add(info);
+                }
+                return new ParceledListSlice<>(result);
+            }
+
+            long ident = injectClearCallingIdentity();
+            try {
+                final HashSet<String> visiblePackages = new HashSet<>();
+                for (ResolveInfo info : result) {
+                    visiblePackages.add(info.activityInfo.packageName);
+                }
+                final PackageManagerInternal pmInt =
+                        LocalServices.getService(PackageManagerInternal.class);
+                List<ApplicationInfo> installedPackages = pmInt.getInstalledApplications(0,
+                        user.getIdentifier(), callingUid);
+                for (ApplicationInfo applicationInfo : installedPackages) {
+                    if (!visiblePackages.contains(applicationInfo.packageName)) {
+                        if (!shouldShowHiddenApp(applicationInfo)) {
+                            continue;
+                        }
+                        ResolveInfo info = getHiddenAppActivityInfo(applicationInfo.packageName,
+                                callingUid, user);
+                        if (info != null) {
+                            result.add(info);
+                        }
+                    }
+                }
+                return new ParceledListSlice<>(result);
+            } finally {
+                injectRestoreCallingIdentity(ident);
+            }
+        }
+
+        private static boolean shouldShowHiddenApp(ApplicationInfo appInfo) {
+            if (appInfo.isSystemApp() || appInfo.isUpdatedSystemApp()) {
+                return false;
+            }
+            return true;
         }
 
         @Override

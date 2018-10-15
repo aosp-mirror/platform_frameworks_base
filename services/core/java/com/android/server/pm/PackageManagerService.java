@@ -121,6 +121,7 @@ import android.annotation.Nullable;
 import android.annotation.UserIdInt;
 import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
+import android.app.AppDetailsActivity;
 import android.app.AppOpsManager;
 import android.app.IActivityManager;
 import android.app.ResourcesManager;
@@ -7869,10 +7870,16 @@ public class PackageManagerService extends IPackageManager.Stub
     @Override
     public ParceledListSlice<ApplicationInfo> getInstalledApplications(int flags, int userId) {
         final int callingUid = Binder.getCallingUid();
+        return new ParceledListSlice<>(
+                getInstalledApplicationsListInternal(flags, userId, callingUid));
+    }
+
+    private List<ApplicationInfo> getInstalledApplicationsListInternal(int flags, int userId,
+            int callingUid) {
         if (getInstantAppPackageName(callingUid) != null) {
-            return ParceledListSlice.emptyList();
+            return Collections.emptyList();
         }
-        if (!sUserManager.exists(userId)) return ParceledListSlice.emptyList();
+        if (!sUserManager.exists(userId)) return Collections.emptyList();
         flags = updateFlagsForApplication(flags, userId, null);
         final boolean listUninstalled = (flags & MATCH_KNOWN_PACKAGES) != 0;
 
@@ -7937,7 +7944,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 }
             }
 
-            return new ParceledListSlice<>(list);
+            return list;
         }
     }
 
@@ -19388,6 +19395,16 @@ public class PackageManagerService extends IPackageManager.Stub
                 throw new SecurityException("Cannot disable a protected package: " + packageName);
             }
         }
+        // Only allow apps with CHANGE_COMPONENT_ENABLED_STATE permission to change hidden
+        // app details activity
+        if (AppDetailsActivity.class.getName().equals(className)) {
+            if (mContext.checkCallingOrSelfPermission(
+                    android.Manifest.permission.CHANGE_COMPONENT_ENABLED_STATE)
+                    != PackageManager.PERMISSION_GRANTED) {
+                Slog.e(TAG, "Cannot disable a protected component: " + packageName);
+                return;
+            }
+        }
 
         synchronized (mPackages) {
             if (callingUid == Process.SHELL_UID
@@ -22281,6 +22298,14 @@ public class PackageManagerService extends IPackageManager.Stub
             PackageManagerService.this.updatePermissionFlags(
                     permName, packageName, flagMask, flagValues, userId);
         }
+
+        @Override
+        public List<ApplicationInfo> getInstalledApplications(int flags, int userId,
+                int callingUid) {
+            return PackageManagerService.this.getInstalledApplicationsListInternal(flags, userId,
+                    callingUid);
+        }
+
 
         @Override
         public boolean isPlatformSigned(String packageName) {
