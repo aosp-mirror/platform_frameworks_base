@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.notification.row.wrapper;
 
 import android.content.Context;
+import android.graphics.Color;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.view.NotificationHeaderView;
@@ -76,8 +77,11 @@ public abstract class NotificationViewWrapper implements TransformableView {
         }
         Drawable background = mView.getBackground();
         if (background instanceof ColorDrawable) {
-            mBackgroundColor = ((ColorDrawable) background).getColor();
-            mView.setBackground(null);
+            int backgroundColor = ((ColorDrawable) background).getColor();
+            if (backgroundColor != Color.TRANSPARENT) {
+                mBackgroundColor = backgroundColor;
+                mView.setBackground(new ColorDrawable(Color.TRANSPARENT));
+            }
         }
     }
 
