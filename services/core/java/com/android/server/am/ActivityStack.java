@@ -1510,8 +1510,6 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         prev.getTask().touchActiveTime();
         clearLaunchTime(prev);
 
-        mStackSupervisor.getActivityMetricsLogger().stopFullyDrawnTraceIfNeeded();
-
         mService.updateCpuStats();
 
         if (prev.attachedToProcess()) {

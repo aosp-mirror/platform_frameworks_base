@@ -155,7 +155,6 @@ class ActivityMetricsLogger {
     private final H mHandler;
 
     private ArtManagerInternal mArtManagerInternal;
-    private boolean mDrawingTraceActive;
     private final StringBuilder mStringBuilder = new StringBuilder();
 
     private final class H extends Handler {
@@ -501,7 +500,6 @@ class ActivityMetricsLogger {
                 if (mWindowingModeTransitionInfo.size() == 0) {
                     reset(true /* abort */, info);
                 }
-                stopFullyDrawnTraceIfNeeded();
             }
         }
     }
@@ -699,6 +697,13 @@ class ActivityMetricsLogger {
         if (info == null) {
             return null;
         }
+
+        // Record the handling of the reportFullyDrawn callback in the trace system. This is not
+        // actually used to trace this function, but instead the logical task that this function
+        // fullfils (handling reportFullyDrawn() callbacks).
+        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                "ActivityManager:ReportingFullyDrawn " + info.launchedActivity.packageName);
+
         final LogMaker builder = new LogMaker(APP_TRANSITION_REPORTED_DRAWN);
         builder.setPackageName(r.packageName);
         builder.addTaggedData(FIELD_CLASS_NAME, r.info.name);
@@ -720,7 +725,11 @@ class ActivityMetricsLogger {
                 info.launchedActivity.info.name,
                 info.currentTransitionProcessRunning,
                 startupTimeMs);
-        stopFullyDrawnTraceIfNeeded();
+
+        // Ends the trace started at the beginning of this function. This is located here to allow
+        // the trace slice to have a noticable duration.
+        Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+
         final WindowingModeTransitionInfoSnapshot infoSnapshot =
                 new WindowingModeTransitionInfoSnapshot(info, r, (int) startupTimeMs);
         BackgroundThread.getHandler().post(() -> logAppFullyDrawn(infoSnapshot));
@@ -887,10 +896,7 @@ class ActivityMetricsLogger {
     }
 
     /**
-     * Starts traces for app launch and draw times. We stop the fully drawn trace if its already
-     * active since the app may not have reported fully drawn in the previous launch.
-     *
-     * See {@link android.app.Activity#reportFullyDrawn()}
+     * Starts traces for app launch.
      *
      * @param info
      * */
@@ -898,14 +904,11 @@ class ActivityMetricsLogger {
         if (info == null) {
             return;
         }
-        stopFullyDrawnTraceIfNeeded();
         int transitionType = getTransitionType(info);
         if (!info.launchTraceActive && transitionType == TYPE_TRANSITION_WARM_LAUNCH
                 || transitionType == TYPE_TRANSITION_COLD_LAUNCH) {
             Trace.asyncTraceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "launching: "
                     + info.launchedActivity.packageName, 0);
-            Trace.asyncTraceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "drawing", 0);
-            mDrawingTraceActive = true;
             info.launchTraceActive = true;
         }
     }
@@ -918,13 +921,6 @@ class ActivityMetricsLogger {
             Trace.asyncTraceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER, "launching: "
                     + info.launchedActivity.packageName, 0);
             info.launchTraceActive = false;
-        }
-    }
-
-    void stopFullyDrawnTraceIfNeeded() {
-        if (mDrawingTraceActive) {
-            Trace.asyncTraceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER, "drawing", 0);
-            mDrawingTraceActive = false;
         }
     }
 }
