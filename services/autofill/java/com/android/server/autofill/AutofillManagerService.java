@@ -182,9 +182,7 @@ public final class AutofillManagerService extends SystemService {
             final int userId = users.get(i).id;
             final boolean disabled = umi.getUserRestriction(userId, UserManager.DISALLOW_AUTOFILL);
             if (disabled) {
-                if (disabled) {
-                    Slog.i(TAG, "Disabling Autofill for user " + userId);
-                }
+                Slog.i(TAG, "Disabling Autofill for user " + userId);
                 mDisabledUsers.put(userId, disabled);
             }
         }

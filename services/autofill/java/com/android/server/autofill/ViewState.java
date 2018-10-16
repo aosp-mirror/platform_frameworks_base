@@ -141,10 +141,6 @@ final class ViewState {
         mResponse = response;
     }
 
-    CharSequence getServiceName() {
-        return mSession.getServiceName();
-    }
-
     int getState() {
         return mState;
     }
