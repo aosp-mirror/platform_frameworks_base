@@ -16,6 +16,7 @@
 
 #include "gflags/gflags.h"
 
+#include "dex_builder.h"
 #include "java_lang_builder.h"
 #include "util.h"
 
@@ -27,15 +28,17 @@
 #include <string>
 #include <vector>
 
+namespace {
+
 using namespace tinyxml2;
 using std::string;
 
 constexpr char kStdoutFilename[]{"stdout"};
 
-DEFINE_string(package, "", "The package name for the generated class (required)");
+DEFINE_bool(dex, false, "Generate a DEX file instead of Java");
 DEFINE_string(out, kStdoutFilename, "Where to write the generated class");
+DEFINE_string(package, "", "The package name for the generated class (required)");
 
-namespace {
 class ViewCompilerXmlVisitor : public XMLVisitor {
  public:
   ViewCompilerXmlVisitor(JavaLangViewBuilder* builder) : builder_(builder) {}
@@ -63,6 +66,7 @@ class ViewCompilerXmlVisitor : public XMLVisitor {
  private:
   JavaLangViewBuilder* builder_;
 };
+
 }  // end namespace
 
 int main(int argc, char** argv) {
@@ -80,6 +84,11 @@ int main(int argc, char** argv) {
   if (argc != kNumRequiredArgs || cmd.is_default) {
     gflags::ShowUsageWithFlags(argv[kProgramName]);
     return 1;
+  }
+
+  if (FLAGS_dex) {
+    startop::dex::WriteTestDexFile("test.dex");
+    return 0;
   }
 
   const char* const filename = argv[kFileNameParam];
