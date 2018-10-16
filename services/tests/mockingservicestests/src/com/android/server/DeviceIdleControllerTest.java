@@ -425,6 +425,54 @@ public class DeviceIdleControllerTest {
     }
 
     @Test
+    public void testStepIdleStateLocked_ValidStates_WithWakeFromIdleAlarmSoon() {
+        enterDeepState(STATE_ACTIVE);
+        // Return that there's an alarm coming soon.
+        doReturn(SystemClock.elapsedRealtime() + mConstants.MIN_TIME_TO_ALARM / 2).when(
+                mAlarmManager).getNextWakeFromIdleTime();
+        mDeviceIdleController.stepIdleStateLocked("testing");
+        verifyStateConditions(STATE_ACTIVE);
+
+        // Everything besides ACTIVE should end up as INACTIVE since the screen would be off.
+
+        enterDeepState(STATE_INACTIVE);
+        doReturn(SystemClock.elapsedRealtime() + mConstants.MIN_TIME_TO_ALARM / 2).when(
+                mAlarmManager).getNextWakeFromIdleTime();
+        mDeviceIdleController.stepIdleStateLocked("testing");
+        verifyStateConditions(STATE_INACTIVE);
+
+        enterDeepState(STATE_IDLE_PENDING);
+        doReturn(SystemClock.elapsedRealtime() + mConstants.MIN_TIME_TO_ALARM / 2).when(
+                mAlarmManager).getNextWakeFromIdleTime();
+        mDeviceIdleController.stepIdleStateLocked("testing");
+        verifyStateConditions(STATE_INACTIVE);
+
+        enterDeepState(STATE_SENSING);
+        doReturn(SystemClock.elapsedRealtime() + mConstants.MIN_TIME_TO_ALARM / 2).when(
+                mAlarmManager).getNextWakeFromIdleTime();
+        mDeviceIdleController.stepIdleStateLocked("testing");
+        verifyStateConditions(STATE_INACTIVE);
+
+        enterDeepState(STATE_LOCATING);
+        doReturn(SystemClock.elapsedRealtime() + mConstants.MIN_TIME_TO_ALARM / 2).when(
+                mAlarmManager).getNextWakeFromIdleTime();
+        mDeviceIdleController.stepIdleStateLocked("testing");
+        verifyStateConditions(STATE_INACTIVE);
+
+        enterDeepState(STATE_IDLE);
+        doReturn(SystemClock.elapsedRealtime() + mConstants.MIN_TIME_TO_ALARM / 2).when(
+                mAlarmManager).getNextWakeFromIdleTime();
+        mDeviceIdleController.stepIdleStateLocked("testing");
+        verifyStateConditions(STATE_INACTIVE);
+
+        enterDeepState(STATE_IDLE_MAINTENANCE);
+        doReturn(SystemClock.elapsedRealtime() + mConstants.MIN_TIME_TO_ALARM / 2).when(
+                mAlarmManager).getNextWakeFromIdleTime();
+        mDeviceIdleController.stepIdleStateLocked("testing");
+        verifyStateConditions(STATE_INACTIVE);
+    }
+
+    @Test
     public void testStepIdleStateLocked_ValidStates_NoLocationManager() {
         mInjector.locationManager = null;
         // Make sure the controller doesn't think there's a wake-from-idle alarm coming soon.
@@ -495,7 +543,6 @@ public class DeviceIdleControllerTest {
         mInjector.locationManager = mLocationManager;
         doReturn(mock(LocationProvider.class)).when(mLocationManager).getProvider(anyString());
         // Make sure the controller doesn't think there's a wake-from-idle alarm coming soon.
-        // TODO: add tests for when there's a wake-from-idle alarm coming soon.
         doReturn(Long.MAX_VALUE).when(mAlarmManager).getNextWakeFromIdleTime();
         // Set state to INACTIVE.
         mDeviceIdleController.becomeActiveLocked("testing", 0);
