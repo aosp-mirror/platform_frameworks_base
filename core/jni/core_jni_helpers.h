@@ -18,6 +18,8 @@
 #define CORE_JNI_HELPERS
 
 #include <nativehelper/JNIHelp.h>
+#include <nativehelper/scoped_local_ref.h>
+#include <nativehelper/scoped_utf_chars.h>
 #include <android_runtime/AndroidRuntime.h>
 
 namespace android {
@@ -70,6 +72,20 @@ static inline int RegisterMethodsOrDie(JNIEnv* env, const char* className,
     int res = AndroidRuntime::registerNativeMethods(env, className, gMethods, numMethods);
     LOG_ALWAYS_FATAL_IF(res < 0, "Unable to register native methods.");
     return res;
+}
+
+/**
+ * Read the specified field from jobject, and convert to std::string.
+ * If the field cannot be obtained, return defaultValue.
+ */
+static inline std::string getStringField(JNIEnv* env, jobject obj, jfieldID fieldId,
+        const char* defaultValue) {
+    ScopedLocalRef<jstring> strObj(env, jstring(env->GetObjectField(obj, fieldId)));
+    if (strObj != nullptr) {
+        ScopedUtfChars chars(env, strObj.get());
+        return std::string(chars.c_str());
+    }
+    return std::string(defaultValue);
 }
 
 }  // namespace android
