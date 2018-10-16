@@ -28,6 +28,11 @@ oneway interface INetdEventCallback {
      * Reports a single DNS lookup function call.
      * This method must not block or perform long-running operations.
      *
+     * @param netId the ID of the network the lookup was performed on.
+     * @param eventType one of the EVENT_* constants in {@link INetdEventListener}.
+     * @param returnCode the return value of the query, may vary based on {@code eventType}. See
+     *        {@code getaddrinfo()}, {@code gethostbyaddr()} and {@code gethostbyname()} section in
+     *        bionic/libc/include/netdb.h.
      * @param hostname the name that was looked up.
      * @param ipAddresses (possibly a subset of) the IP addresses returned.
      *        At most {@link #DNS_REPORTED_IP_ADDRESSES_LIMIT} addresses are logged.
@@ -36,8 +41,8 @@ oneway interface INetdEventCallback {
      * @param timestamp the timestamp at which the query was reported by netd.
      * @param uid the UID of the application that performed the query.
      */
-    void onDnsEvent(String hostname, in String[] ipAddresses, int ipAddressesCount, long timestamp,
-            int uid);
+    void onDnsEvent(int netId, int eventType, int returnCode, String hostname,
+            in String[] ipAddresses, int ipAddressesCount, long timestamp, int uid);
 
     /**
      * Represents a private DNS validation success or failure.

@@ -53,8 +53,8 @@ final class NetworkLogger {
 
     private final INetdEventCallback mNetdEventCallback = new BaseNetdEventCallback() {
         @Override
-        public void onDnsEvent(String hostname, String[] ipAddresses, int ipAddressesCount,
-                long timestamp, int uid) {
+        public void onDnsEvent(int netId, int eventType, int returnCode, String hostname,
+                String[] ipAddresses, int ipAddressesCount, long timestamp, int uid) {
             if (!mIsLoggingEnabled.get()) {
                 return;
             }
