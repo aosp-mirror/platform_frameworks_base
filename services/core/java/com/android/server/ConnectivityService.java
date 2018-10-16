@@ -212,7 +212,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private static final String REQUEST_ARG = "requests";
 
     private static final boolean DBG = true;
-    private static final boolean VDBG = false;
+    private static final boolean DDBG = Log.isLoggable(TAG, Log.DEBUG);
+    private static final boolean VDBG = Log.isLoggable(TAG, Log.VERBOSE);
 
     private static final boolean LOGD_BLOCKED_NETWORKINFO = true;
 
@@ -1974,7 +1975,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
 
         try {
-            if (VDBG) log("Setting MTU size: " + iface + ", " + mtu);
+            if (VDBG || DDBG) log("Setting MTU size: " + iface + ", " + mtu);
             mNMS.setMtu(iface, mtu);
         } catch (Exception e) {
             Slog.e(TAG, "exception in setMtu()" + e);
@@ -2010,7 +2011,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         if (tcpBufferSizes.equals(mCurrentTcpBufferSizes)) return;
 
         try {
-            if (VDBG) Slog.d(TAG, "Setting tx/rx TCP buffers to " + tcpBufferSizes);
+            if (VDBG || DDBG) Slog.d(TAG, "Setting tx/rx TCP buffers to " + tcpBufferSizes);
 
             final String prefix = "/sys/kernel/ipv4/tcp_";
             FileUtils.stringToFile(prefix + "rmem_min", values[0]);
@@ -2827,7 +2828,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             if (nai != null) {
                 boolean wasBackgroundNetwork = nai.isBackgroundNetwork();
                 nai.removeRequest(nri.request.requestId);
-                if (VDBG) {
+                if (VDBG || DDBG) {
                     log(" Removing from current network " + nai.name() +
                             ", leaving " + nai.numNetworkRequests() + " requests.");
                 }
@@ -3050,7 +3051,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     private void handlePromptUnvalidated(Network network) {
-        if (VDBG) log("handlePromptUnvalidated " + network);
+        if (VDBG || DDBG) log("handlePromptUnvalidated " + network);
         NetworkAgentInfo nai = getNetworkAgentInfoForNetwork(network);
 
         // Only prompt if the network is unvalidated and was explicitly selected by the user, and if
@@ -4731,7 +4732,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         // do this twice, adding non-next-hop routes first, then routes they are dependent on
         for (RouteInfo route : routeDiff.added) {
             if (route.hasGateway()) continue;
-            if (VDBG) log("Adding Route [" + route + "] to network " + netId);
+            if (VDBG || DDBG) log("Adding Route [" + route + "] to network " + netId);
             try {
                 mNMS.addRoute(netId, route);
             } catch (Exception e) {
@@ -4742,7 +4743,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
         for (RouteInfo route : routeDiff.added) {
             if (route.hasGateway() == false) continue;
-            if (VDBG) log("Adding Route [" + route + "] to network " + netId);
+            if (VDBG || DDBG) log("Adding Route [" + route + "] to network " + netId);
             try {
                 mNMS.addRoute(netId, route);
             } catch (Exception e) {
@@ -4753,7 +4754,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
 
         for (RouteInfo route : routeDiff.removed) {
-            if (VDBG) log("Removing Route [" + route + "] from network " + netId);
+            if (VDBG || DDBG) log("Removing Route [" + route + "] from network " + netId);
             try {
                 mNMS.removeRoute(netId, route);
             } catch (Exception e) {
@@ -4946,7 +4947,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
         // newLp is already a defensive copy.
         newLp.ensureDirectlyConnectedRoutes();
-        if (VDBG) {
+        if (VDBG || DDBG) {
             log("Update of LinkProperties for " + nai.name() +
                     "; created=" + nai.created +
                     "; everConnected=" + nai.everConnected);
@@ -4970,7 +4971,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     private void sendUpdatedScoreToFactories(NetworkRequest networkRequest, int score) {
-        if (VDBG) log("sending new Min Network Score(" + score + "): " + networkRequest.toString());
+        if (VDBG || DDBG){
+            log("sending new Min Network Score(" + score + "): " + networkRequest.toString());
+        }
         for (NetworkFactoryInfo nfi : mNetworkFactoryInfos.values()) {
             nfi.asyncChannel.sendMessage(android.net.NetworkFactory.CMD_REQUEST_NETWORK, score, 0,
                     networkRequest);
@@ -5176,7 +5179,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         final boolean wasBackgroundNetwork = newNetwork.isBackgroundNetwork();
         final int score = newNetwork.getCurrentScore();
 
-        if (VDBG) log("rematching " + newNetwork.name());
+        if (VDBG || DDBG) log("rematching " + newNetwork.name());
 
         // Find and migrate to this Network any NetworkRequests for
         // which this network is now the best.
@@ -5207,7 +5210,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             if (satisfies) {
                 // next check if it's better than any current network we're using for
                 // this request
-                if (VDBG) {
+                if (VDBG || DDBG) {
                     log("currentScore = " +
                             (currentNetwork != null ? currentNetwork.getCurrentScore() : 0) +
                             ", newScore = " + score);
@@ -5215,12 +5218,14 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 if (currentNetwork == null || currentNetwork.getCurrentScore() < score) {
                     if (VDBG) log("rematch for " + newNetwork.name());
                     if (currentNetwork != null) {
-                        if (VDBG) log("   accepting network in place of " + currentNetwork.name());
+                        if (VDBG || DDBG){
+                            log("   accepting network in place of " + currentNetwork.name());
+                        }
                         currentNetwork.removeRequest(nri.request.requestId);
                         currentNetwork.lingerRequest(nri.request, now, mLingerDelayMs);
                         affectedNetworks.add(currentNetwork);
                     } else {
-                        if (VDBG) log("   accepting network in place of null");
+                        if (VDBG || DDBG) log("   accepting network in place of null");
                     }
                     newNetwork.unlingerRequest(nri.request);
                     setNetworkForRequest(nri.request.requestId, newNetwork);
@@ -5573,7 +5578,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     private void updateNetworkScore(NetworkAgentInfo nai, int score) {
-        if (VDBG) log("updateNetworkScore for " + nai.name() + " to " + score);
+        if (VDBG || DDBG) log("updateNetworkScore for " + nai.name() + " to " + score);
         if (score < 0) {
             loge("updateNetworkScore for " + nai.name() + " got a negative score (" + score +
                     ").  Bumping score to min of 0");
@@ -5650,7 +5655,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
     }
 
     protected void notifyNetworkCallbacks(NetworkAgentInfo networkAgent, int notifyType, int arg1) {
-        if (VDBG) {
+        if (VDBG || DDBG) {
             String notification = ConnectivityManager.getCallbackName(notifyType);
             log("notifyType " + notification + " for " + networkAgent.name());
         }
