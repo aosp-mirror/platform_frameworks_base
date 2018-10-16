@@ -17,6 +17,7 @@
 #define LOG_TAG "InputApplicationHandle"
 
 #include <nativehelper/JNIHelp.h>
+#include "nativehelper/scoped_utf_chars.h"
 #include "jni.h"
 #include <android_runtime/AndroidRuntime.h>
 #include <utils/threads.h>
@@ -64,9 +65,8 @@ bool NativeInputApplicationHandle::updateInfo() {
     jstring nameObj = jstring(env->GetObjectField(obj,
             gInputApplicationHandleClassInfo.name));
     if (nameObj) {
-        const char* nameStr = env->GetStringUTFChars(nameObj, NULL);
-        mInfo->name = nameStr;
-        env->ReleaseStringUTFChars(nameObj, nameStr);
+        ScopedUtfChars nameChars(env, nameObj);
+        mInfo->name = nameChars.c_str();
         env->DeleteLocalRef(nameObj);
     } else {
         mInfo->name = "<null>";
