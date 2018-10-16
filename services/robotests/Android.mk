@@ -80,7 +80,7 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
 
 LOCAL_JAVA_LIBRARIES := \
     junit \
-    platform-robolectric-3.6.1-prebuilt
+    platform-robolectric-3.6.2-prebuilt
 
 LOCAL_INSTRUMENTATION_FOR := FrameworksServicesLib
 LOCAL_MODULE := FrameworksServicesRoboTests
@@ -105,4 +105,4 @@ LOCAL_TEST_PACKAGE := FrameworksServicesLib
 
 LOCAL_INSTRUMENT_SOURCE_DIRS := $(dir $(LOCAL_PATH))backup/java
 
-include prebuilts/misc/common/robolectric/3.6.1/run_robotests.mk
+include prebuilts/misc/common/robolectric/3.6.2/run_robotests.mk
