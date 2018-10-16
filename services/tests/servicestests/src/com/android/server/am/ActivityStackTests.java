@@ -26,6 +26,9 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMAR
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
+import static com.android.server.am.ActivityStack.ActivityState.DESTROYING;
+import static com.android.server.am.ActivityStack.ActivityState.FINISHING;
+import static com.android.server.am.ActivityStack.ActivityState.PAUSED;
 import static com.android.server.am.ActivityStack.ActivityState.PAUSING;
 import static com.android.server.am.ActivityStack.ActivityState.RESUMED;
 import static com.android.server.am.ActivityStack.REMOVE_TASK_MODE_DESTROYING;
@@ -35,10 +38,14 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.anyInt;
+import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.verify;
 
 import android.content.pm.ActivityInfo;
 import android.os.UserHandle;
@@ -652,6 +659,39 @@ public class ActivityStackTests extends ActivityTestsBase {
 
         assertTrue(mTask.mActivities.isEmpty());
         assertTrue(mStack.getAllTasks().isEmpty());
+    }
+
+    @Test
+    public void testFinishCurrentActivity() {
+        // Create 2 activities on a new display.
+        final ActivityDisplay display = addNewActivityDisplayAt(ActivityDisplay.POSITION_TOP);
+        final ActivityStack stack1 = createStackForShouldBeVisibleTest(display,
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
+        final ActivityStack stack2 = createStackForShouldBeVisibleTest(display,
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
+
+        // There is still an activity1 in stack1 so the activity2 should be added to finishing list
+        // that will be destroyed until idle.
+        final ActivityRecord activity2 = finishCurrentActivity(stack2);
+        assertEquals(FINISHING, activity2.getState());
+        assertTrue(mSupervisor.mFinishingActivities.contains(activity2));
+
+        // The display becomes empty. Since there is no next activity to be idle, the activity
+        // should be destroyed immediately with updating configuration to restore original state.
+        final ActivityRecord activity1 = finishCurrentActivity(stack1);
+        assertEquals(DESTROYING, activity1.getState());
+        verify(mSupervisor).ensureVisibilityAndConfig(eq(null) /* starting */,
+                eq(display.mDisplayId), anyBoolean(), anyBoolean());
+    }
+
+    private ActivityRecord finishCurrentActivity(ActivityStack stack) {
+        final ActivityRecord activity = stack.topRunningActivityLocked();
+        assertNotNull(activity);
+        activity.setState(PAUSED, "finishCurrentActivity");
+        activity.makeFinishingLocked();
+        stack.finishCurrentActivityLocked(activity, ActivityStack.FINISH_AFTER_VISIBLE,
+                false /* oomAdj */, "finishCurrentActivity");
+        return activity;
     }
 
     @Test

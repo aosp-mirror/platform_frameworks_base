@@ -3877,8 +3877,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         // The activity that we are finishing may be over the lock screen. In this case, we do not
         // want to consider activities that cannot be shown on the lock screen as running and should
         // proceed with finishing the activity if there is no valid next top running activity.
-        final ActivityRecord next = mStackSupervisor.topRunningActivityLocked(
-                true /* considerKeyguardState */);
+        final ActivityDisplay display = getDisplay();
+        final ActivityRecord next = display.topRunningActivity(true /* considerKeyguardState */);
 
         if (mode == FINISH_AFTER_VISIBLE && (r.visible || r.nowVisible)
                 && next != null && !next.nowVisible) {
@@ -3902,23 +3902,25 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         if (DEBUG_STATES) Slog.v(TAG_STATES, "Moving to FINISHING: " + r);
 
         r.setState(FINISHING, "finishCurrentActivityLocked");
-        final boolean finishingActivityInNonFocusedStack
-                = r.getStack() != mStackSupervisor.getTopDisplayFocusedStack()
-                && prevState == PAUSED && mode == FINISH_AFTER_VISIBLE;
+        final boolean finishingInNonFocusedStackOrNoRunning = mode == FINISH_AFTER_VISIBLE
+                && prevState == PAUSED && (r.getStack() != display.getFocusedStack()
+                        || (next == null && display.topRunningActivity() == null));
 
         if (mode == FINISH_IMMEDIATELY
                 || (prevState == PAUSED
                     && (mode == FINISH_AFTER_PAUSE || inPinnedWindowingMode()))
-                || finishingActivityInNonFocusedStack
+                || finishingInNonFocusedStackOrNoRunning
                 || prevState == STOPPING
                 || prevState == STOPPED
                 || prevState == ActivityState.INITIALIZING) {
             r.makeFinishingLocked();
             boolean activityRemoved = destroyActivityLocked(r, true, "finish-imm:" + reason);
 
-            if (finishingActivityInNonFocusedStack) {
+            if (finishingInNonFocusedStackOrNoRunning) {
                 // Finishing activity that was in paused state and it was in not currently focused
-                // stack, need to make something visible in its place.
+                // stack, need to make something visible in its place. Also if the display does not
+                // have running activity, the configuration may need to be updated for restoring
+                // original orientation of the display.
                 mStackSupervisor.ensureVisibilityAndConfig(next, mDisplayId,
                         false /* markFrozenIfConfigChanged */, true /* deferResume */);
             }
