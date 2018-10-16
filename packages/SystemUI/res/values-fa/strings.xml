@@ -47,7 +47,7 @@
     <string name="status_bar_settings_settings_button" msgid="3023889916699270224">"تنظیمات"</string>
     <string name="status_bar_settings_wifi_button" msgid="1733928151698311923">"Wi-Fi"</string>
     <string name="status_bar_settings_auto_rotation" msgid="3790482541357798421">"چرخش خودکار صفحه"</string>
-    <string name="status_bar_settings_mute_label" msgid="554682549917429396">"بی‌صدا"</string>
+    <string name="status_bar_settings_mute_label" msgid="554682549917429396">"صامت"</string>
     <string name="status_bar_settings_auto_brightness_label" msgid="511453614962324674">"خودکار"</string>
     <string name="status_bar_settings_notifications" msgid="397146176280905137">"اعلان‌ها"</string>
     <string name="bluetooth_tethered" msgid="7094101612161133267">"اتصال اینترنتی با بلوتوث تلفن همراه"</string>
@@ -472,28 +472,28 @@
     <string name="monitoring_description_managed_profile_ca_certificate" msgid="4683248196789897964">"سازمان شما مرجع گواهینامه‌ای در نمایه کاری شما نصب کرده است. ممکن است ترافیک امن شبکه شما پایش یا تغییر داده شود."</string>
     <string name="monitoring_description_ca_certificate" msgid="7886985418413598352">"مرجع گواهینامه‌ای در این دستگاه نصب شده است. ممکن است ترافیک امن شبکه شما پایش یا تغییر داده شود."</string>
     <string name="monitoring_description_management_network_logging" msgid="7184005419733060736">"سرپرست سیستم شما گزارش‌گیری از شبکه را (که ترافیک دستگاه شما را پایش می‌کند) روشن کرده است."</string>
-    <string name="monitoring_description_named_vpn" msgid="7403457334088909254">"به <xliff:g id="VPN_APP">%1$s</xliff:g> متصل شده‌اید، که می‌تواند فعالیت شبکه شما را (ازجمله رایانامه‌‌ها، برنامه‌‌ها و وب‌سایت‌ها) پایش کند."</string>
-    <string name="monitoring_description_two_named_vpns" msgid="4198511413729213802">"به <xliff:g id="VPN_APP_0">%1$s</xliff:g> و <xliff:g id="VPN_APP_1">%2$s</xliff:g> متصل شده‌اید، که می‌توانند فعالیت شما را در شبکه (ازجمله رایانامه‌‌ها، برنامه‌‌ها و وب‌سایت‌ها) پایش کنند."</string>
-    <string name="monitoring_description_managed_profile_named_vpn" msgid="1427905889862420559">"نمایه کاری شما به <xliff:g id="VPN_APP">%1$s</xliff:g> متصل است، که می‌تواند فعالیت شما در شبکه (ازجمله رایانامه‌ها، برنامه‌ها و وب‌سایت‌ها) را پایش کند."</string>
-    <string name="monitoring_description_personal_profile_named_vpn" msgid="3133980926929069283">"نمایه شخصی شما به <xliff:g id="VPN_APP">%1$s</xliff:g> متصل شده‌ است، که می‌تواند فعالیت شما در شبکه (ازجمله رایانامه‌‌ها، برنامه‌‌ها و وب‌سایت‌ها) را پایش کند."</string>
+    <string name="monitoring_description_named_vpn" msgid="7403457334088909254">"به <xliff:g id="VPN_APP">%1$s</xliff:g> متصل شده‌اید، که می‌تواند فعالیت شبکه شما را (ازجمله ایمیل‌ها، برنامه‌‌ها و وب‌سایت‌ها) پایش کند."</string>
+    <string name="monitoring_description_two_named_vpns" msgid="4198511413729213802">"به <xliff:g id="VPN_APP_0">%1$s</xliff:g> و <xliff:g id="VPN_APP_1">%2$s</xliff:g> متصل شده‌اید، که می‌توانند فعالیت شما را در شبکه (ازجمله ایمیل‌ها، برنامه‌‌ها و وب‌سایت‌ها) پایش کنند."</string>
+    <string name="monitoring_description_managed_profile_named_vpn" msgid="1427905889862420559">"نمایه کاری شما به <xliff:g id="VPN_APP">%1$s</xliff:g> متصل است، که می‌تواند فعالیت شما در شبکه (ازجمله ایمیل‌ها، برنامه‌ها و وب‌سایت‌ها) را پایش کند."</string>
+    <string name="monitoring_description_personal_profile_named_vpn" msgid="3133980926929069283">"نمایه شخصی شما به <xliff:g id="VPN_APP">%1$s</xliff:g> متصل شده‌ است، که می‌تواند فعالیت شما در شبکه (ازجمله ایمیل‌ها، برنامه‌‌ها و وب‌سایت‌ها) را پایش کند."</string>
     <string name="monitoring_description_do_header_generic" msgid="96588491028288691">"<xliff:g id="DEVICE_OWNER_APP">%1$s</xliff:g> دستگاه شما را مدیریت می‌کند."</string>
     <string name="monitoring_description_do_header_with_name" msgid="5511133708978206460">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> با استفاده از <xliff:g id="DEVICE_OWNER_APP">%2$s</xliff:g> دستگاهتان را مدیریت می‌کند."</string>
     <string name="monitoring_description_do_body" msgid="3639594537660975895">"سرپرست سیستم شما می‌تواند تنظیمات، دسترسی شرکتی، برنامه‌ها، داده‌های مرتبط با دستگاه و اطلاعات مکان دستگاه شما را مدیریت کند و بر آن‌ها نظارت داشته باشد."</string>
     <string name="monitoring_description_do_learn_more_separator" msgid="3785251953067436862">" "</string>
     <string name="monitoring_description_do_learn_more" msgid="1849514470437907421">"بیشتر بدانید"</string>
-    <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"به <xliff:g id="VPN_APP">%1$s</xliff:g> وصل شده‌اید، که می‌تواند فعالیت شبکه شما را (ازجمله رایانامه‌‌ها، برنامه‌‌ها و وب‌سایت‌ها) کنترل کند."</string>
+    <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"به <xliff:g id="VPN_APP">%1$s</xliff:g> وصل شده‌اید، که می‌تواند فعالیت شبکه شما را (ازجمله ایمیل‌ها، برنامه‌‌ها و وب‌سایت‌ها) کنترل کند."</string>
     <string name="monitoring_description_vpn_settings_separator" msgid="1933186756733474388">" "</string>
     <string name="monitoring_description_vpn_settings" msgid="6434859242636063861">"‏باز کردن تنظیمات VPN"</string>
     <string name="monitoring_description_ca_cert_settings_separator" msgid="4987350385906393626">" "</string>
     <string name="monitoring_description_ca_cert_settings" msgid="5489969458872997092">"باز کردن اعتبارنامه مورداعتماد"</string>
     <string name="monitoring_description_network_logging" msgid="7223505523384076027">"سرپرست سیستم شما گزارش‌گیری شبکه را (که بر ترافیک دستگاهتان نظارت می‌کند) روشن کرده است.\n\nبرای اطلاعات بیشتر، با سرپرست خود تماس بگیرید."</string>
-    <string name="monitoring_description_vpn" msgid="4445150119515393526">"‏شما به برنامه‌ای برای تنظیم اتصال VPN اجازه دادید.\n\n این برنامه می‌تواند دستگاه و فعالیت شبکه‌تان را کنترل کند، از جمله رایانامه‌، برنامه‌ و وب‌سایت‌ها."</string>
-    <string name="monitoring_description_vpn_profile_owned" msgid="2958019119161161530">"‏نمایه کاری شما توسط <xliff:g id="ORGANIZATION">%1$s</xliff:g> مدیریت می‌شود.\n\nسرپرست سیستم شما می‌تواند بر فعالیت شبکه شما (ازجمله رایانامه‌ها، برنامه‌ها و وب‌سایت‌ها) نظارت داشته باشد.\n\nبرای اطلاعات بیشتر، با سرپرست خود تماس بگیرید.\n\nهمچنین به VPN متصل هستید که می‌تواند بر فعالیت شبکه شما نظارت داشته باشد."</string>
+    <string name="monitoring_description_vpn" msgid="4445150119515393526">"‏شما به برنامه‌ای برای تنظیم اتصال VPN اجازه دادید.\n\n این برنامه می‌تواند دستگاه و فعالیت شبکه‌تان را کنترل کند، از جمله ایمیل‌، برنامه‌ و وب‌سایت‌ها."</string>
+    <string name="monitoring_description_vpn_profile_owned" msgid="2958019119161161530">"‏نمایه کاری شما توسط <xliff:g id="ORGANIZATION">%1$s</xliff:g> مدیریت می‌شود.\n\nسرپرست سیستم شما می‌تواند بر فعالیت شبکه شما (ازجمله ایمیل‌ها، برنامه‌ها و وب‌سایت‌ها) نظارت داشته باشد.\n\nبرای اطلاعات بیشتر، با سرپرست خود تماس بگیرید.\n\nهمچنین به VPN متصل هستید که می‌تواند بر فعالیت شبکه شما نظارت داشته باشد."</string>
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
-    <string name="monitoring_description_app" msgid="1828472472674709532">"شما به <xliff:g id="APPLICATION">%1$s</xliff:g> متصل هستید، که می‌تواند فعالیت شما در شبکه (ازجمله رایانامه‌، برنامه‌ و وب‌سایت‌ها) را پایش کند."</string>
-    <string name="monitoring_description_app_personal" msgid="484599052118316268">"شما به <xliff:g id="APPLICATION">%1$s</xliff:g> وصل شده‌اید، که می‌تواند فعالیت شبکه شخصی شما از جمله رایانامه‌، برنامه‌ و وب‌سایت‌ها را کنترل کند."</string>
-    <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"به <xliff:g id="APPLICATION">%1$s</xliff:g> وصل شده‌اید، که می‌تواند فعالیت شبکه شخصی شما را (ازجمله رایانامه‌‌ها، برنامه‌‌ها و وب‌سایت‌ها) کنترل کند."</string>
-    <string name="monitoring_description_app_work" msgid="4612997849787922906">"نمایه کاری شما توسط <xliff:g id="ORGANIZATION">%1$s</xliff:g> مدیریت می‌شود. این نمایه به <xliff:g id="APPLICATION">%2$s</xliff:g> متصل است که می‌تواند فعالیت شما در شبکه (ازجمله رایانامه‌ها، برنامه‌ها و وب‌سایت‌ها) را پایش کند.\n\nبرای اطلاعات بیشتر، با سرپرست سیستم تماس بگیرید."</string>
+    <string name="monitoring_description_app" msgid="1828472472674709532">"شما به <xliff:g id="APPLICATION">%1$s</xliff:g> متصل هستید، که می‌تواند فعالیت شما در شبکه (ازجمله ایمیل‌، برنامه‌ و وب‌سایت‌ها) را پایش کند."</string>
+    <string name="monitoring_description_app_personal" msgid="484599052118316268">"شما به <xliff:g id="APPLICATION">%1$s</xliff:g> وصل شده‌اید، که می‌تواند فعالیت شبکه شخصی شما از جمله ایمیل‌، برنامه‌ و وب‌سایت‌ها را کنترل کند."</string>
+    <string name="branded_monitoring_description_app_personal" msgid="2669518213949202599">"به <xliff:g id="APPLICATION">%1$s</xliff:g> وصل شده‌اید که می‌تواند فعالیت شبکه شخصی شما را (ازجمله ایمیل‌ها، برنامه‌‌ها و وب‌سایت‌ها) کنترل کند."</string>
+    <string name="monitoring_description_app_work" msgid="4612997849787922906">"نمایه کاری شما توسط <xliff:g id="ORGANIZATION">%1$s</xliff:g> مدیریت می‌شود. این نمایه به <xliff:g id="APPLICATION">%2$s</xliff:g> متصل است که می‌تواند فعالیت شما در شبکه (ازجمله ایمیل‌ها، برنامه‌ها و وب‌سایت‌ها) را پایش کند.\n\nبرای اطلاعات بیشتر، با سرپرست سیستم تماس بگیرید."</string>
     <string name="monitoring_description_app_personal_work" msgid="5664165460056859391">"نمایه کاری‌تان توسط <xliff:g id="ORGANIZATION">%1$s</xliff:g> مدیریت می‌شود. این نمایه به <xliff:g id="APPLICATION_WORK">%2$s</xliff:g> متصل است که می‌تواند تنظیمات، دسترسی شرکتی، برنامه‌ها، داده‌های مرتبط با دستگاه و اطلاعات مکان دستگاه شما را پایش کند.\n\nشما همچنین به <xliff:g id="APPLICATION_PERSONAL">%3$s</xliff:g> متصل هستید که می‌تواند فعالیت خصوصی شما را در شبکه پایش کند."</string>
     <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"قفل برای <xliff:g id="USER_NAME">%1$s</xliff:g> باز شد"</string>
     <string name="keyguard_indication_trust_managed" msgid="8319646760022357585">"<xliff:g id="TRUST_AGENT">%1$s</xliff:g> درحال اجرا است"</string>
@@ -534,14 +534,14 @@
     <string name="ring_toggle_title" msgid="3281244519428819576">"تماس‌ها"</string>
     <string name="volume_ringer_status_normal" msgid="4273142424125855384">"زنگ زدن"</string>
     <string name="volume_ringer_status_vibrate" msgid="1825615171021346557">"لرزش"</string>
-    <string name="volume_ringer_status_silent" msgid="6896394161022916369">"بی‌صدا"</string>
+    <string name="volume_ringer_status_silent" msgid="6896394161022916369">"صامت"</string>
     <string name="qs_status_phone_vibrate" msgid="204362991135761679">"تلفن در حالت لرزش است"</string>
     <string name="qs_status_phone_muted" msgid="5437668875879171548">"تلفن بی‌صدا است"</string>
     <string name="volume_stream_content_description_unmute" msgid="4436631538779230857">"‏%1$s. برای باصدا کردن ضربه بزنید."</string>
     <string name="volume_stream_content_description_vibrate" msgid="1187944970457807498">"‏%1$s. برای تنظیم روی لرزش ضربه بزنید. ممکن است سرویس‌های دسترس‌پذیری بی‌صدا شوند."</string>
-    <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"‏%1$s. برای بی‌صدا کردن ضربه بزنید. ممکن است سرویس‌های دسترس‌پذیری بی‌صدا شوند."</string>
+    <string name="volume_stream_content_description_mute" msgid="3625049841390467354">"‏%1$s. برای صامت کردن ضربه بزنید. ممکن است سرویس‌های دسترس‌پذیری صامت شود."</string>
     <string name="volume_stream_content_description_vibrate_a11y" msgid="6427727603978431301">"‏%1$s. برای تنظیم روی لرزش، ضربه بزنید."</string>
-    <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"‏%1$s. برای بی‌صدا کردن ضربه بزنید."</string>
+    <string name="volume_stream_content_description_mute_a11y" msgid="8995013018414535494">"‏%1$s. برای صامت کردن ضربه بزنید."</string>
     <string name="volume_ringer_hint_mute" msgid="9199811307292269601">"صامت کردن"</string>
     <string name="volume_ringer_hint_unmute" msgid="6602880133293060368">"باصدا کردن"</string>
     <string name="volume_ringer_hint_vibrate" msgid="4036802135666515202">"لرزش"</string>
@@ -681,7 +681,7 @@
     <string name="keyboard_shortcut_group_applications_assist" msgid="9095441910537146013">"دستیار"</string>
     <string name="keyboard_shortcut_group_applications_browser" msgid="6465985474000766533">"مرورگر"</string>
     <string name="keyboard_shortcut_group_applications_contacts" msgid="2064197111278436375">"مخاطبین"</string>
-    <string name="keyboard_shortcut_group_applications_email" msgid="6257036897441939004">"رایانامه"</string>
+    <string name="keyboard_shortcut_group_applications_email" msgid="6257036897441939004">"ایمیل"</string>
     <string name="keyboard_shortcut_group_applications_sms" msgid="638701213803242744">"پیامک"</string>
     <string name="keyboard_shortcut_group_applications_music" msgid="4775559515850922780">"موسیقی"</string>
     <string name="keyboard_shortcut_group_applications_youtube" msgid="6555453761294723317">"YouTube"</string>
