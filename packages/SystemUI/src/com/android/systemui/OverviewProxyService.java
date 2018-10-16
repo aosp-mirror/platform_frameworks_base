@@ -259,6 +259,7 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             mHandler.removeCallbacks(mDeferredConnectionCallback);
+            mCurrentBoundedUserId = mDeviceProvisionedController.getCurrentUser();
             mConnectionBackoffAttempts = 0;
             mOverviewProxy = IOverviewProxy.Stub.asInterface(service);
             // Listen for launcher's death
@@ -269,7 +270,6 @@ public class OverviewProxyService implements CallbackController<OverviewProxyLis
             }
             try {
                 mOverviewProxy.onBind(mSysUiProxy);
-                mCurrentBoundedUserId = mDeviceProvisionedController.getCurrentUser();
             } catch (RemoteException e) {
                 mCurrentBoundedUserId = -1;
                 Log.e(TAG_OPS, "Failed to call onBind()", e);
