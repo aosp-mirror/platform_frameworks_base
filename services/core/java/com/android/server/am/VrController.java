@@ -248,9 +248,9 @@ final class VrController {
      *
      * @param tid the tid of the thread to set, or 0 to unset the current thread.
      * @param pid the pid of the process owning the thread to set.
-     * @param proc the ProcessRecord of the process owning the thread to set.
+     * @param proc the process owning the thread to set.
      */
-    public void setPersistentVrThreadLocked(int tid, int pid, ProcessRecord proc) {
+    public void setPersistentVrThreadLocked(int tid, int pid, WindowProcessController proc) {
         if (!hasPersistentVrFlagSet()) {
             Slog.w(TAG, "Persistent VR thread may only be set in persistent VR mode!");
             return;

@@ -220,7 +220,7 @@ final class ActivityManagerConstants extends ContentObserver {
 
     // Indicates whether the activity starts logging is enabled.
     // Controlled by Settings.Global.ACTIVITY_STARTS_LOGGING_ENABLED
-    boolean mFlagActivityStartsLoggingEnabled;
+    volatile boolean mFlagActivityStartsLoggingEnabled;
 
     private final ActivityManagerService mService;
     private ContentResolver mResolver;

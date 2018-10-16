@@ -684,7 +684,7 @@ class AppErrors {
                 Settings.Secure.ANR_SHOW_BACKGROUND, 0) != 0;
 
         final boolean procIsBoundForeground =
-            (app.curProcState == ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE);
+            (app.getCurProcState() == ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE);
 
         Long crashTime;
         Long crashTimePersistent;
@@ -878,7 +878,7 @@ class AppErrors {
         // several places in the system server.
         return app.isInterestingToUserLocked() ||
             (app.info != null && "com.android.systemui".equals(app.info.packageName)) ||
-            (app.hasTopUi || app.hasOverlayUi);
+            (app.hasTopUi() || app.hasOverlayUi());
     }
 
     final void appNotResponding(ProcessRecord app, ActivityRecord activity,

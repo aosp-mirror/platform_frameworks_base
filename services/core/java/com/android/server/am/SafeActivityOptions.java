@@ -21,9 +21,9 @@ import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
 import static android.content.pm.PackageManager.PERMISSION_DENIED;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.view.Display.INVALID_DISPLAY;
-import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
-import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
-import static com.android.server.am.TaskRecord.INVALID_TASK_ID;
+import static android.app.ActivityTaskManager.INVALID_TASK_ID;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.TAG_ATM;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 
 import android.annotation.Nullable;
 import android.app.ActivityOptions;
@@ -46,7 +46,7 @@ import com.android.internal.annotations.VisibleForTesting;
  */
 public class SafeActivityOptions {
 
-    private static final String TAG = TAG_WITH_CLASS_NAME ? "SafeActivityOptions" : TAG_AM;
+    private static final String TAG = TAG_WITH_CLASS_NAME ? "SafeActivityOptions" : TAG_ATM;
 
     private final int mOriginalCallingPid;
     private final int mOriginalCallingUid;

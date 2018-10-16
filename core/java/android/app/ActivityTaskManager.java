@@ -45,6 +45,12 @@ public class ActivityTaskManager {
     public static final int INVALID_STACK_ID = -1;
 
     /**
+     * Invalid task ID.
+     * @hide
+     */
+    public static final int INVALID_TASK_ID = -1;
+
+    /**
      * Parameter to {@link IActivityTaskManager#setTaskWindowingModeSplitScreenPrimary} which
      * specifies the position of the created docked stack at the top half of the screen if
      * in portrait mode or at the left half of the screen if in landscape mode.

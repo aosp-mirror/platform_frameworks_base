@@ -53,20 +53,20 @@ import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TOP;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_CONFIGURATION;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_FOCUS;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PERMISSIONS_REVIEW;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_RESULTS;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_STACK;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_TASKS;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_USER_LEAVING;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_CONFIGURATION;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_FOCUS;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_RESULTS;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_USER_LEAVING;
-import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
-import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
-import static com.android.server.am.ActivityManagerService.ANIMATE;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_CONFIGURATION;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_FOCUS;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_PERMISSIONS_REVIEW;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_RESULTS;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_STACK;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_TASKS;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_USER_LEAVING;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_CONFIGURATION;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_FOCUS;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_RESULTS;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_USER_LEAVING;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.TAG_ATM;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.am.ActivityTaskManagerService.ANIMATE;
 import static com.android.server.am.ActivityStack.ActivityState.RESUMED;
 import static com.android.server.am.ActivityStackSupervisor.DEFER_RESUME;
 import static com.android.server.am.ActivityStackSupervisor.ON_TOP;
@@ -127,7 +127,7 @@ import java.util.Date;
  * an activity and associated task and stack.
  */
 class ActivityStarter {
-    private static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityStarter" : TAG_AM;
+    private static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityStarter" : TAG_ATM;
     private static final String TAG_RESULTS = TAG + POSTFIX_RESULTS;
     private static final String TAG_FOCUS = TAG + POSTFIX_FOCUS;
     private static final String TAG_CONFIGURATION = TAG + POSTFIX_CONFIGURATION;
@@ -590,12 +590,12 @@ class ActivityStarter {
         final Bundle verificationBundle
                 = options != null ? options.popAppVerificationBundle() : null;
 
-        ProcessRecord callerApp = null;
+        WindowProcessController callerApp = null;
         if (caller != null) {
-            callerApp = mService.mAm.getRecordForAppLocked(caller);
+            callerApp = mService.getProcessController(caller);
             if (callerApp != null) {
-                callingPid = callerApp.pid;
-                callingUid = callerApp.info.uid;
+                callingPid = callerApp.getPid();
+                callingUid = callerApp.mInfo.uid;
             } else {
                 Slog.w(TAG, "Unable to find app for caller " + caller
                         + " (pid=" + callingPid + ") when starting: "
@@ -726,14 +726,12 @@ class ActivityStarter {
         boolean abort = !mSupervisor.checkStartAnyActivityPermission(intent, aInfo, resultWho,
                 requestCode, callingPid, callingUid, callingPackage, ignoreTargetSecurity,
                 inTask != null, callerApp, resultRecord, resultStack);
-        abort |= !mService.mAm.mIntentFirewall.checkStartActivity(intent, callingUid,
+        abort |= !mService.mIntentFirewall.checkStartActivity(intent, callingUid,
                 callingPid, resolvedType, aInfo.applicationInfo);
 
-        final WindowProcessController callerWpc =
-                callerApp != null ? callerApp.getWindowProcessController() : null;
         // Merge the two options bundles, while realCallerOptions takes precedence.
         ActivityOptions checkedOptions = options != null
-                ? options.getOptions(intent, aInfo, callerWpc, mSupervisor) : null;
+                ? options.getOptions(intent, aInfo, callerApp, mSupervisor) : null;
         if (allowPendingRemoteAnimationRegistryLookup) {
             checkedOptions = mService.getActivityStartController()
                     .getPendingRemoteAnimationRegistry()
@@ -833,8 +831,7 @@ class ActivityStarter {
             aInfo = mSupervisor.resolveActivity(intent, rInfo, startFlags, null /*profilerInfo*/);
         }
 
-        ActivityRecord r = new ActivityRecord(mService, callerApp, callingPid,
-                callingUid,
+        ActivityRecord r = new ActivityRecord(mService, callerApp, callingPid, callingUid,
                 callingPackage, intent, resolvedType, aInfo, mService.getGlobalConfiguration(),
                 resultRecord, resultWho, requestCode, componentSpecified, voiceSession != null,
                 mSupervisor, checkedOptions, sourceRecord);
@@ -857,7 +854,7 @@ class ActivityStarter {
             if (!mService.checkAppSwitchAllowedLocked(callingPid, callingUid,
                     realCallingPid, realCallingUid, "Activity start")) {
                 mController.addPendingActivityLaunch(new PendingActivityLaunch(r,
-                        sourceRecord, startFlags, stack, callerWpc));
+                        sourceRecord, startFlags, stack, callerApp));
                 ActivityOptions.abort(checkedOptions);
                 return ActivityManager.START_SWITCHES_CANCELED;
             }
@@ -874,12 +871,11 @@ class ActivityStarter {
     }
 
     private void maybeLogActivityStart(int callingUid, String callingPackage, int realCallingUid,
-            Intent intent, ProcessRecord callerApp, ActivityRecord r,
+            Intent intent, WindowProcessController callerApp, ActivityRecord r,
             PendingIntentRecord originatingPendingIntent) {
-        boolean callerAppHasForegroundActivity = (callerApp != null)
-                ? callerApp.foregroundActivities
-                : false;
-        if (!mService.mAm.isActivityStartsLoggingEnabled() || callerAppHasForegroundActivity
+        boolean callerAppHasForegroundActivity =
+                callerApp != null && callerApp.hasForegroundActivities();
+        if (!mService.isActivityStartsLoggingEnabled() || callerAppHasForegroundActivity
                 || r == null) {
             // skip logging in this case
             return;
@@ -1085,9 +1081,10 @@ class ActivityStarter {
                             || !heavy.mName.equals(aInfo.processName))) {
                         int appCallingUid = callingUid;
                         if (caller != null) {
-                            ProcessRecord callerApp = mService.mAm.getRecordForAppLocked(caller);
+                            WindowProcessController callerApp =
+                                    mService.getProcessController(caller);
                             if (callerApp != null) {
-                                appCallingUid = callerApp.info.uid;
+                                appCallingUid = callerApp.mInfo.uid;
                             } else {
                                 Slog.w(TAG, "Unable to find app for caller " + caller
                                         + " (pid=" + callingPid + ") when starting: "
@@ -1127,7 +1124,7 @@ class ActivityStarter {
                                         callingUid, realCallingUid, mRequest.filterCallingUid));
                         aInfo = rInfo != null ? rInfo.activityInfo : null;
                         if (aInfo != null) {
-                            aInfo = mService.mAm.getActivityInfoForUser(aInfo, userId);
+                            aInfo = mService.mAmInternal.getActivityInfoForUser(aInfo, userId);
                         }
                     }
                 }
@@ -1493,8 +1490,9 @@ class ActivityStarter {
 
         mService.mUgmInternal.grantUriPermissionFromIntent(mCallingUid, mStartActivity.packageName,
                 mIntent, mStartActivity.getUriPermissionsLocked(), mStartActivity.userId);
-        mService.mAm.grantEphemeralAccessLocked(mStartActivity.userId, mIntent,
-                UserHandle.getAppId(mStartActivity.appInfo.uid), UserHandle.getAppId(mCallingUid));
+        mService.getPackageManagerInternalLocked().grantEphemeralAccess(
+                mStartActivity.userId, mIntent, UserHandle.getAppId(mStartActivity.appInfo.uid),
+                UserHandle.getAppId(mCallingUid));
         if (newTask) {
             EventLog.writeEvent(EventLogTags.AM_CREATE_TASK, mStartActivity.userId,
                     mStartActivity.getTask().taskId);

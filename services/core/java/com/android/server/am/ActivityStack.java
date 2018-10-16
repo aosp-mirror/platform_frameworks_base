@@ -48,39 +48,39 @@ import static android.view.WindowManager.TRANSIT_TASK_TO_FRONT;
 
 import static com.android.server.am.ActivityDisplay.POSITION_BOTTOM;
 import static com.android.server.am.ActivityDisplay.POSITION_TOP;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ADD_REMOVE;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ALL;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_APP;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_CLEANUP;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_CONTAINERS;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PAUSE;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_RELEASE;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_RESULTS;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_SAVED_STATE;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_STACK;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_STATES;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_SWITCH;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_TASKS;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_TRANSITION;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_USER_LEAVING;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_VISIBILITY;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_ADD_REMOVE;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_APP;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_ADD_REMOVE;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_ALL;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_APP;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_CLEANUP;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_CONTAINERS;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_PAUSE;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_RELEASE;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_RESULTS;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_SAVED_STATE;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_STACK;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_STATES;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_SWITCH;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_TASKS;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_TRANSITION;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_USER_LEAVING;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_VISIBILITY;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_ADD_REMOVE;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_APP;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_CLEANUP;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_CONTAINERS;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_PAUSE;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_RELEASE;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_RESULTS;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_SAVED_STATE;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_STACK;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_STATES;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_SWITCH;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_TASKS;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_TRANSITION;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_USER_LEAVING;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_VISIBILITY;
-import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
-import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_CONTAINERS;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_PAUSE;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_RELEASE;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_RESULTS;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_SAVED_STATE;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_STACK;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_STATES;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_SWITCH;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_TASKS;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_TRANSITION;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_USER_LEAVING;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_VISIBILITY;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.TAG_ATM;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.ActivityRecord.RELAUNCH_REASON_FREE_RESIZE;
 import static com.android.server.am.ActivityRecord.RELAUNCH_REASON_WINDOWING_MODE_RESIZE;
 import static com.android.server.am.ActivityStack.ActivityState.DESTROYED;
@@ -103,6 +103,7 @@ import static com.android.server.am.ActivityStackSupervisor.PAUSE_IMMEDIATELY;
 import static com.android.server.am.ActivityStackSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.am.ActivityStackSupervisor.REMOVE_FROM_RECENTS;
 
+import static com.android.server.am.ActivityTaskManagerService.H.FIRST_ACTIVITY_STACK_MSG;
 import static java.lang.Integer.MAX_VALUE;
 
 import android.app.Activity;
@@ -172,7 +173,7 @@ import java.util.Set;
  */
 class ActivityStack<T extends StackWindowController> extends ConfigurationContainer
         implements StackWindowListener {
-    private static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityStack" : TAG_AM;
+    private static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityStack" : TAG_ATM;
     private static final String TAG_ADD_REMOVE = TAG + POSTFIX_ADD_REMOVE;
     private static final String TAG_APP = TAG + POSTFIX_APP;
     private static final String TAG_CLEANUP = TAG + POSTFIX_CLEANUP;
@@ -364,12 +365,12 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     private boolean mTopActivityOccludesKeyguard;
     private ActivityRecord mTopDismissingKeyguardActivity;
 
-    static final int PAUSE_TIMEOUT_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 1;
-    static final int DESTROY_TIMEOUT_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 2;
-    static final int LAUNCH_TICK_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 3;
-    static final int STOP_TIMEOUT_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 4;
-    static final int DESTROY_ACTIVITIES_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 5;
-    static final int TRANSLUCENT_TIMEOUT_MSG = ActivityManagerService.FIRST_ACTIVITY_STACK_MSG + 6;
+    static final int PAUSE_TIMEOUT_MSG = FIRST_ACTIVITY_STACK_MSG + 1;
+    static final int DESTROY_TIMEOUT_MSG = FIRST_ACTIVITY_STACK_MSG + 2;
+    static final int LAUNCH_TICK_MSG = FIRST_ACTIVITY_STACK_MSG + 3;
+    static final int STOP_TIMEOUT_MSG = FIRST_ACTIVITY_STACK_MSG + 4;
+    static final int DESTROY_ACTIVITIES_MSG = FIRST_ACTIVITY_STACK_MSG + 5;
+    static final int TRANSLUCENT_TIMEOUT_MSG = FIRST_ACTIVITY_STACK_MSG + 6;
 
     private static class ScheduleDestroyArgs {
         final WindowProcessController mOwner;

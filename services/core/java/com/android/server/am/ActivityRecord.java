@@ -83,20 +83,20 @@ import static android.os.Build.VERSION_CODES.O;
 import static android.os.Process.SYSTEM_UID;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_LEFT;
 
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_CONFIGURATION;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_FOCUS;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_SAVED_STATE;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_STATES;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_SWITCH;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_VISIBILITY;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_CONFIGURATION;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_FOCUS;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_SAVED_STATE;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_STATES;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_SWITCH;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_VISIBILITY;
-import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
-import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_CONFIGURATION;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_FOCUS;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_SAVED_STATE;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_STATES;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_SWITCH;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_VISIBILITY;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_CONFIGURATION;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_FOCUS;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_SAVED_STATE;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_STATES;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_SWITCH;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_VISIBILITY;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.TAG_ATM;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.ActivityRecordProto.CONFIGURATION_CONTAINER;
 import static com.android.server.am.ActivityRecordProto.FRONT_OF_TASK;
 import static com.android.server.am.ActivityRecordProto.IDENTIFIER;
@@ -118,7 +118,7 @@ import static com.android.server.am.EventLogTags.AM_RELAUNCH_ACTIVITY;
 import static com.android.server.am.EventLogTags.AM_RELAUNCH_RESUME_ACTIVITY;
 import static com.android.server.am.TaskPersister.DEBUG;
 import static com.android.server.am.TaskPersister.IMAGE_EXTENSION;
-import static com.android.server.am.TaskRecord.INVALID_TASK_ID;
+import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static com.android.server.wm.IdentifierProto.HASH_CODE;
 import static com.android.server.wm.IdentifierProto.TITLE;
 import static com.android.server.wm.IdentifierProto.USER_ID;
@@ -211,7 +211,7 @@ import java.util.Objects;
  * An entry in the history stack, representing an activity.
  */
 final class ActivityRecord extends ConfigurationContainer implements AppWindowContainerListener {
-    private static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityRecord" : TAG_AM;
+    private static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityRecord" : TAG_ATM;
     private static final String TAG_CONFIGURATION = TAG + POSTFIX_CONFIGURATION;
     private static final String TAG_SAVED_STATE = TAG + POSTFIX_SAVED_STATE;
     private static final String TAG_STATES = TAG + POSTFIX_STATES;
@@ -852,13 +852,12 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         }
     }
 
-    ActivityRecord(ActivityTaskManagerService _service, ProcessRecord _caller, int _launchedFromPid,
-            int _launchedFromUid, String _launchedFromPackage, Intent _intent, String _resolvedType,
-            ActivityInfo aInfo, Configuration _configuration,
-            ActivityRecord _resultTo, String _resultWho, int _reqCode,
-            boolean _componentSpecified, boolean _rootVoiceInteraction,
-            ActivityStackSupervisor supervisor, ActivityOptions options,
-            ActivityRecord sourceRecord) {
+    ActivityRecord(ActivityTaskManagerService _service, WindowProcessController _caller,
+            int _launchedFromPid, int _launchedFromUid, String _launchedFromPackage, Intent _intent,
+            String _resolvedType, ActivityInfo aInfo, Configuration _configuration,
+            ActivityRecord _resultTo, String _resultWho, int _reqCode, boolean _componentSpecified,
+            boolean _rootVoiceInteraction, ActivityStackSupervisor supervisor,
+            ActivityOptions options, ActivityRecord sourceRecord) {
         service = _service;
         appToken = new Token(this, _intent);
         info = aInfo;
@@ -928,8 +927,8 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         }
         if ((aInfo.flags & FLAG_MULTIPROCESS) != 0 && _caller != null
                 && (aInfo.applicationInfo.uid == SYSTEM_UID
-                    || aInfo.applicationInfo.uid == _caller.info.uid)) {
-            processName = _caller.processName;
+                    || aInfo.applicationInfo.uid == _caller.mInfo.uid)) {
+            processName = _caller.mName;
         } else {
             processName = aInfo.processName;
         }
@@ -1783,7 +1782,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             }
             setVisible(true);
             sleeping = false;
-            app.setPendingUiClean(true);
+            app.postPendingUiCleanMsg(true);
             if (reportToClient) {
                 makeClientVisible();
             } else {

@@ -22,8 +22,8 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 
 import static android.os.FactoryTest.FACTORY_TEST_LOW_LEVEL;
-import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
-import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.TAG_ATM;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 
 import android.app.ActivityOptions;
 import android.app.IApplicationThread;
@@ -65,7 +65,7 @@ import java.util.List;
  * through the pending activity list, and recording home activity launches.
  */
 public class ActivityStartController {
-    private static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityStartController" : TAG_AM;
+    private static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityStartController" : TAG_ATM;
 
     private static final int DO_PENDING_ACTIVITY_LAUNCHES_MSG = 1;
 
@@ -90,6 +90,8 @@ public class ActivityStartController {
     private final Handler mHandler;
 
     private final PendingRemoteAnimationRegistry mPendingRemoteAnimationRegistry;
+
+    boolean mCheckedForSetup = false;
 
     private final class StartHandler extends Handler {
         public StartHandler(Looper looper) {
@@ -193,7 +195,7 @@ public class ActivityStartController {
      */
     void startSetupActivity() {
         // Only do this once per boot.
-        if (mService.mAm.getCheckedForSetup()) {
+        if (mCheckedForSetup) {
             return;
         }
 
@@ -203,7 +205,7 @@ public class ActivityStartController {
         final ContentResolver resolver = mService.mContext.getContentResolver();
         if (mService.mFactoryTest != FACTORY_TEST_LOW_LEVEL
                 && Settings.Global.getInt(resolver, Settings.Global.DEVICE_PROVISIONED, 0) != 0) {
-            mService.mAm.setCheckedForSetup(true);
+            mCheckedForSetup = true;
 
             // See if we should be showing the platform update setup UI.
             final Intent intent = new Intent(Intent.ACTION_UPGRADE_SETUP);
@@ -357,7 +359,7 @@ public class ActivityStartController {
                             null, userId, ActivityStarter.computeResolveFilterUid(
                                     callingUid, realCallingUid, UserHandle.USER_NULL));
                     // TODO: New, check if this is correct
-                    aInfo = mService.mAm.getActivityInfoForUser(aInfo, userId);
+                    aInfo = mService.mAmInternal.getActivityInfoForUser(aInfo, userId);
 
                     if (aInfo != null &&
                             (aInfo.applicationInfo.privateFlags

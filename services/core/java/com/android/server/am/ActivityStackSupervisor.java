@@ -54,27 +54,27 @@ import static android.view.Display.INVALID_DISPLAY;
 import static android.view.Display.TYPE_VIRTUAL;
 import static android.view.WindowManager.TRANSIT_DOCK_TASK_FROM_RECENTS;
 
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ALL;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_IDLE;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PAUSE;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_RECENTS;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_RELEASE;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_STACK;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_STATES;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_SWITCH;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_TASKS;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_IDLE;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_PAUSE;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_RECENTS;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_RELEASE;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_STACK;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_STATES;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_SWITCH;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_TASKS;
-import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
-import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
-import static com.android.server.am.ActivityManagerService.ANIMATE;
-import static com.android.server.am.ActivityManagerService.FIRST_SUPERVISOR_STACK_MSG;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_ALL;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_IDLE;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_PAUSE;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_RECENTS;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_RELEASE;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_STACK;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_STATES;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_SWITCH;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_TASKS;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_IDLE;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_PAUSE;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_RECENTS;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_RELEASE;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_STACK;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_STATES;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_SWITCH;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_TASKS;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.TAG_ATM;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.am.ActivityTaskManagerService.ANIMATE;
+import static com.android.server.am.ActivityTaskManagerService.H.FIRST_SUPERVISOR_STACK_MSG;
 import static com.android.server.am.ActivityRecord.RELAUNCH_REASON_NONE;
 import static com.android.server.am.ActivityStack.ActivityState.DESTROYED;
 import static com.android.server.am.ActivityStack.ActivityState.INITIALIZING;
@@ -91,7 +91,7 @@ import static com.android.server.am.ActivityStackSupervisorProto.IS_HOME_RECENTS
 import static com.android.server.am.ActivityStackSupervisorProto.KEYGUARD_CONTROLLER;
 import static com.android.server.am.ActivityStackSupervisorProto.PENDING_ACTIVITIES;
 import static com.android.server.am.ActivityStackSupervisorProto.RESUMED_ACTIVITY;
-import static com.android.server.am.TaskRecord.INVALID_TASK_ID;
+import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_LAUNCHABLE;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_LAUNCHABLE_PRIV;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_WHITELISTED;
@@ -198,7 +198,7 @@ import java.util.Set;
 
 public class ActivityStackSupervisor extends ConfigurationContainer implements DisplayListener,
         RecentTasks.Callbacks, RootWindowContainerListener {
-    private static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityStackSupervisor" : TAG_AM;
+    private static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityStackSupervisor" : TAG_ATM;
     private static final String TAG_IDLE = TAG + POSTFIX_IDLE;
     private static final String TAG_PAUSE = TAG + POSTFIX_PAUSE;
     private static final String TAG_RECENTS = TAG + POSTFIX_RECENTS;
@@ -1487,7 +1487,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 }
 
                 app.hasShownUi = true;
-                app.pendingUiClean = true;
+                app.setPendingUiClean(true);
                 app.forceProcessStateUpTo(mService.mTopProcessState);
                 // Because we could be starting an Activity in the system process this may not go
                 // across a Binder interface which would create a new Configuration. Consequently
@@ -1717,24 +1717,25 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             sendHint = noResumedActivities || allFocusedProcessesDiffer;
         }
 
-        if (sendHint && mService.mAm.mLocalPowerManager != null) {
-            mService.mAm.mLocalPowerManager.powerHint(PowerHint.LAUNCH, 1);
+        if (sendHint && mService.mPowerManagerInternal != null) {
+            mService.mPowerManagerInternal.powerHint(PowerHint.LAUNCH, 1);
             mPowerHintSent = true;
         }
     }
 
     void sendPowerHintForLaunchEndIfNeeded() {
         // Trigger launch power hint if activity is launched
-        if (mPowerHintSent && mService.mAm.mLocalPowerManager != null) {
-            mService.mAm.mLocalPowerManager.powerHint(PowerHint.LAUNCH, 0);
+        if (mPowerHintSent && mService.mPowerManagerInternal != null) {
+            mService.mPowerManagerInternal.powerHint(PowerHint.LAUNCH, 0);
             mPowerHintSent = false;
         }
     }
 
-    boolean checkStartAnyActivityPermission(Intent intent, ActivityInfo aInfo,
-            String resultWho, int requestCode, int callingPid, int callingUid,
-            String callingPackage, boolean ignoreTargetSecurity, boolean launchingInTask,
-            ProcessRecord callerApp, ActivityRecord resultRecord, ActivityStack resultStack) {
+    boolean checkStartAnyActivityPermission(Intent intent, ActivityInfo aInfo, String resultWho,
+            int requestCode, int callingPid, int callingUid, String callingPackage,
+            boolean ignoreTargetSecurity, boolean launchingInTask,
+            WindowProcessController callerApp, ActivityRecord resultRecord,
+            ActivityStack resultStack) {
         final boolean isCallerRecents = mService.getRecentTasks() != null
                 && mService.getRecentTasks().isCallerRecents(callingUid);
         final int startAnyPerm = mService.checkPermission(START_ANY_ACTIVITY, callingPid,
@@ -3072,7 +3073,9 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         }
 
         // Find any running services associated with this app and stop if needed.
-        mService.mAm.mServices.cleanUpRemovedTaskLocked(tr, component, new Intent(tr.getBaseIntent()));
+        final Message msg = PooledLambda.obtainMessage(ActivityManagerInternal::cleanUpServices,
+                mService.mAmInternal, tr.userId, component, new Intent(tr.getBaseIntent()));
+        mService.mH.sendMessage(msg);
 
         if (!killProcess) {
             return;
@@ -3422,7 +3425,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                     throw new IllegalStateException("Calling must be system uid");
                 }
                 mLaunchingActivity.release();
-                mService.mAm.mHandler.removeMessages(LAUNCH_TIMEOUT_MSG);
+                mHandler.removeMessages(LAUNCH_TIMEOUT_MSG);
             }
         }
 

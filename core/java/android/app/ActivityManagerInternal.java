@@ -22,6 +22,7 @@ import android.content.ComponentName;
 import android.content.IIntentReceiver;
 import android.content.IIntentSender;
 import android.content.Intent;
+import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.UserInfo;
 import android.os.Bundle;
@@ -242,4 +243,10 @@ public abstract class ActivityManagerInternal {
             throws TransactionTooLargeException;
 
     public abstract void disconnectActivityFromServices(Object connectionHolder);
+    public abstract void cleanUpServices(int userId, ComponentName component, Intent baseIntent);
+    public abstract ActivityInfo getActivityInfoForUser(ActivityInfo aInfo, int userId);
+    public abstract void ensureBootCompleted();
+    public abstract void updateOomLevelsForDisplay(int displayId);
+    public abstract boolean isActivityStartsLoggingEnabled();
+    public abstract void reportCurKeyguardUsageEvent(boolean keyguardShowing);
 }
