@@ -39,7 +39,7 @@ public class KeyValueAdbRestoreEngine implements Runnable {
     private static final String TAG = "KeyValueAdbRestoreEngine";
     private static final boolean DEBUG = false;
 
-    private final BackupManagerServiceInterface mBackupManagerService;
+    private final BackupManagerService mBackupManagerService;
     private final File mDataDir;
 
     FileMetadata mInfo;
@@ -48,7 +48,7 @@ public class KeyValueAdbRestoreEngine implements Runnable {
     IBackupAgent mAgent;
     int mToken;
 
-    public KeyValueAdbRestoreEngine(BackupManagerServiceInterface backupManagerService,
+    public KeyValueAdbRestoreEngine(BackupManagerService backupManagerService,
             File dataDir, FileMetadata info, ParcelFileDescriptor inFD, IBackupAgent agent,
             int token) {
         mBackupManagerService = backupManagerService;
