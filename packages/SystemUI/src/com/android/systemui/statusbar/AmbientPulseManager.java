@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar;
 
+import static com.android.systemui.statusbar.notification.row.NotificationInflater.FLAG_CONTENT_VIEW_AMBIENT;
+
 import android.annotation.NonNull;
 import android.content.Context;
 import android.content.res.Resources;
@@ -85,6 +87,7 @@ public final class AmbientPulseManager extends AlertingNotificationManager {
         for (OnAmbientChangedListener listener : mListeners) {
             listener.onAmbientStateChanged(entry, false);
         }
+        entry.row.freeContentViewWhenSafe(FLAG_CONTENT_VIEW_AMBIENT);
     }
 
     @Override

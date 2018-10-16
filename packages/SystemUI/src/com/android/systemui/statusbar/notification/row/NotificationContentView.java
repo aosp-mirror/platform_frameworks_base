@@ -23,6 +23,7 @@ import android.content.Context;
 import android.graphics.Rect;
 import android.os.Build;
 import android.service.notification.StatusBarNotification;
+import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -108,6 +109,10 @@ public class NotificationContentView extends FrameLayout {
     private NotificationGroupManager mGroupManager;
     private RemoteInputController mRemoteInputController;
     private Runnable mExpandedVisibleListener;
+    /**
+     * List of listeners for when content views become inactive (i.e. not the showing view).
+     */
+    private final ArrayMap<View, Runnable> mOnContentViewInactiveListeners = new ArrayMap<>();
 
     private final ViewTreeObserver.OnPreDrawListener mEnableAnimationPredrawListener
             = new ViewTreeObserver.OnPreDrawListener() {
@@ -517,6 +522,14 @@ public class NotificationContentView extends FrameLayout {
             removeView(mAmbientChild);
         }
         if (child == null) {
+            mAmbientChild = null;
+            mAmbientWrapper = null;
+            if (mVisibleType == VISIBLE_TYPE_AMBIENT) {
+                mVisibleType = VISIBLE_TYPE_CONTRACTED;
+            }
+            if (mTransformationStartVisibleType == VISIBLE_TYPE_AMBIENT) {
+                mTransformationStartVisibleType = UNDEFINED;
+            }
             return;
         }
         addView(child);
@@ -1163,6 +1176,7 @@ public class NotificationContentView extends FrameLayout {
 
     public void onNotificationUpdated(NotificationData.Entry entry) {
         mStatusBarNotification = entry.notification;
+        mOnContentViewInactiveListeners.clear();
         mBeforeN = entry.targetSdk < Build.VERSION_CODES.N;
         updateAllSingleLineViews();
         if (mContractedChild != null) {
@@ -1618,6 +1632,58 @@ public class NotificationContentView extends FrameLayout {
     public void setOnExpandedVisibleListener(Runnable r) {
         mExpandedVisibleListener = r;
         fireExpandedVisibleListenerIfVisible();
+    }
+
+    /**
+     * Set a one-shot listener to run when a given content view becomes inactive.
+     *
+     * @param visibleType visible type corresponding to the content view to listen
+     * @param listener runnable to run once when the content view becomes inactive
+     */
+    public void performWhenContentInactive(int visibleType, Runnable listener) {
+        View view = getViewForVisibleType(visibleType);
+        // View is already inactive
+        if (view == null || isContentViewInactive(visibleType)) {
+            listener.run();
+            return;
+        }
+        mOnContentViewInactiveListeners.put(view, listener);
+    }
+
+    /**
+     * Whether or not the content view is inactive.  This means it should not be visible
+     * or the showing content as removing it would cause visual jank.
+     *
+     * @param visibleType visible type corresponding to the content view to be removed
+     * @return true if the content view is inactive, false otherwise
+     */
+    public boolean isContentViewInactive(int visibleType) {
+        View view = getViewForVisibleType(visibleType);
+        return isContentViewInactive(view);
+    }
+
+    /**
+     * Whether or not the content view is inactive.
+     *
+     * @param view view to see if its inactive
+     * @return true if the view is inactive, false o/w
+     */
+    private boolean isContentViewInactive(View view) {
+        if (view == null) {
+            return true;
+        }
+        return view.getVisibility() != VISIBLE && getViewForVisibleType(mVisibleType) != view;
+    }
+
+    @Override
+    protected void onChildVisibilityChanged(View child, int oldVisibility, int newVisibility) {
+        super.onChildVisibilityChanged(child, oldVisibility, newVisibility);
+        if (isContentViewInactive(child)) {
+            Runnable listener = mOnContentViewInactiveListeners.remove(child);
+            if (listener != null) {
+                listener.run();
+            }
+        }
     }
 
     public void setIsLowPriority(boolean isLowPriority) {

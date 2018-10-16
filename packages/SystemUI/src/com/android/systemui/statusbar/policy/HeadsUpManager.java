@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar.policy;
 
+import static com.android.systemui.statusbar.notification.row.NotificationInflater.FLAG_CONTENT_VIEW_HEADS_UP;
+
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.content.Context;
@@ -151,6 +153,7 @@ public abstract class HeadsUpManager extends AlertingNotificationManager {
         for (OnHeadsUpChangedListener listener : mListeners) {
             listener.onHeadsUpStateChanged(entry, false);
         }
+        entry.row.freeContentViewWhenSafe(FLAG_CONTENT_VIEW_HEADS_UP);
     }
 
     protected void updatePinnedMode() {

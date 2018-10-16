@@ -17,12 +17,19 @@
 package com.android.systemui.statusbar.notification.row;
 
 import static com.android.systemui.statusbar.notification.ActivityLaunchAnimator.ExpandAnimationParameters;
+import static com.android.systemui.statusbar.notification.row.NotificationContentView.VISIBLE_TYPE_AMBIENT;
+import static com.android.systemui.statusbar.notification.row.NotificationContentView.VISIBLE_TYPE_HEADSUP;
+import static com.android.systemui.statusbar.notification.row.NotificationInflater
+        .FLAG_CONTENT_VIEW_AMBIENT;
+import static com.android.systemui.statusbar.notification.row.NotificationInflater
+        .FLAG_CONTENT_VIEW_HEADS_UP;
 import static com.android.systemui.statusbar.notification.row.NotificationInflater.InflationCallback;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ObjectAnimator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -83,6 +90,7 @@ import com.android.systemui.statusbar.notification.AboveShelfChangedListener;
 import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
 import com.android.systemui.statusbar.notification.logging.NotificationCounters;
 import com.android.systemui.statusbar.notification.NotificationUtils;
+import com.android.systemui.statusbar.notification.row.NotificationInflater.InflationFlag;
 import com.android.systemui.statusbar.notification.row.wrapper.NotificationViewWrapper;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
@@ -429,12 +437,59 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         }
     }
 
-    public void updateNotification(NotificationData.Entry entry) {
+    /**
+     * Set the entry for the row.
+     *
+     * @param entry the entry this row is tied to
+     */
+    public void setEntry(@NonNull NotificationData.Entry entry) {
         mEntry = entry;
         mStatusBarNotification = entry.notification;
-        mNotificationInflater.inflateNotificationViews();
-
         cacheIsSystemNotification();
+    }
+
+    /**
+     * Inflate views based off the inflation flags set.  Inflation happens asynchronously.
+     */
+    public void inflateViews() {
+        mNotificationInflater.inflateNotificationViews();
+    }
+
+    /**
+     * Marks a content view as freeable, setting it so that future inflations do not reinflate
+     * and ensuring that the view is freed when it is safe to remove.
+     *
+     * @param inflationFlag flag corresponding to the content view to be freed
+     */
+    public void freeContentViewWhenSafe(@InflationFlag int inflationFlag) {
+        // View should not be reinflated in the future
+        updateInflationFlag(inflationFlag, false);
+        Runnable freeViewRunnable = () ->
+                mNotificationInflater.freeNotificationView(inflationFlag);
+        switch (inflationFlag) {
+            case FLAG_CONTENT_VIEW_HEADS_UP:
+                getPrivateLayout().performWhenContentInactive(VISIBLE_TYPE_HEADSUP,
+                        freeViewRunnable);
+                break;
+            case FLAG_CONTENT_VIEW_AMBIENT:
+                getPrivateLayout().performWhenContentInactive(VISIBLE_TYPE_AMBIENT,
+                        freeViewRunnable);
+                getPublicLayout().performWhenContentInactive(VISIBLE_TYPE_AMBIENT,
+                        freeViewRunnable);
+                break;
+            default:
+                break;
+        }
+    }
+
+    /**
+     * Update whether or not a content view should be inflated.
+     *
+     * @param flag the flag corresponding to the content view
+     * @param shouldInflate true if it should be inflated, false if it should not
+     */
+    public void updateInflationFlag(@InflationFlag int flag, boolean shouldInflate) {
+        mNotificationInflater.updateInflationFlag(flag, shouldInflate);
     }
 
     /**
@@ -581,7 +636,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
             headsUpHeight = mMaxHeadsUpHeight;
         }
         NotificationViewWrapper headsUpWrapper = layout.getVisibleWrapper(
-                NotificationContentView.VISIBLE_TYPE_HEADSUP);
+                VISIBLE_TYPE_HEADSUP);
         if (headsUpWrapper != null) {
             headsUpHeight = Math.max(headsUpHeight, headsUpWrapper.getMinLayoutHeight());
         }
@@ -2614,6 +2669,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     public NotificationContentView getShowingLayout() {
         return shouldShowPublic() ? mPublicLayout : mPrivateLayout;
+    }
+
+    public View getExpandedContentView() {
+        return getPrivateLayout().getExpandedChild();
     }
 
     public void setLegacy(boolean legacy) {

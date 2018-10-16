@@ -31,9 +31,9 @@ import android.text.TextUtils;
 import android.view.LayoutInflater;
 import android.widget.RemoteViews;
 
-import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.notification.NotificationData;
+import com.android.systemui.statusbar.notification.row.NotificationInflater.InflationFlag;
 import com.android.systemui.statusbar.notification.row.NotificationInflaterTest;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
@@ -67,16 +67,50 @@ public class NotificationTestHelper {
         mGroupManager.setHeadsUpManager(mHeadsUpManager);
     }
 
+    /**
+     * Creates a generic row.
+     *
+     * @return a generic row with no special properties.
+     * @throws Exception
+     */
     public ExpandableNotificationRow createRow() throws Exception {
         return createRow(PKG, UID);
     }
 
+    /**
+     * Create a row with the package and user id specified.
+     *
+     * @param pkg package
+     * @param uid user id
+     * @return a row with a notification using the package and user id
+     * @throws Exception
+     */
     public ExpandableNotificationRow createRow(String pkg, int uid) throws Exception {
         return createRow(pkg, uid, false /* isGroupSummary */, null /* groupKey */);
     }
 
+    /**
+     * Creates a row based off the notification given.
+     *
+     * @param notification the notification
+     * @return a row built off the notification
+     * @throws Exception
+     */
     public ExpandableNotificationRow createRow(Notification notification) throws Exception {
-        return generateRow(notification, PKG, UID, false /* isGroupRow */);
+        return generateRow(notification, PKG, UID, 0 /* extraInflationFlags */);
+    }
+
+    /**
+     * Create a row with the specified content views inflated in addition to the default.
+     *
+     * @param extraInflationFlags the flags corresponding to the additional content views that
+     *                            should be inflated
+     * @return a row with the specified content views inflated in addition to the default
+     * @throws Exception
+     */
+    public ExpandableNotificationRow createRow(@InflationFlag int extraInflationFlags)
+            throws Exception {
+        return generateRow(createNotification(), PKG, UID, extraInflationFlags);
     }
 
     /**
@@ -122,34 +156,53 @@ public class NotificationTestHelper {
             boolean isGroupSummary,
             @Nullable String groupKey)
             throws Exception {
+        Notification notif = createNotification(isGroupSummary, groupKey);
+        return generateRow(notif, pkg, uid, 0 /* inflationFlags */);
+    }
+
+    /**
+     * Creates a generic notification.
+     *
+     * @return a notification with no special properties
+     */
+    private Notification createNotification() {
+        return createNotification(false /* isGroupSummary */, null /* groupKey */);
+    }
+
+    /**
+     * Creates a notification with the given parameters.
+     *
+     * @param isGroupSummary whether the notification is a group summary
+     * @param groupKey the group key for the notification group used across notifications
+     * @return a notification that is in the group specified or standalone if unspecified
+     */
+    private Notification createNotification(boolean isGroupSummary,
+            @Nullable String groupKey) {
         Notification publicVersion = new Notification.Builder(mContext).setSmallIcon(
                 R.drawable.ic_person)
                 .setCustomContentView(new RemoteViews(mContext.getPackageName(),
                         R.layout.custom_view_dark))
                 .build();
-        Notification.Builder notificationBuilder =
-                new Notification.Builder(mContext, "channelId")
-                        .setSmallIcon(R.drawable.ic_person)
-                        .setContentTitle("Title")
-                        .setContentText("Text")
-                        .setPublicVersion(publicVersion);
-
-        // Group notification setup
+        Notification.Builder notificationBuilder = new Notification.Builder(mContext, "channelId")
+                .setSmallIcon(R.drawable.ic_person)
+                .setContentTitle("Title")
+                .setContentText("Text")
+                .setPublicVersion(publicVersion)
+                .setStyle(new Notification.BigTextStyle().bigText("Big Text"));
         if (isGroupSummary) {
             notificationBuilder.setGroupSummary(true);
         }
         if (!TextUtils.isEmpty(groupKey)) {
             notificationBuilder.setGroup(groupKey);
         }
-
-        return generateRow(notificationBuilder.build(), pkg, uid, !TextUtils.isEmpty(groupKey));
+        return notificationBuilder.build();
     }
 
     private ExpandableNotificationRow generateRow(
             Notification notification,
             String pkg,
             int uid,
-            boolean isGroupRow)
+            @InflationFlag int extraInflationFlags)
             throws Exception {
         LayoutInflater inflater = (LayoutInflater) mContext.getSystemService(
                 mContext.LAYOUT_INFLATER_SERVICE);
@@ -179,8 +232,10 @@ public class NotificationTestHelper {
         entry.channel = new NotificationChannel(
                 notification.getChannelId(), notification.getChannelId(), IMPORTANCE_DEFAULT);
         entry.channel.setBlockableSystem(true);
+        row.setEntry(entry);
+        row.getNotificationInflater().addInflationFlags(extraInflationFlags);
         NotificationInflaterTest.runThenWaitForInflation(
-                () -> row.updateNotification(entry),
+                () -> row.inflateViews(),
                 row.getNotificationInflater());
 
         // This would be done as part of onAsyncInflationFinished, but we skip large amounts of
