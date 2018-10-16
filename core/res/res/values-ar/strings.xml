@@ -138,7 +138,7 @@
   </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"إيقاف"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"‏شبكة Wi-Fi مفضّلة"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"مفضَّل للجوّال"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"شبكة بيانات الجوال مفضَّلة"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"‏Wi-Fi فقط"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: لم تتم إعادة التوجيه"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>

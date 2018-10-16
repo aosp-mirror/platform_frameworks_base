@@ -133,8 +133,8 @@
     <item msgid="4397097370387921767">"%s Wi-Fi Дуудлага"</item>
   </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Идэвхгүй"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi илүү эрхэмлэдэг"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Давуу эрхтэй мобайл"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi давуу эрхтэй"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Мобайл давуу эрхтэй"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Зөвхөн Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: дамжуулагдаагүй"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -729,7 +729,7 @@
     <string name="keyguard_password_enter_pin_password_code" msgid="6391755146112503443">"Тайлах PIN-г оруулна уу"</string>
     <string name="keyguard_password_wrong_pin_code" msgid="2422225591006134936">"Буруу PIN код."</string>
     <string name="keyguard_label_text" msgid="861796461028298424">"Тайлах бол Цэсийг дараад 0."</string>
-    <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"Яаралтай дугаар"</string>
+    <string name="emergency_call_dialog_number_for_display" msgid="696192103195090970">"Яаралтай тусламжийн дугаар"</string>
     <string name="lockscreen_carrier_default" msgid="6169005837238288522">"Үйлчилгээ байхгүй"</string>
     <string name="lockscreen_screen_locked" msgid="7288443074806832904">"Дэлгэц түгжигдсэн."</string>
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Яаралтай дуудлага хийх буюу эсвэл түгжээг тайлах бол цэсийг дарна уу."</string>
@@ -1128,7 +1128,7 @@
     <string name="dump_heap_text" msgid="4809417337240334941">"Энэ үйл явц <xliff:g id="PROC">%1$s</xliff:g> нь үйл ажиллагааны санах ойн хязгаар болох <xliff:g id="SIZE">%2$s</xliff:g> хэмжээг давсан байна. Та хэт их хуримтлагдсан мэдээллийг тэдгээрийн өөрсдийнх нь хөгжүүлэгчтэй хуваалцах боломжтой. Болгоомжтой байгаарай: энэхүү хэт их хуримтлагдсан мэдээлэлд аппликейшнаас нэвтрэх боломжтой таны хувийн мэдээлэл агуулагдсан байж болно."</string>
     <string name="sendText" msgid="5209874571959469142">"Текст илгээх үйлдлийг сонгох"</string>
     <string name="volume_ringtone" msgid="6885421406845734650">"Хонхны аяны хэмжээ"</string>
-    <string name="volume_music" msgid="5421651157138628171">"Медиа дууны хэмжээ"</string>
+    <string name="volume_music" msgid="5421651157138628171">"Медиа дууны түвшин"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="9165984379394601533">"Блютүүтээр тоглож байна"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="8310739960973156272">"Хонхны дууг чимээгүй болгов"</string>
     <string name="volume_call" msgid="3941680041282788711">"Ирсэн дуудлагын дууны хэмжээ"</string>
@@ -1139,7 +1139,7 @@
     <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"Блютүүтын хэмжээ"</string>
     <string name="volume_icon_description_ringer" msgid="3326003847006162496">"Хонхны дууны хэмжээ"</string>
     <string name="volume_icon_description_incall" msgid="8890073218154543397">"Дуудлагын дууны хэмжээ"</string>
-    <string name="volume_icon_description_media" msgid="4217311719665194215">"Медиа дууны хэмжээ"</string>
+    <string name="volume_icon_description_media" msgid="4217311719665194215">"Медиа дууны түвшин"</string>
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Мэдэгдлийн дууны хэмжээ"</string>
     <string name="ringtone_default" msgid="3789758980357696936">"Үндсэн хонхны ая"</string>
     <string name="ringtone_default_with_actual" msgid="1767304850491060581">"Үндсэн (<xliff:g id="ACTUAL_RINGTONE">%1$s</xliff:g>)"</string>

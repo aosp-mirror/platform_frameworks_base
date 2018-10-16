@@ -316,8 +316,8 @@
     <string name="capability_desc_canControlMagnification" msgid="4791858203568383773">"Valdyti ekrano mastelio keitimo lygį ir pozicijos nustatymą."</string>
     <string name="capability_title_canPerformGestures" msgid="7418984730362576862">"Veiksmai gestais"</string>
     <string name="capability_desc_canPerformGestures" msgid="8296373021636981249">"Galima paliesti, perbraukti, suimti ir atlikti kitus veiksmus gestais."</string>
-    <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Kontrolinio kodo gestai"</string>
-    <string name="capability_desc_canCaptureFingerprintGestures" msgid="4386487962402228670">"Gali užfiksuoti gestus, atliktus naudojant įrenginio kontrolinio kodo jutiklį."</string>
+    <string name="capability_title_canCaptureFingerprintGestures" msgid="6309568287512278670">"Piršto antspaudo gestai"</string>
+    <string name="capability_desc_canCaptureFingerprintGestures" msgid="4386487962402228670">"Gali užfiksuoti gestus, atliktus naudojant įrenginio piršto antspaudo jutiklį."</string>
     <string name="permlab_statusBar" msgid="7417192629601890791">"išjungti ar keisti būsenos juostą"</string>
     <string name="permdesc_statusBar" msgid="8434669549504290975">"Leidžiama programai neleisti būsenos juostos arba pridėti ir pašalinti sistemos piktogramas."</string>
     <string name="permlab_statusBarService" msgid="4826835508226139688">"būti būsenos juosta"</string>
@@ -494,33 +494,33 @@
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Leidžiama programai neleisti klavišo užrakto ir visos susijusios slaptažodžio apsaugos. Pvz., telefonas neleidžia klavišo užrakto priimant gaunamąjį skambutį ir pakartotinai jį įgalina, kai skambutis baigiamas."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"naudoti biometrinę aparatinę įrangą"</string>
     <string name="permdesc_useBiometric" msgid="8389855232721612926">"Leidžiama programai naudoti biometrinę aparatinę įrangą tapatybei nustatyti"</string>
-    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"tvarkyti kontrolinio kodo aparatinę įrangą"</string>
+    <string name="permlab_manageFingerprint" msgid="5640858826254575638">"tvarkyti piršto antspaudo aparatinę įrangą"</string>
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Leidžiama programai aktyvinti metodus, norint pridėti ir ištrinti naudojamus kontrolinių kodų šablonus."</string>
-    <string name="permlab_useFingerprint" msgid="3150478619915124905">"naudoti kontrolinio kodo aparatinę įrangą"</string>
-    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Leidžiama programai naudoti kontrolinio kodo aparatinę įrangą tapatybei nustatyti"</string>
-    <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Aptiktas dalinis kontrolinis kodas. Bandykite dar kartą."</string>
-    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Nepavyko apdoroti kontrolinio kodo. Bandykite dar kartą."</string>
-    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Kontrolinio kodo jutiklis purvinas. Nuvalykite ir bandykite dar kartą."</string>
+    <string name="permlab_useFingerprint" msgid="3150478619915124905">"naudoti piršto antspaudo aparatinę įrangą"</string>
+    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Leidžiama programai naudoti piršto antspaudo aparatinę įrangą tapatybei nustatyti"</string>
+    <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Aptiktas dalinis piršto antspaudas. Bandykite dar kartą."</string>
+    <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Nepavyko apdoroti piršto antspaudo. Bandykite dar kartą."</string>
+    <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Piršto antspaudo jutiklis purvinas. Nuvalykite ir bandykite dar kartą."</string>
     <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Per greitai judinate pirštą. Bandykite dar kartą."</string>
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"Per lėtai judinate pirštą. Bandykite dar kartą."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
     <string name="fingerprint_not_recognized" msgid="2690661881608146617">"Neatpažintas"</string>
-    <string name="fingerprint_authenticated" msgid="5309333983002526448">"Kontrolinis kodas autentifikuotas"</string>
-    <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Kontrolinio kodo aparatinė įranga nepasiekiama."</string>
-    <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Negalima išsaugoti kontrolinio kodo. Pašalinkite esamą kontrolinį kodą."</string>
-    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Baigėsi kontrolinio kodo nustatymo skirtasis laikas. Bandykite dar kartą."</string>
-    <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Kontrolinio kodo operacija atšaukta."</string>
-    <string name="fingerprint_error_user_canceled" msgid="7999639584615291494">"Kontrolinio kodo operaciją atšaukė naudotojas."</string>
+    <string name="fingerprint_authenticated" msgid="5309333983002526448">"Piršto antspaudas autentifikuotas"</string>
+    <string name="fingerprint_error_hw_not_available" msgid="7955921658939936596">"Piršto antspaudo aparatinė įranga nepasiekiama."</string>
+    <string name="fingerprint_error_no_space" msgid="1055819001126053318">"Negalima išsaugoti piršto antspaudo. Pašalinkite esamą piršto antspaudą."</string>
+    <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Baigėsi piršto antspaudo nustatymo skirtasis laikas. Bandykite dar kartą."</string>
+    <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Piršto antspaudo operacija atšaukta."</string>
+    <string name="fingerprint_error_user_canceled" msgid="7999639584615291494">"Piršto antspaudo operaciją atšaukė naudotojas."</string>
     <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Per daug bandymų. Vėliau bandykite dar kartą."</string>
-    <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"Per daug bandymų. Kontrolinio kodo jutiklis išjungtas."</string>
+    <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"Per daug bandymų. Piršto antspaudo jutiklis išjungtas."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Bandykite dar kartą."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"Neužregistruota jokių kontrolinių kodų."</string>
-    <string name="fingerprint_error_hw_not_present" msgid="5729436878065119329">"Šiame įrenginyje nėra kontrolinio kodo jutiklio"</string>
+    <string name="fingerprint_error_hw_not_present" msgid="5729436878065119329">"Šiame įrenginyje nėra piršto antspaudo jutiklio"</string>
     <string name="fingerprint_name_template" msgid="5870957565512716938">"<xliff:g id="FINGERID">%d</xliff:g> pirštas"</string>
   <string-array name="fingerprint_error_vendor">
   </string-array>
-    <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Kontrolinio kodo piktograma"</string>
+    <string name="fingerprint_icon_content_description" msgid="2340202869968465936">"Piršto antspaudo piktograma"</string>
     <string name="permlab_readSyncSettings" msgid="6201810008230503052">"skaityti sinchronizavimo nustatymus"</string>
     <string name="permdesc_readSyncSettings" msgid="2706745674569678644">"Leidžiama programai skaityti ir sinchronizuoti paskyros nustatymus. Pvz., taip gali būti nustatoma, ar su paskyra sinchronizuota Žmonių programa."</string>
     <string name="permlab_writeSyncSettings" msgid="5408694875793945314">"įjungti arba išjungti sinchronizavimą"</string>
@@ -1519,8 +1519,8 @@
     <string name="expires_on" msgid="3676242949915959821">"Galiojimas baigiasi:"</string>
     <string name="serial_number" msgid="758814067660862493">"Serijos numeris:"</string>
     <string name="fingerprints" msgid="4516019619850763049">"Kontroliniai kodai"</string>
-    <string name="sha256_fingerprint" msgid="4391271286477279263">"SHA-256 kontrolinis kodas"</string>
-    <string name="sha1_fingerprint" msgid="7930330235269404581">"SHA-1 kontrolinis kodas"</string>
+    <string name="sha256_fingerprint" msgid="4391271286477279263">"SHA-256 piršto antspaudas"</string>
+    <string name="sha1_fingerprint" msgid="7930330235269404581">"SHA-1 piršto antspaudas"</string>
     <string name="activity_chooser_view_see_all" msgid="4292569383976636200">"Žr. viską"</string>
     <string name="activity_chooser_view_dialog_title_default" msgid="4710013864974040615">"Pasirinkti veiklą"</string>
     <string name="share_action_provider_share_with" msgid="5247684435979149216">"Bendrinti su"</string>
