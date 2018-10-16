@@ -808,7 +808,7 @@ public final class ContextHubManager {
      *
      * @throws IllegalArgumentException if hubInfo does not represent a valid hub, or pendingIntent
      *                                  was not associated with a client
-     * @throws IllegalStateException    if there were too many registered clients at the service
+     * @throws IllegalStateException    if the client is already registered to a valid callback
      * @throws NullPointerException     if pendingIntent, hubInfo, callback, or executor is null
      *
      * @hide
@@ -833,7 +833,7 @@ public final class ContextHubManager {
      *
      * @throws IllegalArgumentException if hubInfo does not represent a valid hub, or pendingIntent
      *                                  was not associated with a client
-     * @throws IllegalStateException    if there were too many registered clients at the service
+     * @throws IllegalStateException    if the client is already registered to a valid callback
      * @throws NullPointerException     if pendingIntent, hubInfo, or callback is null
      *
      * @hide
