@@ -7,6 +7,6 @@
     <string name="action_bar_label" msgid="917235635415966620">"Im Netzwerk anmelden"</string>
     <string name="action_bar_title" msgid="5645564790486983117">"In %1$s anmelden"</string>
     <string name="ssl_error_warning" msgid="6653188881418638872">"Im Netzwerk, zu dem du eine Verbindung herstellen möchtest, liegen Sicherheitsprobleme vor."</string>
-    <string name="ssl_error_example" msgid="647898534624078900">"Beispiel: Die Log-in-Seite gehört möglicherweise nicht zur angezeigten Organisation."</string>
+    <string name="ssl_error_example" msgid="647898534624078900">"Beispiel: Die Log-in-Seite gehört eventuell nicht zur angezeigten Organisation."</string>
     <string name="ssl_error_continue" msgid="6492718244923937110">"Trotzdem in einem Browser fortfahren"</string>
 </resources>
