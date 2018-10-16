@@ -43,12 +43,15 @@ import android.os.Binder;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.FileUtils;
+import android.os.Handler;
+import android.os.HandlerThread;
 import android.os.IBinder;
 import android.os.IStatsCompanionService;
 import android.os.IStatsManager;
 import android.os.IStoraged;
 import android.os.IThermalEventListener;
 import android.os.IThermalService;
+import android.os.Looper;
 import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
 import android.os.Process;
@@ -148,6 +151,13 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     public static final String EXTRA_LAST_REPORT_TIME = "android.app.extra.LAST_REPORT_TIME";
     public static final int DEATH_THRESHOLD = 10;
 
+
+    static final class CompanionHandler extends Handler {
+        CompanionHandler(Looper looper) {
+            super(looper);
+        }
+    }
+
     private final Context mContext;
     private final AlarmManager mAlarmManager;
     @GuardedBy("sStatsdLock")
@@ -173,6 +183,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     private final HashSet<Long> mDeathTimeMillis = new HashSet<>();
     @GuardedBy("sStatsdLock")
     private final HashMap<Long, String> mDeletedFiles = new HashMap<>();
+    private final CompanionHandler mHandler;
 
     private KernelUidCpuTimeReader mKernelUidCpuTimeReader = new KernelUidCpuTimeReader();
     private KernelCpuSpeedReader[] mKernelCpuSpeedReaders;
@@ -251,6 +262,11 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         } else {
             Slog.e(TAG, "cannot find thermalservice, no throttling push notifications");
         }
+
+        HandlerThread handlerThread = new HandlerThread(TAG);
+        handlerThread.start();
+        mHandler = new CompanionHandler(handlerThread.getLooper());
+
     }
 
     @Override
@@ -498,7 +514,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             // only fire when it awakens.
             // AlarmManager will automatically cancel any previous mAnomalyAlarmListener alarm.
             mAlarmManager.setExact(AlarmManager.ELAPSED_REALTIME, timestampMs, TAG + ".anomaly",
-                    mAnomalyAlarmListener, null);
+                    mAnomalyAlarmListener, mHandler);
         } finally {
             Binder.restoreCallingIdentity(callingToken);
         }
@@ -529,7 +545,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             // using ELAPSED_REALTIME, not ELAPSED_REALTIME_WAKEUP, so if device is asleep, will
             // only fire when it awakens.
             mAlarmManager.setExact(AlarmManager.ELAPSED_REALTIME, timestampMs, TAG + ".periodic",
-                    mPeriodicAlarmListener, null);
+                    mPeriodicAlarmListener, mHandler);
         } finally {
             Binder.restoreCallingIdentity(callingToken);
         }
@@ -561,7 +577,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             // using ELAPSED_REALTIME, not ELAPSED_REALTIME_WAKEUP, so if device is asleep, will
             // only fire when it awakens.
             mAlarmManager.setExact(AlarmManager.ELAPSED_REALTIME, nextPullTimeMs, TAG + ".pull",
-                    mPullingAlarmListener, null);
+                    mPullingAlarmListener, mHandler);
         } finally {
             Binder.restoreCallingIdentity(callingToken);
         }
