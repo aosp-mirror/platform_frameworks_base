@@ -137,7 +137,7 @@ public class Toast {
         String pkg = mContext.getOpPackageName();
         TN tn = mTN;
         tn.mNextView = mNextView;
-        final int displayId = mContext.getDisplay().getDisplayId();
+        final int displayId = mContext.getDisplayId();
 
         try {
             service.enqueueToast(pkg, tn, mDuration, displayId);

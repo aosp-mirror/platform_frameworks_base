@@ -397,7 +397,7 @@ public final class DisplayManager {
         if (display == null) {
             // TODO: We cannot currently provide any override configurations for metrics on displays
             // other than the display the context is associated with.
-            final Context context = mContext.getDisplay().getDisplayId() == displayId
+            final Context context = mContext.getDisplayId() == displayId
                     ? mContext : mContext.getApplicationContext();
 
             display = mGlobal.getCompatibleDisplay(displayId, context.getResources());
