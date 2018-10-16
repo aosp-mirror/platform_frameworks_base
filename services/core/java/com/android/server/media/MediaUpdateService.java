@@ -22,7 +22,7 @@ import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
-import android.media.IMediaExtractorUpdateService;
+import android.media.IMediaUpdateService;
 import android.os.Build;
 import android.os.IBinder;
 import android.os.Handler;
@@ -34,6 +34,7 @@ import android.text.TextUtils;
 import android.util.Log;
 import android.util.Slog;
 import com.android.server.SystemService;
+import java.util.HashMap;
 
 /** This class provides a system service that manages media framework updates. */
 public class MediaUpdateService extends SystemService {
@@ -42,34 +43,40 @@ public class MediaUpdateService extends SystemService {
     private static final String MEDIA_UPDATE_PACKAGE_NAME =
             SystemProperties.get("ro.mediacomponents.package");
     private static final String EXTRACTOR_UPDATE_SERVICE_NAME = "media.extractor.update";
-
-    private IMediaExtractorUpdateService mMediaExtractorUpdateService;
-    final Handler mHandler;
+    private static final String CODEC_UPDATE_SERVICE_NAME = "media.codec.update";
+    private static final String[] UPDATE_SERVICE_NAME_ARRAY = {
+            EXTRACTOR_UPDATE_SERVICE_NAME, CODEC_UPDATE_SERVICE_NAME,
+    };
+    private final HashMap<String, IMediaUpdateService> mUpdateServiceMap = new HashMap<>();
+    private final Handler mHandler = new Handler();
 
     public MediaUpdateService(Context context) {
         super(context);
-        mHandler = new Handler();
     }
 
     @Override
     public void onStart() {
         if (("userdebug".equals(android.os.Build.TYPE) || "eng".equals(android.os.Build.TYPE))
                 && !TextUtils.isEmpty(MEDIA_UPDATE_PACKAGE_NAME)) {
-            connect();
+            for (String serviceName : UPDATE_SERVICE_NAME_ARRAY) {
+                connect(serviceName);
+            }
             registerBroadcastReceiver();
         }
     }
 
-    private void connect() {
-        IBinder binder = ServiceManager.getService(EXTRACTOR_UPDATE_SERVICE_NAME);
+    private void connect(final String serviceName) {
+        IBinder binder = ServiceManager.getService(serviceName);
         if (binder != null) {
             try {
                 binder.linkToDeath(new IBinder.DeathRecipient() {
                     @Override
                     public void binderDied() {
-                        Slog.w(TAG, "mediaextractor died; reconnecting");
-                        mMediaExtractorUpdateService = null;
-                        connect();
+                        Slog.w(TAG, "service " + serviceName + " died; reconnecting");
+                        synchronized (mUpdateServiceMap) {
+                            mUpdateServiceMap.remove(serviceName);
+                        }
+                        connect(serviceName);
                     }
                 }, 0);
             } catch (Exception e) {
@@ -77,15 +84,18 @@ public class MediaUpdateService extends SystemService {
             }
         }
         if (binder != null) {
-            mMediaExtractorUpdateService = IMediaExtractorUpdateService.Stub.asInterface(binder);
+            synchronized (mUpdateServiceMap) {
+                mUpdateServiceMap.put(serviceName,
+                        IMediaUpdateService.Stub.asInterface(binder));
+            }
             mHandler.post(new Runnable() {
                 @Override
                 public void run() {
-                    packageStateChanged();
+                    packageStateChanged(serviceName);
                 }
             });
         } else {
-            Slog.w(TAG, EXTRACTOR_UPDATE_SERVICE_NAME + " not found.");
+            Slog.w(TAG, serviceName + " not found.");
         }
     }
 
@@ -106,13 +116,12 @@ public class MediaUpdateService extends SystemService {
                                 // following ACTION_PACKAGE_ADDED case.
                                 return;
                             }
-                            packageStateChanged();
-                            break;
+                            // fall-thru
                         case Intent.ACTION_PACKAGE_CHANGED:
-                            packageStateChanged();
-                            break;
                         case Intent.ACTION_PACKAGE_ADDED:
-                            packageStateChanged();
+                            for (String serviceName : UPDATE_SERVICE_NAME_ARRAY) {
+                                packageStateChanged(serviceName);
+                            }
                             break;
                     }
                 }
@@ -128,7 +137,7 @@ public class MediaUpdateService extends SystemService {
                 null /* broadcast permission */, null /* handler */);
     }
 
-    private void packageStateChanged() {
+    private void packageStateChanged(String serviceName) {
         ApplicationInfo packageInfo = null;
         boolean pluginsAvailable = false;
         try {
@@ -144,17 +153,23 @@ public class MediaUpdateService extends SystemService {
                     + " targetSdk:" + packageInfo.targetSdkVersion);
             pluginsAvailable = false;
         }
-        loadExtractorPlugins(
+        loadPlugins(serviceName,
                 (packageInfo != null && pluginsAvailable) ? packageInfo.sourceDir : "");
     }
 
-    private void loadExtractorPlugins(String apkPath) {
+    private void loadPlugins(String serviceName, String apkPath) {
         try {
-            if (mMediaExtractorUpdateService != null) {
-                mMediaExtractorUpdateService.loadPlugins(apkPath);
+            IMediaUpdateService service = null;
+            synchronized (serviceName) {
+                service = mUpdateServiceMap.get(serviceName);
+            }
+            if (service != null) {
+                service.loadPlugins(apkPath);
+            } else {
+                Slog.w(TAG, "service " + serviceName + " passed away");
             }
         } catch (Exception e) {
-            Slog.w(TAG, "Error in loadPlugins", e);
+            Slog.w(TAG, "Error in loadPlugins for " + serviceName, e);
         }
     }
 }
