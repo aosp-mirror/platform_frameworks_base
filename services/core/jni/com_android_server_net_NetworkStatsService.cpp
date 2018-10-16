@@ -30,8 +30,8 @@
 #include <utils/Log.h>
 
 #include "android-base/unique_fd.h"
-#include "bpf/BpfNetworkStats.h"
 #include "bpf/BpfUtils.h"
+#include "netdbpf/BpfNetworkStats.h"
 
 using android::bpf::Stats;
 using android::bpf::hasBpfSupport;
