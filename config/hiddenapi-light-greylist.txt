@@ -2791,16 +2791,6 @@ Ljavax/net/ssl/SSLServerSocketFactory;->defaultServerSocketFactory:Ljavax/net/ss
 Ljavax/net/ssl/SSLSocketFactory;->createSocket(Ljava/net/Socket;Ljava/io/InputStream;Z)Ljava/net/Socket;
 Ljavax/net/ssl/SSLSocketFactory;->defaultSocketFactory:Ljavax/net/ssl/SSLSocketFactory;
 Llibcore/icu/ICU;->addLikelySubtags(Ljava/util/Locale;)Ljava/util/Locale;
-Llibcore/io/Libcore;->os:Llibcore/io/Os;
-Llibcore/io/Memory;->peekByte(J)B
-Llibcore/io/Memory;->peekByteArray(J[BII)V
-Llibcore/io/Memory;->peekInt(JZ)I
-Llibcore/io/Memory;->peekLong(JZ)J
-Llibcore/io/Memory;->pokeByte(JB)V
-Llibcore/io/Memory;->pokeByteArray(J[BII)V
-Llibcore/io/Memory;->pokeInt(JIZ)V
-Llibcore/io/Memory;->pokeLong(JJZ)V
-Llibcore/io/Streams;->copy(Ljava/io/InputStream;Ljava/io/OutputStream;)I
 Llibcore/util/BasicLruCache;->map:Ljava/util/LinkedHashMap;
 Llibcore/util/ZoneInfo;->mTransitions:[J
 Lorg/ccil/cowan/tagsoup/AttributesImpl;->data:[Ljava/lang/String;
