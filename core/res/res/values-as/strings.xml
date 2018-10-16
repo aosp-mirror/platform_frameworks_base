@@ -302,7 +302,7 @@
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ক আপোনাৰ দেহৰ গুৰুত্বপূৰ্ণ অংগসমূহৰ অৱস্থাৰ বিষয়ে ছেন্সৰৰ ডেটা লাভ কৰিবলৈ অনুমতি দিবনে?"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"ৱিণ্ড\' সমল বিচাৰি উলিয়াওক"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"আপুনি যোগাযোগ কৰি থকা ৱিণ্ড\'খনৰ সমল পৰীক্ষা কৰক।"</string>
-    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"স্পৰ্শৰদ্বাৰা অন্বেষণ কৰাৰ সুবিধা অন কৰক"</string>
+    <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"স্পৰ্শৰ দ্বাৰা অন্বেষণ কৰাৰ সুবিধা অন কৰক"</string>
     <string name="capability_desc_canRequestTouchExploration" msgid="7543249041581408313">"টেপ কৰা বস্তুসমূহ ডাঙৰকৈ কোৱা হ\'ব আৰু আঙুলিৰ স্পৰ্শেৰে নিৰ্দেশ দি স্ক্ৰীণ অন্বেষণ কৰিব পাৰিব।"</string>
     <string name="capability_title_canRequestFilterKeyEvents" msgid="2103440391902412174">"আপুনি লিখা পাঠ নিৰীক্ষণ কৰক"</string>
     <string name="capability_desc_canRequestFilterKeyEvents" msgid="7463135292204152818">"ক্ৰেডিট কাৰ্ডৰ নম্বৰ আৰু পাছৱৰ্ডৰ দৰে ব্যক্তিগত ডেটা অন্তৰ্ভুক্ত হ\'ব পাৰে।"</string>
@@ -1349,7 +1349,7 @@
     <string name="forward_intent_to_work" msgid="621480743856004612">"আপুনি আপোনাৰ কৰ্মস্থানৰ প্ৰ\'ফাইলৰ ভিতৰত এই এপটো ব্যৱহাৰ কৰি আছে"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"ইনপুট পদ্ধতি"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"ছিংক"</string>
-    <string name="accessibility_binding_label" msgid="4148120742096474641">"সাধ্য় সুবিধাসমূহ"</string>
+    <string name="accessibility_binding_label" msgid="4148120742096474641">"সাধ্য সুবিধাসমূহ"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"ৱালপেপাৰ"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"ৱালপেপাৰ সলনি কৰক"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"জাননী নিৰীক্ষক"</string>

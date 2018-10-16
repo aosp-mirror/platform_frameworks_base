@@ -611,7 +611,7 @@
     <string name="notification_channel_minimized" msgid="1664411570378910931">"Te powiadomienia zostaną zminimalizowane"</string>
     <string name="inline_blocking_helper" msgid="3055064577771478591">"Zwykle odrzucasz te powiadomienia. \nNadal je pokazywać?"</string>
     <string name="inline_keep_showing" msgid="8945102997083836858">"Nadal pokazywać te powiadomienia?"</string>
-    <string name="inline_stop_button" msgid="4172980096860941033">"Zatrzymaj powiadomienia"</string>
+    <string name="inline_stop_button" msgid="4172980096860941033">"Zablokuj powiadomienia"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"Pokazuj nadal"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"Minimalizuj"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Nadal pokazywać powiadomienia z tej aplikacji?"</string>

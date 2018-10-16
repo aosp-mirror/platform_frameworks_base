@@ -160,7 +160,7 @@
     <string name="data_connection_roaming" msgid="6037232010953697354">"Rouming"</string>
     <string name="data_connection_edge" msgid="871835227939216682">"EDGE"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
-    <string name="accessibility_no_sim" msgid="8274017118472455155">"SIM karta yo‘q."</string>
+    <string name="accessibility_no_sim" msgid="8274017118472455155">"SIM karta solinmagan."</string>
     <string name="accessibility_cell_data" msgid="5326139158682385073">"Mobil internet"</string>
     <string name="accessibility_cell_data_on" msgid="5927098403452994422">"Mobil internet yoniq"</string>
     <string name="cell_data_off_content_description" msgid="4356113230238585072">"Mobil internet yoqilmagan"</string>

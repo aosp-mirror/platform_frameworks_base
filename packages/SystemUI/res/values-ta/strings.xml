@@ -344,9 +344,9 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"<xliff:g id="DATA_LIMIT">%s</xliff:g> வரம்பு"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"<xliff:g id="DATA_LIMIT">%s</xliff:g> எச்சரிக்கை"</string>
     <string name="quick_settings_work_mode_label" msgid="7608026833638817218">"பணி விவரம்"</string>
-    <string name="quick_settings_night_display_label" msgid="3577098011487644395">"இரவு ஒளி"</string>
+    <string name="quick_settings_night_display_label" msgid="3577098011487644395">"நைட் லைட்"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="8483259341596943314">"மாலையில் ஆன் செய்"</string>
-    <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"சூரிய உதயம் வரை"</string>
+    <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"காலை வரை"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"<xliff:g id="TIME">%s</xliff:g>க்கு ஆன் செய்"</string>
     <string name="quick_settings_secondary_label_until" msgid="2749196569462600150">"<xliff:g id="TIME">%s</xliff:g> வரை"</string>
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
