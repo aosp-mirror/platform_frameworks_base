@@ -21,6 +21,7 @@ import java.util.concurrent.ConcurrentLinkedQueue;
 /**
  * A Task load queue
  */
+@Deprecated
 class TaskResourceLoadQueue {
 
     private final ConcurrentLinkedQueue<Task> mQueue = new ConcurrentLinkedQueue<>();

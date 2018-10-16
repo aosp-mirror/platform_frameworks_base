@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 The Android Open Source Project
+ * Copyright (C) 2018 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,15 +14,19 @@
  * limitations under the License
  */
 
-package com.android.systemui.shared.recents.model;
+package com.android.systemui.shared.system;
 
-import android.util.SparseArray;
+import android.app.KeyguardManager;
+import android.content.Context;
 
-/**
- * An interface for a task filter to query whether a particular task should show in a stack.
- */
-@Deprecated
-public interface TaskFilter {
-    /** Returns whether the filter accepts the specified task */
-    boolean acceptTask(SparseArray<Task> taskIdMap, Task t, int index);
+public class KeyguardManagerCompat {
+    private final KeyguardManager mKeyguardManager;
+
+    public KeyguardManagerCompat(Context context) {
+        mKeyguardManager = (KeyguardManager) context.getSystemService(Context.KEYGUARD_SERVICE);
+    }
+
+    public boolean isDeviceLocked(int userId) {
+        return mKeyguardManager.isDeviceLocked(userId);
+    }
 }

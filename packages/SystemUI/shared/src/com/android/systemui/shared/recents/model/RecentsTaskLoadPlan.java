@@ -45,6 +45,7 @@ import java.util.List;
  *   3) executePlan() will actually load and fill in the icons and thumbnails according to the load
  *      options specified, such that we can transition into the Recents activity seamlessly
  */
+@Deprecated
 public class RecentsTaskLoadPlan {
 
     /** The set of conditions to preload tasks. */

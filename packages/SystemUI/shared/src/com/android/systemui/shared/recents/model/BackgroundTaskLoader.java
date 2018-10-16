@@ -27,6 +27,7 @@ import com.android.systemui.shared.system.ActivityManagerWrapper;
 /**
  * Background task resource loader
  */
+@Deprecated
 class BackgroundTaskLoader implements Runnable {
     static String TAG = "BackgroundTaskLoader";
     static boolean DEBUG = false;
