@@ -232,9 +232,7 @@ public class MeasuredText {
          * @throws IllegalStateException if this Builder is reused.
          */
         public MeasuredText build() {
-            if (mNativePtr == 0) {
-                throw new IllegalStateException("Builder can not be reused.");
-            }
+            ensureNativePtrNoReuse();
             try {
                 long ptr = nBuildMeasuredText(mNativePtr, mText, mComputeHyphenation,
                         mComputeLayout);
@@ -244,6 +242,18 @@ public class MeasuredText {
             } finally {
                 nFreeBuilder(mNativePtr);
                 mNativePtr = 0;
+            }
+        }
+
+        /**
+         * Ensures {@link #mNativePtr} is not reused.
+         *
+         * <p/> This is a method by itself to help increase testability - eg. Robolectric might want
+         * to override the validation behavior in test environment.
+         */
+        private void ensureNativePtrNoReuse() {
+            if (mNativePtr == 0) {
+                throw new IllegalStateException("Builder can not be reused.");
             }
         }
 
