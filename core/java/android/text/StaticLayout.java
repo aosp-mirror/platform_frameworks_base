@@ -777,7 +777,7 @@ public class StaticLayout extends Layout {
                         width += lineWidths[i];
                     } else {
                         for (int j = (i == 0 ? 0 : breaks[i - 1]); j < breaks[i]; j++) {
-                            width += measuredPara.getCharWidthAt(j - paraStart);
+                            width += measuredPara.getCharWidthAt(j);
                         }
                     }
                     hasTab |= hasTabs[i];
