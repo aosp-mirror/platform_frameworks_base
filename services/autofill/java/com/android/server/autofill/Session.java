@@ -92,6 +92,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.ArrayUtils;
+import com.android.server.AbstractRemoteService;
 import com.android.server.autofill.ui.AutoFillUI;
 import com.android.server.autofill.ui.PendingUi;
 
@@ -901,9 +902,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 this, authenticationId, intent, fillInIntent));
     }
 
-    // FillServiceCallbacks
+    // VultureCallback
     @Override
-    public void onServiceDied(RemoteFillService service) {
+    public void onServiceDied(AbstractRemoteService service) {
         Slog.w(TAG, "removing session because service died");
         forceRemoveSelfLocked();
     }
