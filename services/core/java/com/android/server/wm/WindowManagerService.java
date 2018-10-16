@@ -7201,16 +7201,20 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         @Override
-        public boolean isInputMethodClientFocus(int uid, int pid) {
+        public boolean isInputMethodClientFocus(int uid, int pid, int displayId) {
+            if (displayId == Display.INVALID_DISPLAY) {
+                return false;
+            }
             synchronized (mWindowMap) {
-                // Check all displays if any input method window has focus.
-                for (int i = mRoot.mChildren.size() - 1; i >= 0; --i) {
-                    final DisplayContent displayContent = mRoot.mChildren.get(i);
-                    if (displayContent.isInputMethodClientFocus(uid, pid)) {
-                        return true;
-                    }
+                final DisplayContent displayContent = mRoot.getTopFocusedDisplayContent();
+                if (displayContent == null
+                        || displayContent.getDisplayId() != displayId
+                        || !displayContent.hasAccess(uid)) {
+                    return false;
                 }
-
+                if (displayContent.isInputMethodClientFocus(uid, pid)) {
+                    return true;
+                }
                 // Okay, how about this...  what is the current focus?
                 // It seems in some cases we may not have moved the IM
                 // target window, such as when it was in a pop-up window,
@@ -7219,13 +7223,27 @@ public class WindowManagerService extends IWindowManager.Stub
                 // press home.  Sometimes the IME won't go down.)
                 // Would be nice to fix this more correctly, but it's
                 // way at the end of a release, and this should be good enough.
-                final WindowState currentFocus = mRoot.getTopFocusedDisplayContent().mCurrentFocus;
+                final WindowState currentFocus = displayContent.mCurrentFocus;
                 if (currentFocus != null && currentFocus.mSession.mUid == uid
                         && currentFocus.mSession.mPid == pid) {
                     return true;
                 }
             }
             return false;
+        }
+
+        @Override
+        public boolean isUidAllowedOnDisplay(int displayId, int uid) {
+            if (displayId == Display.DEFAULT_DISPLAY) {
+                return true;
+            }
+            if (displayId == Display.INVALID_DISPLAY) {
+                return false;
+            }
+            synchronized (mWindowMap) {
+                final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
+                return displayContent != null && displayContent.hasAccess(uid);
+            }
         }
 
         @Override
