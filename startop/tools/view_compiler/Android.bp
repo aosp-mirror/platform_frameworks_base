@@ -14,19 +14,30 @@
 // limitations under the License.
 //
 
+cc_defaults {
+    name: "viewcompiler_defaults",
+    shared_libs: [
+        "libdexfile",
+        "slicer",
+    ],
+}
+
 cc_library_host_static {
     name: "libviewcompiler",
+    defaults: ["viewcompiler_defaults"],
     srcs: [
+        "dex_builder.cc",
         "java_lang_builder.cc",
         "util.cc",
     ],
     static_libs: [
-        "libbase"
-    ]
+        "libbase",
+    ],
 }
 
 cc_binary_host {
     name: "viewcompiler",
+    defaults: ["viewcompiler_defaults"],
     srcs: [
         "main.cc",
     ],
@@ -40,10 +51,12 @@ cc_binary_host {
 
 cc_test_host {
     name: "view-compiler-tests",
+    defaults: ["viewcompiler_defaults"],
     srcs: [
+        "dex_builder_test.cc",
         "util_test.cc",
     ],
     static_libs: [
         "libviewcompiler",
-    ]
+    ],
 }
