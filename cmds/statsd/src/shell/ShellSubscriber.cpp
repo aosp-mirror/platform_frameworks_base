@@ -18,15 +18,17 @@
 
 #include "ShellSubscriber.h"
 
-#include "matchers/matcher_util.h"
-
 #include <android-base/file.h>
+#include "matchers/matcher_util.h"
+#include "stats_log_util.h"
 
 using android::util::ProtoOutputStream;
 
 namespace android {
 namespace os {
 namespace statsd {
+
+const static int FIELD_ID_ATOM = 1;
 
 void ShellSubscriber::startNewSubscription(int in, int out, sp<IResultReceiver> resultReceiver) {
     VLOG("start new shell subscription");
@@ -42,24 +44,105 @@ void ShellSubscriber::startNewSubscription(int in, int out, sp<IResultReceiver> 
         IInterface::asBinder(mResultReceiver)->linkToDeath(this);
     }
 
-    // Spawn another thread to read the config updates from the input file descriptor
-    std::thread reader([in, this] { readConfig(in); });
-    reader.detach();
+    // Note that the following is blocking, and it's intended as we cannot return until the shell
+    // cmd exits, otherwise all resources & FDs will be automatically closed.
 
+    // Read config forever until EOF is reached. Clients may send multiple configs -- each new
+    // config replace the previous one.
+    readConfig(in);
+
+    // Now we have read an EOF we now wait for the semaphore until the client exits.
+    VLOG("Now wait for client to exit");
     std::unique_lock<std::mutex> lk(mMutex);
-
     mShellDied.wait(lk, [this, resultReceiver] { return mResultReceiver != resultReceiver; });
-    if (reader.joinable()) {
-        reader.join();
-    }
 }
 
 void ShellSubscriber::updateConfig(const ShellSubscription& config) {
     std::lock_guard<std::mutex> lock(mMutex);
     mPushedMatchers.clear();
+    mPulledInfo.clear();
+
     for (const auto& pushed : config.pushed()) {
         mPushedMatchers.push_back(pushed);
         VLOG("adding matcher for atom %d", pushed.atom_id());
+    }
+
+    int64_t token = getElapsedRealtimeNs();
+    mPullToken = token;
+
+    int64_t minInterval = -1;
+    for (const auto& pulled : config.pulled()) {
+        // All intervals need to be multiples of the min interval.
+        if (minInterval < 0 || pulled.freq_millis() < minInterval) {
+            minInterval = pulled.freq_millis();
+        }
+
+        mPulledInfo.emplace_back(pulled.matcher(), pulled.freq_millis());
+        VLOG("adding matcher for pulled atom %d", pulled.matcher().atom_id());
+    }
+
+    if (mPulledInfo.size() > 0 && minInterval > 0) {
+        // This thread is guaranteed to terminate after it detects the token is different or
+        // cleaned up.
+        std::thread puller([token, minInterval, this] { startPull(token, minInterval); });
+        puller.detach();
+    }
+}
+
+void ShellSubscriber::writeToOutputLocked(const vector<std::shared_ptr<LogEvent>>& data,
+                                          const SimpleAtomMatcher& matcher) {
+    if (mOutput == 0) return;
+    int count = 0;
+    mProto.clear();
+    for (const auto& event : data) {
+        VLOG("%s", event->ToString().c_str());
+        if (matchesSimple(*mUidMap, matcher, *event)) {
+            VLOG("matched");
+            count++;
+            uint64_t atomToken = mProto.start(util::FIELD_TYPE_MESSAGE |
+                                              util::FIELD_COUNT_REPEATED | FIELD_ID_ATOM);
+            event->ToProto(mProto);
+            mProto.end(atomToken);
+        }
+    }
+
+    if (count > 0) {
+        // First write the payload size.
+        size_t bufferSize = mProto.size();
+        write(mOutput, &bufferSize, sizeof(bufferSize));
+        VLOG("%d atoms, proto size: %zu", count, bufferSize);
+        // Then write the payload.
+        mProto.flush(mOutput);
+    }
+    mProto.clear();
+}
+
+void ShellSubscriber::startPull(int64_t token, int64_t intervalMillis) {
+    while (1) {
+        int64_t nowMillis = getElapsedRealtimeMillis();
+        {
+            std::lock_guard<std::mutex> lock(mMutex);
+            if (mPulledInfo.size() == 0 || mPullToken != token) {
+                VLOG("Pulling thread %lld done!", (long long)token);
+                return;
+            }
+            for (auto& pullInfo : mPulledInfo) {
+                if (pullInfo.mPrevPullElapsedRealtimeMs + pullInfo.mInterval < nowMillis) {
+                    VLOG("pull atom %d now", pullInfo.mPullerMatcher.atom_id());
+
+                    vector<std::shared_ptr<LogEvent>> data;
+                    mPullerMgr->Pull(pullInfo.mPullerMatcher.atom_id(), nowMillis * 1000000L,
+                                     &data);
+                    VLOG("pulled %zu atoms", data.size());
+                    if (data.size() > 0) {
+                        writeToOutputLocked(data, pullInfo.mPullerMatcher);
+                    }
+                    pullInfo.mPrevPullElapsedRealtimeMs = nowMillis;
+                }
+            }
+        }
+        VLOG("Pulling thread %lld sleep....", (long long)token);
+        std::this_thread::sleep_for(std::chrono::milliseconds(intervalMillis));
     }
 }
 
@@ -101,6 +184,8 @@ void ShellSubscriber::cleanUpLocked() {
     mOutput = 0;
     mResultReceiver = nullptr;
     mPushedMatchers.clear();
+    mPulledInfo.clear();
+    mPullToken = 0;
     VLOG("done clean up");
 }
 
@@ -110,10 +195,13 @@ void ShellSubscriber::onLogEvent(const LogEvent& event) {
     if (mOutput <= 0) {
         return;
     }
-
     for (const auto& matcher : mPushedMatchers) {
         if (matchesSimple(*mUidMap, matcher, event)) {
+            VLOG("%s", event.ToString().c_str());
+            uint64_t atomToken = mProto.start(util::FIELD_TYPE_MESSAGE |
+                                              util::FIELD_COUNT_REPEATED | FIELD_ID_ATOM);
             event.ToProto(mProto);
+            mProto.end(atomToken);
             // First write the payload size.
             size_t bufferSize = mProto.size();
             write(mOutput, &bufferSize, sizeof(bufferSize));

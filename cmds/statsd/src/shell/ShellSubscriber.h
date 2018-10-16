@@ -24,6 +24,7 @@
 #include <mutex>
 #include <string>
 #include <thread>
+#include "external/StatsPullerManager.h"
 #include "frameworks/base/cmds/statsd/src/shell/shell_config.pb.h"
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
 #include "packages/UidMap.h"
@@ -51,14 +52,15 @@ namespace statsd {
  * with sizeof(size_t) bytes indicating the size of the proto message payload.
  *
  * The stream would be in the following format:
- * |size_t|atom1 proto|size_t|atom2 proto|....
+ * |size_t|shellData proto|size_t|shellData proto|....
  *
  * Only one shell subscriber allowed at a time, because each shell subscriber blocks one thread
  * until it exits.
  */
 class ShellSubscriber : public virtual IBinder::DeathRecipient {
 public:
-    ShellSubscriber(sp<UidMap> uidMap) : mUidMap(uidMap){};
+    ShellSubscriber(sp<UidMap> uidMap, sp<StatsPullerManager> pullerMgr)
+        : mUidMap(uidMap), mPullerMgr(pullerMgr){};
 
     /**
      * Start a new subscription.
@@ -70,15 +72,28 @@ public:
     void onLogEvent(const LogEvent& event);
 
 private:
+    struct PullInfo {
+        PullInfo(const SimpleAtomMatcher& matcher, int64_t interval)
+            : mPullerMatcher(matcher), mInterval(interval), mPrevPullElapsedRealtimeMs(0) {
+        }
+        SimpleAtomMatcher mPullerMatcher;
+        int64_t mInterval;
+        int64_t mPrevPullElapsedRealtimeMs;
+    };
     void readConfig(int in);
 
     void updateConfig(const ShellSubscription& config);
 
+    void startPull(int64_t token, int64_t intervalMillis);
+
     void cleanUpLocked();
+
+    void writeToOutputLocked(const vector<std::shared_ptr<LogEvent>>& data,
+                             const SimpleAtomMatcher& matcher);
 
     sp<UidMap> mUidMap;
 
-    // bool mWritten = false;
+    sp<StatsPullerManager> mPullerMgr;
 
     android::util::ProtoOutputStream mProto;
 
@@ -93,6 +108,10 @@ private:
     sp<IResultReceiver> mResultReceiver;
 
     std::vector<SimpleAtomMatcher> mPushedMatchers;
+
+    std::vector<PullInfo> mPulledInfo;
+
+    int64_t mPullToken = 0;  // A unique token to identify a puller thread.
 };
 
 }  // namespace statsd

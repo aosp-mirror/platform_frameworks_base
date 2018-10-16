@@ -18,19 +18,12 @@ syntax = "proto2";
 
 package android.os.statsd;
 
-option java_package = "com.android.os";
-option java_outer_classname = "ShellConfig";
+option java_package = "com.android.os.statsd";
+option java_outer_classname = "ShellDataProto";
 
-import "frameworks/base/cmds/statsd/src/statsd_config.proto";
+import "frameworks/base/cmds/statsd/src/atoms.proto";
 
-message PulledAtomSubscription {
-    optional SimpleAtomMatcher matcher = 1;
-
-    /* gap between two pulls in milliseconds */
-    optional int32 freq_millis = 2;
-}
-
-message ShellSubscription {
-    repeated SimpleAtomMatcher pushed = 1;
-    repeated PulledAtomSubscription pulled = 2;
+// The output of shell subscription, including both pulled and pushed subscriptions.
+message ShellData {
+    repeated Atom atom = 1;
 }
