@@ -290,7 +290,7 @@
     <string name="permgrouprequest_sms" msgid="7168124215838204719">"Разрешить приложению &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; отправлять и просматривать SMS?"</string>
     <string name="permgrouplab_storage" msgid="1971118770546336966">"Хранилище"</string>
     <string name="permgroupdesc_storage" msgid="637758554581589203">"доступ к фото, мультимедиа и файлам на вашем устройстве"</string>
-    <string name="permgrouprequest_storage" msgid="7885942926944299560">"Разрешить приложению &lt;b&gt;\"<xliff:g id="APP_NAME">%1$s</xliff:g>\"&lt;/b&gt; доступ к фото, мультимедиа и файлам на устройстве?"</string>
+    <string name="permgrouprequest_storage" msgid="7885942926944299560">"Разрешить приложению &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; доступ к фото, мультимедиа и файлам на устройстве?"</string>
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Микрофон"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"записывать аудио"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"Разрешить приложению &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; записывать аудио?"</string>
@@ -305,7 +305,7 @@
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"Разрешить приложению &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; совершать звонки и управлять ими?"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Нательные датчики"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"доступ к данным датчиков о состоянии организма"</string>
-    <string name="permgrouprequest_sensors" msgid="6349806962814556786">"Разрешить приложению &lt;b&gt;\"<xliff:g id="APP_NAME">%1$s</xliff:g>\"&lt;/b&gt; доступ к данным датчиков о состоянии организма?"</string>
+    <string name="permgrouprequest_sensors" msgid="6349806962814556786">"Разрешить приложению &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; доступ к данным датчиков о состоянии организма?"</string>
     <string name="capability_title_canRetrieveWindowContent" msgid="3901717936930170320">"Получать содержимое окна"</string>
     <string name="capability_desc_canRetrieveWindowContent" msgid="3772225008605310672">"Анализировать содержимое активного окна."</string>
     <string name="capability_title_canRequestTouchExploration" msgid="3108723364676667320">"Включать Изучение касанием"</string>

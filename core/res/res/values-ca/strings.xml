@@ -216,7 +216,7 @@
     <string name="global_actions" product="default" msgid="2406416831541615258">"Opcions del telèfon"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Bloqueig de pantalla"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Apaga"</string>
-    <string name="global_action_emergency" msgid="7112311161137421166">"Emergències"</string>
+    <string name="global_action_emergency" msgid="7112311161137421166">"Emergència"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Informe d\'error"</string>
     <string name="global_action_logout" msgid="935179188218826050">"Finalitza la sessió"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"Captura de pantalla"</string>
@@ -295,7 +295,7 @@
     <string name="permgroupdesc_calllog" msgid="3006237336748283775">"llegir i editar el registre de trucades del telèfon"</string>
     <string name="permgrouprequest_calllog" msgid="8487355309583773267">"Vols permetre que &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; accedeixi als registres de trucades del telèfon?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"Telèfon"</string>
-    <string name="permgroupdesc_phone" msgid="6234224354060641055">"fer i gestionar trucades telefòniques"</string>
+    <string name="permgroupdesc_phone" msgid="6234224354060641055">"fer i gestionar trucades"</string>
     <string name="permgrouprequest_phone" msgid="9166979577750581037">"Vols permetre que &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; faci trucades i les gestioni?"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"Sensors corporals"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"accedir a les dades del sensor sobre els signes vitals"</string>
@@ -750,8 +750,8 @@
     <string name="lockscreen_missing_sim_instructions_long" msgid="3526573099019319472">"Falta la targeta SIM o no es pot llegir. Insereix-ne una."</string>
     <string name="lockscreen_permanent_disabled_sim_message_short" msgid="5096149665138916184">"Targeta SIM no utilitzable."</string>
     <string name="lockscreen_permanent_disabled_sim_instructions" msgid="910904643433151371">"La targeta SIM està desactivada permanentment.\n Contacta amb el teu proveïdor de serveis sense fil per obtenir-ne una altra."</string>
-    <string name="lockscreen_transport_prev_description" msgid="6300840251218161534">"Ruta anterior"</string>
-    <string name="lockscreen_transport_next_description" msgid="573285210424377338">"Ruta següent"</string>
+    <string name="lockscreen_transport_prev_description" msgid="6300840251218161534">"Pista anterior"</string>
+    <string name="lockscreen_transport_next_description" msgid="573285210424377338">"Pista següent"</string>
     <string name="lockscreen_transport_pause_description" msgid="3980308465056173363">"Posa en pausa"</string>
     <string name="lockscreen_transport_play_description" msgid="1901258823643886401">"Reprodueix"</string>
     <string name="lockscreen_transport_stop_description" msgid="5907083260651210034">"Atura"</string>
@@ -1067,7 +1067,7 @@
     <string name="alwaysUse" msgid="4583018368000610438">"Utilitza-ho de manera predeterminada per a aquesta acció."</string>
     <string name="use_a_different_app" msgid="8134926230585710243">"Fes servir una altra aplicació"</string>
     <string name="clearDefaultHintMsg" msgid="3252584689512077257">"Esborra els paràmetres predeterminats a Configuració del sistema &gt; Aplicacions &gt; Baixades."</string>
-    <string name="chooseActivity" msgid="7486876147751803333">"Tria una acció"</string>
+    <string name="chooseActivity" msgid="7486876147751803333">"Selecciona una acció"</string>
     <string name="chooseUsbActivity" msgid="6894748416073583509">"Tria una aplicació per al dispositiu USB"</string>
     <string name="noApplications" msgid="2991814273936504689">"No hi ha cap aplicació que pugui dur a terme aquesta acció."</string>
     <string name="aerr_application" msgid="250320989337856518">"S\'ha aturat <xliff:g id="APPLICATION">%1$s</xliff:g>"</string>
@@ -1256,9 +1256,9 @@
     <string name="usb_power_notification_message" msgid="4647527153291917218">"S\'està carregant el dispositiu connectat. Toca per veure més opcions."</string>
     <string name="usb_unsupported_audio_accessory_title" msgid="3529881374464628084">"S\'ha detectat un accessori d\'àudio analògic"</string>
     <string name="usb_unsupported_audio_accessory_message" msgid="6309553946441565215">"El dispositiu connectat no és compatible amb aquest telèfon. Toca per obtenir més informació."</string>
-    <string name="adb_active_notification_title" msgid="6729044778949189918">"Depuració USB activada"</string>
-    <string name="adb_active_notification_message" msgid="7463062450474107752">"Toca per desactivar la depuració USB"</string>
-    <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Selecciona per desactivar la depuració USB"</string>
+    <string name="adb_active_notification_title" msgid="6729044778949189918">"Depuració per USB activada"</string>
+    <string name="adb_active_notification_message" msgid="7463062450474107752">"Toca per desactivar la depuració per USB"</string>
+    <string name="adb_active_notification_message" product="tv" msgid="8470296818270110396">"Selecciona per desactivar la depuració per USB"</string>
     <string name="taking_remote_bugreport_notification_title" msgid="6742483073875060934">"S\'està creant l\'informe d\'errors…"</string>
     <string name="share_remote_bugreport_notification_title" msgid="4987095013583691873">"Vols compartir l\'informe d\'errors?"</string>
     <string name="sharing_remote_bugreport_notification_title" msgid="7572089031496651372">"S\'està compartint l\'informe d\'errors…"</string>
