@@ -4912,6 +4912,34 @@ public class NotificationStackScrollLayout extends ViewGroup
                 mMaxTopPadding,
                 mShouldShowShelfOnly ? "T" : "f",
                 mQsExpansionFraction));
+        int childCount = getChildCount();
+        pw.println("  Number of children: " + childCount);
+        pw.println();
+
+        for (int i = 0; i < childCount; i++) {
+            ExpandableView child = (ExpandableView) getChildAt(i);
+            child.dump(fd, pw, args);
+            if (!(child instanceof ExpandableNotificationRow)) {
+                pw.println("  " + child.getClass().getSimpleName());
+                // Notifications dump it's viewstate as part of their dump to support children
+                ExpandableViewState viewState = mCurrentStackScrollState.getViewStateForView(
+                        child);
+                if (viewState == null) {
+                    pw.println("    no viewState!!!");
+                } else {
+                    pw.print("    ");
+                    viewState.dump(fd, pw, args);
+                    pw.println();
+                    pw.println();
+                }
+            }
+        }
+        pw.println("  Transient Views: " + childCount);
+        int transientViewCount = getTransientViewCount();
+        for (int i = 0; i < transientViewCount; i++) {
+            ExpandableView child = (ExpandableView) getTransientView(i);
+            child.dump(fd, pw, args);
+        }
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
