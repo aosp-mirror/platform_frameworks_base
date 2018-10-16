@@ -209,7 +209,7 @@
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"Təyyarə rejimi deaktiv edildi."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Təyyarə rejimi aktiv edildi."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="2960643943620637020">"tam sakitlik"</string>
-    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3357131899365865386">"yalnız siqnallar"</string>
+    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3357131899365865386">"yalnız alarmlar"</string>
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"Narahat etməyin."</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"\"Narahat etməyin\" qeyri-aktivdir."</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"\"Narahat etməyin\" aktivdir."</string>
