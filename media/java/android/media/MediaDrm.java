@@ -547,6 +547,13 @@ public final class MediaDrm implements AutoCloseable {
          */
         public static final int STATUS_INTERNAL_ERROR = 4;
 
+        /**
+         * The key is not yet usable to decrypt media because the start
+         * time is in the future. The key will become usable when
+         * its start time is reached.
+         */
+        public static final int STATUS_USABLE_IN_FUTURE = 5;
+
         /** @hide */
         @IntDef({
             STATUS_USABLE,
@@ -554,6 +561,7 @@ public final class MediaDrm implements AutoCloseable {
             STATUS_OUTPUT_NOT_ALLOWED,
             STATUS_PENDING,
             STATUS_INTERNAL_ERROR,
+            STATUS_USABLE_IN_FUTURE,
         })
         @Retention(RetentionPolicy.SOURCE)
         public @interface KeyStatusCode {}
