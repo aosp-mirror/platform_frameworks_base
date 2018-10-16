@@ -81,8 +81,8 @@ import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_USER_
 import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_VISIBILITY;
 import static com.android.server.am.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.am.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
-import static com.android.server.am.ActivityRecord.RELAUNCH_REASON_FREE_RESIZE;
-import static com.android.server.am.ActivityRecord.RELAUNCH_REASON_WINDOWING_MODE_RESIZE;
+import static com.android.server.am.ActivityTaskManagerService.RELAUNCH_REASON_FREE_RESIZE;
+import static com.android.server.am.ActivityTaskManagerService.RELAUNCH_REASON_WINDOWING_MODE_RESIZE;
 import static com.android.server.am.ActivityStack.ActivityState.DESTROYED;
 import static com.android.server.am.ActivityStack.ActivityState.DESTROYING;
 import static com.android.server.am.ActivityStack.ActivityState.FINISHING;

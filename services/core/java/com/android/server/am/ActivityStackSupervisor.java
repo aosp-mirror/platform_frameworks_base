@@ -75,7 +75,7 @@ import static com.android.server.am.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.am.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.ActivityTaskManagerService.ANIMATE;
 import static com.android.server.am.ActivityTaskManagerService.H.FIRST_SUPERVISOR_STACK_MSG;
-import static com.android.server.am.ActivityRecord.RELAUNCH_REASON_NONE;
+import static com.android.server.am.ActivityTaskManagerService.RELAUNCH_REASON_NONE;
 import static com.android.server.am.ActivityStack.ActivityState.DESTROYED;
 import static com.android.server.am.ActivityStack.ActivityState.INITIALIZING;
 import static com.android.server.am.ActivityStack.ActivityState.PAUSED;
@@ -2258,9 +2258,9 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
      * Finish the topmost activities in all stacks that belong to the crashed app.
      * @param app The app that crashed.
      * @param reason Reason to perform this action.
-     * @return The task that was finished in this stack, {@code null} if haven't found any.
+     * @return The task id that was finished in this stack, or INVALID_TASK_ID if none was finished.
      */
-    TaskRecord finishTopCrashedActivitiesLocked(WindowProcessController app, String reason) {
+    int finishTopCrashedActivitiesLocked(WindowProcessController app, String reason) {
         TaskRecord finishedTask = null;
         ActivityStack focusedStack = getTopDisplayFocusedStack();
         for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
@@ -2275,7 +2275,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 }
             }
         }
-        return finishedTask;
+        return finishedTask != null ? finishedTask.taskId : INVALID_TASK_ID;
     }
 
     void finishVoiceTask(IVoiceInteractionSession session) {

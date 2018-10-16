@@ -277,7 +277,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Predicate;
 
 /**
  * System service for managing activities and their containers (task, stacks, displays,... ).
@@ -314,7 +313,15 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     public static final String DUMP_RECENTS_CMD = "recents" ;
     public static final String DUMP_RECENTS_SHORT_CMD = "r" ;
 
+    /** This activity is not being relaunched, or being relaunched for a non-resize reason. */
+    public static final int RELAUNCH_REASON_NONE = 0;
+    /** This activity is being relaunched due to windowing mode change. */
+    public static final int RELAUNCH_REASON_WINDOWING_MODE_RESIZE = 1;
+    /** This activity is being relaunched due to a free-resize operation. */
+    public static final int RELAUNCH_REASON_FREE_RESIZE = 2;
+
     Context mContext;
+
     /**
      * This Context is themable and meant for UI display (AlertDialogs, etc.). The theme can
      * change at runtime. Use mContext for non-UI purposes.
@@ -1362,7 +1369,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                         Slog.i(TAG, "Removing task failed to finish activity");
                     }
                     // Explicitly dismissing the activity so reset its relaunch flag.
-                    r.mRelaunchReason = ActivityRecord.RELAUNCH_REASON_NONE;
+                    r.mRelaunchReason = RELAUNCH_REASON_NONE;
                 } else {
                     res = tr.getStack().requestFinishActivityLocked(token, resultCode,
                             resultData, "app-request", true);
@@ -4325,6 +4332,17 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
     }
 
+    public static String relaunchReasonToString(int relaunchReason) {
+        switch (relaunchReason) {
+            case RELAUNCH_REASON_WINDOWING_MODE_RESIZE:
+                return "window_resize";
+            case RELAUNCH_REASON_FREE_RESIZE:
+                return "free_resize";
+            default:
+                return null;
+        }
+    }
+
     ActivityStack getTopDisplayFocusedStack() {
         return mStackSupervisor.getTopDisplayFocusedStack();
     }
@@ -6640,6 +6658,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         public void onHandleAppCrash(WindowProcessController wpc) {
             synchronized (mGlobalLock) {
                 mStackSupervisor.handleAppCrashLocked(wpc);
+            }
+        }
+
+        @Override
+        public int finishTopCrashedActivities(WindowProcessController crashedApp, String reason) {
+            synchronized (mGlobalLock) {
+                return mStackSupervisor.finishTopCrashedActivitiesLocked(crashedApp, reason);
             }
         }
     }
