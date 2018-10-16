@@ -1806,6 +1806,7 @@ public abstract class Layout {
         }
 
     }
+
     /**
      * Fills in the specified Path with a representation of a cursor
      * at the specified offset.  This will often be a vertical line
@@ -1821,7 +1822,6 @@ public abstract class Layout {
 
         boolean clamped = shouldClampCursor(line);
         float h1 = getPrimaryHorizontal(point, clamped) - 0.5f;
-        float h2 = isLevelBoundary(point) ? getSecondaryHorizontal(point, clamped) - 0.5f : h1;
 
         int caps = TextKeyListener.getMetaState(editingBuffer, TextKeyListener.META_SHIFT_ON) |
                    TextKeyListener.getMetaState(editingBuffer, TextKeyListener.META_SELECTING);
@@ -1839,34 +1839,24 @@ public abstract class Layout {
 
         if (h1 < 0.5f)
             h1 = 0.5f;
-        if (h2 < 0.5f)
-            h2 = 0.5f;
 
-        if (Float.compare(h1, h2) == 0) {
-            dest.moveTo(h1, top);
-            dest.lineTo(h1, bottom);
-        } else {
-            dest.moveTo(h1, top);
-            dest.lineTo(h1, (top + bottom) >> 1);
-
-            dest.moveTo(h2, (top + bottom) >> 1);
-            dest.lineTo(h2, bottom);
-        }
+        dest.moveTo(h1, top);
+        dest.lineTo(h1, bottom);
 
         if (caps == 2) {
-            dest.moveTo(h2, bottom);
-            dest.lineTo(h2 - dist, bottom + dist);
-            dest.lineTo(h2, bottom);
-            dest.lineTo(h2 + dist, bottom + dist);
+            dest.moveTo(h1, bottom);
+            dest.lineTo(h1 - dist, bottom + dist);
+            dest.lineTo(h1, bottom);
+            dest.lineTo(h1 + dist, bottom + dist);
         } else if (caps == 1) {
-            dest.moveTo(h2, bottom);
-            dest.lineTo(h2 - dist, bottom + dist);
+            dest.moveTo(h1, bottom);
+            dest.lineTo(h1 - dist, bottom + dist);
 
-            dest.moveTo(h2 - dist, bottom + dist - 0.5f);
-            dest.lineTo(h2 + dist, bottom + dist - 0.5f);
+            dest.moveTo(h1 - dist, bottom + dist - 0.5f);
+            dest.lineTo(h1 + dist, bottom + dist - 0.5f);
 
-            dest.moveTo(h2 + dist, bottom + dist);
-            dest.lineTo(h2, bottom);
+            dest.moveTo(h1 + dist, bottom + dist);
+            dest.lineTo(h1, bottom);
         }
 
         if (fn == 2) {
