@@ -16,12 +16,15 @@
 
 package com.android.server.location;
 
+import android.Manifest;
 import android.app.PendingIntent;
 import android.content.Context;
+import android.content.Intent;
 import android.hardware.contexthub.V1_0.ContextHubMsg;
 import android.hardware.contexthub.V1_0.IContexthub;
 import android.hardware.contexthub.V1_0.Result;
 import android.hardware.location.ContextHubInfo;
+import android.hardware.location.ContextHubManager;
 import android.hardware.location.ContextHubTransaction;
 import android.hardware.location.IContextHubClient;
 import android.hardware.location.IContextHubClientCallback;
@@ -29,6 +32,8 @@ import android.hardware.location.NanoAppMessage;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.Log;
+
+import java.util.function.Supplier;
 
 /**
  * A class that acts as a broker for the ContextHubClient, which handles messaging and life-cycle
@@ -291,6 +296,11 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
      */
     /* package */ void sendMessageToClient(NanoAppMessage message) {
         invokeCallback(callback -> callback.onMessageFromNanoApp(message));
+
+        Supplier<Intent> supplier =
+                () -> createIntent(ContextHubManager.EVENT_NANOAPP_MESSAGE, message.getNanoAppId())
+                        .putExtra(ContextHubManager.EXTRA_MESSAGE, message);
+        sendPendingIntent(supplier);
     }
 
     /**
@@ -300,6 +310,7 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
      */
     /* package */ void onNanoAppLoaded(long nanoAppId) {
         invokeCallback(callback -> callback.onNanoAppLoaded(nanoAppId));
+        sendPendingIntent(() -> createIntent(ContextHubManager.EVENT_NANOAPP_LOADED, nanoAppId));
     }
 
     /**
@@ -309,6 +320,7 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
      */
     /* package */ void onNanoAppUnloaded(long nanoAppId) {
         invokeCallback(callback -> callback.onNanoAppUnloaded(nanoAppId));
+        sendPendingIntent(() -> createIntent(ContextHubManager.EVENT_NANOAPP_UNLOADED, nanoAppId));
     }
 
     /**
@@ -316,6 +328,7 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
      */
     /* package */ void onHubReset() {
         invokeCallback(callback -> callback.onHubReset());
+        sendPendingIntent(() -> createIntent(ContextHubManager.EVENT_HUB_RESET));
     }
 
     /**
@@ -326,6 +339,11 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
      */
     /* package */ void onNanoAppAborted(long nanoAppId, int abortCode) {
         invokeCallback(callback -> callback.onNanoAppAborted(nanoAppId, abortCode));
+
+        Supplier<Intent> supplier =
+                () -> createIntent(ContextHubManager.EVENT_NANOAPP_ABORTED, nanoAppId)
+                        .putExtra(ContextHubManager.EXTRA_NANOAPP_ABORT_CODE, abortCode);
+        sendPendingIntent(supplier);
     }
 
     /**
@@ -340,6 +358,55 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
             } catch (RemoteException e) {
                 Log.e(TAG, "RemoteException while invoking client callback (host endpoint ID = "
                         + mHostEndPointId + ")", e);
+            }
+        }
+    }
+
+    /**
+     * Creates an Intent object containing the ContextHubManager.EXTRA_EVENT_TYPE extra field
+     *
+     * @param eventType the ContextHubManager.Event type describing the event
+     * @return the Intent object
+     */
+    private Intent createIntent(int eventType) {
+        Intent intent = new Intent();
+        intent.putExtra(ContextHubManager.EXTRA_EVENT_TYPE, eventType);
+        intent.putExtra(ContextHubManager.EXTRA_CONTEXT_HUB_INFO, mAttachedContextHubInfo);
+        return intent;
+    }
+
+    /**
+     * Creates an Intent object containing the ContextHubManager.EXTRA_EVENT_TYPE and the
+     * ContextHubManager.EXTRA_NANOAPP_ID extra fields
+     *
+     * @param eventType the ContextHubManager.Event type describing the event
+     * @param nanoAppId the ID of the nanoapp this event is for
+     * @return the Intent object
+     */
+    private Intent createIntent(int eventType, long nanoAppId) {
+        Intent intent = createIntent(eventType);
+        intent.putExtra(ContextHubManager.EXTRA_NANOAPP_ID, nanoAppId);
+        return intent;
+    }
+
+    /**
+     * Sends an intent to any existing PendingIntent
+     *
+     * @param supplier method to create the extra Intent
+     */
+    private synchronized void sendPendingIntent(Supplier<Intent> supplier) {
+        if (mPendingIntentRequest.hasPendingIntent()) {
+            Intent intent = supplier.get();
+            try {
+                mPendingIntentRequest.getPendingIntent().send(
+                        mContext, 0 /* code */, intent, null /* onFinished */, null /* Handler */,
+                        Manifest.permission.LOCATION_HARDWARE /* requiredPermission */,
+                        null /* options */);
+            } catch (PendingIntent.CanceledException e) {
+                // The PendingIntent is no longer valid
+                Log.w(TAG, "PendingIntent has been canceled, unregistering from client"
+                        + " (host endpoint ID " + mHostEndPointId + ")");
+                mPendingIntentRequest.clear();
             }
         }
     }
