@@ -645,7 +645,7 @@ public class SettingsProviderTest extends BaseSettingsProviderTest {
                         return;
                     }
                     final long elapsedTimeMillis = SystemClock.uptimeMillis() - startTimeMillis;
-                    if (elapsedTimeMillis > WAIT_FOR_SETTING_URI_CHANGE_TIMEOUT_MILLIS) {
+                    if (elapsedTimeMillis >= WAIT_FOR_SETTING_URI_CHANGE_TIMEOUT_MILLIS) {
                         fail("Could not change setting for "
                                 + WAIT_FOR_SETTING_URI_CHANGE_TIMEOUT_MILLIS + " ms");
                     }
