@@ -126,9 +126,9 @@ public class ProxyTracker {
     public ProxyInfo getDefaultProxy() {
         // This information is already available as a world read/writable jvm property.
         synchronized (mProxyLock) {
-            final ProxyInfo ret = mGlobalProxy;
-            if ((ret == null) && mDefaultProxyEnabled) return mDefaultProxy;
-            return ret;
+            if (mGlobalProxy != null) return mGlobalProxy;
+            if (mDefaultProxyEnabled) return mDefaultProxy;
+            return null;
         }
     }
 
@@ -204,11 +204,10 @@ public class ProxyTracker {
      *
      * Confusingly this method also sets the PAC file URL. TODO : separate this, it has nothing
      * to do in a "sendProxyBroadcast" method.
-     * @param proxyInfo the proxy spec, or null for no proxy.
      */
-    // TODO : make the argument NonNull final and the method private
-    public void sendProxyBroadcast(@Nullable ProxyInfo proxyInfo) {
-        if (proxyInfo == null) proxyInfo = new ProxyInfo("", 0, "");
+    public void sendProxyBroadcast() {
+        final ProxyInfo defaultProxy = getDefaultProxy();
+        final ProxyInfo proxyInfo = null != defaultProxy ? defaultProxy : new ProxyInfo("", 0, "");
         if (mPacManager.setCurrentProxyScriptUrl(proxyInfo)) return;
         if (DBG) Slog.d(TAG, "sending Proxy Broadcast for " + proxyInfo);
         Intent intent = new Intent(Proxy.PROXY_CHANGE_ACTION);
@@ -269,7 +268,7 @@ public class ProxyTracker {
                 Binder.restoreCallingIdentity(token);
             }
 
-            sendProxyBroadcast(mGlobalProxy == null ? mDefaultProxy : proxyInfo);
+            sendProxyBroadcast();
         }
     }
 
@@ -296,14 +295,14 @@ public class ProxyTracker {
                     && (!Uri.EMPTY.equals(proxyInfo.getPacFileUrl()))
                     && proxyInfo.getPacFileUrl().equals(mGlobalProxy.getPacFileUrl())) {
                 mGlobalProxy = proxyInfo;
-                sendProxyBroadcast(mGlobalProxy);
+                sendProxyBroadcast();
                 return;
             }
             mDefaultProxy = proxyInfo;
 
             if (mGlobalProxy != null) return;
             if (mDefaultProxyEnabled) {
-                sendProxyBroadcast(proxyInfo);
+                sendProxyBroadcast();
             }
         }
     }
@@ -320,7 +319,7 @@ public class ProxyTracker {
             if (mDefaultProxyEnabled != enabled) {
                 mDefaultProxyEnabled = enabled;
                 if (mGlobalProxy == null && mDefaultProxy != null) {
-                    sendProxyBroadcast(enabled ? mDefaultProxy : null);
+                    sendProxyBroadcast();
                 }
             }
         }
