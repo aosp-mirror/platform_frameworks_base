@@ -18,11 +18,14 @@
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android"
             android:paddingMode="stack">
     <item>
-        <shape>
+        <shape
+            android:tint="?android:attr/colorForeground">
             <corners
                 android:radius="20dp"/>
+            <solid
+                android:color="@android:color/transparent"/>
             <stroke
-                android:color="?android:attr/textColorSecondary"
+                android:color="#1f000000"
                 android:width="1dp"/>
             <size
                 android:height="32dp"/>
