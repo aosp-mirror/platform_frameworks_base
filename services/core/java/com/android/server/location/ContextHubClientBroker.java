@@ -84,6 +84,74 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
         void accept(IContextHubClientCallback callback) throws RemoteException;
     }
 
+    /*
+     * The PendingIntent registered with this client.
+     */
+    private final PendingIntentRequest mPendingIntentRequest = new PendingIntentRequest();
+
+    /*
+     * Helper class to manage registered PendingIntent requests from the client.
+     */
+    private class PendingIntentRequest {
+        /*
+         * The PendingIntent object to request, null if there is no open request.
+         */
+        private PendingIntent mPendingIntent;
+
+        /*
+         * The ID of the nanoapp the request is for, invalid if there is no open request.
+         */
+        private long mNanoAppId;
+
+        PendingIntentRequest() {}
+
+        PendingIntentRequest(PendingIntent pendingIntent, long nanoAppId) {
+            mPendingIntent = pendingIntent;
+            mNanoAppId = nanoAppId;
+        }
+
+        public long getNanoAppId() {
+            return mNanoAppId;
+        }
+
+        public PendingIntent getPendingIntent() {
+            return mPendingIntent;
+        }
+
+        public boolean hasPendingIntent() {
+            return mPendingIntent != null;
+        }
+
+        public void clear() {
+            mPendingIntent = null;
+        }
+
+        public boolean register(PendingIntent pendingIntent, long nanoAppId) {
+            boolean success = false;
+            if (hasPendingIntent()) {
+                Log.e(TAG, "Failed to register PendingIntent: registered PendingIntent exists");
+            } else {
+                mNanoAppId = nanoAppId;
+                mPendingIntent = pendingIntent;
+                success = true;
+            }
+
+            return success;
+        }
+
+        public boolean unregister(PendingIntent pendingIntent) {
+            boolean success = false;
+            if (!hasPendingIntent() || !mPendingIntent.equals(pendingIntent)) {
+                Log.e(TAG, "Failed to unregister PendingIntent: PendingIntent is not registered");
+            } else {
+                mPendingIntent = null;
+                success = true;
+            }
+
+            return success;
+        }
+    }
+
     /* package */ ContextHubClientBroker(
             Context context, IContexthub contextHubProxy, ContextHubClientManager clientManager,
             ContextHubInfo contextHubInfo, short hostEndPointId,
@@ -150,8 +218,18 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
      */
     @Override
     public boolean registerIntent(PendingIntent pendingIntent, long nanoAppId) {
-        // TODO: Implement this
-        return false;
+        ContextHubServiceUtil.checkPermissions(mContext);
+
+        boolean success = false;
+        synchronized (this) {
+            if (mCallbackInterface == null) {
+                Log.e(TAG, "Failed to register PendingIntent: client connection is closed");
+            } else {
+                success = mPendingIntentRequest.register(pendingIntent, nanoAppId);
+            }
+        }
+
+        return success;
     }
 
     /**
@@ -160,8 +238,11 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
      */
     @Override
     public boolean unregisterIntent(PendingIntent pendingIntent) {
-        // TODO: Implement this
-        return false;
+        ContextHubServiceUtil.checkPermissions(mContext);
+
+        synchronized (this) {
+            return mPendingIntentRequest.unregister(pendingIntent);
+        }
     }
 
     /**
@@ -174,7 +255,7 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
                 mCallbackInterface.asBinder().unlinkToDeath(this, 0 /* flags */);
                 mCallbackInterface = null;
             }
-            if (mRegistered) {
+            if (!mPendingIntentRequest.hasPendingIntent() && mRegistered) {
                 mClientManager.unregisterClient(mHostEndPointId);
                 mRegistered = false;
             }
