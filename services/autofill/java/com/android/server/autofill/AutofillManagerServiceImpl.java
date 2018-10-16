@@ -185,23 +185,6 @@ final class AutofillManagerServiceImpl {
         updateLocked(disabled);
     }
 
-    @Nullable
-    CharSequence getServiceName() {
-        final String packageName = getServicePackageName();
-        if (packageName == null) {
-            return null;
-        }
-
-        try {
-            final PackageManager pm = mContext.getPackageManager();
-            final ApplicationInfo info = pm.getApplicationInfo(packageName, 0);
-            return pm.getApplicationLabel(info);
-        } catch (Exception e) {
-            Slog.e(TAG, "Could not get label for " + packageName + ": " + e);
-            return packageName;
-        }
-    }
-
     @GuardedBy("mLock")
     private int getServiceUidLocked() {
         if (mInfo == null) {
@@ -226,6 +209,7 @@ final class AutofillManagerServiceImpl {
         return null;
     }
 
+    @Nullable
     ComponentName getServiceComponentName() {
         synchronized (mLock) {
             if (mInfo == null) {
@@ -706,17 +690,27 @@ final class AutofillManagerServiceImpl {
         }
     }
 
-    @NonNull
-    CharSequence getServiceLabel() {
-        final CharSequence label = mInfo.getServiceInfo().loadSafeLabel(
+    /**
+     * Gets the user-visibile name of the service this service binds to, or {@code null} if the
+     * service is disabled.
+     */
+    @Nullable
+    @GuardedBy("mLock")
+    public CharSequence getServiceLabelLocked() {
+        return mInfo == null ? null : mInfo.getServiceInfo().loadSafeLabel(
                 mContext.getPackageManager(), 0 /* do not ellipsize */,
                 PackageItemInfo.SAFE_LABEL_FLAG_FIRST_LINE | PackageItemInfo.SAFE_LABEL_FLAG_TRIM);
-        return label;
     }
 
+    /**
+     * Gets the icon of the service this service binds to, or {@code null} if the service is
+     * disabled.
+     */
     @NonNull
-    Drawable getServiceIcon() {
-        return mInfo.getServiceInfo().loadIcon(mContext.getPackageManager());
+    @Nullable
+    @GuardedBy("mLock")
+    Drawable getServiceIconLocked() {
+        return mInfo == null ? null : mInfo.getServiceInfo().loadIcon(mContext.getPackageManager());
     }
 
     /**
@@ -959,7 +953,7 @@ final class AutofillManagerServiceImpl {
         } else {
             pw.println();
             mInfo.dump(prefix2, pw);
-            pw.print(prefix); pw.print("Service Label: "); pw.println(getServiceLabel());
+            pw.print(prefix); pw.print("Service Label: "); pw.println(getServiceLabelLocked());
             pw.print(prefix); pw.print("Target SDK: "); pw.println(getTargedSdkLocked());
         }
         pw.print(prefix); pw.print("Component from settings: ");
