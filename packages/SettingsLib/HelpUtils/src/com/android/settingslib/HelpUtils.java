@@ -187,17 +187,17 @@ public class HelpUtils {
 
         if (sendPackageName && includePackageName) {
             String[] packageNameKey =
-                    {resources.getString(android.R.string.config_help_package_name_key)};
+                    {resources.getString(android.R.string.config_helpPackageNameKey)};
             String[] packageNameValue =
-                    {resources.getString(android.R.string.config_help_package_name_value)};
+                    {resources.getString(android.R.string.config_helpPackageNameValue)};
             String helpIntentExtraKey =
-                    resources.getString(android.R.string.config_help_intent_extra_key);
+                    resources.getString(android.R.string.config_helpIntentExtraKey);
             String helpIntentNameKey =
-                    resources.getString(android.R.string.config_help_intent_name_key);
+                    resources.getString(android.R.string.config_helpIntentNameKey);
             String feedbackIntentExtraKey =
-                    resources.getString(android.R.string.config_feedback_intent_extra_key);
+                    resources.getString(android.R.string.config_feedbackIntentExtraKey);
             String feedbackIntentNameKey =
-                    resources.getString(android.R.string.config_feedback_intent_name_key);
+                    resources.getString(android.R.string.config_feedbackIntentNameKey);
             intent.putExtra(helpIntentExtraKey, packageNameKey);
             intent.putExtra(helpIntentNameKey, packageNameValue);
             intent.putExtra(feedbackIntentExtraKey, packageNameKey);

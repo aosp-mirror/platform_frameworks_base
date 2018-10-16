@@ -152,7 +152,7 @@ TEST(GaugeMetricE2eTest, TestRandomSamplePulledEvents) {
     EXPECT_EQ(baseTimeNs + 2 * bucketSizeNs, data.bucket_info(0).start_bucket_elapsed_nanos());
     EXPECT_EQ(baseTimeNs + 3 * bucketSizeNs, data.bucket_info(0).end_bucket_elapsed_nanos());
     EXPECT_TRUE(data.bucket_info(0).atom(0).temperature().sensor_name().empty());
-    EXPECT_GT(data.bucket_info(0).atom(0).temperature().temperature_dc(), 0);
+    EXPECT_GT(data.bucket_info(0).atom(0).temperature().temperature_deci_celsius(), 0);
 
     EXPECT_EQ(1, data.bucket_info(1).atom_size());
     EXPECT_EQ(baseTimeNs + 3 * bucketSizeNs + 1,
@@ -161,7 +161,7 @@ TEST(GaugeMetricE2eTest, TestRandomSamplePulledEvents) {
     EXPECT_EQ(baseTimeNs + 3 * bucketSizeNs, data.bucket_info(1).start_bucket_elapsed_nanos());
     EXPECT_EQ(baseTimeNs + 4 * bucketSizeNs, data.bucket_info(1).end_bucket_elapsed_nanos());
     EXPECT_TRUE(data.bucket_info(1).atom(0).temperature().sensor_name().empty());
-    EXPECT_GT(data.bucket_info(1).atom(0).temperature().temperature_dc(), 0);
+    EXPECT_GT(data.bucket_info(1).atom(0).temperature().temperature_deci_celsius(), 0);
 
     EXPECT_EQ(1, data.bucket_info(2).atom_size());
     EXPECT_EQ(1, data.bucket_info(2).elapsed_timestamp_nanos_size());
@@ -170,7 +170,7 @@ TEST(GaugeMetricE2eTest, TestRandomSamplePulledEvents) {
     EXPECT_EQ(baseTimeNs + 4 * bucketSizeNs, data.bucket_info(2).start_bucket_elapsed_nanos());
     EXPECT_EQ(baseTimeNs + 5 * bucketSizeNs, data.bucket_info(2).end_bucket_elapsed_nanos());
     EXPECT_TRUE(data.bucket_info(2).atom(0).temperature().sensor_name().empty());
-    EXPECT_GT(data.bucket_info(2).atom(0).temperature().temperature_dc(), 0);
+    EXPECT_GT(data.bucket_info(2).atom(0).temperature().temperature_deci_celsius(), 0);
 
     EXPECT_EQ(1, data.bucket_info(3).atom_size());
     EXPECT_EQ(1, data.bucket_info(3).elapsed_timestamp_nanos_size());
@@ -179,7 +179,7 @@ TEST(GaugeMetricE2eTest, TestRandomSamplePulledEvents) {
     EXPECT_EQ(baseTimeNs + 5 * bucketSizeNs, data.bucket_info(3).start_bucket_elapsed_nanos());
     EXPECT_EQ(baseTimeNs + 6 * bucketSizeNs, data.bucket_info(3).end_bucket_elapsed_nanos());
     EXPECT_TRUE(data.bucket_info(3).atom(0).temperature().sensor_name().empty());
-    EXPECT_GT(data.bucket_info(3).atom(0).temperature().temperature_dc(), 0);
+    EXPECT_GT(data.bucket_info(3).atom(0).temperature().temperature_deci_celsius(), 0);
 
     EXPECT_EQ(1, data.bucket_info(4).atom_size());
     EXPECT_EQ(1, data.bucket_info(4).elapsed_timestamp_nanos_size());
@@ -188,7 +188,7 @@ TEST(GaugeMetricE2eTest, TestRandomSamplePulledEvents) {
     EXPECT_EQ(baseTimeNs + 7 * bucketSizeNs, data.bucket_info(4).start_bucket_elapsed_nanos());
     EXPECT_EQ(baseTimeNs + 8 * bucketSizeNs, data.bucket_info(4).end_bucket_elapsed_nanos());
     EXPECT_TRUE(data.bucket_info(4).atom(0).temperature().sensor_name().empty());
-    EXPECT_GT(data.bucket_info(4).atom(0).temperature().temperature_dc(), 0);
+    EXPECT_GT(data.bucket_info(4).atom(0).temperature().temperature_deci_celsius(), 0);
 
     EXPECT_EQ(1, data.bucket_info(5).atom_size());
     EXPECT_EQ(1, data.bucket_info(5).elapsed_timestamp_nanos_size());
@@ -197,7 +197,7 @@ TEST(GaugeMetricE2eTest, TestRandomSamplePulledEvents) {
     EXPECT_EQ(baseTimeNs + 8 * bucketSizeNs, data.bucket_info(5).start_bucket_elapsed_nanos());
     EXPECT_EQ(baseTimeNs + 9 * bucketSizeNs, data.bucket_info(5).end_bucket_elapsed_nanos());
     EXPECT_TRUE(data.bucket_info(5).atom(0).temperature().sensor_name().empty());
-    EXPECT_GT(data.bucket_info(5).atom(0).temperature().temperature_dc(), 0);
+    EXPECT_GT(data.bucket_info(5).atom(0).temperature().temperature_deci_celsius(), 0);
 }
 
 TEST(GaugeMetricE2eTest, TestAllConditionChangesSamplePulledEvents) {
@@ -275,7 +275,7 @@ TEST(GaugeMetricE2eTest, TestAllConditionChangesSamplePulledEvents) {
     EXPECT_EQ(baseTimeNs + 2 * bucketSizeNs, data.bucket_info(0).start_bucket_elapsed_nanos());
     EXPECT_EQ(baseTimeNs + 3 * bucketSizeNs, data.bucket_info(0).end_bucket_elapsed_nanos());
     EXPECT_TRUE(data.bucket_info(0).atom(0).temperature().sensor_name().empty());
-    EXPECT_GT(data.bucket_info(0).atom(0).temperature().temperature_dc(), 0);
+    EXPECT_GT(data.bucket_info(0).atom(0).temperature().temperature_deci_celsius(), 0);
 
     EXPECT_EQ(1, data.bucket_info(1).atom_size());
     EXPECT_EQ(baseTimeNs + 3 * bucketSizeNs + 100,
@@ -284,7 +284,7 @@ TEST(GaugeMetricE2eTest, TestAllConditionChangesSamplePulledEvents) {
     EXPECT_EQ(baseTimeNs + 3 * bucketSizeNs, data.bucket_info(1).start_bucket_elapsed_nanos());
     EXPECT_EQ(baseTimeNs + 4 * bucketSizeNs, data.bucket_info(1).end_bucket_elapsed_nanos());
     EXPECT_TRUE(data.bucket_info(1).atom(0).temperature().sensor_name().empty());
-    EXPECT_GT(data.bucket_info(1).atom(0).temperature().temperature_dc(), 0);
+    EXPECT_GT(data.bucket_info(1).atom(0).temperature().temperature_deci_celsius(), 0);
 
     EXPECT_EQ(2, data.bucket_info(2).atom_size());
     EXPECT_EQ(2, data.bucket_info(2).elapsed_timestamp_nanos_size());
@@ -295,9 +295,9 @@ TEST(GaugeMetricE2eTest, TestAllConditionChangesSamplePulledEvents) {
     EXPECT_EQ(baseTimeNs + 7 * bucketSizeNs, data.bucket_info(2).start_bucket_elapsed_nanos());
     EXPECT_EQ(baseTimeNs + 8 * bucketSizeNs, data.bucket_info(2).end_bucket_elapsed_nanos());
     EXPECT_TRUE(data.bucket_info(2).atom(0).temperature().sensor_name().empty());
-    EXPECT_GT(data.bucket_info(2).atom(0).temperature().temperature_dc(), 0);
+    EXPECT_GT(data.bucket_info(2).atom(0).temperature().temperature_deci_celsius(), 0);
     EXPECT_TRUE(data.bucket_info(2).atom(1).temperature().sensor_name().empty());
-    EXPECT_GT(data.bucket_info(2).atom(1).temperature().temperature_dc(), 0);
+    EXPECT_GT(data.bucket_info(2).atom(1).temperature().temperature_deci_celsius(), 0);
 }
 
 
@@ -378,7 +378,7 @@ TEST(GaugeMetricE2eTest, TestRandomSamplePulledEvent_LateAlarm) {
     EXPECT_EQ(baseTimeNs + 2 * bucketSizeNs, data.bucket_info(0).start_bucket_elapsed_nanos());
     EXPECT_EQ(baseTimeNs + 3 * bucketSizeNs, data.bucket_info(0).end_bucket_elapsed_nanos());
     EXPECT_TRUE(data.bucket_info(0).atom(0).temperature().sensor_name().empty());
-    EXPECT_GT(data.bucket_info(0).atom(0).temperature().temperature_dc(), 0);
+    EXPECT_GT(data.bucket_info(0).atom(0).temperature().temperature_deci_celsius(), 0);
 
     EXPECT_EQ(1, data.bucket_info(1).atom_size());
     EXPECT_EQ(configAddedTimeNs + 3 * bucketSizeNs + 11,
@@ -387,7 +387,7 @@ TEST(GaugeMetricE2eTest, TestRandomSamplePulledEvent_LateAlarm) {
     EXPECT_EQ(baseTimeNs + 5 * bucketSizeNs, data.bucket_info(1).start_bucket_elapsed_nanos());
     EXPECT_EQ(baseTimeNs + 6 * bucketSizeNs, data.bucket_info(1).end_bucket_elapsed_nanos());
     EXPECT_TRUE(data.bucket_info(1).atom(0).temperature().sensor_name().empty());
-    EXPECT_GT(data.bucket_info(1).atom(0).temperature().temperature_dc(), 0);
+    EXPECT_GT(data.bucket_info(1).atom(0).temperature().temperature_deci_celsius(), 0);
 
     EXPECT_EQ(1, data.bucket_info(2).atom_size());
     EXPECT_EQ(1, data.bucket_info(2).elapsed_timestamp_nanos_size());
@@ -396,7 +396,7 @@ TEST(GaugeMetricE2eTest, TestRandomSamplePulledEvent_LateAlarm) {
     EXPECT_EQ(baseTimeNs + 6 * bucketSizeNs, data.bucket_info(2).start_bucket_elapsed_nanos());
     EXPECT_EQ(baseTimeNs + 7 * bucketSizeNs, data.bucket_info(2).end_bucket_elapsed_nanos());
     EXPECT_TRUE(data.bucket_info(2).atom(0).temperature().sensor_name().empty());
-    EXPECT_GT(data.bucket_info(2).atom(0).temperature().temperature_dc(), 0);
+    EXPECT_GT(data.bucket_info(2).atom(0).temperature().temperature_deci_celsius(), 0);
 
 }
 

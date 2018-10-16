@@ -42,6 +42,7 @@ import android.text.style.CharacterStyle;
 import android.text.style.EasyEditSpan;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.LeadingMarginSpan;
+import android.text.style.LineBackgroundSpan;
 import android.text.style.LocaleSpan;
 import android.text.style.ParagraphStyle;
 import android.text.style.QuoteSpan;
@@ -687,7 +688,9 @@ public class TextUtils {
     /** @hide */
     public static final int ACCESSIBILITY_URL_SPAN = 26;
     /** @hide */
-    public static final int LAST_SPAN = ACCESSIBILITY_URL_SPAN;
+    public static final int LINE_BACKGROUND_SPAN = 27;
+    /** @hide */
+    public static final int LAST_SPAN = LINE_BACKGROUND_SPAN;
 
     /**
      * Flatten a CharSequence and whatever styles can be copied across processes
@@ -876,6 +879,10 @@ public class TextUtils {
 
                 case ACCESSIBILITY_URL_SPAN:
                     readSpan(p, sp, new AccessibilityURLSpan(p));
+                    break;
+
+                case LINE_BACKGROUND_SPAN:
+                    readSpan(p, sp, new LineBackgroundSpan.Standard(p));
                     break;
 
                 default:

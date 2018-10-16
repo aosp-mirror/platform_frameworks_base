@@ -774,6 +774,12 @@ public class MockContext extends Context {
 
     /** @hide */
     @Override
+    public int getDisplayId() {
+        throw new UnsupportedOperationException();
+    }
+
+    /** @hide */
+    @Override
     public void updateDisplay(int displayId) {
         throw new UnsupportedOperationException();
     }

@@ -29,6 +29,7 @@ package android.test.mock {
     method public void removeOnPermissionsChangeListener(android.content.pm.PackageManager.OnPermissionsChangedListener);
     method public void revokeRuntimePermission(java.lang.String, java.lang.String, android.os.UserHandle);
     method public boolean setDefaultBrowserPackageNameAsUser(java.lang.String, int);
+    method public java.lang.String[] setPackagesSuspended(java.lang.String[], boolean, android.os.PersistableBundle, android.os.PersistableBundle, java.lang.String);
     method public void setUpdateAvailable(java.lang.String, boolean);
     method public boolean updateIntentVerificationStatusAsUser(java.lang.String, int, int);
     method public void updatePermissionFlags(java.lang.String, java.lang.String, int, int, android.os.UserHandle);

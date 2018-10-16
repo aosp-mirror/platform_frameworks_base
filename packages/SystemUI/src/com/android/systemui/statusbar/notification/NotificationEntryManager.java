@@ -18,6 +18,10 @@ package com.android.systemui.statusbar.notification;
 import static com.android.systemui.statusbar.NotificationRemoteInputManager.ENABLE_REMOTE_INPUT;
 import static com.android.systemui.statusbar.NotificationRemoteInputManager
         .FORCE_REMOTE_INPUT_HISTORY;
+import static com.android.systemui.statusbar.notification.row.NotificationInflater
+        .FLAG_CONTENT_VIEW_AMBIENT;
+import static com.android.systemui.statusbar.notification.row.NotificationInflater
+        .FLAG_CONTENT_VIEW_HEADS_UP;
 
 import android.annotation.Nullable;
 import android.app.Notification;
@@ -71,6 +75,7 @@ import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationUiAdjustment;
 import com.android.systemui.statusbar.NotificationUpdateHandler;
 import com.android.systemui.statusbar.notification.row.NotificationInflater;
+import com.android.systemui.statusbar.notification.row.NotificationInflater.InflationFlag;
 import com.android.systemui.statusbar.notification.row.RowInflaterTask;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
@@ -440,25 +445,48 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
     }
 
     private void addEntry(NotificationData.Entry shadeEntry) {
-        if (shouldHeadsUp(shadeEntry)) {
-            mHeadsUpManager.showNotification(shadeEntry);
-            // Mark as seen immediately
-            setNotificationShown(shadeEntry.notification);
-        }
-        if (shouldPulse(shadeEntry)) {
-            mAmbientPulseManager.showNotification(shadeEntry);
-        }
         addNotificationViews(shadeEntry);
         mCallback.onNotificationAdded(shadeEntry);
     }
 
+    /**
+     * Adds the entry to the respective alerting manager if the content view was inflated and
+     * the entry should still alert.
+     *
+     * @param entry entry to add
+     * @param inflatedFlags flags representing content views that were inflated
+     */
+    private void showAlertingView(NotificationData.Entry entry,
+            @InflationFlag int inflatedFlags) {
+        if ((inflatedFlags & FLAG_CONTENT_VIEW_HEADS_UP) != 0) {
+            // Possible for shouldHeadsUp to change between the inflation starting and ending.
+            // If it does and we no longer need to heads up, we should free the view.
+            if (shouldHeadsUp(entry)) {
+                mHeadsUpManager.showNotification(entry);
+                // Mark as seen immediately
+                setNotificationShown(entry.notification);
+            } else {
+                entry.row.freeContentViewWhenSafe(FLAG_CONTENT_VIEW_HEADS_UP);
+            }
+        }
+        if ((inflatedFlags & FLAG_CONTENT_VIEW_AMBIENT) != 0) {
+            if (shouldPulse(entry)) {
+                mAmbientPulseManager.showNotification(entry);
+            } else {
+                entry.row.freeContentViewWhenSafe(FLAG_CONTENT_VIEW_AMBIENT);
+            }
+        }
+    }
+
     @Override
-    public void onAsyncInflationFinished(NotificationData.Entry entry) {
+    public void onAsyncInflationFinished(NotificationData.Entry entry,
+            @InflationFlag int inflatedFlags) {
         mPendingNotifications.remove(entry.key);
         // If there was an async task started after the removal, we don't want to add it back to
         // the list, otherwise we might get leaks.
         boolean isNew = mNotificationData.get(entry.key) == null;
         if (isNew && !entry.row.isRemoved()) {
+            showAlertingView(entry, inflatedFlags);
             addEntry(entry);
         } else if (!isNew && entry.row.hasLowPriorityStateUpdated()) {
             mVisualStabilityManager.onLowPriorityUpdated(entry);
@@ -636,7 +664,11 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
         row.setUseIncreasedCollapsedHeight(useIncreasedCollapsedHeight);
         row.setUseIncreasedHeadsUpHeight(useIncreasedHeadsUp);
         row.setSmartActions(entry.smartActions);
-        row.updateNotification(entry);
+        row.setEntry(entry);
+
+        row.updateInflationFlag(FLAG_CONTENT_VIEW_HEADS_UP, shouldHeadsUp(entry));
+        row.updateInflationFlag(FLAG_CONTENT_VIEW_AMBIENT, shouldPulse(entry));
+        row.inflateViews();
     }
 
     protected void addNotificationViews(NotificationData.Entry entry) {

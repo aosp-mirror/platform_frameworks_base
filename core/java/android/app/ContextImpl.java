@@ -2088,8 +2088,7 @@ class ContextImpl extends Context {
             ContextImpl c = new ContextImpl(this, mMainThread, pi, null, mActivityToken,
                     new UserHandle(UserHandle.getUserId(application.uid)), flags, null);
 
-            final int displayId = mDisplay != null
-                    ? mDisplay.getDisplayId() : Display.DEFAULT_DISPLAY;
+            final int displayId = getDisplayId();
 
             c.setResources(createResources(mActivityToken, pi, null, displayId, null,
                     getDisplayAdjustments(displayId).getCompatibilityInfo()));
@@ -2124,8 +2123,7 @@ class ContextImpl extends Context {
             ContextImpl c = new ContextImpl(this, mMainThread, pi, null, mActivityToken, user,
                     flags, null);
 
-            final int displayId = mDisplay != null
-                    ? mDisplay.getDisplayId() : Display.DEFAULT_DISPLAY;
+            final int displayId = getDisplayId();
 
             c.setResources(createResources(mActivityToken, pi, null, displayId, null,
                     getDisplayAdjustments(displayId).getCompatibilityInfo()));
@@ -2152,8 +2150,7 @@ class ContextImpl extends Context {
         final ContextImpl context = new ContextImpl(this, mMainThread, mPackageInfo, splitName,
                 mActivityToken, mUser, mFlags, classLoader);
 
-        final int displayId = mDisplay != null
-                ? mDisplay.getDisplayId() : Display.DEFAULT_DISPLAY;
+        final int displayId = getDisplayId();
 
         context.setResources(ResourcesManager.getInstance().getResources(
                 mActivityToken,
@@ -2177,7 +2174,7 @@ class ContextImpl extends Context {
         ContextImpl context = new ContextImpl(this, mMainThread, mPackageInfo, mSplitName,
                 mActivityToken, mUser, mFlags, mClassLoader);
 
-        final int displayId = mDisplay != null ? mDisplay.getDisplayId() : Display.DEFAULT_DISPLAY;
+        final int displayId = getDisplayId();
         context.setResources(createResources(mActivityToken, mPackageInfo, mSplitName, displayId,
                 overrideConfiguration, getDisplayAdjustments(displayId).getCompatibilityInfo()));
         return context;
@@ -2247,6 +2244,11 @@ class ContextImpl extends Context {
         }
 
         return mDisplay;
+    }
+
+    @Override
+    public int getDisplayId() {
+        return mDisplay != null ? mDisplay.getDisplayId() : Display.DEFAULT_DISPLAY;
     }
 
     @Override

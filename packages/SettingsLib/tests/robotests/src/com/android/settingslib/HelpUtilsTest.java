@@ -70,17 +70,17 @@ public class HelpUtilsTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        when(mContext.getResources().getString(R.string.config_help_package_name_key))
+        when(mContext.getResources().getString(R.string.config_helpPackageNameKey))
                 .thenReturn(PACKAGE_NAME_KEY);
-        when(mContext.getResources().getString(R.string.config_help_package_name_value))
+        when(mContext.getResources().getString(R.string.config_helpPackageNameValue))
                 .thenReturn(PACKAGE_NAME_VALUE);
-        when(mContext.getResources().getString(R.string.config_help_intent_extra_key))
+        when(mContext.getResources().getString(R.string.config_helpIntentExtraKey))
                 .thenReturn(HELP_INTENT_EXTRA_KEY);
-        when(mContext.getResources().getString(R.string.config_help_intent_name_key))
+        when(mContext.getResources().getString(R.string.config_helpIntentNameKey))
                 .thenReturn(HELP_INTENT_NAME_KEY);
-        when(mContext.getResources().getString(R.string.config_feedback_intent_extra_key))
+        when(mContext.getResources().getString(R.string.config_feedbackIntentExtraKey))
                 .thenReturn(FEEDBACK_INTENT_EXTRA_KEY);
-        when(mContext.getResources().getString(R.string.config_feedback_intent_name_key))
+        when(mContext.getResources().getString(R.string.config_feedbackIntentNameKey))
                 .thenReturn(FEEDBACK_INTENT_NAME_KEY);
         when(mActivity.getPackageManager()).thenReturn(mPackageManager);
 

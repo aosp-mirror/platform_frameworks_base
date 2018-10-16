@@ -26,6 +26,7 @@ import android.content.pm.PackageManager;
 import android.content.pm.PackageParser;
 import android.content.pm.PackageUserState;
 import android.content.pm.Signature;
+import android.content.pm.SuspendDialogInfo;
 import android.os.PersistableBundle;
 import android.service.pm.PackageProto;
 import android.util.ArraySet;
@@ -395,12 +396,12 @@ public abstract class PackageSettingBase extends SettingBase {
         return readUserState(userId).suspended;
     }
 
-    void setSuspended(boolean suspended, String suspendingPackage, String dialogMessage,
+    void setSuspended(boolean suspended, String suspendingPackage, SuspendDialogInfo dialogInfo,
             PersistableBundle appExtras, PersistableBundle launcherExtras, int userId) {
         final PackageUserState existingUserState = modifyUserState(userId);
         existingUserState.suspended = suspended;
         existingUserState.suspendingPackage = suspended ? suspendingPackage : null;
-        existingUserState.dialogMessage = suspended ? dialogMessage : null;
+        existingUserState.dialogInfo = suspended ? dialogInfo : null;
         existingUserState.suspendedAppExtras = suspended ? appExtras : null;
         existingUserState.suspendedLauncherExtras = suspended ? launcherExtras : null;
     }
@@ -423,7 +424,7 @@ public abstract class PackageSettingBase extends SettingBase {
 
     void setUserState(int userId, long ceDataInode, int enabled, boolean installed, boolean stopped,
             boolean notLaunched, boolean hidden, boolean suspended, String suspendingPackage,
-            String dialogMessage, PersistableBundle suspendedAppExtras,
+            SuspendDialogInfo dialogInfo, PersistableBundle suspendedAppExtras,
             PersistableBundle suspendedLauncherExtras, boolean instantApp,
             boolean virtualPreload, String lastDisableAppCaller,
             ArraySet<String> enabledComponents, ArraySet<String> disabledComponents,
@@ -438,7 +439,7 @@ public abstract class PackageSettingBase extends SettingBase {
         state.hidden = hidden;
         state.suspended = suspended;
         state.suspendingPackage = suspendingPackage;
-        state.dialogMessage = dialogMessage;
+        state.dialogInfo = dialogInfo;
         state.suspendedAppExtras = suspendedAppExtras;
         state.suspendedLauncherExtras = suspendedLauncherExtras;
         state.lastDisableAppCaller = lastDisableAppCaller;

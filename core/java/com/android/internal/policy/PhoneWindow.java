@@ -1387,7 +1387,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
     private int getOptionsPanelGravity() {
         try {
             return WindowManagerHolder.sWindowManager.getPreferredOptionsPanelGravity(
-                    getContext().getDisplay().getDisplayId());
+                    getContext().getDisplayId());
         } catch (RemoteException ex) {
             Log.e(TAG, "Couldn't getOptionsPanelGravity; using default", ex);
             return Gravity.CENTER | Gravity.BOTTOM;
@@ -3642,7 +3642,7 @@ public class PhoneWindow extends Window implements MenuBuilder.Callback {
                 if (!mIsWatching) {
                     try {
                         WindowManagerHolder.sWindowManager.watchRotation(this,
-                                phoneWindow.getContext().getDisplay().getDisplayId());
+                                phoneWindow.getContext().getDisplayId());
                         mHandler = new Handler();
                         mIsWatching = true;
                     } catch (RemoteException ex) {

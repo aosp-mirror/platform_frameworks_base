@@ -18,8 +18,13 @@ package com.android.systemui.statusbar.notification.row;
 
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 
+import static com.android.systemui.statusbar.notification.row.NotificationInflater.FLAG_CONTENT_VIEW_ALL;
+import static com.android.systemui.statusbar.notification.row.NotificationInflater.FLAG_CONTENT_VIEW_HEADS_UP;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
@@ -35,6 +40,7 @@ import android.app.AppOpsManager;
 import android.app.NotificationChannel;
 import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 import android.util.ArraySet;
 import android.view.NotificationHeaderView;
@@ -131,6 +137,15 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
         ExpandableNotificationRow row = spy(mNotificationTestHelper.createRow());
         row.setDark(true, false, 0);
         verify(row).updateShelfIconColor();
+    }
+
+    @Test
+    public void testFreeContentViewWhenSafe() throws Exception {
+        ExpandableNotificationRow row = mNotificationTestHelper.createRow(FLAG_CONTENT_VIEW_ALL);
+
+        row.freeContentViewWhenSafe(FLAG_CONTENT_VIEW_HEADS_UP);
+
+        assertNull(row.getPrivateLayout().getHeadsUpChild());
     }
 
     @Test

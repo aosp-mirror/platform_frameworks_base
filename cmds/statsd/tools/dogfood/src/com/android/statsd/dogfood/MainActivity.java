@@ -319,7 +319,7 @@ public class MainActivity extends Activity {
         int[] uids = new int[]{mUids[id]};
         String[] tags = new String[]{"acquire"};
         StatsLog.write(StatsLog.WAKELOCK_STATE_CHANGED, uids, tags,
-                StatsLog.WAKELOCK_STATE_CHANGED__LEVEL__PARTIAL_WAKE_LOCK, name,
+                StatsLog.WAKELOCK_STATE_CHANGED__TYPE__PARTIAL_WAKE_LOCK, name,
                 StatsLog.WAKELOCK_STATE_CHANGED__STATE__ACQUIRE);
         StringBuilder sb = new StringBuilder();
         sb.append("StagsLog.write(10, ").append(mUids[id]).append(", ").append(0)
@@ -335,7 +335,7 @@ public class MainActivity extends Activity {
         int[] uids = new int[]{mUids[id]};
         String[] tags = new String[]{"release"};
         StatsLog.write(StatsLog.WAKELOCK_STATE_CHANGED, uids, tags,
-                StatsLog.WAKELOCK_STATE_CHANGED__LEVEL__PARTIAL_WAKE_LOCK, name,
+                StatsLog.WAKELOCK_STATE_CHANGED__TYPE__PARTIAL_WAKE_LOCK, name,
                 StatsLog.WAKELOCK_STATE_CHANGED__STATE__RELEASE);
         StringBuilder sb = new StringBuilder();
         sb.append("StagsLog.write(10, ").append(mUids[id]).append(", ").append(0)

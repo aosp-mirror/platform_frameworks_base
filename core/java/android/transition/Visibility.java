@@ -25,6 +25,7 @@ import android.content.res.TypedArray;
 import android.util.AttributeSet;
 import android.view.View;
 import android.view.ViewGroup;
+import android.view.ViewGroupOverlay;
 
 import com.android.internal.R;
 
@@ -413,7 +414,6 @@ public abstract class Visibility extends Transition {
             }
         }
         final int finalVisibility = endVisibility;
-        final ViewGroup finalSceneRoot = sceneRoot;
 
         if (overlayView != null) {
             // TODO: Need to do this for general case of adding to overlay
@@ -424,16 +424,32 @@ public abstract class Visibility extends Transition {
             sceneRoot.getLocationOnScreen(loc);
             overlayView.offsetLeftAndRight((screenX - loc[0]) - overlayView.getLeft());
             overlayView.offsetTopAndBottom((screenY - loc[1]) - overlayView.getTop());
-            sceneRoot.getOverlay().add(overlayView);
+            final ViewGroupOverlay overlay = sceneRoot.getOverlay();
+            overlay.add(overlayView);
             Animator animator = onDisappear(sceneRoot, overlayView, startValues, endValues);
             if (animator == null) {
-                sceneRoot.getOverlay().remove(overlayView);
+                overlay.remove(overlayView);
             } else {
                 final View finalOverlayView = overlayView;
                 addListener(new TransitionListenerAdapter() {
+
+                    @Override
+                    public void onTransitionPause(Transition transition) {
+                        overlay.remove(finalOverlayView);
+                    }
+
+                    @Override
+                    public void onTransitionResume(Transition transition) {
+                        if (finalOverlayView.getParent() == null) {
+                            overlay.add(finalOverlayView);
+                        } else {
+                            cancel();
+                        }
+                    }
+
                     @Override
                     public void onTransitionEnd(Transition transition) {
-                        finalSceneRoot.getOverlay().remove(finalOverlayView);
+                        overlay.remove(finalOverlayView);
                         transition.removeListener(this);
                     }
                 });

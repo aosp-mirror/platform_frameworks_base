@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.mock;
@@ -28,6 +30,7 @@ import android.app.Instrumentation;
 import android.app.admin.DevicePolicyManager;
 import android.app.trust.TrustManager;
 import android.content.Context;
+import android.graphics.Color;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.Looper;
 import android.support.test.InstrumentationRegistry;
@@ -45,6 +48,8 @@ import com.android.systemui.util.wakelock.WakeLockFake;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -54,9 +59,13 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
 
     private String mDisclosureWithOrganization;
 
-    private DevicePolicyManager mDevicePolicyManager = mock(DevicePolicyManager.class);
-    private ViewGroup mIndicationArea = mock(ViewGroup.class);
-    private KeyguardIndicationTextView mDisclosure = mock(KeyguardIndicationTextView.class);
+    @Mock
+    private DevicePolicyManager mDevicePolicyManager;
+    @Mock
+    private ViewGroup mIndicationArea;
+    @Mock
+    private KeyguardIndicationTextView mDisclosure;
+    private KeyguardIndicationTextView mTextView;
 
     private KeyguardIndicationController mController;
     private WakeLockFake mWakeLock;
@@ -64,7 +73,9 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
 
     @Before
     public void setUp() throws Exception {
+        MockitoAnnotations.initMocks(this);
         mInstrumentation = InstrumentationRegistry.getInstrumentation();
+        mTextView = new KeyguardIndicationTextView(mContext);
 
         mContext.addMockSystemService(Context.DEVICE_POLICY_SERVICE, mDevicePolicyManager);
         mContext.addMockSystemService(Context.TRUST_SERVICE, mock(TrustManager.class));
@@ -74,6 +85,7 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
 
         when(mIndicationArea.findViewById(R.id.keyguard_indication_enterprise_disclosure))
                 .thenReturn(mDisclosure);
+        when(mIndicationArea.findViewById(R.id.keyguard_indication_text)).thenReturn(mTextView);
 
         mWakeLock = new WakeLockFake();
     }
@@ -188,5 +200,18 @@ public class KeyguardIndicationControllerTest extends SysuiTestCase {
             held[0] = mWakeLock.isHeld();
         });
         assertFalse("WakeLock expected: RELEASED, was: HELD", held[0]);
+    }
+
+    @Test
+    public void transientIndication_visibleWhenDozing() {
+        createController();
+
+        mController.setVisible(true);
+        mController.showTransientIndication("Test");
+        mController.setDozing(true);
+
+        assertThat(mTextView.getText()).isEqualTo("Test");
+        assertThat(mTextView.getCurrentTextColor()).isEqualTo(Color.WHITE);
+        assertThat(mTextView.getAlpha()).isEqualTo(1f);
     }
 }

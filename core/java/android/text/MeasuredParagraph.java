@@ -22,6 +22,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.graphics.Paint;
 import android.graphics.Rect;
+import android.graphics.text.MeasuredText;
 import android.text.AutoGrowArray.ByteArray;
 import android.text.AutoGrowArray.FloatArray;
 import android.text.AutoGrowArray.IntArray;
@@ -121,7 +122,7 @@ public class MeasuredParagraph {
     private @Nullable IntArray mFontMetrics = new IntArray(4 * 4);
 
     // The native MeasuredParagraph.
-    private @Nullable NativeMeasuredParagraph mNativeMeasuredParagraph;
+    private @Nullable MeasuredText mMeasuredText;
 
     // Following two objects are for avoiding object allocation.
     private @NonNull TextPaint mCachedPaint = new TextPaint();
@@ -149,7 +150,7 @@ public class MeasuredParagraph {
         mWidths.clear();
         mFontMetrics.clear();
         mSpanEndCache.clear();
-        mNativeMeasuredParagraph = null;
+        mMeasuredText = null;
     }
 
     /**
@@ -245,8 +246,8 @@ public class MeasuredParagraph {
      * This is available only if the MeasuredParagraph is computed with buildForStaticLayout.
      * Returns null in other cases.
      */
-    public NativeMeasuredParagraph getNativeMeasuredParagraph() {
-        return mNativeMeasuredParagraph;
+    public MeasuredText getMeasuredText() {
+        return mMeasuredText;
     }
 
     /**
@@ -259,7 +260,7 @@ public class MeasuredParagraph {
      * @param end the exclusive end offset of the target region in the text
      */
     public float getWidth(int start, int end) {
-        if (mNativeMeasuredParagraph == null) {
+        if (mMeasuredText == null) {
             // We have result in Java.
             final float[] widths = mWidths.getRawArray();
             float r = 0.0f;
@@ -269,7 +270,7 @@ public class MeasuredParagraph {
             return r;
         } else {
             // We have result in native.
-            return mNativeMeasuredParagraph.getWidth(start, end);
+            return mMeasuredText.getWidth(start, end);
         }
     }
 
@@ -281,7 +282,7 @@ public class MeasuredParagraph {
      */
     public void getBounds(@IntRange(from = 0) int start, @IntRange(from = 0) int end,
             @NonNull Rect bounds) {
-        mNativeMeasuredParagraph.getBounds(mCopiedBuffer, start, end, bounds);
+        mMeasuredText.getBounds(start, end, bounds);
     }
 
     /**
@@ -290,7 +291,7 @@ public class MeasuredParagraph {
      * This is available only if the MeasuredParagraph is computed with buildForStaticLayout.
      */
     public float getCharWidthAt(@IntRange(from = 0) int offset) {
-        return mNativeMeasuredParagraph.getCharWidthAt(offset);
+        return mMeasuredText.getCharWidthAt(offset);
     }
 
     /**
@@ -391,12 +392,13 @@ public class MeasuredParagraph {
             @Nullable MeasuredParagraph recycle) {
         final MeasuredParagraph mt = recycle == null ? obtain() : recycle;
         mt.resetAndAnalyzeBidi(text, start, end, textDir);
-        final NativeMeasuredParagraph.Builder builder = new NativeMeasuredParagraph.Builder();
+        final MeasuredText.Builder builder = new MeasuredText.Builder(mt.mCopiedBuffer);
+        builder.setComputeHyphenation(computeHyphenation);
+        builder.setComputeLayout(computeLayout);
         if (mt.mTextLength == 0) {
             // Need to build empty native measured text for StaticLayout.
             // TODO: Stop creating empty measured text for empty lines.
-            mt.mNativeMeasuredParagraph = builder.build(mt.mCopiedBuffer, computeHyphenation,
-                        computeLayout);
+            mt.mMeasuredText = builder.build();
         } else {
             if (mt.mSpanned == null) {
                 // No style change by MetricsAffectingSpan. Just measure all text.
@@ -417,8 +419,7 @@ public class MeasuredParagraph {
                     mt.mSpanEndCache.append(spanEnd);
                 }
             }
-            mt.mNativeMeasuredParagraph = builder.build(mt.mCopiedBuffer, computeHyphenation,
-                    computeLayout);
+            mt.mMeasuredText = builder.build();
         }
 
         return mt;
@@ -490,7 +491,7 @@ public class MeasuredParagraph {
     private void applyReplacementRun(@NonNull ReplacementSpan replacement,
                                      @IntRange(from = 0) int start,  // inclusive, in copied buffer
                                      @IntRange(from = 0) int end,  // exclusive, in copied buffer
-                                     @Nullable NativeMeasuredParagraph.Builder builder) {
+                                     @Nullable MeasuredText.Builder builder) {
         // Use original text. Shouldn't matter.
         // TODO: passing uninitizlied FontMetrics to developers. Do we need to keep this for
         //       backward compatibility? or Should we initialize them for getFontMetricsInt?
@@ -510,7 +511,7 @@ public class MeasuredParagraph {
 
     private void applyStyleRun(@IntRange(from = 0) int start,  // inclusive, in copied buffer
                                @IntRange(from = 0) int end,  // exclusive, in copied buffer
-                               @Nullable NativeMeasuredParagraph.Builder builder) {
+                               @Nullable MeasuredText.Builder builder) {
 
         if (mLtrWithoutBidi) {
             // If the whole text is LTR direction, just apply whole region.
@@ -552,7 +553,7 @@ public class MeasuredParagraph {
             @Nullable MetricAffectingSpan[] spans,
             @IntRange(from = 0) int start,  // inclusive, in original text buffer
             @IntRange(from = 0) int end,  // exclusive, in original text buffer
-            @Nullable NativeMeasuredParagraph.Builder builder) {
+            @Nullable MeasuredText.Builder builder) {
         mCachedPaint.set(paint);
         // XXX paint should not have a baseline shift, but...
         mCachedPaint.baselineShift = 0;
@@ -658,6 +659,6 @@ public class MeasuredParagraph {
      * This only works if the MeasuredParagraph is computed with buildForStaticLayout.
      */
     public @IntRange(from = 0) int getMemoryUsage() {
-        return mNativeMeasuredParagraph.getMemoryUsage();
+        return mMeasuredText.getMemoryUsage();
     }
 }

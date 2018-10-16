@@ -726,6 +726,39 @@ public class KeyValueBackupTaskTest {
     }
 
     @Test
+    public void testRunTask_whenSecondAgentUnavailable_commitsFirstAgentState() throws Exception {
+        TransportMock transportMock = setUpInitializedTransport(mTransport);
+        AgentMock agentMock = setUpAgent(PACKAGE_1);
+        setUpAgent(PACKAGE_2.unavailable());
+        agentOnBackupDo(
+                agentMock,
+                (oldState, dataOutput, newState) -> {
+                    writeData(dataOutput, "key", "data".getBytes());
+                    writeState(newState, "newState".getBytes());
+                });
+        KeyValueBackupTask task = createKeyValueBackupTask(transportMock, PACKAGE_1, PACKAGE_2);
+
+        runTask(task);
+
+        assertThat(Files.readAllBytes(getStateFile(mTransport, PACKAGE_1))).isEqualTo(
+                "newState".getBytes());
+    }
+
+    @Test
+    public void testRunTask_whenNonIncrementalAndAgentUnavailable() throws Exception {
+        TransportMock transportMock = setUpInitializedTransport(mTransport);
+        setUpAgent(PACKAGE_1.unavailable());
+        KeyValueBackupTask task = createKeyValueBackupTask(transportMock, true, PACKAGE_1);
+
+        runTask(task);
+
+        verify(mBackupManagerService).setWorkSource(null);
+        verify(mObserver).onResult(PACKAGE_1.packageName, ERROR_AGENT_FAILURE);
+        verify(mObserver).backupFinished(BackupManager.SUCCESS);
+        assertBackupPendingFor(PACKAGE_1);
+    }
+
+    @Test
     public void testRunTask_whenBindToAgentThrowsSecurityException() throws Exception {
         TransportMock transportMock = setUpInitializedTransport(mTransport);
         setUpAgent(PACKAGE_1);
@@ -733,6 +766,23 @@ public class KeyValueBackupTaskTest {
                 .when(mBackupManagerService)
                 .bindToAgentSynchronous(argThat(applicationInfo(PACKAGE_1)), anyInt());
         KeyValueBackupTask task = createKeyValueBackupTask(transportMock, PACKAGE_1);
+
+        runTask(task);
+
+        verify(mBackupManagerService).setWorkSource(null);
+        verify(mObserver).onResult(PACKAGE_1.packageName, ERROR_AGENT_FAILURE);
+        verify(mObserver).backupFinished(BackupManager.SUCCESS);
+        assertBackupPendingFor(PACKAGE_1);
+    }
+
+    @Test
+    public void testRunTask_whenNonIncrementalAndBindToAgentThrowsSecurityException() throws Exception {
+        TransportMock transportMock = setUpInitializedTransport(mTransport);
+        setUpAgent(PACKAGE_1);
+        doThrow(SecurityException.class)
+                .when(mBackupManagerService)
+                .bindToAgentSynchronous(argThat(applicationInfo(PACKAGE_1)), anyInt());
+        KeyValueBackupTask task = createKeyValueBackupTask(transportMock, true, PACKAGE_1);
 
         runTask(task);
 

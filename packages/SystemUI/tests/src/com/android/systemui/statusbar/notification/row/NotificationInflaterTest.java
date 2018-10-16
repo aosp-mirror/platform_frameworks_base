@@ -16,10 +16,13 @@
 
 package com.android.systemui.statusbar.notification.row;
 
+import static com.android.systemui.statusbar.notification.row.NotificationInflater.FLAG_CONTENT_VIEW_HEADS_UP;
+import static com.android.systemui.statusbar.notification.row.NotificationInflater.FLAG_CONTENT_VIEW_ALL;
+import static com.android.systemui.statusbar.notification.row.NotificationInflater.FLAG_CONTENT_VIEW_EXPANDED;
 
-import static com.android.systemui.statusbar.notification.row.NotificationInflater.FLAG_REINFLATE_ALL;
-
-import static com.android.systemui.statusbar.notification.row.NotificationInflater.FLAG_REINFLATE_EXPANDED_VIEW;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -34,6 +37,7 @@ import android.service.notification.StatusBarNotification;
 import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
+import android.util.ArrayMap;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.RemoteViews;
@@ -82,7 +86,8 @@ public class NotificationInflaterTest extends SysuiTestCase {
             }
 
             @Override
-            public void onAsyncInflationFinished(NotificationData.Entry entry) {
+            public void onAsyncInflationFinished(NotificationData.Entry entry,
+                    @NotificationInflater.InflationFlag int inflatedFlags) {
             }
         });
     }
@@ -91,7 +96,7 @@ public class NotificationInflaterTest extends SysuiTestCase {
     public void testIncreasedHeadsUpBeingUsed() {
         mNotificationInflater.setUsesIncreasedHeadsUpHeight(true);
         Notification.Builder builder = spy(mBuilder);
-        mNotificationInflater.inflateNotificationViews(FLAG_REINFLATE_ALL, builder, mContext);
+        mNotificationInflater.inflateNotificationViews(FLAG_CONTENT_VIEW_ALL, builder, mContext);
         verify(builder).createHeadsUpContentView(true);
     }
 
@@ -99,7 +104,7 @@ public class NotificationInflaterTest extends SysuiTestCase {
     public void testIncreasedHeightBeingUsed() {
         mNotificationInflater.setUsesIncreasedHeight(true);
         Notification.Builder builder = spy(mBuilder);
-        mNotificationInflater.inflateNotificationViews(FLAG_REINFLATE_ALL, builder, mContext);
+        mNotificationInflater.inflateNotificationViews(FLAG_CONTENT_VIEW_ALL, builder, mContext);
         verify(builder).createContentView(true);
     }
 
@@ -111,14 +116,14 @@ public class NotificationInflaterTest extends SysuiTestCase {
     }
 
     @Test
-    public void testInflationCallsOnlyRightMethod() throws Exception {
-        mRow.getPrivateLayout().removeAllViews();
-        mRow.getEntry().cachedBigContentView = null;
-        runThenWaitForInflation(() -> mNotificationInflater.inflateNotificationViews(
-                FLAG_REINFLATE_EXPANDED_VIEW), mNotificationInflater);
-        assertTrue(mRow.getPrivateLayout().getChildCount() == 1);
-        assertTrue(mRow.getPrivateLayout().getChildAt(0)
-                == mRow.getPrivateLayout().getExpandedChild());
+    public void testInflationOnlyInflatesSetFlags() throws Exception {
+        mNotificationInflater.updateInflationFlag(FLAG_CONTENT_VIEW_HEADS_UP,
+                true /* shouldInflate */);
+        runThenWaitForInflation(() -> mNotificationInflater.inflateNotificationViews(),
+                mNotificationInflater);
+
+        assertNotNull(mRow.getPrivateLayout().getHeadsUpChild());
+        assertNull(mRow.getShowingLayout().getAmbientChild());
         verify(mRow).onNotificationUpdated();
     }
 
@@ -155,8 +160,9 @@ public class NotificationInflaterTest extends SysuiTestCase {
                 new NotificationInflater.InflationProgress();
         result.packageContext = mContext;
         CountDownLatch countDownLatch = new CountDownLatch(1);
-        NotificationInflater.applyRemoteView(result, FLAG_REINFLATE_EXPANDED_VIEW, 0, mRow,
-                false /* redactAmbient */, true /* isNewView */, new RemoteViews.OnClickHandler(),
+        NotificationInflater.applyRemoteView(result, FLAG_CONTENT_VIEW_EXPANDED, 0,
+                new ArrayMap() /* cachedContentViews */, mRow, false /* redactAmbient */,
+                true /* isNewView */, new RemoteViews.OnClickHandler(),
                 new NotificationInflater.InflationCallback() {
                     @Override
                     public void handleInflationException(StatusBarNotification notification,
@@ -166,10 +172,11 @@ public class NotificationInflaterTest extends SysuiTestCase {
                     }
 
                     @Override
-                    public void onAsyncInflationFinished(NotificationData.Entry entry) {
+                    public void onAsyncInflationFinished(NotificationData.Entry entry,
+                            @NotificationInflater.InflationFlag int inflatedFlags) {
                         countDownLatch.countDown();
                     }
-                }, mRow.getEntry(), mRow.getPrivateLayout(), null, null, new HashMap<>(),
+                }, mRow.getPrivateLayout(), null, null, new HashMap<>(),
                 new NotificationInflater.ApplyCallback() {
                     @Override
                     public void setResultView(View v) {
@@ -186,16 +193,19 @@ public class NotificationInflaterTest extends SysuiTestCase {
 
     /* Cancelling requires us to be on the UI thread otherwise we might have a race */
     @Test
-    public void testSupersedesExistingTask() throws Exception {
+    public void testSupersedesExistingTask() {
+        mNotificationInflater.addInflationFlags(FLAG_CONTENT_VIEW_ALL);
         mNotificationInflater.inflateNotificationViews();
+
+        // Trigger inflation of content and expanded only.
         mNotificationInflater.setIsLowPriority(true);
         mNotificationInflater.setIsChildInGroup(true);
+
         InflationTask runningTask = mRow.getEntry().getRunningTask();
         NotificationInflater.AsyncInflationTask asyncInflationTask =
                 (NotificationInflater.AsyncInflationTask) runningTask;
-        Assert.assertSame("Successive inflations don't inherit the previous flags!",
-                asyncInflationTask.getReInflateFlags(),
-                NotificationInflater.FLAG_REINFLATE_ALL);
+        assertEquals("Successive inflations don't inherit the previous flags!",
+                asyncInflationTask.getReInflateFlags(), FLAG_CONTENT_VIEW_ALL);
         runningTask.abort();
     }
 
@@ -231,7 +241,8 @@ public class NotificationInflaterTest extends SysuiTestCase {
             }
 
             @Override
-            public void onAsyncInflationFinished(NotificationData.Entry entry) {
+            public void onAsyncInflationFinished(NotificationData.Entry entry,
+                    @NotificationInflater.InflationFlag int inflatedFlags) {
                 if (expectingException) {
                     exceptionHolder.setException(new RuntimeException(
                             "Inflation finished even though there should be an error"));

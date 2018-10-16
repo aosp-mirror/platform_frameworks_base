@@ -1056,6 +1056,11 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             e.writeLong(entry.totalLatencyMicros);
             e.writeLong(entry.cpuUsageMicros);
             e.writeBoolean(entry.isInteractive);
+            e.writeLong(entry.maxCpuUsageMicros);
+            e.writeLong(entry.maxLatencyMicros);
+            e.writeLong(entry.recordedDelayMessageCount);
+            e.writeLong(entry.delayMillis);
+            e.writeLong(entry.maxDelayMillis);
             pulledData.add(e);
         }
     }

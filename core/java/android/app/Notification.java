@@ -20,6 +20,7 @@ import static com.android.internal.util.ContrastColorUtil.satisfiesTextContrast;
 
 import android.annotation.ColorInt;
 import android.annotation.DrawableRes;
+import android.annotation.IdRes;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -37,6 +38,7 @@ import android.content.pm.ShortcutInfo;
 import android.content.res.ColorStateList;
 import android.content.res.Configuration;
 import android.content.res.Resources;
+import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
 import android.graphics.Color;
@@ -7759,8 +7761,17 @@ public class Notification implements Parcelable
      * @see Notification.Builder#setColorized(boolean)
      */
     public static class MediaStyle extends Style {
+        // Changing max media buttons requires also changing templates
+        // (notification_template_material_media and notification_template_material_big_media).
         static final int MAX_MEDIA_BUTTONS_IN_COMPACT = 3;
         static final int MAX_MEDIA_BUTTONS = 5;
+        @IdRes private static final int[] MEDIA_BUTTON_IDS = {
+                R.id.action0,
+                R.id.action1,
+                R.id.action2,
+                R.id.action3,
+                R.id.action4,
+        };
 
         private int[] mActionsToShowInCompact = null;
         private MediaSession.Token mToken;
@@ -7874,15 +7885,16 @@ public class Notification implements Parcelable
             return false;
         }
 
-        private RemoteViews generateMediaActionButton(Action action, int color) {
+        private void bindMediaActionButton(RemoteViews container, @IdRes int buttonId,
+                Action action, int color) {
             final boolean tombstone = (action.actionIntent == null);
-            RemoteViews button = new BuilderRemoteViews(mBuilder.mContext.getApplicationInfo(),
-                    R.layout.notification_material_media_action);
-            button.setImageViewIcon(R.id.action0, action.getIcon());
+            container.setViewVisibility(buttonId, View.VISIBLE);
+            container.setImageViewIcon(buttonId, action.getIcon());
 
             // If the action buttons should not be tinted, then just use the default
             // notification color. Otherwise, just use the passed-in color.
-            Configuration currentConfig = mBuilder.mContext.getResources().getConfiguration();
+            Resources resources = mBuilder.mContext.getResources();
+            Configuration currentConfig = resources.getConfiguration();
             boolean inNightMode = (currentConfig.uiMode & Configuration.UI_MODE_NIGHT_MASK)
                     == Configuration.UI_MODE_NIGHT_YES;
             int tintColor = mBuilder.shouldTintActionButtons() || mBuilder.isColorized()
@@ -7890,13 +7902,21 @@ public class Notification implements Parcelable
                     : ContrastColorUtil.resolveColor(mBuilder.mContext,
                             Notification.COLOR_DEFAULT, inNightMode);
 
-            button.setDrawableTint(R.id.action0, false, tintColor,
+            container.setDrawableTint(buttonId, false, tintColor,
                     PorterDuff.Mode.SRC_ATOP);
+
+            final TypedArray typedArray = mBuilder.mContext.obtainStyledAttributes(
+                    new int[]{ android.R.attr.colorControlHighlight });
+            int rippleAlpha = Color.alpha(typedArray.getColor(0, 0));
+            typedArray.recycle();
+            int rippleColor = Color.argb(rippleAlpha, Color.red(tintColor), Color.green(tintColor),
+                    Color.blue(tintColor));
+            container.setRippleDrawableColor(buttonId, ColorStateList.valueOf(rippleColor));
+
             if (!tombstone) {
-                button.setOnClickPendingIntent(R.id.action0, action.actionIntent);
+                container.setOnClickPendingIntent(buttonId, action.actionIntent);
             }
-            button.setContentDescription(R.id.action0, action.title);
-            return button;
+            container.setContentDescription(buttonId, action.title);
         }
 
         private RemoteViews makeMediaContentView() {
@@ -7905,21 +7925,20 @@ public class Notification implements Parcelable
                     null /* result */);
 
             final int numActions = mBuilder.mActions.size();
-            final int N = mActionsToShowInCompact == null
+            final int numActionsToShow = mActionsToShowInCompact == null
                     ? 0
                     : Math.min(mActionsToShowInCompact.length, MAX_MEDIA_BUTTONS_IN_COMPACT);
-            view.removeAllViews(com.android.internal.R.id.media_actions);
-            if (N > 0) {
-                for (int i = 0; i < N; i++) {
-                    if (i >= numActions) {
-                        throw new IllegalArgumentException(String.format(
-                                "setShowActionsInCompactView: action %d out of bounds (max %d)",
-                                i, numActions - 1));
-                    }
-
+            if (numActionsToShow > numActions) {
+                throw new IllegalArgumentException(String.format(
+                        "setShowActionsInCompactView: action %d out of bounds (max %d)",
+                        numActions, numActions - 1));
+            }
+            for (int i = 0; i < MAX_MEDIA_BUTTONS_IN_COMPACT; i++) {
+                if (i < numActionsToShow) {
                     final Action action = mBuilder.mActions.get(mActionsToShowInCompact[i]);
-                    final RemoteViews button = generateMediaActionButton(action, getActionColor());
-                    view.addView(com.android.internal.R.id.media_actions, button);
+                    bindMediaActionButton(view, MEDIA_BUTTON_IDS[i], action, getActionColor());
+                } else {
+                    view.setViewVisibility(MEDIA_BUTTON_IDS[i], View.GONE);
                 }
             }
             handleImage(view);
@@ -7949,12 +7968,12 @@ public class Notification implements Parcelable
             RemoteViews big = mBuilder.applyStandardTemplate(
                     R.layout.notification_template_material_big_media, false, null /* result */);
 
-            if (actionCount > 0) {
-                big.removeAllViews(com.android.internal.R.id.media_actions);
-                for (int i = 0; i < actionCount; i++) {
-                    final RemoteViews button = generateMediaActionButton(mBuilder.mActions.get(i),
+            for (int i = 0; i < MAX_MEDIA_BUTTONS; i++) {
+                if (i < actionCount) {
+                    bindMediaActionButton(big, MEDIA_BUTTON_IDS[i], mBuilder.mActions.get(i),
                             getActionColor());
-                    big.addView(com.android.internal.R.id.media_actions, button);
+                } else {
+                    big.setViewVisibility(MEDIA_BUTTON_IDS[i], View.GONE);
                 }
             }
             handleImage(big);

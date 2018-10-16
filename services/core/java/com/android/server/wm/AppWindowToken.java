@@ -102,6 +102,7 @@ import android.view.WindowManager.LayoutParams;
 import android.view.animation.Animation;
 
 import com.android.internal.R;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ToBooleanFunction;
 import com.android.server.input.InputApplicationHandle;
 import com.android.server.policy.WindowManagerPolicy.StartingSurface;
@@ -1741,6 +1742,30 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         return boundsLayer;
     }
 
+    /** Get position and crop region of animation. */
+    @VisibleForTesting
+    void getAnimationBounds(Point outPosition, Rect outBounds) {
+        outPosition.set(0, 0);
+        outBounds.setEmpty();
+
+        final TaskStack stack = getStack();
+        final Task task = getTask();
+        if (task != null && task.inFreeformWindowingMode()) {
+            task.getRelativePosition(outPosition);
+        } else if (stack != null) {
+            stack.getRelativePosition(outPosition);
+        }
+
+        // Always use stack bounds in order to have the ability to animate outside the task region.
+        // It also needs to be consistent when {@link #mNeedsAnimationBoundsLayer} is set that crops
+        // according to the bounds.
+        if (stack != null) {
+            stack.getBounds(outBounds);
+        }
+        // We have the relative position so the local position can be removed from bounds.
+        outBounds.offsetTo(0, 0);
+    }
+
     boolean applyAnimationLocked(WindowManager.LayoutParams lp, int transit, boolean enter,
             boolean isVoiceInteraction) {
 
@@ -1759,14 +1784,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
         Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "AWT#applyAnimationLocked");
         if (okToAnimate()) {
             final AnimationAdapter adapter;
-            final TaskStack stack = getStack();
-            mTmpPoint.set(0, 0);
-            mTmpRect.setEmpty();
-            if (stack != null) {
-                stack.getRelativePosition(mTmpPoint);
-                stack.getBounds(mTmpRect);
-                mTmpRect.offsetTo(0, 0);
-            }
+            getAnimationBounds(mTmpPoint, mTmpRect);
 
             // Delaying animation start isn't compatible with remote animations at all.
             if (mService.mAppTransition.getRemoteAnimationController() != null

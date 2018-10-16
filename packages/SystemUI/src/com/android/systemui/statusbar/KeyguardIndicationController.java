@@ -19,14 +19,14 @@ package com.android.systemui.statusbar;
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.app.admin.DevicePolicyManager;
-import android.hardware.biometrics.BiometricSourceType;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.content.res.Resources;
 import android.content.res.ColorStateList;
+import android.content.res.Resources;
 import android.graphics.Color;
+import android.hardware.biometrics.BiometricSourceType;
 import android.hardware.face.FaceManager;
 import android.hardware.fingerprint.FingerprintManager;
 import android.os.BatteryManager;
@@ -106,6 +106,7 @@ public class KeyguardIndicationController {
 
     private final DevicePolicyManager mDevicePolicyManager;
     private boolean mDozing;
+    private float mDarkAmount;
 
     /**
      * Creates a new KeyguardIndicationController and registers callbacks.
@@ -298,6 +299,15 @@ public class KeyguardIndicationController {
         if (mVisible) {
             // Walk down a precedence-ordered list of what indication
             // should be shown based on user or device state
+            if (mDozing) {
+                if (!TextUtils.isEmpty(mTransientIndication)) {
+                    mTextView.setTextColor(Color.WHITE);
+                    mTextView.switchIndication(mTransientIndication);
+                }
+                updateAlphas();
+                return;
+            }
+
             KeyguardUpdateMonitor updateMonitor = KeyguardUpdateMonitor.getInstance(mContext);
             int userId = KeyguardUpdateMonitor.getCurrentUser();
             String trustGrantedIndication = getTrustGrantedIndication();
@@ -332,6 +342,14 @@ public class KeyguardIndicationController {
                 mTextView.switchIndication(mRestingIndication);
                 mTextView.setTextColor(mInitialTextColorState);
             }
+        }
+    }
+
+    private void updateAlphas() {
+        if (!TextUtils.isEmpty(mTransientIndication)) {
+            mTextView.setAlpha(1f);
+        } else {
+            mTextView.setAlpha(1f - mDarkAmount);
         }
     }
 
@@ -490,6 +508,14 @@ public class KeyguardIndicationController {
         pw.println("  mBatteryLevel: " + mBatteryLevel);
         pw.println("  mTextView.getText(): " + (mTextView == null ? null : mTextView.getText()));
         pw.println("  computePowerIndication(): " + computePowerIndication());
+    }
+
+    public void setDarkAmount(float darkAmount) {
+        if (mDarkAmount == darkAmount) {
+            return;
+        }
+        mDarkAmount = darkAmount;
+        updateAlphas();
     }
 
     protected class BaseKeyguardCallback extends KeyguardUpdateMonitorCallback {

@@ -102,6 +102,12 @@ public abstract class ProvisioningCallback {
     public static final int OSU_FAILURE_NO_OSU_ACTIVITY_FOUND = 14;
 
     /**
+     * The reason code for provisioning failure when the status of a SOAP message is not the
+     * expected message status.
+     */
+    public static final int OSU_FAILURE_UNEXPECTED_SOAP_MESSAGE_STATUS = 15;
+
+    /**
      * The status code for provisioning flow to indicate connecting to OSU AP
      */
     public static final int OSU_STATUS_AP_CONNECTING = 1;
@@ -145,6 +151,11 @@ public abstract class ProvisioningCallback {
      * The status code for provisioning flow to indicate starting the second SOAP exchange.
      */
     public static final int OSU_STATUS_SECOND_SOAP_EXCHANGE = 9;
+
+    /**
+     * The status code for provisioning flow to indicate starting the third SOAP exchange.
+     */
+    public static final int OSU_STATUS_THIRD_SOAP_EXCHANGE = 10;
 
     /**
      * Provisioning status for OSU failure

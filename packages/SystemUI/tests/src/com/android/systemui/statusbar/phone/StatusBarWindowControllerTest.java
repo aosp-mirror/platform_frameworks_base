@@ -74,14 +74,14 @@ public class StatusBarWindowControllerTest extends SysuiTestCase {
                 ArgumentCaptor.forClass(WindowManager.LayoutParams.class);
         verify(mWindowManager).updateViewLayout(any(), captor.capture());
         int flag = captor.getValue().privateFlags
-                & WindowManager.LayoutParams.PRIVATE_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
+                & WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
         assertThat(flag).isNotEqualTo(0);
 
         reset(mWindowManager);
         mStatusBarWindowController.setDozing(false);
         verify(mWindowManager).updateViewLayout(any(), captor.capture());
         flag = captor.getValue().privateFlags
-                & WindowManager.LayoutParams.PRIVATE_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
+                & WindowManager.LayoutParams.SYSTEM_FLAG_HIDE_NON_SYSTEM_OVERLAY_WINDOWS;
         assertThat(flag).isEqualTo(0);
     }
 

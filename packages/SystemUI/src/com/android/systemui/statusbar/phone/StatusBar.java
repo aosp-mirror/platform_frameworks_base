@@ -3756,9 +3756,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         Trace.beginSection("StatusBar#updateKeyguardState");
         if (mState == StatusBarState.KEYGUARD) {
             mKeyguardIndicationController.setVisible(true);
-            boolean dozingAnimated = mDozingRequested
-                    && DozeParameters.getInstance(mContext).shouldControlScreenOff();
-            mNotificationPanel.resetViews(dozingAnimated);
             if (mKeyguardUserSwitcher != null) {
                 mKeyguardUserSwitcher.setKeyguard(true,
                         mStatusBarStateController.fromShadeLocked());
@@ -3787,6 +3784,47 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mUnlockMethodCache.isMethodSecure(),
                 mStatusBarKeyguardViewManager.isOccluded());
         Trace.endSection();
+    }
+
+    @Override
+    public void onDozingChanged(boolean isDozing) {
+        Trace.beginSection("StatusBar#updateDozing");
+        mDozing = isDozing;
+
+        // Collapse the notification panel if open
+        boolean dozingAnimated = mDozingRequested
+                && DozeParameters.getInstance(mContext).shouldControlScreenOff();
+        mNotificationPanel.resetViews(dozingAnimated);
+
+        mKeyguardViewMediator.setAodShowing(mDozing);
+
+        //TODO: make these folks listeners of StatusBarStateController.onDozingChanged
+        mStatusBarWindowController.setDozing(mDozing);
+        mStatusBarKeyguardViewManager.setDozing(mDozing);
+        if (mAmbientIndicationContainer instanceof DozeReceiver) {
+            ((DozeReceiver) mAmbientIndicationContainer).setDozing(mDozing);
+        }
+
+        mEntryManager.updateNotifications();
+        updateDozingState();
+        updateScrimController();
+        updateReportRejectedTouchVisibility();
+        Trace.endSection();
+    }
+
+    private void updateDozing() {
+        // When in wake-and-unlock while pulsing, keep dozing state until fully unlocked.
+        boolean dozing = mDozingRequested && mState == StatusBarState.KEYGUARD
+                || mBiometricUnlockController.getMode()
+                == BiometricUnlockController.MODE_WAKE_AND_UNLOCK_PULSING;
+        // When in wake-and-unlock we may not have received a change to mState
+        // but we still should not be dozing, manually set to false.
+        if (mBiometricUnlockController.getMode() ==
+                BiometricUnlockController.MODE_WAKE_AND_UNLOCK) {
+            dozing = false;
+        }
+
+        mStatusBarStateController.setIsDozing(dozing);
     }
 
     @Override
@@ -4339,34 +4377,6 @@ public class StatusBar extends SystemUI implements DemoMode,
     public void notifyBiometricAuthModeChanged() {
         updateDozing();
         updateScrimController();
-    }
-
-    private void updateDozing() {
-        Trace.beginSection("StatusBar#updateDozing");
-        // When in wake-and-unlock while pulsing, keep dozing state until fully unlocked.
-        boolean dozing = mDozingRequested && mState == StatusBarState.KEYGUARD
-                || mBiometricUnlockController.getMode()
-                        == BiometricUnlockController.MODE_WAKE_AND_UNLOCK_PULSING;
-        // When in wake-and-unlock we may not have received a change to mState
-        // but we still should not be dozing, manually set to false.
-        if (mBiometricUnlockController.getMode() ==
-                mBiometricUnlockController.MODE_WAKE_AND_UNLOCK) {
-            dozing = false;
-        }
-        if (mDozing != dozing) {
-            mDozing = dozing;
-            mKeyguardViewMediator.setAodShowing(mDozing);
-            mStatusBarWindowController.setDozing(mDozing);
-            mStatusBarKeyguardViewManager.setDozing(mDozing);
-            if (mAmbientIndicationContainer instanceof DozeReceiver) {
-                ((DozeReceiver) mAmbientIndicationContainer).setDozing(mDozing);
-            }
-            mEntryManager.updateNotifications();
-            updateDozingState();
-            updateScrimController();
-            updateReportRejectedTouchVisibility();
-        }
-        Trace.endSection();
     }
 
     @VisibleForTesting

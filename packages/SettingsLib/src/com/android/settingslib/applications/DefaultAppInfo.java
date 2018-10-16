@@ -25,7 +25,6 @@ import android.content.pm.PackageItemInfo;
 import android.content.pm.PackageManager;
 import android.graphics.drawable.Drawable;
 import android.os.RemoteException;
-import android.os.UserHandle;
 import android.util.IconDrawableFactory;
 
 import com.android.settingslib.widget.CandidateInfo;
@@ -46,8 +45,8 @@ public class DefaultAppInfo extends CandidateInfo {
         this(context, pm, uid, cn, null /* summary */, true /* enabled */);
     }
 
-    public DefaultAppInfo(Context context, PackageManager pm, PackageItemInfo info) {
-        this(context, pm, info, null /* summary */, true /* enabled */);
+    public DefaultAppInfo(Context context, PackageManager pm, int uid, PackageItemInfo info) {
+        this(context, pm, uid, info, null /* summary */, true /* enabled */);
     }
 
     public DefaultAppInfo(Context context, PackageManager pm, int uid, ComponentName cn,
@@ -61,12 +60,12 @@ public class DefaultAppInfo extends CandidateInfo {
         this.summary = summary;
     }
 
-    public DefaultAppInfo(Context context, PackageManager pm, PackageItemInfo info,
+    public DefaultAppInfo(Context context, PackageManager pm, int uid, PackageItemInfo info,
                           String summary, boolean enabled) {
         super(enabled);
         mContext = context;
         mPm = pm;
-        userId = UserHandle.myUserId();
+        userId = uid;
         packageItemInfo = info;
         componentName = null;
         this.summary = summary;

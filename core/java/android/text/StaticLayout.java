@@ -22,6 +22,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
 import android.graphics.Paint;
+import android.graphics.text.LineBreaker;
 import android.os.Build;
 import android.text.style.LeadingMarginSpan;
 import android.text.style.LeadingMarginSpan.LeadingMarginSpan2;
@@ -55,7 +56,7 @@ public class StaticLayout extends Layout {
      *
      *   - Create MeasuredParagraph by MeasuredParagraph.buildForStaticLayout which measures in
      *     native.
-     *   - Run NativeLineBreaker.computeLineBreaks() to obtain line breaks for the paragraph.
+     *   - Run LineBreaker.computeLineBreaks() to obtain line breaks for the paragraph.
      *
      * After all paragraphs, call finish() to release expensive buffers.
      */
@@ -634,7 +635,7 @@ public class StaticLayout extends Layout {
             indents = null;
         }
 
-        final NativeLineBreaker lineBreaker = new NativeLineBreaker.Builder()
+        final LineBreaker lineBreaker = new LineBreaker.Builder()
                 .setBreakStrategy(b.mBreakStrategy)
                 .setHyphenationFrequency(b.mHyphenationFrequency)
                 // TODO: Support more justification mode, e.g. letter spacing, stretching.
@@ -642,8 +643,8 @@ public class StaticLayout extends Layout {
                 .setIndents(indents)
                 .build();
 
-        NativeLineBreaker.ParagraphConstraints constraints =
-                new NativeLineBreaker.ParagraphConstraints();
+        LineBreaker.ParagraphConstraints constraints =
+                new LineBreaker.ParagraphConstraints();
 
         PrecomputedText.ParagraphInfo[] paragraphInfo = null;
         final Spanned spanned = (source instanceof Spanned) ? (Spanned) source : null;
@@ -739,8 +740,8 @@ public class StaticLayout extends Layout {
             constraints.setIndent(firstWidth, firstWidthLineCount);
             constraints.setTabStops(variableTabStops, TAB_INCREMENT);
 
-            NativeLineBreaker.Result res = lineBreaker.computeLineBreaks(
-                    measuredPara.getNativeMeasuredParagraph(), constraints, mLineCount);
+            LineBreaker.Result res = lineBreaker.computeLineBreaks(
+                    measuredPara.getMeasuredText(), constraints, mLineCount);
             int breakCount = res.getLineCount();
             if (lineBreakCapacity < breakCount) {
                 lineBreakCapacity = breakCount;

@@ -23,6 +23,7 @@
 #include <atomic>
 #include <fcntl.h>
 #include <inttypes.h>
+#include <mutex>
 #include <stdio.h>
 #include <sys/stat.h>
 #include <sys/types.h>
@@ -69,6 +70,7 @@ static struct bindernative_offsets_t
     // Class state.
     jclass mClass;
     jmethodID mExecTransact;
+    jmethodID mGetInterfaceDescriptor;
 
     // Object state.
     jfieldID mObject;
@@ -326,8 +328,32 @@ protected:
         env->DeleteGlobalRef(mObject);
     }
 
-    virtual status_t onTransact(
-        uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags = 0)
+    const String16& getInterfaceDescriptor() const override
+    {
+        call_once(mPopulateDescriptor, [this] {
+            JNIEnv* env = javavm_to_jnienv(mVM);
+
+            ALOGV("getInterfaceDescriptor() on %p calling object %p in env %p vm %p\n", this, mObject, env, mVM);
+
+            jstring descriptor = (jstring)env->CallObjectMethod(mObject, gBinderOffsets.mGetInterfaceDescriptor);
+
+            if (descriptor == nullptr) {
+                return;
+            }
+
+            static_assert(sizeof(jchar) == sizeof(char16_t), "");
+            const jchar* descriptorChars = env->GetStringChars(descriptor, nullptr);
+            const char16_t* rawDescriptor = reinterpret_cast<const char16_t*>(descriptorChars);
+            jsize rawDescriptorLen = env->GetStringLength(descriptor);
+            mDescriptor = String16(rawDescriptor, rawDescriptorLen);
+            env->ReleaseStringChars(descriptor, descriptorChars);
+        });
+
+        return mDescriptor;
+    }
+
+    status_t onTransact(
+        uint32_t code, const Parcel& data, Parcel* reply, uint32_t flags = 0) override
     {
         JNIEnv* env = javavm_to_jnienv(mVM);
 
@@ -376,7 +402,7 @@ protected:
         return res != JNI_FALSE ? NO_ERROR : UNKNOWN_TRANSACTION;
     }
 
-    virtual status_t dump(int fd, const Vector<String16>& args)
+    status_t dump(int fd, const Vector<String16>& args) override
     {
         return 0;
     }
@@ -384,6 +410,9 @@ protected:
 private:
     JavaVM* const   mVM;
     jobject const   mObject;  // GlobalRef to Java Binder
+
+    mutable std::once_flag mPopulateDescriptor;
+    mutable String16 mDescriptor;
 };
 
 // ----------------------------------------------------------------------------
@@ -926,6 +955,8 @@ static int int_register_android_os_Binder(JNIEnv* env)
 
     gBinderOffsets.mClass = MakeGlobalRefOrDie(env, clazz);
     gBinderOffsets.mExecTransact = GetMethodIDOrDie(env, clazz, "execTransact", "(IJJI)Z");
+    gBinderOffsets.mGetInterfaceDescriptor = GetMethodIDOrDie(env, clazz, "getInterfaceDescriptor",
+        "()Ljava/lang/String;");
     gBinderOffsets.mObject = GetFieldIDOrDie(env, clazz, "mObject", "J");
 
     return RegisterMethodsOrDie(

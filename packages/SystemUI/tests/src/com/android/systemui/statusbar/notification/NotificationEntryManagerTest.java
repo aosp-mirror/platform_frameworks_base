@@ -68,6 +68,7 @@ import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
+import com.android.systemui.statusbar.notification.row.NotificationInflater;
 import com.android.systemui.statusbar.notification.row.RowInflaterTask;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
@@ -134,8 +135,9 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         }
 
         @Override
-        public void onAsyncInflationFinished(NotificationData.Entry entry) {
-            super.onAsyncInflationFinished(entry);
+        public void onAsyncInflationFinished(NotificationData.Entry entry,
+                @NotificationInflater.InflationFlag int inflatedFlags) {
+            super.onAsyncInflationFinished(entry, inflatedFlags);
 
             mCountDownLatch.countDown();
         }
@@ -428,7 +430,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         setSmartActions(mEntry.key, new ArrayList<>(Arrays.asList(createAction())));
 
         mEntryManager.updateNotificationRanking(mRankingMap);
-        verify(mRow).updateNotification(eq(mEntry));
+        verify(mRow).setEntry(eq(mEntry));
         assertEquals(1, mEntry.smartActions.size());
         assertEquals("action", mEntry.smartActions.get(0).title);
     }
@@ -443,7 +445,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         setSmartActions(mEntry.key, null);
 
         mEntryManager.updateNotificationRanking(mRankingMap);
-        verify(mRow, never()).updateNotification(eq(mEntry));
+        verify(mRow, never()).setEntry(eq(mEntry));
         assertEquals(0, mEntry.smartActions.size());
     }
 
@@ -457,7 +459,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         setSmartActions(mEntry.key, new ArrayList<>(Arrays.asList(createAction())));
 
         mEntryManager.updateNotificationRanking(mRankingMap);
-        verify(mRow, never()).updateNotification(eq(mEntry));
+        verify(mRow, never()).setEntry(eq(mEntry));
         assertEquals(1, mEntry.smartActions.size());
         assertEquals("action", mEntry.smartActions.get(0).title);
     }
@@ -472,7 +474,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         setSmartActions(mEntry.key, new ArrayList<>(Arrays.asList(createAction())));
 
         mEntryManager.updateNotificationRanking(mRankingMap);
-        verify(mRow, never()).updateNotification(eq(mEntry));
+        verify(mRow, never()).setEntry(eq(mEntry));
         assertEquals(1, mEntry.smartActions.size());
         assertEquals("action", mEntry.smartActions.get(0).title);
     }

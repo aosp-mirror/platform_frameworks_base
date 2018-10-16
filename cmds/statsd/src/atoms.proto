@@ -638,7 +638,7 @@ message WakelockStateChanged {
 
     // The type (level) of the wakelock; e.g. a partial wakelock or a full wakelock.
     // From frameworks/base/core/proto/android/os/enums.proto.
-    optional android.os.WakeLockLevelEnum level = 2;
+    optional android.os.WakeLockLevelEnum type = 2;
 
     // The wakelock tag (Called tag in the Java API, sometimes name elsewhere).
     optional string tag = 3;
@@ -1031,20 +1031,20 @@ message ResourceConfigurationChanged {
     // Bit mask of color capabilities of the screen.
     // Contains information about the color gamut and hdr mode of the screen.
     // See: https://d.android.com/reference/android/content/res/Configuration.html#colorMode
-    optional int32 colorMode = 1;
+    optional int32 color_mode = 1;
 
     // The target screen density being rendered to.
     // See: https://d.android.com/reference/android/content/res/Configuration.html#densityDpi
-    optional int32 densityDpi = 2;
+    optional int32 density_dpi = 2;
 
     // Current user preference for the scaling factor for fonts,
     // relative to the base density scaling.
     // See: https://d.android.com/reference/android/content/res/Configuration.html#fontScale
-    optional float fontScale = 3;
+    optional float font_scale = 3;
 
     // Flag indicating whether the hard keyboard is hidden.
     // See: https://d.android.com/reference/android/content/res/Configuration.html#hardKeyboardHidden
-    optional int32 hardKeyboardHidden = 4;
+    optional int32 hard_keyboard_hidden = 4;
 
     // The type of keyboard attached to the device.
     // See: https://d.android.com/reference/android/content/res/Configuration.html#keyboard
@@ -1052,7 +1052,7 @@ message ResourceConfigurationChanged {
 
     // Flag indicating whether any keyboard is available. Takes soft keyboards into account.
     // See: https://d.android.com/reference/android/content/res/Configuration.html#keyboardHidden
-    optional int32 keyboardHideen = 6;
+    optional int32 keyboard_hidden = 6;
 
     // IMSI MCC (Mobile Country Code), corresponding to mcc resource qualifier.
     // 0 if undefined.
@@ -1071,7 +1071,7 @@ message ResourceConfigurationChanged {
 
     // Flag indicating whether the navigation is available.
     // See: https://d.android.com/reference/android/content/res/Configuration.html#navigationHidden
-    optional int32 navigationHidden = 10;
+    optional int32 navigation_hidden = 10;
 
     // Overall orientation of the screen.
     // See: https://d.android.com/reference/android/content/res/Configuration.html#orientation
@@ -1079,24 +1079,24 @@ message ResourceConfigurationChanged {
 
     // The current height of the available screen space, in dp units.
     // See: https://d.android.com/reference/android/content/res/Configuration.html#screenHeightDp
-    optional int32 screenHeightDp = 12;
+    optional int32 screen_height_dp = 12;
 
     // Bit mask of overall layout of the screen.
     // Contains information about screen size, whether the screen is wider/taller
     // than normal, whether the screen layout is right-tl-left or left-to-right,
     // and whether the screen has a rounded shape.
     // See: https://d.android.com/reference/android/content/res/Configuration.html#screenLayout
-    optional int32 screenLayout = 13;
+    optional int32 screen_layout = 13;
 
     // Current width of the available screen space, in dp units.
     // See: https://d.android.com/reference/android/content/res/Configuration.html#screenWidthDp
-    optional int32 screenWidthDp = 14;
+    optional int32 screen_width_dp = 14;
 
     // The smallest screen size an application will see in normal operation.
     // This is the smallest value of both screenWidthDp and screenHeightDp
     // in portrait and landscape.
     // See: https://d.android.com/reference/android/content/res/Configuration.html#smallestScreenWidthDp
-    optional int32 smallestScreenWidthDp = 15;
+    optional int32 smallest_screen_width_dp = 15;
 
     // The type of touch screen attached to the device.
     // See: https://d.android.com/reference/android/content/res/Configuration.html#touchscreen
@@ -1107,7 +1107,7 @@ message ResourceConfigurationChanged {
     // Eg: NORMAL, DESK, CAR, TELEVISION, WATCH, VR_HEADSET
     // Also contains information about whether the device is in night mode.
     // See: https://d.android.com/reference/android/content/res/Configuration.html#uiMode
-    optional int32 uiMode = 17;
+    optional int32 ui_mode = 17;
 }
 
 
@@ -1194,7 +1194,7 @@ message BluetoothEnabledStateChanged {
     // Eg. Airplane mode, crash, application request.
     optional android.bluetooth.EnableDisableReasonEnum reason = 3;
     // If the reason is an application request, this will be the package name.
-    optional string pkgName = 4;
+    optional string pkg_name = 4;
 }
 
 /**
@@ -1343,7 +1343,7 @@ message BatteryHealthSnapshot {
     }
     optional BatterySnapshotType type = 1;
     // Temperature, in 1/10ths of degree C.
-    optional int32 temperature_deci_celcius = 2;
+    optional int32 temperature_deci_celsius = 2;
     // Voltage Battery Voltage, in microVolts.
     optional int32 voltage_micro_volt = 3;
     // Current Battery current, in microAmps.
@@ -1871,10 +1871,10 @@ message AppStartMemoryStateCaptured {
     optional string activity_name = 3;
 
     // # of page-faults
-    optional int64 pgfault = 4;
+    optional int64 page_fault = 4;
 
     // # of major page-faults
-    optional int64 pgmajfault = 5;
+    optional int64 page_major_fault = 5;
 
     // RSS
     optional int64 rss_in_bytes = 6;
@@ -1914,13 +1914,13 @@ message LmkKillOccurred {
     optional string process_name = 2;
 
     // oom adj score.
-    optional int32 oom_score = 3;
+    optional int32 oom_adj_score = 3;
 
     // # of page-faults
-    optional int64 pgfault = 4;
+    optional int64 page_fault = 4;
 
     // # of major page-faults
-    optional int64 pgmajfault = 5;
+    optional int64 page_major_fault = 5;
 
     // RSS
     optional int64 rss_in_bytes = 6;
@@ -2182,7 +2182,7 @@ message KernelWakelock {
 
     optional int32 version = 3;
 
-    optional int64 time = 4;
+    optional int64 time_micros = 4;
 }
 
 /**
@@ -2246,11 +2246,11 @@ message WifiActivityInfo {
     // stack reported state
     // TODO: replace this with proto enum
     optional int32 stack_state = 2;
-    // tx time in ms
+    // tx time in millis
     optional uint64 controller_tx_time_millis = 3;
-    // rx time in ms
+    // rx time in millis
     optional uint64 controller_rx_time_millis = 4;
-    // idle time in ms
+    // idle time in millis
     optional uint64 controller_idle_time_millis = 5;
     // product of current(mA), voltage(V) and time(ms)
     optional uint64 controller_energy_used = 6;
@@ -2262,9 +2262,9 @@ message WifiActivityInfo {
 message ModemActivityInfo {
     // timestamp(wall clock) of record creation
     optional uint64 timestamp_millis = 1;
-    // sleep time in ms.
+    // sleep time in millis.
     optional uint64 sleep_time_millis = 2;
-    // idle time in ms
+    // idle time in millis
     optional uint64 controller_idle_time_millis = 3;
     /**
      * Tx power index
@@ -2299,11 +2299,11 @@ message BluetoothActivityInfo {
     optional uint64 timestamp_millis = 1;
     // bluetooth stack state
     optional int32 bluetooth_stack_state = 2;
-    // tx time in ms
+    // tx time in millis
     optional uint64 controller_tx_time_millis = 3;
-    // rx time in ms
+    // rx time in millis
     optional uint64 controller_rx_time_millis = 4;
-    // idle time in ms
+    // idle time in millis
     optional uint64 controller_idle_time_millis = 5;
     // product of current(mA), voltage(V) and time(ms)
     optional uint64 energy_used = 6;
@@ -2320,13 +2320,13 @@ message ProcessMemoryState {
     optional string process_name = 2;
 
     // oom adj score.
-    optional int32 oom_score = 3;
+    optional int32 oom_adj_score = 3;
 
     // # of page-faults
-    optional int64 pgfault = 4;
+    optional int64 page_fault = 4;
 
     // # of major page-faults
-    optional int64 pgmajfault = 5;
+    optional int64 page_major_fault = 5;
 
     // RSS
     optional int64 rss_in_bytes = 6;
@@ -2408,7 +2408,7 @@ message DiskSpace {
  *   frameworks/base/cmds/statsd/src/external/ResourceHealthManagerPuller.cpp
  */
 message RemainingBatteryCapacity {
-    optional int32 charge_uAh = 1;
+    optional int32 charge_micro_ampere_hour = 1;
 }
 
 /**
@@ -2417,7 +2417,7 @@ message RemainingBatteryCapacity {
  *   frameworks/base/cmds/statsd/src/external/ResourceHealthManagerPuller.cpp
  */
 message FullBatteryCapacity {
-    optional int32 capacity_uAh = 1;
+    optional int32 capacity_micro_ampere_hour = 1;
 }
 
 /**
@@ -2427,7 +2427,7 @@ message FullBatteryCapacity {
  */
 message BatteryVoltage {
     // The voltage of the battery, in millivolts.
-    optional int32 voltage_mV = 1;
+    optional int32 voltage_millivolt = 1;
 }
 
 /**
@@ -2445,7 +2445,7 @@ message Temperature {
     optional string sensor_name = 2;
 
     // Temperature in tenths of a degree C.
-    optional int32 temperature_dC = 3;
+    optional int32 temperature_deci_celsius = 3;
 }
 
 /**
@@ -2555,8 +2555,7 @@ message LooperStats {
     // recorded_message_count.
     //
     // If recorded_message_count is different than message_count, it means data
-    // collection has been sampled. All the fields below will be sampled in this
-    // case.
+    // collection has been sampled. The fields below will be sampled in this case.
     optional int64 recorded_message_count = 7;
 
     // Total latency of all processed messages.
@@ -2572,6 +2571,32 @@ message LooperStats {
 
     // True if the screen was interactive PowerManager#isInteractive at the end of the call.
     optional bool screen_interactive = 10;
+
+    // Max recorded CPU usage of all processed messages.
+    optional int64 recorded_max_cpu_micros = 11;
+
+    // Max recorded latency of all processed messages.
+    optional int64 recorded_max_latency_micros = 12;
+
+    // Total number of messages we tracked the dispatching delay for. If we
+    // collected data for all the messages, message_count will be equal to
+    // recorded_delay_message_count.
+    //
+    // If recorded_delay_message_count is different than message_count, it means data
+    // collection has been sampled or/and not all messages specified the target dispatch time.
+    // The fields below will be sampled in this case.
+    optional int64 recorded_delay_message_count = 13;
+
+    // Total dispatching delay of all processed messages.
+    // Calculated as a difference between the target dispatching time (Message.when)
+    // and the actual dispatching time.
+    // Average can be computed using recorded_total_delay_millis / recorded_delay_message_count.
+    optional int64 recorded_total_delay_millis = 14;
+
+    // Max dispatching delay of all processed messages.
+    // Calculated as a difference between the target dispatching time (Message.when)
+    // and the actual dispatching time.
+    optional int64 recorded_max_delay_millis = 15;
 }
 
 /**
@@ -2708,10 +2733,10 @@ message ProcessStatsStateProto {
     optional android.service.procstats.ProcessState process_state = 3;
 
     // Millisecond uptime duration spent in this state
-    optional int64 duration_ms = 4;
+    optional int64 duration_millis = 4;
 
     // Millisecond elapsed realtime duration spent in this state
-    optional int64 realtime_duration_ms = 9;
+    optional int64 realtime_duration_millis = 9;
 
     // # of samples taken
     optional int32 sample_size = 5;
@@ -2770,9 +2795,9 @@ message PackageServiceOperationStatsProto {
         optional android.service.procstats.MemoryState memory_state = 2;
 
         // duration in milliseconds.
-        optional int64 duration_ms = 3;
+        optional int64 duration_millis = 3;
         // Millisecond elapsed realtime duration spent in this state
-        optional int64 realtime_duration_ms = 4;
+        optional int64 realtime_duration_millis = 4;
     }
     repeated StateStats state_stats = 3;
 }
@@ -2796,7 +2821,7 @@ message PackageAssociationSourceProcessStatsProto {
     optional int32 total_count = 3;
 
     // Millisecond uptime total duration this association was around.
-    optional int64 total_duration_ms = 4;
+    optional int64 total_duration_millis = 4;
 
     // Total count of the times this association became actively impacting its target process.
     optional int32 active_count = 5;
@@ -2806,9 +2831,9 @@ message PackageAssociationSourceProcessStatsProto {
         // Process state enum.
         optional android.service.procstats.ProcessState process_state = 1;
         // Millisecond uptime duration spent in this state
-        optional int64 duration_ms = 2;
+        optional int64 duration_millis = 2;
         // Millisecond elapsed realtime duration spent in this state
-        optional int64 realtime_duration_ms = 3;
+        optional int64 realtime_duration_mmillis = 3;
     }
     repeated StateStats active_state_stats = 6;
 }
@@ -2843,16 +2868,16 @@ message ProcessStatsPackageProto {
 
 message ProcessStatsSectionProto {
     // Elapsed realtime at start of report.
-    optional int64 start_realtime_ms = 1;
+    optional int64 start_realtime_millis = 1;
 
     // Elapsed realtime at end of report.
-    optional int64 end_realtime_ms = 2;
+    optional int64 end_realtime_millis = 2;
 
     // CPU uptime at start of report.
-    optional int64 start_uptime_ms = 3;
+    optional int64 start_uptime_millis = 3;
 
     // CPU uptime at end of report.
-    optional int64 end_uptime_ms = 4;
+    optional int64 end_uptime_millis = 4;
 
     // System runtime library. e.g. "libdvm.so", "libart.so".
     optional string runtime = 5;

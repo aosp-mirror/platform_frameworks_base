@@ -44,6 +44,7 @@ import android.content.IntentSender;
 import android.content.pm.ActivityInfo;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.ResolveInfo;
+import android.content.pm.SuspendDialogInfo;
 import android.content.pm.UserInfo;
 import android.os.Binder;
 import android.os.Bundle;
@@ -246,9 +247,9 @@ class ActivityStartInterceptor {
         if (PLATFORM_PACKAGE_NAME.equals(suspendingPackage)) {
             return interceptSuspendedByAdminPackage();
         }
-        final String dialogMessage = pmi.getSuspendedDialogMessage(suspendedPackage, mUserId);
+        final SuspendDialogInfo dialogInfo = pmi.getSuspendedDialogInfo(suspendedPackage, mUserId);
         mIntent = SuspendedAppActivity.createSuspendedAppInterceptIntent(suspendedPackage,
-                suspendingPackage, dialogMessage, mUserId);
+                suspendingPackage, dialogInfo, mUserId);
         mCallingPid = mRealCallingPid;
         mCallingUid = mRealCallingUid;
         mResolvedType = null;
