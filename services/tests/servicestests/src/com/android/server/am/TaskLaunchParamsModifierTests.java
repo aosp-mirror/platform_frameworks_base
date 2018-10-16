@@ -189,7 +189,7 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
         assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, /* layout */ null,
                 mActivity, /* source */ null, options, mCurrent, mResult));
 
-        assertEquivalentWindowingMode(WINDOWING_MODE_FREEFORM, mResult.mWindowingMode,
+        assertEquivalentWindowingMode(WINDOWING_MODE_FULLSCREEN, mResult.mWindowingMode,
                 WINDOWING_MODE_FULLSCREEN);
     }
 
@@ -277,7 +277,7 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
     }
 
     @Test
-    public void testNonEmptyLayoutInfersFreeformWithResizeableActivity() {
+    public void testNonEmptyLayoutUsesFullscreenWithResizeableActivity() {
         final ActivityInfo.WindowLayout layout = new WindowLayoutBuilder()
                 .setWidth(120).setHeight(80).build();
 
@@ -286,7 +286,7 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
         assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, layout, mActivity,
                 /* source */ null, /* options */ null, mCurrent, mResult));
 
-        assertEquivalentWindowingMode(WINDOWING_MODE_FREEFORM, mResult.mWindowingMode,
+        assertEquivalentWindowingMode(WINDOWING_MODE_FULLSCREEN, mResult.mWindowingMode,
                 WINDOWING_MODE_FULLSCREEN);
     }
 
@@ -710,21 +710,6 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
                 /* source */ null, /* options */ null, mCurrent, mResult));
 
         assertEquals(new Rect(900, 486, 1020, 594), mResult.mBounds);
-    }
-
-    @Test
-    public void testNonEmptyLayoutBoundsWithResizeableActivity() {
-        final ActivityDisplay display = mSupervisor.getActivityDisplay(DEFAULT_DISPLAY);
-        display.setBounds(new Rect(0, 0, 1920, 1080));
-        final ActivityInfo.WindowLayout layout = new WindowLayoutBuilder()
-                .setWidth(120).setHeight(80).build();
-
-        mCurrent.mPreferredDisplayId = DEFAULT_DISPLAY;
-
-        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(/* task */ null, layout, mActivity,
-                /* source */ null, /* options */ null, mCurrent, mResult));
-
-        assertEquals(new Rect(900, 500, 1020, 580), mResult.mBounds);
     }
 
     @Test
