@@ -659,15 +659,6 @@ public class LauncherAppsService extends SystemService {
             try {
                 final PackageManagerInternal pmInt =
                         LocalServices.getService(PackageManagerInternal.class);
-                ActivityInfo info = pmInt.getActivityInfo(component,
-                        PackageManager.MATCH_DIRECT_BOOT_AWARE
-                                | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
-                        callingUid, user.getIdentifier());
-                if (!info.exported) {
-                    throw new SecurityException("Cannot launch non-exported components "
-                            + component);
-                }
-
                 // Check that the component actually has Intent.CATEGORY_LAUCNCHER
                 // as calling startActivityAsUser ignores the category and just
                 // resolves based on the component if present.
@@ -680,6 +671,11 @@ public class LauncherAppsService extends SystemService {
                     ActivityInfo activityInfo = apps.get(i).activityInfo;
                     if (activityInfo.packageName.equals(component.getPackageName()) &&
                             activityInfo.name.equals(component.getClassName())) {
+                        if (!activityInfo.exported) {
+                            throw new SecurityException("Cannot launch non-exported components "
+                                    + component);
+                        }
+
                         // Found an activity with category launcher that matches
                         // this component so ok to launch.
                         launchIntent.setPackage(null);
