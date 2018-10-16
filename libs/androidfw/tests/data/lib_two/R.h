@@ -24,10 +24,22 @@ namespace android {
 namespace lib_two {
 
 struct R {
+  struct attr {
+    enum : uint32_t {
+      attr3 = 0x02010000, // default
+    };
+  };
+
   struct string {
     enum : uint32_t {
       LibraryString = 0x02020000,  // default
       foo = 0x02020001, // default
+    };
+  };
+
+  struct style {
+    enum : uint32_t {
+      Theme = 0x02030000, // default
     };
   };
 };

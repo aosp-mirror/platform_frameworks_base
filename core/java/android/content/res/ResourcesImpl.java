@@ -1335,7 +1335,7 @@ public class ResourcesImpl {
         void setTo(ThemeImpl other) {
             synchronized (mKey) {
                 synchronized (other.mKey) {
-                    AssetManager.nativeThemeCopy(mTheme, other.mTheme);
+                    mAssets.setThemeTo(mTheme, other.mAssets, other.mTheme);
 
                     mThemeResId = other.mThemeResId;
                     mKey.setTo(other.getKey());

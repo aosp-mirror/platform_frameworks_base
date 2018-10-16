@@ -1208,13 +1208,23 @@ static void NativeThemeApplyStyle(JNIEnv* env, jclass /*clazz*/, jlong ptr, jlon
   // jniThrowException(env, "java/lang/IllegalArgumentException", error_msg.c_str());
 }
 
-static void NativeThemeCopy(JNIEnv* env, jclass /*clazz*/, jlong dst_theme_ptr,
-                            jlong src_theme_ptr) {
+static void NativeThemeCopy(JNIEnv* env, jclass /*clazz*/, jlong dst_asset_manager_ptr,
+                            jlong dst_theme_ptr, jlong src_asset_manager_ptr, jlong src_theme_ptr) {
   Theme* dst_theme = reinterpret_cast<Theme*>(dst_theme_ptr);
   Theme* src_theme = reinterpret_cast<Theme*>(src_theme_ptr);
-  if (!dst_theme->SetTo(*src_theme)) {
-    jniThrowException(env, "java/lang/IllegalArgumentException",
-                      "Themes are from different AssetManagers");
+
+  if (dst_asset_manager_ptr != src_asset_manager_ptr) {
+    ScopedLock<AssetManager2> dst_assetmanager(AssetManagerFromLong(dst_asset_manager_ptr));
+    CHECK(dst_theme->GetAssetManager() == &(*dst_assetmanager));
+    (void) dst_assetmanager;
+
+    ScopedLock <AssetManager2> src_assetmanager(AssetManagerFromLong(src_asset_manager_ptr));
+    CHECK(src_theme->GetAssetManager() == &(*src_assetmanager));
+    (void) src_assetmanager;
+
+    dst_theme->SetTo(*src_theme);
+  } else {
+    dst_theme->SetTo(*src_theme);
   }
 }
 
@@ -1255,10 +1265,11 @@ static void NativeThemeDump(JNIEnv* /*env*/, jclass /*clazz*/, jlong ptr, jlong 
   Theme* theme = reinterpret_cast<Theme*>(theme_ptr);
   CHECK(theme->GetAssetManager() == &(*assetmanager));
   (void) assetmanager;
-  (void) theme;
   (void) priority;
   (void) tag;
   (void) prefix;
+
+  theme->Dump();
 }
 
 static jint NativeThemeGetChangingConfigurations(JNIEnv* /*env*/, jclass /*clazz*/,
@@ -1377,7 +1388,7 @@ static const JNINativeMethod gAssetManagerMethods[] = {
     {"nativeThemeCreate", "(J)J", (void*)NativeThemeCreate},
     {"nativeThemeDestroy", "(J)V", (void*)NativeThemeDestroy},
     {"nativeThemeApplyStyle", "(JJIZ)V", (void*)NativeThemeApplyStyle},
-    {"nativeThemeCopy", "(JJ)V", (void*)NativeThemeCopy},
+    {"nativeThemeCopy", "(JJJJ)V", (void*)NativeThemeCopy},
     {"nativeThemeClear", "(J)V", (void*)NativeThemeClear},
     {"nativeThemeGetAttributeValue", "(JJILandroid/util/TypedValue;Z)I",
      (void*)NativeThemeGetAttributeValue},

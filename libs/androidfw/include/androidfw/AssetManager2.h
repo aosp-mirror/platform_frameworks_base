@@ -74,6 +74,8 @@ struct FindEntryResult;
 // AssetManager2 is the main entry point for accessing assets and resources.
 // AssetManager2 provides caching of resources retrieved via the underlying ApkAssets.
 class AssetManager2 {
+  friend Theme;
+
  public:
   struct ResourceName {
     const char* package = nullptr;
@@ -285,6 +287,9 @@ class AssetManager2 {
   // been seen while traversing bag parents.
   const ResolvedBag* GetBag(uint32_t resid, std::vector<uint32_t>& child_resids);
 
+  // Retrieve the assigned package id of the package if loaded into this AssetManager
+  uint8_t GetAssignedPackageId(const LoadedPackage* package);
+
   // The ordered list of ApkAssets to search. These are not owned by the AssetManager, and must
   // have a longer lifetime.
   std::vector<const ApkAssets*> apk_assets_;
@@ -355,10 +360,13 @@ class Theme {
   bool ApplyStyle(uint32_t resid, bool force = false);
 
   // Sets this Theme to be a copy of `o` if `o` has the same AssetManager as this Theme.
-  // Returns false if the AssetManagers of the Themes were not compatible.
-  bool SetTo(const Theme& o);
+  // If `o` does not have the same AssetManager as this theme, only attributes from ApkAssets loaded
+  // into both AssetManagers will be copied to this theme.
+  void SetTo(const Theme& o);
 
   void Clear();
+
+  void Dump() const;
 
   inline const AssetManager2* GetAssetManager() const {
     return asset_manager_;
