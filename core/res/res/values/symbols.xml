@@ -3481,4 +3481,6 @@
   <java-symbol type="fraction" name="config_prescaleAbsoluteVolume_index3" />
 
   <java-symbol type="bool" name="config_useSmsAppService" />
+
+  <java-symbol type="string" name="config_defaultAssistantComponentName" />
 </resources>
