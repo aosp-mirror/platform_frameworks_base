@@ -1508,11 +1508,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 resetDefaultImeLocked(mContext);
             }
             updateFromSettingsLocked(true);
-            try {
-                startInputInnerLocked();
-            } catch (RuntimeException e) {
-                Slog.w(TAG, "Unexpected exception", e);
-            }
         }
 
         if (initialUserSwitch) {
@@ -1588,12 +1583,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 InputMethodUtils.setNonSelectedSystemImesDisabledUntilUsed(mIPackageManager,
                         mSettings.getEnabledInputMethodListLocked(), currentUserId,
                         mContext.getBasePackageName());
-
-                try {
-                    startInputInnerLocked();
-                } catch (RuntimeException e) {
-                    Slog.w(TAG, "Unexpected exception", e);
-                }
             }
         }
     }
