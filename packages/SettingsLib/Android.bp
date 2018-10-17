@@ -2,16 +2,14 @@ android_library {
 
     name: "SettingsLib",
 
-    libs: [
+    static_libs: [
         "androidx.annotation_annotation",
         "androidx.legacy_legacy-support-v4",
         "androidx.recyclerview_recyclerview",
         "androidx.preference_preference",
         "androidx.appcompat_appcompat",
         "androidx.lifecycle_lifecycle-runtime",
-    ],
 
-    static_libs: [
         "SettingsLibHelpUtils",
         "SettingsLibRestrictedLockUtils",
         "SettingsLibAppPreference",
