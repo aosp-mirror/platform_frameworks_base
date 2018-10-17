@@ -1776,6 +1776,47 @@ public final class MotionEvent extends InputEvent implements Parcelable {
     static public MotionEvent obtain(long downTime, long eventTime, int action,
             float x, float y, float pressure, float size, int metaState,
             float xPrecision, float yPrecision, int deviceId, int edgeFlags) {
+        return obtain(downTime, eventTime, action, x, y, pressure, size, metaState,
+                xPrecision, yPrecision, deviceId, edgeFlags, InputDevice.SOURCE_UNKNOWN,
+                DEFAULT_DISPLAY);
+    }
+
+    /**
+     * Create a new MotionEvent, filling in all of the basic values that
+     * define the motion.
+     *
+     * @param downTime The time (in ms) when the user originally pressed down to start
+     * a stream of position events.  This must be obtained from {@link SystemClock#uptimeMillis()}.
+     * @param eventTime  The the time (in ms) when this specific event was generated.  This
+     * must be obtained from {@link SystemClock#uptimeMillis()}.
+     * @param action The kind of action being performed, such as {@link #ACTION_DOWN}.
+     * @param x The X coordinate of this event.
+     * @param y The Y coordinate of this event.
+     * @param pressure The current pressure of this event.  The pressure generally
+     * ranges from 0 (no pressure at all) to 1 (normal pressure), however
+     * values higher than 1 may be generated depending on the calibration of
+     * the input device.
+     * @param size A scaled value of the approximate size of the area being pressed when
+     * touched with the finger. The actual value in pixels corresponding to the finger
+     * touch is normalized with a device specific range of values
+     * and scaled to a value between 0 and 1.
+     * @param metaState The state of any meta / modifier keys that were in effect when
+     * the event was generated.
+     * @param xPrecision The precision of the X coordinate being reported.
+     * @param yPrecision The precision of the Y coordinate being reported.
+     * @param deviceId The id for the device that this event came from.  An id of
+     * zero indicates that the event didn't come from a physical device; other
+     * numbers are arbitrary and you shouldn't depend on the values.
+     * @param source The source of this event.
+     * @param edgeFlags A bitfield indicating which edges, if any, were touched by this
+     * MotionEvent.
+     * @param displayId The display ID associated with this event.
+     * @hide
+     */
+    public static MotionEvent obtain(long downTime, long eventTime, int action,
+            float x, float y, float pressure, float size, int metaState,
+            float xPrecision, float yPrecision, int deviceId, int edgeFlags, int source,
+            int displayId) {
         MotionEvent ev = obtain();
         synchronized (gSharedTempLock) {
             ensureSharedTempPointerCapacity(1);
@@ -1791,7 +1832,7 @@ public final class MotionEvent extends InputEvent implements Parcelable {
             pc[0].size = size;
 
             ev.mNativePtr = nativeInitialize(ev.mNativePtr,
-                    deviceId, InputDevice.SOURCE_UNKNOWN, DEFAULT_DISPLAY,
+                    deviceId, source, displayId,
                     action, 0, edgeFlags, metaState, 0,
                     0, 0, xPrecision, yPrecision,
                     downTime * NS_PER_MS, eventTime * NS_PER_MS,
