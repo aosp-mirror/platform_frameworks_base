@@ -1614,6 +1614,11 @@ public final class Settings {
     public static final String CALL_METHOD_GET_GLOBAL = "GET_global";
 
     /**
+     * @hide - Private call() method on SettingsProvider to read from 'config' table.
+     */
+    public static final String CALL_METHOD_GET_CONFIG = "GET_config";
+
+    /**
      * @hide - Specifies that the caller of the fast-path call()-based flow tracks
      * the settings generation in order to cache values locally. If this key is
      * mapped to a <code>null</code> string extra in the request bundle, the response
@@ -1672,8 +1677,14 @@ public final class Settings {
     /** @hide - Private call() method to write to 'global' table */
     public static final String CALL_METHOD_PUT_GLOBAL= "PUT_global";
 
+    /** @hide - Private call() method to write to 'configuration' table */
+    public static final String CALL_METHOD_PUT_CONFIG = "PUT_config";
+
     /** @hide - Private call() method to reset to defaults the 'global' table */
     public static final String CALL_METHOD_RESET_GLOBAL = "RESET_global";
+
+    /** @hide - Private call() method to reset to defaults the 'configuration' table */
+    public static final String CALL_METHOD_RESET_CONFIG = "RESET_config";
 
     /** @hide - Private call() method to reset to defaults the 'secure' table */
     public static final String CALL_METHOD_RESET_SECURE = "RESET_secure";
@@ -13436,6 +13447,112 @@ public final class Settings {
          */
         public static final String LAST_ACTIVE_USER_ID = "last_active_persistent_user_id";
 
+    }
+
+    /**
+     * Configuration system settings, containing settings which are applied identically for all
+     * defined users. Only Android can read these and only a specific configuration service can
+     * write these.
+     *
+     * @hide
+     */
+    public static final class Config extends NameValueTable {
+        /**
+         * The content:// style URL for the config table.
+         *
+         * TODO(b/113100523): Move this to DeviceConfig.java when it is added, and expose it as a
+         *     System API.
+         */
+        private static final Uri CONTENT_URI =
+                Uri.parse("content://" + AUTHORITY + "/config");
+
+        private static final ContentProviderHolder sProviderHolder =
+                new ContentProviderHolder(CONTENT_URI);
+
+        // Populated lazily, guarded by class object:
+        private static final NameValueCache sNameValueCache = new NameValueCache(
+                CONTENT_URI,
+                CALL_METHOD_GET_CONFIG,
+                CALL_METHOD_PUT_CONFIG,
+                sProviderHolder);
+
+        /**
+         * Look up a name in the database.
+         * @param resolver to access the database with
+         * @param name to look up in the table
+         * @return the corresponding value, or null if not present
+         *
+         * @hide
+         */
+        // TODO(b/117663715): require a new read permission
+        static String getString(ContentResolver resolver, String name) {
+            return sNameValueCache.getStringForUser(resolver, name, resolver.getUserId());
+        }
+
+        /**
+         * Store a name/value pair into the database.
+         * <p>
+         * The method takes an optional tag to associate with the setting which can be used to clear
+         * only settings made by your package and associated with this tag by passing the tag to
+         * {@link #resetToDefaults(ContentResolver, String)}. The value of this setting can be
+         * overridden by future calls to this or other put methods, and the tag provided in those
+         * calls, which may be null, will override the tag provided in this call. Any call to a put
+         * method which does not accept a tag will effectively set the tag to null.
+         * </p><p>
+         * Also the method takes an argument whether to make the value the default for this setting.
+         * If the system already specified a default value, then the one passed in here will
+         * <strong>not</strong> be set as the default.
+         * </p>
+         *
+         * @param resolver to access the database with.
+         * @param name to store.
+         * @param value to associate with the name.
+         * @param tag to associated with the setting.
+         * @param makeDefault whether to make the value the default one.
+         * @return true if the value was set, false on database errors.
+         *
+         * @see #resetToDefaults(ContentResolver, String)
+         *
+         * @hide
+         */
+        // TODO(b/117663715): require a new write permission restricted to a single source
+        @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
+        static boolean putString(@NonNull ContentResolver resolver,
+                @NonNull String name, @Nullable String value, @Nullable String tag,
+                boolean makeDefault) {
+            return sNameValueCache.putStringForUser(resolver, name, value, tag, makeDefault,
+                    resolver.getUserId());
+        }
+
+        /**
+         * Reset the settings to their defaults. This would reset <strong>only</strong> settings set
+         * by the caller's package. Passing in the optional tag will reset only settings changed by
+         * your package and associated with this tag.
+         *
+         * @param resolver Handle to the content resolver.
+         * @param tag Optional tag which should be associated with the settings to reset.
+         *
+         * @see #putString(ContentResolver, String, String, String, boolean)
+         *
+         * @hide
+         */
+        // TODO(b/117663715): require a new write permission restricted to a single source
+        @RequiresPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
+        static void resetToDefaults(@NonNull ContentResolver resolver,
+                @Nullable String tag) {
+            try {
+                Bundle arg = new Bundle();
+                arg.putInt(CALL_METHOD_USER_KEY, resolver.getUserId());
+                if (tag != null) {
+                    arg.putString(CALL_METHOD_TAG_KEY, tag);
+                }
+                arg.putInt(CALL_METHOD_RESET_MODE_KEY, RESET_MODE_PACKAGE_DEFAULTS);
+                IContentProvider cp = sProviderHolder.getProvider(resolver);
+                cp.call(resolver.getPackageName(), CALL_METHOD_RESET_CONFIG, null, arg);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Can't reset to defaults for " + CONTENT_URI, e);
+            }
+        }
     }
 
     /**

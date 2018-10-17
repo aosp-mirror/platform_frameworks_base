@@ -180,6 +180,7 @@ public class SettingsProvider extends ContentProvider {
     public static final int SETTINGS_TYPE_SYSTEM = SettingsState.SETTINGS_TYPE_SYSTEM;
     public static final int SETTINGS_TYPE_SECURE = SettingsState.SETTINGS_TYPE_SECURE;
     public static final int SETTINGS_TYPE_SSAID = SettingsState.SETTINGS_TYPE_SSAID;
+    public static final int SETTINGS_TYPE_CONFIG = SettingsState.SETTINGS_TYPE_CONFIG;
 
     private static final Bundle NULL_SETTING_BUNDLE = Bundle.forPair(
             Settings.NameValueTable.VALUE, null);
@@ -188,6 +189,13 @@ public class SettingsProvider extends ContentProvider {
     private static final Set<String> OVERLAY_ALLOWED_GLOBAL_INSTANT_APP_SETTINGS = new ArraySet<>();
     private static final Set<String> OVERLAY_ALLOWED_SYSTEM_INSTANT_APP_SETTINGS = new ArraySet<>();
     private static final Set<String> OVERLAY_ALLOWED_SECURE_INSTANT_APP_SETTINGS = new ArraySet<>();
+
+    /**
+     * TODO(b/113100523): Move this to DeviceConfig.java when it is added, and expose it as a System
+     *     API.
+     */
+    private static final Uri CONFIG_CONTENT_URI =
+            Uri.parse("content://" + Settings.AUTHORITY + "/config");
 
     static {
         for (String name : Resources.getSystem().getStringArray(
@@ -380,6 +388,11 @@ public class SettingsProvider extends ContentProvider {
     public Bundle call(String method, String name, Bundle args) {
         final int requestingUserId = getRequestingUserId(args);
         switch (method) {
+            case Settings.CALL_METHOD_GET_CONFIG: {
+                Setting setting = getConfigSetting(name);
+                return packageValueForCallResult(setting, isTrackingGeneration(args));
+            }
+
             case Settings.CALL_METHOD_GET_GLOBAL: {
                 Setting setting = getGlobalSetting(name);
                 return packageValueForCallResult(setting, isTrackingGeneration(args));
@@ -394,6 +407,14 @@ public class SettingsProvider extends ContentProvider {
             case Settings.CALL_METHOD_GET_SYSTEM: {
                 Setting setting = getSystemSetting(name, requestingUserId);
                 return packageValueForCallResult(setting, isTrackingGeneration(args));
+            }
+
+            case Settings.CALL_METHOD_PUT_CONFIG: {
+                String value = getSettingValue(args);
+                String tag = getSettingTag(args);
+                final boolean makeDefault = getSettingMakeDefault(args);
+                insertConfigSetting(name, value, tag, makeDefault, requestingUserId, false);
+                break;
             }
 
             case Settings.CALL_METHOD_PUT_GLOBAL: {
@@ -415,6 +436,13 @@ public class SettingsProvider extends ContentProvider {
             case Settings.CALL_METHOD_PUT_SYSTEM: {
                 String value = getSettingValue(args);
                 insertSystemSetting(name, value, requestingUserId);
+                break;
+            }
+
+            case Settings.CALL_METHOD_RESET_CONFIG: {
+                final int mode = getResetModeEnforcingPermission(args);
+                String tag = getSettingTag(args);
+                resetConfigSetting(requestingUserId, mode, tag);
                 break;
             }
 
@@ -725,6 +753,15 @@ public class SettingsProvider extends ContentProvider {
     @GuardedBy("mLock")
     private void dumpForUserLocked(int userId, PrintWriter pw) {
         if (userId == UserHandle.USER_SYSTEM) {
+            pw.println("CONFIG SETTINGS (user " + userId + ")");
+            SettingsState configSettings = mSettingsRegistry.getSettingsLocked(
+                    SETTINGS_TYPE_CONFIG, UserHandle.USER_SYSTEM);
+            if (configSettings != null) {
+                dumpSettingsLocked(configSettings, pw);
+                pw.println();
+                configSettings.dumpHistoricalOperations(pw);
+            }
+
             pw.println("GLOBAL SETTINGS (user " + userId + ")");
             SettingsState globalSettings = mSettingsRegistry.getSettingsLocked(
                     SETTINGS_TYPE_GLOBAL, UserHandle.USER_SYSTEM);
@@ -937,6 +974,69 @@ public class SettingsProvider extends ContentProvider {
                 }
             }
         });
+    }
+
+    private Setting getConfigSetting(String name) {
+        if (DEBUG) {
+            Slog.v(LOG_TAG, "getConfigSetting(" + name + ")");
+        }
+
+        // TODO(b/117663715): Ensure the caller can access the setting.
+        // enforceSettingReadable(name, SETTINGS_TYPE_CONFIG, UserHandle.getCallingUserId());
+
+        // Get the value.
+        synchronized (mLock) {
+            return mSettingsRegistry.getSettingLocked(SETTINGS_TYPE_CONFIG,
+                    UserHandle.USER_SYSTEM, name);
+        }
+    }
+
+    private boolean insertConfigSetting(String name, String value, String tag,
+            boolean makeDefault, int requestingUserId, boolean forceNotify) {
+        if (DEBUG) {
+            Slog.v(LOG_TAG, "insertConfigSetting(" + name + ", " + value  + ", "
+                    + ", " + tag + ", " + makeDefault + ", " + requestingUserId
+                    + ", " + forceNotify + ")");
+        }
+        return mutateConfigSetting(name, value, tag, makeDefault, requestingUserId,
+                MUTATION_OPERATION_INSERT, forceNotify, 0);
+    }
+
+    private void resetConfigSetting(int requestingUserId, int mode, String tag) {
+        if (DEBUG) {
+            Slog.v(LOG_TAG, "resetConfigSetting(" + requestingUserId + ", "
+                    + mode + ", " + tag + ")");
+        }
+        mutateConfigSetting(null, null, tag, false, requestingUserId,
+                MUTATION_OPERATION_RESET, false, mode);
+    }
+
+    private boolean mutateConfigSetting(String name, String value, String tag,
+            boolean makeDefault, int requestingUserId, int operation, boolean forceNotify,
+            int mode) {
+        // TODO(b/117663715): check the new permission when it's added.
+        // enforceWritePermission(Manifest.permission.WRITE_SECURE_SETTINGS);
+
+        // Resolve the userId on whose behalf the call is made.
+        final int callingUserId = resolveCallingUserIdEnforcingPermissionsLocked(requestingUserId);
+
+        // Perform the mutation.
+        synchronized (mLock) {
+            switch (operation) {
+                case MUTATION_OPERATION_INSERT: {
+                    return mSettingsRegistry.insertSettingLocked(SETTINGS_TYPE_CONFIG,
+                            UserHandle.USER_SYSTEM, name, value, tag, makeDefault,
+                            getCallingPackage(), forceNotify, null);
+                }
+
+                case MUTATION_OPERATION_RESET: {
+                    mSettingsRegistry.resetSettingsLocked(SETTINGS_TYPE_CONFIG,
+                            UserHandle.USER_SYSTEM, getCallingPackage(), mode, tag);
+                } return true;
+            }
+        }
+
+        return false;
     }
 
     private Cursor getAllGlobalSettings(String[] projection) {
@@ -2132,6 +2232,7 @@ public class SettingsProvider extends ContentProvider {
         private static final String SETTINGS_FILE_SYSTEM = "settings_system.xml";
         private static final String SETTINGS_FILE_SECURE = "settings_secure.xml";
         private static final String SETTINGS_FILE_SSAID = "settings_ssaid.xml";
+        private static final String SETTINGS_FILE_CONFIG = "settings_config.xml";
 
         private static final String SSAID_USER_KEY = "userkey";
 
@@ -2302,6 +2403,13 @@ public class SettingsProvider extends ContentProvider {
 
             // Migrate the setting for this user if needed.
             migrateLegacySettingsForUserIfNeededLocked(userId);
+
+            // Ensure config settings loaded if owner.
+            if (userId == UserHandle.USER_SYSTEM) {
+                final int configKey
+                        = makeKey(SETTINGS_TYPE_CONFIG, UserHandle.USER_SYSTEM);
+                ensureSettingsStateLocked(configKey);
+            }
 
             // Ensure global settings loaded if owner.
             if (userId == UserHandle.USER_SYSTEM) {
@@ -2853,6 +2961,10 @@ public class SettingsProvider extends ContentProvider {
             }
         }
 
+        private boolean isConfigSettingsKey(int key) {
+            return getTypeFromKey(key) == SETTINGS_TYPE_CONFIG;
+        }
+
         private boolean isGlobalSettingsKey(int key) {
             return getTypeFromKey(key) == SETTINGS_TYPE_GLOBAL;
         }
@@ -2870,7 +2982,11 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private File getSettingsFile(int key) {
-            if (isGlobalSettingsKey(key)) {
+            if (isConfigSettingsKey(key)) {
+                final int userId = getUserIdFromKey(key);
+                return new File(Environment.getUserSystemDirectory(userId),
+                        SETTINGS_FILE_CONFIG);
+            } else if (isGlobalSettingsKey(key)) {
                 final int userId = getUserIdFromKey(key);
                 return new File(Environment.getUserSystemDirectory(userId),
                         SETTINGS_FILE_GLOBAL);
@@ -2892,7 +3008,10 @@ public class SettingsProvider extends ContentProvider {
         }
 
         private Uri getNotificationUriFor(int key, String name) {
-            if (isGlobalSettingsKey(key)) {
+            if (isConfigSettingsKey(key)) {
+                return (name != null) ? Uri.withAppendedPath(CONFIG_CONTENT_URI, name)
+                        : CONFIG_CONTENT_URI;
+            } else if (isGlobalSettingsKey(key)) {
                 return (name != null) ? Uri.withAppendedPath(Settings.Global.CONTENT_URI, name)
                         : Settings.Global.CONTENT_URI;
             } else if (isSecureSettingsKey(key)) {
@@ -2908,6 +3027,7 @@ public class SettingsProvider extends ContentProvider {
 
         private int getMaxBytesPerPackageForType(int type) {
             switch (type) {
+                case SETTINGS_TYPE_CONFIG:
                 case SETTINGS_TYPE_GLOBAL:
                 case SETTINGS_TYPE_SECURE:
                 case SETTINGS_TYPE_SSAID: {
