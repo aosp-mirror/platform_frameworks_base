@@ -4816,7 +4816,7 @@ public class WindowManagerService extends IWindowManager.Stub
                     synchronized (mWindowMap) {
                         mLastANRState = null;
                     }
-                    mAmInternal.clearSavedANRState();
+                    mAtmInternal.clearSavedANRState();
                 }
                 break;
                 case WALLPAPER_DRAW_PENDING_TIMEOUT: {

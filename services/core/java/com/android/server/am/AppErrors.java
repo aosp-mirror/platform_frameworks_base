@@ -501,10 +501,10 @@ class AppErrors {
                 long orig = Binder.clearCallingIdentity();
                 try {
                     // Kill it with fire!
-                    mService.mStackSupervisor.handleAppCrashLocked(r.getWindowProcessController());
+                    mService.mAtmInternal.onHandleAppCrash(r.getWindowProcessController());
                     if (!r.isPersistent()) {
                         mService.removeProcessLocked(r, false, false, "crash");
-                        mService.mStackSupervisor.resumeFocusedStacksTopActivitiesLocked();
+                        mService.mAtmInternal.resumeTopActivities(false /* scheduleIdle */);
                     }
                 } finally {
                     Binder.restoreCallingIdentity(orig);
@@ -723,7 +723,7 @@ class AppErrors {
                     + " has crashed too many times: killing!");
             EventLog.writeEvent(EventLogTags.AM_PROCESS_CRASHED_TOO_MUCH,
                     app.userId, app.info.processName, app.uid);
-            mService.mStackSupervisor.handleAppCrashLocked(app.getWindowProcessController());
+            mService.mAtmInternal.onHandleAppCrash(app.getWindowProcessController());
             if (!app.isPersistent()) {
                 // We don't want to start this process again until the user
                 // explicitly does so...  but for persistent process, we really
@@ -744,15 +744,16 @@ class AppErrors {
                 // annoy the user repeatedly.  Unless it is persistent, since those
                 // processes run critical code.
                 mService.removeProcessLocked(app, false, tryAgain, "crash");
-                mService.mStackSupervisor.resumeFocusedStacksTopActivitiesLocked();
+                mService.mAtmInternal.resumeTopActivities(false /* scheduleIdle */);
                 if (!showBackground) {
                     return false;
                 }
             }
-            mService.mStackSupervisor.resumeFocusedStacksTopActivitiesLocked();
+            mService.mAtmInternal.resumeTopActivities(false /* scheduleIdle */);
         } else {
             final TaskRecord affectedTask =
-                    mService.mStackSupervisor.finishTopCrashedActivitiesLocked(app.getWindowProcessController(), reason);
+                    mService.mActivityTaskManager.mStackSupervisor.finishTopCrashedActivitiesLocked(
+                            app.getWindowProcessController(), reason);
             if (data != null) {
                 data.task = affectedTask;
             }

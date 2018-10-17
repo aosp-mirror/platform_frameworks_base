@@ -69,13 +69,13 @@ public class TaskRecordTests extends ActivityTestsBase {
 
     private static final String TASK_TAG = "task";
 
-    private ActivityManagerService mService;
+    private ActivityTaskManagerService mService;
 
     @Before
     public void setUp() throws Exception {
         super.setUp();
         TaskRecord.setTaskRecordFactory(null);
-        mService = createActivityManagerService();
+        mService = createActivityTaskManagerService();
     }
 
     @Test
@@ -150,7 +150,7 @@ public class TaskRecordTests extends ActivityTestsBase {
     }
 
     private TaskRecord createTaskRecord(int taskId) {
-        return new TaskRecord(mService.mActivityTaskManager, taskId, new Intent(), null, null, null,
+        return new TaskRecord(mService, taskId, new Intent(), null, null, null,
                 ActivityBuilder.getDefaultComponent(), null, false, false, false, 0, 10050, null,
                 new ArrayList<>(), 0, false, null, 0, 0, 0, 0, 0, null, 0, false, false, false, 0, 0
         );

@@ -127,6 +127,8 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     private volatile boolean mDebugging;
     // Active instrumentation running in process?
     private volatile boolean mInstrumenting;
+    // This process it perceptible by the user.
+    private volatile boolean mPerceptible;
     // Set to true when process was launched with a wrapper attached
     private volatile boolean mUsingWrapper;
 
@@ -335,6 +337,14 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
 
     boolean isInstrumenting() {
         return mInstrumenting;
+    }
+
+    public void setPerceptible(boolean perceptible) {
+        mPerceptible = perceptible;
+    }
+
+    boolean isPerceptible() {
+        return mPerceptible;
     }
 
     @Override

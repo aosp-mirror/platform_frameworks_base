@@ -128,7 +128,7 @@ final class ProcessRecord implements WindowProcessListener {
     long lastCachedPss;         // Last computed pss when in cached state.
     long lastCachedSwapPss;     // Last computed SwapPss when in cached state.
     int maxAdj;                 // Maximum OOM adjustment for this process
-    int curRawAdj;              // Current OOM unlimited adjustment for this process
+    private int mCurRawAdj;     // Current OOM unlimited adjustment for this process
     int setRawAdj;              // Last set OOM unlimited adjustment for this process
     int curAdj;                 // Current OOM adjustment for this process
     int setAdj;                 // Last set OOM adjustment for this process
@@ -362,7 +362,7 @@ final class ProcessRecord implements WindowProcessListener {
                     pw.print(" initialIdlePss="); pw.println(initialIdlePss);
         }
         pw.print(prefix); pw.print("oom: max="); pw.print(maxAdj);
-                pw.print(" curRaw="); pw.print(curRawAdj);
+                pw.print(" curRaw="); pw.print(mCurRawAdj);
                 pw.print(" setRaw="); pw.print(setRawAdj);
                 pw.print(" cur="); pw.print(curAdj);
                 pw.print(" set="); pw.println(setAdj);
@@ -531,7 +531,7 @@ final class ProcessRecord implements WindowProcessListener {
         userId = UserHandle.getUserId(_uid);
         processName = _processName;
         maxAdj = ProcessList.UNKNOWN_ADJ;
-        curRawAdj = setRawAdj = ProcessList.INVALID_ADJ;
+        mCurRawAdj = setRawAdj = ProcessList.INVALID_ADJ;
         curAdj = setAdj = verifiedAdj = ProcessList.INVALID_ADJ;
         mPersistent = false;
         removed = false;
@@ -1089,6 +1089,15 @@ final class ProcessRecord implements WindowProcessListener {
 
     ActiveInstrumentation getActiveInstrumentation() {
         return mInstr;
+    }
+
+    void setCurRawAdj(int curRawAdj) {
+        mCurRawAdj = curRawAdj;
+        mWindowProcessController.setPerceptible(curRawAdj <= ProcessList.PERCEPTIBLE_APP_ADJ);
+    }
+
+    int getCurRawAdj() {
+        return mCurRawAdj;
     }
 
     @Override

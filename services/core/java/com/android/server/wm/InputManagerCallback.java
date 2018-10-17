@@ -108,7 +108,7 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
         }
 
         // All the calls below need to happen without the WM lock held since they call into AM.
-        mService.mAmInternal.saveANRState(reason);
+        mService.mAtmInternal.saveANRState(reason);
 
         if (appWindowToken != null && appWindowToken.appToken != null) {
             // Notify the activity manager about the timeout and let it decide whether
