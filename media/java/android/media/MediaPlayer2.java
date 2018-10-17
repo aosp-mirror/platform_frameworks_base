@@ -37,7 +37,6 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.Executor;
 
@@ -1023,50 +1022,6 @@ public abstract class MediaPlayer2 implements AutoCloseable
      */
     @Nullable
     public abstract MediaTimestamp getTimestamp();
-
-    /**
-     * Gets the media metadata.
-     *
-     * @param update_only controls whether the full set of available
-     * metadata is returned or just the set that changed since the
-     * last call. See {@see #METADATA_UPDATE_ONLY} and {@see
-     * #METADATA_ALL}.
-     *
-     * @param apply_filter if true only metadata that matches the
-     * filter is returned. See {@see #APPLY_METADATA_FILTER} and {@see
-     * #BYPASS_METADATA_FILTER}.
-     *
-     * @return The metadata, possibly empty. null if an error occured.
-     // FIXME: unhide.
-     * {@hide}
-     */
-    public Metadata getMetadata(final boolean update_only,
-            final boolean apply_filter) {
-        return null;
-    }
-
-    /**
-     * Set a filter for the metadata update notification and update
-     * retrieval. The caller provides 2 set of metadata keys, allowed
-     * and blocked. The blocked set always takes precedence over the
-     * allowed one.
-     * Metadata.MATCH_ALL and Metadata.MATCH_NONE are 2 sets available as
-     * shorthands to allow/block all or no metadata.
-     *
-     * By default, there is no filter set.
-     *
-     * @param allow Is the set of metadata the client is interested
-     *              in receiving new notifications for.
-     * @param block Is the set of metadata the client is not interested
-     *              in receiving new notifications for.
-     * @return The call status code.
-     *
-     // FIXME: unhide.
-     * {@hide}
-     */
-    public int setMetadataFilter(Set<Integer> allow, Set<Integer> block) {
-        return 0;
-    }
 
     /**
      * Resets the MediaPlayer2 to its uninitialized state. After calling
@@ -2266,38 +2221,4 @@ public abstract class MediaPlayer2 implements AutoCloseable
         public static final String ERROR_CODE = "android.media.mediaplayer.errcode";
 
     }
-
-    /**
-       Constant to retrieve only the new metadata since the last
-       call.
-       // FIXME: unhide.
-       // FIXME: add link to getMetadata(boolean, boolean)
-       {@hide}
-     */
-    public static final boolean METADATA_UPDATE_ONLY = true;
-
-    /**
-       Constant to retrieve all the metadata.
-       // FIXME: unhide.
-       // FIXME: add link to getMetadata(boolean, boolean)
-       {@hide}
-     */
-    public static final boolean METADATA_ALL = false;
-
-    /**
-       Constant to enable the metadata filter during retrieval.
-       // FIXME: unhide.
-       // FIXME: add link to getMetadata(boolean, boolean)
-       {@hide}
-     */
-    public static final boolean APPLY_METADATA_FILTER = true;
-
-    /**
-       Constant to disable the metadata filter during retrieval.
-       // FIXME: unhide.
-       // FIXME: add link to getMetadata(boolean, boolean)
-       {@hide}
-     */
-    public static final boolean BYPASS_METADATA_FILTER = false;
-
 }
