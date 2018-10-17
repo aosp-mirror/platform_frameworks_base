@@ -104,6 +104,8 @@ public class SurfaceControl implements Parcelable {
             int flags, int mask);
     private static native void nativeSetWindowCrop(long transactionObj, long nativeObject,
             int l, int t, int r, int b);
+    private static native void nativeSetCornerRadius(long transactionObj, long nativeObject,
+            float cornerRadius);
     private static native void nativeSetLayerStack(long transactionObj, long nativeObject,
             int layerStack);
 
@@ -1006,6 +1008,18 @@ public class SurfaceControl implements Parcelable {
         }
     }
 
+    /**
+     * Sets the corner radius of a {@link SurfaceControl}.
+     *
+     * @param cornerRadius Corner radius in pixels.
+     */
+    public void setCornerRadius(float cornerRadius) {
+        checkNotReleased();
+        synchronized (SurfaceControl.class) {
+            sGlobalTransaction.setCornerRadius(this, cornerRadius);
+        }
+    }
+
     public void setLayerStack(int layerStack) {
         checkNotReleased();
         synchronized(SurfaceControl.class) {
@@ -1526,6 +1540,20 @@ public class SurfaceControl implements Parcelable {
         public Transaction setWindowCrop(SurfaceControl sc, int width, int height) {
             sc.checkNotReleased();
             nativeSetWindowCrop(mNativeObject, sc.mNativeObject, 0, 0, width, height);
+            return this;
+        }
+
+        /**
+         * Sets the corner radius of a {@link SurfaceControl}.
+         * @param sc SurfaceControl
+         * @param cornerRadius Corner radius in pixels.
+         * @return Itself.
+         */
+        @UnsupportedAppUsage
+        public Transaction setCornerRadius(SurfaceControl sc, float cornerRadius) {
+            sc.checkNotReleased();
+            nativeSetCornerRadius(mNativeObject, sc.mNativeObject, cornerRadius);
+
             return this;
         }
 

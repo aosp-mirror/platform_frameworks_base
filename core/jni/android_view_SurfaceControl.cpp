@@ -377,6 +377,14 @@ static void nativeSetWindowCrop(JNIEnv* env, jclass clazz, jlong transactionObj,
     transaction->setCrop_legacy(ctrl, crop);
 }
 
+static void nativeSetCornerRadius(JNIEnv* env, jclass clazz, jlong transactionObj,
+         jlong nativeObject, jfloat cornerRadius) {
+    auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
+
+    SurfaceControl* const ctrl = reinterpret_cast<SurfaceControl *>(nativeObject);
+    transaction->setCornerRadius(ctrl, cornerRadius);
+}
+
 static void nativeSetLayerStack(JNIEnv* env, jclass clazz, jlong transactionObj,
         jlong nativeObject, jint layerStack) {
     auto transaction = reinterpret_cast<SurfaceComposerClient::Transaction*>(transactionObj);
@@ -883,6 +891,8 @@ static const JNINativeMethod sSurfaceControlMethods[] = {
             (void*)nativeSetFlags },
     {"nativeSetWindowCrop", "(JJIIII)V",
             (void*)nativeSetWindowCrop },
+    {"nativeSetCornerRadius", "(JJF)V",
+            (void*)nativeSetCornerRadius },
     {"nativeSetLayerStack", "(JJI)V",
             (void*)nativeSetLayerStack },
     {"nativeGetBuiltInDisplay", "(I)Landroid/os/IBinder;",
