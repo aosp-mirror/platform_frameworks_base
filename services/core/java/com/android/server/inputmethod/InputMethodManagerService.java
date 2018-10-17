@@ -1963,11 +1963,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
         }
 
-        return startInputInnerLocked();
-    }
-
-    @GuardedBy("mMethodMap")
-    InputBindResult startInputInnerLocked() {
         if (mCurMethodId == null) {
             return InputBindResult.NO_IME;
         }
@@ -2005,7 +2000,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 // Wait, the client no longer has access to the display.
                 return InputBindResult.INVALID_DISPLAY_ID;
             }
-            final int displayId = mCurFocusedWindowClient.selfReportedDisplayId;
             mCurTokenDisplayId = (displayId != INVALID_DISPLAY) ? displayId : DEFAULT_DISPLAY;
         }
 
