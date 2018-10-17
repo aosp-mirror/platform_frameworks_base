@@ -2015,10 +2015,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     }
 
     @Override
-    public void finishInput(IInputMethodClient client) {
-    }
-
-    @Override
     public void onServiceConnected(ComponentName name, IBinder service) {
         synchronized (mMethodMap) {
             if (mCurIntent != null && name.equals(mCurIntent.getComponent())) {
