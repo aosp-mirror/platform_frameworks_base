@@ -114,6 +114,26 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
     private int calculate(TaskRecord task, ActivityInfo.WindowLayout layout,
             ActivityRecord activity, ActivityRecord source, ActivityOptions options,
             LaunchParams currentParams, LaunchParams outParams) {
+        final ActivityRecord root;
+        if (task != null) {
+            root = task.getRootActivity() == null ? activity : task.getRootActivity();
+        } else {
+            root = activity;
+        }
+
+        // TODO: Investigate whether we can safely ignore all cases where we don't have root
+        // activity available. Note we can't know if the bounds are valid if we're not sure of the
+        // requested orientation of the root activity. Therefore if we found such a case we may need
+        // to pass the activity into this modifier in that case.
+        if (root == null) {
+            // There is a case that can lead us here. The caller is moving the top activity that is
+            // in a task that has multiple activities to PIP mode. For that the caller is creating a
+            // new task to host the activity so that we only move the top activity to PIP mode and
+            // keep other activities in the previous task. There is no point to apply the launch
+            // logic in this case.
+            return RESULT_SKIP;
+        }
+
         // STEP 1: Determine the display to launch the activity/task.
         final int displayId = getPreferredLaunchDisplay(options, source, currentParams);
         outParams.mPreferredDisplayId = displayId;
@@ -123,12 +143,6 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
                     + display.getWindowingMode());
         }
 
-        final ActivityRecord root;
-        if (task != null) {
-            root = (task.getRootActivity() == null ? activity : task.getRootActivity());
-        } else {
-            root = activity;
-        }
         // STEP 2: Resolve launch windowing mode.
         // STEP 2.1: Determine if any parameter has specified initial bounds. That might be the
         // launch bounds from activity options, or size/gravity passed in layout. It also treats the

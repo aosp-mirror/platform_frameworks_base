@@ -29,6 +29,7 @@ import static android.util.DisplayMetrics.DENSITY_DEFAULT;
 import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.android.server.am.LaunchParamsController.LaunchParamsModifier.RESULT_CONTINUE;
+import static com.android.server.am.LaunchParamsController.LaunchParamsModifier.RESULT_SKIP;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -95,6 +96,13 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
         mCurrent.reset();
         mResult = new LaunchParams();
         mResult.reset();
+    }
+
+    @Test
+    public void testReturnsSkipWithEmptyActivity() {
+        final TaskRecord task = new TaskBuilder(mSupervisor).build();
+        assertEquals(RESULT_SKIP, mTarget.onCalculate(task, /* layout */ null,
+                /* activity */ null, /* source */ null, /* options */ null, mCurrent, mResult));
     }
 
     // =============================
