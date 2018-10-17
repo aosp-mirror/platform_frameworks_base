@@ -1813,8 +1813,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         return sanitizers;
     }
 
-    // TODO: this method is called a few times in the save process, we should cache its results into
-    // ViewState.
     @Nullable
     private AutofillValue getSanitizedValue(
             @Nullable ArrayMap<AutofillId, InternalSanitizer> sanitizers,
@@ -1822,13 +1820,22 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             @Nullable AutofillValue value) {
         if (sanitizers == null || value == null) return value;
 
-        final InternalSanitizer sanitizer = sanitizers.get(id);
-        if (sanitizer == null) {
-            return value;
-        }
+        final ViewState state = mViewStates.get(id);
+        AutofillValue sanitized = state == null ? null : state.getSanitizedValue();
+        if (sanitized == null) {
+            final InternalSanitizer sanitizer = sanitizers.get(id);
+            if (sanitizer == null) {
+                return value;
+            }
 
-        final AutofillValue sanitized = sanitizer.sanitize(value);
-        if (sDebug) Slog.d(TAG, "Value for " + id + "(" + value + ") sanitized to " + sanitized);
+            sanitized = sanitizer.sanitize(value);
+            if (sDebug) {
+                Slog.d(TAG, "Value for " + id + "(" + value + ") sanitized to " + sanitized);
+            }
+            if (state != null) {
+                state.setSanitizedValue(sanitized);
+            }
+        }
         return sanitized;
     }
 
