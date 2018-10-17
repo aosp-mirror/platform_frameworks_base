@@ -20,6 +20,7 @@ import android.content.Context;
 import android.hardware.contexthub.V1_0.ContextHubMsg;
 import android.hardware.contexthub.V1_0.IContexthub;
 import android.hardware.contexthub.V1_0.Result;
+import android.hardware.location.ContextHubInfo;
 import android.hardware.location.ContextHubTransaction;
 import android.hardware.location.IContextHubClient;
 import android.hardware.location.IContextHubClientCallback;
@@ -57,9 +58,9 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
     private final ContextHubClientManager mClientManager;
 
     /*
-     * The ID of the hub that this client is attached to.
+     * The object describing the hub that this client is attached to.
      */
-    private final int mAttachedContextHubId;
+    private final ContextHubInfo mAttachedContextHubInfo;
 
     /*
      * The host end point ID of this client.
@@ -85,11 +86,12 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
 
     /* package */ ContextHubClientBroker(
             Context context, IContexthub contextHubProxy, ContextHubClientManager clientManager,
-            int contextHubId, short hostEndPointId, IContextHubClientCallback callback) {
+            ContextHubInfo contextHubInfo, short hostEndPointId,
+            IContextHubClientCallback callback) {
         mContext = context;
         mContextHubProxy = contextHubProxy;
         mClientManager = clientManager;
-        mAttachedContextHubId = contextHubId;
+        mAttachedContextHubInfo = contextHubInfo;
         mHostEndPointId = hostEndPointId;
         mCallbackInterface = callback;
     }
@@ -119,11 +121,12 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
             ContextHubMsg messageToNanoApp = ContextHubServiceUtil.createHidlContextHubMessage(
                     mHostEndPointId, message);
 
+            int contextHubId = mAttachedContextHubInfo.getId();
             try {
-                result = mContextHubProxy.sendMessageToHub(mAttachedContextHubId, messageToNanoApp);
+                result = mContextHubProxy.sendMessageToHub(contextHubId, messageToNanoApp);
             } catch (RemoteException e) {
                 Log.e(TAG, "RemoteException in sendMessageToNanoApp (target hub ID = "
-                        + mAttachedContextHubId + ")", e);
+                        + contextHubId + ")", e);
                 result = Result.UNKNOWN_FAILURE;
             }
         } else {
@@ -156,7 +159,7 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
      * @return the ID of the context hub this client is attached to
      */
     /* package */ int getAttachedContextHubId() {
-        return mAttachedContextHubId;
+        return mAttachedContextHubInfo.getId();
     }
 
     /**
