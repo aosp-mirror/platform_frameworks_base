@@ -60,8 +60,7 @@ public class ActivityDisplayTests extends ActivityTestsBase {
     public void testLastFocusedStackIsUpdatedWhenMovingStack() {
         // Create a stack at bottom.
         final ActivityDisplay display = mSupervisor.getDefaultDisplay();
-        final ActivityStack stack = display.createStack(
-                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, !ON_TOP);
+        final ActivityStack stack = new StackBuilder(mSupervisor).setOnTop(!ON_TOP).build();
         final ActivityStack prevFocusedStack = display.getFocusedStack();
 
         stack.moveToFront("moveStackToFront");
@@ -140,16 +139,14 @@ public class ActivityDisplayTests extends ActivityTestsBase {
      */
     @Test
     public void testTopRunningActivity() {
-        // Create stack to hold focus.
         final ActivityDisplay display = mSupervisor.getDefaultDisplay();
-        final ActivityStack emptyStack = display.createStack(WINDOWING_MODE_FULLSCREEN,
-                ACTIVITY_TYPE_STANDARD, true /* onTop */);
-
         final KeyguardController keyguard = mSupervisor.getKeyguardController();
-        final ActivityStack stack = mSupervisor.getDefaultDisplay().createStack(
-                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
-        final ActivityRecord activity = new ActivityBuilder(mService).setCreateTask(true)
-                .setStack(stack).build();
+        final ActivityStack stack = new StackBuilder(mSupervisor).build();
+        final ActivityRecord activity = stack.getTopActivity();
+
+        // Create empty stack on top.
+        final ActivityStack emptyStack =
+                new StackBuilder(mSupervisor).setCreateActivity(false).build();
 
         // Make sure the top running activity is not affected when keyguard is not locked.
         assertTopRunningActivity(activity, display);
@@ -159,8 +156,8 @@ public class ActivityDisplayTests extends ActivityTestsBase {
         assertEquals(activity, display.topRunningActivity());
         assertNull(display.topRunningActivity(true /* considerKeyguardState */));
 
-        // Change focus to stack with activity.
-        stack.moveToFront("focusChangeToTestStack");
+        // Move stack with activity to top.
+        stack.moveToFront("testStackToFront");
         assertEquals(stack, display.getFocusedStack());
         assertEquals(activity, display.topRunningActivity());
         assertNull(display.topRunningActivity(true /* considerKeyguardState */));
@@ -175,11 +172,10 @@ public class ActivityDisplayTests extends ActivityTestsBase {
         // Ensure the show when locked activity is returned.
         assertTopRunningActivity(showWhenLockedActivity, display);
 
-        // Change focus back to empty stack.
-        emptyStack.moveToFront("focusChangeToEmptyStack");
-        assertEquals(emptyStack, display.getFocusedStack());
-        // If there is no running activity in focused stack, the running activity in next focusable
-        // stack should be returned.
+        // Move empty stack to front. The running activity in focusable stack which below the
+        // empty stack should be returned.
+        emptyStack.moveToFront("emptyStackToFront");
+        assertEquals(stack, display.getFocusedStack());
         assertTopRunningActivity(showWhenLockedActivity, display);
     }
 

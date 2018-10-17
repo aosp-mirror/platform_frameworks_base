@@ -16,9 +16,7 @@
 
 package com.android.server.am;
 
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
-import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.view.Display.DEFAULT_DISPLAY;
 
@@ -30,7 +28,6 @@ import android.app.ActivityManager.RunningTaskInfo;
 import android.content.ComponentName;
 import android.content.Context;
 import android.platform.test.annotations.Presubmit;
-import android.util.SparseArray;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.MediumTest;
@@ -72,8 +69,8 @@ public class RunningTasksTest extends ActivityTestsBase {
 
         final int numStacks = 2;
         for (int stackIndex = 0; stackIndex < numStacks; stackIndex++) {
-            final ActivityStack stack = new TestActivityStack(display, stackIndex, mSupervisor,
-                    WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true);
+            final ActivityStack stack =
+                    new StackBuilder(mSupervisor).setCreateActivity(false).build();
             display.addChild(stack, POSITION_BOTTOM);
         }
 

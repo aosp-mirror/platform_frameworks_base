@@ -883,7 +883,7 @@ public class RecentTasksTest extends ActivityTestsBase {
 
         MyTestActivityStack(ActivityDisplay display, ActivityStackSupervisor supervisor) {
             super(display, LAST_STACK_ID++, supervisor, WINDOWING_MODE_FULLSCREEN,
-                    ACTIVITY_TYPE_STANDARD, true);
+                    ACTIVITY_TYPE_STANDARD, true /* onTop */, false /* createActivity */);
             mDisplay = display;
         }
 
