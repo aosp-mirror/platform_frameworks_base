@@ -123,14 +123,6 @@ Landroid/os/UserHandle;->isSameApp(II)Z
 Landroid/os/UserManager;->hasUserRestriction(Ljava/lang/String;Landroid/os/UserHandle;)Z
 Landroid/os/UserManager;->isAdminUser()Z
 Landroid/R$styleable;->CheckBoxPreference:[I
-Landroid/system/NetlinkSocketAddress;-><init>(II)V
-Landroid/system/Os;->bind(Ljava/io/FileDescriptor;Ljava/net/SocketAddress;)V
-Landroid/system/Os;->connect(Ljava/io/FileDescriptor;Ljava/net/SocketAddress;)V
-Landroid/system/Os;->sendto(Ljava/io/FileDescriptor;[BIIILjava/net/SocketAddress;)I
-Landroid/system/Os;->setsockoptIfreq(Ljava/io/FileDescriptor;IILjava/lang/String;)V
-Landroid/system/Os;->setsockoptTimeval(Ljava/io/FileDescriptor;IILandroid/system/StructTimeval;)V
-Landroid/system/PacketSocketAddress;-><init>(I[B)V
-Landroid/system/PacketSocketAddress;-><init>(SI)V
 Landroid/telephony/ims/compat/feature/MMTelFeature;-><init>()V
 Landroid/telephony/ims/compat/ImsService;-><init>()V
 Landroid/telephony/ims/compat/stub/ImsCallSessionImplBase;-><init>()V
