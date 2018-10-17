@@ -35,6 +35,43 @@ using ::std::unique_ptr;
 
 namespace aapt {
 
+static ApkFormat DetermineApkFormat(io::IFileCollection* apk) {
+  if (apk->FindFile(kApkResourceTablePath) != nullptr) {
+    return ApkFormat::kBinary;
+  } else if (apk->FindFile(kProtoResourceTablePath) != nullptr) {
+    return ApkFormat::kProto;
+  } else {
+    // If the resource table is not present, attempt to read the manifest.
+    io::IFile* manifest_file = apk->FindFile(kAndroidManifestPath);
+    if (manifest_file == nullptr) {
+      return ApkFormat::kUnknown;
+    }
+
+    // First try in proto format.
+    std::unique_ptr<io::InputStream> manifest_in = manifest_file->OpenInputStream();
+    if (manifest_in != nullptr) {
+      pb::XmlNode pb_node;
+      io::ProtoInputStreamReader proto_reader(manifest_in.get());
+      if (proto_reader.ReadMessage(&pb_node)) {
+        return ApkFormat::kProto;
+      }
+    }
+
+    // If it didn't work, try in binary format.
+    std::unique_ptr<io::IData> manifest_data = manifest_file->OpenAsData();
+    if (manifest_data != nullptr) {
+      std::string error;
+      std::unique_ptr<xml::XmlResource> manifest =
+          xml::Inflate(manifest_data->data(), manifest_data->size(), &error);
+      if (manifest != nullptr) {
+        return ApkFormat::kBinary;
+      }
+    }
+
+    return ApkFormat::kUnknown;
+  }
+}
+
 std::unique_ptr<LoadedApk> LoadedApk::LoadApkFromPath(const StringPiece& path, IDiagnostics* diag) {
   Source source(path);
   std::string error;
@@ -299,43 +336,6 @@ std::unique_ptr<xml::XmlResource> LoadedApk::LoadXml(const std::string& file_pat
   }
 
   return doc;
-}
-
-ApkFormat LoadedApk::DetermineApkFormat(io::IFileCollection* apk) {
-  if (apk->FindFile(kApkResourceTablePath) != nullptr) {
-    return ApkFormat::kBinary;
-  } else if (apk->FindFile(kProtoResourceTablePath) != nullptr) {
-    return ApkFormat::kProto;
-  } else {
-    // If the resource table is not present, attempt to read the manifest.
-    io::IFile* manifest_file = apk->FindFile(kAndroidManifestPath);
-    if (manifest_file == nullptr) {
-      return ApkFormat::kUnknown;
-    }
-
-    // First try in proto format.
-    std::unique_ptr<io::InputStream> manifest_in = manifest_file->OpenInputStream();
-    if (manifest_in != nullptr) {
-      pb::XmlNode pb_node;
-      io::ProtoInputStreamReader proto_reader(manifest_in.get());
-      if (!proto_reader.ReadMessage(&pb_node)) {
-        return ApkFormat::kProto;
-      }
-    }
-
-    // If it didn't work, try in binary format.
-    std::unique_ptr<io::IData> manifest_data = manifest_file->OpenAsData();
-    if (manifest_data != nullptr) {
-      std::string error;
-      std::unique_ptr<xml::XmlResource> manifest =
-          xml::Inflate(manifest_data->data(), manifest_data->size(), &error);
-      if (manifest != nullptr) {
-        return ApkFormat::kBinary;
-      }
-    }
-
-    return ApkFormat::kUnknown;
-  }
 }
 
 }  // namespace aapt
