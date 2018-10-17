@@ -3423,4 +3423,6 @@
   <java-symbol type="fraction" name="config_prescaleAbsoluteVolume_index1" />
   <java-symbol type="fraction" name="config_prescaleAbsoluteVolume_index2" />
   <java-symbol type="fraction" name="config_prescaleAbsoluteVolume_index3" />
+
+  <java-symbol type="string" name="config_defaultAssistantComponentName" />
 </resources>
