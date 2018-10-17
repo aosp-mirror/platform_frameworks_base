@@ -10,6 +10,7 @@ import android.content.res.Configuration;
 import android.content.res.Resources;
 import androidx.viewpager.widget.PagerAdapter;
 import androidx.viewpager.widget.ViewPager;
+import android.graphics.Rect;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -57,6 +58,7 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
     private AnimatorSet mBounceAnimatorSet;
     private int mAnimatingToPage = -1;
     private float mLastExpansion;
+    private int mHorizontalClipBounds;
 
     public PagedTileLayout(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -243,6 +245,8 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
     public boolean updateResources() {
         // Update bottom padding, useful for removing extra space once the panel page indicator is
         // hidden.
+        mHorizontalClipBounds = getContext().getResources().getDimensionPixelSize(
+                R.dimen.notification_side_paddings);
         setPadding(0, 0, 0,
                 getContext().getResources().getDimensionPixelSize(
                         R.dimen.qs_paged_tile_layout_padding_bottom));
@@ -272,6 +276,15 @@ public class PagedTileLayout extends ViewPager implements QSTileLayout {
         }
         setMeasuredDimension(getMeasuredWidth(), maxHeight + getPaddingBottom());
     }
+
+    @Override
+    protected void onLayout(boolean changed, int l, int t, int r, int b) {
+        super.onLayout(changed, l, t, r, b);
+        Rect clipBounds = new Rect(mHorizontalClipBounds, 0,
+                r - l - mHorizontalClipBounds, b - t);
+        setClipBounds(clipBounds);
+    }
+
 
     private final Runnable mDistribute = new Runnable() {
         @Override
