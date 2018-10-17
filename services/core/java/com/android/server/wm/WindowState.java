@@ -2256,7 +2256,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     private Configuration getProcessGlobalConfiguration() {
         // For child windows we want to use the pid for the parent window in case the the child
         // window was added from another process.
-        final int pid = isChildWindow() ? getParentWindow().mSession.mPid : mSession.mPid;
+        final int pid = getParentWindow() != null ? getParentWindow().mSession.mPid : mSession.mPid;
         mTempConfiguration.setTo(mService.mProcessConfigurations.get(
                 pid, mService.mRoot.getConfiguration()));
         return mTempConfiguration;
