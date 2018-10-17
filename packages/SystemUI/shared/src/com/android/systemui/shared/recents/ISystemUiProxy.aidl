@@ -71,4 +71,9 @@ interface ISystemUiProxy {
      */
     void onStatusBarMotionEvent(in MotionEvent event) = 9;
 
+    /**
+     * Get the corner radius of windows in pixels.
+     */
+    float getWindowCornerRadius() = 10;
+
 }

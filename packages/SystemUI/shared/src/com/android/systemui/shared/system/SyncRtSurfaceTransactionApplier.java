@@ -83,6 +83,7 @@ public class SyncRtSurfaceTransactionApplier {
         t.setWindowCrop(params.surface, params.windowCrop);
         t.setAlpha(params.surface, params.alpha);
         t.setLayer(params.surface, params.layer);
+        t.setCornerRadius(params.surface, params.cornerRadius);
         t.show(params.surface);
     }
 
@@ -98,12 +99,13 @@ public class SyncRtSurfaceTransactionApplier {
          * @param windowCrop Crop to apply.
          */
         public SurfaceParams(SurfaceControlCompat surface, float alpha, Matrix matrix,
-                Rect windowCrop, int layer) {
+                Rect windowCrop, int layer, float cornerRadius) {
             this.surface = surface.mSurfaceControl;
             this.alpha = alpha;
             this.matrix = new Matrix(matrix);
             this.windowCrop = new Rect(windowCrop);
             this.layer = layer;
+            this.cornerRadius = cornerRadius;
         }
 
         final SurfaceControl surface;
@@ -111,5 +113,6 @@ public class SyncRtSurfaceTransactionApplier {
         final Matrix matrix;
         final Rect windowCrop;
         final int layer;
+        final float cornerRadius;
     }
 }
