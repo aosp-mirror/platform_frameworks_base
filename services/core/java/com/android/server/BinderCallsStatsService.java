@@ -49,6 +49,7 @@ public class BinderCallsStatsService extends Binder {
     private static final String PERSIST_SYS_BINDER_CALLS_DETAILED_TRACKING
             = "persist.sys.binder_calls_detailed_tracking";
 
+
     /** Listens for flag changes. */
     private static class SettingsObserver extends ContentObserver {
         private static final String SETTINGS_ENABLED_KEY = "enabled";
@@ -101,7 +102,14 @@ public class BinderCallsStatsService extends Binder {
             final boolean enabled =
                     mParser.getBoolean(SETTINGS_ENABLED_KEY, BinderCallsStats.ENABLED_DEFAULT);
             if (mEnabled != enabled) {
-                Binder.setObserver(enabled ? mBinderCallsStats : null);
+                if (enabled) {
+                    Binder.setObserver(mBinderCallsStats);
+                    Binder.setProxyTransactListener(
+                            new Binder.PropagateWorkSourceTransactListener());
+                } else {
+                    Binder.setObserver(null);
+                    Binder.setProxyTransactListener(null);
+                }
                 mEnabled = enabled;
                 mBinderCallsStats.reset();
             }
