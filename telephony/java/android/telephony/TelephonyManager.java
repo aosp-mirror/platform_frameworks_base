@@ -21,6 +21,7 @@ import static android.content.Context.TELECOM_SERVICE;
 import static com.android.internal.util.Preconditions.checkNotNull;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
@@ -56,6 +57,8 @@ import android.telecom.PhoneAccount;
 import android.telecom.PhoneAccountHandle;
 import android.telecom.TelecomManager;
 import android.telephony.VisualVoicemailService.VisualVoicemailTask;
+import android.telephony.emergency.EmergencyNumber;
+import android.telephony.emergency.EmergencyNumber.EmergencyServiceCategories;
 import android.telephony.ims.aidl.IImsConfig;
 import android.telephony.ims.aidl.IImsMmTelFeature;
 import android.telephony.ims.aidl.IImsRcsFeature;
@@ -85,6 +88,7 @@ import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.concurrent.Executor;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -8984,4 +8988,117 @@ public class TelephonyManager {
         }
     }
 
+    /**
+     * Get the emergency number list based on current locale, sim, default, modem and network.
+     *
+     * <p>The emergency number {@link EmergencyNumber} with higher display priority is located at
+     * the smaller index in the returned list.
+     *
+     * <p>The subscriptions which the returned list would be based on, are all the active
+     * subscriptions, no matter which subscription could be used to create TelephonyManager.
+     *
+     * <p>Requires permission {@link android.Manifest.permission#READ_PHONE_STATE} or
+     * {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE} or the calling
+     * app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     *
+     * @return Map including the key as the active subscription ID (Note: if there is no active
+     * subscription, the key is {@link SubscriptionManager#DEFAULT_SUBSCRIPTION_ID}) and the value
+     * as the list of {@link EmergencyNumber}; null if this information is not available.
+     */
+    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
+    @Nullable
+    public Map<Integer, List<EmergencyNumber>> getCurrentEmergencyNumberList() {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony == null) {
+                return null;
+            }
+            return telephony.getCurrentEmergencyNumberList(mContext.getOpPackageName());
+        } catch (RemoteException ex) {
+            Log.e(TAG, "getCurrentEmergencyNumberList RemoteException", ex);
+        }
+        return null;
+    }
+
+    /**
+     * Get the per-category emergency number list based on current locale, sim, default, modem
+     * and network.
+     *
+     * <p>The emergency number {@link EmergencyNumber} with higher display priority is located at
+     * the smaller index in the returned list.
+     *
+     * <p>The subscriptions which the returned list would be based on, are all the active
+     * subscriptions, no matter which subscription could be used to create TelephonyManager.
+     *
+     * <p>Requires permission {@link android.Manifest.permission#READ_PHONE_STATE} or
+     * {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE} or the calling
+     * app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     *
+     * @param categories the emergency service categories which are the bitwise-OR combination of
+     * the following constants:
+     * <ol>
+     * <li>{@link EmergencyNumber#EMERGENCY_SERVICE_CATEGORY_UNSPECIFIED} </li>
+     * <li>{@link EmergencyNumber#EMERGENCY_SERVICE_CATEGORY_POLICE} </li>
+     * <li>{@link EmergencyNumber#EMERGENCY_SERVICE_CATEGORY_AMBULANCE} </li>
+     * <li>{@link EmergencyNumber#EMERGENCY_SERVICE_CATEGORY_FIRE_BRIGADE} </li>
+     * <li>{@link EmergencyNumber#EMERGENCY_SERVICE_CATEGORY_MARINE_GUARD} </li>
+     * <li>{@link EmergencyNumber#EMERGENCY_SERVICE_CATEGORY_MOUNTAIN_RESCUE} </li>
+     * <li>{@link EmergencyNumber#EMERGENCY_SERVICE_CATEGORY_MIEC} </li>
+     * <li>{@link EmergencyNumber#EMERGENCY_SERVICE_CATEGORY_AIEC} </li>
+     * </ol>
+     * @return Map including the key as the active subscription ID (Note: if there is no active
+     * subscription, the key is {@link SubscriptionManager#DEFAULT_SUBSCRIPTION_ID}) and the value
+     * as the list of {@link EmergencyNumber}; null if this information is not available.
+     */
+    @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
+    @Nullable
+    public Map<Integer, List<EmergencyNumber>> getCurrentEmergencyNumberList(
+            @EmergencyServiceCategories int categories) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony == null) {
+                return null;
+            }
+            Map<Integer, List<EmergencyNumber>> numberMap = telephony
+                    .getCurrentEmergencyNumberList(mContext.getOpPackageName());
+            if (numberMap != null) {
+                for (Integer subscriptionId : numberMap.keySet()) {
+                    List<EmergencyNumber> numberList = numberMap.get(subscriptionId);
+                    for (EmergencyNumber number : numberList) {
+                        if (!number.isInEmergencyServiceCategories(categories)) {
+                            numberList.remove(number);
+                        }
+                    }
+                }
+            }
+            return numberMap;
+        } catch (RemoteException ex) {
+            Log.e(TAG, "getCurrentEmergencyNumberList with Categories RemoteException", ex);
+        }
+        return null;
+    }
+
+    /**
+     * Checks if the supplied number is an emergency number based on current locale, sim, default,
+     * modem and network.
+     *
+     * <p>The subscriptions which the identification would be based on, are all the active
+     * subscriptions, no matter which subscription could be used to create TelephonyManager.
+     *
+     * @param number - the number to look up
+     * @return {@code true} if the given number is an emergency number based on current locale,
+     * sim, modem and network; {@code false} otherwise.
+     */
+    public boolean isCurrentEmergencyNumber(@NonNull String number) {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony == null) {
+                return false;
+            }
+            return telephony.isCurrentEmergencyNumber(number);
+        } catch (RemoteException ex) {
+            Log.e(TAG, "isCurrentEmergencyNumber RemoteException", ex);
+        }
+        return false;
+    }
 }
