@@ -22,6 +22,7 @@ option java_outer_classname = "AtomsProto";
 
 import "frameworks/base/cmds/statsd/src/atom_field_options.proto";
 import "frameworks/base/core/proto/android/app/enums.proto";
+import "frameworks/base/core/proto/android/app/launcher/launcher.proto";
 import "frameworks/base/core/proto/android/app/settings_enums.proto";
 import "frameworks/base/core/proto/android/app/job/enums.proto";
 import "frameworks/base/core/proto/android/bluetooth/enums.proto";
@@ -67,7 +68,7 @@ message Atom {
         ExcessiveCpuUsageReported excessive_cpu_usage_reported = 16;
         CachedKillReported cached_kill_reported = 17;
         ProcessMemoryStatReported process_memory_stat_reported = 18;
-        // 19 is available
+        LauncherUIChanged launcher_event = 19;
         BatterySaverModeStateChanged battery_saver_mode_state_changed = 20;
         DeviceIdleModeStateChanged device_idle_mode_state_changed = 21;
         DeviceIdlingModeStateChanged device_idling_mode_state_changed = 22;
@@ -1437,6 +1438,14 @@ message PhoneStateChanged {
         ON = 1;
     }
     optional State state = 1;
+}
+
+message LauncherUIChanged {
+    optional android.app.launcher.LauncherAction action = 1;
+    optional android.app.launcher.LauncherState src_state = 2;
+    optional android.app.launcher.LauncherState dst_state = 3;
+    optional android.app.launcher.LauncherExtension extension = 4 [(log_mode) = MODE_BYTES];
+    optional bool is_swipe_up_enabled = 5;
 }
 
 /**
