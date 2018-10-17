@@ -43,6 +43,7 @@ import android.database.ContentObserver;
 import android.net.INetworkPolicyManager;
 import android.net.NetworkCapabilities;
 import android.net.Uri;
+import android.os.Binder;
 import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
@@ -781,8 +782,13 @@ public class SubscriptionManager {
         IOnSubscriptionsChangedListener callback = new IOnSubscriptionsChangedListener.Stub() {
             @Override
             public void onSubscriptionsChanged() {
-                if (DBG) log("onOpportunisticSubscriptionsChanged callback received.");
-                mExecutor.execute(() -> onOpportunisticSubscriptionsChanged());
+                final long identity = Binder.clearCallingIdentity();
+                try {
+                    if (DBG) log("onOpportunisticSubscriptionsChanged callback received.");
+                    mExecutor.execute(() -> onOpportunisticSubscriptionsChanged());
+                } finally {
+                    Binder.restoreCallingIdentity(identity);
+                }
             }
         };
 
