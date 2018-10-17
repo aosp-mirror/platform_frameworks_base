@@ -31,6 +31,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.UserInfo;
+import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
 import android.media.MediaScannerConnection.MediaScannerConnectionClient;
 import android.net.Uri;
@@ -1125,6 +1126,38 @@ public class RingtoneManager {
         } else {
             return null;
         }
+    }
+
+    /**
+     * Opens a raw file descriptor to read the data under the given default URI.
+     *
+     * @param context the Context to use when resolving the Uri.
+     * @param uri The desired default URI to open.
+     * @return a new AssetFileDescriptor pointing to the file. You own this descriptor
+     * and are responsible for closing it when done. This value may be {@code null}.
+     * @throws FileNotFoundException if the provided URI could not be opened.
+     * @see #getDefaultUri
+     */
+    public static AssetFileDescriptor openDefaultRingtoneUri(
+            @NonNull Context context, @NonNull Uri uri) throws FileNotFoundException {
+        // Try cached ringtone first since the actual provider may not be
+        // encryption aware, or it may be stored on CE media storage
+        final int type = getDefaultType(uri);
+        final Uri cacheUri = getCacheForType(type, context.getUserId());
+        final Uri actualUri = getActualDefaultRingtoneUri(context, type);
+        final ContentResolver resolver = context.getContentResolver();
+
+        AssetFileDescriptor afd = null;
+        if (cacheUri != null) {
+            afd = resolver.openAssetFileDescriptor(cacheUri, "r");
+            if (afd != null) {
+                return afd;
+            }
+        }
+        if (actualUri != null) {
+            afd = resolver.openAssetFileDescriptor(actualUri, "r");
+        }
+        return afd;
     }
 
     /**
