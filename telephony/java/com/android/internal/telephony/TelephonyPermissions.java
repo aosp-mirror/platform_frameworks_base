@@ -29,6 +29,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
+import android.provider.Settings;
 import android.telephony.Rlog;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
@@ -43,10 +44,6 @@ public final class TelephonyPermissions {
     private static final String LOG_TAG = "TelephonyPermissions";
 
     private static final boolean DBG = false;
-
-    // When set to true this flag will treat all apps that fail the device identifier check as
-    // though they are targeting pre-Q and return dummy data instead of throwing a SecurityException
-    private static final boolean RELAX_DEVICE_IDENTIFIER_CHECK = true;
 
     private static final Supplier<ITelephony> TELEPHONY_SUPPLIER = () ->
             ITelephony.Stub.asInterface(ServiceManager.getService(Context.TELEPHONY_SERVICE));
@@ -280,23 +277,29 @@ public final class TelephonyPermissions {
      */
     private static boolean reportAccessDeniedToReadIdentifiers(Context context, int subId, int pid,
             int uid, String callingPackage, String message) {
-        // if the device identifier check is relaxed then just return false to return dummy data to
-        // the caller instead of throwing a SecurityException for apps targeting Q+.
-        if (RELAX_DEVICE_IDENTIFIER_CHECK) {
-            Log.wtf(LOG_TAG,
-                    "reportAccessDeniedToReadIdentifiers:" + callingPackage + ":" + message);
-            return false;
+        Log.wtf(LOG_TAG,
+                "reportAccessDeniedToReadIdentifiers:" + callingPackage + ":" + message);
+        // if the device identifier check is relaxed then revert to the READ_PHONE_STATE permission
+        // check that was previously required to access device identifiers.
+        boolean relaxDeviceIdentifierCheck = Settings.Global.getInt(context.getContentResolver(),
+                Settings.Global.PRIVILEGED_DEVICE_IDENTIFIER_CHECK_ENABLED, 0) == 0;
+        if (relaxDeviceIdentifierCheck) {
+            return checkReadPhoneState(context, subId, pid, uid, callingPackage, message);
         } else {
+            boolean targetQBehaviorDisabled = Settings.Global.getInt(context.getContentResolver(),
+                    Settings.Global.PRIVILEGED_DEVICE_IDENTIFIER_TARGET_Q_BEHAVIOR_ENABLED, 0) == 0;
             if (callingPackage != null) {
                 try {
-                    // if the target SDK is pre-Q then check if the calling package would have
-                    // previously had access to device identifiers.
+                    // if the target SDK is pre-Q or the target Q behavior is disabled then check if
+                    // the calling package would have previously had access to device identifiers.
                     ApplicationInfo callingPackageInfo =
                             context.getPackageManager().getApplicationInfo(
                                     callingPackage, 0);
-                    if (callingPackageInfo != null
-                            && callingPackageInfo.targetSdkVersion < Build.VERSION_CODES.Q) {
-                        if (context.checkPermission(android.Manifest.permission.READ_PHONE_STATE,
+                    if (callingPackageInfo != null && (
+                            callingPackageInfo.targetSdkVersion < Build.VERSION_CODES.Q
+                                    || targetQBehaviorDisabled)) {
+                        if (context.checkPermission(
+                                android.Manifest.permission.READ_PHONE_STATE,
                                 pid,
                                 uid) == PackageManager.PERMISSION_GRANTED) {
                             return false;
@@ -312,8 +315,8 @@ public final class TelephonyPermissions {
                     // default to throwing the SecurityException.
                 }
             }
-            throw new SecurityException(message + ": The user " + uid + " does not have the "
-                    + "READ_PRIVILEGED_PHONE_STATE permission to access the device identifiers");
+            throw new SecurityException(message + ": The user " + uid
+                    + " does not meet the requirements to access device identifiers.");
         }
     }
 

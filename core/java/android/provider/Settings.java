@@ -12363,6 +12363,28 @@ public final class Settings {
                 "sms_access_restriction_enabled";
 
         /**
+         * If set to 1, an app must have the READ_PRIVILEGED_PHONE_STATE permission (or be a device
+         * / profile owner with the READ_PHONE_STATE permission) to access device identifiers.
+         *
+         * STOPSHIP: Remove this once we ship with the new device identifier check enabled.
+         *
+         * @hide
+         */
+        public static final String PRIVILEGED_DEVICE_IDENTIFIER_CHECK_ENABLED =
+                "privileged_device_identifier_check_enabled";
+
+        /**
+         * If set to 1, an app that is targeting Q and does not meet the new requirements to access
+         * device identifiers will receive a SecurityException.
+         *
+         * STOPSHIP: Remove this once we ship with the new device identifier check enabled.
+         *
+         * @hide
+         */
+        public static final String PRIVILEGED_DEVICE_IDENTIFIER_TARGET_Q_BEHAVIOR_ENABLED =
+                "privileged_device_identifier_target_q_behavior_enabled";
+
+        /**
          * If set to 1, SettingsProvider's restoreAnyVersion="true" attribute will be ignored
          * and restoring to lower version of platform API will be skipped.
          *
