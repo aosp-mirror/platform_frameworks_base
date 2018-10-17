@@ -109,6 +109,10 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
         mHiSyncId = id;
     }
 
+    public boolean isHearingAidDevice() {
+        return mHiSyncId != BluetoothHearingAid.HI_SYNC_ID_INVALID;
+    }
+
     /**
      * Last time a bt profile auto-connect was attempted.
      * If an ACTION_UUID intent comes in within
@@ -143,8 +147,8 @@ public class CachedBluetoothDevice implements Comparable<CachedBluetoothDevice> 
 
     void onProfileStateChanged(LocalBluetoothProfile profile, int newProfileState) {
         if (Utils.D) {
-            Log.d(TAG, "onProfileStateChanged: profile " + profile +
-                    " newProfileState " + newProfileState);
+            Log.d(TAG, "onProfileStateChanged: profile " + profile + ", device=" + mDevice
+                    + ", newProfileState " + newProfileState);
         }
         if (mLocalAdapter.getBluetoothState() == BluetoothAdapter.STATE_TURNING_OFF)
         {
