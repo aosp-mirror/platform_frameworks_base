@@ -86,12 +86,8 @@ public class MagnificationControllerTest {
     final AccessibilityManagerService mMockAms = mock(AccessibilityManagerService.class);
     final WindowManagerInternal mMockWindowManager = mock(WindowManagerInternal.class);
     final MessageCapturingHandler mMessageCapturingHandler =
-            new MessageCapturingHandler(new Handler.Callback() {
-        @Override
-        public boolean handleMessage(Message msg) {
-            return mMagnificationController.handleMessage(msg);
-        }
-    });
+            new MessageCapturingHandler(null);
+
     final ValueAnimator mMockValueAnimator = mock(ValueAnimator.class);
     MagnificationController.SettingsBridge mMockSettingsBridge;
 

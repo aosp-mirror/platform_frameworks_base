@@ -29,9 +29,11 @@ import static org.junit.Assert.fail;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import android.animation.ValueAnimator;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.os.Message;
@@ -44,7 +46,9 @@ import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.testutils.OffsettableClock;
 import com.android.server.testutils.TestHandler;
+import com.android.server.wm.WindowManagerInternal;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -101,8 +105,15 @@ public class MagnificationGestureHandlerTest {
     public static final float DEFAULT_Y = 299;
 
     private Context mContext;
-    private AccessibilityManagerService mAms;
-    private MagnificationController mMagnificationController;
+    final AccessibilityManagerService mMockAms = mock(AccessibilityManagerService.class);
+    final WindowManagerInternal mMockWindowManager = mock(WindowManagerInternal.class);
+    final MessageCapturingHandler mMessageCapturingHandler =
+            new MessageCapturingHandler(null);
+    final ValueAnimator mMockValueAnimator = mock(ValueAnimator.class);
+    MagnificationController.SettingsBridge mMockSettingsBridge =
+            mock(MagnificationController.SettingsBridge.class);
+    MagnificationController mMagnificationController;
+
     private OffsettableClock mClock;
     private MagnificationGestureHandler mMgh;
     private TestHandler mHandler;
@@ -112,9 +123,9 @@ public class MagnificationGestureHandlerTest {
     @Before
     public void setUp() {
         mContext = InstrumentationRegistry.getContext();
-        mAms = new AccessibilityManagerService(mContext);
-        mMagnificationController = new MagnificationController(
-                mContext, mAms, /* lock */ new Object()) {
+        mMagnificationController = new MagnificationController(mContext, mMockAms, new Object(),
+                mMessageCapturingHandler, mMockWindowManager, mMockValueAnimator,
+                mMockSettingsBridge) {
             @Override
             public boolean magnificationRegionContains(float x, float y) {
                 return true;
@@ -123,12 +134,17 @@ public class MagnificationGestureHandlerTest {
             @Override
             void setForceShowMagnifiableBounds(boolean show) {}
         };
-        mMagnificationController.mRegistered = true;
+        mMagnificationController.register();
         mClock = new OffsettableClock.Stopped();
 
         boolean detectTripleTap = true;
         boolean detectShortcutTrigger = true;
         mMgh = newInstance(detectTripleTap, detectShortcutTrigger);
+    }
+
+    @After
+    public void tearDown() {
+        mMagnificationController.unregister();
     }
 
     @NonNull
