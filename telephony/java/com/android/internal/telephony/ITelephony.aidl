@@ -1499,10 +1499,4 @@ interface ITelephony {
      * Set the default SMS app to a given package on a given user.
      */
     void setDefaultSmsApp(int userId, String packageName);
-
-    /**
-     * Return the modem radio power state for slot index.
-     *
-     */
-    int getRadioPowerState(int slotIndex, String callingPackage);
 }
