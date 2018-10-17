@@ -6564,6 +6564,11 @@ message MetricsEvent {
     // OS: Q
     MOBILE_ROAMING_DIALOG = 1583;
 
+    // OPEN: Settings > Display > Lock screen display > On lock screen
+    // CATEGORY: SETTINGS
+    // OS: Q
+    LOCK_SCREEN_NOTIFICATION_CONTENT = 1584;
+
     // ---- End Q Constants, all Q constants go above this line ----
 
     // Add new aosp constants above this line.
