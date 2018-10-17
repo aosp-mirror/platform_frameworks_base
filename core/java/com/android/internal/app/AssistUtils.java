@@ -152,6 +152,12 @@ public class AssistUtils {
             return ComponentName.unflattenFromString(setting);
         }
 
+        final String defaultSetting = mContext.getResources().getString(
+                R.string.config_defaultAssistantComponentName);
+        if (defaultSetting != null) {
+            return ComponentName.unflattenFromString(defaultSetting);
+        }
+
         // Fallback to keep backward compatible behavior when there is no user setting.
         if (activeServiceSupportsAssistGesture()) {
             return getActiveServiceComponentName();
