@@ -16,6 +16,7 @@
 
 package android.nfc;
 
+import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
@@ -42,7 +43,9 @@ import android.os.ServiceManager;
 import android.util.Log;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * Represents the local NFC adapter.
@@ -485,6 +488,35 @@ public final class NfcAdapter {
             Log.e(TAG, "Package manager query failed, assuming no NFC feature", e);
             return false;
         }
+    }
+
+    /**
+     * Return list of Secure Elements which support off host card emulation.
+     *
+     * @return List<String> containing secure elements on the device which supports
+     *                      off host card emulation. eSE for Embedded secure element,
+     *                      SIM for UICC and so on.
+     */
+    public @NonNull List<String> getSupportedOffHostSecureElements() {
+        List<String> offHostSE = new ArrayList<String>();
+        IPackageManager pm = ActivityThread.getPackageManager();
+        if (pm == null) {
+            Log.e(TAG, "Cannot get package manager, assuming no off-host CE feature");
+            return offHostSE;
+        }
+        try {
+            if (pm.hasSystemFeature(PackageManager.FEATURE_NFC_OFF_HOST_CARD_EMULATION_UICC, 0)) {
+                offHostSE.add("SIM");
+            }
+            if (pm.hasSystemFeature(PackageManager.FEATURE_NFC_OFF_HOST_CARD_EMULATION_ESE, 0)) {
+                offHostSE.add("eSE");
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Package manager query failed, assuming no off-host CE feature", e);
+            offHostSE.clear();
+            return offHostSE;
+        }
+        return offHostSE;
     }
 
     /**
