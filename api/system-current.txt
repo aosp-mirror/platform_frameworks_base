@@ -5405,17 +5405,12 @@ package android.telephony.data {
   }
 
   public final class DataProfile implements android.os.Parcelable {
-    ctor public DataProfile(int, java.lang.String, java.lang.String, int, java.lang.String, java.lang.String, int, int, int, int, boolean, int, java.lang.String, int, int, java.lang.String, java.lang.String, boolean);
-    ctor public DataProfile(android.os.Parcel);
-    method public int describeContents();
     method public java.lang.String getApn();
     method public int getAuthType();
     method public int getBearerBitmap();
     method public int getMaxConns();
     method public int getMaxConnsTime();
     method public int getMtu();
-    method public java.lang.String getMvnoMatchData();
-    method public java.lang.String getMvnoType();
     method public java.lang.String getPassword();
     method public int getProfileId();
     method public java.lang.String getProtocol();
@@ -5425,9 +5420,8 @@ package android.telephony.data {
     method public java.lang.String getUserName();
     method public int getWaitTime();
     method public boolean isEnabled();
-    method public boolean isModemCognitive();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.telephony.data.DataProfile> CREATOR;
+    method public boolean isPersistent();
+    method public boolean isPreferred();
     field public static final int TYPE_3GPP = 1; // 0x1
     field public static final int TYPE_3GPP2 = 2; // 0x2
     field public static final int TYPE_COMMON = 0; // 0x0
