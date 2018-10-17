@@ -35,6 +35,13 @@ class SettingsProtoDumpUtil {
 
     static void dumpProtoLocked(SettingsProvider.SettingsRegistry settingsRegistry,
             ProtoOutputStream proto) {
+        // Config settings
+        SettingsState configSettings = settingsRegistry.getSettingsLocked(
+                SettingsProvider.SETTINGS_TYPE_CONFIG, UserHandle.USER_SYSTEM);
+        if (configSettings != null) {
+            // TODO(b/113100523): dump configuration settings after they are added
+        }
+
         // Global settings
         SettingsState globalSettings = settingsRegistry.getSettingsLocked(
                 SettingsProvider.SETTINGS_TYPE_GLOBAL, UserHandle.USER_SYSTEM);
