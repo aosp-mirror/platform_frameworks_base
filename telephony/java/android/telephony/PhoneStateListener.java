@@ -17,6 +17,7 @@
 package android.telephony;
 
 import android.annotation.NonNull;
+import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
 import android.os.Bundle;
 import android.os.Handler;
@@ -281,6 +282,15 @@ public class PhoneStateListener {
      */
     public static final int LISTEN_PHONE_CAPABILITY_CHANGE                 = 0x00200000;
 
+    /**
+     *  Listen for changes to the radio power state.
+     *
+     *  @see #onRadioPowerStateChanged
+     *  @hide
+     */
+    @SystemApi
+    public static final int LISTEN_RADIO_POWER_STATE_CHANGED               = 0x00400000;
+
     /*
      * Subscription used to listen to the phone state changes
      * @hide
@@ -406,6 +416,9 @@ public class PhoneStateListener {
                     case LISTEN_PHONE_CAPABILITY_CHANGE:
                         PhoneStateListener.this.onPhoneCapabilityChanged(
                                 (PhoneCapability) msg.obj);
+                        break;
+                    case LISTEN_RADIO_POWER_STATE_CHANGED:
+                        PhoneStateListener.this.onRadioPowerStateChanged((int) msg.obj);
                         break;
                 }
             }
@@ -647,6 +660,18 @@ public class PhoneStateListener {
     }
 
     /**
+     * Callback invoked when modem radio power state changes. Requires
+     * the READ_PRIVILEGED_PHONE_STATE permission.
+     * @param state the modem radio power state
+     * @hide
+     */
+    @SystemApi
+    public void onRadioPowerStateChanged(@TelephonyManager.RadioPowerState int state) {
+        // default implementation empty
+    }
+
+
+    /**
      * Callback invoked when telephony has received notice from a carrier
      * app that a network action that could result in connectivity loss
      * has been requested by an app using
@@ -776,6 +801,10 @@ public class PhoneStateListener {
 
         public void onPhoneCapabilityChanged(PhoneCapability capability) {
             send(LISTEN_PHONE_CAPABILITY_CHANGE, 0, 0, capability);
+        }
+
+        public void onRadioPowerStateChanged(@TelephonyManager.RadioPowerState int state) {
+            send(LISTEN_RADIO_POWER_STATE_CHANGED, 0, 0, state);
         }
     }
 
