@@ -692,6 +692,11 @@
     <!-- Wifi driver supports Automatic channel selection (ACS) for softap -->
     <bool translatable="false" name="config_wifi_softap_acs_supported">false</bool>
 
+    <!-- Channel list restriction to Automatic channel selection (ACS) for softap. If the device
+         doesn't want to restrict channels this should be empty. Value is a comma separated channel
+         string and/or channel range string like '1-6,11' -->
+    <string translatable="false" name="config_wifi_softap_acs_supported_channel_list"></string>
+
     <!-- Wifi driver supports IEEE80211AC for softap -->
     <bool translatable="false" name="config_wifi_softap_ieee80211ac_supported">false</bool>
 
