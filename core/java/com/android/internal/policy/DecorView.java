@@ -2093,7 +2093,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                     initialBounds, mResizingBackgroundDrawable, mCaptionBackgroundDrawable,
                     mUserCaptionBackgroundDrawable, getCurrentColor(mStatusColorViewState),
                     getCurrentColor(mNavigationColorViewState), fullscreen, systemInsets,
-                    stableInsets, resizeMode);
+                    stableInsets);
 
             // Get rid of the shadow while we are resizing. Shadow drawing takes considerable time.
             // If we want to get the shadow shown while resizing, we would need to elevate a new
@@ -2229,7 +2229,14 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
         // or it didn't change.
         if ((wasAdjustedForStack || mElevationAdjustedForStack)
                 && getElevation() != elevation) {
-            mWindow.setElevation(elevation);
+            if (!isResizing()) {
+                mWindow.setElevation(elevation);
+            } else {
+                // Just suppress the shadow when resizing, don't adjust surface insets because it'll
+                // cause a flicker when drag resize for freeform window starts. #onContentDrawn()
+                // will compensate the offset when passing to BackdropFrameRenderer.
+                setElevation(elevation);
+            }
         }
     }
 

@@ -2316,10 +2316,12 @@ public final class ViewRootImpl implements ViewParent,
                         mResizeMode = freeformResizing
                                 ? RESIZE_MODE_FREEFORM
                                 : RESIZE_MODE_DOCKED_DIVIDER;
+                        final boolean backdropSizeMatchesFrame =
+                                mWinFrame.width() == mPendingBackDropFrame.width()
+                                        && mWinFrame.height() == mPendingBackDropFrame.height();
                         // TODO: Need cutout?
-                        startDragResizing(mPendingBackDropFrame,
-                                mWinFrame.equals(mPendingBackDropFrame), mPendingVisibleInsets,
-                                mPendingStableInsets, mResizeMode);
+                        startDragResizing(mPendingBackDropFrame, !backdropSizeMatchesFrame,
+                                mPendingVisibleInsets, mPendingStableInsets, mResizeMode);
                     } else {
                         // We shouldn't come here, but if we come we should end the resize.
                         endDragResizing();

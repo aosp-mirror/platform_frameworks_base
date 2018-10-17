@@ -69,7 +69,6 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
     private ColorDrawable mNavigationBarColor;
     private boolean mOldFullscreen;
     private boolean mFullscreen;
-    private final int mResizeMode;
     private final Rect mOldSystemInsets = new Rect();
     private final Rect mOldStableInsets = new Rect();
     private final Rect mSystemInsets = new Rect();
@@ -79,7 +78,7 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
     public BackdropFrameRenderer(DecorView decorView, ThreadedRenderer renderer, Rect initialBounds,
             Drawable resizingBackgroundDrawable, Drawable captionBackgroundDrawable,
             Drawable userCaptionBackgroundDrawable, int statusBarColor, int navigationBarColor,
-            boolean fullscreen, Rect systemInsets, Rect stableInsets, int resizeMode) {
+            boolean fullscreen, Rect systemInsets, Rect stableInsets) {
         setName("ResizeFrame");
 
         mRenderer = renderer;
@@ -100,7 +99,6 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
         mStableInsets.set(stableInsets);
         mOldSystemInsets.set(systemInsets);
         mOldStableInsets.set(stableInsets);
-        mResizeMode = resizeMode;
 
         // Kick off our draw thread.
         start();
@@ -109,33 +107,35 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
     void onResourcesLoaded(DecorView decorView, Drawable resizingBackgroundDrawable,
             Drawable captionBackgroundDrawableDrawable, Drawable userCaptionBackgroundDrawable,
             int statusBarColor, int navigationBarColor) {
-        mDecorView = decorView;
-        mResizingBackgroundDrawable = resizingBackgroundDrawable != null
-                        && resizingBackgroundDrawable.getConstantState() != null
-                ? resizingBackgroundDrawable.getConstantState().newDrawable()
-                : null;
-        mCaptionBackgroundDrawable = captionBackgroundDrawableDrawable != null
-                        && captionBackgroundDrawableDrawable.getConstantState() != null
-                ? captionBackgroundDrawableDrawable.getConstantState().newDrawable()
-                : null;
-        mUserCaptionBackgroundDrawable = userCaptionBackgroundDrawable != null
-                        && userCaptionBackgroundDrawable.getConstantState() != null
-                ? userCaptionBackgroundDrawable.getConstantState().newDrawable()
-                : null;
-        if (mCaptionBackgroundDrawable == null) {
-            mCaptionBackgroundDrawable = mResizingBackgroundDrawable;
-        }
-        if (statusBarColor != 0) {
-            mStatusBarColor = new ColorDrawable(statusBarColor);
-            addSystemBarNodeIfNeeded();
-        } else {
-            mStatusBarColor = null;
-        }
-        if (navigationBarColor != 0) {
-            mNavigationBarColor = new ColorDrawable(navigationBarColor);
-            addSystemBarNodeIfNeeded();
-        } else {
-            mNavigationBarColor = null;
+        synchronized (this) {
+            mDecorView = decorView;
+            mResizingBackgroundDrawable = resizingBackgroundDrawable != null
+                    && resizingBackgroundDrawable.getConstantState() != null
+                    ? resizingBackgroundDrawable.getConstantState().newDrawable()
+                    : null;
+            mCaptionBackgroundDrawable = captionBackgroundDrawableDrawable != null
+                    && captionBackgroundDrawableDrawable.getConstantState() != null
+                    ? captionBackgroundDrawableDrawable.getConstantState().newDrawable()
+                    : null;
+            mUserCaptionBackgroundDrawable = userCaptionBackgroundDrawable != null
+                    && userCaptionBackgroundDrawable.getConstantState() != null
+                    ? userCaptionBackgroundDrawable.getConstantState().newDrawable()
+                    : null;
+            if (mCaptionBackgroundDrawable == null) {
+                mCaptionBackgroundDrawable = mResizingBackgroundDrawable;
+            }
+            if (statusBarColor != 0) {
+                mStatusBarColor = new ColorDrawable(statusBarColor);
+                addSystemBarNodeIfNeeded();
+            } else {
+                mStatusBarColor = null;
+            }
+            if (navigationBarColor != 0) {
+                mNavigationBarColor = new ColorDrawable(navigationBarColor);
+                addSystemBarNodeIfNeeded();
+            } else {
+                mNavigationBarColor = null;
+            }
         }
     }
 
@@ -186,7 +186,7 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
      * All resources of the renderer will be released. This function can be called from the
      * the UI thread as well as the renderer thread.
      */
-    public void releaseRenderer() {
+    void releaseRenderer() {
         synchronized (this) {
             if (mRenderer != null) {
                 // Invalidate the current content bounds.
@@ -268,7 +268,7 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
      * @param ySize The height of the content.
      * @return true if a frame should be requested after the content is drawn; false otherwise.
      */
-    public boolean onContentDrawn(int xOffset, int yOffset, int xSize, int ySize) {
+    boolean onContentDrawn(int xOffset, int yOffset, int xSize, int ySize) {
         synchronized (this) {
             final boolean firstCall = mLastContentWidth == 0;
             // The current content buffer is drawn here.
@@ -291,7 +291,7 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
         }
     }
 
-    public void onRequestDraw(boolean reportNextDraw) {
+    void onRequestDraw(boolean reportNextDraw) {
         synchronized (this) {
             mReportNextDraw = reportNextDraw;
             mOldTargetRect.set(0, 0, 0, 0);
@@ -329,8 +329,8 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
             return;
         }
 
-        // Since the surface is spanning the entire screen, we have to add the start offset of
-        // the bounds to get to the surface location.
+        // Content may not be drawn at the surface origin, so we want to keep the offset when we're
+        // resizing it.
         final int left = mLastXOffset + newBounds.left;
         final int top = mLastYOffset + newBounds.top;
         final int width = newBounds.width();
@@ -414,6 +414,8 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
     }
 
     void setUserCaptionBackgroundDrawable(Drawable userCaptionBackgroundDrawable) {
-        mUserCaptionBackgroundDrawable = userCaptionBackgroundDrawable;
+        synchronized (this) {
+            mUserCaptionBackgroundDrawable = userCaptionBackgroundDrawable;
+        }
     }
 }
