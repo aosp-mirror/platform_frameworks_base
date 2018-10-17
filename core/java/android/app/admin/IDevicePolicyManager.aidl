@@ -413,4 +413,8 @@ interface IDevicePolicyManager {
     boolean isOverrideApnEnabled(in ComponentName admin);
 
     boolean isMeteredDataDisabledPackageForUser(in ComponentName admin, String packageName, int userId);
+
+    void setGlobalPrivateDns(in ComponentName admin, int mode, in String privateDnsHost);
+    int getGlobalPrivateDnsMode(in ComponentName admin);
+    String getGlobalPrivateDnsHost(in ComponentName admin);
 }
