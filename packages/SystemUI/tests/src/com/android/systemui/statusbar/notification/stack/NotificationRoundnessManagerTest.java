@@ -18,7 +18,10 @@ package com.android.systemui.statusbar.notification.stack;
 
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
@@ -26,8 +29,8 @@ import android.testing.TestableLooper.RunWithLooper;
 import android.view.View;
 
 import com.android.systemui.SysuiTestCase;
-import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.NotificationTestHelper;
+import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -58,39 +61,105 @@ public class NotificationRoundnessManagerTest extends SysuiTestCase {
                 -> mRoundnessManager.onHeadsupAnimatingAwayChanged(mSecond, animatingAway));
         mRoundnessManager.setOnRoundingChangedCallback(mRoundnessCallback);
         mRoundnessManager.setAnimatedChildren(mAnimatedChildren);
-        mRoundnessManager.setFirstAndLastBackgroundChild(mFirst, mFirst);
+        mRoundnessManager.updateRoundedChildren(new NotificationSection[]{
+                createSection(mFirst, mFirst),
+                createSection(null, null)
+        });
         mRoundnessManager.setExpanded(1.0f, 1.0f);
+        reset(mRoundnessCallback);
     }
 
     @Test
     public void testCallbackCalledWhenSecondChanged() {
-        mRoundnessManager.setFirstAndLastBackgroundChild(mFirst, mSecond);
+        mRoundnessManager.updateRoundedChildren(new NotificationSection[]{
+                createSection(mFirst, mSecond),
+                createSection(null, null)
+        });
         verify(mRoundnessCallback, atLeast(1)).run();
     }
 
     @Test
     public void testCallbackCalledWhenFirstChanged() {
-        mRoundnessManager.setFirstAndLastBackgroundChild(mSecond, mFirst);
+        mRoundnessManager.updateRoundedChildren(new NotificationSection[]{
+                createSection(mSecond, mFirst),
+                createSection(null, null)
+        });
         verify(mRoundnessCallback, atLeast(1)).run();
     }
 
     @Test
+    public void testCallbackCalledWhenSecondSectionFirstChanged() {
+        mRoundnessManager.updateRoundedChildren(new NotificationSection[]{
+                createSection(mFirst, mFirst),
+                createSection(mSecond, null)
+        });
+        verify(mRoundnessCallback, atLeast(1)).run();
+    }
+
+    @Test
+    public void testCallbackCalledWhenSecondSectionLastChanged() {
+        mRoundnessManager.updateRoundedChildren(new NotificationSection[]{
+                createSection(mFirst, mFirst),
+                createSection(null, mSecond)
+        });
+        verify(mRoundnessCallback, atLeast(1)).run();
+    }
+
+    @Test
+    public void testCallbackNotCalledWhenFirstChangesSections() {
+        mRoundnessManager.updateRoundedChildren(new NotificationSection[]{
+                createSection(null, mFirst),
+                createSection(mFirst, null)
+        });
+        verify(mRoundnessCallback, never()).run();
+    }
+
+    @Test
     public void testRoundnessSetOnLast() {
-        mRoundnessManager.setFirstAndLastBackgroundChild(mFirst, mSecond);
+        mRoundnessManager.updateRoundedChildren(new NotificationSection[]{
+                createSection(mFirst, mSecond),
+                createSection(null, null)
+        });
         Assert.assertEquals(1.0f, mSecond.getCurrentBottomRoundness(), 0.0f);
         Assert.assertEquals(0.0f, mSecond.getCurrentTopRoundness(), 0.0f);
     }
 
     @Test
+    public void testRoundnessSetOnSecondSectionLast() {
+        mRoundnessManager.updateRoundedChildren(new NotificationSection[]{
+                createSection(mFirst, mFirst),
+                createSection(null, mSecond)
+        });
+        Assert.assertEquals(1.0f, mSecond.getCurrentBottomRoundness(), 0.0f);
+        Assert.assertEquals(0.0f, mSecond.getCurrentTopRoundness(), 0.0f);
+    }
+
+    @Test
+    public void testRoundnessSetOnSecondSectionFirst() {
+        mRoundnessManager.updateRoundedChildren(new NotificationSection[]{
+                createSection(mFirst, mFirst),
+                createSection(mSecond, null)
+        });
+        Assert.assertEquals(0.0f, mSecond.getCurrentBottomRoundness(), 0.0f);
+        Assert.assertEquals(1.0f, mSecond.getCurrentTopRoundness(), 0.0f);
+    }
+
+    @Test
     public void testRoundnessSetOnNew() {
-        mRoundnessManager.setFirstAndLastBackgroundChild(mFirst, null);
+        mRoundnessManager.updateRoundedChildren(new NotificationSection[]{
+                createSection(mFirst, null),
+                createSection(null, null)
+        });
         Assert.assertEquals(0.0f, mFirst.getCurrentBottomRoundness(), 0.0f);
         Assert.assertEquals(1.0f, mFirst.getCurrentTopRoundness(), 0.0f);
     }
 
     @Test
     public void testCompleteReplacement() {
-        mRoundnessManager.setFirstAndLastBackgroundChild(mSecond, mSecond);
+        mRoundnessManager.updateRoundedChildren(new NotificationSection[]{
+                createSection(mSecond, mSecond),
+                createSection(null, null)
+        });
         Assert.assertEquals(0.0f, mFirst.getCurrentBottomRoundness(), 0.0f);
         Assert.assertEquals(0.0f, mFirst.getCurrentTopRoundness(), 0.0f);
     }
@@ -98,7 +167,10 @@ public class NotificationRoundnessManagerTest extends SysuiTestCase {
     @Test
     public void testNotCalledWhenRemoved() {
         mFirst.setRemoved();
-        mRoundnessManager.setFirstAndLastBackgroundChild(mSecond, mSecond);
+        mRoundnessManager.updateRoundedChildren(new NotificationSection[]{
+                createSection(mSecond, mSecond),
+                createSection(null, null)
+        });
         Assert.assertEquals(1.0f, mFirst.getCurrentBottomRoundness(), 0.0f);
         Assert.assertEquals(1.0f, mFirst.getCurrentTopRoundness(), 0.0f);
     }
@@ -107,7 +179,10 @@ public class NotificationRoundnessManagerTest extends SysuiTestCase {
     public void testRoundedWhenPinnedAndCollapsed() {
         mFirst.setPinned(true);
         mRoundnessManager.setExpanded(0.0f /* expandedHeight */, 0.0f /* appearFraction */);
-        mRoundnessManager.setFirstAndLastBackgroundChild(mSecond, mSecond);
+        mRoundnessManager.updateRoundedChildren(new NotificationSection[]{
+                createSection(mSecond, mSecond),
+                createSection(null, null)
+        });
         Assert.assertEquals(1.0f, mFirst.getCurrentBottomRoundness(), 0.0f);
         Assert.assertEquals(1.0f, mFirst.getCurrentTopRoundness(), 0.0f);
     }
@@ -116,7 +191,10 @@ public class NotificationRoundnessManagerTest extends SysuiTestCase {
     public void testRoundedWhenGoingAwayAndCollapsed() {
         mFirst.setHeadsUpAnimatingAway(true);
         mRoundnessManager.setExpanded(0.0f /* expandedHeight */, 0.0f /* appearFraction */);
-        mRoundnessManager.setFirstAndLastBackgroundChild(mSecond, mSecond);
+        mRoundnessManager.updateRoundedChildren(new NotificationSection[]{
+                createSection(mSecond, mSecond),
+                createSection(null, null)
+        });
         Assert.assertEquals(1.0f, mFirst.getCurrentBottomRoundness(), 0.0f);
         Assert.assertEquals(1.0f, mFirst.getCurrentTopRoundness(), 0.0f);
     }
@@ -125,7 +203,10 @@ public class NotificationRoundnessManagerTest extends SysuiTestCase {
     public void testRoundedNormalRoundingWhenExpanded() {
         mFirst.setHeadsUpAnimatingAway(true);
         mRoundnessManager.setExpanded(1.0f /* expandedHeight */, 0.0f /* appearFraction */);
-        mRoundnessManager.setFirstAndLastBackgroundChild(mSecond, mSecond);
+        mRoundnessManager.updateRoundedChildren(new NotificationSection[]{
+                createSection(mSecond, mSecond),
+                createSection(null, null)
+        });
         Assert.assertEquals(0.0f, mFirst.getCurrentBottomRoundness(), 0.0f);
         Assert.assertEquals(0.0f, mFirst.getCurrentTopRoundness(), 0.0f);
     }
@@ -134,7 +215,10 @@ public class NotificationRoundnessManagerTest extends SysuiTestCase {
     public void testTrackingHeadsUpRoundedIfPushingUp() {
         mRoundnessManager.setExpanded(1.0f /* expandedHeight */, -0.5f /* appearFraction */);
         mRoundnessManager.setTrackingHeadsUp(mFirst);
-        mRoundnessManager.setFirstAndLastBackgroundChild(mSecond, mSecond);
+        mRoundnessManager.updateRoundedChildren(new NotificationSection[]{
+                createSection(mSecond, mSecond),
+                createSection(null, null)
+        });
         Assert.assertEquals(1.0f, mFirst.getCurrentBottomRoundness(), 0.0f);
         Assert.assertEquals(1.0f, mFirst.getCurrentTopRoundness(), 0.0f);
     }
@@ -143,7 +227,10 @@ public class NotificationRoundnessManagerTest extends SysuiTestCase {
     public void testTrackingHeadsUpNotRoundedIfPushingDown() {
         mRoundnessManager.setExpanded(1.0f /* expandedHeight */, 0.5f /* appearFraction */);
         mRoundnessManager.setTrackingHeadsUp(mFirst);
-        mRoundnessManager.setFirstAndLastBackgroundChild(mSecond, mSecond);
+        mRoundnessManager.updateRoundedChildren(new NotificationSection[]{
+                createSection(mSecond, mSecond),
+                createSection(null, null)
+        });
         Assert.assertEquals(0.0f, mFirst.getCurrentBottomRoundness(), 0.0f);
         Assert.assertEquals(0.0f, mFirst.getCurrentTopRoundness(), 0.0f);
     }
@@ -151,7 +238,10 @@ public class NotificationRoundnessManagerTest extends SysuiTestCase {
     @Test
     public void testRoundingUpdatedWhenAnimatingAwayTrue() {
         mRoundnessManager.setExpanded(0.0f, 0.0f);
-        mRoundnessManager.setFirstAndLastBackgroundChild(mSecond, mSecond);
+        mRoundnessManager.updateRoundedChildren(new NotificationSection[]{
+                createSection(mSecond, mSecond),
+                createSection(null, null)
+        });
         mFirst.setHeadsUpAnimatingAway(true);
         Assert.assertEquals(1.0f, mFirst.getCurrentBottomRoundness(), 0.0f);
         Assert.assertEquals(1.0f, mFirst.getCurrentTopRoundness(), 0.0f);
@@ -161,10 +251,49 @@ public class NotificationRoundnessManagerTest extends SysuiTestCase {
     @Test
     public void testRoundingUpdatedWhenAnimatingAwayFalse() {
         mRoundnessManager.setExpanded(0.0f, 0.0f);
-        mRoundnessManager.setFirstAndLastBackgroundChild(mSecond, mSecond);
+        mRoundnessManager.updateRoundedChildren(new NotificationSection[]{
+                createSection(mSecond, mSecond),
+                createSection(null, null)
+        });
         mFirst.setHeadsUpAnimatingAway(true);
         mFirst.setHeadsUpAnimatingAway(false);
         Assert.assertEquals(0.0f, mFirst.getCurrentBottomRoundness(), 0.0f);
         Assert.assertEquals(0.0f, mFirst.getCurrentTopRoundness(), 0.0f);
+    }
+
+    @Test
+    public void testNoViewsFirstOrLastInSectionWhenSecondSectionEmpty() {
+        Assert.assertFalse(mFirst.isFirstInSection());
+        Assert.assertFalse(mFirst.isLastInSection());
+    }
+
+    @Test
+    public void testNoViewsFirstOrLastInSectionWhenFirstSectionEmpty() {
+        mRoundnessManager.updateRoundedChildren(new NotificationSection[]{
+                createSection(null, null),
+                createSection(mSecond, mSecond)
+        });
+        Assert.assertFalse(mSecond.isFirstInSection());
+        Assert.assertFalse(mSecond.isLastInSection());
+    }
+
+    @Test
+    public void testFirstAndLastViewsInSectionSetWhenBothSectionsNonEmpty() {
+        mRoundnessManager.updateRoundedChildren(new NotificationSection[]{
+                createSection(mFirst, mFirst),
+                createSection(mSecond, mSecond)
+        });
+        Assert.assertFalse(mFirst.isFirstInSection());
+        Assert.assertTrue(mFirst.isLastInSection());
+        Assert.assertTrue(mSecond.isFirstInSection());
+        Assert.assertFalse(mSecond.isLastInSection());
+    }
+
+    private NotificationSection createSection(ExpandableNotificationRow first,
+            ExpandableNotificationRow last) {
+        NotificationSection section = mock(NotificationSection.class);
+        when(section.getFirstVisibleChild()).thenReturn(first);
+        when(section.getLastVisibleChild()).thenReturn(last);
+        return section;
     }
 }
