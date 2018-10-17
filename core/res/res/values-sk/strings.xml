@@ -135,8 +135,8 @@
     <item msgid="4397097370387921767">"Volanie siete Wi‑Fi %s"</item>
   </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Vypnuté"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Uprednostniť Wi‑Fi"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Preferujem mobilné dáta"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Preferovať Wi‑Fi"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Preferovať mobilné spojenie"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Len Wi‑Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: Nepresmerované"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>

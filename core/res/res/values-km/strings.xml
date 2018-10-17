@@ -133,8 +133,8 @@
     <item msgid="4397097370387921767">"ការហៅតាមរយៈ Wi-Fi %s"</item>
   </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"បិទ"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"គួរប្រើ Wi-Fi"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"បាន​ជ្រើសរើសប្រើទិន្នន័យចល័ត"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi ជាអាទិភាព"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"ទិន្នន័យទូរសព្ទចល័តជាអាទិភាព"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Wi-Fi តែប៉ុណ្ណោះ"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g> ៖ មិន​បាន​បញ្ជូន​បន្ត"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>

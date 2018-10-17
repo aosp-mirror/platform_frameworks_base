@@ -178,7 +178,7 @@
     <string name="accessibility_settings_button" msgid="799583911231893380">"הגדרות מערכת"</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"הודעות"</string>
     <string name="accessibility_overflow_action" msgid="5681882033274783311">"הצגת כל ההודעות"</string>
-    <string name="accessibility_remove_notification" msgid="3603099514902182350">"נקה התראה"</string>
+    <string name="accessibility_remove_notification" msgid="3603099514902182350">"מחיקת התראה"</string>
     <string name="accessibility_gps_enabled" msgid="3511469499240123019">"‏GPS מופעל."</string>
     <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"‏השגת GPS."</string>
     <string name="accessibility_tty_enabled" msgid="4613200365379426561">"‏TeleTypewriter מופעל"</string>
@@ -194,7 +194,7 @@
     <string name="accessibility_recents_item_open_app_info" msgid="5107479759905883540">"פתח מידע על האפליקציה <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="accessibility_recents_item_launched" msgid="7616039892382525203">"מפעיל את <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"הודעה נדחתה."</string>
-    <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"לוח הודעות."</string>
+    <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"לוח התראות."</string>
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"הגדרות מהירות."</string>
     <string name="accessibility_desc_lock_screen" msgid="5625143713611759164">"מסך נעילה."</string>
     <string name="accessibility_desc_settings" msgid="3417884241751434521">"הגדרות"</string>
@@ -266,7 +266,7 @@
       <item quantity="other">יש בפנים עוד <xliff:g id="NUMBER_1">%s</xliff:g> הודעות.</item>
       <item quantity="one">יש בפנים עוד הודעה <xliff:g id="NUMBER_0">%s</xliff:g>.</item>
     </plurals>
-    <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"הגדרות עבור הודעות"</string>
+    <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"הגדרת התראות"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"הגדרות <xliff:g id="APP_NAME">%s</xliff:g>"</string>
     <string name="accessibility_rotation_lock_off" msgid="4062780228931590069">"המסך יסתובב באופן אוטומטי."</string>
     <string name="accessibility_rotation_lock_on_landscape" msgid="6731197337665366273">"המסך נעול כעת לרוחב."</string>
@@ -533,7 +533,7 @@
     <string name="stream_ring" msgid="8213049469184048338">"צלצול"</string>
     <string name="stream_music" msgid="9086982948697544342">"מדיה"</string>
     <string name="stream_alarm" msgid="5209444229227197703">"שעון מעורר"</string>
-    <string name="stream_notification" msgid="2563720670905665031">"הודעה"</string>
+    <string name="stream_notification" msgid="2563720670905665031">"התראה"</string>
     <string name="stream_bluetooth_sco" msgid="2055645746402746292">"Bluetooth"</string>
     <string name="stream_dtmf" msgid="2447177903892477915">"‏טון זוגי מרובה תדרים (DTMF)"</string>
     <string name="stream_accessibility" msgid="301136219144385106">"נגישות"</string>
@@ -774,7 +774,7 @@
     <string name="accessibility_qs_edit_tile_removed" msgid="8584304916627913440">"<xliff:g id="TILE_NAME">%1$s</xliff:g> הוסר"</string>
     <string name="accessibility_qs_edit_tile_moved" msgid="4343693412689365038">"<xliff:g id="TILE_NAME">%1$s</xliff:g> הועבר למיקום <xliff:g id="POSITION">%2$d</xliff:g>"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="8073587401747016103">"עורך הגדרות מהירות."</string>
-    <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"הודעת <xliff:g id="ID_1">%1$s</xliff:g>: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
+    <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"התראות <xliff:g id="ID_1">%1$s</xliff:g>: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="dock_forced_resizable" msgid="5914261505436217520">"ייתכן שהיישום לא יפעל עם מסך מפוצל."</string>
     <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"האפליקציה אינה תומכת במסך מפוצל."</string>
     <string name="forced_resizable_secondary_display" msgid="4230857851756391925">"ייתכן שהאפליקציה לא תפעל במסך משני."</string>

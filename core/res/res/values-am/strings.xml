@@ -814,7 +814,7 @@
     <string name="keyguard_accessibility_face_unlock" msgid="4817282543351718535">"በፊት መክፈት።"</string>
     <string name="keyguard_accessibility_pin_unlock" msgid="2469687111784035046">"በፒን መክፈት።"</string>
     <string name="keyguard_accessibility_sim_pin_unlock" msgid="9149698847116962307">"የሲም ፒን ክፈት።"</string>
-    <string name="keyguard_accessibility_sim_puk_unlock" msgid="9106899279724723341">"የሲም ፒዩኬ ክፈት።"</string>
+    <string name="keyguard_accessibility_sim_puk_unlock" msgid="9106899279724723341">"የሲም PUK ክፈት።"</string>
     <string name="keyguard_accessibility_password_unlock" msgid="7675777623912155089">"በይለፍ ቃል መክፈት።"</string>
     <string name="keyguard_accessibility_pattern_area" msgid="7679891324509597904">"የስርዓተ-ጥለት አካባቢ።"</string>
     <string name="keyguard_accessibility_slide_area" msgid="6736064494019979544">"የማንሸራተቻ አካባቢ።"</string>
@@ -1528,7 +1528,7 @@
     <string name="kg_sim_unlock_progress_dialog_message" msgid="8950398016976865762">"ሲም ካርዱን በመክፈት ላይ…"</string>
     <string name="kg_password_wrong_pin_code" msgid="1139324887413846912">"ትክክል ያልሆነ ፒን ኮድ።"</string>
     <string name="kg_invalid_sim_pin_hint" msgid="8795159358110620001">"ከ4 እስከ 8 ቁጥሮች የያዘ ፒን ይተይቡ።"</string>
-    <string name="kg_invalid_sim_puk_hint" msgid="6025069204539532000">"የፒዩኬ ኮድ 8 ቁጥሮች ነው መሆን ያለበት።"</string>
+    <string name="kg_invalid_sim_puk_hint" msgid="6025069204539532000">"የPUK ኮድ 8 ቁጥሮች ነው መሆን ያለበት።"</string>
     <string name="kg_invalid_puk" msgid="3638289409676051243">"ትክክለኛውን የPUK ኮድ እንደገና ያስገቡ። ተደጋጋሚ ሙከራዎች ሲም ካርዱን እስከመጨረሻው ያሰናክሉታል።"</string>
     <string name="kg_invalid_confirm_pin_hint" product="default" msgid="7003469261464593516">"ፒን ኮዶች አይገጣጠሙም"</string>
     <string name="kg_login_too_many_attempts" msgid="6486842094005698475">"በጣም ብዙ የስርዓተ ጥለት ሙከራዎች"</string>

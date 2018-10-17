@@ -59,7 +59,7 @@
     <string name="ClipMmi" msgid="6952821216480289285">"Sarrerako deien identifikazio-zerbitzua"</string>
     <string name="ClirMmi" msgid="7784673673446833091">"Irteerako deien identifikazio-zerbitzua"</string>
     <string name="ColpMmi" msgid="3065121483740183974">"Konektatutako linearen IDa"</string>
-    <string name="ColrMmi" msgid="4996540314421889589">"Konektatutako linearen ID murrizketa"</string>
+    <string name="ColrMmi" msgid="4996540314421889589">"Konektatutako linearen ID murriztapena"</string>
     <string name="CfMmi" msgid="5123218989141573515">"Dei-desbideratzea"</string>
     <string name="CwMmi" msgid="9129678056795016867">"Deia zain"</string>
     <string name="BaMmi" msgid="455193067926770581">"Deien debekuak"</string>
@@ -1075,7 +1075,7 @@
     <string name="aerr_application_repeated" msgid="3146328699537439573">"Behin eta berriz gelditzen ari da <xliff:g id="APPLICATION">%1$s</xliff:g>"</string>
     <string name="aerr_process_repeated" msgid="6235302956890402259">"Behin eta berriz gelditzen ari da <xliff:g id="PROCESS">%1$s</xliff:g>"</string>
     <string name="aerr_restart" msgid="7581308074153624475">"Ireki aplikazioa berriro"</string>
-    <string name="aerr_report" msgid="5371800241488400617">"Bidali iritzia"</string>
+    <string name="aerr_report" msgid="5371800241488400617">"Bidali oharrak"</string>
     <string name="aerr_close" msgid="2991640326563991340">"Itxi"</string>
     <string name="aerr_mute" msgid="1974781923723235953">"Ezkutatu gailua berrabiarazi arte"</string>
     <string name="aerr_wait" msgid="3199956902437040261">"Itxaron"</string>

@@ -136,7 +136,7 @@
   </string-array>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Wył."</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Preferuj Wi-Fi"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Preferowane mobilne"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Preferowane komórkowe"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Tylko Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: nieprzekierowane"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
