@@ -80,4 +80,5 @@ interface ITelephonyRegistry {
     void notifyUserMobileDataStateChangedForPhoneId(in int phoneId, in int subId, in boolean state);
     void notifyPhoneCapabilityChanged(in PhoneCapability capability);
     void notifyPreferredDataSubIdChanged(int preferredSubId);
+    void notifyRadioPowerStateChanged(in int state);
 }
