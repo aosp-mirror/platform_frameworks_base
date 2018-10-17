@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.notification.row;
 
 import static com.android.systemui.statusbar.notification.row.NotificationContentView.VISIBLE_TYPE_AMBIENT;
+import static com.android.systemui.statusbar.notification.row.NotificationContentView.VISIBLE_TYPE_CONTRACTED;
 import static com.android.systemui.statusbar.notification.row.NotificationContentView.VISIBLE_TYPE_HEADSUP;
 
 import android.annotation.IntDef;
@@ -35,8 +36,8 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.statusbar.InflationTask;
 import com.android.systemui.statusbar.notification.InflationException;
 import com.android.systemui.statusbar.notification.MediaNotificationProcessor;
-import com.android.systemui.statusbar.notification.row.wrapper.NotificationViewWrapper;
 import com.android.systemui.statusbar.notification.NotificationData;
+import com.android.systemui.statusbar.notification.row.wrapper.NotificationViewWrapper;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.util.Assert;
 
@@ -111,7 +112,6 @@ public class NotificationInflater {
     private static final int REQUIRED_INFLATION_FLAGS =
             FLAG_CONTENT_VIEW_CONTRACTED
             | FLAG_CONTENT_VIEW_EXPANDED
-            | FLAG_CONTENT_VIEW_PUBLIC
             | FLAG_CONTENT_VIEW_HEADS_UP
             | FLAG_CONTENT_VIEW_AMBIENT;
 
@@ -173,14 +173,23 @@ public class NotificationInflater {
         mRemoteViewClickHandler = remoteViewClickHandler;
     }
 
-    public void setRedactAmbient(boolean redactAmbient) {
-        if (mRedactAmbient != redactAmbient) {
-            mRedactAmbient = redactAmbient;
-            if (mRow.getEntry() == null) {
-                return;
-            }
-            inflateNotificationViews(FLAG_CONTENT_VIEW_AMBIENT);
+    /**
+     * Update whether or not the notification is redacted on the lock screen.  If the notification
+     * is now redacted, we should inflate the public contracted view and public ambient view to
+     * now show on the lock screen.
+     *
+     * @param needsRedaction true if the notification should now be redacted on the lock screen
+     */
+    public void updateNeedsRedaction(boolean needsRedaction) {
+        mRedactAmbient = needsRedaction;
+        if (mRow.getEntry() == null) {
+            return;
         }
+        int flags = FLAG_CONTENT_VIEW_AMBIENT;
+        if (needsRedaction) {
+            flags |= FLAG_CONTENT_VIEW_PUBLIC;
+        }
+        inflateNotificationViews(flags);
     }
 
     /**
@@ -210,6 +219,17 @@ public class NotificationInflater {
     }
 
     /**
+     * Whether or not the view corresponding to the flag is set to be inflated currently.
+     *
+     * @param flag the {@link InflationFlag} corresponding to the view
+     * @return true if the flag is set and view will be inflated, false o/w
+     */
+    @VisibleForTesting
+    public boolean isInflationFlagSet(@InflationFlag int flag) {
+        return ((mInflationFlags & flag) != 0);
+    }
+
+    /**
      * Inflate all views of this notification on a background thread. This is asynchronous and will
      * notify the callback once it's finished.
      */
@@ -234,7 +254,7 @@ public class NotificationInflater {
             return;
         }
         // Only inflate the ones that are set.
-        reInflateFlags |= mInflationFlags;
+        reInflateFlags &= mInflationFlags;
         StatusBarNotification sbn = mRow.getEntry().notification;
         AsyncInflationTask task = new AsyncInflationTask(sbn, reInflateFlags, mCachedContentViews,
                 mRow, mIsLowPriority, mIsChildInGroup, mUsesIncreasedHeight,
@@ -291,9 +311,14 @@ public class NotificationInflater {
                     mCachedContentViews.remove(FLAG_CONTENT_VIEW_AMBIENT);
                 }
                 break;
+            case FLAG_CONTENT_VIEW_PUBLIC:
+                if (mRow.getPublicLayout().isContentViewInactive(VISIBLE_TYPE_CONTRACTED)) {
+                    mRow.getPublicLayout().setContractedChild(null);
+                    mCachedContentViews.remove(FLAG_CONTENT_VIEW_PUBLIC);
+                }
+                break;
             case FLAG_CONTENT_VIEW_CONTRACTED:
             case FLAG_CONTENT_VIEW_EXPANDED:
-            case FLAG_CONTENT_VIEW_PUBLIC:
             default:
                 break;
         }
