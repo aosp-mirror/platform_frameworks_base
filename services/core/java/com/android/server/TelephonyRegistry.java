@@ -216,9 +216,6 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     private int mPreferredDataSubId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 
-    @TelephonyManager.RadioPowerState
-    private int mRadioPowerState = TelephonyManager.RADIO_POWER_UNAVAILABLE;
-
     private final LocalLog mLocalLog = new LocalLog(100);
 
     private PreciseDataConnectionState mPreciseDataConnectionState =
@@ -761,13 +758,6 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     if ((events & PhoneStateListener.LISTEN_PREFERRED_DATA_SUBID_CHANGE) != 0) {
                         try {
                             r.callback.onPreferredDataSubIdChanged(mPreferredDataSubId);
-                        } catch (RemoteException ex) {
-                            remove(r.binder);
-                        }
-                    }
-                    if ((events & PhoneStateListener.LISTEN_RADIO_POWER_STATE_CHANGED) != 0) {
-                        try {
-                            r.callback.onRadioPowerStateChanged(mRadioPowerState);
                         } catch (RemoteException ex) {
                             remove(r.binder);
                         }
@@ -1619,32 +1609,6 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         }
     }
 
-    public void notifyRadioPowerStateChanged(@TelephonyManager.RadioPowerState int state) {
-        if (!checkNotifyPermission("notifyRadioPowerStateChanged()")) {
-            return;
-        }
-
-        if (VDBG) {
-            log("notifyRadioPowerStateChanged: state= " + state);
-        }
-
-        synchronized (mRecords) {
-            mRadioPowerState = state;
-
-            for (Record r : mRecords) {
-                if (r.matchPhoneStateListenerEvent(
-                        PhoneStateListener.LISTEN_RADIO_POWER_STATE_CHANGED)) {
-                    try {
-                        r.callback.onRadioPowerStateChanged(state);
-                    } catch (RemoteException ex) {
-                        mRemoveList.add(r.binder);
-                    }
-                }
-            }
-            handleRemoveListLocked();
-        }
-    }
-
     @Override
     public void dump(FileDescriptor fd, PrintWriter writer, String[] args) {
         final IndentingPrintWriter pw = new IndentingPrintWriter(writer, "  ");
@@ -1682,7 +1646,6 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             pw.println("mVoLteServiceState=" + mVoLteServiceState);
             pw.println("mPhoneCapability=" + mPhoneCapability);
             pw.println("mPreferredDataSubId=" + mPreferredDataSubId);
-            pw.println("mRadioPowerState=" + mRadioPowerState);
 
             pw.decreaseIndent();
 
