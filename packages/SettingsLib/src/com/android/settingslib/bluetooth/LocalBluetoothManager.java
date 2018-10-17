@@ -18,9 +18,13 @@ package com.android.settingslib.bluetooth;
 
 import android.content.Context;
 import android.os.Handler;
+import android.os.UserHandle;
 import android.util.Log;
 
 import java.lang.ref.WeakReference;
+
+import androidx.annotation.Nullable;
+import androidx.annotation.RequiresPermission;
 
 /**
  * LocalBluetoothManager provides a simplified interface on top of a subset of
@@ -49,6 +53,7 @@ public class LocalBluetoothManager {
     /** The broadcast receiver event manager. */
     private final BluetoothEventManager mEventManager;
 
+    @Nullable
     public static synchronized LocalBluetoothManager getInstance(Context context,
             BluetoothManagerCallback onInitCallback) {
         if (sInstance == null) {
@@ -57,10 +62,11 @@ public class LocalBluetoothManager {
                 return null;
             }
             // This will be around as long as this process is
-            Context appContext = context.getApplicationContext();
-            sInstance = new LocalBluetoothManager(adapter, appContext, null);
+            sInstance = new LocalBluetoothManager(adapter, context, /* handler= */ null,
+                    /* userHandle= */ null);
             if (onInitCallback != null) {
-                onInitCallback.onBluetoothManagerInitialized(appContext, sInstance);
+                onInitCallback.onBluetoothManagerInitialized(context.getApplicationContext(),
+                        sInstance);
             }
         }
 
@@ -71,22 +77,43 @@ public class LocalBluetoothManager {
      * Returns a new instance of {@link LocalBluetoothManager} or null if Bluetooth is not
      * supported for this hardware. This instance should be globally cached by the caller.
      */
+    @Nullable
     public static LocalBluetoothManager create(Context context, Handler handler) {
         LocalBluetoothAdapter adapter = LocalBluetoothAdapter.getInstance();
         if (adapter == null) {
             return null;
         }
-        return new LocalBluetoothManager(adapter, context.getApplicationContext(), handler);
+        return new LocalBluetoothManager(adapter, context, handler, /* userHandle= */ null);
     }
 
-    private LocalBluetoothManager(
-            LocalBluetoothAdapter adapter, Context context, Handler handler) {
-        mContext = context;
+    /**
+     * Returns a new instance of {@link LocalBluetoothManager} or null if Bluetooth is not
+     * supported for this hardware. This instance should be globally cached by the caller.
+     *
+     * <p> Allows to specify a {@link UserHandle} for which to receive bluetooth events.
+     *
+     * <p> Requires {@link android.Manifest.permission#INTERACT_ACROSS_USERS_FULL} permission.
+     */
+    @Nullable
+    @RequiresPermission(android.Manifest.permission.INTERACT_ACROSS_USERS_FULL)
+    public static LocalBluetoothManager create(Context context, Handler handler,
+            UserHandle userHandle) {
+        LocalBluetoothAdapter adapter = LocalBluetoothAdapter.getInstance();
+        if (adapter == null) {
+            return null;
+        }
+        return new LocalBluetoothManager(adapter, context, handler,
+                userHandle);
+    }
+
+    private LocalBluetoothManager(LocalBluetoothAdapter adapter, Context context, Handler handler,
+            UserHandle userHandle) {
+        mContext = context.getApplicationContext();
         mLocalAdapter = adapter;
-        mCachedDeviceManager = new CachedBluetoothDeviceManager(context, this);
-        mEventManager = new BluetoothEventManager(mLocalAdapter,
-                mCachedDeviceManager, context, handler);
-        mProfileManager = new LocalBluetoothProfileManager(context,
+        mCachedDeviceManager = new CachedBluetoothDeviceManager(mContext, this);
+        mEventManager = new BluetoothEventManager(mLocalAdapter, mCachedDeviceManager, mContext,
+                handler, userHandle);
+        mProfileManager = new LocalBluetoothProfileManager(mContext,
                 mLocalAdapter, mCachedDeviceManager, mEventManager);
 
         mProfileManager.updateLocalProfiles();

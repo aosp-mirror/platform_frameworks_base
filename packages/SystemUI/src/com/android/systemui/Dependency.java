@@ -22,6 +22,7 @@ import android.os.HandlerThread;
 import android.os.Looper;
 import android.os.Process;
 import android.os.ServiceManager;
+import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.DisplayMetrics;
 import android.view.IWindowManager;
@@ -295,7 +296,8 @@ public class Dependency extends SystemUI {
                 new PluginDependencyProvider(get(PluginManager.class)));
 
         mProviders.put(LocalBluetoothManager.class, () ->
-                LocalBluetoothManager.create(mContext, getDependency(BG_HANDLER)));
+                LocalBluetoothManager.create(mContext, getDependency(BG_HANDLER),
+                        UserHandle.ALL));
 
         mProviders.put(VolumeDialogController.class, () ->
                 new VolumeDialogControllerImpl(mContext));
