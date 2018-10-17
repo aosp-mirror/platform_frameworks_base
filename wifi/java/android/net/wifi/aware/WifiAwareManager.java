@@ -35,6 +35,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.Process;
 import android.os.RemoteException;
+import android.text.TextUtils;
 import android.util.Log;
 
 import libcore.util.HexEncoding;
@@ -434,6 +435,8 @@ public class WifiAwareManager {
                 null, // peerMac (not used in this method)
                 pmk,
                 passphrase,
+                0, // no port info for deprecated IB APIs
+                -1, // no transport info for deprecated IB APIs
                 Process.myUid());
     }
 
@@ -473,6 +476,8 @@ public class WifiAwareManager {
                 peer,
                 pmk,
                 passphrase,
+                0, // no port info for OOB APIs
+                -1, // no transport protocol info for OOB APIs
                 Process.myUid());
     }
 
@@ -824,6 +829,8 @@ public class WifiAwareManager {
         private PeerHandle mPeerHandle;
         private String mPskPassphrase;
         private byte[] mPmk;
+        private int mPort = 0; // invalid value
+        private int mTransportProtocol = -1; // invalid value
 
         /**
          * Configure the {@link PublishDiscoverySession} or {@link SubscribeDiscoverySession}
@@ -902,6 +909,55 @@ public class WifiAwareManager {
         }
 
         /**
+         * Configure the port number which will be used to create a connection over this link. This
+         * configuration should only be done on the server device, e.g. the device creating the
+         * {@link java.net.ServerSocket}.
+         * <p>Notes:
+         * <ul>
+         *     <li>The server device must be the Publisher device!
+         *     <li>The port information can only be specified on secure links, specified using
+         *     {@link #setPskPassphrase(String)}.
+         * </ul>
+         *
+         * @param port A positive integer indicating the port to be used for communication.
+         * @return the current {@link NetworkSpecifierBuilder} builder, enabling chaining of builder
+         *         methods.
+         */
+        public @NonNull NetworkSpecifierBuilder setPort(int port) {
+            if (port <= 0 || port > 65535) {
+                throw new IllegalArgumentException("The port must be a positive value (0, 65535]");
+            }
+            mPort = port;
+            return this;
+        }
+
+        /**
+         * Configure the transport protocol which will be used to create a connection over this
+         * link. This configuration should only be done on the server device, e.g. the device
+         * creating the {@link java.net.ServerSocket} for TCP.
+         * <p>Notes:
+         * <ul>
+         *     <li>The server device must be the Publisher device!
+         *     <li>The transport protocol information can only be specified on secure links,
+         *     specified using {@link #setPskPassphrase(String)}.
+         * </ul>
+         * The transport protocol number is assigned by the Internet Assigned Numbers Authority
+         * (IANA) https://www.iana.org/assignments/protocol-numbers/protocol-numbers.xhtml.
+         *
+         * @param transportProtocol The transport protocol to be used for communication.
+         * @return the current {@link NetworkSpecifierBuilder} builder, enabling chaining of builder
+         *         methods.
+         */
+        public @NonNull NetworkSpecifierBuilder setTransportProtocol(int transportProtocol) {
+            if (transportProtocol < 0 || transportProtocol > 255) {
+                throw new IllegalArgumentException(
+                        "The transport protocol must be in range [0, 255]");
+            }
+            mTransportProtocol = transportProtocol;
+            return this;
+        }
+
+        /**
          * Create a {@link android.net.NetworkRequest.Builder#setNetworkSpecifier(NetworkSpecifier)}
          * for a WiFi Aware connection (link) to the specified peer. The
          * {@link android.net.NetworkRequest.Builder#addTransportType(int)} should be set to
@@ -929,6 +985,18 @@ public class WifiAwareManager {
                     ? WifiAwareManager.WIFI_AWARE_DATA_PATH_ROLE_INITIATOR
                     : WifiAwareManager.WIFI_AWARE_DATA_PATH_ROLE_RESPONDER;
 
+            if (mPort != 0 || mTransportProtocol != -1) {
+                if (role != WifiAwareManager.WIFI_AWARE_DATA_PATH_ROLE_RESPONDER) {
+                    throw new IllegalStateException(
+                            "Port and transport protocol information can only "
+                                    + "be specified on the Publisher device (which is the server");
+                }
+                if (TextUtils.isEmpty(mPskPassphrase) && mPmk == null) {
+                    throw new IllegalStateException("Port and transport protocol information can "
+                            + "only be specified on a secure link");
+                }
+            }
+
             if (role == WIFI_AWARE_DATA_PATH_ROLE_INITIATOR && mPeerHandle == null) {
                 throw new IllegalStateException("Null peerHandle!?");
             }
@@ -936,7 +1004,7 @@ public class WifiAwareManager {
             return new WifiAwareNetworkSpecifier(
                     WifiAwareNetworkSpecifier.NETWORK_SPECIFIER_TYPE_IB, role,
                     mDiscoverySession.mClientId, mDiscoverySession.mSessionId, mPeerHandle.peerId,
-                    null, mPmk, mPskPassphrase, Process.myUid());
+                    null, mPmk, mPskPassphrase, mPort, mTransportProtocol, Process.myUid());
         }
     }
 }
