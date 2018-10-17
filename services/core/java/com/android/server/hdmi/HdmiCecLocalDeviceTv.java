@@ -346,10 +346,6 @@ final class HdmiCecLocalDeviceTv extends HdmiCecLocalDevice {
         }
     }
 
-    int getPortId(int physicalAddress) {
-        return mService.pathToPortId(physicalAddress);
-    }
-
     /**
      * Returns the previous port id kept to handle input switching on <Inactive Source>.
      */

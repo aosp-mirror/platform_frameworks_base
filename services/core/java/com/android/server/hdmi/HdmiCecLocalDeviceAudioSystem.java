@@ -36,10 +36,12 @@ import android.util.SparseArray;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.hdmi.Constants.AudioCodec;
+import com.android.server.hdmi.DeviceDiscoveryAction.DeviceDiscoveryCallback;
 import com.android.server.hdmi.HdmiAnnotations.ServiceThreadOnly;
 
 import java.io.UnsupportedEncodingException;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * Represent a logical device of type {@link HdmiDeviceInfo#DEVICE_AUDIO_SYSTEM} residing in Android
@@ -213,7 +215,7 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
             mCecMessageCache.flushAll();
         } else {
             if (connected) {
-                // TODO(amyjojo): start the device discovery action
+                launchDeviceDiscovery();
             } else {
                 // TODO(amyjojo): remove device from mDeviceInfo
             }
@@ -250,6 +252,8 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
         boolean lastSystemAudioControlStatus =
                 SystemProperties.getBoolean(Constants.PROPERTY_LAST_SYSTEM_AUDIO_CONTROL, true);
         systemAudioControlOnPowerOn(systemAudioControlOnPowerOnProp, lastSystemAudioControlStatus);
+        clearDeviceInfoList();
+        launchDeviceDiscovery();
         startQueuedActions();
     }
 
@@ -945,5 +949,33 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
         addDeviceInfo(newInfo);
 
         invokeDeviceEventListener(newInfo, HdmiControlManager.DEVICE_EVENT_UPDATE_DEVICE);
+    }
+
+    @ServiceThreadOnly
+    private void launchDeviceDiscovery() {
+        assertRunOnServiceThread();
+        DeviceDiscoveryAction action = new DeviceDiscoveryAction(this,
+                new DeviceDiscoveryCallback() {
+                    @Override
+                    public void onDeviceDiscoveryDone(List<HdmiDeviceInfo> deviceInfos) {
+                        for (HdmiDeviceInfo info : deviceInfos) {
+                            addCecDevice(info);
+                        }
+                    }
+                });
+        addAndStartAction(action);
+    }
+
+    // Clear all device info.
+    @ServiceThreadOnly
+    private void clearDeviceInfoList() {
+        assertRunOnServiceThread();
+        for (HdmiDeviceInfo info : HdmiUtils.sparseArrayToList(mDeviceInfos)) {
+            if (info.getPhysicalAddress() == mService.getPhysicalAddress()) {
+                continue;
+            }
+            invokeDeviceEventListener(info, HdmiControlManager.DEVICE_EVENT_REMOVE_DEVICE);
+        }
+        mDeviceInfos.clear();
     }
 }
