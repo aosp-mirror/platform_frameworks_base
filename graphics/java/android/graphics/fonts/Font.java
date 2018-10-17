@@ -51,61 +51,6 @@ public final class Font {
     private static final int STYLE_NORMAL = 0;
 
     /**
-     * A minimum weight value for the font
-     */
-    public static final int FONT_WEIGHT_MIN = 1;
-
-    /**
-     * A font weight value for the thin weight
-     */
-    public static final int FONT_WEIGHT_THIN = 100;
-
-    /**
-     * A font weight value for the extra-light weight
-     */
-    public static final int FONT_WEIGHT_EXTRA_LIGHT = 200;
-
-    /**
-     * A font weight value for the light weight
-     */
-    public static final int FONT_WEIGHT_LIGHT = 300;
-
-    /**
-     * A font weight value for the normal weight
-     */
-    public static final int FONT_WEIGHT_NORMAL = 400;
-
-    /**
-     * A font weight value for the medium weight
-     */
-    public static final int FONT_WEIGHT_MEDIUM = 500;
-
-    /**
-     * A font weight value for the semi-bold weight
-     */
-    public static final int FONT_WEIGHT_SEMI_BOLD = 600;
-
-    /**
-     * A font weight value for the bold weight.
-     */
-    public static final int FONT_WEIGHT_BOLD = 700;
-
-    /**
-     * A font weight value for the extra-bold weight
-     */
-    public static final int FONT_WEIGHT_EXTRA_BOLD = 800;
-
-    /**
-     * A font weight value for the black weight
-     */
-    public static final int FONT_WEIGHT_BLACK = 900;
-
-    /**
-     * A maximum weight value for the font
-     */
-    public static final int FONT_WEIGHT_MAX = 1000;
-
-    /**
      * A builder class for creating new Font.
      */
     public static class Builder {
@@ -275,66 +220,68 @@ public final class Font {
          *  <tr>
          *  <td align="center">100</td>
          *  <td align="center">Thin</td>
-         *  <td align="center">{@link Font#FONT_WEIGHT_THIN}</td>
+         *  <td align="center">{@link FontStyle#FONT_WEIGHT_THIN}</td>
          *  </tr>
          *  <tr>
          *  <td align="center">200</td>
          *  <td align="center">Extra Light (Ultra Light)</td>
-         *  <td align="center">{@link Font#FONT_WEIGHT_EXTRA_LIGHT}</td>
+         *  <td align="center">{@link FontStyle#FONT_WEIGHT_EXTRA_LIGHT}</td>
          *  </tr>
          *  <tr>
          *  <td align="center">300</td>
          *  <td align="center">Light</td>
-         *  <td align="center">{@link Font#FONT_WEIGHT_LIGHT}</td>
+         *  <td align="center">{@link FontStyle#FONT_WEIGHT_LIGHT}</td>
          *  </tr>
          *  <tr>
          *  <td align="center">400</td>
          *  <td align="center">Normal (Regular)</td>
-         *  <td align="center">{@link Font#FONT_WEIGHT_NORMAL}</td>
+         *  <td align="center">{@link FontStyle#FONT_WEIGHT_NORMAL}</td>
          *  </tr>
          *  <tr>
          *  <td align="center">500</td>
          *  <td align="center">Medium</td>
-         *  <td align="center">{@link Font#FONT_WEIGHT_MEDIUM}</td>
+         *  <td align="center">{@link FontStyle#FONT_WEIGHT_MEDIUM}</td>
          *  </tr>
          *  <tr>
          *  <td align="center">600</td>
          *  <td align="center">Semi Bold (Demi Bold)</td>
-         *  <td align="center">{@link Font#FONT_WEIGHT_SEMI_BOLD}</td>
+         *  <td align="center">{@link FontStyle#FONT_WEIGHT_SEMI_BOLD}</td>
          *  </tr>
          *  <tr>
          *  <td align="center">700</td>
          *  <td align="center">Bold</td>
-         *  <td align="center">{@link Font#FONT_WEIGHT_BOLD}</td>
+         *  <td align="center">{@link FontStyle#FONT_WEIGHT_BOLD}</td>
          *  </tr>
          *  <tr>
          *  <td align="center">800</td>
          *  <td align="center">Extra Bold (Ultra Bold)</td>
-         *  <td align="center">{@link Font#FONT_WEIGHT_EXTRA_BOLD}</td>
+         *  <td align="center">{@link FontStyle#FONT_WEIGHT_EXTRA_BOLD}</td>
          *  </tr>
          *  <tr>
          *  <td align="center">900</td>
          *  <td align="center">Black (Heavy)</td>
-         *  <td align="center">{@link Font#FONT_WEIGHT_BLACK}</td>
+         *  <td align="center">{@link FontStyle#FONT_WEIGHT_BLACK}</td>
          *  </tr>
          *  </tbody>
          * </p>
          *
-         * @see Font#FONT_WEIGHT_THIN
-         * @see Font#FONT_WEIGHT_EXTRA_LIGHT
-         * @see Font#FONT_WEIGHT_LIGHT
-         * @see Font#FONT_WEIGHT_NORMAL
-         * @see Font#FONT_WEIGHT_MEDIUM
-         * @see Font#FONT_WEIGHT_SEMI_BOLD
-         * @see Font#FONT_WEIGHT_BOLD
-         * @see Font#FONT_WEIGHT_EXTRA_BOLD
-         * @see Font#FONT_WEIGHT_BLACK
+         * @see FontStyle#FONT_WEIGHT_THIN
+         * @see FontStyle#FONT_WEIGHT_EXTRA_LIGHT
+         * @see FontStyle#FONT_WEIGHT_LIGHT
+         * @see FontStyle#FONT_WEIGHT_NORMAL
+         * @see FontStyle#FONT_WEIGHT_MEDIUM
+         * @see FontStyle#FONT_WEIGHT_SEMI_BOLD
+         * @see FontStyle#FONT_WEIGHT_BOLD
+         * @see FontStyle#FONT_WEIGHT_EXTRA_BOLD
+         * @see FontStyle#FONT_WEIGHT_BLACK
          * @param weight a weight value
          * @return this builder
          */
         public @NonNull Builder setWeight(
-                @IntRange(from = FONT_WEIGHT_MIN, to = FONT_WEIGHT_MAX) int weight) {
-            Preconditions.checkArgument(FONT_WEIGHT_MIN <= weight && weight <= FONT_WEIGHT_MAX);
+                @IntRange(from = FontStyle.FONT_WEIGHT_MIN, to = FontStyle.FONT_WEIGHT_MAX)
+                int weight) {
+            Preconditions.checkArgument(
+                    FontStyle.FONT_WEIGHT_MIN <= weight && weight <= FontStyle.FONT_WEIGHT_MAX);
             mWeight = weight;
             return this;
         }
@@ -346,13 +293,12 @@ public final class Font {
          * will resolve the style by reading font tables.
          *
          * For example, if you want to use italic font as upright font, call {@code
-         * setItalic(false)} explicitly.
+         * setSlant(false)} explicitly.
          *
-         * @param italic {@code true} if the font is italic. Otherwise {@code false}.
          * @return this builder
          */
-        public @NonNull Builder setItalic(boolean italic) {
-            mItalic = italic ? STYLE_ITALIC : STYLE_NORMAL;
+        public @NonNull Builder setSlant(@FontStyle.FontSlant int slant) {
+            mItalic = slant == FontStyle.FONT_SLANT_UPRIGHT ? STYLE_NORMAL : STYLE_ITALIC;
             return this;
         }
 
@@ -414,8 +360,11 @@ public final class Font {
                     mItalic = STYLE_NORMAL;
                 }
             }
-            mWeight = Math.max(FONT_WEIGHT_MIN, Math.min(FONT_WEIGHT_MAX, mWeight));
+            mWeight = Math.max(FontStyle.FONT_WEIGHT_MIN,
+                    Math.min(FontStyle.FONT_WEIGHT_MAX, mWeight));
             final boolean italic = (mItalic == STYLE_ITALIC);
+            final int slant = (mItalic == STYLE_ITALIC)
+                    ? FontStyle.FONT_SLANT_ITALIC : FontStyle.FONT_SLANT_UPRIGHT;
             final long builderPtr = nInitBuilder();
             if (mAxes != null) {
                 for (FontVariationAxis axis : mAxes) {
@@ -424,8 +373,8 @@ public final class Font {
             }
             final ByteBuffer readonlyBuffer = mBuffer.asReadOnlyBuffer();
             final long ptr = nBuild(builderPtr, readonlyBuffer, mWeight, italic, mTtcIndex);
-            final Font font = new Font(ptr, readonlyBuffer, mFile, mWeight, italic, mTtcIndex,
-                    mAxes, mLocaleList);
+            final Font font = new Font(ptr, readonlyBuffer, mFile,
+                    new FontStyle(mWeight, slant), mTtcIndex, mAxes, mLocaleList);
             sFontRegistory.registerNativeAllocation(font, ptr);
             return font;
         }
@@ -454,8 +403,7 @@ public final class Font {
     private final long mNativePtr;  // address of the shared ptr of minikin::Font
     private final @NonNull ByteBuffer mBuffer;
     private final @Nullable File mFile;
-    private final @IntRange(from = 0, to = 1000) int mWeight;
-    private final boolean mItalic;
+    private final FontStyle mFontStyle;
     private final @IntRange(from = 0) int mTtcIndex;
     private final @Nullable FontVariationAxis[] mAxes;
     private final @NonNull String mLocaleList;
@@ -464,13 +412,11 @@ public final class Font {
      * Use Builder instead
      */
     private Font(long nativePtr, @NonNull ByteBuffer buffer, @Nullable File file,
-            @IntRange(from = 0, to = 1000) int weight, boolean italic,
-            @IntRange(from = 0) int ttcIndex, @Nullable FontVariationAxis[] axes,
-            @NonNull String localeList) {
+            @NonNull FontStyle fontStyle, @IntRange(from = 0) int ttcIndex,
+            @Nullable FontVariationAxis[] axes, @NonNull String localeList) {
         mBuffer = buffer;
         mFile = file;
-        mWeight = weight;
-        mItalic = italic;
+        mFontStyle = fontStyle;
         mNativePtr = nativePtr;
         mTtcIndex = ttcIndex;
         mAxes = axes;
@@ -504,17 +450,17 @@ public final class Font {
      * @return a weight value
      */
     public @IntRange(from = 0, to = 1000)int getWeight() {
-        return mWeight;
+        return mFontStyle.getWeight();
     }
 
     /**
-     * Returns true if this font is marked as italic, otherwise returns false.
+     * Get a slant value associated with this font.
      *
-     * @see Builder#setItalic(boolean)
-     * @return true if italic, otherwise false
+     * @see Builder#setSlant(boolean)
+     * @return a slant value
      */
-    public boolean isItalic() {
-        return mItalic;
+    public @FontStyle.FontSlant int getSlant() {
+        return mFontStyle.getSlant();
     }
 
     /**
@@ -564,21 +510,20 @@ public final class Font {
             return false;
         }
         Font f = (Font) o;
-        return f.mWeight == mWeight && f.mItalic == mItalic && f.mTtcIndex == mTtcIndex
+        return mFontStyle.equals(f.mFontStyle) && f.mTtcIndex == mTtcIndex
                 && Arrays.equals(f.mAxes, mAxes) && f.mBuffer.equals(mBuffer);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(mWeight, mItalic, mTtcIndex, Arrays.hashCode(mAxes), mBuffer);
+        return Objects.hash(mFontStyle, mTtcIndex, Arrays.hashCode(mAxes), mBuffer);
     }
 
     @Override
     public String toString() {
         return "Font {"
             + "path=" + mFile
-            + ", weight=" + mWeight
-            + ", italic=" + mItalic
+            + ", style=" + mFontStyle
             + ", ttcIndex=" + mTtcIndex
             + ", axes=" + FontVariationAxis.toFontVariationSettings(mAxes)
             + ", localeList=" + mLocaleList
