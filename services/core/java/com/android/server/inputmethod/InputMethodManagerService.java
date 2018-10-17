@@ -15,7 +15,6 @@
 
 package com.android.server.inputmethod;
 
-import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_SHOW_FOR_ALL_USERS;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
@@ -1895,12 +1894,27 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             return InputBindResult.NO_IME;
         }
 
+        if (!mSystemReady) {
+            // If the system is not yet ready, we shouldn't be running third
+            // party code.
+            return new InputBindResult(
+                    InputBindResult.ResultCode.ERROR_SYSTEM_NOT_READY,
+                    null, null, mCurMethodId, mCurSeq);
+        }
+
         if (!InputMethodUtils.checkIfPackageBelongsToUid(mAppOpsManager, cs.uid,
                 attribute.packageName)) {
             Slog.e(TAG, "Rejecting this client as it reported an invalid package name."
                     + " uid=" + cs.uid + " package=" + attribute.packageName);
             return InputBindResult.INVALID_PACKAGE_NAME;
         }
+
+        if (!mWindowManagerInternal.isUidAllowedOnDisplay(cs.selfReportedDisplayId, cs.uid)) {
+            // Wait, the client no longer has access to the display.
+            return InputBindResult.INVALID_DISPLAY_ID;
+        }
+        // Now that the display ID is validated, we trust cs.selfReportedDisplayId for this session.
+        final int displayIdToShowIme = cs.selfReportedDisplayId;
 
         if (mCurClient != cs) {
             // Was the keyguard locked when switching over to the new client?
@@ -1928,8 +1942,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         // Check if the input method is changing.
         // We expect the caller has already verified that the client is allowed to access this
         // display ID.
-        final int displayId = mCurFocusedWindowClient.selfReportedDisplayId;
-        if (mCurId != null && mCurId.equals(mCurMethodId) && displayId == mCurTokenDisplayId) {
+        if (mCurId != null && mCurId.equals(mCurMethodId)
+                && displayIdToShowIme == mCurTokenDisplayId) {
             if (cs.curSession != null) {
                 // Fast case: if we are already connected to the input method,
                 // then just return it.
@@ -1963,18 +1977,6 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             }
         }
 
-        if (mCurMethodId == null) {
-            return InputBindResult.NO_IME;
-        }
-
-        if (!mSystemReady) {
-            // If the system is not yet ready, we shouldn't be running third
-            // party code.
-            return new InputBindResult(
-                    InputBindResult.ResultCode.ERROR_SYSTEM_NOT_READY,
-                    null, null, mCurMethodId, mCurSeq);
-        }
-
         InputMethodInfo info = mMethodMap.get(mCurMethodId);
         if (info == null) {
             throw new IllegalArgumentException("Unknown id: " + mCurMethodId);
@@ -1989,25 +1991,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         mCurIntent.putExtra(Intent.EXTRA_CLIENT_INTENT, PendingIntent.getActivity(
                 mContext, 0, new Intent(Settings.ACTION_INPUT_METHOD_SETTINGS), 0));
 
-        if (mCurFocusedWindowClient == null) {
-            // This can happen when called from systemRunning() or switchUserLocked(). In this case,
-            // there really isn't an actual client yet.  Let IME be on the default display.
-            // TODO(Bug 117730713): Check if really need to bind to the IME or not.
-            mCurTokenDisplayId = DEFAULT_DISPLAY;
-        } else {
-            if (!mWindowManagerInternal.isUidAllowedOnDisplay(
-                    mCurFocusedWindowClient.selfReportedDisplayId, mCurFocusedWindowClient.uid)) {
-                // Wait, the client no longer has access to the display.
-                return InputBindResult.INVALID_DISPLAY_ID;
-            }
-            mCurTokenDisplayId = (displayId != INVALID_DISPLAY) ? displayId : DEFAULT_DISPLAY;
-        }
-
         if (bindCurrentInputMethodServiceLocked(mCurIntent, this, IME_CONNECTION_BIND_FLAGS)) {
             mLastBindTime = SystemClock.uptimeMillis();
             mHaveConnection = true;
             mCurId = info.getId();
             mCurToken = new Binder();
+            mCurTokenDisplayId = displayIdToShowIme;
             try {
                 if (DEBUG) {
                     Slog.v(TAG, "Adding window token: " + mCurToken + " for display: "
