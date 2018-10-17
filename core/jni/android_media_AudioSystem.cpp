@@ -2032,6 +2032,35 @@ static jint android_media_AudioSystem_get_FCC_8(JNIEnv *env, jobject thiz) {
     return FCC_8;
 }
 
+static jint
+android_media_AudioSystem_setAssistantUid(JNIEnv *env, jobject thiz, jint uid)
+{
+    status_t status = AudioSystem::setAssistantUid(uid);
+    return (jint)nativeToJavaStatus(status);
+}
+
+static jint
+android_media_AudioSystem_setA11yServicesUids(JNIEnv *env, jobject thiz, jintArray uids) {
+    std::vector<uid_t> nativeUidsVector;
+
+    if (uids != nullptr) {
+       jsize len = env->GetArrayLength(uids);
+
+       if (len > 0) {
+           int *nativeUids = nullptr;
+           nativeUids = env->GetIntArrayElements(uids, 0);
+           if (nativeUids != nullptr) {
+               for (size_t i = 0; i < len; i++) {
+                   nativeUidsVector.push_back(nativeUids[i]);
+               }
+               env->ReleaseIntArrayElements(uids, nativeUids, 0);
+           }
+       }
+    }
+    status_t status = AudioSystem::setA11yServicesUids(nativeUidsVector);
+    return (jint)nativeToJavaStatus(status);
+}
+
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gMethods[] = {
@@ -2092,6 +2121,8 @@ static const JNINativeMethod gMethods[] = {
     {"getMicrophones", "(Ljava/util/ArrayList;)I", (void *)android_media_AudioSystem_getMicrophones},
     {"getSurroundFormats", "(Ljava/util/Map;Z)I", (void *)android_media_AudioSystem_getSurroundFormats},
     {"setSurroundFormatEnabled", "(IZ)I", (void *)android_media_AudioSystem_setSurroundFormatEnabled},
+    {"setAssistantUid", "(I)I", (void *)android_media_AudioSystem_setAssistantUid},
+    {"setA11yServicesUids", "([I)I", (void *)android_media_AudioSystem_setA11yServicesUids},
 };
 
 static const JNINativeMethod gEventHandlerMethods[] = {

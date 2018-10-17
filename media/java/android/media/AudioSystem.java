@@ -924,6 +924,15 @@ public class AudioSystem
 
     public static native int setSurroundFormatEnabled(int audioFormat, boolean enabled);
 
+    /**
+     * Communicate UID of active assistant to audio policy service.
+     */
+    public static native int setAssistantUid(int uid);
+    /**
+     * Communicate UIDs of active accessibility services to audio policy service.
+     */
+    public static native int setA11yServicesUids(int[] uids);
+
     // Items shared with audio service
 
     /**

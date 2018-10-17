@@ -649,6 +649,9 @@ public class AudioService extends IAudioService.Stub
     private String mEnabledSurroundFormats;
     private boolean mSurroundModeChanged;
 
+    @GuardedBy("mSettingsLock")
+    private int mAssistantUid;
+
     // Intent "extra" data keys.
     public static final String CONNECT_INTENT_KEY_PORT_NAME = "portName";
     public static final String CONNECT_INTENT_KEY_STATE = "state";
@@ -1079,6 +1082,10 @@ public class AudioService extends IAudioService.Stub
             AudioSystem.setForceUse(AudioSystem.FOR_DOCK, forDock);
             sendEncodedSurroundMode(mContentResolver, "onAudioServerDied");
             sendEnabledSurroundFormats(mContentResolver, true);
+            updateAssistantUId(true);
+        }
+        synchronized (mAccessibilityServiceUidsLock) {
+            AudioSystem.setA11yServicesUids(mAccessibilityServiceUids);
         }
         synchronized (mHdmiClientLock) {
             if (mHdmiManager != null && mHdmiTvClient != null) {
@@ -1404,6 +1411,39 @@ public class AudioService extends IAudioService.Stub
         }
     }
 
+    @GuardedBy("mSettingsLock")
+    private void updateAssistantUId(boolean forceUpdate) {
+        int assistantUid = 0;
+
+        // Consider assistants in the following order of priority:
+        // 1) voice interaction service
+        // 2) assistant
+        String assistantName = Settings.Secure.getStringForUser(
+                        mContentResolver,
+                        Settings.Secure.VOICE_INTERACTION_SERVICE, UserHandle.USER_CURRENT);
+        if (TextUtils.isEmpty(assistantName)) {
+            assistantName = Settings.Secure.getStringForUser(
+                    mContentResolver,
+                    Settings.Secure.ASSISTANT, UserHandle.USER_CURRENT);
+        }
+        if (!TextUtils.isEmpty(assistantName)) {
+            String packageName = ComponentName.unflattenFromString(assistantName).getPackageName();
+            if (!TextUtils.isEmpty(packageName)) {
+                try {
+                    assistantUid = mContext.getPackageManager().getPackageUid(packageName, 0);
+                } catch (PackageManager.NameNotFoundException e) {
+                    Log.e(TAG,
+                            "updateAssistantUId() could not find UID for package: " + packageName);
+                }
+            }
+        }
+
+        if (assistantUid != mAssistantUid || forceUpdate) {
+            AudioSystem.setAssistantUid(assistantUid);
+            mAssistantUid = assistantUid;
+        }
+    }
+
     private void readPersistedSettings() {
         final ContentResolver cr = mContentResolver;
 
@@ -1447,6 +1487,7 @@ public class AudioService extends IAudioService.Stub
             readDockAudioSettings(cr);
             sendEncodedSurroundMode(cr, "readPersistedSettings");
             sendEnabledSurroundFormats(cr, true);
+            updateAssistantUId(true);
         }
 
         mMuteAffectedStreams = System.getIntForUser(cr,
@@ -5811,6 +5852,9 @@ public class AudioService extends IAudioService.Stub
                     mContentResolver, Settings.Global.ENCODED_SURROUND_OUTPUT_ENABLED_FORMATS);
             mContentResolver.registerContentObserver(Settings.Global.getUriFor(
                     Settings.Global.ENCODED_SURROUND_OUTPUT_ENABLED_FORMATS), false, this);
+
+            mContentResolver.registerContentObserver(Settings.Secure.getUriFor(
+                    Settings.Secure.VOICE_INTERACTION_SERVICE), false, this);
         }
 
         @Override
@@ -5832,6 +5876,7 @@ public class AudioService extends IAudioService.Stub
                 updateMasterMono(mContentResolver);
                 updateEncodedSurroundOutput();
                 sendEnabledSurroundFormats(mContentResolver, mSurroundModeChanged);
+                updateAssistantUId(false);
             }
         }
 
@@ -7658,6 +7703,7 @@ public class AudioService extends IAudioService.Stub
                         mAccessibilityServiceUids = uids.toArray();
                     }
                 }
+                AudioSystem.setA11yServicesUids(mAccessibilityServiceUids);
             }
         }
     }
