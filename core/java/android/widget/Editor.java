@@ -48,6 +48,7 @@ import android.graphics.RectF;
 import android.graphics.RenderNode;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.LocaleList;
 import android.os.Parcel;
@@ -310,12 +311,12 @@ public class Editor {
 
     Drawable mDrawableForCursor = null;
 
-    @UnsupportedAppUsage
-    private Drawable mSelectHandleLeft;
-    @UnsupportedAppUsage
-    private Drawable mSelectHandleRight;
-    @UnsupportedAppUsage
-    private Drawable mSelectHandleCenter;
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
+    Drawable mSelectHandleLeft;
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
+    Drawable mSelectHandleRight;
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
+    Drawable mSelectHandleCenter;
 
     // Global listener that detects changes in the global position of the TextView
     private PositionListener mPositionListener;
@@ -3927,7 +3928,6 @@ public class Editor {
                 SelectionModifierCursorController selectionController = getSelectionController();
                 if (selectionController.mStartHandle == null) {
                     // As these are for initializing selectionController, hide() must be called.
-                    selectionController.initDrawables();
                     selectionController.initHandles();
                     selectionController.hide();
                 }
@@ -4495,12 +4495,10 @@ public class Editor {
             mContainer.setHeight(ViewGroup.LayoutParams.WRAP_CONTENT);
             mContainer.setContentView(this);
 
-            mDrawableLtr = drawableLtr;
-            mDrawableRtl = drawableRtl;
+            setDrawables(drawableLtr, drawableRtl);
+
             mMinSize = mTextView.getContext().getResources().getDimensionPixelSize(
                     com.android.internal.R.dimen.text_handle_min_size);
-
-            updateDrawable();
 
             final int handleHeight = getPreferredHeight();
             mTouchOffsetY = -0.3f * handleHeight;
@@ -4511,9 +4509,14 @@ public class Editor {
             return mIdealVerticalOffset;
         }
 
-        protected void updateDrawable() {
-            if (mIsDragging) {
-                // Don't update drawable during dragging.
+        void setDrawables(final Drawable drawableLtr, final Drawable drawableRtl) {
+            mDrawableLtr = drawableLtr;
+            mDrawableRtl = drawableRtl;
+            updateDrawable(true /* updateDrawableWhenDragging */);
+        }
+
+        protected void updateDrawable(final boolean updateDrawableWhenDragging) {
+            if (!updateDrawableWhenDragging && mIsDragging) {
                 return;
             }
             final Layout layout = mTextView.getLayout();
@@ -5030,7 +5033,7 @@ public class Editor {
                     // Fall through.
                 case MotionEvent.ACTION_CANCEL:
                     mIsDragging = false;
-                    updateDrawable();
+                    updateDrawable(false /* updateDrawableWhenDragging */);
                     break;
             }
             return true;
@@ -5315,7 +5318,7 @@ public class Editor {
                 Selection.setSelection((Spannable) mTextView.getText(),
                         mTextView.getSelectionStart(), offset);
             }
-            updateDrawable();
+            updateDrawable(false /* updateDrawableWhenDragging */);
             if (mTextActionMode != null) {
                 invalidateActionMode();
             }
@@ -5717,14 +5720,20 @@ public class Editor {
         }
 
         private InsertionHandleView getHandle() {
-            if (mSelectHandleCenter == null) {
-                mSelectHandleCenter = mTextView.getContext().getDrawable(
-                        mTextView.mTextSelectHandleRes);
-            }
             if (mHandle == null) {
+                loadHandleDrawables(false /* overwrite */);
                 mHandle = new InsertionHandleView(mSelectHandleCenter);
             }
             return mHandle;
+        }
+
+        private void reloadHandleDrawable() {
+            if (mHandle == null) {
+                // No need to reload, the potentially new drawable will
+                // be used when the handle is created.
+                return;
+            }
+            mHandle.setDrawables(mSelectHandleCenter, mSelectHandleCenter);
         }
 
         @Override
@@ -5790,19 +5799,8 @@ public class Editor {
             if (mTextView.isInBatchEditMode()) {
                 return;
             }
-            initDrawables();
+            loadHandleDrawables(false /* overwrite */);
             initHandles();
-        }
-
-        private void initDrawables() {
-            if (mSelectHandleLeft == null) {
-                mSelectHandleLeft = mTextView.getContext().getDrawable(
-                        mTextView.mTextSelectHandleLeftRes);
-            }
-            if (mSelectHandleRight == null) {
-                mSelectHandleRight = mTextView.getContext().getDrawable(
-                        mTextView.mTextSelectHandleRightRes);
-            }
         }
 
         private void initHandles() {
@@ -5822,6 +5820,16 @@ public class Editor {
             mEndHandle.show();
 
             hideInsertionPointCursorController();
+        }
+
+        private void reloadHandleDrawables() {
+            if (mStartHandle == null) {
+                // No need to reload, the potentially new drawables will
+                // be used when the handles are created.
+                return;
+            }
+            mStartHandle.setDrawables(mSelectHandleLeft, mSelectHandleRight);
+            mEndHandle.setDrawables(mSelectHandleRight, mSelectHandleLeft);
         }
 
         public void hide() {
@@ -6180,6 +6188,32 @@ public class Editor {
             }
             if (mEndHandle != null) {
                 mEndHandle.invalidate();
+            }
+        }
+    }
+
+    /**
+     * Loads the insertion and selection handle Drawables from TextView. If the handle
+     * drawables are already loaded, do not overwrite them unless the method parameter
+     * is set to true. This logic is required to avoid overwriting Drawables assigned
+     * to mSelectHandle[Center/Left/Right] by developers using reflection, unless they
+     * explicitly call the setters in TextView.
+     *
+     * @param overwrite whether to overwrite already existing nonnull Drawables
+     */
+    void loadHandleDrawables(final boolean overwrite) {
+        if (mSelectHandleCenter == null || overwrite) {
+            mSelectHandleCenter = mTextView.getTextSelectHandle();
+            if (hasInsertionController()) {
+                getInsertionController().reloadHandleDrawable();
+            }
+        }
+
+        if (mSelectHandleLeft == null || mSelectHandleRight == null || overwrite) {
+            mSelectHandleLeft = mTextView.getTextSelectHandleLeft();
+            mSelectHandleRight = mTextView.getTextSelectHandleRight();
+            if (hasSelectionController()) {
+                getSelectionController().reloadHandleDrawables();
             }
         }
     }
