@@ -16,8 +16,11 @@
 
 package com.android.server.am;
 
-import static com.android.server.am.ActivityManagerDebugConfig.*;
 import static com.android.server.am.ActivityStackSupervisor.PRESERVE_WINDOWS;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_CONFIGURATION;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_CONFIGURATION;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.TAG_ATM;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -48,7 +51,7 @@ import android.util.Slog;
 import android.util.Xml;
 
 public final class CompatModePackages {
-    private static final String TAG = TAG_WITH_CLASS_NAME ? "CompatModePackages" : TAG_AM;
+    private static final String TAG = TAG_WITH_CLASS_NAME ? "CompatModePackages" : TAG_ATM;
     private static final String TAG_CONFIGURATION = TAG + POSTFIX_CONFIGURATION;
 
     private final ActivityTaskManagerService mService;
@@ -61,7 +64,7 @@ public final class CompatModePackages {
 
     private final HashMap<String, Integer> mPackages = new HashMap<String, Integer>();
 
-    private static final int MSG_WRITE = ActivityManagerService.FIRST_COMPAT_MODE_MSG;
+    private static final int MSG_WRITE = 300;
 
     private final CompatHandler mHandler;
 
@@ -321,16 +324,16 @@ public final class CompatModePackages {
             ActivityRecord starting = stack.restartPackage(packageName);
 
             // Tell all processes that loaded this package about the change.
-            for (int i = mService.mAm.mLruProcesses.size() - 1; i >= 0; i--) {
-                final ProcessRecord app = mService.mAm.mLruProcesses.get(i);
-                if (!app.pkgList.containsKey(packageName)) {
+            for (int i = mService.mPidMap.size() - 1; i >= 0; i--) {
+                final WindowProcessController app = mService.mPidMap.valueAt(i);
+                if (!app.mPkgList.contains(packageName)) {
                     continue;
                 }
                 try {
-                    if (app.thread != null) {
+                    if (app.hasThread()) {
                         if (DEBUG_CONFIGURATION) Slog.v(TAG_CONFIGURATION, "Sending to proc "
-                                + app.processName + " new compat " + ci);
-                        app.thread.updatePackageCompatibilityInfo(packageName, ci);
+                                + app.mName + " new compat " + ci);
+                        app.getThread().updatePackageCompatibilityInfo(packageName, ci);
                     }
                 } catch (Exception e) {
                 }

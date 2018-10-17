@@ -207,7 +207,7 @@ HPLandroid/hardware/weaver/V1_0/IWeaver;->read(ILjava/util/ArrayList;Landroid/ha
 HPLandroid/hardware/weaver/V1_0/IWeaver;->setHALInstrumentation()V
 HPLandroid/hardware/weaver/V1_0/IWeaver;->unlinkToDeath(Landroid/os/IHwBinder$DeathRecipient;)Z
 HPLandroid/hardware/weaver/V1_0/IWeaver;->write(ILjava/util/ArrayList;Ljava/util/ArrayList;)I
-HPLandroid/media/IMediaExtractorUpdateService;->loadPlugins(Ljava/lang/String;)V
+HPLandroid/media/IMediaUpdateService;->loadPlugins(Ljava/lang/String;)V
 HPLandroid/net/apf/ApfGenerator$Instruction;-><init>(Landroid/net/apf/ApfGenerator;Landroid/net/apf/ApfGenerator$Opcodes;Landroid/net/apf/ApfGenerator$Register;)V
 HPLandroid/net/apf/ApfGenerator$Instruction;->calculateImmSize(IZ)B
 HPLandroid/net/apf/ApfGenerator$Instruction;->calculateTargetLabelOffset()I
@@ -3977,9 +3977,9 @@ PLandroid/hardware/weaver/V1_0/WeaverConfig;->readFromParcel(Landroid/os/HwParce
 PLandroid/hardware/weaver/V1_0/WeaverReadResponse;-><init>()V
 PLandroid/hardware/weaver/V1_0/WeaverReadResponse;->readEmbeddedFromParcel(Landroid/os/HwParcel;Landroid/os/HwBlob;J)V
 PLandroid/hardware/weaver/V1_0/WeaverReadResponse;->readFromParcel(Landroid/os/HwParcel;)V
-PLandroid/media/IMediaExtractorUpdateService$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
-PLandroid/media/IMediaExtractorUpdateService$Stub$Proxy;->loadPlugins(Ljava/lang/String;)V
-PLandroid/media/IMediaExtractorUpdateService$Stub;->asInterface(Landroid/os/IBinder;)Landroid/media/IMediaExtractorUpdateService;
+PLandroid/media/IMediaUpdateService$Stub$Proxy;-><init>(Landroid/os/IBinder;)V
+PLandroid/media/IMediaUpdateService$Stub$Proxy;->loadPlugins(Ljava/lang/String;)V
+PLandroid/media/IMediaUpdateService$Stub;->asInterface(Landroid/os/IBinder;)Landroid/media/IMediaExtractorUpdateService;
 PLandroid/net/apf/-$$Lambda$ApfFilter$UV1wDVoVlbcxpr8zevj_aMFtUGw;-><init>()V
 PLandroid/net/apf/-$$Lambda$ApfFilter$UV1wDVoVlbcxpr8zevj_aMFtUGw;->applyAsInt(Ljava/lang/Object;)I
 PLandroid/net/apf/ApfCapabilities;-><init>(III)V

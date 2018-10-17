@@ -33,15 +33,15 @@ import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.os.Process.SYSTEM_UID;
 import static android.view.Display.DEFAULT_DISPLAY;
 
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_RECENTS;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_RECENTS_TRIM_TASKS;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_TASKS;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_RECENTS;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_TASKS;
-import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
-import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_RECENTS;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_RECENTS_TRIM_TASKS;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_TASKS;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_RECENTS;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_TASKS;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.TAG_ATM;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.ActivityStackSupervisor.REMOVE_FROM_RECENTS;
-import static com.android.server.am.TaskRecord.INVALID_TASK_ID;
+import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
@@ -103,7 +103,7 @@ import java.util.concurrent.TimeUnit;
  *                                  // 'X' tasks are trimmed.
  */
 class RecentTasks {
-    private static final String TAG = TAG_WITH_CLASS_NAME ? "RecentTasks" : TAG_AM;
+    private static final String TAG = TAG_WITH_CLASS_NAME ? "RecentTasks" : TAG_ATM;
     private static final String TAG_RECENTS = TAG + POSTFIX_RECENTS;
     private static final String TAG_TASKS = TAG + POSTFIX_TASKS;
 

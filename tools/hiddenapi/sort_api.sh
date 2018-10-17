@@ -21,4 +21,6 @@ A=( $(uniq <<< "${A[*]}") )
 A=( ${C[*]} ${A[*]} )
 unset IFS
 # Dump array back into the file
-printf '%s\n' "${A[@]}" > "$dest_list"
+if [ ${#A[@]} -ne 0 ]; then
+  printf '%s\n' "${A[@]}" > "$dest_list"
+fi

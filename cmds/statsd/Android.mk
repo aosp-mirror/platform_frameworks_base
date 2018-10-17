@@ -189,6 +189,7 @@ LOCAL_SRC_FILES := \
     src/atom_field_options.proto \
     src/atoms.proto \
     src/stats_log.proto \
+    src/shell/shell_data.proto \
     tests/AlarmMonitor_test.cpp \
     tests/anomaly/AlarmTracker_test.cpp \
     tests/anomaly/AnomalyTracker_test.cpp \

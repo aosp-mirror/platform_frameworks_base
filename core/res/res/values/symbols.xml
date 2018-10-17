@@ -1875,6 +1875,7 @@
   <java-symbol type="bool" name="config_wifi_background_scan_support" />
   <java-symbol type="bool" name="config_wifi_dual_band_support" />
   <java-symbol type="bool" name="config_wifi_convert_apband_5ghz_to_any" />
+  <java-symbol type="bool" name="config_wifi_local_only_hotspot_5ghz" />
   <java-symbol type="bool" name="config_wifi_fast_bss_transition_enabled" />
   <java-symbol type="bool" name="config_wimaxEnabled" />
   <java-symbol type="bool" name="show_ongoing_ime_switcher" />
@@ -3480,4 +3481,6 @@
   <java-symbol type="fraction" name="config_prescaleAbsoluteVolume_index3" />
 
   <java-symbol type="bool" name="config_useSmsAppService" />
+
+  <java-symbol type="string" name="config_defaultAssistantComponentName" />
 </resources>

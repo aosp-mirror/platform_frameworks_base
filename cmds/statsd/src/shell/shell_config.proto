@@ -24,7 +24,7 @@ option java_outer_classname = "ShellConfig";
 import "frameworks/base/cmds/statsd/src/statsd_config.proto";
 
 message PulledAtomSubscription {
-    optional int32 atom_id = 1;
+    optional SimpleAtomMatcher matcher = 1;
 
     /* gap between two pulls in milliseconds */
     optional int32 freq_millis = 2;

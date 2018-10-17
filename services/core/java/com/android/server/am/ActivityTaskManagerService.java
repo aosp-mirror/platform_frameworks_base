@@ -40,6 +40,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECOND
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.pm.ApplicationInfo.FLAG_FACTORY_TEST;
+import static android.content.pm.ConfigurationInfo.GL_ES_VERSION_UNDEFINED;
 import static android.content.pm.PackageManager.FEATURE_ACTIVITIES_ON_SECONDARY_DISPLAYS;
 import static android.content.pm.PackageManager.FEATURE_FREEFORM_WINDOW_MANAGEMENT;
 import static android.content.pm.PackageManager.FEATURE_PC;
@@ -67,29 +68,26 @@ import static android.view.WindowManager.TRANSIT_TASK_IN_PLACE;
 import static android.view.WindowManager.TRANSIT_TASK_OPEN;
 import static android.view.WindowManager.TRANSIT_TASK_TO_FRONT;
 
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ALL;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_CONFIGURATION;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_FOCUS;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_IMMERSIVE;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_LOCKTASK;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_STACK;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_SWITCH;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_TASKS;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_VISIBILITY;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_CONFIGURATION;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_FOCUS;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_IMMERSIVE;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_LOCKTASK;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_STACK;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_SWITCH;
-import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_VISIBILITY;
-import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
-import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
-import static com.android.server.am.ActivityManagerService.ANIMATE;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_ALL;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_CONFIGURATION;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_FOCUS;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_IMMERSIVE;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_LOCKTASK;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_STACK;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_SWITCH;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_TASKS;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_VISIBILITY;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_CONFIGURATION;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_FOCUS;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_IMMERSIVE;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_LOCKTASK;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_STACK;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_SWITCH;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_VISIBILITY;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.TAG_ATM;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.ActivityManagerService.MY_PID;
-import static com.android.server.am.ActivityManagerService.SEND_LOCALE_TO_MOUNT_DAEMON_MSG;
 import static com.android.server.am.ActivityManagerService.STOCK_PM_FLAGS;
-import static com.android.server.am.ActivityManagerService.UPDATE_CONFIGURATION_MSG;
 import static com.android.server.am.ActivityManagerService.dumpStackTraces;
 import static com.android.server.am.ActivityStack.REMOVE_TASK_MODE_DESTROYING;
 import static com.android.server.am.ActivityStackSupervisor.DEFER_RESUME;
@@ -100,7 +98,7 @@ import static com.android.server.am.ActivityStackSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.am.ActivityStackSupervisor.REMOVE_FROM_RECENTS;
 import static com.android.server.am.ActivityTaskManagerService.H.REPORT_TIME_TRACKER_MSG;
 import static com.android.server.am.ActivityTaskManagerService.UiHandler.DISMISS_DIALOG_UI_MSG;
-import static com.android.server.am.TaskRecord.INVALID_TASK_ID;
+import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_DONT_LOCK;
 import static com.android.server.am.TaskRecord.REPARENT_KEEP_STACK_AT_FRONT;
 import static com.android.server.am.TaskRecord.REPARENT_LEAVE_STACK_IN_PLACE;
@@ -141,7 +139,7 @@ import android.app.WindowConfiguration;
 import android.app.admin.DevicePolicyCache;
 import android.app.assist.AssistContent;
 import android.app.assist.AssistStructure;
-import android.app.usage.UsageEvents;
+import android.app.usage.UsageStatsManagerInternal;
 import android.content.ActivityNotFoundException;
 import android.content.ComponentName;
 import android.content.ContentResolver;
@@ -179,6 +177,7 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.PersistableBundle;
 import android.os.PowerManager;
+import android.os.PowerManagerInternal;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.StrictMode;
@@ -189,6 +188,8 @@ import android.os.UpdateLock;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.os.WorkSource;
+import android.os.storage.IStorageManager;
+import android.os.storage.StorageManager;
 import android.provider.Settings;
 import android.service.voice.IVoiceInteractionSession;
 import android.service.voice.VoiceInteractionManagerInternal;
@@ -230,6 +231,7 @@ import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.SystemServiceManager;
 import com.android.server.Watchdog;
+import com.android.server.firewall.IntentFirewall;
 import com.android.server.pm.UserManagerService;
 import com.android.server.uri.UriGrantsManagerInternal;
 import com.android.server.vr.VrManagerInternal;
@@ -254,7 +256,7 @@ import java.util.Locale;
  * {@hide}
  */
 public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
-    private static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityTaskManagerService" : TAG_AM;
+    private static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityTaskManagerService" : TAG_ATM;
     private static final String TAG_STACK = TAG + POSTFIX_STACK;
     private static final String TAG_SWITCH = TAG + POSTFIX_SWITCH;
     private static final String TAG_IMMERSIVE = TAG + POSTFIX_IMMERSIVE;
@@ -268,12 +270,19 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     // How long we wait until we timeout on key dispatching during instrumentation.
     private static final int INSTRUMENTATION_KEY_DISPATCHING_TIMEOUT_MS = 60 * 1000;
 
+    /** Used to indicate that an app transition should be animated. */
+    static final boolean ANIMATE = true;
+
+    /** Hardware-reported OpenGLES version. */
+    final int GL_ES_VERSION;
+
     Context mContext;
     /**
      * This Context is themable and meant for UI display (AlertDialogs, etc.). The theme can
      * change at runtime. Use mContext for non-UI purposes.
      */
     final Context mUiContext;
+    final ActivityThread mSystemThread;
     H mH;
     UiHandler mUiHandler;
     ActivityManagerService mAm;
@@ -281,7 +290,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     UriGrantsManagerInternal mUgmInternal;
     private PackageManagerInternal mPmInternal;
     private ActivityTaskManagerInternal mInternal;
+    PowerManagerInternal mPowerManagerInternal;
+    private UsageStatsManagerInternal mUsageStatsInternal;
+
     PendingIntentController mPendingIntentController;
+    IntentFirewall mIntentFirewall;
+
     /* Global service lock used by the package the owns this service. */
     Object mGlobalLock;
     ActivityStackSupervisor mStackSupervisor;
@@ -536,8 +550,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     ActivityTaskManagerService(Context context) {
         mContext = context;
         mFactoryTest = FactoryTest.getMode();
-        mUiContext = ActivityThread.currentActivityThread().getSystemUiContext();
+        mSystemThread = ActivityThread.currentActivityThread();
+        mUiContext = mSystemThread.getSystemUiContext();
         mLifecycleManager = new ClientLifecycleManager();
+        GL_ES_VERSION = SystemProperties.getInt("ro.opengles.version", GL_ES_VERSION_UNDEFINED);
     }
 
     void onSystemReady() {
@@ -551,6 +567,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     void onInitPowerManagement() {
         mStackSupervisor.initPowerManagement();
         final PowerManager pm = (PowerManager)mContext.getSystemService(Context.POWER_SERVICE);
+        mPowerManagerInternal = LocalServices.getService(PowerManagerInternal.class);
         mVoiceWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "*voice*");
         mVoiceWakeLock.setReferenceCounted(false);
     }
@@ -637,15 +654,17 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     // TODO: Will be converted to WM lock once transition is complete.
-    void setActivityManagerService(ActivityManagerService am) {
+    void setActivityManagerService(ActivityManagerService am, Looper looper,
+            IntentFirewall intentFirewall, PendingIntentController intentController) {
         mAm = am;
         mGlobalLock = mAm;
-        mH = new H(mAm.mHandlerThread.getLooper());
+        mH = new H(looper);
         mUiHandler = new UiHandler();
+        mIntentFirewall = intentFirewall;
         final File systemDir = SystemServiceManager.ensureSystemDir();
         mAppWarnings = new AppWarnings(this, mUiContext, mH, mUiHandler, systemDir);
         mCompatModePackages = new CompatModePackages(this, systemDir, mH);
-        mPendingIntentController = mAm.mPendingIntentController;
+        mPendingIntentController = intentController;
 
         mTempConfig.setToDefaults();
         mTempConfig.setLocales(LocaleList.getDefault());
@@ -682,6 +701,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     void setWindowManager(WindowManagerService wm) {
         mWindowManager = wm;
         mLockTaskController.setWindowManager(wm);
+    }
+
+    void setUsageStatsManager(UsageStatsManagerInternal usageStatsManager) {
+        mUsageStatsInternal = usageStatsManager;
     }
 
     UserManagerService getUserManager() {
@@ -763,7 +786,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                     && globalConfig.keyboard != Configuration.KEYBOARD_NOKEYS) {
                 config.reqInputFeatures |= ConfigurationInfo.INPUT_FEATURE_HARD_KEYBOARD;
             }
-            config.reqGlEsVersion = mAm.GL_ES_VERSION;
+            config.reqGlEsVersion = GL_ES_VERSION;
         }
         return config;
     }
@@ -2761,8 +2784,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         synchronized (mGlobalLock) {
             final long origId = Binder.clearCallingIdentity();
             try {
-                WindowProcessController app =
-                        mAm.getRecordForAppLocked(appInt).getWindowProcessController();
+                final WindowProcessController app = getProcessController(appInt);
                 mStackSupervisor.releaseSomeActivitiesLocked(app, "low-mem");
             } finally {
                 Binder.restoreCallingIdentity(origId);
@@ -2783,7 +2805,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             long ident = Binder.clearCallingIdentity();
             if (mKeyguardShown != keyguardShowing) {
                 mKeyguardShown = keyguardShowing;
-                reportCurKeyguardUsageEventLocked(keyguardShowing);
+                final Message msg = PooledLambda.obtainMessage(
+                        ActivityManagerInternal::reportCurKeyguardUsageEvent, mAmInternal,
+                        keyguardShowing);
+                mH.sendMessage(msg);
             }
             try {
                 mKeyguardController.setKeyguardShown(keyguardShowing, aodShowing,
@@ -2918,12 +2943,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         enforceCallerIsRecentsOrHasPermission(MANAGE_ACTIVITY_STACKS,
                 "unregisterTaskStackListener()");
         mTaskChangeNotificationController.unregisterTaskStackListener(listener);
-    }
-
-    private void reportCurKeyguardUsageEventLocked(boolean keyguardShowing) {
-        mAm.reportGlobalUsageEventLocked(keyguardShowing
-                ? UsageEvents.Event.KEYGUARD_SHOWN
-                : UsageEvents.Event.KEYGUARD_HIDDEN);
     }
 
     @Override
@@ -3892,8 +3911,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             }
 
             if (mWindowManager != null) {
-                // Update OOM levels based on display size.
-                mAm.mProcessList.applyDisplaySize(mWindowManager);
+                final Message msg = PooledLambda.obtainMessage(
+                        ActivityManagerInternal::updateOomLevelsForDisplay, mAmInternal, displayId);
+                mH.sendMessage(msg);
             }
 
             final long origId = Binder.clearCallingIdentity();
@@ -3921,8 +3941,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             }
 
             if (mWindowManager != null) {
-                // Update OOM levels based on display size.
-                mAm.mProcessList.applyDisplaySize(mWindowManager);
+                final Message msg = PooledLambda.obtainMessage(
+                        ActivityManagerInternal::updateOomLevelsForDisplay, mAmInternal,
+                        DEFAULT_DISPLAY);
+                mH.sendMessage(msg);
             }
 
             final long origId = Binder.clearCallingIdentity();
@@ -4129,11 +4151,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     public void setVrThread(int tid) {
         enforceSystemHasVrFeature();
         synchronized (mGlobalLock) {
-            synchronized (mAm.mPidsSelfLocked) {
-                final int pid = Binder.getCallingPid();
-                final ProcessRecord proc = mAm.mPidsSelfLocked.get(pid);
-                mVrController.setVrThreadLocked(tid, pid, proc.getWindowProcessController());
-            }
+            final int pid = Binder.getCallingPid();
+            final WindowProcessController wpc = mPidMap.get(pid);
+            mVrController.setVrThreadLocked(tid, pid, wpc);
         }
     }
 
@@ -4150,11 +4170,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
         enforceSystemHasVrFeature();
         synchronized (mGlobalLock) {
-            synchronized (mAm.mPidsSelfLocked) {
-                final int pid = Binder.getCallingPid();
-                final ProcessRecord proc = mAm.mPidsSelfLocked.get(pid);
-                mVrController.setPersistentVrThreadLocked(tid, pid, proc);
-            }
+            final int pid = Binder.getCallingPid();
+            final WindowProcessController proc = mPidMap.get(pid);
+            mVrController.setPersistentVrThreadLocked(tid, pid, proc);
         }
     }
 
@@ -4486,8 +4504,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             SystemProperties.set("persist.sys.locale",
                     locales.get(bestLocaleIndex).toLanguageTag());
             LocaleList.setDefault(locales, bestLocaleIndex);
-            mAm.mHandler.sendMessage(mAm.mHandler.obtainMessage(SEND_LOCALE_TO_MOUNT_DAEMON_MSG,
-                    locales.get(bestLocaleIndex)));
+
+            final Message m = PooledLambda.obtainMessage(
+                    ActivityTaskManagerService::sendLocaleToMountDaemonMsg, this,
+                    locales.get(bestLocaleIndex));
+            mH.sendMessage(m);
         }
 
         mTempConfig.seq = increaseConfigurationSeqLocked();
@@ -4497,8 +4518,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
         Slog.i(TAG, "Config changes=" + Integer.toHexString(changes) + " " + mTempConfig);
         // TODO(multi-display): Update UsageEvents#Event to include displayId.
-        mAm.mUsageStatsService.reportConfigurationChange(
-                mTempConfig, mAmInternal.getCurrentUserId());
+        mUsageStatsInternal.reportConfigurationChange(mTempConfig, mAmInternal.getCurrentUserId());
 
         // TODO: If our config changes, should we auto dismiss any currently showing dialogs?
         updateShouldShowDialogsLocked(mTempConfig);
@@ -4512,16 +4532,16 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         // to retrieve resource values after we return will be sure to get the new ones. This is
         // especially important during boot, where the first config change needs to guarantee all
         // resources have that config before following boot code is executed.
-        mAm.mSystemThread.applyConfigurationToResources(mTempConfig);
+        mSystemThread.applyConfigurationToResources(mTempConfig);
 
         // We need another copy of global config because we're scheduling some calls instead of
         // running them in place. We need to be sure that object we send will be handled unchanged.
         final Configuration configCopy = new Configuration(mTempConfig);
         if (persistent && Settings.System.hasInterestingConfigurationChanges(changes)) {
-            Message msg = mAm.mHandler.obtainMessage(UPDATE_CONFIGURATION_MSG);
-            msg.obj = configCopy;
-            msg.arg1 = userId;
-            mAm.mHandler.sendMessage(msg);
+            final Message msg = PooledLambda.obtainMessage(
+                    ActivityTaskManagerService::sendPutConfigurationForUserMsg,
+                    this, userId, configCopy);
+            mH.sendMessage(msg);
         }
 
         for (int i = mPidMap.size() - 1; i >= 0; i--) {
@@ -4657,6 +4677,26 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     private void updateEventDispatchingLocked(boolean booted) {
         mWindowManager.setEventDispatching(booted && !mShuttingDown);
+    }
+
+    private void sendPutConfigurationForUserMsg(int userId, Configuration config) {
+        final ContentResolver resolver = mContext.getContentResolver();
+        Settings.System.putConfigurationForUser(resolver, config, userId);
+    }
+
+    private void sendLocaleToMountDaemonMsg(Locale l) {
+        try {
+            IBinder service = ServiceManager.getService("mount");
+            IStorageManager storageManager = IStorageManager.Stub.asInterface(service);
+            Log.d(TAG, "Storing locale " + l.toLanguageTag() + " for decryption UI");
+            storageManager.setField(StorageManager.SYSTEM_LOCALE_KEY, l.toLanguageTag());
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error storing locale for decryption UI", e);
+        }
+    }
+
+    boolean isActivityStartsLoggingEnabled() {
+        return mAmInternal.isActivityStartsLoggingEnabled();
     }
 
     void enableScreenAfterBoot(boolean booted) {
@@ -5266,6 +5306,26 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         return mProcessNames.get(processName, uid);
     }
 
+    WindowProcessController getProcessController(IApplicationThread thread) {
+        if (thread == null) {
+            return null;
+        }
+
+        final IBinder threadBinder = thread.asBinder();
+        final ArrayMap<String, SparseArray<WindowProcessController>> pmap = mProcessNames.getMap();
+        for (int i = pmap.size()-1; i >= 0; i--) {
+            final SparseArray<WindowProcessController> procs = pmap.valueAt(i);
+            for (int j = procs.size() - 1; j >= 0; j--) {
+                final WindowProcessController proc = procs.valueAt(j);
+                if (proc.hasThread() && proc.getThread().asBinder() == threadBinder) {
+                    return proc;
+                }
+            }
+        }
+
+        return null;
+    }
+
     void logAppTooSlow(WindowProcessController app, long startTime, String msg) {
         if (true || Build.IS_USER) {
             return;
@@ -5327,6 +5387,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     final class H extends Handler {
         static final int REPORT_TIME_TRACKER_MSG = 1;
+        static final int FIRST_ACTIVITY_STACK_MSG = 100;
+        static final int FIRST_SUPERVISOR_STACK_MSG = 200;
 
         public H(Looper looper) {
             super(looper, null, true);
@@ -5971,7 +6033,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 mUiHandler.post(() -> {
                     Dialog d = new FactoryErrorDialog(mUiContext, errorMsg);
                     d.show();
-                    mAm.ensureBootCompleted();
+                    mAmInternal.ensureBootCompleted();
                 });
             }
         }

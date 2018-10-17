@@ -48,6 +48,7 @@ import android.content.Intent;
 import android.content.IntentSender;
 import android.graphics.Bitmap;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.metrics.LogMaker;
 import android.os.Binder;
 import android.os.Build;
@@ -1749,7 +1750,18 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
                 final IAutoFillManagerClient client = getClient();
                 mPendingSaveUi = new PendingUi(mActivityToken, id, client);
-                getUiForShowing().showSaveUi(mService.getServiceLabel(), mService.getServiceIcon(),
+
+                final CharSequence serviceLabel;
+                final Drawable serviceIcon;
+                synchronized (mLock) {
+                    serviceLabel = mService.getServiceLabelLocked();
+                    serviceIcon = mService.getServiceIconLocked();
+                }
+                if (serviceLabel == null || serviceIcon == null) {
+                    wtf(null, "showSaveLocked(): no service label or icon");
+                    return true;
+                }
+                getUiForShowing().showSaveUi(serviceLabel, serviceIcon,
                         mService.getServicePackageName(), saveInfo, this,
                         mComponentName, this, mPendingSaveUi, isUpdate, mCompatMode);
                 if (client != null) {
@@ -2318,9 +2330,19 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
             filterText = value.getTextValue().toString();
         }
 
+        final CharSequence serviceLabel;
+        final Drawable serviceIcon;
+        synchronized (mLock) {
+            serviceLabel = mService.getServiceLabelLocked();
+            serviceIcon = mService.getServiceIconLocked();
+        }
+        if (serviceLabel == null || serviceIcon == null) {
+            wtf(null, "onFillReady(): no service label or icon");
+            return;
+        }
         getUiForShowing().showFillUi(filledId, response, filterText,
                 mService.getServicePackageName(), mComponentName,
-                mService.getServiceLabel(), mService.getServiceIcon(), this, id, mCompatMode);
+                serviceLabel, serviceIcon, this, id, mCompatMode);
 
         synchronized (mLock) {
             if (mUiShownTime == 0) {
@@ -2652,12 +2674,6 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     datasetIndex);
             startAuthentication(authenticationId, dataset.getAuthentication(), fillInIntent);
 
-        }
-    }
-
-    CharSequence getServiceName() {
-        synchronized (mLock) {
-            return mService.getServiceName();
         }
     }
 

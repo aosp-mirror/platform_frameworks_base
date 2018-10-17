@@ -461,12 +461,12 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
             @Override
             void process() {
                 mVolume = volume;
-                _setVolume(volume, volume);
+                _setVolume(volume);
             }
         });
     }
 
-    private native void _setVolume(float leftVolume, float rightVolume);
+    private native void _setVolume(float volume);
 
     /**
      * Returns the current volume of this player to this player.

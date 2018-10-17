@@ -556,14 +556,15 @@ public class VolumeDialogImpl implements VolumeDialog {
         mHandler.removeMessages(H.SHOW);
         mHandler.removeMessages(H.DISMISS);
         rescheduleTimeoutH();
-        mShowing = true;
 
         if (mConfigChanged) {
-            initDialog();
+            initDialog(); // resets mShowing to false
             mConfigurableTexts.update();
             mConfigChanged = false;
         }
+
         initSettingsH();
+        mShowing = true;
         mDialog.show();
         Events.writeEvent(mContext, Events.EVENT_SHOW_DIALOG, reason, mKeyguard.isKeyguardLocked());
         mController.notifyVisible(true);

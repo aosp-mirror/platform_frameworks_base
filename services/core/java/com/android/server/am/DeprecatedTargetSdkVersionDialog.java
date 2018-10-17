@@ -16,8 +16,8 @@
 
 package com.android.server.am;
 
-import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
-import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.TAG_ATM;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 
 import android.app.AlertDialog;
 import android.content.Context;
@@ -34,7 +34,7 @@ import com.android.internal.R;
 import com.android.server.utils.AppInstallerUtil;
 
 public class DeprecatedTargetSdkVersionDialog {
-    private static final String TAG = TAG_WITH_CLASS_NAME ? "DeprecatedTargetSdkVersionDialog" : TAG_AM;
+    private static final String TAG = TAG_WITH_CLASS_NAME ? "DeprecatedTargetSdkVersionDialog" : TAG_ATM;
 
     private final AlertDialog mDialog;
     private final String mPackageName;

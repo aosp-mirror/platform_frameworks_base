@@ -136,7 +136,7 @@ final class ProcessRecord implements WindowProcessListener {
     private int mCurSchedGroup; // Currently desired scheduling class
     int setSchedGroup;          // Last set to background scheduling class
     int trimMemoryLevel;        // Last selected memory trimming level
-    int curProcState = PROCESS_STATE_NONEXISTENT; // Currently computed process state
+    private int mCurProcState = PROCESS_STATE_NONEXISTENT; // Currently computed process state
     private int mRepProcState = PROCESS_STATE_NONEXISTENT; // Last reported process state
     int setProcState = PROCESS_STATE_NONEXISTENT; // Last set process state in process tracker
     int pssProcState = PROCESS_STATE_NONEXISTENT; // Currently requesting pss for
@@ -146,19 +146,19 @@ final class ProcessRecord implements WindowProcessListener {
     boolean serviceb;           // Process currently is on the service B list
     boolean serviceHighRam;     // We are forcing to service B list due to its RAM use
     boolean notCachedSinceIdle; // Has this process not been in a cached state since last idle?
-    boolean hasClientActivities;  // Are there any client services with activities?
+    private boolean mHasClientActivities;  // Are there any client services with activities?
     boolean hasStartedServices; // Are there any started services running in this process?
     private boolean mHasForegroundServices; // Running any services that are foreground?
-    boolean foregroundActivities; // Running any activities that are foreground?
+    private boolean mHasForegroundActivities; // Running any activities that are foreground?
     boolean repForegroundActivities; // Last reported foreground activities.
     boolean systemNoUi;         // This is a system process, but not currently showing UI.
     boolean hasShownUi;         // Has UI been shown in this process since it was started?
-    boolean hasTopUi;           // Is this process currently showing a non-activity UI that the user
+    private boolean mHasTopUi;  // Is this process currently showing a non-activity UI that the user
                                 // is interacting with? E.g. The status bar when it is expanded, but
                                 // not when it is minimized. When true the
                                 // process will be set to use the ProcessList#SCHED_GROUP_TOP_APP
                                 // scheduling group to boost performance.
-    boolean hasOverlayUi;       // Is the process currently showing a non-activity UI that
+    private boolean mHasOverlayUi; // Is the process currently showing a non-activity UI that
                                 // overlays on-top of activity UIs on screen. E.g. display a window
                                 // of type
                                 // android.view.WindowManager.LayoutParams#TYPE_APPLICATION_OVERLAY
@@ -171,7 +171,7 @@ final class ProcessRecord implements WindowProcessListener {
                                 // performance, as well as oom adj score will be set to
                                 // ProcessList#VISIBLE_APP_ADJ at minimum to reduce the chance
                                 // of the process getting killed.
-    boolean pendingUiClean;     // Want to clean up resources from showing UI?
+    private boolean mPendingUiClean; // Want to clean up resources from showing UI?
     boolean hasAboveClient;     // Bound using BIND_ABOVE_CLIENT, so want to be lower
     boolean treatLikeActivity;  // Bound using BIND_TREAT_LIKE_ACTIVITY
     boolean bad;                // True if disabled in the bad process list
@@ -180,8 +180,8 @@ final class ProcessRecord implements WindowProcessListener {
     boolean procStateChanged;   // Keep track of whether we changed 'setAdj'.
     boolean reportedInteraction;// Whether we have told usage stats about it being an interaction
     boolean unlocked;           // True when proc was started in user unlocked state
-    long interactionEventTime;  // The time we sent the last interaction event
-    long fgInteractionTime;     // When we became foreground for interaction purposes
+    private long mInteractionEventTime; // The time we sent the last interaction event
+    private long mFgInteractionTime; // When we became foreground for interaction purposes
     String waitingToKill;       // Process is waiting to be killed when in the bg, and reason
     Object forcingToImportant;  // Token that is forcing this process to be important
     int adjSeq;                 // Sequence id for identifying oom_adj assignment cycles
@@ -194,7 +194,7 @@ final class ProcessRecord implements WindowProcessListener {
                                           // process.
     private boolean mUsingWrapper; // Set to true when process was launched with a wrapper attached
     final ArraySet<BroadcastRecord> curReceivers = new ArraySet<BroadcastRecord>();// receivers currently running in the app
-    long whenUnimportant;       // When (uptime) the process last became unimportant
+    private long mWhenUnimportant; // When (uptime) the process last became unimportant
     long lastCpuTime;           // How long proc has run CPU at last check
     long curCpuTime;            // How long proc has run CPU most recently
     long lastRequestedGc;       // When we last asked the app to do a gc
@@ -370,38 +370,38 @@ final class ProcessRecord implements WindowProcessListener {
                 pw.print(" setSchedGroup="); pw.print(setSchedGroup);
                 pw.print(" systemNoUi="); pw.print(systemNoUi);
                 pw.print(" trimMemoryLevel="); pw.println(trimMemoryLevel);
-        pw.print(prefix); pw.print("curProcState="); pw.print(curProcState);
+        pw.print(prefix); pw.print("curProcState="); pw.print(getCurProcState());
                 pw.print(" mRepProcState="); pw.print(mRepProcState);
                 pw.print(" pssProcState="); pw.print(pssProcState);
                 pw.print(" setProcState="); pw.print(setProcState);
                 pw.print(" lastStateTime=");
                 TimeUtils.formatDuration(lastStateTime, nowUptime, pw);
                 pw.println();
-        if (hasShownUi || pendingUiClean || hasAboveClient || treatLikeActivity) {
+        if (hasShownUi || mPendingUiClean || hasAboveClient || treatLikeActivity) {
             pw.print(prefix); pw.print("hasShownUi="); pw.print(hasShownUi);
-                    pw.print(" pendingUiClean="); pw.print(pendingUiClean);
+                    pw.print(" pendingUiClean="); pw.print(mPendingUiClean);
                     pw.print(" hasAboveClient="); pw.print(hasAboveClient);
                     pw.print(" treatLikeActivity="); pw.println(treatLikeActivity);
         }
-        if (hasTopUi || hasOverlayUi || runningRemoteAnimation) {
-            pw.print(prefix); pw.print("hasTopUi="); pw.print(hasTopUi);
-                    pw.print(" hasOverlayUi="); pw.print(hasOverlayUi);
+        if (hasTopUi() || hasOverlayUi() || runningRemoteAnimation) {
+            pw.print(prefix); pw.print("hasTopUi="); pw.print(hasTopUi());
+                    pw.print(" hasOverlayUi="); pw.print(hasOverlayUi());
                     pw.print(" runningRemoteAnimation="); pw.println(runningRemoteAnimation);
         }
         if (mHasForegroundServices || forcingToImportant != null) {
             pw.print(prefix); pw.print("mHasForegroundServices="); pw.print(mHasForegroundServices);
                     pw.print(" forcingToImportant="); pw.println(forcingToImportant);
         }
-        if (reportedInteraction || fgInteractionTime != 0) {
+        if (reportedInteraction || mFgInteractionTime != 0) {
             pw.print(prefix); pw.print("reportedInteraction=");
             pw.print(reportedInteraction);
-            if (interactionEventTime != 0) {
+            if (mInteractionEventTime != 0) {
                 pw.print(" time=");
-                TimeUtils.formatDuration(interactionEventTime, SystemClock.elapsedRealtime(), pw);
+                TimeUtils.formatDuration(mInteractionEventTime, SystemClock.elapsedRealtime(), pw);
             }
-            if (fgInteractionTime != 0) {
+            if (mFgInteractionTime != 0) {
                 pw.print(" fgInteractionTime=");
-                TimeUtils.formatDuration(fgInteractionTime, SystemClock.elapsedRealtime(), pw);
+                TimeUtils.formatDuration(mFgInteractionTime, SystemClock.elapsedRealtime(), pw);
             }
             pw.println();
         }
@@ -409,9 +409,9 @@ final class ProcessRecord implements WindowProcessListener {
             pw.print(prefix); pw.print("persistent="); pw.print(mPersistent);
                     pw.print(" removed="); pw.println(removed);
         }
-        if (hasClientActivities || foregroundActivities || repForegroundActivities) {
-            pw.print(prefix); pw.print("hasClientActivities="); pw.print(hasClientActivities);
-                    pw.print(" foregroundActivities="); pw.print(foregroundActivities);
+        if (mHasClientActivities || mHasForegroundActivities || repForegroundActivities) {
+            pw.print(prefix); pw.print("hasClientActivities="); pw.print(mHasClientActivities);
+                    pw.print(" foregroundActivities="); pw.print(mHasForegroundActivities);
                     pw.print(" (rep="); pw.print(repForegroundActivities); pw.println(")");
         }
         if (lastProviderTime > 0) {
@@ -438,7 +438,7 @@ final class ProcessRecord implements WindowProcessListener {
                         TimeUtils.formatDuration(curCpuTime - lastCpuTime, pw);
                     }
                     pw.print(" whenUnimportant=");
-                    TimeUtils.formatDuration(whenUnimportant - nowUptime, pw);
+                    TimeUtils.formatDuration(mWhenUnimportant - nowUptime, pw);
                     pw.println();
         }
         pw.print(prefix); pw.print("lastRequestedGc=");
@@ -857,7 +857,8 @@ final class ProcessRecord implements WindowProcessListener {
 
     public void forceProcessStateUpTo(int newState) {
         if (mRepProcState > newState) {
-            curProcState = mRepProcState = newState;
+            mRepProcState = newState;
+            setCurProcState(newState);
             for (int ipkg = pkgList.size() - 1; ipkg >= 0; ipkg--) {
                 StatsLog.write(StatsLog.PROCESS_STATE_CHANGED,
                         uid, processName, pkgList.keyAt(ipkg),
@@ -931,6 +932,15 @@ final class ProcessRecord implements WindowProcessListener {
         return mCurSchedGroup;
     }
 
+    void setCurProcState(int curProcState) {
+        mCurProcState = curProcState;
+        mWindowProcessController.setCurrentProcState(mCurProcState);
+    }
+
+    int getCurProcState() {
+        return mCurProcState;
+    }
+
     void setReportedProcState(int repProcState) {
         mRepProcState = repProcState;
         for (int ipkg = pkgList.size() - 1; ipkg >= 0; ipkg--) {
@@ -991,6 +1001,69 @@ final class ProcessRecord implements WindowProcessListener {
         return mHasForegroundServices;
     }
 
+    void setHasForegroundActivities(boolean hasForegroundActivities) {
+        mHasForegroundActivities = hasForegroundActivities;
+        mWindowProcessController.setHasForegroundActivities(hasForegroundActivities);
+    }
+
+    boolean hasForegroundActivities() {
+        return mHasForegroundActivities;
+    }
+
+    void setHasClientActivities(boolean hasClientActivities) {
+        mHasClientActivities = hasClientActivities;
+        mWindowProcessController.setHasClientActivities(hasClientActivities);
+    }
+
+    boolean hasClientActivities() {
+        return mHasClientActivities;
+    }
+
+    void setHasTopUi(boolean hasTopUi) {
+        mHasTopUi = hasTopUi;
+        mWindowProcessController.setHasTopUi(hasTopUi);
+    }
+
+    boolean hasTopUi() {
+        return mHasTopUi;
+    }
+
+    void setHasOverlayUi(boolean hasOverlayUi) {
+        mHasOverlayUi = hasOverlayUi;
+        mWindowProcessController.setHasOverlayUi(hasOverlayUi);
+    }
+
+    boolean hasOverlayUi() {
+        return mHasOverlayUi;
+    }
+
+    void setInteractionEventTime(long interactionEventTime) {
+        mInteractionEventTime = interactionEventTime;
+        mWindowProcessController.setInteractionEventTime(interactionEventTime);
+    }
+
+    long getInteractionEventTime() {
+        return mInteractionEventTime;
+    }
+
+    void setFgInteractionTime(long fgInteractionTime) {
+        mFgInteractionTime = fgInteractionTime;
+        mWindowProcessController.setFgInteractionTime(fgInteractionTime);
+    }
+
+    long getFgInteractionTime() {
+        return mFgInteractionTime;
+    }
+
+    void setWhenUnimportant(long whenUnimportant) {
+        mWhenUnimportant = whenUnimportant;
+        mWindowProcessController.setWhenUnimportant(whenUnimportant);
+    }
+
+    long getWhenUnimportant() {
+        return mWhenUnimportant;
+    }
+
     void setDebugging(boolean debugging) {
         mDebugging = debugging;
         mWindowProcessController.setDebugging(debugging);
@@ -1039,14 +1112,19 @@ final class ProcessRecord implements WindowProcessListener {
     @Override
     public void setPendingUiClean(boolean pendingUiClean) {
         synchronized (mService) {
-            this.pendingUiClean = true;
+            mPendingUiClean = pendingUiClean;
+            mWindowProcessController.setPendingUiClean(pendingUiClean);
         }
+    }
+
+    boolean hasPendingUiClean() {
+        return mPendingUiClean;
     }
 
     @Override
     public void setPendingUiCleanAndForceProcessStateUpTo(int newState) {
         synchronized (mService) {
-            pendingUiClean = true;
+            setPendingUiClean(true);
             forceProcessStateUpTo(newState);
         }
     }

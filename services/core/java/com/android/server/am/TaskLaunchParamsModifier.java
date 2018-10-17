@@ -35,8 +35,8 @@ import static android.util.DisplayMetrics.DENSITY_DEFAULT;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 
-import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
-import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.TAG_ATM;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -59,7 +59,7 @@ import java.util.List;
  * The class that defines the default launch params for tasks.
  */
 class TaskLaunchParamsModifier implements LaunchParamsModifier {
-    private static final String TAG = TAG_WITH_CLASS_NAME ? "TaskLaunchParamsModifier" : TAG_AM;
+    private static final String TAG = TAG_WITH_CLASS_NAME ? "TaskLaunchParamsModifier" : TAG_ATM;
     private static final boolean DEBUG = false;
 
     // A mask for SUPPORTS_SCREEN that indicates the activity supports resize.
@@ -131,16 +131,16 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         }
         // STEP 2: Resolve launch windowing mode.
         // STEP 2.1: Determine if any parameter has specified initial bounds. That might be the
-        // launch bounds from activity options, or size/gravity passed in layout. It also treat the
+        // launch bounds from activity options, or size/gravity passed in layout. It also treats the
         // launch windowing mode in options as a suggestion for future resolution.
         int launchMode = options != null ? options.getLaunchWindowingMode()
                 : WINDOWING_MODE_UNDEFINED;
         // hasInitialBounds is set if either activity options or layout has specified bounds. If
         // that's set we'll skip some adjustments later to avoid overriding the initial bounds.
         boolean hasInitialBounds = false;
-        final boolean canApplyFreeformPolicy =
-                canApplyFreeformWindowPolicy(display, root, launchMode);
-        if (mSupervisor.canUseActivityOptionsLaunchBounds(options) && canApplyFreeformPolicy) {
+        final boolean canApplyFreeformPolicy = canApplyFreeformWindowPolicy(display, launchMode);
+        if (mSupervisor.canUseActivityOptionsLaunchBounds(options)
+                && (canApplyFreeformPolicy || canApplyPipWindowPolicy(launchMode))) {
             hasInitialBounds = true;
             launchMode = launchMode == WINDOWING_MODE_UNDEFINED
                     ? WINDOWING_MODE_FREEFORM
@@ -279,10 +279,14 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         return displayId;
     }
 
-    private boolean canApplyFreeformWindowPolicy(@NonNull ActivityDisplay display,
-            @NonNull ActivityRecord root, int launchMode) {
-        return display.inFreeformWindowingMode() || launchMode == WINDOWING_MODE_FREEFORM
-                || root.isResizeable();
+    private boolean canApplyFreeformWindowPolicy(@NonNull ActivityDisplay display, int launchMode) {
+        return mSupervisor.mService.mSupportsFreeformWindowManagement
+                && (display.inFreeformWindowingMode() || launchMode == WINDOWING_MODE_FREEFORM);
+    }
+
+    private boolean canApplyPipWindowPolicy(int launchMode) {
+        return mSupervisor.mService.mSupportsPictureInPicture
+                && launchMode == WINDOWING_MODE_PINNED;
     }
 
     private void getLayoutBounds(@NonNull ActivityDisplay display, @NonNull ActivityRecord root,

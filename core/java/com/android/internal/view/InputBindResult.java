@@ -51,6 +51,9 @@ public final class InputBindResult implements Parcelable {
             ResultCode.ERROR_INVALID_USER,
             ResultCode.ERROR_NULL_EDITOR_INFO,
             ResultCode.ERROR_NOT_IME_TARGET_WINDOW,
+            ResultCode.ERROR_NO_EDITOR,
+            ResultCode.ERROR_DISPLAY_ID_MISMATCH,
+            ResultCode.ERROR_INVALID_DISPLAY_ID,
     })
     public @interface ResultCode {
         /**
@@ -139,13 +142,22 @@ public final class InputBindResult implements Parcelable {
          * The client should try to restart input when its {@link android.view.Window} is focused
          * again.</p>
          *
-         * @see com.android.server.wm.WindowManagerInternal#isInputMethodClientFocus(int, int)
+         * @see com.android.server.wm.WindowManagerInternal#isInputMethodClientFocus(int, int, int)
          */
         int ERROR_NOT_IME_TARGET_WINDOW = 11;
         /**
          * Indicates that focused view in the current window is not an editor.
          */
         int ERROR_NO_EDITOR = 12;
+        /**
+         * Indicates that there is a mismatch in display ID between IME client and focused Window.
+         */
+        int ERROR_DISPLAY_ID_MISMATCH = 13;
+        /**
+         * Indicates that current IME client is no longer allowed to access to the associated
+         * display.
+         */
+        int ERROR_INVALID_DISPLAY_ID = 14;
     }
 
     @ResultCode
@@ -271,6 +283,10 @@ public final class InputBindResult implements Parcelable {
                 return "ERROR_NULL_EDITOR_INFO";
             case ResultCode.ERROR_NOT_IME_TARGET_WINDOW:
                 return "ERROR_NOT_IME_TARGET_WINDOW";
+            case ResultCode.ERROR_DISPLAY_ID_MISMATCH:
+                return "ERROR_DISPLAY_ID_MISMATCH";
+            case ResultCode.ERROR_INVALID_DISPLAY_ID:
+                return "ERROR_INVALID_DISPLAY_ID";
             default:
                 return "Unknown(" + result + ")";
         }
@@ -316,4 +332,15 @@ public final class InputBindResult implements Parcelable {
      */
     public static final InputBindResult INVALID_USER = error(ResultCode.ERROR_INVALID_USER);
 
+    /**
+     * Predefined error object for {@link ResultCode#ERROR_DISPLAY_ID_MISMATCH}.
+     */
+    public static final InputBindResult DISPLAY_ID_MISMATCH =
+            error(ResultCode.ERROR_DISPLAY_ID_MISMATCH);
+
+    /**
+     * Predefined error object for {@link ResultCode#ERROR_INVALID_DISPLAY_ID}.
+     */
+    public static final InputBindResult INVALID_DISPLAY_ID =
+            error(ResultCode.ERROR_INVALID_DISPLAY_ID);
 }

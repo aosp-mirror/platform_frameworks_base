@@ -2077,9 +2077,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     int taskForTapOutside(int x, int y) {
         for (int stackNdx = mTaskStackContainers.getChildCount() - 1; stackNdx >= 0; --stackNdx) {
             final TaskStack stack = mTaskStackContainers.getChildAt(stackNdx);
-            if (stack.isActivityTypeHome()) {
+            if (stack.isActivityTypeHome() && !stack.inMultiWindowMode()) {
                 // We skip not only home stack, but also everything behind home because user can't
-                // see them.
+                // see them when home stack is isn't in multi-window mode.
                 break;
             }
             final int taskId = stack.taskIdFromPoint(x, y);

@@ -319,7 +319,7 @@ status_t StatsService::command(int in, int out, int err, Vector<String8>& args,
         }
         if (!args[0].compare(String8("data-subscribe"))) {
             if (mShellSubscriber == nullptr) {
-                mShellSubscriber = new ShellSubscriber(mUidMap);
+                mShellSubscriber = new ShellSubscriber(mUidMap, mPullerManager);
             }
             mShellSubscriber->startNewSubscription(in, out, resultReceiver);
             return NO_ERROR;

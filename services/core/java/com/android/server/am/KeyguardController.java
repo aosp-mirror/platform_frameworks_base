@@ -30,9 +30,9 @@ import static android.view.WindowManagerPolicyConstants.KEYGUARD_GOING_AWAY_FLAG
 import static android.view.WindowManagerPolicyConstants.KEYGUARD_GOING_AWAY_FLAG_TO_SHADE;
 import static android.view.WindowManagerPolicyConstants.KEYGUARD_GOING_AWAY_FLAG_WITH_WALLPAPER;
 
-import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
-import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.ActivityStackSupervisor.PRESERVE_WINDOWS;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.TAG_ATM;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.KeyguardControllerProto.KEYGUARD_OCCLUDED_STATES;
 import static com.android.server.am.KeyguardControllerProto.KEYGUARD_SHOWING;
 import static com.android.server.am.KeyguardOccludedProto.DISPLAY_ID;
@@ -60,7 +60,7 @@ import java.io.PrintWriter;
  */
 class KeyguardController {
 
-    private static final String TAG = TAG_WITH_CLASS_NAME ? "KeyguardController" : TAG_AM;
+    private static final String TAG = TAG_WITH_CLASS_NAME ? "KeyguardController" : TAG_ATM;
 
     private final ActivityStackSupervisor mStackSupervisor;
     private WindowManagerService mWindowManager;

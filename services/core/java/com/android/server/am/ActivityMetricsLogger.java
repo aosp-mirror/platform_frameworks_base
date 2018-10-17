@@ -72,9 +72,9 @@ import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.TYPE_T
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.TYPE_TRANSITION_REPORTED_DRAWN_NO_BUNDLE;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.TYPE_TRANSITION_REPORTED_DRAWN_WITH_BUNDLE;
 import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.TYPE_TRANSITION_WARM_LAUNCH;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_METRICS;
-import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
-import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_METRICS;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.TAG_ATM;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.EventLogTags.AM_ACTIVITY_LAUNCH_TIME;
 import static com.android.server.am.MemoryStatUtil.MemoryStat;
 import static com.android.server.am.MemoryStatUtil.readMemoryStatFromFilesystem;
@@ -114,7 +114,7 @@ import com.android.server.LocalServices;
  */
 class ActivityMetricsLogger {
 
-    private static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityMetricsLogger" : TAG_AM;
+    private static final String TAG = TAG_WITH_CLASS_NAME ? "ActivityMetricsLogger" : TAG_ATM;
 
     // Window modes we are interested in logging. If we ever introduce a new type, we need to add
     // a value here and increase the {@link #TRON_WINDOW_STATE_VARZ_STRINGS} array.
@@ -155,7 +155,6 @@ class ActivityMetricsLogger {
     private final H mHandler;
 
     private ArtManagerInternal mArtManagerInternal;
-    private boolean mDrawingTraceActive;
     private final StringBuilder mStringBuilder = new StringBuilder();
 
     private final class H extends Handler {
@@ -230,14 +229,14 @@ class ActivityMetricsLogger {
             launchedActivityLaunchToken = launchedActivity.info.launchToken;
             launchedActivityAppRecordRequiredAbi = launchedActivity.app == null
                     ? null
-                    : info.launchedActivity.app.getRequiredAbi();
+                    : launchedActivity.app.getRequiredAbi();
             reason = info.reason;
             startingWindowDelayMs = info.startingWindowDelayMs;
             bindApplicationDelayMs = info.bindApplicationDelayMs;
             windowsDrawnDelayMs = info.windowsDrawnDelayMs;
             type = getTransitionType(info);
-            processRecord = findProcessForActivity(info.launchedActivity);
-            processName = info.launchedActivity.processName;
+            processRecord = findProcessForActivity(launchedActivity);
+            processName = launchedActivity.processName;
             userId = launchedActivity.userId;
             launchedActivityShortComponentName = launchedActivity.shortComponentName;
             activityRecordIdHashCode = System.identityHashCode(launchedActivity);
@@ -501,7 +500,6 @@ class ActivityMetricsLogger {
                 if (mWindowingModeTransitionInfo.size() == 0) {
                     reset(true /* abort */, info);
                 }
-                stopFullyDrawnTraceIfNeeded();
             }
         }
     }
@@ -699,6 +697,13 @@ class ActivityMetricsLogger {
         if (info == null) {
             return null;
         }
+
+        // Record the handling of the reportFullyDrawn callback in the trace system. This is not
+        // actually used to trace this function, but instead the logical task that this function
+        // fullfils (handling reportFullyDrawn() callbacks).
+        Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER,
+                "ActivityManager:ReportingFullyDrawn " + info.launchedActivity.packageName);
+
         final LogMaker builder = new LogMaker(APP_TRANSITION_REPORTED_DRAWN);
         builder.setPackageName(r.packageName);
         builder.addTaggedData(FIELD_CLASS_NAME, r.info.name);
@@ -720,7 +725,11 @@ class ActivityMetricsLogger {
                 info.launchedActivity.info.name,
                 info.currentTransitionProcessRunning,
                 startupTimeMs);
-        stopFullyDrawnTraceIfNeeded();
+
+        // Ends the trace started at the beginning of this function. This is located here to allow
+        // the trace slice to have a noticable duration.
+        Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+
         final WindowingModeTransitionInfoSnapshot infoSnapshot =
                 new WindowingModeTransitionInfoSnapshot(info, r, (int) startupTimeMs);
         BackgroundThread.getHandler().post(() -> logAppFullyDrawn(infoSnapshot));
@@ -741,7 +750,7 @@ class ActivityMetricsLogger {
         Log.i(TAG, sb.toString());
     }
 
-    void logActivityStart(Intent intent, ProcessRecord callerApp, ActivityRecord r,
+    void logActivityStart(Intent intent, WindowProcessController callerApp, ActivityRecord r,
             int callingUid, String callingPackage, int callingUidProcState,
             boolean callingUidHasAnyVisibleWindow,
             int realCallingUid, int realCallingUidProcState,
@@ -776,31 +785,31 @@ class ActivityMetricsLogger {
         builder.addTaggedData(FIELD_COMING_FROM_PENDING_INTENT, comingFromPendingIntent ? 1 : 0);
         builder.addTaggedData(FIELD_INTENT_ACTION, intent.getAction());
         if (callerApp != null) {
-            builder.addTaggedData(FIELD_PROCESS_RECORD_PROCESS_NAME, callerApp.processName);
+            builder.addTaggedData(FIELD_PROCESS_RECORD_PROCESS_NAME, callerApp.mName);
             builder.addTaggedData(FIELD_PROCESS_RECORD_CUR_PROC_STATE,
-                    processStateAmToProto(callerApp.curProcState));
+                    processStateAmToProto(callerApp.getCurrentProcState()));
             builder.addTaggedData(FIELD_PROCESS_RECORD_HAS_CLIENT_ACTIVITIES,
-                    callerApp.hasClientActivities ? 1 : 0);
+                    callerApp.hasClientActivities() ? 1 : 0);
             builder.addTaggedData(FIELD_PROCESS_RECORD_HAS_FOREGROUND_SERVICES,
                     callerApp.hasForegroundServices() ? 1 : 0);
             builder.addTaggedData(FIELD_PROCESS_RECORD_HAS_FOREGROUND_ACTIVITIES,
-                    callerApp.foregroundActivities ? 1 : 0);
-            builder.addTaggedData(FIELD_PROCESS_RECORD_HAS_TOP_UI, callerApp.hasTopUi ? 1 : 0);
+                    callerApp.hasForegroundActivities() ? 1 : 0);
+            builder.addTaggedData(FIELD_PROCESS_RECORD_HAS_TOP_UI, callerApp.hasTopUi() ? 1 : 0);
             builder.addTaggedData(FIELD_PROCESS_RECORD_HAS_OVERLAY_UI,
-                    callerApp.hasOverlayUi ? 1 : 0);
+                    callerApp.hasOverlayUi() ? 1 : 0);
             builder.addTaggedData(FIELD_PROCESS_RECORD_PENDING_UI_CLEAN,
-                    callerApp.pendingUiClean ? 1 : 0);
-            if (callerApp.interactionEventTime != 0) {
+                    callerApp.hasPendingUiClean() ? 1 : 0);
+            if (callerApp.getInteractionEventTime() != 0) {
                 builder.addTaggedData(FIELD_PROCESS_RECORD_MILLIS_SINCE_LAST_INTERACTION_EVENT,
-                        (nowElapsed - callerApp.interactionEventTime));
+                        (nowElapsed - callerApp.getInteractionEventTime()));
             }
-            if (callerApp.fgInteractionTime != 0) {
+            if (callerApp.getFgInteractionTime() != 0) {
                 builder.addTaggedData(FIELD_PROCESS_RECORD_MILLIS_SINCE_FG_INTERACTION,
-                        (nowElapsed - callerApp.fgInteractionTime));
+                        (nowElapsed - callerApp.getFgInteractionTime()));
             }
-            if (callerApp.whenUnimportant != 0) {
+            if (callerApp.getWhenUnimportant() != 0) {
                 builder.addTaggedData(FIELD_PROCESS_RECORD_MILLIS_SINCE_UNIMPORTANT,
-                        (nowUptime - callerApp.whenUnimportant));
+                        (nowUptime - callerApp.getWhenUnimportant()));
             }
         }
         builder.addTaggedData(FIELD_ACTIVITY_RECORD_LAUNCH_MODE, r.info.launchMode);
@@ -887,10 +896,7 @@ class ActivityMetricsLogger {
     }
 
     /**
-     * Starts traces for app launch and draw times. We stop the fully drawn trace if its already
-     * active since the app may not have reported fully drawn in the previous launch.
-     *
-     * See {@link android.app.Activity#reportFullyDrawn()}
+     * Starts traces for app launch.
      *
      * @param info
      * */
@@ -898,14 +904,11 @@ class ActivityMetricsLogger {
         if (info == null) {
             return;
         }
-        stopFullyDrawnTraceIfNeeded();
         int transitionType = getTransitionType(info);
         if (!info.launchTraceActive && transitionType == TYPE_TRANSITION_WARM_LAUNCH
                 || transitionType == TYPE_TRANSITION_COLD_LAUNCH) {
             Trace.asyncTraceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "launching: "
                     + info.launchedActivity.packageName, 0);
-            Trace.asyncTraceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "drawing", 0);
-            mDrawingTraceActive = true;
             info.launchTraceActive = true;
         }
     }
@@ -918,13 +921,6 @@ class ActivityMetricsLogger {
             Trace.asyncTraceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER, "launching: "
                     + info.launchedActivity.packageName, 0);
             info.launchTraceActive = false;
-        }
-    }
-
-    void stopFullyDrawnTraceIfNeeded() {
-        if (mDrawingTraceActive) {
-            Trace.asyncTraceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER, "drawing", 0);
-            mDrawingTraceActive = false;
         }
     }
 }

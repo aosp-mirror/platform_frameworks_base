@@ -737,8 +737,7 @@ public final class ProtoInputStream extends ProtoStream {
         fillBuffer();
         if (mOffset + n <= mEnd) {
             // fast path read. String is well within the current buffer
-            String value = StringFactory.newStringFromBytes(mBuffer, mOffset, n,
-                    StandardCharsets.UTF_8);
+            String value = new String(mBuffer, mOffset, n, StandardCharsets.UTF_8);
             incOffset(n);
             return value;
         } else if (n <= mBufferSize) {
@@ -752,14 +751,13 @@ public final class ProtoInputStream extends ProtoStream {
             mDiscardedBytes += mOffset;
             mOffset = 0;
 
-            String value = StringFactory.newStringFromBytes(mBuffer, mOffset, n,
-                    StandardCharsets.UTF_8);
+            String value = new String(mBuffer, mOffset, n, StandardCharsets.UTF_8);
             incOffset(n);
             return value;
         }
         // Otherwise, the string is too large to use the buffer. Create the string from a
         // separate byte array.
-        return StringFactory.newStringFromBytes(readRawBytes(n), 0, n, StandardCharsets.UTF_8);
+        return new String(readRawBytes(n), 0, n, StandardCharsets.UTF_8);
     }
 
     /**

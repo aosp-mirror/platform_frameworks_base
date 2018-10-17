@@ -41,6 +41,9 @@ import static com.android.server.DeviceIdleController.lightStateToString;
 import static com.android.server.DeviceIdleController.stateToString;
 
 import static org.junit.Assert.assertEquals;
+
+import android.net.NetworkInfo;
+
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -50,6 +53,8 @@ import static org.mockito.ArgumentMatchers.anyString;
 
 import android.app.ActivityManagerInternal;
 import android.app.AlarmManager;
+import android.net.ConnectivityManager;
+import android.content.Intent;
 import android.app.IActivityManager;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -83,10 +88,13 @@ public class DeviceIdleControllerTest {
     private DeviceIdleController mDeviceIdleController;
     private AnyMotionDetectorForTest mAnyMotionDetector;
     private AppStateTrackerForTest mAppStateTracker;
+    private InjectorForTest mInjector;
 
     private MockitoSession mMockingSession;
     @Mock
     private AlarmManager mAlarmManager;
+    @Mock
+    private ConnectivityService mConnectivityService;
     @Mock
     private DeviceIdleController.Constants mConstants;
     @Mock
@@ -99,6 +107,8 @@ public class DeviceIdleControllerTest {
     private PowerManager.WakeLock mWakeLock;
 
     class InjectorForTest extends DeviceIdleController.Injector {
+        ConnectivityService connectivityService;
+        LocationManager locationManager;
 
         InjectorForTest(Context ctx) {
             super(ctx);
@@ -122,18 +132,19 @@ public class DeviceIdleControllerTest {
 
         @Override
         ConnectivityService getConnectivityService() {
-            return null;
+            return connectivityService;
         }
 
         @Override
-        DeviceIdleController.Constants getConstants(DeviceIdleController controller, Handler handler,
+        DeviceIdleController.Constants getConstants(DeviceIdleController controller,
+                Handler handler,
                 ContentResolver resolver) {
             return mConstants;
         }
 
         @Override
         LocationManager getLocationManager() {
-            return mLocationManager;
+            return locationManager;
         }
 
         @Override
@@ -201,8 +212,8 @@ public class DeviceIdleControllerTest {
         doNothing().when(mWakeLock).acquire();
         mAppStateTracker = new AppStateTrackerForTest(getContext(), Looper.getMainLooper());
         mAnyMotionDetector = new AnyMotionDetectorForTest();
-        mDeviceIdleController = new DeviceIdleController(getContext(),
-                new InjectorForTest(getContext()));
+        mInjector = new InjectorForTest(getContext());
+        mDeviceIdleController = new DeviceIdleController(getContext(), mInjector);
         spyOn(mDeviceIdleController);
         doNothing().when(mDeviceIdleController).publishBinderService(any(), any());
         mDeviceIdleController.onStart();
@@ -268,6 +279,60 @@ public class DeviceIdleControllerTest {
         // Test changing from charging on to charging off.
         mDeviceIdleController.updateChargingLocked(false);
         assertFalse(mDeviceIdleController.isCharging());
+    }
+
+    @Test
+    public void testUpdateConnectivityState() {
+        // No connectivity service
+        final boolean isConnected = mDeviceIdleController.isNetworkConnected();
+        mInjector.connectivityService = null;
+        mDeviceIdleController.updateConnectivityState(null);
+        assertEquals(isConnected, mDeviceIdleController.isNetworkConnected());
+
+        // No active network info
+        mInjector.connectivityService = mConnectivityService;
+        doReturn(null).when(mConnectivityService).getActiveNetworkInfo();
+        mDeviceIdleController.updateConnectivityState(null);
+        assertFalse(mDeviceIdleController.isNetworkConnected());
+
+        // Active network info says connected.
+        final NetworkInfo ani = mock(NetworkInfo.class);
+        doReturn(ani).when(mConnectivityService).getActiveNetworkInfo();
+        doReturn(true).when(ani).isConnected();
+        mDeviceIdleController.updateConnectivityState(null);
+        assertTrue(mDeviceIdleController.isNetworkConnected());
+
+        // Active network info says not connected.
+        doReturn(false).when(ani).isConnected();
+        mDeviceIdleController.updateConnectivityState(null);
+        assertFalse(mDeviceIdleController.isNetworkConnected());
+
+        // Wrong intent passed (false).
+        Intent intent = new Intent(ConnectivityManager.CONNECTIVITY_ACTION);
+        intent.putExtra(ConnectivityManager.EXTRA_NETWORK_TYPE, 3);
+        doReturn(true).when(ani).isConnected();
+        doReturn(1).when(ani).getType();
+        mDeviceIdleController.updateConnectivityState(intent);
+        // Wrong intent means we shouldn't update the connected state.
+        assertFalse(mDeviceIdleController.isNetworkConnected());
+
+        // Intent says connected.
+        doReturn(1).when(ani).getType();
+        intent.putExtra(ConnectivityManager.EXTRA_NETWORK_TYPE, 1);
+        intent.putExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, false);
+        mDeviceIdleController.updateConnectivityState(intent);
+        assertTrue(mDeviceIdleController.isNetworkConnected());
+
+        // Wrong intent passed (true).
+        intent.putExtra(ConnectivityManager.EXTRA_NETWORK_TYPE, 3);
+        // Wrong intent means we shouldn't update the connected state.
+        assertTrue(mDeviceIdleController.isNetworkConnected());
+
+        // Intent says not connected.
+        intent.putExtra(ConnectivityManager.EXTRA_NETWORK_TYPE, 1);
+        intent.putExtra(ConnectivityManager.EXTRA_NO_CONNECTIVITY, true);
+        mDeviceIdleController.updateConnectivityState(intent);
+        assertFalse(mDeviceIdleController.isNetworkConnected());
     }
 
     @Test
@@ -360,8 +425,56 @@ public class DeviceIdleControllerTest {
     }
 
     @Test
+    public void testStepIdleStateLocked_ValidStates_WithWakeFromIdleAlarmSoon() {
+        enterDeepState(STATE_ACTIVE);
+        // Return that there's an alarm coming soon.
+        doReturn(SystemClock.elapsedRealtime() + mConstants.MIN_TIME_TO_ALARM / 2).when(
+                mAlarmManager).getNextWakeFromIdleTime();
+        mDeviceIdleController.stepIdleStateLocked("testing");
+        verifyStateConditions(STATE_ACTIVE);
+
+        // Everything besides ACTIVE should end up as INACTIVE since the screen would be off.
+
+        enterDeepState(STATE_INACTIVE);
+        doReturn(SystemClock.elapsedRealtime() + mConstants.MIN_TIME_TO_ALARM / 2).when(
+                mAlarmManager).getNextWakeFromIdleTime();
+        mDeviceIdleController.stepIdleStateLocked("testing");
+        verifyStateConditions(STATE_INACTIVE);
+
+        enterDeepState(STATE_IDLE_PENDING);
+        doReturn(SystemClock.elapsedRealtime() + mConstants.MIN_TIME_TO_ALARM / 2).when(
+                mAlarmManager).getNextWakeFromIdleTime();
+        mDeviceIdleController.stepIdleStateLocked("testing");
+        verifyStateConditions(STATE_INACTIVE);
+
+        enterDeepState(STATE_SENSING);
+        doReturn(SystemClock.elapsedRealtime() + mConstants.MIN_TIME_TO_ALARM / 2).when(
+                mAlarmManager).getNextWakeFromIdleTime();
+        mDeviceIdleController.stepIdleStateLocked("testing");
+        verifyStateConditions(STATE_INACTIVE);
+
+        enterDeepState(STATE_LOCATING);
+        doReturn(SystemClock.elapsedRealtime() + mConstants.MIN_TIME_TO_ALARM / 2).when(
+                mAlarmManager).getNextWakeFromIdleTime();
+        mDeviceIdleController.stepIdleStateLocked("testing");
+        verifyStateConditions(STATE_INACTIVE);
+
+        enterDeepState(STATE_IDLE);
+        doReturn(SystemClock.elapsedRealtime() + mConstants.MIN_TIME_TO_ALARM / 2).when(
+                mAlarmManager).getNextWakeFromIdleTime();
+        mDeviceIdleController.stepIdleStateLocked("testing");
+        verifyStateConditions(STATE_INACTIVE);
+
+        enterDeepState(STATE_IDLE_MAINTENANCE);
+        doReturn(SystemClock.elapsedRealtime() + mConstants.MIN_TIME_TO_ALARM / 2).when(
+                mAlarmManager).getNextWakeFromIdleTime();
+        mDeviceIdleController.stepIdleStateLocked("testing");
+        verifyStateConditions(STATE_INACTIVE);
+    }
+
+    @Test
     public void testStepIdleStateLocked_ValidStates_NoLocationManager() {
-        mDeviceIdleController.setLocationManagerForTest(null);
+        mInjector.locationManager = null;
         // Make sure the controller doesn't think there's a wake-from-idle alarm coming soon.
         doReturn(Long.MAX_VALUE).when(mAlarmManager).getNextWakeFromIdleTime();
         // Set state to INACTIVE.
@@ -427,9 +540,9 @@ public class DeviceIdleControllerTest {
 
     @Test
     public void testStepIdleStateLocked_ValidStates_WithLocationManager_WithProviders() {
+        mInjector.locationManager = mLocationManager;
         doReturn(mock(LocationProvider.class)).when(mLocationManager).getProvider(anyString());
         // Make sure the controller doesn't think there's a wake-from-idle alarm coming soon.
-        // TODO: add tests for when there's a wake-from-idle alarm coming soon.
         doReturn(Long.MAX_VALUE).when(mAlarmManager).getNextWakeFromIdleTime();
         // Set state to INACTIVE.
         mDeviceIdleController.becomeActiveLocked("testing", 0);
@@ -460,6 +573,160 @@ public class DeviceIdleControllerTest {
 
         mDeviceIdleController.stepIdleStateLocked("testing");
         verifyStateConditions(STATE_IDLE_MAINTENANCE);
+    }
+
+    @Test
+    public void testLightStepIdleStateLocked_InvalidStates() {
+        mDeviceIdleController.becomeActiveLocked("testing", 0);
+        mDeviceIdleController.stepLightIdleStateLocked("testing");
+        // stepLightIdleStateLocked doesn't handle the ACTIVE case, so the state
+        // should stay as ACTIVE.
+        verifyLightStateConditions(LIGHT_STATE_ACTIVE);
+    }
+
+    /**
+     * Make sure stepLightIdleStateLocked doesn't change state when the state is
+     * LIGHT_STATE_OVERRIDE.
+     */
+    @Test
+    public void testLightStepIdleStateLocked_Overriden() {
+        enterLightState(LIGHT_STATE_OVERRIDE);
+        mDeviceIdleController.stepLightIdleStateLocked("testing");
+        verifyLightStateConditions(LIGHT_STATE_OVERRIDE);
+    }
+
+    @Test
+    public void testLightStepIdleStateLocked_ValidStates_NoActiveOps_NetworkConnected() {
+        setNetworkConnected(true);
+        mDeviceIdleController.setJobsActive(false);
+        mDeviceIdleController.setAlarmsActive(false);
+        mDeviceIdleController.setActiveIdleOpsForTest(0);
+
+        // Set state to INACTIVE.
+        mDeviceIdleController.becomeActiveLocked("testing", 0);
+        setChargingOn(false);
+        setScreenOn(false);
+        verifyLightStateConditions(LIGHT_STATE_INACTIVE);
+
+        // No active ops means INACTIVE should go straight to IDLE.
+        mDeviceIdleController.stepLightIdleStateLocked("testing");
+        verifyLightStateConditions(LIGHT_STATE_IDLE);
+
+        // Should just alternate between IDLE and IDLE_MAINTENANCE now.
+
+        mDeviceIdleController.stepLightIdleStateLocked("testing");
+        verifyLightStateConditions(LIGHT_STATE_IDLE_MAINTENANCE);
+
+        mDeviceIdleController.stepLightIdleStateLocked("testing");
+        verifyLightStateConditions(LIGHT_STATE_IDLE);
+
+        mDeviceIdleController.stepLightIdleStateLocked("testing");
+        verifyLightStateConditions(LIGHT_STATE_IDLE_MAINTENANCE);
+    }
+
+    @Test
+    public void testLightStepIdleStateLocked_ValidStates_ActiveOps_NetworkConnected() {
+        setNetworkConnected(true);
+        // Set state to INACTIVE.
+        mDeviceIdleController.becomeActiveLocked("testing", 0);
+        setChargingOn(false);
+        setScreenOn(false);
+        verifyLightStateConditions(LIGHT_STATE_INACTIVE);
+
+        // Active ops means INACTIVE should go to PRE_IDLE to wait.
+        mDeviceIdleController.setJobsActive(true);
+        mDeviceIdleController.setAlarmsActive(true);
+        mDeviceIdleController.setActiveIdleOpsForTest(1);
+        mDeviceIdleController.stepLightIdleStateLocked("testing");
+        verifyLightStateConditions(LIGHT_STATE_PRE_IDLE);
+
+        // Even with active ops, PRE_IDLE should go to IDLE.
+        mDeviceIdleController.stepLightIdleStateLocked("testing");
+        verifyLightStateConditions(LIGHT_STATE_IDLE);
+
+        // Should just alternate between IDLE and IDLE_MAINTENANCE now.
+
+        mDeviceIdleController.stepLightIdleStateLocked("testing");
+        verifyLightStateConditions(LIGHT_STATE_IDLE_MAINTENANCE);
+
+        mDeviceIdleController.stepLightIdleStateLocked("testing");
+        verifyLightStateConditions(LIGHT_STATE_IDLE);
+
+        mDeviceIdleController.stepLightIdleStateLocked("testing");
+        verifyLightStateConditions(LIGHT_STATE_IDLE_MAINTENANCE);
+    }
+
+    @Test
+    public void testLightStepIdleStateLocked_ValidStates_NoActiveOps_NoNetworkConnected() {
+        setNetworkConnected(false);
+        mDeviceIdleController.setJobsActive(false);
+        mDeviceIdleController.setAlarmsActive(false);
+        mDeviceIdleController.setActiveIdleOpsForTest(0);
+
+        // Set state to INACTIVE.
+        mDeviceIdleController.becomeActiveLocked("testing", 0);
+        setChargingOn(false);
+        setScreenOn(false);
+        verifyLightStateConditions(LIGHT_STATE_INACTIVE);
+
+        // No active ops means INACTIVE should go straight to IDLE.
+        mDeviceIdleController.stepLightIdleStateLocked("testing");
+        verifyLightStateConditions(LIGHT_STATE_IDLE);
+
+        // Should cycle between IDLE, WAITING_FOR_NETWORK, and IDLE_MAINTENANCE now.
+
+        mDeviceIdleController.stepLightIdleStateLocked("testing");
+        verifyLightStateConditions(LIGHT_STATE_WAITING_FOR_NETWORK);
+
+        mDeviceIdleController.stepLightIdleStateLocked("testing");
+        verifyLightStateConditions(LIGHT_STATE_IDLE_MAINTENANCE);
+
+        mDeviceIdleController.stepLightIdleStateLocked("testing");
+        verifyLightStateConditions(LIGHT_STATE_IDLE);
+
+        mDeviceIdleController.stepLightIdleStateLocked("testing");
+        verifyLightStateConditions(LIGHT_STATE_WAITING_FOR_NETWORK);
+
+        mDeviceIdleController.stepLightIdleStateLocked("testing");
+        verifyLightStateConditions(LIGHT_STATE_IDLE_MAINTENANCE);
+    }
+
+    @Test
+    public void testLightStepIdleStateLocked_ValidStates_ActiveOps_NoNetworkConnected() {
+        setNetworkConnected(false);
+        // Set state to INACTIVE.
+        mDeviceIdleController.becomeActiveLocked("testing", 0);
+        setChargingOn(false);
+        setScreenOn(false);
+        verifyLightStateConditions(LIGHT_STATE_INACTIVE);
+
+        // Active ops means INACTIVE should go to PRE_IDLE to wait.
+        mDeviceIdleController.setJobsActive(true);
+        mDeviceIdleController.setAlarmsActive(true);
+        mDeviceIdleController.setActiveIdleOpsForTest(1);
+        mDeviceIdleController.stepLightIdleStateLocked("testing");
+        verifyLightStateConditions(LIGHT_STATE_PRE_IDLE);
+
+        // Even with active ops, PRE_IDLE should go to IDLE.
+        mDeviceIdleController.stepLightIdleStateLocked("testing");
+        verifyLightStateConditions(LIGHT_STATE_IDLE);
+
+        // Should cycle between IDLE, WAITING_FOR_NETWORK, and IDLE_MAINTENANCE now.
+
+        mDeviceIdleController.stepLightIdleStateLocked("testing");
+        verifyLightStateConditions(LIGHT_STATE_WAITING_FOR_NETWORK);
+
+        mDeviceIdleController.stepLightIdleStateLocked("testing");
+        verifyLightStateConditions(LIGHT_STATE_IDLE_MAINTENANCE);
+
+        mDeviceIdleController.stepLightIdleStateLocked("testing");
+        verifyLightStateConditions(LIGHT_STATE_IDLE);
+
+        mDeviceIdleController.stepLightIdleStateLocked("testing");
+        verifyLightStateConditions(LIGHT_STATE_WAITING_FOR_NETWORK);
+
+        mDeviceIdleController.stepLightIdleStateLocked("testing");
+        verifyLightStateConditions(LIGHT_STATE_IDLE_MAINTENANCE);
     }
 
     @Test
@@ -903,6 +1170,7 @@ public class DeviceIdleControllerTest {
                 mDeviceIdleController.becomeActiveLocked("testing", 0);
                 break;
             case STATE_LOCATING:
+                mInjector.locationManager = mLocationManager;
                 doReturn(mock(LocationProvider.class)).when(mLocationManager).getProvider(
                         anyString());
                 // Fallthrough to step loop.
@@ -917,7 +1185,6 @@ public class DeviceIdleControllerTest {
                 setScreenOn(false);
                 setChargingOn(false);
                 mDeviceIdleController.becomeInactiveIfAppropriateLocked();
-                //fail(stateToString(mDeviceIdleController.getState()));
                 int count = 0;
                 while (mDeviceIdleController.getState() != state) {
                     // Stepping through each state ensures that the proper features are turned
@@ -925,7 +1192,8 @@ public class DeviceIdleControllerTest {
                     mDeviceIdleController.stepIdleStateLocked("testing");
                     count++;
                     if (count > 10) {
-                        fail(stateToString(mDeviceIdleController.getState()));
+                        fail("Infinite loop. Check test configuration. Currently at " +
+                                stateToString(mDeviceIdleController.getState()));
                     }
                 }
                 break;
@@ -954,7 +1222,8 @@ public class DeviceIdleControllerTest {
 
                     count++;
                     if (count > 10) {
-                        fail(lightStateToString(mDeviceIdleController.getLightState()));
+                        fail("Infinite loop. Check test configuration. Currently at " +
+                                lightStateToString(mDeviceIdleController.getLightState()));
                     }
                 }
                 break;
@@ -977,6 +1246,14 @@ public class DeviceIdleControllerTest {
     private void setScreenOn(boolean on) {
         doReturn(on).when(mPowerManager).isInteractive();
         mDeviceIdleController.updateInteractivityLocked();
+    }
+
+    private void setNetworkConnected(boolean connected) {
+        mInjector.connectivityService = mConnectivityService;
+        final NetworkInfo ani = mock(NetworkInfo.class);
+        doReturn(connected).when(ani).isConnected();
+        doReturn(ani).when(mConnectivityService).getActiveNetworkInfo();
+        mDeviceIdleController.updateConnectivityState(null);
     }
 
     private void verifyStateConditions(int expectedState) {

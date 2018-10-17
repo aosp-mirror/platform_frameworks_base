@@ -242,11 +242,9 @@ public class DeviceIdleController extends SystemService
     private ActivityTaskManagerInternal mLocalActivityTaskManager;
     private PowerManagerInternal mLocalPowerManager;
     private PowerManager mPowerManager;
-    private ConnectivityService mConnectivityService;
     private INetworkPolicyManager mNetworkPolicyManager;
     private SensorManager mSensorManager;
     private Sensor mMotionSensor;
-    private LocationManager mLocationManager;
     private LocationRequest mLocationRequest;
     private Intent mIdleIntent;
     private Intent mLightIdleIntent;
@@ -1508,6 +1506,8 @@ public class DeviceIdleController extends SystemService
 
     static class Injector {
         private final Context mContext;
+        private ConnectivityService mConnectivityService;
+        private LocationManager mLocationManager;
 
         Injector(Context ctx) {
             mContext = ctx;
@@ -1527,7 +1527,11 @@ public class DeviceIdleController extends SystemService
         }
 
         ConnectivityService getConnectivityService() {
-            return (ConnectivityService) ServiceManager.getService(Context.CONNECTIVITY_SERVICE);
+            if (mConnectivityService == null) {
+                mConnectivityService = (ConnectivityService) ServiceManager.getService(
+                        Context.CONNECTIVITY_SERVICE);
+            }
+            return mConnectivityService;
         }
 
         Constants getConstants(DeviceIdleController controller, Handler handler,
@@ -1536,7 +1540,10 @@ public class DeviceIdleController extends SystemService
         }
 
         LocationManager getLocationManager() {
-            return mContext.getSystemService(LocationManager.class);
+            if (mLocationManager == null) {
+                mLocationManager = mContext.getSystemService(LocationManager.class);
+            }
+            return mLocationManager;
         }
 
         MyHandler getHandler(DeviceIdleController controller) {
@@ -1666,7 +1673,6 @@ public class DeviceIdleController extends SystemService
                 mGoingIdleWakeLock = mPowerManager.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK,
                         "deviceidle_going_idle");
                 mGoingIdleWakeLock.setReferenceCounted(true);
-                mConnectivityService = mInjector.getConnectivityService();
                 mNetworkPolicyManager = INetworkPolicyManager.Stub.asInterface(
                         ServiceManager.getService(Context.NETWORK_POLICY_SERVICE));
                 mNetworkPolicyManagerInternal = getLocalService(NetworkPolicyManagerInternal.class);
@@ -1689,7 +1695,6 @@ public class DeviceIdleController extends SystemService
 
                 if (getContext().getResources().getBoolean(
                         com.android.internal.R.bool.config_autoPowerModePrefetchLocation)) {
-                    mLocationManager = mInjector.getLocationManager();
                     mLocationRequest = new LocationRequest()
                         .setQuality(LocationRequest.ACCURACY_FINE)
                         .setInterval(0)
@@ -2160,10 +2165,17 @@ public class DeviceIdleController extends SystemService
         }
     }
 
+    @VisibleForTesting
+    boolean isNetworkConnected() {
+        synchronized (this) {
+            return mNetworkConnected;
+        }
+    }
+
     void updateConnectivityState(Intent connIntent) {
         ConnectivityService cm;
         synchronized (this) {
-            cm = mConnectivityService;
+            cm = mInjector.getConnectivityService();
         }
         if (cm == null) {
             return;
@@ -2276,13 +2288,17 @@ public class DeviceIdleController extends SystemService
     /** Must only be used in tests. */
     @VisibleForTesting
     void setDeepEnabledForTest(boolean enabled) {
-        mDeepEnabled = enabled;
+        synchronized (this) {
+            mDeepEnabled = enabled;
+        }
     }
 
     /** Must only be used in tests. */
     @VisibleForTesting
     void setLightEnabledForTest(boolean enabled) {
-        mLightEnabled = enabled;
+        synchronized (this) {
+            mLightEnabled = enabled;
+        }
     }
 
     void becomeInactiveIfAppropriateLocked() {
@@ -2338,7 +2354,9 @@ public class DeviceIdleController extends SystemService
      */
     @VisibleForTesting
     void setLightStateForTest(int lightState) {
-        mLightState = lightState;
+        synchronized (this) {
+            mLightState = lightState;
+        }
     }
 
     @VisibleForTesting
@@ -2429,12 +2447,6 @@ public class DeviceIdleController extends SystemService
         }
     }
 
-    /** Must only be used in tests. */
-    @VisibleForTesting
-    void setLocationManagerForTest(LocationManager lm) {
-        mLocationManager = lm;
-    }
-
     @VisibleForTesting
     int getState() {
         return mState;
@@ -2486,18 +2498,19 @@ public class DeviceIdleController extends SystemService
                 if (DEBUG) Slog.d(TAG, "Moved from STATE_SENSING to STATE_LOCATING.");
                 EventLogTags.writeDeviceIdle(mState, reason);
                 scheduleAlarmLocked(mConstants.LOCATING_TIMEOUT, false);
-                if (mLocationManager != null
-                        && mLocationManager.getProvider(LocationManager.NETWORK_PROVIDER) != null) {
-                    mLocationManager.requestLocationUpdates(mLocationRequest,
+                LocationManager locationManager = mInjector.getLocationManager();
+                if (locationManager != null
+                        && locationManager.getProvider(LocationManager.NETWORK_PROVIDER) != null) {
+                    locationManager.requestLocationUpdates(mLocationRequest,
                             mGenericLocationListener, mHandler.getLooper());
                     mLocating = true;
                 } else {
                     mHasNetworkLocation = false;
                 }
-                if (mLocationManager != null
-                        && mLocationManager.getProvider(LocationManager.GPS_PROVIDER) != null) {
+                if (locationManager != null
+                        && locationManager.getProvider(LocationManager.GPS_PROVIDER) != null) {
                     mHasGps = true;
-                    mLocationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 5,
+                    locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER, 1000, 5,
                             mGpsLocationListener, mHandler.getLooper());
                     mLocating = true;
                 } else {
@@ -2575,7 +2588,9 @@ public class DeviceIdleController extends SystemService
     /** Must only be used in tests. */
     @VisibleForTesting
     void setActiveIdleOpsForTest(int count) {
-        mActiveIdleOpCount = count;
+        synchronized (this) {
+            mActiveIdleOpCount = count;
+        }
     }
 
     void setJobsActive(boolean active) {
@@ -2751,8 +2766,9 @@ public class DeviceIdleController extends SystemService
 
     void cancelLocatingLocked() {
         if (mLocating) {
-            mLocationManager.removeUpdates(mGenericLocationListener);
-            mLocationManager.removeUpdates(mGpsLocationListener);
+            LocationManager locationManager = mInjector.getLocationManager();
+            locationManager.removeUpdates(mGenericLocationListener);
+            locationManager.removeUpdates(mGpsLocationListener);
             mLocating = false;
         }
     }

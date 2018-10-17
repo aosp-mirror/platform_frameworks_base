@@ -378,8 +378,8 @@
                    Values must be from NetworkCapabilities#NET_CAPABILITIES_* constants.
                [IP config] Optional. If empty or not specified - DHCP will be used, otherwise
                    use the following format to specify static IP configuration:
-		       ip=<ip-address/mask> gateway=<ip-address> dns=<comma-sep-ip-addresses>
-                       domains=<comma-sep-domains> 
+                       ip=<ip-address/mask> gateway=<ip-address> dns=<comma-sep-ip-addresses>
+                       domains=<comma-sep-domains>
          -->
     <string-array translatable="false" name="config_ethernet_interfaces">
         <!--
@@ -696,6 +696,10 @@
 
     <!-- Wifi driver supports IEEE80211AC for softap -->
     <bool translatable="false" name="config_wifi_softap_ieee80211ac_supported">false</bool>
+
+    <!-- Indicates that local-only hotspot should be brought up at 5GHz.  This option is
+         for automotive builds only (the one that have PackageManager#FEATURE_AUTOMOTIVE) -->
+    <bool translatable="false" name="config_wifi_local_only_hotspot_5ghz">false</bool>
 
     <!-- Flag indicating whether we should enable the automatic brightness.
          Software implementation will be used if config_hardware_auto_brightness_available is not set -->
@@ -3553,4 +3557,8 @@
 
     <!-- Whether or not the "SMS app service" feature is enabled -->
     <bool name="config_useSmsAppService">true</bool>
+
+    <!-- Component name for default assistant on this device -->
+    <string name="config_defaultAssistantComponentName">#+UNSET</string>
+
 </resources>

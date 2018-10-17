@@ -23,6 +23,10 @@
 
 namespace {
 
+int getCanLoadSystemLibraries_native() {
+    return android::GraphicsEnv::getInstance().getCanLoadSystemLibraries();
+}
+
 void setDriverPath(JNIEnv* env, jobject clazz, jstring path) {
     ScopedUtfChars pathChars(env, path);
     android::GraphicsEnv::getInstance().setDriverPath(pathChars.c_str());
@@ -51,6 +55,7 @@ void setDebugLayers_native(JNIEnv* env, jobject clazz, jstring layers) {
 }
 
 const JNINativeMethod g_methods[] = {
+    { "getCanLoadSystemLibraries", "()I", reinterpret_cast<void*>(getCanLoadSystemLibraries_native) },
     { "setDriverPath", "(Ljava/lang/String;)V", reinterpret_cast<void*>(setDriverPath) },
     { "setAngleInfo", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Z)V", reinterpret_cast<void*>(setAngleInfo_native) },
     { "setLayerPaths", "(Ljava/lang/ClassLoader;Ljava/lang/String;)V", reinterpret_cast<void*>(setLayerPaths_native) },
