@@ -9792,7 +9792,6 @@ public class DevicePolicyManager {
         }
     }
 
-
     /**
      * Sets the global Private DNS mode and host to be used.
      * May only be called by the device owner.
@@ -9863,6 +9862,33 @@ public class DevicePolicyManager {
 
         try {
             return mService.getGlobalPrivateDnsHost(admin);
+        } catch (RemoteException re) {
+            throw re.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Grants the profile owner of the given user access to device identifiers (such as
+     * serial number, IMEI and MEID).
+     *
+     * <p>This lets the profile owner request inclusion of device identifiers when calling
+     * {@link generateKeyPair}.
+     *
+     * <p>This grant is necessary to guarantee that profile owners can access device identifiers.
+     *
+     * <p>Privileged system API - meant to be called by the system, particularly the managed
+     * provisioning app, when a work profile is set up.
+     *
+     * @hide
+     */
+    @SystemApi
+    public void setProfileOwnerCanAccessDeviceIdsForUser(
+            @NonNull ComponentName who, @NonNull UserHandle userHandle) {
+        if (mService == null) {
+            return;
+        }
+        try {
+            mService.grantDeviceIdsAccessToProfileOwner(who, userHandle.getIdentifier());
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }

@@ -50,6 +50,7 @@ public abstract class DpmTestBase extends AndroidTestCase {
     public ComponentName admin3;
     public ComponentName adminAnotherPackage;
     public ComponentName adminNoPerm;
+    public ComponentName delegateCertInstaller;
 
     @Override
     protected void setUp() throws Exception {
@@ -66,6 +67,8 @@ public abstract class DpmTestBase extends AndroidTestCase {
         adminAnotherPackage = new ComponentName(DpmMockContext.ANOTHER_PACKAGE_NAME,
                 "whatever.random.class");
         adminNoPerm = new ComponentName(mRealTestContext, DummyDeviceAdmins.AdminNoPerm.class);
+        delegateCertInstaller = new ComponentName(DpmMockContext.DELEGATE_PACKAGE_NAME,
+                "some.random.class");
         mockSystemPropertiesToReturnDefault();
     }
 
@@ -128,6 +131,20 @@ public abstract class DpmTestBase extends AndroidTestCase {
         doReturn(ai.uid).when(mServices.packageManager).getPackageUidAsUser(
                 eq(packageName),
                 eq(userId));
+    }
+
+    protected void markDelegatedCertInstallerAsInstalled() throws Exception {
+        final ApplicationInfo ai = new ApplicationInfo();
+        ai.enabledSetting = PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
+        ai.flags = ApplicationInfo.FLAG_HAS_CODE;
+        // Mark the package as installed on the work profile.
+        ai.uid = UserHandle.getUid(DpmMockContext.CALLER_USER_HANDLE,
+                DpmMockContext.DELEGATE_CERT_INSTALLER_UID);
+        ai.packageName = delegateCertInstaller.getPackageName();
+        ai.name = delegateCertInstaller.getClassName();
+
+        markPackageAsInstalled(delegateCertInstaller.getPackageName(), ai,
+                DpmMockContext.CALLER_USER_HANDLE);
     }
 
     protected void setUpPackageManagerForAdmin(ComponentName admin, int packageUid)

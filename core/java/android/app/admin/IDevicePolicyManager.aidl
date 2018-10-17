@@ -417,4 +417,6 @@ interface IDevicePolicyManager {
     void setGlobalPrivateDns(in ComponentName admin, int mode, in String privateDnsHost);
     int getGlobalPrivateDnsMode(in ComponentName admin);
     String getGlobalPrivateDnsHost(in ComponentName admin);
+
+    void grantDeviceIdsAccessToProfileOwner(in ComponentName who, int userId);
 }

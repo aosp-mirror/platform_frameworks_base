@@ -74,6 +74,7 @@ package android {
     field public static final java.lang.String GET_PROCESS_STATE_AND_OOM_SCORE = "android.permission.GET_PROCESS_STATE_AND_OOM_SCORE";
     field public static final java.lang.String GET_TOP_ACTIVITY_INFO = "android.permission.GET_TOP_ACTIVITY_INFO";
     field public static final java.lang.String GLOBAL_SEARCH = "android.permission.GLOBAL_SEARCH";
+    field public static final java.lang.String GRANT_PROFILE_OWNER_DEVICE_IDS_ACCESS = "android.permission.GRANT_PROFILE_OWNER_DEVICE_IDS_ACCESS";
     field public static final java.lang.String GRANT_RUNTIME_PERMISSIONS = "android.permission.GRANT_RUNTIME_PERMISSIONS";
     field public static final java.lang.String HARDWARE_TEST = "android.permission.HARDWARE_TEST";
     field public static final java.lang.String HDMI_CEC = "android.permission.HDMI_CEC";
@@ -581,6 +582,7 @@ package android.app.admin {
     method public boolean packageHasActiveAdmins(java.lang.String);
     method public deprecated boolean setActiveProfileOwner(android.content.ComponentName, java.lang.String) throws java.lang.IllegalArgumentException;
     method public void setDeviceProvisioningConfigApplied();
+    method public void setProfileOwnerCanAccessDeviceIdsForUser(android.content.ComponentName, android.os.UserHandle);
     field public static final java.lang.String ACCOUNT_FEATURE_DEVICE_OR_PROFILE_OWNER_ALLOWED = "android.account.DEVICE_OR_PROFILE_OWNER_ALLOWED";
     field public static final java.lang.String ACCOUNT_FEATURE_DEVICE_OR_PROFILE_OWNER_DISALLOWED = "android.account.DEVICE_OR_PROFILE_OWNER_DISALLOWED";
     field public static final java.lang.String ACTION_PROVISION_FINALIZATION = "android.app.action.PROVISION_FINALIZATION";
