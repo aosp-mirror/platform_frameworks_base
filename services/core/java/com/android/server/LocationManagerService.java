@@ -76,6 +76,7 @@ import android.util.ArraySet;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
+
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.location.ProviderProperties;
 import com.android.internal.location.ProviderRequest;
@@ -99,6 +100,7 @@ import com.android.server.location.LocationRequestStatistics.PackageProviderKey;
 import com.android.server.location.LocationRequestStatistics.PackageStatistics;
 import com.android.server.location.MockProvider;
 import com.android.server.location.PassiveProvider;
+
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -1764,9 +1766,7 @@ public class LocationManagerService extends ILocationManager.Stub {
 
         if (enabled) {
             p.enable();
-            if (listeners > 0) {
-                applyRequirementsLocked(provider);
-            }
+            applyRequirementsLocked(provider);
         } else {
             p.disable();
         }
