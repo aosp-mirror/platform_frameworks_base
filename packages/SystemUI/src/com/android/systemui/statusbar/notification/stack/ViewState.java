@@ -25,6 +25,7 @@ import android.util.Property;
 import android.view.View;
 import android.view.animation.Interpolator;
 
+import com.android.systemui.Dumpable;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
@@ -32,12 +33,17 @@ import com.android.systemui.statusbar.notification.AnimatableProperty;
 import com.android.systemui.statusbar.notification.PropertyAnimator;
 import com.android.systemui.statusbar.policy.HeadsUpUtil;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+import java.lang.reflect.Field;
+import java.lang.reflect.Modifier;
+
 /**
  * A state of a view. This can be used to apply a set of view properties to a view with
  * {@link com.android.systemui.statusbar.notification.stack.StackScrollState} or start
  * animations with {@link com.android.systemui.statusbar.notification.stack.StackStateAnimator}.
 */
-public class ViewState {
+public class ViewState implements Dumpable {
 
     /**
      * Some animation properties that can be used to update running animations but not creating
@@ -709,5 +715,40 @@ public class ViewState {
         if (animator != null) {
             animator.cancel();
         }
+    }
+
+    @Override
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        StringBuilder result = new StringBuilder();
+        result.append("ViewState { ");
+
+        boolean first = true;
+        Class currentClass = this.getClass();
+        while (currentClass != null) {
+            Field[] fields = currentClass.getDeclaredFields();
+            // Print field names paired with their values
+            for (Field field : fields) {
+                int modifiers = field.getModifiers();
+                if (Modifier.isStatic(modifiers) || field.isSynthetic()
+                        || Modifier.isTransient(modifiers)) {
+                    continue;
+                }
+                if (!first) {
+                    result.append(", ");
+                }
+                try {
+                    result.append(field.getName());
+                    result.append(": ");
+                    //requires access to private field:
+                    field.setAccessible(true);
+                    result.append(field.get(this));
+                } catch (IllegalAccessException ex) {
+                }
+                first = false;
+            }
+            currentClass = currentClass.getSuperclass();
+        }
+        result.append(" }");
+        pw.print(result);
     }
 }
