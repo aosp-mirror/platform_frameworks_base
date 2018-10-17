@@ -295,9 +295,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     private static final String TAG_CONFIGURATION = TAG + POSTFIX_CONFIGURATION;
 
     // How long we wait until we timeout on key dispatching.
-    private static final int KEY_DISPATCHING_TIMEOUT_MS = 5 * 1000;
+    public static final int KEY_DISPATCHING_TIMEOUT_MS = 5 * 1000;
     // How long we wait until we timeout on key dispatching during instrumentation.
-    private static final int INSTRUMENTATION_KEY_DISPATCHING_TIMEOUT_MS = 60 * 1000;
+    static final int INSTRUMENTATION_KEY_DISPATCHING_TIMEOUT_MS = 60 * 1000;
 
     /** Used to indicate that an app transition should be animated. */
     static final boolean ANIMATE = true;
@@ -4932,70 +4932,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     private static long getInputDispatchingTimeoutLocked(WindowProcessController r) {
-        if (r != null && (r.isInstrumenting() || r.isUsingWrapper())) {
-            return INSTRUMENTATION_KEY_DISPATCHING_TIMEOUT_MS;
-        }
-        return KEY_DISPATCHING_TIMEOUT_MS;
-    }
-
-    long inputDispatchingTimedOut(int pid, final boolean aboveSystem, String reason) {
-        if (checkCallingPermission(FILTER_EVENTS) != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Requires permission " + FILTER_EVENTS);
-        }
-        WindowProcessController proc;
-        long timeout;
-        synchronized (mGlobalLock) {
-            proc = mPidMap.get(pid);
-            timeout = getInputDispatchingTimeoutLocked(proc);
-        }
-
-        if (inputDispatchingTimedOut(proc, null, null, aboveSystem, reason)) {
-            return -1;
-        }
-
-        return timeout;
-    }
-
-    /**
-     * Handle input dispatching timeouts.
-     * Returns whether input dispatching should be aborted or not.
-     */
-    boolean inputDispatchingTimedOut(final WindowProcessController proc,
-            final ActivityRecord activity, final ActivityRecord parent,
-            final boolean aboveSystem, String reason) {
-        if (checkCallingPermission(FILTER_EVENTS) != PackageManager.PERMISSION_GRANTED) {
-            throw new SecurityException("Requires permission " + FILTER_EVENTS);
-        }
-
-        final String annotation;
-        if (reason == null) {
-            annotation = "Input dispatching timed out";
-        } else {
-            annotation = "Input dispatching timed out (" + reason + ")";
-        }
-
-        if (proc != null) {
-            synchronized (mGlobalLock) {
-                if (proc.isDebugging()) {
-                    return false;
-                }
-
-                if (proc.isInstrumenting()) {
-                    Bundle info = new Bundle();
-                    info.putString("shortMsg", "keyDispatchingTimedOut");
-                    info.putString("longMsg", annotation);
-                    mAm.finishInstrumentationLocked(
-                            (ProcessRecord) proc.mOwner, Activity.RESULT_CANCELED, info);
-                    return true;
-                }
-            }
-            mH.post(() -> {
-                mAm.mAppErrors.appNotResponding(
-                        (ProcessRecord) proc.mOwner, activity, parent, aboveSystem, annotation);
-            });
-        }
-
-        return true;
+        return r != null ? r.getInputDispatchingTimeout() : KEY_DISPATCHING_TIMEOUT_MS;
     }
 
     /**
@@ -6031,14 +5968,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         @Override
-        public long inputDispatchingTimedOut(int pid, boolean aboveSystem, String reason) {
-            synchronized (mGlobalLock) {
-                return ActivityTaskManagerService.this.inputDispatchingTimedOut(
-                        pid, aboveSystem, reason);
-            }
-        }
-
-        @Override
         public void onProcessMapped(int pid, WindowProcessController proc) {
             synchronized (mGlobalLock) {
                 mPidMap.put(pid, proc);
@@ -6619,19 +6548,18 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
                 if (mHomeProcess != null && (dumpPackage == null
                         || mHomeProcess.mPkgList.contains(dumpPackage))) {
-                    ((ProcessRecord) mHomeProcess.mOwner).writeToProto(proto, HOME_PROC);
+                    mHomeProcess.writeToProto(proto, HOME_PROC);
                 }
 
                 if (mPreviousProcess != null && (dumpPackage == null
                         || mPreviousProcess.mPkgList.contains(dumpPackage))) {
-                    ((ProcessRecord) mPreviousProcess.mOwner).writeToProto(proto, PREVIOUS_PROC);
+                    mPreviousProcess.writeToProto(proto, PREVIOUS_PROC);
                     proto.write(PREVIOUS_PROC_VISIBLE_TIME_MS, mPreviousProcessVisibleTime);
                 }
 
                 if (mHeavyWeightProcess != null && (dumpPackage == null
                         || mHeavyWeightProcess.mPkgList.contains(dumpPackage))) {
-                    ((ProcessRecord) mHeavyWeightProcess.mOwner).writeToProto(
-                            proto, HEAVY_WEIGHT_PROC);
+                    mHeavyWeightProcess.writeToProto(proto, HEAVY_WEIGHT_PROC);
                 }
 
                 for (Map.Entry<String, Integer> entry

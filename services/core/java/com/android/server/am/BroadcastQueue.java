@@ -191,7 +191,7 @@ public final class BroadcastQueue {
 
         @Override
         public void run() {
-            mService.mAppErrors.appNotResponding(mApp, null, null, false, mAnnotation);
+            mApp.appNotResponding(null, null, null, null, false, mAnnotation);
         }
     }
 

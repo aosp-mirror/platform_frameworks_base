@@ -18,6 +18,7 @@ package com.android.server.am;
 
 import static android.Manifest.permission.CHANGE_CONFIGURATION;
 import static android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST;
+import static android.Manifest.permission.FILTER_EVENTS;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 import static android.Manifest.permission.MANAGE_ACTIVITY_STACKS;
@@ -148,6 +149,7 @@ import static com.android.server.am.ActivityTaskManagerService.DUMP_LASTANR_TRAC
 import static com.android.server.am.ActivityTaskManagerService.DUMP_RECENTS_CMD;
 import static com.android.server.am.ActivityTaskManagerService.DUMP_RECENTS_SHORT_CMD;
 import static com.android.server.am.ActivityTaskManagerService.DUMP_STARTER_CMD;
+import static com.android.server.am.ActivityTaskManagerService.KEY_DISPATCHING_TIMEOUT_MS;
 import static com.android.server.am.MemoryStatUtil.hasMemcg;
 import static com.android.server.am.MemoryStatUtil.readCmdlineFromProcfs;
 import static com.android.server.am.MemoryStatUtil.readMemoryStatFromFilesystem;
@@ -8119,8 +8121,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-                mAppErrors.appNotResponding(host, null, null, false,
-                        "ContentProvider not responding");
+                host.appNotResponding(
+                        null, null, null, null, false, "ContentProvider not responding");
             }
         });
     }
@@ -9790,7 +9792,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             crashInfo.crashTag = crashInfo.crashTag + " " + relaunchReasonString;
         }
 
-        addErrorToDropBox(eventType, r, processName, null, null, null, null, null, crashInfo);
+        addErrorToDropBox(
+                eventType, r, processName, null, null, null, null, null, null, crashInfo);
 
         mAppErrors.crashApplication(r, crashInfo);
     }
@@ -9962,7 +9965,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         StatsLog.write(StatsLog.WTF_OCCURRED, callingUid, tag, processName,
                 callingPid);
 
-        addErrorToDropBox("wtf", r, processName, null, null, tag, null, null, crashInfo);
+        addErrorToDropBox("wtf", r, processName, null, null, null, tag, null, null, crashInfo);
 
         return r;
     }
@@ -10061,17 +10064,18 @@ public class ActivityManagerService extends IActivityManager.Stub
      * Write a description of an error (crash, WTF, ANR) to the drop box.
      * @param eventType to include in the drop box tag ("crash", "wtf", etc.)
      * @param process which caused the error, null means the system server
-     * @param activity which triggered the error, null if unknown
-     * @param parent activity related to the error, null if unknown
+     * @param activityShortComponentName which triggered the error, null if unknown
+     * @param parentShortComponentName activity related to the error, null if unknown
+     * @param parentProcess parent process
      * @param subject line related to the error, null if absent
      * @param report in long form describing the error, null if absent
      * @param dataFile text file to include in the report, null if none
      * @param crashInfo giving an application stack trace, null if absent
      */
     public void addErrorToDropBox(String eventType,
-            ProcessRecord process, String processName, ActivityRecord activity,
-            ActivityRecord parent, String subject,
-            final String report, final File dataFile,
+            ProcessRecord process, String processName, String activityShortComponentName,
+            String parentShortComponentName, ProcessRecord parentProcess,
+            String subject, final String report, final File dataFile,
             final ApplicationErrorReport.CrashInfo crashInfo) {
         // NOTE -- this must never acquire the ActivityManagerService lock,
         // otherwise the watchdog may be prevented from resetting the system.
@@ -10101,14 +10105,16 @@ public class ActivityManagerService extends IActivityManager.Stub
                     .append(process.isInterestingToUserLocked() ? "Yes" : "No")
                     .append("\n");
         }
-        if (activity != null) {
-            sb.append("Activity: ").append(activity.shortComponentName).append("\n");
+        if (activityShortComponentName != null) {
+            sb.append("Activity: ").append(activityShortComponentName).append("\n");
         }
-        if (parent != null && parent.app != null && parent.app.getPid() != process.pid) {
-            sb.append("Parent-Process: ").append(parent.app.mName).append("\n");
-        }
-        if (parent != null && parent != activity) {
-            sb.append("Parent-Activity: ").append(parent.shortComponentName).append("\n");
+        if (parentShortComponentName != null) {
+            if (parentProcess != null && parentProcess.pid != process.pid) {
+                sb.append("Parent-Process: ").append(parentProcess.processName).append("\n");
+            }
+            if (!parentShortComponentName.equals(activityShortComponentName)) {
+                sb.append("Parent-Activity: ").append(parentShortComponentName).append("\n");
+            }
         }
         if (subject != null) {
             sb.append("Subject: ").append(subject).append("\n");
@@ -13983,7 +13989,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         dropBuilder.append(catSw.toString());
         StatsLog.write(StatsLog.LOW_MEM_REPORTED);
         addErrorToDropBox("lowmem", null, "system_server", null,
-                null, tag.toString(), dropBuilder.toString(), null, null);
+                null, null, tag.toString(), dropBuilder.toString(), null, null);
         //Slog.i(TAG, "Sent to dropbox:");
         //Slog.i(TAG, dropBuilder.toString());
         synchronized (ActivityManagerService.this) {
@@ -20295,6 +20301,83 @@ public class ActivityManagerService extends IActivityManager.Stub
                         : UsageEvents.Event.KEYGUARD_HIDDEN);
             }
         }
+
+        @Override
+        public long inputDispatchingTimedOut(int pid, boolean aboveSystem, String reason) {
+            synchronized (ActivityManagerService.this) {
+                return ActivityManagerService.this.inputDispatchingTimedOut(
+                        pid, aboveSystem, reason);
+            }
+        }
+
+        @Override
+        public boolean inputDispatchingTimedOut(Object proc, String activityShortComponentName,
+                ApplicationInfo aInfo, String parentShortComponentName, Object parentProc,
+                boolean aboveSystem, String reason) {
+            return ActivityManagerService.this.inputDispatchingTimedOut((ProcessRecord) proc,
+                    activityShortComponentName, aInfo, parentShortComponentName,
+                    (WindowProcessController) parentProc, aboveSystem, reason);
+
+        }
+    }
+
+    long inputDispatchingTimedOut(int pid, final boolean aboveSystem, String reason) {
+        if (checkCallingPermission(FILTER_EVENTS) != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Requires permission " + FILTER_EVENTS);
+        }
+        ProcessRecord proc;
+        long timeout;
+        synchronized (this) {
+            synchronized (mPidsSelfLocked) {
+                proc = mPidsSelfLocked.get(pid);
+            }
+            timeout = proc != null ? proc.getInputDispatchingTimeout() : KEY_DISPATCHING_TIMEOUT_MS;
+        }
+
+        if (inputDispatchingTimedOut(proc, null, null, null, null, aboveSystem, reason)) {
+            return -1;
+        }
+
+        return timeout;
+    }
+
+    /**
+     * Handle input dispatching timeouts.
+     * @return whether input dispatching should be aborted or not.
+     */
+    boolean inputDispatchingTimedOut(ProcessRecord proc, String activityShortComponentName,
+            ApplicationInfo aInfo, String parentShortComponentName,
+            WindowProcessController parentProcess, boolean aboveSystem, String reason) {
+        if (checkCallingPermission(FILTER_EVENTS) != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Requires permission " + FILTER_EVENTS);
+        }
+
+        final String annotation;
+        if (reason == null) {
+            annotation = "Input dispatching timed out";
+        } else {
+            annotation = "Input dispatching timed out (" + reason + ")";
+        }
+
+        if (proc != null) {
+            synchronized (this) {
+                if (proc.isDebugging()) {
+                    return false;
+                }
+
+                if (proc.getActiveInstrumentation() != null) {
+                    Bundle info = new Bundle();
+                    info.putString("shortMsg", "keyDispatchingTimedOut");
+                    info.putString("longMsg", annotation);
+                    finishInstrumentationLocked(proc, Activity.RESULT_CANCELED, info);
+                    return true;
+                }
+            }
+            proc.appNotResponding(activityShortComponentName, aInfo,
+                    parentShortComponentName, parentProcess, aboveSystem, annotation);
+        }
+
+        return true;
     }
 
     /**
