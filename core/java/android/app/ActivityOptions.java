@@ -195,6 +195,13 @@ public class ActivityOptions {
     private static final String KEY_LAUNCH_TASK_ID = "android.activity.launchTaskId";
 
     /**
+     * See {@link #setPendingIntentLaunchFlags(int)}
+     * @hide
+     */
+    private static final String KEY_PENDING_INTENT_LAUNCH_FLAGS =
+            "android.activity.pendingIntentLaunchFlags";
+
+    /**
      * See {@link #setTaskOverlay}.
      * @hide
      */
@@ -309,6 +316,7 @@ public class ActivityOptions {
     @WindowConfiguration.ActivityType
     private int mLaunchActivityType = ACTIVITY_TYPE_UNDEFINED;
     private int mLaunchTaskId = -1;
+    private int mPendingIntentLaunchFlags;
     private int mSplitScreenCreateMode = SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
     private boolean mLockTaskMode = false;
     private boolean mDisallowEnterPictureInPictureWhileLaunching;
@@ -932,6 +940,7 @@ public class ActivityOptions {
         mLaunchWindowingMode = opts.getInt(KEY_LAUNCH_WINDOWING_MODE, WINDOWING_MODE_UNDEFINED);
         mLaunchActivityType = opts.getInt(KEY_LAUNCH_ACTIVITY_TYPE, ACTIVITY_TYPE_UNDEFINED);
         mLaunchTaskId = opts.getInt(KEY_LAUNCH_TASK_ID, -1);
+        mPendingIntentLaunchFlags = opts.getInt(KEY_PENDING_INTENT_LAUNCH_FLAGS, 0);
         mTaskOverlay = opts.getBoolean(KEY_TASK_OVERLAY, false);
         mTaskOverlayCanResume = opts.getBoolean(KEY_TASK_OVERLAY_CAN_RESUME, false);
         mAvoidMoveToFront = opts.getBoolean(KEY_AVOID_MOVE_TO_FRONT, false);
@@ -1233,6 +1242,22 @@ public class ActivityOptions {
     }
 
     /**
+     * Specifies intent flags to be applied for any activity started from a PendingIntent.
+     *
+     * @hide
+     */
+    public void setPendingIntentLaunchFlags(@android.content.Intent.Flags int flags) {
+        mPendingIntentLaunchFlags = flags;
+    }
+
+    /**
+     * @hide
+     */
+    public int getPendingIntentLaunchFlags() {
+        return mPendingIntentLaunchFlags;
+    }
+
+    /**
      * Set's whether the activity launched with this option should be a task overlay. That is the
      * activity will always be the top activity of the task.  If {@param canResume} is true, then
      * the task will also not be moved to the front of the stack.
@@ -1462,6 +1487,9 @@ public class ActivityOptions {
         }
         if (mLaunchTaskId != -1) {
             b.putInt(KEY_LAUNCH_TASK_ID, mLaunchTaskId);
+        }
+        if (mPendingIntentLaunchFlags != 0) {
+            b.putInt(KEY_PENDING_INTENT_LAUNCH_FLAGS, mPendingIntentLaunchFlags);
         }
         if (mTaskOverlay) {
             b.putBoolean(KEY_TASK_OVERLAY, mTaskOverlay);
