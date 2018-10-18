@@ -14,7 +14,7 @@ LOCAL_SRC_FILES := \
     $(call all-java-files-under, ../servicestests/utils)
 
 LOCAL_STATIC_JAVA_LIBRARIES := \
-    androidx-test \
+    androidx.test.runner \
     mockito-target-minus-junit4 \
     platform-test-annotations \
 
