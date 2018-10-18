@@ -45,6 +45,7 @@ cc_library_shared {
         "android_app_NativeActivity.cpp",
         "android_app_admin_SecurityLog.cpp",
         "android_opengl_EGL14.cpp",
+        "android_opengl_EGL15.cpp",
         "android_opengl_EGLExt.cpp",
         "android_opengl_GLES10.cpp",
         "android_opengl_GLES10Ext.cpp",
