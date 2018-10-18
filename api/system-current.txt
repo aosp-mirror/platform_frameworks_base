@@ -24,6 +24,7 @@ package android {
     field public static final java.lang.String BIND_DIRECTORY_SEARCH = "android.permission.BIND_DIRECTORY_SEARCH";
     field public static final java.lang.String BIND_EUICC_SERVICE = "android.permission.BIND_EUICC_SERVICE";
     field public static final java.lang.String BIND_IMS_SERVICE = "android.permission.BIND_IMS_SERVICE";
+    field public static final java.lang.String BIND_INTELLIGENCE_SERVICE = "android.permission.BIND_INTELLIGENCE_SERVICE";
     field public static final java.lang.String BIND_KEYGUARD_APPWIDGET = "android.permission.BIND_KEYGUARD_APPWIDGET";
     field public static final java.lang.String BIND_NETWORK_RECOMMENDATION_SERVICE = "android.permission.BIND_NETWORK_RECOMMENDATION_SERVICE";
     field public static final java.lang.String BIND_NOTIFICATION_ASSISTANT_SERVICE = "android.permission.BIND_NOTIFICATION_ASSISTANT_SERVICE";
@@ -574,6 +575,14 @@ package android.app.admin {
   public static class SystemUpdatePolicy.InstallationOption {
     method public long getEffectiveTime();
     method public int getType();
+  }
+
+}
+
+package android.app.assist {
+
+  public static class AssistStructure.ViewNode {
+    ctor public AssistStructure.ViewNode();
   }
 
 }
@@ -4825,6 +4834,36 @@ package android.service.euicc {
 
 }
 
+package android.service.intelligence {
+
+  public abstract class IntelligenceService extends android.app.Service {
+    ctor public IntelligenceService();
+    method public abstract void onContentCaptureEvent(android.service.intelligence.InteractionSessionId, java.util.List<android.view.intelligence.ContentCaptureEvent>);
+    method public void onCreateInteractionSession(android.service.intelligence.InteractionContext, android.service.intelligence.InteractionSessionId);
+    method public void onDestroyInteractionSession(android.service.intelligence.InteractionSessionId);
+    field public static final java.lang.String SERVICE_INTERFACE = "android.service.intelligence.IntelligenceService";
+  }
+
+  public final class InteractionContext implements android.os.Parcelable {
+    method public int describeContents();
+    method public android.content.ComponentName getActivityComponent();
+    method public int getDisplayId();
+    method public int getFlags();
+    method public int getTaskId();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.service.intelligence.InteractionContext> CREATOR;
+    field public static final int FLAG_DISABLED_BY_APP = 1; // 0x1
+    field public static final int FLAG_DISABLED_BY_FLAG_SECURE = 2; // 0x2
+  }
+
+  public final class InteractionSessionId implements android.os.Parcelable {
+    method public int describeContents();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.service.intelligence.InteractionSessionId> CREATOR;
+  }
+
+}
+
 package android.service.notification {
 
   public final class Adjustment implements android.os.Parcelable {
@@ -6858,6 +6897,40 @@ package android.view.accessibility {
 
   public final class AccessibilityManager {
     method public void performAccessibilityShortcut();
+  }
+
+}
+
+package android.view.intelligence {
+
+  public final class ContentCaptureEvent implements android.os.Parcelable {
+    method public int describeContents();
+    method public long getEventTime();
+    method public int getFlags();
+    method public android.view.autofill.AutofillId getId();
+    method public java.lang.CharSequence getText();
+    method public int getType();
+    method public android.view.intelligence.ViewNode getViewNode();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.view.intelligence.ContentCaptureEvent> CREATOR;
+    field public static final int TYPE_ACTIVITY_PAUSED = 3; // 0x3
+    field public static final int TYPE_ACTIVITY_RESUMED = 2; // 0x2
+    field public static final int TYPE_ACTIVITY_STARTED = 1; // 0x1
+    field public static final int TYPE_ACTIVITY_STOPPED = 4; // 0x4
+    field public static final int TYPE_VIEW_ADDED = 5; // 0x5
+    field public static final int TYPE_VIEW_REMOVED = 6; // 0x6
+    field public static final int TYPE_VIEW_TEXT_CHANGED = 7; // 0x7
+  }
+
+  public final class IntelligenceManager {
+    method public java.util.Set<android.content.ComponentName> getContentCaptureDisabledActivities();
+    method public java.util.Set<java.lang.String> getContentCaptureDisabledPackages();
+    method public void setActivityContentCaptureEnabled(android.content.ComponentName, boolean);
+    method public void setPackageContentCaptureEnabled(java.lang.String, boolean);
+  }
+
+  public final class ViewNode extends android.app.assist.AssistStructure.ViewNode {
+    method public android.view.autofill.AutofillId getParentAutofillId();
   }
 
 }
