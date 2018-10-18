@@ -73,7 +73,8 @@ MetricsManager::MetricsManager(const ConfigKey& key, const StatsdConfig& config,
             key, config, *uidMap, pullerManager, anomalyAlarmMonitor, periodicAlarmMonitor,
             timeBaseNs, currentTimeNs, mTagIds, mAllAtomMatchers, mAllConditionTrackers,
             mAllMetricProducers, mAllAnomalyTrackers, mAllPeriodicAlarmTrackers,
-            mConditionToMetricMap, mTrackerToMetricMap, mTrackerToConditionMap, mNoReportMetricIds);
+            mConditionToMetricMap, mTrackerToMetricMap, mTrackerToConditionMap,
+            mActivationAtomTrackerToMetricMap, mMetricIndexesWithActivation, mNoReportMetricIds);
 
     mHashStringsInReport = config.hash_strings_in_metric_report();
 
@@ -298,7 +299,12 @@ void MetricsManager::onLogEvent(const LogEvent& event) {
     }
 
     int tagId = event.GetTagId();
-    int64_t eventTime = event.GetElapsedTimestampNs();
+    int64_t eventTimeNs = event.GetElapsedTimestampNs();
+
+    for (int metric : mMetricIndexesWithActivation) {
+        mAllMetricProducers[metric]->flushIfExpire(eventTimeNs);
+    }
+
     if (mTagIds.find(tagId) == mTagIds.end()) {
         // not interesting...
         return;
@@ -308,6 +314,14 @@ void MetricsManager::onLogEvent(const LogEvent& event) {
 
     for (auto& matcher : mAllAtomMatchers) {
         matcher->onLogEvent(event, mAllAtomMatchers, matcherCache);
+    }
+
+    for (const auto& it : mActivationAtomTrackerToMetricMap) {
+        if (matcherCache[it.first] == MatchingState::kMatched) {
+            for (int metricIndex : it.second) {
+                mAllMetricProducers[metricIndex]->activate(it.first, eventTimeNs);
+            }
+        }
     }
 
     // A bitmap to see which ConditionTracker needs to be re-evaluated.
@@ -347,13 +361,13 @@ void MetricsManager::onLogEvent(const LogEvent& event) {
                 // Push the new condition to it directly.
                 if (!mAllMetricProducers[metricIndex]->isConditionSliced()) {
                     mAllMetricProducers[metricIndex]->onConditionChanged(conditionCache[i],
-                                                                         eventTime);
+                                                                         eventTimeNs);
                     // metric cares about sliced conditions, and it may have changed. Send
                     // notification, and the metric can query the sliced conditions that are
                     // interesting to it.
                 } else {
                     mAllMetricProducers[metricIndex]->onSlicedConditionMayChange(conditionCache[i],
-                                                                                 eventTime);
+                                                                                 eventTimeNs);
                 }
             }
         }

@@ -195,6 +195,11 @@ private:
     // maps from ConditionTracker to MetricProducer
     std::unordered_map<int, std::vector<int>> mConditionToMetricMap;
 
+    // maps from life span triggering event to MetricProducers.
+    std::unordered_map<int, std::vector<int>> mActivationAtomTrackerToMetricMap;
+
+    std::vector<int> mMetricIndexesWithActivation;
+
     void initLogSourceWhiteList();
 
     // The metrics that don't need to be uploaded or even reported.
@@ -230,6 +235,7 @@ private:
 
     FRIEND_TEST(AlarmE2eTest, TestMultipleAlarms);
     FRIEND_TEST(ConfigTtlE2eTest, TestCountMetric);
+    FRIEND_TEST(MetricActivationE2eTest, TestCountMetric);
 };
 
 }  // namespace statsd
