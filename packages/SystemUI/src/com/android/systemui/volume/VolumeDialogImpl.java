@@ -135,10 +135,6 @@ public class VolumeDialogImpl implements VolumeDialog {
     private final AccessibilityManagerWrapper mAccessibilityMgr;
     private final Object mSafetyWarningLock = new Object();
     private final Accessibility mAccessibility = new Accessibility();
-    private ColorStateList mActiveTint;
-    private int mActiveAlpha;
-    private ColorStateList mInactiveTint;
-    private int mInactiveAlpha;
 
     private boolean mShowing;
     private boolean mShowA11yStream;
@@ -237,11 +233,6 @@ public class VolumeDialogImpl implements VolumeDialog {
         lp = mWindow.getAttributes();
         lp.gravity = ((FrameLayout.LayoutParams) mDialogView.getLayoutParams()).gravity;
         mWindow.setAttributes(lp);
-
-        mActiveTint = Utils.getColorAccent(mContext);
-        mActiveAlpha = Color.alpha(mActiveTint.getDefaultColor());
-        mInactiveTint = Utils.getColorAttr(mContext, android.R.attr.colorForeground);
-        mInactiveAlpha = getAlphaAttr(android.R.attr.secondaryContentAlpha);
 
         mDialogRowsView = mDialog.findViewById(R.id.volume_dialog_rows);
         mRinger = mDialog.findViewById(R.id.ringer);
@@ -942,8 +933,12 @@ public class VolumeDialogImpl implements VolumeDialog {
             row.slider.requestFocus();
         }
         boolean useActiveColoring = isActive && row.slider.isEnabled();
-        final ColorStateList tint = useActiveColoring ? mActiveTint : mInactiveTint;
-        final int alpha = useActiveColoring ? mActiveAlpha : mInactiveAlpha;
+        final ColorStateList tint = useActiveColoring
+                ? Utils.getColorAccent(mContext)
+                : Utils.getColorAttr(mContext, android.R.attr.colorForeground);
+        final int alpha = useActiveColoring
+                ? Color.alpha(tint.getDefaultColor())
+                : getAlphaAttr(android.R.attr.secondaryContentAlpha);
         if (tint == row.cachedTint) return;
         row.slider.setProgressTintList(tint);
         row.slider.setThumbTintList(tint);
