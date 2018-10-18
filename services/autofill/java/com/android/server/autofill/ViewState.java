@@ -77,7 +77,6 @@ final class ViewState {
     public final AutofillId id;
 
     private final Listener mListener;
-    private final Session mSession;
 
     private FillResponse mResponse;
     private AutofillValue mCurrentValue;
@@ -87,8 +86,7 @@ final class ViewState {
     private int mState;
     private String mDatasetId;
 
-    ViewState(Session session, AutofillId id, Listener listener, int state) {
-        mSession = session;
+    ViewState(AutofillId id, Listener listener, int state) {
         this.id = id;
         mListener = listener;
         mState = state;
