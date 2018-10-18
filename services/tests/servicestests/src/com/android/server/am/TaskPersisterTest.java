@@ -16,43 +16,34 @@
 
 package com.android.server.am;
 
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertTrue;
-
-import static androidx.test.InstrumentationRegistry.getTargetContext;
-
 import android.content.pm.UserInfo;
+import android.os.Environment;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.platform.test.annotations.Presubmit;
+import android.test.AndroidTestCase;
+import android.util.Log;
 import android.util.SparseBooleanArray;
 
-import org.junit.After;
-import org.junit.Before;
-import org.junit.Test;
+import com.android.server.am.TaskPersister;
 
-import androidx.test.filters.FlakyTest;
+import java.io.File;
+import java.util.Random;
 
 /**
- * Tests for {@link TaskPersister}.
- *
- * Build/Install/Run:
- *  atest FrameworksServicesTests:TaskPersisterTest
+ * atest FrameworksServicesTests:TaskPersisterTest
  */
-@Presubmit
-@FlakyTest(detail = "Promote to presubmit if stable")
-public class TaskPersisterTest {
+public class TaskPersisterTest extends AndroidTestCase {
     private static final String TEST_USER_NAME = "AM-Test-User";
 
     private TaskPersister mTaskPersister;
     private int testUserId;
     private UserManager mUserManager;
 
-    @Before
+    @Override
     public void setUp() throws Exception {
-        mUserManager = UserManager.get(getTargetContext());
-        mTaskPersister = new TaskPersister(getTargetContext().getFilesDir());
+        super.setUp();
+        mUserManager = UserManager.get(getContext());
+        mTaskPersister = new TaskPersister(getContext().getFilesDir());
         // In ARC, the maximum number of supported users is one, which is different from the ones of
         // most phones (more than 4). This prevents TaskPersisterTest from creating another user for
         // test. However, since guest users can be added as much as possible, we create guest user
@@ -60,8 +51,9 @@ public class TaskPersisterTest {
         testUserId = createUser(TEST_USER_NAME, UserInfo.FLAG_GUEST);
     }
 
-    @After
+    @Override
     public void tearDown() throws Exception {
+        super.tearDown();
         mTaskPersister.unloadUserDataFromMemory(testUserId);
         removeUser(testUserId);
     }
@@ -72,7 +64,6 @@ public class TaskPersisterTest {
         return taskId;
     }
 
-    @Test
     public void testTaskIdsPersistence() {
         SparseBooleanArray taskIdsOnFile = new SparseBooleanArray();
         for (int i = 0; i < 100; i++) {
@@ -81,18 +72,21 @@ public class TaskPersisterTest {
         mTaskPersister.writePersistedTaskIdsForUser(taskIdsOnFile, testUserId);
         SparseBooleanArray newTaskIdsOnFile = mTaskPersister
                 .loadPersistedTaskIdsForUser(testUserId);
-        assertEquals("TaskIds written differ from TaskIds read back from file",
-                taskIdsOnFile, newTaskIdsOnFile);
+        assertTrue("TaskIds written differ from TaskIds read back from file",
+                taskIdsOnFile.equals(newTaskIdsOnFile));
     }
 
     private int createUser(String name, int flags) {
         UserInfo user = mUserManager.createUser(name, flags);
-        assertNotNull("Error while creating the test user: " + TEST_USER_NAME, user);
+        if (user == null) {
+            fail("Error while creating the test user: " + TEST_USER_NAME);
+        }
         return user.id;
     }
 
     private void removeUser(int userId) {
-        boolean userRemoved = mUserManager.removeUser(userId);
-        assertTrue("Error while removing the test user: " + TEST_USER_NAME, userRemoved);
+        if (!mUserManager.removeUser(userId)) {
+            fail("Error while removing the test user: " + TEST_USER_NAME);
+        }
     }
 }
