@@ -16,22 +16,19 @@
 
 package android.telephony.ims;
 
+import android.annotation.IntDef;
 import android.annotation.SystemApi;
-import android.annotation.UnsupportedAppUsage;
 import android.net.Uri;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.telecom.Log;
 import android.telephony.Rlog;
 
-/*
- * This file contains all the api's through which
- * information received in Dialog Event Package can be
- * queried
- */
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
- * Parcelable object to handle MultiEndpoint Dialog Information
+ * Parcelable object to handle MultiEndpoint Dialog Event Package Information.
  * @hide
  */
 @SystemApi
@@ -40,8 +37,39 @@ public final class ImsExternalCallState implements Parcelable {
     private static final String TAG = "ImsExternalCallState";
 
     // Dialog States
+    /**
+     * The external call is in the confirmed dialog state.
+     */
     public static final int CALL_STATE_CONFIRMED = 1;
+    /**
+     * The external call is in the terminated dialog state.
+     */
     public static final int CALL_STATE_TERMINATED = 2;
+
+    /**@hide*/
+    @IntDef(flag = true,
+            value = {
+                    CALL_STATE_CONFIRMED,
+                    CALL_STATE_TERMINATED
+            },
+            prefix = "CALL_STATE_")
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ExternalCallState {}
+
+    /**@hide*/
+    @IntDef(flag = true,
+            value = {
+                    ImsCallProfile.CALL_TYPE_VOICE,
+                    ImsCallProfile.CALL_TYPE_VT_TX,
+                    ImsCallProfile.CALL_TYPE_VT_RX,
+                    ImsCallProfile.CALL_TYPE_VT
+            },
+            prefix = "CALL_TYPE_")
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ExternalCallType {}
+
+
+
     // Dialog Id
     private int mCallId;
     // Number
@@ -58,10 +86,9 @@ public final class ImsExternalCallState implements Parcelable {
     public ImsExternalCallState() {
     }
 
-    /** @hide */
-    @UnsupportedAppUsage
-    public ImsExternalCallState(int callId, Uri address, boolean isPullable, int callState,
-            int callType, boolean isCallheld) {
+    /**@hide*/
+    public ImsExternalCallState(int callId, Uri address, boolean isPullable,
+            @ExternalCallState int callState, int callType, boolean isCallheld) {
         mCallId = callId;
         mAddress = address;
         mIsPullable = isPullable;
@@ -71,10 +98,36 @@ public final class ImsExternalCallState implements Parcelable {
         Rlog.d(TAG, "ImsExternalCallState = " + this);
     }
 
-    /** @hide */
+    /**@hide*/
     public ImsExternalCallState(int callId, Uri address, Uri localAddress,
-            boolean isPullable, int callState, int callType, boolean isCallheld) {
+            boolean isPullable, @ExternalCallState int callState, int callType,
+            boolean isCallheld) {
         mCallId = callId;
+        mAddress = address;
+        mLocalAddress = localAddress;
+        mIsPullable = isPullable;
+        mCallState = callState;
+        mCallType = callType;
+        mIsHeld = isCallheld;
+        Rlog.d(TAG, "ImsExternalCallState = " + this);
+    }
+
+    /**
+     * Create a new ImsExternalCallState instance to contain Multiendpoint Dialog information.
+     * @param callId The unique ID of the call, which will be used to identify this external
+     *               connection.
+     * @param address A {@link Uri} containing the remote address of this external connection.
+     * @param localAddress A {@link Uri} containing the local address information.
+     * @param isPullable A flag determining if this external connection can be pulled to the current
+     *         device.
+     * @param callState The state of the external call.
+     * @param callType The type of external call.
+     * @param isCallheld A flag determining if the external connection is currently held.
+     */
+    public ImsExternalCallState(String callId, Uri address, Uri localAddress,
+            boolean isPullable, @ExternalCallState int callState, @ExternalCallType int callType,
+            boolean isCallheld) {
+        mCallId = getIdForString(callId);
         mAddress = address;
         mLocalAddress = localAddress;
         mIsPullable = isPullable;
@@ -135,7 +188,9 @@ public final class ImsExternalCallState implements Parcelable {
         return mAddress;
     }
 
-    /** @hide */
+    /**
+     * @return A {@link Uri} containing the local address from the Multiendpoint Dialog Information.
+     */
     public Uri getLocalAddress() {
         return mLocalAddress;
     }
@@ -144,11 +199,11 @@ public final class ImsExternalCallState implements Parcelable {
         return mIsPullable;
     }
 
-    public int getCallState() {
+    public @ExternalCallState int getCallState() {
         return mCallState;
     }
 
-    public int getCallType() {
+    public @ExternalCallType int getCallType() {
         return mCallType;
     }
 
@@ -165,5 +220,16 @@ public final class ImsExternalCallState implements Parcelable {
                 ", mCallState = " + mCallState +
                 ", mCallType = " + mCallType +
                 ", mIsHeld = " + mIsHeld + "}";
+    }
+
+    private int getIdForString(String idString) {
+        try {
+            return Integer.parseInt(idString);
+        } catch (NumberFormatException e) {
+            // In the case that there are alphanumeric characters, we will create a hash of the
+            // String value as a backup.
+            // TODO: Modify call IDs to use Strings as keys instead of integers in telephony/telecom
+            return idString.hashCode();
+        }
     }
 }
