@@ -283,7 +283,8 @@ static void process_media_player_call(
 static void
 android_media_MediaPlayer2_handleDataSourceUrl(
         JNIEnv *env, jobject thiz, jboolean isCurrent, jlong srcId,
-        jobject httpServiceObj, jstring path, jobjectArray keys, jobjectArray values) {
+        jobject httpServiceObj, jstring path, jobjectArray keys, jobjectArray values,
+        jlong startPos, jlong endPos) {
 
     sp<MediaPlayer2> mp = getMediaPlayer(env, thiz);
     if (mp == NULL) {
@@ -300,7 +301,8 @@ android_media_MediaPlayer2_handleDataSourceUrl(
     if (tmp == NULL) {  // Out of memory
         return;
     }
-    ALOGV("handleDataSourceUrl: path %s, srcId %lld", tmp, (long long)srcId);
+    ALOGV("handleDataSourceUrl: path %s, srcId %lld, start %lld, end %lld",
+          tmp, (long long)srcId, (long long)startPos, (long long)endPos);
 
     if (strncmp(tmp, "content://", 10) == 0) {
         ALOGE("handleDataSourceUrl: content scheme is not supported in native code");
@@ -313,6 +315,8 @@ android_media_MediaPlayer2_handleDataSourceUrl(
     dsd->mId = srcId;
     dsd->mType = DataSourceDesc::TYPE_URL;
     dsd->mUrl = tmp;
+    dsd->mStartPositionMs = startPos;
+    dsd->mEndPositionMs = endPos;
 
     env->ReleaseStringUTFChars(path, tmp);
     tmp = NULL;
@@ -341,9 +345,9 @@ android_media_MediaPlayer2_handleDataSourceUrl(
 
 static void
 android_media_MediaPlayer2_handleDataSourceFD(
-    JNIEnv *env, jobject thiz, jboolean isCurrent, jlong srcId,
-    jobject fileDescriptor, jlong offset, jlong length)
-{
+        JNIEnv *env, jobject thiz, jboolean isCurrent, jlong srcId,
+        jobject fileDescriptor, jlong offset, jlong length,
+        jlong startPos, jlong endPos) {
     sp<MediaPlayer2> mp = getMediaPlayer(env, thiz);
     if (mp == NULL ) {
         jniThrowException(env, "java/lang/IllegalStateException", NULL);
@@ -355,8 +359,10 @@ android_media_MediaPlayer2_handleDataSourceFD(
         return;
     }
     int fd = jniGetFDFromFileDescriptor(env, fileDescriptor);
-    ALOGV("handleDataSourceFD: srcId=%lld, fd=%d (%s), offset=%lld, length=%lld",
-          (long long)srcId, fd, nameForFd(fd).c_str(), (long long)offset, (long long)length);
+    ALOGV("handleDataSourceFD: srcId=%lld, fd=%d (%s), offset=%lld, length=%lld, "
+          "start=%lld, end=%lld",
+          (long long)srcId, fd, nameForFd(fd).c_str(), (long long)offset, (long long)length,
+          (long long)startPos, (long long)endPos);
 
     struct stat sb;
     int ret = fstat(fd, &sb);
@@ -389,6 +395,8 @@ android_media_MediaPlayer2_handleDataSourceFD(
     dsd->mFD = fd;
     dsd->mFDOffset = offset;
     dsd->mFDLength = length;
+    dsd->mStartPositionMs = startPos;
+    dsd->mEndPositionMs = endPos;
 
     status_t err;
     if (isCurrent) {
@@ -402,7 +410,8 @@ android_media_MediaPlayer2_handleDataSourceFD(
 
 static void
 android_media_MediaPlayer2_handleDataSourceCallback(
-    JNIEnv *env, jobject thiz, jboolean isCurrent, jlong srcId, jobject dataSource)
+    JNIEnv *env, jobject thiz, jboolean isCurrent, jlong srcId, jobject dataSource,
+    jlong startPos, jlong endPos)
 {
     sp<MediaPlayer2> mp = getMediaPlayer(env, thiz);
     if (mp == NULL ) {
@@ -419,6 +428,8 @@ android_media_MediaPlayer2_handleDataSourceCallback(
     dsd->mId = srcId;
     dsd->mType = DataSourceDesc::TYPE_CALLBACK;
     dsd->mCallbackSource = callbackDataSource;
+    dsd->mStartPositionMs = startPos;
+    dsd->mEndPositionMs = endPos;
 
     status_t err;
     if (isCurrent) {
@@ -1442,17 +1453,17 @@ static const JNINativeMethod gMethods[] = {
     {
         "nativeHandleDataSourceUrl",
         "(ZJLandroid/media/Media2HTTPService;Ljava/lang/String;[Ljava/lang/String;"
-        "[Ljava/lang/String;)V",
+        "[Ljava/lang/String;JJ)V",
         (void *)android_media_MediaPlayer2_handleDataSourceUrl
     },
     {
         "nativeHandleDataSourceFD",
-        "(ZJLjava/io/FileDescriptor;JJ)V",
+        "(ZJLjava/io/FileDescriptor;JJJJ)V",
         (void *)android_media_MediaPlayer2_handleDataSourceFD
     },
     {
         "nativeHandleDataSourceCallback",
-        "(ZJLandroid/media/Media2DataSource;)V",
+        "(ZJLandroid/media/Media2DataSource;JJ)V",
         (void *)android_media_MediaPlayer2_handleDataSourceCallback
     },
     {"nativePlayNextDataSource", "(J)V",                        (void *)android_media_MediaPlayer2_playNextDataSource},
