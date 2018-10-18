@@ -21,7 +21,6 @@
 #include <Properties.h>
 #include <Rect.h>
 #include <RenderNode.h>
-#include <Snapshot.h>
 #include <hwui/Bitmap.h>
 #include <pipeline/skia/SkiaRecordingCanvas.h>
 #include <private/hwui/DrawGlInfo.h>
@@ -139,14 +138,6 @@ public:
             }
         }
         return true;
-    }
-
-    static std::unique_ptr<Snapshot> makeSnapshot(const Matrix4& transform, const Rect& clip) {
-        std::unique_ptr<Snapshot> snapshot(new Snapshot());
-        // store clip first, so it isn't transformed
-        snapshot->setClip(clip.left, clip.top, clip.right, clip.bottom);
-        *(snapshot->transform) = transform;
-        return snapshot;
     }
 
     static sk_sp<Bitmap> createBitmap(int width, int height,

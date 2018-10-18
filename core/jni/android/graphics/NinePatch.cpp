@@ -23,8 +23,6 @@
 #include <hwui/Paint.h>
 #include <utils/Log.h>
 
-#include <ResourceCache.h>
-
 #include "SkCanvas.h"
 #include "SkLatticeIter.h"
 #include "SkRegion.h"
@@ -83,12 +81,7 @@ public:
 
     static void finalize(JNIEnv* env, jobject, jlong patchHandle) {
         int8_t* patch = reinterpret_cast<int8_t*>(patchHandle);
-        if (android::uirenderer::ResourceCache::hasInstance()) {
-            Res_png_9patch* p = (Res_png_9patch*) patch;
-            android::uirenderer::ResourceCache::getInstance().destructor(p);
-        } else {
-            delete[] patch;
-        }
+        delete[] patch;
     }
 
     static jlong getTransparentRegion(JNIEnv* env, jobject, jobject jbitmap,
