@@ -26,6 +26,7 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.content.res.XmlResourceParser;
 import android.graphics.Canvas;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Message;
 import android.os.Trace;
@@ -78,7 +79,7 @@ public abstract class LayoutInflater {
      * This field should be made private, so it is hidden from the SDK.
      * {@hide}
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     protected final Context mContext;
 
     // these are optional, set by the caller
