@@ -828,11 +828,14 @@ public class HdmiControlService extends SystemService {
         int mask = 0xF000;
         int finalMask = 0xF000;
         int physicalAddress = getPhysicalAddress();
-        while (physicalAddress != 0) {
-            physicalAddress &= mask;
-            mask >>= 4;
+        int maskedAddress = physicalAddress;
+
+        while (maskedAddress != 0) {
+            maskedAddress = physicalAddress & mask;
             finalMask |= mask;
+            mask >>= 4;
         }
+
         int portAddress = path & finalMask;
         return mPortIdMap.get(portAddress, Constants.INVALID_PORT_ID);
     }

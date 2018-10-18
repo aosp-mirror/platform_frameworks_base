@@ -137,11 +137,15 @@ public class HdmiControlServiceTest {
 
         mLocalDevices.add(mMyAudioSystemDevice);
         mLocalDevices.add(mMyPlaybackDevice);
-        mHdmiPortInfo = new HdmiPortInfo[2];
+        mHdmiPortInfo = new HdmiPortInfo[4];
         mHdmiPortInfo[0] =
             new HdmiPortInfo(1, HdmiPortInfo.PORT_INPUT, 0x2100, true, false, false);
         mHdmiPortInfo[1] =
             new HdmiPortInfo(2, HdmiPortInfo.PORT_INPUT, 0x2200, true, false, false);
+        mHdmiPortInfo[2] =
+            new HdmiPortInfo(3, HdmiPortInfo.PORT_INPUT, 0x2000, true, false, false);
+        mHdmiPortInfo[3] =
+            new HdmiPortInfo(4, HdmiPortInfo.PORT_INPUT, 0x3000, true, false, false);
         mNativeWrapper.setPortInfo(mHdmiPortInfo);
         mHdmiControlService.initPortInfo();
         mHdmiControlService.allocateLogicalAddress(mLocalDevices, INITIATED_BY_ENABLE_CEC);
@@ -182,8 +186,8 @@ public class HdmiControlServiceTest {
     @Test
     public void pathToPort_pathExists_weAreTv() {
         mNativeWrapper.setPhysicalAddress(0x0000);
-        assertThat(mHdmiControlService.pathToPortId(0x2120)).isEqualTo(2);
-        assertThat(mHdmiControlService.pathToPortId(0x1234)).isEqualTo(1);
+        assertThat(mHdmiControlService.pathToPortId(0x2120)).isEqualTo(3);
+        assertThat(mHdmiControlService.pathToPortId(0x3234)).isEqualTo(4);
     }
 
     @Test
