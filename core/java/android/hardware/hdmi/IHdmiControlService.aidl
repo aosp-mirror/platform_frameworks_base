@@ -73,4 +73,5 @@ interface IHdmiControlService {
     void addHdmiMhlVendorCommandListener(IHdmiMhlVendorCommandListener listener);
     void setStandbyMode(boolean isStandbyModeOn);
     void reportAudioStatus(int deviceType, int volume, int maxVolume, boolean isMute);
+    void setSystemAudioModeOnForAudioOnlySource();
 }

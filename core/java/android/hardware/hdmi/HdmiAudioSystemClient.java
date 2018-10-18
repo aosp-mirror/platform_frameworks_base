@@ -15,10 +15,12 @@
  */
 package android.hardware.hdmi;
 
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
+import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.annotations.VisibleForTesting.Visibility;
@@ -54,6 +56,21 @@ public final class HdmiAudioSystemClient extends HdmiClient {
     public HdmiAudioSystemClient(IHdmiControlService service, @Nullable Handler handler) {
         super(service);
         mHandler = handler == null ? new Handler(Looper.getMainLooper()) : handler;
+    }
+
+    /**
+     * Callback interface used to get the set System Audio Mode result.
+     *
+     * @hide
+     */
+    // TODO(b/110094868): unhide and add @SystemApi for Q
+    public interface SetSystemAudioModeCallback {
+        /**
+         * Called when the input was changed.
+         *
+         * @param result the result of the set System Audio Mode
+         */
+        void onComplete(int result);
     }
 
     /** @hide */
@@ -115,6 +132,36 @@ public final class HdmiAudioSystemClient extends HdmiClient {
         } else {
             // if audio status cannot be sent, send it latter
             mPendingReportAudioStatus = true;
+        }
+    }
+
+    /**
+     * Set System Audio Mode on/off with audio system device.
+     *
+     * @param state true to set System Audio Mode on. False to set off.
+     * @param callback callback offer the setting result.
+     *
+     * @hide
+     */
+    // TODO(b/110094868): unhide and add @SystemApi for Q
+    public void setSystemAudioMode(boolean state, @NonNull SetSystemAudioModeCallback callback) {
+        // TODO(amyjojo): implement this when needed.
+    }
+
+    /**
+     * When device is switching to an audio only source, this method is called to broadcast
+     * a setSystemAudioMode on message to the HDMI CEC system without querying Active Source or
+     * TV supporting System Audio Control or not. This is to get volume control passthrough
+     * from STB even if TV does not support it.
+     *
+     * @hide
+     */
+    // TODO(b/110094868): unhide and add @SystemApi for Q
+    public void setSystemAudioModeOnForAudioOnlySource() {
+        try {
+            mService.setSystemAudioModeOnForAudioOnlySource();
+        } catch (RemoteException e) {
+            Log.d(TAG, "Failed to set System Audio Mode on for Audio Only source");
         }
     }
 }

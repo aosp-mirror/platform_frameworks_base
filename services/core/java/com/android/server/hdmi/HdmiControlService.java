@@ -1840,6 +1840,27 @@ public class HdmiControlService extends SystemService {
         }
 
         @Override
+        public void setSystemAudioModeOnForAudioOnlySource() {
+            enforceAccessPermission();
+            runOnServiceThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (!isAudioSystemDevice()) {
+                        Slog.e(TAG, "Not an audio system device. Won't set system audio mode on");
+                        return;
+                    }
+                    if (!audioSystem().checkSupportAndSetSystemAudioMode(true)) {
+                        Slog.e(TAG, "System Audio Mode is not supported.");
+                        return;
+                    }
+                    sendCecCommand(
+                            HdmiCecMessageBuilder.buildSetSystemAudioMode(
+                                    audioSystem().mAddress, Constants.ADDR_BROADCAST, true));
+                }
+            });
+        }
+
+        @Override
         protected void dump(FileDescriptor fd, final PrintWriter writer, String[] args) {
             if (!DumpUtils.checkDumpPermission(getContext(), TAG, writer)) return;
             final IndentingPrintWriter pw = new IndentingPrintWriter(writer, "  ");
