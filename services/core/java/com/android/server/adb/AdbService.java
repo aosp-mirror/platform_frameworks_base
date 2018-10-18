@@ -16,11 +16,13 @@
 package com.android.server.adb;
 
 import android.content.Context;
+import android.debug.AdbManagerInternal;
 import android.debug.IAdbManager;
 import android.os.Binder;
 
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.IndentingPrintWriter;
+import com.android.server.LocalServices;
 import com.android.server.SystemService;
 
 import java.io.FileDescriptor;
@@ -48,12 +50,17 @@ public class AdbService extends IAdbManager.Stub {
         }
     }
 
+    private class AdbManagerInternalImpl extends AdbManagerInternal {
+    }
+
     private static final String TAG = "AdbService";
 
     private final Context mContext;
 
     private AdbService(Context context) {
         mContext = context;
+
+        LocalServices.addService(AdbManagerInternal.class, new AdbManagerInternalImpl());
     }
 
     @Override
