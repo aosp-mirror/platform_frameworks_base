@@ -41,6 +41,7 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import android.content.Context;
 import android.os.FileUtils.MemoryPipe;
@@ -508,6 +509,20 @@ public class FileUtilsTest {
                 MODE_WRITE_ONLY | MODE_CREATE | MODE_TRUNCATE);
         assertTranslate("wa", O_WRONLY | O_CREAT | O_APPEND,
                 MODE_WRITE_ONLY | MODE_CREATE | MODE_APPEND);
+    }
+
+    @Test
+    public void testTranslateMode_Invalid() throws Exception {
+        try {
+            translateModeStringToPosix("rwx");
+            fail();
+        } catch (IllegalArgumentException expected) {
+        }
+        try {
+            translateModeStringToPosix("");
+            fail();
+        } catch (IllegalArgumentException expected) {
+        }
     }
 
     private static void assertTranslate(String string, int posix, int pfd) {
