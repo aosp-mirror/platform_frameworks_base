@@ -5446,7 +5446,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         return newInfo;
     }
 
-    private WindowProcessController getProcessController(String processName, int uid) {
+    WindowProcessController getProcessController(String processName, int uid) {
         if (uid == SYSTEM_UID) {
             // The system gets to run in any process. If there are multiple processes with the same
             // uid, just pick the first (this should never happen).
