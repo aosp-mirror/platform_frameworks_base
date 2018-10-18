@@ -53,6 +53,11 @@ import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TOP;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 
+import static com.android.server.am.ActivityStack.ActivityState.RESUMED;
+import static com.android.server.am.ActivityStackSupervisor.DEFER_RESUME;
+import static com.android.server.am.ActivityStackSupervisor.ON_TOP;
+import static com.android.server.am.ActivityStackSupervisor.PRESERVE_WINDOWS;
+import static com.android.server.am.ActivityStackSupervisor.TAG_TASKS;
 import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_CONFIGURATION;
 import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_FOCUS;
 import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_PERMISSIONS_REVIEW;
@@ -67,11 +72,6 @@ import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_USER_
 import static com.android.server.am.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.am.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.ActivityTaskManagerService.ANIMATE;
-import static com.android.server.am.ActivityStack.ActivityState.RESUMED;
-import static com.android.server.am.ActivityStackSupervisor.DEFER_RESUME;
-import static com.android.server.am.ActivityStackSupervisor.ON_TOP;
-import static com.android.server.am.ActivityStackSupervisor.PRESERVE_WINDOWS;
-import static com.android.server.am.ActivityStackSupervisor.TAG_TASKS;
 import static com.android.server.am.EventLogTags.AM_NEW_INTENT;
 import static com.android.server.am.TaskRecord.REPARENT_KEEP_STACK_AT_FRONT;
 import static com.android.server.am.TaskRecord.REPARENT_MOVE_STACK_TO_FRONT;
@@ -1277,6 +1277,7 @@ class ActivityStarter {
 
         setInitialState(r, options, inTask, doResume, startFlags, sourceRecord, voiceSession,
                 voiceInteractor);
+        final int preferredWindowingMode = mLaunchParams.mWindowingMode;
 
         // Do not start home activity if it cannot be launched on preferred display. We are not
         // doing this in ActivityStackSupervisor#canPlaceEntityOnDisplay because it might
@@ -1294,25 +1295,6 @@ class ActivityStarter {
         mIntent.setFlags(mLaunchFlags);
 
         ActivityRecord reusedActivity = getReusableIntentActivity();
-
-        int preferredWindowingMode = WINDOWING_MODE_UNDEFINED;
-        int preferredLaunchDisplayId = DEFAULT_DISPLAY;
-        if (mOptions != null) {
-            preferredWindowingMode = mOptions.getLaunchWindowingMode();
-            preferredLaunchDisplayId = mOptions.getLaunchDisplayId();
-        }
-
-        // windowing mode and preferred launch display values from {@link LaunchParams} take
-        // priority over those specified in {@link ActivityOptions}.
-        if (!mLaunchParams.isEmpty()) {
-            if (mLaunchParams.hasPreferredDisplay()) {
-                preferredLaunchDisplayId = mLaunchParams.mPreferredDisplayId;
-            }
-
-            if (mLaunchParams.hasWindowingMode()) {
-                preferredWindowingMode = mLaunchParams.mWindowingMode;
-            }
-        }
 
         if (reusedActivity != null) {
             // When the flags NEW_TASK and CLEAR_TASK are set, then the task gets reused but
@@ -1460,7 +1442,7 @@ class ActivityStarter {
             // Don't use mStartActivity.task to show the toast. We're not starting a new activity
             // but reusing 'top'. Fields in mStartActivity may not be fully initialized.
             mSupervisor.handleNonResizableTaskIfNeeded(top.getTask(), preferredWindowingMode,
-                    preferredLaunchDisplayId, topStack);
+                    mPreferredDisplayId, topStack);
 
             return START_DELIVERED_TO_TOP;
         }
@@ -1540,7 +1522,7 @@ class ActivityStarter {
         mSupervisor.updateUserStackLocked(mStartActivity.userId, mTargetStack);
 
         mSupervisor.handleNonResizableTaskIfNeeded(mStartActivity.getTask(), preferredWindowingMode,
-                preferredLaunchDisplayId, mTargetStack);
+                mPreferredDisplayId, mTargetStack);
 
         return START_SUCCESS;
     }
@@ -1614,7 +1596,6 @@ class ActivityStarter {
         } else {
             mPreferredDisplayId = DEFAULT_DISPLAY;
         }
-        ensureValidPreferredDisplayId(r);
 
         mLaunchMode = r.launchMode;
 
@@ -1705,24 +1686,6 @@ class ActivityStarter {
         }
 
         mNoAnimation = (mLaunchFlags & FLAG_ACTIVITY_NO_ANIMATION) != 0;
-    }
-
-    /**
-     * Ensure preferred display ID matches the starting activity.
-     */
-    private void ensureValidPreferredDisplayId(ActivityRecord startingActivity) {
-        // Check if the Activity is a VR activity. If so, the activity should be launched in
-        // main display.
-        if (startingActivity != null && startingActivity.requestedVrComponent != null) {
-            mPreferredDisplayId = DEFAULT_DISPLAY;
-        }
-
-        // Get the virtual display ID from ActivityStackManagerService. If that's set we should
-        // always use that.
-        final int displayId = mService.mVr2dDisplayId;
-        if (displayId != INVALID_DISPLAY) {
-            mPreferredDisplayId = displayId;
-        }
     }
 
     private void sendNewTaskResultRequestIfNeeded() {

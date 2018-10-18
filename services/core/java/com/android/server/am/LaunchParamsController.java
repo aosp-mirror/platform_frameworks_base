@@ -17,6 +17,7 @@
 package com.android.server.am;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 
 import static com.android.server.am.LaunchParamsController.LaunchParamsModifier.RESULT_CONTINUE;
@@ -96,6 +97,15 @@ class LaunchParamsController {
                     result.set(mTmpResult);
                     break;
             }
+        }
+
+        if (activity != null && activity.requestedVrComponent != null) {
+            // Check if the Activity is a VR activity. If so, it should be launched in main display.
+            result.mPreferredDisplayId = DEFAULT_DISPLAY;
+        } else if (mService.mVr2dDisplayId != INVALID_DISPLAY) {
+            // Get the virtual display ID from ActivityTaskManagerService. If that's set we
+            // should always use that.
+            result.mPreferredDisplayId = mService.mVr2dDisplayId;
         }
     }
 
