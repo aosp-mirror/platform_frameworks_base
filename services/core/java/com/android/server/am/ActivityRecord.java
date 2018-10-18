@@ -81,6 +81,7 @@ import static android.content.res.Configuration.UI_MODE_TYPE_VR_HEADSET;
 import static android.os.Build.VERSION_CODES.HONEYCOMB;
 import static android.os.Build.VERSION_CODES.O;
 import static android.os.Process.SYSTEM_UID;
+import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManagerPolicyConstants.NAV_BAR_LEFT;
 
 import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_CONFIGURATION;
@@ -2212,12 +2213,13 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     }
 
     /**
-     * @return display id to which this record is attached, -1 if not attached.
+     * @return display id to which this record is attached,
+     *         {@link android.view.Display#INVALID_DISPLAY} if not attached.
      */
     int getDisplayId() {
         final ActivityStack stack = getStack();
         if (stack == null) {
-            return -1;
+            return INVALID_DISPLAY;
         }
         return stack.mDisplayId;
     }

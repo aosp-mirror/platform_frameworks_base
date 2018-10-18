@@ -2466,7 +2466,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         }
         if (displayId != INVALID_DISPLAY && canLaunchOnDisplay(r, displayId)) {
             if (r != null) {
-                stack = (T) getValidLaunchStackOnDisplay(displayId, r, options);
+                stack = (T) getValidLaunchStackOnDisplay(displayId, r, candidateTask, options);
                 if (stack != null) {
                     return stack;
                 }
@@ -2531,10 +2531,11 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
      * If there is no such stack, new dynamic stack can be created.
      * @param displayId Target display.
      * @param r Activity that should be launched there.
+     * @param candidateTask The possible task the activity might be put in.
      * @return Existing stack if there is a valid one, new dynamic stack if it is valid or null.
      */
     ActivityStack getValidLaunchStackOnDisplay(int displayId, @NonNull ActivityRecord r,
-            @Nullable ActivityOptions options) {
+            @Nullable TaskRecord candidateTask, @Nullable ActivityOptions options) {
         final ActivityDisplay activityDisplay = getActivityDisplayOrCreateLocked(displayId);
         if (activityDisplay == null) {
             throw new IllegalArgumentException(
@@ -2543,6 +2544,13 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
         if (!r.canBeLaunchedOnDisplay(displayId)) {
             return null;
+        }
+
+        // If {@code r} is already in target display and its task is the same as the candidate task,
+        // the intention should be getting a launch stack for the reusable activity, so we can use
+        // the existing stack.
+        if (r.getDisplayId() == displayId && r.getTask() == candidateTask) {
+            return candidateTask.getStack();
         }
 
         // Return the topmost valid stack on the display.
@@ -2563,6 +2571,11 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
         Slog.w(TAG, "getValidLaunchStackOnDisplay: can't launch on displayId " + displayId);
         return null;
+    }
+
+    ActivityStack getValidLaunchStackOnDisplay(int displayId, @NonNull ActivityRecord r,
+            @Nullable ActivityOptions options) {
+        return getValidLaunchStackOnDisplay(displayId, r, null /* candidateTask */, options);
     }
 
     // TODO: Can probably be consolidated into getLaunchStack()...
