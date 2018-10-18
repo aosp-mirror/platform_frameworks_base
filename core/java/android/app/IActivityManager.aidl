@@ -96,6 +96,7 @@ interface IActivityManager {
             String callingPackage);
     void unregisterUidObserver(in IUidObserver observer);
     boolean isUidActive(int uid, String callingPackage);
+    int getUidProcessState(int uid, in String callingPackage);
     // =============== End of transactions used on native side as well ============================
 
     // Special low-level communication with activity manager.
@@ -379,8 +380,6 @@ interface IActivityManager {
     void noteAlarmFinish(in IIntentSender sender, in WorkSource workSource, int sourceUid, in String tag);
     int getPackageProcessState(in String packageName, in String callingPackage);
     void updateDeviceOwner(in String packageName);
-    int getUidProcessState(int uid, in String callingPackage);
-
 
     // Start of N transactions
     // Start Binder transaction tracking for all applications.
