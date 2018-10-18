@@ -75,14 +75,21 @@ class UsbSerialReader extends IUsbSerialReader.Stub {
         if (uid != Process.SYSTEM_UID) {
             enforcePackageBelongsToUid(uid, packageName);
 
-            PackageInfo pkg;
+            int packageTargetSdkVersion;
+            long token = Binder.clearCallingIdentity();
             try {
-                pkg = mContext.getPackageManager().getPackageInfo(packageName, 0);
-            } catch (PackageManager.NameNotFoundException e) {
-                throw new RemoteException("package " + packageName + " cannot be found");
+                PackageInfo pkg;
+                try {
+                    pkg = mContext.getPackageManager().getPackageInfo(packageName, 0);
+                } catch (PackageManager.NameNotFoundException e) {
+                    throw new RemoteException("package " + packageName + " cannot be found");
+                }
+                packageTargetSdkVersion = pkg.applicationInfo.targetSdkVersion;
+            } finally {
+                Binder.restoreCallingIdentity(token);
             }
 
-            if (pkg.applicationInfo.targetSdkVersion >= Build.VERSION_CODES.Q) {
+            if (packageTargetSdkVersion >= Build.VERSION_CODES.Q) {
                 if (mContext.checkPermission(android.Manifest.permission.MANAGE_USB, pid, uid)
                         == PackageManager.PERMISSION_DENIED) {
                     UsbUserSettingsManager settings = mSettingsManager.getSettingsForUser(
