@@ -1353,9 +1353,10 @@ final class ProcessRecord implements WindowProcessListener {
                 isInterestingToUserLocked()
                         ? StatsLog.ANROCCURRED__FOREGROUND_STATE__FOREGROUND
                         : StatsLog.ANROCCURRED__FOREGROUND_STATE__BACKGROUND);
+        final ProcessRecord parentPr = parentProcess != null
+                ? (ProcessRecord) parentProcess.mOwner : null;
         mService.addErrorToDropBox("anr", this, processName, activityShortComponentName,
-                parentShortComponentName, (ProcessRecord) parentProcess.mOwner, annotation,
-                cpuInfo, tracesFile, null);
+                parentShortComponentName, parentPr, annotation, cpuInfo, tracesFile, null);
 
         if (mService.mActivityTaskManager.mController != null) {
             try {
