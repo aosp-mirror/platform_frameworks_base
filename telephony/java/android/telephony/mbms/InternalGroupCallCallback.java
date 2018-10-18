@@ -38,17 +38,17 @@ public class InternalGroupCallCallback extends IGroupCallCallback.Stub {
             return;
         }
 
-        mExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
-                long token = Binder.clearCallingIdentity();
-                try {
+        long token = Binder.clearCallingIdentity();
+        try {
+            mExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
                     mAppCallback.onError(errorCode, message);
-                } finally {
-                    Binder.restoreCallingIdentity(token);
                 }
-            }
-        });
+            });
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
     @Override
@@ -57,17 +57,17 @@ public class InternalGroupCallCallback extends IGroupCallCallback.Stub {
             return;
         }
 
-        mExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
-                long token = Binder.clearCallingIdentity();
-                try {
+        long token = Binder.clearCallingIdentity();
+        try {
+            mExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
                     mAppCallback.onGroupCallStateChanged(state, reason);
-                } finally {
-                    Binder.restoreCallingIdentity(token);
                 }
-            }
-        });
+            });
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
     @Override
@@ -76,17 +76,17 @@ public class InternalGroupCallCallback extends IGroupCallCallback.Stub {
             return;
         }
 
-        mExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
-                long token = Binder.clearCallingIdentity();
-                try {
+        long token = Binder.clearCallingIdentity();
+        try {
+            mExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
                     mAppCallback.onBroadcastSignalStrengthUpdated(signalStrength);
-                } finally {
-                    Binder.restoreCallingIdentity(token);
                 }
-            }
-        });
+            });
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
     /** Prevents this callback from calling the app */
