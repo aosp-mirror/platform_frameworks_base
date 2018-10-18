@@ -1052,13 +1052,6 @@ public final class InputMethodManager {
         mNextServedView = null;
         if (mServedView != null) {
             if (DEBUG) Log.v(TAG, "FINISH INPUT: mServedView=" + dumpViewInfo(mServedView));
-            if (mCurrentTextBoxAttribute != null) {
-                try {
-                    mService.finishInput(mClient);
-                } catch (RemoteException e) {
-                    throw e.rethrowFromSystemServer();
-                }
-            }
             mServedView = null;
             mCompletions = null;
             mServedConnecting = false;

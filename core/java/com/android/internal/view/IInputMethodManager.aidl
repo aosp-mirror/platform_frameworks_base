@@ -46,7 +46,6 @@ interface IInputMethodManager {
     // Currently there is a bug that aidl doesn't accept List<Parcelable>
     List getShortcutInputMethodsAndSubtypes();
 
-    void finishInput(in IInputMethodClient client);
     boolean showSoftInput(in IInputMethodClient client, int flags,
             in ResultReceiver resultReceiver);
     boolean hideSoftInput(in IInputMethodClient client, int flags,
