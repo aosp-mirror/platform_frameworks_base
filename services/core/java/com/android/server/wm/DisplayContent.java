@@ -145,12 +145,14 @@ import android.view.Display;
 import android.view.DisplayCutout;
 import android.view.DisplayInfo;
 import android.view.Gravity;
+import android.view.InputChannel;
 import android.view.InputDevice;
 import android.view.MagnificationSpec;
 import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 import android.view.SurfaceSession;
+import android.view.WindowManagerPolicyConstants.PointerEventListener;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ToBooleanFunction;
@@ -453,6 +455,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * The input method window for this display.
      */
     WindowState mInputMethodWindow;
+
+    private final PointerEventDispatcher mPointerEventDispatcher;
 
     private final Consumer<WindowState> mUpdateWindowsForAnimator = w -> {
         WindowStateAnimator winAnimator = w.mWinAnimator;
@@ -833,6 +837,15 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         mDisplayReady = true;
 
         mInputMonitor = new InputMonitor(service, mDisplayId);
+
+        if (mService.mInputManager != null) {
+            final InputChannel inputChannel = mService.mInputManager.monitorInput("Display "
+                    + mDisplayId, mDisplayId);
+            mPointerEventDispatcher = inputChannel != null
+                    ? new PointerEventDispatcher(inputChannel) : null;
+        } else {
+            mPointerEventDispatcher = null;
+        }
     }
 
     boolean isReady() {
@@ -1286,6 +1299,19 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         mDisplayFrames.onDisplayInfoUpdated(mDisplayInfo,
                 calculateDisplayCutoutForRotation(mDisplayInfo.rotation));
+
+        // Tap Listeners are supported for:
+        // 1. All physical displays (multi-display).
+        // 2. VirtualDisplays on VR, AA (and everything else).
+        if (mPointerEventDispatcher != null && mTapDetector == null) {
+            if (DEBUG_DISPLAY) {
+                Slog.d(TAG,
+                        "Registering PointerEventListener for DisplayId: " + mDisplayId);
+            }
+            mTapDetector = new TaskTapPointerEventListener(mService, this);
+            registerPointerEventListener(mTapDetector);
+            registerPointerEventListener(mService.mMousePositionTracker);
+        }
     }
 
     /**
@@ -2186,13 +2212,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         try {
             super.removeImmediately();
             if (DEBUG_DISPLAY) Slog.v(TAG_WM, "Removing display=" + this);
-            if (mService.canDispatchPointerEvents()) {
-                if (mTapDetector != null) {
-                    mService.unregisterPointerEventListener(mTapDetector);
-                }
-                if (mDisplayId == DEFAULT_DISPLAY && mService.mMousePositionTracker != null) {
-                    mService.unregisterPointerEventListener(mService.mMousePositionTracker);
-                }
+            if (mPointerEventDispatcher != null && mTapDetector != null) {
+                unregisterPointerEventListener(mTapDetector);
+                unregisterPointerEventListener(mService.mMousePositionTracker);
+                mTapDetector = null;
             }
             mService.mAnimator.removeDisplayLocked(mDisplayId);
             mWindowingLayer.release();
@@ -4408,5 +4431,17 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      */
     boolean getLastHasContent() {
         return mLastHasContent;
+    }
+
+    void registerPointerEventListener(@NonNull PointerEventListener listener) {
+        if (mPointerEventDispatcher != null) {
+            mPointerEventDispatcher.registerInputEventListener(listener);
+        }
+    }
+
+    void unregisterPointerEventListener(@NonNull PointerEventListener listener) {
+        if (mPointerEventDispatcher != null) {
+            mPointerEventDispatcher.unregisterInputEventListener(listener);
+        }
     }
 }

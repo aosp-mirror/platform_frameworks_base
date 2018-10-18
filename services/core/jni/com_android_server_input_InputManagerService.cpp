@@ -217,7 +217,7 @@ public:
     void setDisplayViewports(JNIEnv* env, jobjectArray viewportObjArray);
 
     status_t registerInputChannel(JNIEnv* env, const sp<InputChannel>& inputChannel,
-            const sp<InputWindowHandle>& inputWindowHandle, bool monitor);
+            const sp<InputWindowHandle>& inputWindowHandle, int32_t displayId);
     status_t unregisterInputChannel(JNIEnv* env, const sp<InputChannel>& inputChannel);
 
     void setInputWindows(JNIEnv* env, jobjectArray windowHandleObjArray, int32_t displayId);
@@ -442,11 +442,11 @@ void NativeInputManager::setDisplayViewports(JNIEnv* env, jobjectArray viewportO
 }
 
 status_t NativeInputManager::registerInputChannel(JNIEnv* /* env */,
-        const sp<InputChannel>& inputChannel,
-        const sp<InputWindowHandle>& inputWindowHandle, bool monitor) {
+        const sp<InputChannel>& inputChannel, const sp<InputWindowHandle>& inputWindowHandle,
+                int32_t displayId) {
     ATRACE_CALL();
-    return mInputManager->getDispatcher()->registerInputChannel(
-            inputChannel, inputWindowHandle, monitor);
+    return mInputManager->getDispatcher()->registerInputChannel(inputChannel, inputWindowHandle,
+            displayId);
 }
 
 status_t NativeInputManager::unregisterInputChannel(JNIEnv* /* env */,
@@ -1316,7 +1316,7 @@ static void handleInputChannelDisposed(JNIEnv* env,
 }
 
 static void nativeRegisterInputChannel(JNIEnv* env, jclass /* clazz */,
-        jlong ptr, jobject inputChannelObj, jobject inputWindowHandleObj, jboolean monitor) {
+        jlong ptr, jobject inputChannelObj, jobject inputWindowHandleObj, jint displayId) {
     NativeInputManager* im = reinterpret_cast<NativeInputManager*>(ptr);
 
     sp<InputChannel> inputChannel = android_view_InputChannel_getInputChannel(env,
@@ -1330,7 +1330,7 @@ static void nativeRegisterInputChannel(JNIEnv* env, jclass /* clazz */,
             android_server_InputWindowHandle_getHandle(env, inputWindowHandleObj);
 
     status_t status = im->registerInputChannel(
-            env, inputChannel, inputWindowHandle, monitor);
+            env, inputChannel, inputWindowHandle, displayId);
     if (status) {
         std::string message;
         message += StringPrintf("Failed to register input channel.  status=%d", status);
@@ -1338,7 +1338,8 @@ static void nativeRegisterInputChannel(JNIEnv* env, jclass /* clazz */,
         return;
     }
 
-    if (! monitor) {
+    // If inputWindowHandle is null and displayId >= 0, treat inputChannel as monitor.
+    if (inputWindowHandle != nullptr || displayId == ADISPLAY_ID_NONE) {
         android_view_InputChannel_setDisposeCallback(env, inputChannelObj,
                 handleInputChannelDisposed, im);
     }
@@ -1639,7 +1640,7 @@ static const JNINativeMethod gInputManagerMethods[] = {
     { "nativeHasKeys", "(JII[I[Z)Z",
             (void*) nativeHasKeys },
     { "nativeRegisterInputChannel",
-            "(JLandroid/view/InputChannel;Lcom/android/server/input/InputWindowHandle;Z)V",
+            "(JLandroid/view/InputChannel;Lcom/android/server/input/InputWindowHandle;I)V",
             (void*) nativeRegisterInputChannel },
     { "nativeUnregisterInputChannel", "(JLandroid/view/InputChannel;)V",
             (void*) nativeUnregisterInputChannel },

@@ -197,7 +197,7 @@ public class InputManagerService extends IInputManager.Stub
     private static native boolean nativeHasKeys(long ptr,
             int deviceId, int sourceMask, int[] keyCodes, boolean[] keyExists);
     private static native void nativeRegisterInputChannel(long ptr, InputChannel inputChannel,
-            InputWindowHandle inputWindowHandle, boolean monitor);
+            InputWindowHandle inputWindowHandle, int displayId);
     private static native void nativeUnregisterInputChannel(long ptr, InputChannel inputChannel);
     private static native void nativeSetInputFilterEnabled(long ptr, boolean enable);
     private static native int nativeInjectInputEvent(long ptr, InputEvent event,
@@ -473,15 +473,21 @@ public class InputManagerService extends IInputManager.Stub
     /**
      * Creates an input channel that will receive all input from the input dispatcher.
      * @param inputChannelName The input channel name.
+     * @param displayId Target display id.
      * @return The input channel.
      */
-    public InputChannel monitorInput(String inputChannelName) {
+    public InputChannel monitorInput(String inputChannelName, int displayId) {
         if (inputChannelName == null) {
             throw new IllegalArgumentException("inputChannelName must not be null.");
         }
 
+        if (displayId < Display.DEFAULT_DISPLAY) {
+            throw new IllegalArgumentException("displayId must >= 0.");
+        }
+
         InputChannel[] inputChannels = InputChannel.openInputChannelPair(inputChannelName);
-        nativeRegisterInputChannel(mPtr, inputChannels[0], null, true);
+        // Register channel for monitor.
+        nativeRegisterInputChannel(mPtr, inputChannels[0], null, displayId);
         inputChannels[0].dispose(); // don't need to retain the Java object reference
         return inputChannels[1];
     }
@@ -498,7 +504,8 @@ public class InputManagerService extends IInputManager.Stub
             throw new IllegalArgumentException("inputChannel must not be null.");
         }
 
-        nativeRegisterInputChannel(mPtr, inputChannel, inputWindowHandle, false);
+        // Register channel for normal.
+        nativeRegisterInputChannel(mPtr, inputChannel, inputWindowHandle, Display.INVALID_DISPLAY);
     }
 
     /**

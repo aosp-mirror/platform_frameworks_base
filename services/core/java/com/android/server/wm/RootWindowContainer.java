@@ -228,21 +228,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
             mService.mDisplayManagerInternal.setDisplayInfoOverrideFromWindowManager(
                     displayId, dc.getDisplayInfo());
             dc.configureDisplayPolicy();
-
-            // Tap Listeners are supported for:
-            // 1. All physical displays (multi-display).
-            // 2. VirtualDisplays on VR, AA (and everything else).
-            if (mService.canDispatchPointerEvents()) {
-                if (DEBUG_DISPLAY) {
-                    Slog.d(TAG,
-                            "Registering PointerEventListener for DisplayId: " + displayId);
-                }
-                dc.mTapDetector = new TaskTapPointerEventListener(mService, dc);
-                mService.registerPointerEventListener(dc.mTapDetector);
-                if (displayId == DEFAULT_DISPLAY) {
-                    mService.registerPointerEventListener(mService.mMousePositionTracker);
-                }
-            }
         }
 
         return dc;
