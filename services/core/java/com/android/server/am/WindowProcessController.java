@@ -32,6 +32,7 @@ import static com.android.server.am.ActivityStack.ActivityState.RESUMED;
 import static com.android.server.am.ActivityStack.ActivityState.STOPPING;
 import static com.android.server.am.ActivityTaskManagerService.INSTRUMENTATION_KEY_DISPATCHING_TIMEOUT_MS;
 import static com.android.server.am.ActivityTaskManagerService.KEY_DISPATCHING_TIMEOUT_MS;
+import static com.android.server.am.ActivityTaskManagerService.RELAUNCH_REASON_NONE;
 
 import android.app.Activity;
 import android.app.ActivityThread;
@@ -617,12 +618,12 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             final int activitiesSize = mActivities.size();
             for (int i = activitiesSize - 1; i >= 0; i--) {
                 final ActivityRecord r = mActivities.get(i);
-                if (r.mRelaunchReason != ActivityRecord.RELAUNCH_REASON_NONE) {
+                if (r.mRelaunchReason != RELAUNCH_REASON_NONE) {
                     return r.mRelaunchReason;
                 }
             }
         }
-        return ActivityRecord.RELAUNCH_REASON_NONE;
+        return RELAUNCH_REASON_NONE;
     }
 
     public long getInputDispatchingTimeout() {

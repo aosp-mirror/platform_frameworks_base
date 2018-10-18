@@ -21,7 +21,6 @@ import static android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST;
 import static android.Manifest.permission.FILTER_EVENTS;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
-import static android.Manifest.permission.MANAGE_ACTIVITY_STACKS;
 import static android.Manifest.permission.REMOVE_TASKS;
 import static android.app.ActivityManager.PROCESS_STATE_CACHED_ACTIVITY;
 import static android.app.ActivityManager.PROCESS_STATE_LAST_ACTIVITY;
@@ -29,9 +28,7 @@ import static android.app.ActivityManagerInternal.ALLOW_FULL_ONLY;
 import static android.app.ActivityManagerInternal.ALLOW_NON_FULL;
 import static android.app.ActivityThread.PROC_START_SEQ_IDENT;
 import static android.app.AppOpsManager.OP_NONE;
-import static android.content.Intent.FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
-import static android.content.Intent.FLAG_ACTIVITY_TASK_ON_HOME;
 import static android.content.pm.ApplicationInfo.HIDDEN_API_ENFORCEMENT_DEFAULT;
 import static android.content.pm.PackageManager.GET_PROVIDERS;
 import static android.content.pm.PackageManager.MATCH_ANY_USER;
@@ -150,6 +147,8 @@ import static com.android.server.am.ActivityTaskManagerService.DUMP_RECENTS_CMD;
 import static com.android.server.am.ActivityTaskManagerService.DUMP_RECENTS_SHORT_CMD;
 import static com.android.server.am.ActivityTaskManagerService.DUMP_STARTER_CMD;
 import static com.android.server.am.ActivityTaskManagerService.KEY_DISPATCHING_TIMEOUT_MS;
+import static com.android.server.am.ActivityTaskManagerService.RELAUNCH_REASON_NONE;
+import static com.android.server.am.ActivityTaskManagerService.relaunchReasonToString;
 import static com.android.server.am.MemoryStatUtil.hasMemcg;
 import static com.android.server.am.MemoryStatUtil.readCmdlineFromProcfs;
 import static com.android.server.am.MemoryStatUtil.readMemoryStatFromFilesystem;
@@ -166,7 +165,6 @@ import android.app.ActivityManager.RunningTaskInfo;
 import android.app.ActivityManager.StackInfo;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityManagerProto;
-import android.app.ActivityOptions;
 import android.app.ActivityThread;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
@@ -369,18 +367,15 @@ import dalvik.system.VMRuntime;
 
 import libcore.util.EmptyArray;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
-import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -9783,9 +9778,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                         : StatsLog.APP_CRASH_OCCURRED__FOREGROUND_STATE__UNKNOWN
         );
 
-        final int relaunchReason = r == null ? ActivityRecord.RELAUNCH_REASON_NONE
+        final int relaunchReason = r == null ? RELAUNCH_REASON_NONE
                         : r.getWindowProcessController().computeRelaunchReason();
-        final String relaunchReasonString = ActivityRecord.relaunchReasonToString(relaunchReason);
+        final String relaunchReasonString = relaunchReasonToString(relaunchReason);
         if (crashInfo.crashTag == null) {
             crashInfo.crashTag = relaunchReasonString;
         } else {

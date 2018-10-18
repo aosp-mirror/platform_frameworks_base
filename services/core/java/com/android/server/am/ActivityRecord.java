@@ -114,6 +114,9 @@ import static com.android.server.am.ActivityStack.LAUNCH_TICK;
 import static com.android.server.am.ActivityStack.LAUNCH_TICK_MSG;
 import static com.android.server.am.ActivityStack.PAUSE_TIMEOUT_MSG;
 import static com.android.server.am.ActivityStack.STOP_TIMEOUT_MSG;
+import static com.android.server.am.ActivityTaskManagerService.RELAUNCH_REASON_FREE_RESIZE;
+import static com.android.server.am.ActivityTaskManagerService.RELAUNCH_REASON_NONE;
+import static com.android.server.am.ActivityTaskManagerService.RELAUNCH_REASON_WINDOWING_MODE_RESIZE;
 import static com.android.server.am.EventLogTags.AM_RELAUNCH_ACTIVITY;
 import static com.android.server.am.EventLogTags.AM_RELAUNCH_RESUME_ACTIVITY;
 import static com.android.server.am.TaskPersister.DEBUG;
@@ -338,12 +341,6 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     int mStartingWindowState = STARTING_WINDOW_NOT_SHOWN;
     boolean mTaskOverlay = false; // Task is always on-top of other activities in the task.
 
-    // This activity is not being relaunched, or being relaunched for a non-resize reason.
-    static final int RELAUNCH_REASON_NONE = 0;
-    // This activity is being relaunched due to windowing mode change.
-    static final int RELAUNCH_REASON_WINDOWING_MODE_RESIZE = 1;
-    // This activity is being relaunched due to a free-resize operation.
-    static final int RELAUNCH_REASON_FREE_RESIZE = 2;
     // Marking the reason why this activity is being relaunched. Mainly used to track that this
     // activity is being relaunched to fulfill a resize request due to compatibility issues, e.g. in
     // pre-NYC apps that don't have a sense of being resized.
@@ -3008,17 +3005,6 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
 
     void registerRemoteAnimations(RemoteAnimationDefinition definition) {
         mWindowContainerController.registerRemoteAnimations(definition);
-    }
-
-    static String relaunchReasonToString(int relaunchReason) {
-        switch (relaunchReason) {
-            case RELAUNCH_REASON_WINDOWING_MODE_RESIZE:
-                return "window_resize";
-            case RELAUNCH_REASON_FREE_RESIZE:
-                return "free_resize";
-            default:
-                return null;
-        }
     }
 
     @Override
