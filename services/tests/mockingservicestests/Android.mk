@@ -23,7 +23,7 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
     frameworks-base-testutils \
     services.core \
     services.net \
-    androidx-test \
+    androidx.test.runner \
     mockito-target-extended-minus-junit4 \
     platform-test-annotations \
     ShortcutManagerTestUtils \
