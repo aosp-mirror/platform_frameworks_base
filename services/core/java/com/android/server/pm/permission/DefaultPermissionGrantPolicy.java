@@ -31,9 +31,11 @@ import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
+import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.PackageManagerInternal;
 import android.content.pm.PackageManagerInternal.PackagesProvider;
 import android.content.pm.PackageManagerInternal.SyncAdapterPackagesProvider;
+import android.content.pm.PermissionInfo;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.media.RingtoneManager;
@@ -1182,12 +1184,16 @@ public final class DefaultPermissionGrantPolicy {
             final int permissionGrantCount = permissionGrants.size();
             for (int j = 0; j < permissionGrantCount; j++) {
                 DefaultPermissionGrant permissionGrant = permissionGrants.get(j);
+                if (!isPermissionDangerous(permissionGrant.name)) {
+                    Log.w(TAG, "Ignoring permission " + permissionGrant.name
+                            + " which isn't dangerous");
+                    continue;
+                }
                 if (permissions == null) {
                     permissions = new ArraySet<>();
                 } else {
                     permissions.clear();
                 }
-                permissions.add(permissionGrant.name);
                 grantRuntimePermissions(pkg, permissions, permissionGrant.fixed, userId);
             }
         }
@@ -1348,6 +1354,16 @@ public final class DefaultPermissionGrantPolicy {
     private static boolean doesPackageSupportRuntimePermissions(PackageInfo pkg) {
         return pkg.applicationInfo != null
                 && pkg.applicationInfo.targetSdkVersion > Build.VERSION_CODES.LOLLIPOP_MR1;
+    }
+
+    private boolean isPermissionDangerous(String name) {
+        try {
+            final PermissionInfo pi = mContext.getPackageManager().getPermissionInfo(name, 0);
+            return (pi.getProtectionFlags() & PermissionInfo.PROTECTION_DANGEROUS) != 0;
+        } catch (NameNotFoundException e) {
+            // When unknown assume it's dangerous to be on the safe side
+            return true;
+        }
     }
 
     private static final class DefaultPermissionGrant {
