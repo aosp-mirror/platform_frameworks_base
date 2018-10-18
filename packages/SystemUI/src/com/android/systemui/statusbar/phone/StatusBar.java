@@ -5277,8 +5277,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             (Runnable saveImportance, StatusBarNotification sbn) -> {
                 // If the user has security enabled, show challenge if the setting is changed.
                 if (mLockscreenUserManager.isLockscreenPublicMode(sbn.getUser().getIdentifier())
-                        && (mState == StatusBarState.KEYGUARD ||
-                                mState == StatusBarState.SHADE_LOCKED)) {
+                        && mKeyguardManager.isKeyguardLocked()) {
                     onLockedNotificationImportanceChange(() -> {
                         saveImportance.run();
                         return true;
