@@ -99,6 +99,7 @@ cc_defaults {
         "libutils",
         "libhwui",
         "libbpf",
+        "libnetdbpf",
         "libnetdutils",
         "android.hardware.audio.common@2.0",
         "android.hardware.broadcastradio@1.0",

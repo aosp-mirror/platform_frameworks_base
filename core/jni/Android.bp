@@ -239,6 +239,7 @@ cc_library_shared {
 
     shared_libs: [
         "libbpf",
+        "libnetdbpf",
         "libnetdutils",
         "libmemtrack",
         "libandroidfw",
