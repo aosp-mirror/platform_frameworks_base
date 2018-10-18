@@ -17,14 +17,9 @@
 package android.content.pm;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import android.content.Context;
 import android.os.FileUtils;
-import android.os.Process;
 import android.os.ServiceManager;
 import android.os.UserManager;
 import android.support.test.InstrumentationRegistry;
@@ -32,7 +27,6 @@ import android.support.test.runner.AndroidJUnit4;
 import android.util.Log;
 
 import org.junit.After;
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
@@ -86,8 +80,19 @@ public class KernelPackageMappingTests {
     }
 
     @Test
+    public void testSharedInstalledPrimary() throws Exception {
+        assertEquals("1001", getContent(getKernelPackageFile("shared:android.uid.phone", "appid")));
+    }
+
+    @Test
     public void testInstalledAll() throws Exception {
         assertEquals("", getContent(getKernelPackageFile("com.android.settings",
+                "excluded_userids")));
+    }
+
+    @Test
+    public void testSharedInstalledAll() throws Exception {
+        assertEquals("", getContent(getKernelPackageFile("shared:android.uid.phone",
                 "excluded_userids")));
     }
 
