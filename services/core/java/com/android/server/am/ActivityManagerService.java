@@ -99,9 +99,6 @@ import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BACKUP;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BROADCAST;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BROADCAST_BACKGROUND;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_BROADCAST_LIGHT;
-import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_CLEANUP;
-import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_CONFIGURATION;
-import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_LOCKTASK;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_LRU;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_MU;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_NETWORK;
@@ -114,15 +111,12 @@ import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PROCESS_OBS
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PROVIDER;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PSS;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_SERVICE;
-import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_SWITCH;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_UID_OBSERVERS;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_USAGE_STATS;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_WHITELISTS;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_BACKUP;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_BROADCAST;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_CLEANUP;
-import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_CONFIGURATION;
-import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_LOCKTASK;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_LRU;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_MU;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_NETWORK;
@@ -133,11 +127,16 @@ import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_PROCESS_O
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_PROVIDER;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_PSS;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_SERVICE;
-import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_SWITCH;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_UID_OBSERVERS;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
-import static com.android.server.am.MemoryStatUtil.MEMORY_STAT_INTERESTING_NATIVE_PROCESSES;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_CLEANUP;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_CONFIGURATION;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_LOCKTASK;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_SWITCH;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_CONFIGURATION;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_LOCKTASK;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_SWITCH;
 import static com.android.server.am.ActivityTaskManagerService.DUMP_ACTIVITIES_CMD;
 import static com.android.server.am.ActivityTaskManagerService.DUMP_ACTIVITIES_SHORT_CMD;
 import static com.android.server.am.ActivityTaskManagerService.DUMP_CONTAINERS_CMD;
@@ -149,6 +148,7 @@ import static com.android.server.am.ActivityTaskManagerService.DUMP_STARTER_CMD;
 import static com.android.server.am.ActivityTaskManagerService.KEY_DISPATCHING_TIMEOUT_MS;
 import static com.android.server.am.ActivityTaskManagerService.RELAUNCH_REASON_NONE;
 import static com.android.server.am.ActivityTaskManagerService.relaunchReasonToString;
+import static com.android.server.am.MemoryStatUtil.MEMORY_STAT_INTERESTING_NATIVE_PROCESSES;
 import static com.android.server.am.MemoryStatUtil.hasMemcg;
 import static com.android.server.am.MemoryStatUtil.readCmdlineFromProcfs;
 import static com.android.server.am.MemoryStatUtil.readMemoryStatFromFilesystem;
@@ -497,6 +497,9 @@ public class ActivityManagerService extends IActivityManager.Stub
      * Default value for {@link Settings.Global#NETWORK_ACCESS_TIMEOUT_MS}.
      */
     private static final long NETWORK_ACCESS_TIMEOUT_DEFAULT_MS = 200; // 0.2 sec
+
+    // The minimum memory growth threshold (in KB) for low RAM devices.
+    private static final int MINIMUM_MEMORY_GROWTH_THRESHOLD = 10 * 1000; // 10 MB
 
     /**
      * State indicating that there is no need for any blocking for network.
@@ -9457,6 +9460,11 @@ public class ActivityManagerService extends IActivityManager.Stub
             // If at least 1/3 of our time since the last idle period has been spent
             // with RAM low, then we want to kill processes.
             boolean doKilling = lowRamSinceLastIdle > (timeSinceLastIdle/3);
+            // If the processes' memory has increased by more than 1% of the total memory,
+            // or 10 MB, whichever is greater, then the processes' are eligible to be killed.
+            final long totalMemoryInKb = getTotalMemory() / 1000;
+            final long memoryGrowthThreshold =
+                    Math.max(totalMemoryInKb / 100, MINIMUM_MEMORY_GROWTH_THRESHOLD);
 
             for (int i = mLruProcesses.size() - 1 ; i >= 0 ; i--) {
                 ProcessRecord proc = mLruProcesses.get(i);
@@ -9464,7 +9472,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     if (proc.setProcState >= ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE
                             && proc.setProcState <= ActivityManager.PROCESS_STATE_SERVICE) {
                         if (doKilling && proc.initialIdlePss != 0
-                                && proc.lastPss > ((proc.initialIdlePss*3)/2)) {
+                                && proc.lastPss > ((proc.initialIdlePss * 3) / 2)
+                                && proc.lastPss > (proc.initialIdlePss + memoryGrowthThreshold)) {
                             sb = new StringBuilder(128);
                             sb.append("Kill");
                             sb.append(proc.processName);
