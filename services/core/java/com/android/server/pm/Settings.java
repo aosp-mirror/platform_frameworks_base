@@ -20,6 +20,7 @@ import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DEFAULT;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_DISABLED;
 import static android.content.pm.PackageManager.COMPONENT_ENABLED_STATE_ENABLED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_REVOKE_ON_UPGRADE;
+import static android.content.pm.PackageManager.FLAG_PERMISSION_REVOKE_WHEN_REQUESTED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_FIXED;
 import static android.content.pm.PackageManager.FLAG_PERMISSION_USER_SET;
 import static android.content.pm.PackageManager.INSTALL_FAILED_INSUFFICIENT_STORAGE;
@@ -256,6 +257,7 @@ public final class Settings {
     private static final String ATTR_USER_SET = "set";
     private static final String ATTR_USER_FIXED = "fixed";
     private static final String ATTR_REVOKE_ON_UPGRADE = "rou";
+    private static final String ATTR_REVOKE_WHEN_REQUESTED = "rwr";
 
     // Flag mask of restored permission grants that are applied at install time
     private static final int USER_RUNTIME_GRANT_MASK =
@@ -5011,6 +5013,9 @@ public final class Settings {
                                 if ((g.grantBits&FLAG_PERMISSION_REVOKE_ON_UPGRADE) != 0) {
                                     pw.print(" revoke_on_upgrade");
                                 }
+                                if ((g.grantBits & FLAG_PERMISSION_REVOKE_WHEN_REQUESTED) != 0) {
+                                    pw.print(" revoke_when_requested");
+                                }
                                 pw.println();
                             }
                         }
@@ -5326,6 +5331,11 @@ public final class Settings {
                                     if ((g.grantBits&FLAG_PERMISSION_REVOKE_ON_UPGRADE) != 0) {
                                         serializer.attribute(null, ATTR_REVOKE_ON_UPGRADE, "true");
                                     }
+                                    if ((g.grantBits & FLAG_PERMISSION_REVOKE_WHEN_REQUESTED)
+                                            != 0) {
+                                        serializer.attribute(null, ATTR_REVOKE_WHEN_REQUESTED,
+                                                "true");
+                                    }
                                     serializer.endTag(null, TAG_PERMISSION_ENTRY);
                                 }
                                 serializer.endTag(null, TAG_RESTORED_RUNTIME_PERMISSIONS);
@@ -5511,6 +5521,10 @@ public final class Settings {
                         }
                         if ("true".equals(parser.getAttributeValue(null, ATTR_REVOKE_ON_UPGRADE))) {
                             permBits |= FLAG_PERMISSION_REVOKE_ON_UPGRADE;
+                        }
+                        if ("true".equals(parser.getAttributeValue(null,
+                                ATTR_REVOKE_WHEN_REQUESTED))) {
+                            permBits |= FLAG_PERMISSION_REVOKE_WHEN_REQUESTED;
                         }
 
                         if (isGranted || permBits != 0) {

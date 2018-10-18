@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.annotation.NonNull;
 import android.util.SparseIntArray;
 
 import com.android.internal.util.function.QuadFunction;
@@ -73,4 +74,21 @@ public abstract class AppOpsManagerInternal {
      * access to app ops for their user.
      */
     public abstract void setDeviceAndProfileOwners(SparseIntArray owners);
+
+    /**
+     * Sets the app-ops mode for a certain app-op and uid.
+     *
+     * <p>Similar as {@link AppOpsManager#setMode} but does not require the package manager to be
+     * working. Hence this can be used very early during boot.
+     *
+     * <p>Only for internal callers. Does <u>not</u> verify that package name belongs to uid.
+     *
+     * @param code The op code to set.
+     * @param uid The UID for which to set.
+     * @param packageName The package for which to set.
+     * @param mode The new mode to set.
+     * @param isPrivileged If the package is privileged
+     */
+    public abstract void setMode(int code, int uid, @NonNull String packageName, int mode,
+            boolean isPrivileged);
 }

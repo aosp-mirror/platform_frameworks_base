@@ -1009,6 +1009,24 @@ public final class DefaultPermissionGrantPolicy {
         }
     }
 
+    /**
+     * Check if a permission is already fixed or is set by the user.
+     *
+     * <p>A permission should not be set by the default policy if the user or other policies already
+     * set the permission.
+     *
+     * @param flags The flags of the permission
+     *
+     * @return {@code true} iff the permission can be set without violating a policy of the users
+     *         intention
+     */
+    private boolean isFixedOrUserSet(int flags) {
+        return (flags & (PackageManager.FLAG_PERMISSION_USER_SET
+                | PackageManager.FLAG_PERMISSION_USER_FIXED
+                | PackageManager.FLAG_PERMISSION_POLICY_FIXED
+                | PackageManager.FLAG_PERMISSION_SYSTEM_FIXED)) != 0;
+    }
+
     private void grantRuntimePermissions(PackageInfo pkg,
             Set<String> permissionsWithoutSplits, boolean systemFixed, boolean ignoreSystemPackage,
             int userId) {
@@ -1078,13 +1096,14 @@ public final class DefaultPermissionGrantPolicy {
                 final int flags = mContext.getPackageManager().getPermissionFlags(
                         permission, pkg.packageName, user);
 
-                // If any flags are set to the permission, then it is either set in
-                // its current state by the system or device/profile owner or the user.
-                // In all these cases we do not want to clobber the current state.
+                // Certain flags imply that the permission's current state by the system or
+                // device/profile owner or the user. In these cases we do not want to clobber the
+                // current state.
+                //
                 // Unless the caller wants to override user choices. The override is
                 // to make sure we can grant the needed permission to the default
                 // sms and phone apps after the user chooses this in the UI.
-                if (flags == 0 || ignoreSystemPackage) {
+                if (!isFixedOrUserSet(flags) || ignoreSystemPackage) {
                     // Never clobber policy fixed permissions.
                     // We must allow the grant of a system-fixed permission because
                     // system-fixed is sticky, but the permission itself may be revoked.

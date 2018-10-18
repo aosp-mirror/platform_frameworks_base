@@ -2943,6 +2943,15 @@ public abstract class PackageManager {
     public static final int FLAG_PERMISSION_REVIEW_REQUIRED =  1 << 6;
 
     /**
+     * Permission flag: The permission has not been explicitly requested by
+     * the app but has been added automatically by the system. Revoke once
+     * the app does explicitly request it.
+     *
+     * @hide
+     */
+    public static final int FLAG_PERMISSION_REVOKE_WHEN_REQUESTED =  1 << 7;
+
+    /**
      * Mask for all permission flags.
      *
      * @hide
@@ -3593,7 +3602,10 @@ public abstract class PackageManager {
             FLAG_PERMISSION_POLICY_FIXED,
             FLAG_PERMISSION_REVOKE_ON_UPGRADE,
             FLAG_PERMISSION_SYSTEM_FIXED,
-            FLAG_PERMISSION_GRANTED_BY_DEFAULT
+            FLAG_PERMISSION_GRANTED_BY_DEFAULT,
+            /*
+            FLAG_PERMISSION_REVOKE_WHEN_REQUESED
+            */
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface PermissionFlags {}
@@ -6133,6 +6145,7 @@ public abstract class PackageManager {
             case FLAG_PERMISSION_REVOKE_ON_UPGRADE: return "REVOKE_ON_UPGRADE";
             case FLAG_PERMISSION_USER_FIXED: return "USER_FIXED";
             case FLAG_PERMISSION_REVIEW_REQUIRED: return "REVIEW_REQUIRED";
+            case FLAG_PERMISSION_REVOKE_WHEN_REQUESTED: return "REVOKE_WHEN_REQUESTED";
             default: return Integer.toString(flag);
         }
     }

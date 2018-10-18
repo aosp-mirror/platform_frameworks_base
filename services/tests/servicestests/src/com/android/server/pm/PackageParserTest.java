@@ -15,7 +15,10 @@
  */
 package com.android.server.pm;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
+import static org.junit.Assert.assertTrue;
 
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
@@ -461,6 +464,7 @@ public class PackageParserTest {
         pkg.services.add(new PackageParser.Service(dummy, new ServiceInfo()));
         pkg.instrumentation.add(new PackageParser.Instrumentation(dummy, new InstrumentationInfo()));
         pkg.requestedPermissions.add("foo7");
+        pkg.implicitPermissions.add("foo25");
 
         pkg.protectedBroadcasts = new ArrayList<>();
         pkg.protectedBroadcasts.add("foo8");
