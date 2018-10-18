@@ -1220,11 +1220,6 @@ stubs_defaults {
     srcs_lib_whitelist_dirs: frameworks_base_subdirs,
     srcs_lib_whitelist_pkgs: packages_to_document,
     libs: [
-        "core-oj",
-        "core-libart",
-        "conscrypt",
-        "bouncycastle",
-        "okhttp",
         "ext",
         "framework",
         "voip-common",
