@@ -5747,11 +5747,13 @@ package android.telephony.ims {
   }
 
   public final class ImsExternalCallState implements android.os.Parcelable {
+    ctor public ImsExternalCallState(java.lang.String, android.net.Uri, android.net.Uri, boolean, int, int, boolean);
     method public int describeContents();
     method public android.net.Uri getAddress();
     method public int getCallId();
     method public int getCallState();
     method public int getCallType();
+    method public android.net.Uri getLocalAddress();
     method public boolean isCallHeld();
     method public boolean isCallPullable();
     method public void writeToParcel(android.os.Parcel, int);
