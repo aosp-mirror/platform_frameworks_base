@@ -262,4 +262,18 @@ public abstract class ActivityManagerInternal {
      * flags.
      */
     public abstract void broadcastCloseSystemDialogs(String reason);
+
+    /**
+     * Kills all background processes, except those matching any of the specified properties.
+     *
+     * @param minTargetSdk the target SDK version at or above which to preserve processes,
+     *                     or {@code -1} to ignore the target SDK
+     * @param maxProcState the process state at or below which to preserve processes,
+     *                     or {@code -1} to ignore the process state
+     */
+    public abstract void killAllBackgroundProcessesExcept(int minTargetSdk, int maxProcState);
+
+    /** Starts a given process. */
+    public abstract void startProcess(String processName, ApplicationInfo info,
+            boolean knownToBeDead, String hostingType, ComponentName hostingName);
 }

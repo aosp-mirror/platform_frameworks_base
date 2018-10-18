@@ -20402,6 +20402,24 @@ public class ActivityManagerService extends IActivityManager.Stub
                         OP_NONE, null, false, false, -1, SYSTEM_UID, UserHandle.USER_ALL);
             }
         }
+
+        @Override
+        public void killAllBackgroundProcessesExcept(int minTargetSdk, int maxProcState) {
+            synchronized (ActivityManagerService.this) {
+                ActivityManagerService.this.killAllBackgroundProcessesExcept(
+                        minTargetSdk, maxProcState);
+            }
+        }
+
+        @Override
+        public void startProcess(String processName, ApplicationInfo info,
+                boolean knownToBeDead, String hostingType, ComponentName hostingName) {
+            synchronized (ActivityManagerService.this) {
+                startProcessLocked(processName, info, knownToBeDead, 0 /* intentFlags */,
+                        hostingType, hostingName, false /* allowWhileBooting */,
+                        false /* isolated */, true /* keepIfLarge */);
+            }
+        }
     }
 
     long inputDispatchingTimedOut(int pid, final boolean aboveSystem, String reason) {

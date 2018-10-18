@@ -4841,8 +4841,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             if (isDensityChange && displayId == DEFAULT_DISPLAY) {
                 mAppWarnings.onDensityChanged();
 
-                mAm.killAllBackgroundProcessesExcept(N,
-                        ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE);
+                // Post message to start process to avoid possible deadlock of calling into AMS with
+                // the ATMS lock held.
+                final Message msg = PooledLambda.obtainMessage(
+                        ActivityManagerInternal::killAllBackgroundProcessesExcept, mAmInternal,
+                        N, ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE);
+                mH.sendMessage(msg);
             }
         }
 

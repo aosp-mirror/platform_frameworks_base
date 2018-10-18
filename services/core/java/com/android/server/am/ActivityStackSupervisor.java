@@ -1660,8 +1660,12 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             // restart the application.
         }
 
-        mService.mAm.startProcessLocked(r.processName, r.info.applicationInfo, true, 0,
-                "activity", r.intent.getComponent(), false, false, true);
+        // Post message to start process to avoid possible deadlock of calling into AMS with the
+        // ATMS lock held.
+        final Message msg = PooledLambda.obtainMessage(
+                ActivityManagerInternal::startProcess, mService.mAmInternal, r.processName,
+                r.info.applicationInfo, true, "activity", r.intent.getComponent());
+        mService.mH.sendMessage(msg);
     }
 
     void sendPowerHintForLaunchStartIfNeeded(boolean forceSend, ActivityRecord targetActivity) {
