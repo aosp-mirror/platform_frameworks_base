@@ -45,6 +45,7 @@ import android.os.UserManager;
 import android.provider.MediaStore;
 import android.provider.Settings;
 import android.provider.Settings.System;
+import android.telephony.SubscriptionManager;
 import android.util.Log;
 
 import com.android.internal.database.SortCursor;
@@ -146,6 +147,7 @@ public class RingtoneManager {
      * for this {@link Uri}. If showing an item for "Default" (@see
      * {@link #EXTRA_RINGTONE_SHOW_DEFAULT}), this can also be one of
      * {@link System#DEFAULT_RINGTONE_URI},
+     * {@link System#DEFAULT_RINGTONE2_URI},
      * {@link System#DEFAULT_NOTIFICATION_URI}, or
      * {@link System#DEFAULT_ALARM_ALERT_URI} to have the "Default" item
      * checked.
@@ -159,7 +161,7 @@ public class RingtoneManager {
      * Given to the ringtone picker as a {@link Uri}. The {@link Uri} of the
      * ringtone to play when the user attempts to preview the "Default"
      * ringtone. This can be one of {@link System#DEFAULT_RINGTONE_URI},
-     * {@link System#DEFAULT_NOTIFICATION_URI}, or
+     * {@link System#DEFAULT_RINGTONE2_URI}, {@link System#DEFAULT_NOTIFICATION_URI}, or
      * {@link System#DEFAULT_ALARM_ALERT_URI} to have the "Default" point to
      * the current sound for the given default sound type. If you are showing a
      * ringtone picker for some other type of sound, you are free to provide any
@@ -198,7 +200,7 @@ public class RingtoneManager {
      * It will be one of:
      * <li> the picked ringtone,
      * <li> a {@link Uri} that equals {@link System#DEFAULT_RINGTONE_URI},
-     * {@link System#DEFAULT_NOTIFICATION_URI}, or
+     * {@link System#DEFAULT_RINGTONE2_URI}, {@link System#DEFAULT_NOTIFICATION_URI}, or
      * {@link System#DEFAULT_ALARM_ALERT_URI} if the default was chosen,
      * <li> null if the "Silent" item was picked.
      * 
@@ -763,8 +765,8 @@ public class RingtoneManager {
     /**
      * Gets the current default sound's {@link Uri}. This will give the actual
      * sound {@link Uri}, instead of using this, most clients can use
-     * {@link System#DEFAULT_RINGTONE_URI}.
-     * 
+     * {@link System#DEFAULT_RINGTONE_URI} or {@link System#DEFAULT_RINGTONE2_URI}.
+     *
      * @param context A context used for querying.
      * @param type The type whose default sound should be returned. One of
      *            {@link #TYPE_RINGTONE}, {@link #TYPE_NOTIFICATION}, or
@@ -773,7 +775,27 @@ public class RingtoneManager {
      * @see #setActualDefaultRingtoneUri(Context, int, Uri)
      */
     public static Uri getActualDefaultRingtoneUri(Context context, int type) {
-        String setting = getSettingForType(type);
+        return getActualDefaultRingtoneUriBySlot(context, type,
+                SubscriptionManager.getDefaultVoicePhoneId());
+    }
+
+    /**
+     * Gets the current default sound's {@link Uri} by slotId. This will give the actual
+     * sound {@link Uri}, instead of using this, most clients can use
+     * {@link System#DEFAULT_RINGTONE_URI} or {@link System#DEFAULT_RINGTONE2_URI}.
+     *
+     * @param context A context used for querying.
+     * @param type The type whose default sound should be returned. One of
+     *            {@link #TYPE_RINGTONE}, {@link #TYPE_NOTIFICATION}, or
+     *            {@link #TYPE_ALARM}.
+     * @param slotId The slotId whose default sound should be returned.
+     * @return A {@link Uri} pointing to the default sound for the sound type.
+     * @see #setActualDefaultRingtoneUriBySlot(Context, int, Uri, int)
+     *
+     * @hide
+     */
+    public static Uri getActualDefaultRingtoneUriBySlot(Context context, int type, int slotId) {
+        String setting = getSettingForTypeBySlot(type, slotId);
         if (setting == null) return null;
         final String uriString = Settings.System.getStringForUser(context.getContentResolver(),
                 setting, context.getUserId());
@@ -791,7 +813,7 @@ public class RingtoneManager {
     
     /**
      * Sets the {@link Uri} of the default sound for a given sound type.
-     * 
+     *
      * @param context A context used for querying.
      * @param type The type whose default sound should be set. One of
      *            {@link #TYPE_RINGTONE}, {@link #TYPE_NOTIFICATION}, or
@@ -800,7 +822,26 @@ public class RingtoneManager {
      * @see #getActualDefaultRingtoneUri(Context, int)
      */
     public static void setActualDefaultRingtoneUri(Context context, int type, Uri ringtoneUri) {
-        String setting = getSettingForType(type);
+        setActualDefaultRingtoneUriBySlot(context, type, ringtoneUri,
+                SubscriptionManager.getDefaultVoicePhoneId());
+    }
+
+    /**
+     * Sets the {@link Uri} of the default sound by slotId for a given sound type.
+     *
+     * @param context A context used for querying.
+     * @param type The type whose default sound should be set. One of
+     *            {@link #TYPE_RINGTONE}, {@link #TYPE_NOTIFICATION}, or
+     *            {@link #TYPE_ALARM}.
+     * @param ringtoneUri A {@link Uri} pointing to the default sound to set.
+     * @param slotId The slotId whose default sound should be set.
+     * @see #getActualDefaultRingtoneUriBySlot(Context, int, int)
+     *
+     * @hide
+     */
+    public static void setActualDefaultRingtoneUriBySlot(Context context, int type,
+                Uri ringtoneUri, int slotId) {
+        String setting = getSettingForTypeBySlot(type, slotId);
         if (setting == null) return;
 
         final ContentResolver resolver = context.getContentResolver();
@@ -818,7 +859,7 @@ public class RingtoneManager {
         // Stream selected ringtone into cache so it's available for playback
         // when CE storage is still locked
         if (ringtoneUri != null) {
-            final Uri cacheUri = getCacheForType(type, context.getUserId());
+            final Uri cacheUri = getCacheForTypeBySlot(type, context.getUserId(), slotId);
             try (InputStream in = openRingtone(context, ringtoneUri);
                     OutputStream out = resolver.openOutputStream(cacheUri)) {
                 FileUtils.copy(in, out);
@@ -943,9 +984,9 @@ public class RingtoneManager {
         }
     }
 
-    private static String getSettingForType(int type) {
+    private static String getSettingForTypeBySlot(int type, int slotId) {
         if ((type & TYPE_RINGTONE) != 0) {
-            return Settings.System.RINGTONE;
+            return slotId == 1 ? Settings.System.RINGTONE2 : Settings.System.RINGTONE;
         } else if ((type & TYPE_NOTIFICATION) != 0) {
             return Settings.System.NOTIFICATION_SOUND;
         } else if ((type & TYPE_ALARM) != 0) {
@@ -957,13 +998,22 @@ public class RingtoneManager {
 
     /** {@hide} */
     public static Uri getCacheForType(int type) {
-        return getCacheForType(type, UserHandle.getCallingUserId());
+        return getCacheForTypeBySlot(type, UserHandle.getCallingUserId(),
+                SubscriptionManager.getDefaultVoicePhoneId());
     }
 
     /** {@hide} */
     public static Uri getCacheForType(int type, int userId) {
+        return getCacheForTypeBySlot(type, userId, SubscriptionManager.getDefaultVoicePhoneId());
+    }
+
+    /** {@hide} */
+    public static Uri getCacheForTypeBySlot(int type, int userId, int slotId) {
         if ((type & TYPE_RINGTONE) != 0) {
-            return ContentProvider.maybeAddUserId(Settings.System.RINGTONE_CACHE_URI, userId);
+            Uri ringtoneUri = slotId == 1
+                    ? Settings.System.RINGTONE2_CACHE_URI
+                    : Settings.System.RINGTONE_CACHE_URI;
+            return ContentProvider.maybeAddUserId(ringtoneUri, userId);
         } else if ((type & TYPE_NOTIFICATION) != 0) {
             return ContentProvider.maybeAddUserId(Settings.System.NOTIFICATION_SOUND_CACHE_URI,
                     userId);
@@ -988,6 +1038,7 @@ public class RingtoneManager {
      * 
      * @param defaultRingtoneUri The default {@link Uri}. For example,
      *            {@link System#DEFAULT_RINGTONE_URI},
+     *            {@link System#DEFAULT_RINGTONE2_URI},
      *            {@link System#DEFAULT_NOTIFICATION_URI}, or
      *            {@link System#DEFAULT_ALARM_ALERT_URI}.
      * @return The type of the defaultRingtoneUri, or -1.
@@ -996,7 +1047,8 @@ public class RingtoneManager {
         defaultRingtoneUri = ContentProvider.getUriWithoutUserId(defaultRingtoneUri);
         if (defaultRingtoneUri == null) {
             return -1;
-        } else if (defaultRingtoneUri.equals(Settings.System.DEFAULT_RINGTONE_URI)) {
+        } else if (defaultRingtoneUri.equals(Settings.System.DEFAULT_RINGTONE_URI)
+                    || defaultRingtoneUri.equals(Settings.System.DEFAULT_RINGTONE2_URI)) {
             return TYPE_RINGTONE;
         } else if (defaultRingtoneUri.equals(Settings.System.DEFAULT_NOTIFICATION_URI)) {
             return TYPE_NOTIFICATION;
@@ -1012,13 +1064,31 @@ public class RingtoneManager {
      * Rather than returning the actual ringtone's sound {@link Uri}, this will
      * return the symbolic {@link Uri} which will resolved to the actual sound
      * when played.
-     * 
+     *
      * @param type The ringtone type whose default should be returned.
      * @return The {@link Uri} of the default ringtone for the given type.
      */
     public static Uri getDefaultUri(int type) {
+        return getDefaultUriBySlot(type, SubscriptionManager.getDefaultVoicePhoneId());
+    }
+
+    /**
+     * Returns the {@link Uri} for the default ringtone by slotId of a particular type.
+     * Rather than returning the actual ringtone's sound {@link Uri}, this will
+     * return the symbolic {@link Uri} which will resolved to the actual sound
+     * when played.
+     *
+     * @param type The ringtone type whose default should be returned.
+     * @param slotId The slotId whose default should be returned.
+     * @return The {@link Uri} of the default ringtone for the given type.
+     *
+     * @hide
+     */
+    public static Uri getDefaultUriBySlot(int type, int slotId) {
         if ((type & TYPE_RINGTONE) != 0) {
-            return Settings.System.DEFAULT_RINGTONE_URI;
+            return slotId == 1
+                    ? Settings.System.DEFAULT_RINGTONE2_URI
+                    : Settings.System.DEFAULT_RINGTONE_URI;
         } else if ((type & TYPE_NOTIFICATION) != 0) {
             return Settings.System.DEFAULT_NOTIFICATION_URI;
         } else if ((type & TYPE_ALARM) != 0) {
