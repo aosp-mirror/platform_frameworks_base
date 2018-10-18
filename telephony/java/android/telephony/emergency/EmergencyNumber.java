@@ -33,7 +33,7 @@ import java.util.Set;
  * A parcelable class that wraps and retrieves the information of number, service category(s) and
  * country code for a specific emergency number.
  */
-public final class EmergencyNumber implements Parcelable {
+public final class EmergencyNumber implements Parcelable, Comparable<EmergencyNumber> {
 
     private static final String LOG_TAG = "EmergencyNumber";
 
@@ -235,20 +235,22 @@ public final class EmergencyNumber implements Parcelable {
     }
 
     /**
-     * Returns the bitmask of emergency service categories {@link EmergencyServiceCategories} of
-     * the emergency number.
+     * Returns the bitmask of emergency service categories of the emergency number.
      *
-     * @return bitmask of the emergency service categories {@link EmergencyServiceCategories}
+     * @return bitmask of the emergency service categories
      */
     public @EmergencyServiceCategories int getEmergencyServiceCategoryBitmask() {
         return mEmergencyServiceCategoryBitmask;
     }
 
     /**
-     * Returns the emergency service categories {@link EmergencyServiceCategories} of the emergency
-     * number.
+     * Returns the emergency service categories of the emergency number.
      *
-     * @return a list of the emergency service categories {@link EmergencyServiceCategories}
+     * Note: if the emergency number is in {@link #EMERGENCY_SERVICE_CATEGORY_UNSPECIFIED}, only
+     * {@link #EMERGENCY_SERVICE_CATEGORY_UNSPECIFIED} is returned and it means the number is in
+     * all categories.
+     *
+     * @return a list of the emergency service categories
      */
     public List<Integer> getEmergencyServiceCategories() {
         List<Integer> categories = new ArrayList<>();
@@ -276,34 +278,37 @@ public final class EmergencyNumber implements Parcelable {
     }
 
     /**
-     * Checks if the emergency number is in the specified emergency service category(s)
-     * {@link EmergencyServiceCategories}.
+     * Checks if the emergency number is in the supplied emergency service category(s).
+     *
+     * @param categories - the supplied emergency service categories
      *
      * @return {@code true} if the emergency number is in the specified emergency service
-     * category(s) {@link EmergencyServiceCategories}; {@code false} otherwise.
-     *
-     * @param categories - emergency service categories {@link EmergencyServiceCategories}
+     * category(s) or if its emergency service category is
+     * {@link #EMERGENCY_SERVICE_CATEGORY_UNSPECIFIED}; {@code false} otherwise.
      */
     public boolean isInEmergencyServiceCategories(@EmergencyServiceCategories int categories) {
         if (categories == EMERGENCY_SERVICE_CATEGORY_UNSPECIFIED) {
             return serviceUnspecified();
         }
+        if (serviceUnspecified()) {
+            return true;
+        }
         return (mEmergencyServiceCategoryBitmask & categories) == categories;
     }
 
     /**
-     * Returns the bitmask of the sources {@link EmergencyNumberSources} of the emergency number.
+     * Returns the bitmask of the sources of the emergency number.
      *
-     * @return bitmask of the emergency number sources {@link EmergencyNumberSources}
+     * @return bitmask of the emergency number sources
      */
     public @EmergencyNumberSources int getEmergencyNumberSourceBitmask() {
         return mEmergencyNumberSourceBitmask;
     }
 
     /**
-     * Returns a list of {@link EmergencyNumberSources} of the emergency number.
+     * Returns a list of sources of the emergency number.
      *
-     * @return a list of {@link EmergencyNumberSources}
+     * @return a list of emergency number sources
      */
     public List<Integer> getEmergencyNumberSources() {
         List<Integer> sources = new ArrayList<>();
@@ -316,13 +321,12 @@ public final class EmergencyNumber implements Parcelable {
     }
 
     /**
-     * Checks if the emergency number is from the specified emergency number source(s)
-     * {@link EmergencyNumberSources}.
+     * Checks if the emergency number is from the specified emergency number source(s).
      *
      * @return {@code true} if the emergency number is from the specified emergency number
-     * source(s) {@link EmergencyNumberSources}; {@code false} otherwise.
+     * source(s); {@code false} otherwise.
      *
-     * @param sources - {@link EmergencyNumberSources}
+     * @param sources - the supplied emergency number sources
      */
     public boolean isFromSources(@EmergencyNumberSources int sources) {
         return (mEmergencyNumberSourceBitmask & sources) == sources;
@@ -357,6 +361,62 @@ public final class EmergencyNumber implements Parcelable {
             return false;
         }
         return (o == this || toString().equals(o.toString()));
+    }
+
+    /**
+     * Calculate the score for display priority.
+     *
+     * A higher display priority score means the emergency number has a higher display priority.
+     * The score is higher if the source is defined for a higher display priority.
+     *
+     * The priority of sources are defined as follows:
+     *     EMERGENCY_NUMBER_SOURCE_NETWORK_SIGNALING >
+     *     EMERGENCY_NUMBER_SOURCE_SIM >
+     *     EMERGENCY_NUMBER_SOURCE_DEFAULT >
+     *     EMERGENCY_NUMBER_SOURCE_MODEM_CONFIG
+     *
+     */
+    private int getDisplayPriorityScore() {
+        int score = 0;
+        if (this.isFromSources(EMERGENCY_NUMBER_SOURCE_NETWORK_SIGNALING)) {
+            score += 1 << 4;
+        }
+        if (this.isFromSources(EMERGENCY_NUMBER_SOURCE_SIM)) {
+            score += 1 << 3;
+        }
+        // TODO add a score if the number comes from Google's emergency number database
+        if (this.isFromSources(EMERGENCY_NUMBER_SOURCE_DEFAULT)) {
+            score += 1 << 1;
+        }
+        if (this.isFromSources(EMERGENCY_NUMBER_SOURCE_MODEM_CONFIG)) {
+            score += 1 << 0;
+        }
+        return score;
+    }
+
+    /**
+     * Compare the display priority for this emergency number and the supplied emergency number.
+     *
+     * @param emergencyNumber the supplied emergency number
+     * @return a negative value if the supplied emergency number has a lower display priority;
+     *         a positive value if the supplied emergency number has a higher display priority;
+     *         0 if both have equal display priority.
+     */
+    @Override
+    public int compareTo(EmergencyNumber emergencyNumber) {
+        if (this.getDisplayPriorityScore()
+                > emergencyNumber.getDisplayPriorityScore()) {
+            return -1;
+        } else if (this.getDisplayPriorityScore()
+                < emergencyNumber.getDisplayPriorityScore()) {
+            return 1;
+        } else {
+            /**
+             * TODO if both numbers have the same display priority score, the number matches the
+             * Google's emergency number database has a higher display priority.
+             */
+            return 0;
+        }
     }
 
     public static final Parcelable.Creator<EmergencyNumber> CREATOR =
