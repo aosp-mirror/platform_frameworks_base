@@ -46,6 +46,7 @@ statsd_common_src := \
     src/logd/LogEvent.cpp \
     src/logd/LogListener.cpp \
     src/matchers/CombinationLogMatchingTracker.cpp \
+    src/matchers/EventMatcherWizard.cpp \
     src/matchers/matcher_util.cpp \
     src/matchers/SimpleLogMatchingTracker.cpp \
     src/metrics/MetricProducer.cpp \

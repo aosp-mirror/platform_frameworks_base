@@ -200,8 +200,8 @@ TEST(GaugeMetricE2eTest, TestRandomSamplePulledEvents) {
     EXPECT_GT(data.bucket_info(5).atom(0).temperature().temperature_deci_celsius(), 0);
 }
 
-TEST(GaugeMetricE2eTest, TestAllConditionChangesSamplePulledEvents) {
-    auto config = CreateStatsdConfig(GaugeMetric::ALL_CONDITION_CHANGES);
+TEST(GaugeMetricE2eTest, TestConditionChangeToTrueSamplePulledEvents) {
+    auto config = CreateStatsdConfig(GaugeMetric::CONDITION_CHANGE_TO_TRUE);
     int64_t baseTimeNs = 10 * NS_PER_SEC;
     int64_t configAddedTimeNs = 10 * 60 * NS_PER_SEC + baseTimeNs;
     int64_t bucketSizeNs =

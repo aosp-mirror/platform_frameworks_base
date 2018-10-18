@@ -25,6 +25,7 @@
 #include "../external/StatsPullerManager.h"
 #include "../matchers/CombinationLogMatchingTracker.h"
 #include "../matchers/SimpleLogMatchingTracker.h"
+#include "../matchers/EventMatcherWizard.h"
 #include "../metrics/CountMetricProducer.h"
 #include "../metrics/DurationMetricProducer.h"
 #include "../metrics/EventMetricProducer.h"
@@ -294,6 +295,7 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config, const int64_t
                  unordered_map<int, std::vector<int>>& trackerToMetricMap,
                  unordered_map<int64_t, int>& metricMap, std::set<int64_t>& noReportMetricIds) {
     sp<ConditionWizard> wizard = new ConditionWizard(allConditionTrackers);
+    sp<EventMatcherWizard> matcherWizard = new EventMatcherWizard(allAtomMatchers);
     const int allMetricsCount = config.count_metric_size() + config.duration_metric_size() +
                                 config.event_metric_size() + config.value_metric_size();
     allMetricProducers.reserve(allMetricsCount);
@@ -563,7 +565,8 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config, const int64_t
         }
 
         sp<MetricProducer> gaugeProducer = new GaugeMetricProducer(
-                key, metric, conditionIndex, wizard, pullTagId, triggerAtomId, atomTagId,
+                key, metric, conditionIndex, wizard,
+                trackerIndex, matcherWizard, pullTagId, triggerAtomId, atomTagId,
                 timeBaseTimeNs, currentTimeNs, pullerManager);
         allMetricProducers.push_back(gaugeProducer);
     }
