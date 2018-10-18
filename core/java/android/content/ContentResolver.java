@@ -36,11 +36,9 @@ import android.database.CrossProcessCursorWrapper;
 import android.database.Cursor;
 import android.database.IContentObserver;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.graphics.ImageDecoder;
 import android.graphics.ImageDecoder.ImageInfo;
 import android.graphics.ImageDecoder.Source;
-import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -55,7 +53,6 @@ import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
-import android.provider.DocumentsContract;
 import android.text.TextUtils;
 import android.util.EventLog;
 import android.util.Log;
@@ -3254,5 +3251,14 @@ public abstract class ContentResolver {
                 decoder.setTargetSampleSize(sample);
             }
         });
+    }
+
+    /** {@hide} */
+    public static void onDbCorruption(String tag, String message, Throwable stacktrace) {
+        try {
+            getContentService().onDbCorruption(tag, message, Log.getStackTraceString(stacktrace));
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
     }
 }

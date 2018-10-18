@@ -1615,6 +1615,15 @@ public final class ContentService extends IContentService.Stub {
     }
 
     @Override
+    public void onDbCorruption(String tag, String message, String stacktrace) {
+        Slog.e(tag, message);
+        Slog.e(tag, "at " + stacktrace);
+
+        // TODO: Figure out a better way to report it. b/117886381
+        Slog.wtf(tag, message);
+    }
+
+    @Override
     public void onShellCommand(FileDescriptor in, FileDescriptor out,
             FileDescriptor err, String[] args, ShellCallback callback,
             ResultReceiver resultReceiver) {

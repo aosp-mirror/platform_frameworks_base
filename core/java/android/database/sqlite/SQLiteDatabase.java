@@ -22,6 +22,8 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityManager;
+import android.app.ActivityThread;
+import android.content.ContentResolver;
 import android.content.ContentValues;
 import android.database.Cursor;
 import android.database.DatabaseErrorHandler;
@@ -34,6 +36,7 @@ import android.os.Looper;
 import android.os.OperationCanceledException;
 import android.os.SystemProperties;
 import android.text.TextUtils;
+import android.util.ArraySet;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Pair;
@@ -45,9 +48,14 @@ import dalvik.system.CloseGuard;
 
 import java.io.File;
 import java.io.FileFilter;
+import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
@@ -808,6 +816,12 @@ public final class SQLiteDatabase extends SQLiteClosable {
      * @return True if the database was successfully deleted.
      */
     public static boolean deleteDatabase(@NonNull File file) {
+        return deleteDatabase(file, /*removeCheckFile=*/ true);
+    }
+
+
+    /** @hide */
+    public static boolean deleteDatabase(@NonNull File file, boolean removeCheckFile) {
         if (file == null) {
             throw new IllegalArgumentException("file must not be null");
         }
@@ -817,6 +831,9 @@ public final class SQLiteDatabase extends SQLiteClosable {
         deleted |= new File(file.getPath() + "-journal").delete();
         deleted |= new File(file.getPath() + "-shm").delete();
         deleted |= new File(file.getPath() + "-wal").delete();
+
+        // This file is not a standard SQLite file, so don't update the deleted flag.
+        new File(file.getPath() + SQLiteGlobal.WIPE_CHECK_FILE_SUFFIX).delete();
 
         File dir = file.getParentFile();
         if (dir != null) {
@@ -2170,18 +2187,58 @@ public final class SQLiteDatabase extends SQLiteClosable {
      * Dump detailed information about all open databases in the current process.
      * Used by bug report.
      */
-    static void dumpAll(Printer printer, boolean verbose) {
+    static void dumpAll(Printer printer, boolean verbose, boolean isSystem) {
+        // Use this ArraySet to collect file paths.
+        final ArraySet<String> directories = new ArraySet<>();
+
         for (SQLiteDatabase db : getActiveDatabases()) {
-            db.dump(printer, verbose);
+            db.dump(printer, verbose, isSystem, directories);
+        }
+
+        // Dump DB files in the directories.
+        if (directories.size() > 0) {
+            final String[] dirs = directories.toArray(new String[directories.size()]);
+            Arrays.sort(dirs);
+            for (String dir : dirs) {
+                dumpDatabaseDirectory(printer, new File(dir), isSystem);
+            }
         }
     }
 
-    private void dump(Printer printer, boolean verbose) {
+    private void dump(Printer printer, boolean verbose, boolean isSystem, ArraySet directories) {
         synchronized (mLock) {
             if (mConnectionPoolLocked != null) {
                 printer.println("");
-                mConnectionPoolLocked.dump(printer, verbose);
+                mConnectionPoolLocked.dump(printer, verbose, directories);
             }
+        }
+    }
+
+    private static void dumpDatabaseDirectory(Printer pw, File dir, boolean isSystem) {
+        pw.println("");
+        pw.println("Database files in " + dir.getAbsolutePath() + ":");
+        final File[] files = dir.listFiles();
+        if (files == null || files.length == 0) {
+            pw.println("  [none]");
+            return;
+        }
+        Arrays.sort(files, (a, b) -> a.getName().compareTo(b.getName()));
+
+        for (File f : files) {
+            if (isSystem) {
+                // If called within the system server, the directory contains other files too, so
+                // filter by file extensions.
+                // (If it's an app, just print all files because they may not use *.db
+                // extension.)
+                final String name = f.getName();
+                if (!(name.endsWith(".db") || name.endsWith(".db-wal")
+                        || name.endsWith(".db-journal")
+                        || name.endsWith(SQLiteGlobal.WIPE_CHECK_FILE_SUFFIX))) {
+                    continue;
+                }
+            }
+            pw.println(String.format("  %-40s %7db %s", f.getName(), f.length(),
+                    SQLiteDatabase.getFileTimestamps(f.getAbsolutePath())));
         }
     }
 
@@ -2611,7 +2668,7 @@ public final class SQLiteDatabase extends SQLiteClosable {
                 return this;
             }
 
-            /**
+            /**w
              * Sets <a href="https://sqlite.org/pragma.html#pragma_synchronous">synchronous mode</a>
              * .
              * @return
@@ -2646,5 +2703,34 @@ public final class SQLiteDatabase extends SQLiteClosable {
     @Retention(RetentionPolicy.SOURCE)
     public @interface DatabaseOpenFlags {}
 
+    /** @hide */
+    public static void wipeDetected(String filename, String reason) {
+        wtfAsSystemServer(TAG, "DB wipe detected:"
+                + " package=" + ActivityThread.currentPackageName()
+                + " reason=" + reason
+                + " file=" + filename
+                + " " + getFileTimestamps(filename)
+                + " checkfile " + getFileTimestamps(filename + SQLiteGlobal.WIPE_CHECK_FILE_SUFFIX),
+                new Throwable("STACKTRACE"));
+    }
+
+    /** @hide */
+    public static String getFileTimestamps(String path) {
+        try {
+            BasicFileAttributes attr = Files.readAttributes(
+                    FileSystems.getDefault().getPath(path), BasicFileAttributes.class);
+            return "ctime=" + attr.creationTime()
+                    + " mtime=" + attr.lastModifiedTime()
+                    + " atime=" + attr.lastAccessTime();
+        } catch (IOException e) {
+            return "[unable to obtain timestamp]";
+        }
+    }
+
+    /** @hide */
+    static void wtfAsSystemServer(String tag, String message, Throwable stacktrace) {
+        Log.e(tag, message, stacktrace);
+        ContentResolver.onDbCorruption(tag, message, stacktrace);
+    }
 }
 

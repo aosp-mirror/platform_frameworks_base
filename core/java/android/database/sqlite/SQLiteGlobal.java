@@ -42,6 +42,9 @@ public final class SQLiteGlobal {
     /** @hide */
     public static final String SYNC_MODE_FULL = "FULL";
 
+    /** @hide */
+    static final String WIPE_CHECK_FILE_SUFFIX = "-wipecheck";
+
     private static final Object sLock = new Object();
 
     private static int sDefaultPageSize;
@@ -181,4 +184,8 @@ public final class SQLiteGlobal {
                         com.android.internal.R.integer.db_wal_truncate_size));
     }
 
+    /** @hide */
+    public static boolean checkDbWipe() {
+        return true;
+    }
 }
