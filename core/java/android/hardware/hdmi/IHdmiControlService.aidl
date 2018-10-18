@@ -50,6 +50,7 @@ interface IHdmiControlService {
     List<HdmiPortInfo> getPortInfo();
     boolean canChangeSystemAudioMode();
     boolean getSystemAudioMode();
+    int getPhysicalAddress();
     void setSystemAudioMode(boolean enabled, IHdmiControlCallback callback);
     void addSystemAudioModeChangeListener(IHdmiSystemAudioModeChangeListener listener);
     void removeSystemAudioModeChangeListener(IHdmiSystemAudioModeChangeListener listener);

@@ -345,6 +345,10 @@ public class HdmiControlService extends SystemService {
     @Nullable
     private Looper mIoLooper;
 
+    // Thread safe physical address
+    @GuardedBy("mLock")
+    private int mPhysicalAddress = Constants.INVALID_PHYSICAL_ADDRESS;
+
     // Last input port before switching to the MHL port. Should switch back to this port
     // when the mobile device sends the request one touch play with off.
     // Gets invalidated if we go to other port/input.
@@ -733,6 +737,10 @@ public class HdmiControlService extends SystemService {
     protected void initPortInfo() {
         assertRunOnServiceThread();
         HdmiPortInfo[] cecPortInfo = null;
+
+        synchronized (mLock) {
+            mPhysicalAddress = getPhysicalAddress();
+        }
 
         // CEC HAL provides majority of the info while MHL does only MHL support flag for
         // each port. Return empty array if CEC HAL didn't provide the info.
@@ -1529,6 +1537,14 @@ public class HdmiControlService extends SystemService {
             HdmiCecLocalDeviceAudioSystem audioSystem = audioSystem();
             return (tv != null && tv.isSystemAudioActivated())
                     || (audioSystem != null && audioSystem.isSystemAudioActivated());
+        }
+
+        @Override
+        public int getPhysicalAddress() {
+            enforceAccessPermission();
+            synchronized (mLock) {
+                return mPhysicalAddress;
+            }
         }
 
         @Override

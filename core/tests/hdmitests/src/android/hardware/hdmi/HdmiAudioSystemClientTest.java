@@ -322,6 +322,11 @@ public class HdmiAudioSystemClientTest {
         @Override
         public void setSystemAudioModeOnForAudioOnlySource() {
         }
+
+        @Override
+        public int getPhysicalAddress() {
+            return 0x0000;
+        }
     }
 
 }
