@@ -102,6 +102,9 @@ import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
 import com.android.systemui.statusbar.notification.stack.NotificationChildrenContainer;
 import com.android.systemui.statusbar.notification.stack.StackScrollState;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.function.BooleanSupplier;
@@ -3074,6 +3077,36 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
          * @return whether the click was handled
          */
         boolean onClick(View v, int x, int y, MenuItem item);
+    }
+
+    @Override
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
+        super.dump(fd, pw, args);
+        pw.println("  Notification: " + getStatusBarNotification().getKey());
+        pw.print("    visibility: " + getVisibility());
+        pw.print(", alpha: " + getAlpha());
+        pw.print(", translation: " + getTranslation());
+        pw.print(", removed: " + isRemoved());
+        pw.print(", privateShowing: " + (getShowingLayout() == mPrivateLayout));
+        pw.println();
+        pw.print("    ");
+        if (mNotificationViewState != null) {
+            mNotificationViewState.dump(fd, pw, args);
+        } else {
+            pw.print("no viewState!!!");
+        }
+        pw.println();
+        pw.println();
+        if (mIsSummaryWithChildren) {
+            List<ExpandableNotificationRow> notificationChildren = getNotificationChildren();
+            pw.println("  Children: " + notificationChildren.size());
+            pw.println("  {");
+            for(ExpandableNotificationRow child : notificationChildren) {
+                child.dump(fd, pw, args);
+            }
+            pw.println("  }");
+            pw.println();
+        }
     }
 
     /**

@@ -34,7 +34,6 @@ import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.provider.Settings.Global;
-import android.providers.settings.GlobalSettingsProto;
 import android.providers.settings.SettingsOperationProto;
 import android.text.TextUtils;
 import android.util.ArrayMap;
@@ -67,7 +66,6 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.Set;
 
 /**
  * This class contains the state for one type of settings. It is responsible
@@ -205,6 +203,7 @@ final class SettingsState {
     public static final int SETTINGS_TYPE_SYSTEM = 1;
     public static final int SETTINGS_TYPE_SECURE = 2;
     public static final int SETTINGS_TYPE_SSAID = 3;
+    public static final int SETTINGS_TYPE_CONFIG = 4;
 
     public static final int SETTINGS_TYPE_MASK = 0xF0000000;
     public static final int SETTINGS_TYPE_SHIFT = 28;
@@ -223,6 +222,9 @@ final class SettingsState {
 
     public static String settingTypeToString(int type) {
         switch (type) {
+            case SETTINGS_TYPE_CONFIG: {
+                return "SETTINGS_CONFIG";
+            }
             case SETTINGS_TYPE_GLOBAL: {
                 return "SETTINGS_GLOBAL";
             }

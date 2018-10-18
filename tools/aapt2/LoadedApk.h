@@ -121,8 +121,6 @@ class LoadedApk {
   std::unique_ptr<ResourceTable> table_;
   std::unique_ptr<xml::XmlResource> manifest_;
   ApkFormat format_;
-
-  static ApkFormat DetermineApkFormat(io::IFileCollection* apk);
 };
 
 }  // namespace aapt

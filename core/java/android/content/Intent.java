@@ -4453,7 +4453,6 @@ public class Intent implements Parcelable, Cloneable {
      *
      * @hide
      */
-    @SystemApi
     public static final String EXTRA_USER_ID = "android.intent.extra.USER_ID";
 
     /**
@@ -5009,8 +5008,7 @@ public class Intent implements Parcelable, Cloneable {
             "android.intent.extra.user_handle";
 
     /**
-     * The UserHandle carried with broadcasts intents related to addition and removal of managed
-     * profiles - {@link #ACTION_MANAGED_PROFILE_ADDED} and {@link #ACTION_MANAGED_PROFILE_REMOVED}.
+     * The UserHandle carried with intents.
      */
     public static final String EXTRA_USER =
             "android.intent.extra.USER";

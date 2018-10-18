@@ -54,6 +54,13 @@ public class MotionEventTest {
         MotionEvent motionEvent = MotionEvent.obtain(0, 0, ACTION_DOWN,
                 pointerCount, properties, coords,
                 0, 0, 0, 0, 0, 0, InputDevice.SOURCE_TOUCHSCREEN, displayId, 0);
+
+        MotionEvent motionEvent_Single = MotionEvent.obtain(0 /* downTime */, 0 /* eventTime */,
+                ACTION_DOWN /* action */, 0f /* x */, 0f /* y */, 0/* pressure */, 0 /* size */,
+                0 /* metaState */, 0 /* xPrecision */, 0 /* yPrecision */,
+                0 /* deviceId */, 0 /* edgeFlags */, InputDevice.SOURCE_TOUCHSCREEN, displayId);
+
+        assertEquals(displayId, motionEvent_Single.getDisplayId());
         assertEquals(displayId, motionEvent.getDisplayId());
 
         displayId = 5;

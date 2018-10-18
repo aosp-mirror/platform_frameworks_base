@@ -983,6 +983,21 @@ public class UserManager {
     public static final String DISALLOW_PRINTING = "no_printing";
 
     /**
+     * Specifies whether the user is allowed to modify private DNS settings.
+     *
+     * <p>The default value is <code>false</code>.
+     *
+     * <p>This user restriction can only be applied by the Device Owner.
+     * <p>Key for user restrictions.
+     * <p>Type: Boolean
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_CONFIG_PRIVATE_DNS =
+            "disallow_config_private_dns";
+
+    /**
      * Application restriction key that is used to indicate the pending arrival
      * of real restrictions for the app.
      *

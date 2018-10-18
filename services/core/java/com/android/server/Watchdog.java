@@ -528,7 +528,7 @@ public class Watchdog extends Thread {
             Thread dropboxThread = new Thread("watchdogWriteToDropbox") {
                     public void run() {
                         mActivity.addErrorToDropBox(
-                                "watchdog", null, "system_server", null, null,
+                                "watchdog", null, "system_server", null, null, null,
                                 subject, null, stack, null);
                     }
                 };

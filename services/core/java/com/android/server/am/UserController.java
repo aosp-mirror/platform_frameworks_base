@@ -2242,21 +2242,15 @@ class UserController implements Handler.Callback {
         }
 
         void stackSupervisorRemoveUser(int userId) {
-            synchronized (mService) {
-                mService.mStackSupervisor.removeUserLocked(userId);
-            }
+            mService.mAtmInternal.removeUser(userId);
         }
 
         protected boolean stackSupervisorSwitchUser(int userId, UserState uss) {
-            synchronized (mService) {
-                return mService.mStackSupervisor.switchUserLocked(userId, uss);
-            }
+            return mService.mAtmInternal.switchUser(userId, uss);
         }
 
         protected void stackSupervisorResumeFocusedStackTopActivity() {
-            synchronized (mService) {
-                mService.mStackSupervisor.resumeFocusedStacksTopActivitiesLocked();
-            }
+            mService.mAtmInternal.resumeTopActivities(false /* scheduleIdle */);
         }
 
         protected void clearAllLockedTasks(String reason) {

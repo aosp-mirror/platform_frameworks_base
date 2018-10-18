@@ -132,15 +132,36 @@ public class CoreSettingsObserverTest {
                 settingsBundle.containsKey(TEST_SETTING_SYSTEM_STRING));
     }
 
+    @Test
+    public void testPopulateSettings_settingDeleted() {
+        Settings.Secure.putInt(mContentResolver, TEST_SETTING_SECURE_INT, TEST_INT);
+        Settings.Global.putFloat(mContentResolver, TEST_SETTING_GLOBAL_FLOAT, TEST_FLOAT);
+        Settings.System.putString(mContentResolver, TEST_SETTING_SYSTEM_STRING, TEST_STRING);
+
+        Bundle settingsBundle = getPopulatedBundle();
+
+        assertEquals("Unexpected value of " + TEST_SETTING_SECURE_INT,
+                TEST_INT, settingsBundle.getInt(TEST_SETTING_SECURE_INT));
+        assertEquals("Unexpected value of " + TEST_SETTING_GLOBAL_FLOAT,
+                TEST_FLOAT, settingsBundle.getFloat(TEST_SETTING_GLOBAL_FLOAT), 0);
+        assertEquals("Unexpected value of " + TEST_SETTING_SYSTEM_STRING,
+                TEST_STRING, settingsBundle.getString(TEST_SETTING_SYSTEM_STRING));
+
+        Settings.Global.putString(mContentResolver, TEST_SETTING_GLOBAL_FLOAT, null);
+        settingsBundle = getPopulatedBundle();
+
+        assertFalse("Bundle should not contain " + TEST_SETTING_GLOBAL_FLOAT,
+                settingsBundle.containsKey(TEST_SETTING_GLOBAL_FLOAT));
+        assertEquals("Unexpected value of " + TEST_SETTING_SECURE_INT,
+                TEST_INT, settingsBundle.getInt(TEST_SETTING_SECURE_INT));
+        assertEquals("Unexpected value of " + TEST_SETTING_SYSTEM_STRING,
+                TEST_STRING, settingsBundle.getString(TEST_SETTING_SYSTEM_STRING));
+
+    }
+
     private Bundle getPopulatedBundle() {
-        final Bundle settingsBundle = new Bundle();
-        mCoreSettingsObserver.populateSettings(settingsBundle,
-                CoreSettingsObserver.sGlobalSettingToTypeMap);
-        mCoreSettingsObserver.populateSettings(settingsBundle,
-                CoreSettingsObserver.sSecureSettingToTypeMap);
-        mCoreSettingsObserver.populateSettings(settingsBundle,
-                CoreSettingsObserver.sSystemSettingToTypeMap);
-        return settingsBundle;
+        mCoreSettingsObserver.onChange(false);
+        return mCoreSettingsObserver.getCoreSettingsLocked();
     }
 
     private class TestInjector extends Injector {

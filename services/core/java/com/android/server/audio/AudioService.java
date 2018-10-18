@@ -5975,6 +5975,9 @@ public class AudioService extends IAudioService.Stub
                                    address));
         sendMsg(mAudioHandler, MSG_ACCESSORY_PLUG_MEDIA_UNMUTE, SENDMSG_QUEUE,
                 AudioSystem.DEVICE_OUT_HEARING_AID, 0, null, 0);
+        sendMsg(mAudioHandler, MSG_SET_DEVICE_VOLUME, SENDMSG_QUEUE,
+                            AudioSystem.DEVICE_OUT_HEARING_AID, 0,
+                            mStreamStates[AudioSystem.STREAM_MUSIC], 0);
     }
 
     // must be called synchronized on mConnectedDevices

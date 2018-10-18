@@ -108,7 +108,7 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
         }
 
         // All the calls below need to happen without the WM lock held since they call into AM.
-        mService.mAmInternal.saveANRState(reason);
+        mService.mAtmInternal.saveANRState(reason);
 
         if (appWindowToken != null && appWindowToken.appToken != null) {
             // Notify the activity manager about the timeout and let it decide whether
@@ -125,7 +125,7 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
         } else if (windowState != null) {
             // Notify the activity manager about the timeout and let it decide whether
             // to abort dispatching or keep waiting.
-            long timeout = mService.mAtmInternal.inputDispatchingTimedOut(
+            long timeout = mService.mAmInternal.inputDispatchingTimedOut(
                     windowState.mSession.mPid, aboveSystem, reason);
             if (timeout >= 0) {
                 // The activity manager declined to abort dispatching.

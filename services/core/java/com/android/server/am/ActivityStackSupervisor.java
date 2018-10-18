@@ -994,8 +994,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         return candidateTaskId;
     }
 
-    boolean attachApplicationLocked(ProcessRecord app) throws RemoteException {
-        final String processName = app.processName;
+    boolean attachApplicationLocked(WindowProcessController app) throws RemoteException {
+        final String processName = app.mName;
         boolean didSomething = false;
         for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
             final ActivityDisplay display = mActivityDisplays.get(displayNdx);
@@ -1009,10 +1009,10 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 final int size = mTmpActivityList.size();
                 for (int i = 0; i < size; i++) {
                     final ActivityRecord activity = mTmpActivityList.get(i);
-                    if (activity.app == null && app.uid == activity.info.applicationInfo.uid
+                    if (activity.app == null && app.mUid == activity.info.applicationInfo.uid
                             && processName.equals(activity.processName)) {
                         try {
-                            if (realStartActivityLocked(activity, app,
+                            if (realStartActivityLocked(activity, (ProcessRecord) app.mOwner,
                                     top == activity /* andResume */, true /* checkConfig */)) {
                                 didSomething = true;
                             }
@@ -2305,17 +2305,8 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             mUserLeaving = true;
         }
 
-        // TODO(b/111363427): The moving-to-top task may not be on the top display, so it could be
-        // different from where the prev activity stays on.
-        final ActivityRecord prev = topRunningActivityLocked();
-
-        if ((flags & ActivityManager.MOVE_TASK_WITH_HOME) != 0
-                || (prev != null && prev.isActivityTypeRecents())) {
-            // Caller wants the home activity moved with it or the previous task is recents in which
-            // case we always return home from the task we are moving to the front.
-            currentStack.getDisplay().moveHomeStackToFront("findTaskToMoveToFront");
-        }
-
+        reason = reason + " findTaskToMoveToFront";
+        boolean reparented = false;
         if (task.isResizeable() && canUseActivityOptionsLaunchBounds(options)) {
             final Rect bounds = options.getLaunchBounds();
             task.updateOverrideConfiguration(bounds);
@@ -2323,10 +2314,12 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             ActivityStack stack = getLaunchStack(null, options, task, ON_TOP);
 
             if (stack != currentStack) {
+                moveHomeStackToFrontIfNeeded(flags, stack.getDisplay(), reason);
                 task.reparent(stack, ON_TOP, REPARENT_KEEP_STACK_AT_FRONT, !ANIMATE, DEFER_RESUME,
-                        "findTaskToMoveToFront");
+                        reason);
                 currentStack = stack;
-                // moveTaskToStackUncheckedLocked() should already placed the task on top,
+                reparented = true;
+                // task.reparent() should already placed the task on top,
                 // still need moveTaskToFrontLocked() below for any transition settings.
             }
             if (stack.resizeStackWithLaunchBounds()) {
@@ -2341,6 +2334,10 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             }
         }
 
+        if (!reparented) {
+            moveHomeStackToFrontIfNeeded(flags, currentStack.getDisplay(), reason);
+        }
+
         final ActivityRecord r = task.getTopActivity();
         currentStack.moveTaskToFrontLocked(task, false /* noAnimation */, options,
                 r == null ? null : r.appTimeTracker, reason);
@@ -2350,6 +2347,18 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
         handleNonResizableTaskIfNeeded(task, WINDOWING_MODE_UNDEFINED, DEFAULT_DISPLAY,
                 currentStack, forceNonResizeable);
+    }
+
+    private void moveHomeStackToFrontIfNeeded(int flags, ActivityDisplay display, String reason) {
+        final ActivityStack focusedStack = display.getFocusedStack();
+
+        if ((display.getWindowingMode() == WINDOWING_MODE_FULLSCREEN
+                && (flags & ActivityManager.MOVE_TASK_WITH_HOME) != 0)
+                || (focusedStack != null && focusedStack.isActivityTypeRecents())) {
+            // We move home stack to front when we are on a fullscreen display and caller has
+            // requested the home activity to move with it. Or the previous stack is recents.
+            display.moveHomeStackToFront(reason);
+        }
     }
 
     boolean canUseActivityOptionsLaunchBounds(ActivityOptions options) {

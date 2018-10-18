@@ -308,6 +308,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
                     @Override
                     public void onClick(View v) {
                         int position = holder.getAdapterPosition();
+                        if (position == RecyclerView.NO_POSITION) return;
                         if (mAccessibilityAction != ACTION_NONE) {
                             selectPosition(position, v);
                         } else {
@@ -561,6 +562,7 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
             if (viewHolder == mCurrentDrag) return;
             if (mCurrentDrag != null) {
                 int position = mCurrentDrag.getAdapterPosition();
+                if (position == RecyclerView.NO_POSITION) return;
                 TileInfo info = mTiles.get(position);
                 mCurrentDrag.mTileView.setShowAppLabel(
                         position > mEditIndex && !info.isSystem);
@@ -582,13 +584,14 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         @Override
         public boolean canDropOver(RecyclerView recyclerView, ViewHolder current,
                 ViewHolder target) {
-            if (target.getAdapterPosition() == 0){
+            final int position = target.getAdapterPosition();
+            if (position == 0 || position == RecyclerView.NO_POSITION){
                 return false;
             }
             if (!canRemoveTiles() && current.getAdapterPosition() < mEditIndex) {
-                return target.getAdapterPosition() < mEditIndex;
+                return position < mEditIndex;
             }
-            return target.getAdapterPosition() <= mEditIndex + 1;
+            return position <= mEditIndex + 1;
         }
 
         @Override
@@ -610,6 +613,10 @@ public class TileAdapter extends RecyclerView.Adapter<Holder> implements TileSta
         public boolean onMove(RecyclerView recyclerView, ViewHolder viewHolder, ViewHolder target) {
             int from = viewHolder.getAdapterPosition();
             int to = target.getAdapterPosition();
+            if (from == 0 || from == RecyclerView.NO_POSITION ||
+                    to == 0 || to == RecyclerView.NO_POSITION) {
+                return false;
+            }
             return move(from, to, target.itemView);
         }
 

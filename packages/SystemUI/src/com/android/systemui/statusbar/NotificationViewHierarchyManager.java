@@ -327,6 +327,17 @@ public class NotificationViewHierarchyManager {
                     entry.notification) && !entry.row.isRemoved();
             boolean showOnKeyguard = mLockscreenUserManager.shouldShowOnKeyguard(entry
                     .notification);
+            if (!showOnKeyguard) {
+                // min priority notifications should show if their summary is showing
+                if (mGroupManager.isChildInGroupWithSummary(entry.notification)) {
+                    ExpandableNotificationRow summary = mGroupManager.getLogicalGroupSummary(
+                            entry.notification);
+                    if (summary != null && mLockscreenUserManager.shouldShowOnKeyguard(
+                            summary.getStatusBarNotification()))         {
+                        showOnKeyguard = true;
+                    }
+                }
+            }
             if (suppressedSummary
                     || mLockscreenUserManager.shouldHideNotifications(userId)
                     || (isLocked && !showOnKeyguard)) {

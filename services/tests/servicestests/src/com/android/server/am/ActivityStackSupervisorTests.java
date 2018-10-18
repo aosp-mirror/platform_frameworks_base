@@ -18,6 +18,7 @@ package com.android.server.am;
 
 import static android.app.ActivityManager.START_DELIVERED_TO_TOP;
 import static android.app.ActivityManager.START_TASK_TO_FRONT;
+import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY;
@@ -34,9 +35,11 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
@@ -404,6 +407,57 @@ public class ActivityStackSupervisorTests extends ActivityTestsBase {
         // Verify dock stack & its task bounds if is equal as resized result.
         assertEquals(primaryStack.getBounds(), STACK_SIZE);
         assertEquals(task.getBounds(), TASK_SIZE);
+    }
+
+    /**
+     * Verify that home stack would be moved to front when the top activity is Recents.
+     */
+    @Test
+    public void testFindTaskToMoveToFrontWhenRecentsOnTop() throws Exception {
+        // Create stack/task on default display.
+        final ActivityDisplay display = mSupervisor.getDefaultDisplay();
+        final ActivityStack targetStack = display.createStack(WINDOWING_MODE_FULLSCREEN,
+                ACTIVITY_TYPE_STANDARD, false /* onTop */);
+        final TaskRecord targetTask = new TaskBuilder(mSupervisor).setStack(targetStack).build();
+
+        // Create Recents on top of the display.
+        final ActivityStack stack = display.createStack(WINDOWING_MODE_FULLSCREEN,
+                ACTIVITY_TYPE_RECENTS, true /* onTop */);
+        final TaskRecord task = new TaskBuilder(mSupervisor).setStack(stack).build();
+        new ActivityBuilder(mService).setTask(task).build();
+
+        final String reason = "findTaskToMoveToFront";
+        mSupervisor.findTaskToMoveToFront(targetTask, 0, ActivityOptions.makeBasic(), reason,
+                false);
+
+        verify(display).moveHomeStackToFront(contains(reason));
+    }
+
+    /**
+     * Verify that home stack won't be moved to front if the top activity on other display is
+     * Recents.
+     */
+    @Test
+    public void testFindTaskToMoveToFrontWhenRecentsOnOtherDisplay() throws Exception {
+        // Create stack/task on default display.
+        final ActivityDisplay display = mSupervisor.getDefaultDisplay();
+        final ActivityStack targetStack = display.createStack(WINDOWING_MODE_FULLSCREEN,
+                ACTIVITY_TYPE_STANDARD, false /* onTop */);
+        final TaskRecord targetTask = new TaskBuilder(mSupervisor).setStack(targetStack).build();
+
+        // Create Recents on secondary display.
+        final TestActivityDisplay secondDisplay = addNewActivityDisplayAt(
+                ActivityDisplay.POSITION_TOP);
+        final ActivityStack stack = secondDisplay.createStack(WINDOWING_MODE_FULLSCREEN,
+                ACTIVITY_TYPE_RECENTS, true /* onTop */);
+        final TaskRecord task = new TaskBuilder(mSupervisor).setStack(stack).build();
+        new ActivityBuilder(mService).setTask(task).build();
+
+        final String reason = "findTaskToMoveToFront";
+        mSupervisor.findTaskToMoveToFront(targetTask, 0, ActivityOptions.makeBasic(), reason,
+                false);
+
+        verify(display, never()).moveHomeStackToFront(contains(reason));
     }
 
     /**

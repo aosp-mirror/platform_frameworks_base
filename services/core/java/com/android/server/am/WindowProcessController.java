@@ -30,6 +30,8 @@ import static com.android.server.am.ActivityStack.ActivityState.PAUSED;
 import static com.android.server.am.ActivityStack.ActivityState.PAUSING;
 import static com.android.server.am.ActivityStack.ActivityState.RESUMED;
 import static com.android.server.am.ActivityStack.ActivityState.STOPPING;
+import static com.android.server.am.ActivityTaskManagerService.INSTRUMENTATION_KEY_DISPATCHING_TIMEOUT_MS;
+import static com.android.server.am.ActivityTaskManagerService.KEY_DISPATCHING_TIMEOUT_MS;
 
 import android.app.Activity;
 import android.app.ActivityThread;
@@ -44,6 +46,7 @@ import android.util.ArraySet;
 import android.util.Log;
 import android.util.Slog;
 
+import android.util.proto.ProtoOutputStream;
 import com.android.internal.app.HeavyWeightSwitcherActivity;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.wm.ConfigurationContainer;
@@ -127,6 +130,8 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     private volatile boolean mDebugging;
     // Active instrumentation running in process?
     private volatile boolean mInstrumenting;
+    // This process it perceptible by the user.
+    private volatile boolean mPerceptible;
     // Set to true when process was launched with a wrapper attached
     private volatile boolean mUsingWrapper;
 
@@ -335,6 +340,14 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
 
     boolean isInstrumenting() {
         return mInstrumenting;
+    }
+
+    public void setPerceptible(boolean perceptible) {
+        mPerceptible = perceptible;
+    }
+
+    boolean isPerceptible() {
+        return mPerceptible;
     }
 
     @Override
@@ -612,6 +625,13 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         return ActivityRecord.RELAUNCH_REASON_NONE;
     }
 
+    public long getInputDispatchingTimeout() {
+        synchronized (mAtm.mGlobalLock) {
+            return isInstrumenting() || isUsingWrapper()
+                    ? INSTRUMENTATION_KEY_DISPATCHING_TIMEOUT_MS : KEY_DISPATCHING_TIMEOUT_MS;
+        }
+    }
+
     void clearProfilerIfNeeded() {
         if (mListener == null) return;
         // Posting on handler so WM lock isn't held when we call into AM.
@@ -750,4 +770,9 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         pw.println(prefix + " mLastReportedConfiguration=" + mLastReportedConfiguration);
     }
 
+    void writeToProto(ProtoOutputStream proto, long fieldId) {
+        if (mListener != null) {
+            mListener.writeToProto(proto, fieldId);
+        }
+    }
 }

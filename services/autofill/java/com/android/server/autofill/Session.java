@@ -312,8 +312,8 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                                 Slog.d(TAG, "Setting urlBar as id=" + urlBarId + " and domain "
                                         + mUrlBar.getWebDomain());
                             }
-                            final ViewState viewState = new ViewState(Session.this, urlBarId,
-                                    Session.this, ViewState.STATE_URL_BAR);
+                            final ViewState viewState = new ViewState(urlBarId, Session.this,
+                                    ViewState.STATE_URL_BAR);
                             mViewStates.put(urlBarId, viewState);
                         }
                     }
@@ -2149,7 +2149,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                     || action == ACTION_VIEW_ENTERED) {
                 if (sVerbose) Slog.v(TAG, "Creating viewState for " + id);
                 boolean isIgnored = isIgnoredLocked(id);
-                viewState = new ViewState(this, id, this,
+                viewState = new ViewState(id, this,
                         isIgnored ? ViewState.STATE_IGNORED : ViewState.STATE_INITIAL);
                 mViewStates.put(id, viewState);
 
@@ -2629,7 +2629,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         if (viewState != null)  {
             viewState.setState(state);
         } else {
-            viewState = new ViewState(this, id, this, state);
+            viewState = new ViewState(id, this, state);
             if (sVerbose) {
                 Slog.v(TAG, "Adding autofillable view with id " + id + " and state " + state);
             }

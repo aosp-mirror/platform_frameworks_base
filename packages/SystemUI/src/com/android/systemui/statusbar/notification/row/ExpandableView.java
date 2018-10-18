@@ -25,16 +25,19 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
+import com.android.systemui.Dumpable;
 import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.StackScrollState;
 
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 
 /**
  * An abstract view for expandable views.
  */
-public abstract class ExpandableView extends FrameLayout {
+public abstract class ExpandableView extends FrameLayout implements Dumpable {
 
     public static final float NO_ROUNDNESS = -1;
     protected OnHeightChangedListener mOnHeightChangedListener;
@@ -557,6 +560,10 @@ public abstract class ExpandableView extends FrameLayout {
 
     public boolean hasExpandingChild() {
         return false;
+    }
+
+    @Override
+    public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
     }
 
     /**

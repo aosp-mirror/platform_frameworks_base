@@ -113,19 +113,6 @@ public final class KeyChainSnapshot implements Parcelable {
     }
 
     /**
-     * Public key used to encrypt {@code encryptedRecoveryKeyBlob}.
-     *
-     * See implementation for binary key format.
-     *
-     * @deprecated Use {@link #getTrustedHardwareCertPath} instead.
-     * @removed
-     */
-    @Deprecated
-    public @NonNull byte[] getTrustedHardwarePublicKey() {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
      * CertPath containing the public key used to encrypt {@code encryptedRecoveryKeyBlob}.
      */
     public @NonNull CertPath getTrustedHardwareCertPath() {
@@ -220,18 +207,6 @@ public final class KeyChainSnapshot implements Parcelable {
         public Builder setServerParams(byte[] serverParams) {
             mInstance.mServerParams = serverParams;
             return this;
-        }
-
-        /**
-         * Sets public key used to encrypt recovery blob.
-         *
-         * @param publicKey The public key
-         * @return This builder.
-         * @removed Use {@link #setTrustedHardwareCertPath} instead.
-         */
-        @Deprecated
-        public Builder setTrustedHardwarePublicKey(byte[] publicKey) {
-            throw new UnsupportedOperationException();
         }
 
         /**

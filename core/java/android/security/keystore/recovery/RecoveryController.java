@@ -23,7 +23,6 @@ import android.annotation.SystemApi;
 import android.app.KeyguardManager;
 import android.app.PendingIntent;
 import android.content.Context;
-import android.content.pm.PackageManager.NameNotFoundException;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.ServiceSpecificException;
@@ -301,18 +300,6 @@ public class RecoveryController {
     }
 
     /**
-     * @deprecated Use {@link #initRecoveryService(String, byte[], byte[])} instead.
-     * @removed
-     */
-    @Deprecated
-    @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
-    public void initRecoveryService(
-            @NonNull String rootCertificateAlias, @NonNull byte[] signedPublicKeyList)
-            throws CertificateException, InternalRecoveryServiceException {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
      * Initializes the recovery service for the calling application. The detailed steps should be:
      * <ol>
      *     <li>Parse {@code signatureFile} to get relevant information.
@@ -360,16 +347,6 @@ public class RecoveryController {
             }
             throw wrapUnexpectedServiceSpecificException(e);
         }
-    }
-
-    /**
-     * @deprecated Use {@link #getKeyChainSnapshot()}
-     * @removed
-     */
-    @Deprecated
-    @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
-    public @Nullable KeyChainSnapshot getRecoveryData() throws InternalRecoveryServiceException {
-        throw new UnsupportedOperationException();
     }
 
     /**
@@ -440,17 +417,6 @@ public class RecoveryController {
     }
 
     /**
-     * @deprecated Use {@link #getAliases()}.
-     * @removed
-     */
-    @Deprecated
-    @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
-    public List<String> getAliases(@Nullable String packageName)
-            throws InternalRecoveryServiceException {
-        throw new UnsupportedOperationException();
-    }
-
-    /**
      * Returns a list of aliases of keys belonging to the application.
      */
     @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
@@ -463,18 +429,6 @@ public class RecoveryController {
         } catch (ServiceSpecificException e) {
             throw wrapUnexpectedServiceSpecificException(e);
         }
-    }
-
-    /**
-     * @deprecated Use {@link #setRecoveryStatus(String, int)}
-     * @removed
-     */
-    @Deprecated
-    @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
-    public void setRecoveryStatus(
-            @NonNull String packageName, String alias, int status)
-            throws NameNotFoundException, InternalRecoveryServiceException {
-        throw new UnsupportedOperationException();
     }
 
     /**
@@ -498,17 +452,6 @@ public class RecoveryController {
         } catch (ServiceSpecificException e) {
             throw wrapUnexpectedServiceSpecificException(e);
         }
-    }
-
-    /**
-     * @deprecated Use {@link #getRecoveryStatus(String)}.
-     * @removed
-     */
-    @Deprecated
-    @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
-    public int getRecoveryStatus(String packageName, String alias)
-            throws InternalRecoveryServiceException {
-        throw new UnsupportedOperationException();
     }
 
     /**
@@ -581,39 +524,6 @@ public class RecoveryController {
         } catch (ServiceSpecificException e) {
             throw wrapUnexpectedServiceSpecificException(e);
         }
-    }
-
-    /**
-     * Deprecated.
-     * Generates a AES256/GCM/NoPADDING key called {@code alias} and loads it into the recoverable
-     * key store. Returns the raw material of the key.
-     *
-     * @param alias The key alias.
-     * @param account The account associated with the key
-     * @throws InternalRecoveryServiceException if an unexpected error occurred in the recovery
-     *     service.
-     * @throws LockScreenRequiredException if the user has not set a lock screen. This is required
-     *     to generate recoverable keys, as the snapshots are encrypted using a key derived from the
-     *     lock screen.
-     * @deprecated Use {@link #generateKey(String)}
-     * @removed
-     */
-    @Deprecated
-    @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
-    public byte[] generateAndStoreKey(@NonNull String alias, byte[] account)
-            throws InternalRecoveryServiceException, LockScreenRequiredException {
-        throw new UnsupportedOperationException("Operation is not supported, use generateKey");
-    }
-
-    /**
-     * @deprecated Use {@link #generateKey(String)}.
-     * @removed
-     */
-    @Deprecated
-    @RequiresPermission(android.Manifest.permission.RECOVER_KEYSTORE)
-    public Key generateKey(@NonNull String alias, byte[] account)
-            throws InternalRecoveryServiceException, LockScreenRequiredException {
-        throw new UnsupportedOperationException();
     }
 
     /**

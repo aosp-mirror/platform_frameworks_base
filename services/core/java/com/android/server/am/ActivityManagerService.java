@@ -18,6 +18,7 @@ package com.android.server.am;
 
 import static android.Manifest.permission.CHANGE_CONFIGURATION;
 import static android.Manifest.permission.CHANGE_DEVICE_IDLE_TEMP_WHITELIST;
+import static android.Manifest.permission.FILTER_EVENTS;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS;
 import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 import static android.Manifest.permission.MANAGE_ACTIVITY_STACKS;
@@ -72,7 +73,9 @@ import static android.os.Process.THREAD_GROUP_TOP_APP;
 import static android.os.Process.THREAD_PRIORITY_BACKGROUND;
 import static android.os.Process.THREAD_PRIORITY_FOREGROUND;
 import static android.os.Process.getFreeMemory;
+import static android.os.Process.getPidsForCommands;
 import static android.os.Process.getTotalMemory;
+import static android.os.Process.getUidForPid;
 import static android.os.Process.isThreadInProcess;
 import static android.os.Process.killProcess;
 import static android.os.Process.killProcessQuiet;
@@ -137,9 +140,20 @@ import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_SWITC
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_UID_OBSERVERS;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
-import static com.android.server.am.ActivityStackSupervisor.PRESERVE_WINDOWS;
+import static com.android.server.am.MemoryStatUtil.MEMORY_STAT_INTERESTING_NATIVE_PROCESSES;
+import static com.android.server.am.ActivityTaskManagerService.DUMP_ACTIVITIES_CMD;
+import static com.android.server.am.ActivityTaskManagerService.DUMP_ACTIVITIES_SHORT_CMD;
+import static com.android.server.am.ActivityTaskManagerService.DUMP_CONTAINERS_CMD;
+import static com.android.server.am.ActivityTaskManagerService.DUMP_LASTANR_CMD;
+import static com.android.server.am.ActivityTaskManagerService.DUMP_LASTANR_TRACES_CMD;
+import static com.android.server.am.ActivityTaskManagerService.DUMP_RECENTS_CMD;
+import static com.android.server.am.ActivityTaskManagerService.DUMP_RECENTS_SHORT_CMD;
+import static com.android.server.am.ActivityTaskManagerService.DUMP_STARTER_CMD;
+import static com.android.server.am.ActivityTaskManagerService.KEY_DISPATCHING_TIMEOUT_MS;
 import static com.android.server.am.MemoryStatUtil.hasMemcg;
+import static com.android.server.am.MemoryStatUtil.readCmdlineFromProcfs;
 import static com.android.server.am.MemoryStatUtil.readMemoryStatFromFilesystem;
+import static com.android.server.am.MemoryStatUtil.readMemoryStatFromProcfs;
 
 import android.Manifest;
 import android.Manifest.permission;
@@ -434,7 +448,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     static final String SYSTEM_DEBUGGABLE = "ro.debuggable";
 
-    private static final String ANR_TRACE_DIR = "/data/anr";
+    public static final String ANR_TRACE_DIR = "/data/anr";
 
     // Maximum number of receivers an app can register.
     private static final int MAX_RECEIVERS_ALLOWED_PER_APP = 1000;
@@ -518,9 +532,6 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     private Installer mInstaller;
 
-    /** Run all ActivityStacks through this */
-    ActivityStackSupervisor mStackSupervisor;
-
     final InstrumentationReporter mInstrumentationReporter = new InstrumentationReporter();
 
     final ArrayList<ActiveInstrumentation> mActiveInstrumentation = new ArrayList<>();
@@ -558,12 +569,6 @@ public class ActivityManagerService extends IActivityManager.Stub
     final PendingIntentController mPendingIntentController;
 
     final AppErrors mAppErrors;
-
-    /**
-     * Dump of the activity state at the time of the last ANR. Cleared after
-     * {@link WindowManagerService#LAST_ANR_LIFETIME_DURATION_MSECS}
-     */
-    String mLastANRState;
 
     /**
      * Indicates the maximum time spent waiting for the network rules to get updated.
@@ -1459,7 +1464,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      * also corresponds to the merged configuration of the default display.
      */
     Configuration getGlobalConfiguration() {
-        return mStackSupervisor.getConfiguration();
+        return mActivityTaskManager.getGlobalConfiguration();
     }
 
     final class KillHandler extends Handler {
@@ -2017,7 +2022,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         synchronized (this) {
             mWindowManager = wm;
             mActivityTaskManager.setWindowManager(wm);
-            mStackSupervisor.setWindowManager(wm);
         }
     }
 
@@ -2363,7 +2367,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         mActivityTaskManager.setActivityManagerService(this, mHandlerThread.getLooper(),
                 mIntentFirewall, mPendingIntentController);
         mAtmInternal = LocalServices.getService(ActivityTaskManagerInternal.class);
-        mStackSupervisor = mActivityTaskManager.mStackSupervisor;
 
         mProcessCpuThread = new Thread("CpuTracker") {
             @Override
@@ -4082,33 +4085,13 @@ public class ActivityManagerService extends IActivityManager.Stub
             clearProfilerLocked();
         }
 
-        // Remove this application's activities from active lists.
-        boolean hasVisibleActivities = mStackSupervisor.handleAppDiedLocked(app.getWindowProcessController());
-
-        app.clearRecentTasks();
-        app.clearActivities();
-
-        if (app.getActiveInstrumentation() != null) {
+        mAtmInternal.handleAppDied(app.getWindowProcessController(), restarting, () -> {
             Slog.w(TAG, "Crash of app " + app.processName
-                  + " running instrumentation " + app.getActiveInstrumentation().mClass);
+                    + " running instrumentation " + app.getActiveInstrumentation().mClass);
             Bundle info = new Bundle();
             info.putString("shortMsg", "Process crashed.");
             finishInstrumentationLocked(app, Activity.RESULT_CANCELED, info);
-        }
-
-        mWindowManager.deferSurfaceLayout();
-        try {
-            if (!restarting && hasVisibleActivities
-                    && !mStackSupervisor.resumeFocusedStacksTopActivitiesLocked()) {
-                // If there was nothing to resume, and we are not already restarting this process, but
-                // there is a visible activity that is hosted by the process...  then make sure all
-                // visible activities are running, taking care of restarting this process.
-                mStackSupervisor.ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
-            }
-        } finally {
-            mWindowManager.continueSurfaceLayout();
-        }
-
+        });
     }
 
     private final int getLRURecordIndexForAppLocked(IApplicationThread thread) {
@@ -4874,48 +4857,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public void closeSystemDialogs(String reason) {
-        enforceNotIsolatedCaller("closeSystemDialogs");
-
-        final int pid = Binder.getCallingPid();
-        final int uid = Binder.getCallingUid();
-        final long origId = Binder.clearCallingIdentity();
-        try {
-            synchronized (this) {
-                // Only allow this from foreground processes, so that background
-                // applications can't abuse it to prevent system UI from being shown.
-                if (uid >= FIRST_APPLICATION_UID) {
-                    ProcessRecord proc;
-                    synchronized (mPidsSelfLocked) {
-                        proc = mPidsSelfLocked.get(pid);
-                    }
-                    if (proc.curRawAdj > ProcessList.PERCEPTIBLE_APP_ADJ) {
-                        Slog.w(TAG, "Ignoring closeSystemDialogs " + reason
-                                + " from background process " + proc);
-                        return;
-                    }
-                }
-                closeSystemDialogsLocked(reason);
-            }
-        } finally {
-            Binder.restoreCallingIdentity(origId);
-        }
-    }
-
-    @GuardedBy("this")
-    void closeSystemDialogsLocked(String reason) {
-        Intent intent = new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
-        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY
-                | Intent.FLAG_RECEIVER_FOREGROUND);
-        if (reason != null) {
-            intent.putExtra("reason", reason);
-        }
-        mWindowManager.closeSystemDialogs(reason);
-
-        mStackSupervisor.closeSystemDialogsLocked();
-
-        broadcastIntentLocked(null, null, intent, null, null, 0, null, null, null,
-                OP_NONE, null, false, false,
-                -1, SYSTEM_UID, UserHandle.USER_ALL);
+        mAtmInternal.closeSystemDialogs(reason);
     }
 
     @Override
@@ -5230,15 +5172,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             return;
         }
 
-        // Clean-up disabled activities.
-        if (mStackSupervisor.finishDisabledPackageActivitiesLocked(
-                packageName, disabledClasses, true, false, userId) && mBooted) {
-            mStackSupervisor.resumeFocusedStacksTopActivitiesLocked();
-            mStackSupervisor.scheduleIdleLocked();
-        }
-
-        // Clean-up disabled tasks
-        mActivityTaskManager.getRecentTasks().cleanupDisabledPackageTasksLocked(packageName, disabledClasses, userId);
+        mAtmInternal.cleanupDisabledPackageComponents(
+                packageName, disabledClasses, userId, mBooted);
 
         // Clean-up disabled services.
         mServices.bringDownDisabledPackageServicesLocked(
@@ -5302,15 +5237,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 ProcessList.INVALID_ADJ, callerWillRestart, true, doit, evenPersistent,
                 packageName == null ? ("stop user " + userId) : ("stop " + packageName));
 
-        didSomething |= mActivityTaskManager.getActivityStartController().clearPendingActivityLaunches(packageName);
-
-        if (mStackSupervisor.finishDisabledPackageActivitiesLocked(
-                packageName, null, doit, evenPersistent, userId)) {
-            if (!doit) {
-                return true;
-            }
-            didSomething = true;
-        }
+        didSomething |=
+                mAtmInternal.onForceStopPackage(packageName, doit, evenPersistent, userId);
 
         if (mServices.bringDownDisabledPackageServicesLocked(
                 packageName, null, userId, evenPersistent, true, doit)) {
@@ -5360,8 +5288,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             }
             if (mBooted) {
-                mStackSupervisor.resumeFocusedStacksTopActivitiesLocked();
-                mStackSupervisor.scheduleIdleLocked();
+                mAtmInternal.resumeTopActivities(true /* scheduleIdle */);
             }
         }
 
@@ -5785,7 +5712,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
 
             checkTime(startTime, "attachApplicationLocked: immediately before bindApplication");
-            mStackSupervisor.getActivityMetricsLogger().notifyBindApplication(app);
+            mAtmInternal.preBindApplication(app.getWindowProcessController());
             final ActiveInstrumentation instr2 = app.getActiveInstrumentation();
             if (app.isolatedEntryPoint != null) {
                 // This is an isolated process which should just call an entry point instead of
@@ -5845,9 +5772,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         // See if the top visible activity is waiting to run in this process...
         if (normalMode) {
             try {
-                if (mStackSupervisor.attachApplicationLocked(app)) {
-                    didSomething = true;
-                }
+                didSomething = mAtmInternal.attachApplication(app.getWindowProcessController());
             } catch (Exception e) {
                 Slog.wtf(TAG, "Exception thrown launching activities in " + app, e);
                 badApp = true;
@@ -8196,8 +8121,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         mHandler.post(new Runnable() {
             @Override
             public void run() {
-                mAppErrors.appNotResponding(host, null, null, false,
-                        "ContentProvider not responding");
+                host.appNotResponding(
+                        null, null, null, null, false, "ContentProvider not responding");
             }
         });
     }
@@ -8646,51 +8571,12 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public void notifyLockedProfile(@UserIdInt int userId) {
-        try {
-            if (!AppGlobals.getPackageManager().isUidPrivileged(Binder.getCallingUid())) {
-                throw new SecurityException("Only privileged app can call notifyLockedProfile");
-            }
-        } catch (RemoteException ex) {
-            throw new SecurityException("Fail to check is caller a privileged app", ex);
-        }
-
-        synchronized (this) {
-            final long ident = Binder.clearCallingIdentity();
-            try {
-                if (mUserController.shouldConfirmCredentials(userId)) {
-                    if (mActivityTaskManager.mKeyguardController.isKeyguardLocked()) {
-                        // Showing launcher to avoid user entering credential twice.
-                        final int currentUserId = mUserController.getCurrentUserId();
-                        mAtmInternal.startHomeActivity(currentUserId, "notifyLockedProfile");
-                    }
-                    mStackSupervisor.lockAllProfileTasks(userId);
-                }
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-            }
-        }
+        mAtmInternal.notifyLockedProfile(userId, mUserController.getCurrentUserId());
     }
 
     @Override
     public void startConfirmDeviceCredentialIntent(Intent intent, Bundle options) {
-        enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "startConfirmDeviceCredentialIntent");
-        synchronized (this) {
-            final long ident = Binder.clearCallingIdentity();
-            try {
-                intent.addFlags(FLAG_ACTIVITY_NEW_TASK |
-                        FLAG_ACTIVITY_EXCLUDE_FROM_RECENTS |
-                        FLAG_ACTIVITY_TASK_ON_HOME);
-                ActivityOptions activityOptions = options != null
-                        ? new ActivityOptions(options)
-                        : ActivityOptions.makeBasic();
-                activityOptions.setLaunchTaskId(
-                        mStackSupervisor.getDefaultDisplayHomeActivity().getTask().taskId);
-                mContext.startActivityAsUser(intent, activityOptions.toBundle(),
-                        UserHandle.CURRENT);
-            } finally {
-                Binder.restoreCallingIdentity(ident);
-            }
-        }
+        mAtmInternal.startConfirmDeviceCredentialIntent(intent, options);
     }
 
     @Override
@@ -9798,7 +9684,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
-            mStackSupervisor.resumeFocusedStacksTopActivitiesLocked();
+            mAtmInternal.resumeTopActivities(false /* scheduleIdle */);
             mUserController.sendUserSwitchBroadcasts(-1, currentUserId);
 
             BinderInternal.nSetBinderProxyCountWatermarks(6000,5500);
@@ -9906,7 +9792,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             crashInfo.crashTag = crashInfo.crashTag + " " + relaunchReasonString;
         }
 
-        addErrorToDropBox(eventType, r, processName, null, null, null, null, null, crashInfo);
+        addErrorToDropBox(
+                eventType, r, processName, null, null, null, null, null, null, crashInfo);
 
         mAppErrors.crashApplication(r, crashInfo);
     }
@@ -10078,7 +9965,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         StatsLog.write(StatsLog.WTF_OCCURRED, callingUid, tag, processName,
                 callingPid);
 
-        addErrorToDropBox("wtf", r, processName, null, null, tag, null, null, crashInfo);
+        addErrorToDropBox("wtf", r, processName, null, null, null, tag, null, null, crashInfo);
 
         return r;
     }
@@ -10177,17 +10064,18 @@ public class ActivityManagerService extends IActivityManager.Stub
      * Write a description of an error (crash, WTF, ANR) to the drop box.
      * @param eventType to include in the drop box tag ("crash", "wtf", etc.)
      * @param process which caused the error, null means the system server
-     * @param activity which triggered the error, null if unknown
-     * @param parent activity related to the error, null if unknown
+     * @param activityShortComponentName which triggered the error, null if unknown
+     * @param parentShortComponentName activity related to the error, null if unknown
+     * @param parentProcess parent process
      * @param subject line related to the error, null if absent
      * @param report in long form describing the error, null if absent
      * @param dataFile text file to include in the report, null if none
      * @param crashInfo giving an application stack trace, null if absent
      */
     public void addErrorToDropBox(String eventType,
-            ProcessRecord process, String processName, ActivityRecord activity,
-            ActivityRecord parent, String subject,
-            final String report, final File dataFile,
+            ProcessRecord process, String processName, String activityShortComponentName,
+            String parentShortComponentName, ProcessRecord parentProcess,
+            String subject, final String report, final File dataFile,
             final ApplicationErrorReport.CrashInfo crashInfo) {
         // NOTE -- this must never acquire the ActivityManagerService lock,
         // otherwise the watchdog may be prevented from resetting the system.
@@ -10217,14 +10105,16 @@ public class ActivityManagerService extends IActivityManager.Stub
                     .append(process.isInterestingToUserLocked() ? "Yes" : "No")
                     .append("\n");
         }
-        if (activity != null) {
-            sb.append("Activity: ").append(activity.shortComponentName).append("\n");
+        if (activityShortComponentName != null) {
+            sb.append("Activity: ").append(activityShortComponentName).append("\n");
         }
-        if (parent != null && parent.app != null && parent.app.getPid() != process.pid) {
-            sb.append("Parent-Process: ").append(parent.app.mName).append("\n");
-        }
-        if (parent != null && parent != activity) {
-            sb.append("Parent-Activity: ").append(parent.shortComponentName).append("\n");
+        if (parentShortComponentName != null) {
+            if (parentProcess != null && parentProcess.pid != process.pid) {
+                sb.append("Parent-Process: ").append(parentProcess.processName).append("\n");
+            }
+            if (!parentShortComponentName.equals(activityShortComponentName)) {
+                sb.append("Parent-Activity: ").append(parentShortComponentName).append("\n");
+            }
         }
         if (subject != null) {
             sb.append("Subject: ").append(subject).append("\n");
@@ -10579,24 +10469,26 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (dumpAll) {
                 pw.println("-------------------------------------------------------------------------------");
             }
-            if (mActivityTaskManager.getRecentTasks() != null) {
-                mActivityTaskManager.getRecentTasks().dump(pw, dumpAll, dumpPackage);
-            }
+            mAtmInternal.dump(
+                    DUMP_RECENTS_CMD, fd, pw, args, opti, dumpAll, dumpClient, dumpPackage);
             pw.println();
             if (dumpAll) {
                 pw.println("-------------------------------------------------------------------------------");
             }
-            dumpLastANRLocked(pw);
+            mAtmInternal.dump(
+                    DUMP_LASTANR_CMD, fd, pw, args, opti, dumpAll, dumpClient, dumpPackage);
             pw.println();
             if (dumpAll) {
                 pw.println("-------------------------------------------------------------------------------");
             }
-            dumpActivityStarterLocked(pw, dumpPackage);
+            mAtmInternal.dump(
+                    DUMP_STARTER_CMD, fd, pw, args, opti, dumpAll, dumpClient, dumpPackage);
             pw.println();
             if (dumpAll) {
                 pw.println("-------------------------------------------------------------------------------");
             }
-            dumpActivityContainersLocked(pw);
+            mAtmInternal.dump(
+                    DUMP_CONTAINERS_CMD, fd, pw, args, opti, dumpAll, dumpClient, dumpPackage);
             // Activities section is dumped as part of the Critical priority dump. Exclude the
             // section if priority is Normal.
             if (!dumpNormalPriority) {
@@ -10604,7 +10496,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (dumpAll) {
                     pw.println("-------------------------------------------------------------------------------");
                 }
-                dumpActivitiesLocked(fd, pw, args, opti, dumpAll, dumpClient, dumpPackage);
+                mAtmInternal.dump(
+                        DUMP_ACTIVITIES_CMD, fd, pw, args, opti, dumpAll, dumpClient, dumpPackage);
             }
             if (mAssociations.size() > 0) {
                 pw.println();
@@ -10693,9 +10586,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
             if ("activities".equals(cmd) || "a".equals(cmd)) {
                 // output proto is ActivityManagerServiceDumpActivitiesProto
-                synchronized (this) {
-                    writeActivitiesToProtoLocked(proto);
-                }
+                mAtmInternal.writeActivitiesToProto(proto);
             } else if ("broadcasts".equals(cmd) || "b".equals(cmd)) {
                 // output proto is ActivityManagerServiceDumpBroadcastsProto
                 synchronized (this) {
@@ -10734,7 +10625,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 // default option, dump everything, output is ActivityManagerServiceProto
                 synchronized (this) {
                     long activityToken = proto.start(ActivityManagerServiceProto.ACTIVITIES);
-                    writeActivitiesToProtoLocked(proto);
+                    mAtmInternal.writeActivitiesToProto(proto);
                     proto.end(activityToken);
 
                     long broadcastToken = proto.start(ActivityManagerServiceProto.BROADCASTS);
@@ -10761,32 +10652,12 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (opti < args.length) {
             String cmd = args[opti];
             opti++;
-            if ("activities".equals(cmd) || "a".equals(cmd)) {
-                synchronized (this) {
-                    dumpActivitiesLocked(fd, pw, args, opti, true, dumpClient, dumpPackage);
-                }
-            } else if ("lastanr".equals(cmd)) {
-                synchronized (this) {
-                    dumpLastANRLocked(pw);
-                }
-            } else if ("lastanr-traces".equals(cmd)) {
-                synchronized (this) {
-                    dumpLastANRTracesLocked(pw);
-                }
-            } else if ("starter".equals(cmd)) {
-                synchronized (this) {
-                    dumpActivityStarterLocked(pw, dumpPackage);
-                }
-            } else if ("containers".equals(cmd)) {
-                synchronized (this) {
-                    dumpActivityContainersLocked(pw);
-                }
-            } else if ("recents".equals(cmd) || "r".equals(cmd)) {
-                synchronized (this) {
-                    if (mActivityTaskManager.getRecentTasks() != null) {
-                        mActivityTaskManager.getRecentTasks().dump(pw, true /* dumpAll */, dumpPackage);
-                    }
-                }
+            if (DUMP_ACTIVITIES_CMD.equals(cmd) || DUMP_ACTIVITIES_SHORT_CMD.equals(cmd)
+                    || DUMP_LASTANR_CMD.equals(cmd) || DUMP_LASTANR_TRACES_CMD.equals(cmd)
+                    || DUMP_STARTER_CMD.equals(cmd) || DUMP_CONTAINERS_CMD.equals(cmd)
+                    || DUMP_RECENTS_CMD.equals(cmd) || DUMP_RECENTS_SHORT_CMD.equals(cmd)) {
+                mAtmInternal.dump(
+                        cmd, fd, pw, args, opti, true /* dumpAll */, dumpClient, dumpPackage);
             } else if ("binder-proxies".equals(cmd)) {
                 if (opti >= args.length) {
                     dumpBinderProxies(pw);
@@ -10922,8 +10793,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 LockGuard.dump(fd, pw, args);
             } else {
                 // Dumping a single activity?
-                if (!dumpActivity(fd, pw, cmd, args, opti, dumpAll, dumpVisibleStacksOnly,
-                        dumpFocusedStackOnly)) {
+                if (!mAtmInternal.dumpActivity(fd, pw, cmd, args, opti, dumpAll,
+                        dumpVisibleStacksOnly, dumpFocusedStackOnly)) {
                     ActivityManagerShellCommand shell = new ActivityManagerShellCommand(this, true);
                     int res = shell.exec(this, null, fd, null, args, null,
                             new ResultReceiver(null));
@@ -10958,96 +10829,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
         Binder.restoreCallingIdentity(origId);
-    }
-
-    private void writeActivitiesToProtoLocked(ProtoOutputStream proto) {
-        // The output proto of "activity --proto activities" is ActivityManagerServiceDumpActivitiesProto
-        mStackSupervisor.writeToProto(proto, ActivityManagerServiceDumpActivitiesProto.ACTIVITY_STACK_SUPERVISOR);
-    }
-
-    private void dumpLastANRLocked(PrintWriter pw) {
-        pw.println("ACTIVITY MANAGER LAST ANR (dumpsys activity lastanr)");
-        if (mLastANRState == null) {
-            pw.println("  <no ANR has occurred since boot>");
-        } else {
-            pw.println(mLastANRState);
-        }
-    }
-
-    private void dumpLastANRTracesLocked(PrintWriter pw) {
-        pw.println("ACTIVITY MANAGER LAST ANR TRACES (dumpsys activity lastanr-traces)");
-
-        final File[] files = new File(ANR_TRACE_DIR).listFiles();
-        if (ArrayUtils.isEmpty(files)) {
-            pw.println("  <no ANR has occurred since boot>");
-            return;
-        }
-        // Find the latest file.
-        File latest = null;
-        for (File f : files) {
-            if ((latest == null) || (latest.lastModified() < f.lastModified())) {
-                latest = f;
-            }
-        }
-        pw.print("File: ");
-        pw.print(latest.getName());
-        pw.println();
-        try (BufferedReader in = new BufferedReader(new FileReader(latest))) {
-            String line;
-            while ((line = in.readLine()) != null) {
-                pw.println(line);
-            }
-        } catch (IOException e) {
-            pw.print("Unable to read: ");
-            pw.print(e);
-            pw.println();
-        }
-    }
-
-    private void dumpActivityContainersLocked(PrintWriter pw) {
-        pw.println("ACTIVITY MANAGER STARTER (dumpsys activity containers)");
-        mStackSupervisor.dumpChildrenNames(pw, " ");
-        pw.println(" ");
-    }
-
-    private void dumpActivityStarterLocked(PrintWriter pw, String dumpPackage) {
-        pw.println("ACTIVITY MANAGER STARTER (dumpsys activity starter)");
-        mActivityTaskManager.getActivityStartController().dump(pw, "", dumpPackage);
-    }
-
-    void dumpActivitiesLocked(FileDescriptor fd, PrintWriter pw, String[] args,
-            int opti, boolean dumpAll, boolean dumpClient, String dumpPackage) {
-        dumpActivitiesLocked(fd, pw, args, opti, dumpAll, dumpClient, dumpPackage,
-                "ACTIVITY MANAGER ACTIVITIES (dumpsys activity activities)");
-    }
-
-    void dumpActivitiesLocked(FileDescriptor fd, PrintWriter pw, String[] args,
-            int opti, boolean dumpAll, boolean dumpClient, String dumpPackage, String header) {
-        pw.println(header);
-
-        boolean printedAnything = mStackSupervisor.dumpActivitiesLocked(fd, pw, dumpAll, dumpClient,
-                dumpPackage);
-        boolean needSep = printedAnything;
-
-        boolean printed = ActivityStackSupervisor.printThisActivity(pw,
-                mStackSupervisor.getTopResumedActivity(),  dumpPackage, needSep,
-                "  ResumedActivity: ");
-        if (printed) {
-            printedAnything = true;
-            needSep = false;
-        }
-
-        if (dumpPackage == null) {
-            if (needSep) {
-                pw.println();
-            }
-            printedAnything = true;
-            mStackSupervisor.dump(pw, "  ");
-        }
-
-        if (!printedAnything) {
-            pw.println("  (nothing)");
-        }
     }
 
     void dumpAssociationsLocked(FileDescriptor fd, PrintWriter pw, String[] args,
@@ -11398,37 +11179,10 @@ public class ActivityManagerService extends IActivityManager.Stub
             needSep = false;
             mUserController.dump(pw, dumpAll);
         }
-        if (mActivityTaskManager.mHomeProcess != null && (dumpPackage == null
-                || mActivityTaskManager.mHomeProcess.mPkgList.contains(dumpPackage))) {
-            if (needSep) {
-                pw.println();
-                needSep = false;
-            }
-            pw.println("  mHomeProcess: " + mActivityTaskManager.mHomeProcess);
-        }
-        if (mActivityTaskManager.mPreviousProcess != null && (dumpPackage == null
-                || mActivityTaskManager.mPreviousProcess.mPkgList.contains(dumpPackage))) {
-            if (needSep) {
-                pw.println();
-                needSep = false;
-            }
-            pw.println("  mPreviousProcess: " + mActivityTaskManager.mPreviousProcess);
-        }
-        if (dumpAll && (mActivityTaskManager.mPreviousProcess == null || dumpPackage == null
-                || mActivityTaskManager.mPreviousProcess.mPkgList.contains(dumpPackage))) {
-            StringBuilder sb = new StringBuilder(128);
-            sb.append("  mPreviousProcessVisibleTime: ");
-            TimeUtils.formatDuration(mActivityTaskManager.mPreviousProcessVisibleTime, sb);
-            pw.println(sb);
-        }
-        if (mActivityTaskManager.mHeavyWeightProcess != null && (dumpPackage == null
-                || mActivityTaskManager.mHeavyWeightProcess.mPkgList.contains(dumpPackage))) {
-            if (needSep) {
-                pw.println();
-                needSep = false;
-            }
-            pw.println("  mHeavyWeightProcess: " + mActivityTaskManager.mHeavyWeightProcess);
-        }
+
+        needSep = mAtmInternal.dumpForProcesses(fd, pw, dumpAll, dumpPackage, dumpAppId, needSep,
+                mTestPssMode, mWakefulness);
+
         if (dumpAll && mPendingStarts.size() > 0) {
             if (needSep) pw.println();
             needSep = true;
@@ -11437,32 +11191,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 pw.println("    " + mPendingStarts.keyAt(i) + ": " + mPendingStarts.valueAt(i));
             }
         }
-        if (dumpPackage == null) {
-            pw.println("  mGlobalConfiguration: " + getGlobalConfiguration());
-            mStackSupervisor.dumpDisplayConfigs(pw, "  ");
-        }
         if (dumpAll) {
-            if (dumpPackage == null) {
-                pw.println("  mConfigWillChange: "
-                        + mActivityTaskManager.getTopDisplayFocusedStack().mConfigWillChange);
-            }
-            if (mActivityTaskManager.mCompatModePackages.getPackages().size() > 0) {
-                boolean printed = false;
-                for (Map.Entry<String, Integer> entry
-                        : mActivityTaskManager.mCompatModePackages.getPackages().entrySet()) {
-                    String pkg = entry.getKey();
-                    int mode = entry.getValue();
-                    if (dumpPackage != null && !dumpPackage.equals(pkg)) {
-                        continue;
-                    }
-                    if (!printed) {
-                        pw.println("  mScreenCompatPackages:");
-                        printed = true;
-                    }
-                    pw.print("    "); pw.print(pkg); pw.print(": ");
-                            pw.print(mode); pw.println();
-                }
-            }
             final int NI = mUidObservers.getRegisteredCallbackCount();
             boolean printed = false;
             for (int i=0; i<NI; i++) {
@@ -11519,11 +11248,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             }
         }
-        if (dumpPackage == null) {
-            pw.println("  mWakefulness="
-                    + PowerManagerInternal.wakefulnessToString(mWakefulness));
-            mActivityTaskManager.dumpSleepStates(pw, mTestPssMode);
-        }
         if (mDebugApp != null || mOrigDebugApp != null || mDebugTransient
                 || mOrigWaitForDebugger) {
             if (dumpPackage == null || dumpPackage.equals(mDebugApp)
@@ -11536,9 +11260,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                         + " mDebugTransient=" + mDebugTransient
                         + " mOrigWaitForDebugger=" + mOrigWaitForDebugger);
             }
-        }
-        if (mActivityTaskManager.mCurAppTimeTracker != null) {
-            mActivityTaskManager.mCurAppTimeTracker.dumpWithHeader(pw, "  ", true);
         }
         if (mMemWatchProcesses.getMap().size() > 0) {
             pw.println("  Mem watch processes:");
@@ -11604,39 +11325,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                 pw.println("  mNativeDebuggingApp=" + mNativeDebuggingApp);
             }
         }
-        if (mActivityTaskManager.mAllowAppSwitchUids.size() > 0) {
-            boolean printed = false;
-            for (int i = 0; i < mActivityTaskManager.mAllowAppSwitchUids.size(); i++) {
-                ArrayMap<String, Integer> types = mActivityTaskManager.mAllowAppSwitchUids.valueAt(i);
-                for (int j = 0; j < types.size(); j++) {
-                    if (dumpPackage == null ||
-                            UserHandle.getAppId(types.valueAt(j).intValue()) == dumpAppId) {
-                        if (needSep) {
-                            pw.println();
-                            needSep = false;
-                        }
-                        if (!printed) {
-                            pw.println("  mAllowAppSwitchUids:");
-                            printed = true;
-                        }
-                        pw.print("    User ");
-                        pw.print(mActivityTaskManager.mAllowAppSwitchUids.keyAt(i));
-                        pw.print(": Type ");
-                        pw.print(types.keyAt(j));
-                        pw.print(" = ");
-                        UserHandle.formatUid(pw, types.valueAt(j).intValue());
-                        pw.println();
-                    }
-                }
-            }
-        }
         if (dumpPackage == null) {
             if (mAlwaysFinishActivities) {
                 pw.println("  mAlwaysFinishActivities=" + mAlwaysFinishActivities);
-            }
-            if (mActivityTaskManager.mController != null) {
-                pw.println("  mController=" + mActivityTaskManager.mController
-                        + " mControllerIsAMonkey=" + mActivityTaskManager.mControllerIsAMonkey);
             }
             if (dumpAll) {
                 pw.println("  Total persistent processes: " + numPers);
@@ -11650,8 +11341,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 pw.print("  mLastPowerCheckUptime=");
                         TimeUtils.formatDuration(mLastPowerCheckUptime, pw);
                         pw.println("");
-                pw.println("  mGoingToSleep=" + mStackSupervisor.mGoingToSleep);
-                pw.println("  mLaunchingActivity=" + mStackSupervisor.mLaunchingActivity);
                 pw.println("  mAdjSeq=" + mAdjSeq + " mLruSeq=" + mLruSeq);
                 pw.println("  mNumNonCachedProcs=" + mNumNonCachedProcs
                         + " (" + mLruProcesses.size() + " total)"
@@ -11813,39 +11502,10 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         writeProcessesToGcToProto(proto, ActivityManagerServiceDumpProcessesProto.GC_PROCS, dumpPackage);
         mAppErrors.writeToProto(proto, ActivityManagerServiceDumpProcessesProto.APP_ERRORS, dumpPackage);
+        mAtmInternal.writeProcessesToProto(proto, dumpPackage);
 
         if (dumpPackage == null) {
             mUserController.writeToProto(proto, ActivityManagerServiceDumpProcessesProto.USER_CONTROLLER);
-            getGlobalConfiguration().writeToProto(proto, ActivityManagerServiceDumpProcessesProto.GLOBAL_CONFIGURATION);
-            proto.write(ActivityManagerServiceDumpProcessesProto.CONFIG_WILL_CHANGE, mActivityTaskManager.getTopDisplayFocusedStack().mConfigWillChange);
-        }
-
-        if (mActivityTaskManager.mHomeProcess != null && (dumpPackage == null
-                || mActivityTaskManager.mHomeProcess.mPkgList.contains(dumpPackage))) {
-            ((ProcessRecord) mActivityTaskManager.mHomeProcess.mOwner).writeToProto(proto, ActivityManagerServiceDumpProcessesProto.HOME_PROC);
-        }
-
-        if (mActivityTaskManager.mPreviousProcess != null && (dumpPackage == null
-                || mActivityTaskManager.mPreviousProcess.mPkgList.contains(dumpPackage))) {
-            ((ProcessRecord) mActivityTaskManager.mPreviousProcess.mOwner).writeToProto(proto, ActivityManagerServiceDumpProcessesProto.PREVIOUS_PROC);
-            proto.write(ActivityManagerServiceDumpProcessesProto.PREVIOUS_PROC_VISIBLE_TIME_MS, mActivityTaskManager.mPreviousProcessVisibleTime);
-        }
-
-        if (mActivityTaskManager.mHeavyWeightProcess != null && (dumpPackage == null
-                || mActivityTaskManager.mHeavyWeightProcess.mPkgList.contains(dumpPackage))) {
-            ((ProcessRecord) mActivityTaskManager.mHeavyWeightProcess.mOwner).writeToProto(proto, ActivityManagerServiceDumpProcessesProto.HEAVY_WEIGHT_PROC);
-        }
-
-        for (Map.Entry<String, Integer> entry
-                : mActivityTaskManager.mCompatModePackages.getPackages().entrySet()) {
-            String pkg = entry.getKey();
-            int mode = entry.getValue();
-            if (dumpPackage == null || dumpPackage.equals(pkg)) {
-                long compatToken = proto.start(ActivityManagerServiceDumpProcessesProto.SCREEN_COMPAT_PACKAGES);
-                proto.write(ActivityManagerServiceDumpProcessesProto.ScreenCompatPackage.PACKAGE, pkg);
-                proto.write(ActivityManagerServiceDumpProcessesProto.ScreenCompatPackage.MODE, mode);
-                proto.end(compatToken);
-            }
         }
 
         final int NI = mUidObservers.getRegisteredCallbackCount();
@@ -11878,8 +11538,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                     PowerManagerInternal.wakefulnessToProtoEnum(mWakefulness));
             proto.write(ActivityManagerServiceDumpProcessesProto.SleepStatus.TEST_PSS_MODE, mTestPssMode);
             proto.end(sleepToken);
-
-            mActivityTaskManager.writeSleepStateToProto(proto);
         }
 
         if (mDebugApp != null || mOrigDebugApp != null || mDebugTransient
@@ -11893,11 +11551,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 proto.write(ActivityManagerServiceDumpProcessesProto.DebugApp.ORIG_WAIT_FOR_DEBUGGER, mOrigWaitForDebugger);
                 proto.end(debugAppToken);
             }
-        }
-
-        if (mActivityTaskManager.mCurAppTimeTracker != null) {
-            mActivityTaskManager.mCurAppTimeTracker.writeToProto(
-                    proto, ActivityManagerServiceDumpProcessesProto.CURRENT_TRACKER, true);
         }
 
         if (mMemWatchProcesses.getMap().size() > 0) {
@@ -11956,12 +11609,6 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         if (dumpPackage == null) {
             proto.write(ActivityManagerServiceDumpProcessesProto.ALWAYS_FINISH_ACTIVITIES, mAlwaysFinishActivities);
-            if (mActivityTaskManager.mController != null) {
-                final long token = proto.start(ActivityManagerServiceDumpProcessesProto.CONTROLLER);
-                proto.write(ActivityManagerServiceDumpProcessesProto.Controller.CONTROLLER, mActivityTaskManager.mController.toString());
-                proto.write(ActivityManagerServiceDumpProcessesProto.Controller.IS_A_MONKEY, mActivityTaskManager.mControllerIsAMonkey);
-                proto.end(token);
-            }
             proto.write(ActivityManagerServiceDumpProcessesProto.TOTAL_PERSISTENT_PROCS, numPers);
             proto.write(ActivityManagerServiceDumpProcessesProto.PROCESSES_READY, mProcessesReady);
             proto.write(ActivityManagerServiceDumpProcessesProto.SYSTEM_READY, mSystemReady);
@@ -11971,8 +11618,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             proto.write(ActivityManagerServiceDumpProcessesProto.CALL_FINISH_BOOTING, mCallFinishBooting);
             proto.write(ActivityManagerServiceDumpProcessesProto.BOOT_ANIMATION_COMPLETE, mBootAnimationComplete);
             proto.write(ActivityManagerServiceDumpProcessesProto.LAST_POWER_CHECK_UPTIME_MS, mLastPowerCheckUptime);
-            mStackSupervisor.mGoingToSleep.writeToProto(proto, ActivityManagerServiceDumpProcessesProto.GOING_TO_SLEEP);
-            mStackSupervisor.mLaunchingActivity.writeToProto(proto, ActivityManagerServiceDumpProcessesProto.LAUNCHING_ACTIVITY);
             proto.write(ActivityManagerServiceDumpProcessesProto.ADJ_SEQ, mAdjSeq);
             proto.write(ActivityManagerServiceDumpProcessesProto.LRU_SEQ, mLruSeq);
             proto.write(ActivityManagerServiceDumpProcessesProto.NUM_NON_CACHED_PROCS, mNumNonCachedProcs);
@@ -12196,95 +11841,6 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             }
             return false;
-        }
-    }
-
-    /**
-     * There are three things that cmd can be:
-     *  - a flattened component name that matches an existing activity
-     *  - the cmd arg isn't the flattened component name of an existing activity:
-     *    dump all activity whose component contains the cmd as a substring
-     *  - A hex number of the ActivityRecord object instance.
-     *
-     *  @param dumpVisibleStacksOnly dump activity with {@param name} only if in a visible stack
-     *  @param dumpFocusedStackOnly dump activity with {@param name} only if in the focused stack
-     */
-    protected boolean dumpActivity(FileDescriptor fd, PrintWriter pw, String name, String[] args,
-            int opti, boolean dumpAll, boolean dumpVisibleStacksOnly, boolean dumpFocusedStackOnly) {
-        ArrayList<ActivityRecord> activities;
-
-        synchronized (this) {
-            activities = mStackSupervisor.getDumpActivitiesLocked(name, dumpVisibleStacksOnly,
-                    dumpFocusedStackOnly);
-        }
-
-        if (activities.size() <= 0) {
-            return false;
-        }
-
-        String[] newArgs = new String[args.length - opti];
-        System.arraycopy(args, opti, newArgs, 0, args.length - opti);
-
-        TaskRecord lastTask = null;
-        boolean needSep = false;
-        for (int i=activities.size()-1; i>=0; i--) {
-            ActivityRecord r = activities.get(i);
-            if (needSep) {
-                pw.println();
-            }
-            needSep = true;
-            synchronized (this) {
-                final TaskRecord task = r.getTask();
-                if (lastTask != task) {
-                    lastTask = task;
-                    pw.print("TASK "); pw.print(lastTask.affinity);
-                            pw.print(" id="); pw.print(lastTask.taskId);
-                            pw.print(" userId="); pw.println(lastTask.userId);
-                    if (dumpAll) {
-                        lastTask.dump(pw, "  ");
-                    }
-                }
-            }
-            dumpActivity("  ", fd, pw, activities.get(i), newArgs, dumpAll);
-        }
-        return true;
-    }
-
-    /**
-     * Invokes IApplicationThread.dumpActivity() on the thread of the specified activity if
-     * there is a thread associated with the activity.
-     */
-    private void dumpActivity(String prefix, FileDescriptor fd, PrintWriter pw,
-            final ActivityRecord r, String[] args, boolean dumpAll) {
-        String innerPrefix = prefix + "  ";
-        synchronized (this) {
-            pw.print(prefix); pw.print("ACTIVITY "); pw.print(r.shortComponentName);
-                    pw.print(" "); pw.print(Integer.toHexString(System.identityHashCode(r)));
-                    pw.print(" pid=");
-                    if (r.hasProcess()) pw.println(r.app.getPid());
-                    else pw.println("(not running)");
-            if (dumpAll) {
-                r.dump(pw, innerPrefix);
-            }
-        }
-        if (r.attachedToProcess()) {
-            // flush anything that is already in the PrintWriter since the thread is going
-            // to write to the file descriptor directly
-            pw.flush();
-            try {
-                TransferPipe tp = new TransferPipe();
-                try {
-                    r.app.getThread().dumpActivity(tp.getWriteFd(),
-                            r.appToken, innerPrefix, args);
-                    tp.go(fd);
-                } finally {
-                    tp.kill();
-                }
-            } catch (IOException e) {
-                pw.println(innerPrefix + "Failure while dumping the activity: " + e);
-            } catch (RemoteException e) {
-                pw.println(innerPrefix + "Got a RemoteException while dumping the activity");
-            }
         }
     }
 
@@ -12639,7 +12195,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (inclDetails) {
                 long detailToken = proto.start(ProcessOomProto.DETAIL);
                 proto.write(ProcessOomProto.Detail.MAX_ADJ, r.maxAdj);
-                proto.write(ProcessOomProto.Detail.CUR_RAW_ADJ, r.curRawAdj);
+                proto.write(ProcessOomProto.Detail.CUR_RAW_ADJ, r.getCurRawAdj());
                 proto.write(ProcessOomProto.Detail.SET_RAW_ADJ, r.setRawAdj);
                 proto.write(ProcessOomProto.Detail.CUR_ADJ, r.curAdj);
                 proto.write(ProcessOomProto.Detail.SET_ADJ, r.setAdj);
@@ -12765,7 +12321,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 pw.print(prefix);
                 pw.print("    ");
                 pw.print("oom: max="); pw.print(r.maxAdj);
-                pw.print(" curRaw="); pw.print(r.curRawAdj);
+                pw.print(" curRaw="); pw.print(r.getCurRawAdj());
                 pw.print(" setRaw="); pw.print(r.setRawAdj);
                 pw.print(" cur="); pw.print(r.curAdj);
                 pw.print(" set="); pw.println(r.setAdj);
@@ -14427,13 +13983,13 @@ public class ActivityManagerService extends IActivityManager.Stub
             mServices.newServiceDumperLocked(null, catPw, emptyArgs, 0,
                     false, null).dumpLocked();
             catPw.println();
-            dumpActivitiesLocked(null, catPw, emptyArgs, 0, false, false, null);
+            mAtmInternal.dump(DUMP_ACTIVITIES_CMD, null, catPw, emptyArgs, 0, false, false, null);
             catPw.flush();
         }
         dropBuilder.append(catSw.toString());
         StatsLog.write(StatsLog.LOW_MEM_REPORTED);
         addErrorToDropBox("lowmem", null, "system_server", null,
-                null, tag.toString(), dropBuilder.toString(), null, null);
+                null, null, tag.toString(), dropBuilder.toString(), null, null);
         //Slog.i(TAG, "Sent to dropbox:");
         //Slog.i(TAG, dropBuilder.toString());
         synchronized (ActivityManagerService.this) {
@@ -15890,7 +15446,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                                     + " ssp=" + ssp + " data=" + data);
                             return ActivityManager.BROADCAST_SUCCESS;
                         }
-                        mStackSupervisor.updateActivityApplicationInfoLocked(aInfo);
+                        mAtmInternal.onPackageReplaced(aInfo);
                         mServices.updateServiceApplicationInfoLocked(aInfo);
                         sendPackageBroadcastLocked(ApplicationThreadConstants.PACKAGE_REPLACED,
                                 new String[] {ssp}, userId);
@@ -17009,7 +16565,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             app.adjSeq = mAdjSeq;
             app.setCurrentSchedulingGroup(ProcessList.SCHED_GROUP_BACKGROUND);
             app.setCurProcState(ActivityManager.PROCESS_STATE_CACHED_EMPTY);
-            app.curAdj=app.curRawAdj=ProcessList.CACHED_APP_MAX_ADJ;
+            app.curAdj = ProcessList.CACHED_APP_MAX_ADJ;
+            app.setCurRawAdj(ProcessList.CACHED_APP_MAX_ADJ);
             app.completedAdjSeq = app.adjSeq;
             return false;
         }
@@ -17035,7 +16592,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             app.adjType = "fixed";
             app.adjSeq = mAdjSeq;
-            app.curRawAdj = app.maxAdj;
+            app.setCurRawAdj(app.maxAdj);
             app.setHasForegroundActivities(false);
             app.setCurrentSchedulingGroup(ProcessList.SCHED_GROUP_DEFAULT);
             app.setCurProcState(ActivityManager.PROCESS_STATE_PERSISTENT);
@@ -17312,7 +16869,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         // there are applications dependent on our services or providers, but
         // this gives us a baseline and makes sure we don't get into an
         // infinite recursion.
-        app.curRawAdj = adj;
+        app.setCurRawAdj(adj);
         app.hasStartedServices = false;
         app.adjSeq = mAdjSeq;
 
@@ -17427,7 +16984,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                                 continue;
                             }
                         }
-                        int clientAdj = client.curRawAdj;
+                        int clientAdj = client.getCurRawAdj();
                         int clientProcState = client.getCurProcState();
                         if (clientProcState >= PROCESS_STATE_CACHED_ACTIVITY) {
                             // If the other app is cached for any reason, for purposes here
@@ -17669,7 +17226,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         continue;
                     }
                 }
-                int clientAdj = client.curRawAdj;
+                int clientAdj = client.getCurRawAdj();
                 int clientProcState = client.getCurProcState();
                 if (clientProcState >= PROCESS_STATE_CACHED_ACTIVITY) {
                     // If the other app is cached for any reason, for purposes here
@@ -17871,7 +17428,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
 
-        app.curRawAdj = adj;
+        app.setCurRawAdj(adj);
 
         //Slog.i(TAG, "OOM ADJ " + app + ": pid=" + app.pid +
         //      " adj=" + adj + " curAdj=" + app.curAdj + " maxAdj=" + app.maxAdj);
@@ -18114,8 +17671,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 processingBroadcasts = true;
             }
         }
-        return !processingBroadcasts
-                && (mAtmInternal.isSleeping() || mStackSupervisor.allResumedActivitiesIdle());
+        return !processingBroadcasts && mAtmInternal.canGcNow();
     }
 
     /**
@@ -18130,7 +17686,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (canGcNowLocked()) {
             while (mProcessesToGc.size() > 0) {
                 ProcessRecord proc = mProcessesToGc.remove(0);
-                if (proc.curRawAdj > ProcessList.PERCEPTIBLE_APP_ADJ || proc.reportLowMemory) {
+                if (proc.getCurRawAdj() > ProcessList.PERCEPTIBLE_APP_ADJ || proc.reportLowMemory) {
                     if ((proc.lastRequestedGc+mConstants.GC_MIN_INTERVAL)
                             <= SystemClock.uptimeMillis()) {
                         // To avoid spamming the system, we will GC processes one
@@ -18295,8 +17851,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             long nowElapsed) {
         boolean success = true;
 
-        if (app.curRawAdj != app.setRawAdj) {
-            app.setRawAdj = app.curRawAdj;
+        if (app.getCurRawAdj() != app.setRawAdj) {
+            app.setRawAdj = app.getCurRawAdj();
         }
 
         int changes = 0;
@@ -18783,13 +18339,14 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     // TODO(b/111541062): This method is only used for updating OOM adjustments. We need to update
     // the logic there and in mBatteryStatsService to make them aware of multiple resumed activities
-    private ActivityRecord resumedAppLocked() {
-        final ActivityRecord act = mStackSupervisor.getTopResumedActivity();
+    private ProcessRecord getTopAppLocked() {
+        final WindowProcessController wpc = mAtmInternal != null ? mAtmInternal.getTopApp() : null;
+        final ProcessRecord r = wpc != null ? (ProcessRecord) wpc.mOwner : null;
         String pkg;
         int uid;
-        if (act != null) {
-            pkg = act.packageName;
-            uid = act.info.applicationInfo.uid;
+        if (r != null) {
+            pkg = r.processName;
+            uid = r.info.uid;
         } else {
             pkg = null;
             uid = -1;
@@ -18815,7 +18372,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
 
         }
-        return act;
+        return r;
     }
 
     /**
@@ -18827,9 +18384,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     @GuardedBy("this")
     final boolean updateOomAdjLocked(ProcessRecord app, boolean oomAdjAll) {
-        final ActivityRecord TOP_ACT = resumedAppLocked();
-        final ProcessRecord TOP_APP = TOP_ACT != null && TOP_ACT.hasProcess()
-                ? (ProcessRecord) TOP_ACT.app.mOwner : null;
+        final ProcessRecord TOP_APP = getTopAppLocked();
         final boolean wasCached = app.cached;
 
         mAdjSeq++;
@@ -18838,27 +18393,17 @@ public class ActivityManagerService extends IActivityManager.Stub
         // If our app is currently cached, we know it, and that is it.  Otherwise,
         // we don't know it yet, and it needs to now be cached we will then
         // need to do a complete oom adj.
-        final int cachedAdj = app.curRawAdj >= ProcessList.CACHED_APP_MIN_ADJ
-                ? app.curRawAdj : ProcessList.UNKNOWN_ADJ;
+        final int cachedAdj = app.getCurRawAdj() >= ProcessList.CACHED_APP_MIN_ADJ
+                ? app.getCurRawAdj() : ProcessList.UNKNOWN_ADJ;
         boolean success = updateOomAdjLocked(app, cachedAdj, TOP_APP, false,
                 SystemClock.uptimeMillis());
         if (oomAdjAll
-                && (wasCached != app.cached || app.curRawAdj == ProcessList.UNKNOWN_ADJ)) {
+                && (wasCached != app.cached || app.getCurRawAdj() == ProcessList.UNKNOWN_ADJ)) {
             // Changed to/from cached state, so apps after it in the LRU
             // list may also be changed.
             updateOomAdjLocked();
         }
         return success;
-    }
-
-    @GuardedBy("this")
-    ProcessRecord getTopAppLocked() {
-        final ActivityRecord TOP_ACT = resumedAppLocked();
-        if (TOP_ACT != null && TOP_ACT.hasProcess()) {
-            return (ProcessRecord) TOP_ACT.app.mOwner;
-        } else {
-            return null;
-        }
     }
 
     @GuardedBy("this")
@@ -18878,8 +18423,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             uidRec.reset();
         }
 
-        if (mStackSupervisor != null) {
-            mStackSupervisor.rankTaskLayersIfNeeded();
+        if (mAtmInternal != null) {
+            mAtmInternal.rankTaskLayersIfNeeded();
         }
 
         mAdjSeq++;
@@ -18951,7 +18496,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                             // This process is a cached process holding activities...
                             // assign it the next cached value for that type, and then
                             // step that cached level.
-                            app.curRawAdj = curCachedAdj;
+                            app.setCurRawAdj(curCachedAdj);
                             app.curAdj = app.modifyRawOomAdj(curCachedAdj);
                             if (DEBUG_LRU && false) Slog.d(TAG_LRU, "Assigning activity LRU #" + i
                                     + " adj: " + app.curAdj + " (curCachedAdj=" + curCachedAdj
@@ -18974,7 +18519,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                             // long-running services that have dropped down to the
                             // cached level will be treated as empty (since their process
                             // state is still as a service), which is what we want.
-                            app.curRawAdj = curEmptyAdj;
+                            app.setCurRawAdj(curEmptyAdj);
                             app.curAdj = app.modifyRawOomAdj(curEmptyAdj);
                             if (DEBUG_LRU && false) Slog.d(TAG_LRU, "Assigning empty LRU #" + i
                                     + " adj: " + app.curAdj + " (curEmptyAdj=" + curEmptyAdj
@@ -19265,7 +18810,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (mAlwaysFinishActivities) {
             // Need to do this on its own message because the stack may not
             // be in a consistent state at this point.
-            mStackSupervisor.scheduleDestroyAllActivities(null, "always-finish");
+            mAtmInternal.scheduleDestroyAllActivities("always-finish");
         }
 
         if (allChanged) {
@@ -20403,36 +19948,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
-        public void saveANRState(String reason) {
-            synchronized (ActivityManagerService.this) {
-                final StringWriter sw = new StringWriter();
-                final PrintWriter pw = new FastPrintWriter(sw, false, 1024);
-                pw.println("  ANR time: " + DateFormat.getDateTimeInstance().format(new Date()));
-                if (reason != null) {
-                    pw.println("  Reason: " + reason);
-                }
-                pw.println();
-                mActivityTaskManager.getActivityStartController().dump(pw, "  ", null);
-                pw.println();
-                pw.println("-------------------------------------------------------------------------------");
-                dumpActivitiesLocked(null /* fd */, pw, null /* args */, 0 /* opti */,
-                        true /* dumpAll */, false /* dumpClient */, null /* dumpPackage */,
-                        "" /* header */);
-                pw.println();
-                pw.close();
-
-                mLastANRState = sw.toString();
-            }
-        }
-
-        @Override
-        public void clearSavedANRState() {
-            synchronized (ActivityManagerService.this) {
-                mLastANRState = null;
-            }
-        }
-
-        @Override
         public boolean isRuntimeRestarted() {
             return mSystemServiceManager.isRuntimeRestarted();
         }
@@ -20498,6 +20013,28 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         @Override
+        public List<ProcessMemoryState> getMemoryStateForNativeProcesses() {
+            List<ProcessMemoryState> processMemoryStates = new ArrayList<>();
+            int[] pids = getPidsForCommands(MEMORY_STAT_INTERESTING_NATIVE_PROCESSES);
+            for (int i = 0; i < pids.length; i++) {
+                int pid = pids[i];
+                MemoryStat memoryStat = readMemoryStatFromProcfs(pid);
+                if (memoryStat == null) {
+                    continue;
+                }
+                int uid = getUidForPid(pid);
+                String processName = readCmdlineFromProcfs(pid);
+                int oomScore = -1; // Unused, not included in the NativeProcessMemoryState atom.
+                ProcessMemoryState processMemoryState = new ProcessMemoryState(uid, processName,
+                        oomScore, memoryStat.pgfault, memoryStat.pgmajfault,
+                        memoryStat.rssInBytes, memoryStat.cacheInBytes, memoryStat.swapInBytes,
+                        memoryStat.rssHighWatermarkInBytes);
+                processMemoryStates.add(processMemoryState);
+            }
+            return processMemoryStates;
+        }
+
+        @Override
         public int handleIncomingUser(int callingPid, int callingUid, int userId,
                 boolean allowAll, int allowMode, String name, String callerPackage) {
             return mUserController.handleIncomingUser(callingPid, callingUid, userId, allowAll,
@@ -20523,10 +20060,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         public void trimApplications() {
             ActivityManagerService.this.trimApplications();
-        }
-
-        public void closeSystemDialogs(String reason) {
-            ActivityManagerService.this.closeSystemDialogs(reason);
         }
 
         public void killProcessesForRemovedTask(ArrayList<Object> procsToKill) {
@@ -20768,6 +20301,83 @@ public class ActivityManagerService extends IActivityManager.Stub
                         : UsageEvents.Event.KEYGUARD_HIDDEN);
             }
         }
+
+        @Override
+        public long inputDispatchingTimedOut(int pid, boolean aboveSystem, String reason) {
+            synchronized (ActivityManagerService.this) {
+                return ActivityManagerService.this.inputDispatchingTimedOut(
+                        pid, aboveSystem, reason);
+            }
+        }
+
+        @Override
+        public boolean inputDispatchingTimedOut(Object proc, String activityShortComponentName,
+                ApplicationInfo aInfo, String parentShortComponentName, Object parentProc,
+                boolean aboveSystem, String reason) {
+            return ActivityManagerService.this.inputDispatchingTimedOut((ProcessRecord) proc,
+                    activityShortComponentName, aInfo, parentShortComponentName,
+                    (WindowProcessController) parentProc, aboveSystem, reason);
+
+        }
+    }
+
+    long inputDispatchingTimedOut(int pid, final boolean aboveSystem, String reason) {
+        if (checkCallingPermission(FILTER_EVENTS) != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Requires permission " + FILTER_EVENTS);
+        }
+        ProcessRecord proc;
+        long timeout;
+        synchronized (this) {
+            synchronized (mPidsSelfLocked) {
+                proc = mPidsSelfLocked.get(pid);
+            }
+            timeout = proc != null ? proc.getInputDispatchingTimeout() : KEY_DISPATCHING_TIMEOUT_MS;
+        }
+
+        if (inputDispatchingTimedOut(proc, null, null, null, null, aboveSystem, reason)) {
+            return -1;
+        }
+
+        return timeout;
+    }
+
+    /**
+     * Handle input dispatching timeouts.
+     * @return whether input dispatching should be aborted or not.
+     */
+    boolean inputDispatchingTimedOut(ProcessRecord proc, String activityShortComponentName,
+            ApplicationInfo aInfo, String parentShortComponentName,
+            WindowProcessController parentProcess, boolean aboveSystem, String reason) {
+        if (checkCallingPermission(FILTER_EVENTS) != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException("Requires permission " + FILTER_EVENTS);
+        }
+
+        final String annotation;
+        if (reason == null) {
+            annotation = "Input dispatching timed out";
+        } else {
+            annotation = "Input dispatching timed out (" + reason + ")";
+        }
+
+        if (proc != null) {
+            synchronized (this) {
+                if (proc.isDebugging()) {
+                    return false;
+                }
+
+                if (proc.getActiveInstrumentation() != null) {
+                    Bundle info = new Bundle();
+                    info.putString("shortMsg", "keyDispatchingTimedOut");
+                    info.putString("longMsg", annotation);
+                    finishInstrumentationLocked(proc, Activity.RESULT_CANCELED, info);
+                    return true;
+                }
+            }
+            proc.appNotResponding(activityShortComponentName, aInfo,
+                    parentShortComponentName, parentProcess, aboveSystem, annotation);
+        }
+
+        return true;
     }
 
     /**

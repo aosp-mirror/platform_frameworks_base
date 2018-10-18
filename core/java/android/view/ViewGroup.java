@@ -541,11 +541,11 @@ public abstract class ViewGroup extends View implements ViewParent, ViewManager 
     private static final int CHILD_TOP_INDEX = 1;
 
     // Child views of this ViewGroup
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private View[] mChildren;
     // Number of valid children in the mChildren array, the rest should be null or not
     // considered as children
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private int mChildrenCount;
 
     // Whether layout calls are currently being suppressed, controlled by calls to

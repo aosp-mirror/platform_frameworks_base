@@ -501,10 +501,10 @@ class AppErrors {
                 long orig = Binder.clearCallingIdentity();
                 try {
                     // Kill it with fire!
-                    mService.mStackSupervisor.handleAppCrashLocked(r.getWindowProcessController());
+                    mService.mAtmInternal.onHandleAppCrash(r.getWindowProcessController());
                     if (!r.isPersistent()) {
                         mService.removeProcessLocked(r, false, false, "crash");
-                        mService.mStackSupervisor.resumeFocusedStacksTopActivitiesLocked();
+                        mService.mAtmInternal.resumeTopActivities(false /* scheduleIdle */);
                     }
                 } finally {
                     Binder.restoreCallingIdentity(orig);
@@ -582,25 +582,10 @@ class AppErrors {
         app.setCrashing(true);
         app.crashingReport = generateProcessError(app,
                 ActivityManager.ProcessErrorStateInfo.CRASHED, null, shortMsg, longMsg, stackTrace);
-        startAppProblemLocked(app);
+        app.startAppProblemLocked();
         app.getWindowProcessController().stopFreezingActivities();
         return handleAppCrashLocked(app, "force-crash" /*reason*/, shortMsg, longMsg, stackTrace,
                 data);
-    }
-
-    void startAppProblemLocked(ProcessRecord app) {
-        // If this app is not running under the current user, then we
-        // can't give it a report button because that would require
-        // launching the report UI under a different user.
-        app.errorReportReceiver = null;
-
-        for (int userId : mService.mUserController.getCurrentProfileIds()) {
-            if (app.userId == userId) {
-                app.errorReportReceiver = ApplicationErrorReport.getErrorReportReceiver(
-                        mContext, app.info.packageName, app.info.flags);
-            }
-        }
-        mService.skipCurrentReceiverLocked(app);
     }
 
     /**
@@ -616,7 +601,7 @@ class AppErrors {
      *
      * @return Returns a fully-formed ProcessErrorStateInfo record.
      */
-    private ActivityManager.ProcessErrorStateInfo generateProcessError(ProcessRecord app,
+    ActivityManager.ProcessErrorStateInfo generateProcessError(ProcessRecord app,
             int condition, String activity, String shortMsg, String longMsg, String stackTrace) {
         ActivityManager.ProcessErrorStateInfo report = new ActivityManager.ProcessErrorStateInfo();
 
@@ -723,7 +708,7 @@ class AppErrors {
                     + " has crashed too many times: killing!");
             EventLog.writeEvent(EventLogTags.AM_PROCESS_CRASHED_TOO_MUCH,
                     app.userId, app.info.processName, app.uid);
-            mService.mStackSupervisor.handleAppCrashLocked(app.getWindowProcessController());
+            mService.mAtmInternal.onHandleAppCrash(app.getWindowProcessController());
             if (!app.isPersistent()) {
                 // We don't want to start this process again until the user
                 // explicitly does so...  but for persistent process, we really
@@ -744,15 +729,16 @@ class AppErrors {
                 // annoy the user repeatedly.  Unless it is persistent, since those
                 // processes run critical code.
                 mService.removeProcessLocked(app, false, tryAgain, "crash");
-                mService.mStackSupervisor.resumeFocusedStacksTopActivitiesLocked();
+                mService.mAtmInternal.resumeTopActivities(false /* scheduleIdle */);
                 if (!showBackground) {
                     return false;
                 }
             }
-            mService.mStackSupervisor.resumeFocusedStacksTopActivitiesLocked();
+            mService.mAtmInternal.resumeTopActivities(false /* scheduleIdle */);
         } else {
             final TaskRecord affectedTask =
-                    mService.mStackSupervisor.finishTopCrashedActivitiesLocked(app.getWindowProcessController(), reason);
+                    mService.mActivityTaskManager.mStackSupervisor.finishTopCrashedActivitiesLocked(
+                            app.getWindowProcessController(), reason);
             if (data != null) {
                 data.task = affectedTask;
             }
@@ -854,257 +840,11 @@ class AppErrors {
         }
     }
 
-    void stopReportingCrashesLocked(ProcessRecord proc) {
+    private void stopReportingCrashesLocked(ProcessRecord proc) {
         if (mAppsNotReportingCrashes == null) {
             mAppsNotReportingCrashes = new ArraySet<>();
         }
         mAppsNotReportingCrashes.add(proc.info.packageName);
-    }
-
-    static boolean isInterestingForBackgroundTraces(ProcessRecord app) {
-        // The system_server is always considered interesting.
-        if (app.pid == MY_PID) {
-            return true;
-        }
-
-        // A package is considered interesting if any of the following is true :
-        //
-        // - It's displaying an activity.
-        // - It's the SystemUI.
-        // - It has an overlay or a top UI visible.
-        //
-        // NOTE: The check whether a given ProcessRecord belongs to the systemui
-        // process is a bit of a kludge, but the same pattern seems repeated at
-        // several places in the system server.
-        return app.isInterestingToUserLocked() ||
-            (app.info != null && "com.android.systemui".equals(app.info.packageName)) ||
-            (app.hasTopUi() || app.hasOverlayUi());
-    }
-
-    final void appNotResponding(ProcessRecord app, ActivityRecord activity,
-            ActivityRecord parent, boolean aboveSystem, final String annotation) {
-        ArrayList<Integer> firstPids = new ArrayList<Integer>(5);
-        SparseArray<Boolean> lastPids = new SparseArray<Boolean>(20);
-
-        if (mService.mActivityTaskManager.mController != null) {
-            try {
-                // 0 == continue, -1 = kill process immediately
-                int res = mService.mActivityTaskManager.mController.appEarlyNotResponding(
-                        app.processName, app.pid, annotation);
-                if (res < 0 && app.pid != MY_PID) {
-                    app.kill("anr", true);
-                }
-            } catch (RemoteException e) {
-                mService.mActivityTaskManager.mController = null;
-                Watchdog.getInstance().setActivityController(null);
-            }
-        }
-
-        long anrTime = SystemClock.uptimeMillis();
-        if (ActivityManagerService.MONITOR_CPU_USAGE) {
-            mService.updateCpuStatsNow();
-        }
-
-        // Unless configured otherwise, swallow ANRs in background processes & kill the process.
-        boolean showBackground = Settings.Secure.getInt(mContext.getContentResolver(),
-                Settings.Secure.ANR_SHOW_BACKGROUND, 0) != 0;
-
-        boolean isSilentANR;
-
-        synchronized (mService) {
-            // PowerManager.reboot() can block for a long time, so ignore ANRs while shutting down.
-            if (mService.mActivityTaskManager.mShuttingDown) {
-                Slog.i(TAG, "During shutdown skipping ANR: " + app + " " + annotation);
-                return;
-            } else if (app.isNotResponding()) {
-                Slog.i(TAG, "Skipping duplicate ANR: " + app + " " + annotation);
-                return;
-            } else if (app.isCrashing()) {
-                Slog.i(TAG, "Crashing app skipping ANR: " + app + " " + annotation);
-                return;
-            } else if (app.killedByAm) {
-                Slog.i(TAG, "App already killed by AM skipping ANR: " + app + " " + annotation);
-                return;
-            } else if (app.killed) {
-                Slog.i(TAG, "Skipping died app ANR: " + app + " " + annotation);
-                return;
-            }
-
-            // In case we come through here for the same app before completing
-            // this one, mark as anring now so we will bail out.
-            app.setNotResponding(true);
-
-            // Log the ANR to the event log.
-            EventLog.writeEvent(EventLogTags.AM_ANR, app.userId, app.pid,
-                    app.processName, app.info.flags, annotation);
-
-            // Dump thread traces as quickly as we can, starting with "interesting" processes.
-            firstPids.add(app.pid);
-
-            // Don't dump other PIDs if it's a background ANR
-            isSilentANR = !showBackground && !isInterestingForBackgroundTraces(app);
-            if (!isSilentANR) {
-                int parentPid = app.pid;
-                if (parent != null && parent.app != null && parent.app.getPid() > 0) {
-                    parentPid = parent.app.getPid();
-                }
-                if (parentPid != app.pid) firstPids.add(parentPid);
-
-                if (MY_PID != app.pid && MY_PID != parentPid) firstPids.add(MY_PID);
-
-                for (int i = mService.mLruProcesses.size() - 1; i >= 0; i--) {
-                    ProcessRecord r = mService.mLruProcesses.get(i);
-                    if (r != null && r.thread != null) {
-                        int pid = r.pid;
-                        if (pid > 0 && pid != app.pid && pid != parentPid && pid != MY_PID) {
-                            if (r.isPersistent()) {
-                                firstPids.add(pid);
-                                if (DEBUG_ANR) Slog.i(TAG, "Adding persistent proc: " + r);
-                            } else if (r.treatLikeActivity) {
-                                firstPids.add(pid);
-                                if (DEBUG_ANR) Slog.i(TAG, "Adding likely IME: " + r);
-                            } else {
-                                lastPids.put(pid, Boolean.TRUE);
-                                if (DEBUG_ANR) Slog.i(TAG, "Adding ANR proc: " + r);
-                            }
-                        }
-                    }
-                }
-            }
-        }
-
-        // Log the ANR to the main log.
-        StringBuilder info = new StringBuilder();
-        info.setLength(0);
-        info.append("ANR in ").append(app.processName);
-        if (activity != null && activity.shortComponentName != null) {
-            info.append(" (").append(activity.shortComponentName).append(")");
-        }
-        info.append("\n");
-        info.append("PID: ").append(app.pid).append("\n");
-        if (annotation != null) {
-            info.append("Reason: ").append(annotation).append("\n");
-        }
-        if (parent != null && parent != activity) {
-            info.append("Parent: ").append(parent.shortComponentName).append("\n");
-        }
-
-        ProcessCpuTracker processCpuTracker = new ProcessCpuTracker(true);
-
-        // don't dump native PIDs for background ANRs unless it is the process of interest
-        String[] nativeProcs = null;
-        if (isSilentANR) {
-            for (int i = 0; i < NATIVE_STACKS_OF_INTEREST.length; i++) {
-                if (NATIVE_STACKS_OF_INTEREST[i].equals(app.processName)) {
-                    nativeProcs = new String[] { app.processName };
-                    break;
-                }
-            }
-        } else {
-            nativeProcs = NATIVE_STACKS_OF_INTEREST;
-        }
-
-        int[] pids = nativeProcs == null ? null : Process.getPidsForCommands(nativeProcs);
-        ArrayList<Integer> nativePids = null;
-
-        if (pids != null) {
-            nativePids = new ArrayList<Integer>(pids.length);
-            for (int i : pids) {
-                nativePids.add(i);
-            }
-        }
-
-        // For background ANRs, don't pass the ProcessCpuTracker to
-        // avoid spending 1/2 second collecting stats to rank lastPids.
-        File tracesFile = ActivityManagerService.dumpStackTraces(
-                firstPids,
-                (isSilentANR) ? null : processCpuTracker,
-                (isSilentANR) ? null : lastPids,
-                nativePids);
-
-        String cpuInfo = null;
-        if (ActivityManagerService.MONITOR_CPU_USAGE) {
-            mService.updateCpuStatsNow();
-            synchronized (mService.mProcessCpuTracker) {
-                cpuInfo = mService.mProcessCpuTracker.printCurrentState(anrTime);
-            }
-            info.append(processCpuTracker.printCurrentLoad());
-            info.append(cpuInfo);
-        }
-
-        info.append(processCpuTracker.printCurrentState(anrTime));
-
-        Slog.e(TAG, info.toString());
-        if (tracesFile == null) {
-            // There is no trace file, so dump (only) the alleged culprit's threads to the log
-            Process.sendSignal(app.pid, Process.SIGNAL_QUIT);
-        }
-
-        StatsLog.write(StatsLog.ANR_OCCURRED, app.uid, app.processName,
-                activity == null ? "unknown": activity.shortComponentName, annotation,
-                (app.info != null) ? (app.info.isInstantApp()
-                        ? StatsLog.ANROCCURRED__IS_INSTANT_APP__TRUE
-                        : StatsLog.ANROCCURRED__IS_INSTANT_APP__FALSE)
-                        : StatsLog.ANROCCURRED__IS_INSTANT_APP__UNAVAILABLE,
-                app != null ? (app.isInterestingToUserLocked()
-                        ? StatsLog.ANROCCURRED__FOREGROUND_STATE__FOREGROUND
-                        : StatsLog.ANROCCURRED__FOREGROUND_STATE__BACKGROUND)
-                        : StatsLog.ANROCCURRED__FOREGROUND_STATE__UNKNOWN);
-        mService.addErrorToDropBox("anr", app, app.processName, activity, parent, annotation,
-                cpuInfo, tracesFile, null);
-
-        if (mService.mActivityTaskManager.mController != null) {
-            try {
-                // 0 == show dialog, 1 = keep waiting, -1 = kill process immediately
-                int res = mService.mActivityTaskManager.mController.appNotResponding(
-                        app.processName, app.pid, info.toString());
-                if (res != 0) {
-                    if (res < 0 && app.pid != MY_PID) {
-                        app.kill("anr", true);
-                    } else {
-                        synchronized (mService) {
-                            mService.mServices.scheduleServiceTimeoutLocked(app);
-                        }
-                    }
-                    return;
-                }
-            } catch (RemoteException e) {
-                mService.mActivityTaskManager.mController = null;
-                Watchdog.getInstance().setActivityController(null);
-            }
-        }
-
-        synchronized (mService) {
-            mService.mBatteryStatsService.noteProcessAnr(app.processName, app.uid);
-
-            if (isSilentANR) {
-                app.kill("bg anr", true);
-                return;
-            }
-
-            // Set the app's notResponding state, and look up the errorReportReceiver
-            makeAppNotRespondingLocked(app,
-                    activity != null ? activity.shortComponentName : null,
-                    annotation != null ? "ANR " + annotation : "ANR",
-                    info.toString());
-
-            // Bring up the infamous App Not Responding dialog
-            Message msg = Message.obtain();
-            msg.what = ActivityManagerService.SHOW_NOT_RESPONDING_UI_MSG;
-            msg.obj = new AppNotRespondingDialog.Data(app, activity, aboveSystem);
-
-            mService.mUiHandler.sendMessage(msg);
-        }
-    }
-
-    private void makeAppNotRespondingLocked(ProcessRecord app,
-            String activity, String shortMsg, String longMsg) {
-        app.setNotResponding(true);
-        app.notRespondingReport = generateProcessError(app,
-                ActivityManager.ProcessErrorStateInfo.NOT_RESPONDING,
-                activity, shortMsg, longMsg, null);
-        startAppProblemLocked(app);
-        app.getWindowProcessController().stopFreezingActivities();
     }
 
     void handleShowAnrUi(Message msg) {

@@ -3641,7 +3641,7 @@ public final class ActiveServices {
         }
 
         if (anrMessage != null) {
-            mAm.mAppErrors.appNotResponding(proc, null, null, false, anrMessage);
+            proc.appNotResponding(null, null, null, null, false, anrMessage);
         }
     }
 
@@ -3666,7 +3666,7 @@ public final class ActiveServices {
         }
 
         if (app != null) {
-            mAm.mAppErrors.appNotResponding(app, null, null, false,
+            app.appNotResponding(null, null, null, null, false,
                     "Context.startForegroundService() did not then call Service.startForeground(): "
                         + r);
         }
