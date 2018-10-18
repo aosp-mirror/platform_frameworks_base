@@ -45,7 +45,7 @@ import java.util.List;
 @SmallTest
 @Presubmit
 @RunWith(AndroidJUnit4.class)
-public class BroadcastRecordTest extends ActivityTestsBase {
+public class BroadcastRecordTest {
 
     @Test
     public void testCleanupDisabledPackageReceivers() {

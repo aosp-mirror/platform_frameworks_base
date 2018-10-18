@@ -58,8 +58,9 @@ import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManagerGlobal;
-import android.os.HandlerThread;
+import android.os.Handler;
 import android.os.Looper;
+import android.os.Process;
 import android.os.UserHandle;
 import android.service.voice.IVoiceInteractionSession;
 import android.testing.DexmakerShareClassLoaderRule;
@@ -69,7 +70,9 @@ import android.view.DisplayInfo;
 import androidx.test.InstrumentationRegistry;
 
 import com.android.internal.app.IVoiceInteractor;
+import com.android.server.AppOpsService;
 import com.android.server.AttributeCache;
+import com.android.server.ServiceThread;
 import com.android.server.wm.AppWindowContainerController;
 import com.android.server.wm.PinnedStackWindowController;
 import com.android.server.wm.RootWindowContainerController;
@@ -82,6 +85,7 @@ import org.junit.After;
 import org.junit.Before;
 import org.mockito.MockitoAnnotations;
 
+import java.io.File;
 import java.util.List;
 
 /**
@@ -97,7 +101,7 @@ public class ActivityTestsBase {
             new DexmakerShareClassLoaderRule();
 
     private final Context mContext = InstrumentationRegistry.getContext();
-    private HandlerThread mHandlerThread;
+    final TestInjector mTestInjector = new TestInjector();
 
     ActivityTaskManagerService mService;
     ActivityStackSupervisor mSupervisor;
@@ -115,13 +119,12 @@ public class ActivityTestsBase {
             MockitoAnnotations.initMocks(this);
             AttributeCache.init(mContext);
         }
-        mHandlerThread = new HandlerThread("ActivityTestsBaseThread");
-        mHandlerThread.start();
+        mTestInjector.setUp();
     }
 
     @After
     public void tearDown() {
-        mHandlerThread.quitSafely();
+        mTestInjector.tearDown();
     }
 
     protected ActivityTaskManagerService createActivityTaskManagerService() {
@@ -143,7 +146,7 @@ public class ActivityTestsBase {
     }
 
     ActivityManagerService setupActivityManagerService(TestActivityTaskManagerService atm) {
-        final TestActivityManagerService am = spy(new TestActivityManagerService(mContext, atm));
+        final TestActivityManagerService am = spy(new TestActivityManagerService(mTestInjector));
         setupActivityManagerService(am, atm);
         return am;
     }
@@ -173,6 +176,7 @@ public class ActivityTestsBase {
         doReturn(mockPackageManager).when(am).getPackageManagerInternalLocked();
         doReturn(null).when(mockPackageManager).getDefaultHomeActivity(anyInt());
         doNothing().when(am).grantEphemeralAccessLocked(anyInt(), any(), anyInt(), anyInt());
+        am.mActivityTaskManager = atm;
         am.mWindowManager = prepareMockWindowManager();
         atm.setWindowManager(am.mWindowManager);
 
@@ -191,8 +195,6 @@ public class ActivityTestsBase {
     protected static class ActivityBuilder {
         // An id appended to the end of the component name to make it unique
         private static int sCurrentActivityId = 0;
-
-
 
         private final ActivityTaskManagerService mService;
 
@@ -487,6 +489,40 @@ public class ActivityTestsBase {
         }
     }
 
+    private static class TestInjector extends ActivityManagerService.Injector {
+        private ServiceThread mHandlerThread;
+
+        @Override
+        public Context getContext() {
+            return InstrumentationRegistry.getContext();
+        }
+
+        @Override
+        public AppOpsService getAppOpsService(File file, Handler handler) {
+            return null;
+        }
+
+        @Override
+        public Handler getUiHandler(ActivityManagerService service) {
+            return mHandlerThread.getThreadHandler();
+        }
+
+        @Override
+        public boolean isNetworkRestrictedForUid(int uid) {
+            return false;
+        }
+
+        void setUp() {
+            mHandlerThread = new ServiceThread("ActivityTestsThread",
+                    Process.THREAD_PRIORITY_DEFAULT, true /* allowIo */);
+            mHandlerThread.start();
+        }
+
+        void tearDown() {
+            mHandlerThread.quitSafely();
+        }
+    }
+
     /**
      * An {@link ActivityManagerService} subclass which provides a test
      * {@link ActivityStackSupervisor}.
@@ -495,8 +531,8 @@ public class ActivityTestsBase {
 
         private ActivityManagerInternal mInternal;
 
-        TestActivityManagerService(Context context, TestActivityTaskManagerService atm) {
-            super(context, atm);
+        TestActivityManagerService(TestInjector testInjector) {
+            super(testInjector, testInjector.mHandlerThread);
             mUgmInternal = mock(UriGrantsManagerInternal.class);
         }
 
