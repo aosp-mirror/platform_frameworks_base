@@ -250,4 +250,16 @@ public abstract class ActivityManagerInternal {
     public abstract boolean inputDispatchingTimedOut(Object proc, String activityShortComponentName,
             ApplicationInfo aInfo, String parentShortComponentName, Object parentProc,
             boolean aboveSystem, String reason);
+
+    /**
+     * Sends {@link android.content.Intent#ACTION_CONFIGURATION_CHANGED} with all the appropriate
+     * flags.
+     */
+    public abstract void broadcastGlobalConfigurationChanged(int changes, boolean initLocale);
+
+    /**
+     * Sends {@link android.content.Intent#ACTION_CLOSE_SYSTEM_DIALOGS} with all the appropriate
+     * flags.
+     */
+    public abstract void broadcastCloseSystemDialogs(String reason);
 }
