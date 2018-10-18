@@ -738,59 +738,67 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
             @Nullable Map<String, String> headers, @Nullable List<HttpCookie> cookies,
             long startPos, long endPos)
             throws IOException {
-        // The context and URI usually belong to the calling user. Get a resolver for that user
-        // and strip out the userId from the URI if present.
+        // The context and URI usually belong to the calling user. Get a resolver for that user.
         final ContentResolver resolver = context.getContentResolver();
         final String scheme = uri.getScheme();
-        final String authority = ContentProvider.getAuthorityWithoutUserId(uri.getAuthority());
         if (ContentResolver.SCHEME_FILE.equals(scheme)) {
             handleDataSource(isCurrent, srcId, uri.getPath(), null, null, startPos, endPos);
             return;
         }
 
-        AssetFileDescriptor afd = null;
+        final int ringToneType = RingtoneManager.getDefaultType(uri);
         try {
+            AssetFileDescriptor afd;
             // Try requested Uri locally first
-            if (ContentResolver.SCHEME_CONTENT.equals(scheme)
-                    && Settings.AUTHORITY.equals(authority)) {
+            if (ContentResolver.SCHEME_CONTENT.equals(scheme) && ringToneType != -1) {
                 afd = RingtoneManager.openDefaultRingtoneUri(context, uri);
+                if (attemptDataSource(isCurrent, srcId, afd, startPos, endPos)) {
+                    return;
+                }
+                final Uri actualUri = RingtoneManager.getActualDefaultRingtoneUri(
+                        context, ringToneType);
+                afd = resolver.openAssetFileDescriptor(actualUri, "r");
             } else {
                 afd = resolver.openAssetFileDescriptor(uri, "r");
             }
-            if (afd != null) {
-                handleDataSource(isCurrent, srcId, afd, startPos, endPos);
+            if (attemptDataSource(isCurrent, srcId, afd, startPos, endPos)) {
                 return;
             }
         } catch (NullPointerException | SecurityException | IOException ex) {
             Log.w(TAG, "Couldn't open " + uri + ": " + ex);
             // Fallback to media server
-        } finally {
-            if (afd != null) {
-                afd.close();
-            }
         }
         handleDataSource(isCurrent, srcId, uri.toString(), headers, cookies, startPos, endPos);
     }
 
-    private void handleDataSource(boolean isCurrent, long srcId, AssetFileDescriptor afd,
-            long startPos, long endPos)
-            throws IOException {
-        if (afd.getDeclaredLength() < 0) {
-            handleDataSource(isCurrent,
-                    srcId,
-                    afd.getFileDescriptor(),
-                    0,
-                    DataSourceDesc.LONG_MAX,
-                    startPos,
-                    endPos);
-        } else {
-            handleDataSource(isCurrent,
-                    srcId,
-                    afd.getFileDescriptor(),
-                    afd.getStartOffset(),
-                    afd.getDeclaredLength(),
-                    startPos,
-                    endPos);
+    private boolean attemptDataSource(boolean isCurrent, long srcId, AssetFileDescriptor afd,
+            long startPos, long endPos) throws IOException {
+        try {
+            if (afd.getDeclaredLength() < 0) {
+                handleDataSource(isCurrent,
+                        srcId,
+                        afd.getFileDescriptor(),
+                        0,
+                        DataSourceDesc.LONG_MAX,
+                        startPos,
+                        endPos);
+            } else {
+                handleDataSource(isCurrent,
+                        srcId,
+                        afd.getFileDescriptor(),
+                        afd.getStartOffset(),
+                        afd.getDeclaredLength(),
+                        startPos,
+                        endPos);
+            }
+            return true;
+        } catch (NullPointerException | SecurityException | IOException ex) {
+            Log.w(TAG, "Couldn't open srcId:" + srcId + ": " + ex);
+            return false;
+        } finally {
+            if (afd != null) {
+                afd.close();
+            }
         }
     }
 
