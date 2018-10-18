@@ -3483,4 +3483,6 @@
   <java-symbol type="bool" name="config_useSmsAppService" />
 
   <java-symbol type="string" name="config_defaultAssistantComponentName" />
+
+  <java-symbol type="id" name="transition_overlay_view_tag" />
 </resources>
