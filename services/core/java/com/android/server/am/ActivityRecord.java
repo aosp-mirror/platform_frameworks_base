@@ -2284,6 +2284,11 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             // We don't show starting window for overlay activities.
             return;
         }
+        if (pendingOptions != null
+                && pendingOptions.getAnimationType() == ActivityOptions.ANIM_SCENE_TRANSITION) {
+            // Don't show starting window when using shared element transition.
+            return;
+        }
 
         final CompatibilityInfo compatInfo =
                 service.compatibilityInfoForPackageLocked(info.applicationInfo);

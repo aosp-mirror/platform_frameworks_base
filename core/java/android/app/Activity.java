@@ -4678,7 +4678,7 @@ public class Activity extends ContextThemeWrapper
         if (decor != null) {
             decor.cancelPendingInputEvents();
         }
-        if (options != null && !isTopOfTask()) {
+        if (options != null) {
             mActivityTransitionState.startExitOutTransition(this, options);
         }
     }
@@ -4882,6 +4882,7 @@ public class Activity extends ContextThemeWrapper
             Bundle options)
             throws IntentSender.SendIntentException {
         try {
+            options = transferSpringboardActivityOptions(options);
             String resolvedType = null;
             if (fillInIntent != null) {
                 fillInIntent.migrateExtraStreamToClipData();
@@ -4898,6 +4899,12 @@ public class Activity extends ContextThemeWrapper
                 throw new IntentSender.SendIntentException();
             }
             Instrumentation.checkStartActivityResult(result, null);
+
+            if (options != null) {
+                // Only when the options are not null, as the intent can point to something other
+                // than an Activity.
+                cancelInputsAndStartExitTransition(options);
+            }
         } catch (RemoteException e) {
         }
         if (requestCode >= 0) {
@@ -6471,7 +6478,7 @@ public class Activity extends ContextThemeWrapper
      *
      * @return true if this is the topmost, non-finishing activity in its task.
      */
-    private boolean isTopOfTask() {
+    final boolean isTopOfTask() {
         if (mToken == null || mWindow == null) {
             return false;
         }
