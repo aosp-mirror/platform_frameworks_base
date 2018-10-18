@@ -60,7 +60,6 @@ import com.android.systemui.DockedStackExistsListener;
 import com.android.systemui.Interpolators;
 import com.android.systemui.OverviewProxyService;
 import com.android.systemui.R;
-import com.android.systemui.RecentsComponent;
 import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.shared.plugins.PluginManager;
@@ -71,7 +70,6 @@ import com.android.systemui.recents.RecentsOnboarding;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.NavigationBarCompat;
 import com.android.systemui.shared.system.WindowManagerWrapper;
-import com.android.systemui.stackdivider.Divider;
 import com.android.systemui.statusbar.policy.DeadZone;
 import com.android.systemui.statusbar.policy.KeyButtonDrawable;
 
@@ -140,6 +138,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     private final SparseArray<ButtonDispatcher> mButtonDispatchers = new SparseArray<>();
     private final ContextualButtonGroup mContextualButtonGroup;
     private Configuration mConfiguration;
+    private Configuration mTmpLastConfiguration;
 
     private NavigationBarInflaterView mNavigationInflaterView;
     private RecentsOnboarding mRecentsOnboarding;
@@ -286,6 +285,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         mRecentsOnboarding = new RecentsOnboarding(context, mOverviewProxyService);
 
         mConfiguration = new Configuration();
+        mTmpLastConfiguration = new Configuration();
         mConfiguration.updateFrom(context.getResources().getConfiguration());
 
         mScreenPinningNotify = new ScreenPinningNotify(mContext);
@@ -445,13 +445,13 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     }
 
     private void reloadNavIcons() {
-        updateIcons(Configuration.EMPTY, mConfiguration);
+        updateIcons(Configuration.EMPTY);
     }
 
-    private void updateIcons(Configuration oldConfig, Configuration newConfig) {
-        final boolean orientationChange = oldConfig.orientation != newConfig.orientation;
-        final boolean densityChange = oldConfig.densityDpi != newConfig.densityDpi;
-        final boolean dirChange = oldConfig.getLayoutDirection() != newConfig.getLayoutDirection();
+    private void updateIcons(Configuration oldConfig) {
+        final boolean orientationChange = oldConfig.orientation != mConfiguration.orientation;
+        final boolean densityChange = oldConfig.densityDpi != mConfiguration.densityDpi;
+        final boolean dirChange = oldConfig.getLayoutDirection() != mConfiguration.getLayoutDirection();
 
         if (orientationChange || densityChange) {
             mDockedIcon = getDrawable(R.drawable.ic_sysbar_docked);
@@ -485,7 +485,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     private void orientBackButton(KeyButtonDrawable drawable) {
         final boolean useAltBack =
                 (mNavigationIconHints & StatusBarManager.NAVIGATION_HINT_BACK_ALT) != 0;
-        final boolean isRtl = getLayoutDirection() == View.LAYOUT_DIRECTION_RTL;
+        final boolean isRtl = mConfiguration.getLayoutDirection() == View.LAYOUT_DIRECTION_RTL;
         float degrees = useAltBack
                 ? (isRtl ? 270 : -90)
                 : (isRtl ? 180 : 0);
@@ -946,26 +946,27 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
         super.onConfigurationChanged(newConfig);
-        boolean uiCarModeChanged = updateCarMode(newConfig);
+        mTmpLastConfiguration.updateFrom(mConfiguration);
+        mConfiguration.updateFrom(newConfig);
+        boolean uiCarModeChanged = updateCarMode();
         updateTaskSwitchHelper();
-        updateIcons(mConfiguration, newConfig);
+        updateIcons(mTmpLastConfiguration);
         updateRecentsIcon();
-        mRecentsOnboarding.onConfigurationChanged(newConfig);
-        if (uiCarModeChanged || mConfiguration.densityDpi != newConfig.densityDpi
-                || mConfiguration.getLayoutDirection() != newConfig.getLayoutDirection()) {
+        mRecentsOnboarding.onConfigurationChanged(mConfiguration);
+        if (uiCarModeChanged || mTmpLastConfiguration.densityDpi != mConfiguration.densityDpi
+                || mTmpLastConfiguration.getLayoutDirection() != mConfiguration.getLayoutDirection()) {
             // If car mode or density changes, we need to reset the icons.
             updateNavButtonIcons();
         }
-        mConfiguration.updateFrom(newConfig);
     }
 
     /**
      * If the configuration changed, update the carmode and return that it was updated.
      */
-    private boolean updateCarMode(Configuration newConfig) {
+    private boolean updateCarMode() {
         boolean uiCarModeChanged = false;
-        if (newConfig != null) {
-            int uiMode = newConfig.uiMode & Configuration.UI_MODE_TYPE_MASK;
+        if (mConfiguration != null) {
+            int uiMode = mConfiguration.uiMode & Configuration.UI_MODE_TYPE_MASK;
             final boolean isCarMode = (uiMode == Configuration.UI_MODE_TYPE_CAR);
 
             if (isCarMode != mInCarMode) {
