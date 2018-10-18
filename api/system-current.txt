@@ -5140,6 +5140,11 @@ package android.telephony {
     field public static final int RESULT_SUCCESS = 0; // 0x0
   }
 
+  public class PhoneStateListener {
+    method public void onRadioPowerStateChanged(int);
+    field public static final int LISTEN_RADIO_POWER_STATE_CHANGED = 4194304; // 0x400000
+  }
+
   public class ServiceState implements android.os.Parcelable {
     method public android.telephony.NetworkRegistrationState getNetworkRegistrationState(int, int);
     method public java.util.List<android.telephony.NetworkRegistrationState> getNetworkRegistrationStates();
@@ -5266,6 +5271,7 @@ package android.telephony {
     method public deprecated boolean getDataEnabled(int);
     method public boolean getEmergencyCallbackMode();
     method public java.lang.String getIsimDomain();
+    method public int getRadioPowerState();
     method public int getSimApplicationState();
     method public int getSimCardState();
     method public java.util.List<android.telephony.TelephonyHistogram> getTelephonyHistograms();
@@ -5306,6 +5312,9 @@ package android.telephony {
     field public static final java.lang.String EXTRA_SIM_STATE = "android.telephony.extra.SIM_STATE";
     field public static final java.lang.String EXTRA_VISUAL_VOICEMAIL_ENABLED_BY_USER_BOOL = "android.telephony.extra.VISUAL_VOICEMAIL_ENABLED_BY_USER_BOOL";
     field public static final java.lang.String EXTRA_VOICEMAIL_SCRAMBLED_PIN_STRING = "android.telephony.extra.VOICEMAIL_SCRAMBLED_PIN_STRING";
+    field public static final int RADIO_POWER_OFF = 0; // 0x0
+    field public static final int RADIO_POWER_ON = 1; // 0x1
+    field public static final int RADIO_POWER_UNAVAILABLE = 2; // 0x2
     field public static final int SIM_ACTIVATION_STATE_ACTIVATED = 2; // 0x2
     field public static final int SIM_ACTIVATION_STATE_ACTIVATING = 1; // 0x1
     field public static final int SIM_ACTIVATION_STATE_DEACTIVATED = 3; // 0x3
