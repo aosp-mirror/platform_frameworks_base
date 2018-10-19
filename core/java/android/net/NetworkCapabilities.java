@@ -1589,4 +1589,14 @@ public final class NetworkCapabilities implements Parcelable {
         Preconditions.checkArgument(isValidCapability(capability),
                 "NetworkCapability " + capability + "out of range");
     }
+
+    /**
+     * Check if this {@code NetworkCapability} instance is metered.
+     *
+     * @return {@code true} if {@code NET_CAPABILITY_NOT_METERED} is not set on this instance.
+     * @hide
+     */
+    public boolean isMetered() {
+        return !hasCapability(NET_CAPABILITY_NOT_METERED);
+    }
 }

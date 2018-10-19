@@ -35,6 +35,8 @@ import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_SUSPENDED;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_NOT_VPN;
 import static android.net.NetworkCapabilities.NET_CAPABILITY_VALIDATED;
 import static android.net.NetworkCapabilities.TRANSPORT_VPN;
+import static android.net.NetworkPolicyManager.RULE_NONE;
+import static android.net.NetworkPolicyManager.uidRulesToString;
 import static android.os.Process.INVALID_UID;
 import static android.system.OsConstants.IPPROTO_TCP;
 import static android.system.OsConstants.IPPROTO_UDP;
@@ -189,6 +191,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.ConcurrentModificationException;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
@@ -256,6 +259,14 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private boolean mLockdownEnabled;
     @GuardedBy("mVpns")
     private LockdownVpnTracker mLockdownTracker;
+
+    /**
+     * Stale copy of uid rules provided by NPMS. As long as they are accessed only in internal
+     * handler thread, they don't need a lock.
+     */
+    private SparseIntArray mUidRules = new SparseIntArray();
+    /** Flag indicating if background data is restricted. */
+    private boolean mRestrictBackground;
 
     final private Context mContext;
     // 0 is full bad, 100 is full good
@@ -418,6 +429,16 @@ public class ConnectivityService extends IConnectivityManager.Stub
 
     // Handle private DNS validation status updates.
     private static final int EVENT_PRIVATE_DNS_VALIDATION_UPDATE = 38;
+
+    /**
+     * Used to handle onUidRulesChanged event from NetworkPolicyManagerService.
+     */
+    private static final int EVENT_UID_RULES_CHANGED = 39;
+
+    /**
+     * Used to handle onRestrictBackgroundChanged event from NetworkPolicyManagerService.
+     */
+    private static final int EVENT_DATA_SAVER_CHANGED = 40;
 
     private static String eventName(int what) {
         return sMagicDecoderRing.get(what, Integer.toString(what));
@@ -780,6 +801,9 @@ public class ConnectivityService extends IConnectivityManager.Stub
         mKeyStore = KeyStore.getInstance();
         mTelephonyManager = (TelephonyManager) mContext.getSystemService(Context.TELEPHONY_SERVICE);
 
+        // To ensure uid rules are synchronized with Network Policy, register for
+        // NetworkPolicyManagerService events must happen prior to NetworkPolicyManagerService
+        // reading existing policy from disk.
         try {
             mPolicyManager.registerListener(mPolicyListener);
         } catch (RemoteException e) {
@@ -1116,11 +1140,6 @@ public class ConnectivityService extends IConnectivityManager.Stub
         if (ignoreBlocked) {
             return false;
         }
-        // Networks are never blocked for system services
-        // TODO: consider moving this check to NetworkPolicyManagerInternal.isUidNetworkingBlocked.
-        if (isSystem(uid)) {
-            return false;
-        }
         synchronized (mVpns) {
             final Vpn vpn = mVpns.get(UserHandle.getUserId(uid));
             if (vpn != null && vpn.isBlockingUid(uid)) {
@@ -1148,6 +1167,17 @@ public class ConnectivityService extends IConnectivityManager.Stub
         String action = blocked ? "BLOCKED" : "UNBLOCKED";
         log(String.format("Returning %s NetworkInfo to uid=%d", action, uid));
         mNetworkInfoBlockingLogs.log(action + " " + uid);
+    }
+
+    private void maybeLogBlockedStatusChanged(NetworkRequestInfo nri, Network net,
+            boolean blocked) {
+        if (nri == null || net == null || !LOGD_BLOCKED_NETWORKINFO) {
+            return;
+        }
+        String action = blocked ? "BLOCKED" : "UNBLOCKED";
+        log(String.format("Blocked status changed to %s for %d(%d) on netId %d", blocked,
+                nri.mUid, nri.request.requestId, net.netId));
+        mNetworkInfoBlockingLogs.log(action + " " + nri.mUid);
     }
 
     /**
@@ -1651,10 +1681,17 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private final INetworkPolicyListener mPolicyListener = new NetworkPolicyManager.Listener() {
         @Override
         public void onUidRulesChanged(int uid, int uidRules) {
-            // TODO: notify UID when it has requested targeted updates
+            mHandler.sendMessage(mHandler.obtainMessage(EVENT_UID_RULES_CHANGED, uid, uidRules));
         }
         @Override
         public void onRestrictBackgroundChanged(boolean restrictBackground) {
+            // caller is NPMS, since we only register with them
+            if (LOGD_BLOCKED_NETWORKINFO) {
+                log("onRestrictBackgroundChanged(restrictBackground=" + restrictBackground + ")");
+            }
+            mHandler.sendMessage(mHandler.obtainMessage(
+                    EVENT_DATA_SAVER_CHANGED, restrictBackground ? 1 : 0, 0));
+
             // TODO: relocate this specific callback in Tethering.
             if (restrictBackground) {
                 log("onRestrictBackgroundChanged(true): disabling tethering");
@@ -1662,6 +1699,50 @@ public class ConnectivityService extends IConnectivityManager.Stub
             }
         }
     };
+
+    void handleUidRulesChanged(int uid, int newRules) {
+        // skip update when we've already applied rules
+        final int oldRules = mUidRules.get(uid, RULE_NONE);
+        if (oldRules == newRules) return;
+
+        maybeNotifyNetworkBlockedForNewUidRules(uid, newRules);
+
+        if (newRules == RULE_NONE) {
+            mUidRules.delete(uid);
+        } else {
+            mUidRules.put(uid, newRules);
+        }
+    }
+
+    void handleRestrictBackgroundChanged(boolean restrictBackground) {
+        if (mRestrictBackground == restrictBackground) return;
+
+        for (final NetworkAgentInfo nai : mNetworkAgentInfos.values()) {
+            final boolean curMetered = nai.networkCapabilities.isMetered();
+            maybeNotifyNetworkBlocked(nai, curMetered, curMetered, mRestrictBackground,
+                    restrictBackground);
+        }
+
+        mRestrictBackground = restrictBackground;
+    }
+
+    private boolean isUidNetworkingWithVpnBlocked(int uid, int uidRules, boolean isNetworkMetered,
+            boolean isBackgroundRestricted) {
+        synchronized (mVpns) {
+            final Vpn vpn = mVpns.get(UserHandle.getUserId(uid));
+            // Because the return value of this function depends on the list of UIDs the
+            // always-on VPN blocks when in lockdown mode, when the always-on VPN changes that
+            // list all state depending on the return value of this function has to be recomputed.
+            // TODO: add a trigger when the always-on VPN sets its blocked UIDs to reevaluate and
+            // send the necessary onBlockedStatusChanged callbacks.
+            if (vpn != null && vpn.isBlockingUid(uid)) {
+                return true;
+            }
+        }
+
+        return mPolicyManagerInternal.isUidNetworkingBlocked(uid, uidRules,
+                isNetworkMetered, isBackgroundRestricted);
+    }
 
     /**
      * Require that the caller is either in the same user or has appropriate permission to interact
@@ -2117,6 +2198,28 @@ public class ConnectivityService extends IConnectivityManager.Stub
         dumpNetworks(pw);
         pw.decreaseIndent();
         pw.println();
+
+        pw.print("Restrict background: ");
+        pw.println(mRestrictBackground);
+        pw.println();
+
+        pw.println("Status for known UIDs:");
+        pw.increaseIndent();
+        final int size = mUidRules.size();
+        for (int i = 0; i < size; i++) {
+            // Don't crash if the array is modified while dumping in bugreports.
+            try {
+                final int uid = mUidRules.keyAt(i);
+                final int uidRules = mUidRules.get(uid, RULE_NONE);
+                pw.println("UID=" + uid + " rules=" + uidRulesToString(uidRules));
+            } catch (ArrayIndexOutOfBoundsException e) {
+                pw.println("  ArrayIndexOutOfBoundsException");
+            } catch (ConcurrentModificationException e) {
+                pw.println("  ConcurrentModificationException");
+            }
+        }
+        pw.println();
+        pw.decreaseIndent();
 
         pw.println("Network Requests:");
         pw.increaseIndent();
@@ -3195,6 +3298,12 @@ public class ConnectivityService extends IConnectivityManager.Stub
                     handlePrivateDnsValidationUpdate(
                             (PrivateDnsValidationUpdate) msg.obj);
                     break;
+                case EVENT_UID_RULES_CHANGED:
+                    handleUidRulesChanged(msg.arg1, msg.arg2);
+                    break;
+                case EVENT_DATA_SAVER_CHANGED:
+                    handleRestrictBackgroundChanged(toBool(msg.arg1));
+                    break;
             }
         }
     }
@@ -3783,6 +3892,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private void setLockdownTracker(LockdownVpnTracker tracker) {
         // Shutdown any existing tracker
         final LockdownVpnTracker existing = mLockdownTracker;
+        // TODO: Add a trigger when the always-on VPN enable/disable to reevaluate and send the
+        // necessary onBlockedStatusChanged callbacks.
         mLockdownTracker = null;
         if (existing != null) {
             existing.shutdown();
@@ -4893,12 +5004,20 @@ public class ConnectivityService extends IConnectivityManager.Stub
             notifyNetworkCallbacks(nai, ConnectivityManager.CALLBACK_CAP_CHANGED);
         }
 
-        // Report changes that are interesting for network statistics tracking.
         if (prevNc != null) {
-            final boolean meteredChanged = prevNc.hasCapability(NET_CAPABILITY_NOT_METERED) !=
-                    newNc.hasCapability(NET_CAPABILITY_NOT_METERED);
+            final boolean oldMetered = prevNc.isMetered();
+            final boolean newMetered = newNc.isMetered();
+            final boolean meteredChanged = oldMetered != newMetered;
+
+            if (meteredChanged) {
+                maybeNotifyNetworkBlocked(nai, oldMetered, newMetered, mRestrictBackground,
+                        mRestrictBackground);
+            }
+
             final boolean roamingChanged = prevNc.hasCapability(NET_CAPABILITY_NOT_ROAMING) !=
                     newNc.hasCapability(NET_CAPABILITY_NOT_ROAMING);
+
+            // Report changes that are interesting for network statistics tracking.
             if (meteredChanged || roamingChanged) {
                 notifyIfacesChangedForNetworkStats();
             }
@@ -5028,6 +5147,8 @@ public class ConnectivityService extends IConnectivityManager.Stub
             case ConnectivityManager.CALLBACK_AVAILABLE: {
                 putParcelable(bundle, new NetworkCapabilities(networkAgent.networkCapabilities));
                 putParcelable(bundle, new LinkProperties(networkAgent.linkProperties));
+                // For this notification, arg1 contains the blocked status.
+                msg.arg1 = arg1;
                 break;
             }
             case ConnectivityManager.CALLBACK_LOSING: {
@@ -5043,6 +5164,10 @@ public class ConnectivityService extends IConnectivityManager.Stub
             }
             case ConnectivityManager.CALLBACK_IP_CHANGED: {
                 putParcelable(bundle, new LinkProperties(networkAgent.linkProperties));
+                break;
+            }
+            case ConnectivityManager.CALLBACK_BLK_CHANGED: {
+                msg.arg1 = arg1;
                 break;
             }
         }
@@ -5600,7 +5725,76 @@ public class ConnectivityService extends IConnectivityManager.Stub
             return;
         }
 
-        callCallbackForRequest(nri, nai, ConnectivityManager.CALLBACK_AVAILABLE, 0);
+        final boolean metered = nai.networkCapabilities.isMetered();
+        final boolean blocked = isUidNetworkingWithVpnBlocked(nri.mUid, mUidRules.get(nri.mUid),
+                metered, mRestrictBackground);
+        callCallbackForRequest(nri, nai, ConnectivityManager.CALLBACK_AVAILABLE, blocked ? 1 : 0);
+    }
+
+    /**
+     * Notify of the blocked state apps with a registered callback matching a given NAI.
+     *
+     * Unlike other callbacks, blocked status is different between each individual uid. So for
+     * any given nai, all requests need to be considered according to the uid who filed it.
+     *
+     * @param nai The target NetworkAgentInfo.
+     * @param oldMetered True if the previous network capabilities is metered.
+     * @param newRestrictBackground True if data saver is enabled.
+     */
+    private void maybeNotifyNetworkBlocked(NetworkAgentInfo nai, boolean oldMetered,
+            boolean newMetered, boolean oldRestrictBackground, boolean newRestrictBackground) {
+
+        for (int i = 0; i < nai.numNetworkRequests(); i++) {
+            NetworkRequest nr = nai.requestAt(i);
+            NetworkRequestInfo nri = mNetworkRequests.get(nr);
+            final int uidRules = mUidRules.get(nri.mUid);
+            final boolean oldBlocked, newBlocked;
+            // mVpns lock needs to be hold here to ensure that the active VPN cannot be changed
+            // between these two calls.
+            synchronized (mVpns) {
+                oldBlocked = isUidNetworkingWithVpnBlocked(nri.mUid, uidRules, oldMetered,
+                        oldRestrictBackground);
+                newBlocked = isUidNetworkingWithVpnBlocked(nri.mUid, uidRules, newMetered,
+                        newRestrictBackground);
+            }
+            if (oldBlocked != newBlocked) {
+                callCallbackForRequest(nri, nai, ConnectivityManager.CALLBACK_BLK_CHANGED,
+                        encodeBool(newBlocked));
+            }
+        }
+    }
+
+    /**
+     * Notify apps with a given UID of the new blocked state according to new uid rules.
+     * @param uid The uid for which the rules changed.
+     * @param newRules The new rules to apply.
+     */
+    private void maybeNotifyNetworkBlockedForNewUidRules(int uid, int newRules) {
+        for (final NetworkAgentInfo nai : mNetworkAgentInfos.values()) {
+            final boolean metered = nai.networkCapabilities.isMetered();
+            final boolean oldBlocked, newBlocked;
+            // TODO: Consider that doze mode or turn on/off battery saver would deliver lots of uid
+            // rules changed event. And this function actually loop through all connected nai and
+            // its requests. It seems that mVpns lock will be grabbed frequently in this case.
+            // Reduce the number of locking or optimize the use of lock are likely needed in future.
+            synchronized (mVpns) {
+                oldBlocked = isUidNetworkingWithVpnBlocked(
+                        uid, mUidRules.get(uid), metered, mRestrictBackground);
+                newBlocked = isUidNetworkingWithVpnBlocked(
+                        uid, newRules, metered, mRestrictBackground);
+            }
+            if (oldBlocked == newBlocked) {
+                return;
+            }
+            final int arg = encodeBool(newBlocked);
+            for (int i = 0; i < nai.numNetworkRequests(); i++) {
+                NetworkRequest nr = nai.requestAt(i);
+                NetworkRequestInfo nri = mNetworkRequests.get(nr);
+                if (nri != null && nri.mUid == uid) {
+                    callCallbackForRequest(nri, nai, ConnectivityManager.CALLBACK_BLK_CHANGED, arg);
+                }
+            }
+        }
     }
 
     private void sendLegacyNetworkBroadcast(NetworkAgentInfo nai, DetailedState state, int type) {
