@@ -202,7 +202,9 @@ public class NetworkInfo implements Parcelable {
      * Return a network-type-specific integer describing the subtype
      * of the network.
      * @return the network subtype
+     * @deprecated Use {@link android.telephony.TelephonyManager#getDataNetworkType} instead.
      */
+    @Deprecated
     public int getSubtype() {
         synchronized (this) {
             return mSubtype;
@@ -243,7 +245,9 @@ public class NetworkInfo implements Parcelable {
     /**
      * Return a human-readable name describing the subtype of the network.
      * @return the name of the network subtype
+     * @deprecated Use {@link android.telephony.TelephonyManager#getDataNetworkType} instead.
      */
+    @Deprecated
     public String getSubtypeName() {
         synchronized (this) {
             return mSubtypeName;
@@ -278,7 +282,15 @@ public class NetworkInfo implements Parcelable {
      * connections and pass data.
      * <p>Always call this before attempting to perform data transactions.
      * @return {@code true} if network connectivity exists, {@code false} otherwise.
+     * @deprecated Apps should instead use the
+     *             {@link android.net.ConnectivityManager.NetworkCallback} API to
+     *             learn about connectivity changes. See
+     *             {@link ConnectivityManager#registerDefaultNetworkCallback} and
+     *             {@link ConnectivityManager#registerNetworkCallback}. These will
+     *             give a more accurate picture of the connectivity state of
+     *             the device and let apps react more easily and quickly to changes.
      */
+    @Deprecated
     public boolean isConnected() {
         synchronized (this) {
             return mState == State.CONNECTED;
@@ -411,7 +423,15 @@ public class NetworkInfo implements Parcelable {
     /**
      * Reports the current fine-grained state of the network.
      * @return the fine-grained state
+     * @deprecated Apps should instead use the
+     *             {@link android.net.ConnectivityManager.NetworkCallback} API to
+     *             learn about connectivity changes. See
+     *             {@link ConnectivityManager#registerDefaultNetworkCallback} and
+     *             {@link ConnectivityManager#registerNetworkCallback}. These will
+     *             give a more accurate picture of the connectivity state of
+     *             the device and let apps react more easily and quickly to changes.
      */
+    @Deprecated
     public DetailedState getDetailedState() {
         synchronized (this) {
             return mDetailedState;
