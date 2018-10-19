@@ -62,14 +62,14 @@ public class ActivityManagerTest {
 
     private void testTaskIdsForUser(int userId) throws RemoteException {
         List<?> recentTasks = service.getRecentTasks(100, 0, userId).getList();
-        assertThat(recentTasks).isNotNull();
-        assertThat(recentTasks).isNotEmpty();
-        for (Object elem : recentTasks) {
-            assertThat(elem).isInstanceOf(RecentTaskInfo.class);
-            RecentTaskInfo recentTask = (RecentTaskInfo) elem;
-            int taskId = recentTask.taskId;
-            assertEquals("The task id " + taskId + " should not belong to user " + userId,
-                    taskId / UserHandle.PER_USER_RANGE, userId);
+        if (recentTasks != null) {
+            for (Object elem : recentTasks) {
+                assertThat(elem).isInstanceOf(RecentTaskInfo.class);
+                RecentTaskInfo recentTask = (RecentTaskInfo) elem;
+                int taskId = recentTask.taskId;
+                assertEquals("The task id " + taskId + " should not belong to user " + userId,
+                             taskId / UserHandle.PER_USER_RANGE, userId);
+            }
         }
     }
 }
