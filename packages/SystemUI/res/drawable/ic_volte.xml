@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!--Copyright (c) 2018, The Linux Foundation. All rights reserved.
+<!-- Copyright (c) 2018, The Linux Foundation. All rights reserved.
+ *                 2018, Citrus-CAF
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions are
@@ -28,20 +29,13 @@
 -->
 
 <vector xmlns:android="http://schemas.android.com/apk/res/android"
-    android:width="14dp"
-    android:height="17dp"
-    android:viewportWidth="14"
+    android:width="15dp"
+    android:height="15dp"
+    android:viewportWidth="17"
     android:viewportHeight="17">
 
     <path
-        android:pathData="M 1.2 4 H 13.7 V 13.2 H 1.2 V 4 Z" />
-    <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M1.9,12.6V4h0.8v3.5h3.2V4h0.8v8.6H5.9v-4H2.7v4H1.9z" />
-    <path
-        android:fillColor="#FFFFFF"
-        android:pathData="M8,12.6V4h2.1c0.5,0,0.8,0,1.1,0.1c0.4,0.1,0.7,0.3,0.9,0.6c0.3,0.4,0.6,0.9,0.7,1.5s0.2,1.3,0.2,2c0,0.7-0.1,1.2-0.2,1.7c-0.1,0.5-0.2,0.9-0.4,1.3S12.2,11.8,12,12s-0.4,0.3-0.7,0.4s-0.6,0.1-1,0.1H8zM8.8,11.6h1.3c0.4,0,0.7-0.1,0.9-0.2c0.2-0.1,0.4-0.3,0.5-0.4c0.2-0.3,0.3-0.6,0.4-1.1c0.1-0.5,0.2-1,0.2-1.7c0-0.9-0.1-1.6-0.3-2.1c-0.2-0.5-0.5-0.8-0.8-1C11,5.1,10.6,5,10.1,5H8.8V11.6z" />
-    <path
-        android:fillColor="#000000"
-        android:pathData="M 2 9 L 1 9 L 1 9 L 2 9 Z" />
+        android:pathData="M14.5 1C15.328 1 16 1.672 16 2.5l0 12c0 0.828 -0.672 1.5 -1.5 1.5l-12 0C1.672 16 1 15.328 1 14.5L1 2.5C1 1.672 1.672 1 2.5 1l12 0zm-6.904 11.13l0 -7.26 -0.736 0 0 3.071 -2.995 0 0 -3.071 -0.736 0 0 7.26 0.736 0 0 -3.386 2.995 0 0 3.386 0.736 0zm3.224 0c0.96 0 1.708 -0.31 2.245 -0.931 0.538 -0.62 0.806 -1.543 0.806 -2.77 0 -0.773 -0.117 -1.424 -0.351 -1.952C13.285 5.948 12.951 5.548 12.517 5.277 12.084 5.006 11.575 4.87 10.991 4.87l-1.8 0 0 7.26 1.629 0zm0.065 -6.477c0.704 0 1.248 0.225 1.632 0.676 0.385 0.451 0.577 1.161 0.577 2.13 0 1.925 -0.791 2.888 -2.373 2.888l-0.793 0 0 -5.694 0.957 0z"
+        android:fillType="evenOdd"
+        android:fillColor="#ffffff" />
 </vector>
