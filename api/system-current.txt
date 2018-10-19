@@ -4471,6 +4471,23 @@ package android.provider {
     field public static final java.lang.String VOLUME_HUSH_GESTURE = "volume_hush_gesture";
   }
 
+  public static final class Telephony.Carriers implements android.provider.BaseColumns {
+    field public static final java.lang.String APN_SET_ID = "apn_set_id";
+    field public static final int CARRIER_EDITED = 4; // 0x4
+    field public static final java.lang.String EDITED = "edited";
+    field public static final java.lang.String MAX_CONNS = "max_conns";
+    field public static final java.lang.String MAX_CONNS_TIME = "max_conns_time";
+    field public static final java.lang.String MODEM_COGNITIVE = "modem_cognitive";
+    field public static final java.lang.String MTU = "mtu";
+    field public static final int NO_SET_SET = 0; // 0x0
+    field public static final int UNEDITED = 0; // 0x0
+    field public static final int USER_DELETED = 2; // 0x2
+    field public static final java.lang.String USER_EDITABLE = "user_editable";
+    field public static final int USER_EDITED = 1; // 0x1
+    field public static final java.lang.String USER_VISIBLE = "user_visible";
+    field public static final java.lang.String WAIT_TIME = "wait_time";
+  }
+
   public final class TimeZoneRulesDataContract {
     field public static final java.lang.String AUTHORITY = "com.android.timezone";
   }
