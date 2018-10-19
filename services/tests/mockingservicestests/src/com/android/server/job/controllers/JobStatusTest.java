@@ -16,19 +16,27 @@
 
 package com.android.server.job.controllers;
 
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.doReturn;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
+import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
+
 import static org.junit.Assert.assertEquals;
 
 import android.app.job.JobInfo;
 import android.content.ComponentName;
+import android.content.pm.PackageManagerInternal;
 import android.os.SystemClock;
 
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.server.LocalServices;
 import com.android.server.job.JobSchedulerService;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.MockitoSession;
 
 import java.time.Clock;
 import java.time.ZoneOffset;
@@ -37,8 +45,17 @@ import java.time.ZoneOffset;
 public class JobStatusTest {
     private static final double DELTA = 0.00001;
 
+    private MockitoSession mMockingSession;
+
     @Before
     public void setUp() throws Exception {
+        mMockingSession = mockitoSession()
+                .initMocks(this)
+                .mockStatic(LocalServices.class)
+                .startMocking();
+        doReturn(mock(PackageManagerInternal.class))
+                .when(() -> LocalServices.getService(PackageManagerInternal.class));
+
         // Freeze the clocks at this moment in time
         JobSchedulerService.sSystemClock =
                 Clock.fixed(Clock.systemUTC().instant(), ZoneOffset.UTC);
@@ -46,6 +63,13 @@ public class JobStatusTest {
                 Clock.fixed(SystemClock.uptimeMillisClock().instant(), ZoneOffset.UTC);
         JobSchedulerService.sElapsedRealtimeClock =
                 Clock.fixed(SystemClock.elapsedRealtimeClock().instant(), ZoneOffset.UTC);
+    }
+
+    @After
+    public void tearDown() {
+        if (mMockingSession != null) {
+            mMockingSession.finishMocking();
+        }
     }
 
     @Test
