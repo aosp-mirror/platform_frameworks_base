@@ -33,6 +33,9 @@ LOCAL_SRC_FILES := $(call all-cpp-files-under, src) \
 LOCAL_CFLAGS += \
         -Wall -Werror -Wno-missing-field-initializers -Wno-unused-variable -Wunused-parameter
 
+# Allow implicit fallthrough in IncidentService.cpp:85 until it is fixed.
+LOCAL_CFLAGS += -Wno-error=implicit-fallthrough
+
 ifeq (debug,)
     LOCAL_CFLAGS += \
             -g -O0
@@ -99,6 +102,9 @@ LOCAL_COMPATIBILITY_SUITE := device-tests
 LOCAL_MODULE_TAGS := tests
 
 LOCAL_CFLAGS := -Werror -Wall -Wno-unused-variable -Wunused-parameter
+
+# Allow implicit fallthrough in IncidentService.cpp:85 until it is fixed.
+LOCAL_CFLAGS += -Wno-error=implicit-fallthrough
 
 LOCAL_C_INCLUDES += $(LOCAL_PATH)/src
 
