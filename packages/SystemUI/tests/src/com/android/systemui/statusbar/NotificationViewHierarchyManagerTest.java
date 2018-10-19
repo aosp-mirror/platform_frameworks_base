@@ -218,6 +218,9 @@ public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
         public void generateChildOrderChangedEvent() {}
 
         @Override
+        public void onReset(ExpandableView view) {}
+
+        @Override
         public int getContainerChildCount() {
             return mRows.size();
         }

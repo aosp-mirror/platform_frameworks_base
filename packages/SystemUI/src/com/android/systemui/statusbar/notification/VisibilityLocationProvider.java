@@ -24,7 +24,10 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 public interface VisibilityLocationProvider {
 
     /**
-     * @return whether the view is in a visible location right now.
+     * Returns whether an ExpandableNotificationRow is in a visible location or not.
+     *
+     * @param row
+     * @return true if row is in a visible location
      */
     boolean isInVisibleLocation(ExpandableNotificationRow row);
 }

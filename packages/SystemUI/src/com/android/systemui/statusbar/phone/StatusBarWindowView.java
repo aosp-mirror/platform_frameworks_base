@@ -58,6 +58,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.view.FloatingActionMode;
 import com.android.internal.widget.FloatingToolbar;
 import com.android.systemui.Dependency;
+import com.android.systemui.ExpandHelper;
 import com.android.systemui.R;
 import com.android.systemui.classifier.FalsingManager;
 import com.android.systemui.statusbar.DragDownHelper;
@@ -182,6 +183,11 @@ public class StatusBarWindowView extends FrameLayout {
         }
     }
 
+    @VisibleForTesting
+    protected NotificationStackScrollLayout getStackScrollLayout() {
+        return mStackScrollLayout;
+    }
+
     @Override
     public FrameLayout.LayoutParams generateLayoutParams(AttributeSet attrs) {
         return new LayoutParams(getContext(), attrs);
@@ -215,8 +221,11 @@ public class StatusBarWindowView extends FrameLayout {
 
     public void setService(StatusBar service) {
         mService = service;
-        setDragDownHelper(new DragDownHelper(getContext(), this, mStackScrollLayout,
-                mStackScrollLayout));
+        NotificationStackScrollLayout stackScrollLayout = getStackScrollLayout();
+        ExpandHelper.Callback expandHelperCallback = stackScrollLayout.getExpandHelperCallback();
+        DragDownHelper.DragDownCallback dragDownCallback = stackScrollLayout.getDragDownCallback();
+        setDragDownHelper(new DragDownHelper(getContext(), this, expandHelperCallback,
+                dragDownCallback));
     }
 
     @VisibleForTesting
@@ -309,7 +318,7 @@ public class StatusBarWindowView extends FrameLayout {
             }
         }
         if (isDown) {
-            mStackScrollLayout.closeControlsIfOutsideTouch(ev);
+            getStackScrollLayout().closeControlsIfOutsideTouch(ev);
         }
         if (mService.isDozing()) {
             mService.mDozeScrimController.extendPulse();
@@ -331,13 +340,14 @@ public class StatusBarWindowView extends FrameLayout {
 
     @Override
     public boolean onInterceptTouchEvent(MotionEvent ev) {
-        if (mService.isDozing() && !mStackScrollLayout.hasPulsingNotifications()) {
+        NotificationStackScrollLayout stackScrollLayout = getStackScrollLayout();
+        if (mService.isDozing() && !stackScrollLayout.hasPulsingNotifications()) {
             // Capture all touch events in always-on.
             return true;
         }
         boolean intercept = false;
         if (mNotificationPanel.isFullyExpanded()
-                && mStackScrollLayout.getVisibility() == View.VISIBLE
+                && stackScrollLayout.getVisibility() == View.VISIBLE
                 && mStatusBarStateController.getState() == StatusBarState.KEYGUARD
                 && !mService.isBouncerShowing()
                 && !mService.isDozing()) {
@@ -349,7 +359,7 @@ public class StatusBarWindowView extends FrameLayout {
         if (intercept) {
             MotionEvent cancellation = MotionEvent.obtain(ev);
             cancellation.setAction(MotionEvent.ACTION_CANCEL);
-            mStackScrollLayout.onInterceptTouchEvent(cancellation);
+            stackScrollLayout.onInterceptTouchEvent(cancellation);
             mNotificationPanel.onInterceptTouchEvent(cancellation);
             cancellation.recycle();
         }
@@ -391,8 +401,9 @@ public class StatusBarWindowView extends FrameLayout {
     }
 
     public void cancelExpandHelper() {
-        if (mStackScrollLayout != null) {
-            mStackScrollLayout.cancelExpandHelper();
+        NotificationStackScrollLayout stackScrollLayout = getStackScrollLayout();
+        if (stackScrollLayout != null) {
+            stackScrollLayout.cancelExpandHelper();
         }
     }
 
