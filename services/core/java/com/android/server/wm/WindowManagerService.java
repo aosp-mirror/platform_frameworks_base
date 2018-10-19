@@ -2675,8 +2675,9 @@ public class WindowManagerService extends IWindowManager.Stub
     public void cleanupRecentsAnimation(@RecentsAnimationController.ReorderMode int reorderMode) {
         synchronized (mWindowMap) {
             if (mRecentsAnimationController != null) {
-                mRecentsAnimationController.cleanupAnimation(reorderMode);
+                final RecentsAnimationController controller = mRecentsAnimationController;
                 mRecentsAnimationController = null;
+                controller.cleanupAnimation(reorderMode);
                 mAppTransition.updateBooster();
             }
         }
