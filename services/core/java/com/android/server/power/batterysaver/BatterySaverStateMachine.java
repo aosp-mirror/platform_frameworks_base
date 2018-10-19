@@ -19,6 +19,7 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.database.ContentObserver;
 import android.os.Handler;
+import android.os.PowerManager;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.provider.Settings.Global;
@@ -241,7 +242,7 @@ public class BatterySaverStateMachine {
                 Settings.Global.LOW_POWER_MODE_TRIGGER_LEVEL, 0);
         final int automaticBatterySaver = getGlobalSetting(
                 Global.AUTOMATIC_POWER_SAVER_MODE,
-                Settings.Global.AUTOMATIC_POWER_SAVER_MODE_PERCENTAGE);
+                PowerManager.POWER_SAVER_MODE_PERCENTAGE);
         final int dynamicPowerSavingsDisableThreshold = getGlobalSetting(
                 Global.DYNAMIC_POWER_SAVINGS_DISABLE_THRESHOLD,
                 mDynamicPowerSavingsDefaultDisableThreshold);
@@ -343,6 +344,17 @@ public class BatterySaverStateMachine {
         }
     }
 
+    @GuardedBy("mLock")
+    private boolean isBatteryLowLocked() {
+        final boolean percentageLow =
+                mSettingAutomaticBatterySaver == PowerManager.POWER_SAVER_MODE_PERCENTAGE
+                && mIsBatteryLevelLow;
+        final boolean dynamicPowerSavingsLow =
+                mSettingAutomaticBatterySaver == PowerManager.POWER_SAVER_MODE_DYNAMIC
+                && mBatteryLevel <= mDynamicPowerSavingsDisableThreshold;
+        return percentageLow || dynamicPowerSavingsLow;
+    }
+
     /**
      * Decide whether to auto-start / stop battery saver.
      */
@@ -361,14 +373,8 @@ public class BatterySaverStateMachine {
         if (!(mBootCompleted && mSettingsLoaded && mBatteryStatusSet)) {
             return; // Not fully initialized yet.
         }
-        final boolean percetageLow =
-                mSettingAutomaticBatterySaver
-                        == Settings.Global.AUTOMATIC_POWER_SAVER_MODE_PERCENTAGE
-                        && mIsBatteryLevelLow;
-        final boolean dynamicPowerSavingsLow =
-                mSettingAutomaticBatterySaver == Settings.Global.AUTOMATIC_POWER_SAVER_MODE_DYNAMIC
-                        && mBatteryLevel <= mDynamicPowerSavingsDisableThreshold;
-        if (!percetageLow && !dynamicPowerSavingsLow) {
+
+        if (!isBatteryLowLocked()) {
             updateSnoozingLocked(false, "Battery not low");
         }
         if (mIsPowered) {
@@ -384,7 +390,7 @@ public class BatterySaverStateMachine {
                     "Sticky restore");
 
         } else if (mSettingAutomaticBatterySaver
-                == Settings.Global.AUTOMATIC_POWER_SAVER_MODE_PERCENTAGE
+                == PowerManager.POWER_SAVER_MODE_PERCENTAGE
                 && isAutoBatterySaverConfiguredLocked()) {
             if (mIsBatteryLevelLow && !mBatterySaverSnoozing) {
                 enableBatterySaverLocked(/*enable=*/ true, /*manual=*/ false,
@@ -397,21 +403,21 @@ public class BatterySaverStateMachine {
                         "Percentage Auto OFF");
             }
         } else if (mSettingAutomaticBatterySaver
-                == Settings.Global.AUTOMATIC_POWER_SAVER_MODE_DYNAMIC) {
+                == PowerManager.POWER_SAVER_MODE_DYNAMIC) {
             if (mBatteryLevel >= mDynamicPowerSavingsDisableThreshold) {
                 enableBatterySaverLocked(/*enable=*/ false, /*manual=*/ false,
                         BatterySaverController.REASON_DYNAMIC_POWER_SAVINGS_AUTOMATIC_OFF,
-                        "Dynamic Power Savings Auto OFF");
+                        "Dynamic Warning Auto OFF");
             } else if (mDynamicPowerSavingsBatterySaver && !mBatterySaverSnoozing) {
                 enableBatterySaverLocked(/*enable=*/ true, /*manual=*/ false,
                         BatterySaverController.REASON_DYNAMIC_POWER_SAVINGS_AUTOMATIC_ON,
-                        "Dynamic Power Savings Auto ON");
+                        "Dynamic Warning Auto ON");
             }
         }
         // do nothing if automatic battery saver mode = PERCENTAGE and low warning threshold = 0%
     }
 
-    /**
+  /**
      * {@link com.android.server.power.PowerManagerService} calls it when
      * {@link android.os.PowerManager#setPowerSaveMode} is called.
      *
@@ -462,15 +468,7 @@ public class BatterySaverStateMachine {
                 // When battery saver is disabled manually (while battery saver is enabled)
                 // when the battery level is low, we "snooze" BS -- i.e. disable auto battery saver.
                 // We resume auto-BS once the battery level is not low, or the device is plugged in.
-                final boolean percetageLow =
-                        mSettingAutomaticBatterySaver
-                                == Settings.Global.AUTOMATIC_POWER_SAVER_MODE_PERCENTAGE
-                                && mIsBatteryLevelLow;
-                final boolean dynamicPowerSavingsLow =
-                        mSettingAutomaticBatterySaver
-                                == Settings.Global.AUTOMATIC_POWER_SAVER_MODE_DYNAMIC
-                                && mBatteryLevel <= mDynamicPowerSavingsDisableThreshold;
-                if (isBatterySaverEnabled() && (percetageLow || dynamicPowerSavingsLow)) {
+                if (isBatterySaverEnabled() && isBatteryLowLocked()) {
                     updateSnoozingLocked(true, "Manual snooze");
                 }
             }

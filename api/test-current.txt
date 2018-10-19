@@ -744,7 +744,11 @@ package android.os {
   }
 
   public final class PowerManager {
+    method public int getPowerSaveMode();
+    method public boolean setDynamicPowerSavings(boolean, int);
     method public boolean setPowerSaveMode(boolean);
+    field public static final int POWER_SAVER_MODE_DYNAMIC = 1; // 0x1
+    field public static final int POWER_SAVER_MODE_PERCENTAGE = 0; // 0x0
   }
 
   public class Process {
@@ -981,6 +985,9 @@ package android.provider {
 
   public static final class Settings.Global extends android.provider.Settings.NameValueTable {
     field public static final java.lang.String AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES = "autofill_compat_mode_allowed_packages";
+    field public static final java.lang.String AUTOMATIC_POWER_SAVER_MODE = "automatic_power_saver_mode";
+    field public static final java.lang.String DYNAMIC_POWER_SAVINGS_DISABLE_THRESHOLD = "dynamic_power_savings_disable_threshold";
+    field public static final java.lang.String DYNAMIC_POWER_SAVINGS_ENABLED = "dynamic_power_savings_enabled";
     field public static final java.lang.String HIDDEN_API_BLACKLIST_EXEMPTIONS = "hidden_api_blacklist_exemptions";
     field public static final java.lang.String LOCATION_GLOBAL_KILL_SWITCH = "location_global_kill_switch";
     field public static final java.lang.String LOW_POWER_MODE = "low_power";
