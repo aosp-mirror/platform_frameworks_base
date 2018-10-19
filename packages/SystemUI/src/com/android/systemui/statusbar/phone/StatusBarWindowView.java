@@ -37,6 +37,7 @@ import android.os.IBinder;
 import android.os.SystemClock;
 import android.util.AttributeSet;
 import android.view.ActionMode;
+import android.view.DisplayCutout;
 import android.view.InputDevice;
 import android.view.InputQueue;
 import android.view.KeyEvent;
@@ -75,6 +76,7 @@ public class StatusBarWindowView extends FrameLayout {
     private NotificationStackScrollLayout mStackScrollLayout;
     private NotificationPanelView mNotificationPanel;
     private View mBrightnessMirror;
+    private PhoneStatusBarView mStatusBarView;
 
     private int mRightInset = 0;
     private int mLeftInset = 0;
@@ -94,6 +96,12 @@ public class StatusBarWindowView extends FrameLayout {
     private boolean mExpandAnimationRunning;
     private boolean mExpandAnimationPending;
 
+    /**
+     * If set to true, the current gesture started below the notch and we need to dispatch touch
+     * events manually as it's outside of the regular view bounds.
+     */
+    private boolean mExpandingBelowNotch;
+
     public StatusBarWindowView(Context context, AttributeSet attrs) {
         super(context, attrs);
         setMotionEventSplittingEnabled(false);
@@ -112,10 +120,21 @@ public class StatusBarWindowView extends FrameLayout {
             boolean paddingChanged = insets.top != getPaddingTop()
                     || insets.bottom != getPaddingBottom();
 
+            int rightCutout = 0;
+            int leftCutout = 0;
+            DisplayCutout displayCutout = getRootWindowInsets().getDisplayCutout();
+            if (displayCutout != null) {
+                leftCutout = displayCutout.getSafeInsetLeft();
+                rightCutout = displayCutout.getSafeInsetRight();
+            }
+
+            int targetLeft = Math.max(insets.left, leftCutout);
+            int targetRight = Math.max(insets.right, rightCutout);
+
             // Super-special right inset handling, because scrims and backdrop need to ignore it.
-            if (insets.right != mRightInset || insets.left != mLeftInset) {
-                mRightInset = insets.right;
-                mLeftInset = insets.left;
+            if (targetRight != mRightInset || targetLeft != mLeftInset) {
+                mRightInset = targetRight;
+                mLeftInset = targetLeft;
                 applyMargins();
             }
             // Drop top inset, and pass through bottom inset.
@@ -184,6 +203,10 @@ public class StatusBarWindowView extends FrameLayout {
         if (child.getId() == R.id.brightness_mirror) {
             mBrightnessMirror = child;
         }
+    }
+
+    public void setStatusBarView(PhoneStatusBarView statusBarView) {
+        mStatusBarView = statusBarView;
     }
 
     public void setService(StatusBar service) {
@@ -258,7 +281,16 @@ public class StatusBarWindowView extends FrameLayout {
     @Override
     public boolean dispatchTouchEvent(MotionEvent ev) {
         boolean isDown = ev.getActionMasked() == MotionEvent.ACTION_DOWN;
+        boolean isUp = ev.getActionMasked() == MotionEvent.ACTION_UP;
         boolean isCancel = ev.getActionMasked() == MotionEvent.ACTION_CANCEL;
+
+        // Reset manual touch dispatch state here but make sure the UP/CANCEL event still gets
+        // delivered.
+        boolean expandingBelowNotch = mExpandingBelowNotch;
+        if (isUp || isCancel) {
+            mExpandingBelowNotch = false;
+        }
+
         if (!isCancel && mService.shouldIgnoreTouch()) {
             return false;
         }
@@ -289,6 +321,17 @@ public class StatusBarWindowView extends FrameLayout {
         }
         if (mService.isDozing()) {
             mService.mDozeScrimController.extendPulse();
+        }
+
+        // In case we start outside of the view bounds (below the status bar), we need to dispatch
+        // the touch manually as the view system can't accomodate for touches outside of the
+        // regular view bounds.
+        if (isDown && ev.getY() >= mBottom) {
+            mExpandingBelowNotch = true;
+            expandingBelowNotch = true;
+        }
+        if (expandingBelowNotch) {
+            return mStatusBarView.dispatchTouchEvent(ev);
         }
 
         return super.dispatchTouchEvent(ev);

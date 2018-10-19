@@ -160,7 +160,7 @@
     <string name="data_connection_roaming" msgid="6037232010953697354">"Rouming"</string>
     <string name="data_connection_edge" msgid="871835227939216682">"EDGE"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
-    <string name="accessibility_no_sim" msgid="8274017118472455155">"SIM karta yo‘q."</string>
+    <string name="accessibility_no_sim" msgid="8274017118472455155">"SIM karta solinmagan."</string>
     <string name="accessibility_cell_data" msgid="5326139158682385073">"Mobil internet"</string>
     <string name="accessibility_cell_data_on" msgid="5927098403452994422">"Mobil internet yoniq"</string>
     <string name="cell_data_off_content_description" msgid="4356113230238585072">"Mobil internet yoqilmagan"</string>
@@ -524,7 +524,6 @@
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> berkitilsinmi?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"Keyingi safar sozlamalardan yoqilgan paydo bo‘ladi."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"Berkitish"</string>
-    <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Siz ishchi profildan foydalanmoqdasiz"</string>
     <string name="stream_voice_call" msgid="4410002696470423714">"Chaqiruv"</string>
     <string name="stream_system" msgid="7493299064422163147">"Tizim"</string>
     <string name="stream_ring" msgid="8213049469184048338">"Jiringlatish"</string>

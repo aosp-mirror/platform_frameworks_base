@@ -24,16 +24,15 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.res.Configuration;
 import android.os.UserHandle;
+import androidx.preference.Preference;
+import androidx.preference.Preference.OnPreferenceChangeListener;
+import androidx.preference.Preference.OnPreferenceClickListener;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
 import android.view.inputmethod.InputMethodSubtype;
 import android.widget.Toast;
-
-import androidx.preference.Preference;
-import androidx.preference.Preference.OnPreferenceChangeListener;
-import androidx.preference.Preference.OnPreferenceClickListener;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.inputmethod.InputMethodUtils;

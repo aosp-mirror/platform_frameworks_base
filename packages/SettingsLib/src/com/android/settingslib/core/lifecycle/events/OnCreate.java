@@ -16,10 +16,9 @@
 package com.android.settingslib.core.lifecycle.events;
 
 
-import android.os.Bundle;
-
 import androidx.lifecycle.Lifecycle;
 import androidx.lifecycle.OnLifecycleEvent;
+import android.os.Bundle;
 
 /**
  * @deprecated use {@link OnLifecycleEvent(Lifecycle.Event) }

@@ -17,13 +17,12 @@
 package com.android.settingslib.widget;
 
 import android.content.Context;
-import android.text.method.LinkMovementMethod;
-import android.util.AttributeSet;
-import android.widget.TextView;
-
 import androidx.core.content.res.TypedArrayUtils;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceViewHolder;
+import android.text.method.LinkMovementMethod;
+import android.util.AttributeSet;
+import android.widget.TextView;
 
 import com.android.settingslib.R;
 

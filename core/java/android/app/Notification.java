@@ -2775,7 +2775,6 @@ public class Notification implements Parcelable
      */
     private void fixDuplicateExtras() {
         if (extras != null) {
-            fixDuplicateExtra(mSmallIcon, EXTRA_SMALL_ICON);
             fixDuplicateExtra(mLargeIcon, EXTRA_LARGE_ICON);
         }
     }

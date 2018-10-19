@@ -522,7 +522,6 @@
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g>ని దాచాలా?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"మీరు సెట్టింగ్‌ల్లో దీన్ని ఆన్ చేసిన తదుపరిసారి ఇది కనిపిస్తుంది."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"దాచు"</string>
-    <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"మీరు మీ కార్యాలయ ప్రొఫైల్‌ను ఉపయోగిస్తున్నారు"</string>
     <string name="stream_voice_call" msgid="4410002696470423714">"కాల్"</string>
     <string name="stream_system" msgid="7493299064422163147">"సిస్టమ్"</string>
     <string name="stream_ring" msgid="8213049469184048338">"రింగ్"</string>

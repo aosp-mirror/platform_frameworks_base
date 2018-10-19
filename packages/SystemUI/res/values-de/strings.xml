@@ -443,9 +443,9 @@
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"Benachrichtigungen durch \"Bitte nicht stören\" pausiert"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"Jetzt starten"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"Keine Benachrichtigungen"</string>
-    <string name="profile_owned_footer" msgid="8021888108553696069">"Profil wird möglicherweise überwacht."</string>
-    <string name="vpn_footer" msgid="2388611096129106812">"Das Netzwerk wird möglicherweise überwacht."</string>
-    <string name="branded_vpn_footer" msgid="2168111859226496230">"Das Netzwerk wird möglicherweise überwacht"</string>
+    <string name="profile_owned_footer" msgid="8021888108553696069">"Profil wird eventuell überwacht."</string>
+    <string name="vpn_footer" msgid="2388611096129106812">"Das Netzwerk wird eventuell überwacht."</string>
+    <string name="branded_vpn_footer" msgid="2168111859226496230">"Das Netzwerk wird eventuell überwacht"</string>
     <string name="quick_settings_disclosure_management_monitoring" msgid="6645176135063957394">"Deine Organisation verwaltet dieses Gerät und kann den Netzwerkverkehr überwachen"</string>
     <string name="quick_settings_disclosure_named_management_monitoring" msgid="370622174777570853">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> verwaltet dieses Gerät und kann den Netzwerkverkehr überwachen"</string>
     <string name="quick_settings_disclosure_management_named_vpn" msgid="1085137869053332307">"Das Gerät wird von deiner Organisation verwaltet und ist mit <xliff:g id="VPN_APP">%1$s</xliff:g> verbunden"</string>
@@ -456,7 +456,7 @@
     <string name="quick_settings_disclosure_named_management_vpns" msgid="7777821385318891527">"Das Gerät wird von <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> verwaltet und ist mit VPNs verbunden"</string>
     <string name="quick_settings_disclosure_managed_profile_monitoring" msgid="5125463987558278215">"Deine Organisation kann den Netzwerkverkehr in deinem Arbeitsprofil überwachen"</string>
     <string name="quick_settings_disclosure_named_managed_profile_monitoring" msgid="8973606847896650284">"<xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> kann den Netzwerkverkehr in deinem Arbeitsprofil überwachen"</string>
-    <string name="quick_settings_disclosure_monitoring" msgid="679658227269205728">"Das Netzwerk wird möglicherweise überwacht"</string>
+    <string name="quick_settings_disclosure_monitoring" msgid="679658227269205728">"Das Netzwerk wird eventuell überwacht"</string>
     <string name="quick_settings_disclosure_vpns" msgid="8170318392053156330">"Das Gerät ist mit VPNs verbunden"</string>
     <string name="quick_settings_disclosure_managed_profile_named_vpn" msgid="3494535754792751741">"Arbeitsprofil verbunden mit <xliff:g id="VPN_APP">%1$s</xliff:g>"</string>
     <string name="quick_settings_disclosure_personal_profile_named_vpn" msgid="4467456202486569906">"Das persönliche Profil ist mit <xliff:g id="VPN_APP">%1$s</xliff:g> verbunden"</string>
@@ -526,7 +526,6 @@
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> ausblenden?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"Sie wird wieder eingeblendet, wenn du sie in den Einstellungen erneut aktivierst."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"Ausblenden"</string>
-    <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Du verwendest dein Arbeitsprofil."</string>
     <string name="stream_voice_call" msgid="4410002696470423714">"Anruf"</string>
     <string name="stream_system" msgid="7493299064422163147">"System"</string>
     <string name="stream_ring" msgid="8213049469184048338">"Klingelton"</string>

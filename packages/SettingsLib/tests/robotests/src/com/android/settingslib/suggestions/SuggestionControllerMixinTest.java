@@ -18,18 +18,15 @@ package com.android.settingslib.suggestions;
 
 import static androidx.lifecycle.Lifecycle.Event.ON_START;
 import static androidx.lifecycle.Lifecycle.Event.ON_STOP;
-
 import static com.google.common.truth.Truth.assertThat;
-
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.LoaderManager;
+import androidx.lifecycle.LifecycleOwner;
 import android.content.ComponentName;
 import android.content.Context;
-
-import androidx.lifecycle.LifecycleOwner;
 
 import com.android.settingslib.SettingsLibRobolectricTestRunner;
 import com.android.settingslib.core.lifecycle.Lifecycle;

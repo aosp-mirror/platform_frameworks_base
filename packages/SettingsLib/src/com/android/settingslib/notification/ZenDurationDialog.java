@@ -24,6 +24,7 @@ import android.content.DialogInterface;
 import android.provider.Settings;
 import android.service.notification.Condition;
 import android.service.notification.ZenModeConfig;
+import androidx.annotation.VisibleForTesting;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.widget.CompoundButton;
@@ -33,8 +34,6 @@ import android.widget.RadioButton;
 import android.widget.RadioGroup;
 import android.widget.ScrollView;
 import android.widget.TextView;
-
-import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;

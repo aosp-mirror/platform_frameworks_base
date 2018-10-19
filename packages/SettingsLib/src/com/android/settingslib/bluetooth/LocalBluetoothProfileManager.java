@@ -35,12 +35,9 @@ import android.bluetooth.BluetoothUuid;
 import android.content.Context;
 import android.content.Intent;
 import android.os.ParcelUuid;
-import android.util.Log;
-
 import androidx.annotation.VisibleForTesting;
-
+import android.util.Log;
 import com.android.internal.R;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;

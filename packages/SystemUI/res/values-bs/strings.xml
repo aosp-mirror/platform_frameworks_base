@@ -525,7 +525,6 @@
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"Želite li sakriti <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"Pojavit će se sljedeći put kada opciju uključite u postavkama."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"Sakrij"</string>
-    <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Koristite svoj profil za posao"</string>
     <string name="stream_voice_call" msgid="4410002696470423714">"Poziv"</string>
     <string name="stream_system" msgid="7493299064422163147">"Sistem"</string>
     <string name="stream_ring" msgid="8213049469184048338">"Zvono"</string>
@@ -849,7 +848,7 @@
     <string name="touch_filtered_warning" msgid="8671693809204767551">"Postavke ne mogu potvrditi vaš odgovor jer aplikacija zaklanja zahtjev za odobrenje."</string>
     <string name="slice_permission_title" msgid="7465009437851044444">"Dozvoliti aplikaciji <xliff:g id="APP_0">%1$s</xliff:g> prikazivanje isječaka aplikacije <xliff:g id="APP_2">%2$s</xliff:g>?"</string>
     <string name="slice_permission_text_1" msgid="3514586565609596523">"- Može čitati informacije iz aplikacije <xliff:g id="APP">%1$s</xliff:g>"</string>
-    <string name="slice_permission_text_2" msgid="3146758297471143723">"- Može poduzeti radnje unutar aplikacije <xliff:g id="APP">%1$s</xliff:g>"</string>
+    <string name="slice_permission_text_2" msgid="3146758297471143723">"- Može poduzeti radnje u aplikaciji <xliff:g id="APP">%1$s</xliff:g>"</string>
     <string name="slice_permission_checkbox" msgid="7986504458640562900">"Dozvoli aplikaciji <xliff:g id="APP">%1$s</xliff:g> prikazivanje isječaka iz svake aplikacije"</string>
     <string name="slice_permission_allow" msgid="2340244901366722709">"Dozvoli"</string>
     <string name="slice_permission_deny" msgid="7683681514008048807">"Odbij"</string>

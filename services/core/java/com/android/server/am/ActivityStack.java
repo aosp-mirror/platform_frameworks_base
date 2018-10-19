@@ -1658,7 +1658,10 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             // Some activity is waiting for another activity to become visible before it's being
             // stopped, which means that we also want to wait with stopping this one to avoid
             // flickers.
-            if (!mStackSupervisor.mActivitiesWaitingForVisibleActivity.isEmpty()) {
+            if (!mStackSupervisor.mActivitiesWaitingForVisibleActivity.isEmpty()
+                    && !mStackSupervisor.mActivitiesWaitingForVisibleActivity.contains(r)) {
+                if (DEBUG_SWITCH) Slog.i(TAG_SWITCH, "adding to waiting visible activity=" + r
+                        + " existing=" + mStackSupervisor.mActivitiesWaitingForVisibleActivity);
                 mStackSupervisor.mActivitiesWaitingForVisibleActivity.add(r);
             }
         }

@@ -42,13 +42,13 @@
         <item><xliff:g id="id">@string/status_bar_phone_evdo_signal</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_phone_signal</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_secure</xliff:g></item>
-        <item><xliff:g id="id">@string/status_bar_bluetooth</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_managed_profile</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_cast</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_vpn</xliff:g></item>
+        <item><xliff:g id="id">@string/status_bar_bluetooth</xliff:g></item>
+        <item><xliff:g id="id">@string/status_bar_location</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_mute</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_volume</xliff:g></item>
-        <item><xliff:g id="id">@string/status_bar_location</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_zen</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_ethernet</xliff:g></item>
         <item><xliff:g id="id">@string/status_bar_wifi</xliff:g></item>
@@ -667,9 +667,27 @@
     <!-- Boolean indicating that wifi only link configuratios that have exact same credentials (i.e PSK) -->
     <bool translatable="false" name="config_wifi_only_link_same_credential_configurations">true</bool>
 
-    <!-- Boolean indicating whether framework needs to set the tx power limit for meeting SAR requirements
-         during voice calls -->
-    <bool translatable="false" name="config_wifi_framework_enable_voice_call_sar_tx_power_limit">false</bool>
+    <!-- Boolean indicating whether framework needs to set the tx power limit for meeting SAR requirements -->
+    <bool translatable="false" name="config_wifi_framework_enable_sar_tx_power_limit">false</bool>
+
+    <!-- Boolean indicating whether framework needs to use body proximity to set the tx power limit
+         for meeting SAR requirements -->
+    <bool translatable="false" name="config_wifi_framework_enable_body_proximity_sar_tx_power_limit">false</bool>
+
+    <!-- String for the sensor type for body/head proximity for SAR -->
+    <string translatable="false" name="config_wifi_sar_sensor_type"></string>
+
+    <!-- Integer indicating event id by sar sensor for free space -->
+    <integer translatable="false" name="config_wifi_framework_sar_free_space_event_id">1</integer>
+
+    <!-- Integer indicating event id by sar sensor for near hand -->
+    <integer translatable="false" name="config_wifi_framework_sar_near_hand_event_id">2</integer>
+
+    <!-- Integer indicating event id by sar sensor for near head -->
+    <integer translatable="false" name="config_wifi_framework_sar_near_head_event_id">3</integer>
+
+    <!-- Integer indicating event id by sar sensor for near body -->
+    <integer translatable="false" name="config_wifi_framework_sar_near_body_event_id">4</integer>
 
     <!-- Wifi driver supports batched scan -->
     <bool translatable="false" name="config_wifi_batched_scan_supported">false</bool>
@@ -2093,6 +2111,10 @@
          states. -->
     <bool name="config_dozeAlwaysOnDisplayAvailable">false</bool>
 
+    <!-- Control whether the always on display mode is enabled by default. This value will be used
+         during initialization when the setting is still null. -->
+    <bool name="config_dozeAlwaysOnEnabled">true</bool>
+
     <!-- Whether the display blanks itself when transitioning from a doze to a non-doze state -->
     <bool name="config_displayBlanksAfterDoze">false</bool>
 
@@ -2944,6 +2966,14 @@
          -->
     <string translatable="false" name="config_mainBuiltInDisplayCutout"></string>
 
+    <!-- Like config_mainBuiltInDisplayCutout, but this path is used to report the
+         one single bounding rect per device edge to the app via
+         {@link DisplayCutout#getBoundingRect}. Note that this path should try to match the visual
+         appearance of the cutout as much as possible, and may be smaller than
+         config_mainBuiltInDisplayCutout
+         -->
+    <string translatable="false" name="config_mainBuiltInDisplayCutoutRectApproximation">@string/config_mainBuiltInDisplayCutout</string>
+
     <!-- Whether the display cutout region of the main built-in display should be forced to
          black in software (to avoid aliasing or emulate a cutout that is not physically existent).
          -->
@@ -3149,6 +3179,9 @@
 
     <!-- True if camera app should be pinned via Pinner Service -->
     <bool name="config_pinnerCameraApp">false</bool>
+
+    <!-- True if home app should be pinned via Pinner Service -->
+    <bool name="config_pinnerHomeApp">false</bool>
 
     <!-- Number of days preloaded file cache should be preserved on a device before it can be
          deleted -->
@@ -3462,6 +3495,13 @@
 
     <!-- Whether or not swipe up gesture's opt-in setting is available on this device -->
     <bool name="config_swipe_up_gesture_setting_available">false</bool>
+
+    <!-- Applications which are disabled unless matching a particular sku -->
+    <string-array name="config_disableApksUnlessMatchedSku_apk_list" translatable="false" />
+    <string-array name="config_disableApkUnlessMatchedSku_skus_list" translatable="false" />
+
+    <!-- Whether or not we should show the option to show battery percentage -->
+    <bool name="config_battery_percentage_setting_available">true</bool>
 
     <!-- Pre-scale volume at volume step 1 for Absolute Volume -->
     <fraction name="config_prescaleAbsoluteVolume_index1">50%</fraction>

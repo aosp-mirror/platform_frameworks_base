@@ -160,7 +160,7 @@
     <string name="data_connection_roaming" msgid="6037232010953697354">"Roaming"</string>
     <string name="data_connection_edge" msgid="871835227939216682">"EDGE"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
-    <string name="accessibility_no_sim" msgid="8274017118472455155">"Sem SIM."</string>
+    <string name="accessibility_no_sim" msgid="8274017118472455155">"Sem chip."</string>
     <string name="accessibility_cell_data" msgid="5326139158682385073">"Dados móveis"</string>
     <string name="accessibility_cell_data_on" msgid="5927098403452994422">"Dados móveis ativados"</string>
     <string name="cell_data_off_content_description" msgid="4356113230238585072">"Dados móveis desativados"</string>
@@ -168,7 +168,7 @@
     <string name="accessibility_bluetooth_tether" msgid="4102784498140271969">"Tethering Bluetooth."</string>
     <string name="accessibility_airplane_mode" msgid="834748999790763092">"Modo avião."</string>
     <string name="accessibility_vpn_on" msgid="5993385083262856059">"VPN ativada."</string>
-    <string name="accessibility_no_sims" msgid="3957997018324995781">"Sem cartão SIM."</string>
+    <string name="accessibility_no_sims" msgid="3957997018324995781">"Sem chip."</string>
     <string name="carrier_network_change_mode" msgid="8149202439957837762">"Alteração de rede da operadora"</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"Abrir detalhes da bateria"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Bateria em <xliff:g id="NUMBER">%d</xliff:g> por cento."</string>
@@ -524,7 +524,6 @@
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"Esconder <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"Ela reaparecerá na próxima vez que você ativá-la nas configurações."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"Ocultar"</string>
-    <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Você está usando seu perfil de trabalho"</string>
     <string name="stream_voice_call" msgid="4410002696470423714">"Ligar"</string>
     <string name="stream_system" msgid="7493299064422163147">"Sistema"</string>
     <string name="stream_ring" msgid="8213049469184048338">"Tocar"</string>

@@ -97,11 +97,14 @@ public final class ParcelableKeyGenParameterSpec implements Parcelable {
         out.writeBoolean(mSpec.isRandomizedEncryptionRequired());
         out.writeBoolean(mSpec.isUserAuthenticationRequired());
         out.writeInt(mSpec.getUserAuthenticationValidityDurationSeconds());
+        out.writeBoolean(mSpec.isUserPresenceRequired());
         out.writeByteArray(mSpec.getAttestationChallenge());
         out.writeBoolean(mSpec.isUniqueIdIncluded());
         out.writeBoolean(mSpec.isUserAuthenticationValidWhileOnBody());
         out.writeBoolean(mSpec.isInvalidatedByBiometricEnrollment());
-        out.writeBoolean(mSpec.isUserPresenceRequired());
+        out.writeBoolean(mSpec.isStrongBoxBacked());
+        out.writeBoolean(mSpec.isUserConfirmationRequired());
+        out.writeBoolean(mSpec.isUnlockedDeviceRequired());
     }
 
     private static Date readDateOrNull(Parcel in) {
@@ -114,19 +117,12 @@ public final class ParcelableKeyGenParameterSpec implements Parcelable {
     }
 
     private ParcelableKeyGenParameterSpec(Parcel in) {
-        String keystoreAlias = in.readString();
-        int purposes = in.readInt();
-        KeyGenParameterSpec.Builder builder = new KeyGenParameterSpec.Builder(
-                keystoreAlias, purposes);
-        builder.setUid(in.readInt());
-        // KeySize is -1 by default, if the KeyGenParameterSpec previously parcelled had the default
-        // value, do not set it as this will cause setKeySize to throw.
-        int keySize = in.readInt();
-        if (keySize >= 0) {
-            builder.setKeySize(keySize);
-        }
+        final String keystoreAlias = in.readString();
+        final int purposes = in.readInt();
+        final int uid = in.readInt();
+        final int keySize = in.readInt();
 
-        int keySpecType = in.readInt();
+        final int keySpecType = in.readInt();
         AlgorithmParameterSpec algorithmSpec = null;
         if (keySpecType == ALGORITHM_PARAMETER_SPEC_NONE) {
             algorithmSpec = null;
@@ -141,32 +137,60 @@ public final class ParcelableKeyGenParameterSpec implements Parcelable {
             throw new IllegalArgumentException(
                     String.format("Unknown algorithm parameter spec: %d", keySpecType));
         }
-        if (algorithmSpec != null) {
-            builder.setAlgorithmParameterSpec(algorithmSpec);
-        }
-        builder.setCertificateSubject(new X500Principal(in.createByteArray()));
-        builder.setCertificateSerialNumber(new BigInteger(in.createByteArray()));
-        builder.setCertificateNotBefore(new Date(in.readLong()));
-        builder.setCertificateNotAfter(new Date(in.readLong()));
-        builder.setKeyValidityStart(readDateOrNull(in));
-        builder.setKeyValidityForOriginationEnd(readDateOrNull(in));
-        builder.setKeyValidityForConsumptionEnd(readDateOrNull(in));
-        String[] digests = in.createStringArray();
-        if (digests != null) {
-            builder.setDigests(digests);
-        }
-        builder.setEncryptionPaddings(in.createStringArray());
-        builder.setSignaturePaddings(in.createStringArray());
-        builder.setBlockModes(in.createStringArray());
-        builder.setRandomizedEncryptionRequired(in.readBoolean());
-        builder.setUserAuthenticationRequired(in.readBoolean());
-        builder.setUserAuthenticationValidityDurationSeconds(in.readInt());
-        builder.setAttestationChallenge(in.createByteArray());
-        builder.setUniqueIdIncluded(in.readBoolean());
-        builder.setUserAuthenticationValidWhileOnBody(in.readBoolean());
-        builder.setInvalidatedByBiometricEnrollment(in.readBoolean());
-        builder.setUserPresenceRequired(in.readBoolean());
-        mSpec = builder.build();
+
+        final X500Principal certificateSubject = new X500Principal(in.createByteArray());
+        final BigInteger certificateSerialNumber = new BigInteger(in.createByteArray());
+        final Date certificateNotBefore = new Date(in.readLong());
+        final Date certificateNotAfter = new Date(in.readLong());
+        final Date keyValidityStartDate = readDateOrNull(in);
+        final Date keyValidityForOriginationEnd = readDateOrNull(in);
+        final Date keyValidityForConsumptionEnd = readDateOrNull(in);
+        final String[] digests = in.createStringArray();
+        final String[] encryptionPaddings = in.createStringArray();
+        final String[] signaturePaddings = in.createStringArray();
+        final String[] blockModes = in.createStringArray();
+        final boolean randomizedEncryptionRequired = in.readBoolean();
+        final boolean userAuthenticationRequired = in.readBoolean();
+        final int userAuthenticationValidityDurationSeconds = in.readInt();
+        final boolean userPresenceRequired = in.readBoolean();
+        final byte[] attestationChallenge = in.createByteArray();
+        final boolean uniqueIdIncluded = in.readBoolean();
+        final boolean userAuthenticationValidWhileOnBody = in.readBoolean();
+        final boolean invalidatedByBiometricEnrollment = in.readBoolean();
+        final boolean isStrongBoxBacked = in.readBoolean();
+        final boolean userConfirmationRequired = in.readBoolean();
+        final boolean unlockedDeviceRequired = in.readBoolean();
+        // The KeyGenParameterSpec is intentionally not constructed using a Builder here:
+        // The intention is for this class to break if new parameters are added to the
+        // KeyGenParameterSpec constructor (whereas using a builder would silently drop them).
+        mSpec = new KeyGenParameterSpec(
+                keystoreAlias,
+                uid,
+                keySize,
+                algorithmSpec,
+                certificateSubject,
+                certificateSerialNumber,
+                certificateNotBefore,
+                certificateNotAfter,
+                keyValidityStartDate,
+                keyValidityForOriginationEnd,
+                keyValidityForConsumptionEnd,
+                purposes,
+                digests,
+                encryptionPaddings,
+                signaturePaddings,
+                blockModes,
+                randomizedEncryptionRequired,
+                userAuthenticationRequired,
+                userAuthenticationValidityDurationSeconds,
+                userPresenceRequired,
+                attestationChallenge,
+                uniqueIdIncluded,
+                userAuthenticationValidWhileOnBody,
+                invalidatedByBiometricEnrollment,
+                isStrongBoxBacked,
+                userConfirmationRequired,
+                unlockedDeviceRequired);
     }
 
     public static final Creator<ParcelableKeyGenParameterSpec> CREATOR = new Creator<ParcelableKeyGenParameterSpec>() {

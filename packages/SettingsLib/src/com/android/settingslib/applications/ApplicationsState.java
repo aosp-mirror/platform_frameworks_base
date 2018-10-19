@@ -22,6 +22,9 @@ import android.app.AppGlobals;
 import android.app.Application;
 import android.app.usage.StorageStats;
 import android.app.usage.StorageStatsManager;
+import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LifecycleObserver;
+import androidx.lifecycle.OnLifecycleEvent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -46,15 +49,11 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
 import android.os.UserManager;
+import androidx.annotation.VisibleForTesting;
 import android.text.format.Formatter;
 import android.util.IconDrawableFactory;
 import android.util.Log;
 import android.util.SparseArray;
-
-import androidx.annotation.VisibleForTesting;
-import androidx.lifecycle.Lifecycle;
-import androidx.lifecycle.LifecycleObserver;
-import androidx.lifecycle.OnLifecycleEvent;
 
 import com.android.internal.R;
 import com.android.internal.util.ArrayUtils;

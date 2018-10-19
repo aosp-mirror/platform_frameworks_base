@@ -594,7 +594,9 @@ std::unique_ptr<const LoadedPackage> LoadedPackage::Load(const Chunk& chunk,
 
   if (iter.HadError()) {
     LOG(ERROR) << iter.GetLastError();
-    return {};
+    if (iter.HadFatalError()) {
+      return {};
+    }
   }
 
   // Flatten and construct the TypeSpecs.
@@ -675,7 +677,9 @@ bool LoadedArsc::LoadTable(const Chunk& chunk, const LoadedIdmap* loaded_idmap,
 
   if (iter.HadError()) {
     LOG(ERROR) << iter.GetLastError();
-    return false;
+    if (iter.HadFatalError()) {
+      return false;
+    }
   }
   return true;
 }
@@ -707,7 +711,9 @@ std::unique_ptr<const LoadedArsc> LoadedArsc::Load(const StringPiece& data,
 
   if (iter.HadError()) {
     LOG(ERROR) << iter.GetLastError();
-    return {};
+    if (iter.HadFatalError()) {
+      return {};
+    }
   }
 
   // Need to force a move for mingw32.

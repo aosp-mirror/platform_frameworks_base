@@ -22,13 +22,14 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
+
 import android.content.Context;
 import android.content.pm.UserInfo;
 import android.os.UserHandle;
 import android.os.UserManager;
 
-import com.android.settingslib.SettingsLibRobolectricTestRunner;
 import com.android.settingslib.testutils.shadow.ShadowActivityManager;
+import com.android.settingslib.SettingsLibRobolectricTestRunner;
 
 import org.junit.After;
 import org.junit.Before;

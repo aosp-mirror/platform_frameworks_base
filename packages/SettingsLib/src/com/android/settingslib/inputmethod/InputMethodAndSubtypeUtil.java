@@ -25,15 +25,14 @@ import android.content.res.Configuration;
 import android.icu.text.ListFormatter;
 import android.provider.Settings;
 import android.provider.Settings.SettingNotFoundException;
+import androidx.preference.PreferenceFragment;
+import androidx.preference.Preference;
+import androidx.preference.PreferenceScreen;
+import androidx.preference.TwoStatePreference;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodSubtype;
-
-import androidx.preference.Preference;
-import androidx.preference.PreferenceFragment;
-import androidx.preference.PreferenceScreen;
-import androidx.preference.TwoStatePreference;
 
 import com.android.internal.app.LocaleHelper;
 import com.android.internal.inputmethod.InputMethodUtils;

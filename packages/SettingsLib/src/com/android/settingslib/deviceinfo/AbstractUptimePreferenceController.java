@@ -20,11 +20,10 @@ import android.content.Context;
 import android.os.Handler;
 import android.os.Message;
 import android.os.SystemClock;
-import android.text.format.DateUtils;
-
 import androidx.annotation.VisibleForTesting;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceScreen;
+import android.text.format.DateUtils;
 
 import com.android.settingslib.core.AbstractPreferenceController;
 import com.android.settingslib.core.lifecycle.Lifecycle;

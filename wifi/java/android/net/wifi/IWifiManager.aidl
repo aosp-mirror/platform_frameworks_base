@@ -147,6 +147,8 @@ interface IWifiManager
 
     boolean setWifiApConfiguration(in WifiConfiguration wifiConfig, String packageName);
 
+    void notifyUserOfApBandConversion(String packageName);
+
     Messenger getWifiServiceMessenger(String packageName);
 
     void enableTdls(String remoteIPAddress, boolean enable);

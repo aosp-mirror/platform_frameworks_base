@@ -41,15 +41,14 @@ import android.os.Message;
 import android.os.Process;
 import android.os.SystemClock;
 import android.provider.Settings;
+import androidx.annotation.GuardedBy;
+import androidx.annotation.NonNull;
+import androidx.annotation.VisibleForTesting;
 import android.text.format.DateUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
 import android.widget.Toast;
-
-import androidx.annotation.GuardedBy;
-import androidx.annotation.NonNull;
-import androidx.annotation.VisibleForTesting;
 
 import com.android.settingslib.R;
 import com.android.settingslib.core.lifecycle.Lifecycle;

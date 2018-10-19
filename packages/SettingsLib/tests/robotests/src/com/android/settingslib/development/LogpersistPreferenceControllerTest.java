@@ -17,14 +17,12 @@
 package com.android.settingslib.development;
 
 import static com.google.common.truth.Truth.assertThat;
-
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.verify;
 
-import android.os.SystemProperties;
-
 import androidx.lifecycle.LifecycleOwner;
+import android.os.SystemProperties;
 import androidx.preference.ListPreference;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceScreen;

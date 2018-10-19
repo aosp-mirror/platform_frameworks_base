@@ -530,7 +530,6 @@
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"Сховати <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"З’явиться знову, коли ви ввімкнете його в налаштуваннях."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"Сховати"</string>
-    <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Ви в робочому профілі"</string>
     <string name="stream_voice_call" msgid="4410002696470423714">"Виклик"</string>
     <string name="stream_system" msgid="7493299064422163147">"Система"</string>
     <string name="stream_ring" msgid="8213049469184048338">"Дзвінок"</string>

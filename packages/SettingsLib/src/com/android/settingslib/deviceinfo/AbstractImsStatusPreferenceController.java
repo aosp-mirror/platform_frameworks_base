@@ -21,13 +21,12 @@ import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.wifi.WifiManager;
 import android.os.PersistableBundle;
-import android.telephony.CarrierConfigManager;
-import android.telephony.SubscriptionManager;
-import android.telephony.TelephonyManager;
-
 import androidx.annotation.VisibleForTesting;
 import androidx.preference.Preference;
 import androidx.preference.PreferenceScreen;
+import android.telephony.CarrierConfigManager;
+import android.telephony.SubscriptionManager;
+import android.telephony.TelephonyManager;
 
 import com.android.settingslib.R;
 import com.android.settingslib.core.lifecycle.Lifecycle;

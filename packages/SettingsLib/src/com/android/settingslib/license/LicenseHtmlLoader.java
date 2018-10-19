@@ -17,9 +17,8 @@
 package com.android.settingslib.license;
 
 import android.content.Context;
-import android.util.Log;
-
 import androidx.annotation.VisibleForTesting;
+import android.util.Log;
 
 import com.android.settingslib.R;
 import com.android.settingslib.utils.AsyncLoader;

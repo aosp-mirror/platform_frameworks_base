@@ -16,7 +16,6 @@
 
 package com.android.settingslib.bluetooth;
 
-import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
 import android.bluetooth.BluetoothHearingAid;
@@ -29,7 +28,7 @@ import android.os.ParcelUuid;
 import android.os.SystemClock;
 import android.text.TextUtils;
 import android.util.Log;
-
+import android.bluetooth.BluetoothAdapter;
 import androidx.annotation.VisibleForTesting;
 
 import com.android.settingslib.R;

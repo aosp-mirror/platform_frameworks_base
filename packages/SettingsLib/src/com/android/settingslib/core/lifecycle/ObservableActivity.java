@@ -24,12 +24,11 @@ import static androidx.lifecycle.Lifecycle.Event.ON_STOP;
 
 import android.annotation.Nullable;
 import android.app.Activity;
+import androidx.lifecycle.LifecycleOwner;
 import android.os.Bundle;
 import android.os.PersistableBundle;
 import android.view.Menu;
 import android.view.MenuItem;
-
-import androidx.lifecycle.LifecycleOwner;
 
 /**
  * {@link Activity} that has hooks to observe activity lifecycle events.

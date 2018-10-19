@@ -31,12 +31,11 @@ import android.graphics.drawable.Drawable;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
+import androidx.annotation.VisibleForTesting;
 import android.text.TextUtils;
 import android.util.Log;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
-
-import androidx.annotation.VisibleForTesting;
 
 import java.util.ArrayList;
 import java.util.Collections;

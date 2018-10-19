@@ -24,11 +24,10 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
-import android.view.View;
-import android.widget.TextView;
-
 import androidx.preference.Preference;
 import androidx.preference.PreferenceViewHolder;
+import android.view.View;
+import android.widget.TextView;
 
 import org.junit.Before;
 import org.junit.Test;

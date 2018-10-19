@@ -128,10 +128,14 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="7372514042696663278">"Une erreur s\'est produite lors de l\'enregistrement des appels Wi-Fi avec votre fournisseur de services : <xliff:g id="CODE">%1$s</xliff:g>"</item>
   </string-array>
-  <string-array name="wfcSpnFormats">
-    <item msgid="6830082633573257149">"%s"</item>
-    <item msgid="4397097370387921767">"Appels Wi-Fi %s"</item>
-  </string-array>
+    <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
+    <skip />
+    <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"Appels Wi-Fi <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"Appel WLAN"</string>
+    <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"Appel WLAN <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"Wi-Fi <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Appels Wi-Fi | <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"Voix par Wi-Fi <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Désactivé"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Réseau Wi-Fi de préférence"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Connexion cellulaire de préférence"</string>
@@ -256,7 +260,7 @@
     <string name="notification_channel_network_alerts" msgid="2895141221414156525">"Alertes réseau"</string>
     <string name="notification_channel_network_available" msgid="4531717914138179517">"Réseau accessible"</string>
     <string name="notification_channel_vpn" msgid="8330103431055860618">"État du RPV"</string>
-    <string name="notification_channel_device_admin" msgid="1568154104368069249">"Administration d\'appareils"</string>
+    <string name="notification_channel_device_admin" msgid="1568154104368069249">"Gestion de l\'appareil"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Alertes"</string>
     <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Démo en magasin"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"Connexion USB"</string>
@@ -1175,6 +1179,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Le réseau Wi-Fi ne dispose d\'aucun accès à Internet"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Touchez pour afficher les options"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Modifications apportées à vos paramètres de point d\'accès"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"La bande de votre point d\'accès a changé."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Cet appareil ne prend pas en charge votre préférence pour la bande de 5 GHz seulement. Au lieu de cela, cet appareil utilisera la bande de 5 GHz lorsqu\'elle sera disponible."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Passé au réseau <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"L\'appareil utilise <xliff:g id="NEW_NETWORK">%1$s</xliff:g> quand <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> n\'a pas d\'accès à Internet. Des frais peuvent s\'appliquer."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Passé du réseau <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> au <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>

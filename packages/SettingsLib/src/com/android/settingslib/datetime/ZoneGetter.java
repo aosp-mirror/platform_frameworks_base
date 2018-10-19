@@ -20,6 +20,9 @@ import android.content.Context;
 import android.content.res.XmlResourceParser;
 import android.icu.text.TimeZoneFormat;
 import android.icu.text.TimeZoneNames;
+import androidx.annotation.VisibleForTesting;
+import androidx.core.text.BidiFormatter;
+import androidx.core.text.TextDirectionHeuristicsCompat;
 import android.text.SpannableString;
 import android.text.SpannableStringBuilder;
 import android.text.TextUtils;
@@ -27,10 +30,6 @@ import android.text.format.DateUtils;
 import android.text.style.TtsSpan;
 import android.util.Log;
 import android.view.View;
-
-import androidx.annotation.VisibleForTesting;
-import androidx.core.text.BidiFormatter;
-import androidx.core.text.TextDirectionHeuristicsCompat;
 
 import com.android.settingslib.R;
 

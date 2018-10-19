@@ -17,11 +17,10 @@
 package com.android.settingslib.inputmethod;
 
 import android.content.Context;
+import androidx.preference.Preference;
 import android.text.TextUtils;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodSubtype;
-
-import androidx.preference.Preference;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.inputmethod.InputMethodUtils;

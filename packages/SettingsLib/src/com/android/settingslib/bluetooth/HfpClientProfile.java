@@ -16,10 +16,10 @@
 
 package com.android.settingslib.bluetooth;
 
+import android.bluetooth.BluetoothHeadsetClient;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothHeadsetClient;
 import android.bluetooth.BluetoothProfile;
 import android.bluetooth.BluetoothUuid;
 import android.content.Context;

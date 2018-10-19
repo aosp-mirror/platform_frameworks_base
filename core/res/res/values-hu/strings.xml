@@ -128,10 +128,14 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="7372514042696663278">"Hiba történt a Wi‑Fi-hívás szolgáltatónál való regisztrálása során: <xliff:g id="CODE">%1$s</xliff:g>"</item>
   </string-array>
-  <string-array name="wfcSpnFormats">
-    <item msgid="6830082633573257149">"%s"</item>
-    <item msgid="4397097370387921767">"%s Wi-Fi-hívás"</item>
-  </string-array>
+    <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
+    <skip />
+    <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi-hívás"</string>
+    <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"WLAN-hívás"</string>
+    <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"<xliff:g id="SPN">%s</xliff:g> WLAN-hívás"</string>
+    <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Wi-Fi-hívás | <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Ki"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi előnyben részesítve"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Preferált: mobil"</string>
@@ -1175,6 +1179,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"A Wi-Fi-hálózaton nincs internetkapcsolat"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Koppintson a beállítások megjelenítéséhez"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"A hotspot beállításainak módosítása"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"A hotspot sávja megváltozott."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Ez az eszköz nem támogatja a csak 5 GHz-es sávra vonatkozó beállítást. Az eszköz akkor használ 5 GHz-es sávot, ha a sáv rendelkezésre áll."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Átváltva erre: <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"<xliff:g id="NEW_NETWORK">%1$s</xliff:g> használata, ha nincs internet-hozzáférés <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g>-kapcsolaton keresztül. A szolgáltató díjat számíthat fel."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Átváltva <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g>-hálózatról erre: <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>

@@ -21,7 +21,11 @@ import static android.view.Surface.ROTATION_180;
 import static android.view.Surface.ROTATION_270;
 import static android.view.Surface.ROTATION_90;
 
+import static com.android.server.wm.utils.CoordinateTransforms.transformLogicalToPhysicalCoordinates;
 import static com.android.server.wm.utils.CoordinateTransforms.transformPhysicalToLogicalCoordinates;
+
+
+import static com.android.server.wm.utils.CoordinateTransforms.transformToRotation;
 
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.*;
@@ -29,6 +33,7 @@ import static org.junit.Assert.*;
 import android.graphics.Matrix;
 import android.graphics.Point;
 import android.graphics.PointF;
+import android.view.DisplayInfo;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -41,6 +46,7 @@ public class CoordinateTransformsTest {
     private static final int H = 400;
 
     private final Matrix mMatrix = new Matrix();
+    private final Matrix mMatrix2 = new Matrix();
 
     @Rule
     public final ErrorCollector mErrorCollector = new ErrorCollector();
@@ -48,39 +54,140 @@ public class CoordinateTransformsTest {
     @Before
     public void setUp() throws Exception {
         mMatrix.setTranslate(0xdeadbeef, 0xdeadbeef);
+        mMatrix2.setTranslate(0xbeefdead, 0xbeefdead);
     }
 
     @Test
-    public void transformPhysicalToLogicalCoordinates_rot0() throws Exception {
+    public void transformPhysicalToLogicalCoordinates_rot0() {
         transformPhysicalToLogicalCoordinates(ROTATION_0, W, H, mMatrix);
         assertThat(mMatrix, is(Matrix.IDENTITY_MATRIX));
     }
 
     @Test
-    public void transformPhysicalToLogicalCoordinates_rot90() throws Exception {
+    public void transformPhysicalToLogicalCoordinates_rot90() {
         transformPhysicalToLogicalCoordinates(ROTATION_90, W, H, mMatrix);
 
-        checkDevicePoint(0, 0).mapsToLogicalPoint(0, W);
-        checkDevicePoint(W, H).mapsToLogicalPoint(H, 0);
+        checkPoint(0, 0).transformsTo(0, W);
+        checkPoint(W, H).transformsTo(H, 0);
     }
 
     @Test
-    public void transformPhysicalToLogicalCoordinates_rot180() throws Exception {
+    public void transformPhysicalToLogicalCoordinates_rot180() {
         transformPhysicalToLogicalCoordinates(ROTATION_180, W, H, mMatrix);
 
-        checkDevicePoint(0, 0).mapsToLogicalPoint(W, H);
-        checkDevicePoint(W, H).mapsToLogicalPoint(0, 0);
+        checkPoint(0, 0).transformsTo(W, H);
+        checkPoint(W, H).transformsTo(0, 0);
     }
 
     @Test
-    public void transformPhysicalToLogicalCoordinates_rot270() throws Exception {
+    public void transformPhysicalToLogicalCoordinates_rot270() {
         transformPhysicalToLogicalCoordinates(ROTATION_270, W, H, mMatrix);
 
-        checkDevicePoint(0, 0).mapsToLogicalPoint(H, 0);
-        checkDevicePoint(W, H).mapsToLogicalPoint(0, W);
+        checkPoint(0, 0).transformsTo(H, 0);
+        checkPoint(W, H).transformsTo(0, W);
     }
 
-    private DevicePointAssertable checkDevicePoint(int x, int y) {
+    @Test
+    public void transformLogicalToPhysicalCoordinates_rot0() {
+        transformLogicalToPhysicalCoordinates(ROTATION_0, W, H, mMatrix);
+        assertThat(mMatrix, is(Matrix.IDENTITY_MATRIX));
+    }
+
+    @Test
+    public void transformLogicalToPhysicalCoordinates_rot90() {
+        transformLogicalToPhysicalCoordinates(ROTATION_90, W, H, mMatrix);
+
+        checkPoint(0, W).transformsTo(0, 0);
+        checkPoint(H, 0).transformsTo(W, H);
+    }
+
+    @Test
+    public void transformLogicalToPhysicalCoordinates_rot180() {
+        transformLogicalToPhysicalCoordinates(ROTATION_180, W, H, mMatrix);
+
+        checkPoint(W, H).transformsTo(0, 0);
+        checkPoint(0, 0).transformsTo(W, H);
+    }
+
+    @Test
+    public void transformLogicalToPhysicalCoordinates_rot270() {
+        transformLogicalToPhysicalCoordinates(ROTATION_270, W, H, mMatrix);
+
+        checkPoint(H, 0).transformsTo(0, 0);
+        checkPoint(0, W).transformsTo(W, H);
+    }
+
+    @Test
+    public void transformLogicalToPhysicalCoordinatesIsInverse_rot0() {
+        transformLogicalToPhysicalCoordinates(ROTATION_0, W, H, mMatrix);
+        transformPhysicalToLogicalCoordinates(ROTATION_0, W, H, mMatrix2);
+
+        assertMatricesAreInverses(mMatrix, mMatrix2);
+    }
+
+    @Test
+    public void transformLogicalToPhysicalCoordinatesIsInverse_rot90() {
+        transformLogicalToPhysicalCoordinates(ROTATION_90, W, H, mMatrix);
+        transformPhysicalToLogicalCoordinates(ROTATION_90, W, H, mMatrix2);
+
+        assertMatricesAreInverses(mMatrix, mMatrix2);
+    }
+
+    @Test
+    public void transformLogicalToPhysicalCoordinatesIsInverse_rot180() {
+        transformLogicalToPhysicalCoordinates(ROTATION_180, W, H, mMatrix);
+        transformPhysicalToLogicalCoordinates(ROTATION_180, W, H, mMatrix2);
+
+        assertMatricesAreInverses(mMatrix, mMatrix2);
+    }
+
+    @Test
+    public void transformLogicalToPhysicalCoordinatesIsInverse_rot270() {
+        transformLogicalToPhysicalCoordinates(ROTATION_270, W, H, mMatrix);
+        transformPhysicalToLogicalCoordinates(ROTATION_270, W, H, mMatrix2);
+
+        assertMatricesAreInverses(mMatrix, mMatrix2);
+    }
+
+    @Test
+    public void transformBetweenRotations_rot180_rot270() {
+        // W,H are flipped, because they need to be given in the new orientation, i.e. ROT_270.
+        transformToRotation(ROTATION_180, ROTATION_270, H, W, mMatrix);
+
+        checkPoint(0, 0).transformsTo(0, W);
+        checkPoint(W, H).transformsTo(H, 0);
+    }
+
+    @Test
+    public void transformBetweenRotations_rot90_rot0() {
+        transformToRotation(ROTATION_180, ROTATION_270, W, H, mMatrix);
+
+        checkPoint(0, 0).transformsTo(0, H);
+        // H,W is bottom right in ROT_90
+        checkPoint(H, W).transformsTo(W, 0);
+    }
+
+    @Test
+    public void transformBetweenRotations_displayInfo() {
+        final DisplayInfo di = new DisplayInfo();
+        di.rotation = ROTATION_90;
+        di.logicalWidth = H;  // dimensions are flipped in ROT_90
+        di.logicalHeight = W;
+        transformToRotation(ROTATION_180, ROTATION_270, di, mMatrix);
+
+        // W,H are flipped, because they need to be given in the new orientation, i.e. ROT_270.
+        transformToRotation(ROTATION_180, ROTATION_270, H, W, mMatrix2);
+
+        assertEquals(mMatrix2, mMatrix);
+    }
+
+    private void assertMatricesAreInverses(Matrix matrix, Matrix matrix2) {
+        final Matrix concat = new Matrix();
+        concat.setConcat(matrix, matrix2);
+        assertTrue("expected identity, but was: " + concat, concat.isIdentity());
+    }
+
+    private TransformPointAssertable checkPoint(int x, int y) {
         final Point devicePoint = new Point(x, y);
         final float[] fs = new float[] {x, y};
         mMatrix.mapPoints(fs);
@@ -92,7 +199,7 @@ public class CoordinateTransformsTest {
         };
     }
 
-    public interface DevicePointAssertable {
-        void mapsToLogicalPoint(int x, int y);
+    public interface TransformPointAssertable {
+        void transformsTo(int x, int y);
     }
 }

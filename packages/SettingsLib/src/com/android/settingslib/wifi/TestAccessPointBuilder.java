@@ -24,7 +24,6 @@ import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiInfo;
 import android.os.Bundle;
 import android.os.Parcelable;
-
 import androidx.annotation.Keep;
 
 import com.android.settingslib.wifi.AccessPoint.Speed;

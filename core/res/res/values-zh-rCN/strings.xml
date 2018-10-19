@@ -128,10 +128,14 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="7372514042696663278">"向您的运营商注册 WLAN 通话时遇到问题：<xliff:g id="CODE">%1$s</xliff:g>"</item>
   </string-array>
-  <string-array name="wfcSpnFormats">
-    <item msgid="6830082633573257149">"%s"</item>
-    <item msgid="4397097370387921767">"%s WLAN 通话功能"</item>
-  </string-array>
+    <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
+    <skip />
+    <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"<xliff:g id="SPN">%s</xliff:g> WLAN 通话"</string>
+    <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"WLAN 通话"</string>
+    <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"<xliff:g id="SPN">%s</xliff:g> WLAN 通话"</string>
+    <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> WLAN"</string>
+    <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"WLAN 通话 | <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"关闭"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"首选 WLAN"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"首选移动数据网络"</string>
@@ -275,7 +279,7 @@
     <string name="permgrouprequest_contacts" msgid="6032805601881764300">"允许&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;访问您的通讯录吗？"</string>
     <string name="permgrouplab_location" msgid="7275582855722310164">"位置信息"</string>
     <string name="permgroupdesc_location" msgid="1346617465127855033">"获取此设备的位置信息"</string>
-    <string name="permgrouprequest_location" msgid="3788275734953323491">"允许&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;获取此设备的位置信息吗？"</string>
+    <string name="permgrouprequest_location" msgid="3788275734953323491">"要允许“<xliff:g id="APP_NAME">%1$s</xliff:g>”获取此设备的位置信息吗？"</string>
     <string name="permgrouplab_calendar" msgid="5863508437783683902">"日历"</string>
     <string name="permgroupdesc_calendar" msgid="3889615280211184106">"访问您的日历"</string>
     <string name="permgrouprequest_calendar" msgid="289900767793189421">"允许&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;访问您的日历吗？"</string>
@@ -296,7 +300,7 @@
     <string name="permgrouprequest_calllog" msgid="8487355309583773267">"允许&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;访问您的手机通话记录吗？"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"电话"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"拨打电话和管理通话"</string>
-    <string name="permgrouprequest_phone" msgid="9166979577750581037">"允许&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;拨打电话和管理通话吗？"</string>
+    <string name="permgrouprequest_phone" msgid="9166979577750581037">"允许“&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;”拨打电话和管理通话吗？"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"身体传感器"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"访问与您的生命体征相关的传感器数据"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"允许&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;访问与您的生命体征相关的传感器数据吗？"</string>
@@ -1175,6 +1179,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"此 WLAN 网络无法访问互联网"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"点按即可查看相关选项"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"您的热点设置已变更"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"您的热点频段已变更。"</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"此设备不支持您的偏好设置（仅限 5GHz），而且会在 5GHz 频段可用时使用该频段。"</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"已切换至<xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"设备会在<xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g>无法访问互联网时使用<xliff:g id="NEW_NETWORK">%1$s</xliff:g>（可能需要支付相应的费用）。"</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"已从<xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g>切换至<xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>

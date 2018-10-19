@@ -130,10 +130,14 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="7372514042696663278">"Проблема з реєстрацією дзвінків через Wi‑Fi у вашого оператора: <xliff:g id="CODE">%1$s</xliff:g>"</item>
   </string-array>
-  <string-array name="wfcSpnFormats">
-    <item msgid="6830082633573257149">"%s"</item>
-    <item msgid="4397097370387921767">"Дзвінок через Wi-Fi від оператора %s"</item>
-  </string-array>
+    <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
+    <skip />
+    <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"Виклики <xliff:g id="SPN">%s</xliff:g> через Wi-Fi"</string>
+    <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"Виклик через WLAN"</string>
+    <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"Виклик <xliff:g id="SPN">%s</xliff:g> через WLAN"</string>
+    <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> через Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Виклики через Wi-Fi | <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> через VoWi-Fi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Вимкнено"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi за умовчанням"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Мобільна мережа за умовчанням"</string>
@@ -1219,6 +1223,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Мережа Wi-Fi не має доступу до Інтернету"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Торкніться, щоб відкрити опції"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Зміни в налаштуваннях точки доступу"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Діапазон точки доступу змінено."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"На цьому пристрої не підтримується налаштування лише 5 ГГц. Замість цього буде використовуватися діапазон 5 ГГц, якщо доступно."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Пристрій перейшов на мережу <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"Коли мережа <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> не має доступу до Інтернету, використовується <xliff:g id="NEW_NETWORK">%1$s</xliff:g>. Може стягуватися плата."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Пристрій перейшов з мережі <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> на мережу <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>

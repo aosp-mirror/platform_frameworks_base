@@ -16,15 +16,13 @@
 package com.android.settingslib.core.lifecycle;
 
 import static androidx.lifecycle.Lifecycle.Event.ON_START;
-
 import static com.google.common.truth.Truth.assertThat;
 
+import androidx.lifecycle.LifecycleOwner;
 import android.content.Context;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-
-import androidx.lifecycle.LifecycleOwner;
 
 import com.android.settingslib.SettingsLibRobolectricTestRunner;
 import com.android.settingslib.core.lifecycle.events.OnAttach;

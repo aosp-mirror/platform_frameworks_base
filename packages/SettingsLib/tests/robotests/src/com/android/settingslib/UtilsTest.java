@@ -20,7 +20,6 @@ import static android.Manifest.permission.WRITE_SECURE_SETTINGS;
 import static com.android.settingslib.Utils.STORAGE_MANAGER_SHOW_OPT_IN_PROPERTY;
 
 import static com.google.common.truth.Truth.assertThat;
-
 import static org.mockito.ArgumentMatchers.argThat;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.mock;
@@ -42,6 +41,8 @@ import android.provider.Settings;
 import android.provider.Settings.Secure;
 import android.text.TextUtils;
 
+import com.android.settingslib.wrapper.LocationManagerWrapper;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -62,7 +63,7 @@ import java.util.Map;
 @RunWith(SettingsLibRobolectricTestRunner.class)
 @Config(shadows = {
             UtilsTest.ShadowSecure.class,
-            UtilsTest.ShadowLocationManager.class})
+            UtilsTest.ShadowLocationManagerWrapper.class})
 public class UtilsTest {
     private static final double[] TEST_PERCENTAGES = {0, 0.4, 0.5, 0.6, 49, 49.3, 49.8, 50, 100};
     private static final String PERCENTAGE_0 = "0%";
@@ -191,8 +192,8 @@ public class UtilsTest {
         }
     }
 
-    @Implements(value = LocationManager.class)
-    public static class ShadowLocationManager {
+    @Implements(value = LocationManagerWrapper.class)
+    public static class ShadowLocationManagerWrapper {
 
         @Implementation
         public void setLocationEnabledForUser(boolean enabled, UserHandle userHandle) {

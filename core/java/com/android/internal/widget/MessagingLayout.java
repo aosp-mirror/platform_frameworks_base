@@ -60,6 +60,13 @@ import java.util.regex.Pattern;
 public class MessagingLayout extends FrameLayout {
 
     private static final float COLOR_SHIFT_AMOUNT = 60;
+    /**
+     *  Pattren for filter some ingonable characters.
+     *  p{Z} for any kind of whitespace or invisible separator.
+     *  p{C} for any kind of punctuation character.
+     */
+    private static final Pattern IGNORABLE_CHAR_PATTERN
+            = Pattern.compile("[\\p{C}\\p{Z}]");
     private static final Pattern SPECIAL_CHAR_PATTERN
             = Pattern.compile ("[!@#$%&*()_+=|<>?{}\\[\\]~-]");
     private static final Consumer<MessagingMessage> REMOVE_MESSAGE
@@ -233,7 +240,10 @@ public class MessagingLayout extends FrameLayout {
                 continue;
             }
             if (!uniqueNames.containsKey(senderName)) {
-                char c = senderName.charAt(0);
+                // Only use visible characters to get uniqueNames
+                String pureSenderName = IGNORABLE_CHAR_PATTERN
+                        .matcher(senderName).replaceAll("" /* replacement */);
+                char c = pureSenderName.charAt(0);
                 if (uniqueCharacters.containsKey(c)) {
                     // this character was already used, lets make it more unique. We first need to
                     // resolve the existing character if it exists
@@ -245,7 +255,7 @@ public class MessagingLayout extends FrameLayout {
                     uniqueNames.put(senderName, findNameSplit((String) senderName));
                 } else {
                     uniqueNames.put(senderName, Character.toString(c));
-                    uniqueCharacters.put(c, senderName);
+                    uniqueCharacters.put(c, pureSenderName);
                 }
             }
         }

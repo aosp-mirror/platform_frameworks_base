@@ -26,11 +26,14 @@ public class Utils {
 
     /**
      * Allows lambda iteration over a list. It is done in reverse order so it is safe
-     * to add or remove items during the iteration.
+     * to add or remove items during the iteration.  Skips over null items.
      */
     public static <T> void safeForeach(List<T> list, Consumer<T> c) {
         for (int i = list.size() - 1; i >= 0; i--) {
-            c.accept(list.get(i));
+            T item = list.get(i);
+            if (item != null) {
+                c.accept(item);
+            }
         }
     }
 

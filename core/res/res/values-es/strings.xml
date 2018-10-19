@@ -34,7 +34,7 @@
     <string name="defaultMsisdnAlphaTag" msgid="2850889754919584674">"MSISDN1"</string>
     <string name="mmiError" msgid="5154499457739052907">"Se ha producido un problema de conexión o el código MMI no es válido."</string>
     <string name="mmiFdnError" msgid="5224398216385316471">"La operación solo es válida para números de marcación fija."</string>
-    <string name="mmiErrorWhileRoaming" msgid="762488890299284230">"No se puede cambiar la configuración de desvío de llamada desde tu teléfono mientras estás en itinerancia."</string>
+    <string name="mmiErrorWhileRoaming" msgid="762488890299284230">"No se puede cambiar la configuración de desvío de llamadas desde tu teléfono mientras estás en itinerancia."</string>
     <string name="serviceEnabled" msgid="8147278346414714315">"El servicio se ha habilitado."</string>
     <string name="serviceEnabledFor" msgid="6856228140453471041">"Se ha habilitado el servicio para:"</string>
     <string name="serviceDisabled" msgid="1937553226592516411">"El servicio se ha inhabilitado."</string>
@@ -60,7 +60,7 @@
     <string name="ClirMmi" msgid="7784673673446833091">"ID de emisor de llamada saliente"</string>
     <string name="ColpMmi" msgid="3065121483740183974">"ID de línea conectada"</string>
     <string name="ColrMmi" msgid="4996540314421889589">"Restricción de ID de línea conectada"</string>
-    <string name="CfMmi" msgid="5123218989141573515">"Desvío de llamada"</string>
+    <string name="CfMmi" msgid="5123218989141573515">"Desvío de llamadas"</string>
     <string name="CwMmi" msgid="9129678056795016867">"Llamada en espera"</string>
     <string name="BaMmi" msgid="455193067926770581">"Bloqueo de llamada"</string>
     <string name="PwdMmi" msgid="7043715687905254199">"Cambio de contraseña"</string>
@@ -88,7 +88,7 @@
     <string name="EmergencyCallWarningTitle" msgid="813380189532491336">"Servicio de llamadas de emergencia no disponible"</string>
     <string name="EmergencyCallWarningSummary" msgid="1899692069750260619">"No se pueden hacer llamadas de emergencia por Wi‑Fi"</string>
     <string name="notification_channel_network_alert" msgid="4427736684338074967">"Alertas"</string>
-    <string name="notification_channel_call_forward" msgid="2419697808481833249">"Desvío de llamada"</string>
+    <string name="notification_channel_call_forward" msgid="2419697808481833249">"Desvío de llamadas"</string>
     <string name="notification_channel_emergency_callback" msgid="6686166232265733921">"Modo de devolución de llamada de emergencia"</string>
     <string name="notification_channel_mobile_data_status" msgid="4575131690860945836">"Estado de los datos móviles"</string>
     <string name="notification_channel_sms" msgid="3441746047346135073">"Mensajes SMS"</string>
@@ -128,12 +128,16 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="7372514042696663278">"No se ha podido registrar la llamada por Wi‑Fi con tu operador: <xliff:g id="CODE">%1$s</xliff:g>"</item>
   </string-array>
-  <string-array name="wfcSpnFormats">
-    <item msgid="6830082633573257149">"%s"</item>
-    <item msgid="4397097370387921767">"Llamadas Wi-Fi de %s"</item>
-  </string-array>
+    <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
+    <skip />
+    <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"Llamada por Wi‑Fi de <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"Llamada por WLAN"</string>
+    <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"Llamada por WLAN de <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"Wi‑Fi de <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Llamada por Wi‑Fi | <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"VoWiFi de <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Desactivado"</string>
-    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Preferir Wi-Fi"</string>
+    <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Dar preferencia a Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Preferir datos móviles"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"Solo conexión Wi-Fi"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: No desviada"</string>
@@ -1075,7 +1079,7 @@
     <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> sigue sin funcionar"</string>
     <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> sigue sin funcionar"</string>
     <string name="aerr_restart" msgid="7581308074153624475">"Volver a abrir la aplicación"</string>
-    <string name="aerr_report" msgid="5371800241488400617">"Enviar sugerencias"</string>
+    <string name="aerr_report" msgid="5371800241488400617">"Enviar comentarios"</string>
     <string name="aerr_close" msgid="2991640326563991340">"Cerrar"</string>
     <string name="aerr_mute" msgid="1974781923723235953">"Silenciar hasta que se reinicie el dispositivo"</string>
     <string name="aerr_wait" msgid="3199956902437040261">"Esperar"</string>
@@ -1175,6 +1179,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"La red Wi-Fi no tiene acceso a Internet"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Toca para ver opciones"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Cambios en los ajustes de tu punto de acceso"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"La banda de tu punto de acceso ha cambiado."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Este dispositivo no admite la opción de conectarse exclusivamente a bandas de 5 GHz, pero las usará cuando estén disponibles."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Se ha cambiado a <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"El dispositivo utiliza <xliff:g id="NEW_NETWORK">%1$s</xliff:g> cuando <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> no tiene acceso a Internet. Es posible que se apliquen cargos."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Se ha cambiado de <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> a <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>

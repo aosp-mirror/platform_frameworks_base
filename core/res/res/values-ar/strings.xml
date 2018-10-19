@@ -132,13 +132,17 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="7372514042696663278">"‏حدثت مشكلة أثناء تسجيل الاتصال عبر Wi‑Fi باستخدام مشغِّل شبكة الجوّال: <xliff:g id="CODE">%1$s</xliff:g>"</item>
   </string-array>
-  <string-array name="wfcSpnFormats">
-    <item msgid="6830082633573257149">"%s"</item>
-    <item msgid="4397097370387921767">"‏%s الاتصال عبر Wi-Fi"</item>
-  </string-array>
+    <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
+    <skip />
+    <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"‏الاتصال عبر شبكة Wi-Fi التابعة لـ <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"‏مكالمة عبر شبكة WLAN"</string>
+    <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"‏مكالمة عبر شبكة WLAN التابعة لـ <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"‏شبكة Wi-Fi التابعة لـ <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"‏الاتصال عبر شبكة WiFi | <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"‏شبكة VoWifi التابعة لـ <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"إيقاف"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"‏شبكة Wi-Fi مفضّلة"</string>
-    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"مفضَّل للجوّال"</string>
+    <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"شبكة بيانات الجوال مفضَّلة"</string>
     <string name="wfc_mode_wifi_only_summary" msgid="2379919155237869320">"‏Wi-Fi فقط"</string>
     <string name="cfTemplateNotForwarded" msgid="1683685883841272560">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: لم تتم إعادة التوجيه"</string>
     <string name="cfTemplateForwarded" msgid="1302922117498590521">"<xliff:g id="BEARER_SERVICE_CODE">{0}</xliff:g>: <xliff:g id="DIALING_NUMBER">{1}</xliff:g>"</string>
@@ -1263,6 +1267,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"‏شبكة Wi-Fi غير متصلة بالإنترنت"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"انقر للحصول على الخيارات."</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"التغييرات التي طرأت على إعدادات نقطة الاتصال"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"تمّ تغيير نطاق نقطة الاتصال الخاصة بك."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"لا يتوافق هذا الجهاز مع إعدادك المفضّل الخاص باستخدام النطاق 5 غيغاهرتز فقط. وسيستخدم الجهاز بدلاً من ذلك النطاق 5 غيغاهرتز عندما يكون متاحًا."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"تم التبديل إلى <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"يستخدم الجهاز <xliff:g id="NEW_NETWORK">%1$s</xliff:g> عندما لا يتوفر اتصال بالإنترنت في شبكة <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g>، ويمكن أن يتم فرض رسوم مقابل ذلك."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"تم التبديل من <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> إلى <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>

@@ -25,6 +25,9 @@ import android.graphics.drawable.StateListDrawable;
 import android.net.wifi.WifiConfiguration;
 import android.os.Looper;
 import android.os.UserHandle;
+import androidx.annotation.VisibleForTesting;
+import androidx.preference.Preference;
+import androidx.preference.PreferenceViewHolder;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.SparseArray;
@@ -32,12 +35,9 @@ import android.view.View;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import androidx.annotation.VisibleForTesting;
-import androidx.preference.Preference;
-import androidx.preference.PreferenceViewHolder;
-
 import com.android.settingslib.R;
 import com.android.settingslib.TronUtils;
+import com.android.settingslib.TwoTargetPreference;
 import com.android.settingslib.Utils;
 import com.android.settingslib.wifi.AccessPoint.Speed;
 

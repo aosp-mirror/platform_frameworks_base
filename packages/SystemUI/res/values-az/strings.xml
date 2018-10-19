@@ -209,7 +209,7 @@
     <string name="accessibility_quick_settings_airplane_changed_off" msgid="66846307818850664">"Təyyarə rejimi deaktiv edildi."</string>
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"Təyyarə rejimi aktiv edildi."</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="2960643943620637020">"tam sakitlik"</string>
-    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3357131899365865386">"yalnız siqnallar"</string>
+    <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3357131899365865386">"yalnız alarmlar"</string>
     <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"Narahat etməyin."</string>
     <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"\"Narahat etməyin\" qeyri-aktivdir."</string>
     <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"\"Narahat etməyin\" aktivdir."</string>
@@ -522,7 +522,6 @@
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> gizlədilsin?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"Ayarlarda onu aktivləşdirəcəyiniz vaxta qədər o, yenidən görünəcək."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"Gizlədin"</string>
-    <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"İş profilinizi istifadə edirsiniz"</string>
     <string name="stream_voice_call" msgid="4410002696470423714">"Zəng"</string>
     <string name="stream_system" msgid="7493299064422163147">"Sistem"</string>
     <string name="stream_ring" msgid="8213049469184048338">"Zəng Edin"</string>

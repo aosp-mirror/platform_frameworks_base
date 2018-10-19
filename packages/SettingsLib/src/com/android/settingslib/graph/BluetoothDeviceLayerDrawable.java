@@ -19,13 +19,18 @@ package com.android.settingslib.graph;
 import android.annotation.NonNull;
 import android.content.Context;
 import android.content.res.Resources;
+import android.graphics.Bitmap;
+import android.graphics.Canvas;
+import android.graphics.Matrix;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffColorFilter;
+import android.graphics.Rect;
+import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.LayerDrawable;
-import android.view.Gravity;
-
 import androidx.annotation.VisibleForTesting;
+import android.view.Gravity;
+import android.view.View;
 
 import com.android.settingslib.R;
 import com.android.settingslib.Utils;

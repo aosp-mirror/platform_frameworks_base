@@ -17,7 +17,6 @@
 package com.android.settingslib.development;
 
 import android.content.Context;
-
 import androidx.preference.Preference;
 import androidx.preference.PreferenceScreen;
 
