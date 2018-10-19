@@ -20,7 +20,6 @@ import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.fail;
 
-import android.os.Parcel;
 import android.support.test.runner.AndroidJUnit4;
 import android.support.test.filters.SmallTest;
 
@@ -31,34 +30,10 @@ import org.junit.Test;
 @SmallTest
 public class UidRangeTest {
 
-    static {
-        System.loadLibrary("frameworksnettestsjni");
-    }
-
-    private static native byte[] readAndWriteNative(byte[] inParcel);
-    private static native int getStart(byte[] inParcel);
-    private static native int getStop(byte[] inParcel);
-
-    @Test
-    public void testNativeParcelUnparcel() {
-        UidRange original = new UidRange(1234, Integer.MAX_VALUE);
-
-        byte[] inParcel = marshall(original);
-        byte[] outParcel = readAndWriteNative(inParcel);
-        UidRange roundTrip = unmarshall(outParcel);
-
-        assertEquals(original, roundTrip);
-        assertArrayEquals(inParcel, outParcel);
-    }
-
-    @Test
-    public void testIndividualNativeFields() {
-        UidRange original = new UidRange(0x11115678, 0x22224321);
-        byte[] originalBytes = marshall(original);
-
-        assertEquals(original.start, getStart(originalBytes));
-        assertEquals(original.stop, getStop(originalBytes));
-    }
+  /*
+   * UidRange is no longer passed to netd. UID ranges between the framework and netd are passed as
+   * UidRangeParcel objects.
+   */
 
     @Test
     public void testSingleItemUidRangeAllowed() {
@@ -90,29 +65,5 @@ public class UidRangeTest {
             fail("Exception not thrown for negative-length UID range");
         } catch (IllegalArgumentException expected) {
         }
-    }
-
-    /**
-     * Write a {@link UidRange} into an empty parcel and return the underlying data.
-     *
-     * @see unmarshall(byte[])
-     */
-    private static byte[] marshall(UidRange range) {
-        Parcel p = Parcel.obtain();
-        range.writeToParcel(p, /* flags */ 0);
-        p.setDataPosition(0);
-        return p.marshall();
-    }
-
-    /**
-     * Read raw bytes into a parcel, and read a {@link UidRange} back out of them.
-     *
-     * @see marshall(UidRange)
-     */
-    private static UidRange unmarshall(byte[] data) {
-        Parcel p = Parcel.obtain();
-        p.unmarshall(data, 0, data.length);
-        p.setDataPosition(0);
-        return UidRange.CREATOR.createFromParcel(p);
     }
 }
