@@ -4467,6 +4467,7 @@ package android.provider {
     field public static final java.lang.String AUTOFILL_USER_DATA_MIN_VALUE_LENGTH = "autofill_user_data_min_value_length";
     field public static final java.lang.String HUSH_GESTURE_USED = "hush_gesture_used";
     field public static final java.lang.String INSTANT_APPS_ENABLED = "instant_apps_enabled";
+    field public static final java.lang.String LAST_SETUP_SHOWN = "last_setup_shown";
     field public static final java.lang.String MANUAL_RINGER_TOGGLE_COUNT = "manual_ringer_toggle_count";
     field public static final java.lang.String VOLUME_HUSH_GESTURE = "volume_hush_gesture";
   }

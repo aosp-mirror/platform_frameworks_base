@@ -6947,6 +6947,7 @@ public final class Settings {
          * each release when there is new setup information to show.
          * @hide
          */
+        @SystemApi
         public static final String LAST_SETUP_SHOWN = "last_setup_shown";
 
         /**
