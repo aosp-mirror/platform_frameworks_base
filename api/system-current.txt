@@ -5159,7 +5159,7 @@ package android.telephony {
 
   public class PhoneStateListener {
     method public void onRadioPowerStateChanged(int);
-    field public static final int LISTEN_RADIO_POWER_STATE_CHANGED = 4194304; // 0x400000
+    field public static final int LISTEN_RADIO_POWER_STATE_CHANGED = 8388608; // 0x800000
   }
 
   public class ServiceState implements android.os.Parcelable {

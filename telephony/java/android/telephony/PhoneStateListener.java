@@ -289,7 +289,7 @@ public class PhoneStateListener {
      *  @hide
      */
     @SystemApi
-    public static final int LISTEN_RADIO_POWER_STATE_CHANGED               = 0x00400000;
+    public static final int LISTEN_RADIO_POWER_STATE_CHANGED               = 0x00800000;
 
     /*
      * Subscription used to listen to the phone state changes
