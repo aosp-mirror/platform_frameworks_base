@@ -822,6 +822,48 @@ public abstract class ContentProvider implements ComponentCallbacks2 {
     }
 
     /**
+     * Opaque token representing the identity of an incoming IPC.
+     */
+    public final class CallingIdentity {
+        /** {@hide} */
+        public final long binderToken;
+        /** {@hide} */
+        public final String callingPackage;
+
+        /** {@hide} */
+        public CallingIdentity(long binderToken, String callingPackage) {
+            this.binderToken = binderToken;
+            this.callingPackage = callingPackage;
+        }
+    }
+
+    /**
+     * Reset the identity of the incoming IPC on the current thread.
+     * <p>
+     * Internally this calls {@link Binder#clearCallingIdentity()} and also
+     * clears any value stored in {@link #getCallingPackage()}.
+     *
+     * @return Returns an opaque token that can be used to restore the original
+     *         calling identity by passing it to
+     *         {@link #restoreCallingIdentity}.
+     */
+    public final @NonNull CallingIdentity clearCallingIdentity() {
+        return new CallingIdentity(Binder.clearCallingIdentity(), setCallingPackage(null));
+    }
+
+    /**
+     * Restore the identity of the incoming IPC on the current thread back to a
+     * previously identity that was returned by {@link #clearCallingIdentity}.
+     * <p>
+     * Internally this calls {@link Binder#restoreCallingIdentity(long)} and
+     * also restores any value stored in {@link #getCallingPackage()}.
+     */
+    public final void restoreCallingIdentity(@NonNull CallingIdentity identity) {
+        Binder.restoreCallingIdentity(identity.binderToken);
+        mCallingPackage.set(identity.callingPackage);
+    }
+
+    /**
      * Change the authorities of the ContentProvider.
      * This is normally set for you from its manifest information when the provider is first
      * created.
