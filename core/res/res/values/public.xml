@@ -2915,6 +2915,7 @@
         <public name="minimumUiTimeout" />
         <public name="isLightTheme" />
         <public name="isSplitRequired" />
+        <public name="textLocale" />
     </public-group>
 
     <public-group type="drawable" first-id="0x010800b4">
