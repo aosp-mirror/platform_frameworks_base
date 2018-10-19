@@ -67,6 +67,7 @@ final class ActivityManagerConstants extends ContentObserver {
     static final String KEY_BOUND_SERVICE_CRASH_RESTART_DURATION = "service_crash_restart_duration";
     static final String KEY_BOUND_SERVICE_CRASH_MAX_RETRY = "service_crash_max_retry";
     static final String KEY_PROCESS_START_ASYNC = "process_start_async";
+    static final String KEY_TOP_TO_FGS_GRACE_DURATION = "top_to_fgs_grace_duration";
 
     private static final int DEFAULT_MAX_CACHED_PROCESSES = 32;
     private static final long DEFAULT_BACKGROUND_SETTLE_TIME = 60*1000;
@@ -95,7 +96,7 @@ final class ActivityManagerConstants extends ContentObserver {
     private static final long DEFAULT_BOUND_SERVICE_CRASH_RESTART_DURATION = 30*60_000;
     private static final int DEFAULT_BOUND_SERVICE_CRASH_MAX_RETRY = 16;
     private static final boolean DEFAULT_PROCESS_START_ASYNC = true;
-
+    private static final long DEFAULT_TOP_TO_FGS_GRACE_DURATION = 15 * 1000;
 
     // Maximum number of cached processes we will allow.
     public int MAX_CACHED_PROCESSES = DEFAULT_MAX_CACHED_PROCESSES;
@@ -206,6 +207,10 @@ final class ActivityManagerConstants extends ContentObserver {
 
     // Indicates if the processes need to be started asynchronously.
     public boolean FLAG_PROCESS_START_ASYNC = DEFAULT_PROCESS_START_ASYNC;
+
+    // Allow app just moving from TOP to FOREGROUND_SERVICE to stay in a higher adj value for
+    // this long.
+    public long TOP_TO_FGS_GRACE_DURATION = DEFAULT_TOP_TO_FGS_GRACE_DURATION;
 
     // Indicates whether the activity starts logging is enabled.
     // Controlled by Settings.Global.ACTIVITY_STARTS_LOGGING_ENABLED
@@ -348,6 +353,8 @@ final class ActivityManagerConstants extends ContentObserver {
                 DEFAULT_BOUND_SERVICE_CRASH_MAX_RETRY);
             FLAG_PROCESS_START_ASYNC = mParser.getBoolean(KEY_PROCESS_START_ASYNC,
                     DEFAULT_PROCESS_START_ASYNC);
+            TOP_TO_FGS_GRACE_DURATION = mParser.getDurationMillis(KEY_TOP_TO_FGS_GRACE_DURATION,
+                    DEFAULT_TOP_TO_FGS_GRACE_DURATION);
 
             updateMaxCachedProcesses();
         }
@@ -423,6 +430,8 @@ final class ActivityManagerConstants extends ContentObserver {
         pw.println(MAX_SERVICE_INACTIVITY);
         pw.print("  "); pw.print(KEY_BG_START_TIMEOUT); pw.print("=");
         pw.println(BG_START_TIMEOUT);
+        pw.print("  "); pw.print(KEY_TOP_TO_FGS_GRACE_DURATION); pw.print("=");
+        pw.println(TOP_TO_FGS_GRACE_DURATION);
 
         pw.println();
         if (mOverrideMaxCachedProcesses >= 0) {
