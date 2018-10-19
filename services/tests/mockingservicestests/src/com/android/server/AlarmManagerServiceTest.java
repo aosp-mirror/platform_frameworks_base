@@ -58,6 +58,8 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.annotations.GuardedBy;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -66,8 +68,6 @@ import org.mockito.Answers;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoSession;
-
-import javax.annotation.concurrent.GuardedBy;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
