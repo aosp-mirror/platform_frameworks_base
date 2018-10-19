@@ -21,7 +21,6 @@ import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.content.Intent;
-import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -247,7 +246,7 @@ public class ServiceState implements Parcelable {
     private String mDataOperatorAlphaLong;
     private String mDataOperatorAlphaShort;
     private String mDataOperatorNumeric;
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
+    @UnsupportedAppUsage
     private boolean mIsManualNetworkSelection;
 
     private boolean mIsEmergencyOnly;
@@ -257,9 +256,9 @@ public class ServiceState implements Parcelable {
 
     @UnsupportedAppUsage
     private boolean mCssIndicator;
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
+    @UnsupportedAppUsage
     private int mNetworkId;
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
+    @UnsupportedAppUsage
     private int mSystemId;
     @UnsupportedAppUsage
     private int mCdmaRoamingIndicator;
@@ -457,7 +456,7 @@ public class ServiceState implements Parcelable {
      *
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
+    @UnsupportedAppUsage
     public int getVoiceRegState() {
         return mVoiceRegState;
     }
@@ -472,7 +471,7 @@ public class ServiceState implements Parcelable {
      *
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
+    @UnsupportedAppUsage
     public int getDataRegState() {
         return mDataRegState;
     }
@@ -533,7 +532,7 @@ public class ServiceState implements Parcelable {
      * @return roaming status
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
+    @UnsupportedAppUsage
     public boolean getVoiceRoaming() {
         return getVoiceRoamingType() != ROAMING_TYPE_NOT_ROAMING;
     }
@@ -557,7 +556,7 @@ public class ServiceState implements Parcelable {
      * @return roaming type
      * @hide
      */
-    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
+    @UnsupportedAppUsage
     public boolean getDataRoaming() {
         return getDataRoamingType() != ROAMING_TYPE_NOT_ROAMING;
     }
