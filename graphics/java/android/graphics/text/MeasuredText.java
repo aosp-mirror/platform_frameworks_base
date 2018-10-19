@@ -31,6 +31,21 @@ import libcore.util.NativeAllocationRegistry;
 
 /**
  * Result of text shaping of the single paragraph string.
+ *
+ * <p>
+ * <pre>
+ * <code>
+ * Paint paint = new Paint();
+ * Paint bigPaint = new Paint();
+ * bigPaint.setTextSize(paint.getTextSize() * 2.0);
+ * String text = "Hello, Android.";
+ * MeasuredText mt = new MeasuredText.Builder(text.toCharArray())
+ *      .appendStyleRun(paint, 7, false)  // Use paint for "Hello, "
+ *      .appendStyleRun(bigPaint, 8, false)  // Use bigPaint for "Hello, "
+ *      .build();
+ * </code>
+ * </pre>
+ * </p>
  */
 public class MeasuredText {
     private static final NativeAllocationRegistry sRegistry = new NativeAllocationRegistry(
@@ -136,6 +151,19 @@ public class MeasuredText {
 
     /**
      * Helper class for creating a {@link MeasuredText}.
+     * <p>
+     * <pre>
+     * <code>
+     * Paint paint = new Paint();
+     * String text = "Hello, Android.";
+     * MeasuredText mt = new MeasuredText.Builder(text.toCharArray())
+     *      .appendStyleRun(paint, text.length, false)
+     *      .build();
+     * </code>
+     * </pre>
+     * </p>
+     *
+     * Note: The appendStyle and appendReplacementRun should be called to cover the text length.
      */
     public static class Builder {
         private long mNativePtr;
@@ -143,6 +171,7 @@ public class MeasuredText {
         private final @NonNull char[] mText;
         private boolean mComputeHyphenation = false;
         private boolean mComputeLayout = true;
+        private int mCurrentOffset = 0;
 
         /**
          * Construct a builder.
@@ -159,35 +188,50 @@ public class MeasuredText {
         }
 
         /**
-         * Apply styles to the given range.
+         * Apply styles to the given length.
+         *
+         * Keeps an internal offset which increases at every append. The initial value for this
+         * offset is zero. After the style is applied the internal offset is moved to {@code offset
+         * + length}, and next call will start from this new position.
          *
          * @param paint a paint
-         * @param start an inclusive start index of the range
-         * @param end an exclusive end index of the range
+         * @param length a length to be applied with a given paint, can not exceed the length of the
+         *               text
          * @param isRtl true if the text is in RTL context, otherwise false.
          */
-        public Builder addStyleRun(@NonNull Paint paint,
-                @IntRange(from = 0) int start, @IntRange(from = 0) int end, boolean isRtl) {
+        public Builder appendStyleRun(@NonNull Paint paint, @IntRange(from = 0) int length,
+                boolean isRtl) {
             Preconditions.checkNotNull(paint);
-            nAddStyleRun(mNativePtr, paint.getNativeInstance(), start, end, isRtl);
+            Preconditions.checkArgument(length > 0, "length can not be negative");
+            final int end = mCurrentOffset + length;
+            Preconditions.checkArgument(end <= mText.length, "Style exceeds the text length");
+            nAddStyleRun(mNativePtr, paint.getNativeInstance(), mCurrentOffset, end, isRtl);
+            mCurrentOffset = end;
             return this;
         }
 
         /**
-         * Used to inform the text layout that the given range is replaced with the object of given
+         * Used to inform the text layout that the given length is replaced with the object of given
          * width.
          *
-         * Informs the layout engine that the given range should not be processed, instead the
+         * Keeps an internal offset which increases at every append. The initial value for this
+         * offset is zero. After the style is applied the internal offset is moved to {@code offset
+         * + length}, and next call will start from this new position.
+         *
+         * Informs the layout engine that the given length should not be processed, instead the
          * provided width should be used for calculating the width of that range.
          *
-         * @param start an inclusive start index of the range
-         * @param end an exclusive end index of the range
+         * @param length a length to be replaced with the object, can not exceed the length of the
+         *               text
          * @param width a replacement width of the range
          */
-        public Builder addReplacementRun(@NonNull Paint paint,
-                @IntRange(from = 0) int start, @IntRange(from = 0) int end,
-                @FloatRange(from = 0) float width) {
-            nAddReplacementRun(mNativePtr, paint.getNativeInstance(), start, end, width);
+        public Builder appendReplacementRun(@NonNull Paint paint,
+                @IntRange(from = 0) int length, @FloatRange(from = 0) float width) {
+            Preconditions.checkArgument(length > 0, "length can not be negative");
+            final int end = mCurrentOffset + length;
+            Preconditions.checkArgument(end <= mText.length, "Replacement exceeds the text length");
+            nAddReplacementRun(mNativePtr, paint.getNativeInstance(), mCurrentOffset, end, width);
+            mCurrentOffset = end;
             return this;
         }
 
@@ -230,9 +274,14 @@ public class MeasuredText {
          *
          * Once you called build() method, you can't reuse the Builder class again.
          * @throws IllegalStateException if this Builder is reused.
+         * @throws IllegalStateException if the whole text is not covered by one or more runs (style
+         *                               or replacement)
          */
         public MeasuredText build() {
             ensureNativePtrNoReuse();
+            if (mCurrentOffset != mText.length) {
+                throw new IllegalStateException("Style info has not been provided for all text.");
+            }
             try {
                 long ptr = nBuildMeasuredText(mNativePtr, mText, mComputeHyphenation,
                         mComputeLayout);

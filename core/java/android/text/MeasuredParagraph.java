@@ -505,7 +505,7 @@ public class MeasuredParagraph {
             }
             mWholeWidth += width;
         } else {
-            builder.addReplacementRun(mCachedPaint, start, end, width);
+            builder.appendReplacementRun(mCachedPaint, end - start, width);
         }
     }
 
@@ -520,7 +520,7 @@ public class MeasuredParagraph {
                         mCopiedBuffer, start, end - start, start, end - start, false /* isRtl */,
                         mWidths.getRawArray(), start);
             } else {
-                builder.addStyleRun(mCachedPaint, start, end, false /* isRtl */);
+                builder.appendStyleRun(mCachedPaint, end - start, false /* isRtl */);
             }
         } else {
             // If there is multiple bidi levels, split into individual bidi level and apply style.
@@ -536,7 +536,7 @@ public class MeasuredParagraph {
                                 mCopiedBuffer, levelStart, levelLength, levelStart, levelLength,
                                 isRtl, mWidths.getRawArray(), levelStart);
                     } else {
-                        builder.addStyleRun(mCachedPaint, levelStart, levelEnd, isRtl);
+                        builder.appendStyleRun(mCachedPaint, levelEnd - levelStart, isRtl);
                     }
                     if (levelEnd == end) {
                         break;

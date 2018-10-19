@@ -38,11 +38,14 @@ import java.lang.annotation.RetentionPolicy;
  * <pre>
  * <code>
  * Paint paint = new Paint();
+ * Paint bigPaint = new Paint();
+ * bigPaint.setTextSize(paint.getTextSize() * 2.0);
  * String text = "Hello, Android.";
  *
  * // Prepare the measured text
  * MeasuredText mt = new MeasuredText.Builder(text.toCharArray())
- *     .addStyleRun(paint, 0, text.length(), false)  // Use paint for whole paragraph.
+ *     .appendStyleRun(paint, 7, false)  // Use paint for "Hello, "
+ *     .appednStyleRun(bigPaint, 8, false)  // Use bigPaint for "Hello, "
  *     .build();
  *
  * LineBreaker lb = new LineBreaker.Builder()
