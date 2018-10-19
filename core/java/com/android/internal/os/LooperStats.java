@@ -49,6 +49,7 @@ public class LooperStats implements Looper.Observer {
     private final int mEntriesSizeCap;
     private int mSamplingInterval;
     private CachedDeviceState.Readonly mDeviceState;
+    private long mStartTime = System.currentTimeMillis();
 
     public LooperStats(int samplingInterval, int entriesSizeCap) {
         this.mSamplingInterval = samplingInterval;
@@ -144,6 +145,11 @@ public class LooperStats implements Looper.Observer {
         return exportedEntries;
     }
 
+    /** Returns a timestamp indicating when the statistics were last reset. */
+    public long getStartTimeMillis() {
+        return mStartTime;
+    }
+
     private void maybeAddSpecialEntry(List<ExportedEntry> exportedEntries, Entry specialEntry) {
         synchronized (specialEntry) {
             if (specialEntry.messageCount > 0 || specialEntry.exceptionCount > 0) {
@@ -163,6 +169,7 @@ public class LooperStats implements Looper.Observer {
         synchronized (mOverflowEntry) {
             mOverflowEntry.reset();
         }
+        mStartTime = System.currentTimeMillis();
     }
 
     public void setSamplingInterval(int samplingInterval) {
