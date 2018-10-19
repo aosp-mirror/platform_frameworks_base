@@ -20,6 +20,7 @@ import android.content.Context;
 import android.os.Handler;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.annotation.UiThreadTest;
+import android.support.test.filters.FlakyTest;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 
@@ -36,6 +37,7 @@ import java.io.File;
  */
 @RunWith(AndroidJUnit4.class)
 @SmallTest
+@FlakyTest(bugId = 113616538)
 public class AppErrorDialogTest {
 
     private Context mContext;

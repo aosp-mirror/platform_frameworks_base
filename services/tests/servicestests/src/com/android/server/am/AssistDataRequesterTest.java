@@ -42,6 +42,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.support.test.InstrumentationRegistry;
+import android.support.test.filters.FlakyTest;
 import android.support.test.filters.MediumTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.util.Log;
@@ -65,6 +66,7 @@ import java.util.concurrent.TimeUnit;
  * runtest --path frameworks/base/services/tests/servicestests/src/com/android/server/am/AssistDataRequesterTest.java
  */
 @MediumTest
+@FlakyTest(bugId = 113616538)
 @RunWith(AndroidJUnit4.class)
 public class AssistDataRequesterTest extends ActivityTestsBase {
 
