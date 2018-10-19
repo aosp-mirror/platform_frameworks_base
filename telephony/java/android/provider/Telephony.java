@@ -3059,6 +3059,13 @@ public final class Telephony {
         @SystemApi
         public static final int NO_SET_SET = 0;
 
+        /**
+         * A unique carrier id associated with this APN
+         * {@see TelephonyManager#getSimCarrierId()}
+         * <p>Type: STRING</p>
+         */
+        public static final String CARRIER_ID = "carrier_id";
+
     }
 
     /**
