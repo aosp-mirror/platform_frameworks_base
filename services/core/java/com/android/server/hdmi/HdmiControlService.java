@@ -1834,14 +1834,7 @@ public class HdmiControlService extends SystemService {
                         Slog.w(TAG, "audio system is not in system audio mode");
                         return;
                     }
-                    int scaledVolume = VolumeControlAction.scaleToCecVolume(volume, maxVolume);
-
-                    sendCecCommand(HdmiCecMessageBuilder
-                            .buildReportAudioStatus(
-                                    device.getDeviceInfo().getLogicalAddress(),
-                                    Constants.ADDR_TV,
-                                    scaledVolume,
-                                    isMute));
+                    audioSystem().reportAudioStatus(Constants.ADDR_TV);
                 }
             });
         }

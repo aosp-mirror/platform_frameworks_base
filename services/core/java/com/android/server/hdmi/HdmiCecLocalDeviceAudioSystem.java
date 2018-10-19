@@ -401,7 +401,7 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
     protected boolean handleGiveAudioStatus(HdmiCecMessage message) {
         assertRunOnServiceThread();
 
-        reportAudioStatus(message);
+        reportAudioStatus(message.getSource());
         return true;
     }
 
@@ -583,17 +583,20 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
             .setWiredDeviceConnectionState(AudioSystem.DEVICE_IN_HDMI, enabled ? 1 : 0, "", "");
     }
 
-    private void reportAudioStatus(HdmiCecMessage message) {
+    void reportAudioStatus(int source) {
         assertRunOnServiceThread();
 
         int volume = mService.getAudioManager().getStreamVolume(AudioManager.STREAM_MUSIC);
         boolean mute = mService.getAudioManager().isStreamMute(AudioManager.STREAM_MUSIC);
         int maxVolume = mService.getAudioManager().getStreamMaxVolume(AudioManager.STREAM_MUSIC);
+        int minVolume = mService.getAudioManager().getStreamMinVolume(AudioManager.STREAM_MUSIC);
         int scaledVolume = VolumeControlAction.scaleToCecVolume(volume, maxVolume);
+        HdmiLogger.debug("Reporting volume %i (%i-%i) as CEC volume %i", volume,
+                minVolume, maxVolume, scaledVolume);
 
         mService.sendCecCommand(
                 HdmiCecMessageBuilder.buildReportAudioStatus(
-                        mAddress, message.getSource(), scaledVolume, mute));
+                        mAddress, source, scaledVolume, mute));
     }
 
     /**
