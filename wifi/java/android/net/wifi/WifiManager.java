@@ -2081,7 +2081,10 @@ public class WifiManager {
      * even when Wi-Fi is turned off.
      *
      * To change this setting, see {@link #ACTION_REQUEST_SCAN_ALWAYS_AVAILABLE}.
+     * @deprecated The ability for apps to trigger scan requests will be removed in a future
+     * release.
      */
+    @Deprecated
     public boolean isScanAlwaysAvailable() {
         try {
             return mService.isScanAlwaysAvailable();
