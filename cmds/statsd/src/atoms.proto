@@ -2356,10 +2356,10 @@ message NativeProcessMemoryState {
   optional string process_name = 2;
 
   // # of page-faults
-  optional int64 pgfault = 3;
+  optional int64 page_fault = 3;
 
   // # of major page-faults
-  optional int64 pgmajfault = 4;
+  optional int64 page_major_fault = 4;
 
   // RSS
   optional int64 rss_in_bytes = 5;
