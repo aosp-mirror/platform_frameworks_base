@@ -55,6 +55,8 @@ import java.util.function.Predicate;
  * Each app can have a different default networks or different connectivity
  * status due to user-requested network policies, so we need to check
  * constraints on a per-UID basis.
+ *
+ * Test: atest com.android.server.job.controllers.ConnectivityControllerTest
  */
 public final class ConnectivityController extends StateController implements
         ConnectivityManager.OnNetworkActiveListener {
@@ -65,8 +67,9 @@ public final class ConnectivityController extends StateController implements
     private final ConnectivityManager mConnManager;
     private final NetworkPolicyManager mNetPolicyManager;
 
+    /** List of tracked jobs keyed by source UID. */
     @GuardedBy("mLock")
-    private final ArraySet<JobStatus> mTrackedJobs = new ArraySet<>();
+    private final SparseArray<ArraySet<JobStatus>> mTrackedJobs = new SparseArray<>();
 
     public ConnectivityController(JobSchedulerService service) {
         super(service);
@@ -87,7 +90,12 @@ public final class ConnectivityController extends StateController implements
     public void maybeStartTrackingJobLocked(JobStatus jobStatus, JobStatus lastJob) {
         if (jobStatus.hasConnectivityConstraint()) {
             updateConstraintsSatisfied(jobStatus);
-            mTrackedJobs.add(jobStatus);
+            ArraySet<JobStatus> jobs = mTrackedJobs.get(jobStatus.getSourceUid());
+            if (jobs == null) {
+                jobs = new ArraySet<>();
+                mTrackedJobs.put(jobStatus.getSourceUid(), jobs);
+            }
+            jobs.add(jobStatus);
             jobStatus.setTrackingController(JobStatus.TRACKING_CONNECTIVITY);
         }
     }
@@ -97,7 +105,10 @@ public final class ConnectivityController extends StateController implements
     public void maybeStopTrackingJobLocked(JobStatus jobStatus, JobStatus incomingJob,
             boolean forUpdate) {
         if (jobStatus.clearTrackingController(JobStatus.TRACKING_CONNECTIVITY)) {
-            mTrackedJobs.remove(jobStatus);
+            ArraySet<JobStatus> jobs = mTrackedJobs.get(jobStatus.getSourceUid());
+            if (jobs != null) {
+                jobs.remove(jobStatus);
+            }
         }
     }
 
@@ -235,52 +246,61 @@ public final class ConnectivityController extends StateController implements
     /**
      * Update any jobs tracked by this controller that match given filters.
      *
-     * @param filterUid only update jobs belonging to this UID, or {@code -1} to
-     *            update all tracked jobs.
+     * @param filterUid     only update jobs belonging to this UID, or {@code -1} to
+     *                      update all tracked jobs.
      * @param filterNetwork only update jobs that would use this
-     *            {@link Network}, or {@code null} to update all tracked jobs.
+     *                      {@link Network}, or {@code null} to update all tracked jobs.
      */
     private void updateTrackedJobs(int filterUid, Network filterNetwork) {
         synchronized (mLock) {
             // Since this is a really hot codepath, temporarily cache any
             // answers that we get from ConnectivityManager.
-            final SparseArray<Network> uidToNetwork = new SparseArray<>();
             final SparseArray<NetworkCapabilities> networkToCapabilities = new SparseArray<>();
 
             boolean changed = false;
-            for (int i = mTrackedJobs.size() - 1; i >= 0; i--) {
-                final JobStatus js = mTrackedJobs.valueAt(i);
-                final int uid = js.getSourceUid();
-
-                final boolean uidMatch = (filterUid == -1 || filterUid == uid);
-                if (uidMatch) {
-                    Network network = uidToNetwork.get(uid);
-                    if (network == null) {
-                        network = mConnManager.getActiveNetworkForUid(uid);
-                        uidToNetwork.put(uid, network);
-                    }
-
-                    // Update either when we have a network match, or when the
-                    // job hasn't yet been evaluated against the currently
-                    // active network; typically when we just lost a network.
-                    final boolean networkMatch = (filterNetwork == null
-                            || Objects.equals(filterNetwork, network));
-                    final boolean forceUpdate = !Objects.equals(js.network, network);
-                    if (networkMatch || forceUpdate) {
-                        final int netId = network != null ? network.netId : -1;
-                        NetworkCapabilities capabilities = networkToCapabilities.get(netId);
-                        if (capabilities == null) {
-                            capabilities = mConnManager.getNetworkCapabilities(network);
-                            networkToCapabilities.put(netId, capabilities);
-                        }
-                        changed |= updateConstraintsSatisfied(js, network, capabilities);
-                    }
+            if (filterUid == -1) {
+                for (int i = mTrackedJobs.size() - 1; i >= 0; i--) {
+                    changed |= updateTrackedJobsLocked(mTrackedJobs.valueAt(i),
+                            filterNetwork, networkToCapabilities);
                 }
+            } else {
+                changed = updateTrackedJobsLocked(mTrackedJobs.get(filterUid),
+                        filterNetwork, networkToCapabilities);
             }
             if (changed) {
                 mStateChangedListener.onControllerStateChanged();
             }
         }
+    }
+
+    private boolean updateTrackedJobsLocked(ArraySet<JobStatus> jobs, Network filterNetwork,
+            SparseArray<NetworkCapabilities> networkToCapabilities) {
+        if (jobs == null || jobs.size() == 0) {
+            return false;
+        }
+
+        final Network network = mConnManager.getActiveNetworkForUid(jobs.valueAt(0).getSourceUid());
+        final int netId = network != null ? network.netId : -1;
+        NetworkCapabilities capabilities = networkToCapabilities.get(netId);
+        if (capabilities == null) {
+            capabilities = mConnManager.getNetworkCapabilities(network);
+            networkToCapabilities.put(netId, capabilities);
+        }
+        final boolean networkMatch = (filterNetwork == null
+                || Objects.equals(filterNetwork, network));
+
+        boolean changed = false;
+        for (int i = jobs.size() - 1; i >= 0; i--) {
+            final JobStatus js = jobs.valueAt(i);
+
+            // Update either when we have a network match, or when the
+            // job hasn't yet been evaluated against the currently
+            // active network; typically when we just lost a network.
+            if (networkMatch || !Objects.equals(js.network, network)) {
+                changed |= updateConstraintsSatisfied(js, network, capabilities);
+            }
+        }
+        return changed;
     }
 
     /**
@@ -290,12 +310,15 @@ public final class ConnectivityController extends StateController implements
     public void onNetworkActive() {
         synchronized (mLock) {
             for (int i = mTrackedJobs.size()-1; i >= 0; i--) {
-                final JobStatus js = mTrackedJobs.valueAt(i);
-                if (js.isReady()) {
-                    if (DEBUG) {
-                        Slog.d(TAG, "Running " + js + " due to network activity.");
+                final ArraySet<JobStatus> jobs = mTrackedJobs.valueAt(i);
+                for (int j = jobs.size() - 1; j >= 0; j--) {
+                    final JobStatus js = jobs.valueAt(j);
+                    if (js.isReady()) {
+                        if (DEBUG) {
+                            Slog.d(TAG, "Running " + js + " due to network activity.");
+                        }
+                        mStateChangedListener.onRunJobNow(js);
                     }
-                    mStateChangedListener.onRunJobNow(js);
                 }
             }
         }
@@ -334,8 +357,12 @@ public final class ConnectivityController extends StateController implements
     public void dumpControllerStateLocked(IndentingPrintWriter pw,
             Predicate<JobStatus> predicate) {
         for (int i = 0; i < mTrackedJobs.size(); i++) {
-            final JobStatus js = mTrackedJobs.valueAt(i);
-            if (predicate.test(js)) {
+            final ArraySet<JobStatus> jobs = mTrackedJobs.valueAt(i);
+            for (int j = 0; j < jobs.size(); j++) {
+                final JobStatus js = jobs.valueAt(j);
+                if (!predicate.test(js)) {
+                    continue;
+                }
                 pw.print("#");
                 js.printUniqueId(pw);
                 pw.print(" from ");
@@ -355,20 +382,26 @@ public final class ConnectivityController extends StateController implements
         final long mToken = proto.start(StateControllerProto.CONNECTIVITY);
 
         for (int i = 0; i < mTrackedJobs.size(); i++) {
-            final JobStatus js = mTrackedJobs.valueAt(i);
-            if (!predicate.test(js)) {
-                continue;
+            final ArraySet<JobStatus> jobs = mTrackedJobs.valueAt(i);
+            for (int j = 0; j < jobs.size(); j++) {
+                final JobStatus js = jobs.valueAt(j);
+                if (!predicate.test(js)) {
+                    continue;
+                }
+                final long jsToken = proto.start(
+                        StateControllerProto.ConnectivityController.TRACKED_JOBS);
+                js.writeToShortProto(proto,
+                        StateControllerProto.ConnectivityController.TrackedJob.INFO);
+                proto.write(StateControllerProto.ConnectivityController.TrackedJob.SOURCE_UID,
+                        js.getSourceUid());
+                NetworkRequest rn = js.getJob().getRequiredNetwork();
+                if (rn != null) {
+                    rn.writeToProto(proto,
+                            StateControllerProto.ConnectivityController.TrackedJob
+                                    .REQUIRED_NETWORK);
+                }
+                proto.end(jsToken);
             }
-            final long jsToken = proto.start(StateControllerProto.ConnectivityController.TRACKED_JOBS);
-            js.writeToShortProto(proto, StateControllerProto.ConnectivityController.TrackedJob.INFO);
-            proto.write(StateControllerProto.ConnectivityController.TrackedJob.SOURCE_UID,
-                    js.getSourceUid());
-            NetworkRequest rn = js.getJob().getRequiredNetwork();
-            if (rn != null) {
-                rn.writeToProto(proto,
-                        StateControllerProto.ConnectivityController.TrackedJob.REQUIRED_NETWORK);
-            }
-            proto.end(jsToken);
         }
 
         proto.end(mToken);
