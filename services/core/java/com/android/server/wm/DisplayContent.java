@@ -100,7 +100,6 @@ import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.CUSTOM_SCREEN_ROTATION;
-import static com.android.server.wm.WindowManagerService.H.REPORT_FOCUS_CHANGE;
 import static com.android.server.wm.WindowManagerService.H.REPORT_LOSING_FOCUS;
 import static com.android.server.wm.WindowManagerService.H.SEND_NEW_CONFIGURATION;
 import static com.android.server.wm.WindowManagerService.H.UPDATE_DOCKED_STACK_DIVIDER;
@@ -157,8 +156,8 @@ import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 import android.view.SurfaceSession;
-import android.view.WindowManagerPolicyConstants.PointerEventListener;
 import android.view.WindowManager;
+import android.view.WindowManagerPolicyConstants.PointerEventListener;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ToBooleanFunction;
@@ -2787,7 +2786,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         if (mCurrentFocus == newFocus) {
             return false;
         }
-        mService.mH.obtainMessage(REPORT_FOCUS_CHANGE, this).sendToTarget();
         boolean imWindowChanged = false;
         // TODO (b/111080190): Multi-Session IME
         if (!focusFound) {
