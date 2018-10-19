@@ -799,7 +799,9 @@ public class NavigationBarFragment extends LifecycleFragment implements Callback
     }
 
     private void onAccessibilityClick(View v) {
-        mAccessibilityManager.notifyAccessibilityButtonClicked();
+        final Display display = v.getDisplay();
+        mAccessibilityManager.notifyAccessibilityButtonClicked(
+                display != null ? display.getDisplayId() : Display.DEFAULT_DISPLAY);
     }
 
     private boolean onAccessibilityLongClick(View v) {

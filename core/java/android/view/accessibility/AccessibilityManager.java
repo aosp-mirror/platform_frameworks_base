@@ -1166,9 +1166,10 @@ public final class AccessibilityManager {
     /**
      * Notifies that the accessibility button in the system's navigation area has been clicked
      *
+     * @param displayId The logical display id.
      * @hide
      */
-    public void notifyAccessibilityButtonClicked() {
+    public void notifyAccessibilityButtonClicked(int displayId) {
         final IAccessibilityManager service;
         synchronized (mLock) {
             service = getServiceLocked();
@@ -1177,7 +1178,7 @@ public final class AccessibilityManager {
             }
         }
         try {
-            service.notifyAccessibilityButtonClicked();
+            service.notifyAccessibilityButtonClicked(displayId);
         } catch (RemoteException re) {
             Log.e(LOG_TAG, "Error while dispatching accessibility button click", re);
         }
