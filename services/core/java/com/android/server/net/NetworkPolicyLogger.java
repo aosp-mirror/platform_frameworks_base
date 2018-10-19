@@ -72,6 +72,7 @@ public class NetworkPolicyLogger {
     static final int NTWK_ALLOWED_TMP_WHITELIST = 4;
     static final int NTWK_BLOCKED_BG_RESTRICT = 5;
     static final int NTWK_ALLOWED_DEFAULT = 6;
+    static final int NTWK_ALLOWED_SYSTEM = 7;
 
     private final LogBuffer mNetworkBlockedBuffer = new LogBuffer(MAX_NETWORK_BLOCKED_LOG_SIZE);
     private final LogBuffer mUidStateChangeBuffer = new LogBuffer(MAX_LOG_SIZE);
