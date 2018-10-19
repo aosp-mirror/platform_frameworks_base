@@ -15,15 +15,10 @@
  */
 package com.android.settingslib.core.instrumentation;
 
-import static com.android.internal.logging.nano.MetricsProto.MetricsEvent
-        .ACTION_SETTINGS_PREFERENCE_CHANGE;
-import static com.android.internal.logging.nano.MetricsProto.MetricsEvent
-        .FIELD_SETTINGS_PREFERENCE_CHANGE_FLOAT_VALUE;
-import static com.android.internal.logging.nano.MetricsProto.MetricsEvent
-        .FIELD_SETTINGS_PREFERENCE_CHANGE_INT_VALUE;
-import static com.android.internal.logging.nano.MetricsProto.MetricsEvent
-        .FIELD_SETTINGS_PREFERENCE_CHANGE_NAME;
-
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.ACTION_SETTINGS_PREFERENCE_CHANGE;
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_SETTINGS_PREFERENCE_CHANGE_FLOAT_VALUE;
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_SETTINGS_PREFERENCE_CHANGE_INT_VALUE;
+import static com.android.internal.logging.nano.MetricsProto.MetricsEvent.FIELD_SETTINGS_PREFERENCE_CHANGE_NAME;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.argThat;

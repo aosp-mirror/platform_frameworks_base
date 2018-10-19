@@ -154,8 +154,8 @@ public class PinnedSliceState {
     }
 
     ContentProviderClient getClient() {
-        ContentProviderClient client =
-                mService.getContext().getContentResolver().acquireContentProviderClient(mUri);
+        ContentProviderClient client = mService.getContext().getContentResolver()
+                .acquireUnstableContentProviderClient(mUri);
         if (client == null) return null;
         client.setDetectNotResponding(SLICE_TIMEOUT);
         return client;

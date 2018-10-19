@@ -79,7 +79,7 @@
     <string name="CLIRPermanent" msgid="3377371145926835671">"U kunt de instelling voor de beller-ID niet wijzigen."</string>
     <string name="RestrictedOnDataTitle" msgid="5221736429761078014">"Geen service voor mobiele data"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="6855466023161191166">"Noodoproepen niet beschikbaar"</string>
-    <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Geen service voor spraakoproepen"</string>
+    <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Geen belservice"</string>
     <string name="RestrictedOnAllVoiceTitle" msgid="8037246983606545202">"Geen spraakservice of noodoproepen"</string>
     <string name="RestrictedStateContent" msgid="6538703255570997248">"Tijdelijk uitgeschakeld door je provider"</string>
     <string name="RestrictedStateContentMsimTemplate" msgid="673416791370248176">"Tijdelijk uitgeschakeld door je provider voor sim <xliff:g id="SIMNUMBER">%d</xliff:g>"</string>
@@ -128,10 +128,14 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="7372514042696663278">"Probleem bij registratie van Bellen via wifi bij je provider: <xliff:g id="CODE">%1$s</xliff:g>"</item>
   </string-array>
-  <string-array name="wfcSpnFormats">
-    <item msgid="6830082633573257149">"%s"</item>
-    <item msgid="4397097370387921767">"Bellen via wifi van %s"</item>
-  </string-array>
+    <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
+    <skip />
+    <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"Bellen via wifi van <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"Bellen via WLAN"</string>
+    <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"Bellen via WLAN van <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"Wifi van <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Bellen via wifi | <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"VoWifi van <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Uit"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Voorkeur voor wifi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Voorkeur voor mobiel"</string>
@@ -1133,7 +1137,7 @@
     <string name="volume_music_hint_silent_ringtone_selected" msgid="8310739960973156272">"Stille beltoon ingesteld"</string>
     <string name="volume_call" msgid="3941680041282788711">"Volume inkomend gesprek"</string>
     <string name="volume_bluetooth_call" msgid="2002891926351151534">"Volume tijdens gesprek in Bluetooth-modus"</string>
-    <string name="volume_alarm" msgid="1985191616042689100">"Alarmvolume"</string>
+    <string name="volume_alarm" msgid="1985191616042689100">"Wekkervolume"</string>
     <string name="volume_notification" msgid="2422265656744276715">"Meldingsvolume"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"Volume"</string>
     <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"Bluetooth-volume"</string>
@@ -1175,6 +1179,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Wifi-netwerk heeft geen internettoegang"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Tik voor opties"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Wijzigingen in je hotspot-instellingen"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Je hotspot-band is gewijzigd."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Dit apparaat biedt geen ondersteuning voor je voorkeur voor alleen 5 GHz. In plaats daarvan gebruikt dit apparaat de 5-GHz-band wanneer deze beschikbaar is."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Overgeschakeld naar <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"Apparaat gebruikt <xliff:g id="NEW_NETWORK">%1$s</xliff:g> wanneer <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> geen internetverbinding heeft. Er kunnen kosten in rekening worden gebracht."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Overgeschakeld van <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> naar <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>

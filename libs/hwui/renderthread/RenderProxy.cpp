@@ -87,6 +87,11 @@ void RenderProxy::initialize(const sp<Surface>& surface) {
             [ this, surf = surface ]() mutable { mContext->setSurface(std::move(surf)); });
 }
 
+void RenderProxy::allocateBuffers(const sp<Surface>& surface) {
+    mRenderThread.queue().post(
+            [ surf = surface ]() mutable { surf->allocateBuffers(); });
+}
+
 void RenderProxy::updateSurface(const sp<Surface>& surface) {
     mRenderThread.queue().post(
             [ this, surf = surface ]() mutable { mContext->setSurface(std::move(surf)); });

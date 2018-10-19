@@ -58,8 +58,8 @@
     </plurals>
     <string name="imei" msgid="2625429890869005782">"IMEI"</string>
     <string name="meid" msgid="4841221237681254195">"MEID"</string>
-    <string name="ClipMmi" msgid="6952821216480289285">"Příchozí identifikace volajícího"</string>
-    <string name="ClirMmi" msgid="7784673673446833091">"Odchozí identifikace volajícího"</string>
+    <string name="ClipMmi" msgid="6952821216480289285">"Příchozí ID volajícího"</string>
+    <string name="ClirMmi" msgid="7784673673446833091">"Odchozí ID volajícího"</string>
     <string name="ColpMmi" msgid="3065121483740183974">"ID připojené linky"</string>
     <string name="ColrMmi" msgid="4996540314421889589">"Omezení ID připojené linky"</string>
     <string name="CfMmi" msgid="5123218989141573515">"Přesměrování hovorů"</string>
@@ -73,12 +73,12 @@
     <string name="RuacMmi" msgid="7827887459138308886">"Odmítnutí nevyžádaných obtěžujících hovorů"</string>
     <string name="CndMmi" msgid="3116446237081575808">"Doručení volaného čísla"</string>
     <string name="DndMmi" msgid="1265478932418334331">"Nerušit"</string>
-    <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"Ve výchozím nastavení je identifikace volajícího omezena. Příští hovor: Omezeno"</string>
-    <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"Ve výchozím nastavení je identifikace volajícího omezena. Příští hovor: Neomezeno"</string>
-    <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"Ve výchozím nastavení není identifikace volajícího omezena. Příští hovor: Omezeno"</string>
-    <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"Ve výchozím nastavení není identifikace volajícího omezena. Příští hovor: Neomezeno"</string>
+    <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"Ve výchozím nastavení je funkce ID volajícího omezena. Příští hovor: Omezeno"</string>
+    <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"Ve výchozím nastavení je funkce ID volajícího omezena. Příští hovor: Neomezeno"</string>
+    <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"Ve výchozím nastavení není funkce ID volajícího omezena. Příští hovor: Omezeno"</string>
+    <string name="CLIRDefaultOffNextCallOff" msgid="2567998633124408552">"Ve výchozím nastavení není funkce ID volajícího omezena. Příští hovor: Neomezeno"</string>
     <string name="serviceNotProvisioned" msgid="8614830180508686666">"Služba není zřízena."</string>
-    <string name="CLIRPermanent" msgid="3377371145926835671">"Nastavení identifikace volajícího nesmíte měnit."</string>
+    <string name="CLIRPermanent" msgid="3377371145926835671">"Nastavení ID volajícího nesmíte měnit."</string>
     <string name="RestrictedOnDataTitle" msgid="5221736429761078014">"Není k dispozici žádná mobilní datová služba"</string>
     <string name="RestrictedOnEmergencyTitle" msgid="6855466023161191166">"Tísňová volání jsou nedostupná"</string>
     <string name="RestrictedOnNormalTitle" msgid="3179574012752700984">"Hlasová volání nejsou k dispozici"</string>
@@ -130,10 +130,14 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="7372514042696663278">"Při registraci volání přes Wi-Fi u operátora <xliff:g id="CODE">%1$s</xliff:g> došlo k chybě"</item>
   </string-array>
-  <string-array name="wfcSpnFormats">
-    <item msgid="6830082633573257149">"%s"</item>
-    <item msgid="4397097370387921767">"Volání přes Wi-Fi: %s"</item>
-  </string-array>
+    <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
+    <skip />
+    <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"<xliff:g id="SPN">%s</xliff:g>: volání přes Wi-Fi"</string>
+    <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"Volání přes WLAN"</string>
+    <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"<xliff:g id="SPN">%s</xliff:g>: volání přes WLAN"</string>
+    <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g>: Wi-Fi"</string>
+    <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Volání přes Wi-Fi | <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g>: VoWifi"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Vypnuto"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Preferována síť W-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Preferována mobilní data"</string>
@@ -1219,6 +1223,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Wi-Fi nemá přístup k internetu"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Klepnutím zobrazíte možnosti"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Změny nastavení hotspotu"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Pásmo hotspotu se změnilo."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Toto zařízení nepodporuje vaše nastavení jen 5GHz pásma. Zařízení použije pásmo 5 GHz, jen když bude dostupné."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Přechod na síť <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"Když síť <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> nebude mít přístup k internetu, zařízení použije síť <xliff:g id="NEW_NETWORK">%1$s</xliff:g>. Mohou být účtovány poplatky."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Přechod ze sítě <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> na síť <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>

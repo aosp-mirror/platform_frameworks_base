@@ -23,13 +23,12 @@ import static androidx.lifecycle.Lifecycle.Event.ON_START;
 import static androidx.lifecycle.Lifecycle.Event.ON_STOP;
 
 import android.app.DialogFragment;
+import androidx.lifecycle.LifecycleOwner;
 import android.content.Context;
 import android.os.Bundle;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-
-import androidx.lifecycle.LifecycleOwner;
 
 /**
  * {@link DialogFragment} that has hooks to observe fragment lifecycle events.

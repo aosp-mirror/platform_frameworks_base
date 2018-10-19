@@ -22,7 +22,6 @@ import static org.mockito.Mockito.doReturn;
 
 import android.bluetooth.BluetoothAdapter;
 import android.content.Context;
-
 import androidx.preference.Preference;
 import androidx.preference.PreferenceScreen;
 

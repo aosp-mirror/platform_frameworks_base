@@ -25,6 +25,7 @@ import static org.robolectric.shadow.api.Shadow.extract;
 
 import android.annotation.UserIdInt;
 import android.app.ApplicationPackageManager;
+import android.app.usage.IStorageStatsManager;
 import android.app.usage.StorageStats;
 import android.app.usage.StorageStatsManager;
 import android.content.ComponentName;
@@ -41,10 +42,10 @@ import android.os.Handler;
 import android.os.UserHandle;
 import android.util.IconDrawableFactory;
 
-import com.android.settingslib.SettingsLibRobolectricTestRunner;
 import com.android.settingslib.applications.ApplicationsState.AppEntry;
 import com.android.settingslib.applications.ApplicationsState.Callbacks;
 import com.android.settingslib.applications.ApplicationsState.Session;
+import com.android.settingslib.SettingsLibRobolectricTestRunner;
 import com.android.settingslib.testutils.shadow.ShadowUserManager;
 
 import org.junit.Before;

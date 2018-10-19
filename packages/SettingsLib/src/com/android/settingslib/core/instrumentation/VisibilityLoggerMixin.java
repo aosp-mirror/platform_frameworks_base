@@ -16,17 +16,16 @@
 
 package com.android.settingslib.core.instrumentation;
 
-import static com.android.settingslib.core.instrumentation.Instrumentable.METRICS_CATEGORY_UNKNOWN;
-
 import android.app.Activity;
-import android.content.Intent;
-import android.os.SystemClock;
-
 import androidx.lifecycle.Lifecycle.Event;
 import androidx.lifecycle.LifecycleObserver;
 import androidx.lifecycle.OnLifecycleEvent;
+import android.content.Intent;
 
+import android.os.SystemClock;
 import com.android.internal.logging.nano.MetricsProto;
+
+import static com.android.settingslib.core.instrumentation.Instrumentable.METRICS_CATEGORY_UNKNOWN;
 
 /**
  * Logs visibility change of a fragment.

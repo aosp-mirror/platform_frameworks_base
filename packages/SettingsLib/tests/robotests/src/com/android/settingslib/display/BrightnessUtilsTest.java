@@ -17,7 +17,6 @@
 package com.android.settingslib.display;
 
 import static com.android.settingslib.display.BrightnessUtils.GAMMA_SPACE_MAX;
-
 import static com.google.common.truth.Truth.assertThat;
 
 import com.android.settingslib.SettingsLibRobolectricTestRunner;

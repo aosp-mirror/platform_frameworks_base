@@ -16,8 +16,11 @@
 
 package com.android.settingslib.display;
 
+import com.android.settingslib.R;
+
 import android.content.Context;
 import android.content.res.Resources;
+import android.hardware.display.DisplayManager;
 import android.os.AsyncTask;
 import android.os.RemoteException;
 import android.os.UserHandle;
@@ -27,8 +30,6 @@ import android.util.MathUtils;
 import android.view.Display;
 import android.view.IWindowManager;
 import android.view.WindowManagerGlobal;
-
-import com.android.settingslib.R;
 
 import java.util.Arrays;
 

@@ -35,14 +35,13 @@ import android.os.RemoteException;
 import android.os.UserHandle;
 import android.os.UserManager;
 import android.provider.Settings;
+import androidx.annotation.VisibleForTesting;
 import android.text.SpannableStringBuilder;
 import android.text.Spanned;
 import android.text.style.ForegroundColorSpan;
 import android.text.style.ImageSpan;
 import android.view.MenuItem;
 import android.widget.TextView;
-
-import androidx.annotation.VisibleForTesting;
 
 import com.android.internal.widget.LockPatternUtils;
 

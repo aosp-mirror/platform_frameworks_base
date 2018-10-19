@@ -129,10 +129,14 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="7372514042696663278">"A apărut o problemă la înregistrarea apelării prin Wi‑Fi la operatorul dvs.: <xliff:g id="CODE">%1$s</xliff:g>"</item>
   </string-array>
-  <string-array name="wfcSpnFormats">
-    <item msgid="6830082633573257149">"%s"</item>
-    <item msgid="4397097370387921767">"Apelare prin Wi-Fi %s"</item>
-  </string-array>
+    <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
+    <skip />
+    <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"Apelare prin Wi-Fi <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"Apel WLAN"</string>
+    <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"Apel WLAN <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"Wi-Fi <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Apelare prin Wi-Fi | <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"VoWifi <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Dezactivată"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Se preferă conexiunea Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Se preferă datele mobile"</string>
@@ -245,7 +249,7 @@
     <string name="global_action_settings" msgid="1756531602592545966">"Setări"</string>
     <string name="global_action_assist" msgid="3892832961594295030">"Asistență"</string>
     <string name="global_action_voice_assist" msgid="7751191495200504480">"Asistent vocal"</string>
-    <string name="global_action_lockdown" msgid="1099326950891078929">"Blocați"</string>
+    <string name="global_action_lockdown" msgid="1099326950891078929">"Blocare strictă"</string>
     <string name="status_bar_notification_info_overflow" msgid="5301981741705354993">"˃999"</string>
     <string name="notification_hidden_text" msgid="6351207030447943784">"Notificare nouă"</string>
     <string name="notification_channel_virtual_keyboard" msgid="6969925135507955575">"Tastatură virtuală"</string>
@@ -1197,6 +1201,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"Rețeaua Wi-Fi nu are acces la internet"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Atingeți pentru opțiuni"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Modificări aduse setărilor pentru hotspot"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"S-a schimbat banda de frecvență a hotspotului."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Dispozitivul nu acceptă doar preferința pentru 5 GHz. Dispozitivul va folosi banda de 5 GHz când este disponibilă."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"S-a comutat la <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"Dispozitivul folosește <xliff:g id="NEW_NETWORK">%1$s</xliff:g> când <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> nu are acces la internet. Se pot aplica taxe."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"S-a comutat de la <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> la <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>

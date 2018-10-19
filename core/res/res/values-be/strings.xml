@@ -130,10 +130,14 @@
   <string-array name="wfcOperatorErrorNotificationMessages">
     <item msgid="7372514042696663278">"Памылка падключэння Wi‑Fi-тэлефаніі ў вашага аператара: <xliff:g id="CODE">%1$s</xliff:g>"</item>
   </string-array>
-  <string-array name="wfcSpnFormats">
-    <item msgid="6830082633573257149">"%s"</item>
-    <item msgid="4397097370387921767">"Wi-Fi-тэлефанія %s"</item>
-  </string-array>
+    <!-- no translation found for wfcSpnFormat_spn (4998685024207291232) -->
+    <skip />
+    <string name="wfcSpnFormat_spn_wifi_calling" msgid="136001023263502280">"Wi-Fi-тэлефанія ад <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_wlan_call" msgid="2533371081782489793">"Выклік праз WLAN"</string>
+    <string name="wfcSpnFormat_spn_wlan_call" msgid="2315240198303197168">"Выклік праз WLAN ад <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"Wi-Fi ад <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Wi-Fi-тэлефанія | <xliff:g id="SPN">%s</xliff:g>"</string>
+    <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"VoWi-Fi ад <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Выкл."</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Прыярытэт Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Прыярытэт мабільнай сеткі"</string>
@@ -1219,6 +1223,9 @@
     <skip />
     <string name="wifi_no_internet" msgid="8938267198124654938">"У Wi-Fi няма доступу да інтэрнэту"</string>
     <string name="wifi_no_internet_detailed" msgid="8083079241212301741">"Дакраніцеся, каб убачыць параметры"</string>
+    <string name="wifi_softap_config_change" msgid="8475911871165857607">"Змяненні ў наладах хот-спота"</string>
+    <string name="wifi_softap_config_change_summary" msgid="7601233252456548891">"Частата хот-спота змянілася."</string>
+    <string name="wifi_softap_config_change_detailed" msgid="8022936822860678033">"Прылада не можа працаваць толькі на частаце 5 ГГц. Гэта частата будзе выкарыстоўвацца, калі гэта магчыма."</string>
     <string name="network_switch_metered" msgid="4671730921726992671">"Выкананы пераход да <xliff:g id="NETWORK_TYPE">%1$s</xliff:g>"</string>
     <string name="network_switch_metered_detail" msgid="775163331794506615">"Прылада выкарыстоўвае сетку <xliff:g id="NEW_NETWORK">%1$s</xliff:g>, калі ў сетцы <xliff:g id="PREVIOUS_NETWORK">%2$s</xliff:g> няма доступу да інтэрнэту. Можа спаганяцца плата."</string>
     <string name="network_switch_metered_toast" msgid="5779283181685974304">"Выкананы пераход з <xliff:g id="PREVIOUS_NETWORK">%1$s</xliff:g> да <xliff:g id="NEW_NETWORK">%2$s</xliff:g>"</string>

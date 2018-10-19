@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!--
-Copyright (C) 2016 The Android Open Source Project
+Copyright (C) 2018 The Android Open Source Project
 
    Licensed under the Apache License, Version 2.0 (the "License");
     you may not use this file except in compliance with the License.
@@ -15,40 +15,5 @@ Copyright (C) 2016 The Android Open Source Project
     limitations under the License.
 -->
 <resources xmlns:android="http://schemas.android.com/apk/res/android">
-    <string name="app_name" translatable="false">Android Easter Egg</string>
-    <string name="notification_name" translatable="false">Android Neko</string>
-    <string name="notification_channel_name" translatable="false">New cats</string>
-    <string name="default_tile_name" translatable="false">\????</string>
-    <string name="notification_title" translatable="false">A cat is here.</string>
-    <string name="default_cat_name" translatable="false">Cat #%s</string>
-    <string name="directory_name" translatable="false">Cats</string>
-    <string name="confirm_delete" translatable="false">Forget %s?</string>
-    <string-array name="food_names" translatable="false">
-        <item>Empty dish</item>
-        <item>Bits</item>
-        <item>Fish</item>
-        <item>Chicken</item>
-        <item>Treat</item>
-    </string-array>
-    <array name="food_icons">
-        <item>@drawable/food_dish</item>
-        <item>@drawable/food_bits</item>
-        <item>@drawable/food_sysuituna</item>
-        <item>@drawable/food_chicken</item>
-        <item>@drawable/food_cookie</item>
-    </array>
-    <integer-array name="food_intervals">
-        <item>0</item>
-        <item>15</item>
-        <item>30</item>
-        <item>60</item>
-        <item>120</item>
-    </integer-array>
-    <integer-array name="food_new_cat_prob">
-        <item>0</item>
-        <item>5</item>
-        <item>35</item>
-        <item>65</item>
-        <item>90</item>
-    </integer-array>
+    <string name="app_name" translatable="false">PAINT.APK</string>
 </resources>

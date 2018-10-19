@@ -525,7 +525,6 @@
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"Želite li sakriti pločicu <xliff:g id="TILE_LABEL">%1$s</xliff:g>?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"Ponovo će se pojaviti kada je sljedeći put uključite u postavkama."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"Sakrij"</string>
-    <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"Upotrebljavate radni profil"</string>
     <string name="stream_voice_call" msgid="4410002696470423714">"Nazovi"</string>
     <string name="stream_system" msgid="7493299064422163147">"Sustav"</string>
     <string name="stream_ring" msgid="8213049469184048338">"Zvoni"</string>
@@ -842,7 +841,7 @@
     <string name="running_foreground_services_title" msgid="381024150898615683">"Izvođenje aplikacija u pozadini"</string>
     <string name="running_foreground_services_msg" msgid="6326247670075574355">"Dodirnite da biste vidjeli pojedinosti o potrošnji baterije i podatkovnom prometu"</string>
     <string name="mobile_data_disable_title" msgid="1068272097382942231">"Želite li isključiti mobilne podatke?"</string>
-    <string name="mobile_data_disable_message" msgid="4756541658791493506">"Nećete imati pristup mobilnim podacima ili internetu putem operatera <xliff:g id="CARRIER">%s</xliff:g>. Internet će biti dostupan samo putem Wi-Fi-ja."</string>
+    <string name="mobile_data_disable_message" msgid="4756541658791493506">"Nećete imati pristup mobilnim podacima ili internetu putem operatera <xliff:g id="CARRIER">%s</xliff:g>. Internet će biti dostupan samo putem Wi-Fija."</string>
     <string name="mobile_data_disable_message_default_carrier" msgid="6078110473451946831">"vaš mobilni operater"</string>
     <string name="touch_filtered_warning" msgid="8671693809204767551">"Budući da aplikacija prekriva zahtjev za dopuštenje, Postavke ne mogu potvrditi vaš odgovor."</string>
     <string name="slice_permission_title" msgid="7465009437851044444">"Želite li dopustiti aplikaciji <xliff:g id="APP_0">%1$s</xliff:g> da prikazuje isječke aplikacije <xliff:g id="APP_2">%2$s</xliff:g>?"</string>

@@ -19,22 +19,34 @@ package com.android.settingslib.notification;
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
-
+import static org.mockito.ArgumentMatchers.anyObject;
+import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.Mockito.doNothing;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.spy;
+import static org.mockito.Mockito.when;
 
 import android.app.AlertDialog;
-import android.content.ContentResolver;
+import android.app.Fragment;
+import android.app.NotificationManager;
 import android.content.Context;
+import android.content.ContentResolver;
+import android.content.DialogInterface;
+import android.content.res.Resources;
+import android.net.Uri;
 import android.provider.Settings;
 import android.service.notification.Condition;
 import android.view.LayoutInflater;
 import android.view.View;
+import android.widget.Button;
 
 import com.android.settingslib.SettingsLibRobolectricTestRunner;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.robolectric.RuntimeEnvironment;
 
 @RunWith(SettingsLibRobolectricTestRunner.class)

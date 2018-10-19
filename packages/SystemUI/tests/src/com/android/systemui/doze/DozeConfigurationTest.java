@@ -16,7 +16,7 @@
 
 package com.android.systemui.doze;
 
-import static org.junit.Assert.assertTrue;
+import static junit.framework.TestCase.assertEquals;
 
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -42,14 +42,15 @@ public class DozeConfigurationTest extends SysuiTestCase {
     }
 
     @Test
-    public void alwaysOn_onByDefault() throws Exception {
+    public void alwaysOn_followsConfigByDefault() throws Exception {
         if (!mDozeConfig.alwaysOnAvailable()) {
             return;
         }
 
         Settings.Secure.putString(mContext.getContentResolver(), Settings.Secure.DOZE_ALWAYS_ON,
                 null);
-
-        assertTrue(mDozeConfig.alwaysOnEnabled(UserHandle.USER_CURRENT));
+        boolean defaultValue = mContext.getResources()
+                .getBoolean(com.android.internal.R.bool.config_dozeAlwaysOnEnabled);
+        assertEquals(mDozeConfig.alwaysOnEnabled(UserHandle.USER_CURRENT), defaultValue);
     }
 }

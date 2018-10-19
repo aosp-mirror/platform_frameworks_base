@@ -16,17 +16,23 @@
 
 package com.android.settingslib.bluetooth;
 
+import android.bluetooth.BluetoothHearingAid;
 import android.bluetooth.BluetoothAdapter;
 import android.bluetooth.BluetoothClass;
+import android.bluetooth.BluetoothCodecConfig;
+import android.bluetooth.BluetoothCodecStatus;
 import android.bluetooth.BluetoothDevice;
-import android.bluetooth.BluetoothHearingAid;
 import android.bluetooth.BluetoothProfile;
+import android.bluetooth.BluetoothUuid;
 import android.content.Context;
+import android.os.ParcelUuid;
 import android.util.Log;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.settingslib.R;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 public class HearingAidProfile implements LocalBluetoothProfile {

@@ -53,7 +53,6 @@ public class ZenModeControllerImpl extends CurrentUserTracker implements ZenMode
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private final ArrayList<Callback> mCallbacks = new ArrayList<Callback>();
-    private final Object mCallbacksLock = new Object();
     private final Context mContext;
     private final GlobalSetting mModeSetting;
     private final GlobalSetting mConfigSetting;
@@ -114,20 +113,12 @@ public class ZenModeControllerImpl extends CurrentUserTracker implements ZenMode
 
     @Override
     public void addCallback(Callback callback) {
-        synchronized (mCallbacksLock) {
-            if (callback == null) {
-                Slog.e(TAG, "Attempted to add a null callback.");
-                return;
-            }
-            mCallbacks.add(callback);
-        }
+        mCallbacks.add(callback);
     }
 
     @Override
     public void removeCallback(Callback callback) {
-        synchronized (mCallbacksLock) {
-            mCallbacks.remove(callback);
-        }
+        mCallbacks.remove(callback);
     }
 
     @Override
@@ -191,40 +182,28 @@ public class ZenModeControllerImpl extends CurrentUserTracker implements ZenMode
     }
 
     private void fireNextAlarmChanged() {
-        synchronized (mCallbacksLock) {
-            Utils.safeForeach(mCallbacks, c -> c.onNextAlarmChanged());
-        }
+        Utils.safeForeach(mCallbacks, c -> c.onNextAlarmChanged());
     }
 
     private void fireEffectsSuppressorChanged() {
-        synchronized (mCallbacksLock) {
-            Utils.safeForeach(mCallbacks, c -> c.onEffectsSupressorChanged());
-        }
+        Utils.safeForeach(mCallbacks, c -> c.onEffectsSupressorChanged());
     }
 
     private void fireZenChanged(int zen) {
-        synchronized (mCallbacksLock) {
-            Utils.safeForeach(mCallbacks, c -> c.onZenChanged(zen));
-        }
+        Utils.safeForeach(mCallbacks, c -> c.onZenChanged(zen));
     }
 
     private void fireZenAvailableChanged(boolean available) {
-        synchronized (mCallbacksLock) {
-            Utils.safeForeach(mCallbacks, c -> c.onZenAvailableChanged(available));
-        }
+        Utils.safeForeach(mCallbacks, c -> c.onZenAvailableChanged(available));
     }
 
     private void fireManualRuleChanged(ZenRule rule) {
-        synchronized (mCallbacksLock) {
-            Utils.safeForeach(mCallbacks, c -> c.onManualRuleChanged(rule));
-        }
+        Utils.safeForeach(mCallbacks, c -> c.onManualRuleChanged(rule));
     }
 
     @VisibleForTesting
     protected void fireConfigChanged(ZenModeConfig config) {
-        synchronized (mCallbacksLock) {
-            Utils.safeForeach(mCallbacks, c -> c.onConfigChanged(config));
-        }
+        Utils.safeForeach(mCallbacks, c -> c.onConfigChanged(config));
     }
 
     @VisibleForTesting

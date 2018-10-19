@@ -15,12 +15,15 @@
  */
 package com.android.settingslib.bluetooth;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.Mockito.verify;
 
 import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothProfile;
 import android.content.Context;
 import android.content.Intent;
+
 import android.telephony.TelephonyManager;
 
 import org.junit.Before;

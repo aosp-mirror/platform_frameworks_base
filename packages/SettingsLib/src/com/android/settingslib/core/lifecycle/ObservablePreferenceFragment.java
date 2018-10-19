@@ -24,15 +24,14 @@ import static androidx.lifecycle.Lifecycle.Event.ON_START;
 import static androidx.lifecycle.Lifecycle.Event.ON_STOP;
 
 import android.annotation.CallSuper;
+import androidx.lifecycle.LifecycleOwner;
 import android.content.Context;
 import android.os.Bundle;
+import androidx.preference.PreferenceFragment;
+import androidx.preference.PreferenceScreen;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
-
-import androidx.lifecycle.LifecycleOwner;
-import androidx.preference.PreferenceFragment;
-import androidx.preference.PreferenceScreen;
 
 /**
  * {@link PreferenceFragment} that has hooks to observe fragment lifecycle events.

@@ -346,7 +346,7 @@
     <string name="quick_settings_cellular_detail_data_limit" msgid="56011158504994128">"上限: <xliff:g id="DATA_LIMIT">%s</xliff:g>"</string>
     <string name="quick_settings_cellular_detail_data_warning" msgid="2440098045692399009">"警告: 上限は<xliff:g id="DATA_LIMIT">%s</xliff:g>です"</string>
     <string name="quick_settings_work_mode_label" msgid="7608026833638817218">"仕事用プロファイル"</string>
-    <string name="quick_settings_night_display_label" msgid="3577098011487644395">"読書灯"</string>
+    <string name="quick_settings_night_display_label" msgid="3577098011487644395">"夜間モード"</string>
     <string name="quick_settings_night_secondary_label_on_at_sunset" msgid="8483259341596943314">"日の入りに ON"</string>
     <string name="quick_settings_night_secondary_label_until_sunrise" msgid="4453017157391574402">"日の出まで"</string>
     <string name="quick_settings_night_secondary_label_on_at" msgid="6256314040368487637">"<xliff:g id="TIME">%s</xliff:g> に ON"</string>
@@ -524,7 +524,6 @@
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g>を非表示にしますか？"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"次回、設定でONにすると再表示されます。"</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"非表示"</string>
-    <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"仕事用プロファイルを使用しています"</string>
     <string name="stream_voice_call" msgid="4410002696470423714">"発信"</string>
     <string name="stream_system" msgid="7493299064422163147">"システム"</string>
     <string name="stream_ring" msgid="8213049469184048338">"着信音"</string>

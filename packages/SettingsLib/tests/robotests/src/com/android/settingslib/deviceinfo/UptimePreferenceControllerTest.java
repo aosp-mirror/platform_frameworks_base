@@ -23,10 +23,9 @@ import static org.mockito.Mockito.verify;
 
 import android.content.Context;
 import android.os.SystemClock;
-import android.text.format.DateUtils;
-
 import androidx.preference.Preference;
 import androidx.preference.PreferenceScreen;
+import android.text.format.DateUtils;
 
 import com.android.settingslib.SettingsLibRobolectricTestRunner;
 import com.android.settingslib.core.lifecycle.Lifecycle;

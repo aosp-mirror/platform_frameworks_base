@@ -16,18 +16,19 @@
 
 package com.android.settingslib;
 
-import static com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
-
 import android.content.Context;
 import android.content.res.TypedArray;
+import android.graphics.drawable.Drawable;
 import android.os.UserHandle;
+import androidx.preference.Preference;
+import androidx.preference.PreferenceViewHolder;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.TypedValue;
+import android.view.View;
 import android.widget.TextView;
 
-import androidx.preference.Preference;
-import androidx.preference.PreferenceViewHolder;
+import static com.android.settingslib.RestrictedLockUtils.EnforcedAdmin;
 
 /**
  * Helper class for managing settings preferences that can be disabled

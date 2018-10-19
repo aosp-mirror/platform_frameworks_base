@@ -23,7 +23,6 @@ import static org.mockito.Mockito.doReturn;
 import android.content.Context;
 import android.net.ConnectivityManager;
 import android.net.wifi.WifiManager;
-
 import androidx.preference.Preference;
 import androidx.preference.PreferenceScreen;
 

@@ -524,9 +524,12 @@ LEGACY_ANDROID_EMOJI = {
     0xFE837: (ord('0'), COMBINING_KEYCAP),
 }
 
+# This is used to define the emoji that should have the same glyph.
+# i.e. previously we had gender based Kiss (0x1F48F), which had the same glyph
+# with Kiss: Woman, Man (0x1F469, 0x200D, 0x2764, 0x200D, 0x1F48B, 0x200D, 0x1F468)
+# in that case a valid row would be:
+# (0x1F469, 0x200D, 0x2764, 0x200D, 0x1F48B, 0x200D, 0x1F468): 0x1F48F,
 ZWJ_IDENTICALS = {
-    # KISS
-    (0x1F469, 0x200D, 0x2764, 0x200D, 0x1F48B, 0x200D, 0x1F468): 0x1F48F,
 }
 
 SAME_FLAG_MAPPINGS = [

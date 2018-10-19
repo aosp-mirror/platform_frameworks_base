@@ -17,7 +17,6 @@ package com.android.settingslib.utils;
 
 
 import static com.google.common.truth.Truth.assertThat;
-
 import static org.junit.Assert.fail;
 
 import org.junit.Test;

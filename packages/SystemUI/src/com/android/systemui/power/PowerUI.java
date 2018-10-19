@@ -77,6 +77,7 @@ public class PowerUI extends SystemUI {
     private int mPlugType = 0;
     private int mInvalidCharger = 0;
     private EnhancedEstimates mEnhancedEstimates;
+    private Estimate mLastEstimate;
     private boolean mLowWarningShownThisChargeCycle;
     private boolean mSevereWarningShownThisChargeCycle;
 
@@ -247,7 +248,8 @@ public class PowerUI extends SystemUI {
 
                 // Show the correct version of low battery warning if needed
                 ThreadUtils.postOnBackgroundThread(() -> {
-                    maybeShowBatteryWarning(plugged, oldPlugged, oldBucket, bucket);
+                    maybeShowBatteryWarning(
+                            oldBatteryLevel, plugged, oldPlugged, oldBucket, bucket);
                 });
 
             } else if (Intent.ACTION_SCREEN_OFF.equals(action)) {
@@ -262,14 +264,18 @@ public class PowerUI extends SystemUI {
         }
     }
 
-    protected void maybeShowBatteryWarning(boolean plugged, boolean oldPlugged, int oldBucket,
-        int bucket) {
+    protected void maybeShowBatteryWarning(int oldBatteryLevel, boolean plugged, boolean oldPlugged,
+            int oldBucket, int bucket) {
         boolean isPowerSaver = mPowerManager.isPowerSaveMode();
         // only play SFX when the dialog comes up or the bucket changes
         final boolean playSound = bucket != oldBucket || oldPlugged;
         final boolean hybridEnabled = mEnhancedEstimates.isHybridNotificationEnabled();
         if (hybridEnabled) {
-            final Estimate estimate = mEnhancedEstimates.getEstimate();
+            Estimate estimate = mLastEstimate;
+            if (estimate == null || mBatteryLevel != oldBatteryLevel) {
+                estimate = mEnhancedEstimates.getEstimate();
+                mLastEstimate = estimate;
+            }
             // Turbo is not always booted once SysUI is running so we have ot make sure we actually
             // get data back
             if (estimate != null) {

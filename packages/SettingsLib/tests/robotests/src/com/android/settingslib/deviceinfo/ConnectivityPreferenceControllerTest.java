@@ -17,7 +17,6 @@
 package com.android.settingslib.deviceinfo;
 
 import static com.google.common.truth.Truth.assertWithMessage;
-
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.nullable;
 import static org.mockito.Mockito.doReturn;

@@ -17,9 +17,8 @@ package com.android.settingslib;
 
 import android.content.Context;
 import android.os.SystemProperties;
-import android.telephony.CarrierConfigManager;
-
 import androidx.annotation.VisibleForTesting;
+import android.telephony.CarrierConfigManager;
 
 public class TetherUtil {
 

@@ -17,12 +17,11 @@ package com.android.settingslib.drawer;
 
 import android.content.ComponentName;
 import android.content.Context;
+import androidx.annotation.VisibleForTesting;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.Pair;
-
-import androidx.annotation.VisibleForTesting;
 
 import com.android.settingslib.applications.InterestingConfigChanges;
 
@@ -32,6 +31,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Set;
+
+import static java.lang.String.CASE_INSENSITIVE_ORDER;
 
 public class CategoryManager {
 

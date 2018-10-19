@@ -21,7 +21,6 @@ import android.app.usage.StorageStatsManager;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.os.UserHandle;
-
 import androidx.annotation.VisibleForTesting;
 
 import java.io.IOException;

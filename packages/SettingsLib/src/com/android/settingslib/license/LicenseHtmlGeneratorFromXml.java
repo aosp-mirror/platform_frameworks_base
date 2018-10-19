@@ -16,11 +16,10 @@
 
 package com.android.settingslib.license;
 
+import androidx.annotation.VisibleForTesting;
 import android.text.TextUtils;
 import android.util.Log;
 import android.util.Xml;
-
-import androidx.annotation.VisibleForTesting;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;

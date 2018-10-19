@@ -522,7 +522,6 @@
     <string name="quick_settings_reset_confirmation_title" msgid="748792586749897883">"<xliff:g id="TILE_LABEL">%1$s</xliff:g> लपवायचे?"</string>
     <string name="quick_settings_reset_confirmation_message" msgid="2235970126803317374">"तुम्ही सेटिंग्जमध्ये ते पुढील वेळी चालू कराल तेव्हा ते पुन्हा दिसेल."</string>
     <string name="quick_settings_reset_confirmation_button" msgid="2660339101868367515">"लपवा"</string>
-    <string name="managed_profile_foreground_toast" msgid="5421487114739245972">"तुम्ही तुमचे कार्य प्रोफाईल वापरत आहात"</string>
     <string name="stream_voice_call" msgid="4410002696470423714">"कॉल करा"</string>
     <string name="stream_system" msgid="7493299064422163147">"सिस्टम"</string>
     <string name="stream_ring" msgid="8213049469184048338">"रिंग करा"</string>
@@ -600,7 +599,7 @@
     <string name="tuner_full_importance_settings" msgid="3207312268609236827">"पॉवर सूचना नियंत्रणे"</string>
     <string name="tuner_full_importance_settings_on" msgid="7545060756610299966">"चालू"</string>
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"बंद"</string>
-    <string name="power_notification_controls_description" msgid="4372459941671353358">"पॉवर सूचना नियंत्रणांच्या साहाय्याने तुम्ही अॅप सूचनांसाठी 0 ते 5 असे महत्त्व स्तर सेट करू शकता. \n\n"<b>"स्तर 5"</b>" \n- सूचना सूचीच्या शीर्षस्थानी दाखवा \n- पूर्ण स्क्रीन व्यत्ययास अनुमती द्या \n- नेहमी डोकावून पहा \n\n"<b>"स्तर 4"</b>\n" - पूर्ण स्क्रीन व्यत्ययास प्रतिबंधित करा \n- नेहमी डोकावून पहा \n\n"<b>"स्तर 3"</b>" \n- पूर्ण स्क्रीन व्यत्ययास प्रतिबंधित करा \n- कधीही डोकावून पाहू नका \n\n"<b>"स्तर 2"</b>" \n- पूर्ण स्क्रीन व्यत्ययास प्रतिबंधित करा \n- कधीही डोकावून पाहू नका \n- कधीही ध्वनी किंवा व्हायब्रेट करू नका \n\n"<b>"स्तर 1"</b>\n"- पूर्ण स्क्रीन व्यत्ययास प्रतिबंधित करा \n- कधीही डोकावून पाहू नका \n- कधीही ध्वनी किंवा व्हायब्रेट करू नका \n- लॉक स्क्रीन आणि स्टेटस बार मधून लपवा \n- सूचना सूचीच्या तळाशी दर्शवा \n\n"<b>"स्तर 0"</b>" \n- अॅपमधील सर्व सूचना ब्लॉक करा"</string>
+    <string name="power_notification_controls_description" msgid="4372459941671353358">"पॉवर सूचना नियंत्रणांच्या साहाय्याने तुम्ही अॅप सूचनांसाठी 0 ते 5 असे महत्त्व स्तर सेट करू शकता. \n\n"<b>"स्तर 5"</b>" \n- सूचना सूचीच्या शीर्षस्थानी दाखवा \n- फुल स्क्रीन व्यत्ययास अनुमती द्या \n- नेहमी डोकावून पहा \n\n"<b>"स्तर 4"</b>\n" - फुल स्क्रीन व्यत्ययास प्रतिबंधित करा \n- नेहमी डोकावून पहा \n\n"<b>"स्तर 3"</b>" \n- फुल स्क्रीन व्यत्ययास प्रतिबंधित करा \n- कधीही डोकावून पाहू नका \n\n"<b>"स्तर 2"</b>" \n- फुल स्क्रीन व्यत्ययास प्रतिबंधित करा \n- कधीही डोकावून पाहू नका \n- कधीही ध्वनी किंवा व्हायब्रेट करू नका \n\n"<b>"स्तर 1"</b>\n"- फुल स्क्रीन व्यत्ययास प्रतिबंधित करा \n- कधीही डोकावून पाहू नका \n- कधीही ध्वनी किंवा व्हायब्रेट करू नका \n- लॉक स्क्रीन आणि स्टेटस बार मधून लपवा \n- सूचना सूचीच्या तळाशी दर्शवा \n\n"<b>"स्तर 0"</b>" \n- अॅपमधील सर्व सूचना ब्लॉक करा"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"सूचना"</string>
     <string name="notification_channel_disabled" msgid="344536703863700565">"आता तुम्हाला या सूचना दिसणार नाहीत"</string>
     <string name="notification_channel_minimized" msgid="1664411570378910931">"या सूचना लहान केल्या जातील"</string>
@@ -746,16 +745,16 @@
   </string-array>
     <string name="other" msgid="4060683095962566764">"अन्य"</string>
     <string name="accessibility_divider" msgid="5903423481953635044">"विभाजित-स्क्रीन विभाजक"</string>
-    <string name="accessibility_action_divider_left_full" msgid="2801570521881574972">"डावी पूर्ण स्क्रीन"</string>
+    <string name="accessibility_action_divider_left_full" msgid="2801570521881574972">"डावी फुल स्क्रीन"</string>
     <string name="accessibility_action_divider_left_70" msgid="3612060638991687254">"डावी 70%"</string>
     <string name="accessibility_action_divider_left_50" msgid="1248083470322193075">"डावी 50%"</string>
     <string name="accessibility_action_divider_left_30" msgid="543324403127069386">"डावी 30%"</string>
-    <string name="accessibility_action_divider_right_full" msgid="4639381073802030463">"उजवी पूर्ण स्क्रीन"</string>
-    <string name="accessibility_action_divider_top_full" msgid="5357010904067731654">"शीर्ष पूर्ण स्क्रीन"</string>
+    <string name="accessibility_action_divider_right_full" msgid="4639381073802030463">"उजवी फुल स्क्रीन"</string>
+    <string name="accessibility_action_divider_top_full" msgid="5357010904067731654">"शीर्ष फुल स्क्रीन"</string>
     <string name="accessibility_action_divider_top_70" msgid="5090779195650364522">"शीर्ष 70%"</string>
     <string name="accessibility_action_divider_top_50" msgid="6385859741925078668">"शीर्ष 50%"</string>
     <string name="accessibility_action_divider_top_30" msgid="6201455163864841205">"शीर्ष 10"</string>
-    <string name="accessibility_action_divider_bottom_full" msgid="301433196679548001">"तळाशी पूर्ण स्क्रीन"</string>
+    <string name="accessibility_action_divider_bottom_full" msgid="301433196679548001">"तळाशी फुल स्क्रीन"</string>
     <string name="accessibility_qs_edit_tile_label" msgid="8374924053307764245">"स्थिती <xliff:g id="POSITION">%1$d</xliff:g>, <xliff:g id="TILE_NAME">%2$s</xliff:g>. संपादित करण्यासाठी दोनदा टॅप करा."</string>
     <string name="accessibility_qs_edit_add_tile_label" msgid="8133209638023882667">"<xliff:g id="TILE_NAME">%1$s</xliff:g> . जोडण्यासाठी दोनदा टॅप करा."</string>
     <string name="accessibility_qs_edit_position_label" msgid="5055306305919289819">"स्थिती <xliff:g id="POSITION">%1$d</xliff:g>. निवडण्यासाठी दोनदा टॅप करा."</string>
