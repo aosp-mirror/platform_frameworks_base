@@ -1067,7 +1067,7 @@ public class WifiManager {
     public List<WifiConfiguration> getConfiguredNetworks() {
         try {
             ParceledListSlice<WifiConfiguration> parceledList =
-                mService.getConfiguredNetworks();
+                    mService.getConfiguredNetworks(mContext.getOpPackageName());
             if (parceledList == null) {
                 return Collections.emptyList();
             }
@@ -1761,8 +1761,7 @@ public class WifiManager {
     @Deprecated
     public boolean disconnect() {
         try {
-            mService.disconnect(mContext.getOpPackageName());
-            return true;
+            return mService.disconnect(mContext.getOpPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1786,8 +1785,7 @@ public class WifiManager {
     @Deprecated
     public boolean reconnect() {
         try {
-            mService.reconnect(mContext.getOpPackageName());
-            return true;
+            return mService.reconnect(mContext.getOpPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -1811,8 +1809,7 @@ public class WifiManager {
     @Deprecated
     public boolean reassociate() {
         try {
-            mService.reassociate(mContext.getOpPackageName());
-            return true;
+            return mService.reassociate(mContext.getOpPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -2132,14 +2129,14 @@ public class WifiManager {
      * existing networks. You should assume the network IDs can be different
      * after calling this method.
      *
-     * @return {@code false} Will always return true.
+     * @return {@code false}.
      * @deprecated There is no need to call this method -
      * {@link #addNetwork(WifiConfiguration)}, {@link #updateNetwork(WifiConfiguration)}
      * and {@link #removeNetwork(int)} already persist the configurations automatically.
      */
     @Deprecated
     public boolean saveConfiguration() {
-        return true;
+        return false;
     }
 
     /**
