@@ -299,7 +299,7 @@ public class WebViewClient {
     /**
      * The resource was blocked because it may trick the user into a billing agreement.
      *
-     * <p>This constant is only used when targetSdkVersion is greater than {@link
+     * <p>This constant is only used when targetSdkVersion is at least {@link
      * android.os.Build.VERSION_CODES#Q}. Otherwise, {@link #SAFE_BROWSING_THREAT_UNKNOWN} is used
      * instead.
      */
