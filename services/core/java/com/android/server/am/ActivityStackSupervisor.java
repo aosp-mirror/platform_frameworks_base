@@ -23,6 +23,7 @@ import static android.app.ActivityManager.LOCK_TASK_MODE_LOCKED;
 import static android.app.ActivityManager.START_DELIVERED_TO_TOP;
 import static android.app.ActivityManager.START_TASK_TO_FRONT;
 import static android.app.ActivityTaskManager.INVALID_STACK_ID;
+import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.ITaskStackListener.FORCED_RESIZEABLE_REASON_SECONDARY_DISPLAY;
 import static android.app.ITaskStackListener.FORCED_RESIZEABLE_REASON_SPLIT_SCREEN;
 import static android.app.WaitResult.INVALID_DELAY;
@@ -54,6 +55,21 @@ import static android.view.Display.INVALID_DISPLAY;
 import static android.view.Display.TYPE_VIRTUAL;
 import static android.view.WindowManager.TRANSIT_DOCK_TASK_FROM_RECENTS;
 
+import static com.android.server.am.ActivityStack.ActivityState.DESTROYED;
+import static com.android.server.am.ActivityStack.ActivityState.INITIALIZING;
+import static com.android.server.am.ActivityStack.ActivityState.PAUSED;
+import static com.android.server.am.ActivityStack.ActivityState.PAUSING;
+import static com.android.server.am.ActivityStack.ActivityState.RESUMED;
+import static com.android.server.am.ActivityStack.ActivityState.STOPPED;
+import static com.android.server.am.ActivityStack.ActivityState.STOPPING;
+import static com.android.server.am.ActivityStack.REMOVE_TASK_MODE_MOVING;
+import static com.android.server.am.ActivityStackSupervisorProto.CONFIGURATION_CONTAINER;
+import static com.android.server.am.ActivityStackSupervisorProto.DISPLAYS;
+import static com.android.server.am.ActivityStackSupervisorProto.FOCUSED_STACK_ID;
+import static com.android.server.am.ActivityStackSupervisorProto.IS_HOME_RECENTS_COMPONENT;
+import static com.android.server.am.ActivityStackSupervisorProto.KEYGUARD_CONTROLLER;
+import static com.android.server.am.ActivityStackSupervisorProto.PENDING_ACTIVITIES;
+import static com.android.server.am.ActivityStackSupervisorProto.RESUMED_ACTIVITY;
 import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_ALL;
 import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_IDLE;
 import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_PAUSE;
@@ -76,22 +92,6 @@ import static com.android.server.am.ActivityTaskManagerDebugConfig.TAG_WITH_CLAS
 import static com.android.server.am.ActivityTaskManagerService.ANIMATE;
 import static com.android.server.am.ActivityTaskManagerService.H.FIRST_SUPERVISOR_STACK_MSG;
 import static com.android.server.am.ActivityTaskManagerService.RELAUNCH_REASON_NONE;
-import static com.android.server.am.ActivityStack.ActivityState.DESTROYED;
-import static com.android.server.am.ActivityStack.ActivityState.INITIALIZING;
-import static com.android.server.am.ActivityStack.ActivityState.PAUSED;
-import static com.android.server.am.ActivityStack.ActivityState.PAUSING;
-import static com.android.server.am.ActivityStack.ActivityState.RESUMED;
-import static com.android.server.am.ActivityStack.ActivityState.STOPPED;
-import static com.android.server.am.ActivityStack.ActivityState.STOPPING;
-import static com.android.server.am.ActivityStack.REMOVE_TASK_MODE_MOVING;
-import static com.android.server.am.ActivityStackSupervisorProto.CONFIGURATION_CONTAINER;
-import static com.android.server.am.ActivityStackSupervisorProto.DISPLAYS;
-import static com.android.server.am.ActivityStackSupervisorProto.FOCUSED_STACK_ID;
-import static com.android.server.am.ActivityStackSupervisorProto.IS_HOME_RECENTS_COMPONENT;
-import static com.android.server.am.ActivityStackSupervisorProto.KEYGUARD_CONTROLLER;
-import static com.android.server.am.ActivityStackSupervisorProto.PENDING_ACTIVITIES;
-import static com.android.server.am.ActivityStackSupervisorProto.RESUMED_ACTIVITY;
-import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_LAUNCHABLE;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_LAUNCHABLE_PRIV;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_WHITELISTED;
@@ -789,8 +789,9 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     }
 
     boolean canStartHomeOnDisplay(ActivityInfo homeActivity, int displayId) {
-        if (displayId == DEFAULT_DISPLAY) {
-            // No restrictions to default display.
+        if (displayId == DEFAULT_DISPLAY || (displayId != INVALID_DISPLAY
+                && displayId == mService.mVr2dDisplayId)) {
+            // No restrictions to default display or vr 2d display.
             return true;
         }
 
