@@ -29,7 +29,6 @@ import android.content.ContentValues;
 import android.content.Context;
 import android.content.Intent;
 import android.content.UriPermission;
-import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
 import android.database.DatabaseUtils;
 import android.graphics.Bitmap;
@@ -39,6 +38,7 @@ import android.net.Uri;
 import android.os.Bundle;
 import android.os.CancellationSignal;
 import android.os.Environment;
+import android.os.OperationCanceledException;
 import android.os.RemoteException;
 import android.service.media.CameraPrewarmService;
 import android.util.ArrayMap;
@@ -402,7 +402,16 @@ public final class MediaStore {
          * access.
          * <p>
          * Type: TEXT
+         *
+         * @deprecated Apps may not have filesystem permissions to directly
+         *             access this path. Instead of trying to open this path
+         *             directly, apps should use
+         *             {@link ContentResolver#openFileDescriptor(Uri, String)}
+         *             to gain access. This value will always be {@code NULL}
+         *             for apps targeting
+         *             {@link android.os.Build.VERSION_CODES#Q} or higher.
          */
+        @Deprecated
         public static final String DATA = "_data";
 
         /**
@@ -641,6 +650,7 @@ public final class MediaStore {
      * This class is used internally by Images.Thumbnails and Video.Thumbnails, it's not intended
      * to be accessed elsewhere.
      */
+    @Deprecated
     private static class InternalThumbnails implements BaseColumns {
         /**
          * Currently outstanding thumbnail requests that can be cancelled.
@@ -654,13 +664,14 @@ public final class MediaStore {
          *
          * @see #cancelThumbnail(ContentResolver, Uri)
          */
+        @Deprecated
         static @Nullable Bitmap getThumbnail(@NonNull ContentResolver cr, @NonNull Uri uri,
                 int kind, @Nullable BitmapFactory.Options opts) {
-            final Bundle openOpts = new Bundle();
+            final Point size;
             if (kind == ThumbnailConstants.MICRO_KIND) {
-                openOpts.putParcelable(ContentResolver.EXTRA_SIZE, ThumbnailConstants.MICRO_SIZE);
+                size = ThumbnailConstants.MICRO_SIZE;
             } else if (kind == ThumbnailConstants.MINI_KIND) {
-                openOpts.putParcelable(ContentResolver.EXTRA_SIZE, ThumbnailConstants.MINI_SIZE);
+                size = ThumbnailConstants.MINI_SIZE;
             } else {
                 throw new IllegalArgumentException("Unsupported kind: " + kind);
             }
@@ -674,9 +685,8 @@ public final class MediaStore {
                 }
             }
 
-            try (AssetFileDescriptor afd = cr.openTypedAssetFileDescriptor(uri,
-                    "image/*", openOpts, signal)) {
-                return BitmapFactory.decodeFileDescriptor(afd.getFileDescriptor(), null, opts);
+            try {
+                return cr.loadThumbnail(uri, Point.convert(size), signal);
             } catch (IOException e) {
                 Log.w(TAG, "Failed to obtain thumbnail for " + uri, e);
                 return null;
@@ -693,6 +703,7 @@ public final class MediaStore {
          * Only the original process which made the request can cancel their own
          * requests.
          */
+        @Deprecated
         static void cancelThumbnail(@NonNull ContentResolver cr, @NonNull Uri uri) {
             synchronized (sPending) {
                 final CancellationSignal signal = sPending.get(uri);
@@ -936,9 +947,8 @@ public final class MediaStore {
         }
 
         /**
-         * This class allows developers to query and get two kinds of thumbnails:
-         * MINI_KIND: 512 x 384 thumbnail
-         * MICRO_KIND: 96 x 96 thumbnail
+         * This class provides utility methods to obtain thumbnails for various
+         * {@link Images} items.
          */
         public static class Thumbnails implements BaseColumns {
             public static final Cursor query(ContentResolver cr, Uri uri, String[] projection) {
@@ -958,13 +968,19 @@ public final class MediaStore {
             }
 
             /**
-             * This method cancels the thumbnail request so clients waiting for getThumbnail will be
-             * interrupted and return immediately. Only the original process which made the getThumbnail
-             * requests can cancel their own requests.
+             * Cancel any outstanding {@link #getThumbnail} requests, causing
+             * them to return by throwing a {@link OperationCanceledException}.
+             * <p>
+             * This method has no effect on
+             * {@link ContentResolver#loadThumbnail} calls, since they provide
+             * their own {@link CancellationSignal}.
              *
-             * @param cr ContentResolver
-             * @param origId original image id
+             * @deprecated Callers should migrate to using
+             *             {@link ContentResolver#loadThumbnail}, since it
+             *             offers richer control over requested thumbnail sizes
+             *             and cancellation behavior.
              */
+            @Deprecated
             public static void cancelThumbnailRequest(ContentResolver cr, long origId) {
                 final Uri uri = ContentUris.withAppendedId(
                         Images.Media.EXTERNAL_CONTENT_URI, origId);
@@ -972,51 +988,66 @@ public final class MediaStore {
             }
 
             /**
-             * This method checks if the thumbnails of the specified image (origId) has been created.
-             * It will be blocked until the thumbnails are generated.
+             * Return thumbnail representing a specific image item. If a
+             * thumbnail doesn't exist, this method will block until it's
+             * generated. Callers are responsible for their own in-memory
+             * caching of returned values.
              *
-             * @param cr ContentResolver used to dispatch queries to MediaProvider.
-             * @param origId Original image id associated with thumbnail of interest.
-             * @param kind The type of thumbnail to fetch. Should be either MINI_KIND or MICRO_KIND.
-             * @param options this is only used for MINI_KIND when decoding the Bitmap
-             * @return A Bitmap instance. It could be null if the original image
-             *         associated with origId doesn't exist or memory is not enough.
+             * @param imageId the image item to obtain a thumbnail for.
+             * @param kind optimal thumbnail size desired.
+             * @return decoded thumbnail, or {@code null} if problem was
+             *         encountered.
+             * @deprecated Callers should migrate to using
+             *             {@link ContentResolver#loadThumbnail}, since it
+             *             offers richer control over requested thumbnail sizes
+             *             and cancellation behavior.
              */
-            public static Bitmap getThumbnail(ContentResolver cr, long origId, int kind,
+            @Deprecated
+            public static Bitmap getThumbnail(ContentResolver cr, long imageId, int kind,
                     BitmapFactory.Options options) {
                 final Uri uri = ContentUris.withAppendedId(
-                        Images.Media.EXTERNAL_CONTENT_URI, origId);
+                        Images.Media.EXTERNAL_CONTENT_URI, imageId);
                 return InternalThumbnails.getThumbnail(cr, uri, kind, options);
             }
 
             /**
-             * This method cancels the thumbnail request so clients waiting for getThumbnail will be
-             * interrupted and return immediately. Only the original process which made the getThumbnail
-             * requests can cancel their own requests.
+             * Cancel any outstanding {@link #getThumbnail} requests, causing
+             * them to return by throwing a {@link OperationCanceledException}.
+             * <p>
+             * This method has no effect on
+             * {@link ContentResolver#loadThumbnail} calls, since they provide
+             * their own {@link CancellationSignal}.
              *
-             * @param cr ContentResolver
-             * @param origId original image id
-             * @param groupId the same groupId used in getThumbnail.
+             * @deprecated Callers should migrate to using
+             *             {@link ContentResolver#loadThumbnail}, since it
+             *             offers richer control over requested thumbnail sizes
+             *             and cancellation behavior.
              */
-            public static void cancelThumbnailRequest(ContentResolver cr, long origId, long groupId) {
+            @Deprecated
+            public static void cancelThumbnailRequest(ContentResolver cr, long origId,
+                    long groupId) {
                 cancelThumbnailRequest(cr, origId);
             }
 
             /**
-             * This method checks if the thumbnails of the specified image (origId) has been created.
-             * It will be blocked until the thumbnails are generated.
+             * Return thumbnail representing a specific image item. If a
+             * thumbnail doesn't exist, this method will block until it's
+             * generated. Callers are responsible for their own in-memory
+             * caching of returned values.
              *
-             * @param cr ContentResolver used to dispatch queries to MediaProvider.
-             * @param origId Original image id associated with thumbnail of interest.
-             * @param groupId the id of group to which this request belongs
-             * @param kind The type of thumbnail to fetch. Should be either MINI_KIND or MICRO_KIND.
-             * @param options this is only used for MINI_KIND when decoding the Bitmap
-             * @return A Bitmap instance. It could be null if the original image
-             *         associated with origId doesn't exist or memory is not enough.
+             * @param imageId the image item to obtain a thumbnail for.
+             * @param kind optimal thumbnail size desired.
+             * @return decoded thumbnail, or {@code null} if problem was
+             *         encountered.
+             * @deprecated Callers should migrate to using
+             *             {@link ContentResolver#loadThumbnail}, since it
+             *             offers richer control over requested thumbnail sizes
+             *             and cancellation behavior.
              */
-            public static Bitmap getThumbnail(ContentResolver cr, long origId, long groupId,
+            @Deprecated
+            public static Bitmap getThumbnail(ContentResolver cr, long imageId, long groupId,
                     int kind, BitmapFactory.Options options) {
-                return getThumbnail(cr, origId, kind, options);
+                return getThumbnail(cr, imageId, kind, options);
             }
 
             /**
@@ -1059,7 +1090,16 @@ public final class MediaStore {
              * access.
              * <p>
              * Type: TEXT
+             *
+             * @deprecated Apps may not have filesystem permissions to directly
+             *             access this path. Instead of trying to open this path
+             *             directly, apps should use
+             *             {@link ContentResolver#loadThumbnail}
+             *             to gain access. This value will always be
+             *             {@code NULL} for apps targeting
+             *             {@link android.os.Build.VERSION_CODES#Q} or higher.
              */
+            @Deprecated
             public static final String DATA = "_data";
 
             /**
@@ -1509,7 +1549,16 @@ public final class MediaStore {
              * access.
              * <p>
              * Type: TEXT
+             *
+             * @deprecated Apps may not have filesystem permissions to directly
+             *             access this path. Instead of trying to open this path
+             *             directly, apps should use
+             *             {@link ContentResolver#openFileDescriptor(Uri, String)}
+             *             to gain access. This value will always be
+             *             {@code NULL} for apps targeting
+             *             {@link android.os.Build.VERSION_CODES#Q} or higher.
              */
+            @Deprecated
             public static final String DATA = "_data";
 
             /**
@@ -1790,7 +1839,16 @@ public final class MediaStore {
             /**
              * Cached album art.
              * <P>Type: TEXT</P>
+             *
+             * @deprecated Apps may not have filesystem permissions to directly
+             *             access this path. Instead of trying to open this path
+             *             directly, apps should use
+             *             {@link ContentResolver#loadThumbnail}
+             *             to gain access. This value will always be
+             *             {@code NULL} for apps targeting
+             *             {@link android.os.Build.VERSION_CODES#Q} or higher.
              */
+            @Deprecated
             public static final String ALBUM_ART = "album_art";
         }
 
@@ -2009,20 +2067,24 @@ public final class MediaStore {
         }
 
         /**
-         * This class allows developers to query and get two kinds of thumbnails:
-         * MINI_KIND: 512 x 384 thumbnail
-         * MICRO_KIND: 96 x 96 thumbnail
-         *
+         * This class provides utility methods to obtain thumbnails for various
+         * {@link Video} items.
          */
         public static class Thumbnails implements BaseColumns {
             /**
-             * This method cancels the thumbnail request so clients waiting for getThumbnail will be
-             * interrupted and return immediately. Only the original process which made the getThumbnail
-             * requests can cancel their own requests.
+             * Cancel any outstanding {@link #getThumbnail} requests, causing
+             * them to return by throwing a {@link OperationCanceledException}.
+             * <p>
+             * This method has no effect on
+             * {@link ContentResolver#loadThumbnail} calls, since they provide
+             * their own {@link CancellationSignal}.
              *
-             * @param cr ContentResolver
-             * @param origId original video id
+             * @deprecated Callers should migrate to using
+             *             {@link ContentResolver#loadThumbnail}, since it
+             *             offers richer control over requested thumbnail sizes
+             *             and cancellation behavior.
              */
+            @Deprecated
             public static void cancelThumbnailRequest(ContentResolver cr, long origId) {
                 final Uri uri = ContentUris.withAppendedId(
                         Video.Media.EXTERNAL_CONTENT_URI, origId);
@@ -2030,51 +2092,66 @@ public final class MediaStore {
             }
 
             /**
-             * This method checks if the thumbnails of the specified image (origId) has been created.
-             * It will be blocked until the thumbnails are generated.
+             * Return thumbnail representing a specific video item. If a
+             * thumbnail doesn't exist, this method will block until it's
+             * generated. Callers are responsible for their own in-memory
+             * caching of returned values.
              *
-             * @param cr ContentResolver used to dispatch queries to MediaProvider.
-             * @param origId Original image id associated with thumbnail of interest.
-             * @param kind The type of thumbnail to fetch. Should be either MINI_KIND or MICRO_KIND.
-             * @param options this is only used for MINI_KIND when decoding the Bitmap
-             * @return A Bitmap instance. It could be null if the original image
-             *         associated with origId doesn't exist or memory is not enough.
+             * @param videoId the video item to obtain a thumbnail for.
+             * @param kind optimal thumbnail size desired.
+             * @return decoded thumbnail, or {@code null} if problem was
+             *         encountered.
+             * @deprecated Callers should migrate to using
+             *             {@link ContentResolver#loadThumbnail}, since it
+             *             offers richer control over requested thumbnail sizes
+             *             and cancellation behavior.
              */
-            public static Bitmap getThumbnail(ContentResolver cr, long origId, int kind,
+            @Deprecated
+            public static Bitmap getThumbnail(ContentResolver cr, long videoId, int kind,
                     BitmapFactory.Options options) {
                 final Uri uri = ContentUris.withAppendedId(
-                        Video.Media.EXTERNAL_CONTENT_URI, origId);
+                        Video.Media.EXTERNAL_CONTENT_URI, videoId);
                 return InternalThumbnails.getThumbnail(cr, uri, kind, options);
             }
 
             /**
-             * This method checks if the thumbnails of the specified image (origId) has been created.
-             * It will be blocked until the thumbnails are generated.
+             * Cancel any outstanding {@link #getThumbnail} requests, causing
+             * them to return by throwing a {@link OperationCanceledException}.
+             * <p>
+             * This method has no effect on
+             * {@link ContentResolver#loadThumbnail} calls, since they provide
+             * their own {@link CancellationSignal}.
              *
-             * @param cr ContentResolver used to dispatch queries to MediaProvider.
-             * @param origId Original image id associated with thumbnail of interest.
-             * @param groupId the id of group to which this request belongs
-             * @param kind The type of thumbnail to fetch. Should be either MINI_KIND or MICRO_KIND
-             * @param options this is only used for MINI_KIND when decoding the Bitmap
-             * @return A Bitmap instance. It could be null if the original image associated with
-             *         origId doesn't exist or memory is not enough.
+             * @deprecated Callers should migrate to using
+             *             {@link ContentResolver#loadThumbnail}, since it
+             *             offers richer control over requested thumbnail sizes
+             *             and cancellation behavior.
              */
-            public static Bitmap getThumbnail(ContentResolver cr, long origId, long groupId,
-                    int kind, BitmapFactory.Options options) {
-                return getThumbnail(cr, origId, kind, options);
+            @Deprecated
+            public static void cancelThumbnailRequest(ContentResolver cr, long videoId,
+                    long groupId) {
+                cancelThumbnailRequest(cr, videoId);
             }
 
             /**
-             * This method cancels the thumbnail request so clients waiting for getThumbnail will be
-             * interrupted and return immediately. Only the original process which made the getThumbnail
-             * requests can cancel their own requests.
+             * Return thumbnail representing a specific video item. If a
+             * thumbnail doesn't exist, this method will block until it's
+             * generated. Callers are responsible for their own in-memory
+             * caching of returned values.
              *
-             * @param cr ContentResolver
-             * @param origId original video id
-             * @param groupId the same groupId used in getThumbnail.
+             * @param videoId the video item to obtain a thumbnail for.
+             * @param kind optimal thumbnail size desired.
+             * @return decoded thumbnail, or {@code null} if problem was
+             *         encountered.
+             * @deprecated Callers should migrate to using
+             *             {@link ContentResolver#loadThumbnail}, since it
+             *             offers richer control over requested thumbnail sizes
+             *             and cancellation behavior.
              */
-            public static void cancelThumbnailRequest(ContentResolver cr, long origId, long groupId) {
-                cancelThumbnailRequest(cr, origId);
+            @Deprecated
+            public static Bitmap getThumbnail(ContentResolver cr, long videoId, long groupId,
+                    int kind, BitmapFactory.Options options) {
+                return getThumbnail(cr, videoId, kind, options);
             }
 
             /**
@@ -2110,14 +2187,17 @@ public final class MediaStore {
             /**
              * Path to the thumbnail file on disk.
              * <p>
-             * Note that apps may not have filesystem permissions to directly
-             * access this path. Instead of trying to open this path directly,
-             * apps should use
-             * {@link ContentResolver#openFileDescriptor(Uri, String)} to gain
-             * access.
-             * <p>
              * Type: TEXT
+             *
+             * @deprecated Apps may not have filesystem permissions to directly
+             *             access this path. Instead of trying to open this path
+             *             directly, apps should use
+             *             {@link ContentResolver#openFileDescriptor(Uri, String)}
+             *             to gain access. This value will always be
+             *             {@code NULL} for apps targeting
+             *             {@link android.os.Build.VERSION_CODES#Q} or higher.
              */
+            @Deprecated
             public static final String DATA = "_data";
 
             /**

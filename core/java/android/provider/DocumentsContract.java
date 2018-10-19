@@ -34,6 +34,7 @@ import android.content.res.AssetFileDescriptor;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.ImageDecoder;
 import android.graphics.Matrix;
 import android.graphics.Point;
 import android.media.ExifInterface;
@@ -53,6 +54,7 @@ import android.system.ErrnoException;
 import android.system.Os;
 import android.util.DataUnit;
 import android.util.Log;
+import android.util.Size;
 
 import libcore.io.IoUtils;
 
@@ -136,10 +138,11 @@ public final class DocumentsContract {
     public static final String EXTRA_EXCLUDE_SELF = "android.provider.extra.EXCLUDE_SELF";
 
     /**
-     * Included in {@link AssetFileDescriptor#getExtras()} when returned
-     * thumbnail should be rotated.
+     * An extra number of degrees that an image should be rotated during the
+     * decode process to be presented correctly.
      *
-     * @see MediaStore.Images.ImageColumns#ORIENTATION
+     * @see AssetFileDescriptor#getExtras()
+     * @see android.provider.MediaStore.Images.ImageColumns#ORIENTATION
      */
     public static final String EXTRA_ORIENTATION = "android.provider.extra.ORIENTATION";
 
@@ -1093,75 +1096,10 @@ public final class DocumentsContract {
 
     /** {@hide} */
     @UnsupportedAppUsage
-    public static Bitmap getDocumentThumbnail(
-            ContentProviderClient client, Uri documentUri, Point size, CancellationSignal signal)
-            throws RemoteException, IOException {
-        final Bundle openOpts = new Bundle();
-        openOpts.putParcelable(ContentResolver.EXTRA_SIZE, size);
-
-        AssetFileDescriptor afd = null;
-        Bitmap bitmap = null;
-        try {
-            afd = client.openTypedAssetFileDescriptor(documentUri, "image/*", openOpts, signal);
-
-            final FileDescriptor fd = afd.getFileDescriptor();
-            final long offset = afd.getStartOffset();
-
-            // Try seeking on the returned FD, since it gives us the most
-            // optimal decode path; otherwise fall back to buffering.
-            BufferedInputStream is = null;
-            try {
-                Os.lseek(fd, offset, SEEK_SET);
-            } catch (ErrnoException e) {
-                is = new BufferedInputStream(new FileInputStream(fd), THUMBNAIL_BUFFER_SIZE);
-                is.mark(THUMBNAIL_BUFFER_SIZE);
-            }
-
-            // We requested a rough thumbnail size, but the remote size may have
-            // returned something giant, so defensively scale down as needed.
-            final BitmapFactory.Options opts = new BitmapFactory.Options();
-            opts.inJustDecodeBounds = true;
-            if (is != null) {
-                BitmapFactory.decodeStream(is, null, opts);
-            } else {
-                BitmapFactory.decodeFileDescriptor(fd, null, opts);
-            }
-
-            final int widthSample = opts.outWidth / size.x;
-            final int heightSample = opts.outHeight / size.y;
-
-            opts.inJustDecodeBounds = false;
-            opts.inSampleSize = Math.min(widthSample, heightSample);
-            if (is != null) {
-                is.reset();
-                bitmap = BitmapFactory.decodeStream(is, null, opts);
-            } else {
-                try {
-                    Os.lseek(fd, offset, SEEK_SET);
-                } catch (ErrnoException e) {
-                    e.rethrowAsIOException();
-                }
-                bitmap = BitmapFactory.decodeFileDescriptor(fd, null, opts);
-            }
-
-            // Transform the bitmap if requested. We use a side-channel to
-            // communicate the orientation, since EXIF thumbnails don't contain
-            // the rotation flags of the original image.
-            final Bundle extras = afd.getExtras();
-            final int orientation = (extras != null) ? extras.getInt(EXTRA_ORIENTATION, 0) : 0;
-            if (orientation != 0) {
-                final int width = bitmap.getWidth();
-                final int height = bitmap.getHeight();
-
-                final Matrix m = new Matrix();
-                m.setRotate(orientation, width / 2, height / 2);
-                bitmap = Bitmap.createBitmap(bitmap, 0, 0, width, height, m, false);
-            }
-        } finally {
-            IoUtils.closeQuietly(afd);
-        }
-
-        return bitmap;
+    public static Bitmap getDocumentThumbnail(ContentProviderClient client, Uri documentUri,
+            Point size, CancellationSignal signal) throws IOException {
+        return ContentResolver.loadThumbnail(client, documentUri, Point.convert(size), signal,
+                ImageDecoder.ALLOCATOR_DEFAULT);
     }
 
     /**
