@@ -331,6 +331,8 @@ struct Value {
 
     std::string toString() const;
 
+    bool isZero() const;
+
     Type getType() const {
         return type;
     }

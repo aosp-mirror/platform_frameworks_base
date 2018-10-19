@@ -63,6 +63,7 @@ const int FIELD_ID_AVERAGE_PULL_TIME_NANOS = 5;
 const int FIELD_ID_MAX_PULL_TIME_NANOS = 6;
 const int FIELD_ID_AVERAGE_PULL_DELAY_NANOS = 7;
 const int FIELD_ID_MAX_PULL_DELAY_NANOS = 8;
+const int FIELD_ID_DATA_ERROR = 9;
 
 namespace {
 
@@ -446,6 +447,7 @@ void writePullerStatsToStream(const std::pair<int, StatsdStats::PulledAtomStats>
                        (long long)pair.second.avgPullDelayNs);
     protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_MAX_PULL_DELAY_NANOS,
                        (long long)pair.second.maxPullDelayNs);
+    protoOutput->write(FIELD_TYPE_INT64 | FIELD_ID_DATA_ERROR, (long long)pair.second.dataError);
     protoOutput->end(token);
 }
 

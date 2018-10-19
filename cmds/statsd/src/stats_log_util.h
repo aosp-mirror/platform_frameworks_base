@@ -21,6 +21,7 @@
 #include "HashableDimensionKey.h"
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
 #include "guardrail/StatsdStats.h"
+#include "statslog.h"
 
 namespace android {
 namespace os {
@@ -86,6 +87,10 @@ bool parseProtoOutputStream(util::ProtoOutputStream& protoOutput, T* message) {
 
 // Returns the truncated timestamp.
 int64_t truncateTimestampNsToFiveMinutes(int64_t timestampNs);
+
+inline bool isPushedAtom(int atomId) {
+    return atomId <= util::kMaxPushedAtomId && atomId > 1;
+}
 
 }  // namespace statsd
 }  // namespace os
