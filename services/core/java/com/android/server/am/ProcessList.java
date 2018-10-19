@@ -1911,7 +1911,7 @@ public final class ProcessList {
         }
         UidRecord uidRec = mService.mActiveUids.get(proc.uid);
         if (uidRec == null) {
-            uidRec = new UidRecord(proc.uid);
+            uidRec = new UidRecord(proc.uid, mService.mAtmInternal);
             // This is the first appearance of the uid, report it now!
             if (DEBUG_UID_OBSERVERS) Slog.i(TAG_UID_OBSERVERS,
                     "Creating new process uid: " + uidRec);
@@ -1923,7 +1923,7 @@ public final class ProcessList {
             uidRec.updateHasInternetPermission();
             mService.mActiveUids.put(proc.uid, uidRec);
             EventLogTags.writeAmUidRunning(uidRec.uid);
-            mService.noteUidProcessState(uidRec.uid, uidRec.curProcState);
+            mService.noteUidProcessState(uidRec.uid, uidRec.getCurProcState());
         }
         proc.uidRecord = uidRec;
 

@@ -27,6 +27,7 @@ import static android.Manifest.permission.REMOVE_TASKS;
 import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
 import static android.Manifest.permission.STOP_APP_SWITCHES;
 import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
+import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
 import static android.app.ActivityManagerInternal.ALLOW_FULL_ONLY;
 import static android.app.ActivityTaskManager.RESIZE_MODE_PRESERVE_WINDOW;
 import static android.app.ActivityTaskManager.SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
@@ -347,6 +348,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     WindowManagerService mWindowManager;
     private UserManagerService mUserManager;
     private AppOpsService mAppOpsService;
+    /** All active uids in the system. */
+    final SparseArray<Integer> mActiveUids = new SparseArray<>();
     /** All processes currently running that might have a window organized by name. */
     final ProcessMap<WindowProcessController> mProcessNames = new ProcessMap<>();
     /** All processes we currently have running mapped by pid */
@@ -5455,6 +5458,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         return null;
     }
 
+    int getUidStateLocked(int uid) {
+        return mActiveUids.get(uid, PROCESS_STATE_NONEXISTENT);
+    }
+
     void logAppTooSlow(WindowProcessController app, long startTime, String msg) {
         if (true || Build.IS_USER) {
             return;
@@ -6625,6 +6632,36 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         public int finishTopCrashedActivities(WindowProcessController crashedApp, String reason) {
             synchronized (mGlobalLock) {
                 return mStackSupervisor.finishTopCrashedActivitiesLocked(crashedApp, reason);
+            }
+        }
+
+        @Override
+        public void onUidActive(int uid, int procState) {
+            synchronized (mGlobalLock) {
+                mActiveUids.put(uid, procState);
+            }
+        }
+
+        @Override
+        public void onUidInactive(int uid) {
+            synchronized (mGlobalLock) {
+                mActiveUids.remove(uid);
+            }
+        }
+
+        @Override
+        public void onActiveUidsCleared() {
+            synchronized (mGlobalLock) {
+                mActiveUids.clear();
+            }
+        }
+
+        @Override
+        public void onUidProcStateChanged(int uid, int procState) {
+            synchronized (mGlobalLock) {
+                if (mActiveUids.get(uid) != null) {
+                    mActiveUids.put(uid, procState);
+                }
             }
         }
     }

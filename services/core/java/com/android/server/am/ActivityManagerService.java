@@ -24,6 +24,7 @@ import static android.Manifest.permission.INTERACT_ACROSS_USERS_FULL;
 import static android.Manifest.permission.REMOVE_TASKS;
 import static android.app.ActivityManager.PROCESS_STATE_CACHED_ACTIVITY;
 import static android.app.ActivityManager.PROCESS_STATE_LAST_ACTIVITY;
+import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
 import static android.app.ActivityManagerInternal.ALLOW_FULL_ONLY;
 import static android.app.ActivityManagerInternal.ALLOW_NON_FULL;
 import static android.app.AppOpsManager.OP_NONE;
@@ -745,16 +746,14 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     boolean mFullPssPending = false;
 
-    /**
-     * Track all uids that have actively running processes.
-     */
-    final SparseArray<UidRecord> mActiveUids = new SparseArray<>();
+    /** Track all uids that have actively running processes. */
+    final ActiveUids mActiveUids = new ActiveUids(this, true /* postChangesToAtm */);
 
     /**
      * This is for verifying the UID report flow.
      */
     static final boolean VALIDATE_UID_STATES = true;
-    final SparseArray<UidRecord> mValidateUids = new SparseArray<>();
+    final ActiveUids mValidateUids = new ActiveUids(this, false /* postChangesToAtm */);
 
     /**
      * Fingerprints (hashCode()) of stack traces that we've
@@ -2703,7 +2702,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     "getPackageProcessState");
         }
 
-        int procState = ActivityManager.PROCESS_STATE_NONEXISTENT;
+        int procState = PROCESS_STATE_NONEXISTENT;
         synchronized (this) {
             for (int i=mProcessList.mLruProcesses.size()-1; i>=0; i--) {
                 final ProcessRecord proc = mProcessList.mLruProcesses.get(i);
@@ -2839,7 +2838,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 } else {
                     UidRecord validateUid = mValidateUids.get(item.uid);
                     if (validateUid == null) {
-                        validateUid = new UidRecord(item.uid);
+                        validateUid = new UidRecord(item.uid, mAtmInternal);
                         mValidateUids.put(item.uid, validateUid);
                     }
                     if ((item.change & UidRecord.CHANGE_IDLE) != 0) {
@@ -2847,7 +2846,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     } else if ((item.change & UidRecord.CHANGE_ACTIVE) != 0) {
                         validateUid.idle = false;
                     }
-                    validateUid.curProcState = validateUid.setProcState = item.processState;
+                    validateUid.setCurProcState(validateUid.setProcState = item.processState);
                     validateUid.lastDispatchedProcStateSeq = item.procStateSeq;
                 }
             }
@@ -2923,8 +2922,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                                 final boolean newAboveCut = item.processState <= reg.cutpoint;
                                 doReport = lastAboveCut != newAboveCut;
                             } else {
-                                doReport = item.processState
-                                        != ActivityManager.PROCESS_STATE_NONEXISTENT;
+                                doReport = item.processState != PROCESS_STATE_NONEXISTENT;
                             }
                         }
                         if (doReport) {
@@ -5142,7 +5140,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (uidRec == null || uidRec.idle) {
                 return false;
             }
-            return uidRec.curProcState <= ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
+            return uidRec.getCurProcState() <= ActivityManager.PROCESS_STATE_IMPORTANT_FOREGROUND;
         }
     }
 
@@ -5156,7 +5154,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     int getUidStateLocked(int uid) {
         UidRecord uidRec = mActiveUids.get(uid);
-        return uidRec == null ? ActivityManager.PROCESS_STATE_NONEXISTENT : uidRec.curProcState;
+        return uidRec == null ? PROCESS_STATE_NONEXISTENT : uidRec.getCurProcState();
     }
 
     // =========================================================
@@ -5210,8 +5208,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         synchronized (mPidsSelfLocked) {
             for (int i = 0; i < pids.length; i++) {
                 ProcessRecord pr = mPidsSelfLocked.get(pids[i]);
-                states[i] = (pr == null) ? ActivityManager.PROCESS_STATE_NONEXISTENT :
-                        pr.getCurProcState();
+                states[i] = (pr == null) ? PROCESS_STATE_NONEXISTENT : pr.getCurProcState();
                 if (scores != null) {
                     scores[i] = (pr == null) ? ProcessList.INVALID_ADJ : pr.curAdj;
                 }
@@ -7619,7 +7616,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         synchronized (this) {
             UidRecord uidRec = mActiveUids.get(uid);
-            return uidRec != null ? uidRec.curProcState : ActivityManager.PROCESS_STATE_NONEXISTENT;
+            return uidRec != null ? uidRec.getCurProcState() : PROCESS_STATE_NONEXISTENT;
         }
     }
 
@@ -9568,7 +9565,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         return -1;
     }
 
-    boolean dumpUids(PrintWriter pw, String dumpPackage, int dumpAppId, SparseArray<UidRecord> uids,
+    boolean dumpUids(PrintWriter pw, String dumpPackage, int dumpAppId, ActiveUids uids,
                 String header, boolean needSep) {
         boolean printed = false;
         for (int i=0; i<uids.size(); i++) {
@@ -16222,8 +16219,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mPendingPssProcesses.clear();
         for (int i = mProcessList.getLruSizeLocked() - 1; i >= 0; i--) {
             ProcessRecord app = mProcessList.mLruProcesses.get(i);
-            if (app.thread == null
-                    || app.getCurProcState() == ActivityManager.PROCESS_STATE_NONEXISTENT) {
+            if (app.thread == null || app.getCurProcState() == PROCESS_STATE_NONEXISTENT) {
                 continue;
             }
             if (memLowered || (always && now >
@@ -16604,7 +16600,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             }
         }
-        if (app.setProcState == ActivityManager.PROCESS_STATE_NONEXISTENT
+        if (app.setProcState == PROCESS_STATE_NONEXISTENT
                 || ProcessList.procStatesDifferForMem(app.getCurProcState(), app.setProcState)) {
             if (false && mTestPssMode && app.setProcState >= 0 && app.lastStateTime <= (now-200)) {
                 // Experimental code to more aggressively collect pss while
@@ -16793,8 +16789,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
         pendingChange.change = change;
-        pendingChange.processState = uidRec != null
-                ? uidRec.setProcState : ActivityManager.PROCESS_STATE_NONEXISTENT;
+        pendingChange.processState = uidRec != null ? uidRec.setProcState : PROCESS_STATE_NONEXISTENT;
         pendingChange.ephemeral = uidRec != null ? uidRec.ephemeral : isEphemeralLocked(uid);
         pendingChange.procStateSeq = uidRec != null ? uidRec.curProcStateSeq : 0;
         if (uidRec != null) {
@@ -17229,8 +17224,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     final UidRecord uidRec = app.uidRecord;
                     if (uidRec != null) {
                         uidRec.ephemeral = app.info.isInstantApp();
-                        if (uidRec.curProcState > app.getCurProcState()) {
-                            uidRec.curProcState = app.getCurProcState();
+                        if (uidRec.getCurProcState() > app.getCurProcState()) {
+                            uidRec.setCurProcState(app.getCurProcState());
                         }
                         if (app.hasForegroundServices()) {
                             uidRec.foregroundServices = true;
@@ -17437,14 +17432,14 @@ public class ActivityManagerService extends IActivityManager.Stub
         for (int i=mActiveUids.size()-1; i>=0; i--) {
             final UidRecord uidRec = mActiveUids.valueAt(i);
             int uidChange = UidRecord.CHANGE_PROCSTATE;
-            if (uidRec.curProcState != ActivityManager.PROCESS_STATE_NONEXISTENT
-                    && (uidRec.setProcState != uidRec.curProcState
+            if (uidRec.getCurProcState() != PROCESS_STATE_NONEXISTENT
+                    && (uidRec.setProcState != uidRec.getCurProcState()
                            || uidRec.setWhitelist != uidRec.curWhitelist)) {
-                if (DEBUG_UID_OBSERVERS) Slog.i(TAG_UID_OBSERVERS,
-                        "Changes in " + uidRec + ": proc state from " + uidRec.setProcState
-                        + " to " + uidRec.curProcState + ", whitelist from " + uidRec.setWhitelist
+                if (DEBUG_UID_OBSERVERS) Slog.i(TAG_UID_OBSERVERS, "Changes in " + uidRec
+                        + ": proc state from " + uidRec.setProcState + " to "
+                        + uidRec.getCurProcState() + ", whitelist from " + uidRec.setWhitelist
                         + " to " + uidRec.curWhitelist);
-                if (ActivityManager.isProcStateBackground(uidRec.curProcState)
+                if (ActivityManager.isProcStateBackground(uidRec.getCurProcState())
                         && !uidRec.curWhitelist) {
                     // UID is now in the background (and not on the temp whitelist).  Was it
                     // previously in the foreground (or on the temp whitelist)?
@@ -17477,17 +17472,16 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
                 final boolean wasCached = uidRec.setProcState
                         > ActivityManager.PROCESS_STATE_RECEIVER;
-                final boolean isCached = uidRec.curProcState
+                final boolean isCached = uidRec.getCurProcState()
                         > ActivityManager.PROCESS_STATE_RECEIVER;
-                if (wasCached != isCached ||
-                        uidRec.setProcState == ActivityManager.PROCESS_STATE_NONEXISTENT) {
+                if (wasCached != isCached || uidRec.setProcState == PROCESS_STATE_NONEXISTENT) {
                     uidChange |= isCached ? UidRecord.CHANGE_CACHED : UidRecord.CHANGE_UNCACHED;
                 }
-                uidRec.setProcState = uidRec.curProcState;
+                uidRec.setProcState = uidRec.getCurProcState();
                 uidRec.setWhitelist = uidRec.curWhitelist;
                 uidRec.setIdle = uidRec.idle;
                 enqueueUidChangeLocked(uidRec, -1, uidChange);
-                noteUidProcessState(uidRec.uid, uidRec.curProcState);
+                noteUidProcessState(uidRec.uid, uidRec.getCurProcState());
                 if (uidRec.foregroundServices) {
                     mServices.foregroundServiceProcStateChangedLocked(uidRec);
                 }
@@ -17648,7 +17642,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 continue;
             }
             // If process state is not changed, then there's nothing to do.
-            if (uidRec.setProcState == uidRec.curProcState) {
+            if (uidRec.setProcState == uidRec.getCurProcState()) {
                 continue;
             }
             final int blockState = getBlockStateForUid(uidRec);
@@ -17712,8 +17706,9 @@ public class ActivityManagerService extends IActivityManager.Stub
     @VisibleForTesting
     int getBlockStateForUid(UidRecord uidRec) {
         // Denotes whether uid's process state is currently allowed network access.
-        final boolean isAllowed = isProcStateAllowedWhileIdleOrPowerSaveMode(uidRec.curProcState)
-                || isProcStateAllowedWhileOnRestrictBackground(uidRec.curProcState);
+        final boolean isAllowed =
+                isProcStateAllowedWhileIdleOrPowerSaveMode(uidRec.getCurProcState())
+                || isProcStateAllowedWhileOnRestrictBackground(uidRec.getCurProcState());
         // Denotes whether uid's process state was previously allowed network access.
         final boolean wasAllowed = isProcStateAllowedWhileIdleOrPowerSaveMode(uidRec.setProcState)
                 || isProcStateAllowedWhileOnRestrictBackground(uidRec.setProcState);

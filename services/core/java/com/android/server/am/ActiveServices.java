@@ -1138,7 +1138,7 @@ public final class ActiveServices {
             for (int j = smap.mActiveForegroundApps.size()-1; j >= 0; j--) {
                 ActiveForegroundApp active = smap.mActiveForegroundApps.valueAt(j);
                 if (active.mUid == uidRec.uid) {
-                    if (uidRec.curProcState <= ActivityManager.PROCESS_STATE_TOP) {
+                    if (uidRec.getCurProcState() <= ActivityManager.PROCESS_STATE_TOP) {
                         if (!active.mAppOnTop) {
                             active.mAppOnTop = true;
                             changed = true;
@@ -1257,7 +1257,7 @@ public final class ActiveServices {
                                 active.mShownWhileScreenOn = mScreenOn;
                                 if (r.app != null) {
                                     active.mAppOnTop = active.mShownWhileTop =
-                                            r.app.uidRecord.curProcState
+                                            r.app.uidRecord.getCurProcState()
                                                     <= ActivityManager.PROCESS_STATE_TOP;
                                 }
                                 active.mStartTime = active.mStartVisibleTime
