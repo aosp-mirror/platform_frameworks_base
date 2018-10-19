@@ -639,6 +639,7 @@ public class SettingsBackupTest {
                  Settings.Secure.SELECTED_INPUT_METHOD_SUBTYPE,
                  Settings.Secure.SELECTED_SPELL_CHECKER,  // Intentionally removed in Q
                  Settings.Secure.SELECTED_SPELL_CHECKER_SUBTYPE,  // Intentionally removed in Q
+                 Settings.Secure.SENSOR_PRIVACY_SENSOR_STATE,
                  Settings.Secure.SETTINGS_CLASSNAME,
                  Settings.Secure.SHOW_NOTE_ABOUT_NOTIFICATION_HIDING, // candidate?
                  Settings.Secure.SHOW_ROTATION_SUGGESTIONS,

@@ -17,6 +17,7 @@ package com.android.systemui;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.hardware.SensorManager;
+import android.hardware.SensorPrivacyManager;
 import android.os.Handler;
 import android.os.HandlerThread;
 import android.os.Looper;
@@ -190,6 +191,9 @@ public class Dependency extends SystemUI {
         mProviders.put(AsyncSensorManager.class, () ->
                 new AsyncSensorManager(mContext.getSystemService(SensorManager.class),
                         getDependency(PluginManager.class)));
+
+        mProviders.put(SensorPrivacyManager.class, () ->
+                mContext.getSystemService(SensorPrivacyManager.class));
 
         mProviders.put(BluetoothController.class, () ->
                 new BluetoothControllerImpl(mContext, getDependency(BG_LOOPER)));

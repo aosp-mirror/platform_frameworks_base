@@ -598,6 +598,10 @@
     <string name="accessibility_quick_settings_data_saver_changed_off">Data Saver turned off.</string>
     <!-- Announcement made when the Data Saver changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_quick_settings_data_saver_changed_on">Data Saver turned on.</string>
+    <!-- Announcement made when the Sensor Privacy changes to off (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_sensor_privacy_changed_off">Sensor Privacy turned off.</string>
+    <!-- Announcement made when the Sensor Privacy changes to on (not shown on the screen). [CHAR LIMIT=NONE] -->
+    <string name="accessibility_quick_settings_sensor_privacy_changed_on">Sensor Privacy turned on.</string>
 
     <!-- Content description of the display brightness slider (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_brightness">Display brightness</string>
@@ -2318,4 +2322,6 @@
         <item quantity="one"><xliff:g id="num_apps" example="1">%d</xliff:g> other app</item>
         <item quantity="other"><xliff:g id="num_apps" example="3">%d</xliff:g> other apps</item>
     </plurals>
+    <!-- Text for the quick setting tile for sensor privacy [CHAR LIMIT=30] -->
+    <string name="sensor_privacy_mode">Sensors off</string>
 </resources>

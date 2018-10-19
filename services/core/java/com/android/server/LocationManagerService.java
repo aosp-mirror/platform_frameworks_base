@@ -2763,7 +2763,7 @@ public class LocationManagerService extends ILocationManager.Stub {
      */
     @Override
     public void setLocationEnabledForUser(boolean enabled, int userId) {
-        mContext.enforceCallingPermission(
+        mContext.enforceCallingOrSelfPermission(
                 android.Manifest.permission.WRITE_SECURE_SETTINGS,
                 "Requires WRITE_SECURE_SETTINGS permission");
 
