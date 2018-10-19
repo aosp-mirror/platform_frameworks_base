@@ -21,7 +21,6 @@ import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.StringDef;
-import android.annotation.UnsupportedAppUsage;
 import android.annotation.WorkerThread;
 import android.os.LocaleList;
 import android.os.Looper;
@@ -212,34 +211,13 @@ public interface TextClassifier {
         return suggestSelection(request);
     }
 
-    // TODO: Remove once apps can build against the latest sdk.
-    /** @hide */
-    @UnsupportedAppUsage
-    default TextSelection suggestSelection(
-            @NonNull CharSequence text,
-            @IntRange(from = 0) int selectionStartIndex,
-            @IntRange(from = 0) int selectionEndIndex,
-            @Nullable TextSelection.Options options) {
-        if (options == null) {
-            return suggestSelection(new TextSelection.Request.Builder(
-                    text, selectionStartIndex, selectionEndIndex).build());
-        } else if (options.getRequest() != null) {
-            return suggestSelection(options.getRequest());
-        } else {
-            return suggestSelection(
-                    new TextSelection.Request.Builder(text, selectionStartIndex, selectionEndIndex)
-                            .setDefaultLocales(options.getDefaultLocales())
-                            .build());
-        }
-    }
-
     /**
      * Classifies the specified text and returns a {@link TextClassification} object that can be
      * used to generate a widget for handling the classified text.
      *
      * <p><strong>NOTE: </strong>Call on a worker thread.
      *
-     * <strong>NOTE: </strong>If a TextClassifier has been destroyed, calls to this method should
+     * <p><strong>NOTE: </strong>If a TextClassifier has been destroyed, calls to this method should
      * throw an {@link IllegalStateException}. See {@link #isDestroyed()}.
      *
      * @param request the text classification request
@@ -262,7 +240,7 @@ public interface TextClassifier {
      * {@link #classifyText(TextClassification.Request)}. If that method calls this method,
      * a stack overflow error will happen.
      *
-     * <strong>NOTE: </strong>If a TextClassifier has been destroyed, calls to this method should
+     * <p><strong>NOTE: </strong>If a TextClassifier has been destroyed, calls to this method should
      * throw an {@link IllegalStateException}. See {@link #isDestroyed()}.
      *
      * @param text text providing context for the text to classify (which is specified
@@ -292,34 +270,13 @@ public interface TextClassifier {
         return classifyText(request);
     }
 
-    // TODO: Remove once apps can build against the latest sdk.
-    /** @hide */
-    @UnsupportedAppUsage
-    default TextClassification classifyText(
-            @NonNull CharSequence text,
-            @IntRange(from = 0) int startIndex,
-            @IntRange(from = 0) int endIndex,
-            @Nullable TextClassification.Options options) {
-        if (options == null) {
-            return classifyText(
-                    new TextClassification.Request.Builder(text, startIndex, endIndex).build());
-        } else if (options.getRequest() != null) {
-            return classifyText(options.getRequest());
-        } else {
-            return classifyText(new TextClassification.Request.Builder(text, startIndex, endIndex)
-                    .setDefaultLocales(options.getDefaultLocales())
-                    .setReferenceTime(options.getReferenceTime())
-                    .build());
-        }
-    }
-
     /**
      * Generates and returns a {@link TextLinks} that may be applied to the text to annotate it with
      * links information.
      *
      * <p><strong>NOTE: </strong>Call on a worker thread.
      *
-     * <strong>NOTE: </strong>If a TextClassifier has been destroyed, calls to this method should
+     * <p><strong>NOTE: </strong>If a TextClassifier has been destroyed, calls to this method should
      * throw an {@link IllegalStateException}. See {@link #isDestroyed()}.
      *
      * @param request the text links request
@@ -334,27 +291,10 @@ public interface TextClassifier {
         return new TextLinks.Builder(request.getText().toString()).build();
     }
 
-    // TODO: Remove once apps can build against the latest sdk.
-    /** @hide */
-    @UnsupportedAppUsage
-    default TextLinks generateLinks(
-            @NonNull CharSequence text, @Nullable TextLinks.Options options) {
-        if (options == null) {
-            return generateLinks(new TextLinks.Request.Builder(text).build());
-        } else if (options.getRequest() != null) {
-            return generateLinks(options.getRequest());
-        } else {
-            return generateLinks(new TextLinks.Request.Builder(text)
-                    .setDefaultLocales(options.getDefaultLocales())
-                    .setEntityConfig(options.getEntityConfig())
-                    .build());
-        }
-    }
-
     /**
      * Returns the maximal length of text that can be processed by generateLinks.
      *
-     * <strong>NOTE: </strong>If a TextClassifier has been destroyed, calls to this method should
+     * <p><strong>NOTE: </strong>If a TextClassifier has been destroyed, calls to this method should
      * throw an {@link IllegalStateException}. See {@link #isDestroyed()}.
      *
      * @see #generateLinks(TextLinks.Request)
@@ -365,9 +305,29 @@ public interface TextClassifier {
     }
 
     /**
+     * Detects the language of the specified text.
+     *
+     * <p><strong>NOTE: </strong>Call on a worker thread.
+     *
+     *
+     * <p><strong>NOTE: </strong>If a TextClassifier has been destroyed, calls to this method should
+     * throw an {@link IllegalStateException}. See {@link #isDestroyed()}.
+     *
+     * @param request the {@link TextLanguage} request.
+     * @return the {@link TextLanguage} result.
+     */
+    @WorkerThread
+    @NonNull
+    default TextLanguage detectLanguage(@NonNull TextLanguage.Request request) {
+        Preconditions.checkNotNull(request);
+        Utils.checkMainThread();
+        return TextLanguage.EMPTY;
+    }
+
+    /**
      * Reports a selection event.
      *
-     * <strong>NOTE: </strong>If a TextClassifier has been destroyed, calls to this method should
+     * <p><strong>NOTE: </strong>If a TextClassifier has been destroyed, calls to this method should
      * throw an {@link IllegalStateException}. See {@link #isDestroyed()}.
      */
     default void onSelectionEvent(@NonNull SelectionEvent event) {}
@@ -375,7 +335,7 @@ public interface TextClassifier {
     /**
      * Destroys this TextClassifier.
      *
-     * <strong>NOTE: </strong>If a TextClassifier has been destroyed, calls to its methods should
+     * <p><strong>NOTE: </strong>If a TextClassifier has been destroyed, calls to its methods should
      * throw an {@link IllegalStateException}. See {@link #isDestroyed()}.
      *
      * <p>Subsequent calls to this method are no-ops.
@@ -385,7 +345,7 @@ public interface TextClassifier {
     /**
      * Returns whether or not this TextClassifier has been destroyed.
      *
-     * <strong>NOTE: </strong>If a TextClassifier has been destroyed, caller should not interact
+     * <p><strong>NOTE: </strong>If a TextClassifier has been destroyed, caller should not interact
      * with the classifier and an attempt to do so would throw an {@link IllegalStateException}.
      * However, this method should never throw an {@link IllegalStateException}.
      *
@@ -396,9 +356,7 @@ public interface TextClassifier {
     }
 
     /** @hide **/
-    default void dump(@NonNull IndentingPrintWriter printWriter) {
-
-    }
+    default void dump(@NonNull IndentingPrintWriter printWriter) {}
 
     /**
      * Configuration object for specifying what entities to identify.
