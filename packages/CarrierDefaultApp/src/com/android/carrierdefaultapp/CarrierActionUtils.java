@@ -30,7 +30,7 @@ import android.telephony.TelephonyManager;
 import android.text.TextUtils;
 import android.util.Log;
 import com.android.internal.telephony.PhoneConstants;
-import com.android.carrierdefaultapp.R;
+
 /**
  * This util class provides common logic for carrier actions
  */
@@ -102,7 +102,7 @@ public class CarrierActionUtils {
                 SubscriptionManager.getDefaultVoiceSubscriptionId());
         logd("onDisableAllMeteredApns subId: " + subId);
         final TelephonyManager telephonyMgr = context.getSystemService(TelephonyManager.class);
-        telephonyMgr.carrierActionSetMeteredApnsEnabled(subId, !ENABLE);
+        telephonyMgr.createForSubscriptionId(subId).setCarrierDataEnabled(!ENABLE);
     }
 
     private static void onEnableAllMeteredApns(Intent intent, Context context) {
@@ -110,7 +110,7 @@ public class CarrierActionUtils {
                 SubscriptionManager.getDefaultVoiceSubscriptionId());
         logd("onEnableAllMeteredApns subId: " + subId);
         final TelephonyManager telephonyMgr = context.getSystemService(TelephonyManager.class);
-        telephonyMgr.carrierActionSetMeteredApnsEnabled(subId, ENABLE);
+        telephonyMgr.createForSubscriptionId(subId).setCarrierDataEnabled(ENABLE);
     }
 
     private static void onEnableDefaultURLHandler(Context context) {
