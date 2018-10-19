@@ -1102,19 +1102,18 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
         public String getHost() {
             @SuppressWarnings("StringEquality")
             boolean cached = (host != NOT_CACHED);
-            return cached ? host
-                    : (host = parseHost());
+            return cached ? host : (host = parseHost());
         }
 
         private String parseHost() {
-            String authority = getEncodedAuthority();
+            final String authority = getEncodedAuthority();
             if (authority == null) {
                 return null;
             }
 
             // Parse out user info and then port.
             int userInfoSeparator = authority.lastIndexOf('@');
-            int portSeparator = authority.indexOf(':', userInfoSeparator);
+            int portSeparator = findPortSeparator(authority);
 
             String encodedHost = portSeparator == NOT_FOUND
                     ? authority.substring(userInfoSeparator + 1)
@@ -1132,16 +1131,8 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
         }
 
         private int parsePort() {
-            String authority = getEncodedAuthority();
-            if (authority == null) {
-                return -1;
-            }
-
-            // Make sure we look for the port separtor *after* the user info
-            // separator. We have URLs with a ':' in the user info.
-            int userInfoSeparator = authority.lastIndexOf('@');
-            int portSeparator = authority.indexOf(':', userInfoSeparator);
-
+            final String authority = getEncodedAuthority();
+            int portSeparator = findPortSeparator(authority);
             if (portSeparator == NOT_FOUND) {
                 return -1;
             }
@@ -1153,6 +1144,24 @@ public abstract class Uri implements Parcelable, Comparable<Uri> {
                 Log.w(LOG, "Error parsing port string.", e);
                 return -1;
             }
+        }
+
+        private int findPortSeparator(String authority) {
+            if (authority == null) {
+                return NOT_FOUND;
+            }
+
+            // Reverse search for the ':' character that breaks as soon as a char that is neither
+            // a colon nor an ascii digit is encountered. Thanks to the goodness of UTF-16 encoding,
+            // it's not possible that a surrogate matches one of these, so this loop can just
+            // look for characters rather than care about code points.
+            for (int i = authority.length() - 1; i >= 0; --i) {
+                final int character = authority.charAt(i);
+                if (':' == character) return i;
+                // Character.isDigit would include non-ascii digits
+                if (character < '0' || character > '9') return NOT_FOUND;
+            }
+            return NOT_FOUND;
         }
     }
 
