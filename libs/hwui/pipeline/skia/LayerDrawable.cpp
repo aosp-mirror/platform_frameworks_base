@@ -71,15 +71,12 @@ bool LayerDrawable::DrawLayer(GrContext* context, SkCanvas* canvas, Layer* layer
         paint.setAlpha(layer->getAlpha());
         paint.setBlendMode(layer->getMode());
         paint.setColorFilter(layer->getColorSpaceWithFilter());
-        if (layer->getForceFilter()) {
-            paint.setFilterQuality(kLow_SkFilterQuality);
-        }
-
         const bool nonIdentityMatrix = !matrix.isIdentity();
         if (nonIdentityMatrix) {
             canvas->save();
             canvas->concat(matrix);
         }
+        const SkMatrix& totalMatrix = canvas->getTotalMatrix();
         if (dstRect || srcRect) {
             SkMatrix matrixInv;
             if (!matrix.invert(&matrixInv)) {
@@ -99,9 +96,28 @@ bool LayerDrawable::DrawLayer(GrContext* context, SkCanvas* canvas, Layer* layer
                 skiaDestRect = SkRect::MakeIWH(layerWidth, layerHeight);
             }
             matrixInv.mapRect(&skiaDestRect);
+            // If (matrix is identity or an integer translation) and (src/dst buffers size match),
+            // then use nearest neighbor, otherwise use bilerp sampling.
+            // Integer translation is defined as when src rect and dst rect align fractionally.
+            // Skia TextureOp has the above logic build-in, but not NonAAFillRectOp. TextureOp works
+            // only for SrcOver blending and without color filter (readback uses Src blending).
+            bool isIntegerTranslate = totalMatrix.isTranslate()
+                    && SkScalarFraction(skiaDestRect.fLeft + totalMatrix[SkMatrix::kMTransX])
+                    == SkScalarFraction(skiaSrcRect.fLeft)
+                    && SkScalarFraction(skiaDestRect.fTop + totalMatrix[SkMatrix::kMTransY])
+                    == SkScalarFraction(skiaSrcRect.fTop);
+            if (layer->getForceFilter() || !isIntegerTranslate) {
+                paint.setFilterQuality(kLow_SkFilterQuality);
+            }
             canvas->drawImageRect(layerImage.get(), skiaSrcRect, skiaDestRect, &paint,
                                   SkCanvas::kFast_SrcRectConstraint);
         } else {
+            bool isIntegerTranslate = totalMatrix.isTranslate()
+                    && SkScalarIsInt(totalMatrix[SkMatrix::kMTransX])
+                    && SkScalarIsInt(totalMatrix[SkMatrix::kMTransY]);
+            if (layer->getForceFilter() || !isIntegerTranslate) {
+                paint.setFilterQuality(kLow_SkFilterQuality);
+            }
             canvas->drawImage(layerImage.get(), 0, 0, &paint);
         }
         // restore the original matrix
