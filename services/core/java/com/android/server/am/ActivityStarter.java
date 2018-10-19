@@ -899,7 +899,7 @@ class ActivityStarter {
                     ? mService.mWindowManager.isAnyWindowVisibleForUid(targetUid)
                     : false;
             final String targetWhitelistTag = (targetUid != -1)
-                    ? mService.mAm.getPendingTempWhitelistTagForUidLocked(targetUid)
+                    ? mService.getPendingTempWhitelistTagForUidLocked(targetUid)
                     : null;
 
             mSupervisor.getActivityMetricsLogger().logActivityStart(intent, callerApp, r,
