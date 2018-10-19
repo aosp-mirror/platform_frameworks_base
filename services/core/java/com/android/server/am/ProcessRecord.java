@@ -28,6 +28,7 @@ import android.app.ActivityManager;
 import android.app.ApplicationErrorReport;
 import android.app.Dialog;
 import android.app.IApplicationThread;
+import android.app.ProfilerInfo;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -60,6 +61,7 @@ import com.android.internal.os.ProcessCpuTracker;
 import com.android.server.Watchdog;
 
 import java.io.File;
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -836,6 +838,13 @@ final class ProcessRecord implements WindowProcessListener {
         return null;
     }
 
+    @Override
+    public void addPackage(String pkg, long versionCode) {
+        synchronized (mService) {
+            addPackage(pkg, versionCode, mService.mProcessStats);
+        }
+    }
+
     /*
      *  Return true if package has been added false if not
      */
@@ -1176,8 +1185,53 @@ final class ProcessRecord implements WindowProcessListener {
      * Returns the total time (in milliseconds) spent executing in both user and system code.
      * Safe to call without lock held.
      */
+    @Override
     public long getCpuTime() {
         return mService.mProcessCpuTracker.getCpuTimeForPid(pid);
+    }
+
+    @Override
+    public void clearWaitingToKill() {
+        synchronized (mService) {
+            waitingToKill = null;
+        }
+    }
+
+    @Override
+    public ProfilerInfo onStartActivity(int topProcessState) {
+        synchronized (mService) {
+            ProfilerInfo profilerInfo = null;
+            if (mService.mProfileApp != null && mService.mProfileApp.equals(processName)) {
+                if (mService.mProfileProc == null || mService.mProfileProc == this) {
+                    mService.mProfileProc = this;
+                    final ProfilerInfo profilerInfoSvc = mService.mProfilerInfo;
+                    if (profilerInfoSvc != null && profilerInfoSvc.profileFile != null) {
+                        if (profilerInfoSvc.profileFd != null) {
+                            try {
+                                profilerInfoSvc.profileFd = profilerInfoSvc.profileFd.dup();
+                            } catch (IOException e) {
+                                profilerInfoSvc.closeFd();
+                            }
+                        }
+
+                        profilerInfo = new ProfilerInfo(profilerInfoSvc);
+                    }
+                }
+            }
+
+            hasShownUi = true;
+            setPendingUiClean(true);
+            forceProcessStateUpTo(topProcessState);
+
+            return profilerInfo;
+        }
+    }
+
+    @Override
+    public void appDied() {
+        synchronized (mService) {
+            mService.appDiedLocked(this);
+        }
     }
 
     public long getInputDispatchingTimeout() {

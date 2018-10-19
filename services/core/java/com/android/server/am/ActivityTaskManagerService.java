@@ -4670,14 +4670,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         return kept;
     }
 
-    /**
-     * Returns true if this configuration change is interesting enough to send an
-     * {@link Intent#ACTION_SPLIT_CONFIGURATION_CHANGED} broadcast.
-     */
-    private static boolean isSplitConfigurationChange(int configDiff) {
-        return (configDiff & (ActivityInfo.CONFIG_LOCALE | ActivityInfo.CONFIG_DENSITY)) != 0;
-    }
-
     /** Update default (global) configuration and notify listeners about changes. */
     private int updateGlobalConfigurationLocked(@NonNull Configuration values, boolean initLocale,
             boolean persistent, int userId, boolean deferResume) {
@@ -4777,38 +4769,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             app.onConfigurationChanged(configCopy);
         }
 
-        Intent intent = new Intent(Intent.ACTION_CONFIGURATION_CHANGED);
-        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY | Intent.FLAG_RECEIVER_REPLACE_PENDING
-                | Intent.FLAG_RECEIVER_FOREGROUND
-                | Intent.FLAG_RECEIVER_VISIBLE_TO_INSTANT_APPS);
-        mAm.broadcastIntentLocked(null, null, intent, null, null, 0, null, null, null,
-                OP_NONE, null, false, false, MY_PID, SYSTEM_UID,
-                UserHandle.USER_ALL);
-        if ((changes & ActivityInfo.CONFIG_LOCALE) != 0) {
-            intent = new Intent(Intent.ACTION_LOCALE_CHANGED);
-            intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND
-                    | Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND
-                    | Intent.FLAG_RECEIVER_VISIBLE_TO_INSTANT_APPS);
-            if (initLocale || !mAm.mProcessesReady) {
-                intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-            }
-            mAm.broadcastIntentLocked(null, null, intent, null, null, 0, null, null, null,
-                    OP_NONE, null, false, false, MY_PID, SYSTEM_UID,
-                    UserHandle.USER_ALL);
-        }
-
-        // Send a broadcast to PackageInstallers if the configuration change is interesting
-        // for the purposes of installing additional splits.
-        if (!initLocale && isSplitConfigurationChange(changes)) {
-            intent = new Intent(Intent.ACTION_SPLIT_CONFIGURATION_CHANGED);
-            intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING
-                    | Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
-
-            // Typically only app stores will have this permission.
-            String[] permissions = new String[] { android.Manifest.permission.INSTALL_PACKAGES };
-            mAm.broadcastIntentLocked(null, null, intent, null, null, 0, null, null, permissions,
-                    OP_NONE, null, false, false, MY_PID, SYSTEM_UID, UserHandle.USER_ALL);
-        }
+        final Message msg = PooledLambda.obtainMessage(
+                ActivityManagerInternal::broadcastGlobalConfigurationChanged,
+                mAmInternal, changes, initLocale);
+        mH.sendMessage(msg);
 
         // Override configuration of the default display duplicates global config, so we need to
         // update it also. This will also notify WindowManager about changes.
@@ -4877,8 +4841,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             if (isDensityChange && displayId == DEFAULT_DISPLAY) {
                 mAppWarnings.onDensityChanged();
 
-                mAm.killAllBackgroundProcessesExcept(N,
-                        ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE);
+                // Post message to start process to avoid possible deadlock of calling into AMS with
+                // the ATMS lock held.
+                final Message msg = PooledLambda.obtainMessage(
+                        ActivityManagerInternal::killAllBackgroundProcessesExcept, mAmInternal,
+                        N, ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE);
+                mH.sendMessage(msg);
             }
         }
 
@@ -5446,7 +5414,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         return newInfo;
     }
 
-    private WindowProcessController getProcessController(String processName, int uid) {
+    WindowProcessController getProcessController(String processName, int uid) {
         if (uid == SYSTEM_UID) {
             // The system gets to run in any process. If there are multiple processes with the same
             // uid, just pick the first (this should never happen).
@@ -6247,20 +6215,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                             return;
                         }
                     }
-                    Intent intent = new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
-                    intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY
-                            | Intent.FLAG_RECEIVER_FOREGROUND);
-                    if (reason != null) {
-                        intent.putExtra("reason", reason);
-                    }
                     mWindowManager.closeSystemDialogs(reason);
 
                     mStackSupervisor.closeSystemDialogsLocked();
-
-                    mAm.broadcastIntentLocked(null, null, intent, null, null, 0, null, null, null,
-                            OP_NONE, null, false, false,
-                            -1, SYSTEM_UID, UserHandle.USER_ALL);
                 }
+                // Call into AM outside the synchronized block.
+                mAmInternal.broadcastCloseSystemDialogs(reason);
             } finally {
                 Binder.restoreCallingIdentity(origId);
             }
