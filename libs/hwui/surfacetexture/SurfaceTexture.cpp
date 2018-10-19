@@ -470,8 +470,7 @@ void SurfaceTexture::dumpLocked(String8& result, const char* prefix) const {
     ConsumerBase::dumpLocked(result, prefix);
 }
 
-sk_sp<SkImage> SurfaceTexture::dequeueImage(SkMatrix& transformMatrix, android_dataspace& dataSpace,
-                                            bool* queueEmpty,
+sk_sp<SkImage> SurfaceTexture::dequeueImage(SkMatrix& transformMatrix, bool* queueEmpty,
                                             uirenderer::RenderState& renderState) {
     Mutex::Autolock _l(mMutex);
 
@@ -488,7 +487,6 @@ sk_sp<SkImage> SurfaceTexture::dequeueImage(SkMatrix& transformMatrix, android_d
     auto image = mImageConsumer.dequeueImage(queueEmpty, *this, renderState);
     if (image.get()) {
         uirenderer::mat4(mCurrentTransformMatrix).copyTo(transformMatrix);
-        dataSpace = mCurrentDataSpace;
     }
     return image;
 }

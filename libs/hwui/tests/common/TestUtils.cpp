@@ -72,9 +72,7 @@ sp<DeferredLayerUpdater> TestUtils::createTextureLayerUpdater(
     layerUpdater->setTransform(&transform);
 
     // updateLayer so it's ready to draw
-    SkMatrix identity;
-    identity.setIdentity();
-    layerUpdater->updateLayer(true, identity, HAL_DATASPACE_UNKNOWN, nullptr);
+    layerUpdater->updateLayer(true, SkMatrix::I(), nullptr);
     return layerUpdater;
 }
 

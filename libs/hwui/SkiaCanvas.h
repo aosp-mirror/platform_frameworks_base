@@ -232,7 +232,6 @@ private:
 
     class Clip;
 
-    std::unique_ptr<SkCanvas> mCanvasWrapper;  // might own a wrapper on the canvas
     std::unique_ptr<SkCanvas> mCanvasOwned;    // might own a canvas we allocated
     SkCanvas* mCanvas;                         // we do NOT own this canvas, it must survive us
                                                // unless it is the same as mCanvasOwned.get()

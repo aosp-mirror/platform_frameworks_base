@@ -95,7 +95,7 @@ public:
     void detachSurfaceTexture();
 
     void updateLayer(bool forceFilter, const SkMatrix& textureTransform,
-            android_dataspace dataspace, const sk_sp<SkImage>& layerImage);
+                     const sk_sp<SkImage>& layerImage);
 
     void destroyLayer();
 

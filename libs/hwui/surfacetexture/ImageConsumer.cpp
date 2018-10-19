@@ -22,6 +22,7 @@
 #include "renderthread/EglManager.h"
 #include "renderthread/RenderThread.h"
 #include "renderthread/VulkanManager.h"
+#include "utils/Color.h"
 
 // Macro for including the SurfaceTexture name in log messages
 #define IMG_LOGE(x, ...) ALOGE("[%s] " x, st.mName.string(), ##__VA_ARGS__)
@@ -44,13 +45,16 @@ void ImageConsumer::onReleaseBufferLocked(int buf) {
     mImageSlots[buf].mEglFence = EGL_NO_SYNC_KHR;
 }
 
-void ImageConsumer::ImageSlot::createIfNeeded(sp<GraphicBuffer> graphicBuffer) {
-    if (!mImage.get()) {
+void ImageConsumer::ImageSlot::createIfNeeded(sp<GraphicBuffer> graphicBuffer,
+                                              android_dataspace dataspace) {
+    if (!mImage.get() || dataspace != mDataspace) {
         mImage = graphicBuffer.get()
                          ? SkImage::MakeFromAHardwareBuffer(
                                    reinterpret_cast<AHardwareBuffer*>(graphicBuffer.get()),
-                                   kPremul_SkAlphaType)
+                                   kPremul_SkAlphaType,
+                                   uirenderer::DataSpaceToColorSpace(dataspace))
                          : nullptr;
+        mDataspace = dataspace;
     }
 }
 
@@ -66,7 +70,7 @@ sk_sp<SkImage> ImageConsumer::dequeueImage(bool* queueEmpty, SurfaceTexture& st,
             int slot = st.mCurrentTexture;
             if (slot != BufferItem::INVALID_BUFFER_SLOT) {
                 *queueEmpty = true;
-                mImageSlots[slot].createIfNeeded(st.mSlots[slot].mGraphicBuffer);
+                mImageSlots[slot].createIfNeeded(st.mSlots[slot].mGraphicBuffer, item.mDataSpace);
                 return mImageSlots[slot].mImage;
             }
         }
@@ -145,7 +149,7 @@ sk_sp<SkImage> ImageConsumer::dequeueImage(bool* queueEmpty, SurfaceTexture& st,
     st.computeCurrentTransformMatrixLocked();
 
     *queueEmpty = false;
-    mImageSlots[slot].createIfNeeded(st.mSlots[slot].mGraphicBuffer);
+    mImageSlots[slot].createIfNeeded(st.mSlots[slot].mGraphicBuffer, item.mDataSpace);
     return mImageSlots[slot].mImage;
 }
 

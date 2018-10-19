@@ -70,7 +70,7 @@ bool LayerDrawable::DrawLayer(GrContext* context, SkCanvas* canvas, Layer* layer
         SkPaint paint;
         paint.setAlpha(layer->getAlpha());
         paint.setBlendMode(layer->getMode());
-        paint.setColorFilter(layer->getColorSpaceWithFilter());
+        paint.setColorFilter(layer->getColorFilter());
         const bool nonIdentityMatrix = !matrix.isIdentity();
         if (nonIdentityMatrix) {
             canvas->save();

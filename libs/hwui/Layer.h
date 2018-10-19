@@ -69,15 +69,9 @@ public:
 
     SkBlendMode getMode() const;
 
-    inline SkColorFilter* getColorFilter() const { return mColorFilter.get(); }
+    inline sk_sp<SkColorFilter> getColorFilter() const { return mColorFilter; }
 
-    void setColorFilter(sk_sp<SkColorFilter> filter);
-
-    void setDataSpace(android_dataspace dataspace);
-
-    void setColorSpace(sk_sp<SkColorSpace> colorSpace);
-
-    inline sk_sp<SkColorFilter> getColorSpaceWithFilter() const { return mColorSpaceWithFilter; }
+    void setColorFilter(sk_sp<SkColorFilter> filter) { mColorFilter = filter; };
 
     inline SkMatrix& getTexTransform() { return texTransform; }
 
@@ -98,22 +92,10 @@ protected:
     RenderState& mRenderState;
 
 private:
-    void buildColorSpaceWithFilter();
-
     /**
      * Color filter used to draw this layer. Optional.
      */
     sk_sp<SkColorFilter> mColorFilter;
-
-    /**
-     * Colorspace of the contents of the layer. Optional.
-     */
-    android_dataspace mCurrentDataspace = HAL_DATASPACE_UNKNOWN;
-
-    /**
-     * A color filter that is the combination of the mColorFilter and mColorSpace. Optional.
-     */
-    sk_sp<SkColorFilter> mColorSpaceWithFilter;
 
     /**
      * Indicates raster data backing the layer is scaled, requiring filtration.

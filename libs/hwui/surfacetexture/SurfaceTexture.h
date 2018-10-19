@@ -258,8 +258,8 @@ public:
      */
     status_t attachToContext(uint32_t tex);
 
-    sk_sp<SkImage> dequeueImage(SkMatrix& transformMatrix, android_dataspace& dataSpace,
-                                bool* queueEmpty, uirenderer::RenderState& renderState);
+    sk_sp<SkImage> dequeueImage(SkMatrix& transformMatrix, bool* queueEmpty,
+                                uirenderer::RenderState& renderState);
 
     /**
      * attachToView attaches a SurfaceTexture that is currently in the

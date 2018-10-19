@@ -43,7 +43,7 @@ RENDERTHREAD_TEST(DeferredLayerUpdater, updateLayer) {
     SkBitmap bitmap;
     bitmap.allocN32Pixels(16, 16);
     sk_sp<SkImage> layerImage = SkImage::MakeFromBitmap(bitmap);
-    layerUpdater->updateLayer(true, scaledMatrix, HAL_DATASPACE_UNKNOWN, layerImage);
+    layerUpdater->updateLayer(true, scaledMatrix, layerImage);
 
     // the backing layer should now have all the properties applied.
     EXPECT_EQ(100u, layerUpdater->backingLayer()->getWidth());
