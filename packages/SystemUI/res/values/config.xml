@@ -141,14 +141,8 @@
     <integer name="quick_settings_brightness_dialog_short_timeout">2000</integer>
     <integer name="quick_settings_brightness_dialog_long_timeout">4000</integer>
 
-    <!-- Should "4G" be shown instead of "LTE" when the network is NETWORK_TYPE_LTE? -->
-    <bool name="config_show4GForLTE">true</bool>
-
     <!-- Show indicator for Wifi on but not connected. -->
     <bool name="config_showWifiIndicatorWhenEnabled">false</bool>
-
-    <!-- Should "LTE"/"4G" be shown instead of "LTE+"/"4G+" when on NETWORK_TYPE_LTE_CA? -->
-    <bool name="config_hideLtePlus">false</bool>
 
     <!-- milliseconds before the heads up notification auto-dismisses. -->
     <integer name="heads_up_notification_decay">5000</integer>
