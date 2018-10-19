@@ -28,12 +28,12 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Handler;
 import android.os.IBinder;
+import android.os.RemoteException;
 import android.os.UserHandle;
 import android.rolecontrollerservice.IRoleControllerService;
 import android.rolecontrollerservice.RoleControllerService;
 import android.util.Slog;
 
-import com.android.internal.util.FunctionalUtils;
 import com.android.internal.util.function.pooled.PooledLambda;
 
 import java.util.ArrayDeque;
@@ -61,8 +61,8 @@ public class RemoteRoleControllerService {
      */
     public void onAddRoleHolder(@NonNull String roleName, @NonNull String packageName,
             @NonNull IRoleManagerCallback callback) {
-        mConnection.enqueueCall(new Connection.Call(service -> service.onAddRoleHolder(roleName,
-                packageName, callback), callback::onFailure));
+        mConnection.enqueueCall(new Connection.Call((service, callbackDelegate) ->
+                service.onAddRoleHolder(roleName, packageName, callbackDelegate), callback));
     }
 
     /**
@@ -72,8 +72,8 @@ public class RemoteRoleControllerService {
      */
     public void onRemoveRoleHolder(@NonNull String roleName, @NonNull String packageName,
             @NonNull IRoleManagerCallback callback) {
-        mConnection.enqueueCall(new Connection.Call(service -> service.onRemoveRoleHolder(roleName,
-                packageName, callback), callback::onFailure));
+        mConnection.enqueueCall(new Connection.Call((service, callbackDelegate) ->
+                service.onRemoveRoleHolder(roleName, packageName, callbackDelegate), callback));
     }
 
     /**
@@ -83,13 +83,13 @@ public class RemoteRoleControllerService {
      */
     public void onClearRoleHolders(@NonNull String roleName,
             @NonNull IRoleManagerCallback callback) {
-        mConnection.enqueueCall(new Connection.Call(service -> service.onClearRoleHolders(roleName,
-                callback), callback::onFailure));
+        mConnection.enqueueCall(new Connection.Call((service, callbackDelegate) ->
+                service.onClearRoleHolders(roleName, callbackDelegate), callback));
     }
 
     private static final class Connection implements ServiceConnection {
 
-        private static final long UNBIND_DELAY_MILLIS = 10000;
+        private static final long UNBIND_DELAY_MILLIS = 15 * 1000;
 
         @UserIdInt
         private final int mUserId;
@@ -185,29 +185,77 @@ public class RemoteRoleControllerService {
 
         public static class Call {
 
-            @NonNull
-            private final FunctionalUtils.ThrowingConsumer<IRoleControllerService> mOnExecute;
+            private static final int TIMEOUT_MILLIS = 15 * 1000;
 
             @NonNull
-            private final FunctionalUtils.ThrowingRunnable mOnFailure;
+            private final CallExecutor mCallExecutor;
 
-            Call(@NonNull FunctionalUtils.ThrowingConsumer<IRoleControllerService> onExecute,
-                    @NonNull FunctionalUtils.ThrowingRunnable onFailure) {
-                mOnExecute = onExecute;
-                mOnFailure = onFailure;
+            @NonNull
+            private final IRoleManagerCallback mCallback;
+
+            @NonNull
+            private final Handler mMainHandler = Handler.getMain();
+
+            @NonNull
+            private final Runnable mTimeoutRunnable = () -> notifyCallback(false);
+
+            private boolean mCallbackNotified;
+
+            private Call(@NonNull CallExecutor callExecutor,
+                    @NonNull IRoleManagerCallback callback) {
+                mCallExecutor = callExecutor;
+                mCallback = callback;
             }
 
             @MainThread
             public void execute(IRoleControllerService service) {
                 try {
-                    mOnExecute.acceptOrThrow(service);
-                } catch (Exception e) {
-                    Slog.e(LOG_TAG, "Error calling role controller service", e);
-                    try {
-                        mOnFailure.runOrThrow();
-                    } catch (Exception e2) {
-                        Slog.e(LOG_TAG, "Error reporting failure from role controller service", e2);
+                    mMainHandler.postDelayed(mTimeoutRunnable, TIMEOUT_MILLIS);
+                    mCallExecutor.execute(service, new CallbackDelegate());
+                } catch (RemoteException e) {
+                    Slog.e(LOG_TAG, "Error calling RoleControllerService", e);
+                    notifyCallback(false);
+                }
+            }
+
+            @MainThread
+            private void notifyCallback(boolean success) {
+                if (mCallbackNotified) {
+                    return;
+                }
+                mCallbackNotified = true;
+                mMainHandler.removeCallbacks(mTimeoutRunnable);
+                try {
+                    if (success) {
+                        mCallback.onSuccess();
+                    } else {
+                        mCallback.onFailure();
                     }
+                } catch (RemoteException e) {
+                    Slog.e(LOG_TAG, "Error calling " + (success ? "onSuccess()" : "onFailure()")
+                            + " callback", e);
+                }
+            }
+
+            @FunctionalInterface
+            public interface CallExecutor {
+
+                @MainThread
+                void execute(IRoleControllerService service, IRoleManagerCallback callbackDelegate)
+                        throws RemoteException;
+            }
+
+            private class CallbackDelegate extends IRoleManagerCallback.Stub {
+
+                @Override
+                public void onSuccess() throws RemoteException {
+                    mMainHandler.post(PooledLambda.obtainRunnable(Call.this::notifyCallback, true));
+                }
+
+                @Override
+                public void onFailure() throws RemoteException {
+                    mMainHandler.post(PooledLambda.obtainRunnable(Call.this::notifyCallback,
+                            false));
                 }
             }
         }
