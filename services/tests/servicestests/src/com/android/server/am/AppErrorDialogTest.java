@@ -21,6 +21,7 @@ import android.os.Handler;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.annotation.UiThreadTest;
+import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
@@ -37,6 +38,7 @@ import java.io.File;
  */
 @RunWith(AndroidJUnit4.class)
 @SmallTest
+@FlakyTest(bugId = 113616538)
 public class AppErrorDialogTest {
 
     private Context mContext;

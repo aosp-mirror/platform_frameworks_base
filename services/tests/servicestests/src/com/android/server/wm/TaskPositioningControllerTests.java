@@ -30,6 +30,7 @@ import static org.mockito.Mockito.when;
 import android.platform.test.annotations.Presubmit;
 import android.view.InputChannel;
 
+import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
@@ -43,6 +44,7 @@ import org.junit.runner.RunWith;
  * atest com.android.server.wm.TaskPositioningControllerTests
  */
 @SmallTest
+@FlakyTest(bugId = 117924387)
 @RunWith(AndroidJUnit4.class)
 @Presubmit
 public class TaskPositioningControllerTests extends WindowTestsBase {
