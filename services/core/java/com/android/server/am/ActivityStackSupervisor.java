@@ -21,6 +21,9 @@ import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
 import static android.Manifest.permission.START_ANY_ACTIVITY;
 import static android.app.ActivityManager.LOCK_TASK_MODE_LOCKED;
 import static android.app.ActivityManager.START_DELIVERED_TO_TOP;
+import static android.app.ActivityManager.START_FLAG_DEBUG;
+import static android.app.ActivityManager.START_FLAG_NATIVE_DEBUGGING;
+import static android.app.ActivityManager.START_FLAG_TRACK_ALLOCATION;
 import static android.app.ActivityManager.START_TASK_TO_FRONT;
 import static android.app.ActivityTaskManager.INVALID_STACK_ID;
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
@@ -113,6 +116,7 @@ import android.app.ActivityManager.StackInfo;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityOptions;
 import android.app.AppOpsManager;
+import android.app.IApplicationThread;
 import android.app.ProfilerInfo;
 import android.app.ResultInfo;
 import android.app.WaitResult;
@@ -1300,20 +1304,17 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
             // Don't debug things in the system process
             if (!aInfo.processName.equals("system")) {
-                if ((startFlags & ActivityManager.START_FLAG_DEBUG) != 0) {
-                    mService.mAm.setDebugApp(aInfo.processName, true, false);
-                }
-
-                if ((startFlags & ActivityManager.START_FLAG_NATIVE_DEBUGGING) != 0) {
-                    mService.mAm.setNativeDebuggingAppLocked(aInfo.applicationInfo, aInfo.processName);
-                }
-
-                if ((startFlags & ActivityManager.START_FLAG_TRACK_ALLOCATION) != 0) {
-                    mService.mAm.setTrackAllocationApp(aInfo.applicationInfo, aInfo.processName);
-                }
-
-                if (profilerInfo != null) {
-                    mService.mAm.setProfileApp(aInfo.applicationInfo, aInfo.processName, profilerInfo);
+                if ((startFlags & (START_FLAG_DEBUG | START_FLAG_NATIVE_DEBUGGING
+                        | START_FLAG_TRACK_ALLOCATION)) != 0 || profilerInfo != null) {
+                    /**
+                     * Assume safe to call into AMS synchronously because the call that set these
+                     * flags should have originated from AMS which will already have its lock held.
+                     * @see ActivityManagerService#startActivityAndWait(IApplicationThread, String,
+                     * Intent, String, IBinder, String, int, int, ProfilerInfo, Bundle, int)
+                     * TODO(b/80414790): Investigate a better way of untangling this.
+                     */
+                    mService.mAmInternal.setDebugFlagsForStartingActivity(
+                            aInfo, startFlags, profilerInfo);
                 }
             }
             final String intentLaunchToken = intent.getLaunchToken();
