@@ -20,14 +20,11 @@ LOCAL_MODULE_TAGS := tests
 LOCAL_SRC_FILES := $(call all-java-files-under, src)
 
 LOCAL_STATIC_JAVA_LIBRARIES := \
-    frameworks-base-testutils \
     services.core \
     services.net \
     androidx-test \
     mockito-target-extended-minus-junit4 \
     platform-test-annotations \
-    ShortcutManagerTestUtils \
-    truth-prebuilt \
 
 LOCAL_JAVA_LIBRARIES := android.test.mock android.test.base android.test.runner
 
