@@ -1341,6 +1341,7 @@ public class SubscriptionManager {
      * @param slotIndex the slot Index.
      * @return subscription Ids or null if the given slot Index is not valid.
      */
+    @Nullable
     public static int[] getSubscriptionIds(int slotIndex) {
         return getSubId(slotIndex);
     }
