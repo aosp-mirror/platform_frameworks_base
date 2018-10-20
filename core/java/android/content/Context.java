@@ -326,6 +326,15 @@ public abstract class Context {
     public static final int BIND_ADJUST_WITH_ACTIVITY = 0x0080;
 
     /**
+     * Flag for {@link #bindService}: If binding from something better than perceptible,
+     * still set the adjust below perceptible. This would be used for bound services that can
+     * afford to be evicted when under extreme memory pressure, but should be restarted as soon
+     * as possible.
+     * @hide
+     */
+    public static final int BIND_ADJUST_BELOW_PERCEPTIBLE = 0x0100;
+
+    /**
      * @hide Flag for {@link #bindService}: allows binding to a service provided
      * by an instant app. Note that the caller may not have access to the instant
      * app providing the service which is a violation of the instant app sandbox.

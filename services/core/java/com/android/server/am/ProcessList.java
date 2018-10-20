@@ -104,6 +104,11 @@ public final class ProcessList {
     static final int VISIBLE_APP_ADJ = 100;
     static final int VISIBLE_APP_LAYER_MAX = PERCEPTIBLE_APP_ADJ - VISIBLE_APP_ADJ - 1;
 
+    // This is a process that was recently TOP and moved to FGS. Continue to treat it almost
+    // like a foreground app for a while.
+    // @see TOP_TO_FGS_GRACE_PERIOD
+    static final int PERCEPTIBLE_RECENT_FOREGROUND_APP_ADJ = 50;
+
     // This is the process running the current foreground app.  We'd really
     // rather not kill it!
     static final int FOREGROUND_APP_ADJ = 0;
