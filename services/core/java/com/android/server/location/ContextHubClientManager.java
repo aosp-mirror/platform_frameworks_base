@@ -19,13 +19,13 @@ package com.android.server.location;
 import android.content.Context;
 import android.hardware.contexthub.V1_0.ContextHubMsg;
 import android.hardware.contexthub.V1_0.IContexthub;
+import android.hardware.location.ContextHubInfo;
 import android.hardware.location.IContextHubClient;
 import android.hardware.location.IContextHubClientCallback;
 import android.hardware.location.NanoAppMessage;
 import android.os.RemoteException;
 import android.util.Log;
 
-import java.util.NoSuchElementException;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
 
@@ -80,15 +80,15 @@ import java.util.function.Consumer;
      * Registers a new client with the service.
      *
      * @param clientCallback the callback interface of the client to register
-     * @param contextHubId   the ID of the hub this client is attached to
+     * @param contextHubInfo the object describing the hub this client is attached to
      *
      * @return the client interface
      *
      * @throws IllegalStateException if max number of clients have already registered
      */
     /* package */ IContextHubClient registerClient(
-            IContextHubClientCallback clientCallback, int contextHubId) {
-        ContextHubClientBroker broker = createNewClientBroker(clientCallback, contextHubId);
+            IContextHubClientCallback clientCallback, ContextHubInfo contextHubInfo) {
+        ContextHubClientBroker broker = createNewClientBroker(clientCallback, contextHubInfo);
 
         try {
             broker.attachDeathRecipient();
@@ -183,14 +183,14 @@ import java.util.function.Consumer;
      * manager.
      *
      * @param clientCallback the callback interface of the client to register
-     * @param contextHubId   the ID of the hub this client is attached to
+     * @param contextHubInfo the object describing the hub this client is attached to
      *
      * @return the ContextHubClientBroker object
      *
      * @throws IllegalStateException if max number of clients have already registered
      */
     private synchronized ContextHubClientBroker createNewClientBroker(
-            IContextHubClientCallback clientCallback, int contextHubId) {
+            IContextHubClientCallback clientCallback, ContextHubInfo contextHubInfo) {
         if (mHostEndPointIdToClientMap.size() == MAX_CLIENT_ID + 1) {
             throw new IllegalStateException("Could not register client - max limit exceeded");
         }
@@ -198,10 +198,11 @@ import java.util.function.Consumer;
         ContextHubClientBroker broker = null;
         int id = mNextHostEndpointId;
         for (int i = 0; i <= MAX_CLIENT_ID; i++) {
-            if (!mHostEndPointIdToClientMap.containsKey((short)id)) {
+            if (!mHostEndPointIdToClientMap.containsKey((short) id)) {
                 broker = new ContextHubClientBroker(
-                        mContext, mContextHubProxy, this, contextHubId, (short)id, clientCallback);
-                mHostEndPointIdToClientMap.put((short)id, broker);
+                        mContext, mContextHubProxy, this, contextHubInfo, (short) id,
+                        clientCallback);
+                mHostEndPointIdToClientMap.put((short) id, broker);
                 mNextHostEndpointId = (id == MAX_CLIENT_ID) ? 0 : id + 1;
                 break;
             }

@@ -170,8 +170,9 @@ public class ContextHubService extends IContextHubService.Stub {
 
         HashMap<Integer, IContextHubClient> defaultClientMap = new HashMap<>();
         for (int contextHubId : mContextHubIdToInfoMap.keySet()) {
+            ContextHubInfo contextHubInfo = mContextHubIdToInfoMap.get(contextHubId);
             IContextHubClient client = mClientManager.registerClient(
-                    createDefaultClientCallback(contextHubId), contextHubId);
+                    createDefaultClientCallback(contextHubId), contextHubInfo);
             defaultClientMap.put(contextHubId, client);
 
             try {
@@ -623,7 +624,8 @@ public class ContextHubService extends IContextHubService.Stub {
             throw new NullPointerException("Cannot register client with null callback");
         }
 
-        return mClientManager.registerClient(clientCallback, contextHubId);
+        ContextHubInfo contextHubInfo = mContextHubIdToInfoMap.get(contextHubId);
+        return mClientManager.registerClient(clientCallback, contextHubInfo);
     }
 
     /**
