@@ -1177,6 +1177,38 @@ public class TelephonyManager {
      */
     public static final String EXTRA_RECOVERY_ACTION = "recoveryAction";
 
+    /**
+     * Broadcast intent action indicating that the telephony provider DB got lost.
+     *
+     * <p>
+     * The {@link #EXTRA_IS_CORRUPTED} extra indicates whether the database is lost
+     * due to corruption or not
+     *
+     * <p class="note">
+     * Requires the MODIFY_PHONE_STATE permission.
+     *
+     * <p class="note">
+     * This is a protected intent that can only be sent by the system.
+     *
+     * @see #EXTRA_IS_CORRUPTED
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public static final String ACTION_MMSSMS_DATABASE_LOST =
+            "android.intent.action.MMSSMS_DATABASE_LOST";
+
+    /**
+     * A boolean extra used with {@link #ACTION_MMSSMS_DATABASE_LOST} to indicate
+     * whether the database is lost due to corruption or not.
+     *
+     * @see #ACTION_MMSSMS_DATABASE_LOST
+     *
+     * @hide
+     */
+    public static final String EXTRA_IS_CORRUPTED = "isCorrupted";
+
     //
     //
     // Device Info
