@@ -148,6 +148,7 @@ import com.android.internal.view.IInputSessionCallback;
 import com.android.internal.view.InputBindResult;
 import com.android.internal.view.InputMethodClient;
 import com.android.internal.view.InputMethodClient.StartInputReason;
+import com.android.internal.view.InputMethodClient.UnbindReason;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
@@ -1815,8 +1816,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
          }
     }
 
-    void unbindCurrentClientLocked(
-            /* @InputMethodClient.UnbindReason */ final int unbindClientReason) {
+    void unbindCurrentClientLocked(@UnbindReason int unbindClientReason) {
         if (mCurClient != null) {
             if (DEBUG) Slog.v(TAG, "unbindCurrentInputLocked: client="
                     + mCurClient.client.asBinder());
@@ -2093,8 +2093,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         clearCurMethodLocked();
     }
 
-    void resetCurrentMethodAndClient(
-            /* @InputMethodClient.UnbindReason */ final int unbindClientReason) {
+    void resetCurrentMethodAndClient(@UnbindReason int unbindClientReason) {
         mCurMethodId = null;
         unbindCurrentMethodLocked();
         unbindCurrentClientLocked(unbindClientReason);
