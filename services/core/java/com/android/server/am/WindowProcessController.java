@@ -32,10 +32,12 @@ import static com.android.server.am.ActivityStack.ActivityState.RESUMED;
 import static com.android.server.am.ActivityStack.ActivityState.STOPPING;
 import static com.android.server.am.ActivityTaskManagerService.INSTRUMENTATION_KEY_DISPATCHING_TIMEOUT_MS;
 import static com.android.server.am.ActivityTaskManagerService.KEY_DISPATCHING_TIMEOUT_MS;
+import static com.android.server.am.ActivityTaskManagerService.RELAUNCH_REASON_NONE;
 
 import android.app.Activity;
 import android.app.ActivityThread;
 import android.app.IApplicationThread;
+import android.app.ProfilerInfo;
 import android.app.servertransaction.ConfigurationChangeItem;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -617,12 +619,12 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             final int activitiesSize = mActivities.size();
             for (int i = activitiesSize - 1; i >= 0; i--) {
                 final ActivityRecord r = mActivities.get(i);
-                if (r.mRelaunchReason != ActivityRecord.RELAUNCH_REASON_NONE) {
+                if (r.mRelaunchReason != RELAUNCH_REASON_NONE) {
                     return r.mRelaunchReason;
                 }
             }
         }
-        return ActivityRecord.RELAUNCH_REASON_NONE;
+        return RELAUNCH_REASON_NONE;
     }
 
     public long getInputDispatchingTimeout() {
@@ -671,6 +673,35 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         final Message m = PooledLambda.obtainMessage(
                 WindowProcessListener::setRemoved, mListener, removed);
         mAtm.mH.sendMessage(m);
+    }
+
+    void clearWaitingToKill() {
+        if (mListener == null) return;
+        // Posting on handler so WM lock isn't held when we call into AM.
+        final Message m = PooledLambda.obtainMessage(
+                WindowProcessListener::clearWaitingToKill, mListener);
+        mAtm.mH.sendMessage(m);
+    }
+
+    void addPackage(String pkg, long versionCode) {
+        // TODO(b/80414790): Calling directly into AM for now which can lead to deadlock once we are
+        // using WM lock. Need to figure-out if it is okay to do this asynchronously.
+        if (mListener == null) return;
+        mListener.addPackage(pkg, versionCode);
+    }
+
+    ProfilerInfo onStartActivity(int topProcessState) {
+        // TODO(b/80414790): Calling directly into AM for now which can lead to deadlock once we are
+        // using WM lock. Need to figure-out if it is okay to do this asynchronously.
+        if (mListener == null) return null;
+        return mListener.onStartActivity(topProcessState);
+    }
+
+    public void appDied() {
+        // TODO(b/80414790): Calling directly into AM for now which can lead to deadlock once we are
+        // using WM lock. Need to figure-out if it is okay to do this asynchronously.
+        if (mListener == null) return;
+        mListener.appDied();
     }
 
     @Override

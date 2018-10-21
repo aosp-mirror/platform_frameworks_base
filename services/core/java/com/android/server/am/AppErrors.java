@@ -16,12 +16,13 @@
 
 package com.android.server.am;
 
-import static com.android.server.Watchdog.NATIVE_STACKS_OF_INTEREST;
-import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_ANR;
+import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.ActivityManagerService.MY_PID;
 import static com.android.server.am.ActivityManagerService.SYSTEM_DEBUGGABLE;
+import static com.android.server.am.ActivityTaskManagerService.RELAUNCH_REASON_FREE_RESIZE;
+import static com.android.server.am.ActivityTaskManagerService.RELAUNCH_REASON_NONE;
 
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
@@ -46,21 +47,17 @@ import android.util.ArraySet;
 import android.util.EventLog;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.util.StatsLog;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.app.ProcessMap;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
-import com.android.internal.os.ProcessCpuTracker;
 import com.android.server.RescueParty;
 import com.android.server.Watchdog;
 
-import java.io.File;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Set;
 
@@ -124,7 +121,7 @@ class AppErrors {
                 proto.write(AppErrorsProto.ProcessCrashTime.PROCESS_NAME, pname);
                 for (int i = 0; i < uidCount; i++) {
                     final int puid = uids.keyAt(i);
-                    final ProcessRecord r = mService.mProcessNames.get(pname, puid);
+                    final ProcessRecord r = mService.getProcessNames().get(pname, puid);
                     if (dumpPackage != null && (r == null || !r.pkgList.containsKey(dumpPackage))) {
                         continue;
                     }
@@ -151,7 +148,7 @@ class AppErrors {
                 proto.write(AppErrorsProto.BadProcess.PROCESS_NAME, pname);
                 for (int i = 0; i < uidCount; i++) {
                     final int puid = uids.keyAt(i);
-                    final ProcessRecord r = mService.mProcessNames.get(pname, puid);
+                    final ProcessRecord r = mService.getProcessNames().get(pname, puid);
                     if (dumpPackage != null && (r == null
                             || !r.pkgList.containsKey(dumpPackage))) {
                         continue;
@@ -184,7 +181,7 @@ class AppErrors {
                 final int uidCount = uids.size();
                 for (int i = 0; i < uidCount; i++) {
                     final int puid = uids.keyAt(i);
-                    final ProcessRecord r = mService.mProcessNames.get(pname, puid);
+                    final ProcessRecord r = mService.getProcessNames().get(pname, puid);
                     if (dumpPackage != null && (r == null
                             || !r.pkgList.containsKey(dumpPackage))) {
                         continue;
@@ -214,7 +211,7 @@ class AppErrors {
                 final int uidCount = uids.size();
                 for (int i = 0; i < uidCount; i++) {
                     final int puid = uids.keyAt(i);
-                    final ProcessRecord r = mService.mProcessNames.get(pname, puid);
+                    final ProcessRecord r = mService.getProcessNames().get(pname, puid);
                     if (dumpPackage != null && (r == null
                             || !r.pkgList.containsKey(dumpPackage))) {
                         continue;
@@ -411,11 +408,10 @@ class AppErrors {
         }
 
         final int relaunchReason = r != null
-                ? r.getWindowProcessController().computeRelaunchReason()
-                : ActivityRecord.RELAUNCH_REASON_NONE;
+                ? r.getWindowProcessController().computeRelaunchReason() : RELAUNCH_REASON_NONE;
 
         AppErrorResult result = new AppErrorResult();
-        TaskRecord task;
+        int taskId;
         synchronized (mService) {
             /**
              * If crash is handled by instance of {@link android.app.IActivityController},
@@ -428,7 +424,7 @@ class AppErrors {
 
             // Suppress crash dialog if the process is being relaunched due to a crash during a free
             // resize.
-            if (relaunchReason == ActivityRecord.RELAUNCH_REASON_FREE_RESIZE) {
+            if (relaunchReason == RELAUNCH_REASON_FREE_RESIZE) {
                 return;
             }
 
@@ -458,7 +454,7 @@ class AppErrors {
             final Message msg = Message.obtain();
             msg.what = ActivityManagerService.SHOW_ERROR_UI_MSG;
 
-            task = data.task;
+            taskId = data.taskId;
             msg.obj = data;
             mService.mUiHandler.sendMessage(msg);
         }
@@ -475,25 +471,15 @@ class AppErrors {
                 stopReportingCrashesLocked(r);
             }
             if (res == AppErrorDialog.RESTART) {
-                mService.removeProcessLocked(r, false, true, "crash");
-                if (task != null) {
+                mService.mProcessList.removeProcessLocked(r, false, true, "crash");
+                if (taskId != INVALID_TASK_ID) {
                     try {
-                        mService.mActivityTaskManager.startActivityFromRecents(task.taskId,
+                        mService.mActivityTaskManager.startActivityFromRecents(taskId,
                                 ActivityOptions.makeBasic().toBundle());
                     } catch (IllegalArgumentException e) {
-                        // Hmm, that didn't work, app might have crashed before creating a
-                        // recents entry. Let's see if we have a safe-to-restart intent.
-                        final Set<String> cats = task.intent != null
-                                ? task.intent.getCategories() : null;
-                        if (cats != null && cats.contains(Intent.CATEGORY_LAUNCHER)) {
-                            mService.mActivityTaskManager.getActivityStartController().startActivityInPackage(
-                                    task.mCallingUid, callingPid, callingUid, task.mCallingPackage,
-                                    task.intent, null, null, null, 0, 0,
-                                    new SafeActivityOptions(ActivityOptions.makeBasic()),
-                                    task.userId, null,
-                                    "AppErrors", false /*validateIncomingUser*/,
-                                    null /* originatingPendingIntent */);
-                        }
+                        // Hmm...that didn't work. Task should either be in recents or associated
+                        // with a stack.
+                        Slog.e(TAG, "Could not restart taskId=" + taskId, e);
                     }
                 }
             }
@@ -503,7 +489,7 @@ class AppErrors {
                     // Kill it with fire!
                     mService.mAtmInternal.onHandleAppCrash(r.getWindowProcessController());
                     if (!r.isPersistent()) {
-                        mService.removeProcessLocked(r, false, false, "crash");
+                        mService.mProcessList.removeProcessLocked(r, false, false, "crash");
                         mService.mAtmInternal.resumeTopActivities(false /* scheduleIdle */);
                     }
                 } finally {
@@ -565,7 +551,7 @@ class AppErrors {
                     } else {
                         // Huh.
                         Process.killProcess(pid);
-                        ActivityManagerService.killProcessGroup(uid, pid);
+                        ProcessList.killProcessGroup(uid, pid);
                     }
                 }
                 return true;
@@ -728,7 +714,7 @@ class AppErrors {
                 // Don't let services in this process be restarted and potentially
                 // annoy the user repeatedly.  Unless it is persistent, since those
                 // processes run critical code.
-                mService.removeProcessLocked(app, false, tryAgain, "crash");
+                mService.mProcessList.removeProcessLocked(app, false, tryAgain, "crash");
                 mService.mAtmInternal.resumeTopActivities(false /* scheduleIdle */);
                 if (!showBackground) {
                     return false;
@@ -736,11 +722,10 @@ class AppErrors {
             }
             mService.mAtmInternal.resumeTopActivities(false /* scheduleIdle */);
         } else {
-            final TaskRecord affectedTask =
-                    mService.mActivityTaskManager.mStackSupervisor.finishTopCrashedActivitiesLocked(
+            final int affectedTaskId = mService.mAtmInternal.finishTopCrashedActivities(
                             app.getWindowProcessController(), reason);
             if (data != null) {
-                data.task = affectedTask;
+                data.taskId = affectedTaskId;
             }
             if (data != null && crashTimePersistent != null
                     && now < crashTimePersistent + ProcessList.MIN_CRASH_INTERVAL) {

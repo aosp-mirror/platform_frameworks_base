@@ -32,12 +32,16 @@ void setDriverPath(JNIEnv* env, jobject clazz, jstring path) {
     android::GraphicsEnv::getInstance().setDriverPath(pathChars.c_str());
 }
 
-void setAngleInfo_native(JNIEnv* env, jobject clazz, jstring path, jstring appName, jstring appPref, jboolean devOptIn) {
+void setAngleInfo_native(JNIEnv* env, jobject clazz, jstring path, jstring appName, jstring appPref, jboolean devOptIn,
+                         jobject rulesFd, jlong rulesOffset, jlong rulesLength) {
     ScopedUtfChars pathChars(env, path);
     ScopedUtfChars appNameChars(env, appName);
     ScopedUtfChars appPrefChars(env, appPref);
+
+    int rulesFd_native = jniGetFDFromFileDescriptor(env, rulesFd);
+
     android::GraphicsEnv::getInstance().setAngleInfo(pathChars.c_str(), appNameChars.c_str(),
-            appPrefChars.c_str(), devOptIn);
+            appPrefChars.c_str(), devOptIn, rulesFd_native, rulesOffset, rulesLength);
 }
 
 void setLayerPaths_native(JNIEnv* env, jobject clazz, jobject classLoader, jstring layerPaths) {
@@ -57,7 +61,7 @@ void setDebugLayers_native(JNIEnv* env, jobject clazz, jstring layers) {
 const JNINativeMethod g_methods[] = {
     { "getCanLoadSystemLibraries", "()I", reinterpret_cast<void*>(getCanLoadSystemLibraries_native) },
     { "setDriverPath", "(Ljava/lang/String;)V", reinterpret_cast<void*>(setDriverPath) },
-    { "setAngleInfo", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;Z)V", reinterpret_cast<void*>(setAngleInfo_native) },
+    { "setAngleInfo", "(Ljava/lang/String;Ljava/lang/String;Ljava/lang/String;ZLjava/io/FileDescriptor;JJ)V", reinterpret_cast<void*>(setAngleInfo_native) },
     { "setLayerPaths", "(Ljava/lang/ClassLoader;Ljava/lang/String;)V", reinterpret_cast<void*>(setLayerPaths_native) },
     { "setDebugLayers", "(Ljava/lang/String;)V", reinterpret_cast<void*>(setDebugLayers_native) },
 };

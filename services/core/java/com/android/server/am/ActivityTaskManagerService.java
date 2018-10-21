@@ -277,7 +277,6 @@ import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Set;
-import java.util.function.Predicate;
 
 /**
  * System service for managing activities and their containers (task, stacks, displays,... ).
@@ -314,7 +313,15 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     public static final String DUMP_RECENTS_CMD = "recents" ;
     public static final String DUMP_RECENTS_SHORT_CMD = "r" ;
 
+    /** This activity is not being relaunched, or being relaunched for a non-resize reason. */
+    public static final int RELAUNCH_REASON_NONE = 0;
+    /** This activity is being relaunched due to windowing mode change. */
+    public static final int RELAUNCH_REASON_WINDOWING_MODE_RESIZE = 1;
+    /** This activity is being relaunched due to a free-resize operation. */
+    public static final int RELAUNCH_REASON_FREE_RESIZE = 2;
+
     Context mContext;
+
     /**
      * This Context is themable and meant for UI display (AlertDialogs, etc.). The theme can
      * change at runtime. Use mContext for non-UI purposes.
@@ -1362,7 +1369,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                         Slog.i(TAG, "Removing task failed to finish activity");
                     }
                     // Explicitly dismissing the activity so reset its relaunch flag.
-                    r.mRelaunchReason = ActivityRecord.RELAUNCH_REASON_NONE;
+                    r.mRelaunchReason = RELAUNCH_REASON_NONE;
                 } else {
                     res = tr.getStack().requestFinishActivityLocked(token, resultCode,
                             resultData, "app-request", true);
@@ -4325,6 +4332,17 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
     }
 
+    public static String relaunchReasonToString(int relaunchReason) {
+        switch (relaunchReason) {
+            case RELAUNCH_REASON_WINDOWING_MODE_RESIZE:
+                return "window_resize";
+            case RELAUNCH_REASON_FREE_RESIZE:
+                return "free_resize";
+            default:
+                return null;
+        }
+    }
+
     ActivityStack getTopDisplayFocusedStack() {
         return mStackSupervisor.getTopDisplayFocusedStack();
     }
@@ -4652,14 +4670,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         return kept;
     }
 
-    /**
-     * Returns true if this configuration change is interesting enough to send an
-     * {@link Intent#ACTION_SPLIT_CONFIGURATION_CHANGED} broadcast.
-     */
-    private static boolean isSplitConfigurationChange(int configDiff) {
-        return (configDiff & (ActivityInfo.CONFIG_LOCALE | ActivityInfo.CONFIG_DENSITY)) != 0;
-    }
-
     /** Update default (global) configuration and notify listeners about changes. */
     private int updateGlobalConfigurationLocked(@NonNull Configuration values, boolean initLocale,
             boolean persistent, int userId, boolean deferResume) {
@@ -4759,38 +4769,10 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             app.onConfigurationChanged(configCopy);
         }
 
-        Intent intent = new Intent(Intent.ACTION_CONFIGURATION_CHANGED);
-        intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY | Intent.FLAG_RECEIVER_REPLACE_PENDING
-                | Intent.FLAG_RECEIVER_FOREGROUND
-                | Intent.FLAG_RECEIVER_VISIBLE_TO_INSTANT_APPS);
-        mAm.broadcastIntentLocked(null, null, intent, null, null, 0, null, null, null,
-                OP_NONE, null, false, false, MY_PID, SYSTEM_UID,
-                UserHandle.USER_ALL);
-        if ((changes & ActivityInfo.CONFIG_LOCALE) != 0) {
-            intent = new Intent(Intent.ACTION_LOCALE_CHANGED);
-            intent.addFlags(Intent.FLAG_RECEIVER_FOREGROUND
-                    | Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND
-                    | Intent.FLAG_RECEIVER_VISIBLE_TO_INSTANT_APPS);
-            if (initLocale || !mAm.mProcessesReady) {
-                intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY);
-            }
-            mAm.broadcastIntentLocked(null, null, intent, null, null, 0, null, null, null,
-                    OP_NONE, null, false, false, MY_PID, SYSTEM_UID,
-                    UserHandle.USER_ALL);
-        }
-
-        // Send a broadcast to PackageInstallers if the configuration change is interesting
-        // for the purposes of installing additional splits.
-        if (!initLocale && isSplitConfigurationChange(changes)) {
-            intent = new Intent(Intent.ACTION_SPLIT_CONFIGURATION_CHANGED);
-            intent.addFlags(Intent.FLAG_RECEIVER_REPLACE_PENDING
-                    | Intent.FLAG_RECEIVER_INCLUDE_BACKGROUND);
-
-            // Typically only app stores will have this permission.
-            String[] permissions = new String[] { android.Manifest.permission.INSTALL_PACKAGES };
-            mAm.broadcastIntentLocked(null, null, intent, null, null, 0, null, null, permissions,
-                    OP_NONE, null, false, false, MY_PID, SYSTEM_UID, UserHandle.USER_ALL);
-        }
+        final Message msg = PooledLambda.obtainMessage(
+                ActivityManagerInternal::broadcastGlobalConfigurationChanged,
+                mAmInternal, changes, initLocale);
+        mH.sendMessage(msg);
 
         // Override configuration of the default display duplicates global config, so we need to
         // update it also. This will also notify WindowManager about changes.
@@ -4859,8 +4841,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             if (isDensityChange && displayId == DEFAULT_DISPLAY) {
                 mAppWarnings.onDensityChanged();
 
-                mAm.killAllBackgroundProcessesExcept(N,
-                        ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE);
+                // Post message to start process to avoid possible deadlock of calling into AMS with
+                // the ATMS lock held.
+                final Message msg = PooledLambda.obtainMessage(
+                        ActivityManagerInternal::killAllBackgroundProcessesExcept, mAmInternal,
+                        N, ActivityManager.PROCESS_STATE_BOUND_FOREGROUND_SERVICE);
+                mH.sendMessage(msg);
             }
         }
 
@@ -5428,7 +5414,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         return newInfo;
     }
 
-    private WindowProcessController getProcessController(String processName, int uid) {
+    WindowProcessController getProcessController(String processName, int uid) {
         if (uid == SYSTEM_UID) {
             // The system gets to run in any process. If there are multiple processes with the same
             // uid, just pick the first (this should never happen).
@@ -6229,20 +6215,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                             return;
                         }
                     }
-                    Intent intent = new Intent(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
-                    intent.addFlags(Intent.FLAG_RECEIVER_REGISTERED_ONLY
-                            | Intent.FLAG_RECEIVER_FOREGROUND);
-                    if (reason != null) {
-                        intent.putExtra("reason", reason);
-                    }
                     mWindowManager.closeSystemDialogs(reason);
 
                     mStackSupervisor.closeSystemDialogsLocked();
-
-                    mAm.broadcastIntentLocked(null, null, intent, null, null, 0, null, null, null,
-                            OP_NONE, null, false, false,
-                            -1, SYSTEM_UID, UserHandle.USER_ALL);
                 }
+                // Call into AM outside the synchronized block.
+                mAmInternal.broadcastCloseSystemDialogs(reason);
             } finally {
                 Binder.restoreCallingIdentity(origId);
             }
@@ -6640,6 +6618,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         public void onHandleAppCrash(WindowProcessController wpc) {
             synchronized (mGlobalLock) {
                 mStackSupervisor.handleAppCrashLocked(wpc);
+            }
+        }
+
+        @Override
+        public int finishTopCrashedActivities(WindowProcessController crashedApp, String reason) {
+            synchronized (mGlobalLock) {
+                return mStackSupervisor.finishTopCrashedActivitiesLocked(crashedApp, reason);
             }
         }
     }

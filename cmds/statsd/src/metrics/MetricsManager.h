@@ -195,6 +195,11 @@ private:
     // maps from ConditionTracker to MetricProducer
     std::unordered_map<int, std::vector<int>> mConditionToMetricMap;
 
+    // maps from life span triggering event to MetricProducers.
+    std::unordered_map<int, std::vector<int>> mActivationAtomTrackerToMetricMap;
+
+    std::vector<int> mMetricIndexesWithActivation;
+
     void initLogSourceWhiteList();
 
     // The metrics that don't need to be uploaded or even reported.
@@ -207,7 +212,7 @@ private:
     FRIEND_TEST(GaugeMetricE2eTest, TestMultipleFieldsForPushedEvent);
     FRIEND_TEST(GaugeMetricE2eTest, TestRandomSamplePulledEvents);
     FRIEND_TEST(GaugeMetricE2eTest, TestRandomSamplePulledEvent_LateAlarm);
-    FRIEND_TEST(GaugeMetricE2eTest, TestAllConditionChangesSamplePulledEvents);
+    FRIEND_TEST(GaugeMetricE2eTest, TestConditionChangeToTrueSamplePulledEvents);
     FRIEND_TEST(ValueMetricE2eTest, TestPulledEvents);
     FRIEND_TEST(ValueMetricE2eTest, TestPulledEvents_LateAlarm);
     FRIEND_TEST(DimensionInConditionE2eTest, TestCreateCountMetric_NoLink_OR_CombinationCondition);
@@ -230,6 +235,7 @@ private:
 
     FRIEND_TEST(AlarmE2eTest, TestMultipleAlarms);
     FRIEND_TEST(ConfigTtlE2eTest, TestCountMetric);
+    FRIEND_TEST(MetricActivationE2eTest, TestCountMetric);
 };
 
 }  // namespace statsd

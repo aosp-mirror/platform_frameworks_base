@@ -64,6 +64,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.SystemClock;
 
+import androidx.test.filters.FlakyTest;
 import androidx.test.filters.MediumTest;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
@@ -102,6 +103,7 @@ import java.util.function.Function;
  *     com.android.frameworks.servicestests/androidx.test.runner.AndroidJUnitRunner
  */
 @SmallTest
+@FlakyTest(bugId = 113616538)
 @RunWith(AndroidJUnit4.class)
 public class ActivityManagerServiceTest {
     private static final String TAG = ActivityManagerServiceTest.class.getSimpleName();
@@ -173,7 +175,7 @@ public class ActivityManagerServiceTest {
                 true); // expectNotify
 
         // Explicitly setting the seq counter for more verification.
-        mAms.mProcStateSeqCounter = 42;
+        mAms.mProcessList.mProcStateSeqCounter = 42;
 
         // Uid state is not moving from background to foreground or vice versa.
         verifySeqCounterAndInteractions(uidRec,
@@ -260,7 +262,7 @@ public class ActivityManagerServiceTest {
 
         final ProcessRecord appRec = new ProcessRecord(mAms, new ApplicationInfo(), TAG, uid, null);
         appRec.thread = Mockito.mock(IApplicationThread.class);
-        mAms.mLruProcesses.add(appRec);
+        mAms.mProcessList.mLruProcesses.add(appRec);
 
         return uidRec;
     }
@@ -275,11 +277,11 @@ public class ActivityManagerServiceTest {
         uidRec.curProcState = curState;
         mAms.incrementProcStateSeqAndNotifyAppsLocked();
 
-        assertEquals(expectedGlobalCounter, mAms.mProcStateSeqCounter);
+        assertEquals(expectedGlobalCounter, mAms.mProcessList.mProcStateSeqCounter);
         assertEquals(expectedCurProcStateSeq, uidRec.curProcStateSeq);
 
-        for (int i = mAms.mLruProcesses.size() - 1; i >= 0; --i) {
-            final ProcessRecord app = mAms.mLruProcesses.get(i);
+        for (int i = mAms.mProcessList.getLruSizeLocked() - 1; i >= 0; --i) {
+            final ProcessRecord app = mAms.mProcessList.mLruProcesses.get(i);
             // AMS should notify apps only for block states other than NETWORK_STATE_NO_CHANGE.
             if (app.uid == uidRec.uid && expectedBlockState == NETWORK_STATE_BLOCK) {
                 verify(app.thread).setNetworkBlockSeq(uidRec.curProcStateSeq);

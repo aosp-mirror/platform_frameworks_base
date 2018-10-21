@@ -26,13 +26,21 @@ import static android.net.NetworkPolicy.WARNING_DISABLED;
 import static android.net.NetworkPolicyManager.POLICY_ALLOW_METERED_BACKGROUND;
 import static android.net.NetworkPolicyManager.POLICY_NONE;
 import static android.net.NetworkPolicyManager.POLICY_REJECT_METERED_BACKGROUND;
+import static android.net.NetworkPolicyManager.RULE_ALLOW_ALL;
+import static android.net.NetworkPolicyManager.RULE_ALLOW_METERED;
+import static android.net.NetworkPolicyManager.RULE_NONE;
+import static android.net.NetworkPolicyManager.RULE_REJECT_ALL;
+import static android.net.NetworkPolicyManager.RULE_REJECT_METERED;
+import static android.net.NetworkPolicyManager.RULE_TEMPORARY_ALLOW_METERED;
 import static android.net.NetworkPolicyManager.uidPoliciesToString;
+import static android.net.NetworkPolicyManager.uidRulesToString;
 import static android.net.NetworkStats.IFACE_ALL;
 import static android.net.NetworkStats.SET_ALL;
 import static android.net.NetworkStats.TAG_ALL;
 import static android.net.NetworkTemplate.buildTemplateMobileAll;
 import static android.net.NetworkTemplate.buildTemplateWifi;
 import static android.net.TrafficStats.MB_IN_BYTES;
+import static android.os.Process.SYSTEM_UID;
 import static android.telephony.CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED;
 import static android.telephony.CarrierConfigManager.DATA_CYCLE_THRESHOLD_DISABLED;
 import static android.telephony.CarrierConfigManager.DATA_CYCLE_USE_PLATFORM_DEFAULT;
@@ -124,6 +132,7 @@ import android.text.TextUtils;
 import android.text.format.Time;
 import android.util.DataUnit;
 import android.util.Log;
+import android.util.Pair;
 import android.util.Range;
 import android.util.RecurrenceRule;
 
@@ -171,6 +180,7 @@ import java.time.Period;
 import java.time.ZoneId;
 import java.time.ZoneOffset;
 import java.time.ZonedDateTime;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
 import java.util.Iterator;
@@ -1642,6 +1652,76 @@ public class NetworkPolicyManagerServiceTest {
 
         assertNetworkPolicyEquals(DEFAULT_CYCLE_DAY, mDefaultWarningBytes, mDefaultLimitBytes,
                 true);
+    }
+
+    /**
+     * Exhaustively test isUidNetworkingBlocked to output the expected results based on external
+     * conditions.
+     */
+    @Test
+    public void testIsUidNetworkingBlocked() {
+        final ArrayList<Pair<Boolean, Integer>> expectedBlockedStates = new ArrayList<>();
+
+        // Metered network. Data saver on.
+        expectedBlockedStates.add(new Pair<>(true, RULE_NONE));
+        expectedBlockedStates.add(new Pair<>(false, RULE_ALLOW_METERED));
+        expectedBlockedStates.add(new Pair<>(false, RULE_TEMPORARY_ALLOW_METERED));
+        expectedBlockedStates.add(new Pair<>(true, RULE_REJECT_METERED));
+        expectedBlockedStates.add(new Pair<>(true, RULE_ALLOW_ALL));
+        expectedBlockedStates.add(new Pair<>(true, RULE_REJECT_ALL));
+        verifyNetworkBlockedState(
+                true /* metered */, true /* backgroundRestricted */, expectedBlockedStates);
+        expectedBlockedStates.clear();
+
+        // Metered network. Data saver off.
+        expectedBlockedStates.add(new Pair<>(false, RULE_NONE));
+        expectedBlockedStates.add(new Pair<>(false, RULE_ALLOW_METERED));
+        expectedBlockedStates.add(new Pair<>(false, RULE_TEMPORARY_ALLOW_METERED));
+        expectedBlockedStates.add(new Pair<>(true, RULE_REJECT_METERED));
+        expectedBlockedStates.add(new Pair<>(false, RULE_ALLOW_ALL));
+        expectedBlockedStates.add(new Pair<>(true, RULE_REJECT_ALL));
+        verifyNetworkBlockedState(
+                true /* metered */, false /* backgroundRestricted */, expectedBlockedStates);
+        expectedBlockedStates.clear();
+
+        // Non-metered network. Data saver on.
+        expectedBlockedStates.add(new Pair<>(false, RULE_NONE));
+        expectedBlockedStates.add(new Pair<>(false, RULE_ALLOW_METERED));
+        expectedBlockedStates.add(new Pair<>(false, RULE_TEMPORARY_ALLOW_METERED));
+        expectedBlockedStates.add(new Pair<>(false, RULE_REJECT_METERED));
+        expectedBlockedStates.add(new Pair<>(false, RULE_ALLOW_ALL));
+        expectedBlockedStates.add(new Pair<>(true, RULE_REJECT_ALL));
+        verifyNetworkBlockedState(
+                false /* metered */, true /* backgroundRestricted */, expectedBlockedStates);
+
+        // Non-metered network. Data saver off. The result is the same as previous case since
+        // the network is blocked only for RULE_REJECT_ALL regardless of data saver.
+        verifyNetworkBlockedState(
+                false /* metered */, false /* backgroundRestricted */, expectedBlockedStates);
+        expectedBlockedStates.clear();
+    }
+
+    private void verifyNetworkBlockedState(boolean metered, boolean backgroundRestricted,
+            ArrayList<Pair<Boolean, Integer>> expectedBlockedStateForRules) {
+        final NetworkPolicyManagerInternal npmi = LocalServices
+                .getService(NetworkPolicyManagerInternal.class);
+
+        for (Pair<Boolean, Integer> pair : expectedBlockedStateForRules) {
+            final boolean expectedResult = pair.first;
+            final int rule = pair.second;
+            assertEquals(formatBlockedStateError(UID_A, rule, metered, backgroundRestricted),
+                    expectedResult,
+                    npmi.isUidNetworkingBlocked(UID_A, rule, metered, backgroundRestricted));
+            assertFalse(formatBlockedStateError(SYSTEM_UID, rule, metered, backgroundRestricted),
+                    npmi.isUidNetworkingBlocked(SYSTEM_UID, rule, metered, backgroundRestricted));
+        }
+    }
+
+    private String formatBlockedStateError(int uid, int rule, boolean metered,
+            boolean backgroundRestricted) {
+        return String.format(
+                "Unexpected BlockedState: (uid=%d, rule=%s, metered=%b, backgroundRestricted=%b)",
+                uid, uidRulesToString(rule), metered, backgroundRestricted);
     }
 
     private SubscriptionPlan buildMonthlyDataPlan(ZonedDateTime start, long limitBytes) {

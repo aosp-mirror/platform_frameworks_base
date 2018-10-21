@@ -24,6 +24,7 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -491,7 +492,7 @@ public final class BluetoothHealth implements BluetoothProfile {
         ComponentName comp = intent.resolveSystemService(mContext.getPackageManager(), 0);
         intent.setComponent(comp);
         if (comp == null || !mContext.bindServiceAsUser(intent, mConnection, 0,
-                mContext.getUser())) {
+                UserHandle.CURRENT_OR_SELF)) {
             Log.e(TAG, "Could not bind to Bluetooth Health Service with " + intent);
             return false;
         }

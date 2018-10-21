@@ -7871,7 +7871,21 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
     }
 
     @Override
-    public boolean checkDeviceIdentifierAccess(String packageName, int userHandle) {
+    public boolean checkDeviceIdentifierAccess(String packageName, int userHandle, int pid,
+            int uid) {
+        // If the caller is not a system app then it should only be able to check its own device
+        // identifier access.
+        int callingAppId = UserHandle.getAppId(mInjector.binderGetCallingUid());
+        if (callingAppId >= Process.FIRST_APPLICATION_UID
+                && callingAppId != UserHandle.getAppId(uid)) {
+            return false;
+        }
+        // A device or profile owner must also have the READ_PHONE_STATE permission to access device
+        // identifiers. If the package being checked does not have this permission then deny access.
+        if (mContext.checkPermission(android.Manifest.permission.READ_PHONE_STATE, pid, uid)
+                != PackageManager.PERMISSION_GRANTED) {
+            return false;
+        }
         // Allow access to the device owner.
         ComponentName deviceOwner = getDeviceOwnerComponent(true);
         if (deviceOwner != null && deviceOwner.getPackageName().equals(packageName)) {

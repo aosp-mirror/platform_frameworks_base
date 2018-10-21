@@ -956,11 +956,13 @@ public class VolumeDialogControllerImpl implements VolumeDialogController, Dumpa
                 changed |= onVolumeChangedW(stream, 0);
             } else if (action.equals(AudioManager.RINGER_MODE_CHANGED_ACTION)) {
                 final int rm = intent.getIntExtra(AudioManager.EXTRA_RINGER_MODE, -1);
+                if (isInitialStickyBroadcast()) mState.ringerModeExternal = rm;
                 if (D.BUG) Log.d(TAG, "onReceive RINGER_MODE_CHANGED_ACTION rm="
                         + Util.ringerModeToString(rm));
                 changed = updateRingerModeExternalW(rm);
             } else if (action.equals(AudioManager.INTERNAL_RINGER_MODE_CHANGED_ACTION)) {
                 final int rm = intent.getIntExtra(AudioManager.EXTRA_RINGER_MODE, -1);
+                if (isInitialStickyBroadcast()) mState.ringerModeInternal = rm;
                 if (D.BUG) Log.d(TAG, "onReceive INTERNAL_RINGER_MODE_CHANGED_ACTION rm="
                         + Util.ringerModeToString(rm));
                 changed = updateRingerModeInternalW(rm);

@@ -1202,6 +1202,20 @@ public class CarrierConfigManager {
             "always_show_data_rat_icon_bool";
 
     /**
+     * Boolean indicating if default data account should show LTE or 4G icon
+     * @hide
+     */
+    public static final String KEY_SHOW_4G_FOR_LTE_DATA_ICON_BOOL =
+            "show_4g_for_lte_data_icon_bool";
+
+    /**
+     * Boolean indicating if lte+ icon should be shown if available
+     * @hide
+     */
+    public static final String KEY_HIDE_LTE_PLUS_DATA_ICON_BOOL =
+            "hide_lte_plus_data_icon_bool";
+
+    /**
      * Boolean to decide whether to show precise call failed cause to user
      * @hide
      */
@@ -1965,6 +1979,31 @@ public class CarrierConfigManager {
     public static final String KEY_RTT_SUPPORTED_BOOL = "rtt_supported_bool";
 
     /**
+     * Indicates if the carrier supports auto-upgrading a call to RTT when receiving a call from a
+     * RTT-supported device.
+     * @hide
+     */
+    public static final String KEY_RTT_AUTO_UPGRADE_BOOL = "rtt_auto_upgrade_bool";
+
+    /**
+     * Indicates if the carrier supports RTT during a video call.
+     * @hide
+     */
+    public static final String KEY_RTT_SUPPORTED_FOR_VT_BOOL = "rtt_supported_for_vt_bool";
+
+    /**
+     * Indicates if the carrier supports upgrading a voice call to an RTT call during the call.
+     * @hide
+     */
+    public static final String KEY_RTT_UPGRADE_SUPPORTED_BOOL = "rtt_upgrade_supported_bool";
+
+    /**
+     * Indicates if the carrier supports downgrading a RTT call to a voice call during the call.
+     * @hide
+     */
+    public static final String KEY_RTT_DOWNGRADE_SUPPORTED_BOOL = "rtt_downgrade_supported_bool";
+
+    /**
      * The flag to disable the popup dialog which warns the user of data charges.
      * @hide
      */
@@ -2505,6 +2544,8 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_SHOW_PRECISE_FAILED_CAUSE_BOOL, false);
         sDefaults.putBoolean(KEY_SPN_DISPLAY_RULE_USE_ROAMING_FROM_SERVICE_STATE_BOOL, false);
         sDefaults.putBoolean(KEY_ALWAYS_SHOW_DATA_RAT_ICON_BOOL, false);
+        sDefaults.putBoolean(KEY_SHOW_4G_FOR_LTE_DATA_ICON_BOOL, true);
+        sDefaults.putBoolean(KEY_HIDE_LTE_PLUS_DATA_ICON_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_CONFIG_APPLIED_BOOL, false);
         sDefaults.putBoolean(KEY_CHECK_PRICING_WITH_CARRIER_FOR_DATA_ROAMING_BOOL, false);
         sDefaults.putIntArray(KEY_LTE_RSRP_THRESHOLDS_INT_ARRAY,

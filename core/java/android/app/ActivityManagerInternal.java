@@ -250,4 +250,34 @@ public abstract class ActivityManagerInternal {
     public abstract boolean inputDispatchingTimedOut(Object proc, String activityShortComponentName,
             ApplicationInfo aInfo, String parentShortComponentName, Object parentProc,
             boolean aboveSystem, String reason);
+
+    /**
+     * Sends {@link android.content.Intent#ACTION_CONFIGURATION_CHANGED} with all the appropriate
+     * flags.
+     */
+    public abstract void broadcastGlobalConfigurationChanged(int changes, boolean initLocale);
+
+    /**
+     * Sends {@link android.content.Intent#ACTION_CLOSE_SYSTEM_DIALOGS} with all the appropriate
+     * flags.
+     */
+    public abstract void broadcastCloseSystemDialogs(String reason);
+
+    /**
+     * Kills all background processes, except those matching any of the specified properties.
+     *
+     * @param minTargetSdk the target SDK version at or above which to preserve processes,
+     *                     or {@code -1} to ignore the target SDK
+     * @param maxProcState the process state at or below which to preserve processes,
+     *                     or {@code -1} to ignore the process state
+     */
+    public abstract void killAllBackgroundProcessesExcept(int minTargetSdk, int maxProcState);
+
+    /** Starts a given process. */
+    public abstract void startProcess(String processName, ApplicationInfo info,
+            boolean knownToBeDead, String hostingType, ComponentName hostingName);
+
+    /** Starts up the starting activity process for debugging if needed. */
+    public abstract void setDebugFlagsForStartingActivity(ActivityInfo aInfo, int startFlags,
+            ProfilerInfo profilerInfo);
 }

@@ -69,11 +69,16 @@ const int FIELD_ID_END_BUCKET_ELAPSED_MILLIS = 8;
 
 GaugeMetricProducer::GaugeMetricProducer(const ConfigKey& key, const GaugeMetric& metric,
                                          const int conditionIndex,
-                                         const sp<ConditionWizard>& wizard, const int pullTagId,
+                                         const sp<ConditionWizard>& wizard,
+                                         const int whatMatcherIndex,
+                                         const sp<EventMatcherWizard>& matcherWizard,
+                                         const int pullTagId,
                                          const int triggerAtomId, const int atomId,
                                          const int64_t timeBaseNs, const int64_t startTimeNs,
                                          const sp<StatsPullerManager>& pullerManager)
     : MetricProducer(metric.id(), key, timeBaseNs, conditionIndex, wizard),
+      mWhatMatcherIndex(whatMatcherIndex),
+      mEventMatcherWizard(matcherWizard),
       mPullerManager(pullerManager),
       mPullTagId(pullTagId),
       mTriggerAtomId(triggerAtomId),
@@ -136,7 +141,7 @@ GaugeMetricProducer::GaugeMetricProducer(const ConfigKey& key, const GaugeMetric
     // Adjust start for partial bucket
     mCurrentBucketStartTimeNs = startTimeNs;
     if (mIsPulled) {
-        pullLocked(startTimeNs);
+        pullAndMatchEventsLocked(startTimeNs);
     }
 
     VLOG("Gauge metric %lld created. bucket size %lld start_time: %lld sliced %d",
@@ -302,7 +307,7 @@ void GaugeMetricProducer::onDumpReportLocked(const int64_t dumpTimeNs,
     mPastBuckets.clear();
 }
 
-void GaugeMetricProducer::pullLocked(const int64_t timestampNs) {
+void GaugeMetricProducer::pullAndMatchEventsLocked(const int64_t timestampNs) {
     bool triggerPuller = false;
     switch(mSamplingType) {
         // When the metric wants to do random sampling and there is already one gauge atom for the
@@ -331,7 +336,10 @@ void GaugeMetricProducer::pullLocked(const int64_t timestampNs) {
         return;
     }
     for (const auto& data : allData) {
-        onMatchedLogEventLocked(0, *data);
+        if (mEventMatcherWizard->matchLogEvent(
+                *data, mWhatMatcherIndex) == MatchingState::kMatched) {
+            onMatchedLogEventLocked(mWhatMatcherIndex, *data);
+        }
     }
 }
 
@@ -341,7 +349,7 @@ void GaugeMetricProducer::onConditionChangedLocked(const bool conditionMet,
     flushIfNeededLocked(eventTimeNs);
     mCondition = conditionMet;
     if (mIsPulled) {
-        pullLocked(eventTimeNs);
+        pullAndMatchEventsLocked(eventTimeNs);
     }  // else: Push mode. No need to proactively pull the gauge data.
 }
 
@@ -354,7 +362,7 @@ void GaugeMetricProducer::onSlicedConditionMayChangeLocked(bool overallCondition
     // pull for every dimension.
     mCondition = overallCondition;
     if (mIsPulled) {
-        pullLocked(eventTimeNs);
+        pullAndMatchEventsLocked(eventTimeNs);
     }  // else: Push mode. No need to proactively pull the gauge data.
 }
 
@@ -387,7 +395,10 @@ void GaugeMetricProducer::onDataPulled(const std::vector<std::shared_ptr<LogEven
         return;
     }
     for (const auto& data : allData) {
-        onMatchedLogEventLocked(0, *data);
+        if (mEventMatcherWizard->matchLogEvent(
+                *data, mWhatMatcherIndex) == MatchingState::kMatched) {
+            onMatchedLogEventLocked(mWhatMatcherIndex, *data);
+        }
     }
 }
 
@@ -426,7 +437,7 @@ void GaugeMetricProducer::onMatchedLogEventInternalLocked(
     flushIfNeededLocked(eventTimeNs);
 
     if (mTriggerAtomId == event.GetTagId()) {
-        pullLocked(eventTimeNs);
+        pullAndMatchEventsLocked(eventTimeNs);
         return;
     }
 

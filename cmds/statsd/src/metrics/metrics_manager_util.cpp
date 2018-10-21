@@ -25,6 +25,7 @@
 #include "../external/StatsPullerManager.h"
 #include "../matchers/CombinationLogMatchingTracker.h"
 #include "../matchers/SimpleLogMatchingTracker.h"
+#include "../matchers/EventMatcherWizard.h"
 #include "../metrics/CountMetricProducer.h"
 #include "../metrics/DurationMetricProducer.h"
 #include "../metrics/EventMetricProducer.h"
@@ -294,6 +295,7 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config, const int64_t
                  unordered_map<int, std::vector<int>>& trackerToMetricMap,
                  unordered_map<int64_t, int>& metricMap, std::set<int64_t>& noReportMetricIds) {
     sp<ConditionWizard> wizard = new ConditionWizard(allConditionTrackers);
+    sp<EventMatcherWizard> matcherWizard = new EventMatcherWizard(allAtomMatchers);
     const int allMetricsCount = config.count_metric_size() + config.duration_metric_size() +
                                 config.event_metric_size() + config.value_metric_size();
     allMetricProducers.reserve(allMetricsCount);
@@ -563,7 +565,8 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config, const int64_t
         }
 
         sp<MetricProducer> gaugeProducer = new GaugeMetricProducer(
-                key, metric, conditionIndex, wizard, pullTagId, triggerAtomId, atomTagId,
+                key, metric, conditionIndex, wizard,
+                trackerIndex, matcherWizard, pullTagId, triggerAtomId, atomTagId,
                 timeBaseTimeNs, currentTimeNs, pullerManager);
         allMetricProducers.push_back(gaugeProducer);
     }
@@ -682,6 +685,44 @@ bool initAlarms(const StatsdConfig& config, const ConfigKey& key,
     return true;
 }
 
+bool initMetricActivations(const ConfigKey& key, const StatsdConfig& config,
+                           const int64_t currentTimeNs,
+                           const unordered_map<int64_t, int> &logEventTrackerMap,
+                           const unordered_map<int64_t, int> &metricProducerMap,
+                           vector<sp<MetricProducer>>& allMetricProducers,
+                           unordered_map<int, std::vector<int>>& activationAtomTrackerToMetricMap,
+                           vector<int>& metricsWithActivation) {
+    for (int i = 0; i < config.metric_activation_size(); ++i) {
+        const MetricActivation& metric_activation = config.metric_activation(i);
+        auto itr = metricProducerMap.find(metric_activation.metric_id());
+        if (itr == metricProducerMap.end()) {
+            ALOGE("Metric id not found in metric activation: %lld",
+                (long long)metric_activation.metric_id());
+            return false;
+        }
+        const int metricTrackerIndex = itr->second;
+        if (metricTrackerIndex < 0 || metricTrackerIndex >= (int)allMetricProducers.size()) {
+            ALOGE("Invalid metric tracker index.");
+            return false;
+        }
+        metricsWithActivation.push_back(metricTrackerIndex);
+        for (int j = 0; j < metric_activation.event_activation_size(); ++j) {
+            const EventActivation& activation = metric_activation.event_activation(j);
+            auto logTrackerIt = logEventTrackerMap.find(activation.atom_matcher_id());
+            if (logTrackerIt == logEventTrackerMap.end()) {
+                ALOGE("Atom matcher not found for event activation.");
+                return false;
+            }
+            const int atomMatcherIndex = logTrackerIt->second;
+            activationAtomTrackerToMetricMap[atomMatcherIndex].push_back(
+                metricTrackerIndex);
+            allMetricProducers[metricTrackerIndex]->addActivation(
+                atomMatcherIndex, activation.ttl_seconds());
+        }
+    }
+    return true;
+}
+
 bool initStatsdConfig(const ConfigKey& key, const StatsdConfig& config, UidMap& uidMap,
                       const sp<StatsPullerManager>& pullerManager,
                       const sp<AlarmMonitor>& anomalyAlarmMonitor,
@@ -695,6 +736,8 @@ bool initStatsdConfig(const ConfigKey& key, const StatsdConfig& config, UidMap& 
                       unordered_map<int, std::vector<int>>& conditionToMetricMap,
                       unordered_map<int, std::vector<int>>& trackerToMetricMap,
                       unordered_map<int, std::vector<int>>& trackerToConditionMap,
+                      unordered_map<int, std::vector<int>>& activationAtomTrackerToMetricMap,
+                      vector<int>& metricsWithActivation,
                       std::set<int64_t>& noReportMetricIds) {
     unordered_map<int64_t, int> logTrackerMap;
     unordered_map<int64_t, int> conditionTrackerMap;
@@ -727,6 +770,11 @@ bool initStatsdConfig(const ConfigKey& key, const StatsdConfig& config, UidMap& 
     if (!initAlarms(config, key, periodicAlarmMonitor,
                     timeBaseNs, currentTimeNs, allPeriodicAlarmTrackers)) {
         ALOGE("initAlarms failed");
+        return false;
+    }
+    if (!initMetricActivations(key, config, currentTimeNs, logTrackerMap, metricProducerMap,
+            allMetricProducers, activationAtomTrackerToMetricMap, metricsWithActivation)) {
+        ALOGE("initMetricActivations failed");
         return false;
     }
 

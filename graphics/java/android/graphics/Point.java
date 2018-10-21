@@ -19,6 +19,7 @@ package android.graphics;
 import android.annotation.NonNull;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.util.Size;
 import android.util.proto.ProtoOutputStream;
 
 import java.io.PrintWriter;
@@ -167,5 +168,15 @@ public class Point implements Parcelable {
     public void readFromParcel(@NonNull Parcel in) {
         x = in.readInt();
         y = in.readInt();
+    }
+
+    /** {@hide} */
+    public static @NonNull Point convert(@NonNull Size size) {
+        return new Point(size.getWidth(), size.getHeight());
+    }
+
+    /** {@hide} */
+    public static @NonNull Size convert(@NonNull Point point) {
+        return new Size(point.x, point.y);
     }
 }

@@ -1538,6 +1538,9 @@ public class StorageManager {
      * @hide
      */
     public File translateAppToSystem(File file, String packageName) {
+        // We can only translate absolute paths
+        if (!file.isAbsolute()) return file;
+
         try {
             return new File(mStorageManager.translateAppToSystem(file.getAbsolutePath(),
                     packageName, mContext.getUserId()));
@@ -1553,6 +1556,9 @@ public class StorageManager {
      * @hide
      */
     public File translateSystemToApp(File file, String packageName) {
+        // We can only translate absolute paths
+        if (!file.isAbsolute()) return file;
+
         try {
             return new File(mStorageManager.translateSystemToApp(file.getAbsolutePath(),
                     packageName, mContext.getUserId()));

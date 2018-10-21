@@ -34,8 +34,8 @@ import android.hardware.display.DisplayManagerInternal;
 import android.os.PowerManagerInternal;
 import android.os.PowerSaveState;
 import android.view.InputChannel;
-
-import androidx.test.InstrumentationRegistry;
+import android.view.SurfaceControl;
+import android.view.SurfaceControl.Transaction;
 
 import com.android.server.LocalServices;
 import com.android.server.input.InputManagerService;
@@ -45,6 +45,12 @@ import org.junit.rules.TestRule;
 import org.junit.runner.Description;
 import org.junit.runners.model.Statement;
 import org.mockito.invocation.InvocationOnMock;
+
+import java.lang.ref.WeakReference;
+import java.util.ArrayList;
+import java.util.List;
+
+import androidx.test.InstrumentationRegistry;
 
 /**
  * A test rule that sets up a fresh WindowManagerService instance before each test and makes sure
@@ -61,6 +67,12 @@ public class WindowManagerServiceRule implements TestRule {
 
     private WindowManagerService mService;
     private TestWindowManagerPolicy mPolicy;
+    // Record all {@link SurfaceControl.Transaction} created while testing and releases native
+    // resources when test finishes.
+    private final List<WeakReference<Transaction>> mSurfaceTransactions = new ArrayList<>();
+    // Record all {@link SurfaceControl} created while testing and releases native resources when
+    // test finishes.
+    private final List<WeakReference<SurfaceControl>> mSurfaceControls = new ArrayList<>();
 
     @Override
     public Statement apply(Statement base, Description description) {
@@ -108,12 +120,25 @@ public class WindowManagerServiceRule implements TestRule {
                 // InputChannel is final and can't be mocked.
                 InputChannel[] input = InputChannel.openInputChannelPair(TAG_WM);
                 if (input != null && input.length > 1) {
-                    doReturn(input[1]).when(ims).monitorInput(anyString());
+                    doReturn(input[1]).when(ims).monitorInput(anyString(), anyInt());
                 }
 
                 mService = WindowManagerService.main(context, ims, false,
                         false, mPolicy = new TestWindowManagerPolicy(
                                 WindowManagerServiceRule.this::getWindowManagerService));
+                mService.mTransactionFactory = () -> {
+                    final SurfaceControl.Transaction transaction = new SurfaceControl.Transaction();
+                    mSurfaceTransactions.add(new WeakReference<>(transaction));
+                    return transaction;
+                };
+                mService.mSurfaceBuilderFactory = session -> new SurfaceControl.Builder(session) {
+                    @Override
+                    public SurfaceControl build() {
+                        final SurfaceControl control = super.build();
+                        mSurfaceControls.add(new WeakReference<>(control));
+                        return control;
+                    }
+                };
 
                 mService.onInitReady();
 
@@ -135,6 +160,8 @@ public class WindowManagerServiceRule implements TestRule {
 
             private void tearDown() {
                 waitUntilWindowManagerHandlersIdle();
+                destroyAllSurfaceTransactions();
+                destroyAllSurfaceControls();
                 removeServices();
                 mService = null;
                 mPolicy = null;
@@ -156,6 +183,26 @@ public class WindowManagerServiceRule implements TestRule {
             wm.mH.runWithScissors(() -> { }, 0);
             wm.mAnimationHandler.runWithScissors(() -> { }, 0);
             SurfaceAnimationThread.getHandler().runWithScissors(() -> { }, 0);
+        }
+    }
+
+    private void destroyAllSurfaceTransactions() {
+        for (final WeakReference<Transaction> reference : mSurfaceTransactions) {
+            final Transaction transaction = reference.get();
+            if (transaction != null) {
+                reference.clear();
+                transaction.close();
+            }
+        }
+    }
+
+    private void destroyAllSurfaceControls() {
+        for (final WeakReference<SurfaceControl> reference : mSurfaceControls) {
+            final SurfaceControl control = reference.get();
+            if (control != null) {
+                reference.clear();
+                control.destroy();
+            }
         }
     }
 }

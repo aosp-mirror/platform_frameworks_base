@@ -24,6 +24,7 @@
 #include "../external/PullDataReceiver.h"
 #include "../external/StatsPullerManager.h"
 #include "../matchers/matcher_util.h"
+#include "../matchers/EventMatcherWizard.h"
 #include "MetricProducer.h"
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
 #include "../stats_util.h"
@@ -56,7 +57,9 @@ typedef std::unordered_map<MetricDimensionKey, std::vector<GaugeAtom>>
 class GaugeMetricProducer : public virtual MetricProducer, public virtual PullDataReceiver {
 public:
     GaugeMetricProducer(const ConfigKey& key, const GaugeMetric& gaugeMetric,
-                        const int conditionIndex, const sp<ConditionWizard>& wizard,
+                        const int conditionIndex, const sp<ConditionWizard>& conditionWizard,
+                        const int whatMatcherIndex,
+                        const sp<EventMatcherWizard>& matcherWizard,
                         const int pullTagId, const int triggerAtomId, const int atomId,
                         const int64_t timeBaseNs, const int64_t startTimeNs,
                         const sp<StatsPullerManager>& pullerManager);
@@ -78,7 +81,7 @@ public:
         flushCurrentBucketLocked(eventTimeNs);
         mCurrentBucketStartTimeNs = eventTimeNs;
         if (mIsPulled) {
-            pullLocked(eventTimeNs);
+            pullAndMatchEventsLocked(eventTimeNs);
         }
     };
 
@@ -113,7 +116,11 @@ private:
 
     void flushCurrentBucketLocked(const int64_t& eventTimeNs) override;
 
-    void pullLocked(const int64_t timestampNs);
+    void pullAndMatchEventsLocked(const int64_t timestampNs);
+
+    const int mWhatMatcherIndex;
+
+    sp<EventMatcherWizard> mEventMatcherWizard;
 
     sp<StatsPullerManager> mPullerManager;
     // tagId for pulled data. -1 if this is not pulled

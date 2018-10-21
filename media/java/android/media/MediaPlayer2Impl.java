@@ -682,7 +682,9 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
             case DataSourceDesc.TYPE_CALLBACK:
                 handleDataSource(isCurrent,
                                  srcId,
-                                 dsd.getMedia2DataSource());
+                                 dsd.getMedia2DataSource(),
+                                 dsd.getStartPosition(),
+                                 dsd.getEndPosition());
                 break;
 
             case DataSourceDesc.TYPE_FD:
@@ -690,7 +692,9 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                                  srcId,
                                  dsd.getFileDescriptor(),
                                  dsd.getFileDescriptorOffset(),
-                                 dsd.getFileDescriptorLength());
+                                 dsd.getFileDescriptorLength(),
+                                 dsd.getStartPosition(),
+                                 dsd.getEndPosition());
                 break;
 
             case DataSourceDesc.TYPE_URI:
@@ -699,7 +703,9 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                                  dsd.getUriContext(),
                                  dsd.getUri(),
                                  dsd.getUriHeaders(),
-                                 dsd.getUriCookies());
+                                 dsd.getUriCookies(),
+                                 dsd.getStartPosition(),
+                                 dsd.getEndPosition());
                 break;
 
             default:
@@ -729,62 +735,77 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
     private void handleDataSource(
             boolean isCurrent, long srcId,
             @NonNull Context context, @NonNull Uri uri,
-            @Nullable Map<String, String> headers, @Nullable List<HttpCookie> cookies)
+            @Nullable Map<String, String> headers, @Nullable List<HttpCookie> cookies,
+            long startPos, long endPos)
             throws IOException {
-        // The context and URI usually belong to the calling user. Get a resolver for that user
-        // and strip out the userId from the URI if present.
+        // The context and URI usually belong to the calling user. Get a resolver for that user.
         final ContentResolver resolver = context.getContentResolver();
         final String scheme = uri.getScheme();
-        final String authority = ContentProvider.getAuthorityWithoutUserId(uri.getAuthority());
         if (ContentResolver.SCHEME_FILE.equals(scheme)) {
-            handleDataSource(isCurrent, srcId, uri.getPath(), null, null);
+            handleDataSource(isCurrent, srcId, uri.getPath(), null, null, startPos, endPos);
             return;
         }
 
-        AssetFileDescriptor afd = null;
+        final int ringToneType = RingtoneManager.getDefaultType(uri);
         try {
+            AssetFileDescriptor afd;
             // Try requested Uri locally first
-            if (ContentResolver.SCHEME_CONTENT.equals(scheme)
-                    && Settings.AUTHORITY.equals(authority)) {
+            if (ContentResolver.SCHEME_CONTENT.equals(scheme) && ringToneType != -1) {
                 afd = RingtoneManager.openDefaultRingtoneUri(context, uri);
+                if (attemptDataSource(isCurrent, srcId, afd, startPos, endPos)) {
+                    return;
+                }
+                final Uri actualUri = RingtoneManager.getActualDefaultRingtoneUri(
+                        context, ringToneType);
+                afd = resolver.openAssetFileDescriptor(actualUri, "r");
             } else {
                 afd = resolver.openAssetFileDescriptor(uri, "r");
             }
-            if (afd != null) {
-                handleDataSource(isCurrent, srcId, afd);
+            if (attemptDataSource(isCurrent, srcId, afd, startPos, endPos)) {
                 return;
             }
         } catch (NullPointerException | SecurityException | IOException ex) {
             Log.w(TAG, "Couldn't open " + uri + ": " + ex);
             // Fallback to media server
+        }
+        handleDataSource(isCurrent, srcId, uri.toString(), headers, cookies, startPos, endPos);
+    }
+
+    private boolean attemptDataSource(boolean isCurrent, long srcId, AssetFileDescriptor afd,
+            long startPos, long endPos) throws IOException {
+        try {
+            if (afd.getDeclaredLength() < 0) {
+                handleDataSource(isCurrent,
+                        srcId,
+                        afd.getFileDescriptor(),
+                        0,
+                        DataSourceDesc.LONG_MAX,
+                        startPos,
+                        endPos);
+            } else {
+                handleDataSource(isCurrent,
+                        srcId,
+                        afd.getFileDescriptor(),
+                        afd.getStartOffset(),
+                        afd.getDeclaredLength(),
+                        startPos,
+                        endPos);
+            }
+            return true;
+        } catch (NullPointerException | SecurityException | IOException ex) {
+            Log.w(TAG, "Couldn't open srcId:" + srcId + ": " + ex);
+            return false;
         } finally {
             if (afd != null) {
                 afd.close();
             }
         }
-        handleDataSource(isCurrent, srcId, uri.toString(), headers, cookies);
-    }
-
-    private void handleDataSource(boolean isCurrent, long srcId, AssetFileDescriptor afd)
-            throws IOException {
-        if (afd.getDeclaredLength() < 0) {
-            handleDataSource(isCurrent,
-                    srcId,
-                    afd.getFileDescriptor(),
-                    0,
-                    DataSourceDesc.LONG_MAX);
-        } else {
-            handleDataSource(isCurrent,
-                    srcId,
-                    afd.getFileDescriptor(),
-                    afd.getStartOffset(),
-                    afd.getDeclaredLength());
-        }
     }
 
     private void handleDataSource(
             boolean isCurrent, long srcId,
-            String path, Map<String, String> headers, List<HttpCookie> cookies)
+            String path, Map<String, String> headers, List<HttpCookie> cookies,
+            long startPos, long endPos)
             throws IOException {
         String[] keys = null;
         String[] values = null;
@@ -800,11 +821,12 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                 ++i;
             }
         }
-        handleDataSource(isCurrent, srcId, path, keys, values, cookies);
+        handleDataSource(isCurrent, srcId, path, keys, values, cookies, startPos, endPos);
     }
 
     private void handleDataSource(boolean isCurrent, long srcId,
-            String path, String[] keys, String[] values, List<HttpCookie> cookies)
+            String path, String[] keys, String[] values, List<HttpCookie> cookies,
+            long startPos, long endPos)
             throws IOException {
         final Uri uri = Uri.parse(path);
         final String scheme = uri.getScheme();
@@ -818,7 +840,9 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                 Media2HTTPService.createHTTPService(path, cookies),
                 path,
                 keys,
-                values);
+                values,
+                startPos,
+                endPos);
             return;
         }
 
@@ -826,7 +850,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
         if (file.exists()) {
             FileInputStream is = new FileInputStream(file);
             FileDescriptor fd = is.getFD();
-            handleDataSource(isCurrent, srcId, fd, 0, DataSourceDesc.LONG_MAX);
+            handleDataSource(isCurrent, srcId, fd, 0, DataSourceDesc.LONG_MAX, startPos, endPos);
             is.close();
         } else {
             throw new IOException("handleDataSource failed.");
@@ -835,7 +859,8 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
 
     private native void nativeHandleDataSourceUrl(
             boolean isCurrent, long srcId,
-            Media2HTTPService httpService, String path, String[] keys, String[] values)
+            Media2HTTPService httpService, String path, String[] keys, String[] values,
+            long startPos, long endPos)
             throws IOException;
 
     /**
@@ -849,23 +874,27 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
      */
     private void handleDataSource(
             boolean isCurrent, long srcId,
-            FileDescriptor fd, long offset, long length) throws IOException {
-        nativeHandleDataSourceFD(isCurrent, srcId, fd, offset, length);
+            FileDescriptor fd, long offset, long length,
+            long startPos, long endPos) throws IOException {
+        nativeHandleDataSourceFD(isCurrent, srcId, fd, offset, length, startPos, endPos);
     }
 
     private native void nativeHandleDataSourceFD(boolean isCurrent, long srcId,
-            FileDescriptor fd, long offset, long length) throws IOException;
+            FileDescriptor fd, long offset, long length,
+            long startPos, long endPos) throws IOException;
 
     /**
      * @throws IllegalStateException if it is called in an invalid state
      * @throws IllegalArgumentException if dataSource is not a valid Media2DataSource
      */
-    private void handleDataSource(boolean isCurrent, long srcId, Media2DataSource dataSource) {
-        nativeHandleDataSourceCallback(isCurrent, srcId, dataSource);
+    private void handleDataSource(boolean isCurrent, long srcId, Media2DataSource dataSource,
+            long startPos, long endPos) {
+        nativeHandleDataSourceCallback(isCurrent, srcId, dataSource, startPos, endPos);
     }
 
     private native void nativeHandleDataSourceCallback(
-            boolean isCurrent, long srcId, Media2DataSource dataSource);
+            boolean isCurrent, long srcId, Media2DataSource dataSource,
+            long startPos, long endPos);
 
     /**
      * @return true if there is a next data source, false otherwise.

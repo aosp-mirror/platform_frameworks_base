@@ -3517,6 +3517,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         ColorStateList mTextColorHint = null;
         ColorStateList mTextColorLink = null;
         int mTextSize = -1;
+        LocaleList mTextLocales = null;
         String mFontFamily = null;
         Typeface mFontTypeface = null;
         boolean mFontFamilyExplicit = false;
@@ -3543,6 +3544,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                     + "    mTextColorHint:" + mTextColorHint + "\n"
                     + "    mTextColorLink:" + mTextColorLink + "\n"
                     + "    mTextSize:" + mTextSize + "\n"
+                    + "    mTextLocales:" + mTextLocales + "\n"
                     + "    mFontFamily:" + mFontFamily + "\n"
                     + "    mFontTypeface:" + mFontTypeface + "\n"
                     + "    mFontFamilyExplicit:" + mFontFamilyExplicit + "\n"
@@ -3579,6 +3581,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 com.android.internal.R.styleable.TextAppearance_textColorLink);
         sAppearanceValues.put(com.android.internal.R.styleable.TextView_textSize,
                 com.android.internal.R.styleable.TextAppearance_textSize);
+        sAppearanceValues.put(com.android.internal.R.styleable.TextView_textLocale,
+                com.android.internal.R.styleable.TextAppearance_textLocale);
         sAppearanceValues.put(com.android.internal.R.styleable.TextView_typeface,
                 com.android.internal.R.styleable.TextAppearance_typeface);
         sAppearanceValues.put(com.android.internal.R.styleable.TextView_fontFamily,
@@ -3651,6 +3655,15 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 case com.android.internal.R.styleable.TextAppearance_textSize:
                     attributes.mTextSize =
                             appearance.getDimensionPixelSize(attr, attributes.mTextSize);
+                    break;
+                case com.android.internal.R.styleable.TextAppearance_textLocale:
+                    final String localeString = appearance.getString(attr);
+                    if (localeString != null) {
+                        final LocaleList localeList = LocaleList.forLanguageTags(localeString);
+                        if (!localeList.isEmpty()) {
+                            attributes.mTextLocales = localeList;
+                        }
+                    }
                     break;
                 case com.android.internal.R.styleable.TextAppearance_typeface:
                     attributes.mTypefaceIndex = appearance.getInt(attr, attributes.mTypefaceIndex);
@@ -3736,6 +3749,10 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
 
         if (attributes.mTextSize != -1) {
             setRawTextSize(attributes.mTextSize, true /* shouldRequestLayout */);
+        }
+
+        if (attributes.mTextLocales != null) {
+            setTextLocales(attributes.mTextLocales);
         }
 
         if (attributes.mTypefaceIndex != -1 && !attributes.mFontFamilyExplicit) {

@@ -39,6 +39,7 @@ import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
 import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.doNothing;
@@ -288,34 +289,25 @@ public class DisplayContentTests extends WindowTestsBase {
         final WindowTestUtils.TestAppWindowToken token =
                 WindowTestUtils.createTestAppWindowToken(dc0);
         task0.addChild(token, 0);
-        dc0.mTapDetector = new TaskTapPointerEventListener(sWm, dc0);
-        sWm.registerPointerEventListener(dc0.mTapDetector);
+        dc0.configureDisplayPolicy();
+        assertNotNull(dc0.mTapDetector);
+
         final TaskStack stack1 = createTaskStackOnDisplay(dc1);
         final Task task1 = createTaskInStack(stack1, 0 /* userId */);
         final WindowTestUtils.TestAppWindowToken token1 =
                 WindowTestUtils.createTestAppWindowToken(dc0);
         task1.addChild(token1, 0);
-        dc1.mTapDetector = new TaskTapPointerEventListener(sWm, dc0);
-        sWm.registerPointerEventListener(dc1.mTapDetector);
+        dc1.configureDisplayPolicy();
+        assertNotNull(dc1.mTapDetector);
 
-        // tap on primary display (by sending ACTION_DOWN followed by ACTION_UP)
-        DisplayMetrics dm0 = dc0.getDisplayMetrics();
-        dc0.mTapDetector.onPointerEvent(
-                createTapEvent(dm0.widthPixels / 2, dm0.heightPixels / 2, true));
-        dc0.mTapDetector.onPointerEvent(
-                createTapEvent(dm0.widthPixels / 2, dm0.heightPixels / 2, false));
-
+        // tap on primary display.
+        tapOnDisplay(dc0);
         // Check focus is on primary display.
         assertEquals(sWm.mRoot.getTopFocusedDisplayContent().mCurrentFocus,
                 dc0.findFocusedWindow());
 
-        // Tap on secondary display
-        DisplayMetrics dm1 = dc1.getDisplayMetrics();
-        dc1.mTapDetector.onPointerEvent(
-                createTapEvent(dm1.widthPixels / 2, dm1.heightPixels / 2, true));
-        dc1.mTapDetector.onPointerEvent(
-                createTapEvent(dm1.widthPixels / 2, dm1.heightPixels / 2, false));
-
+        // Tap on secondary display.
+        tapOnDisplay(dc1);
         // Check focus is on secondary.
         assertEquals(sWm.mRoot.getTopFocusedDisplayContent().mCurrentFocus,
                 dc1.findFocusedWindow());
@@ -626,17 +618,32 @@ public class DisplayContentTests extends WindowTestsBase {
         return result;
     }
 
-    private MotionEvent createTapEvent(float x, float y, boolean isDownEvent) {
+    private void tapOnDisplay(final DisplayContent dc) {
+        final DisplayMetrics dm = dc.getDisplayMetrics();
+        final float x = dm.widthPixels / 2;
+        final float y = dm.heightPixels / 2;
         final long downTime = SystemClock.uptimeMillis();
         final long eventTime = SystemClock.uptimeMillis() + 100;
-        final int metaState = 0;
-
-        return MotionEvent.obtain(
+        // sending ACTION_DOWN
+        final MotionEvent downEvent = MotionEvent.obtain(
                 downTime,
-                eventTime,
-                isDownEvent ? MotionEvent.ACTION_DOWN : MotionEvent.ACTION_UP,
+                downTime,
+                MotionEvent.ACTION_DOWN,
                 x,
                 y,
-                metaState);
+                0 /*metaState*/);
+        downEvent.setDisplayId(dc.getDisplayId());
+        dc.mTapDetector.onPointerEvent(downEvent);
+
+        // sending ACTION_UP
+        final MotionEvent upEvent = MotionEvent.obtain(
+                downTime,
+                eventTime,
+                MotionEvent.ACTION_UP,
+                x,
+                y,
+                0 /*metaState*/);
+        upEvent.setDisplayId(dc.getDisplayId());
+        dc.mTapDetector.onPointerEvent(upEvent);
     }
 }

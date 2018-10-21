@@ -98,10 +98,13 @@ public class ZOrderingTests extends WindowTestsBase {
             super(s);
         }
 
+        @Override
         public SurfaceControl.Builder setParent(SurfaceControl sc) {
             mPendingParent = sc;
             return super.setParent(sc);
         }
+
+        @Override
         public SurfaceControl build() {
             SurfaceControl sc = super.build();
             mParentFor.put(sc, mPendingParent);
@@ -110,7 +113,7 @@ public class ZOrderingTests extends WindowTestsBase {
         }
     }
 
-    class HierarchyRecordingBuilderFactory implements SurfaceBuilderFactory {
+    private class HierarchyRecordingBuilderFactory implements SurfaceBuilderFactory {
         public SurfaceControl.Builder make(SurfaceSession s) {
             return new HierarchyRecorder(s);
         }
@@ -131,6 +134,7 @@ public class ZOrderingTests extends WindowTestsBase {
     @After
     public void after() {
         mTransaction.close();
+        mParentFor.keySet().forEach(SurfaceControl::destroy);
         mParentFor.clear();
     }
 

@@ -753,8 +753,6 @@ public class WindowManagerService extends IWindowManager.Stub
     final ArrayMap<AnimationAdapter, SurfaceAnimator> mAnimationTransferMap = new ArrayMap<>();
     final BoundsAnimationController mBoundsAnimationController;
 
-    private final PointerEventDispatcher mPointerEventDispatcher;
-
     private WindowContentFrameStats mTempWindowRenderStats;
 
     private final LatencyTracker mLatencyTracker;
@@ -944,14 +942,6 @@ public class WindowManagerService extends IWindowManager.Stub
         mWindowTracing = WindowTracing.createDefaultAndStartLooper(context);
 
         LocalServices.addService(WindowManagerPolicy.class, mPolicy);
-
-        if(mInputManager != null) {
-            final InputChannel inputChannel = mInputManager.monitorInput(TAG_WM);
-            mPointerEventDispatcher = inputChannel != null
-                    ? new PointerEventDispatcher(inputChannel) : null;
-        } else {
-            mPointerEventDispatcher = null;
-        }
 
         mDisplayManager = (DisplayManager)context.getSystemService(Context.DISPLAY_SERVICE);
 
@@ -2685,8 +2675,9 @@ public class WindowManagerService extends IWindowManager.Stub
     public void cleanupRecentsAnimation(@RecentsAnimationController.ReorderMode int reorderMode) {
         synchronized (mWindowMap) {
             if (mRecentsAnimationController != null) {
-                mRecentsAnimationController.cleanupAnimation(reorderMode);
+                final RecentsAnimationController controller = mRecentsAnimationController;
                 mRecentsAnimationController = null;
+                controller.cleanupAnimation(reorderMode);
                 mAppTransition.updateBooster();
             }
         }
@@ -3126,18 +3117,23 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     @Override
-    public void registerPointerEventListener(PointerEventListener listener) {
-        mPointerEventDispatcher.registerInputEventListener(listener);
+    public void registerPointerEventListener(PointerEventListener listener, int displayId) {
+        synchronized (mWindowMap) {
+            final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
+            if (displayContent != null) {
+                displayContent.registerPointerEventListener(listener);
+            }
+        }
     }
 
     @Override
-    public void unregisterPointerEventListener(PointerEventListener listener) {
-        mPointerEventDispatcher.unregisterInputEventListener(listener);
-    }
-
-    /** Check if the service is set to dispatch pointer events. */
-    boolean canDispatchPointerEvents() {
-        return mPointerEventDispatcher != null;
+    public void unregisterPointerEventListener(PointerEventListener listener, int displayId) {
+        synchronized (mWindowMap) {
+            final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
+            if (displayContent != null) {
+                displayContent.unregisterPointerEventListener(listener);
+            }
+        }
     }
 
     // Called by window manager policy. Not exposed externally.

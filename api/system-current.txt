@@ -4471,6 +4471,23 @@ package android.provider {
     field public static final java.lang.String VOLUME_HUSH_GESTURE = "volume_hush_gesture";
   }
 
+  public static final class Telephony.Carriers implements android.provider.BaseColumns {
+    field public static final java.lang.String APN_SET_ID = "apn_set_id";
+    field public static final int CARRIER_EDITED = 4; // 0x4
+    field public static final java.lang.String EDITED = "edited";
+    field public static final java.lang.String MAX_CONNS = "max_conns";
+    field public static final java.lang.String MAX_CONNS_TIME = "max_conns_time";
+    field public static final java.lang.String MODEM_COGNITIVE = "modem_cognitive";
+    field public static final java.lang.String MTU = "mtu";
+    field public static final int NO_SET_SET = 0; // 0x0
+    field public static final int UNEDITED = 0; // 0x0
+    field public static final int USER_DELETED = 2; // 0x2
+    field public static final java.lang.String USER_EDITABLE = "user_editable";
+    field public static final int USER_EDITED = 1; // 0x1
+    field public static final java.lang.String USER_VISIBLE = "user_visible";
+    field public static final java.lang.String WAIT_TIME = "wait_time";
+  }
+
   public final class TimeZoneRulesDataContract {
     field public static final java.lang.String AUTHORITY = "com.android.timezone";
   }
@@ -5486,6 +5503,7 @@ package android.telephony {
     method public deprecated boolean isVisualVoicemailEnabled(android.telecom.PhoneAccountHandle);
     method public boolean needsOtaServiceProvisioning();
     method public int setAllowedCarriers(int, java.util.List<android.service.carrier.CarrierIdentifier>);
+    method public void setCarrierDataEnabled(boolean);
     method public void setDataActivationState(int);
     method public deprecated void setDataEnabled(int, boolean);
     method public void setDataRoamingEnabled(boolean);
@@ -5604,17 +5622,12 @@ package android.telephony.data {
   }
 
   public final class DataProfile implements android.os.Parcelable {
-    ctor public DataProfile(int, java.lang.String, java.lang.String, int, java.lang.String, java.lang.String, int, int, int, int, boolean, int, java.lang.String, int, int, java.lang.String, java.lang.String, boolean);
-    ctor public DataProfile(android.os.Parcel);
-    method public int describeContents();
     method public java.lang.String getApn();
     method public int getAuthType();
     method public int getBearerBitmap();
     method public int getMaxConns();
     method public int getMaxConnsTime();
     method public int getMtu();
-    method public java.lang.String getMvnoMatchData();
-    method public java.lang.String getMvnoType();
     method public java.lang.String getPassword();
     method public int getProfileId();
     method public java.lang.String getProtocol();
@@ -5624,9 +5637,8 @@ package android.telephony.data {
     method public java.lang.String getUserName();
     method public int getWaitTime();
     method public boolean isEnabled();
-    method public boolean isModemCognitive();
-    method public void writeToParcel(android.os.Parcel, int);
-    field public static final android.os.Parcelable.Creator<android.telephony.data.DataProfile> CREATOR;
+    method public boolean isPersistent();
+    method public boolean isPreferred();
     field public static final int TYPE_3GPP = 1; // 0x1
     field public static final int TYPE_3GPP2 = 2; // 0x2
     field public static final int TYPE_COMMON = 0; // 0x0
@@ -5952,11 +5964,13 @@ package android.telephony.ims {
   }
 
   public final class ImsExternalCallState implements android.os.Parcelable {
+    ctor public ImsExternalCallState(java.lang.String, android.net.Uri, android.net.Uri, boolean, int, int, boolean);
     method public int describeContents();
     method public android.net.Uri getAddress();
     method public int getCallId();
     method public int getCallState();
     method public int getCallType();
+    method public android.net.Uri getLocalAddress();
     method public boolean isCallHeld();
     method public boolean isCallPullable();
     method public void writeToParcel(android.os.Parcel, int);
@@ -6376,7 +6390,8 @@ package android.telephony.ims.feature {
   }
 
   public static class MmTelFeature.MmTelCapabilities {
-    ctor public MmTelFeature.MmTelCapabilities(android.telephony.ims.feature.ImsFeature.Capabilities);
+    ctor public MmTelFeature.MmTelCapabilities();
+    ctor public deprecated MmTelFeature.MmTelCapabilities(android.telephony.ims.feature.ImsFeature.Capabilities);
     ctor public MmTelFeature.MmTelCapabilities(int);
     method public final void addCapabilities(int);
     method public final boolean isCapable(int);

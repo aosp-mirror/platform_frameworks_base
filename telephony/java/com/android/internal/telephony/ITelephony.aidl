@@ -38,10 +38,12 @@ import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.TelephonyHistogram;
 import android.telephony.VisualVoicemailSmsFilterSettings;
+import android.telephony.ims.aidl.IImsCapabilityCallback;
 import android.telephony.ims.aidl.IImsConfig;
 import android.telephony.ims.aidl.IImsMmTelFeature;
 import android.telephony.ims.aidl.IImsRcsFeature;
 import android.telephony.ims.aidl.IImsRegistration;
+import android.telephony.ims.aidl.IImsRegistrationCallback;
 import com.android.ims.internal.IImsServiceFeatureCallback;
 import com.android.internal.telephony.CellNetworkScanResult;
 import com.android.internal.telephony.OperatorInfo;
@@ -1057,11 +1059,6 @@ interface ITelephony {
      */
     boolean isWifiCallingAvailable(int subId);
 
-    /**
-     * Returns the Status of VoLTE for the subscription ID specified.
-     */
-    boolean isVolteAvailable(int subId);
-
      /**
      * Returns the Status of VT (video telephony) for the subscription ID specified.
      */
@@ -1505,4 +1502,117 @@ interface ITelephony {
      *
      */
     int getRadioPowerState(int slotIndex, String callingPackage);
+
+    // IMS specific AIDL commands, see ImsMmTelManager.java
+
+    /**
+     * Adds an IMS registration status callback for the subscription id specified.
+     */
+    oneway void addImsRegistrationCallback(int subId, IImsRegistrationCallback c,
+            String callingPackage);
+     /**
+      * Removes an existing IMS registration status callback for the subscription specified.
+      */
+    oneway void removeImsRegistrationCallback(int subId, IImsRegistrationCallback c,
+            String callingPackage);
+
+    /**
+     * Adds an IMS MmTel capabilities callback for the subscription specified.
+     */
+    oneway void addMmTelCapabilityCallback(int subId, IImsCapabilityCallback c,
+            String callingPackage);
+
+    /**
+     * Removes an existing IMS MmTel capabilities callback for the subscription specified.
+     */
+    oneway void removeMmTelCapabilityCallback(int subId, IImsCapabilityCallback c,
+            String callingPackage);
+
+    /**
+     * return true if the IMS MmTel capability for the given registration tech is capable.
+     */
+    boolean isCapable(int subId, int capability, int regTech, String callingPackage);
+
+    /**
+     * return true if the IMS MmTel capability for the given registration tech is available.
+     */
+    boolean isAvailable(int subId, int capability, int regTech, String callingPackage);
+
+    /**
+     * Returns true if the user's setting for 4G LTE is enabled, for the subscription specified.
+     */
+    boolean isAdvancedCallingSettingEnabled(int subId);
+
+    /**
+     * Modify the user's setting for whether or not 4G LTE is enabled.
+     */
+    void setAdvancedCallingSetting(int subId, boolean isEnabled);
+
+    /**
+     * return true if the user's setting for VT is enabled for the subscription.
+     */
+    boolean isVtSettingEnabled(int subId, String callingPackage);
+
+    /**
+     * Modify the user's setting for whether or not VT is available for the subscrption specified.
+     */
+    void setVtSetting(int subId, boolean isEnabled);
+
+    /**
+     * return true if the user's setting for whether or not Voice over WiFi is currently enabled.
+     */
+    boolean isVoWiFiSettingEnabled(int subId);
+
+    /**
+     * sets the user's setting for Voice over WiFi enabled state.
+     */
+    void setVoWiFiSetting(int subId, boolean isEnabled);
+
+    /**
+     * return true if the user's setting for Voice over WiFi while roaming is enabled.
+     */
+    boolean isVoWiFiRoamingSettingEnabled(int subId);
+
+    /**
+     * Sets the user's preference for whether or not Voice over WiFi is enabled for the current
+     * subscription while roaming.
+     */
+    void setVoWiFiRoamingSetting(int subId, boolean isEnabled);
+
+    /**
+     * Set the Voice over WiFi enabled state, but do not persist the setting.
+     */
+    void setVoWiFiNonPersistent(int subId, boolean isCapable, int mode);
+
+    /**
+     * return the Voice over WiFi mode preference set by the user for the subscription specified.
+     */
+    int getVoWiFiModeSetting(int subId);
+
+    /**
+     * sets the user's preference for the Voice over WiFi mode for the subscription specified.
+     */
+    void setVoWiFiModeSetting(int subId, int mode);
+
+    /**
+     * return the Voice over WiFi mode preference set by the user for the subscription specified
+     * while roaming.
+     */
+    int getVoWiFiRoamingModeSetting(int subId);
+
+    /**
+     * sets the user's preference for the Voice over WiFi mode for the subscription specified
+     * while roaming.
+     */
+    void setVoWiFiRoamingModeSetting(int subId, int mode);
+
+    /**
+     * Modify the user's setting for whether or not RTT is enabled for the subscrption specified.
+     */
+    void setRttCapabilitySetting(int subId, boolean isEnabled);
+
+    /**
+     * return true if TTY over VoLTE is enabled for the subscription specified.
+     */
+    boolean isTtyOverVolteEnabled(int subId);
 }

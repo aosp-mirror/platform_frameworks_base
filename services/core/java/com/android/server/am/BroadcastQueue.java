@@ -286,7 +286,7 @@ public final class BroadcastQueue {
         r.curApp = app;
         app.curReceivers.add(r);
         app.forceProcessStateUpTo(ActivityManager.PROCESS_STATE_RECEIVER);
-        mService.updateLruProcessLocked(app, false, null);
+        mService.mProcessList.updateLruProcessLocked(app, false, null);
         if (!skipOomAdj) {
             mService.updateOomAdjLocked();
         }
@@ -892,7 +892,7 @@ public final class BroadcastQueue {
                     isDead = proc == null || proc.isCrashing();
                 }
             } else {
-                final ProcessRecord proc = mService.mProcessNames.get(
+                final ProcessRecord proc = mService.mProcessList.mProcessNames.get(
                         mPendingBroadcast.curApp.processName, mPendingBroadcast.curApp.uid);
                 isDead = proc == null || !proc.pendingStart;
             }

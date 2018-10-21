@@ -46,6 +46,7 @@ statsd_common_src := \
     src/logd/LogEvent.cpp \
     src/logd/LogListener.cpp \
     src/matchers/CombinationLogMatchingTracker.cpp \
+    src/matchers/EventMatcherWizard.cpp \
     src/matchers/matcher_util.cpp \
     src/matchers/SimpleLogMatchingTracker.cpp \
     src/metrics/MetricProducer.cpp \
@@ -217,6 +218,7 @@ LOCAL_SRC_FILES := \
     tests/metrics/metrics_test_helper.cpp \
     tests/statsd_test_util.cpp \
     tests/e2e/WakelockDuration_e2e_test.cpp \
+    tests/e2e/MetricActivation_e2e_test.cpp \
     tests/e2e/MetricConditionLink_e2e_test.cpp \
     tests/e2e/Alarm_e2e_test.cpp \
     tests/e2e/Attribution_e2e_test.cpp \

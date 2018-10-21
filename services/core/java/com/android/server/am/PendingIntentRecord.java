@@ -288,12 +288,19 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
                 resolvedType = key.requestResolvedType;
             }
 
+            // Apply any launch flags from the ActivityOptions. This is to ensure that the caller
+            // can specify a consistent launch mode even if the PendingIntent is immutable
+            final ActivityOptions opts = ActivityOptions.fromBundle(options);
+            if (opts != null) {
+                finalIntent.addFlags(opts.getPendingIntentLaunchFlags());
+            }
+
             // Extract options before clearing calling identity
             mergedOptions = key.options;
             if (mergedOptions == null) {
-                mergedOptions = SafeActivityOptions.fromBundle(options);
+                mergedOptions = new SafeActivityOptions(opts);
             } else {
-                mergedOptions.setCallerOptions(ActivityOptions.fromBundle(options));
+                mergedOptions.setCallerOptions(opts);
             }
 
             if (whitelistDuration != null) {

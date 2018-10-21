@@ -17,6 +17,7 @@
 package android.telephony;
 
 import static android.content.Context.TELECOM_SERVICE;
+
 import static com.android.internal.util.Preconditions.checkNotNull;
 
 import android.annotation.IntDef;
@@ -59,6 +60,7 @@ import android.telephony.ims.aidl.IImsConfig;
 import android.telephony.ims.aidl.IImsMmTelFeature;
 import android.telephony.ims.aidl.IImsRcsFeature;
 import android.telephony.ims.aidl.IImsRegistration;
+import android.telephony.ims.feature.MmTelFeature;
 import android.telephony.ims.stub.ImsRegistrationImplBase;
 import android.text.TextUtils;
 import android.util.Log;
@@ -1162,6 +1164,16 @@ public class TelephonyManager {
     public static final String EXTRA_CARRIER_ID = "android.telephony.extra.CARRIER_ID";
 
     /**
+     * An int extra used with {@link #ACTION_SUBSCRIPTION_CARRIER_IDENTITY_CHANGED} which indicates
+     * the updated mno carrier id of the current subscription.
+     * <p>Will be {@link TelephonyManager#UNKNOWN_CARRIER_ID} if the subscription is unavailable or
+     * the carrier cannot be identified.
+     *
+     *@hide
+     */
+    public static final String EXTRA_MNO_CARRIER_ID = "android.telephony.extra.MNO_CARRIER_ID";
+
+    /**
      * An string extra used with {@link #ACTION_SUBSCRIPTION_CARRIER_IDENTITY_CHANGED} which
      * indicates the updated carrier name of the current subscription.
      * {@see TelephonyManager#getSimCarrierIdName()}
@@ -1220,6 +1232,38 @@ public class TelephonyManager {
      */
     public static final String EXTRA_RECOVERY_ACTION = "recoveryAction";
 
+     /**
+     * Broadcast intent action indicating that the telephony provider DB got lost.
+     *
+     * <p>
+     * The {@link #EXTRA_IS_CORRUPTED} extra indicates whether the database is lost
+     * due to corruption or not
+     *
+     * <p class="note">
+     * Requires the MODIFY_PHONE_STATE permission.
+     *
+     * <p class="note">
+     * This is a protected intent that can only be sent by the system.
+     *
+     * @see #EXTRA_IS_CORRUPTED
+     *
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public static final String ACTION_MMSSMS_DATABASE_LOST =
+            "android.intent.action.MMSSMS_DATABASE_LOST";
+
+    /**
+     * A boolean extra used with {@link #ACTION_MMSSMS_DATABASE_LOST} to indicate
+     * whether the database is lost due to corruption or not.
+     *
+     * @see #ACTION_MMSSMS_DATABASE_LOST
+     *
+     * @hide
+     */
+    public static final String EXTRA_IS_CORRUPTED = "isCorrupted";
+
     //
     //
     // Device Info
@@ -1267,11 +1311,11 @@ public class TelephonyManager {
      * Returns the unique device ID, for example, the IMEI for GSM and the MEID
      * or ESN for CDMA phones. Return null if device ID is not available.
      *
-     * <p>Requires Permission: READ_PRIVILEGED_PHONE_STATE or for the calling package to be the
-     * device or profile owner. The profile owner is an app that owns a managed profile on the
-     * device; for more details see <a href="https://developer.android.com/work/managed-profiles">
-     * Work profiles</a>. Profile owner access is deprecated and will be removed in a future
-     * release.
+     * <p>Requires Permission: READ_PRIVILEGED_PHONE_STATE, or for the calling package to be the
+     * device or profile owner and have the READ_PHONE_STATE permission. The profile owner is an app
+     * that owns a managed profile on the device; for more details see <a
+     * href="https://developer.android.com/work/managed-profiles">Work profiles</a>. Profile owner
+     * access is deprecated and will be removed in a future release.
      *
      * @deprecated Use (@link getImei} which returns IMEI for GSM or (@link getMeid} which returns
      * MEID for CDMA.
@@ -1296,11 +1340,11 @@ public class TelephonyManager {
      * Returns the unique device ID of a subscription, for example, the IMEI for
      * GSM and the MEID for CDMA phones. Return null if device ID is not available.
      *
-     * <p>Requires Permission: READ_PRIVILEGED_PHONE_STATE or for the calling package to be the
-     * device or profile owner. The profile owner is an app that owns a managed profile on the
-     * device; for more details see <a href="https://developer.android.com/work/managed-profiles">
-     * Work profiles</a>. Profile owner access is deprecated and will be removed in a future
-     * release.
+     * <p>Requires Permission: READ_PRIVILEGED_PHONE_STATE, or for the calling package to be the
+     * device or profile owner and have the READ_PHONE_STATE permission. The profile owner is an app
+     * that owns a managed profile on the device; for more details see <a
+     * href="https://developer.android.com/work/managed-profiles">Work profiles</a>. Profile owner
+     * access is deprecated and will be removed in a future release.
      *
      * @param slotIndex of which deviceID is returned
      *
@@ -1328,11 +1372,11 @@ public class TelephonyManager {
      * Returns the IMEI (International Mobile Equipment Identity). Return null if IMEI is not
      * available.
      *
-     * <p>Requires Permission: READ_PRIVILEGED_PHONE_STATE or for the calling package to be the
-     * device or profile owner. The profile owner is an app that owns a managed profile on the
-     * device; for more details see <a href="https://developer.android.com/work/managed-profiles">
-     * Work profiles</a>. Profile owner access is deprecated and will be removed in a future
-     * release.
+     * <p>Requires Permission: READ_PRIVILEGED_PHONE_STATE, or for the calling package to be the
+     * device or profile owner and have the READ_PHONE_STATE permission. The profile owner is an app
+     * that owns a managed profile on the device; for more details see <a
+     * href="https://developer.android.com/work/managed-profiles">Work profiles</a>. Profile owner
+     * access is deprecated and will be removed in a future release.
      */
     @SuppressAutoDoc // No support for device / profile owner.
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
@@ -1344,11 +1388,11 @@ public class TelephonyManager {
      * Returns the IMEI (International Mobile Equipment Identity). Return null if IMEI is not
      * available.
      *
-     * <p>Requires Permission: READ_PRIVILEGED_PHONE_STATE or for the calling package to be the
-     * device or profile owner. The profile owner is an app that owns a managed profile on the
-     * device; for more details see <a href="https://developer.android.com/work/managed-profiles">
-     * Work profiles</a>. Profile owner access is deprecated and will be removed in a future
-     * release.
+     * <p>Requires Permission: READ_PRIVILEGED_PHONE_STATE, or for the calling package to be the
+     * device or profile owner and have the READ_PHONE_STATE permission. The profile owner is an app
+     * that owns a managed profile on the device; for more details see <a
+     * href="https://developer.android.com/work/managed-profiles">Work profiles</a>. Profile owner
+     * access is deprecated and will be removed in a future release.
      *
      * @param slotIndex of which IMEI is returned
      */
@@ -1397,11 +1441,11 @@ public class TelephonyManager {
     /**
      * Returns the MEID (Mobile Equipment Identifier). Return null if MEID is not available.
      *
-     * <p>Requires Permission: READ_PRIVILEGED_PHONE_STATE or for the calling package to be the
-     * device or profile owner. The profile owner is an app that owns a managed profile on the
-     * device; for more details see <a href="https://developer.android.com/work/managed-profiles">
-     * Work profiles</a>. Profile owner access is deprecated and will be removed in a future
-     * release.
+     * <p>Requires Permission: READ_PRIVILEGED_PHONE_STATE, or for the calling package to be the
+     * device or profile owner and have the READ_PHONE_STATE permission. The profile owner is an app
+     * that owns a managed profile on the device; for more details see <a
+     * href="https://developer.android.com/work/managed-profiles">Work profiles</a>. Profile owner
+     * access is deprecated and will be removed in a future release.
      */
     @SuppressAutoDoc // No support for device / profile owner.
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
@@ -1412,11 +1456,11 @@ public class TelephonyManager {
     /**
      * Returns the MEID (Mobile Equipment Identifier). Return null if MEID is not available.
      *
-     * <p>Requires Permission: READ_PRIVILEGED_PHONE_STATE or for the calling package to be the
-     * device or profile owner. The profile owner is an app that owns a managed profile on the
-     * device; for more details see <a href="https://developer.android.com/work/managed-profiles">
-     * Work profiles</a>. Profile owner access is deprecated and will be removed in a future
-     * release.
+     * <p>Requires Permission: READ_PRIVILEGED_PHONE_STATE, or for the calling package to be the
+     * device or profile owner and have the READ_PHONE_STATE permission. The profile owner is an app
+     * that owns a managed profile on the device; for more details see <a
+     * href="https://developer.android.com/work/managed-profiles">Work profiles</a>. Profile owner
+     * access is deprecated and will be removed in a future release.
      *
      * @param slotIndex of which MEID is returned
      */
@@ -2912,11 +2956,11 @@ public class TelephonyManager {
      * unavailable.
      *
      * <p>Requires Permission: READ_PRIVILEGED_PHONE_STATE, for the calling app to be the device or
-     * profile owner, or that the calling app has carrier privileges (see {@link
-     * #hasCarrierPrivileges}). The profile owner is an app that owns a managed profile on the
-     * device; for more details see <a href="https://developer.android.com/work/managed-profiles">
-     * Work profiles</a>. Profile owner access is deprecated and will be removed in a future
-     * release.
+     * profile owner and have the READ_PHONE_STATE permission, or that the calling app has carrier
+     * privileges (see {@link #hasCarrierPrivileges}). The profile owner is an app that owns a
+     * managed profile on the device; for more details see <a
+     * href="https://developer.android.com/work/managed-profiles">Work profiles</a>. Profile owner
+     * access is deprecated and will be removed in a future release.
      */
     @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
@@ -2929,11 +2973,11 @@ public class TelephonyManager {
      * unavailable.
      *
      * <p>Requires Permission: READ_PRIVILEGED_PHONE_STATE, for the calling app to be the device or
-     * profile owner, or that the calling app has carrier privileges (see {@link
-     * #hasCarrierPrivileges}). The profile owner is an app that owns a managed profile on the
-     * device; for more details see <a href="https://developer.android.com/work/managed-profiles">
-     * Work profiles</a>. Profile owner access is deprecated and will be removed in a future
-     * release.
+     * profile owner and have the READ_PHONE_STATE permission, or that the calling app has carrier
+     * privileges (see {@link #hasCarrierPrivileges}). The profile owner is an app that owns a
+     * managed profile on the device; for more details see <a
+     * href="https://developer.android.com/work/managed-profiles">Work profiles</a>. Profile owner
+     * access is deprecated and will be removed in a future release.
      *
      * @param subId for which Sim Serial number is returned
      * @hide
@@ -3074,11 +3118,11 @@ public class TelephonyManager {
      * Return null if it is unavailable.
      *
      * <p>Requires Permission: READ_PRIVILEGED_PHONE_STATE, for the calling app to be the device or
-     * profile owner, or that the calling app has carrier privileges (see {@link
-     * #hasCarrierPrivileges}). The profile owner is an app that owns a managed profile on the
-     * device; for more details see <a href="https://developer.android.com/work/managed-profiles">
-     * Work profiles</a>. Profile owner access is deprecated and will be removed in a future
-     * release.
+     * profile owner and have the READ_PHONE_STATE permission, or that the calling app has carrier
+     * privileges (see {@link #hasCarrierPrivileges}). The profile owner is an app that owns a
+     * managed profile on the device; for more details see <a
+     * href="https://developer.android.com/work/managed-profiles">Work profiles</a>. Profile owner
+     * access is deprecated and will be removed in a future release.
      */
     @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
@@ -3092,11 +3136,11 @@ public class TelephonyManager {
      * Return null if it is unavailable.
      *
      * <p>Requires Permission: READ_PRIVILEGED_PHONE_STATE, for the calling app to be the device or
-     * profile owner, or that the calling app has carrier privileges (see {@link
-     * #hasCarrierPrivileges}). The profile owner is an app that owns a managed profile on the
-     * device; for more details see <a href="https://developer.android.com/work/managed-profiles">
-     * Work profiles</a>. Profile owner access is deprecated and will be removed in a future
-     * release.
+     * profile owner and have the READ_PHONE_STATE permission, or that the calling app has carrier
+     * privileges (see {@link #hasCarrierPrivileges}). The profile owner is an app that owns a
+     * managed profile on the device; for more details see <a
+     * href="https://developer.android.com/work/managed-profiles">Work profiles</a>. Profile owner
+     * access is deprecated and will be removed in a future release.
      *
      * @param subId whose subscriber id is returned
      * @hide
@@ -7393,7 +7437,9 @@ public class TelephonyManager {
     @UnsupportedAppUsage
     public boolean isVolteAvailable() {
         try {
-            return getITelephony().isVolteAvailable(getSubId());
+            return getITelephony().isAvailable(getSubId(),
+                    MmTelFeature.MmTelCapabilities.CAPABILITY_TYPE_VOICE,
+                    ImsRegistrationImplBase.REGISTRATION_TECH_LTE, getOpPackageName());
         } catch (RemoteException | NullPointerException ex) {
             return false;
         }
@@ -8332,20 +8378,31 @@ public class TelephonyManager {
     }
 
     /**
-     * Action set from carrier signalling broadcast receivers to enable/disable metered apns
-     * Permissions android.Manifest.permission.MODIFY_PHONE_STATE is required
-     * @param subId the subscription ID that this action applies to.
-     * @param enabled control enable or disable metered apns.
+     * Used to enable or disable carrier data by the system based on carrier signalling or
+     * carrier privileged apps. Different from {@link #setDataEnabled(boolean)} which is linked to
+     * user settings, carrier data on/off won't affect user settings but will bypass the
+     * settings and turns off data internally if set to {@code false}.
+     *
+     * <p>If this object has been created with {@link #createForSubscriptionId}, applies to the
+     * given subId. Otherwise, applies to {@link SubscriptionManager#getDefaultDataSubscriptionId()}
+     *
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE}.
+     *
+     * @param enabled control enable or disable carrier data.
      * @hide
      */
-    public void carrierActionSetMeteredApnsEnabled(int subId, boolean enabled) {
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
+    public void setCarrierDataEnabled(boolean enabled) {
         try {
             ITelephony service = getITelephony();
             if (service != null) {
-                service.carrierActionSetMeteredApnsEnabled(subId, enabled);
+                service.carrierActionSetMeteredApnsEnabled(
+                        getSubId(SubscriptionManager.getDefaultDataSubscriptionId()), enabled);
             }
         } catch (RemoteException e) {
-            Log.e(TAG, "Error calling ITelephony#carrierActionSetMeteredApnsEnabled", e);
+            Log.e(TAG, "Error calling ITelephony#setCarrierDataEnabled", e);
         }
     }
 

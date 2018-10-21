@@ -19,7 +19,6 @@
 
 #include "Vector.h"
 
-#include "FloatColor.h"
 #include "utils/Macros.h"
 
 namespace android {

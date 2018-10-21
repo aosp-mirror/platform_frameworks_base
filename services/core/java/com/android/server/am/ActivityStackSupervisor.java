@@ -21,8 +21,12 @@ import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
 import static android.Manifest.permission.START_ANY_ACTIVITY;
 import static android.app.ActivityManager.LOCK_TASK_MODE_LOCKED;
 import static android.app.ActivityManager.START_DELIVERED_TO_TOP;
+import static android.app.ActivityManager.START_FLAG_DEBUG;
+import static android.app.ActivityManager.START_FLAG_NATIVE_DEBUGGING;
+import static android.app.ActivityManager.START_FLAG_TRACK_ALLOCATION;
 import static android.app.ActivityManager.START_TASK_TO_FRONT;
 import static android.app.ActivityTaskManager.INVALID_STACK_ID;
+import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.ITaskStackListener.FORCED_RESIZEABLE_REASON_SECONDARY_DISPLAY;
 import static android.app.ITaskStackListener.FORCED_RESIZEABLE_REASON_SPLIT_SCREEN;
 import static android.app.WaitResult.INVALID_DELAY;
@@ -54,6 +58,21 @@ import static android.view.Display.INVALID_DISPLAY;
 import static android.view.Display.TYPE_VIRTUAL;
 import static android.view.WindowManager.TRANSIT_DOCK_TASK_FROM_RECENTS;
 
+import static com.android.server.am.ActivityStack.ActivityState.DESTROYED;
+import static com.android.server.am.ActivityStack.ActivityState.INITIALIZING;
+import static com.android.server.am.ActivityStack.ActivityState.PAUSED;
+import static com.android.server.am.ActivityStack.ActivityState.PAUSING;
+import static com.android.server.am.ActivityStack.ActivityState.RESUMED;
+import static com.android.server.am.ActivityStack.ActivityState.STOPPED;
+import static com.android.server.am.ActivityStack.ActivityState.STOPPING;
+import static com.android.server.am.ActivityStack.REMOVE_TASK_MODE_MOVING;
+import static com.android.server.am.ActivityStackSupervisorProto.CONFIGURATION_CONTAINER;
+import static com.android.server.am.ActivityStackSupervisorProto.DISPLAYS;
+import static com.android.server.am.ActivityStackSupervisorProto.FOCUSED_STACK_ID;
+import static com.android.server.am.ActivityStackSupervisorProto.IS_HOME_RECENTS_COMPONENT;
+import static com.android.server.am.ActivityStackSupervisorProto.KEYGUARD_CONTROLLER;
+import static com.android.server.am.ActivityStackSupervisorProto.PENDING_ACTIVITIES;
+import static com.android.server.am.ActivityStackSupervisorProto.RESUMED_ACTIVITY;
 import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_ALL;
 import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_IDLE;
 import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_PAUSE;
@@ -75,23 +94,7 @@ import static com.android.server.am.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.am.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.ActivityTaskManagerService.ANIMATE;
 import static com.android.server.am.ActivityTaskManagerService.H.FIRST_SUPERVISOR_STACK_MSG;
-import static com.android.server.am.ActivityRecord.RELAUNCH_REASON_NONE;
-import static com.android.server.am.ActivityStack.ActivityState.DESTROYED;
-import static com.android.server.am.ActivityStack.ActivityState.INITIALIZING;
-import static com.android.server.am.ActivityStack.ActivityState.PAUSED;
-import static com.android.server.am.ActivityStack.ActivityState.PAUSING;
-import static com.android.server.am.ActivityStack.ActivityState.RESUMED;
-import static com.android.server.am.ActivityStack.ActivityState.STOPPED;
-import static com.android.server.am.ActivityStack.ActivityState.STOPPING;
-import static com.android.server.am.ActivityStack.REMOVE_TASK_MODE_MOVING;
-import static com.android.server.am.ActivityStackSupervisorProto.CONFIGURATION_CONTAINER;
-import static com.android.server.am.ActivityStackSupervisorProto.DISPLAYS;
-import static com.android.server.am.ActivityStackSupervisorProto.FOCUSED_STACK_ID;
-import static com.android.server.am.ActivityStackSupervisorProto.IS_HOME_RECENTS_COMPONENT;
-import static com.android.server.am.ActivityStackSupervisorProto.KEYGUARD_CONTROLLER;
-import static com.android.server.am.ActivityStackSupervisorProto.PENDING_ACTIVITIES;
-import static com.android.server.am.ActivityStackSupervisorProto.RESUMED_ACTIVITY;
-import static android.app.ActivityTaskManager.INVALID_TASK_ID;
+import static com.android.server.am.ActivityTaskManagerService.RELAUNCH_REASON_NONE;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_LAUNCHABLE;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_LAUNCHABLE_PRIV;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_WHITELISTED;
@@ -113,6 +116,7 @@ import android.app.ActivityManager.StackInfo;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityOptions;
 import android.app.AppOpsManager;
+import android.app.IApplicationThread;
 import android.app.ProfilerInfo;
 import android.app.ResultInfo;
 import android.app.WaitResult;
@@ -789,8 +793,9 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     }
 
     boolean canStartHomeOnDisplay(ActivityInfo homeActivity, int displayId) {
-        if (displayId == DEFAULT_DISPLAY) {
-            // No restrictions to default display.
+        if (displayId == DEFAULT_DISPLAY || (displayId != INVALID_DISPLAY
+                && displayId == mService.mVr2dDisplayId)) {
+            // No restrictions to default display or vr 2d display.
             return true;
         }
 
@@ -1012,7 +1017,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                     if (activity.app == null && app.mUid == activity.info.applicationInfo.uid
                             && processName.equals(activity.processName)) {
                         try {
-                            if (realStartActivityLocked(activity, (ProcessRecord) app.mOwner,
+                            if (realStartActivityLocked(activity, app,
                                     top == activity /* andResume */, true /* checkConfig */)) {
                                 didSomething = true;
                             }
@@ -1299,20 +1304,17 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
             // Don't debug things in the system process
             if (!aInfo.processName.equals("system")) {
-                if ((startFlags & ActivityManager.START_FLAG_DEBUG) != 0) {
-                    mService.mAm.setDebugApp(aInfo.processName, true, false);
-                }
-
-                if ((startFlags & ActivityManager.START_FLAG_NATIVE_DEBUGGING) != 0) {
-                    mService.mAm.setNativeDebuggingAppLocked(aInfo.applicationInfo, aInfo.processName);
-                }
-
-                if ((startFlags & ActivityManager.START_FLAG_TRACK_ALLOCATION) != 0) {
-                    mService.mAm.setTrackAllocationApp(aInfo.applicationInfo, aInfo.processName);
-                }
-
-                if (profilerInfo != null) {
-                    mService.mAm.setProfileApp(aInfo.applicationInfo, aInfo.processName, profilerInfo);
+                if ((startFlags & (START_FLAG_DEBUG | START_FLAG_NATIVE_DEBUGGING
+                        | START_FLAG_TRACK_ALLOCATION)) != 0 || profilerInfo != null) {
+                    /**
+                     * Assume safe to call into AMS synchronously because the call that set these
+                     * flags should have originated from AMS which will already have its lock held.
+                     * @see ActivityManagerService#startActivityAndWait(IApplicationThread, String,
+                     * Intent, String, IBinder, String, int, int, ProfilerInfo, Bundle, int)
+                     * TODO(b/80414790): Investigate a better way of untangling this.
+                     */
+                    mService.mAmInternal.setDebugFlagsForStartingActivity(
+                            aInfo, startFlags, profilerInfo);
                 }
             }
             final String intentLaunchToken = intent.getLaunchToken();
@@ -1359,7 +1361,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         return resolveActivity(intent, rInfo, startFlags, profilerInfo);
     }
 
-    final boolean realStartActivityLocked(ActivityRecord r, ProcessRecord app,
+    private boolean realStartActivityLocked(ActivityRecord r, WindowProcessController proc,
             boolean andResume, boolean checkConfig) throws RemoteException {
 
         if (!allPausedActivitiesComplete()) {
@@ -1378,7 +1380,6 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         beginDeferResume();
 
         try {
-            final WindowProcessController proc = app.getWindowProcessController();
             r.startFreezingScreenLocked(proc, 0);
 
             // schedule launch ticks to collect information about slow apps.
@@ -1414,15 +1415,15 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
             final int applicationInfoUid =
                     (r.info.applicationInfo != null) ? r.info.applicationInfo.uid : -1;
-            if ((r.userId != app.userId) || (r.appInfo.uid != applicationInfoUid)) {
+            if ((r.userId != proc.mUserId) || (r.appInfo.uid != applicationInfoUid)) {
                 Slog.wtf(TAG,
                         "User ID for activity changing for " + r
                                 + " appInfo.uid=" + r.appInfo.uid
                                 + " info.ai.uid=" + applicationInfoUid
-                                + " old=" + r.app + " new=" + app);
+                                + " old=" + r.app + " new=" + proc);
             }
 
-            app.waitingToKill = null;
+            proc.clearWaitingToKill();
             r.launchCount++;
             r.lastLaunchTime = SystemClock.uptimeMillis();
 
@@ -1441,7 +1442,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             }
 
             try {
-                if (app.thread == null) {
+                if (!proc.hasThread()) {
                     throw new RemoteException();
                 }
                 List<ResultInfo> results = null;
@@ -1467,50 +1468,29 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 r.forceNewConfig = false;
                 mService.getAppWarningsLocked().onStartActivity(r);
                 r.compat = mService.compatibilityInfoForPackageLocked(r.info.applicationInfo);
-                ProfilerInfo profilerInfo = null;
-                if (mService.mAm.mProfileApp != null && mService.mAm.mProfileApp.equals(app.processName)) {
-                    if (mService.mAm.mProfileProc == null || mService.mAm.mProfileProc == app) {
-                        mService.mAm.mProfileProc = app;
-                        ProfilerInfo profilerInfoSvc = mService.mAm.mProfilerInfo;
-                        if (profilerInfoSvc != null && profilerInfoSvc.profileFile != null) {
-                            if (profilerInfoSvc.profileFd != null) {
-                                try {
-                                    profilerInfoSvc.profileFd = profilerInfoSvc.profileFd.dup();
-                                } catch (IOException e) {
-                                    profilerInfoSvc.closeFd();
-                                }
-                            }
+                ProfilerInfo profilerInfo = proc.onStartActivity(mService.mTopProcessState);
 
-                            profilerInfo = new ProfilerInfo(profilerInfoSvc);
-                        }
-                    }
-                }
-
-                app.hasShownUi = true;
-                app.setPendingUiClean(true);
-                app.forceProcessStateUpTo(mService.mTopProcessState);
                 // Because we could be starting an Activity in the system process this may not go
                 // across a Binder interface which would create a new Configuration. Consequently
                 // we have to always create a new Configuration here.
 
                 final MergedConfiguration mergedConfiguration = new MergedConfiguration(
-                        app.getWindowProcessController().getConfiguration(),
-                        r.getMergedOverrideConfiguration());
+                        proc.getConfiguration(), r.getMergedOverrideConfiguration());
                 r.setLastReportedConfiguration(mergedConfiguration);
 
                 logIfTransactionTooLarge(r.intent, r.icicle);
 
 
                 // Create activity launch transaction.
-                final ClientTransaction clientTransaction = ClientTransaction.obtain(app.thread,
-                        r.appToken);
+                final ClientTransaction clientTransaction = ClientTransaction.obtain(
+                        proc.getThread(), r.appToken);
                 clientTransaction.addCallback(LaunchActivityItem.obtain(new Intent(r.intent),
                         System.identityHashCode(r), r.info,
                         // TODO: Have this take the merged configuration instead of separate global
                         // and override configs.
                         mergedConfiguration.getGlobalConfiguration(),
                         mergedConfiguration.getOverrideConfiguration(), r.compat,
-                        r.launchedFromPackage, task.voiceInteractor, app.getReportedProcState(),
+                        r.launchedFromPackage, task.voiceInteractor, proc.getReportedProcState(),
                         r.icicle, r.persistentState, results, newIntents,
                         mService.isNextTransitionForward(), profilerInfo));
 
@@ -1526,12 +1506,12 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 // Schedule transaction.
                 mService.getLifecycleManager().scheduleTransaction(clientTransaction);
 
-                if ((app.info.privateFlags & ApplicationInfo.PRIVATE_FLAG_CANT_SAVE_STATE) != 0
+                if ((proc.mInfo.privateFlags & ApplicationInfo.PRIVATE_FLAG_CANT_SAVE_STATE) != 0
                         && mService.mHasHeavyWeightFeature) {
                     // This may be a heavy-weight process! Note that the package manager will ensure
                     // that only activity can run in the main process of the .apk, which is the only
                     // thing that will be considered heavy-weight.
-                    if (app.processName.equals(app.info.packageName)) {
+                    if (proc.mName.equals(proc.mInfo.packageName)) {
                         if (mService.mHeavyWeightProcess != null
                                 && mService.mHeavyWeightProcess != proc) {
                             Slog.w(TAG, "Starting new heavy weight process " + proc
@@ -1544,12 +1524,10 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
             } catch (RemoteException e) {
                 if (r.launchFailed) {
-                    // This is the second time we failed -- finish activity
-                    // and give up.
+                    // This is the second time we failed -- finish activity and give up.
                     Slog.e(TAG, "Second failure launching "
-                            + r.intent.getComponent().flattenToShortString()
-                            + ", giving up", e);
-                    mService.mAm.appDiedLocked(app);
+                            + r.intent.getComponent().flattenToShortString() + ", giving up", e);
+                    proc.appDied();
                     stack.requestFinishActivityLocked(r.appToken, Activity.RESULT_CANCELED, null,
                             "2nd-crash", false);
                     return false;
@@ -1658,24 +1636,21 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         }
     }
 
-    void startSpecificActivityLocked(ActivityRecord r,
-            boolean andResume, boolean checkConfig) {
+    void startSpecificActivityLocked(ActivityRecord r, boolean andResume, boolean checkConfig) {
         // Is this activity's application already running?
-        ProcessRecord app = mService.mAm.getProcessRecordLocked(r.processName,
-                r.info.applicationInfo.uid, true);
+        final WindowProcessController wpc =
+                mService.getProcessController(r.processName, r.info.applicationInfo.uid);
 
-        if (app != null && app.thread != null) {
+        if (wpc != null && wpc.hasThread()) {
             try {
-                if ((r.info.flags&ActivityInfo.FLAG_MULTIPROCESS) == 0
+                if ((r.info.flags & ActivityInfo.FLAG_MULTIPROCESS) == 0
                         || !"android".equals(r.info.packageName)) {
-                    // Don't add this if it is a platform component that is marked
-                    // to run in multiple processes, because this is actually
-                    // part of the framework so doesn't make sense to track as a
-                    // separate apk in the process.
-                    app.addPackage(r.info.packageName, r.info.applicationInfo.longVersionCode,
-                            mService.mAm.mProcessStats);
+                    // Don't add this if it is a platform component that is marked to run in
+                    // multiple processes, because this is actually part of the framework so doesn't
+                    // make sense to track as a separate apk in the process.
+                    wpc.addPackage(r.info.packageName, r.info.applicationInfo.longVersionCode);
                 }
-                realStartActivityLocked(r, app, andResume, checkConfig);
+                realStartActivityLocked(r, wpc, andResume, checkConfig);
                 return;
             } catch (RemoteException e) {
                 Slog.w(TAG, "Exception when starting activity "
@@ -1686,8 +1661,12 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             // restart the application.
         }
 
-        mService.mAm.startProcessLocked(r.processName, r.info.applicationInfo, true, 0,
-                "activity", r.intent.getComponent(), false, false, true);
+        // Post message to start process to avoid possible deadlock of calling into AMS with the
+        // ATMS lock held.
+        final Message msg = PooledLambda.obtainMessage(
+                ActivityManagerInternal::startProcess, mService.mAmInternal, r.processName,
+                r.info.applicationInfo, true, "activity", r.intent.getComponent());
+        mService.mH.sendMessage(msg);
     }
 
     void sendPowerHintForLaunchStartIfNeeded(boolean forceSend, ActivityRecord targetActivity) {
@@ -2258,9 +2237,9 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
      * Finish the topmost activities in all stacks that belong to the crashed app.
      * @param app The app that crashed.
      * @param reason Reason to perform this action.
-     * @return The task that was finished in this stack, {@code null} if haven't found any.
+     * @return The task id that was finished in this stack, or INVALID_TASK_ID if none was finished.
      */
-    TaskRecord finishTopCrashedActivitiesLocked(WindowProcessController app, String reason) {
+    int finishTopCrashedActivitiesLocked(WindowProcessController app, String reason) {
         TaskRecord finishedTask = null;
         ActivityStack focusedStack = getTopDisplayFocusedStack();
         for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
@@ -2275,7 +2254,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 }
             }
         }
-        return finishedTask;
+        return finishedTask != null ? finishedTask.taskId : INVALID_TASK_ID;
     }
 
     void finishVoiceTask(IVoiceInteractionSession session) {
@@ -2466,7 +2445,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         }
         if (displayId != INVALID_DISPLAY && canLaunchOnDisplay(r, displayId)) {
             if (r != null) {
-                stack = (T) getValidLaunchStackOnDisplay(displayId, r, options);
+                stack = (T) getValidLaunchStackOnDisplay(displayId, r, candidateTask, options);
                 if (stack != null) {
                     return stack;
                 }
@@ -2531,10 +2510,11 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
      * If there is no such stack, new dynamic stack can be created.
      * @param displayId Target display.
      * @param r Activity that should be launched there.
+     * @param candidateTask The possible task the activity might be put in.
      * @return Existing stack if there is a valid one, new dynamic stack if it is valid or null.
      */
     ActivityStack getValidLaunchStackOnDisplay(int displayId, @NonNull ActivityRecord r,
-            @Nullable ActivityOptions options) {
+            @Nullable TaskRecord candidateTask, @Nullable ActivityOptions options) {
         final ActivityDisplay activityDisplay = getActivityDisplayOrCreateLocked(displayId);
         if (activityDisplay == null) {
             throw new IllegalArgumentException(
@@ -2543,6 +2523,13 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
         if (!r.canBeLaunchedOnDisplay(displayId)) {
             return null;
+        }
+
+        // If {@code r} is already in target display and its task is the same as the candidate task,
+        // the intention should be getting a launch stack for the reusable activity, so we can use
+        // the existing stack.
+        if (r.getDisplayId() == displayId && r.getTask() == candidateTask) {
+            return candidateTask.getStack();
         }
 
         // Return the topmost valid stack on the display.
@@ -2563,6 +2550,11 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
         Slog.w(TAG, "getValidLaunchStackOnDisplay: can't launch on displayId " + displayId);
         return null;
+    }
+
+    ActivityStack getValidLaunchStackOnDisplay(int displayId, @NonNull ActivityRecord r,
+            @Nullable ActivityOptions options) {
+        return getValidLaunchStackOnDisplay(displayId, r, null /* candidateTask */, options);
     }
 
     // TODO: Can probably be consolidated into getLaunchStack()...

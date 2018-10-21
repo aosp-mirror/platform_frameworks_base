@@ -2354,6 +2354,7 @@ android.nfc.NfcAdapter$1
 android.nfc.NfcAdapter$CreateNdefMessageCallback
 android.nfc.NfcManager
 android.opengl.EGL14
+android.opengl.EGL15
 android.opengl.EGLConfig
 android.opengl.EGLContext
 android.opengl.EGLDisplay

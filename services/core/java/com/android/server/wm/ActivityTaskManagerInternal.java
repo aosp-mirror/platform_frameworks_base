@@ -430,4 +430,13 @@ public abstract class ActivityTaskManagerInternal {
 
     /** Called whenever an app crashes. */
     public abstract void onHandleAppCrash(WindowProcessController wpc);
+
+    /**
+     * Finish the topmost activities in all stacks that belong to the crashed app.
+     * @param crashedApp The app that crashed.
+     * @param reason Reason to perform this action.
+     * @return The task id that was finished in this stack, or INVALID_TASK_ID if none was finished.
+     */
+    public abstract int finishTopCrashedActivities(
+            WindowProcessController crashedApp, String reason);
 }

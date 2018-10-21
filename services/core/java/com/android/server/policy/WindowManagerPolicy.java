@@ -559,10 +559,10 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
         public Object getWindowManagerLock();
 
         /** Register a system listener for touch events */
-        void registerPointerEventListener(PointerEventListener listener);
+        void registerPointerEventListener(PointerEventListener listener, int displayId);
 
         /** Unregister a system listener for touch events */
-        void unregisterPointerEventListener(PointerEventListener listener);
+        void unregisterPointerEventListener(PointerEventListener listener, int displayId);
 
         /**
          * @return The content insets of the docked divider window.

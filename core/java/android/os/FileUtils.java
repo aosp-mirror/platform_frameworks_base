@@ -1198,6 +1198,19 @@ public class FileUtils {
 
     /** {@hide} */
     public static int translateModeStringToPosix(String mode) {
+        // Sanity check for invalid chars
+        for (int i = 0; i < mode.length(); i++) {
+            switch (mode.charAt(i)) {
+                case 'r':
+                case 'w':
+                case 't':
+                case 'a':
+                    break;
+                default:
+                    throw new IllegalArgumentException("Bad mode: " + mode);
+            }
+        }
+
         int res = 0;
         if (mode.startsWith("rw")) {
             res |= O_RDWR | O_CREAT;

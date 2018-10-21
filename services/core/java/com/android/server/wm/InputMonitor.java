@@ -435,14 +435,14 @@ final class InputMonitor {
                 final RecentsAnimationController recentsAnimationController =
                         mService.getRecentsAnimationController();
                 if (recentsAnimationController != null
-                        && recentsAnimationController.hasInputConsumerForApp(w.mAppToken)) {
+                        && recentsAnimationController.shouldApplyInputConsumer(w.mAppToken)) {
                     if (recentsAnimationController.updateInputConsumerForApp(
                             recentsAnimationInputConsumer.mWindowHandle, hasFocus)) {
                         addInputWindowHandle(recentsAnimationInputConsumer.mWindowHandle);
                         mAddRecentsAnimationInputConsumerHandle = false;
                     }
-                    // Skip adding the window below regardless of whether there is an input consumer
-                    // to handle it
+                    // If the target app window does not yet exist, then we don't add the input
+                    // consumer window, but also don't add the app window below.
                     return;
                 }
             }

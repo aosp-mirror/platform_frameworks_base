@@ -92,7 +92,9 @@ public class AppLaunch extends InstrumentationTestCase {
             "com.google.android.wearable.action.GOOGLE";
     private static final int INITIAL_LAUNCH_IDLE_TIMEOUT = 5000; // 5s to allow app to idle
     private static final int POST_LAUNCH_IDLE_TIMEOUT = 750; // 750ms idle for non initial launches
-    private static final int BETWEEN_LAUNCH_SLEEP_TIMEOUT = 5000; // 5s between launching apps
+    private static final int BEFORE_FORCE_STOP_SLEEP_TIMEOUT = 1000; // 1s before force stopping
+    private static final int BEFORE_KILL_APP_SLEEP_TIMEOUT = 1000; // 1s before killing
+    private static final int BETWEEN_LAUNCH_SLEEP_TIMEOUT = 3000; // 3s between launching apps
     private static final int PROFILE_SAVE_SLEEP_TIMEOUT = 1000; // Allow 1s for the profile to save
     private static final String LAUNCH_SUB_DIRECTORY = "launch_logs";
     private static final String LAUNCH_FILE = "applaunch.txt";
@@ -327,7 +329,14 @@ public class AppLaunch extends InstrumentationTestCase {
                     }
                 }
                 if(mForceStopApp) {
-                    closeApp(launch.getApp());
+                    sleep(BEFORE_FORCE_STOP_SLEEP_TIMEOUT);
+                    forceStopApp(launch.getApp());
+                    sleep(BEFORE_KILL_APP_SLEEP_TIMEOUT);
+                    // Close again for good measure (just in case).
+                    forceStopApp(launch.getApp());
+                    // Kill the backgrounded process in the case forceStopApp only sent it to
+                    // background.
+                    killBackgroundApp(launch.getApp());
                 } else {
                     startHomeIntent();
                 }
@@ -638,7 +647,7 @@ public class AppLaunch extends InstrumentationTestCase {
         // Kill all the apps
         for (String appName : mNameToIntent.keySet()) {
             Log.w(TAG, String.format("killing %s", appName));
-            closeApp(appName);
+            forceStopApp(appName);
         }
         // Drop all the cache.
         assertNotNull("Issue in dropping the cache",
@@ -646,12 +655,24 @@ public class AppLaunch extends InstrumentationTestCase {
                         .executeShellCommand(DROP_CACHE_SCRIPT));
     }
 
-    private void closeApp(String appName) {
+    private void forceStopApp(String appName) {
         Intent startIntent = mNameToIntent.get(appName);
         if (startIntent != null) {
             String packageName = startIntent.getComponent().getPackageName();
             try {
                 mAm.forceStopPackage(packageName, UserHandle.USER_CURRENT);
+            } catch (RemoteException e) {
+                Log.w(TAG, "Error closing app", e);
+            }
+        }
+    }
+
+    private void killBackgroundApp(String appName) {
+        Intent startIntent = mNameToIntent.get(appName);
+        if (startIntent != null) {
+            String packageName = startIntent.getComponent().getPackageName();
+            try {
+                mAm.killBackgroundProcesses(packageName, UserHandle.USER_CURRENT);
             } catch (RemoteException e) {
                 Log.w(TAG, "Error closing app", e);
             }

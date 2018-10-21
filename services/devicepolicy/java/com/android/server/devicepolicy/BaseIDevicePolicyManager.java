@@ -70,7 +70,8 @@ abstract class BaseIDevicePolicyManager extends IDevicePolicyManager.Stub {
     }
 
     @Override
-    public boolean checkDeviceIdentifierAccess(String packageName, int userHandle) {
+    public boolean checkDeviceIdentifierAccess(String packageName, int userHandle, int pid,
+            int uid) {
         return false;
     }
 

@@ -158,7 +158,7 @@ public class KernelWakelockReader {
                                          PROC_WAKELOCKS_FORMAT,
                         nameStringArray, wlData, null);
 
-                name = nameStringArray[0];
+                name = nameStringArray[0].trim();
                 count = (int) wlData[1];
 
                 if (wakeup_sources) {
