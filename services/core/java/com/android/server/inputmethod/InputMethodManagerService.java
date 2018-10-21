@@ -147,6 +147,7 @@ import com.android.internal.view.IInputMethodSession;
 import com.android.internal.view.IInputSessionCallback;
 import com.android.internal.view.InputBindResult;
 import com.android.internal.view.InputMethodClient;
+import com.android.internal.view.InputMethodClient.StartInputReason;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
@@ -694,7 +695,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         final IBinder mImeToken;
         @NonNull
         final String mImeId;
-        // @InputMethodClient.StartInputReason
+        @StartInputReason
         final int mStartInputReason;
         final boolean mRestarting;
         @Nullable
@@ -706,7 +707,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         final int mClientBindSequenceNumber;
 
         StartInputInfo(@NonNull IBinder imeToken, @NonNull String imeId,
-                /* @InputMethodClient.StartInputReason */ int startInputReason, boolean restarting,
+                @StartInputReason int startInputReason, boolean restarting,
                 @Nullable IBinder targetWindow, @NonNull EditorInfo editorInfo,
                 @SoftInputModeFlags int targetWindowSoftInputMode, int clientBindSequenceNumber) {
             mSequenceNumber = sSequenceNumber.getAndIncrement();
@@ -776,7 +777,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             String mImeTokenString;
             @NonNull
             String mImeId;
-            /* @InputMethodClient.StartInputReason */
+            @StartInputReason
             int mStartInputReason;
             boolean mRestarting;
             @NonNull
@@ -1861,8 +1862,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     @GuardedBy("mMethodMap")
     @NonNull
-    InputBindResult attachNewInputLocked(
-            /* @InputMethodClient.StartInputReason */ final int startInputReason, boolean initial) {
+    InputBindResult attachNewInputLocked(@StartInputReason int startInputReason, boolean initial) {
         if (!mBoundToMethod) {
             executeOrSendMessage(mCurMethod, mCaller.obtainMessageOO(
                     MSG_BIND_INPUT, mCurMethod, mCurClient.binding));
@@ -1893,7 +1893,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     @NonNull
     InputBindResult startInputUncheckedLocked(@NonNull ClientState cs, IInputContext inputContext,
             @MissingMethodFlags int missingMethods, @NonNull EditorInfo attribute, int controlFlags,
-            /* @InputMethodClient.StartInputReason */ final int startInputReason) {
+            @StartInputReason int startInputReason) {
         // If no method is currently selected, do nothing.
         if (mCurMethodId == null) {
             return InputBindResult.NO_IME;
@@ -2739,11 +2739,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     @NonNull
     @Override
     public InputBindResult startInputOrWindowGainedFocus(
-            /* @InputMethodClient.StartInputReason */ final int startInputReason,
-            IInputMethodClient client, IBinder windowToken, int controlFlags,
-            @SoftInputModeFlags int softInputMode, int windowFlags, @Nullable EditorInfo attribute,
-            IInputContext inputContext, @MissingMethodFlags int missingMethods,
-            int unverifiedTargetSdkVersion) {
+            @StartInputReason int startInputReason, IInputMethodClient client, IBinder windowToken,
+            int controlFlags, @SoftInputModeFlags int softInputMode, int windowFlags,
+            @Nullable EditorInfo attribute, IInputContext inputContext,
+            @MissingMethodFlags int missingMethods, int unverifiedTargetSdkVersion) {
         if (windowToken == null) {
             Slog.e(TAG, "windowToken cannot be null.");
             return InputBindResult.NULL;
@@ -2764,11 +2763,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
 
     @NonNull
     private InputBindResult startInputOrWindowGainedFocusInternal(
-            /* @InputMethodClient.StartInputReason */ final int startInputReason,
-            IInputMethodClient client, @NonNull IBinder windowToken, int controlFlags,
-            @SoftInputModeFlags int softInputMode, int windowFlags, EditorInfo attribute,
-            IInputContext inputContext, @MissingMethodFlags int missingMethods,
-            int unverifiedTargetSdkVersion) {
+            @StartInputReason int startInputReason, IInputMethodClient client,
+            @NonNull IBinder windowToken, int controlFlags, @SoftInputModeFlags int softInputMode,
+            int windowFlags, EditorInfo attribute, IInputContext inputContext,
+            @MissingMethodFlags int missingMethods, int unverifiedTargetSdkVersion) {
         // Needs to check the validity before clearing calling identity
         final boolean calledFromValidUser = calledFromValidUser();
         InputBindResult res = null;
