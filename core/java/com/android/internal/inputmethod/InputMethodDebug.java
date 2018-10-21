@@ -20,7 +20,6 @@ import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
 
 import com.android.internal.view.InputMethodClient;
-import com.android.internal.view.InputMethodClient.StartInputReason;
 import com.android.internal.view.InputMethodClient.UnbindReason;
 
 /**
@@ -41,25 +40,25 @@ public final class InputMethodDebug {
      */
     public static String startInputReasonToString(@StartInputReason int reason) {
         switch (reason) {
-            case InputMethodClient.START_INPUT_REASON_UNSPECIFIED:
+            case StartInputReason.START_INPUT_REASON_UNSPECIFIED:
                 return "UNSPECIFIED";
-            case InputMethodClient.START_INPUT_REASON_WINDOW_FOCUS_GAIN:
+            case StartInputReason.START_INPUT_REASON_WINDOW_FOCUS_GAIN:
                 return "WINDOW_FOCUS_GAIN";
-            case InputMethodClient.START_INPUT_REASON_WINDOW_FOCUS_GAIN_REPORT_ONLY:
+            case StartInputReason.START_INPUT_REASON_WINDOW_FOCUS_GAIN_REPORT_ONLY:
                 return "WINDOW_FOCUS_GAIN_REPORT_ONLY";
-            case InputMethodClient.START_INPUT_REASON_APP_CALLED_RESTART_INPUT_API:
+            case StartInputReason.START_INPUT_REASON_APP_CALLED_RESTART_INPUT_API:
                 return "APP_CALLED_RESTART_INPUT_API";
-            case InputMethodClient.START_INPUT_REASON_CHECK_FOCUS:
+            case StartInputReason.START_INPUT_REASON_CHECK_FOCUS:
                 return "CHECK_FOCUS";
-            case InputMethodClient.START_INPUT_REASON_BOUND_TO_IMMS:
+            case StartInputReason.START_INPUT_REASON_BOUND_TO_IMMS:
                 return "BOUND_TO_IMMS";
-            case InputMethodClient.START_INPUT_REASON_UNBOUND_FROM_IMMS:
+            case StartInputReason.START_INPUT_REASON_UNBOUND_FROM_IMMS:
                 return "UNBOUND_FROM_IMMS";
-            case InputMethodClient.START_INPUT_REASON_ACTIVATED_BY_IMMS:
+            case StartInputReason.START_INPUT_REASON_ACTIVATED_BY_IMMS:
                 return "ACTIVATED_BY_IMMS";
-            case InputMethodClient.START_INPUT_REASON_DEACTIVATED_BY_IMMS:
+            case StartInputReason.START_INPUT_REASON_DEACTIVATED_BY_IMMS:
                 return "DEACTIVATED_BY_IMMS";
-            case InputMethodClient.START_INPUT_REASON_SESSION_CREATED_BY_IME:
+            case StartInputReason.START_INPUT_REASON_SESSION_CREATED_BY_IME:
                 return "SESSION_CREATED_BY_IME";
             default:
                 return "Unknown=" + reason;

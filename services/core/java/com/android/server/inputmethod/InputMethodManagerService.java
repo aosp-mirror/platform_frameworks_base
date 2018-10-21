@@ -132,6 +132,7 @@ import com.android.internal.content.PackageMonitor;
 import com.android.internal.inputmethod.IInputContentUriToken;
 import com.android.internal.inputmethod.IInputMethodPrivilegedOperations;
 import com.android.internal.inputmethod.InputMethodDebug;
+import com.android.internal.inputmethod.StartInputReason;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.HandlerCaller;
@@ -148,7 +149,6 @@ import com.android.internal.view.IInputMethodSession;
 import com.android.internal.view.IInputSessionCallback;
 import com.android.internal.view.InputBindResult;
 import com.android.internal.view.InputMethodClient;
-import com.android.internal.view.InputMethodClient.StartInputReason;
 import com.android.internal.view.InputMethodClient.UnbindReason;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
@@ -2052,7 +2052,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     mCurClient.curSession = new SessionState(mCurClient,
                             method, session, channel);
                     InputBindResult res = attachNewInputLocked(
-                            InputMethodClient.START_INPUT_REASON_SESSION_CREATED_BY_IME, true);
+                            StartInputReason.START_INPUT_REASON_SESSION_CREATED_BY_IME, true);
                     if (res.method != null) {
                         executeOrSendMessage(mCurClient.client, mCaller.obtainMessageOO(
                                 MSG_BIND_CLIENT, mCurClient.client, res));

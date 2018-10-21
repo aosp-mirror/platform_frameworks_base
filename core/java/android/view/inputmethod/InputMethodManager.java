@@ -61,6 +61,7 @@ import android.view.autofill.AutofillManager;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.inputmethod.InputMethodDebug;
 import com.android.internal.inputmethod.InputMethodPrivilegedOperationsRegistry;
+import com.android.internal.inputmethod.StartInputReason;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.view.IInputConnectionWrapper;
 import com.android.internal.view.IInputContext;
@@ -541,7 +542,7 @@ public final class InputMethodManager {
                         mCurId = res.id;
                         mBindSequence = res.sequence;
                     }
-                    startInputInner(InputMethodClient.START_INPUT_REASON_BOUND_TO_IMMS,
+                    startInputInner(StartInputReason.START_INPUT_REASON_BOUND_TO_IMMS,
                             null, 0, 0, 0);
                     return;
                 }
@@ -568,7 +569,7 @@ public final class InputMethodManager {
                     }
                     if (startInput) {
                         startInputInner(
-                                InputMethodClient.START_INPUT_REASON_UNBOUND_FROM_IMMS, null, 0, 0,
+                                StartInputReason.START_INPUT_REASON_UNBOUND_FROM_IMMS, null, 0, 0,
                                 0);
                     }
                     return;
@@ -599,8 +600,8 @@ public final class InputMethodManager {
                         if (mServedView != null && canStartInput(mServedView)) {
                             if (checkFocusNoStartInput(mRestartOnNextWindowFocus)) {
                                 final int reason = active ?
-                                        InputMethodClient.START_INPUT_REASON_ACTIVATED_BY_IMMS :
-                                        InputMethodClient.START_INPUT_REASON_DEACTIVATED_BY_IMMS;
+                                        StartInputReason.START_INPUT_REASON_ACTIVATED_BY_IMMS :
+                                        StartInputReason.START_INPUT_REASON_DEACTIVATED_BY_IMMS;
                                 startInputInner(reason, null, 0, 0, 0);
                             }
                         }
@@ -1387,11 +1388,11 @@ public final class InputMethodManager {
             mServedConnecting = true;
         }
 
-        startInputInner(InputMethodClient.START_INPUT_REASON_APP_CALLED_RESTART_INPUT_API, null, 0,
+        startInputInner(StartInputReason.START_INPUT_REASON_APP_CALLED_RESTART_INPUT_API, null, 0,
                 0, 0);
     }
 
-    boolean startInputInner(@InputMethodClient.StartInputReason final int startInputReason,
+    boolean startInputInner(@StartInputReason int startInputReason,
             @Nullable IBinder windowGainingFocus, int controlFlags, int softInputMode,
             int windowFlags) {
         final View view;
@@ -1655,7 +1656,7 @@ public final class InputMethodManager {
     @UnsupportedAppUsage
     public void checkFocus() {
         if (checkFocusNoStartInput(false)) {
-            startInputInner(InputMethodClient.START_INPUT_REASON_CHECK_FOCUS, null, 0, 0, 0);
+            startInputInner(StartInputReason.START_INPUT_REASON_CHECK_FOCUS, null, 0, 0, 0);
         }
     }
 
@@ -1745,7 +1746,7 @@ public final class InputMethodManager {
             // should be done in conjunction with telling the system service
             // about the window gaining focus, to help make the transition
             // smooth.
-            if (startInputInner(InputMethodClient.START_INPUT_REASON_WINDOW_FOCUS_GAIN,
+            if (startInputInner(StartInputReason.START_INPUT_REASON_WINDOW_FOCUS_GAIN,
                     rootView.getWindowToken(), controlFlags, softInputMode, windowFlags)) {
                 return;
             }
@@ -1757,7 +1758,7 @@ public final class InputMethodManager {
             try {
                 if (DEBUG) Log.v(TAG, "Reporting focus gain, without startInput");
                 mService.startInputOrWindowGainedFocus(
-                        InputMethodClient.START_INPUT_REASON_WINDOW_FOCUS_GAIN_REPORT_ONLY, mClient,
+                        StartInputReason.START_INPUT_REASON_WINDOW_FOCUS_GAIN_REPORT_ONLY, mClient,
                         rootView.getWindowToken(), controlFlags, softInputMode, windowFlags, null,
                         null, 0 /* missingMethodFlags */,
                         rootView.getContext().getApplicationInfo().targetSdkVersion);
