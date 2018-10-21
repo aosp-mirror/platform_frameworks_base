@@ -109,6 +109,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.view.Window;
 import android.view.WindowManager;
+import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
 import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputBinding;
 import android.view.inputmethod.InputConnection;
@@ -501,6 +502,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
      *
      * @see #mCurFocusedWindow
      */
+    @SoftInputModeFlags
     int mCurFocusedWindowSoftInputMode;
 
     /**
@@ -699,13 +701,14 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         final IBinder mTargetWindow;
         @NonNull
         final EditorInfo mEditorInfo;
+        @SoftInputModeFlags
         final int mTargetWindowSoftInputMode;
         final int mClientBindSequenceNumber;
 
         StartInputInfo(@NonNull IBinder imeToken, @NonNull String imeId,
                 /* @InputMethodClient.StartInputReason */ int startInputReason, boolean restarting,
                 @Nullable IBinder targetWindow, @NonNull EditorInfo editorInfo,
-                int targetWindowSoftInputMode, int clientBindSequenceNumber) {
+                @SoftInputModeFlags int targetWindowSoftInputMode, int clientBindSequenceNumber) {
             mSequenceNumber = sSequenceNumber.getAndIncrement();
             mTimestamp = SystemClock.uptimeMillis();
             mWallTime = System.currentTimeMillis();
@@ -780,6 +783,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             String mTargetWindowString;
             @NonNull
             EditorInfo mEditorInfo;
+            @SoftInputModeFlags
             int mTargetWindowSoftInputMode;
             int mClientBindSequenceNumber;
 
@@ -2736,9 +2740,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     @Override
     public InputBindResult startInputOrWindowGainedFocus(
             /* @InputMethodClient.StartInputReason */ final int startInputReason,
-            IInputMethodClient client, IBinder windowToken, int controlFlags, int softInputMode,
-            int windowFlags, @Nullable EditorInfo attribute, IInputContext inputContext,
-            @MissingMethodFlags int missingMethods, int unverifiedTargetSdkVersion) {
+            IInputMethodClient client, IBinder windowToken, int controlFlags,
+            @SoftInputModeFlags int softInputMode, int windowFlags, @Nullable EditorInfo attribute,
+            IInputContext inputContext, @MissingMethodFlags int missingMethods,
+            int unverifiedTargetSdkVersion) {
         if (windowToken == null) {
             Slog.e(TAG, "windowToken cannot be null.");
             return InputBindResult.NULL;
@@ -2761,9 +2766,9 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private InputBindResult startInputOrWindowGainedFocusInternal(
             /* @InputMethodClient.StartInputReason */ final int startInputReason,
             IInputMethodClient client, @NonNull IBinder windowToken, int controlFlags,
-            /* @android.view.WindowManager.LayoutParams.SoftInputModeFlags */ int softInputMode,
-            int windowFlags, EditorInfo attribute, IInputContext inputContext,
-            @MissingMethodFlags int missingMethods, int unverifiedTargetSdkVersion) {
+            @SoftInputModeFlags int softInputMode, int windowFlags, EditorInfo attribute,
+            IInputContext inputContext, @MissingMethodFlags int missingMethods,
+            int unverifiedTargetSdkVersion) {
         // Needs to check the validity before clearing calling identity
         final boolean calledFromValidUser = calledFromValidUser();
         InputBindResult res = null;
