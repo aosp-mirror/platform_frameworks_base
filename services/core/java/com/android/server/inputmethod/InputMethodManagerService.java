@@ -131,6 +131,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.content.PackageMonitor;
 import com.android.internal.inputmethod.IInputContentUriToken;
 import com.android.internal.inputmethod.IInputMethodPrivilegedOperations;
+import com.android.internal.inputmethod.InputMethodDebug;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.HandlerCaller;
@@ -842,7 +843,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 pw.println(" time=" + dataFormat.format(new Date(entry.mWallTime))
                         + " (timestamp=" + entry.mTimestamp + ")"
                         + " reason="
-                        + InputMethodClient.getStartInputReason(entry.mStartInputReason)
+                        + InputMethodDebug.startInputReasonToString(entry.mStartInputReason)
                         + " restarting=" + entry.mRestarting);
 
                 pw.print(prefix);
@@ -854,7 +855,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         + " clientBindSeq=" + entry.mClientBindSequenceNumber);
 
                 pw.print(prefix);
-                pw.println(" softInputMode=" + InputMethodClient.softInputModeToString(
+                pw.println(" softInputMode=" + InputMethodDebug.softInputModeToString(
                                 entry.mTargetWindowSoftInputMode));
 
                 pw.print(prefix);
@@ -2752,7 +2753,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         if (result == null) {
             // This must never happen, but just in case.
             Slog.wtf(TAG, "InputBindResult is @NonNull. startInputReason="
-                    + InputMethodClient.getStartInputReason(startInputReason)
+                    + InputMethodDebug.startInputReasonToString(startInputReason)
                     + " windowFlags=#" + Integer.toHexString(windowFlags)
                     + " editorInfo=" + attribute);
             return InputBindResult.NULL;
@@ -2775,14 +2776,14 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     mWindowManagerInternal.getDisplayIdForWindow(windowToken);
             synchronized (mMethodMap) {
                 if (DEBUG) Slog.v(TAG, "startInputOrWindowGainedFocusInternal: reason="
-                        + InputMethodClient.getStartInputReason(startInputReason)
+                        + InputMethodDebug.startInputReasonToString(startInputReason)
                         + " client=" + client.asBinder()
                         + " inputContext=" + inputContext
                         + " missingMethods="
                         + InputConnectionInspector.getMissingMethodFlagsAsString(missingMethods)
                         + " attribute=" + attribute
                         + " controlFlags=#" + Integer.toHexString(controlFlags)
-                        + " softInputMode=" + InputMethodClient.softInputModeToString(softInputMode)
+                        + " softInputMode=" + InputMethodDebug.softInputModeToString(softInputMode)
                         + " windowFlags=#" + Integer.toHexString(windowFlags)
                         + " unverifiedTargetSdkVersion=" + unverifiedTargetSdkVersion);
 
@@ -4580,7 +4581,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             p.println("  mCurClient=" + client + " mCurSeq=" + mCurSeq);
             p.println("  mCurFocusedWindow=" + mCurFocusedWindow
                     + " softInputMode=" +
-                    InputMethodClient.softInputModeToString(mCurFocusedWindowSoftInputMode)
+                    InputMethodDebug.softInputModeToString(mCurFocusedWindowSoftInputMode)
                     + " client=" + mCurFocusedWindowClient);
             focusedWindowClient = mCurFocusedWindowClient;
             p.println("  mCurId=" + mCurId + " mHaveConnection=" + mHaveConnection

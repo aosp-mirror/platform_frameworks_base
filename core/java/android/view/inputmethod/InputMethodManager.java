@@ -59,6 +59,7 @@ import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
 import android.view.autofill.AutofillManager;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.inputmethod.InputMethodDebug;
 import com.android.internal.inputmethod.InputMethodPrivilegedOperationsRegistry;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.view.IInputConnectionWrapper;
@@ -550,7 +551,7 @@ public final class InputMethodManager {
                     final int reason = msg.arg2;
                     if (DEBUG) {
                         Log.i(TAG, "handleMessage: MSG_UNBIND " + sequence +
-                                " reason=" + InputMethodClient.getUnbindReason(reason));
+                                " reason=" + InputMethodDebug.unbindReasonToString(reason));
                     }
                     final boolean startInput;
                     synchronized (mH) {
@@ -1400,7 +1401,7 @@ public final class InputMethodManager {
             // Make sure we have a window token for the served view.
             if (DEBUG) {
                 Log.v(TAG, "Starting input: view=" + dumpViewInfo(view) +
-                        " reason=" + InputMethodClient.getStartInputReason(startInputReason));
+                        " reason=" + InputMethodDebug.startInputReasonToString(startInputReason));
             }
             if (view == null) {
                 if (DEBUG) Log.v(TAG, "ABORT input: no served view!");
@@ -1519,7 +1520,7 @@ public final class InputMethodManager {
                 if (res == null) {
                     Log.wtf(TAG, "startInputOrWindowGainedFocus must not return"
                             + " null. startInputReason="
-                            + InputMethodClient.getStartInputReason(startInputReason)
+                            + InputMethodDebug.startInputReasonToString(startInputReason)
                             + " editorInfo=" + tba
                             + " controlFlags=#" + Integer.toHexString(controlFlags));
                     return false;
@@ -1717,7 +1718,7 @@ public final class InputMethodManager {
         boolean forceNewFocus = false;
         synchronized (mH) {
             if (DEBUG) Log.v(TAG, "onWindowFocus: " + focusedView
-                    + " softInputMode=" + InputMethodClient.softInputModeToString(softInputMode)
+                    + " softInputMode=" + InputMethodDebug.softInputModeToString(softInputMode)
                     + " first=" + first + " flags=#"
                     + Integer.toHexString(windowFlags));
             if (mRestartOnNextWindowFocus) {
