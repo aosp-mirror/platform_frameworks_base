@@ -3150,10 +3150,10 @@ class StorageManagerService extends IStorageManager.Stub
 
             if (toSystem) {
                 // Everything else goes into sandbox.
-                return device + "Android/sandbox/" + sandboxId.replace(':', '/') + "/" + devicePath;
+                return device + "Android/sandbox/" + sandboxId + "/" + devicePath;
             } else {
                 // Does path belong to this sandbox? If so, leave sandbox.
-                final String sandboxPrefix = "Android/sandbox/" + sandboxId.replace(':', '/') + "/";
+                final String sandboxPrefix = "Android/sandbox/" + sandboxId + "/";
                 if (devicePath.startsWith(sandboxPrefix)) {
                     return device + devicePath.substring(sandboxPrefix.length());
                 }
