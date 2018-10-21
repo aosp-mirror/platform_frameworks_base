@@ -137,6 +137,17 @@ public class ActivityManager {
     private static final int FIRST_START_NON_FATAL_ERROR_CODE = 100;
     private static final int LAST_START_NON_FATAL_ERROR_CODE = 199;
 
+    /**
+     * Disable hidden API checks for the newly started instrumentation.
+     * @hide
+     */
+    public static final int INSTR_FLAG_DISABLE_HIDDEN_API_CHECKS = 1 << 0;
+    /**
+     * Mount full external storage for the newly started instrumentation.
+     * @hide
+     */
+    public static final int INSTR_FLAG_MOUNT_EXTERNAL_STORAGE_FULL = 1 << 1;
+
     static final class UidObserver extends IUidObserver.Stub {
         final OnUidImportanceListener mListener;
         final Context mContext;
