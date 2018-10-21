@@ -113,6 +113,7 @@ import android.view.inputmethod.EditorInfo;
 import android.view.inputmethod.InputBinding;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputConnectionInspector;
+import android.view.inputmethod.InputConnectionInspector.MissingMethodFlags;
 import android.view.inputmethod.InputMethod;
 import android.view.inputmethod.InputMethodInfo;
 import android.view.inputmethod.InputMethodManager;
@@ -517,6 +518,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
      *
      * @see android.view.inputmethod.InputConnectionInspector.MissingMethodFlags
      */
+    @MissingMethodFlags
     int mCurInputContextMissingMethods;
 
     /**
@@ -1886,8 +1888,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     @GuardedBy("mMethodMap")
     @NonNull
     InputBindResult startInputUncheckedLocked(@NonNull ClientState cs, IInputContext inputContext,
-            /* @InputConnectionInspector.missingMethods */ final int missingMethods,
-            @NonNull EditorInfo attribute, int controlFlags,
+            @MissingMethodFlags int missingMethods, @NonNull EditorInfo attribute, int controlFlags,
             /* @InputMethodClient.StartInputReason */ final int startInputReason) {
         // If no method is currently selected, do nothing.
         if (mCurMethodId == null) {
@@ -2737,8 +2738,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             /* @InputMethodClient.StartInputReason */ final int startInputReason,
             IInputMethodClient client, IBinder windowToken, int controlFlags, int softInputMode,
             int windowFlags, @Nullable EditorInfo attribute, IInputContext inputContext,
-            /* @InputConnectionInspector.missingMethods */ final int missingMethods,
-            int unverifiedTargetSdkVersion) {
+            @MissingMethodFlags int missingMethods, int unverifiedTargetSdkVersion) {
         if (windowToken == null) {
             Slog.e(TAG, "windowToken cannot be null.");
             return InputBindResult.NULL;
@@ -2763,8 +2763,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             IInputMethodClient client, @NonNull IBinder windowToken, int controlFlags,
             /* @android.view.WindowManager.LayoutParams.SoftInputModeFlags */ int softInputMode,
             int windowFlags, EditorInfo attribute, IInputContext inputContext,
-            /* @InputConnectionInspector.missingMethods */  final int missingMethods,
-            int unverifiedTargetSdkVersion) {
+            @MissingMethodFlags int missingMethods, int unverifiedTargetSdkVersion) {
         // Needs to check the validity before clearing calling identity
         final boolean calledFromValidUser = calledFromValidUser();
         InputBindResult res = null;
