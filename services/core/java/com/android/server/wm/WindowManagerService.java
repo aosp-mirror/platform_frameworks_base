@@ -3668,14 +3668,19 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    @Override
+    public void freezeRotation(int rotation) {
+        freezeDisplayRotation(Display.DEFAULT_DISPLAY, rotation);
+    }
+
     /**
      * Freeze rotation changes.  (Enable "rotation lock".)
      * Persists across reboots.
-     * @param rotation The desired rotation to freeze to, or -1 to use the
-     * current rotation.
+     * @param displayId The ID of the display to freeze.
+     * @param rotation The desired rotation to freeze to, or -1 to use the current rotation.
      */
     @Override
-    public void freezeRotation(int rotation) {
+    public void freezeDisplayRotation(int displayId, int rotation) {
         // TODO(multi-display): Track which display is rotated.
         if (!checkCallingPermission(android.Manifest.permission.SET_ORIENTATION,
                 "freezeRotation()")) {
@@ -3686,14 +3691,16 @@ public class WindowManagerService extends IWindowManager.Stub
                     + "rotation constant.");
         }
 
-        final int defaultDisplayRotation = getDefaultDisplayRotation();
-        if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "freezeRotation: mRotation="
-                + defaultDisplayRotation);
-
         long origId = Binder.clearCallingIdentity();
         try {
-            mPolicy.setUserRotationMode(WindowManagerPolicy.USER_ROTATION_LOCKED,
-                    rotation == -1 ? defaultDisplayRotation : rotation);
+            synchronized (mWindowMap) {
+                final DisplayContent display = mRoot.getDisplayContent(displayId);
+                if (display == null) {
+                    Slog.w(TAG, "Trying to freeze rotation for a missing display.");
+                    return;
+                }
+                display.getDisplayRotation().freezeRotation(rotation);
+            }
         } finally {
             Binder.restoreCallingIdentity(origId);
         }
@@ -3701,12 +3708,17 @@ public class WindowManagerService extends IWindowManager.Stub
         updateRotationUnchecked(false, false);
     }
 
+    @Override
+    public void thawRotation() {
+        thawDisplayRotation(Display.DEFAULT_DISPLAY);
+    }
+
     /**
      * Thaw rotation changes.  (Disable "rotation lock".)
      * Persists across reboots.
      */
     @Override
-    public void thawRotation() {
+    public void thawDisplayRotation(int displayId) {
         if (!checkCallingPermission(android.Manifest.permission.SET_ORIENTATION,
                 "thawRotation()")) {
             throw new SecurityException("Requires SET_ORIENTATION permission");
@@ -3717,13 +3729,36 @@ public class WindowManagerService extends IWindowManager.Stub
 
         long origId = Binder.clearCallingIdentity();
         try {
-            mPolicy.setUserRotationMode(WindowManagerPolicy.USER_ROTATION_FREE,
-                    777); // rot not used
+            synchronized (mWindowMap) {
+                final DisplayContent display = mRoot.getDisplayContent(displayId);
+                if (display == null) {
+                    Slog.w(TAG, "Trying to thaw rotation for a missing display.");
+                    return;
+                }
+                display.getDisplayRotation().thawRotation();
+            }
         } finally {
             Binder.restoreCallingIdentity(origId);
         }
 
         updateRotationUnchecked(false, false);
+    }
+
+    @Override
+    public boolean isRotationFrozen() {
+        return isDisplayRotationFrozen(Display.DEFAULT_DISPLAY);
+    }
+
+    @Override
+    public boolean isDisplayRotationFrozen(int displayId) {
+        synchronized (mWindowMap) {
+            final DisplayContent display = mRoot.getDisplayContent(displayId);
+            if (display == null) {
+                Slog.w(TAG, "Trying to thaw rotation for a missing display.");
+                return false;
+            }
+            return display.getDisplayRotation().isRotationFrozen();
+        }
     }
 
     /**
@@ -3792,11 +3827,6 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized (mWindowMap) {
             return getDefaultDisplayContentLocked().getRotation();
         }
-    }
-
-    @Override
-    public boolean isRotationFrozen() {
-        return mPolicy.getUserRotationMode() == WindowManagerPolicy.USER_ROTATION_LOCKED;
     }
 
     @Override

@@ -432,17 +432,6 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public int getUserRotationMode() {
-        return 0;
-    }
-
-    @Override
-    public void setUserRotationMode(int mode,
-            int rotation) {
-
-    }
-
-    @Override
     public int adjustSystemUiVisibilityLw(int visibility) {
         return 0;
     }
