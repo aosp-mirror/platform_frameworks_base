@@ -719,8 +719,7 @@ public class NotificationManagerService extends SystemService {
                     return;
                 }
                 final long now = System.currentTimeMillis();
-                MetricsLogger.action(r.getLogMaker(now)
-                        .setCategory(MetricsEvent.NOTIFICATION_ITEM)
+                MetricsLogger.action(r.getItemLogMaker()
                         .setType(MetricsEvent.TYPE_ACTION)
                         .addTaggedData(MetricsEvent.NOTIFICATION_SHADE_INDEX, nv.rank)
                         .addTaggedData(MetricsEvent.NOTIFICATION_SHADE_COUNT, nv.count));
@@ -865,8 +864,7 @@ public class NotificationManagerService extends SystemService {
                     r.stats.onExpansionChanged(userAction, expanded);
                     final long now = System.currentTimeMillis();
                     if (userAction) {
-                        MetricsLogger.action(r.getLogMaker(now)
-                                .setCategory(MetricsEvent.NOTIFICATION_ITEM)
+                        MetricsLogger.action(r.getItemLogMaker()
                                 .setType(expanded ? MetricsEvent.TYPE_DETAIL
                                         : MetricsEvent.TYPE_COLLAPSE));
                     }
@@ -5842,8 +5840,7 @@ public class NotificationManagerService extends SystemService {
         mArchive.record(r.sbn);
 
         final long now = System.currentTimeMillis();
-        final LogMaker logMaker = r.getLogMaker(now)
-                .setCategory(MetricsEvent.NOTIFICATION_ITEM)
+        final LogMaker logMaker = r.getItemLogMaker()
                 .setType(MetricsEvent.TYPE_DISMISS)
                 .setSubtype(reason);
         if (rank != -1 && count != -1) {

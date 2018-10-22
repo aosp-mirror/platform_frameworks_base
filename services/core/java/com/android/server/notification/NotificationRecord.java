@@ -611,6 +611,7 @@ public final class NotificationRecord {
     }
 
     public void applyAdjustments() {
+        long now = System.currentTimeMillis();
         synchronized (mAdjustments) {
             for (Adjustment adjustment: mAdjustments) {
                 Bundle signals = adjustment.getSignals();
@@ -618,17 +619,25 @@ public final class NotificationRecord {
                     final ArrayList<String> people =
                             adjustment.getSignals().getStringArrayList(Adjustment.KEY_PEOPLE);
                     setPeopleOverride(people);
+                    MetricsLogger.action(getAdjustmentLogMaker()
+                            .addTaggedData(MetricsEvent.ADJUSTMENT_KEY_PEOPLE, people.size()));
                 }
                 if (signals.containsKey(Adjustment.KEY_SNOOZE_CRITERIA)) {
                     final ArrayList<SnoozeCriterion> snoozeCriterionList =
                             adjustment.getSignals().getParcelableArrayList(
                                     Adjustment.KEY_SNOOZE_CRITERIA);
                     setSnoozeCriteria(snoozeCriterionList);
+                    MetricsLogger.action(getAdjustmentLogMaker()
+                            .addTaggedData(MetricsEvent.ADJUSTMENT_KEY_SNOOZE_CRITERIA,
+                                    snoozeCriterionList.size()));
                 }
                 if (signals.containsKey(Adjustment.KEY_GROUP_KEY)) {
                     final String groupOverrideKey =
                             adjustment.getSignals().getString(Adjustment.KEY_GROUP_KEY);
                     setOverrideGroupKey(groupOverrideKey);
+                    MetricsLogger.action(getAdjustmentLogMaker()
+                            .addTaggedData(MetricsEvent.ADJUSTMENT_KEY_GROUP_KEY,
+                                    groupOverrideKey));
                 }
                 if (signals.containsKey(Adjustment.KEY_USER_SENTIMENT)) {
                     // Only allow user sentiment update from assistant if user hasn't already
@@ -637,19 +646,31 @@ public final class NotificationRecord {
                             && (getChannel().getUserLockedFields() & USER_LOCKED_IMPORTANCE) == 0) {
                         setUserSentiment(adjustment.getSignals().getInt(
                                 Adjustment.KEY_USER_SENTIMENT, USER_SENTIMENT_NEUTRAL));
+                        MetricsLogger.action(getAdjustmentLogMaker()
+                                .addTaggedData(MetricsEvent.ADJUSTMENT_KEY_USER_SENTIMENT,
+                                        getUserSentiment()));
                     }
                 }
                 if (signals.containsKey(Adjustment.KEY_SMART_ACTIONS)) {
                     setSmartActions(signals.getParcelableArrayList(Adjustment.KEY_SMART_ACTIONS));
+                    MetricsLogger.action(getAdjustmentLogMaker()
+                            .addTaggedData(MetricsEvent.ADJUSTMENT_KEY_SMART_ACTIONS,
+                                    getSmartActions().size()));
                 }
                 if (signals.containsKey(Adjustment.KEY_SMART_REPLIES)) {
                     setSmartReplies(signals.getCharSequenceArrayList(Adjustment.KEY_SMART_REPLIES));
+                    MetricsLogger.action(getAdjustmentLogMaker()
+                            .addTaggedData(MetricsEvent.ADJUSTMENT_KEY_SMART_REPLIES,
+                                    getSmartReplies().size()));
                 }
                 if (signals.containsKey(Adjustment.KEY_IMPORTANCE)) {
                     int importance = signals.getInt(Adjustment.KEY_IMPORTANCE);
                     importance = Math.max(IMPORTANCE_UNSPECIFIED, importance);
                     importance = Math.min(IMPORTANCE_HIGH, importance);
                     setAssistantImportance(importance);
+                    MetricsLogger.action(getAdjustmentLogMaker()
+                            .addTaggedData(MetricsEvent.ADJUSTMENT_KEY_IMPORTANCE,
+                                    importance));
                 }
             }
         }
@@ -1201,6 +1222,16 @@ public final class NotificationRecord {
 
     public LogMaker getLogMaker() {
         return getLogMaker(System.currentTimeMillis());
+    }
+
+    public LogMaker getItemLogMaker() {
+        return getLogMaker().setCategory(MetricsEvent.NOTIFICATION_ITEM);
+    }
+
+    public LogMaker getAdjustmentLogMaker() {
+        return getLogMaker()
+                .setCategory(MetricsEvent.NOTIFICATION_ITEM)
+                .setType(MetricsEvent.NOTIFICATION_ASSISTANT_ADJUSTMENT);
     }
 
     @VisibleForTesting

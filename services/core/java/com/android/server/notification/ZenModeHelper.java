@@ -1212,27 +1212,89 @@ public class ZenModeHelper {
     }
 
     private final class Metrics extends Callback {
-        private static final String COUNTER_PREFIX = "dnd_mode_";
+        private static final String COUNTER_MODE_PREFIX = "dnd_mode_";
+        private static final String COUNTER_TYPE_PREFIX = "dnd_type_";
+        private static final int DND_OFF = 0;
+        private static final int DND_ON_MANUAL = 1;
+        private static final int DND_ON_AUTOMATIC = 2;
+        private static final String COUNTER_RULE = "dnd_rule_count";
         private static final long MINIMUM_LOG_PERIOD_MS = 60 * 1000;
 
+        // Total silence, alarms only, priority only
         private int mPreviousZenMode = -1;
-        private long mBeginningMs = 0L;
+        private long mModeLogTimeMs = 0L;
+
+        private int mNumZenRules = -1;
+        private long mRuleCountLogTime = 0L;
+
+        // automatic (1) vs manual (0) vs dnd off (2)
+        private int mPreviousZenType = -1;
+        private long mTypeLogTimeMs = 0L;
 
         @Override
         void onZenModeChanged() {
             emit();
         }
 
+        @Override
+        void onConfigChanged() {
+            emit();
+        }
+
         private void emit() {
             mHandler.postMetricsTimer();
+            emitZenMode();
+            emitRules();
+            emitDndType();
+        }
+
+        private void emitZenMode() {
             final long now = SystemClock.elapsedRealtime();
-            final long since = (now - mBeginningMs);
+            final long since = (now - mModeLogTimeMs);
             if (mPreviousZenMode != mZenMode || since > MINIMUM_LOG_PERIOD_MS) {
                 if (mPreviousZenMode != -1) {
-                    MetricsLogger.count(mContext, COUNTER_PREFIX + mPreviousZenMode, (int) since);
+                    MetricsLogger.count(
+                            mContext, COUNTER_MODE_PREFIX + mPreviousZenMode, (int) since);
                 }
                 mPreviousZenMode = mZenMode;
-                mBeginningMs = now;
+                mModeLogTimeMs = now;
+            }
+        }
+
+        private void emitRules() {
+            final long now = SystemClock.elapsedRealtime();
+            final long since = (now - mRuleCountLogTime);
+            synchronized (mConfig) {
+                int numZenRules = mConfig.automaticRules.size();
+                if (mNumZenRules != numZenRules
+                        || since > MINIMUM_LOG_PERIOD_MS) {
+                    if (mNumZenRules != -1) {
+                        MetricsLogger.count(mContext, COUNTER_RULE,
+                                numZenRules - mNumZenRules);
+                    }
+                    mNumZenRules = numZenRules;
+
+                    mRuleCountLogTime = since;
+                }
+            }
+        }
+
+        private void emitDndType() {
+            final long now = SystemClock.elapsedRealtime();
+            final long since = (now - mTypeLogTimeMs);
+            synchronized (mConfig) {
+                boolean dndOn = mZenMode != Global.ZEN_MODE_OFF;
+                int zenType = !dndOn ? DND_OFF
+                        : (mConfig.manualRule != null) ? DND_ON_MANUAL : DND_ON_AUTOMATIC;
+                if (zenType != mPreviousZenType
+                        || since > MINIMUM_LOG_PERIOD_MS) {
+                    if (mPreviousZenType != -1) {
+                        MetricsLogger.count(
+                                mContext, COUNTER_TYPE_PREFIX + mPreviousZenType, (int) since);
+                    }
+                    mTypeLogTimeMs = now;
+                    mPreviousZenType = zenType;
+                }
             }
         }
     }
