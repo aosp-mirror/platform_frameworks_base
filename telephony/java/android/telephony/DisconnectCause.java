@@ -342,6 +342,12 @@ public class DisconnectCause {
      */
     public static final int TOO_MANY_ONGOING_CALLS = 75;
 
+    /**
+     * Indicates that a new outgoing call cannot be placed because OTASP provisioning is currently
+     * in process.
+     */
+    public static final int OTASP_PROVISIONING_IN_PROCESS = 76;
+
     //*********************************************************************************************
     // When adding a disconnect type:
     // 1) Update toString() with the newly added disconnect type.
@@ -505,6 +511,8 @@ public class DisconnectCause {
             return "CALLING_DISABLED";
         case TOO_MANY_ONGOING_CALLS:
             return "TOO_MANY_ONGOING_CALLS";
+        case OTASP_PROVISIONING_IN_PROCESS:
+            return "OTASP_PROVISIONING_IN_PROCESS";
         default:
             return "INVALID: " + cause;
         }
