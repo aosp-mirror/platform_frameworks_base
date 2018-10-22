@@ -3622,7 +3622,7 @@ public class NotificationManagerService extends SystemService {
                 INotificationListener token, String pkg, UserHandle user,
                 NotificationChannelGroup group) throws RemoteException {
             Preconditions.checkNotNull(user);
-            verifyPrivilegedListener(token, user);
+            verifyPrivilegedListener(token, user, false);
             createNotificationChannelGroup(
                     pkg, getUidForPackageAndUser(pkg, user), group, false, true);
             savePolicyFile();
@@ -3635,7 +3635,7 @@ public class NotificationManagerService extends SystemService {
             Preconditions.checkNotNull(pkg);
             Preconditions.checkNotNull(user);
 
-            verifyPrivilegedListener(token, user);
+            verifyPrivilegedListener(token, user, false);
             updateNotificationChannelInt(pkg, getUidForPackageAndUser(pkg, user), channel, true);
         }
 
@@ -3644,7 +3644,7 @@ public class NotificationManagerService extends SystemService {
                 INotificationListener token, String pkg, UserHandle user) throws RemoteException {
             Preconditions.checkNotNull(pkg);
             Preconditions.checkNotNull(user);
-            verifyPrivilegedListener(token, user);
+            verifyPrivilegedListener(token, user, true);
 
             return mPreferencesHelper.getNotificationChannels(pkg, getUidForPackageAndUser(pkg, user),
                     false /* includeDeleted */);
@@ -3656,7 +3656,7 @@ public class NotificationManagerService extends SystemService {
                 INotificationListener token, String pkg, UserHandle user) throws RemoteException {
             Preconditions.checkNotNull(pkg);
             Preconditions.checkNotNull(user);
-            verifyPrivilegedListener(token, user);
+            verifyPrivilegedListener(token, user, true);
 
             List<NotificationChannelGroup> groups = new ArrayList<>();
             groups.addAll(mPreferencesHelper.getNotificationChannelGroups(
@@ -3664,13 +3664,18 @@ public class NotificationManagerService extends SystemService {
             return new ParceledListSlice<>(groups);
         }
 
-        private void verifyPrivilegedListener(INotificationListener token, UserHandle user) {
+        private void verifyPrivilegedListener(INotificationListener token, UserHandle user,
+                boolean assistantAllowed) {
             ManagedServiceInfo info;
             synchronized (mNotificationLock) {
                 info = mListeners.checkServiceTokenLocked(token);
             }
             if (!hasCompanionDevice(info)) {
-                throw new SecurityException(info + " does not have access");
+                synchronized (mNotificationLock) {
+                    if (!assistantAllowed || !mAssistants.isServiceTokenValidLocked(info.service)) {
+                        throw new SecurityException(info + " does not have access");
+                    }
+                }
             }
             if (!info.enabledAndUserMatches(user.getIdentifier())) {
                 throw new SecurityException(info + " does not have access");

@@ -737,7 +737,8 @@ public abstract class NotificationListenerService extends Service {
      * <p>This method will throw a security exception if you don't have access to notifications
      * for the given user.</p>
      * <p>The caller must have {@link CompanionDeviceManager#getAssociations() an associated
-     * device} in order to use this method.
+     * device} or be the {@link NotificationAssistantService notification assistant} in order to
+     * use this method.
      *
      * @param pkg The package to retrieve channels for.
      */
@@ -760,7 +761,8 @@ public abstract class NotificationListenerService extends Service {
      * <p>This method will throw a security exception if you don't have access to notifications
      * for the given user.</p>
      * <p>The caller must have {@link CompanionDeviceManager#getAssociations() an associated
-     * device} in order to use this method.
+     * device} or be the {@link NotificationAssistantService notification assistant} in order to
+     * use this method.
      *
      * @param pkg The package to retrieve channel groups for.
      */
