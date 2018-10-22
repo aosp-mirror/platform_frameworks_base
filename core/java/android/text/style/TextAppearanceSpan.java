@@ -22,7 +22,7 @@ import android.content.res.ColorStateList;
 import android.content.res.TypedArray;
 import android.graphics.LeakyTypefaceStorage;
 import android.graphics.Typeface;
-import android.graphics.fonts.Font;
+import android.graphics.fonts.FontStyle;
 import android.os.LocaleList;
 import android.os.Parcel;
 import android.text.ParcelableSpan;
@@ -490,7 +490,7 @@ public class TextAppearanceSpan extends MetricAffectingSpan implements Parcelabl
         if (styledTypeface != null) {
             final Typeface readyTypeface;
             if (mTextFontWeight >= 0) {
-                final int weight = Math.min(Font.FONT_WEIGHT_MAX, mTextFontWeight);
+                final int weight = Math.min(FontStyle.FONT_WEIGHT_MAX, mTextFontWeight);
                 final boolean italic = (style & Typeface.ITALIC) != 0;
                 readyTypeface = ds.setTypeface(Typeface.create(styledTypeface, weight, italic));
             } else {
