@@ -399,9 +399,12 @@ public class UpstreamNetworkMonitor {
         @Override
         public void onLinkPropertiesChanged(Network network, LinkProperties newLp) {
             handleLinkProp(network, newLp);
-            // TODO(b/110335330): reduce the number of times this is called by
-            // only recomputing on the LISTEN_ALL callback.
-            recomputeLocalPrefixes();
+            // Any non-LISTEN_ALL callback will necessarily concern a network that will
+            // also match the LISTEN_ALL callback by construction of the LISTEN_ALL callback.
+            // So it's not useful to do this work for non-LISTEN_ALL callbacks.
+            if (mCallbackType == CALLBACK_LISTEN_ALL) {
+                recomputeLocalPrefixes();
+            }
         }
 
         @Override
@@ -417,9 +420,12 @@ public class UpstreamNetworkMonitor {
         @Override
         public void onLost(Network network) {
             handleLost(mCallbackType, network);
-            // TODO(b/110335330): reduce the number of times this is called by
-            // only recomputing on the LISTEN_ALL callback.
-            recomputeLocalPrefixes();
+            // Any non-LISTEN_ALL callback will necessarily concern a network that will
+            // also match the LISTEN_ALL callback by construction of the LISTEN_ALL callback.
+            // So it's not useful to do this work for non-LISTEN_ALL callbacks.
+            if (mCallbackType == CALLBACK_LISTEN_ALL) {
+                recomputeLocalPrefixes();
+            }
         }
     }
 
