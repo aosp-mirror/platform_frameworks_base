@@ -144,6 +144,7 @@ message Atom {
         PhoneServiceStateChanged phone_service_state_changed = 94;
         PhoneStateChanged phone_state_changed = 95;
         UserRestrictionChanged user_restriction_changed = 96;
+        SettingsUIChanged settings_ui_changed = 97;
     }
 
     // Pulled events will start at field 10000.
@@ -1434,6 +1435,61 @@ message PhoneStateChanged {
         ON = 1;
     }
     optional State state = 1;
+}
+
+/**
+ * Logs when Settings UI has changed.
+ *
+ * Logged from:
+ *   packages/apps/Settings
+ */
+message SettingsUIChanged {
+    /**
+     * The action performed in this event
+     */
+    enum Action {
+        ACTION_UNKNOWN = 0;
+        PAGE_VISIBLE = 1;
+        PAGE_HIDE = 2;
+        PREF_CHANGE = 3;
+    }
+
+    /**
+     * Id for Settings pages. Each page must have its own unique Id.
+     */
+    enum PageId {
+      // Unknown page. Should not be used in production code.
+      PAGE_UNKNOWN = 0;
+
+      // Settings > Display > Lock screen display > On lock screen
+      LOCK_SCREEN_NOTIFICATION_CONTENT = 1584;
+    }
+
+    /**
+     * Where this SettingsUIChange event comes from. For example, if
+     * it's a PAGE_VISIBLE event, where the page is opened from.
+     */
+    optional PageId attribution = 1;
+
+    /**
+     * What the UI action is.
+     */
+    optional Action action = 2;
+
+    /**
+     * Where the action is happening
+     */
+    optional PageId pageId = 3;
+
+    /**
+     * What preference changed in this event.
+     */
+    optional string changedPreferenceKey = 4;
+
+    /**
+     * The new value of the changed preference.
+     */
+    optional int64 changedPreferenceIntValue = 5;
 }
 
 /**
