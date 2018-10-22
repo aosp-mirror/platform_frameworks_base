@@ -19,9 +19,6 @@ package com.android.tests.sysmem.host;
 import com.android.tradefed.device.DeviceNotAvailableException;
 import com.android.tradefed.device.ITestDevice;
 
-import java.util.InputMismatchException;
-import java.util.Scanner;
-
 /**
  * Wrapper around ITestDevice exposing useful device functions.
  */
@@ -58,29 +55,15 @@ class Device {
     /**
      * Returns the pid for the process with the given name.
      */
-    public int getPidForProcess(String name) throws TestException {
-        String psout = executeShellCommand("ps -A -o PID,CMD");
-        Scanner sc = new Scanner(psout);
+    public int getProcessPid(String name) throws TestException {
         try {
-            // ps output is of the form:
-            //  PID CMD
-            //    1 init
-            //    2 kthreadd
-            //    ...
-            // 9693 ps
-            sc.nextLine();
-            while (sc.hasNextLine()) {
-                int pid = sc.nextInt();
-                String cmd = sc.next();
-
-                if (name.equals(cmd)) {
-                    return pid;
-                }
+            String pid = mDevice.getProcessPid(name);
+            if (pid == null) {
+                throw new TestException("failed to get pid for " + name);
             }
-        } catch (InputMismatchException e) {
-            throw new TestException("unexpected ps output format: " + psout, e);
+            return Integer.parseInt(pid);
+        } catch (DeviceNotAvailableException e) {
+            throw new TestException(e);
         }
-
-        throw new TestException("failed to get pid for process " + name);
     }
 }
