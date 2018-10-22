@@ -288,7 +288,7 @@ void parseOptions(int argc, char* argv[]) {
 
             case '?':
                 fprintf(stderr, "Unrecognized option '%s'\n", argv[optind - 1]);
-            // fall-through
+                [[fallthrough]];
             default:
                 error = true;
                 break;
