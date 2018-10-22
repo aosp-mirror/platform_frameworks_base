@@ -165,7 +165,11 @@ public class TouchDelegate {
     public TouchDelegateInfo getTouchDelegateInfo() {
         if (mTouchDelegateInfo == null) {
             final ArrayMap<Region, View> targetMap = new ArrayMap<>(1);
-            targetMap.put(new Region(mBounds), mDelegateView);
+            Rect bounds = mBounds;
+            if (bounds == null) {
+                bounds = new Rect();
+            }
+            targetMap.put(new Region(bounds), mDelegateView);
             mTouchDelegateInfo = new TouchDelegateInfo(targetMap);
         }
         return mTouchDelegateInfo;
