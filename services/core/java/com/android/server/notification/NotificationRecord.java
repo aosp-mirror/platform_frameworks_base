@@ -753,10 +753,10 @@ public final class NotificationRecord {
     protected void calculateImportance() {
         mImportance = calculateInitialImportance();
         mImportanceExplanation = "app";
-        if (getChannel().isImportanceLocked()) {
+        if (getChannel().hasUserSetImportance()) {
             mImportanceExplanation = "user";
         }
-        if (!getChannel().isImportanceLocked() && mAssistantImportance != IMPORTANCE_UNSPECIFIED) {
+        if (!getChannel().hasUserSetImportance() && mAssistantImportance != IMPORTANCE_UNSPECIFIED) {
             mImportance = mAssistantImportance;
             mImportanceExplanation = "asst";
         }

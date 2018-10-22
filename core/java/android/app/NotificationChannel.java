@@ -603,9 +603,10 @@ public final class NotificationChannel implements Parcelable {
     }
 
     /**
-     * @hide
+     * Returns whether the user has chosen the importance of this channel, either to affirm the
+     * initial selection from the app, or changed it to be higher or lower.
      */
-    public boolean isImportanceLocked() {
+    public boolean hasUserSetImportance() {
         return (mUserLockedFields & USER_LOCKED_IMPORTANCE) != 0;
     }
 
