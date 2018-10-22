@@ -16,6 +16,9 @@
 
 package com.android.commands.am;
 
+import static android.app.ActivityManager.INSTR_FLAG_DISABLE_HIDDEN_API_CHECKS;
+import static android.app.ActivityManager.INSTR_FLAG_MOUNT_EXTERNAL_STORAGE_FULL;
+
 import android.app.IActivityManager;
 import android.app.IInstrumentationWatcher;
 import android.app.Instrumentation;
@@ -74,15 +77,12 @@ public class Instrument {
     String logPath = null;
     public boolean noWindowAnimation = false;
     public boolean disableHiddenApiChecks = false;
+    public boolean disableIsolatedStorage = false;
     public String abi = null;
     public int userId = UserHandle.USER_CURRENT;
     public Bundle args = new Bundle();
     // Required
     public String componentNameArg;
-
-    // Disable hidden API checks for the newly started instrumentation.
-    // Must be kept in sync with ActivityManagerService.
-    private static final int INSTRUMENTATION_FLAG_DISABLE_HIDDEN_API_CHECKS = 1 << 0;
 
     /**
      * Construct the instrument command runner.
@@ -480,7 +480,13 @@ public class Instrument {
             }
 
             // Start the instrumentation
-            int flags = disableHiddenApiChecks ? INSTRUMENTATION_FLAG_DISABLE_HIDDEN_API_CHECKS : 0;
+            int flags = 0;
+            if (disableHiddenApiChecks) {
+                flags |= INSTR_FLAG_DISABLE_HIDDEN_API_CHECKS;
+            }
+            if (disableIsolatedStorage) {
+                flags |= INSTR_FLAG_MOUNT_EXTERNAL_STORAGE_FULL;
+            }
             if (!mAm.startInstrumentation(cn, profileFile, flags, args, watcher, connection, userId,
                         abi)) {
                 throw new AndroidException("INSTRUMENTATION_FAILED: " + cn.flattenToString());
