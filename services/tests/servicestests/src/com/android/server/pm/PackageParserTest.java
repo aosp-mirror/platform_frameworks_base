@@ -26,6 +26,7 @@ import android.content.pm.InstrumentationInfo;
 import android.content.pm.PackageParser;
 import android.content.pm.ProviderInfo;
 import android.content.pm.ServiceInfo;
+import android.content.pm.SharedLibraryInfo;
 import android.content.pm.Signature;
 import android.os.Bundle;
 import android.os.Parcel;
@@ -487,6 +488,9 @@ public class PackageParserTest {
         pkg.usesOptionalLibraries.add("foo12");
 
         pkg.usesLibraryFiles = new String[] { "foo13"};
+
+        pkg.usesLibraryInfos = new ArrayList<>();
+        pkg.usesLibraryInfos.add(new SharedLibraryInfo(null, null, null, 0L, 0, null, null));
 
         pkg.mOriginalPackages = new ArrayList<>();
         pkg.mOriginalPackages.add("foo14");

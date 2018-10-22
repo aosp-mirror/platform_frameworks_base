@@ -19,6 +19,7 @@ package android.content.pm;
 import android.annotation.IntDef;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -69,6 +70,8 @@ public final class SharedLibraryInfo implements Parcelable {
      */
     public static final int VERSION_UNDEFINED = -1;
 
+    private final String mPath;
+    private final String mPackageName;
     private final String mName;
 
     private final long mVersion;
@@ -87,8 +90,10 @@ public final class SharedLibraryInfo implements Parcelable {
      *
      * @hide
      */
-    public SharedLibraryInfo(String name, long version, int type,
+    public SharedLibraryInfo(String path, String packageName, String name, long version, int type,
             VersionedPackage declaringPackage, List<VersionedPackage> dependentPackages) {
+        mPath = path;
+        mPackageName = packageName;
         mName = name;
         mVersion = version;
         mType = type;
@@ -97,8 +102,8 @@ public final class SharedLibraryInfo implements Parcelable {
     }
 
     private SharedLibraryInfo(Parcel parcel) {
-        this(parcel.readString(), parcel.readLong(), parcel.readInt(),
-                parcel.readParcelable(null), parcel.readArrayList(null));
+        this(parcel.readString(), parcel.readString(), parcel.readString(), parcel.readLong(),
+                parcel.readInt(), parcel.readParcelable(null), parcel.readArrayList(null));
     }
 
     /**
@@ -118,6 +123,30 @@ public final class SharedLibraryInfo implements Parcelable {
      */
     public String getName() {
         return mName;
+    }
+
+    /**
+     * If the shared library is a jar file, returns the path of that jar. Null otherwise.
+     * Only libraries with TYPE_BUILTIN are in jar files.
+     *
+     * @return The path.
+     *
+     * @hide
+     */
+    public @Nullable String getPath() {
+        return mPath;
+    }
+
+    /**
+     * If the shared library is an apk, returns the package name. Null otherwise.
+     * Only libraries with TYPE_DYNAMIC or TYPE_STATIC are in apks.
+     *
+     * @return The package name.
+     *
+     * @hide
+     */
+    public @Nullable String getPackageName() {
+        return mPackageName;
     }
 
     /**
@@ -196,6 +225,8 @@ public final class SharedLibraryInfo implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
+        parcel.writeString(mPath);
+        parcel.writeString(mPackageName);
         parcel.writeString(mName);
         parcel.writeLong(mVersion);
         parcel.writeInt(mType);
