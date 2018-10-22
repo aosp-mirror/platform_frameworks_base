@@ -17,7 +17,9 @@ package com.android.server.devicepolicy;
 
 import android.app.admin.DevicePolicyManager;
 import android.app.admin.IDevicePolicyManager;
+import android.app.admin.StartInstallingUpdateCallback;
 import android.content.ComponentName;
+import android.os.ParcelFileDescriptor;
 
 import com.android.server.SystemService;
 
@@ -91,4 +93,8 @@ abstract class BaseIDevicePolicyManager extends IDevicePolicyManager.Stub {
 
     @Override
     public void grantDeviceIdsAccessToProfileOwner(ComponentName who, int userId) { }
+
+    @Override
+    public void installUpdateFromFile(ComponentName admin,
+            ParcelFileDescriptor updateFileDescriptor, StartInstallingUpdateCallback listener) {}
 }

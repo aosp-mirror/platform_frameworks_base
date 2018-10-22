@@ -53,6 +53,7 @@ import android.net.ProxyInfo;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
+import android.os.ParcelFileDescriptor;
 import android.os.Parcelable;
 import android.os.PersistableBundle;
 import android.os.Process;
@@ -87,6 +88,7 @@ import com.android.internal.util.Preconditions;
 import com.android.org.conscrypt.TrustedCertificateStore;
 
 import java.io.ByteArrayInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -1928,6 +1930,48 @@ public class DevicePolicyManager {
      * Specifies that the device owner configured a specific host to use for Private DNS.
      */
     public static final int PRIVATE_DNS_MODE_PROVIDER_HOSTNAME = 3;
+
+    /**
+     * Callback used in {@link #installSystemUpdate} to indicate that there was an error while
+     * trying to install an update.
+     */
+    public abstract static class InstallUpdateCallback {
+        /** Represents an unknown error while trying to install an update. */
+        public static final int UPDATE_ERROR_UNKNOWN = 1;
+
+        /** Represents the update file being intended for different OS version. */
+        public static final int UPDATE_ERROR_INCORRECT_OS_VERSION = 2;
+
+        /**
+         * Represents the update file being wrong, i.e. payloads are mismatched, wrong compressions
+         * method.
+         */
+        public static final int UPDATE_ERROR_UPDATE_FILE_INVALID = 3;
+
+        /** Represents that the file could not be found. */
+        public static final int UPDATE_ERROR_FILE_NOT_FOUND = 4;
+
+        /** Represents the battery being too low to apply an update. */
+        public static final int UPDATE_ERROR_BATTERY_LOW = 5;
+
+        /** Method invoked when there was an error while installing an update. */
+        public void onInstallUpdateError(
+                @InstallUpdateCallbackErrorConstants int errorCode, String errorMessage) {
+        }
+    }
+
+    /**
+     * @hide
+     */
+    @IntDef(prefix = { "UPDATE_ERROR_" }, value = {
+            InstallUpdateCallback.UPDATE_ERROR_UNKNOWN,
+            InstallUpdateCallback.UPDATE_ERROR_INCORRECT_OS_VERSION,
+            InstallUpdateCallback.UPDATE_ERROR_UPDATE_FILE_INVALID,
+            InstallUpdateCallback.UPDATE_ERROR_FILE_NOT_FOUND,
+            InstallUpdateCallback.UPDATE_ERROR_BATTERY_LOW
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface InstallUpdateCallbackErrorConstants {}
 
     /**
      * Return true if the given administrator component is currently active (enabled) in the system.
@@ -6796,7 +6840,6 @@ public class DevicePolicyManager {
     @Retention(RetentionPolicy.SOURCE)
     public @interface CreateAndManageUserFlags {}
 
-
     /**
      * Called by a device owner to create a user with the specified name and a given component of
      * the calling package as profile owner. The UserHandle returned by this method should not be
@@ -9824,6 +9867,62 @@ public class DevicePolicyManager {
         } catch (RemoteException re) {
             throw re.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Called by device owner to install a system update from the given file. The device will be
+     * rebooted in order to finish installing the update. Note that if the device is rebooted, this
+     * doesn't necessarily mean that the update has been applied successfully. The caller should
+     * additionally check the system version with {@link android.os.Build#FINGERPRINT} or {@link
+     * android.os.Build.VERSION}. If an error occurs during processing the OTA before the reboot,
+     * the caller will be notified by {@link InstallUpdateCallback}. If device does not have
+     * sufficient battery level, the installation will fail with error {@link
+     * InstallUpdateCallback#UPDATE_ERROR_BATTERY_LOW}.
+     *
+     * @param admin The {@link DeviceAdminReceiver} that this request is associated with.
+     * @param updateFilePath An Uri of the file that contains the update. The file should be
+     * readable by the calling app.
+     * @param executor The executor through which the callback should be invoked.
+     * @param callback A callback object that will inform the caller when installing an update
+     * fails.
+     */
+    public void installSystemUpdate(
+            @NonNull ComponentName admin, @NonNull Uri updateFilePath,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull InstallUpdateCallback callback) {
+        throwIfParentInstance("installUpdate");
+        if (mService == null) {
+            return;
+        }
+        try (ParcelFileDescriptor fileDescriptor = mContext.getContentResolver()
+                    .openFileDescriptor(updateFilePath, "r")) {
+            mService.installUpdateFromFile(
+                    admin, fileDescriptor, new StartInstallingUpdateCallback.Stub() {
+                        @Override
+                        public void onStartInstallingUpdateError(
+                                int errorCode, String errorMessage) {
+                            executeCallback(errorCode, errorMessage, executor, callback);
+                        }
+                    });
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        } catch (FileNotFoundException e) {
+            Log.w(TAG, e);
+            executeCallback(
+                    InstallUpdateCallback.UPDATE_ERROR_FILE_NOT_FOUND, Log.getStackTraceString(e),
+                    executor, callback);
+        } catch (IOException e) {
+            Log.w(TAG, e);
+            executeCallback(
+                    InstallUpdateCallback.UPDATE_ERROR_UNKNOWN, Log.getStackTraceString(e),
+                    executor, callback);
+        }
+    }
+
+    private void executeCallback(int errorCode, String errorMessage,
+            @NonNull @CallbackExecutor Executor executor,
+            @NonNull InstallUpdateCallback callback) {
+        executor.execute(() -> callback.onInstallUpdateError(errorCode, errorMessage));
     }
 
     /**
