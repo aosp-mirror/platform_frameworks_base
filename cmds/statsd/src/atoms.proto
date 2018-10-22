@@ -184,7 +184,6 @@ message Atom {
         DiskIo disk_io = 10032;
         PowerProfile power_profile = 10033;
         ProcStats proc_stats_pkg_proc = 10034;
-        ProcessCpuTime process_cpu_time = 10035;
         NativeProcessMemoryState native_process_memory_state = 10036;
     }
 
@@ -3033,22 +3032,6 @@ message PowerProfileProto {
  */
 message PowerProfile {
     optional PowerProfileProto power_profile = 1;
-}
-
-/**
- * Pulls process user time and system time. Puller takes a snapshot of all pids
- * in the system and returns cpu stats for those that are working at the time.
- * Dead pids will be dropped. Kernel processes are excluded.
- * Min cool-down is 5 sec.
- */
-message ProcessCpuTime {
-    optional int32 uid = 1 [(is_uid) = true];
-
-    optional string process_name = 2;
-    // Process cpu time in user space, cumulative from boot/process start
-    optional int64 user_time_millis = 3;
-    // Process cpu time in system space, cumulative from boot/process start
-    optional int64 system_time_millis = 4;
 }
 
 /**
