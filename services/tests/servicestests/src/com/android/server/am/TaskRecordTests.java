@@ -69,13 +69,11 @@ public class TaskRecordTests extends ActivityTestsBase {
 
     private static final String TASK_TAG = "task";
 
-    private ActivityTaskManagerService mService;
-
     @Before
     public void setUp() throws Exception {
         super.setUp();
         TaskRecord.setTaskRecordFactory(null);
-        mService = createActivityTaskManagerService();
+        setupActivityTaskManagerService();
     }
 
     @Test

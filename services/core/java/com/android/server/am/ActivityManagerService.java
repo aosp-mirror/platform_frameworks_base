@@ -2106,24 +2106,38 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @VisibleForTesting
     public ActivityManagerService(Injector injector) {
+        this(injector, null /* handlerThread */);
+    }
+
+    /**
+     * Provides the basic functionality for activity task related tests when a handler thread is
+     * given to initialize the dependency members.
+     */
+    @VisibleForTesting
+    ActivityManagerService(Injector injector, ServiceThread handlerThread) {
+        final boolean hasHandlerThread = handlerThread != null;
         mInjector = injector;
         mContext = mInjector.getContext();
         mUiContext = null;
         mAppErrors = null;
-        mAppOpsService = mInjector.getAppOpsService(null, null);
+        mAppOpsService = mInjector.getAppOpsService(null /* file */, null /* handler */);
         mBatteryStatsService = null;
-        mConstants = null;
-        mHandler = null;
-        mHandlerThread = null;
-        mIntentFirewall = null;
+        mHandler = hasHandlerThread ? new MainHandler(handlerThread.getLooper()) : null;
+        mHandlerThread = handlerThread;
+        mConstants = hasHandlerThread ? new ActivityManagerConstants(this, mHandler) : null;
+        mIntentFirewall = hasHandlerThread
+                ? new IntentFirewall(new IntentFirewallInterface(), mHandler) : null;
         mProcessCpuThread = null;
         mProcessStats = null;
         mProviderMap = null;
-        mServices = null;
+        // For the usage of {@link ActiveServices#cleanUpServices} that may be invoked from
+        // {@link ActivityStackSupervisor#cleanUpRemovedTaskLocked}.
+        mServices = hasHandlerThread ? new ActiveServices(this) : null;
         mSystemThread = null;
-        mUiHandler = injector.getUiHandler(null);
-        mUserController = null;
-        mPendingIntentController = null;
+        mUiHandler = injector.getUiHandler(null /* service */);
+        mUserController = hasHandlerThread ? new UserController(this) : null;
+        mPendingIntentController = hasHandlerThread
+                ? new PendingIntentController(handlerThread.getLooper(), mUserController) : null;
         mProcStartHandlerThread = null;
         mProcStartHandler = null;
         mHiddenApiBlacklist = null;
