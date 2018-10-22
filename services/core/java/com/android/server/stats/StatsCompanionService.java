@@ -174,11 +174,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     private final KernelWakelockStats mTmpWakelockStats = new KernelWakelockStats();
     private IWifiManager mWifiManager = null;
     private TelephonyManager mTelephony = null;
-    private final StatFs mStatFsData = new StatFs(Environment.getDataDirectory().getAbsolutePath());
-    private final StatFs mStatFsSystem =
-            new StatFs(Environment.getRootDirectory().getAbsolutePath());
-    private final StatFs mStatFsTemp =
-            new StatFs(Environment.getDownloadCacheDirectory().getAbsolutePath());
     @GuardedBy("sStatsdLock")
     private final HashSet<Long> mDeathTimeMillis = new HashSet<>();
     @GuardedBy("sStatsdLock")
@@ -772,7 +767,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     private void pullBluetoothBytesTransfer(
             int tagId, long elapsedNanos, long wallClockNanos,
             List<StatsLogEventWrapper> pulledData) {
-        BluetoothActivityEnergyInfo info = pullBluetoothData();
+        BluetoothActivityEnergyInfo info = fetchBluetoothData();
         if (info.getUidTraffic() != null) {
             for (UidTraffic traffic : info.getUidTraffic()) {
                 StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos,
@@ -884,9 +879,12 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             int tagId, long elapsedNanos, long wallClockNanos,
             List<StatsLogEventWrapper> pulledData) {
         long token = Binder.clearCallingIdentity();
-        if (mWifiManager == null) {
-            mWifiManager =
-                    IWifiManager.Stub.asInterface(ServiceManager.getService(Context.WIFI_SERVICE));
+        synchronized (this) {
+            if (mWifiManager == null) {
+                mWifiManager =
+                        IWifiManager.Stub.asInterface(
+                                ServiceManager.getService(Context.WIFI_SERVICE));
+            }
         }
         if (mWifiManager != null) {
             try {
@@ -916,8 +914,10 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             int tagId, long elapsedNanos, long wallClockNanos,
             List<StatsLogEventWrapper> pulledData) {
         long token = Binder.clearCallingIdentity();
-        if (mTelephony == null) {
-            mTelephony = TelephonyManager.from(mContext);
+        synchronized (this) {
+            if (mTelephony == null) {
+                mTelephony = TelephonyManager.from(mContext);
+            }
         }
         if (mTelephony != null) {
             SynchronousResultReceiver modemReceiver = new SynchronousResultReceiver("telephony");
@@ -941,7 +941,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     private void pullBluetoothActivityInfo(
             int tagId, long elapsedNanos, long wallClockNanos,
             List<StatsLogEventWrapper> pulledData) {
-        BluetoothActivityEnergyInfo info = pullBluetoothData();
+        BluetoothActivityEnergyInfo info = fetchBluetoothData();
         StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
         e.writeLong(info.getTimeStamp());
         e.writeInt(info.getBluetoothStackState());
@@ -952,7 +952,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         pulledData.add(e);
     }
 
-    private synchronized BluetoothActivityEnergyInfo pullBluetoothData() {
+    private synchronized BluetoothActivityEnergyInfo fetchBluetoothData() {
         final BluetoothAdapter adapter = BluetoothAdapter.getDefaultAdapter();
         if (adapter != null) {
             SynchronousResultReceiver bluetoothReceiver = new SynchronousResultReceiver(
@@ -1323,30 +1323,35 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
 
     private void pullProcessStats(int section, int tagId, long elapsedNanos, long wallClockNanos,
             List<StatsLogEventWrapper> pulledData) {
-        try {
-            long lastHighWaterMark = readProcStatsHighWaterMark(section);
-            List<ParcelFileDescriptor> statsFiles = new ArrayList<>();
-            long highWaterMark = mProcessStats.getCommittedStats(
-                    lastHighWaterMark, section, true, statsFiles);
-            if (statsFiles.size() != 1) {
-                return;
+        synchronized (this) {
+            try {
+                long lastHighWaterMark = readProcStatsHighWaterMark(section);
+                List<ParcelFileDescriptor> statsFiles = new ArrayList<>();
+                long highWaterMark = mProcessStats.getCommittedStats(
+                        lastHighWaterMark, section, true, statsFiles);
+                if (statsFiles.size() != 1) {
+                    return;
+                }
+                InputStream stream = new ParcelFileDescriptor.AutoCloseInputStream(
+                        statsFiles.get(0));
+                int[] len = new int[1];
+                byte[] stats = readFully(stream, len);
+                StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos,
+                        wallClockNanos);
+                e.writeStorage(Arrays.copyOf(stats, len[0]));
+                pulledData.add(e);
+                new File(mBaseDir.getAbsolutePath() + "/" + section + "_"
+                        + lastHighWaterMark).delete();
+                new File(
+                        mBaseDir.getAbsolutePath() + "/" + section + "_"
+                                + highWaterMark).createNewFile();
+            } catch (IOException e) {
+                Log.e(TAG, "Getting procstats failed: ", e);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Getting procstats failed: ", e);
+            } catch (SecurityException e) {
+                Log.e(TAG, "Getting procstats failed: ", e);
             }
-            InputStream stream = new ParcelFileDescriptor.AutoCloseInputStream(statsFiles.get(0));
-            int[] len = new int[1];
-            byte[] stats = readFully(stream, len);
-            StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
-            e.writeStorage(Arrays.copyOf(stats, len[0]));
-            pulledData.add(e);
-            new File(mBaseDir.getAbsolutePath() + "/" + section + "_" + lastHighWaterMark).delete();
-            new File(
-                    mBaseDir.getAbsolutePath() + "/" + section + "_"
-                            + highWaterMark).createNewFile();
-        } catch (IOException e) {
-            Log.e(TAG, "Getting procstats failed: ", e);
-        } catch (RemoteException e) {
-            Log.e(TAG, "Getting procstats failed: ", e);
-        } catch (SecurityException e) {
-            Log.e(TAG, "Getting procstats failed: ", e);
         }
     }
 
