@@ -70,19 +70,19 @@ public final class InputMethodDebug {
      */
     public static String unbindReasonToString(@UnbindReason int reason) {
         switch (reason) {
-            case UnbindReason.UNBIND_REASON_UNSPECIFIED:
+            case UnbindReason.UNSPECIFIED:
                 return "UNSPECIFIED";
-            case UnbindReason.UNBIND_REASON_SWITCH_CLIENT:
+            case UnbindReason.SWITCH_CLIENT:
                 return "SWITCH_CLIENT";
-            case UnbindReason.UNBIND_REASON_SWITCH_IME:
+            case UnbindReason.SWITCH_IME:
                 return "SWITCH_IME";
-            case UnbindReason.UNBIND_REASON_DISCONNECT_IME:
+            case UnbindReason.DISCONNECT_IME:
                 return "DISCONNECT_IME";
-            case UnbindReason.UNBIND_REASON_NO_IME:
+            case UnbindReason.NO_IME:
                 return "NO_IME";
-            case UnbindReason.UNBIND_REASON_SWITCH_IME_FAILED:
+            case UnbindReason.SWITCH_IME_FAILED:
                 return "SWITCH_IME_FAILED";
-            case UnbindReason.UNBIND_REASON_SWITCH_USER:
+            case UnbindReason.SWITCH_USER:
                 return "SWITCH_USER";
             default:
                 return "Unknown=" + reason;

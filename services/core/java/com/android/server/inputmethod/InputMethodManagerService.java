@@ -1507,7 +1507,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         // TODO: Is it really possible that switchUserLocked() happens before system ready?
         if (mSystemReady) {
             hideCurrentInputLocked(0, null);
-            resetCurrentMethodAndClient(UnbindReason.UNBIND_REASON_SWITCH_USER);
+            resetCurrentMethodAndClient(UnbindReason.SWITCH_USER);
             buildInputMethodListLocked(initialUserSwitch);
             if (TextUtils.isEmpty(mSettings.getSelectedInputMethod())) {
                 // This is the first time of the user switch and
@@ -1926,7 +1926,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             mCurClientInKeyguard = isKeyguardLocked();
             // If the client is changing, we need to switch over to the new
             // one.
-            unbindCurrentClientLocked(UnbindReason.UNBIND_REASON_SWITCH_CLIENT);
+            unbindCurrentClientLocked(UnbindReason.SWITCH_CLIENT);
             if (DEBUG) Slog.v(TAG, "switching to client: client="
                     + cs.client.asBinder() + " keyguard=" + mCurClientInKeyguard);
 
@@ -2170,7 +2170,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 mLastBindTime = SystemClock.uptimeMillis();
                 mShowRequested = mInputShown;
                 mInputShown = false;
-                unbindCurrentClientLocked(UnbindReason.UNBIND_REASON_DISCONNECT_IME);
+                unbindCurrentClientLocked(UnbindReason.DISCONNECT_IME);
             }
         }
     }
@@ -2481,12 +2481,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 setInputMethodLocked(id, mSettings.getSelectedInputMethodSubtypeId(id));
             } catch (IllegalArgumentException e) {
                 Slog.w(TAG, "Unknown input method from prefs: " + id, e);
-                resetCurrentMethodAndClient(UnbindReason.UNBIND_REASON_SWITCH_IME_FAILED);
+                resetCurrentMethodAndClient(UnbindReason.SWITCH_IME_FAILED);
             }
             mShortcutInputMethodsAndSubtypes.clear();
         } else {
             // There is no longer an input method set, so stop any current one.
-            resetCurrentMethodAndClient(UnbindReason.UNBIND_REASON_NO_IME);
+            resetCurrentMethodAndClient(UnbindReason.NO_IME);
         }
         // Here is not the perfect place to reset the switching controller. Ideally
         // mSwitchingController and mSettings should be able to share the same state.
@@ -2564,7 +2564,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 intent.putExtra("input_method_id", id);
                 mContext.sendBroadcastAsUser(intent, UserHandle.CURRENT);
             }
-            unbindCurrentClientLocked(UnbindReason.UNBIND_REASON_SWITCH_IME);
+            unbindCurrentClientLocked(UnbindReason.SWITCH_IME);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }

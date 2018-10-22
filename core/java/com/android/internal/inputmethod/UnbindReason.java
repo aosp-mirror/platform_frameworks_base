@@ -27,43 +27,43 @@ import java.lang.annotation.Retention;
  * calling {@link com.android.internal.view.IInputMethodClient#onUnbindMethod}.
  */
 @Retention(SOURCE)
-@IntDef(prefix = "UNBIND_REASON_", value = {
-        UnbindReason.UNBIND_REASON_UNSPECIFIED,
-        UnbindReason.UNBIND_REASON_SWITCH_CLIENT,
-        UnbindReason.UNBIND_REASON_SWITCH_IME,
-        UnbindReason.UNBIND_REASON_DISCONNECT_IME,
-        UnbindReason.UNBIND_REASON_NO_IME,
-        UnbindReason.UNBIND_REASON_SWITCH_IME_FAILED,
-        UnbindReason.UNBIND_REASON_SWITCH_USER})
+@IntDef(value = {
+        UnbindReason.UNSPECIFIED,
+        UnbindReason.SWITCH_CLIENT,
+        UnbindReason.SWITCH_IME,
+        UnbindReason.DISCONNECT_IME,
+        UnbindReason.NO_IME,
+        UnbindReason.SWITCH_IME_FAILED,
+        UnbindReason.SWITCH_USER})
 public @interface UnbindReason {
     /**
      * Reason is not specified.
      */
-    int UNBIND_REASON_UNSPECIFIED = 0;
+    int UNSPECIFIED = 0;
     /**
      * When a new IME client becomes active, the previous IME client will unbound from the current
      * IME.
      */
-    int UNBIND_REASON_SWITCH_CLIENT = 1;
+    int SWITCH_CLIENT = 1;
     /**
      * Before a new IME becomes active, the current IME client be unbound from the previous IME.
      */
-    int UNBIND_REASON_SWITCH_IME = 2;
+    int SWITCH_IME = 2;
     /**
      * When the current IME is disconnected, the current IME client will be unbound.
      */
-    int UNBIND_REASON_DISCONNECT_IME = 3;
+    int DISCONNECT_IME = 3;
     /**
      * When the system loses the last enabled IME, the current IME client will be unbound.
      */
-    int UNBIND_REASON_NO_IME = 4;
+    int NO_IME = 4;
     /**
      * When the system failed to switch to another IME, the current IME client will be unbound.
      */
-    int UNBIND_REASON_SWITCH_IME_FAILED = 5;
+    int SWITCH_IME_FAILED = 5;
     /**
      * When a new user becomes foreground, the previous IME client will be unbound from the previous
      * user's active IME.
      */
-    int UNBIND_REASON_SWITCH_USER = 6;
+    int SWITCH_USER = 6;
 }
