@@ -29,9 +29,14 @@ import android.util.Log;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.settingslib.fuelgauge.BatterySaverUtils;
+import com.android.settingslib.utils.PowerUtil;
+import com.android.systemui.Dependency;
+import com.android.systemui.power.EnhancedEstimates;
+import com.android.systemui.power.Estimate;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.text.NumberFormat;
 import java.util.ArrayList;
 
 /**
@@ -44,7 +49,9 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
     public static final String ACTION_LEVEL_TEST = "com.android.systemui.BATTERY_LEVEL_TEST";
 
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+    private static final int UPDATE_GRANULARITY_MSEC = 1000 * 60;
 
+    private final EnhancedEstimates mEstimates = Dependency.get(EnhancedEstimates.class);
     private final ArrayList<BatteryController.BatteryStateChangeCallback> mChangeCallbacks = new ArrayList<>();
     private final PowerManager mPowerManager;
     private final Handler mHandler;
@@ -58,6 +65,8 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
     protected boolean mAodPowerSave;
     private boolean mTestmode = false;
     private boolean mHasReceivedBattery = false;
+    private Estimate mEstimate;
+    private long mLastEstimateTimestamp = -1;
 
     public BatteryControllerImpl(Context context) {
         this(context, context.getSystemService(PowerManager.class));
@@ -71,6 +80,7 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
 
         registerReceiver();
         updatePowerSave();
+        updateEstimate();
     }
 
     private void registerReceiver() {
@@ -178,6 +188,26 @@ public class BatteryControllerImpl extends BroadcastReceiver implements BatteryC
     @Override
     public boolean isAodPowerSave() {
         return mAodPowerSave;
+    }
+
+    @Override
+    public String getEstimatedTimeRemainingString() {
+        if (mEstimate == null
+                || System.currentTimeMillis() > mLastEstimateTimestamp + UPDATE_GRANULARITY_MSEC) {
+            updateEstimate();
+        }
+        // Estimates may not exist yet even if we've checked
+        if (mEstimate == null) {
+            return null;
+        }
+        final String percentage = NumberFormat.getPercentInstance().format((double) mLevel / 100.0);
+        return PowerUtil.getBatteryRemainingShortStringFormatted(
+                mContext, mEstimate.estimateMillis);
+    }
+
+    private void updateEstimate() {
+        mEstimate = mEstimates.getEstimate();
+        mLastEstimateTimestamp = System.currentTimeMillis();
     }
 
     private void updatePowerSave() {

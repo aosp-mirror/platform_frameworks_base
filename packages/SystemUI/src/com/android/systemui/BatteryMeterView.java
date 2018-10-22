@@ -19,7 +19,10 @@ import static android.app.StatusBarManager.DISABLE2_SYSTEM_ICONS;
 import static android.app.StatusBarManager.DISABLE_NONE;
 import static android.provider.Settings.System.SHOW_BATTERY_PERCENT;
 
+import static java.lang.annotation.RetentionPolicy.SOURCE;
+
 import android.animation.ArgbEvaluator;
+import android.annotation.IntDef;
 import android.app.ActivityManager;
 import android.content.Context;
 import android.content.res.Resources;
@@ -55,14 +58,22 @@ import com.android.systemui.statusbar.policy.IconLogger;
 import com.android.systemui.tuner.TunerService;
 import com.android.systemui.tuner.TunerService.Tunable;
 import com.android.systemui.util.Utils.DisableStateTracker;
-import com.android.systemui.R;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
 import java.text.NumberFormat;
 
 public class BatteryMeterView extends LinearLayout implements
         BatteryStateChangeCallback, Tunable, DarkReceiver, ConfigurationListener {
+
+
+    @Retention(SOURCE)
+    @IntDef({MODE_DEFAULT, MODE_ON, MODE_OFF})
+    public @interface BatteryPercentMode {}
+    public static final int MODE_DEFAULT = 0;
+    public static final int MODE_ON = 1;
+    public static final int MODE_OFF = 2;
 
     private final BatteryMeterDrawableBase mDrawable;
     private final String mSlotBattery;
@@ -74,6 +85,7 @@ public class BatteryMeterView extends LinearLayout implements
     private SettingObserver mSettingObserver;
     private int mTextColor;
     private int mLevel;
+    private int mShowPercentMode = MODE_DEFAULT;
     private boolean mForceShowPercent;
     private boolean mShowPercentAvailable;
 
@@ -154,7 +166,19 @@ public class BatteryMeterView extends LinearLayout implements
     }
 
     public void setForceShowPercent(boolean show) {
-        mForceShowPercent = show;
+        setPercentShowMode(show ? MODE_ON : MODE_DEFAULT);
+    }
+
+    /**
+     * Force a particular mode of showing percent
+     *
+     * 0 - No preference
+     * 1 - Force on
+     * 2 - Force off
+     * @param mode desired mode (none, on, off)
+     */
+    public void setPercentShowMode(@BatteryPercentMode int mode) {
+        mShowPercentMode = mode;
         updateShowPercent();
     }
 
@@ -273,7 +297,8 @@ public class BatteryMeterView extends LinearLayout implements
                 .getIntForUser(getContext().getContentResolver(),
                 SHOW_BATTERY_PERCENT, 0, mUser);
 
-        if ((mShowPercentAvailable && systemSetting) || mForceShowPercent) {
+        if ((mShowPercentAvailable && systemSetting && mShowPercentMode != MODE_OFF)
+                || mShowPercentMode == MODE_ON) {
             if (!showing) {
                 mBatteryPercentView = loadPercentView();
                 if (mTextColor != 0) mBatteryPercentView.setTextColor(mTextColor);
