@@ -9539,7 +9539,7 @@ public class PackageManagerService extends IPackageManager.Stub
                         }
                     }
                 }
-                if (deleteSandboxData) {
+                if (deleteSandboxData && getStorageManagerInternal() != null) {
                     getStorageManagerInternal().destroySandboxForApp(pkg.packageName, realUserId);
                 }
             } catch (PackageManagerException e) {
