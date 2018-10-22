@@ -133,6 +133,7 @@ import com.android.internal.inputmethod.IInputContentUriToken;
 import com.android.internal.inputmethod.IInputMethodPrivilegedOperations;
 import com.android.internal.inputmethod.InputMethodDebug;
 import com.android.internal.inputmethod.StartInputReason;
+import com.android.internal.inputmethod.UnbindReason;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.internal.notification.SystemNotificationChannels;
 import com.android.internal.os.HandlerCaller;
@@ -148,8 +149,6 @@ import com.android.internal.view.IInputMethodManager;
 import com.android.internal.view.IInputMethodSession;
 import com.android.internal.view.IInputSessionCallback;
 import com.android.internal.view.InputBindResult;
-import com.android.internal.view.InputMethodClient;
-import com.android.internal.view.InputMethodClient.UnbindReason;
 import com.android.server.EventLogTags;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
@@ -1508,7 +1507,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         // TODO: Is it really possible that switchUserLocked() happens before system ready?
         if (mSystemReady) {
             hideCurrentInputLocked(0, null);
-            resetCurrentMethodAndClient(InputMethodClient.UNBIND_REASON_SWITCH_USER);
+            resetCurrentMethodAndClient(UnbindReason.UNBIND_REASON_SWITCH_USER);
             buildInputMethodListLocked(initialUserSwitch);
             if (TextUtils.isEmpty(mSettings.getSelectedInputMethod())) {
                 // This is the first time of the user switch and
@@ -1738,7 +1737,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
      * {@link InputMethodManagerService}.
      *
      * <p>As a general principle, IPCs from the application process that take
-     * {@link InputMethodClient} will be rejected without this step.</p>
+     * {@link IInputMethodClient} will be rejected without this step.</p>
      *
      * @param client {@link android.os.Binder} proxy that is associated with the singleton instance
      *               of {@link android.view.inputmethod.InputMethodManager} that runs on the client
@@ -1927,7 +1926,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
             mCurClientInKeyguard = isKeyguardLocked();
             // If the client is changing, we need to switch over to the new
             // one.
-            unbindCurrentClientLocked(InputMethodClient.UNBIND_REASON_SWITCH_CLIENT);
+            unbindCurrentClientLocked(UnbindReason.UNBIND_REASON_SWITCH_CLIENT);
             if (DEBUG) Slog.v(TAG, "switching to client: client="
                     + cs.client.asBinder() + " keyguard=" + mCurClientInKeyguard);
 
@@ -2171,7 +2170,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 mLastBindTime = SystemClock.uptimeMillis();
                 mShowRequested = mInputShown;
                 mInputShown = false;
-                unbindCurrentClientLocked(InputMethodClient.UNBIND_REASON_DISCONNECT_IME);
+                unbindCurrentClientLocked(UnbindReason.UNBIND_REASON_DISCONNECT_IME);
             }
         }
     }
@@ -2482,12 +2481,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 setInputMethodLocked(id, mSettings.getSelectedInputMethodSubtypeId(id));
             } catch (IllegalArgumentException e) {
                 Slog.w(TAG, "Unknown input method from prefs: " + id, e);
-                resetCurrentMethodAndClient(InputMethodClient.UNBIND_REASON_SWITCH_IME_FAILED);
+                resetCurrentMethodAndClient(UnbindReason.UNBIND_REASON_SWITCH_IME_FAILED);
             }
             mShortcutInputMethodsAndSubtypes.clear();
         } else {
             // There is no longer an input method set, so stop any current one.
-            resetCurrentMethodAndClient(InputMethodClient.UNBIND_REASON_NO_IME);
+            resetCurrentMethodAndClient(UnbindReason.UNBIND_REASON_NO_IME);
         }
         // Here is not the perfect place to reset the switching controller. Ideally
         // mSwitchingController and mSettings should be able to share the same state.
@@ -2565,7 +2564,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 intent.putExtra("input_method_id", id);
                 mContext.sendBroadcastAsUser(intent, UserHandle.CURRENT);
             }
-            unbindCurrentClientLocked(InputMethodClient.UNBIND_REASON_SWITCH_IME);
+            unbindCurrentClientLocked(UnbindReason.UNBIND_REASON_SWITCH_IME);
         } finally {
             Binder.restoreCallingIdentity(ident);
         }

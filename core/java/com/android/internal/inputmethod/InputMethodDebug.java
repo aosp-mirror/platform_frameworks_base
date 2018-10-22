@@ -19,9 +19,6 @@ package com.android.internal.inputmethod;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
 
-import com.android.internal.view.InputMethodClient;
-import com.android.internal.view.InputMethodClient.UnbindReason;
-
 /**
  * Provides useful methods for debugging.
  */
@@ -73,19 +70,19 @@ public final class InputMethodDebug {
      */
     public static String unbindReasonToString(@UnbindReason int reason) {
         switch (reason) {
-            case InputMethodClient.UNBIND_REASON_UNSPECIFIED:
+            case UnbindReason.UNBIND_REASON_UNSPECIFIED:
                 return "UNSPECIFIED";
-            case InputMethodClient.UNBIND_REASON_SWITCH_CLIENT:
+            case UnbindReason.UNBIND_REASON_SWITCH_CLIENT:
                 return "SWITCH_CLIENT";
-            case InputMethodClient.UNBIND_REASON_SWITCH_IME:
+            case UnbindReason.UNBIND_REASON_SWITCH_IME:
                 return "SWITCH_IME";
-            case InputMethodClient.UNBIND_REASON_DISCONNECT_IME:
+            case UnbindReason.UNBIND_REASON_DISCONNECT_IME:
                 return "DISCONNECT_IME";
-            case InputMethodClient.UNBIND_REASON_NO_IME:
+            case UnbindReason.UNBIND_REASON_NO_IME:
                 return "NO_IME";
-            case InputMethodClient.UNBIND_REASON_SWITCH_IME_FAILED:
+            case UnbindReason.UNBIND_REASON_SWITCH_IME_FAILED:
                 return "SWITCH_IME_FAILED";
-            case InputMethodClient.UNBIND_REASON_SWITCH_USER:
+            case UnbindReason.UNBIND_REASON_SWITCH_USER:
                 return "SWITCH_USER";
             default:
                 return "Unknown=" + reason;

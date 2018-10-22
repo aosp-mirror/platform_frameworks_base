@@ -62,6 +62,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.inputmethod.InputMethodDebug;
 import com.android.internal.inputmethod.InputMethodPrivilegedOperationsRegistry;
 import com.android.internal.inputmethod.StartInputReason;
+import com.android.internal.inputmethod.UnbindReason;
 import com.android.internal.os.SomeArgs;
 import com.android.internal.view.IInputConnectionWrapper;
 import com.android.internal.view.IInputContext;
@@ -69,7 +70,6 @@ import com.android.internal.view.IInputMethodClient;
 import com.android.internal.view.IInputMethodManager;
 import com.android.internal.view.IInputMethodSession;
 import com.android.internal.view.InputBindResult;
-import com.android.internal.view.InputMethodClient;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -547,7 +547,7 @@ public final class InputMethodManager {
                 }
                 case MSG_UNBIND: {
                     final int sequence = msg.arg1;
-                    @InputMethodClient.UnbindReason
+                    @UnbindReason
                     final int reason = msg.arg2;
                     if (DEBUG) {
                         Log.i(TAG, "handleMessage: MSG_UNBIND " + sequence +
@@ -695,7 +695,7 @@ public final class InputMethodManager {
         }
 
         @Override
-        public void onUnbindMethod(int sequence, @InputMethodClient.UnbindReason int unbindReason) {
+        public void onUnbindMethod(int sequence, @UnbindReason int unbindReason) {
             mH.obtainMessage(MSG_UNBIND, sequence, unbindReason).sendToTarget();
         }
 
