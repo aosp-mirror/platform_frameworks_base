@@ -873,6 +873,52 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
         return null;
     }
 
+    ActivityRecord topRunningActivity() {
+        return topRunningActivity(false /* considerKeyguardState */);
+    }
+
+    /**
+     * Returns the top running activity in the focused stack. In the case the focused stack has no
+     * such activity, the next focusable stack on this display is returned.
+     *
+     * @param considerKeyguardState Indicates whether the locked state should be considered. if
+     *                              {@code true} and the keyguard is locked, only activities that
+     *                              can be shown on top of the keyguard will be considered.
+     * @return The top running activity. {@code null} if none is available.
+     */
+    ActivityRecord topRunningActivity(boolean considerKeyguardState) {
+        ActivityRecord topRunning = null;
+        final ActivityStack focusedStack = getFocusedStack();
+        if (focusedStack != null) {
+            topRunning = focusedStack.topRunningActivityLocked();
+        }
+
+        // Look in other focusable stacks.
+        if (topRunning == null) {
+            for (int i = mStacks.size() - 1; i >= 0; --i) {
+                final ActivityStack stack = mStacks.get(i);
+                // Only consider focusable stacks other than the current focused one.
+                if (stack == focusedStack || !stack.isFocusable()) {
+                    continue;
+                }
+                topRunning = stack.topRunningActivityLocked();
+                if (topRunning != null) {
+                    break;
+                }
+            }
+        }
+
+        // This activity can be considered the top running activity if we are not considering
+        // the locked state, the keyguard isn't locked, or we can show when locked.
+        if (topRunning != null && considerKeyguardState
+                && mSupervisor.getKeyguardController().isKeyguardLocked()
+                && !topRunning.canShowWhenLocked()) {
+            return null;
+        }
+
+        return topRunning;
+    }
+
     int getIndexOf(ActivityStack stack) {
         return mStacks.indexOf(stack);
     }
