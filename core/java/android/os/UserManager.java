@@ -1278,6 +1278,8 @@ public class UserManager {
      * @return whether this process is running under the primary user.
      * @hide
      */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
     public boolean isPrimaryUser() {
         UserInfo user = getUserInfo(UserHandle.myUserId());
         return user != null && user.isPrimary();
@@ -1295,10 +1297,15 @@ public class UserManager {
     }
 
     /**
+     * Used to check if this process is running as an admin user. An admin user is allowed to
+     * modify or configure certain settings that aren't available to non-admin users,
+     * create and delete additional users, etc. There can be more than one admin users.
+     *
+     * @return whether this process is running under an admin user.
      * @hide
-     * Returns whether the caller is running as an admin user. There can be more than one admin
-     * user.
      */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
     public boolean isAdminUser() {
         return isUserAdmin(UserHandle.myUserId());
     }
@@ -1323,12 +1330,14 @@ public class UserManager {
     }
 
     /**
-     * Returns whether the caller is running as restricted profile. Restricted profile may have
-     * a reduced number of available apps, app restrictions and account restrictions.
-     * @return whether the user making this call is a linked user
+     * Used to check if this process is running under a restricted profile. Restricted profiles
+     * may have a reduced number of available apps, app restrictions, and account restrictions.
+     *
+     * @return whether this process is running under a restricted profile.
      * @hide
      */
     @SystemApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
     public boolean isRestrictedProfile() {
         try {
             return mService.isRestricted();
@@ -1374,10 +1383,13 @@ public class UserManager {
     }
 
     /**
-     * Checks if the calling app is running as a guest user.
-     * @return whether the caller is a guest user.
+     * Used to check if this process is running under a guest user. A guest user may be transient.
+     *
+     * @return whether this process is running under a guest user.
      * @hide
      */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.MANAGE_USERS)
     public boolean isGuestUser() {
         UserInfo user = getUserInfo(UserHandle.myUserId());
         return user != null && user.isGuest();
