@@ -24,6 +24,7 @@ import static android.graphics.GraphicBuffer.USAGE_SW_READ_RARELY;
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
 import android.app.ActivityManager.TaskSnapshot;
+import android.content.ComponentName;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.GraphicBuffer;
@@ -126,9 +127,9 @@ class TaskSnapshotPersisterTestBase extends WindowTestsBase {
             Canvas c = buffer.lockCanvas();
             c.drawColor(Color.RED);
             buffer.unlockCanvasAndPost(c);
-            return new TaskSnapshot(buffer, ORIENTATION_PORTRAIT, TEST_INSETS,
-                    mScale < 1f /* reducedResolution */, mScale, mIsRealSnapshot, mWindowingMode,
-                    mSystemUiVisibility, mIsTranslucent);
+            return new TaskSnapshot(new ComponentName("", ""), buffer, ORIENTATION_PORTRAIT,
+                    TEST_INSETS, mScale < 1f /* reducedResolution */, mScale, mIsRealSnapshot,
+                    mWindowingMode, mSystemUiVisibility, mIsTranslucent);
         }
     }
 }

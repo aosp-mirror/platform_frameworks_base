@@ -41,6 +41,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import android.app.ActivityManager.TaskSnapshot;
 import android.app.ActivityOptions;
 import android.content.Intent;
+import android.content.ComponentName;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.GraphicBuffer;
@@ -199,20 +200,21 @@ public class AppWindowContainerController
     };
 
     public AppWindowContainerController(TaskWindowContainerController taskController,
-            IApplicationToken token, AppWindowContainerListener listener, int index,
-            int requestedOrientation, boolean fullscreen, boolean showForAllUsers, int configChanges,
+            IApplicationToken token, ComponentName activityComponent,
+            AppWindowContainerListener listener, int index, int requestedOrientation,
+            boolean fullscreen, boolean showForAllUsers, int configChanges,
             boolean voiceInteraction, boolean launchTaskBehind, boolean alwaysFocusable,
             int targetSdkVersion, int rotationAnimationHint, long inputDispatchingTimeoutNanos) {
-        this(taskController, token, listener, index, requestedOrientation, fullscreen,
-                showForAllUsers,
-                configChanges, voiceInteraction, launchTaskBehind, alwaysFocusable,
-                targetSdkVersion, rotationAnimationHint, inputDispatchingTimeoutNanos,
-                WindowManagerService.getInstance());
+        this(taskController, token, activityComponent, listener, index, requestedOrientation,
+                fullscreen, showForAllUsers, configChanges, voiceInteraction, launchTaskBehind,
+                alwaysFocusable, targetSdkVersion, rotationAnimationHint,
+                inputDispatchingTimeoutNanos, WindowManagerService.getInstance());
     }
 
     public AppWindowContainerController(TaskWindowContainerController taskController,
-            IApplicationToken token, AppWindowContainerListener listener, int index,
-            int requestedOrientation, boolean fullscreen, boolean showForAllUsers, int configChanges,
+            IApplicationToken token, ComponentName activityComponent,
+            AppWindowContainerListener listener, int index, int requestedOrientation,
+            boolean fullscreen, boolean showForAllUsers, int configChanges,
             boolean voiceInteraction, boolean launchTaskBehind, boolean alwaysFocusable,
             int targetSdkVersion, int rotationAnimationHint, long inputDispatchingTimeoutNanos,
             WindowManagerService service) {
@@ -233,10 +235,10 @@ public class AppWindowContainerController
                         + " controller=" + taskController);
             }
 
-            atoken = createAppWindow(mService, token, voiceInteraction, task.getDisplayContent(),
-                    inputDispatchingTimeoutNanos, fullscreen, showForAllUsers, targetSdkVersion,
-                    requestedOrientation, rotationAnimationHint, configChanges, launchTaskBehind,
-                    alwaysFocusable, this);
+            atoken = createAppWindow(mService, token, activityComponent, voiceInteraction,
+                    task.getDisplayContent(), inputDispatchingTimeoutNanos, fullscreen,
+                    showForAllUsers, targetSdkVersion, requestedOrientation, rotationAnimationHint,
+                    configChanges, launchTaskBehind, alwaysFocusable, this);
             if (DEBUG_TOKEN_MOVEMENT || DEBUG_ADD_REMOVE) Slog.v(TAG_WM, "addAppToken: " + atoken
                     + " controller=" + taskController + " at " + index);
             task.addChild(atoken, index);
@@ -245,11 +247,12 @@ public class AppWindowContainerController
 
     @VisibleForTesting
     AppWindowToken createAppWindow(WindowManagerService service, IApplicationToken token,
-            boolean voiceInteraction, DisplayContent dc, long inputDispatchingTimeoutNanos,
-            boolean fullscreen, boolean showForAllUsers, int targetSdk, int orientation,
-            int rotationAnimationHint, int configChanges, boolean launchTaskBehind,
-            boolean alwaysFocusable, AppWindowContainerController controller) {
-        return new AppWindowToken(service, token, voiceInteraction, dc,
+            ComponentName component, boolean voiceInteraction, DisplayContent dc,
+            long inputDispatchingTimeoutNanos, boolean fullscreen, boolean showForAllUsers,
+            int targetSdk, int orientation, int rotationAnimationHint, int configChanges,
+            boolean launchTaskBehind, boolean alwaysFocusable,
+            AppWindowContainerController controller) {
+        return new AppWindowToken(service, token, component, voiceInteraction, dc,
                 inputDispatchingTimeoutNanos, fullscreen, showForAllUsers, targetSdk, orientation,
                 rotationAnimationHint, configChanges, launchTaskBehind, alwaysFocusable,
                 controller);

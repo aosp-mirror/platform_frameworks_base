@@ -1965,7 +1965,7 @@ public class TaskRecord extends ConfigurationContainer implements TaskWindowCont
                 ? reuseActivitiesReport.base.intent.getComponent()
                 : null;
         info.topActivity = reuseActivitiesReport.top != null
-                ? reuseActivitiesReport.top.intent.getComponent()
+                ? reuseActivitiesReport.top.realActivity
                 : null;
         info.origActivity = origActivity;
         info.realActivity = realActivity;

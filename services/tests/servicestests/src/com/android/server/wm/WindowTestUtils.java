@@ -32,6 +32,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Rect;
@@ -152,17 +153,19 @@ public class WindowTestUtils {
         private TestAppWindowToken(DisplayContent dc) {
             super(dc.mService, new IApplicationToken.Stub() {
                 public String getName() {return null;}
-                }, false, dc, true /* fillsParent */);
+                }, new ComponentName("", ""), false, dc, true /* fillsParent */);
         }
 
         TestAppWindowToken(WindowManagerService service, IApplicationToken token,
-                boolean voiceInteraction, DisplayContent dc, long inputDispatchingTimeoutNanos,
-                boolean fullscreen, boolean showForAllUsers, int targetSdk, int orientation,
-                int rotationAnimationHint, int configChanges, boolean launchTaskBehind,
-                boolean alwaysFocusable, AppWindowContainerController controller) {
-            super(service, token, voiceInteraction, dc, inputDispatchingTimeoutNanos, fullscreen,
-                    showForAllUsers, targetSdk, orientation, rotationAnimationHint, configChanges,
-                    launchTaskBehind, alwaysFocusable, controller);
+                ComponentName activityComponent, boolean voiceInteraction, DisplayContent dc,
+                long inputDispatchingTimeoutNanos, boolean fullscreen, boolean showForAllUsers,
+                int targetSdk, int orientation, int rotationAnimationHint, int configChanges,
+                boolean launchTaskBehind, boolean alwaysFocusable,
+                AppWindowContainerController controller) {
+            super(service, token, activityComponent, voiceInteraction, dc,
+                    inputDispatchingTimeoutNanos, fullscreen, showForAllUsers, targetSdk,
+                    orientation, rotationAnimationHint, configChanges, launchTaskBehind,
+                    alwaysFocusable, controller);
         }
 
         int getWindowsCount() {
@@ -326,22 +329,24 @@ public class WindowTestUtils {
 
         TestAppWindowContainerController(TestTaskWindowContainerController taskController,
                 IApplicationToken token) {
-            super(taskController, token, null /* listener */, 0 /* index */,
-                    SCREEN_ORIENTATION_UNSPECIFIED, true /* fullscreen */,
-                    true /* showForAllUsers */, 0 /* configChanges */, false /* voiceInteraction */,
-                    false /* launchTaskBehind */, false /* alwaysFocusable */,
-                    0 /* targetSdkVersion */, 0 /* rotationAnimationHint */,
-                    0 /* inputDispatchingTimeoutNanos */, taskController.mService);
+            super(taskController, token, new ComponentName("", "") /* activityComponent */,
+                    null /* listener */, 0 /* index */, SCREEN_ORIENTATION_UNSPECIFIED,
+                    true /* fullscreen */, true /* showForAllUsers */, 0 /* configChanges */,
+                    false /* voiceInteraction */, false /* launchTaskBehind */,
+                    false /* alwaysFocusable */, 0 /* targetSdkVersion */,
+                    0 /* rotationAnimationHint */, 0 /* inputDispatchingTimeoutNanos */,
+                    taskController.mService);
             mToken = token;
         }
 
         @Override
         AppWindowToken createAppWindow(WindowManagerService service, IApplicationToken token,
-                boolean voiceInteraction, DisplayContent dc, long inputDispatchingTimeoutNanos,
+                ComponentName activityComponent, boolean voiceInteraction, DisplayContent dc,
+                long inputDispatchingTimeoutNanos,
                 boolean fullscreen, boolean showForAllUsers, int targetSdk, int orientation,
                 int rotationAnimationHint, int configChanges, boolean launchTaskBehind,
                 boolean alwaysFocusable, AppWindowContainerController controller) {
-            return new TestAppWindowToken(service, token, voiceInteraction, dc,
+            return new TestAppWindowToken(service, token, activityComponent, voiceInteraction, dc,
                     inputDispatchingTimeoutNanos, fullscreen, showForAllUsers, targetSdk,
                     orientation,
                     rotationAnimationHint, configChanges, launchTaskBehind, alwaysFocusable,
