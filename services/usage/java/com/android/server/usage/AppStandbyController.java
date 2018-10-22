@@ -1161,6 +1161,10 @@ public class AppStandbyController {
     void setAppStandbyBucket(String packageName, int userId, @StandbyBuckets int newBucket,
             int reason, long elapsedRealtime, boolean resetTimeout) {
         synchronized (mAppIdleLock) {
+            // If the package is not installed, don't allow the bucket to be set.
+            if (!mInjector.isPackageInstalled(packageName, 0, userId)) {
+                return;
+            }
             AppIdleHistory.AppUsageHistory app = mAppIdleHistory.getAppUsageHistory(packageName,
                     userId, elapsedRealtime);
             boolean predicted = (reason & REASON_MAIN_MASK) == REASON_MAIN_PREDICTED;
@@ -1592,6 +1596,10 @@ public class AppStandbyController {
 
         boolean isPackageEphemeral(int userId, String packageName) {
             return mPackageManagerInternal.isPackageEphemeral(userId, packageName);
+        }
+
+        boolean isPackageInstalled(String packageName, int flags, int userId) {
+            return mPackageManagerInternal.getPackageUid(packageName, flags, userId) >= 0;
         }
 
         int[] getRunningUserIds() throws RemoteException {
