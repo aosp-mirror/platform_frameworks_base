@@ -6560,7 +6560,7 @@ public class TelephonyManager {
     }
 
     /**
-     * @removed Use {@link android.telecom.TelecomManager#isInCall} instead
+     * @deprecated Use {@link android.telecom.TelecomManager#isInCall} instead
      * @hide
      */
     @Deprecated
@@ -6570,11 +6570,12 @@ public class TelephonyManager {
             android.Manifest.permission.READ_PHONE_STATE
     })
     public boolean isOffhook() {
-        return false;
+        TelecomManager tm = (TelecomManager) mContext.getSystemService(TELECOM_SERVICE);
+        return tm.isInCall();
     }
 
     /**
-     * @removed Use {@link android.telecom.TelecomManager#isRinging} instead
+     * @deprecated Use {@link android.telecom.TelecomManager#isRinging} instead
      * @hide
      */
     @Deprecated
@@ -6584,11 +6585,12 @@ public class TelephonyManager {
             android.Manifest.permission.READ_PHONE_STATE
     })
     public boolean isRinging() {
-        return false;
+        TelecomManager tm = (TelecomManager) mContext.getSystemService(TELECOM_SERVICE);
+        return tm.isRinging();
     }
 
     /**
-     * @removed Use {@link android.telecom.TelecomManager#isInCall} instead
+     * @deprecated Use {@link android.telecom.TelecomManager#isInCall} instead
      * @hide
      */
     @Deprecated
@@ -6598,7 +6600,8 @@ public class TelephonyManager {
             android.Manifest.permission.READ_PHONE_STATE
     })
     public boolean isIdle() {
-        return true;
+        TelecomManager tm = (TelecomManager) mContext.getSystemService(TELECOM_SERVICE);
+        return !tm.isInCall();
     }
 
     /**
