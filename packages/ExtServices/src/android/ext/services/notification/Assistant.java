@@ -25,7 +25,6 @@ import static android.service.notification.NotificationListenerService.Ranking
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityThread;
-import android.app.AlarmManager;
 import android.app.INotificationManager;
 import android.app.Notification;
 import android.app.NotificationChannel;
@@ -224,8 +223,9 @@ public class Assistant extends NotificationAssistantService {
     }
 
     /** A convenience helper for creating an adjustment for an SBN. */
+    @VisibleForTesting
     @Nullable
-    private Adjustment createEnqueuedNotificationAdjustment(
+    Adjustment createEnqueuedNotificationAdjustment(
             @NonNull NotificationEntry entry,
             @NonNull ArrayList<Notification.Action> smartActions,
             @NonNull ArrayList<CharSequence> smartReplies) {
@@ -237,7 +237,9 @@ public class Assistant extends NotificationAssistantService {
             signals.putCharSequenceArrayList(Adjustment.KEY_SMART_REPLIES, smartReplies);
         }
         if (mNotificationCategorizer.shouldSilence(entry)) {
-            signals.putInt(KEY_IMPORTANCE, IMPORTANCE_LOW);
+            final int importance = entry.getImportance() < IMPORTANCE_LOW ? entry.getImportance()
+                    : IMPORTANCE_LOW;
+            signals.putInt(KEY_IMPORTANCE, importance);
         }
 
         return new Adjustment(
