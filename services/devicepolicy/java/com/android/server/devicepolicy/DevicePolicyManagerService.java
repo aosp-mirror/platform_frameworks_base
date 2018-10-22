@@ -206,6 +206,7 @@ import android.util.Log;
 import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.util.StatsLog;
 import android.util.Xml;
 import android.view.IWindowManager;
 import android.view.accessibility.AccessibilityManager;
@@ -9387,6 +9388,7 @@ public class DevicePolicyManagerService extends BaseIDevicePolicyManager {
             }
             saveUserRestrictionsLocked(userHandle);
         }
+        StatsLog.write(StatsLog.USER_RESTRICTION_CHANGED, key, enabledFromThisOwner);
         if (SecurityLog.isLoggingEnabled()) {
             final int eventTag = enabledFromThisOwner
                     ? SecurityLog.TAG_USER_RESTRICTION_ADDED
