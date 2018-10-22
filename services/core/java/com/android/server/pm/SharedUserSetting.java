@@ -23,6 +23,10 @@ import android.service.pm.PackageServiceDumpProto;
 import android.util.ArraySet;
 import android.util.proto.ProtoOutputStream;
 
+import com.android.internal.util.ArrayUtils;
+
+import libcore.util.EmptyArray;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -142,6 +146,28 @@ public final class SharedUserSetting extends SettingBase {
             pkg.applicationInfo.seInfo = SELinuxMMAC.getSeInfo(pkg, isPrivileged,
                 pkg.applicationInfo.targetSandboxVersion, seInfoTargetSdkVersion);
         }
+    }
+
+    /** Returns userIds which doesn't have any packages with this sharedUserId */
+    public int[] getNotInstalledUserIds() {
+        int[] excludedUserIds = null;
+        for (PackageSetting ps : packages) {
+            final int[] userIds = ps.getNotInstalledUserIds();
+            if (excludedUserIds == null) {
+                excludedUserIds = userIds;
+            } else {
+                for (int userId : excludedUserIds) {
+                    if (!ArrayUtils.contains(userIds, userId)) {
+                        excludedUserIds = ArrayUtils.removeInt(excludedUserIds, userId);
+                    }
+                }
+            }
+        }
+        return excludedUserIds == null ? EmptyArray.INT : excludedUserIds;
+    }
+
+    public String getSandboxName() {
+        return "shared:" + name;
     }
 
     /** Updates all fields in this shared user setting from another. */
