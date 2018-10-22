@@ -785,6 +785,23 @@ public class WifiConfiguration implements Parcelable {
 
     /**
      * @hide
+     * Use factory MAC when connecting to this network
+     */
+    public static final int RANDOMIZATION_NONE = 0;
+    /**
+     * @hide
+     * Generate a randomized MAC once and reuse it for all connections to this network
+     */
+    public static final int RANDOMIZATION_PERSISTENT = 1;
+
+    /**
+     * @hide
+     * Level of MAC randomization for this network
+     */
+    public int macRandomizationSetting = RANDOMIZATION_PERSISTENT;
+
+    /**
+     * @hide
      * Randomized MAC address to use with this particular network
      */
     @NonNull
@@ -1645,6 +1662,7 @@ public class WifiConfiguration implements Parcelable {
         if (this.meteredOverride != METERED_OVERRIDE_NONE) {
             sbuf.append(" meteredOverride ").append(meteredOverride).append("\n");
         }
+        sbuf.append(" macRandomizationSetting ").append(macRandomizationSetting).append("\n");
         sbuf.append(" KeyMgmt:");
         for (int k = 0; k < this.allowedKeyManagement.size(); k++) {
             if (this.allowedKeyManagement.get(k)) {
@@ -2109,6 +2127,7 @@ public class WifiConfiguration implements Parcelable {
             shared = source.shared;
             recentFailure.setAssociationStatus(source.recentFailure.getAssociationStatus());
             mRandomizedMacAddress = source.mRandomizedMacAddress;
+            macRandomizationSetting = source.macRandomizationSetting;
         }
     }
 
@@ -2173,6 +2192,7 @@ public class WifiConfiguration implements Parcelable {
         dest.writeString(mPasspointManagementObjectTree);
         dest.writeInt(recentFailure.getAssociationStatus());
         dest.writeParcelable(mRandomizedMacAddress, flags);
+        dest.writeInt(macRandomizationSetting);
     }
 
     /** Implement the Parcelable interface {@hide} */
@@ -2239,6 +2259,7 @@ public class WifiConfiguration implements Parcelable {
                 config.mPasspointManagementObjectTree = in.readString();
                 config.recentFailure.setAssociationStatus(in.readInt());
                 config.mRandomizedMacAddress = in.readParcelable(null);
+                config.macRandomizationSetting = in.readInt();
                 return config;
             }
 
