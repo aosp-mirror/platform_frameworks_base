@@ -542,8 +542,7 @@ public final class InputMethodManager {
                         mCurId = res.id;
                         mBindSequence = res.sequence;
                     }
-                    startInputInner(StartInputReason.START_INPUT_REASON_BOUND_TO_IMMS,
-                            null, 0, 0, 0);
+                    startInputInner(StartInputReason.BOUND_TO_IMMS, null, 0, 0, 0);
                     return;
                 }
                 case MSG_UNBIND: {
@@ -569,8 +568,7 @@ public final class InputMethodManager {
                     }
                     if (startInput) {
                         startInputInner(
-                                StartInputReason.START_INPUT_REASON_UNBOUND_FROM_IMMS, null, 0, 0,
-                                0);
+                                StartInputReason.UNBOUND_FROM_IMMS, null, 0, 0, 0);
                     }
                     return;
                 }
@@ -599,9 +597,8 @@ public final class InputMethodManager {
                         // handling this message.
                         if (mServedView != null && canStartInput(mServedView)) {
                             if (checkFocusNoStartInput(mRestartOnNextWindowFocus)) {
-                                final int reason = active ?
-                                        StartInputReason.START_INPUT_REASON_ACTIVATED_BY_IMMS :
-                                        StartInputReason.START_INPUT_REASON_DEACTIVATED_BY_IMMS;
+                                final int reason = active ? StartInputReason.ACTIVATED_BY_IMMS
+                                        : StartInputReason.DEACTIVATED_BY_IMMS;
                                 startInputInner(reason, null, 0, 0, 0);
                             }
                         }
@@ -1388,8 +1385,7 @@ public final class InputMethodManager {
             mServedConnecting = true;
         }
 
-        startInputInner(StartInputReason.START_INPUT_REASON_APP_CALLED_RESTART_INPUT_API, null, 0,
-                0, 0);
+        startInputInner(StartInputReason.APP_CALLED_RESTART_INPUT_API, null, 0, 0, 0);
     }
 
     boolean startInputInner(@StartInputReason int startInputReason,
@@ -1656,7 +1652,7 @@ public final class InputMethodManager {
     @UnsupportedAppUsage
     public void checkFocus() {
         if (checkFocusNoStartInput(false)) {
-            startInputInner(StartInputReason.START_INPUT_REASON_CHECK_FOCUS, null, 0, 0, 0);
+            startInputInner(StartInputReason.CHECK_FOCUS, null, 0, 0, 0);
         }
     }
 
@@ -1746,8 +1742,8 @@ public final class InputMethodManager {
             // should be done in conjunction with telling the system service
             // about the window gaining focus, to help make the transition
             // smooth.
-            if (startInputInner(StartInputReason.START_INPUT_REASON_WINDOW_FOCUS_GAIN,
-                    rootView.getWindowToken(), controlFlags, softInputMode, windowFlags)) {
+            if (startInputInner(StartInputReason.WINDOW_FOCUS_GAIN, rootView.getWindowToken(),
+                    controlFlags, softInputMode, windowFlags)) {
                 return;
             }
         }
@@ -1758,7 +1754,7 @@ public final class InputMethodManager {
             try {
                 if (DEBUG) Log.v(TAG, "Reporting focus gain, without startInput");
                 mService.startInputOrWindowGainedFocus(
-                        StartInputReason.START_INPUT_REASON_WINDOW_FOCUS_GAIN_REPORT_ONLY, mClient,
+                        StartInputReason.WINDOW_FOCUS_GAIN_REPORT_ONLY, mClient,
                         rootView.getWindowToken(), controlFlags, softInputMode, windowFlags, null,
                         null, 0 /* missingMethodFlags */,
                         rootView.getContext().getApplicationInfo().targetSdkVersion);

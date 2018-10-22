@@ -2052,7 +2052,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     mCurClient.curSession = new SessionState(mCurClient,
                             method, session, channel);
                     InputBindResult res = attachNewInputLocked(
-                            StartInputReason.START_INPUT_REASON_SESSION_CREATED_BY_IME, true);
+                            StartInputReason.SESSION_CREATED_BY_IME, true);
                     if (res.method != null) {
                         executeOrSendMessage(mCurClient.client, mCaller.obtainMessageOO(
                                 MSG_BIND_CLIENT, mCurClient.client, res));
