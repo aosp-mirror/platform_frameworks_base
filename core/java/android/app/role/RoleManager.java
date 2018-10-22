@@ -22,19 +22,16 @@ import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
-import android.app.Activity;
 import android.content.Context;
 import android.content.Intent;
 import android.os.Binder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
-import android.util.ArraySet;
 
 import com.android.internal.util.Preconditions;
 
 import java.util.List;
-import java.util.Set;
 import java.util.concurrent.Executor;
 
 /**
@@ -51,8 +48,8 @@ import java.util.concurrent.Executor;
  * role holders. To qualify for a role, an application must meet certain requirements, including
  * defining certain components in its manifest. These requirements can be found in the AndroidX
  * Libraries. Then the application will need user consent to become a role holder, which can be
- * requested using {@link Activity#startActivityForResult(Intent, int)} with the {@code Intent}
- * obtained from {@link #createRequestRoleIntent(String)}.
+ * requested using {@link android.app.Activity#startActivityForResult(Intent, int)} with the
+ * {@code Intent} obtained from {@link #createRequestRoleIntent(String)}.
  * <p>
  * Upon becoming a role holder, the application may be granted certain privileges that are role
  * specific. When the application loses its role, these privileges will also be revoked.
@@ -89,6 +86,14 @@ public final class RoleManager {
     @SystemApi
     public static final String EXTRA_REQUEST_ROLE_NAME = "android.app.role.extra.REQUEST_ROLE_NAME";
 
+    /**
+     * The permission required to manage records of role holders in {@link RoleManager} directly.
+     *
+     * @hide
+     */
+    public static final String PERMISSION_MANAGE_ROLE_HOLDERS_FROM_CONTROLLER =
+            "com.android.permissioncontroller.permission.MANAGE_ROLE_HOLDERS_FROM_CONTROLLER";
+
     @NonNull
     private final Context mContext;
 
@@ -105,11 +110,13 @@ public final class RoleManager {
     }
 
     /**
-     * Returns an {@code Intent} suitable for passing to {@link Activity#startActivityForResult(
-     * Intent, int)} which prompts the user to grant a role to this application.
+     * Returns an {@code Intent} suitable for passing to
+     * {@link android.app.Activity#startActivityForResult(Intent, int)} which prompts the user to
+     * grant a role to this application.
      * <p>
-     * If the role is granted, the {@code resultCode} will be {@link Activity#RESULT_OK}, otherwise
-     * it will be {@link Activity#RESULT_CANCELED}.
+     * If the role is granted, the {@code resultCode} will be
+     * {@link android.app.Activity#RESULT_OK}, otherwise it will be
+     * {@link android.app.Activity#RESULT_CANCELED}.
      *
      * @param roleName the name of requested role
      *
@@ -165,14 +172,37 @@ public final class RoleManager {
     /**
      * Get package names of the applications holding the role.
      * <p>
-     * <strong>Note: </strong>Using this API requires holding
+     * <strong>Note:</strong> Using this API requires holding
+     * {@code android.permission.MANAGE_ROLE_HOLDERS}.
+     *
+     * @param roleName the name of the role to get the role holder for
+     *
+     * @return a list of package names of the role holders, or an empty list if none.
+     *
+     * @throws IllegalArgumentException if the role name is {@code null} or empty.
+     *
+     * @see #getRoleHoldersAsUser(String, UserHandle)
+     *
+     * @hide
+     */
+    @NonNull
+    @RequiresPermission(Manifest.permission.MANAGE_ROLE_HOLDERS)
+    @SystemApi
+    public List<String> getRoleHolders(@NonNull String roleName) {
+        return getRoleHoldersAsUser(roleName, UserHandle.of(UserHandle.getCallingUserId()));
+    }
+
+    /**
+     * Get package names of the applications holding the role.
+     * <p>
+     * <strong>Note:</strong> Using this API requires holding
      * {@code android.permission.MANAGE_ROLE_HOLDERS} and if the user id is not the current user
      * {@code android.permission.INTERACT_ACROSS_USERS_FULL}.
      *
      * @param roleName the name of the role to get the role holder for
      * @param user the user to get the role holder for
      *
-     * @return the package name of the role holder, or {@code null} if none.
+     * @return a list of package names of the role holders, or an empty list if none.
      *
      * @throws IllegalArgumentException if the role name is {@code null} or empty.
      *
@@ -185,23 +215,21 @@ public final class RoleManager {
     @NonNull
     @RequiresPermission(Manifest.permission.MANAGE_ROLE_HOLDERS)
     @SystemApi
-    public Set<String> getRoleHoldersAsUser(@NonNull String roleName, @NonNull UserHandle user) {
+    public List<String> getRoleHoldersAsUser(@NonNull String roleName, @NonNull UserHandle user) {
         Preconditions.checkStringNotEmpty(roleName, "roleName cannot be null or empty");
         Preconditions.checkNotNull(user, "user cannot be null");
-        List<String> roleHolders;
         try {
-            roleHolders = mService.getRoleHoldersAsUser(roleName, user.getIdentifier());
+            return mService.getRoleHoldersAsUser(roleName, user.getIdentifier());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
-        return new ArraySet<>(roleHolders);
     }
 
     /**
      * Add a specific application to the holders of a role. If the role is exclusive, the previous
      * holder will be replaced.
      * <p>
-     * <strong>Note: </strong>Using this API requires holding
+     * <strong>Note:</strong> Using this API requires holding
      * {@code android.permission.MANAGE_ROLE_HOLDERS} and if the user id is not the current user
      * {@code android.permission.INTERACT_ACROSS_USERS_FULL}.
      *
@@ -240,7 +268,7 @@ public final class RoleManager {
     /**
      * Remove a specific application from the holders of a role.
      * <p>
-     * <strong>Note: </strong>Using this API requires holding
+     * <strong>Note:</strong> Using this API requires holding
      * {@code android.permission.MANAGE_ROLE_HOLDERS} and if the user id is not the current user
      * {@code android.permission.INTERACT_ACROSS_USERS_FULL}.
      *
@@ -279,7 +307,7 @@ public final class RoleManager {
     /**
      * Remove all holders of a role.
      * <p>
-     * <strong>Note: </strong>Using this API requires holding
+     * <strong>Note:</strong> Using this API requires holding
      * {@code android.permission.MANAGE_ROLE_HOLDERS} and if the user id is not the current user
      * {@code android.permission.INTERACT_ACROSS_USERS_FULL}.
      *
@@ -307,6 +335,74 @@ public final class RoleManager {
         try {
             mService.clearRoleHoldersAsUser(roleName, user.getIdentifier(),
                     new RoleManagerCallbackDelegate(executor, callback));
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Add a specific application to the holders of a role, only modifying records inside
+     * {@link RoleManager}. Should only be called from
+     * {@link android.rolecontrollerservice.RoleControllerService}.
+     * <p>
+     * <strong>Note:</strong> Using this API requires holding
+     * {@link #PERMISSION_MANAGE_ROLE_HOLDERS_FROM_CONTROLLER}.
+     *
+     * @param roleName the name of the role to add the role holder for
+     * @param packageName the package name of the application to add to the role holders
+     *
+     * @return whether the operation was successful, and will also be {@code true} if a matching
+     *         role holder is already found.
+     *
+     * @throws IllegalArgumentException if the role name or package name is {@code null} or empty.
+     *
+     * @see #getRoleHolders(String)
+     * @see #removeRoleHolderFromController(String, String)
+     *
+     * @hide
+     */
+    @RequiresPermission(PERMISSION_MANAGE_ROLE_HOLDERS_FROM_CONTROLLER)
+    @SystemApi
+    public boolean addRoleHolderFromController(@NonNull String roleName,
+            @NonNull String packageName) {
+        Preconditions.checkStringNotEmpty(roleName, "roleName cannot be null or empty");
+        Preconditions.checkStringNotEmpty(packageName, "packageName cannot be null or empty");
+        try {
+            return mService.addRoleHolderFromController(roleName, packageName);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Remove a specific application from the holders of a role, only modifying records inside
+     * {@link RoleManager}. Should only be called from
+     * {@link android.rolecontrollerservice.RoleControllerService}.
+     * <p>
+     * <strong>Note:</strong> Using this API requires holding
+     * {@link #PERMISSION_MANAGE_ROLE_HOLDERS_FROM_CONTROLLER}.
+     *
+     * @param roleName the name of the role to remove the role holder for
+     * @param packageName the package name of the application to remove from the role holders
+     *
+     * @return whether the operation was successful, and will also be {@code true} if no matching
+     *         role holder was found to remove.
+     *
+     * @throws IllegalArgumentException if the role name or package name is {@code null} or empty.
+     *
+     * @see #getRoleHolders(String)
+     * @see #addRoleHolderFromController(String, String)
+     *
+     * @hide
+     */
+    @RequiresPermission(PERMISSION_MANAGE_ROLE_HOLDERS_FROM_CONTROLLER)
+    @SystemApi
+    public boolean removeRoleHolderFromController(@NonNull String roleName,
+            @NonNull String packageName) {
+        Preconditions.checkStringNotEmpty(roleName, "roleName cannot be null or empty");
+        Preconditions.checkStringNotEmpty(packageName, "packageName cannot be null or empty");
+        try {
+            return mService.removeRoleHolderFromController(roleName, packageName);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

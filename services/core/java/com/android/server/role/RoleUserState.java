@@ -174,25 +174,6 @@ public class RoleUserState {
     }
 
     /**
-     * Remove all holders of a role.
-     *
-     * @param roleName the name of the role to remove all its holders
-     *
-     * @return {@code false} only if the set of role holders is null, which should not happen and
-     *         indicates an issue.
-     */
-    @GuardedBy("RoleManagerService.mLock")
-    public boolean clearRoleHolderLocked(@NonNull String roleName) {
-        throwIfDestroyedLocked();
-        ArraySet<String> roleHolders = mRoles.get(roleName);
-        if (roleHolders == null) {
-            return false;
-        }
-        roleHolders.clear();
-        return true;
-    }
-
-    /**
      * Schedule writing the state to file.
      */
     @GuardedBy("RoleManagerService.mLock")
