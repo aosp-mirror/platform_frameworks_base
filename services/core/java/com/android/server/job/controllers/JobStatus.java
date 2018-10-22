@@ -57,6 +57,8 @@ import java.util.function.Predicate;
  * This isn't strictly necessary because each controller is only interested in a specific field,
  * and the receivers that are listening for global state change will all run on the main looper,
  * but we don't enforce that so this is safer.
+ *
+ * Test: atest com.android.server.job.controllers.JobStatusTest
  * @hide
  */
 public final class JobStatus {
@@ -154,7 +156,9 @@ public final class JobStatus {
 
     // Constraints.
     final int requiredConstraints;
+    private final int mRequiredConstraintsOfInterest;
     int satisfiedConstraints = 0;
+    private int mSatisfiedConstraintsOfInterest = 0;
 
     // Set to true if doze constraint was satisfied due to app being whitelisted.
     public boolean dozeWhitelisted;
@@ -265,6 +269,28 @@ public final class JobStatus {
 
     private long totalNetworkBytes = JobInfo.NETWORK_BYTES_UNKNOWN;
 
+    /////// Booleans that track if a job is ready to run. They should be updated whenever dependent
+    /////// states change.
+
+    /**
+     * The deadline for the job has passed. This is only good for non-periodic jobs. A periodic job
+     * should only run if its constraints are satisfied.
+     * Computed as: NOT periodic AND has deadline constraint AND deadline constraint satisfied.
+     */
+    private boolean mReadyDeadlineSatisfied;
+
+    /**
+     * The device isn't Dozing or this job will be in the foreground. This implicit constraint must
+     * be satisfied.
+     */
+    private boolean mReadyNotDozing;
+
+    /**
+     * The job is not restricted from running in the background (due to Battery Saver). This
+     * implicit constraint must be satisfied.
+     */
+    private boolean mReadyNotRestrictedInBg;
+
     /** Provide a handle to the service that this job will be run on. */
     public int getServiceToken() {
         return callingUid;
@@ -349,6 +375,8 @@ public final class JobStatus {
             requiredConstraints |= CONSTRAINT_CONTENT_TRIGGER;
         }
         this.requiredConstraints = requiredConstraints;
+        mRequiredConstraintsOfInterest = requiredConstraints & CONSTRAINTS_OF_INTEREST;
+        mReadyNotDozing = (job.getFlags() & JobInfo.FLAG_WILL_BE_FOREGROUND) != 0;
 
         mLastSuccessfulRunTime = lastSuccessfulRunTime;
         mLastFailedRunTime = lastFailedRunTime;
@@ -865,7 +893,12 @@ public final class JobStatus {
     }
 
     boolean setDeadlineConstraintSatisfied(boolean state) {
-        return setConstraintSatisfied(CONSTRAINT_DEADLINE, state);
+        if (setConstraintSatisfied(CONSTRAINT_DEADLINE, state)) {
+            // The constraint was changed. Update the ready flag.
+            mReadyDeadlineSatisfied = !job.isPeriodic() && hasDeadlineConstraint() && state;
+            return true;
+        }
+        return false;
     }
 
     boolean setIdleConstraintSatisfied(boolean state) {
@@ -882,11 +915,21 @@ public final class JobStatus {
 
     boolean setDeviceNotDozingConstraintSatisfied(boolean state, boolean whitelisted) {
         dozeWhitelisted = whitelisted;
-        return setConstraintSatisfied(CONSTRAINT_DEVICE_NOT_DOZING, state);
+        if (setConstraintSatisfied(CONSTRAINT_DEVICE_NOT_DOZING, state)) {
+            // The constraint was changed. Update the ready flag.
+            mReadyNotDozing = state || (job.getFlags() & JobInfo.FLAG_WILL_BE_FOREGROUND) != 0;
+            return true;
+        }
+        return false;
     }
 
     boolean setBackgroundNotRestrictedConstraintSatisfied(boolean state) {
-        return setConstraintSatisfied(CONSTRAINT_BACKGROUND_NOT_RESTRICTED, state);
+        if (setConstraintSatisfied(CONSTRAINT_BACKGROUND_NOT_RESTRICTED, state)) {
+            // The constraint was changed. Update the ready flag.
+            mReadyNotRestrictedInBg = state;
+            return true;
+        }
+        return false;
     }
 
     boolean setUidActive(final boolean newActiveState) {
@@ -903,6 +946,7 @@ public final class JobStatus {
             return false;
         }
         satisfiedConstraints = (satisfiedConstraints&~constraint) | (state ? constraint : 0);
+        mSatisfiedConstraintsOfInterest = satisfiedConstraints & CONSTRAINTS_OF_INTEREST;
         return true;
     }
 
@@ -933,24 +977,15 @@ public final class JobStatus {
     /**
      * @return Whether or not this job is ready to run, based on its requirements. This is true if
      * the constraints are satisfied <strong>or</strong> the deadline on the job has expired.
-     * TODO: This function is called a *lot*.  We should probably just have it check an
-     * already-computed boolean, which we updated whenever we see one of the states it depends
-     * on here change.
      */
     public boolean isReady() {
         // Deadline constraint trumps other constraints (except for periodic jobs where deadline
         // is an implementation detail. A periodic job should only run if its constraints are
         // satisfied).
-        // AppNotIdle implicit constraint must be satisfied
         // DeviceNotDozing implicit constraint must be satisfied
         // NotRestrictedInBackground implicit constraint must be satisfied
-        final boolean deadlineSatisfied = (!job.isPeriodic() && hasDeadlineConstraint()
-                && (satisfiedConstraints & CONSTRAINT_DEADLINE) != 0);
-        final boolean notDozing = (satisfiedConstraints & CONSTRAINT_DEVICE_NOT_DOZING) != 0
-                || (job.getFlags() & JobInfo.FLAG_WILL_BE_FOREGROUND) != 0;
-        final boolean notRestrictedInBg =
-                (satisfiedConstraints & CONSTRAINT_BACKGROUND_NOT_RESTRICTED) != 0;
-        return (isConstraintsSatisfied() || deadlineSatisfied) && notDozing && notRestrictedInBg;
+        return mReadyNotDozing && mReadyNotRestrictedInBg && (mReadyDeadlineSatisfied
+                || isConstraintsSatisfied());
     }
 
     static final int CONSTRAINTS_OF_INTEREST = CONSTRAINT_CHARGING | CONSTRAINT_BATTERY_NOT_LOW
@@ -971,15 +1006,13 @@ public final class JobStatus {
             return true;
         }
 
-        final int req = requiredConstraints & CONSTRAINTS_OF_INTEREST;
-
-        int sat = satisfiedConstraints & CONSTRAINTS_OF_INTEREST;
+        int sat = mSatisfiedConstraintsOfInterest;
         if (overrideState == OVERRIDE_SOFT) {
             // override: pretend all 'soft' requirements are satisfied
             sat |= (requiredConstraints & SOFT_OVERRIDE_CONSTRAINTS);
         }
 
-        return (sat & req) == req;
+        return (sat & mRequiredConstraintsOfInterest) == mRequiredConstraintsOfInterest;
     }
 
     public boolean matches(int uid, int jobId) {
