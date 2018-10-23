@@ -1591,8 +1591,11 @@ public final class Settings {
      * Applications typically use this action to ask the user to revert the "Do not ask again"
      * status of directory access requests made by
      * {@link android.os.storage.StorageVolume#createAccessIntent(String)}.
+     * @deprecated use {@link #ACTION_APPLICATION_DETAILS_SETTINGS} to manage storage permissions
+     *             for a specific application
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    @Deprecated
     public static final String ACTION_STORAGE_VOLUME_ACCESS_SETTINGS =
             "android.settings.STORAGE_VOLUME_ACCESS_SETTINGS";
 
