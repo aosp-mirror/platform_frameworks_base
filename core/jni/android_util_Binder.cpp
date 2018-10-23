@@ -865,17 +865,17 @@ void signalExceptionForError(JNIEnv* env, jobject obj, status_t err,
 
 // ----------------------------------------------------------------------------
 
-static jint android_os_Binder_getCallingPid(JNIEnv* env, jobject clazz)
+static jint android_os_Binder_getCallingPid()
 {
     return IPCThreadState::self()->getCallingPid();
 }
 
-static jint android_os_Binder_getCallingUid(JNIEnv* env, jobject clazz)
+static jint android_os_Binder_getCallingUid()
 {
     return IPCThreadState::self()->getCallingUid();
 }
 
-static jlong android_os_Binder_clearCallingIdentity(JNIEnv* env, jobject clazz)
+static jlong android_os_Binder_clearCallingIdentity()
 {
     return IPCThreadState::self()->clearCallingIdentity();
 }
@@ -894,12 +894,12 @@ static void android_os_Binder_restoreCallingIdentity(JNIEnv* env, jobject clazz,
     IPCThreadState::self()->restoreCallingIdentity(token);
 }
 
-static void android_os_Binder_setThreadStrictModePolicy(JNIEnv* env, jobject clazz, jint policyMask)
+static void android_os_Binder_setThreadStrictModePolicy(jint policyMask)
 {
     IPCThreadState::self()->setStrictModePolicy(policyMask);
 }
 
-static jint android_os_Binder_getThreadStrictModePolicy(JNIEnv* env, jobject clazz)
+static jint android_os_Binder_getThreadStrictModePolicy()
 {
     return IPCThreadState::self()->getStrictModePolicy();
 }
@@ -950,11 +950,16 @@ static void android_os_Binder_blockUntilThreadAvailable(JNIEnv* env, jobject cla
 
 static const JNINativeMethod gBinderMethods[] = {
      /* name, signature, funcPtr */
+    // @CriticalNative
     { "getCallingPid", "()I", (void*)android_os_Binder_getCallingPid },
+    // @CriticalNative
     { "getCallingUid", "()I", (void*)android_os_Binder_getCallingUid },
+    // @CriticalNative
     { "clearCallingIdentity", "()J", (void*)android_os_Binder_clearCallingIdentity },
     { "restoreCallingIdentity", "(J)V", (void*)android_os_Binder_restoreCallingIdentity },
+    // @CriticalNative
     { "setThreadStrictModePolicy", "(I)V", (void*)android_os_Binder_setThreadStrictModePolicy },
+    // @CriticalNative
     { "getThreadStrictModePolicy", "()I", (void*)android_os_Binder_getThreadStrictModePolicy },
     // @CriticalNative
     { "setThreadWorkSource", "(I)I", (void*)android_os_Binder_setThreadWorkSource },
