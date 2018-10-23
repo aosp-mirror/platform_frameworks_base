@@ -43,7 +43,7 @@
 
     <!-- Slice header -->
     <dimen name="widget_title_font_size">24dp</dimen>
-    <dimen name="widget_title_bottom_margin">7dp</dimen>
+    <dimen name="widget_title_bottom_margin">14dp</dimen>
     <dimen name="bottom_text_spacing_digital">0dp</dimen>
     <!-- Slice subtitle -->
     <dimen name="widget_label_font_size">16dp</dimen>
@@ -52,19 +52,17 @@
     <!-- Clock without header -->
     <dimen name="widget_big_font_size">64dp</dimen>
     <!-- Clock with header -->
+    <dimen name="widget_small_clock_padding">-25dp</dimen>
     <dimen name="widget_small_font_size">24dp</dimen>
     <dimen name="widget_small_font_stroke">0.6dp</dimen>
-    <!-- Dash between clock and header -->
-    <dimen name="widget_separator_width">12dp</dimen>
-    <dimen name="widget_separator_thickness">1dp</dimen>
-    <dimen name="widget_vertical_padding">26dp</dimen>
-    <dimen name="widget_icon_bottom_padding">14dp</dimen>
+    <dimen name="widget_vertical_padding">32dp</dimen>
     <!-- Subtitle paddings -->
     <dimen name="widget_horizontal_padding">8dp</dimen>
     <dimen name="widget_icon_size">16dp</dimen>
     <dimen name="widget_icon_padding">8dp</dimen>
-    <!-- Space between notification shelf and dash above it -->
-    <dimen name="widget_bottom_separator_padding">28dp</dimen>
+    <dimen name="subtitle_clock_padding">15dp</dimen>
+    <!-- Notification shelf padding when dark -->
+    <dimen name="widget_bottom_separator_padding">-6dp</dimen>
 
     <!-- The y translation to apply at the start in appear animations. -->
     <dimen name="appear_y_translation_start">32dp</dimen>

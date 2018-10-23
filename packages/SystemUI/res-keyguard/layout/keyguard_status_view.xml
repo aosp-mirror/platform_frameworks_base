@@ -59,19 +59,11 @@
                  android:id="@+id/clock_view"
                  android:layout_width="match_parent"
                  android:layout_height="wrap_content" />
-            <View
-                android:id="@+id/clock_separator"
-                android:layout_width="@dimen/widget_separator_width"
-                android:layout_height="@dimen/widget_separator_thickness"
-                android:layout_below="@id/clock_view"
-                android:background="#f00"
-                android:layout_centerHorizontal="true" />
-
             <include layout="@layout/keyguard_status_area"
                 android:id="@+id/keyguard_status_area"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:layout_below="@id/clock_separator" />
+                android:layout_below="@id/clock_view" />
         </RelativeLayout>
 
         <TextView

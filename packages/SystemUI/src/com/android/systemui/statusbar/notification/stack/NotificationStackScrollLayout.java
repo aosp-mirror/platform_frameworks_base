@@ -25,7 +25,6 @@ import android.animation.ObjectAnimator;
 import android.animation.PropertyValuesHolder;
 import android.animation.TimeAnimator;
 import android.animation.ValueAnimator;
-import android.animation.ValueAnimator.AnimatorUpdateListener;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.WallpaperManager;
@@ -101,13 +100,11 @@ import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.ShadeViewRefactor;
 import com.android.systemui.statusbar.notification.ShadeViewRefactor.RefactorComponent;
-import com.android.systemui.statusbar.notification.VisibilityLocationProvider;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
 import com.android.systemui.statusbar.notification.logging.NotificationLogger;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
-import com.android.systemui.statusbar.notification.row.ExpandableView.OnHeightChangedListener;
 import com.android.systemui.statusbar.notification.row.FooterView;
 import com.android.systemui.statusbar.notification.row.NotificationBlockingHelperManager;
 import com.android.systemui.statusbar.notification.row.NotificationGuts;
@@ -195,7 +192,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     // Current padding, will be either mRegularTopPadding or mDarkTopPadding
     private int mTopPadding;
     // Distance between AOD separator and shelf
-    private int mDarkSeparatorPadding;
+    private int mDarkShelfPadding;
     private int mBottomMargin;
     private int mBottomInset = 0;
     private float mQsExpansionFraction;
@@ -424,8 +421,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     private Runnable mAnimateScroll = this::animateScroll;
     private int mCornerRadius;
     private int mSidePaddings;
-    private final int mSeparatorWidth;
-    private final int mSeparatorThickness;
     private final Rect mBackgroundAnimationRect = new Rect();
     private int mAntiBurnInOffsetX;
     private ArrayList<BiConsumer<Float, Float>> mExpandedHeightListeners = new ArrayList<>();
@@ -499,9 +494,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                 res.getBoolean(R.bool.config_drawNotificationBackground);
         mFadeNotificationsOnDismiss =
                 res.getBoolean(R.bool.config_fadeNotificationsOnDismiss);
-        mSeparatorWidth = res.getDimensionPixelSize(R.dimen.widget_separator_width);
-        mSeparatorThickness = res.getDimensionPixelSize(R.dimen.widget_separator_thickness);
-        mDarkSeparatorPadding = res.getDimensionPixelSize(R.dimen.widget_bottom_separator_padding);
+        mDarkShelfPadding = res.getDimensionPixelSize(R.dimen.widget_bottom_separator_padding);
         mRoundnessManager.setAnimatedChildren(mChildrenToAddAnimated);
         mRoundnessManager.setOnRoundingChangedCallback(this::invalidate);
         addOnExpandedHeightListener(mRoundnessManager::setExpanded);
@@ -673,23 +666,15 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         final int lockScreenRight = getWidth() - mSidePaddings;
         final int lockScreenTop = mCurrentBounds.top;
         final int lockScreenBottom = mCurrentBounds.bottom;
-        int separatorWidth = 0;
-        int separatorThickness = 0;
-        if (mIconAreaController.hasShelfIconsWhenFullyDark()) {
-            separatorThickness = mSeparatorThickness;
-            separatorWidth = mSeparatorWidth;
-        }
-        final int darkLeft = getWidth() / 2 - separatorWidth / 2;
-        final int darkRight = darkLeft + separatorWidth;
-        final int darkTop = (int) (mRegularTopPadding + separatorThickness / 2f);
-        final int darkBottom = darkTop + separatorThickness;
+        final int darkLeft = getWidth() / 2;
+        final int darkTop = mRegularTopPadding;
 
         if (mAmbientState.hasPulsingNotifications()) {
             // No divider, we have a notification icon instead
         } else if (mAmbientState.isFullyDark()) {
             // Only draw divider on AOD if we actually have notifications
             if (mFirstVisibleBackgroundChild != null) {
-                canvas.drawRect(darkLeft, darkTop, darkRight, darkBottom, mBackgroundPaint);
+                canvas.drawRect(darkLeft, darkTop, darkLeft, darkTop, mBackgroundPaint);
             }
         } else {
             float yProgress = 1 - mInterpolatedDarkAmount;
@@ -699,8 +684,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             mBackgroundAnimationRect.set(
                     (int) MathUtils.lerp(darkLeft, lockScreenLeft, xProgress),
                     (int) MathUtils.lerp(darkTop, lockScreenTop, yProgress),
-                    (int) MathUtils.lerp(darkRight, lockScreenRight, xProgress),
-                    (int) MathUtils.lerp(darkBottom, lockScreenBottom, yProgress));
+                    (int) MathUtils.lerp(darkLeft, lockScreenRight, xProgress),
+                    (int) MathUtils.lerp(darkTop, lockScreenBottom, yProgress));
 
             if (!mAmbientState.isDark() || mFirstVisibleBackgroundChild != null) {
                 canvas.drawRoundRect(mBackgroundAnimationRect.left, mBackgroundAnimationRect.top,
@@ -1013,7 +998,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     private void setTopPadding(int topPadding, boolean animate) {
         if (mRegularTopPadding != topPadding) {
             mRegularTopPadding = topPadding;
-            mDarkTopPadding = topPadding + mDarkSeparatorPadding;
+            mDarkTopPadding = topPadding + mDarkShelfPadding;
             mAmbientState.setDarkTopPadding(mDarkTopPadding);
             updateAlgorithmHeightAndPadding();
             updateContentHeight();

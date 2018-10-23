@@ -145,7 +145,7 @@ public class KeyguardClockPositionAlgorithm {
         final int y = getClockY();
         result.clockY = y;
         result.clockAlpha = getClockAlpha(y);
-        result.stackScrollerPadding = y + (mPulsing ? 0 : mKeyguardStatusHeight);
+        result.stackScrollerPadding = y + (mPulsing ? mPulsingPadding : mKeyguardStatusHeight);
         result.clockX = (int) interpolate(0, burnInPreventionOffsetX(), mDarkAmount);
     }
 
