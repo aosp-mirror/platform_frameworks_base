@@ -116,8 +116,7 @@ public class RecentTasksTest extends ActivityTestsBase {
 
         mTaskPersister = new TestTaskPersister(mContext.getFilesDir());
         mService = spy(new MyTestActivityTaskManagerService(mContext));
-        final TestActivityManagerService am =
-                spy(new MyTestActivityManagerService(mContext, mService));
+        final TestActivityManagerService am = spy(new MyTestActivityManagerService());
         setupActivityManagerService(am, mService);
         mRecentTasks = (TestRecentTasks) mService.getRecentTasks();
         mRecentTasks.loadParametersFromResources(mContext.getResources());
@@ -848,8 +847,8 @@ public class RecentTasksTest extends ActivityTestsBase {
     }
 
     private class MyTestActivityManagerService extends TestActivityManagerService {
-        MyTestActivityManagerService(Context context, TestActivityTaskManagerService atm) {
-            super(context, atm);
+        MyTestActivityManagerService() {
+            super(mTestInjector);
         }
 
         @Override

@@ -272,6 +272,10 @@ public class UserManager {
      *
      * Specifies if all users on the device are disallowed from enabling the
      * "Unknown Sources" setting, that allows installation of apps from unknown sources.
+     *
+     * This restriction can be enabled by the profile owner, in which case all accounts and
+     * profiles will be affected.
+     *
      * The default value is <code>false</code>.
      *
      * <p>Key for user restrictions.

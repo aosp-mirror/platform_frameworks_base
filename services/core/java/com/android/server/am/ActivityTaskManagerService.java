@@ -5864,6 +5864,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         @Override
         public void finishHeavyWeightApp() {
             synchronized (mGlobalLock) {
+                if (mHeavyWeightProcess != null) {
+                    mHeavyWeightProcess.finishActivities();
+                }
                 ActivityTaskManagerService.this.clearHeavyWeightProcessIfEquals(
                         mHeavyWeightProcess);
             }

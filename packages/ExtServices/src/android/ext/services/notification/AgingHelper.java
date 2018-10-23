@@ -66,7 +66,7 @@ public class AgingHelper {
 
     public void onNotificationSeen(NotificationEntry entry) {
         // user has strong opinions about this notification. we can't down rank it, so don't bother.
-        if (entry.getChannel().isImportanceLocked()) {
+        if (entry.getChannel().hasUserSetImportance()) {
             return;
         }
 

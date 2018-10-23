@@ -1270,26 +1270,36 @@ public class VibratorService extends IVibratorService.Stub
         public int onCommand(String cmd) {
             if ("vibrate".equals(cmd)) {
                 return runVibrate();
+            } else if ("prebaked".equals(cmd)) {
+                return runPrebaked();
             }
             return handleDefaultCommands(cmd);
+        }
+
+        private boolean checkDoNotDisturb() {
+            try {
+                final int zenMode = Settings.Global.getInt(mContext.getContentResolver(),
+                        Settings.Global.ZEN_MODE);
+                if (zenMode != Settings.Global.ZEN_MODE_OFF) {
+                    try (PrintWriter pw = getOutPrintWriter();) {
+                        pw.print("Ignoring because device is on DND mode ");
+                        pw.println(DebugUtils.flagsToString(Settings.Global.class, "ZEN_MODE_",
+                                zenMode));
+                        return true;
+                    }
+                }
+            } catch (SettingNotFoundException e) {
+                // ignore
+            }
+
+            return false;
         }
 
         private int runVibrate() {
             Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "runVibrate");
             try {
-                try {
-                    final int zenMode = Settings.Global.getInt(mContext.getContentResolver(),
-                            Settings.Global.ZEN_MODE);
-                    if (zenMode != Settings.Global.ZEN_MODE_OFF) {
-                        try (PrintWriter pw = getOutPrintWriter();) {
-                            pw.print("Ignoring because device is on DND mode ");
-                            pw.println(DebugUtils.flagsToString(Settings.Global.class, "ZEN_MODE_",
-                                    zenMode));
-                            return 0;
-                        }
-                    }
-                } catch (SettingNotFoundException e) {
-                    // ignore
+                if (checkDoNotDisturb()) {
+                    return 0;
                 }
 
                 final long duration = Long.parseLong(getNextArgRequired());
@@ -1311,6 +1321,30 @@ public class VibratorService extends IVibratorService.Stub
             }
         }
 
+        private int runPrebaked() {
+            Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "runPrebaked");
+            try {
+                if (checkDoNotDisturb()) {
+                    return 0;
+                }
+
+                final int id = Integer.parseInt(getNextArgRequired());
+
+                String description = getNextArg();
+                if (description == null) {
+                    description = "Shell command";
+                }
+
+                VibrationEffect effect =
+                        VibrationEffect.get(id, false);
+                vibrate(Binder.getCallingUid(), description, effect, AudioAttributes.USAGE_UNKNOWN,
+                        "Shell Command", mToken);
+                return 0;
+            } finally {
+                Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
+            }
+        }
+
         @Override
         public void onHelp() {
             try (PrintWriter pw = getOutPrintWriter();) {
@@ -1320,6 +1354,9 @@ public class VibratorService extends IVibratorService.Stub
                 pw.println("");
                 pw.println("  vibrate duration [description]");
                 pw.println("    Vibrates for duration milliseconds; ignored when device is on DND ");
+                pw.println("    (Do Not Disturb) mode.");
+                pw.println("  prebaked effect-id [description]");
+                pw.println("    Vibrates with prebaked effect; ignored when device is on DND ");
                 pw.println("    (Do Not Disturb) mode.");
                 pw.println("");
             }

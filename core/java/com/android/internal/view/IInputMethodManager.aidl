@@ -54,7 +54,7 @@ interface IInputMethodManager {
     // has gained focus, and if 'attribute' is non-null then also does startInput.
     // @NonNull
     InputBindResult startInputOrWindowGainedFocus(
-            /* @InputMethodClient.StartInputReason */ int startInputReason,
+            /* @StartInputReason */ int startInputReason,
             in IInputMethodClient client, in IBinder windowToken, int controlFlags,
             /* @android.view.WindowManager.LayoutParams.SoftInputModeFlags */ int softInputMode,
             int windowFlags, in EditorInfo attribute, IInputContext inputContext,

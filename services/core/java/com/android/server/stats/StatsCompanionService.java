@@ -88,7 +88,6 @@ import com.android.internal.os.KernelWakelockReader;
 import com.android.internal.os.KernelWakelockStats;
 import com.android.internal.os.LooperStats;
 import com.android.internal.os.PowerProfile;
-import com.android.internal.os.ProcessCpuTracker;
 import com.android.internal.os.StoragedUidIoStatsReader;
 import com.android.internal.util.DumpUtils;
 import com.android.server.BinderCallsStatsService;
@@ -195,8 +194,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     private static IThermalService sThermalService;
     private File mBaseDir =
             new File(SystemServiceManager.ensureSystemDir(), "stats_companion");
-    @GuardedBy("this")
-    ProcessCpuTracker mProcessCpuTracker = null;
 
     public StatsCompanionService(Context context) {
         super();
@@ -1423,34 +1420,12 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         });
     }
 
-    private void pullProcessCpuTime(int tagId, long elapsedNanos, final long wallClockNanos,
-            List<StatsLogEventWrapper> pulledData) {
-        synchronized (this) {
-            if (mProcessCpuTracker == null) {
-                mProcessCpuTracker = new ProcessCpuTracker(false);
-                mProcessCpuTracker.init();
-            }
-            mProcessCpuTracker.update();
-            for (int i = 0; i < mProcessCpuTracker.countStats(); i++) {
-                ProcessCpuTracker.Stats st = mProcessCpuTracker.getStats(i);
-                StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos,
-                        wallClockNanos);
-                e.writeInt(st.uid);
-                e.writeString(st.name);
-                e.writeLong(st.base_utime);
-                e.writeLong(st.base_stime);
-                pulledData.add(e);
-            }
-        }
-    }
-
     /**
      * Pulls various data.
      */
     @Override // Binder call
     public StatsLogEventWrapper[] pullData(int tagId) {
         enforceCallingPermission();
-
         if (DEBUG) {
             Slog.d(TAG, "Pulling " + tagId);
         }
@@ -1563,8 +1538,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                 break;
             }
             case StatsLog.PROC_STATS: {
-                pullProcessStats(ProcessStats.REPORT_ALL, tagId, elapsedNanos, wallClockNanos,
-                        ret);
+                pullProcessStats(ProcessStats.REPORT_ALL, tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
             case StatsLog.PROC_STATS_PKG_PROC: {
@@ -1578,10 +1552,6 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             }
             case StatsLog.POWER_PROFILE: {
                 pullPowerProfile(tagId, elapsedNanos, wallClockNanos, ret);
-                break;
-            }
-            case StatsLog.PROCESS_CPU_TIME: {
-                pullProcessCpuTime(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
             default:

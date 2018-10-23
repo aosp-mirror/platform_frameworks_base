@@ -128,6 +128,7 @@ cc_library_shared {
         "libmediametrics",
         "libmediaplayer2",
         "libmediaplayer2-protos",
+        "libmediandk_utils",
         "libmediautils",
         "libnetd_client",  // for setNetworkForUser
         "libprotobuf-cpp-lite",

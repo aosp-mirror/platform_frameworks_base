@@ -20,20 +20,23 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.app.WindowConfiguration;
-import android.content.Context;
-import android.content.pm.PackageManager;
 import android.graphics.Rect;
 import android.os.Environment;
-import android.provider.Settings;
 import android.util.AtomicFile;
 import android.util.Slog;
 import android.util.Xml;
 import android.view.Display;
 import android.view.DisplayInfo;
+import android.view.Surface;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.internal.util.XmlUtils;
+import com.android.server.policy.WindowManagerPolicy;
+
+import org.xmlpull.v1.XmlPullParser;
+import org.xmlpull.v1.XmlPullParserException;
+import org.xmlpull.v1.XmlSerializer;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -42,10 +45,6 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
-
-import org.xmlpull.v1.XmlPullParser;
-import org.xmlpull.v1.XmlPullParserException;
-import org.xmlpull.v1.XmlSerializer;
 
 /**
  * Current persistent settings about a display
@@ -58,15 +57,25 @@ class DisplaySettings {
     private final HashMap<String, Entry> mEntries = new HashMap<String, Entry>();
 
     private static class Entry {
-        private final String name;
-        private int overscanLeft;
-        private int overscanTop;
-        private int overscanRight;
-        private int overscanBottom;
-        private int windowingMode = WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+        private final String mName;
+        private int mOverscanLeft;
+        private int mOverscanTop;
+        private int mOverscanRight;
+        private int mOverscanBottom;
+        private int mWindowingMode = WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+        private int mUserRotationMode = WindowManagerPolicy.USER_ROTATION_FREE;
+        private int mUserRotation = Surface.ROTATION_0;
 
         private Entry(String _name) {
-            name = _name;
+            mName = _name;
+        }
+
+        private boolean isEmpty() {
+            return mOverscanLeft == 0 && mOverscanTop == 0 && mOverscanRight == 0
+                    && mOverscanBottom == 0
+                    && mWindowingMode == WindowConfiguration.WINDOWING_MODE_UNDEFINED
+                    && mUserRotationMode == WindowManagerPolicy.USER_ROTATION_FREE
+                    && mUserRotation == Surface.ROTATION_0;
         }
     }
 
@@ -90,13 +99,30 @@ class DisplaySettings {
         return entry;
     }
 
+    private Entry getOrCreateEntry(String uniqueId, String name) {
+        Entry entry = getEntry(uniqueId, name);
+        if (entry == null) {
+            entry = new Entry(uniqueId);
+            mEntries.put(uniqueId, entry);
+        }
+        return entry;
+    }
+
+    private void removeEntryIfEmpty(String uniqueId, String name) {
+        final Entry entry = getEntry(uniqueId, name);
+        if (entry.isEmpty()) {
+            mEntries.remove(uniqueId);
+            mEntries.remove(name);
+        }
+    }
+
     private void getOverscanLocked(String name, String uniqueId, Rect outRect) {
         final Entry entry = getEntry(name, uniqueId);
         if (entry != null) {
-            outRect.left = entry.overscanLeft;
-            outRect.top = entry.overscanTop;
-            outRect.right = entry.overscanRight;
-            outRect.bottom = entry.overscanBottom;
+            outRect.left = entry.mOverscanLeft;
+            outRect.top = entry.mOverscanTop;
+            outRect.right = entry.mOverscanRight;
+            outRect.bottom = entry.mOverscanBottom;
         } else {
             outRect.set(0, 0, 0, 0);
         }
@@ -104,28 +130,22 @@ class DisplaySettings {
 
     void setOverscanLocked(String uniqueId, String name, int left, int top, int right,
             int bottom) {
-        if (left == 0 && top == 0 && right == 0 && bottom == 0) {
-            // Right now all we are storing is overscan; if there is no overscan,
-            // we have no need for the entry.
-            mEntries.remove(uniqueId);
-            // Legacy name might have been in used, so we need to clear it.
-            mEntries.remove(name);
+        Entry entry = mEntries.get(uniqueId);
+        if (left == 0 && top == 0 && right == 0 && bottom == 0 && entry == null) {
+            // All default value, no action needed.
             return;
         }
-        Entry entry = mEntries.get(uniqueId);
-        if (entry == null) {
-            entry = new Entry(uniqueId);
-            mEntries.put(uniqueId, entry);
-        }
-        entry.overscanLeft = left;
-        entry.overscanTop = top;
-        entry.overscanRight = right;
-        entry.overscanBottom = bottom;
+        entry = getOrCreateEntry(uniqueId, name);
+        entry.mOverscanLeft = left;
+        entry.mOverscanTop = top;
+        entry.mOverscanRight = right;
+        entry.mOverscanBottom = bottom;
+        removeEntryIfEmpty(uniqueId, name);
     }
 
     private int getWindowingModeLocked(String name, String uniqueId, int displayId) {
         final Entry entry = getEntry(name, uniqueId);
-        int windowingMode = entry != null ? entry.windowingMode
+        int windowingMode = entry != null ? entry.mWindowingMode
                 : WindowConfiguration.WINDOWING_MODE_UNDEFINED;
         // This display used to be in freeform, but we don't support freeform anymore, so fall
         // back to fullscreen.
@@ -148,6 +168,36 @@ class DisplaySettings {
         return windowingMode;
     }
 
+    void setUserRotation(DisplayContent dc, int rotationMode, int rotation) {
+        final DisplayInfo displayInfo = dc.getDisplayInfo();
+
+        final String uniqueId = displayInfo.uniqueId;
+        final String name = displayInfo.name;
+        Entry entry = getEntry(displayInfo.name, uniqueId);
+        if (rotationMode == WindowManagerPolicy.USER_ROTATION_FREE
+                && rotation == Surface.ROTATION_0 && entry == null) {
+            // All default values. No action needed.
+            return;
+        }
+
+        entry = getOrCreateEntry(uniqueId, name);
+        entry.mUserRotationMode = rotationMode;
+        entry.mUserRotation = rotation;
+        removeEntryIfEmpty(uniqueId, name);
+    }
+
+    private void restoreUserRotation(DisplayContent dc) {
+        final DisplayInfo info = dc.getDisplayInfo();
+
+        final Entry entry = getEntry(info.name, info.uniqueId);
+        final int userRotationMode = entry != null ? entry.mUserRotationMode
+                : WindowManagerPolicy.USER_ROTATION_FREE;
+        final int userRotation = entry != null ? entry.mUserRotation
+                : Surface.ROTATION_0;
+
+        dc.getDisplayRotation().restoreUserRotation(userRotationMode, userRotation);
+    }
+
     void applySettingsToDisplayLocked(DisplayContent dc) {
         final DisplayInfo displayInfo = dc.getDisplayInfo();
 
@@ -161,6 +211,8 @@ class DisplaySettings {
         displayInfo.overscanTop = rect.top;
         displayInfo.overscanRight = rect.right;
         displayInfo.overscanBottom = rect.bottom;
+
+        restoreUserRotation(dc);
     }
 
     void readSettingsLocked() {
@@ -244,12 +296,16 @@ class DisplaySettings {
         String name = parser.getAttributeValue(null, "name");
         if (name != null) {
             Entry entry = new Entry(name);
-            entry.overscanLeft = getIntAttribute(parser, "overscanLeft");
-            entry.overscanTop = getIntAttribute(parser, "overscanTop");
-            entry.overscanRight = getIntAttribute(parser, "overscanRight");
-            entry.overscanBottom = getIntAttribute(parser, "overscanBottom");
-            entry.windowingMode = getIntAttribute(parser, "windowingMode",
+            entry.mOverscanLeft = getIntAttribute(parser, "overscanLeft");
+            entry.mOverscanTop = getIntAttribute(parser, "overscanTop");
+            entry.mOverscanRight = getIntAttribute(parser, "overscanRight");
+            entry.mOverscanBottom = getIntAttribute(parser, "overscanBottom");
+            entry.mWindowingMode = getIntAttribute(parser, "windowingMode",
                     WindowConfiguration.WINDOWING_MODE_UNDEFINED);
+            entry.mUserRotationMode = getIntAttribute(parser, "userRotationMode",
+                    WindowManagerPolicy.USER_ROTATION_FREE);
+            entry.mUserRotation = getIntAttribute(parser, "userRotation",
+                    Surface.ROTATION_0);
             mEntries.put(name, entry);
         }
         XmlUtils.skipCurrentTag(parser);
@@ -272,21 +328,28 @@ class DisplaySettings {
 
             for (Entry entry : mEntries.values()) {
                 out.startTag(null, "display");
-                out.attribute(null, "name", entry.name);
-                if (entry.overscanLeft != 0) {
-                    out.attribute(null, "overscanLeft", Integer.toString(entry.overscanLeft));
+                out.attribute(null, "name", entry.mName);
+                if (entry.mOverscanLeft != 0) {
+                    out.attribute(null, "overscanLeft", Integer.toString(entry.mOverscanLeft));
                 }
-                if (entry.overscanTop != 0) {
-                    out.attribute(null, "overscanTop", Integer.toString(entry.overscanTop));
+                if (entry.mOverscanTop != 0) {
+                    out.attribute(null, "overscanTop", Integer.toString(entry.mOverscanTop));
                 }
-                if (entry.overscanRight != 0) {
-                    out.attribute(null, "overscanRight", Integer.toString(entry.overscanRight));
+                if (entry.mOverscanRight != 0) {
+                    out.attribute(null, "overscanRight", Integer.toString(entry.mOverscanRight));
                 }
-                if (entry.overscanBottom != 0) {
-                    out.attribute(null, "overscanBottom", Integer.toString(entry.overscanBottom));
+                if (entry.mOverscanBottom != 0) {
+                    out.attribute(null, "overscanBottom", Integer.toString(entry.mOverscanBottom));
                 }
-                if (entry.windowingMode != WindowConfiguration.WINDOWING_MODE_UNDEFINED) {
-                    out.attribute(null, "windowingMode", Integer.toString(entry.windowingMode));
+                if (entry.mWindowingMode != WindowConfiguration.WINDOWING_MODE_UNDEFINED) {
+                    out.attribute(null, "windowingMode", Integer.toString(entry.mWindowingMode));
+                }
+                if (entry.mUserRotationMode != WindowManagerPolicy.USER_ROTATION_FREE) {
+                    out.attribute(null, "userRotationMode",
+                            Integer.toString(entry.mUserRotationMode));
+                }
+                if (entry.mUserRotation != Surface.ROTATION_0) {
+                    out.attribute(null, "userRotation", Integer.toString(entry.mUserRotation));
                 }
                 out.endTag(null, "display");
             }

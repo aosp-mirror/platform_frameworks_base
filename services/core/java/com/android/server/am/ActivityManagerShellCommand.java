@@ -17,13 +17,12 @@
 package com.android.server.am;
 
 import static android.app.ActivityManagerInternal.ALLOW_FULL_ONLY;
+import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.ActivityTaskManager.RESIZE_MODE_SYSTEM;
 import static android.app.ActivityTaskManager.RESIZE_MODE_USER;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 import static android.view.Display.INVALID_DISPLAY;
-
-import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
@@ -2902,6 +2901,7 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      --receiver-permission <PERMISSION>: Require receiver to hold permission.");
             pw.println("  instrument [-r] [-e <NAME> <VALUE>] [-p <FILE>] [-w]");
             pw.println("          [--user <USER_ID> | current] [--no-hidden-api-checks]");
+            pw.println("          [--no-isolated-storage]");
             pw.println("          [--no-window-animation] [--abi <ABI>] <COMPONENT>");
             pw.println("      Start an Instrumentation.  Typically this target <COMPONENT> is in the");
             pw.println("      form <TEST_PACKAGE>/<RUNNER_CLASS> or only <TEST_PACKAGE> if there");
@@ -2920,6 +2920,8 @@ final class ActivityManagerShellCommand extends ShellCommand {
             pw.println("      --user <USER_ID> | current: Specify user instrumentation runs in;");
             pw.println("          current user if not specified.");
             pw.println("      --no-hidden-api-checks: disable restrictions on use of hidden API.");
+            pw.println("      --no-isolated-storage: don't use isolated storage sandbox and ");
+            pw.println("          mount full external storage");
             pw.println("      --no-window-animation: turn off window animations while running.");
             pw.println("      --abi <ABI>: Launch the instrumented process with the selected ABI.");
             pw.println("          This assumes that the process supports the selected ABI.");

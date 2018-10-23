@@ -192,7 +192,8 @@ public final class SystemFonts {
             try {
                 font = new Font.Builder(buffer, new File(fullPath), languageTags)
                         .setWeight(fontConfig.getWeight())
-                        .setItalic(fontConfig.isItalic())
+                        .setSlant(fontConfig.isItalic() ? FontStyle.FONT_SLANT_ITALIC
+                                : FontStyle.FONT_SLANT_UPRIGHT)
                         .setTtcIndex(fontConfig.getTtcIndex())
                         .setFontVariationSettings(fontConfig.getAxes())
                         .build();

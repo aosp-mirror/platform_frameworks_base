@@ -115,6 +115,11 @@ class DozeHostFake implements DozeHost {
     }
 
     @Override
+    public void setPassiveInterrupt(boolean lightInterrupt) {
+
+    }
+
+    @Override
     public void setDozeScreenBrightness(int value) {
     }
 

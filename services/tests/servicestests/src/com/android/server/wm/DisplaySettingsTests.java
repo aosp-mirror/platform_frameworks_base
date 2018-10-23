@@ -18,16 +18,21 @@
 package com.android.server.wm;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
+import static org.junit.Assert.assertTrue;
 
 import android.app.WindowConfiguration;
 import android.platform.test.annotations.Presubmit;
 import android.view.Display;
 import android.view.DisplayInfo;
+import android.view.Surface;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
+
+import com.android.server.policy.WindowManagerPolicy;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -35,6 +40,12 @@ import org.junit.runner.RunWith;
 
 import java.io.File;
 
+/**
+ * Tests for the {@link DisplaySettings} class.
+ *
+ * Build/Install/Run:
+ *  atest FrameworksServicesTests:com.android.server.wm.DisplaySettingsTests
+ */
 @SmallTest
 @Presubmit
 @RunWith(AndroidJUnit4.class)
@@ -153,6 +164,71 @@ public class DisplaySettingsTests extends WindowTestsBase {
         target.applySettingsToDisplayLocked(mPrimaryDisplay);
 
         assertOverscan(mPrimaryDisplay, 1 /* left */, 2 /* top */, 3 /* right */, 4 /* bottom */);
+    }
+
+    @Test
+    public void testDefaultToFreeUserRotation() {
+        mTarget.applySettingsToDisplayLocked(mSecondaryDisplay);
+
+        final DisplayRotation rotation = mSecondaryDisplay.getDisplayRotation();
+        assertEquals(WindowManagerPolicy.USER_ROTATION_FREE, rotation.getUserRotationMode());
+        assertFalse(rotation.isRotationFrozen());
+    }
+
+    @Test
+    public void testDefaultTo0DegRotation() {
+        mTarget.applySettingsToDisplayLocked(mSecondaryDisplay);
+
+        assertEquals(Surface.ROTATION_0, mSecondaryDisplay.getDisplayRotation().getUserRotation());
+    }
+
+    @Test
+    public void testPersistUserRotationModeInSameInstance() {
+        mTarget.setUserRotation(mSecondaryDisplay, WindowManagerPolicy.USER_ROTATION_LOCKED,
+                Surface.ROTATION_90);
+
+        mTarget.applySettingsToDisplayLocked(mSecondaryDisplay);
+
+        final DisplayRotation rotation = mSecondaryDisplay.getDisplayRotation();
+        assertEquals(WindowManagerPolicy.USER_ROTATION_LOCKED, rotation.getUserRotationMode());
+        assertTrue(rotation.isRotationFrozen());
+    }
+
+    @Test
+    public void testPersistUserRotationInSameInstance() {
+        mTarget.setUserRotation(mSecondaryDisplay, WindowManagerPolicy.USER_ROTATION_LOCKED,
+                Surface.ROTATION_90);
+
+        mTarget.applySettingsToDisplayLocked(mSecondaryDisplay);
+
+        assertEquals(Surface.ROTATION_90, mSecondaryDisplay.getDisplayRotation().getUserRotation());
+    }
+
+    @Test
+    public void testPersistUserRotationModeAcrossInstances() {
+        mTarget.setUserRotation(mSecondaryDisplay, WindowManagerPolicy.USER_ROTATION_LOCKED,
+                Surface.ROTATION_270);
+        mTarget.writeSettingsLocked();
+
+        DisplaySettings target = new DisplaySettings(sWm, mTestFolder);
+        target.readSettingsLocked();
+
+        target.applySettingsToDisplayLocked(mSecondaryDisplay);
+
+        final DisplayRotation rotation = mSecondaryDisplay.getDisplayRotation();
+        assertEquals(WindowManagerPolicy.USER_ROTATION_LOCKED, rotation.getUserRotationMode());
+        assertTrue(rotation.isRotationFrozen());
+    }
+
+    @Test
+    public void testPersistUserRotationAcrossInstances() {
+        mTarget.setUserRotation(mSecondaryDisplay, WindowManagerPolicy.USER_ROTATION_LOCKED,
+                Surface.ROTATION_270);
+
+        mTarget.applySettingsToDisplayLocked(mSecondaryDisplay);
+
+        assertEquals(Surface.ROTATION_270,
+                mSecondaryDisplay.getDisplayRotation().getUserRotation());
     }
 
     private static void assertOverscan(DisplayContent display, int left, int top, int right,

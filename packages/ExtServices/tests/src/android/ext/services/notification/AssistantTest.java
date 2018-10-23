@@ -66,6 +66,7 @@ import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileOutputStream;
+import java.util.ArrayList;
 
 public class AssistantTest extends ServiceTestCase<Assistant> {
 
@@ -465,5 +466,13 @@ public class AssistantTest extends ServiceTestCase<Assistant> {
                 sbn, mock(RankingMap.class), new NotificationStats(), 0);
 
         assertFalse(mAssistant.mLiveNotifications.containsKey(sbn.getKey()));
+    }
+
+    @Test
+    public void testAssistantNeverIncreasesImportanceWhenSuggestingSilent() throws Exception {
+        StatusBarNotification sbn = generateSbn(PKG1, UID1, P1C3, "min notif!", null);
+        Adjustment adjust = mAssistant.createEnqueuedNotificationAdjustment(new NotificationEntry(
+                mPackageManager, sbn, P1C3), new ArrayList<>(), new ArrayList<>());
+        assertEquals(IMPORTANCE_MIN, adjust.getSignals().getInt(Adjustment.KEY_IMPORTANCE));
     }
 }

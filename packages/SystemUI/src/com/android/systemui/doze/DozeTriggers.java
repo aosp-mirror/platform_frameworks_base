@@ -142,6 +142,7 @@ public class DozeTriggers implements DozeMachine.Part {
                     mDozeHost.onDoubleTap(screenX, screenY);
                     mMachine.wakeUp();
                 } else if (isPickup || isWakeLockScreen) {
+                    mDozeHost.setPassiveInterrupt(true);
                     mMachine.wakeUp();
                 } else {
                     mDozeHost.extendPulse();
@@ -210,6 +211,7 @@ public class DozeTriggers implements DozeMachine.Part {
             case INITIALIZED:
                 mBroadcastReceiver.register(mContext);
                 mDozeHost.addCallback(mHostCallback);
+                mDozeHost.setPassiveInterrupt(false);
                 checkTriggersAtInit();
                 break;
             case DOZE:
@@ -219,6 +221,7 @@ public class DozeTriggers implements DozeMachine.Part {
                     mDozeSensors.reregisterAllSensors();
                 }
                 mDozeSensors.setListening(true);
+                mDozeHost.setPassiveInterrupt(false);
                 break;
             case DOZE_AOD_PAUSED:
             case DOZE_AOD_PAUSING:

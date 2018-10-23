@@ -27,6 +27,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
 import android.content.res.AssetManager;
+import android.graphics.fonts.FontStyle;
 import android.graphics.fonts.FontVariationAxis;
 import android.graphics.fonts.SystemFonts;
 import android.net.Uri;
@@ -148,7 +149,7 @@ public class Typeface {
     @UnsupportedAppUsage
     private @Style int mStyle = 0;
 
-    private @IntRange(from = 0, to = android.graphics.fonts.Font.FONT_WEIGHT_MAX) int mWeight = 0;
+    private @IntRange(from = 0, to = FontStyle.FONT_WEIGHT_MAX) int mWeight = 0;
 
     // Value for weight and italic. Indicates the value is resolved by font metadata.
     // Must be the same as the C++ constant in core/jni/android/graphics/FontFamily.cpp

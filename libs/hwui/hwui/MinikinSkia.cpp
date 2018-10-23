@@ -141,7 +141,7 @@ uint32_t MinikinFontSkia::packPaintFlags(const SkPaint* paint) {
     // select only flags that might affect text layout
     flags &= (SkPaint::kAntiAlias_Flag | SkPaint::kFakeBoldText_Flag | SkPaint::kLinearText_Flag |
               SkPaint::kSubpixelText_Flag | SkPaint::kEmbeddedBitmapText_Flag |
-              SkPaint::kAutoHinting_Flag | SkPaint::kVerticalText_Flag);
+              SkPaint::kAutoHinting_Flag);
     flags |= (hinting << 16);
     return flags;
 }

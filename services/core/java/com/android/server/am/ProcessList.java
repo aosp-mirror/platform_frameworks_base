@@ -18,7 +18,6 @@ package com.android.server.am;
 
 import static android.app.ActivityManager.PROCESS_STATE_CACHED_ACTIVITY;
 import static android.app.ActivityThread.PROC_START_SEQ_IDENT;
-import static android.content.pm.PackageManager.MATCH_DEBUG_TRIAGED_MISSING;
 import static android.content.pm.PackageManager.MATCH_DIRECT_BOOT_AUTO;
 import static android.os.Process.FIRST_ISOLATED_UID;
 import static android.os.Process.LAST_ISOLATED_UID;
@@ -28,6 +27,7 @@ import static android.os.Process.getFreeMemory;
 import static android.os.Process.getTotalMemory;
 import static android.os.Process.killProcessQuiet;
 import static android.os.Process.startWebView;
+import static android.os.storage.StorageManager.PROP_ISOLATED_STORAGE;
 
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_LRU;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PROCESSES;
@@ -45,17 +45,6 @@ import static com.android.server.am.ActivityManagerService.TAG_PROCESSES;
 import static com.android.server.am.ActivityManagerService.TAG_PSS;
 import static com.android.server.am.ActivityManagerService.TAG_UID_OBSERVERS;
 
-import dalvik.system.VMRuntime;
-
-import java.io.File;
-import java.io.IOException;
-import java.io.OutputStream;
-import java.io.PrintWriter;
-import java.nio.ByteBuffer;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import android.app.ActivityManager;
 import android.app.AppGlobals;
 import android.app.AppProtoEnums;
@@ -64,11 +53,14 @@ import android.content.ComponentName;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
+import android.content.res.Resources;
+import android.graphics.Point;
+import android.net.LocalSocket;
+import android.net.LocalSocketAddress;
 import android.net.Uri;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
-import android.os.FactoryTest;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -77,6 +69,17 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.StrictMode;
 import android.os.SystemClock;
+import android.os.SystemProperties;
+import android.os.Trace;
+import android.os.UserHandle;
+import android.os.storage.StorageManagerInternal;
+import android.text.TextUtils;
+import android.util.EventLog;
+import android.util.LongSparseArray;
+import android.util.Slog;
+import android.util.SparseArray;
+import android.util.StatsLog;
+import android.view.Display;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
@@ -91,21 +94,16 @@ import com.android.server.Watchdog;
 import com.android.server.pm.dex.DexManager;
 import com.android.server.wm.WindowManagerService;
 
-import android.content.res.Resources;
-import android.graphics.Point;
-import android.os.SystemProperties;
-import android.net.LocalSocketAddress;
-import android.net.LocalSocket;
-import android.os.Trace;
-import android.os.UserHandle;
-import android.os.storage.StorageManagerInternal;
-import android.text.TextUtils;
-import android.util.EventLog;
-import android.util.LongSparseArray;
-import android.util.Slog;
-import android.util.SparseArray;
-import android.util.StatsLog;
-import android.view.Display;
+import dalvik.system.VMRuntime;
+
+import java.io.File;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.io.PrintWriter;
+import java.nio.ByteBuffer;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 /**
  * Activity manager code dealing with processes.
@@ -1182,7 +1180,8 @@ public final class ProcessList {
      */
     @GuardedBy("mService")
     boolean startProcessLocked(ProcessRecord app, String hostingType,
-            String hostingNameStr, boolean disableHiddenApiChecks, String abiOverride) {
+            String hostingNameStr, boolean disableHiddenApiChecks, boolean mountExtStorageFull,
+            String abiOverride) {
         if (app.pendingStart) {
             return true;
         }
@@ -1224,10 +1223,15 @@ public final class ProcessList {
                     final IPackageManager pm = AppGlobals.getPackageManager();
                     permGids = pm.getPackageGids(app.info.packageName,
                             MATCH_DIRECT_BOOT_AUTO, app.userId);
-                    StorageManagerInternal storageManagerInternal = LocalServices.getService(
-                            StorageManagerInternal.class);
-                    mountExternal = storageManagerInternal.getExternalStorageMountMode(uid,
-                            app.info.packageName);
+                    if (SystemProperties.getBoolean(PROP_ISOLATED_STORAGE, false)
+                            && mountExtStorageFull) {
+                        mountExternal = Zygote.MOUNT_EXTERNAL_FULL;
+                    } else {
+                        StorageManagerInternal storageManagerInternal = LocalServices.getService(
+                                StorageManagerInternal.class);
+                        mountExternal = storageManagerInternal.getExternalStorageMountMode(uid,
+                                app.info.packageName);
+                    }
                 } catch (RemoteException e) {
                     throw e.rethrowAsRuntimeException();
                 }
@@ -1482,7 +1486,7 @@ public final class ProcessList {
     final boolean startProcessLocked(ProcessRecord app,
             String hostingType, String hostingNameStr, String abiOverride) {
         return startProcessLocked(app, hostingType, hostingNameStr,
-                false /* disableHiddenApiChecks */, abiOverride);
+                false /* disableHiddenApiChecks */, false /* mountExtStorageFull */, abiOverride);
     }
 
     @GuardedBy("mService")

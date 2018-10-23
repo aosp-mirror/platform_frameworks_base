@@ -25,7 +25,6 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN_OR_SPLIT
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.content.pm.ActivityInfo.FLAG_ALWAYS_FOCUSABLE;
-import static android.content.pm.ActivityInfo.FLAG_SHOW_WHEN_LOCKED;
 
 import static com.android.server.am.ActivityStack.REMOVE_TASK_MODE_DESTROYING;
 import static com.android.server.am.ActivityStackSupervisor.MATCH_TASK_IN_STACKS_OR_RECENT_TASKS_AND_RESTORE;
@@ -304,62 +303,6 @@ public class ActivityStackSupervisorTests extends ActivityTestsBase {
         pinnedStack.removeTask(pinnedActivity.getTask(), "testFocusability",
                 REMOVE_TASK_MODE_DESTROYING);
         assertFalse(pinnedStack.isFocusable());
-    }
-
-    /**
-     * Verifies the correct activity is returned when querying the top running activity.
-     */
-    @Test
-    public void testTopRunningActivity() throws Exception {
-        // Create stack to hold focus
-        final ActivityDisplay display = mService.mStackSupervisor.getDefaultDisplay();
-        final ActivityStack emptyStack = display.createStack(WINDOWING_MODE_FULLSCREEN,
-                ACTIVITY_TYPE_STANDARD, true /* onTop */);
-
-        final KeyguardController keyguard = mSupervisor.getKeyguardController();
-        final ActivityStack stack = mService.mStackSupervisor.getDefaultDisplay().createStack(
-                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
-        final ActivityRecord activity = new ActivityBuilder(mService).setCreateTask(true)
-                .setStack(stack).build();
-
-        // Make sure the top running activity is not affected when keyguard is not locked
-        assertEquals(activity, mService.mStackSupervisor.topRunningActivityLocked());
-        assertEquals(activity, mService.mStackSupervisor.topRunningActivityLocked(
-                true /* considerKeyguardState */));
-
-        // Check to make sure activity not reported when it cannot show on lock and lock is on.
-        doReturn(true).when(keyguard).isKeyguardLocked();
-        assertEquals(activity, mService.mStackSupervisor.topRunningActivityLocked());
-        assertEquals(null, mService.mStackSupervisor.topRunningActivityLocked(
-                true /* considerKeyguardState */));
-
-        // Change focus to stack with activity.
-        stack.moveToFront("focusChangeToTestStack");
-        assertEquals(stack, display.getFocusedStack());
-        assertEquals(activity, mService.mStackSupervisor.topRunningActivityLocked());
-        assertEquals(null, mService.mStackSupervisor.topRunningActivityLocked(
-                true /* considerKeyguardState */));
-
-        // Add activity that should be shown on the keyguard.
-        final ActivityRecord showWhenLockedActivity = new ActivityBuilder(mService)
-                .setCreateTask(true)
-                .setStack(stack)
-                .setActivityFlags(FLAG_SHOW_WHEN_LOCKED)
-                .build();
-
-        // Ensure the show when locked activity is returned.
-        assertEquals(showWhenLockedActivity, mService.mStackSupervisor.topRunningActivityLocked());
-        assertEquals(showWhenLockedActivity, mService.mStackSupervisor.topRunningActivityLocked(
-                true /* considerKeyguardState */));
-
-        // Change focus back to empty stack
-        emptyStack.moveToFront("focusChangeToEmptyStack");
-        assertEquals(emptyStack, display.getFocusedStack());
-        // Looking for running activity only in top and focused stack, so nothing should be returned
-        // from empty stack.
-        assertEquals(null, mService.mStackSupervisor.topRunningActivityLocked());
-        assertEquals(null, mService.mStackSupervisor.topRunningActivityLocked(
-                true /* considerKeyguardState */));
     }
 
     /**

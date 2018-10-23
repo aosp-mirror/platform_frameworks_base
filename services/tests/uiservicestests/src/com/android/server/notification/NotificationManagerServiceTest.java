@@ -1689,7 +1689,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testGetNotificationChannelFromPrivilegedListener_success() throws Exception {
+    public void testGetNotificationChannelFromPrivilegedListener_cdm_success() throws Exception {
         mService.setPreferencesHelper(mPreferencesHelper);
         List<String> associations = new ArrayList<>();
         associations.add("a");
@@ -1703,10 +1703,42 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testGetNotificationChannelFromPrivilegedListener_noAccess() throws Exception {
+    public void testGetNotificationChannelFromPrivilegedListener_cdm_noAccess() throws Exception {
         mService.setPreferencesHelper(mPreferencesHelper);
         List<String> associations = new ArrayList<>();
         when(mCompanionMgr.getAssociations(PKG, mUid)).thenReturn(associations);
+
+        try {
+            mBinderService.getNotificationChannelsFromPrivilegedListener(
+                    null, PKG, Process.myUserHandle());
+            fail("listeners that don't have a companion device shouldn't be able to call this");
+        } catch (SecurityException e) {
+            // pass
+        }
+
+        verify(mPreferencesHelper, never()).getNotificationChannels(
+                anyString(), anyInt(), anyBoolean());
+    }
+
+    @Test
+    public void testGetNotificationChannelFromPrivilegedListener_assistant_success()
+            throws Exception {
+        mService.setPreferencesHelper(mPreferencesHelper);
+        when(mCompanionMgr.getAssociations(PKG, mUid)).thenReturn(new ArrayList<>());
+        when(mAssistants.isServiceTokenValidLocked(any())).thenReturn(true);
+
+        mBinderService.getNotificationChannelsFromPrivilegedListener(
+                null, PKG, Process.myUserHandle());
+
+        verify(mPreferencesHelper, times(1)).getNotificationChannels(
+                anyString(), anyInt(), anyBoolean());
+    }
+
+    @Test
+    public void testGetNotificationChannelFromPrivilegedListener_assistant_noAccess() throws Exception {
+        mService.setPreferencesHelper(mPreferencesHelper);
+        when(mCompanionMgr.getAssociations(PKG, mUid)).thenReturn(new ArrayList<>());
+        when(mAssistants.isServiceTokenValidLocked(any())).thenReturn(false);
 
         try {
             mBinderService.getNotificationChannelsFromPrivilegedListener(
