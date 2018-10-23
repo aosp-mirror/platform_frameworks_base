@@ -79,7 +79,7 @@ class Metrics {
         // adb root access is required to get showmap
         mDevice.enableAdbRoot();
 
-        int pid = mDevice.getPidForProcess("system_server");
+        int pid = mDevice.getProcessPid("system_server");
 
         // Read showmap for system server and add it as a test log
         String showmap = mDevice.executeShellCommand("showmap " + pid);
