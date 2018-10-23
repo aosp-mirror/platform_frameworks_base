@@ -834,10 +834,11 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
             path = uri.getPath();
         } else if (scheme != null) {
             // handle non-file sources
+            Media2Utils.storeCookies(cookies);
             nativeHandleDataSourceUrl(
                 isCurrent,
                 srcId,
-                Media2HTTPService.createHTTPService(path, cookies),
+                Media2HTTPService.createHTTPService(path),
                 path,
                 keys,
                 values,
