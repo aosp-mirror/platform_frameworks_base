@@ -58,7 +58,8 @@ public class BatterySaverPolicyTest extends AndroidTestCase {
             + "adjust_brightness_factor=0.7,"
             + "fullbackup_deferred=true,"
             + "keyvaluebackup_deferred=false,"
-            + "gps_mode=0";
+            + "gps_mode=0,"
+            + "quick_doze_enabled=true";
     private static final String BATTERY_SAVER_INCORRECT_CONSTANTS = "vi*,!=,,true";
 
     private class BatterySaverPolicyForTest extends BatterySaverPolicy {
@@ -102,48 +103,48 @@ public class BatterySaverPolicyTest extends AndroidTestCase {
 
     @SmallTest
     public void testGetBatterySaverPolicy_PolicyNull_DefaultValueCorrect() {
-        testServiceDefaultValue(ServiceType.NULL);
+        testServiceDefaultValue_On(ServiceType.NULL);
     }
 
     @SmallTest
     public void testGetBatterySaverPolicy_PolicyVibration_DefaultValueCorrect() {
-        testServiceDefaultValue(ServiceType.VIBRATION);
+        testServiceDefaultValue_On(ServiceType.VIBRATION);
     }
 
     @SmallTest
     public void testGetBatterySaverPolicy_PolicyVibration_WithAccessibilityEnabled() {
         mBatterySaverPolicy.setAccessibilityEnabledForTest(true);
-        testServiceDefaultValue_unchanged(ServiceType.VIBRATION);
+        testServiceDefaultValue_Off(ServiceType.VIBRATION);
     }
 
     @SmallTest
     public void testGetBatterySaverPolicy_PolicySound_DefaultValueCorrect() {
-        testServiceDefaultValue(ServiceType.SOUND);
+        testServiceDefaultValue_On(ServiceType.SOUND);
     }
 
     @SmallTest
     public void testGetBatterySaverPolicy_PolicyFullBackup_DefaultValueCorrect() {
-        testServiceDefaultValue(ServiceType.FULL_BACKUP);
+        testServiceDefaultValue_On(ServiceType.FULL_BACKUP);
     }
 
     @SmallTest
     public void testGetBatterySaverPolicy_PolicyKeyValueBackup_DefaultValueCorrect() {
-        testServiceDefaultValue(ServiceType.KEYVALUE_BACKUP);
+        testServiceDefaultValue_On(ServiceType.KEYVALUE_BACKUP);
     }
 
     @SmallTest
     public void testGetBatterySaverPolicy_PolicyAnimation_DefaultValueCorrect() {
-        testServiceDefaultValue_unchanged(ServiceType.ANIMATION);
+        testServiceDefaultValue_Off(ServiceType.ANIMATION);
     }
 
     @SmallTest
     public void testGetBatterySaverPolicy_PolicyBatteryStats_DefaultValueCorrect() {
-        testServiceDefaultValue(ServiceType.BATTERY_STATS);
+        testServiceDefaultValue_On(ServiceType.BATTERY_STATS);
     }
 
     @SmallTest
     public void testGetBatterySaverPolicy_PolicyNetworkFirewall_DefaultValueCorrect() {
-        testServiceDefaultValue(ServiceType.NETWORK_FIREWALL);
+        testServiceDefaultValue_On(ServiceType.NETWORK_FIREWALL);
     }
 
     @SmallTest
@@ -160,16 +161,21 @@ public class BatterySaverPolicyTest extends AndroidTestCase {
 
     @SmallTest
     public void testGetBatterySaverPolicy_PolicyScreenBrightness_DefaultValueCorrect() {
-        testServiceDefaultValue_unchanged(ServiceType.SCREEN_BRIGHTNESS);
+        testServiceDefaultValue_Off(ServiceType.SCREEN_BRIGHTNESS);
     }
 
     @SmallTest
     public void testGetBatterySaverPolicy_PolicyGps_DefaultValueCorrect() {
-        testServiceDefaultValue(ServiceType.GPS);
+        testServiceDefaultValue_On(ServiceType.GPS);
 
         PowerSaveState stateOn =
                 mBatterySaverPolicy.getBatterySaverPolicy(ServiceType.GPS, true);
         assertThat(stateOn.gpsMode).isEqualTo(DEFAULT_GPS_MODE);
+    }
+
+    @SmallTest
+    public void testGetBatterySaverPolicy_PolicyQuickDoze_DefaultValueCorrect() {
+        testServiceDefaultValue_Off(ServiceType.QUICK_DOZE);
     }
 
     @SmallTest
@@ -214,6 +220,10 @@ public class BatterySaverPolicyTest extends AndroidTestCase {
                 mBatterySaverPolicy.getBatterySaverPolicy(ServiceType.GPS, BATTERY_SAVER_ON);
         assertThat(gpsState.batterySaverEnabled).isTrue();
         assertThat(gpsState.gpsMode).isEqualTo(GPS_MODE);
+
+        final PowerSaveState quickDozeState = mBatterySaverPolicy.getBatterySaverPolicy(
+                ServiceType.QUICK_DOZE, BATTERY_SAVER_ON);
+        assertThat(quickDozeState.batterySaverEnabled).isTrue();
     }
 
     @SmallTest
@@ -223,7 +233,7 @@ public class BatterySaverPolicyTest extends AndroidTestCase {
         mBatterySaverPolicy.updateConstantsLocked(null, "");
     }
 
-    private void testServiceDefaultValue(@ServiceType int type) {
+    private void testServiceDefaultValue_On(@ServiceType int type) {
         mBatterySaverPolicy.updateConstantsLocked("", "");
         final PowerSaveState batterySaverStateOn =
                 mBatterySaverPolicy.getBatterySaverPolicy(type, BATTERY_SAVER_ON);
@@ -234,7 +244,7 @@ public class BatterySaverPolicyTest extends AndroidTestCase {
         assertThat(batterySaverStateOff.batterySaverEnabled).isFalse();
     }
 
-    private void testServiceDefaultValue_unchanged(@ServiceType int type) {
+    private void testServiceDefaultValue_Off(@ServiceType int type) {
         mBatterySaverPolicy.updateConstantsLocked("", "");
         final PowerSaveState batterySaverStateOn =
                 mBatterySaverPolicy.getBatterySaverPolicy(type, BATTERY_SAVER_ON);
