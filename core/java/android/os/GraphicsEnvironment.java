@@ -170,9 +170,17 @@ public class GraphicsEnvironment {
 
                     String layers = coreSettings.getString(Settings.Global.GPU_DEBUG_LAYERS);
 
-                    Log.i(TAG, "Debug layer list: " + layers);
+                    Log.i(TAG, "Vulkan debug layer list: " + layers);
                     if (layers != null && !layers.isEmpty()) {
                         setDebugLayers(layers);
+                    }
+
+                    String layersGLES =
+                            coreSettings.getString(Settings.Global.GPU_DEBUG_LAYERS_GLES);
+
+                    Log.i(TAG, "GLES debug layer list: " + layersGLES);
+                    if (layersGLES != null && !layersGLES.isEmpty()) {
+                        setDebugLayersGLES(layersGLES);
                     }
                 }
             }
@@ -424,6 +432,7 @@ public class GraphicsEnvironment {
     private static native int getCanLoadSystemLibraries();
     private static native void setLayerPaths(ClassLoader classLoader, String layerPaths);
     private static native void setDebugLayers(String layers);
+    private static native void setDebugLayersGLES(String layers);
     private static native void setDriverPath(String path);
     private static native void setAngleInfo(String path, String appPackage, String appPref,
                                             boolean devOptIn, FileDescriptor rulesFd,

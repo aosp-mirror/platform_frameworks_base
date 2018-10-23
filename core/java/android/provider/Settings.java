@@ -11692,11 +11692,18 @@ public final class Settings {
         public static final String ANGLE_ENABLED_APP = "angle_enabled_app";
 
         /**
-         * Ordered GPU debug layer list
+         * Ordered GPU debug layer list for Vulkan
          * i.e. <layer1>:<layer2>:...:<layerN>
          * @hide
          */
         public static final String GPU_DEBUG_LAYERS = "gpu_debug_layers";
+
+        /**
+         * Ordered GPU debug layer list for GLES
+         * i.e. <layer1>:<layer2>:...:<layerN>
+         * @hide
+         */
+        public static final String GPU_DEBUG_LAYERS_GLES = "gpu_debug_layers_gles";
 
         /**
          * Addition app for GPU layer discovery
