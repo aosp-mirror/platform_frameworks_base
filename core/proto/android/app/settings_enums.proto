@@ -1,0 +1,60 @@
+/*
+ * Copyright (C) 2018 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+syntax = "proto2";
+
+package android.app.settings;
+option java_multiple_files = true;
+
+/**
+ * The action performed in this event
+ */
+enum Action {
+    ACTION_UNKNOWN = 0;
+    PAGE_VISIBLE = 1;
+    PAGE_HIDE = 2;
+    PREF_CHANGE = 3;
+}
+
+/**
+ * Id for Settings pages. Each page must have its own unique Id.
+ */
+enum PageId {
+  // Unknown page. Should not be used in production code.
+  PAGE_UNKNOWN = 0;
+
+  // OPEN: Settings homepage
+  SETTINGS_HOMEPAGE = 1502;
+
+  // OPEN: Settings > System > Input & Gesture > Wake screen
+  SETTINGS_GESTURE_WAKE_SCREEN = 1570;
+
+  // OPEN: Settings > Network & internet > Mobile network
+  MOBILE_NETWORK = 1571;
+
+  // OPEN: Settings > Network & internet > Mobile network > Choose network
+  MOBILE_NETWORK_SELECT = 1581;
+
+  // OPEN: Settings > Network & internet > Mobile network > Mobile Data > Dialog
+  MOBILE_DATA_DIALOG = 1582;
+
+  // OPEN: Settings > Network & internet > Mobile network > Data roaming > Dialog
+  MOBILE_ROAMING_DIALOG = 1583;
+
+  // Settings > Display > Lock screen display > On lock screen
+  LOCK_SCREEN_NOTIFICATION_CONTENT = 1584;
+}
+
