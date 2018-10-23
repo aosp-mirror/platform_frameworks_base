@@ -4457,6 +4457,7 @@ public class Notification implements Parcelable
             contentView.setViewVisibility(R.id.time, View.GONE);
             contentView.setImageViewIcon(R.id.profile_badge, null);
             contentView.setViewVisibility(R.id.profile_badge, View.GONE);
+            contentView.setViewVisibility(R.id.alerted_icon, View.GONE);
             mN.mUsesStandardHeader = false;
         }
 

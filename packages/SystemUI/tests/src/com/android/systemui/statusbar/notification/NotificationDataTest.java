@@ -437,21 +437,23 @@ public class NotificationDataTest extends SysuiTestCase {
                         outRanking.getImportance(), outRanking.getImportanceExplanation(),
                         outRanking.getOverrideGroupKey(), outRanking.getChannel(), null, null,
                         outRanking.canShowBadge(), outRanking.getUserSentiment(), true,
-                        null, null);
+                        false, null, null);
             } else if (key.equals(TEST_EXEMPT_DND_VISUAL_SUPPRESSION_KEY)) {
                 outRanking.populate(key, outRanking.getRank(),
                         outRanking.matchesInterruptionFilter(),
                         outRanking.getVisibilityOverride(), 255,
                         outRanking.getImportance(), outRanking.getImportanceExplanation(),
                         outRanking.getOverrideGroupKey(), outRanking.getChannel(), null, null,
-                        outRanking.canShowBadge(), outRanking.getUserSentiment(), true, null, null);
+                        outRanking.canShowBadge(), outRanking.getUserSentiment(), true, false, null,
+                        null);
             } else {
                 outRanking.populate(key, outRanking.getRank(),
                         outRanking.matchesInterruptionFilter(),
                         outRanking.getVisibilityOverride(), outRanking.getSuppressedVisualEffects(),
                         outRanking.getImportance(), outRanking.getImportanceExplanation(),
                         outRanking.getOverrideGroupKey(), NOTIFICATION_CHANNEL, null, null,
-                        outRanking.canShowBadge(), outRanking.getUserSentiment(), false, null,
+                        outRanking.canShowBadge(), outRanking.getUserSentiment(), false, false,
+                        null,
                         null);
             }
             return true;

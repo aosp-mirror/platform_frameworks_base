@@ -1461,6 +1461,7 @@ public abstract class NotificationListenerService extends Service {
         private boolean mShowBadge;
         private @UserSentiment int mUserSentiment = USER_SENTIMENT_NEUTRAL;
         private boolean mHidden;
+        private boolean mAudiblyAlerted;
         private ArrayList<Notification.Action> mSmartActions;
         private ArrayList<CharSequence> mSmartReplies;
 
@@ -1627,6 +1628,15 @@ public abstract class NotificationListenerService extends Service {
         }
 
         /**
+         * Returns whether this notification alerted the user via sound or vibration.
+         *
+         * @return true if the notification alerted the user, false otherwise.
+         */
+        public boolean audiblyAlerted() {
+            return mAudiblyAlerted;
+        }
+
+        /**
          * @hide
          */
         @VisibleForTesting
@@ -1635,8 +1645,8 @@ public abstract class NotificationListenerService extends Service {
                 CharSequence explanation, String overrideGroupKey,
                 NotificationChannel channel, ArrayList<String> overridePeople,
                 ArrayList<SnoozeCriterion> snoozeCriteria, boolean showBadge,
-                int userSentiment, boolean hidden, ArrayList<Notification.Action> smartActions,
-                ArrayList<CharSequence> smartReplies) {
+                int userSentiment, boolean hidden, boolean audiblyAlerted,
+                ArrayList<Notification.Action> smartActions, ArrayList<CharSequence> smartReplies) {
             mKey = key;
             mRank = rank;
             mIsAmbient = importance < NotificationManager.IMPORTANCE_LOW;
@@ -1652,6 +1662,7 @@ public abstract class NotificationListenerService extends Service {
             mShowBadge = showBadge;
             mUserSentiment = userSentiment;
             mHidden = hidden;
+            mAudiblyAlerted = audiblyAlerted;
             mSmartActions = smartActions;
             mSmartReplies = smartReplies;
         }
@@ -1703,6 +1714,7 @@ public abstract class NotificationListenerService extends Service {
         private ArrayMap<String, Boolean> mShowBadge;
         private ArrayMap<String, Integer> mUserSentiment;
         private ArrayMap<String, Boolean> mHidden;
+        private ArrayMap<String, Boolean> mAudiblyAlerted;
         private ArrayMap<String, ArrayList<Notification.Action>> mSmartActions;
         private ArrayMap<String, ArrayList<CharSequence>> mSmartReplies;
 
@@ -1733,8 +1745,8 @@ public abstract class NotificationListenerService extends Service {
                     getVisibilityOverride(key), getSuppressedVisualEffects(key),
                     getImportance(key), getImportanceExplanation(key), getOverrideGroupKey(key),
                     getChannel(key), getOverridePeople(key), getSnoozeCriteria(key),
-                    getShowBadge(key), getUserSentiment(key), getHidden(key), getSmartActions(key),
-                    getSmartReplies(key));
+                    getShowBadge(key), getUserSentiment(key), getHidden(key),
+                    getAudiblyAlerted(key), getSmartActions(key), getSmartReplies(key));
             return rank >= 0;
         }
 
@@ -1872,6 +1884,16 @@ public abstract class NotificationListenerService extends Service {
             return hidden == null ? false : hidden.booleanValue();
         }
 
+        private boolean getAudiblyAlerted(String key) {
+            synchronized (this) {
+                if (mAudiblyAlerted == null) {
+                    buildAudiblyAlertedLocked();
+                }
+            }
+            Boolean audiblyAlerted = mAudiblyAlerted.get(key);
+            return audiblyAlerted == null ? false : audiblyAlerted.booleanValue();
+        }
+
         private ArrayList<Notification.Action> getSmartActions(String key) {
             synchronized (this) {
                 if (mSmartActions == null) {
@@ -2004,6 +2026,11 @@ public abstract class NotificationListenerService extends Service {
         // Locked by 'this'
         private void buildHiddenLocked() {
             mHidden = buildBooleanMapFromBundle(mRankingUpdate.getHidden());
+        }
+
+        // Locked by 'this'
+        private void buildAudiblyAlertedLocked() {
+            mAudiblyAlerted = buildBooleanMapFromBundle(mRankingUpdate.getAudiblyAlerted());
         }
 
         // Locked by 'this'

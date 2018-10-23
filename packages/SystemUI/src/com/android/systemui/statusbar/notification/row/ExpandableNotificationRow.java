@@ -16,14 +16,22 @@
 
 package com.android.systemui.statusbar.notification.row;
 
-import static com.android.systemui.statusbar.notification.ActivityLaunchAnimator.ExpandAnimationParameters;
-import static com.android.systemui.statusbar.notification.row.NotificationContentView.VISIBLE_TYPE_AMBIENT;
-import static com.android.systemui.statusbar.notification.row.NotificationContentView.VISIBLE_TYPE_CONTRACTED;
-import static com.android.systemui.statusbar.notification.row.NotificationContentView.VISIBLE_TYPE_HEADSUP;
-import static com.android.systemui.statusbar.notification.row.NotificationInflater.FLAG_CONTENT_VIEW_AMBIENT;
-import static com.android.systemui.statusbar.notification.row.NotificationInflater.FLAG_CONTENT_VIEW_HEADS_UP;
-import static com.android.systemui.statusbar.notification.row.NotificationInflater.FLAG_CONTENT_VIEW_PUBLIC;
-import static com.android.systemui.statusbar.notification.row.NotificationInflater.InflationCallback;
+import static com.android.systemui.statusbar.notification.ActivityLaunchAnimator
+        .ExpandAnimationParameters;
+import static com.android.systemui.statusbar.notification.row.NotificationContentView
+        .VISIBLE_TYPE_AMBIENT;
+import static com.android.systemui.statusbar.notification.row.NotificationContentView
+        .VISIBLE_TYPE_CONTRACTED;
+import static com.android.systemui.statusbar.notification.row.NotificationContentView
+        .VISIBLE_TYPE_HEADSUP;
+import static com.android.systemui.statusbar.notification.row.NotificationInflater
+        .FLAG_CONTENT_VIEW_AMBIENT;
+import static com.android.systemui.statusbar.notification.row.NotificationInflater
+        .FLAG_CONTENT_VIEW_HEADS_UP;
+import static com.android.systemui.statusbar.notification.row.NotificationInflater
+        .FLAG_CONTENT_VIEW_PUBLIC;
+import static com.android.systemui.statusbar.notification.row.NotificationInflater
+        .InflationCallback;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -1656,6 +1664,17 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         }
         mPrivateLayout.showAppOpsIcons(activeOps);
         mPublicLayout.showAppOpsIcons(activeOps);
+    }
+
+    /** Sets whether the notification being displayed audibly alerted the user. */
+    public void setAudiblyAlerted(boolean audiblyAlerted) {
+        if (NotificationUtils.useNewInterruptionModel(mContext)) {
+            if (mIsSummaryWithChildren && mChildrenContainer.getHeaderView() != null) {
+                mChildrenContainer.getHeaderView().setAudiblyAlerted(audiblyAlerted);
+            }
+            mPrivateLayout.setAudiblyAlerted(audiblyAlerted);
+            mPublicLayout.setAudiblyAlerted(audiblyAlerted);
+        }
     }
 
     public View.OnClickListener getAppOpsOnClickListener() {

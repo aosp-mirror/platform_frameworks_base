@@ -4820,6 +4820,9 @@
     <!-- Content description of the work profile icon in the notification. -->
     <string name="notification_work_profile_content_description">Work profile</string>
 
+    <!-- Content description of the alerting icon in the notification. [CHAR_LIMIT=NONE] -->
+    <string name="notification_alerted_content_description">Alerted</string>
+
     <!-- Content description of the expand button icon in the notification when collaped.-->
     <string name="expand_button_content_description_collapsed">Expand</string>
 
