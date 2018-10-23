@@ -4584,7 +4584,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     /**
      * Object that handles automatic animation of view properties.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private ViewPropertyAnimator mAnimator = null;
 
     /**
@@ -6873,7 +6873,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * @param requestCode The request code to use.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public void startActivityForResult(Intent intent, int requestCode) {
         mStartActivityRequestWho = "@android:view:" + System.identityHashCode(this);
         getContext().startActivityForResult(mStartActivityRequestWho, intent, requestCode, null);
@@ -18413,7 +18413,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * communicate with the window manager.
      * @return the session object to communicate with the window manager
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     /*package*/ IWindowSession getWindowSession() {
         return mAttachInfo != null ? mAttachInfo.mSession : null;
     }

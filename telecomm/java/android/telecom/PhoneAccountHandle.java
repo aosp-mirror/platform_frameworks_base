@@ -19,6 +19,7 @@ package android.telecom;
 import android.annotation.NonNull;
 import android.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.Process;
@@ -43,7 +44,7 @@ import java.util.Objects;
 public final class PhoneAccountHandle implements Parcelable {
     @UnsupportedAppUsage
     private final ComponentName mComponentName;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private final String mId;
     private final UserHandle mUserHandle;
 

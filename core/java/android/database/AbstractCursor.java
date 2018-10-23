@@ -19,6 +19,7 @@ package android.database;
 import android.annotation.UnsupportedAppUsage;
 import android.content.ContentResolver;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.UserHandle;
 import android.util.Log;
@@ -79,7 +80,7 @@ public abstract class AbstractCursor implements CrossProcessCursor {
     private final DataSetObservable mDataSetObservable = new DataSetObservable();
     private final ContentObservable mContentObservable = new ContentObservable();
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private Bundle mExtras = Bundle.EMPTY;
 
     /* -------------------------------------------------------- */

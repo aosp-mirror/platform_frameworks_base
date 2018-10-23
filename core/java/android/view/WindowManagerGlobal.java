@@ -23,6 +23,7 @@ import android.content.ComponentCallbacks2;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.res.Configuration;
+import android.os.Build;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.ServiceManager;
@@ -213,7 +214,7 @@ public final class WindowManagerGlobal {
         }
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public static IWindowSession peekWindowSession() {
         synchronized (WindowManagerGlobal.class) {
             return sWindowSession;
