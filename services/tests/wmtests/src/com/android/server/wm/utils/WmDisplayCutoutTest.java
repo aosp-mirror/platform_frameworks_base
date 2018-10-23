@@ -16,19 +16,17 @@
 
 package com.android.server.wm.utils;
 
-
-import static android.view.DisplayCutout.NO_CUTOUT;
 import static android.view.DisplayCutout.BOUNDS_POSITION_BOTTOM;
 import static android.view.DisplayCutout.BOUNDS_POSITION_LEFT;
 import static android.view.DisplayCutout.BOUNDS_POSITION_RIGHT;
 import static android.view.DisplayCutout.BOUNDS_POSITION_TOP;
+import static android.view.DisplayCutout.NO_CUTOUT;
 import static android.view.DisplayCutout.fromBoundingRect;
 
 import static org.hamcrest.Matchers.equalTo;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertThat;
-
 
 import android.graphics.Insets;
 import android.graphics.Rect;
@@ -37,24 +35,18 @@ import android.util.Size;
 import android.view.DisplayCutout;
 
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
-
-import java.util.Arrays;
 
 /**
  * Tests for {@link WmDisplayCutout}
  *
- * Run with: atest WmDisplayCutoutTest
+ * Build/Install/Run:
+ *  atest WmTests:WmDisplayCutoutTest
  */
-@RunWith(AndroidJUnit4.class)
 @SmallTest
 @Presubmit
 public class WmDisplayCutoutTest {
-    private static final Rect ZERO_RECT = new Rect();
-
     private final DisplayCutout mCutoutTop = new DisplayCutout(
             Insets.of(0, 100, 0, 0),
             null /* boundLeft */, new Rect(50, 0, 75, 100) /* boundTop */,

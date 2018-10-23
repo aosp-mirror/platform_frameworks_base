@@ -11,7 +11,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
 package com.android.server.wm.utils;
@@ -27,18 +27,19 @@ import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
-@RunWith(AndroidJUnit4.class)
+/**
+ * Build/Install/Run:
+ *  atest WmTests:InsetUtilsTest
+ */
 @SmallTest
 @Presubmit
 public class InsetUtilsTest {
 
     @Test
-    public void testAdd() throws Exception {
+    public void testAdd() {
         final Rect rect1 = new Rect(10, 20, 30, 40);
         final Rect rect2 = new Rect(50, 60, 70, 80);
         InsetUtils.addInsets(rect1, rect2);

@@ -11,7 +11,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
 package com.android.server.wm;
@@ -33,19 +33,17 @@ import android.view.animation.Animation;
 import android.view.animation.ClipRectAnimation;
 
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 /**
  * Tests for the {@link WindowAnimationSpec} class.
  *
- *  atest FrameworksServicesTests:com.android.server.wm.WindowAnimationSpecTest
+ * Build/Install/Run:
+ *  atest WmTests:WindowAnimationSpecTest
  */
 @SmallTest
 @Presubmit
-@RunWith(AndroidJUnit4.class)
 public class WindowAnimationSpecTest {
     private final SurfaceControl mSurfaceControl = mock(SurfaceControl.class);
     private final SurfaceControl.Transaction mTransaction = mock(SurfaceControl.Transaction.class);

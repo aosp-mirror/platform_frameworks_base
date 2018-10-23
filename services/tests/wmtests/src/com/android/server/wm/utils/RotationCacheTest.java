@@ -28,13 +28,14 @@ import android.util.Pair;
 
 import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
-@RunWith(AndroidJUnit4.class)
+/**
+ * Build/Install/Run:
+ *  atest WmTests:RotationCacheTest
+ */
 @SmallTest
 @FlakyTest(bugId = 74078662)
 @Presubmit
@@ -53,7 +54,7 @@ public class RotationCacheTest {
     }
 
     @Test
-    public void getOrCompute_computes() throws Exception {
+    public void getOrCompute_computes() {
         assertThat(mCache.getOrCompute("hello", 0), equalTo(create("hello", 0)));
         assertThat(mCache.getOrCompute("hello", 1), equalTo(create("hello", 1)));
         assertThat(mCache.getOrCompute("hello", 2), equalTo(create("hello", 2)));
@@ -61,7 +62,7 @@ public class RotationCacheTest {
     }
 
     @Test
-    public void getOrCompute_sameParam_sameRot_hitsCache() throws Exception {
+    public void getOrCompute_sameParam_sameRot_hitsCache() {
         assertNotNull(mCache.getOrCompute("hello", 1));
 
         mComputationCalled = false;
@@ -70,7 +71,7 @@ public class RotationCacheTest {
     }
 
     @Test
-    public void getOrCompute_sameParam_hitsCache_forAllRots() throws Exception {
+    public void getOrCompute_sameParam_hitsCache_forAllRots() {
         assertNotNull(mCache.getOrCompute("hello", 3));
         assertNotNull(mCache.getOrCompute("hello", 2));
         assertNotNull(mCache.getOrCompute("hello", 1));
@@ -85,14 +86,14 @@ public class RotationCacheTest {
     }
 
     @Test
-    public void getOrCompute_changingParam_recomputes() throws Exception {
+    public void getOrCompute_changingParam_recomputes() {
         assertNotNull(mCache.getOrCompute("hello", 1));
 
         assertThat(mCache.getOrCompute("world", 1), equalTo(create("world", 1)));
     }
 
     @Test
-    public void getOrCompute_changingParam_clearsCacheForDifferentRots() throws Exception {
+    public void getOrCompute_changingParam_clearsCacheForDifferentRots() {
         assertNotNull(mCache.getOrCompute("hello", 1));
         assertNotNull(mCache.getOrCompute("world", 2));
 
