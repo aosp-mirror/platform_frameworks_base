@@ -1461,6 +1461,24 @@ message SettingsUIChanged {
       // Unknown page. Should not be used in production code.
       PAGE_UNKNOWN = 0;
 
+      // OPEN: Settings homepage
+      SETTINGS_HOMEPAGE = 1502;
+
+      // OPEN: Settings > System > Input & Gesture > Wake screen
+      SETTINGS_GESTURE_WAKE_SCREEN = 1570;
+
+      // OPEN: Settings > Network & internet > Mobile network
+      MOBILE_NETWORK = 1571;
+
+      // OPEN: Settings > Network & internet > Mobile network > Choose network
+      MOBILE_NETWORK_SELECT = 1581;
+
+      // OPEN: Settings > Network & internet > Mobile network > Mobile Data > Dialog
+      MOBILE_DATA_DIALOG = 1582;
+
+      // OPEN: Settings > Network & internet > Mobile network > Data roaming > Dialog
+      MOBILE_ROAMING_DIALOG = 1583;
+
       // Settings > Display > Lock screen display > On lock screen
       LOCK_SCREEN_NOTIFICATION_CONTENT = 1584;
     }
