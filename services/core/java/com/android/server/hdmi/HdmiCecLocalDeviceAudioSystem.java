@@ -37,6 +37,7 @@ import android.util.SparseArray;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.util.IndentingPrintWriter;
 import com.android.server.hdmi.Constants.AudioCodec;
 import com.android.server.hdmi.DeviceDiscoveryAction.DeviceDiscoveryCallback;
 import com.android.server.hdmi.HdmiAnnotations.ServiceThreadOnly;
@@ -1086,4 +1087,20 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
         }
         mDeviceInfos.clear();
     }
+
+    @Override
+    protected void dump(IndentingPrintWriter pw) {
+        pw.println("HdmiCecLocalDeviceAudioSystem:");
+        pw.increaseIndent();
+        pw.println("mSystemAudioActivated: " + mSystemAudioActivated);
+        pw.println("mSystemAudioControlFeatureEnabled: " + mSystemAudioControlFeatureEnabled);
+        pw.println("mTvSystemAudioModeSupport: " + mTvSystemAudioModeSupport);
+        pw.println("mArcEstablished: " + mArcEstablished);
+        pw.println("mArcIntentUsed: " + mArcIntentUsed);
+        HdmiUtils.dumpMap(pw, "mTvInputs:", mTvInputs);
+        HdmiUtils.dumpSparseArray(pw, "mDeviceInfos:", mDeviceInfos);
+        pw.decreaseIndent();
+        super.dump(pw);
+    }
+
 }

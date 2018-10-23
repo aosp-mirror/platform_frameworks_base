@@ -77,7 +77,7 @@ final class HdmiCecController {
 
     private static final int NUM_LOGICAL_ADDRESS = 16;
 
-    private static final int MAX_CEC_MESSAGE_HISTORY = 20;
+    private static final int MAX_CEC_MESSAGE_HISTORY = 200;
 
     // Predicate for whether the given logical address is remote device's one or not.
     private final Predicate<Integer> mRemoteDeviceAddressPredicate = new Predicate<Integer>() {
@@ -682,7 +682,7 @@ final class HdmiCecController {
 
     void dump(final IndentingPrintWriter pw) {
         for (int i = 0; i < mLocalDevices.size(); ++i) {
-            pw.println("HdmiCecLocalDevice #" + i + ":");
+            pw.println("HdmiCecLocalDevice #" + mLocalDevices.keyAt(i) + ":");
             pw.increaseIndent();
             mLocalDevices.valueAt(i).dump(pw);
             pw.decreaseIndent();

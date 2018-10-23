@@ -1890,27 +1890,28 @@ public class HdmiControlService extends SystemService {
             if (!DumpUtils.checkDumpPermission(getContext(), TAG, writer)) return;
             final IndentingPrintWriter pw = new IndentingPrintWriter(writer, "  ");
 
-            pw.println("mHdmiControlEnabled: " + mHdmiControlEnabled);
             pw.println("mProhibitMode: " + mProhibitMode);
-            if (mCecController != null) {
-                pw.println("mCecController: ");
-                pw.increaseIndent();
-                mCecController.dump(pw);
-                pw.decreaseIndent();
-            }
+            pw.println("mPowerStatus: " + mPowerStatus);
+
+            // System settings
+            pw.println("System_settings:");
+            pw.increaseIndent();
+            pw.println("mHdmiControlEnabled: " + mHdmiControlEnabled);
+            pw.println("mMhlInputChangeEnabled: " + mMhlInputChangeEnabled);
+            pw.decreaseIndent();
 
             pw.println("mMhlController: ");
             pw.increaseIndent();
             mMhlController.dump(pw);
             pw.decreaseIndent();
 
-            pw.println("mPortInfo: ");
-            pw.increaseIndent();
-            for (HdmiPortInfo hdmiPortInfo : mPortInfo) {
-                pw.println("- " + hdmiPortInfo);
+            HdmiUtils.dumpIterable(pw, "mPortInfo:", mPortInfo);
+            if (mCecController != null) {
+                pw.println("mCecController: ");
+                pw.increaseIndent();
+                mCecController.dump(pw);
+                pw.decreaseIndent();
             }
-            pw.decreaseIndent();
-            pw.println("mPowerStatus: " + mPowerStatus);
         }
     }
 
