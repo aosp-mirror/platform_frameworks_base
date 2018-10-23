@@ -31,6 +31,7 @@ import android.media.AudioManager;
 import android.media.AudioSystem;
 import android.media.tv.TvContract;
 import android.os.SystemProperties;
+import android.provider.Settings.Global;
 import android.util.Slog;
 import android.util.SparseArray;
 
@@ -92,6 +93,8 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
         // TODO(amyjojo) make System Audio Control controllable by users
         /*mSystemAudioControlFeatureEnabled =
         mService.readBooleanSetting(Global.HDMI_SYSTEM_AUDIO_CONTROL_ENABLED, true);*/
+        mRoutingControlFeatureEnabled =
+            mService.readBooleanSetting(Global.HDMI_CEC_SWITCH_ENABLED, true);
         // TODO(amyjojo): make the map ro property.
         mTvInputs.put(Constants.CEC_SWITCH_HDMI1,
                 "com.droidlogic.tvinput/.services.Hdmi1InputService/HW5");
@@ -782,6 +785,14 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
     }
 
     @ServiceThreadOnly
+    void setRoutingControlFeatureEnables(boolean enabled) {
+        assertRunOnServiceThread();
+        synchronized (mLock) {
+            mRoutingControlFeatureEnabled = enabled;
+        }
+    }
+
+    @ServiceThreadOnly
     void doManualPortSwitching(int portId, IHdmiControlCallback callback) {
         assertRunOnServiceThread();
         // TODO: validate port ID
@@ -916,6 +927,10 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
     }
 
     protected void routeToInputFromPortId(int portId) {
+        if (!isRoutingControlFeatureEnabled()) {
+            HdmiLogger.debug("Routing Control Feature is not enabled.");
+            return;
+        }
         if (mArcIntentUsed) {
             routeToTvInputFromPortId(portId);
         } else {

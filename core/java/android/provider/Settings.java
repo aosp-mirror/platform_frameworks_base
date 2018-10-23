@@ -9361,6 +9361,15 @@ public final class Settings {
                 "hdmi_system_audio_control_enabled";
 
         /**
+         * Whether HDMI Routing Control feature is enabled. If enabled, the switch device will
+         * route to the correct input source on receiving Routing Control related messages. If
+         * disabled, you can only switch the input via controls on this device.
+         * @hide
+         */
+        public static final String HDMI_CEC_SWITCH_ENABLED =
+                "hdmi_cec_switch_enabled";
+
+        /**
          * Whether TV will automatically turn on upon reception of the CEC command
          * &lt;Text View On&gt; or &lt;Image View On&gt;. (0 = false, 1 = true)
          *

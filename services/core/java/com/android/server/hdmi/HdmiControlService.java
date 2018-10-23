@@ -568,7 +568,8 @@ public class HdmiControlService extends SystemService {
                 Global.HDMI_CONTROL_AUTO_DEVICE_OFF_ENABLED,
                 Global.HDMI_SYSTEM_AUDIO_CONTROL_ENABLED,
                 Global.MHL_INPUT_SWITCHING_ENABLED,
-                Global.MHL_POWER_CHARGE_ENABLED
+                Global.MHL_POWER_CHARGE_ENABLED,
+                Global.HDMI_CEC_SWITCH_ENABLED
         };
         for (String s : settings) {
             resolver.registerContentObserver(Global.getUriFor(s), false, mSettingsObserver,
@@ -608,6 +609,11 @@ public class HdmiControlService extends SystemService {
                 case Global.HDMI_SYSTEM_AUDIO_CONTROL_ENABLED:
                     if (isTvDeviceEnabled()) {
                         tv().setSystemAudioControlFeatureEnabled(enabled);
+                    }
+                    break;
+                case Global.HDMI_CEC_SWITCH_ENABLED:
+                    if (isAudioSystemDevice()) {
+                        audioSystem().setRoutingControlFeatureEnables(enabled);
                     }
                     break;
                 case Global.MHL_INPUT_SWITCHING_ENABLED:

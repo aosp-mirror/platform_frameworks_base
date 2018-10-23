@@ -66,6 +66,10 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
     @LocalActivePort
     protected int mLocalActivePort = Constants.CEC_SWITCH_HOME;
 
+    // Whether the Routing Coutrol feature is enabled or not. True by default.
+    @GuardedBy("mLock")
+    protected boolean mRoutingControlFeatureEnabled;
+
     protected HdmiCecLocalDeviceSource(HdmiControlService service, int deviceType) {
         super(service, deviceType);
     }
@@ -123,7 +127,9 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
         }
         setIsActiveSource(physicalAddress == mService.getPhysicalAddress());
         updateDevicePowerStatus(logicalAddress, HdmiControlManager.POWER_STATUS_ON);
-        switchInputOnReceivingNewActivePath(physicalAddress);
+        if (isRoutingControlFeatureEnabled()) {
+            switchInputOnReceivingNewActivePath(physicalAddress);
+        }
         return true;
     }
 
@@ -153,6 +159,10 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
     @ServiceThreadOnly
     protected boolean handleRoutingChange(HdmiCecMessage message) {
         assertRunOnServiceThread();
+        if (!isRoutingControlFeatureEnabled()) {
+            mService.maySendFeatureAbortCommand(message, Constants.ABORT_REFUSED);
+            return true;
+        }
         int newPath = HdmiUtils.twoBytesToInt(message.getParams(), 2);
         // if the current device is a pure playback device
         if (!mIsSwitchDevice
@@ -168,6 +178,10 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
     @ServiceThreadOnly
     protected boolean handleRoutingInformation(HdmiCecMessage message) {
         assertRunOnServiceThread();
+        if (!isRoutingControlFeatureEnabled()) {
+            mService.maySendFeatureAbortCommand(message, Constants.ABORT_REFUSED);
+            return true;
+        }
         int physicalAddress = HdmiUtils.twoBytesToInt(message.getParams());
         // if the current device is a pure playback device
         if (!mIsSwitchDevice
@@ -276,6 +290,12 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
     protected void setLocalActivePort(@LocalActivePort int activePort) {
         synchronized (mLock) {
             mLocalActivePort = activePort;
+        }
+    }
+
+    boolean isRoutingControlFeatureEnabled() {
+        synchronized (mLock) {
+            return mRoutingControlFeatureEnabled;
         }
     }
 
