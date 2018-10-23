@@ -67,6 +67,8 @@ import com.android.systemui.ForegroundServiceController;
 import com.android.systemui.InitController;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.appops.AppOpsController;
+import com.android.systemui.appops.AppOpsControllerImpl;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.classifier.FalsingManager;
 import com.android.systemui.keyguard.KeyguardViewMediator;
@@ -84,7 +86,6 @@ import com.android.systemui.statusbar.NotificationViewHierarchyManager;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.StatusBarStateController;
-import com.android.systemui.statusbar.notification.AppOpsListener;
 import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.NotificationData.Entry;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
@@ -157,7 +158,7 @@ public class StatusBarTest extends SysuiTestCase {
         mDependency.injectTestDependency(VisualStabilityManager.class, mVisualStabilityManager);
         mDependency.injectTestDependency(NotificationListener.class, mNotificationListener);
         mDependency.injectTestDependency(KeyguardMonitor.class, mock(KeyguardMonitorImpl.class));
-        mDependency.injectTestDependency(AppOpsListener.class, mock(AppOpsListener.class));
+        mDependency.injectTestDependency(AppOpsController.class, mock(AppOpsControllerImpl.class));
         mDependency.injectTestDependency(StatusBarStateController.class, mStatusBarStateController);
         mDependency.injectTestDependency(DeviceProvisionedController.class,
                 mDeviceProvisionedController);

@@ -29,7 +29,6 @@ import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_WAK
 import static com.android.systemui.shared.system.WindowManagerWrapper.NAV_BAR_POS_INVALID;
 import static com.android.systemui.shared.system.WindowManagerWrapper.NAV_BAR_POS_LEFT;
 import static com.android.systemui.statusbar.NotificationLockscreenUserManager.PERMISSION_SELF;
-import static com.android.systemui.statusbar.NotificationMediaManager.DEBUG_MEDIA;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_LIGHTS_OUT_TRANSPARENT;
 import static com.android.systemui.statusbar.phone.BarTransitions.MODE_OPAQUE;
@@ -46,6 +45,7 @@ import android.app.ActivityManager;
 import android.app.ActivityOptions;
 import android.app.ActivityTaskManager;
 import android.app.AlarmManager;
+import android.app.AppOpsManager;
 import android.app.IWallpaperManager;
 import android.app.KeyguardManager;
 import android.app.Notification;
@@ -130,6 +130,7 @@ import com.android.systemui.DemoMode;
 import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.EventLogTags;
+import com.android.systemui.ForegroundServiceController;
 import com.android.systemui.InitController;
 import com.android.systemui.Interpolators;
 import com.android.systemui.Prefs;
@@ -138,6 +139,7 @@ import com.android.systemui.RecentsComponent;
 import com.android.systemui.SystemUI;
 import com.android.systemui.SystemUIFactory;
 import com.android.systemui.UiOffloadThread;
+import com.android.systemui.appops.AppOpsController;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.charging.WirelessChargingAnimation;
 import com.android.systemui.classifier.FalsingLog;
@@ -183,7 +185,6 @@ import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
-import com.android.systemui.statusbar.notification.AppOpsListener;
 import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.NotificationData.Entry;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
@@ -228,7 +229,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         OnHeadsUpChangedListener, CommandQueue.Callbacks, ZenModeController.Callback,
         ColorExtractor.OnColorsChangedListener, ConfigurationListener,
         StatusBarStateController.StateListener, ShadeController,
-        ActivityLaunchAnimator.Callback, AmbientPulseManager.OnAmbientChangedListener {
+        ActivityLaunchAnimator.Callback, AmbientPulseManager.OnAmbientChangedListener,
+        AppOpsController.Callback {
     public static final boolean MULTIUSER_DEBUG = false;
 
     public static final boolean ENABLE_CHILD_NOTIFICATIONS
@@ -372,7 +374,8 @@ public class StatusBar extends SystemUI implements DemoMode,
     protected NotificationLogger mNotificationLogger;
     protected NotificationEntryManager mEntryManager;
     protected NotificationViewHierarchyManager mViewHierarchyManager;
-    protected AppOpsListener mAppOpsListener;
+    protected ForegroundServiceController mForegroundServiceController;
+    protected AppOpsController mAppOpsController;
     protected KeyguardViewMediator mKeyguardViewMediator;
     private ZenModeController mZenController;
 
@@ -564,6 +567,20 @@ public class StatusBar extends SystemUI implements DemoMode,
     protected NotificationPresenter mPresenter;
 
     @Override
+    public void onActiveStateChanged(int code, int uid, String packageName, boolean active) {
+        mForegroundServiceController.onAppOpChanged(code, uid, packageName, active);
+        Dependency.get(Dependency.MAIN_HANDLER).post(() -> {
+            mEntryManager.updateNotificationsForAppOp(code, uid, packageName, active);
+        });
+    }
+
+    protected static final int[] APP_OPS = new int[] {AppOpsManager.OP_CAMERA,
+            AppOpsManager.OP_SYSTEM_ALERT_WINDOW,
+            AppOpsManager.OP_RECORD_AUDIO,
+            AppOpsManager.OP_COARSE_LOCATION,
+            AppOpsManager.OP_FINE_LOCATION};
+
+    @Override
     public void start() {
         mGroupManager = Dependency.get(NotificationGroupManager.class);
         mVisualStabilityManager = Dependency.get(VisualStabilityManager.class);
@@ -585,7 +602,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         mMediaManager = Dependency.get(NotificationMediaManager.class);
         mEntryManager = Dependency.get(NotificationEntryManager.class);
         mViewHierarchyManager = Dependency.get(NotificationViewHierarchyManager.class);
-        mAppOpsListener = Dependency.get(AppOpsListener.class);
+        mForegroundServiceController = Dependency.get(ForegroundServiceController.class);
+        mAppOpsController = Dependency.get(AppOpsController.class);
         mZenController = Dependency.get(ZenModeController.class);
         mKeyguardViewMediator = getComponent(KeyguardViewMediator.class);
         mColorExtractor = Dependency.get(SysuiColorExtractor.class);
@@ -984,7 +1002,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mPresenter = new StatusBarNotificationPresenter(mContext, mNotificationPanel,
                 mHeadsUpManager, mStatusBarWindow, mStackScroller, mDozeScrimController,
                 mScrimController, this);
-        mAppOpsListener.setUpWithPresenter(mPresenter);
+        mAppOpsController.addCallback(APP_OPS, this);
         mNotificationListener.setUpWithPresenter(mPresenter);
         mNotificationShelf.setOnActivatedListener(mPresenter);
         mRemoteInputManager.getController().addCallback(mStatusBarWindowController);
@@ -2853,7 +2871,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mDeviceProvisionedController.removeCallback(mUserSetupObserver);
         Dependency.get(ConfigurationController.class).removeCallback(this);
         mZenController.removeCallback(this);
-        mAppOpsListener.destroy();
+        mAppOpsController.removeCallback(APP_OPS, this);
     }
 
     private boolean mDemoModeAllowed;
