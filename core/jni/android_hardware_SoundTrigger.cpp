@@ -800,17 +800,17 @@ android_hardware_SoundTrigger_getModelState(JNIEnv *env, jobject thiz,
     sp<IMemory> memory;
     jint status = module->getModelState(jHandle, memory);
     if (status != 0 || memory == NULL) {
-      ALOGW("getModelState, failed to get model state, status: %d", status);
-      return NULL;
+        ALOGW("getModelState, failed to get model state, status: %d", status);
+        return NULL;
     }
     struct sound_trigger_recognition_event* event =
         (struct sound_trigger_recognition_event *)memory->pointer();
     if (event == NULL) {
-      return NULL;
+        return NULL;
     }
     if (event->type != SOUND_MODEL_TYPE_GENERIC) {
-      ALOGW("getModelState, unsupported model type: %d", event->type);
-      return NULL;
+        ALOGW("getModelState, unsupported model type: %d", event->type);
+        return NULL;
     }
 
     jbyteArray jData = NULL;
