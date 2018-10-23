@@ -36,6 +36,7 @@ import android.database.Cursor;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -1292,7 +1293,7 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
         mSearchSrcTextView.dismissDropDown();
     }
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private void onCloseClicked() {
         CharSequence text = mSearchSrcTextView.getText();
         if (TextUtils.isEmpty(text)) {
@@ -1590,7 +1591,7 @@ public class SearchView extends LinearLayout implements CollapsibleActionView {
     /**
      * Sets the text in the query box, without updating the suggestions.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private void setQuery(CharSequence query) {
         mSearchSrcTextView.setText(query, true);
         // Move the cursor to the end

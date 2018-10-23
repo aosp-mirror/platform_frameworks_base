@@ -17,6 +17,7 @@
 package android.net;
 
 import android.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.os.SystemProperties;
 import android.util.Log;
 
@@ -87,7 +88,7 @@ import javax.net.ssl.X509TrustManager;
  * requires root access.
  */
 public class SSLCertificateSocketFactory extends SSLSocketFactory {
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private static final String TAG = "SSLCertificateSocketFactory";
 
     @UnsupportedAppUsage
@@ -384,7 +385,7 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
      * @throws IllegalArgumentException if the socket was not created by this factory.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public byte[] getAlpnSelectedProtocol(Socket socket) {
         return castToOpenSSLSocket(socket).getAlpnSelectedProtocol();
     }
@@ -410,7 +411,7 @@ public class SSLCertificateSocketFactory extends SSLSocketFactory {
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public void setChannelIdPrivateKey(PrivateKey privateKey) {
         mChannelIdPrivateKey = privateKey;
     }

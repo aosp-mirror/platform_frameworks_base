@@ -38,6 +38,7 @@ import android.media.SubtitleTrack.RenderingWidget;
 import android.media.TtmlRenderer;
 import android.media.WebVttRenderer;
 import android.net.Uri;
+import android.os.Build;
 import android.os.Looper;
 import android.util.AttributeSet;
 import android.util.Log;
@@ -85,7 +86,7 @@ public class VideoView extends SurfaceView
 
     // all possible internal states
     private static final int STATE_ERROR = -1;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private static final int STATE_IDLE = 0;
     private static final int STATE_PREPARING = 1;
     private static final int STATE_PREPARED = 2;

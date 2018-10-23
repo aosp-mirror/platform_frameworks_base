@@ -22,6 +22,7 @@ import static android.view.DisplayEventReceiver.VSYNC_SOURCE_SURFACE_FLINGER;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.hardware.display.DisplayManagerGlobal;
+import android.os.Build;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
@@ -153,7 +154,7 @@ public final class Choreographer {
         public String toString() { return "FRAME_CALLBACK_TOKEN"; }
     };
 
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private final Object mLock = new Object();
 
     private final Looper mLooper;
