@@ -46,9 +46,6 @@ import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
 
-import libcore.io.IoUtils;
-
-import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -81,6 +78,11 @@ public final class MediaStore {
      * @hide
      */
     public static final String RETRANSLATE_CALL = "update_titles";
+
+    /** {@hide} */
+    public static final String GET_DOCUMENT_URI_CALL = "get_document_uri";
+    /** {@hide} */
+    public static final String GET_MEDIA_URI_CALL = "get_media_uri";
 
     /**
      * This is for internal use by the media scanner only.
@@ -2275,84 +2277,62 @@ public final class MediaStore {
     }
 
     /**
-     * Gets a URI backed by a {@link DocumentsProvider} that points to the same media
-     * file as the specified mediaUri. This allows apps who have permissions to access
-     * media files in Storage Access Framework to perform file operations through that
-     * on media files.
+     * Return a {@link DocumentsProvider} Uri that is an equivalent to the given
+     * {@link MediaStore} Uri.
      * <p>
-     * Note: this method doesn't grant any URI permission. Callers need to obtain
-     * permission before calling this method. One way to obtain permission is through
-     * a 3-step process:
-     * <ol>
-     *     <li>Call {@link android.os.storage.StorageManager#getStorageVolume(File)} to
-     *     obtain the {@link android.os.storage.StorageVolume} of a media file;</li>
+     * This allows apps with Storage Access Framework permissions to convert
+     * between {@link MediaStore} and {@link DocumentsProvider} Uris that refer
+     * to the same underlying item. Note that this method doesn't grant any new
+     * permissions; callers must already hold permissions obtained with
+     * {@link Intent#ACTION_OPEN_DOCUMENT} or related APIs.
      *
-     *     <li>Invoke the intent returned by
-     *     {@link android.os.storage.StorageVolume#createAccessIntent(String)} to
-     *     obtain the access of the volume or one of its specific subdirectories;</li>
-     *
-     *     <li>Check whether permission is granted and take persistent permission.</li>
-     * </ol>
-     * @param mediaUri the media URI which document URI is requested
-     * @return the document URI
+     * @param mediaUri The {@link MediaStore} Uri to convert.
+     * @return An equivalent {@link DocumentsProvider} Uri. Returns {@code null}
+     *         if no equivalent was found.
+     * @see #getMediaUri(Context, Uri)
      */
     public static Uri getDocumentUri(Context context, Uri mediaUri) {
+        final ContentResolver resolver = context.getContentResolver();
+        final List<UriPermission> uriPermissions = resolver.getPersistedUriPermissions();
 
-        try {
-            final ContentResolver resolver = context.getContentResolver();
-
-            final String path = getFilePath(resolver, mediaUri);
-            final List<UriPermission> uriPermissions = resolver.getPersistedUriPermissions();
-
-            return getDocumentUri(resolver, path, uriPermissions);
+        try (ContentProviderClient client = resolver.acquireContentProviderClient(AUTHORITY)) {
+            final Bundle in = new Bundle();
+            in.putParcelable(DocumentsContract.EXTRA_URI, mediaUri);
+            in.putParcelableList(DocumentsContract.EXTRA_URI_PERMISSIONS, uriPermissions);
+            final Bundle out = client.call(GET_DOCUMENT_URI_CALL, null, in);
+            return out.getParcelable(DocumentsContract.EXTRA_URI);
         } catch (RemoteException e) {
             throw e.rethrowAsRuntimeException();
         }
     }
 
-    private static String getFilePath(ContentResolver resolver, Uri mediaUri)
-            throws RemoteException {
+    /**
+     * Return a {@link MediaStore} Uri that is an equivalent to the given
+     * {@link DocumentsProvider} Uri.
+     * <p>
+     * This allows apps with Storage Access Framework permissions to convert
+     * between {@link MediaStore} and {@link DocumentsProvider} Uris that refer
+     * to the same underlying item. Note that this method doesn't grant any new
+     * permissions; callers must already hold permissions obtained with
+     * {@link Intent#ACTION_OPEN_DOCUMENT} or related APIs.
+     *
+     * @param documentUri The {@link DocumentsProvider} Uri to convert.
+     * @return An equivalent {@link MediaStore} Uri. Returns {@code null} if no
+     *         equivalent was found.
+     * @see #getDocumentUri(Context, Uri)
+     */
+    public static Uri getMediaUri(Context context, Uri documentUri) {
+        final ContentResolver resolver = context.getContentResolver();
+        final List<UriPermission> uriPermissions = resolver.getPersistedUriPermissions();
 
-        try (ContentProviderClient client =
-                     resolver.acquireUnstableContentProviderClient(AUTHORITY)) {
-            final Cursor c = client.query(
-                    mediaUri,
-                    new String[]{ MediaColumns.DATA },
-                    null, /* selection */
-                    null, /* selectionArg */
-                    null /* sortOrder */);
-
-            final String path;
-            try {
-                if (c.getCount() == 0) {
-                    throw new IllegalStateException("Not found media file under URI: " + mediaUri);
-                }
-
-                if (!c.moveToFirst()) {
-                    throw new IllegalStateException("Failed to move cursor to the first item.");
-                }
-
-                path = c.getString(0);
-            } finally {
-                IoUtils.closeQuietly(c);
-            }
-
-            return path;
-        }
-    }
-
-    private static Uri getDocumentUri(
-            ContentResolver resolver, String path, List<UriPermission> uriPermissions)
-            throws RemoteException {
-
-        try (ContentProviderClient client = resolver.acquireUnstableContentProviderClient(
-                DocumentsContract.EXTERNAL_STORAGE_PROVIDER_AUTHORITY)) {
+        try (ContentProviderClient client = resolver.acquireContentProviderClient(AUTHORITY)) {
             final Bundle in = new Bundle();
-            in.putParcelableList(
-                    DocumentsContract.EXTERNAL_STORAGE_PROVIDER_AUTHORITY + ".extra.uriPermissions",
-                    uriPermissions);
-            final Bundle out = client.call("getDocumentId", path, in);
+            in.putParcelable(DocumentsContract.EXTRA_URI, documentUri);
+            in.putParcelableList(DocumentsContract.EXTRA_URI_PERMISSIONS, uriPermissions);
+            final Bundle out = client.call(GET_MEDIA_URI_CALL, null, in);
             return out.getParcelable(DocumentsContract.EXTRA_URI);
+        } catch (RemoteException e) {
+            throw e.rethrowAsRuntimeException();
         }
     }
 }
