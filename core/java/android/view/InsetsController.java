@@ -16,17 +16,30 @@
 
 package android.view;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.graphics.Rect;
+import android.util.ArraySet;
+import android.util.SparseArray;
+import android.view.SurfaceControl.Transaction;
+import android.view.WindowInsets.Type.InsetType;
+import android.view.InsetsState.InternalInsetType;
+
+import com.android.internal.annotations.VisibleForTesting;
 
 import java.io.PrintWriter;
 
 /**
  * Implements {@link WindowInsetsController} on the client.
+ * @hide
  */
-class InsetsController {
+public class InsetsController implements WindowInsetsController {
 
     private final InsetsState mState = new InsetsState();
     private final Rect mFrame = new Rect();
+    private final SparseArray<InsetsSourceConsumer> mSourceConsumers = new SparseArray<>();
+
+    private final SparseArray<InsetsSourceControl> mTmpControlArray = new SparseArray<>();
 
     void onFrameChanged(Rect frame) {
         mFrame.set(frame);
@@ -46,6 +59,61 @@ class InsetsController {
     WindowInsets calculateInsets(boolean isScreenRound,
             boolean alwaysConsumeNavBar, DisplayCutout cutout) {
         return mState.calculateInsets(mFrame, isScreenRound, alwaysConsumeNavBar, cutout);
+    }
+
+    /**
+     * Called when the server has dispatched us a new set of inset controls.
+     */
+    public void onControlsChanged(InsetsSourceControl[] activeControls) {
+        if (activeControls != null) {
+            for (InsetsSourceControl activeControl : activeControls) {
+                mTmpControlArray.put(activeControl.getType(), activeControl);
+            }
+        }
+
+        // Ensure to update all existing source consumers
+        for (int i = mSourceConsumers.size() - 1; i >= 0; i--) {
+            final InsetsSourceConsumer consumer = mSourceConsumers.valueAt(i);
+            final InsetsSourceControl control = mTmpControlArray.get(consumer.getType());
+
+            // control may be null, but we still need to update the control to null if it got
+            // revoked.
+            consumer.setControl(control);
+        }
+
+        // Ensure to create source consumers if not available yet.
+        for (int i = mTmpControlArray.size() - 1; i >= 0; i--) {
+            final InsetsSourceControl control = mTmpControlArray.valueAt(i);
+            getSourceConsumer(control.getType()).setControl(control);
+        }
+        mTmpControlArray.clear();
+    }
+
+    @Override
+    public void show(@InsetType int types) {
+        final ArraySet<Integer> internalTypes = InsetsState.toInternalType(types);
+        for (int i = internalTypes.size() - 1; i >= 0; i--) {
+            getSourceConsumer(internalTypes.valueAt(i)).show();
+        }
+    }
+
+    @Override
+    public void hide(@InsetType int types) {
+        final ArraySet<Integer> internalTypes = InsetsState.toInternalType(types);
+        for (int i = internalTypes.size() - 1; i >= 0; i--) {
+            getSourceConsumer(internalTypes.valueAt(i)).hide();
+        }
+    }
+
+    @VisibleForTesting
+    public @NonNull InsetsSourceConsumer getSourceConsumer(@InternalInsetType int type) {
+        InsetsSourceConsumer controller = mSourceConsumers.get(type);
+        if (controller != null) {
+            return controller;
+        }
+        controller = new InsetsSourceConsumer(type, mState, Transaction::new);
+        mSourceConsumers.put(type, controller);
+        return controller;
     }
 
     void dump(String prefix, PrintWriter pw) {

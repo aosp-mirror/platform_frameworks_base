@@ -22,6 +22,9 @@ import android.graphics.Rect;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.util.ArrayMap;
+import android.util.ArraySet;
+import android.view.WindowInsets.Type;
+import android.view.WindowInsets.Type.InsetType;
 
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
@@ -146,6 +149,22 @@ public class InsetsState implements Parcelable {
         } else {
             mSources.putAll(other.mSources);
         }
+    }
+
+    public static @InternalInsetType ArraySet<Integer> toInternalType(@InsetType int insetTypes) {
+        final ArraySet<Integer> result = new ArraySet<>();
+        if ((insetTypes & Type.TOP_BAR) != 0) {
+            result.add(TYPE_TOP_BAR);
+        }
+        if ((insetTypes & Type.SIDE_BARS) != 0) {
+            result.add(TYPE_SIDE_BAR_1);
+            result.add(TYPE_SIDE_BAR_2);
+            result.add(TYPE_SIDE_BAR_3);
+        }
+        if ((insetTypes & Type.IME) != 0) {
+            result.add(TYPE_IME);
+        }
+        return result;
     }
 
     public void dump(String prefix, PrintWriter pw) {

@@ -25,6 +25,7 @@ import android.view.KeyEvent;
 import android.view.MotionEvent;
 import android.view.DisplayCutout;
 import android.view.InsetsState;
+import android.view.InsetsSourceControl;
 
 import com.android.internal.os.IResultReceiver;
 import android.util.MergedConfiguration;
@@ -59,6 +60,11 @@ oneway interface IWindow {
      * Called when the window insets configuration has changed.
      */
     void insetsChanged(in InsetsState insetsState);
+
+    /**
+     * Called when this window retrieved control over a specified set of inset sources.
+     */
+    void insetsControlChanged(in InsetsState insetsState, in InsetsSourceControl[] activeControls);
 
     void moved(int newX, int newY);
     void dispatchAppVisibility(boolean visible);

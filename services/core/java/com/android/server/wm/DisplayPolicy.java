@@ -2834,6 +2834,9 @@ public class DisplayPolicy {
             return 0;
         }
 
+        mDisplayContent.getInsetsStateController().onBarControllingWindowChanged(
+                mTopFullscreenOpaqueWindowState);
+
         int tmpVisibility = PolicyControl.getSystemUiVisibility(win, null)
                 & ~mResettingSystemUiFlags
                 & ~mForceClearedSystemUiFlags;

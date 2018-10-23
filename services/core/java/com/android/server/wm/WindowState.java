@@ -2972,6 +2972,17 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         }
     }
 
+    void notifyInsetsControlChanged() {
+        final InsetsStateController stateController =
+                getDisplayContent().getInsetsStateController();
+        try {
+            mClient.insetsControlChanged(stateController.getInsetsForDispatch(this),
+                    stateController.getControlsForDispatch(this));
+        } catch (RemoteException e) {
+            Slog.w(TAG, "Failed to deliver inset state change", e);
+        }
+    }
+
     Rect getBackdropFrame(Rect frame) {
         // When the task is docked, we send fullscreen sized backDropFrame as soon as resizing
         // start even if we haven't received the relayout window, so that the client requests

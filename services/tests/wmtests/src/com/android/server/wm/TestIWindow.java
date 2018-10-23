@@ -24,6 +24,7 @@ import android.util.MergedConfiguration;
 import android.view.DisplayCutout;
 import android.view.DragEvent;
 import android.view.IWindow;
+import android.view.InsetsSourceControl;
 import android.view.InsetsState;
 
 import com.android.internal.os.IResultReceiver;
@@ -40,8 +41,14 @@ public class TestIWindow extends IWindow.Stub {
             Rect backDropFrame, boolean forceLayout, boolean alwaysConsumeNavBar, int displayId,
             DisplayCutout.ParcelableWrapper displayCutout) throws RemoteException {
     }
+
     @Override
     public void insetsChanged(InsetsState insetsState) throws RemoteException {
+    }
+
+    @Override
+    public void insetsControlChanged(InsetsState insetsState, InsetsSourceControl[] activeControls)
+            throws RemoteException {
     }
 
     @Override
