@@ -64,7 +64,7 @@ import com.android.server.wm.utils.WmDisplayCutout;
 
 import org.junit.Before;
 
-public class PhoneWindowManagerTestBase {
+class PhoneWindowManagerTestBase {
     static final int DISPLAY_WIDTH = 500;
     static final int DISPLAY_HEIGHT = 1000;
 
@@ -82,7 +82,7 @@ public class PhoneWindowManagerTestBase {
     private int mRotation = ROTATION_0;
 
     @Before
-    public void setUpBase() throws Exception {
+    public void setUpBase() {
         mContext = new TestContextWrapper(InstrumentationRegistry.getTargetContext());
         mContext.getResourceMocker().addOverride(
                 com.android.internal.R.dimen.status_bar_height_portrait, STATUS_BAR_HEIGHT);
@@ -207,7 +207,7 @@ public class PhoneWindowManagerTestBase {
     static class TestContextWrapper extends ContextWrapper {
         private final TestableResources mResourceMocker;
 
-        public TestContextWrapper(Context targetContext) {
+        TestContextWrapper(Context targetContext) {
             super(targetContext);
             mResourceMocker = new TestableResources(targetContext.getResources());
         }
@@ -234,7 +234,7 @@ public class PhoneWindowManagerTestBase {
 
     static class TestablePhoneWindowManager extends PhoneWindowManager {
 
-        public TestablePhoneWindowManager() {
+        TestablePhoneWindowManager() {
         }
 
         @Override

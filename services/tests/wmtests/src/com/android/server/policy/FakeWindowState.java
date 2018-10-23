@@ -16,17 +16,13 @@
 
 package com.android.server.policy;
 
-import android.annotation.Nullable;
-import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.proto.ProtoOutputStream;
 import android.view.Display;
-import android.view.DisplayCutout;
 import android.view.IApplicationToken;
 import android.view.WindowManager;
 
 import com.android.server.wm.WindowFrames;
-import com.android.server.wm.utils.WmDisplayCutout;
 
 public class FakeWindowState implements WindowManagerPolicy.WindowState {
 
@@ -243,10 +239,12 @@ public class FakeWindowState implements WindowManagerPolicy.WindowState {
     }
 
     @Override
-    public boolean canReceiveKeys() { return false; }
+    public boolean canReceiveKeys() {
+        return false;
+    }
 
     @Override
-    public void writeIdentifierToProto(ProtoOutputStream proto, long fieldId){
+    public void writeIdentifierToProto(ProtoOutputStream proto, long fieldId) {
         throw new UnsupportedOperationException("not implemented");
     }
 
