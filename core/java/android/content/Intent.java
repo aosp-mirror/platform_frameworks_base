@@ -1908,6 +1908,22 @@ public class Intent implements Parcelable, Cloneable {
     @SystemApi
     public static final String EXTRA_PERMISSION_NAME = "android.intent.extra.PERMISSION_NAME";
 
+    /**
+     * Activity action: Launch UI to review app uses of permissions.
+     * <p>
+     * Input: Nothing
+     * </p>
+     * <p>
+     * Output: Nothing.
+     * </p>
+     *
+     * @hide
+     */
+    @SystemApi
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_REVIEW_PERMISSION_USAGE =
+            "android.intent.action.REVIEW_PERMISSION_USAGE";
+
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
     // Standard intent broadcast actions (see action variable).
