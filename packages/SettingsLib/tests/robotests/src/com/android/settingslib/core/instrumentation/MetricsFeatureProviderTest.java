@@ -15,13 +15,10 @@
  */
 package com.android.settingslib.core.instrumentation;
 
-import static com.google.common.truth.Truth.assertThat;
-
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
 
 import android.content.ComponentName;
 import android.content.Context;
@@ -34,8 +31,6 @@ import com.android.settingslib.SettingsLibRobolectricTestRunner;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.robolectric.RuntimeEnvironment;
@@ -46,19 +41,11 @@ import java.util.List;
 
 @RunWith(SettingsLibRobolectricTestRunner.class)
 public class MetricsFeatureProviderTest {
-    private static int CATEGORY = 10;
-    private static boolean SUBTYPE_BOOLEAN = true;
-    private static int SUBTYPE_INTEGER = 1;
-    private static long ELAPSED_TIME = 1000;
-
-    @Mock private LogWriter mockLogWriter;
-    @Mock private VisibilityLoggerMixin mockVisibilityLogger;
+    @Mock
+    private LogWriter mLogWriter;
 
     private Context mContext;
     private MetricsFeatureProvider mProvider;
-
-    @Captor
-    private ArgumentCaptor<Pair> mPairCaptor;
 
     @Before
     public void setUp() {
@@ -66,10 +53,8 @@ public class MetricsFeatureProviderTest {
         mContext = RuntimeEnvironment.application;
         mProvider = new MetricsFeatureProvider();
         List<LogWriter> writers = new ArrayList<>();
-        writers.add(mockLogWriter);
+        writers.add(mLogWriter);
         ReflectionHelpers.setField(mProvider, "mLoggerWriters", writers);
-
-        when(mockVisibilityLogger.elapsedTimeSinceVisible()).thenReturn(ELAPSED_TIME);
     }
 
     @Test
@@ -77,7 +62,7 @@ public class MetricsFeatureProviderTest {
         mProvider.logDashboardStartIntent(mContext, null /* intent */,
                 MetricsEvent.SETTINGS_GESTURES);
 
-        verifyNoMoreInteractions(mockLogWriter);
+        verifyNoMoreInteractions(mLogWriter);
     }
 
     @Test
@@ -86,7 +71,7 @@ public class MetricsFeatureProviderTest {
 
         mProvider.logDashboardStartIntent(mContext, intent, MetricsEvent.SETTINGS_GESTURES);
 
-        verify(mockLogWriter).action(
+        verify(mLogWriter).action(
                 eq(mContext),
                 eq(MetricsEvent.ACTION_SETTINGS_TILE_CLICK),
                 anyString(),
@@ -99,32 +84,10 @@ public class MetricsFeatureProviderTest {
 
         mProvider.logDashboardStartIntent(mContext, intent, MetricsEvent.SETTINGS_GESTURES);
 
-        verify(mockLogWriter).action(
+        verify(mLogWriter).action(
                 eq(mContext),
                 eq(MetricsEvent.ACTION_SETTINGS_TILE_CLICK),
                 anyString(),
                 eq(Pair.create(MetricsEvent.FIELD_CONTEXT, MetricsEvent.SETTINGS_GESTURES)));
-    }
-
-    @Test
-    public void action_BooleanLogsElapsedTime() {
-        mProvider.action(mockVisibilityLogger, CATEGORY, SUBTYPE_BOOLEAN);
-        verify(mockLogWriter).action(eq(CATEGORY), eq(SUBTYPE_BOOLEAN), mPairCaptor.capture());
-
-        Pair value = mPairCaptor.getValue();
-        assertThat(value.first instanceof Integer).isTrue();
-        assertThat((int) value.first).isEqualTo(MetricsEvent.NOTIFICATION_SINCE_VISIBLE_MILLIS);
-        assertThat(value.second).isEqualTo(ELAPSED_TIME);
-    }
-
-    @Test
-    public void action_IntegerLogsElapsedTime() {
-        mProvider.action(mockVisibilityLogger, CATEGORY, SUBTYPE_INTEGER);
-        verify(mockLogWriter).action(eq(CATEGORY), eq(SUBTYPE_INTEGER), mPairCaptor.capture());
-
-        Pair value = mPairCaptor.getValue();
-        assertThat(value.first instanceof Integer).isTrue();
-        assertThat((int) value.first).isEqualTo(MetricsEvent.NOTIFICATION_SINCE_VISIBLE_MILLIS);
-        assertThat(value.second).isEqualTo(ELAPSED_TIME);
     }
 }
