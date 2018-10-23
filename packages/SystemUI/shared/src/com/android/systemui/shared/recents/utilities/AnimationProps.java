@@ -34,6 +34,7 @@ import java.util.List;
  * The generic set of animation properties to animate a {@link View}. The animation can have
  * different interpolators, start delays and durations for each of the different properties.
  */
+@Deprecated
 public class AnimationProps {
 
     private static final Interpolator LINEAR_INTERPOLATOR = new LinearInterpolator();

@@ -42,6 +42,7 @@ import java.util.Map;
 /**
  * Recents task loader
  */
+@Deprecated
 public class RecentsTaskLoader {
     private static final String TAG = "RecentsTaskLoader";
     private static final boolean DEBUG = false;
