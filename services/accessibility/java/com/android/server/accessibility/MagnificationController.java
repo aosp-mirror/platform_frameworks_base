@@ -32,6 +32,8 @@ import android.provider.Settings;
 import android.text.TextUtils;
 import android.util.MathUtils;
 import android.util.Slog;
+import android.util.SparseArray;
+import android.view.Display;
 import android.view.MagnificationSpec;
 import android.view.View;
 import android.view.animation.DecelerateInterpolator;
@@ -40,6 +42,7 @@ import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.os.SomeArgs;
+import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.LocalServices;
 import com.android.server.wm.WindowManagerInternal;
 
@@ -55,7 +58,7 @@ import java.util.Locale;
  * magnification region. If a value is out of bounds, it will be adjusted to guarantee these
  * constraints.
  */
-public class MagnificationController implements Handler.Callback {
+public class MagnificationController {
     private static final boolean DEBUG = false;
     private static final String LOG_TAG = "MagnificationController";
 
@@ -64,30 +67,9 @@ public class MagnificationController implements Handler.Callback {
 
     private static final boolean DEBUG_SET_MAGNIFICATION_SPEC = false;
 
-    private static final int INVALID_ID = -1;
-
     private static final float DEFAULT_MAGNIFICATION_SCALE = 2.0f;
 
-    // Messages
-    private static final int MSG_SEND_SPEC_TO_ANIMATION = 1;
-    private static final int MSG_SCREEN_TURNED_OFF = 2;
-    private static final int MSG_ON_MAGNIFIED_BOUNDS_CHANGED = 3;
-    private static final int MSG_ON_RECTANGLE_ON_SCREEN_REQUESTED = 4;
-    private static final int MSG_ON_USER_CONTEXT_CHANGED = 5;
-
     private final Object mLock;
-
-    /**
-     * The current magnification spec. If an animation is running, this
-     * reflects the end state.
-     */
-    private final MagnificationSpec mCurrentMagnificationSpec = MagnificationSpec.obtain();
-
-    private final Region mMagnificationRegion = Region.obtain();
-    private final Rect mMagnificationBounds = new Rect();
-
-    private final Rect mTempRect = new Rect();
-    private final Rect mTempRect1 = new Rect();
 
     private final AccessibilityManagerService mAms;
 
@@ -95,59 +77,543 @@ public class MagnificationController implements Handler.Callback {
 
     private final ScreenStateObserver mScreenStateObserver;
 
-    private final SpecAnimationBridge mSpecAnimationBridge;
-
-    private final WindowManagerInternal.MagnificationCallbacks mWMCallbacks =
-            new WindowManagerInternal.MagnificationCallbacks () {
-                @Override
-                public void onMagnificationRegionChanged(Region region) {
-                    final SomeArgs args = SomeArgs.obtain();
-                    args.arg1 = Region.obtain(region);
-                    mHandler.obtainMessage(MSG_ON_MAGNIFIED_BOUNDS_CHANGED, args).sendToTarget();
-                }
-
-                @Override
-                public void onRectangleOnScreenRequested(int left, int top, int right, int bottom) {
-                    final SomeArgs args = SomeArgs.obtain();
-                    args.argi1 = left;
-                    args.argi2 = top;
-                    args.argi3 = right;
-                    args.argi4 = bottom;
-                    mHandler.obtainMessage(MSG_ON_RECTANGLE_ON_SCREEN_REQUESTED, args)
-                            .sendToTarget();
-                }
-
-                @Override
-                public void onRotationChanged(int rotation) {
-                    // Treat as context change and reset
-                    mHandler.sendEmptyMessage(MSG_ON_USER_CONTEXT_CHANGED);
-                }
-
-                @Override
-                public void onUserContextChanged() {
-                    mHandler.sendEmptyMessage(MSG_ON_USER_CONTEXT_CHANGED);
-                }
-            };
-
     private int mUserId;
 
     private final long mMainThreadId;
 
     private Handler mHandler;
 
-    private int mIdOfLastServiceToMagnify = INVALID_ID;
-
     private final WindowManagerInternal mWindowManager;
 
-    // Flag indicating that we are registered with window manager.
-    @VisibleForTesting boolean mRegistered;
+    private final DisplayMagnification mDisplay;
 
-    private boolean mUnregisterPending;
+    /**
+     * This class implements {@link WindowManagerInternal.MagnificationCallbacks} and holds
+     * magnification information per display.
+     */
+    private final class DisplayMagnification implements
+            WindowManagerInternal.MagnificationCallbacks {
+        /**
+         * The current magnification spec. If an animation is running, this
+         * reflects the end state.
+         */
+        private final MagnificationSpec mCurrentMagnificationSpec = MagnificationSpec.obtain();
+
+        private final Region mMagnificationRegion = Region.obtain();
+        private final Rect mMagnificationBounds = new Rect();
+
+        private final Rect mTempRect = new Rect();
+        private final Rect mTempRect1 = new Rect();
+
+        private final SpecAnimationBridge mSpecAnimationBridge;
+
+        // Flag indicating that we are registered with window manager.
+        private boolean mRegistered;
+        private boolean mUnregisterPending;
+
+        private final int mDisplayId;
+
+        private static final int INVALID_ID = -1;
+        private int mIdOfLastServiceToMagnify = INVALID_ID;
+
+
+        DisplayMagnification(int displayId, SpecAnimationBridge specAnimation) {
+            mDisplayId = displayId;
+            mSpecAnimationBridge = specAnimation;
+        }
+
+        void register() {
+            synchronized (mLock) {
+                if (!mRegistered) {
+                    mWindowManager.setMagnificationCallbacks(this);
+                    mSpecAnimationBridge.setEnabled(true);
+                    // Obtain initial state.
+                    mWindowManager.getMagnificationRegion(mMagnificationRegion);
+                    mMagnificationRegion.getBounds(mMagnificationBounds);
+                    mRegistered = true;
+                }
+            }
+        }
+
+        void unregister() {
+            synchronized (mLock) {
+                if (!isMagnifying()) {
+                    unregisterInternalLocked();
+                } else {
+                    mUnregisterPending = true;
+                    reset(true);
+                }
+            }
+        }
+
+        boolean isRegisteredLocked() {
+            return mRegistered;
+        }
+
+
+        float getScale() {
+            return mCurrentMagnificationSpec.scale;
+        }
+
+        float getOffsetX() {
+            return mCurrentMagnificationSpec.offsetX;
+        }
+
+        float getCenterX() {
+            synchronized (mLock) {
+                return (mMagnificationBounds.width() / 2.0f
+                        + mMagnificationBounds.left - getOffsetX()) / getScale();
+            }
+        }
+
+        float getCenterY() {
+            synchronized (mLock) {
+                return (mMagnificationBounds.height() / 2.0f
+                        + mMagnificationBounds.top - getOffsetY()) / getScale();
+            }
+        }
+
+        /**
+         * Returns the scale currently used by the window manager. If an
+         * animation is in progress, this reflects the current state of the
+         * animation.
+         *
+         * @return the scale currently used by the window manager
+         */
+        float getSentScale() {
+            return mSpecAnimationBridge.mSentMagnificationSpec.scale;
+        }
+
+        /**
+         * Returns the X offset currently used by the window manager. If an
+         * animation is in progress, this reflects the current state of the
+         * animation.
+         *
+         * @return the X offset currently used by the window manager
+         */
+        float getSentOffsetX() {
+            return mSpecAnimationBridge.mSentMagnificationSpec.offsetX;
+        }
+
+        /**
+         * Returns the Y offset currently used by the window manager. If an
+         * animation is in progress, this reflects the current state of the
+         * animation.
+         *
+         * @return the Y offset currently used by the window manager
+         */
+        float getSentOffsetY() {
+            return mSpecAnimationBridge.mSentMagnificationSpec.offsetY;
+        }
+
+        boolean resetIfNeeded(boolean animate) {
+            synchronized (mLock) {
+                if (isMagnifying()) {
+                    reset(animate);
+                    return true;
+                }
+                return false;
+            }
+        }
+
+        float getOffsetY() {
+            return mCurrentMagnificationSpec.offsetY;
+        }
+
+        boolean isMagnifying() {
+            return mCurrentMagnificationSpec.scale > 1.0f;
+        }
+
+        void unregisterInternalLocked() {
+            if (mRegistered) {
+                mSpecAnimationBridge.setEnabled(false);
+                mWindowManager.setMagnificationCallbacks(null);
+                mMagnificationRegion.setEmpty();
+
+                mRegistered = false;
+            }
+            mUnregisterPending = false;
+        }
+
+
+        @Override
+        public void onMagnificationRegionChanged(Region magnificationRegion) {
+            final Message m = PooledLambda.obtainMessage(
+                    DisplayMagnification.this::updateMagnificationRegion,
+                    Region.obtain(magnificationRegion));
+            mHandler.sendMessage(m);
+        }
+
+        @Override
+        public void onRectangleOnScreenRequested(int left, int top, int right, int bottom) {
+            final Message m = PooledLambda.obtainMessage(
+                    DisplayMagnification.this::requestRectangleOnScreen, left, top, right, bottom);
+            mHandler.sendMessage(m);
+        }
+
+        @Override
+        public void onRotationChanged(int rotation) {
+            // Treat as context change and reset
+            final Message m = PooledLambda.obtainMessage(DisplayMagnification.this::resetIfNeeded,
+                    true);
+            mHandler.sendMessage(m);
+        }
+
+        @Override
+        public void onUserContextChanged() {
+            final Message m = PooledLambda.obtainMessage(DisplayMagnification.this::resetIfNeeded,
+                    true);
+            mHandler.sendMessage(m);
+        }
+
+        /**
+         * Update our copy of the current magnification region
+         *
+         * @param magnified the magnified region
+         */
+        void updateMagnificationRegion(Region magnified) {
+            synchronized (mLock) {
+                if (!mRegistered) {
+                    // Don't update if we've unregistered
+                    return;
+                }
+                if (!mMagnificationRegion.equals(magnified)) {
+                    mMagnificationRegion.set(magnified);
+                    mMagnificationRegion.getBounds(mMagnificationBounds);
+                    // It's possible that our magnification spec is invalid with the new bounds.
+                    // Adjust the current spec's offsets if necessary.
+                    if (updateCurrentSpecWithOffsetsLocked(
+                            mCurrentMagnificationSpec.offsetX, mCurrentMagnificationSpec.offsetY)) {
+                        sendSpecToAnimation(mCurrentMagnificationSpec, false);
+                    }
+                    onMagnificationChangedLocked();
+                }
+                magnified.recycle();
+            }
+        }
+
+        void sendSpecToAnimation(MagnificationSpec spec, boolean animate) {
+            if (DEBUG) {
+                Slog.i(LOG_TAG,
+                        "sendSpecToAnimation(spec = " + spec + ", animate = " + animate + ")");
+            }
+            if (Thread.currentThread().getId() == mMainThreadId) {
+                mSpecAnimationBridge.updateSentSpecMainThread(spec, animate);
+            } else {
+                final Message m = PooledLambda.obtainMessage(
+                        this.mSpecAnimationBridge::updateSentSpecMainThread, spec, animate);
+                mHandler.sendMessage(m);
+            }
+        }
+
+        /**
+         * Get the ID of the last service that changed the magnification spec.
+         *
+         * @return The id
+         */
+        int getIdOfLastServiceToMagnify() {
+            return mIdOfLastServiceToMagnify;
+        }
+
+        void onMagnificationChangedLocked() {
+            mAms.notifyMagnificationChanged(mMagnificationRegion,
+                    getScale(), getCenterX(), getCenterY());
+            if (mUnregisterPending && !isMagnifying()) {
+                unregisterInternalLocked();
+            }
+        }
+
+        boolean magnificationRegionContains(float x, float y) {
+            synchronized (mLock) {
+                return mMagnificationRegion.contains((int) x, (int) y);
+
+            }
+        }
+
+        void getMagnificationBounds(@NonNull Rect outBounds) {
+            synchronized (mLock) {
+                outBounds.set(mMagnificationBounds);
+            }
+        }
+
+        void getMagnificationRegion(@NonNull Region outRegion) {
+            synchronized (mLock) {
+                outRegion.set(mMagnificationRegion);
+            }
+        }
+
+        void requestRectangleOnScreen(int left, int top, int right, int bottom) {
+            synchronized (mLock) {
+                final Rect magnifiedFrame = mTempRect;
+                getMagnificationBounds(magnifiedFrame);
+                if (!magnifiedFrame.intersects(left, top, right, bottom)) {
+                    return;
+                }
+
+                final Rect magnifFrameInScreenCoords = mTempRect1;
+                getMagnifiedFrameInContentCoordsLocked(magnifFrameInScreenCoords);
+
+                final float scrollX;
+                final float scrollY;
+                if (right - left > magnifFrameInScreenCoords.width()) {
+                    final int direction = TextUtils
+                            .getLayoutDirectionFromLocale(Locale.getDefault());
+                    if (direction == View.LAYOUT_DIRECTION_LTR) {
+                        scrollX = left - magnifFrameInScreenCoords.left;
+                    } else {
+                        scrollX = right - magnifFrameInScreenCoords.right;
+                    }
+                } else if (left < magnifFrameInScreenCoords.left) {
+                    scrollX = left - magnifFrameInScreenCoords.left;
+                } else if (right > magnifFrameInScreenCoords.right) {
+                    scrollX = right - magnifFrameInScreenCoords.right;
+                } else {
+                    scrollX = 0;
+                }
+
+                if (bottom - top > magnifFrameInScreenCoords.height()) {
+                    scrollY = top - magnifFrameInScreenCoords.top;
+                } else if (top < magnifFrameInScreenCoords.top) {
+                    scrollY = top - magnifFrameInScreenCoords.top;
+                } else if (bottom > magnifFrameInScreenCoords.bottom) {
+                    scrollY = bottom - magnifFrameInScreenCoords.bottom;
+                } else {
+                    scrollY = 0;
+                }
+
+                final float scale = getScale();
+                offsetMagnifiedRegion(scrollX * scale, scrollY * scale, INVALID_ID);
+            }
+        }
+
+        void getMagnifiedFrameInContentCoordsLocked(Rect outFrame) {
+            final float scale = getSentScale();
+            final float offsetX = getSentOffsetX();
+            final float offsetY = getSentOffsetY();
+            getMagnificationBounds(outFrame);
+            outFrame.offset((int) -offsetX, (int) -offsetY);
+            outFrame.scale(1.0f / scale);
+        }
+
+        /**
+         * Resets magnification if last magnifying service is disabled.
+         *
+         * @param connectionId the connection ID be disabled.
+         * @return {@code true} on success, {@code false} on failure
+         */
+        boolean resetIfNeeded(int connectionId) {
+            if (mIdOfLastServiceToMagnify == connectionId) {
+                return resetIfNeeded(true /*animate*/);
+            }
+            return false;
+        }
+
+        void setForceShowMagnifiableBounds(boolean show) {
+            if (mRegistered) {
+                mWindowManager.setForceShowMagnifiableBounds(show);
+            }
+        }
+
+        boolean reset(boolean animate) {
+            synchronized (mLock) {
+                if (!mRegistered) {
+                    return false;
+                }
+                final MagnificationSpec spec = mCurrentMagnificationSpec;
+                final boolean changed = !spec.isNop();
+                if (changed) {
+                    spec.clear();
+                    onMagnificationChangedLocked();
+                }
+                mIdOfLastServiceToMagnify = INVALID_ID;
+                sendSpecToAnimation(spec, animate);
+                return changed;
+            }
+        }
+
+
+        boolean setScale(float scale, float pivotX, float pivotY,
+                boolean animate, int id) {
+
+            synchronized (mLock) {
+                if (!mRegistered) {
+                    return false;
+                }
+                // Constrain scale immediately for use in the pivot calculations.
+                scale = MathUtils.constrain(scale, MIN_SCALE, MAX_SCALE);
+
+                final Rect viewport = mTempRect;
+                mMagnificationRegion.getBounds(viewport);
+                final MagnificationSpec spec = mCurrentMagnificationSpec;
+                final float oldScale = spec.scale;
+                final float oldCenterX
+                        = (viewport.width() / 2.0f - spec.offsetX + viewport.left) / oldScale;
+                final float oldCenterY
+                        = (viewport.height() / 2.0f - spec.offsetY + viewport.top) / oldScale;
+                final float normPivotX = (pivotX - spec.offsetX) / oldScale;
+                final float normPivotY = (pivotY - spec.offsetY) / oldScale;
+                final float offsetX = (oldCenterX - normPivotX) * (oldScale / scale);
+                final float offsetY = (oldCenterY - normPivotY) * (oldScale / scale);
+                final float centerX = normPivotX + offsetX;
+                final float centerY = normPivotY + offsetY;
+                mIdOfLastServiceToMagnify = id;
+
+                return setScaleAndCenter(scale, centerX, centerY, animate, id);
+            }
+        }
+
+        boolean setScaleAndCenter(float scale, float centerX, float centerY,
+                boolean animate, int id) {
+
+            synchronized (mLock) {
+                if (!mRegistered) {
+                    return false;
+                }
+                if (DEBUG) {
+                    Slog.i(LOG_TAG,
+                            "setScaleAndCenterLocked(scale = " + scale + ", centerX = " + centerX
+                                    + ", centerY = " + centerY + ", animate = " + animate
+                                    + ", id = " + id
+                                    + ")");
+                }
+                final boolean changed = updateMagnificationSpecLocked(scale, centerX, centerY);
+                sendSpecToAnimation(mCurrentMagnificationSpec, animate);
+                if (isMagnifying() && (id != INVALID_ID)) {
+                    mIdOfLastServiceToMagnify = id;
+                }
+                return changed;
+            }
+        }
+
+        /**
+         * Updates the current magnification spec.
+         *
+         * @param scale the magnification scale
+         * @param centerX the unscaled, screen-relative X coordinate of the center
+         *                of the viewport, or {@link Float#NaN} to leave unchanged
+         * @param centerY the unscaled, screen-relative Y coordinate of the center
+         *                of the viewport, or {@link Float#NaN} to leave unchanged
+         * @return {@code true} if the magnification spec changed or {@code false}
+         *         otherwise
+         */
+        boolean updateMagnificationSpecLocked(float scale, float centerX, float centerY) {
+            // Handle defaults.
+            if (Float.isNaN(centerX)) {
+                centerX = getCenterX();
+            }
+            if (Float.isNaN(centerY)) {
+                centerY = getCenterY();
+            }
+            if (Float.isNaN(scale)) {
+                scale = getScale();
+            }
+
+            // Compute changes.
+            boolean changed = false;
+
+            final float normScale = MathUtils.constrain(scale, MIN_SCALE, MAX_SCALE);
+            if (Float.compare(mCurrentMagnificationSpec.scale, normScale) != 0) {
+                mCurrentMagnificationSpec.scale = normScale;
+                changed = true;
+            }
+
+            final float nonNormOffsetX = mMagnificationBounds.width() / 2.0f
+                    + mMagnificationBounds.left - centerX * normScale;
+            final float nonNormOffsetY = mMagnificationBounds.height() / 2.0f
+                    + mMagnificationBounds.top - centerY * normScale;
+            changed |= updateCurrentSpecWithOffsetsLocked(nonNormOffsetX, nonNormOffsetY);
+
+            if (changed) {
+                onMagnificationChangedLocked();
+            }
+
+            return changed;
+        }
+
+        void offsetMagnifiedRegion(float offsetX, float offsetY, int id) {
+            synchronized (mLock) {
+                if (!mRegistered) {
+                    return;
+                }
+
+                final float nonNormOffsetX = mCurrentMagnificationSpec.offsetX - offsetX;
+                final float nonNormOffsetY = mCurrentMagnificationSpec.offsetY - offsetY;
+                if (updateCurrentSpecWithOffsetsLocked(nonNormOffsetX, nonNormOffsetY)) {
+                    onMagnificationChangedLocked();
+                }
+                if (id != INVALID_ID) {
+                    mIdOfLastServiceToMagnify = id;
+                }
+                sendSpecToAnimation(mCurrentMagnificationSpec, false);
+            }
+        }
+
+        boolean updateCurrentSpecWithOffsetsLocked(float nonNormOffsetX, float nonNormOffsetY) {
+            if (DEBUG) {
+                Slog.i(LOG_TAG,
+                        "updateCurrentSpecWithOffsetsLocked(nonNormOffsetX = " + nonNormOffsetX
+                                + ", nonNormOffsetY = " + nonNormOffsetY + ")");
+            }
+            boolean changed = false;
+            final float offsetX = MathUtils.constrain(
+                    nonNormOffsetX, getMinOffsetXLocked(), getMaxOffsetXLocked());
+            if (Float.compare(mCurrentMagnificationSpec.offsetX, offsetX) != 0) {
+                mCurrentMagnificationSpec.offsetX = offsetX;
+                changed = true;
+            }
+            final float offsetY = MathUtils.constrain(
+                    nonNormOffsetY, getMinOffsetYLocked(), getMaxOffsetYLocked());
+            if (Float.compare(mCurrentMagnificationSpec.offsetY, offsetY) != 0) {
+                mCurrentMagnificationSpec.offsetY = offsetY;
+                changed = true;
+            }
+            return changed;
+        }
+
+        float getMinOffsetXLocked() {
+            final float viewportWidth = mMagnificationBounds.width();
+            final float viewportLeft = mMagnificationBounds.left;
+            return (viewportLeft + viewportWidth) -
+                    (viewportLeft + viewportWidth) * mCurrentMagnificationSpec.scale;
+        }
+
+        float getMaxOffsetXLocked() {
+            return mMagnificationBounds.left -
+                    mMagnificationBounds.left * mCurrentMagnificationSpec.scale;
+        }
+
+        float getMinOffsetYLocked() {
+            final float viewportHeight = mMagnificationBounds.height();
+            final float viewportTop = mMagnificationBounds.top;
+            return (viewportTop + viewportHeight) -
+                    (viewportTop + viewportHeight) * mCurrentMagnificationSpec.scale;
+        }
+
+        float getMaxOffsetYLocked() {
+            return mMagnificationBounds.top -
+                    mMagnificationBounds.top * mCurrentMagnificationSpec.scale;
+        }
+
+        @Override
+        public String toString() {
+            return "DisplayMagnification{" +
+                    "mCurrentMagnificationSpec=" + mCurrentMagnificationSpec +
+                    ", mMagnificationRegion=" + mMagnificationRegion +
+                    ", mMagnificationBounds=" + mMagnificationBounds +
+                    ", mDisplayId=" + mDisplayId +
+                    ", mUserId=" + mUserId +
+                    ", mIdOfLastServiceToMagnify=" + mIdOfLastServiceToMagnify +
+                    ", mRegistered=" + mRegistered +
+                    ", mUnregisterPending=" + mUnregisterPending +
+                    '}';
+        }
+
+    }
 
     public MagnificationController(Context context, AccessibilityManagerService ams, Object lock) {
         this(context, ams, lock, null, LocalServices.getService(WindowManagerInternal.class),
                 new ValueAnimator(), new SettingsBridge(context.getContentResolver()));
-        mHandler = new Handler(context.getMainLooper(), this);
+        mHandler = new Handler(context.getMainLooper());
     }
 
     public MagnificationController(
@@ -164,9 +630,10 @@ public class MagnificationController implements Handler.Callback {
         mAms = ams;
         mScreenStateObserver = new ScreenStateObserver(context, this);
         mLock = lock;
-        mSpecAnimationBridge = new SpecAnimationBridge(
-                context, mLock, mWindowManager, valueAnimator);
         mSettingsBridge = settingsBridge;
+        //TODO (multidisplay): Magnification is supported only for the default display.
+        mDisplay =  new DisplayMagnification(Display.DEFAULT_DISPLAY,
+                new SpecAnimationBridge(context, mLock, mWindowManager, valueAnimator));
     }
 
     /**
@@ -178,16 +645,9 @@ public class MagnificationController implements Handler.Callback {
      */
     public void register() {
         synchronized (mLock) {
-            if (!mRegistered) {
-                mScreenStateObserver.register();
-                mWindowManager.setMagnificationCallbacks(mWMCallbacks);
-                mSpecAnimationBridge.setEnabled(true);
-                // Obtain initial state.
-                mWindowManager.getMagnificationRegion(mMagnificationRegion);
-                mMagnificationRegion.getBounds(mMagnificationBounds);
-                mRegistered = true;
-            }
+            mScreenStateObserver.register();
         }
+        mDisplay.register();
     }
 
     /**
@@ -196,33 +656,18 @@ public class MagnificationController implements Handler.Callback {
      */
     public void unregister() {
         synchronized (mLock) {
-            if (!isMagnifying()) {
-                unregisterInternalLocked();
-            } else {
-                mUnregisterPending = true;
-                resetLocked(true);
-            }
+            mScreenStateObserver.unregister();
         }
+        mDisplay.unregister();
     }
-
+    
     /**
      * Check if we are registered. Note that we may be planning to unregister at any moment.
      *
      * @return {@code true} if the controller is registered. {@code false} otherwise.
      */
     public boolean isRegisteredLocked() {
-        return mRegistered;
-    }
-
-    private void unregisterInternalLocked() {
-        if (mRegistered) {
-            mSpecAnimationBridge.setEnabled(false);
-            mScreenStateObserver.unregister();
-            mWindowManager.setMagnificationCallbacks(null);
-            mMagnificationRegion.setEmpty();
-            mRegistered = false;
-        }
-        mUnregisterPending = false;
+        return mDisplay.isRegisteredLocked();
     }
 
     /**
@@ -230,32 +675,7 @@ public class MagnificationController implements Handler.Callback {
      *         is > 1, {@code false} otherwise
      */
     public boolean isMagnifying() {
-        return mCurrentMagnificationSpec.scale > 1.0f;
-    }
-
-    /**
-     * Update our copy of the current magnification region
-     *
-     * @param magnified the magnified region
-     */
-    private void onMagnificationRegionChanged(Region magnified) {
-        synchronized (mLock) {
-            if (!mRegistered) {
-                // Don't update if we've unregistered
-                return;
-            }
-            if (!mMagnificationRegion.equals(magnified)) {
-                mMagnificationRegion.set(magnified);
-                mMagnificationRegion.getBounds(mMagnificationBounds);
-                // It's possible that our magnification spec is invalid with the new bounds.
-                // Adjust the current spec's offsets if necessary.
-                if (updateCurrentSpecWithOffsetsLocked(
-                        mCurrentMagnificationSpec.offsetX, mCurrentMagnificationSpec.offsetY)) {
-                    sendSpecToAnimation(mCurrentMagnificationSpec, false);
-                }
-                onMagnificationChangedLocked();
-            }
-        }
+        return mDisplay.isMagnifying();
     }
 
     /**
@@ -268,9 +688,8 @@ public class MagnificationController implements Handler.Callback {
      *         magnified region, or {@code false} otherwise
      */
     public boolean magnificationRegionContains(float x, float y) {
-        synchronized (mLock) {
-            return mMagnificationRegion.contains((int) x, (int) y);
-        }
+        return mDisplay.magnificationRegionContains(x, y);
+
     }
 
     /**
@@ -282,9 +701,7 @@ public class MagnificationController implements Handler.Callback {
      *                  region
      */
     public void getMagnificationBounds(@NonNull Rect outBounds) {
-        synchronized (mLock) {
-            outBounds.set(mMagnificationBounds);
-        }
+        mDisplay.getMagnificationBounds(outBounds);
     }
 
     /**
@@ -295,9 +712,7 @@ public class MagnificationController implements Handler.Callback {
      * @param outRegion the region to populate
      */
     public void getMagnificationRegion(@NonNull Region outRegion) {
-        synchronized (mLock) {
-            outRegion.set(mMagnificationRegion);
-        }
+        mDisplay.getMagnificationRegion(outRegion);
     }
 
     /**
@@ -307,7 +722,7 @@ public class MagnificationController implements Handler.Callback {
      * @return the scale
      */
     public float getScale() {
-        return mCurrentMagnificationSpec.scale;
+        return mDisplay.getScale();
     }
 
     /**
@@ -317,7 +732,7 @@ public class MagnificationController implements Handler.Callback {
      * @return the X offset
      */
     public float getOffsetX() {
-        return mCurrentMagnificationSpec.offsetX;
+        return mDisplay.getOffsetX();
     }
 
 
@@ -328,10 +743,7 @@ public class MagnificationController implements Handler.Callback {
      * @return the X coordinate
      */
     public float getCenterX() {
-        synchronized (mLock) {
-            return (mMagnificationBounds.width() / 2.0f
-                    + mMagnificationBounds.left - getOffsetX()) / getScale();
-        }
+        return mDisplay.getCenterX();
     }
 
     /**
@@ -341,7 +753,7 @@ public class MagnificationController implements Handler.Callback {
      * @return the Y offset
      */
     public float getOffsetY() {
-        return mCurrentMagnificationSpec.offsetY;
+        return mDisplay.getOffsetY();
     }
 
     /**
@@ -351,43 +763,7 @@ public class MagnificationController implements Handler.Callback {
      * @return the Y coordinate
      */
     public float getCenterY() {
-        synchronized (mLock) {
-            return (mMagnificationBounds.height() / 2.0f
-                    + mMagnificationBounds.top - getOffsetY()) / getScale();
-        }
-    }
-
-    /**
-     * Returns the scale currently used by the window manager. If an
-     * animation is in progress, this reflects the current state of the
-     * animation.
-     *
-     * @return the scale currently used by the window manager
-     */
-    private float getSentScale() {
-        return mSpecAnimationBridge.mSentMagnificationSpec.scale;
-    }
-
-    /**
-     * Returns the X offset currently used by the window manager. If an
-     * animation is in progress, this reflects the current state of the
-     * animation.
-     *
-     * @return the X offset currently used by the window manager
-     */
-    private float getSentOffsetX() {
-        return mSpecAnimationBridge.mSentMagnificationSpec.offsetX;
-    }
-
-    /**
-     * Returns the Y offset currently used by the window manager. If an
-     * animation is in progress, this reflects the current state of the
-     * animation.
-     *
-     * @return the Y offset currently used by the window manager
-     */
-    private float getSentOffsetY() {
-        return mSpecAnimationBridge.mSentMagnificationSpec.offsetY;
+        return mDisplay.getCenterY();
     }
 
     /**
@@ -400,24 +776,9 @@ public class MagnificationController implements Handler.Callback {
      *         the spec did not change
      */
     public boolean reset(boolean animate) {
-        synchronized (mLock) {
-            return resetLocked(animate);
-        }
-    }
 
-    private boolean resetLocked(boolean animate) {
-        if (!mRegistered) {
-            return false;
-        }
-        final MagnificationSpec spec = mCurrentMagnificationSpec;
-        final boolean changed = !spec.isNop();
-        if (changed) {
-            spec.clear();
-            onMagnificationChangedLocked();
-        }
-        mIdOfLastServiceToMagnify = INVALID_ID;
-        sendSpecToAnimation(spec, animate);
-        return changed;
+        return mDisplay.reset(animate);
+
     }
 
     /**
@@ -435,30 +796,8 @@ public class MagnificationController implements Handler.Callback {
      *         the spec did not change
      */
     public boolean setScale(float scale, float pivotX, float pivotY, boolean animate, int id) {
-        synchronized (mLock) {
-            if (!mRegistered) {
-                return false;
-            }
-            // Constrain scale immediately for use in the pivot calculations.
-            scale = MathUtils.constrain(scale, MIN_SCALE, MAX_SCALE);
-
-            final Rect viewport = mTempRect;
-            mMagnificationRegion.getBounds(viewport);
-            final MagnificationSpec spec = mCurrentMagnificationSpec;
-            final float oldScale = spec.scale;
-            final float oldCenterX
-                    = (viewport.width() / 2.0f - spec.offsetX + viewport.left) / oldScale;
-            final float oldCenterY
-                    = (viewport.height() / 2.0f - spec.offsetY + viewport.top) / oldScale;
-            final float normPivotX = (pivotX - spec.offsetX) / oldScale;
-            final float normPivotY = (pivotY - spec.offsetY) / oldScale;
-            final float offsetX = (oldCenterX - normPivotX) * (oldScale / scale);
-            final float offsetY = (oldCenterY - normPivotY) * (oldScale / scale);
-            final float centerX = normPivotX + offsetX;
-            final float centerY = normPivotY + offsetY;
-            mIdOfLastServiceToMagnify = id;
-            return setScaleAndCenterLocked(scale, centerX, centerY, animate, id);
-        }
+            return mDisplay.
+                    setScale(scale, pivotX, pivotY, animate, id);
     }
 
     /**
@@ -471,17 +810,13 @@ public class MagnificationController implements Handler.Callback {
      *                center
      * @param animate {@code true} to animate the transition, {@code false}
      *                to transition immediately
-     * @param id the ID of the service requesting the change
+     * @param id      the ID of the service requesting the change
      * @return {@code true} if the magnification spec changed, {@code false} if
-     *         the spec did not change
+     * the spec did not change
      */
     public boolean setCenter(float centerX, float centerY, boolean animate, int id) {
-        synchronized (mLock) {
-            if (!mRegistered) {
-                return false;
-            }
-            return setScaleAndCenterLocked(Float.NaN, centerX, centerY, animate, id);
-        }
+            return mDisplay.
+                    setScaleAndCenter(Float.NaN, centerX, centerY, animate, id);
     }
 
     /**
@@ -502,28 +837,8 @@ public class MagnificationController implements Handler.Callback {
      */
     public boolean setScaleAndCenter(
             float scale, float centerX, float centerY, boolean animate, int id) {
-        synchronized (mLock) {
-            if (!mRegistered) {
-                return false;
-            }
-            return setScaleAndCenterLocked(scale, centerX, centerY, animate, id);
-        }
-    }
-
-    private boolean setScaleAndCenterLocked(float scale, float centerX, float centerY,
-            boolean animate, int id) {
-        if (DEBUG) {
-            Slog.i(LOG_TAG,
-                    "setScaleAndCenterLocked(scale = " + scale + ", centerX = " + centerX
-                            + ", centerY = " + centerY + ", animate = " + animate + ", id = " + id
-                            + ")");
-        }
-        final boolean changed = updateMagnificationSpecLocked(scale, centerX, centerY);
-        sendSpecToAnimation(mCurrentMagnificationSpec, animate);
-        if (isMagnifying() && (id != INVALID_ID)) {
-            mIdOfLastServiceToMagnify = id;
-        }
-        return changed;
+        return mDisplay.
+                setScaleAndCenter(scale, centerX, centerY, animate, id);
     }
 
     /**
@@ -531,27 +846,14 @@ public class MagnificationController implements Handler.Callback {
      * opposite direction as the offsets passed in here.
      *
      * @param offsetX the amount in pixels to offset the region in the X direction, in current
-     * screen pixels.
+     *                screen pixels.
      * @param offsetY the amount in pixels to offset the region in the Y direction, in current
-     * screen pixels.
-     * @param id the ID of the service requesting the change
+     *                screen pixels.
+     * @param id      the ID of the service requesting the change
      */
     public void offsetMagnifiedRegion(float offsetX, float offsetY, int id) {
-        synchronized (mLock) {
-            if (!mRegistered) {
-                return;
-            }
-
-            final float nonNormOffsetX = mCurrentMagnificationSpec.offsetX - offsetX;
-            final float nonNormOffsetY = mCurrentMagnificationSpec.offsetY - offsetY;
-            if (updateCurrentSpecWithOffsetsLocked(nonNormOffsetX, nonNormOffsetY)) {
-                onMagnificationChangedLocked();
-            }
-            if (id != INVALID_ID) {
-                mIdOfLastServiceToMagnify = id;
-            }
-            sendSpecToAnimation(mCurrentMagnificationSpec, false);
-        }
+        mDisplay.offsetMagnifiedRegion(offsetX, offsetY,
+                id);
     }
 
     /**
@@ -560,28 +862,26 @@ public class MagnificationController implements Handler.Callback {
      * @return The id
      */
     public int getIdOfLastServiceToMagnify() {
-        return mIdOfLastServiceToMagnify;
-    }
-
-    private void onMagnificationChangedLocked() {
-        mAms.notifyMagnificationChanged(mMagnificationRegion,
-                getScale(), getCenterX(), getCenterY());
-        if (mUnregisterPending && !isMagnifying()) {
-            unregisterInternalLocked();
-        }
+        return mDisplay.getIdOfLastServiceToMagnify();
     }
 
     /**
      * Persists the current magnification scale to the current user's settings.
      */
     public void persistScale() {
-        final float scale = mCurrentMagnificationSpec.scale;
+        persistScale(Display.DEFAULT_DISPLAY);
+    }
+    /**
+     * Persists the current magnification scale to the current user's settings.
+     */
+    public void persistScale(int displayId) {
+        final float scale = mDisplay.getScale();
         final int userId = mUserId;
 
         new AsyncTask<Void, Void, Void>() {
             @Override
             protected Void doInBackground(Void... params) {
-                mSettingsBridge.putMagnificationScale(scale, userId);
+                mSettingsBridge.putMagnificationScale(scale, displayId, userId);
                 return null;
             }
         }.execute();
@@ -595,98 +895,7 @@ public class MagnificationController implements Handler.Callback {
      *         scale if none is available
      */
     public float getPersistedScale() {
-        return mSettingsBridge.getMagnificationScale(mUserId);
-    }
-
-    /**
-     * Updates the current magnification spec.
-     *
-     * @param scale the magnification scale
-     * @param centerX the unscaled, screen-relative X coordinate of the center
-     *                of the viewport, or {@link Float#NaN} to leave unchanged
-     * @param centerY the unscaled, screen-relative Y coordinate of the center
-     *                of the viewport, or {@link Float#NaN} to leave unchanged
-     * @return {@code true} if the magnification spec changed or {@code false}
-     *         otherwise
-     */
-    private boolean updateMagnificationSpecLocked(float scale, float centerX, float centerY) {
-        // Handle defaults.
-        if (Float.isNaN(centerX)) {
-            centerX = getCenterX();
-        }
-        if (Float.isNaN(centerY)) {
-            centerY = getCenterY();
-        }
-        if (Float.isNaN(scale)) {
-            scale = getScale();
-        }
-
-        // Compute changes.
-        boolean changed = false;
-
-        final float normScale = MathUtils.constrain(scale, MIN_SCALE, MAX_SCALE);
-        if (Float.compare(mCurrentMagnificationSpec.scale, normScale) != 0) {
-            mCurrentMagnificationSpec.scale = normScale;
-            changed = true;
-        }
-
-        final float nonNormOffsetX = mMagnificationBounds.width() / 2.0f
-                + mMagnificationBounds.left - centerX * normScale;
-        final float nonNormOffsetY = mMagnificationBounds.height() / 2.0f
-                + mMagnificationBounds.top - centerY * normScale;
-        changed |= updateCurrentSpecWithOffsetsLocked(nonNormOffsetX, nonNormOffsetY);
-
-        if (changed) {
-            onMagnificationChangedLocked();
-        }
-
-        return changed;
-    }
-
-    private boolean updateCurrentSpecWithOffsetsLocked(float nonNormOffsetX, float nonNormOffsetY) {
-        if (DEBUG) {
-            Slog.i(LOG_TAG,
-                    "updateCurrentSpecWithOffsetsLocked(nonNormOffsetX = " + nonNormOffsetX
-                            + ", nonNormOffsetY = " + nonNormOffsetY + ")");
-        }
-        boolean changed = false;
-        final float offsetX = MathUtils.constrain(
-            nonNormOffsetX, getMinOffsetXLocked(), getMaxOffsetXLocked());
-        if (Float.compare(mCurrentMagnificationSpec.offsetX, offsetX) != 0) {
-            mCurrentMagnificationSpec.offsetX = offsetX;
-            changed = true;
-        }
-        final float offsetY = MathUtils.constrain(
-            nonNormOffsetY, getMinOffsetYLocked(), getMaxOffsetYLocked());
-        if (Float.compare(mCurrentMagnificationSpec.offsetY, offsetY) != 0) {
-            mCurrentMagnificationSpec.offsetY = offsetY;
-            changed = true;
-        }
-        return changed;
-    }
-
-    private float getMinOffsetXLocked() {
-        final float viewportWidth = mMagnificationBounds.width();
-        final float viewportLeft = mMagnificationBounds.left;
-        return (viewportLeft + viewportWidth) -
-            (viewportLeft + viewportWidth) * mCurrentMagnificationSpec.scale;
-    }
-
-    private float getMaxOffsetXLocked() {
-        return mMagnificationBounds.left -
-            mMagnificationBounds.left * mCurrentMagnificationSpec.scale;
-    }
-
-    private float getMinOffsetYLocked() {
-        final float viewportHeight = mMagnificationBounds.height();
-        final float viewportTop = mMagnificationBounds.top;
-        return (viewportTop + viewportHeight) -
-            (viewportTop + viewportHeight) * mCurrentMagnificationSpec.scale;
-    }
-
-    private float getMaxOffsetYLocked() {
-        return mMagnificationBounds.top -
-            mMagnificationBounds.top * mCurrentMagnificationSpec.scale;
+        return mSettingsBridge.getMagnificationScale(Display.DEFAULT_DISPLAY, mUserId);
     }
 
     /**
@@ -706,20 +915,14 @@ public class MagnificationController implements Handler.Callback {
         }
     }
 
-    /**
+   /**
      * Resets magnification if magnification and auto-update are both enabled.
      *
      * @param animate whether the animate the transition
      * @return whether was {@link #isMagnifying magnifying}
      */
-    boolean resetIfNeeded(boolean animate) {
-        synchronized (mLock) {
-            if (isMagnifying()) {
-                reset(animate);
-                return true;
-            }
-            return false;
-        }
+    public boolean resetIfNeeded(boolean animate) {
+        return mDisplay.resetIfNeeded(animate);
     }
 
     /**
@@ -728,132 +931,23 @@ public class MagnificationController implements Handler.Callback {
      * @param connectionId the connection ID be disabled.
      * @return {@code true} on success, {@code false} on failure
      */
-    boolean resetIfNeeded(int connectionId) {
-        if (mIdOfLastServiceToMagnify == connectionId) {
-            return resetIfNeeded(true /*animate*/);
-        }
-        return false;
+    public boolean resetIfNeeded(int connectionId) {
+        return mDisplay.resetIfNeeded(connectionId);
     }
 
     void setForceShowMagnifiableBounds(boolean show) {
-        if (mRegistered) {
-            mWindowManager.setForceShowMagnifiableBounds(show);
-        }
-    }
-
-    private void getMagnifiedFrameInContentCoordsLocked(Rect outFrame) {
-        final float scale = getSentScale();
-        final float offsetX = getSentOffsetX();
-        final float offsetY = getSentOffsetY();
-        getMagnificationBounds(outFrame);
-        outFrame.offset((int) -offsetX, (int) -offsetY);
-        outFrame.scale(1.0f / scale);
-    }
-
-    private void requestRectangleOnScreen(int left, int top, int right, int bottom) {
-        synchronized (mLock) {
-            final Rect magnifiedFrame = mTempRect;
-            getMagnificationBounds(magnifiedFrame);
-            if (!magnifiedFrame.intersects(left, top, right, bottom)) {
-                return;
-            }
-
-            final Rect magnifFrameInScreenCoords = mTempRect1;
-            getMagnifiedFrameInContentCoordsLocked(magnifFrameInScreenCoords);
-
-            final float scrollX;
-            final float scrollY;
-            if (right - left > magnifFrameInScreenCoords.width()) {
-                final int direction = TextUtils
-                        .getLayoutDirectionFromLocale(Locale.getDefault());
-                if (direction == View.LAYOUT_DIRECTION_LTR) {
-                    scrollX = left - magnifFrameInScreenCoords.left;
-                } else {
-                    scrollX = right - magnifFrameInScreenCoords.right;
-                }
-            } else if (left < magnifFrameInScreenCoords.left) {
-                scrollX = left - magnifFrameInScreenCoords.left;
-            } else if (right > magnifFrameInScreenCoords.right) {
-                scrollX = right - magnifFrameInScreenCoords.right;
-            } else {
-                scrollX = 0;
-            }
-
-            if (bottom - top > magnifFrameInScreenCoords.height()) {
-                scrollY = top - magnifFrameInScreenCoords.top;
-            } else if (top < magnifFrameInScreenCoords.top) {
-                scrollY = top - magnifFrameInScreenCoords.top;
-            } else if (bottom > magnifFrameInScreenCoords.bottom) {
-                scrollY = bottom - magnifFrameInScreenCoords.bottom;
-            } else {
-                scrollY = 0;
-            }
-
-            final float scale = getScale();
-            offsetMagnifiedRegion(scrollX * scale, scrollY * scale, INVALID_ID);
-        }
-    }
-
-    private void sendSpecToAnimation(MagnificationSpec spec, boolean animate) {
-        if (DEBUG) {
-            Slog.i(LOG_TAG, "sendSpecToAnimation(spec = " + spec + ", animate = " + animate + ")");
-        }
-        if (Thread.currentThread().getId() == mMainThreadId) {
-            mSpecAnimationBridge.updateSentSpecMainThread(spec, animate);
-        } else {
-            mHandler.obtainMessage(MSG_SEND_SPEC_TO_ANIMATION,
-                    animate ? 1 : 0, 0, spec).sendToTarget();
-        }
+        mDisplay.setForceShowMagnifiableBounds(show);
     }
 
     private void onScreenTurnedOff() {
-        mHandler.sendEmptyMessage(MSG_SCREEN_TURNED_OFF);
-    }
-
-    public boolean handleMessage(Message msg) {
-        switch (msg.what) {
-            case MSG_SEND_SPEC_TO_ANIMATION:
-                final boolean animate = msg.arg1 == 1;
-                final MagnificationSpec spec = (MagnificationSpec) msg.obj;
-                mSpecAnimationBridge.updateSentSpecMainThread(spec, animate);
-                break;
-            case MSG_SCREEN_TURNED_OFF:
-                resetIfNeeded(false);
-                break;
-            case MSG_ON_MAGNIFIED_BOUNDS_CHANGED: {
-                final SomeArgs args = (SomeArgs) msg.obj;
-                final Region magnifiedBounds = (Region) args.arg1;
-                onMagnificationRegionChanged(magnifiedBounds);
-                magnifiedBounds.recycle();
-                args.recycle();
-            } break;
-            case MSG_ON_RECTANGLE_ON_SCREEN_REQUESTED: {
-                final SomeArgs args = (SomeArgs) msg.obj;
-                final int left = args.argi1;
-                final int top = args.argi2;
-                final int right = args.argi3;
-                final int bottom = args.argi4;
-                requestRectangleOnScreen(left, top, right, bottom);
-                args.recycle();
-            } break;
-            case MSG_ON_USER_CONTEXT_CHANGED:
-                resetIfNeeded(true);
-                break;
-        }
-        return true;
+        final Message m = PooledLambda.obtainMessage(
+                mDisplay::resetIfNeeded, false);
+        mHandler.sendMessage(m);
     }
 
     @Override
     public String toString() {
-        return "MagnificationController{" +
-                "mCurrentMagnificationSpec=" + mCurrentMagnificationSpec +
-                ", mMagnificationRegion=" + mMagnificationRegion +
-                ", mMagnificationBounds=" + mMagnificationBounds +
-                ", mUserId=" + mUserId +
-                ", mIdOfLastServiceToMagnify=" + mIdOfLastServiceToMagnify +
-                ", mRegistered=" + mRegistered +
-                ", mUnregisterPending=" + mUnregisterPending +
-                '}';
+        return mDisplay.toString();
     }
 
     /**
@@ -974,6 +1068,7 @@ public class MagnificationController implements Handler.Callback {
     private static class ScreenStateObserver extends BroadcastReceiver {
         private final Context mContext;
         private final MagnificationController mController;
+        private boolean mRegistered = false;
 
         public ScreenStateObserver(Context context, MagnificationController controller) {
             mContext = context;
@@ -981,11 +1076,17 @@ public class MagnificationController implements Handler.Callback {
         }
 
         public void register() {
-            mContext.registerReceiver(this, new IntentFilter(Intent.ACTION_SCREEN_OFF));
+            if (!mRegistered) {
+                mContext.registerReceiver(this, new IntentFilter(Intent.ACTION_SCREEN_OFF));
+                mRegistered = true;
+            }
         }
 
         public void unregister() {
-            mContext.unregisterReceiver(this);
+            if (mRegistered) {
+                mContext.unregisterReceiver(this);
+                mRegistered = false;
+            }
         }
 
         @Override
@@ -1002,14 +1103,17 @@ public class MagnificationController implements Handler.Callback {
             mContentResolver = contentResolver;
         }
 
-        public void putMagnificationScale(float value, int userId) {
+        public void putMagnificationScale(float value, int displayId, int userId) {
             Settings.Secure.putFloatForUser(mContentResolver,
-                    Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE, value, userId);
+                    Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE + (
+                            Display.DEFAULT_DISPLAY == displayId ? "" : displayId),
+                    value, userId);
         }
 
-        public float getMagnificationScale(int userId) {
+        public float getMagnificationScale(int displayId, int userId) {
             return Settings.Secure.getFloatForUser(mContentResolver,
-                    Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE,
+                    Settings.Secure.ACCESSIBILITY_DISPLAY_MAGNIFICATION_SCALE
+                            + (Display.DEFAULT_DISPLAY == displayId ? "" : displayId),
                     DEFAULT_MAGNIFICATION_SCALE, userId);
         }
     }
