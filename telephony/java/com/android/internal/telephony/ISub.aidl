@@ -16,7 +16,6 @@
 
 package com.android.internal.telephony;
 
-import android.app.PendingIntent;
 import android.telephony.SubscriptionInfo;
 
 interface ISub {
@@ -175,14 +174,14 @@ interface ISub {
     int setParentSubId(int parentSubId, int subId);
 
     /**
-     * Set preferred default data.
-     * Set on which slot default data will be on.
+     * Set which subscription is preferred for cellular data. It's
+     * designed to overwrite default data subscription temporarily.
      *
-     * @param slotId which slot is preferred to for cellular data.
+     * @param subId which subscription is preferred to for cellular data.
      * @hide
      *
      */
-    int setPreferredData(int slotId);
+    int setPreferredData(int subId);
 
     /**
      * Get User downloaded Profiles.
