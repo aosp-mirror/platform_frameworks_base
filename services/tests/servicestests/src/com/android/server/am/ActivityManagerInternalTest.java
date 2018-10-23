@@ -133,7 +133,7 @@ public class ActivityManagerInternalTest {
 
     private UidRecord addActiveUidRecord(int uid, long curProcStateSeq,
             long lastNetworkUpdatedProcStateSeq) {
-        final UidRecord record = new UidRecord(uid);
+        final UidRecord record = new UidRecord(uid, null /* atmInternal */);
         record.lastNetworkUpdatedProcStateSeq = lastNetworkUpdatedProcStateSeq;
         record.curProcStateSeq = curProcStateSeq;
         record.waitingForNetwork = true;
