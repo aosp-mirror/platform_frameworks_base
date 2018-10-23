@@ -17,6 +17,7 @@
 package com.android.server.am;
 
 import static com.android.server.am.MemoryStatUtil.BYTES_IN_KILOBYTE;
+import static com.android.server.am.MemoryStatUtil.JIFFY_NANOS;
 import static com.android.server.am.MemoryStatUtil.MemoryStat;
 import static com.android.server.am.MemoryStatUtil.PAGE_SIZE;
 import static com.android.server.am.MemoryStatUtil.parseMemoryMaxUsageFromMemCg;
@@ -96,7 +97,7 @@ public class MemoryStatUtilTest {
             "-2",
             "117",
             "0",
-            "2206",
+            "2222", // this in start time (in ticks per second)
             "1257177088",
             "3", // this is RSS (number of pages)
             "4294967295",
@@ -219,6 +220,7 @@ public class MemoryStatUtilTest {
         assertEquals(3 * PAGE_SIZE, stat.rssInBytes);
         assertEquals(0, stat.cacheInBytes);
         assertEquals(0, stat.swapInBytes);
+        assertEquals(2222 * JIFFY_NANOS, stat.startTimeNanos);
     }
 
     @Test

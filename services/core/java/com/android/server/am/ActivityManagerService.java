@@ -18620,7 +18620,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                                     memoryStat.rssInBytes,
                                     memoryStat.cacheInBytes,
                                     memoryStat.swapInBytes,
-                                    memoryStat.rssHighWatermarkInBytes);
+                                    memoryStat.rssHighWatermarkInBytes,
+                                    memoryStat.startTimeNanos);
                     processMemoryStates.add(processMemoryState);
                 }
             }
@@ -18643,7 +18644,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 ProcessMemoryState processMemoryState = new ProcessMemoryState(uid, processName,
                         oomScore, memoryStat.pgfault, memoryStat.pgmajfault,
                         memoryStat.rssInBytes, memoryStat.cacheInBytes, memoryStat.swapInBytes,
-                        memoryStat.rssHighWatermarkInBytes);
+                        memoryStat.rssHighWatermarkInBytes, memoryStat.startTimeNanos);
                 processMemoryStates.add(processMemoryState);
             }
             return processMemoryStates;
