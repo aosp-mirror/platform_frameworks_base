@@ -51,8 +51,10 @@ import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.PorterDuff;
+import android.graphics.RecordingCanvas;
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.graphics.RenderNode;
 import android.graphics.drawable.Drawable;
 import android.hardware.display.DisplayManager;
 import android.hardware.display.DisplayManager.DisplayListener;
@@ -3120,7 +3122,7 @@ public final class ViewRootImpl implements ViewParent,
     int mHardwareYOffset;
 
     @Override
-    public void onPreDraw(DisplayListCanvas canvas) {
+    public void onPreDraw(RecordingCanvas canvas) {
         // If mCurScrollY is not 0 then this influences the hardwareYOffset. The end result is we
         // can apply offsets that are not handled by anything else, resulting in underdraw as
         // the View is shifted (thus shifting the window background) exposing unpainted
@@ -3134,7 +3136,7 @@ public final class ViewRootImpl implements ViewParent,
     }
 
     @Override
-    public void onPostDraw(DisplayListCanvas canvas) {
+    public void onPostDraw(RecordingCanvas canvas) {
         drawAccessibilityFocusedDrawableIfNeeded(canvas);
         if (mUseMTRenderer) {
             for (int i = mWindowCallbacks.size() - 1; i >= 0; i--) {

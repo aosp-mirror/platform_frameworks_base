@@ -29,9 +29,9 @@ import android.graphics.CanvasProperty;
 import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.PorterDuff;
+import android.graphics.RecordingCanvas;
 import android.graphics.drawable.Drawable;
 import android.util.AttributeSet;
-import android.view.DisplayListCanvas;
 import android.view.RenderNodeAnimator;
 import android.view.View;
 import android.view.ViewAnimationUtils;
@@ -192,8 +192,8 @@ public class KeyguardAffordanceView extends ImageView {
                 // Our hardware drawing proparties can be null if the finishing started but we have
                 // never drawn before. In that case we are not doing a render thread animation
                 // anyway, so we need to use the normal drawing.
-                DisplayListCanvas displayListCanvas = (DisplayListCanvas) canvas;
-                displayListCanvas.drawCircle(mHwCenterX, mHwCenterY, mHwCircleRadius,
+                RecordingCanvas recordingCanvas = (RecordingCanvas) canvas;
+                recordingCanvas.drawCircle(mHwCenterX, mHwCenterY, mHwCircleRadius,
                         mHwCirclePaint);
             } else {
                 updateCircleColor();

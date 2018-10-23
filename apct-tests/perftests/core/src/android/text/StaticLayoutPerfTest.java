@@ -16,29 +16,18 @@
 
 package android.text;
 
-import static android.text.TextDirectionHeuristics.LTR;
-
+import android.graphics.Canvas;
+import android.graphics.RecordingCanvas;
+import android.graphics.RenderNode;
 import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.PerfStatusReporter;
-
 import android.support.test.filters.LargeTest;
 import android.support.test.runner.AndroidJUnit4;
-
-import android.content.res.ColorStateList;
-import android.graphics.Canvas;
-import android.graphics.Typeface;
-import android.text.Layout;
-import android.text.style.TextAppearanceSpan;
-import android.view.DisplayListCanvas;
-import android.view.RenderNode;
 
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import java.nio.CharBuffer;
-import java.util.Random;
 
 @LargeTest
 @RunWith(AndroidJUnit4.class)
@@ -256,7 +245,7 @@ public class StaticLayoutPerfTest {
             state.pauseTiming();
             final StaticLayout layout =
                     StaticLayout.Builder.obtain(text, 0, text.length(), PAINT, TEXT_WIDTH).build();
-            final DisplayListCanvas c = node.start(1200, 200);
+            final RecordingCanvas c = node.start(1200, 200);
             state.resumeTiming();
 
             layout.draw(c);
@@ -272,7 +261,7 @@ public class StaticLayoutPerfTest {
             final CharSequence text = mTextUtil.nextRandomParagraph(WORD_LENGTH, STYLE_TEXT);
             final StaticLayout layout =
                     StaticLayout.Builder.obtain(text, 0, text.length(), PAINT, TEXT_WIDTH).build();
-            final DisplayListCanvas c = node.start(1200, 200);
+            final RecordingCanvas c = node.start(1200, 200);
             state.resumeTiming();
 
             layout.draw(c);
@@ -288,7 +277,7 @@ public class StaticLayoutPerfTest {
             final CharSequence text = mTextUtil.nextRandomParagraph(WORD_LENGTH, NO_STYLE_TEXT);
             final StaticLayout layout =
                     StaticLayout.Builder.obtain(text, 0, text.length(), PAINT, TEXT_WIDTH).build();
-            final DisplayListCanvas c = node.start(1200, 200);
+            final RecordingCanvas c = node.start(1200, 200);
             state.resumeTiming();
 
             layout.draw(c);
@@ -304,7 +293,7 @@ public class StaticLayoutPerfTest {
             final CharSequence text = mTextUtil.nextRandomParagraph(WORD_LENGTH, STYLE_TEXT);
             final StaticLayout layout =
                     StaticLayout.Builder.obtain(text, 0, text.length(), PAINT, TEXT_WIDTH).build();
-            final DisplayListCanvas c = node.start(1200, 200);
+            final RecordingCanvas c = node.start(1200, 200);
             Canvas.freeTextLayoutCaches();
             state.resumeTiming();
 
@@ -321,7 +310,7 @@ public class StaticLayoutPerfTest {
             final CharSequence text = mTextUtil.nextRandomParagraph(WORD_LENGTH, NO_STYLE_TEXT);
             final StaticLayout layout =
                     StaticLayout.Builder.obtain(text, 0, text.length(), PAINT, TEXT_WIDTH).build();
-            final DisplayListCanvas c = node.start(1200, 200);
+            final RecordingCanvas c = node.start(1200, 200);
             Canvas.freeTextLayoutCaches();
             state.resumeTiming();
 
@@ -339,7 +328,7 @@ public class StaticLayoutPerfTest {
                     mTextUtil.nextRandomParagraph(WORD_LENGTH, STYLE_TEXT), PAINT);
             final StaticLayout layout =
                     StaticLayout.Builder.obtain(text, 0, text.length(), PAINT, TEXT_WIDTH).build();
-            final DisplayListCanvas c = node.start(1200, 200);
+            final RecordingCanvas c = node.start(1200, 200);
             state.resumeTiming();
 
             layout.draw(c);
@@ -356,7 +345,7 @@ public class StaticLayoutPerfTest {
                     mTextUtil.nextRandomParagraph(WORD_LENGTH, NO_STYLE_TEXT), PAINT);
             final StaticLayout layout =
                     StaticLayout.Builder.obtain(text, 0, text.length(), PAINT, TEXT_WIDTH).build();
-            final DisplayListCanvas c = node.start(1200, 200);
+            final RecordingCanvas c = node.start(1200, 200);
             state.resumeTiming();
 
             layout.draw(c);
@@ -373,7 +362,7 @@ public class StaticLayoutPerfTest {
                     mTextUtil.nextRandomParagraph(WORD_LENGTH, STYLE_TEXT), PAINT);
             final StaticLayout layout =
                     StaticLayout.Builder.obtain(text, 0, text.length(), PAINT, TEXT_WIDTH).build();
-            final DisplayListCanvas c = node.start(1200, 200);
+            final RecordingCanvas c = node.start(1200, 200);
             Canvas.freeTextLayoutCaches();
             state.resumeTiming();
 
@@ -391,7 +380,7 @@ public class StaticLayoutPerfTest {
                     mTextUtil.nextRandomParagraph(WORD_LENGTH, NO_STYLE_TEXT), PAINT);
             final StaticLayout layout =
                     StaticLayout.Builder.obtain(text, 0, text.length(), PAINT, TEXT_WIDTH).build();
-            final DisplayListCanvas c = node.start(1200, 200);
+            final RecordingCanvas c = node.start(1200, 200);
             Canvas.freeTextLayoutCaches();
             state.resumeTiming();
 

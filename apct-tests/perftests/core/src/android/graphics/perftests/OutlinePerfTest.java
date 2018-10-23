@@ -20,7 +20,6 @@ import android.graphics.Outline;
 import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.PerfStatusReporter;
 import android.support.test.filters.LargeTest;
-import android.view.RenderNode;
 
 import org.junit.Rule;
 import org.junit.Test;

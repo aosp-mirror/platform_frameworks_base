@@ -14,47 +14,47 @@
  * limitations under the License.
  */
 
-package android.view;
+package android.graphics;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
-import android.graphics.BaseRecordingCanvas;
-import android.graphics.Bitmap;
-import android.graphics.CanvasProperty;
-import android.graphics.Paint;
 import android.util.Pools.SynchronizedPool;
+import android.view.TextureLayer;
 
 import dalvik.annotation.optimization.CriticalNative;
 import dalvik.annotation.optimization.FastNative;
 
 /**
  * A Canvas implementation that records view system drawing operations for deferred rendering.
- * This is intended for use with a DisplayList. This class keeps a list of all the Paint and
+ * This is intended for use with RenderNode. This class keeps a list of all the Paint and
  * Bitmap objects that it draws, preventing the backing memory of Bitmaps from being freed while
- * the DisplayList is still holding a native reference to the memory.
+ * the RecordingCanvas is still holding a native reference to the memory.
  *
  * @hide
  */
-public final class DisplayListCanvas extends BaseRecordingCanvas {
+public final class RecordingCanvas extends BaseRecordingCanvas {
     // The recording canvas pool should be large enough to handle a deeply nested
     // view hierarchy because display lists are generated recursively.
     private static final int POOL_LIMIT = 25;
 
     public static final int MAX_BITMAP_SIZE = 100 * 1024 * 1024; // 100 MB
 
-    private static final SynchronizedPool<DisplayListCanvas> sPool =
+    private static final SynchronizedPool<RecordingCanvas> sPool =
             new SynchronizedPool<>(POOL_LIMIT);
 
-    RenderNode mNode;
+    /**
+     * TODO: Temporarily exposed for RenderNodeAnimator(Set)
+     * @hide */
+    public RenderNode mNode;
     private int mWidth;
     private int mHeight;
 
-    static DisplayListCanvas obtain(@NonNull RenderNode node, int width, int height) {
+    static RecordingCanvas obtain(@NonNull RenderNode node, int width, int height) {
         if (node == null) throw new IllegalArgumentException("node cannot be null");
-        DisplayListCanvas canvas = sPool.acquire();
+        RecordingCanvas canvas = sPool.acquire();
         if (canvas == null) {
-            canvas = new DisplayListCanvas(node, width, height);
+            canvas = new RecordingCanvas(node, width, height);
         } else {
             nResetDisplayListCanvas(canvas.mNativeCanvasWrapper, node.mNativeRenderNode,
                     width, height);
@@ -83,7 +83,7 @@ public final class DisplayListCanvas extends BaseRecordingCanvas {
     // Constructors
     ///////////////////////////////////////////////////////////////////////////
 
-    private DisplayListCanvas(@NonNull RenderNode node, int width, int height) {
+    private RecordingCanvas(@NonNull RenderNode node, int width, int height) {
         super(nCreateDisplayListCanvas(node.mNativeRenderNode, width, height));
         mDensity = 0; // disable bitmap density scaling
     }
@@ -95,7 +95,7 @@ public final class DisplayListCanvas extends BaseRecordingCanvas {
 
     @Override
     public void setDensity(int density) {
-        // drop silently, since DisplayListCanvas doesn't perform density scaling
+        // drop silently, since RecordingCanvas doesn't perform density scaling
     }
 
     @Override
@@ -156,6 +156,8 @@ public final class DisplayListCanvas extends BaseRecordingCanvas {
      * functionality used by webview for calling into their renderer from our display lists.
      *
      * @param drawGLFunction A native function pointer
+     *
+     * @hide
      */
     @UnsupportedAppUsage
     public void callDrawGLFunction2(long drawGLFunction) {
@@ -166,13 +168,15 @@ public final class DisplayListCanvas extends BaseRecordingCanvas {
      * Records the functor specified with the drawGLFunction function pointer. This is
      * functionality used by webview for calling into their renderer from our display lists.
      *
-     * @param drawGLFunction A native function pointer
+     * @param drawGLFunctor A native function pointer
      * @param releasedCallback Called when the display list is destroyed, and thus
      * the functor is no longer referenced by this canvas's display list.
      *
      * NOTE: The callback does *not* necessarily mean that there are no longer
      * any references to the functor, just that the reference from this specific
      * canvas's display list has been released.
+     *
+     * @hide
      */
     @UnsupportedAppUsage
     public void drawGLFunctor2(long drawGLFunctor, @Nullable Runnable releasedCallback) {
@@ -201,8 +205,9 @@ public final class DisplayListCanvas extends BaseRecordingCanvas {
      * Draws the specified layer onto this canvas.
      *
      * @param layer The layer to composite on this canvas
+     * @hide
      */
-    void drawTextureLayer(TextureLayer layer) {
+    public void drawTextureLayer(TextureLayer layer) {
         nDrawTextureLayer(mNativeCanvasWrapper, layer.getLayerHandle());
     }
 
@@ -210,6 +215,16 @@ public final class DisplayListCanvas extends BaseRecordingCanvas {
     // Drawing
     ///////////////////////////////////////////////////////////////////////////
 
+    /**
+     * Draws a circle
+     *
+     * @param cx
+     * @param cy
+     * @param radius
+     * @param paint
+     *
+     * @hide
+     */
     @UnsupportedAppUsage
     public void drawCircle(CanvasProperty<Float> cx, CanvasProperty<Float> cy,
             CanvasProperty<Float> radius, CanvasProperty<Paint> paint) {
@@ -217,6 +232,19 @@ public final class DisplayListCanvas extends BaseRecordingCanvas {
                 radius.getNativeContainer(), paint.getNativeContainer());
     }
 
+    /**
+     * Draws a round rect
+     *
+     * @param left
+     * @param top
+     * @param right
+     * @param bottom
+     * @param rx
+     * @param ry
+     * @param paint
+     *
+     * @hide
+     */
     public void drawRoundRect(CanvasProperty<Float> left, CanvasProperty<Float> top,
             CanvasProperty<Float> right, CanvasProperty<Float> bottom, CanvasProperty<Float> rx,
             CanvasProperty<Float> ry, CanvasProperty<Paint> paint) {

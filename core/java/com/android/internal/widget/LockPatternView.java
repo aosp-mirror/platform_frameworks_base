@@ -24,23 +24,21 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.CanvasProperty;
-import android.graphics.drawable.Drawable;
 import android.graphics.Paint;
 import android.graphics.Path;
+import android.graphics.RecordingCanvas;
 import android.graphics.Rect;
+import android.graphics.drawable.Drawable;
 import android.media.AudioManager;
 import android.os.Bundle;
 import android.os.Debug;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.os.SystemClock;
-import android.os.UserHandle;
-import android.provider.Settings;
 import android.util.AttributeSet;
 import android.util.IntArray;
 import android.util.Log;
 import android.util.SparseArray;
-import android.view.DisplayListCanvas;
 import android.view.HapticFeedbackConstants;
 import android.view.MotionEvent;
 import android.view.RenderNodeAnimator;
@@ -1131,8 +1129,8 @@ public class LockPatternView extends View {
                     drawCellDrawable(canvas, i, j, cellState.radius, drawLookup[i][j]);
                 } else {
                     if (isHardwareAccelerated() && cellState.hwAnimating) {
-                        DisplayListCanvas displayListCanvas = (DisplayListCanvas) canvas;
-                        displayListCanvas.drawCircle(cellState.hwCenterX, cellState.hwCenterY,
+                        RecordingCanvas recordingCanvas = (RecordingCanvas) canvas;
+                        recordingCanvas.drawCircle(cellState.hwCenterX, cellState.hwCenterY,
                                 cellState.hwRadius, cellState.hwPaint);
                     } else {
                         drawCircle(canvas, (int) centerX, (int) centerY + translationY,

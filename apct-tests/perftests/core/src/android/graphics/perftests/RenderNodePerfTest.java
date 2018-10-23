@@ -17,16 +17,14 @@
 package android.graphics.perftests;
 
 import android.graphics.Outline;
+import android.graphics.RecordingCanvas;
+import android.graphics.RenderNode;
 import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.PerfStatusReporter;
 import android.support.test.filters.LargeTest;
-import android.view.DisplayListCanvas;
-import android.view.RenderNode;
 
 import org.junit.Rule;
 import org.junit.Test;
-
-import java.util.ArrayList;
 
 @LargeTest
 public class RenderNodePerfTest {
@@ -73,7 +71,7 @@ public class RenderNodePerfTest {
         final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         RenderNode node = RenderNode.create("LinearLayout", null);
         while (state.keepRunning()) {
-            DisplayListCanvas canvas = node.start(100, 100);
+            RecordingCanvas canvas = node.start(100, 100);
             node.end(canvas);
         }
     }
@@ -82,7 +80,7 @@ public class RenderNodePerfTest {
     public void testStartEndDeepHierarchy() {
         final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         RenderNode[] nodes = new RenderNode[30];
-        DisplayListCanvas[] canvases = new DisplayListCanvas[nodes.length];
+        RecordingCanvas[] canvases = new RecordingCanvas[nodes.length];
         for (int i = 0; i < nodes.length; i++) {
             nodes[i] = RenderNode.create("LinearLayout", null);
         }

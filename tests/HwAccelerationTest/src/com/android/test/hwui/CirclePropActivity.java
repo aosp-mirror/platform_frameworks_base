@@ -22,9 +22,9 @@ import android.graphics.Canvas;
 import android.graphics.CanvasProperty;
 import android.graphics.Paint;
 import android.graphics.Paint.Style;
+import android.graphics.RecordingCanvas;
 import android.os.Bundle;
 import android.os.Trace;
-import android.view.DisplayListCanvas;
 import android.view.RenderNodeAnimator;
 import android.view.View;
 import android.widget.LinearLayout;
@@ -88,8 +88,8 @@ public class CirclePropActivity extends Activity {
             super.onDraw(canvas);
 
             if (canvas.isHardwareAccelerated()) {
-                DisplayListCanvas displayListCanvas = (DisplayListCanvas) canvas;
-                displayListCanvas.drawCircle(mX, mY, mRadius, mPaint);
+                RecordingCanvas recordingCanvas = (RecordingCanvas) canvas;
+                recordingCanvas.drawCircle(mX, mY, mRadius, mPaint);
             }
         }
 

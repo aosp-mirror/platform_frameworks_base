@@ -14,16 +14,15 @@
  * limitations under the License.
  */
 
-package android.view;
+package android.graphics;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
-import android.graphics.Matrix;
-import android.graphics.Outline;
-import android.graphics.Paint;
-import android.graphics.Rect;
+import android.view.NativeVectorDrawableAnimator;
+import android.view.RenderNodeAnimator;
+import android.view.View;
 
 import dalvik.annotation.optimization.CriticalNative;
 import dalvik.annotation.optimization.FastNative;
@@ -36,7 +35,7 @@ import java.lang.annotation.RetentionPolicy;
 /**
  * <p>A display list records a series of graphics related operations and can replay
  * them later. Display lists are usually built by recording operations on a
- * {@link DisplayListCanvas}. Replaying the operations from a display list avoids
+ * {@link RecordingCanvas}. Replaying the operations from a display list avoids
  * executing application code on every frame, and is thus much more efficient.</p>
  *
  * <p>Display lists are used internally for all views by default, and are not
@@ -53,7 +52,7 @@ import java.lang.annotation.RetentionPolicy;
  * affected paragraph needs to be recorded again.</p>
  *
  * <h3>Hardware acceleration</h3>
- * <p>Display lists can only be replayed using a {@link DisplayListCanvas}. They are not
+ * <p>Display lists can only be replayed using a {@link RecordingCanvas}. They are not
  * supported in software. Always make sure that the {@link android.graphics.Canvas}
  * you are using to render a display list is hardware accelerated using
  * {@link android.graphics.Canvas#isHardwareAccelerated()}.</p>
@@ -63,7 +62,7 @@ import java.lang.annotation.RetentionPolicy;
  *     ThreadedRenderer renderer = myView.getThreadedRenderer();
  *     if (renderer != null) {
  *         DisplayList displayList = renderer.createDisplayList();
- *         DisplayListCanvas canvas = displayList.start(width, height);
+ *         RecordingCanvas canvas = displayList.start(width, height);
  *         try {
  *             // Draw onto the canvas
  *             // For instance: canvas.drawBitmap(...);
@@ -77,7 +76,7 @@ import java.lang.annotation.RetentionPolicy;
  * <pre class="prettyprint">
  *     protected void onDraw(Canvas canvas) {
  *         if (canvas.isHardwareAccelerated()) {
- *             DisplayListCanvas displayListCanvas = (DisplayListCanvas) canvas;
+ *             RecordingCanvas displayListCanvas = (RecordingCanvas) canvas;
  *             displayListCanvas.drawDisplayList(mDisplayList);
  *         }
  *     }
@@ -102,7 +101,7 @@ import java.lang.annotation.RetentionPolicy;
  * <pre class="prettyprint">
  *     private void createDisplayList() {
  *         mDisplayList = DisplayList.create("MyDisplayList");
- *         DisplayListCanvas canvas = mDisplayList.start(width, height);
+ *         RecordingCanvas canvas = mDisplayList.start(width, height);
  *         try {
  *             for (Bitmap b : mBitmaps) {
  *                 canvas.drawBitmap(b, 0.0f, 0.0f, null);
@@ -115,7 +114,7 @@ import java.lang.annotation.RetentionPolicy;
  *
  *     protected void onDraw(Canvas canvas) {
  *         if (canvas.isHardwareAccelerated()) {
- *             DisplayListCanvas displayListCanvas = (DisplayListCanvas) canvas;
+ *             RecordingCanvas displayListCanvas = (RecordingCanvas) canvas;
  *             displayListCanvas.drawDisplayList(mDisplayList);
  *         }
  *     }
@@ -143,10 +142,10 @@ public class RenderNode {
                 RenderNode.class.getClassLoader(), nGetNativeFinalizer(), 1024);
     }
 
-    /** Not for general use; use only if you are ThreadedRenderer or DisplayListCanvas.
+    /** Not for general use; use only if you are ThreadedRenderer or RecordingCanvas.
      * @hide
      */
-    final long mNativeRenderNode;
+    public final long mNativeRenderNode;
     private final AnimationHost mAnimationHost;
 
     private RenderNode(String name, AnimationHost animationHost) {
@@ -195,7 +194,7 @@ public class RenderNode {
      *
      * @hide
      */
-    interface PositionUpdateListener {
+    public interface PositionUpdateListener {
 
         /**
          * Called by native by a Rendering Worker thread to update window position
@@ -228,7 +227,7 @@ public class RenderNode {
      * stored in this display list.
      *
      * Calling this method will mark the render node invalid until
-     * {@link #end(DisplayListCanvas)} is called.
+     * {@link #end(RecordingCanvas)} is called.
      * Only valid render nodes can be replayed.
      *
      * @param width The width of the recording viewport
@@ -236,19 +235,19 @@ public class RenderNode {
      *
      * @return A canvas to record drawing operations.
      *
-     * @see #end(DisplayListCanvas)
+     * @see #end(RecordingCanvas)
      * @see #isValid()
      */
     @UnsupportedAppUsage
-    public DisplayListCanvas start(int width, int height) {
-        return DisplayListCanvas.obtain(this, width, height);
+    public RecordingCanvas start(int width, int height) {
+        return RecordingCanvas.obtain(this, width, height);
     }
 
     /**
      * Same as {@link #start(int, int)} but with the RenderNode's width & height
      */
-    public DisplayListCanvas start() {
-        return DisplayListCanvas.obtain(this,
+    public RecordingCanvas start() {
+        return RecordingCanvas.obtain(this,
                 nGetWidth(mNativeRenderNode), nGetHeight(mNativeRenderNode));
     }
 
@@ -261,7 +260,7 @@ public class RenderNode {
      * @see #isValid()
      */
     @UnsupportedAppUsage
-    public void end(DisplayListCanvas canvas) {
+    public void end(RecordingCanvas canvas) {
         long displayList = canvas.finishRecording();
         nSetDisplayList(mNativeRenderNode, displayList);
         canvas.recycle();
@@ -292,14 +291,32 @@ public class RenderNode {
     // Matrix manipulation
     ///////////////////////////////////////////////////////////////////////////
 
+    /**
+     * Whether or not the RenderNode has an identity transform. This is a faster
+     * way to do the otherwise equivalent {@link #getMatrix(Matrix)} {@link Matrix#isIdentity()}
+     * as it doesn't require copying the Matrix first, thus minimizing overhead.
+     *
+     * @return true if the RenderNode has an identity transform, false otherwise
+     */
     public boolean hasIdentityMatrix() {
         return nHasIdentityMatrix(mNativeRenderNode);
     }
 
+    /**
+     * Gets the current transform matrix
+     *
+     * @param outMatrix The matrix to store the transform of the RenderNode
+     */
     public void getMatrix(@NonNull Matrix outMatrix) {
         nGetTransformMatrix(mNativeRenderNode, outMatrix.native_instance);
     }
 
+    /**
+     * Gets the current transform inverted. This is a faster way to do the otherwise
+     * equivalent {@link #getMatrix(Matrix)} followed by {@link Matrix#invert(Matrix)}
+     *
+     * @param outMatrix The matrix to store the inverse transform of the RenderNode
+     */
     public void getInverseMatrix(@NonNull Matrix outMatrix) {
         nGetInverseTransformMatrix(mNativeRenderNode, outMatrix.native_instance);
     }
@@ -308,14 +325,25 @@ public class RenderNode {
     // RenderProperty Setters
     ///////////////////////////////////////////////////////////////////////////
 
+    /**
+     * TODO
+     */
     public boolean setLayerType(int layerType) {
         return nSetLayerType(mNativeRenderNode, layerType);
     }
 
+    /**
+     * TODO
+     */
     public boolean setLayerPaint(@Nullable Paint paint) {
         return nSetLayerPaint(mNativeRenderNode, paint != null ? paint.getNativeInstance() : 0);
     }
 
+    /**
+     * Sets the clip bounds of the RenderNode.
+     * @param rect the bounds to clip to. If null, the clip bounds are reset
+     * @return True if the clip bounds changed, false otherwise
+     */
     public boolean setClipBounds(@Nullable Rect rect) {
         if (rect == null) {
             return nSetClipBoundsEmpty(mNativeRenderNode);
@@ -371,8 +399,10 @@ public class RenderNode {
             case Outline.MODE_EMPTY:
                 return nSetOutlineEmpty(mNativeRenderNode);
             case Outline.MODE_ROUND_RECT:
-                return nSetOutlineRoundRect(mNativeRenderNode, outline.mRect.left, outline.mRect.top,
-                        outline.mRect.right, outline.mRect.bottom, outline.mRadius, outline.mAlpha);
+                return nSetOutlineRoundRect(mNativeRenderNode,
+                        outline.mRect.left, outline.mRect.top,
+                        outline.mRect.right, outline.mRect.bottom,
+                        outline.mRadius, outline.mAlpha);
             case Outline.MODE_CONVEX_PATH:
                 return nSetOutlineConvexPath(mNativeRenderNode, outline.mPath.mNativePath,
                         outline.mAlpha);
@@ -381,6 +411,9 @@ public class RenderNode {
         throw new IllegalArgumentException("Unrecognized outline?");
     }
 
+    /**
+     * @return True if this RenderNode has a shadow, false otherwise
+     */
     public boolean hasShadow() {
         return nHasShadow(mNativeRenderNode);
     }
@@ -414,6 +447,11 @@ public class RenderNode {
         return nSetClipToOutline(mNativeRenderNode, clipToOutline);
     }
 
+    /**
+     * See {@link #setClipToOutline(boolean)}
+     *
+     * @return True if this RenderNode clips to its outline, false otherwise
+     */
     public boolean getClipToOutline() {
         return nGetClipToOutline(mNativeRenderNode);
     }
@@ -518,10 +556,21 @@ public class RenderNode {
         return nHasOverlappingRendering(mNativeRenderNode);
     }
 
+    /**
+     * Sets the base elevation of this RenderNode in pixels
+     *
+     * @param lift the elevation in pixels
+     * @return true if the elevation changed, false if it was the same
+     */
     public boolean setElevation(float lift) {
         return nSetElevation(mNativeRenderNode, lift);
     }
 
+    /**
+     * See {@link #setElevation(float)}
+     *
+     * @return The RenderNode's current elevation
+     */
     public float getElevation() {
         return nGetElevation(mNativeRenderNode);
     }
@@ -906,9 +955,12 @@ public class RenderNode {
      * bit of a kludge.
      *
      * @hide */
-    interface AnimationHost {
+    public interface AnimationHost {
+        /** checkstyle */
         void registerAnimatingRenderNode(RenderNode animator);
+        /** checkstyle */
         void registerVectorDrawableAnimator(NativeVectorDrawableAnimator animator);
+        /** checkstyle */
         boolean isAttached();
     }
 

@@ -16,45 +16,28 @@
 
 package android.widget;
 
-import static android.view.View.MeasureSpec.AT_MOST;
-import static android.view.View.MeasureSpec.EXACTLY;
-import static android.view.View.MeasureSpec.UNSPECIFIED;
+import static android.widget.TextView.UNKNOWN_BORING;
 
 import android.content.Context;
-import android.content.res.ColorStateList;
-import android.graphics.Typeface;
 import android.graphics.Canvas;
+import android.graphics.RecordingCanvas;
+import android.graphics.RenderNode;
 import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.PerfStatusReporter;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.LargeTest;
 import android.support.test.runner.AndroidJUnit4;
-import android.text.PrecomputedText;
-import android.text.Layout;
 import android.text.BoringLayout;
-import android.text.SpannableStringBuilder;
-import android.text.Spanned;
+import android.text.Layout;
+import android.text.PrecomputedText;
 import android.text.TextPaint;
-import android.text.style.TextAppearanceSpan;
-import android.view.LayoutInflater;
 import android.text.TextPerfUtils;
 import android.view.View.MeasureSpec;
-import android.view.DisplayListCanvas;
-import android.view.RenderNode;
-
-import com.android.perftests.core.R;
-
-import java.util.Random;
-import java.util.Locale;
 
 import org.junit.Before;
-import org.junit.Test;
 import org.junit.Rule;
+import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import static org.junit.Assert.assertTrue;
-
-import static android.widget.TextView.UNKNOWN_BORING;
 
 @LargeTest
 @RunWith(AndroidJUnit4.class)
@@ -360,7 +343,7 @@ public class TextViewPrecomputedTextPerfTest {
             textView.setText(text);
             textView.measure(width, height);
             textView.layout(0, 0, textView.getMeasuredWidth(), textView.getMeasuredHeight());
-            final DisplayListCanvas c = node.start(
+            final RecordingCanvas c = node.start(
                 textView.getMeasuredWidth(), textView.getMeasuredHeight());
             textView.nullLayouts();
             Canvas.freeTextLayoutCaches();
@@ -386,7 +369,7 @@ public class TextViewPrecomputedTextPerfTest {
             textView.setText(text);
             textView.measure(width, height);
             textView.layout(0, 0, textView.getMeasuredWidth(), textView.getMeasuredHeight());
-            final DisplayListCanvas c = node.start(
+            final RecordingCanvas c = node.start(
                 textView.getMeasuredWidth(), textView.getMeasuredHeight());
             textView.nullLayouts();
             Canvas.freeTextLayoutCaches();
@@ -414,7 +397,7 @@ public class TextViewPrecomputedTextPerfTest {
             textView.setText(text);
             textView.measure(width, height);
             textView.layout(0, 0, textView.getMeasuredWidth(), textView.getMeasuredHeight());
-            final DisplayListCanvas c = node.start(
+            final RecordingCanvas c = node.start(
                 textView.getMeasuredWidth(), textView.getMeasuredHeight());
             textView.nullLayouts();
             Canvas.freeTextLayoutCaches();
@@ -443,7 +426,7 @@ public class TextViewPrecomputedTextPerfTest {
             textView.setText(text);
             textView.measure(width, height);
             textView.layout(0, 0, textView.getMeasuredWidth(), textView.getMeasuredHeight());
-            final DisplayListCanvas c = node.start(
+            final RecordingCanvas c = node.start(
                 textView.getMeasuredWidth(), textView.getMeasuredHeight());
             textView.nullLayouts();
             Canvas.freeTextLayoutCaches();

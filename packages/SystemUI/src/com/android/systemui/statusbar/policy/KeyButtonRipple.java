@@ -27,8 +27,7 @@ import android.graphics.Paint;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
-import android.os.SystemProperties;
-import android.view.DisplayListCanvas;
+import android.graphics.RecordingCanvas;
 import android.view.RenderNodeAnimator;
 import android.view.View;
 import android.view.ViewConfiguration;
@@ -122,7 +121,7 @@ public class KeyButtonRipple extends Drawable {
     public void draw(Canvas canvas) {
         mSupportHardware = canvas.isHardwareAccelerated();
         if (mSupportHardware) {
-            drawHardware((DisplayListCanvas) canvas);
+            drawHardware((RecordingCanvas) canvas);
         } else {
             drawSoftware(canvas);
         }
@@ -147,7 +146,7 @@ public class KeyButtonRipple extends Drawable {
         return getBounds().width() > getBounds().height();
     }
 
-    private void drawHardware(DisplayListCanvas c) {
+    private void drawHardware(RecordingCanvas c) {
         if (mDrawingHardwareGlow) {
             c.drawRoundRect(mLeftProp, mTopProp, mRightProp, mBottomProp, mRxProp, mRyProp,
                     mPaintProp);

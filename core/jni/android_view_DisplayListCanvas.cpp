@@ -183,7 +183,7 @@ static void android_view_DisplayListCanvas_drawCircleProps(jlong canvasPtr,
 // JNI Glue
 // ----------------------------------------------------------------------------
 
-const char* const kClassPathName = "android/view/DisplayListCanvas";
+const char* const kClassPathName = "android/graphics/RecordingCanvas";
 
 static JNINativeMethod gMethods[] = {
 

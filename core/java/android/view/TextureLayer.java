@@ -31,7 +31,7 @@ import com.android.internal.util.VirtualRefBasePtr;
  *
  * @hide
  */
-final class TextureLayer {
+public final class TextureLayer {
     private ThreadedRenderer mRenderer;
     private VirtualRefBasePtr mFinalizer;
 
