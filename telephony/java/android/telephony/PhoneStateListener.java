@@ -283,6 +283,16 @@ public class PhoneStateListener {
     public static final int LISTEN_PHONE_CAPABILITY_CHANGE                 = 0x00200000;
 
     /**
+     *  Listen for changes to preferred data subId.
+     *  See {@link SubscriptionManager#setPreferredData(int)}
+     *  for more details.
+     *
+     *  @see #onPreferredDataSubIdChanged
+     *  @hide
+     */
+    public static final int LISTEN_PREFERRED_DATA_SUBID_CHANGE              = 0x00400000;
+
+    /**
      *  Listen for changes to the radio power state.
      *
      *  @see #onRadioPowerStateChanged
@@ -419,6 +429,9 @@ public class PhoneStateListener {
                         break;
                     case LISTEN_RADIO_POWER_STATE_CHANGED:
                         PhoneStateListener.this.onRadioPowerStateChanged((int) msg.obj);
+                        break;
+                    case LISTEN_PREFERRED_DATA_SUBID_CHANGE:
+                        PhoneStateListener.this.onPreferredDataSubIdChanged((int) msg.obj);
                         break;
                 }
             }
@@ -670,6 +683,17 @@ public class PhoneStateListener {
         // default implementation empty
     }
 
+    /**
+     * Callback invoked when preferred data subId changes. Requires
+     * the READ_PRIVILEGED_PHONE_STATE permission.
+     * @param subId the new preferred data subId. If it's INVALID_SUBSCRIPTION_ID,
+     *              it means it's unset and defaultDataSub is used to determine which
+     *              modem is preferred.
+     * @hide
+     */
+    public void onPreferredDataSubIdChanged(int subId) {
+        // default implementation empty
+    }
 
     /**
      * Callback invoked when telephony has received notice from a carrier
@@ -805,6 +829,10 @@ public class PhoneStateListener {
 
         public void onRadioPowerStateChanged(@TelephonyManager.RadioPowerState int state) {
             send(LISTEN_RADIO_POWER_STATE_CHANGED, 0, 0, state);
+        }
+
+        public void onPreferredDataSubIdChanged(int subId) {
+            send(LISTEN_PREFERRED_DATA_SUBID_CHANGE, 0, 0, subId);
         }
     }
 
