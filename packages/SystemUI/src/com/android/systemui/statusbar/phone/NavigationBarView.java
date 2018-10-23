@@ -350,7 +350,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     @Override
     public boolean onTouchEvent(MotionEvent event) {
         shouldDeadZoneConsumeTouchEvents(event);
-        if (mGestureHelper.onTouchEvent(event)) {
+        if (mGestureHelper != null && mGestureHelper.onTouchEvent(event)) {
             return true;
         }
         return super.onTouchEvent(event);
@@ -680,7 +680,9 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     }
 
     public void onNavigationButtonLongPress(View v) {
-        mGestureHelper.onNavigationButtonLongPress(v);
+        if (mGestureHelper != null) {
+            mGestureHelper.onNavigationButtonLongPress(v);
+        }
     }
 
     public void onPanelExpandedChange(boolean expanded) {
@@ -807,7 +809,9 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
     @Override
     protected void onDraw(Canvas canvas) {
-        mGestureHelper.onDraw(canvas);
+        if (mGestureHelper != null) {
+            mGestureHelper.onDraw(canvas);
+        }
         mDeadZone.onDraw(canvas);
         super.onDraw(canvas);
     }
@@ -819,7 +823,9 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         updateButtonLocationOnScreen(getHomeButton(), mHomeButtonBounds);
         updateButtonLocationOnScreen(getRecentsButton(), mRecentsButtonBounds);
         updateButtonLocationOnScreen(getRotateSuggestionButton(), mRotationButtonBounds);
-        mGestureHelper.onLayout(changed, left, top, right, bottom);
+        if (mGestureHelper != null) {
+            mGestureHelper.onLayout(changed, left, top, right, bottom);
+        }
         mRecentsOnboarding.setNavBarHeight(getMeasuredHeight());
     }
 
@@ -1117,7 +1123,9 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         pw.println("    }");
 
         mContextualButtonGroup.dump(pw);
-        mGestureHelper.dump(pw);
+        if (mGestureHelper != null) {
+            mGestureHelper.dump(pw);
+        }
         mRecentsOnboarding.dump(pw);
     }
 

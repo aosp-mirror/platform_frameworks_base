@@ -25,6 +25,9 @@ public class TestableDependency extends Dependency {
     private final ArraySet<Object> mInstantiatedObjects = new ArraySet<>();
 
     public TestableDependency(Context context) {
+        if (context instanceof SysuiTestableContext) {
+            mComponents = ((SysuiTestableContext) context).getComponents();
+        }
         mContext = context;
         if (SystemUIFactory.getInstance() == null) {
             SystemUIFactory.createFromConfig(context);
@@ -43,6 +46,9 @@ public class TestableDependency extends Dependency {
     }
 
     public <T> void injectTestDependency(Class<T> key, T obj) {
+        if (mInstantiatedObjects.contains(key)) {
+            throw new IllegalStateException(key + " was already initialized");
+        }
         mObjs.put(key, obj);
     }
 

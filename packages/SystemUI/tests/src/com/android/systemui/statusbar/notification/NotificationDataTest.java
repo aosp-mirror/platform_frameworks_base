@@ -55,13 +55,16 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper.RunWithLooper;
 import android.util.ArraySet;
 
+import com.android.systemui.Dependency;
 import com.android.systemui.ForegroundServiceController;
+import com.android.systemui.InitController;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.NotificationTestHelper;
+import com.android.systemui.statusbar.notification.NotificationData.KeyguardEnvironment;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
+import com.android.systemui.statusbar.phone.ShadeController;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -87,7 +90,7 @@ public class NotificationDataTest extends SysuiTestCase {
     @Mock
     ForegroundServiceController mFsc;
     @Mock
-    NotificationData.Environment mEnvironment;
+    NotificationData.KeyguardEnvironment mEnvironment;
 
     private final IPackageManager mMockPackageManager = mock(IPackageManager.class);
     private NotificationData mNotificationData;
@@ -108,10 +111,14 @@ public class NotificationDataTest extends SysuiTestCase {
                 .thenReturn(PackageManager.PERMISSION_GRANTED);
 
         mDependency.injectTestDependency(ForegroundServiceController.class, mFsc);
-        when(mEnvironment.getGroupManager()).thenReturn(new NotificationGroupManager());
+        mDependency.injectTestDependency(NotificationGroupManager.class,
+                new NotificationGroupManager());
+        mDependency.injectMockDependency(ShadeController.class);
+        mDependency.injectTestDependency(KeyguardEnvironment.class, mEnvironment);
         when(mEnvironment.isDeviceProvisioned()).thenReturn(true);
         when(mEnvironment.isNotificationForCurrentProfiles(any())).thenReturn(true);
-        mNotificationData = new TestableNotificationData(mEnvironment);
+        mNotificationData = new TestableNotificationData();
+        Dependency.get(InitController.class).executePostInitTasks();
         mNotificationData.updateRanking(mock(NotificationListenerService.RankingMap.class));
         mRow = new NotificationTestHelper(getContext()).createRow();
     }
@@ -298,11 +305,11 @@ public class NotificationDataTest extends SysuiTestCase {
                 mRow.getEntry().notification)).thenReturn(false);
         when(mEnvironment.isNotificationForCurrentProfiles(
                 row2.getEntry().notification)).thenReturn(true);
-        ArrayList<NotificationData.Entry> reuslt =
+        ArrayList<NotificationData.Entry> result =
                 mNotificationData.getNotificationsForCurrentUser();
 
-        assertEquals(reuslt.size(), 1);
-        junit.framework.Assert.assertEquals(reuslt.get(0), row2.getEntry());
+        assertEquals(result.size(), 1);
+        junit.framework.Assert.assertEquals(result.get(0), row2.getEntry());
     }
 
     @Test
@@ -416,8 +423,8 @@ public class NotificationDataTest extends SysuiTestCase {
     }
 
     private class TestableNotificationData extends NotificationData {
-        public TestableNotificationData(Environment environment) {
-            super(environment);
+        public TestableNotificationData() {
+            super();
         }
 
         @Override

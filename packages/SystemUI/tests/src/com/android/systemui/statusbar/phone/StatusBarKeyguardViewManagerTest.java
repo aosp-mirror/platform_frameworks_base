@@ -31,10 +31,10 @@ import android.testing.TestableLooper;
 import android.view.ViewGroup;
 
 import com.android.internal.widget.LockPatternUtils;
-import com.android.keyguard.KeyguardHostView;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
+import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -78,7 +78,7 @@ public class StatusBarKeyguardViewManagerTest extends SysuiTestCase {
 
     @Test
     public void dismissWithAction_AfterKeyguardGoneSetToFalse() {
-        KeyguardHostView.OnDismissAction action = () -> false;
+        OnDismissAction action = () -> false;
         Runnable cancelAction = () -> {};
         mStatusBarKeyguardViewManager.dismissWithAction(action, cancelAction,
                 false /* afterKeyguardGone */);

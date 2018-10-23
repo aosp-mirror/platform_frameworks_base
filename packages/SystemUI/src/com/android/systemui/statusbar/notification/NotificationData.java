@@ -51,21 +51,22 @@ import android.util.ArraySet;
 import android.view.View;
 import android.widget.ImageView;
 
-import androidx.annotation.Nullable;
-
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.ContrastColorUtil;
 import com.android.systemui.Dependency;
 import com.android.systemui.ForegroundServiceController;
+import com.android.systemui.InitController;
 import com.android.systemui.statusbar.InflationTask;
+import com.android.systemui.statusbar.NotificationLockscreenUserManager;
+import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
+import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
-import com.android.systemui.statusbar.policy.ZenModeController;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -74,16 +75,23 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
 
+import androidx.annotation.Nullable;
+
 /**
  * The list of currently displaying notifications.
  */
 public class NotificationData {
 
-    private final Environment mEnvironment;
-    private HeadsUpManager mHeadsUpManager;
+    /**
+     * These dependencies are late init-ed
+     */
+    private KeyguardEnvironment mEnvironment;
+    private ShadeController mShadeController;
+    private NotificationMediaManager mMediaManager;
+    private ForegroundServiceController mFsc;
+    private NotificationLockscreenUserManager mUserManager;
 
-    final ZenModeController mZen = Dependency.get(ZenModeController.class);
-    final ForegroundServiceController mFsc = Dependency.get(ForegroundServiceController.class);
+    private HeadsUpManager mHeadsUpManager;
 
     public static final class Entry {
         private static final long LAUNCH_COOLDOWN = 2000;
@@ -375,7 +383,8 @@ public class NotificationData {
     private final ArrayList<Entry> mSortedAndFiltered = new ArrayList<>();
     private final ArrayList<Entry> mFilteredForUser = new ArrayList<>();
 
-    private NotificationGroupManager mGroupManager;
+    private final NotificationGroupManager mGroupManager
+            = Dependency.get(NotificationGroupManager.class);
 
     private RankingMap mRankingMap;
     private final Ranking mTmpRanking = new Ranking();
@@ -407,7 +416,7 @@ public class NotificationData {
                 bRank = mRankingB.getRank();
             }
 
-            String mediaNotification = mEnvironment.getCurrentMediaNotificationKey();
+            String mediaNotification = getMediaManager().getMediaNotificationKey();
 
             // IMPORTANCE_MIN media streams are allowed to drift to the bottom
             final boolean aMedia = a.key.equals(mediaNotification)
@@ -442,13 +451,43 @@ public class NotificationData {
         }
     };
 
-    public NotificationData(Environment environment) {
-        mEnvironment = environment;
-        mGroupManager = environment.getGroupManager();
+    private KeyguardEnvironment getEnvironment() {
+        if (mEnvironment == null) {
+            mEnvironment = Dependency.get(KeyguardEnvironment.class);
+        }
+        return mEnvironment;
+    }
+
+    private ShadeController getShadeController() {
+        if (mShadeController == null) {
+            mShadeController = Dependency.get(ShadeController.class);
+        }
+        return mShadeController;
+    }
+
+    private NotificationMediaManager getMediaManager() {
+        if (mMediaManager == null) {
+            mMediaManager = Dependency.get(NotificationMediaManager.class);
+        }
+        return mMediaManager;
+    }
+
+    private ForegroundServiceController getFsc() {
+        if (mFsc == null) {
+            mFsc = Dependency.get(ForegroundServiceController.class);
+        }
+        return mFsc;
+    }
+
+    private NotificationLockscreenUserManager getUserManager() {
+        if (mUserManager == null) {
+            mUserManager = Dependency.get(NotificationLockscreenUserManager.class);
+        }
+        return mUserManager;
     }
 
     /**
-     * Returns the sorted list of active notifications (depending on {@link Environment}
+     * Returns the sorted list of active notifications (depending on {@link KeyguardEnvironment}
      *
      * <p>
      * This call doesn't update the list of active notifications. Call {@link #filterAndSort()}
@@ -468,7 +507,7 @@ public class NotificationData {
             for (int i = 0; i < N; i++) {
                 Entry entry = mEntries.valueAt(i);
                 final StatusBarNotification sbn = entry.notification;
-                if (!mEnvironment.isNotificationForCurrentProfiles(sbn)) {
+                if (!getEnvironment().isNotificationForCurrentProfiles(sbn)) {
                     continue;
                 }
                 mFilteredForUser.add(entry);
@@ -719,27 +758,27 @@ public class NotificationData {
      */
     public boolean shouldFilterOut(Entry entry) {
         final StatusBarNotification sbn = entry.notification;
-        if (!(mEnvironment.isDeviceProvisioned() ||
+        if (!(getEnvironment().isDeviceProvisioned() ||
                 showNotificationEvenIfUnprovisioned(sbn))) {
             return true;
         }
 
-        if (!mEnvironment.isNotificationForCurrentProfiles(sbn)) {
+        if (!getEnvironment().isNotificationForCurrentProfiles(sbn)) {
             return true;
         }
 
-        if (mEnvironment.isSecurelyLocked(sbn.getUserId()) &&
+        if (getUserManager().isLockscreenPublicMode(sbn.getUserId()) &&
                 (sbn.getNotification().visibility == Notification.VISIBILITY_SECRET
-                        || mEnvironment.shouldHideNotifications(sbn.getUserId())
-                        || mEnvironment.shouldHideNotifications(sbn.getKey()))) {
+                        || getUserManager().shouldHideNotifications(sbn.getUserId())
+                        || getUserManager().shouldHideNotifications(sbn.getKey()))) {
             return true;
         }
 
-        if (mEnvironment.isDozing() && shouldSuppressAmbient(entry)) {
+        if (getShadeController().isDozing() && shouldSuppressAmbient(entry)) {
             return true;
         }
 
-        if (!mEnvironment.isDozing() && shouldSuppressNotificationList(entry)) {
+        if (!getShadeController().isDozing() && shouldSuppressNotificationList(entry)) {
             return true;
         }
 
@@ -752,15 +791,16 @@ public class NotificationData {
             return true;
         }
 
-        if (mFsc.isDungeonNotification(sbn) && !mFsc.isDungeonNeededForUser(sbn.getUserId())) {
+        if (getFsc().isDungeonNotification(sbn)
+                && !getFsc().isDungeonNeededForUser(sbn.getUserId())) {
             // this is a foreground-service disclosure for a user that does not need to show one
             return true;
         }
-        if (mFsc.isSystemAlertNotification(sbn)) {
+        if (getFsc().isSystemAlertNotification(sbn)) {
             final String[] apps = sbn.getNotification().extras.getStringArray(
                     Notification.EXTRA_FOREGROUND_APPS);
             if (apps != null && apps.length >= 1) {
-                if (!mFsc.isSystemAlertWarningNeeded(sbn.getUserId(), apps[0])) {
+                if (!getFsc().isSystemAlertWarningNeeded(sbn.getUserId(), apps[0])) {
                     return true;
                 }
             }
@@ -838,18 +878,8 @@ public class NotificationData {
     /**
      * Provides access to keyguard state and user settings dependent data.
      */
-    public interface Environment {
-        public boolean isSecurelyLocked(int userId);
-        public boolean shouldHideNotifications(int userid);
-        public boolean shouldHideNotifications(String key);
-        public boolean isDeviceProvisioned();
-        public boolean isNotificationForCurrentProfiles(StatusBarNotification sbn);
-        public String getCurrentMediaNotificationKey();
-        public NotificationGroupManager getGroupManager();
-
-        /**
-         * @return true iff the device is dozing
-         */
-        boolean isDozing();
+    public interface KeyguardEnvironment {
+        boolean isDeviceProvisioned();
+        boolean isNotificationForCurrentProfiles(StatusBarNotification sbn);
     }
 }

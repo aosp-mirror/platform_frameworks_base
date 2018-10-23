@@ -92,7 +92,7 @@ public class NotificationLoggerTest extends SysuiTestCase {
         mEntry.row = mRow;
 
         mLogger = new TestableNotificationLogger(mBarService);
-        mLogger.setUpWithEntryManager(mEntryManager, mListContainer);
+        mLogger.setUpWithContainer(mListContainer);
     }
 
     @Test

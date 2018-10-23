@@ -62,6 +62,7 @@ import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.EventLogTags;
 import com.android.systemui.ForegroundServiceController;
+import com.android.systemui.InitController;
 import com.android.systemui.R;
 import com.android.systemui.UiOffloadThread;
 import com.android.systemui.statusbar.NotificationLifetimeExtender;
@@ -74,13 +75,15 @@ import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.NotificationUiAdjustment;
 import com.android.systemui.statusbar.NotificationUpdateHandler;
+import com.android.systemui.statusbar.notification.NotificationData.KeyguardEnvironment;
+import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
+import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.row.NotificationInflater;
 import com.android.systemui.statusbar.notification.row.NotificationInflater.InflationFlag;
 import com.android.systemui.statusbar.notification.row.RowInflaterTask;
-import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
-import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
+import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
@@ -110,33 +113,31 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
     protected final HashMap<String, NotificationData.Entry> mPendingNotifications = new HashMap<>();
     protected final NotificationClicker mNotificationClicker = new NotificationClicker();
 
-    // Dependencies:
-    protected final NotificationLockscreenUserManager mLockscreenUserManager =
-            Dependency.get(NotificationLockscreenUserManager.class);
-    protected final NotificationGroupManager mGroupManager =
+    private final NotificationGroupManager mGroupManager =
             Dependency.get(NotificationGroupManager.class);
-    protected final NotificationGutsManager mGutsManager =
+    private final NotificationGutsManager mGutsManager =
             Dependency.get(NotificationGutsManager.class);
-    protected final NotificationRemoteInputManager mRemoteInputManager =
-            Dependency.get(NotificationRemoteInputManager.class);
-    protected final NotificationMediaManager mMediaManager =
-            Dependency.get(NotificationMediaManager.class);
-    protected final MetricsLogger mMetricsLogger = Dependency.get(MetricsLogger.class);
-    protected final DeviceProvisionedController mDeviceProvisionedController =
+    private final MetricsLogger mMetricsLogger = Dependency.get(MetricsLogger.class);
+    private final DeviceProvisionedController mDeviceProvisionedController =
             Dependency.get(DeviceProvisionedController.class);
-    protected final VisualStabilityManager mVisualStabilityManager =
+    private final VisualStabilityManager mVisualStabilityManager =
             Dependency.get(VisualStabilityManager.class);
-    protected final UiOffloadThread mUiOffloadThread = Dependency.get(UiOffloadThread.class);
-    protected final ForegroundServiceController mForegroundServiceController =
+    private final UiOffloadThread mUiOffloadThread = Dependency.get(UiOffloadThread.class);
+    private final ForegroundServiceController mForegroundServiceController =
             Dependency.get(ForegroundServiceController.class);
-    protected final NotificationListener mNotificationListener =
-            Dependency.get(NotificationListener.class);
-    protected AmbientPulseManager mAmbientPulseManager = Dependency.get(AmbientPulseManager.class);
+    private final AmbientPulseManager mAmbientPulseManager =
+            Dependency.get(AmbientPulseManager.class);
+
+    // Lazily retrieved dependencies
+    private NotificationRemoteInputManager mRemoteInputManager;
+    private NotificationMediaManager mMediaManager;
+    private NotificationListener mNotificationListener;
+    private ShadeController mShadeController;
 
     protected IDreamManager mDreamManager;
     protected IStatusBarService mBarService;
-    protected NotificationPresenter mPresenter;
-    protected Callback mCallback;
+    private NotificationPresenter mPresenter;
+    private Callback mCallback;
     protected PowerManager mPowerManager;
     protected NotificationListenerService.RankingMap mLatestRankingMap;
     protected HeadsUpManager mHeadsUpManager;
@@ -149,7 +150,6 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
             = new ArrayList<>();
     private ExpandableNotificationRow.OnAppOpsClickListener mOnAppOpsClickListener;
 
-
     private final class NotificationClicker implements View.OnClickListener {
 
         @Override
@@ -159,7 +159,7 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
                 return;
             }
 
-            mPresenter.wakeUpIfDozing(SystemClock.uptimeMillis(), v);
+            getShadeController().wakeUpIfDozing(SystemClock.uptimeMillis(), v);
 
             final ExpandableNotificationRow row = (ExpandableNotificationRow) v;
             final StatusBarNotification sbn = row.getStatusBarNotification();
@@ -232,7 +232,43 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
         mDreamManager = IDreamManager.Stub.asInterface(
                 ServiceManager.checkService(DreamService.DREAM_SERVICE));
         mMessagingUtil = new NotificationMessagingUtil(context);
+        mNotificationData = new NotificationData();
+        Dependency.get(InitController.class).addPostInitTask(this::onPostInit);
+    }
+
+    private void onPostInit() {
         mGroupManager.setPendingEntries(mPendingNotifications);
+    }
+
+    /**
+     * Our dependencies can have cyclic references, so some need to be lazy
+     */
+    private NotificationRemoteInputManager getRemoteInputManager() {
+        if (mRemoteInputManager == null) {
+            mRemoteInputManager = Dependency.get(NotificationRemoteInputManager.class);
+        }
+        return mRemoteInputManager;
+    }
+
+    private NotificationMediaManager getMediaManager() {
+        if (mMediaManager == null) {
+            mMediaManager = Dependency.get(NotificationMediaManager.class);
+        }
+        return mMediaManager;
+    }
+
+    private NotificationListener getNotificationListener() {
+        if (mNotificationListener == null) {
+            mNotificationListener = Dependency.get(NotificationListener.class);
+        }
+        return mNotificationListener;
+    }
+
+    private ShadeController getShadeController() {
+        if (mShadeController == null) {
+            mShadeController = Dependency.get(ShadeController.class);
+        }
+        return mShadeController;
     }
 
     public void setUpWithPresenter(NotificationPresenter presenter,
@@ -240,12 +276,11 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
             HeadsUpManager headsUpManager) {
         mPresenter = presenter;
         mCallback = callback;
-        mNotificationData = new NotificationData(presenter);
         mHeadsUpManager = headsUpManager;
         mNotificationData.setHeadsUpManager(mHeadsUpManager);
         mListContainer = listContainer;
 
-        mHeadsUpObserver = new ContentObserver(mPresenter.getHandler()) {
+        mHeadsUpObserver = new ContentObserver(Dependency.get(Dependency.MAIN_HANDLER)) {
             @Override
             public void onChange(boolean selfChange) {
                 boolean wasUsing = mUseHeadsUp;
@@ -278,7 +313,7 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
         mNotificationLifetimeExtenders.add(mHeadsUpManager);
         mNotificationLifetimeExtenders.add(mAmbientPulseManager);
         mNotificationLifetimeExtenders.add(mGutsManager);
-        mNotificationLifetimeExtenders.addAll(mRemoteInputManager.getLifetimeExtenders());
+        mNotificationLifetimeExtenders.addAll(getRemoteInputManager().getLifetimeExtenders());
 
         for (NotificationLifetimeExtender extender : mNotificationLifetimeExtenders) {
             extender.setCallback(key -> removeNotification(key, mLatestRankingMap));
@@ -292,6 +327,14 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
 
     public NotificationData getNotificationData() {
         return mNotificationData;
+    }
+
+    protected Context getContext() {
+        return mContext;
+    }
+
+    protected NotificationPresenter getPresenter() {
+        return mPresenter;
     }
 
     public ExpandableNotificationRow.LongPressListener getNotificationLongClicker() {
@@ -348,7 +391,7 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
         row.setInflationCallback(this);
         row.setLongPressListener(getNotificationLongClicker());
         mListContainer.bindRow(row);
-        mRemoteInputManager.bindRow(row);
+        getRemoteInputManager().bindRow(row);
 
         // Get the app name.
         // Note that Notification.Builder#bindHeaderAppName has similar logic
@@ -387,7 +430,7 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
                 true);
         NotificationData.Entry entry = mNotificationData.get(n.getKey());
 
-        mRemoteInputManager.onPerformRemoveNotification(n, entry);
+        getRemoteInputManager().onPerformRemoveNotification(n, entry);
         final String pkg = n.getPackageName();
         final String tag = n.getTag();
         final int id = n.getId();
@@ -512,7 +555,7 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
             // sending look longer than it takes.
             // Also we should not defer the removal if reordering isn't allowed since otherwise
             // some notifications can't disappear before the panel is closed.
-            boolean ignoreEarliestRemovalTime = mRemoteInputManager.getController().isSpinning(key)
+            boolean ignoreEarliestRemovalTime = getRemoteInputManager().getController().isSpinning(key)
                     && !FORCE_REMOTE_INPUT_HISTORY
                     || !mVisualStabilityManager.isReorderingAllowed();
             mHeadsUpManager.removeNotification(key, ignoreEarliestRemovalTime);
@@ -547,7 +590,7 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
             extender.setShouldManageLifetime(entry, false /* shouldManage */);
         }
 
-        mMediaManager.onNotificationRemoved(key);
+        getMediaManager().onNotificationRemoved(key);
         mForegroundServiceController.removeNotification(entry.notification);
 
         if (entry.row != null) {
@@ -602,8 +645,8 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
                 boolean isForeground = (row.getStatusBarNotification().getNotification().flags
                         & Notification.FLAG_FOREGROUND_SERVICE) != 0;
                 boolean keepForReply =
-                        mRemoteInputManager.shouldKeepForRemoteInputHistory(childEntry)
-                        || mRemoteInputManager.shouldKeepForSmartReplyHistory(childEntry);
+                        getRemoteInputManager().shouldKeepForRemoteInputHistory(childEntry)
+                        || getRemoteInputManager().shouldKeepForSmartReplyHistory(childEntry);
                 if (isForeground || keepForReply) {
                     // the child is a foreground service notification which we can't remove or it's
                     // a child we're keeping around for reply!
@@ -633,7 +676,8 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
 
     protected void updateNotification(NotificationData.Entry entry, PackageManager pmUser,
             StatusBarNotification sbn, ExpandableNotificationRow row) {
-        row.setNeedsRedaction(mLockscreenUserManager.needsRedaction(entry));
+        row.setNeedsRedaction(
+                Dependency.get(NotificationLockscreenUserManager.class).needsRedaction(entry));
         boolean isLowPriority = mNotificationData.isAmbient(sbn.getKey());
         boolean isUpdate = mNotificationData.get(entry.key) != null;
         boolean wasLowPriority = row.isLowPriority();
@@ -818,7 +862,7 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
                 mNotificationData.getImportance(key));
 
         boolean alertAgain = alertAgain(entry, entry.notification.getNotification());
-        if (mPresenter.isDozing()) {
+        if (getShadeController().isDozing()) {
             updateAlertState(entry, shouldPulse(entry), alertAgain, mAmbientPulseManager);
         } else {
             updateAlertState(entry, shouldHeadsUp(entry), alertAgain, mHeadsUpManager);
@@ -833,7 +877,8 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
 
         if (DEBUG) {
             // Is this for you?
-            boolean isForCurrentUser = mPresenter.isNotificationForCurrentProfiles(notification);
+            boolean isForCurrentUser = Dependency.get(KeyguardEnvironment.class)
+                    .isNotificationForCurrentProfiles(notification);
             Log.d(TAG, "notification is " + (isForCurrentUser ? "" : "not ") + "for you");
         }
 
@@ -917,7 +962,7 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
     public boolean shouldHeadsUp(NotificationData.Entry entry) {
         StatusBarNotification sbn = entry.notification;
 
-        if (mPresenter.isDozing()) {
+        if (getShadeController().isDozing()) {
             if (DEBUG) {
                 Log.d(TAG, "No heads up: device is dozing: " + sbn.getKey());
             }
@@ -998,7 +1043,7 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
     protected boolean shouldPulse(NotificationData.Entry entry) {
         StatusBarNotification sbn = entry.notification;
 
-        if (!mPresenter.isDozing()) {
+        if (!getShadeController().isDozing()) {
             if (DEBUG) {
                 Log.d(TAG, "No pulsing: not dozing: " + sbn.getKey());
             }
@@ -1076,7 +1121,7 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
 
     protected void setNotificationsShown(String[] keys) {
         try {
-            mNotificationListener.setNotificationsShown(keys);
+            getNotificationListener().setNotificationsShown(keys);
         } catch (RuntimeException e) {
             Log.d(TAG, "failed setNotificationsShown: ", e);
         }

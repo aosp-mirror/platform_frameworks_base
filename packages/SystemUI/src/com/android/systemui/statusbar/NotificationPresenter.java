@@ -19,6 +19,7 @@ import android.content.Intent;
 import android.os.Handler;
 import android.view.View;
 
+import com.android.systemui.statusbar.notification.ActivityLaunchAnimator;
 import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
@@ -31,9 +32,7 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
  * for affecting the state of the system (e.g. starting an intent, given that the presenter may
  * want to perform some action before doing so).
  */
-public interface NotificationPresenter extends NotificationData.Environment,
-        NotificationRemoteInputManager.Callback,
-        ExpandableNotificationRow.OnExpandClickListener,
+public interface NotificationPresenter extends ExpandableNotificationRow.OnExpandClickListener,
         ActivatableNotificationView.OnActivatedListener,
         NotificationEntryManager.Callback {
     /**
@@ -43,20 +42,10 @@ public interface NotificationPresenter extends NotificationData.Environment,
     boolean isPresenterFullyCollapsed();
 
     /**
-     * Returns true if the presenter is locked. For example, if the keyguard is active.
-     */
-    boolean isPresenterLocked();
-
-    /**
      * Runs the given intent. The presenter may want to run some animations or close itself when
      * this happens.
      */
     void startNotificationGutsIntent(Intent intent, int appUid, ExpandableNotificationRow row);
-
-    /**
-     * Returns the Handler for NotificationPresenter.
-     */
-    Handler getHandler();
 
     /**
      * Refresh or remove lockscreen artwork from media metadata or the lockscreen wallpaper.
@@ -64,36 +53,10 @@ public interface NotificationPresenter extends NotificationData.Environment,
     void updateMediaMetaData(boolean metaDataChanged, boolean allowEnterAnimation);
 
     /**
-     * Called when the locked status of the device is changed for a work profile.
-     */
-    void onWorkChallengeChanged();
-
-    /**
      * Called when the current user changes.
      * @param newUserId new user id
      */
     void onUserSwitched(int newUserId);
-
-    /**
-     * Gets the NotificationLockscreenUserManager for this Presenter.
-     */
-    NotificationLockscreenUserManager getNotificationLockscreenUserManager();
-
-    /**
-     * Wakes the device up if dozing.
-     *
-     * @param time the time when the request to wake up was issued
-     * @param where which view caused this wake up request
-     */
-    void wakeUpIfDozing(long time, View where);
-
-    /**
-     * True if the device currently requires a PIN, pattern, or password to unlock.
-     *
-     * @param userId user id to query about
-     * @return true iff the device is locked
-     */
-    boolean isDeviceLocked(int userId);
 
     /**
      * @return true iff the device is in vr mode
@@ -114,7 +77,36 @@ public interface NotificationPresenter extends NotificationData.Environment,
     int getMaxNotificationsWhileLocked(boolean recompute);
 
     /**
-     * Called when the row states are updated by NotificationViewHierarchyManager.
+     * True if the presenter
+     * @return
+     */
+    default boolean isPresenterLocked() { return false; }
+
+    /**
+     * Called when the row states are updated by {@link NotificationViewHierarchyManager}.
      */
     void onUpdateRowStates();
+
+    /**
+     * @return true if the shade is collapsing.
+     */
+    boolean isCollapsing();
+
+    /**
+     * @return true if the shade is collapsing to show an activity over the lock screen
+     */
+    default public boolean isCollapsingToShowActivityOverLockscreen() {
+        return false;
+    }
+
+    /**
+     * Get the {@link ActivityLaunchAnimator} from the presenter so it can be queried by
+     * {@link com.android.systemui.statusbar.phone.StatusBar}
+     * @return the current animator
+     * @deprecated This is only here for now because StatusBar is still the ActivityLaunchAnimator
+     * callback but shouldn't be.
+     */
+    default public ActivityLaunchAnimator getActivityLaunchAnimator() {
+        return null;
+    }
 }

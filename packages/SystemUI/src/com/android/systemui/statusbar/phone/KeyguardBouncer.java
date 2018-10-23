@@ -16,7 +16,7 @@
 
 package com.android.systemui.statusbar.phone;
 
-import static com.android.keyguard.KeyguardHostView.OnDismissAction;
+import static com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import static com.android.keyguard.KeyguardSecurityModel.SecurityMode;
 
 import android.content.Context;

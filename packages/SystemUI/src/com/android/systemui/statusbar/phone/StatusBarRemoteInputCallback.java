@@ -1,0 +1,252 @@
+/*
+ * Copyright (C) 2018 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License"); you may not use this file
+ * except in compliance with the License. You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software distributed under the
+ * License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY
+ * KIND, either express or implied. See the License for the specific language governing
+ * permissions and limitations under the License.
+ */
+
+package com.android.systemui.statusbar.phone;
+
+import static android.content.Intent.ACTION_DEVICE_LOCKED_CHANGED;
+
+import static com.android.systemui.SysUiServiceProvider.getComponent;
+import static com.android.systemui.statusbar.NotificationLockscreenUserManager
+        .NOTIFICATION_UNLOCKED_BY_WORK_CHALLENGE_ACTION;
+
+import android.app.ActivityManager;
+import android.app.KeyguardManager;
+import android.app.PendingIntent;
+import android.app.StatusBarManager;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
+import android.content.IntentSender;
+import android.os.RemoteException;
+import android.os.UserHandle;
+import android.view.View;
+import android.view.ViewParent;
+import android.view.ViewTreeObserver;
+
+import com.android.systemui.Dependency;
+import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.CommandQueue.Callbacks;
+import com.android.systemui.statusbar.NotificationLockscreenUserManager;
+import com.android.systemui.statusbar.NotificationRemoteInputManager;
+import com.android.systemui.statusbar.NotificationRemoteInputManager.Callback;
+import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
+import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
+import com.android.systemui.statusbar.policy.KeyguardMonitor;
+import com.android.systemui.statusbar.policy.PreviewInflater;
+
+public class StatusBarRemoteInputCallback implements Callback, Callbacks {
+
+    private final KeyguardMonitor mKeyguardMonitor = Dependency.get(KeyguardMonitor.class);
+    private final StatusBarStateController mStatusBarStateController
+            = Dependency.get(StatusBarStateController.class);
+    private final NotificationLockscreenUserManager mLockscreenUserManager
+            = Dependency.get(NotificationLockscreenUserManager.class);
+    private final ActivityStarter mActivityStarter = Dependency.get(ActivityStarter.class);
+    private final Context mContext;
+    private View mPendingWorkRemoteInputView;
+    private final StatusBarStateController.StateListener mStateListener = this::setStatusBarState;
+    private View mPendingRemoteInputView;
+    private final ShadeController mShadeController = Dependency.get(ShadeController.class);
+    private KeyguardManager mKeyguardManager;
+    private final CommandQueue mCommandQueue;
+    private int mDisabled2;
+    protected BroadcastReceiver mChallengeReceiver = new ChallengeReceiver();
+
+    public StatusBarRemoteInputCallback(Context context) {
+        mContext = context;
+        mContext.registerReceiverAsUser(mChallengeReceiver, UserHandle.ALL,
+                new IntentFilter(ACTION_DEVICE_LOCKED_CHANGED), null, null);
+        mStatusBarStateController.addListener(mStateListener);
+        mKeyguardManager = context.getSystemService(KeyguardManager.class);
+        mCommandQueue = getComponent(context, CommandQueue.class);
+        mCommandQueue.addCallbacks(this);
+    }
+
+    private void setStatusBarState(int state) {
+        if (state == StatusBarState.SHADE && mStatusBarStateController.leaveOpenOnKeyguardHide()) {
+            if (!mStatusBarStateController.isKeyguardRequested()) {
+                if (mPendingRemoteInputView != null
+                        && mPendingRemoteInputView.isAttachedToWindow()) {
+                    mPendingRemoteInputView.post(mPendingRemoteInputView::callOnClick);
+                }
+                mPendingRemoteInputView = null;
+            }
+        }
+    }
+
+    @Override
+    public void onLockedRemoteInput(ExpandableNotificationRow row, View clicked) {
+        mStatusBarStateController.setLeaveOpenOnKeyguardHide(true);
+        mShadeController.showBouncer(true /* scrimmed */);
+        mPendingRemoteInputView = clicked;
+    }
+
+    protected void onWorkChallengeChanged() {
+        if (mPendingWorkRemoteInputView != null
+                && !mLockscreenUserManager.isAnyProfilePublicMode()) {
+            // Expand notification panel and the notification row, then click on remote input view
+            final Runnable clickPendingViewRunnable = () -> {
+                final View pendingWorkRemoteInputView = mPendingWorkRemoteInputView;
+                if (pendingWorkRemoteInputView == null) {
+                    return;
+                }
+
+                // Climb up the hierarchy until we get to the container for this row.
+                ViewParent p = pendingWorkRemoteInputView.getParent();
+                while (!(p instanceof ExpandableNotificationRow)) {
+                    if (p == null) {
+                        return;
+                    }
+                    p = p.getParent();
+                }
+
+                final ExpandableNotificationRow row = (ExpandableNotificationRow) p;
+                ViewParent viewParent = row.getParent();
+                if (viewParent instanceof NotificationStackScrollLayout) {
+                    final NotificationStackScrollLayout scrollLayout =
+                            (NotificationStackScrollLayout) viewParent;
+                    row.makeActionsVisibile();
+                    row.post(() -> {
+                        final Runnable finishScrollingCallback = () -> {
+                            mPendingWorkRemoteInputView.callOnClick();
+                            mPendingWorkRemoteInputView = null;
+                            scrollLayout.setFinishScrollingCallback(null);
+                        };
+                        if (scrollLayout.scrollTo(row)) {
+                            // It scrolls! So call it when it's finished.
+                            scrollLayout.setFinishScrollingCallback(finishScrollingCallback);
+                        } else {
+                            // It does not scroll, so call it now!
+                            finishScrollingCallback.run();
+                        }
+                    });
+                }
+            };
+            mShadeController.postOnShadeExpanded(clickPendingViewRunnable);
+            mShadeController.instantExpandNotificationsPanel();
+        }
+    }
+
+    @Override
+    public void onMakeExpandedVisibleForRemoteInput(ExpandableNotificationRow row,
+            View clickedView) {
+        if (mKeyguardMonitor.isShowing()) {
+            onLockedRemoteInput(row, clickedView);
+        } else {
+            row.setUserExpanded(true);
+            row.getPrivateLayout().setOnExpandedVisibleListener(clickedView::performClick);
+        }
+    }
+
+    @Override
+    public void onLockedWorkRemoteInput(int userId, ExpandableNotificationRow row,
+            View clicked) {
+        // Collapse notification and show work challenge
+        mCommandQueue.animateCollapsePanels();
+        startWorkChallengeIfNecessary(userId, null, null);
+        // Add pending remote input view after starting work challenge, as starting work challenge
+        // will clear all previous pending review view
+        mPendingWorkRemoteInputView = clicked;
+    }
+
+    protected boolean startWorkChallengeIfNecessary(int userId, IntentSender intendSender,
+            String notificationKey) {
+        // Clear pending remote view, as we do not want to trigger pending remote input view when
+        // it's called by other code
+        mPendingWorkRemoteInputView = null;
+        // Begin old BaseStatusBar.startWorkChallengeIfNecessary.
+        final Intent newIntent = mKeyguardManager.createConfirmDeviceCredentialIntent(null,
+                null, userId);
+        if (newIntent == null) {
+            return false;
+        }
+        final Intent callBackIntent = new Intent(NOTIFICATION_UNLOCKED_BY_WORK_CHALLENGE_ACTION);
+        callBackIntent.putExtra(Intent.EXTRA_INTENT, intendSender);
+        callBackIntent.putExtra(Intent.EXTRA_INDEX, notificationKey);
+        callBackIntent.setPackage(mContext.getPackageName());
+
+        PendingIntent callBackPendingIntent = PendingIntent.getBroadcast(
+                mContext,
+                0,
+                callBackIntent,
+                PendingIntent.FLAG_CANCEL_CURRENT |
+                        PendingIntent.FLAG_ONE_SHOT |
+                        PendingIntent.FLAG_IMMUTABLE);
+        newIntent.putExtra(
+                Intent.EXTRA_INTENT,
+                callBackPendingIntent.getIntentSender());
+        try {
+            ActivityManager.getService().startConfirmDeviceCredentialIntent(newIntent,
+                    null /*options*/);
+        } catch (RemoteException ex) {
+            // ignore
+        }
+        return true;
+        // End old BaseStatusBar.startWorkChallengeIfNecessary.
+    }
+
+    @Override
+    public boolean shouldHandleRemoteInput(View view, PendingIntent pendingIntent) {
+        // Skip remote input as doing so will expand the notification shade.
+        return (mDisabled2 & StatusBarManager.DISABLE2_NOTIFICATION_SHADE) != 0;
+    }
+
+    @Override
+    public boolean handleRemoteViewClick(View view, PendingIntent pendingIntent,
+            Intent fillInIntent, NotificationRemoteInputManager.ClickHandler defaultHandler) {
+        final boolean isActivity = pendingIntent.isActivity();
+        if (isActivity) {
+            final boolean afterKeyguardGone = PreviewInflater.wouldLaunchResolverActivity(
+                    mContext, pendingIntent.getIntent(), mLockscreenUserManager.getCurrentUserId());
+            mActivityStarter.dismissKeyguardThenExecute(() -> {
+                try {
+                    ActivityManager.getService().resumeAppSwitches();
+                } catch (RemoteException e) {
+                }
+
+                boolean handled = defaultHandler.handleClick();
+
+                // close the shade if it was open and maybe wait for activity start.
+                return handled && mShadeController.closeShadeIfOpen();
+            }, null, afterKeyguardGone);
+            return true;
+        } else {
+            return defaultHandler.handleClick();
+        }
+    }
+
+    @Override
+    public void disable(int state1, int state2, boolean animate) {
+        mDisabled2 = state2;
+    }
+
+    protected class ChallengeReceiver extends BroadcastReceiver {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            final String action = intent.getAction();
+            final int userId = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL);
+            if (Intent.ACTION_DEVICE_LOCKED_CHANGED.equals(action)) {
+                if (userId != mLockscreenUserManager.getCurrentUserId()
+                        && mLockscreenUserManager.isCurrentProfile(userId)) {
+                    onWorkChallengeChanged();
+                }
+            }
+        }
+    };
+}

@@ -32,6 +32,8 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.LinearLayout;
 
+import com.android.systemui.Dependency;
+import com.android.systemui.InitController;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
 import com.android.systemui.statusbar.notification.NotificationData;
@@ -42,6 +44,7 @@ import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
+import com.android.systemui.statusbar.phone.ShadeController;
 
 import com.google.android.collect.Lists;
 
@@ -67,6 +70,7 @@ public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
     @Mock private NotificationLockscreenUserManager mLockscreenUserManager;
     @Mock private NotificationGroupManager mGroupManager;
     @Mock private VisualStabilityManager mVisualStabilityManager;
+    @Mock private ShadeController mShadeController;
 
     private NotificationViewHierarchyManager mViewHierarchyManager;
     private NotificationTestHelper mHelper = new NotificationTestHelper(mContext);;
@@ -79,11 +83,13 @@ public class NotificationViewHierarchyManagerTest extends SysuiTestCase {
                 mLockscreenUserManager);
         mDependency.injectTestDependency(NotificationGroupManager.class, mGroupManager);
         mDependency.injectTestDependency(VisualStabilityManager.class, mVisualStabilityManager);
+        mDependency.injectTestDependency(ShadeController.class, mShadeController);
 
         when(mEntryManager.getNotificationData()).thenReturn(mNotificationData);
 
         mViewHierarchyManager = new NotificationViewHierarchyManager(mContext);
-        mViewHierarchyManager.setUpWithPresenter(mPresenter, mEntryManager, mListContainer);
+        Dependency.get(InitController.class).executePostInitTasks();
+        mViewHierarchyManager.setUpWithPresenter(mPresenter, mListContainer);
     }
 
     private NotificationData.Entry createEntry() throws Exception {

@@ -40,7 +40,7 @@ import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
-import android.util.Log;
+import com.android.systemui.Dependency;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
@@ -83,12 +83,12 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
 
         when(mUserManager.getProfiles(mCurrentUserId)).thenReturn(Lists.newArrayList(
                 new UserInfo(mCurrentUserId, "", 0), new UserInfo(mCurrentUserId + 1, "", 0)));
-        when(mPresenter.getHandler()).thenReturn(Handler.createAsync(Looper.myLooper()));
         when(mEntryManager.getNotificationData()).thenReturn(mNotificationData);
+        mDependency.injectTestDependency(Dependency.MAIN_HANDLER,
+                Handler.createAsync(Looper.myLooper()));
 
         mLockscreenUserManager = new TestNotificationLockscreenUserManager(mContext);
-        mLockscreenUserManager.setUpWithPresenter(mPresenter, mEntryManager);
-        mLockscreenUserManager.setKeyguardViewManager(mKeyguardViewManager);
+        mLockscreenUserManager.setUpWithPresenter(mPresenter);
     }
 
     @Test
@@ -137,15 +137,6 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
     }
 
     @Test
-    public void testActionDeviceLockedChangedWithDifferentUserIdCallsOnWorkChallengeChanged() {
-        Intent intent = new Intent()
-                .setAction(ACTION_DEVICE_LOCKED_CHANGED)
-                .putExtra(Intent.EXTRA_USER_HANDLE, mCurrentUserId + 1);
-        mLockscreenUserManager.getAllUsersReceiverForTest().onReceive(mContext, intent);
-        verify(mPresenter, times(1)).onWorkChallengeChanged();
-    }
-
-    @Test
     public void testActionUserSwitchedCallsOnUserSwitched() {
         Intent intent = new Intent()
                 .setAction(ACTION_USER_SWITCHED)
@@ -161,13 +152,9 @@ public class NotificationLockscreenUserManagerTest extends SysuiTestCase {
         assertTrue(mLockscreenUserManager.isLockscreenPublicMode(mCurrentUserId));
     }
 
-    private class TestNotificationLockscreenUserManager extends NotificationLockscreenUserManager {
+    private class TestNotificationLockscreenUserManager extends NotificationLockscreenUserManagerImpl {
         public TestNotificationLockscreenUserManager(Context context) {
             super(context);
-        }
-
-        public BroadcastReceiver getAllUsersReceiverForTest() {
-            return mAllUsersReceiver;
         }
 
         public BroadcastReceiver getBaseBroadcastReceiverForTest() {

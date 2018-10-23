@@ -48,16 +48,22 @@ import com.android.systemui.power.EnhancedEstimates;
 import com.android.systemui.power.EnhancedEstimatesImpl;
 import com.android.systemui.power.PowerNotificationWarnings;
 import com.android.systemui.power.PowerUI;
+import com.android.systemui.statusbar.NotificationRemoteInputManager;
 import com.android.systemui.statusbar.notification.AppOpsListener;
 import com.android.systemui.statusbar.VibratorHelper;
+import com.android.systemui.statusbar.notification.NotificationData.KeyguardEnvironment;
 import com.android.systemui.statusbar.phone.ConfigurationControllerImpl;
 import com.android.systemui.statusbar.phone.DarkIconDispatcherImpl;
 import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.phone.LockscreenGestureLogger;
 import com.android.systemui.statusbar.phone.ManagedProfileController;
 import com.android.systemui.statusbar.phone.ManagedProfileControllerImpl;
+import com.android.systemui.statusbar.phone.ShadeController;
+import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.statusbar.phone.KeyguardEnvironmentImpl;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarIconControllerImpl;
+import com.android.systemui.statusbar.phone.StatusBarRemoteInputCallback;
 import com.android.systemui.statusbar.phone.StatusBarWindowController;
 import com.android.systemui.statusbar.policy.AccessibilityController;
 import com.android.systemui.statusbar.policy.AccessibilityManagerWrapper;
@@ -342,6 +348,14 @@ public class Dependency extends SystemUI {
         mProviders.put(DisplayMetrics.class, () -> new DisplayMetrics());
 
         mProviders.put(LockscreenGestureLogger.class, () -> new LockscreenGestureLogger());
+
+        mProviders.put(KeyguardEnvironment.class, () -> new KeyguardEnvironmentImpl());
+        mProviders.put(ShadeController.class, () ->
+                SysUiServiceProvider.getComponent(mContext, StatusBar.class));
+        mProviders.put(NotificationRemoteInputManager.Callback.class,
+                () -> new StatusBarRemoteInputCallback(mContext));
+
+        mProviders.put(InitController.class, InitController::new);
 
         // Put all dependencies above here so the factory can override them if it wants.
         SystemUIFactory.getInstance().injectDependencies(mProviders, mContext);

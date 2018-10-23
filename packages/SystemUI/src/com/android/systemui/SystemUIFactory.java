@@ -32,6 +32,7 @@ import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.qs.QSTileHost;
 import com.android.systemui.statusbar.AmbientPulseManager;
 import com.android.systemui.statusbar.KeyguardIndicationController;
+import com.android.systemui.statusbar.NotificationLockscreenUserManagerImpl;
 import com.android.systemui.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.notification.row.NotificationBlockingHelperManager;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
@@ -133,7 +134,7 @@ public class SystemUIFactory {
             Context context) {
         providers.put(StatusBarStateController.class, StatusBarStateController::new);
         providers.put(NotificationLockscreenUserManager.class,
-                () -> new NotificationLockscreenUserManager(context));
+                () -> new NotificationLockscreenUserManagerImpl(context));
         providers.put(VisualStabilityManager.class, VisualStabilityManager::new);
         providers.put(NotificationGroupManager.class, NotificationGroupManager::new);
         providers.put(NotificationMediaManager.class, () -> new NotificationMediaManager(context));

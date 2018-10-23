@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.phone;
 
+import static com.android.systemui.SysUiServiceProvider.getComponent;
 import static com.android.systemui.statusbar.notification.ActivityLaunchAnimator
         .ExpandAnimationParameters;
 
@@ -65,10 +66,12 @@ import com.android.systemui.fragments.FragmentHostManager;
 import com.android.systemui.fragments.FragmentHostManager.FragmentListener;
 import com.android.systemui.plugins.qs.QS;
 import com.android.systemui.qs.QSFragment;
+import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.FlingAnimationUtils;
 import com.android.systemui.statusbar.GestureRecorder;
 import com.android.systemui.statusbar.KeyguardAffordanceView;
 import com.android.systemui.statusbar.KeyguardIndicationController;
+import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.StatusBarState;
@@ -337,6 +340,11 @@ public class NotificationPanelView extends PanelView implements
             Dependency.get(NotificationEntryManager.class);
 
     private final StateListener mListener = this::setBarState;
+    private final CommandQueue mCommandQueue;
+    private final NotificationLockscreenUserManager mLockscreenUserManager =
+            Dependency.get(NotificationLockscreenUserManager.class);
+    private final ShadeController mShadeController =
+            Dependency.get(ShadeController.class);
 
     public NotificationPanelView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -347,6 +355,7 @@ public class NotificationPanelView extends PanelView implements
         setAccessibilityPaneTitle(determineAccessibilityPaneTitle());
         mAlphaPaint.setXfermode(new PorterDuffXfermode(PorterDuff.Mode.MULTIPLY));
         setPanelAlpha(255, false /* animate */);
+        mCommandQueue = getComponent(context, CommandQueue.class);
     }
 
     private void setStatusBar(StatusBar bar) {
@@ -630,7 +639,7 @@ public class NotificationPanelView extends PanelView implements
             if (suppressedSummary) {
                 continue;
             }
-            if (!mStatusBar.getNotificationLockscreenUserManager().shouldShowOnKeyguard(
+            if (!mLockscreenUserManager.shouldShowOnKeyguard(
                     row.getStatusBarNotification())) {
                 continue;
             }
@@ -2414,7 +2423,7 @@ public class NotificationPanelView extends PanelView implements
                 return true;
             case StatusBarState.SHADE_LOCKED:
                 if (!mQsExpanded) {
-                    mStatusBar.goToKeyguard();
+                    mShadeController.goToKeyguard();
                 }
                 return true;
             case StatusBarState.SHADE:
@@ -2617,7 +2626,7 @@ public class NotificationPanelView extends PanelView implements
         }
         if (showIconsWhenExpanded != mShowIconsWhenExpanded) {
             mShowIconsWhenExpanded = showIconsWhenExpanded;
-            mStatusBar.recomputeDisableFlags(false);
+            mCommandQueue.recomputeDisableFlags(false);
         }
     }
 
@@ -2904,7 +2913,7 @@ public class NotificationPanelView extends PanelView implements
             if (hideIcons != mHideIconsDuringNotificationLaunch) {
                 mHideIconsDuringNotificationLaunch = hideIcons;
                 if (!hideIcons) {
-                    mStatusBar.recomputeDisableFlags(true /* animate */);
+                    mCommandQueue.recomputeDisableFlags(true /* animate */);
                 }
             }
         }
@@ -2972,6 +2981,7 @@ public class NotificationPanelView extends PanelView implements
         mNotificationStackScroller.updateSpeedBumpIndex();
         mNotificationStackScroller.updateFooter();
         updateShowEmptyShadeView();
+        mNotificationStackScroller.updateIconAreaViews();
     }
 
     public void onUpdateRowStates() {
@@ -3017,6 +3027,10 @@ public class NotificationPanelView extends PanelView implements
         mNotificationStackScroller.setShelf(notificationShelf);
         mNotificationStackScroller.setScrimController(scrimController);
         updateShowEmptyShadeView();
+    }
+
+    public void showTransientIndication(int id) {
+        mKeyguardBottomArea.showTransientIndication(id);
     }
 
     /**

@@ -28,7 +28,7 @@ import android.widget.Button;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ContrastColorUtil;
-import com.android.keyguard.KeyguardHostView.OnDismissAction;
+import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.notification.NotificationData;

@@ -16,6 +16,9 @@
 
 package com.android.systemui.statusbar;
 
+import static com.android.systemui.statusbar.phone.StatusBar.ONLY_CORE_APPS;
+
+import android.app.StatusBarManager;
 import android.content.ComponentName;
 import android.graphics.Rect;
 import android.hardware.biometrics.IBiometricPromptReceiver;
@@ -24,7 +27,7 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
-import android.os.RemoteException;
+
 import androidx.annotation.VisibleForTesting;
 import android.util.Pair;
 
@@ -117,7 +120,7 @@ public class CommandQueue extends IStatusBar.Stub {
         default void removeIcon(String slot) { }
         default void disable(int state1, int state2, boolean animate) { }
         default void animateExpandNotificationsPanel() { }
-        default void animateCollapsePanels(int flags) { }
+        default void animateCollapsePanels(int flags, boolean force) { }
         default void togglePanel() { }
         default void animateExpandSettingsPanel(String obj) { }
         default void setSystemUiVisibility(int vis, int fullscreenStackVis,
@@ -169,7 +172,13 @@ public class CommandQueue extends IStatusBar.Stub {
     }
 
     @VisibleForTesting
-    protected CommandQueue() {
+    public CommandQueue() {
+    }
+
+    public boolean panelsEnabled() {
+        return (mDisable1 & StatusBarManager.DISABLE_EXPAND) == 0
+                && (mDisable2 & StatusBarManager.DISABLE2_NOTIFICATION_SHADE) == 0
+                && !ONLY_CORE_APPS;
     }
 
     public void addCallbacks(Callbacks callbacks) {
@@ -234,10 +243,10 @@ public class CommandQueue extends IStatusBar.Stub {
         }
     }
 
-    public void animateCollapsePanels(int flags) {
+    public void animateCollapsePanels(int flags, boolean force) {
         synchronized (mLock) {
             mHandler.removeMessages(MSG_COLLAPSE_PANELS);
-            mHandler.obtainMessage(MSG_COLLAPSE_PANELS, flags, 0).sendToTarget();
+            mHandler.obtainMessage(MSG_COLLAPSE_PANELS, flags, force ? 1 : 0).sendToTarget();
         }
     }
 
@@ -592,7 +601,7 @@ public class CommandQueue extends IStatusBar.Stub {
                     break;
                 case MSG_COLLAPSE_PANELS:
                     for (int i = 0; i < mCallbacks.size(); i++) {
-                        mCallbacks.get(i).animateCollapsePanels(msg.arg1);
+                        mCallbacks.get(i).animateCollapsePanels(msg.arg1, msg.arg2 != 0);
                     }
                     break;
                 case MSG_TOGGLE_PANEL:

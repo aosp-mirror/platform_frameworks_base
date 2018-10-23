@@ -84,7 +84,7 @@ public class CommandQueueTest extends SysuiTestCase {
     public void testCollapsePanels() {
         mCommandQueue.animateCollapsePanels();
         waitForIdleSync();
-        verify(mCallbacks).animateCollapsePanels(eq(0));
+        verify(mCallbacks).animateCollapsePanels(eq(0), eq(false));
     }
 
     @Test
