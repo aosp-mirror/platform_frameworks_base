@@ -7894,6 +7894,9 @@
         <!-- Wallpapers optimized and capable of drawing in ambient mode will return true. -->
         <attr name="supportsAmbientMode" format="boolean" />
 
+        <!-- Uri that specifies a settings Slice for this wallpaper. -->
+        <attr name="settingsSliceUri" />
+
     </declare-styleable>
 
     <!-- Use <code>dream</code> as the root tag of the XML resource that
