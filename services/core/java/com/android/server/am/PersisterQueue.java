@@ -171,6 +171,11 @@ class PersisterQueue {
         mListeners.add(listener);
     }
 
+    @VisibleForTesting
+    boolean removeListener(Listener listener) {
+        return mListeners.remove(listener);
+    }
+
     private void processNextItem() throws InterruptedException {
         // This part is extracted into a method so that the GC can clearly see the end of the
         // scope of the variable 'item'.  If this part was in the loop in LazyTaskWriterThread, the
