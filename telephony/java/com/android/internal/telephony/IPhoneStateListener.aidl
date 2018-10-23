@@ -53,5 +53,6 @@ oneway interface IPhoneStateListener {
     void onUserMobileDataStateChanged(in boolean enabled);
     void onPhoneCapabilityChanged(in PhoneCapability capability);
     void onRadioPowerStateChanged(in int state);
+    void onPreferredDataSubIdChanged(in int subId);
 }
 
