@@ -3415,4 +3415,6 @@
 
   <java-symbol type="string" name="config_misprovisionedDeviceModel" />
   <java-symbol type="string" name="config_misprovisionedBrandValue" />
+ 
+  <java-symbol type="string" name="config_defaultAssistantComponentName" />
 </resources>
