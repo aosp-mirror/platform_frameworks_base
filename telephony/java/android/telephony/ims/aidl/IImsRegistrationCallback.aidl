@@ -23,7 +23,7 @@ import android.telephony.ims.stub.ImsFeatureConfiguration;
 import android.telephony.ims.ImsReasonInfo;
 
 /**
- * See ImsRegistrationImplBase.Callback for more information.
+ * See {@link ImsManager#RegistrationCallback} for more information.
  *
  * {@hide}
  */
