@@ -1361,7 +1361,7 @@ public abstract class MediaPlayer2 implements AutoCloseable
     }
 
     /**
-     * Sets the callback to be invoked when the media source is ready for playback.
+     * Registers the callback to be invoked for various events covered by {@link EventCallback}.
      *
      * @param executor the executor through which the callback should be invoked
      * @param eventCallback the callback that will be run
@@ -1378,7 +1378,6 @@ public abstract class MediaPlayer2 implements AutoCloseable
     // This is a synchronous call.
     public abstract void unregisterEventCallback(EventCallback eventCallback);
 
-
     /* Do not change these values without updating their counterparts
      * in include/media/mediaplayer2.h!
      */
@@ -1387,7 +1386,8 @@ public abstract class MediaPlayer2 implements AutoCloseable
      */
     public static final int MEDIA_ERROR_UNKNOWN = 1;
 
-    /** The video is streamed and its container is not valid for progressive
+    /**
+     * The video is streamed and its container is not valid for progressive
      * playback i.e the video's index (e.g moov atom) is not at the start of the
      * file.
      * @see EventCallback#onError
@@ -1698,19 +1698,33 @@ public abstract class MediaPlayer2 implements AutoCloseable
      * @see EventCallback#onCallCompleted
      * @hide
      */
-    public static final int CALL_COMPLETED_SET_BUFFERING_PARAMS = 1001;
+    public static final int CALL_COMPLETED_SET_BUFFERING_PARAMS = 31;
 
-    /** The player just completed a call {@code setVideoScalingMode}.
+    /** The player just completed a call {@link #setVideoScalingMode}.
      * @see EventCallback#onCallCompleted
      * @hide
      */
-    public static final int CALL_COMPLETED_SET_VIDEO_SCALING_MODE = 1002;
+    public static final int CALL_COMPLETED_SET_VIDEO_SCALING_MODE = 32;
 
-    /** The player just completed a call {@code notifyWhenCommandLabelReached}.
+    /**
+     * The start of the methods which have separate call complete callback.
+     * @hide
+     */
+    public static final int SEPARATE_CALL_COMPLETED_CALLBACK_START = 1000;
+
+    /** The player just completed a call {@link #notifyWhenCommandLabelReached}.
      * @see EventCallback#onCommandLabelReached
      * @hide
      */
-    public static final int CALL_COMPLETED_NOTIFY_WHEN_COMMAND_LABEL_REACHED = 1003;
+    public static final int CALL_COMPLETED_NOTIFY_WHEN_COMMAND_LABEL_REACHED =
+            SEPARATE_CALL_COMPLETED_CALLBACK_START;
+
+    /** The player just completed a call {@link #prepareDrm}.
+     * @see DrmEventCallback#onDrmPrepared
+     * @hide
+     */
+    public static final int CALL_COMPLETED_PREPARE_DRM =
+            SEPARATE_CALL_COMPLETED_CALLBACK_START + 1;
 
     /**
      * @hide
@@ -1740,7 +1754,8 @@ public abstract class MediaPlayer2 implements AutoCloseable
             CALL_COMPLETED_CLEAR_NEXT_DATA_SOURCES,
             CALL_COMPLETED_SET_BUFFERING_PARAMS,
             CALL_COMPLETED_SET_VIDEO_SCALING_MODE,
-            CALL_COMPLETED_NOTIFY_WHEN_COMMAND_LABEL_REACHED
+            CALL_COMPLETED_NOTIFY_WHEN_COMMAND_LABEL_REACHED,
+            CALL_COMPLETED_PREPARE_DRM,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface CallCompleted {}
@@ -1864,20 +1879,22 @@ public abstract class MediaPlayer2 implements AutoCloseable
     }
 
     /**
-     * Sets the callback to be invoked when the media source is ready for playback.
+     * Registers the callback to be invoked for various DRM events.
      *
      * @param eventCallback the callback that will be run
      * @param executor the executor through which the callback should be invoked
      */
     // This is a synchronous call.
-    public abstract void setDrmEventCallback(@NonNull @CallbackExecutor Executor executor,
+    public abstract void registerDrmEventCallback(@NonNull @CallbackExecutor Executor executor,
             @NonNull DrmEventCallback eventCallback);
 
     /**
-     * Clears the {@link DrmEventCallback}.
+     * Unregisters the {@link DrmEventCallback}.
+     *
+     * @param eventCallback the callback to be unregistered
      */
     // This is a synchronous call.
-    public abstract void clearDrmEventCallback();
+    public abstract void unregisterDrmEventCallback(DrmEventCallback eventCallback);
 
     /**
      * The status codes for {@link DrmEventCallback#onDrmPrepared} listener.
@@ -1902,6 +1919,15 @@ public abstract class MediaPlayer2 implements AutoCloseable
      */
     public static final int PREPARE_DRM_STATUS_PREPARATION_ERROR = 3;
 
+    /**
+     * The crypto scheme UUID is not supported by the device.
+     */
+    public static final int PREPARE_DRM_STATUS_UNSUPPORTED_SCHEME = 4;
+
+    /**
+     * The hardware resources are not available, due to being in use.
+     */
+    public static final int PREPARE_DRM_STATUS_RESOURCE_BUSY = 5;
 
     /** @hide */
     @IntDef(flag = false, prefix = "PREPARE_DRM_STATUS", value = {
@@ -1909,6 +1935,8 @@ public abstract class MediaPlayer2 implements AutoCloseable
         PREPARE_DRM_STATUS_PROVISIONING_NETWORK_ERROR,
         PREPARE_DRM_STATUS_PROVISIONING_SERVER_ERROR,
         PREPARE_DRM_STATUS_PREPARATION_ERROR,
+        PREPARE_DRM_STATUS_UNSUPPORTED_SCHEME,
+        PREPARE_DRM_STATUS_RESOURCE_BUSY,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface PrepareDrmStatusCode {}
@@ -1925,41 +1953,28 @@ public abstract class MediaPlayer2 implements AutoCloseable
      * <p>
      * If {@link OnDrmConfigHelper} is registered, it will be called during
      * preparation to allow configuration of the DRM properties before opening the
-     * DRM session. Note that the callback is called synchronously in the thread that called
-     * {@link #prepareDrm}. It should be used only for a series of {@code getDrmPropertyString}
-     * and {@code setDrmPropertyString} calls and refrain from any lengthy operation.
+     * DRM session. It should be used only for a series of {@link #getDrmPropertyString}
+     * and {@link #setDrmPropertyString} calls and refrain from any lengthy operation.
      * <p>
      * If the device has not been provisioned before, this call also provisions the device
      * which involves accessing the provisioning server and can take a variable time to
      * complete depending on the network connectivity.
-     * If {@code OnDrmPreparedListener} is registered, prepareDrm() runs in non-blocking
-     * mode by launching the provisioning in the background and returning. The listener
-     * will be called when provisioning and preparation has finished. If a
-     * {@code OnDrmPreparedListener} is not registered, prepareDrm() waits till provisioning
-     * and preparation has finished, i.e., runs in blocking mode.
+     * When needed, the provisioning will be launched  in the background.
+     * The listener {@link DrmEventCallback#onDrmPrepared}
+     * will be called when provisioning and preparation are finished. The application should
+     * check the status code returned with {@link DrmEventCallback#onDrmPrepared} to proceed.
      * <p>
-     * If {@code OnDrmPreparedListener} is registered, it is called to indicate the DRM
+     * The registered {@link DrmEventCallback#onDrmPrepared} is called to indicate the DRM
      * session being ready. The application should not make any assumption about its call
-     * sequence (e.g., before or after prepareDrm returns), or the thread context that will
-     * execute the listener (unless the listener is registered with a handler thread).
+     * sequence (e.g., before or after prepareDrm returns).
      * <p>
      *
      * @param uuid The UUID of the crypto scheme. If not known beforehand, it can be retrieved
-     * from the source through {@code getDrmInfo} or registering a {@code onDrmInfoListener}.
-     *
-     * @throws IllegalStateException              if called before being prepared or the DRM was
-     *                                            prepared already
-     * @throws UnsupportedSchemeException         if the crypto scheme is not supported
-     * @throws ResourceBusyException              if required DRM resources are in use
-     * @throws ProvisioningNetworkErrorException  if provisioning is required but failed due to a
-     *                                            network error
-     * @throws ProvisioningServerErrorException   if provisioning is required but failed due to
-     *                                            the request denied by the provisioning server
+     * from the source through {@code getDrmInfo} or registering a
+     * {@link DrmEventCallback#onDrmInfo}.
      */
-    // This is a synchronous call.
-    public abstract void prepareDrm(@NonNull UUID uuid)
-            throws UnsupportedSchemeException, ResourceBusyException,
-                   ProvisioningNetworkErrorException, ProvisioningServerErrorException;
+    // This is an asynchronous call.
+    public abstract void prepareDrm(@NonNull UUID uuid);
 
     /**
      * Releases the DRM session
@@ -2103,28 +2118,6 @@ public abstract class MediaPlayer2 implements AutoCloseable
      */
     public abstract static class NoDrmSchemeException extends MediaDrmException {
           protected NoDrmSchemeException(String detailMessage) {
-              super(detailMessage);
-          }
-    }
-
-    /**
-     * Thrown when the device requires DRM provisioning but the provisioning attempt has
-     * failed due to a network error (Internet reachability, timeout, etc.).
-     * Extends MediaDrm.MediaDrmException
-     */
-    public abstract static class ProvisioningNetworkErrorException extends MediaDrmException {
-          protected ProvisioningNetworkErrorException(String detailMessage) {
-              super(detailMessage);
-          }
-    }
-
-    /**
-     * Thrown when the device requires DRM provisioning but the provisioning attempt has
-     * failed due to the provisioning server denying the request.
-     * Extends MediaDrm.MediaDrmException
-     */
-    public abstract static class ProvisioningServerErrorException extends MediaDrmException {
-          protected ProvisioningServerErrorException(String detailMessage) {
               super(detailMessage);
           }
     }
