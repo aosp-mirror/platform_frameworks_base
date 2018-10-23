@@ -1120,6 +1120,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Global.SHOW_FIRST_CRASH_DIALOG,
                 GlobalSettingsProto.SHOW_FIRST_CRASH_DIALOG);
+        dumpSetting(s, p,
+                Settings.Global.SHOW_HIDDEN_LAUNCHER_ICON_APPS_ENABLED,
+                GlobalSettingsProto.SHOW_HIDDEN_LAUNCHER_ICON_APPS_ENABLED);
         // Settings.Global.SHOW_PROCESSES intentionally excluded since it's deprecated.
         dumpSetting(s, p,
                 Settings.Global.SHOW_RESTART_IN_CRASH_DIALOG,
@@ -1127,6 +1130,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Global.SHOW_MUTE_IN_CRASH_DIALOG,
                 GlobalSettingsProto.SHOW_MUTE_IN_CRASH_DIALOG);
+        dumpSetting(s, p,
+                Settings.Global.SHOW_NEW_APP_INSTALLED_NOTIFICATION_ENABLED,
+                GlobalSettingsProto.SHOW_NEW_APP_INSTALLED_NOTIFICATION_ENABLED);
 
         final long smartSelectToken = p.start(GlobalSettingsProto.SMART_SELECTION);
         dumpSetting(s, p,
