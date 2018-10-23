@@ -19,23 +19,22 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.Notification;
 import android.app.RemoteAction;
-import android.app.RemoteInput;
 import android.content.Context;
 import android.os.Bundle;
 import android.os.Parcelable;
 import android.os.Process;
-import android.os.SystemProperties;
-import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
 import android.util.ArrayMap;
+import android.view.textclassifier.ConversationActions;
 import android.view.textclassifier.TextClassification;
 import android.view.textclassifier.TextClassificationManager;
 import android.view.textclassifier.TextClassifier;
 import android.view.textclassifier.TextLinks;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collections;
+import java.util.List;
+import java.util.stream.Collectors;
 
 public class SmartActionsHelper {
     private static final ArrayList<Notification.Action> EMPTY_ACTION_LIST = new ArrayList<>();
@@ -50,12 +49,18 @@ public class SmartActionsHelper {
     private static final int MAX_ACTION_EXTRACTION_TEXT_LENGTH = 400;
     private static final int MAX_ACTIONS_PER_LINK = 1;
     private static final int MAX_SMART_ACTIONS = Notification.MAX_ACTION_BUTTONS;
-    // Allow us to test out smart reply with dumb suggestions, it is disabled by default.
-    // TODO: Removed this once we have the model.
-    private static final String SYS_PROP_SMART_REPLIES_EXPERIMENT =
-            "persist.sys.smart_replies_experiment";
+    private static final int MAX_SUGGESTED_REPLIES = 3;
 
-    SmartActionsHelper() {}
+    private static final ConversationActions.TypeConfig TYPE_CONFIG =
+            new ConversationActions.TypeConfig.Builder().setIncludedTypes(
+                    Collections.singletonList(ConversationActions.TYPE_TEXT_REPLY))
+                    .includeTypesFromTextClassifier(false)
+                    .build();
+    private static final List<String> HINTS =
+            Collections.singletonList(ConversationActions.HINT_FOR_NOTIFICATION);
+
+    SmartActionsHelper() {
+    }
 
     /**
      * Adds action adjustments based on the notification contents.
@@ -92,8 +97,31 @@ public class SmartActionsHelper {
         if (context == null) {
             return EMPTY_REPLY_LIST;
         }
-        // TODO: replaced this with our model when it is ready.
-        return new ArrayList<>(Arrays.asList("Yes, please", "No, thanks"));
+        TextClassificationManager tcm = context.getSystemService(TextClassificationManager.class);
+        if (tcm == null) {
+            return EMPTY_REPLY_LIST;
+        }
+        CharSequence text = getMostSalientActionText(entry.getNotification());
+        ConversationActions.Message message =
+                new ConversationActions.Message.Builder()
+                        .setText(text)
+                        .build();
+
+        ConversationActions.Request request =
+                new ConversationActions.Request.Builder(Collections.singletonList(message))
+                        .setMaxSuggestions(MAX_SUGGESTED_REPLIES)
+                        .setHints(HINTS)
+                        .setTypeConfig(TYPE_CONFIG)
+                        .build();
+
+        TextClassifier textClassifier = tcm.getTextClassifier();
+        List<ConversationActions.ConversationAction> conversationActions =
+                textClassifier.suggestConversationActions(request).getConversationActions();
+
+        return conversationActions.stream()
+                .map(conversationAction -> conversationAction.getTextReply())
+                .filter(textReply -> !TextUtils.isEmpty(textReply))
+                .collect(Collectors.toCollection(ArrayList::new));
     }
 
     /**
@@ -124,20 +152,30 @@ public class SmartActionsHelper {
     }
 
     private boolean isEligibleForReplyAdjustment(@NonNull NotificationEntry entry) {
-        if (!SystemProperties.getBoolean(SYS_PROP_SMART_REPLIES_EXPERIMENT, false)) {
+        if (!Process.myUserHandle().equals(entry.getSbn().getUser())) {
             return false;
         }
-        Notification notification = entry.getNotification();
-        if (notification.actions == null) {
+        String pkg = entry.getSbn().getPackageName();
+        if (TextUtils.isEmpty(pkg) || pkg.equals("android")) {
             return false;
         }
-        return entry.hasInlineReply();
+        // For now, we are only interested in messages.
+        if (!entry.isMessaging()) {
+            return false;
+        }
+        // Does not make sense to provide suggested replies if it is not something that can be
+        // replied.
+        if (!entry.hasInlineReply()) {
+            return false;
+        }
+        return true;
     }
 
     /** Returns the text most salient for action extraction in a notification. */
     @Nullable
     private CharSequence getMostSalientActionText(@NonNull Notification notification) {
         /* If it's messaging style, use the most recent message. */
+        // TODO: Use the last few X messages instead and take the Person object into consideration.
         Parcelable[] messages = notification.extras.getParcelableArray(Notification.EXTRA_MESSAGES);
         if (messages != null && messages.length != 0) {
             Bundle lastMessage = (Bundle) messages[messages.length - 1];
