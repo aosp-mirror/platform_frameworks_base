@@ -17,20 +17,22 @@
 package com.android.server.am;
 
 import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
+import static android.view.Display.INVALID_DISPLAY;
 
-import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_CONFIGURATION;
-import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_RELEASE;
-import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_CONFIGURATION;
-import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_RELEASE;
-import static com.android.server.am.ActivityTaskManagerDebugConfig.TAG_ATM;
-import static com.android.server.am.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.ActivityStack.ActivityState.DESTROYED;
 import static com.android.server.am.ActivityStack.ActivityState.DESTROYING;
 import static com.android.server.am.ActivityStack.ActivityState.PAUSED;
 import static com.android.server.am.ActivityStack.ActivityState.PAUSING;
 import static com.android.server.am.ActivityStack.ActivityState.RESUMED;
 import static com.android.server.am.ActivityStack.ActivityState.STOPPING;
-import static com.android.server.am.ActivityTaskManagerService.INSTRUMENTATION_KEY_DISPATCHING_TIMEOUT_MS;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_CONFIGURATION;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_RELEASE;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_CONFIGURATION;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_RELEASE;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.TAG_ATM;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.am.ActivityTaskManagerService
+        .INSTRUMENTATION_KEY_DISPATCHING_TIMEOUT_MS;
 import static com.android.server.am.ActivityTaskManagerService.KEY_DISPATCHING_TIMEOUT_MS;
 import static com.android.server.am.ActivityTaskManagerService.RELAUNCH_REASON_NONE;
 
@@ -47,11 +49,12 @@ import android.os.RemoteException;
 import android.util.ArraySet;
 import android.util.Log;
 import android.util.Slog;
-
 import android.util.proto.ProtoOutputStream;
+
 import com.android.internal.app.HeavyWeightSwitcherActivity;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.wm.ConfigurationContainer;
+import com.android.server.wm.ConfigurationContainerListener;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -67,7 +70,8 @@ import java.util.ArrayList;
  * window manager so the window manager lock is held and appropriate permissions are checked before
  * calls are allowed to proceed.
  */
-public class WindowProcessController extends ConfigurationContainer<ConfigurationContainer> {
+public class WindowProcessController extends ConfigurationContainer<ConfigurationContainer>
+        implements ConfigurationContainerListener {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "WindowProcessController" : TAG_ATM;
     private static final String TAG_RELEASE = TAG + POSTFIX_RELEASE;
     private static final String TAG_CONFIGURATION = TAG + POSTFIX_CONFIGURATION;
@@ -147,6 +151,8 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
 
     // Last configuration that was reported to the process.
     private final Configuration mLastReportedConfiguration;
+    // Registered display id as a listener to override config change
+    private int mDisplayId;
 
     WindowProcessController(ActivityTaskManagerService atm, ApplicationInfo info, String name,
             int uid, int userId, Object owner, WindowProcessListener listener,
@@ -159,6 +165,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         mListener = listener;
         mAtm = atm;
         mLastReportedConfiguration = new Configuration();
+        mDisplayId = INVALID_DISPLAY;
         if (config != null) {
             onConfigurationChanged(config);
         }
@@ -702,6 +709,30 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         // using WM lock. Need to figure-out if it is okay to do this asynchronously.
         if (mListener == null) return;
         mListener.appDied();
+    }
+
+    void registerDisplayConfigurationListenerLocked(ActivityDisplay activityDisplay) {
+        if (activityDisplay == null) {
+            return;
+        }
+        // A process can only register to one display to listener to the override configuration
+        // change. Unregister existing listener if it has one before register the new one.
+        unregisterDisplayConfigurationListenerLocked();
+        mDisplayId = activityDisplay.mDisplayId;
+        activityDisplay.registerConfigurationChangeListener(this);
+    }
+
+    private void unregisterDisplayConfigurationListenerLocked() {
+        if (mDisplayId == INVALID_DISPLAY) {
+            return;
+        }
+        final ActivityDisplay activityDisplay =
+                mAtm.mStackSupervisor.getActivityDisplay(mDisplayId);
+        if (activityDisplay != null) {
+            mAtm.mStackSupervisor.getActivityDisplay(
+                    mDisplayId).unregisterConfigurationChangeListener(this);
+        }
+        mDisplayId = INVALID_DISPLAY;
     }
 
     @Override
