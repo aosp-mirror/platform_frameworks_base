@@ -331,7 +331,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     final ActivityThread mSystemThread;
     H mH;
     UiHandler mUiHandler;
-    ActivityManagerService mAm;
     ActivityManagerInternal mAmInternal;
     UriGrantsManagerInternal mUgmInternal;
     private PackageManagerInternal mPmInternal;
@@ -349,7 +348,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     private UserManagerService mUserManager;
     private AppOpsService mAppOpsService;
     /** All active uids in the system. */
-    final SparseArray<Integer> mActiveUids = new SparseArray<>();
+    private final SparseArray<Integer> mActiveUids = new SparseArray<>();
+    private final SparseArray<String> mPendingTempWhitelist = new SparseArray<>();
     /** All processes currently running that might have a window organized by name. */
     final ProcessMap<WindowProcessController> mProcessNames = new ProcessMap<>();
     /** All processes we currently have running mapped by pid */
@@ -708,10 +708,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     // TODO: Will be converted to WM lock once transition is complete.
-    void setActivityManagerService(ActivityManagerService am, Looper looper,
+    void setActivityManagerService(Object globalLock, Looper looper,
             IntentFirewall intentFirewall, PendingIntentController intentController) {
-        mAm = am;
-        mGlobalLock = mAm;
+        mGlobalLock = globalLock;
         mH = new H(looper);
         mUiHandler = new UiHandler();
         mIntentFirewall = intentFirewall;
@@ -5462,6 +5461,14 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         return mActiveUids.get(uid, PROCESS_STATE_NONEXISTENT);
     }
 
+    /**
+     * @return whitelist tag for a uid from mPendingTempWhitelist, null if not currently on
+     * the whitelist
+     */
+    String getPendingTempWhitelistTagForUidLocked(int uid) {
+        return mPendingTempWhitelist.get(uid);
+    }
+
     void logAppTooSlow(WindowProcessController app, long startTime, String msg) {
         if (true || Build.IS_USER) {
             return;
@@ -6665,6 +6672,20 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 if (mActiveUids.get(uid) != null) {
                     mActiveUids.put(uid, procState);
                 }
+            }
+        }
+
+        @Override
+        public void onUidAddedToPendingTempWhitelist(int uid, String tag) {
+            synchronized (mGlobalLock) {
+                mPendingTempWhitelist.put(uid, tag);
+            }
+        }
+
+        @Override
+        public void onUidRemovedFromPendingTempWhitelist(int uid) {
+            synchronized (mGlobalLock) {
+                mPendingTempWhitelist.remove(uid);
             }
         }
     }

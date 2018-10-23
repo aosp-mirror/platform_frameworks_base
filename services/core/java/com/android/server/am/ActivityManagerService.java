@@ -978,7 +978,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
     }
 
-    final SparseArray<PendingTempWhitelist> mPendingTempWhitelist = new SparseArray<>();
+    final PendingTempWhitelists mPendingTempWhitelist = new PendingTempWhitelists(this);
 
     /**
      * Information about and control over application operations
