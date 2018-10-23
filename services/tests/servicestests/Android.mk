@@ -24,7 +24,8 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
     services.net \
     services.usage \
     guava \
-    androidx-test \
+    androidx.test.runner \
+    androidx.test.rules \
     mockito-target-minus-junit4 \
     platform-test-annotations \
     ShortcutManagerTestUtils \
