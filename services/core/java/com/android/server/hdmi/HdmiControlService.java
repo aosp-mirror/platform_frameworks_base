@@ -610,6 +610,9 @@ public class HdmiControlService extends SystemService {
                     if (isTvDeviceEnabled()) {
                         tv().setSystemAudioControlFeatureEnabled(enabled);
                     }
+                    if (isAudioSystemDevice()) {
+                        audioSystem().onSystemAduioControlFeatureSupportChanged(enabled);
+                    }
                     break;
                 case Global.HDMI_CEC_SWITCH_ENABLED:
                     if (isAudioSystemDevice()) {
