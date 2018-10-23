@@ -47,6 +47,12 @@ public interface DozeHost {
 
     void onIgnoreTouchWhilePulsing(boolean ignore);
 
+    /**
+     * If the device was waken up by a passive interrupt that will show the lock screen without
+     * expanding the notification panel/shade.
+     */
+    void setPassiveInterrupt(boolean lightInterrupt);
+
     interface Callback {
         /**
          * Called when a high priority notification is added.

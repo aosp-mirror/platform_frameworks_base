@@ -38,6 +38,7 @@ import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
 import android.graphics.Rect;
 import android.os.PowerManager;
+import android.os.SystemProperties;
 import android.util.AttributeSet;
 import android.util.FloatProperty;
 import android.util.Log;
@@ -103,6 +104,11 @@ public class NotificationPanelView extends PanelView implements
         ConfigurationController.ConfigurationListener {
 
     private static final boolean DEBUG = false;
+
+    private static final boolean EXPAND_ON_WAKE_UP = SystemProperties.getBoolean(
+            "persist.sysui.expand_shade_on_wake_up", true);
+    private static final boolean WAKE_UP_TO_SHADE = SystemProperties.getBoolean(
+            "persist.sysui.go_to_shade_on_wake_up", true);
 
     /**
      * Fling expanding QS.
@@ -279,6 +285,12 @@ public class NotificationPanelView extends PanelView implements
      * interpolation curve is different.
      */
     private float mLinearDarkAmount;
+
+    /**
+     * State where the device isn't dozing anymore, but the lock screen isn't fully awake.
+     * The screen will be dimmed down with the shade collapsed.
+     */
+    private boolean mSemiAwake;
 
     private float mDarkAmountTarget;
     private boolean mPulsing;
@@ -573,7 +585,7 @@ public class NotificationPanelView extends PanelView implements
                     mInterpolatedDarkAmount,
                     mStatusBar.isKeyguardCurrentlySecure(),
                     mPulsing,
-                    mBouncerTop);
+                    mEmptyDragAmount);
             mClockPositionAlgorithm.run(mClockPositionResult);
             PropertyAnimator.setProperty(mKeyguardStatusView, AnimatableProperty.X,
                     mClockPositionResult.clockX, CLOCK_ANIMATION_PROPERTIES, animateClock);
@@ -1234,6 +1246,12 @@ public class NotificationPanelView extends PanelView implements
         }
         if (keyguardShowing) {
             updateDozingVisibilities(false /* animate */);
+        }
+
+        // Expand notification shade if the device was is semi-awake state
+        if (mBarState == StatusBarState.SHADE && isSemiAwake()) {
+            mNotificationStackScroller.setDark(false /* dark */, false /* animated */,
+                    null /* touchLocation */);
         }
         resetVerticalPanelPosition();
         updateQsState();
@@ -2335,13 +2353,7 @@ public class NotificationPanelView extends PanelView implements
     }
 
     public void setEmptyDragAmount(float amount) {
-        float factor = 0.8f;
-        if (mNotificationStackScroller.getNotGoneChildCount() > 0) {
-            factor = 0.4f;
-        } else if (!mStatusBar.hasActiveNotifications()) {
-            factor = 0.4f;
-        }
-        mEmptyDragAmount = amount * factor;
+        mEmptyDragAmount = amount * 0.2f;
         positionClockAndNotifications();
     }
 
@@ -2769,11 +2781,14 @@ public class NotificationPanelView extends PanelView implements
         mNotificationStackScroller.setAnimationsEnabled(!disabled);
     }
 
-    public void setDozing(boolean dozing, boolean animate,
-            PointF wakeUpTouchLocation) {
-        mNotificationStackScroller.setDark(mDozing, animate, wakeUpTouchLocation);
+    public void setDozing(boolean dozing, boolean animate, PointF wakeUpTouchLocation,
+            boolean passiveInterrupted) {
         if (dozing == mDozing) return;
         mDozing = dozing;
+        mSemiAwake = !EXPAND_ON_WAKE_UP && !mDozing && passiveInterrupted;
+        if (!mSemiAwake) {
+            mNotificationStackScroller.setDark(mDozing, animate, wakeUpTouchLocation);
+        }
 
         if (mBarState == StatusBarState.KEYGUARD
                 || mBarState == StatusBarState.SHADE_LOCKED) {
@@ -2787,22 +2802,36 @@ public class NotificationPanelView extends PanelView implements
             } else {
                 mDarkAnimator.cancel();
             }
+            if (mSemiAwake) {
+                setDarkAmount(0, 0);
+            }
         }
         mDarkAmountTarget = darkAmount;
-        if (animate) {
-            if (mInterpolatedDarkAmount == 0f || mInterpolatedDarkAmount == 1f) {
-                mDarkInterpolator = dozing
-                        ? Interpolators.FAST_OUT_SLOW_IN
-                        : Interpolators.TOUCH_RESPONSE_REVERSE;
+        if (!mSemiAwake) {
+            if (animate) {
+                startDarkAnimation();
+            } else {
+                setDarkAmount(darkAmount, darkAmount);
             }
-            mNotificationStackScroller.notifyDarkAnimationStart(dozing);
-            mDarkAnimator = ObjectAnimator.ofFloat(this, SET_DARK_AMOUNT_PROPERTY, darkAmount);
-            mDarkAnimator.setInterpolator(Interpolators.LINEAR);
-            mDarkAnimator.setDuration(mNotificationStackScroller.getDarkAnimationDuration(dozing));
-            mDarkAnimator.start();
-        } else {
-            setDarkAmount(darkAmount, darkAmount);
         }
+    }
+
+    public boolean isSemiAwake() {
+        return mSemiAwake;
+    }
+
+    private void startDarkAnimation() {
+        if (mInterpolatedDarkAmount == 0f || mInterpolatedDarkAmount == 1f) {
+            mDarkInterpolator = mDozing
+                    ? Interpolators.FAST_OUT_SLOW_IN
+                    : Interpolators.TOUCH_RESPONSE_REVERSE;
+        }
+        mNotificationStackScroller.notifyDarkAnimationStart(mDozing);
+        mDarkAnimator = ObjectAnimator.ofFloat(this, SET_DARK_AMOUNT_PROPERTY, mDozing ? 1 : 0);
+        mDarkAnimator.setInterpolator(Interpolators.LINEAR);
+        mDarkAnimator.setDuration(
+                mNotificationStackScroller.getDarkAnimationDuration(mDozing));
+        mDarkAnimator.start();
     }
 
     private void setDarkAmount(float linearAmount, float amount) {
@@ -2988,5 +3017,23 @@ public class NotificationPanelView extends PanelView implements
         mNotificationStackScroller.setShelf(notificationShelf);
         mNotificationStackScroller.setScrimController(scrimController);
         updateShowEmptyShadeView();
+    }
+
+    /**
+     * Whenever a user drags down on the empty area (pulling down the shade and clock) and lets go.
+     *
+     * @return {@code true} if dragging down should take the user to SHADE_LOCKED.
+     */
+    public boolean onDraggedDown() {
+        if (isSemiAwake()) {
+            mSemiAwake = false;
+            mNotificationStackScroller.setDark(false /* dark */, true /* animate */,
+                    null /* touchLocation */);
+            startDarkAnimation();
+            mStatusBar.updateScrimController();
+
+            return WAKE_UP_TO_SHADE;
+        }
+        return true;
     }
 }

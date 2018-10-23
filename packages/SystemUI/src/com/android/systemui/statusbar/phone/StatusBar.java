@@ -3617,7 +3617,8 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         mDozeScrimController.setDozing(mDozing);
         mKeyguardIndicationController.setDozing(mDozing);
-        mNotificationPanel.setDozing(mDozing, animate, mWakeUpTouchLocation);
+        mNotificationPanel.setDozing(mDozing, animate, mWakeUpTouchLocation,
+                mDozeServiceHost.wasPassivelyInterrupted());
         mNotificationLogger.setDozing(mDozing);
         mGroupManager.setDozing(mDozing);
         updateQsExpansionEnabled();
@@ -4203,7 +4204,6 @@ public class StatusBar extends SystemUI implements DemoMode,
             mAmbientPulseManager.releaseAllImmediately();
             mVisualStabilityManager.setScreenOn(true);
             mNotificationPanel.setTouchAndAnimationDisabled(false);
-            mDozeServiceHost.stopDozing();
             updateVisibleToUser();
             updateIsKeyguard();
             updateScrimController();
@@ -4401,6 +4401,9 @@ public class StatusBar extends SystemUI implements DemoMode,
             // FLAG_DISMISS_KEYGUARD_ACTIVITY.
             ScrimState state = mStatusBarKeyguardViewManager.bouncerNeedsScrimming()
                     ? ScrimState.BOUNCER_SCRIMMED : ScrimState.BOUNCER;
+            if (mNotificationPanel.isSemiAwake()) {
+                state = ScrimState.DARK_KEYGUARD;
+            }
             mScrimController.transitionTo(state);
         } else if (isInLaunchTransition() || mLaunchCameraOnScreenTurningOn
                 || launchingAffordanceWithPreview) {
@@ -4412,7 +4415,8 @@ public class StatusBar extends SystemUI implements DemoMode,
         } else if (mDozing) {
             mScrimController.transitionTo(ScrimState.AOD);
         } else if (mIsKeyguard && !wakeAndUnlocking) {
-            mScrimController.transitionTo(ScrimState.KEYGUARD);
+            mScrimController.transitionTo(mNotificationPanel.isSemiAwake()
+                    ? ScrimState.DARK_KEYGUARD : ScrimState.KEYGUARD);
         } else {
             mScrimController.transitionTo(ScrimState.UNLOCKED, mUnlockScrimCallback);
         }
@@ -4432,6 +4436,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         private boolean mAnimateWakeup;
         private boolean mAnimateScreenOff;
         private boolean mIgnoreTouchWhilePulsing;
+        private boolean mPassivelyInterrupted;
 
         @Override
         public String toString() {
@@ -4512,6 +4517,11 @@ public class StatusBar extends SystemUI implements DemoMode,
                 updateDozing();
                 mWakefulnessLifecycle.dispatchStartedWakingUp();
             }
+        }
+
+        @Override
+        public void setPassiveInterrupt(boolean passiveInterrupt) {
+            mPassivelyInterrupted = passiveInterrupt;
         }
 
         @Override
@@ -4632,6 +4642,10 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         public boolean shouldAnimateScreenOff() {
             return mAnimateScreenOff;
+        }
+
+        public boolean wasPassivelyInterrupted() {
+            return mPassivelyInterrupted;
         }
     }
 

@@ -63,7 +63,7 @@ import java.util.function.Consumer;
 public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnColorsChangedListener,
         Dumpable {
 
-    private static final String TAG = "ScrimController";
+    static final String TAG = "ScrimController";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     /**
@@ -95,6 +95,11 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
      * how many notifications are currently visible.
      */
     public static final float GRADIENT_SCRIM_ALPHA_BUSY = 0.70f;
+    /**
+     * A scrim varies its opacity based on a busyness factor, for example
+     * how many notifications are currently visible.
+     */
+    public static final float GRADIENT_SCRIM_DARK_KEYGUARD = 0.80f;
     /**
      * The most common scrim, the one under the keyguard.
      */
@@ -361,7 +366,7 @@ public class ScrimController implements ViewTreeObserver.OnPreDrawListener, OnCo
             mExpansionFraction = fraction;
 
             final boolean keyguardOrUnlocked = mState == ScrimState.UNLOCKED
-                    || mState == ScrimState.KEYGUARD;
+                    || mState == ScrimState.KEYGUARD || mState == ScrimState.DARK_KEYGUARD;
             if (!keyguardOrUnlocked || !mExpansionAffectsAlpha) {
                 return;
             }
