@@ -227,6 +227,12 @@ public class NetworkMonitor extends StateMachine {
     public static final int EVENT_PRIVATE_DNS_CONFIG_RESOLVED = BASE + 14;
     private static final int CMD_EVALUATE_PRIVATE_DNS = BASE + 15;
 
+    /**
+     * Message to self indicating captive portal detection is completed.
+     * obj = CaptivePortalProbeResult for detection result;
+     */
+    public static final int CMD_PROBE_COMPLETE = BASE + 16;
+
     // Start mReevaluateDelayMs at this value and double.
     private static final int INITIAL_REEVALUATE_DELAY_MS = 1000;
     private static final int MAX_REEVALUATE_DELAY_MS = 10*60*1000;
@@ -290,6 +296,7 @@ public class NetworkMonitor extends StateMachine {
     private final State mEvaluatingState = new EvaluatingState();
     private final State mCaptivePortalState = new CaptivePortalState();
     private final State mEvaluatingPrivateDnsState = new EvaluatingPrivateDnsState();
+    private final State mProbingState = new ProbingState();
 
     private CustomIntentReceiver mLaunchCaptivePortalAppBroadcastReceiver = null;
 
@@ -303,6 +310,9 @@ public class NetworkMonitor extends StateMachine {
     // Random generator to select fallback URL index
     private final Random mRandom;
     private int mNextFallbackUrlIndex = 0;
+
+    private int mReevaluateDelayMs = INITIAL_REEVALUATE_DELAY_MS;
+    private int mEvaluateAttempts = 0;
 
     public NetworkMonitor(Context context, Handler handler, NetworkAgentInfo networkAgentInfo,
             NetworkRequest defaultRequest) {
@@ -334,6 +344,7 @@ public class NetworkMonitor extends StateMachine {
         addState(mDefaultState);
         addState(mMaybeNotifyState, mDefaultState);
             addState(mEvaluatingState, mMaybeNotifyState);
+                addState(mProbingState, mEvaluatingState);
             addState(mCaptivePortalState, mMaybeNotifyState);
         addState(mEvaluatingPrivateDnsState, mDefaultState);
         addState(mValidatedState, mDefaultState);
@@ -582,9 +593,6 @@ public class NetworkMonitor extends StateMachine {
     // Being in the EvaluatingState State indicates the Network is being evaluated for internet
     // connectivity, or that the user has indicated that this network is unwanted.
     private class EvaluatingState extends State {
-        private int mReevaluateDelayMs;
-        private int mAttempts;
-
         @Override
         public void enter() {
             // If we have already started to track time spent in EvaluatingState
@@ -599,7 +607,7 @@ public class NetworkMonitor extends StateMachine {
                 mUidResponsibleForReeval = INVALID_UID;
             }
             mReevaluateDelayMs = INITIAL_REEVALUATE_DELAY_MS;
-            mAttempts = 0;
+            mEvaluateAttempts = 0;
         }
 
         @Override
@@ -630,42 +638,15 @@ public class NetworkMonitor extends StateMachine {
                         transitionTo(mValidatedState);
                         return HANDLED;
                     }
-                    mAttempts++;
-                    // Note: This call to isCaptivePortal() could take up to a minute. Resolving the
-                    // server's IP addresses could hit the DNS timeout, and attempting connections
-                    // to each of the server's several IP addresses (currently one IPv4 and one
-                    // IPv6) could each take SOCKET_TIMEOUT_MS.  During this time this StateMachine
-                    // will be unresponsive. isCaptivePortal() could be executed on another Thread
-                    // if this is found to cause problems.
-                    CaptivePortalProbeResult probeResult = isCaptivePortal();
-                    if (probeResult.isSuccessful()) {
-                        // Transit EvaluatingPrivateDnsState to get to Validated
-                        // state (even if no Private DNS validation required).
-                        transitionTo(mEvaluatingPrivateDnsState);
-                    } else if (probeResult.isPortal()) {
-                        notifyNetworkTestResultInvalid(probeResult.redirectUrl);
-                        mLastPortalProbeResult = probeResult;
-                        transitionTo(mCaptivePortalState);
-                    } else {
-                        final Message msg = obtainMessage(CMD_REEVALUATE, ++mReevaluateToken, 0);
-                        sendMessageDelayed(msg, mReevaluateDelayMs);
-                        logNetworkEvent(NetworkEvent.NETWORK_VALIDATION_FAILED);
-                        notifyNetworkTestResultInvalid(probeResult.redirectUrl);
-                        if (mAttempts >= BLAME_FOR_EVALUATION_ATTEMPTS) {
-                            // Don't continue to blame UID forever.
-                            TrafficStats.clearThreadStatsUid();
-                        }
-                        mReevaluateDelayMs *= 2;
-                        if (mReevaluateDelayMs > MAX_REEVALUATE_DELAY_MS) {
-                            mReevaluateDelayMs = MAX_REEVALUATE_DELAY_MS;
-                        }
-                    }
+                    mEvaluateAttempts++;
+
+                    transitionTo(mProbingState);
                     return HANDLED;
                 case CMD_FORCE_REEVALUATION:
                     // Before IGNORE_REEVALUATE_ATTEMPTS attempts are made,
                     // ignore any re-evaluation requests. After, restart the
                     // evaluation process via EvaluatingState#enter.
-                    return (mAttempts < IGNORE_REEVALUATE_ATTEMPTS) ? HANDLED : NOT_HANDLED;
+                    return (mEvaluateAttempts < IGNORE_REEVALUATE_ATTEMPTS) ? HANDLED : NOT_HANDLED;
                 default:
                     return NOT_HANDLED;
             }
@@ -852,6 +833,76 @@ public class NetworkMonitor extends StateMachine {
         }
     }
 
+    private class ProbingState extends State {
+        private Thread mThread;
+
+        @Override
+        public void enter() {
+            mThread = new Thread(() -> sendMessage(obtainMessage(CMD_PROBE_COMPLETE,
+                    isCaptivePortal())));
+            mThread.start();
+        }
+
+        @Override
+        public boolean processMessage(Message message) {
+            switch (message.what) {
+                case CMD_PROBE_COMPLETE:
+                    // Currently, it's not possible to exit this state without mThread having
+                    // terminated. Therefore, this state can never get CMD_PROBE_COMPLETE from a
+                    // stale thread that is not mThread.
+                    // TODO: As soon as it's possible to exit this state without mThread having
+                    // terminated, ensure that CMD_PROBE_COMPLETE from stale threads are ignored.
+                    // This could be done via a sequence number, or by changing mThread to a class
+                    // that has a stopped volatile boolean or AtomicBoolean.
+                    final CaptivePortalProbeResult probeResult =
+                            (CaptivePortalProbeResult) message.obj;
+
+                    if (probeResult.isSuccessful()) {
+                        // Transit EvaluatingPrivateDnsState to get to Validated
+                        // state (even if no Private DNS validation required).
+                        transitionTo(mEvaluatingPrivateDnsState);
+                    } else if (probeResult.isPortal()) {
+                        notifyNetworkTestResultInvalid(probeResult.redirectUrl);
+                        mLastPortalProbeResult = probeResult;
+                        transitionTo(mCaptivePortalState);
+                    } else {
+                        final Message msg = obtainMessage(CMD_REEVALUATE, ++mReevaluateToken, 0);
+                        sendMessageDelayed(msg, mReevaluateDelayMs);
+                        logNetworkEvent(NetworkEvent.NETWORK_VALIDATION_FAILED);
+                        notifyNetworkTestResultInvalid(probeResult.redirectUrl);
+                        if (mEvaluateAttempts >= BLAME_FOR_EVALUATION_ATTEMPTS) {
+                            // Don't continue to blame UID forever.
+                            TrafficStats.clearThreadStatsUid();
+                        }
+                        mReevaluateDelayMs *= 2;
+                        if (mReevaluateDelayMs > MAX_REEVALUATE_DELAY_MS) {
+                            mReevaluateDelayMs = MAX_REEVALUATE_DELAY_MS;
+                        }
+                    }
+                    return HANDLED;
+                case CMD_REEVALUATE:
+                    // Leave the event to EvaluatingState. Defer this message will result in reset
+                    // of mReevaluateDelayMs and mEvaluateAttempts.
+                    return NOT_HANDLED;
+                default:
+                    // TODO: Some events may able to handle in this state, instead of deferring to
+                    // next state.
+                    deferMessage(message);
+                    return HANDLED;
+            }
+        }
+
+        @Override
+        public void exit() {
+            // If StateMachine get here, the probe started in enter() is guaranteed to have
+            // completed, because in this state, all messages except CMD_PROBE_COMPLETE and
+            // CMD_REEVALUATE are deferred. CMD_REEVALUATE cannot be in the queue, because it is
+            // only ever sent in EvaluatingState#enter, and the StateMachine reach this state by
+            // processing it. Therefore, there is no need to stop the thread.
+            mThread = null;
+        }
+    }
+
     // Limits the list of IP addresses returned by getAllByName or tried by openConnection to at
     // most one per address family. This ensures we only wait up to 20 seconds for TCP connections
     // to complete, regardless of how many IP addresses a host has.
@@ -1031,10 +1082,10 @@ public class NetworkMonitor extends StateMachine {
                 result.isPortal() /* isCaptivePortal */,
                 startTime, endTime);
 
-        log("isCaptivePortal: isSuccessful()=" + result.isSuccessful() +
-                " isPortal()=" + result.isPortal() +
-                " RedirectUrl=" + result.redirectUrl +
-                " StartTime=" + startTime + " EndTime=" + endTime);
+        log("isCaptivePortal: isSuccessful()=" + result.isSuccessful()
+                + " isPortal()=" + result.isPortal()
+                + " RedirectUrl=" + result.redirectUrl
+                + " Time=" + (endTime - startTime) + "ms");
 
         return result;
     }
