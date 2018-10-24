@@ -402,11 +402,10 @@ public class ForwardDeleteTest {
         state.assertEquals("|");
 
         // Emoji modifier + ZERO WIDTH JOINER
-        state.setByString("| U+1F466 U+1F3FB U+200D U+1F469");
-        forwardDelete(state, 0);
-        state.assertEquals("| U+1F469");
-        forwardDelete(state, 0);
-        state.assertEquals("|");
+        // TODO(nona): Revive this test once HarfBuzz is updated to 2.0.2 (b/117953171)
+        // state.setByString("| U+1F466 U+1F3FB U+200D U+1F469");
+        // forwardDelete(state, 0);
+        // state.assertEquals("|");
 
         // Regional indicator symbol + emoji modifier
         state.setByString("| U+1F1FA U+1F3FB");
