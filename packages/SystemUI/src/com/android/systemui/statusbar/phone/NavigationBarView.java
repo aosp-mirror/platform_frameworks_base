@@ -57,7 +57,7 @@ import android.widget.FrameLayout;
 import com.android.systemui.Dependency;
 import com.android.systemui.DockedStackExistsListener;
 import com.android.systemui.Interpolators;
-import com.android.systemui.OverviewProxyService;
+import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.R;
 import com.android.systemui.SysUiServiceProvider;
 import com.android.systemui.plugins.PluginListener;

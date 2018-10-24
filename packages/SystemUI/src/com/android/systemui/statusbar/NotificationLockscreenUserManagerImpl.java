@@ -44,11 +44,10 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
-import com.android.systemui.OverviewProxyService;
+import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
-import com.android.systemui.statusbar.phone.StatusBarRemoteInputCallback;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
 

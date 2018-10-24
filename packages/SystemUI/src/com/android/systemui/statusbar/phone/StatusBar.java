@@ -135,7 +135,6 @@ import com.android.systemui.InitController;
 import com.android.systemui.Interpolators;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
-import com.android.systemui.RecentsComponent;
 import com.android.systemui.SystemUI;
 import com.android.systemui.SystemUIFactory;
 import com.android.systemui.UiOffloadThread;
@@ -4121,7 +4120,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     protected Display mDisplay;
 
-    protected RecentsComponent mRecents;
+    protected Recents mRecents;
 
     protected NotificationShelf mNotificationShelf;
     protected EmptyShadeView mEmptyShadeView;

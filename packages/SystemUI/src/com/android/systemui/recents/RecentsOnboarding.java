@@ -59,13 +59,11 @@ import android.view.animation.DecelerateInterpolator;
 import android.widget.ImageView;
 import android.widget.TextView;
 
-import com.android.systemui.OverviewProxyService;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
-import com.android.systemui.recents.misc.SysUiTaskStackChangeListener;
 import com.android.systemui.shared.recents.IOverviewProxy;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
-
+import com.android.systemui.shared.system.TaskStackChangeListener;
 import java.io.PrintWriter;
 import java.util.Collections;
 import java.util.HashSet;
@@ -119,7 +117,7 @@ public class RecentsOnboarding {
     private int mNumAppsLaunchedSinceSwipeUpTipDismiss;
     private int mOverviewOpenedCountSinceQuickScrubTipDismiss;
 
-    private final SysUiTaskStackChangeListener mTaskListener = new SysUiTaskStackChangeListener() {
+    private final TaskStackChangeListener mTaskListener = new TaskStackChangeListener() {
         private String mLastPackageName;
 
         @Override

@@ -20,19 +20,6 @@
 <!-- These resources are around just to allow their values to be customized
      for different hardware and product builds. -->
 <resources>
-    <!-- Whether recents should use hardware layers for its taskviews. This flag can be enabled
-    for devices where the java drawing of round rects may be slow -->
-    <bool name="config_recents_use_hardware_layers">false</bool>
-
-    <!-- The number of app thumbnails we keep in memory -->
-    <integer name="config_recents_max_thumbnail_count">10</integer>
-
-    <!-- The number of app icons we keep in memory -->
-    <integer name="config_recents_max_icon_count">20</integer>
-
-    <!-- Whether to use cheap, less good looking shadows for recents -->
-    <bool name="config_recents_fake_shadows">false</bool>
-
     <!-- Whether to clip notification contents with a rounded rectangle. Might be expensive on
          certain GPU's and thus can be turned off with only minimal visual impact. -->
     <bool name="config_notifications_round_rect_clipping">true</bool>
@@ -44,6 +31,11 @@
     <!-- Component to be used as the status bar service.  Must implement the IStatusBar
      interface.  This name is in the ComponentName flattened format (package/class)  -->
     <string name="config_statusBarComponent" translatable="false">com.android.systemui.statusbar.phone.StatusBar</string>
+
+    <!-- Component to be used as the recents implementation.  Must implement the
+     RecentsImplementation interface.  This name is in the ComponentName flattened format
+     (package/class)  -->
+    <string name="config_recentsComponent" translatable="false">com.android.systemui.recents.OverviewProxyRecentsImpl</string>
 
     <!-- Whether or not we show the number in the bar. -->
     <bool name="config_statusBarShowNumber">false</bool>
@@ -163,46 +155,12 @@
     <!-- The number of milliseconds to extend ambient pulse by when prompted (e.g. on touch) -->
     <integer name="ambient_notification_extension_time">6000</integer>
 
-    <!-- The duration in seconds to wait before the dismiss buttons are shown. -->
-    <integer name="recents_task_bar_dismiss_delay_seconds">1000</integer>
-
-    <!-- The duration for animating the task decorations in after transitioning from an app. -->
-    <integer name="recents_task_enter_from_app_duration">200</integer>
-
-    <!-- The duration for animating the task decorations in after transitioning from an app. -->
-    <integer name="recents_task_enter_from_affiliated_app_duration">125</integer>
-
-    <!-- The duration for animating the task decorations out before transitioning to an app. -->
-    <integer name="recents_task_exit_to_app_duration">125</integer>
-
-    <!-- The min animation duration for animating the nav bar scrim in. -->
-    <integer name="recents_nav_bar_scrim_enter_duration">400</integer>
-
-    <!-- The animation duration for scrolling the stack to a particular item. -->
-    <integer name="recents_animate_task_stack_scroll_duration">200</integer>
-
-    <!-- The delay to enforce between each alt-tab key press. -->
-    <integer name="recents_alt_tab_key_delay">200</integer>
-
-    <!-- Svelte specific logic, see RecentsConfiguration.SVELTE_* constants. -->
-    <integer name="recents_svelte_level">0</integer>
-
     <!-- In multi-window, determines whether the stack where recents lives should grow from
          the smallest position when being launched. -->
     <bool name="recents_grow_in_multiwindow">true</bool>
 
     <!-- Animation duration when using long press on recents to dock -->
     <integer name="long_press_dock_anim_duration">250</integer>
-
-    <!-- Recents: The relative range of visible tasks from the current scroll position
-         while the stack is focused. -->
-    <item name="recents_layout_focused_range_min" format="float" type="integer">-3</item>
-    <item name="recents_layout_focused_range_max" format="float" type="integer">2</item>
-
-    <!-- Recents: The relative range of visible tasks from the current scroll position
-         while the stack is not focused. -->
-    <item name="recents_layout_unfocused_range_min" format="float" type="integer">-2</item>
-    <item name="recents_layout_unfocused_range_max" format="float" type="integer">2.5</item>
 
     <!-- Whether to enable KeyguardService or not -->
     <bool name="config_enableKeyguardService">true</bool>
@@ -362,7 +320,6 @@
     <string-array name="config_systemUIServiceComponentsPerUser" translatable="false">
         <item>com.android.systemui.Dependency</item>
         <item>com.android.systemui.util.NotificationChannels</item>
-        <item>com.android.systemui.recents.Recents</item>
     </string-array>
 
     <!-- Nav bar button default ordering/layout -->

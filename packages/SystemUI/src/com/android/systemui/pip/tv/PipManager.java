@@ -758,9 +758,4 @@ public class PipManager implements BasePipManager {
             WindowManagerWrapper.getInstance().setPipVisibility(visible);
         });
     }
-
-    @Override
-    public void dump(PrintWriter pw) {
-        // Do nothing
-    }
 }
