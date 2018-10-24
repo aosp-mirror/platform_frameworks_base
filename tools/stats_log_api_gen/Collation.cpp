@@ -47,7 +47,8 @@ AtomDecl::AtomDecl(const AtomDecl& that)
       fields(that.fields),
       primaryFields(that.primaryFields),
       exclusiveField(that.exclusiveField),
-      uidField(that.uidField) {}
+      uidField(that.uidField),
+      binaryFields(that.binaryFields) {}
 
 AtomDecl::AtomDecl(int c, const string& n, const string& m)
     :code(c),
@@ -116,6 +117,9 @@ java_type(const FieldDescriptor* field)
             if (field->message_type()->full_name() ==
                 "android.os.statsd.AttributionNode") {
               return JAVA_TYPE_ATTRIBUTION_CHAIN;
+            } else if (field->options().GetExtension(os::statsd::log_mode) ==
+                       os::statsd::LogMode::MODE_BYTES) {
+                return JAVA_TYPE_BYTE_ARRAY;
             } else {
                 return JAVA_TYPE_OBJECT;
             }
@@ -185,6 +189,8 @@ int collate_atom(const Descriptor *atom, AtomDecl *atomDecl,
   for (map<int, const FieldDescriptor *>::const_iterator it = fields.begin();
        it != fields.end(); it++) {
     const FieldDescriptor *field = it->second;
+    bool isBinaryField = field->options().GetExtension(os::statsd::log_mode) ==
+                         os::statsd::LogMode::MODE_BYTES;
 
     java_type_t javaType = java_type(field);
 
@@ -198,8 +204,15 @@ int collate_atom(const Descriptor *atom, AtomDecl *atomDecl,
                   field->name().c_str());
       errorCount++;
       continue;
-    } else if (javaType == JAVA_TYPE_BYTE_ARRAY) {
+    } else if (javaType == JAVA_TYPE_BYTE_ARRAY && !isBinaryField) {
       print_error(field, "Raw bytes type not allowed for field: %s\n",
+                  field->name().c_str());
+      errorCount++;
+      continue;
+    }
+
+    if (isBinaryField && javaType != JAVA_TYPE_BYTE_ARRAY) {
+      print_error(field, "Cannot mark field %s as bytes.\n",
                   field->name().c_str());
       errorCount++;
       continue;
@@ -228,12 +241,16 @@ int collate_atom(const Descriptor *atom, AtomDecl *atomDecl,
        it != fields.end(); it++) {
     const FieldDescriptor *field = it->second;
     java_type_t javaType = java_type(field);
+    bool isBinaryField = field->options().GetExtension(os::statsd::log_mode) ==
+                         os::statsd::LogMode::MODE_BYTES;
 
     AtomField atField(field->name(), javaType);
     if (javaType == JAVA_TYPE_ENUM) {
       // All enums are treated as ints when it comes to function signatures.
       signature->push_back(JAVA_TYPE_INT);
       collate_enums(*field->enum_type(), &atField);
+    } else if (javaType == JAVA_TYPE_OBJECT && isBinaryField) {
+      signature->push_back(JAVA_TYPE_BYTE_ARRAY);
     } else {
       signature->push_back(javaType);
     }
@@ -274,6 +291,10 @@ int collate_atom(const Descriptor *atom, AtomDecl *atomDecl,
         } else {
             errorCount++;
         }
+    }
+    // Binary field validity is already checked above.
+    if (isBinaryField) {
+        atomDecl->binaryFields.push_back(it->first);
     }
   }
 
