@@ -102,7 +102,7 @@ public class NetworkRegistrationState implements Parcelable {
     @ServiceState.RoamingType
     private int mRoamingType;
 
-    private final int mAccessNetworkTechnology;
+    private int mAccessNetworkTechnology;
 
     private final int mRejectCause;
 
@@ -256,10 +256,18 @@ public class NetworkRegistrationState implements Parcelable {
     public int[] getAvailableServices() { return mAvailableServices; }
 
     /**
-     * @return The access network technology. Must be one of TelephonyManager.NETWORK_TYPE_XXXX.
+     * @return The access network technology {@link TelephonyManager.NetworkType}.
      */
-    public int getAccessNetworkTechnology() {
+    public @TelephonyManager.NetworkType int getAccessNetworkTechnology() {
         return mAccessNetworkTechnology;
+    }
+
+    /**
+     * override the access network technology {@link TelephonyManager.NetworkType} e.g, rat ratchet.
+     * @hide
+     */
+    public void setAccessNetworkTechnology(@TelephonyManager.NetworkType int tech) {
+        mAccessNetworkTechnology = tech;
     }
 
     /**
