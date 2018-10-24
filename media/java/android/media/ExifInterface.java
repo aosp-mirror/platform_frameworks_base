@@ -2545,13 +2545,22 @@ public class ExifInterface {
                     if (size == 0) {
                         return 0;
                     }
-                    if (position < 0) {
+                    // We don't allow read positions after the available bytes,
+                    // the input stream won't be able to seek back then.
+                    if (position < 0 || position >= in.available()) {
                         return -1;
                     }
                     try {
                         if (mPosition != position) {
                             in.seek(position);
                             mPosition = position;
+                        }
+
+                        // If the read will cause us to go over the available bytes,
+                        // reduce the size so that we stay in the available range.
+                        // Otherwise the input stream may not be able to seek back.
+                        if (mPosition + size > in.available()) {
+                            size = in.available() - (int)mPosition;
                         }
 
                         int bytesRead = in.read(buffer, offset, size);
