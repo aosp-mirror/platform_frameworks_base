@@ -3485,6 +3485,18 @@ public final class Telephony {
         public static final String CARRIER_ID = "carrier_id";
 
         /**
+         * A unique mno carrier id. mno carrier shares the same {@link All#MCCMNC} as carrier id
+         * and can be solely identified by {@link All#MCCMNC} only. If there is no such mno
+         * carrier, then mno carrier id equals to {@link #CARRIER_ID carrier id}.
+         *
+         * <p>mno carrier id can be used as fallback id. When the exact carrier id configurations
+         * are not found, usually fall back to its mno carrier id.
+         * <P>Type: INTEGER </P>
+         * @hide
+         */
+        public static final String MNO_CARRIER_ID = "mno_carrier_id";
+
+        /**
          * Contains mappings between matching rules with carrier id for all carriers.
          * @hide
          */
@@ -3536,6 +3548,12 @@ public final class Telephony {
              * <P>Type: TEXT </P>
              */
             public static final String ICCID_PREFIX = "iccid_prefix";
+
+            /**
+             * Certificate for carrier privilege access rules.
+             * <P>Type: TEXT in hex string </P>
+             */
+            public static final String PRIVILEGE_ACCESS_RULE = "privilege_access_rule";
 
             /**
              * The {@code content://} URI for this table.
