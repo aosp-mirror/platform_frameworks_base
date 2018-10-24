@@ -43,7 +43,6 @@ import com.android.ims.internal.IImsCallSession;
 import com.android.ims.internal.IImsEcbm;
 import com.android.ims.internal.IImsMultiEndpoint;
 import com.android.ims.internal.IImsUt;
-import com.android.internal.annotations.VisibleForTesting;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -233,7 +232,6 @@ public class MmTelFeature extends ImsFeature {
          * @see #addCapabilities(int)
          * @see #removeCapabilities(int)
          */
-        @VisibleForTesting
         public MmTelCapabilities() {
             super();
         }
