@@ -1770,6 +1770,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     @Override
     public void addClient(IInputMethodClient client, IInputContext inputContext,
             int selfReportedDisplayId) {
+        // Here there are two scenarios where this method is called:
+        // A. IMM is being instantiated in a different process and this is an IPC from that process
+        // B. IMM is being instantiated in the same process but Binder.clearCallingIdentity() is
+        //    called in the caller side if necessary.
+        // In either case the following UID/PID should be the ones where InputMethodManager is
+        // actually running.
         final int callerUid = Binder.getCallingUid();
         final int callerPid = Binder.getCallingPid();
         synchronized (mMethodMap) {
@@ -1778,7 +1784,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 if (state.uid == callerUid && state.pid == callerPid
                         && state.selfReportedDisplayId == selfReportedDisplayId) {
                     throw new SecurityException("uid=" + callerUid + "/pid=" + callerPid
-                            + " is already registered");
+                            + "/displayId=" + selfReportedDisplayId + " is already registered.");
                 }
             }
             final ClientDeathRecipient deathRecipient = new ClientDeathRecipient(this, client);
