@@ -17,6 +17,7 @@
 package android.database.sqlite;
 
 import android.annotation.UnsupportedAppUsage;
+import android.os.Build;
 
 /**
  * Describes a custom SQL function.
@@ -24,7 +25,7 @@ import android.annotation.UnsupportedAppUsage;
  * @hide
  */
 public final class SQLiteCustomFunction {
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public final String name;
     @UnsupportedAppUsage
     public final int numArgs;

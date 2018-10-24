@@ -18,6 +18,7 @@ package android.content;
 
 import android.accounts.Account;
 import android.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -33,10 +34,10 @@ public class SyncRequest implements Parcelable {
     @UnsupportedAppUsage
     private final Account mAccountToSync;
     /** Authority string that corresponds to a ContentProvider. */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private final String mAuthority;
     /** Bundle containing user info as well as sync settings. */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private final Bundle mExtras;
     /** Don't allow this sync request on metered networks. */
     private final boolean mDisallowMetered;

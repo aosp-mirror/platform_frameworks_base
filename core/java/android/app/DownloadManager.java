@@ -879,7 +879,7 @@ public class DownloadManager {
          * @return this object
          * @hide
          */
-        @UnsupportedAppUsage
+        @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         public Query orderBy(String column, int direction) {
             if (direction != ORDER_ASCENDING && direction != ORDER_DESCENDING) {
                 throw new IllegalArgumentException("Invalid direction: " + direction);
@@ -1011,7 +1011,7 @@ public class DownloadManager {
     }
 
     /** {@hide} */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public void setAccessFilename(boolean accessFilename) {
         mAccessFilename = accessFilename;
     }

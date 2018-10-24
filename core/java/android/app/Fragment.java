@@ -264,7 +264,7 @@ import java.lang.reflect.InvocationTargetException;
  */
 @Deprecated
 public class Fragment implements ComponentCallbacks2, OnCreateContextMenuListener {
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private static final ArrayMap<String, Class<?>> sClassMap =
             new ArrayMap<String, Class<?>>();
 

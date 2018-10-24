@@ -41,6 +41,7 @@ import android.net.NetworkStats;
 import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.BatteryStats;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.PersistableBundle;
@@ -706,7 +707,7 @@ public class TelephonyManager {
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     @Deprecated
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public static final String ACTION_PRECISE_DATA_CONNECTION_STATE_CHANGED =
             "android.intent.action.PRECISE_DATA_CONNECTION_STATE_CHANGED";
 
@@ -1737,7 +1738,7 @@ public class TelephonyManager {
     }
 
     /** {@hide} */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private int getPhoneTypeFromProperty(int phoneId) {
         String type = getTelephonyProperty(phoneId,
                 TelephonyProperties.CURRENT_ACTIVE_PHONE, null);

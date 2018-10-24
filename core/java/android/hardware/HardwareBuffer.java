@@ -20,6 +20,7 @@ import android.annotation.IntDef;
 import android.annotation.LongDef;
 import android.annotation.NonNull;
 import android.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -184,7 +185,7 @@ public final class HardwareBuffer implements Parcelable, AutoCloseable {
      * Private use only. See {@link #create(int, int, int, int, long)}. May also be
      * called from JNI using an already allocated native <code>HardwareBuffer</code>.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private HardwareBuffer(long nativeObject) {
         mNativeObject = nativeObject;
 

@@ -29,6 +29,7 @@ import android.app.ActionBar;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.Layout;
@@ -137,7 +138,7 @@ public class Toolbar extends ViewGroup {
     @UnsupportedAppUsage
     private TextView mTitleTextView;
     private TextView mSubtitleTextView;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private ImageButton mNavButtonView;
     private ImageView mLogoView;
 

@@ -17,6 +17,7 @@
 package android.bluetooth;
 
 import android.annotation.UnsupportedAppUsage;
+import android.os.Build;
 import android.os.Handler;
 import android.os.ParcelUuid;
 import android.os.RemoteException;
@@ -52,7 +53,7 @@ public final class BluetoothGatt implements BluetoothProfile {
     private BluetoothDevice mDevice;
     @UnsupportedAppUsage
     private boolean mAutoConnect;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     private int mAuthRetryState;
     private int mConnState;
     private final Object mStateLock = new Object();

@@ -24,6 +24,7 @@ import android.content.res.TypedArray;
 import android.database.DataSetObserver;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
+import android.os.Build;
 import android.text.Editable;
 import android.text.Selection;
 import android.text.TextUtils;
@@ -533,7 +534,7 @@ public class AutoCompleteTextView extends EditText implements Filter.FilterListe
      *
      * @hide Pending API council approval
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
     public void setDropDownAnimationStyle(int animationStyle) {
         mPopup.setAnimationStyle(animationStyle);
     }
