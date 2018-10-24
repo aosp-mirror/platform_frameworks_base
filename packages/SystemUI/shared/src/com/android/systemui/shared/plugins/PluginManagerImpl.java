@@ -246,7 +246,11 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
                         SystemMessage.NOTE_PLUGIN, nb.build(), UserHandle.ALL);
             }
             if (clearClassLoader(pkg)) {
-                Toast.makeText(mContext, "Reloading " + pkg, Toast.LENGTH_LONG).show();
+                if (Build.IS_ENG) {
+                    Toast.makeText(mContext, "Reloading " + pkg, Toast.LENGTH_LONG).show();
+                } else {
+                    Log.v(TAG, "Reloading " + pkg);
+                }
             }
             if (!Intent.ACTION_PACKAGE_REMOVED.equals(intent.getAction())) {
                 for (PluginInstanceManager manager : mPluginMap.values()) {
