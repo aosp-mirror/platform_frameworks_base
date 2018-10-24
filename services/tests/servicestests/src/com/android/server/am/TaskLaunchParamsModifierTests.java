@@ -167,6 +167,18 @@ public class TaskLaunchParamsModifierTests extends ActivityTestsBase {
         assertEquals(fullscreenDisplay.mDisplayId, mResult.mPreferredDisplayId);
     }
 
+    @Test
+    public void testUsesTaskDisplayIdIfSet() {
+        final TestActivityDisplay freeformDisplay = createNewActivityDisplay(
+                WINDOWING_MODE_FREEFORM);
+        ActivityRecord source = createSourceActivity(freeformDisplay);
+
+        assertEquals(RESULT_CONTINUE, mTarget.onCalculate(source.getTask(), null /* layout */,
+                null /* activity */, null /* source */, null /* options */, mCurrent, mResult));
+
+        assertEquals(freeformDisplay.mDisplayId, mResult.mPreferredDisplayId);
+    }
+
     // =====================================
     // Launch Windowing Mode Related Tests
     // =====================================
