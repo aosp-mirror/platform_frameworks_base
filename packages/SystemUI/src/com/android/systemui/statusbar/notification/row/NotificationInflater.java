@@ -102,6 +102,8 @@ public class NotificationInflater {
 
     public static final int FLAG_CONTENT_VIEW_ALL = ~0;
 
+    // TODO: Heads up and ambient are always inflated as a temporary workaround.
+    // See http://b/117933032 and http://b/117894786
     /**
      * Content views that must be inflated at all times.
      */
@@ -109,7 +111,9 @@ public class NotificationInflater {
     private static final int REQUIRED_INFLATION_FLAGS =
             FLAG_CONTENT_VIEW_CONTRACTED
             | FLAG_CONTENT_VIEW_EXPANDED
-            | FLAG_CONTENT_VIEW_PUBLIC;
+            | FLAG_CONTENT_VIEW_PUBLIC
+            | FLAG_CONTENT_VIEW_HEADS_UP
+            | FLAG_CONTENT_VIEW_AMBIENT;
 
     /**
      * The set of content views to inflate.
