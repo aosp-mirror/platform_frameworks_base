@@ -91,7 +91,7 @@ final class DeviceDiscoveryAction extends HdmiCecFeatureAction {
     private final DeviceDiscoveryCallback mCallback;
     private int mProcessedDeviceCount = 0;
     private int mTimeoutRetry = 0;
-    private boolean mIsTvDevice = source().mService.isTvDevice();
+    private boolean mIsTvDevice = localDevice().mService.isTvDevice();
     private final int mDelayPeriod;
 
     /**
