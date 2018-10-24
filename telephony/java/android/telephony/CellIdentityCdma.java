@@ -16,7 +16,6 @@
 
 package android.telephony;
 
-import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.telephony.cdma.CdmaCellLocation;
@@ -56,11 +55,11 @@ public final class CellIdentityCdma extends CellIdentity {
      */
     public CellIdentityCdma() {
         super(TAG, CellInfo.TYPE_CDMA, null, null, null, null);
-        mNetworkId = Integer.MAX_VALUE;
-        mSystemId = Integer.MAX_VALUE;
-        mBasestationId = Integer.MAX_VALUE;
-        mLongitude = Integer.MAX_VALUE;
-        mLatitude = Integer.MAX_VALUE;
+        mNetworkId = CellInfo.UNAVAILABLE;
+        mSystemId = CellInfo.UNAVAILABLE;
+        mBasestationId = CellInfo.UNAVAILABLE;
+        mLongitude = CellInfo.UNAVAILABLE;
+        mLatitude = CellInfo.UNAVAILABLE;
     }
 
     /**
@@ -104,7 +103,7 @@ public final class CellIdentityCdma extends CellIdentity {
             mLongitude = lon;
             mLatitude = lat;
         } else {
-            mLongitude = mLatitude = Integer.MAX_VALUE;
+            mLongitude = mLatitude = CellInfo.UNAVAILABLE;
         }
     }
 
@@ -130,21 +129,24 @@ public final class CellIdentityCdma extends CellIdentity {
     }
 
     /**
-     * @return Network Id 0..65535, Integer.MAX_VALUE if unknown
+     * @return Network Id 0..65535, {@link android.telephony.CellInfo#UNAVAILABLE UNAVAILABLE}
+     *         if unavailable.
      */
     public int getNetworkId() {
         return mNetworkId;
     }
 
     /**
-     * @return System Id 0..32767, Integer.MAX_VALUE if unknown
+     * @return System Id 0..32767, {@link android.telephony.CellInfo#UNAVAILABLE UNAVAILABLE}
+     *         if unavailable.
      */
     public int getSystemId() {
         return mSystemId;
     }
 
     /**
-     * @return Base Station Id 0..65535, Integer.MAX_VALUE if unknown
+     * @return Base Station Id 0..65535, {@link android.telephony.CellInfo#UNAVAILABLE UNAVAILABLE}
+     *         if unavailable.
      */
     public int getBasestationId() {
         return mBasestationId;
@@ -155,7 +157,7 @@ public final class CellIdentityCdma extends CellIdentity {
      * specified in 3GPP2 C.S0005-A v6.0. It is represented in units
      * of 0.25 seconds and ranges from -2592000 to 2592000, both
      * values inclusive (corresponding to a range of -180
-     * to +180 degrees). Integer.MAX_VALUE if unknown.
+     * to +180 degrees). {@link android.telephony.CellInfo#UNAVAILABLE UNAVAILABLE} if unavailable.
      */
     public int getLongitude() {
         return mLongitude;
@@ -166,7 +168,7 @@ public final class CellIdentityCdma extends CellIdentity {
      * specified in 3GPP2 C.S0005-A v6.0. It is represented in units
      * of 0.25 seconds and ranges from -1296000 to 1296000, both
      * values inclusive (corresponding to a range of -90
-     * to +90 degrees). Integer.MAX_VALUE if unknown.
+     * to +90 degrees). {@link android.telephony.CellInfo#UNAVAILABLE UNAVAILABLE} if unavailable.
      */
     public int getLatitude() {
         return mLatitude;
@@ -182,10 +184,10 @@ public final class CellIdentityCdma extends CellIdentity {
     @Override
     public CdmaCellLocation asCellLocation() {
         CdmaCellLocation cl = new CdmaCellLocation();
-        int bsid = mBasestationId != Integer.MAX_VALUE ? mBasestationId : -1;
-        int sid = mSystemId != Integer.MAX_VALUE ? mSystemId : -1;
-        int nid = mNetworkId != Integer.MAX_VALUE ? mNetworkId : -1;
-        // lat and long already use Integer.MAX_VALUE for invalid/unknown
+        int bsid = mBasestationId != CellInfo.UNAVAILABLE ? mBasestationId : -1;
+        int sid = mSystemId != CellInfo.UNAVAILABLE ? mSystemId : -1;
+        int nid = mNetworkId != CellInfo.UNAVAILABLE ? mNetworkId : -1;
+        // lat and long already use CellInfo.UNAVAILABLE for invalid/unknown
         cl.setCellLocationData(bsid, mLatitude, mLongitude, sid, nid);
         return cl;
     }
