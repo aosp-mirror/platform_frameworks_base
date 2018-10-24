@@ -33,6 +33,7 @@ import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityThread;
 import android.content.Context;
+import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -1506,7 +1507,7 @@ public class AudioTrack extends PlayerBase
      * a better solution.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 112561552)
     public int getLatency() {
         return native_get_latency();
     }
