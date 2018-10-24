@@ -989,7 +989,7 @@ public class MediaScanner implements AutoCloseable {
                 ExifInterface exif = null;
                 try {
                     exif = new ExifInterface(entry.mPath);
-                } catch (IOException ex) {
+                } catch (Exception ex) {
                     // exif is null
                 }
                 if (exif != null) {
