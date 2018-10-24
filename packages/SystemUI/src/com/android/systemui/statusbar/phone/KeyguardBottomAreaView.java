@@ -63,6 +63,7 @@ import android.view.accessibility.AccessibilityNodeInfo;
 import android.widget.FrameLayout;
 import android.widget.TextView;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.KeyguardUpdateMonitor;
@@ -227,6 +228,11 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
             return super.performAccessibilityAction(host, action, args);
         }
     };
+
+    public void initFrom(KeyguardBottomAreaView oldBottomArea) {
+        setKeyguardIndicationController(oldBottomArea.mIndicationController);
+        setStatusBar(oldBottomArea.mStatusBar);
+    }
 
     @Override
     protected void onFinishInflate() {
@@ -578,7 +584,8 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         }
     }
 
-    private void launchVoiceAssist() {
+    @VisibleForTesting
+    void launchVoiceAssist() {
         Runnable runnable = new Runnable() {
             @Override
             public void run() {
