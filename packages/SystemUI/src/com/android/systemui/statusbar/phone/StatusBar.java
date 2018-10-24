@@ -651,7 +651,9 @@ public class StatusBar extends SystemUI implements DemoMode,
                 wallpaperChangedFilter, null /* broadcastPermission */, null /* scheduler */);
         mWallpaperChangedReceiver.onReceive(mContext, null);
 
-        mCommandQueue.disable(switches[0], switches[6], false /* animate */);
+        // Set up the initial notification state. This needs to happen before CommandQueue.disable()
+        setUpPresenter();
+
         setSystemUiVisibility(switches[1], switches[7], switches[8], 0xffffffff,
                 fullscreenStackBounds, dockedStackBounds);
         topAppWindowChanged(switches[2] != 0);
@@ -664,17 +666,6 @@ public class StatusBar extends SystemUI implements DemoMode,
             mCommandQueue.setIcon(iconSlots.get(i), icons.get(i));
         }
 
-        // Set up the initial notification state.
-        mPresenter = new StatusBarNotificationPresenter(mContext, mNotificationPanel,
-                mHeadsUpManager, mStatusBarWindow, mStackScroller, mDozeScrimController,
-                mScrimController, this);
-        mAppOpsListener.setUpWithPresenter(mPresenter);
-        mNotificationListener.setUpWithPresenter(mPresenter);
-        mNotificationShelf.setOnActivatedListener(mPresenter);
-        mRemoteInputManager.getController().addCallback(mStatusBarWindowController);
-
-        // set the initial view visibility
-        Dependency.get(InitController.class).addPostInitTask(this::updateAreThereNotifications);
 
         if (DEBUG) {
             Log.d(TAG, String.format(
@@ -720,6 +711,13 @@ public class StatusBar extends SystemUI implements DemoMode,
         Dependency.get(ActivityStarterDelegate.class).setActivityStarterImpl(this);
 
         Dependency.get(ConfigurationController.class).addCallback(this);
+
+        // set the initial view visibility
+        Dependency.get(InitController.class).addPostInitTask(this::updateAreThereNotifications);
+        Dependency.get(InitController.class).addPostInitTask(() -> {
+            setUpDisableFlags(switches[0], switches[6]);
+        });
+
     }
 
     // ================================================================================
@@ -979,6 +977,26 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         // Private API call to make the shadows look better for Recents
         ThreadedRenderer.overrideProperty("ambientRatio", String.valueOf(1.5f));
+    }
+
+    protected void setUpPresenter() {
+        // Set up the initial notification state.
+        mPresenter = new StatusBarNotificationPresenter(mContext, mNotificationPanel,
+                mHeadsUpManager, mStatusBarWindow, mStackScroller, mDozeScrimController,
+                mScrimController, this);
+        mAppOpsListener.setUpWithPresenter(mPresenter);
+        mNotificationListener.setUpWithPresenter(mPresenter);
+        mNotificationShelf.setOnActivatedListener(mPresenter);
+        mRemoteInputManager.getController().addCallback(mStatusBarWindowController);
+    }
+
+    /**
+     * Post-init task of {@link #start()}
+     * @param state1 disable1 flags
+     * @param state2 disable2 flags
+     */
+    protected void setUpDisableFlags(int state1, int state2) {
+        mCommandQueue.disable(state1, state2, false /* animate */);
     }
 
     @Override
