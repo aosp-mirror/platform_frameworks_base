@@ -29,7 +29,6 @@ import android.animation.PropertyValuesHolder;
 import android.animation.TimeInterpolator;
 import android.animation.ValueAnimator;
 import android.annotation.DrawableRes;
-import android.annotation.StyleRes;
 import android.app.StatusBarManager;
 import android.content.Context;
 import android.content.res.Configuration;
@@ -271,7 +270,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         final ContextualButton imeSwitcherButton = new ContextualButton(R.id.ime_switcher,
                 R.drawable.ic_ime_switcher_default);
         final RotationContextButton rotateSuggestionButton = new RotationContextButton(
-                R.id.rotate_suggestion, R.drawable.ic_sysbar_rotate_button,
+                R.id.rotate_suggestion, R.drawable.ic_sysbar_rotate_button, getContext(),
                 R.style.RotateButtonCCWStart90);
         final ContextualButton accessibilityButton =
                 new ContextualButton(R.id.accessibility_button,
@@ -418,8 +417,9 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         return mButtonDispatchers.get(R.id.accessibility_button);
     }
 
-    public ButtonDispatcher getRotateSuggestionButton() {
-        return mButtonDispatchers.get(R.id.rotate_suggestion);
+    public RotationContextButton getRotateSuggestionButton() {
+        return (RotationContextButton) mContextualButtonGroup
+                .getContextButton(R.id.rotate_suggestion);
     }
 
     public SparseArray<ButtonDispatcher> getButtonDispatchers() {
@@ -746,25 +746,10 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         mContextualButtonGroup.setButtonVisiblity(R.id.menu, show);
     }
 
-    public void updateRotateSuggestionButtonStyle(@StyleRes int style) {
-        RotationContextButton button = (RotationContextButton) mContextualButtonGroup
-                .getContextButton(R.id.rotate_suggestion);
-        button.setStyle(style);
-        button.updateIcon();
-    }
-
     public void setAccessibilityButtonState(final boolean visible, final boolean longClickable) {
         mLongClickableAccessibilityButton = longClickable;
         getAccessibilityButton().setLongClickable(longClickable);
         mContextualButtonGroup.setButtonVisiblity(R.id.accessibility_button, visible);
-    }
-
-    public int setRotateButtonVisibility(boolean visible) {
-        return mContextualButtonGroup.setButtonVisiblity(R.id.rotate_suggestion, visible);
-    }
-
-    public boolean isRotateButtonVisible() {
-        return getRotateSuggestionButton().isVisible();
     }
 
     void hideRecentsOnboarding() {
@@ -1058,6 +1043,9 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
             mGestureHelper.destroy();
         }
         setUpSwipeUpOnboarding(false);
+        for (int i = 0; i < mButtonDispatchers.size(); ++i) {
+            mButtonDispatchers.valueAt(i).onDestroy();
+        }
     }
 
     private void setUpSwipeUpOnboarding(boolean connectedToOverviewProxy) {

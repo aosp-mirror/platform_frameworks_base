@@ -288,4 +288,10 @@ public class ButtonDispatcher {
             }
         }
     }
+
+    /**
+     * Executes when button is detached from window.
+     */
+    protected void onDestroy() {
+    }
 }
