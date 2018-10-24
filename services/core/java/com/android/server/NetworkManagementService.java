@@ -2548,18 +2548,18 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
     @Override
     public void addInterfaceToLocalNetwork(String iface, List<RouteInfo> routes) {
-        modifyInterfaceInNetwork(MODIFY_OPERATION_ADD, INetd.NETID_LOCAL, iface);
+        modifyInterfaceInNetwork(MODIFY_OPERATION_ADD, INetd.LOCAL_NET_ID, iface);
 
         for (RouteInfo route : routes) {
             if (!route.isDefaultRoute()) {
-                modifyRoute(MODIFY_OPERATION_ADD, INetd.NETID_LOCAL, route);
+                modifyRoute(MODIFY_OPERATION_ADD, INetd.LOCAL_NET_ID, route);
             }
         }
     }
 
     @Override
     public void removeInterfaceFromLocalNetwork(String iface) {
-        modifyInterfaceInNetwork(MODIFY_OPERATION_REMOVE, INetd.NETID_LOCAL, iface);
+        modifyInterfaceInNetwork(MODIFY_OPERATION_REMOVE, INetd.LOCAL_NET_ID, iface);
     }
 
     @Override
@@ -2568,7 +2568,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
 
         for (RouteInfo route : routes) {
             try {
-                modifyRoute(MODIFY_OPERATION_REMOVE, INetd.NETID_LOCAL, route);
+                modifyRoute(MODIFY_OPERATION_REMOVE, INetd.LOCAL_NET_ID, route);
             } catch (IllegalStateException e) {
                 failures++;
             }
