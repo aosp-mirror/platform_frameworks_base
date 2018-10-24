@@ -61,6 +61,7 @@ public class AppTimeLimitControllerTests {
 
     private static final long TIME_30_MIN = 30 * 60_000L;
     private static final long TIME_10_MIN = 10 * 60_000L;
+    private static final long TIME_1_MIN = 10 * 60_000L;
 
     private static final long MAX_OBSERVER_PER_UID = 10;
     private static final long MIN_TIME_LIMIT = 4_000L;
@@ -77,7 +78,8 @@ public class AppTimeLimitControllerTests {
             PKG_GAME1, PKG_GAME2
     };
 
-    private final CountDownLatch mCountDownLatch = new CountDownLatch(1);
+    private CountDownLatch mLimitReachedLatch = new CountDownLatch(1);
+    private CountDownLatch mSessionEndLatch = new CountDownLatch(1);
 
     private AppTimeLimitController mController;
 
@@ -85,18 +87,24 @@ public class AppTimeLimitControllerTests {
 
     private long mUptimeMillis;
 
-    AppTimeLimitController.OnLimitReachedListener mListener
-            = new AppTimeLimitController.OnLimitReachedListener() {
+    AppTimeLimitController.TimeLimitCallbackListener mListener =
+            new AppTimeLimitController.TimeLimitCallbackListener() {
+                @Override
+                public void onLimitReached(int observerId, int userId, long timeLimit,
+                        long timeElapsed,
+                        PendingIntent callbackIntent) {
+                    mLimitReachedLatch.countDown();
+                }
 
-        @Override
-        public void onLimitReached(int observerId, int userId, long timeLimit, long timeElapsed,
-                PendingIntent callbackIntent) {
-            mCountDownLatch.countDown();
-        }
-    };
+                @Override
+                public void onSessionEnd(int observerId, int userId, long timeElapsed,
+                        PendingIntent callbackIntent) {
+                    mSessionEndLatch.countDown();
+                }
+            };
 
     class MyAppTimeLimitController extends AppTimeLimitController {
-        MyAppTimeLimitController(AppTimeLimitController.OnLimitReachedListener listener,
+        MyAppTimeLimitController(AppTimeLimitController.TimeLimitCallbackListener listener,
                 Looper looper) {
             super(listener, looper);
         }
@@ -107,7 +115,12 @@ public class AppTimeLimitControllerTests {
         }
 
         @Override
-        protected long getObserverPerUidLimit() {
+        protected long getAppUsageObserverPerUidLimit() {
+            return MAX_OBSERVER_PER_UID;
+        }
+
+        @Override
+        protected long getUsageSessionObserverPerUidLimit() {
             return MAX_OBSERVER_PER_UID;
         }
 
@@ -129,188 +142,551 @@ public class AppTimeLimitControllerTests {
         mThread.quit();
     }
 
-    /** Verify observer is added */
+    /** Verify app usage observer is added */
     @Test
-    public void testAddObserver() {
-        addObserver(OBS_ID1, GROUP1, TIME_30_MIN);
-        assertTrue("Observer wasn't added", hasObserver(OBS_ID1));
-        addObserver(OBS_ID2, GROUP_GAME, TIME_30_MIN);
-        assertTrue("Observer wasn't added", hasObserver(OBS_ID2));
-        assertTrue("Observer wasn't added", hasObserver(OBS_ID1));
+    public void testAppUsageObserver_AddObserver() {
+        addAppUsageObserver(OBS_ID1, GROUP1, TIME_30_MIN);
+        assertTrue("Observer wasn't added", hasAppUsageObserver(UID, OBS_ID1));
+        addAppUsageObserver(OBS_ID2, GROUP_GAME, TIME_30_MIN);
+        assertTrue("Observer wasn't added", hasAppUsageObserver(UID, OBS_ID2));
+        assertTrue("Observer wasn't added", hasAppUsageObserver(UID, OBS_ID1));
     }
 
-    /** Verify observer is removed */
+    /** Verify usage session observer is added */
     @Test
-    public void testRemoveObserver() {
-        addObserver(OBS_ID1, GROUP1, TIME_30_MIN);
-        assertTrue("Observer wasn't added", hasObserver(OBS_ID1));
-        mController.removeObserver(UID, OBS_ID1, USER_ID);
-        assertFalse("Observer wasn't removed", hasObserver(OBS_ID1));
+    public void testUsageSessionObserver_AddObserver() {
+        addUsageSessionObserver(OBS_ID1, GROUP1, TIME_30_MIN, TIME_1_MIN);
+        assertTrue("Observer wasn't added", hasUsageSessionObserver(UID, OBS_ID1));
+        addUsageSessionObserver(OBS_ID2, GROUP_GAME, TIME_30_MIN, TIME_1_MIN);
+        assertTrue("Observer wasn't added", hasUsageSessionObserver(UID, OBS_ID2));
+        assertTrue("Observer wasn't added", hasUsageSessionObserver(UID, OBS_ID1));
+    }
+
+    /** Verify app usage observer is removed */
+    @Test
+    public void testAppUsageObserver_RemoveObserver() {
+        addAppUsageObserver(OBS_ID1, GROUP1, TIME_30_MIN);
+        assertTrue("Observer wasn't added", hasAppUsageObserver(UID, OBS_ID1));
+        mController.removeAppUsageObserver(UID, OBS_ID1, USER_ID);
+        assertFalse("Observer wasn't removed", hasAppUsageObserver(UID, OBS_ID1));
+    }
+
+    /** Verify usage session observer is removed */
+    @Test
+    public void testUsageSessionObserver_RemoveObserver() {
+        addUsageSessionObserver(OBS_ID1, GROUP1, TIME_30_MIN, TIME_1_MIN);
+        assertTrue("Observer wasn't added", hasUsageSessionObserver(UID, OBS_ID1));
+        mController.removeUsageSessionObserver(UID, OBS_ID1, USER_ID);
+        assertFalse("Observer wasn't removed", hasUsageSessionObserver(UID, OBS_ID1));
     }
 
     /** Re-adding an observer should result in only one copy */
     @Test
-    public void testObserverReAdd() {
-        addObserver(OBS_ID1, GROUP1, TIME_30_MIN);
-        assertTrue("Observer wasn't added", hasObserver(OBS_ID1));
-        addObserver(OBS_ID1, GROUP1, TIME_10_MIN);
+    public void testAppUsageObserver_ObserverReAdd() {
+        addAppUsageObserver(OBS_ID1, GROUP1, TIME_30_MIN);
+        assertTrue("Observer wasn't added", hasAppUsageObserver(UID, OBS_ID1));
+        addAppUsageObserver(OBS_ID1, GROUP1, TIME_10_MIN);
         assertTrue("Observer wasn't added",
-                mController.getObserverGroup(OBS_ID1, USER_ID).timeLimit == TIME_10_MIN);
-        mController.removeObserver(UID, OBS_ID1, USER_ID);
-        assertFalse("Observer wasn't removed", hasObserver(OBS_ID1));
+                mController.getAppUsageGroup(UID, OBS_ID1).getTimeLimitMs() == TIME_10_MIN);
+        mController.removeAppUsageObserver(UID, OBS_ID1, USER_ID);
+        assertFalse("Observer wasn't removed", hasAppUsageObserver(UID, OBS_ID1));
+    }
+
+    /** Re-adding an observer should result in only one copy */
+    @Test
+    public void testUsageSessionObserver_ObserverReAdd() {
+        addUsageSessionObserver(OBS_ID1, GROUP1, TIME_30_MIN, TIME_1_MIN);
+        assertTrue("Observer wasn't added", hasUsageSessionObserver(UID, OBS_ID1));
+        addUsageSessionObserver(OBS_ID1, GROUP1, TIME_10_MIN, TIME_1_MIN);
+        assertTrue("Observer wasn't added",
+                mController.getSessionUsageGroup(UID, OBS_ID1).getTimeLimitMs() == TIME_10_MIN);
+        mController.removeUsageSessionObserver(UID, OBS_ID1, USER_ID);
+        assertFalse("Observer wasn't removed", hasUsageSessionObserver(UID, OBS_ID1));
+    }
+
+    /** Different type observers can be registered to the same observerId value */
+    @Test
+    public void testAllObservers_ExclusiveObserverIds() {
+        addAppUsageObserver(OBS_ID1, GROUP1, TIME_10_MIN);
+        addUsageSessionObserver(OBS_ID1, GROUP1, TIME_30_MIN, TIME_1_MIN);
+        assertTrue("Observer wasn't added", hasAppUsageObserver(UID, OBS_ID1));
+        assertTrue("Observer wasn't added", hasUsageSessionObserver(UID, OBS_ID1));
+
+        AppTimeLimitController.UsageGroup appUsageGroup = mController.getAppUsageGroup(UID,
+                OBS_ID1);
+        AppTimeLimitController.UsageGroup sessionUsageGroup = mController.getSessionUsageGroup(UID,
+                OBS_ID1);
+
+        // Verify data still intact
+        assertEquals(TIME_10_MIN, appUsageGroup.getTimeLimitMs());
+        assertEquals(TIME_30_MIN, sessionUsageGroup.getTimeLimitMs());
     }
 
     /** Verify that usage across different apps within a group are added up */
     @Test
-    public void testAccumulation() throws Exception {
+    public void testAppUsageObserver_Accumulation() throws Exception {
         setTime(0L);
-        addObserver(OBS_ID1, GROUP1, TIME_30_MIN);
-        moveToForeground(PKG_SOC1);
+        addAppUsageObserver(OBS_ID1, GROUP1, TIME_30_MIN);
+        startUsage(PKG_SOC1);
         // Add 10 mins
         setTime(TIME_10_MIN);
-        moveToBackground(PKG_SOC1);
+        stopUsage(PKG_SOC1);
 
-        long timeRemaining = mController.getObserverGroup(OBS_ID1, USER_ID).timeRemaining;
+        AppTimeLimitController.UsageGroup group = mController.getAppUsageGroup(UID, OBS_ID1);
+
+        long timeRemaining = group.getTimeLimitMs() - group.getUsageTimeMs();
         assertEquals(TIME_10_MIN * 2, timeRemaining);
 
-        moveToForeground(PKG_SOC1);
+        startUsage(PKG_SOC1);
         setTime(TIME_10_MIN * 2);
-        moveToBackground(PKG_SOC1);
+        stopUsage(PKG_SOC1);
 
-        timeRemaining = mController.getObserverGroup(OBS_ID1, USER_ID).timeRemaining;
+        timeRemaining = group.getTimeLimitMs() - group.getUsageTimeMs();
         assertEquals(TIME_10_MIN, timeRemaining);
 
         setTime(TIME_30_MIN);
 
-        assertFalse(mCountDownLatch.await(100L, TimeUnit.MILLISECONDS));
+        assertFalse(mLimitReachedLatch.await(100L, TimeUnit.MILLISECONDS));
 
         // Add a different package in the group
-        moveToForeground(PKG_GAME1);
+        startUsage(PKG_GAME1);
         setTime(TIME_30_MIN + TIME_10_MIN);
-        moveToBackground(PKG_GAME1);
+        stopUsage(PKG_GAME1);
 
-        assertEquals(0, mController.getObserverGroup(OBS_ID1, USER_ID).timeRemaining);
-        assertTrue(mCountDownLatch.await(100L, TimeUnit.MILLISECONDS));
+        assertEquals(0, group.getTimeLimitMs() - group.getUsageTimeMs());
+        assertTrue(mLimitReachedLatch.await(100L, TimeUnit.MILLISECONDS));
+    }
+
+    /** Verify that usage across different apps within a group are added up */
+    @Test
+    public void testUsageSessionObserver_Accumulation() throws Exception {
+        setTime(0L);
+        addUsageSessionObserver(OBS_ID1, GROUP1, TIME_30_MIN, TIME_1_MIN);
+        startUsage(PKG_SOC1);
+        // Add 10 mins
+        setTime(TIME_10_MIN);
+        stopUsage(PKG_SOC1);
+
+        AppTimeLimitController.UsageGroup group = mController.getSessionUsageGroup(UID, OBS_ID1);
+
+        long timeRemaining = group.getTimeLimitMs() - group.getUsageTimeMs();
+        assertEquals(TIME_10_MIN * 2, timeRemaining);
+
+        startUsage(PKG_SOC1);
+        setTime(TIME_10_MIN * 2);
+        stopUsage(PKG_SOC1);
+
+        timeRemaining = group.getTimeLimitMs() - group.getUsageTimeMs();
+        assertEquals(TIME_10_MIN, timeRemaining);
+
+        setTime(TIME_30_MIN);
+
+        assertFalse(mLimitReachedLatch.await(100L, TimeUnit.MILLISECONDS));
+
+        // Add a different package in the group
+        startUsage(PKG_GAME1);
+        setTime(TIME_30_MIN + TIME_10_MIN);
+        stopUsage(PKG_GAME1);
+
+        assertEquals(0, group.getTimeLimitMs() - group.getUsageTimeMs());
+        assertTrue(mLimitReachedLatch.await(100L, TimeUnit.MILLISECONDS));
     }
 
     /** Verify that time limit does not get triggered due to a different app */
     @Test
-    public void testTimeoutOtherApp() throws Exception {
+    public void testAppUsageObserver_TimeoutOtherApp() throws Exception {
         setTime(0L);
-        addObserver(OBS_ID1, GROUP1, 4_000L);
-        moveToForeground(PKG_SOC2);
-        assertFalse(mCountDownLatch.await(6_000L, TimeUnit.MILLISECONDS));
+        addAppUsageObserver(OBS_ID1, GROUP1, 4_000L);
+        startUsage(PKG_SOC2);
+        assertFalse(mLimitReachedLatch.await(6_000L, TimeUnit.MILLISECONDS));
         setTime(6_000L);
-        moveToBackground(PKG_SOC2);
-        assertFalse(mCountDownLatch.await(100L, TimeUnit.MILLISECONDS));
+        stopUsage(PKG_SOC2);
+        assertFalse(mLimitReachedLatch.await(100L, TimeUnit.MILLISECONDS));
+    }
+
+    /** Verify that time limit does not get triggered due to a different app */
+    @Test
+    public void testUsageSessionObserver_TimeoutOtherApp() throws Exception {
+        setTime(0L);
+        addUsageSessionObserver(OBS_ID1, GROUP1, 4_000L, 1_000L);
+        startUsage(PKG_SOC2);
+        assertFalse(mLimitReachedLatch.await(6_000L, TimeUnit.MILLISECONDS));
+        setTime(6_000L);
+        stopUsage(PKG_SOC2);
+        assertFalse(mLimitReachedLatch.await(100L, TimeUnit.MILLISECONDS));
+
     }
 
     /** Verify the timeout message is delivered at the right time */
     @Test
-    public void testTimeout() throws Exception {
+    public void testAppUsageObserver_Timeout() throws Exception {
         setTime(0L);
-        addObserver(OBS_ID1, GROUP1, 4_000L);
-        moveToForeground(PKG_SOC1);
+        addAppUsageObserver(OBS_ID1, GROUP1, 4_000L);
+        startUsage(PKG_SOC1);
         setTime(6_000L);
-        assertTrue(mCountDownLatch.await(6_000L, TimeUnit.MILLISECONDS));
-        moveToBackground(PKG_SOC1);
+        assertTrue(mLimitReachedLatch.await(6_000L, TimeUnit.MILLISECONDS));
+        stopUsage(PKG_SOC1);
         // Verify that the observer was removed
-        assertFalse(hasObserver(OBS_ID1));
+        assertFalse(hasAppUsageObserver(UID, OBS_ID1));
+    }
+
+    /** Verify the timeout message is delivered at the right time */
+    @Test
+    public void testUsageSessionObserver_Timeout() throws Exception {
+        setTime(0L);
+        addUsageSessionObserver(OBS_ID1, GROUP1, 4_000L, 1_000L);
+        startUsage(PKG_SOC1);
+        setTime(6_000L);
+        assertTrue(mLimitReachedLatch.await(6_000L, TimeUnit.MILLISECONDS));
+        stopUsage(PKG_SOC1);
+        // Usage has stopped, Session should end in a second. Verify session end occurs in a second
+        // (+/- 100ms, which is hopefully not too slim a margin)
+        assertFalse(mSessionEndLatch.await(900L, TimeUnit.MILLISECONDS));
+        assertTrue(mSessionEndLatch.await(200L, TimeUnit.MILLISECONDS));
+        // Verify that the observer was not removed
+        assertTrue(hasUsageSessionObserver(UID, OBS_ID1));
     }
 
     /** If an app was already running, make sure it is partially counted towards the time limit */
     @Test
-    public void testAlreadyRunning() throws Exception {
+    public void testAppUsageObserver_AlreadyRunning() throws Exception {
         setTime(TIME_10_MIN);
-        moveToForeground(PKG_GAME1);
+        startUsage(PKG_GAME1);
         setTime(TIME_30_MIN);
-        addObserver(OBS_ID2, GROUP_GAME, TIME_30_MIN);
+        addAppUsageObserver(OBS_ID2, GROUP_GAME, TIME_30_MIN);
         setTime(TIME_30_MIN + TIME_10_MIN);
-        moveToBackground(PKG_GAME1);
-        assertFalse(mCountDownLatch.await(1000L, TimeUnit.MILLISECONDS));
+        stopUsage(PKG_GAME1);
+        assertFalse(mLimitReachedLatch.await(1_000L, TimeUnit.MILLISECONDS));
 
-        moveToForeground(PKG_GAME2);
+        startUsage(PKG_GAME2);
         setTime(TIME_30_MIN + TIME_30_MIN);
-        moveToBackground(PKG_GAME2);
-        assertTrue(mCountDownLatch.await(1000L, TimeUnit.MILLISECONDS));
+        stopUsage(PKG_GAME2);
+        assertTrue(mLimitReachedLatch.await(1_000L, TimeUnit.MILLISECONDS));
         // Verify that the observer was removed
-        assertFalse(hasObserver(OBS_ID2));
+        assertFalse(hasAppUsageObserver(UID, OBS_ID2));
+    }
+
+    /** If an app was already running, make sure it is partially counted towards the time limit */
+    @Test
+    public void testUsageSessionObserver_AlreadyRunning() throws Exception {
+        setTime(TIME_10_MIN);
+        startUsage(PKG_GAME1);
+        setTime(TIME_30_MIN);
+        addUsageSessionObserver(OBS_ID2, GROUP_GAME, TIME_30_MIN, TIME_1_MIN);
+        setTime(TIME_30_MIN + TIME_10_MIN);
+        stopUsage(PKG_GAME1);
+        assertFalse(mLimitReachedLatch.await(1_000L, TimeUnit.MILLISECONDS));
+
+        startUsage(PKG_GAME2);
+        setTime(TIME_30_MIN + TIME_30_MIN);
+        stopUsage(PKG_GAME2);
+        assertTrue(mLimitReachedLatch.await(1_000L, TimeUnit.MILLISECONDS));
+        // Verify that the observer was removed
+        assertTrue(hasUsageSessionObserver(UID, OBS_ID2));
     }
 
     /** If watched app is already running, verify the timeout callback happens at the right time */
     @Test
-    public void testAlreadyRunningTimeout() throws Exception {
+    public void testAppUsageObserver_AlreadyRunningTimeout() throws Exception {
         setTime(0);
-        moveToForeground(PKG_SOC1);
+        startUsage(PKG_SOC1);
         setTime(TIME_10_MIN);
         // 10 second time limit
-        addObserver(OBS_ID1, GROUP_SOC, 10_000L);
+        addAppUsageObserver(OBS_ID1, GROUP_SOC, 10_000L);
         setTime(TIME_10_MIN + 5_000L);
         // Shouldn't call back in 6 seconds
-        assertFalse(mCountDownLatch.await(6_000L, TimeUnit.MILLISECONDS));
+        assertFalse(mLimitReachedLatch.await(6_000L, TimeUnit.MILLISECONDS));
         setTime(TIME_10_MIN + 10_000L);
         // Should call back by 11 seconds (6 earlier + 5 now)
-        assertTrue(mCountDownLatch.await(5_000L, TimeUnit.MILLISECONDS));
+        assertTrue(mLimitReachedLatch.await(5_000L, TimeUnit.MILLISECONDS));
         // Verify that the observer was removed
-        assertFalse(hasObserver(OBS_ID1));
+        assertFalse(hasAppUsageObserver(UID, OBS_ID1));
     }
 
-    /** Verify that App Time Limit Controller will limit the number of observerIds */
+    /** If watched app is already running, verify the timeout callback happens at the right time */
     @Test
-    public void testMaxObserverLimit() throws Exception {
+    public void testUsageSessionObserver_AlreadyRunningTimeout() throws Exception {
+        setTime(0);
+        startUsage(PKG_SOC1);
+        setTime(TIME_10_MIN);
+        // 10 second time limit
+        addUsageSessionObserver(OBS_ID1, GROUP_SOC, 10_000L, 1_000L);
+        setTime(TIME_10_MIN + 5_000L);
+        // Shouldn't call back in 6 seconds
+        assertFalse(mLimitReachedLatch.await(6_000L, TimeUnit.MILLISECONDS));
+        setTime(TIME_10_MIN + 10_000L);
+        // Should call back by 11 seconds (6 earlier + 5 now)
+        assertTrue(mLimitReachedLatch.await(5_000L, TimeUnit.MILLISECONDS));
+        stopUsage(PKG_SOC1);
+        // Usage has stopped, Session should end in a second. Verify session end occurs in a second
+        // (+/- 100ms, which is hopefully not too slim a margin)
+        assertFalse(mSessionEndLatch.await(900L, TimeUnit.MILLISECONDS));
+        assertTrue(mSessionEndLatch.await(200L, TimeUnit.MILLISECONDS));
+        // Verify that the observer was removed
+        assertTrue(hasUsageSessionObserver(UID, OBS_ID1));
+    }
+
+    /**
+     * Verify that App Time Limit Controller will limit the number of observerIds for app usage
+     * observers
+     */
+    @Test
+    public void testAppUsageObserver_MaxObserverLimit() throws Exception {
         boolean receivedException = false;
         int ANOTHER_UID = UID + 1;
-        addObserver(OBS_ID1, GROUP1, TIME_30_MIN);
-        addObserver(OBS_ID2, GROUP1, TIME_30_MIN);
-        addObserver(OBS_ID3, GROUP1, TIME_30_MIN);
-        addObserver(OBS_ID4, GROUP1, TIME_30_MIN);
-        addObserver(OBS_ID5, GROUP1, TIME_30_MIN);
-        addObserver(OBS_ID6, GROUP1, TIME_30_MIN);
-        addObserver(OBS_ID7, GROUP1, TIME_30_MIN);
-        addObserver(OBS_ID8, GROUP1, TIME_30_MIN);
-        addObserver(OBS_ID9, GROUP1, TIME_30_MIN);
-        addObserver(OBS_ID10, GROUP1, TIME_30_MIN);
+        addAppUsageObserver(OBS_ID1, GROUP1, TIME_30_MIN);
+        addAppUsageObserver(OBS_ID2, GROUP1, TIME_30_MIN);
+        addAppUsageObserver(OBS_ID3, GROUP1, TIME_30_MIN);
+        addAppUsageObserver(OBS_ID4, GROUP1, TIME_30_MIN);
+        addAppUsageObserver(OBS_ID5, GROUP1, TIME_30_MIN);
+        addAppUsageObserver(OBS_ID6, GROUP1, TIME_30_MIN);
+        addAppUsageObserver(OBS_ID7, GROUP1, TIME_30_MIN);
+        addAppUsageObserver(OBS_ID8, GROUP1, TIME_30_MIN);
+        addAppUsageObserver(OBS_ID9, GROUP1, TIME_30_MIN);
+        addAppUsageObserver(OBS_ID10, GROUP1, TIME_30_MIN);
         // Readding an observer should not cause an IllegalStateException
-        addObserver(OBS_ID5, GROUP1, TIME_30_MIN);
+        addAppUsageObserver(OBS_ID5, GROUP1, TIME_30_MIN);
         // Adding an observer for a different uid shouldn't cause an IllegalStateException
-        mController.addObserver(ANOTHER_UID, OBS_ID11, GROUP1, TIME_30_MIN, null, USER_ID);
+        mController.addAppUsageObserver(ANOTHER_UID, OBS_ID11, GROUP1, TIME_30_MIN, null, USER_ID);
         try {
-            addObserver(OBS_ID11, GROUP1, TIME_30_MIN);
+            addAppUsageObserver(OBS_ID11, GROUP1, TIME_30_MIN);
         } catch (IllegalStateException ise) {
             receivedException = true;
         }
         assertTrue("Should have caused an IllegalStateException", receivedException);
     }
 
-    /** Verify that addObserver minimum time limit is one minute */
+    /**
+     * Verify that App Time Limit Controller will limit the number of observerIds for usage session
+     * observers
+     */
     @Test
-    public void testMinimumTimeLimit() throws Exception {
+    public void testUsageSessionObserver_MaxObserverLimit() throws Exception {
+        addUsageSessionObserver(OBS_ID1, GROUP1, TIME_30_MIN, TIME_1_MIN);
+        boolean receivedException = false;
+        int ANOTHER_UID = UID + 1;
+        addUsageSessionObserver(OBS_ID2, GROUP1, TIME_30_MIN, TIME_1_MIN);
+        addUsageSessionObserver(OBS_ID3, GROUP1, TIME_30_MIN, TIME_1_MIN);
+        addUsageSessionObserver(OBS_ID4, GROUP1, TIME_30_MIN, TIME_1_MIN);
+        addUsageSessionObserver(OBS_ID5, GROUP1, TIME_30_MIN, TIME_1_MIN);
+        addUsageSessionObserver(OBS_ID6, GROUP1, TIME_30_MIN, TIME_1_MIN);
+        addUsageSessionObserver(OBS_ID7, GROUP1, TIME_30_MIN, TIME_1_MIN);
+        addUsageSessionObserver(OBS_ID8, GROUP1, TIME_30_MIN, TIME_1_MIN);
+        addUsageSessionObserver(OBS_ID9, GROUP1, TIME_30_MIN, TIME_1_MIN);
+        addUsageSessionObserver(OBS_ID10, GROUP1, TIME_30_MIN, TIME_1_MIN);
+        // Readding an observer should not cause an IllegalStateException
+        addUsageSessionObserver(OBS_ID5, GROUP1, TIME_30_MIN, TIME_1_MIN);
+        // Adding an observer for a different uid shouldn't cause an IllegalStateException
+        mController.addUsageSessionObserver(ANOTHER_UID, OBS_ID11, GROUP1, TIME_30_MIN, TIME_1_MIN,
+                null, null, USER_ID);
+        try {
+            addUsageSessionObserver(OBS_ID11, GROUP1, TIME_30_MIN, TIME_1_MIN);
+        } catch (IllegalStateException ise) {
+            receivedException = true;
+        }
+        assertTrue("Should have caused an IllegalStateException", receivedException);
+    }
+
+    /** Verify that addAppUsageObserver minimum time limit is one minute */
+    @Test
+    public void testAppUsageObserver_MinimumTimeLimit() throws Exception {
         boolean receivedException = false;
         // adding an observer with a one minute time limit should not cause an exception
-        addObserver(OBS_ID1, GROUP1, MIN_TIME_LIMIT);
+        addAppUsageObserver(OBS_ID1, GROUP1, MIN_TIME_LIMIT);
         try {
-            addObserver(OBS_ID1, GROUP1, MIN_TIME_LIMIT - 1);
+            addAppUsageObserver(OBS_ID1, GROUP1, MIN_TIME_LIMIT - 1);
         } catch (IllegalArgumentException iae) {
             receivedException = true;
         }
         assertTrue("Should have caused an IllegalArgumentException", receivedException);
     }
 
-    private void moveToForeground(String packageName) {
-        mController.moveToForeground(packageName, "class", USER_ID);
+    /** Verify that addUsageSessionObserver minimum time limit is one minute */
+    @Test
+    public void testUsageSessionObserver_MinimumTimeLimit() throws Exception {
+        boolean receivedException = false;
+        // test also for session observers
+        addUsageSessionObserver(OBS_ID10, GROUP1, MIN_TIME_LIMIT, TIME_1_MIN);
+        try {
+            addUsageSessionObserver(OBS_ID10, GROUP1, MIN_TIME_LIMIT - 1, TIME_1_MIN);
+        } catch (IllegalArgumentException iae) {
+            receivedException = true;
+        }
+        assertTrue("Should have caused an IllegalArgumentException", receivedException);
     }
 
-    private void moveToBackground(String packageName) {
-        mController.moveToBackground(packageName, "class", USER_ID);
+    /** Verify that concurrent usage from multiple apps in the same group will counted correctly */
+    @Test
+    public void testAppUsageObserver_ConcurrentUsage() throws Exception {
+        setTime(0L);
+        addAppUsageObserver(OBS_ID1, GROUP1, TIME_30_MIN);
+        AppTimeLimitController.UsageGroup group = mController.getAppUsageGroup(UID, OBS_ID1);
+        startUsage(PKG_SOC1);
+        // Add 10 mins
+        setTime(TIME_10_MIN);
+
+        // Add a different package in the group will first package is still in use
+        startUsage(PKG_GAME1);
+        setTime(TIME_10_MIN * 2);
+        // Stop first package usage
+        stopUsage(PKG_SOC1);
+
+        setTime(TIME_30_MIN);
+        stopUsage(PKG_GAME1);
+
+        assertEquals(TIME_30_MIN, group.getUsageTimeMs());
+        assertTrue(mLimitReachedLatch.await(100L, TimeUnit.MILLISECONDS));
     }
 
-    private void addObserver(int observerId, String[] packages, long timeLimit) {
-        mController.addObserver(UID, observerId, packages, timeLimit, null, USER_ID);
+    /** Verify that concurrent usage from multiple apps in the same group will counted correctly */
+    @Test
+    public void testUsageSessionObserver_ConcurrentUsage() throws Exception {
+        setTime(0L);
+        addUsageSessionObserver(OBS_ID1, GROUP1, TIME_30_MIN, TIME_1_MIN);
+        AppTimeLimitController.UsageGroup group = mController.getSessionUsageGroup(UID, OBS_ID1);
+        startUsage(PKG_SOC1);
+        // Add 10 mins
+        setTime(TIME_10_MIN);
+
+        // Add a different package in the group will first package is still in use
+        startUsage(PKG_GAME1);
+        setTime(TIME_10_MIN * 2);
+        // Stop first package usage
+        stopUsage(PKG_SOC1);
+
+        setTime(TIME_30_MIN);
+        stopUsage(PKG_GAME1);
+
+        assertEquals(TIME_30_MIN, group.getUsageTimeMs());
+        assertTrue(mLimitReachedLatch.await(100L, TimeUnit.MILLISECONDS));
     }
 
-    /** Is there still an observer by that id */
-    private boolean hasObserver(int observerId) {
-        return mController.getObserverGroup(observerId, USER_ID) != null;
+    /** Verify that a session will continue if usage starts again within the session threshold */
+    @Test
+    public void testUsageSessionObserver_ContinueSession() throws Exception {
+        setTime(0L);
+        addUsageSessionObserver(OBS_ID1, GROUP1, 10_000L, 2_000L);
+        startUsage(PKG_SOC1);
+        setTime(6_000L);
+        stopUsage(PKG_SOC1);
+        // Wait momentarily, Session should not end
+        assertFalse(mSessionEndLatch.await(1_000L, TimeUnit.MILLISECONDS));
+
+        setTime(7_000L);
+        startUsage(PKG_SOC1);
+        setTime(10_500L);
+        stopUsage(PKG_SOC1);
+        // Total usage time has not reached the limit. Time limit callback should not fire yet
+        assertFalse(mLimitReachedLatch.await(100L, TimeUnit.MILLISECONDS));
+
+        setTime(10_600L);
+        startUsage(PKG_SOC1);
+        setTime(12_000L);
+        assertTrue(mLimitReachedLatch.await(1_000L, TimeUnit.MILLISECONDS));
+        stopUsage(PKG_SOC1);
+        // Usage has stopped, Session should end in 2 seconds. Verify session end occurs
+        // (+/- 100ms, which is hopefully not too slim a margin)
+        assertFalse(mSessionEndLatch.await(1_900L, TimeUnit.MILLISECONDS));
+        assertTrue(mSessionEndLatch.await(200L, TimeUnit.MILLISECONDS));
+        // Verify that the observer was not removed
+        assertTrue(hasUsageSessionObserver(UID, OBS_ID1));
+    }
+
+    /** Verify that a new session will start if next usage starts after the session threshold */
+    @Test
+    public void testUsageSessionObserver_NewSession() throws Exception {
+        setTime(0L);
+        addUsageSessionObserver(OBS_ID1, GROUP1, 10_000L, 1_000L);
+        startUsage(PKG_SOC1);
+        setTime(6_000L);
+        stopUsage(PKG_SOC1);
+        // Wait for longer than the session threshold. Session end callback should not be triggered
+        // because the usage timelimit hasn't been triggered.
+        assertFalse(mSessionEndLatch.await(1_500L, TimeUnit.MILLISECONDS));
+
+        setTime(7_500L);
+        // This should be the start of a new session
+        startUsage(PKG_SOC1);
+        setTime(16_000L);
+        stopUsage(PKG_SOC1);
+        // Total usage has exceed the timelimit, but current session time has not
+        assertFalse(mLimitReachedLatch.await(100L, TimeUnit.MILLISECONDS));
+
+        setTime(16_100L);
+        startUsage(PKG_SOC1);
+        setTime(18_000L);
+        assertTrue(mLimitReachedLatch.await(2000L, TimeUnit.MILLISECONDS));
+        stopUsage(PKG_SOC1);
+        // Usage has stopped, Session should end in 2 seconds. Verify session end occurs
+        // (+/- 100ms, which is hopefully not too slim a margin)
+        assertFalse(mSessionEndLatch.await(900L, TimeUnit.MILLISECONDS));
+        assertTrue(mSessionEndLatch.await(200L, TimeUnit.MILLISECONDS));
+        // Verify that the observer was not removed
+        assertTrue(hasUsageSessionObserver(UID, OBS_ID1));
+    }
+
+    /** Verify that the callbacks will be triggered for multiple sessions */
+    @Test
+    public void testUsageSessionObserver_RepeatSessions() throws Exception {
+        setTime(0L);
+        addUsageSessionObserver(OBS_ID1, GROUP1, 10_000L, 1_000L);
+        startUsage(PKG_SOC1);
+        setTime(9_000L);
+        stopUsage(PKG_SOC1);
+        // Stutter usage here, to reduce real world time needed trigger limit reached callback
+        startUsage(PKG_SOC1);
+        setTime(11_000L);
+        assertTrue(mLimitReachedLatch.await(2_000L, TimeUnit.MILLISECONDS));
+        stopUsage(PKG_SOC1);
+        // Usage has stopped, Session should end in 1 seconds. Verify session end occurs
+        // (+/- 100ms, which is hopefully not too slim a margin)
+        assertFalse(mSessionEndLatch.await(900L, TimeUnit.MILLISECONDS));
+        assertTrue(mSessionEndLatch.await(200L, TimeUnit.MILLISECONDS));
+
+        // Rearm the countdown latches
+        mLimitReachedLatch = new CountDownLatch(1);
+        mSessionEndLatch = new CountDownLatch(1);
+
+        // New session start
+        setTime(20_000L);
+        startUsage(PKG_SOC1);
+        setTime(29_000L);
+        stopUsage(PKG_SOC1);
+        startUsage(PKG_SOC1);
+        setTime(31_000L);
+        assertTrue(mLimitReachedLatch.await(2_000L, TimeUnit.MILLISECONDS));
+        stopUsage(PKG_SOC1);
+        assertFalse(mSessionEndLatch.await(900L, TimeUnit.MILLISECONDS));
+        assertTrue(mSessionEndLatch.await(200L, TimeUnit.MILLISECONDS));
+        assertTrue(hasUsageSessionObserver(UID, OBS_ID1));
+    }
+
+    private void startUsage(String packageName) {
+        mController.noteUsageStart(packageName, USER_ID);
+    }
+
+    private void stopUsage(String packageName) {
+        mController.noteUsageStop(packageName, USER_ID);
+    }
+
+    private void addAppUsageObserver(int observerId, String[] packages, long timeLimit) {
+        mController.addAppUsageObserver(UID, observerId, packages, timeLimit, null, USER_ID);
+    }
+
+    private void addUsageSessionObserver(int observerId, String[] packages, long timeLimit,
+            long sessionThreshold) {
+        mController.addUsageSessionObserver(UID, observerId, packages, timeLimit, sessionThreshold,
+                null, null, USER_ID);
+    }
+
+    /** Is there still an app usage observer by that id */
+    private boolean hasAppUsageObserver(int uid, int observerId) {
+        return mController.getAppUsageGroup(uid, observerId) != null;
+    }
+
+    /** Is there still an usage session observer by that id */
+    private boolean hasUsageSessionObserver(int uid, int observerId) {
+        return mController.getSessionUsageGroup(uid, observerId) != null;
     }
 
     private void setTime(long time) {
