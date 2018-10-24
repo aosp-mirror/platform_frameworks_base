@@ -800,22 +800,22 @@ public final class ContextHubManager {
      * through {@link #createClient(ContextHubInfo, ContextHubClientCallback, Executor)} or
      * equivalent at an earlier time.
      *
-     * @param intent   the intent that is associated with a client
-     * @param hubInfo  the hub to attach this client to
-     * @param callback the notification callback to register
-     * @param executor the executor to invoke the callback
+     * @param pendingIntent the PendingIntent that has been registered with a client
+     * @param hubInfo       the hub to attach this client to
+     * @param callback      the notification callback to register
+     * @param executor      the executor to invoke the callback
      * @return the registered client object
      *
-     * @throws IllegalArgumentException if hubInfo does not represent a valid hub, or the intent
+     * @throws IllegalArgumentException if hubInfo does not represent a valid hub, or pendingIntent
      *                                  was not associated with a client
      * @throws IllegalStateException    if there were too many registered clients at the service
-     * @throws NullPointerException     if intent, hubInfo, callback, or executor is null
+     * @throws NullPointerException     if pendingIntent, hubInfo, callback, or executor is null
      *
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
     @NonNull public ContextHubClient createClient(
-            @NonNull PendingIntent intent, @NonNull ContextHubInfo hubInfo,
+            @NonNull PendingIntent pendingIntent, @NonNull ContextHubInfo hubInfo,
             @NonNull ContextHubClientCallback callback,
             @NonNull @CallbackExecutor Executor executor) {
         // TODO: Implement this
@@ -823,26 +823,27 @@ public final class ContextHubManager {
     }
 
     /**
-     * Equivalent to {@link #createClient(Intent, ContextHubInfo, ContextHubClientCallback,
+     * Equivalent to {@link #createClient(PendingIntent, ContextHubInfo, ContextHubClientCallback,
      * Executor)} with the executor using the main thread's Looper.
      *
-     * @param intent   the intent that is associated with a client
-     * @param hubInfo  the hub to attach this client to
-     * @param callback the notification callback to register
+     * @param pendingIntent the PendingIntent that has been registered with a client
+     * @param hubInfo       the hub to attach this client to
+     * @param callback      the notification callback to register
      * @return the registered client object
      *
-     * @throws IllegalArgumentException if hubInfo does not represent a valid hub, or the intent
+     * @throws IllegalArgumentException if hubInfo does not represent a valid hub, or pendingIntent
      *                                  was not associated with a client
      * @throws IllegalStateException    if there were too many registered clients at the service
-     * @throws NullPointerException     if intent, hubInfo, or callback is null
+     * @throws NullPointerException     if pendingIntent, hubInfo, or callback is null
      *
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
     @NonNull public ContextHubClient createClient(
-            @NonNull PendingIntent intent, @NonNull ContextHubInfo hubInfo,
+            @NonNull PendingIntent pendingIntent, @NonNull ContextHubInfo hubInfo,
             @NonNull ContextHubClientCallback callback) {
-        return createClient(intent, hubInfo, callback, new HandlerExecutor(Handler.getMain()));
+        return createClient(
+                pendingIntent, hubInfo, callback, new HandlerExecutor(Handler.getMain()));
     }
 
     /**

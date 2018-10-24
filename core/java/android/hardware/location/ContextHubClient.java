@@ -130,18 +130,18 @@ public class ContextHubClient implements Closeable {
      * {@link PendingIntent} through a {@link BroadcastReceiver}, and maps an {@link Intent} to a
      * {@link ContextHubClientCallback}.
      *
-     * @param intent    The PendingIntent to register for this client
-     * @param nanoAppId the unique ID of the nanoapp to receive events for
+     * @param pendingIntent the PendingIntent to register for this client
+     * @param nanoAppId     the unique ID of the nanoapp to receive events for
      * @return true on success, false otherwise
      *
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
-    public boolean registerIntent(@NonNull PendingIntent intent, long nanoAppId) {
-        Preconditions.checkNotNull(intent, "PendingIntent cannot be null");
+    public boolean registerIntent(@NonNull PendingIntent pendingIntent, long nanoAppId) {
+        Preconditions.checkNotNull(pendingIntent, "PendingIntent cannot be null");
 
         try {
-            return mClientProxy.registerIntent(intent, nanoAppId);
+            return mClientProxy.registerIntent(pendingIntent, nanoAppId);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -151,16 +151,18 @@ public class ContextHubClient implements Closeable {
      * Unregisters an intent previously registered via {@link #registerIntent(PendingIntent, long)}.
      * If this intent has not been registered for this client, this method returns false.
      *
+     * @param pendingIntent the PendingIntent to unregister
+     *
      * @return true on success, false otherwise
      *
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
-    public boolean unregisterIntent(@NonNull PendingIntent intent) {
-        Preconditions.checkNotNull(intent, "PendingIntent cannot be null");
+    public boolean unregisterIntent(@NonNull PendingIntent pendingIntent) {
+        Preconditions.checkNotNull(pendingIntent, "PendingIntent cannot be null");
 
         try {
-            return mClientProxy.unregisterIntent(intent);
+            return mClientProxy.unregisterIntent(pendingIntent);
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
