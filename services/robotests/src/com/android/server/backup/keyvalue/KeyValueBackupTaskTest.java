@@ -2680,9 +2680,7 @@ public class KeyValueBackupTaskTest {
         return Files.createTempFile(mContext.getCacheDir().toPath(), "backup", ".tmp");
     }
 
-    private static IterableSubject<
-                    ? extends IterableSubject<?, Path, Iterable<Path>>, Path, Iterable<Path>>
-            assertDirectory(Path directory) throws IOException {
+    private static IterableSubject assertDirectory(Path directory) throws IOException {
         return assertThat(oneTimeIterable(Files.newDirectoryStream(directory).iterator()))
                 .named("directory " + directory);
     }

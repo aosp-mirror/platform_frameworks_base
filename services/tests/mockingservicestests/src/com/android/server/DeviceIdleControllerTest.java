@@ -36,35 +36,36 @@ import static com.android.server.DeviceIdleController.STATE_IDLE_MAINTENANCE;
 import static com.android.server.DeviceIdleController.STATE_IDLE_PENDING;
 import static com.android.server.DeviceIdleController.STATE_INACTIVE;
 import static com.android.server.DeviceIdleController.STATE_LOCATING;
+import static com.android.server.DeviceIdleController.STATE_QUICK_DOZE_DELAY;
 import static com.android.server.DeviceIdleController.STATE_SENSING;
 import static com.android.server.DeviceIdleController.lightStateToString;
 import static com.android.server.DeviceIdleController.stateToString;
 
 import static org.junit.Assert.assertEquals;
-
-import android.net.NetworkInfo;
-
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.anyString;
 
 import android.app.ActivityManagerInternal;
 import android.app.AlarmManager;
-import android.net.ConnectivityManager;
-import android.content.Intent;
 import android.app.IActivityManager;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
 import android.hardware.SensorManager;
 import android.location.LocationManager;
 import android.location.LocationProvider;
+import android.net.ConnectivityManager;
+import android.net.NetworkInfo;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.PowerManager;
 import android.os.PowerManagerInternal;
+import android.os.PowerSaveState;
 import android.os.SystemClock;
 
 import androidx.test.runner.AndroidJUnit4;
@@ -105,6 +106,8 @@ public class DeviceIdleControllerTest {
     private PowerManager mPowerManager;
     @Mock
     private PowerManager.WakeLock mWakeLock;
+    @Mock
+    private PowerManagerInternal mPowerManagerInternal;
 
     class InjectorForTest extends DeviceIdleController.Injector {
         ConnectivityService connectivityService;
@@ -204,12 +207,15 @@ public class DeviceIdleControllerTest {
                 .when(() -> LocalServices.getService(ActivityManagerInternal.class));
         doReturn(mock(ActivityTaskManagerInternal.class))
                 .when(() -> LocalServices.getService(ActivityTaskManagerInternal.class));
-        doReturn(mock(PowerManagerInternal.class))
+        doReturn(mPowerManagerInternal)
                 .when(() -> LocalServices.getService(PowerManagerInternal.class));
+        when(mPowerManagerInternal.getLowPowerState(anyInt())).thenReturn(
+                mock(PowerSaveState.class));
         doReturn(mock(NetworkPolicyManagerInternal.class))
                 .when(() -> LocalServices.getService(NetworkPolicyManagerInternal.class));
         when(mPowerManager.newWakeLock(anyInt(), anyString())).thenReturn(mWakeLock);
         doNothing().when(mWakeLock).acquire();
+        doNothing().when(mAlarmManager).set(anyInt(), anyLong(), anyString(), any(), any());
         mAppStateTracker = new AppStateTrackerForTest(getContext(), Looper.getMainLooper());
         mAnyMotionDetector = new AnyMotionDetectorForTest();
         mInjector = new InjectorForTest(getContext());
@@ -336,6 +342,28 @@ public class DeviceIdleControllerTest {
     }
 
     @Test
+    public void testUpdateQuickDozeFlagLocked() {
+        mDeviceIdleController.updateQuickDozeFlagLocked(false);
+        assertFalse(mDeviceIdleController.isQuickDozeEnabled());
+
+        // Make sure setting false when quick doze is already off doesn't change anything.
+        mDeviceIdleController.updateQuickDozeFlagLocked(false);
+        assertFalse(mDeviceIdleController.isQuickDozeEnabled());
+
+        // Test changing from quick doze off to quick doze on.
+        mDeviceIdleController.updateQuickDozeFlagLocked(true);
+        assertTrue(mDeviceIdleController.isQuickDozeEnabled());
+
+        // Make sure setting true when quick doze is already on doesn't change anything.
+        mDeviceIdleController.updateQuickDozeFlagLocked(true);
+        assertTrue(mDeviceIdleController.isQuickDozeEnabled());
+
+        // Test changing from quick doze on to quick doze off.
+        mDeviceIdleController.updateQuickDozeFlagLocked(false);
+        assertFalse(mDeviceIdleController.isQuickDozeEnabled());
+    }
+
+    @Test
     public void testStateActiveToStateInactive_ConditionsNotMet() {
         mDeviceIdleController.becomeActiveLocked("testing", 0);
         verifyStateConditions(STATE_ACTIVE);
@@ -416,6 +444,46 @@ public class DeviceIdleControllerTest {
     }
 
     @Test
+    public void testTransitionFromAnyStateToStateQuickDozeDelay() {
+        enterDeepState(STATE_ACTIVE);
+        setQuickDozeEnabled(true);
+        setChargingOn(false);
+        setScreenOn(false);
+        verifyStateConditions(STATE_QUICK_DOZE_DELAY);
+
+        enterDeepState(STATE_INACTIVE);
+        setQuickDozeEnabled(true);
+        verifyStateConditions(STATE_QUICK_DOZE_DELAY);
+
+        enterDeepState(STATE_IDLE_PENDING);
+        setQuickDozeEnabled(true);
+        verifyStateConditions(STATE_QUICK_DOZE_DELAY);
+
+        enterDeepState(STATE_SENSING);
+        setQuickDozeEnabled(true);
+        verifyStateConditions(STATE_QUICK_DOZE_DELAY);
+
+        enterDeepState(STATE_LOCATING);
+        setQuickDozeEnabled(true);
+        verifyStateConditions(STATE_QUICK_DOZE_DELAY);
+
+        // IDLE should stay as IDLE.
+        enterDeepState(STATE_IDLE);
+        setQuickDozeEnabled(true);
+        verifyStateConditions(STATE_IDLE);
+
+        // IDLE_MAINTENANCE should stay as IDLE_MAINTENANCE.
+        enterDeepState(STATE_IDLE_MAINTENANCE);
+        setQuickDozeEnabled(true);
+        verifyStateConditions(STATE_IDLE_MAINTENANCE);
+
+        enterDeepState(STATE_QUICK_DOZE_DELAY);
+        setQuickDozeEnabled(true);
+        mDeviceIdleController.becomeInactiveIfAppropriateLocked();
+        verifyStateConditions(STATE_QUICK_DOZE_DELAY);
+    }
+
+    @Test
     public void testStepIdleStateLocked_InvalidStates() {
         mDeviceIdleController.becomeActiveLocked("testing", 0);
         mDeviceIdleController.stepIdleStateLocked("testing");
@@ -425,49 +493,77 @@ public class DeviceIdleControllerTest {
     }
 
     @Test
+    public void testStepIdleStateLocked_ValidStates_QuickDoze() {
+        setAlarmSoon(false);
+
+        // Quick doze should go directly into IDLE.
+        enterDeepState(STATE_QUICK_DOZE_DELAY);
+        mDeviceIdleController.stepIdleStateLocked("testing");
+        verifyStateConditions(STATE_IDLE);
+
+        // Should just alternate between IDLE and IDLE_MAINTENANCE now.
+
+        mDeviceIdleController.stepIdleStateLocked("testing");
+        verifyStateConditions(STATE_IDLE_MAINTENANCE);
+
+        mDeviceIdleController.stepIdleStateLocked("testing");
+        verifyStateConditions(STATE_IDLE);
+
+        mDeviceIdleController.stepIdleStateLocked("testing");
+        verifyStateConditions(STATE_IDLE_MAINTENANCE);
+    }
+
+    @Test
     public void testStepIdleStateLocked_ValidStates_WithWakeFromIdleAlarmSoon() {
         enterDeepState(STATE_ACTIVE);
         // Return that there's an alarm coming soon.
-        doReturn(SystemClock.elapsedRealtime() + mConstants.MIN_TIME_TO_ALARM / 2).when(
-                mAlarmManager).getNextWakeFromIdleTime();
+        setAlarmSoon(true);
         mDeviceIdleController.stepIdleStateLocked("testing");
         verifyStateConditions(STATE_ACTIVE);
 
         // Everything besides ACTIVE should end up as INACTIVE since the screen would be off.
 
         enterDeepState(STATE_INACTIVE);
-        doReturn(SystemClock.elapsedRealtime() + mConstants.MIN_TIME_TO_ALARM / 2).when(
-                mAlarmManager).getNextWakeFromIdleTime();
+        setAlarmSoon(true);
         mDeviceIdleController.stepIdleStateLocked("testing");
         verifyStateConditions(STATE_INACTIVE);
 
         enterDeepState(STATE_IDLE_PENDING);
-        doReturn(SystemClock.elapsedRealtime() + mConstants.MIN_TIME_TO_ALARM / 2).when(
-                mAlarmManager).getNextWakeFromIdleTime();
+        setAlarmSoon(true);
         mDeviceIdleController.stepIdleStateLocked("testing");
         verifyStateConditions(STATE_INACTIVE);
 
         enterDeepState(STATE_SENSING);
-        doReturn(SystemClock.elapsedRealtime() + mConstants.MIN_TIME_TO_ALARM / 2).when(
-                mAlarmManager).getNextWakeFromIdleTime();
+        setAlarmSoon(true);
         mDeviceIdleController.stepIdleStateLocked("testing");
         verifyStateConditions(STATE_INACTIVE);
 
         enterDeepState(STATE_LOCATING);
-        doReturn(SystemClock.elapsedRealtime() + mConstants.MIN_TIME_TO_ALARM / 2).when(
-                mAlarmManager).getNextWakeFromIdleTime();
+        setAlarmSoon(true);
+        mDeviceIdleController.stepIdleStateLocked("testing");
+        verifyStateConditions(STATE_INACTIVE);
+
+        // With quick doze enabled, we should end up in QUICK_DOZE_DELAY instead of INACTIVE.
+        enterDeepState(STATE_QUICK_DOZE_DELAY);
+        setQuickDozeEnabled(true);
+        setAlarmSoon(true);
+        mDeviceIdleController.stepIdleStateLocked("testing");
+        verifyStateConditions(STATE_QUICK_DOZE_DELAY);
+
+        // With quick doze disabled, we should end up in INACTIVE instead of QUICK_DOZE_DELAY.
+        enterDeepState(STATE_QUICK_DOZE_DELAY);
+        setQuickDozeEnabled(false);
+        setAlarmSoon(true);
         mDeviceIdleController.stepIdleStateLocked("testing");
         verifyStateConditions(STATE_INACTIVE);
 
         enterDeepState(STATE_IDLE);
-        doReturn(SystemClock.elapsedRealtime() + mConstants.MIN_TIME_TO_ALARM / 2).when(
-                mAlarmManager).getNextWakeFromIdleTime();
+        setAlarmSoon(true);
         mDeviceIdleController.stepIdleStateLocked("testing");
         verifyStateConditions(STATE_INACTIVE);
 
         enterDeepState(STATE_IDLE_MAINTENANCE);
-        doReturn(SystemClock.elapsedRealtime() + mConstants.MIN_TIME_TO_ALARM / 2).when(
-                mAlarmManager).getNextWakeFromIdleTime();
+        setAlarmSoon(true);
         mDeviceIdleController.stepIdleStateLocked("testing");
         verifyStateConditions(STATE_INACTIVE);
     }
@@ -476,7 +572,7 @@ public class DeviceIdleControllerTest {
     public void testStepIdleStateLocked_ValidStates_NoLocationManager() {
         mInjector.locationManager = null;
         // Make sure the controller doesn't think there's a wake-from-idle alarm coming soon.
-        doReturn(Long.MAX_VALUE).when(mAlarmManager).getNextWakeFromIdleTime();
+        setAlarmSoon(false);
         // Set state to INACTIVE.
         mDeviceIdleController.becomeActiveLocked("testing", 0);
         setChargingOn(false);
@@ -508,7 +604,7 @@ public class DeviceIdleControllerTest {
     @Test
     public void testStepIdleStateLocked_ValidStates_WithLocationManager_NoProviders() {
         // Make sure the controller doesn't think there's a wake-from-idle alarm coming soon.
-        doReturn(Long.MAX_VALUE).when(mAlarmManager).getNextWakeFromIdleTime();
+        setAlarmSoon(false);
         // Set state to INACTIVE.
         mDeviceIdleController.becomeActiveLocked("testing", 0);
         setChargingOn(false);
@@ -543,7 +639,7 @@ public class DeviceIdleControllerTest {
         mInjector.locationManager = mLocationManager;
         doReturn(mock(LocationProvider.class)).when(mLocationManager).getProvider(anyString());
         // Make sure the controller doesn't think there's a wake-from-idle alarm coming soon.
-        doReturn(Long.MAX_VALUE).when(mAlarmManager).getNextWakeFromIdleTime();
+        setAlarmSoon(false);
         // Set state to INACTIVE.
         mDeviceIdleController.becomeActiveLocked("testing", 0);
         setChargingOn(false);
@@ -729,6 +825,8 @@ public class DeviceIdleControllerTest {
         verifyLightStateConditions(LIGHT_STATE_IDLE_MAINTENANCE);
     }
 
+    ///////////////// EXIT conditions ///////////////////
+
     @Test
     public void testExitMaintenanceEarlyIfNeededLocked_deep_noActiveOps() {
         mDeviceIdleController.setJobsActive(false);
@@ -766,6 +864,10 @@ public class DeviceIdleControllerTest {
         mDeviceIdleController.setActiveIdleOpsForTest(0);
         mDeviceIdleController.exitMaintenanceEarlyIfNeededLocked();
         verifyStateConditions(STATE_IDLE);
+
+        enterDeepState(STATE_QUICK_DOZE_DELAY);
+        mDeviceIdleController.exitMaintenanceEarlyIfNeededLocked();
+        verifyStateConditions(STATE_QUICK_DOZE_DELAY);
     }
 
     @Test
@@ -803,6 +905,10 @@ public class DeviceIdleControllerTest {
         enterDeepState(STATE_IDLE_MAINTENANCE);
         mDeviceIdleController.exitMaintenanceEarlyIfNeededLocked();
         verifyStateConditions(STATE_IDLE_MAINTENANCE);
+
+        enterDeepState(STATE_QUICK_DOZE_DELAY);
+        mDeviceIdleController.exitMaintenanceEarlyIfNeededLocked();
+        verifyStateConditions(STATE_QUICK_DOZE_DELAY);
     }
 
     @Test
@@ -840,6 +946,10 @@ public class DeviceIdleControllerTest {
         enterDeepState(STATE_IDLE_MAINTENANCE);
         mDeviceIdleController.exitMaintenanceEarlyIfNeededLocked();
         verifyStateConditions(STATE_IDLE_MAINTENANCE);
+
+        enterDeepState(STATE_QUICK_DOZE_DELAY);
+        mDeviceIdleController.exitMaintenanceEarlyIfNeededLocked();
+        verifyStateConditions(STATE_QUICK_DOZE_DELAY);
     }
 
     @Test
@@ -877,6 +987,10 @@ public class DeviceIdleControllerTest {
         enterDeepState(STATE_IDLE_MAINTENANCE);
         mDeviceIdleController.exitMaintenanceEarlyIfNeededLocked();
         verifyStateConditions(STATE_IDLE_MAINTENANCE);
+
+        enterDeepState(STATE_QUICK_DOZE_DELAY);
+        mDeviceIdleController.exitMaintenanceEarlyIfNeededLocked();
+        verifyStateConditions(STATE_QUICK_DOZE_DELAY);
     }
 
     @Test
@@ -1030,36 +1144,97 @@ public class DeviceIdleControllerTest {
     }
 
     @Test
-    public void testHandleMotionDetectedLocked_deep() {
+    public void testHandleMotionDetectedLocked_deep_quickDoze_off() {
         enterDeepState(STATE_ACTIVE);
+        setQuickDozeEnabled(false);
         mDeviceIdleController.handleMotionDetectedLocked(50, "test");
         verifyStateConditions(STATE_ACTIVE);
 
         // Anything that wasn't ACTIVE before motion detection should end up in the INACTIVE state.
 
         enterDeepState(STATE_INACTIVE);
+        setQuickDozeEnabled(false);
         mDeviceIdleController.handleMotionDetectedLocked(50, "test");
         verifyStateConditions(STATE_INACTIVE);
 
         enterDeepState(STATE_IDLE_PENDING);
+        setQuickDozeEnabled(false);
         mDeviceIdleController.handleMotionDetectedLocked(50, "test");
         verifyStateConditions(STATE_INACTIVE);
 
         enterDeepState(STATE_SENSING);
+        setQuickDozeEnabled(false);
         mDeviceIdleController.handleMotionDetectedLocked(50, "test");
         verifyStateConditions(STATE_INACTIVE);
 
         enterDeepState(STATE_LOCATING);
+        setQuickDozeEnabled(false);
         mDeviceIdleController.handleMotionDetectedLocked(50, "test");
         verifyStateConditions(STATE_INACTIVE);
 
         enterDeepState(STATE_IDLE);
+        setQuickDozeEnabled(false);
         mDeviceIdleController.handleMotionDetectedLocked(50, "test");
         verifyStateConditions(STATE_INACTIVE);
 
         enterDeepState(STATE_IDLE_MAINTENANCE);
+        setQuickDozeEnabled(false);
         mDeviceIdleController.handleMotionDetectedLocked(50, "test");
         verifyStateConditions(STATE_INACTIVE);
+
+        enterDeepState(STATE_QUICK_DOZE_DELAY);
+        setQuickDozeEnabled(false);
+        // Disabling quick doze doesn't immediately change the state as coming out is harder than
+        // going in.
+        verifyStateConditions(STATE_QUICK_DOZE_DELAY);
+        mDeviceIdleController.handleMotionDetectedLocked(50, "test");
+        verifyStateConditions(STATE_INACTIVE);
+    }
+
+    @Test
+    public void testHandleMotionDetectedLocked_deep_quickDoze_on() {
+        enterDeepState(STATE_ACTIVE);
+        setQuickDozeEnabled(true);
+        mDeviceIdleController.handleMotionDetectedLocked(50, "test");
+        verifyStateConditions(STATE_ACTIVE);
+
+        // Anything that wasn't ACTIVE before motion detection should end up in the
+        // QUICK_DOZE_DELAY state since quick doze is enabled.
+
+        enterDeepState(STATE_INACTIVE);
+        setQuickDozeEnabled(true);
+        mDeviceIdleController.handleMotionDetectedLocked(50, "test");
+        verifyStateConditions(STATE_QUICK_DOZE_DELAY);
+
+        enterDeepState(STATE_IDLE_PENDING);
+        setQuickDozeEnabled(true);
+        mDeviceIdleController.handleMotionDetectedLocked(50, "test");
+        verifyStateConditions(STATE_QUICK_DOZE_DELAY);
+
+        enterDeepState(STATE_SENSING);
+        setQuickDozeEnabled(true);
+        mDeviceIdleController.handleMotionDetectedLocked(50, "test");
+        verifyStateConditions(STATE_QUICK_DOZE_DELAY);
+
+        enterDeepState(STATE_LOCATING);
+        setQuickDozeEnabled(true);
+        mDeviceIdleController.handleMotionDetectedLocked(50, "test");
+        verifyStateConditions(STATE_QUICK_DOZE_DELAY);
+
+        enterDeepState(STATE_IDLE);
+        setQuickDozeEnabled(true);
+        mDeviceIdleController.handleMotionDetectedLocked(50, "test");
+        verifyStateConditions(STATE_QUICK_DOZE_DELAY);
+
+        enterDeepState(STATE_IDLE_MAINTENANCE);
+        setQuickDozeEnabled(true);
+        mDeviceIdleController.handleMotionDetectedLocked(50, "test");
+        verifyStateConditions(STATE_QUICK_DOZE_DELAY);
+
+        enterDeepState(STATE_QUICK_DOZE_DELAY);
+        setQuickDozeEnabled(true);
+        mDeviceIdleController.handleMotionDetectedLocked(50, "test");
+        verifyStateConditions(STATE_QUICK_DOZE_DELAY);
     }
 
     @Test
@@ -1128,6 +1303,10 @@ public class DeviceIdleControllerTest {
         enterDeepState(STATE_IDLE_MAINTENANCE);
         mDeviceIdleController.becomeActiveLocked("test", 1000);
         verifyStateConditions(STATE_ACTIVE);
+
+        enterDeepState(STATE_QUICK_DOZE_DELAY);
+        mDeviceIdleController.becomeActiveLocked("test", 1000);
+        verifyStateConditions(STATE_ACTIVE);
     }
 
     @Test
@@ -1169,6 +1348,14 @@ public class DeviceIdleControllerTest {
                 setScreenOn(true);
                 mDeviceIdleController.becomeActiveLocked("testing", 0);
                 break;
+            case STATE_QUICK_DOZE_DELAY:
+                // Start off from ACTIVE in case we're already past the desired state.
+                enterDeepState(STATE_ACTIVE);
+                setQuickDozeEnabled(true);
+                setScreenOn(false);
+                setChargingOn(false);
+                mDeviceIdleController.becomeInactiveIfAppropriateLocked();
+                break;
             case STATE_LOCATING:
                 mInjector.locationManager = mLocationManager;
                 doReturn(mock(LocationProvider.class)).when(mLocationManager).getProvider(
@@ -1180,8 +1367,11 @@ public class DeviceIdleControllerTest {
             case STATE_IDLE_MAINTENANCE:
                 // Make sure the controller doesn't think there's a wake-from-idle alarm coming
                 // soon.
-                doReturn(Long.MAX_VALUE).when(mAlarmManager).getNextWakeFromIdleTime();
+                setAlarmSoon(false);
             case STATE_INACTIVE:
+                // Start off from ACTIVE in case we're already past the desired state.
+                enterDeepState(STATE_ACTIVE);
+                setQuickDozeEnabled(false);
                 setScreenOn(false);
                 setChargingOn(false);
                 mDeviceIdleController.becomeInactiveIfAppropriateLocked();
@@ -1211,6 +1401,8 @@ public class DeviceIdleControllerTest {
             case LIGHT_STATE_INACTIVE:
             case LIGHT_STATE_IDLE:
             case LIGHT_STATE_IDLE_MAINTENANCE:
+                // Start off from ACTIVE in case we're already past the desired state.
+                enterLightState(LIGHT_STATE_ACTIVE);
                 setScreenOn(false);
                 setChargingOn(false);
                 int count = 0;
@@ -1256,6 +1448,19 @@ public class DeviceIdleControllerTest {
         mDeviceIdleController.updateConnectivityState(null);
     }
 
+    private void setQuickDozeEnabled(boolean on) {
+        mDeviceIdleController.updateQuickDozeFlagLocked(on);
+    }
+
+    private void setAlarmSoon(boolean isSoon) {
+        if (isSoon) {
+            doReturn(SystemClock.elapsedRealtime() + mConstants.MIN_TIME_TO_ALARM / 2).when(
+                    mAlarmManager).getNextWakeFromIdleTime();
+        } else {
+            doReturn(Long.MAX_VALUE).when(mAlarmManager).getNextWakeFromIdleTime();
+        }
+    }
+
     private void verifyStateConditions(int expectedState) {
         int curState = mDeviceIdleController.getState();
         assertEquals(
@@ -1292,7 +1497,9 @@ public class DeviceIdleControllerTest {
                 assertFalse(mDeviceIdleController.isScreenOn());
                 break;
             case STATE_IDLE:
-                assertTrue(mDeviceIdleController.mMotionListener.isActive());
+                assertTrue(mDeviceIdleController.mMotionListener.isActive()
+                        // If quick doze is enabled, the motion listener should NOT be active.
+                        || mDeviceIdleController.isQuickDozeEnabled());
                 assertFalse(mAnyMotionDetector.isMonitoring);
                 assertFalse(mDeviceIdleController.isCharging());
                 assertFalse(mDeviceIdleController.isScreenOn());
@@ -1300,7 +1507,16 @@ public class DeviceIdleControllerTest {
                 verifyLightStateConditions(LIGHT_STATE_OVERRIDE);
                 break;
             case STATE_IDLE_MAINTENANCE:
-                assertTrue(mDeviceIdleController.mMotionListener.isActive());
+                assertTrue(mDeviceIdleController.mMotionListener.isActive()
+                        // If quick doze is enabled, the motion listener should NOT be active.
+                        || mDeviceIdleController.isQuickDozeEnabled());
+                assertFalse(mAnyMotionDetector.isMonitoring);
+                assertFalse(mDeviceIdleController.isCharging());
+                assertFalse(mDeviceIdleController.isScreenOn());
+                break;
+            case STATE_QUICK_DOZE_DELAY:
+                // If quick doze is enabled, the motion listener should NOT be active.
+                assertFalse(mDeviceIdleController.mMotionListener.isActive());
                 assertFalse(mAnyMotionDetector.isMonitoring);
                 assertFalse(mDeviceIdleController.isCharging());
                 assertFalse(mDeviceIdleController.isScreenOn());

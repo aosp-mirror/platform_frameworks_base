@@ -25,10 +25,12 @@ public class SysuiTestableContext extends TestableContext implements SysUiServic
 
     public SysuiTestableContext(Context base) {
         super(base);
+        setTheme(R.style.Theme_SystemUI);
     }
 
     public SysuiTestableContext(Context base, LeakCheck check) {
         super(base, check);
+        setTheme(R.style.Theme_SystemUI);
     }
 
     public ArrayMap<Class<?>, Object> getComponents() {

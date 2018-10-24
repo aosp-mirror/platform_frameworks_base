@@ -56,8 +56,9 @@ public class NotificationLogger {
     private final NotificationListenerService mNotificationListener =
             Dependency.get(NotificationListener.class);
     private final UiOffloadThread mUiOffloadThread = Dependency.get(UiOffloadThread.class);
+    protected NotificationEntryManager mEntryManager
+            = Dependency.get(NotificationEntryManager.class);
 
-    protected NotificationEntryManager mEntryManager;
     protected Handler mHandler = new Handler();
     protected IStatusBarService mBarService;
     private long mLastVisibilityReportUptimeMs;
@@ -147,9 +148,7 @@ public class NotificationLogger {
                 ServiceManager.getService(Context.STATUS_BAR_SERVICE));
     }
 
-    public void setUpWithEntryManager(NotificationEntryManager entryManager,
-            NotificationListContainer listContainer) {
-        mEntryManager = entryManager;
+    public void setUpWithContainer(NotificationListContainer listContainer) {
         mListContainer = listContainer;
     }
 

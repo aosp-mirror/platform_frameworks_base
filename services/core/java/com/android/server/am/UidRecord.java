@@ -18,7 +18,6 @@ package com.android.server.am;
 
 import android.Manifest;
 import android.app.ActivityManager;
-import android.app.ActivityManagerProto;
 import android.content.pm.PackageManager;
 import android.os.SystemClock;
 import android.os.UserHandle;
@@ -27,14 +26,14 @@ import android.util.proto.ProtoOutputStream;
 import android.util.proto.ProtoUtils;
 
 import com.android.internal.annotations.GuardedBy;
-import com.android.internal.annotations.VisibleForTesting;
+import com.android.server.wm.ActivityTaskManagerInternal;
 
 /**
  * Overall information about a uid that has actively running processes.
  */
 public final class UidRecord {
     final int uid;
-    int curProcState;
+    private int mCurProcState;
     int setProcState = ActivityManager.PROCESS_STATE_NONEXISTENT;
     long lastBackgroundTime;
     boolean ephemeral;
@@ -44,11 +43,12 @@ public final class UidRecord {
     boolean idle;
     boolean setIdle;
     int numProcs;
+    final ActivityTaskManagerInternal mAtmInternal;
 
     /**
-     * Sequence number associated with the {@link #curProcState}. This is incremented using
+     * Sequence number associated with the {@link #mCurProcState}. This is incremented using
      * {@link ActivityManagerService#mProcStateSeqCounter}
-     * when {@link #curProcState} changes from background to foreground or vice versa.
+     * when {@link #mCurProcState} changes from background to foreground or vice versa.
      */
     @GuardedBy("networkStateUpdate")
     long curProcStateSeq;
@@ -117,14 +117,26 @@ public final class UidRecord {
     ChangeItem pendingChange;
     int lastReportedChange;
 
-    public UidRecord(int _uid) {
+    public UidRecord(int _uid, ActivityTaskManagerInternal atmInternal) {
         uid = _uid;
         idle = true;
+        mAtmInternal = atmInternal;
         reset();
     }
 
+    public int getCurProcState() {
+        return mCurProcState;
+    }
+
+    public void setCurProcState(int curProcState) {
+        mCurProcState = curProcState;
+        if (mAtmInternal != null) {
+            mAtmInternal.onUidProcStateChanged(uid, curProcState);
+        }
+    }
+
     public void reset() {
-        curProcState = ActivityManager.PROCESS_STATE_CACHED_EMPTY;
+        setCurProcState(ActivityManager.PROCESS_STATE_CACHED_EMPTY);
         foregroundServices = false;
     }
 
@@ -148,7 +160,7 @@ public final class UidRecord {
     void writeToProto(ProtoOutputStream proto, long fieldId) {
         long token = proto.start(fieldId);
         proto.write(UidRecordProto.UID, uid);
-        proto.write(UidRecordProto.CURRENT, ProcessList.makeProcStateProtoEnum(curProcState));
+        proto.write(UidRecordProto.CURRENT, ProcessList.makeProcStateProtoEnum(mCurProcState));
         proto.write(UidRecordProto.EPHEMERAL, ephemeral);
         proto.write(UidRecordProto.FG_SERVICES, foregroundServices);
         proto.write(UidRecordProto.WHILELIST, curWhitelist);
@@ -178,7 +190,7 @@ public final class UidRecord {
         sb.append(' ');
         UserHandle.formatUid(sb, uid);
         sb.append(' ');
-        sb.append(ProcessList.makeProcStateString(curProcState));
+        sb.append(ProcessList.makeProcStateString(mCurProcState));
         if (ephemeral) {
             sb.append(" ephemeral");
         }

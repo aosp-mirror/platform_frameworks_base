@@ -45,6 +45,7 @@ import com.android.systemui.DejankUtils;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.classifier.FalsingManager;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
+import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -238,7 +239,7 @@ public class KeyguardBouncerTest extends SysuiTestCase {
 
     @Test
     public void testShowOnDismissAction_showsBouncer() {
-        final KeyguardHostView.OnDismissAction dismissAction = () -> false;
+        final OnDismissAction dismissAction = () -> false;
         final Runnable cancelAction = () -> {};
         mBouncer.showWithDismissAction(dismissAction, cancelAction);
         verify(mKeyguardHostView).setOnDismissAction(dismissAction, cancelAction);

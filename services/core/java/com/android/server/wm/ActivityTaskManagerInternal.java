@@ -439,4 +439,12 @@ public abstract class ActivityTaskManagerInternal {
      */
     public abstract int finishTopCrashedActivities(
             WindowProcessController crashedApp, String reason);
+
+    public abstract void onUidActive(int uid, int procState);
+    public abstract void onUidInactive(int uid);
+    public abstract void onActiveUidsCleared();
+    public abstract void onUidProcStateChanged(int uid, int procState);
+
+    public abstract void onUidAddedToPendingTempWhitelist(int uid, String tag);
+    public abstract void onUidRemovedFromPendingTempWhitelist(int uid);
 }

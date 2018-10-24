@@ -576,7 +576,7 @@ static void android_view_RenderNode_requestPositionUpdates(JNIEnv* env, jobject,
 // JNI Glue
 // ----------------------------------------------------------------------------
 
-const char* const kClassPathName = "android/view/RenderNode";
+const char* const kClassPathName = "android/graphics/RenderNode";
 
 static const JNINativeMethod gMethods[] = {
 // ----------------------------------------------------------------------------
@@ -588,7 +588,7 @@ static const JNINativeMethod gMethods[] = {
     { "nGetDebugSize",         "(J)I",    (void*) android_view_RenderNode_getDebugSize },
     { "nAddAnimator",              "(JJ)V", (void*) android_view_RenderNode_addAnimator },
     { "nEndAllAnimators",          "(J)V", (void*) android_view_RenderNode_endAllAnimators },
-    { "nRequestPositionUpdates",   "(JLandroid/view/RenderNode$PositionUpdateListener;)V", (void*) android_view_RenderNode_requestPositionUpdates },
+    { "nRequestPositionUpdates",   "(JLandroid/graphics/RenderNode$PositionUpdateListener;)V", (void*) android_view_RenderNode_requestPositionUpdates },
     { "nSetDisplayList",       "(JJ)V",   (void*) android_view_RenderNode_setDisplayList },
 
 
@@ -677,7 +677,7 @@ static const JNINativeMethod gMethods[] = {
 };
 
 int register_android_view_RenderNode(JNIEnv* env) {
-    jclass clazz = FindClassOrDie(env, "android/view/RenderNode$PositionUpdateListener");
+    jclass clazz = FindClassOrDie(env, "android/graphics/RenderNode$PositionUpdateListener");
     gPositionListener_PositionChangedMethod = GetMethodIDOrDie(env, clazz,
             "positionChanged", "(JIIII)V");
     gPositionListener_PositionLostMethod = GetMethodIDOrDie(env, clazz,

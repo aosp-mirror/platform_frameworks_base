@@ -34,6 +34,7 @@ import java.util.ArrayList;
 /**
  * Loader class that loads full-resolution thumbnails when appropriate.
  */
+@Deprecated
 public class HighResThumbnailLoader implements
         TaskCallbacks, BackgroundTaskLoader.OnIdleChangedListener {
 

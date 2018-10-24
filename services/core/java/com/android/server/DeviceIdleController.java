@@ -54,6 +54,7 @@ import android.os.IMaintenanceActivityListener;
 import android.os.Looper;
 import android.os.Message;
 import android.os.PowerManager;
+import android.os.PowerManager.ServiceType;
 import android.os.PowerManagerInternal;
 import android.os.Process;
 import android.os.RemoteCallbackList;
@@ -116,6 +117,11 @@ import java.util.Arrays;
 
        STATE_ACTIVE [label="STATE_ACTIVE\nScreen on OR Charging OR Alarm going off soon"]
        STATE_INACTIVE [label="STATE_INACTIVE\nScreen off AND Not charging"]
+       STATE_QUICK_DOZE_DELAY [
+         label="STATE_QUICK_DOZE_DELAY\n"
+             + "Screen off AND Not charging\n"
+             + "Location, motion detection, and significant motion monitoring turned off"
+       ]
        STATE_IDLE_PENDING [
          label="STATE_IDLE_PENDING\nSignificant motion monitoring turned on"
        ]
@@ -125,26 +131,40 @@ import java.util.Arrays;
        ]
        STATE_IDLE [
          label="STATE_IDLE\nLocation and motion detection turned off\n"
-             + "Significant motion monitoring still on"
+             + "Significant motion monitoring state unchanged"
        ]
        STATE_IDLE_MAINTENANCE [label="STATE_IDLE_MAINTENANCE\n"]
 
-       STATE_ACTIVE -> STATE_INACTIVE [label="becomeInactiveIfAppropriateLocked()"]
+       STATE_ACTIVE -> STATE_INACTIVE [
+         label="becomeInactiveIfAppropriateLocked() AND Quick Doze not enabled"
+       ]
+       STATE_ACTIVE -> STATE_QUICK_DOZE_DELAY [
+         label="becomeInactiveIfAppropriateLocked() AND Quick Doze enabled"
+       ]
 
        STATE_INACTIVE -> STATE_ACTIVE [
          label="handleMotionDetectedLocked(), becomeActiveLocked()"
        ]
        STATE_INACTIVE -> STATE_IDLE_PENDING [label="stepIdleStateLocked()"]
+       STATE_INACTIVE -> STATE_QUICK_DOZE_DELAY [
+         label="becomeInactiveIfAppropriateLocked() AND Quick Doze enabled"
+       ]
 
        STATE_IDLE_PENDING -> STATE_ACTIVE [
          label="handleMotionDetectedLocked(), becomeActiveLocked()"
        ]
        STATE_IDLE_PENDING -> STATE_SENSING [label="stepIdleStateLocked()"]
+       STATE_IDLE_PENDING -> STATE_QUICK_DOZE_DELAY [
+         label="becomeInactiveIfAppropriateLocked() AND Quick Doze enabled"
+       ]
 
        STATE_SENSING -> STATE_ACTIVE [
          label="handleMotionDetectedLocked(), becomeActiveLocked()"
        ]
        STATE_SENSING -> STATE_LOCATING [label="stepIdleStateLocked()"]
+       STATE_SENSING -> STATE_QUICK_DOZE_DELAY [
+         label="becomeInactiveIfAppropriateLocked() AND Quick Doze enabled"
+       ]
        STATE_SENSING -> STATE_IDLE [
          label="stepIdleStateLocked()\n"
              + "No Location Manager OR (no Network provider AND no GPS provider)"
@@ -153,7 +173,15 @@ import java.util.Arrays;
        STATE_LOCATING -> STATE_ACTIVE [
          label="handleMotionDetectedLocked(), becomeActiveLocked()"
        ]
+       STATE_LOCATING -> STATE_QUICK_DOZE_DELAY [
+         label="becomeInactiveIfAppropriateLocked() AND Quick Doze enabled"
+       ]
        STATE_LOCATING -> STATE_IDLE [label="stepIdleStateLocked()"]
+
+       STATE_QUICK_DOZE_DELAY -> STATE_ACTIVE [
+         label="handleMotionDetectedLocked(), becomeActiveLocked()"
+       ]
+       STATE_QUICK_DOZE_DELAY -> STATE_IDLE [label="stepIdleStateLocked()"]
 
        STATE_IDLE -> STATE_ACTIVE [label="handleMotionDetectedLocked(), becomeActiveLocked()"]
        STATE_IDLE -> STATE_IDLE_MAINTENANCE [label="stepIdleStateLocked()"]
@@ -252,6 +280,7 @@ public class DeviceIdleController extends SystemService
     private final AppStateTracker mAppStateTracker;
     private boolean mLightEnabled;
     private boolean mDeepEnabled;
+    private boolean mQuickDozeActivated;
     private boolean mForceIdle;
     private boolean mNetworkConnected;
     private boolean mScreenOn;
@@ -287,6 +316,12 @@ public class DeviceIdleController extends SystemService
     /** Device is in the idle state, but temporarily out of idle to do regular maintenance. */
     @VisibleForTesting
     static final int STATE_IDLE_MAINTENANCE = 6;
+    /**
+     * Device is inactive and should go straight into idle (foregoing motion and location
+     * monitoring), but allow some time for current work to complete first.
+     */
+    @VisibleForTesting
+    static final int STATE_QUICK_DOZE_DELAY = 7;
 
     @VisibleForTesting
     static String stateToString(int state) {
@@ -298,6 +333,7 @@ public class DeviceIdleController extends SystemService
             case STATE_LOCATING: return "LOCATING";
             case STATE_IDLE: return "IDLE";
             case STATE_IDLE_MAINTENANCE: return "IDLE_MAINTENANCE";
+            case STATE_QUICK_DOZE_DELAY: return "QUICK_DOZE_DELAY";
             default: return Integer.toString(state);
         }
     }
@@ -688,6 +724,7 @@ public class DeviceIdleController extends SystemService
         private static final String KEY_IDLE_PENDING_TIMEOUT = "idle_pending_to";
         private static final String KEY_MAX_IDLE_PENDING_TIMEOUT = "max_idle_pending_to";
         private static final String KEY_IDLE_PENDING_FACTOR = "idle_pending_factor";
+        private static final String KEY_QUICK_DOZE_DELAY_TIMEOUT = "quick_doze_delay_to";
         private static final String KEY_IDLE_TIMEOUT = "idle_to";
         private static final String KEY_MAX_IDLE_TIMEOUT = "max_idle_to";
         private static final String KEY_IDLE_FACTOR = "idle_factor";
@@ -864,6 +901,15 @@ public class DeviceIdleController extends SystemService
         public float IDLE_PENDING_FACTOR;
 
         /**
+         * This is amount of time we will wait from the point where we go into
+         * STATE_QUICK_DOZE_DELAY until we actually go into STATE_IDLE, while waiting for jobs
+         * and other current activity to finish.
+         * @see Settings.Global#DEVICE_IDLE_CONSTANTS
+         * @see #KEY_QUICK_DOZE_DELAY_TIMEOUT
+         */
+        public long QUICK_DOZE_DELAY_TIMEOUT;
+
+        /**
          * This is the initial time that we want to sit in the idle state before waking up
          * again to return to pending idle and allowing normal work to run.
          * @see Settings.Global#DEVICE_IDLE_CONSTANTS
@@ -999,6 +1045,8 @@ public class DeviceIdleController extends SystemService
                         !COMPRESS_TIME ? 10 * 60 * 1000L : 60 * 1000L);
                 IDLE_PENDING_FACTOR = mParser.getFloat(KEY_IDLE_PENDING_FACTOR,
                         2f);
+                QUICK_DOZE_DELAY_TIMEOUT = mParser.getDurationMillis(
+                        KEY_QUICK_DOZE_DELAY_TIMEOUT, !COMPRESS_TIME ? 60 * 1000L : 15 * 1000L);
                 IDLE_TIMEOUT = mParser.getDurationMillis(KEY_IDLE_TIMEOUT,
                         !COMPRESS_TIME ? 60 * 60 * 1000L : 6 * 60 * 1000L);
                 MAX_IDLE_TIMEOUT = mParser.getDurationMillis(KEY_MAX_IDLE_TIMEOUT,
@@ -1092,6 +1140,10 @@ public class DeviceIdleController extends SystemService
 
             pw.print("    "); pw.print(KEY_IDLE_PENDING_FACTOR); pw.print("=");
             pw.println(IDLE_PENDING_FACTOR);
+
+            pw.print("    "); pw.print(KEY_QUICK_DOZE_DELAY_TIMEOUT); pw.print("=");
+            TimeUtils.formatDuration(QUICK_DOZE_DELAY_TIMEOUT, pw);
+            pw.println();
 
             pw.print("    "); pw.print(KEY_IDLE_TIMEOUT); pw.print("=");
             TimeUtils.formatDuration(IDLE_TIMEOUT, pw);
@@ -1738,6 +1790,16 @@ public class DeviceIdleController extends SystemService
                         mPowerSaveWhitelistAllAppIdArray, mPowerSaveWhitelistExceptIdleAppIdArray);
                 mLocalPowerManager.setDeviceIdleWhitelist(mPowerSaveWhitelistAllAppIdArray);
 
+                mLocalPowerManager.registerLowPowerModeObserver(ServiceType.QUICK_DOZE,
+                        state -> {
+                            synchronized (DeviceIdleController.this) {
+                                updateQuickDozeFlagLocked(state.batterySaverEnabled);
+                            }
+                        });
+                updateQuickDozeFlagLocked(
+                        mLocalPowerManager.getLowPowerState(
+                                ServiceType.QUICK_DOZE).batterySaverEnabled);
+
                 mLocalActivityTaskManager.registerScreenObserver(mScreenObserver);
 
                 passWhiteListsToForceAppStandbyTrackerLocked();
@@ -2211,7 +2273,9 @@ public class DeviceIdleController extends SystemService
 
     @VisibleForTesting
     boolean isScreenOn() {
-        return mScreenOn;
+        synchronized (this) {
+            return mScreenOn;
+        }
     }
 
     void updateInteractivityLocked() {
@@ -2235,7 +2299,9 @@ public class DeviceIdleController extends SystemService
 
     @VisibleForTesting
     boolean isCharging() {
-        return mCharging;
+        synchronized (this) {
+            return mCharging;
+        }
     }
 
     void updateChargingLocked(boolean charging) {
@@ -2251,6 +2317,27 @@ public class DeviceIdleController extends SystemService
                 becomeActiveLocked("charging", Process.myUid());
             }
         }
+    }
+
+    @VisibleForTesting
+    boolean isQuickDozeEnabled() {
+        synchronized (this) {
+            return mQuickDozeActivated;
+        }
+    }
+
+    /** Updates the quick doze flag and enters deep doze if appropriate. */
+    @VisibleForTesting
+    void updateQuickDozeFlagLocked(boolean enabled) {
+        if (DEBUG) Slog.i(TAG, "updateQuickDozeFlagLocked: enabled=" + enabled);
+        mQuickDozeActivated = enabled;
+        if (enabled) {
+            // If Quick Doze is enabled, see if we should go straight into it.
+            becomeInactiveIfAppropriateLocked();
+        }
+        // Going from Deep Doze to Light Idle (if quick doze becomes disabled) is tricky and
+        // probably not worth the overhead, so leave in deep doze if that's the case until the
+        // next natural time to come out of it.
     }
 
     void keyguardShowingLocked(boolean showing) {
@@ -2304,14 +2391,34 @@ public class DeviceIdleController extends SystemService
     void becomeInactiveIfAppropriateLocked() {
         if (DEBUG) Slog.d(TAG, "becomeInactiveIfAppropriateLocked()");
         if ((!mScreenOn && !mCharging) || mForceIdle) {
-            // Screen has turned off; we are now going to become inactive and start
-            // waiting to see if we will ultimately go idle.
-            if (mState == STATE_ACTIVE && mDeepEnabled) {
-                mState = STATE_INACTIVE;
-                if (DEBUG) Slog.d(TAG, "Moved from STATE_ACTIVE to STATE_INACTIVE");
-                resetIdleManagementLocked();
-                scheduleAlarmLocked(mInactiveTimeout, false);
-                EventLogTags.writeDeviceIdle(mState, "no activity");
+            // Become inactive and determine if we will ultimately go idle.
+            if (mDeepEnabled) {
+                if (mQuickDozeActivated) {
+                    if (mState == STATE_QUICK_DOZE_DELAY || mState == STATE_IDLE
+                            || mState == STATE_IDLE_MAINTENANCE) {
+                        // Already "idling". Don't want to restart the process.
+                        // mLightState can't be LIGHT_STATE_ACTIVE if mState is any of these 3
+                        // values, so returning here is safe.
+                        return;
+                    }
+                    if (DEBUG) {
+                        Slog.d(TAG, "Moved from "
+                                + stateToString(mState) + " to STATE_QUICK_DOZE_DELAY");
+                    }
+                    mState = STATE_QUICK_DOZE_DELAY;
+                    // Make sure any motion sensing or locating is stopped.
+                    resetIdleManagementLocked();
+                    // Wait a small amount of time in case something (eg: background service from
+                    // recently closed app) needs to finish running.
+                    scheduleAlarmLocked(mConstants.QUICK_DOZE_DELAY_TIMEOUT, false);
+                    EventLogTags.writeDeviceIdle(mState, "no activity");
+                } else if (mState == STATE_ACTIVE) {
+                    mState = STATE_INACTIVE;
+                    if (DEBUG) Slog.d(TAG, "Moved from STATE_ACTIVE to STATE_INACTIVE");
+                    resetIdleManagementLocked();
+                    scheduleAlarmLocked(mInactiveTimeout, false);
+                    EventLogTags.writeDeviceIdle(mState, "no activity");
+                }
             }
             if (mLightState == LIGHT_STATE_ACTIVE && mLightEnabled) {
                 mLightState = LIGHT_STATE_INACTIVE;
@@ -2473,9 +2580,6 @@ public class DeviceIdleController extends SystemService
                 // for motion and sleep some more while doing so.
                 startMonitoringMotionLocked();
                 scheduleAlarmLocked(mConstants.IDLE_AFTER_INACTIVE_TIMEOUT, false);
-                // Reset the upcoming idle delays.
-                mNextIdlePendingDelay = mConstants.IDLE_PENDING_TIMEOUT;
-                mNextIdleDelay = mConstants.IDLE_TIMEOUT;
                 mState = STATE_IDLE_PENDING;
                 if (DEBUG) Slog.d(TAG, "Moved from STATE_INACTIVE to STATE_IDLE_PENDING.");
                 EventLogTags.writeDeviceIdle(mState, reason);
@@ -2528,6 +2632,13 @@ public class DeviceIdleController extends SystemService
                 cancelLocatingLocked();
                 mAnyMotionDetector.stop();
 
+                // Intentional fallthrough -- time to go into IDLE state.
+            case STATE_QUICK_DOZE_DELAY:
+                // Reset the upcoming idle delays.
+                mNextIdlePendingDelay = mConstants.IDLE_PENDING_TIMEOUT;
+                mNextIdleDelay = mConstants.IDLE_TIMEOUT;
+
+                // Everything is in place to go into IDLE state.
             case STATE_IDLE_MAINTENANCE:
                 scheduleAlarmLocked(mNextIdleDelay, true);
                 if (DEBUG) Slog.d(TAG, "Moved to STATE_IDLE. Next alarm in " + mNextIdleDelay +
@@ -2782,11 +2893,15 @@ public class DeviceIdleController extends SystemService
 
     void scheduleAlarmLocked(long delay, boolean idleUntil) {
         if (DEBUG) Slog.d(TAG, "scheduleAlarmLocked(" + delay + ", " + idleUntil + ")");
-        if (mMotionSensor == null) {
+        if (mMotionSensor == null && !(mState == STATE_QUICK_DOZE_DELAY || mState == STATE_IDLE
+                  || mState == STATE_IDLE_MAINTENANCE)) {
             // If there is no motion sensor on this device, then we won't schedule
             // alarms, because we can't determine if the device is not moving.  This effectively
             // turns off normal execution of device idling, although it is still possible to
             // manually poke it by pretending like the alarm is going off.
+            // STATE_QUICK_DOZE_DELAY skips the motion sensing so if the state is past the motion
+            // sensing stage (ie, is QUICK_DOZE_DELAY, IDLE, or IDLE_MAINTENANCE), then idling
+            // can continue until the user interacts with the device.
             return;
         }
         mNextAlarmTime = SystemClock.elapsedRealtime() + delay;
@@ -3215,6 +3330,7 @@ public class DeviceIdleController extends SystemService
                             case "light": pw.println(lightStateToString(mLightState)); break;
                             case "deep": pw.println(stateToString(mState)); break;
                             case "force": pw.println(mForceIdle); break;
+                            case "quick": pw.println(mQuickDozeActivated); break;
                             case "screen": pw.println(mScreenOn); break;
                             case "charging": pw.println(mCharging); break;
                             case "network": pw.println(mNetworkConnected); break;

@@ -32,6 +32,7 @@ import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
+import com.android.systemui.Dependency;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
@@ -44,7 +45,7 @@ import org.mockito.MockitoAnnotations;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
-@TestableLooper.RunWithLooper
+@TestableLooper.RunWithLooper(setAsMainLooper = true)
 public class NotificationListenerTest extends SysuiTestCase {
     private static final String TEST_PACKAGE_NAME = "test";
     private static final int TEST_UID = 0;
@@ -66,15 +67,16 @@ public class NotificationListenerTest extends SysuiTestCase {
         mDependency.injectTestDependency(NotificationEntryManager.class, mEntryManager);
         mDependency.injectTestDependency(NotificationRemoteInputManager.class,
                 mRemoteInputManager);
+        mDependency.injectTestDependency(Dependency.MAIN_HANDLER,
+                new Handler(TestableLooper.get(this).getLooper()));
 
-        when(mPresenter.getHandler()).thenReturn(Handler.createAsync(Looper.myLooper()));
         when(mEntryManager.getNotificationData()).thenReturn(mNotificationData);
 
         mListener = new NotificationListener(mContext);
         mSbn = new StatusBarNotification(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, 0, null, TEST_UID, 0,
                 new Notification(), UserHandle.CURRENT, null, 0);
 
-        mListener.setUpWithPresenter(mPresenter, mEntryManager);
+        mListener.setUpWithPresenter(mPresenter);
     }
 
     @Test

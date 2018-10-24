@@ -59,44 +59,18 @@ public class MetricsFeatureProvider {
         }
     }
 
-    /**
-     * Logs a user action. Includes the elapsed time since the containing
-     * fragment has been visible.
-     */
-    public void action(VisibilityLoggerMixin visibilityLogger, int category, int value) {
-        for (LogWriter writer : mLoggerWriters) {
-            writer.action(category, value,
-                    sinceVisibleTaggedData(visibilityLogger.elapsedTimeSinceVisible()));
-        }
-    }
-
-    /**
-     * Logs a user action. Includes the elapsed time since the containing
-     * fragment has been visible.
-     */
-    public void action(VisibilityLoggerMixin visibilityLogger, int category, boolean value) {
-        for (LogWriter writer : mLoggerWriters) {
-            writer.action(category, value,
-                    sinceVisibleTaggedData(visibilityLogger.elapsedTimeSinceVisible()));
-        }
-    }
-
     public void action(Context context, int category, Pair<Integer, Object>... taggedData) {
         for (LogWriter writer : mLoggerWriters) {
             writer.action(context, category, taggedData);
         }
     }
 
-    /** @deprecated use {@link #action(VisibilityLoggerMixin, int, int)} */
-    @Deprecated
     public void action(Context context, int category, int value) {
         for (LogWriter writer : mLoggerWriters) {
             writer.action(context, category, value);
         }
     }
 
-    /** @deprecated use {@link #action(VisibilityLoggerMixin, int, boolean)} */
-    @Deprecated
     public void action(Context context, int category, boolean value) {
         for (LogWriter writer : mLoggerWriters) {
             writer.action(context, category, value);
@@ -113,12 +87,6 @@ public class MetricsFeatureProvider {
     public void count(Context context, String name, int value) {
         for (LogWriter writer : mLoggerWriters) {
             writer.count(context, name, value);
-        }
-    }
-
-    public void histogram(Context context, String name, int bucket) {
-        for (LogWriter writer : mLoggerWriters) {
-            writer.histogram(context, name, bucket);
         }
     }
 
@@ -153,7 +121,4 @@ public class MetricsFeatureProvider {
                 Pair.create(MetricsEvent.FIELD_CONTEXT, sourceMetricsCategory));
     }
 
-    private Pair<Integer, Object> sinceVisibleTaggedData(long timestamp) {
-        return Pair.create(MetricsEvent.NOTIFICATION_SINCE_VISIBLE_MILLIS, timestamp);
-    }
 }

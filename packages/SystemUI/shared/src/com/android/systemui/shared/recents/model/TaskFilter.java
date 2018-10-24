@@ -21,6 +21,7 @@ import android.util.SparseArray;
 /**
  * An interface for a task filter to query whether a particular task should show in a stack.
  */
+@Deprecated
 public interface TaskFilter {
     /** Returns whether the filter accepts the specified task */
     boolean acceptTask(SparseArray<Task> taskIdMap, Task t, int index);

@@ -33,6 +33,7 @@ import java.util.List;
 /**
  * The task stack contains a list of multiple tasks.
  */
+@Deprecated
 public class TaskStack {
 
     private static final String TAG = "TaskStack";

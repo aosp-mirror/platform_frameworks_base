@@ -109,7 +109,6 @@ public class ActivityStartInterceptorTest {
     @Before
     public void setUp() {
         MockitoAnnotations.initMocks(this);
-        mService.mAm = mAm;
         mService.mAmInternal = mAmInternal;
         mInterceptor = new ActivityStartInterceptor(mService, mSupervisor, mContext);
         mInterceptor.setStates(TEST_USER_ID, TEST_REAL_CALLING_PID, TEST_REAL_CALLING_UID,

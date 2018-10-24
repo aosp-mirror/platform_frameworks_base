@@ -41,8 +41,7 @@ import com.android.internal.view.IInputMethodSession;
 class IInputMethodSessionWrapper extends IInputMethodSession.Stub
         implements HandlerCaller.Callback {
     private static final String TAG = "InputMethodWrapper";
-    
-    private static final int DO_FINISH_INPUT = 60;
+
     private static final int DO_DISPLAY_COMPLETIONS = 65;
     private static final int DO_UPDATE_EXTRACTED_TEXT = 67;
     private static final int DO_UPDATE_SELECTION = 90;
@@ -89,9 +88,6 @@ class IInputMethodSessionWrapper extends IInputMethodSession.Stub
         }
 
         switch (msg.what) {
-            case DO_FINISH_INPUT:
-                mInputMethodSession.finishInput();
-                return;
             case DO_DISPLAY_COMPLETIONS:
                 mInputMethodSession.displayCompletions((CompletionInfo[])msg.obj);
                 return;
@@ -147,11 +143,6 @@ class IInputMethodSessionWrapper extends IInputMethodSession.Stub
             mChannel.dispose();
             mChannel = null;
         }
-    }
-
-    @Override
-    public void finishInput() {
-        mCaller.executeOrSendMessage(mCaller.obtainMessage(DO_FINISH_INPUT));
     }
 
     @Override

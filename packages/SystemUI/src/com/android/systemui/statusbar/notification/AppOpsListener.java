@@ -33,10 +33,11 @@ public class AppOpsListener implements AppOpsManager.OnOpActiveChangedListener {
     // Dependencies:
     private final ForegroundServiceController mFsc =
             Dependency.get(ForegroundServiceController.class);
+    private final NotificationEntryManager mEntryManager =
+            Dependency.get(NotificationEntryManager.class);
 
     private final Context mContext;
     protected NotificationPresenter mPresenter;
-    protected NotificationEntryManager mEntryManager;
     protected final AppOpsManager mAppOps;
 
     protected static final int[] OPS = new int[] {AppOpsManager.OP_CAMERA,
@@ -48,10 +49,8 @@ public class AppOpsListener implements AppOpsManager.OnOpActiveChangedListener {
         mAppOps = (AppOpsManager) context.getSystemService(Context.APP_OPS_SERVICE);
     }
 
-    public void setUpWithPresenter(NotificationPresenter presenter,
-            NotificationEntryManager entryManager) {
+    public void setUpWithPresenter(NotificationPresenter presenter) {
         mPresenter = presenter;
-        mEntryManager = entryManager;
         mAppOps.startWatchingActive(OPS, this);
     }
 
@@ -62,7 +61,7 @@ public class AppOpsListener implements AppOpsManager.OnOpActiveChangedListener {
     @Override
     public void onOpActiveChanged(int code, int uid, String packageName, boolean active) {
         mFsc.onAppOpChanged(code, uid, packageName, active);
-        mPresenter.getHandler().post(() -> {
+        Dependency.get(Dependency.MAIN_HANDLER).post(() -> {
           mEntryManager.updateNotificationsForAppOp(code, uid, packageName, active);
         });
     }

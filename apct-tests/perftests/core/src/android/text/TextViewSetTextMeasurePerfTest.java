@@ -19,13 +19,13 @@ import static android.view.View.MeasureSpec.AT_MOST;
 import static android.view.View.MeasureSpec.UNSPECIFIED;
 
 import android.graphics.Canvas;
+import android.graphics.RecordingCanvas;
+import android.graphics.RenderNode;
 import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.PerfStatusReporter;
 import android.support.test.InstrumentationRegistry;
 import android.support.test.filters.LargeTest;
 import android.text.NonEditableTextGenerator.TextType;
-import android.view.DisplayListCanvas;
-import android.view.RenderNode;
 import android.widget.TextView;
 
 import org.junit.Rule;
@@ -128,7 +128,7 @@ public class TextViewSetTextMeasurePerfTest {
         while (state.keepRunning()) {
 
             state.pauseTiming();
-            final DisplayListCanvas canvas = node.start(1200, 200);
+            final RecordingCanvas canvas = node.start(1200, 200);
             int save = canvas.save();
             textView.setTextLocale(Locale.UK);
             textView.setTextLocale(Locale.US);

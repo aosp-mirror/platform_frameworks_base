@@ -30,7 +30,7 @@ import android.service.wallpaper.WallpaperService;
 import android.util.Log;
 import android.view.Display;
 import android.view.DisplayInfo;
-import android.view.DisplayListCanvas;
+import android.graphics.RecordingCanvas;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.WindowManager;
@@ -381,7 +381,7 @@ public class ImageWallpaper extends WallpaperService {
                     try {
                         Bitmap wallpaper = mWallpaperManager.getBitmap(true /* hardware */);
                         if (wallpaper != null
-                                && wallpaper.getByteCount() > DisplayListCanvas.MAX_BITMAP_SIZE) {
+                                && wallpaper.getByteCount() > RecordingCanvas.MAX_BITMAP_SIZE) {
                             throw new RuntimeException("Wallpaper is too large to draw!");
                         }
                         return wallpaper;

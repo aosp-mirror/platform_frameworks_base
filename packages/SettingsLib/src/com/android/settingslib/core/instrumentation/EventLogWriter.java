@@ -102,8 +102,4 @@ public class EventLogWriter implements LogWriter {
     public void count(Context context, String name, int value) {
         MetricsLogger.count(context, name, value);
     }
-
-    public void histogram(Context context, String name, int bucket) {
-        MetricsLogger.histogram(context, name, bucket);
-    }
 }

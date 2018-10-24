@@ -3754,6 +3754,13 @@ public class WifiManager {
                 mCallback.onProvisioningFailure(status);
             });
         }
+
+        @Override
+        public void onProvisioningComplete() {
+            mHandler.post(() -> {
+                mCallback.onProvisioningComplete();
+            });
+        }
     }
 
     /**

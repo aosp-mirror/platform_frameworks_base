@@ -30,6 +30,7 @@ import android.graphics.PixelFormat;
 import android.graphics.PorterDuff;
 import android.graphics.Rect;
 import android.graphics.Region;
+import android.graphics.RenderNode;
 import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;

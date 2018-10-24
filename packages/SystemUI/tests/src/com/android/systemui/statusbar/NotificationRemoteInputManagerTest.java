@@ -20,6 +20,7 @@ import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
+import com.android.systemui.Dependency;
 import com.android.systemui.SysuiTestCase;
 
 import com.android.systemui.statusbar.notification.NotificationData;
@@ -70,8 +71,8 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
         mDependency.injectTestDependency(NotificationLockscreenUserManager.class,
                 mLockscreenUserManager);
         mDependency.injectTestDependency(SmartReplyController.class, mSmartReplyController);
-
-        when(mPresenter.getHandler()).thenReturn(Handler.createAsync(Looper.myLooper()));
+        mDependency.injectTestDependency(Dependency.MAIN_HANDLER,
+                Handler.createAsync(Looper.myLooper()));
 
         mRemoteInputManager = new TestableNotificationRemoteInputManager(mContext);
         mSbn = new StatusBarNotification(TEST_PACKAGE_NAME, TEST_PACKAGE_NAME, 0, null, TEST_UID,
@@ -79,7 +80,7 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
         mEntry = new NotificationData.Entry(mSbn);
         mEntry.row = mRow;
 
-        mRemoteInputManager.setUpWithPresenterForTest(mPresenter, mEntryManager, mCallback,
+        mRemoteInputManager.setUpWithPresenterForTest(mPresenter, mCallback,
                 mDelegate, mController);
         for (NotificationLifetimeExtender extender : mRemoteInputManager.getLifetimeExtenders()) {
             extender.setCallback(
@@ -201,11 +202,10 @@ public class NotificationRemoteInputManagerTest extends SysuiTestCase {
         }
 
         public void setUpWithPresenterForTest(NotificationPresenter presenter,
-                NotificationEntryManager entryManager,
                 Callback callback,
                 RemoteInputController.Delegate delegate,
                 RemoteInputController controller) {
-            super.setUpWithPresenter(presenter, entryManager, callback, delegate);
+            super.setUpWithPresenter(presenter, callback, delegate);
             mRemoteInputController = controller;
         }
 

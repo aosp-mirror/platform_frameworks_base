@@ -18,7 +18,7 @@ package com.android.systemui.statusbar.phone;
 
 import android.util.Log;
 
-import com.android.keyguard.KeyguardHostView.OnDismissAction;
+import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 
 /**
  * Executes actions that require the screen to be unlocked. Delegates the actual handling to an

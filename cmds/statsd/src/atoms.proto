@@ -22,6 +22,7 @@ option java_outer_classname = "AtomsProto";
 
 import "frameworks/base/cmds/statsd/src/atom_field_options.proto";
 import "frameworks/base/core/proto/android/app/enums.proto";
+import "frameworks/base/core/proto/android/app/settings_enums.proto";
 import "frameworks/base/core/proto/android/app/job/enums.proto";
 import "frameworks/base/core/proto/android/bluetooth/enums.proto";
 import "frameworks/base/core/proto/android/os/enums.proto";
@@ -1445,41 +1446,20 @@ message PhoneStateChanged {
  */
 message SettingsUIChanged {
     /**
-     * The action performed in this event
-     */
-    enum Action {
-        ACTION_UNKNOWN = 0;
-        PAGE_VISIBLE = 1;
-        PAGE_HIDE = 2;
-        PREF_CHANGE = 3;
-    }
-
-    /**
-     * Id for Settings pages. Each page must have its own unique Id.
-     */
-    enum PageId {
-      // Unknown page. Should not be used in production code.
-      PAGE_UNKNOWN = 0;
-
-      // Settings > Display > Lock screen display > On lock screen
-      LOCK_SCREEN_NOTIFICATION_CONTENT = 1584;
-    }
-
-    /**
      * Where this SettingsUIChange event comes from. For example, if
      * it's a PAGE_VISIBLE event, where the page is opened from.
      */
-    optional PageId attribution = 1;
+    optional android.app.settings.PageId attribution = 1;
 
     /**
      * What the UI action is.
      */
-    optional Action action = 2;
+    optional android.app.settings.Action action = 2;
 
     /**
      * Where the action is happening
      */
-    optional PageId pageId = 3;
+    optional android.app.settings.PageId pageId = 3;
 
     /**
      * What preference changed in this event.
@@ -2107,25 +2087,34 @@ message Notification {
     optional int32 importance = 7;
 
     // ID for the notification channel.
-    optional int32 channel_id = 8;
+    optional string channel_id = 8;
 
     // Importance for the notification channel.
     optional int32 channel_importance = 9;
 
+    // Application-supplied ID associated with the notifications group.
+    optional string group_id = 10;
+
     // Whether notification was a group summary.
-    optional bool group_summary = 10;
+    optional bool group_summary = 11;
 
-    // Time since notification was created in milliseconds.
-    optional int64 since_create_millis = 11;
+    // Reason for dismissal of a notification. This field is only meaningful for
+    // TYPE_DISMISS events.
+    optional int32 dismiss_reason = 12;
 
-    // Time since notification was interrupted in milliseconds.
-    optional int64 since_interruption_millis = 12;
+    // The first post time of notification, stable across updates.
+    optional int64 creation_millis = 13;
 
-    // Time since notification was updated in milliseconds.
-    optional int64 since_update_millis = 13;
+    // The most recent interruption time, or the creation time if no updates.
+    // Differs from update_millis because updates are filtered based on whether
+    // they actually interrupted the user.
+    optional int64 interruption_millis = 14;
 
-    // Time since notification was visible in milliseconds.
-    optional int64 since_visible_millis = 14;
+    // The most recent update time, or the creation time if no updates.
+    optional int64 update_millis = 15;
+
+    // The most recent visibility event.
+    optional int64 visible_millis = 16;
 }
 
 

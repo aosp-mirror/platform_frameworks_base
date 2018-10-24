@@ -44,7 +44,6 @@ import android.os.Bundle;
 import android.os.ServiceManager;
 import android.provider.Settings;
 import android.service.notification.StatusBarNotification;
-
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -88,33 +87,33 @@ import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin.OnMenuEv
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.DragDownHelper.DragDownCallback;
-import com.android.systemui.statusbar.NotificationLockscreenUserManager;
-import com.android.systemui.statusbar.StatusBarState;
-import com.android.systemui.statusbar.NotificationRemoteInputManager;
-import com.android.systemui.statusbar.RemoteInputController;
-import com.android.systemui.statusbar.StatusBarStateController.StateListener;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
-import com.android.systemui.statusbar.notification.VisualStabilityManager;
-import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.EmptyShadeView;
+import com.android.systemui.statusbar.NotificationLockscreenUserManager;
+import com.android.systemui.statusbar.NotificationRemoteInputManager;
+import com.android.systemui.statusbar.NotificationShelf;
+import com.android.systemui.statusbar.RemoteInputController;
+import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.StatusBarStateController.StateListener;
+import com.android.systemui.statusbar.notification.FakeShadowView;
+import com.android.systemui.statusbar.notification.NotificationData;
+import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.NotificationUtils;
+import com.android.systemui.statusbar.notification.ShadeViewRefactor;
+import com.android.systemui.statusbar.notification.ShadeViewRefactor.RefactorComponent;
+import com.android.systemui.statusbar.notification.VisibilityLocationProvider;
+import com.android.systemui.statusbar.notification.VisualStabilityManager;
+import com.android.systemui.statusbar.notification.logging.NotificationLogger;
+import com.android.systemui.statusbar.notification.row.ActivatableNotificationView;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.row.ExpandableView.OnHeightChangedListener;
 import com.android.systemui.statusbar.notification.row.FooterView;
 import com.android.systemui.statusbar.notification.row.NotificationBlockingHelperManager;
-import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.row.NotificationGuts;
-import com.android.systemui.statusbar.notification.logging.NotificationLogger;
-import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.row.NotificationSnooze;
 import com.android.systemui.statusbar.notification.row.StackScrollerDecorView;
-import com.android.systemui.statusbar.StatusBarStateController;
-import com.android.systemui.statusbar.notification.FakeShadowView;
-import com.android.systemui.statusbar.notification.NotificationUtils;
-import com.android.systemui.statusbar.notification.ShadeViewRefactor;
-import com.android.systemui.statusbar.notification.ShadeViewRefactor.RefactorComponent;
-import com.android.systemui.statusbar.notification.VisibilityLocationProvider;
 import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
@@ -125,6 +124,7 @@ import com.android.systemui.statusbar.phone.NotificationGroupManager.OnGroupChan
 import com.android.systemui.statusbar.phone.NotificationIconAreaController;
 import com.android.systemui.statusbar.phone.NotificationPanelView;
 import com.android.systemui.statusbar.phone.ScrimController;
+import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
 import com.android.systemui.statusbar.policy.ConfigurationController;
 import com.android.systemui.statusbar.policy.ConfigurationController.ConfigurationListener;
@@ -435,6 +435,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     private float mVerticalPanelTranslation;
     private final NotificationLockscreenUserManager mLockscreenUserManager =
             Dependency.get(NotificationLockscreenUserManager.class);
+    protected final NotificationGutsManager mGutsManager =
+            Dependency.get(NotificationGutsManager.class);
     private final Rect mTmpRect = new Rect();
     private final NotificationEntryManager mEntryManager =
             Dependency.get(NotificationEntryManager.class);
@@ -454,6 +456,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
 
     private Interpolator mDarkXInterpolator = Interpolators.FAST_OUT_SLOW_IN;
     private NotificationPanelView mNotificationPanel;
+    private final ShadeController mShadeController = Dependency.get(ShadeController.class);
 
     private final NotificationGutsManager
             mNotificationGutsManager = Dependency.get(NotificationGutsManager.class);
@@ -4740,7 +4743,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     }
 
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
-    private void setStatusBarState(int statusBarState) {
+    @VisibleForTesting
+    protected void setStatusBarState(int statusBarState) {
         mStatusBarState = statusBarState;
         mAmbientState.setStatusBarState(statusBarState);
     }
@@ -4942,7 +4946,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             return;
         }
 
-        mStatusBar.addPostCollapseAction(() -> {
+        mShadeController.addPostCollapseAction(() -> {
             setDismissAllInProgress(false);
             for (ExpandableNotificationRow rowToRemove : viewsToRemove) {
                 if (canChildBeDismissed(rowToRemove)) {
@@ -5040,6 +5044,10 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void setNotificationPanel(NotificationPanelView notificationPanelView) {
         mNotificationPanel = notificationPanelView;
+    }
+
+    public void updateIconAreaViews() {
+        mIconAreaController.updateNotificationIcons();
     }
 
     /**
@@ -5662,7 +5670,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
 
                 if (mNotificationPanel.onDraggedDown() || startingChild != null) {
                     // We have notifications, go to locked shade.
-                    mStatusBar.goToLockedShade(startingChild);
+                    mShadeController.goToLockedShade(startingChild);
                     if (startingChild instanceof ExpandableNotificationRow) {
                         ExpandableNotificationRow row = (ExpandableNotificationRow) startingChild;
                         row.onExpandedByGesture(true /* drag down is always an open */);

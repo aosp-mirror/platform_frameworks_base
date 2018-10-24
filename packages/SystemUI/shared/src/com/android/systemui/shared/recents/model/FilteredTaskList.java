@@ -27,6 +27,7 @@ import java.util.List;
 /**
  * A list of filtered tasks.
  */
+@Deprecated
 class FilteredTaskList {
 
     private final ArrayList<Task> mTasks = new ArrayList<>();

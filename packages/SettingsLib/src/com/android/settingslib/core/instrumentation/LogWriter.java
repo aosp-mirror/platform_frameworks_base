@@ -76,9 +76,4 @@ public interface LogWriter {
      * Logs a count.
      */
     void count(Context context, String name, int value);
-
-    /**
-     * Logs a histogram event.
-     */
-    void histogram(Context context, String name, int bucket);
 }

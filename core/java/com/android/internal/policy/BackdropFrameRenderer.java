@@ -16,13 +16,13 @@
 
 package com.android.internal.policy;
 
+import android.graphics.RecordingCanvas;
 import android.graphics.Rect;
+import android.graphics.RenderNode;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
 import android.os.Looper;
 import android.view.Choreographer;
-import android.view.DisplayListCanvas;
-import android.view.RenderNode;
 import android.view.ThreadedRenderer;
 
 /**
@@ -339,7 +339,7 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
         mFrameAndBackdropNode.setLeftTopRightBottom(left, top, left + width, top + height);
 
         // Draw the caption and content backdrops in to our render node.
-        DisplayListCanvas canvas = mFrameAndBackdropNode.start(width, height);
+        RecordingCanvas canvas = mFrameAndBackdropNode.start(width, height);
         final Drawable drawable = mUserCaptionBackgroundDrawable != null
                 ? mUserCaptionBackgroundDrawable : mCaptionBackgroundDrawable;
 
@@ -368,7 +368,7 @@ public class BackdropFrameRenderer extends Thread implements Choreographer.Frame
         if (mSystemBarBackgroundNode == null) {
             return;
         }
-        DisplayListCanvas canvas = mSystemBarBackgroundNode.start(width, height);
+        RecordingCanvas canvas = mSystemBarBackgroundNode.start(width, height);
         mSystemBarBackgroundNode.setLeftTopRightBottom(left, top, left + width, top + height);
         final int topInset = DecorView.getColorViewTopInset(mStableInsets.top, mSystemInsets.top);
         if (mStatusBarColor != null) {

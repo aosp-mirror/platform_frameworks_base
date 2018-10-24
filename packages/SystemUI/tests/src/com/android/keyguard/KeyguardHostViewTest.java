@@ -23,6 +23,7 @@ import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
 
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -44,7 +45,7 @@ public class KeyguardHostViewTest extends SysuiTestCase {
     @Test
     public void testHasDismissActions() {
         Assert.assertFalse("Action not set yet", mKeyguardHostView.hasDismissActions());
-        mKeyguardHostView.setOnDismissAction(mock(KeyguardHostView.OnDismissAction.class),
+        mKeyguardHostView.setOnDismissAction(mock(OnDismissAction.class),
                 null /* cancelAction */);
         Assert.assertTrue("Action should exist", mKeyguardHostView.hasDismissActions());
     }

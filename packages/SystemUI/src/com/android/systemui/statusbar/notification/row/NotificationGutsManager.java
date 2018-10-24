@@ -28,6 +28,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.net.Uri;
+import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -41,15 +42,23 @@ import android.view.accessibility.AccessibilityManager;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
+import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
+import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
+import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin.MenuItem;
 import com.android.systemui.statusbar.NotificationLifetimeExtender;
-import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
+import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.NotificationPresenter;
+import com.android.systemui.statusbar.StatusBarState;
+import com.android.systemui.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.notification.row.NotificationInfo.CheckSaveListener;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.phone.StatusBar;
+import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -71,14 +80,20 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
     // Dependencies:
     private final NotificationLockscreenUserManager mLockscreenUserManager =
             Dependency.get(NotificationLockscreenUserManager.class);
+    private final StatusBarStateController mStatusBarStateController =
+            Dependency.get(StatusBarStateController.class);
+    private final DeviceProvisionedController mDeviceProvisionedController =
+            Dependency.get(DeviceProvisionedController.class);
+    private final ActivityStarter mActivityStarter = Dependency.get(ActivityStarter.class);
 
     // which notification is currently being longpress-examined by the user
+    private final IStatusBarService mBarService;
     private NotificationGuts mNotificationGutsExposed;
     private NotificationMenuRowPlugin.MenuItem mGutsMenuItem;
-    private NotificationPresenter mPresenter;
     private NotificationSafeToRemoveCallback mNotificationLifetimeFinishedCallback;
+    private NotificationPresenter mPresenter;
     private NotificationListContainer mListContainer;
-    private NotificationInfo.CheckSaveListener mCheckSaveListener;
+    private CheckSaveListener mCheckSaveListener;
     private OnSettingsClickListener mOnSettingsClickListener;
     @VisibleForTesting
     protected String mKeyToRemoveOnGutsClosed;
@@ -89,16 +104,17 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
 
         mAccessibilityManager = (AccessibilityManager)
                 mContext.getSystemService(Context.ACCESSIBILITY_SERVICE);
+        mBarService = IStatusBarService.Stub.asInterface(
+                ServiceManager.getService(Context.STATUS_BAR_SERVICE));
     }
 
     public void setUpWithPresenter(NotificationPresenter presenter,
             NotificationListContainer listContainer,
-            NotificationInfo.CheckSaveListener checkSaveListener,
-            OnSettingsClickListener onSettingsClickListener) {
+            CheckSaveListener checkSave, OnSettingsClickListener onSettingsClick) {
         mPresenter = presenter;
         mListContainer = listContainer;
-        mCheckSaveListener = checkSaveListener;
-        mOnSettingsClickListener = onSettingsClickListener;
+        mCheckSaveListener = checkSave;
+        mOnSettingsClickListener = onSettingsClick;
     }
 
     public void onDensityOrFontScaleChanged(ExpandableNotificationRow row) {
@@ -264,7 +280,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
             onSettingsClick = (View v, NotificationChannel channel, int appUid) -> {
                 mMetricsLogger.action(MetricsProto.MetricsEvent.ACTION_NOTE_INFO);
                 guts.resetFalsingCheck();
-                mOnSettingsClickListener.onClick(sbn.getKey());
+                mOnSettingsClickListener.onSettingsClick(sbn.getKey());
                 startAppNotificationSettingsActivity(packageName, appUid, channel, row);
             };
         }
@@ -279,7 +295,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
                 mCheckSaveListener,
                 onSettingsClick,
                 onAppSettingsClick,
-                mPresenter.isDeviceProvisioned(),
+                mDeviceProvisionedController.isDeviceProvisioned(),
                 row.getIsNonblockable(),
                 isForBlockingHelper,
                 row.getEntry().userSentiment == USER_SENTIMENT_NEGATIVE);
@@ -315,6 +331,10 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
 
     public void setExposedGuts(NotificationGuts guts) {
         mNotificationGutsExposed = guts;
+    }
+
+    public ExpandableNotificationRow.LongPressListener getNotificationLongClicker() {
+        return this::openGuts;
     }
 
     /**
@@ -385,7 +405,7 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
                 guts.setVisibility(View.VISIBLE);
 
                 final boolean needsFalsingProtection =
-                        (mPresenter.isPresenterLocked() &&
+                        (mStatusBarStateController.getState() == StatusBarState.KEYGUARD &&
                                 !mAccessibilityManager.isTouchExplorationEnabled());
 
                 guts.openControls(
@@ -442,6 +462,6 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
     }
 
     public interface OnSettingsClickListener {
-        void onClick(String key);
+        public void onSettingsClick(String key);
     }
 }

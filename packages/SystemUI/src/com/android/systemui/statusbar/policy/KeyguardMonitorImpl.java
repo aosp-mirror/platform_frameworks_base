@@ -28,7 +28,7 @@ import java.util.ArrayList;
 public class KeyguardMonitorImpl extends KeyguardUpdateMonitorCallback
         implements KeyguardMonitor {
 
-    private final ArrayList<Callback> mCallbacks = new ArrayList<Callback>();
+    private final ArrayList<Callback> mCallbacks = new ArrayList<>();
 
     private final Context mContext;
     private final CurrentUserTracker mUserTracker;
@@ -45,6 +45,7 @@ public class KeyguardMonitorImpl extends KeyguardUpdateMonitorCallback
     private long mKeyguardFadingAwayDelay;
     private long mKeyguardFadingAwayDuration;
     private boolean mKeyguardGoingAway;
+    private boolean mLaunchTransitionFadingAway;
 
     public KeyguardMonitorImpl(Context context) {
         mContext = context;
@@ -123,7 +124,7 @@ public class KeyguardMonitorImpl extends KeyguardUpdateMonitorCallback
 
     private void notifyKeyguardChanged() {
         // Copy the list to allow removal during callback.
-        new ArrayList<Callback>(mCallbacks).forEach(Callback::onKeyguardShowingChanged);
+        new ArrayList<>(mCallbacks).forEach(Callback::onKeyguardShowingChanged);
     }
 
     public void notifyKeyguardFadingAway(long delay, long fadeoutDuration) {
@@ -164,5 +165,14 @@ public class KeyguardMonitorImpl extends KeyguardUpdateMonitorCallback
 
     public void notifyKeyguardGoingAway(boolean keyguardGoingAway) {
         mKeyguardGoingAway = keyguardGoingAway;
+    }
+
+    public void setLaunchTransitionFadingAway(boolean fadingAway) {
+        mLaunchTransitionFadingAway = fadingAway;
+    }
+
+    @Override
+    public boolean isLaunchTransitionFadingAway() {
+        return mLaunchTransitionFadingAway;
     }
 }

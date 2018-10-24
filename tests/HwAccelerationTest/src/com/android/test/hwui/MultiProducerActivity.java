@@ -21,12 +21,12 @@ import android.graphics.Canvas;
 import android.graphics.ColorFilter;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
+import android.graphics.RecordingCanvas;
 import android.graphics.Rect;
 import android.graphics.drawable.Drawable;
 import android.os.Bundle;
-import android.view.DisplayListCanvas;
 import android.view.ThreadedRenderer;
-import android.view.RenderNode;
+import android.graphics.RenderNode;
 import android.view.View;
 import android.view.View.OnClickListener;
 import android.widget.AbsoluteLayout;
@@ -206,7 +206,7 @@ public class MultiProducerActivity extends Activity implements OnClickListener {
                     }
 
                     // Draw frame
-                    DisplayListCanvas canvas = nodeFrame.start(currentFrameBounds.width(),
+                    RecordingCanvas canvas = nodeFrame.start(currentFrameBounds.width(),
                             currentFrameBounds.height());
                     mFrameContent.draw(canvas);
                     nodeFrame.end(canvas);
@@ -228,7 +228,7 @@ public class MultiProducerActivity extends Activity implements OnClickListener {
                     }
 
                     // Draw Backdrop
-                    DisplayListCanvas canvas = nodeBack.start(currentBackBounds.width(),
+                    RecordingCanvas canvas = nodeBack.start(currentBackBounds.width(),
                             currentBackBounds.height());
                     mBackContent.draw(canvas);
                     nodeBack.end(canvas);

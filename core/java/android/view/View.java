@@ -57,9 +57,11 @@ import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.PorterDuff;
 import android.graphics.PorterDuffXfermode;
+import android.graphics.RecordingCanvas;
 import android.graphics.Rect;
 import android.graphics.RectF;
 import android.graphics.Region;
+import android.graphics.RenderNode;
 import android.graphics.Shader;
 import android.graphics.drawable.ColorDrawable;
 import android.graphics.drawable.Drawable;
@@ -19233,7 +19235,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             int height = mBottom - mTop;
             int layerType = getLayerType();
 
-            final DisplayListCanvas canvas = renderNode.start(width, height);
+            final RecordingCanvas canvas = renderNode.start(width, height);
 
             try {
                 if (layerType == LAYER_TYPE_SOFTWARE) {
@@ -20250,7 +20252,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         if (!drawingWithDrawingCache) {
             if (drawingWithRenderNode) {
                 mPrivateFlags &= ~PFLAG_DIRTY_MASK;
-                ((DisplayListCanvas) canvas).drawRenderNode(renderNode);
+                ((RecordingCanvas) canvas).drawRenderNode(renderNode);
             } else {
                 // Fast path for layouts with no backgrounds
                 if ((mPrivateFlags & PFLAG_SKIP_DRAW) == PFLAG_SKIP_DRAW) {
@@ -20581,7 +20583,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             final RenderNode renderNode = mBackgroundRenderNode;
             if (renderNode != null && renderNode.isValid()) {
                 setBackgroundRenderNodeProperties(renderNode);
-                ((DisplayListCanvas) canvas).drawRenderNode(renderNode);
+                ((RecordingCanvas) canvas).drawRenderNode(renderNode);
                 return;
             }
         }
@@ -20633,7 +20635,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         final Rect bounds = drawable.getBounds();
         final int width = bounds.width();
         final int height = bounds.height();
-        final DisplayListCanvas canvas = renderNode.start(width, height);
+        final RecordingCanvas canvas = renderNode.start(width, height);
 
         // Reverse left/top translation done by drawable canvas, which will
         // instead be applied by rendernode's LTRB bounds below. This way, the

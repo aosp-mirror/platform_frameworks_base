@@ -16,7 +16,7 @@
 
 package com.android.systemui.statusbar.phone;
 
-import static com.android.keyguard.KeyguardHostView.OnDismissAction;
+import static com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import static com.android.systemui.statusbar.phone.BiometricUnlockController.MODE_WAKE_AND_UNLOCK;
 import static com.android.systemui.statusbar.phone.BiometricUnlockController.MODE_WAKE_AND_UNLOCK_PULSING;
 
@@ -43,6 +43,7 @@ import com.android.systemui.Dependency;
 import com.android.systemui.SystemUIFactory;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.statusbar.CommandQueue;
+import com.android.systemui.statusbar.NotificationMediaManager;
 import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.phone.KeyguardBouncer.BouncerExpansionCallback;
@@ -124,6 +125,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     // Dismiss action to be launched when we stop dozing or the keyguard is gone.
     private DismissWithActionRequest mPendingWakeupAction;
     private final KeyguardMonitor mKeyguardMonitor = Dependency.get(KeyguardMonitor.class);
+    private final NotificationMediaManager mMediaManager =
+            Dependency.get(NotificationMediaManager.class);
 
     private final KeyguardUpdateMonitorCallback mUpdateMonitorCallback =
             new KeyguardUpdateMonitorCallback() {
@@ -381,7 +384,7 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
         boolean isOccluding = !mOccluded && occluded;
         mOccluded = occluded;
         if (mShowing) {
-            mStatusBar.updateMediaMetaData(false, animate && !occluded);
+            mMediaManager.updateMediaMetaData(false, animate && !occluded);
         }
         mStatusBarWindowController.setKeyguardOccluded(occluded);
 

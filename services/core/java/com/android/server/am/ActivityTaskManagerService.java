@@ -19,7 +19,6 @@ package com.android.server.am;
 import static android.Manifest.permission.BIND_VOICE_INTERACTION;
 import static android.Manifest.permission.CHANGE_CONFIGURATION;
 import static android.Manifest.permission.CONTROL_REMOTE_APP_TRANSITION_ANIMATIONS;
-import static android.Manifest.permission.FILTER_EVENTS;
 import static android.Manifest.permission.INTERNAL_SYSTEM_WINDOW;
 import static android.Manifest.permission.MANAGE_ACTIVITY_STACKS;
 import static android.Manifest.permission.READ_FRAME_BUFFER;
@@ -27,10 +26,11 @@ import static android.Manifest.permission.REMOVE_TASKS;
 import static android.Manifest.permission.START_TASKS_FROM_RECENTS;
 import static android.Manifest.permission.STOP_APP_SWITCHES;
 import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
+import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
 import static android.app.ActivityManagerInternal.ALLOW_FULL_ONLY;
+import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.ActivityTaskManager.RESIZE_MODE_PRESERVE_WINDOW;
 import static android.app.ActivityTaskManager.SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
-import static android.app.AppOpsManager.OP_NONE;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
@@ -71,6 +71,10 @@ import static android.view.WindowManager.TRANSIT_TASK_IN_PLACE;
 import static android.view.WindowManager.TRANSIT_TASK_OPEN;
 import static android.view.WindowManager.TRANSIT_TASK_TO_FRONT;
 
+import static com.android.server.am.ActivityManagerService.ANR_TRACE_DIR;
+import static com.android.server.am.ActivityManagerService.MY_PID;
+import static com.android.server.am.ActivityManagerService.STOCK_PM_FLAGS;
+import static com.android.server.am.ActivityManagerService.dumpStackTraces;
 import static com.android.server.am.ActivityManagerServiceDumpProcessesProto.CONFIG_WILL_CHANGE;
 import static com.android.server.am.ActivityManagerServiceDumpProcessesProto.CONTROLLER;
 import static com.android.server.am.ActivityManagerServiceDumpProcessesProto.CURRENT_TRACKER;
@@ -81,12 +85,21 @@ import static com.android.server.am.ActivityManagerServiceDumpProcessesProto.HEA
 import static com.android.server.am.ActivityManagerServiceDumpProcessesProto.HOME_PROC;
 import static com.android.server.am.ActivityManagerServiceDumpProcessesProto.LAUNCHING_ACTIVITY;
 import static com.android.server.am.ActivityManagerServiceDumpProcessesProto.PREVIOUS_PROC;
-import static com.android.server.am.ActivityManagerServiceDumpProcessesProto.PREVIOUS_PROC_VISIBLE_TIME_MS;
+import static com.android.server.am.ActivityManagerServiceDumpProcessesProto
+        .PREVIOUS_PROC_VISIBLE_TIME_MS;
 import static com.android.server.am.ActivityManagerServiceDumpProcessesProto.SCREEN_COMPAT_PACKAGES;
-import static com.android.server.am.ActivityManagerServiceDumpProcessesProto.ScreenCompatPackage.MODE;
-import static com.android.server.am.ActivityManagerServiceDumpProcessesProto.ScreenCompatPackage.PACKAGE;
+import static com.android.server.am.ActivityManagerServiceDumpProcessesProto.ScreenCompatPackage
+        .MODE;
+import static com.android.server.am.ActivityManagerServiceDumpProcessesProto.ScreenCompatPackage
+        .PACKAGE;
+import static com.android.server.am.ActivityStack.REMOVE_TASK_MODE_DESTROYING;
+import static com.android.server.am.ActivityStackSupervisor.DEFER_RESUME;
+import static com.android.server.am.ActivityStackSupervisor.MATCH_TASK_IN_STACKS_ONLY;
+import static com.android.server.am.ActivityStackSupervisor.MATCH_TASK_IN_STACKS_OR_RECENT_TASKS;
+import static com.android.server.am.ActivityStackSupervisor.ON_TOP;
+import static com.android.server.am.ActivityStackSupervisor.PRESERVE_WINDOWS;
+import static com.android.server.am.ActivityStackSupervisor.REMOVE_FROM_RECENTS;
 import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_ALL;
-import static com.android.server.am.ActivityManagerService.ANR_TRACE_DIR;
 import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_CONFIGURATION;
 import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_FOCUS;
 import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_IMMERSIVE;
@@ -104,19 +117,8 @@ import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_SWITC
 import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_VISIBILITY;
 import static com.android.server.am.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.am.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
-import static com.android.server.am.ActivityManagerService.MY_PID;
-import static com.android.server.am.ActivityManagerService.STOCK_PM_FLAGS;
-import static com.android.server.am.ActivityManagerService.dumpStackTraces;
-import static com.android.server.am.ActivityStack.REMOVE_TASK_MODE_DESTROYING;
-import static com.android.server.am.ActivityStackSupervisor.DEFER_RESUME;
-import static com.android.server.am.ActivityStackSupervisor.MATCH_TASK_IN_STACKS_ONLY;
-import static com.android.server.am.ActivityStackSupervisor.MATCH_TASK_IN_STACKS_OR_RECENT_TASKS;
-import static com.android.server.am.ActivityStackSupervisor.ON_TOP;
-import static com.android.server.am.ActivityStackSupervisor.PRESERVE_WINDOWS;
-import static com.android.server.am.ActivityStackSupervisor.REMOVE_FROM_RECENTS;
 import static com.android.server.am.ActivityTaskManagerService.H.REPORT_TIME_TRACKER_MSG;
 import static com.android.server.am.ActivityTaskManagerService.UiHandler.DISMISS_DIALOG_UI_MSG;
-import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static com.android.server.am.TaskRecord.LOCK_TASK_AUTH_DONT_LOCK;
 import static com.android.server.am.TaskRecord.REPARENT_KEEP_STACK_AT_FRONT;
 import static com.android.server.am.TaskRecord.REPARENT_LEAVE_STACK_IN_PLACE;
@@ -330,7 +332,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     final ActivityThread mSystemThread;
     H mH;
     UiHandler mUiHandler;
-    ActivityManagerService mAm;
     ActivityManagerInternal mAmInternal;
     UriGrantsManagerInternal mUgmInternal;
     private PackageManagerInternal mPmInternal;
@@ -347,6 +348,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     WindowManagerService mWindowManager;
     private UserManagerService mUserManager;
     private AppOpsService mAppOpsService;
+    /** All active uids in the system. */
+    private final SparseArray<Integer> mActiveUids = new SparseArray<>();
+    private final SparseArray<String> mPendingTempWhitelist = new SparseArray<>();
     /** All processes currently running that might have a window organized by name. */
     final ProcessMap<WindowProcessController> mProcessNames = new ProcessMap<>();
     /** All processes we currently have running mapped by pid */
@@ -705,10 +709,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     // TODO: Will be converted to WM lock once transition is complete.
-    void setActivityManagerService(ActivityManagerService am, Looper looper,
+    void setActivityManagerService(Object globalLock, Looper looper,
             IntentFirewall intentFirewall, PendingIntentController intentController) {
-        mAm = am;
-        mGlobalLock = mAm;
+        mGlobalLock = globalLock;
         mH = new H(looper);
         mUiHandler = new UiHandler();
         mIntentFirewall = intentFirewall;
@@ -4761,7 +4764,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         for (int i = mPidMap.size() - 1; i >= 0; i--) {
-            WindowProcessController app = mPidMap.get(mPidMap.keyAt(i));
+            final int pid = mPidMap.keyAt(i);
+            final WindowProcessController app = mPidMap.get(pid);
             if (DEBUG_CONFIGURATION) {
                 Slog.v(TAG_CONFIGURATION, "Update process config of "
                         + app.mName + " to new config " + configCopy);
@@ -5455,6 +5459,18 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         return null;
     }
 
+    int getUidStateLocked(int uid) {
+        return mActiveUids.get(uid, PROCESS_STATE_NONEXISTENT);
+    }
+
+    /**
+     * @return whitelist tag for a uid from mPendingTempWhitelist, null if not currently on
+     * the whitelist
+     */
+    String getPendingTempWhitelistTagForUidLocked(int uid) {
+        return mPendingTempWhitelist.get(uid);
+    }
+
     void logAppTooSlow(WindowProcessController app, long startTime, String msg) {
         if (true || Build.IS_USER) {
             return;
@@ -6015,7 +6031,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
          * @param displayId The ID of the display showing the IME.
          */
         @Override
-        public void onImeWindowSetOnDisplay(int pid, int displayId) {
+        public void onImeWindowSetOnDisplay(final int pid, final int displayId) {
             if (pid == MY_PID || pid < 0) {
                 if (DEBUG_CONFIGURATION) {
                     Slog.w(TAG,
@@ -6025,29 +6041,28 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             }
             mH.post(() -> {
                 synchronized (mGlobalLock) {
-                    // Check if display is initialized in AM.
-                    if (!mStackSupervisor.isDisplayAdded(displayId)) {
-                        // Call come when display is not yet added or has already been removed.
+                    final ActivityDisplay activityDisplay =
+                            mStackSupervisor.getActivityDisplay(displayId);
+                    if (activityDisplay == null) {
+                        // Call might come when display is not yet added or has been removed.
                         if (DEBUG_CONFIGURATION) {
                             Slog.w(TAG, "Trying to update display configuration for non-existing "
-                                            + "displayId=" + displayId);
+                                    + "displayId=" + displayId);
                         }
                         return;
                     }
-                    final WindowProcessController imeProcess = mPidMap.get(pid);
-                    if (imeProcess == null) {
+                    final WindowProcessController process = mPidMap.get(pid);
+                    if (process == null) {
                         if (DEBUG_CONFIGURATION) {
-                            Slog.w(TAG, "Trying to update display configuration for invalid pid: "
-                                            + pid);
+                            Slog.w(TAG, "Trying to update display configuration for invalid "
+                                    + "process, pid=" + pid);
                         }
                         return;
                     }
-                    // Fetch the current override configuration of the display and set it to the
-                    // process global configuration.
-                    imeProcess.onConfigurationChanged(
-                            mStackSupervisor.getDisplayOverrideConfiguration(displayId));
+                    process.registerDisplayConfigurationListenerLocked(activityDisplay);
                 }
             });
+
         }
 
         @Override
@@ -6628,6 +6643,50 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         public int finishTopCrashedActivities(WindowProcessController crashedApp, String reason) {
             synchronized (mGlobalLock) {
                 return mStackSupervisor.finishTopCrashedActivitiesLocked(crashedApp, reason);
+            }
+        }
+
+        @Override
+        public void onUidActive(int uid, int procState) {
+            synchronized (mGlobalLock) {
+                mActiveUids.put(uid, procState);
+            }
+        }
+
+        @Override
+        public void onUidInactive(int uid) {
+            synchronized (mGlobalLock) {
+                mActiveUids.remove(uid);
+            }
+        }
+
+        @Override
+        public void onActiveUidsCleared() {
+            synchronized (mGlobalLock) {
+                mActiveUids.clear();
+            }
+        }
+
+        @Override
+        public void onUidProcStateChanged(int uid, int procState) {
+            synchronized (mGlobalLock) {
+                if (mActiveUids.get(uid) != null) {
+                    mActiveUids.put(uid, procState);
+                }
+            }
+        }
+
+        @Override
+        public void onUidAddedToPendingTempWhitelist(int uid, String tag) {
+            synchronized (mGlobalLock) {
+                mPendingTempWhitelist.put(uid, tag);
+            }
+        }
+
+        @Override
+        public void onUidRemovedFromPendingTempWhitelist(int uid) {
+            synchronized (mGlobalLock) {
+                mPendingTempWhitelist.remove(uid);
             }
         }
     }

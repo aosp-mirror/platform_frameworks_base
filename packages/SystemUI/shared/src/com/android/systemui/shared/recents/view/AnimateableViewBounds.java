@@ -27,6 +27,7 @@ import com.android.systemui.shared.recents.utilities.Utilities;
 /**
  * An outline provider that has a clip and outline that can be animated.
  */
+@Deprecated
 public class AnimateableViewBounds extends ViewOutlineProvider {
 
     private static final float MIN_ALPHA = 0.1f;

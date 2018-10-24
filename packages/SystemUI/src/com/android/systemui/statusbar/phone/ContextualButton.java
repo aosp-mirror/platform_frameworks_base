@@ -18,8 +18,10 @@ package com.android.systemui.statusbar.phone;
 
 import android.annotation.DrawableRes;
 import android.annotation.IdRes;
+import android.annotation.NonNull;
 import android.content.Context;
 import android.view.View;
+
 import com.android.systemui.statusbar.policy.KeyButtonDrawable;
 import com.android.systemui.statusbar.policy.KeyButtonView;
 
@@ -28,6 +30,9 @@ import com.android.systemui.statusbar.policy.KeyButtonView;
  * functionality.
  */
 public class ContextualButton extends ButtonDispatcher {
+
+    private ContextButtonListener mListener;
+    private ContextualButtonGroup mGroup;
 
     protected final @DrawableRes int mIconResId;
 
@@ -64,6 +69,48 @@ public class ContextualButton extends ButtonDispatcher {
             currentDrawable.clearAnimationCallbacks();
             currentDrawable.resetAnimation();
         }
+
+        if (mListener != null) {
+            mListener.onVisibilityChanged(this, visibility == View.VISIBLE);
+        }
+    }
+
+    public void setListener(ContextButtonListener listener) {
+        mListener = listener;
+    }
+
+    /**
+     * Show this button based on its priority compared to other buttons in the group. If not
+     * attached to a group it will set its own visibility to be visible.
+     * @return if visible
+     */
+    public boolean show() {
+        if (mGroup == null) {
+            setVisibility(View.VISIBLE);
+            return true;
+        }
+        return mGroup.setButtonVisiblity(getId(), true /* visible */) == View.VISIBLE;
+    }
+
+    /**
+     * Hide this button.
+     * @return if visible
+     */
+    public boolean hide() {
+        if (mGroup == null) {
+            setVisibility(View.INVISIBLE);
+            return false;
+        }
+        return mGroup.setButtonVisiblity(getId(), false /* visible */) != View.VISIBLE;
+    }
+
+    /**
+     * Called when this button was added to the group. Keep a reference to the group to show based
+     * on priority compared to other buttons.
+     * @param group the holder of all the buttons
+     */
+    void attachToGroup(@NonNull ContextualButtonGroup group) {
+        mGroup = group;
     }
 
     protected KeyButtonDrawable getNewDrawable() {
@@ -78,5 +125,9 @@ public class ContextualButton extends ButtonDispatcher {
      */
     protected Context getContext() {
         return getCurrentView().getContext();
+    }
+
+    public interface ContextButtonListener {
+        void onVisibilityChanged(ContextualButton button, boolean visible);
     }
 }

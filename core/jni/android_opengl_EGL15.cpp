@@ -456,67 +456,9 @@ exit:
 static jobject
 android_eglCreatePlatformPixmapSurface
   (JNIEnv *_env, jobject _this, jobject dpy, jobject config, jobject native_pixmap_buf, jlongArray attrib_list_ref, jint offset) {
-    jint _exception = 0;
-    const char * _exceptionType = NULL;
-    const char * _exceptionMessage = NULL;
-    jarray _array = (jarray) 0;
-    jint _bufferOffset = (jint) 0;
-    EGLSurface _returnValue = (EGLSurface) 0;
-    EGLDisplay dpy_native = (EGLDisplay) fromEGLHandle(_env, egldisplayGetHandleID, dpy);
-    EGLConfig config_native = (EGLConfig) fromEGLHandle(_env, eglconfigGetHandleID, config);
-    jint _native_pixmapRemaining;
-    void *native_pixmap = (void *) 0;
-    EGLAttrib *attrib_list_base = (EGLAttrib *) 0;
-    jint _attrib_listRemaining;
-    EGLAttrib *attrib_list = (EGLAttrib *) 0;
-
-    if (!native_pixmap_buf) {
-        _exception = 1;
-        _exceptionType = "java/lang/IllegalArgumentException";
-        _exceptionMessage = "native_pixmap == null";
-        goto exit;
-    }
-    native_pixmap = (void *)getPointer(_env, native_pixmap_buf, (jarray*)&_array, &_native_pixmapRemaining, &_bufferOffset);
-    if (!attrib_list_ref) {
-        _exception = 1;
-        _exceptionType = "java/lang/IllegalArgumentException";
-        _exceptionMessage = "attrib_list == null";
-        goto exit;
-    }
-    if (offset < 0) {
-        _exception = 1;
-        _exceptionType = "java/lang/IllegalArgumentException";
-        _exceptionMessage = "offset < 0";
-        goto exit;
-    }
-    _attrib_listRemaining = _env->GetArrayLength(attrib_list_ref) - offset;
-    attrib_list_base = (EGLAttrib *)
-        _env->GetLongArrayElements(attrib_list_ref, (jboolean *)0);
-    attrib_list = attrib_list_base + offset;
-
-    if (native_pixmap == NULL) {
-        char * _native_pixmapBase = (char *)_env->GetPrimitiveArrayCritical(_array, (jboolean *) 0);
-        native_pixmap = (void *) (_native_pixmapBase + _bufferOffset);
-    }
-    _returnValue = eglCreatePlatformPixmapSurface(
-        (EGLDisplay)dpy_native,
-        (EGLConfig)config_native,
-        (void *)native_pixmap,
-        (EGLAttrib *)attrib_list
-    );
-
-exit:
-    if (attrib_list_base) {
-        _env->ReleaseLongArrayElements(attrib_list_ref, (jlong*)attrib_list_base,
-            JNI_ABORT);
-    }
-    if (_array) {
-        releasePointer(_env, _array, native_pixmap, _exception ? JNI_FALSE : JNI_TRUE);
-    }
-    if (_exception) {
-        jniThrowException(_env, _exceptionType, _exceptionMessage);
-    }
-    return toEGLHandle(_env, eglsurfaceClass, eglsurfaceConstructor, _returnValue);
+    jniThrowException(_env, "java/lang/UnsupportedOperationException",
+        "eglCreatePlatformPixmapSurface");
+    return toEGLHandle(_env, eglsurfaceClass, eglsurfaceConstructor, (EGLSurface) 0);
 }
 
 /* EGLBoolean eglWaitSync ( EGLDisplay dpy, EGLSync sync, EGLint flags ) */
@@ -535,6 +477,71 @@ android_eglWaitSync
     return (jboolean)_returnValue;
 }
 
+/* EGLImage eglCreateImage ( EGLDisplay dpy, EGLContext context, EGLenum target, EGLClientBuffer buffer, const EGLAttrib *attrib_list ) */
+static jobject
+android_eglCreateImage
+  (JNIEnv *_env, jobject _this, jobject dpy, jobject context, jint target, jlong buffer, jlongArray attrib_list_ref, jint offset) {
+    jint _exception = 0;
+    const char * _exceptionType = NULL;
+    const char * _exceptionMessage = NULL;
+    EGLImage _returnValue = (EGLImage) 0;
+    EGLDisplay dpy_native = (EGLDisplay) fromEGLHandle(_env, egldisplayGetHandleID, dpy);
+    EGLContext context_native = (EGLContext) fromEGLHandle(_env, eglcontextGetHandleID, context);
+    EGLAttrib *attrib_list_base = (EGLAttrib *) 0;
+    jint _remaining;
+    EGLAttrib *attrib_list = (EGLAttrib *) 0;
+
+    if (!attrib_list_ref) {
+        _exception = 1;
+        _exceptionType = "java/lang/IllegalArgumentException";
+        _exceptionMessage = "attrib_list == null";
+        goto exit;
+    }
+    if (offset < 0) {
+        _exception = 1;
+        _exceptionType = "java/lang/IllegalArgumentException";
+        _exceptionMessage = "offset < 0";
+        goto exit;
+    }
+    _remaining = _env->GetArrayLength(attrib_list_ref) - offset;
+    attrib_list_base = (EGLAttrib *)
+        _env->GetLongArrayElements(attrib_list_ref, (jboolean *)0);
+    attrib_list = attrib_list_base + offset;
+
+    _returnValue = eglCreateImage(
+        (EGLDisplay)dpy_native,
+        (EGLContext)context_native,
+        (EGLenum)target,
+        (EGLClientBuffer)buffer,
+        (EGLAttrib *)attrib_list
+    );
+
+exit:
+    if (attrib_list_base) {
+        _env->ReleaseLongArrayElements(attrib_list_ref, (jlong*)attrib_list_base,
+            JNI_ABORT);
+    }
+    if (_exception) {
+        jniThrowException(_env, _exceptionType, _exceptionMessage);
+    }
+    return toEGLHandle(_env, eglimageClass, eglimageConstructor, _returnValue);
+}
+
+/* EGLBoolean eglDestroyImage ( EGLDisplay dpy, EGLImage image ) */
+static jboolean
+android_eglDestroyImage
+  (JNIEnv *_env, jobject _this, jobject dpy, jobject image) {
+    EGLBoolean _returnValue = (EGLBoolean) 0;
+    EGLDisplay dpy_native = (EGLDisplay) fromEGLHandle(_env, egldisplayGetHandleID, dpy);
+    EGLImage image_native = (EGLImage) fromEGLHandle(_env, eglimageGetHandleID, image);
+
+    _returnValue = eglDestroyImage(
+        (EGLDisplay)dpy_native,
+        (EGLImage)image_native
+    );
+    return (jboolean)_returnValue;
+}
+
 static const char *classPathName = "android/opengl/EGL15";
 
 static const JNINativeMethod methods[] = {
@@ -547,6 +554,8 @@ static const JNINativeMethod methods[] = {
 {"eglCreatePlatformWindowSurface", "(Landroid/opengl/EGLDisplay;Landroid/opengl/EGLConfig;Ljava/nio/Buffer;[JI)Landroid/opengl/EGLSurface;", (void *) android_eglCreatePlatformWindowSurface },
 {"eglCreatePlatformPixmapSurface", "(Landroid/opengl/EGLDisplay;Landroid/opengl/EGLConfig;Ljava/nio/Buffer;[JI)Landroid/opengl/EGLSurface;", (void *) android_eglCreatePlatformPixmapSurface },
 {"eglWaitSync", "(Landroid/opengl/EGLDisplay;Landroid/opengl/EGLSync;I)Z", (void *) android_eglWaitSync },
+{"eglCreateImage", "(Landroid/opengl/EGLDisplay;Landroid/opengl/EGLContext;IJ[JI)Landroid/opengl/EGLImage;", (void *) android_eglCreateImage },
+{"eglDestroyImage", "(Landroid/opengl/EGLDisplay;Landroid/opengl/EGLImage;)Z", (void *) android_eglDestroyImage },
 };
 
 int register_android_opengl_jni_EGL15(JNIEnv *_env)

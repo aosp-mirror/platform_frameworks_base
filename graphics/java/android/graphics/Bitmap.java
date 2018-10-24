@@ -31,8 +31,6 @@ import android.os.StrictMode;
 import android.os.Trace;
 import android.util.DisplayMetrics;
 import android.util.Log;
-import android.view.DisplayListCanvas;
-import android.view.RenderNode;
 import android.view.ThreadedRenderer;
 
 import dalvik.annotation.optimization.CriticalNative;
@@ -1297,7 +1295,7 @@ public final class Bitmap implements Parcelable {
             node.setLeftTopRightBottom(0, 0, width, height);
             node.setClipToBounds(false);
             node.setAllowForceDark(false);
-            final DisplayListCanvas canvas = node.start(width, height);
+            final RecordingCanvas canvas = node.start(width, height);
             if (source.getWidth() != width || source.getHeight() != height) {
                 canvas.scale(width / (float) source.getWidth(),
                         height / (float) source.getHeight());

@@ -16,6 +16,8 @@
 
 package android.view;
 
+import android.graphics.RenderNode;
+
 /**
  * Maps a View to a RenderNode's AnimationHost
  *

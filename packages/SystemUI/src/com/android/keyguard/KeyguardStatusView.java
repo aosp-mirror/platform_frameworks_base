@@ -28,7 +28,6 @@ import android.os.Handler;
 import android.os.Looper;
 import android.os.RemoteException;
 import android.os.UserHandle;
-import androidx.core.graphics.ColorUtils;
 import android.text.TextUtils;
 import android.text.format.DateFormat;
 import android.util.ArraySet;
@@ -40,6 +39,8 @@ import android.view.View;
 import android.widget.GridLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
+import androidx.core.graphics.ColorUtils;
 
 import com.android.internal.widget.LockPatternUtils;
 import com.android.internal.widget.ViewClippingUtil;
@@ -352,6 +353,7 @@ public class KeyguardStatusView extends GridLayout implements
             }
         }
         mOwnerInfo.setText(info);
+        updateDark();
     }
 
     @Override

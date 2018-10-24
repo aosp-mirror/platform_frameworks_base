@@ -787,6 +787,10 @@ public class KeyguardBottomAreaView extends FrameLayout implements View.OnClickL
         mIndicationController = keyguardIndicationController;
     }
 
+    public void showTransientIndication(int id) {
+        mIndicationController.showTransientIndication(id);
+    }
+
     public void updateLeftAffordance() {
         updateLeftAffordanceIcon();
         updateLeftPreview();

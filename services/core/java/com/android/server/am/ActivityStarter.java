@@ -883,23 +883,23 @@ class ActivityStarter {
 
         try {
             Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "logActivityStart");
-            final int callingUidProcState = mService.mAm.getUidStateLocked(callingUid);
+            final int callingUidProcState = mService.getUidStateLocked(callingUid);
             final boolean callingUidHasAnyVisibleWindow =
                     mService.mWindowManager.isAnyWindowVisibleForUid(callingUid);
             final int realCallingUidProcState = (callingUid == realCallingUid)
                     ? callingUidProcState
-                    : mService.mAm.getUidStateLocked(realCallingUid);
+                    : mService.getUidStateLocked(realCallingUid);
             final boolean realCallingUidHasAnyVisibleWindow = (callingUid == realCallingUid)
                     ? callingUidHasAnyVisibleWindow
                     : mService.mWindowManager.isAnyWindowVisibleForUid(realCallingUid);
             final String targetPackage = r.packageName;
             final int targetUid = (r.appInfo != null) ? r.appInfo.uid : -1;
-            final int targetUidProcState = mService.mAm.getUidStateLocked(targetUid);
+            final int targetUidProcState = mService.getUidStateLocked(targetUid);
             final boolean targetUidHasAnyVisibleWindow = (targetUid != -1)
                     ? mService.mWindowManager.isAnyWindowVisibleForUid(targetUid)
                     : false;
             final String targetWhitelistTag = (targetUid != -1)
-                    ? mService.mAm.getPendingTempWhitelistTagForUidLocked(targetUid)
+                    ? mService.getPendingTempWhitelistTagForUidLocked(targetUid)
                     : null;
 
             mSupervisor.getActivityMetricsLogger().logActivityStart(intent, callerApp, r,

@@ -255,7 +255,7 @@ public class ActivityManagerServiceTest {
     }
 
     private UidRecord addUidRecord(int uid) {
-        final UidRecord uidRec = new UidRecord(uid);
+        final UidRecord uidRec = new UidRecord(uid, null /* atmInternal */);
         uidRec.waitingForNetwork = true;
         uidRec.hasInternetPermission = true;
         mAms.mActiveUids.put(uid, uidRec);
@@ -274,7 +274,7 @@ public class ActivityManagerServiceTest {
         thread.startAndWait("Unexpected state for " + uidRec);
 
         uidRec.setProcState = prevState;
-        uidRec.curProcState = curState;
+        uidRec.setCurProcState(curState);
         mAms.incrementProcStateSeqAndNotifyAppsLocked();
 
         assertEquals(expectedGlobalCounter, mAms.mProcessList.mProcStateSeqCounter);
@@ -301,7 +301,7 @@ public class ActivityManagerServiceTest {
 
     @Test
     public void testBlockStateForUid() {
-        final UidRecord uidRec = new UidRecord(TEST_UID);
+        final UidRecord uidRec = new UidRecord(TEST_UID, null /* atmInternal */);
         int expectedBlockState;
 
         final String errorTemplate = "Block state should be %s, prevState: %s, curState: %s";
@@ -309,47 +309,48 @@ public class ActivityManagerServiceTest {
             return String.format(errorTemplate,
                     valueToString(ActivityManagerService.class, "NETWORK_STATE_", blockState),
                     valueToString(ActivityManager.class, "PROCESS_STATE_", uidRec.setProcState),
-                    valueToString(ActivityManager.class, "PROCESS_STATE_", uidRec.curProcState));
+                    valueToString(ActivityManager.class, "PROCESS_STATE_", uidRec.getCurProcState())
+            );
         };
 
         // No change in uid state
         uidRec.setProcState = PROCESS_STATE_RECEIVER;
-        uidRec.curProcState = PROCESS_STATE_RECEIVER;
+        uidRec.setCurProcState(PROCESS_STATE_RECEIVER);
         expectedBlockState = NETWORK_STATE_NO_CHANGE;
         assertEquals(errorMsg.apply(expectedBlockState),
                 expectedBlockState, mAms.getBlockStateForUid(uidRec));
 
         // Foreground to foreground
         uidRec.setProcState = PROCESS_STATE_FOREGROUND_SERVICE;
-        uidRec.curProcState = PROCESS_STATE_BOUND_FOREGROUND_SERVICE;
+        uidRec.setCurProcState(PROCESS_STATE_BOUND_FOREGROUND_SERVICE);
         expectedBlockState = NETWORK_STATE_NO_CHANGE;
         assertEquals(errorMsg.apply(expectedBlockState),
                 expectedBlockState, mAms.getBlockStateForUid(uidRec));
 
         // Background to background
         uidRec.setProcState = PROCESS_STATE_CACHED_ACTIVITY;
-        uidRec.curProcState = PROCESS_STATE_CACHED_EMPTY;
+        uidRec.setCurProcState(PROCESS_STATE_CACHED_EMPTY);
         expectedBlockState = NETWORK_STATE_NO_CHANGE;
         assertEquals(errorMsg.apply(expectedBlockState),
                 expectedBlockState, mAms.getBlockStateForUid(uidRec));
 
         // Background to background
         uidRec.setProcState = PROCESS_STATE_NONEXISTENT;
-        uidRec.curProcState = PROCESS_STATE_CACHED_ACTIVITY;
+        uidRec.setCurProcState(PROCESS_STATE_CACHED_ACTIVITY);
         expectedBlockState = NETWORK_STATE_NO_CHANGE;
         assertEquals(errorMsg.apply(expectedBlockState),
                 expectedBlockState, mAms.getBlockStateForUid(uidRec));
 
         // Background to foreground
         uidRec.setProcState = PROCESS_STATE_SERVICE;
-        uidRec.curProcState = PROCESS_STATE_FOREGROUND_SERVICE;
+        uidRec.setCurProcState(PROCESS_STATE_FOREGROUND_SERVICE);
         expectedBlockState = NETWORK_STATE_BLOCK;
         assertEquals(errorMsg.apply(expectedBlockState),
                 expectedBlockState, mAms.getBlockStateForUid(uidRec));
 
         // Foreground to background
         uidRec.setProcState = PROCESS_STATE_TOP;
-        uidRec.curProcState = PROCESS_STATE_LAST_ACTIVITY;
+        uidRec.setCurProcState(PROCESS_STATE_LAST_ACTIVITY);
         expectedBlockState = NETWORK_STATE_UNBLOCK;
         assertEquals(errorMsg.apply(expectedBlockState),
                 expectedBlockState, mAms.getBlockStateForUid(uidRec));
@@ -593,10 +594,10 @@ public class ActivityManagerServiceTest {
                 assertNotNull("validateUidRecord should not be null since the change is neither "
                         + "CHANGE_GONE nor CHANGE_GONE_IDLE", validateUidRecord);
                 assertEquals("processState: " + item.processState + " curProcState: "
-                        + validateUidRecord.curProcState + " should have been equal",
-                        item.processState, validateUidRecord.curProcState);
+                        + validateUidRecord.getCurProcState() + " should have been equal",
+                        item.processState, validateUidRecord.getCurProcState());
                 assertEquals("processState: " + item.processState + " setProcState: "
-                        + validateUidRecord.curProcState + " should have been equal",
+                        + validateUidRecord.getCurProcState() + " should have been equal",
                         item.processState, validateUidRecord.setProcState);
                 if (item.change == UidRecord.CHANGE_IDLE) {
                     assertTrue("UidRecord.idle should be updated to true for CHANGE_IDLE",
@@ -626,7 +627,7 @@ public class ActivityManagerServiceTest {
 
     @Test
     public void testEnqueueUidChangeLocked_procStateSeqUpdated() {
-        final UidRecord uidRecord = new UidRecord(TEST_UID);
+        final UidRecord uidRecord = new UidRecord(TEST_UID, null /* atmInternal */);
         uidRecord.curProcStateSeq = TEST_PROC_STATE_SEQ1;
 
         // Verify with no pending changes for TEST_UID.
@@ -672,7 +673,7 @@ public class ActivityManagerServiceTest {
     @MediumTest
     @Test
     public void testEnqueueUidChangeLocked_dispatchUidsChanged() {
-        final UidRecord uidRecord = new UidRecord(TEST_UID);
+        final UidRecord uidRecord = new UidRecord(TEST_UID, null /* atmInternal */);
         final int expectedProcState = PROCESS_STATE_SERVICE;
         uidRecord.setProcState = expectedProcState;
         uidRecord.curProcStateSeq = TEST_PROC_STATE_SEQ1;
@@ -744,7 +745,7 @@ public class ActivityManagerServiceTest {
     private void verifyWaitingForNetworkStateUpdate(long curProcStateSeq,
             long lastDispatchedProcStateSeq, long lastNetworkUpdatedProcStateSeq,
             final long procStateSeqToWait, boolean expectWait) throws Exception {
-        final UidRecord record = new UidRecord(Process.myUid());
+        final UidRecord record = new UidRecord(Process.myUid(), null /* atmInternal */);
         record.curProcStateSeq = curProcStateSeq;
         record.lastDispatchedProcStateSeq = lastDispatchedProcStateSeq;
         record.lastNetworkUpdatedProcStateSeq = lastNetworkUpdatedProcStateSeq;

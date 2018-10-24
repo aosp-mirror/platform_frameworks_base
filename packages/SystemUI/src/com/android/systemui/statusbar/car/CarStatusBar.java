@@ -525,12 +525,6 @@ public class CarStatusBar extends StatusBar implements
     }
 
     @Override
-    public void updateMediaMetaData(boolean metaDataChanged, boolean allowEnterAnimation) {
-        // Do nothing, we don't want to display media art in the lock screen for a car.
-    }
-
-
-    @Override
     public void animateExpandNotificationsPanel() {
         // Because space is usually constrained in the auto use-case, there should not be a
         // pinned notification when the shade has been expanded. Ensure this by removing all heads-
