@@ -65,7 +65,6 @@ public class KeyguardStatusView extends GridLayout implements
 
     private TextView mLogoutView;
     private KeyguardClockSwitch mClockView;
-    private View mClockSeparator;
     private TextView mOwnerInfo;
     private KeyguardSliceView mKeyguardSlice;
     private Runnable mPendingMarqueeStart;
@@ -76,8 +75,8 @@ public class KeyguardStatusView extends GridLayout implements
     private boolean mWasPulsing;
     private float mDarkAmount = 0;
     private int mTextColor;
-    private float mWidgetPadding;
     private int mLastLayoutHeight;
+    private int mSmallClockPadding;
 
     private KeyguardUpdateMonitorCallback mInfoCallback = new KeyguardUpdateMonitorCallback() {
 
@@ -176,14 +175,12 @@ public class KeyguardStatusView extends GridLayout implements
         }
         mOwnerInfo = findViewById(R.id.owner_info);
         mKeyguardSlice = findViewById(R.id.keyguard_status_area);
-        mClockSeparator = findViewById(R.id.clock_separator);
         mVisibleInDoze = Sets.newArraySet(mClockView, mKeyguardSlice);
         mTextColor = mClockView.getCurrentTextColor();
 
         int clockStroke = getResources().getDimensionPixelSize(R.dimen.widget_small_font_stroke);
         mClockView.getPaint().setStrokeWidth(clockStroke);
         mClockView.addOnLayoutChangeListener(this);
-        mClockSeparator.addOnLayoutChangeListener(this);
         mKeyguardSlice.setContentChangeListener(this::onSliceContentChanged);
         onSliceContentChanged();
 
@@ -200,26 +197,18 @@ public class KeyguardStatusView extends GridLayout implements
     }
 
     /**
-     * Moves clock and separator, adjusting margins when slice content changes.
+     * Moves clock, adjusting margins when slice content changes.
      */
     private void onSliceContentChanged() {
         boolean smallClock = mKeyguardSlice.hasHeader() || mPulsing;
-        float clockScale = smallClock ? mSmallClockScale : 1;
-
         RelativeLayout.LayoutParams layoutParams =
                 (RelativeLayout.LayoutParams) mClockView.getLayoutParams();
-        int height = mClockView.getHeight();
-        layoutParams.bottomMargin = (int) -(height - (clockScale * height));
+        layoutParams.bottomMargin = smallClock ? mSmallClockPadding : 0;
         mClockView.setLayoutParams(layoutParams);
-
-        layoutParams = (RelativeLayout.LayoutParams) mClockSeparator.getLayoutParams();
-        layoutParams.topMargin = smallClock ? (int) mWidgetPadding : 0;
-        layoutParams.bottomMargin = layoutParams.topMargin;
-        mClockSeparator.setLayoutParams(layoutParams);
     }
 
     /**
-     * Animate clock and its separator when necessary.
+     * Animate clock when necessary.
      */
     @Override
     public void onLayoutChange(View view, int left, int top, int right, int bottom,
@@ -259,25 +248,6 @@ public class KeyguardStatusView extends GridLayout implements
                 mClockView.setStyle(style);
                 mClockView.invalidate();
             }
-        } else if (view == mClockSeparator) {
-            boolean hasSeparator = hasHeader && !mPulsing;
-            float alpha = hasSeparator ? 1 : 0;
-            mClockSeparator.animate().cancel();
-            if (shouldAnimate) {
-                boolean isAwake = mDarkAmount != 0;
-                mClockSeparator.setY(oldTop + heightOffset);
-                mClockSeparator.animate()
-                        .setInterpolator(Interpolators.FAST_OUT_SLOW_IN)
-                        .setDuration(duration)
-                        .setListener(isAwake ? null : new KeepAwakeAnimationListener(getContext()))
-                        .setStartDelay(delay)
-                        .y(top)
-                        .alpha(alpha)
-                        .start();
-            } else {
-                mClockSeparator.setY(top);
-                mClockSeparator.setAlpha(alpha);
-            }
         }
     }
 
@@ -292,7 +262,8 @@ public class KeyguardStatusView extends GridLayout implements
 
     @Override
     public void onDensityOrFontScaleChanged() {
-        mWidgetPadding = getResources().getDimension(R.dimen.widget_vertical_padding);
+        mSmallClockPadding = getResources()
+                .getDimensionPixelSize(R.dimen.widget_small_clock_padding);
         if (mClockView != null) {
             mClockView.setTextSize(TypedValue.COMPLEX_UNIT_PX,
                     getResources().getDimensionPixelSize(R.dimen.widget_big_font_size));
@@ -436,7 +407,6 @@ public class KeyguardStatusView extends GridLayout implements
         updateDozeVisibleViews();
         mKeyguardSlice.setDarkAmount(mDarkAmount);
         mClockView.setTextColor(blendedTextColor);
-        mClockSeparator.setBackgroundColor(blendedTextColor);
     }
 
     private void layoutOwnerInfo() {
