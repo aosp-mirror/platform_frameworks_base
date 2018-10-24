@@ -31,7 +31,10 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.logging.ConsoleHandler;
+import java.util.logging.Formatter;
 import java.util.logging.Level;
+import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
 public class TestDrive {
@@ -68,6 +71,12 @@ public class TestDrive {
         mIsPushedAtom = atomId < PULL_ATOM_START;
 
         TestDrive testDrive = new TestDrive();
+        TestDriveFormatter formatter = new TestDriveFormatter();
+        ConsoleHandler handler = new ConsoleHandler();
+        handler.setFormatter(formatter);
+        logger.addHandler(handler);
+        logger.setUseParentHandlers(false);
+
         try {
             StatsdConfig config = testDrive.createConfig(atomId);
             if (config == null) {
@@ -79,7 +88,8 @@ public class TestDrive {
             logger.info(config.toString());
             if (mIsPushedAtom) {
                 logger.info(
-                        "Now please play with the device to trigger the event. All events should be dumped after 1 min ...");
+                        "Now please play with the device to trigger the event. All events should "
+                                + "be dumped after 1 min ...");
                 Thread.sleep(60_000);
             } else {
                 // wait for 2 min
@@ -140,7 +150,7 @@ public class TestDrive {
 
         // Check result
         if (process.waitFor() == 0) {
-            logger.info("Success!");
+            logger.fine("Success!");
         } else {
             // Abnormal termination: Log command parameters and output and throw ExecutionException
             logger.log(Level.SEVERE, out.toString());
@@ -235,8 +245,8 @@ public class TestDrive {
         ConfigMetricsReport report = reportList.getReports(reportList.getReportsCount() - 1);
         // Really should be only one metric.
         if (report.getMetricsCount() != 1) {
-            logger.log(Level.SEVERE, "Only one report metric expected, got "
-                    + report.getMetricsCount());
+            logger.log(Level.SEVERE,
+                    "Only one report metric expected, got " + report.getMetricsCount());
             return;
         }
 
@@ -283,4 +293,10 @@ public class TestDrive {
                     + "allowed_log_source: \"AID_BLUETOOTH\"\n"
                     + "\n"
                     + "hash_strings_in_metric_report: false";
+
+    public static class TestDriveFormatter extends Formatter {
+        public String format(LogRecord record) {
+            return record.getMessage() + "\n";
+        }
+    }
 }
