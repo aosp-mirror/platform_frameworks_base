@@ -36,4 +36,7 @@ message NotificationChannelGroupProto {
     optional string description = 3;
     optional bool is_blocked = 4;
     repeated NotificationChannelProto channels = 5;
+    // Default is true.
+    // Allows the notifications to appear outside of the shade in floating windows
+    optional bool allow_app_overlay = 6;
 }

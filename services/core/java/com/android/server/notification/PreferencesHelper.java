@@ -515,8 +515,20 @@ public class PreferencesHelper implements RankingConfig {
         if (oldGroup != null) {
             group.setChannels(oldGroup.getChannels());
 
+            // apps can't update the blocked status or app overlay permission
             if (fromTargetApp) {
                 group.setBlocked(oldGroup.isBlocked());
+                group.setAllowAppOverlay(oldGroup.canOverlayApps());
+                group.unlockFields(group.getUserLockedFields());
+                group.lockFields(oldGroup.getUserLockedFields());
+            } else {
+                // but the system can
+                if (group.isBlocked() != oldGroup.isBlocked()) {
+                    group.lockFields(NotificationChannelGroup.USER_LOCKED_BLOCKED_STATE);
+                }
+                if (group.canOverlayApps() != oldGroup.canOverlayApps()) {
+                    group.lockFields(NotificationChannelGroup.USER_LOCKED_ALLOW_APP_OVERLAY);
+                }
             }
         }
         r.groups.put(group.getId(), group);
@@ -1070,6 +1082,9 @@ public class PreferencesHelper implements RankingConfig {
         }
         if (original.canShowBadge() != update.canShowBadge()) {
             update.lockFields(NotificationChannel.USER_LOCKED_SHOW_BADGE);
+        }
+        if (original.isAppOverlayAllowed() != update.isAppOverlayAllowed()) {
+            update.lockFields(NotificationChannel.USER_LOCKED_ALLOW_APP_OVERLAY);
         }
     }
 

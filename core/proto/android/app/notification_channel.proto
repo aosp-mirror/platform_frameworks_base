@@ -57,4 +57,7 @@ message NotificationChannelProto {
     // If this is a blockable system notification channel.
     optional bool is_blockable_system = 17;
     optional bool fg_service_shown = 18;
+    // Default is true.
+    // Allows the notifications to appear outside of the shade in floating windows
+    optional bool allow_app_overlay = 19;
 }
