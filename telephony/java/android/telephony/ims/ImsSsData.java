@@ -16,9 +16,11 @@
 package android.telephony.ims;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.telephony.Rlog;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
@@ -30,6 +32,8 @@ import java.lang.annotation.RetentionPolicy;
  */
 @SystemApi
 public final class ImsSsData implements Parcelable {
+
+    private static final String TAG = ImsSsData.class.getCanonicalName();
 
     // Supplementary Service Type
     // Call Forwarding
@@ -76,30 +80,85 @@ public final class ImsSsData implements Parcelable {
     public static final int SS_SMS_SERVICES = 4;
     public static final int SS_ALL_TELESERVICES_EXCEPT_SMS = 5;
 
-    // Service Class of Supplementary Service
-    // See 27.007 +CCFC or +CLCK
-    /** @hide */
-    public static final int SERVICE_CLASS_NONE = 0; // no user input
-    /** @hide */
-    public static final int SERVICE_CLASS_VOICE = 1;
-    /** @hide */
-    public static final int SERVICE_CLASS_DATA = (1 << 1);
-    /** @hide */
-    public static final int SERVICE_CLASS_FAX = (1 << 2);
-    /** @hide */
-    public static final int SERVICE_CLASS_SMS = (1 << 3);
-    /** @hide */
-    public static final int SERVICE_CLASS_DATA_SYNC = (1 << 4);
-    /** @hide */
-    public static final int SERVICE_CLASS_DATA_ASYNC = (1 << 5);
-    /** @hide */
-    public static final int SERVICE_CLASS_PACKET = (1 << 6);
-    /** @hide */
-    public static final int SERVICE_CLASS_PAD = (1 << 7);
+    /**
+     * No call forwarding service class defined.
+     *
+     * See TS 27.007 7.11 (+CCFC) and 7.4 (CLCK)
+     */
+    public static final int SERVICE_CLASS_NONE = 0;
 
     /**
-     * Result code used if the operation was successful. See {@link #result}.
-     * @hide
+     * Service class flag for voice telephony.
+     *
+     * See TS 27.007 7.11 (+CCFC) and 7.4 (CLCK)
+     */
+    public static final int SERVICE_CLASS_VOICE = 1;
+
+    /**
+     * Service class flag for all data bearers (including
+     * {@link #SERVICE_CLASS_DATA_CIRCUIT_SYNC,
+     * {@link #SERVICE_CLASS_DATA_CIRCUIT_ASYNC}, {@link #SERVICE_CLASS_PACKET_ACCESS},
+     * {@link #SERVICE_CLASS_PAD}}) if supported by the carrier.
+     *
+     * See TS 27.007 7.11 (+CCFC) and 7.4 (CLCK)
+     */
+    public static final int SERVICE_CLASS_DATA = (1 << 1);
+    /**
+     * Service class flag for fax services.
+     *
+     * See TS 27.007 7.11 (+CCFC) and 7.4 (CLCK)
+     */
+    public static final int SERVICE_CLASS_FAX = (1 << 2);
+    /**
+     * Service class flag for SMS services.
+     *
+     * See TS 27.007 7.11 (+CCFC) and 7.4 (CLCK)
+     */
+    public static final int SERVICE_CLASS_SMS = (1 << 3);
+    /**
+     * Service class flag for the synchronous bearer service.
+     *
+     * See TS 27.007 7.11 (+CCFC) and 7.4 (CLCK)
+     */
+    public static final int SERVICE_CLASS_DATA_CIRCUIT_SYNC = (1 << 4);
+
+    /**
+     * Service class flag for the asynchronous bearer service.
+     *
+     * See TS 27.007 7.11 (+CCFC) and 7.4 (CLCK)
+     */
+    public static final int SERVICE_CLASS_DATA_CIRCUIT_ASYNC = (1 << 5);
+
+    /**
+     * Service class flag for the packet access bearer service.
+     *
+     * See TS 27.007 7.11 (+CCFC) and 7.4 (CLCK)
+     */
+    public static final int SERVICE_CLASS_DATA_PACKET_ACCESS = (1 << 6);
+
+    /**
+     * Service class flag for the Packet Assembly/Disassembly bearer service.
+     *
+     * See TS 27.007 7.11 (+CCFC) and 7.4 (CLCK)
+     */
+    public static final int SERVICE_CLASS_DATA_PAD = (1 << 7);
+
+    /**@hide*/
+    @IntDef(flag = true, prefix = {"SERVICE_CLASS_"}, value = {
+            SERVICE_CLASS_NONE,
+            SERVICE_CLASS_VOICE,
+            SERVICE_CLASS_DATA,
+            SERVICE_CLASS_FAX,
+            SERVICE_CLASS_SMS,
+            SERVICE_CLASS_DATA_CIRCUIT_SYNC,
+            SERVICE_CLASS_DATA_CIRCUIT_ASYNC,
+            SERVICE_CLASS_DATA_PACKET_ACCESS,
+            SERVICE_CLASS_DATA_PAD})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ServiceClassFlags{}
+
+    /**
+     * Result code used if the operation was successful. See {@link #getResult()}.
      */
     public static final int RESULT_SUCCESS = 0;
 
@@ -139,97 +198,58 @@ public final class ImsSsData implements Parcelable {
             SERVICE_CLASS_DATA,
             SERVICE_CLASS_FAX,
             SERVICE_CLASS_SMS,
-            SERVICE_CLASS_DATA_SYNC,
-            SERVICE_CLASS_DATA_ASYNC,
-            SERVICE_CLASS_PACKET,
-            SERVICE_CLASS_PAD
+            SERVICE_CLASS_DATA_CIRCUIT_SYNC,
+            SERVICE_CLASS_DATA_CIRCUIT_ASYNC,
+            SERVICE_CLASS_DATA_PACKET_ACCESS,
+            SERVICE_CLASS_DATA_PAD
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface ServiceClass{}
 
     /**
-     * The Service type of this Supplementary service. Valid values include:
-     *     SS_CFU,
-     *     SS_CF_BUSY,
-     *     SS_CF_NO_REPLY,
-     *     SS_CF_NOT_REACHABLE,
-     *     SS_CF_ALL,
-     *     SS_CF_ALL_CONDITIONAL,
-     *     SS_CFUT,
-     *     SS_CLIP,
-     *     SS_CLIR,
-     *     SS_COLP,
-     *     SS_COLR,
-     *     SS_CNAP,
-     *     SS_WAIT,
-     *     SS_BAOC,
-     *     SS_BAOIC,
-     *     SS_BAOIC_EXC_HOME,
-     *     SS_BAIC,
-     *     SS_BAIC_ROAMING,
-     *     SS_ALL_BARRING,
-     *     SS_OUTGOING_BARRING,
-     *     SS_INCOMING_BARRING,
-     *     SS_INCOMING_BARRING_DN,
-     *     SS_INCOMING_BARRING_ANONYMOUS
-     *
+     * The Service type of this Supplementary service.
      * @hide
      */
-    // TODO: Make final, do not modify this field directly!
-    public int serviceType;
+    public final @ServiceType int serviceType;
 
     /**
-     * Supplementary Service request Type. Valid values are:
-     *     SS_ACTIVATION,
-     *     SS_DEACTIVATION,
-     *     SS_INTERROGATION,
-     *     SS_REGISTRATION,
-     *     SS_ERASURE
-     *
+     * Supplementary Service request Type:
+     *     {@link #SS_ACTIVATION),
+     *     {@link #SS_DEACTIVATION},
+     *     {@link #SS_INTERROGATION},
+     *     {@link #SS_REGISTRATION},
+     *     {@link #SS_ERASURE}
      * @hide
      */
-    // TODO: Make final, do not modify this field directly!
-    public int requestType;
+    public final int requestType;
 
     /**
      * Supplementary Service teleservice type:
-     *     SS_TELESERVICE_ALL_TELE_AND_BEARER,
-     *     SS_TELESERVICE_ALL_TELESEVICES,
-     *     SS_TELESERVICE_TELEPHONY,
-     *     SS_TELESERVICE_ALL_DATA,
-     *     SS_TELESERVICE_SMS,
-     *     SS_TELESERVICE_ALL_TELESERVICES_EXCEPT_SMS
+     *     {@link #SS_ALL_TELE_AND_BEARER_SERVICES},
+     *     {@link #SS_ALL_TELESEVICES},
+     *     {@link #SS_TELEPHONY},
+     *     {@link #SS_ALL_DATA_TELESERVICES},
+     *     {@link #SS_SMS_SERVICES},
+     *     {@link #SS_ALL_TELESERVICES_EXCEPT_SMS}
      *
      * @hide
      */
-    // TODO: Make this param final! Do not try to modify this param directly.
-    public int teleserviceType;
+    public final int teleserviceType;
 
     /**
-     * Supplementary Service service class. Valid values are:
-     *     SERVICE_CLASS_NONE,
-     *     SERVICE_CLASS_VOICE,
-     *     SERVICE_CLASS_DATA,
-     *     SERVICE_CLASS_FAX,
-     *     SERVICE_CLASS_SMS,
-     *     SERVICE_CLASS_DATA_SYNC,
-     *     SERVICE_CLASS_DATA_ASYNC,
-     *     SERVICE_CLASS_PACKET,
-     *     SERVICE_CLASS_PAD
+     * Supplementary Service service class.
      *
      * @hide
      */
-    // TODO: Make this param final! Do not try to modify this param directly.
-    public int serviceClass;
+    public final @ServiceClass int serviceClass;
 
     /**
      * Result of Supplementary Service operation. Valid values are:
-     *     RESULT_SUCCESS if the result is success, or
+     *     {@link #RESULT_SUCCESS} if the result is success, or
      *     ImsReasonInfo code if the result is a failure.
      *
      * @hide
      */
-    // TODO: Make this param final! Do not try to modify this param directly.
     public final int result;
 
     private int[] mSsInfo;
@@ -237,44 +257,81 @@ public final class ImsSsData implements Parcelable {
     private ImsSsInfo[] mImsSsInfo;
 
     /**
+     * Builder for optional ImsSsData parameters.
+     */
+    public static class Builder {
+        private ImsSsData mImsSsData;
+
+        /**
+         * Generate IMS Supplementary Service information.
+         * @param serviceType The Supplementary Service type.
+         * @param requestType Supplementary Service request Type:
+         *     {@link #SS_ACTIVATION},
+         *     {@link #SS_DEACTIVATION},
+         *     {@link #SS_INTERROGATION},
+         *     {@link #SS_REGISTRATION},
+         *     {@link #SS_ERASURE}
+         * @param teleserviceType Supplementary Service teleservice type:
+         *     {@link #SS_ALL_TELE_AND_BEARER_SERVICES},
+         *     {@link #SS_ALL_TELESEVICES},
+         *     {@link #SS_TELEPHONY},
+         *     {@link #SS_ALL_DATA_TELESERVICES},
+         *     {@link #SS_SMS_SERVICES},
+         *     {@link #SS_ALL_TELESERVICES_EXCEPT_SMS}
+         * @param serviceClass Supplementary Service service class. See See 27.007 +CCFC or +CLCK.
+         * @param result Result of Supplementary Service operation. Valid values are 0 if the result
+         *               is success, or {@link ImsReasonInfo} code if the result is a failure.
+         * @return this Builder instance for further constructing.
+         * @see #build()
+         */
+        public Builder(@ServiceType int serviceType, int requestType, int teleserviceType,
+                @ServiceClass int serviceClass, int result) {
+            mImsSsData = new ImsSsData(serviceType, requestType, teleserviceType, serviceClass,
+                    result);
+        }
+
+        /**
+         * Set the array of {@link ImsSsInfo}s that are associated with this supplementary service
+         * data.
+         */
+        public Builder setSuppServiceInfo(@NonNull ImsSsInfo[] imsSsInfos) {
+            mImsSsData.mImsSsInfo = imsSsInfos;
+            return this;
+        }
+
+        /**
+         * Set the array of {@link ImsCallForwardInfo}s that are associated with this supplementary
+         * service data.
+         */
+        public Builder setCallForwardingInfo(@NonNull ImsCallForwardInfo[] imsCallForwardInfos) {
+            mImsSsData.mCfInfo = imsCallForwardInfos;
+            return this;
+        }
+
+        /**
+         * @return an {@link ImsSsData} containing optional parameters.
+         */
+        public ImsSsData build() {
+            return mImsSsData;
+        }
+    }
+
+    /**
      * Generate IMS Supplementary Service information.
-     * @param serviceType The Supplementary Service type. Valid entries:
-     *     SS_CFU,
-     *     SS_CF_BUSY,
-     *     SS_CF_NO_REPLY,
-     *     SS_CF_NOT_REACHABLE,
-     *     SS_CF_ALL,
-     *     SS_CF_ALL_CONDITIONAL,
-     *     SS_CFUT,
-     *     SS_CLIP,
-     *     SS_CLIR,
-     *     SS_COLP,
-     *     SS_COLR,
-     *     SS_CNAP,
-     *     SS_WAIT,
-     *     SS_BAOC,
-     *     SS_BAOIC,
-     *     SS_BAOIC_EXC_HOME,
-     *     SS_BAIC,
-     *     SS_BAIC_ROAMING,
-     *     SS_ALL_BARRING,
-     *     SS_OUTGOING_BARRING,
-     *     SS_INCOMING_BARRING,
-     *     SS_INCOMING_BARRING_DN,
-     *     SS_INCOMING_BARRING_ANONYMOUS
+     * @param serviceType The Supplementary Service type.
      * @param requestType Supplementary Service request Type. Valid values are:
-     *     SS_ACTIVATION,
-     *     SS_DEACTIVATION,
-     *     SS_INTERROGATION,
-     *     SS_REGISTRATION,
-     *     SS_ERASURE
+     *     {@link #SS_ACTIVATION},
+     *     {@link #SS_DEACTIVATION},
+     *     {@link #SS_INTERROGATION},
+     *     {@link #SS_REGISTRATION},
+     *     {@link #SS_ERASURE}
      * @param teleserviceType Supplementary Service teleservice type:
-     *     SS_TELESERVICE_ALL_TELE_AND_BEARER,
-     *     SS_TELESERVICE_ALL_TELESEVICES,
-     *     SS_TELESERVICE_TELEPHONY,
-     *     SS_TELESERVICE_ALL_DATA,
-     *     SS_TELESERVICE_SMS,
-     *     SS_TELESERVICE_ALL_TELESERVICES_EXCEPT_SMS
+     *     {@link #SS_ALL_TELE_AND_BEARER_SERVICES},
+     *     {@link #SS_ALL_TELESEVICES},
+     *     {@link #SS_TELEPHONY},
+     *     {@link #SS_ALL_DATA_TELESERVICES},
+     *     {@link #SS_SMS_SERVICES},
+     *     {@link #SS_ALL_TELESERVICES_EXCEPT_SMS}
      * @param serviceClass Supplementary Service service class. See See 27.007 +CCFC or +CLCK.
      * @param result Result of Supplementary Service operation. Valid values are 0 if the result is
      *               success, or ImsReasonInfo code if the result is a failure.
@@ -313,11 +370,11 @@ public final class ImsSsData implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel out, int flags) {
-        out.writeInt(serviceType);
-        out.writeInt(requestType);
-        out.writeInt(teleserviceType);
-        out.writeInt(serviceClass);
-        out.writeInt(result);
+        out.writeInt(getServiceType());
+        out.writeInt(getRequestType());
+        out.writeInt(getTeleserviceType());
+        out.writeInt(getServiceClass());
+        out.writeInt(getResult());
         out.writeIntArray(mSsInfo);
         out.writeParcelableArray(mCfInfo, 0);
         out.writeParcelableArray(mImsSsInfo, 0);
@@ -333,9 +390,9 @@ public final class ImsSsData implements Parcelable {
      * @hide
      */
     public boolean isTypeCF() {
-        return (serviceType == SS_CFU || serviceType == SS_CF_BUSY ||
-              serviceType == SS_CF_NO_REPLY || serviceType == SS_CF_NOT_REACHABLE ||
-              serviceType == SS_CF_ALL || serviceType == SS_CF_ALL_CONDITIONAL);
+        return (getServiceType() == SS_CFU || getServiceType() == SS_CF_BUSY
+                || getServiceType() == SS_CF_NO_REPLY || getServiceType() == SS_CF_NOT_REACHABLE
+                || getServiceType() == SS_CF_ALL || getServiceType() == SS_CF_ALL_CONDITIONAL);
     }
 
     public boolean isTypeCf() {
@@ -343,7 +400,7 @@ public final class ImsSsData implements Parcelable {
     }
 
     public boolean isTypeUnConditional() {
-        return (serviceType == SS_CFU || serviceType == SS_CF_ALL);
+        return (getServiceType() == SS_CFU || getServiceType() == SS_CF_ALL);
     }
 
     /**
@@ -351,7 +408,7 @@ public final class ImsSsData implements Parcelable {
      * @hide
      */
     public boolean isTypeCW() {
-        return (serviceType == SS_WAIT);
+        return (getServiceType() == SS_WAIT);
     }
 
     public boolean isTypeCw() {
@@ -359,35 +416,84 @@ public final class ImsSsData implements Parcelable {
     }
 
     public boolean isTypeClip() {
-        return (serviceType == SS_CLIP);
+        return (getServiceType() == SS_CLIP);
     }
 
     public boolean isTypeColr() {
-        return (serviceType == SS_COLR);
+        return (getServiceType() == SS_COLR);
     }
 
     public boolean isTypeColp() {
-        return (serviceType == SS_COLP);
+        return (getServiceType() == SS_COLP);
     }
 
     public boolean isTypeClir() {
-        return (serviceType == SS_CLIR);
+        return (getServiceType() == SS_CLIR);
     }
 
     public boolean isTypeIcb() {
-        return (serviceType == SS_INCOMING_BARRING_DN ||
-                serviceType == SS_INCOMING_BARRING_ANONYMOUS);
+        return (getServiceType() == SS_INCOMING_BARRING_DN
+                || getServiceType() == SS_INCOMING_BARRING_ANONYMOUS);
     }
 
     public boolean isTypeBarring() {
-        return (serviceType == SS_BAOC || serviceType == SS_BAOIC ||
-              serviceType == SS_BAOIC_EXC_HOME || serviceType == SS_BAIC ||
-              serviceType == SS_BAIC_ROAMING || serviceType == SS_ALL_BARRING ||
-              serviceType == SS_OUTGOING_BARRING || serviceType == SS_INCOMING_BARRING);
+        return (getServiceType() == SS_BAOC || getServiceType() == SS_BAOIC
+                || getServiceType() == SS_BAOIC_EXC_HOME || getServiceType() == SS_BAIC
+                || getServiceType() == SS_BAIC_ROAMING || getServiceType() == SS_ALL_BARRING
+                || getServiceType() == SS_OUTGOING_BARRING
+                || getServiceType() == SS_INCOMING_BARRING);
     }
 
     public boolean isTypeInterrogation() {
-        return (serviceType == SS_INTERROGATION);
+        return (getServiceType() == SS_INTERROGATION);
+    }
+
+    /**
+     * Supplementary Service request Type:
+     *     {@link #SS_ACTIVATION),
+     *     {@link #SS_DEACTIVATION},
+     *     {@link #SS_INTERROGATION},
+     *     {@link #SS_REGISTRATION},
+     *     {@link #SS_ERASURE}
+     */
+    public int getRequestType() {
+        return requestType;
+    }
+
+    /**
+     * The Service type of this Supplementary service.
+     */
+    public @ServiceType int getServiceType() {
+        return serviceType;
+    }
+
+    /**
+     * Supplementary Service teleservice type:
+     *     {@link #SS_ALL_TELE_AND_BEARER_SERVICES},
+     *     {@link #SS_ALL_TELESEVICES},
+     *     {@link #SS_TELEPHONY},
+     *     {@link #SS_ALL_DATA_TELESERVICES},
+     *     {@link #SS_SMS_SERVICES},
+     *     {@link #SS_ALL_TELESERVICES_EXCEPT_SMS}
+     */
+    public int getTeleserviceType() {
+        return teleserviceType;
+    }
+
+    /**
+     * Supplementary Service service class.
+     */
+    public @ServiceClass int getServiceClass() {
+        return serviceClass;
+    }
+
+    /**
+     * Result of Supplementary Service operation. Valid values are:
+     *     {@link #RESULT_SUCCESS} if the result is success, or
+     *     {@link ImsReasonInfo} CODE_* code if the result is a failure.
+     */
+    public int getResult() {
+        return result;
     }
 
     /** @hide */
@@ -406,43 +512,68 @@ public final class ImsSsData implements Parcelable {
     }
 
     /**
-     * This field will be null for RequestType SS_INTERROGATION
-     * and ServiceType SS_CF_*, SS_INCOMING_BARRING_DN,
-     * SS_INCOMING_BARRING_ANONYMOUS.
+     * This is a compatibility function to transform the public API to a form that can be processed
+     * by telephony.
      *
      * @hide
      */
-    public int[] getSuppServiceInfo() {
-        return mSsInfo;
+    //TODO: Refactor Telephony to use well defined classes instead of an int[] to process SS.
+    public int[] getSuppServiceInfoCompat() {
+        if (mSsInfo != null) {
+            // Something has set the ssInfo using hidden APIs, so for compatibility just return that
+            // structure directly.
+            return mSsInfo;
+        }
+
+
+        int[] result = new int[2];
+        if (mImsSsInfo == null || mImsSsInfo.length == 0) {
+            Rlog.e(TAG, "getSuppServiceInfoCompat: Could not parse mImsSsInfo, returning empty "
+                    + "int[]");
+            return result;
+        }
+
+        // Convert ImsSsInfo into a form that telephony can read (as per 3GPP 27.007)
+        // CLIR (section 7.7)
+        if (isTypeClir()) {
+            // Assume there will only be one ImsSsInfo.
+            // contains {"n","m"} parameters
+            result[0] = mImsSsInfo[0].getClirOutgoingState();
+            result[1] = mImsSsInfo[0].getClirInterrogationStatus();
+            return result;
+        }
+        // COLR 7.31
+        if (isTypeColr()) {
+            result[0] = mImsSsInfo[0].getProvisionStatus();
+        }
+        // Facility Lock CLCK 7.4 (for call barring), CLIP 7.6, COLP 7.8, as well as any
+        // other result, just return the status for the "n" parameter and provisioning status for
+        // "m" as the default.
+        result[0] = mImsSsInfo[0].getStatus();
+        result[1] = mImsSsInfo[0].getProvisionStatus();
+        return result;
     }
 
     /**
-     * Valid only for ServiceTypes
-     *  - SS_INCOMING_BARRING_DN and
-     *  - ServiceType SS_INCOMING_BARRING_ANONYMOUS.
-     *  Will be null otherwise.
-     * @hide
+     * @return an array of {@link ImsSsInfo}s associated with this supplementary service data.
      */
-    public ImsSsInfo[] getImsSpecificSuppServiceInfo() {
+    public @NonNull ImsSsInfo[] getSuppServiceInfo() {
         return mImsSsInfo;
     }
 
     /**
-     * Valid only for supplementary services
-     * - ServiceType SS_CF_* and
-     * - RequestType SS_INTERROGATION.
-     * Will be null otherwise.
-     * @hide
+     * @return an array of {@link ImsCallForwardInfo}s associated with this supplementary service
+     * data.
      **/
     public ImsCallForwardInfo[] getCallForwardInfo() {
         return mCfInfo;
     }
 
     public String toString() {
-        return "[ImsSsData] " + "ServiceType: " + serviceType
-            + " RequestType: " + requestType
-            + " TeleserviceType: " + teleserviceType
-            + " ServiceClass: " + serviceClass
-            + " Result: " + result;
+        return "[ImsSsData] " + "ServiceType: " + getServiceType()
+            + " RequestType: " + getRequestType()
+            + " TeleserviceType: " + getTeleserviceType()
+            + " ServiceClass: " + getServiceClass()
+            + " Result: " + getResult();
     }
 }
