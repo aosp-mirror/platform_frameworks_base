@@ -188,6 +188,13 @@ public final class TelephonyPermissions {
         if (checkReadDeviceIdentifiers(context, pid, uid, callingPackage)) {
             return true;
         }
+        // Calling packages with carrier privileges will also have access to device identifiers, but
+        // this may be removed in a future release.
+        if (SubscriptionManager.isValidSubscriptionId(subId) && getCarrierPrivilegeStatus(
+                TELEPHONY_SUPPLIER, subId, uid)
+                == TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS) {
+            return true;
+        }
         // else the calling package is not authorized to access the device identifiers; call
         // a central method to report the failure based on the target SDK and if the calling package
         // has the READ_PHONE_STATE permission or carrier privileges that were previously required
