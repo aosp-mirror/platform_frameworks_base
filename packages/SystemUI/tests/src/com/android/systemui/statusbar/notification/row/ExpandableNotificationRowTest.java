@@ -20,10 +20,10 @@ import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 
 import static com.android.systemui.statusbar.notification.row.NotificationInflater.FLAG_CONTENT_VIEW_ALL;
 import static com.android.systemui.statusbar.notification.row.NotificationInflater.FLAG_CONTENT_VIEW_HEADS_UP;
+import static com.android.systemui.statusbar.notification.row.NotificationInflater.FLAG_CONTENT_VIEW_PUBLIC;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
-import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
@@ -40,7 +40,6 @@ import android.app.AppOpsManager;
 import android.app.NotificationChannel;
 import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
-import android.testing.TestableLooper;
 import android.testing.TestableLooper.RunWithLooper;
 import android.util.ArraySet;
 import android.view.NotificationHeaderView;
@@ -127,7 +126,8 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
 
     @Test
     public void testIconColorShouldBeUpdatedWhenSensitive() throws Exception {
-        ExpandableNotificationRow row = spy(mNotificationTestHelper.createRow());
+        ExpandableNotificationRow row = spy(mNotificationTestHelper.createRow(
+                FLAG_CONTENT_VIEW_ALL));
         row.setSensitive(true, true);
         row.setHideSensitive(true, false, 0, 0);
         verify(row).updateShelfIconColor();
@@ -150,6 +150,26 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
         row.freeContentViewWhenSafe(FLAG_CONTENT_VIEW_HEADS_UP);
 
         assertNull(row.getPrivateLayout().getHeadsUpChild());
+    }
+
+    @Test
+    public void setNeedsRedactionSetsInflationFlag() throws Exception {
+        ExpandableNotificationRow row = mNotificationTestHelper.createRow();
+
+        row.setNeedsRedaction(true);
+
+        assertTrue(row.getNotificationInflater().isInflationFlagSet(FLAG_CONTENT_VIEW_PUBLIC));
+    }
+
+    @Test
+    public void setNeedsRedactionFreesViewWhenFalse() throws Exception {
+        ExpandableNotificationRow row = mNotificationTestHelper.createRow(FLAG_CONTENT_VIEW_ALL);
+        row.setNeedsRedaction(true);
+        row.getPublicLayout().setVisibility(View.GONE);
+
+        row.setNeedsRedaction(false);
+
+        assertNull(row.getPublicLayout().getContractedChild());
     }
 
     @Test
