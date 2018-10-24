@@ -282,7 +282,7 @@ public class StatusBarNotificationPresenter implements NotificationPresenter {
 
     @Override
     public boolean canHeadsUp(Entry entry, StatusBarNotification sbn) {
-        if (!mShadeController.isDozing()) {
+        if (mShadeController.isDozing()) {
             return false;
         }
 
