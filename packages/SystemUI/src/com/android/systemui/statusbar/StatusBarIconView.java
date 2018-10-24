@@ -38,7 +38,6 @@ import android.graphics.drawable.Icon;
 import android.os.Parcelable;
 import android.os.UserHandle;
 import android.service.notification.StatusBarNotification;
-import androidx.core.graphics.ColorUtils;
 import android.text.TextUtils;
 import android.util.AttributeSet;
 import android.util.FloatProperty;
@@ -48,6 +47,8 @@ import android.util.TypedValue;
 import android.view.ViewDebug;
 import android.view.accessibility.AccessibilityEvent;
 import android.view.animation.Interpolator;
+
+import androidx.core.graphics.ColorUtils;
 
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.util.ContrastColorUtil;
@@ -121,6 +122,7 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
     private StatusBarNotification mNotification;
     private final boolean mBlocked;
     private int mDensity;
+    private boolean mNightMode;
     private float mIconScale = 1.0f;
     private final Paint mDotPaint = new Paint(Paint.ANTI_ALIAS_FLAG);
     private float mDotRadius;
@@ -171,10 +173,10 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
         setNotification(sbn);
         setScaleType(ScaleType.CENTER);
         mDensity = context.getResources().getDisplayMetrics().densityDpi;
-        if (mNotification != null) {
-            setDecorColor(getContext().getColor(
-                    com.android.internal.R.color.notification_default_color_light));
-        }
+        Configuration configuration = context.getResources().getConfiguration();
+        mNightMode = (configuration.uiMode & Configuration.UI_MODE_NIGHT_MASK)
+                == Configuration.UI_MODE_NIGHT_YES;
+        initializeDecorColor();
         reloadDimens();
         maybeUpdateIconScaleDimens();
     }
@@ -221,6 +223,12 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
             reloadDimens();
             maybeUpdateIconScaleDimens();
             updateDrawable();
+        }
+        boolean nightMode = (newConfig.uiMode & Configuration.UI_MODE_NIGHT_MASK)
+                == Configuration.UI_MODE_NIGHT_YES;
+        if (nightMode != mNightMode) {
+            mNightMode = nightMode;
+            initializeDecorColor();
         }
     }
 
@@ -538,6 +546,14 @@ public class StatusBarIconView extends AnimatedImageView implements StatusIconDi
     public void setDecorColor(int iconTint) {
         mDecorColor = iconTint;
         updateDecorColor();
+    }
+
+    private void initializeDecorColor() {
+        if (mNotification != null) {
+            setDecorColor(getContext().getColor(mNightMode
+                    ? com.android.internal.R.color.notification_default_color_dark
+                    : com.android.internal.R.color.notification_default_color_light));
+        }
     }
 
     private void updateDecorColor() {
