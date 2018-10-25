@@ -61,7 +61,7 @@ bool Properties::filterOutTestOverhead = false;
 bool Properties::disableVsync = false;
 bool Properties::skpCaptureEnabled = false;
 bool Properties::forceDarkMode = false;
-bool Properties::enableForceDarkSupport = false;
+bool Properties::enableForceDarkSupport = true;
 bool Properties::enableRTAnimations = true;
 
 bool Properties::runningInEmulator = false;
@@ -150,8 +150,7 @@ bool Properties::load() {
 
     forceDarkMode = property_get_bool(PROPERTY_FORCE_DARK, false);
 
-    // TODO: make this on by default
-    enableForceDarkSupport = property_get_bool(PROPERTY_ENABLE_FORCE_DARK, false);
+    enableForceDarkSupport = property_get_bool(PROPERTY_ENABLE_FORCE_DARK, true);
 
     return (prevDebugLayersUpdates != debugLayersUpdates) || (prevDebugOverdraw != debugOverdraw) ||
            (prevDebugStencilClip != debugStencilClip);
