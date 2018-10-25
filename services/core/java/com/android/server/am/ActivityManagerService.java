@@ -3552,7 +3552,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
                 if (appInfo != null) {
                     forceStopPackageLocked(packageName, appInfo.uid, "clear data");
-                    mActivityTaskManager.getRecentTasks().removeTasksByPackageName(packageName, resolvedUserId);
+                    mAtmInternal.removeRecentTasksByPackageName(packageName, resolvedUserId);
                 }
             }
 
@@ -13971,16 +13971,14 @@ public class ActivityManagerService extends IActivityManager.Stub
                                     forceStopPackageLocked(list[i], -1, false, true, true,
                                             false, false, userId, "storage unmount");
                                 }
-                                mActivityTaskManager.getRecentTasks().cleanupLocked(
-                                        UserHandle.USER_ALL);
+                                mAtmInternal.cleanupRecentTasksForUser(UserHandle.USER_ALL);
                                 sendPackageBroadcastLocked(
                                         ApplicationThreadConstants.EXTERNAL_STORAGE_UNAVAILABLE,
                                         list, userId);
                             }
                             break;
                         case Intent.ACTION_EXTERNAL_APPLICATIONS_AVAILABLE:
-                            mActivityTaskManager.getRecentTasks().cleanupLocked(
-                                    UserHandle.USER_ALL);
+                            mAtmInternal.cleanupRecentTasksForUser(UserHandle.USER_ALL);
                             break;
                         case Intent.ACTION_PACKAGE_REMOVED:
                         case Intent.ACTION_PACKAGE_CHANGED:
@@ -14013,7 +14011,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                                         mUgmInternal.removeUriPermissionsForPackage(ssp, userId,
                                                 true, false);
 
-                                        mActivityTaskManager.getRecentTasks().removeTasksByPackageName(ssp, userId);
+                                        mAtmInternal.removeRecentTasksByPackageName(ssp, userId);
 
                                         mServices.forceStopPackageLocked(ssp, userId);
                                         mAtmInternal.onPackageUninstalled(ssp);
@@ -14043,10 +14041,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                             final int userHandle = intent.getIntExtra(
                                     Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL);
 
-                            synchronized(ActivityManagerService.this) {
-                                mActivityTaskManager.getRecentTasks().onPackagesSuspendedChanged(
-                                        packageNames, suspended, userHandle);
-                            }
+                            mAtmInternal.onPackagesSuspendedChanged(packageNames, suspended,
+                                    userHandle);
                             break;
                     }
                     break;

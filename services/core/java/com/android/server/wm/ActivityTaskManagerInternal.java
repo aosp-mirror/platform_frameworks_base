@@ -452,4 +452,12 @@ public abstract class ActivityTaskManagerInternal {
     public abstract boolean handleAppCrashInActivityController(String processName, int pid,
             String shortMsg, String longMsg, long timeMillis, String stackTrace,
             Runnable killCrashingAppCallback);
+
+    public abstract void removeRecentTasksByPackageName(String packageName, int userId);
+    public abstract void cleanupRecentTasksForUser(int userId);
+    public abstract void loadRecentTasksForUser(int userId);
+    public abstract void onPackagesSuspendedChanged(String[] packages, boolean suspended,
+            int userId);
+    /** Flush recent tasks to disk. */
+    public abstract void flushRecentTasks();
 }

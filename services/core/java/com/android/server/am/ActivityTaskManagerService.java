@@ -6708,5 +6708,38 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 return false;
             }
         }
+
+        @Override
+        public void removeRecentTasksByPackageName(String packageName, int userId) {
+            synchronized (mGlobalLock) {
+                mRecentTasks.removeTasksByPackageName(packageName, userId);
+            }
+        }
+
+        @Override
+        public void cleanupRecentTasksForUser(int userId) {
+            synchronized (mGlobalLock) {
+                mRecentTasks.cleanupLocked(userId);
+            }
+        }
+
+        @Override
+        public void loadRecentTasksForUser(int userId) {
+            synchronized (mGlobalLock) {
+                mRecentTasks.loadUserRecentsLocked(userId);
+            }
+        }
+
+        @Override
+        public void onPackagesSuspendedChanged(String[] packages, boolean suspended, int userId) {
+            synchronized (mGlobalLock) {
+                mRecentTasks.onPackagesSuspendedChanged(packages, suspended, userId);
+            }
+        }
+
+        @Override
+        public void flushRecentTasks() {
+            mRecentTasks.flush();
+        }
     }
 }
