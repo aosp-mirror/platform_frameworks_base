@@ -5491,6 +5491,7 @@ package android.telephony {
     method public int getRadioPowerState();
     method public int getSimApplicationState();
     method public int getSimCardState();
+    method public int getSupportedRadioAccessFamily();
     method public java.util.List<android.telephony.TelephonyHistogram> getTelephonyHistograms();
     method public android.telephony.UiccSlotInfo[] getUiccSlotsInfo();
     method public android.os.Bundle getVisualVoicemailSettings();
@@ -5553,6 +5554,24 @@ package android.telephony {
     field public static final int NETWORK_MODE_TDSCDMA_WCDMA = 14; // 0xe
     field public static final int NETWORK_MODE_WCDMA_ONLY = 2; // 0x2
     field public static final int NETWORK_MODE_WCDMA_PREF = 0; // 0x0
+    field public static final int NETWORK_TYPE_BITMASK_1xRTT = 128; // 0x80
+    field public static final int NETWORK_TYPE_BITMASK_CDMA = 16; // 0x10
+    field public static final int NETWORK_TYPE_BITMASK_EDGE = 4; // 0x4
+    field public static final int NETWORK_TYPE_BITMASK_EHRPD = 16384; // 0x4000
+    field public static final int NETWORK_TYPE_BITMASK_EVDO_0 = 32; // 0x20
+    field public static final int NETWORK_TYPE_BITMASK_EVDO_A = 64; // 0x40
+    field public static final int NETWORK_TYPE_BITMASK_EVDO_B = 4096; // 0x1000
+    field public static final int NETWORK_TYPE_BITMASK_GPRS = 2; // 0x2
+    field public static final int NETWORK_TYPE_BITMASK_GSM = 65536; // 0x10000
+    field public static final int NETWORK_TYPE_BITMASK_HSDPA = 256; // 0x100
+    field public static final int NETWORK_TYPE_BITMASK_HSPA = 1024; // 0x400
+    field public static final int NETWORK_TYPE_BITMASK_HSPAP = 32768; // 0x8000
+    field public static final int NETWORK_TYPE_BITMASK_HSUPA = 512; // 0x200
+    field public static final int NETWORK_TYPE_BITMASK_LTE = 8192; // 0x2000
+    field public static final int NETWORK_TYPE_BITMASK_LTE_CA = 524288; // 0x80000
+    field public static final int NETWORK_TYPE_BITMASK_TD_SCDMA = 131072; // 0x20000
+    field public static final int NETWORK_TYPE_BITMASK_UMTS = 8; // 0x8
+    field public static final int NETWORK_TYPE_BITMASK_UNKNOWN = 1; // 0x1
     field public static final int RADIO_POWER_OFF = 0; // 0x0
     field public static final int RADIO_POWER_ON = 1; // 0x1
     field public static final int RADIO_POWER_UNAVAILABLE = 2; // 0x2

@@ -456,6 +456,27 @@ public final class TelephonyPermissions {
     }
 
     /**
+     * Ensure the caller (or self, if not processing an IPC) has
+     * {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE} or carrier privileges.
+     *
+     * @throws SecurityException if the caller does not have the required permission/privileges
+     */
+    public static void enforeceCallingOrSelfReadPrivilegedPhoneStatePermissionOrCarrierPrivilege(
+            Context context, int subId, String message) {
+        if (context.checkCallingOrSelfPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+                == PERMISSION_GRANTED) {
+            return;
+        }
+
+        if (DBG) {
+            Rlog.d(LOG_TAG, "No READ_PRIVILEDED_PHONE_STATE permission, " +
+                    "check carrier privilege next.");
+        }
+
+        enforceCallingOrSelfCarrierPrivilege(subId, message);
+    }
+
+    /**
      * Make sure the caller (or self, if not processing an IPC) has carrier privileges.
      *
      * @throws SecurityException if the caller does not have the required privileges
