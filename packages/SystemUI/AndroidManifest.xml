@@ -209,6 +209,9 @@
     <!-- to read and change hvac values in a car -->
     <uses-permission android:name="android.car.permission.CONTROL_CAR_CLIMATE" />
 
+    <!-- to be able to detect the driving state in a car-->
+    <uses-permission android:name="android.car.permission.CAR_DRIVING_STATE" />
+
     <!-- Permission necessary to change car audio volume through CarAudioManager -->
     <uses-permission android:name="android.car.permission.CAR_CONTROL_AUDIO_VOLUME" />
 
