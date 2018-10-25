@@ -1379,14 +1379,20 @@ public class AudioManager {
     //====================================================================
     // Offload query
     /**
-     * @hide
      * Returns whether offloaded playback of an audio format is supported on the device.
-     * Offloaded playback is where the decoding of an audio stream is not competing with other
-     * software resources. In general, it is supported by dedicated hardware, such as audio DSPs.
+     * <p>Offloaded playback is the feature where the decoding and playback of an audio stream
+     * is not competing with other software resources. In general, it is supported by dedicated
+     * hardware, such as audio DSPs.
+     * <p>Note that this query only provides information about the support of an audio format,
+     * it does not indicate whether the resources necessary for the offloaded playback are
+     * available at that instant.
      * @param format the audio format (codec, sample rate, channels) being checked.
      * @return true if the given audio format can be offloaded.
      */
-    public boolean isOffloadedPlaybackSupported(@NonNull AudioFormat format) {
+    public static boolean isOffloadedPlaybackSupported(@NonNull AudioFormat format) {
+        if (format == null) {
+            throw new IllegalArgumentException("Illegal null AudioFormat");
+        }
         return AudioSystem.isOffloadSupported(format);
     }
 
