@@ -2206,24 +2206,25 @@ public class SubscriptionManager {
     }
 
     /**
-     * Set preferred default data.
-     * Set on which slot most cellular data will be on.
-     * It's also usually what we set up internet connection on.
+     * Set which subscription is preferred for cellular data.
+     * It's also usually the subscription we set up internet connection on.
      *
      * PreferredData overwrites user setting of default data subscription. And it's used
-     * by AlternativeNetworkAccessService or carrier apps to switch primary and CBRS
+     * by AlternativeNetworkService or carrier apps to switch primary and CBRS
      * subscription dynamically in multi-SIM devices.
      *
-     * @param slotId which slot is preferred to for cellular data. If it's INVALID, it means
-     *               it's unset and defaultDataSubId is used to determine which modem is preferred.
+     * @param subId which subscription is preferred to for cellular data. If it's
+     *              {@link SubscriptionManager#INVALID_SUBSCRIPTION_ID}, it means
+     *              it's unset and {@link SubscriptionManager#getDefaultDataSubscriptionId()}
+     *              is used to determine which modem is preferred.
      * @hide
      *
      */
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
-    public void setPreferredData(int slotId) {
-        if (VDBG) logd("[setPreferredData]+ slotId:" + slotId);
+    public void setPreferredData(int subId) {
+        if (VDBG) logd("[setPreferredData]+ subId:" + subId);
         setSubscriptionPropertyHelper(SubscriptionManager.DEFAULT_SUBSCRIPTION_ID,
-                "setPreferredData", (iSub)-> iSub.setPreferredData(slotId));
+                "setPreferredData", (iSub)-> iSub.setPreferredData(subId));
     }
 
     /**
