@@ -38,7 +38,7 @@ public interface BiometricConstants {
      * BiometricManager.
      * @hide
      */
-    int BIOMETRIC_ERROR_NONE = 0;
+    int BIOMETRIC_SUCCESS = 0;
 
     /**
      * The hardware is unavailable. Try again later.
