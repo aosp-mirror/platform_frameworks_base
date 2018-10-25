@@ -3586,6 +3586,17 @@ public class Intent implements Parcelable, Cloneable {
     public static final String
             ACTION_OPEN_DOCUMENT_TREE = "android.intent.action.OPEN_DOCUMENT_TREE";
 
+
+    /**
+     * Activity Action: Perform text translation.
+     * <p>
+     * Input: {@link #EXTRA_TEXT getCharSequence(EXTRA_TEXT)} is the text to translate.
+     * <p>
+     * Output: nothing.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_TRANSLATE = "android.intent.action.TRANSLATE";
+
     /**
      * Broadcast Action: List of dynamic sensor is changed due to new sensor being connected or
      * exisiting sensor being disconnected.
