@@ -311,6 +311,21 @@ public class FaceManager implements BiometricAuthenticator, BiometricFaceConstan
     }
 
     /**
+     * Pokes the the driver to have it start looking for faces again.
+     * @hide
+     */
+    @RequiresPermission(MANAGE_BIOMETRIC)
+    public void userActivity() {
+        if (mService != null) {
+            try {
+                mService.userActivity();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
      * Sets the active user. This is meant to be used to select the current profile for enrollment
      * to allow separate enrolled faces for a work profile
      *

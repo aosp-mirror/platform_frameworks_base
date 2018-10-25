@@ -362,7 +362,7 @@ public class FaceService extends BiometricServiceBase {
                 result = mDaemon != null ? mDaemon.setRequireAttention(requireAttention, byteToken)
                         : Status.INTERNAL_ERROR;
             } catch (RemoteException e) {
-                Slog.e(getTag(), "Unable to setRequireAttention to " + requireAttention);
+                Slog.e(getTag(), "Unable to setRequireAttention to " + requireAttention, e);
                 result = Status.INTERNAL_ERROR;
             }
 
@@ -382,9 +382,22 @@ public class FaceService extends BiometricServiceBase {
             try {
                 result = mDaemon != null ? mDaemon.getRequireAttention(byteToken).value : true;
             } catch (RemoteException e) {
-                Slog.e(getTag(), "Unable to getRequireAttention");
+                Slog.e(getTag(), "Unable to getRequireAttention", e);
             }
             return result;
+        }
+
+        @Override
+        public void userActivity() {
+            checkPermission(MANAGE_BIOMETRIC);
+
+            if (mDaemon != null) {
+                try {
+                    mDaemon.userActivity();
+                } catch (RemoteException e) {
+                    Slog.e(getTag(), "Unable to send userActivity", e);
+                }
+            }
         }
     }
 
