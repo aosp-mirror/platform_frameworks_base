@@ -49,6 +49,7 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put("settings_seamless_transfer", "false");
         DEFAULT_FLAGS.put(HEARING_AID_SETTINGS, "false");
         DEFAULT_FLAGS.put(EMERGENCY_DIAL_SHORTCUTS, "false");
+        DEFAULT_FLAGS.put("settings_network_and_internet_v2", "false");
     }
 
     /**
