@@ -170,7 +170,7 @@
     <string name="carrier_network_change_mode" msgid="8149202439957837762">"Оператор компанийн сүлжээг өөрчилж байна"</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"Тэжээлийн дэлгэрэнгүй мэдээллийг нээх"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Батерей <xliff:g id="NUMBER">%d</xliff:g> хувьтай."</string>
-    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"Тэжээлийг цэнэглэж байна, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> хувь."</string>
+    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"Батарейг цэнэглэж байна, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%%."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Системийн тохиргоо."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Мэдэгдэл."</string>
     <string name="accessibility_overflow_action" msgid="5681882033274783311">"Бүх мэдэгдлийг харах"</string>
@@ -844,10 +844,10 @@
     <string name="slice_permission_allow" msgid="2340244901366722709">"Зөвшөөрөх"</string>
     <string name="slice_permission_deny" msgid="7683681514008048807">"Татгалзах"</string>
     <string name="auto_saver_title" msgid="1217959994732964228">"Тэжээл хэмнэгч онцлогийг хуваарилахын тулд товших"</string>
-    <string name="auto_saver_text" msgid="6324376061044218113">"Батерей <xliff:g id="PERCENTAGE">%d</xliff:g>%% болох үед автоматаар асаах"</string>
+    <string name="auto_saver_text" msgid="6324376061044218113">"Батарей <xliff:g id="PERCENTAGE">%d</xliff:g>%% болох үед автоматаар асаах"</string>
     <string name="no_auto_saver_action" msgid="8086002101711328500">"Үгүй, баярлалаа"</string>
     <string name="auto_saver_enabled_title" msgid="6726474226058316862">"Тэжээл хэмнэгч онцлогийн хуваарийг асаасан"</string>
-    <string name="auto_saver_enabled_text" msgid="874711029884777579">"Батерей <xliff:g id="PERCENTAGE">%d</xliff:g>%%-с бага болсон үед Тэжээл хэмнэгч онцлог автоматаар асна."</string>
+    <string name="auto_saver_enabled_text" msgid="874711029884777579">"Батарей <xliff:g id="PERCENTAGE">%d</xliff:g>%%-с бага болсон үед Тэжээл хэмнэгч автоматаар асна."</string>
     <string name="open_saver_setting_action" msgid="8314624730997322529">"Тохиргоо"</string>
     <string name="auto_saver_okay_action" msgid="2701221740227683650">"Ойлголоо"</string>
     <string name="heap_dump_tile_name" msgid="9141031328971226374">"Dump SysUI Heap"</string>

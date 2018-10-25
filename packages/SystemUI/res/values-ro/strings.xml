@@ -173,9 +173,7 @@
     <string name="carrier_network_change_mode" msgid="8149202439957837762">"Se schimbă rețeaua operatorului"</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"Deschideți detaliile privind bateria"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Baterie: <xliff:g id="NUMBER">%d</xliff:g> la sută."</string>
-    <!-- String.format failed for translation -->
-    <!-- no translation found for accessibility_battery_level_charging (1147587904439319646) -->
-    <skip />
+    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"Se încarcă bateria, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%%."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Setări de sistem."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Notificări."</string>
     <string name="accessibility_overflow_action" msgid="5681882033274783311">"Vedeți toate notificările"</string>
