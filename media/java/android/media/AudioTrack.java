@@ -3023,7 +3023,7 @@ public class AudioTrack extends PlayerBase
     /**
      * Registers a callback for the notification of stream events.
      * This callback can only be registered for instances operating in offloaded mode
-     * (see {@link #Builder.setOffloadedPlayback(boolean)} and
+     * (see {@link AudioTrack.Builder#setOffloadedPlayback(boolean)} and
      * {@link AudioManager#isOffloadedPlaybackSupported(AudioFormat)} for more details).
      * @param executor {@link Executor} to handle the callbacks.
      * @param eventCallback the callback to receive the stream event notifications.
