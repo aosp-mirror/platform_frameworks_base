@@ -16544,8 +16544,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     if (curSchedGroup == ProcessList.SCHED_GROUP_TOP_APP) {
                         // do nothing if we already switched to RT
                         if (oldSchedGroup != ProcessList.SCHED_GROUP_TOP_APP) {
-                            mActivityTaskManager.onTopProcChangedLocked(
-                                    app.getWindowProcessController());
+                            app.getWindowProcessController().onTopProcChanged();
                             if (mUseFifoUiScheduling) {
                                 // Switch UI pipeline for app to SCHED_FIFO
                                 app.savedPriority = Process.getThreadPriority(app.pid);
@@ -16577,8 +16576,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         }
                     } else if (oldSchedGroup == ProcessList.SCHED_GROUP_TOP_APP &&
                             curSchedGroup != ProcessList.SCHED_GROUP_TOP_APP) {
-                        mActivityTaskManager.onTopProcChangedLocked(
-                                app.getWindowProcessController());
+                        app.getWindowProcessController().onTopProcChanged();
                         if (mUseFifoUiScheduling) {
                             try {
                                 // Reset UI pipeline to SCHED_OTHER

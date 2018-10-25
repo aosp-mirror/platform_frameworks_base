@@ -397,7 +397,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     // VoiceInteractionManagerService
     ComponentName mActiveVoiceInteractionServiceComponent;
 
-    private VrController mVrController;
+    VrController mVrController;
     KeyguardController mKeyguardController;
     private final ClientLifecycleManager mLifecycleManager;
     private TaskChangeNotificationController mTaskChangeNotificationController;
@@ -4355,10 +4355,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         mRecentTasks.notifyTaskPersisterLocked(task, flush);
     }
 
-    void onTopProcChangedLocked(WindowProcessController proc) {
-        mVrController.onTopProcChangedLocked(proc);
-    }
-
     boolean isKeyguardLocked() {
         return mKeyguardController.isKeyguardLocked();
     }
@@ -6687,6 +6683,29 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         public void onUidRemovedFromPendingTempWhitelist(int uid) {
             synchronized (mGlobalLock) {
                 mPendingTempWhitelist.remove(uid);
+            }
+        }
+
+        @Override
+        public boolean handleAppCrashInActivityController(String processName, int pid,
+                String shortMsg, String longMsg, long timeMillis, String stackTrace,
+                Runnable killCrashingAppCallback) {
+            synchronized (mGlobalLock) {
+                if (mController == null) {
+                    return false;
+                }
+
+                try {
+                    if (!mController.appCrashed(processName, pid, shortMsg, longMsg, timeMillis,
+                            stackTrace)) {
+                        killCrashingAppCallback.run();
+                        return true;
+                    }
+                } catch (RemoteException e) {
+                    mController = null;
+                    Watchdog.getInstance().setActivityController(null);
+                }
+                return false;
             }
         }
     }
