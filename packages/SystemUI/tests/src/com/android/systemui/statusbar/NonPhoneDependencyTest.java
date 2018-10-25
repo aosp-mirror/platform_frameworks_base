@@ -19,7 +19,6 @@ package com.android.systemui.statusbar;
 import static org.junit.Assert.assertFalse;
 
 import android.os.Handler;
-import android.os.Looper;
 import android.support.test.filters.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -38,6 +37,7 @@ import com.android.systemui.statusbar.phone.StatusBarWindowController;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -51,6 +51,7 @@ import org.mockito.MockitoAnnotations;
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper(setAsMainLooper = true)
+@Ignore("b/118400112")
 public class NonPhoneDependencyTest extends SysuiTestCase {
     @Mock private NotificationPresenter mPresenter;
     @Mock private NotificationListContainer mListContainer;
@@ -69,6 +70,7 @@ public class NonPhoneDependencyTest extends SysuiTestCase {
     }
 
     @Test
+    @Ignore("b/118400112")
     public void testNotificationManagementCodeHasNoDependencyOnStatusBarWindowManager() {
         mDependency.injectMockDependency(ShadeController.class);
         NotificationEntryManager entryManager = Dependency.get(NotificationEntryManager.class);
