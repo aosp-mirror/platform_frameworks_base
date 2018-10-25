@@ -1143,7 +1143,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
         }
         synchronized (mVpns) {
             final Vpn vpn = mVpns.get(UserHandle.getUserId(uid));
-            if (vpn != null && vpn.isBlockingUid(uid)) {
+            if (vpn != null && vpn.getLockdown() && vpn.isBlockingUid(uid)) {
                 return true;
             }
         }
@@ -1736,7 +1736,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
             // list all state depending on the return value of this function has to be recomputed.
             // TODO: add a trigger when the always-on VPN sets its blocked UIDs to reevaluate and
             // send the necessary onBlockedStatusChanged callbacks.
-            if (vpn != null && vpn.isBlockingUid(uid)) {
+            if (vpn != null && vpn.getLockdown() && vpn.isBlockingUid(uid)) {
                 return true;
             }
         }
