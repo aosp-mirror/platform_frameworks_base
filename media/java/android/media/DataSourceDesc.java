@@ -62,6 +62,11 @@ public final class DataSourceDesc {
     // intentionally less than long.MAX_VALUE
     public static final long LONG_MAX = 0x7ffffffffffffffL;
 
+    // keep consistent with native code
+    public static final long LONG_MAX_TIME_MS = LONG_MAX / 1000;
+    public static final long LONG_MAX_TIME_US = LONG_MAX_TIME_MS * 1000;
+
+
     private int mType = TYPE_NONE;
 
     private Media2DataSource mMedia2DataSource;
@@ -77,7 +82,7 @@ public final class DataSourceDesc {
 
     private String mMediaId;
     private long mStartPositionMs = 0;
-    private long mEndPositionMs = LONG_MAX;
+    private long mEndPositionMs = LONG_MAX_TIME_MS;
 
     private DataSourceDesc() {
     }
@@ -225,7 +230,7 @@ public final class DataSourceDesc {
 
         private String mMediaId;
         private long mStartPositionMs = 0;
-        private long mEndPositionMs = LONG_MAX;
+        private long mEndPositionMs = LONG_MAX_TIME_MS;
 
         /**
          * Constructs a new Builder with the defaults.
@@ -326,7 +331,7 @@ public final class DataSourceDesc {
          */
         public Builder setEndPosition(long position) {
             if (position < 0) {
-                position = LONG_MAX;
+                position = LONG_MAX_TIME_MS;
             }
             mEndPositionMs = position;
             return this;
