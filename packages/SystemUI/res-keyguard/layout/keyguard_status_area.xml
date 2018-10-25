@@ -43,6 +43,7 @@
               android:id="@+id/row"
               android:layout_width="match_parent"
               android:layout_height="wrap_content"
+              android:layout_marginTop="@dimen/subtitle_clock_padding"
               android:orientation="horizontal"
               android:gravity="center"
     />

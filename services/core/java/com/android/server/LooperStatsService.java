@@ -27,6 +27,7 @@ import android.os.ShellCommand;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings;
+import android.text.format.DateFormat;
 import android.util.KeyValueListParser;
 import android.util.Slog;
 
@@ -91,7 +92,9 @@ public class LooperStatsService extends Binder {
     @Override
     protected void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
         if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
-        List<LooperStats.ExportedEntry> entries = mStats.getEntries();
+        pw.print("Start time: ");
+        pw.println(DateFormat.format("yyyy-MM-dd HH:mm:ss", mStats.getStartTimeMillis()));
+        final List<LooperStats.ExportedEntry> entries = mStats.getEntries();
         entries.sort(Comparator
                 .comparing((LooperStats.ExportedEntry entry) -> entry.workSourceUid)
                 .thenComparing(entry -> entry.threadName)

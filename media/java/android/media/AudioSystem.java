@@ -21,6 +21,7 @@ import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.content.pm.PackageManager;
 import android.media.audiopolicy.AudioMix;
+import android.os.Build;
 import android.util.Log;
 
 import java.util.ArrayList;
@@ -864,9 +865,9 @@ public class AudioSystem
     public static native int setMasterMono(boolean mono);
 
     // helpers for android.media.AudioManager.getProperty(), see description there for meaning
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 112561552)
     public static native int getPrimaryOutputSamplingRate();
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 112561552)
     public static native int getPrimaryOutputFrameCount();
     @UnsupportedAppUsage
     public static native int getOutputLatency(int stream);

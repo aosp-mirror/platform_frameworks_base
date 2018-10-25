@@ -1283,8 +1283,8 @@ public class AppOpsManager {
             AppOpsManager.MODE_ALLOWED, // POST_NOTIFICATION
             AppOpsManager.MODE_ALLOWED, // NEIGHBORING_CELLS
             AppOpsManager.MODE_ALLOWED, // CALL_PHONE
-            AppOpsManager.MODE_DEFAULT, // READ_SMS
-            AppOpsManager.MODE_DEFAULT, // WRITE_SMS
+            AppOpsManager.MODE_ALLOWED, // READ_SMS
+            AppOpsManager.MODE_IGNORED, // WRITE_SMS
             AppOpsManager.MODE_DEFAULT, // RECEIVE_SMS
             AppOpsManager.MODE_ALLOWED, // RECEIVE_EMERGENCY_BROADCAST
             AppOpsManager.MODE_ALLOWED, // RECEIVE_MMS

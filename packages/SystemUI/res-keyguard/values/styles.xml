@@ -37,8 +37,16 @@
         <item name="android:textColor">?attr/wallpaperTextColor</item>
         <item name="android:paddingBottom">-16dp</item>
     </style>
+    <style name="Keyguard.ImageButton.NumPadDelete" parent="@android:style/Widget.ImageButton">
+        <item name="android:src">@drawable/ic_backspace_black_24dp</item>
+        <item name="android:paddingBottom">11sp</item>
+        <item name="android:tint">@color/pin_delete_color</item>
+        <item name="android:tintMode">src_in</item>
+        <item name="android:src">@drawable/ic_backspace_black_24dp</item>
+    </style>
     <style name="Keyguard.ImageButton.NumPadEnter" parent="@android:style/Widget.ImageButton">
-        <item name="android:tint">@color/background_protected</item>
+        <item name="android:src">@drawable/ic_keyboard_tab_36dp</item>
+        <item name="android:paddingBottom">11sp</item>
     </style>
     <style name="Widget.TextView.NumPadKey.Klondike" parent="Widget.TextView.NumPadKey">
         <item name="android:textSize">12sp</item>

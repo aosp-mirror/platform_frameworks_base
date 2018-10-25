@@ -16,12 +16,9 @@
 package com.android.systemui.statusbar.notification;
 
 import static com.android.systemui.statusbar.NotificationRemoteInputManager.ENABLE_REMOTE_INPUT;
-import static com.android.systemui.statusbar.NotificationRemoteInputManager
-        .FORCE_REMOTE_INPUT_HISTORY;
-import static com.android.systemui.statusbar.notification.row.NotificationInflater
-        .FLAG_CONTENT_VIEW_AMBIENT;
-import static com.android.systemui.statusbar.notification.row.NotificationInflater
-        .FLAG_CONTENT_VIEW_HEADS_UP;
+import static com.android.systemui.statusbar.NotificationRemoteInputManager.FORCE_REMOTE_INPUT_HISTORY;
+import static com.android.systemui.statusbar.notification.row.NotificationInflater.FLAG_CONTENT_VIEW_AMBIENT;
+import static com.android.systemui.statusbar.notification.row.NotificationInflater.FLAG_CONTENT_VIEW_HEADS_UP;
 
 import android.annotation.Nullable;
 import android.app.Notification;
@@ -65,9 +62,9 @@ import com.android.systemui.ForegroundServiceController;
 import com.android.systemui.InitController;
 import com.android.systemui.R;
 import com.android.systemui.UiOffloadThread;
-import com.android.systemui.statusbar.NotificationLifetimeExtender;
 import com.android.systemui.statusbar.AlertingNotificationManager;
 import com.android.systemui.statusbar.AmbientPulseManager;
+import com.android.systemui.statusbar.NotificationLifetimeExtender;
 import com.android.systemui.statusbar.NotificationListener;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationMediaManager;
@@ -676,8 +673,6 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
 
     protected void updateNotification(NotificationData.Entry entry, PackageManager pmUser,
             StatusBarNotification sbn, ExpandableNotificationRow row) {
-        row.setNeedsRedaction(
-                Dependency.get(NotificationLockscreenUserManager.class).needsRedaction(entry));
         boolean isLowPriority = mNotificationData.isAmbient(sbn.getKey());
         boolean isUpdate = mNotificationData.get(entry.key) != null;
         boolean wasLowPriority = row.isLowPriority();
@@ -712,6 +707,8 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
 
         row.updateInflationFlag(FLAG_CONTENT_VIEW_HEADS_UP, shouldHeadsUp(entry));
         row.updateInflationFlag(FLAG_CONTENT_VIEW_AMBIENT, shouldPulse(entry));
+        row.setNeedsRedaction(
+                Dependency.get(NotificationLockscreenUserManager.class).needsRedaction(entry));
         row.inflateViews();
     }
 

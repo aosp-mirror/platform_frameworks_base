@@ -467,10 +467,12 @@ public class NotificationPanelView extends PanelView implements
         // Update keyguard bottom area
         index = indexOfChild(mKeyguardBottomArea);
         removeView(mKeyguardBottomArea);
+        KeyguardBottomAreaView oldBottomArea = mKeyguardBottomArea;
         mKeyguardBottomArea = (KeyguardBottomAreaView) LayoutInflater.from(mContext).inflate(
                 R.layout.keyguard_bottom_area,
                 this,
                 false);
+        mKeyguardBottomArea.initFrom(oldBottomArea);
         addView(mKeyguardBottomArea, index);
         initBottomArea();
         setDarkAmount(mLinearDarkAmount, mInterpolatedDarkAmount);

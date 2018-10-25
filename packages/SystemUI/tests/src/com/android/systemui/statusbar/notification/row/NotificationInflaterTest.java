@@ -16,9 +16,11 @@
 
 package com.android.systemui.statusbar.notification.row;
 
-import static com.android.systemui.statusbar.notification.row.NotificationInflater.FLAG_CONTENT_VIEW_HEADS_UP;
 import static com.android.systemui.statusbar.notification.row.NotificationInflater.FLAG_CONTENT_VIEW_ALL;
+import static com.android.systemui.statusbar.notification.row.NotificationInflater.FLAG_CONTENT_VIEW_AMBIENT;
 import static com.android.systemui.statusbar.notification.row.NotificationInflater.FLAG_CONTENT_VIEW_EXPANDED;
+import static com.android.systemui.statusbar.notification.row.NotificationInflater.FLAG_CONTENT_VIEW_HEADS_UP;
+import static com.android.systemui.statusbar.notification.row.NotificationInflater.FLAG_CONTENT_VIEW_PUBLIC;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -45,8 +47,8 @@ import android.widget.RemoteViews;
 import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.statusbar.InflationTask;
-import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.NotificationTestHelper;
+import com.android.systemui.statusbar.notification.NotificationData;
 
 import org.junit.Assert;
 import org.junit.Before;
@@ -115,7 +117,10 @@ public class NotificationInflaterTest extends SysuiTestCase {
         verify(mRow).onNotificationUpdated();
     }
 
+    // TODO: Ignoring as a temporary workaround until ambient views can be safely freed.
+    // See http://b/117894786
     @Test
+    @Ignore
     public void testInflationOnlyInflatesSetFlags() throws Exception {
         mNotificationInflater.updateInflationFlag(FLAG_CONTENT_VIEW_HEADS_UP,
                 true /* shouldInflate */);
@@ -191,6 +196,19 @@ public class NotificationInflaterTest extends SysuiTestCase {
         assertTrue(countDownLatch.await(500, TimeUnit.MILLISECONDS));
     }
 
+    @Test
+    public void testUpdateNeedsRedactionReinflatesChangedContentViews() {
+        mNotificationInflater.updateInflationFlag(FLAG_CONTENT_VIEW_AMBIENT, true);
+        mNotificationInflater.updateInflationFlag(FLAG_CONTENT_VIEW_PUBLIC, true);
+        mNotificationInflater.updateNeedsRedaction(true);
+
+        NotificationInflater.AsyncInflationTask asyncInflationTask =
+                (NotificationInflater.AsyncInflationTask) mRow.getEntry().getRunningTask();
+        assertEquals(FLAG_CONTENT_VIEW_AMBIENT | FLAG_CONTENT_VIEW_PUBLIC,
+                asyncInflationTask.getReInflateFlags());
+        asyncInflationTask.abort();
+    }
+
     /* Cancelling requires us to be on the UI thread otherwise we might have a race */
     @Test
     public void testSupersedesExistingTask() {
@@ -205,7 +223,7 @@ public class NotificationInflaterTest extends SysuiTestCase {
         NotificationInflater.AsyncInflationTask asyncInflationTask =
                 (NotificationInflater.AsyncInflationTask) runningTask;
         assertEquals("Successive inflations don't inherit the previous flags!",
-                asyncInflationTask.getReInflateFlags(), FLAG_CONTENT_VIEW_ALL);
+                FLAG_CONTENT_VIEW_ALL, asyncInflationTask.getReInflateFlags());
         runningTask.abort();
     }
 

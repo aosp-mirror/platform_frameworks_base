@@ -51,6 +51,10 @@ public class UsageStatsDatabaseTest {
     private IntervalStats mIntervalStats = new IntervalStats();
     private long mEndTime = 0;
 
+    // Key under which the payload blob is stored
+    // same as UsageStatsBackupHelper.KEY_USAGE_STATS
+    static final String KEY_USAGE_STATS = "usage_stats";
+
     private static final UsageStatsDatabase.StatCombiner<IntervalStats> mIntervalStatsVerifier =
             new UsageStatsDatabase.StatCombiner<IntervalStats>() {
                 @Override
@@ -104,10 +108,11 @@ public class UsageStatsDatabaseTest {
 
     private void populateIntervalStats() {
         final int numberOfEvents = 3000;
-        long time = 1;
+        final int timeProgression = 23;
+        long time = System.currentTimeMillis() - (numberOfEvents*timeProgression);
         mIntervalStats = new IntervalStats();
 
-        mIntervalStats.beginTime = 1;
+        mIntervalStats.beginTime = time;
         mIntervalStats.interactiveTracker.count = 2;
         mIntervalStats.interactiveTracker.duration = 111111;
         mIntervalStats.nonInteractiveTracker.count = 3;
@@ -158,7 +163,7 @@ public class UsageStatsDatabaseTest {
             mIntervalStats.events.insert(event);
             mIntervalStats.update(event.mPackage, event.mTimeStamp, event.mEventType);
 
-            time += 23; // Arbitrary progression of time
+            time += timeProgression; // Arbitrary progression of time
         }
         mEndTime = time;
 
@@ -286,9 +291,19 @@ public class UsageStatsDatabaseTest {
         }
         assertEquals(stats1.activeConfiguration, stats2.activeConfiguration);
 
-        assertEquals(stats1.events.size(), stats2.events.size());
-        for (int i = 0; i < stats1.events.size(); i++) {
-            compareUsageEvent(stats1.events.get(i), stats2.events.get(i), i);
+        if (stats1.events == null) {
+            // If stats1 events are null, stats2 should be null or empty
+            if (stats2.events != null) {
+                assertEquals(stats2.events.size(), 0);
+            }
+        } else if (stats2.events == null) {
+            // If stats2 events are null, stats1 should be null or empty
+            assertEquals(stats1.events.size(), 0);
+        } else {
+            assertEquals(stats1.events.size(), stats2.events.size());
+            for (int i = 0; i < stats1.events.size(); i++) {
+                compareUsageEvent(stats1.events.get(i), stats2.events.get(i), i);
+            }
         }
     }
 
@@ -340,6 +355,47 @@ public class UsageStatsDatabaseTest {
     }
 
     /**
+     * Runs the Backup and Restore tests.
+     * Will write the generated IntervalStat to a database and create a backup in the specified
+     * version's format. The database will then be restored from the blob and the restored
+     * interval stats will be compared to the generated stats.
+     */
+    void runBackupRestoreTest(int version) throws IOException {
+        UsageStatsDatabase prevDB = new UsageStatsDatabase(mTestDir);
+        prevDB.init(1);
+        prevDB.putUsageStats(UsageStatsManager.INTERVAL_DAILY, mIntervalStats);
+        // Create a backup with a specific version
+        byte[] blob = prevDB.getBackupPayload(KEY_USAGE_STATS, version);
+
+        clearUsageStatsFiles();
+
+        UsageStatsDatabase newDB = new UsageStatsDatabase(mTestDir);
+        newDB.init(1);
+        // Attempt to restore the usage stats from the backup
+        newDB.applyRestoredPayload(KEY_USAGE_STATS, blob);
+        List<IntervalStats> stats = newDB.queryUsageStats(UsageStatsManager.INTERVAL_DAILY, 0, mEndTime,
+                mIntervalStatsVerifier);
+
+
+        if (version > newDB.BACKUP_VERSION || version < 1) {
+            if (stats != null && stats.size() != 0) {
+                fail("UsageStatsDatabase should ne be able to restore from unknown data versions");
+            }
+            return;
+        }
+
+        assertEquals(1, stats.size());
+
+        // Clear non backed up data from expected IntervalStats
+        mIntervalStats.activeConfiguration = null;
+        mIntervalStats.configurations.clear();
+        if (mIntervalStats.events != null) mIntervalStats.events.clear();
+
+        // The written and read IntervalStats should match
+        compareIntervalStats(mIntervalStats, stats.get(0));
+    }
+
+    /**
      * Test the version upgrade from 3 to 4
      */
     @Test
@@ -348,5 +404,19 @@ public class UsageStatsDatabaseTest {
         runVersionChangeTest(3, 4, UsageStatsManager.INTERVAL_WEEKLY);
         runVersionChangeTest(3, 4, UsageStatsManager.INTERVAL_MONTHLY);
         runVersionChangeTest(3, 4, UsageStatsManager.INTERVAL_YEARLY);
+    }
+
+
+    /**
+     * Test the version upgrade from 3 to 4
+     */
+    @Test
+    public void testBackupRestore() throws IOException {
+        runBackupRestoreTest(1);
+        runBackupRestoreTest(4);
+
+        // test invalid backup versions as well
+        runBackupRestoreTest(0);
+        runBackupRestoreTest(99999);
     }
 }

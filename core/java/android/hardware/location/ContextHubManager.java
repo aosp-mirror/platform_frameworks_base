@@ -73,7 +73,7 @@ public final class ContextHubManager {
      *
      * @hide
      */
-    public static final String EXTRA_NANOAPP_ID = "android.location.hardware.extra.NANOAPP_ID";
+    public static final String EXTRA_NANOAPP_ID = "android.hardware.location.extra.NANOAPP_ID";
 
     /**
      * An extra of type int describing the nanoapp-specific abort code.
@@ -81,14 +81,14 @@ public final class ContextHubManager {
      * @hide
      */
     public static final String EXTRA_NANOAPP_ABORT_CODE =
-            "android.location.hardware.extra.NANOAPP_ABORT_CODE";
+            "android.hardware.location.extra.NANOAPP_ABORT_CODE";
 
     /**
      * An extra of type {@link NanoAppMessage} describing contents of a message from a nanoapp.
      *
      * @hide
      */
-    public static final String EXTRA_MESSAGE = "android.location.hardware.extra.MESSAGE";
+    public static final String EXTRA_MESSAGE = "android.hardware.location.extra.MESSAGE";
 
     /**
      * Constants describing the type of events from a Context Hub.

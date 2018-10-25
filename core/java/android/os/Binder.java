@@ -28,6 +28,8 @@ import com.android.internal.util.FastPrintWriter;
 import com.android.internal.util.FunctionalUtils.ThrowingRunnable;
 import com.android.internal.util.FunctionalUtils.ThrowingSupplier;
 
+import dalvik.annotation.optimization.CriticalNative;
+
 import libcore.io.IoUtils;
 import libcore.util.NativeAllocationRegistry;
 
@@ -371,6 +373,54 @@ public class Binder implements IBinder {
      * @hide
      */
     public static final native int getThreadStrictModePolicy();
+
+    /**
+     * Sets the work source for this thread.
+     *
+     * <p>All the following binder calls on this thread will use the provided work source.
+     *
+     * <p>The concept of worksource is similar to {@link WorkSource}. However, for performance
+     * reasons, we only support one UID. This UID represents the original user responsible for the
+     * binder calls.
+     *
+     * <p>A typical use case would be
+     * <pre>
+     * Binder.setThreadWorkSource(uid);
+     * try {
+     *   // Call an API.
+     * } finally {
+     *   Binder.clearThreadWorkSource();
+     * }
+     * </pre>
+     *
+     * @param workSource The original UID responsible for the binder call.
+     * @return The previously set work source.
+     * @hide
+     **/
+    @CriticalNative
+    public static final native int setThreadWorkSource(int workSource);
+
+    /**
+     * Returns the work source set by the caller.
+     *
+     * Unlike {@link Binder#getCallingUid()}, this result of this method cannot be trusted. The
+     * caller can set the value to whatever he wants. Only use this value if you trust the calling
+     * uid.
+     *
+     * @return The original UID responsible for the binder transaction.
+     * @hide
+     */
+    @CriticalNative
+    public static final native int getThreadWorkSource();
+
+    /**
+     * Clears the work source on this thread.
+     *
+     * @return The previously set work source.
+     * @hide
+     **/
+    @CriticalNative
+    public static final native int clearThreadWorkSource();
 
     /**
      * Flush any Binder commands pending in the current thread to the kernel
