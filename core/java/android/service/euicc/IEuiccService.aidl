@@ -30,11 +30,12 @@ import android.service.euicc.IRetainSubscriptionsForFactoryResetCallback;
 import android.service.euicc.ISwitchToSubscriptionCallback;
 import android.service.euicc.IUpdateSubscriptionNicknameCallback;
 import android.telephony.euicc.DownloadableSubscription;
+import android.os.Bundle;
 
 /** @hide */
 oneway interface IEuiccService {
     void downloadSubscription(int slotId, in DownloadableSubscription subscription,
-            boolean switchAfterDownload, boolean forceDeactivateSim,
+            boolean switchAfterDownload, boolean forceDeactivateSim, in Bundle resolvedBundle,
             in IDownloadSubscriptionCallback callback);
     void getDownloadableSubscriptionMetadata(int slotId, in DownloadableSubscription subscription,
             boolean forceDeactivateSim, in IGetDownloadableSubscriptionMetadataCallback callback);
