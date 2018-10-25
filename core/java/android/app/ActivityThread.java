@@ -1425,58 +1425,8 @@ public final class ActivityThread extends ClientTransactionHandler {
             PrintWriter pw = new FastPrintWriter(
                     new FileOutputStream(pfd.getFileDescriptor()));
             PrintWriterPrinter printer = new PrintWriterPrinter(pw);
-            SQLiteDebug.dump(printer, args);
-
-            if (isSystem) {
-                dumpDatabaseFileSizes(pw, Environment.getDataSystemDirectory(), true);
-                dumpDatabaseFileSizes(pw, Environment.getDataSystemDeDirectory(), true);
-                dumpDatabaseFileSizes(pw, Environment.getDataSystemCeDirectory(), true);
-            } else {
-                Context context = getApplication();
-                if (context != null) {
-                    dumpDatabaseFileSizes(pw,
-                            getDatabasesDir(context.createDeviceProtectedStorageContext()),
-                            false);
-                    dumpDatabaseFileSizes(pw,
-                            getDatabasesDir(context.createCredentialProtectedStorageContext()),
-                            false);
-                }
-            }
+            SQLiteDebug.dump(printer, args, isSystem);
             pw.flush();
-        }
-
-        private void dumpDatabaseFileSizes(PrintWriter pw, File dir, boolean isSystem) {
-            final File[] files = dir.listFiles();
-            if (files == null || files.length == 0) {
-                return;
-            }
-            Arrays.sort(files, (a, b) -> a.getName().compareTo(b.getName()));
-
-            boolean needHeader = true;
-            for (File f : files) {
-                if (isSystem) {
-                    // If it's the system server, the directory contains other files too, so
-                    // filter by file extensions.
-                    // (If it's an app, just print all files because they may not use *.db
-                    // extension.)
-                    final String name = f.getName();
-                    if (!(name.endsWith(".db") || name.endsWith(".db-wal")
-                            || name.endsWith(".db-journal"))) {
-                        continue;
-                    }
-                }
-                if (needHeader) {
-                    pw.println();
-                    pw.println("Database files in " + dir.getAbsolutePath() + ":");
-                    needHeader = false;
-                }
-
-                pw.print("  ");
-                pw.print(f.getName());
-                pw.print("  ");
-                pw.print(f.length());
-                pw.println(" bytes");
-            }
         }
 
         @Override

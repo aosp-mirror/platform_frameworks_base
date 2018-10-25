@@ -34,6 +34,7 @@ import dalvik.system.BlockGuard;
 import dalvik.system.CloseGuard;
 
 import java.io.File;
+import java.io.IOException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -414,6 +415,10 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
         final String newLocale = mConfiguration.locale.toString();
         nativeRegisterLocalizedCollators(mConnectionPtr, newLocale);
 
+        if (!mConfiguration.isInMemoryDb()) {
+            checkDatabaseWiped();
+        }
+
         // If the database is read-only, we cannot modify the android metadata table
         // or existing indexes.
         if (mIsReadOnlyConnection) {
@@ -446,6 +451,36 @@ public final class SQLiteConnection implements CancellationSignal.OnCancelListen
         } catch (RuntimeException ex) {
             throw new SQLiteException("Failed to change locale for db '" + mConfiguration.label
                     + "' to '" + newLocale + "'.", ex);
+        }
+    }
+
+    private void checkDatabaseWiped() {
+        if (!SQLiteGlobal.checkDbWipe()) {
+            return;
+        }
+        try {
+            final File checkFile = new File(mConfiguration.path
+                    + SQLiteGlobal.WIPE_CHECK_FILE_SUFFIX);
+
+            final boolean hasMetadataTable = executeForLong(
+                    "SELECT count(*) FROM sqlite_master"
+                            + " WHERE type='table' AND name='android_metadata'", null, null) > 0;
+            final boolean hasCheckFile = checkFile.exists();
+
+            if (!mIsReadOnlyConnection && !hasCheckFile) {
+                // Create the check file, unless it's a readonly connection,
+                // in which case we can't create the metadata table anyway.
+                checkFile.createNewFile();
+            }
+
+            if (!hasMetadataTable && hasCheckFile) {
+                // Bad. The DB is gone unexpectedly.
+                SQLiteDatabase.wipeDetected(mConfiguration.path, "unknown");
+            }
+
+        } catch (RuntimeException | IOException ex) {
+            SQLiteDatabase.wtfAsSystemServer(TAG,
+                    "Unexpected exception while checking for wipe", ex);
         }
     }
 

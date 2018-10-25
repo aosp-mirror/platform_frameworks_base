@@ -189,6 +189,11 @@ public final class SQLiteDebug {
      * @param args Command-line arguments supplied to dumpsys dbinfo
      */
     public static void dump(Printer printer, String[] args) {
+        dump(printer, args, false);
+    }
+
+    /** @hide */
+    public static void dump(Printer printer, String[] args, boolean isSystem) {
         boolean verbose = false;
         for (String arg : args) {
             if (arg.equals("-v")) {
@@ -196,6 +201,6 @@ public final class SQLiteDebug {
             }
         }
 
-        SQLiteDatabase.dumpAll(printer, verbose);
+        SQLiteDatabase.dumpAll(printer, verbose, isSystem);
     }
 }

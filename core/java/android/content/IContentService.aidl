@@ -185,4 +185,6 @@ interface IContentService {
     Bundle getCache(in String packageName, in Uri key, int userId);
 
     void resetTodayStats();
+
+    void onDbCorruption(String tag, String message, String stacktrace);
 }

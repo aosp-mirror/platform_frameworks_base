@@ -24,6 +24,7 @@ import android.os.Message;
 import android.os.OperationCanceledException;
 import android.os.SystemClock;
 import android.text.TextUtils;
+import android.util.ArraySet;
 import android.util.Log;
 import android.util.PrefixPrinter;
 import android.util.Printer;
@@ -34,6 +35,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import dalvik.system.CloseGuard;
 
 import java.io.Closeable;
+import java.io.File;
 import java.util.ArrayList;
 import java.util.Map;
 import java.util.WeakHashMap;
@@ -1105,9 +1107,12 @@ public final class SQLiteConnectionPool implements Closeable {
      * @param printer The printer to receive the dump, not null.
      * @param verbose True to dump more verbose information.
      */
-    public void dump(Printer printer, boolean verbose) {
+    public void dump(Printer printer, boolean verbose, ArraySet<String> directories) {
         Printer indentedPrinter = PrefixPrinter.create(printer, "    ");
         synchronized (mLock) {
+            if (directories != null) {
+                directories.add(new File(mConfiguration.path).getParent());
+            }
             printer.println("Connection pool for " + mConfiguration.path + ":");
             printer.println("  Open: " + mIsOpen);
             printer.println("  Max connections: " + mMaxConnectionPoolSize);
