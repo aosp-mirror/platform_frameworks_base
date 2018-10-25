@@ -525,14 +525,16 @@ public class NotificationMediaManager implements Dumpable {
     }
 
     public void setup(BackDropView backdrop, ImageView backdropFront, ImageView backdropBack,
-            BiometricUnlockController biometricUnlockController, ScrimController scrimController,
-            LockscreenWallpaper lockscreenWallpaper) {
+            ScrimController scrimController, LockscreenWallpaper lockscreenWallpaper) {
         mBackdrop = backdrop;
         mBackdropFront = backdropFront;
         mBackdropBack = backdropBack;
-        mBiometricUnlockController = biometricUnlockController;
         mScrimController = scrimController;
         mLockscreenWallpaper = lockscreenWallpaper;
+    }
+
+    public void setBiometricUnlockController(BiometricUnlockController biometricUnlockController) {
+        mBiometricUnlockController = biometricUnlockController;
     }
 
     /**
