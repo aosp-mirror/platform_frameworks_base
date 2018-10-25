@@ -69,6 +69,7 @@ public class LockPatternView extends View {
     private static final int ASPECT_LOCK_HEIGHT = 2; // Fixed height; width will be minimum of (w,h)
 
     private static final boolean PROFILE_DRAWING = false;
+    private static final float LINE_FADE_ALPHA_MULTIPLIER = 3.5f;
     private final CellState[][] mCellStates;
 
     private final int mDotSize;
@@ -1170,9 +1171,9 @@ public class LockPatternView extends View {
                 float centerX = getCenterXForColumn(cell.column);
                 float centerY = getCenterYForRow(cell.row);
                 if (i != 0) {
-                   // Set this line segment to slowly fade over the next second.
+                   // Set this line segment to fade away animated.
                    int lineFadeVal = (int) Math.min((elapsedRealtime -
-                           mLineFadeStart[i])/2f, 255f);
+                           mLineFadeStart[i]) * LINE_FADE_ALPHA_MULTIPLIER, 255f);
 
                     CellState state = mCellStates[cell.row][cell.column];
                     currentPath.rewind();
