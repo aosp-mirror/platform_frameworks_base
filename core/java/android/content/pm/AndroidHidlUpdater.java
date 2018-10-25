@@ -38,6 +38,9 @@ public class AndroidHidlUpdater extends PackageSharedLibraryUpdater {
         if (pkg.applicationInfo.targetSdkVersion <= Build.VERSION_CODES.P) {
             prefixRequiredLibrary(pkg, ANDROID_HIDL_BASE);
             prefixRequiredLibrary(pkg, ANDROID_HIDL_MANAGER);
+        } else {
+            removeLibrary(pkg, ANDROID_HIDL_BASE);
+            removeLibrary(pkg, ANDROID_HIDL_MANAGER);
         }
     }
 }
