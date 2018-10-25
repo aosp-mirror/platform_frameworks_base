@@ -51,7 +51,7 @@
             android:layout_centerVertical="true"
             android:layout_toEndOf="@id/pkgicon" />
         <TextView
-            android:id="@+id/pkg_group_divider"
+            android:id="@+id/pkg_divider"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="@*android:style/TextAppearance.Material.Notification.Info"
@@ -61,7 +61,7 @@
             android:layout_centerVertical="true"
             android:layout_toEndOf="@id/pkgname" />
         <TextView
-            android:id="@+id/group_name"
+            android:id="@+id/delegate_name"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:textAppearance="@*android:style/TextAppearance.Material.Notification.Info"
@@ -70,7 +70,7 @@
             android:ellipsize="end"
             android:maxLines="1"
             android:layout_centerVertical="true"
-            android:layout_toEndOf="@id/pkg_group_divider" />
+            android:layout_toEndOf="@id/pkg_divider" />
         <!-- 24 dp icon with 16 dp padding all around to mirror notification content margins -->
         <ImageButton
             android:id="@+id/info"
@@ -101,13 +101,39 @@
             android:layout_marginStart="@*android:dimen/notification_content_margin_start"
             android:layout_marginEnd="@*android:dimen/notification_content_margin_start"
             android:orientation="vertical">
-            <!-- Channel Name -->
-            <TextView
-                android:id="@+id/channel_name"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:layout_weight="1"
-                style="@android:style/TextAppearance.Material.Notification.Title" />
+            <RelativeLayout
+                android:id="@+id/names"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content">
+                <TextView
+                    android:id="@+id/group_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="@*android:style/TextAppearance.Material.Notification.Title"
+                    android:layout_marginStart="2dp"
+                    android:layout_marginEnd="2dp"
+                    android:ellipsize="end"
+                    android:maxLines="1"
+                    android:layout_centerVertical="true" />
+                <TextView
+                    android:id="@+id/pkg_group_divider"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:textAppearance="@*android:style/TextAppearance.Material.Notification.Title"
+                    android:layout_marginStart="2dp"
+                    android:layout_marginEnd="2dp"
+                    android:text="@*android:string/notification_header_divider_symbol"
+                    android:layout_centerVertical="true"
+                    android:layout_toEndOf="@id/group_name" />
+                <!-- Channel Name -->
+                <TextView
+                    android:id="@+id/channel_name"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    style="@android:style/TextAppearance.Material.Notification.Title"
+                    android:layout_toEndOf="@id/pkg_group_divider"/>
+            </RelativeLayout>
             <!-- Question prompt -->
             <TextView
                 android:id="@+id/block_prompt"
