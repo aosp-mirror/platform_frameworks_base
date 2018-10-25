@@ -411,8 +411,6 @@ public class ForwardDeleteTest {
         // Emoji modifier + ZERO WIDTH JOINER
         state.setByString("| U+1F466 U+1F3FB U+200D U+1F469");
         forwardDelete(state, 0);
-        state.assertEquals("| U+1F469");
-        forwardDelete(state, 0);
         state.assertEquals("|");
 
         // Regional indicator symbol + emoji modifier
