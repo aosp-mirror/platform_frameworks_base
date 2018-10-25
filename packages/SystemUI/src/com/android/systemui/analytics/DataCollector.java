@@ -16,6 +16,9 @@
 
 package com.android.systemui.analytics;
 
+import static com.android.systemui.statusbar.phone.nano.TouchAnalyticsProto.Session;
+import static com.android.systemui.statusbar.phone.nano.TouchAnalyticsProto.Session.PhoneEvent;
+
 import android.content.Context;
 import android.database.ContentObserver;
 import android.hardware.Sensor;
@@ -36,9 +39,6 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 
-import static com.android.systemui.statusbar.phone.nano.TouchAnalyticsProto.Session;
-import static com.android.systemui.statusbar.phone.nano.TouchAnalyticsProto.Session.PhoneEvent;
-
 /**
  * Tracks touch, sensor and phone events when the lockscreen is on. If the phone is unlocked
  * the data containing these events is saved to a file. This data is collected
@@ -53,6 +53,8 @@ public class DataCollector implements SensorEventListener {
     private static final String COLLECT_BAD_TOUCHES = "data_collector_collect_bad_touches";
     private static final String ALLOW_REJECTED_TOUCH_REPORTS =
             "data_collector_allow_rejected_touch_reports";
+    private static final String DISABLE_UNLOCKING_FOR_FALSING_COLLECTION =
+            "data_collector_disable_unlocking";
 
     private static final long TIMEOUT_MILLIS = 11000; // 11 seconds.
     public static final boolean DEBUG = false;
@@ -65,11 +67,11 @@ public class DataCollector implements SensorEventListener {
     private SensorLoggerSession mCurrentSession = null;
 
     private boolean mEnableCollector = false;
-    private boolean mTimeoutActive = false;
     private boolean mCollectBadTouches = false;
     private boolean mCornerSwiping = false;
     private boolean mTrackingStarted = false;
     private boolean mAllowReportRejectedTouch = false;
+    private boolean mDisableUnlocking = false;
 
     private static DataCollector sInstance = null;
 
@@ -98,6 +100,11 @@ public class DataCollector implements SensorEventListener {
                 mSettingsObserver,
                 UserHandle.USER_ALL);
 
+        mContext.getContentResolver().registerContentObserver(
+                Settings.Secure.getUriFor(DISABLE_UNLOCKING_FOR_FALSING_COLLECTION), false,
+                mSettingsObserver,
+                UserHandle.USER_ALL);
+
         updateConfiguration();
     }
 
@@ -118,6 +125,9 @@ public class DataCollector implements SensorEventListener {
         mAllowReportRejectedTouch = Build.IS_DEBUGGABLE && 0 != Settings.Secure.getInt(
                 mContext.getContentResolver(),
                 ALLOW_REJECTED_TOUCH_REPORTS, 0);
+        mDisableUnlocking = mEnableCollector && Build.IS_DEBUGGABLE && 0 != Settings.Secure.getInt(
+                mContext.getContentResolver(),
+                DISABLE_UNLOCKING_FOR_FALSING_COLLECTION, 0);
     }
 
     private boolean sessionEntrypoint() {
@@ -144,7 +154,7 @@ public class DataCollector implements SensorEventListener {
         SensorLoggerSession session = mCurrentSession;
         mCurrentSession = null;
 
-        if (mEnableCollector) {
+        if (mEnableCollector || mDisableUnlocking) {
             session.end(System.currentTimeMillis(), result);
             queueSession(session);
         }
@@ -183,11 +193,11 @@ public class DataCollector implements SensorEventListener {
                 byte[] b = Session.toByteArray(currentSession.toProto());
                 String dir = mContext.getFilesDir().getAbsolutePath();
                 if (currentSession.getResult() != Session.SUCCESS) {
-                    if (!mCollectBadTouches) {
+                    if (!mDisableUnlocking && !mCollectBadTouches) {
                         return;
                     }
                     dir += "/bad_touches";
-                } else {
+                } else if (!mDisableUnlocking) {
                     dir += "/good_touches";
                 }
 
@@ -208,19 +218,6 @@ public class DataCollector implements SensorEventListener {
     public synchronized void onSensorChanged(SensorEvent event) {
         if (isEnabled() && mCurrentSession != null) {
             mCurrentSession.addSensorEvent(event, System.nanoTime());
-            enforceTimeout();
-        }
-    }
-
-    private void enforceTimeout() {
-        if (mTimeoutActive) {
-            if (System.currentTimeMillis() - mCurrentSession.getStartTimestampMillis()
-                    > TIMEOUT_MILLIS) {
-                onSessionEnd(Session.UNKNOWN);
-                if (DEBUG) {
-                    Log.i(TAG, "Analytics timed out.");
-                }
-            }
         }
     }
 
@@ -233,9 +230,12 @@ public class DataCollector implements SensorEventListener {
      *         rejected touch report.
      */
     public boolean isEnabled() {
-        return mEnableCollector || mAllowReportRejectedTouch;
+        return mEnableCollector || mAllowReportRejectedTouch || mDisableUnlocking;
     }
 
+    public boolean isUnlockingDisabled() {
+        return mDisableUnlocking;
+    }
     /**
      * @return true if the full data set for data gathering should be collected - including
      *         extensive sensor data, which is is not normally included with rejected touch reports.
@@ -450,7 +450,6 @@ public class DataCollector implements SensorEventListener {
             }
             mCurrentSession.addMotionEvent(event);
             mCurrentSession.setTouchArea(width, height);
-            enforceTimeout();
         }
     }
 

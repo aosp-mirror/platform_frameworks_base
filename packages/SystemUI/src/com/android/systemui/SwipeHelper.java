@@ -33,10 +33,11 @@ import android.view.VelocityTracker;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.accessibility.AccessibilityEvent;
+
 import com.android.systemui.classifier.FalsingManager;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
-import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.FlingAnimationUtils;
+import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 
 public class SwipeHelper implements Gefingerpoken {
     static final String TAG = "com.android.systemui.SwipeHelper";
@@ -675,6 +676,7 @@ public class SwipeHelper implements Gefingerpoken {
 
     public boolean isDismissGesture(MotionEvent ev) {
         return ev.getActionMasked() == MotionEvent.ACTION_UP
+                && !mFalsingManager.isUnlockingDisabled()
                 && !isFalseGesture(ev) && (swipedFastEnough() || swipedFarEnough())
                 && mCallback.canChildBeDismissed(mCurrView);
     }

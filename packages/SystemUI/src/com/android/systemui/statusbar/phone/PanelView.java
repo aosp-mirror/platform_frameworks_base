@@ -670,6 +670,10 @@ public abstract class PanelView extends FrameLayout {
      * @return whether a fling should expands the panel; contracts otherwise
      */
     protected boolean flingExpands(float vel, float vectorVel, float x, float y) {
+        if (mFalsingManager.isUnlockingDisabled()) {
+            return true;
+        }
+
         if (isFalseTouch(x, y)) {
             return true;
         }

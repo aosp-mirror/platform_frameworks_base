@@ -35,7 +35,7 @@ public class KeyguardDismissUtil implements KeyguardDismissHandler {
     }
 
     /**
-     * Executes an action that requres the screen to be unlocked.
+     * Executes an action that requires the screen to be unlocked.
      *
      * <p>Must be called after {@link #setDismissHandler}.
      */
