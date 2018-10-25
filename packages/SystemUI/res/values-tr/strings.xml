@@ -319,6 +319,7 @@
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Adsız cihaz"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"Yayın için hazır"</string>
     <string name="quick_settings_cast_detail_empty_text" msgid="311785821261640623">"Kullanılabilir cihaz yok"</string>
+    <string name="quick_settings_cast_no_wifi" msgid="2696477881905521882">"Kablosuz ağ bağlı değil"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Parlaklık"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"OTOMATİK"</string>
     <string name="quick_settings_inversion_label" msgid="8790919884718619648">"Renkleri çevir"</string>
@@ -372,7 +373,7 @@
     <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"Ekranı sola doğru böl"</string>
     <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"Ekranı sağa doğru böl"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7171470775439860480">"Genel bakışı aç/kapat"</string>
-    <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Ödeme alındı"</string>
+    <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Şarj oldu"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"Şarj oluyor"</string>
     <string name="expanded_header_battery_charging_with_time" msgid="457559884275395376">"Tam şarj olmasına <xliff:g id="CHARGING_TIME">%s</xliff:g> kaldı"</string>
     <string name="expanded_header_battery_not_charging" msgid="4798147152367049732">"Şarj olmuyor"</string>
@@ -782,6 +783,7 @@
     <string name="accessibility_quick_settings_user" msgid="1567445362870421770">"<xliff:g id="ID_1">%s</xliff:g> olarak oturum açıldı"</string>
     <string name="data_connection_no_internet" msgid="4503302451650972989">"İnternet yok"</string>
     <string name="accessibility_quick_settings_open_details" msgid="4230931801728005194">"Ayrıntıları aç."</string>
+    <string name="accessibility_quick_settings_not_available" msgid="4190068184294019846">"<xliff:g id="REASON">%s</xliff:g> nedeniyle kullanılamıyor"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"<xliff:g id="ID_1">%s</xliff:g> ayarlarını aç."</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Ayarların sırasını düzenle."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Sayfa <xliff:g id="ID_1">%1$d</xliff:g> / <xliff:g id="ID_2">%2$d</xliff:g>"</string>

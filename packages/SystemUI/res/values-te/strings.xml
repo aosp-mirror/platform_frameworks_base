@@ -174,7 +174,7 @@
     <string name="carrier_network_change_mode" msgid="8149202439957837762">"క్యారియర్ నెట్‌వర్క్ మారుతోంది"</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"బ్యాటరీ వివరాలను తెరుస్తుంది"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"బ్యాటరీ <xliff:g id="NUMBER">%d</xliff:g> శాతం."</string>
-    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"బ్యాటరీ ఛార్జ్ అవుతోంది, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> శాతం."</string>
+    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"బ్యాటరీ ఛార్జ్ అవుతోంది, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> %%."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"సిస్టమ్ సెట్టింగ్‌లు."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"నోటిఫికేషన్‌లు."</string>
     <string name="accessibility_overflow_action" msgid="5681882033274783311">"అన్ని నోటిఫికేషన్‌లను చూడండి"</string>
@@ -319,6 +319,7 @@
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"పేరులేని పరికరం"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"ప్రసారం చేయడానికి సిద్ధంగా ఉంది"</string>
     <string name="quick_settings_cast_detail_empty_text" msgid="311785821261640623">"పరికరాలు ఏవీ అందుబాటులో లేవు"</string>
+    <string name="quick_settings_cast_no_wifi" msgid="2696477881905521882">"Wi‑Fi కనెక్ట్ కాలేదు"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"ప్రకాశం"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"స్వయంచాలకం"</string>
     <string name="quick_settings_inversion_label" msgid="8790919884718619648">"రంగులను తారుమారు చేయి"</string>
@@ -442,8 +443,7 @@
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"<xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> మీ స్క్రీన్‌పై కనిపించే ప్రతిదాన్ని క్యాప్చర్ చేయడం ప్రారంభిస్తుంది."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"మళ్లీ చూపవద్దు"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"అన్నీ క్లియర్ చేయండి"</string>
-    <!-- no translation found for manage_notifications_text (2386728145475108753) -->
-    <skip />
+    <string name="manage_notifications_text" msgid="2386728145475108753">"నిర్వహించండి"</string>
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"అంతరాయం కలిగించవద్దు ద్వారా నోటిఫికేషన్‌లు పాజ్ చేయబడ్డాయి"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"ఇప్పుడే ప్రారంభించు"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"నోటిఫికేషన్‌లు లేవు"</string>
@@ -783,6 +783,7 @@
     <string name="accessibility_quick_settings_user" msgid="1567445362870421770">"<xliff:g id="ID_1">%s</xliff:g> వలె సైన్ ఇన్ చేసారు"</string>
     <string name="data_connection_no_internet" msgid="4503302451650972989">"ఇంటర్నెట్ లేదు"</string>
     <string name="accessibility_quick_settings_open_details" msgid="4230931801728005194">"వివరాలను తెరవండి."</string>
+    <string name="accessibility_quick_settings_not_available" msgid="4190068184294019846">"<xliff:g id="REASON">%s</xliff:g> కారణంగా అందుబాటులో లేదు"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"<xliff:g id="ID_1">%s</xliff:g> సెట్టింగ్‌లను తెరవండి."</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"సెట్టింగ్‌ల క్రమాన్ని సవరించండి."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"<xliff:g id="ID_2">%2$d</xliff:g>లో <xliff:g id="ID_1">%1$d</xliff:g>వ పేజీ"</string>

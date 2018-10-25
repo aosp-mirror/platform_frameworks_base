@@ -319,6 +319,7 @@
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"பெயரிடப்படாத சாதனம்"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"திரையிடத் தயார்"</string>
     <string name="quick_settings_cast_detail_empty_text" msgid="311785821261640623">"சாதனங்கள் இல்லை"</string>
+    <string name="quick_settings_cast_no_wifi" msgid="2696477881905521882">"வைஃபை இணைக்கப்படவில்லை"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"ஒளிர்வு"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"தானியங்கு"</string>
     <string name="quick_settings_inversion_label" msgid="8790919884718619648">"வண்ணங்களை மாற்று"</string>
@@ -442,8 +443,7 @@
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"திரையில் காட்டப்படும் அனைத்தையும் <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> படமெடுக்கும்."</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"மீண்டும் காட்டாதே"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"எல்லாவற்றையும் அழி"</string>
-    <!-- no translation found for manage_notifications_text (2386728145475108753) -->
-    <skip />
+    <string name="manage_notifications_text" msgid="2386728145475108753">"அறிவிப்புகளை நிர்வகி"</string>
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"\'தொந்தரவு செய்ய வேண்டாம்\' அம்சத்தின் மூலம் அறிவிப்புகள் இடைநிறுத்தப்பட்டுள்ளன"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"இப்போது தொடங்கு"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"அறிவிப்புகள் இல்லை"</string>
@@ -783,6 +783,7 @@
     <string name="accessibility_quick_settings_user" msgid="1567445362870421770">"<xliff:g id="ID_1">%s</xliff:g> என்ற பெயரில் உள்நுழைந்துள்ளீர்கள்"</string>
     <string name="data_connection_no_internet" msgid="4503302451650972989">"இணைய இணைப்பு இல்லை"</string>
     <string name="accessibility_quick_settings_open_details" msgid="4230931801728005194">"விவரங்களைத் திற."</string>
+    <string name="accessibility_quick_settings_not_available" msgid="4190068184294019846">"<xliff:g id="REASON">%s</xliff:g> என்பதால் தற்போது முடக்கப்பட்டுள்ளது"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"<xliff:g id="ID_1">%s</xliff:g> அமைப்புகளைத் திற."</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"அமைப்புகளின் வரிசை முறையைத் திருத்து."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"பக்கம் <xliff:g id="ID_1">%1$d</xliff:g> / <xliff:g id="ID_2">%2$d</xliff:g>"</string>
