@@ -745,7 +745,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     boolean mFullPssPending = false;
 
     /** Track all uids that have actively running processes. */
-    final ActiveUids mActiveUids = new ActiveUids(this, true /* postChangesToAtm */);
+    final ActiveUids mActiveUids;
 
     /**
      * This is for verifying the UID report flow.
@@ -2117,6 +2117,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mContext = mInjector.getContext();
         mUiContext = null;
         mAppErrors = null;
+        mActiveUids = new ActiveUids(this, false /* postChangesToAtm */);
         mAppOpsService = mInjector.getAppOpsService(null /* file */, null /* handler */);
         mBatteryStatsService = null;
         mHandler = hasHandlerThread ? new MainHandler(handlerThread.getLooper()) : null;
@@ -2179,6 +2180,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mServices = new ActiveServices(this);
         mProviderMap = new ProviderMap(this);
         mAppErrors = new AppErrors(mUiContext, this);
+        mActiveUids = new ActiveUids(this, true /* postChangesToAtm */);
 
         final File systemDir = SystemServiceManager.ensureSystemDir();
 
