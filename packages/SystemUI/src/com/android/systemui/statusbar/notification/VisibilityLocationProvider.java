@@ -26,8 +26,8 @@ public interface VisibilityLocationProvider {
     /**
      * Returns whether an ExpandableNotificationRow is in a visible location or not.
      *
-     * @param row
+     * @param entry
      * @return true if row is in a visible location
      */
-    boolean isInVisibleLocation(ExpandableNotificationRow row);
+    boolean isInVisibleLocation(NotificationData.Entry entry);
 }

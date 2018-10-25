@@ -86,7 +86,6 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
     private final ActivityStarter mActivityStarter = Dependency.get(ActivityStarter.class);
 
     // which notification is currently being longpress-examined by the user
-    private final IStatusBarService mBarService;
     private NotificationGuts mNotificationGutsExposed;
     private NotificationMenuRowPlugin.MenuItem mGutsMenuItem;
     private NotificationSafeToRemoveCallback mNotificationLifetimeFinishedCallback;
@@ -103,8 +102,6 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
 
         mAccessibilityManager = (AccessibilityManager)
                 mContext.getSystemService(Context.ACCESSIBILITY_SERVICE);
-        mBarService = IStatusBarService.Stub.asInterface(
-                ServiceManager.getService(Context.STATUS_BAR_SERVICE));
     }
 
     public void setUpWithPresenter(NotificationPresenter presenter,
@@ -116,9 +113,9 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
         mOnSettingsClickListener = onSettingsClick;
     }
 
-    public void onDensityOrFontScaleChanged(ExpandableNotificationRow row) {
-        setExposedGuts(row.getGuts());
-        bindGuts(row);
+    public void onDensityOrFontScaleChanged(NotificationData.Entry entry) {
+        setExposedGuts(entry.getGuts());
+        bindGuts(entry.getRow());
     }
 
     /**
@@ -441,8 +438,8 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
     public boolean shouldExtendLifetime(NotificationData.Entry entry) {
         return entry != null
                 &&(mNotificationGutsExposed != null
-                    && entry.row.getGuts() != null
-                    && mNotificationGutsExposed == entry.row.getGuts()
+                    && entry.getGuts() != null
+                    && mNotificationGutsExposed == entry.getGuts()
                     && !mNotificationGutsExposed.isLeavebehind());
     }
 

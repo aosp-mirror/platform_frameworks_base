@@ -600,12 +600,12 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             public void setRemoteInputActive(NotificationData.Entry entry,
                     boolean remoteInputActive) {
                 mHeadsUpManager.setRemoteInputActive(entry, remoteInputActive);
-                entry.row.notifyHeightChanged(true /* needsAnimation */);
+                entry.notifyHeightChanged(true /* needsAnimation */);
                 updateFooter();
             }
 
             public void lockScrollTo(NotificationData.Entry entry) {
-                NotificationStackScrollLayout.this.lockScrollTo(entry.row);
+                NotificationStackScrollLayout.this.lockScrollTo(entry.getRow());
             }
 
             public void requestDisallowLongPressAndDismiss() {
@@ -897,7 +897,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
 
     @Override
     @ShadeViewRefactor(RefactorComponent.LAYOUT_ALGORITHM)
-    public boolean isInVisibleLocation(ExpandableNotificationRow row) {
+    public boolean isInVisibleLocation(NotificationData.Entry entry) {
+        ExpandableNotificationRow row = entry.getRow();
         ExpandableViewState childViewState = mCurrentStackScrollState.getViewStateForView(row);
         if (childViewState == null) {
             return false;
@@ -1213,12 +1214,12 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         if (topEntry == null) {
             return 0;
         }
-        ExpandableNotificationRow row = topEntry.row;
+        ExpandableNotificationRow row = topEntry.getRow();
         if (row.isChildInGroup()) {
-            final ExpandableNotificationRow groupSummary
+            final NotificationData.Entry groupSummary
                     = mGroupManager.getGroupSummary(row.getStatusBarNotification());
             if (groupSummary != null) {
-                row = groupSummary;
+                row = groupSummary.getRow();
             }
         }
         return row.getPinnedHeadsUpHeight();
@@ -1390,11 +1391,12 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                     && touchY >= top && touchY <= bottom && touchX >= left && touchX <= right) {
                 if (slidingChild instanceof ExpandableNotificationRow) {
                     ExpandableNotificationRow row = (ExpandableNotificationRow) slidingChild;
+                    NotificationData.Entry entry = row.getEntry();
                     if (!mIsExpanded && row.isHeadsUp() && row.isPinned()
-                            && mHeadsUpManager.getTopEntry().row != row
+                            && mHeadsUpManager.getTopEntry().getRow() != row
                             && mGroupManager.getGroupSummary(
-                            mHeadsUpManager.getTopEntry().row.getStatusBarNotification())
-                            != row) {
+                                mHeadsUpManager.getTopEntry().notification)
+                            != entry) {
                         continue;
                     }
                     return row.getViewAtPosition(touchY - childTop);
@@ -1524,7 +1526,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
 
     @Override
     @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
-    public void snapViewIfNeeded(ExpandableNotificationRow child) {
+    public void snapViewIfNeeded(NotificationData.Entry entry) {
+        ExpandableNotificationRow child = entry.getRow();
         boolean animate = mIsExpanded || isPinnedHeadsUp(child);
         // If the child is showing the notification menu snap to that
         float targetLeft = child.getProvider().isMenuVisible() ? child.getTranslation() : 0;
@@ -2514,7 +2517,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
 
     @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     @Override
-    public void cleanUpViewState(View child) {
+    public void cleanUpViewStateForEntry(NotificationData.Entry entry) {
+        View child = entry.getRow();
         if (child == mSwipeHelper.getTranslatingParentView()) {
             mSwipeHelper.clearTranslatingParentView();
         }
@@ -2644,9 +2648,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     private boolean isChildInInvisibleGroup(View child) {
         if (child instanceof ExpandableNotificationRow) {
             ExpandableNotificationRow row = (ExpandableNotificationRow) child;
-            ExpandableNotificationRow groupSummary =
+            NotificationData.Entry groupSummary =
                     mGroupManager.getGroupSummary(row.getStatusBarNotification());
-            if (groupSummary != null && groupSummary != row) {
+            if (groupSummary != null && groupSummary.getRow() != row) {
                 return row.getVisibility() == View.INVISIBLE;
             }
         }
@@ -4662,6 +4666,11 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         mHeadsUpManager.setAnimationStateHandler(this::setHeadsUpGoingAwayAnimationsAllowed);
     }
 
+    public void generateHeadsUpAnimation(NotificationData.Entry entry, boolean isHeadsUp) {
+        ExpandableNotificationRow row = entry.getHeadsUpAnimationView();
+        generateHeadsUpAnimation(row, isHeadsUp);
+    }
+
     @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     public void generateHeadsUpAnimation(ExpandableNotificationRow row, boolean isHeadsUp) {
         if (mAnimationsEnabled && (isHeadsUp || mHeadsUpGoingAwayAnimationsAllowed)) {
@@ -5692,7 +5701,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                         && (parent.areGutsExposed()
                         || mSwipeHelper.getExposedMenuView() == parent
                         || (parent.getNotificationChildren().size() == 1
-                        && parent.isClearable()))) {
+                        && parent.getEntry().isClearable()))) {
                     // In this case the group is expanded and showing the menu for the
                     // group, further interaction should apply to the group, not any
                     // child notifications so we use the parent of the child. We also do the same

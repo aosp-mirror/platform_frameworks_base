@@ -115,7 +115,7 @@ public class NotificationLogger implements StateListener {
             for (int i = 0; i < N; i++) {
                 NotificationData.Entry entry = activeNotifications.get(i);
                 String key = entry.notification.getKey();
-                boolean isVisible = mListContainer.isInVisibleLocation(entry.row);
+                boolean isVisible = mListContainer.isInVisibleLocation(entry);
                 NotificationVisibility visObj = NotificationVisibility.obtain(key, i, N, isVisible);
                 boolean previouslyVisible = mCurrentlyVisibleNotifications.contains(visObj);
                 if (isVisible) {

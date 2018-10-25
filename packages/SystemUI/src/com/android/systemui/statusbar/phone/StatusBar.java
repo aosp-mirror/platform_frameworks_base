@@ -484,7 +484,7 @@ public class StatusBar extends SystemUI implements DemoMode,
 
     private Runnable mLaunchTransitionEndRunnable;
     protected boolean mLaunchTransitionFadingAway;
-    private ExpandableNotificationRow mDraggedDownRow;
+    private NotificationData.Entry mDraggedDownEntry;
     private boolean mLaunchCameraOnScreenTurningOn;
     private boolean mLaunchCameraOnFinishedGoingToSleep;
     private int mLastCameraLaunchSource;
@@ -1265,10 +1265,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         mQSPanel.clickTile(tile);
     }
 
-    public static boolean isTopLevelChild(Entry entry) {
-        return entry.row.getParent() instanceof NotificationStackScrollLayout;
-    }
-
     public boolean areNotificationsHidden() {
         return mZenController.areNotificationsHiddenInShade();
     }
@@ -1491,12 +1487,12 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     @Override
-    public void onHeadsUpPinned(ExpandableNotificationRow headsUp) {
+    public void onHeadsUpPinned(NotificationData.Entry entry) {
         dismissVolumeDialog();
     }
 
     @Override
-    public void onHeadsUpUnPinned(ExpandableNotificationRow headsUp) {
+    public void onHeadsUpUnPinned(NotificationData.Entry entry) {
     }
 
     @Override
@@ -2605,9 +2601,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         final int notificationCount = activeNotifications.size();
         for (int i = 0; i < notificationCount; i++) {
             NotificationData.Entry entry = activeNotifications.get(i);
-            if (entry.row != null) {
-                entry.row.resetUserExpansion();
-            }
+            entry.resetUserExpansion();
         }
     }
 
@@ -3038,10 +3032,10 @@ public class StatusBar extends SystemUI implements DemoMode,
             mStatusBarStateController.setState(StatusBarState.KEYGUARD);
         }
         updatePanelExpansionForKeyguard();
-        if (mDraggedDownRow != null) {
-            mDraggedDownRow.setUserLocked(false);
-            mDraggedDownRow.notifyHeightChanged(false  /* needsAnimation */);
-            mDraggedDownRow = null;
+        if (mDraggedDownEntry != null) {
+            mDraggedDownEntry.setUserLocked(false);
+            mDraggedDownEntry.notifyHeightChanged(false /* needsAnimation */);
+            mDraggedDownEntry = null;
         }
     }
 
@@ -3181,9 +3175,9 @@ public class StatusBar extends SystemUI implements DemoMode,
             }
             long delay = mKeyguardMonitor.calculateGoingToFullShadeDelay();
             mNotificationPanel.animateToFullShade(delay);
-            if (mDraggedDownRow != null) {
-                mDraggedDownRow.setUserLocked(false);
-                mDraggedDownRow = null;
+            if (mDraggedDownEntry != null) {
+                mDraggedDownEntry.setUserLocked(false);
+                mDraggedDownEntry = null;
             }
 
             // TODO(115978725): Support animations on external nav bars.
@@ -3575,14 +3569,15 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         int userId = mLockscreenUserManager.getCurrentUserId();
         ExpandableNotificationRow row = null;
+        NotificationData.Entry entry = null;
         if (expandView instanceof ExpandableNotificationRow) {
-            row = (ExpandableNotificationRow) expandView;
-            row.setUserExpanded(true /* userExpanded */, true /* allowChildExpansion */);
+            entry = ((ExpandableNotificationRow) expandView).getEntry();
+            entry.setUserExpanded(true /* userExpanded */, true /* allowChildExpansion */);
             // Indicate that the group expansion is changing at this time -- this way the group
             // and children backgrounds / divider animations will look correct.
-            row.setGroupExpansionChanging(true);
-            if (row.getStatusBarNotification() != null) {
-                userId = row.getStatusBarNotification().getUserId();
+            entry.setGroupExpansionChanging(true);
+            if (entry.notification != null) {
+                userId = entry.notification.getUserId();
             }
         }
         boolean fullShadeNeedsBouncer = !mLockscreenUserManager.
@@ -3592,7 +3587,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         if (mLockscreenUserManager.isLockscreenPublicMode(userId) && fullShadeNeedsBouncer) {
             mStatusBarStateController.setLeaveOpenOnKeyguardHide(true);
             showBouncerIfKeyguard();
-            mDraggedDownRow = row;
+            mDraggedDownEntry = entry;
             mPendingRemoteInputView = null;
         } else {
             mNotificationPanel.animateToFullShade(0 /* delay */);

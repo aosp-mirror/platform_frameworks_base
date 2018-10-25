@@ -268,7 +268,7 @@ public class BubbleController {
         for (BubbleView bv : mBubbles.values()) {
             NotificationData.Entry entry = bv.getEntry();
             if (entry != null) {
-                if (entry.row.isRemoved() || entry.isBubbleDismissed() || entry.row.isDismissed()) {
+                if (entry.isRowRemoved() || entry.isBubbleDismissed() || entry.isRowDismissed()) {
                     viewsToRemove.add(bv);
                 }
             }

@@ -198,7 +198,7 @@ public class NotificationGroupAlertTransferHelper implements OnGroupChangeListen
                 alertNotificationWhenPossible(entry, getActiveAlertManager());
             } else {
                 // The transfer is no longer valid. Free the content.
-                entry.row.freeContentViewWhenSafe(alertInfo.mAlertManager.getContentFlag());
+                entry.getRow().freeContentViewWhenSafe(alertInfo.mAlertManager.getContentFlag());
             }
         }
     }
@@ -299,9 +299,9 @@ public class NotificationGroupAlertTransferHelper implements OnGroupChangeListen
 
         Entry child = mGroupManager.getLogicalChildren(summary.notification).iterator().next();
         if (child != null) {
-            if (child.row.keepInParent()
-                    || child.row.isRemoved()
-                    || child.row.isDismissed()) {
+            if (child.getRow().keepInParent()
+                    || child.isRowRemoved()
+                    || child.isRowDismissed()) {
                 // The notification is actually already removed. No need to alert it.
                 return;
             }
@@ -390,10 +390,10 @@ public class NotificationGroupAlertTransferHelper implements OnGroupChangeListen
     private void alertNotificationWhenPossible(@NonNull Entry entry,
             @NonNull AlertingNotificationManager alertManager) {
         @InflationFlag int contentFlag = alertManager.getContentFlag();
-        if (!entry.row.isInflationFlagSet(contentFlag)) {
+        if (!entry.getRow().isInflationFlagSet(contentFlag)) {
             mPendingAlerts.put(entry.key, new PendingAlertInfo(entry, alertManager));
-            entry.row.updateInflationFlag(contentFlag, true /* shouldInflate */);
-            entry.row.inflateViews();
+            entry.getRow().updateInflationFlag(contentFlag, true /* shouldInflate */);
+            entry.getRow().inflateViews();
             return;
         }
         if (alertManager.isAlerting(entry.key)) {

@@ -304,18 +304,19 @@ public class HeadsUpManagerPhone extends HeadsUpManager implements Dumpable,
             return;
         }
         if (hasPinnedHeadsUp()) {
-            ExpandableNotificationRow topEntry = getTopEntry().row;
+            NotificationData.Entry topEntry = getTopEntry();
             if (topEntry.isChildInGroup()) {
-                final ExpandableNotificationRow groupSummary
-                        = mGroupManager.getGroupSummary(topEntry.getStatusBarNotification());
+                final NotificationData.Entry groupSummary
+                        = mGroupManager.getGroupSummary(topEntry.notification);
                 if (groupSummary != null) {
                     topEntry = groupSummary;
                 }
             }
-            topEntry.getLocationOnScreen(mTmpTwoArray);
+            ExpandableNotificationRow topRow = topEntry.getRow();
+            topRow.getLocationOnScreen(mTmpTwoArray);
             int minX = mTmpTwoArray[0];
-            int maxX = mTmpTwoArray[0] + topEntry.getWidth();
-            int height = topEntry.getIntrinsicHeight();
+            int maxX = mTmpTwoArray[0] + topRow.getWidth();
+            int height = topRow.getIntrinsicHeight();
 
             info.setTouchableInsets(ViewTreeObserver.InternalInsetsInfo.TOUCHABLE_INSETS_REGION);
             info.touchableRegion.set(minX, 0, maxX, mHeadsUpInset + height);

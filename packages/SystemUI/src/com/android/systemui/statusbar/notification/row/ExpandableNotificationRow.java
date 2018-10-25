@@ -104,6 +104,7 @@ import com.android.systemui.statusbar.notification.stack.AmbientState;
 import com.android.systemui.statusbar.notification.stack.AnimationProperties;
 import com.android.systemui.statusbar.notification.stack.ExpandableViewState;
 import com.android.systemui.statusbar.notification.stack.NotificationChildrenContainer;
+import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.StackScrollState;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -1411,16 +1412,16 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     public void performDismiss(boolean fromAccessibility) {
         if (isOnlyChildInGroup()) {
-            ExpandableNotificationRow groupSummary =
+            NotificationData.Entry groupSummary =
                     mGroupManager.getLogicalGroupSummary(getStatusBarNotification());
             if (groupSummary.isClearable()) {
                 // If this is the only child in the group, dismiss the group, but don't try to show
                 // the blocking helper affordance!
-                groupSummary.performDismiss(fromAccessibility);
+                groupSummary.getRow().performDismiss(fromAccessibility);
             }
         }
         setDismissed(fromAccessibility);
-        if (isClearable()) {
+        if (mEntry.isClearable()) {
             // TODO: track dismiss sentiment
             if (mOnDismissRunnable != null) {
                 mOnDismissRunnable.run();
@@ -2244,28 +2245,6 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
         setRippleAllowed(allowed);
     }
 
-    /**
-     * @return Can the underlying notification be cleared? This can be different from whether the
-     *         notification can be dismissed in case notifications are sensitive on the lockscreen.
-     * @see #canViewBeDismissed()
-     */
-    public boolean isClearable() {
-        if (mStatusBarNotification == null || !mStatusBarNotification.isClearable()) {
-            return false;
-        }
-        if (mIsSummaryWithChildren) {
-            List<ExpandableNotificationRow> notificationChildren =
-                    mChildrenContainer.getNotificationChildren();
-            for (int i = 0; i < notificationChildren.size(); i++) {
-                ExpandableNotificationRow child = notificationChildren.get(i);
-                if (!child.isClearable()) {
-                    return false;
-                }
-            }
-        }
-        return true;
-    }
-
     @Override
     public int getIntrinsicHeight() {
         if (isShownAsBubble()) {
@@ -2533,10 +2512,10 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     /**
      * @return Whether this view is allowed to be dismissed. Only valid for visible notifications as
      *         otherwise some state might not be updated. To request about the general clearability
-     *         see {@link #isClearable()}.
+     *         see {@link NotificationData.Entry#isClearable()}.
      */
     public boolean canViewBeDismissed() {
-        return isClearable() && (!shouldShowPublic() || !mSensitiveHiddenInGeneral);
+        return mEntry.isClearable() && (!shouldShowPublic() || !mSensitiveHiddenInGeneral);
     }
 
     private boolean shouldShowPublic() {
@@ -3036,6 +3015,21 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     public boolean isOnAmbient() {
         return mOnAmbient;
+    }
+
+    //TODO: this logic can't depend on layout if we are recycling!
+    public boolean isMediaRow() {
+        return getExpandedContentView() != null
+                && getExpandedContentView().findViewById(
+                com.android.internal.R.id.media_actions) != null;
+    }
+
+    public boolean isTopLevelChild() {
+        return getParent() instanceof NotificationStackScrollLayout;
+    }
+
+    public boolean isGroupNotFullyVisible() {
+        return getClipTopAmount() > 0 || getTranslationY() < 0;
     }
 
     public void setAboveShelf(boolean aboveShelf) {

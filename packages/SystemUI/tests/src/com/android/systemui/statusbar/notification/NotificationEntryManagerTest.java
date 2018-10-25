@@ -262,14 +262,14 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
                 NotificationData.Entry.class);
         verify(mCallback).onBindRow(entryCaptor.capture(), any(), eq(mSbn), any());
         NotificationData.Entry entry = entryCaptor.getValue();
-        verify(mRemoteInputManager).bindRow(entry.row);
+        verify(mRemoteInputManager).bindRow(entry.getRow());
 
         // Row content inflation:
         verify(mCallback).onNotificationAdded(entry);
         verify(mPresenter).updateNotificationViews();
 
         assertEquals(mEntryManager.getNotificationData().get(mSbn.getKey()), entry);
-        assertNotNull(entry.row);
+        assertNotNull(entry.getRow());
         assertEquals(mEntry.userSentiment,
                 NotificationListenerService.Ranking.USER_SENTIMENT_NEUTRAL);
     }
@@ -294,7 +294,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         verify(mPresenter).updateNotificationViews();
         verify(mForegroundServiceController).updateNotification(eq(mSbn), anyInt());
         verify(mCallback).onNotificationUpdated(mSbn);
-        assertNotNull(mEntry.row);
+        assertNotNull(mEntry.getRow());
         assertEquals(mEntry.userSentiment,
                 NotificationListenerService.Ranking.USER_SENTIMENT_NEGATIVE);
     }
@@ -303,7 +303,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
     public void testRemoveNotification() throws Exception {
         com.android.systemui.util.Assert.isNotMainThread();
 
-        mEntry.row = mRow;
+        mEntry.setRow(mRow);
         mEntryManager.getNotificationData().add(mEntry);
 
         mEntryManager.removeNotification(mSbn.getKey(), mRankingMap);
@@ -313,7 +313,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
 
         verify(mMediaManager).onNotificationRemoved(mSbn.getKey());
         verify(mForegroundServiceController).removeNotification(mSbn);
-        verify(mListContainer).cleanUpViewState(mRow);
+        verify(mListContainer).cleanUpViewStateForEntry(mEntry);
         verify(mPresenter).updateNotificationViews();
         verify(mCallback).onNotificationRemoved(mSbn.getKey(), mSbn);
         verify(mRow).setRemoved();
@@ -332,7 +332,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         extenders.clear();
         extenders.add(extender);
 
-        mEntry.row = mRow;
+        mEntry.setRow(mRow);
         mEntryManager.getNotificationData().add(mEntry);
 
         mEntryManager.removeNotification(mSbn.getKey(), mRankingMap);
@@ -347,7 +347,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
 
         when(mForegroundServiceController.getStandardLayoutKey(anyInt(), anyString()))
                 .thenReturn(mEntry.key);
-        mEntry.row = mRow;
+        mEntry.setRow(mRow);
         mEntryManager.getNotificationData().add(mEntry);
 
         mEntryManager.updateNotificationsForAppOp(
@@ -372,7 +372,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
 
     @Test
     public void testAddNotificationExistingAppOps() {
-        mEntry.row = mRow;
+        mEntry.setRow(mRow);
         mEntryManager.getNotificationData().add(mEntry);
         ArraySet<Integer> expected = new ArraySet<>();
         expected.add(3);
@@ -395,7 +395,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
 
     @Test
     public void testAdd_noExistingAppOps() {
-        mEntry.row = mRow;
+        mEntry.setRow(mRow);
         mEntryManager.getNotificationData().add(mEntry);
         when(mForegroundServiceController.getStandardLayoutKey(
                 mEntry.notification.getUserId(),
@@ -409,7 +409,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
 
     @Test
     public void testAdd_existingAppOpsNotForegroundNoti() {
-        mEntry.row = mRow;
+        mEntry.setRow(mRow);
         mEntryManager.getNotificationData().add(mEntry);
         ArraySet<Integer> ops = new ArraySet<>();
         ops.add(3);
@@ -431,7 +431,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         when(mEnvironment.isDeviceProvisioned()).thenReturn(true);
         when(mEnvironment.isNotificationForCurrentProfiles(any())).thenReturn(true);
 
-        mEntry.row = mRow;
+        mEntry.setRow(mRow);
         mEntry.setInflationTask(mAsyncInflationTask);
         mEntryManager.getNotificationData().add(mEntry);
         setSmartActions(mEntry.key, new ArrayList<>(Arrays.asList(createAction())));
@@ -447,7 +447,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         when(mDeviceProvisionedController.isDeviceProvisioned()).thenReturn(true);
         when(mEnvironment.isNotificationForCurrentProfiles(any())).thenReturn(true);
 
-        mEntry.row = mRow;
+        mEntry.setRow(mRow);
         mEntryManager.getNotificationData().add(mEntry);
         setSmartActions(mEntry.key, null);
 
@@ -461,7 +461,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         when(mDeviceProvisionedController.isDeviceProvisioned()).thenReturn(true);
         when(mEnvironment.isNotificationForCurrentProfiles(any())).thenReturn(true);
 
-        mEntry.row = null;
+        mEntry.setRow(null);
         mEntryManager.getNotificationData().add(mEntry);
         setSmartActions(mEntry.key, new ArrayList<>(Arrays.asList(createAction())));
 
@@ -476,7 +476,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
         when(mDeviceProvisionedController.isDeviceProvisioned()).thenReturn(true);
         when(mEnvironment.isNotificationForCurrentProfiles(any())).thenReturn(true);
 
-        mEntry.row = null;
+        mEntry.setRow(null);
         mEntryManager.mPendingNotifications.put(mEntry.key, mEntry);
         setSmartActions(mEntry.key, new ArrayList<>(Arrays.asList(createAction())));
 
