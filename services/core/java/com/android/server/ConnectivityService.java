@@ -5168,6 +5168,7 @@ public class ConnectivityService extends IConnectivityManager.Stub
                 break;
             }
             case ConnectivityManager.CALLBACK_BLK_CHANGED: {
+                maybeLogBlockedStatusChanged(nri, networkAgent.network, arg1 != 0);
                 msg.arg1 = arg1;
                 break;
             }
