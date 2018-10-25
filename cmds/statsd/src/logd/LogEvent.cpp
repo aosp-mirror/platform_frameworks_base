@@ -267,10 +267,12 @@ LogEvent::LogEvent(int64_t wallClockTimestampNs, int64_t elapsedTimestampNs,
     }
 }
 
-LogEvent::LogEvent(int32_t tagId, int64_t timestampNs) {
+LogEvent::LogEvent(int32_t tagId, int64_t timestampNs) : LogEvent(tagId, timestampNs, 0) {}
+
+LogEvent::LogEvent(int32_t tagId, int64_t timestampNs, int32_t uid) {
     mLogdTimestampNs = timestampNs;
     mTagId = tagId;
-    mLogUid = 0;
+    mLogUid = uid;
     mContext = create_android_logger(1937006964); // the event tag shared by all stats logs
     if (mContext) {
         android_log_write_int64(mContext, timestampNs);
@@ -344,7 +346,8 @@ bool LogEvent::write(float value) {
     return false;
 }
 
-bool LogEvent::writeKeyValuePairs(const std::map<int32_t, int32_t>& int_map,
+bool LogEvent::writeKeyValuePairs(int32_t uid,
+                                  const std::map<int32_t, int32_t>& int_map,
                                   const std::map<int32_t, int64_t>& long_map,
                                   const std::map<int32_t, std::string>& string_map,
                                   const std::map<int32_t, float>& float_map) {
@@ -352,6 +355,7 @@ bool LogEvent::writeKeyValuePairs(const std::map<int32_t, int32_t>& int_map,
          if (android_log_write_list_begin(mContext) < 0) {
             return false;
          }
+         write(uid);
          for (const auto& itr : int_map) {
              if (android_log_write_list_begin(mContext) < 0) {
                 return false;
@@ -561,6 +565,10 @@ void LogEvent::init(android_log_context context) {
         }
         i++;
     } while ((elem.type != EVENT_TYPE_UNKNOWN) && !elem.complete);
+    if (isKeyValuePairAtom && mValues.size() > 0) {
+        mValues[0] = FieldValue(Field(android::util::KEY_VALUE_PAIRS_ATOM, getSimpleField(1)),
+                                Value((int32_t)mLogUid));
+    }
 }
 
 int64_t LogEvent::GetLong(size_t key, status_t* err) const {
