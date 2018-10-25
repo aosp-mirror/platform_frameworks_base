@@ -737,45 +737,67 @@ public final class InputMethodManager {
         return false;
     }
 
-    private static IInputMethodManager getIInputMethodManager() throws ServiceNotFoundException {
-        if (!isInEditMode()) {
-            return IInputMethodManager.Stub.asInterface(
-                    ServiceManager.getServiceOrThrow(Context.INPUT_METHOD_SERVICE));
-        }
-        // If InputMethodManager is running for layoutlib, stub out IPCs into IMMS.
-        final Class<IInputMethodManager> c = IInputMethodManager.class;
-        return (IInputMethodManager) Proxy.newProxyInstance(c.getClassLoader(),
-                new Class[]{c}, (proxy, method, args) -> {
-                    final Class<?> returnType = method.getReturnType();
-                    if (returnType == boolean.class) {
-                        return false;
-                    } else if (returnType == int.class) {
-                        return 0;
-                    } else if (returnType == long.class) {
-                        return 0L;
-                    } else if (returnType == short.class) {
-                        return 0;
-                    } else if (returnType == char.class) {
-                        return 0;
-                    } else if (returnType == byte.class) {
-                        return 0;
-                    } else if (returnType == float.class) {
-                        return 0f;
-                    } else if (returnType == double.class) {
-                        return 0.0;
-                    } else {
-                        return null;
-                    }
-                });
+    @NonNull
+    private static InputMethodManager createInstance(int displayId, Looper looper) {
+        return isInEditMode() ? createStubInstance(displayId, looper)
+                : createRealInstance(displayId, looper);
     }
 
-    InputMethodManager(int displayId, Looper looper) throws ServiceNotFoundException {
-        mService = getIInputMethodManager();
+    @NonNull
+    private static InputMethodManager createRealInstance(int displayId, Looper looper) {
+        final IInputMethodManager service;
+        try {
+            service = IInputMethodManager.Stub.asInterface(
+                    ServiceManager.getServiceOrThrow(Context.INPUT_METHOD_SERVICE));
+        } catch (ServiceNotFoundException e) {
+            throw new IllegalStateException(e);
+        }
+        final InputMethodManager imm = new InputMethodManager(service, displayId, looper);
+        try {
+            service.addClient(imm.mClient, imm.mIInputContext, displayId);
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+        return imm;
+    }
+
+    @NonNull
+    private static InputMethodManager createStubInstance(int displayId, Looper looper) {
+        // If InputMethodManager is running for layoutlib, stub out IPCs into IMMS.
+        final Class<IInputMethodManager> c = IInputMethodManager.class;
+        final IInputMethodManager stubInterface =
+                (IInputMethodManager) Proxy.newProxyInstance(c.getClassLoader(),
+                        new Class[]{c}, (proxy, method, args) -> {
+                            final Class<?> returnType = method.getReturnType();
+                            if (returnType == boolean.class) {
+                                return false;
+                            } else if (returnType == int.class) {
+                                return 0;
+                            } else if (returnType == long.class) {
+                                return 0L;
+                            } else if (returnType == short.class) {
+                                return 0;
+                            } else if (returnType == char.class) {
+                                return 0;
+                            } else if (returnType == byte.class) {
+                                return 0;
+                            } else if (returnType == float.class) {
+                                return 0f;
+                            } else if (returnType == double.class) {
+                                return 0.0;
+                            } else {
+                                return null;
+                            }
+                        });
+        return new InputMethodManager(stubInterface, displayId, looper);
+    }
+
+    private InputMethodManager(IInputMethodManager service, int displayId, Looper looper) {
+        mService = service;
         mMainLooper = looper;
         mH = new H(looper);
         mDisplayId = displayId;
-        mIInputContext = new ControlledInputConnectionWrapper(looper,
-                mDummyInputConnection, this);
+        mIInputContext = new ControlledInputConnectionWrapper(looper, mDummyInputConnection, this);
     }
 
     /**
@@ -785,7 +807,7 @@ public final class InputMethodManager {
      * @return {@link InputMethodManager} instance
      * @hide
      */
-    @Nullable
+    @NonNull
     public static InputMethodManager forContext(Context context) {
         final int displayId = context.getDisplayId();
         // For better backward compatibility, we always use Looper.getMainLooper() for the default
@@ -795,7 +817,7 @@ public final class InputMethodManager {
         return forContextInternal(displayId, looper);
     }
 
-    @Nullable
+    @NonNull
     private static InputMethodManager forContextInternal(int displayId, Looper looper) {
         final boolean isDefaultDisplay = displayId == Display.DEFAULT_DISPLAY;
         synchronized (sLock) {
@@ -803,12 +825,7 @@ public final class InputMethodManager {
             if (instance != null) {
                 return instance;
             }
-            try {
-                instance = new InputMethodManager(displayId, looper);
-                instance.mService.addClient(instance.mClient, instance.mIInputContext, displayId);
-            } catch (ServiceNotFoundException | RemoteException e) {
-                throw new IllegalStateException(e);
-            }
+            instance = createInstance(displayId, looper);
             // For backward compatibility, store the instance also to sInstance for default display.
             if (sInstance == null && isDefaultDisplay) {
                 sInstance = instance;
