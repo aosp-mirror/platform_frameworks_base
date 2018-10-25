@@ -944,7 +944,8 @@ public class ResourcesImpl {
                 }
                 return Typeface.createFromResources(familyEntry, mAssets, file);
             }
-            return Typeface.createFromResources(mAssets, file, value.assetCookie);
+            return new Typeface.Builder(mAssets, file, false /* isAsset */, value.assetCookie)
+                    .build();
         } catch (XmlPullParserException e) {
             Log.e(TAG, "Failed to parse xml resource " + file, e);
         } catch (IOException e) {

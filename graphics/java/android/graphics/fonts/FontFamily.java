@@ -124,7 +124,7 @@ public final class FontFamily {
         }
 
         private static int makeStyleIdentifier(@NonNull Font font) {
-            return font.getWeight() | (font.getSlant()  << 16);
+            return font.getStyle().getWeight() | (font.getStyle().getSlant()  << 16);
         }
 
         private static native long nInitBuilder();
