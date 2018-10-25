@@ -57,7 +57,7 @@
     <string name="usb_accessory_permission_prompt" msgid="2465531696941369047">"<xliff:g id="APPLICATION">%1$s</xliff:g> ला <xliff:g id="USB_ACCESSORY">%2$s</xliff:g> अॅक्सेस करण्याची अनुमती द्यायची का?"</string>
     <string name="usb_device_confirm_prompt" msgid="7440562274256843905">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> हाताळण्यासाठी <xliff:g id="APPLICATION">%1$s</xliff:g> उघडायचे का?"</string>
     <string name="usb_accessory_confirm_prompt" msgid="4333670517539993561">"<xliff:g id="USB_ACCESSORY">%2$s</xliff:g> हाताळण्यासाठी <xliff:g id="APPLICATION">%1$s</xliff:g> उघडायचे का?"</string>
-    <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"इंस्टॉल केलेले अॅप्स या USB उपसाधनासह कार्य करत नाहीत. <xliff:g id="URL">%1$s</xliff:g> येथे या उपसाधनाविषयी अधिक जाणून घ्या"</string>
+    <string name="usb_accessory_uri_prompt" msgid="513450621413733343">"इंस्टॉल केलेली अॅप्स या USB उपसाधनासह कार्य करत नाहीत. <xliff:g id="URL">%1$s</xliff:g> येथे या उपसाधनाविषयी अधिक जाणून घ्या"</string>
     <string name="title_usb_accessory" msgid="4966265263465181372">"USB उपसाधन"</string>
     <string name="label_view" msgid="6304565553218192990">"पहा"</string>
     <string name="always_use_device" msgid="4015357883336738417">"<xliff:g id="USB_DEVICE">%2$s</xliff:g> कनेक्ट केलेली असताना नेहमी <xliff:g id="APPLICATION">%1$s</xliff:g> उघडा"</string>
@@ -478,7 +478,7 @@
     <string name="monitoring_description_personal_profile_named_vpn" msgid="3133980926929069283">"तुमचे वैयक्तिक प्रोफाइल <xliff:g id="VPN_APP">%1$s</xliff:g> शी कनेक्‍ट केले आहे, जे ईमेल, अ‍ॅप्स आणि वेबसाइटसह आपल्‍या नेटवर्क क्रियाकलापाचे परीक्षण करू शकते."</string>
     <string name="monitoring_description_do_header_generic" msgid="96588491028288691">"तुमचे डिव्हाइस <xliff:g id="DEVICE_OWNER_APP">%1$s</xliff:g> ने व्यवस्थापित केले आहे."</string>
     <string name="monitoring_description_do_header_with_name" msgid="5511133708978206460">"तुमचे डिव्हाइस व्यवस्थापित करण्यासाठी <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> <xliff:g id="DEVICE_OWNER_APP">%2$s</xliff:g> वापरते."</string>
-    <string name="monitoring_description_do_body" msgid="3639594537660975895">"आपला प्रशासक सेटिंग्ज, कॉर्पोरेट प्रवेश, अॅप्स, आपल्या डिव्हाइशी संबंधित डेटा आणि डिव्हाइसच्या स्थान माहितीचे निरीक्षण आणि व्यवस्थापन करू शकतो."</string>
+    <string name="monitoring_description_do_body" msgid="3639594537660975895">"तुमचा प्रशासक सेटिंग्ज, कॉर्पोरेट प्रवेश, अॅप्स, आपल्या डिव्हाइशी संबंधित डेटा आणि डिव्हाइसच्या स्थान माहितीचे निरीक्षण आणि व्यवस्थापन करू शकतो."</string>
     <string name="monitoring_description_do_learn_more_separator" msgid="3785251953067436862">" "</string>
     <string name="monitoring_description_do_learn_more" msgid="1849514470437907421">"अधिक जाणून घ्या"</string>
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"तुम्ही <xliff:g id="VPN_APP">%1$s</xliff:g> शी कनेक्‍ट केले आहे, जो ईमेल, अ‍ॅप्स आणि वेबसाइटसह आपल्‍या नेटवर्क क्रियाकलापाचे परीक्षण करू शकतो."</string>
@@ -488,7 +488,7 @@
     <string name="monitoring_description_ca_cert_settings" msgid="5489969458872997092">"विश्वासू क्रेडेंशियल उघडा"</string>
     <string name="monitoring_description_network_logging" msgid="7223505523384076027">"आपल्या प्रशासकाने नेटवर्क लॉगिंग चालू केले आहे, जे आपल्या डिव्हाइसवरील रहदारीचे निरीक्षण करते.\n\nअधिक माहितीसाठी आपल्या प्रशासकाशी संपर्क साधा."</string>
     <string name="monitoring_description_vpn" msgid="4445150119515393526">"तुम्ही VPN कनेक्शन सेट करण्यासाठी अ‍ॅपला परवानगी दिली.\n\nहा अ‍ॅप ईमेल, अ‍ॅप्स आणि वेबसाइटसह, तुमच्या डिव्हाइस आणि नेटवर्क अॅक्टिव्हिटीचे परीक्षण करू शकतो."</string>
-    <string name="monitoring_description_vpn_profile_owned" msgid="2958019119161161530">"तुमचे कार्य प्रोफाइल <xliff:g id="ORGANIZATION">%1$s</xliff:g> द्वारे व्यवस्थापित केले जाते.\n\nआपला प्रशासक ईमेल, अॅप्स आणि वेबसाइटसह आपल्या नेटवर्क अॅक्टिव्हिटीचे निरीक्षण करण्यास सक्षम आहे.\n\nअधिक माहितीसाठी आपल्या प्रशासकाशी संपर्क साधा.\n\nतुम्ही VPN शी देखील कनेक्ट आहात, जे आपल्या नेटवर्क अॅक्टिव्हिटीचे निरीक्षण करू शकते."</string>
+    <string name="monitoring_description_vpn_profile_owned" msgid="2958019119161161530">"तुमचे कार्य प्रोफाइल <xliff:g id="ORGANIZATION">%1$s</xliff:g> द्वारे व्यवस्थापित केले जाते.\n\nतुमचा प्रशासक ईमेल, अॅप्स आणि वेबसाइटसह आपल्या नेटवर्क अॅक्टिव्हिटीचे निरीक्षण करण्यास सक्षम आहे.\n\nअधिक माहितीसाठी आपल्या प्रशासकाशी संपर्क साधा.\n\nतुम्ही VPN शी देखील कनेक्ट आहात, जे आपल्या नेटवर्क अॅक्टिव्हिटीचे निरीक्षण करू शकते."</string>
     <string name="legacy_vpn_name" msgid="6604123105765737830">"VPN"</string>
     <string name="monitoring_description_app" msgid="1828472472674709532">"तुम्ही <xliff:g id="APPLICATION">%1$s</xliff:g> शी कनेक्‍ट केले आहे, जे ईमेल, अ‍ॅप्स आणि वेबसाइटसह आपल्‍या नेटवर्क क्रियाकलापाचे परीक्षण करू शकते."</string>
     <string name="monitoring_description_app_personal" msgid="484599052118316268">"तुम्ही <xliff:g id="APPLICATION">%1$s</xliff:g> शी कनेक्‍ट केले आहे, जो ईमेल, अ‍ॅप्स आणि वेबसाइटसह आपल्‍या वैयक्तिक नेटवर्क क्रियाकलापाचे परीक्षण करू शकतो."</string>
@@ -569,8 +569,8 @@
     <string name="status_bar_airplane" msgid="7057575501472249002">"विमान मोड"</string>
     <string name="add_tile" msgid="2995389510240786221">"टाइल जोडा"</string>
     <string name="broadcast_tile" msgid="3894036511763289383">"प्रसारण टाइल"</string>
-    <string name="zen_alarm_warning_indef" msgid="3482966345578319605">"तुम्ही त्यापूर्वी हे बंद केल्याशिय आपला पुढील <xliff:g id="WHEN">%1$s</xliff:g> होणारा अलार्म ऐकणार नाही"</string>
-    <string name="zen_alarm_warning" msgid="444533119582244293">"तुम्ही आपला <xliff:g id="WHEN">%1$s</xliff:g> वाजता होणारा पुढील अलार्म ऐकणार नाही"</string>
+    <string name="zen_alarm_warning_indef" msgid="3482966345578319605">"तुम्ही त्यापूर्वी हे बंद केल्याशिय तुमचा पुढील <xliff:g id="WHEN">%1$s</xliff:g> होणारा अलार्म ऐकणार नाही"</string>
+    <string name="zen_alarm_warning" msgid="444533119582244293">"तुम्ही तुमचा <xliff:g id="WHEN">%1$s</xliff:g> वाजता होणारा पुढील अलार्म ऐकणार नाही"</string>
     <string name="alarm_template" msgid="3980063409350522735">"<xliff:g id="WHEN">%1$s</xliff:g> वाजता"</string>
     <string name="alarm_template_far" msgid="4242179982586714810">"<xliff:g id="WHEN">%1$s</xliff:g> रोजी"</string>
     <string name="accessibility_quick_settings_detail" msgid="2579369091672902101">"द्रुत सेटिंग्ज, <xliff:g id="TITLE">%s</xliff:g>."</string>
@@ -590,7 +590,7 @@
     <string name="show_brightness" msgid="6613930842805942519">"द्रुत सेटिंग्जमध्‍ये चमक दर्शवा"</string>
     <string name="experimental" msgid="6198182315536726162">"प्रायोगिक"</string>
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"ब्लूटूथ सुरू करायचे?"</string>
-    <string name="enable_bluetooth_message" msgid="9106595990708985385">"आपला कीबोर्ड तुमच्या टॅबलेटसह कनेक्ट करण्यासाठी, तुम्ही प्रथम ब्लूटूथ चालू करणे आवश्यक आहे."</string>
+    <string name="enable_bluetooth_message" msgid="9106595990708985385">"तुमचा कीबोर्ड तुमच्या टॅबलेटसह कनेक्ट करण्यासाठी, तुम्ही प्रथम ब्लूटूथ चालू करणे आवश्यक आहे."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"चालू करा"</string>
     <string name="show_silently" msgid="6841966539811264192">"सूचना शांतपणे दर्शवा"</string>
     <string name="block" msgid="2734508760962682611">"सर्व सूचना ब्लॉक करा"</string>
@@ -793,11 +793,11 @@
     <string name="pip_skip_to_next" msgid="1948440006726306284">"डावलून पुढे जा"</string>
     <string name="pip_skip_to_prev" msgid="1955311326688637914">"डावलून मागे जा"</string>
     <string name="thermal_shutdown_title" msgid="4458304833443861111">"तापल्‍यामुळे फोन बंद झाला"</string>
-    <string name="thermal_shutdown_message" msgid="9006456746902370523">"आपला फोन आता व्‍यवस्थित चालू आहे"</string>
-    <string name="thermal_shutdown_dialog_message" msgid="566347880005304139">"आपला फोन खूप तापलाय, म्हणून तो थंड होण्यासाठी बंद झाला आहे. आपला फोन आता व्‍यवस्थित चालू आहे.\n\nतुम्ही असे केल्यास आपला फोन खूप तापेल:\n	•संसाधन केंद्रित अॅप वापरणे (गेमिंग, व्हिडिओ किंवा नेव्हिगेशन अॅप यासारखे)\n	•मोठ्या फायली डाउनलोड किंवा अपलोड करणे\n	•उच्च तापमानामध्ये आपला फोन वापरणे"</string>
+    <string name="thermal_shutdown_message" msgid="9006456746902370523">"तुमचा फोन आता व्‍यवस्थित चालू आहे"</string>
+    <string name="thermal_shutdown_dialog_message" msgid="566347880005304139">"तुमचा फोन खूप तापलाय, म्हणून तो थंड होण्यासाठी बंद झाला आहे. तुमचा फोन आता व्‍यवस्थित चालू आहे.\n\nतुम्ही असे केल्यास तुमचा फोन खूप तापेल:\n	•संसाधन केंद्रित अॅप वापरणे (गेमिंग, व्हिडिओ किंवा नेव्हिगेशन अॅप यासारखे)\n	•मोठ्या फायली डाउनलोड किंवा अपलोड करणे\n	•उच्च तापमानामध्ये तुमचा फोन वापरणे"</string>
     <string name="high_temp_title" msgid="4589508026407318374">"फोन ऊष्ण होत आहे"</string>
     <string name="high_temp_notif_message" msgid="5642466103153429279">"फोन थंड होत असताना काही वैशिष्‍ट्ये मर्यादित असतात"</string>
-    <string name="high_temp_dialog_message" msgid="6840700639374113553">"आपला फोन स्वयंचलितपणे थंड होईल. तुम्ही अद्यापही आपला फोन वापरू शकता परंतु तो कदाचित धीमेपणे कार्य करेल.\n\nआपला फोन एकदा थंड झाला की, तो सामान्यपणे कार्य करेल."</string>
+    <string name="high_temp_dialog_message" msgid="6840700639374113553">"तुमचा फोन स्वयंचलितपणे थंड होईल. तुम्ही अद्यापही तुमचा फोन वापरू शकता परंतु तो कदाचित धीमेपणे कार्य करेल.\n\nतुमचा फोन एकदा थंड झाला की, तो सामान्यपणे कार्य करेल."</string>
     <string name="lockscreen_shortcut_left" msgid="2182769107618938629">"डावा शॉर्टकट"</string>
     <string name="lockscreen_shortcut_right" msgid="3328683699505226536">"उजवा शॉर्टकट"</string>
     <string name="lockscreen_unlock_left" msgid="2043092136246951985">"डावा शॉर्टकट देखील अनलॉक करतो"</string>
