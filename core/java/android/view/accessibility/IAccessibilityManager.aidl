@@ -76,5 +76,5 @@ interface IAccessibilityManager {
     // System process only
     boolean sendFingerprintGesture(int gestureKeyCode);
 
-    int getMinimumUiTimeout();
+    long getRecommendedTimeoutMillis();
 }

@@ -2912,12 +2912,13 @@
         <public name="supportsAmbientMode" />
         <!-- @hide For use by platform and tools only. Developers should not specify this value. -->
         <public name="usesNonSdkApi" />
-        <public name="minimumUiTimeout" />
+        <public name="nonInteractiveUiTimeout" />
         <public name="isLightTheme" />
         <public name="isSplitRequired" />
         <public name="textLocale" />
         <public name="settingsSliceUri" />
         <public name="shell" />
+        <public name="interactiveUiTimeout" />
     </public-group>
 
     <public-group type="drawable" first-id="0x010800b4">

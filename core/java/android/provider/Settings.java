@@ -6567,23 +6567,22 @@ public final class Settings {
         public static final String MULTI_PRESS_TIMEOUT = "multi_press_timeout";
 
         /**
-         * Whether the user specifies a minimum ui timeout to override minimum ui timeout of
-         * accessibility service
+         * Setting that specifies recommended timeout in milliseconds for controls
+         * which don't need user's interactions.
          *
-         * Type: int (0 for false, 1 for true)
          * @hide
          */
-        public static final String ACCESSIBILITY_MINIMUM_UI_TIMEOUT_ENABLED =
-                "accessibility_minimum_ui_timeout_enabled";
+        public static final String ACCESSIBILITY_NON_INTERACTIVE_UI_TIMEOUT_MS =
+                "accessibility_non_interactive_ui_timeout_ms";
 
         /**
-         * Setting that specifies ui minimum timeout in milliseconds.
+         * Setting that specifies recommended timeout in milliseconds for controls
+         * which need user's interactions.
          *
-         * @see #ACCESSIBILITY_MINIMUM_UI_TIMEOUT_ENABLED
          * @hide
          */
-        public static final String ACCESSIBILITY_MINIMUM_UI_TIMEOUT_MS =
-                "accessibility_minimum_ui_timeout_ms";
+        public static final String ACCESSIBILITY_INTERACTIVE_UI_TIMEOUT_MS =
+                "accessibility_interactive_ui_timeout_ms";
 
         /**
          * List of the enabled print services.
@@ -8318,8 +8317,8 @@ public final class Settings {
             ZEN_SETTINGS_SUGGESTION_VIEWED,
             CHARGING_SOUNDS_ENABLED,
             CHARGING_VIBRATION_ENABLED,
-            ACCESSIBILITY_MINIMUM_UI_TIMEOUT_ENABLED,
-            ACCESSIBILITY_MINIMUM_UI_TIMEOUT_MS,
+            ACCESSIBILITY_NON_INTERACTIVE_UI_TIMEOUT_MS,
+            ACCESSIBILITY_INTERACTIVE_UI_TIMEOUT_MS,
             NOTIFICATION_NEW_INTERRUPTION_MODEL,
         };
 
@@ -8476,8 +8475,9 @@ public final class Settings {
             VALIDATORS.put(ZEN_SETTINGS_SUGGESTION_VIEWED, BOOLEAN_VALIDATOR);
             VALIDATORS.put(CHARGING_SOUNDS_ENABLED, BOOLEAN_VALIDATOR);
             VALIDATORS.put(CHARGING_VIBRATION_ENABLED, BOOLEAN_VALIDATOR);
-            VALIDATORS.put(ACCESSIBILITY_MINIMUM_UI_TIMEOUT_ENABLED, BOOLEAN_VALIDATOR);
-            VALIDATORS.put(ACCESSIBILITY_MINIMUM_UI_TIMEOUT_MS, NON_NEGATIVE_INTEGER_VALIDATOR);
+            VALIDATORS.put(ACCESSIBILITY_NON_INTERACTIVE_UI_TIMEOUT_MS,
+                    NON_NEGATIVE_INTEGER_VALIDATOR);
+            VALIDATORS.put(ACCESSIBILITY_INTERACTIVE_UI_TIMEOUT_MS, NON_NEGATIVE_INTEGER_VALIDATOR);
             VALIDATORS.put(USER_SETUP_COMPLETE, BOOLEAN_VALIDATOR);
             VALIDATORS.put(ASSIST_GESTURE_SETUP_COMPLETE, BOOLEAN_VALIDATOR);
             VALIDATORS.put(NOTIFICATION_NEW_INTERRUPTION_MODEL, BOOLEAN_VALIDATOR);
