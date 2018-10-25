@@ -703,6 +703,18 @@ public abstract class PackageManagerInternal {
     public abstract SparseArray<String> getAppsWithSharedUserIds();
 
     /**
+     * Get the value of attribute android:sharedUserId for the given packageName if specified,
+     * otherwise {@code null}.
+     */
+    public abstract String getSharedUserIdForPackage(@NonNull String packageName);
+
+    /**
+     * Get all packages which specified the given sharedUserId as android:sharedUserId attribute
+     * or an empty array if no package specified it.
+     */
+    public abstract String[] getPackagesForSharedUserId(@NonNull String sharedUserId, int userId);
+
+    /**
      * Return if device is currently in a "core" boot environment, typically
      * used to support full-disk encryption. Only apps marked with
      * {@code coreApp} attribute are available.
