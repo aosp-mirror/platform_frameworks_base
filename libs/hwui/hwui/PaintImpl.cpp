@@ -34,7 +34,8 @@ Paint::Paint(const Paint& paint)
         , mMinikinLocaleListId(paint.mMinikinLocaleListId)
         , mFamilyVariant(paint.mFamilyVariant)
         , mHyphenEdit(paint.mHyphenEdit)
-        , mTypeface(paint.mTypeface) {}
+        , mTypeface(paint.mTypeface)
+        , mAlign(paint.mAlign) {}
 
 Paint::Paint(const SkPaint& paint)
         : SkPaint(paint)
@@ -55,6 +56,7 @@ Paint& Paint::operator=(const Paint& other) {
     mFamilyVariant = other.mFamilyVariant;
     mHyphenEdit = other.mHyphenEdit;
     mTypeface = other.mTypeface;
+    mAlign = other.mAlign;
     return *this;
 }
 
@@ -64,6 +66,6 @@ bool operator==(const Paint& a, const Paint& b) {
            a.mFontFeatureSettings == b.mFontFeatureSettings &&
            a.mMinikinLocaleListId == b.mMinikinLocaleListId &&
            a.mFamilyVariant == b.mFamilyVariant && a.mHyphenEdit == b.mHyphenEdit &&
-           a.mTypeface == b.mTypeface;
+           a.mTypeface == b.mTypeface && a.mAlign == b.mAlign;
 }
 }  // namespace android
