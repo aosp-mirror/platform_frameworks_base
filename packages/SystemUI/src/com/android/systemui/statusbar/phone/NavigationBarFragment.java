@@ -478,7 +478,9 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
 
     private void setDisabled2Flags(int state2) {
         // Method only called on change of disable2 flags
-        mNavigationBarView.getRotateSuggestionButton().onDisable2FlagChanged(state2);
+        if (mNavigationBarView != null) {
+            mNavigationBarView.getRotateSuggestionButton().onDisable2FlagChanged(state2);
+        }
     }
 
     // ----- Internal stuffz -----
