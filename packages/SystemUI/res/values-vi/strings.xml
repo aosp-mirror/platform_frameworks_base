@@ -174,7 +174,7 @@
     <string name="carrier_network_change_mode" msgid="8149202439957837762">"Thay đổi mạng của nhà mạng"</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"Mở chi tiết về pin"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"<xliff:g id="NUMBER">%d</xliff:g> phần trăm pin."</string>
-    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"Đang sạc pin, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> phần trăm."</string>
+    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"Đang sạc pin, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%%."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Cài đặt hệ thống"</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Thông báo."</string>
     <string name="accessibility_overflow_action" msgid="5681882033274783311">"Xem tất cả thông báo"</string>
@@ -319,6 +319,7 @@
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Thiết bị không có tên"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"Sẵn sàng truyền"</string>
     <string name="quick_settings_cast_detail_empty_text" msgid="311785821261640623">"Không có thiết bị nào"</string>
+    <string name="quick_settings_cast_no_wifi" msgid="2696477881905521882">"Chưa kết nối với Wi-Fi"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Độ sáng"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"TỰ ĐỘNG"</string>
     <string name="quick_settings_inversion_label" msgid="8790919884718619648">"Đảo ngược màu"</string>
@@ -782,6 +783,7 @@
     <string name="accessibility_quick_settings_user" msgid="1567445362870421770">"Đã đăng nhập là <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="data_connection_no_internet" msgid="4503302451650972989">"Không có Internet"</string>
     <string name="accessibility_quick_settings_open_details" msgid="4230931801728005194">"Mở chi tiết."</string>
+    <string name="accessibility_quick_settings_not_available" msgid="4190068184294019846">"Không sử dụng được do <xliff:g id="REASON">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"Mở cài đặt <xliff:g id="ID_1">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Chỉnh sửa thứ tự cài đặt."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Trang <xliff:g id="ID_1">%1$d</xliff:g> / <xliff:g id="ID_2">%2$d</xliff:g>"</string>

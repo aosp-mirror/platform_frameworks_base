@@ -323,6 +323,7 @@
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Urządzenie bez nazwy"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"Gotowy do działania"</string>
     <string name="quick_settings_cast_detail_empty_text" msgid="311785821261640623">"Brak dostępnych urządzeń"</string>
+    <string name="quick_settings_cast_no_wifi" msgid="2696477881905521882">"Brak połączenia z Wi-Fi"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Jasność"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTOMATYCZNA"</string>
     <string name="quick_settings_inversion_label" msgid="8790919884718619648">"Odwróć kolory"</string>
@@ -794,6 +795,7 @@
     <string name="accessibility_quick_settings_user" msgid="1567445362870421770">"Jesteś zalogowany jako <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="data_connection_no_internet" msgid="4503302451650972989">"Brak internetu"</string>
     <string name="accessibility_quick_settings_open_details" msgid="4230931801728005194">"Otwórz szczegóły."</string>
+    <string name="accessibility_quick_settings_not_available" msgid="4190068184294019846">"Niedostępne z powodu: <xliff:g id="REASON">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"Otwórz ustawienia: <xliff:g id="ID_1">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Edytuj kolejność ustawień."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Strona <xliff:g id="ID_1">%1$d</xliff:g> z <xliff:g id="ID_2">%2$d</xliff:g>"</string>

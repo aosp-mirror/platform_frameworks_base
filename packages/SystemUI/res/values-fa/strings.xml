@@ -319,6 +319,7 @@
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"دستگاه بدون نام"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"آماده برای فرستادن"</string>
     <string name="quick_settings_cast_detail_empty_text" msgid="311785821261640623">"دستگاهی موجود نیست"</string>
+    <string name="quick_settings_cast_no_wifi" msgid="2696477881905521882">"‏Wi-Fi وصل نیست"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"روشنایی"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"خودکار"</string>
     <string name="quick_settings_inversion_label" msgid="8790919884718619648">"برگردان رنگ‌ها"</string>
@@ -782,6 +783,7 @@
     <string name="accessibility_quick_settings_user" msgid="1567445362870421770">"با <xliff:g id="ID_1">%s</xliff:g> به سیستم وارد شده‌اید"</string>
     <string name="data_connection_no_internet" msgid="4503302451650972989">"عدم اتصال به اینترنت"</string>
     <string name="accessibility_quick_settings_open_details" msgid="4230931801728005194">"باز کردن جزئیات."</string>
+    <string name="accessibility_quick_settings_not_available" msgid="4190068184294019846">"به‌دلیل <xliff:g id="REASON">%s</xliff:g> دردسترس نیست"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"باز کردن تنظیمات <xliff:g id="ID_1">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"ویرایش ترتیب تنظیمات."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"صفحه <xliff:g id="ID_1">%1$d</xliff:g> از <xliff:g id="ID_2">%2$d</xliff:g>"</string>

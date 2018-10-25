@@ -174,7 +174,7 @@
     <string name="carrier_network_change_mode" msgid="8149202439957837762">"Operator şəbəkəsinin dəyişilməsi"</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"Batareya detallarını açın"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Batareya <xliff:g id="NUMBER">%d</xliff:g> faizdir."</string>
-    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"Batareya doldurulur, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> faiz."</string>
+    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"Batareya doldurulur, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%% faiz."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Sistem parametrləri"</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Bildirişlər."</string>
     <string name="accessibility_overflow_action" msgid="5681882033274783311">"Bütün bildirişlərə baxın"</string>
@@ -319,6 +319,7 @@
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Adsız cihaz"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"Yayıma hazırdır"</string>
     <string name="quick_settings_cast_detail_empty_text" msgid="311785821261640623">"Heç bir cihaz əlçatan deyil"</string>
+    <string name="quick_settings_cast_no_wifi" msgid="2696477881905521882">"Wi-Fi qoşulu deyil"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Parlaqlıq"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AVTO"</string>
     <string name="quick_settings_inversion_label" msgid="8790919884718619648">"Rəngləri çevirin"</string>
@@ -782,6 +783,7 @@
     <string name="accessibility_quick_settings_user" msgid="1567445362870421770">"<xliff:g id="ID_1">%s</xliff:g> kimi daxil olunub"</string>
     <string name="data_connection_no_internet" msgid="4503302451650972989">"İnternet yoxdur"</string>
     <string name="accessibility_quick_settings_open_details" msgid="4230931801728005194">"Detalları açın."</string>
+    <string name="accessibility_quick_settings_not_available" msgid="4190068184294019846">"<xliff:g id="REASON">%s</xliff:g> səbəbi ilə əlçatan deyil"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"<xliff:g id="ID_1">%s</xliff:g> ayarlarını açın."</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Ayarların sıralanmasını redaktə edin."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"<xliff:g id="ID_2">%2$d</xliff:g> səhifədən <xliff:g id="ID_1">%1$d</xliff:g> səhifə"</string>

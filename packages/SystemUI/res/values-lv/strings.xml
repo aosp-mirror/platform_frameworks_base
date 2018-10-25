@@ -175,7 +175,7 @@
     <string name="carrier_network_change_mode" msgid="8149202439957837762">"Mobilo sakaru operatora tīkla mainīšana"</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"Atvērt akumulatora informāciju"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Akumulators: <xliff:g id="NUMBER">%d</xliff:g> procenti"</string>
-    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"Notiek akumulatora uzlāde, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> procenti."</string>
+    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"Notiek akumulatora uzlāde, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%%."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Sistēmas iestatījumi"</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Paziņojumi"</string>
     <string name="accessibility_overflow_action" msgid="5681882033274783311">"Skatīt visus paziņojumus"</string>
@@ -321,6 +321,7 @@
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Nenosaukta ierīce"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"Gatavs apraidei"</string>
     <string name="quick_settings_cast_detail_empty_text" msgid="311785821261640623">"Nav pieejamu ierīču."</string>
+    <string name="quick_settings_cast_no_wifi" msgid="2696477881905521882">"Nav izveidots savienojums ar Wi-Fi"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Spilgtums"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTOMĀTISKI"</string>
     <string name="quick_settings_inversion_label" msgid="8790919884718619648">"Invertēt krāsas"</string>
@@ -788,6 +789,7 @@
     <string name="accessibility_quick_settings_user" msgid="1567445362870421770">"Pierakstījies kā <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="data_connection_no_internet" msgid="4503302451650972989">"Nav piekļuves internetam"</string>
     <string name="accessibility_quick_settings_open_details" msgid="4230931801728005194">"Atvērt detalizēto informāciju."</string>
+    <string name="accessibility_quick_settings_not_available" msgid="4190068184294019846">"Nav pieejams šāda iemesla dēļ: <xliff:g id="REASON">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"Atvērt <xliff:g id="ID_1">%s</xliff:g> iestatījumus."</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Rediģēt iestatījumu secību."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"<xliff:g id="ID_1">%1$d</xliff:g>. lpp. no <xliff:g id="ID_2">%2$d</xliff:g>"</string>
@@ -860,14 +862,10 @@
     <string name="slice_permission_allow" msgid="2340244901366722709">"Atļaut"</string>
     <string name="slice_permission_deny" msgid="7683681514008048807">"Neatļaut"</string>
     <string name="auto_saver_title" msgid="1217959994732964228">"Pieskarieties, lai iestatītu akumulatora jaudas taupīšanas režīma grafiku"</string>
-    <!-- String.format failed for translation -->
-    <!-- no translation found for auto_saver_text (6324376061044218113) -->
-    <skip />
+    <string name="auto_saver_text" msgid="6324376061044218113">"Ieslēgt automātiski, kad akumulatora uzlādes līmenis ir <xliff:g id="PERCENTAGE">%d</xliff:g>%%"</string>
     <string name="no_auto_saver_action" msgid="8086002101711328500">"Nē, paldies"</string>
     <string name="auto_saver_enabled_title" msgid="6726474226058316862">"Ieslēgts akumulatora enerģijas taupīšanas režīma grafiks"</string>
-    <!-- String.format failed for translation -->
-    <!-- no translation found for auto_saver_enabled_text (874711029884777579) -->
-    <skip />
+    <string name="auto_saver_enabled_text" msgid="874711029884777579">"Tiklīdz akumulatora uzlādes līmenis būs zemāks nekā <xliff:g id="PERCENTAGE">%d</xliff:g>%%, tiks automātiski ieslēgts akumulatora jaudas taupīšanas režīms."</string>
     <string name="open_saver_setting_action" msgid="8314624730997322529">"Iestatījumi"</string>
     <string name="auto_saver_okay_action" msgid="2701221740227683650">"Labi"</string>
     <string name="heap_dump_tile_name" msgid="9141031328971226374">"Dump SysUI Heap"</string>
