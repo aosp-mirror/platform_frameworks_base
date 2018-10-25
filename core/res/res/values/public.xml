@@ -2908,7 +2908,7 @@
         <public name="opticalInsetTop" />
         <public name="opticalInsetRight" />
         <public name="opticalInsetBottom" />
-        <public name="allowForceDark" />
+        <public name="forceDarkAllowed" />
         <public name="supportsAmbientMode" />
         <!-- @hide For use by platform and tools only. Developers should not specify this value. -->
         <public name="usesNonSdkApi" />

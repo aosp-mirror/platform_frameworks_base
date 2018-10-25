@@ -5542,6 +5542,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     break;
                 case com.android.internal.R.styleable.View_accessibilityHeading:
                     setAccessibilityHeading(a.getBoolean(attr, false));
+                    break;
+                case R.styleable.View_forceDarkAllowed:
+                    mRenderNode.setForceDarkAllowed(a.getBoolean(attr, true));
+                    break;
             }
         }
 
@@ -15286,11 +15290,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * If a theme is isLightTheme="false", then force dark is globally disabled for that theme.
      *
      * @param allow Whether or not to allow force dark.
-     *
-     * @hide
      */
-    public void setAllowForceDark(boolean allow) {
-        if (mRenderNode.setAllowForceDark(allow)) {
+    public void setForceDarkAllowed(boolean allow) {
+        if (mRenderNode.setForceDarkAllowed(allow)) {
             // Currently toggling force-dark requires a new display list push to apply
             // TODO: Make it not clobber the display list so this is just a damageSelf() instead
             invalidate();
@@ -15298,15 +15300,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * See {@link #setAllowForceDark(boolean)}
+     * See {@link #setForceDarkAllowed(boolean)}
      *
      * @return true if force dark is allowed (default), false if it is disabled
-     *
-     * @hide
      */
     @ViewDebug.ExportedProperty(category = "drawing")
-    public boolean getAllowForceDark() {
-        return mRenderNode.getAllowForceDark();
+    public boolean isForceDarkAllowed() {
+        return mRenderNode.isForceDarkAllowed();
     }
 
     /**

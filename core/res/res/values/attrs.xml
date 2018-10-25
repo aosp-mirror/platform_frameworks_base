@@ -1141,6 +1141,15 @@
 
         <!-- Alpha value of the spot shadow projected by elevated views, between 0 and 1. -->
         <attr name="spotShadowAlpha" format="float" />
+
+        <!-- <p>Whether or not the force dark feature is allowed to be applied to this theme.
+             <p>Setting this to false will disable the auto-dark feature on everything this
+             theme is applied to along with anything drawn by any children of views using
+             this theme.
+             <p>Setting this to true will allow this view to be automatically made dark, however
+             a value of 'true' will not override any 'false' value in its parent chain nor will
+             it prevent any 'false' in any of its children. -->
+        <attr name="forceDarkAllowed" format="boolean" />
     </declare-styleable>
 
     <!-- **************************************************************** -->
@@ -3116,8 +3125,13 @@
              {@link android.R.attr#ambientShadowAlpha} theme attribute. -->
         <attr name="outlineAmbientShadowColor" format="color" />
 
-        <!-- Whether to allow the rendering system to force this View to render as light-on-dark. -->
-        <attr name="allowForceDark" format="boolean" />
+        <!-- <p>Whether or not the force dark feature is allowed to be applied to this View.
+             <p>Setting this to false will disable the auto-dark feature on this View draws
+             including any descendants.
+             <p>Setting this to true will allow this view to be automatically made dark, however
+             a value of 'true' will not override any 'false' value in its parent chain nor will
+             it prevent any 'false' in any of its children. -->
+        <attr name="forceDarkAllowed" format="boolean" />
     </declare-styleable>
 
     <!-- Attributes that can be assigned to a tag for a particular View. -->

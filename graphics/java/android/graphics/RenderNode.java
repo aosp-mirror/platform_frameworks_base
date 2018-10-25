@@ -931,16 +931,16 @@ public class RenderNode {
      * @param allow Whether or not to allow force dark.
      * @return true If the value has changed, false otherwise.
      */
-    public boolean setAllowForceDark(boolean allow) {
+    public boolean setForceDarkAllowed(boolean allow) {
         return nSetAllowForceDark(mNativeRenderNode, allow);
     }
 
     /**
-     * See {@link #setAllowForceDark(boolean)}
+     * See {@link #setForceDarkAllowed(boolean)}
      *
      * @return true if force dark is allowed (default), false if it is disabled
      */
-    public boolean getAllowForceDark() {
+    public boolean isForceDarkAllowed() {
         return nGetAllowForceDark(mNativeRenderNode);
     }
 
