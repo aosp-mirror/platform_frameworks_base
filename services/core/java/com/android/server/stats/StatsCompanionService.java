@@ -35,6 +35,9 @@ import android.content.pm.PackageInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.UserInfo;
 import android.hardware.fingerprint.FingerprintManager;
+import android.net.ConnectivityManager;
+import android.net.Network;
+import android.net.NetworkRequest;
 import android.net.NetworkStats;
 import android.net.wifi.IWifiManager;
 import android.net.wifi.WifiActivityEnergyInfo;
@@ -263,6 +266,12 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         } else {
             Slog.e(TAG, "cannot find thermalservice, no throttling push notifications");
         }
+
+        // Default NetworkRequest should cover all transport types.
+        final NetworkRequest request = new NetworkRequest.Builder().build();
+        final ConnectivityManager connectivityManager =
+                (ConnectivityManager) mContext.getSystemService(Context.CONNECTIVITY_SERVICE);
+        connectivityManager.registerNetworkCallback(request, new ConnectivityStatsCallback());
 
         HandlerThread handlerThread = new HandlerThread(TAG);
         handlerThread.start();
@@ -1860,6 +1869,21 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
                             StatsLog.THERMAL_THROTTLING_STATE_CHANGED__STATE__START :
                             StatsLog.THERMAL_THROTTLING_STATE_CHANGED__STATE__STOP,
                     temp.getValue());
+        }
+    }
+
+    private static final class ConnectivityStatsCallback extends
+            ConnectivityManager.NetworkCallback {
+        @Override
+        public void onAvailable(Network network) {
+            StatsLog.write(StatsLog.CONNECTIVITY_STATE_CHANGED, network.netId,
+                    StatsLog.CONNECTIVITY_STATE_CHANGED__STATE__CONNECTED);
+        }
+
+        @Override
+        public void onLost(Network network) {
+            StatsLog.write(StatsLog.CONNECTIVITY_STATE_CHANGED, network.netId,
+                    StatsLog.CONNECTIVITY_STATE_CHANGED__STATE__DISCONNECTED);
         }
     }
 }

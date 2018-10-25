@@ -147,6 +147,7 @@ message Atom {
         PhoneStateChanged phone_state_changed = 95;
         UserRestrictionChanged user_restriction_changed = 96;
         SettingsUIChanged settings_ui_changed = 97;
+        ConnectivityStateChanged connectivity_state_changed = 98;
     }
 
     // Pulled events will start at field 10000.
@@ -2128,6 +2129,22 @@ message Notification {
     optional int64 visible_millis = 16;
 }
 
+/*
+ * Logs when a connection becomes available and lost.
+ * Logged in StatsCompanionService.java
+ */
+message ConnectivityStateChanged {
+    // Id of the network.
+    optional int32 net_id = 1;
+
+    enum State {
+        UNKNOWN = 0;
+        CONNECTED = 1;
+        DISCONNECTED = 2;
+    }
+    // Connected state of a network.
+    optional State state = 2;
+}
 
 //////////////////////////////////////////////////////////////////////
 // Pulled atoms below this line //
