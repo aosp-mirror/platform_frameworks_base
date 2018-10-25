@@ -16,9 +16,7 @@
 
 package com.android.server;
 
-import android.annotation.MainThread;
 import android.annotation.Nullable;
-import android.annotation.WorkerThread;
 import android.app.ActivityManager;
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
@@ -168,13 +166,13 @@ public class ServiceWatcher implements ServiceConnection {
     // called on handler thread
     @GuardedBy("mBindLock")
     protected void onBind() {
-
+        Preconditions.checkState(Looper.myLooper() == mHandler.getLooper());
     }
 
     // called on handler thread
     @GuardedBy("mBindLock")
     protected void onUnbind() {
-
+        Preconditions.checkState(Looper.myLooper() == mHandler.getLooper());
     }
 
     /**
@@ -205,12 +203,12 @@ public class ServiceWatcher implements ServiceConnection {
 
                 @Override
                 public void onPackageRemoved(String packageName, int uid) {
-                        bindBestPackage(Objects.equals(packageName, getCurrentPackageName()));
+                    bindBestPackage(Objects.equals(packageName, getCurrentPackageName()));
                 }
 
                 @Override
                 public boolean onPackageChanged(String packageName, int uid, String[] components) {
-                        bindBestPackage(Objects.equals(packageName, getCurrentPackageName()));
+                    bindBestPackage(Objects.equals(packageName, getCurrentPackageName()));
                     return super.onPackageChanged(packageName, uid, components);
                 }
             }.register(mContext, UserHandle.ALL, true, mHandler);
@@ -243,20 +241,16 @@ public class ServiceWatcher implements ServiceConnection {
         return true;
     }
 
-    /** Returns thje name of the currently connected package or null. */
+    /** Returns the name of the currently connected package or null. */
     @Nullable
     public String getCurrentPackageName() {
         ComponentName bestComponent = mBestComponent;
         return bestComponent == null ? null : bestComponent.getPackageName();
     }
 
-    public int getCurrentPackageVersion() {
-        return mBestVersion;
-    }
-
     /**
-     * Runs the given BinderRunner if currently connected. Returns true if it was run, and false
-     * otherwise. All invocations to runOnBinder are run serially.
+     * Runs the given BinderRunner if currently connected. All invocations to runOnBinder are run
+     * serially.
      */
     public final void runOnBinder(BinderRunner runner) {
         synchronized (mBindLock) {
@@ -267,7 +261,7 @@ public class ServiceWatcher implements ServiceConnection {
                 } catch (Exception e) {
                     // remote exceptions cannot be allowed to crash system server
                     Log.e(TAG, "exception while while running " + runner + " on " + service
-                            + " from " + mBestComponent.toShortString(), e);
+                            + " from " + this, e);
                 }
             }
         }
@@ -280,14 +274,6 @@ public class ServiceWatcher implements ServiceConnection {
                 UserHandle.USER_SYSTEM).isEmpty();
     }
 
-    /**
-     * Searches and binds to the best package, or do nothing if the best package
-     * is already bound, unless force rebinding is requested.
-     *
-     * @param forceRebind          Force a rebinding to the best package if it's already
-     *                             bound.
-     */
-    @WorkerThread
     private void bindBestPackage(boolean forceRebind) {
         Preconditions.checkState(Looper.myLooper() == mHandler.getLooper());
 
@@ -365,7 +351,6 @@ public class ServiceWatcher implements ServiceConnection {
         }
     }
 
-    @WorkerThread
     private void bind(ComponentName component, int version, int userId) {
         Preconditions.checkState(Looper.myLooper() == mHandler.getLooper());
 
@@ -382,7 +367,6 @@ public class ServiceWatcher implements ServiceConnection {
                 UserHandle.of(userId));
     }
 
-    @WorkerThread
     private void unbind() {
         Preconditions.checkState(Looper.myLooper() == mHandler.getLooper());
 
@@ -396,7 +380,6 @@ public class ServiceWatcher implements ServiceConnection {
         mBestUserId = UserHandle.USER_NULL;
     }
 
-    @MainThread
     @Override
     public final void onServiceConnected(ComponentName component, IBinder binder) {
         mHandler.post(() -> {
@@ -410,7 +393,6 @@ public class ServiceWatcher implements ServiceConnection {
         });
     }
 
-    @MainThread
     @Override
     public final void onServiceDisconnected(ComponentName component) {
         mHandler.post(() -> {
