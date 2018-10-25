@@ -295,6 +295,9 @@
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"snima zvuk"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"Dozvoliti aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; snimanje zvuka?"</string>
+    <string name="permgrouplab_activityRecognition" msgid="2838596644535616493">"Prepoznavanje aktivnosti"</string>
+    <string name="permgroupdesc_activityRecognition" msgid="7672248027571522602">"prepoznavanje aktivnosti"</string>
+    <string name="permgrouprequest_activityRecognition" msgid="8121253142311250055">"Dozvoliti aplikaciji<xliff:g id="APP_NAME">%1$s</xliff:g> prepoznavanje vaše fizičke aktivnosti?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Kamera"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"slika i snima videozapise"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"Dozvoliti aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; snimanje slika i videozapisa?"</string>
@@ -421,14 +424,16 @@
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Ova aplikacija može odrediti vašu lokaciju na osnovu izvora mreže kao što su predajnici za mobilnu mrežu i WiFi mreže. Ove usluge za određivanje lokacije moraju biti uključene i omogućene na vašem tabletu kako bi ih aplikacija mogla koristiti."</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"Ova aplikacija može odrediti vašu lokaciju na osnovu izvora mreže kao što su predajnici za mobilnu mrežu i WiFi mreže. Ove usluge za određivanje lokacije moraju biti uključene i omogućene na vašem TV-u kako bi ih aplikacija mogla koristiti."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"Ova aplikacija može odrediti vašu lokaciju na osnovu izvora mreže kao što su predajnici za mobilnu mrežu i WiFi mreže. Ove usluge za određivanje lokacije moraju biti uključene i omogućene na vašem telefonu kako bi ih aplikacija mogla koristiti."</string>
-    <string name="permlab_accessBackgroundLocation" msgid="5742466381902568536">"pristupi tačnoj lokaciji u pozadini"</string>
-    <string name="permdesc_accessBackgroundLocation" msgid="6371533283380774135">"Ova aplikacija može odrediti vašu tačnu lokaciju u svakom trenutku kada je u pozadini. Ove usluge za određivanje lokacije moraju biti uključene i dostupne na vašem telefonu da ih aplikacija može koristiti. To može izazvati povećanje potrošnje baterije."</string>
+    <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"pristup lokaciji u pozadini"</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"Ako je ovo odobreno, pored pristupa približnoj ili tačnoj lokaciji, aplikacija može pristupiti lokaciji dok radi u pozadini."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"izmjene postavki zvuka"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Omogućava aplikaciji izmjenu općih postavki zvuka, kao što su jačina zvuka i izbor izlaznog zvučnika."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"snimanje audiozapisa"</string>
     <string name="permdesc_recordAudio" msgid="4245930455135321433">"Ova aplikacija može u svakom trenutku snimati zvuk koristeći mikrofon."</string>
     <string name="permlab_sim_communication" msgid="2935852302216852065">"slanje komandi SIM kartici"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Omogućava aplikaciji slanje naredbi na SIM. Ovo je vrlo opasno."</string>
+    <string name="permlab_activityRecognition" msgid="3634590230567608356">"prepoznavanje fizičke aktivnosti"</string>
+    <string name="permdesc_activityRecognition" msgid="3143453925156552894">"Ova aplikacija može prepoznati vašu fizičku aktivnost."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"snimanje slika i videozapisa"</string>
     <string name="permdesc_camera" msgid="5392231870049240670">"Ova aplikacija može slikati fotografije i snimati videozapise koristeći kameru bilo kada."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"kontrola vibracije"</string>
@@ -521,6 +526,7 @@
     <string name="permdesc_imagesWrite" msgid="7073662756617474375">"Omogućava aplikaciji da mijenja vašu kolekciju fotografija."</string>
     <string name="permlab_mediaLocation" msgid="8675148183726247864">"čitanje lokacija iz kolekcije medija"</string>
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"Omogućava aplikaciji da čita lokacije iz vaše kolekcije medija."</string>
+    <string name="biometric_dialog_default_title" msgid="4229778503907743328">"Aplikacija <xliff:g id="APP">%s</xliff:g> traži autentifikaciju."</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"Biometrijski hardver nije dostupan"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Otkriven je djelomičan otisak prsta. Pokušajte ponovo."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Nije uspjela obrada otiska prsta. Pokušajte ponovo."</string>
@@ -831,7 +837,7 @@
     <string name="lockscreen_too_many_failed_password_attempts_dialog_message" msgid="2725973286239344555">"Pogrešno ste unijeli svoju lozinku <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. \n\nBroj sekundi do sljedećeg pokušaja: <xliff:g id="NUMBER_1">%2$d</xliff:g>"</string>
     <string name="lockscreen_too_many_failed_pin_attempts_dialog_message" msgid="6216672706545696955">"Pogrešno ste unijeli svoj PIN <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. \n\nBroj sekundi do sljedećeg pokušaja: <xliff:g id="NUMBER_1">%2$d</xliff:g>"</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="tablet" msgid="9191611984625460820">"Pogrešno ste unijeli uzorak za otključavanje <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. Možete pokušati još <xliff:g id="NUMBER_1">%2$d</xliff:g> puta. Nakon toga ćete morati otključati tablet prijavom na svoj Google račun.\n\n Broj sekundi do sljedećeg pokušaja: <xliff:g id="NUMBER_2">%3$d</xliff:g>"</string>
-    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="5316664559603394684">"Uzorak za otključavanje ste neispravno nacrtali <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. U slučaju još <xliff:g id="NUMBER_1">%2$d</xliff:g> pokušaja bez uspjeha, bit će zatraženo da TV otključate pomoću Google prijave.\n\n Pokušajte opet za <xliff:g id="NUMBER_2">%3$d</xliff:g> sek."</string>
+    <string name="lockscreen_failed_attempts_almost_glogin" product="tv" msgid="5316664559603394684">"Uzorak za otključavanje ste neispravno nacrtali <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. U slučaju još <xliff:g id="NUMBER_1">%2$d</xliff:g> pokušaja bez uspjeha, bit će zatraženo da TV otključate pomoću Google prijave.\n\n Pokušajte opet za <xliff:g id="NUMBER_2">%3$d</xliff:g> s."</string>
     <string name="lockscreen_failed_attempts_almost_glogin" product="default" msgid="2590227559763762751">"Pogrešno ste unijeli uzorak za otključavanje <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. Možete pokušati još <xliff:g id="NUMBER_1">%2$d</xliff:g> puta. Nakon toga ćete morati otključati telefon prijavom na svoj Google račun.\n\n Broj sekundi do sljedećeg pokušaja: <xliff:g id="NUMBER_2">%3$d</xliff:g>"</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tablet" msgid="6128106399745755604">"Pogrešno ste pokušali otključati tablet <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. Možete pokušati još <xliff:g id="NUMBER_1">%2$d</xliff:g> puta. Ukoliko ni tada ne uspijete otključati tablet, tablet će se vratiti na fabričke postavke i svi korisnički podaci bit će izgubljeni."</string>
     <string name="lockscreen_failed_attempts_almost_at_wipe" product="tv" msgid="950408382418270260">"Pokušali ste <xliff:g id="NUMBER_0">%1$d</xliff:g> puta neispravno otključati TV. U slučaju još <xliff:g id="NUMBER_1">%2$d</xliff:g> pokušaja bez uspjeha, TV će biti vraćen na fabričke postavke i svi podaci korisnika bit će izgubljeni."</string>
@@ -1635,9 +1641,9 @@
     <string name="kg_failed_attempts_now_wiping" product="tablet" msgid="2072996269148483637">"Pokušali ste otključati tablet na pogrešan način <xliff:g id="NUMBER">%d</xliff:g> puta. Tablet će sada biti vraćen na fabričke postavke."</string>
     <string name="kg_failed_attempts_now_wiping" product="tv" msgid="4987878286750741463">"Pokušali ste <xliff:g id="NUMBER">%d</xliff:g> puta neispravno otključati TV. TV će sada biti vraćen na fabričke postavke."</string>
     <string name="kg_failed_attempts_now_wiping" product="default" msgid="4817627474419471518">"Pokušali ste otključati telefon na pogrešan način <xliff:g id="NUMBER">%d</xliff:g> puta. Telefon će sada biti vraćen na fabričke postavke."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Pogrešno ste nacrtali uzorak za otključavanje <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. Ako napravite još <xliff:g id="NUMBER_1">%2$d</xliff:g> pokušaja bez uspjeha, od vas će se tražiti da otključate tablet pomoću e-pošte. \n\n Pokušajte ponovo za <xliff:g id="NUMBER_2">%3$d</xliff:g> sek."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4224651132862313471">"Uzorak za otključavanje ste pogrešno nacrtali <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. U slučaju još <xliff:g id="NUMBER_1">%2$d</xliff:g> pokušaja bez uspjeha, bit će zatraženo da TV otključate pomoću računa e-pošte.\n\n Pokušajte opet za <xliff:g id="NUMBER_2">%3$d</xliff:g> sek."</string>
-    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Pogrešno ste nacrtali uzorak za otključavanje <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. Ako napravite još <xliff:g id="NUMBER_1">%2$d</xliff:g> pokušaja bez uspjeha, od vas će se tražiti da otključate telefon pomoću e-pošte. \n\n Pokušajte ponovo za <xliff:g id="NUMBER_2">%3$d</xliff:g> sek."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tablet" msgid="3253575572118914370">"Pogrešno ste nacrtali uzorak za otključavanje <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. Ako napravite još <xliff:g id="NUMBER_1">%2$d</xliff:g> pokušaja bez uspjeha, od vas će se tražiti da otključate tablet pomoću e-pošte. \n\n Pokušajte ponovo za <xliff:g id="NUMBER_2">%3$d</xliff:g> s."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="tv" msgid="4224651132862313471">"Uzorak za otključavanje ste pogrešno nacrtali <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. U slučaju još <xliff:g id="NUMBER_1">%2$d</xliff:g> pokušaja bez uspjeha, bit će zatraženo da TV otključate pomoću računa e-pošte.\n\n Pokušajte opet za <xliff:g id="NUMBER_2">%3$d</xliff:g> s."</string>
+    <string name="kg_failed_attempts_almost_at_login" product="default" msgid="1437638152015574839">"Pogrešno ste nacrtali uzorak za otključavanje <xliff:g id="NUMBER_0">%1$d</xliff:g> puta. Ako napravite još <xliff:g id="NUMBER_1">%2$d</xliff:g> pokušaja bez uspjeha, od vas će se tražiti da otključate telefon pomoću e-pošte. \n\n Pokušajte ponovo za <xliff:g id="NUMBER_2">%3$d</xliff:g> s."</string>
     <string name="kg_text_message_separator" product="default" msgid="4160700433287233771">" — "</string>
     <string name="kg_reordering_delete_drop_target_text" msgid="7899202978204438708">"Ukloni"</string>
     <string name="safe_media_volume_warning" product="default" msgid="2276318909314492312">"Želite li pojačati zvuk iznad preporučenog nivoa?\n\nDužim slušanjem glasnog zvuka možete oštetiti sluh."</string>
@@ -1934,14 +1940,14 @@
       <item quantity="few"><xliff:g id="COUNT">%1$s</xliff:g> prijedloga za automatsko popunjavanje</item>
       <item quantity="other"><xliff:g id="COUNT">%1$s</xliff:g> prijedloga za automatsko popunjavanje</item>
     </plurals>
-    <string name="autofill_save_title" msgid="3345527308992082601">"Želite li sačuvati u &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_save_title_with_type" msgid="8637809388029313305">"Želite li da se <xliff:g id="TYPE">%1$s</xliff:g> sačuva u &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"Želite li da se <xliff:g id="TYPE_0">%1$s</xliff:g> i <xliff:g id="TYPE_1">%2$s</xliff:g> sačuvaju u &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"Želite li da se <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g>, i <xliff:g id="TYPE_2">%3$s</xliff:g> sačuvaju &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_update_title" msgid="4879673117448810818">"Želite li ažurirati na &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_update_title_with_type" msgid="339733442087186755">"Želite li da se <xliff:g id="TYPE">%1$s</xliff:g> ažurira na &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_update_title_with_2types" msgid="6321714204167424745">"Želite li da se <xliff:g id="TYPE_0">%1$s</xliff:g> i <xliff:g id="TYPE_1">%2$s</xliff:g> ažuriraju na &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_update_title_with_3types" msgid="5866735124066629287">"Želite li da se <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g>, i <xliff:g id="TYPE_2">%3$s</xliff:g> ažuriraju na &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_save_title" msgid="327541108460384555">"Sačuvati u "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_save_title_with_type" msgid="2339135393607143594">"Sačuvati <xliff:g id="TYPE">%1$s</xliff:g> u "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_save_title_with_2types" msgid="87616102361154432">"Sačuvati <xliff:g id="TYPE_0">%1$s</xliff:g> i <xliff:g id="TYPE_1">%2$s</xliff:g> u "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_save_title_with_3types" msgid="4108978552969604555">"Sačuvati <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> i <xliff:g id="TYPE_2">%3$s</xliff:g> u "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_update_title" msgid="5305781141104585279">"Ažurirati u "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_update_title_with_type" msgid="4624181147422762233">"Ažurirati <xliff:g id="TYPE">%1$s</xliff:g> u "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_update_title_with_2types" msgid="2300113827053626484">"Ažurirati <xliff:g id="TYPE_0">%1$s</xliff:g> i <xliff:g id="TYPE_1">%2$s</xliff:g> u "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_update_title_with_3types" msgid="9089824354296211922">"Ažurirati ove stavke u "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>": <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> i <xliff:g id="TYPE_2">%3$s</xliff:g>?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"Sačuvaj"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"Ne, hvala"</string>
     <string name="autofill_update_yes" msgid="310358413273276958">"Ažuriraj"</string>

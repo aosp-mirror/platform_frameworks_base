@@ -292,6 +292,9 @@
     <string name="permgrouplab_microphone" msgid="171539900250043464">"មីក្រូ​ហ្វូន"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"ថតសំឡេង"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"អនុញ្ញាតឱ្យ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ថតសំឡេង?"</string>
+    <string name="permgrouplab_activityRecognition" msgid="2838596644535616493">"ការសម្គាល់​សកម្មភាព"</string>
+    <string name="permgroupdesc_activityRecognition" msgid="7672248027571522602">"ស្គាល់​សកម្មភាព"</string>
+    <string name="permgrouprequest_activityRecognition" msgid="8121253142311250055">"អនុញ្ញាតឱ្យ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ស្គាល់​សកម្មភាព​រាងកាយ​របស់អ្នក?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"កាមេរ៉ា"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"ថតរូប និងថតវីដេអូ"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"អនុញ្ញាតឱ្យ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ថតរូប និងថត​វីដេអូ?"</string>
@@ -418,14 +421,16 @@
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"កម្មវិធី​នេះ​អាច​ទទួល​បាន​ទីតាំង​របស់​អ្នក​ ដោយ​ផ្អែក​លើ​ប្រភព​បណ្តាញ​ ដូចជា​៖​ អង់តែន​ និង​បណ្តាញ​ Wi-Fi​ ។​ សេវាកម្ម​ទីតាំង​ទាំងនេះ​ត្រូវតែ​បើក​ និង​ត្រូវតែ​មាន​នៅ​លើ​ថេប្លេត​របស់​អ្នក ដើម្បី​ឲ្យ​កម្មវិធី​នេះ​អាច​ប្រើ​វា​បាន​។"</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"កម្មវិធី​នេះ​អាច​ទទួល​បាន​ទីតាំង​របស់​អ្នក​ ដោយ​ផ្អែក​លើ​ប្រភព​បណ្តាញ​ ដូចជា​៖​ អង់តែន​ និង​បណ្តាញ​ Wi-Fi​ ។​ សេវាកម្ម​ទីតាំង​ទាំងនេះ​ត្រូវតែ​បើក​ និង​ត្រូវតែ​មាន​នៅ​លើ​ទូរទស្សន៍​របស់​អ្នក ដើម្បី​ឲ្យ​កម្មវិធី​នេះ​អាច​ប្រើ​វា​បាន​។"</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"កម្មវិធី​នេះ​អាច​ទទួល​បាន​ទីតាំង​របស់​អ្នក​ ដោយ​ផ្អែក​លើ​ប្រភព​បណ្តាញ​ ដូចជា​៖​ អង់តែន​ និង​បណ្តាញ​ Wi-Fi​ ។​ សេវាកម្ម​ទីតាំង​ទាំងនេះ​ត្រូវតែ​បើក​ និង​ត្រូវតែ​មាន​នៅ​លើ​ទូរសព្ទ​របស់​អ្នក ដើម្បី​ឲ្យ​កម្មវិធី​នេះ​អាច​ប្រើ​វា​បាន​។"</string>
-    <string name="permlab_accessBackgroundLocation" msgid="5742466381902568536">"ចូលប្រើ​ទីតាំង​ជាក់លាក់​នៅផ្ទៃ​ខាងក្រោយ"</string>
-    <string name="permdesc_accessBackgroundLocation" msgid="6371533283380774135">"កម្មវិធីនេះ​អាចទទួល​បានទីតាំង​ពិតប្រាកដ​របស់អ្នក​គ្រប់ពេល​ដែលវា​ស្ថិតនៅ​ផ្ទៃខាងក្រោយ។ សេវាកម្ម​ទីតាំង​ទាំងនេះ​ត្រូវតែ​បើក និងមាន​នៅលើ​ទូរសព្ទ​របស់អ្នក ដើម្បីឱ្យ​កម្មវិធី​នេះអាចប្រើ​ពួកវាបាន។ វាអាចប្រើ​ថាមពល​ច្រើន​ជាងមុន។"</string>
+    <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"ចូល​ប្រើ​ទីតាំង​នៅ​ផ្ទៃខាងក្រោយ"</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"ប្រសិនបើ​ផ្ដល់​ការអនុញ្ញាត​នេះ​បន្ថែម​ពីលើ​ការចូលប្រើទីតាំងជាក់លាក់ ឬប្រហាក់ប្រហែល កម្មវិធី​នឹងអាចចូលប្រើទីតាំងនោះ ខណៈពេលដំណើរការនៅផ្ទៃខាងក្រោយ។"</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"ប្ដូរ​ការ​កំណត់​អូឌីយូ​របស់​អ្នក"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"ឲ្យ​កម្មវិធី​កែ​ការ​កំណត់​សំឡេង​សកល ដូច​ជា​កម្រិត​សំឡេង និង​អូប៉ាល័រ​ដែល​បាន​ប្រើ​សម្រាប់​លទ្ធផល។"</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"ថត​សំឡេង"</string>
     <string name="permdesc_recordAudio" msgid="4245930455135321433">"កម្មវិធី​នេះ​អាច​ថត​សំឡេង​ដោយ​ប្រើ​មីក្រូហ្វូន​បាន​គ្រប់​ពេល។"</string>
     <string name="permlab_sim_communication" msgid="2935852302216852065">"ផ្ញើពាក្យបញ្ជាទៅស៊ីមកាត"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"ឲ្យ​កម្មវិធី​ផ្ញើ​ពាក្យ​បញ្ជា​ទៅ​ស៊ីម​កាត។ វា​គ្រោះ​ថ្នាក់​ណាស់។"</string>
+    <string name="permlab_activityRecognition" msgid="3634590230567608356">"ស្គាល់​សកម្មភាព​រាងកាយ"</string>
+    <string name="permdesc_activityRecognition" msgid="3143453925156552894">"កម្មវិធីនេះ​អាចស្គាល់សកម្មភាព​រាងកាយ​របស់អ្នក។"</string>
     <string name="permlab_camera" msgid="3616391919559751192">"ថត​រូប និងវីដេអូ"</string>
     <string name="permdesc_camera" msgid="5392231870049240670">"កម្មវិធី​នេះ​អាច​ថត​រូប​ និង​ថត​វីដេអូ​ ដោយ​ប្រើ​កាមេរ៉ា​បាន​គ្រប់​ពេល​។"</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"ពិនិត្យ​ការ​ញ័រ"</string>
@@ -518,6 +523,7 @@
     <string name="permdesc_imagesWrite" msgid="7073662756617474375">"អនុញ្ញាតឱ្យ​កម្មវិធី​កែប្រែ​បណ្ដុំ​រូបថត​របស់​អ្នក។"</string>
     <string name="permlab_mediaLocation" msgid="8675148183726247864">"អាន​ទីតាំង​ពី​បណ្ដុំ​មេឌៀ​របស់​អ្នក"</string>
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"អនុញ្ញាតឱ្យ​កម្មវិធី​អាន​ទីតាំង​ពីបណ្ដុំ​មេឌៀ​របស់​អ្នក។"</string>
+    <string name="biometric_dialog_default_title" msgid="4229778503907743328">"កម្មវិធី <xliff:g id="APP">%s</xliff:g> ចង់​ធ្វើ​កា​រផ្ទៀងផ្ទាត់។"</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"មិនអាច​ប្រើឧបករណ៍​ស្កេន​ស្នាមម្រាមដៃ​បានទេ"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"បានផ្តិតយកស្នាមម្រាមដៃមិនពេញលក្ខណៈ។ សូមព្យាយាមម្តងទៀត។"</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"មិនអាចដំណើរការស្នាមម្រាមដៃបានទេ។ សូមព្យាយាមម្តងទៀត។"</string>
@@ -1899,14 +1905,14 @@
       <item quantity="other">ការណែនាំអំពីការបំពេញដោយស្វ័យប្រវត្តិ <xliff:g id="COUNT">%1$s</xliff:g></item>
       <item quantity="one">ការណែនាំអំពីការបំពេញដោយស្វ័យប្រវត្តិមួយ</item>
     </plurals>
-    <string name="autofill_save_title" msgid="3345527308992082601">"រក្សាទុក​ទៅក្នុង &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_save_title_with_type" msgid="8637809388029313305">"រក្សាទុក <xliff:g id="TYPE">%1$s</xliff:g> ទៅក្នុង &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"រក្សាទុក <xliff:g id="TYPE_0">%1$s</xliff:g> និង <xliff:g id="TYPE_1">%2$s</xliff:g> ទៅក្នុង &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"រក្សាទុក <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g>, និង <xliff:g id="TYPE_2">%3$s</xliff:g> ទៅក្នុង &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_update_title" msgid="4879673117448810818">"ធ្វើ​បច្ចុប្បន្នភាព​ទៅ &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_update_title_with_type" msgid="339733442087186755">"ធ្វើ​បច្ចុប្បន្នភាព <xliff:g id="TYPE">%1$s</xliff:g> ទៅ &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_update_title_with_2types" msgid="6321714204167424745">"ធ្វើ​បច្ចុប្បន្នភាព <xliff:g id="TYPE_0">%1$s</xliff:g> និង <xliff:g id="TYPE_1">%2$s</xliff:g> ទៅ &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_update_title_with_3types" msgid="5866735124066629287">"ធ្វើ​បច្ចុប្បន្នភាព <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> និង <xliff:g id="TYPE_2">%3$s</xliff:g> ទៅ &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_save_title" msgid="327541108460384555">"រក្សាទុក​ទៅក្នុង "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_save_title_with_type" msgid="2339135393607143594">"រក្សាទុក <xliff:g id="TYPE">%1$s</xliff:g> ទៅក្នុង "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_save_title_with_2types" msgid="87616102361154432">"រក្សាទុក​ <xliff:g id="TYPE_0">%1$s</xliff:g> និង <xliff:g id="TYPE_1">%2$s</xliff:g> ទៅ​ក្នុង "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_save_title_with_3types" msgid="4108978552969604555">"រក្សាទុក​ <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> និង <xliff:g id="TYPE_2">%3$s</xliff:g> ទៅក្នុង "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_update_title" msgid="5305781141104585279">"ធ្វើ​បច្ចុប្បន្នភាព​នៅក្នុង "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_update_title_with_type" msgid="4624181147422762233">"ធ្វើ​បច្ចុប្បន្នភាព <xliff:g id="TYPE">%1$s</xliff:g> នៅក្នុង "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_update_title_with_2types" msgid="2300113827053626484">"ធ្វើ​បច្ចុប្បន្នភាព​ <xliff:g id="TYPE_0">%1$s</xliff:g> និង <xliff:g id="TYPE_1">%2$s</xliff:g> នៅក្នុង "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_update_title_with_3types" msgid="9089824354296211922">"ធ្វើ​បច្ចុប្បន្នភាព​ធាតុ​ទាំងនេះ​នៅក្នុង "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>": <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> និង <xliff:g id="TYPE_2">%3$s</xliff:g>?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"រក្សាទុក"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"ទេ អរគុណ"</string>
     <string name="autofill_update_yes" msgid="310358413273276958">"ធ្វើ​បច្ចុប្បន្នភាព"</string>

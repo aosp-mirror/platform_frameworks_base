@@ -292,6 +292,9 @@
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofoni"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"tallentaa ääntä"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"Saako &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; nauhoittaa ääntä?"</string>
+    <string name="permgrouplab_activityRecognition" msgid="2838596644535616493">"Liikunnan tunnistaminen"</string>
+    <string name="permgroupdesc_activityRecognition" msgid="7672248027571522602">"tunnistaa liikunnan"</string>
+    <string name="permgrouprequest_activityRecognition" msgid="8121253142311250055">"Saako &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; tunnistaa liikkumisesi?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Kamera"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"ottaa kuvia ja videoita"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"Saako &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ottaa kuvia ja nauhoittaa videoita?"</string>
@@ -418,14 +421,16 @@
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Tämä sovellus voi määrittää sijaintisi matkapuhelinverkon tukiasemien, Wi-Fi-verkkojen ja muiden verkkolähteiden perusteella. Näiden sijaintipalveluiden tulee olla käytössä ja käytettävissä tabletillasi, jotta sovellus voi käyttää niitä."</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"Tämä sovellus voi määrittää sijaintisi matkapuhelinverkon tukiasemien, Wi-Fi-verkkojen ja muiden verkkolähteiden perusteella. Näiden sijaintipalveluiden tulee olla käytössä ja käytettävissä TV:lläsi, jotta sovellus voi käyttää niitä."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"Tämä sovellus voi määrittää sijaintisi matkapuhelinverkon tukiasemien, Wi-Fi-verkkojen ja muiden verkkolähteiden perusteella. Näiden sijaintipalveluiden tulee olla käytössä ja käytettävissä puhelimellasi, jotta sovellus voi käyttää niitä."</string>
-    <string name="permlab_accessBackgroundLocation" msgid="5742466381902568536">"käyttää tarkkaa sijaintia taustalla"</string>
-    <string name="permdesc_accessBackgroundLocation" msgid="6371533283380774135">"Tämä sovellus saa tarkat sijaintitietosi käyttöönsä taustalla. Näiden sijaintipalveluiden tulee olla käytössä ja käytettävissä puhelimellasi, jotta sovellus voi käyttää niitä. Tämä voi lisätä akun kulutusta."</string>
+    <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"käytä sijaintia taustalla"</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"Jos tämä myönnetään karkean tai tarkan sijainnin käyttöoikeuden lisäksi, sovellus voi käyttää sijaintia toimiessaan taustalla."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"muuta ääniasetuksia"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Antaa sovelluksen muokata yleisiä ääniasetuksia, kuten äänenvoimakkuutta ja käytettävää kaiutinta."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"tallentaa ääntä"</string>
     <string name="permdesc_recordAudio" msgid="4245930455135321433">"Tämä sovellus voi tallentaa mikrofonilla ääntä koska tahansa."</string>
     <string name="permlab_sim_communication" msgid="2935852302216852065">"lähettää komentoja SIM-kortille"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Antaa sovelluksen lähettää komentoja SIM-kortille. Tämä ei ole turvallista."</string>
+    <string name="permlab_activityRecognition" msgid="3634590230567608356">"tunnistaa liikkumisen"</string>
+    <string name="permdesc_activityRecognition" msgid="3143453925156552894">"Sovellus voi tunnistaa liikkumisesi."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"ota kuvia ja videoita"</string>
     <string name="permdesc_camera" msgid="5392231870049240670">"Tämä sovellus voi ottaa kameralla kuvia ja videoita koska tahansa."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"hallitse värinää"</string>
@@ -518,6 +523,7 @@
     <string name="permdesc_imagesWrite" msgid="7073662756617474375">"Antaa sovelluksen muokata kuvakokoelmaasi."</string>
     <string name="permlab_mediaLocation" msgid="8675148183726247864">"lukea mediakokoelmasi sijainteja"</string>
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"Antaa sovelluksen lukea mediakokoelmasi sijainteja."</string>
+    <string name="biometric_dialog_default_title" msgid="4229778503907743328">"<xliff:g id="APP">%s</xliff:g> pyytää todentamista"</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"Biometrinen laitteisto ei käytettävissä"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Sormenjälki havaittiin vain osittain. Yritä uudelleen."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Sormenjäljen käsittely epäonnistui. Yritä uudelleen."</string>
@@ -636,9 +642,9 @@
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Antaa sovelluksen luoda sidoksen operaattorin palveluun. Ei tavallisten sovelluksien käyttöön."</string>
     <string name="permlab_access_notification_policy" msgid="4247510821662059671">"Älä häiritse -tilan käyttöoikeus"</string>
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Sallii sovelluksen lukea ja muokata Älä häiritse -tilan asetuksia."</string>
-    <string name="policylab_limitPassword" msgid="4497420728857585791">"Aseta salasanasäännöt"</string>
-    <string name="policydesc_limitPassword" msgid="2502021457917874968">"Hallinnoi ruudun ruudun lukituksen salasanoissa ja PIN-koodeissa sallittuja merkkejä ja niiden pituutta."</string>
-    <string name="policylab_watchLogin" msgid="5091404125971980158">"Tarkkaile näytön avaamisyrityksiä"</string>
+    <string name="policylab_limitPassword" msgid="4497420728857585791">"Asentaa salasanasäännöt"</string>
+    <string name="policydesc_limitPassword" msgid="2502021457917874968">"Hallinnoida ruudun lukituksen salasanoissa ja PIN-koodeissa sallittuja merkkejä ja niiden pituutta."</string>
+    <string name="policylab_watchLogin" msgid="5091404125971980158">"Tarkkailla näytön avaamisyrityksiä"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Valvoo väärien salasanojen lukumäärää näytön lukituksen poistossa sekä lukitsee tablet-laitteen tai poistaa sen tiedot, jos salasana syötetään väärin liian monta kertaa."</string>
     <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"Valvo väärien salasanojen määrää poistettaessa näytön lukitusta ja lukitse televisio tai poista television kaikki tiedot, jos salasana kirjoitetaan väärin liian monta kertaa."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Valvoo väärien salasanojen lukumäärää näytön lukituksen poistossa ja lukitsee puhelimen tai poistaa sen kaikki tiedot, jos väärä salasana syötetään liian monta kertaa."</string>
@@ -659,14 +665,14 @@
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"Pyyhi tämän käyttäjän tiedot puhelimesta ilman varoitusta."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Aseta laitteen yleinen välityspalvelin"</string>
     <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"Aseta laitteen yleinen välityspalvelin käyttöön, kun käytäntö on käytössä. Vain laitteen omistaja voi asettaa yleisen välityspalvelimen."</string>
-    <string name="policylab_expirePassword" msgid="5610055012328825874">"Määritä ruudun lukituksen salasanan viimeinen voimassaolopäivä"</string>
-    <string name="policydesc_expirePassword" msgid="5367525762204416046">"Muuta sitä, miten usein ruudun lukituksen salasana, PIN-koodi tai kuvio tulee vaihtaa."</string>
-    <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Aseta tallennustilan salaus"</string>
+    <string name="policylab_expirePassword" msgid="5610055012328825874">"Määrittää ruudun lukituksen salasanan viimeinen voimassaolopäivä"</string>
+    <string name="policydesc_expirePassword" msgid="5367525762204416046">"Muuttaa sitä, miten usein ruudun lukituksen salasana, PIN-koodi tai kuvio tulee vaihtaa."</string>
+    <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Asettaa tallennustilan salaus"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Pakota tallennettujen sovellustietojen salaus."</string>
-    <string name="policylab_disableCamera" msgid="6395301023152297826">"Poista kamerat käytöstä"</string>
-    <string name="policydesc_disableCamera" msgid="2306349042834754597">"Estä laitteen kaikkien kameroiden käyttö."</string>
+    <string name="policylab_disableCamera" msgid="6395301023152297826">"Poistaa kamerat käytöstä"</string>
+    <string name="policydesc_disableCamera" msgid="2306349042834754597">"Estää laitteen kaikkien kameroiden käytön."</string>
     <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Estää lukitun näytön toimintoja"</string>
-    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Estä joidenkin lukitun näytön toimintojen käyttö."</string>
+    <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Estää joidenkin lukitun näytön toimintojen käytön."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Koti"</item>
     <item msgid="869923650527136615">"Mobiili"</item>
@@ -1897,14 +1903,14 @@
       <item quantity="other"><xliff:g id="COUNT">%1$s</xliff:g> automaattisen täytön ehdotusta</item>
       <item quantity="one">Yksi automaattisen täytön ehdotus</item>
     </plurals>
-    <string name="autofill_save_title" msgid="3345527308992082601">"Tallennetaanko tämä palveluun &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_save_title_with_type" msgid="8637809388029313305">"Tallennetaanko <xliff:g id="TYPE">%1$s</xliff:g> palveluun &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"Tallennetaanko <xliff:g id="TYPE_0">%1$s</xliff:g> ja <xliff:g id="TYPE_1">%2$s</xliff:g> palveluun &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"Tallennetaanko <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> ja <xliff:g id="TYPE_2">%3$s</xliff:g> palveluun &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_update_title" msgid="4879673117448810818">"Muutetaanko tämä palvelussa &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_update_title_with_type" msgid="339733442087186755">"Muutetaanko <xliff:g id="TYPE">%1$s</xliff:g>, jonka &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt; on tallentanut?"</string>
-    <string name="autofill_update_title_with_2types" msgid="6321714204167424745">"Muutetaanko <xliff:g id="TYPE_0">%1$s</xliff:g> ja <xliff:g id="TYPE_1">%2$s</xliff:g>, jotka &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt; on tallentanut?"</string>
-    <string name="autofill_update_title_with_3types" msgid="5866735124066629287">"Muutetaanko <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> ja <xliff:g id="TYPE_2">%3$s</xliff:g>, jotka &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt; on tallentanut?"</string>
+    <string name="autofill_save_title" msgid="327541108460384555">"Saako "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>" tallentaa tämän?"</string>
+    <string name="autofill_save_title_with_type" msgid="2339135393607143594">"Tallennetaanko <xliff:g id="TYPE">%1$s</xliff:g> ("<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>")?"</string>
+    <string name="autofill_save_title_with_2types" msgid="87616102361154432">"Tallennetaanko <xliff:g id="TYPE_0">%1$s</xliff:g> ja <xliff:g id="TYPE_1">%2$s</xliff:g> ("<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>")?"</string>
+    <string name="autofill_save_title_with_3types" msgid="4108978552969604555">"Tallennetaanko <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> ja <xliff:g id="TYPE_2">%3$s</xliff:g> ("<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>")?"</string>
+    <string name="autofill_update_title" msgid="5305781141104585279">"Päivitetäänkö "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_update_title_with_type" msgid="4624181147422762233">"Päivitetäänkö <xliff:g id="TYPE">%1$s</xliff:g> ("<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>")?"</string>
+    <string name="autofill_update_title_with_2types" msgid="2300113827053626484">"Päivitetäänkö <xliff:g id="TYPE_0">%1$s</xliff:g> ja <xliff:g id="TYPE_1">%2$s</xliff:g> ("<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>")?"</string>
+    <string name="autofill_update_title_with_3types" msgid="9089824354296211922">"Päivitetäänkö nämä ("<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>"): <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> ja <xliff:g id="TYPE_2">%3$s</xliff:g>?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"Tallenna"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"Ei kiitos"</string>
     <string name="autofill_update_yes" msgid="310358413273276958">"Muuta"</string>

@@ -292,6 +292,9 @@
     <string name="permgrouplab_microphone" msgid="171539900250043464">"මයික්‍රොෆෝනය"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"ශ්‍රව්‍ය පටිගත කරන්න"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;b&gt; වෙත ශබ්දය පටි ගත කිරීමට ඉඩ දෙන්නද?"</string>
+    <string name="permgrouplab_activityRecognition" msgid="2838596644535616493">"ක්‍රියාකාරකම් හැඳුනුම"</string>
+    <string name="permgroupdesc_activityRecognition" msgid="7672248027571522602">"ක්‍රියාකාරකම හඳුනා ගන්න"</string>
+    <string name="permgrouprequest_activityRecognition" msgid="8121253142311250055">"ඔබේ ශාරීරික ක්‍රියාකාරකම හඳුනා ගැනීමට &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ඉඩ දෙන්නද?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"කැමරාව"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"පින්තූර ගැනීම සහ වීඩියෝ පටිගත කිරීම"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;b&gt; වෙත පින්තූර සහ වීඩියෝ ගැනීමට ඉඩ දෙන්නද?"</string>
@@ -418,14 +421,16 @@
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"මෙම යෙදුමට ජංගම දුරකථන කුළුණු සහ Wi-Fi ජාල වැනි ජාල මූලාශ්‍ර පදනම්ව ඔබගේ ස්ථානය ලබා ගත හැකිය. යෙදුමට ඒවා භාවිත කිරීමට හැකි වීමට මෙම ස්ථාන සේවා ක්‍රියාත්මක කර සහ ඔබේ ටැබ්ලට් පරිගණකය මත ලබා ගත හැකිව තිබිය යුතුය."</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"මෙම යෙදුමට ජංගම දුරකථන කුළුණු සහ Wi-Fi ජාල වැනි ජාල මූලාශ්‍ර පදනම්ව ඔබගේ ස්ථානය ලබා ගත හැකිය. යෙදුමට ඒවා භාවිත කිරීමට හැකි වීමට මෙම ස්ථාන සේවා ක්‍රියාත්මක කර සහ ඔබේ TV මත ලබා ගත හැකිව තිබිය යුතුය."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"මෙම යෙදුමට ජංගම දුරකථන කුළුණු සහ Wi-Fi ජාල වැනි ජාල මූලාශ්‍ර පදනම්ව ඔබගේ ස්ථානය ලබා ගත හැකිය. යෙදුමට ඒවා භාවිත කිරීමට හැකි වීමට මෙම ස්ථාන සේවා ක්‍රියාත්මක කර සහ ඔබේ දුරකථනය මත ලබා ගත හැකිව තිබිය යුතුය."</string>
-    <string name="permlab_accessBackgroundLocation" msgid="5742466381902568536">"පසුබිම තුළ නිශ්චිත ස්ථානය වෙත පිවිසෙන්න"</string>
-    <string name="permdesc_accessBackgroundLocation" msgid="6371533283380774135">"මෙම යෙදුම පසුබිම තුළ ඇති ඕනෑම අවස්ථාවක එයට ඔබේ නිශ්චිත ස්ථානය ලබා ගත හැකිය. යෙදුමට ඒවා භාවිත කිරීමට හැකි වීමට මෙම ස්ථාන සේවා ක්‍රියාත්මක කර සහ ඔබේ දුරකථනය මත ලබා ගත හැකිව තිබිය යුතුය. මෙය බැටරි පරිභෝජනය වැඩි කළ හැකිය."</string>
+    <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"පසුබිමේ ස්ථානය ප්‍රවේශ කිරීම"</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"මෙය ආසන්න වශයෙන් හෝ නිශ්චිත ස්ථානයක ප්‍රවේශය ලබා දෙන්නේ නම් පසුබිම් ධාවන අතරතුරදී යෙදුමට ස්ථානය වෙත ප්‍රවේශය විය හැක."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"ඔබගේ ශ්‍රව්‍ය සැකසීම් වෙනස් කරන්න"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"ශබ්දය ආදී ගෝලීය ශබ්ද සැකසීම් වෙනස් කිරීමට සහ ප්‍රතිදානය සඳහා භාවිත කරන්නේ කුමන නාදකය දැයි තේරීමට යෙදුමට අවසර දෙන්න."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"ශබ්ද පටිගත කරන්න"</string>
     <string name="permdesc_recordAudio" msgid="4245930455135321433">"මෙම යෙදුමට ඕනෑම වේලාවක මයික්‍රෆෝනය භාවිතයෙන් ශ්‍රව්‍ය පටිගත කිරීමට හැකිය."</string>
     <string name="permlab_sim_communication" msgid="2935852302216852065">"SIM වෙත විධාන යැවීම"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"SIM වෙත විධාන ගෙන යාමට යෙදුමට අවසර දෙයි. මෙය ඉතා භයානක වේ."</string>
+    <string name="permlab_activityRecognition" msgid="3634590230567608356">"ශාරීරික ක්‍රියාකාරකම හඳුනා ගන්න"</string>
+    <string name="permdesc_activityRecognition" msgid="3143453925156552894">"මෙම යෙදුමට ඔබේ ශාරීරික ක්‍රියාකාරකම හඳුනා ගැනීමට නොහැකිය"</string>
     <string name="permlab_camera" msgid="3616391919559751192">"පින්තූර සහ වීඩියෝ ගන්න"</string>
     <string name="permdesc_camera" msgid="5392231870049240670">"මෙම යෙදුමට ඕනෑම වේලාවක කැමරාව භාවිත කර පින්තූර ගැනීමට සහ වීඩියෝ පටිගත කිරීමට හැකිය."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"කම්පනය පාලනය කිරීම"</string>
@@ -518,6 +523,7 @@
     <string name="permdesc_imagesWrite" msgid="7073662756617474375">"ඔබගේ ඡායාරූප එකතුව වෙනස් කිරීමට යෙදුමට ඉඩ දෙයි."</string>
     <string name="permlab_mediaLocation" msgid="8675148183726247864">"ඔබගේ මාධ්‍ය එකතුවෙන් ස්ථාන කියවන්න"</string>
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"ඔබගේ මාධ්‍ය එකතුවෙන් ස්ථාන කියවීමට යෙදුමට ඉඩ දෙයි."</string>
+    <string name="biometric_dialog_default_title" msgid="4229778503907743328">"<xliff:g id="APP">%s</xliff:g> යෙදුම වෙත සත්‍යාපනය කිරීමට අවශ්‍යයි."</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"ජීවමිතික දෘඪාංග ලබා ගත නොහැකිය"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"ඇඟිලි සලකුණ අඩ වශයෙන් අනාවරණය කර ගැනිණි. කරුණාකර නැවත උත්සාහ කරන්න."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"ඇඟිලි සලකුණ පිරිසැකසීමට නොහැකි විය. කරුණාකර නැවත උත්සාහ කරන්න."</string>
@@ -1899,14 +1905,14 @@
       <item quantity="one">ස්වයං පිරවුම් යෝජනා <xliff:g id="COUNT">%1$s</xliff:g></item>
       <item quantity="other">ස්වයං පිරවුම් යෝජනා <xliff:g id="COUNT">%1$s</xliff:g></item>
     </plurals>
-    <string name="autofill_save_title" msgid="3345527308992082601">"&lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt; වෙත සුරකින්නද?"</string>
-    <string name="autofill_save_title_with_type" msgid="8637809388029313305">"<xliff:g id="TYPE">%1$s</xliff:g> &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt; වෙත සුරකින්නද?"</string>
-    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"<xliff:g id="TYPE_0">%1$s</xliff:g> සහ <xliff:g id="TYPE_1">%2$s</xliff:g> &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt; වෙත සුරකින්නද?"</string>
-    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g>, සහ <xliff:g id="TYPE_2">%3$s</xliff:g> &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt; වෙත සුරකින්නද?"</string>
-    <string name="autofill_update_title" msgid="4879673117448810818">"&lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt; වෙත යාවත්කාලීන කරන්නද?"</string>
-    <string name="autofill_update_title_with_type" msgid="339733442087186755">"<xliff:g id="TYPE">%1$s</xliff:g> &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt; වෙත යාවත්කාලීන කරන්නද?"</string>
-    <string name="autofill_update_title_with_2types" msgid="6321714204167424745">"<xliff:g id="TYPE_0">%1$s</xliff:g> සහ <xliff:g id="TYPE_1">%2$s</xliff:g> &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt; වෙත යාවත්කාලීන කරන්නද?"</string>
-    <string name="autofill_update_title_with_3types" msgid="5866735124066629287">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g>, සහ <xliff:g id="TYPE_2">%3$s</xliff:g> &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt; වෙත යාවත්කාලීන කරන්නද?"</string>
+    <string name="autofill_save_title" msgid="327541108460384555"><b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>" වෙත සුරකින්නද?"</string>
+    <string name="autofill_save_title_with_type" msgid="2339135393607143594"><b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>" වෙත <xliff:g id="TYPE">%1$s</xliff:g> සුරකින්නද?"</string>
+    <string name="autofill_save_title_with_2types" msgid="87616102361154432"><b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>" වෙත <xliff:g id="TYPE_0">%1$s</xliff:g> සහ <xliff:g id="TYPE_1">%2$s</xliff:g> සුරකින්නද?"</string>
+    <string name="autofill_save_title_with_3types" msgid="4108978552969604555"><b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>" වෙත <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g>, සහ <xliff:g id="TYPE_2">%3$s</xliff:g> සුරකින්න?"</string>
+    <string name="autofill_update_title" msgid="5305781141104585279"><b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>" තුළ යාවත්කාලීන කරන්නද?"</string>
+    <string name="autofill_update_title_with_type" msgid="4624181147422762233"><b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>" තුළ <xliff:g id="TYPE">%1$s</xliff:g> යාවත්කාලීන කරන්නද?"</string>
+    <string name="autofill_update_title_with_2types" msgid="2300113827053626484"><b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>" තුළ <xliff:g id="TYPE_0">%1$s</xliff:g> සහ <xliff:g id="TYPE_1">%2$s</xliff:g> යාවත්කාලීන කරන්නද?"</string>
+    <string name="autofill_update_title_with_3types" msgid="9089824354296211922"><b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>" තුළ යාවත්කාලීන කරන්නද?: <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g>, සහ <xliff:g id="TYPE_2">%3$s</xliff:g> ?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"සුරකින්න"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"එපා ස්තූතියි"</string>
     <string name="autofill_update_yes" msgid="310358413273276958">"යාවත්කාලීන කරන්න"</string>

@@ -292,6 +292,9 @@
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"səsi qeydə alın"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; tətbiqinə səs yazmaq icazəsi verilsin?"</string>
+    <string name="permgrouplab_activityRecognition" msgid="2838596644535616493">"Fəaliyyətin tanınması"</string>
+    <string name="permgroupdesc_activityRecognition" msgid="7672248027571522602">"fəaliyyəti tanıyın"</string>
+    <string name="permgrouprequest_activityRecognition" msgid="8121253142311250055">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; tətbiqinin fiziki fəaliyyətinizi tanımasına icazə verilsin?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Kamera"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"şəkil çəkin və video yazın"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; tətbiqinə şəkil və video çəkmək icazəsi verilsin?"</string>
@@ -418,14 +421,16 @@
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Bu tətbiq mobil qüllələr və Wi-Fi şəbəkələri kimi şəbəkə mənbələrinin əassında əkanınızı əldə edə bilər. Bu məkan xidmətləri aktiv edilməlidir və planşetdə tətbiq tərəfindən istifadə üçün əlçatan olmalıdır."</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"Bu tətbiq mobil qüllələr və Wi-Fi şəbəkələri kimi şəbəkə mənbələrinin əassında əkanınızı əldə edə bilər. Bu məkan xidmətləri aktiv edilməlidir və TV\'də tətbiq tərəfindən istifadə üçün əlçatan olmalıdır."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"Bu tətbiq mobil qüllələr və Wi-Fi şəbəkələri kimi şəbəkə mənbələrinin əassında əkanınızı əldə edə bilər. Bu məkan xidmətləri aktiv edilməlidir və telefonda tətbiq tərəfindən istifadə üçün əlçatan olmalıdır."</string>
-    <string name="permlab_accessBackgroundLocation" msgid="5742466381902568536">"arxa fonda dəqiq məkana daxil olun"</string>
-    <string name="permdesc_accessBackgroundLocation" msgid="6371533283380774135">"Bu tətbiq istənilən zaman arxa fonda olduqda dəqiq məkanınızı əldə edə bilər. Tətbiqin bunlardan istifadə etməsi üçün bu məkan xidmətləri aktiv edilməlidir və telefonda əlçatan olmalıdır. Bu, batareya sərfiyyatını artıra bilər."</string>
+    <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"arxa fonda məkan girişi"</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"Bu, təqribi və ya dəqiq məkan girişinə əlavə olaraq verilərsə, tətbiq arxa fonda işləyərkən məkana daxil ola bilər."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"audio ayarlarınızı dəyişir"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Tətbiqə səs və hansı spikerin çıxış üçün istifadə olunduğu kimi qlobal səs ayarlarını dəyişdirməyə imkan verir."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"səs yaz"</string>
     <string name="permdesc_recordAudio" msgid="4245930455135321433">"Bu tətbiq istədiyiniz zaman mikrofonu istifadə edərək audio qeyd edə bilər."</string>
     <string name="permlab_sim_communication" msgid="2935852302216852065">"əmrləri SIM\'ə göndərin"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Tətbiqə SIM-ə əmrlər göndərməyə imkan verir. Bu, çox təhlükəlidir."</string>
+    <string name="permlab_activityRecognition" msgid="3634590230567608356">"fiziki fəaliyyəti tanıyın"</string>
+    <string name="permdesc_activityRecognition" msgid="3143453925156552894">"Bu tətbiq fiziki fəaliyyətinizi tanıya bilər."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"şəkil və video çəkmək"</string>
     <string name="permdesc_camera" msgid="5392231870049240670">"Bu tətbiq istədiyiniz zaman kameranı istifadə edərək şəkil çəkə və video qeydə ala bilər."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"vibrasiyaya nəzarət edir"</string>
@@ -518,6 +523,7 @@
     <string name="permdesc_imagesWrite" msgid="7073662756617474375">"Tətbiqin foto kolleksiyanıza düzəliş etməsinə icazə verir."</string>
     <string name="permlab_mediaLocation" msgid="8675148183726247864">"media kolleksiyanızdan məkanları oxuyun"</string>
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"Tətbiqin media kolleksiyanızdan məkanları oxumasına icazə verin."</string>
+    <string name="biometric_dialog_default_title" msgid="4229778503907743328">"<xliff:g id="APP">%s</xliff:g> doğrulamaq istəyir."</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"Biometrik proqram əlçatan deyil"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Barmaq qismən müəyyən olundu. Lütfən, yenidən cəhd edin."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Barmaq izi tanınmadı. Lütfən, yenidən cəhd edin."</string>
@@ -1897,14 +1903,14 @@
       <item quantity="other"><xliff:g id="COUNT">%1$s</xliff:g> avtomatik doldurma təklifi</item>
       <item quantity="one">Bir avtomatik doldurma təklifi</item>
     </plurals>
-    <string name="autofill_save_title" msgid="3345527308992082601">"&lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt; etiketində yadda saxlansın?"</string>
-    <string name="autofill_save_title_with_type" msgid="8637809388029313305">"<xliff:g id="TYPE">%1$s</xliff:g> &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;b&gt; etiketində yadda saxlansın?"</string>
-    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"<xliff:g id="TYPE_0">%1$s</xliff:g> və <xliff:g id="TYPE_1">%2$s</xliff:g> &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt; etiketində yadda saxlansın?"</string>
-    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> və <xliff:g id="TYPE_2">%3$s</xliff:g> &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt; etiketində yadda saxlansın?"</string>
-    <string name="autofill_update_title" msgid="4879673117448810818">"&lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt; etiketində yenilənsin?"</string>
-    <string name="autofill_update_title_with_type" msgid="339733442087186755">"<xliff:g id="TYPE">%1$s</xliff:g> &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;b&gt; etiketində yenilənsin?"</string>
-    <string name="autofill_update_title_with_2types" msgid="6321714204167424745">"<xliff:g id="TYPE_0">%1$s</xliff:g> və <xliff:g id="TYPE_1">%2$s</xliff:g> &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt; etiketində yenilənsin?"</string>
-    <string name="autofill_update_title_with_3types" msgid="5866735124066629287">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> və <xliff:g id="TYPE_2">%3$s</xliff:g> &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt; etiketində yenilənsin?"</string>
+    <string name="autofill_save_title" msgid="327541108460384555"><b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>" ünvanında yadda saxlansın?"</string>
+    <string name="autofill_save_title_with_type" msgid="2339135393607143594">"<xliff:g id="TYPE">%1$s</xliff:g> "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>" ünvanında yadda saxlansın?"</string>
+    <string name="autofill_save_title_with_2types" msgid="87616102361154432">"<xliff:g id="TYPE_0">%1$s</xliff:g> və <xliff:g id="TYPE_1">%2$s</xliff:g> "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>" ünvanında yadda saxlansın?"</string>
+    <string name="autofill_save_title_with_3types" msgid="4108978552969604555">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> və <xliff:g id="TYPE_2">%3$s</xliff:g> "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>" ünvanında yadda saxlansın?"</string>
+    <string name="autofill_update_title" msgid="5305781141104585279"><b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>" ünvanında yenilənsin?"</string>
+    <string name="autofill_update_title_with_type" msgid="4624181147422762233">"<xliff:g id="TYPE">%1$s</xliff:g> "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>" ünvanında yenilənsin?"</string>
+    <string name="autofill_update_title_with_2types" msgid="2300113827053626484">"<xliff:g id="TYPE_0">%1$s</xliff:g> və <xliff:g id="TYPE_1">%2$s</xliff:g> "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>" ünvanında yenilənsin?"</string>
+    <string name="autofill_update_title_with_3types" msgid="9089824354296211922">"Bu elementlər "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>" ünvanında yenilənsin: <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> və <xliff:g id="TYPE_2">%3$s</xliff:g> ?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"Yadda saxlayın"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"Xeyr, çox sağ olun"</string>
     <string name="autofill_update_yes" msgid="310358413273276958">"Yeniləyin"</string>
