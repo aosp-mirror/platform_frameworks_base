@@ -30,6 +30,7 @@ import android.content.Context;
 import android.content.pm.PackageManager;
 import android.graphics.Rect;
 import android.inputmethodservice.InputMethodService;
+import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
@@ -753,10 +754,20 @@ public final class InputMethodManager {
             throw new IllegalStateException(e);
         }
         final InputMethodManager imm = new InputMethodManager(service, displayId, looper);
+        // InputMethodManagerService#addClient() relies on Binder.getCalling{Pid, Uid}() to
+        // associate PID/UID with each IME client. This means:
+        //  A. if this method call will be handled as an IPC, there is no problem.
+        //  B. if this method call will be handled as an in-proc method call, we need to
+        //     ensure that Binder.getCalling{Pid, Uid}() return Process.my{Pid, Uid}()
+        // Either ways we can always call Binder.{clear, restore}CallingIdentity() because
+        // 1) doing so has no effect for A and 2) doing so is sufficient for B.
+        final long identity = Binder.clearCallingIdentity();
         try {
             service.addClient(imm.mClient, imm.mIInputContext, displayId);
         } catch (RemoteException e) {
             e.rethrowFromSystemServer();
+        } finally {
+            Binder.restoreCallingIdentity(identity);
         }
         return imm;
     }
