@@ -17,6 +17,8 @@
 package com.android.server.am;
 
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
+import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.Display.INVALID_DISPLAY;
 
 import static com.android.server.am.LaunchParamsController.LaunchParamsModifier.RESULT_CONTINUE;
 import static com.android.server.am.LaunchParamsController.LaunchParamsModifier.RESULT_DONE;
@@ -186,6 +188,35 @@ public class LaunchParamsControllerTests extends ActivityTestsBase {
                 null /*options*/, result);
 
         assertEquals(result, positioner2.getLaunchParams());
+    }
+
+    /**
+     * Tests preferred display id calculation for VR.
+     */
+    @Test
+    public void testVrPreferredDisplay() {
+        final int vr2dDisplayId = 1;
+        mService.mVr2dDisplayId = vr2dDisplayId;
+
+        final LaunchParams result = new LaunchParams();
+        final ActivityRecord vrActivity = new ActivityBuilder(mService).build();
+        vrActivity.requestedVrComponent = vrActivity.realActivity;
+
+        // VR activities should always land on default display.
+        mController.calculate(null /*task*/, null /*layout*/, vrActivity /*activity*/,
+                null /*source*/, null /*options*/, result);
+        assertEquals(DEFAULT_DISPLAY, result.mPreferredDisplayId);
+
+        // Otherwise, always lands on VR 2D display.
+        final ActivityRecord vr2dActivity = new ActivityBuilder(mService).build();
+        mController.calculate(null /*task*/, null /*layout*/, vr2dActivity /*activity*/,
+                null /*source*/, null /*options*/, result);
+        assertEquals(vr2dDisplayId, result.mPreferredDisplayId);
+        mController.calculate(null /*task*/, null /*layout*/, null /*activity*/, null /*source*/,
+                null /*options*/, result);
+        assertEquals(vr2dDisplayId, result.mPreferredDisplayId);
+
+        mService.mVr2dDisplayId = INVALID_DISPLAY;
     }
 
     /**
