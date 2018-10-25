@@ -134,7 +134,7 @@ public class NotificationInfoTest extends SysuiTestCase {
                 .thenReturn(packageInfo);
         final ApplicationInfo applicationInfo = new ApplicationInfo();
         applicationInfo.uid = TEST_UID;  // non-zero
-        when(mMockPackageManager.getApplicationInfo(anyString(), anyInt())).thenReturn(
+        when(mMockPackageManager.getApplicationInfo(eq(TEST_PACKAGE_NAME), anyInt())).thenReturn(
                 applicationInfo);
         final PackageInfo systemPackageInfo = new PackageInfo();
         systemPackageInfo.packageName = TEST_SYSTEM_PACKAGE_NAME;
@@ -203,6 +203,37 @@ public class NotificationInfoTest extends SysuiTestCase {
                 false, IMPORTANCE_DEFAULT, NotificationInfo.ACTION_NONE);
         final ImageView iconView = mNotificationInfo.findViewById(R.id.pkgicon);
         assertEquals(iconDrawable, iconView.getDrawable());
+    }
+
+    @Test
+    public void testBindNotification_noDelegate() throws Exception {
+        mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
+                TEST_PACKAGE_NAME, mNotificationChannel, 1, mSbn, null, null, null, true, false,
+                false, IMPORTANCE_DEFAULT, NotificationInfo.ACTION_NONE);
+        final TextView nameView = mNotificationInfo.findViewById(R.id.delegate_name);
+        assertEquals(GONE, nameView.getVisibility());
+        final TextView dividerView = mNotificationInfo.findViewById(R.id.pkg_divider);
+        assertEquals(GONE, dividerView.getVisibility());
+    }
+
+    @Test
+    public void testBindNotification_delegate() throws Exception {
+        mSbn = new StatusBarNotification(TEST_PACKAGE_NAME, "other", 0, null, TEST_UID, 0,
+                new Notification(), UserHandle.CURRENT, null, 0);
+        final ApplicationInfo applicationInfo = new ApplicationInfo();
+        applicationInfo.uid = 7;  // non-zero
+        when(mMockPackageManager.getApplicationInfo(eq("other"), anyInt())).thenReturn(
+                applicationInfo);
+        when(mMockPackageManager.getApplicationLabel(any())).thenReturn("Other");
+
+        mNotificationInfo.bindNotification(mMockPackageManager, mMockINotificationManager,
+                TEST_PACKAGE_NAME, mNotificationChannel, 1, mSbn, null, null, null, true, false,
+                false, IMPORTANCE_DEFAULT, NotificationInfo.ACTION_NONE);
+        final TextView nameView = mNotificationInfo.findViewById(R.id.delegate_name);
+        assertEquals(VISIBLE, nameView.getVisibility());
+        assertTrue(nameView.getText().toString().contains("Other"));
+        final TextView dividerView = mNotificationInfo.findViewById(R.id.pkg_divider);
+        assertEquals(VISIBLE, dividerView.getVisibility());
     }
 
     @Test
