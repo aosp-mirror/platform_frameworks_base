@@ -166,8 +166,10 @@ static jobject nativeScreenshot(JNIEnv* env, jclass clazz,
     }
     Rect sourceCrop = rectFromObj(env, sourceCropObj);
     sp<GraphicBuffer> buffer;
-    status_t res = ScreenshotClient::capture(displayToken, sourceCrop, width, height,
-            useIdentityTransform, rotation, &buffer);
+    status_t res = ScreenshotClient::capture(displayToken, ui::Dataspace::V0_SRGB,
+                                             ui::PixelFormat::RGBA_8888,
+                                             sourceCrop, width, height,
+                                             useIdentityTransform, rotation, &buffer);
     if (res != NO_ERROR) {
         return NULL;
     }
@@ -195,7 +197,9 @@ static jobject nativeCaptureLayers(JNIEnv* env, jclass clazz, jobject layerHandl
     }
 
     sp<GraphicBuffer> buffer;
-    status_t res = ScreenshotClient::captureChildLayers(layerHandle, sourceCrop, frameScale, &buffer);
+    status_t res = ScreenshotClient::captureChildLayers(layerHandle, ui::Dataspace::V0_SRGB,
+                                                        ui::PixelFormat::RGBA_8888, sourceCrop,
+                                                        frameScale, &buffer);
     if (res != NO_ERROR) {
         return NULL;
     }
