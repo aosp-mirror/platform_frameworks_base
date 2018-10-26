@@ -29,6 +29,7 @@ import android.graphics.Color;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
+import android.os.Bundle;
 import android.os.LocaleList;
 import android.os.Parcel;
 import android.support.test.InstrumentationRegistry;
@@ -47,6 +48,13 @@ import java.util.Locale;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class TextClassificationTest {
+
+    private static final String BUNDLE_KEY = "key";
+    private static final String BUNDLE_VALUE = "value";
+    private static final Bundle BUNDLE = new Bundle();
+    static {
+        BUNDLE.putString(BUNDLE_KEY, BUNDLE_VALUE);
+    }
 
     public Icon generateTestIcon(int width, int height, int colorValue) {
         final int numPixels = width * height;
@@ -89,6 +97,7 @@ public class TextClassificationTest {
                 .setEntityType(TextClassifier.TYPE_ADDRESS, 0.3f)
                 .setEntityType(TextClassifier.TYPE_PHONE, 0.7f)
                 .setId(id)
+                .setExtras(BUNDLE)
                 .build();
 
         // Parcel and unparcel
@@ -119,6 +128,9 @@ public class TextClassificationTest {
         assertEquals(TextClassifier.TYPE_ADDRESS, result.getEntity(1));
         assertEquals(0.7f, result.getConfidenceScore(TextClassifier.TYPE_PHONE), 1e-7f);
         assertEquals(0.3f, result.getConfidenceScore(TextClassifier.TYPE_ADDRESS), 1e-7f);
+
+        // Extras
+        assertEquals(BUNDLE_VALUE, result.getExtras().getString(BUNDLE_KEY));
     }
 
     @Test
@@ -182,6 +194,7 @@ public class TextClassificationTest {
                 new TextClassification.Request.Builder(text, 0, text.length())
                         .setDefaultLocales(new LocaleList(Locale.US, Locale.GERMANY))
                         .setReferenceTime(referenceTime)
+                        .setExtras(BUNDLE)
                         .build();
 
         // Parcel and unparcel.
@@ -197,5 +210,6 @@ public class TextClassificationTest {
         assertEquals(referenceTime, result.getReferenceTime());
         assertEquals("en-US,de-DE", result.getDefaultLocales().toLanguageTags());
         assertEquals(referenceTime, result.getReferenceTime());
+        assertEquals(BUNDLE_VALUE, result.getExtras().getString(BUNDLE_KEY));
     }
 }
