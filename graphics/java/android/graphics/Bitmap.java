@@ -773,7 +773,13 @@ public final class Bitmap implements Parcelable {
      * @param src       The source bitmap.
      * @param dstWidth  The new bitmap's desired width.
      * @param dstHeight The new bitmap's desired height.
-     * @param filter    true if the source should be filtered.
+     * @param filter    Whether or not bilinear filtering should be used when scaling the
+     *                  bitmap. If this is true then bilinear filtering will be used when
+     *                  scaling which has better image quality at the cost of worse performance.
+     *                  If this is false then nearest-neighbor scaling is used instead which
+     *                  will have worse image quality but is faster. Recommended default
+     *                  is to set filter to 'true' as the cost of bilinear filtering is
+     *                  typically minimal and the improved image quality is significant.
      * @return The new scaled bitmap or the source bitmap if no scaling is required.
      * @throws IllegalArgumentException if width is <= 0, or height is <= 0
      */
