@@ -5832,7 +5832,18 @@ package android.telephony.ims {
     method public int getTimeSeconds();
     method public int getToA();
     method public void writeToParcel(android.os.Parcel, int);
+    field public static final int CDIV_CF_REASON_ALL = 4; // 0x4
+    field public static final int CDIV_CF_REASON_ALL_CONDITIONAL = 5; // 0x5
+    field public static final int CDIV_CF_REASON_BUSY = 1; // 0x1
+    field public static final int CDIV_CF_REASON_NOT_LOGGED_IN = 6; // 0x6
+    field public static final int CDIV_CF_REASON_NOT_REACHABLE = 3; // 0x3
+    field public static final int CDIV_CF_REASON_NO_REPLY = 2; // 0x2
+    field public static final int CDIV_CF_REASON_UNCONDITIONAL = 0; // 0x0
     field public static final android.os.Parcelable.Creator<android.telephony.ims.ImsCallForwardInfo> CREATOR;
+    field public static final int STATUS_ACTIVE = 1; // 0x1
+    field public static final int STATUS_NOT_ACTIVE = 0; // 0x0
+    field public static final int TYPE_OF_ADDRESS_INTERNATIONAL = 145; // 0x91
+    field public static final int TYPE_OF_ADDRESS_UNKNOWN = 129; // 0x81
   }
 
   public final class ImsCallProfile implements android.os.Parcelable {
@@ -6168,6 +6179,13 @@ package android.telephony.ims {
   public final class ImsSsData implements android.os.Parcelable {
     ctor public ImsSsData(int, int, int, int, int);
     method public int describeContents();
+    method public android.telephony.ims.ImsCallForwardInfo[] getCallForwardInfo();
+    method public int getRequestType();
+    method public int getResult();
+    method public int getServiceClass();
+    method public int getServiceType();
+    method public android.telephony.ims.ImsSsInfo[] getSuppServiceInfo();
+    method public int getTeleserviceType();
     method public boolean isTypeBarring();
     method public boolean isTypeCf();
     method public boolean isTypeClip();
@@ -6180,6 +6198,16 @@ package android.telephony.ims {
     method public boolean isTypeUnConditional();
     method public void writeToParcel(android.os.Parcel, int);
     field public static final android.os.Parcelable.Creator<android.telephony.ims.ImsSsData> CREATOR;
+    field public static final int RESULT_SUCCESS = 0; // 0x0
+    field public static final int SERVICE_CLASS_DATA = 2; // 0x2
+    field public static final int SERVICE_CLASS_DATA_CIRCUIT_ASYNC = 32; // 0x20
+    field public static final int SERVICE_CLASS_DATA_CIRCUIT_SYNC = 16; // 0x10
+    field public static final int SERVICE_CLASS_DATA_PACKET_ACCESS = 64; // 0x40
+    field public static final int SERVICE_CLASS_DATA_PAD = 128; // 0x80
+    field public static final int SERVICE_CLASS_FAX = 4; // 0x4
+    field public static final int SERVICE_CLASS_NONE = 0; // 0x0
+    field public static final int SERVICE_CLASS_SMS = 8; // 0x8
+    field public static final int SERVICE_CLASS_VOICE = 1; // 0x1
     field public static final int SS_ACTIVATION = 0; // 0x0
     field public static final int SS_ALL_BARRING = 18; // 0x12
     field public static final int SS_ALL_DATA_TELESERVICES = 3; // 0x3
@@ -6216,13 +6244,31 @@ package android.telephony.ims {
     field public static final int SS_WAIT = 12; // 0xc
   }
 
+  public static class ImsSsData.Builder {
+    ctor public ImsSsData.Builder(int, int, int, int, int);
+    method public android.telephony.ims.ImsSsData build();
+    method public android.telephony.ims.ImsSsData.Builder setCallForwardingInfo(android.telephony.ims.ImsCallForwardInfo[]);
+    method public android.telephony.ims.ImsSsData.Builder setSuppServiceInfo(android.telephony.ims.ImsSsInfo[]);
+  }
+
   public final class ImsSsInfo implements android.os.Parcelable {
-    ctor public ImsSsInfo(int, java.lang.String);
+    ctor public deprecated ImsSsInfo(int, java.lang.String);
     method public int describeContents();
-    method public java.lang.String getIcbNum();
+    method public int getClirInterrogationStatus();
+    method public int getClirOutgoingState();
+    method public deprecated java.lang.String getIcbNum();
+    method public java.lang.String getIncomingCommunicationBarringNumber();
     method public int getProvisionStatus();
     method public int getStatus();
     method public void writeToParcel(android.os.Parcel, int);
+    field public static final int CLIR_OUTGOING_DEFAULT = 0; // 0x0
+    field public static final int CLIR_OUTGOING_INVOCATION = 1; // 0x1
+    field public static final int CLIR_OUTGOING_SUPPRESSION = 2; // 0x2
+    field public static final int CLIR_STATUS_NOT_PROVISIONED = 0; // 0x0
+    field public static final int CLIR_STATUS_PROVISIONED_PERMANENT = 1; // 0x1
+    field public static final int CLIR_STATUS_TEMPORARILY_ALLOWED = 4; // 0x4
+    field public static final int CLIR_STATUS_TEMPORARILY_RESTRICTED = 3; // 0x3
+    field public static final int CLIR_STATUS_UNKNOWN = 2; // 0x2
     field public static final android.os.Parcelable.Creator<android.telephony.ims.ImsSsInfo> CREATOR;
     field public static final int DISABLED = 0; // 0x0
     field public static final int ENABLED = 1; // 0x1
@@ -6230,6 +6276,21 @@ package android.telephony.ims {
     field public static final int SERVICE_NOT_PROVISIONED = 0; // 0x0
     field public static final int SERVICE_PROVISIONED = 1; // 0x1
     field public static final int SERVICE_PROVISIONING_UNKNOWN = -1; // 0xffffffff
+  }
+
+  public static class ImsSsInfo.Builder {
+    ctor public ImsSsInfo.Builder(int);
+    method public android.telephony.ims.ImsSsInfo build();
+    method public android.telephony.ims.ImsSsInfo.Builder setClirInterrogationStatus(int);
+    method public android.telephony.ims.ImsSsInfo.Builder setClirOutgoingState(int);
+    method public android.telephony.ims.ImsSsInfo.Builder setIncomingCommunicationBarringNumber(java.lang.String);
+    method public android.telephony.ims.ImsSsInfo.Builder setProvisionStatus(int);
+  }
+
+  public static abstract class ImsSsInfo.ClirInterrogationStatus implements java.lang.annotation.Annotation {
+  }
+
+  public static abstract class ImsSsInfo.ClirOutgoingState implements java.lang.annotation.Annotation {
   }
 
   public final class ImsStreamMediaProfile implements android.os.Parcelable {
