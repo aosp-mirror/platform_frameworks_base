@@ -6548,6 +6548,23 @@ public class ActivityManagerService extends IActivityManager.Stub
         return cpr != null ? cpr.newHolder(conn) : null;
     }
 
+    private static final class StartActivityRunnable implements Runnable {
+        private final Context mContext;
+        private final Intent mIntent;
+        private final UserHandle mUserHandle;
+
+        StartActivityRunnable(Context context, Intent intent, UserHandle userHandle) {
+            this.mContext = context;
+            this.mIntent = intent;
+            this.mUserHandle = userHandle;
+        }
+
+        @Override
+        public void run() {
+            mContext.startActivityAsUser(mIntent, mUserHandle);
+        }
+    }
+
     private boolean requestTargetProviderPermissionsReviewIfNeededLocked(ProviderInfo cpi,
             ProcessRecord r, final int userId) {
         if (getPackageManagerInternalLocked().isPermissionsReviewRequired(
@@ -6574,12 +6591,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
 
             final UserHandle userHandle = new UserHandle(userId);
-            mHandler.post(new Runnable() {
-                @Override
-                public void run() {
-                    mContext.startActivityAsUser(intent, userHandle);
-                }
-            });
+            mHandler.post(new StartActivityRunnable(mContext, intent, userHandle));
 
             return false;
         }
@@ -16078,6 +16090,60 @@ public class ActivityManagerService extends IActivityManager.Stub
         return app.curAdj < prevAppAdj || app.getCurProcState() < prevProcState;
     }
 
+    private static final class RecordPssRunnable implements Runnable {
+        private final ActivityManagerService mService;
+        private final ProcessRecord mProc;
+        private final File mHeapdumpFile;
+
+        RecordPssRunnable(ActivityManagerService service, ProcessRecord proc, File heapdumpFile) {
+            this.mService = service;
+            this.mProc = proc;
+            this.mHeapdumpFile = heapdumpFile;
+        }
+
+        @Override
+        public void run() {
+            mService.revokeUriPermission(ActivityThread.currentActivityThread()
+                            .getApplicationThread(),
+                    null, DumpHeapActivity.JAVA_URI,
+                    Intent.FLAG_GRANT_READ_URI_PERMISSION
+                            | Intent.FLAG_GRANT_WRITE_URI_PERMISSION,
+                    UserHandle.myUserId());
+            ParcelFileDescriptor fd = null;
+            try {
+                mHeapdumpFile.delete();
+                fd = ParcelFileDescriptor.open(mHeapdumpFile,
+                        ParcelFileDescriptor.MODE_CREATE
+                        | ParcelFileDescriptor.MODE_TRUNCATE
+                        | ParcelFileDescriptor.MODE_WRITE_ONLY
+                        | ParcelFileDescriptor.MODE_APPEND);
+                IApplicationThread thread = mProc.thread;
+                if (thread != null) {
+                    try {
+                        if (DEBUG_PSS) {
+                            Slog.d(TAG_PSS, "Requesting dump heap from "
+                                    + mProc + " to " + mHeapdumpFile);
+                        }
+                        thread.dumpHeap(/* managed= */ true,
+                                /* mallocInfo= */ false, /* runGc= */ false,
+                                mHeapdumpFile.toString(), fd,
+                                /* finishCallback= */ null);
+                    } catch (RemoteException e) {
+                    }
+                }
+            } catch (FileNotFoundException e) {
+                e.printStackTrace();
+            } finally {
+                if (fd != null) {
+                    try {
+                        fd.close();
+                    } catch (IOException e) {
+                    }
+                }
+            }
+        }
+    }
+
     /**
      * Record new PSS sample for a process.
      */
@@ -16138,48 +16204,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     mMemWatchDumpFile = heapdumpFile.toString();
                     mMemWatchDumpPid = proc.pid;
                     mMemWatchDumpUid = proc.uid;
-                    BackgroundThread.getHandler().post(new Runnable() {
-                        @Override
-                        public void run() {
-                            revokeUriPermission(ActivityThread.currentActivityThread()
-                                            .getApplicationThread(),
-                                    null, DumpHeapActivity.JAVA_URI,
-                                    Intent.FLAG_GRANT_READ_URI_PERMISSION
-                                            | Intent.FLAG_GRANT_WRITE_URI_PERMISSION,
-                                    UserHandle.myUserId());
-                            ParcelFileDescriptor fd = null;
-                            try {
-                                heapdumpFile.delete();
-                                fd = ParcelFileDescriptor.open(heapdumpFile,
-                                        ParcelFileDescriptor.MODE_CREATE |
-                                                ParcelFileDescriptor.MODE_TRUNCATE |
-                                                ParcelFileDescriptor.MODE_WRITE_ONLY |
-                                                ParcelFileDescriptor.MODE_APPEND);
-                                IApplicationThread thread = myProc.thread;
-                                if (thread != null) {
-                                    try {
-                                        if (DEBUG_PSS) Slog.d(TAG_PSS,
-                                                "Requesting dump heap from "
-                                                + myProc + " to " + heapdumpFile);
-                                        thread.dumpHeap(/* managed= */ true,
-                                                /* mallocInfo= */ false, /* runGc= */ false,
-                                                heapdumpFile.toString(), fd,
-                                                /* finishCallback= */ null);
-                                    } catch (RemoteException e) {
-                                    }
-                                }
-                            } catch (FileNotFoundException e) {
-                                e.printStackTrace();
-                            } finally {
-                                if (fd != null) {
-                                    try {
-                                        fd.close();
-                                    } catch (IOException e) {
-                                    }
-                                }
-                            }
-                        }
-                    });
+                    BackgroundThread.getHandler().post(
+                            new RecordPssRunnable(this, myProc, DumpHeapProvider.getJavaFile()));
                 } else {
                     Slog.w(TAG, "Process " + proc + " exceeded pss limit " + check
                             + ", but debugging not enabled");
@@ -17019,6 +17045,22 @@ public class ActivityManagerService extends IActivityManager.Stub
         return success;
     }
 
+    private static final class ProcStatsRunnable implements Runnable {
+        private final ActivityManagerService mService;
+        private final ProcessStatsService mProcessStats;
+
+        ProcStatsRunnable(ActivityManagerService service, ProcessStatsService mProcessStats) {
+            this.mService = service;
+            this.mProcessStats = mProcessStats;
+        }
+
+        @Override public void run() {
+            synchronized (mService) {
+                mProcessStats.writeStateAsyncLocked();
+            }
+        }
+    }
+
     @GuardedBy("this")
     final void updateOomAdjLocked() {
         mOomAdjProfiler.oomAdjStarted();
@@ -17507,13 +17549,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         if (mProcessStats.shouldWriteNowLocked(now)) {
-            mHandler.post(new Runnable() {
-                @Override public void run() {
-                    synchronized (ActivityManagerService.this) {
-                        mProcessStats.writeStateAsyncLocked();
-                    }
-                }
-            });
+            mHandler.post(new ProcStatsRunnable(ActivityManagerService.this, mProcessStats));
         }
 
         if (DEBUG_OOM_ADJ) {
