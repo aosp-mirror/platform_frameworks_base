@@ -81,6 +81,9 @@ cc_library_shared {
         "-Wno-error=deprecated-declarations",
         "-Wunused",
         "-Wunreachable-code",
+        // Allow implicit fallthroughs in android_media_MediaScanner.cpp and
+        // android_mtp_MtpDatabase.cpp until they are fixed.
+        "-Wno-error=implicit-fallthrough",
     ],
 }
 

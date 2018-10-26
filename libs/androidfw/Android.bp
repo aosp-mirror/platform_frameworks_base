@@ -59,6 +59,8 @@ cc_library {
         "ZipFileRO.cpp",
         "ZipUtils.cpp",
     ],
+    // Allow implicit fallthroughs in Locale.cpp and ResourceTypes.cpp until they are fixed.
+    cflags: ["-Wno-implicit-fallthrough"],
     export_include_dirs: ["include"],
     export_shared_lib_headers: ["libz"],
     target: {
