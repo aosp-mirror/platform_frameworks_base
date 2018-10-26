@@ -497,34 +497,6 @@ public class RingtoneManager {
         return getUriFromCursor(mCursor);
     }
 
-    /**
-     * Queries the database for the Uri to a ringtone in a specific path (the ringtone has to have
-     * been scanned before)
-     *
-     * @param context Context used to query the database
-     * @param path Path to the ringtone file
-     * @return Uri of the ringtone, null if something fails in the query or the ringtone doesn't
-     *            exist
-     *
-     * @hide
-     */
-    private static Uri getExistingRingtoneUriFromPath(Context context, String path) {
-        final String[] proj = {MediaStore.Audio.Media._ID};
-        final String[] selectionArgs = {path};
-        try (final Cursor cursor = context.getContentResolver().query(
-                MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, proj,
-                MediaStore.Audio.Media.DATA + "=? ", selectionArgs, /* sortOrder */ null)) {
-            if (cursor == null || !cursor.moveToFirst()) {
-                return null;
-            }
-            final int id = cursor.getInt(cursor.getColumnIndex(MediaStore.MediaColumns._ID));
-            if (id == -1) {
-                return null;
-            }
-            return Uri.withAppendedPath(MediaStore.Audio.Media.EXTERNAL_CONTENT_URI, "" + id);
-        }
-    }
-
     private static Uri getUriFromCursor(Cursor cursor) {
         return ContentUris.withAppendedId(Uri.parse(cursor.getString(URI_COLUMN_INDEX)), cursor
                 .getLong(ID_COLUMN_INDEX));
@@ -750,28 +722,6 @@ public class RingtoneManager {
     }
 
     /**
-     * Look up the path for a given {@link Uri} referring to a ringtone sound (TYPE_RINGTONE,
-     * TYPE_NOTIFICATION, or TYPE_ALARM). This is saved in {@link MediaStore.Audio.Media#DATA}.
-     *
-     * @return a {@link File} pointing at the location of the {@param uri} on disk, or {@code null}
-     * if there is no such file.
-     */
-    private File getRingtonePathFromUri(Uri uri) {
-        // Query cursor to get ringtone path
-        final String[] projection = {MediaStore.Audio.Media.DATA};
-        setFilterColumnsList(TYPE_RINGTONE | TYPE_NOTIFICATION | TYPE_ALARM);
-
-        String path = null;
-        try (Cursor cursor = query(uri, projection, constructBooleanTrueWhereClause(mFilterColumns),
-                null, null)) {
-            if (cursor != null && cursor.moveToFirst()) {
-                path = cursor.getString(cursor.getColumnIndex(MediaStore.Audio.Media.DATA));
-            }
-        }
-        return path != null ? new File(path) : null;
-    }
-
-    /**
      * Disables Settings.System.SYNC_PARENT_SOUNDS.
      *
      * @hide
@@ -879,32 +829,6 @@ public class RingtoneManager {
                 : uriWithoutUserId.toString().startsWith(storage.toString());
     }
 
-    /** @hide */
-    public boolean isCustomRingtone(Uri uri) {
-        if(!isExternalRingtoneUri(uri)) {
-            // A custom ringtone would be in the external storage
-            return false;
-        }
-
-        final File ringtoneFile = (uri == null ? null : getRingtonePathFromUri(uri));
-        final File parent = (ringtoneFile == null ? null : ringtoneFile.getParentFile());
-        if (parent == null) {
-            return false;
-        }
-
-        final String[] directories = {
-            Environment.DIRECTORY_RINGTONES,
-            Environment.DIRECTORY_NOTIFICATIONS,
-            Environment.DIRECTORY_ALARMS
-        };
-        for (final String directory : directories) {
-            if (parent.equals(Environment.getExternalStoragePublicDirectory(directory))) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     /**
      * Adds an audio file to the list of ringtones.
      *
@@ -986,39 +910,6 @@ public class RingtoneManager {
             default:
                 throw new IllegalArgumentException("Unsupported ringtone type: " + type);
         }
-    }
-
-    /**
-     * Deletes the actual file in the Uri and its ringtone database entry if the Uri's actual path
-     * is in one of the following directories: {@link android.is.Environment#DIRECTORY_RINGTONES},
-     * {@link android.is.Environment#DIRECTORY_NOTIFICATIONS} or
-     * {@link android.is.Environment#DIRECTORY_ALARMS}.
-     *
-     * The given Uri must be a ringtone Content Uri.
-     *
-     * Keep in mind that if the ringtone deleted is a default ringtone, it will still live in the
-     * ringtone cache file so it will be playable from there. However, if an app uses the ringtone
-     * as its own ringtone, it won't be played, which is the same behavior observed for 3rd party
-     * custom ringtones.
-     *
-     * @hide
-     */
-    public boolean deleteExternalRingtone(Uri uri) {
-        if(!isCustomRingtone(uri)) {
-            // We can only delete custom ringtones in the default ringtone storages
-            return false;
-        }
-
-        // Save the path of the ringtone before deleting from our content resolver.
-        final File ringtoneFile = getRingtonePathFromUri(uri);
-        try {
-            if (ringtoneFile != null && mContext.getContentResolver().delete(uri, null, null) > 0) {
-                return ringtoneFile.delete();
-            }
-        } catch (SecurityException e) {
-            Log.d(TAG, "Unable to delete custom ringtone", e);
-        }
-        return false;
     }
 
     /**
