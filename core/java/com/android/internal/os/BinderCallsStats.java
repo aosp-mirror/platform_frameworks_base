@@ -428,7 +428,7 @@ public class BinderCallsStats implements BinderInternal.Observer {
         return SystemClock.elapsedRealtimeNanos() / 1000;
     }
 
-    private boolean shouldRecordDetailedData() {
+    protected boolean shouldRecordDetailedData() {
         return mRandom.nextInt() % mPeriodicSamplingInterval == 0;
     }
 
