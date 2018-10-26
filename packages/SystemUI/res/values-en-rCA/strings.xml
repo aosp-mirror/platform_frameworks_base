@@ -436,7 +436,7 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"Don\'t show again"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"Clear all"</string>
     <string name="manage_notifications_text" msgid="8035284146227267681">"Manage notifications"</string>
-    <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"Notifications paused by Do not disturb"</string>
+    <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"Notifications paused by Do Not Disturb"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"Start now"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"No notifications"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"Profile may be monitored"</string>

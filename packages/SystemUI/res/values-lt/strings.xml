@@ -174,7 +174,7 @@
     <string name="carrier_network_change_mode" msgid="8149202439957837762">"Keičiamas operatoriaus tinklas"</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"Atidaryti išsamią akumuliatoriaus informaciją"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Akumuliatorius: <xliff:g id="NUMBER">%d</xliff:g> proc."</string>
-    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"Įkraunamas akumuliatorius, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> proc."</string>
+    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"Įkraunamas akumuliatorius, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%%."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Sistemos nustatymai"</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Pranešimai."</string>
     <string name="accessibility_overflow_action" msgid="5681882033274783311">"Žr. visus pranešimus"</string>
@@ -856,10 +856,10 @@
     <string name="slice_permission_allow" msgid="2340244901366722709">"Leisti"</string>
     <string name="slice_permission_deny" msgid="7683681514008048807">"Neleisti"</string>
     <string name="auto_saver_title" msgid="1217959994732964228">"Palietę planuokite akumuliatoriaus tausojimo priemonės veikimą"</string>
-    <string name="auto_saver_text" msgid="6324376061044218113">"Įjunkite automatiškai akumuliatoriaus įkrovai pasiekus <xliff:g id="PERCENTAGE">%d</xliff:g> proc."</string>
+    <string name="auto_saver_text" msgid="6324376061044218113">"Įjunkite automatiškai akumuliatoriaus įkrovai pasiekus <xliff:g id="PERCENTAGE">%d</xliff:g>%%."</string>
     <string name="no_auto_saver_action" msgid="8086002101711328500">"Ne, ačiū"</string>
     <string name="auto_saver_enabled_title" msgid="6726474226058316862">"Akumuliatoriaus tausojimo priemonės veikimas suplanuotas"</string>
-    <string name="auto_saver_enabled_text" msgid="874711029884777579">"Akumuliatoriaus tausojimo priemonė bus įjungta automatiškai akumuliatoriaus įkrovai pasiekus mažiau nei <xliff:g id="PERCENTAGE">%d</xliff:g> proc."</string>
+    <string name="auto_saver_enabled_text" msgid="874711029884777579">"Akumuliatoriaus tausojimo priemonė bus įjungta automatiškai akumuliatoriaus įkrovai pasiekus mažiau nei <xliff:g id="PERCENTAGE">%d</xliff:g>%%."</string>
     <string name="open_saver_setting_action" msgid="8314624730997322529">"Nustatymai"</string>
     <string name="auto_saver_okay_action" msgid="2701221740227683650">"Supratau"</string>
     <string name="heap_dump_tile_name" msgid="9141031328971226374">"Pat. „SysUI“ krūvą"</string>

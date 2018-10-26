@@ -172,7 +172,7 @@
     <string name="carrier_network_change_mode" msgid="8149202439957837762">"ವಾಹಕ ನೆಟ್‌ವರ್ಕ್ ಬದಲಾಯಿಸುವಿಕೆ"</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"ಬ್ಯಾಟರಿ ವಿವರಗಳನ್ನು ತೆರೆಯಿರಿ"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"ಬ್ಯಾಟರಿ <xliff:g id="NUMBER">%d</xliff:g> ಪ್ರತಿಶತ."</string>
-    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"ಬ್ಯಾಟರಿ ಚಾರ್ಜ್ ಆಗುತ್ತಿದೆ, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> ಪ್ರತಿಶತ."</string>
+    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"ಬ್ಯಾಟರಿ <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> ಪ್ರತಿಶತ ಚಾರ್ಜ್ ಆಗುತ್ತಿದೆ."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"ಸಿಸ್ಟಂ ಸೆಟ್ಟಿಂಗ್‌ಗಳು."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"ಅಧಿಸೂಚನೆಗಳು."</string>
     <string name="accessibility_overflow_action" msgid="5681882033274783311">"ಎಲ್ಲಾ ಅಧಿಸೂಚನೆಗಳನ್ನು ನೋಡಿ"</string>
