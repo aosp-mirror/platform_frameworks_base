@@ -30,13 +30,15 @@
 namespace android {
 
 MinikinFontSkia::MinikinFontSkia(sk_sp<SkTypeface> typeface, const void* fontData, size_t fontSize,
-                                 int ttcIndex, const std::vector<minikin::FontVariation>& axes)
+                                 std::string_view filePath, int ttcIndex,
+                                 const std::vector<minikin::FontVariation>& axes)
         : minikin::MinikinFont(typeface->uniqueID())
         , mTypeface(std::move(typeface))
         , mFontData(fontData)
         , mFontSize(fontSize)
         , mTtcIndex(ttcIndex)
-        , mAxes(axes) {}
+        , mAxes(axes)
+        , mFilePath(filePath) {}
 
 static void MinikinFontSkia_SetSkiaPaint(const minikin::MinikinFont* font, SkPaint* skPaint,
                                          const minikin::MinikinPaint& paint,
@@ -131,8 +133,8 @@ std::shared_ptr<minikin::MinikinFont> MinikinFontSkia::createFontWithVariation(
     sk_sp<SkFontMgr> fm(SkFontMgr::RefDefault());
     sk_sp<SkTypeface> face(fm->makeFromStream(std::move(stream), params));
 
-    return std::make_shared<MinikinFontSkia>(std::move(face), mFontData, mFontSize, ttcIndex,
-                                             variations);
+    return std::make_shared<MinikinFontSkia>(std::move(face), mFontData, mFontSize, mFilePath,
+                                             ttcIndex, variations);
 }
 
 uint32_t MinikinFontSkia::packPaintFlags(const SkPaint* paint) {

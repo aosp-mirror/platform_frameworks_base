@@ -183,7 +183,8 @@ void Typeface::setRobotoTypefaceForTest() {
     LOG_ALWAYS_FATAL_IF(typeface == nullptr, "Failed to make typeface from %s", kRobotoFont);
 
     std::shared_ptr<minikin::MinikinFont> font = std::make_shared<MinikinFontSkia>(
-            std::move(typeface), data, st.st_size, 0, std::vector<minikin::FontVariation>());
+            std::move(typeface), data, st.st_size, kRobotoFont, 0,
+            std::vector<minikin::FontVariation>());
     std::vector<minikin::Font> fonts;
     fonts.push_back(minikin::Font::Builder(font).build());
 

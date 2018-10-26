@@ -372,7 +372,9 @@ public final class Font {
                 }
             }
             final ByteBuffer readonlyBuffer = mBuffer.asReadOnlyBuffer();
-            final long ptr = nBuild(builderPtr, readonlyBuffer, mWeight, italic, mTtcIndex);
+            final String filePath = mFile == null ? "" : mFile.getAbsolutePath();
+            final long ptr = nBuild(builderPtr, readonlyBuffer, filePath, mWeight, italic,
+                    mTtcIndex);
             final Font font = new Font(ptr, readonlyBuffer, mFile,
                     new FontStyle(mWeight, slant), mTtcIndex, mAxes, mLocaleList);
             sFontRegistory.registerNativeAllocation(font, ptr);
@@ -395,7 +397,8 @@ public final class Font {
         @CriticalNative
         private static native void nAddAxis(long builderPtr, int tag, float value);
         private static native long nBuild(
-                long builderPtr, ByteBuffer buffer, int weight, boolean italic, int ttcIndex);
+                long builderPtr, @NonNull ByteBuffer buffer, @NonNull String filePath, int weight,
+                boolean italic, int ttcIndex);
         @CriticalNative
         private static native long nGetReleaseNativeFont();
     }
