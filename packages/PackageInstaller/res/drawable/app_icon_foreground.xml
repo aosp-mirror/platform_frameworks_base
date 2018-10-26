@@ -16,10 +16,10 @@
   -->
 <inset
     xmlns:android="http://schemas.android.com/apk/res/android"
-    android:insetTop="12dp"
-    android:insetRight="12dp"
-    android:insetBottom="12dp"
-    android:insetLeft="12dp">
+    android:insetTop="25%"
+    android:insetRight="25%"
+    android:insetBottom="25%"
+    android:insetLeft="25%">
 
     <vector
         android:width="24dp"
