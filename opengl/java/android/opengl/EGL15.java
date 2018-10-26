@@ -20,7 +20,9 @@ package android.opengl;
  * EGL 1.5
  *
  */
-public class EGL15 {
+public final class EGL15 {
+
+    private EGL15() {};
 
     public static final int EGL_CONTEXT_OPENGL_CORE_PROFILE_BIT            = 0x00000001;
     public static final int EGL_CONTEXT_OPENGL_COMPATIBILITY_PROFILE_BIT   = 0x00000002;
