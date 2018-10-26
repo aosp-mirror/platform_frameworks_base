@@ -1134,6 +1134,13 @@ public class CarrierConfigManager {
     public static final String KEY_CARRIER_NAME_STRING = "carrier_name_string";
 
     /**
+     * The Component Name of a carrier-provided CallScreeningService implementation. Telecom will
+     * bind to this CallScreeningService for ALL incoming calls and provide the carrier
+     * CallScreeningService with the opportunity to allow or block calls.
+     */
+    public static final String KEY_CARRIER_CALL_SCREENING_APP_STRING = "call_screening_app";
+
+    /**
      * Override the registered PLMN name using #KEY_CDMA_HOME_REGISTERED_PLMN_NAME_STRING.
      *
      * If true, then the registered PLMN name (only for CDMA/CDMA-LTE and only when not roaming)
@@ -2408,6 +2415,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_CONFIG_WIFI_DISABLE_IN_ECBM, false);
         sDefaults.putBoolean(KEY_CARRIER_NAME_OVERRIDE_BOOL, false);
         sDefaults.putString(KEY_CARRIER_NAME_STRING, "");
+        sDefaults.putString(KEY_CARRIER_CALL_SCREENING_APP_STRING, "");
         sDefaults.putBoolean(KEY_CDMA_HOME_REGISTERED_PLMN_NAME_OVERRIDE_BOOL, false);
         sDefaults.putString(KEY_CDMA_HOME_REGISTERED_PLMN_NAME_STRING, "");
         sDefaults.putBoolean(KEY_SUPPORT_DIRECT_FDN_DIALING_BOOL, false);
