@@ -5160,7 +5160,9 @@ package android.telephony {
 
   public class PhoneStateListener {
     method public void onRadioPowerStateChanged(int);
+    method public void onSrvccStateChanged(int);
     field public static final int LISTEN_RADIO_POWER_STATE_CHANGED = 8388608; // 0x800000
+    field public static final int LISTEN_SRVCC_STATE_CHANGED = 16384; // 0x4000
   }
 
   public class ServiceState implements android.os.Parcelable {
@@ -5389,6 +5391,11 @@ package android.telephony {
     field public static final int SIM_ACTIVATION_STATE_UNKNOWN = 0; // 0x0
     field public static final int SIM_STATE_LOADED = 10; // 0xa
     field public static final int SIM_STATE_PRESENT = 11; // 0xb
+    field public static final int SRVCC_STATE_HANDOVER_CANCELED = 3; // 0x3
+    field public static final int SRVCC_STATE_HANDOVER_COMPLETED = 1; // 0x1
+    field public static final int SRVCC_STATE_HANDOVER_FAILED = 2; // 0x2
+    field public static final int SRVCC_STATE_HANDOVER_NONE = -1; // 0xffffffff
+    field public static final int SRVCC_STATE_HANDOVER_STARTED = 0; // 0x0
   }
 
   public final class UiccAccessRule implements android.os.Parcelable {

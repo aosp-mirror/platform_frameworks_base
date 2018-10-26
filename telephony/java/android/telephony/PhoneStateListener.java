@@ -16,7 +16,9 @@
 
 package android.telephony;
 
+import android.Manifest;
 import android.annotation.NonNull;
+import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
 import android.os.Bundle;
@@ -201,12 +203,13 @@ public class PhoneStateListener {
     public static final int LISTEN_DATA_CONNECTION_REAL_TIME_INFO           = 0x00002000;
 
     /**
-     * Listen for changes to LTE network state
-     *
-     * @see #onLteNetworkStateChanged
+     * Listen for changes to the SRVCC state of the active call.
+     * @see #onServiceStateChanged(ServiceState)
      * @hide
      */
-    public static final int LISTEN_VOLTE_STATE                              = 0x00004000;
+    @SystemApi
+    @RequiresPermission(Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public static final int LISTEN_SRVCC_STATE_CHANGED                     = 0x00004000;
 
     /**
      * Listen for OEM hook raw event
@@ -401,8 +404,8 @@ public class PhoneStateListener {
                         PhoneStateListener.this.onDataConnectionRealTimeInfoChanged(
                                 (DataConnectionRealTimeInfo)msg.obj);
                         break;
-                    case LISTEN_VOLTE_STATE:
-                        PhoneStateListener.this.onVoLteServiceStateChanged((VoLteServiceState)msg.obj);
+                    case LISTEN_SRVCC_STATE_CHANGED:
+                        PhoneStateListener.this.onSrvccStateChanged((int) msg.obj);
                         break;
                     case LISTEN_VOICE_ACTIVATION_STATE:
                         PhoneStateListener.this.onVoiceActivationStateChanged((int)msg.obj);
@@ -605,13 +608,13 @@ public class PhoneStateListener {
     }
 
     /**
-     * Callback invoked when the service state of LTE network
-     * related to the VoLTE service has changed.
-     * @param stateInfo is the current LTE network information
+     * Callback invoked when there has been a change in the Single Radio Voice Call Continuity
+     * (SRVCC) state for the currently active call.
      * @hide
      */
-    @UnsupportedAppUsage
-    public void onVoLteServiceStateChanged(VoLteServiceState stateInfo) {
+    @SystemApi
+    public void onSrvccStateChanged(@TelephonyManager.SrvccState int srvccState) {
+
     }
 
     /**
@@ -795,8 +798,8 @@ public class PhoneStateListener {
             send(LISTEN_DATA_CONNECTION_REAL_TIME_INFO, 0, 0, dcRtInfo);
         }
 
-        public void onVoLteServiceStateChanged(VoLteServiceState lteState) {
-            send(LISTEN_VOLTE_STATE, 0, 0, lteState);
+        public void onSrvccStateChanged(int state) {
+            send(LISTEN_SRVCC_STATE_CHANGED, 0, 0, state);
         }
 
         public void onVoiceActivationStateChanged(int activationState) {

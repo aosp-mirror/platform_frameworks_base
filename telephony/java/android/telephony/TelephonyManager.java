@@ -177,6 +177,57 @@ public class TelephonyManager {
     /** @hide */
     static public final int KEY_TYPE_WLAN = 2;
 
+    /**
+     * No Single Radio Voice Call Continuity (SRVCC) handover is active.
+     * See TS 23.216 for more information.
+     * @hide
+     */
+    @SystemApi
+    public static final int SRVCC_STATE_HANDOVER_NONE  = -1;
+
+    /**
+     * Single Radio Voice Call Continuity (SRVCC) handover has been started on the network.
+     * See TS 23.216 for more information.
+     * @hide
+     */
+    @SystemApi
+    public static final int SRVCC_STATE_HANDOVER_STARTED  = 0;
+
+    /**
+     * Ongoing Single Radio Voice Call Continuity (SRVCC) handover has successfully completed.
+     * See TS 23.216 for more information.
+     * @hide
+     */
+    @SystemApi
+    public static final int SRVCC_STATE_HANDOVER_COMPLETED = 1;
+
+    /**
+     * Ongoing Single Radio Voice Call Continuity (SRVCC) handover has failed.
+     * See TS 23.216 for more information.
+     * @hide
+     */
+    @SystemApi
+    public static final int SRVCC_STATE_HANDOVER_FAILED   = 2;
+
+    /**
+     * Ongoing Single Radio Voice Call Continuity (SRVCC) handover has been canceled.
+     * See TS 23.216 for more information.
+     * @hide
+     */
+    @SystemApi
+    public static final int SRVCC_STATE_HANDOVER_CANCELED  = 3;
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = {"SRVCC_STATE_"},
+            value = {
+                    SRVCC_STATE_HANDOVER_NONE,
+                    SRVCC_STATE_HANDOVER_STARTED,
+                    SRVCC_STATE_HANDOVER_COMPLETED,
+                    SRVCC_STATE_HANDOVER_FAILED,
+                    SRVCC_STATE_HANDOVER_CANCELED})
+    public @interface SrvccState {}
+
     private final Context mContext;
     private final int mSubId;
     @UnsupportedAppUsage
