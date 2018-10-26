@@ -73,7 +73,8 @@ const int FIELD_ID_CONFIG_STATS_MATCHER_COUNT = 7;
 const int FIELD_ID_CONFIG_STATS_ALERT_COUNT = 8;
 const int FIELD_ID_CONFIG_STATS_VALID = 9;
 const int FIELD_ID_CONFIG_STATS_BROADCAST = 10;
-const int FIELD_ID_CONFIG_STATS_DATA_DROP = 11;
+const int FIELD_ID_CONFIG_STATS_DATA_DROP_TIME = 11;
+const int FIELD_ID_CONFIG_STATS_DATA_DROP_BYTES = 21;
 const int FIELD_ID_CONFIG_STATS_DUMP_REPORT_TIME = 12;
 const int FIELD_ID_CONFIG_STATS_DUMP_REPORT_BYTES = 20;
 const int FIELD_ID_CONFIG_STATS_MATCHER_STATS = 13;
@@ -205,11 +206,11 @@ void StatsdStats::noteBroadcastSent(const ConfigKey& key, int32_t timeSec) {
     it->second->broadcast_sent_time_sec.push_back(timeSec);
 }
 
-void StatsdStats::noteDataDropped(const ConfigKey& key) {
-    noteDataDropped(key, getWallClockSec());
+void StatsdStats::noteDataDropped(const ConfigKey& key, const size_t totalBytes) {
+    noteDataDropped(key, totalBytes, getWallClockSec());
 }
 
-void StatsdStats::noteDataDropped(const ConfigKey& key, int32_t timeSec) {
+void StatsdStats::noteDataDropped(const ConfigKey& key, const size_t totalBytes, int32_t timeSec) {
     lock_guard<std::mutex> lock(mLock);
     auto it = mConfigStats.find(key);
     if (it == mConfigStats.end()) {
@@ -218,8 +219,10 @@ void StatsdStats::noteDataDropped(const ConfigKey& key, int32_t timeSec) {
     }
     if (it->second->data_drop_time_sec.size() == kMaxTimestampCount) {
         it->second->data_drop_time_sec.pop_front();
+        it->second->data_drop_bytes.pop_front();
     }
     it->second->data_drop_time_sec.push_back(timeSec);
+    it->second->data_drop_bytes.push_back(totalBytes);
 }
 
 void StatsdStats::noteMetricsReportSent(const ConfigKey& key, const size_t num_bytes) {
@@ -382,6 +385,7 @@ void StatsdStats::resetInternalLocked() {
     for (auto& config : mConfigStats) {
         config.second->broadcast_sent_time_sec.clear();
         config.second->data_drop_time_sec.clear();
+        config.second->data_drop_bytes.clear();
         config.second->dump_report_stats.clear();
         config.second->annotations.clear();
         config.second->matcher_stats.clear();
@@ -421,8 +425,12 @@ void StatsdStats::dumpStats(int out) const {
             dprintf(out, "\tbroadcast time: %d\n", broadcastTime);
         }
 
-        for (const auto& dataDropTime : configStats->data_drop_time_sec) {
-            dprintf(out, "\tdata drop time: %d\n", dataDropTime);
+        auto dropTimePtr = configStats->data_drop_time_sec.begin();
+        auto dropBytesPtr = configStats->data_drop_bytes.begin();
+        for (int i = 0; i < (int)configStats->data_drop_time_sec.size();
+             i++, dropTimePtr++, dropBytesPtr++) {
+            dprintf(out, "\tdata drop time: %d with size %lld", *dropTimePtr,
+                    (long long)*dropBytesPtr);
         }
     }
     dprintf(out, "%lu Active Configs\n", (unsigned long)mConfigStats.size());
@@ -445,9 +453,13 @@ void StatsdStats::dumpStats(int out) const {
                     (long long)broadcastTime);
         }
 
-        for (const auto& dataDropTime : configStats->data_drop_time_sec) {
-            dprintf(out, "\tdata drop time: %s(%lld)\n", buildTimeString(dataDropTime).c_str(),
-                    (long long)dataDropTime);
+        auto dropTimePtr = configStats->data_drop_time_sec.begin();
+        auto dropBytesPtr = configStats->data_drop_bytes.begin();
+        for (int i = 0; i < (int)configStats->data_drop_time_sec.size();
+             i++, dropTimePtr++, dropBytesPtr++) {
+            dprintf(out, "\tdata drop time: %s(%lld) with %lld bytes\n",
+                    buildTimeString(*dropTimePtr).c_str(), (long long)*dropTimePtr,
+                    (long long)*dropBytesPtr);
         }
 
         for (const auto& dump : configStats->dump_report_stats) {
@@ -540,9 +552,15 @@ void addConfigStatsToProto(const ConfigStats& configStats, ProtoOutputStream* pr
                      broadcast);
     }
 
-    for (const auto& drop : configStats.data_drop_time_sec) {
-        proto->write(FIELD_TYPE_INT32 | FIELD_ID_CONFIG_STATS_DATA_DROP | FIELD_COUNT_REPEATED,
-                     drop);
+    for (const auto& drop_time : configStats.data_drop_time_sec) {
+        proto->write(FIELD_TYPE_INT32 | FIELD_ID_CONFIG_STATS_DATA_DROP_TIME | FIELD_COUNT_REPEATED,
+                     drop_time);
+    }
+
+    for (const auto& drop_bytes : configStats.data_drop_bytes) {
+        proto->write(
+                FIELD_TYPE_INT64 | FIELD_ID_CONFIG_STATS_DATA_DROP_BYTES | FIELD_COUNT_REPEATED,
+                (long long)drop_bytes);
     }
 
     for (const auto& dump : configStats.dump_report_stats) {

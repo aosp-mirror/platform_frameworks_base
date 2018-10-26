@@ -328,6 +328,7 @@ message StatsdStatsReport {
         optional bool is_valid = 9;
         repeated int32 broadcast_sent_time_sec = 10;
         repeated int32 data_drop_time_sec = 11;
+        repeated int64 data_drop_bytes = 21;
         repeated int32 dump_report_time_sec = 12;
         repeated int32 dump_report_data_size = 20;
         repeated MatcherStats matcher_stats = 13;
