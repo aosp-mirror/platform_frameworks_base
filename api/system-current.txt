@@ -158,6 +158,7 @@ package android {
     field public static final java.lang.String REAL_GET_TASKS = "android.permission.REAL_GET_TASKS";
     field public static final java.lang.String REBOOT = "android.permission.REBOOT";
     field public static final java.lang.String RECEIVE_DATA_ACTIVITY_CHANGE = "android.permission.RECEIVE_DATA_ACTIVITY_CHANGE";
+    field public static final java.lang.String RECEIVE_DEVICE_CUSTOMIZATION_READY = "android.permission.RECEIVE_DEVICE_CUSTOMIZATION_READY";
     field public static final java.lang.String RECEIVE_EMERGENCY_BROADCAST = "android.permission.RECEIVE_EMERGENCY_BROADCAST";
     field public static final java.lang.String RECEIVE_WIFI_CREDENTIAL_CHANGE = "android.permission.RECEIVE_WIFI_CREDENTIAL_CHANGE";
     field public static final java.lang.String RECOVERY = "android.permission.RECOVERY";
@@ -171,6 +172,7 @@ package android {
     field public static final java.lang.String RETRIEVE_WINDOW_CONTENT = "android.permission.RETRIEVE_WINDOW_CONTENT";
     field public static final java.lang.String REVOKE_RUNTIME_PERMISSIONS = "android.permission.REVOKE_RUNTIME_PERMISSIONS";
     field public static final java.lang.String SCORE_NETWORKS = "android.permission.SCORE_NETWORKS";
+    field public static final java.lang.String SEND_DEVICE_CUSTOMIZATION_READY = "android.permission.SEND_DEVICE_CUSTOMIZATION_READY";
     field public static final java.lang.String SEND_RESPOND_VIA_MESSAGE = "android.permission.SEND_RESPOND_VIA_MESSAGE";
     field public static final java.lang.String SEND_SHOW_SUSPENDED_APP_DETAILS = "android.permission.SEND_SHOW_SUSPENDED_APP_DETAILS";
     field public static final java.lang.String SEND_SMS_NO_CONFIRMATION = "android.permission.SEND_SMS_NO_CONFIRMATION";
@@ -1055,6 +1057,7 @@ package android.content {
     field public static final java.lang.String ACTION_BATTERY_LEVEL_CHANGED = "android.intent.action.BATTERY_LEVEL_CHANGED";
     field public static final java.lang.String ACTION_CALL_EMERGENCY = "android.intent.action.CALL_EMERGENCY";
     field public static final java.lang.String ACTION_CALL_PRIVILEGED = "android.intent.action.CALL_PRIVILEGED";
+    field public static final java.lang.String ACTION_DEVICE_CUSTOMIZATION_READY = "android.intent.action.DEVICE_CUSTOMIZATION_READY";
     field public static final java.lang.String ACTION_FACTORY_RESET = "android.intent.action.FACTORY_RESET";
     field public static final java.lang.String ACTION_GLOBAL_BUTTON = "android.intent.action.GLOBAL_BUTTON";
     field public static final java.lang.String ACTION_INSTALL_INSTANT_APP_PACKAGE = "android.intent.action.INSTALL_INSTANT_APP_PACKAGE";
@@ -1234,6 +1237,7 @@ package android.content.pm {
     method public abstract void removeOnPermissionsChangeListener(android.content.pm.PackageManager.OnPermissionsChangedListener);
     method public void replacePreferredActivity(android.content.IntentFilter, int, java.util.List<android.content.ComponentName>, android.content.ComponentName);
     method public abstract void revokeRuntimePermission(java.lang.String, java.lang.String, android.os.UserHandle);
+    method public void sendDeviceCustomizationReadyBroadcast();
     method public abstract boolean setDefaultBrowserPackageNameAsUser(java.lang.String, int);
     method public void setHarmfulAppWarning(java.lang.String, java.lang.CharSequence);
     method public deprecated java.lang.String[] setPackagesSuspended(java.lang.String[], boolean, android.os.PersistableBundle, android.os.PersistableBundle, java.lang.String);

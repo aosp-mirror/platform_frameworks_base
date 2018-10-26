@@ -4116,6 +4116,18 @@ public class Intent implements Parcelable, Cloneable {
      */
     public static final String ACTION_DOCK_ACTIVE = "android.intent.action.DOCK_ACTIVE";
 
+    /**
+     * Broadcast Action: Indicates that a new device customization has been
+     * downloaded and applied (packages installed, runtime resource overlays
+     * enabled, xml files copied, ...), and that it is time for components that
+     * need to for example clear their caches to do so now.
+     *
+     * @hide
+     */
+    @SystemApi
+    public static final String ACTION_DEVICE_CUSTOMIZATION_READY =
+            "android.intent.action.DEVICE_CUSTOMIZATION_READY";
+
 
     // ---------------------------------------------------------------------
     // ---------------------------------------------------------------------
