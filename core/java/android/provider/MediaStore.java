@@ -60,7 +60,10 @@ import java.util.List;
 public final class MediaStore {
     private final static String TAG = "MediaStore";
 
+    /** The authority for the media provider */
     public static final String AUTHORITY = "media";
+    /** A content:// style uri to the authority for the media provider */
+    public static final Uri AUTHORITY_URI = Uri.parse("content://" + AUTHORITY);
 
     private static final String CONTENT_AUTHORITY_SLASH = "content://" + AUTHORITY + "/";
 
@@ -2250,6 +2253,18 @@ public final class MediaStore {
              * <P>Type: INTEGER (long)</P>
              */
             public static final String HEIGHT = "height";
+        }
+    }
+
+    /**
+     * Return the volume name that the given {@link Uri} references.
+     */
+    public static @NonNull String getVolumeName(@NonNull Uri uri) {
+        final List<String> segments = uri.getPathSegments();
+        if (uri.getAuthority().equals(AUTHORITY) && segments != null && segments.size() > 0) {
+            return segments.get(0);
+        } else {
+            throw new IllegalArgumentException("Not a media Uri: " + uri);
         }
     }
 
