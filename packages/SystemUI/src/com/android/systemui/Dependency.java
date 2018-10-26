@@ -33,34 +33,35 @@ import com.android.internal.logging.MetricsLogger;
 import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.util.Preconditions;
 import com.android.settingslib.bluetooth.LocalBluetoothManager;
+import com.android.systemui.appops.AppOpsController;
+import com.android.systemui.appops.AppOpsControllerImpl;
 import com.android.systemui.assist.AssistManager;
 import com.android.systemui.colorextraction.SysuiColorExtractor;
 import com.android.systemui.fragments.FragmentService;
 import com.android.systemui.keyguard.ScreenLifecycle;
 import com.android.systemui.keyguard.WakefulnessLifecycle;
 import com.android.systemui.plugins.ActivityStarter;
-import com.android.systemui.plugins.PluginInitializerImpl;
 import com.android.systemui.plugins.PluginDependencyProvider;
-import com.android.systemui.shared.plugins.PluginManager;
-import com.android.systemui.shared.plugins.PluginManagerImpl;
+import com.android.systemui.plugins.PluginInitializerImpl;
 import com.android.systemui.plugins.VolumeDialogController;
 import com.android.systemui.power.EnhancedEstimates;
 import com.android.systemui.power.EnhancedEstimatesImpl;
 import com.android.systemui.power.PowerNotificationWarnings;
 import com.android.systemui.power.PowerUI;
+import com.android.systemui.shared.plugins.PluginManager;
+import com.android.systemui.shared.plugins.PluginManagerImpl;
 import com.android.systemui.statusbar.NotificationRemoteInputManager;
-import com.android.systemui.statusbar.notification.AppOpsListener;
 import com.android.systemui.statusbar.VibratorHelper;
 import com.android.systemui.statusbar.notification.NotificationData.KeyguardEnvironment;
 import com.android.systemui.statusbar.phone.ConfigurationControllerImpl;
 import com.android.systemui.statusbar.phone.DarkIconDispatcherImpl;
+import com.android.systemui.statusbar.phone.KeyguardEnvironmentImpl;
 import com.android.systemui.statusbar.phone.LightBarController;
 import com.android.systemui.statusbar.phone.LockscreenGestureLogger;
 import com.android.systemui.statusbar.phone.ManagedProfileController;
 import com.android.systemui.statusbar.phone.ManagedProfileControllerImpl;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
-import com.android.systemui.statusbar.phone.KeyguardEnvironmentImpl;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarIconControllerImpl;
 import com.android.systemui.statusbar.phone.StatusBarRemoteInputCallback;
@@ -336,8 +337,6 @@ public class Dependency extends SystemUI {
 
         mProviders.put(EnhancedEstimates.class, () -> new EnhancedEstimatesImpl());
 
-        mProviders.put(AppOpsListener.class, () -> new AppOpsListener(mContext));
-
         mProviders.put(VibratorHelper.class, () -> new VibratorHelper(mContext));
 
         mProviders.put(IStatusBarService.class, () -> IStatusBarService.Stub.asInterface(
@@ -356,6 +355,9 @@ public class Dependency extends SystemUI {
                 () -> new StatusBarRemoteInputCallback(mContext));
 
         mProviders.put(InitController.class, InitController::new);
+
+        mProviders.put(AppOpsController.class, () ->
+                new AppOpsControllerImpl(mContext, getDependency(BG_LOOPER)));
 
         // Put all dependencies above here so the factory can override them if it wants.
         SystemUIFactory.getInstance().injectDependencies(mProviders, mContext);
