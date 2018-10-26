@@ -2029,6 +2029,27 @@ public final class MediaStore {
              * <P>Type: INTEGER</P>
              */
             public static final String BOOKMARK = "bookmark";
+
+            /**
+             * The standard of color aspects
+             * <P>Type: INTEGER</P>
+             * @hide
+             */
+            public static final String COLOR_STANDARD = "color_standard";
+
+            /**
+             * The transfer of color aspects
+             * <P>Type: INTEGER</P>
+             * @hide
+             */
+            public static final String COLOR_TRANSFER = "color_transfer";
+
+            /**
+             * The range of color aspects
+             * <P>Type: INTEGER</P>
+             * @hide
+             */
+            public static final String COLOR_RANGE = "color_range";
         }
 
         public static final class Media implements VideoColumns {
