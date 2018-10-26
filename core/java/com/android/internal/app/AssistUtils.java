@@ -32,6 +32,11 @@ import android.os.ServiceManager;
 import android.provider.Settings;
 import android.util.Log;
 
+import com.android.internal.R;
+
+import java.util.ArrayList;
+import java.util.Set;
+
 /**
  * Utility method for dealing with the assistant aspects of
  * {@link com.android.internal.app.IVoiceInteractionManagerService IVoiceInteractionManagerService}.
@@ -39,6 +44,14 @@ import android.util.Log;
 public class AssistUtils {
 
     private static final String TAG = "AssistUtils";
+
+    /**
+     * Sentinel value for "no default assistant specified."
+     *
+     * Empty string is already used to represent an explicit setting of No Assistant. null cannot
+     * be used because we can't represent a null value in XML.
+     */
+    private static final String UNSET = "#+UNSET";
 
     private final Context mContext;
     private final IVoiceInteractionManagerService mVoiceInteractionManagerService;
@@ -152,13 +165,27 @@ public class AssistUtils {
             return ComponentName.unflattenFromString(setting);
         }
 
+        final String defaultSetting = mContext.getResources().getString(
+                R.string.config_defaultAssistantComponentName);
+        if (defaultSetting != null && !defaultSetting.equals(UNSET)) {
+            return ComponentName.unflattenFromString(defaultSetting);
+        }
+
         // Fallback to keep backward compatible behavior when there is no user setting.
         if (activeServiceSupportsAssistGesture()) {
             return getActiveServiceComponentName();
         }
 
-        Intent intent = ((SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE))
-                .getAssistIntent(false);
+        if (UNSET.equals(defaultSetting)) {
+            return null;
+        }
+
+        final SearchManager searchManager =
+                (SearchManager) mContext.getSystemService(Context.SEARCH_SERVICE);
+        if (searchManager == null) {
+            return null;
+        }
+        final Intent intent = searchManager.getAssistIntent(false);
         PackageManager pm = mContext.getPackageManager();
         ResolveInfo info = pm.resolveActivityAsUser(intent, PackageManager.MATCH_DEFAULT_ONLY,
                 userId);
