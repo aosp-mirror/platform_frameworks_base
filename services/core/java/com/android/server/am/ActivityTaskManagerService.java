@@ -273,6 +273,7 @@ import java.io.StringWriter;
 import java.lang.ref.WeakReference;
 import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -2512,6 +2513,20 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     @Override
+    public void updateLockTaskPackages(int userId, String[] packages) {
+        final int callingUid = Binder.getCallingUid();
+        if (callingUid != 0 && callingUid != SYSTEM_UID) {
+            mAmInternal.enforceCallingPermission(Manifest.permission.UPDATE_LOCK_TASK_PACKAGES,
+                    "updateLockTaskPackages()");
+        }
+        synchronized (this) {
+            if (DEBUG_LOCKTASK) Slog.w(TAG_LOCKTASK, "Whitelisting " + userId + ":"
+                    + Arrays.toString(packages));
+            getLockTaskController().updateLockTaskPackages(userId, packages);
+        }
+    }
+
+    @Override
     public boolean isInLockTaskMode() {
         return getLockTaskModeState() != LOCK_TASK_MODE_NONE;
     }
@@ -4613,17 +4628,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
     }
 
-    void updateUserConfiguration() {
-        synchronized (mGlobalLock) {
-            final Configuration configuration = new Configuration(getGlobalConfiguration());
-            final int currentUserId = mAmInternal.getCurrentUserId();
-            Settings.System.adjustConfigurationForUser(mContext.getContentResolver(), configuration,
-                    currentUserId, Settings.System.canWrite(mContext));
-            updateConfigurationLocked(configuration, null /* starting */, false /* initLocale */,
-                    false /* persistent */, currentUserId, false /* deferResume */);
-        }
-    }
-
     private boolean updateConfigurationLocked(Configuration values, ActivityRecord starting,
             boolean initLocale, boolean persistent, int userId, boolean deferResume) {
         return updateConfigurationLocked(values, starting, initLocale, persistent, userId,
@@ -5904,6 +5908,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 mShuttingDown = true;
                 mStackSupervisor.prepareForShutdownLocked();
                 updateEventDispatchingLocked(booted);
+                notifyTaskPersisterLocked(null, true);
                 return mStackSupervisor.shutdownLocked(timeout);
             }
         }
@@ -6584,6 +6589,17 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         @Override
+        public void dumpForOom(PrintWriter pw) {
+            synchronized (mGlobalLock) {
+                pw.println("  mHomeProcess: " + mHomeProcess);
+                pw.println("  mPreviousProcess: " + mPreviousProcess);
+                if (mHeavyWeightProcess != null) {
+                    pw.println("  mHeavyWeightProcess: " + mHeavyWeightProcess);
+                }
+            }
+        }
+
+        @Override
         public boolean canGcNow() {
             synchronized (mGlobalLock) {
                 return isSleeping() || mStackSupervisor.allResumedActivitiesIdle();
@@ -6740,6 +6756,40 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         @Override
         public void flushRecentTasks() {
             mRecentTasks.flush();
+        }
+
+        @Override
+        public WindowProcessController getHomeProcess() {
+            synchronized (mGlobalLock) {
+                return mHomeProcess;
+            }
+        }
+
+        @Override
+        public WindowProcessController getPreviousProcess() {
+            synchronized (mGlobalLock) {
+                return mPreviousProcess;
+            }
+        }
+
+        @Override
+        public void clearLockedTasks(String reason) {
+            synchronized (mGlobalLock) {
+                getLockTaskController().clearLockedTasks(reason);
+            }
+        }
+
+        @Override
+        public void updateUserConfiguration() {
+            synchronized (mGlobalLock) {
+                final Configuration configuration = new Configuration(getGlobalConfiguration());
+                final int currentUserId = mAmInternal.getCurrentUserId();
+                Settings.System.adjustConfigurationForUser(mContext.getContentResolver(),
+                        configuration, currentUserId, Settings.System.canWrite(mContext));
+                updateConfigurationLocked(configuration, null /* starting */,
+                        false /* initLocale */, false /* persistent */, currentUserId,
+                        false /* deferResume */);
+            }
         }
     }
 }

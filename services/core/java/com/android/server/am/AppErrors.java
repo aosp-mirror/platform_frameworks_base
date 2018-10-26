@@ -730,7 +730,7 @@ class AppErrors {
         // with a home activity running in the process to prevent a repeatedly crashing app
         // from blocking the user to manually clear the list.
         final WindowProcessController proc = app.getWindowProcessController();
-        final WindowProcessController homeProc = mService.mActivityTaskManager.mHomeProcess;
+        final WindowProcessController homeProc = mService.mAtmInternal.getHomeProcess();
         if (proc == homeProc && proc.hasActivities()
                 && (homeProc.mInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0) {
             proc.clearPackagePreferredForHomeActivities();

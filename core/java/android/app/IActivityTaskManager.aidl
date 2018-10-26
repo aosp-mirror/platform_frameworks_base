@@ -177,6 +177,7 @@ interface IActivityTaskManager {
     void cancelRecentsAnimation(boolean restoreHomeStackPosition);
     void startLockTaskModeByToken(in IBinder token);
     void stopLockTaskModeByToken(in IBinder token);
+    void updateLockTaskPackages(int userId, in String[] packages);
     boolean isInLockTaskMode();
     int getLockTaskModeState();
     void setTaskDescription(in IBinder token, in ActivityManager.TaskDescription values);
