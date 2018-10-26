@@ -104,7 +104,6 @@ java_defaults {
         "core/java/android/app/timedetector/ITimeDetectorService.aidl",
         "core/java/android/app/timezone/ICallback.aidl",
         "core/java/android/app/timezone/IRulesManager.aidl",
-        "core/java/android/app/timezonedetector/ITimeZoneDetectorService.aidl",
         "core/java/android/app/usage/ICacheQuotaService.aidl",
         "core/java/android/app/usage/IStorageStatsManager.aidl",
         "core/java/android/app/usage/IUsageStatsManager.aidl",
