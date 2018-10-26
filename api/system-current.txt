@@ -3684,7 +3684,8 @@ package android.net.wifi {
   }
 
   public static abstract interface WifiManager.NetworkRequestMatchCallback {
-    method public abstract void onMatch(java.util.List<android.net.wifi.WifiConfiguration>);
+    method public abstract void onAbort();
+    method public abstract void onMatch(java.util.List<android.net.wifi.ScanResult>);
     method public abstract void onUserSelectionCallbackRegistration(android.net.wifi.WifiManager.NetworkRequestUserSelectionCallback);
     method public abstract void onUserSelectionConnectFailure(android.net.wifi.WifiConfiguration);
     method public abstract void onUserSelectionConnectSuccess(android.net.wifi.WifiConfiguration);
@@ -4641,6 +4642,7 @@ package android.rolecontrollerservice {
     method public abstract void onAddRoleHolder(java.lang.String, java.lang.String, android.app.role.RoleManagerCallback);
     method public final android.os.IBinder onBind(android.content.Intent);
     method public abstract void onClearRoleHolders(java.lang.String, android.app.role.RoleManagerCallback);
+    method public abstract void onGrantDefaultRoles(android.app.role.RoleManagerCallback);
     method public abstract void onRemoveRoleHolder(java.lang.String, java.lang.String, android.app.role.RoleManagerCallback);
     field public static final java.lang.String SERVICE_INTERFACE = "android.rolecontrollerservice.RoleControllerService";
   }
@@ -4795,8 +4797,8 @@ package android.service.carrier {
 
   public abstract class ApnService extends android.app.Service {
     ctor public ApnService();
-    method public abstract java.util.List<android.content.ContentValues> onRestoreApns(int);
     method public android.os.IBinder onBind(android.content.Intent);
+    method public abstract java.util.List<android.content.ContentValues> onRestoreApns(int);
   }
 
 }
@@ -5155,6 +5157,16 @@ package android.service.settings.suggestions {
     method public abstract java.util.List<android.service.settings.suggestions.Suggestion> onGetSuggestions();
     method public abstract void onSuggestionDismissed(android.service.settings.suggestions.Suggestion);
     method public abstract void onSuggestionLaunched(android.service.settings.suggestions.Suggestion);
+  }
+
+}
+
+package android.service.sms {
+
+  public abstract class FinancialSmsService extends android.app.Service {
+    method public android.os.IBinder onBind(android.content.Intent);
+    method public abstract android.database.CursorWindow onGetSmsMessages(android.os.Bundle);
+    field public static final java.lang.String ACTION_FINANCIAL_SERVICE_INTENT = "android.service.sms.action.FINANCIAL_SERVICE_INTENT";
   }
 
 }
