@@ -88,7 +88,4 @@
 
     <!-- Keyboard shortcuts helper -->
     <dimen name="ksh_layout_width">488dp</dimen>
-
-    <!-- The offsets the tasks animate from when recents is launched while docking -->
-    <dimen name="recents_task_stack_animation_launched_while_docking_offset">192dp</dimen>
 </resources>

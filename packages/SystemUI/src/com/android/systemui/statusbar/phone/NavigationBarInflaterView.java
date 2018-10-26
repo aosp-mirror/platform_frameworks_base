@@ -34,7 +34,7 @@ import android.widget.LinearLayout;
 import android.widget.Space;
 
 import com.android.systemui.Dependency;
-import com.android.systemui.OverviewProxyService;
+import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.R;
 import com.android.systemui.plugins.PluginListener;
 import com.android.systemui.shared.plugins.PluginManager;

@@ -39,32 +39,6 @@
     <!-- Tint color for the content on the notification overflow card. -->
     <color name="keyguard_overflow_content_color">#ff686868</color>
 
-    <!-- The disabled recents task bar background color. -->
-    <color name="recents_task_bar_disabled_background_color">#ff676767</color>
-    <!-- The default recents task bar background color. -->
-    <color name="recents_task_bar_default_background_color">#ffe6e6e6</color>
-    <!-- The default recents task view background color. -->
-    <color name="recents_task_view_default_background_color">#fff3f3f3</color>
-    <!-- The recents task bar light text color to be drawn on top of dark backgrounds. -->
-    <color name="recents_task_bar_light_text_color">#ffeeeeee</color>
-    <!-- The recents task bar dark text color to be drawn on top of light backgrounds. -->
-    <color name="recents_task_bar_dark_text_color">#cc000000</color>
-    <!-- The recents task bar light dismiss icon color to be drawn on top of dark backgrounds. -->
-    <color name="recents_task_bar_light_icon_color">#ccffffff</color>
-    <!-- The recents task bar dark dismiss icon color to be drawn on top of light backgrounds. -->
-    <color name="recents_task_bar_dark_icon_color">#99000000</color>
-    <!-- The lock to task button background color. -->
-    <color name="recents_task_view_lock_to_app_button_background_color">#ffe6e6e6</color>
-    <!-- The lock to task button foreground color. -->
-    <color name="recents_task_view_lock_to_app_button_color">#ff666666</color>
-    <!-- The background color for the freeform workspace. -->
-    <color name="recents_freeform_workspace_bg_color">#33FFFFFF</color>
-
-    <!-- The background color for clear all button on light backgrounds if not transparent. -->
-    <color name="recents_clear_all_button_bg_light_color">#CCFFFFFF</color>
-    <!-- The background color for clear all button on dark backgrounds if not transparent. -->
-    <color name="recents_clear_all_button_bg_dark_color">#CC000000</color>
-
     <color name="keyguard_affordance">#ffffffff</color>
 
     <!-- The color of the legacy notification background -->
@@ -109,12 +83,6 @@
 
     <!-- The shadow color for light navigation bar icons. -->
     <color name="nav_key_button_shadow_color">#30000000</color>
-
-    <!-- Shadow color for the first pixels around the fake shadow for recents. -->
-    <color name="fake_shadow_start_color">#44000000</color>
-
-    <!-- Shadow color for the furthest pixels around the fake shadow for recents. -->
-    <color name="fake_shadow_end_color">#03000000</color>
 
     <color name="screen_pinning_request_window_bg">#80000000</color>
 

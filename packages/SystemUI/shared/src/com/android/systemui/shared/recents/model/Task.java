@@ -143,7 +143,7 @@ public class Task {
      * The temporary sort index in the stack, used when ordering the stack.
      */
     @Deprecated
-    int temporarySortIndexInStack;
+    public int temporarySortIndexInStack;
 
     /**
      * The icon is the task description icon (if provided), which falls back to the activity icon,

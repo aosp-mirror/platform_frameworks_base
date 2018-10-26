@@ -24,26 +24,6 @@
          all of the currently visible notifications. [CHAR LIMIT=10]-->
     <string name="status_bar_clear_all_button">Clear</string>
 
-    <!-- Title shown in recents popup for removing an application from the list -->
-    <string name="status_bar_recent_remove_item_title">Remove from list</string>
-
-    <!-- Title shown in recents popup for inspecting an application's properties -->
-    <string name="status_bar_recent_inspect_item_title">App info</string>
-
-    <!-- Message shown in the middle of the screen after clicking on the recent apps button
-         when there are no recent apps to show. Also used for accessibility. [CHAR LIMIT=45]-->
-    <string name="status_bar_no_recent_apps">Your recent screens appear here</string>
-
-    <!-- Content description for the button to dismiss Recent Apps (only present on large
-         devices) -->
-    <string name="status_bar_accessibility_dismiss_recents">Dismiss recent apps</string>
-
-    <!-- Message that is read when you enter recent apps in TalkBack -->
-    <plurals name="status_bar_accessibility_recent_apps">
-        <item quantity="one">1 screen in Overview</item>
-        <item quantity="other">%d screens in Overview</item>
-    </plurals>
-
     <!-- The label in the bar at the top of the status bar when there are no notifications
          showing.  [CHAR LIMIT=40]-->
     <string name="status_bar_no_notifications_title">No notifications</string>
@@ -252,8 +232,6 @@
     <string name="voice_assist_label">open voice assist</string>
     <!-- Click action label for accessibility for the phone button. [CHAR LIMIT=NONE] -->
     <string name="camera_label">open camera</string>
-    <!-- Caption for "Recents resize" developer debug feature. [CHAR LIMIT=NONE] -->
-    <string name="recents_caption_resize">Select new task layout</string>
     <!-- Button name for "Cancel". [CHAR LIMIT=NONE] -->
     <string name="cancel">Cancel</string>
 
@@ -477,16 +455,6 @@
     <!-- Content description of the work mode icon in the notification panel for accessibility (not shown on the screen). [CHAR LIMIT=NONE] -->
     <string name="accessibility_work_mode">@string/quick_settings_work_mode_label</string>
 
-    <!-- Content description to tell the user that this button will remove an application from recents -->
-    <string name="accessibility_recents_item_will_be_dismissed">Dismiss <xliff:g id="app" example="Calendar">%s</xliff:g>.</string>
-    <!-- Content description to tell the user an application has been removed from recents -->
-    <string name="accessibility_recents_item_dismissed"><xliff:g id="app" example="Calendar">%s</xliff:g> dismissed.</string>
-    <!-- Content description to tell the user all applications has been removed from recents -->
-    <string name="accessibility_recents_all_items_dismissed">All recent applications dismissed.</string>
-    <!-- Content description to tell the user that this button will open application info for an application in recents -->
-    <string name="accessibility_recents_item_open_app_info">Open <xliff:g id="app" example="Calendar">%s</xliff:g> application info.</string>
-    <!-- Content description to tell the user an application has been launched from recents -->
-    <string name="accessibility_recents_item_launched">Starting <xliff:g id="app" example="Calendar">%s</xliff:g>.</string>
     <!-- Content description to tell the user a notification has been removed from the notification shade -->
     <string name="accessibility_notification_dismissed">Notification dismissed.</string>
 
@@ -836,42 +804,10 @@
     <!-- QuickSettings: NFC (on) [CHAR LIMIT=NONE] -->
     <string name="quick_settings_nfc_on">NFC is enabled</string>
 
-    <!-- Recents: The empty recents string. [CHAR LIMIT=NONE] -->
-    <string name="recents_empty_message">No recent items</string>
-    <!-- Recents: The empty recents string after dismissing all tasks. [CHAR LIMIT=NONE] -->
-    <string name="recents_empty_message_dismissed_all">You\'ve cleared everything</string>
-    <!-- Recents: The info panel app info button string. [CHAR LIMIT=NONE] -->
-    <string name="recents_app_info_button_label">Application Info</string>
-    <!-- Recents: The screen pinning button. [CHAR LIMIT=NONE] -->
-    <string name="recents_lock_to_app_button_label">screen pinning</string>
-    <!-- Recents: Temporary string for the button in the recents search bar. [CHAR LIMIT=NONE] -->
-    <string name="recents_search_bar_label">search</string>
-    <!-- Recents: Launch error string. [CHAR LIMIT=NONE] -->
-    <string name="recents_launch_error_message">Could not start <xliff:g id="app" example="Calendar">%s</xliff:g>.</string>
-    <!-- Recents: Launch disabled string. [CHAR LIMIT=NONE] -->
-    <string name="recents_launch_disabled_message"><xliff:g id="app" example="Calendar">%s</xliff:g> is disabled in safe-mode.</string>
-    <!-- Recents: Stack action button string. [CHAR LIMIT=NONE] -->
-    <string name="recents_stack_action_button_label">Clear all</string>
-    <!-- Recents: Hint text that shows on the drop targets to start multiwindow. [CHAR LIMIT=NONE] -->
-    <string name="recents_drag_hint_message">Drag here to use split screen</string>
     <!-- Recents: Text that shows above the navigation bar after launching a few apps. [CHAR LIMIT=NONE] -->
     <string name="recents_swipe_up_onboarding">Swipe up to switch apps</string>
     <!-- Recents: Text that shows above the navigation bar after launching several apps. [CHAR LIMIT=NONE] -->
     <string name="recents_quick_scrub_onboarding">Drag right to quickly switch apps</string>
-
-    <!-- Recents: MultiStack add stack split horizontal radio button. [CHAR LIMIT=NONE] -->
-    <string name="recents_multistack_add_stack_dialog_split_horizontal">Split Horizontal</string>
-    <!-- Recents: MultiStack add stack split vertical radio button. [CHAR LIMIT=NONE] -->
-    <string name="recents_multistack_add_stack_dialog_split_vertical">Split Vertical</string>
-    <!-- Recents: MultiStack add stack split custom radio button. [CHAR LIMIT=NONE] -->
-    <string name="recents_multistack_add_stack_dialog_split_custom">Split Custom</string>
-    <!-- Recents: Accessibility split to the top -->
-    <string name="recents_accessibility_split_screen_top">Split screen to the top</string>
-    <!-- Recents: Accessibility split to the left -->
-    <string name="recents_accessibility_split_screen_left">Split screen to the left</string>
-    <!-- Recents: Accessibility split to the right -->
-    <string name="recents_accessibility_split_screen_right">Split screen to the right</string>
-
     <!-- QuickStep: Accessibility to toggle overview [CHAR LIMIT=40] -->
     <string name="quick_step_accessibility_toggle_overview">Toggle Overview</string>
 

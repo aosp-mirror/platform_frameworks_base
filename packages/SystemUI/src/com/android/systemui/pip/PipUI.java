@@ -24,8 +24,6 @@ import android.content.res.Configuration;
 import android.os.UserHandle;
 import android.os.UserManager;
 import com.android.systemui.SystemUI;
-import com.android.systemui.recents.events.EventBus;
-import com.android.systemui.recents.events.component.ExpandPipEvent;
 import com.android.systemui.statusbar.CommandQueue;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
@@ -68,7 +66,11 @@ public class PipUI extends SystemUI implements CommandQueue.Callbacks {
     }
 
     public void expandPip() {
-        EventBus.getDefault().send(new ExpandPipEvent());
+        mPipManager.expandPip();
+    }
+
+    public void hidePipMenu(Runnable onStartCallback, Runnable onEndCallback) {
+        mPipManager.hidePipMenu(onStartCallback, onEndCallback);
     }
 
     @Override

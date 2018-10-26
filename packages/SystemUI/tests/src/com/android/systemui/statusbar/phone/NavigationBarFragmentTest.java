@@ -27,7 +27,7 @@ import android.view.WindowManager;
 
 import com.android.systemui.Dependency;
 
-import com.android.systemui.OverviewProxyService;
+import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.SysuiBaseFragmentTest;
 import com.android.systemui.recents.Recents;
 import com.android.systemui.stackdivider.Divider;

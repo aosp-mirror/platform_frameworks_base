@@ -44,8 +44,8 @@ import com.android.systemui.Interpolators;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.systemui.R;
-import com.android.systemui.recents.misc.SysUiTaskStackChangeListener;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
+import com.android.systemui.shared.system.TaskStackChangeListener;
 import com.android.systemui.statusbar.policy.KeyButtonDrawable;
 import com.android.systemui.statusbar.policy.RotationLockController;
 
@@ -400,7 +400,7 @@ public class RotationContextButton extends ContextualButton {
         }
     }
 
-    private class TaskStackListenerImpl extends SysUiTaskStackChangeListener {
+    private class TaskStackListenerImpl extends TaskStackChangeListener {
         // Invalidate any rotation suggestion on task change or activity orientation change
         // Note: all callbacks happen on main thread
 

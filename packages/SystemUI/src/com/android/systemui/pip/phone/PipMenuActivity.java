@@ -72,8 +72,6 @@ import android.widget.LinearLayout;
 
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
-import com.android.systemui.recents.events.EventBus;
-import com.android.systemui.recents.events.component.HidePipMenuEvent;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -151,7 +149,7 @@ public class PipMenuActivity extends Activity {
                     cancelDelayedFinish();
                     break;
                 case MESSAGE_HIDE_MENU:
-                    hideMenu();
+                    hideMenu((Runnable) msg.obj);
                     break;
                 case MESSAGE_UPDATE_ACTIONS: {
                     final Bundle data = (Bundle) msg.obj;
@@ -275,7 +273,6 @@ public class PipMenuActivity extends Activity {
         super.onStop();
 
         cancelDelayedFinish();
-        EventBus.getDefault().unregister(this);
     }
 
     @Override
@@ -335,19 +332,6 @@ public class PipMenuActivity extends Activity {
         // Do nothing
     }
 
-    public final void onBusEvent(HidePipMenuEvent event) {
-        if (mMenuState != MENU_STATE_NONE) {
-            // If the menu is visible in either the closed or full state, then hide the menu and
-            // trigger the animation trigger afterwards
-            event.getAnimationTrigger().increment();
-            hideMenu(() -> {
-                mHandler.post(() -> {
-                    event.getAnimationTrigger().decrement();
-                });
-            }, true /* notifyMenuVisibility */, false /* isDismissing */);
-        }
-    }
-
     private void showMenu(int menuState, Rect stackBounds, Rect movementBounds,
             boolean allowMenuTimeout, boolean resizeMenuOnShow) {
         mAllowMenuTimeout = allowMenuTimeout;
@@ -398,8 +382,11 @@ public class PipMenuActivity extends Activity {
     }
 
     private void hideMenu() {
-        hideMenu(null /* animationFinishedRunnable */, true /* notifyMenuVisibility */,
-                false /* isDismissing */);
+        hideMenu(null);
+    }
+
+    private void hideMenu(Runnable animationEndCallback) {
+        hideMenu(animationEndCallback, true /* notifyMenuVisibility */, false /* isDismissing */);
     }
 
     private void hideMenu(final Runnable animationFinishedRunnable, boolean notifyMenuVisibility,
@@ -449,9 +436,6 @@ public class PipMenuActivity extends Activity {
             return;
         }
         notifyActivityCallback(mMessenger);
-
-        // Register for HidePipMenuEvents once we notify the controller of this activity
-        EventBus.getDefault().register(this);
 
         ParceledListSlice actions = intent.getParcelableExtra(EXTRA_ACTIONS);
         if (actions != null) {

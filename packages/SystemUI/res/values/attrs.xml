@@ -30,12 +30,6 @@
     <declare-styleable name="NotificationLinearLayout">
         <attr name="insetLeft" format="dimension" />
     </declare-styleable>
-    <declare-styleable name="RecentsPanelView">
-        <attr name="recentItemLayout" format="reference" />
-        <!-- Style for the "Clear all" button. -->
-        <attr name="clearAllStyle" format="reference" />
-        <attr name="clearAllBackgroundColor" format="reference" />
-    </declare-styleable>
     <declare-styleable name="DeadZone">
         <attr name="minSize" format="dimension" />
         <attr name="maxSize" format="dimension" />
