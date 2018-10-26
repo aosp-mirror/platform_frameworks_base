@@ -39,17 +39,17 @@ public class InternalGroupCallSessionCallback extends IMbmsGroupCallSessionCallb
             return;
         }
 
-        mExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
-                long token = Binder.clearCallingIdentity();
-                try {
+        long token = Binder.clearCallingIdentity();
+        try {
+            mExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
                     mAppCallback.onError(errorCode, message);
-                } finally {
-                    Binder.restoreCallingIdentity(token);
                 }
-            }
-        });
+            });
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
     @Override
@@ -58,17 +58,17 @@ public class InternalGroupCallSessionCallback extends IMbmsGroupCallSessionCallb
             return;
         }
 
-        mExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
-                long token = Binder.clearCallingIdentity();
-                try {
+        long token = Binder.clearCallingIdentity();
+        try {
+            mExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
                     mAppCallback.onAvailableSaisUpdated(currentSais, availableSais);
-                } finally {
-                    Binder.restoreCallingIdentity(token);
                 }
-            }
-        });
+            });
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
     @Override
@@ -77,17 +77,17 @@ public class InternalGroupCallSessionCallback extends IMbmsGroupCallSessionCallb
             return;
         }
 
-        mExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
-                long token = Binder.clearCallingIdentity();
-                try {
+        long token = Binder.clearCallingIdentity();
+        try {
+            mExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
                     mAppCallback.onServiceInterfaceAvailable(interfaceName, index);
-                } finally {
-                    Binder.restoreCallingIdentity(token);
                 }
-            }
-        });
+            });
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
     @Override
@@ -96,17 +96,17 @@ public class InternalGroupCallSessionCallback extends IMbmsGroupCallSessionCallb
             return;
         }
 
-        mExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
-                long token = Binder.clearCallingIdentity();
-                try {
+        long token = Binder.clearCallingIdentity();
+        try {
+            mExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
                     mAppCallback.onMiddlewareReady();
-                } finally {
-                    Binder.restoreCallingIdentity(token);
                 }
-            }
-        });
+            });
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
     /** Prevents this callback from calling the app */
