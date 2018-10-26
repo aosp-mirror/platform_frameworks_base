@@ -36,7 +36,7 @@ public interface NavGesture extends Plugin {
 
         public boolean onInterceptTouchEvent(MotionEvent event);
 
-        public void setBarState(boolean vertical, boolean isRtl);
+        public void setBarState(boolean isRtl, int navBarPosition);
 
         public void onDraw(Canvas canvas);
 
