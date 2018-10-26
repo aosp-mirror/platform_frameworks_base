@@ -172,6 +172,12 @@ public final class ThreadedRenderer extends HardwareRenderer {
      */
     public static final String DEBUG_FPS_DIVISOR = "debug.hwui.fps_divisor";
 
+    /**
+     * Forces smart-dark to be always on.
+     * @hide
+     */
+    public static final String DEBUG_FORCE_DARK = "debug.hwui.force_dark";
+
     public static int EGL_CONTEXT_PRIORITY_HIGH_IMG = 0x3101;
     public static int EGL_CONTEXT_PRIORITY_MEDIUM_IMG = 0x3102;
     public static int EGL_CONTEXT_PRIORITY_LOW_IMG = 0x3103;
