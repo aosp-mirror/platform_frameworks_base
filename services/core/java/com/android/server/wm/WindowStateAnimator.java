@@ -1343,7 +1343,7 @@ class WindowStateAnimator {
         // is running.
         Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "WSA#applyAnimationLocked");
         if (mWin.mToken.okToAnimate()) {
-            int anim = mPolicy.selectAnimationLw(mWin, transit);
+            int anim = mWin.getDisplayContent().getDisplayPolicy().selectAnimationLw(mWin, transit);
             int attr = -1;
             Animation a = null;
             if (anim != 0) {

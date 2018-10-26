@@ -844,9 +844,9 @@ public class DisplayRotation {
         pw.print(prefix + "  mPortraitRotation=" + Surface.rotationToString(mPortraitRotation));
         pw.println(" mUpsideDownRotation=" + Surface.rotationToString(mUpsideDownRotation));
 
-        pw.print(prefix + "  mSupportAutoRotation=" + mSupportAutoRotation);
+        pw.println(prefix + "  mSupportAutoRotation=" + mSupportAutoRotation);
         if (mOrientationListener != null) {
-            pw.print(" mOrientationSensorEnabled=" + mOrientationListener.mEnabled);
+            mOrientationListener.dump(pw, prefix + "  ");
         }
         pw.println();
 

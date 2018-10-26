@@ -97,7 +97,7 @@ message KeyguardServiceDelegateProto {
 message WindowManagerPolicyProto {
     option (.android.msg_privacy).dest = DEST_AUTOMATIC;
 
-    optional int32 last_system_ui_flags = 1;
+    optional int32 last_system_ui_flags = 1 [deprecated=true];
     enum UserRotationMode {
         USER_ROTATION_FREE = 0;
         USER_ROTATION_LOCKED = 1;
@@ -108,18 +108,18 @@ message WindowManagerPolicyProto {
     optional bool screen_on_fully = 5;
     optional bool keyguard_draw_complete = 6;
     optional bool window_manager_draw_complete = 7;
-    optional string focused_app_token = 8;
-    optional IdentifierProto focused_window = 9;
-    optional IdentifierProto top_fullscreen_opaque_window = 10;
-    optional IdentifierProto top_fullscreen_opaque_or_dimming_window = 11;
+    optional string focused_app_token = 8 [deprecated=true];
+    optional IdentifierProto focused_window = 9 [deprecated=true];
+    optional IdentifierProto top_fullscreen_opaque_window = 10 [deprecated=true];
+    optional IdentifierProto top_fullscreen_opaque_or_dimming_window = 11 [deprecated=true];
     optional bool keyguard_occluded = 12;
     optional bool keyguard_occluded_changed = 13;
     optional bool keyguard_occluded_pending = 14;
-    optional bool force_status_bar = 15;
-    optional bool force_status_bar_from_keyguard = 16;
-    optional BarControllerProto status_bar = 17;
-    optional BarControllerProto navigation_bar = 18;
-    optional WindowOrientationListenerProto orientation_listener = 19;
+    optional bool force_status_bar = 15 [deprecated=true];
+    optional bool force_status_bar_from_keyguard = 16 [deprecated=true];
+    optional BarControllerProto status_bar = 17 [deprecated=true];
+    optional BarControllerProto navigation_bar = 18 [deprecated=true];
+    optional WindowOrientationListenerProto orientation_listener = 19 [deprecated=true];
     optional KeyguardServiceDelegateProto keyguard_delegate = 20;
 }
 

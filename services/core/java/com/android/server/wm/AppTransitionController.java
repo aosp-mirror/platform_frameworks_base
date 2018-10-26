@@ -96,14 +96,15 @@ public class AppTransitionController {
         Trace.traceBegin(Trace.TRACE_TAG_WINDOW_MANAGER, "AppTransitionReady");
 
         if (DEBUG_APP_TRANSITIONS) Slog.v(TAG, "**** GOOD TO GO");
-        int transit = mDisplayContent.mAppTransition.getAppTransition();
+        final AppTransition appTransition = mDisplayContent.mAppTransition;
+        int transit = appTransition.getAppTransition();
         if (mDisplayContent.mSkipAppTransitionAnimation && !isKeyguardGoingAwayTransit(transit)) {
             transit = WindowManager.TRANSIT_UNSET;
         }
         mDisplayContent.mSkipAppTransitionAnimation = false;
         mDisplayContent.mNoAnimationNotifyOnTransitionFinished.clear();
 
-        mDisplayContent.mAppTransition.removeAppTransitionTimeoutCallbacks();
+        appTransition.removeAppTransitionTimeoutCallbacks();
 
         mDisplayContent.mWallpaperMayChange = false;
 
@@ -141,7 +142,7 @@ public class AppTransitionController {
         // done behind a dream window.
         final ArraySet<Integer> activityTypes = collectActivityTypes(mDisplayContent.mOpeningApps,
                 mDisplayContent.mClosingApps);
-        final boolean allowAnimations = mService.mPolicy.allowAppAnimationsLw();
+        final boolean allowAnimations = mDisplayContent.getDisplayPolicy().allowAppAnimationsLw();
         final AppWindowToken animLpToken = allowAnimations
                 ? findAnimLayoutParamsToken(transit, activityTypes)
                 : null;
@@ -165,15 +166,15 @@ public class AppTransitionController {
             handleClosingApps(transit, animLp, voiceInteraction);
             handleOpeningApps(transit, animLp, voiceInteraction);
 
-            mDisplayContent.mAppTransition.setLastAppTransition(transit, topOpeningApp,
+            appTransition.setLastAppTransition(transit, topOpeningApp,
                     topClosingApp);
 
-            final int flags = mDisplayContent.mAppTransition.getTransitFlags();
-            layoutRedo = mDisplayContent.mAppTransition.goodToGo(transit, topOpeningApp,
+            final int flags = appTransition.getTransitFlags();
+            layoutRedo = appTransition.goodToGo(transit, topOpeningApp,
                     topClosingApp, mDisplayContent.mOpeningApps, mDisplayContent.mClosingApps);
             handleNonAppWindowsInTransition(transit, flags);
-            mDisplayContent.mAppTransition.postAnimationCallback();
-            mDisplayContent.mAppTransition.clear();
+            appTransition.postAnimationCallback();
+            appTransition.clear();
         } finally {
             mService.mSurfaceAnimationRunner.continueStartingAnimations();
         }
@@ -254,8 +255,8 @@ public class AppTransitionController {
     }
 
     /**
-     * @return The set of {@link WindowConfiguration.ActivityType}s contained in the set of apps in
-     *         {@code array1} and {@code array2}.
+     * @return The set of {@link android.app.WindowConfiguration.ActivityType}s contained in the set
+     *         of apps in {@code array1} and {@code array2}.
      */
     private static ArraySet<Integer> collectActivityTypes(ArraySet<AppWindowToken> array1,
             ArraySet<AppWindowToken> array2) {

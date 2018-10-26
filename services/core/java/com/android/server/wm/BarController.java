@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2013 The Android Open Source Project
+ * Copyright (C) 2018 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package com.android.server.policy;
+package com.android.server.wm;
 
 import static com.android.server.wm.BarControllerProto.STATE;
 import static com.android.server.wm.BarControllerProto.TRANSIENT_STATE;
@@ -30,7 +30,7 @@ import android.view.View;
 import android.view.WindowManager;
 
 import com.android.server.LocalServices;
-import com.android.server.policy.WindowManagerPolicy.WindowState;
+import com.android.server.UiThread;
 import com.android.server.statusbar.StatusBarManagerInternal;
 
 import java.io.PrintWriter;
@@ -59,7 +59,7 @@ public class BarController {
     private final int mTranslucentWmFlag;
     protected final Handler mHandler;
     private final Object mServiceAquireLock = new Object();
-    protected StatusBarManagerInternal mStatusBarInternal;
+    private StatusBarManagerInternal mStatusBarInternal;
 
     protected WindowState mWin;
     private int mState = StatusBarManager.WINDOW_STATE_SHOWING;
@@ -73,7 +73,7 @@ public class BarController {
 
     private OnBarVisibilityChangedListener mVisibilityChangeListener;
 
-    public BarController(String tag, int transientFlag, int unhideFlag, int translucentFlag,
+    BarController(String tag, int transientFlag, int unhideFlag, int translucentFlag,
             int statusBarManagerId, int translucentWmFlag, int transparentFlag) {
         mTag = "BarController." + tag;
         mTransientFlag = transientFlag;
@@ -85,7 +85,7 @@ public class BarController {
         mHandler = new BarHandler();
     }
 
-    public void setWindow(WindowState win) {
+    void setWindow(WindowState win) {
         mWin = win;
     }
 
@@ -94,11 +94,11 @@ public class BarController {
      *
      * This is used to determine if letterboxes interfere with the display of such content.
      */
-    public void setContentFrame(Rect frame) {
+    void setContentFrame(Rect frame) {
         mContentFrame.set(frame);
     }
 
-    public void setShowTransparent(boolean transparent) {
+    void setShowTransparent(boolean transparent) {
         if (transparent != mShowTransparent) {
             mShowTransparent = transparent;
             mSetUnHideFlagWhenNextTransparent = transparent;
@@ -106,27 +106,27 @@ public class BarController {
         }
     }
 
-    public void showTransient() {
+    void showTransient() {
         if (mWin != null) {
             setTransientBarState(TRANSIENT_BAR_SHOW_REQUESTED);
         }
     }
 
-    public boolean isTransientShowing() {
+    boolean isTransientShowing() {
         return mTransientBarState == TRANSIENT_BAR_SHOWING;
     }
 
-    public boolean isTransientShowRequested() {
+    boolean isTransientShowRequested() {
         return mTransientBarState == TRANSIENT_BAR_SHOW_REQUESTED;
     }
 
-    public boolean wasRecentlyTranslucent() {
+    boolean wasRecentlyTranslucent() {
         return (SystemClock.uptimeMillis() - mLastTranslucent) < TRANSLUCENT_ANIMATION_DELAY_MS;
     }
 
-    public void adjustSystemUiVisibilityLw(int oldVis, int vis) {
-        if (mWin != null && mTransientBarState == TRANSIENT_BAR_SHOWING &&
-                (vis & mTransientFlag) == 0) {
+    void adjustSystemUiVisibilityLw(int oldVis, int vis) {
+        if (mWin != null && mTransientBarState == TRANSIENT_BAR_SHOWING
+                && (vis & mTransientFlag) == 0) {
             // sysui requests hide
             setTransientBarState(TRANSIENT_BAR_HIDING);
             setBarShowingLw(false);
@@ -136,7 +136,7 @@ public class BarController {
         }
     }
 
-    public int applyTranslucentFlagLw(WindowState win, int vis, int oldVis) {
+    int applyTranslucentFlagLw(WindowState win, int vis, int oldVis) {
         if (mWin != null) {
             if (win != null && (win.getAttrs().privateFlags
                     & WindowManager.LayoutParams.PRIVATE_FLAG_INHERIT_TRANSLUCENT_DECOR) == 0) {
@@ -164,7 +164,7 @@ public class BarController {
         return win == null || !win.isLetterboxedOverlappingWith(mContentFrame);
     }
 
-    public boolean setBarShowingLw(final boolean show) {
+    boolean setBarShowingLw(final boolean show) {
         if (mWin == null) return false;
         if (show && mTransientBarState == TRANSIENT_BAR_HIDING) {
             mPendingShow = true;
@@ -227,7 +227,7 @@ public class BarController {
                 public void run() {
                     StatusBarManagerInternal statusbar = getStatusBarInternal();
                     if (statusbar != null) {
-                        statusbar.setWindowState(mStatusBarManagerId, state);
+                        statusbar.setWindowState(mWin.getDisplayId(), mStatusBarManagerId, state);
                     }
                 }
             });
@@ -236,7 +236,7 @@ public class BarController {
         return false;
     }
 
-    public boolean checkHiddenLw() {
+    boolean checkHiddenLw() {
         if (mWin != null && mWin.isDrawnLw()) {
             if (!mWin.isVisibleLw() && !mWin.isAnimatingLw()) {
                 updateStateLw(StatusBarManager.WINDOW_STATE_HIDDEN);
@@ -254,7 +254,7 @@ public class BarController {
         return false;
     }
 
-    public boolean checkShowTransientBarLw() {
+    boolean checkShowTransientBarLw() {
         if (mTransientBarState == TRANSIENT_BAR_SHOWING) {
             if (DEBUG) Slog.d(mTag, "Not showing transient bar, already shown");
             return false;
@@ -272,7 +272,7 @@ public class BarController {
         }
     }
 
-    public int updateVisibilityLw(boolean transientAllowed, int oldVis, int vis) {
+    int updateVisibilityLw(boolean transientAllowed, int oldVis, int vis) {
         if (mWin == null) return vis;
         if (isTransientShowing() || isTransientShowRequested()) { // transient bar requested
             if (transientAllowed) {
@@ -296,8 +296,8 @@ public class BarController {
             vis |= mTransientFlag;  // ignore clear requests until transition completes
             vis &= ~View.SYSTEM_UI_FLAG_LOW_PROFILE;  // never show transient bars in low profile
         }
-        if ((vis & mTranslucentFlag) != 0 || (oldVis & mTranslucentFlag) != 0 ||
-                ((vis | oldVis) & mTransparentFlag) != 0) {
+        if ((vis & mTranslucentFlag) != 0 || (oldVis & mTranslucentFlag) != 0
+                || ((vis | oldVis) & mTransparentFlag) != 0) {
             mLastTranslucent = SystemClock.uptimeMillis();
         }
         return vis;
@@ -330,14 +330,14 @@ public class BarController {
         throw new IllegalArgumentException("Unknown state " + state);
     }
 
-    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+    void writeToProto(ProtoOutputStream proto, long fieldId) {
         final long token = proto.start(fieldId);
         proto.write(STATE, mState);
         proto.write(TRANSIENT_STATE, mTransientBarState);
         proto.end(token);
     }
 
-    public void dump(PrintWriter pw, String prefix) {
+    void dump(PrintWriter pw, String prefix) {
         if (mWin != null) {
             pw.print(prefix); pw.println(mTag);
             pw.print(prefix); pw.print("  "); pw.print("mState"); pw.print('=');
@@ -349,6 +349,10 @@ public class BarController {
     }
 
     private class BarHandler extends Handler {
+        BarHandler() {
+            super(UiThread.getHandler().getLooper());
+        }
+
         @Override
         public void handleMessage(Message msg) {
             switch (msg.what) {

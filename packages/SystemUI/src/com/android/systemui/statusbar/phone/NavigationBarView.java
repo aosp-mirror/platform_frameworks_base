@@ -904,6 +904,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         boolean isRtl = (getLayoutDirection() == View.LAYOUT_DIRECTION_RTL);
         int navBarPos = 0;
         try {
+            // TODO: Use WindowManagerService.getNavBarPosition(int displayId)
             navBarPos = WindowManagerGlobal.getWindowManagerService().getNavBarPosition();
         } catch (RemoteException e) {
             Slog.e(TAG, "Failed to get nav bar position.", e);

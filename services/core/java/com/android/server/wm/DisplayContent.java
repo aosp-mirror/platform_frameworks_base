@@ -156,6 +156,7 @@ import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 import android.view.SurfaceSession;
+import android.view.View;
 import android.view.WindowManager;
 import android.view.WindowManagerPolicyConstants.PointerEventListener;
 
@@ -182,9 +183,6 @@ import java.util.function.Predicate;
 /**
  * Utility class for keeping track of the WindowStates and other pertinent contents of a
  * particular Display.
- *
- * IMPORTANT: No method from this class should ever be used without holding
- * WindowManagerService.mWindowMap.
  */
 class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowContainer>
         implements WindowManagerPolicy.DisplayContentInfo {
@@ -289,7 +287,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * @see WindowManagerService#createWatermarkInTransaction()
      */
     final DisplayMetrics mRealDisplayMetrics = new DisplayMetrics();
-    /** @see #computeCompatSmallestWidth(boolean, int, int, int, int) */
+
+    /** @see #computeCompatSmallestWidth(boolean, int, int, int, DisplayCutout) */
     private final DisplayMetrics mTmpDisplayMetrics = new DisplayMetrics();
 
     /**
@@ -508,6 +507,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
     private final PointerEventDispatcher mPointerEventDispatcher;
 
+    // Last systemUiVisibility we received from status bar.
+    private int mLastStatusBarVisibility = 0;
+    // Last systemUiVisibility we dispatched to windows.
+    private int mLastDispatchedSystemUiVisibility = 0;
+
     private final Consumer<WindowState> mUpdateWindowsForAnimator = w -> {
         WindowStateAnimator winAnimator = w.mWinAnimator;
         final AppWindowToken atoken = w.mAppToken;
@@ -649,7 +653,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 w.mLayoutNeeded = false;
                 w.prelayout();
                 final boolean firstLayout = !w.isLaidOut();
-                mService.mPolicy.layoutWindowLw(w, null, mDisplayFrames);
+                getDisplayPolicy().layoutWindowLw(w, null, mDisplayFrames);
                 w.mLayoutSeq = mLayoutSeq;
 
                 // If this is the first layout, we need to initialize the last inset values as
@@ -688,7 +692,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 }
                 w.mLayoutNeeded = false;
                 w.prelayout();
-                mService.mPolicy.layoutWindowLw(w, w.getParentWindow(), mDisplayFrames);
+                getDisplayPolicy().layoutWindowLw(w, w.getParentWindow(), mDisplayFrames);
                 w.mLayoutSeq = mLayoutSeq;
                 if (DEBUG_LAYOUT) Slog.v(TAG, " LAYOUT: mFrame=" + w.getFrameLw()
                         + " mContainingFrame=" + w.getContainingFrame()
@@ -708,7 +712,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     };
 
     private final Consumer<WindowState> mApplyPostLayoutPolicy =
-            w -> mService.mPolicy.applyPostLayoutPolicyLw(w, w.mAttrs, w.getParentWindow(),
+            w -> getDisplayPolicy().applyPostLayoutPolicyLw(w, w.mAttrs, w.getParentWindow(),
                     mInputMethodTarget);
 
     private final Consumer<WindowState> mApplySurfaceChangesTransaction = w -> {
@@ -838,15 +842,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         mDisplayFrames = new DisplayFrames(mDisplayId, mDisplayInfo,
                 calculateDisplayCutoutForRotation(mDisplayInfo.rotation));
         initializeDisplayBaseInfo();
-        mDisplayPolicy = new DisplayPolicy(service);
-        mDisplayRotation = new DisplayRotation(service, this);
-        if (isDefaultDisplay) {
-            // The policy may be invoked right after here, so it requires the necessary default
-            // fields of this display content.
-            mService.mPolicy.setDefaultDisplay(this);
-        }
-        mDividerControllerLocked = new DockedStackDividerController(service, this);
-        mPinnedStackControllerLocked = new PinnedStackController(service, this);
 
         mAppTransition = new AppTransition(service.mContext, service, this);
         mAppTransition.registerListenerLocked(service.mActivityManagerAppTransitionNotifier);
@@ -856,6 +851,30 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         AnimationHandler animationHandler = new AnimationHandler();
         mBoundsAnimationController = new BoundsAnimationController(service.mContext,
                 mAppTransition, SurfaceAnimationThread.getHandler(), animationHandler);
+
+        if (mService.mInputManager != null) {
+            final InputChannel inputChannel = mService.mInputManager.monitorInput("Display "
+                    + mDisplayId, mDisplayId);
+            mPointerEventDispatcher = inputChannel != null
+                    ? new PointerEventDispatcher(inputChannel) : null;
+        } else {
+            mPointerEventDispatcher = null;
+        }
+        mDisplayPolicy = new DisplayPolicy(service, this);
+        mDisplayRotation = new DisplayRotation(service, this);
+        if (isDefaultDisplay) {
+            // The policy may be invoked right after here, so it requires the necessary default
+            // fields of this display content.
+            mService.mPolicy.setDefaultDisplay(this);
+        }
+        if (mService.mDisplayReady) {
+            mDisplayPolicy.onConfigurationChanged();
+        }
+        if (mService.mSystemReady) {
+            mDisplayPolicy.systemReady();
+        }
+        mDividerControllerLocked = new DockedStackDividerController(service, this);
+        mPinnedStackControllerLocked = new PinnedStackController(service, this);
 
         // We use this as our arbitrary surface size for buffer-less parents
         // that don't impose cropping on their children. It may need to be larger
@@ -895,15 +914,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         mService.mAnimator.addDisplayLocked(mDisplayId);
         mInputMonitor = new InputMonitor(service, mDisplayId);
-
-        if (mService.mInputManager != null) {
-            final InputChannel inputChannel = mService.mInputManager.monitorInput("Display "
-                    + mDisplayId, mDisplayId);
-            mPointerEventDispatcher = inputChannel != null
-                    ? new PointerEventDispatcher(inputChannel) : null;
-        } else {
-            mPointerEventDispatcher = null;
-        }
     }
 
     boolean isReady() {
@@ -1223,7 +1233,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         if (DEBUG_ORIENTATION) Slog.v(TAG_WM, "Computed rotation=" + rotation + " for display id="
                 + mDisplayId + " based on lastOrientation=" + lastOrientation
                 + " and oldRotation=" + oldRotation);
-        boolean mayRotateSeamlessly = mService.mPolicy.shouldRotateSeamlessly(mDisplayRotation,
+        boolean mayRotateSeamlessly = mDisplayPolicy.shouldRotateSeamlessly(mDisplayRotation,
                 oldRotation, rotation);
 
         if (mayRotateSeamlessly) {
@@ -1286,7 +1296,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         setLayoutNeeded();
         final int[] anim = new int[2];
-        mService.mPolicy.selectRotationAnimationLw(anim);
+        mDisplayPolicy.selectRotationAnimationLw(anim);
 
         if (!rotateSeamlessly) {
             mService.startFreezingDisplayLocked(anim[0], anim[1], this);
@@ -1445,10 +1455,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         final WmDisplayCutout wmDisplayCutout = calculateDisplayCutoutForRotation(mRotation);
         final DisplayCutout displayCutout = wmDisplayCutout.getDisplayCutout();
 
-        final int appWidth = mService.mPolicy.getNonDecorDisplayWidth(dw, dh, mRotation, uiMode,
-                mDisplayId, displayCutout);
-        final int appHeight = mService.mPolicy.getNonDecorDisplayHeight(dw, dh, mRotation, uiMode,
-                mDisplayId, displayCutout);
+        final int appWidth = mDisplayPolicy.getNonDecorDisplayWidth(dw, dh, mRotation, uiMode,
+                displayCutout);
+        final int appHeight = mDisplayPolicy.getNonDecorDisplayHeight(dw, dh, mRotation, uiMode,
+                displayCutout);
         mDisplayInfo.rotation = mRotation;
         mDisplayInfo.logicalWidth = dw;
         mDisplayInfo.logicalHeight = dh;
@@ -1527,13 +1537,13 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         final float density = mDisplayMetrics.density;
         config.screenWidthDp =
-                (int)(mService.mPolicy.getConfigDisplayWidth(dw, dh, displayInfo.rotation,
-                        config.uiMode, mDisplayId, displayInfo.displayCutout) / density);
+                (int)(mDisplayPolicy.getConfigDisplayWidth(dw, dh, displayInfo.rotation,
+                        config.uiMode, displayInfo.displayCutout) / density);
         config.screenHeightDp =
-                (int)(mService.mPolicy.getConfigDisplayHeight(dw, dh, displayInfo.rotation,
-                        config.uiMode, mDisplayId, displayInfo.displayCutout) / density);
+                (int)(mDisplayPolicy.getConfigDisplayHeight(dw, dh, displayInfo.rotation,
+                        config.uiMode, displayInfo.displayCutout) / density);
 
-        mService.mPolicy.getNonDecorInsetsLw(displayInfo.rotation, dw, dh,
+        mDisplayPolicy.getNonDecorInsetsLw(displayInfo.rotation, dw, dh,
                 displayInfo.displayCutout, mTmpRect);
         final int leftInset = mTmpRect.left;
         final int topInset = mTmpRect.top;
@@ -1544,8 +1554,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         final boolean rotated = (displayInfo.rotation == Surface.ROTATION_90
                 || displayInfo.rotation == Surface.ROTATION_270);
 
-        computeSizeRangesAndScreenLayout(displayInfo, mDisplayId, rotated, config.uiMode, dw, dh,
-                density, config);
+        computeSizeRangesAndScreenLayout(displayInfo, rotated, config.uiMode, dw, dh, density,
+                config);
 
         config.screenLayout = (config.screenLayout & ~Configuration.SCREENLAYOUT_ROUND_MASK)
                 | ((displayInfo.flags & Display.FLAG_ROUND) != 0
@@ -1555,7 +1565,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         config.compatScreenWidthDp = (int)(config.screenWidthDp / mCompatibleScreenScale);
         config.compatScreenHeightDp = (int)(config.screenHeightDp / mCompatibleScreenScale);
         config.compatSmallestScreenWidthDp = computeCompatSmallestWidth(rotated, config.uiMode, dw,
-                dh, displayInfo.displayCutout, mDisplayId);
+                dh, displayInfo.displayCutout);
         config.densityDpi = displayInfo.logicalDensityDpi;
 
         config.colorMode =
@@ -1624,6 +1634,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             mService.mH.sendEmptyMessage(WindowManagerService.H.REPORT_HARD_KEYBOARD_STATUS_CHANGE);
         }
 
+        mDisplayPolicy.updateConfigurationDependentBehaviors();
+
         // Let the policy update hidden states.
         config.keyboardHidden = Configuration.KEYBOARDHIDDEN_NO;
         config.hardKeyboardHidden = Configuration.HARDKEYBOARDHIDDEN_NO;
@@ -1632,7 +1644,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     private int computeCompatSmallestWidth(boolean rotated, int uiMode, int dw, int dh,
-            DisplayCutout displayCutout, int displayId) {
+            DisplayCutout displayCutout) {
         mTmpDisplayMetrics.setTo(mDisplayMetrics);
         final DisplayMetrics tmpDm = mTmpDisplayMetrics;
         final int unrotDw, unrotDh;
@@ -1644,22 +1656,22 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             unrotDh = dh;
         }
         int sw = reduceCompatConfigWidthSize(0, Surface.ROTATION_0, uiMode, tmpDm, unrotDw, unrotDh,
-                displayCutout, displayId);
+                displayCutout);
         sw = reduceCompatConfigWidthSize(sw, Surface.ROTATION_90, uiMode, tmpDm, unrotDh, unrotDw,
-                displayCutout, displayId);
+                displayCutout);
         sw = reduceCompatConfigWidthSize(sw, Surface.ROTATION_180, uiMode, tmpDm, unrotDw, unrotDh,
-                displayCutout, displayId);
+                displayCutout);
         sw = reduceCompatConfigWidthSize(sw, Surface.ROTATION_270, uiMode, tmpDm, unrotDh, unrotDw,
-                displayCutout, displayId);
+                displayCutout);
         return sw;
     }
 
     private int reduceCompatConfigWidthSize(int curSize, int rotation, int uiMode,
-            DisplayMetrics dm, int dw, int dh, DisplayCutout displayCutout, int displayId) {
-        dm.noncompatWidthPixels = mService.mPolicy.getNonDecorDisplayWidth(dw, dh, rotation, uiMode,
-                displayId, displayCutout);
-        dm.noncompatHeightPixels = mService.mPolicy.getNonDecorDisplayHeight(dw, dh, rotation,
-                uiMode, displayId, displayCutout);
+            DisplayMetrics dm, int dw, int dh, DisplayCutout displayCutout) {
+        dm.noncompatWidthPixels = mDisplayPolicy.getNonDecorDisplayWidth(dw, dh, rotation, uiMode,
+                displayCutout);
+        dm.noncompatHeightPixels = mDisplayPolicy.getNonDecorDisplayHeight(dw, dh, rotation, uiMode,
+                displayCutout);
         float scale = CompatibilityInfo.computeCompatibleScaling(dm, null);
         int size = (int)(((dm.noncompatWidthPixels / scale) / dm.density) + .5f);
         if (curSize == 0 || size < curSize) {
@@ -1668,8 +1680,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         return curSize;
     }
 
-    private void computeSizeRangesAndScreenLayout(DisplayInfo displayInfo, int displayId,
-            boolean rotated, int uiMode, int dw, int dh, float density, Configuration outConfig) {
+    private void computeSizeRangesAndScreenLayout(DisplayInfo displayInfo, boolean rotated,
+            int uiMode, int dw, int dh, float density, Configuration outConfig) {
 
         // We need to determine the smallest width that will occur under normal
         // operation.  To this, start with the base screen size and compute the
@@ -1687,34 +1699,28 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         displayInfo.smallestNominalAppHeight = 1<<30;
         displayInfo.largestNominalAppWidth = 0;
         displayInfo.largestNominalAppHeight = 0;
-        adjustDisplaySizeRanges(displayInfo, displayId, Surface.ROTATION_0, uiMode, unrotDw,
-                unrotDh);
-        adjustDisplaySizeRanges(displayInfo, displayId, Surface.ROTATION_90, uiMode, unrotDh,
-                unrotDw);
-        adjustDisplaySizeRanges(displayInfo, displayId, Surface.ROTATION_180, uiMode, unrotDw,
-                unrotDh);
-        adjustDisplaySizeRanges(displayInfo, displayId, Surface.ROTATION_270, uiMode, unrotDh,
-                unrotDw);
+        adjustDisplaySizeRanges(displayInfo, Surface.ROTATION_0, uiMode, unrotDw, unrotDh);
+        adjustDisplaySizeRanges(displayInfo, Surface.ROTATION_90, uiMode, unrotDh, unrotDw);
+        adjustDisplaySizeRanges(displayInfo, Surface.ROTATION_180, uiMode, unrotDw, unrotDh);
+        adjustDisplaySizeRanges(displayInfo, Surface.ROTATION_270, uiMode, unrotDh, unrotDw);
         int sl = Configuration.resetScreenLayout(outConfig.screenLayout);
         sl = reduceConfigLayout(sl, Surface.ROTATION_0, density, unrotDw, unrotDh, uiMode,
-                displayInfo.displayCutout, displayId);
+                displayInfo.displayCutout);
         sl = reduceConfigLayout(sl, Surface.ROTATION_90, density, unrotDh, unrotDw, uiMode,
-                displayInfo.displayCutout, displayId);
+                displayInfo.displayCutout);
         sl = reduceConfigLayout(sl, Surface.ROTATION_180, density, unrotDw, unrotDh, uiMode,
-                displayInfo.displayCutout, displayId);
+                displayInfo.displayCutout);
         sl = reduceConfigLayout(sl, Surface.ROTATION_270, density, unrotDh, unrotDw, uiMode,
-                displayInfo.displayCutout, displayId);
+                displayInfo.displayCutout);
         outConfig.smallestScreenWidthDp = (int)(displayInfo.smallestNominalAppWidth / density);
         outConfig.screenLayout = sl;
     }
 
     private int reduceConfigLayout(int curLayout, int rotation, float density, int dw, int dh,
-            int uiMode, DisplayCutout displayCutout, int displayId) {
+            int uiMode, DisplayCutout displayCutout) {
         // Get the app screen size at this rotation.
-        int w = mService.mPolicy.getNonDecorDisplayWidth(dw, dh, rotation, uiMode, displayId,
-                displayCutout);
-        int h = mService.mPolicy.getNonDecorDisplayHeight(dw, dh, rotation, uiMode, displayId,
-                displayCutout);
+        int w = mDisplayPolicy.getNonDecorDisplayWidth(dw, dh, rotation, uiMode, displayCutout);
+        int h = mDisplayPolicy.getNonDecorDisplayHeight(dw, dh, rotation, uiMode, displayCutout);
 
         // Compute the screen layout size class for this rotation.
         int longSize = w;
@@ -1729,20 +1735,20 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         return Configuration.reduceScreenLayout(curLayout, longSize, shortSize);
     }
 
-    private void adjustDisplaySizeRanges(DisplayInfo displayInfo, int displayId, int rotation,
+    private void adjustDisplaySizeRanges(DisplayInfo displayInfo, int rotation,
             int uiMode, int dw, int dh) {
         final DisplayCutout displayCutout = calculateDisplayCutoutForRotation(
                 rotation).getDisplayCutout();
-        final int width = mService.mPolicy.getConfigDisplayWidth(dw, dh, rotation, uiMode,
-                displayId, displayCutout);
+        final int width = mDisplayPolicy.getConfigDisplayWidth(dw, dh, rotation, uiMode,
+                displayCutout);
         if (width < displayInfo.smallestNominalAppWidth) {
             displayInfo.smallestNominalAppWidth = width;
         }
         if (width > displayInfo.largestNominalAppWidth) {
             displayInfo.largestNominalAppWidth = width;
         }
-        final int height = mService.mPolicy.getConfigDisplayHeight(dw, dh, rotation, uiMode,
-                displayId, displayCutout);
+        final int height = mDisplayPolicy.getConfigDisplayHeight(dw, dh, rotation, uiMode,
+                displayCutout);
         if (height < displayInfo.smallestNominalAppHeight) {
             displayInfo.smallestNominalAppHeight = height;
         }
@@ -1887,6 +1893,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     @Override
     public void onConfigurationChanged(Configuration newParentConfig) {
         super.onConfigurationChanged(newParentConfig);
+        if (mDisplayPolicy != null) {
+            mDisplayPolicy.onConfigurationChanged();
+        }
 
         // If there was no pinned stack, we still need to notify the controller of the display info
         // update as a result of the config change.
@@ -2383,7 +2392,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             mDisplayReady = false;
             mRemovingDisplay = false;
         }
-
+        mDisplayPolicy.onDisplayRemoved();
         mInputMonitor.onRemoved();
         mService.mWindowPlacerLocked.requestTraversal();
     }
@@ -2659,6 +2668,10 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             }
         }
         pw.print("  mFocusedApp="); pw.println(mFocusedApp);
+        if (mLastStatusBarVisibility != 0) {
+            pw.print("  mLastStatusBarVisibility=0x");
+            pw.println(Integer.toHexString(mLastStatusBarVisibility));
+        }
 
         pw.println();
         mWallpaperController.dump(pw, "  ");
@@ -2852,9 +2865,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             }
         }
 
-        // System UI is only shown on the default display.
-        int focusChanged = isDefaultDisplay
-                ? mService.mPolicy.focusChangedLw(oldFocus, newFocus) : 0;
+        int focusChanged = getDisplayPolicy().focusChangedLw(oldFocus, newFocus);
 
         if (imWindowChanged && oldFocus != mInputMethodWindow) {
             // Focus of the input method window changed. Perform layout if needed.
@@ -3321,6 +3332,31 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         return win != null;
     }
 
+    void statusBarVisibilityChanged(int visibility) {
+        mLastStatusBarVisibility = visibility;
+        visibility = getDisplayPolicy().adjustSystemUiVisibilityLw(visibility);
+        updateStatusBarVisibilityLocked(visibility);
+    }
+
+    private boolean updateStatusBarVisibilityLocked(int visibility) {
+        if (mLastDispatchedSystemUiVisibility == visibility) {
+            return false;
+        }
+        final int globalDiff = (visibility ^ mLastDispatchedSystemUiVisibility)
+                // We are only interested in differences of one of the
+                // clearable flags...
+                & View.SYSTEM_UI_CLEARABLE_FLAGS
+                // ...if it has actually been cleared.
+                & ~visibility;
+
+        mLastDispatchedSystemUiVisibility = visibility;
+        if (isDefaultDisplay) {
+            mService.mInputManager.setSystemUiVisibility(visibility);
+        }
+        updateSystemUiVisibility(visibility, globalDiff);
+        return true;
+    }
+
     void updateSystemUiVisibility(int visibility, int globalDiff) {
         forAllWindows(w -> {
             try {
@@ -3339,6 +3375,13 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 // so sorry
             }
         }, true /* traverseTopToBottom */);
+    }
+
+    void reevaluateStatusBarVisibility() {
+        int visibility = getDisplayPolicy().adjustSystemUiVisibilityLw(mLastStatusBarVisibility);
+        if (updateStatusBarVisibilityLocked(visibility)) {
+            mService.mWindowPlacerLocked.requestTraversal();
+        }
     }
 
     void onWindowFreezeTimeout() {
@@ -3372,9 +3415,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
     // TODO: Super crazy long method that should be broken down...
     void applySurfaceChangesTransaction(boolean recoveringMemory) {
-
-        final int dw = mDisplayInfo.logicalWidth;
-        final int dh = mDisplayInfo.logicalHeight;
         final WindowSurfacePlacer surfacePlacer = mService.mWindowPlacerLocked;
 
         mTmpUpdateAllDrawn.clear();
@@ -3417,13 +3457,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             // FIRST AND ONE HALF LOOP: Make WindowManagerPolicy think it is animating.
             pendingLayoutChanges = 0;
 
-            if (isDefaultDisplay) {
-                mService.mPolicy.beginPostLayoutPolicyLw(dw, dh);
-                forAllWindows(mApplyPostLayoutPolicy, true /* traverseTopToBottom */);
-                pendingLayoutChanges |= mService.mPolicy.finishPostLayoutPolicyLw();
-                if (DEBUG_LAYOUT_REPEATS) surfacePlacer.debugLayoutRepeats(
-                        "after finishPostLayoutPolicyLw", pendingLayoutChanges);
-            }
+            mDisplayPolicy.beginPostLayoutPolicyLw();
+            forAllWindows(mApplyPostLayoutPolicy, true /* traverseTopToBottom */);
+            pendingLayoutChanges |= mDisplayPolicy.finishPostLayoutPolicyLw();
+            if (DEBUG_LAYOUT_REPEATS) surfacePlacer.debugLayoutRepeats(
+                    "after finishPostLayoutPolicyLw", pendingLayoutChanges);
         } while (pendingLayoutChanges != 0);
 
         mTmpApplySurfaceChangesTransactionState.reset();
@@ -3513,12 +3551,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         // TODO: Not sure if we really need to set the rotation here since we are updating from the
         // display info above...
         mDisplayFrames.mRotation = mRotation;
-        mService.mPolicy.beginLayoutLw(mDisplayFrames, getConfiguration().uiMode);
-        if (isDefaultDisplay) {
-            // Not needed on non-default displays.
-            mService.mSystemDecorLayer = mService.mPolicy.getSystemDecorLayerLw();
-            mService.mScreenRect.set(0, 0, dw, dh);
-        }
+        mDisplayPolicy.beginLayoutLw(mDisplayFrames, getConfiguration().uiMode);
 
         int seq = mLayoutSeq + 1;
         if (seq < 0) seq = 0;
@@ -4548,7 +4581,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * However we need child windows of the applications to be above the IME (Text drag handles).
      * This is a non-strictly hierarcical layering and we need to break out of the Z ordering
      * somehow. We do this by relatively ordering children of the target to the IME in cooperation
-     * with {@link #WindowState#assignLayer}
+     * with {@link WindowState#assignLayer}
      */
     void assignRelativeLayerForImeTargetChild(SurfaceControl.Transaction t, WindowContainer child) {
         child.assignRelativeLayer(t, mImeWindowsContainers.getSurfaceControl(), 1);
