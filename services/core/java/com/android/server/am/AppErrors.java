@@ -526,41 +526,29 @@ class AppErrors {
                                                        String shortMsg, String longMsg,
                                                        String stackTrace, long timeMillis,
                                                        int callingPid, int callingUid) {
-        if (mService.mActivityTaskManager.mController == null) {
-            return false;
-        }
+        String name = r != null ? r.processName : null;
+        int pid = r != null ? r.pid : callingPid;
+        int uid = r != null ? r.info.uid : callingUid;
 
-        try {
-            String name = r != null ? r.processName : null;
-            int pid = r != null ? r.pid : callingPid;
-            int uid = r != null ? r.info.uid : callingUid;
-            if (!mService.mActivityTaskManager.mController.appCrashed(name, pid,
-                    shortMsg, longMsg, timeMillis, crashInfo.stackTrace)) {
-                if ("1".equals(SystemProperties.get(SYSTEM_DEBUGGABLE, "0"))
-                        && "Native crash".equals(crashInfo.exceptionClassName)) {
-                    Slog.w(TAG, "Skip killing native crashed app " + name
-                            + "(" + pid + ") during testing");
-                } else {
-                    Slog.w(TAG, "Force-killing crashed app " + name
-                            + " at watcher's request");
-                    if (r != null) {
-                        if (!makeAppCrashingLocked(r, shortMsg, longMsg, stackTrace, null))
-                        {
-                            r.kill("crash", true);
-                        }
-                    } else {
-                        // Huh.
-                        Process.killProcess(pid);
-                        ProcessList.killProcessGroup(uid, pid);
+        return mService.mAtmInternal.handleAppCrashInActivityController(
+                name, pid, shortMsg, longMsg, timeMillis, crashInfo.stackTrace, () -> {
+            if ("1".equals(SystemProperties.get(SYSTEM_DEBUGGABLE, "0"))
+                    && "Native crash".equals(crashInfo.exceptionClassName)) {
+                Slog.w(TAG, "Skip killing native crashed app " + name
+                        + "(" + pid + ") during testing");
+            } else {
+                Slog.w(TAG, "Force-killing crashed app " + name + " at watcher's request");
+                if (r != null) {
+                    if (!makeAppCrashingLocked(r, shortMsg, longMsg, stackTrace, null)) {
+                        r.kill("crash", true);
                     }
+                } else {
+                    // Huh.
+                    Process.killProcess(pid);
+                    ProcessList.killProcessGroup(uid, pid);
                 }
-                return true;
             }
-        } catch (RemoteException e) {
-            mService.mActivityTaskManager.mController = null;
-            Watchdog.getInstance().setActivityController(null);
-        }
-        return false;
+        });
     }
 
     private boolean makeAppCrashingLocked(ProcessRecord app,

@@ -397,7 +397,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     // VoiceInteractionManagerService
     ComponentName mActiveVoiceInteractionServiceComponent;
 
-    private VrController mVrController;
+    VrController mVrController;
     KeyguardController mKeyguardController;
     private final ClientLifecycleManager mLifecycleManager;
     private TaskChangeNotificationController mTaskChangeNotificationController;
@@ -4355,10 +4355,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         mRecentTasks.notifyTaskPersisterLocked(task, flush);
     }
 
-    void onTopProcChangedLocked(WindowProcessController proc) {
-        mVrController.onTopProcChangedLocked(proc);
-    }
-
     boolean isKeyguardLocked() {
         return mKeyguardController.isKeyguardLocked();
     }
@@ -6688,6 +6684,62 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             synchronized (mGlobalLock) {
                 mPendingTempWhitelist.remove(uid);
             }
+        }
+
+        @Override
+        public boolean handleAppCrashInActivityController(String processName, int pid,
+                String shortMsg, String longMsg, long timeMillis, String stackTrace,
+                Runnable killCrashingAppCallback) {
+            synchronized (mGlobalLock) {
+                if (mController == null) {
+                    return false;
+                }
+
+                try {
+                    if (!mController.appCrashed(processName, pid, shortMsg, longMsg, timeMillis,
+                            stackTrace)) {
+                        killCrashingAppCallback.run();
+                        return true;
+                    }
+                } catch (RemoteException e) {
+                    mController = null;
+                    Watchdog.getInstance().setActivityController(null);
+                }
+                return false;
+            }
+        }
+
+        @Override
+        public void removeRecentTasksByPackageName(String packageName, int userId) {
+            synchronized (mGlobalLock) {
+                mRecentTasks.removeTasksByPackageName(packageName, userId);
+            }
+        }
+
+        @Override
+        public void cleanupRecentTasksForUser(int userId) {
+            synchronized (mGlobalLock) {
+                mRecentTasks.cleanupLocked(userId);
+            }
+        }
+
+        @Override
+        public void loadRecentTasksForUser(int userId) {
+            synchronized (mGlobalLock) {
+                mRecentTasks.loadUserRecentsLocked(userId);
+            }
+        }
+
+        @Override
+        public void onPackagesSuspendedChanged(String[] packages, boolean suspended, int userId) {
+            synchronized (mGlobalLock) {
+                mRecentTasks.onPackagesSuspendedChanged(packages, suspended, userId);
+            }
+        }
+
+        @Override
+        public void flushRecentTasks() {
+            mRecentTasks.flush();
         }
     }
 }
