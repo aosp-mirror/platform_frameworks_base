@@ -2229,27 +2229,22 @@ public class SubscriptionManager {
     }
 
     /**
-     * Return opportunistic subscriptions that can be visible to the caller.
-     * Opportunistic subscriptions are for opportunistic networks, which are cellular
-     * networks with limited capabilities and coverage, for example, CBRS.
+     * Get opportunistic data Profiles.
      *
-     * <p>Requires Permission:
-     * {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
-     * or that the calling app has carrier privileges (see
-     * {@link TelephonyManager#hasCarrierPrivileges}).
-     *
-     * @return the list of opportunistic subscription info. If none exists, an empty list.
+     *  Provide all available user downloaded profiles on phone which are used only for
+     *  opportunistic data.
+     *  @param slotIndex slot on which the profiles are queried from.
+     *  @return the list of opportunistic subscription info. If none exists, an empty list. 
      */
-    @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
-    public @NonNull List<SubscriptionInfo> getOpportunisticSubscriptions() {
+    public @NonNull List<SubscriptionInfo> getOpportunisticSubscriptions(int slotIndex) {
         String pkgForDebug = mContext != null ? mContext.getOpPackageName() : "<unknown>";
         List<SubscriptionInfo> subInfoList = null;
 
         try {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
             if (iSub != null) {
-                subInfoList = iSub.getOpportunisticSubscriptions(pkgForDebug);
+                subInfoList = iSub.getOpportunisticSubscriptions(slotIndex, pkgForDebug);
             }
         } catch (RemoteException ex) {
             // ignore it
