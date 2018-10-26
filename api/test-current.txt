@@ -1183,6 +1183,10 @@ package android.telecom {
 
 package android.telephony {
 
+  public class CarrierConfigManager {
+    method public void overrideConfig(int, android.os.PersistableBundle);
+  }
+
   public class MbmsDownloadSession implements java.lang.AutoCloseable {
     field public static final java.lang.String MBMS_DOWNLOAD_SERVICE_OVERRIDE_METADATA = "mbms-download-service-override";
   }

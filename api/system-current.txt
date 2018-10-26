@@ -5286,6 +5286,7 @@ package android.telephony {
 
   public class CarrierConfigManager {
     method public static android.os.PersistableBundle getDefaultConfig();
+    method public void overrideConfig(int, android.os.PersistableBundle);
     method public void updateConfigForPhoneId(int, java.lang.String);
     field public static final java.lang.String KEY_CONFIG_PLANS_PACKAGE_OVERRIDE_STRING = "config_plans_package_override_string";
   }
