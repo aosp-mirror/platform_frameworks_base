@@ -30,7 +30,7 @@ import java.util.List;
  * FeatureProvider for metrics.
  */
 public class MetricsFeatureProvider {
-    private List<LogWriter> mLoggerWriters;
+    protected List<LogWriter> mLoggerWriters;
 
     public MetricsFeatureProvider() {
         mLoggerWriters = new ArrayList<>();
