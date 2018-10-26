@@ -466,4 +466,7 @@ public abstract class ActivityTaskManagerInternal {
 
     public abstract WindowProcessController getHomeProcess();
     public abstract WindowProcessController getPreviousProcess();
+
+    public abstract void clearLockedTasks(String reason);
+    public abstract void updateUserConfiguration();
 }

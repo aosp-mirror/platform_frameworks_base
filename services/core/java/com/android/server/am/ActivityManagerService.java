@@ -5815,16 +5815,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     @Override
     public void updateLockTaskPackages(int userId, String[] packages) {
-        final int callingUid = Binder.getCallingUid();
-        if (callingUid != 0 && callingUid != SYSTEM_UID) {
-            enforceCallingPermission(android.Manifest.permission.UPDATE_LOCK_TASK_PACKAGES,
-                    "updateLockTaskPackages()");
-        }
-        synchronized (this) {
-            if (DEBUG_LOCKTASK) Slog.w(TAG_LOCKTASK, "Whitelisting " + userId + ":" +
-                    Arrays.toString(packages));
-            mActivityTaskManager.getLockTaskController().updateLockTaskPackages(userId, packages);
-        }
+        mActivityTaskManager.updateLockTaskPackages(userId, packages);
     }
 
     @Override
