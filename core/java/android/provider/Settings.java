@@ -7967,6 +7967,14 @@ public final class Settings {
                 "managed_profile_contact_remote_search";
 
         /**
+         * Whether parent profile can access remote calendar data in managed profile.
+         *
+         * @hide
+         */
+        public static final String CROSS_PROFILE_CALENDAR_ENABLED =
+                "cross_profile_calendar_enabled";
+
+        /**
          * Whether or not the automatic storage manager is enabled and should run on the device.
          *
          * @hide
