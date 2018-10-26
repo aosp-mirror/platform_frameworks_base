@@ -337,16 +337,11 @@ public class SystemConfig {
         readPermissions(Environment.buildPath(
                 Environment.getProductDirectory(), "etc", "permissions"), ALLOW_ALL);
 
-        // Allow /product_services to customize system configs around libs, features, permissions
-        // and apps.
-        int productServicesPermissionFlag = ALLOW_LIBS | ALLOW_FEATURES | ALLOW_PERMISSIONS |
-                ALLOW_APP_CONFIGS | ALLOW_PRIVAPP_PERMISSIONS;
+        // Allow /product_services to customize all system configs
         readPermissions(Environment.buildPath(
-                Environment.getProductServicesDirectory(), "etc", "sysconfig"),
-                productServicesPermissionFlag);
+                Environment.getProductServicesDirectory(), "etc", "sysconfig"), ALLOW_ALL);
         readPermissions(Environment.buildPath(
-                Environment.getProductServicesDirectory(), "etc", "permissions"),
-                productServicesPermissionFlag);
+                Environment.getProductServicesDirectory(), "etc", "permissions"), ALLOW_ALL);
     }
 
     void readPermissions(File libraryDir, int permissionFlag) {
