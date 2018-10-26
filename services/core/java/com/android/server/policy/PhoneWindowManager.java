@@ -7861,8 +7861,7 @@ public class PhoneWindowManager implements WindowManagerPolicy {
         // requires freezing various Surface states and won't work well
         // with animations, so we disable it in the animation case for now.
         if (w != null && !w.isAnimatingLw() &&
-                ((w.getAttrs().rotationAnimation == ROTATION_ANIMATION_JUMPCUT) ||
-                        (w.getAttrs().rotationAnimation == ROTATION_ANIMATION_SEAMLESS))) {
+                w.getAttrs().rotationAnimation == ROTATION_ANIMATION_SEAMLESS) {
             return true;
         }
         return false;

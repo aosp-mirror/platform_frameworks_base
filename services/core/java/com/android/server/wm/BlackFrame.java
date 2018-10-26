@@ -16,20 +16,17 @@
 
 package com.android.server.wm;
 
-import static android.graphics.PixelFormat.OPAQUE;
-import static android.view.SurfaceControl.FX_SURFACE_DIM;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_SURFACE_ALLOC;
 import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
-import java.io.PrintWriter;
-
 import android.graphics.Matrix;
-import android.graphics.PixelFormat;
 import android.graphics.Rect;
 import android.util.Slog;
 import android.view.Surface.OutOfResourcesException;
 import android.view.SurfaceControl;
+
+import java.io.PrintWriter;
 
 /**
  * Four black surfaces put together to make a black frame.
@@ -59,6 +56,7 @@ public class BlackFrame {
             transaction.setLayerStack(surface, dc.getDisplayId());
             transaction.setAlpha(surface, 1);
             transaction.setLayer(surface, layer);
+            transaction.setPosition(surface, left, top);
             transaction.show(surface);
             if (SHOW_TRANSACTIONS || SHOW_SURFACE_ALLOC) Slog.i(TAG_WM,
                             "  BLACK " + surface + ": CREATE layer=" + layer);
