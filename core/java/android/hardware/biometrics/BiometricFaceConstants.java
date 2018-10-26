@@ -224,12 +224,25 @@ public interface BiometricFaceConstants {
     public static final int FACE_ACQUIRED_RECALIBRATE = 13;
 
     /**
+     * The face is too different from a previous acquisition. This condition
+     * only applies to enrollment. This can happen if the user passes the
+     * device to someone else in the middle of enrollment.
+     */
+    public static final int FACE_ACQUIRED_TOO_DIFFERENT = 14;
+
+    /**
+     * The face is too similar to a previous acquisition. This condition only
+     * applies to enrollment. The user should change their pose.
+     */
+    public static final int FACE_ACQUIRED_TOO_SIMILAR = 15;
+
+    /**
      * Hardware vendors may extend this list if there are conditions that do not fall under one of
      * the above categories. Vendors are responsible for providing error strings for these errors.
      *
      * @hide
      */
-    public static final int FACE_ACQUIRED_VENDOR = 14;
+    public static final int FACE_ACQUIRED_VENDOR = 16;
 
     /**
      * @hide
