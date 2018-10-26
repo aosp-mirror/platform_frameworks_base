@@ -47,7 +47,7 @@ final class Utils {
 
     static @NonNull Map<String, String> readStringMap(@NonNull Parcel in) {
         int size = in.readInt();
-        Map<String, String> map = new HashMap<>();
+        Map<String, String> map = new HashMap<>(size);
         while (size-- > 0) {
             String key = in.readString();
             String value = in.readString();
@@ -70,7 +70,7 @@ final class Utils {
 
     static @NonNull Map<String, Integer> readStringIntMap(@NonNull Parcel in) {
         int size = in.readInt();
-        Map<String, Integer> map = new HashMap<>();
+        Map<String, Integer> map = new HashMap<>(size);
         while (size-- > 0) {
             String key = in.readString();
             int value = in.readInt();
@@ -90,7 +90,7 @@ final class Utils {
 
     static <T> Set<T> createSet(@NonNull Parcel in, Parcelable.Creator<T> c) {
         int size = in.readInt();
-        Set<T> set = new HashSet<>();
+        Set<T> set = new HashSet<>(size);
         while (size-- > 0) {
             set.add(in.readTypedObject(c));
         }
@@ -107,15 +107,12 @@ final class Utils {
     }
 
     static Set<Integer> createIntSet(@NonNull Parcel in) {
-        return createSet(in, new Parcelable.Creator<Integer>() {
-            public Integer createFromParcel(Parcel in) {
-                return in.readInt();
-            }
-
-            public Integer[] newArray(int size) {
-                return new Integer[size];
-            }
-        });
+        int size = in.readInt();
+        Set<Integer> set = new HashSet<>(size);
+        while (size-- > 0) {
+            set.add(in.readInt());
+        }
+        return set;
     }
 
     static <T extends Parcelable> void writeTypedCollection(@NonNull Parcel dest,
