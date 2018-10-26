@@ -1115,6 +1115,13 @@ public class Typeface {
         }
     }
 
+    private static void registerGenericFamilyNative(@NonNull String familyName,
+            @Nullable Typeface typeface) {
+        if (typeface != null) {
+            nativeRegisterGenericFamily(familyName, typeface.native_instance);
+        }
+    }
+
     static {
         final HashMap<String, Typeface> systemFontMap = new HashMap<>();
         initSystemDefaultTypefaces(systemFontMap, SystemFonts.getRawSystemFallbackMap(),
@@ -1140,6 +1147,15 @@ public class Typeface {
             create((String) null, Typeface.BOLD_ITALIC),
         };
 
+        // A list of generic families to be registered in native.
+        // https://www.w3.org/TR/css-fonts-4/#generic-font-families
+        String[] genericFamilies = {
+            "serif", "sans-serif", "cursive", "fantasy", "monospace", "system-ui"
+        };
+
+        for (String genericFamily : genericFamilies) {
+            registerGenericFamilyNative(genericFamily, systemFontMap.get(genericFamily));
+        }
     }
 
     @Override
@@ -1202,4 +1218,6 @@ public class Typeface {
 
     @CriticalNative
     private static native long nativeGetReleaseFunc();
+
+    private static native void nativeRegisterGenericFamily(String str, long nativePtr);
 }
