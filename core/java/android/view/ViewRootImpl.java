@@ -243,9 +243,10 @@ public final class ViewRootImpl implements ViewParent,
     final Context mContext;
     /**
      * TODO(b/116349163): Check if we can merge this into {@link #mContext}.
+     * @hide
      */
     @NonNull
-    private Context mDisplayContext;
+    public Context mDisplayContext;
 
     @UnsupportedAppUsage
     final IWindowSession mWindowSession;
