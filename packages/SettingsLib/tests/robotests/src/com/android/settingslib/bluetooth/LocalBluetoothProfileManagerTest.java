@@ -78,7 +78,7 @@ public class LocalBluetoothProfileManagerTest {
         mContext = spy(RuntimeEnvironment.application);
         mLocalBluetoothAdapter = LocalBluetoothAdapter.getInstance();
         mEventManager = spy(new BluetoothEventManager(mLocalBluetoothAdapter, mDeviceManager,
-                mContext, null));
+                mContext, /* handler= */ null, /* userHandle= */ null));
         mShadowBluetoothAdapter = Shadow.extract(BluetoothAdapter.getDefaultAdapter());
         when(mDeviceManager.findDevice(mDevice)).thenReturn(mCachedBluetoothDevice);
         when(mCachedBluetoothDevice.getDevice()).thenReturn(mDevice);
