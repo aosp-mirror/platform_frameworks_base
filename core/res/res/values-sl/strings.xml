@@ -298,6 +298,9 @@
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"snemanje zvoka"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"Želite aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; omogočiti snemanje zvoka?"</string>
+    <string name="permgrouplab_activityRecognition" msgid="2838596644535616493">"Prepoznavanje dejavnosti"</string>
+    <string name="permgroupdesc_activityRecognition" msgid="7672248027571522602">"prepoznavanje dejavnosti"</string>
+    <string name="permgrouprequest_activityRecognition" msgid="8121253142311250055">"Želite aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; omogočiti prepoznavanje svoje telesne dejavnosti?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Fotoaparat"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"fotografiranje in snemanje videoposnetkov"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"Želite aplikaciji &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; omogočiti fotografiranje in snemanje videoposnetkov?"</string>
@@ -424,14 +427,16 @@
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Ta aplikacija lahko pridobi vašo lokacijo na podlagi omrežnih virov, kot so bazne postaje in omrežja Wi-Fi. Če želite aplikaciji omogočiti uporabo teh lokacijskih storitev, morajo biti te vklopljene in na voljo v tabličnem računalniku."</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"Ta aplikacija lahko pridobi vašo lokacijo na podlagi omrežnih virov, kot so bazne postaje in omrežja Wi-Fi. Če želite aplikaciji omogočiti uporabo teh lokacijskih storitev, morajo biti te vklopljene in na voljo v televizorju."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"Ta aplikacija lahko pridobi vašo lokacijo na podlagi omrežnih virov, kot so bazne postaje in omrežja Wi-Fi. Če želite aplikaciji omogočiti uporabo teh lokacijskih storitev, morajo biti te vklopljene in na voljo v telefonu."</string>
-    <string name="permlab_accessBackgroundLocation" msgid="5742466381902568536">"dostop do točne lokacije, ko deluje v ozadju"</string>
-    <string name="permdesc_accessBackgroundLocation" msgid="6371533283380774135">"Ta aplikacija lahko pridobi vašo točno lokacijo, ko deluje v ozadju. Če želite aplikaciji omogočiti uporabo teh lokacijskih storitev, morajo biti te vklopljene in na voljo v telefonu. Poraba energije akumulatorja bo morda večja."</string>
+    <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"dostop do lokacije med izvajanjem v ozadju"</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"Če to dovolite poleg dostopa do približne ali natančne lokacije, lahko aplikacija dostopa do lokacije, medtem ko se izvaja v ozadju."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"spreminjanje nastavitev zvoka"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Aplikaciji omogoča spreminjanje splošnih zvočnih nastavitev, na primer glasnost in kateri zvočnik se uporablja."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"snemanje zvoka"</string>
     <string name="permdesc_recordAudio" msgid="4245930455135321433">"Ta aplikacija lahko poljubno uporablja mikrofon za snemanje zvoka."</string>
     <string name="permlab_sim_communication" msgid="2935852302216852065">"pošiljanje ukazov na kartico SIM"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Aplikaciji dovoli pošiljanje ukazov kartici SIM. To je lahko zelo nevarno."</string>
+    <string name="permlab_activityRecognition" msgid="3634590230567608356">"prepoznavanje telesne dejavnosti"</string>
+    <string name="permdesc_activityRecognition" msgid="3143453925156552894">"Ta aplikacija lahko prepoznava vašo telesno dejavnost."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"fotografiranje in snemanje videoposnetkov"</string>
     <string name="permdesc_camera" msgid="5392231870049240670">"Ta aplikacija lahko poljubno uporablja fotoaparat za snemanje fotografij ali videoposnetkov."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"nadzor vibriranja"</string>
@@ -524,6 +529,7 @@
     <string name="permdesc_imagesWrite" msgid="7073662756617474375">"Aplikaciji omogoča spreminjanje zbirke fotografij."</string>
     <string name="permlab_mediaLocation" msgid="8675148183726247864">"branje lokacij v predstavnostni zbirki"</string>
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"Aplikaciji omogoča branje lokacij v predstavnostni zbirki."</string>
+    <string name="biometric_dialog_default_title" msgid="4229778503907743328">"Aplikacija <xliff:g id="APP">%s</xliff:g> želi preveriti pristnost."</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"Strojna oprema za biometrične podatke ni na voljo"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Zaznan delni prstni odtis. Poskusite znova."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Prstnega odtisa ni bilo mogoče obdelati. Poskusite znova."</string>
@@ -669,7 +675,7 @@
     <string name="policydesc_expirePassword" msgid="5367525762204416046">"Spreminjanje tega, kako pogosto je treba spremeniti geslo, kodo PIN ali vzorec za zaklepanje zaslona."</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Nastavitev šifriranja shrambe"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Shranjeni podatki aplikacije morajo biti šifrirani."</string>
-    <string name="policylab_disableCamera" msgid="6395301023152297826">"Onemogoči fotoaparate"</string>
+    <string name="policylab_disableCamera" msgid="6395301023152297826">"Onemogočanje fotoaparatov"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Prepreči uporabo vseh fotoaparatov v napravi."</string>
     <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Onemogočanje nekaterih funkcij zaklepanja zaslona"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Prepreči uporabo nekaterih funkcij zaklepanja zaslona."</string>
@@ -1967,14 +1973,14 @@
       <item quantity="few"><xliff:g id="COUNT">%1$s</xliff:g> predlogi za samodejno izpolnjevanje</item>
       <item quantity="other"><xliff:g id="COUNT">%1$s</xliff:g> predlogov za samodejno izpolnjevanje</item>
     </plurals>
-    <string name="autofill_save_title" msgid="3345527308992082601">"Želite shraniti pod oznako &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_save_title_with_type" msgid="8637809388029313305">"Želite <xliff:g id="TYPE">%1$s</xliff:g> shraniti pod oznako &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"Želite <xliff:g id="TYPE_0">%1$s</xliff:g> in <xliff:g id="TYPE_1">%2$s</xliff:g> shraniti pod oznako &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"Želite <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> in <xliff:g id="TYPE_2">%3$s</xliff:g> shraniti pod oznako &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_update_title" msgid="4879673117448810818">"Želite posodobiti na oznako &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_update_title_with_type" msgid="339733442087186755">"Želite <xliff:g id="TYPE">%1$s</xliff:g> posodobiti na oznako &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_update_title_with_2types" msgid="6321714204167424745">"Želite <xliff:g id="TYPE_0">%1$s</xliff:g> in <xliff:g id="TYPE_1">%2$s</xliff:g> posodobiti na oznako &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_update_title_with_3types" msgid="5866735124066629287">"Želite <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> in <xliff:g id="TYPE_2">%3$s</xliff:g> posodobiti na oznako &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_save_title" msgid="327541108460384555">"Želite shraniti v aplikacijo "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_save_title_with_type" msgid="2339135393607143594">"Želite shraniti element <xliff:g id="TYPE">%1$s</xliff:g> v aplikacijo "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_save_title_with_2types" msgid="87616102361154432">"Želite shraniti elementa <xliff:g id="TYPE_0">%1$s</xliff:g> in <xliff:g id="TYPE_1">%2$s</xliff:g> v aplikacijo "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_save_title_with_3types" msgid="4108978552969604555">"Želite shraniti elemente <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> in <xliff:g id="TYPE_2">%3$s</xliff:g> v aplikacijo "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_update_title" msgid="5305781141104585279">"Želite posodobiti v aplikaciji "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_update_title_with_type" msgid="4624181147422762233">"Želite posodobiti element <xliff:g id="TYPE">%1$s</xliff:g> v aplikaciji "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_update_title_with_2types" msgid="2300113827053626484">"Želite posodobiti elementa <xliff:g id="TYPE_0">%1$s</xliff:g> in <xliff:g id="TYPE_1">%2$s</xliff:g> v aplikaciji "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_update_title_with_3types" msgid="9089824354296211922">"Želite posodobiti te elemente v aplikaciji "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>": <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> in <xliff:g id="TYPE_2">%3$s</xliff:g>?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"Shrani"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"Ne, hvala"</string>
     <string name="autofill_update_yes" msgid="310358413273276958">"Posodobi"</string>

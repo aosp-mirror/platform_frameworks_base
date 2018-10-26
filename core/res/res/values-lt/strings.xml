@@ -298,6 +298,9 @@
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofonas"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"įrašyti garso įrašą"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"Leisti &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; įrašyti garsą?"</string>
+    <string name="permgrouplab_activityRecognition" msgid="2838596644535616493">"Veiklos atpažinimas"</string>
+    <string name="permgroupdesc_activityRecognition" msgid="7672248027571522602">"atpažinti veiklą"</string>
+    <string name="permgrouprequest_activityRecognition" msgid="8121253142311250055">"Leisti programai &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; atpažinti jūsų fizinę veiklą?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Fotoaparatas"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"fotografuoti ir filmuoti"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"Leisti &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; fotografuoti ir įrašyti vaizdo įrašus?"</string>
@@ -424,14 +427,16 @@
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Ši programa gali gauti jūsų vietos informaciją naudodamasi tinklo šaltinių, pvz., mobiliojo ryšio bokštų ir „Wi-Fi“ tinklų, duomenimis. Šios vietovės paslaugos turi būti įjungtos ir pasiekiamos planšetiniame kompiuteryje, kad programa galėtų jas naudoti."</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"Ši programa gali gauti jūsų vietos informaciją naudodamasi tinklo šaltinių, pvz., mobiliojo ryšio bokštų ir „Wi-Fi“ tinklų, duomenimis. Šios vietovės paslaugos turi būti įjungtos ir pasiekiamos TV, kad programa galėtų jas naudoti."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"Ši programa gali gauti jūsų vietos informaciją naudodamasi tinklo šaltinių, pvz., mobiliojo ryšio bokštų ir „Wi-Fi“ tinklų, duomenimis. Šios vietovės paslaugos turi būti įjungtos ir pasiekiamos telefone, kad programa galėtų jas naudoti."</string>
-    <string name="permlab_accessBackgroundLocation" msgid="5742466381902568536">"pasiekti tikslią vietovę, kai programa veikia fone"</string>
-    <string name="permdesc_accessBackgroundLocation" msgid="6371533283380774135">"Ši programa gali gauti tikslius jūsų vietovės duomenis bet kuriuo metu, kai veikia fone. Šios vietovės paslaugos turi būti įjungtos ir pasiekiamos telefone, kad programa galėtų jas naudoti. Tai gali padidinti akumuliatoriaus energijos suvartojimą."</string>
+    <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"prieiga prie vietovės fone"</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"Jei papildomai suteikiama prieiga prie apytikslės arba tikslios vietovės, programa gali pasiekti vietovės duomenis veikdama fone."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"keisti garso nustatymus"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Leidžiama programai keisti visuotinius garso nustatymus, pvz., garsumą ir tai, kuris garsiakalbis naudojamas išvesčiai."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"įrašyti garsą"</string>
     <string name="permdesc_recordAudio" msgid="4245930455135321433">"Ši programa gali bet kada įrašyti garsą naudodama mikrofoną."</string>
     <string name="permlab_sim_communication" msgid="2935852302216852065">"siųsti komandas į SIM kortelę"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Programai leidžiama siųsti komandas į SIM kortelę. Tai labai pavojinga."</string>
+    <string name="permlab_activityRecognition" msgid="3634590230567608356">"atpažinti fizinę veiklą"</string>
+    <string name="permdesc_activityRecognition" msgid="3143453925156552894">"Ši programa gali atpažinti jūsų fizinę veiklą."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"fotografuoti ir filmuoti"</string>
     <string name="permdesc_camera" msgid="5392231870049240670">"Ši programa gali bet kada fotografuoti ir įrašyti vaizdo įrašų naudodama fotoaparatą."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"valdyti vibraciją"</string>
@@ -524,6 +529,7 @@
     <string name="permdesc_imagesWrite" msgid="7073662756617474375">"Programai leidžiama keisti nuotraukų kolekciją."</string>
     <string name="permlab_mediaLocation" msgid="8675148183726247864">"skaityti vietoves iš medijos kolekcijos"</string>
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"Programai leidžiama skaityti vietoves iš medijos kolekcijos."</string>
+    <string name="biometric_dialog_default_title" msgid="4229778503907743328">"Programa „<xliff:g id="APP">%s</xliff:g>“ nori jus autentifikuoti."</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"Biometrinė aparatinė įranga nepasiekiama"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Aptiktas dalinis piršto antspaudas. Bandykite dar kartą."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Nepavyko apdoroti piršto antspaudo. Bandykite dar kartą."</string>
@@ -1967,14 +1973,14 @@
       <item quantity="many"><xliff:g id="COUNT">%1$s</xliff:g> automatinio pildymo pasiūlymo</item>
       <item quantity="other"><xliff:g id="COUNT">%1$s</xliff:g> automatinio pildymo pasiūlymų</item>
     </plurals>
-    <string name="autofill_save_title" msgid="3345527308992082601">"Išsaugoti sistemoje &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_save_title_with_type" msgid="8637809388029313305">"Išsaugoti <xliff:g id="TYPE">%1$s</xliff:g> sistemoje &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"Išsaugoti <xliff:g id="TYPE_0">%1$s</xliff:g> ir <xliff:g id="TYPE_1">%2$s</xliff:g> sistemoje &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"Išsaugoti <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> ir <xliff:g id="TYPE_2">%3$s</xliff:g> sistemoje &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_update_title" msgid="4879673117448810818">"Atnaujinti paslaugoje &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_update_title_with_type" msgid="339733442087186755">"Atnaujinti <xliff:g id="TYPE">%1$s</xliff:g> paslaugoje &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_update_title_with_2types" msgid="6321714204167424745">"Atnaujinti <xliff:g id="TYPE_0">%1$s</xliff:g> ir <xliff:g id="TYPE_1">%2$s</xliff:g> paslaugoje &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_update_title_with_3types" msgid="5866735124066629287">"Atnaujinti <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> ir <xliff:g id="TYPE_2">%3$s</xliff:g> paslaugoje &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_save_title" msgid="327541108460384555">"Išsaugoti paslaugoje "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_save_title_with_type" msgid="2339135393607143594">"Išsaugoti <xliff:g id="TYPE">%1$s</xliff:g> paslaugoje "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_save_title_with_2types" msgid="87616102361154432">"Išsaugoti <xliff:g id="TYPE_0">%1$s</xliff:g> ir <xliff:g id="TYPE_1">%2$s</xliff:g> paslaugoje "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_save_title_with_3types" msgid="4108978552969604555">"Išsaugoti <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> ir <xliff:g id="TYPE_2">%3$s</xliff:g> paslaugoje "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_update_title" msgid="5305781141104585279">"Atnaujinti paslaugoje "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_update_title_with_type" msgid="4624181147422762233">"Atnaujinti <xliff:g id="TYPE">%1$s</xliff:g> paslaugoje "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_update_title_with_2types" msgid="2300113827053626484">"Atnaujinti <xliff:g id="TYPE_0">%1$s</xliff:g> ir <xliff:g id="TYPE_1">%2$s</xliff:g> paslaugoje "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_update_title_with_3types" msgid="9089824354296211922">"Atnaujinti šiuos elementus paslaugoje "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>": <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> ir <xliff:g id="TYPE_2">%3$s</xliff:g> ?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"Išsaugoti"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"Ne, ačiū"</string>
     <string name="autofill_update_yes" msgid="310358413273276958">"Atnaujinti"</string>

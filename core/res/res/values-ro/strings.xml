@@ -295,6 +295,9 @@
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Microfon"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"înregistreze sunet"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"Pemiteți &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; să înregistreze conținut audio?"</string>
+    <string name="permgrouplab_activityRecognition" msgid="2838596644535616493">"Recunoașterea activității"</string>
+    <string name="permgroupdesc_activityRecognition" msgid="7672248027571522602">"recunoașterea activității"</string>
+    <string name="permgrouprequest_activityRecognition" msgid="8121253142311250055">"Permiteți aplicației &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; să vă recunoască activitatea fizică?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Camera foto"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"fotografieze și să înregistreze videoclipuri"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"Permiteți &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; să facă fotografii și să înregistreze videoclipuri?"</string>
@@ -421,14 +424,16 @@
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Această aplicație vă poate obține locația cu ajutorul surselor rețelei, cum ar fi turnurile de telefonie mobilă și rețelele Wi-Fi. Aceste servicii de localizare trebuie să fie activate și disponibile pe tabletă pentru ca aplicația să le poată folosi."</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"Această aplicație vă poate obține locația cu ajutorul surselor rețelei, cum ar fi turnurile de telefonie mobilă și rețelele Wi-Fi. Aceste servicii de localizare trebuie să fie activate și disponibile pe televizor pentru ca aplicația să le poată folosi."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"Această aplicație vă poate obține locația cu ajutorul surselor rețelei, cum ar fi turnurile de telefonie mobilă și rețelele Wi-Fi. Aceste servicii de localizare trebuie să fie activate și disponibile pe telefon pentru ca aplicația să le poată folosi."</string>
-    <string name="permlab_accessBackgroundLocation" msgid="5742466381902568536">"să acceseze locația exactă în fundal"</string>
-    <string name="permdesc_accessBackgroundLocation" msgid="6371533283380774135">"Aplicația vă poate obține locația exactă ori de câte ori rulează în fundal. Serviciile de localizare trebuie să fie activate și disponibile pe telefon pentru ca aplicația să le poată folosi. Acest lucru poate accelera descărcarea bateriei."</string>
+    <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"accesați locația în fundal"</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"Dacă se acordă în plus față de accesul la locație aproximativă sau exactă, aplicația poate accesa locația în timp ce rulează în fundal."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"modificare setări audio"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Permite aplicației să modifice setările audio globale, cum ar fi volumul și difuzorul care este utilizat pentru ieșire."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"înregistreze sunet"</string>
     <string name="permdesc_recordAudio" msgid="4245930455135321433">"Această aplicație poate înregistra conținut audio folosind microfonul în orice moment."</string>
     <string name="permlab_sim_communication" msgid="2935852302216852065">"să trimită comenzi către SIM"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Permite aplicației să trimită comenzi pe cardul SIM. Această permisiune este foarte periculoasă."</string>
+    <string name="permlab_activityRecognition" msgid="3634590230567608356">"recunoașterea activității fizice"</string>
+    <string name="permdesc_activityRecognition" msgid="3143453925156552894">"Această aplicație vă poate recunoaște activitatea fizică."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"realizarea de fotografii și videoclipuri"</string>
     <string name="permdesc_camera" msgid="5392231870049240670">"Această aplicație poate să facă fotografii și să înregistreze videoclipuri folosind camera foto în orice moment."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"controlează vibrarea"</string>
@@ -521,6 +526,7 @@
     <string name="permdesc_imagesWrite" msgid="7073662756617474375">"Permite aplicației să vă modifice colecția de fotografii."</string>
     <string name="permlab_mediaLocation" msgid="8675148183726247864">"citiți locațiile din colecția media"</string>
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"Permite aplicației să citească locațiile din colecția dvs. media."</string>
+    <string name="biometric_dialog_default_title" msgid="4229778503907743328">"Aplicația <xliff:g id="APP">%s</xliff:g> dorește să se autentifice."</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"Hardware biometric indisponibil"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"S-a detectat parțial amprenta. Încercați din nou."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Amprenta nu a putut fi procesată. Încercați din nou."</string>
@@ -639,9 +645,9 @@
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Permite aplicației să se conecteze la serviciile operatorului. Nu ar trebui să fie niciodată necesară pentru aplicațiile obișnuite."</string>
     <string name="permlab_access_notification_policy" msgid="4247510821662059671">"accesează Nu deranja"</string>
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Permite aplicației să citească și să scrie configurația Nu deranja."</string>
-    <string name="policylab_limitPassword" msgid="4497420728857585791">"Setați reguli pentru parolă"</string>
+    <string name="policylab_limitPassword" msgid="4497420728857585791">"Să seteze reguli pentru parolă"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Stabiliți lungimea și tipul de caractere permise pentru parolele și codurile PIN de blocare a ecranului."</string>
-    <string name="policylab_watchLogin" msgid="5091404125971980158">"Monitorizați încercările de deblocare a ecranului"</string>
+    <string name="policylab_watchLogin" msgid="5091404125971980158">"Să monitorizeze încercările de deblocare a ecranului"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Monitorizați numărul de parole incorecte introduse la deblocarea ecranului și blocați tableta sau ștergeți datele acesteia dacă sunt introduse prea multe parole incorecte."</string>
     <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"Monitorizați numărul de parole incorecte introduse la deblocarea ecranului și blocați televizorul sau ștergeți toate datele acestuia dacă sunt introduse prea multe parole incorecte."</string>
     <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Monitorizați numărul de parole incorecte introduse la deblocarea ecranului și blocați telefonul sau ștergeți toate datele acestuia dacă sunt introduse prea multe parole incorecte."</string>
@@ -664,9 +670,9 @@
     <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"Setați serverul proxy global pentru dispozitiv, care să fie utilizat cât timp politica este activă. Numai proprietarul dispozitivului poate seta serverul proxy global."</string>
     <string name="policylab_expirePassword" msgid="5610055012328825874">"Setați expirarea parolei pentru blocarea ecranului"</string>
     <string name="policydesc_expirePassword" msgid="5367525762204416046">"Modificați frecvența cu care trebuie să se schimbe parola, codul PIN sau modelul pentru blocarea ecranului."</string>
-    <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Setați criptarea stocării"</string>
+    <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Să seteze criptarea stocării"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Necesită ca datele aplicației stocate să fie criptate."</string>
-    <string name="policylab_disableCamera" msgid="6395301023152297826">"Dezactivați camerele foto"</string>
+    <string name="policylab_disableCamera" msgid="6395301023152297826">"Să dezactiveze camerele foto"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Împiedicați utilizarea camerelor foto de pe dispozitiv."</string>
     <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Să oprească funcții de blocare ecran"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Împiedicați folosirea unor funcții de blocare a ecranului."</string>
@@ -1932,14 +1938,14 @@
       <item quantity="other"><xliff:g id="COUNT">%1$s</xliff:g> de sugestii de completare automată</item>
       <item quantity="one">O sugestie de completare automată</item>
     </plurals>
-    <string name="autofill_save_title" msgid="3345527308992082601">"Salvați în &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_save_title_with_type" msgid="8637809388029313305">"Salvați <xliff:g id="TYPE">%1$s</xliff:g> în &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"Salvați <xliff:g id="TYPE_0">%1$s</xliff:g> și <xliff:g id="TYPE_1">%2$s</xliff:g> în &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"Salvați <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> și <xliff:g id="TYPE_2">%3$s</xliff:g> în &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_update_title" msgid="4879673117448810818">"Actualizați la &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_update_title_with_type" msgid="339733442087186755">"Actualizați <xliff:g id="TYPE">%1$s</xliff:g> la &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_update_title_with_2types" msgid="6321714204167424745">"Actualizați <xliff:g id="TYPE_0">%1$s</xliff:g> și <xliff:g id="TYPE_1">%2$s</xliff:g> la &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_update_title_with_3types" msgid="5866735124066629287">"Actualizați <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> și <xliff:g id="TYPE_2">%3$s</xliff:g> la &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_save_title" msgid="327541108460384555">"Salvați în "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_save_title_with_type" msgid="2339135393607143594">"Salvați <xliff:g id="TYPE">%1$s</xliff:g> în "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_save_title_with_2types" msgid="87616102361154432">"Salvați <xliff:g id="TYPE_0">%1$s</xliff:g> și <xliff:g id="TYPE_1">%2$s</xliff:g> în "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_save_title_with_3types" msgid="4108978552969604555">"Salvați <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> și <xliff:g id="TYPE_2">%3$s</xliff:g> în "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_update_title" msgid="5305781141104585279">"Actualizați în "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_update_title_with_type" msgid="4624181147422762233">"Actualizați <xliff:g id="TYPE">%1$s</xliff:g> în "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_update_title_with_2types" msgid="2300113827053626484">"Actualizați <xliff:g id="TYPE_0">%1$s</xliff:g> și <xliff:g id="TYPE_1">%2$s</xliff:g> în "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_update_title_with_3types" msgid="9089824354296211922">"Actualizați aceste articole în "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>": <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> și <xliff:g id="TYPE_2">%3$s</xliff:g>?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"Salvați"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"Nu, mulțumesc"</string>
     <string name="autofill_update_yes" msgid="310358413273276958">"Actualizați"</string>

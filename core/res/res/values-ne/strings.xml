@@ -292,6 +292,9 @@
     <string name="permgrouplab_microphone" msgid="171539900250043464">"माइक्रोफोन"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"अडियो रेकर्ड गर्नुहोस्"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; लाई अडियो रेकर्ड गर्न दिने हो?"</string>
+    <string name="permgrouplab_activityRecognition" msgid="2838596644535616493">"गतिविधिको पहिचान"</string>
+    <string name="permgroupdesc_activityRecognition" msgid="7672248027571522602">"गतिविधि पहिचान गर्नुहोस्‌"</string>
+    <string name="permgrouprequest_activityRecognition" msgid="8121253142311250055">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; लाई तपाईंको गतिविधि पहिचान गर्न अनुमति दिने हो?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"क्यामेरा"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"तस्बिर खिच्नुका साथै भिडियो रेकर्ड गर्नुहोस्"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; लाई तस्बिरहरू खिच्न र भिडियो रेकर्ड गर्न दिने हो?"</string>
@@ -418,14 +421,16 @@
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"यस अनुप्रयोगले सेलका टावर र Wi-Fi नेटवर्कहरू जस्ता नेटवर्कका स्रोतहरूको आधारमा तपाईंको स्थान बारे जानकारी प्राप्त गर्न सक्छ। यो अनुप्रयोग ती स्रोतहरूको प्रयोग गर्न सक्षम होस् भन्नका खातिर यी स्थान सम्बन्धी सेवाहरूलाई अनिवार्य रूपमा सक्रिय पार्नुपर्छ र यी तपाईंको ट्याब्लेटमा उपलब्ध हुनु पर्छ।"</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"यस अनुप्रयोगले सेलका टावर र Wi-Fi नेटवर्कहरू जस्ता नेटवर्कका स्रोतहरूको आधारमा तपाईंको स्थान बारे जानकारी प्राप्त गर्न सक्छ। यो अनुप्रयोग ती स्रोतहरूको प्रयोग गर्न सक्षम होस् भन्नका खातिर यी स्थान सम्बन्धी सेवाहरूलाई अनिवार्य रूपमा सक्रिय पार्नुपर्छ र यी तपाईंको TV मा उपलब्ध हुनु पर्छ।"</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"यस अनुप्रयोगले सेलका टावर र Wi-Fi नेटवर्कहरू जस्ता नेटवर्कका स्रोतहरूको आधारमा तपाईंको स्थान बारे जानकारी प्राप्त गर्न सक्छ। यो अनुप्रयोग ती स्रोतहरूको प्रयोग गर्न सक्षम होस् भन्नका खातिर यी स्थान सम्बन्धी सेवाहरूलाई अनिवार्य रूपमा सक्रिय पार्नुपर्छ र यी तपाईंको फोनमा उपलब्ध हुनु पर्छ।"</string>
-    <string name="permlab_accessBackgroundLocation" msgid="5742466381902568536">"पृष्ठभूमिमा सटीक स्थानमाथि पहुँच राख्नुहोस्"</string>
-    <string name="permdesc_accessBackgroundLocation" msgid="6371533283380774135">"यो अनुप्रयोगले पृष्ठभूमिमा चलिरहेको अवस्थामा तपाईंलाई जुनसुकै बेला स्थानको सटिक जानकारी दिन सक्छ। यी स्थानसम्बन्धी सेवाहरू अनिवार्य रूपमा सक्रिय गरिएका हुनु पर्छ र अनुप्रयोगले यिनीहरूको प्रयोग गर्न सकोस् भन्नाका खातिर तपाईंको फोनमै उपलब्ध हुन्छन्। यस कार्यले गर्दा ब्याट्री बढी खर्च हुन सक्छ।"</string>
+    <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"पृष्ठभूमिमा स्थानसम्बन्धी पहुँच"</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"यसका अतिरिक्त यसलाई अनुमानित वा सटिक स्थानमाथि पहुँच राख्ने अनुमति दिइएको छ भने उक्त अनुप्रयोगले पृष्ठभूमिमा चलिरहेको बेला स्थानमाथि पहुँच राख्न सक्छ।"</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"तपाईँका अडियो सेटिङहरू परिवर्तन गर्नुहोस्"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"अनुप्रयोगलाई ग्लोबल अडियो सेटिङहरू परिमार्जन गर्न अनुमति दिन्छ, जस्तै आवाजको मात्रा र आउटपुटको लागि कुन स्पिकर प्रयोग गर्ने।"</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"अडियो रेकर्ड गर्नुहोस्"</string>
     <string name="permdesc_recordAudio" msgid="4245930455135321433">"यस अनुप्रयोगले जुनसुकै समय माइक्रोफोनको प्रयोग गरी अडियो रेकर्ड गर्न सक्छ।"</string>
     <string name="permlab_sim_communication" msgid="2935852302216852065">"SIM मा आदेशहरू पठाउन दिनुहोस्"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"SIM लाई आदेश पठाउन अनुप्रयोगलाई अनुमति दिन्छ। यो निकै खतरनाक हुन्छ।"</string>
+    <string name="permlab_activityRecognition" msgid="3634590230567608356">"शारीरिक गतिविधि पहिचान गर्नुहोस्‌"</string>
+    <string name="permdesc_activityRecognition" msgid="3143453925156552894">"यो अनुप्रयोगले तपाईंको शारीरिक गतिविधिको पहिचान गर्न सक्छ।"</string>
     <string name="permlab_camera" msgid="3616391919559751192">"तस्बिरहरू र भिडियोहरू लिनुहोस्।"</string>
     <string name="permdesc_camera" msgid="5392231870049240670">"यस अनुप्रयोगले जुनसुकै समय क्यामेराको प्रयोग गरी तस्बिर खिच्न र भिडियो रेकर्ड गर्न सक्छ।"</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"कम्पन नियन्त्रण गर्नुहोस्"</string>
@@ -518,6 +523,7 @@
     <string name="permdesc_imagesWrite" msgid="7073662756617474375">"यसले अनुप्रयोगलाई तपाईंको तस्बिरको सङ्ग्रह परिमार्जन गर्न दिन्छ।"</string>
     <string name="permlab_mediaLocation" msgid="8675148183726247864">"आफ्नो मिडियाको सङ्ग्रहका स्थानहरू पढ्नुहोस्‌"</string>
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"यसले अनुप्रयोगलाई तपाईंको मिडिया सङ्ग्रहका स्थानहरू पढ्न दिन्छ।"</string>
+    <string name="biometric_dialog_default_title" msgid="4229778503907743328">"अनुप्रयोग <xliff:g id="APP">%s</xliff:g> ले प्रमाणीकरण गर्न चाहन्छ।"</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"बायोमेट्रिक हार्डवेयर उपलब्ध छैन"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"आंशिक औठाछाप पत्ता लाग्यो। कृपया फेरि प्रयास गर्नुहोस्।"</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"औठाछाप प्रशोधन गर्न सकिएन। कृपया फेरि प्रयास गर्नुहोस्।"</string>
@@ -1903,14 +1909,14 @@
       <item quantity="other"><xliff:g id="COUNT">%1$s</xliff:g> स्वत: भरण सुझावहरू</item>
       <item quantity="one">एउटा स्वत: भरण सुझाव</item>
     </plurals>
-    <string name="autofill_save_title" msgid="3345527308992082601">"&lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt; मा सुरक्षित गर्ने हो?"</string>
-    <string name="autofill_save_title_with_type" msgid="8637809388029313305">"<xliff:g id="TYPE">%1$s</xliff:g> लाई &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt; मा सुरक्षित गर्ने हो?"</string>
-    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"<xliff:g id="TYPE_0">%1$s</xliff:g> र <xliff:g id="TYPE_1">%2$s</xliff:g> लाई  &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt; मा सुरक्षित गर्ने हो?"</string>
-    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> र <xliff:g id="TYPE_2">%3$s</xliff:g> लाई to &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt; मा सुरक्षित गर्ने हो?"</string>
-    <string name="autofill_update_title" msgid="4879673117448810818">"&lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt; मा अद्यावधिक गर्ने हो?"</string>
-    <string name="autofill_update_title_with_type" msgid="339733442087186755">"<xliff:g id="TYPE">%1$s</xliff:g> लाई &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt; मा अद्यावधिक गर्ने हो?"</string>
-    <string name="autofill_update_title_with_2types" msgid="6321714204167424745">"<xliff:g id="TYPE_0">%1$s</xliff:g> र <xliff:g id="TYPE_1">%2$s</xliff:g> लाई &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt; मा अद्यावधिक गर्ने हो?"</string>
-    <string name="autofill_update_title_with_3types" msgid="5866735124066629287">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> र <xliff:g id="TYPE_2">%3$s</xliff:g> लाई to &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt; मा अद्यावधिक गर्ने हो?"</string>
+    <string name="autofill_save_title" msgid="327541108460384555"><b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>" मा सुरक्षित गर्ने हो?"</string>
+    <string name="autofill_save_title_with_type" msgid="2339135393607143594">"<xliff:g id="TYPE">%1$s</xliff:g> लाई "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>" मा सुरक्षित गर्ने हो?"</string>
+    <string name="autofill_save_title_with_2types" msgid="87616102361154432">"<xliff:g id="TYPE_0">%1$s</xliff:g> र <xliff:g id="TYPE_1">%2$s</xliff:g> लाई "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>" मा सुरक्षित गर्ने हो?"</string>
+    <string name="autofill_save_title_with_3types" msgid="4108978552969604555">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> र <xliff:g id="TYPE_2">%3$s</xliff:g> लाई "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>" मा सुरक्षित गर्ने हो?"</string>
+    <string name="autofill_update_title" msgid="5305781141104585279"><b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>" मा अद्यावधिक गर्ने हो?"</string>
+    <string name="autofill_update_title_with_type" msgid="4624181147422762233">"<xliff:g id="TYPE">%1$s</xliff:g> लाई "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>" मा अद्यावधिक गर्ने हो?"</string>
+    <string name="autofill_update_title_with_2types" msgid="2300113827053626484">"<xliff:g id="TYPE_0">%1$s</xliff:g> र <xliff:g id="TYPE_1">%2$s</xliff:g> लाई "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>" मा अद्यावधिक गर्ने हो?"</string>
+    <string name="autofill_update_title_with_3types" msgid="9089824354296211922">"यी वस्तुहरू "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>" मा अद्यावधिक गर्नुहोस्‌: <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> र <xliff:g id="TYPE_2">%3$s</xliff:g> हो?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"सुरक्षित गर्नुहोस्"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"पर्दैन, धन्यवाद"</string>
     <string name="autofill_update_yes" msgid="310358413273276958">"अद्यावधिक गर्नुहोस्"</string>

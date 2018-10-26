@@ -292,6 +292,9 @@
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"merekam audio"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"Izinkan &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; merekam audio?"</string>
+    <string name="permgrouplab_activityRecognition" msgid="2838596644535616493">"Pengenalan aktivitas"</string>
+    <string name="permgroupdesc_activityRecognition" msgid="7672248027571522602">"kenali aktivitas"</string>
+    <string name="permgrouprequest_activityRecognition" msgid="8121253142311250055">"Izinkan &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; mengenali aktivitas fisik Anda?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Kamera"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"mengambil gambar dan merekam video"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"Izinkan &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; mengambil gambar dan merekam video?"</string>
@@ -418,14 +421,16 @@
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Aplikasi ini dapat memperoleh lokasi Anda berdasarkan sumber jaringan seperti menara seluler dan jaringan Wi-Fi. Layanan lokasi ini harus diaktifkan dan tersedia di tablet agar aplikasi dapat menggunakannya."</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"Aplikasi ini dapat memperoleh lokasi Anda berdasarkan sumber jaringan seperti menara seluler dan jaringan Wi-Fi. Layanan lokasi ini harus diaktifkan dan tersedia di TV agar aplikasi dapat menggunakannya."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"Aplikasi ini dapat memperoleh lokasi Anda berdasarkan sumber jaringan seperti menara seluler dan jaringan Wi-Fi. Layanan lokasi ini harus diaktifkan dan tersedia di ponsel agar aplikasi dapat menggunakannya."</string>
-    <string name="permlab_accessBackgroundLocation" msgid="5742466381902568536">"akses lokasi pasti saat di latar belakang"</string>
-    <string name="permdesc_accessBackgroundLocation" msgid="6371533283380774135">"Aplikasi ini bisa mendapatkan lokasi pasti Anda kapan pun aplikasi ada di latar belakang. Fitur layanan lokasi ini harus diaktifkan dan tersedia di ponsel agar dapat digunakan oleh aplikasi. Fitur ini dapat meningkatkan konsumsi baterai."</string>
+    <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"akses lokasi di latar belakang"</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"Jika aplikasi diberi izin tambahan ke akses lokasi perkiraan atau akurat, aplikasi dapat mengakses lokasi saat bekerja di latar belakang."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"ubah setelan audio Anda"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Memungkinkan aplikasi mengubah setelan audio global, misalnya volume dan pengeras suara mana yang digunakan untuk keluaran."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"rekam audio"</string>
     <string name="permdesc_recordAudio" msgid="4245930455135321433">"Aplikasi ini dapat merekam audio menggunakan mikrofon kapan saja."</string>
     <string name="permlab_sim_communication" msgid="2935852302216852065">"kirimkan perintah ke SIM"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Mengizinkan aplikasi mengirim perintah ke SIM. Ini sangat berbahaya."</string>
+    <string name="permlab_activityRecognition" msgid="3634590230567608356">"kenali aktivitas fisik"</string>
+    <string name="permdesc_activityRecognition" msgid="3143453925156552894">"Aplikasi ini dapat mengenali aktivitas fisik Anda."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"ambil gambar dan video"</string>
     <string name="permdesc_camera" msgid="5392231870049240670">"Aplikasi ini dapat mengambil foto dan merekam video menggunakan kamera kapan saja."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"kontrol getaran"</string>
@@ -518,6 +523,7 @@
     <string name="permdesc_imagesWrite" msgid="7073662756617474375">"Mengizinkan aplikasi untuk memodifikasi koleksi foto Anda."</string>
     <string name="permlab_mediaLocation" msgid="8675148183726247864">"membaca lokasi dari koleksi media Anda"</string>
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"Mengizinkan aplikasi untuk membaca lokasi dari koleksi media Anda."</string>
+    <string name="biometric_dialog_default_title" msgid="4229778503907743328">"Aplikasi <xliff:g id="APP">%s</xliff:g> meminta autentikasi."</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"Hardware biometrik tidak tersedia"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Sebagian sidik jari terdeteksi. Coba lagi."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Tidak dapat memproses sidik jari. Coba lagi."</string>
@@ -1897,14 +1903,14 @@
       <item quantity="other"><xliff:g id="COUNT">%1$s</xliff:g> saran IsiOtomatis</item>
       <item quantity="one">1 saran IsiOtomatis</item>
     </plurals>
-    <string name="autofill_save_title" msgid="3345527308992082601">"Simpan ke &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_save_title_with_type" msgid="8637809388029313305">"Simpan <xliff:g id="TYPE">%1$s</xliff:g> ke &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"Simpan <xliff:g id="TYPE_0">%1$s</xliff:g> dan <xliff:g id="TYPE_1">%2$s</xliff:g> ke &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"Simpan <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g>, dan <xliff:g id="TYPE_2">%3$s</xliff:g> ke &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_update_title" msgid="4879673117448810818">"Update ke &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_update_title_with_type" msgid="339733442087186755">"Update <xliff:g id="TYPE">%1$s</xliff:g> ke &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_update_title_with_2types" msgid="6321714204167424745">"Update <xliff:g id="TYPE_0">%1$s</xliff:g> dan <xliff:g id="TYPE_1">%2$s</xliff:g> ke &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_update_title_with_3types" msgid="5866735124066629287">"Update <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g>, dan <xliff:g id="TYPE_2">%3$s</xliff:g> ke &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_save_title" msgid="327541108460384555">"Simpan ke "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_save_title_with_type" msgid="2339135393607143594">"Simpan <xliff:g id="TYPE">%1$s</xliff:g> ke "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_save_title_with_2types" msgid="87616102361154432">"Simpan <xliff:g id="TYPE_0">%1$s</xliff:g> dan <xliff:g id="TYPE_1">%2$s</xliff:g> ke "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_save_title_with_3types" msgid="4108978552969604555">"Simpan <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g>, dan <xliff:g id="TYPE_2">%3$s</xliff:g> ke "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_update_title" msgid="5305781141104585279">"Perbarui di "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_update_title_with_type" msgid="4624181147422762233">"Perbarui <xliff:g id="TYPE">%1$s</xliff:g> di "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_update_title_with_2types" msgid="2300113827053626484">"Perbarui <xliff:g id="TYPE_0">%1$s</xliff:g> dan <xliff:g id="TYPE_1">%2$s</xliff:g> di "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_update_title_with_3types" msgid="9089824354296211922">"Perbarui item-item berikut di "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>": <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g>, dan <xliff:g id="TYPE_2">%3$s</xliff:g> ?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"Simpan"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"Lain kali"</string>
     <string name="autofill_update_yes" msgid="310358413273276958">"Update"</string>

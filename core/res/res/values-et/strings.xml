@@ -292,6 +292,9 @@
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"heli salvestamine"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"Kas lubada rakendusel &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; salvestada heli?"</string>
+    <string name="permgrouplab_activityRecognition" msgid="2838596644535616493">"Tegevuste tuvastamine"</string>
+    <string name="permgroupdesc_activityRecognition" msgid="7672248027571522602">"tegevuste tuvastamine"</string>
+    <string name="permgrouprequest_activityRecognition" msgid="8121253142311250055">"Kas lubada rakendusel &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; teie füüsilised tegevused tuvastada?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Kaamera"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"pildistamine ja video salvestamine"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"Kas lubada rakendusel &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; jäädvustada pilte ja salvestada videoid?"</string>
@@ -418,14 +421,16 @@
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"See rakendus näeb võrguallikate (nt mobiilimastid ja WiFi-võrgud) abil teie asukohta. Need asukohateenused peavad olema sisse lülitatud ja teie tahvelarvutis saadaval, et rakendus neid kasutada saaks."</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"See rakendus näeb võrguallikate (nt mobiilimastid ja WiFi-võrgud) abil teie asukohta. Need asukohateenused peavad olema sisse lülitatud ja teie teleris saadaval, et rakendus neid kasutada saaks."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"See rakendus näeb võrguallikate (nt mobiilimastid ja WiFi-võrgud) abil teie asukohta. Need asukohateenused peavad olema sisse lülitatud ja teie telefonis saadaval, et rakendus neid kasutada saaks."</string>
-    <string name="permlab_accessBackgroundLocation" msgid="5742466381902568536">"juurdepääs täpsele asukohale taustal"</string>
-    <string name="permdesc_accessBackgroundLocation" msgid="6371533283380774135">"See rakendus hangib teie täpse asukoha alati, kui see töötab taustal. Need asukohateenused peavad olema sisse lülitatud ja teie telefonis saadaval, et rakendus saaks neid kasutada. See võib suurendada akutoite tarbimist."</string>
+    <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"juurdepääs asukohale taustal"</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"Kui see on antud ka umbkaudsele või täpsele asukohale juurdepääsu puhul, saab rakendus taustal käitamisel juurdepääsu asukohale."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"muuda heliseadeid"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Võimaldab rakendusel muuta üldiseid heliseadeid, näiteks helitugevust ja seda, millist kõlarit kasutatakse väljundiks."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"salvesta heli"</string>
     <string name="permdesc_recordAudio" msgid="4245930455135321433">"See rakendus saab mikrofoni kasutades mis tahes ajal heli salvestada."</string>
     <string name="permlab_sim_communication" msgid="2935852302216852065">"SIM-kaardile käskluste saatmine"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Lubab rakendusel saata käske SIM-kaardile. See on väga ohtlik."</string>
+    <string name="permlab_activityRecognition" msgid="3634590230567608356">"füüsiliste tegevuste tuvastamine"</string>
+    <string name="permdesc_activityRecognition" msgid="3143453925156552894">"See rakendus saab tuvastada teie füüsilised tegevused."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"piltide ja videote tegemine"</string>
     <string name="permdesc_camera" msgid="5392231870049240670">"See rakendus saab mis tahes ajal kaameraga pildistada ja videoid salvestada."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"juhtige vibreerimist"</string>
@@ -518,6 +523,7 @@
     <string name="permdesc_imagesWrite" msgid="7073662756617474375">"Võimaldab rakendusel muuta teie fotokogu."</string>
     <string name="permlab_mediaLocation" msgid="8675148183726247864">"Lugeda teie meediakogus olevaid asukohti"</string>
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"Võimaldab rakendusel lugeda teie meediakogus olevaid asukohti."</string>
+    <string name="biometric_dialog_default_title" msgid="4229778503907743328">"Rakendus <xliff:g id="APP">%s</xliff:g> soovib autentimist."</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"Biomeetriline riistvara ei ole saadaval"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Tuvastati osaline sõrmejälg. Proovige uuesti."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Sõrmejälge ei õnnestunud töödelda. Proovige uuesti."</string>
@@ -1897,14 +1903,14 @@
       <item quantity="other"><xliff:g id="COUNT">%1$s</xliff:g> automaatse täitmise soovitust</item>
       <item quantity="one">Üks automaatse täitmise soovitus</item>
     </plurals>
-    <string name="autofill_save_title" msgid="3345527308992082601">"Kas salvestada teenusesse &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_save_title_with_type" msgid="8637809388029313305">"Kas salvestada üksus <xliff:g id="TYPE">%1$s</xliff:g> teenusesse &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"Kas salvestada üksused <xliff:g id="TYPE_0">%1$s</xliff:g> ja <xliff:g id="TYPE_1">%2$s</xliff:g> teenusesse &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"Kas salvestada üksused <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> ja <xliff:g id="TYPE_2">%3$s</xliff:g> teenusesse &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_update_title" msgid="4879673117448810818">"Kas värskendada valikule &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_update_title_with_type" msgid="339733442087186755">"Kas värskendada üksus <xliff:g id="TYPE">%1$s</xliff:g> valikule &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_update_title_with_2types" msgid="6321714204167424745">"Kas värskendada üksused <xliff:g id="TYPE_0">%1$s</xliff:g> ja <xliff:g id="TYPE_1">%2$s</xliff:g> valikule &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_update_title_with_3types" msgid="5866735124066629287">"Kas värskendada üksused <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> ja <xliff:g id="TYPE_2">%3$s</xliff:g> valikule &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_save_title" msgid="327541108460384555">"Kas salvestada teenuses "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_save_title_with_type" msgid="2339135393607143594">"Kas salvestada <xliff:g id="TYPE">%1$s</xliff:g> teenuses "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_save_title_with_2types" msgid="87616102361154432">"Kas salvestada <xliff:g id="TYPE_0">%1$s</xliff:g> ja <xliff:g id="TYPE_1">%2$s</xliff:g> teenuses "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_save_title_with_3types" msgid="4108978552969604555">"Kas salvestada <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> ja <xliff:g id="TYPE_2">%3$s</xliff:g> teenuses "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_update_title" msgid="5305781141104585279">"Kas värskendada üksust teenuses "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_update_title_with_type" msgid="4624181147422762233">"Kas värskendada üksust <xliff:g id="TYPE">%1$s</xliff:g> teenuses "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_update_title_with_2types" msgid="2300113827053626484">"Kas värskendada üksusi <xliff:g id="TYPE_0">%1$s</xliff:g> ja <xliff:g id="TYPE_1">%2$s</xliff:g> teenuses "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_update_title_with_3types" msgid="9089824354296211922">"Kas värskendada teenuses "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>" neid üksusi: <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> ja <xliff:g id="TYPE_2">%3$s</xliff:g>?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"Salvesta"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"Tänan, ei"</string>
     <string name="autofill_update_yes" msgid="310358413273276958">"Värskenda"</string>

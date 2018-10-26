@@ -171,10 +171,10 @@
     <string name="contentServiceSync" msgid="8353523060269335667">"مزامنة"</string>
     <string name="contentServiceSyncNotificationTitle" msgid="7036196943673524858">"تتعذّر المزامنة."</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="4884451152168188763">"تمت محاولة حذف مقدار كبير من محتوى <xliff:g id="CONTENT_TYPE">%s</xliff:g>."</string>
-    <string name="low_memory" product="tablet" msgid="6494019234102154896">"سعة تخزين الجهاز اللوحي ممتلئة! احذف بعض الملفات لإخلاء مساحة."</string>
-    <string name="low_memory" product="watch" msgid="4415914910770005166">"سعة تخزين المشاهدة ممتلئة! احذف بعض الملفات لتحرير مساحة."</string>
-    <string name="low_memory" product="tv" msgid="516619861191025923">"سعة تخزين التلفزيون ممتلئة. يمكنك حذف بعض الملفات لتوفير مساحة فارغة."</string>
-    <string name="low_memory" product="default" msgid="3475999286680000541">"سعة تخزين الهاتف ممتلئة. احذف بعض الملفات لإخلاء مساحة."</string>
+    <string name="low_memory" product="tablet" msgid="6494019234102154896">"مساحة تخزين الجهاز اللوحي ممتلئة! احذف بعض الملفات لإخلاء مساحة."</string>
+    <string name="low_memory" product="watch" msgid="4415914910770005166">"مساحة تخزين المشاهدة ممتلئة! احذف بعض الملفات لتحرير مساحة."</string>
+    <string name="low_memory" product="tv" msgid="516619861191025923">"مساحة تخزين التلفزيون ممتلئة. يمكنك حذف بعض الملفات لتوفير مساحة فارغة."</string>
+    <string name="low_memory" product="default" msgid="3475999286680000541">"مساحة تخزين الهاتف ممتلئة. احذف بعض الملفات لإخلاء مساحة."</string>
     <plurals name="ssl_ca_cert_warning" formatted="false" msgid="5106721205300213569">
       <item quantity="zero">تم تثبيت شهادة المرجع المصدق</item>
       <item quantity="two">تم تثبيت شهادتي المرجع المصدق</item>
@@ -304,6 +304,9 @@
     <string name="permgrouplab_microphone" msgid="171539900250043464">"الميكروفون"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"تسجيل الصوت"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"‏هل تريد السماح لتطبيق &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; بتسجيل الصوت؟"</string>
+    <string name="permgrouplab_activityRecognition" msgid="2838596644535616493">"التعرّف على النشاط"</string>
+    <string name="permgroupdesc_activityRecognition" msgid="7672248027571522602">"التعرّف على النشاط"</string>
+    <string name="permgrouprequest_activityRecognition" msgid="8121253142311250055">"‏هل تريد السماح للتطبيق &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; بالتعرّف على نشاطك البدني؟"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"الكاميرا"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"التقاط صور وتسجيل فيديو"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"‏هل تريد السماح لتطبيق &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; بالتقاط الصور وتسجيل الفيديو؟"</string>
@@ -430,14 +433,16 @@
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"‏يمكن لهذا التطبيق معرفة موقعك من خلال مصادر الشبكات مثل أبراج الجوّال وشبكات Wi-Fi. ويجب تشغيل خدمات المواقع هذه وأن تكون متاحة على الجهاز اللوحي حتى يتمكن التطبيق من استخدامها."</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"‏يمكن لهذا التطبيق معرفة موقعك من خلال مصادر الشبكات مثل أبراج الجوّال وشبكات Wi-Fi. ويجب تشغيل خدمات المواقع هذه وأن تكون متاحة على جهاز التلفزيون حتى يتمكن التطبيق من استخدامها."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"‏يمكن لهذا التطبيق معرفة موقعك من خلال مصادر الشبكات مثل أبراج الجوّال وشبكات Wi-Fi. ويجب تشغيل خدمات المواقع هذه وأن تكون متاحة على الهاتف حتى يتمكن التطبيق من استخدامها."</string>
-    <string name="permlab_accessBackgroundLocation" msgid="5742466381902568536">"الوصول إلى الموقع الجغرافي الدقيق في الخلفية"</string>
-    <string name="permdesc_accessBackgroundLocation" msgid="6371533283380774135">"يمكن لهذا التطبيق معرفة موقعك الجغرافي بالضبط في أي وقت يعمل به في الخلفية. ويجب تفعيل خدمات الموقع الجغرافي هذه وأن تكون متاحة على الهاتف حتى يتمكن التطبيق من استخدامها. وقد يؤدي هذا إلى زيادة استهلاك طاقة البطارية."</string>
+    <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"الوصول إلى الموقع الجغرافي في الخلفية"</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"إذا تمّ منح إذن التطبيق هذا بالإضافة إلى الموقع الجغرافي التقريبي أو الدقيق، يمكن للتطبيق الوصول إلى الموقع الجغرافي أثناء تشغيله في الخلفية."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"تغيير إعداداتك الصوتية"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"للسماح للتطبيق بتعديل إعدادات الصوت العامة مثل مستوى الصوت وأي السماعات يتم استخدامها للاستماع."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"تسجيل الصوت"</string>
     <string name="permdesc_recordAudio" msgid="4245930455135321433">"يمكن لهذا التطبيق تسجيل الصوت باستخدام الميكروفون في أي وقت."</string>
     <string name="permlab_sim_communication" msgid="2935852302216852065">"‏إرسال أوامر إلى شريحة SIM"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"‏السماح للتطبيق بإرسال أوامر إلى شريحة SIM. وهذا أمر بالغ الخطورة."</string>
+    <string name="permlab_activityRecognition" msgid="3634590230567608356">"التعرّف على النشاط البدني"</string>
+    <string name="permdesc_activityRecognition" msgid="3143453925156552894">"يمكن لهذا التطبيق التعرّف على نشاطك البدني."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"التقاط صور وفيديوهات"</string>
     <string name="permdesc_camera" msgid="5392231870049240670">"يمكن لهذا التطبيق التقاط صور وتسجيل فيديوهات باستخدام الكاميرا في أي وقت."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"التحكم في الاهتزاز"</string>
@@ -530,6 +535,7 @@
     <string name="permdesc_imagesWrite" msgid="7073662756617474375">"للسماح للتطبيق بتعديل مجموعة صورك."</string>
     <string name="permlab_mediaLocation" msgid="8675148183726247864">"قراءة المواقع من مجموعة الوسائط التابعة لك"</string>
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"للسماح للتطبيق بقراءة المواقع من مجموعة الوسائط التابعة لك."</string>
+    <string name="biometric_dialog_default_title" msgid="4229778503907743328">"يتطلَّب التطبيق <xliff:g id="APP">%s</xliff:g> المصادقة."</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"معدّات المقاييس الحيوية غير متاحة."</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"تم اكتشاف بصمة الإصبع بشكل جزئي؛ يرجى إعادة المحاولة."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"تعذرت معالجة بصمة الإصبع. يُرجى إعادة المحاولة."</string>
@@ -676,7 +682,7 @@
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"تعيين تشفير التخزين"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"يمكنك طلب تشفير بيانات التطبيق المخزنة."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"إيقاف الكاميرات"</string>
-    <string name="policydesc_disableCamera" msgid="2306349042834754597">"يمكنك منح استخدام جميع كاميرات الجهاز."</string>
+    <string name="policydesc_disableCamera" msgid="2306349042834754597">"يمكنك منع استخدام جميع كاميرات الجهاز."</string>
     <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"إيقاف بعض ميزات قفل الشاشة"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"منع استخدام بعض ميزات قفل الشاشة."</string>
   <string-array name="phoneTypes">
@@ -1173,7 +1179,7 @@
     <string name="view_flight_desc" msgid="3876322502674253506">"تتبُّع الرحلة الجوية المختارة"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"مساحة التخزين منخفضة"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"قد لا تعمل بعض وظائف النظام"</string>
-    <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"ليست هناك سعة تخزينية كافية للنظام. تأكد من أنه لديك مساحة خالية تبلغ ٢٥٠ ميغابايت وأعد التشغيل."</string>
+    <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"ليست هناك مساحة تخزين كافية للنظام. تأكد من أنه لديك مساحة خالية تبلغ ٢٥٠ ميغابايت وأعد التشغيل."</string>
     <string name="app_running_notification_title" msgid="8718335121060787914">"<xliff:g id="APP_NAME">%1$s</xliff:g> قيد التشغيل"</string>
     <string name="app_running_notification_text" msgid="1197581823314971177">"انقر للحصول على مزيد من المعلومات أو لإيقاف التطبيق."</string>
     <string name="ok" msgid="5970060430562524910">"حسنًا"</string>
@@ -1249,7 +1255,7 @@
     <string name="android_start_title" product="default" msgid="4536778526365907780">"جارٍ بدء تشغيل الهاتف…"</string>
     <string name="android_start_title" product="tablet" msgid="4929837533850340472">"جارٍ بدء تشغيل الجهاز اللوحي…"</string>
     <string name="android_start_title" product="device" msgid="7467484093260449437">"جارٍ بدء تشغيل الجهاز…"</string>
-    <string name="android_upgrading_fstrim" msgid="8036718871534640010">"جارٍ تحسين سعة التخزين."</string>
+    <string name="android_upgrading_fstrim" msgid="8036718871534640010">"جارٍ تحسين مساحة التخزين."</string>
     <string name="android_upgrading_notification_title" product="default" msgid="1511552415039349062">"جارٍ إنهاء تحديث النظام…"</string>
     <string name="app_upgrading_toast" msgid="3008139776215597053">"جارٍ ترقية <xliff:g id="APPLICATION">%1$s</xliff:g>…"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"جارٍ تحسين التطبيق <xliff:g id="NUMBER_0">%1$d</xliff:g> من <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
@@ -1594,7 +1600,7 @@
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"المزيد من الخيارات"</string>
     <string name="action_bar_home_description_format" msgid="7965984360903693903">"%1$s، %2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s، %2$s، %3$s"</string>
-    <string name="storage_internal" msgid="3570990907910199483">"سعة التخزين المشتركة الداخلية"</string>
+    <string name="storage_internal" msgid="3570990907910199483">"مساحة التخزين المشتركة الداخلية"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"‏بطاقة SD"</string>
     <string name="storage_sd_card_label" msgid="6347111320774379257">"‏بطاقة SD من <xliff:g id="MANUFACTURER">%s</xliff:g>"</string>
     <string name="storage_usb_drive" msgid="6261899683292244209">"‏محرك أقراص USB"</string>
@@ -2016,7 +2022,7 @@
     <string name="app_category_news" msgid="7496506240743986873">"الأخبار والمجلات"</string>
     <string name="app_category_maps" msgid="5878491404538024367">"الخرائط والتنقل"</string>
     <string name="app_category_productivity" msgid="3742083261781538852">"الإنتاجية"</string>
-    <string name="device_storage_monitor_notification_channel" msgid="3295871267414816228">"سعة التخزين للجهاز"</string>
+    <string name="device_storage_monitor_notification_channel" msgid="3295871267414816228">"مساحة التخزين للجهاز"</string>
     <string name="adb_debugging_notification_channel_tv" msgid="5537766997350092316">"‏تصحيح أخطاء USB"</string>
     <string name="time_picker_hour_label" msgid="2979075098868106450">"ساعة"</string>
     <string name="time_picker_minute_label" msgid="5168864173796598399">"دقيقة"</string>
@@ -2037,14 +2043,14 @@
       <item quantity="other"><xliff:g id="COUNT">%1$s</xliff:g> اقتراح للملء التلقائي</item>
       <item quantity="one">اقتراح واحد للملء التلقائي</item>
     </plurals>
-    <string name="autofill_save_title" msgid="3345527308992082601">"‏هل تريد الحفظ في &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;؟"</string>
-    <string name="autofill_save_title_with_type" msgid="8637809388029313305">"‏هل تريد حفظ <xliff:g id="TYPE">%1$s</xliff:g> في &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;؟"</string>
-    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"‏هل تريد حفظ <xliff:g id="TYPE_0">%1$s</xliff:g> و<xliff:g id="TYPE_1">%2$s</xliff:g> في &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;؟"</string>
-    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"‏هل تريد حفظ <xliff:g id="TYPE_0">%1$s</xliff:g> و<xliff:g id="TYPE_1">%2$s</xliff:g> و<xliff:g id="TYPE_2">%3$s</xliff:g> في &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;؟"</string>
-    <string name="autofill_update_title" msgid="4879673117448810818">"‏هل تريد التعديل إلى &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;؟"</string>
-    <string name="autofill_update_title_with_type" msgid="339733442087186755">"‏هل تريد تعديل <xliff:g id="TYPE">%1$s</xliff:g> إلى &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;؟"</string>
-    <string name="autofill_update_title_with_2types" msgid="6321714204167424745">"‏هل تريد تعديل <xliff:g id="TYPE_0">%1$s</xliff:g> و<xliff:g id="TYPE_1">%2$s</xliff:g> إلى &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;؟"</string>
-    <string name="autofill_update_title_with_3types" msgid="5866735124066629287">"‏هل تريد تعديل <xliff:g id="TYPE_0">%1$s</xliff:g> و<xliff:g id="TYPE_1">%2$s</xliff:g> و<xliff:g id="TYPE_2">%3$s</xliff:g> إلى &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;؟"</string>
+    <string name="autofill_save_title" msgid="327541108460384555">"هل تريد الحفظ في "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"؟"</string>
+    <string name="autofill_save_title_with_type" msgid="2339135393607143594">"هل تريد حفظ <xliff:g id="TYPE">%1$s</xliff:g> في "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"؟"</string>
+    <string name="autofill_save_title_with_2types" msgid="87616102361154432">"هل تريد حفظ <xliff:g id="TYPE_0">%1$s</xliff:g> و<xliff:g id="TYPE_1">%2$s</xliff:g> في "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"؟"</string>
+    <string name="autofill_save_title_with_3types" msgid="4108978552969604555">"هل تريد حفظ <xliff:g id="TYPE_0">%1$s</xliff:g> و<xliff:g id="TYPE_1">%2$s</xliff:g> و<xliff:g id="TYPE_2">%3$s</xliff:g> في "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>"؟"</string>
+    <string name="autofill_update_title" msgid="5305781141104585279">"هل تريد التحديث في "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"؟"</string>
+    <string name="autofill_update_title_with_type" msgid="4624181147422762233">"هل تريد تحديث <xliff:g id="TYPE">%1$s</xliff:g> في "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"؟"</string>
+    <string name="autofill_update_title_with_2types" msgid="2300113827053626484">"هل تريد تحديث <xliff:g id="TYPE_0">%1$s</xliff:g> و<xliff:g id="TYPE_1">%2$s</xliff:g> في "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"؟"</string>
+    <string name="autofill_update_title_with_3types" msgid="9089824354296211922">"هل تريد تحديث هذه العناصر في "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>": <xliff:g id="TYPE_0">%1$s</xliff:g> و<xliff:g id="TYPE_1">%2$s</xliff:g> و<xliff:g id="TYPE_2">%3$s</xliff:g>؟"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"حفظ"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"لا، شكرًا"</string>
     <string name="autofill_update_yes" msgid="310358413273276958">"تعديل"</string>

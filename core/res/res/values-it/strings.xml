@@ -292,6 +292,9 @@
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Microfono"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"registrare audio"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"Consentire all\'app &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; di registrare audio?"</string>
+    <string name="permgrouplab_activityRecognition" msgid="2838596644535616493">"Riconoscimento di attività"</string>
+    <string name="permgroupdesc_activityRecognition" msgid="7672248027571522602">"riconoscere l\'attività"</string>
+    <string name="permgrouprequest_activityRecognition" msgid="8121253142311250055">"Vuoi consentire a &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; di riconoscere la tua attività fisica?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Fotocamera"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"scattare foto e registrare video"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"Consentire a &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; di scattare foto e registrare video?"</string>
@@ -418,14 +421,16 @@
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Questa app può accedere alla tua posizione tramite fonti di rete come antenne di telefonia mobile e reti Wi-Fi. Tali servizi di geolocalizzazione devono essere attivati e disponibili sul tablet per consentire all\'app di utilizzarli."</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"Questa app può accedere alla tua posizione tramite fonti di rete come antenne di telefonia mobile e reti Wi-Fi. Tali servizi di geolocalizzazione devono essere attivati e disponibili sulla TV per consentire all\'app di utilizzarli."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"Questa app può accedere alla tua posizione tramite fonti di rete come antenne di telefonia mobile e reti Wi-Fi. Tali servizi di geolocalizzazione devono essere attivati e disponibili sul telefono per consentire all\'app di utilizzarli."</string>
-    <string name="permlab_accessBackgroundLocation" msgid="5742466381902568536">"Accesso alla posizione esatta in background"</string>
-    <string name="permdesc_accessBackgroundLocation" msgid="6371533283380774135">"Questa app può recuperare la tua posizione esatta quando è in background. Questi servizi di geolocalizzazione devono essere attivi e disponibili sul telefono affinché l\'app possa usarli. Potrebbe aumentare il consumo della batteria."</string>
+    <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"accesso alla posizione in background"</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"Se concedi l\'autorizzazione insieme all\'accesso alla posizione precisa o approssimativa, l\'app potrà accedere alla posizione mentre viene eseguita in background."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"modifica impostazioni audio"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Consente all\'applicazione di modificare le impostazioni audio globali, come il volume e quale altoparlante viene utilizzato per l\'uscita."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"registrare audio"</string>
     <string name="permdesc_recordAudio" msgid="4245930455135321433">"Questa app può registrare audio tramite il microfono in qualsiasi momento."</string>
     <string name="permlab_sim_communication" msgid="2935852302216852065">"invio di comandi alla SIM"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Consente all\'app di inviare comandi alla SIM. Questo è molto pericoloso."</string>
+    <string name="permlab_activityRecognition" msgid="3634590230567608356">"riconoscimento dell\'attività fisica"</string>
+    <string name="permdesc_activityRecognition" msgid="3143453925156552894">"Questa app può riconoscere la tua attività fisica."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"acquisizione di foto e video"</string>
     <string name="permdesc_camera" msgid="5392231870049240670">"Questa app può scattare foto e registrare video tramite la fotocamera in qualsiasi momento."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"controllo vibrazione"</string>
@@ -518,6 +523,7 @@
     <string name="permdesc_imagesWrite" msgid="7073662756617474375">"Consente all\'app di modificare la tua raccolta di foto."</string>
     <string name="permlab_mediaLocation" msgid="8675148183726247864">"Lettura delle posizioni dalla tua raccolta multimediale"</string>
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"Consente all\'app di leggere le posizioni dalla tua raccolta multimediale."</string>
+    <string name="biometric_dialog_default_title" msgid="4229778503907743328">"L\'app <xliff:g id="APP">%s</xliff:g> richiede l\'autenticazione."</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"Hardware biometrico non disponibile"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Rilevata impronta digitale parziale. Riprova."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Impossibile elaborare l\'impronta digitale. Riprova."</string>
@@ -1174,7 +1180,7 @@
     <string name="app_upgrading_toast" msgid="3008139776215597053">"Upgrade dell\'app <xliff:g id="APPLICATION">%1$s</xliff:g>…"</string>
     <string name="android_upgrading_apk" msgid="7904042682111526169">"Ottimizzazione applicazione <xliff:g id="NUMBER_0">%1$d</xliff:g> di <xliff:g id="NUMBER_1">%2$d</xliff:g>."</string>
     <string name="android_preparing_apk" msgid="8162599310274079154">"<xliff:g id="APPNAME">%1$s</xliff:g> in preparazione."</string>
-    <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Avvio applicazioni."</string>
+    <string name="android_upgrading_starting_apps" msgid="451464516346926713">"Avvio app."</string>
     <string name="android_upgrading_complete" msgid="1405954754112999229">"Conclusione dell\'avvio."</string>
     <string name="heavy_weight_notification" msgid="9087063985776626166">"<xliff:g id="APP">%1$s</xliff:g> in esecuzione"</string>
     <string name="heavy_weight_notification_detail" msgid="2304833848484424985">"Tocca per tornare al gioco"</string>
@@ -1802,7 +1808,7 @@
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Comprimi"</string>
     <string name="zen_mode_feature_name" msgid="5254089399895895004">"Non disturbare"</string>
-    <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"Tempo di inattività"</string>
+    <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"Tempo di riposo"</string>
     <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"Notte di un giorno feriale"</string>
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Fine settimana"</string>
     <string name="zen_mode_default_events_name" msgid="8158334939013085363">"Evento"</string>
@@ -1897,14 +1903,14 @@
       <item quantity="other"><xliff:g id="COUNT">%1$s</xliff:g> suggerimenti di Compilazione automatica</item>
       <item quantity="one">Un suggerimento di Compilazione automatica</item>
     </plurals>
-    <string name="autofill_save_title" msgid="3345527308992082601">"Salvare in &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_save_title_with_type" msgid="8637809388029313305">"Salvare <xliff:g id="TYPE">%1$s</xliff:g> in &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"Salvare <xliff:g id="TYPE_0">%1$s</xliff:g> e <xliff:g id="TYPE_1">%2$s</xliff:g> in &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"Salvare <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> e <xliff:g id="TYPE_2">%3$s</xliff:g> in &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_update_title" msgid="4879673117448810818">"Vuoi eseguire l\'aggiornamento a &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_update_title_with_type" msgid="339733442087186755">"Vuoi eseguire l\'aggiornamento di <xliff:g id="TYPE">%1$s</xliff:g> a &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_update_title_with_2types" msgid="6321714204167424745">"Vuoi eseguire l\'aggiornamento di <xliff:g id="TYPE_0">%1$s</xliff:g> e <xliff:g id="TYPE_1">%2$s</xliff:g> a &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_update_title_with_3types" msgid="5866735124066629287">"Vuoi eseguire l\'aggiornamento di <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> e <xliff:g id="TYPE_2">%3$s</xliff:g> a &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_save_title" msgid="327541108460384555">"Vuoi salvare su "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_save_title_with_type" msgid="2339135393607143594">"Vuoi salvare <xliff:g id="TYPE">%1$s</xliff:g> su "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_save_title_with_2types" msgid="87616102361154432">"Vuoi salvare <xliff:g id="TYPE_0">%1$s</xliff:g> e <xliff:g id="TYPE_1">%2$s</xliff:g> su "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_save_title_with_3types" msgid="4108978552969604555">"Vuoi salvare <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> e <xliff:g id="TYPE_2">%3$s</xliff:g> su "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_update_title" msgid="5305781141104585279">"Vuoi aggiornare su "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_update_title_with_type" msgid="4624181147422762233">"Vuoi aggiornare <xliff:g id="TYPE">%1$s</xliff:g> su "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_update_title_with_2types" msgid="2300113827053626484">"Vuoi aggiornare <xliff:g id="TYPE_0">%1$s</xliff:g> e <xliff:g id="TYPE_1">%2$s</xliff:g> su "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_update_title_with_3types" msgid="9089824354296211922">"Vuoi aggiornare questi elementi su "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>": <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> e <xliff:g id="TYPE_2">%3$s</xliff:g>?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"Salva"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"No, grazie"</string>
     <string name="autofill_update_yes" msgid="310358413273276958">"Aggiorna"</string>

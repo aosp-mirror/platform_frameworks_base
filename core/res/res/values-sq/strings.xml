@@ -292,6 +292,9 @@
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofoni"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"regjistro audio"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"Të lejohet që &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; të regjistrojë audio?"</string>
+    <string name="permgrouplab_activityRecognition" msgid="2838596644535616493">"Njohja e aktivitetit"</string>
+    <string name="permgroupdesc_activityRecognition" msgid="7672248027571522602">"njih aktivitetin"</string>
+    <string name="permgrouprequest_activityRecognition" msgid="8121253142311250055">"Të lejohet që &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; të njohë aktivitetin tënd fizik?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Kamera"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"bëj fotografi dhe regjistro video"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"Të lejohet që &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; të nxjerrë fotografi dhe të regjistrojë video?"</string>
@@ -418,14 +421,16 @@
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Ky aplikacion mund të marrë vendndodhjen tënde bazuar në burimet e rrjetit si antenat e operatorëve celulare dhe rrjetet Wi-Fi. Këto shërbime të vendndodhjes duhet të jenë të aktivizuara dhe në dispozicion në tabletin tënd që aplikacioni të mund t\'i përdorë."</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"Ky aplikacion mund të marrë vendndodhjen tënde bazuar në burimet e rrjetit si antenat e operatorëve celulare dhe rrjetet Wi-Fi. Këto shërbime të vendndodhjes duhet të jenë të aktivizuara dhe në dispozicion në televizorin tënd që aplikacioni të mund t\'i përdorë."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"Ky aplikacion mund të marrë vendndodhjen tënde bazuar në burimet e rrjetit si antenat e operatorëve celulare dhe rrjetet Wi-Fi. Këto shërbime të vendndodhjes duhet të jenë të aktivizuara dhe në dispozicion në telefonin tënd që aplikacioni të mund t\'i përdorë."</string>
-    <string name="permlab_accessBackgroundLocation" msgid="5742466381902568536">"qasu në vendndodhjen e saktë në sfond"</string>
-    <string name="permdesc_accessBackgroundLocation" msgid="6371533283380774135">"Ky aplikacion mund të marrë vendndodhjen tënde të saktë në çdo kohë kur është në sfond. Këto shërbime të vendndodhjes duhet të jenë të aktivizuara dhe në dispozicion në telefonin tënd që aplikacioni të mund t\'i përdorë. Kjo gjë mund të rritë konsumin e baterisë."</string>
+    <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"qasje te vendndodhja në sfond"</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"Nëse kjo jepet përveç qasjes te vendndodhja e përafërt ose të saktë, aplikacioni mund të qaset te vendndodhja ndërkohë që ekzekutohet në sfond."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"ndrysho cilësimet e audios"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Lejon aplikacionin të modifikojë cilësimet globale të audios siç është volumi dhe se cili altoparlant përdoret për daljen."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"regjistro audio"</string>
     <string name="permdesc_recordAudio" msgid="4245930455135321433">"Ky aplikacion mund të regjistrojë audio me mikrofonin në çdo kohë."</string>
     <string name="permlab_sim_communication" msgid="2935852302216852065">"dërgo komanda te karta SIM"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Lejon aplikacionin t\'i dërgojë komanda kartës SIM. Kjo është shumë e rrezikshme."</string>
+    <string name="permlab_activityRecognition" msgid="3634590230567608356">"njih aktivitetin fizik"</string>
+    <string name="permdesc_activityRecognition" msgid="3143453925156552894">"Ky aplikacion mund të njohë aktivitetin tënd fizik."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"bëj fotografi dhe video"</string>
     <string name="permdesc_camera" msgid="5392231870049240670">"Ky aplikacion mund të nxjerrë fotografi dhe të regjistrojë video me kamerën tënde në çdo kohë."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"kontrollo dridhjen"</string>
@@ -518,6 +523,7 @@
     <string name="permdesc_imagesWrite" msgid="7073662756617474375">"Lejon aplikacionin të modifikojë koleksionin tënd të fotografive."</string>
     <string name="permlab_mediaLocation" msgid="8675148183726247864">"lexo vendndodhjet nga koleksioni yt i medias"</string>
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"Lejon aplikacionin të lexojë vendndodhjet nga koleksioni yt i medias."</string>
+    <string name="biometric_dialog_default_title" msgid="4229778503907743328">"Aplikacioni <xliff:g id="APP">%s</xliff:g> dëshiron të vërtetojë."</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"Nuk ofrohet harduer biometrik"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"U zbulua një gjurmë gishti e pjesshme. Provo përsëri."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Gjurma e gishtit nuk mund të përpunohej. Provo përsëri."</string>
@@ -1898,14 +1904,14 @@
       <item quantity="other"><xliff:g id="COUNT">%1$s</xliff:g> sugjerime për plotësim automatik</item>
       <item quantity="one">Një sugjerim për plotësim automatik</item>
     </plurals>
-    <string name="autofill_save_title" msgid="3345527308992082601">"Të ruhet te &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_save_title_with_type" msgid="8637809388029313305">"Të ruhet <xliff:g id="TYPE">%1$s</xliff:g> te &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"Të ruhen <xliff:g id="TYPE_0">%1$s</xliff:g> dhe <xliff:g id="TYPE_1">%2$s</xliff:g> te &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"Të ruhen <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> dhe <xliff:g id="TYPE_2">%3$s</xliff:g> te &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_update_title" msgid="4879673117448810818">"Të përditësohet te &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_update_title_with_type" msgid="339733442087186755">"Të përditësohet <xliff:g id="TYPE">%1$s</xliff:g> te &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_update_title_with_2types" msgid="6321714204167424745">"Të përditësohen <xliff:g id="TYPE_0">%1$s</xliff:g> dhe <xliff:g id="TYPE_1">%2$s</xliff:g> te &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_update_title_with_3types" msgid="5866735124066629287">"Të përditësohen <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> dhe <xliff:g id="TYPE_2">%3$s</xliff:g> te &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_save_title" msgid="327541108460384555">"Të ruhet te "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_save_title_with_type" msgid="2339135393607143594">"Të ruhet <xliff:g id="TYPE">%1$s</xliff:g> te "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_save_title_with_2types" msgid="87616102361154432">"Të ruhet <xliff:g id="TYPE_0">%1$s</xliff:g> dhe <xliff:g id="TYPE_1">%2$s</xliff:g> te "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_save_title_with_3types" msgid="4108978552969604555">"Të ruhet <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> dhe <xliff:g id="TYPE_2">%3$s</xliff:g> te "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_update_title" msgid="5305781141104585279">"Të përditësohet në "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_update_title_with_type" msgid="4624181147422762233">"Të përditësohet <xliff:g id="TYPE">%1$s</xliff:g> në "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_update_title_with_2types" msgid="2300113827053626484">"Të përditësohet <xliff:g id="TYPE_0">%1$s</xliff:g> dhe <xliff:g id="TYPE_1">%2$s</xliff:g> në "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_update_title_with_3types" msgid="9089824354296211922">"Të përditësohen këta artikuj në "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>": <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> dhe <xliff:g id="TYPE_2">%3$s</xliff:g> ?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"Ruaj"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"Jo, faleminderit"</string>
     <string name="autofill_update_yes" msgid="310358413273276958">"Përditëso"</string>

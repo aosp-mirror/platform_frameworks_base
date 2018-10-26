@@ -292,6 +292,9 @@
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Micrófono"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"gravar audio"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"Queres permitir que a aplicación &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; grave audio?"</string>
+    <string name="permgrouplab_activityRecognition" msgid="2838596644535616493">"Recoñecemento da actividade"</string>
+    <string name="permgroupdesc_activityRecognition" msgid="7672248027571522602">"recoñecer actividade"</string>
+    <string name="permgrouprequest_activityRecognition" msgid="8121253142311250055">"Queres permitir que &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; recoñeza a túa actividade física?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Cámara"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"tirar fotos e gravar vídeos"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"Queres permitir que a aplicación &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; realice fotos e grave vídeos?"</string>
@@ -418,14 +421,16 @@
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Esta aplicación pode obter a túa localización a partir de fontes de rede como torres de telecomunicacións e redes wifi. Para que a aplicación poida utilizar os servizos de localización, deben estar activados e dispoñibles na túa tableta."</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"Esta aplicación pode obter a túa localización a partir de fontes de rede como torres de telecomunicacións e redes wifi. Para que a aplicación poida utilizar os servizos de localización, deben estar activados e dispoñibles na túa televisión."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"Esta aplicación pode obter a túa localización a partir de fontes de rede como torres de telecomunicacións e redes wifi. Para que a aplicación poida utilizar os servizos de localización, deben estar activados e dispoñibles no teu teléfono."</string>
-    <string name="permlab_accessBackgroundLocation" msgid="5742466381902568536">"acceder á localización exacta en segundo plano"</string>
-    <string name="permdesc_accessBackgroundLocation" msgid="6371533283380774135">"Esta aplicación pode obter a túa localización exacta cando estea en segundo plano. É necesario activar estes servizos de localización e deben estar dispoñibles no teléfono para que a aplicación poida utilizalos. Ademais, poden supoñer un aumento do consumo de batería."</string>
+    <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"acceder á localización en segundo plano"</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"Se a aplicación ten acceso á localización aproximada ou exacta e lle concedes este permiso, poderá consultar onde te atopas cando estea en segundo plano."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"cambiar a configuración de son"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Permite á aplicación modificar a configuración de audio global, como o volume e que altofalante se utiliza para a saída."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"gravar audio"</string>
     <string name="permdesc_recordAudio" msgid="4245930455135321433">"Esta aplicación pode utilizar o micrófono en calquera momento para gravar audio."</string>
     <string name="permlab_sim_communication" msgid="2935852302216852065">"enviar comandos á SIM"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Permite á aplicación enviar comandos á SIM. Isto é moi perigoso."</string>
+    <string name="permlab_activityRecognition" msgid="3634590230567608356">"recoñecer actividade física"</string>
+    <string name="permdesc_activityRecognition" msgid="3143453925156552894">"Esta aplicación pode recoñecer a túa actividade física."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"facer fotos e vídeos"</string>
     <string name="permdesc_camera" msgid="5392231870049240670">"Esta aplicación pode utilizar a cámara en calquera momento para sacar fotos e gravar vídeos."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"controlar a vibración"</string>
@@ -518,6 +523,7 @@
     <string name="permdesc_imagesWrite" msgid="7073662756617474375">"Permite que a aplicación modifique a túa colección de fotos."</string>
     <string name="permlab_mediaLocation" msgid="8675148183726247864">"ler localizacións da túa colección multimedia"</string>
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"Permite que a aplicación lea as localizacións da túa colección multimedia."</string>
+    <string name="biometric_dialog_default_title" msgid="4229778503907743328">"A aplicación <xliff:g id="APP">%s</xliff:g> quere que te autentiques."</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"O hardware biométrico non está dispoñible"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Detectouse unha impresión dixital parcial. Téntao de novo."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Non se puido procesar a impresión dixital. Téntao de novo."</string>
@@ -1898,14 +1904,14 @@
       <item quantity="other"><xliff:g id="COUNT">%1$s</xliff:g> suxestións de autocompletar</item>
       <item quantity="one">Unha suxestión de autocompletar</item>
     </plurals>
-    <string name="autofill_save_title" msgid="3345527308992082601">"Queres gardar o contido en: &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_save_title_with_type" msgid="8637809388029313305">"Queres gardar <xliff:g id="TYPE">%1$s</xliff:g> en: &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"Queres gardar estes datos (<xliff:g id="TYPE_0">%1$s</xliff:g> e <xliff:g id="TYPE_1">%2$s</xliff:g>) en &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"Queres gardar estes datos (<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> e <xliff:g id="TYPE_2">%3$s</xliff:g>) en &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_update_title" msgid="4879673117448810818">"Queres actualizar &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt; con estes datos?"</string>
-    <string name="autofill_update_title_with_type" msgid="339733442087186755">"Queres actualizar &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt; con estes datos (<xliff:g id="TYPE">%1$s</xliff:g>)?"</string>
-    <string name="autofill_update_title_with_2types" msgid="6321714204167424745">"Queres actualizar &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt; con estes datos (<xliff:g id="TYPE_0">%1$s</xliff:g> e <xliff:g id="TYPE_1">%2$s</xliff:g>)?"</string>
-    <string name="autofill_update_title_with_3types" msgid="5866735124066629287">"Queres actualizar &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt; con estes datos (<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> e <xliff:g id="TYPE_2">%3$s</xliff:g>)?"</string>
+    <string name="autofill_save_title" msgid="327541108460384555">"Queres gardar o contido en "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_save_title_with_type" msgid="2339135393607143594">"Queres gardar <xliff:g id="TYPE">%1$s</xliff:g> en "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_save_title_with_2types" msgid="87616102361154432">"Queres gardar <xliff:g id="TYPE_0">%1$s</xliff:g> e <xliff:g id="TYPE_1">%2$s</xliff:g> en "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_save_title_with_3types" msgid="4108978552969604555">"Queres gardar <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> e <xliff:g id="TYPE_2">%3$s</xliff:g> en "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_update_title" msgid="5305781141104585279">"Queres actualizar o contido en "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_update_title_with_type" msgid="4624181147422762233">"Queres actualizar <xliff:g id="TYPE">%1$s</xliff:g> en "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_update_title_with_2types" msgid="2300113827053626484">"Queres actualizar <xliff:g id="TYPE_0">%1$s</xliff:g> e <xliff:g id="TYPE_1">%2$s</xliff:g> en "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_update_title_with_3types" msgid="9089824354296211922">"Queres actualizar <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> e <xliff:g id="TYPE_2">%3$s</xliff:g> en "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>"?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"Gardar"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"Non, grazas"</string>
     <string name="autofill_update_yes" msgid="310358413273276958">"Actualizar"</string>

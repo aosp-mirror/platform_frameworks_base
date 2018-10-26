@@ -292,6 +292,9 @@
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Kipokea sauti"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"irekodi sauti"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"Ungependa kuiruhusu &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; irekodi sauti?"</string>
+    <string name="permgrouplab_activityRecognition" msgid="2838596644535616493">"Kutambua shughuli"</string>
+    <string name="permgroupdesc_activityRecognition" msgid="7672248027571522602">"itambue shughuli"</string>
+    <string name="permgrouprequest_activityRecognition" msgid="8121253142311250055">"Ungependa kuruhusu &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; itambue shughuli unazofanya?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Kamera"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"ipige picha na kurekodi video"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"Ungependa kuiruhusu &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ipige picha na kurekodi video?"</string>
@@ -418,14 +421,16 @@
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Programu hii inaweza kupata eneo lako kulingana na vyanzo vya mtandao kama vile minara ya simu na mitandao ya Wi-Fi. Huduma hizi za mahali lazima ziwashwe na zipatikane kwenye kompyuta yako kibao ili programu iweze kuzitumia."</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"Programu hii inaweza kupata eneo lako kulingana na vyanzo vya mtandao kama vile minara ya simu na mitandao ya Wi-Fi. Huduma hizi za mahali lazima ziwashwe na zipatikane kwenye runinga yako ili programu iweze kuzitumia."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"Programu hii inaweza kupata eneo lako kulingana na vyanzo vya mtandao kama vile minara ya simu na mitandao ya Wi-Fi. Huduma hizi za mahali lazima ziwashwe na zipatikane kwenye simu yako ili programu iweze kuzitumia."</string>
-    <string name="permlab_accessBackgroundLocation" msgid="5742466381902568536">"kufikia mahali halisi ikiwa inatumika chinichini"</string>
-    <string name="permdesc_accessBackgroundLocation" msgid="6371533283380774135">"Programu hii inaweza kupata mahali halisi ulipo wakati wowote ikiwa inatumika chinichini. Ni lazima uwashe huduma hizi za mahali na zipatikane kwenye simu yako ili programu iweze kuzitumia. Hatua hii inaweza kuongeza utumiaji wa betri."</string>
+    <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"ifikie mahali inapotumika chinichini"</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"Kama ruhusa hii itatolewa, mbali na idhini ya kufikia mahali panapokadiriwa au mahali mahususi, programu inaweza kufikia mahali wakati inatumika chinichini."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"badilisha mipangilio yako ya sauti"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Inaruhusu programu kurekebisha mipangilio ya sauti kila mahali kama vile sauti na ni kipaza sauti kipi ambacho kinatumika kwa kutoa."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"kurekodi sauti"</string>
     <string name="permdesc_recordAudio" msgid="4245930455135321433">"Programu hii inaweza kurekodi sauti kwa kutumia maikrofoni wakati wowote."</string>
     <string name="permlab_sim_communication" msgid="2935852302216852065">"tuma amri kwenye SIM"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Huruhusu programu kutuma amri kwa SIM. Hii ni hatari sana."</string>
+    <string name="permlab_activityRecognition" msgid="3634590230567608356">"itambue shughuli unazofanya"</string>
+    <string name="permdesc_activityRecognition" msgid="3143453925156552894">"Programu hii inaweza kutambua shughuli unazofanya."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"Kupiga picha na kurekodi video"</string>
     <string name="permdesc_camera" msgid="5392231870049240670">"Programu hii inaweza kupiga picha na kurekodi video kwa kutumia kamera wakati wowote."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"Kudhibiti mtetemo"</string>
@@ -465,7 +470,7 @@
     <string name="permdesc_getAccounts" product="tv" msgid="4190633395633907543">"Huruhusu programu kupata orodha ya akaunti zinazojulikana na runinga. Hii inaweza kujumuisha akaunti zozote zilizofunguliwa na programu ambazo umesakinisha."</string>
     <string name="permdesc_getAccounts" product="default" msgid="3448316822451807382">"Inaruhusu programu kupata orodha ya akaunti zinazojulikana kwa simu. Hii inaweza kujumuisha akaunti zozote zilizoundwa na programu ambazo umesakinisha."</string>
     <string name="permlab_accessNetworkState" msgid="4951027964348974773">"kuona mitandao"</string>
-    <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Inaruhusu programu kuona taarifa kuhusu miunganisho ya mtandao kama vile mitandao ipi iliyopo na imeunganishwa."</string>
+    <string name="permdesc_accessNetworkState" msgid="8318964424675960975">"Huruhusu programu kuona taarifa kuhusu miunganisho ya mtandao kama vile mitandao iliyopo na iliyounganishwa."</string>
     <string name="permlab_createNetworkSockets" msgid="7934516631384168107">"pata ufikiaji kamili wa mtandao"</string>
     <string name="permdesc_createNetworkSockets" msgid="3403062187779724185">"Inaruhusu programu kuunda soketi za mtandao na kutumia itifaki za mtandao maalum. Kivinajri na programu nyingine zilizotolewa zinamaanisha kutuma data kwenye mtandao, kwa hivyo kibali hiki hakihitajiki kutuma data kwenye mtandao."</string>
     <string name="permlab_changeNetworkState" msgid="958884291454327309">"kubadilisha muunganisho wa mtandao"</string>
@@ -473,7 +478,7 @@
     <string name="permlab_changeTetherState" msgid="5952584964373017960">"Badilisha muunganisho uliofunganishwa"</string>
     <string name="permdesc_changeTetherState" msgid="1524441344412319780">"Inaruhusu programu kubadilisha hali ya muunganisho wa mtandao uliofungwa."</string>
     <string name="permlab_accessWifiState" msgid="5202012949247040011">"Kuona miunganisho ya Wi-Fi"</string>
-    <string name="permdesc_accessWifiState" msgid="5002798077387803726">"Inaruhusu programu kuona taarifa kuhusu mtandao wa Wi-Fi, kama vile ikiwa Wi-Fi imewezeshwa mna jina la vifaa vya Wi-Fi vilivyounganishwa."</string>
+    <string name="permdesc_accessWifiState" msgid="5002798077387803726">"Huruhusu programu kuona taarifa kuhusu mtandao wa Wi-Fi, kama vile ikiwa Wi-Fi imewashwa na majina ya vifaa vya Wi-Fi vilivyounganishwa."</string>
     <string name="permlab_changeWifiState" msgid="6550641188749128035">"unganisha na utenganishe kutoka kwa Wi-Fi"</string>
     <string name="permdesc_changeWifiState" msgid="7137950297386127533">"Inaruhusu programu kuunganisha kwenye au kukata kutoka pointi za ufikivu wa Wi-Fi na kufanya mabadiliko kwenye usanidi wa kifaa cha mitandao ya Wi-Fi."</string>
     <string name="permlab_changeWifiMulticastState" msgid="1368253871483254784">"ruhusu upokeaji wa Wi-Fi Multicast"</string>
@@ -491,9 +496,9 @@
     <string name="permdesc_changeWimaxState" product="tv" msgid="6022307083934827718">"Huruhusu programu kuunganisha runinga kwenye na kuondoa runinga kutoka mitandao ya WiMAX."</string>
     <string name="permdesc_changeWimaxState" product="default" msgid="697025043004923798">"Inaruhusu programu kuunganisha simu kwenye, na kukata simu kutoka mitandao ya WiMAX."</string>
     <string name="permlab_bluetooth" msgid="6127769336339276828">"oanisha na vifaa vya Bluetooth"</string>
-    <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Inaruhusu programu kuona usanidi wa Bluetooth kwenye kompyuta kibao, na kuunda na kukubali miunganisho kwa vifaa vilivyooanishwa."</string>
+    <string name="permdesc_bluetooth" product="tablet" msgid="3480722181852438628">"Huruhusu programu kuona usanidi wa Bluetooth kwenye kompyuta kibao, na kutuma na kukubali miunganisho kwa vifaa vilivyooanishwa."</string>
     <string name="permdesc_bluetooth" product="tv" msgid="3974124940101104206">"Huruhusu programu kuona usanidi wa Bluetooth kwenye runinga, na kuomba na kukubali miunganisho kwa vifaa vilivyooanishwa."</string>
-    <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Inaruhusu programu kuona usanidi wa Bluetooth kwenye simu, na kuunda na kukubali miunganisho kwa vifaa vilivyooanishwa."</string>
+    <string name="permdesc_bluetooth" product="default" msgid="3207106324452312739">"Huruhusu programu kuona usanidi wa Bluetooth kwenye simu, na kutuma na kukubali miunganisho kwa vifaa vilivyooanishwa."</string>
     <string name="permlab_nfc" msgid="4423351274757876953">"kudhibiti Mawasiliano ya Vifaa Vilivyokaribu (NFC)"</string>
     <string name="permdesc_nfc" msgid="7120611819401789907">"Inaruhusu programu kuwasiliana na lebo, kadi na wasomaji wa Near Field Communication (NFC)."</string>
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"zima kufuli la skrini yako"</string>
@@ -518,6 +523,7 @@
     <string name="permdesc_imagesWrite" msgid="7073662756617474375">"Inaruhusu programu kubadilisha mkusanyiko wa picha zako."</string>
     <string name="permlab_mediaLocation" msgid="8675148183726247864">"kusoma maeneo kwenye mkusanyiko wa vipengee vyako"</string>
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"Inaruhusu programu kusoma maeneo kwenye mkusanyiko wa vipengee vyako."</string>
+    <string name="biometric_dialog_default_title" msgid="4229778503907743328">"Programu ya <xliff:g id="APP">%s</xliff:g> inataka kuthibitishwa."</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"Maunzi ya bayometriki hayapatikani"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Kitambuzi kimegundua sehemu ya kitambulisho. Tafadhali jaribu tena."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Haikuweza kuchakata kitambulisho. Tafadhali jaribu tena."</string>
@@ -1581,7 +1587,7 @@
     </plurals>
     <string name="kg_pattern_instructions" msgid="398978611683075868">"Chora ruwaza yako"</string>
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Ingiza PIN ya SIM"</string>
-    <string name="kg_pin_instructions" msgid="2377242233495111557">"Ingiza PIN"</string>
+    <string name="kg_pin_instructions" msgid="2377242233495111557">"Weka PIN"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"Weka Nenosiri"</string>
     <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"SIM sasa imelemazwa. Ingiza msimbo wa PUK ili kuendelea. Wasiliana na mtoa huduma kwa maelezo."</string>
     <string name="kg_puk_enter_pin_hint" msgid="7871604527429602024">"Weka nambari yako ya PIN"</string>
@@ -1725,7 +1731,7 @@
     <string name="print_service_installed_title" msgid="2246317169444081628">"Huduma ya <xliff:g id="NAME">%s</xliff:g> imesakinisha"</string>
     <string name="print_service_installed_message" msgid="5897362931070459152">"Gusa ili uwashe"</string>
     <string name="restr_pin_enter_admin_pin" msgid="8641662909467236832">"Weka PIN ya msimamizi"</string>
-    <string name="restr_pin_enter_pin" msgid="3395953421368476103">"Ingiza PIN"</string>
+    <string name="restr_pin_enter_pin" msgid="3395953421368476103">"Weka PIN"</string>
     <string name="restr_pin_incorrect" msgid="8571512003955077924">"Sio sahihi"</string>
     <string name="restr_pin_enter_old_pin" msgid="1462206225512910757">"PIN ya sasa"</string>
     <string name="restr_pin_enter_new_pin" msgid="5959606691619959184">"PIN mpya"</string>
@@ -1897,14 +1903,14 @@
       <item quantity="other">Mapendekezo <xliff:g id="COUNT">%1$s</xliff:g> ya kujaza kiotomatiki</item>
       <item quantity="one">Pendekezo moja la kujaza kiotomatiki</item>
     </plurals>
-    <string name="autofill_save_title" msgid="3345527308992082601">"Ungependa kuhifadhi kwenye &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_save_title_with_type" msgid="8637809388029313305">"Ungependa kuhifadhi <xliff:g id="TYPE">%1$s</xliff:g> kwenye &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"Ungependa kuhifadhi <xliff:g id="TYPE_0">%1$s</xliff:g> na <xliff:g id="TYPE_1">%2$s</xliff:g> kwenye &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"Ungependa kuhifadhi <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g>, na <xliff:g id="TYPE_2">%3$s</xliff:g> kwenye &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_update_title" msgid="4879673117448810818">"Ungependa kusasisha kuwa &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_update_title_with_type" msgid="339733442087186755">"Ungependa kusasisha <xliff:g id="TYPE">%1$s</xliff:g> kuwa &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_update_title_with_2types" msgid="6321714204167424745">"Ungependa kusasisha <xliff:g id="TYPE_0">%1$s</xliff:g> na <xliff:g id="TYPE_1">%2$s</xliff:g> kuwa &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_update_title_with_3types" msgid="5866735124066629287">"Ungependa kusasisha <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> na <xliff:g id="TYPE_2">%3$s</xliff:g> kuwa &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_save_title" msgid="327541108460384555">"Ungependa kuhifadhi kwenye "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_save_title_with_type" msgid="2339135393607143594">"Ungependa kuhifadhi <xliff:g id="TYPE">%1$s</xliff:g> kwenye "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_save_title_with_2types" msgid="87616102361154432">"Ungependa kuhifadhi <xliff:g id="TYPE_0">%1$s</xliff:g> na <xliff:g id="TYPE_1">%2$s</xliff:g> kwenye "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_save_title_with_3types" msgid="4108978552969604555">"Ungependa kuhifadhi <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> na <xliff:g id="TYPE_2">%3$s</xliff:g> kwenye "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_update_title" msgid="5305781141104585279">"Ungependa kusasisha katika "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_update_title_with_type" msgid="4624181147422762233">"Ungependa kusasisha <xliff:g id="TYPE">%1$s</xliff:g> katika "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_update_title_with_2types" msgid="2300113827053626484">"Ungependa kusasisha <xliff:g id="TYPE_0">%1$s</xliff:g> na <xliff:g id="TYPE_1">%2$s</xliff:g> katika "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_update_title_with_3types" msgid="9089824354296211922">"Ungependa kusasisha vipengee hivi katika "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>": <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> na <xliff:g id="TYPE_2">%3$s</xliff:g>?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"Hifadhi"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"Hapana, asante"</string>
     <string name="autofill_update_yes" msgid="310358413273276958">"Sasisha"</string>
