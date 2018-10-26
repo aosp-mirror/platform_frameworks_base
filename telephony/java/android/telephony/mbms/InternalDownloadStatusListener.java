@@ -42,17 +42,17 @@ public class InternalDownloadStatusListener extends IDownloadStatusListener.Stub
             return;
         }
 
-        mExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
-                long token = Binder.clearCallingIdentity();
-                try {
+        long token = Binder.clearCallingIdentity();
+        try {
+            mExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
                     mAppListener.onStatusUpdated(request, fileInfo, status);
-                } finally {
-                    Binder.restoreCallingIdentity(token);
                 }
-            }
-        });
+            });
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
     public void stop() {
