@@ -186,10 +186,10 @@ interface ISub {
     /**
      * Get User downloaded Profiles.
      *
-     *  Provide all available user downloaded profile on the phone.
-     *  @param slotId on which phone the switch will operate on
+     * Return opportunistic subscriptions that can be visible to the caller.
+     * @return the list of opportunistic subscription info. If none exists, an empty list.
      */
-    List<SubscriptionInfo> getOpportunisticSubscriptions(int slotId, String callingPackage);
+    List<SubscriptionInfo> getOpportunisticSubscriptions(String callingPackage);
 
     int getSlotIndex(int subId);
 
