@@ -21,8 +21,8 @@ import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.CarrierConfigManager;
+import android.text.TextUtils;
 import android.util.Log;
-import android.content.res.Resources;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1116,7 +1116,7 @@ public class SignalStrength implements Parcelable {
     public int getWcdmaLevel() {
         int level = SIGNAL_STRENGTH_NONE_OR_UNKNOWN;
 
-        if (mWcdmaDefaultSignalMeasurement == null) {
+        if (TextUtils.isEmpty(mWcdmaDefaultSignalMeasurement)) {
             Log.wtf(LOG_TAG, "getWcdmaLevel - WCDMA default signal measurement is invalid.");
             return level;
         }
