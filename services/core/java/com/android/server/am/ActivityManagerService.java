@@ -7284,7 +7284,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         mBatteryStatsService.shutdown();
         synchronized (this) {
             mProcessStats.shutdownLocked();
-            mActivityTaskManager.notifyTaskPersisterLocked(null, true);
         }
 
         return timedout;
@@ -10384,11 +10383,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         dumpProcessesToGc(pw, needSep, null);
 
         pw.println();
-        pw.println("  mHomeProcess: " + mActivityTaskManager.mHomeProcess);
-        pw.println("  mPreviousProcess: " + mActivityTaskManager.mPreviousProcess);
-        if (mActivityTaskManager.mHeavyWeightProcess != null) {
-            pw.println("  mHeavyWeightProcess: " + mActivityTaskManager.mHeavyWeightProcess);
-        }
+        mAtmInternal.dumpForOom(pw);
 
         return true;
     }
@@ -15442,7 +15437,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
 
-        if (wpc == mActivityTaskManager.mHomeProcess) {
+        if (wpc.isHomeProcess()) {
             if (adj > ProcessList.HOME_APP_ADJ) {
                 // This process is hosting what we currently consider to be the
                 // home app, so we don't want to let it go into the background.
@@ -15463,7 +15458,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
 
-        if (wpc == mActivityTaskManager.mPreviousProcess && app.hasActivities()) {
+        if (wpc.isPreviousProcess() && app.hasActivities()) {
             if (adj > ProcessList.PREVIOUS_APP_ADJ) {
                 // This was the previous process that showed UI to the user.
                 // We want to try to keep it around more aggressively, to give
@@ -15540,7 +15535,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                                 "Raise procstate to started service: " + app);
                     }
                 }
-                if (app.hasShownUi && wpc != mActivityTaskManager.mHomeProcess) {
+                if (app.hasShownUi && !wpc.isHomeProcess()) {
                     // If this process has shown some UI, let it immediately
                     // go to the LRU list because it may be pretty heavy with
                     // UI stuff.  We'll tag it with a label just to help
@@ -15619,7 +15614,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                         if ((cr.flags&Context.BIND_ALLOW_OOM_MANAGEMENT) != 0) {
                             // Not doing bind OOM management, so treat
                             // this guy more like a started service.
-                            if (app.hasShownUi && wpc != mActivityTaskManager.mHomeProcess) {
+                            if (app.hasShownUi && !wpc.isHomeProcess()) {
                                 // If this process has shown some UI, let it immediately
                                 // go to the LRU list because it may be pretty heavy with
                                 // UI stuff.  We'll tag it with a label just to help
@@ -15652,7 +15647,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                             // about letting this process get into the LRU
                             // list to be killed and restarted if needed for
                             // memory.
-                            if (app.hasShownUi && wpc != mActivityTaskManager.mHomeProcess
+                            if (app.hasShownUi && !wpc.isHomeProcess()
                                     && clientAdj > ProcessList.PERCEPTIBLE_APP_ADJ) {
                                 if (adj >= ProcessList.CACHED_APP_MIN_ADJ) {
                                     adjType = "cch-bound-ui-services";
@@ -15858,7 +15853,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
                 String adjType = null;
                 if (adj > clientAdj) {
-                    if (app.hasShownUi && wpc != mActivityTaskManager.mHomeProcess
+                    if (app.hasShownUi && !wpc.isHomeProcess()
                             && clientAdj > ProcessList.PERCEPTIBLE_APP_ADJ) {
                         adjType = "cch-ui-provider";
                     } else {
@@ -17349,8 +17344,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             int factor = numTrimming/3;
             int minFactor = 2;
-            if (mActivityTaskManager.mHomeProcess != null) minFactor++;
-            if (mActivityTaskManager.mPreviousProcess != null) minFactor++;
+            if (mAtmInternal.getHomeProcess() != null) minFactor++;
+            if (mAtmInternal.getPreviousProcess() != null) minFactor++;
             if (factor < minFactor) factor = minFactor;
             int curLevel = ComponentCallbacks2.TRIM_MEMORY_COMPLETE;
             for (int i=N-1; i>=0; i--) {

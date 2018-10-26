@@ -860,6 +860,18 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         }
     }
 
+    public boolean isHomeProcess() {
+        synchronized (mAtm.mGlobalLock) {
+            return this == mAtm.mHomeProcess;
+        }
+    }
+
+    public boolean isPreviousProcess() {
+        synchronized (mAtm.mGlobalLock) {
+            return this == mAtm.mPreviousProcess;
+        }
+    }
+
     public void dump(PrintWriter pw, String prefix) {
         synchronized (mAtm.mGlobalLock) {
             if (mActivities.size() > 0) {

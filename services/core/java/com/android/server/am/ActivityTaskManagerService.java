@@ -5904,6 +5904,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 mShuttingDown = true;
                 mStackSupervisor.prepareForShutdownLocked();
                 updateEventDispatchingLocked(booted);
+                notifyTaskPersisterLocked(null, true);
                 return mStackSupervisor.shutdownLocked(timeout);
             }
         }
@@ -6584,6 +6585,17 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         @Override
+        public void dumpForOom(PrintWriter pw) {
+            synchronized (mGlobalLock) {
+                pw.println("  mHomeProcess: " + mHomeProcess);
+                pw.println("  mPreviousProcess: " + mPreviousProcess);
+                if (mHeavyWeightProcess != null) {
+                    pw.println("  mHeavyWeightProcess: " + mHeavyWeightProcess);
+                }
+            }
+        }
+
+        @Override
         public boolean canGcNow() {
             synchronized (mGlobalLock) {
                 return isSleeping() || mStackSupervisor.allResumedActivitiesIdle();
@@ -6740,6 +6752,20 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         @Override
         public void flushRecentTasks() {
             mRecentTasks.flush();
+        }
+
+        @Override
+        public WindowProcessController getHomeProcess() {
+            synchronized (mGlobalLock) {
+                return mHomeProcess;
+            }
+        }
+
+        @Override
+        public WindowProcessController getPreviousProcess() {
+            synchronized (mGlobalLock) {
+                return mPreviousProcess;
+            }
         }
     }
 }

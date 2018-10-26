@@ -410,6 +410,9 @@ public abstract class ActivityTaskManagerInternal {
             String[] args, int opti, boolean dumpAll, boolean dumpVisibleStacksOnly,
             boolean dumpFocusedStackOnly);
 
+    /** Dump the current state for inclusion in oom dump. */
+    public abstract void dumpForOom(PrintWriter pw);
+
     /** @return true if it the activity management system is okay with GC running now. */
     public abstract boolean canGcNow();
 
@@ -460,4 +463,7 @@ public abstract class ActivityTaskManagerInternal {
             int userId);
     /** Flush recent tasks to disk. */
     public abstract void flushRecentTasks();
+
+    public abstract WindowProcessController getHomeProcess();
+    public abstract WindowProcessController getPreviousProcess();
 }
