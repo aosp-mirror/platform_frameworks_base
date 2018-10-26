@@ -96,8 +96,5 @@ public class BluetoothEventManagerTest {
 
         verify(mBluetoothCallback).onProfileConnectionStateChanged(mCachedBluetoothDevice,
                 BluetoothProfile.STATE_CONNECTED, BluetoothProfile.A2DP);
-
-        verify(mCachedDeviceManager).onProfileConnectionStateChanged(mCachedBluetoothDevice,
-                BluetoothProfile.STATE_CONNECTED, BluetoothProfile.A2DP);
     }
 }

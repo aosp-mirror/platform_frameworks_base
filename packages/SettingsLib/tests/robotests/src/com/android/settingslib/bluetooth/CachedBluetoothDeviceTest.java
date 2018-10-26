@@ -48,6 +48,10 @@ public class CachedBluetoothDeviceTest {
     private final static String DEVICE_ALIAS = "TestAlias";
     private final static String DEVICE_ADDRESS = "AA:BB:CC:DD:EE:FF";
     private final static String DEVICE_ALIAS_NEW = "TestAliasNew";
+    private final static short RSSI_1 = 10;
+    private final static short RSSI_2 = 11;
+    private final static boolean JUSTDISCOVERED_1 = true;
+    private final static boolean JUSTDISCOVERED_2 = false;
     @Mock
     private LocalBluetoothProfileManager mProfileManager;
     @Mock
@@ -60,6 +64,8 @@ public class CachedBluetoothDeviceTest {
     private HearingAidProfile mHearingAidProfile;
     @Mock
     private BluetoothDevice mDevice;
+    @Mock
+    private BluetoothDevice mSubDevice;
     private CachedBluetoothDevice mCachedDevice;
     private ShadowAudioManager mShadowAudioManager;
     private Context mContext;
@@ -656,5 +662,40 @@ public class CachedBluetoothDeviceTest {
     private void updateProfileStatus(LocalBluetoothProfile profile, int status) {
         doReturn(status).when(profile).getConnectionStatus(mDevice);
         mCachedDevice.onProfileStateChanged(profile, status);
+    }
+
+    @Test
+    public void getSubDevice_setSubDevice() {
+        CachedBluetoothDevice subCachedDevice = new CachedBluetoothDevice(mContext, mProfileManager,
+                mSubDevice);
+        mCachedDevice.setSubDevice(subCachedDevice);
+
+        assertThat(mCachedDevice.getSubDevice()).isEqualTo(subCachedDevice);
+    }
+
+    @Test
+    public void switchSubDeviceContent() {
+        CachedBluetoothDevice subCachedDevice = new CachedBluetoothDevice(mContext, mProfileManager,
+                mSubDevice);
+        mCachedDevice.mRssi = RSSI_1;
+        mCachedDevice.mJustDiscovered = JUSTDISCOVERED_1;
+        subCachedDevice.mRssi = RSSI_2;
+        subCachedDevice.mJustDiscovered = JUSTDISCOVERED_2;
+        mCachedDevice.setSubDevice(subCachedDevice);
+
+        assertThat(mCachedDevice.mRssi).isEqualTo(RSSI_1);
+        assertThat(mCachedDevice.mJustDiscovered).isEqualTo(JUSTDISCOVERED_1);
+        assertThat(mCachedDevice.mDevice).isEqualTo(mDevice);
+        assertThat(subCachedDevice.mRssi).isEqualTo(RSSI_2);
+        assertThat(subCachedDevice.mJustDiscovered).isEqualTo(JUSTDISCOVERED_2);
+        assertThat(subCachedDevice.mDevice).isEqualTo(mSubDevice);
+        mCachedDevice.switchSubDeviceContent();
+
+        assertThat(mCachedDevice.mRssi).isEqualTo(RSSI_2);
+        assertThat(mCachedDevice.mJustDiscovered).isEqualTo(JUSTDISCOVERED_2);
+        assertThat(mCachedDevice.mDevice).isEqualTo(mSubDevice);
+        assertThat(subCachedDevice.mRssi).isEqualTo(RSSI_1);
+        assertThat(subCachedDevice.mJustDiscovered).isEqualTo(JUSTDISCOVERED_1);
+        assertThat(subCachedDevice.mDevice).isEqualTo(mDevice);
     }
 }
