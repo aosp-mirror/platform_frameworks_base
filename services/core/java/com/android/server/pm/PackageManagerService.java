@@ -322,6 +322,7 @@ import dalvik.system.CloseGuard;
 import dalvik.system.VMRuntime;
 
 import libcore.io.IoUtils;
+import libcore.util.EmptyArray;
 
 import org.xmlpull.v1.XmlPullParser;
 import org.xmlpull.v1.XmlPullParserException;
@@ -9530,7 +9531,8 @@ public class PackageManagerService extends IPackageManager.Stub
                     }
                 }
                 if (deleteSandboxData && getStorageManagerInternal() != null) {
-                    getStorageManagerInternal().destroySandboxForApp(pkg.packageName, realUserId);
+                    getStorageManagerInternal().destroySandboxForApp(pkg.packageName,
+                            pkg.mSharedUserId, realUserId);
                 }
             } catch (PackageManagerException e) {
                 // Should not happen
@@ -22942,6 +22944,20 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         @Override
+        public String getSharedUserIdForPackage(String packageName) {
+            synchronized (mPackages) {
+                return getSharedUserIdForPackageLocked(packageName);
+            }
+        }
+
+        @Override
+        public String[] getPackagesForSharedUserId(String sharedUserId, int userId) {
+            synchronized (mPackages) {
+                return getPackagesForSharedUserIdLocked(sharedUserId, userId);
+            }
+        }
+
+        @Override
         public boolean isOnlyCoreApps() {
             return PackageManagerService.this.isOnlyCoreApps();
         }
@@ -22953,6 +22969,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
+    @GuardedBy("mPackages")
     private SparseArray<String> getAppsWithSharedUserIdsLocked() {
         final SparseArray<String> sharedUserIds = new SparseArray<>();
         synchronized (mPackages) {
@@ -22961,6 +22978,38 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
         return sharedUserIds;
+    }
+
+    @GuardedBy("mPackages")
+    private String getSharedUserIdForPackageLocked(String packageName) {
+        final PackageSetting ps = mSettings.mPackages.get(packageName);
+        return (ps != null && ps.isSharedUser()) ? ps.sharedUser.name : null;
+    }
+
+    @GuardedBy("mPackages")
+    private String[] getPackagesForSharedUserIdLocked(String sharedUserId, int userId) {
+        try {
+            final SharedUserSetting sus = mSettings.getSharedUserLPw(
+                    sharedUserId, 0, 0, false);
+            if (sus == null) {
+                return EmptyArray.STRING;
+            }
+            String[] res = new String[sus.packages.size()];
+            final Iterator<PackageSetting> it = sus.packages.iterator();
+            int i = 0;
+            while (it.hasNext()) {
+                PackageSetting ps = it.next();
+                if (ps.getInstalled(userId)) {
+                    res[i++] = ps.name;
+                } else {
+                    res = ArrayUtils.removeElement(String.class, res, res[i]);
+                }
+            }
+            return res;
+        } catch (PackageManagerException e) {
+            // Should not happen
+        }
+        return EmptyArray.STRING;
     }
 
     @Override

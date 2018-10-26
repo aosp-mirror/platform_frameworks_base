@@ -101,9 +101,11 @@ public abstract class StorageManagerInternal {
      * Delete storage sandbox for the given package.
      *
      * @param packageName The package for which the sandbox needs to be destroyed.
+     * @param sharedUserId The sharedUserId if specified by the package.
      * @param userId The userId in which the sandbox needs to be destroyed.
      */
-    public abstract void destroySandboxForApp(@NonNull String packageName, int userId);
+    public abstract void destroySandboxForApp(@NonNull String packageName,
+            @Nullable String sharedUserId, int userId);
 
     /**
      * @return Labels of storage volumes that are visible to the given userId.
