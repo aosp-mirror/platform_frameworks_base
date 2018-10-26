@@ -109,6 +109,13 @@ public final class CellIdentityTdscdma extends CellIdentity {
     }
 
     /**
+     * @return a 5 or 6 character string (MCC+MNC), null if any field is unknown
+     */
+    public String getMobileNetworkOperator() {
+        return (mMccStr == null || mMncStr == null) ? null : mMccStr + mMncStr;
+    }
+
+    /**
      * @return 16-bit Location Area Code, 0..65535, INT_MAX if unknown
      */
     public int getLac() {
