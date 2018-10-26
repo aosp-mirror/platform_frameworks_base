@@ -1851,6 +1851,9 @@
         <item>Don\'t show this icon</item>
     </string-array>
 
+    <!-- SysUI Tuner: Switch for showing low-priority notification icons in status bar [CHAR LIMIT=NONE] -->
+    <string name="tuner_low_priority">Show low-priority notification icons</string>
+
     <!-- SysUI Tuner: Other section -->
     <string name="other">Other</string>
 
