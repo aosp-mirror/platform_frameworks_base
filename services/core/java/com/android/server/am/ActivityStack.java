@@ -820,8 +820,13 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     }
 
     void positionChildWindowContainerAtBottom(TaskRecord child) {
+        // If there are other focusable stacks on the display, the z-order of the display should not
+        // be changed just because a task was placed at the bottom. E.g. if it is moving the topmost
+        // task to bottom, the next focusable stack on the same display should be focused.
+        final ActivityStack nextFocusableStack = getDisplay().getNextFocusableStack(
+                child.getStack(), true /* ignoreCurrent */);
         mWindowContainerController.positionChildAtBottom(child.getWindowContainerController(),
-                true /* includingParents */);
+                nextFocusableStack == null /* includingParents */);
     }
 
     /**
@@ -1132,8 +1137,6 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
 
         getDisplay().positionChildAtBottom(this, reason);
         if (task != null) {
-            // TODO(b/111541062): We probably don't want to change display z-order to bottom just
-            // because one of its stacks moved to bottom.
             insertTaskAtBottom(task);
         }
     }
@@ -2912,7 +2915,6 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     }
 
     private void insertTaskAtBottom(TaskRecord task) {
-        // Unlike insertTaskAtPosition, this will also position parents of the windowcontroller.
         mTaskHistory.remove(task);
         final int position = getAdjustedPositionForTask(task, 0, null);
         mTaskHistory.add(position, task);
