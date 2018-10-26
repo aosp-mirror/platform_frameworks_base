@@ -211,7 +211,7 @@ public class ActivityStarterTests extends ActivityTestsBase {
         final WindowProcessController wpc =
                 containsConditions(preconditions, PRECONDITION_NO_CALLER_APP)
                 ? null : new WindowProcessController(
-                        service, mock(ApplicationInfo.class),null, 0, -1, null, null, null);
+                        service, mock(ApplicationInfo.class),null, 0, -1, null, null);
         doReturn(wpc).when(service).getProcessController(anyObject());
 
         final Intent intent = new Intent();

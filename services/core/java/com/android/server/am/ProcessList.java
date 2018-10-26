@@ -1982,8 +1982,7 @@ public final class ProcessList {
             StatsLog.write(StatsLog.ISOLATED_UID_CHANGED, info.uid, uid,
                     StatsLog.ISOLATED_UID_CHANGED__EVENT__CREATED);
         }
-        final ProcessRecord r = new ProcessRecord(mService, info, proc, uid,
-                mService.getGlobalConfiguration());
+        final ProcessRecord r = new ProcessRecord(mService, info, proc, uid);
 
         if (!mService.mBooted && !mService.mBooting
                 && userId == UserHandle.USER_SYSTEM

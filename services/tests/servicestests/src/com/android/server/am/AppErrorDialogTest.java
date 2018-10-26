@@ -69,7 +69,7 @@ public class AppErrorDialogTest {
     @UiThreadTest
     public void testCreateWorks() throws Exception {
         AppErrorDialog.Data data = new AppErrorDialog.Data();
-        data.proc = new ProcessRecord(null, mContext.getApplicationInfo(), "name", 12345, null);
+        data.proc = new ProcessRecord(null, mContext.getApplicationInfo(), "name", 12345);
         data.result = new AppErrorResult();
 
         AppErrorDialog dialog = new AppErrorDialog(mContext, mService, data);

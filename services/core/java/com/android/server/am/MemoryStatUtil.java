@@ -36,7 +36,7 @@ import java.util.regex.Pattern;
 /**
  * Static utility methods related to {@link MemoryStat}.
  */
-final class MemoryStatUtil {
+public final class MemoryStatUtil {
     /**
      * Which native processes to create {@link MemoryStat} for.
      *
@@ -114,7 +114,7 @@ final class MemoryStatUtil {
      * Returns null if no stats can be read.
      */
     @Nullable
-    static MemoryStat readMemoryStatFromFilesystem(int uid, int pid) {
+    public static MemoryStat readMemoryStatFromFilesystem(int uid, int pid) {
         return hasMemcg() ? readMemoryStatFromMemcg(uid, pid) : readMemoryStatFromProcfs(pid);
     }
 
@@ -266,7 +266,7 @@ final class MemoryStatUtil {
         return DEVICE_HAS_PER_APP_MEMCG;
     }
 
-    static final class MemoryStat {
+    public static final class MemoryStat {
         /** Number of page faults */
         long pgfault;
         /** Number of major page faults */

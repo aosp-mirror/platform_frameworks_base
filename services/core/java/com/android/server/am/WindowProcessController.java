@@ -157,8 +157,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     private int mDisplayId;
 
     WindowProcessController(ActivityTaskManagerService atm, ApplicationInfo info, String name,
-            int uid, int userId, Object owner, WindowProcessListener listener,
-            Configuration config) {
+            int uid, int userId, Object owner, WindowProcessListener listener) {
         mInfo = info;
         mName = name;
         mUid = uid;
@@ -168,8 +167,8 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         mAtm = atm;
         mLastReportedConfiguration = new Configuration();
         mDisplayId = INVALID_DISPLAY;
-        if (config != null) {
-            onConfigurationChanged(config);
+        if (atm != null) {
+            onConfigurationChanged(atm.getGlobalConfiguration());
         }
     }
 

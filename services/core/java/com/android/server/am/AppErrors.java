@@ -474,7 +474,7 @@ class AppErrors {
                 mService.mProcessList.removeProcessLocked(r, false, true, "crash");
                 if (taskId != INVALID_TASK_ID) {
                     try {
-                        mService.mActivityTaskManager.startActivityFromRecents(taskId,
+                        mService.startActivityFromRecents(taskId,
                                 ActivityOptions.makeBasic().toBundle());
                     } catch (IllegalArgumentException e) {
                         // Hmm...that didn't work. Task should either be in recents or associated
@@ -794,7 +794,7 @@ class AppErrors {
                     mService.mUserController.getCurrentUserId()) != 0;
             final boolean crashSilenced = mAppsNotReportingCrashes != null &&
                     mAppsNotReportingCrashes.contains(proc.info.packageName);
-            if ((mService.mActivityTaskManager.canShowErrorDialogs() || showBackground)
+            if ((mService.mAtmInternal.canShowErrorDialogs() || showBackground)
                     && !crashSilenced
                     && (showFirstCrash || showFirstCrashDevOption || data.repeating)) {
                 proc.crashDialog = dialogToShow = new AppErrorDialog(mContext, mService, data);
@@ -847,7 +847,7 @@ class AppErrors {
 
             boolean showBackground = Settings.Secure.getInt(mContext.getContentResolver(),
                     Settings.Secure.ANR_SHOW_BACKGROUND, 0) != 0;
-            if (mService.mActivityTaskManager.canShowErrorDialogs() || showBackground) {
+            if (mService.mAtmInternal.canShowErrorDialogs() || showBackground) {
                 dialogToShow = new AppNotRespondingDialog(mService, mContext, data);
                 proc.anrDialog = dialogToShow;
             } else {

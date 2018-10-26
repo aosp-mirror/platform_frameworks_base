@@ -69,6 +69,7 @@ public class ActivityTaskManagerDebugConfig {
     static final boolean DEBUG_METRICS = DEBUG_ALL || false;
 
     static final String POSTFIX_APP = APPEND_CATEGORY_NAME ? "_App" : "";
+    static final String POSTFIX_CLEANUP = (APPEND_CATEGORY_NAME) ? "_Cleanup" : "";
     static final String POSTFIX_IDLE = APPEND_CATEGORY_NAME ? "_Idle" : "";
     static final String POSTFIX_RELEASE = APPEND_CATEGORY_NAME ? "_Release" : "";
     static final String POSTFIX_USER_LEAVING = APPEND_CATEGORY_NAME ? "_UserLeaving" : "";

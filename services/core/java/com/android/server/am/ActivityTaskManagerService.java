@@ -612,23 +612,27 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         GL_ES_VERSION = SystemProperties.getInt("ro.opengles.version", GL_ES_VERSION_UNDEFINED);
     }
 
-    void onSystemReady() {
-        mHasHeavyWeightFeature = mContext.getPackageManager().hasSystemFeature(
-                PackageManager.FEATURE_CANT_SAVE_STATE);
-        mAssistUtils = new AssistUtils(mContext);
-        mVrController.onSystemReady();
-        mRecentTasks.onSystemReadyLocked();
+    public void onSystemReady() {
+        synchronized (mGlobalLock) {
+            mHasHeavyWeightFeature = mContext.getPackageManager().hasSystemFeature(
+                    PackageManager.FEATURE_CANT_SAVE_STATE);
+            mAssistUtils = new AssistUtils(mContext);
+            mVrController.onSystemReady();
+            mRecentTasks.onSystemReadyLocked();
+        }
     }
 
-    void onInitPowerManagement() {
-        mStackSupervisor.initPowerManagement();
-        final PowerManager pm = (PowerManager)mContext.getSystemService(Context.POWER_SERVICE);
-        mPowerManagerInternal = LocalServices.getService(PowerManagerInternal.class);
-        mVoiceWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "*voice*");
-        mVoiceWakeLock.setReferenceCounted(false);
+    public void onInitPowerManagement() {
+        synchronized (mGlobalLock) {
+            mStackSupervisor.initPowerManagement();
+            final PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
+            mPowerManagerInternal = LocalServices.getService(PowerManagerInternal.class);
+            mVoiceWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "*voice*");
+            mVoiceWakeLock.setReferenceCounted(false);
+        }
     }
 
-    void installSystemProviders() {
+    public void installSystemProviders() {
         mFontScaleSettingObserver = new FontScaleSettingObserver();
     }
 
@@ -737,9 +741,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         mKeyguardController = mStackSupervisor.getKeyguardController();
     }
 
-    void onActivityManagerInternalAdded() {
-        mAmInternal = LocalServices.getService(ActivityManagerInternal.class);
-        mUgmInternal = LocalServices.getService(UriGrantsManagerInternal.class);
+    public void onActivityManagerInternalAdded() {
+        synchronized (mGlobalLock) {
+            mAmInternal = LocalServices.getService(ActivityManagerInternal.class);
+            mUgmInternal = LocalServices.getService(UriGrantsManagerInternal.class);
+        }
     }
 
     int increaseConfigurationSeqLocked() {
@@ -753,14 +759,18 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         return supervisor;
     }
 
-    void setWindowManager(WindowManagerService wm) {
-        mWindowManager = wm;
-        mLockTaskController.setWindowManager(wm);
-        mStackSupervisor.setWindowManager(wm);
+    public void setWindowManager(WindowManagerService wm) {
+        synchronized (mGlobalLock) {
+            mWindowManager = wm;
+            mLockTaskController.setWindowManager(wm);
+            mStackSupervisor.setWindowManager(wm);
+        }
     }
 
-    void setUsageStatsManager(UsageStatsManagerInternal usageStatsManager) {
-        mUsageStatsInternal = usageStatsManager;
+    public void setUsageStatsManager(UsageStatsManagerInternal usageStatsManager) {
+        synchronized (mGlobalLock) {
+            mUsageStatsInternal = usageStatsManager;
+        }
     }
 
     UserManagerService getUserManager() {
@@ -2136,7 +2146,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
     }
 
-    boolean isControllerAMonkey() {
+    public boolean isControllerAMonkey() {
         synchronized (mGlobalLock) {
             return mController != null && mControllerIsAMonkey;
         }
@@ -2895,7 +2905,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         });
     }
 
-    void onScreenAwakeChanged(boolean isAwake) {
+    public void onScreenAwakeChanged(boolean isAwake) {
         mH.post(() -> {
             for (int i = mScreenObservers.size() - 1; i >= 0; i--) {
                 mScreenObservers.get(i).onAwakeStateChanged(isAwake);
@@ -4905,15 +4915,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
     }
 
-    boolean canShowErrorDialogs() {
-        return mShowDialogs && !mSleeping && !mShuttingDown
-                && !mKeyguardController.isKeyguardOrAodShowing(DEFAULT_DISPLAY)
-                && !hasUserRestriction(UserManager.DISALLOW_SYSTEM_ERROR_DIALOGS,
-                mAmInternal.getCurrentUserId())
-                && !(UserManager.isDeviceInDemoMode(mContext)
-                && mAmInternal.getCurrentUser().isDemo());
-    }
-
     static long getInputDispatchingTimeoutLocked(ActivityRecord r) {
         if (r == null || !r.hasProcess()) {
             return KEY_DISPATCHING_TIMEOUT_MS;
@@ -6789,6 +6790,18 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 updateConfigurationLocked(configuration, null /* starting */,
                         false /* initLocale */, false /* persistent */, currentUserId,
                         false /* deferResume */);
+            }
+        }
+
+        @Override
+        public boolean canShowErrorDialogs() {
+            synchronized (mGlobalLock) {
+                return mShowDialogs && !mSleeping && !mShuttingDown
+                        && !mKeyguardController.isKeyguardOrAodShowing(DEFAULT_DISPLAY)
+                        && !hasUserRestriction(UserManager.DISALLOW_SYSTEM_ERROR_DIALOGS,
+                        mAmInternal.getCurrentUserId())
+                        && !(UserManager.isDeviceInDemoMode(mContext)
+                        && mAmInternal.getCurrentUser().isDemo());
             }
         }
     }
