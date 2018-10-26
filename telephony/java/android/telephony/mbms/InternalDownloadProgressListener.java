@@ -43,18 +43,18 @@ public class InternalDownloadProgressListener extends IDownloadProgressListener.
             return;
         }
 
-        mExecutor.execute(new Runnable() {
-            @Override
-            public void run() {
-                long token = Binder.clearCallingIdentity();
-                try {
+        long token = Binder.clearCallingIdentity();
+        try {
+            mExecutor.execute(new Runnable() {
+                @Override
+                public void run() {
                     mAppListener.onProgressUpdated(request, fileInfo, currentDownloadSize,
                             fullDownloadSize, currentDecodedSize, fullDecodedSize);
-                } finally {
-                    Binder.restoreCallingIdentity(token);
                 }
-            }
-        });
+            });
+        } finally {
+            Binder.restoreCallingIdentity(token);
+        }
     }
 
     public void stop() {
