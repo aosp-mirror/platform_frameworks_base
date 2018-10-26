@@ -136,6 +136,10 @@
     <!-- Screen Capturing -->
     <uses-permission android:name="android.permission.MANAGE_MEDIA_PROJECTION" />
 
+    <!-- Screen Recording -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
     <!-- Assist -->
     <uses-permission android:name="android.permission.ACCESS_VOICE_INTERACTION_SERVICE" />
 
@@ -266,6 +270,10 @@
                 <action android:name="com.android.systemui.screenshot.SHOW_ERROR" />
             </intent-filter>
         </receiver>
+
+        <activity android:name=".screenrecord.ScreenRecordDialog"
+            android:theme="@style/ScreenRecord" />
+        <service android:name=".screenrecord.RecordingService" />
 
         <receiver android:name=".SysuiRestartReceiver"
             android:exported="false">
