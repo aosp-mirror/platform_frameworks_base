@@ -2949,7 +2949,12 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         // isDragResizing() or isDragResizeChanged() is true.
         boolean resizing = isDragResizing() || isDragResizeChanged();
         if (getWindowConfiguration().useWindowFrameForBackdrop() || !resizing) {
-            return frame;
+            // Surface position is now inherited from parent, and BackdropFrameRenderer uses
+            // backdrop frame to position content. Thus we just keep the size of backdrop frame, and
+            // remove the offset to avoid double offset from display origin.
+            mTmpRect.set(frame);
+            mTmpRect.offsetTo(0, 0);
+            return mTmpRect;
         }
         final DisplayInfo displayInfo = getDisplayInfo();
         mTmpRect.set(0, 0, displayInfo.logicalWidth, displayInfo.logicalHeight);
