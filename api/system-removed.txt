@@ -116,9 +116,6 @@ package android.telephony {
   public class TelephonyManager {
     method public deprecated void answerRingingCall();
     method public deprecated boolean endCall();
-    method public deprecated boolean isIdle();
-    method public deprecated boolean isOffhook();
-    method public deprecated boolean isRinging();
     method public deprecated void silenceRinger();
   }
 
