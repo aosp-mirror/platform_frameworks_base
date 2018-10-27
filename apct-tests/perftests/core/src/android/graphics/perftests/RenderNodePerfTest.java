@@ -17,7 +17,6 @@
 package android.graphics.perftests;
 
 import android.graphics.Outline;
-import android.graphics.RecordingCanvas;
 import android.graphics.RenderNode;
 import android.perftests.utils.BenchmarkState;
 import android.perftests.utils.PerfStatusReporter;
@@ -62,7 +61,7 @@ public class RenderNodePerfTest {
         final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         RenderNode node = RenderNode.create("LinearLayout", null);
         while (state.keepRunning()) {
-            node.isValid();
+            node.hasDisplayList();
         }
     }
 
@@ -71,8 +70,8 @@ public class RenderNodePerfTest {
         final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         RenderNode node = RenderNode.create("LinearLayout", null);
         while (state.keepRunning()) {
-            RecordingCanvas canvas = node.start(100, 100);
-            node.end(canvas);
+            node.startRecording(100, 100);
+            node.endRecording();
         }
     }
 
@@ -80,17 +79,16 @@ public class RenderNodePerfTest {
     public void testStartEndDeepHierarchy() {
         final BenchmarkState state = mPerfStatusReporter.getBenchmarkState();
         RenderNode[] nodes = new RenderNode[30];
-        RecordingCanvas[] canvases = new RecordingCanvas[nodes.length];
         for (int i = 0; i < nodes.length; i++) {
             nodes[i] = RenderNode.create("LinearLayout", null);
         }
 
         while (state.keepRunning()) {
             for (int i = 0; i < nodes.length; i++) {
-                canvases[i] = nodes[i].start(100, 100);
+                nodes[i].startRecording(100, 100);
             }
             for (int i = nodes.length - 1; i >= 0; i--) {
-                nodes[i].end(canvases[i]);
+                nodes[i].endRecording();
             }
         }
     }

@@ -155,7 +155,7 @@ public class ViewShowHidePerfTest {
     }
 
     private void updateAndValidateDisplayList(View view) {
-        boolean hasDisplayList = view.updateDisplayListIfDirty().isValid();
+        boolean hasDisplayList = view.updateDisplayListIfDirty().hasDisplayList();
         assertTrue(hasDisplayList);
     }
 

@@ -52,7 +52,7 @@ public class GhostView extends View {
             RecordingCanvas dlCanvas = (RecordingCanvas) canvas;
             mView.mRecreateDisplayList = true;
             RenderNode renderNode = mView.updateDisplayListIfDirty();
-            if (renderNode.isValid()) {
+            if (renderNode.hasDisplayList()) {
                 dlCanvas.insertReorderBarrier(); // enable shadow for this rendernode
                 dlCanvas.drawRenderNode(renderNode);
                 dlCanvas.insertInorderBarrier(); // re-disable reordering/shadows

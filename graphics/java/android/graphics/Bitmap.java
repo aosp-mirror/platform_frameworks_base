@@ -1301,13 +1301,13 @@ public final class Bitmap implements Parcelable {
             node.setLeftTopRightBottom(0, 0, width, height);
             node.setClipToBounds(false);
             node.setForceDarkAllowed(false);
-            final RecordingCanvas canvas = node.start(width, height);
+            final RecordingCanvas canvas = node.startRecording(width, height);
             if (source.getWidth() != width || source.getHeight() != height) {
                 canvas.scale(width / (float) source.getWidth(),
                         height / (float) source.getHeight());
             }
             canvas.drawPicture(source);
-            node.end(canvas);
+            node.endRecording();
             Bitmap bitmap = ThreadedRenderer.createHardwareBitmap(node, width, height);
             if (config != Config.HARDWARE) {
                 bitmap = bitmap.copy(config, false);
