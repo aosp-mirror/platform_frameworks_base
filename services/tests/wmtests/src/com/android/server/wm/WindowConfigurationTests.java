@@ -231,7 +231,7 @@ public class WindowConfigurationTests extends WindowTestsBase {
 
         final Configuration config = new Configuration();
         final WindowConfiguration winConfig = config.windowConfiguration;
-        stackController.adjustConfigurationForBounds(bounds, null /*insetBounds*/,
+        stackController.adjustConfigurationForBounds(bounds,
                 new Rect() /*nonDecorBounds*/, new Rect() /*stableBounds*/, false /*overrideWidth*/,
                 false /*overrideHeight*/, mDisplayInfo.logicalDensityDpi, config, parentConfig,
                 windowingMode);

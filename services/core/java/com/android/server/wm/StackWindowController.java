@@ -252,7 +252,7 @@ public class StackWindowController
      * before mContainer has been updated, any relevant properties (like {@param windowingMode})
      * need to be passed in.
      */
-    public void adjustConfigurationForBounds(Rect bounds, Rect insetBounds,
+    public void adjustConfigurationForBounds(Rect bounds,
             Rect nonDecorBounds, Rect stableBounds, boolean overrideWidth,
             boolean overrideHeight, float density, Configuration config,
             Configuration parentConfig, int windowingMode) {
@@ -303,11 +303,9 @@ public class StackWindowController
                 // Additionally task dimensions should not be bigger than its parents dimensions.
                 // The non decor inset are areas that could never be removed in Honeycomb. See
                 // {@link WindowManagerPolicy#getNonDecorInsetsLw}.
-                intersectDisplayBoundsExcludeInsets(nonDecorBounds,
-                        insetBounds != null ? insetBounds : bounds, mTmpNonDecorInsets,
+                intersectDisplayBoundsExcludeInsets(nonDecorBounds, bounds, mTmpNonDecorInsets,
                         mTmpDisplayBounds, overrideWidth, overrideHeight);
-                intersectDisplayBoundsExcludeInsets(stableBounds,
-                        insetBounds != null ? insetBounds : bounds, mTmpStableInsets,
+                intersectDisplayBoundsExcludeInsets(stableBounds, bounds, mTmpStableInsets,
                         mTmpDisplayBounds, overrideWidth, overrideHeight);
                 width = Math.min((int) (stableBounds.width() / density),
                         parentConfig.screenWidthDp);
@@ -323,7 +321,7 @@ public class StackWindowController
             config.screenWidthDp = width;
             config.screenHeightDp = height;
             config.smallestScreenWidthDp = getSmallestWidthForTaskBounds(
-                    insetBounds != null ? insetBounds : bounds, density, windowingMode);
+                    bounds, density, windowingMode);
         }
     }
 

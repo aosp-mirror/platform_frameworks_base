@@ -790,6 +790,18 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     @Override
+    public Rect getDisplayedBounds() {
+        final Task task = getTask();
+        if (task != null) {
+            Rect bounds = task.getOverrideDisplayedBounds();
+            if (!bounds.isEmpty()) {
+                return bounds;
+            }
+        }
+        return super.getDisplayedBounds();
+    }
+
+    @Override
     public void computeFrameLw() {
         if (mWillReplaceWindow && (mAnimatingExit || !mReplacingRemoveRequested)) {
             // This window is being replaced and either already got information that it's being
@@ -805,16 +817,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         final boolean windowsAreFloating = task != null && task.isFloating();
         final DisplayContent dc = getDisplayContent();
 
-        // If the task has temp inset bounds set, we have to make sure all its windows uses
-        // the temp inset frame. Otherwise different display frames get applied to the main
-        // window and the child window, making them misaligned.
-        // Otherwise we need to clear the inset frame, to avoid using a stale frame after leaving
-        // multi window mode.
-        if (task != null && isInMultiWindowMode()) {
-            task.getTempInsetBounds(mInsetFrame);
-        } else {
-            mInsetFrame.setEmpty();
-        }
+        mInsetFrame.set(getBounds());
 
         // Denotes the actual frame used to calculate the insets and to perform the layout. When
         // resizing in docked mode, we'd like to freeze the layout, so we also need to freeze the
@@ -834,7 +837,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             layoutXDiff = 0;
             layoutYDiff = 0;
         } else {
-            getBounds(mWindowFrames.mContainingFrame);
+            mWindowFrames.mContainingFrame.set(getDisplayedBounds());
             if (mAppToken != null && !mAppToken.mFrozenBounds.isEmpty()) {
 
                 // If the bounds are frozen, we still want to translate the window freely and only
@@ -884,14 +887,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
             layoutDisplayFrame = new Rect(mWindowFrames.mDisplayFrame);
             mWindowFrames.mDisplayFrame.set(mWindowFrames.mContainingFrame);
-            layoutXDiff =
-                    !mInsetFrame.isEmpty() ? mInsetFrame.left - mWindowFrames.mContainingFrame.left
-                            : 0;
-            layoutYDiff =
-                    !mInsetFrame.isEmpty() ? mInsetFrame.top - mWindowFrames.mContainingFrame.top
-                            : 0;
-            layoutContainingFrame =
-                    !mInsetFrame.isEmpty() ? mInsetFrame : mWindowFrames.mContainingFrame;
+            layoutXDiff = mInsetFrame.left - mWindowFrames.mContainingFrame.left;
+            layoutYDiff = mInsetFrame.top - mWindowFrames.mContainingFrame.top;
+            layoutContainingFrame = mInsetFrame;
             mTmpRect.set(0, 0, dc.getDisplayInfo().logicalWidth, dc.getDisplayInfo().logicalHeight);
             subtractInsets(mWindowFrames.mDisplayFrame, layoutContainingFrame, layoutDisplayFrame,
                     mTmpRect);
@@ -4603,7 +4601,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             outPoint.offset(-parent.mWindowFrames.mFrame.left + parent.mAttrs.surfaceInsets.left,
                     -parent.mWindowFrames.mFrame.top + parent.mAttrs.surfaceInsets.top);
         } else if (parentWindowContainer != null) {
-            final Rect parentBounds = parentWindowContainer.getBounds();
+            final Rect parentBounds = parentWindowContainer.getDisplayedBounds();
             outPoint.offset(-parentBounds.left, -parentBounds.top);
         }
 

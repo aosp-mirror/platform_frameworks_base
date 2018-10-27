@@ -76,7 +76,7 @@ public class WindowFrameTests extends WindowTestsBase {
 
     private static class TaskWithBounds extends Task {
         final Rect mBounds;
-        final Rect mInsetBounds = new Rect();
+        final Rect mOverrideDisplayedBounds = new Rect();
         boolean mFullscreenForTest = true;
 
         TaskWithBounds(TaskStack stack, WindowManagerService wm, Rect bounds) {
@@ -100,8 +100,8 @@ public class WindowFrameTests extends WindowTestsBase {
             outBounds.set(mBounds);
         }
         @Override
-        void getTempInsetBounds(Rect outBounds) {
-            outBounds.set(mInsetBounds);
+        Rect getOverrideDisplayedBounds() {
+            return mOverrideDisplayedBounds;
         }
         @Override
         boolean isFullscreen() {
@@ -343,14 +343,14 @@ public class WindowFrameTests extends WindowTestsBase {
                 taskBottom - contentInsetBottom));
 
         pf.set(0, 0, logicalWidth, logicalHeight);
-        // However if we set temp inset bounds, the insets will be computed
-        // as if our window was laid out there,  but it will be laid out according to
-        // the task bounds.
+        // If we set displayed bounds, the insets will be computed with the main task bounds
+        // but the frame will be positioned according to the displayed bounds.
         final int insetLeft = logicalWidth / 5;
         final int insetTop = logicalHeight / 5;
         final int insetRight = insetLeft + (taskRight - taskLeft);
         final int insetBottom = insetTop + (taskBottom - taskTop);
-        task.mInsetBounds.set(insetLeft, insetTop, insetRight, insetBottom);
+        task.mOverrideDisplayedBounds.set(taskBounds);
+        task.mBounds.set(insetLeft, insetTop, insetRight, insetBottom);
         windowFrames.setFrames(pf, pf, pf, cf, cf, pf, cf, mEmptyRect);
         w.computeFrameLw();
         assertFrame(w, taskLeft, taskTop, taskRight, taskBottom);
@@ -430,7 +430,6 @@ public class WindowFrameTests extends WindowTestsBase {
         final int taskBottom = logicalHeight / 4 * 3;
         final Rect taskBounds = new Rect(taskLeft, taskTop, taskRight, taskBottom);
         final TaskWithBounds task = new TaskWithBounds(mStubStack, mWm, taskBounds);
-        task.mInsetBounds.set(taskLeft, taskTop, taskRight, taskBottom);
         task.mFullscreenForTest = false;
         WindowState w = createWindow(task, MATCH_PARENT, MATCH_PARENT);
         w.mAttrs.gravity = Gravity.LEFT | Gravity.TOP;
@@ -486,12 +485,12 @@ public class WindowFrameTests extends WindowTestsBase {
     }
 
     @Test
-    public void testDisplayCutout_tempInsetBounds() {
+    public void testDisplayCutout_tempDisplayedBounds() {
         // Regular fullscreen task and window
         final TaskWithBounds task = new TaskWithBounds(mStubStack, mWm,
-                new Rect(0, -500, 1000, 1500));
+                new Rect(0, 0, 1000, 2000));
         task.mFullscreenForTest = false;
-        task.mInsetBounds.set(0, 0, 1000, 2000);
+        task.setOverrideDisplayedBounds(new Rect(0, -500, 1000, 1500));
         WindowState w = createWindow(task, MATCH_PARENT, MATCH_PARENT);
         w.mAttrs.gravity = Gravity.LEFT | Gravity.TOP;
 
