@@ -93,19 +93,19 @@ public class WindowContainerControllerTests extends WindowTestsBase {
 
         controller.setContainer(container);
         assertEquals(controller.mContainer, container);
-        assertEquals(EMPTY, container.getOverrideConfiguration());
+        assertEquals(EMPTY, container.getRequestedOverrideConfiguration());
 
         final Configuration config = new Configuration();
         config.windowConfiguration.setWindowingMode(WINDOWING_MODE_FREEFORM);
         config.windowConfiguration.setAppBounds(10, 10, 10, 10);
 
         // Assert that the config change through the controller is propagated to the container.
-        controller.onOverrideConfigurationChanged(config);
-        assertEquals(config, container.getOverrideConfiguration());
+        controller.onRequestedOverrideConfigurationChanged(config);
+        assertEquals(config, container.getRequestedOverrideConfiguration());
 
         // Assert the container configuration isn't changed after removal from the controller.
         controller.removeContainer();
-        controller.onOverrideConfigurationChanged(EMPTY);
-        assertEquals(config, container.getOverrideConfiguration());
+        controller.onRequestedOverrideConfigurationChanged(EMPTY);
+        assertEquals(config, container.getRequestedOverrideConfiguration());
     }
 }

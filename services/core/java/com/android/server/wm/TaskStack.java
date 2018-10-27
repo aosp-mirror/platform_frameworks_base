@@ -282,7 +282,7 @@ public class TaskStack extends WindowContainer<Task> implements
 
     @Override
     public int setBounds(Rect bounds) {
-        return setBounds(getOverrideBounds(), bounds);
+        return setBounds(getRequestedOverrideBounds(), bounds);
     }
 
     private int setBounds(Rect existing, Rect bounds) {
@@ -304,8 +304,8 @@ public class TaskStack extends WindowContainer<Task> implements
 
     /** Bounds of the stack without adjusting for other factors in the system like visibility
      * of docked stack.
-     * Most callers should be using {@link ConfigurationContainer#getOverrideBounds} as it take into
-     * consideration other system factors. */
+     * Most callers should be using {@link ConfigurationContainer#getRequestedOverrideBounds} a
+     * it takes into consideration other system factors. */
     void getRawBounds(Rect out) {
         out.set(getRawBounds());
     }
@@ -448,7 +448,8 @@ public class TaskStack extends WindowContainer<Task> implements
      * @param inOutBounds the bounds to update (both input and output).
      */
     void calculateDockedBoundsForConfigChange(Configuration parentConfig, Rect inOutBounds) {
-        final boolean primary = getOverrideWindowingMode() == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
+        final boolean primary =
+                getRequestedOverrideWindowingMode() == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
         repositionSplitScreenStackAfterRotation(parentConfig, primary, inOutBounds);
         final DisplayCutout cutout = mDisplayContent.getDisplayInfo().displayCutout;
         snapDockedStackAfterRotation(parentConfig, cutout, inOutBounds);

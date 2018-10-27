@@ -506,7 +506,7 @@ public class TaskRecord extends ConfigurationContainer implements TaskWindowCont
             // If this is a forced resize, let it go through even if the bounds is not changing,
             // as we might need a relayout due to surface size change (to/from fullscreen).
             final boolean forced = (resizeMode & RESIZE_MODE_FORCED) != 0;
-            if (equivalentOverrideBounds(bounds) && !forced) {
+            if (equivalentRequestedOverrideBounds(bounds) && !forced) {
                 // Nothing to do here...
                 return true;
             }
@@ -720,12 +720,12 @@ public class TaskRecord extends ConfigurationContainer implements TaskWindowCont
             // Make sure the task has the appropriate bounds/size for the stack it is in.
             final boolean toStackSplitScreenPrimary =
                     toStackWindowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
-            final Rect configBounds = getOverrideBounds();
+            final Rect configBounds = getRequestedOverrideBounds();
             if ((toStackWindowingMode == WINDOWING_MODE_FULLSCREEN
                     || toStackWindowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY)
-                    && !Objects.equals(configBounds, toStack.getOverrideBounds())) {
-                kept = resize(toStack.getOverrideBounds(), RESIZE_MODE_SYSTEM, !mightReplaceWindow,
-                        deferResume);
+                    && !Objects.equals(configBounds, toStack.getRequestedOverrideBounds())) {
+                kept = resize(toStack.getRequestedOverrideBounds(), RESIZE_MODE_SYSTEM,
+                        !mightReplaceWindow, deferResume);
             } else if (toStackWindowingMode == WINDOWING_MODE_FREEFORM) {
                 Rect bounds = getLaunchBounds();
                 if (bounds == null) {
@@ -739,8 +739,8 @@ public class TaskRecord extends ConfigurationContainer implements TaskWindowCont
                     // mode
                     mService.mStackSupervisor.moveRecentsStackToFront(reason);
                 }
-                kept = resize(toStack.getOverrideBounds(), RESIZE_MODE_SYSTEM, !mightReplaceWindow,
-                        deferResume);
+                kept = resize(toStack.getRequestedOverrideBounds(), RESIZE_MODE_SYSTEM,
+                        !mightReplaceWindow, deferResume);
             }
         } finally {
             windowManager.continueSurfaceLayout();
@@ -1546,7 +1546,7 @@ public class TaskRecord extends ConfigurationContainer implements TaskWindowCont
             return true;
         }
         final boolean landscape = bounds.width() > bounds.height();
-        final Rect configBounds = getOverrideBounds();
+        final Rect configBounds = getRequestedOverrideBounds();
         if (mResizeMode == RESIZE_MODE_FORCE_RESIZABLE_PRESERVE_ORIENTATION) {
             return configBounds.isEmpty()
                     || landscape == (configBounds.width() > configBounds.height());
@@ -1709,7 +1709,7 @@ public class TaskRecord extends ConfigurationContainer implements TaskWindowCont
             return;
         }
 
-        final Rect configBounds = getOverrideBounds();
+        final Rect configBounds = getRequestedOverrideBounds();
         if (adjustWidth) {
             if (!configBounds.isEmpty() && bounds.right == configBounds.right) {
                 bounds.left = bounds.right - minWidth;
@@ -1739,7 +1739,7 @@ public class TaskRecord extends ConfigurationContainer implements TaskWindowCont
         // (bounds == null), then leave the override config unset
         final Configuration newOverrideConfig = new Configuration();
         if (bounds != null) {
-            newOverrideConfig.setTo(getOverrideConfiguration());
+            newOverrideConfig.setTo(getRequestedOverrideConfiguration());
             if (insetBounds != null && !insetBounds.isEmpty()) {
                 mTmpRect.set(insetBounds);
                 setDisplayedBounds(bounds);
@@ -1781,13 +1781,13 @@ public class TaskRecord extends ConfigurationContainer implements TaskWindowCont
      * @return True if the override configuration was updated.
      */
     boolean updateOverrideConfiguration(Rect bounds, @Nullable Rect insetBounds) {
-        if (equivalentOverrideBounds(bounds)) {
+        if (equivalentRequestedOverrideBounds(bounds)) {
             return false;
         }
-        final Rect currentBounds = getOverrideBounds();
+        final Rect currentBounds = getRequestedOverrideBounds();
 
-        mTmpConfig.setTo(getOverrideConfiguration());
-        final Configuration newConfig = getOverrideConfiguration();
+        mTmpConfig.setTo(getRequestedOverrideConfiguration());
+        final Configuration newConfig = getRequestedOverrideConfiguration();
 
         final boolean matchParentBounds = bounds == null || bounds.isEmpty();
         final boolean persistBounds = getWindowConfiguration().persistTaskBounds();
@@ -1810,12 +1810,12 @@ public class TaskRecord extends ConfigurationContainer implements TaskWindowCont
             setBounds(mTmpRect);
 
             if (mStack == null || persistBounds) {
-                setLastNonFullscreenBounds(getOverrideBounds());
+                setLastNonFullscreenBounds(getRequestedOverrideBounds());
             }
             computeOverrideConfiguration(newConfig, mTmpRect,
                     mTmpRect.right != bounds.right, mTmpRect.bottom != bounds.bottom);
         }
-        onOverrideConfigurationChanged(newConfig);
+        onRequestedOverrideConfigurationChanged(newConfig);
         return !mTmpConfig.equals(newConfig);
     }
 
@@ -1949,7 +1949,7 @@ public class TaskRecord extends ConfigurationContainer implements TaskWindowCont
         if (bounds != null && !bounds.isEmpty()) {
             // TODO: Review if we actually want to do this - we are setting the launch bounds
             // directly here.
-            bounds.set(getOverrideBounds());
+            bounds.set(getRequestedOverrideBounds());
         }
         return bounds;
     }
@@ -1975,7 +1975,7 @@ public class TaskRecord extends ConfigurationContainer implements TaskWindowCont
                 mService.mStackSupervisor.getLaunchParamsController().layoutTask(this, null);
             }
         } else {
-            updateOverrideConfiguration(inStack.getOverrideBounds());
+            updateOverrideConfiguration(inStack.getRequestedOverrideBounds());
         }
     }
 
@@ -1989,9 +1989,9 @@ public class TaskRecord extends ConfigurationContainer implements TaskWindowCont
         if (!isActivityTypeStandardOrUndefined()
                 || windowingMode == WINDOWING_MODE_FULLSCREEN
                 || (windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY && !isResizeable())) {
-            return isResizeable() ? mStack.getOverrideBounds() : null;
+            return isResizeable() ? mStack.getRequestedOverrideBounds() : null;
         } else if (!getWindowConfiguration().persistTaskBounds()) {
-            return mStack.getOverrideBounds();
+            return mStack.getRequestedOverrideBounds();
         }
         return mLastNonFullscreenBounds;
     }
@@ -2210,7 +2210,7 @@ public class TaskRecord extends ConfigurationContainer implements TaskWindowCont
         proto.write(FULLSCREEN, matchParentBounds());
 
         if (!matchParentBounds()) {
-            final Rect bounds = getOverrideBounds();
+            final Rect bounds = getRequestedOverrideBounds();
             bounds.writeToProto(proto, BOUNDS);
         }
         proto.write(MIN_WIDTH, mMinWidth);

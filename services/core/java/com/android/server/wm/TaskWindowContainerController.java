@@ -157,7 +157,8 @@ public class TaskWindowContainerController
                 throw new IllegalArgumentException("resizeTask: taskId " + mTaskId + " not found.");
             }
 
-            if (mContainer.setBounds(mContainer.getOverrideBounds(), forced) != BOUNDS_CHANGE_NONE
+            if (mContainer.setBounds(
+                    mContainer.getRequestedOverrideBounds(), forced) != BOUNDS_CHANGE_NONE
                     && relayout) {
                 mContainer.getDisplayContent().layoutAndAssignWindowLayersIfNeeded();
             }

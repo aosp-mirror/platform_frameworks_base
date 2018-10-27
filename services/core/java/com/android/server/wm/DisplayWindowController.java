@@ -87,7 +87,7 @@ public class DisplayWindowController
     }
 
     @Override
-    public void onOverrideConfigurationChanged(Configuration overrideConfiguration) {
+    public void onRequestedOverrideConfigurationChanged(Configuration overrideConfiguration) {
         synchronized (mGlobalLock) {
             if (mContainer != null) {
                 mContainer.mWmService.setNewDisplayOverrideConfiguration(overrideConfiguration,

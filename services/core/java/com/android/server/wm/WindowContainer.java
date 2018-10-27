@@ -469,15 +469,16 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
 
     /**
      * Update override configuration and recalculate full config.
-     * @see #mOverrideConfiguration
+     * @see #mRequestedOverrideConfiguration
      * @see #mFullConfiguration
      */
     @Override
-    public void onOverrideConfigurationChanged(Configuration overrideConfiguration) {
+    public void onRequestedOverrideConfigurationChanged(Configuration overrideConfiguration) {
         // We must diff before the configuration is applied so that we can capture the change
         // against the existing bounds.
-        final int diff = diffOverrideBounds(overrideConfiguration.windowConfiguration.getBounds());
-        super.onOverrideConfigurationChanged(overrideConfiguration);
+        final int diff = diffRequestedOverrideBounds(
+                overrideConfiguration.windowConfiguration.getBounds());
+        super.onRequestedOverrideConfigurationChanged(overrideConfiguration);
         if (mParent != null) {
             mParent.onDescendantOverrideConfigurationChanged();
         }

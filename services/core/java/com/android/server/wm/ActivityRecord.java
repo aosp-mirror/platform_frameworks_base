@@ -441,8 +441,13 @@ final class ActivityRecord extends ConfigurationContainer {
         mLastReportedConfiguration.dump(pw, prefix + " ");
 
         pw.print(prefix); pw.print("CurrentConfiguration="); pw.println(getConfiguration());
-        if (!getOverrideConfiguration().equals(EMPTY)) {
-            pw.println(prefix + "OverrideConfiguration=" + getOverrideConfiguration());
+        if (!getRequestedOverrideConfiguration().equals(EMPTY)) {
+            pw.println(prefix + "RequestedOverrideConfiguration="
+                    + getRequestedOverrideConfiguration());
+        }
+        if (!getResolvedOverrideConfiguration().equals(getRequestedOverrideConfiguration())) {
+            pw.println(prefix + "ResolvedOverrideConfiguration="
+                    + getResolvedOverrideConfiguration());
         }
         if (!matchParentBounds()) {
             pw.println(prefix + "bounds=" + getBounds());
@@ -2531,13 +2536,13 @@ final class ActivityRecord extends ConfigurationContainer {
         mTmpConfig.unset();
         computeBounds(mTmpBounds);
 
-        if (mTmpBounds.equals(getOverrideBounds())) {
+        if (mTmpBounds.equals(getRequestedOverrideBounds())) {
             return;
         }
 
         setBounds(mTmpBounds);
 
-        final Rect updatedBounds = getOverrideBounds();
+        final Rect updatedBounds = getRequestedOverrideBounds();
 
         // Bounds changed...update configuration to match.
         if (!matchParentBounds()) {
@@ -2545,7 +2550,7 @@ final class ActivityRecord extends ConfigurationContainer {
                     false /* overrideWidth */, false /* overrideHeight */);
         }
 
-        onOverrideConfigurationChanged(mTmpConfig);
+        onRequestedOverrideConfigurationChanged(mTmpConfig);
     }
 
     /** Returns true if the configuration is compatible with this activity. */
@@ -2602,11 +2607,11 @@ final class ActivityRecord extends ConfigurationContainer {
         if (containingAppWidth <= maxActivityWidth && containingAppHeight <= maxActivityHeight) {
             // The display matches or is less than the activity aspect ratio, so nothing else to do.
             // Return the existing bounds. If this method is running for the first time,
-            // {@link #getOverrideBounds()} will be empty (representing no override). If the method has run
-            // before, then effect of {@link #getOverrideBounds()} will already have been applied to the
-            // value returned from {@link getConfiguration}. Refer to
-            // {@link TaskRecord#computeOverrideConfiguration}.
-            outBounds.set(getOverrideBounds());
+            // {@link #getRequestedOverrideBounds()} will be empty (representing no override). If
+            // the method has run before, then effect of {@link #getRequestedOverrideBounds()} will
+            // already have been applied to the value returned from {@link getConfiguration}. Refer
+            // to {@link TaskRecord#computeOverrideConfiguration}.
+            outBounds.set(getRequestedOverrideBounds());
             return;
         }
 

@@ -135,8 +135,8 @@ public class ActivityStarterTests extends ActivityTestsBase {
         final Rect bounds = new Rect(10, 10, 100, 100);
 
         mStarter.updateBounds(task, bounds);
-        assertEquals(bounds, task.getOverrideBounds());
-        assertEquals(new Rect(), task.getStack().getOverrideBounds());
+        assertEquals(bounds, task.getRequestedOverrideBounds());
+        assertEquals(new Rect(), task.getStack().getRequestedOverrideBounds());
 
         // When in a resizeable stack, the stack bounds should be updated as well.
         final TaskRecord task2 = new TaskBuilder(mService.mStackSupervisor)
@@ -151,10 +151,10 @@ public class ActivityStarterTests extends ActivityTestsBase {
 
         // In the case of no animation, the stack and task bounds should be set immediately.
         if (!ANIMATE) {
-            assertEquals(bounds, task2.getStack().getOverrideBounds());
-            assertEquals(bounds, task2.getOverrideBounds());
+            assertEquals(bounds, task2.getStack().getRequestedOverrideBounds());
+            assertEquals(bounds, task2.getRequestedOverrideBounds());
         } else {
-            assertEquals(new Rect(), task2.getOverrideBounds());
+            assertEquals(new Rect(), task2.getRequestedOverrideBounds());
         }
     }
 

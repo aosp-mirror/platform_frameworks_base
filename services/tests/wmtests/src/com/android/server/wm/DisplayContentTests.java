@@ -227,7 +227,8 @@ public class DisplayContentTests extends WindowTestsBase {
      */
     @Test
     public void testDisplayOverrideConfigUpdate() {
-        final Configuration currentOverrideConfig = mDisplayContent.getOverrideConfiguration();
+        final Configuration currentOverrideConfig =
+                mDisplayContent.getRequestedOverrideConfiguration();
 
         // Create new, slightly changed override configuration and apply it to the display.
         final Configuration newOverrideConfig = new Configuration(currentOverrideConfig);
@@ -237,7 +238,7 @@ public class DisplayContentTests extends WindowTestsBase {
         mWm.setNewDisplayOverrideConfiguration(newOverrideConfig, mDisplayContent);
 
         // Check that override config is applied.
-        assertEquals(newOverrideConfig, mDisplayContent.getOverrideConfiguration());
+        assertEquals(newOverrideConfig, mDisplayContent.getRequestedOverrideConfiguration());
     }
 
     /**

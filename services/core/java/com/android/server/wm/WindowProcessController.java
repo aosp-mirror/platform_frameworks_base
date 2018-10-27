@@ -770,8 +770,8 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     }
 
     @Override
-    public void onOverrideConfigurationChanged(Configuration newOverrideConfig) {
-        super.onOverrideConfigurationChanged(newOverrideConfig);
+    public void onRequestedOverrideConfigurationChanged(Configuration newOverrideConfig) {
+        super.onRequestedOverrideConfigurationChanged(newOverrideConfig);
         updateConfiguration();
     }
 
@@ -924,7 +924,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
             }
         }
         pw.println(prefix + " Configuration=" + getConfiguration());
-        pw.println(prefix + " OverrideConfiguration=" + getOverrideConfiguration());
+        pw.println(prefix + " OverrideConfiguration=" + getRequestedOverrideConfiguration());
         pw.println(prefix + " mLastReportedConfiguration=" + mLastReportedConfiguration);
     }
 

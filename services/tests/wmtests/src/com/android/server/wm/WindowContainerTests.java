@@ -424,7 +424,7 @@ public class WindowContainerTests extends WindowTestsBase {
 
         final TestWindowContainer parent = grandparent.addChildWindow();
         final TestWindowContainer child = parent.addChildWindow();
-        child.onOverrideConfigurationChanged(new Configuration());
+        child.onRequestedOverrideConfigurationChanged(new Configuration());
 
         assertTrue(grandparent.mOnDescendantOverrideCalled);
     }
