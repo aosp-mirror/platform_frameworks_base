@@ -1,5 +1,5 @@
 //
-// Copyright (C) 2015 The Android Open Source Project
+// Copyright (C) 2017 The Android Open Source Project
 //
 // Licensed under the Apache License, Version 2.0 (the "License");
 // you may not use this file except in compliance with the License.
@@ -42,6 +42,261 @@ cc_library_host_shared {
 
 }
 
+cc_defaults {
+    name: "statsd_defaults",
+    aidl: {
+        include_dirs: ["frameworks/base/core/java"],
+    },
+
+    srcs: [
+        ":statsd_aidl",
+        "src/statsd_config.proto",
+        "src/FieldValue.cpp",
+        "src/hash.cpp",
+        "src/stats_log_util.cpp",
+        "src/anomaly/AlarmMonitor.cpp",
+        "src/anomaly/AlarmTracker.cpp",
+        "src/anomaly/AnomalyTracker.cpp",
+        "src/anomaly/DurationAnomalyTracker.cpp",
+        "src/anomaly/subscriber_util.cpp",
+        "src/condition/CombinationConditionTracker.cpp",
+        "src/condition/condition_util.cpp",
+        "src/condition/SimpleConditionTracker.cpp",
+        "src/condition/ConditionWizard.cpp",
+        "src/condition/StateTracker.cpp",
+        "src/config/ConfigKey.cpp",
+        "src/config/ConfigListener.cpp",
+        "src/config/ConfigManager.cpp",
+        "src/external/Perfetto.cpp",
+        "src/external/StatsPuller.cpp",
+        "src/external/StatsCompanionServicePuller.cpp",
+        "src/external/SubsystemSleepStatePuller.cpp",
+        "src/external/ResourceHealthManagerPuller.cpp",
+        "src/external/ResourceThermalManagerPuller.cpp",
+        "src/external/StatsPullerManagerImpl.cpp",
+        "src/external/puller_util.cpp",
+        "src/logd/LogEvent.cpp",
+        "src/logd/LogListener.cpp",
+        "src/logd/LogReader.cpp",
+        "src/matchers/CombinationLogMatchingTracker.cpp",
+        "src/matchers/matcher_util.cpp",
+        "src/matchers/SimpleLogMatchingTracker.cpp",
+        "src/metrics/MetricProducer.cpp",
+        "src/metrics/EventMetricProducer.cpp",
+        "src/metrics/CountMetricProducer.cpp",
+        "src/metrics/DurationMetricProducer.cpp",
+        "src/metrics/duration_helper/OringDurationTracker.cpp",
+        "src/metrics/duration_helper/MaxDurationTracker.cpp",
+        "src/metrics/ValueMetricProducer.cpp",
+        "src/metrics/GaugeMetricProducer.cpp",
+        "src/metrics/MetricsManager.cpp",
+        "src/metrics/metrics_manager_util.cpp",
+        "src/packages/UidMap.cpp",
+        "src/perfetto/perfetto_config.proto",
+        "src/storage/StorageManager.cpp",
+        "src/StatsLogProcessor.cpp",
+        "src/StatsService.cpp",
+        "src/statscompanion_util.cpp",
+        "src/subscriber/IncidentdReporter.cpp",
+        "src/subscriber/SubscriberReporter.cpp",
+        "src/HashableDimensionKey.cpp",
+        "src/guardrail/StatsdStats.cpp",
+        "src/socket/StatsSocketListener.cpp",
+    ],
+
+    local_include_dirs: [
+        "src",
+    ],
+
+    static_libs: [
+        "libhealthhalutils",
+        "libplatformprotos",
+    ],
+
+    shared_libs: [
+        "libbase",
+        "libbinder",
+        "libincident",
+        "liblog",
+        "libutils",
+        "libservices",
+        "libprotoutil",
+        "libstatslog",
+        "libhardware",
+        "libhardware_legacy",
+        "libhidlbase",
+        "libhidltransport",
+        "libhwbinder",
+        "android.hardware.health@2.0",
+        "android.hardware.power@1.0",
+        "android.hardware.power@1.1",
+        "android.hardware.thermal@1.0",
+        "libpackagelistparser",
+        "libsysutils",
+        "libcutils",
+    ],
+}
+
+// =========
+// statsd
+// =========
+
+cc_binary {
+    name: "statsd",
+    defaults: ["statsd_defaults"],
+
+    srcs: ["src/main.cpp"],
+
+    cflags: [
+        "-Wall",
+        "-Wextra",
+        "-Werror",
+        "-Wno-unused-parameter",
+        // optimize for size (protobuf glop can get big)
+        "-Os",
+        // "-g",
+        // "-O0",
+    ],
+
+    product_variables: {
+        eng: {
+            // Enable sanitizer and allow very verbose printing on eng builds
+            cflags: ["-DVERY_VERBOSE_PRINTING"],
+            sanitize: {
+                address: true,
+            },
+        },
+    },
+
+    proto: {
+        type: "lite",
+    },
+
+    shared_libs: ["libgtest_prod"],
+
+    init_rc: ["statsd.rc"],
+}
+
+// ==============
+// statsd_test
+// ==============
+
+cc_test {
+    name: "statsd_test",
+    defaults: ["statsd_defaults"],
+    test_suites: ["device-tests"],
+
+    cflags: [
+        "-Wall",
+        "-Werror",
+        "-Wno-missing-field-initializers",
+        "-Wno-unused-variable",
+        "-Wno-unused-function",
+        "-Wno-unused-parameter",
+    ],
+
+    srcs: [
+        "src/atom_field_options.proto",
+        "src/atoms.proto",
+        "src/stats_log.proto",
+        "tests/AlarmMonitor_test.cpp",
+        "tests/anomaly/AlarmTracker_test.cpp",
+        "tests/anomaly/AnomalyTracker_test.cpp",
+        "tests/ConfigManager_test.cpp",
+        "tests/external/puller_util_test.cpp",
+        "tests/indexed_priority_queue_test.cpp",
+        "tests/LogEntryMatcher_test.cpp",
+        "tests/LogReader_test.cpp",
+        "tests/LogEvent_test.cpp",
+        "tests/MetricsManager_test.cpp",
+        "tests/StatsLogProcessor_test.cpp",
+        "tests/StatsService_test.cpp",
+        "tests/UidMap_test.cpp",
+        "tests/FieldValue_test.cpp",
+        "tests/condition/CombinationConditionTracker_test.cpp",
+        "tests/condition/SimpleConditionTracker_test.cpp",
+        "tests/condition/StateTracker_test.cpp",
+        "tests/metrics/OringDurationTracker_test.cpp",
+        "tests/metrics/MaxDurationTracker_test.cpp",
+        "tests/metrics/CountMetricProducer_test.cpp",
+        "tests/metrics/DurationMetricProducer_test.cpp",
+        "tests/metrics/EventMetricProducer_test.cpp",
+        "tests/metrics/ValueMetricProducer_test.cpp",
+        "tests/metrics/GaugeMetricProducer_test.cpp",
+        "tests/guardrail/StatsdStats_test.cpp",
+        "tests/metrics/metrics_test_helper.cpp",
+        "tests/statsd_test_util.cpp",
+        "tests/e2e/WakelockDuration_e2e_test.cpp",
+        "tests/e2e/MetricConditionLink_e2e_test.cpp",
+        "tests/e2e/Alarm_e2e_test.cpp",
+        "tests/e2e/Attribution_e2e_test.cpp",
+        "tests/e2e/GaugeMetric_e2e_push_test.cpp",
+        "tests/e2e/GaugeMetric_e2e_pull_test.cpp",
+        "tests/e2e/ValueMetric_pull_e2e_test.cpp",
+        "tests/e2e/DimensionInCondition_e2e_combination_AND_cond_test.cpp",
+        "tests/e2e/DimensionInCondition_e2e_combination_OR_cond_test.cpp",
+        "tests/e2e/DimensionInCondition_e2e_simple_cond_test.cpp",
+        "tests/e2e/Anomaly_count_e2e_test.cpp",
+        "tests/e2e/Anomaly_duration_sum_e2e_test.cpp",
+        "tests/e2e/ConfigTtl_e2e_test.cpp",
+        "tests/e2e/PartialBucket_e2e_test.cpp",
+    ],
+
+    static_libs: ["libgmock"],
+
+    proto: {
+        type: "full",
+        include_dirs: ["external/protobuf/src"],
+    },
+
+    shared_libs: ["libprotobuf-cpp-full"],
+
+}
+
+//#############################
+// statsd micro benchmark
+//#############################
+
+cc_benchmark {
+    name: "statsd_benchmark",
+    defaults: ["statsd_defaults"],
+
+    srcs: [
+        "src/atom_field_options.proto",
+        "src/atoms.proto",
+        "src/stats_log.proto",
+        "benchmark/main.cpp",
+        "benchmark/hello_world_benchmark.cpp",
+        "benchmark/log_event_benchmark.cpp",
+        "benchmark/stats_write_benchmark.cpp",
+        "benchmark/filter_value_benchmark.cpp",
+        "benchmark/get_dimensions_for_condition_benchmark.cpp",
+        "benchmark/metric_util.cpp",
+        "benchmark/duration_metric_benchmark.cpp",
+    ],
+
+    proto: {
+        type: "full",
+        include_dirs: ["external/protobuf/src"],
+    },
+
+    cflags: [
+        "-Wall",
+        "-Werror",
+        "-Wno-unused-parameter",
+        "-Wno-unused-variable",
+        "-Wno-unused-function",
+
+        // Bug: http://b/29823425 Disable -Wvarargs for Clang update to r271374
+        "-Wno-varargs"
+    ],
+
+    shared_libs: [
+        "libgtest_prod",
+        "libstatslog",
+        "libprotobuf-cpp-full",
+    ],
+}
 
 // ====  java proto device library (for test only)  ==============================
 java_library {
