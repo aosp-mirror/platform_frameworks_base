@@ -489,7 +489,7 @@ public class PackageParserTest {
         pkg.usesLibraryFiles = new String[] { "foo13"};
 
         pkg.usesLibraryInfos = new ArrayList<>();
-        pkg.usesLibraryInfos.add(new SharedLibraryInfo(null, null, null, 0L, 0, null, null));
+        pkg.usesLibraryInfos.add(new SharedLibraryInfo(null, null, null, 0L, 0, null, null, null));
 
         pkg.mOriginalPackages = new ArrayList<>();
         pkg.mOriginalPackages.add("foo14");
