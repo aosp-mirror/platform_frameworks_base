@@ -33,6 +33,7 @@ import android.os.Parcelable;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserManager;
+import android.provider.Settings;
 import android.util.ArrayMap;
 
 import com.android.internal.app.IAppOpsActiveCallback;
@@ -1555,6 +1556,26 @@ public class AppOpsManager {
      * @hide
      */
     public static int opToDefaultMode(int op) {
+        // STOPSHIP b/118520006: Hardcode the default values once the feature is stable.
+        switch (op) {
+            // SMS permissions
+            case AppOpsManager.OP_SEND_SMS:
+            case AppOpsManager.OP_RECEIVE_SMS:
+            case AppOpsManager.OP_READ_SMS:
+            case AppOpsManager.OP_RECEIVE_WAP_PUSH:
+            case AppOpsManager.OP_RECEIVE_MMS:
+            case AppOpsManager.OP_READ_CELL_BROADCASTS:
+            // CallLog permissions
+            case AppOpsManager.OP_READ_CALL_LOG:
+            case AppOpsManager.OP_WRITE_CALL_LOG:
+            case AppOpsManager.OP_PROCESS_OUTGOING_CALLS: {
+                // ActivityThread.currentApplication() is never null
+                if (Settings.Global.getInt(ActivityThread.currentApplication().getContentResolver(),
+                        Settings.Global.SMS_ACCESS_RESTRICTION_ENABLED, 0) == 1) {
+                    return AppOpsManager.MODE_DEFAULT;
+                }
+            }
+        }
         return sOpDefaultMode[op];
     }
 
