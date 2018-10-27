@@ -535,7 +535,7 @@ final class ProcessRecord implements WindowProcessListener {
     }
 
     ProcessRecord(ActivityManagerService _service, ApplicationInfo _info, String _processName,
-            int _uid, Configuration config) {
+            int _uid) {
         mService = _service;
         info = _info;
         isolated = _info.uid != _uid;
@@ -549,7 +549,7 @@ final class ProcessRecord implements WindowProcessListener {
         removed = false;
         lastStateTime = lastPssTime = nextPssTime = SystemClock.uptimeMillis();
         mWindowProcessController = new WindowProcessController(
-                mService.mActivityTaskManager, info, processName, uid, userId, this, this, config);
+                mService.mActivityTaskManager, info, processName, uid, userId, this, this);
         pkgList.put(_info.packageName, new ProcessStats.ProcessStateHolder(_info.longVersionCode));
     }
 
@@ -1259,7 +1259,7 @@ final class ProcessRecord implements WindowProcessListener {
 
         synchronized (mService) {
             // PowerManager.reboot() can block for a long time, so ignore ANRs while shutting down.
-            if (mService.mActivityTaskManager.mShuttingDown) {
+            if (mService.mAtmInternal.isShuttingDown()) {
                 Slog.i(TAG, "During shutdown skipping ANR: " + this + " " + annotation);
                 return;
             } else if (isNotResponding()) {

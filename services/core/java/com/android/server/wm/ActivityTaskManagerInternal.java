@@ -469,4 +469,5 @@ public abstract class ActivityTaskManagerInternal {
 
     public abstract void clearLockedTasks(String reason);
     public abstract void updateUserConfiguration();
+    public abstract boolean canShowErrorDialogs();
 }

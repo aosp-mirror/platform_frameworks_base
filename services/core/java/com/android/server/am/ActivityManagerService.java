@@ -1361,14 +1361,6 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     private static String sTheRealBuildSerial = Build.UNKNOWN;
 
-    /**
-     * Current global configuration information. Contains general settings for the entire system,
-     * also corresponds to the merged configuration of the default display.
-     */
-    Configuration getGlobalConfiguration() {
-        return mActivityTaskManager.getGlobalConfiguration();
-    }
-
     final class UiHandler extends Handler {
         public UiHandler() {
             super(com.android.server.UiThread.get().getLooper(), null, true);
@@ -10401,7 +10393,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         return mProviderMap.dumpProviderProto(fd, pw, name, args);
     }
 
-    static class ItemMatcher {
+    public static class ItemMatcher {
         ArrayList<ComponentName> components;
         ArrayList<String> strings;
         ArrayList<Integer> objects;
