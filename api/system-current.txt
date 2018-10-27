@@ -4154,8 +4154,11 @@ package android.os {
     method public deprecated int getUserRestrictionSource(java.lang.String, android.os.UserHandle);
     method public java.util.List<android.os.UserManager.EnforcingUser> getUserRestrictionSources(java.lang.String, android.os.UserHandle);
     method public boolean hasRestrictedProfiles();
+    method public boolean isAdminUser();
+    method public boolean isGuestUser();
     method public boolean isManagedProfile();
     method public boolean isManagedProfile(int);
+    method public boolean isPrimaryUser();
     method public boolean isRestrictedProfile();
     field public static final java.lang.String ACTION_USER_RESTRICTIONS_CHANGED = "android.os.action.USER_RESTRICTIONS_CHANGED";
     field public static final deprecated java.lang.String DISALLOW_OEM_UNLOCK = "no_oem_unlock";

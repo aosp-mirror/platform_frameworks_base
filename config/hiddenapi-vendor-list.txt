@@ -120,7 +120,6 @@ Landroid/os/SystemService;->stop(Ljava/lang/String;)V
 Landroid/os/SystemVibrator;-><init>()V
 Landroid/os/UserHandle;->isSameApp(II)Z
 Landroid/os/UserManager;->hasUserRestriction(Ljava/lang/String;Landroid/os/UserHandle;)Z
-Landroid/os/UserManager;->isAdminUser()Z
 Landroid/R$styleable;->CheckBoxPreference:[I
 Landroid/telephony/ims/compat/feature/MMTelFeature;-><init>()V
 Landroid/telephony/ims/compat/ImsService;-><init>()V
