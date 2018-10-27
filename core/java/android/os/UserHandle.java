@@ -132,6 +132,19 @@ public final class UserHandle implements Parcelable {
     }
 
     /**
+     * Whether a UID belongs to a system core component or not.
+     * @hide
+     */
+    public static boolean isCore(int uid) {
+        if (uid >= 0) {
+            final int appId = getAppId(uid);
+            return appId < Process.FIRST_APPLICATION_UID;
+        } else {
+            return false;
+        }
+    }
+
+    /**
      * Returns the user for a given uid.
      * @param uid A uid for an application running in a particular user.
      * @return A {@link UserHandle} for that user.
