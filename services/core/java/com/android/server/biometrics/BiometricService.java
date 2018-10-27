@@ -272,7 +272,7 @@ public class BiometricService extends SystemService {
                 final int error = result.second;
 
                 // Check for errors, notify callback, and return
-                if (error != BiometricConstants.BIOMETRIC_ERROR_NONE) {
+                if (error != BiometricConstants.BIOMETRIC_SUCCESS) {
                     try {
                         final String hardwareUnavailable =
                                 getContext().getString(R.string.biometric_error_hw_unavailable);
@@ -540,7 +540,7 @@ public class BiometricService extends SystemService {
             return new Pair<>(BIOMETRIC_NONE, BiometricConstants.BIOMETRIC_ERROR_HW_UNAVAILABLE);
         }
 
-        return new Pair<>(modality, BiometricConstants.BIOMETRIC_ERROR_NONE);
+        return new Pair<>(modality, BiometricConstants.BIOMETRIC_SUCCESS);
     }
 
     private boolean isEnabledForApp(int modality) {
