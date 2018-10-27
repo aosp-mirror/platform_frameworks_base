@@ -88,6 +88,7 @@ import com.android.internal.widget.LockPatternUtils;
 import com.android.settingslib.WirelessUtils;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.TaskStackChangeListener;
+
 import com.google.android.collect.Lists;
 
 import java.io.FileDescriptor;
@@ -236,6 +237,8 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     private boolean mIsDreaming;
     private final DevicePolicyManager mDevicePolicyManager;
     private boolean mLogoutEnabled;
+    private boolean mFingerprintLockedOut;
+    private boolean mFaceLockedOut;
 
     /**
      * Short delay before restarting biometric authentication after a successful try
@@ -624,7 +627,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         if (msgId == FingerprintManager.FINGERPRINT_ERROR_CANCELED
                 && mFingerprintRunningState == BIOMETRIC_STATE_CANCELLING_RESTARTING) {
             setFingerprintRunningState(BIOMETRIC_STATE_STOPPED);
-            startListeningForFingerprint();
+            updateFingerprintListeningState();
         } else {
             setFingerprintRunningState(BIOMETRIC_STATE_STOPPED);
         }
@@ -635,6 +638,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                 mHandler.removeCallbacks(mRetryFingerprintAuthentication);
                 mHandler.postDelayed(mRetryFingerprintAuthentication, HW_UNAVAILABLE_TIMEOUT);
             }
+        }
+
+        if (msgId == FingerprintManager.FINGERPRINT_ERROR_LOCKOUT
+                || msgId == FingerprintManager.FINGERPRINT_ERROR_LOCKOUT_PERMANENT) {
+            mFingerprintLockedOut = true;
         }
 
         if (msgId == FingerprintManager.FINGERPRINT_ERROR_LOCKOUT_PERMANENT) {
@@ -652,6 +660,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     private void handleFingerprintLockoutReset() {
+        mFingerprintLockedOut = false;
         updateFingerprintListeningState();
     }
 
@@ -659,7 +668,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         boolean wasRunning = mFingerprintRunningState == BIOMETRIC_STATE_RUNNING;
         boolean isRunning = fingerprintRunningState == BIOMETRIC_STATE_RUNNING;
         mFingerprintRunningState = fingerprintRunningState;
-
+        if (DEBUG) Log.v(TAG, "Fingerprint State: " + mFingerprintRunningState);
         // Clients of KeyguardUpdateMonitor don't care about the internal state about the
         // asynchronousness of the cancel cycle. So only notify them if the actualy running state
         // has changed.
@@ -774,7 +783,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         if (msgId == FaceManager.FACE_ERROR_CANCELED
                 && mFaceRunningState == BIOMETRIC_STATE_CANCELLING_RESTARTING) {
             setFaceRunningState(BIOMETRIC_STATE_STOPPED);
-            startListeningForFace();
+            updateFaceListeningState();
         } else {
             setFaceRunningState(BIOMETRIC_STATE_STOPPED);
         }
@@ -785,6 +794,11 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                 mHandler.removeCallbacks(mRetryFaceAuthentication);
                 mHandler.postDelayed(mRetryFaceAuthentication, HW_UNAVAILABLE_TIMEOUT);
             }
+        }
+
+        if (msgId == FaceManager.FACE_ERROR_LOCKOUT
+                || msgId == FaceManager.FACE_ERROR_LOCKOUT_PERMANENT) {
+            mFaceLockedOut = true;
         }
 
         if (msgId == FaceManager.FACE_ERROR_LOCKOUT_PERMANENT) {
@@ -803,6 +817,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
     }
 
     private void handleFaceLockoutReset() {
+        mFaceLockedOut = false;
         updateFaceListeningState();
     }
 
@@ -810,7 +825,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
         boolean wasRunning = mFaceRunningState == BIOMETRIC_STATE_RUNNING;
         boolean isRunning = faceRunningState == BIOMETRIC_STATE_RUNNING;
         mFaceRunningState = faceRunningState;
-
+        if (DEBUG) Log.v(TAG, "Face State: " + mFaceRunningState);
         // Clients of KeyguardUpdateMonitor don't care about the internal state or about the
         // asynchronousness of the cancel cycle. So only notify them if the actualy running state
         // has changed.
@@ -1557,7 +1572,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                 (mBouncer && !mKeyguardGoingAway) || mGoingToSleep ||
                 shouldListenForFingerprintAssistant() || (mKeyguardOccluded && mIsDreaming))
                 && !mSwitchingUser && !isFingerprintDisabled(getCurrentUser())
-                && !mKeyguardGoingAway;
+                && !mKeyguardGoingAway && !mFingerprintLockedOut;
     }
 
     private boolean shouldListenForFace() {
@@ -1565,7 +1580,7 @@ public class KeyguardUpdateMonitor implements TrustManager.TrustListener {
                 (mBouncer && !mKeyguardGoingAway) || mGoingToSleep ||
                 shouldListenForFaceAssistant() || (mKeyguardOccluded && mIsDreaming))
                 && !mSwitchingUser && !isFaceDisabled(getCurrentUser())
-                && !mKeyguardGoingAway && mFaceSettingEnabledForUser;
+                && !mKeyguardGoingAway && !mFaceLockedOut && mFaceSettingEnabledForUser;
     }
 
 
