@@ -42,6 +42,7 @@ cc_library_shared {
         "com_google_android_gles_jni_EGLImpl.cpp",
         "com_google_android_gles_jni_GLImpl.cpp", // TODO: .arm
         "android_app_Activity.cpp",
+	"android_app_ActivityThread.cpp",
         "android_app_NativeActivity.cpp",
         "android_app_admin_SecurityLog.cpp",
         "android_opengl_EGL14.cpp",
