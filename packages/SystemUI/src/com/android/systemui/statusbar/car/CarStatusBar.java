@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.car;
 
 import android.app.ActivityTaskManager;
+import android.car.drivingstate.CarDrivingStateEvent;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
@@ -82,6 +83,8 @@ public class CarStatusBar extends StatusBar implements
     private DeviceProvisionedController mDeviceProvisionedController;
     private boolean mDeviceIsProvisioned = true;
     private HvacController mHvacController;
+    private DrivingStateHelper mDrivingStateHelper;
+    private SwitchToGuestTimer mSwitchToGuestTimer;
 
     @Override
     public void start() {
@@ -111,6 +114,12 @@ public class CarStatusBar extends StatusBar implements
                         }
                     });
         }
+
+        // Register a listener for driving state changes.
+        mDrivingStateHelper = new DrivingStateHelper(mContext, this::onDrivingStateChanged);
+        mDrivingStateHelper.connectToCarService();
+
+        mSwitchToGuestTimer = new SwitchToGuestTimer(mContext);
     }
 
     /**
@@ -205,6 +214,7 @@ public class CarStatusBar extends StatusBar implements
         mCarBatteryController.stopListening();
         mConnectedDeviceSignalController.stopListening();
         mActivityManagerWrapper.unregisterTaskStackListener(mTaskStackListener);
+        mDrivingStateHelper.disconnectFromCarService();
 
         if (mNavigationBarWindow != null) {
             mWindowManager.removeViewImmediate(mNavigationBarWindow);
@@ -476,6 +486,20 @@ public class CarStatusBar extends StatusBar implements
         }
     }
 
+    private void onDrivingStateChanged(CarDrivingStateEvent notUsed) {
+        // Check if we need to start the timer every time driving state changes.
+        startSwitchToGuestTimerIfDrivingOnKeyguard();
+    }
+
+    private void startSwitchToGuestTimerIfDrivingOnKeyguard() {
+        if (mDrivingStateHelper.isCurrentlyDriving() && mState != StatusBarState.SHADE) {
+            // We're driving while keyguard is up.
+            mSwitchToGuestTimer.start();
+        } else {
+            mSwitchToGuestTimer.cancel();
+        }
+    }
+
     @Override
     protected void createUserSwitcher() {
         UserSwitcherController userSwitcherController =
@@ -491,6 +515,9 @@ public class CarStatusBar extends StatusBar implements
     @Override
     public void onStateChanged(int newState) {
         super.onStateChanged(newState);
+
+        startSwitchToGuestTimerIfDrivingOnKeyguard();
+
         if (mFullscreenUserSwitcher == null) {
             return; // Not using the full screen user switcher.
         }

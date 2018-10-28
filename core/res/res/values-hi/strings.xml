@@ -292,6 +292,9 @@
     <string name="permgrouplab_microphone" msgid="171539900250043464">"माइक्रोफ़ोन"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"ऑडियो रिकॉर्ड करें"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; को ऑडियो रिकॉर्ड करने की अनुमति देना चाहते हैं?"</string>
+    <string name="permgrouplab_activityRecognition" msgid="2838596644535616493">"गतिविधि की पहचान"</string>
+    <string name="permgroupdesc_activityRecognition" msgid="7672248027571522602">"गतिविधि को पहचानें"</string>
+    <string name="permgrouprequest_activityRecognition" msgid="8121253142311250055">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; को अपने शरीर की गतिविधि को पहचानने की मंज़ूरी देना चाहते हैं?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"कैमरा"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"चित्र लेने और वीडियो रिकॉर्ड करने"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; को फ़ोटो खींचने और वीडियो रिकॉर्ड करने की अनुमति देना चाहते हैं?"</string>
@@ -300,7 +303,7 @@
     <string name="permgrouprequest_calllog" msgid="8487355309583773267">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; को अपने काॅल लाॅग एक्सेस करने की मंज़ूरी देना चाहते हैं?"</string>
     <string name="permgrouplab_phone" msgid="5229115638567440675">"फ़ोन"</string>
     <string name="permgroupdesc_phone" msgid="6234224354060641055">"फ़ोन कॉल करें और प्रबंधित करें"</string>
-    <string name="permgrouprequest_phone" msgid="9166979577750581037">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; को फ़ोन कॉल करने और उन्हें प्रबंधित करने की अनुमति देना चाहते हैं?"</string>
+    <string name="permgrouprequest_phone" msgid="9166979577750581037">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; को फ़ोन कॉल करने और उन्हें प्रबंधित करने की अनुमति दें?"</string>
     <string name="permgrouplab_sensors" msgid="416037179223226722">"शरीर संवेदक"</string>
     <string name="permgroupdesc_sensors" msgid="7147968539346634043">"अपने महत्वपूर्ण संकेतों के बारे में सेंसर डेटा को ऐक्सेस करें"</string>
     <string name="permgrouprequest_sensors" msgid="6349806962814556786">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; को अपने स्वास्थ्य से जुड़ी ज़रूरी जानकारी इस्तेमाल करने की अनुमति देना चाहते हैं?"</string>
@@ -418,14 +421,16 @@
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"यह ऐप सेल टावर और वाई-फ़ाई नेटवर्क जैसे नेटवर्क के स्रोतों के आधार पर आपकी जगह का पता कर सकता है. ये जगह की जानकारी आपके टैबलेट पर चालू और मौजूद होनी चाहिए ताकि ऐप उनका इस्तेमाल कर सके."</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"यह ऐप सेल टावर और वाई-फ़ाई नेटवर्क जैसे नेटवर्क के स्रोतों के आधार पर आपकी जगह का पता कर सकता है. ये जगह की जानकारी आपके टीवी पर चालू और मौजूद होनी चाहिए ताकि ऐप उनका इस्तेमाल कर सके."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"यह ऐप सेल टावर और वाई-फ़ाई नेटवर्क जैसे नेटवर्क के स्रोतों के आधार पर आपकी जगह का पता कर सकता है. ये जगह की जानकारी आपके फ़ोन पर चालू और मौजूद होनी चाहिए ताकि ऐप उनका इस्तेमाल कर सके."</string>
-    <string name="permlab_accessBackgroundLocation" msgid="5742466381902568536">"बैकग्राउंड में होने पर \'जगह की सटीक जानकारी\' एक्सेस करें"</string>
-    <string name="permdesc_accessBackgroundLocation" msgid="6371533283380774135">"यह ऐप्लिकेशन बैकग्राउंड में चलते हुए, किसी भी समय आपकी \'जगह की सटीक जानकारी\' का इस्तेमाल कर सकता है. यह ज़रूरी है कि \'जगह की जानकारी\' वाली ये सेवाएं आपके फ़ोन में मौजूद हों और चालू की गई हों ताकि ऐप्लिकेशन उनका इस्तेमाल कर पाए. ऐसा करने से ज़्यादा बैटरी खर्च हो सकती है."</string>
+    <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"बैकग्राउंड में जगह की जानकारी एक्सेस करना"</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"अनुमानित या बिल्कुल सही जगह की जानकारी का एक्सेस करने की अनुमति अलग से दिए जाने पर, बैकग्राउंड में चलने के दौरान ऐप्लिकेशन आपकी जगह की जानकारी एक्सेस कर सकता है."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"अपनी ऑडियो सेटिंग बदलें"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"ऐप्स  को वैश्विक ऑडियो सेटिंग, जैसे वॉल्‍यूम और कौन-सा स्पीकर आउटपुट के लिए उपयोग किया गया, संशोधित करने देता है."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"ऑडियो रिकॉर्ड करने"</string>
     <string name="permdesc_recordAudio" msgid="4245930455135321433">"यह ऐप्लिकेशन किसी भी समय माइक्रोफ़ोन का उपयोग करके ऑडियो रिकॉर्ड कर सकता है."</string>
     <string name="permlab_sim_communication" msgid="2935852302216852065">"सिम पर निर्देश भेजें"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"ऐप को सिम पर निर्देश भेजने देती है. यह बहुत ही खतरनाक है."</string>
+    <string name="permlab_activityRecognition" msgid="3634590230567608356">"शरीर की गतिविधि को पहचानना"</string>
+    <string name="permdesc_activityRecognition" msgid="3143453925156552894">"यह ऐप्लिकेशन आपके शरीर की गतिविधि को पहचान सकता है."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"चित्र और वीडियो लें"</string>
     <string name="permdesc_camera" msgid="5392231870049240670">"यह ऐप्लिकेशन किसी भी समय कैमरे का उपयोग करके चित्र ले सकता है और वीडियो रिकॉर्ड कर सकता है."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"कंपन (वाइब्रेशन) को नियंत्रित करें"</string>
@@ -518,6 +523,7 @@
     <string name="permdesc_imagesWrite" msgid="7073662756617474375">"इससे ऐप्लिकेशन को आपके फ़ोटो संग्रह में बदलाव करने की मंज़ूरी दी जाती है."</string>
     <string name="permlab_mediaLocation" msgid="8675148183726247864">"अपने मीडिया संग्रह से जगह की जानकारी एक्सेस करने की अनुमति दें"</string>
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"इससे ऐप्लिकेशन को आपके मीडिया संग्रह से जगह की जानकारी एक्सेस करने की अनुमति दी जाती है."</string>
+    <string name="biometric_dialog_default_title" msgid="4229778503907743328">"ऐप्लिकेशन <xliff:g id="APP">%s</xliff:g> पुष्टि करना चाहता है."</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"बायोमेट्रिक हार्डवेयर उपलब्ध नहीं है"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"आंशिक फ़िंगरप्रिंट की पहचान की गई. कृपया पुनः प्रयास करें."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"फ़िंगरप्रिंट संसाधित नहीं हो सका. कृपया पुन: प्रयास करें."</string>
@@ -1897,14 +1903,14 @@
       <item quantity="one">ऑटोमैटिक भरने के <xliff:g id="COUNT">%1$s</xliff:g> सुझाव</item>
       <item quantity="other">ऑटोमैटिक भरने के <xliff:g id="COUNT">%1$s</xliff:g> सुझाव</item>
     </plurals>
-    <string name="autofill_save_title" msgid="3345527308992082601">"&lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt; में सेव करें?"</string>
-    <string name="autofill_save_title_with_type" msgid="8637809388029313305">"<xliff:g id="TYPE">%1$s</xliff:g> को &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt; में सेव करें?"</string>
-    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"<xliff:g id="TYPE_0">%1$s</xliff:g> और <xliff:g id="TYPE_1">%2$s</xliff:g> को &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt; में सेव करें?"</string>
-    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> और <xliff:g id="TYPE_2">%3$s</xliff:g> को &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt; में सेव करें?"</string>
-    <string name="autofill_update_title" msgid="4879673117448810818">"&lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt; में अपडेट करें?"</string>
-    <string name="autofill_update_title_with_type" msgid="339733442087186755">"<xliff:g id="TYPE">%1$s</xliff:g> को &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt; में अपडेट करें?"</string>
-    <string name="autofill_update_title_with_2types" msgid="6321714204167424745">"<xliff:g id="TYPE_0">%1$s</xliff:g> और <xliff:g id="TYPE_1">%2$s</xliff:g> को &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt; में अपडेट करें?"</string>
-    <string name="autofill_update_title_with_3types" msgid="5866735124066629287">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> और <xliff:g id="TYPE_2">%3$s</xliff:g> को &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt; में अपडेट करें?"</string>
+    <string name="autofill_save_title" msgid="327541108460384555">"क्या आप "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>" में सेव करना चाहते हैं?"</string>
+    <string name="autofill_save_title_with_type" msgid="2339135393607143594">"क्या आप "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>" में <xliff:g id="TYPE">%1$s</xliff:g> सेव करना चाहते हैं?"</string>
+    <string name="autofill_save_title_with_2types" msgid="87616102361154432">"क्या आप "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>" में <xliff:g id="TYPE_0">%1$s</xliff:g> और <xliff:g id="TYPE_1">%2$s</xliff:g> सेव करना चाहते हैं?"</string>
+    <string name="autofill_save_title_with_3types" msgid="4108978552969604555">"क्या आप "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>" में <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g>, और <xliff:g id="TYPE_2">%3$s</xliff:g> सेव करना चाहते हैं?"</string>
+    <string name="autofill_update_title" msgid="5305781141104585279">"क्या आप "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>" में अपडेट करना चाहते हैं?"</string>
+    <string name="autofill_update_title_with_type" msgid="4624181147422762233">"क्या आप "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>" में <xliff:g id="TYPE">%1$s</xliff:g> अपडेट करना चाहते हैं?"</string>
+    <string name="autofill_update_title_with_2types" msgid="2300113827053626484">"क्या आप "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>" में <xliff:g id="TYPE_0">%1$s</xliff:g> और <xliff:g id="TYPE_1">%2$s</xliff:g> अपडेट करना चाहते हैं?"</string>
+    <string name="autofill_update_title_with_3types" msgid="9089824354296211922">"क्या आप "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>" में इन आइटम को अपडेट करना चाहते हैं: <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g>, और <xliff:g id="TYPE_2">%3$s</xliff:g>?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"सेव करें"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"नहीं, धन्यवाद"</string>
     <string name="autofill_update_yes" msgid="310358413273276958">"अपडेट करें"</string>

@@ -232,7 +232,8 @@ public class TelephonyManager {
 
     /** @hide
     /* @deprecated - use getSystemService as described above */
-    @UnsupportedAppUsage
+    @Deprecated
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public static TelephonyManager getDefault() {
         return sInstance;
     }
@@ -321,7 +322,7 @@ public class TelephonyManager {
     }
 
     /** {@hide} */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public static TelephonyManager from(Context context) {
         return (TelephonyManager) context.getSystemService(Context.TELEPHONY_SERVICE);
     }
@@ -1949,7 +1950,7 @@ public class TelephonyManager {
      * @param subId
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public String getNetworkOperatorName(int subId) {
         int phoneId = SubscriptionManager.getPhoneId(subId);
         return getTelephonyProperty(phoneId, TelephonyProperties.PROPERTY_OPERATOR_ALPHA, "");
@@ -1977,7 +1978,7 @@ public class TelephonyManager {
      * @param subId
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public String getNetworkOperator(int subId) {
         int phoneId = SubscriptionManager.getPhoneId(subId);
         return getNetworkOperatorForPhone(phoneId);
@@ -2301,7 +2302,7 @@ public class TelephonyManager {
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public int getDataNetworkType(int subId) {
         try{
             ITelephony telephony = getITelephony();
@@ -2337,7 +2338,7 @@ public class TelephonyManager {
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public int getVoiceNetworkType(int subId) {
         try{
             ITelephony telephony = getITelephony();
@@ -2820,7 +2821,7 @@ public class TelephonyManager {
      * @param subId for which SimOperator is returned
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public String getSimOperator(int subId) {
         return getSimOperatorNumeric(subId);
     }
@@ -2834,7 +2835,7 @@ public class TelephonyManager {
      * @see #getSimState
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public String getSimOperatorNumeric() {
         int subId = mSubId;
         if (!SubscriptionManager.isUsableSubIdValue(subId)) {
@@ -2863,7 +2864,7 @@ public class TelephonyManager {
      * @param subId for which SimOperator is returned
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public String getSimOperatorNumeric(int subId) {
         int phoneId = SubscriptionManager.getPhoneId(subId);
         return getSimOperatorNumericForPhone(phoneId);
@@ -2877,7 +2878,7 @@ public class TelephonyManager {
      * @param phoneId for which SimOperator is returned
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public String getSimOperatorNumericForPhone(int phoneId) {
         return getTelephonyProperty(phoneId,
                 TelephonyProperties.PROPERTY_ICC_OPERATOR_NUMERIC, "");
@@ -2904,7 +2905,7 @@ public class TelephonyManager {
      * @param subId for which SimOperatorName is returned
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public String getSimOperatorName(int subId) {
         int phoneId = SubscriptionManager.getPhoneId(subId);
         return getSimOperatorNameForPhone(phoneId);
@@ -2934,7 +2935,7 @@ public class TelephonyManager {
      * @param subId for which SimCountryIso is returned
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public String getSimCountryIso(int subId) {
         int phoneId = SubscriptionManager.getPhoneId(subId);
         return getSimCountryIsoForPhone(phoneId);
@@ -3146,7 +3147,7 @@ public class TelephonyManager {
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public String getSubscriberId(int subId) {
         try {
             IPhoneSubInfo info = getSubscriberInfo();
@@ -3531,7 +3532,7 @@ public class TelephonyManager {
      * @hide
      */
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public String getMsisdn(int subId) {
         try {
             IPhoneSubInfo info = getSubscriberInfo();
@@ -4464,7 +4465,7 @@ public class TelephonyManager {
    /**
     * @hide
     */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private ITelephony getITelephony() {
         return ITelephony.Stub.asInterface(ServiceManager.getService(Context.TELEPHONY_SERVICE));
     }
@@ -6619,7 +6620,7 @@ public class TelephonyManager {
     }
 
     /**
-     * @removed Use {@link android.telecom.TelecomManager#isInCall} instead
+     * @deprecated Use {@link android.telecom.TelecomManager#isInCall} instead
      * @hide
      */
     @Deprecated
@@ -6629,11 +6630,12 @@ public class TelephonyManager {
             android.Manifest.permission.READ_PHONE_STATE
     })
     public boolean isOffhook() {
-        return false;
+        TelecomManager tm = (TelecomManager) mContext.getSystemService(TELECOM_SERVICE);
+        return tm.isInCall();
     }
 
     /**
-     * @removed Use {@link android.telecom.TelecomManager#isRinging} instead
+     * @deprecated Use {@link android.telecom.TelecomManager#isRinging} instead
      * @hide
      */
     @Deprecated
@@ -6643,11 +6645,12 @@ public class TelephonyManager {
             android.Manifest.permission.READ_PHONE_STATE
     })
     public boolean isRinging() {
-        return false;
+        TelecomManager tm = (TelecomManager) mContext.getSystemService(TELECOM_SERVICE);
+        return tm.isRinging();
     }
 
     /**
-     * @removed Use {@link android.telecom.TelecomManager#isInCall} instead
+     * @deprecated Use {@link android.telecom.TelecomManager#isInCall} instead
      * @hide
      */
     @Deprecated
@@ -6657,7 +6660,8 @@ public class TelephonyManager {
             android.Manifest.permission.READ_PHONE_STATE
     })
     public boolean isIdle() {
-        return true;
+        TelecomManager tm = (TelecomManager) mContext.getSystemService(TELECOM_SERVICE);
+        return !tm.isInCall();
     }
 
     /**
@@ -8044,7 +8048,7 @@ public class TelephonyManager {
      * either READ_PRIVILEGED_PHONE_STATE or READ_PHONE_STATE to retrieve the information.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public ServiceState getServiceStateForSubscriber(int subId) {
         try {
             ITelephony service = getITelephony();

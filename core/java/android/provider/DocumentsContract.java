@@ -731,6 +731,8 @@ public final class DocumentsContract {
     public static final String EXTRA_PARENT_URI = "parentUri";
     /** {@hide} */
     public static final String EXTRA_URI = "uri";
+    /** {@hide} */
+    public static final String EXTRA_URI_PERMISSIONS = "uriPermissions";
 
     /**
      * @see #createWebLinkIntent(ContentResolver, Uri, Bundle)

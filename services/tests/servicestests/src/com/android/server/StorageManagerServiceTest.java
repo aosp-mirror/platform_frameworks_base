@@ -30,16 +30,12 @@ import android.os.UserManagerInternal;
 import android.os.storage.StorageManagerInternal;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
-import android.util.SparseArray;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-
-import java.util.ArrayList;
-import java.util.List;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -83,29 +79,14 @@ public class StorageManagerServiceTest {
 
         when(mUmi.getUserIds()).thenReturn(new int[] { 0 });
 
-        {
-            final SparseArray<String> res = new SparseArray<>();
-            res.put(UID_COLORS, NAME_COLORS);
-            when(mPmi.getAppsWithSharedUserIds()).thenReturn(res);
-        }
+        when(mPmi.getSharedUserIdForPackage(eq(PKG_GREY))).thenReturn(null);
+        when(mPmi.getSharedUserIdForPackage(eq(PKG_RED))).thenReturn(NAME_COLORS);
+        when(mPmi.getSharedUserIdForPackage(eq(PKG_BLUE))).thenReturn(NAME_COLORS);
 
-        {
-            final List<ApplicationInfo> res = new ArrayList<>();
-            res.add(buildApplicationInfo(PKG_GREY, UID_GREY));
-            res.add(buildApplicationInfo(PKG_RED, UID_COLORS));
-            res.add(buildApplicationInfo(PKG_BLUE, UID_COLORS));
-            when(mPm.getInstalledApplicationsAsUser(anyInt(), anyInt())).thenReturn(res);
-        }
-
-        when(mPmi.getPackageUid(eq(PKG_GREY), anyInt(), anyInt())).thenReturn(UID_GREY);
-        when(mPmi.getPackageUid(eq(PKG_RED), anyInt(), anyInt())).thenReturn(UID_COLORS);
-        when(mPmi.getPackageUid(eq(PKG_BLUE), anyInt(), anyInt())).thenReturn(UID_COLORS);
-
-        when(mPm.getPackagesForUid(eq(UID_GREY))).thenReturn(new String[] { PKG_GREY });
-        when(mPm.getPackagesForUid(eq(UID_COLORS))).thenReturn(new String[] { PKG_RED, PKG_BLUE });
+        when(mPmi.getPackagesForSharedUserId(eq(NAME_COLORS), anyInt()))
+                .thenReturn(new String[] { PKG_RED, PKG_BLUE });
 
         mService = new StorageManagerService(mContext);
-        mService.collectPackagesInfo();
     }
 
     @Test

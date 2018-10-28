@@ -140,6 +140,7 @@ public class BinderCallsStats implements BinderInternal.Observer {
             latencyDuration = 0;
         }
         final int callingUid = getCallingUid();
+        final int workSourceUid = getWorkSourceUid();
 
         synchronized (mLock) {
             // This was already checked in #callStart but check again while synchronized.
@@ -147,7 +148,8 @@ public class BinderCallsStats implements BinderInternal.Observer {
                 return;
             }
 
-            final UidEntry uidEntry = getUidEntry(callingUid);
+            final boolean isWorkSourceSet = workSourceUid >= 0;
+            final UidEntry uidEntry = getUidEntry(isWorkSourceSet ? workSourceUid : callingUid);
             uidEntry.callCount++;
 
             if (recordCall) {
@@ -155,7 +157,8 @@ public class BinderCallsStats implements BinderInternal.Observer {
                 uidEntry.recordedCallCount++;
 
                 final CallStat callStat = uidEntry.getOrCreate(
-                        s.binderClass, s.transactionCode, mDeviceState.isScreenInteractive());
+                        callingUid, s.binderClass, s.transactionCode,
+                        mDeviceState.isScreenInteractive());
                 callStat.callCount++;
                 callStat.recordedCallCount++;
                 callStat.cpuTimeMicros += duration;
@@ -174,7 +177,8 @@ public class BinderCallsStats implements BinderInternal.Observer {
                 // Only record the total call count if we already track data for this key.
                 // It helps to keep the memory usage down when sampling is enabled.
                 final CallStat callStat = uidEntry.get(
-                        s.binderClass, s.transactionCode, mDeviceState.isScreenInteractive());
+                        callingUid, s.binderClass, s.transactionCode,
+                        mDeviceState.isScreenInteractive());
                 if (callStat != null) {
                     callStat.callCount++;
                 }
@@ -251,7 +255,8 @@ public class BinderCallsStats implements BinderInternal.Observer {
                 final UidEntry entry = mUidEntries.valueAt(entryIdx);
                 for (CallStat stat : entry.getCallStatsList()) {
                     ExportedCallStat exported = new ExportedCallStat();
-                    exported.uid = entry.uid;
+                    exported.workSourceUid = entry.workSourceUid;
+                    exported.callingUid = stat.callingUid;
                     exported.className = stat.binderClass.getName();
                     exported.binderClass = stat.binderClass;
                     exported.transactionCode = stat.transactionCode;
@@ -338,10 +343,8 @@ public class BinderCallsStats implements BinderInternal.Observer {
         entries.sort(Comparator.<UidEntry>comparingDouble(value -> value.cpuTimeMicros).reversed());
         final String datasetSizeDesc = verbose ? "" : "(top 90% by cpu time) ";
         final StringBuilder sb = new StringBuilder();
-        final List<UidEntry> topEntries = verbose ? entries
-                : getHighestValues(entries, value -> value.cpuTimeMicros, 0.9);
         pw.println("Per-UID raw data " + datasetSizeDesc
-                + "(package/uid, call_desc, screen_interactive, "
+                + "(package/uid, worksource, call_desc, screen_interactive, "
                 + "cpu_time_micros, max_cpu_time_micros, "
                 + "latency_time_micros, max_latency_time_micros, exception_count, "
                 + "max_request_size_bytes, max_reply_size_bytes, recorded_call_count, "
@@ -351,7 +354,9 @@ public class BinderCallsStats implements BinderInternal.Observer {
         for (ExportedCallStat e : exportedCallStats) {
             sb.setLength(0);
             sb.append("    ")
-                    .append(uidToString(e.uid, appIdToPkgNameMap))
+                    .append(uidToString(e.callingUid, appIdToPkgNameMap))
+                    .append(',')
+                    .append(uidToString(e.workSourceUid, appIdToPkgNameMap))
                     .append(',').append(e.className)
                     .append('#').append(e.methodName)
                     .append(',').append(e.screenInteractive)
@@ -372,7 +377,7 @@ public class BinderCallsStats implements BinderInternal.Observer {
         final List<UidEntry> summaryEntries = verbose ? entries
                 : getHighestValues(entries, value -> value.cpuTimeMicros, 0.9);
         for (UidEntry entry : summaryEntries) {
-            String uidStr = uidToString(entry.uid, appIdToPkgNameMap);
+            String uidStr = uidToString(entry.workSourceUid, appIdToPkgNameMap);
             pw.println(String.format("  %10d %3.0f%% %8d %8d %s",
                     entry.cpuTimeMicros, 100d * entry.cpuTimeMicros / totalCpuTime,
                     entry.recordedCallCount, entry.callCount, uidStr));
@@ -415,11 +420,15 @@ public class BinderCallsStats implements BinderInternal.Observer {
         return Binder.getCallingUid();
     }
 
+    protected int getWorkSourceUid() {
+        return Binder.getThreadWorkSource();
+    }
+
     protected long getElapsedRealtimeMicro() {
         return SystemClock.elapsedRealtimeNanos() / 1000;
     }
 
-    private boolean shouldRecordDetailedData() {
+    protected boolean shouldRecordDetailedData() {
         return mRandom.nextInt() % mPeriodicSamplingInterval == 0;
     }
 
@@ -462,7 +471,8 @@ public class BinderCallsStats implements BinderInternal.Observer {
      * Aggregated data by uid/class/method to be sent through WestWorld.
      */
     public static class ExportedCallStat {
-        public int uid;
+        public int callingUid;
+        public int workSourceUid;
         public String className;
         public String methodName;
         public boolean screenInteractive;
@@ -483,10 +493,12 @@ public class BinderCallsStats implements BinderInternal.Observer {
 
     @VisibleForTesting
     public static class CallStat {
-        public Class<? extends Binder> binderClass;
-        public int transactionCode;
+        // The UID who executed the transaction (i.e. Binder#getCallingUid).
+        public final int callingUid;
+        public final Class<? extends Binder> binderClass;
+        public final int transactionCode;
         // True if the screen was interactive when the call ended.
-        public boolean screenInteractive;
+        public final boolean screenInteractive;
         // Number of calls for which we collected data for. We do not record data for all the calls
         // when sampling is on.
         public long recordedCallCount;
@@ -508,8 +520,9 @@ public class BinderCallsStats implements BinderInternal.Observer {
         public long maxReplySizeBytes;
         public long exceptionCount;
 
-        CallStat(Class<? extends Binder> binderClass, int transactionCode,
+        CallStat(int callingUid, Class<? extends Binder> binderClass, int transactionCode,
                 boolean screenInteractive) {
+            this.callingUid = callingUid;
             this.binderClass = binderClass;
             this.transactionCode = transactionCode;
             this.screenInteractive = screenInteractive;
@@ -518,6 +531,7 @@ public class BinderCallsStats implements BinderInternal.Observer {
 
     /** Key used to store CallStat object in a Map. */
     public static class CallStatKey {
+        public int callingUid;
         public Class<? extends Binder> binderClass;
         public int transactionCode;
         private boolean screenInteractive;
@@ -529,7 +543,8 @@ public class BinderCallsStats implements BinderInternal.Observer {
             }
 
             final CallStatKey key = (CallStatKey) o;
-            return transactionCode == key.transactionCode
+            return callingUid == key.callingUid
+                    && transactionCode == key.transactionCode
                     && screenInteractive == key.screenInteractive
                     && (binderClass.equals(key.binderClass));
         }
@@ -538,6 +553,7 @@ public class BinderCallsStats implements BinderInternal.Observer {
         public int hashCode() {
             int result = binderClass.hashCode();
             result = 31 * result + transactionCode;
+            result = 31 * result + callingUid;
             result = 31 * result + (screenInteractive ? 1231 : 1237);
             return result;
         }
@@ -546,7 +562,9 @@ public class BinderCallsStats implements BinderInternal.Observer {
 
     @VisibleForTesting
     public static class UidEntry {
-        int uid;
+        // The UID who is responsible for the binder transaction. If the bluetooth process execute a
+        // transaction on behalf of app foo, the workSourceUid will be the uid of app foo.
+        public int workSourceUid;
         // Number of calls for which we collected data for. We do not record data for all the calls
         // when sampling is on.
         public long recordedCallCount;
@@ -558,7 +576,7 @@ public class BinderCallsStats implements BinderInternal.Observer {
         public long cpuTimeMicros;
 
         UidEntry(int uid) {
-            this.uid = uid;
+            this.workSourceUid = uid;
         }
 
         // Aggregate time spent per each call name: call_desc -> cpu_time_micros
@@ -566,22 +584,25 @@ public class BinderCallsStats implements BinderInternal.Observer {
         private CallStatKey mTempKey = new CallStatKey();
 
         @Nullable
-        CallStat get(Class<? extends Binder> binderClass, int transactionCode,
+        CallStat get(int callingUid, Class<? extends Binder> binderClass, int transactionCode,
                 boolean screenInteractive) {
             // Use a global temporary key to avoid creating new objects for every lookup.
+            mTempKey.callingUid = callingUid;
             mTempKey.binderClass = binderClass;
             mTempKey.transactionCode = transactionCode;
             mTempKey.screenInteractive = screenInteractive;
             return mCallStats.get(mTempKey);
         }
 
-        CallStat getOrCreate(Class<? extends Binder> binderClass, int transactionCode,
-                boolean screenInteractive) {
-            CallStat mapCallStat = get(binderClass, transactionCode, screenInteractive);
+        CallStat getOrCreate(int callingUid, Class<? extends Binder> binderClass,
+                int transactionCode, boolean screenInteractive) {
+            CallStat mapCallStat = get(callingUid, binderClass, transactionCode, screenInteractive);
             // Only create CallStat if it's a new entry, otherwise update existing instance
             if (mapCallStat == null) {
-                mapCallStat = new CallStat(binderClass, transactionCode, screenInteractive);
+                mapCallStat = new CallStat(callingUid, binderClass, transactionCode,
+                        screenInteractive);
                 CallStatKey key = new CallStatKey();
+                key.callingUid = callingUid;
                 key.binderClass = binderClass;
                 key.transactionCode = transactionCode;
                 key.screenInteractive = screenInteractive;
@@ -613,12 +634,12 @@ public class BinderCallsStats implements BinderInternal.Observer {
             }
 
             UidEntry uidEntry = (UidEntry) o;
-            return uid == uidEntry.uid;
+            return workSourceUid == uidEntry.workSourceUid;
         }
 
         @Override
         public int hashCode() {
-            return uid;
+            return workSourceUid;
         }
     }
 

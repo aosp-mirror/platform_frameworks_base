@@ -25,15 +25,16 @@
 #include <utils/Log.h>
 #include <utils/SystemClock.h>
 
+using android::util::AtomsInfo;
 using android::util::FIELD_COUNT_REPEATED;
 using android::util::FIELD_TYPE_BOOL;
+using android::util::FIELD_TYPE_FIXED64;
 using android::util::FIELD_TYPE_FLOAT;
 using android::util::FIELD_TYPE_INT32;
 using android::util::FIELD_TYPE_INT64;
-using android::util::FIELD_TYPE_UINT64;
-using android::util::FIELD_TYPE_FIXED64;
 using android::util::FIELD_TYPE_MESSAGE;
 using android::util::FIELD_TYPE_STRING;
+using android::util::FIELD_TYPE_UINT64;
 using android::util::ProtoOutputStream;
 
 namespace android {
@@ -294,8 +295,9 @@ void writeDimensionPathToProto(const std::vector<Matcher>& fieldMatchers,
 // }
 //
 //
-void writeFieldValueTreeToStreamHelper(const std::vector<FieldValue>& dims, size_t* index,
-                                       int depth, int prefix, ProtoOutputStream* protoOutput) {
+void writeFieldValueTreeToStreamHelper(int tagId, const std::vector<FieldValue>& dims,
+                                       size_t* index, int depth, int prefix,
+                                       ProtoOutputStream* protoOutput) {
     size_t count = dims.size();
     while (*index < count) {
         const auto& dim = dims[*index];
@@ -319,9 +321,31 @@ void writeFieldValueTreeToStreamHelper(const std::vector<FieldValue>& dims, size
                 case FLOAT:
                     protoOutput->write(FIELD_TYPE_FLOAT | fieldNum, dim.mValue.float_value);
                     break;
-                case STRING:
-                    protoOutput->write(FIELD_TYPE_STRING | fieldNum, dim.mValue.str_value);
+                case STRING: {
+                    bool isBytesField = false;
+                    // Bytes field is logged via string format in log_msg format. So here we check
+                    // if this string field is a byte field.
+                    std::map<int, std::vector<int>>::const_iterator itr;
+                    if (depth == 0 && (itr = AtomsInfo::kBytesFieldAtoms.find(tagId)) !=
+                                              AtomsInfo::kBytesFieldAtoms.end()) {
+                        const std::vector<int>& bytesFields = itr->second;
+                        for (int bytesField : bytesFields) {
+                            if (bytesField == fieldNum) {
+                                // This is a bytes field
+                                isBytesField = true;
+                                break;
+                            }
+                        }
+                    }
+                    if (isBytesField) {
+                        protoOutput->write(FIELD_TYPE_MESSAGE | fieldNum,
+                                           (const char*)dim.mValue.str_value.c_str(),
+                                           dim.mValue.str_value.length());
+                    } else {
+                        protoOutput->write(FIELD_TYPE_STRING | fieldNum, dim.mValue.str_value);
+                    }
                     break;
+                }
                 case STORAGE:
                     protoOutput->write(FIELD_TYPE_MESSAGE | fieldNum,
                                        (const char*)dim.mValue.storage_value.data(),
@@ -342,7 +366,7 @@ void writeFieldValueTreeToStreamHelper(const std::vector<FieldValue>& dims, size
             }
             // Directly jump to the leaf value because the repeated position field is implied
             // by the position of the sub msg in the parent field.
-            writeFieldValueTreeToStreamHelper(dims, index, valueDepth,
+            writeFieldValueTreeToStreamHelper(tagId, dims, index, valueDepth,
                                               dim.mField.getPrefix(valueDepth), protoOutput);
             if (msg_token != 0) {
                 protoOutput->end(msg_token);
@@ -359,7 +383,7 @@ void writeFieldValueTreeToStream(int tagId, const std::vector<FieldValue>& value
     uint64_t atomToken = protoOutput->start(FIELD_TYPE_MESSAGE | tagId);
 
     size_t index = 0;
-    writeFieldValueTreeToStreamHelper(values, &index, 0, 0, protoOutput);
+    writeFieldValueTreeToStreamHelper(tagId, values, &index, 0, 0, protoOutput);
     protoOutput->end(atomToken);
 }
 

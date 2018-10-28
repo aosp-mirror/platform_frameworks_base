@@ -66,6 +66,7 @@ import static java.lang.annotation.RetentionPolicy.SOURCE;
 import android.annotation.IntDef;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
+import android.app.WindowConfiguration;
 import android.content.Context;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
@@ -435,6 +436,14 @@ public interface WindowManagerPolicy extends WindowManagerPolicyConstants {
 
         /** @return the current windowing mode of this window. */
         int getWindowingMode();
+
+        /**
+         * Returns the {@link WindowConfiguration.ActivityType} associated with the configuration
+         * of this window.
+         */
+        default int getActivityType() {
+            return WindowConfiguration.WINDOWING_MODE_UNDEFINED;
+        }
 
         /**
          * Returns true if the window is current in multi-windowing mode. i.e. it shares the

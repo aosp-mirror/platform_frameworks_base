@@ -319,6 +319,7 @@
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"নাম নথকা ডিভাইচ"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"কাষ্টৰ বাবে সাজু"</string>
     <string name="quick_settings_cast_detail_empty_text" msgid="311785821261640623">"কোনো ডিভাইচ নাই"</string>
+    <string name="quick_settings_cast_no_wifi" msgid="2696477881905521882">"ৱাই-ফাইৰ সৈতে সংযোগ হৈ থকা নাই"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"উজ্জ্বলতা"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"স্বয়ং"</string>
     <string name="quick_settings_inversion_label" msgid="8790919884718619648">"ৰং ওলোটা কৰক"</string>
@@ -442,8 +443,7 @@
     <string name="media_projection_dialog_text" msgid="3071431025448218928">"আপোনাৰ স্ক্ৰীণত প্ৰদৰ্শন হোৱা সকলো <xliff:g id="APP_SEEKING_PERMISSION">%s</xliff:g> কেপশ্বাৰ কৰা আৰম্ভ কৰিব।"</string>
     <string name="media_projection_remember_text" msgid="3103510882172746752">"পুনৰাই নেদেখুৱাব"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"সকলো মচক"</string>
-    <!-- no translation found for manage_notifications_text (2386728145475108753) -->
-    <skip />
+    <string name="manage_notifications_text" msgid="2386728145475108753">"পৰিচালনা"</string>
     <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"অসুবিধা নিদিব-ই জাননী পজ কৰিছে"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"এতিয়াই আৰম্ভ কৰক"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"কোনো জাননী নাই"</string>
@@ -783,6 +783,7 @@
     <string name="accessibility_quick_settings_user" msgid="1567445362870421770">"<xliff:g id="ID_1">%s</xliff:g> হিচাপে ছাইন ইন হ\'ল"</string>
     <string name="data_connection_no_internet" msgid="4503302451650972989">"ইণ্টাৰনেট সংযোগ নাই"</string>
     <string name="accessibility_quick_settings_open_details" msgid="4230931801728005194">"বিৱৰণসমূহ খোলক।"</string>
+    <string name="accessibility_quick_settings_not_available" msgid="4190068184294019846">"<xliff:g id="REASON">%s</xliff:g>ৰ বাবে উপলব্ধ নহয়"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"<xliff:g id="ID_1">%s</xliff:g>ৰ ছেটিংসমূহ খোলক।"</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"ছেটিংসমূহৰ ক্ৰম সম্পাদনা কৰক।"</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"<xliff:g id="ID_2">%2$d</xliff:g>ৰ পৃষ্ঠা <xliff:g id="ID_1">%1$d</xliff:g>"</string>

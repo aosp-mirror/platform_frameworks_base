@@ -47,6 +47,20 @@
     <dimen name="navigation_bar_height_landscape">48dp</dimen>
     <!-- Width of the navigation bar when it is placed vertically on the screen -->
     <dimen name="navigation_bar_width">48dp</dimen>
+
+    <!-- EXPERIMENT BEGIN -->
+    <!-- Height of the bottom navigation bar frame; this is different than navigation_bar_height
+         where that is the height reported to all the other windows to resize themselves around the
+         navigation bar window but navigation_bar_frame_height is reported to SystemUI navigation
+         bar view's window -->
+    <dimen name="navigation_bar_frame_height">@dimen/navigation_bar_height</dimen>
+    <!-- Width of the left/right navigation bar frame; this is different than navigation_bar_width
+         where that is the width reported to all the other windows to resize themselves around the
+         navigation bar window but navigation_bar_frame_width is reported to SystemUI navigation
+         bar view's window -->
+    <dimen name="navigation_bar_frame_width">@dimen/navigation_bar_width</dimen>
+    <!-- EXPERIMENT END-->
+
     <!-- Height of the bottom navigation / system bar in car mode. -->
     <dimen name="navigation_bar_height_car_mode">96dp</dimen>
     <!-- Height of the bottom navigation bar in portrait; often the same as

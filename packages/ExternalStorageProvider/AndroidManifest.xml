@@ -17,6 +17,10 @@
             <intent-filter>
                 <action android:name="android.content.action.DOCUMENTS_PROVIDER" />
             </intent-filter>
+            <!-- Stub that allows MediaProvider to make incoming calls -->
+            <path-permission
+                android:path="/media_internal"
+                android:permission="android.permission.WRITE_MEDIA_STORAGE" />
         </provider>
 
         <receiver android:name=".MountReceiver">

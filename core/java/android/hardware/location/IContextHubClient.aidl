@@ -16,6 +16,7 @@
 
 package android.hardware.location;
 
+import android.app.PendingIntent;
 import android.hardware.location.NanoAppMessage;
 
 /**
@@ -28,4 +29,10 @@ interface IContextHubClient {
 
     // Closes the connection with the Context Hub
     void close();
+
+    // Registers a PendingIntent with the client
+    boolean registerIntent(in PendingIntent intent, long nanoAppId);
+
+    // Unregisters a PendingIntent from the client
+    boolean unregisterIntent(in PendingIntent intent);
 }

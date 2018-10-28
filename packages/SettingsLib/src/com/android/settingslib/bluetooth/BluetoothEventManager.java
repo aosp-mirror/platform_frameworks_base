@@ -26,8 +26,12 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
+import android.os.UserHandle;
 import android.telephony.TelephonyManager;
 import android.util.Log;
+
+import androidx.annotation.Nullable;
+import androidx.annotation.VisibleForTesting;
 
 import com.android.settingslib.R;
 
@@ -54,21 +58,32 @@ public class BluetoothEventManager {
     private final BroadcastReceiver mProfileBroadcastReceiver = new BluetoothBroadcastReceiver();
     private final Collection<BluetoothCallback> mCallbacks = new ArrayList<>();
     private final android.os.Handler mReceiverHandler;
+    private final UserHandle mUserHandle;
     private final Context mContext;
 
     interface Handler {
         void onReceive(Context context, Intent intent, BluetoothDevice device);
     }
 
+    /**
+     * Creates BluetoothEventManager with the ability to pass in {@link UserHandle} that tells it to
+     * listen for bluetooth events for that particular userHandle.
+     *
+     * <p> If passing in userHandle that's different from the user running the process,
+     * {@link android.Manifest.permission#INTERACT_ACROSS_USERS_FULL} permission is required. If
+     * userHandle passed in is {@code null}, we register event receiver for the
+     * {@code context.getUser()} handle.
+     */
     BluetoothEventManager(LocalBluetoothAdapter adapter,
             CachedBluetoothDeviceManager deviceManager, Context context,
-            android.os.Handler handler) {
+            android.os.Handler handler, @Nullable UserHandle userHandle) {
         mLocalAdapter = adapter;
         mDeviceManager = deviceManager;
         mAdapterIntentFilter = new IntentFilter();
         mProfileIntentFilter = new IntentFilter();
         mHandlerMap = new HashMap<>();
         mContext = context;
+        mUserHandle = userHandle;
         mReceiverHandler = handler;
 
         // Bluetooth on/off broadcasts
@@ -104,7 +119,7 @@ public class BluetoothEventManager {
         addHandler(TelephonyManager.ACTION_PHONE_STATE_CHANGED,
                 new AudioModeChangedHandler());
 
-        mContext.registerReceiver(mBroadcastReceiver, mAdapterIntentFilter, null, mReceiverHandler);
+        registerAdapterIntentReceiver();
     }
 
     /** Register to start receiving callbacks for Bluetooth events. */
@@ -121,10 +136,31 @@ public class BluetoothEventManager {
         }
     }
 
+    @VisibleForTesting
     void registerProfileIntentReceiver() {
-        mContext.registerReceiver(mProfileBroadcastReceiver, mProfileIntentFilter, null, mReceiverHandler);
+        registerIntentReceiver(mProfileBroadcastReceiver, mProfileIntentFilter);
     }
 
+    @VisibleForTesting
+    void registerAdapterIntentReceiver() {
+        registerIntentReceiver(mBroadcastReceiver, mAdapterIntentFilter);
+    }
+
+    /**
+     * Registers the provided receiver to receive the broadcasts that correspond to the
+     * passed intent filter, in the context of the provided handler.
+     */
+    private void registerIntentReceiver(BroadcastReceiver receiver, IntentFilter filter) {
+        if (mUserHandle == null) {
+            // If userHandle has not been provided, simply call registerReceiver.
+            mContext.registerReceiver(receiver, filter, null, mReceiverHandler);
+        } else {
+            // userHandle was explicitly specified, so need to call multi-user aware API.
+            mContext.registerReceiverAsUser(receiver, mUserHandle, filter, null, mReceiverHandler);
+        }
+    }
+
+    @VisibleForTesting
     void addProfileHandler(String action, Handler handler) {
         mHandlerMap.put(action, handler);
         mProfileIntentFilter.addAction(action);
@@ -171,7 +207,6 @@ public class BluetoothEventManager {
                 callback.onProfileConnectionStateChanged(device, state, bluetoothProfile);
             }
         }
-        mDeviceManager.onProfileConnectionStateChanged(device, state, bluetoothProfile);
     }
 
     private void dispatchConnectionStateChanged(CachedBluetoothDevice cachedDevice, int state) {
@@ -201,7 +236,8 @@ public class BluetoothEventManager {
         }
     }
 
-    private void addHandler(String action, Handler handler) {
+    @VisibleForTesting
+    void addHandler(String action, Handler handler) {
         mHandlerMap.put(action, handler);
         mAdapterIntentFilter.addAction(action);
     }

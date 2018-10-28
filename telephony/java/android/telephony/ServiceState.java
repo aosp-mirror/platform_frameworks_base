@@ -21,6 +21,7 @@ import android.annotation.SystemApi;
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.content.Intent;
+import android.os.Build;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -246,19 +247,28 @@ public class ServiceState implements Parcelable {
     private String mDataOperatorAlphaLong;
     private String mDataOperatorAlphaShort;
     private String mDataOperatorNumeric;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private boolean mIsManualNetworkSelection;
 
     private boolean mIsEmergencyOnly;
-
+    /**
+     * TODO: remove mRilVoiceRadioTechnology after completely migrate to
+     * {@link TelephonyManager.NetworkType}
+     */
+    @RilRadioTechnology
     private int mRilVoiceRadioTechnology;
+    /**
+     * TODO: remove mRilDataRadioTechnology after completely migrate to
+     * {@link TelephonyManager.NetworkType}
+     */
+    @RilRadioTechnology
     private int mRilDataRadioTechnology;
 
     @UnsupportedAppUsage
     private boolean mCssIndicator;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private int mNetworkId;
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     private int mSystemId;
     @UnsupportedAppUsage
     private int mCdmaRoamingIndicator;
@@ -456,7 +466,7 @@ public class ServiceState implements Parcelable {
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public int getVoiceRegState() {
         return mVoiceRegState;
     }
@@ -471,7 +481,7 @@ public class ServiceState implements Parcelable {
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public int getDataRegState() {
         return mDataRegState;
     }
@@ -532,7 +542,7 @@ public class ServiceState implements Parcelable {
      * @return roaming status
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public boolean getVoiceRoaming() {
         return getVoiceRoamingType() != ROAMING_TYPE_NOT_ROAMING;
     }
@@ -556,7 +566,7 @@ public class ServiceState implements Parcelable {
      * @return roaming type
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public boolean getDataRoaming() {
         return getDataRoamingType() != ROAMING_TYPE_NOT_ROAMING;
     }
@@ -1218,17 +1228,30 @@ public class ServiceState implements Parcelable {
 
     /** @hide */
     @TestApi
-    public void setRilVoiceRadioTechnology(int rt) {
+    public void setRilVoiceRadioTechnology(@RilRadioTechnology int rt) {
         if (rt == RIL_RADIO_TECHNOLOGY_LTE_CA) {
             rt = RIL_RADIO_TECHNOLOGY_LTE;
         }
 
         this.mRilVoiceRadioTechnology = rt;
+
+        // sync to network registration state
+        NetworkRegistrationState regState = getNetworkRegistrationState(
+                NetworkRegistrationState.DOMAIN_CS, AccessNetworkConstants.TransportType.WWAN);
+        if (regState == null) {
+            regState = new NetworkRegistrationState(
+                    NetworkRegistrationState.DOMAIN_CS, AccessNetworkConstants.TransportType.WWAN,
+                    ServiceState.ROAMING_TYPE_NOT_ROAMING, TelephonyManager.NETWORK_TYPE_UNKNOWN,
+                    0, false, null, null);
+            addNetworkRegistrationState(regState);
+        }
+        regState.setAccessNetworkTechnology(
+                rilRadioTechnologyToNetworkType(mRilVoiceRadioTechnology));
     }
 
     /** @hide */
     @TestApi
-    public void setRilDataRadioTechnology(int rt) {
+    public void setRilDataRadioTechnology(@RilRadioTechnology int rt) {
         if (rt == RIL_RADIO_TECHNOLOGY_LTE_CA) {
             rt = RIL_RADIO_TECHNOLOGY_LTE;
             this.mIsUsingCarrierAggregation = true;
@@ -1238,6 +1261,20 @@ public class ServiceState implements Parcelable {
         this.mRilDataRadioTechnology = rt;
         if (VDBG) Rlog.d(LOG_TAG, "[ServiceState] setRilDataRadioTechnology=" +
                 mRilDataRadioTechnology);
+
+        // sync to network registration state
+        NetworkRegistrationState regState = getNetworkRegistrationState(
+                NetworkRegistrationState.DOMAIN_PS, AccessNetworkConstants.TransportType.WWAN);
+
+        if (regState == null) {
+            regState = new NetworkRegistrationState(
+                    NetworkRegistrationState.DOMAIN_PS, AccessNetworkConstants.TransportType.WWAN,
+                    ServiceState.ROAMING_TYPE_NOT_ROAMING, TelephonyManager.NETWORK_TYPE_UNKNOWN,
+                    0, false, null, null);
+            addNetworkRegistrationState(regState);
+        }
+        regState.setAccessNetworkTechnology(
+                rilRadioTechnologyToNetworkType(mRilDataRadioTechnology));
     }
 
     /** @hide */
@@ -1418,15 +1455,25 @@ public class ServiceState implements Parcelable {
 
 
     /** @hide */
-    @UnsupportedAppUsage
-    public int getDataNetworkType() {
-        return rilRadioTechnologyToNetworkType(mRilDataRadioTechnology);
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
+    public @TelephonyManager.NetworkType int getDataNetworkType() {
+        final NetworkRegistrationState regState = getNetworkRegistrationState(
+                NetworkRegistrationState.DOMAIN_PS, AccessNetworkConstants.TransportType.WWAN);
+        if (regState != null) {
+            return regState.getAccessNetworkTechnology();
+        }
+        return TelephonyManager.NETWORK_TYPE_UNKNOWN;
     }
 
     /** @hide */
-    @UnsupportedAppUsage
-    public int getVoiceNetworkType() {
-        return rilRadioTechnologyToNetworkType(mRilVoiceRadioTechnology);
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
+    public @TelephonyManager.NetworkType int getVoiceNetworkType() {
+        final NetworkRegistrationState regState = getNetworkRegistrationState(
+                NetworkRegistrationState.DOMAIN_CS, AccessNetworkConstants.TransportType.WWAN);
+        if (regState != null) {
+            return regState.getAccessNetworkTechnology();
+        }
+        return TelephonyManager.NETWORK_TYPE_UNKNOWN;
     }
 
     /** @hide */

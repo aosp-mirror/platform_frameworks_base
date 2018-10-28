@@ -63,7 +63,7 @@
     <string name="always_use_device" msgid="4015357883336738417">"Obre sempre <xliff:g id="APPLICATION">%1$s</xliff:g> quan es connecti <xliff:g id="USB_DEVICE">%2$s</xliff:g>"</string>
     <string name="always_use_accessory" msgid="3257892669444535154">"Obre sempre <xliff:g id="APPLICATION">%1$s</xliff:g> quan es connecti <xliff:g id="USB_ACCESSORY">%2$s</xliff:g>"</string>
     <string name="usb_debugging_title" msgid="4513918393387141949">"Vols permetre la depuració per USB?"</string>
-    <string name="usb_debugging_message" msgid="2220143855912376496">"L\'empremta digital de la clau de RSA de l\'equip és:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
+    <string name="usb_debugging_message" msgid="2220143855912376496">"L\'empremta digital de la clau RSA de l\'equip és:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Dona sempre permís des d\'aquest equip"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"No es permet la depuració per USB"</string>
     <string name="usb_debugging_secondary_user_message" msgid="6067122453571699801">"L\'usuari que té iniciada la sessió al dispositiu en aquest moment no pot activar la depuració per USB. Per utilitzar aquesta funció, cal canviar a l\'usuari principal."</string>
@@ -319,6 +319,7 @@
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Dispositiu sense nom"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"A punt per emetre"</string>
     <string name="quick_settings_cast_detail_empty_text" msgid="311785821261640623">"No hi ha cap dispositiu disponible."</string>
+    <string name="quick_settings_cast_no_wifi" msgid="2696477881905521882">"La Wi‑Fi no està connectada"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Brillantor"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTOMÀTICA"</string>
     <string name="quick_settings_inversion_label" msgid="8790919884718619648">"Inverteix els colors"</string>
@@ -659,7 +660,7 @@
     <string name="keyboard_key_dpad_left" msgid="1346446024676962251">"Esquerra"</string>
     <string name="keyboard_key_dpad_right" msgid="3317323247127515341">"Dreta"</string>
     <string name="keyboard_key_dpad_center" msgid="2566737770049304658">"Centre"</string>
-    <string name="keyboard_key_tab" msgid="3871485650463164476">"Pestanya"</string>
+    <string name="keyboard_key_tab" msgid="3871485650463164476">"Tabulador"</string>
     <string name="keyboard_key_space" msgid="2499861316311153293">"Espai"</string>
     <string name="keyboard_key_enter" msgid="5739632123216118137">"Retorn"</string>
     <string name="keyboard_key_backspace" msgid="1559580097512385854">"Retrocés"</string>
@@ -782,6 +783,7 @@
     <string name="accessibility_quick_settings_user" msgid="1567445362870421770">"S\'ha iniciat la sessió com a <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="data_connection_no_internet" msgid="4503302451650972989">"Sense connexió a Internet"</string>
     <string name="accessibility_quick_settings_open_details" msgid="4230931801728005194">"Obre la informació detallada."</string>
+    <string name="accessibility_quick_settings_not_available" msgid="4190068184294019846">"No està disponible pel motiu següent: <xliff:g id="REASON">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"Obre la configuració per a <xliff:g id="ID_1">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Edita l\'ordre de la configuració."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Pàgina <xliff:g id="ID_1">%1$d</xliff:g> (<xliff:g id="ID_2">%2$d</xliff:g> en total)"</string>

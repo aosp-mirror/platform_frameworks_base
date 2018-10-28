@@ -55,6 +55,8 @@ import java.util.List;
 @RunWith(SettingsLibRobolectricTestRunner.class)
 @Config(shadows = {ShadowBluetoothAdapter.class})
 public class LocalBluetoothProfileManagerTest {
+    private final static long HISYNCID = 10;
+
     @Mock
     private CachedBluetoothDeviceManager mDeviceManager;
     @Mock
@@ -76,9 +78,10 @@ public class LocalBluetoothProfileManagerTest {
         mContext = spy(RuntimeEnvironment.application);
         mLocalBluetoothAdapter = LocalBluetoothAdapter.getInstance();
         mEventManager = spy(new BluetoothEventManager(mLocalBluetoothAdapter, mDeviceManager,
-                mContext, null));
+                mContext, /* handler= */ null, /* userHandle= */ null));
         mShadowBluetoothAdapter = Shadow.extract(BluetoothAdapter.getDefaultAdapter());
         when(mDeviceManager.findDevice(mDevice)).thenReturn(mCachedBluetoothDevice);
+        when(mCachedBluetoothDevice.getDevice()).thenReturn(mDevice);
         mProfileManager = new LocalBluetoothProfileManager(mContext, mLocalBluetoothAdapter,
                 mDeviceManager, mEventManager);
     }
@@ -186,13 +189,14 @@ public class LocalBluetoothProfileManagerTest {
 
     /**
      * Verify BluetoothHearingAid.ACTION_CONNECTION_STATE_CHANGED with uuid intent will dispatch to
-     * profile connection state changed callback
+     * CachedBluetoothDeviceManager method
      */
     @Test
-    public void stateChangedHandler_receiveHAPConnectionStateChanged_shouldDispatchCallback() {
+    public void stateChangedHandler_receiveHAPConnectionStateChanged_shouldDispatchDeviceManager() {
         mShadowBluetoothAdapter.setSupportedProfiles(generateList(
                 new int[] {BluetoothProfile.HEARING_AID}));
         mProfileManager.updateLocalProfiles();
+        when(mCachedBluetoothDevice.getHiSyncId()).thenReturn(HISYNCID);
 
         mIntent = new Intent(BluetoothHearingAid.ACTION_CONNECTION_STATE_CHANGED);
         mIntent.putExtra(BluetoothDevice.EXTRA_DEVICE, mDevice);
@@ -201,8 +205,8 @@ public class LocalBluetoothProfileManagerTest {
 
         mContext.sendBroadcast(mIntent);
 
-        verify(mEventManager).dispatchProfileConnectionStateChanged(mCachedBluetoothDevice,
-                BluetoothProfile.STATE_CONNECTED, BluetoothProfile.HEARING_AID);
+        verify(mDeviceManager).onProfileConnectionStateChangedIfProcessed(mCachedBluetoothDevice,
+                BluetoothProfile.STATE_CONNECTED);
     }
 
     /**

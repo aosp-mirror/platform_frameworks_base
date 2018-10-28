@@ -682,6 +682,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
                         if (PackageInstaller.ENABLE_REVOCABLE_FD) {
                             mFds.remove(fd);
                         } else {
+                            bridge.forceClose();
                             mBridges.remove(bridge);
                         }
                     }

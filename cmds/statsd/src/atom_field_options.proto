@@ -64,10 +64,22 @@ message StateAtomFieldOption {
     optional StateField option = 1 [default = STATE_FIELD_UNSET];
 }
 
+// Used to generate StatsLog.write APIs.
+enum LogMode {
+    MODE_UNSET = 0;
+    // Log fields as their actual types e.g., all primary data types.
+    // Or fields that are hardcoded in stats_log_api_gen tool e.g., AttributionNode
+    MODE_AUTOMATIC = 1;
+    // Log fields in their proto binary format. These fields will not be parsed in statsd
+    MODE_BYTES = 2;
+}
+
 extend google.protobuf.FieldOptions {
     // Flags to decorate an atom that presents a state change.
     optional StateAtomFieldOption state_field_option = 50000;
 
     // Flags to decorate the uid fields in an atom.
     optional bool is_uid = 50001 [default = false];
+
+    optional LogMode log_mode = 50002 [default = MODE_AUTOMATIC];
 }

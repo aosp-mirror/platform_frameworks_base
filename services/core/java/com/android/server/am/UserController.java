@@ -2189,7 +2189,7 @@ class UserController implements Handler.Callback {
         }
 
         void updateUserConfiguration() {
-            mService.mActivityTaskManager.updateUserConfiguration();
+            mService.mAtmInternal.updateUserConfiguration();
         }
 
         void clearBroadcastQueueForUser(int userId) {
@@ -2199,9 +2199,7 @@ class UserController implements Handler.Callback {
         }
 
         void loadUserRecents(int userId) {
-            synchronized (mService) {
-                mService.mActivityTaskManager.getRecentTasks().loadUserRecentsLocked(userId);
-            }
+            mService.mAtmInternal.loadRecentTasksForUser(userId);
         }
 
         void startPersistentApps(int matchFlags) {
@@ -2254,13 +2252,11 @@ class UserController implements Handler.Callback {
         }
 
         protected void clearAllLockedTasks(String reason) {
-            synchronized (mService) {
-                mService.mActivityTaskManager.getLockTaskController().clearLockedTasks(reason);
-            }
+            mService.mAtmInternal.clearLockedTasks(reason);
         }
 
         protected boolean isCallerRecents(int callingUid) {
-            return mService.mActivityTaskManager.getRecentTasks().isCallerRecents(callingUid);
+            return mService.mAtmInternal.isCallerRecents(callingUid);
         }
     }
 }

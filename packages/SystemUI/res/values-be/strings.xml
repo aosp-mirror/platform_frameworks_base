@@ -178,7 +178,7 @@
     <!-- String.format failed for translation -->
     <!-- no translation found for accessibility_battery_level (7451474187113371965) -->
     <skip />
-    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"Зарадка акумулятара, працэнтаў: <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>."</string>
+    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"Зарадка акумулятара: <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%%."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Сістэмныя налады."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Апавяшчэнні."</string>
     <string name="accessibility_overflow_action" msgid="5681882033274783311">"Паказаць усе апавяшчэнні"</string>
@@ -325,6 +325,7 @@
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Прылада без назвы"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"Гатова для трансляцыі"</string>
     <string name="quick_settings_cast_detail_empty_text" msgid="311785821261640623">"Няма даступных прылад"</string>
+    <string name="quick_settings_cast_no_wifi" msgid="2696477881905521882">"Wi-Fi не падключаны"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Яркасць"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"АЎТА"</string>
     <string name="quick_settings_inversion_label" msgid="8790919884718619648">"Інвертаваць колеры"</string>
@@ -796,6 +797,7 @@
     <string name="accessibility_quick_settings_user" msgid="1567445362870421770">"Вы ўвайшлі як <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="data_connection_no_internet" msgid="4503302451650972989">"Не падключана да інтэрнэту"</string>
     <string name="accessibility_quick_settings_open_details" msgid="4230931801728005194">"Паказаць падрабязную інфармацыю."</string>
+    <string name="accessibility_quick_settings_not_available" msgid="4190068184294019846">"Прычына недаступнасці: <xliff:g id="REASON">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"Адкрыць налады <xliff:g id="ID_1">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Змяніць парадак налад."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Старонка <xliff:g id="ID_1">%1$d</xliff:g> з <xliff:g id="ID_2">%2$d</xliff:g>"</string>

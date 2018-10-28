@@ -51,6 +51,8 @@ using namespace android;
 
 static const bool kDebugPolicy = false;
 static const bool kDebugProc = false;
+// When reading `proc` files, how many bytes to read at a time
+static const int kReadSize = 4096;
 
 #if GUARD_THREAD_PRIORITY
 Mutex gKeyCreateMutex;
@@ -1034,21 +1036,35 @@ jboolean android_os_Process_readProcFile(JNIEnv* env, jobject clazz,
     }
     env->ReleaseStringUTFChars(file, file8);
 
-    char buffer[256];
-    const int len = read(fd, buffer, sizeof(buffer)-1);
+    std::vector<char> fileBuffer(kReadSize);
+    int numBytesRead = 0;
+    while (true) {
+        // Resize buffer to make space for contents. This might be more than we need, but once we've
+        // read we resize back down
+        fileBuffer.resize(numBytesRead + kReadSize, 0);
+        // Read in contents
+        int len = TEMP_FAILURE_RETRY(read(fd, fileBuffer.data() + numBytesRead, kReadSize));
+        numBytesRead += len;
+        if (len < 0) {
+            // If `len` is negative, an error occurred on read
+            if (kDebugProc) {
+                ALOGW("Unable to open process file: %s fd=%d\n", file8, fd);
+            }
+            close(fd);
+            return JNI_FALSE;
+        } else if (len == 0) {
+            // If nothing read, we're done
+            break;
+        }
+    }
+    // Resize back down to the amount we read
+    fileBuffer.resize(numBytesRead);
+    // Terminate buffer with null byte
+    fileBuffer.push_back('\0');
     close(fd);
 
-    if (len < 0) {
-        if (kDebugProc) {
-            ALOGW("Unable to open process file: %s fd=%d\n", file8, fd);
-        }
-        return JNI_FALSE;
-    }
-    buffer[len] = 0;
-
-    return android_os_Process_parseProcLineArray(env, clazz, buffer, 0, len,
+    return android_os_Process_parseProcLineArray(env, clazz, fileBuffer.data(), 0, numBytesRead,
             format, outStrings, outLongs, outFloats);
-
 }
 
 void android_os_Process_setApplicationObject(JNIEnv* env, jobject clazz,

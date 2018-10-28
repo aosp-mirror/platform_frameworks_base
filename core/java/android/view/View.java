@@ -5542,6 +5542,10 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     break;
                 case com.android.internal.R.styleable.View_accessibilityHeading:
                     setAccessibilityHeading(a.getBoolean(attr, false));
+                    break;
+                case R.styleable.View_forceDarkAllowed:
+                    mRenderNode.setForceDarkAllowed(a.getBoolean(attr, true));
+                    break;
             }
         }
 
@@ -15286,11 +15290,9 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      * If a theme is isLightTheme="false", then force dark is globally disabled for that theme.
      *
      * @param allow Whether or not to allow force dark.
-     *
-     * @hide
      */
-    public void setAllowForceDark(boolean allow) {
-        if (mRenderNode.setAllowForceDark(allow)) {
+    public void setForceDarkAllowed(boolean allow) {
+        if (mRenderNode.setForceDarkAllowed(allow)) {
             // Currently toggling force-dark requires a new display list push to apply
             // TODO: Make it not clobber the display list so this is just a damageSelf() instead
             invalidate();
@@ -15298,15 +15300,13 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     }
 
     /**
-     * See {@link #setAllowForceDark(boolean)}
+     * See {@link #setForceDarkAllowed(boolean)}
      *
      * @return true if force dark is allowed (default), false if it is disabled
-     *
-     * @hide
      */
     @ViewDebug.ExportedProperty(category = "drawing")
-    public boolean getAllowForceDark() {
-        return mRenderNode.getAllowForceDark();
+    public boolean isForceDarkAllowed() {
+        return mRenderNode.isForceDarkAllowed();
     }
 
     /**
@@ -16658,7 +16658,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     @UnsupportedAppUsage
     void invalidateViewProperty(boolean invalidateParent, boolean forceRedraw) {
         if (!isHardwareAccelerated()
-                || !mRenderNode.isValid()
+                || !mRenderNode.hasDisplayList()
                 || (mPrivateFlags & PFLAG_DRAW_ANIMATION) != 0) {
             if (invalidateParent) {
                 invalidateParentCaches();
@@ -19047,7 +19047,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         switch (mLayerType) {
             case LAYER_TYPE_HARDWARE:
                 updateDisplayListIfDirty();
-                if (attachInfo.mThreadedRenderer != null && mRenderNode.isValid()) {
+                if (attachInfo.mThreadedRenderer != null && mRenderNode.hasDisplayList()) {
                     attachInfo.mThreadedRenderer.buildLayer(mRenderNode);
                 }
                 break;
@@ -19214,11 +19214,11 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         }
 
         if ((mPrivateFlags & PFLAG_DRAWING_CACHE_VALID) == 0
-                || !renderNode.isValid()
+                || !renderNode.hasDisplayList()
                 || (mRecreateDisplayList)) {
             // Don't need to recreate the display list, just need to tell our
             // children to restore/recreate theirs
-            if (renderNode.isValid()
+            if (renderNode.hasDisplayList()
                     && !mRecreateDisplayList) {
                 mPrivateFlags |= PFLAG_DRAWN | PFLAG_DRAWING_CACHE_VALID;
                 mPrivateFlags &= ~PFLAG_DIRTY_MASK;
@@ -19235,7 +19235,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             int height = mBottom - mTop;
             int layerType = getLayerType();
 
-            final RecordingCanvas canvas = renderNode.start(width, height);
+            final RecordingCanvas canvas = renderNode.startRecording(width, height);
 
             try {
                 if (layerType == LAYER_TYPE_SOFTWARE) {
@@ -19266,7 +19266,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                     }
                 }
             } finally {
-                renderNode.end(canvas);
+                renderNode.endRecording();
                 setDisplayListProperties(renderNode);
             }
         } else {
@@ -20118,7 +20118,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             // Delay getting the display list until animation-driven alpha values are
             // set up and possibly passed on to the view
             renderNode = updateDisplayListIfDirty();
-            if (!renderNode.isValid()) {
+            if (!renderNode.hasDisplayList()) {
                 // Uncommon, but possible. If a view is removed from the hierarchy during the call
                 // to getDisplayList(), the display list will be marked invalid and we should not
                 // try to use it again.
@@ -20581,7 +20581,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             mBackgroundRenderNode = getDrawableRenderNode(background, mBackgroundRenderNode);
 
             final RenderNode renderNode = mBackgroundRenderNode;
-            if (renderNode != null && renderNode.isValid()) {
+            if (renderNode != null && renderNode.hasDisplayList()) {
                 setBackgroundRenderNodeProperties(renderNode);
                 ((RecordingCanvas) canvas).drawRenderNode(renderNode);
                 return;
@@ -20635,7 +20635,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         final Rect bounds = drawable.getBounds();
         final int width = bounds.width();
         final int height = bounds.height();
-        final RecordingCanvas canvas = renderNode.start(width, height);
+        final RecordingCanvas canvas = renderNode.startRecording(width, height);
 
         // Reverse left/top translation done by drawable canvas, which will
         // instead be applied by rendernode's LTRB bounds below. This way, the
@@ -20646,7 +20646,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         try {
             drawable.draw(canvas);
         } finally {
-            renderNode.end(canvas);
+            renderNode.endRecording();
         }
 
         // Set up drawable properties that are view-independent.

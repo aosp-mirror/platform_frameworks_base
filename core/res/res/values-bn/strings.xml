@@ -292,6 +292,9 @@
     <string name="permgrouplab_microphone" msgid="171539900250043464">"মাইক্রোফোন"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"অডিও রেকর্ড"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;-কে অডিও রেকর্ড করতে দেবেন?"</string>
+    <string name="permgrouplab_activityRecognition" msgid="2838596644535616493">"অ্যাক্টিভিটি শনাক্তকরণ"</string>
+    <string name="permgroupdesc_activityRecognition" msgid="7672248027571522602">"অ্যাক্টিভিটি শনাক্ত করুন"</string>
+    <string name="permgrouprequest_activityRecognition" msgid="8121253142311250055">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; কে আপনার শারীরিক অ্যাক্টিভিটি শনাক্ত করার অনুমতি দেবেন?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"ক্যামেরা"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"ছবি তোলা এবং ভিডিও রেকর্ড"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;-কে ফটো তুলতে এবং ভিডিও রেকর্ড করতে দেবেন?"</string>
@@ -418,14 +421,16 @@
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"মোবাইল টাওয়ার এবং ওয়াই-ফাই নেটওয়ার্কগুলির মত নেটওয়ার্ক উৎসগুলির উপর ভিত্তি করে এই অ্যাপটি আপনার লোকেশন শনাক্ত করতে পারে৷ এই লোকেশন পরিষেবাগুলি অবশ্যই চালু রাখতে হবে এবং অ্যাপটি যাতে সেগুলি ব্যবহার করতে পারে সেইজন্য সেগুলিকে আপনার ট্যাবলেটে উপলব্ধ করে রাখতে হবে৷"</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"মোবাইল টাওয়ার এবং ওয়াই-ফাই নেটওয়ার্কগুলির মত নেটওয়ার্কের উৎসগুলির উপর ভিত্তি করে এই অ্যাপটি আপনার লোকেশন শনাক্ত করতে পারে৷ এই লোকেশন পরিষেবাগুলি অবশ্যই চালু রাখতে হবে এবং অ্যাপটি যাতে সেগুলি ব্যবহার করতে পারে সেজন্য সেগুলিকে আপনার টিভিতে উপলব্ধ করে রাখতে হবে৷"</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"মোবাইল টাওয়ার এবং ওয়াই-ফাই নেটওয়ার্কগুলির মত নেটওয়ার্ক উৎসগুলির উপর ভিত্তি করে এই অ্যাপটি আপনার লোকেশন শনাক্ত করতে পারে৷ এই লোকেশন পরিষেবাগুলি অবশ্যই চালু রাখতে হবে এবং অ্যাপটি যাতে সেগুলি ব্যবহার করতে পারে সেজন্য সেগুলিকে আপনার ফোনে উপলব্ধ করে রাখতে হবে৷"</string>
-    <string name="permlab_accessBackgroundLocation" msgid="5742466381902568536">"ব্যাকগ্রাউন্ডে চলতে থাকলে আপনার যথাযথ লোকেশন অ্যাক্সেস করা"</string>
-    <string name="permdesc_accessBackgroundLocation" msgid="6371533283380774135">"এই অ্যাপটি ব্যাকগ্রাউন্ডে চলতে থাকলে যেকোনও সময়ে আপনার যথাযথ লোকেশন জানতে পারবে। এই লোকেশন পরিষেবাগুলি অবশ্যই চালু রাখতে হবে এবং আপনার ফোনে সেগুলি উপলভ্য থাকতে হবে যাতে অ্যাপটি সেগুলি ব্যবহার করতে পারে। এর জন্য অতিরিক্ত ব্যাটারি খরচ হতে পারে।"</string>
+    <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"ব্যাকগ্রাউন্ডে লোকেশন অ্যাক্সেস করা"</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"আনুমানিক বা একদম যথাযথ লোকেশন অ্যাক্সেস করার অনুমতি দেওয়া হলে এই অ্যাপটি ব্যাকগ্রাউন্ডে চালু থাকাকালীন আপনার লোকেশন অ্যাক্সেস করতে পারবে।"</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"আপনার অডিও সেটিংস পরিবর্তন করে"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"ভলিউম এবং যেখানে স্পিকার আউটপুট হিসাবে ব্যবহৃত হয় সেই সব ক্ষেত্রে গ্লোবাল অডিও সেটিংসের সংশোধন করতে অ্যাপ্লিকেশনটিকে মঞ্জুর করে৷"</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"অডিও রেকর্ড"</string>
     <string name="permdesc_recordAudio" msgid="4245930455135321433">"এই অ্যাপটি মাইক্রোফোন ব্যবহার করে যে কোনো সময় অডিও রেকর্ড করতে পারে৷"</string>
     <string name="permlab_sim_communication" msgid="2935852302216852065">"সিম এ আদেশগুলি পাঠান"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"অ্যাপ্লিকেশানটিকে সিম কার্ডে কমান্ডগুলি পাঠানোর অনুমতি দেয়৷ এটি খুবই বিপজ্জনক৷"</string>
+    <string name="permlab_activityRecognition" msgid="3634590230567608356">"শারীরিক অ্যাক্টিভিটি শনাক্ত করুন"</string>
+    <string name="permdesc_activityRecognition" msgid="3143453925156552894">"এই অ্যাপ আপনার শারীরিক অ্যাক্টিভিটি শনাক্ত করতে পারবে।"</string>
     <string name="permlab_camera" msgid="3616391919559751192">"ছবি এবং ভিডিও তোলে"</string>
     <string name="permdesc_camera" msgid="5392231870049240670">"এই অ্যাপটি যে কোনো সময় ক্যামেরা ব্যবহার করে ছবি তুলতে বা ভিডিও রেকর্ড করতে পারে৷"</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"ভাইব্রেশন নিয়ন্ত্রণ করুন"</string>
@@ -518,6 +523,7 @@
     <string name="permdesc_imagesWrite" msgid="7073662756617474375">"অ্যাপকে আপনার ফটো সংগ্রহ পরিবর্তন করার অনুমতি দিন।"</string>
     <string name="permlab_mediaLocation" msgid="8675148183726247864">"ডিয়া সংগ্রহ থেকে লোকেশন দেখতে দিন"</string>
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"আপনার মিডিয়া সংগ্রহ থেকে লোকেশন দেখতে অ্যাপকে অনুমতি দিন।"</string>
+    <string name="biometric_dialog_default_title" msgid="4229778503907743328">"<xliff:g id="APP">%s</xliff:g> অ্যাপ্লিকেশন যাচাই করতে চাইছে।"</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"বায়োমেট্রিক হার্ডওয়্যার পাওয়া যাবে না"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"আঙ্গুলের ছাপ আংশিক শনাক্ত করা হয়েছে৷ অনুগ্রহ করে আবার চেষ্টা করুন৷"</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"আঙ্গুলের ছাপ প্রক্রিয়া করা যায়নি৷ অনুগ্রহ করে আবার চেষ্টা করুন৷"</string>
@@ -648,7 +654,7 @@
     <string name="policylab_resetPassword" msgid="4934707632423915395">"স্ক্রিন লক পরিবর্তন করুন"</string>
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"স্ক্রিন লক পরিবর্তন করুন৷"</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"স্ক্রিনটি লক করে"</string>
-    <string name="policydesc_forceLock" msgid="1141797588403827138">"স্ক্রিন কখন কিভাবে লক হবে তা নিয়ন্ত্রণ করে৷"</string>
+    <string name="policydesc_forceLock" msgid="1141797588403827138">"স্ক্রিন কখন কীভাবে লক হবে তা নিয়ন্ত্রণ করে৷"</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"সমস্ত ডেটা মুছে দেয়"</string>
     <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"ফ্যাক্টরি ডেটা আবার সেট কার্য সম্পাদনার দ্বারা কোনো রকম সতর্কতা ছাড়াই ট্যাবলেটের ডেটা মোছে৷"</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"সতর্কীকরণ ছাড়াই একটি ফ্যাক্টরি ডেটা আবার সেট করার দ্বারা টিভির ডেটা মুছে ফেলে৷"</string>
@@ -1873,7 +1879,7 @@
     <string name="suspended_widget_accessibility" msgid="6712143096475264190">"অক্ষম করা <xliff:g id="LABEL">%1$s</xliff:g>"</string>
     <string name="conference_call" msgid="3751093130790472426">"কনফারেন্স কল"</string>
     <string name="tooltip_popup_title" msgid="5253721848739260181">"টুলটিপ"</string>
-    <string name="app_category_game" msgid="5431836943981492993">"গেম্স"</string>
+    <string name="app_category_game" msgid="5431836943981492993">"গেম"</string>
     <string name="app_category_audio" msgid="1659853108734301647">"মিউজিক ও অডিও"</string>
     <string name="app_category_video" msgid="2728726078629384196">"চলচ্চিত্র ও ভিডিওগুলি"</string>
     <string name="app_category_image" msgid="4867854544519846048">"ফটো ও ছবিগুলি"</string>
@@ -1898,14 +1904,14 @@
       <item quantity="one">স্বতঃপূর্ণ করার <xliff:g id="COUNT">%1$s</xliff:g>টি প্রস্তাবনা</item>
       <item quantity="other">স্বতঃপূর্ণ করার <xliff:g id="COUNT">%1$s</xliff:g>টি প্রস্তাবনা</item>
     </plurals>
-    <string name="autofill_save_title" msgid="3345527308992082601">"&lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt; এ সংরক্ষণ করবেন?"</string>
-    <string name="autofill_save_title_with_type" msgid="8637809388029313305">"<xliff:g id="TYPE">%1$s</xliff:g> কে &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;এ সংরক্ষণ করবেন?"</string>
-    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"<xliff:g id="TYPE_0">%1$s</xliff:g> এবং <xliff:g id="TYPE_1">%2$s</xliff:g> কে &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt; এ সংরক্ষণ করবেন?"</string>
-    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g>, এবং <xliff:g id="TYPE_2">%3$s</xliff:g> কে &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt; এ সংরক্ষণ করবেন?"</string>
-    <string name="autofill_update_title" msgid="4879673117448810818">"&lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;-তে আপডেট করতে চান?"</string>
-    <string name="autofill_update_title_with_type" msgid="339733442087186755">"<xliff:g id="TYPE">%1$s</xliff:g> থেকে &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;-এ আপডেট করতে চান?"</string>
-    <string name="autofill_update_title_with_2types" msgid="6321714204167424745">"<xliff:g id="TYPE_0">%1$s</xliff:g> এবং <xliff:g id="TYPE_1">%2$s</xliff:g>o &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;-এ আপডেট করতে চান?"</string>
-    <string name="autofill_update_title_with_3types" msgid="5866735124066629287">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g>,এবং <xliff:g id="TYPE_2">%3$s</xliff:g> to &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt; আপডেট করতে চান?"</string>
+    <string name="autofill_save_title" msgid="327541108460384555"><b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"-এ সেভ করতে চান?"</string>
+    <string name="autofill_save_title_with_type" msgid="2339135393607143594"><b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"-এ <xliff:g id="TYPE">%1$s</xliff:g> সেভ করতে চান?"</string>
+    <string name="autofill_save_title_with_2types" msgid="87616102361154432"><b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"-এ <xliff:g id="TYPE_0">%1$s</xliff:g> এবং <xliff:g id="TYPE_1">%2$s</xliff:g> সেভ করতে চান?"</string>
+    <string name="autofill_save_title_with_3types" msgid="4108978552969604555"><b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>"-এ <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> এবং <xliff:g id="TYPE_2">%3$s</xliff:g> সেভ করতে চান?"</string>
+    <string name="autofill_update_title" msgid="5305781141104585279"><b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"-এ আপডেট করতে চান?"</string>
+    <string name="autofill_update_title_with_type" msgid="4624181147422762233"><b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"-এ <xliff:g id="TYPE">%1$s</xliff:g> আপডেট করতে চান?"</string>
+    <string name="autofill_update_title_with_2types" msgid="2300113827053626484"><b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"-এ <xliff:g id="TYPE_0">%1$s</xliff:g> এবং <xliff:g id="TYPE_1">%2$s</xliff:g> আপডেট করতে চান?"</string>
+    <string name="autofill_update_title_with_3types" msgid="9089824354296211922"><b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>"-এ এই আইটেমগুলি আপডেট করতে চান: <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> এবং <xliff:g id="TYPE_2">%3$s</xliff:g>?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"সেভ করুন"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"না থাক"</string>
     <string name="autofill_update_yes" msgid="310358413273276958">"আপডেট করুন"</string>

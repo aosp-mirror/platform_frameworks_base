@@ -523,10 +523,11 @@ static void drawTextChars(JNIEnv* env, jobject, jlong canvasHandle, jcharArray c
     Paint* paint = reinterpret_cast<Paint*>(paintHandle);
     const Typeface* typeface = paint->getAndroidTypeface();
     ScopedCharArrayRO text(env, charArray);
+    // drawTextString and drawTextChars doesn't use context info
     get_canvas(canvasHandle)->drawText(
-            text.get(), text.size(),  // text buffer
-            index, count,  // draw range
-            0, text.size(),  // context range
+            text.get() + index, count,  // text buffer
+            0, count,  // draw range
+            0, count,  // context range
             x, y,  // draw position
             static_cast<minikin::Bidi>(bidiFlags), *paint, typeface, nullptr /* measured text */);
 }
@@ -537,10 +538,12 @@ static void drawTextString(JNIEnv* env, jobject, jlong canvasHandle, jstring str
     ScopedStringChars text(env, strObj);
     Paint* paint = reinterpret_cast<Paint*>(paintHandle);
     const Typeface* typeface = paint->getAndroidTypeface();
+    const int count = end - start;
+    // drawTextString and drawTextChars doesn't use context info
     get_canvas(canvasHandle)->drawText(
-            text.get(), text.size(),  // text buffer
-            start, end - start,  // draw range
-            0, text.size(),  // context range
+            text.get() + start, count,  // text buffer
+            0, count,  // draw range
+            0, count,  // context range
             x, y,  // draw position
             static_cast<minikin::Bidi>(bidiFlags), *paint, typeface, nullptr /* measured text */);
 }

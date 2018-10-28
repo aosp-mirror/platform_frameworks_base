@@ -19,7 +19,6 @@ package android.graphics;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.UnsupportedAppUsage;
 import android.view.NativeVectorDrawableAnimator;
 import android.view.RenderNodeAnimator;
 import android.view.View;
@@ -33,89 +32,92 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
 /**
- * <p>A display list records a series of graphics related operations and can replay
- * them later. Display lists are usually built by recording operations on a
- * {@link RecordingCanvas}. Replaying the operations from a display list avoids
- * executing application code on every frame, and is thus much more efficient.</p>
+ * <p>RenderNode is used to build hardware accelerated rendering hierarchies. Each RenderNode
+ * contains both a display list as well as a set of properties that affect the rendering of the
+ * display list. RenderNodes are used internally for all Views by default and are not typically
+ * used directly.</p>
  *
- * <p>Display lists are used internally for all views by default, and are not
- * typically used directly. One reason to consider using a display is a custom
- * {@link View} implementation that needs to issue a large number of drawing commands.
- * When the view invalidates, all the drawing commands must be reissued, even if
- * large portions of the drawing command stream stay the same frame to frame, which
- * can become a performance bottleneck. To solve this issue, a custom View might split
- * its content into several display lists. A display list is updated only when its
- * content, and only its content, needs to be updated.</p>
+ * <p>RenderNodes are used to divide up the rendering content of a complex scene into smaller
+ * pieces that can then be updated individually more cheaply. Updating part of the scene only needs
+ * to update the display list or properties of a small number of RenderNode instead of redrawing
+ * everything from scratch. A RenderNode only needs its display list re-recorded when its content
+ * alone should be changed. RenderNodes can also be transformed without re-recording the display
+ * list through the transform properties.</p>
  *
- * <p>A text editor might for instance store each paragraph into its own display list.
+ * <p>A text editor might for instance store each paragraph into its own RenderNode.
  * Thus when the user inserts or removes characters, only the display list of the
  * affected paragraph needs to be recorded again.</p>
  *
  * <h3>Hardware acceleration</h3>
- * <p>Display lists can only be replayed using a {@link RecordingCanvas}. They are not
+ * <p>RenderNodes can be drawn using a {@link RecordingCanvas}. They are not
  * supported in software. Always make sure that the {@link android.graphics.Canvas}
  * you are using to render a display list is hardware accelerated using
  * {@link android.graphics.Canvas#isHardwareAccelerated()}.</p>
  *
- * <h3>Creating a display list</h3>
+ * <h3>Creating a RenderNode</h3>
  * <pre class="prettyprint">
- *     ThreadedRenderer renderer = myView.getThreadedRenderer();
- *     if (renderer != null) {
- *         DisplayList displayList = renderer.createDisplayList();
- *         RecordingCanvas canvas = displayList.start(width, height);
- *         try {
- *             // Draw onto the canvas
- *             // For instance: canvas.drawBitmap(...);
- *         } finally {
- *             displayList.end();
- *         }
+ *     RenderNode renderNode = RenderNode.create("myRenderNode");
+ *     renderNode.setLeftTopRightBottom(0, 0, 50, 50); // Set the size to 50x50
+ *     RecordingCanvas canvas = renderNode.startRecording();
+ *     try {
+ *         // Draw with the canvas
+ *         canvas.drawRect(...);
+ *     } finally {
+ *         renderNode.endRecording();
  *     }
  * </pre>
  *
- * <h3>Rendering a display list on a View</h3>
+ * <h3>Drawing a RenderNode in a View</h3>
  * <pre class="prettyprint">
  *     protected void onDraw(Canvas canvas) {
- *         if (canvas.isHardwareAccelerated()) {
- *             RecordingCanvas displayListCanvas = (RecordingCanvas) canvas;
- *             displayListCanvas.drawDisplayList(mDisplayList);
+ *         if (canvas instanceof RecordingCanvas) {
+ *             RecordingCanvas recordingCanvas = (RecordingCanvas) canvas;
+ *             // Check that the RenderNode has a display list, re-recording it if it does not.
+ *             if (!myRenderNode.hasDisplayList()) {
+ *                 updateDisplayList(myRenderNode);
+ *             }
+ *             // Draw the RenderNode into this canvas.
+ *             recordingCanvas.drawRenderNode(myRenderNode);
  *         }
  *     }
  * </pre>
  *
  * <h3>Releasing resources</h3>
  * <p>This step is not mandatory but recommended if you want to release resources
- * held by a display list as soon as possible.</p>
+ * held by a display list as soon as possible. Most significantly any bitmaps it may contain.</p>
  * <pre class="prettyprint">
- *     // Mark this display list invalid, it cannot be used for drawing anymore,
- *     // and release resources held by this display list
- *     displayList.clear();
+ *     // Discards the display list content allowing for any held resources to be released.
+ *     // After calling this
+ *     renderNode.discardDisplayList();
  * </pre>
  *
+ *
  * <h3>Properties</h3>
- * <p>In addition, a display list offers several properties, such as
+ * <p>In addition, a RenderNode offers several properties, such as
  * {@link #setScaleX(float)} or {@link #setLeft(int)}, that can be used to affect all
  * the drawing commands recorded within. For instance, these properties can be used
  * to move around a large number of images without re-issuing all the individual
- * <code>drawBitmap()</code> calls.</p>
+ * <code>canvas.drawBitmap()</code> calls.</p>
  *
  * <pre class="prettyprint">
  *     private void createDisplayList() {
- *         mDisplayList = DisplayList.create("MyDisplayList");
- *         RecordingCanvas canvas = mDisplayList.start(width, height);
+ *         mRenderNode = RenderNode.create("MyRenderNode");
+ *         mRenderNode.setLeftTopRightBottom(0, 0, width, height);
+ *         RecordingCanvas canvas = mRenderNode.startRecording();
  *         try {
  *             for (Bitmap b : mBitmaps) {
  *                 canvas.drawBitmap(b, 0.0f, 0.0f, null);
  *                 canvas.translate(0.0f, b.getHeight());
  *             }
  *         } finally {
- *             displayList.end();
+ *             mRenderNode.endRecording();
  *         }
  *     }
  *
  *     protected void onDraw(Canvas canvas) {
- *         if (canvas.isHardwareAccelerated()) {
- *             RecordingCanvas displayListCanvas = (RecordingCanvas) canvas;
- *             displayListCanvas.drawDisplayList(mDisplayList);
+ *         if (canvas instanceof RecordingCanvas) {
+ *             RecordingCanvas recordingCanvas = (RecordingCanvas) canvas;
+ *             recordingCanvas.drawRenderNode(mRenderNode);
  *         }
  *     }
  *
@@ -124,13 +126,16 @@ import java.lang.annotation.RetentionPolicy;
  *          // by x pixels to the right and redraw this view. All the commands
  *          // recorded in createDisplayList() won't be re-issued, only onDraw()
  *          // will be invoked and will execute very quickly
- *          mDisplayList.offsetLeftAndRight(x);
+ *          mRenderNode.offsetLeftAndRight(x);
  *          invalidate();
  *     }
  * </pre>
  *
  * <h3>Threading</h3>
- * <p>Display lists must be created on and manipulated from the UI thread only.</p>
+ * <p>RenderNode may be created and used on any thread but they are not thread-safe. Only
+ * a single thread may interact with a RenderNode at any given time. It is critical
+ * that the RenderNode is only used on the same thread it is drawn with. For example when using
+ * RenderNode with a custom View, then that RenderNode must only be used from the UI thread.</p>
  *
  * @hide
  */
@@ -147,6 +152,7 @@ public class RenderNode {
      */
     public final long mNativeRenderNode;
     private final AnimationHost mAnimationHost;
+    private RecordingCanvas mCurrentRecordingCanvas;
 
     private RenderNode(String name, AnimationHost animationHost) {
         mNativeRenderNode = nCreate(name);
@@ -171,7 +177,6 @@ public class RenderNode {
      *
      * @return A new RenderNode.
      */
-    @UnsupportedAppUsage
     public static RenderNode create(String name, @Nullable AnimationHost animationHost) {
         return new RenderNode(name, animationHost);
     }
@@ -226,44 +231,79 @@ public class RenderNode {
      * operations performed on the returned canvas are recorded and
      * stored in this display list.
      *
-     * Calling this method will mark the render node invalid until
-     * {@link #end(RecordingCanvas)} is called.
-     * Only valid render nodes can be replayed.
+     * {@link #endRecording()} must be called when the recording is finished in order to apply
+     * the updated display list.
      *
-     * @param width The width of the recording viewport
-     * @param height The height of the recording viewport
+     * @param width The width of the recording viewport. This will not alter the width of the
+     *              RenderNode itself, that must be set with {@link #setLeft(int)} and
+     *              {@link #setRight(int)}
+     * @param height The height of the recording viewport. This will not alter the height of the
+     *               RenderNode itself, that must be set with {@link #setTop(int)} and
+     *               {@link #setBottom(int)}.
      *
      * @return A canvas to record drawing operations.
      *
-     * @see #end(RecordingCanvas)
-     * @see #isValid()
+     * @see #endRecording()
+     * @see #hasDisplayList()
      */
-    @UnsupportedAppUsage
-    public RecordingCanvas start(int width, int height) {
-        return RecordingCanvas.obtain(this, width, height);
+    public RecordingCanvas startRecording(int width, int height) {
+        if (mCurrentRecordingCanvas != null) {
+            throw new IllegalStateException(
+                    "Recording currently in progress - missing #endRecording() call?");
+        }
+        mCurrentRecordingCanvas = RecordingCanvas.obtain(this, width, height);
+        return mCurrentRecordingCanvas;
     }
 
     /**
-     * Same as {@link #start(int, int)} but with the RenderNode's width & height
+     * Same as {@link #startRecording(int, int)} with the width & height set
+     * to the RenderNode's own width & height. The RenderNode's width & height may be set
+     * with {@link #setLeftTopRightBottom(int, int, int, int)}.
      */
-    public RecordingCanvas start() {
+    public RecordingCanvas startRecording() {
         return RecordingCanvas.obtain(this,
                 nGetWidth(mNativeRenderNode), nGetHeight(mNativeRenderNode));
     }
 
     /**
-     * Ends the recording for this display list. A display list cannot be
-     * replayed if recording is not finished. Calling this method marks
-     * the display list valid and {@link #isValid()} will return true.
-     *
-     * @see #start(int, int)
-     * @see #isValid()
+     * @deprecated use {@link #startRecording(int, int)} instead
+     * @hide
      */
-    @UnsupportedAppUsage
-    public void end(RecordingCanvas canvas) {
+    @Deprecated
+    public RecordingCanvas start(int width, int height) {
+        return startRecording(width, height);
+    }
+
+    /**`
+     * Ends the recording for this display list. Calling this method marks
+     * the display list valid and {@link #hasDisplayList()} will return true.
+     *
+     * @see #startRecording(int, int)
+     * @see #hasDisplayList()
+     */
+    public void endRecording() {
+        if (mCurrentRecordingCanvas == null) {
+            throw new IllegalStateException(
+                    "No recording in progress, forgot to call #startRecording()?");
+        }
+        RecordingCanvas canvas = mCurrentRecordingCanvas;
+        mCurrentRecordingCanvas = null;
         long displayList = canvas.finishRecording();
         nSetDisplayList(mNativeRenderNode, displayList);
         canvas.recycle();
+    }
+
+    /**
+     * @deprecated use {@link #endRecording()} instead
+     * @hide
+     */
+    @Deprecated
+    public void end(RecordingCanvas canvas) {
+        if (mCurrentRecordingCanvas != canvas) {
+            throw new IllegalArgumentException(
+                    "Canvas given isn't the one that was returned from #startRecording");
+        }
+        endRecording();
     }
 
     /**
@@ -271,19 +311,26 @@ public class RenderNode {
      * during destruction of hardware resources, to ensure that we do not hold onto
      * obsolete resources after related resources are gone.
      */
-    @UnsupportedAppUsage
     public void discardDisplayList() {
         nSetDisplayList(mNativeRenderNode, 0);
     }
 
     /**
-     * Returns whether the RenderNode's display list content is currently usable.
-     * If this returns false, the display list should be re-recorded prior to replaying it.
+     * Returns whether the RenderNode has a display list. If this returns false, the RenderNode
+     * should be re-recorded with {@link #startRecording()} and {@link #endRecording()}.
      *
-     * @return boolean true if the display list is able to be replayed, false otherwise.
+     * A RenderNode without a display list may still be drawn, however it will have no impact
+     * on the rendering content until its display list is updated.
+     *
+     * When a RenderNode is no longer drawn by anything the system may automatically
+     * invoke {@link #discardDisplayList()}. It is therefore important to ensure that
+     * {@link #hasDisplayList()} is true on a RenderNode prior to drawing it.
+     *
+     * See {@link #discardDisplayList()}
+     *
+     * @return boolean true if this RenderNode has a display list, false otherwise.
      */
-    @UnsupportedAppUsage
-    public boolean isValid() {
+    public boolean hasDisplayList() {
         return nIsValid(mNativeRenderNode);
     }
 
@@ -358,7 +405,6 @@ public class RenderNode {
      *
      * @param clipToBounds true if the display list should clip to its bounds
      */
-    @UnsupportedAppUsage
     public boolean setClipToBounds(boolean clipToBounds) {
         return nSetClipToBounds(mNativeRenderNode, clipToBounds);
     }
@@ -370,7 +416,6 @@ public class RenderNode {
      * @param shouldProject true if the display list should be projected onto a
      *            containing volume.
      */
-    @UnsupportedAppUsage
     public boolean setProjectBackwards(boolean shouldProject) {
         return nSetProjectBackwards(mNativeRenderNode, shouldProject);
     }
@@ -521,7 +566,6 @@ public class RenderNode {
      * @see android.view.View#hasOverlappingRendering()
      * @see #hasOverlappingRendering()
      */
-    @UnsupportedAppUsage
     public boolean setHasOverlappingRendering(boolean hasOverlappingRendering) {
         return nSetHasOverlappingRendering(mNativeRenderNode, hasOverlappingRendering);
     }
@@ -872,7 +916,6 @@ public class RenderNode {
      * @see View#setRight(int)
      * @see View#setBottom(int)
      */
-    @UnsupportedAppUsage
     public boolean setLeftTopRightBottom(int left, int top, int right, int bottom) {
         return nSetLeftTopRightBottom(mNativeRenderNode, left, top, right, bottom);
     }
@@ -885,7 +928,6 @@ public class RenderNode {
      *
      * @see View#offsetLeftAndRight(int)
      */
-    @UnsupportedAppUsage
     public boolean offsetLeftAndRight(int offset) {
         return nOffsetLeftAndRight(mNativeRenderNode, offset);
     }
@@ -906,7 +948,6 @@ public class RenderNode {
      * Outputs the display list to the log. This method exists for use by
      * tools to output display lists for selected nodes to the log.
      */
-    @UnsupportedAppUsage
     public void output() {
         nOutput(mNativeRenderNode);
     }
@@ -931,16 +972,16 @@ public class RenderNode {
      * @param allow Whether or not to allow force dark.
      * @return true If the value has changed, false otherwise.
      */
-    public boolean setAllowForceDark(boolean allow) {
+    public boolean setForceDarkAllowed(boolean allow) {
         return nSetAllowForceDark(mNativeRenderNode, allow);
     }
 
     /**
-     * See {@link #setAllowForceDark(boolean)}
+     * See {@link #setForceDarkAllowed(boolean)}
      *
      * @return true if force dark is allowed (default), false if it is disabled
      */
-    public boolean getAllowForceDark() {
+    public boolean isForceDarkAllowed() {
         return nGetAllowForceDark(mNativeRenderNode);
     }
 

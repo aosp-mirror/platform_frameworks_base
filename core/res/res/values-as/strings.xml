@@ -292,6 +292,9 @@
     <string name="permgrouplab_microphone" msgid="171539900250043464">"মাইক্ৰ\'ফ\'ন"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"অডিঅ\' ৰেকর্ড কৰিব পাৰে"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ক অডিঅ\' ৰেকৰ্ড কৰিবলৈ অনুমতি দিবনে?"</string>
+    <string name="permgrouplab_activityRecognition" msgid="2838596644535616493">"কার্যকলাপ চিনাক্তকৰণ"</string>
+    <string name="permgroupdesc_activityRecognition" msgid="7672248027571522602">"কাৰ্যকলাপ চিনাক্ত কৰক"</string>
+    <string name="permgrouprequest_activityRecognition" msgid="8121253142311250055">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ক নিজৰ শাৰীৰিক কাৰ্যকলাপ চিনাক্ত কৰাৰ অনুমতি দিবনে?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"কেমেৰা"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"ফট\' তুলিব আৰু ভিডিঅ\' ৰেকৰ্ড কৰিব পাৰে"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;ক ছবি তুলিবলৈ আৰু ভিডিঅ\' ৰেকৰ্ড কৰিবলৈ অনুমতি দিবনে?"</string>
@@ -418,14 +421,16 @@
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"চেল টাৱাৰ আৰু ৱাই-ফাই নেটৱর্কৰ দৰে নেটৱর্কৰ উৎসসমূহক ভিত্তি কৰি এই এপটোৱে আপোনাৰ অৱস্থান নিৰ্ণয় কৰিব পাৰে। এই অৱস্থানৰ সেৱাসমূহ অন হৈ থাকিলে আৰু আপোনাৰ টেবলেটটোত উপলব্ধ হ\'লেহে এপটোৱে সেইবোৰ ব্যৱহাৰ কৰিবলৈ সক্ষম হ\'ব।"</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"চেল টাৱাৰ আৰু ৱাই-ফাই নেটৱর্কৰ দৰে নেটৱর্কৰ উৎসসমূহক ভিত্তি কৰি এই এপটোৱে আপোনাৰ অৱস্থান নিৰ্ণয় কৰিব পাৰে। এই অৱস্থানৰ সেৱাসমূহ অন হৈ থাকিলে আৰু আপোনাৰ টিভিত উপলব্ধ হ\'লেহে এপটোৱে সেইবোৰ ব্যৱহাৰ কৰিবলৈ সক্ষম হ\'ব।"</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"এই এপটোৱে ম\'বাইলৰ টাৱাৰ আৰু ৱাই-ফাইৰ নেটৱৰ্ক আদিৰ দৰে নেটৱৰ্কৰ উৎসসমূহক ভিত্তি কৰি আপোনাৰ অৱস্থান চিনাক্ত কৰিব পাৰে। সেই অৱস্থান সেৱাসমূহ আপোনাৰ ফ\'নত সক্ষম অৱস্থাত থাকিলেহে এপটোৱে সেইবোৰ ব্যৱহাৰ কৰিব পাৰিব।"</string>
-    <string name="permlab_accessBackgroundLocation" msgid="5742466381902568536">"নেপথ্যত সঠিক অৱস্থান পাব পাৰে"</string>
-    <string name="permdesc_accessBackgroundLocation" msgid="6371533283380774135">"এই এপটোৱে যেতিয়া ই নেপথ্যত চলি থাকে তেতিয়া আপোনাৰ সঠিক অৱস্থান নিৰ্ণয় কৰিব পাৰে। এপটোৱে ব্যৱহাৰ কৰিব পৰাকৈ এই অৱস্থান সেৱাসমূহ অন হৈ থাকিবই লাগিব আৰু আপোনাৰ ফ\'নত উপলব্ধ হ\'ব লাগিব। ইয়াৰ ফলত বেটাৰিৰ খৰচ বাঢ়িব পাৰে।"</string>
+    <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"নেপথ্যত চলি থকা সময়ত অৱস্থানৰ এক্সেছ"</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"ইয়াৰ উপৰিও যদি ইয়াক আনুমানিক বা সঠিক অৱস্থানৰ এক্সেছ দিয়া হয়, তেন্তে উক্ত এপে নেপথ্যত চলি থকাৰ সময়ত অৱস্থানৰ এক্সেছ লাভ কৰিব পাৰে।"</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"আপোনাৰ অডিঅ\' ছেটিংসমূহ সলনি কৰক"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"এপটোক ভলিউমৰ দৰে গ্ল\'বেল অডিঅ\' ছেটিংসমূহ যাৰ স্পীকাৰক আউটপুটৰ বাবে ব্যৱহাৰ হয় তাক সলনি কৰিবলৈ অনুমতি দিয়ে৷"</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"অডিঅ\' ৰেকর্ড কৰক"</string>
     <string name="permdesc_recordAudio" msgid="4245930455135321433">"এই এপটোৱে যিকোনো সময়তে মাইক্ৰ\'ফ\'ন ব্যৱহাৰ কৰি অডিঅ\' ৰেকৰ্ড কৰিব পাৰে।"</string>
     <string name="permlab_sim_communication" msgid="2935852302216852065">"ছিমলৈ নিৰ্দেশ পঠিয়াব পাৰে"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"ছিমলৈ নিৰ্দেশসমূহ প্ৰেৰণ কৰিবলৈ এপক অনুমতি দিয়ে। ই অতি ক্ষতিকাৰক।"</string>
+    <string name="permlab_activityRecognition" msgid="3634590230567608356">"শাৰীৰিক কাৰ্যকলাপ চিনাক্ত কৰক"</string>
+    <string name="permdesc_activityRecognition" msgid="3143453925156552894">"এই এপটোৱে আপোনাৰ শাৰীৰিক কাৰ্যকলাপ চিনাক্ত কৰিব পাৰে।"</string>
     <string name="permlab_camera" msgid="3616391919559751192">"ফট\' তোলা আৰু ভিডিঅ\' ৰেকৰ্ড কৰা"</string>
     <string name="permdesc_camera" msgid="5392231870049240670">"এই এপে যিকোনো সময়তে কেমেৰা ব্যৱহাৰ কৰি ফট\' তুলিব আৰু ভিডিঅ\' ৰেকর্ড কৰিব পাৰে।"</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"কম্পন নিয়ন্ত্ৰণ কৰক"</string>
@@ -518,6 +523,7 @@
     <string name="permdesc_imagesWrite" msgid="7073662756617474375">"এপক আপোনাৰ ফট’ সংগ্ৰহ সালসলনি কৰিবলৈ দিয়ে।"</string>
     <string name="permlab_mediaLocation" msgid="8675148183726247864">"আপোনাৰ মিডিয়া সংগ্ৰহৰ অৱস্থান পঢ়িবলৈ"</string>
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"এপক আপোনাৰ মিডিয়া সংগ্ৰহৰ অৱস্থান পঢ়িবলৈ দিয়ে।"</string>
+    <string name="biometric_dialog_default_title" msgid="4229778503907743328">"<xliff:g id="APP">%s</xliff:g> এপে বিশ্বাসযোগ্যতাৰ প্ৰমাণ কৰিব বিচাৰে।"</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"বায়োমেট্ৰিক হাৰ্ডৱেৰ উপলব্ধ নহয়"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"ফিংগাৰপ্ৰিণ্ট আংশিকভাৱে চিনাক্ত কৰা হৈছে। অনুগ্ৰহ কৰি আকৌ চেষ্টা কৰক৷"</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"ফিগাৰপ্ৰিণ্টৰ প্ৰক্ৰিয়া সম্পাদন কৰিবপৰা নগ\'ল। অনুগ্ৰহ কৰি আকৌ চেষ্টা কৰক৷"</string>
@@ -1898,14 +1904,14 @@
       <item quantity="one"><xliff:g id="COUNT">%1$s</xliff:g>টা স্বয়ংপূৰ্তি পৰামৰ্শ</item>
       <item quantity="other"><xliff:g id="COUNT">%1$s</xliff:g>টা স্বয়ংপূৰ্তি পৰামৰ্শ</item>
     </plurals>
-    <string name="autofill_save_title" msgid="3345527308992082601">"&lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;ত ছেভ কৰিবনে?"</string>
-    <string name="autofill_save_title_with_type" msgid="8637809388029313305">"<xliff:g id="TYPE">%1$s</xliff:g>ক &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;ত ছেভ কৰিবনে?"</string>
-    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"<xliff:g id="TYPE_0">%1$s</xliff:g> আৰু <xliff:g id="TYPE_1">%2$s</xliff:g>ক &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;ত ছেভ কৰিবনে?"</string>
-    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g>, আৰু <xliff:g id="TYPE_2">%3$s</xliff:g>ক &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;ত ছেভ কৰিবনে?"</string>
-    <string name="autofill_update_title" msgid="4879673117448810818">"আপডে’ট কৰি &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt; বনাবনে?"</string>
-    <string name="autofill_update_title_with_type" msgid="339733442087186755">"<xliff:g id="TYPE">%1$s</xliff:g>ক আপডে’ট কৰি &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt; বনাবনে?"</string>
-    <string name="autofill_update_title_with_2types" msgid="6321714204167424745">"<xliff:g id="TYPE_0">%1$s</xliff:g> আৰু <xliff:g id="TYPE_1">%2$s</xliff:g>ক আপডে’ট কৰি &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt; বনাবনে?"</string>
-    <string name="autofill_update_title_with_3types" msgid="5866735124066629287">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> আৰু <xliff:g id="TYPE_2">%3$s</xliff:g>ক আপডে’ট কৰি to &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt; বনাবনে?"</string>
+    <string name="autofill_save_title" msgid="327541108460384555"><b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"ত ছেভ কৰিবনে?"</string>
+    <string name="autofill_save_title_with_type" msgid="2339135393607143594"><b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"ত <xliff:g id="TYPE">%1$s</xliff:g>ক ছেভ কৰিবনে?"</string>
+    <string name="autofill_save_title_with_2types" msgid="87616102361154432"><b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"ত <xliff:g id="TYPE_0">%1$s</xliff:g> আৰু <xliff:g id="TYPE_1">%2$s</xliff:g>ক ছেভ কৰিবনে?"</string>
+    <string name="autofill_save_title_with_3types" msgid="4108978552969604555"><b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>"ত <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> আৰু <xliff:g id="TYPE_2">%3$s</xliff:g>ক ছেভ কৰিবনে?"</string>
+    <string name="autofill_update_title" msgid="5305781141104585279"><b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"ত আপডে\'ট কৰিবনে?"</string>
+    <string name="autofill_update_title_with_type" msgid="4624181147422762233"><b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"ত <xliff:g id="TYPE">%1$s</xliff:g> আপডে\'ট কৰিবনে?"</string>
+    <string name="autofill_update_title_with_2types" msgid="2300113827053626484"><b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"ত <xliff:g id="TYPE_0">%1$s</xliff:g> আৰু <xliff:g id="TYPE_1">%2$s</xliff:g> আপডে\'ট কৰিবনে?"</string>
+    <string name="autofill_update_title_with_3types" msgid="9089824354296211922">"এই তথ্যবোৰ "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>": <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> আৰু <xliff:g id="TYPE_2">%3$s</xliff:g>ত আপডে\'ট কৰিবনে ?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"ছেভ কৰক"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"নালাগে, ধন্যবাদ"</string>
     <string name="autofill_update_yes" msgid="310358413273276958">"আপডে’ট কৰক"</string>

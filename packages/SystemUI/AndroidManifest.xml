@@ -128,9 +128,6 @@
     <!-- Needed for WallpaperManager.clear in ImageWallpaper.updateWallpaperLocked -->
     <uses-permission android:name="android.permission.SET_WALLPAPER"/>
 
-    <!-- Recents -->
-    <uses-permission android:name="android.permission.BIND_APPWIDGET" />
-
     <!-- Wifi Display -->
     <uses-permission android:name="android.permission.CONFIGURE_WIFI_DISPLAY" />
 
@@ -209,6 +206,9 @@
     <!-- to read and change hvac values in a car -->
     <uses-permission android:name="android.car.permission.CONTROL_CAR_CLIMATE" />
 
+    <!-- to be able to detect the driving state in a car-->
+    <uses-permission android:name="android.car.permission.CAR_DRIVING_STATE" />
+
     <!-- Permission necessary to change car audio volume through CarAudioManager -->
     <uses-permission android:name="android.car.permission.CAR_CONTROL_AUDIO_VOLUME" />
 
@@ -244,13 +244,13 @@
             android:exported="true"
         />
 
-        <!-- Recents depends on every user having their own SystemUI process, so on user switch,
-             ensure that the process is created by starting this service.
+        <!-- On user switch, this service is started to ensure that the associated SystemUI
+             process for the current user is started. See the resource
+             "config_systemUIServiceComponentsPerUser".
              -->
         <service android:name="SystemUISecondaryUserService"
-            android:exported="true"
+            android:exported="false"
             android:permission="com.android.systemui.permission.SELF" />
-
 
         <!-- started from PhoneWindowManager
              TODO: Should have an android:permission attribute -->
@@ -309,27 +309,6 @@
                 <category android:name="android.intent.category.DEFAULT" />
             </intent-filter>
         </activity-alias>
-
-        <!-- Service used by secondary users to register themselves with the system user. -->
-        <service android:name=".recents.RecentsSystemUserService"
-            android:exported="false"
-            android:permission="com.android.systemui.permission.SELF" />
-
-        <!-- Alternate Recents -->
-        <activity android:name=".recents.RecentsActivity"
-                  android:label="@string/accessibility_desc_recent_apps"
-                  android:exported="false"
-                  android:launchMode="singleInstance"
-                  android:excludeFromRecents="true"
-                  android:stateNotNeeded="true"
-                  android:resumeWhilePausing="true"
-                  android:resizeableActivity="true"
-                  android:configChanges="orientation|screenSize|smallestScreenSize|screenLayout|keyboard|keyboardHidden"
-                  android:theme="@style/RecentsTheme.Wallpaper">
-            <intent-filter>
-                <action android:name="com.android.systemui.recents.TOGGLE_RECENTS" />
-            </intent-filter>
-        </activity>
 
         <activity
             android:name=".stackdivider.ForcedResizableInfoActivity"

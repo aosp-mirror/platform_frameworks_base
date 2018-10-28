@@ -109,6 +109,28 @@ message BadAttributionNodePosition {
   oneof event { BadAttributionNodePositionAtom bad = 1; }
 }
 
+message GoodEventWithBinaryFieldAtom {
+    oneof event { GoodBinaryFieldAtom field1 = 1; }
+}
+
+message ComplexField {
+    optional string str = 1;
+}
+
+message GoodBinaryFieldAtom {
+    optional int32 field1 = 1;
+    optional ComplexField bf = 2 [(android.os.statsd.log_mode) = MODE_BYTES];
+}
+
+message BadEventWithBinaryFieldAtom {
+    oneof event { BadBinaryFieldAtom field1 = 1; }
+}
+
+message BadBinaryFieldAtom {
+    optional int32 field1 = 1;
+    optional ComplexField bf = 2;
+}
+
 message BadStateAtoms {
     oneof event {
         BadStateAtom1 bad1 = 1;

@@ -694,7 +694,7 @@ public final class ThreadedRenderer {
         Trace.traceBegin(Trace.TRACE_TAG_VIEW, "Record View#draw()");
         updateViewTreeDisplayList(view);
 
-        if (mRootNodeNeedsUpdate || !mRootNode.isValid()) {
+        if (mRootNodeNeedsUpdate || !mRootNode.hasDisplayList()) {
             RecordingCanvas canvas = mRootNode.start(mSurfaceWidth, mSurfaceHeight);
             try {
                 final int saveCount = canvas.save();
@@ -857,7 +857,7 @@ public final class ThreadedRenderer {
 
 
     void buildLayer(RenderNode node) {
-        if (node.isValid()) {
+        if (node.hasDisplayList()) {
             nBuildLayer(mNativeProxy, node.mNativeRenderNode);
         }
     }

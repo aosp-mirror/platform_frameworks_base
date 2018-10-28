@@ -75,6 +75,9 @@ public:
     // For testing. The timestamp is used as both elapsed real time and logd timestamp.
     explicit LogEvent(int32_t tagId, int64_t timestampNs);
 
+    // For testing. The timestamp is used as both elapsed real time and logd timestamp.
+    explicit LogEvent(int32_t tagId, int64_t timestampNs, int32_t uid);
+
     /**
      * Constructs a KeyValuePairsAtom LogEvent from value maps.
      */
@@ -147,7 +150,8 @@ public:
     bool write(float value);
     bool write(const std::vector<AttributionNodeInternal>& nodes);
     bool write(const AttributionNodeInternal& node);
-    bool writeKeyValuePairs(const std::map<int32_t, int32_t>& int_map,
+    bool writeKeyValuePairs(int32_t uid,
+                            const std::map<int32_t, int32_t>& int_map,
                             const std::map<int32_t, int64_t>& long_map,
                             const std::map<int32_t, std::string>& string_map,
                             const std::map<int32_t, float>& float_map);

@@ -37,6 +37,7 @@ import android.provider.DocumentsContract;
 import android.provider.DocumentsContract.Document;
 import android.provider.DocumentsContract.Path;
 import android.provider.DocumentsContract.Root;
+import android.provider.MediaStore;
 import android.provider.Settings;
 import android.system.ErrnoException;
 import android.system.Os;
@@ -606,11 +607,16 @@ public class ExternalStorageProvider extends FileSystemProvider {
                     }
                     break;
                 }
-                case "getDocumentId": {
-                    final String path = arg;
-                    final List<UriPermission> accessUriPermissions =
-                            extras.getParcelableArrayList(AUTHORITY + ".extra.uriPermissions");
+                case MediaStore.GET_DOCUMENT_URI_CALL: {
+                    // All callers must go through MediaProvider
+                    getContext().enforceCallingPermission(
+                            android.Manifest.permission.WRITE_MEDIA_STORAGE, TAG);
 
+                    final Uri fileUri = extras.getParcelable(DocumentsContract.EXTRA_URI);
+                    final List<UriPermission> accessUriPermissions = extras
+                            .getParcelableArrayList(DocumentsContract.EXTRA_URI_PERMISSIONS);
+
+                    final String path = fileUri.getPath();
                     try {
                         final Bundle out = new Bundle();
                         final Uri uri = getDocumentUri(path, accessUriPermissions);
@@ -619,7 +625,22 @@ public class ExternalStorageProvider extends FileSystemProvider {
                     } catch (FileNotFoundException e) {
                         throw new IllegalStateException("File in " + path + " is not found.", e);
                     }
+                }
+                case MediaStore.GET_MEDIA_URI_CALL: {
+                    // All callers must go through MediaProvider
+                    getContext().enforceCallingPermission(
+                            android.Manifest.permission.WRITE_MEDIA_STORAGE, TAG);
 
+                    final Uri documentUri = extras.getParcelable(DocumentsContract.EXTRA_URI);
+                    final String docId = DocumentsContract.getDocumentId(documentUri);
+                    try {
+                        final Bundle out = new Bundle();
+                        final Uri uri = Uri.fromFile(getFileForDocId(docId));
+                        out.putParcelable(DocumentsContract.EXTRA_URI, uri);
+                        return out;
+                    } catch (FileNotFoundException e) {
+                        throw new IllegalStateException(e);
+                    }
                 }
                 default:
                     Log.w(TAG, "unknown method passed to call(): " + method);

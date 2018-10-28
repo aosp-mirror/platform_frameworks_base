@@ -410,6 +410,9 @@ public abstract class ActivityTaskManagerInternal {
             String[] args, int opti, boolean dumpAll, boolean dumpVisibleStacksOnly,
             boolean dumpFocusedStackOnly);
 
+    /** Dump the current state for inclusion in oom dump. */
+    public abstract void dumpForOom(PrintWriter pw);
+
     /** @return true if it the activity management system is okay with GC running now. */
     public abstract boolean canGcNow();
 
@@ -447,4 +450,24 @@ public abstract class ActivityTaskManagerInternal {
 
     public abstract void onUidAddedToPendingTempWhitelist(int uid, String tag);
     public abstract void onUidRemovedFromPendingTempWhitelist(int uid);
+
+    /** Handle app crash event in {@link android.app.IActivityController} if there is one. */
+    public abstract boolean handleAppCrashInActivityController(String processName, int pid,
+            String shortMsg, String longMsg, long timeMillis, String stackTrace,
+            Runnable killCrashingAppCallback);
+
+    public abstract void removeRecentTasksByPackageName(String packageName, int userId);
+    public abstract void cleanupRecentTasksForUser(int userId);
+    public abstract void loadRecentTasksForUser(int userId);
+    public abstract void onPackagesSuspendedChanged(String[] packages, boolean suspended,
+            int userId);
+    /** Flush recent tasks to disk. */
+    public abstract void flushRecentTasks();
+
+    public abstract WindowProcessController getHomeProcess();
+    public abstract WindowProcessController getPreviousProcess();
+
+    public abstract void clearLockedTasks(String reason);
+    public abstract void updateUserConfiguration();
+    public abstract boolean canShowErrorDialogs();
 }

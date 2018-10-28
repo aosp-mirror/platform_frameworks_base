@@ -292,6 +292,9 @@
     <string name="permgrouplab_microphone" msgid="171539900250043464">"ମାଇକ୍ରୋଫୋନ୍"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"ଅଡିଓ ରେକର୍ଡ କରେ"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;କୁ ଅଡିଓ ରେକର୍ଡ କରିବା ପାଇଁ ଅନୁମତି ଦେବେ କି?"</string>
+    <string name="permgrouplab_activityRecognition" msgid="2838596644535616493">"ଗତିବିଧି ଚିହ୍ନଟକରଣ"</string>
+    <string name="permgroupdesc_activityRecognition" msgid="7672248027571522602">"ଗତିବିଧିକୁ ଚିହ୍ନଟ କରିପାରେ"</string>
+    <string name="permgrouprequest_activityRecognition" msgid="8121253142311250055">"ଆପଣଙ୍କ ଶାରୀରିକ ଗତିବିଧି ଚିହ୍ନଟ କରିବା ପାଇଁ &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ଅନୁମତି କରିବେ?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"କ୍ୟାମେରା"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"ଫଟୋ ନିଏ ଓ ଭିଡିଓ ରେକର୍ଡ କରେ"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt;କୁ ଫଟୋ ଉଠାଇବାକୁ ଏବଂ ଭିଡିଓ ରେକର୍ଡ କରିବାକୁ ଅନୁମତି ଦେବେ କି?"</string>
@@ -418,14 +421,16 @@
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"ଏହି ଆପ୍‍, ନେଟ୍‌ୱର୍କ ସୋର୍ସ ଉପରେ ଆଧାର କରି ଆପଣଙ୍କ ଲୋକେଶନ୍‍ ପ୍ରାପ୍ତ କରିପାରେ, ଯେପରିକି ସେଲ୍‍ ଟାୱାର୍‍ ଓ ୱାଇ-ଫାଇ ନେଟ୍‌ୱର୍କ। ଏହି ଲୋକେଶନ୍‌ ସେବା, ଆପଣଙ୍କ ଟାବଲେଟ୍‌ରେ ଅନ୍‍ ରହିଥିବା ଓ ଉପଲବ୍ଧ ଥିବା ଦରକାର, ଯେଉଁଥିରୁ ଆପ୍‌ ସେଗୁଡ଼ିକର ବ୍ୟବହାର କରିପାରିବ।"</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"ଏହି ଆପ୍‍, ନେଟ୍‌ୱର୍କ ସୋର୍ସ ଉପରେ ଆଧାର କରି ଆପଣଙ୍କ ଲୋକେଶନ୍‍ ପ୍ରାପ୍ତ କରିପାରେ, ଯେପରିକି ସେଲ୍‍ ଟାୱାର୍‍ ଓ ୱାଇ-ଫାଇ ନେଟ୍‌ୱର୍କ। ଏହି ଲୋକେଶନ୍‌ ସେବା, ଆପଣଙ୍କ ଟିଭିରେ ଅନ୍‍ ରହିଥିବା ଓ ଉପଲବ୍ଧ ଥିବା ଦରକାର, ଯେଉଁଥିରୁ ଆପ୍‌ ସେଗୁଡ଼ିକର ବ୍ୟବହାର କରିପାରିବ।"</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"ସେଲ୍‍ ଟାୱାର ଓ ୱାଇ-ଫାଇ ନେଟ୍‌ୱର୍କ ପରି ସୋର୍ସକୁ ଆଧାର କରି ଏହି ଆପ୍‍ ଆପଣଙ୍କ ଲୋକେଶନ୍‍ ପ୍ରାପ୍ତ କରିପାରିବ। ଏହି ଲୋକେଶନ୍‍ ସେବାଗୁଡ଼ିକର ବ୍ୟବହାର କରିବାକୁ ସେଗୁଡ଼ିକ ଅନ୍‍ କରାଯିବା ଏବଂ ଆପଣଙ୍କ ଫୋନ୍‌ରେ ଉପଲବ୍ଧ ଥିବା ଜରୁରୀ"</string>
-    <string name="permlab_accessBackgroundLocation" msgid="5742466381902568536">"ପୃଷ୍ଠପଟରେ ସଠିକ୍‍ ଲୋକେଶନ୍‍ର ଆକ୍ସେସ୍‍"</string>
-    <string name="permdesc_accessBackgroundLocation" msgid="6371533283380774135">"ଏହି ଆପ୍‍ ପୃଷ୍ଠପଟରେ ରହିଥିବାବେଳେ ଯେକୌଣସି ସମୟରେ ଆପଣଙ୍କର ଲୋକେଶନ୍‍ ପ୍ରାପ୍ତ କରିପାରିବ। ଏହି ଲୋକେଶନ୍‍ ସେବାଗୁଡ଼ିକ ନିଶ୍ଚିତରୂପେ ଅନ୍‍ ରହିବା ଦରକାର ଏବଂ ଆପ୍‍ର ବ୍ୟବହାର ପାଇଁ ଫୋନ୍‍ରେ ଉପଲବ୍ଧ ଥିବା ଦରକାର। ଏହା ବ୍ୟାଟେରୀ ଅଧିକା ଖର୍ଚ୍ଚ କରିପାରେ।"</string>
+    <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"ବ୍ୟାକ୍‌ଗ୍ରାଉଣ୍ଡ୍‌ରେ ଲୋକେସନ୍ ଆକ୍ସେସ୍ କରନ୍ତୁ"</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"ଅନୁମାନିତ କିମ୍ବା ବିଲ୍‌କୁଲ୍ ସଠିକ୍ ସ୍ଥାନ ଆକ୍ସେସ୍ କରିବାର ଅନୁମତି ଅତିରିକ୍ତ ଭାବରେ ଦିଆଗଲେ, ବ୍ୟାକ୍‌ଗ୍ରାଉଣ୍ଡରେ ଚାଲୁଥିବା ସମୟରେ ଆପ୍ ଆପଣଙ୍କର ସ୍ଥାନର ଆକ୍ସେସ୍ କରିପାରିବ।"</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"ଆପଣଙ୍କ ଅଡିଓ ସେଟିଙ୍ଗକୁ ପରିବର୍ତ୍ତନ କରନ୍ତୁ"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"ଆପ୍‌କୁ ଗ୍ଲୋବାଲ୍ ଅଡିଓ ସେଟିଙ୍ଗ, ଯେପରିକି ଭଲ୍ୟୁମ୍‌କୁ ସଂଶୋଧିତ କରିବାକୁ ଏବଂ ଆଉଟପୁଟ୍ ପାଇଁ ସ୍ପିକର୍‌ ବ୍ୟବହାର କରିବାକୁ ଅନୁମତି ଦେଇଥାଏ।"</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"ଅଡିଓ ରେକର୍ଡ କରନ୍ତୁ"</string>
     <string name="permdesc_recordAudio" msgid="4245930455135321433">"ଏହି ଆପ୍‍ ଯେକୌଣସି ସମୟରେ ମାଇକ୍ରୋଫୋନ୍‍ ବ୍ୟବହାର କରି ଅଡିଓ ରେକର୍ଡ କରିପାରିବ।"</string>
     <string name="permlab_sim_communication" msgid="2935852302216852065">"SIMକୁ କମାଣ୍ଡ ପଠାନ୍ତୁ"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"SIMକୁ କମାଣ୍ଡ ପଠାଇବା ପାଇଁ ଆପ୍‍କୁ ଅନୁମତି ଦେଇଥାଏ। ଏହା ବହୁତ ବିପଦପୂର୍ଣ୍ଣ।"</string>
+    <string name="permlab_activityRecognition" msgid="3634590230567608356">"ଶାରୀରିକ ଗତିବିଧି ଚିହ୍ନଟକରେ"</string>
+    <string name="permdesc_activityRecognition" msgid="3143453925156552894">"ଏହି ଆପ୍‍ଣ ଆପଣଙ୍କ ଶାରୀରିକ ଗତିବିଧିକୁ ଚିହ୍ନଟ କରିପାରେ"</string>
     <string name="permlab_camera" msgid="3616391919559751192">"ଫଟୋ ଓ ଭିଡିଓଗୁଡ଼ିକୁ ନିଅନ୍ତୁ"</string>
     <string name="permdesc_camera" msgid="5392231870049240670">"ଏହି ଆପ୍‍ ଯେକୌଣସି ସମୟରେ କ୍ୟାମେରା ବ୍ୟବହାର କରି ଫଟୋ ଉଠାଇପାରେ ଏବଂ ଭିଡିଓ ରେକର୍ଡ କରିପାରେ।"</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"କମ୍ପନ ନିୟନ୍ତ୍ରଣ କରନ୍ତୁ"</string>
@@ -518,6 +523,7 @@
     <string name="permdesc_imagesWrite" msgid="7073662756617474375">"ଆପଣଙ୍କ ଫଟୋ ସଂଗ୍ରହ ପରିବର୍ତ୍ତନ କରିବାକୁ ଆପ୍‍ ଅନୁମତି ଦେଇଥାଏ।"</string>
     <string name="permlab_mediaLocation" msgid="8675148183726247864">"ଆପଣଙ୍କ ମିଡିଆ ସଂଗ୍ରହ ଠାରୁ ଲୋକେସନ୍‍ଗୁଡିକୁ ପଢନ୍ତୁ"</string>
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"ଆପଣଙ୍କ ମିଡିଆ ସଂଗ୍ରହ ଠାରୁ ଅବସ୍ଥାନଗୁଡିକୁ ପଢିବାକୁ ଆପ୍‍ ଅନୁମତି ଦେଇଥାଏ।"</string>
+    <string name="biometric_dialog_default_title" msgid="4229778503907743328">"ଆପ୍ଲିକେସନ୍ <xliff:g id="APP">%s</xliff:g> ପ୍ରମାଣିତକୃତ କରିବାକୁ ଚାହୁଁଛି।"</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"ବାୟୋମେଟ୍ରିକ୍‌ ହାର୍ଡୱେର୍‌ ଉପଲବ୍ଧ ନାହିଁ"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"ଆଙ୍ଗୁଠି ଚିହ୍ନ ଆଂଶିକ ଚିହ୍ନଟ ହେଲା। ଦୟାକରି ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"ଆଙ୍ଗୁଠି ଚିହ୍ନ ପ୍ରୋସେସ୍‍ କରାଯାଇପାରିଲା ନାହିଁ। ଦୟାକରି ପୁଣି ଚେଷ୍ଟା କରନ୍ତୁ।"</string>
@@ -1898,14 +1904,14 @@
       <item quantity="other"><xliff:g id="COUNT">%1$s</xliff:g>ଟି ଅଟୋଫିଲ୍‍ ପରାମର୍ଶ</item>
       <item quantity="one">ଗୋଟିଏ ଅଟୋଫିଲ୍‍ ପରାମର୍ଶ</item>
     </plurals>
-    <string name="autofill_save_title" msgid="3345527308992082601">"&lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;ରେ ସେଭ୍‍ କରିବେ?"</string>
-    <string name="autofill_save_title_with_type" msgid="8637809388029313305">"<xliff:g id="TYPE">%1$s</xliff:g> &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;ରେ ସେଭ୍‍ କରିବେ?"</string>
-    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"<xliff:g id="TYPE_0">%1$s</xliff:g> ଏବଂ <xliff:g id="TYPE_1">%2$s</xliff:g> &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;ରେ ସେଭ୍‍ କରିବେ?"</string>
-    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g>, ଏବଂ <xliff:g id="TYPE_2">%3$s</xliff:g> &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;ରେ ସେଭ୍‍ କରିବେ?"</string>
-    <string name="autofill_update_title" msgid="4879673117448810818">"&lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;କୁ ଅପ୍‍ଡେଟ୍‍ କରିବେ?"</string>
-    <string name="autofill_update_title_with_type" msgid="339733442087186755">"<xliff:g id="TYPE">%1$s</xliff:g> &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;କୁ ଅପ୍‍ଡେଟ୍‍ କରିବେ?"</string>
-    <string name="autofill_update_title_with_2types" msgid="6321714204167424745">"<xliff:g id="TYPE_0">%1$s</xliff:g> ଏବଂ <xliff:g id="TYPE_1">%2$s</xliff:g> &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;କୁ ଅପ୍‍ଡେଟ୍‍ କରିବେ?"</string>
-    <string name="autofill_update_title_with_3types" msgid="5866735124066629287">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g>, ଏବଂ <xliff:g id="TYPE_2">%3$s</xliff:g> &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;କୁ ଅପ୍‍ଡେଟ୍‍ କରିବେ?"</string>
+    <string name="autofill_save_title" msgid="327541108460384555"><b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"କୁ ସେଭ୍ କରିବେ?"</string>
+    <string name="autofill_save_title_with_type" msgid="2339135393607143594"><b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"କୁ <xliff:g id="TYPE">%1$s</xliff:g> ସେଭ୍ କରିବେ?"</string>
+    <string name="autofill_save_title_with_2types" msgid="87616102361154432"><b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"କୁ <xliff:g id="TYPE_0">%1$s</xliff:g> ଏବଂ <xliff:g id="TYPE_1">%2$s</xliff:g> ସେଭ୍ କରିବେ?"</string>
+    <string name="autofill_save_title_with_3types" msgid="4108978552969604555"><b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>"କୁ <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> ଏବଂ <xliff:g id="TYPE_2">%3$s</xliff:g> ସେଭ୍ କରିବେ?"</string>
+    <string name="autofill_update_title" msgid="5305781141104585279"><b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"ରେ ଅପ୍‌ଡେଟ୍ କରିବେ?"</string>
+    <string name="autofill_update_title_with_type" msgid="4624181147422762233"><b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"ରେ <xliff:g id="TYPE">%1$s</xliff:g>କୁ ଅପ୍‌ଡେଟ୍ କରିବେ।"</string>
+    <string name="autofill_update_title_with_2types" msgid="2300113827053626484"><b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"ରେ <xliff:g id="TYPE_0">%1$s</xliff:g> ଏବଂ <xliff:g id="TYPE_1">%2$s</xliff:g> ଅପ୍‌ଡେଟ୍ କରିବେ?"</string>
+    <string name="autofill_update_title_with_3types" msgid="9089824354296211922"><b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>"ରେ: <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> ଏବଂ <xliff:g id="TYPE_2">%3$s</xliff:g> ଆଇଟମ୍‌ଗୁଡ଼ିକ ଅପ୍‌ଡେଟ୍ କରିବେ?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"ସେଭ୍‌ କରନ୍ତୁ"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"ନାଁ, ପଚାରିଥିବାରୁ ଧନ୍ୟବାଦ"</string>
     <string name="autofill_update_yes" msgid="310358413273276958">"ଅପ୍‍ଡେଟ୍‌ କରନ୍ତୁ"</string>

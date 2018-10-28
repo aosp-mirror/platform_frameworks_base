@@ -779,6 +779,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
 
     private boolean mAodShowing;
 
+    // EXPERIMENT TODO(b/113952590): Remove once experiment in bug is completed
+    private NavigationBarExperiments mExperiments = new NavigationBarExperiments();
+    // EXPERIMENT END
+
     private static final int MSG_ENABLE_POINTER_LOCATION = 1;
     private static final int MSG_DISABLE_POINTER_LOCATION = 2;
     private static final int MSG_DISPATCH_MEDIA_KEY_WITH_WAKE_LOCK = 3;
@@ -2607,6 +2611,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     res.getDimensionPixelSize(
                             com.android.internal.R.dimen.navigation_bar_width_car_mode);
         }
+
+        // EXPERIMENT TODO(b/113952590): Remove once experiment in bug is completed
+        mExperiments.onConfigurationChanged(uiContext);
+        // EXPERIMENT END
     }
 
     @VisibleForTesting
@@ -4534,7 +4542,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             // It's a system nav bar or a portrait screen; nav bar goes on bottom.
             final int top = cutoutSafeUnrestricted.bottom
                     - getNavigationBarHeight(rotation, uiMode);
-            navigationFrame.set(0, top, displayWidth, displayFrames.mUnrestricted.bottom);
+            // EXPERIMENT TODO(b/113952590): Remove once experiment in bug is completed
+            final int topNavBar = cutoutSafeUnrestricted.bottom
+                    - mExperiments.getNavigationBarFrameHeight();
+            navigationFrame.set(0, topNavBar, displayWidth, displayFrames.mUnrestricted.bottom);
+            // EXPERIMENT END
             displayFrames.mStable.bottom = displayFrames.mStableFullscreen.bottom = top;
             if (transientNavBarShowing) {
                 mNavigationBarController.setBarShowingLw(true);
@@ -4557,7 +4569,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             // Landscape screen; nav bar goes to the right.
             final int left = cutoutSafeUnrestricted.right
                     - getNavigationBarWidth(rotation, uiMode);
-            navigationFrame.set(left, 0, displayFrames.mUnrestricted.right, displayHeight);
+            // EXPERIMENT TODO(b/113952590): Remove once experiment in bug is completed
+            final int leftNavBar = cutoutSafeUnrestricted.right
+                    - mExperiments.getNavigationBarFrameWidth();
+            navigationFrame.set(leftNavBar, 0, displayFrames.mUnrestricted.right, displayHeight);
+            // EXPERIMENT END
             displayFrames.mStable.right = displayFrames.mStableFullscreen.right = left;
             if (transientNavBarShowing) {
                 mNavigationBarController.setBarShowingLw(true);
@@ -4580,7 +4596,11 @@ public class PhoneWindowManager implements WindowManagerPolicy {
             // Seascape screen; nav bar goes to the left.
             final int right = cutoutSafeUnrestricted.left
                     + getNavigationBarWidth(rotation, uiMode);
-            navigationFrame.set(displayFrames.mUnrestricted.left, 0, right, displayHeight);
+            // EXPERIMENT TODO(b/113952590): Remove once experiment in bug is completed
+            final int rightNavBar = cutoutSafeUnrestricted.left
+                    + mExperiments.getNavigationBarFrameWidth();
+            navigationFrame.set(displayFrames.mUnrestricted.left, 0, rightNavBar, displayHeight);
+            // EXPERIMENT END
             displayFrames.mStable.left = displayFrames.mStableFullscreen.left = right;
             if (transientNavBarShowing) {
                 mNavigationBarController.setBarShowingLw(true);
@@ -4790,6 +4810,12 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     pf.left = df.left = of.left = cf.left = vf.left = displayFrames.mStable.left;
                 }
             }
+
+            // EXPERIMENT TODO(b/113952590): Remove once experiment in bug is completed
+            // Offset the ime to avoid overlapping with the nav bar
+            mExperiments.offsetWindowFramesForNavBar(mNavigationBarPosition, win);
+            // EXPERIMENT END
+
             // IM dock windows always go to the bottom of the screen.
             attrs.gravity = Gravity.BOTTOM;
             mDockLayer = win.getSurfaceLayer();
@@ -4930,6 +4956,10 @@ public class PhoneWindowManager implements WindowManagerPolicy {
                     } else {
                         vf.set(cf);
                     }
+
+                    // EXPERIMENT TODO(b/113952590): Remove once experiment in bug is completed
+                    mExperiments.offsetWindowFramesForNavBar(mNavigationBarPosition, win);
+                    // EXPERIMENT END
                 }
             } else if (layoutInScreen || (sysUiFl
                     & (View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN

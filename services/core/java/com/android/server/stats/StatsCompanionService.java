@@ -1034,7 +1034,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         binderStats.reset();
         for (ExportedCallStat callStat : callStats) {
             StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
-            e.writeInt(callStat.uid);
+            e.writeInt(callStat.workSourceUid);
             e.writeString(callStat.className);
             e.writeString(callStat.methodName);
             e.writeLong(callStat.callCount);

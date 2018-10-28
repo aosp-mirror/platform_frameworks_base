@@ -127,10 +127,9 @@ static inline int audioFormatFromNative(audio_format_t nativeFormat)
     case AUDIO_FORMAT_DOLBY_TRUEHD:
         return ENCODING_DOLBY_TRUEHD;
     case AUDIO_FORMAT_AAC_ELD:
-            return ENCODING_AAC_ELD;
-    // FIXME needs addition of AUDIO_FORMAT_AAC_XHE
-    //case AUDIO_FORMAT_AAC_XHE:
-    //    return ENCODING_AAC_XHE;
+        return ENCODING_AAC_ELD;
+    case AUDIO_FORMAT_AAC_XHE:
+        return ENCODING_AAC_XHE;
     case AUDIO_FORMAT_AC4:
         return ENCODING_AC4;
     case AUDIO_FORMAT_E_AC3_JOC:

@@ -29,6 +29,7 @@
 #include <media/AudioSystem.h>
 #include <media/AudioTrack.h>
 
+#include <android-base/macros.h>
 #include <binder/MemoryHeapBase.h>
 #include <binder/MemoryBase.h>
 
@@ -134,41 +135,53 @@ static void audioCallback(int event, void* user, void *info) {
         callbackInfo->busy = true;
     }
 
+    // used as default argument when event callback doesn't have any, or number of
+    // frames for EVENT_CAN_WRITE_MORE_DATA
+    int arg = 0;
+    bool postEvent = false;
     switch (event) {
     // Offload only events
-    case AudioTrack::EVENT_STREAM_END:
-    case AudioTrack::EVENT_MORE_DATA:
-    // a.k.a. tear down
-    case AudioTrack::EVENT_NEW_IAUDIOTRACK:
+    case AudioTrack::EVENT_CAN_WRITE_MORE_DATA:
+        // this event will read the info return parameter of the callback:
+        // for JNI offload, use the returned size to indicate:
+        // 1/ no data is returned through callback, as it's all done through write()
+        // 2/ do not wait as AudioTrack does when it receives 0 bytes
         if (callbackInfo->isOffload) {
-            JNIEnv *env = AndroidRuntime::getJNIEnv();
-            if (user != NULL && env != NULL) {
-                env->CallStaticVoidMethod(
-                        callbackInfo->audioTrack_class,
-                        javaAudioTrackFields.postNativeEventInJava,
-                        callbackInfo->audioTrack_ref, event, 0,0, NULL);
-                if (env->ExceptionCheck()) {
-                    env->ExceptionDescribe();
-                    env->ExceptionClear();
-                }
-            }
-        } break;
+            AudioTrack::Buffer* pBuffer = (AudioTrack::Buffer*) info;
+            const size_t availableForWrite = pBuffer->size;
+            arg = availableForWrite > INT32_MAX ? INT32_MAX : (int) availableForWrite;
+            pBuffer->size = 0;
+        }
+        FALLTHROUGH_INTENDED;
+    case AudioTrack::EVENT_STREAM_END:
+    case AudioTrack::EVENT_NEW_IAUDIOTRACK: // a.k.a. tear down
+        if (callbackInfo->isOffload) {
+            postEvent = true;
+        }
+        break;
 
     // PCM and offload events
     case AudioTrack::EVENT_MARKER:
-    case AudioTrack::EVENT_NEW_POS: {
+    case AudioTrack::EVENT_NEW_POS:
+        postEvent = true;
+        break;
+    default:
+        // event will not be posted
+        break;
+    }
+
+    if (postEvent) {
         JNIEnv *env = AndroidRuntime::getJNIEnv();
-        if (user != NULL && env != NULL) {
+        if (env != NULL) {
             env->CallStaticVoidMethod(
                     callbackInfo->audioTrack_class,
                     javaAudioTrackFields.postNativeEventInJava,
-                    callbackInfo->audioTrack_ref, event, 0,0, NULL);
+                    callbackInfo->audioTrack_ref, event, arg, 0, NULL);
             if (env->ExceptionCheck()) {
                 env->ExceptionDescribe();
                 env->ExceptionClear();
             }
         }
-        } break;
     }
 
     {
@@ -215,10 +228,10 @@ android_media_AudioTrack_setup(JNIEnv *env, jobject thiz, jobject weak_this, job
         jint audioFormat, jint buffSizeInBytes, jint memoryMode, jintArray jSession,
         jlong nativeAudioTrack, jboolean offload) {
 
-    ALOGV("sampleRates=%p, channel mask=%x, index mask=%x, audioFormat(Java)=%d, buffSize=%d"
-        "nativeAudioTrack=0x%" PRIX64,
+    ALOGV("sampleRates=%p, channel mask=%x, index mask=%x, audioFormat(Java)=%d, buffSize=%d,"
+        " nativeAudioTrack=0x%" PRIX64 ", offload=%d",
         jSampleRate, channelPositionMask, channelIndexMask, audioFormat, buffSizeInBytes,
-        nativeAudioTrack);
+        nativeAudioTrack, offload);
 
     sp<AudioTrack> lpTrack = 0;
 
@@ -318,7 +331,7 @@ android_media_AudioTrack_setup(JNIEnv *env, jobject thiz, jobject weak_this, job
         lpJniStorage->mCallbackData.busy = false;
 
         audio_offload_info_t offloadInfo;
-        if (offload) {
+        if (offload == JNI_TRUE) {
             offloadInfo = AUDIO_INFO_INITIALIZER;
             offloadInfo.format = format;
             offloadInfo.sample_rate = sampleRateInHertz;
@@ -331,23 +344,23 @@ android_media_AudioTrack_setup(JNIEnv *env, jobject thiz, jobject weak_this, job
         status_t status = NO_ERROR;
         switch (memoryMode) {
         case MODE_STREAM:
-
             status = lpTrack->set(
                     AUDIO_STREAM_DEFAULT,// stream type, but more info conveyed in paa (last argument)
                     sampleRateInHertz,
                     format,// word length, PCM
                     nativeChannelMask,
-                    frameCount,
-                    AUDIO_OUTPUT_FLAG_NONE,
+                    offload ? 0 : frameCount,
+                    offload ? AUDIO_OUTPUT_FLAG_COMPRESS_OFFLOAD : AUDIO_OUTPUT_FLAG_NONE,
                     audioCallback, &(lpJniStorage->mCallbackData),//callback, callback data (user)
                     0,// notificationFrames == 0 since not using EVENT_MORE_DATA to feed the AudioTrack
                     0,// shared mem
                     true,// thread can call Java
                     sessionId,// audio session ID
-                    AudioTrack::TRANSFER_SYNC,
+                    offload ? AudioTrack::TRANSFER_SYNC_NOTIF_CALLBACK : AudioTrack::TRANSFER_SYNC,
                     offload ? &offloadInfo : NULL,
                     -1, -1,                       // default uid, pid values
                     paa);
+
             break;
 
         case MODE_STATIC:

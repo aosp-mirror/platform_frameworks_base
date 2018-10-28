@@ -19,6 +19,7 @@ package com.android.server.am;
 import static android.app.ActivityManager.PROCESS_STATE_NONEXISTENT;
 import static android.view.Display.INVALID_DISPLAY;
 
+import static com.android.server.am.ActivityManagerService.MY_PID;
 import static com.android.server.am.ActivityStack.ActivityState.DESTROYED;
 import static com.android.server.am.ActivityStack.ActivityState.DESTROYING;
 import static com.android.server.am.ActivityStack.ActivityState.PAUSED;
@@ -53,6 +54,7 @@ import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.app.HeavyWeightSwitcherActivity;
 import com.android.internal.util.function.pooled.PooledLambda;
+import com.android.server.Watchdog;
 import com.android.server.wm.ConfigurationContainer;
 import com.android.server.wm.ConfigurationContainerListener;
 
@@ -155,8 +157,7 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     private int mDisplayId;
 
     WindowProcessController(ActivityTaskManagerService atm, ApplicationInfo info, String name,
-            int uid, int userId, Object owner, WindowProcessListener listener,
-            Configuration config) {
+            int uid, int userId, Object owner, WindowProcessListener listener) {
         mInfo = info;
         mName = name;
         mUid = uid;
@@ -166,8 +167,8 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
         mAtm = atm;
         mLastReportedConfiguration = new Configuration();
         mDisplayId = INVALID_DISPLAY;
-        if (config != null) {
-            onConfigurationChanged(config);
+        if (atm != null) {
+            onConfigurationChanged(atm.getGlobalConfiguration());
         }
     }
 
@@ -804,6 +805,69 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
                 mRecentTasks.get(i).clearRootProcess();
             }
             mRecentTasks.clear();
+        }
+    }
+
+    public void appEarlyNotResponding(String annotation, Runnable killAppCallback) {
+        synchronized (mAtm.mGlobalLock) {
+            if (mAtm.mController == null) {
+                return;
+            }
+
+            try {
+                // 0 == continue, -1 = kill process immediately
+                int res = mAtm.mController.appEarlyNotResponding(mName, mPid, annotation);
+                if (res < 0 && mPid != MY_PID) {
+                    killAppCallback.run();
+                }
+            } catch (RemoteException e) {
+                mAtm.mController = null;
+                Watchdog.getInstance().setActivityController(null);
+            }
+        }
+    }
+
+    public boolean appNotResponding(String info, Runnable killAppCallback,
+            Runnable serviceTimeoutCallback) {
+        synchronized (mAtm.mGlobalLock) {
+            if (mAtm.mController == null) {
+                return false;
+            }
+
+            try {
+                // 0 == show dialog, 1 = keep waiting, -1 = kill process immediately
+                int res = mAtm.mController.appNotResponding(mName, mPid, info);
+                if (res != 0) {
+                    if (res < 0 && mPid != MY_PID) {
+                        killAppCallback.run();
+                    } else {
+                        serviceTimeoutCallback.run();
+                    }
+                    return true;
+                }
+            } catch (RemoteException e) {
+                mAtm.mController = null;
+                Watchdog.getInstance().setActivityController(null);
+            }
+            return false;
+        }
+    }
+
+    public void onTopProcChanged() {
+        synchronized (mAtm.mGlobalLock) {
+            mAtm.mVrController.onTopProcChangedLocked(this);
+        }
+    }
+
+    public boolean isHomeProcess() {
+        synchronized (mAtm.mGlobalLock) {
+            return this == mAtm.mHomeProcess;
+        }
+    }
+
+    public boolean isPreviousProcess() {
+        synchronized (mAtm.mGlobalLock) {
+            return this == mAtm.mPreviousProcess;
         }
     }
 

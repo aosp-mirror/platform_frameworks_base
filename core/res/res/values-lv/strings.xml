@@ -222,7 +222,7 @@
     <string name="global_actions" product="default" msgid="2406416831541615258">"Tālruņa opcijas"</string>
     <string name="global_action_lock" msgid="2844945191792119712">"Ekrāna bloķētājs"</string>
     <string name="global_action_power_off" msgid="4471879440839879722">"Strāvas padeve ir izslēgta."</string>
-    <string name="global_action_emergency" msgid="7112311161137421166">"Ārkārtas"</string>
+    <string name="global_action_emergency" msgid="7112311161137421166">"Ārkārtas situācija"</string>
     <string name="global_action_bug_report" msgid="7934010578922304799">"Kļūdu ziņojums"</string>
     <string name="global_action_logout" msgid="935179188218826050">"Beigt sesiju"</string>
     <string name="global_action_screenshot" msgid="8329831278085426283">"Ekrānuzņēmums"</string>
@@ -295,6 +295,9 @@
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofons"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"ierakstīt audio"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"Vai atļaut lietotnei &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ierakstīt audio?"</string>
+    <string name="permgrouplab_activityRecognition" msgid="2838596644535616493">"Aktivitātes noteikšana"</string>
+    <string name="permgroupdesc_activityRecognition" msgid="7672248027571522602">"noteikt aktivitātes"</string>
+    <string name="permgrouprequest_activityRecognition" msgid="8121253142311250055">"Vai atļaut lietotnei &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; noteikt jūsu fiziskās aktivitātes?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Kamera"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"uzņemt attēlus un ierakstīt videoklipus"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"Vai atļaut lietotnei &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; uzņemt fotoattēlus un ierakstīt videoklipus?"</string>
@@ -421,14 +424,16 @@
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Šī lietotne var iegūt jūsu atrašanās vietu, pamatojoties uz tīkla avotiem, piemēram, mobilo sakaru torņiem un Wi-Fi tīkliem. Šiem atrašanās vietu pakalpojumiem ir jābūt ieslēgtiem un pieejamiem jūsu planšetdatorā, lai lietotne tos varētu izmantot."</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"Šī lietotne var iegūt jūsu atrašanās vietu, pamatojoties uz tīkla avotiem, piemēram, mobilo sakaru torņiem un Wi-Fi tīkliem. Šiem atrašanās vietu pakalpojumiem ir jābūt ieslēgtiem un pieejamiem jūsu televizorā, lai lietotne tos varētu izmantot."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"Šī lietotne var iegūt jūsu atrašanās vietu, pamatojoties uz tīkla avotiem, piemēram, mobilo sakaru torņiem un Wi-Fi tīkliem. Šiem atrašanās vietu pakalpojumiem ir jābūt ieslēgtiem un pieejamiem jūsu tālrunī, lai lietotne tos varētu izmantot."</string>
-    <string name="permlab_accessBackgroundLocation" msgid="5742466381902568536">"Piekļuve precīzai atrašanās vietai, darbojoties fonā"</string>
-    <string name="permdesc_accessBackgroundLocation" msgid="6371533283380774135">"Šī lietotne var iegūt precīzu jūsu atrašanās vietu jebkurā laikā, darbojoties fonā. Šiem atrašanās vietu pakalpojumiem ir jābūt ieslēgtiem un pieejamiem jūsu tālrunī, lai lietotne varētu tos izmantot. Tādējādi var palielināties akumulatora jaudas patēriņš."</string>
+    <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"piekļūt atrašanās vietai fonā"</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"Ja šī atļauja tiek piešķirta līdz ar piekļuvi aptuvenai vai precīzai atrašanās vietai, lietotne var piekļūt atrašanās vietai, darbojoties fonā."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"mainīt audio iestatījumus"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Ļauj lietotnei mainīt globālos audio iestatījumus, piemēram, skaļumu un izejai izmantoto skaļruni."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"ierakstīt audio"</string>
     <string name="permdesc_recordAudio" msgid="4245930455135321433">"Šī lietotne jebkurā brīdī var ierakstīt audio, izmantojot mikrofonu."</string>
     <string name="permlab_sim_communication" msgid="2935852302216852065">"Sūtīt komandas SIM kartei"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Ļauj lietotnei sūtīt komandas uz SIM karti. Tas ir ļoti bīstami!"</string>
+    <string name="permlab_activityRecognition" msgid="3634590230567608356">"noteikt fiziskās aktivitātes"</string>
+    <string name="permdesc_activityRecognition" msgid="3143453925156552894">"Šī lietotne var noteikt jūsu fiziskās aktivitātes."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"uzņemt attēlus un videoklipus"</string>
     <string name="permdesc_camera" msgid="5392231870049240670">"Šī lietotne jebkurā brīdī var uzņemt attēlus un ierakstīt videoklipus, izmantojot kameru."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"kontrolēt vibrosignālu"</string>
@@ -521,6 +526,7 @@
     <string name="permdesc_imagesWrite" msgid="7073662756617474375">"Ļauj lietotnei pārveidot jūsu fotoattēlu kolekciju."</string>
     <string name="permlab_mediaLocation" msgid="8675148183726247864">"Lasīt atrašanās vietas no jūsu multivides kolekcijas"</string>
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"Ļauj lietotnei lasīt atrašanās vietas no jūsu multivides kolekcijas."</string>
+    <string name="biometric_dialog_default_title" msgid="4229778503907743328">"Lietotne <xliff:g id="APP">%s</xliff:g> pieprasa autentificēt."</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"Biometrisko datu aparatūra nav pieejama"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Noteikts daļējs pirksta nospiedums. Lūdzu, mēģiniet vēlreiz."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Nevarēja apstrādāt pirksta nospiedumu. Lūdzu, mēģiniet vēlreiz."</string>
@@ -799,7 +805,7 @@
     <string name="lockscreen_instructions_when_pattern_enabled" msgid="46154051614126049">"Nospiediet Izvēlne, lai atbloķētu, vai veiciet ārkārtas zvanu."</string>
     <string name="lockscreen_instructions_when_pattern_disabled" msgid="686260028797158364">"Lai atbloķētu, nospiediet vienumu Izvēlne."</string>
     <string name="lockscreen_pattern_instructions" msgid="7478703254964810302">"Zīmējiet kombināciju, lai atbloķētu."</string>
-    <string name="lockscreen_emergency_call" msgid="5298642613417801888">"Ārkārtas"</string>
+    <string name="lockscreen_emergency_call" msgid="5298642613417801888">"Ārkārtas situācija"</string>
     <string name="lockscreen_return_to_call" msgid="5244259785500040021">"Atpakaļ pie zvana"</string>
     <string name="lockscreen_pattern_correct" msgid="9039008650362261237">"Pareizi!"</string>
     <string name="lockscreen_pattern_wrong" msgid="4317955014948108794">"Mēģināt vēlreiz"</string>
@@ -1932,14 +1938,14 @@
       <item quantity="one"><xliff:g id="COUNT">%1$s</xliff:g> automātiskās aizpildes ieteikums</item>
       <item quantity="other"><xliff:g id="COUNT">%1$s</xliff:g> automātiskās aizpildes ieteikumi</item>
     </plurals>
-    <string name="autofill_save_title" msgid="3345527308992082601">"Vai saglabāt pakalpojumā &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_save_title_with_type" msgid="8637809388029313305">"Vai saglabāt vienumu “<xliff:g id="TYPE">%1$s</xliff:g>” pakalpojumā &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"Vai saglabāt vienumus “<xliff:g id="TYPE_0">%1$s</xliff:g>” un “<xliff:g id="TYPE_1">%2$s</xliff:g>” pakalpojumā &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"Vai saglabāt vienumus “<xliff:g id="TYPE_0">%1$s</xliff:g>”, “<xliff:g id="TYPE_1">%2$s</xliff:g>” un “<xliff:g id="TYPE_2">%3$s</xliff:g>” pakalpojumā &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_update_title" msgid="4879673117448810818">"Vai atjaunināt pakalpojumā &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_update_title_with_type" msgid="339733442087186755">"Vai atjaunināt vienumu “<xliff:g id="TYPE">%1$s</xliff:g>” pakalpojumā &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_update_title_with_2types" msgid="6321714204167424745">"Vai atjaunināt vienumus “<xliff:g id="TYPE_0">%1$s</xliff:g>” un “<xliff:g id="TYPE_1">%2$s</xliff:g>” pakalpojumā &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_update_title_with_3types" msgid="5866735124066629287">"Vai atjaunināt vienumus “<xliff:g id="TYPE_0">%1$s</xliff:g>”, “<xliff:g id="TYPE_1">%2$s</xliff:g>” un “<xliff:g id="TYPE_2">%3$s</xliff:g>” pakalpojumā &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_save_title" msgid="327541108460384555">"Vai saglabāt pakalpojumā "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_save_title_with_type" msgid="2339135393607143594">"Vai saglabāt informāciju <xliff:g id="TYPE">%1$s</xliff:g> pakalpojumā "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_save_title_with_2types" msgid="87616102361154432">"Vai saglabāt informāciju <xliff:g id="TYPE_0">%1$s</xliff:g> un <xliff:g id="TYPE_1">%2$s</xliff:g> pakalpojumā "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_save_title_with_3types" msgid="4108978552969604555">"Vai saglabāt informāciju <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> un <xliff:g id="TYPE_2">%3$s</xliff:g> pakalpojumā "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_update_title" msgid="5305781141104585279">"Vai atjaunināt informāciju pakalpojumā "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_update_title_with_type" msgid="4624181147422762233">"Vai atjaunināt informāciju <xliff:g id="TYPE">%1$s</xliff:g> pakalpojumā "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_update_title_with_2types" msgid="2300113827053626484">"Vai atjaunināt informāciju <xliff:g id="TYPE_0">%1$s</xliff:g> un <xliff:g id="TYPE_1">%2$s</xliff:g> pakalpojumā "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_update_title_with_3types" msgid="9089824354296211922">"Vai atjaunināt šos vienumus pakalpojumā "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>": <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> un <xliff:g id="TYPE_2">%3$s</xliff:g>?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"Saglabāt"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"Nē, paldies"</string>
     <string name="autofill_update_yes" msgid="310358413273276958">"Atjaunināt"</string>

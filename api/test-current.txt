@@ -140,7 +140,10 @@ package android.app {
   }
 
   public final class NotificationChannelGroup implements android.os.Parcelable {
+    method public int getUserLockedFields();
+    method public void lockFields(int);
     method public void setBlocked(boolean);
+    field public static final int USER_LOCKED_ALLOW_APP_OVERLAY = 2; // 0x2
   }
 
   public class NotificationManager {
@@ -1182,6 +1185,10 @@ package android.telecom {
 }
 
 package android.telephony {
+
+  public class CarrierConfigManager {
+    method public void overrideConfig(int, android.os.PersistableBundle);
+  }
 
   public class MbmsDownloadSession implements java.lang.AutoCloseable {
     field public static final java.lang.String MBMS_DOWNLOAD_SERVICE_OVERRIDE_METADATA = "mbms-download-service-override";

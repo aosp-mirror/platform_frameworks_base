@@ -102,7 +102,8 @@ public class KeyguardPINView extends KeyguardPinBasedInputView {
                         findViewById(R.id.key9)
                 },
                 new View[]{
-                        null, findViewById(R.id.key0), findViewById(R.id.key_enter)
+                        findViewById(R.id.delete_button), findViewById(R.id.key0),
+                        findViewById(R.id.key_enter)
                 },
                 new View[]{
                         null, mEcaView, null

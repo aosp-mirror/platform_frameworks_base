@@ -36,11 +36,9 @@ import android.database.CrossProcessCursorWrapper;
 import android.database.Cursor;
 import android.database.IContentObserver;
 import android.graphics.Bitmap;
-import android.graphics.Canvas;
 import android.graphics.ImageDecoder;
 import android.graphics.ImageDecoder.ImageInfo;
 import android.graphics.ImageDecoder.Source;
-import android.graphics.PixelFormat;
 import android.graphics.Point;
 import android.graphics.drawable.Drawable;
 import android.net.Uri;
@@ -54,8 +52,9 @@ import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.SystemClock;
+import android.os.SystemProperties;
 import android.os.UserHandle;
-import android.provider.DocumentsContract;
+import android.os.storage.StorageManager;
 import android.text.TextUtils;
 import android.util.EventLog;
 import android.util.Log;
@@ -90,6 +89,30 @@ import java.util.concurrent.atomic.AtomicBoolean;
  * developer guide.</p>
  */
 public abstract class ContentResolver {
+    /**
+     * Enables logic that supports deprecation of {@code _data} columns,
+     * typically by replacing values with fake paths that the OS then offers to
+     * redirect to {@link #openFileDescriptor(Uri, String)}, which developers
+     * should be using directly.
+     *
+     * @hide
+     */
+    public static final boolean DEPRECATE_DATA_COLUMNS = SystemProperties
+            .getBoolean(StorageManager.PROP_ISOLATED_STORAGE, false);
+
+    /**
+     * Special filesystem path prefix which indicates that a path should be
+     * treated as a {@code content://} {@link Uri} when
+     * {@link #DEPRECATE_DATA_COLUMNS} is enabled.
+     * <p>
+     * The remainder of the path after this prefix is a
+     * {@link Uri#getSchemeSpecificPart()} value, which includes authority, path
+     * segments, and query parameters.
+     *
+     * @hide
+     */
+    public static final String DEPRECATE_DATA_PREFIX = "/mnt/content/";
+
     /**
      * @deprecated instead use
      * {@link #requestSync(android.accounts.Account, String, android.os.Bundle)}
@@ -3254,5 +3277,26 @@ public abstract class ContentResolver {
                 decoder.setTargetSampleSize(sample);
             }
         });
+    }
+
+    /** {@hide} */
+    public static void onDbCorruption(String tag, String message, Throwable stacktrace) {
+        try {
+            getContentService().onDbCorruption(tag, message, Log.getStackTraceString(stacktrace));
+        } catch (RemoteException e) {
+            e.rethrowFromSystemServer();
+        }
+    }
+
+    /** {@hide} */
+    public static Uri translateDeprecatedDataPath(String path) {
+        final String ssp = "//" + path.substring(DEPRECATE_DATA_PREFIX.length());
+        return Uri.parse(new Uri.Builder().scheme(SCHEME_CONTENT)
+                .encodedOpaquePart(ssp).build().toString());
+    }
+
+    /** {@hide} */
+    public static String translateDeprecatedDataPath(Uri uri) {
+        return DEPRECATE_DATA_PREFIX + uri.getEncodedSchemeSpecificPart().substring(2);
     }
 }

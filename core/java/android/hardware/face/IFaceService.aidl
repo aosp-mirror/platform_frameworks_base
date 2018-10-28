@@ -98,4 +98,6 @@ interface IFaceService {
     int setRequireAttention(boolean requireAttention, in byte [] token);
 
     boolean getRequireAttention(in byte [] token);
+
+    void userActivity();
 }

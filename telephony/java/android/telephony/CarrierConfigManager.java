@@ -16,12 +16,14 @@
 
 package android.telephony;
 
+import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressLint;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.os.PersistableBundle;
@@ -1132,6 +1134,13 @@ public class CarrierConfigManager {
     public static final String KEY_CARRIER_NAME_STRING = "carrier_name_string";
 
     /**
+     * The Component Name of a carrier-provided CallScreeningService implementation. Telecom will
+     * bind to this CallScreeningService for ALL incoming calls and provide the carrier
+     * CallScreeningService with the opportunity to allow or block calls.
+     */
+    public static final String KEY_CARRIER_CALL_SCREENING_APP_STRING = "call_screening_app";
+
+    /**
      * Override the registered PLMN name using #KEY_CDMA_HOME_REGISTERED_PLMN_NAME_STRING.
      *
      * If true, then the registered PLMN name (only for CDMA/CDMA-LTE and only when not roaming)
@@ -1222,8 +1231,8 @@ public class CarrierConfigManager {
     public static final String KEY_SHOW_PRECISE_FAILED_CAUSE_BOOL =
             "show_precise_failed_cause_bool";
 
-    // These variables are used by the MMS service and exposed through another API, {@link
-    // SmsManager}. The variable names and string values are copied from there.
+    // These variables are used by the MMS service and exposed through another API,
+    // SmsManager. The variable names and string values are copied from there.
     public static final String KEY_MMS_ALIAS_ENABLED_BOOL = "aliasEnabled";
     public static final String KEY_MMS_ALLOW_ATTACH_AUDIO_BOOL = "allowAttachAudio";
     public static final String KEY_MMS_APPEND_TRANSACTION_ID_BOOL = "enabledTransID";
@@ -1271,7 +1280,7 @@ public class CarrierConfigManager {
      * network as part of the Setup Wizard flow.
      * @hide
      */
-     public static final String KEY_CARRIER_SETUP_APP_STRING = "carrier_setup_app_string";
+    public static final String KEY_CARRIER_SETUP_APP_STRING = "carrier_setup_app_string";
 
     /**
      * Defines carrier-specific actions which act upon
@@ -2406,6 +2415,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_CONFIG_WIFI_DISABLE_IN_ECBM, false);
         sDefaults.putBoolean(KEY_CARRIER_NAME_OVERRIDE_BOOL, false);
         sDefaults.putString(KEY_CARRIER_NAME_STRING, "");
+        sDefaults.putString(KEY_CARRIER_CALL_SCREENING_APP_STRING, "");
         sDefaults.putBoolean(KEY_CDMA_HOME_REGISTERED_PLMN_NAME_OVERRIDE_BOOL, false);
         sDefaults.putString(KEY_CDMA_HOME_REGISTERED_PLMN_NAME_STRING, "");
         sDefaults.putBoolean(KEY_SUPPORT_DIRECT_FDN_DIALING_BOOL, false);
@@ -2544,7 +2554,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_SHOW_PRECISE_FAILED_CAUSE_BOOL, false);
         sDefaults.putBoolean(KEY_SPN_DISPLAY_RULE_USE_ROAMING_FROM_SERVICE_STATE_BOOL, false);
         sDefaults.putBoolean(KEY_ALWAYS_SHOW_DATA_RAT_ICON_BOOL, false);
-        sDefaults.putBoolean(KEY_SHOW_4G_FOR_LTE_DATA_ICON_BOOL, true);
+        sDefaults.putBoolean(KEY_SHOW_4G_FOR_LTE_DATA_ICON_BOOL, false);
         sDefaults.putBoolean(KEY_HIDE_LTE_PLUS_DATA_ICON_BOOL, false);
         sDefaults.putBoolean(KEY_CARRIER_CONFIG_APPLIED_BOOL, false);
         sDefaults.putBoolean(KEY_CHECK_PRICING_WITH_CARRIER_FOR_DATA_ROAMING_BOOL, false);
@@ -2600,6 +2610,40 @@ public class CarrierConfigManager {
                     + ex.toString());
         }
         return null;
+    }
+
+    /**
+     * Overrides the carrier config of the provided subscription ID with the provided values.
+     *
+     * Any further queries to carrier config from any process will return
+     * the overriden values after this method returns. The overrides are effective for the lifetime
+     * of the phone process.
+     *
+     * May throw an {@link IllegalArgumentException} if {@code overrideValues} contains invalid
+     * values for the specified config keys.
+     *
+     * @param subscriptionId The subscription ID for which the override should be done.
+     * @param overrideValues Key-value pairs of the values that are to be overriden. If null,
+     *                       all previous overrides will be disabled and the config reset back to
+     *                       its initial state.
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
+    @SystemApi
+    @TestApi
+    public void overrideConfig(int subscriptionId, @Nullable PersistableBundle overrideValues) {
+        try {
+            ICarrierConfigLoader loader = getICarrierConfigLoader();
+            if (loader == null) {
+                Rlog.w(TAG, "Error setting config for subId " + subscriptionId
+                        + " ICarrierConfigLoader is null");
+                return;
+            }
+            loader.overrideConfig(subscriptionId, overrideValues);
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "Error setting config for subId " + subscriptionId + ": "
+                    + ex.toString());
+        }
     }
 
     /**

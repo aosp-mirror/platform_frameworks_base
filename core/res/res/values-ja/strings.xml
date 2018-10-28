@@ -292,6 +292,9 @@
     <string name="permgrouplab_microphone" msgid="171539900250043464">"マイク"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"音声の録音"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"音声の録音を &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; に許可しますか？"</string>
+    <string name="permgrouplab_activityRecognition" msgid="2838596644535616493">"運動の認識"</string>
+    <string name="permgroupdesc_activityRecognition" msgid="7672248027571522602">"運動を認識します"</string>
+    <string name="permgrouprequest_activityRecognition" msgid="8121253142311250055">"運動の認識を &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; に許可しますか？"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"カメラ"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"写真と動画の撮影"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"写真と動画の撮影を &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; に許可しますか？"</string>
@@ -418,14 +421,16 @@
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"このアプリは、ネットワーク位置情報源（携帯基地局や Wi-Fi ネットワークなど）に基づいて、ユーザーの位置情報を取得します。これらの位置情報サービスは ON の状態にして、タブレットでアプリがサービスを利用できるようにする必要があります。"</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"このアプリは、ネットワーク位置情報源（携帯基地局や Wi-Fi ネットワークなど）に基づいて、ユーザーの位置情報を取得します。これらの位置情報サービスは ON の状態にして、テレビでアプリがサービスを利用できるようにする必要があります。"</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"このアプリは、ネットワーク位置情報源（携帯基地局や Wi-Fi ネットワークなど）に基づいて、ユーザーの位置情報を取得します。これらの位置情報サービスは ON の状態にして、スマートフォンでアプリがサービスを利用できるようにする必要があります。"</string>
-    <string name="permlab_accessBackgroundLocation" msgid="5742466381902568536">"バックグラウンドで正確な位置情報にアクセス"</string>
-    <string name="permdesc_accessBackgroundLocation" msgid="6371533283380774135">"このアプリは、バックグラウンド状態でも常にユーザーの正確な位置情報を取得できます。この位置情報サービスは ON の状態にして、スマートフォンでアプリがサービスを利用できるようにする必要があります。これにより、電池の消費量が増える可能性があります。"</string>
+    <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"バックグラウンドでの位置情報へのアクセス"</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"これが、おおよその位置情報または正確な位置情報へのアクセスの追加権限の場合、アプリはバックグラウンドでの実行中も位置情報にアクセスできます。"</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"音声設定の変更"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"音声全般の設定（音量、出力に使用するスピーカーなど）の変更をアプリに許可します。"</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"録音"</string>
     <string name="permdesc_recordAudio" msgid="4245930455135321433">"このアプリは、いつでもマイクを使用して録音できます。"</string>
     <string name="permlab_sim_communication" msgid="2935852302216852065">"SIMへのコマンド送信"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"SIMにコマンドを送信することをアプリに許可します｡この許可は非常に危険です。"</string>
+    <string name="permlab_activityRecognition" msgid="3634590230567608356">"運動の認識"</string>
+    <string name="permdesc_activityRecognition" msgid="3143453925156552894">"このアプリで運動が認識されるようにします。"</string>
     <string name="permlab_camera" msgid="3616391919559751192">"写真と動画の撮影"</string>
     <string name="permdesc_camera" msgid="5392231870049240670">"このアプリは、いつでもカメラを使用して写真や動画を撮影できます。"</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"バイブレーションの制御"</string>
@@ -518,6 +523,7 @@
     <string name="permdesc_imagesWrite" msgid="7073662756617474375">"写真コレクションの変更をアプリに許可します。"</string>
     <string name="permlab_mediaLocation" msgid="8675148183726247864">"メディア コレクションの位置情報の読み取り"</string>
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"メディア コレクションの位置情報の読み取りをアプリに許可します。"</string>
+    <string name="biometric_dialog_default_title" msgid="4229778503907743328">"アプリ <xliff:g id="APP">%s</xliff:g> が認証を求めています。"</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"生体認証ハードウェアが利用できません"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"指紋を一部しか検出できませんでした。もう一度お試しください。"</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"指紋を処理できませんでした。もう一度お試しください。"</string>
@@ -1897,14 +1903,14 @@
       <item quantity="other">自動入力の候補 <xliff:g id="COUNT">%1$s</xliff:g> 件</item>
       <item quantity="one">自動入力の候補 1 件</item>
     </plurals>
-    <string name="autofill_save_title" msgid="3345527308992082601">"&lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt; に保存しますか？"</string>
-    <string name="autofill_save_title_with_type" msgid="8637809388029313305">"<xliff:g id="TYPE">%1$s</xliff:g>を &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt; に保存しますか？"</string>
-    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"<xliff:g id="TYPE_0">%1$s</xliff:g>、<xliff:g id="TYPE_1">%2$s</xliff:g>を &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt; に保存しますか？"</string>
-    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"<xliff:g id="TYPE_0">%1$s</xliff:g>、<xliff:g id="TYPE_1">%2$s</xliff:g>、<xliff:g id="TYPE_2">%3$s</xliff:g>を &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt; に保存しますか？"</string>
-    <string name="autofill_update_title" msgid="4879673117448810818">"&lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt; に更新しますか？"</string>
-    <string name="autofill_update_title_with_type" msgid="339733442087186755">"<xliff:g id="TYPE">%1$s</xliff:g>を &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt; に更新しますか？"</string>
-    <string name="autofill_update_title_with_2types" msgid="6321714204167424745">"<xliff:g id="TYPE_0">%1$s</xliff:g>と<xliff:g id="TYPE_1">%2$s</xliff:g>を &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt; に更新しますか？"</string>
-    <string name="autofill_update_title_with_3types" msgid="5866735124066629287">"<xliff:g id="TYPE_0">%1$s</xliff:g>、<xliff:g id="TYPE_1">%2$s</xliff:g>、<xliff:g id="TYPE_2">%3$s</xliff:g>を &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt; に更新しますか？"</string>
+    <string name="autofill_save_title" msgid="327541108460384555"><b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>" に保存しますか？"</string>
+    <string name="autofill_save_title_with_type" msgid="2339135393607143594">"<xliff:g id="TYPE">%1$s</xliff:g>を "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>" に保存しますか？"</string>
+    <string name="autofill_save_title_with_2types" msgid="87616102361154432">"<xliff:g id="TYPE_0">%1$s</xliff:g>、<xliff:g id="TYPE_1">%2$s</xliff:g>を "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>" に保存しますか？"</string>
+    <string name="autofill_save_title_with_3types" msgid="4108978552969604555">"<xliff:g id="TYPE_0">%1$s</xliff:g>、<xliff:g id="TYPE_1">%2$s</xliff:g>、<xliff:g id="TYPE_2">%3$s</xliff:g>を "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>" に保存しますか？"</string>
+    <string name="autofill_update_title" msgid="5305781141104585279"><b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>" で更新しますか？"</string>
+    <string name="autofill_update_title_with_type" msgid="4624181147422762233">"<xliff:g id="TYPE">%1$s</xliff:g>を "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>" で更新しますか？"</string>
+    <string name="autofill_update_title_with_2types" msgid="2300113827053626484">"<xliff:g id="TYPE_0">%1$s</xliff:g>、<xliff:g id="TYPE_1">%2$s</xliff:g>を "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>" で更新しますか？"</string>
+    <string name="autofill_update_title_with_3types" msgid="9089824354296211922">"<xliff:g id="TYPE_0">%1$s</xliff:g>、<xliff:g id="TYPE_1">%2$s</xliff:g>、<xliff:g id="TYPE_2">%3$s</xliff:g>を "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>" で更新しますか？"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"はい"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"いいえ"</string>
     <string name="autofill_update_yes" msgid="310358413273276958">"更新"</string>

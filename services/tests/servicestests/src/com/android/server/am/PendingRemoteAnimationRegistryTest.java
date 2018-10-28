@@ -50,17 +50,17 @@ public class PendingRemoteAnimationRegistryTest extends ActivityTestsBase {
     private PendingRemoteAnimationRegistry mRegistry;
     private final OffsettableClock mClock = new OffsettableClock.Stopped();
     private TestHandler mHandler;
-    private ActivityManagerService mService;
+    private ActivityTaskManagerService mService;
 
     @Before
     public void setUp() throws Exception {
         super.setUp();
         MockitoAnnotations.initMocks(this);
-        mService = createActivityManagerService();
-        mService.mHandlerThread.getThreadHandler().runWithScissors(() -> {
+        mService = createActivityTaskManagerService();
+        mService.mH.runWithScissors(() -> {
             mHandler = new TestHandler(null, mClock);
         }, 0);
-        mRegistry = new PendingRemoteAnimationRegistry(mService.mActivityTaskManager, mHandler);
+        mRegistry = new PendingRemoteAnimationRegistry(mService, mHandler);
     }
 
     @Test

@@ -292,6 +292,9 @@
     <string name="permgrouplab_microphone" msgid="171539900250043464">"麥克風"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"錄音"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"允許「<xliff:g id="APP_NAME">%1$s</xliff:g>」&lt;b&gt;&lt;/b&gt;錄音嗎？"</string>
+    <string name="permgrouplab_activityRecognition" msgid="2838596644535616493">"活動識別"</string>
+    <string name="permgroupdesc_activityRecognition" msgid="7672248027571522602">"識別活動"</string>
+    <string name="permgrouprequest_activityRecognition" msgid="8121253142311250055">"允許「<xliff:g id="APP_NAME">%1$s</xliff:g>」&lt;b&gt;&lt;/b&gt;識別您的運動嗎？"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"相機"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"拍照和錄製影片"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"允許「<xliff:g id="APP_NAME">%1$s</xliff:g>」&lt;b&gt;&lt;/b&gt;拍照和錄製影片嗎？"</string>
@@ -418,14 +421,16 @@
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"此應用程式可以根據您的網絡來源 (例如手機訊號塔和 Wi-Fi 網絡) 取得您的位置。您的平板電腦必須支援並啟用這些位置資訊服務，應用程式方可使用這項功能。"</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"此應用程式可以根據您的網絡來源 (例如手機訊號塔和 Wi-Fi 網絡) 取得您的位置。您的電視必須支援並啟用這些位置資訊服務，應用程式方可使用這項功能。"</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"此應用程式可以根據您的網絡來源 (例如手機訊號塔和 Wi-Fi 網絡) 取得您的位置。您的手機必須支援並啟用這些位置資訊服務，應用程式方可使用這項功能。"</string>
-    <string name="permlab_accessBackgroundLocation" msgid="5742466381902568536">"在背景中存取精確位置"</string>
-    <string name="permdesc_accessBackgroundLocation" msgid="6371533283380774135">"此應用程式可在背景運行時隨時獲取您的確實位置資訊。您的手機必須支援並啟用這些位置資訊服務，應用程式方可使用這項功能，但這樣做可能會增加耗電量。"</string>
+    <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"在背景存取位置資訊"</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"如果您另外授予概略位置或精確位置的存取權，這個應用程式在背景運行時將可存取位置資訊。"</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"更改音效設定"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"允許應用程式修改全域音頻設定，例如音量和用於輸出的喇叭。"</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"錄製音效"</string>
     <string name="permdesc_recordAudio" msgid="4245930455135321433">"此應用程式可以隨時使用麥克風錄音。"</string>
     <string name="permlab_sim_communication" msgid="2935852302216852065">"發送指令至 SIM 卡"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"允許應用程式傳送指令到 SIM 卡。這項操作具有高危險性。"</string>
+    <string name="permlab_activityRecognition" msgid="3634590230567608356">"識別運動"</string>
+    <string name="permdesc_activityRecognition" msgid="3143453925156552894">"此應用程式可識別您的運動。"</string>
     <string name="permlab_camera" msgid="3616391919559751192">"拍照和拍攝影片"</string>
     <string name="permdesc_camera" msgid="5392231870049240670">"此應用程式可以隨時使用相機拍照和攝錄。"</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"控制震動"</string>
@@ -518,6 +523,7 @@
     <string name="permdesc_imagesWrite" msgid="7073662756617474375">"允許應用程式修改您的相片集。"</string>
     <string name="permlab_mediaLocation" msgid="8675148183726247864">"讀取媒體集的位置"</string>
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"允許應用程式讀取媒體集的位置。"</string>
+    <string name="biometric_dialog_default_title" msgid="4229778503907743328">"「<xliff:g id="APP">%s</xliff:g>」應用程式需要驗證。"</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"無法使用生物識別硬件"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"只偵測到部分指紋。請再試一次。"</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"無法處理指紋。請再試一次。"</string>
@@ -1897,14 +1903,14 @@
       <item quantity="other"><xliff:g id="COUNT">%1$s</xliff:g> 個自動填入建議</item>
       <item quantity="one">一個自動填入建議</item>
     </plurals>
-    <string name="autofill_save_title" msgid="3345527308992082601">"要儲存至「&lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;」嗎？"</string>
-    <string name="autofill_save_title_with_type" msgid="8637809388029313305">"要將<xliff:g id="TYPE">%1$s</xliff:g>儲存至「&lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;」嗎？"</string>
-    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"要將<xliff:g id="TYPE_0">%1$s</xliff:g>和<xliff:g id="TYPE_1">%2$s</xliff:g>儲存至「&lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;」嗎？"</string>
-    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"要將<xliff:g id="TYPE_0">%1$s</xliff:g>、<xliff:g id="TYPE_1">%2$s</xliff:g>和<xliff:g id="TYPE_2">%3$s</xliff:g>儲存至「&lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;」嗎？"</string>
-    <string name="autofill_update_title" msgid="4879673117448810818">"要更新至 &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt; 嗎？"</string>
-    <string name="autofill_update_title_with_type" msgid="339733442087186755">"要將<xliff:g id="TYPE">%1$s</xliff:g>更新至 &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt; 嗎？"</string>
-    <string name="autofill_update_title_with_2types" msgid="6321714204167424745">"要將<xliff:g id="TYPE_0">%1$s</xliff:g>和<xliff:g id="TYPE_1">%2$s</xliff:g>更新至 &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt; 嗎？"</string>
-    <string name="autofill_update_title_with_3types" msgid="5866735124066629287">"要將<xliff:g id="TYPE_0">%1$s</xliff:g>、<xliff:g id="TYPE_1">%2$s</xliff:g>和<xliff:g id="TYPE_2">%3$s</xliff:g>更新至 &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt; 嗎？"</string>
+    <string name="autofill_save_title" msgid="327541108460384555">"要儲存至 "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>" 嗎？"</string>
+    <string name="autofill_save_title_with_type" msgid="2339135393607143594">"要將<xliff:g id="TYPE">%1$s</xliff:g>儲存至 "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>" 嗎？"</string>
+    <string name="autofill_save_title_with_2types" msgid="87616102361154432">"要將<xliff:g id="TYPE_0">%1$s</xliff:g>和<xliff:g id="TYPE_1">%2$s</xliff:g>儲存至 "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>" 嗎？"</string>
+    <string name="autofill_save_title_with_3types" msgid="4108978552969604555">"要將<xliff:g id="TYPE_0">%1$s</xliff:g>、<xliff:g id="TYPE_1">%2$s</xliff:g>和<xliff:g id="TYPE_2">%3$s</xliff:g>儲存至 "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>" 嗎？"</string>
+    <string name="autofill_update_title" msgid="5305781141104585279">"要在 "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>" 中更新嗎？"</string>
+    <string name="autofill_update_title_with_type" msgid="4624181147422762233">"要在 "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>" 中更新<xliff:g id="TYPE">%1$s</xliff:g>嗎？"</string>
+    <string name="autofill_update_title_with_2types" msgid="2300113827053626484">"要在 "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>" 中更新<xliff:g id="TYPE_0">%1$s</xliff:g>和<xliff:g id="TYPE_1">%2$s</xliff:g>嗎？"</string>
+    <string name="autofill_update_title_with_3types" msgid="9089824354296211922">"要在 "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>" 中更新<xliff:g id="TYPE_0">%1$s</xliff:g>、<xliff:g id="TYPE_1">%2$s</xliff:g>和<xliff:g id="TYPE_2">%3$s</xliff:g>嗎？"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"儲存"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"不用了，謝謝"</string>
     <string name="autofill_update_yes" msgid="310358413273276958">"更新"</string>

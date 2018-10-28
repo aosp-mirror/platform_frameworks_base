@@ -17,6 +17,7 @@
 package android.os;
 
 import static android.os.FileUtils.roundStorageSize;
+import static android.os.FileUtils.translateModeAccessToPosix;
 import static android.os.FileUtils.translateModePfdToPosix;
 import static android.os.FileUtils.translateModePosixToPfd;
 import static android.os.FileUtils.translateModePosixToString;
@@ -27,12 +28,16 @@ import static android.os.ParcelFileDescriptor.MODE_READ_ONLY;
 import static android.os.ParcelFileDescriptor.MODE_READ_WRITE;
 import static android.os.ParcelFileDescriptor.MODE_TRUNCATE;
 import static android.os.ParcelFileDescriptor.MODE_WRITE_ONLY;
+import static android.system.OsConstants.F_OK;
 import static android.system.OsConstants.O_APPEND;
 import static android.system.OsConstants.O_CREAT;
 import static android.system.OsConstants.O_RDONLY;
 import static android.system.OsConstants.O_RDWR;
 import static android.system.OsConstants.O_TRUNC;
 import static android.system.OsConstants.O_WRONLY;
+import static android.system.OsConstants.R_OK;
+import static android.system.OsConstants.W_OK;
+import static android.system.OsConstants.X_OK;
 import static android.text.format.DateUtils.DAY_IN_MILLIS;
 import static android.text.format.DateUtils.HOUR_IN_MILLIS;
 import static android.text.format.DateUtils.WEEK_IN_MILLIS;
@@ -523,6 +528,15 @@ public class FileUtilsTest {
             fail();
         } catch (IllegalArgumentException expected) {
         }
+    }
+
+    @Test
+    public void testTranslateMode_Access() throws Exception {
+        assertEquals(O_RDONLY, translateModeAccessToPosix(F_OK));
+        assertEquals(O_RDONLY, translateModeAccessToPosix(R_OK));
+        assertEquals(O_WRONLY, translateModeAccessToPosix(W_OK));
+        assertEquals(O_RDWR, translateModeAccessToPosix(R_OK | W_OK));
+        assertEquals(O_RDWR, translateModeAccessToPosix(R_OK | W_OK | X_OK));
     }
 
     private static void assertTranslate(String string, int posix, int pfd) {

@@ -676,7 +676,7 @@ public class TelecomManager {
     /**
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public static TelecomManager from(Context context) {
         return (TelecomManager) context.getSystemService(Context.TELECOM_SERVICE);
     }

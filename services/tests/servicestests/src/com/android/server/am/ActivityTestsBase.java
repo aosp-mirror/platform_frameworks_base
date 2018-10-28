@@ -286,7 +286,7 @@ public class ActivityTestsBase {
             final WindowProcessController wpc = new WindowProcessController(mService,
                     mService.mContext.getApplicationInfo(), "name", 12345,
                     UserHandle.getUserId(12345), mock(Object.class),
-                    mock(WindowProcessListener.class), null);
+                    mock(WindowProcessListener.class));
             wpc.setThread(mock(IApplicationThread.class));
             activity.setProcess(wpc);
             return activity;
@@ -534,11 +534,6 @@ public class ActivityTestsBase {
         TestActivityManagerService(TestInjector testInjector) {
             super(testInjector, testInjector.mHandlerThread);
             mUgmInternal = mock(UriGrantsManagerInternal.class);
-        }
-
-        @Override
-        Configuration getGlobalConfiguration() {
-            return mContext.getResources().getConfiguration();
         }
 
         ActivityManagerInternal getLocalService() {

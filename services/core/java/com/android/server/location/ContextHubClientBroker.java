@@ -16,6 +16,7 @@
 
 package com.android.server.location;
 
+import android.app.PendingIntent;
 import android.content.Context;
 import android.hardware.contexthub.V1_0.ContextHubMsg;
 import android.hardware.contexthub.V1_0.IContexthub;
@@ -135,6 +136,27 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
         }
 
         return ContextHubServiceUtil.toTransactionResult(result);
+    }
+
+    /**
+     * @param intent the intent to register
+     * @param nanoAppId the ID of the nanoapp to send events for
+     * @return true on success, false otherwise
+     */
+    @Override
+    public boolean registerIntent(PendingIntent intent, long nanoAppId) {
+        // TODO: Implement this
+        return false;
+    }
+
+    /**
+     * @param intent the intent to unregister
+     * @return true on success, false otherwise
+     */
+    @Override
+    public boolean unregisterIntent(PendingIntent intent) {
+        // TODO: Implement this
+        return false;
     }
 
     /**

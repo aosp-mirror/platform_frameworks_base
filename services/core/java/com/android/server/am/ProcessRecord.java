@@ -535,7 +535,7 @@ final class ProcessRecord implements WindowProcessListener {
     }
 
     ProcessRecord(ActivityManagerService _service, ApplicationInfo _info, String _processName,
-            int _uid, Configuration config) {
+            int _uid) {
         mService = _service;
         info = _info;
         isolated = _info.uid != _uid;
@@ -549,7 +549,7 @@ final class ProcessRecord implements WindowProcessListener {
         removed = false;
         lastStateTime = lastPssTime = nextPssTime = SystemClock.uptimeMillis();
         mWindowProcessController = new WindowProcessController(
-                mService.mActivityTaskManager, info, processName, uid, userId, this, this, config);
+                mService.mActivityTaskManager, info, processName, uid, userId, this, this);
         pkgList.put(_info.packageName, new ProcessStats.ProcessStateHolder(_info.longVersionCode));
     }
 
@@ -1244,19 +1244,7 @@ final class ProcessRecord implements WindowProcessListener {
         ArrayList<Integer> firstPids = new ArrayList<>(5);
         SparseArray<Boolean> lastPids = new SparseArray<>(20);
 
-        if (mService.mActivityTaskManager.mController != null) {
-            try {
-                // 0 == continue, -1 = kill process immediately
-                int res = mService.mActivityTaskManager.mController.appEarlyNotResponding(
-                        processName, pid, annotation);
-                if (res < 0 && pid != MY_PID) {
-                    kill("anr", true);
-                }
-            } catch (RemoteException e) {
-                mService.mActivityTaskManager.mController = null;
-                Watchdog.getInstance().setActivityController(null);
-            }
-        }
+        mWindowProcessController.appEarlyNotResponding(annotation, () -> kill("anr", true));
 
         long anrTime = SystemClock.uptimeMillis();
         if (ActivityManagerService.MONITOR_CPU_USAGE) {
@@ -1271,7 +1259,7 @@ final class ProcessRecord implements WindowProcessListener {
 
         synchronized (mService) {
             // PowerManager.reboot() can block for a long time, so ignore ANRs while shutting down.
-            if (mService.mActivityTaskManager.mShuttingDown) {
+            if (mService.mAtmInternal.isShuttingDown()) {
                 Slog.i(TAG, "During shutdown skipping ANR: " + this + " " + annotation);
                 return;
             } else if (isNotResponding()) {
@@ -1412,25 +1400,13 @@ final class ProcessRecord implements WindowProcessListener {
         mService.addErrorToDropBox("anr", this, processName, activityShortComponentName,
                 parentShortComponentName, parentPr, annotation, cpuInfo, tracesFile, null);
 
-        if (mService.mActivityTaskManager.mController != null) {
-            try {
-                // 0 == show dialog, 1 = keep waiting, -1 = kill process immediately
-                int res = mService.mActivityTaskManager.mController.appNotResponding(
-                        processName, pid, info.toString());
-                if (res != 0) {
-                    if (res < 0 && pid != MY_PID) {
-                        kill("anr", true);
-                    } else {
-                        synchronized (mService) {
-                            mService.mServices.scheduleServiceTimeoutLocked(this);
-                        }
+        if (mWindowProcessController.appNotResponding(info.toString(), () -> kill("anr", true),
+                () -> {
+                    synchronized (mService) {
+                        mService.mServices.scheduleServiceTimeoutLocked(this);
                     }
-                    return;
-                }
-            } catch (RemoteException e) {
-                mService.mActivityTaskManager.mController = null;
-                Watchdog.getInstance().setActivityController(null);
-            }
+                })) {
+            return;
         }
 
         synchronized (mService) {

@@ -1194,6 +1194,7 @@ public final class DefaultPermissionGrantPolicy {
                 } else {
                     permissions.clear();
                 }
+                permissions.add(permissionGrant.name);
                 grantRuntimePermissions(pkg, permissions, permissionGrant.fixed, userId);
             }
         }
@@ -1359,7 +1360,7 @@ public final class DefaultPermissionGrantPolicy {
     private boolean isPermissionDangerous(String name) {
         try {
             final PermissionInfo pi = mContext.getPackageManager().getPermissionInfo(name, 0);
-            return (pi.getProtectionFlags() & PermissionInfo.PROTECTION_DANGEROUS) != 0;
+            return (pi.getProtection() == PermissionInfo.PROTECTION_DANGEROUS);
         } catch (NameNotFoundException e) {
             // When unknown assume it's dangerous to be on the safe side
             return true;

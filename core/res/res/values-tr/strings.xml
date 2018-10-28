@@ -292,6 +292,9 @@
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"ses kaydetme"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; uygulamasının ses kaydetmesine izin verilsin mi?"</string>
+    <string name="permgrouplab_activityRecognition" msgid="2838596644535616493">"Aktivite algılama"</string>
+    <string name="permgroupdesc_activityRecognition" msgid="7672248027571522602">"aktiviteyi algıla"</string>
+    <string name="permgrouprequest_activityRecognition" msgid="8121253142311250055">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; uygulamasına fiziksel aktivitenizi algılama izni verilsin mi?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Kamera"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"fotoğraf çekme ve video kaydetme"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; uygulamasının resim çekmesine ve video kaydı yapmasına izin verilsin mi?"</string>
@@ -418,14 +421,16 @@
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Bu uygulama baz istasyonu ve kablosuz ağ gibi ağ kaynaklarını kullanarak konumunuzu belirleyebilir. Uygulamanın bu hizmetleri kullanabilmesi için tabletinizde bu konum hizmetleri açık ve kullanılabilir olmalıdır."</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"Bu uygulama baz istasyonu ve kablosuz ağ gibi ağ kaynaklarını kullanarak konumunuzu belirleyebilir. Uygulamanın bu hizmetleri kullanabilmesi için TV\'nizde bu konum hizmetleri açık ve kullanılabilir olmalıdır."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"Bu uygulama baz istasyonu ve kablosuz ağ gibi ağ kaynaklarını kullanarak konumunuzu belirleyebilir. Uygulamanın bu hizmetleri kullanabilmesi için telefonunuzda bu konum hizmetleri açık ve kullanılabilir olmalıdır."</string>
-    <string name="permlab_accessBackgroundLocation" msgid="5742466381902568536">"arka planda kesin konuma erişme"</string>
-    <string name="permdesc_accessBackgroundLocation" msgid="6371533283380774135">"Bu uygulama arka plandayken istediği zaman kesin konumunuzu alabilir. Uygulamanın bu hizmetleri kullanabilmesi için telefonunuzda bu konum hizmetleri açık ve kullanılabilir olmalıdır. Bu, pil tüketimini artırabilir."</string>
+    <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"konum bilgisine arka planda eriş"</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"Bu izin, yaklaşık veya tam konum erişimine ek olarak verilirse uygulama, konum bilgisine arka planda çalışırken erişebilir."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"ses ayarlarınızı değiştirin"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Uygulamaya ses düzeyi ve ses çıkışı için kullanılan hoparlör gibi genel ses ayarlarını değiştirme izni verir."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"ses kaydet"</string>
     <string name="permdesc_recordAudio" msgid="4245930455135321433">"Bu uygulama, istediği zaman mikrofonu kullanarak ses kaydedebilir."</string>
     <string name="permlab_sim_communication" msgid="2935852302216852065">"SIM karta komut gönderme"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Uygulamanın SIM karta komut göndermesine izin verir. Bu izin çok tehlikelidir."</string>
+    <string name="permlab_activityRecognition" msgid="3634590230567608356">"fiziksel aktiviteyi algıla"</string>
+    <string name="permdesc_activityRecognition" msgid="3143453925156552894">"Bu uygulama fiziksel aktivitenizi algılayabilir."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"resim çekme ve görüntü kaydetme"</string>
     <string name="permdesc_camera" msgid="5392231870049240670">"Bu uygulama, herhangi bir zamanda kamerayı kullanarak fotoğraf ve video çekebilir."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"titreşimi denetleme"</string>
@@ -518,6 +523,7 @@
     <string name="permdesc_imagesWrite" msgid="7073662756617474375">"Uygulamanın fotoğraf koleksiyonunuzu değiştirmesine izin verir."</string>
     <string name="permlab_mediaLocation" msgid="8675148183726247864">"medya koleksiyonunuzdaki konumları okuma"</string>
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"Uygulamanın medya koleksiyonunuzdaki konumları okumasına izin verir."</string>
+    <string name="biometric_dialog_default_title" msgid="4229778503907743328">"<xliff:g id="APP">%s</xliff:g> uygulaması kimlik doğrulamak istiyor."</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"Biyometrik donanım kullanılamıyor"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Parmak izinin tümü algılanamadı. Lütfen tekrar deneyin."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Parmak izi işlenemedi. Lütfen tekrar deneyin."</string>
@@ -1897,14 +1903,14 @@
       <item quantity="other"><xliff:g id="COUNT">%1$s</xliff:g> otomatik doldurma önerisi</item>
       <item quantity="one">Bir otomatik doldurma önerisi</item>
     </plurals>
-    <string name="autofill_save_title" msgid="3345527308992082601">"&lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt; hizmetine kaydedilsin mi?"</string>
-    <string name="autofill_save_title_with_type" msgid="8637809388029313305">"<xliff:g id="TYPE">%1$s</xliff:g>, &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt; hizmetine kaydedilsin mi?"</string>
-    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"<xliff:g id="TYPE_0">%1$s</xliff:g> ve <xliff:g id="TYPE_1">%2$s</xliff:g>, &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt; hizmetine kaydedilsin mi?"</string>
-    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> ve <xliff:g id="TYPE_2">%3$s</xliff:g>, &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt; hizmetine kaydedilsin mi?"</string>
-    <string name="autofill_update_title" msgid="4879673117448810818">"&lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt; hizmetine güncellensin mi?"</string>
-    <string name="autofill_update_title_with_type" msgid="339733442087186755">"<xliff:g id="TYPE">%1$s</xliff:g>, &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt; hizmetine güncellensin mi?"</string>
-    <string name="autofill_update_title_with_2types" msgid="6321714204167424745">"<xliff:g id="TYPE_0">%1$s</xliff:g>  ve <xliff:g id="TYPE_1">%2$s</xliff:g>, &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt; hizmetine güncellensin mi?"</string>
-    <string name="autofill_update_title_with_3types" msgid="5866735124066629287">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> ve <xliff:g id="TYPE_2">%3$s</xliff:g>, &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;hizmetine güncellensin mi?"</string>
+    <string name="autofill_save_title" msgid="327541108460384555"><b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>" hizmetine kaydedilsin mi?"</string>
+    <string name="autofill_save_title_with_type" msgid="2339135393607143594">"<xliff:g id="TYPE">%1$s</xliff:g> "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>" hizmetine kaydedilsin mi?"</string>
+    <string name="autofill_save_title_with_2types" msgid="87616102361154432">"<xliff:g id="TYPE_0">%1$s</xliff:g> ve <xliff:g id="TYPE_1">%2$s</xliff:g> "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>" hizmetine kaydedilsin mi?"</string>
+    <string name="autofill_save_title_with_3types" msgid="4108978552969604555">"<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> ve <xliff:g id="TYPE_2">%3$s</xliff:g> "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>" hizmetine kaydedilsin mi?"</string>
+    <string name="autofill_update_title" msgid="5305781141104585279"><b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>" hizmetinde güncellensin mi?"</string>
+    <string name="autofill_update_title_with_type" msgid="4624181147422762233">"<xliff:g id="TYPE">%1$s</xliff:g> "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>" hizmetinde güncellensin mi?"</string>
+    <string name="autofill_update_title_with_2types" msgid="2300113827053626484">"<xliff:g id="TYPE_0">%1$s</xliff:g> ve <xliff:g id="TYPE_1">%2$s</xliff:g> "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>" hizmetinde güncellensin mi?"</string>
+    <string name="autofill_update_title_with_3types" msgid="9089824354296211922">"Şu öğeler "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>" hizmetinde güncellensin mi: <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> ve <xliff:g id="TYPE_2">%3$s</xliff:g>?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"Kaydet"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"Hayır, teşekkürler"</string>
     <string name="autofill_update_yes" msgid="310358413273276958">"Güncelle"</string>

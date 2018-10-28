@@ -65,6 +65,12 @@ public class NetworkMisc implements Parcelable {
      */
     public String subscriberId;
 
+    /**
+     * Set to skip 464xlat. This means the device will treat the network as IPv6-only and
+     * will not attempt to detect a NAT64 via RFC 7050 DNS lookups.
+     */
+    public boolean skip464xlat;
+
     public NetworkMisc() {
     }
 
@@ -75,6 +81,7 @@ public class NetworkMisc implements Parcelable {
             acceptUnvalidated = nm.acceptUnvalidated;
             subscriberId = nm.subscriberId;
             provisioningNotificationDisabled = nm.provisioningNotificationDisabled;
+            skip464xlat = nm.skip464xlat;
         }
     }
 
@@ -90,6 +97,7 @@ public class NetworkMisc implements Parcelable {
         out.writeInt(acceptUnvalidated ? 1 : 0);
         out.writeString(subscriberId);
         out.writeInt(provisioningNotificationDisabled ? 1 : 0);
+        out.writeInt(skip464xlat ? 1 : 0);
     }
 
     public static final Creator<NetworkMisc> CREATOR = new Creator<NetworkMisc>() {
@@ -101,6 +109,7 @@ public class NetworkMisc implements Parcelable {
             networkMisc.acceptUnvalidated = in.readInt() != 0;
             networkMisc.subscriberId = in.readString();
             networkMisc.provisioningNotificationDisabled = in.readInt() != 0;
+            networkMisc.skip464xlat = in.readInt() != 0;
             return networkMisc;
         }
 

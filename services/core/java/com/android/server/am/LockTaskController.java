@@ -78,7 +78,8 @@ import java.util.Arrays;
  * mode that can be launched via System UI as well as the fully locked mode that can be achieved
  * on fully managed devices.
  *
- * Note: All methods in this class should only be called with the ActivityManagerService lock held.
+ * Note: All methods in this class should only be called with the ActivityTaskManagerService lock
+ * held.
  *
  * @see Activity#startLockTask()
  * @see Activity#stopLockTask()

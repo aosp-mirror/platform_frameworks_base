@@ -38,8 +38,6 @@ import android.view.WindowManagerGlobal;
 import com.android.systemui.Dependency;
 import com.android.systemui.UiOffloadThread;
 import com.android.systemui.pip.BasePipManager;
-import com.android.systemui.recents.events.EventBus;
-import com.android.systemui.recents.events.component.ExpandPipEvent;
 import com.android.systemui.shared.system.ActivityManagerWrapper;
 import com.android.systemui.shared.system.InputConsumerController;
 import com.android.systemui.shared.system.TaskStackChangeListener;
@@ -197,7 +195,6 @@ public class PipManager implements BasePipManager {
                 mMenuController, mInputConsumerController);
         mAppOpsListener = new PipAppOpsListener(context, mActivityManager,
                 mTouchHandler.getMotionHelper());
-        EventBus.getDefault().register(this);
     }
 
     /**
@@ -210,8 +207,17 @@ public class PipManager implements BasePipManager {
     /**
      * Expands the PIP.
      */
-    public final void onBusEvent(ExpandPipEvent event) {
+    @Override
+    public void expandPip() {
         mTouchHandler.getMotionHelper().expandPip(false /* skipAnimation */);
+    }
+
+    /**
+     * Hides the PIP menu.
+     */
+    @Override
+    public void hidePipMenu(Runnable onStartCallback, Runnable onEndCallback) {
+        mMenuController.hideMenu(onStartCallback, onEndCallback);
     }
 
     /**

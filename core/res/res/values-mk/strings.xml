@@ -292,6 +292,9 @@
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Микрофон"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"снима аудио"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"Дали да се дозволи &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; да снима аудио?"</string>
+    <string name="permgrouplab_activityRecognition" msgid="2838596644535616493">"Препознавање активност"</string>
+    <string name="permgroupdesc_activityRecognition" msgid="7672248027571522602">"препознавај ја активноста"</string>
+    <string name="permgrouprequest_activityRecognition" msgid="8121253142311250055">"Дозволувате ли &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; да ја препознава вашата физичка активност?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Камера"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"фотографира и снима видео"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"Дали да се дозволи &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; да фотографира и да снима видео?"</string>
@@ -418,14 +421,16 @@
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Апликацијава може да ја добие вашата локација од мрежните извори како што се репетиторите за мобилни мрежи и Wi-Fi мрежите. Овие услуги за локација мора да се вклучени и достапни на таблетот за да може да ги користи апликацијата."</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"Апликацијава може да ја добие вашата локација од мрежните извори како што се репетиторите за мобилни мрежи и Wi-Fi мрежите. Овие услуги за локација мора да се вклучени и достапни на телевизорот за да може да ги користи апликацијата."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"Апликацијава може да ја добие вашата локација од мрежните извори како што се репетиторите за мобилни мрежи и Wi-Fi мрежите. Овие услуги за локација мора да се вклучени и достапни на телефонот за да може да ги користи апликацијата."</string>
-    <string name="permlab_accessBackgroundLocation" msgid="5742466381902568536">"пристап до прецизната локација во заднина"</string>
-    <string name="permdesc_accessBackgroundLocation" msgid="6371533283380774135">"Апликацијава може да ја добие вашата точна локација секогаш кога е во заднина. Услугиве според локација мора да се вклучени и достапни на телефонот за да може да ги користи апликацијата. Ова може да го зголеми трошењето на батеријата."</string>
+    <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"пристап до локацијата во заднина"</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"Ако покрај дозволата за пристап до приближната или прецизната локација е доделена и оваа дозвола, тогаш апликацијата ќе може да пристапува до локацијата додека се извршува во заднина."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"менува аудио поставки"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Овозможува апликацијата да ги менува глобалните аудио поставки, како што се јачината на звукот и кој звучник се користи за излез."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"снимај аудио"</string>
     <string name="permdesc_recordAudio" msgid="4245930455135321433">"Апликацијава може да снима аудио со микрофонот во секое време."</string>
     <string name="permlab_sim_communication" msgid="2935852302216852065">"испраќање наредби до SIM-картичката"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Овозможува апликацијата да испраќа наредби до SIM картичката. Ова е многу опасно."</string>
+    <string name="permlab_activityRecognition" msgid="3634590230567608356">"препознавајте ја физичката активност"</string>
+    <string name="permdesc_activityRecognition" msgid="3143453925156552894">"Апликацијава може да ја препознава вашата физичка активност."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"снимај слики и видеа"</string>
     <string name="permdesc_camera" msgid="5392231870049240670">"Апликацијава може да фотографира и да снима видеа со камерата во секое време."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"контролирај вибрации"</string>
@@ -518,6 +523,7 @@
     <string name="permdesc_imagesWrite" msgid="7073662756617474375">"Дозволува апликацијата да ја менува вашата збирка на фотографии."</string>
     <string name="permlab_mediaLocation" msgid="8675148183726247864">"да чита локации од вашата збирка на аудиовизуелни содржини"</string>
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"Дозволува апликацијата да чита локации од вашата збирка на аудиовизуелни содржини."</string>
+    <string name="biometric_dialog_default_title" msgid="4229778503907743328">"Апликацијата <xliff:g id="APP">%s</xliff:g> сака да ве провери."</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"Биометрискиот хардвер е недостапен"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Откриен е делумен отпечаток. Обидете се повторно."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Отпечатокот не можеше да се обработи. Обидете се повторно."</string>
@@ -1900,14 +1906,14 @@
       <item quantity="one"><xliff:g id="COUNT">%1$s</xliff:g> предлог за автоматско пополнување</item>
       <item quantity="other"><xliff:g id="COUNT">%1$s</xliff:g> предлози за автоматско пополнување</item>
     </plurals>
-    <string name="autofill_save_title" msgid="3345527308992082601">"Да се зачува во &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_save_title_with_type" msgid="8637809388029313305">"Да се зачува <xliff:g id="TYPE">%1$s</xliff:g> во &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"Да се зачуваат <xliff:g id="TYPE_0">%1$s</xliff:g> и <xliff:g id="TYPE_1">%2$s</xliff:g> во &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"Да се зачуваат <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> и <xliff:g id="TYPE_2">%3$s</xliff:g> во &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_update_title" msgid="4879673117448810818">"Дали да се ажурира на &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_update_title_with_type" msgid="339733442087186755">"Дали да се ажурира <xliff:g id="TYPE">%1$s</xliff:g> на &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_update_title_with_2types" msgid="6321714204167424745">"Дали да се ажурираат <xliff:g id="TYPE_0">%1$s</xliff:g> и <xliff:g id="TYPE_1">%2$s</xliff:g> на &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_update_title_with_3types" msgid="5866735124066629287">"Дали да се ажурираат <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> и <xliff:g id="TYPE_2">%3$s</xliff:g> на &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_save_title" msgid="327541108460384555">"Да се зачува во "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_save_title_with_type" msgid="2339135393607143594">"Да се зачува <xliff:g id="TYPE">%1$s</xliff:g> во "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_save_title_with_2types" msgid="87616102361154432">"Да се зачуваат <xliff:g id="TYPE_0">%1$s</xliff:g> и <xliff:g id="TYPE_1">%2$s</xliff:g> во "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_save_title_with_3types" msgid="4108978552969604555">"Да се зачуваат <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> и <xliff:g id="TYPE_2">%3$s</xliff:g> во "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_update_title" msgid="5305781141104585279">"Да се ажурира во "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_update_title_with_type" msgid="4624181147422762233">"Да се ажурира <xliff:g id="TYPE">%1$s</xliff:g> во "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_update_title_with_2types" msgid="2300113827053626484">"Да се ажурираат <xliff:g id="TYPE_0">%1$s</xliff:g> и <xliff:g id="TYPE_1">%2$s</xliff:g> во "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_update_title_with_3types" msgid="9089824354296211922">"Да се ажурираат овие ставки во "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>": <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> и <xliff:g id="TYPE_2">%3$s</xliff:g>?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"Зачувај"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"Не, фала"</string>
     <string name="autofill_update_yes" msgid="310358413273276958">"Ажурирај"</string>

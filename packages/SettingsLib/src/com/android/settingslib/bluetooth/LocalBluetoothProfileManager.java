@@ -40,7 +40,6 @@ import android.util.Log;
 
 import androidx.annotation.VisibleForTesting;
 
-import com.android.internal.R;
 import com.android.internal.util.CollectionUtils;
 
 import java.util.ArrayList;
@@ -289,21 +288,21 @@ public class LocalBluetoothProfileManager {
                 (newState == BluetoothProfile.STATE_CONNECTED)) {
                 // Check if the HiSyncID has being initialized
                 if (cachedDevice.getHiSyncId() == BluetoothHearingAid.HI_SYNC_ID_INVALID) {
-
                     long newHiSyncId = getHearingAidProfile().getHiSyncId(cachedDevice.getDevice());
-
                     if (newHiSyncId != BluetoothHearingAid.HI_SYNC_ID_INVALID) {
                         cachedDevice.setHiSyncId(newHiSyncId);
-                        mDeviceManager.onHiSyncIdChanged(newHiSyncId);
                     }
                 }
             }
-
             cachedDevice.onProfileStateChanged(mProfile, newState);
-            cachedDevice.refresh();
             // Dispatch profile changed after device update
-            mEventManager.dispatchProfileConnectionStateChanged(cachedDevice, newState,
-                    mProfile.getProfileId());
+            if (!(cachedDevice.getHiSyncId() != BluetoothHearingAid.HI_SYNC_ID_INVALID
+                    && mDeviceManager.onProfileConnectionStateChangedIfProcessed(cachedDevice,
+                    newState))) {
+                cachedDevice.refresh();
+                mEventManager.dispatchProfileConnectionStateChanged(cachedDevice, newState,
+                        mProfile.getProfileId());
+            }
         }
     }
 

@@ -292,6 +292,9 @@
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Mikrofon"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"spela in ljud"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"Vill du ge &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; behörighet att spela in ljud?"</string>
+    <string name="permgrouplab_activityRecognition" msgid="2838596644535616493">"Aktivitetsigenkänning"</string>
+    <string name="permgroupdesc_activityRecognition" msgid="7672248027571522602">"känn igen aktivitet"</string>
+    <string name="permgrouprequest_activityRecognition" msgid="8121253142311250055">"Vill du tillåta att &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; känner igen din fysiska aktivitet?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Kamera"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"ta bilder och spela in video"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"Vill du ge &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; behörighet att ta bilder och spela in video?"</string>
@@ -418,14 +421,16 @@
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Appen kan få information om din plats från källor i nätverket, som mobilmaster och Wi-Fi-nätverk. De platstjänsterna måste ha aktiverats och finnas på surfplattan om appen ska kunna använda dem."</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"Appen kan få information om din plats från källor i nätverket, som mobilmaster och Wi-Fi-nätverk. De platstjänsterna måste ha aktiverats och fungera på TV:n om appen ska kunna använda dem."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"Appen kan få information om din plats från källor i nätverket, som mobilmaster och Wi-Fi-nätverk. De platstjänsterna måste ha aktiverats och finnas på mobilen om appen ska kunna använda dem."</string>
-    <string name="permlab_accessBackgroundLocation" msgid="5742466381902568536">"åtkomst till exakt plats i bakgrunden"</string>
-    <string name="permdesc_accessBackgroundLocation" msgid="6371533283380774135">"Den här appen kan när som helst få information om din exakta plats när den körs i bakgrunden. Platstjänsterna måste ha aktiverats och finnas på mobilen om appen ska kunna använda dem. Detta kan leda till ökad batteriförbrukning."</string>
+    <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"få åtkomst till platsinformation i bakgrunden"</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"Om denna behörighet ges utöver ungefärlig eller exakt platsåtkomst får appen åtkomst till platsinformation när den körs i bakgrunden."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"ändra dina ljudinställningar"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Tillåter att appen ändrar globala ljudinställningar som volym och vilken högtalarutgång som används."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"spela in ljud"</string>
     <string name="permdesc_recordAudio" msgid="4245930455135321433">"Appen kan spela in ljud med mikrofonen när som helst."</string>
     <string name="permlab_sim_communication" msgid="2935852302216852065">"skicka kommandon till SIM-kortet"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Tillåter att appen skickar kommandon till SIM-kortet. Detta är mycket farligt."</string>
+    <string name="permlab_activityRecognition" msgid="3634590230567608356">"känn igen fysisk aktivitet"</string>
+    <string name="permdesc_activityRecognition" msgid="3143453925156552894">"Den här appen kan känna igen fysisk aktivitet."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"ta bilder och spela in videoklipp"</string>
     <string name="permdesc_camera" msgid="5392231870049240670">"Appen kan ta kort och spela in video med kameran när som helst."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"styra vibration"</string>
@@ -518,6 +523,7 @@
     <string name="permdesc_imagesWrite" msgid="7073662756617474375">"Tillåter att appen gör ändringar i din fotosamling."</string>
     <string name="permlab_mediaLocation" msgid="8675148183726247864">"läsa av platser i din mediesamling"</string>
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"Tillåter att appen läser av platser i din mediesamling."</string>
+    <string name="biometric_dialog_default_title" msgid="4229778503907743328">"Appen <xliff:g id="APP">%s</xliff:g> vill autentisera"</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"Biometrisk maskinvara är inte tillgänglig"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Ofullständigt fingeravtryck. Försök igen."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Det gick inte att bearbeta fingeravtrycket. Försök igen."</string>
@@ -1897,14 +1903,14 @@
       <item quantity="other"><xliff:g id="COUNT">%1$s</xliff:g> förslag från autofyll</item>
       <item quantity="one">Ett förslag från autofyll</item>
     </plurals>
-    <string name="autofill_save_title" msgid="3345527308992082601">"Vill du spara innehållet i &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_save_title_with_type" msgid="8637809388029313305">"Vill du spara <xliff:g id="TYPE">%1$s</xliff:g> i &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"Vill du spara <xliff:g id="TYPE_0">%1$s</xliff:g> och <xliff:g id="TYPE_1">%2$s</xliff:g> i &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"Vill du spara <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> och <xliff:g id="TYPE_2">%3$s</xliff:g> i &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_update_title" msgid="4879673117448810818">"Vill du uppdatera till &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_update_title_with_type" msgid="339733442087186755">"Vill du uppdatera <xliff:g id="TYPE">%1$s</xliff:g> till &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_update_title_with_2types" msgid="6321714204167424745">"Vill du uppdatera <xliff:g id="TYPE_0">%1$s</xliff:g> och <xliff:g id="TYPE_1">%2$s</xliff:g> till &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_update_title_with_3types" msgid="5866735124066629287">"Vill du uppdatera <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> och <xliff:g id="TYPE_2">%3$s</xliff:g> till &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_save_title" msgid="327541108460384555">"Vill du spara i "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_save_title_with_type" msgid="2339135393607143594">"Vill du spara <xliff:g id="TYPE">%1$s</xliff:g> i "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_save_title_with_2types" msgid="87616102361154432">"Vill du spara <xliff:g id="TYPE_0">%1$s</xliff:g> och <xliff:g id="TYPE_1">%2$s</xliff:g> i "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_save_title_with_3types" msgid="4108978552969604555">"Vill du spara <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> och <xliff:g id="TYPE_2">%3$s</xliff:g> i "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_update_title" msgid="5305781141104585279">"Vill du uppdatera detta i "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_update_title_with_type" msgid="4624181147422762233">"Vill du uppdatera <xliff:g id="TYPE">%1$s</xliff:g> i "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_update_title_with_2types" msgid="2300113827053626484">"Vill du uppdatera <xliff:g id="TYPE_0">%1$s</xliff:g> och <xliff:g id="TYPE_1">%2$s</xliff:g> i "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_update_title_with_3types" msgid="9089824354296211922">"Vill du uppdatera dessa objekt i "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>": <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> och <xliff:g id="TYPE_2">%3$s</xliff:g>?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"Spara"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"Nej tack"</string>
     <string name="autofill_update_yes" msgid="310358413273276958">"Uppdatera"</string>

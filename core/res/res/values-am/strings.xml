@@ -292,6 +292,9 @@
     <string name="permgrouplab_microphone" msgid="171539900250043464">"ማይክሮፎን"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"ኦዲዮ ይቅዱ"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ኦዲዮን እንዲቀዳ ይፈቀድለት?"</string>
+    <string name="permgrouplab_activityRecognition" msgid="2838596644535616493">"የእንቅስቃሴ ለይቶ ማወቅ"</string>
+    <string name="permgroupdesc_activityRecognition" msgid="7672248027571522602">"እንቅስቃሴን ለይቶ ማወቅ"</string>
+    <string name="permgrouprequest_activityRecognition" msgid="8121253142311250055">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; አካላዊ እንቅስቃሴዎን ለይቶ እንዲያውቅ ይፈቀድለት?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"ካሜራ"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"ስዕሎች ያንሱ እና ቪዲዮ ይቅረጹ"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"&lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; ስዕሎችን እንዲያነሳ እና ቪዲዮን እንዲቀርጽ ይፈቀድለት?"</string>
@@ -418,14 +421,16 @@
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"ይህ መተግበሪያ እንደ የሕዋስ ማማዎች እና የWi-Fi አውታረ መረቦች ከመሳሰሉ የአውታረ መረብ ምንጮች ላይ በመመርኮዝ የእርስዎን መገኛ አካባቢ ማግኘት ይችላል። እነዚህ የመገኛ አካባቢ አገልግሎቶች መተግበሪያው መጠቀም እንዲችል ሊበሩ እና በእርስዎ ጡባዊ ላይ ሊገኙ የሚችሉ መሆን አለባቸው።"</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"ይህ መተግበሪያ እንደ የሕዋስ ማማዎች እና የWi-Fi አውታረ መረቦች ከመሳሰሉ የአውታረ መረብ ምንጮች ላይ በመመርኮዝ የእርስዎን መገኛ አካባቢ ማግኘት ይችላል። እነዚህ የመገኛ አካባቢ አገልግሎቶች እርስዎ መጠቀም እንዲችሉ ሊበሩ እና በእርስዎ ቴሌቪዥን ላይ ሊገኙ የሚችሉ መሆን አለባቸው።"</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"ይህ መተግበሪያ እንደ የሕዋስ ማማዎች እና የWi-Fi አውታረ መረቦች ከመሳሰሉ የአውታረ መረብ ምንጮች ላይ በመመርኮዝ የእርስዎን መገኛ አካባቢ ማግኘት ይችላል። እነዚህ የመገኛ አካባቢ አገልግሎቶች መተግበሪያው መጠቀም እንዲችል ሊበሩ እና በእርስዎ ስልክ ላይ ሊገኙ የሚችሉ መሆን አለባቸው።"</string>
-    <string name="permlab_accessBackgroundLocation" msgid="5742466381902568536">"በበስተጀርባ ትክክለኛ መገኛ አካባቢ ላይ ድረስ"</string>
-    <string name="permdesc_accessBackgroundLocation" msgid="6371533283380774135">"ይህ መተግበሪያ በማናቸውም ጊዜ በበስተጀርባ ሲሆን ብቻ ትክክለኛውን መገኛ አካባቢ ማግኘት ይችላል። እነዚህ የመገኛ አካባቢ አገልግሎቶች መተግበሪያው መጠቀም እንዲችል ሊበሩ እና በእርስዎ ስልክ ላይ ሊገኙ የሚችሉ መሆን አለባቸው።"</string>
+    <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"አካባቢን በበስተጀርባ ድረስ"</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"ይህ ከግምታዊ ወይም ትክክለኛ አካባቢ በተጨማሪ ከተሰጠ መተግበሪያው በበስተጀርባ እያሄደ ሳለ አካባቢውን መድረስ ይችላል።"</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"የድምፅ ቅንብሮችን ለውጥ"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"መተግበሪያው አንደ የድምጽ መጠን እና ለውጽአት የትኛውን የድምጽ ማጉያ ጥቅም ላይ እንደዋለ የመሳሰሉ ሁለንተናዊ የድምጽ ቅንብሮችን እንዲያስተካክል ይፈቅድለታል።"</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"ኦዲዮ ይቅዱ"</string>
     <string name="permdesc_recordAudio" msgid="4245930455135321433">"ይህ መተግበሪያ በማናቸውም ጊዜ ማይክራፎኑን በመጠቀም ኦዲዮን መቅዳት ይችላል።"</string>
     <string name="permlab_sim_communication" msgid="2935852302216852065">"ወደ ሲሙ ትዕዛዞችን መላክ"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"መተግበሪያው ትዕዛዞችን ወደ ሲሙ እንዲልክ ያስችለዋል። ይሄ በጣማ አደገኛ ነው።"</string>
+    <string name="permlab_activityRecognition" msgid="3634590230567608356">"አካላዊ እንቅስቃሴን ለይቶ ማወቅ"</string>
+    <string name="permdesc_activityRecognition" msgid="3143453925156552894">"ይህ መተግበሪያ አካላዊ እንቅስቃሴዎን ለይቶ ሊያውቅ ይችላል።"</string>
     <string name="permlab_camera" msgid="3616391919559751192">"ፎቶዎች እና ቪዲዮዎች ያንሱ"</string>
     <string name="permdesc_camera" msgid="5392231870049240670">"ይህ መተግበሪያ በማናቸውም ጊዜ ካሜራውን በመጠቀም ፎቶ ሊያነሳ እና ቪዲዮዎችን ሊቀርጽ ይችላል።"</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"ነዛሪ ተቆጣጠር"</string>
@@ -518,6 +523,7 @@
     <string name="permdesc_imagesWrite" msgid="7073662756617474375">"መተግበሪያው የፎቶ ስብስብዎን እንዲቀይረው ያስችለዋል።"</string>
     <string name="permlab_mediaLocation" msgid="8675148183726247864">"አካባቢዎችን ከሚዲያ ስብስብዎ ማንበብ"</string>
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"መተግበሪያው አካባቢዎችን ከሚዲያ ስብስብዎ እንዲያነብብ ያስችለዋል።"</string>
+    <string name="biometric_dialog_default_title" msgid="4229778503907743328">"መተግበሪያ <xliff:g id="APP">%s</xliff:g> ማረጋገጥ ይፈልጋል"</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"ባዮሜትራዊ ሃርድዌር አይገኝም"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"ከፊል የጣት አሻራ ተገኝቷል። እባክዎ እንደገና ይሞክሩ።"</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"ጣት አሻራን መስራት አልተቻለም። እባክዎ እንደገና ይሞክሩ።"</string>
@@ -1897,14 +1903,14 @@
       <item quantity="one"><xliff:g id="COUNT">%1$s</xliff:g> ራስ-ሙላ ጥቆማዎች</item>
       <item quantity="other"><xliff:g id="COUNT">%1$s</xliff:g> ራስ-ሙላ ጥቆማዎች</item>
     </plurals>
-    <string name="autofill_save_title" msgid="3345527308992082601">"ወደ &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt; ይቀመጥ?"</string>
-    <string name="autofill_save_title_with_type" msgid="8637809388029313305">"<xliff:g id="TYPE">%1$s</xliff:g> ወደ &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt; ይቀመጥ?"</string>
-    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"<xliff:g id="TYPE_0">%1$s</xliff:g> እና <xliff:g id="TYPE_1">%2$s</xliff:g> ወደ &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt; ይቀመጡ?"</string>
-    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"<xliff:g id="TYPE_0">%1$s</xliff:g>፣ <xliff:g id="TYPE_1">%2$s</xliff:g> እና <xliff:g id="TYPE_2">%3$s</xliff:g> ወደ &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt; ይቀመጡ?"</string>
-    <string name="autofill_update_title" msgid="4879673117448810818">"ወደ &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt; ይዘመን?"</string>
-    <string name="autofill_update_title_with_type" msgid="339733442087186755">"<xliff:g id="TYPE">%1$s</xliff:g> ወደ &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt; ይዘመን?"</string>
-    <string name="autofill_update_title_with_2types" msgid="6321714204167424745">"<xliff:g id="TYPE_0">%1$s</xliff:g> እና <xliff:g id="TYPE_1">%2$s</xliff:g> ወደ &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt; ይዘመኑ?"</string>
-    <string name="autofill_update_title_with_3types" msgid="5866735124066629287">"<xliff:g id="TYPE_0">%1$s</xliff:g>፣ <xliff:g id="TYPE_1">%2$s</xliff:g> እና <xliff:g id="TYPE_2">%3$s</xliff:g> ወደ &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt; ይዘመኑ?"</string>
+    <string name="autofill_save_title" msgid="327541108460384555">"ወደ "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>" ይቀመጥ?"</string>
+    <string name="autofill_save_title_with_type" msgid="2339135393607143594">"<xliff:g id="TYPE">%1$s</xliff:g> ወደ "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>" ይቀመጡ?"</string>
+    <string name="autofill_save_title_with_2types" msgid="87616102361154432">"<xliff:g id="TYPE_0">%1$s</xliff:g> እና <xliff:g id="TYPE_1">%2$s</xliff:g> ወደ "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>" ይቀመጡ?"</string>
+    <string name="autofill_save_title_with_3types" msgid="4108978552969604555">"<xliff:g id="TYPE_0">%1$s</xliff:g>፣ <xliff:g id="TYPE_1">%2$s</xliff:g> እና <xliff:g id="TYPE_2">%3$s</xliff:g> ወደ "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>" ይቀመጡ?"</string>
+    <string name="autofill_update_title" msgid="5305781141104585279">"በ"<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>" ውስጥ ይዘመን?"</string>
+    <string name="autofill_update_title_with_type" msgid="4624181147422762233">"<xliff:g id="TYPE">%1$s</xliff:g> በ"<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>" ውስጥ ይዘመን?"</string>
+    <string name="autofill_update_title_with_2types" msgid="2300113827053626484">"<xliff:g id="TYPE_0">%1$s</xliff:g> እና <xliff:g id="TYPE_1">%2$s</xliff:g> በ"<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>" ውስጥ ይዘመኑ?"</string>
+    <string name="autofill_update_title_with_3types" msgid="9089824354296211922">"እነዚህ ንጥሎች በ"<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>" ውስጥ ይዘመኑ፦ <xliff:g id="TYPE_0">%1$s</xliff:g>፣ <xliff:g id="TYPE_1">%2$s</xliff:g> እና <xliff:g id="TYPE_2">%3$s</xliff:g>?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"አስቀምጥ"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"አይ፣ አመሰግናለሁ"</string>
     <string name="autofill_update_yes" msgid="310358413273276958">"አዘምን"</string>

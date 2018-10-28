@@ -37,6 +37,8 @@ public final class ChannelImpressions implements Parcelable {
     static final String ATT_DISMISSALS = "dismisses";
     static final String ATT_VIEWS = "views";
     static final String ATT_STREAK = "streak";
+    static final String ATT_SENT = "sent";
+    static final String ATT_INTERRUPTIVE = "interruptive";
 
     private int mDismissals = 0;
     private int mViews = 0;

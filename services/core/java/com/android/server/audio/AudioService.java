@@ -819,9 +819,9 @@ public class AudioService extends IAudioService.Stub
                 new String("AudioService ctor"),
                 0);
 
-        mSafeMediaVolumeState = new Integer(Settings.Global.getInt(mContentResolver,
-                                                        Settings.Global.AUDIO_SAFE_VOLUME_STATE,
-                                                        SAFE_MEDIA_VOLUME_NOT_CONFIGURED));
+        mSafeMediaVolumeState = Settings.Global.getInt(mContentResolver,
+                                            Settings.Global.AUDIO_SAFE_VOLUME_STATE,
+                                            SAFE_MEDIA_VOLUME_NOT_CONFIGURED);
         // The default safe volume index read here will be replaced by the actual value when
         // the mcc is read by onConfigureSafeVolume()
         mSafeMediaVolumeIndex = mContext.getResources().getInteger(
@@ -1657,7 +1657,7 @@ public class AudioService extends IAudioService.Stub
         }
 
         // reset any pending volume command
-        synchronized (mSafeMediaVolumeState) {
+        synchronized (mSafeMediaVolumeStateLock) {
             mPendingVolumeCommand = null;
         }
 
@@ -2017,7 +2017,7 @@ public class AudioService extends IAudioService.Stub
             return;
         }
 
-        synchronized (mSafeMediaVolumeState) {
+        synchronized (mSafeMediaVolumeStateLock) {
             // reset any pending volume command
             mPendingVolumeCommand = null;
 
@@ -3259,7 +3259,7 @@ public class AudioService extends IAudioService.Stub
         checkAllAliasStreamVolumes();
         checkMuteAffectedStreams();
 
-        synchronized (mSafeMediaVolumeState) {
+        synchronized (mSafeMediaVolumeStateLock) {
             mMusicActiveMs = MathUtils.constrain(Settings.Secure.getIntForUser(mContentResolver,
                     Settings.Secure.UNSAFE_VOLUME_MUSIC_ACTIVE_MS, 0, UserHandle.USER_CURRENT),
                     0, UNSAFE_VOLUME_MUSIC_ACTIVE_MS_MAX);
@@ -4058,7 +4058,7 @@ public class AudioService extends IAudioService.Stub
     }
 
     private void onCheckMusicActive(String caller) {
-        synchronized (mSafeMediaVolumeState) {
+        synchronized (mSafeMediaVolumeStateLock) {
             if (mSafeMediaVolumeState == SAFE_MEDIA_VOLUME_INACTIVE) {
                 int device = getDeviceForStream(AudioSystem.STREAM_MUSIC);
 
@@ -4119,7 +4119,7 @@ public class AudioService extends IAudioService.Stub
     }
 
     private void onConfigureSafeVolume(boolean force, String caller) {
-        synchronized (mSafeMediaVolumeState) {
+        synchronized (mSafeMediaVolumeStateLock) {
             int mcc = mContext.getResources().getConfiguration().mcc;
             if ((mMcc != mcc) || ((mMcc == 0) && force)) {
                 mSafeMediaVolumeIndex = mContext.getResources().getInteger(
@@ -6975,7 +6975,8 @@ public class AudioService extends IAudioService.Stub
     private static final int SAFE_MEDIA_VOLUME_DISABLED = 1;
     private static final int SAFE_MEDIA_VOLUME_INACTIVE = 2;  // confirmed
     private static final int SAFE_MEDIA_VOLUME_ACTIVE = 3;  // unconfirmed
-    private Integer mSafeMediaVolumeState;
+    private int mSafeMediaVolumeState;
+    private final Object mSafeMediaVolumeStateLock = new Object();
 
     private int mMcc = 0;
     // mSafeMediaVolumeIndex is the cached value of config_safe_media_volume_index property
@@ -7015,7 +7016,7 @@ public class AudioService extends IAudioService.Stub
     }
 
     private void setSafeMediaVolumeEnabled(boolean on, String caller) {
-        synchronized (mSafeMediaVolumeState) {
+        synchronized (mSafeMediaVolumeStateLock) {
             if ((mSafeMediaVolumeState != SAFE_MEDIA_VOLUME_NOT_CONFIGURED) &&
                     (mSafeMediaVolumeState != SAFE_MEDIA_VOLUME_DISABLED)) {
                 if (on && (mSafeMediaVolumeState == SAFE_MEDIA_VOLUME_INACTIVE)) {
@@ -7063,7 +7064,7 @@ public class AudioService extends IAudioService.Stub
     }
 
     private boolean checkSafeMediaVolume(int streamType, int index, int device) {
-        synchronized (mSafeMediaVolumeState) {
+        synchronized (mSafeMediaVolumeStateLock) {
             if ((mSafeMediaVolumeState == SAFE_MEDIA_VOLUME_ACTIVE) &&
                     (mStreamVolumeAlias[streamType] == AudioSystem.STREAM_MUSIC) &&
                     ((device & mSafeMediaVolumeDevices) != 0) &&
@@ -7077,7 +7078,7 @@ public class AudioService extends IAudioService.Stub
     @Override
     public void disableSafeMediaVolume(String callingPackage) {
         enforceVolumeController("disable the safe media volume");
-        synchronized (mSafeMediaVolumeState) {
+        synchronized (mSafeMediaVolumeStateLock) {
             setSafeMediaVolumeEnabled(false, callingPackage);
             if (mPendingVolumeCommand != null) {
                 onSetStreamVolume(mPendingVolumeCommand.mStreamType,
@@ -7359,7 +7360,7 @@ public class AudioService extends IAudioService.Stub
         mVolumeLogger.dump(pw);
     }
 
-    private static String safeMediaVolumeStateToString(Integer state) {
+    private static String safeMediaVolumeStateToString(int state) {
         switch(state) {
             case SAFE_MEDIA_VOLUME_NOT_CONFIGURED: return "SAFE_MEDIA_VOLUME_NOT_CONFIGURED";
             case SAFE_MEDIA_VOLUME_DISABLED: return "SAFE_MEDIA_VOLUME_DISABLED";

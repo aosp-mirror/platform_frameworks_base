@@ -298,6 +298,9 @@
     <string name="permgrouplab_microphone" msgid="171539900250043464">"Мікрофон"</string>
     <string name="permgroupdesc_microphone" msgid="4988812113943554584">"записувати аудіо"</string>
     <string name="permgrouprequest_microphone" msgid="9167492350681916038">"Дозволити додатку &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; записувати аудіо?"</string>
+    <string name="permgrouplab_activityRecognition" msgid="2838596644535616493">"Розпізнавання активності"</string>
+    <string name="permgroupdesc_activityRecognition" msgid="7672248027571522602">"розпізнавати активність"</string>
+    <string name="permgrouprequest_activityRecognition" msgid="8121253142311250055">"Дозволити додатку &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; розпізнавати вашу фізичну активність?"</string>
     <string name="permgrouplab_camera" msgid="4820372495894586615">"Камера"</string>
     <string name="permgroupdesc_camera" msgid="3250611594678347720">"фотографувати та записувати відео"</string>
     <string name="permgrouprequest_camera" msgid="1299833592069671756">"Дозволити додатку &lt;b&gt;<xliff:g id="APP_NAME">%1$s</xliff:g>&lt;/b&gt; робити знімки та записувати відео?"</string>
@@ -424,14 +427,16 @@
     <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Цей додаток може отримувати дані про ваше місцезнаходження на основі джерел мережі, як-от антен мобільного зв’язку та мереж Wi-Fi. Щоб додаток міг користуватися цими службами локації, вони мають бути доступними й увімкненими на вашому планшеті."</string>
     <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"Цей додаток може отримувати дані про ваше місцезнаходження на основі джерел мережі, як-от антен мобільного зв’язку та мереж Wi-Fi. Щоб додаток міг користуватися цими службами локації, вони мають бути доступними й увімкненими на вашому телевізорі."</string>
     <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"Цей додаток може отримувати дані про ваше місцезнаходження на основі джерел мережі, як-от антен мобільного зв’язку та мереж Wi-Fi. Щоб додаток міг користуватися цими службами локації, вони мають бути доступними й увімкненими на вашому телефоні."</string>
-    <string name="permlab_accessBackgroundLocation" msgid="5742466381902568536">"отримувати доступ до даних про точне місцезнаходження у фоновому режимі"</string>
-    <string name="permdesc_accessBackgroundLocation" msgid="6371533283380774135">"Цей додаток може будь-коли отримувати дані про ваше точне місцезнаходження у фоновому режимі. Щоб додаток користувався службами локації, вони мають бути наявні й увімкнені на вашому телефоні. Через це може швидше розряджатись акумулятор."</string>
+    <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"доступ до геоданих у фоновому режимі"</string>
+    <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"Якщо ви надасте цей дозвіл і доступ до приблизного або точного місцезнаходження, додаток зможе отримувати геодані у фоновому режимі."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"змінювати налаштув-ня звуку"</string>
     <string name="permdesc_modifyAudioSettings" msgid="3522565366806248517">"Дозволяє програмі змінювати загальні налаштування звуку, як-от гучність і динамік, який використовується для виводу сигналу."</string>
     <string name="permlab_recordAudio" msgid="3876049771427466323">"запис-ти аудіо"</string>
     <string name="permdesc_recordAudio" msgid="4245930455135321433">"Цей додаток може будь-коли записувати звук за допомогою мікрофона."</string>
     <string name="permlab_sim_communication" msgid="2935852302216852065">"надсилати команди на SIM-карту"</string>
     <string name="permdesc_sim_communication" msgid="5725159654279639498">"Дозволяє програмі надсилати команди на SIM-карту. Це дуже небезпечно."</string>
+    <string name="permlab_activityRecognition" msgid="3634590230567608356">"розпізнавати фізичну активність"</string>
+    <string name="permdesc_activityRecognition" msgid="3143453925156552894">"Цей додаток може розпізнавати фізичну активність."</string>
     <string name="permlab_camera" msgid="3616391919559751192">"фотограф. та знімати відео"</string>
     <string name="permdesc_camera" msgid="5392231870049240670">"Цей додаток може будь-коли робити фотографії та записувати відео за допомогою камери."</string>
     <string name="permlab_vibrate" msgid="7696427026057705834">"контролювати вібросигнал"</string>
@@ -524,6 +529,7 @@
     <string name="permdesc_imagesWrite" msgid="7073662756617474375">"Додаток зможе змінювати вашу колекцію фотографій."</string>
     <string name="permlab_mediaLocation" msgid="8675148183726247864">"розпізнавати геодані з колекції медіа-вмісту"</string>
     <string name="permdesc_mediaLocation" msgid="2237023389178865130">"Додаток зможе розпізнавати геодані з вашої колекції медіа-вмісту."</string>
+    <string name="biometric_dialog_default_title" msgid="4229778503907743328">"Для додатка <xliff:g id="APP">%s</xliff:g> потрібна автентифікація."</string>
     <string name="biometric_error_hw_unavailable" msgid="645781226537551036">"Біометричне апаратне забезпечення недоступне"</string>
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Відбиток розпізнано частково. Повторіть спробу."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Не вдалось обробити відбиток. Повторіть спробу."</string>
@@ -1967,14 +1973,14 @@
       <item quantity="many"><xliff:g id="COUNT">%1$s</xliff:g> пропозицій автозаповнення</item>
       <item quantity="other"><xliff:g id="COUNT">%1$s</xliff:g> пропозиції автозаповнення</item>
     </plurals>
-    <string name="autofill_save_title" msgid="3345527308992082601">"Зберегти дані в службі &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_save_title_with_type" msgid="8637809388029313305">"Зберегти дані (<xliff:g id="TYPE">%1$s</xliff:g>) у службі &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_save_title_with_2types" msgid="5214035651838265325">"Зберегти дані (<xliff:g id="TYPE_0">%1$s</xliff:g> і <xliff:g id="TYPE_1">%2$s</xliff:g>) у службі &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_save_title_with_3types" msgid="6943161834231458441">"Зберегти дані (<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> і <xliff:g id="TYPE_2">%3$s</xliff:g>) у службі &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_update_title" msgid="4879673117448810818">"Оновити дані в сервісі &lt;b&gt;<xliff:g id="LABEL">%1$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_update_title_with_type" msgid="339733442087186755">"Оновити дані (<xliff:g id="TYPE">%1$s</xliff:g>) у сервісі &lt;b&gt;<xliff:g id="LABEL">%2$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_update_title_with_2types" msgid="6321714204167424745">"Оновити дані (<xliff:g id="TYPE_0">%1$s</xliff:g> і <xliff:g id="TYPE_1">%2$s</xliff:g>) у сервісі &lt;b&gt;<xliff:g id="LABEL">%3$s</xliff:g>&lt;/b&gt;?"</string>
-    <string name="autofill_update_title_with_3types" msgid="5866735124066629287">"Оновити дані (<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> і <xliff:g id="TYPE_2">%3$s</xliff:g>) у сервісі &lt;b&gt;<xliff:g id="LABEL">%4$s</xliff:g>&lt;/b&gt;?"</string>
+    <string name="autofill_save_title" msgid="327541108460384555">"Зберегти в сервісі "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_save_title_with_type" msgid="2339135393607143594">"Зберегти дані (<xliff:g id="TYPE">%1$s</xliff:g>) у сервісі "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_save_title_with_2types" msgid="87616102361154432">"Зберегти дані (<xliff:g id="TYPE_0">%1$s</xliff:g> і <xliff:g id="TYPE_1">%2$s</xliff:g>) у сервісі "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_save_title_with_3types" msgid="4108978552969604555">"Зберегти дані (<xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> і <xliff:g id="TYPE_2">%3$s</xliff:g>) у сервісі "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_update_title" msgid="5305781141104585279">"Оновити в сервісі "<b>"<xliff:g id="LABEL">%1$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_update_title_with_type" msgid="4624181147422762233">"Оновити дані (<xliff:g id="TYPE">%1$s</xliff:g>) у сервісі "<b>"<xliff:g id="LABEL">%2$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_update_title_with_2types" msgid="2300113827053626484">"Оновити дані (<xliff:g id="TYPE_0">%1$s</xliff:g> і <xliff:g id="TYPE_1">%2$s</xliff:g>) у сервісі "<b>"<xliff:g id="LABEL">%3$s</xliff:g>"</b>"?"</string>
+    <string name="autofill_update_title_with_3types" msgid="9089824354296211922">"Оновити в сервісі "<b>"<xliff:g id="LABEL">%4$s</xliff:g>"</b>" такі дані: <xliff:g id="TYPE_0">%1$s</xliff:g>, <xliff:g id="TYPE_1">%2$s</xliff:g> і <xliff:g id="TYPE_2">%3$s</xliff:g>?"</string>
     <string name="autofill_save_yes" msgid="6398026094049005921">"Зберегти"</string>
     <string name="autofill_save_no" msgid="2625132258725581787">"Ні, дякую"</string>
     <string name="autofill_update_yes" msgid="310358413273276958">"Оновити"</string>

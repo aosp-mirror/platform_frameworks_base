@@ -15,12 +15,19 @@
  */
 package com.android.settingslib.bluetooth;
 
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 
 import android.bluetooth.BluetoothHeadset;
 import android.bluetooth.BluetoothProfile;
+import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.IntentFilter;
+import android.os.Handler;
+import android.os.UserHandle;
 import android.telephony.TelephonyManager;
 
 import com.android.settingslib.SettingsLibRobolectricTestRunner;
@@ -54,7 +61,29 @@ public class BluetoothEventManagerTest {
         mContext = RuntimeEnvironment.application;
 
         mBluetoothEventManager = new BluetoothEventManager(mLocalAdapter,
-                mCachedDeviceManager, mContext, null);
+                mCachedDeviceManager, mContext, /* handler= */ null, /* userHandle= */ null);
+    }
+
+    @Test
+    public void ifUserHandleIsNull_registerReceiverIsCalled() {
+        Context mockContext = mock(Context.class);
+        BluetoothEventManager eventManager =
+                new BluetoothEventManager(mLocalAdapter, mCachedDeviceManager, mockContext,
+                        /* handler= */ null, /* userHandle= */ null);
+
+        verify(mockContext).registerReceiver(any(BroadcastReceiver.class), any(IntentFilter.class),
+                eq(null), eq(null));
+    }
+
+    @Test
+    public void ifUserHandleSpecified_registerReceiverAsUserIsCalled() {
+        Context mockContext = mock(Context.class);
+        BluetoothEventManager eventManager =
+                new BluetoothEventManager(mLocalAdapter, mCachedDeviceManager, mockContext,
+                        /* handler= */ null, UserHandle.ALL);
+
+        verify(mockContext).registerReceiverAsUser(any(BroadcastReceiver.class), eq(UserHandle.ALL),
+                any(IntentFilter.class), eq(null), eq(null));
     }
 
     /**
@@ -95,9 +124,6 @@ public class BluetoothEventManagerTest {
                 BluetoothProfile.STATE_CONNECTED, BluetoothProfile.A2DP);
 
         verify(mBluetoothCallback).onProfileConnectionStateChanged(mCachedBluetoothDevice,
-                BluetoothProfile.STATE_CONNECTED, BluetoothProfile.A2DP);
-
-        verify(mCachedDeviceManager).onProfileConnectionStateChanged(mCachedBluetoothDevice,
                 BluetoothProfile.STATE_CONNECTED, BluetoothProfile.A2DP);
     }
 }

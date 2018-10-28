@@ -1341,6 +1341,7 @@ public class SubscriptionManager {
      * @param slotIndex the slot Index.
      * @return subscription Ids or null if the given slot Index is not valid.
      */
+    @Nullable
     public static int[] getSubscriptionIds(int slotIndex) {
         return getSubId(slotIndex);
     }
@@ -1368,7 +1369,7 @@ public class SubscriptionManager {
     }
 
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public static int getPhoneId(int subId) {
         if (!isValidSubscriptionId(subId)) {
             if (DBG) {
@@ -1664,7 +1665,7 @@ public class SubscriptionManager {
      * usable subId means its neither a INVALID_SUBSCRIPTION_ID nor a DEFAULT_SUB_ID.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public static boolean isUsableSubIdValue(int subId) {
         return subId >= MIN_SUBSCRIPTION_ID_VALUE && subId <= MAX_SUBSCRIPTION_ID_VALUE;
     }
@@ -1682,7 +1683,7 @@ public class SubscriptionManager {
     }
 
     /** @hide */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P)
     public static void putPhoneIdAndSubIdExtra(Intent intent, int phoneId) {
         int[] subIds = SubscriptionManager.getSubId(phoneId);
         if (subIds != null && subIds.length > 0) {
@@ -2206,43 +2207,49 @@ public class SubscriptionManager {
     }
 
     /**
-     * Set preferred default data.
-     * Set on which slot most cellular data will be on.
-     * It's also usually what we set up internet connection on.
+     * Set which subscription is preferred for cellular data.
+     * It's also usually the subscription we set up internet connection on.
      *
      * PreferredData overwrites user setting of default data subscription. And it's used
-     * by AlternativeNetworkAccessService or carrier apps to switch primary and CBRS
+     * by AlternativeNetworkService or carrier apps to switch primary and CBRS
      * subscription dynamically in multi-SIM devices.
      *
-     * @param slotId which slot is preferred to for cellular data. If it's INVALID, it means
-     *               it's unset and defaultDataSubId is used to determine which modem is preferred.
+     * @param subId which subscription is preferred to for cellular data. If it's
+     *              {@link SubscriptionManager#INVALID_SUBSCRIPTION_ID}, it means
+     *              it's unset and {@link SubscriptionManager#getDefaultDataSubscriptionId()}
+     *              is used to determine which modem is preferred.
      * @hide
      *
      */
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
-    public void setPreferredData(int slotId) {
-        if (VDBG) logd("[setPreferredData]+ slotId:" + slotId);
+    public void setPreferredData(int subId) {
+        if (VDBG) logd("[setPreferredData]+ subId:" + subId);
         setSubscriptionPropertyHelper(SubscriptionManager.DEFAULT_SUBSCRIPTION_ID,
-                "setPreferredData", (iSub)-> iSub.setPreferredData(slotId));
+                "setPreferredData", (iSub)-> iSub.setPreferredData(subId));
     }
 
     /**
-     * Get opportunistic data Profiles.
+     * Return opportunistic subscriptions that can be visible to the caller.
+     * Opportunistic subscriptions are for opportunistic networks, which are cellular
+     * networks with limited capabilities and coverage, for example, CBRS.
      *
-     *  Provide all available user downloaded profiles on phone which are used only for
-     *  opportunistic data.
-     *  @param slotIndex slot on which the profiles are queried from.
-     *  @return the list of opportunistic subscription info. If none exists, an empty list. 
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#READ_PHONE_STATE READ_PHONE_STATE}
+     * or that the calling app has carrier privileges (see
+     * {@link TelephonyManager#hasCarrierPrivileges}).
+     *
+     * @return the list of opportunistic subscription info. If none exists, an empty list.
      */
+    @SuppressAutoDoc // Blocked by b/72967236 - no support for carrier privileges
     @RequiresPermission(android.Manifest.permission.READ_PHONE_STATE)
-    public @NonNull List<SubscriptionInfo> getOpportunisticSubscriptions(int slotIndex) {
+    public @NonNull List<SubscriptionInfo> getOpportunisticSubscriptions() {
         String pkgForDebug = mContext != null ? mContext.getOpPackageName() : "<unknown>";
         List<SubscriptionInfo> subInfoList = null;
 
         try {
             ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
             if (iSub != null) {
-                subInfoList = iSub.getOpportunisticSubscriptions(slotIndex, pkgForDebug);
+                subInfoList = iSub.getOpportunisticSubscriptions(pkgForDebug);
             }
         } catch (RemoteException ex) {
             // ignore it

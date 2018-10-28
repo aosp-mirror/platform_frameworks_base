@@ -1003,11 +1003,38 @@ public class Process {
     public static final int PROC_OUT_LONG = 0x2000;
     /** @hide */
     public static final int PROC_OUT_FLOAT = 0x4000;
-    
-    /** @hide */
+
+    /**
+     * Read and parse a {@code proc} file in the given format.
+     *
+     * <p>The format is a list of integers, where every integer describes a variable in the file. It
+     * specifies how the variable is syntactically terminated (e.g. {@link Process#PROC_SPACE_TERM},
+     * {@link Process#PROC_TAB_TERM}, {@link Process#PROC_ZERO_TERM}).
+     *
+     * <p>If the variable should be parsed and returned to the caller, the termination type should
+     * be binary OR'd with the type of output (e.g. {@link Process#PROC_OUT_STRING}, {@link
+     * Process#PROC_OUT_LONG}, {@link Process#PROC_OUT_FLOAT}.
+     *
+     * <p>If the variable is wrapped in quotation marks it should be binary OR'd with {@link
+     * Process#PROC_QUOTES}. If the variable is wrapped in parentheses it should be binary OR'd with
+     * {@link Process#PROC_PARENS}.
+     *
+     * <p>If the variable is not formatted as a string and should be cast directly from characters
+     * to a long, the {@link Process#PROC_CHAR} integer should be binary OR'd.
+     *
+     * <p>If the terminating character can be repeated, the {@link Process#PROC_COMBINE} integer
+     * should be binary OR'd.
+     *
+     * @param file the path of the {@code proc} file to read
+     * @param format the format of the file
+     * @param outStrings the parsed {@code String}s from the file
+     * @param outLongs the parsed {@code long}s from the file
+     * @param outFloats the parsed {@code float}s from the file
+     * @hide
+     */
     public static final native boolean readProcFile(String file, int[] format,
             String[] outStrings, long[] outLongs, float[] outFloats);
-    
+
     /** @hide */
     public static final native boolean parseProcLine(byte[] buffer, int startIndex, 
             int endIndex, int[] format, String[] outStrings, long[] outLongs, float[] outFloats);

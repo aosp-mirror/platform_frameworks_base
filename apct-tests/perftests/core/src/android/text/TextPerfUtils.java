@@ -65,18 +65,23 @@ public class TextPerfUtils {
     }
 
     public CharSequence nextRandomParagraph(int wordLen, boolean applyRandomStyle, String setStr) {
-        return nextRandomParagraph(wordLen, applyRandomStyle, UnicodeSetToArray(setStr));
+        return nextRandomParagraph(wordLen, PARA_LENGTH, applyRandomStyle,
+                UnicodeSetToArray(setStr));
     }
 
     public CharSequence nextRandomParagraph(int wordLen, boolean applyRandomStyle) {
-        return nextRandomParagraph(wordLen, applyRandomStyle, ALPHABET);
+        return nextRandomParagraph(wordLen, PARA_LENGTH, applyRandomStyle, ALPHABET);
     }
 
-    public CharSequence nextRandomParagraph(int wordLen, boolean applyRandomStyle,
+    public CharSequence nextRandomParagraph(int wordLen, int paraLength) {
+        return nextRandomParagraph(wordLen, paraLength, false /* no style */, ALPHABET);
+    }
+
+    public CharSequence nextRandomParagraph(int wordLen, int paraLength, boolean applyRandomStyle,
             String[] charSet) {
         ArrayList<Character> chars = new ArrayList<>();
         ArrayList<Integer> wordOffsets = new ArrayList<>();
-        for (int i = 0; i < PARA_LENGTH; i++) {
+        for (int i = 0; i < paraLength; i++) {
             if (i % (wordLen + 1) == wordLen) {
                 chars.add(' ');
                 wordOffsets.add(chars.size());

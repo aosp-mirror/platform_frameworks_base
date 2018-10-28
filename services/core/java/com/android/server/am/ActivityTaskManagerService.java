@@ -273,6 +273,7 @@ import java.io.StringWriter;
 import java.lang.ref.WeakReference;
 import java.text.DateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.HashSet;
 import java.util.List;
@@ -397,7 +398,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     // VoiceInteractionManagerService
     ComponentName mActiveVoiceInteractionServiceComponent;
 
-    private VrController mVrController;
+    VrController mVrController;
     KeyguardController mKeyguardController;
     private final ClientLifecycleManager mLifecycleManager;
     private TaskChangeNotificationController mTaskChangeNotificationController;
@@ -611,23 +612,27 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         GL_ES_VERSION = SystemProperties.getInt("ro.opengles.version", GL_ES_VERSION_UNDEFINED);
     }
 
-    void onSystemReady() {
-        mHasHeavyWeightFeature = mContext.getPackageManager().hasSystemFeature(
-                PackageManager.FEATURE_CANT_SAVE_STATE);
-        mAssistUtils = new AssistUtils(mContext);
-        mVrController.onSystemReady();
-        mRecentTasks.onSystemReadyLocked();
+    public void onSystemReady() {
+        synchronized (mGlobalLock) {
+            mHasHeavyWeightFeature = mContext.getPackageManager().hasSystemFeature(
+                    PackageManager.FEATURE_CANT_SAVE_STATE);
+            mAssistUtils = new AssistUtils(mContext);
+            mVrController.onSystemReady();
+            mRecentTasks.onSystemReadyLocked();
+        }
     }
 
-    void onInitPowerManagement() {
-        mStackSupervisor.initPowerManagement();
-        final PowerManager pm = (PowerManager)mContext.getSystemService(Context.POWER_SERVICE);
-        mPowerManagerInternal = LocalServices.getService(PowerManagerInternal.class);
-        mVoiceWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "*voice*");
-        mVoiceWakeLock.setReferenceCounted(false);
+    public void onInitPowerManagement() {
+        synchronized (mGlobalLock) {
+            mStackSupervisor.initPowerManagement();
+            final PowerManager pm = (PowerManager) mContext.getSystemService(Context.POWER_SERVICE);
+            mPowerManagerInternal = LocalServices.getService(PowerManagerInternal.class);
+            mVoiceWakeLock = pm.newWakeLock(PowerManager.PARTIAL_WAKE_LOCK, "*voice*");
+            mVoiceWakeLock.setReferenceCounted(false);
+        }
     }
 
-    void installSystemProviders() {
+    public void installSystemProviders() {
         mFontScaleSettingObserver = new FontScaleSettingObserver();
     }
 
@@ -736,9 +741,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         mKeyguardController = mStackSupervisor.getKeyguardController();
     }
 
-    void onActivityManagerInternalAdded() {
-        mAmInternal = LocalServices.getService(ActivityManagerInternal.class);
-        mUgmInternal = LocalServices.getService(UriGrantsManagerInternal.class);
+    public void onActivityManagerInternalAdded() {
+        synchronized (mGlobalLock) {
+            mAmInternal = LocalServices.getService(ActivityManagerInternal.class);
+            mUgmInternal = LocalServices.getService(UriGrantsManagerInternal.class);
+        }
     }
 
     int increaseConfigurationSeqLocked() {
@@ -752,14 +759,18 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         return supervisor;
     }
 
-    void setWindowManager(WindowManagerService wm) {
-        mWindowManager = wm;
-        mLockTaskController.setWindowManager(wm);
-        mStackSupervisor.setWindowManager(wm);
+    public void setWindowManager(WindowManagerService wm) {
+        synchronized (mGlobalLock) {
+            mWindowManager = wm;
+            mLockTaskController.setWindowManager(wm);
+            mStackSupervisor.setWindowManager(wm);
+        }
     }
 
-    void setUsageStatsManager(UsageStatsManagerInternal usageStatsManager) {
-        mUsageStatsInternal = usageStatsManager;
+    public void setUsageStatsManager(UsageStatsManagerInternal usageStatsManager) {
+        synchronized (mGlobalLock) {
+            mUsageStatsInternal = usageStatsManager;
+        }
     }
 
     UserManagerService getUserManager() {
@@ -2135,7 +2146,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
     }
 
-    boolean isControllerAMonkey() {
+    public boolean isControllerAMonkey() {
         synchronized (mGlobalLock) {
             return mController != null && mControllerIsAMonkey;
         }
@@ -2512,6 +2523,20 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     @Override
+    public void updateLockTaskPackages(int userId, String[] packages) {
+        final int callingUid = Binder.getCallingUid();
+        if (callingUid != 0 && callingUid != SYSTEM_UID) {
+            mAmInternal.enforceCallingPermission(Manifest.permission.UPDATE_LOCK_TASK_PACKAGES,
+                    "updateLockTaskPackages()");
+        }
+        synchronized (this) {
+            if (DEBUG_LOCKTASK) Slog.w(TAG_LOCKTASK, "Whitelisting " + userId + ":"
+                    + Arrays.toString(packages));
+            getLockTaskController().updateLockTaskPackages(userId, packages);
+        }
+    }
+
+    @Override
     public boolean isInLockTaskMode() {
         return getLockTaskModeState() != LOCK_TASK_MODE_NONE;
     }
@@ -2880,7 +2905,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         });
     }
 
-    void onScreenAwakeChanged(boolean isAwake) {
+    public void onScreenAwakeChanged(boolean isAwake) {
         mH.post(() -> {
             for (int i = mScreenObservers.size() - 1; i >= 0; i--) {
                 mScreenObservers.get(i).onAwakeStateChanged(isAwake);
@@ -4355,10 +4380,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         mRecentTasks.notifyTaskPersisterLocked(task, flush);
     }
 
-    void onTopProcChangedLocked(WindowProcessController proc) {
-        mVrController.onTopProcChangedLocked(proc);
-    }
-
     boolean isKeyguardLocked() {
         return mKeyguardController.isKeyguardLocked();
     }
@@ -4614,17 +4635,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             }
         } finally {
             Binder.restoreCallingIdentity(origId);
-        }
-    }
-
-    void updateUserConfiguration() {
-        synchronized (mGlobalLock) {
-            final Configuration configuration = new Configuration(getGlobalConfiguration());
-            final int currentUserId = mAmInternal.getCurrentUserId();
-            Settings.System.adjustConfigurationForUser(mContext.getContentResolver(), configuration,
-                    currentUserId, Settings.System.canWrite(mContext));
-            updateConfigurationLocked(configuration, null /* starting */, false /* initLocale */,
-                    false /* persistent */, currentUserId, false /* deferResume */);
         }
     }
 
@@ -4903,15 +4913,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         synchronized (mGlobalLock) {
             updateEventDispatchingLocked(booted);
         }
-    }
-
-    boolean canShowErrorDialogs() {
-        return mShowDialogs && !mSleeping && !mShuttingDown
-                && !mKeyguardController.isKeyguardOrAodShowing(DEFAULT_DISPLAY)
-                && !hasUserRestriction(UserManager.DISALLOW_SYSTEM_ERROR_DIALOGS,
-                mAmInternal.getCurrentUserId())
-                && !(UserManager.isDeviceInDemoMode(mContext)
-                && mAmInternal.getCurrentUser().isDemo());
     }
 
     static long getInputDispatchingTimeoutLocked(ActivityRecord r) {
@@ -5908,6 +5909,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 mShuttingDown = true;
                 mStackSupervisor.prepareForShutdownLocked();
                 updateEventDispatchingLocked(booted);
+                notifyTaskPersisterLocked(null, true);
                 return mStackSupervisor.shutdownLocked(timeout);
             }
         }
@@ -6588,6 +6590,17 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         @Override
+        public void dumpForOom(PrintWriter pw) {
+            synchronized (mGlobalLock) {
+                pw.println("  mHomeProcess: " + mHomeProcess);
+                pw.println("  mPreviousProcess: " + mPreviousProcess);
+                if (mHeavyWeightProcess != null) {
+                    pw.println("  mHeavyWeightProcess: " + mHeavyWeightProcess);
+                }
+            }
+        }
+
+        @Override
         public boolean canGcNow() {
             synchronized (mGlobalLock) {
                 return isSleeping() || mStackSupervisor.allResumedActivitiesIdle();
@@ -6687,6 +6700,108 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         public void onUidRemovedFromPendingTempWhitelist(int uid) {
             synchronized (mGlobalLock) {
                 mPendingTempWhitelist.remove(uid);
+            }
+        }
+
+        @Override
+        public boolean handleAppCrashInActivityController(String processName, int pid,
+                String shortMsg, String longMsg, long timeMillis, String stackTrace,
+                Runnable killCrashingAppCallback) {
+            synchronized (mGlobalLock) {
+                if (mController == null) {
+                    return false;
+                }
+
+                try {
+                    if (!mController.appCrashed(processName, pid, shortMsg, longMsg, timeMillis,
+                            stackTrace)) {
+                        killCrashingAppCallback.run();
+                        return true;
+                    }
+                } catch (RemoteException e) {
+                    mController = null;
+                    Watchdog.getInstance().setActivityController(null);
+                }
+                return false;
+            }
+        }
+
+        @Override
+        public void removeRecentTasksByPackageName(String packageName, int userId) {
+            synchronized (mGlobalLock) {
+                mRecentTasks.removeTasksByPackageName(packageName, userId);
+            }
+        }
+
+        @Override
+        public void cleanupRecentTasksForUser(int userId) {
+            synchronized (mGlobalLock) {
+                mRecentTasks.cleanupLocked(userId);
+            }
+        }
+
+        @Override
+        public void loadRecentTasksForUser(int userId) {
+            synchronized (mGlobalLock) {
+                mRecentTasks.loadUserRecentsLocked(userId);
+            }
+        }
+
+        @Override
+        public void onPackagesSuspendedChanged(String[] packages, boolean suspended, int userId) {
+            synchronized (mGlobalLock) {
+                mRecentTasks.onPackagesSuspendedChanged(packages, suspended, userId);
+            }
+        }
+
+        @Override
+        public void flushRecentTasks() {
+            mRecentTasks.flush();
+        }
+
+        @Override
+        public WindowProcessController getHomeProcess() {
+            synchronized (mGlobalLock) {
+                return mHomeProcess;
+            }
+        }
+
+        @Override
+        public WindowProcessController getPreviousProcess() {
+            synchronized (mGlobalLock) {
+                return mPreviousProcess;
+            }
+        }
+
+        @Override
+        public void clearLockedTasks(String reason) {
+            synchronized (mGlobalLock) {
+                getLockTaskController().clearLockedTasks(reason);
+            }
+        }
+
+        @Override
+        public void updateUserConfiguration() {
+            synchronized (mGlobalLock) {
+                final Configuration configuration = new Configuration(getGlobalConfiguration());
+                final int currentUserId = mAmInternal.getCurrentUserId();
+                Settings.System.adjustConfigurationForUser(mContext.getContentResolver(),
+                        configuration, currentUserId, Settings.System.canWrite(mContext));
+                updateConfigurationLocked(configuration, null /* starting */,
+                        false /* initLocale */, false /* persistent */, currentUserId,
+                        false /* deferResume */);
+            }
+        }
+
+        @Override
+        public boolean canShowErrorDialogs() {
+            synchronized (mGlobalLock) {
+                return mShowDialogs && !mSleeping && !mShuttingDown
+                        && !mKeyguardController.isKeyguardOrAodShowing(DEFAULT_DISPLAY)
+                        && !hasUserRestriction(UserManager.DISALLOW_SYSTEM_ERROR_DIALOGS,
+                        mAmInternal.getCurrentUserId())
+                        && !(UserManager.isDeviceInDemoMode(mContext)
+                        && mAmInternal.getCurrentUser().isDemo());
             }
         }
     }

@@ -174,9 +174,7 @@
     <string name="carrier_network_change_mode" msgid="8149202439957837762">"Changer de réseau de fournisseur de services"</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"Ouvrir les détails de la pile"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Pile : <xliff:g id="NUMBER">%d</xliff:g> pour cent"</string>
-    <!-- String.format failed for translation -->
-    <!-- no translation found for accessibility_battery_level_charging (1147587904439319646) -->
-    <skip />
+    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"La pile est en cours de charge : <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> %%."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Paramètres système"</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Notifications"</string>
     <string name="accessibility_overflow_action" msgid="5681882033274783311">"Afficher toutes les notifications"</string>
@@ -321,6 +319,7 @@
     <string name="quick_settings_cast_device_default_name" msgid="5367253104742382945">"Appareil sans nom"</string>
     <string name="quick_settings_cast_device_default_description" msgid="2484573682378634413">"Prêt à diffuser"</string>
     <string name="quick_settings_cast_detail_empty_text" msgid="311785821261640623">"Aucun appareil à proximité"</string>
+    <string name="quick_settings_cast_no_wifi" msgid="2696477881905521882">"Non connecté au Wi-Fi"</string>
     <string name="quick_settings_brightness_dialog_title" msgid="8599674057673605368">"Luminosité"</string>
     <string name="quick_settings_brightness_dialog_auto_brightness_label" msgid="5064982743784071218">"AUTOMATIQUE"</string>
     <string name="quick_settings_inversion_label" msgid="8790919884718619648">"Inverser les couleurs"</string>
@@ -784,6 +783,7 @@
     <string name="accessibility_quick_settings_user" msgid="1567445362870421770">"Connecté comme <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="data_connection_no_internet" msgid="4503302451650972989">"Aucune connexion Internet"</string>
     <string name="accessibility_quick_settings_open_details" msgid="4230931801728005194">"Ouvrir les détails."</string>
+    <string name="accessibility_quick_settings_not_available" msgid="4190068184294019846">"Non disponible pour la raison suivante : <xliff:g id="REASON">%s</xliff:g>"</string>
     <string name="accessibility_quick_settings_open_settings" msgid="7806613775728380737">"Ouvrir les paramètres <xliff:g id="ID_1">%s</xliff:g>."</string>
     <string name="accessibility_quick_settings_edit" msgid="7839992848995240393">"Modifier l\'ordre des paramètres."</string>
     <string name="accessibility_quick_settings_page" msgid="5032979051755200721">"Page <xliff:g id="ID_1">%1$d</xliff:g> sur <xliff:g id="ID_2">%2$d</xliff:g>"</string>
