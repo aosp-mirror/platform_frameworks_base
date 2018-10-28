@@ -84,6 +84,7 @@ public class VolumeInfo implements Parcelable {
     public static final int TYPE_EMULATED = IVold.VOLUME_TYPE_EMULATED;
     public static final int TYPE_ASEC = IVold.VOLUME_TYPE_ASEC;
     public static final int TYPE_OBB = IVold.VOLUME_TYPE_OBB;
+    public static final int TYPE_STUB = IVold.VOLUME_TYPE_STUB;
 
     public static final int STATE_UNMOUNTED = IVold.VOLUME_STATE_UNMOUNTED;
     public static final int STATE_CHECKING = IVold.VOLUME_STATE_CHECKING;
@@ -295,7 +296,7 @@ public class VolumeInfo implements Parcelable {
     }
 
     public boolean isVisibleForUser(int userId) {
-        if (type == TYPE_PUBLIC && mountUserId == userId) {
+        if ((type == TYPE_PUBLIC || type == TYPE_STUB) && mountUserId == userId) {
             return isVisible();
         } else if (type == TYPE_EMULATED) {
             return isVisible();
@@ -327,7 +328,7 @@ public class VolumeInfo implements Parcelable {
     public File getPathForUser(int userId) {
         if (path == null) {
             return null;
-        } else if (type == TYPE_PUBLIC) {
+        } else if (type == TYPE_PUBLIC || type == TYPE_STUB) {
             return new File(path);
         } else if (type == TYPE_EMULATED) {
             return new File(path, Integer.toString(userId));
@@ -344,7 +345,7 @@ public class VolumeInfo implements Parcelable {
     public File getInternalPathForUser(int userId) {
         if (path == null) {
             return null;
-        } else if (type == TYPE_PUBLIC) {
+        } else if (type == TYPE_PUBLIC || type == TYPE_STUB) {
             // TODO: plumb through cleaner path from vold
             return new File(path.replace("/storage/", "/mnt/media_rw/"));
         } else {
@@ -390,7 +391,7 @@ public class VolumeInfo implements Parcelable {
                 removable = true;
             }
 
-        } else if (type == TYPE_PUBLIC) {
+        } else if (type == TYPE_PUBLIC || type == TYPE_STUB) {
             emulated = false;
             removable = true;
 
@@ -447,7 +448,8 @@ public class VolumeInfo implements Parcelable {
 
     public @Nullable Intent buildBrowseIntentForUser(int userId) {
         final Uri uri;
-        if (type == VolumeInfo.TYPE_PUBLIC && mountUserId == userId) {
+        if ((type == VolumeInfo.TYPE_PUBLIC || type == VolumeInfo.TYPE_STUB)
+                && mountUserId == userId) {
             uri = DocumentsContract.buildRootUri(DOCUMENT_AUTHORITY, fsUuid);
         } else if (type == VolumeInfo.TYPE_EMULATED && isPrimary()) {
             uri = DocumentsContract.buildRootUri(DOCUMENT_AUTHORITY,
