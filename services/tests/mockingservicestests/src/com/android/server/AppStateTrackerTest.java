@@ -60,8 +60,6 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserHandle;
 import android.provider.Settings.Global;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
 import android.test.mock.MockContentResolver;
 import android.util.ArraySet;
 import android.util.Pair;
@@ -87,11 +85,14 @@ import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 import java.util.function.Consumer;
 
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
+
 /**
  * Tests for {@link AppStateTracker}
  *
  * Run with:
- atest $ANDROID_BUILD_TOP/frameworks/base/services/tests/servicestests/src/com/android/server/AppStateTrackerTest.java
+ atest $ANDROID_BUILD_TOP/frameworks/base/services/tests/mockingservicestests/src/com/android/server/AppStateTrackerTest.java
  */
 @SmallTest
 @RunWith(AndroidJUnit4.class)
@@ -682,10 +683,10 @@ public class AppStateTrackerTest {
 
         //--------------------------------------------------
         List<OpEntry> entries = new ArrayList<>();
-        entries.add(new AppOpsManager.OpEntry(
+        entries.add(new OpEntry(
                 AppOpsManager.OP_ACCESS_NOTIFICATIONS,
                 AppOpsManager.MODE_IGNORED, 0, 0, 0, 0, null));
-        entries.add(new AppOpsManager.OpEntry(
+        entries.add(new OpEntry(
                 AppStateTracker.TARGET_OP,
                 AppOpsManager.MODE_IGNORED, 0, 0, 0, 0, null));
 
@@ -693,7 +694,7 @@ public class AppStateTrackerTest {
 
         //--------------------------------------------------
         entries = new ArrayList<>();
-        entries.add(new AppOpsManager.OpEntry(
+        entries.add(new OpEntry(
                 AppStateTracker.TARGET_OP,
                 AppOpsManager.MODE_IGNORED, 0, 0, 0, 0, null));
 
@@ -701,7 +702,7 @@ public class AppStateTrackerTest {
 
         //--------------------------------------------------
         entries = new ArrayList<>();
-        entries.add(new AppOpsManager.OpEntry(
+        entries.add(new OpEntry(
                 AppStateTracker.TARGET_OP,
                 AppOpsManager.MODE_ALLOWED, 0, 0, 0, 0, null));
 
@@ -709,10 +710,10 @@ public class AppStateTrackerTest {
 
         //--------------------------------------------------
         entries = new ArrayList<>();
-        entries.add(new AppOpsManager.OpEntry(
+        entries.add(new OpEntry(
                 AppStateTracker.TARGET_OP,
                 AppOpsManager.MODE_IGNORED, 0, 0, 0, 0, null));
-        entries.add(new AppOpsManager.OpEntry(
+        entries.add(new OpEntry(
                 AppOpsManager.OP_ACCESS_NOTIFICATIONS,
                 AppOpsManager.MODE_IGNORED, 0, 0, 0, 0, null));
 
@@ -753,7 +754,7 @@ public class AppStateTrackerTest {
         final AppStateTrackerTestable instance = newInstance();
         callStart(instance);
 
-        AppStateTracker.Listener l = mock(AppStateTracker.Listener.class);
+        Listener l = mock(Listener.class);
         instance.addListener(l);
 
         // Power save on.
@@ -796,7 +797,7 @@ public class AppStateTrackerTest {
         final AppStateTrackerTestable instance = newInstance();
         callStart(instance);
 
-        AppStateTracker.Listener l = mock(AppStateTracker.Listener.class);
+        Listener l = mock(Listener.class);
         instance.addListener(l);
 
         // -------------------------------------------------------------------------
