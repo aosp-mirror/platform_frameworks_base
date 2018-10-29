@@ -175,4 +175,7 @@
 
   <!-- Accessibility action to notify a window there is an outside touch. -->
   <item type="id" name="accessibilityActionOutsideTouch" />
+
+  <!-- A tag used to save the view added to a transition overlay -->
+  <item type="id" name="transition_overlay_view_tag" />
 </resources>
