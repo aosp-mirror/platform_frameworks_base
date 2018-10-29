@@ -80,22 +80,16 @@ void RenderProxy::setName(const char* name) {
     mRenderThread.queue().runSync([this, name]() { mContext->setName(std::string(name)); });
 }
 
-void RenderProxy::initialize(const sp<Surface>& surface) {
+void RenderProxy::setSurface(const sp<Surface>& surface) {
     mRenderThread.queue().post(
             [ this, surf = surface ]() mutable { mContext->setSurface(std::move(surf)); });
 }
 
-void RenderProxy::allocateBuffers(const sp<Surface>& surface) {
-    mRenderThread.queue().post(
-            [ surf = surface ]() mutable { surf->allocateBuffers(); });
+void RenderProxy::allocateBuffers() {
+    mRenderThread.queue().post([=]() { mContext->allocateBuffers(); });
 }
 
-void RenderProxy::updateSurface(const sp<Surface>& surface) {
-    mRenderThread.queue().post(
-            [ this, surf = surface ]() mutable { mContext->setSurface(std::move(surf)); });
-}
-
-bool RenderProxy::pauseSurface(const sp<Surface>& surface) {
+bool RenderProxy::pause() {
     return mRenderThread.queue().runSync([this]() -> bool { return mContext->pauseSurface(); });
 }
 
@@ -103,13 +97,13 @@ void RenderProxy::setStopped(bool stopped) {
     mRenderThread.queue().runSync([this, stopped]() { mContext->setStopped(stopped); });
 }
 
-void RenderProxy::setup(float lightRadius, uint8_t ambientShadowAlpha, uint8_t spotShadowAlpha) {
+void RenderProxy::setLightAlpha(uint8_t ambientShadowAlpha, uint8_t spotShadowAlpha) {
     mRenderThread.queue().post(
-            [=]() { mContext->setup(lightRadius, ambientShadowAlpha, spotShadowAlpha); });
+            [=]() { mContext->setLightAlpha(ambientShadowAlpha, spotShadowAlpha); });
 }
 
-void RenderProxy::setLightCenter(const Vector3& lightCenter) {
-    mRenderThread.queue().post([=]() { mContext->setLightCenter(lightCenter); });
+void RenderProxy::setLightGeometry(const Vector3& lightCenter, float lightRadius) {
+    mRenderThread.queue().post([=]() { mContext->setLightGeometry(lightCenter, lightRadius); });
 }
 
 void RenderProxy::setOpaque(bool opaque) {

@@ -72,6 +72,7 @@ import android.database.sqlite.SQLiteDebug;
 import android.database.sqlite.SQLiteDebug.DbStats;
 import android.graphics.Bitmap;
 import android.graphics.Canvas;
+import android.graphics.HardwareRenderer;
 import android.graphics.ImageDecoder;
 import android.hardware.display.DisplayManagerGlobal;
 import android.net.ConnectivityManager;
@@ -5652,7 +5653,7 @@ public final class ActivityThread extends ClientTransactionHandler {
                     int uid = Process.myUid();
                     String[] packages = getPackageManager().getPackagesForUid(uid);
                     if (packages != null) {
-                        ThreadedRenderer.setupDiskCache(codeCacheDir);
+                        HardwareRenderer.setupDiskCache(codeCacheDir);
                         RenderScriptCacheDir.setupDiskCache(codeCacheDir);
                     }
                 } catch (RemoteException e) {
@@ -5887,7 +5888,8 @@ public final class ActivityThread extends ClientTransactionHandler {
 
         // Allow renderer debugging features if we're debuggable.
         boolean isAppDebuggable = (data.appInfo.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
-        ThreadedRenderer.setDebuggingEnabled(isAppDebuggable || Build.IS_DEBUGGABLE);
+        HardwareRenderer.setDebuggingEnabled(isAppDebuggable || Build.IS_DEBUGGABLE);
+        HardwareRenderer.setPackageName(data.appInfo.packageName);
 
         /**
          * Initialize the default http proxy in this process for the reasons we set the time zone.
@@ -5954,7 +5956,7 @@ public final class ActivityThread extends ClientTransactionHandler {
                 StrictMode.setThreadPolicyMask(oldMask);
             }
         } else {
-            ThreadedRenderer.setIsolatedProcess(true);
+            HardwareRenderer.setIsolatedProcess(true);
         }
 
         // If we use profiles, setup the dex reporter to notify package manager
