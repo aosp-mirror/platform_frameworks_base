@@ -84,7 +84,7 @@ import java.util.regex.Pattern;
 public class TextUtils {
     private static final String TAG = "TextUtils";
 
-    // Zero-width character used to fill ellipsized strings when codepoint lenght must be preserved.
+    // Zero-width character used to fill ellipsized strings when codepoint length must be preserved.
     /* package */ static final char ELLIPSIS_FILLER = '\uFEFF'; // ZERO WIDTH NO-BREAK SPACE
 
     // TODO: Based on CLDR data, these need to be localized for Dzongkha (dz) and perhaps
