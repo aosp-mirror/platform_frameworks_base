@@ -26,6 +26,7 @@ import android.os.Build;
 import android.os.Environment;
 import android.os.Process;
 import android.os.storage.StorageManager;
+import android.permission.PermissionManager.SplitPermissionInfo;
 import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
@@ -73,6 +74,8 @@ public class SystemConfig {
     // These are the built-in uid -> permission mappings that were read from the
     // system configuration files.
     final SparseArray<ArraySet<String>> mSystemPermissions = new SparseArray<>();
+
+    final ArrayList<SplitPermissionInfo> mSplitPermissions = new ArrayList<>();
 
     // These are the built-in shared libraries that were read from the
     // system configuration files.  Keys are the library names; strings are the
@@ -190,6 +193,10 @@ public class SystemConfig {
 
     public SparseArray<ArraySet<String>> getSystemPermissions() {
         return mSystemPermissions;
+    }
+
+    public ArrayList<SplitPermissionInfo> getSplitPermissions() {
+        return mSplitPermissions;
     }
 
     public ArrayMap<String, String> getSharedLibraries() {
@@ -489,6 +496,8 @@ public class SystemConfig {
                     perms.add(perm);
                     XmlUtils.skipCurrentTag(parser);
 
+                } else if ("split-permission".equals(name) && allowPermissions) {
+                    readSplitPermission(parser, permFile);
                 } else if ("library".equals(name) && allowLibs) {
                     String lname = parser.getAttributeValue(null, "name");
                     String lfile = parser.getAttributeValue(null, "file");
@@ -887,5 +896,47 @@ public class SystemConfig {
             }
         }
         mOemPermissions.put(packageName, permissions);
+    }
+
+    private void readSplitPermission(XmlPullParser parser, File permFile)
+            throws IOException, XmlPullParserException {
+        String splitPerm = parser.getAttributeValue(null, "name");
+        if (splitPerm == null) {
+            Slog.w(TAG, "<split-permission> without name in " + permFile + " at "
+                    + parser.getPositionDescription());
+            XmlUtils.skipCurrentTag(parser);
+            return;
+        }
+        String targetSdkStr = parser.getAttributeValue(null, "targetSdk");
+        int targetSdk = Build.VERSION_CODES.CUR_DEVELOPMENT + 1;
+        if (!TextUtils.isEmpty(targetSdkStr)) {
+            try {
+                targetSdk = Integer.parseInt(targetSdkStr);
+            } catch (NumberFormatException e) {
+                Slog.w(TAG, "<split-permission> targetSdk not an integer in " + permFile + " at "
+                        + parser.getPositionDescription());
+                XmlUtils.skipCurrentTag(parser);
+                return;
+            }
+        }
+        final int depth = parser.getDepth();
+        List<String> newPermissions = new ArrayList<>();
+        while (XmlUtils.nextElementWithin(parser, depth)) {
+            String name = parser.getName();
+            if ("new-permission".equals(name)) {
+                final String newName = parser.getAttributeValue(null, "name");
+                if (TextUtils.isEmpty(newName)) {
+                    Slog.w(TAG, "name is required for <new-permission> in "
+                            + parser.getPositionDescription());
+                    continue;
+                }
+                newPermissions.add(newName);
+            } else {
+                XmlUtils.skipCurrentTag(parser);
+            }
+        }
+        if (!newPermissions.isEmpty()) {
+            mSplitPermissions.add(new SplitPermissionInfo(splitPerm, newPermissions, targetSdk));
+        }
     }
 }
