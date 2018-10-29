@@ -634,7 +634,7 @@ TEST_F(TableFlattenerTest, FlattenOverlayable) {
           .AddSimple("com.app.test:integer/overlayable", ResourceId(0x7f020000))
           .Build();
 
-  ASSERT_TRUE(table->SetOverlayable(test::ParseNameOrDie("com.app.test:integer/overlayable"),
+  ASSERT_TRUE(table->AddOverlayable(test::ParseNameOrDie("com.app.test:integer/overlayable"),
                                     Overlayable{}, test::GetDiagnostics()));
 
   ResTable res_table;

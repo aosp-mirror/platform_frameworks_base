@@ -437,15 +437,37 @@ static bool DeserializePackageFromPb(const pb::Package& pb_package, const ResStr
         entry->allow_new = std::move(allow_new);
       }
 
-      if (pb_entry.has_overlayable()) {
-        const pb::Overlayable& pb_overlayable = pb_entry.overlayable();
-
+      for (const pb::Overlayable& pb_overlayable : pb_entry.overlayable()) {
         Overlayable overlayable;
+        switch (pb_overlayable.policy()) {
+          case pb::Overlayable::NONE:
+            overlayable.policy = {};
+            break;
+          case pb::Overlayable::PUBLIC:
+            overlayable.policy = Overlayable::Policy::kPublic;
+            break;
+          case pb::Overlayable::PRODUCT:
+            overlayable.policy = Overlayable::Policy::kProduct;
+            break;
+          case pb::Overlayable::PRODUCT_SERVICES:
+            overlayable.policy = Overlayable::Policy::kProductServices;
+            break;
+          case pb::Overlayable::SYSTEM:
+            overlayable.policy = Overlayable::Policy::kSystem;
+            break;
+          case pb::Overlayable::VENDOR:
+            overlayable.policy = Overlayable::Policy::kVendor;
+            break;
+          default:
+            *out_error = "unknown overlayable policy";
+            return false;
+        }
+
         if (pb_overlayable.has_source()) {
           DeserializeSourceFromPb(pb_overlayable.source(), src_pool, &overlayable.source);
         }
         overlayable.comment = pb_overlayable.comment();
-        entry->overlayable = std::move(overlayable);
+        entry->overlayable_declarations.push_back(overlayable);
       }
 
       ResourceId resid(pb_package.package_id().id(), pb_type.type_id().id(),

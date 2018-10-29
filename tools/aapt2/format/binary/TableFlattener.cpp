@@ -446,7 +446,7 @@ class PackageFlattener {
         config_masks[entry->id.value()] |= util::HostToDevice32(ResTable_typeSpec::SPEC_PUBLIC);
       }
 
-      if (entry->overlayable) {
+      if (!entry->overlayable_declarations.empty()) {
         config_masks[entry->id.value()] |=
             util::HostToDevice32(ResTable_typeSpec::SPEC_OVERLAYABLE);
       }
