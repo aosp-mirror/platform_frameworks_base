@@ -26,10 +26,14 @@ import static android.app.AppOpsManager.UID_STATE_TOP;
 import static android.app.AppOpsManager._NUM_UID_STATE;
 
 import android.Manifest;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.app.ActivityManager;
 import android.app.ActivityThread;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
+import android.app.AppOpsManager.HistoricalOpEntry;
+import android.app.AppOpsManager.HistoricalPackageOps;
 import android.app.AppOpsManagerInternal;
 import android.app.AppOpsManagerInternal.CheckOpsDelegate;
 import android.content.ContentResolver;
@@ -38,6 +42,7 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManagerInternal;
+import android.content.pm.ParceledListSlice;
 import android.content.pm.UserInfo;
 import android.database.ContentObserver;
 import android.media.AudioAttributes;
@@ -926,6 +931,116 @@ public class AppOpsService extends IAppOpsService.Stub {
             res.add(resPackage);
             return res;
         }
+    }
+
+    @Override
+    public @Nullable ParceledListSlice getAllHistoricalPackagesOps(@Nullable String[] opNames,
+            long beginTimeMillis, long endTimeMillis) {
+        Preconditions.checkArgument(beginTimeMillis >= 0 && beginTimeMillis < endTimeMillis,
+                "beginTimeMillis must be non negative and lesser than endTimeMillis");
+
+        mContext.enforcePermission(android.Manifest.permission.GET_APP_OPS_STATS,
+                Binder.getCallingPid(), Binder.getCallingUid(), "getAllHistoricalPackagesOps");
+
+        ArrayList<HistoricalPackageOps> historicalPackageOpsList = null;
+
+        final int uidStateCount = mUidStates.size();
+        for (int i = 0; i < uidStateCount; i++) {
+            final UidState uidState = mUidStates.valueAt(i);
+            if (uidState.pkgOps == null || uidState.pkgOps.isEmpty()) {
+                continue;
+            }
+            final ArrayMap<String, Ops> packages = uidState.pkgOps;
+            final int packageCount = packages.size();
+            for (int j = 0; j < packageCount; j++) {
+                final Ops pkgOps = packages.valueAt(j);
+                final AppOpsManager.HistoricalPackageOps historicalPackageOps =
+                        createHistoricalPackageOps(uidState.uid, pkgOps, opNames,
+                                beginTimeMillis, endTimeMillis);
+                if (historicalPackageOps != null) {
+                    if (historicalPackageOpsList == null) {
+                        historicalPackageOpsList = new ArrayList<>();
+                    }
+                    historicalPackageOpsList.add(historicalPackageOps);
+                }
+            }
+        }
+
+        if (historicalPackageOpsList == null) {
+            return null;
+        }
+
+        return new ParceledListSlice<>(historicalPackageOpsList);
+    }
+
+    private static @Nullable HistoricalPackageOps createHistoricalPackageOps(int uid,
+            @Nullable Ops pkgOps, @Nullable String[] opNames, long beginTimeMillis,
+            long endTimeMillis) {
+        // TODO: Implement historical data collection
+        if (pkgOps == null) {
+            return null;
+        }
+
+        final HistoricalPackageOps historicalPackageOps = new HistoricalPackageOps(uid,
+                pkgOps.packageName);
+
+        if (opNames == null) {
+            opNames = AppOpsManager.getOpStrs();
+        }
+        for (String opName : opNames) {
+            addHistoricOpEntry(AppOpsManager.strOpToOp(opName), pkgOps, historicalPackageOps);
+        }
+
+        return historicalPackageOps;
+    }
+
+    @Override
+    public @Nullable HistoricalPackageOps getHistoricalPackagesOps(int uid,
+            @NonNull String packageName, @Nullable String[] opNames,
+            long beginTimeMillis, long endTimeMillis) {
+        Preconditions.checkNotNull(packageName,
+                "packageName cannot be null");
+        Preconditions.checkArgument(beginTimeMillis >= 0 && beginTimeMillis < endTimeMillis,
+                "beginTimeMillis must be non negative and lesser than endTimeMillis");
+
+        mContext.enforcePermission(android.Manifest.permission.GET_APP_OPS_STATS,
+                Binder.getCallingPid(), Binder.getCallingUid(), "getHistoricalPackagesOps");
+
+        final String resolvedPackageName = resolvePackageName(uid, packageName);
+        if (resolvedPackageName == null) {
+            return null;
+        }
+
+        // TODO: Implement historical data collection
+        final Ops pkgOps = getOpsRawLocked(uid, resolvedPackageName, false /* edit */,
+                false /* uidMismatchExpected */);
+        return createHistoricalPackageOps(uid, pkgOps, opNames, beginTimeMillis, endTimeMillis);
+    }
+
+    private static void addHistoricOpEntry(int opCode, @NonNull Ops ops,
+            @NonNull HistoricalPackageOps outHistoricalPackageOps) {
+        final Op op = ops.get(opCode);
+        if (op == null) {
+            return;
+        }
+
+        final HistoricalOpEntry historicalOpEntry = new HistoricalOpEntry(opCode);
+
+        // TODO: Keep per UID state duration
+        for (int uidState = 0; uidState < AppOpsManager._NUM_UID_STATE; uidState++) {
+            final int acceptCount;
+            final int rejectCount;
+            if (op.rejectTime[uidState] == 0) {
+                acceptCount = 1;
+                rejectCount = 0;
+            } else {
+                acceptCount = 0;
+                rejectCount = 1;
+            }
+            historicalOpEntry.addEntry(uidState, acceptCount, rejectCount, 0);
+        }
+
+        outHistoricalPackageOps.addEntry(historicalOpEntry);
     }
 
     @Override
@@ -2020,7 +2135,8 @@ public class AppOpsService extends IAppOpsService.Stub {
                     try {
                         ApplicationInfo appInfo = ActivityThread.getPackageManager()
                                 .getApplicationInfo(packageName,
-                                        PackageManager.MATCH_DEBUG_TRIAGED_MISSING,
+                                        PackageManager.MATCH_DIRECT_BOOT_AWARE
+                                        | PackageManager.MATCH_DIRECT_BOOT_UNAWARE,
                                         UserHandle.getUserId(uid));
                         if (appInfo != null) {
                             pkgUid = appInfo.uid;

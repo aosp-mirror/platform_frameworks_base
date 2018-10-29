@@ -17,6 +17,7 @@
 package android.app;
 
 import android.Manifest;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -26,6 +27,7 @@ import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
+import android.content.pm.ParceledListSlice;
 import android.media.AudioAttributes.AttributeUsage;
 import android.os.Binder;
 import android.os.IBinder;
@@ -41,8 +43,11 @@ import com.android.internal.app.IAppOpsCallback;
 import com.android.internal.app.IAppOpsService;
 import com.android.internal.util.Preconditions;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 
@@ -138,22 +143,38 @@ public class AppOpsManager {
             "foreground",   // MODE_FOREGROUND
     };
 
+
+    /** @hide */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag = true, prefix = { "UID_STATE_" }, value = {
+            UID_STATE_PERSISTENT,
+            UID_STATE_TOP,
+            UID_STATE_FOREGROUND_SERVICE,
+            UID_STATE_FOREGROUND,
+            UID_STATE_BACKGROUND,
+            UID_STATE_CACHED
+    })
+    public @interface UidState {}
+
     /**
      * Metrics about an op when its uid is persistent.
      * @hide
      */
+    @SystemApi
     public static final int UID_STATE_PERSISTENT = 0;
 
     /**
      * Metrics about an op when its uid is at the top.
      * @hide
      */
+    @SystemApi
     public static final int UID_STATE_TOP = 1;
 
     /**
      * Metrics about an op when its uid is running a foreground service.
      * @hide
      */
+    @SystemApi
     public static final int UID_STATE_FOREGROUND_SERVICE = 2;
 
     /**
@@ -166,18 +187,21 @@ public class AppOpsManager {
      * Metrics about an op when its uid is in the foreground for any other reasons.
      * @hide
      */
+    @SystemApi
     public static final int UID_STATE_FOREGROUND = 3;
 
     /**
      * Metrics about an op when its uid is in the background for any reason.
      * @hide
      */
+    @SystemApi
     public static final int UID_STATE_BACKGROUND = 4;
 
     /**
      * Metrics about an op when its uid is cached.
      * @hide
      */
+    @SystemApi
     public static final int UID_STATE_CACHED = 5;
 
     /**
@@ -1883,6 +1907,377 @@ public class AppOpsManager {
     }
 
     /**
+     * This class represents historical app op information about a package. The history
+     * is aggregated information about ops for a certain amount of time such
+     * as the times the op was accessed, the times the op was rejected, the total
+     * duration the app op has been accessed.
+     *
+     * @hide
+     */
+    @TestApi
+    @SystemApi
+    public static final class HistoricalPackageOps implements Parcelable {
+        private final int mUid;
+        private final @NonNull String mPackageName;
+        private final @NonNull List<HistoricalOpEntry> mEntries;
+
+        /**
+         * @hide
+         */
+        public HistoricalPackageOps(int uid, @NonNull String packageName) {
+            mUid = uid;
+            mPackageName = packageName;
+            mEntries = new ArrayList<>();
+        }
+
+        HistoricalPackageOps(@NonNull Parcel parcel) {
+            mUid = parcel.readInt();
+            mPackageName = parcel.readString();
+            mEntries = parcel.createTypedArrayList(HistoricalOpEntry.CREATOR);
+        }
+
+        /**
+         * @hide
+         */
+        public void addEntry(@NonNull HistoricalOpEntry entry) {
+            mEntries.add(entry);
+        }
+
+        /**
+         * Gets the package name which the data represents.
+         *
+         * @return The package name which the data represents.
+         */
+        public @NonNull String getPackageName() {
+            return mPackageName;
+        }
+
+        /**
+         *  Gets the UID which the data represents.
+         *
+         * @return The UID which the data represents.
+         */
+        public int getUid() {
+            return mUid;
+        }
+
+        /**
+         * Gets number historical app op entries.
+         *
+         * @return The number historical app op entries.
+         *
+         * @see #getEntryAt(int)
+         */
+        public int getEntryCount() {
+            return mEntries.size();
+        }
+
+        /**
+         * Gets the historical at a given index.
+         *
+         * @param index The index to lookup.
+         *
+         * @return The entry at the given index.
+         *
+         * @see #getEntryCount()
+         */
+        public @NonNull HistoricalOpEntry getEntryAt(int index) {
+            return mEntries.get(index);
+        }
+
+        /**
+         * Gets the historical entry for a given op name.
+         *
+         * @param opName The op name.
+         *
+         * @return The historical entry for that op name.
+         */
+        public @Nullable HistoricalOpEntry getEntry(@NonNull String opName) {
+            final int entryCount = mEntries.size();
+            for (int i = 0; i < entryCount; i++) {
+                final HistoricalOpEntry entry = mEntries.get(i);
+                if (entry.getOp().equals(opName)) {
+                    return entry;
+                }
+            }
+            return null;
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(@NonNull Parcel parcel, int flags) {
+            parcel.writeInt(mUid);
+            parcel.writeString(mPackageName);
+            parcel.writeTypedList(mEntries, flags);
+        }
+
+        public static final Creator<HistoricalPackageOps> CREATOR =
+                new Creator<HistoricalPackageOps>() {
+            @Override
+            public @NonNull HistoricalPackageOps createFromParcel(@NonNull Parcel parcel) {
+                return new HistoricalPackageOps(parcel);
+            }
+
+            @Override
+            public @NonNull HistoricalPackageOps[] newArray(int size) {
+                return new HistoricalPackageOps[size];
+            }
+        };
+    }
+
+    /**
+     * This class represents historical information about an app op. The history
+     * is aggregated information about the op for a certain amount of time such
+     * as the times the op was accessed, the times the op was rejected, the total
+     * duration the app op has been accessed.
+     *
+     * @hide
+     */
+    @TestApi
+    @SystemApi
+    public static final class HistoricalOpEntry implements Parcelable {
+        private final int mOp;
+        private final long[] mAccessCount;
+        private final long[] mRejectCount;
+        private final long[] mAccessDuration;
+
+        /**
+         * @hide
+         */
+        public HistoricalOpEntry(int op) {
+            mOp = op;
+            mAccessCount = new long[_NUM_UID_STATE];
+            mRejectCount = new long[_NUM_UID_STATE];
+            mAccessDuration = new long[_NUM_UID_STATE];
+        }
+
+        HistoricalOpEntry(@NonNull Parcel parcel) {
+            mOp = parcel.readInt();
+            mAccessCount = parcel.createLongArray();
+            mRejectCount = parcel.createLongArray();
+            mAccessDuration = parcel.createLongArray();
+        }
+
+        /**
+         * @hide
+         */
+        public void addEntry(@UidState int uidState, long accessCount,
+                long rejectCount, long accessDuration) {
+            mAccessCount[uidState] = accessCount;
+            mRejectCount[uidState] = rejectCount;
+            mAccessDuration[uidState] = accessDuration;
+        }
+
+        /**
+         * Gets the op name.
+         *
+         * @return The op name.
+         */
+        public @NonNull String getOp() {
+            return sOpToString[mOp];
+        }
+
+        /**
+         * Gets the number times the op was accessed (performed) in the foreground.
+         *
+         * @return The times the op was accessed in the foreground.
+         *
+         * @see #getBackgroundAccessCount()
+         * @see #getAccessCount(int)
+         */
+        public long getForegroundAccessCount() {
+            return sum(mAccessCount, UID_STATE_PERSISTENT, UID_STATE_LAST_NON_RESTRICTED + 1);
+        }
+
+        /**
+         * Gets the number times the op was accessed (performed) in the background.
+         *
+         * @return The times the op was accessed in the background.
+         *
+         * @see #getForegroundAccessCount()
+         * @see #getAccessCount(int)
+         */
+        public long getBackgroundAccessCount() {
+            return sum(mAccessCount, UID_STATE_LAST_NON_RESTRICTED + 1, _NUM_UID_STATE);
+        }
+
+        /**
+         * Gets the number times the op was accessed (performed) for a given uid state.
+         *
+         * @param uidState The UID state for which to query. Could be one of
+         * {@link #UID_STATE_PERSISTENT}, {@link #UID_STATE_TOP},
+         * {@link #UID_STATE_FOREGROUND_SERVICE}, {@link #UID_STATE_FOREGROUND},
+         * {@link #UID_STATE_BACKGROUND}, {@link #UID_STATE_CACHED}.
+         *
+         * @return The times the op was accessed for the given UID state.
+         *
+         * @see #getForegroundAccessCount()
+         * @see #getBackgroundAccessCount()
+         */
+        public long getAccessCount(@UidState int uidState) {
+            return mAccessCount[uidState];
+        }
+
+        /**
+         * Gets the number times the op was rejected in the foreground.
+         *
+         * @return The times the op was rejected in the foreground.
+         *
+         * @see #getBackgroundRejectCount()
+         * @see #getRejectCount(int)
+         */
+        public long getForegroundRejectCount() {
+            return sum(mRejectCount, UID_STATE_PERSISTENT, UID_STATE_LAST_NON_RESTRICTED + 1);
+        }
+
+        /**
+         * Gets the number times the op was rejected in the background.
+         *
+         * @return The times the op was rejected in the background.
+         *
+         * @see #getForegroundRejectCount()
+         * @see #getRejectCount(int)
+         */
+        public long getBackgroundRejectCount() {
+            return sum(mRejectCount, UID_STATE_LAST_NON_RESTRICTED + 1, _NUM_UID_STATE);
+        }
+
+        /**
+         * Gets the number times the op was rejected for a given uid state.
+         *
+         * @param uidState The UID state for which to query. Could be one of
+         * {@link #UID_STATE_PERSISTENT}, {@link #UID_STATE_TOP},
+         * {@link #UID_STATE_FOREGROUND_SERVICE}, {@link #UID_STATE_FOREGROUND},
+         * {@link #UID_STATE_BACKGROUND}, {@link #UID_STATE_CACHED}.
+         *
+         * @return The times the op was rejected for the given UID state.
+         *
+         * @see #getForegroundRejectCount()
+         * @see #getBackgroundRejectCount()
+         */
+        public long getRejectCount(@UidState int uidState) {
+            return mRejectCount[uidState];
+        }
+
+        /**
+         * Gets the total duration the app op was accessed (performed) in the foreground.
+         *
+         * @return The total duration the app op was accessed in the foreground.
+         *
+         * @see #getBackgroundAccessDuration()
+         * @see #getAccessDuration(int)
+         */
+        public long getForegroundAccessDuration() {
+            return sum(mAccessDuration, UID_STATE_PERSISTENT, UID_STATE_LAST_NON_RESTRICTED + 1);
+        }
+
+        /**
+         * Gets the total duration the app op was accessed (performed) in the background.
+         *
+         * @return The total duration the app op was accessed in the background.
+         *
+         * @see #getForegroundAccessDuration()
+         * @see #getAccessDuration(int)
+         */
+        public long getBackgroundAccessDuration() {
+            return sum(mAccessDuration, UID_STATE_LAST_NON_RESTRICTED + 1, _NUM_UID_STATE);
+        }
+
+        /**
+         * Gets the total duration the app op was accessed (performed) for a given UID state.
+         *
+         * @param uidState The UID state for which to query. Could be one of
+         * {@link #UID_STATE_PERSISTENT}, {@link #UID_STATE_TOP},
+         * {@link #UID_STATE_FOREGROUND_SERVICE}, {@link #UID_STATE_FOREGROUND},
+         * {@link #UID_STATE_BACKGROUND}, {@link #UID_STATE_CACHED}.
+         *
+         * @return The total duration the app op was accessed for the given UID state.
+         *
+         * @see #getForegroundAccessDuration()
+         * @see #getBackgroundAccessDuration()
+         */
+        public long getAccessDuration(@UidState int uidState) {
+            return mAccessDuration[uidState];
+        }
+
+        @Override
+        public int describeContents() {
+            return 0;
+        }
+
+        @Override
+        public void writeToParcel(Parcel parcel, int flags) {
+            parcel.writeInt(mOp);
+            parcel.writeLongArray(mAccessCount);
+            parcel.writeLongArray(mRejectCount);
+            parcel.writeLongArray(mAccessDuration);
+        }
+
+        @Override
+        public boolean equals(Object other) {
+            if (this == other) {
+                return true;
+            }
+            if (other == null || getClass() != other.getClass()) {
+                return false;
+            }
+            final HistoricalOpEntry otherInstance = (HistoricalOpEntry) other;
+            if (mOp != otherInstance.mOp) {
+                return false;
+            }
+            if (!Arrays.equals(mAccessCount, otherInstance.mAccessCount)) {
+                return false;
+            }
+            if (!Arrays.equals(mRejectCount, otherInstance.mRejectCount)) {
+                return false;
+            }
+            return Arrays.equals(mAccessDuration, otherInstance.mAccessDuration);
+        }
+
+        @Override
+        public int hashCode() {
+            int result = mOp;
+            result = 31 * result + Arrays.hashCode(mAccessCount);
+            result = 31 * result + Arrays.hashCode(mRejectCount);
+            result = 31 * result + Arrays.hashCode(mAccessDuration);
+            return result;
+        }
+
+        /**
+         *
+         * Computes the sum given the start and end index.
+         *
+         * @param counts The data array.
+         * @param start The start index (inclusive)
+         * @param end The end index (exclusive)
+         * @return The sum.
+         */
+        private static long sum(@NonNull long[] counts, int start, int end) {
+            long totalCount = 0;
+            for (int i = start; i <= end; i++) {
+                totalCount += counts[i];
+            }
+            return totalCount;
+        }
+
+        public static final Creator<HistoricalOpEntry> CREATOR = new Creator<HistoricalOpEntry>() {
+            @Override
+            public @NonNull HistoricalOpEntry createFromParcel(@NonNull Parcel source) {
+                return new HistoricalOpEntry(source);
+            }
+
+            @Override
+            public @NonNull HistoricalOpEntry[] newArray(int size) {
+                return new HistoricalOpEntry[size];
+            }
+        };
+    }
+
+    /**
      * Callback for notification of changes to operation state.
      */
     public interface OnOpChangedListener {
@@ -1951,6 +2346,74 @@ public class AppOpsManager {
     public List<AppOpsManager.PackageOps> getOpsForPackage(int uid, String packageName, int[] ops) {
         try {
             return mService.getOpsForPackage(uid, packageName, ops);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Retrieve historical app op stats for a package.
+     *
+     * @param uid The UID to query for.
+     * @param packageName The package to query for.
+     * @param beginTimeMillis The beginning of the interval in milliseconds since
+     *     epoch start (January 1, 1970 00:00:00.000 GMT - Gregorian). Must be non
+     *     negative.
+     * @param endTimeMillis The end of the interval in milliseconds since
+     *     epoch start (January 1, 1970 00:00:00.000 GMT - Gregorian). Must be after
+     *     {@code beginTimeMillis}.
+     * @param opNames The ops to query for. Pass {@code null} for all ops.
+     *
+     * @return The historical ops or {@code null} if there are no ops for this package.
+     *
+     * @throws IllegalArgumentException If any of the argument contracts is violated.
+     *
+     * @hide
+     */
+    @TestApi
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.GET_APP_OPS_STATS)
+    public @Nullable HistoricalPackageOps getHistoricalPackagesOps(
+            int uid, @NonNull String packageName, @Nullable String[] opNames,
+            long beginTimeMillis, long endTimeMillis) {
+        try {
+            return mService.getHistoricalPackagesOps(uid, packageName, opNames,
+                    beginTimeMillis, endTimeMillis);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Retrieve historical app op stats for all packages.
+     *
+     * @param beginTimeMillis The beginning of the interval in milliseconds since
+     *     epoch start (January 1, 1970 00:00:00.000 GMT - Gregorian). Must be non
+     *     negative.
+     * @param endTimeMillis The end of the interval in milliseconds since
+     *     epoch start (January 1, 1970 00:00:00.000 GMT - Gregorian). Must be after
+     *     {@code beginTimeMillis}.
+     * @param opNames The ops to query for. Pass {@code null} for all ops.
+     *
+     * @return The historical ops or an empty list if there are no ops for any package.
+     *
+     * @throws IllegalArgumentException If any of the argument contracts is violated.
+     *
+     * @hide
+     */
+    @TestApi
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.GET_APP_OPS_STATS)
+    public @NonNull List<HistoricalPackageOps> getAllHistoricPackagesOps(
+            @Nullable String[] opNames, long beginTimeMillis, long endTimeMillis) {
+        try {
+            @SuppressWarnings("unchecked")
+            final ParceledListSlice<HistoricalPackageOps> payload =
+                    mService.getAllHistoricalPackagesOps(opNames, beginTimeMillis, endTimeMillis);
+            if (payload != null) {
+                return payload.getList();
+            }
+            return Collections.emptyList();
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
