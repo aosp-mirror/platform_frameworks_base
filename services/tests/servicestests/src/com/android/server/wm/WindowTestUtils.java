@@ -40,6 +40,7 @@ import static org.mockito.Mockito.anyBoolean;
 import static org.mockito.Mockito.anyFloat;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -50,15 +51,13 @@ import org.mockito.invocation.InvocationOnMock;
  * to WindowManager related test functionality.
  */
 public class WindowTestUtils {
-    public static int sNextTaskId = 0;
+    private static int sNextTaskId = 0;
 
-    /**
-     * Retrieves an instance of a mock {@link WindowManagerService}.
-     */
-    public static WindowManagerService getMockWindowManagerService() {
+    /** Retrieves an instance of a mock {@link WindowManagerService}. */
+    static WindowManagerService getMockWindowManagerService() {
         final WindowManagerService service = mock(WindowManagerService.class);
         final WindowManagerGlobalLock lock = new WindowManagerGlobalLock();
-        when(service.getWindowManagerLock()).thenReturn(lock);
+        doReturn(lock).when(service).getWindowManagerLock();
         return service;
     }
 

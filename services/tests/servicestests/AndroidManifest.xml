@@ -206,11 +206,11 @@
             </intent-filter>
         </activity-alias>
 
-        <activity android:name="com.android.server.am.TaskStackChangedListenerTest$ActivityA" />
-        <activity android:name="com.android.server.am.TaskStackChangedListenerTest$ActivityB" />
-        <activity android:name="com.android.server.am.TaskStackChangedListenerTest$ActivityRequestedOrientationChange" />
-        <activity android:name="com.android.server.am.TaskStackChangedListenerTest$ActivityTaskChangeCallbacks" />
-        <activity android:name="com.android.server.am.TaskStackChangedListenerTest$ActivityTaskDescriptionChange" />
+        <activity android:name="com.android.server.wm.TaskStackChangedListenerTest$ActivityA" />
+        <activity android:name="com.android.server.wm.TaskStackChangedListenerTest$ActivityB" />
+        <activity android:name="com.android.server.wm.TaskStackChangedListenerTest$ActivityRequestedOrientationChange" />
+        <activity android:name="com.android.server.wm.TaskStackChangedListenerTest$ActivityTaskChangeCallbacks" />
+        <activity android:name="com.android.server.wm.TaskStackChangedListenerTest$ActivityTaskDescriptionChange" />
 
         <receiver android:name="com.android.server.appwidget.DummyAppWidget">
             <intent-filter>

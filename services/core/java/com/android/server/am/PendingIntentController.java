@@ -43,6 +43,7 @@ import com.android.internal.os.IResultReceiver;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.LocalServices;
 import com.android.server.wm.ActivityTaskManagerInternal;
+import com.android.server.wm.SafeActivityOptions;
 
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
@@ -84,8 +85,8 @@ public class PendingIntentController {
         }
     }
 
-    PendingIntentRecord getIntentSender(int type, String packageName, int callingUid, int userId,
-            IBinder token, String resultWho, int requestCode, Intent[] intents,
+    public PendingIntentRecord getIntentSender(int type, String packageName, int callingUid,
+            int userId, IBinder token, String resultWho, int requestCode, Intent[] intents,
             String[] resolvedTypes, int flags, Bundle bOptions) {
         synchronized (mLock) {
             if (DEBUG_MU) Slog.v(TAG_MU, "getIntentSender(): uid=" + callingUid);

@@ -33,7 +33,6 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
 import android.content.res.CompatibilityInfo;
-import android.content.res.Configuration;
 import android.os.Binder;
 import android.os.Debug;
 import android.os.IBinder;
@@ -58,7 +57,8 @@ import com.android.internal.app.procstats.ProcessState;
 import com.android.internal.app.procstats.ProcessStats;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.internal.os.ProcessCpuTracker;
-import com.android.server.Watchdog;
+import com.android.server.wm.WindowProcessController;
+import com.android.server.wm.WindowProcessListener;
 
 import java.io.File;
 import java.io.IOException;

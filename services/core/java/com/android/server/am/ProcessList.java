@@ -92,6 +92,7 @@ import com.android.server.LocalServices;
 import com.android.server.ServiceThread;
 import com.android.server.Watchdog;
 import com.android.server.pm.dex.DexManager;
+import com.android.server.wm.ActivityServiceConnectionsHolder;
 import com.android.server.wm.WindowManagerService;
 
 import dalvik.system.VMRuntime;
@@ -212,7 +213,7 @@ public final class ProcessList {
     // Activity manager's version of Process.THREAD_GROUP_DEFAULT
     static final int SCHED_GROUP_DEFAULT = 2;
     // Activity manager's version of Process.THREAD_GROUP_TOP_APP
-    static final int SCHED_GROUP_TOP_APP = 3;
+    public static final int SCHED_GROUP_TOP_APP = 3;
     // Activity manager's version of Process.THREAD_GROUP_TOP_APP
     // Disambiguate between actual top app and processes bound to the top app
     static final int SCHED_GROUP_TOP_APP_BOUND = 4;
@@ -2523,9 +2524,13 @@ public final class ProcessList {
                     currApp.importanceReasonImportance =
                             ActivityManager.RunningAppProcessInfo.procStateToImportance(
                                     app.adjSourceProcState);
-                } else if (app.adjSource instanceof ActivityRecord) {
-                    ActivityRecord r = (ActivityRecord)app.adjSource;
-                    if (r.app != null) currApp.importanceReasonPid = r.app.getPid();
+                } else if (app.adjSource instanceof ActivityServiceConnectionsHolder) {
+                    final ActivityServiceConnectionsHolder r =
+                            (ActivityServiceConnectionsHolder) app.adjSource;
+                    final int pid = r.getActivityPid();
+                    if (pid != -1) {
+                        currApp.importanceReasonPid = pid;
+                    }
                 }
                 if (app.adjTarget instanceof ComponentName) {
                     currApp.importanceReasonComponent = (ComponentName)app.adjTarget;
