@@ -143,7 +143,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
 
     @Override
     public void binderDied() {
-        synchronized(mService.mWindowMap) {
+        synchronized (mService.mGlobalLock) {
             mCallback.asBinder().unlinkToDeath(this, 0);
             mClientDead = true;
             killSessionLocked();
@@ -229,14 +229,14 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
 
     @Override
     public void setInTouchMode(boolean mode) {
-        synchronized(mService.mWindowMap) {
+        synchronized (mService.mGlobalLock) {
             mService.mInTouchMode = mode;
         }
     }
 
     @Override
     public boolean getInTouchMode() {
-        synchronized(mService.mWindowMap) {
+        synchronized (mService.mGlobalLock) {
             return mService.mInTouchMode;
         }
     }
@@ -244,7 +244,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     @Override
     public boolean performHapticFeedback(IWindow window, int effectId,
             boolean always) {
-        synchronized(mService.mWindowMap) {
+        synchronized (mService.mGlobalLock) {
             long ident = Binder.clearCallingIdentity();
             try {
                 return mService.mPolicy.performHapticFeedbackLw(
@@ -317,7 +317,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
 
     @Override
     public void setWallpaperPosition(IBinder window, float x, float y, float xStep, float yStep) {
-        synchronized(mService.mWindowMap) {
+        synchronized (mService.mGlobalLock) {
             long ident = Binder.clearCallingIdentity();
             try {
                 mService.mRoot.mWallpaperController.setWindowWallpaperPosition(
@@ -331,14 +331,14 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
 
     @Override
     public void wallpaperOffsetsComplete(IBinder window) {
-        synchronized (mService.mWindowMap) {
+        synchronized (mService.mGlobalLock) {
             mService.mRoot.mWallpaperController.wallpaperOffsetsComplete(window);
         }
     }
 
     @Override
     public void setWallpaperDisplayOffset(IBinder window, int x, int y) {
-        synchronized(mService.mWindowMap) {
+        synchronized (mService.mGlobalLock) {
             long ident = Binder.clearCallingIdentity();
             try {
                 mService.mRoot.mWallpaperController.setWindowWallpaperDisplayOffset(
@@ -352,7 +352,7 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
     @Override
     public Bundle sendWallpaperCommand(IBinder window, String action, int x, int y,
             int z, Bundle extras, boolean sync) {
-        synchronized(mService.mWindowMap) {
+        synchronized (mService.mGlobalLock) {
             long ident = Binder.clearCallingIdentity();
             try {
                 return mService.mRoot.mWallpaperController.sendWindowWallpaperCommand(
@@ -366,14 +366,14 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
 
     @Override
     public void wallpaperCommandComplete(IBinder window, Bundle result) {
-        synchronized (mService.mWindowMap) {
+        synchronized (mService.mGlobalLock) {
             mService.mRoot.mWallpaperController.wallpaperCommandComplete(window);
         }
     }
 
     @Override
     public void onRectangleOnScreenRequested(IBinder token, Rect rectangle) {
-        synchronized(mService.mWindowMap) {
+        synchronized (mService.mGlobalLock) {
             final long identity = Binder.clearCallingIdentity();
             try {
                 mService.onRectangleOnScreenRequested(token, rectangle);

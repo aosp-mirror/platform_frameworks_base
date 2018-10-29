@@ -48,7 +48,7 @@ public class AppTransitionControllerTest extends WindowTestsBase {
 
     @Test
     public void testTranslucentOpen() throws Exception {
-        synchronized (sWm.mWindowMap) {
+        synchronized (sWm.mGlobalLock) {
             final AppWindowToken behind = createAppWindowToken(mDisplayContent,
                     WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
             final AppWindowToken translucentOpening = createAppWindowToken(mDisplayContent,
@@ -65,7 +65,7 @@ public class AppTransitionControllerTest extends WindowTestsBase {
 
     @Test
     public void testTranslucentClose() throws Exception {
-        synchronized (sWm.mWindowMap) {
+        synchronized (sWm.mGlobalLock) {
             final AppWindowToken behind = createAppWindowToken(mDisplayContent,
                     WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
             final AppWindowToken translucentClosing = createAppWindowToken(mDisplayContent,

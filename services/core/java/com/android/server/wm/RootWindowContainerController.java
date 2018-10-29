@@ -25,7 +25,7 @@ public class RootWindowContainerController
 
     public RootWindowContainerController(RootWindowContainerListener listener) {
         super(listener, WindowManagerService.getInstance());
-        synchronized (mWindowMap) {
+        synchronized (mGlobalLock) {
             mRoot.setController(this);
         }
     }
@@ -39,7 +39,7 @@ public class RootWindowContainerController
 
     /** Move the display to the given position. */
     public void positionChildAt(DisplayWindowController child, int position) {
-        synchronized (mWindowMap) {
+        synchronized (mGlobalLock) {
             mContainer.positionChildAt(position, child.mContainer);
         }
     }

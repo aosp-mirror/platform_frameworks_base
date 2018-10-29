@@ -2314,7 +2314,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         public void binderDied() {
             try {
                 boolean resetSplitScreenResizing = false;
-                synchronized(mService.mWindowMap) {
+                synchronized (mService.mGlobalLock) {
                     final WindowState win = mService.windowForClientLocked(mSession, mClient, false);
                     Slog.i(TAG, "WIN DEATH: " + win);
                     if (win != null) {
@@ -2984,7 +2984,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     public void registerFocusObserver(IWindowFocusObserver observer) {
-        synchronized(mService.mWindowMap) {
+        synchronized (mService.mGlobalLock) {
             if (mFocusCallbacks == null) {
                 mFocusCallbacks = new RemoteCallbackList<IWindowFocusObserver>();
             }
@@ -2993,7 +2993,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     }
 
     public void unregisterFocusObserver(IWindowFocusObserver observer) {
-        synchronized(mService.mWindowMap) {
+        synchronized (mService.mGlobalLock) {
             if (mFocusCallbacks != null) {
                 mFocusCallbacks.unregister(observer);
             }
@@ -4440,7 +4440,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
         public boolean isFocused() {
             final WindowState outer = mOuter.get();
             if (outer != null) {
-                synchronized (outer.mService.mWindowMap) {
+                synchronized (outer.mService.mGlobalLock) {
                     return outer.isFocused();
                 }
             }

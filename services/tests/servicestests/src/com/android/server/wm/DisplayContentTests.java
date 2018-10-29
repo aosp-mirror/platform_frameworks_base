@@ -583,7 +583,7 @@ public class DisplayContentTests extends WindowTestsBase {
     }
 
     private void updateFocusedWindow() {
-        synchronized (sWm.mWindowMap) {
+        synchronized (sWm.mGlobalLock) {
             sWm.updateFocusedWindowLocked(UPDATE_FOCUS_NORMAL, false);
         }
     }

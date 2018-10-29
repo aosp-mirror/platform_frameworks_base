@@ -52,7 +52,7 @@ public class DisplayWindowController
         super(listener, WindowManagerService.getInstance());
         mDisplayId = display.getDisplayId();
 
-        synchronized (mWindowMap) {
+        synchronized (mGlobalLock) {
             final long callingIdentity = Binder.clearCallingIdentity();
             try {
                 mRoot.createDisplayContent(display, this /* controller */);
@@ -75,7 +75,7 @@ public class DisplayWindowController
 
     @Override
     public void removeContainer() {
-        synchronized (mWindowMap) {
+        synchronized (mGlobalLock) {
             if(mContainer == null) {
                 if (DEBUG_DISPLAY) Slog.i(TAG_WM, "removeDisplay: could not find displayId="
                         + mDisplayId);
@@ -102,7 +102,7 @@ public class DisplayWindowController
      * {@link android.hardware.display.DisplayManager.DisplayListener#onDisplayChanged(int)}.
      */
     public void onDisplayChanged() {
-        synchronized (mWindowMap) {
+        synchronized (mGlobalLock) {
             if (mContainer == null) {
                 if (DEBUG_DISPLAY) Slog.i(TAG_WM, "onDisplayChanged: could not find display="
                         + mDisplayId);
@@ -118,7 +118,7 @@ public class DisplayWindowController
      */
     public void positionChildAt(StackWindowController child, int position,
             boolean includingParents) {
-        synchronized (mWindowMap) {
+        synchronized (mGlobalLock) {
             if (DEBUG_STACK) Slog.i(TAG_WM, "positionTaskStackAt: positioning stack=" + child
                     + " at " + position);
             if (mContainer == null) {
@@ -140,7 +140,7 @@ public class DisplayWindowController
      * attempt to update the IME target before all information about the Windows have been updated.
      */
     public void deferUpdateImeTarget() {
-        synchronized (mWindowMap) {
+        synchronized (mGlobalLock) {
             final DisplayContent dc = mRoot.getDisplayContent(mDisplayId);
             if (dc != null) {
                 dc.deferUpdateImeTarget();
@@ -152,7 +152,7 @@ public class DisplayWindowController
      * Resumes updating the IME target after deferring. See {@link #deferUpdateImeTarget()}
      */
     public void continueUpdateImeTarget() {
-        synchronized (mWindowMap) {
+        synchronized (mGlobalLock) {
             final DisplayContent dc = mRoot.getDisplayContent(mDisplayId);
             if (dc != null) {
                 dc.continueUpdateImeTarget();
@@ -167,7 +167,7 @@ public class DisplayWindowController
      * @param moveFocusNow Specifies if we should update the focused window immediately.
      */
     public void setFocusedApp(IBinder token, boolean moveFocusNow) {
-        synchronized (mWindowMap) {
+        synchronized (mGlobalLock) {
             if (mContainer == null) {
                 if (DEBUG_FOCUS_LIGHT) Slog.i(TAG_WM, "setFocusedApp: could not find displayId="
                         + mDisplayId);
@@ -213,21 +213,21 @@ public class DisplayWindowController
     public void prepareAppTransition(@WindowManager.TransitionType int transit,
             boolean alwaysKeepCurrent, @WindowManager.TransitionFlags int flags,
             boolean forceOverride) {
-        synchronized (mWindowMap) {
+        synchronized (mGlobalLock) {
             mRoot.getDisplayContent(mDisplayId).prepareAppTransition(transit, alwaysKeepCurrent,
                     flags, forceOverride);
         }
     }
 
     public void executeAppTransition() {
-        synchronized (mWindowMap) {
+        synchronized (mGlobalLock) {
             mRoot.getDisplayContent(mDisplayId).executeAppTransition();
         }
     }
 
     public void overridePendingAppTransition(String packageName,
             int enterAnim, int exitAnim, IRemoteCallback startedCallback) {
-        synchronized (mWindowMap) {
+        synchronized (mGlobalLock) {
             mRoot.getDisplayContent(mDisplayId).mAppTransition.overridePendingAppTransition(
                     packageName, enterAnim, exitAnim, startedCallback);
         }
@@ -235,7 +235,7 @@ public class DisplayWindowController
 
     public void overridePendingAppTransitionScaleUp(int startX, int startY, int startWidth,
             int startHeight) {
-        synchronized (mWindowMap) {
+        synchronized (mGlobalLock) {
             mRoot.getDisplayContent(mDisplayId).mAppTransition.overridePendingAppTransitionScaleUp(
                     startX, startY, startWidth, startHeight);
         }
@@ -243,7 +243,7 @@ public class DisplayWindowController
 
     public void overridePendingAppTransitionClipReveal(int startX, int startY,
             int startWidth, int startHeight) {
-        synchronized (mWindowMap) {
+        synchronized (mGlobalLock) {
             mRoot.getDisplayContent(mDisplayId)
                     .mAppTransition.overridePendingAppTransitionClipReveal(startX, startY,
                     startWidth, startHeight);
@@ -252,7 +252,7 @@ public class DisplayWindowController
 
     public void overridePendingAppTransitionThumb(GraphicBuffer srcThumb, int startX,
             int startY, IRemoteCallback startedCallback, boolean scaleUp) {
-        synchronized (mWindowMap) {
+        synchronized (mGlobalLock) {
             mRoot.getDisplayContent(mDisplayId)
                     .mAppTransition.overridePendingAppTransitionThumb(srcThumb, startX, startY,
                     startedCallback, scaleUp);
@@ -262,7 +262,7 @@ public class DisplayWindowController
     public void overridePendingAppTransitionAspectScaledThumb(GraphicBuffer srcThumb, int startX,
             int startY, int targetWidth, int targetHeight, IRemoteCallback startedCallback,
             boolean scaleUp) {
-        synchronized (mWindowMap) {
+        synchronized (mGlobalLock) {
             mRoot.getDisplayContent(mDisplayId)
                     .mAppTransition.overridePendingAppTransitionAspectScaledThumb(srcThumb, startX,
                     startY, targetWidth, targetHeight, startedCallback, scaleUp);
@@ -272,7 +272,7 @@ public class DisplayWindowController
     public void overridePendingAppTransitionMultiThumb(AppTransitionAnimationSpec[] specs,
             IRemoteCallback onAnimationStartedCallback, IRemoteCallback onAnimationFinishedCallback,
             boolean scaleUp) {
-        synchronized (mWindowMap) {
+        synchronized (mGlobalLock) {
             mRoot.getDisplayContent(mDisplayId)
                     .mAppTransition.overridePendingAppTransitionMultiThumb(specs,
                     onAnimationStartedCallback, onAnimationFinishedCallback, scaleUp);
@@ -280,14 +280,14 @@ public class DisplayWindowController
     }
 
     public void overridePendingAppTransitionStartCrossProfileApps() {
-        synchronized (mWindowMap) {
+        synchronized (mGlobalLock) {
             mRoot.getDisplayContent(mDisplayId)
                     .mAppTransition.overridePendingAppTransitionStartCrossProfileApps();
         }
     }
 
     public void overridePendingAppTransitionInPlace(String packageName, int anim) {
-        synchronized (mWindowMap) {
+        synchronized (mGlobalLock) {
             mRoot.getDisplayContent(mDisplayId)
                     .mAppTransition.overrideInPlaceAppTransition(packageName, anim);
         }
@@ -299,7 +299,7 @@ public class DisplayWindowController
      * @return The pending app transition of the display.
      */
     public @TransitionType int getPendingAppTransition() {
-        synchronized (mWindowMap) {
+        synchronized (mGlobalLock) {
             return mRoot.getDisplayContent(mDisplayId).mAppTransition.getAppTransition();
         }
     }
