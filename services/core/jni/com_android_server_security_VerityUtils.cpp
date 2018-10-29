@@ -66,6 +66,30 @@ class JavaByteArrayHolder {
     jbyte* mElements;
 };
 
+jbyteArray constructFsveritySignedData(JNIEnv* env, jobject /* clazz */, jbyteArray digest) {
+#if HAS_FSVERITY
+    const int kSha256Bytes = 32;
+    auto raii = JavaByteArrayHolder::newArray(env, sizeof(fsverity_digest_disk) + kSha256Bytes);
+    fsverity_digest_disk* data = reinterpret_cast<fsverity_digest_disk*>(raii->getRaw());
+
+    data->digest_algorithm = FS_VERITY_ALG_SHA256;
+    data->digest_size = kSha256Bytes;
+    if (env->GetArrayLength(digest) != kSha256Bytes) {
+        jniThrowExceptionFmt(env, "java/lang/IllegalArgumentException", "Invalid hash size of %d",
+                          env->GetArrayLength(digest));
+        return 0;
+    }
+    const jbyte* src = env->GetByteArrayElements(digest, nullptr);
+    memcpy(data->digest, src, kSha256Bytes);
+
+    return raii->release();
+#else
+    LOG_ALWAYS_FATAL("fs-verity is used while not enabled");
+    return 0;
+#endif  // HAS_FSVERITY
+}
+
+
 jbyteArray constructFsverityDescriptor(JNIEnv* env, jobject /* clazz */, jlong fileSize) {
 #if HAS_FSVERITY
     auto raii = JavaByteArrayHolder::newArray(env, sizeof(fsverity_descriptor));
@@ -122,6 +146,7 @@ jbyteArray constructFsverityFooter(JNIEnv* env, jobject /* clazz */,
 }
 
 const JNINativeMethod sMethods[] = {
+    { "constructFsveritySignedDataNative", "([B)[B", (void *)constructFsveritySignedData },
     { "constructFsverityDescriptorNative", "(J)[B", (void *)constructFsverityDescriptor },
     { "constructFsverityExtensionNative", "(SI)[B", (void *)constructFsverityExtension },
     { "constructFsverityFooterNative", "(I)[B", (void *)constructFsverityFooter },

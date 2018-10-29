@@ -138,8 +138,8 @@ abstract public class VerityUtils {
      * <p>It is worthy to note that {@code trackedBufferFactory} generates a "tracked" {@code
      * ByteBuffer}. The data will be used outside this method via the factory itself.
      *
-     * @return fs-verity measurement of {@code filePath}, which is a SHA-256 of fs-verity descriptor
-     *         and authenticated extensions.
+     * @return fs-verity signed data (struct fsverity_digest_disk) of {@code filePath}, which
+     *         includes SHA-256 of fs-verity descriptor and authenticated extensions.
      */
     private static byte[] generateFsverityMetadata(String filePath, String signaturePath,
             @NonNull TrackedShmBufferFactory trackedBufferFactory)
@@ -151,8 +151,10 @@ abstract public class VerityUtils {
 
             ByteBuffer buffer = result.verityData;
             buffer.position(result.merkleTreeSize);
-            return generateFsverityDescriptorAndMeasurement(file, result.rootHash, signaturePath,
-                    buffer);
+
+            final byte[] measurement = generateFsverityDescriptorAndMeasurement(file,
+                    result.rootHash, signaturePath, buffer);
+            return constructFsveritySignedDataNative(measurement);
         }
     }
 
@@ -211,6 +213,7 @@ abstract public class VerityUtils {
         return md.digest();
     }
 
+    private static native byte[] constructFsveritySignedDataNative(@NonNull byte[] measurement);
     private static native byte[] constructFsverityDescriptorNative(long fileSize);
     private static native byte[] constructFsverityExtensionNative(short extensionId,
             int extensionDataSize);
