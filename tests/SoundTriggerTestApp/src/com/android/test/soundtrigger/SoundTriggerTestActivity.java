@@ -257,6 +257,14 @@ public class SoundTriggerTestActivity extends Activity implements SoundTriggerTe
         }
     }
 
+    public synchronized void onGetModelStateButtonClicked(View v) {
+        if (mService == null) {
+            Log.e(TAG, "Can't get model state: not bound to SoundTriggerTestService");
+        } else {
+            mService.getModelState(mSelectedModelUuid);
+        }
+    }
+
     public synchronized void onCaptureAudioCheckboxClicked(View v) {
         // See if we have the right permissions
         if (!mService.hasMicrophonePermission()) {
