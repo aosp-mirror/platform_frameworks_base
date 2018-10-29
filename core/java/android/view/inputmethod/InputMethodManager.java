@@ -470,26 +470,53 @@ public final class InputMethodManager {
     }
 
     /**
-     * Checks the consistency between {@link InputMethodManager} state and {@link View} state.
+     * Returns fallback {@link InputMethodManager} if the called one is not likely to be compatible
+     * with the given {@code view}.
      *
-     * @param view {@link View} to be checked
-     * @return {@code true} if {@code view} is not {@code null} and there is a {@link Context}
-     *         mismatch between {@link InputMethodManager} and {@code view}
+     * @param view {@link View} to be checked.
+     * @return {@code null} when it is unnecessary (or impossible) to use fallback
+     *         {@link InputMethodManager} to which IME API calls need to be re-dispatched.
+     *          Non-{@code null} {@link InputMethodManager} if this method believes it'd be safer to
+     *          re-dispatch IME APIs calls on it.
      */
-    private boolean shouldDispatchToViewContext(@Nullable View view) {
+    @Nullable
+    private InputMethodManager getFallbackInputMethodManagerIfNecessary(@Nullable View view) {
         if (view == null) {
-            return false;
+            return null;
         }
-        final int viewDisplayId = view.getContext().getDisplayId();
-        if (viewDisplayId != mDisplayId) {
-            Log.w(TAG, "b/117267690: Context mismatch found. view=" + view + " belongs to"
-                    + " displayId=" + viewDisplayId
-                    + " but InputMethodManager belongs to displayId=" + mDisplayId
-                    + ". Use the right InputMethodManager instance to avoid performance overhead.",
-                    new Throwable());
-            return true;
+        // As evidenced in Bug 118341760, view.getViewRootImpl().getDisplayId() is supposed to be
+        // more reliable to determine with which display the given view is interacting than
+        // view.getContext().getDisplayId() / view.getContext().getSystemService(), which can be
+        // easily messed up by app developers (or library authors) by creating inconsistent
+        // ContextWrapper objects that re-dispatch those methods to other Context such as
+        // ApplicationContext.
+        final ViewRootImpl viewRootImpl = view.getViewRootImpl();
+        if (viewRootImpl == null) {
+            return null;
         }
-        return false;
+        final int viewRootDisplayId = viewRootImpl.getDisplayId();
+        if (viewRootDisplayId == mDisplayId) {
+            // Expected case.  Good to go.
+            return null;
+        }
+        final InputMethodManager fallbackImm =
+                viewRootImpl.mDisplayContext.getSystemService(InputMethodManager.class);
+        if (fallbackImm == null) {
+            Log.e(TAG, "b/117267690: Failed to get non-null fallback IMM. view=" + view);
+            return null;
+        }
+        if (fallbackImm.mDisplayId != viewRootDisplayId) {
+            Log.e(TAG, "b/117267690: Failed to get fallback IMM with expected displayId="
+                    + viewRootDisplayId + " actual IMM#displayId=" + fallbackImm.mDisplayId
+                    + " view=" + view);
+            return null;
+        }
+        Log.w(TAG, "b/117267690: Display ID mismatch found."
+                + " ViewRootImpl displayId=" + viewRootDisplayId
+                + " InputMethodManager displayId=" + mDisplayId
+                + ". Use the right InputMethodManager instance to avoid performance overhead.",
+                new Throwable());
+        return fallbackImm;
     }
 
     private static boolean canStartInput(View servedView) {
@@ -1000,8 +1027,9 @@ public final class InputMethodManager {
      */
     public boolean isActive(View view) {
         // Re-dispatch if there is a context mismatch.
-        if (shouldDispatchToViewContext(view)) {
-            return view.getContext().getSystemService(InputMethodManager.class).isActive(view);
+        final InputMethodManager fallbackImm = getFallbackInputMethodManagerIfNecessary(view);
+        if (fallbackImm != null) {
+            return fallbackImm.isActive(view);
         }
 
         checkFocus();
@@ -1088,9 +1116,9 @@ public final class InputMethodManager {
 
     public void displayCompletions(View view, CompletionInfo[] completions) {
         // Re-dispatch if there is a context mismatch.
-        if (shouldDispatchToViewContext(view)) {
-            view.getContext().getSystemService(InputMethodManager.class)
-                    .displayCompletions(view, completions);
+        final InputMethodManager fallbackImm = getFallbackInputMethodManagerIfNecessary(view);
+        if (fallbackImm != null) {
+            fallbackImm.displayCompletions(view, completions);
             return;
         }
 
@@ -1113,9 +1141,9 @@ public final class InputMethodManager {
 
     public void updateExtractedText(View view, int token, ExtractedText text) {
         // Re-dispatch if there is a context mismatch.
-        if (shouldDispatchToViewContext(view)) {
-            view.getContext().getSystemService(InputMethodManager.class)
-                    .updateExtractedText(view, token, text);
+        final InputMethodManager fallbackImm = getFallbackInputMethodManagerIfNecessary(view);
+        if (fallbackImm != null) {
+            fallbackImm.updateExtractedText(view, token, text);
             return;
         }
 
@@ -1161,9 +1189,9 @@ public final class InputMethodManager {
      */
     public boolean showSoftInput(View view, int flags) {
         // Re-dispatch if there is a context mismatch.
-        if (shouldDispatchToViewContext(view)) {
-            return view.getContext().getSystemService(InputMethodManager.class)
-                    .showSoftInput(view, flags);
+        final InputMethodManager fallbackImm = getFallbackInputMethodManagerIfNecessary(view);
+        if (fallbackImm != null) {
+            return fallbackImm.showSoftInput(view, flags);
         }
 
         return showSoftInput(view, flags, null);
@@ -1229,9 +1257,9 @@ public final class InputMethodManager {
      */
     public boolean showSoftInput(View view, int flags, ResultReceiver resultReceiver) {
         // Re-dispatch if there is a context mismatch.
-        if (shouldDispatchToViewContext(view)) {
-            return view.getContext().getSystemService(InputMethodManager.class)
-                    .showSoftInput(view, flags, resultReceiver);
+        final InputMethodManager fallbackImm = getFallbackInputMethodManagerIfNecessary(view);
+        if (fallbackImm != null) {
+            return fallbackImm.showSoftInput(view, flags, resultReceiver);
         }
 
         checkFocus();
@@ -1398,8 +1426,9 @@ public final class InputMethodManager {
      */
     public void restartInput(View view) {
         // Re-dispatch if there is a context mismatch.
-        if (shouldDispatchToViewContext(view)) {
-            view.getContext().getSystemService(InputMethodManager.class).restartInput(view);
+        final InputMethodManager fallbackImm = getFallbackInputMethodManagerIfNecessary(view);
+        if (fallbackImm != null) {
+            fallbackImm.restartInput(view);
             return;
         }
 
@@ -1827,9 +1856,9 @@ public final class InputMethodManager {
     public void updateSelection(View view, int selStart, int selEnd,
             int candidatesStart, int candidatesEnd) {
         // Re-dispatch if there is a context mismatch.
-        if (shouldDispatchToViewContext(view)) {
-            view.getContext().getSystemService(InputMethodManager.class)
-                    .updateSelection(view, selStart, selEnd, candidatesStart, candidatesEnd);
+        final InputMethodManager fallbackImm = getFallbackInputMethodManagerIfNecessary(view);
+        if (fallbackImm != null) {
+            fallbackImm.updateSelection(view, selStart, selEnd, candidatesStart, candidatesEnd);
             return;
         }
 
@@ -1871,8 +1900,9 @@ public final class InputMethodManager {
      */
     public void viewClicked(View view) {
         // Re-dispatch if there is a context mismatch.
-        if (shouldDispatchToViewContext(view)) {
-            view.getContext().getSystemService(InputMethodManager.class).viewClicked(view);
+        final InputMethodManager fallbackImm = getFallbackInputMethodManagerIfNecessary(view);
+        if (fallbackImm != null) {
+            fallbackImm.viewClicked(view);
             return;
         }
 
@@ -1941,9 +1971,9 @@ public final class InputMethodManager {
     @Deprecated
     public void updateCursor(View view, int left, int top, int right, int bottom) {
         // Re-dispatch if there is a context mismatch.
-        if (shouldDispatchToViewContext(view)) {
-            view.getContext().getSystemService(InputMethodManager.class)
-                    .updateCursor(view, left, top, right, bottom);
+        final InputMethodManager fallbackImm = getFallbackInputMethodManagerIfNecessary(view);
+        if (fallbackImm != null) {
+            fallbackImm.updateCursor(view, left, top, right, bottom);
             return;
         }
 
@@ -1979,9 +2009,9 @@ public final class InputMethodManager {
             return;
         }
         // Re-dispatch if there is a context mismatch.
-        if (shouldDispatchToViewContext(view)) {
-            view.getContext().getSystemService(InputMethodManager.class)
-                    .updateCursorAnchorInfo(view, cursorAnchorInfo);
+        final InputMethodManager fallbackImm = getFallbackInputMethodManagerIfNecessary(view);
+        if (fallbackImm != null) {
+            fallbackImm.updateCursorAnchorInfo(view, cursorAnchorInfo);
             return;
         }
 
@@ -2031,9 +2061,9 @@ public final class InputMethodManager {
      */
     public void sendAppPrivateCommand(View view, String action, Bundle data) {
         // Re-dispatch if there is a context mismatch.
-        if (shouldDispatchToViewContext(view)) {
-            view.getContext().getSystemService(InputMethodManager.class)
-                    .sendAppPrivateCommand(view, action, data);
+        final InputMethodManager fallbackImm = getFallbackInputMethodManagerIfNecessary(view);
+        if (fallbackImm != null) {
+            fallbackImm.sendAppPrivateCommand(view, action, data);
             return;
         }
 
@@ -2209,9 +2239,9 @@ public final class InputMethodManager {
     public void dispatchKeyEventFromInputMethod(@Nullable View targetView,
             @NonNull KeyEvent event) {
         // Re-dispatch if there is a context mismatch.
-        if (shouldDispatchToViewContext(targetView)) {
-            targetView.getContext().getSystemService(InputMethodManager.class)
-                    .dispatchKeyEventFromInputMethod(targetView, event);
+        final InputMethodManager fallbackImm = getFallbackInputMethodManagerIfNecessary(targetView);
+        if (fallbackImm != null) {
+            fallbackImm.dispatchKeyEventFromInputMethod(targetView, event);
             return;
         }
 
