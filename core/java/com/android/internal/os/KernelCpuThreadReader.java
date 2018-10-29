@@ -29,6 +29,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.function.Predicate;
 
 /**
  * Given a process, will iterate over the child threads of the process, and return the CPU usage
@@ -70,6 +71,11 @@ public class KernelCpuThreadReader {
     private static final String THREAD_NAME_FILENAME = "comm";
 
     /**
+     * Glob pattern for the process directory names under {@code proc}
+     */
+    private static final String PROCESS_DIRECTORY_FILTER = "[0-9]*";
+
+    /**
      * Default process name when the name can't be read
      */
     private static final String DEFAULT_PROCESS_NAME = "unknown_process";
@@ -96,6 +102,18 @@ public class KernelCpuThreadReader {
     private static final int NUM_BUCKETS = 8;
 
     /**
+     * Default predicate for what UIDs to check for when getting processes. This filters to only
+     * select system UIDs (1000-1999)
+     */
+    private static final Predicate<Integer> DEFAULT_UID_PREDICATE =
+            uid -> 1000 <= uid && uid < 2000;
+
+    /**
+     * Value returned when there was an error getting an integer ID value (e.g. PID, UID)
+     */
+    private static final int ID_ERROR = -1;
+
+    /**
      * Where the proc filesystem is mounted
      */
     private final Path mProcPath;
@@ -116,8 +134,13 @@ public class KernelCpuThreadReader {
      */
     private final FrequencyBucketCreator mFrequencyBucketCreator;
 
+    private final Injector mInjector;
+
     private KernelCpuThreadReader() throws IOException {
-        this(DEFAULT_PROC_PATH, DEFAULT_INITIAL_TIME_IN_STATE_PATH);
+        this(
+                DEFAULT_PROC_PATH,
+                DEFAULT_INITIAL_TIME_IN_STATE_PATH,
+                new Injector());
     }
 
     /**
@@ -128,9 +151,13 @@ public class KernelCpuThreadReader {
      * format
      */
     @VisibleForTesting
-    public KernelCpuThreadReader(Path procPath, Path initialTimeInStatePath) throws IOException {
+    public KernelCpuThreadReader(
+            Path procPath,
+            Path initialTimeInStatePath,
+            Injector injector) throws IOException {
         mProcPath = procPath;
         mProcTimeInStateReader = new ProcTimeInStateReader(initialTimeInStatePath);
+        mInjector = injector;
 
         // Copy mProcTimeInState's frequencies and initialize bucketing
         final long[] frequenciesKhz = mProcTimeInStateReader.getFrequenciesKhz();
@@ -154,6 +181,67 @@ public class KernelCpuThreadReader {
     }
 
     /**
+     * Get the per-thread CPU usage of all processes belonging to UIDs between {@code [1000, 2000)}
+     */
+    @Nullable
+    public ArrayList<ProcessCpuUsage> getProcessCpuUsageByUids() {
+        return getProcessCpuUsageByUids(DEFAULT_UID_PREDICATE);
+    }
+
+    /**
+     * Get the per-thread CPU usage of all processes belonging to a set of UIDs
+     *
+     * <p>This function will crawl through all process {@code proc} directories found by the pattern
+     * {@code /proc/[0-9]*}, and then check the UID using {@code /proc/$PID/status}. This takes
+     * approximately 500ms on a Pixel 2. Therefore, this method can be computationally expensive,
+     * and should not be called more than once an hour.
+     *
+     * @param uidPredicate only get usage from processes owned by UIDs that match this predicate
+     */
+    @Nullable
+    public ArrayList<ProcessCpuUsage> getProcessCpuUsageByUids(Predicate<Integer> uidPredicate) {
+        if (DEBUG) {
+            Slog.d(TAG, "Reading CPU thread usages for processes owned by UIDs");
+        }
+
+        final ArrayList<ProcessCpuUsage> processCpuUsages = new ArrayList<>();
+
+        try (DirectoryStream<Path> processPaths =
+                     Files.newDirectoryStream(mProcPath, PROCESS_DIRECTORY_FILTER)) {
+            for (Path processPath : processPaths) {
+                final int processId = getProcessId(processPath);
+                final int uid = mInjector.getUidForPid(processId);
+                if (uid == ID_ERROR || processId == ID_ERROR) {
+                    continue;
+                }
+                if (!uidPredicate.test(uid)) {
+                    continue;
+                }
+
+                final ProcessCpuUsage processCpuUsage =
+                        getProcessCpuUsage(processPath, processId, uid);
+                if (processCpuUsage != null) {
+                    processCpuUsages.add(processCpuUsage);
+                }
+            }
+        } catch (IOException e) {
+            Slog.w("Failed to iterate over process paths", e);
+            return null;
+        }
+
+        if (processCpuUsages.isEmpty()) {
+            Slog.w(TAG, "Didn't successfully get any process CPU information for UIDs specified");
+            return null;
+        }
+
+        if (DEBUG) {
+            Slog.d(TAG, "Read usage for " + processCpuUsages.size() + " processes");
+        }
+
+        return processCpuUsages;
+    }
+
+    /**
      * Read all of the CPU usage statistics for each child thread of the current process
      *
      * @return process CPU usage containing usage of all child threads
@@ -162,8 +250,8 @@ public class KernelCpuThreadReader {
     public ProcessCpuUsage getCurrentProcessCpuUsage() {
         return getProcessCpuUsage(
                 mProcPath.resolve("self"),
-                Process.myPid(),
-                Process.myUid());
+                mInjector.myPid(),
+                mInjector.myUid());
     }
 
     /**
@@ -172,7 +260,8 @@ public class KernelCpuThreadReader {
      * @param processPath the {@code /proc} path of the thread
      * @param processId the ID of the process
      * @param uid the ID of the user who owns the process
-     * @return process CPU usage containing usage of all child threads
+     * @return process CPU usage containing usage of all child threads. Null if the process exited
+     * and its {@code proc} directory was removed while collecting information
      */
     @Nullable
     private ProcessCpuUsage getProcessCpuUsage(Path processPath, int processId, int uid) {
@@ -224,7 +313,8 @@ public class KernelCpuThreadReader {
      * Get a thread's CPU usage
      *
      * @param threadDirectory the {@code /proc} directory of the thread
-     * @return null in the case that the directory read failed
+     * @return thread CPU usage. Null if the thread exited and its {@code proc} directory was
+     * removed while collecting information
      */
     @Nullable
     private ThreadCpuUsage getThreadCpuUsage(Path threadDirectory) {
@@ -277,6 +367,22 @@ public class KernelCpuThreadReader {
             return DEFAULT_THREAD_NAME;
         }
         return threadName;
+    }
+
+    /**
+     * Get the ID of a process from its path
+     *
+     * @param processPath {@code proc} path of the process
+     * @return the ID, {@link #ID_ERROR} if the path could not be parsed
+     */
+    private int getProcessId(Path processPath) {
+        String fileName = processPath.getFileName().toString();
+        try {
+            return Integer.parseInt(fileName);
+        } catch (NumberFormatException e) {
+            Slog.w(TAG, "Failed to parse " + fileName + " as process ID", e);
+            return ID_ERROR;
+        }
     }
 
     /**
@@ -441,6 +547,33 @@ public class KernelCpuThreadReader {
             this.threadId = threadId;
             this.threadName = threadName;
             this.usageTimesMillis = usageTimesMillis;
+        }
+    }
+
+    /**
+     * Used to inject static methods from {@link Process}
+     */
+    @VisibleForTesting
+    public static class Injector {
+        /**
+         * Get the PID of the current process
+         */
+        public int myPid() {
+            return Process.myPid();
+        }
+
+        /**
+         * Get the UID that owns the current process
+         */
+        public int myUid() {
+            return Process.myUid();
+        }
+
+        /**
+         * Get the UID for the process with ID {@code pid}
+         */
+        public int getUidForPid(int pid) {
+            return Process.getUidForPid(pid);
         }
     }
 }

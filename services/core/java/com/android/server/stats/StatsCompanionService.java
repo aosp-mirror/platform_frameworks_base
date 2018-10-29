@@ -1630,37 +1630,42 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         if (this.mKernelCpuThreadReader == null) {
             return;
         }
-        KernelCpuThreadReader.ProcessCpuUsage processCpuUsage = this.mKernelCpuThreadReader
-                .getCurrentProcessCpuUsage();
-        if (processCpuUsage == null) {
+        ArrayList<KernelCpuThreadReader.ProcessCpuUsage> processCpuUsages =
+                this.mKernelCpuThreadReader.getProcessCpuUsageByUids();
+        if (processCpuUsages == null) {
             return;
         }
         int[] cpuFrequencies = mKernelCpuThreadReader.getCpuFrequenciesKhz();
-        for (KernelCpuThreadReader.ThreadCpuUsage threadCpuUsage
-                : processCpuUsage.threadCpuUsages) {
-            if (threadCpuUsage.usageTimesMillis.length != cpuFrequencies.length) {
-                Slog.w(TAG, "Unexpected number of usage times,"
-                        + " expected " + cpuFrequencies.length
-                        + " but got " + threadCpuUsage.usageTimesMillis.length);
-                continue;
-            }
-
-            for (int i = 0; i < threadCpuUsage.usageTimesMillis.length; i++) {
-                // Do not report CPU usage at a frequency when it's zero
-                if (threadCpuUsage.usageTimesMillis[i] == 0) {
+        for (int i = 0; i < processCpuUsages.size(); i++) {
+            KernelCpuThreadReader.ProcessCpuUsage processCpuUsage = processCpuUsages.get(i);
+            ArrayList<KernelCpuThreadReader.ThreadCpuUsage> threadCpuUsages =
+                    processCpuUsage.threadCpuUsages;
+            for (int j = 0; j < threadCpuUsages.size(); j++) {
+                KernelCpuThreadReader.ThreadCpuUsage threadCpuUsage = threadCpuUsages.get(j);
+                if (threadCpuUsage.usageTimesMillis.length != cpuFrequencies.length) {
+                    Slog.w(TAG, "Unexpected number of usage times,"
+                            + " expected " + cpuFrequencies.length
+                            + " but got " + threadCpuUsage.usageTimesMillis.length);
                     continue;
                 }
 
-                StatsLogEventWrapper e =
-                        new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
-                e.writeInt(processCpuUsage.uid);
-                e.writeInt(processCpuUsage.processId);
-                e.writeInt(threadCpuUsage.threadId);
-                e.writeString(processCpuUsage.processName);
-                e.writeString(threadCpuUsage.threadName);
-                e.writeInt(cpuFrequencies[i]);
-                e.writeInt(threadCpuUsage.usageTimesMillis[i]);
-                pulledData.add(e);
+                for (int k = 0; k < threadCpuUsage.usageTimesMillis.length; k++) {
+                    // Do not report CPU usage at a frequency when it's zero
+                    if (threadCpuUsage.usageTimesMillis[k] == 0) {
+                        continue;
+                    }
+
+                    StatsLogEventWrapper e =
+                            new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
+                    e.writeInt(processCpuUsage.uid);
+                    e.writeInt(processCpuUsage.processId);
+                    e.writeInt(threadCpuUsage.threadId);
+                    e.writeString(processCpuUsage.processName);
+                    e.writeString(threadCpuUsage.threadName);
+                    e.writeInt(cpuFrequencies[k]);
+                    e.writeInt(threadCpuUsage.usageTimesMillis[k]);
+                    pulledData.add(e);
+                }
             }
         }
     }
