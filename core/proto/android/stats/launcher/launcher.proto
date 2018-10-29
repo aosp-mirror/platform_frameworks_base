@@ -15,7 +15,7 @@
  */
 
 syntax = "proto2";
-package android.app.launcher;
+package android.stats.launcher;
 option java_multiple_files = true;
 
 enum LauncherAction {

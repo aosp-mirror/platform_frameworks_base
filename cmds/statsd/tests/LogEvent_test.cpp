@@ -12,15 +12,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "src/logd/LogEvent.h"
 #include <gtest/gtest.h>
 #include <log/log_event_list.h>
-#include "src/logd/LogEvent.h"
+#include "frameworks/base/cmds/statsd/src/atoms.pb.h"
+#include "frameworks/base/core/proto/android/stats/launcher/launcher.pb.h"
 
 #ifdef __ANDROID__
 
 namespace android {
 namespace os {
 namespace statsd {
+
+using std::string;
+using util::ProtoOutputStream;
 
 TEST(LogEventTest, TestLogParsing) {
     LogEvent event1(1, 2000);
@@ -388,6 +393,57 @@ TEST(LogEventTest, TestKeyValuePairsEvent) {
     EXPECT_EQ(Type::FLOAT, item16.mValue.getType());
     EXPECT_EQ(1.1f, item16.mValue.float_value);
 }
+
+
+TEST(LogEventTest, TestBinaryFieldAtom) {
+    Atom launcherAtom;
+    auto launcher_event = launcherAtom.mutable_launcher_event();
+    launcher_event->set_action(stats::launcher::LauncherAction::LONGPRESS);
+    launcher_event->set_src_state(stats::launcher::LauncherState::OVERVIEW);
+    launcher_event->set_dst_state(stats::launcher::LauncherState::ALLAPPS);
+
+    auto extension = launcher_event->mutable_extension();
+
+    auto src_target = extension->add_src_target();
+    src_target->set_type(stats::launcher::LauncherTarget_Type_ITEM_TYPE);
+    src_target->set_item(stats::launcher::LauncherTarget_Item_FOLDER_ICON);
+
+    auto dst_target = extension->add_dst_target();
+    dst_target->set_type(stats::launcher::LauncherTarget_Type_ITEM_TYPE);
+    dst_target->set_item(stats::launcher::LauncherTarget_Item_WIDGET);
+
+    string extension_str;
+    extension->SerializeToString(&extension_str);
+
+    LogEvent event1(Atom::kLauncherEventFieldNumber, 1000);
+
+    event1.write((int32_t)stats::launcher::LauncherAction::LONGPRESS);
+    event1.write((int32_t)stats::launcher::LauncherState::OVERVIEW);
+    event1.write((int64_t)stats::launcher::LauncherState::ALLAPPS);
+    event1.write(extension_str);
+    event1.init();
+
+    ProtoOutputStream proto;
+    event1.ToProto(proto);
+
+    std::vector<uint8_t> outData;
+    outData.resize(proto.size());
+    size_t pos = 0;
+    auto iter = proto.data();
+    while (iter.readBuffer() != NULL) {
+        size_t toRead = iter.currentToRead();
+        std::memcpy(&(outData[pos]), iter.readBuffer(), toRead);
+        pos += toRead;
+        iter.rp()->move(toRead);
+    }
+
+    std::string result_str(outData.begin(), outData.end());
+    std::string orig_str;
+    launcherAtom.SerializeToString(&orig_str);
+
+    EXPECT_EQ(orig_str, result_str);
+}
+
 
 
 }  // namespace statsd
