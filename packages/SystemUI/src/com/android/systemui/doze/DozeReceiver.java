@@ -20,5 +20,19 @@ package com.android.systemui.doze;
  * Interface for class that cares about doze states.
  */
 public interface DozeReceiver {
+
+    /**
+     * If device enters or leaves doze mode
+     */
     void setDozing(boolean dozing);
+
+    /**
+     * Invoked every time a minute is elapsed in doze mode
+     */
+    void dozeTimeTick();
+
+    /**
+     * When view is double tapped in doze mode.
+     */
+    void onDozeDoubleTap();
 }
