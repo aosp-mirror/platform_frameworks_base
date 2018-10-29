@@ -124,7 +124,7 @@ final public class SettingsService extends Binder {
 
         @Override
         public int onCommand(String cmd) {
-            if (cmd == null) {
+            if (cmd == null || "help".equals(cmd) || "-h".equals(cmd)) {
                 return handleDefaultCommands(cmd);
             }
 
