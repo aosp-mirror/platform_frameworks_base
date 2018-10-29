@@ -148,8 +148,12 @@ TEST(AtomMatcherTest, TestAttributionMatcher) {
 
     uidMap.updateMap(
             1, {1111, 1111, 2222, 3333, 3333} /* uid list */, {1, 1, 2, 1, 2} /* version list */,
+            {android::String16("v1"), android::String16("v1"), android::String16("v2"),
+             android::String16("v1"), android::String16("v2")},
             {android::String16("pkg0"), android::String16("pkg1"), android::String16("pkg1"),
-             android::String16("Pkg2"), android::String16("PkG3")} /* package name list */);
+             android::String16("Pkg2"), android::String16("PkG3")} /* package name list */,
+            {android::String16(""), android::String16(""), android::String16(""),
+             android::String16(""), android::String16("")});
 
     EXPECT_TRUE(matchesSimple(uidMap, *simpleMatcher, event));
     attributionMatcher->mutable_matches_tuple()->mutable_field_value_matcher(0)
@@ -297,8 +301,12 @@ TEST(AtomMatcherTest, TestNeqAnyStringMatcher) {
     UidMap uidMap;
     uidMap.updateMap(
             1, {1111, 1111, 2222, 3333, 3333} /* uid list */, {1, 1, 2, 1, 2} /* version list */,
+            {android::String16("v1"), android::String16("v1"), android::String16("v2"),
+             android::String16("v1"), android::String16("v2")},
             {android::String16("pkg0"), android::String16("pkg1"), android::String16("pkg1"),
-             android::String16("Pkg2"), android::String16("PkG3")} /* package name list */);
+             android::String16("Pkg2"), android::String16("PkG3")} /* package name list */,
+            {android::String16(""), android::String16(""), android::String16(""),
+             android::String16(""), android::String16("")});
 
     AttributionNodeInternal attribution_node1;
     attribution_node1.set_uid(1111);
@@ -372,8 +380,12 @@ TEST(AtomMatcherTest, TestEqAnyStringMatcher) {
     UidMap uidMap;
     uidMap.updateMap(
             1, {1111, 1111, 2222, 3333, 3333} /* uid list */, {1, 1, 2, 1, 2} /* version list */,
+            {android::String16("v1"), android::String16("v1"), android::String16("v2"),
+             android::String16("v1"), android::String16("v2")},
             {android::String16("pkg0"), android::String16("pkg1"), android::String16("pkg1"),
-             android::String16("Pkg2"), android::String16("PkG3")} /* package name list */);
+             android::String16("Pkg2"), android::String16("PkG3")} /* package name list */,
+            {android::String16(""), android::String16(""), android::String16(""),
+             android::String16(""), android::String16("")});
 
     AttributionNodeInternal attribution_node1;
     attribution_node1.set_uid(1067);

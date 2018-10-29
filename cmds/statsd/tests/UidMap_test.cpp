@@ -71,14 +71,20 @@ TEST(UidMapTest, TestMatching) {
     vector<int32_t> uids;
     vector<int64_t> versions;
     vector<String16> apps;
+    vector<String16> versionStrings;
+    vector<String16> installers;
 
     uids.push_back(1000);
     uids.push_back(1000);
+    versionStrings.push_back(String16("v1"));
+    versionStrings.push_back(String16("v1"));
+    installers.push_back(String16(""));
+    installers.push_back(String16(""));
     apps.push_back(String16(kApp1.c_str()));
     apps.push_back(String16(kApp2.c_str()));
     versions.push_back(4);
     versions.push_back(5);
-    m.updateMap(1, uids, versions, apps);
+    m.updateMap(1, uids, versions, versionStrings, apps, installers);
     EXPECT_TRUE(m.hasApp(1000, kApp1));
     EXPECT_TRUE(m.hasApp(1000, kApp2));
     EXPECT_FALSE(m.hasApp(1000, "not.app"));
@@ -97,14 +103,20 @@ TEST(UidMapTest, TestAddAndRemove) {
     vector<int32_t> uids;
     vector<int64_t> versions;
     vector<String16> apps;
+    vector<String16> versionStrings;
+    vector<String16> installers;
 
     uids.push_back(1000);
     uids.push_back(1000);
+    versionStrings.push_back(String16("v1"));
+    versionStrings.push_back(String16("v1"));
+    installers.push_back(String16(""));
+    installers.push_back(String16(""));
     apps.push_back(String16(kApp1.c_str()));
     apps.push_back(String16(kApp2.c_str()));
     versions.push_back(4);
     versions.push_back(5);
-    m.updateMap(1, uids, versions, apps);
+    m.updateMap(1, uids, versions, versionStrings, apps, installers);
 
     std::set<string> name_set = m.getAppNamesFromUid(1000, true /* returnNormalized */);
     EXPECT_EQ(name_set.size(), 2u);
@@ -112,7 +124,7 @@ TEST(UidMapTest, TestAddAndRemove) {
     EXPECT_TRUE(name_set.find(kApp2) != name_set.end());
 
     // Update the app1 version.
-    m.updateApp(2, String16(kApp1.c_str()), 1000, 40);
+    m.updateApp(2, String16(kApp1.c_str()), 1000, 40, String16("v40"), String16(""));
     EXPECT_EQ(40, m.getAppVersion(1000, kApp1));
 
     name_set = m.getAppNamesFromUid(1000, true /* returnNormalized */);
@@ -138,14 +150,15 @@ TEST(UidMapTest, TestAddAndRemove) {
 
 TEST(UidMapTest, TestUpdateApp) {
     UidMap m;
-    m.updateMap(1, {1000, 1000}, {4, 5}, {String16(kApp1.c_str()), String16(kApp2.c_str())});
+    m.updateMap(1, {1000, 1000}, {4, 5}, {String16("v4"), String16("v5")},
+                {String16(kApp1.c_str()), String16(kApp2.c_str())}, {String16(""), String16("")});
     std::set<string> name_set = m.getAppNamesFromUid(1000, true /* returnNormalized */);
     EXPECT_EQ(name_set.size(), 2u);
     EXPECT_TRUE(name_set.find(kApp1) != name_set.end());
     EXPECT_TRUE(name_set.find(kApp2) != name_set.end());
 
     // Adds a new name for uid 1000.
-    m.updateApp(2, String16("NeW_aPP1_NAmE"), 1000, 40);
+    m.updateApp(2, String16("NeW_aPP1_NAmE"), 1000, 40, String16("v40"), String16(""));
     name_set = m.getAppNamesFromUid(1000, true /* returnNormalized */);
     EXPECT_EQ(name_set.size(), 3u);
     EXPECT_TRUE(name_set.find(kApp1) != name_set.end());
@@ -154,7 +167,7 @@ TEST(UidMapTest, TestUpdateApp) {
     EXPECT_TRUE(name_set.find("new_app1_name") != name_set.end());
 
     // This name is also reused by another uid 2000.
-    m.updateApp(3, String16("NeW_aPP1_NAmE"), 2000, 1);
+    m.updateApp(3, String16("NeW_aPP1_NAmE"), 2000, 1, String16("v1"), String16(""));
     name_set = m.getAppNamesFromUid(2000, true /* returnNormalized */);
     EXPECT_EQ(name_set.size(), 1u);
     EXPECT_TRUE(name_set.find("NeW_aPP1_NAmE") == name_set.end());
@@ -185,21 +198,26 @@ TEST(UidMapTest, TestOutputIncludesAtLeastOneSnapshot) {
     vector<int32_t> uids;
     vector<int64_t> versions;
     vector<String16> apps;
+    vector<String16> versionStrings;
+    vector<String16> installers;
     uids.push_back(1000);
     apps.push_back(String16(kApp2.c_str()));
+    versionStrings.push_back(String16("v1"));
+    installers.push_back(String16(""));
     versions.push_back(5);
-    m.updateMap(1, uids, versions, apps);
+    m.updateMap(1, uids, versions, versionStrings, apps, installers);
 
     // Set the last timestamp for this config key to be newer.
     m.mLastUpdatePerConfigKey[config1] = 2;
 
     ProtoOutputStream proto;
-    m.appendUidMap(3, config1, nullptr, &proto);
+    m.appendUidMap(3, config1, nullptr, true, true, &proto);
 
     // Check there's still a uidmap attached this one.
     UidMapping results;
     protoOutputStreamToUidMapping(&proto, &results);
     EXPECT_EQ(1, results.snapshots_size());
+    EXPECT_EQ("v1", results.snapshots(0).package_info(0).version_string());
 }
 
 TEST(UidMapTest, TestRemovedAppRetained) {
@@ -209,15 +227,19 @@ TEST(UidMapTest, TestRemovedAppRetained) {
     m.OnConfigUpdated(config1);
     vector<int32_t> uids;
     vector<int64_t> versions;
+    vector<String16> versionStrings;
+    vector<String16> installers;
     vector<String16> apps;
     uids.push_back(1000);
     apps.push_back(String16(kApp2.c_str()));
     versions.push_back(5);
-    m.updateMap(1, uids, versions, apps);
+    versionStrings.push_back(String16("v5"));
+    installers.push_back(String16(""));
+    m.updateMap(1, uids, versions, versionStrings, apps, installers);
     m.removeApp(2, String16(kApp2.c_str()), 1000);
 
     ProtoOutputStream proto;
-    m.appendUidMap(3, config1, nullptr, &proto);
+    m.appendUidMap(3, config1, nullptr, true, true, &proto);
 
     // Snapshot should still contain this item as deleted.
     UidMapping results;
@@ -233,30 +255,34 @@ TEST(UidMapTest, TestRemovedAppOverGuardrail) {
     m.OnConfigUpdated(config1);
     vector<int32_t> uids;
     vector<int64_t> versions;
+    vector<String16> versionStrings;
+    vector<String16> installers;
     vector<String16> apps;
     const int maxDeletedApps = StatsdStats::kMaxDeletedAppsInUidMap;
     for (int j = 0; j < maxDeletedApps + 10; j++) {
         uids.push_back(j);
         apps.push_back(String16(kApp1.c_str()));
         versions.push_back(j);
+        versionStrings.push_back(String16("v"));
+        installers.push_back(String16(""));
     }
-    m.updateMap(1, uids, versions, apps);
+    m.updateMap(1, uids, versions, versionStrings, apps, installers);
 
     // First, verify that we have the expected number of items.
     UidMapping results;
     ProtoOutputStream proto;
-    m.appendUidMap(3, config1, nullptr, &proto);
+    m.appendUidMap(3, config1, nullptr, true, true, &proto);
     protoOutputStreamToUidMapping(&proto, &results);
     EXPECT_EQ(maxDeletedApps + 10, results.snapshots(0).package_info_size());
 
     // Now remove all the apps.
-    m.updateMap(1, uids, versions, apps);
+    m.updateMap(1, uids, versions, versionStrings, apps, installers);
     for (int j = 0; j < maxDeletedApps + 10; j++) {
         m.removeApp(4, String16(kApp1.c_str()), j);
     }
 
     proto.clear();
-    m.appendUidMap(5, config1, nullptr, &proto);
+    m.appendUidMap(5, config1, nullptr, true, true, &proto);
     // Snapshot drops the first nine items.
     protoOutputStreamToUidMapping(&proto, &results);
     EXPECT_EQ(maxDeletedApps, results.snapshots(0).package_info_size());
@@ -272,6 +298,8 @@ TEST(UidMapTest, TestClearingOutput) {
 
     vector<int32_t> uids;
     vector<int64_t> versions;
+    vector<String16> versionStrings;
+    vector<String16> installers;
     vector<String16> apps;
     uids.push_back(1000);
     uids.push_back(1000);
@@ -279,45 +307,49 @@ TEST(UidMapTest, TestClearingOutput) {
     apps.push_back(String16(kApp2.c_str()));
     versions.push_back(4);
     versions.push_back(5);
-    m.updateMap(1, uids, versions, apps);
+    versionStrings.push_back(String16("v4"));
+    versionStrings.push_back(String16("v5"));
+    installers.push_back(String16(""));
+    installers.push_back(String16(""));
+    m.updateMap(1, uids, versions, versionStrings, apps, installers);
 
     ProtoOutputStream proto;
-    m.appendUidMap(2, config1, nullptr, &proto);
+    m.appendUidMap(2, config1, nullptr, true, true, &proto);
     UidMapping results;
     protoOutputStreamToUidMapping(&proto, &results);
     EXPECT_EQ(1, results.snapshots_size());
 
     // We have to keep at least one snapshot in memory at all times.
     proto.clear();
-    m.appendUidMap(2, config1, nullptr, &proto);
+    m.appendUidMap(2, config1, nullptr, true, true, &proto);
     protoOutputStreamToUidMapping(&proto, &results);
     EXPECT_EQ(1, results.snapshots_size());
 
     // Now add another configuration.
     m.OnConfigUpdated(config2);
-    m.updateApp(5, String16(kApp1.c_str()), 1000, 40);
+    m.updateApp(5, String16(kApp1.c_str()), 1000, 40, String16("v40"), String16(""));
     EXPECT_EQ(1U, m.mChanges.size());
     proto.clear();
-    m.appendUidMap(6, config1, nullptr, &proto);
+    m.appendUidMap(6, config1, nullptr, true, true, &proto);
     protoOutputStreamToUidMapping(&proto, &results);
     EXPECT_EQ(1, results.snapshots_size());
     EXPECT_EQ(1, results.changes_size());
     EXPECT_EQ(1U, m.mChanges.size());
 
     // Add another delta update.
-    m.updateApp(7, String16(kApp2.c_str()), 1001, 41);
+    m.updateApp(7, String16(kApp2.c_str()), 1001, 41, String16("v41"), String16(""));
     EXPECT_EQ(2U, m.mChanges.size());
 
     // We still can't remove anything.
     proto.clear();
-    m.appendUidMap(8, config1, nullptr, &proto);
+    m.appendUidMap(8, config1, nullptr, true, true, &proto);
     protoOutputStreamToUidMapping(&proto, &results);
     EXPECT_EQ(1, results.snapshots_size());
     EXPECT_EQ(1, results.changes_size());
     EXPECT_EQ(2U, m.mChanges.size());
 
     proto.clear();
-    m.appendUidMap(9, config2, nullptr, &proto);
+    m.appendUidMap(9, config2, nullptr, true, true, &proto);
     protoOutputStreamToUidMapping(&proto, &results);
     EXPECT_EQ(1, results.snapshots_size());
     EXPECT_EQ(2, results.changes_size());
@@ -335,19 +367,23 @@ TEST(UidMapTest, TestMemoryComputed) {
     vector<int32_t> uids;
     vector<int64_t> versions;
     vector<String16> apps;
+    vector<String16> versionStrings;
+    vector<String16> installers;
     uids.push_back(1000);
     apps.push_back(String16(kApp1.c_str()));
     versions.push_back(1);
-    m.updateMap(1, uids, versions, apps);
+    versionStrings.push_back(String16("v1"));
+    installers.push_back(String16(""));
+    m.updateMap(1, uids, versions, versionStrings, apps, installers);
 
-    m.updateApp(3, String16(kApp1.c_str()), 1000, 40);
+    m.updateApp(3, String16(kApp1.c_str()), 1000, 40, String16("v40"), String16(""));
 
     ProtoOutputStream proto;
     vector<uint8_t> bytes;
-    m.appendUidMap(2, config1, nullptr, &proto);
+    m.appendUidMap(2, config1, nullptr, true, true, &proto);
     size_t prevBytes = m.mBytesUsed;
 
-    m.appendUidMap(4, config1, nullptr, &proto);
+    m.appendUidMap(4, config1, nullptr, true, true, &proto);
     EXPECT_TRUE(m.mBytesUsed < prevBytes);
 }
 
@@ -361,21 +397,27 @@ TEST(UidMapTest, TestMemoryGuardrail) {
     size_t startBytes = m.mBytesUsed;
     vector<int32_t> uids;
     vector<int64_t> versions;
+    vector<String16> versionStrings;
+    vector<String16> installers;
     vector<String16> apps;
     for (int i = 0; i < 100; i++) {
         uids.push_back(1);
         buf = "EXTREMELY_LONG_STRING_FOR_APP_TO_WASTE_MEMORY." + to_string(i);
         apps.push_back(String16(buf.c_str()));
         versions.push_back(1);
+        versionStrings.push_back(String16("v1"));
+        installers.push_back(String16(""));
     }
-    m.updateMap(1, uids, versions, apps);
+    m.updateMap(1, uids, versions, versionStrings, apps, installers);
 
-    m.updateApp(3, String16("EXTREMELY_LONG_STRING_FOR_APP_TO_WASTE_MEMORY.0"), 1000, 2);
+    m.updateApp(3, String16("EXTREMELY_LONG_STRING_FOR_APP_TO_WASTE_MEMORY.0"), 1000, 2,
+                String16("v2"), String16(""));
     EXPECT_EQ(1U, m.mChanges.size());
 
     // Now force deletion by limiting the memory to hold one delta change.
-    m.maxBytesOverride = 80; // Since the app string alone requires >45 characters.
-    m.updateApp(5, String16("EXTREMELY_LONG_STRING_FOR_APP_TO_WASTE_MEMORY.0"), 1000, 4);
+    m.maxBytesOverride = 120; // Since the app string alone requires >45 characters.
+    m.updateApp(5, String16("EXTREMELY_LONG_STRING_FOR_APP_TO_WASTE_MEMORY.0"), 1000, 4,
+                String16("v4"), String16(""));
     EXPECT_EQ(1U, m.mChanges.size());
 }
 

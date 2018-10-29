@@ -73,8 +73,10 @@ public:
     virtual Status informAlarmForSubscriberTriggeringFired();
 
     virtual Status informAllUidData(const vector<int32_t>& uid, const vector<int64_t>& version,
-                                    const vector<String16>& app);
-    virtual Status informOnePackage(const String16& app, int32_t uid, int64_t version);
+                                    const vector<String16>& version_string,
+                                    const vector<String16>& app, const vector<String16>& installer);
+    virtual Status informOnePackage(const String16& app, int32_t uid, int64_t version,
+                                    const String16& version_string, const String16& installer);
     virtual Status informOnePackageRemoved(const String16& app, int32_t uid);
     virtual Status informDeviceShutdown();
 
