@@ -237,29 +237,6 @@ LOCAL_SHARED_LIBRARIES := $(statsd_common_shared_libraries) \
 include $(BUILD_NATIVE_TEST)
 
 ##############################
-# stats proto static java lib
-##############################
-
-include $(CLEAR_VARS)
-LOCAL_MODULE := statsdprotolite
-
-LOCAL_SRC_FILES := \
-    src/stats_log.proto \
-    src/statsd_config.proto \
-    src/perfetto/perfetto_config.proto \
-    src/atoms.proto
-
-LOCAL_PROTOC_OPTIMIZE_TYPE := lite
-
-LOCAL_STATIC_JAVA_LIBRARIES := \
-    platformprotoslite
-
-LOCAL_PROTOC_FLAGS := \
-    -Iexternal/protobuf/src
-
-include $(BUILD_STATIC_JAVA_LIBRARY)
-
-##############################
 # statsd micro benchmark
 ##############################
 
