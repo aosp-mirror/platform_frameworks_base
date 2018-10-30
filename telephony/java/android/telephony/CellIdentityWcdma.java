@@ -16,7 +16,6 @@
 
 package android.telephony;
 
-import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.telephony.gsm.GsmCellLocation;
@@ -46,10 +45,10 @@ public final class CellIdentityWcdma extends CellIdentity {
      */
     public CellIdentityWcdma() {
         super(TAG, CellInfo.TYPE_WCDMA, null, null, null, null);
-        mLac = Integer.MAX_VALUE;
-        mCid = Integer.MAX_VALUE;
-        mPsc = Integer.MAX_VALUE;
-        mUarfcn = Integer.MAX_VALUE;
+        mLac = CellInfo.UNAVAILABLE;
+        mCid = CellInfo.UNAVAILABLE;
+        mPsc = CellInfo.UNAVAILABLE;
+        mUarfcn = CellInfo.UNAVAILABLE;
     }
     /**
      * public constructor
@@ -62,7 +61,7 @@ public final class CellIdentityWcdma extends CellIdentity {
      * @hide
      */
     public CellIdentityWcdma (int mcc, int mnc, int lac, int cid, int psc) {
-        this(lac, cid, psc, Integer.MAX_VALUE, String.valueOf(mcc), String.valueOf(mnc),
+        this(lac, cid, psc, CellInfo.UNAVAILABLE, String.valueOf(mcc), String.valueOf(mnc),
                 null, null);
     }
 
@@ -113,25 +112,28 @@ public final class CellIdentityWcdma extends CellIdentity {
     }
 
     /**
-     * @return 3-digit Mobile Country Code, 0..999, Integer.MAX_VALUE if unknown
+     * @return 3-digit Mobile Country Code, 0..999,
+     *         {@link android.telephony.CellInfo#UNAVAILABLE UNAVAILABLE} if unavailable.
      * @deprecated Use {@link #getMccString} instead.
      */
     @Deprecated
     public int getMcc() {
-        return (mMccStr != null) ? Integer.valueOf(mMccStr) : Integer.MAX_VALUE;
+        return (mMccStr != null) ? Integer.valueOf(mMccStr) : CellInfo.UNAVAILABLE;
     }
 
     /**
-     * @return 2 or 3-digit Mobile Network Code, 0..999, Integer.MAX_VALUE if unknown
+     * @return 2 or 3-digit Mobile Network Code, 0..999,
+     *         {@link android.telephony.CellInfo#UNAVAILABLE UNAVAILABLE} if unavailable.
      * @deprecated Use {@link #getMncString} instead.
      */
     @Deprecated
     public int getMnc() {
-        return (mMncStr != null) ? Integer.valueOf(mMncStr) : Integer.MAX_VALUE;
+        return (mMncStr != null) ? Integer.valueOf(mMncStr) : CellInfo.UNAVAILABLE;
     }
 
     /**
-     * @return 16-bit Location Area Code, 0..65535, Integer.MAX_VALUE if unknown
+     * @return 16-bit Location Area Code, 0..65535,
+     *         {@link android.telephony.CellInfo#UNAVAILABLE UNAVAILABLE} if unavailable.
      */
     public int getLac() {
         return mLac;
@@ -139,29 +141,30 @@ public final class CellIdentityWcdma extends CellIdentity {
 
     /**
      * @return CID
-     * 28-bit UMTS Cell Identity described in TS 25.331, 0..268435455, Integer.MAX_VALUE if unknown
+     * 28-bit UMTS Cell Identity described in TS 25.331, 0..268435455,
+     *         {@link android.telephony.CellInfo#UNAVAILABLE UNAVAILABLE} if unavailable.
      */
     public int getCid() {
         return mCid;
     }
 
     /**
-     * @return 9-bit UMTS Primary Scrambling Code described in TS 25.331, 0..511, Integer.MAX_VALUE
-     * if unknown
+     * @return 9-bit UMTS Primary Scrambling Code described in TS 25.331, 0..511,
+     *         {@link android.telephony.CellInfo#UNAVAILABLE UNAVAILABLE} if unavailable.
      */
     public int getPsc() {
         return mPsc;
     }
 
     /**
-     * @return Mobile Country Code in string version, null if unknown
+     * @return Mobile Country Code in string version, null if unavailable.
      */
     public String getMccString() {
         return mMccStr;
     }
 
     /**
-     * @return Mobile Network Code in string version, null if unknown
+     * @return Mobile Network Code in string version, null if unavailable.
      */
     public String getMncString() {
         return mMncStr;
@@ -180,7 +183,8 @@ public final class CellIdentityWcdma extends CellIdentity {
     }
 
     /**
-     * @return 16-bit UMTS Absolute RF Channel Number, Integer.MAX_VALUE if unknown
+     * @return 16-bit UMTS Absolute RF Channel Number,
+     *         {@link android.telephony.CellInfo#UNAVAILABLE UNAVAILABLE} if unavailable.
      */
     public int getUarfcn() {
         return mUarfcn;
@@ -196,9 +200,9 @@ public final class CellIdentityWcdma extends CellIdentity {
     @Override
     public GsmCellLocation asCellLocation() {
         GsmCellLocation cl = new GsmCellLocation();
-        int lac = mLac != Integer.MAX_VALUE ? mLac : -1;
-        int cid = mCid != Integer.MAX_VALUE ? mCid : -1;
-        int psc = mPsc != Integer.MAX_VALUE ? mPsc : -1;
+        int lac = mLac != CellInfo.UNAVAILABLE ? mLac : -1;
+        int cid = mCid != CellInfo.UNAVAILABLE ? mCid : -1;
+        int psc = mPsc != CellInfo.UNAVAILABLE ? mPsc : -1;
         cl.setLacAndCid(lac, cid);
         cl.setPsc(psc);
 
