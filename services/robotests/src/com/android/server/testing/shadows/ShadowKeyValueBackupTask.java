@@ -53,7 +53,7 @@ public class ShadowKeyValueBackupTask {
     private List<String> mPendingFullBackups;
 
     @Implementation
-    public void __constructor__(
+    protected void __constructor__(
             BackupManagerService backupManagerService,
             TransportClient transportClient,
             String transportDirName,
@@ -71,7 +71,7 @@ public class ShadowKeyValueBackupTask {
     }
 
     @Implementation
-    public void execute() {
+    protected void execute() {
         mListener.onFinished("ShadowKeyValueBackupTask.execute()");
     }
 

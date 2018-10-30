@@ -17,25 +17,25 @@
 package com.android.server.backup.encryption.chunking;
 
 import static com.google.common.truth.Truth.assertThat;
+
 import static org.mockito.Mockito.inOrder;
 import static org.mockito.Mockito.mock;
 
 import android.platform.test.annotations.Presubmit;
+
 import com.android.server.backup.encryption.chunk.ChunkHash;
 import com.android.server.backup.encryption.chunk.ChunksMetadataProto;
-import com.android.server.testing.FrameworkRobolectricTestRunner;
-import com.android.server.testing.SystemLoaderPackages;
-import java.util.Arrays;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InOrder;
 import org.mockito.Mock;
-import org.robolectric.annotation.Config;
+import org.robolectric.RobolectricTestRunner;
 
-@RunWith(FrameworkRobolectricTestRunner.class)
-@Config(manifest = Config.NONE, sdk = 26)
-@SystemLoaderPackages({"com.android.server.backup"})
+import java.util.Arrays;
+
+@RunWith(RobolectricTestRunner.class)
 @Presubmit
 public class LengthlessEncryptedChunkEncoderTest {
     private static final byte[] TEST_NONCE =
@@ -74,7 +74,7 @@ public class LengthlessEncryptedChunkEncoderTest {
     }
 
     @Test
-    public void getChunkOrderingType_returnsExplicitStartsType() throws Exception {
+    public void getChunkOrderingType_returnsExplicitStartsType() {
         assertThat(mEncoder.getChunkOrderingType()).isEqualTo(ChunksMetadataProto.EXPLICIT_STARTS);
     }
 }

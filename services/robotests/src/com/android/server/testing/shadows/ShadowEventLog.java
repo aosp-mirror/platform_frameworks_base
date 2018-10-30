@@ -32,14 +32,14 @@ public class ShadowEventLog {
     private static final LinkedHashSet<Entry> ENTRIES = new LinkedHashSet<>();
 
     @Implementation
-    public static int writeEvent(int tag, Object... values) {
+    protected static int writeEvent(int tag, Object... values) {
         ENTRIES.add(new Entry(tag, Arrays.asList(values)));
         // Currently we don't care about the return value, if we do, estimate it correctly
         return 0;
     }
 
     @Implementation
-    public static int writeEvent(int tag, String string) {
+    protected static int writeEvent(int tag, String string) {
         return writeEvent(tag, (Object) string);
     }
 

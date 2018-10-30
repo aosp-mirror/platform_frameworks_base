@@ -17,32 +17,35 @@
 package com.android.server.backup.encryption.chunking;
 
 import static com.android.server.backup.testing.CryptoTestUtils.generateAesKey;
+
 import static com.google.common.truth.Truth.assertThat;
-import static java.nio.charset.StandardCharsets.UTF_8;
+
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 
+import static java.nio.charset.StandardCharsets.UTF_8;
+
 import android.platform.test.annotations.Presubmit;
+
 import com.android.server.backup.encryption.chunk.ChunkHash;
-import com.android.server.testing.FrameworkRobolectricTestRunner;
-import com.android.server.testing.SystemLoaderPackages;
-import java.security.SecureRandom;
-import javax.crypto.Cipher;
-import javax.crypto.Mac;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.GCMParameterSpec;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
-import org.robolectric.annotation.Config;
+import org.robolectric.RobolectricTestRunner;
 
-@RunWith(FrameworkRobolectricTestRunner.class)
-@Config(manifest = Config.NONE, sdk = 26)
-@SystemLoaderPackages({"com.android.server.backup"})
+import java.security.SecureRandom;
+
+import javax.crypto.Cipher;
+import javax.crypto.Mac;
+import javax.crypto.SecretKey;
+import javax.crypto.spec.GCMParameterSpec;
+
+@RunWith(RobolectricTestRunner.class)
 @Presubmit
 public class ChunkEncryptorTest {
     private static final String MAC_ALGORITHM = "HmacSHA256";

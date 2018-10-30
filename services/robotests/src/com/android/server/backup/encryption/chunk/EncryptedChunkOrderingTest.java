@@ -19,16 +19,14 @@ package com.android.server.backup.encryption.chunk;
 import static com.google.common.truth.Truth.assertThat;
 
 import android.platform.test.annotations.Presubmit;
-import com.android.server.testing.FrameworkRobolectricTestRunner;
-import com.android.server.testing.SystemLoaderPackages;
+
 import com.google.common.primitives.Bytes;
+
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.annotation.Config;
+import org.robolectric.RobolectricTestRunner;
 
-@RunWith(FrameworkRobolectricTestRunner.class)
-@Config(manifest = Config.NONE, sdk = 26)
-@SystemLoaderPackages({"com.android.server.backup"})
+@RunWith(RobolectricTestRunner.class)
 @Presubmit
 public class EncryptedChunkOrderingTest {
     private static final byte[] TEST_BYTE_ARRAY_1 = new byte[] {1, 2, 3, 4, 5};

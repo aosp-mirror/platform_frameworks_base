@@ -39,19 +39,19 @@ public class ShadowBackupDataOutput {
     private int mTransportFlags;
 
     @Implementation
-    public void __constructor__(FileDescriptor fd, long quota, int transportFlags) {
+    protected void __constructor__(FileDescriptor fd, long quota, int transportFlags) {
         mFileDescriptor = fd;
         mQuota = quota;
         mTransportFlags = transportFlags;
     }
 
     @Implementation
-    public long getQuota() {
+    protected long getQuota() {
         return mQuota;
     }
 
     @Implementation
-    public int getTransportFlags() {
+    protected int getTransportFlags() {
         return mTransportFlags;
     }
 
@@ -61,7 +61,7 @@ public class ShadowBackupDataOutput {
     }
 
     @Implementation
-    public int writeEntityHeader(String key, int dataSize) throws IOException {
+    protected int writeEntityHeader(String key, int dataSize) throws IOException {
         ensureOutput();
         final int size;
         try (ByteArrayOutputStream byteStream = new ByteArrayOutputStream()) {
@@ -81,7 +81,7 @@ public class ShadowBackupDataOutput {
     }
 
     @Implementation
-    public int writeEntityData(byte[] data, int size) throws IOException {
+    protected int writeEntityData(byte[] data, int size) throws IOException {
         ensureOutput();
         mOutput.write(data, 0, size);
         mOutput.flush();

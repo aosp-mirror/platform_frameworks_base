@@ -22,14 +22,11 @@ import android.app.backup.FullBackup.BackupScheme.PathWithRequiredFlags;
 import android.content.Context;
 import android.platform.test.annotations.Presubmit;
 
-import com.android.server.testing.FrameworkRobolectricTestRunner;
-import com.android.server.testing.SystemLoaderPackages;
-
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
-import org.robolectric.annotation.Config;
 import org.robolectric.annotation.internal.DoNotInstrument;
 
 import java.io.File;
@@ -38,9 +35,7 @@ import java.util.Collection;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-@RunWith(FrameworkRobolectricTestRunner.class)
-@Config(manifest = Config.NONE, sdk = 26)
-@SystemLoaderPackages({"android.app.backup"})
+@RunWith(RobolectricTestRunner.class)
 @Presubmit
 @DoNotInstrument
 public class BackupUtilsTest {

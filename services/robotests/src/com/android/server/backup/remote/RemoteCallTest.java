@@ -32,23 +32,19 @@ import android.os.Looper;
 import android.platform.test.annotations.Presubmit;
 
 import com.android.server.backup.testing.TestUtils.ThrowingRunnable;
-import com.android.server.testing.FrameworkRobolectricTestRunner;
-import com.android.server.testing.SystemLoaderPackages;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.robolectric.annotation.Config;
+import org.robolectric.RobolectricTestRunner;
 
 import java.util.concurrent.Callable;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
-@RunWith(FrameworkRobolectricTestRunner.class)
-@Config(manifest = Config.NONE, sdk = 26)
-@SystemLoaderPackages({"com.android.server.backup"})
+@RunWith(RobolectricTestRunner.class)
 @Presubmit
 public class RemoteCallTest {
     /** A {@link RemoteCallable} that calls the callback immediately. */
@@ -266,10 +262,5 @@ public class RemoteCallTest {
     /** Unchecked version of {@link Handler#postDelayed(Runnable, long)}. */
     private static void postDelayed(Handler handler, ThrowingRunnable runnable, long delayMillis) {
         handler.postDelayed(() -> uncheck(runnable), delayMillis);
-    }
-
-    /** Unchecked version of {@link Handler#post(Runnable)}. */
-    private static void post(Handler handler, ThrowingRunnable runnable) {
-        handler.post(() -> uncheck(runnable));
     }
 }

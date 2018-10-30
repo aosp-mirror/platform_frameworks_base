@@ -54,7 +54,7 @@ public class ShadowPerformUnifiedRestoreTask {
     private OnTaskFinishedListener mListener;
 
     @Implementation
-    public void __constructor__(
+    protected void __constructor__(
             BackupManagerService backupManagerService,
             TransportClient transportClient,
             IRestoreObserver observer,
@@ -74,7 +74,7 @@ public class ShadowPerformUnifiedRestoreTask {
     }
 
     @Implementation
-    public void execute() {
+    protected void execute() {
         mBackupManagerService.setRestoreInProgress(false);
         mListener.onFinished("ShadowPerformUnifiedRestoreTask.execute()");
     }

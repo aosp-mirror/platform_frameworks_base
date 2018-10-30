@@ -49,8 +49,6 @@ import android.util.Log;
 
 import com.android.internal.backup.IBackupTransport;
 import com.android.server.EventLogTags;
-import com.android.server.testing.FrameworkRobolectricTestRunner;
-import com.android.server.testing.SystemLoaderPackages;
 import com.android.server.testing.shadows.FrameworkShadowLooper;
 import com.android.server.testing.shadows.ShadowCloseGuard;
 import com.android.server.testing.shadows.ShadowEventLog;
@@ -62,6 +60,7 @@ import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowLog;
 import org.robolectric.shadows.ShadowLooper;
@@ -69,17 +68,13 @@ import org.robolectric.shadows.ShadowLooper;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Supplier;
 
-@RunWith(FrameworkRobolectricTestRunner.class)
-@Config(
-        manifest = Config.NONE,
-        sdk = 26,
-        shadows = {
+@RunWith(RobolectricTestRunner.class)
+@Config(shadows = {
             ShadowEventLog.class,
             ShadowCloseGuard.class,
             ShadowSlog.class,
             FrameworkShadowLooper.class
         })
-@SystemLoaderPackages({"com.android.server.backup"})
 @Presubmit
 public class TransportClientTest {
     private static final String PACKAGE_NAME = "some.package.name";
@@ -137,7 +132,7 @@ public class TransportClientTest {
     }
 
     @Test
-    public void testConnectAsync_callsBindService() throws Exception {
+    public void testConnectAsync_callsBindService() {
         mTransportClient.connectAsync(mTransportConnectionListener, "caller");
 
         verify(mContext)
@@ -149,7 +144,7 @@ public class TransportClientTest {
     }
 
     @Test
-    public void testConnectAsync_callsListenerWhenConnected() throws Exception {
+    public void testConnectAsync_callsListenerWhenConnected() {
         mTransportClient.connectAsync(mTransportConnectionListener, "caller");
         ServiceConnection connection = verifyBindServiceAsUserAndCaptureServiceConnection(mContext);
 
@@ -161,8 +156,7 @@ public class TransportClientTest {
     }
 
     @Test
-    public void testConnectAsync_whenPendingConnection_callsAllListenersWhenConnected()
-            throws Exception {
+    public void testConnectAsync_whenPendingConnection_callsAllListenersWhenConnected() {
         mTransportClient.connectAsync(mTransportConnectionListener, "caller1");
         ServiceConnection connection = verifyBindServiceAsUserAndCaptureServiceConnection(mContext);
 
@@ -177,7 +171,7 @@ public class TransportClientTest {
     }
 
     @Test
-    public void testConnectAsync_whenAlreadyConnected_callsListener() throws Exception {
+    public void testConnectAsync_whenAlreadyConnected_callsListener() {
         mTransportClient.connectAsync(mTransportConnectionListener, "caller1");
         ServiceConnection connection = verifyBindServiceAsUserAndCaptureServiceConnection(mContext);
         connection.onServiceConnected(mTransportComponent, mTransportBinder);
@@ -190,7 +184,7 @@ public class TransportClientTest {
     }
 
     @Test
-    public void testConnectAsync_whenFrameworkDoesntBind_callsListener() throws Exception {
+    public void testConnectAsync_whenFrameworkDoesntBind_callsListener() {
         when(mContext.bindServiceAsUser(
                         eq(mBindIntent),
                         any(ServiceConnection.class),
@@ -206,7 +200,7 @@ public class TransportClientTest {
     }
 
     @Test
-    public void testConnectAsync_whenFrameworkDoesNotBind_releasesConnection() throws Exception {
+    public void testConnectAsync_whenFrameworkDoesNotBind_releasesConnection() {
         when(mContext.bindServiceAsUser(
                         eq(mBindIntent),
                         any(ServiceConnection.class),
@@ -221,8 +215,7 @@ public class TransportClientTest {
     }
 
     @Test
-    public void testConnectAsync_afterOnServiceDisconnectedBeforeNewConnection_callsListener()
-            throws Exception {
+    public void testConnectAsync_afterOnServiceDisconnectedBeforeNewConnection_callsListener() {
         mTransportClient.connectAsync(mTransportConnectionListener, "caller1");
         ServiceConnection connection = verifyBindServiceAsUserAndCaptureServiceConnection(mContext);
         connection.onServiceConnected(mTransportComponent, mTransportBinder);
@@ -235,8 +228,7 @@ public class TransportClientTest {
     }
 
     @Test
-    public void testConnectAsync_afterOnServiceDisconnectedAfterNewConnection_callsListener()
-            throws Exception {
+    public void testConnectAsync_afterOnServiceDisconnectedAfterNewConnection_callsListener() {
         mTransportClient.connectAsync(mTransportConnectionListener, "caller1");
         ServiceConnection connection = verifyBindServiceAsUserAndCaptureServiceConnection(mContext);
         connection.onServiceConnected(mTransportComponent, mTransportBinder);
@@ -251,7 +243,7 @@ public class TransportClientTest {
     }
 
     @Test
-    public void testConnectAsync_callsListenerIfBindingDies() throws Exception {
+    public void testConnectAsync_callsListenerIfBindingDies() {
         mTransportClient.connectAsync(mTransportConnectionListener, "caller");
         ServiceConnection connection = verifyBindServiceAsUserAndCaptureServiceConnection(mContext);
 
@@ -263,8 +255,7 @@ public class TransportClientTest {
     }
 
     @Test
-    public void testConnectAsync_whenPendingConnection_callsListenersIfBindingDies()
-            throws Exception {
+    public void testConnectAsync_whenPendingConnection_callsListenersIfBindingDies() {
         mTransportClient.connectAsync(mTransportConnectionListener, "caller1");
         ServiceConnection connection = verifyBindServiceAsUserAndCaptureServiceConnection(mContext);
 
@@ -412,14 +403,14 @@ public class TransportClientTest {
     }
 
     @Test
-    public void testMarkAsDisposed_whenCreated() throws Throwable {
+    public void testMarkAsDisposed_whenCreated() {
         mTransportClient.markAsDisposed();
 
         // No exception thrown
     }
 
     @Test
-    public void testMarkAsDisposed_afterOnBindingDied() throws Throwable {
+    public void testMarkAsDisposed_afterOnBindingDied() {
         mTransportClient.connectAsync(mTransportConnectionListener, "caller1");
         ServiceConnection connection = verifyBindServiceAsUserAndCaptureServiceConnection(mContext);
         connection.onBindingDied(mTransportComponent);
@@ -430,7 +421,7 @@ public class TransportClientTest {
     }
 
     @Test
-    public void testMarkAsDisposed_whenConnectedAndUnbound() throws Throwable {
+    public void testMarkAsDisposed_whenConnectedAndUnbound() {
         mTransportClient.connectAsync(mTransportConnectionListener, "caller1");
         ServiceConnection connection = verifyBindServiceAsUserAndCaptureServiceConnection(mContext);
         connection.onServiceConnected(mTransportComponent, mTransportBinder);
@@ -442,7 +433,7 @@ public class TransportClientTest {
     }
 
     @Test
-    public void testMarkAsDisposed_afterOnServiceDisconnected() throws Throwable {
+    public void testMarkAsDisposed_afterOnServiceDisconnected() {
         mTransportClient.connectAsync(mTransportConnectionListener, "caller1");
         ServiceConnection connection = verifyBindServiceAsUserAndCaptureServiceConnection(mContext);
         connection.onServiceConnected(mTransportComponent, mTransportBinder);
@@ -454,14 +445,14 @@ public class TransportClientTest {
     }
 
     @Test
-    public void testMarkAsDisposed_whenBound() throws Throwable {
+    public void testMarkAsDisposed_whenBound() {
         mTransportClient.connectAsync(mTransportConnectionListener, "caller1");
 
         expectThrows(RuntimeException.class, mTransportClient::markAsDisposed);
     }
 
     @Test
-    public void testMarkAsDisposed_whenConnected() throws Throwable {
+    public void testMarkAsDisposed_whenConnected() {
         mTransportClient.connectAsync(mTransportConnectionListener, "caller1");
         ServiceConnection connection = verifyBindServiceAsUserAndCaptureServiceConnection(mContext);
         connection.onServiceConnected(mTransportComponent, mTransportBinder);

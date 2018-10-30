@@ -62,8 +62,8 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 import static org.mockito.Mockito.when;
 import static org.robolectric.Shadows.shadowOf;
 import static org.robolectric.shadow.api.Shadow.extract;
-import static org.testng.Assert.fail;
 import static org.testng.Assert.expectThrows;
+import static org.testng.Assert.fail;
 
 import static java.nio.file.StandardCopyOption.REPLACE_EXISTING;
 import static java.util.Collections.emptyList;
@@ -114,9 +114,6 @@ import com.android.server.backup.testing.TestUtils.ThrowingRunnable;
 import com.android.server.backup.testing.TransportData;
 import com.android.server.backup.testing.TransportTestUtils;
 import com.android.server.backup.testing.TransportTestUtils.TransportMock;
-import com.android.server.testing.FrameworkRobolectricTestRunner;
-import com.android.server.testing.SystemLoaderClasses;
-import com.android.server.testing.SystemLoaderPackages;
 import com.android.server.testing.shadows.FrameworkShadowLooper;
 import com.android.server.testing.shadows.ShadowBackupDataInput;
 import com.android.server.testing.shadows.ShadowBackupDataOutput;
@@ -134,6 +131,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
+import org.robolectric.RobolectricTestRunner;
 import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 import org.robolectric.shadows.ShadowApplication;
@@ -156,10 +154,8 @@ import java.util.concurrent.TimeoutException;
 import java.util.stream.Stream;
 
 // TODO: Test agents timing out
-@RunWith(FrameworkRobolectricTestRunner.class)
+@RunWith(RobolectricTestRunner.class)
 @Config(
-        manifest = Config.NONE,
-        sdk = 26,
         shadows = {
             FrameworkShadowLooper.class,
             ShadowBackupDataInput.class,
@@ -167,8 +163,6 @@ import java.util.stream.Stream;
             ShadowEventLog.class,
             ShadowQueuedWork.class,
         })
-@SystemLoaderPackages({"com.android.server.backup", "android.app.backup"})
-@SystemLoaderClasses({IBackupTransport.class, IBackupAgent.class, PackageInfo.class})
 @Presubmit
 public class KeyValueBackupTaskTest {
     private static final PackageData PACKAGE_1 = keyValuePackage(1);
@@ -187,6 +181,7 @@ public class KeyValueBackupTaskTest {
     private Handler mBackupHandler;
     private PowerManager.WakeLock mWakeLock;
     private KeyValueBackupReporter mReporter;
+    private PackageManager mPackageManager;
     private ShadowPackageManager mShadowPackageManager;
     private FakeIBackupManager mBackupManager;
     private File mBaseStateDir;
@@ -219,8 +214,8 @@ public class KeyValueBackupTaskTest {
         mDataDir.mkdirs();
         assertThat(mDataDir.isDirectory()).isTrue();
 
-        PackageManager packageManager = mApplication.getPackageManager();
-        mShadowPackageManager = shadowOf(packageManager);
+        mPackageManager = mApplication.getPackageManager();
+        mShadowPackageManager = shadowOf(mPackageManager);
 
         mWakeLock = createBackupWakeLock(mApplication);
         mBackupManager = spy(FakeIBackupManager.class);
@@ -235,7 +230,7 @@ public class KeyValueBackupTaskTest {
                 mBackupManagerService,
                 mApplication,
                 mTransportManager,
-                packageManager,
+                mPackageManager,
                 mBackupManagerService.getBackupHandler(),
                 mWakeLock,
                 mBackupManagerService.getAgentTimeoutParameters());
@@ -2406,7 +2401,7 @@ public class KeyValueBackupTaskTest {
 
     private AgentMock setUpAgent(PackageData packageData) {
         try {
-            mShadowPackageManager.setApplicationEnabledSetting(
+            mPackageManager.setApplicationEnabledSetting(
                     packageData.packageName, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, 0);
             PackageInfo packageInfo = getPackageInfo(packageData);
             mShadowPackageManager.addPackage(packageInfo);

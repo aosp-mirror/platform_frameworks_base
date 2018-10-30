@@ -52,12 +52,12 @@ public class ShadowBackupDataInput {
     private boolean mHeaderReady;
 
     @Implementation
-    public void __constructor__(FileDescriptor fd) {
+    protected void __constructor__(FileDescriptor fd) {
         mFileDescriptor = fd;
     }
 
     @Implementation
-    public boolean readNextHeader() throws IOException {
+    protected boolean readNextHeader() throws IOException {
         if (sReadNextHeaderThrow) {
             sReadNextHeaderThrow = false;
             throw new IOException("Fake exception");
@@ -75,19 +75,19 @@ public class ShadowBackupDataInput {
     }
 
     @Implementation
-    public String getKey() {
+    protected String getKey() {
         checkHeaderReady();
         return mKey;
     }
 
     @Implementation
-    public int getDataSize() {
+    protected int getDataSize() {
         checkHeaderReady();
         return mSize;
     }
 
     @Implementation
-    public int readEntityData(byte[] data, int offset, int size) throws IOException {
+    protected int readEntityData(byte[] data, int offset, int size) throws IOException {
         checkHeaderReady();
         int result = mInput.read(data, offset, size);
         if (result < 0) {
@@ -97,7 +97,7 @@ public class ShadowBackupDataInput {
     }
 
     @Implementation
-    public void skipEntityData() throws IOException {
+    protected void skipEntityData() throws IOException {
         checkHeaderReady();
         mInput.read(new byte[mSize], 0, mSize);
     }
