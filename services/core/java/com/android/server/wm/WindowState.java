@@ -1607,8 +1607,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                         mWmService.mAccessibilityController;
                 final int winTransit = TRANSIT_EXIT;
                 mWinAnimator.applyAnimationLocked(winTransit, false /* isEntrance */);
-                //TODO (multidisplay): Magnification is supported only for the default
-                if (accessibilityController != null && getDisplayId() == DEFAULT_DISPLAY) {
+                if (accessibilityController != null) {
                     accessibilityController.onWindowTransitionLocked(this, winTransit);
                 }
             }
@@ -1625,8 +1624,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
         if (isVisibleNow()) {
             mWinAnimator.applyAnimationLocked(TRANSIT_EXIT, false);
-            //TODO (multidisplay): Magnification is supported only for the default
-            if (mWmService.mAccessibilityController != null && isDefaultDisplay()) {
+            if (mWmService.mAccessibilityController != null) {
                 mWmService.mAccessibilityController.onWindowTransitionLocked(this, TRANSIT_EXIT);
             }
             changed = true;
@@ -1915,9 +1913,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
                         setDisplayLayoutNeeded();
                         mWmService.requestTraversal();
                     }
-                    //TODO (multidisplay): Magnification is supported only for the default display.
-                    if (mWmService.mAccessibilityController != null
-                            && displayId == DEFAULT_DISPLAY) {
+                    if (mWmService.mAccessibilityController != null) {
                         mWmService.mAccessibilityController.onWindowTransitionLocked(this, transit);
                     }
                 }

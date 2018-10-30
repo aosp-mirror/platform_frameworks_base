@@ -1240,7 +1240,7 @@ public final class UiAutomation {
                 }
 
                 @Override
-                public void onMagnificationChanged(@NonNull Region region,
+                public void onMagnificationChanged(int displayId, @NonNull Region region,
                         float scale, float centerX, float centerY) {
                     /* do nothing */
                 }

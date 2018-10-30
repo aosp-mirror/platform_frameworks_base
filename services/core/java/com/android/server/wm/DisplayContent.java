@@ -1483,11 +1483,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             }
         }
 
-        // TODO (multi-display): Magnification is supported only for the default display.
         // Announce rotation only if we will not animate as we already have the
         // windows in final state. Otherwise, we make this call at the rotation end.
-        if (screenRotationAnimation == null && mWmService.mAccessibilityController != null
-                && isDefaultDisplay) {
+        if (screenRotationAnimation == null && mWmService.mAccessibilityController != null) {
             mWmService.mAccessibilityController.onRotationChangedLocked(this);
         }
     }

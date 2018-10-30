@@ -212,34 +212,40 @@ public abstract class WindowManagerInternal {
      * and has access to the raw window data while the accessibility layer serves
      * as a controller.
      *
+     * @param displayId The logical display id.
      * @param callbacks The callbacks to invoke.
+     * @return {@code false} if display id is not valid.
      */
-    public abstract void setMagnificationCallbacks(@Nullable MagnificationCallbacks callbacks);
+    public abstract boolean setMagnificationCallbacks(int displayId,
+            @Nullable MagnificationCallbacks callbacks);
 
     /**
      * Set by the accessibility layer to specify the magnification and panning to
      * be applied to all windows that should be magnified.
      *
+     * @param displayId The logical display id.
      * @param spec The MagnficationSpec to set.
      *
-     * @see #setMagnificationCallbacks(MagnificationCallbacks)
+     * @see #setMagnificationCallbacks(int, MagnificationCallbacks)
      */
-    public abstract void setMagnificationSpec(MagnificationSpec spec);
+    public abstract void setMagnificationSpec(int displayId, MagnificationSpec spec);
 
     /**
      * Set by the accessibility framework to indicate whether the magnifiable regions of the display
      * should be shown.
      *
+     * @param displayId The logical display id.
      * @param show {@code true} to show magnifiable region bounds, {@code false} to hide
      */
-    public abstract void setForceShowMagnifiableBounds(boolean show);
+    public abstract void setForceShowMagnifiableBounds(int displayId, boolean show);
 
     /**
      * Obtains the magnification regions.
      *
+     * @param displayId The logical display id.
      * @param magnificationRegion the current magnification region
      */
-    public abstract void getMagnificationRegion(@NonNull Region magnificationRegion);
+    public abstract void getMagnificationRegion(int displayId, @NonNull Region magnificationRegion);
 
     /**
      * Gets the magnification and translation applied to a window given its token.
@@ -251,7 +257,7 @@ public abstract class WindowManagerInternal {
      *
      * @return The magnification spec for the window.
      *
-     * @see #setMagnificationCallbacks(MagnificationCallbacks)
+     * @see #setMagnificationCallbacks(int, MagnificationCallbacks)
      */
     public abstract MagnificationSpec getCompatibleMagnificationSpecForWindow(
             IBinder windowToken);
