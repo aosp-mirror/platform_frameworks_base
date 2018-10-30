@@ -680,8 +680,24 @@ public class PermissionManagerService {
         }
     }
 
-    private void grantPermissions(PackageParser.Package pkg, boolean replace,
-            String packageOfInterest, PermissionCallback callback) {
+    /**
+     * Restore the permission state for a package.
+     *
+     * <ul>
+     *     <li>During boot the state gets restored from the disk</li>
+     *     <li>During app update the state gets restored from the last version of the app</li>
+     * </ul>
+     *
+     * <p>This restores the permission state for all users.
+     *
+     * @param pkg the package the permissions belong to
+     * @param replace if the package is getting replaced (this might change the requested
+     *                permissions of this package)
+     * @param packageOfInterest If this is the name of {@code pkg} add extra logging
+     * @param callback Result call back
+     */
+    private void restorePermissionState(@NonNull PackageParser.Package pkg, boolean replace,
+            @Nullable String packageOfInterest, @Nullable PermissionCallback callback) {
         // IMPORTANT: There are two types of permissions: install and runtime.
         // Install time permissions are granted when the app is installed to
         // all device users and users added in the future. Runtime permissions
@@ -1754,7 +1770,7 @@ public class PermissionManagerService {
         // and make sure there are no dangling permissions.
         flags = updatePermissions(changingPkgName, changingPkg, flags);
 
-        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "grantPermissions");
+        Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "restorePermissionState");
         // Now update the permissions for all packages, in particular
         // replace the granted permissions of the system packages.
         if ((flags & UPDATE_PERMISSIONS_ALL) != 0) {
@@ -1764,7 +1780,7 @@ public class PermissionManagerService {
                     final String volumeUuid = getVolumeUuidForPackage(pkg);
                     final boolean replace = ((flags & UPDATE_PERMISSIONS_REPLACE_ALL) != 0)
                             && Objects.equals(replaceVolumeUuid, volumeUuid);
-                    grantPermissions(pkg, replace, changingPkgName, callback);
+                    restorePermissionState(pkg, replace, changingPkgName, callback);
                 }
             }
         }
@@ -1774,7 +1790,7 @@ public class PermissionManagerService {
             final String volumeUuid = getVolumeUuidForPackage(changingPkg);
             final boolean replace = ((flags & UPDATE_PERMISSIONS_REPLACE_PKG) != 0)
                     && Objects.equals(replaceVolumeUuid, volumeUuid);
-            grantPermissions(changingPkg, replace, changingPkgName, callback);
+            restorePermissionState(changingPkg, replace, changingPkgName, callback);
         }
         Trace.traceEnd(TRACE_TAG_PACKAGE_MANAGER);
     }
