@@ -7307,8 +7307,8 @@ public final class Settings {
                 "call_screening_default_component";
 
         /**
-         * Specifies the package name currently configured to be the default application to perform
-         * the user-defined call redirection service with Telecom.
+         * Specifies the component name currently configured to be the default application to
+         * perform the user-defined call redirection service with Telecom.
          * @hide
          */
         @UnsupportedAppUsage
