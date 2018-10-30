@@ -48,6 +48,7 @@ import com.android.systemui.statusbar.RemoteInputController;
 import com.android.systemui.statusbar.StatusBarStateController;
 import com.android.systemui.statusbar.phone.KeyguardBouncer.BouncerExpansionCallback;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
+import com.android.systemui.statusbar.policy.KeyguardMonitorImpl;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
@@ -124,7 +125,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
 
     // Dismiss action to be launched when we stop dozing or the keyguard is gone.
     private DismissWithActionRequest mPendingWakeupAction;
-    private final KeyguardMonitor mKeyguardMonitor = Dependency.get(KeyguardMonitor.class);
+    private final KeyguardMonitorImpl mKeyguardMonitor =
+            (KeyguardMonitorImpl) Dependency.get(KeyguardMonitor.class);
     private final NotificationMediaManager mMediaManager =
             Dependency.get(NotificationMediaManager.class);
 
@@ -202,6 +204,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
     public void show(Bundle options) {
         mShowing = true;
         mStatusBarWindowController.setKeyguardShowing(true);
+        mKeyguardMonitor.notifyKeyguardState(
+                mShowing, mKeyguardMonitor.isSecure(), mKeyguardMonitor.isOccluded());
         reset(true /* hideBouncerWhenShowing */);
         StatsLog.write(StatsLog.KEYGUARD_STATE_CHANGED,
             StatsLog.KEYGUARD_STATE_CHANGED__STATE__SHOWN);
@@ -424,6 +428,8 @@ public class StatusBarKeyguardViewManager implements RemoteInputController.Callb
      */
     public void hide(long startTime, long fadeoutDuration) {
         mShowing = false;
+        mKeyguardMonitor.notifyKeyguardState(
+                mShowing, mKeyguardMonitor.isSecure(), mKeyguardMonitor.isOccluded());
         launchPendingWakeupAction();
 
         if (KeyguardUpdateMonitor.getInstance(mContext).needsSlowUnlockTransition()) {
