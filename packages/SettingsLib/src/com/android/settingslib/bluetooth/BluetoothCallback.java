@@ -127,4 +127,17 @@ public interface BluetoothCallback {
     default void onProfileConnectionStateChanged(CachedBluetoothDevice cachedDevice,
             int state, int bluetoothProfile) {
     }
+
+    /**
+     * Called when ACL connection state is changed. It listens to
+     * {@link android.bluetooth.BluetoothDevice#ACTION_ACL_CONNECTED} and {@link
+     * android.bluetooth.BluetoothDevice#ACTION_ACL_DISCONNECTED}
+     *
+     * @param cachedDevice Bluetooth device that changed
+     * @param state        the Bluetooth device connection state, the possible values are:
+     *                     {@link android.bluetooth.BluetoothAdapter#STATE_DISCONNECTED},
+     *                     {@link android.bluetooth.BluetoothAdapter#STATE_CONNECTED}
+     */
+    default void onAclConnectionStateChanged(CachedBluetoothDevice cachedDevice, int state) {
+    }
 }
