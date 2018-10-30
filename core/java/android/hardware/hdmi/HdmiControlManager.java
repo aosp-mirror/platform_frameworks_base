@@ -33,6 +33,8 @@ import android.os.SystemProperties;
 import android.util.ArrayMap;
 import android.util.Log;
 
+import java.util.List;
+
 /**
  * The {@link HdmiControlManager} class is used to send HDMI control messages
  * to attached CEC devices.
@@ -401,6 +403,72 @@ public final class HdmiControlManager {
     @SuppressLint("Doclava125")
     public HdmiSwitchClient getSwitchClient() {
         return (HdmiSwitchClient) getClient(HdmiDeviceInfo.DEVICE_PURE_CEC_SWITCH);
+    }
+
+    /**
+     * Get a snapshot of the real-time status of the remote devices.
+     *
+     * @return a list of {@link HdmiDeviceInfo} of the devices connected to the current device.
+     *
+     * TODO(b/110094868): unhide for Q
+     * @hide
+     */
+    public List<HdmiDeviceInfo> getConnectedDevicesList() {
+        try {
+            return mService.getDeviceList();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Power off the target device.
+     *
+     * @param deviceInfo HdmiDeviceInfo of the device to be powered off
+     *
+     * TODO(b/110094868): unhide for Q
+     * @hide
+     */
+    public void powerOffRemoteDevice(HdmiDeviceInfo deviceInfo) {
+        try {
+            mService.powerOffRemoteDevice(
+                    deviceInfo.getLogicalAddress(), deviceInfo.getDevicePowerStatus());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Power on the target device.
+     *
+     * @param deviceInfo HdmiDeviceInfo of the device to be powered on
+     *
+     * TODO(b/110094868): unhide for Q
+     * @hide
+     */
+    public void powerOnRemoteDevice(HdmiDeviceInfo deviceInfo) {
+        try {
+            mService.powerOnRemoteDevice(
+                    deviceInfo.getLogicalAddress(), deviceInfo.getDevicePowerStatus());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Ask the target device to be the new Active Source.
+     *
+     * @param deviceInfo HdmiDeviceInfo of the target device
+     *
+     * TODO(b/110094868): unhide for Q
+     * @hide
+     */
+    public void askRemoteDeviceToBecomeActiveSource(HdmiDeviceInfo deviceInfo) {
+        try {
+            mService.askRemoteDeviceToBecomeActiveSource(deviceInfo.getPhysicalAddress());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**

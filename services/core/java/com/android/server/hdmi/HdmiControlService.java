@@ -20,6 +20,7 @@ import static android.hardware.hdmi.HdmiControlManager.DEVICE_EVENT_ADD_DEVICE;
 import static android.hardware.hdmi.HdmiControlManager.DEVICE_EVENT_REMOVE_DEVICE;
 
 import static com.android.internal.os.RoSystemProperties.PROPERTY_HDMI_IS_DEVICE_HDMI_CEC_SWITCH;
+import static com.android.server.hdmi.Constants.ADDR_UNREGISTERED;
 import static com.android.server.hdmi.Constants.DISABLED;
 import static com.android.server.hdmi.Constants.ENABLED;
 import static com.android.server.hdmi.Constants.OPTION_MHL_ENABLE;
@@ -1615,11 +1616,62 @@ public class HdmiControlService extends SystemService {
         public List<HdmiDeviceInfo> getDeviceList() {
             enforceAccessPermission();
             HdmiCecLocalDeviceTv tv = tv();
-            synchronized (mLock) {
-                return (tv == null)
+            if (tv != null) {
+                synchronized (mLock) {
+                    return tv.getSafeCecDevicesLocked();
+                }
+            } else {
+                HdmiCecLocalDeviceAudioSystem audioSystem = audioSystem();
+                synchronized (mLock) {
+                    return (audioSystem == null)
                         ? Collections.<HdmiDeviceInfo>emptyList()
-                        : tv.getSafeCecDevicesLocked();
+                        : audioSystem.getSafeCecDevicesLocked();
+                }
             }
+        }
+
+        @Override
+        public void powerOffRemoteDevice(int logicalAddress, int powerStatus) {
+            enforceAccessPermission();
+            runOnServiceThread(new Runnable() {
+                @Override
+                public void run() {
+                    if (powerStatus == HdmiControlManager.POWER_STATUS_ON
+                            || powerStatus == HdmiControlManager.POWER_STATUS_TRANSIENT_TO_ON) {
+                        sendCecCommand(HdmiCecMessageBuilder.buildStandby(
+                                getRemoteControlSourceAddress(), logicalAddress));
+                    } else {
+                        Slog.w(TAG, "Device " + logicalAddress + " is already off " + powerStatus);
+                    }
+                }
+            });
+        }
+
+        @Override
+        public void powerOnRemoteDevice(int logicalAddress, int powerStatus) {
+            // TODO(amyjojo): implement the method
+        }
+
+        @Override
+        // TODO(AMYJOJO): add a result callback
+        public void askRemoteDeviceToBecomeActiveSource(int physicalAddress) {
+            enforceAccessPermission();
+            runOnServiceThread(new Runnable() {
+                @Override
+                public void run() {
+                    HdmiCecMessage setStreamPath = HdmiCecMessageBuilder.buildSetStreamPath(
+                            getRemoteControlSourceAddress(), physicalAddress);
+                    if (pathToPortId(physicalAddress) != Constants.INVALID_PORT_ID) {
+                        if (getSwitchDevice() != null) {
+                            getSwitchDevice().handleSetStreamPath(setStreamPath);
+                        } else {
+                            Slog.e(TAG, "Can't get the correct local device to handle routing.");
+                        }
+                    } else {
+                        sendCecCommand(setStreamPath);
+                    }
+                }
+            });
         }
 
         @Override
@@ -1915,6 +1967,29 @@ public class HdmiControlService extends SystemService {
                 pw.decreaseIndent();
             }
         }
+    }
+
+    // Get the source address to send out commands to devices connected to the current device
+    // when other services interact with HdmiControlService.
+    private int getRemoteControlSourceAddress() {
+        if (isAudioSystemDevice()) {
+            return audioSystem().getDeviceInfo().getLogicalAddress();
+        } else if (isPlaybackDevice()) {
+            return playback().getDeviceInfo().getLogicalAddress();
+        }
+        return ADDR_UNREGISTERED;
+    }
+
+    // Get the switch device to do CEC routing control
+    @Nullable
+    private HdmiCecLocalDeviceSource getSwitchDevice() {
+        if (isAudioSystemDevice()) {
+            return audioSystem();
+        }
+        if (isPlaybackDevice()) {
+            return playback();
+        }
+        return null;
     }
 
     @ServiceThreadOnly

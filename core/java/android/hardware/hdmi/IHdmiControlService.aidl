@@ -61,6 +61,9 @@ interface IHdmiControlService {
     void setInputChangeListener(IHdmiInputChangeListener listener);
     List<HdmiDeviceInfo> getInputDevices();
     List<HdmiDeviceInfo> getDeviceList();
+    void powerOffRemoteDevice(int logicalAddress, int powerStatus);
+    void powerOnRemoteDevice(int logicalAddress, int powerStatus);
+    void askRemoteDeviceToBecomeActiveSource(int physicalAddress);
     void sendVendorCommand(int deviceType, int targetAddress, in byte[] params,
             boolean hasVendorId);
     void addVendorCommandListener(IHdmiVendorCommandListener listener, int deviceType);
