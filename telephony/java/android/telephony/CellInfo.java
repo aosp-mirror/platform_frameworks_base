@@ -33,6 +33,11 @@ import java.lang.annotation.RetentionPolicy;
 public abstract class CellInfo implements Parcelable {
 
     /**
+     * This value indicates that the integer field is unreported.
+     */
+    public static final int UNAVAILABLE = Integer.MAX_VALUE;
+
+    /**
      * Cell identity type
      * @hide
      */
