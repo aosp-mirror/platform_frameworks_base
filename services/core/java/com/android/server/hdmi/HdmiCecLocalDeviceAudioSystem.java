@@ -45,6 +45,7 @@ import com.android.server.hdmi.HdmiAnnotations.ServiceThreadOnly;
 import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -83,6 +84,10 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
     // input ID is not yet registered by TV input framework need to be buffered for delayed
     // processing.
     private final HashMap<Integer, String> mTvInputs = new HashMap<>();
+
+    // Copy of mDeviceInfos to guarantee thread-safety.
+    @GuardedBy("mLock")
+    private List<HdmiDeviceInfo> mSafeAllDeviceInfos = Collections.emptyList();
 
     // Map-like container of all cec devices.
     // device id is used as key of container.
@@ -174,6 +179,7 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
             removeDeviceInfo(deviceInfo.getId());
         }
         mDeviceInfos.append(deviceInfo.getId(), deviceInfo);
+        updateSafeDeviceInfoList();
         return oldDeviceInfo;
     }
 
@@ -191,6 +197,7 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
         if (deviceInfo != null) {
             mDeviceInfos.remove(id);
         }
+        updateSafeDeviceInfoList();
         return deviceInfo;
     }
 
@@ -205,6 +212,24 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
     HdmiDeviceInfo getCecDeviceInfo(int logicalAddress) {
         assertRunOnServiceThread();
         return mDeviceInfos.get(HdmiDeviceInfo.idForCecDevice(logicalAddress));
+    }
+
+    @ServiceThreadOnly
+    private void updateSafeDeviceInfoList() {
+        assertRunOnServiceThread();
+        List<HdmiDeviceInfo> copiedDevices = HdmiUtils.sparseArrayToList(mDeviceInfos);
+        synchronized (mLock) {
+            mSafeAllDeviceInfos = copiedDevices;
+        }
+    }
+
+    @GuardedBy("mLock")
+    List<HdmiDeviceInfo> getSafeCecDevicesLocked() {
+        ArrayList<HdmiDeviceInfo> infoList = new ArrayList<>();
+        for (HdmiDeviceInfo info : mSafeAllDeviceInfos) {
+            infoList.add(info);
+        }
+        return infoList;
     }
 
     private void invokeDeviceEventListener(HdmiDeviceInfo info, int status) {
@@ -1086,6 +1111,7 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
             invokeDeviceEventListener(info, HdmiControlManager.DEVICE_EVENT_REMOVE_DEVICE);
         }
         mDeviceInfos.clear();
+        updateSafeDeviceInfoList();
     }
 
     @Override
