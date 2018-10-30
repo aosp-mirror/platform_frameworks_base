@@ -18,7 +18,6 @@ package android.graphics;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.annotation.UnsupportedAppUsage;
 import android.util.Pools.SynchronizedPool;
 import android.view.TextureLayer;
 
@@ -27,17 +26,20 @@ import dalvik.annotation.optimization.FastNative;
 
 /**
  * A Canvas implementation that records view system drawing operations for deferred rendering.
- * This is intended for use with RenderNode. This class keeps a list of all the Paint and
- * Bitmap objects that it draws, preventing the backing memory of Bitmaps from being freed while
+ * This is used in combination with RenderNode. This class keeps a list of all the Paint and
+ * Bitmap objects that it draws, preventing the backing memory of Bitmaps from being released while
  * the RecordingCanvas is still holding a native reference to the memory.
  *
- * @hide
+ * This is obtained by calling {@link RenderNode#startRecording()} and is valid until the matching
+ * {@link RenderNode#endRecording()} is called. It must not be retained beyond that as it is
+ * internally reused.
  */
 public final class RecordingCanvas extends BaseRecordingCanvas {
     // The recording canvas pool should be large enough to handle a deeply nested
     // view hierarchy because display lists are generated recursively.
     private static final int POOL_LIMIT = 25;
 
+    /** @hide */
     public static final int MAX_BITMAP_SIZE = 100 * 1024 * 1024; // 100 MB
 
     private static final SynchronizedPool<RecordingCanvas> sPool =
@@ -50,6 +52,7 @@ public final class RecordingCanvas extends BaseRecordingCanvas {
     private int mWidth;
     private int mHeight;
 
+    /** @hide */
     static RecordingCanvas obtain(@NonNull RenderNode node, int width, int height) {
         if (node == null) throw new IllegalArgumentException("node cannot be null");
         RecordingCanvas canvas = sPool.acquire();
@@ -65,15 +68,18 @@ public final class RecordingCanvas extends BaseRecordingCanvas {
         return canvas;
     }
 
+    /** @hide */
     void recycle() {
         mNode = null;
         sPool.release(this);
     }
 
+    /** @hide */
     long finishRecording() {
         return nFinishRecording(mNativeCanvasWrapper);
     }
 
+    /** @hide */
     @Override
     public boolean isRecordingFor(Object o) {
         return o == mNode;
@@ -138,12 +144,12 @@ public final class RecordingCanvas extends BaseRecordingCanvas {
     ///////////////////////////////////////////////////////////////////////////
 
     @Override
-    public void insertReorderBarrier() {
+    public void enableZ() {
         nInsertReorderBarrier(mNativeCanvasWrapper, true);
     }
 
     @Override
-    public void insertInorderBarrier() {
+    public void disableZ() {
         nInsertReorderBarrier(mNativeCanvasWrapper, false);
     }
 
@@ -159,7 +165,6 @@ public final class RecordingCanvas extends BaseRecordingCanvas {
      *
      * @hide
      */
-    @UnsupportedAppUsage
     public void callDrawGLFunction2(long drawGLFunction) {
         nCallDrawGLFunction(mNativeCanvasWrapper, drawGLFunction, null);
     }
@@ -178,7 +183,6 @@ public final class RecordingCanvas extends BaseRecordingCanvas {
      *
      * @hide
      */
-    @UnsupportedAppUsage
     public void drawGLFunctor2(long drawGLFunctor, @Nullable Runnable releasedCallback) {
         nCallDrawGLFunction(mNativeCanvasWrapper, drawGLFunctor, releasedCallback);
     }
@@ -192,8 +196,8 @@ public final class RecordingCanvas extends BaseRecordingCanvas {
      *
      * @param renderNode The RenderNode to draw.
      */
-    @UnsupportedAppUsage
-    public void drawRenderNode(RenderNode renderNode) {
+    @Override
+    public void drawRenderNode(@NonNull RenderNode renderNode) {
         nDrawRenderNode(mNativeCanvasWrapper, renderNode.mNativeRenderNode);
     }
 
@@ -225,7 +229,6 @@ public final class RecordingCanvas extends BaseRecordingCanvas {
      *
      * @hide
      */
-    @UnsupportedAppUsage
     public void drawCircle(CanvasProperty<Float> cx, CanvasProperty<Float> cy,
             CanvasProperty<Float> radius, CanvasProperty<Paint> paint) {
         nDrawCircle(mNativeCanvasWrapper, cx.getNativeContainer(), cy.getNativeContainer(),
@@ -254,6 +257,7 @@ public final class RecordingCanvas extends BaseRecordingCanvas {
                 paint.getNativeContainer());
     }
 
+    /** @hide */
     @Override
     protected void throwIfCannotDraw(Bitmap bitmap) {
         super.throwIfCannotDraw(bitmap);

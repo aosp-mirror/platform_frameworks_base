@@ -14710,7 +14710,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
      */
     public float getCameraDistance() {
         final float dpi = mResources.getDisplayMetrics().densityDpi;
-        return -(mRenderNode.getCameraDistance() * dpi);
+        return mRenderNode.getCameraDistance() * dpi;
     }
 
     /**
@@ -14756,7 +14756,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
         final float dpi = mResources.getDisplayMetrics().densityDpi;
 
         invalidateViewProperty(true, false);
-        mRenderNode.setCameraDistance(-Math.abs(distance) / dpi);
+        mRenderNode.setCameraDistance(Math.abs(distance) / dpi);
         invalidateViewProperty(false, false);
 
         invalidateParentIfNeededAndWasQuickRejected();

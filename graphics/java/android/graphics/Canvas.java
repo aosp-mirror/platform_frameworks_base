@@ -205,11 +205,70 @@ public class Canvas extends BaseCanvas {
         mBitmap = bitmap;
     }
 
-    /** @hide */
-    public void insertReorderBarrier() {}
+    /**
+     * @deprecated use {@link #enableZ()} instead
+     * @hide */
+    @Deprecated
+    public void insertReorderBarrier() {
+        enableZ();
+    }
 
-    /** @hide */
-    public void insertInorderBarrier() {}
+    /**
+     * @deprecated use {@link #disableZ()} instead
+     * @hide */
+    @Deprecated
+    public void insertInorderBarrier() {
+        disableZ();
+    }
+
+    /**
+     * <p>Enables Z support which defaults to disabled. This allows for RenderNodes drawn with
+     * {@link #drawRenderNode(RenderNode)} to be re-arranged based off of their
+     * {@link RenderNode#getElevation()} and {@link RenderNode#getTranslationZ()}
+     * values. It also enables rendering of shadows for RenderNodes with an elevation or
+     * translationZ.</p>
+     *
+     * <p>Any draw reordering will not be moved before this call. A typical usage of this might
+     * look something like:
+     *
+     * <pre class="prettyprint">
+     *     void draw(Canvas canvas) {
+     *         // Draw any background content
+     *         canvas.drawColor(backgroundColor);
+     *
+     *         // Begin drawing that may be reordered based off of Z
+     *         canvas.enableZ();
+     *         for (RenderNode child : children) {
+     *             canvas.drawRenderNode(child);
+     *         }
+     *         // End drawing that may be reordered based off of Z
+     *         canvas.disableZ();
+     *
+     *         // Draw any overlays
+     *         canvas.drawText("I'm on top of everything!", 0, 0, paint);
+     *     }
+     * </pre>
+     * </p>
+     *
+     * Note: This is not impacted by any {@link #save()} or {@link #restore()} calls as it is not
+     * considered to be part of the current matrix or clip.
+     *
+     * See {@link #disableZ()}
+     */
+    public void enableZ() {
+    }
+
+    /**
+     * Disables Z support, preventing any RenderNodes drawn after this point from being
+     * visually reordered or having shadows rendered.
+     *
+     * Note: This is not impacted by any {@link #save()} or {@link #restore()} calls as it is not
+     * considered to be part of the current matrix or clip.
+     *
+     * See {@link #enableZ()}
+     */
+    public void disableZ() {
+    }
 
     /**
      * Return true if the device that the current layer draws into is opaque
@@ -2109,5 +2168,18 @@ public class Canvas extends BaseCanvas {
             @NonNull Paint paint) {
         super.drawVertices(mode, vertexCount, verts, vertOffset, texs, texOffset,
                 colors, colorOffset, indices, indexOffset, indexCount, paint);
+    }
+
+    /**
+     * Draws the given RenderNode. This is only supported in hardware rendering, which can be
+     * verified by asserting that {@link #isHardwareAccelerated()} is true. If
+     * {@link #isHardwareAccelerated()} is false then this throws an exception.
+     *
+     * See {@link RenderNode} for more information on what a RenderNode is and how to use it.
+     *
+     * @param renderNode The RenderNode to draw, must be non-null.
+     */
+    public void drawRenderNode(@NonNull RenderNode renderNode) {
+        throw new IllegalArgumentException("Software rendering doesn't support drawRenderNode");
     }
 }

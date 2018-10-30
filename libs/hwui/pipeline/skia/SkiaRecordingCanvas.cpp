@@ -81,6 +81,11 @@ void SkiaRecordingCanvas::drawCircle(uirenderer::CanvasPropertyPrimitive* x,
 }
 
 void SkiaRecordingCanvas::insertReorderBarrier(bool enableReorder) {
+    if (mCurrentBarrier && enableReorder) {
+        // Already in a re-order section, nothing to do
+        return;
+    }
+
     if (nullptr != mCurrentBarrier) {
         // finish off the existing chunk
         SkDrawable* drawable =
@@ -89,9 +94,8 @@ void SkiaRecordingCanvas::insertReorderBarrier(bool enableReorder) {
         drawDrawable(drawable);
     }
     if (enableReorder) {
-        mCurrentBarrier = (StartReorderBarrierDrawable*)
-                                  mDisplayList->allocateDrawable<StartReorderBarrierDrawable>(
-                                          mDisplayList.get());
+        mCurrentBarrier = mDisplayList->allocateDrawable<StartReorderBarrierDrawable>(
+                mDisplayList.get());
         drawDrawable(mCurrentBarrier);
     }
 }

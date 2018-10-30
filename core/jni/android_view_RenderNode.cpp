@@ -295,6 +295,22 @@ static jboolean android_view_RenderNode_setBottom(jlong renderNodePtr, int botto
     return SET_AND_DIRTY(setBottom, bottom, RenderNode::Y);
 }
 
+static jint android_view_RenderNode_getLeft(jlong renderNodePtr) {
+    return reinterpret_cast<RenderNode*>(renderNodePtr)->stagingProperties().getLeft();
+}
+
+static jint android_view_RenderNode_getTop(jlong renderNodePtr) {
+    return reinterpret_cast<RenderNode*>(renderNodePtr)->stagingProperties().getTop();
+}
+
+static jint android_view_RenderNode_getRight(jlong renderNodePtr) {
+    return reinterpret_cast<RenderNode*>(renderNodePtr)->stagingProperties().getRight();
+}
+
+static jint android_view_RenderNode_getBottom(jlong renderNodePtr) {
+    return reinterpret_cast<RenderNode*>(renderNodePtr)->stagingProperties().getBottom();
+}
+
 static jboolean android_view_RenderNode_setLeftTopRightBottom(jlong renderNodePtr,
         int left, int top, int right, int bottom) {
     RenderNode* renderNode = reinterpret_cast<RenderNode*>(renderNodePtr);
@@ -645,6 +661,10 @@ static const JNINativeMethod gMethods[] = {
     { "nSetTop",               "(JI)Z",  (void*) android_view_RenderNode_setTop },
     { "nSetRight",             "(JI)Z",  (void*) android_view_RenderNode_setRight },
     { "nSetBottom",            "(JI)Z",  (void*) android_view_RenderNode_setBottom },
+    { "nGetLeft",              "(J)I",  (void*) android_view_RenderNode_getLeft },
+    { "nGetTop",               "(J)I",  (void*) android_view_RenderNode_getTop },
+    { "nGetRight",             "(J)I",  (void*) android_view_RenderNode_getRight },
+    { "nGetBottom",            "(J)I",  (void*) android_view_RenderNode_getBottom },
     { "nSetLeftTopRightBottom","(JIIII)Z", (void*) android_view_RenderNode_setLeftTopRightBottom },
     { "nOffsetLeftAndRight",   "(JI)Z",  (void*) android_view_RenderNode_offsetLeftAndRight },
     { "nOffsetTopAndBottom",   "(JI)Z",  (void*) android_view_RenderNode_offsetTopAndBottom },
