@@ -28,10 +28,7 @@ import android.util.Slog;
 
 import com.android.internal.util.FastPrintWriter;
 
-import libcore.io.IoUtils;
-
 import java.io.File;
-import java.io.FileInputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.text.SimpleDateFormat;
@@ -40,7 +37,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
-import java.util.StringTokenizer;
 
 public class ProcessCpuTracker {
     private static final String TAG = "ProcessCpuTracker";
@@ -175,8 +171,6 @@ public class ProcessCpuTracker {
     private boolean mWorkingProcsSorted;
 
     private boolean mFirst = true;
-
-    private byte[] mBuffer = new byte[4096];
 
     public interface FilterStats {
         /** Which stats to pick when filtering */
@@ -863,40 +857,11 @@ public class ProcessCpuTracker {
         pw.println();
     }
 
-    private String readFile(String file, char endChar) {
-        // Permit disk reads here, as /proc/meminfo isn't really "on
-        // disk" and should be fast.  TODO: make BlockGuard ignore
-        // /proc/ and /sys/ files perhaps?
-        StrictMode.ThreadPolicy savedPolicy = StrictMode.allowThreadDiskReads();
-        FileInputStream is = null;
-        try {
-            is = new FileInputStream(file);
-            int len = is.read(mBuffer);
-            is.close();
-
-            if (len > 0) {
-                int i;
-                for (i=0; i<len; i++) {
-                    if (mBuffer[i] == endChar) {
-                        break;
-                    }
-                }
-                return new String(mBuffer, 0, i);
-            }
-        } catch (java.io.FileNotFoundException e) {
-        } catch (java.io.IOException e) {
-        } finally {
-            IoUtils.closeQuietly(is);
-            StrictMode.setThreadPolicy(savedPolicy);
-        }
-        return null;
-    }
-
     private void getName(Stats st, String cmdlineFile) {
         String newName = st.name;
         if (st.name == null || st.name.equals("app_process")
                 || st.name.equals("<pre-initialized>")) {
-            String cmdName = readFile(cmdlineFile, '\0');
+            String cmdName = ProcStatsUtil.readTerminatedProcFile(cmdlineFile, (byte) '\0');
             if (cmdName != null && cmdName.length() > 1) {
                 newName = cmdName;
                 int i = newName.lastIndexOf("/");
