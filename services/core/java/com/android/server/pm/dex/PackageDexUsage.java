@@ -21,6 +21,7 @@ import android.util.Slog;
 import android.os.Build;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.FastPrintWriter;
 import com.android.server.pm.AbstractStatsBase;
 import com.android.server.pm.PackageManagerServiceUtils;
@@ -78,13 +79,15 @@ public class PackageDexUsage extends AbstractStatsBase<Void> {
     // skip optimizations on that dex files.
     /*package*/ static final String VARIABLE_CLASS_LOADER_CONTEXT =
             "=VariableClassLoaderContext=";
-    // The marker used for unsupported class loader contexts.
-    /*package*/ static final String UNSUPPORTED_CLASS_LOADER_CONTEXT =
-            "=UnsupportedClassLoaderContext=";
     // The markers used for unknown class loader contexts. This can happen if the dex file was
     // recorded in a previous version and we didn't have a chance to update its usage.
     /*package*/ static final String UNKNOWN_CLASS_LOADER_CONTEXT =
             "=UnknownClassLoaderContext=";
+
+    // The marker used for unsupported class loader contexts (no longer written, may occur in old
+    // files so discarded on read).
+    private static final String UNSUPPORTED_CLASS_LOADER_CONTEXT =
+            "=UnsupportedClassLoaderContext=";
 
     // Map which structures the information we have on a package.
     // Maps package name to package data (which stores info about UsedByOtherApps and
@@ -364,6 +367,12 @@ public class PackageDexUsage extends AbstractStatsBase<Void> {
                 // In version 2 we added the loading packages and class loader context.
                 Set<String> loadingPackages = maybeReadLoadingPackages(in, version);
                 String classLoaderContext = maybeReadClassLoaderContext(in, version);
+
+                if (UNSUPPORTED_CLASS_LOADER_CONTEXT.equals(classLoaderContext)) {
+                    // We used to record use of unsupported class loaders, but we no longer do.
+                    // Discard such entries; they will be deleted when we next write the file.
+                    continue;
+                }
 
                 int ownerUserId = Integer.parseInt(elems[0]);
                 boolean isUsedByOtherApps = readBoolean(elems[1]);
@@ -709,13 +718,13 @@ public class PackageDexUsage extends AbstractStatsBase<Void> {
         //      the compiled code will be private.
         private boolean mUsedByOtherAppsBeforeUpgrade;
 
-        public PackageUseInfo() {
+        /*package*/ PackageUseInfo() {
             mCodePathsUsedByOtherApps = new HashMap<>();
             mDexUseInfoMap = new HashMap<>();
         }
 
         // Creates a deep copy of the `other`.
-        public PackageUseInfo(PackageUseInfo other) {
+        private PackageUseInfo(PackageUseInfo other) {
             mCodePathsUsedByOtherApps = new HashMap<>();
             for (Map.Entry<String, Set<String>> e : other.mCodePathsUsedByOtherApps.entrySet()) {
                 mCodePathsUsedByOtherApps.put(e.getKey(), new HashSet<>(e.getValue()));
@@ -796,8 +805,9 @@ public class PackageDexUsage extends AbstractStatsBase<Void> {
         // Packages who load this dex file.
         private final Set<String> mLoadingPackages;
 
-        public DexUseInfo(boolean isUsedByOtherApps, int ownerUserId, String classLoaderContext,
-                String loaderIsa) {
+        @VisibleForTesting
+        /* package */ DexUseInfo(boolean isUsedByOtherApps, int ownerUserId,
+                String classLoaderContext, String loaderIsa) {
             mIsUsedByOtherApps = isUsedByOtherApps;
             mOwnerUserId = ownerUserId;
             mClassLoaderContext = classLoaderContext;
@@ -809,7 +819,7 @@ public class PackageDexUsage extends AbstractStatsBase<Void> {
         }
 
         // Creates a deep copy of the `other`.
-        public DexUseInfo(DexUseInfo other) {
+        private DexUseInfo(DexUseInfo other) {
             mIsUsedByOtherApps = other.mIsUsedByOtherApps;
             mOwnerUserId = other.mOwnerUserId;
             mClassLoaderContext = other.mClassLoaderContext;
@@ -827,11 +837,7 @@ public class PackageDexUsage extends AbstractStatsBase<Void> {
             if (UNKNOWN_CLASS_LOADER_CONTEXT.equals(mClassLoaderContext)) {
                 // Can happen if we read a previous version.
                 mClassLoaderContext = dexUseInfo.mClassLoaderContext;
-            } else if (UNSUPPORTED_CLASS_LOADER_CONTEXT.equals(dexUseInfo.mClassLoaderContext)) {
-                // We detected an unsupported context.
-                mClassLoaderContext = UNSUPPORTED_CLASS_LOADER_CONTEXT;
-            } else if (!UNSUPPORTED_CLASS_LOADER_CONTEXT.equals(mClassLoaderContext) &&
-                    !Objects.equals(mClassLoaderContext, dexUseInfo.mClassLoaderContext)) {
+            } else if (!Objects.equals(mClassLoaderContext, dexUseInfo.mClassLoaderContext)) {
                 // We detected a context change.
                 mClassLoaderContext = VARIABLE_CLASS_LOADER_CONTEXT;
             }
@@ -846,7 +852,7 @@ public class PackageDexUsage extends AbstractStatsBase<Void> {
             return mIsUsedByOtherApps;
         }
 
-        public int getOwnerUserId() {
+        /* package */ int getOwnerUserId() {
             return mOwnerUserId;
         }
 
@@ -860,17 +866,15 @@ public class PackageDexUsage extends AbstractStatsBase<Void> {
 
         public String getClassLoaderContext() { return mClassLoaderContext; }
 
-        public boolean isUnsupportedClassLoaderContext() {
-            return UNSUPPORTED_CLASS_LOADER_CONTEXT.equals(mClassLoaderContext);
-        }
-
-        public boolean isUnknownClassLoaderContext() {
+        @VisibleForTesting
+        /* package */ boolean isUnknownClassLoaderContext() {
             // The class loader context may be unknown if we loaded the data from a previous version
             // which didn't save the context.
             return UNKNOWN_CLASS_LOADER_CONTEXT.equals(mClassLoaderContext);
         }
 
-        public boolean isVariableClassLoaderContext() {
+        @VisibleForTesting
+        /* package */ boolean isVariableClassLoaderContext() {
             return VARIABLE_CLASS_LOADER_CONTEXT.equals(mClassLoaderContext);
         }
     }
