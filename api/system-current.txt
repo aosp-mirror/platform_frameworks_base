@@ -93,6 +93,7 @@ package android {
     field public static final java.lang.String LOCATION_HARDWARE = "android.permission.LOCATION_HARDWARE";
     field public static final java.lang.String LOCK_DEVICE = "android.permission.LOCK_DEVICE";
     field public static final java.lang.String LOOP_RADIO = "android.permission.LOOP_RADIO";
+    field public static final java.lang.String MANAGE_ACCESSIBILITY = "android.permission.MANAGE_ACCESSIBILITY";
     field public static final java.lang.String MANAGE_ACTIVITY_STACKS = "android.permission.MANAGE_ACTIVITY_STACKS";
     field public static final java.lang.String MANAGE_APP_OPS_RESTRICTIONS = "android.permission.MANAGE_APP_OPS_RESTRICTIONS";
     field public static final java.lang.String MANAGE_APP_TOKENS = "android.permission.MANAGE_APP_TOKENS";
@@ -6826,6 +6827,14 @@ package android.view {
   }
 
   public static abstract class WindowManager.LayoutParams.SystemFlags implements java.lang.annotation.Annotation {
+  }
+
+}
+
+package android.view.accessibility {
+
+  public final class AccessibilityManager {
+    method public void performAccessibilityShortcut();
   }
 
 }

@@ -2068,7 +2068,9 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 && componentNameToEnable.equals(userState.mServiceToEnableWithShortcut)) {
             return false;
         }
+
         userState.mServiceToEnableWithShortcut = componentNameToEnable;
+        scheduleNotifyClientsOfServicesStateChange(userState);
         return true;
     }
 
@@ -2343,10 +2345,10 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     @Override
     public void performAccessibilityShortcut() {
         if ((UserHandle.getAppId(Binder.getCallingUid()) != Process.SYSTEM_UID)
-                && (mContext.checkCallingPermission(Manifest.permission.WRITE_SECURE_SETTINGS)
+                && (mContext.checkCallingPermission(Manifest.permission.MANAGE_ACCESSIBILITY)
                 != PackageManager.PERMISSION_GRANTED)) {
             throw new SecurityException(
-                    "performAccessibilityShortcut requires the WRITE_SECURE_SETTINGS permission");
+                    "performAccessibilityShortcut requires the MANAGE_ACCESSIBILITY permission");
         }
         final Map<ComponentName, ToggleableFrameworkFeatureInfo> frameworkFeatureMap =
                 AccessibilityShortcutController.getFrameworkShortcutFeaturesMap();
@@ -2380,6 +2382,19 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             }
         }
     };
+
+    @Override
+    public String getAccessibilityShortcutService() {
+        if (mContext.checkCallingPermission(Manifest.permission.MANAGE_ACCESSIBILITY)
+                != PackageManager.PERMISSION_GRANTED) {
+            throw new SecurityException(
+                    "getAccessibilityShortcutService requires the MANAGE_ACCESSIBILITY permission");
+        }
+        synchronized(mLock) {
+            final UserState userState = getUserStateLocked(mCurrentUserId);
+            return userState.mServiceToEnableWithShortcut.flattenToString();
+        }
+    }
 
     /**
      * Enables accessibility service specified by {@param componentName} for the {@param userId}.
