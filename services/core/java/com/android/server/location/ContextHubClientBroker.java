@@ -245,9 +245,15 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
     public boolean unregisterIntent(PendingIntent pendingIntent) {
         ContextHubServiceUtil.checkPermissions(mContext);
 
+        boolean success = false;
         synchronized (this) {
-            return mPendingIntentRequest.unregister(pendingIntent);
+            success = mPendingIntentRequest.unregister(pendingIntent);
+            if (mCallbackInterface == null) {
+                close();
+            }
         }
+
+        return success;
     }
 
     /**
@@ -407,6 +413,9 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
                 Log.w(TAG, "PendingIntent has been canceled, unregistering from client"
                         + " (host endpoint ID " + mHostEndPointId + ")");
                 mPendingIntentRequest.clear();
+                if (mCallbackInterface == null) {
+                    close();
+                }
             }
         }
     }
