@@ -832,25 +832,23 @@ public class NetworkStatsTest {
                 0 /* operations */);
 
         // Traffic measured for the root uid on the base interface if eBPF is in use.
-        // Incorrectly includes appEntry's bytes and packets, plus IPv4-IPv6 translation
-        // overhead (20 bytes per packet), only for TX traffic.
         final NetworkStats.Entry ebpfRootUidEntry = new NetworkStats.Entry(
                 baseIface, rootUid, SET_DEFAULT, TAG_NONE,
                 163577 /* rxBytes */,
                 187 /* rxPackets */,
-                1169942 /* txBytes */,
-                13902 /* txPackets */,
+                17607 /* txBytes */,
+                97 /* txPackets */,
                 0 /* operations */);
 
         // Traffic measured for the root uid on the base interface if xt_qtaguid is in use.
         // Incorrectly includes appEntry's bytes and packets, plus IPv4-IPv6 translation
-        // overhead (20 bytes per packet), in both directions.
+        // overhead (20 bytes per packet), in rx direction.
         final NetworkStats.Entry xtRootUidEntry = new NetworkStats.Entry(
                 baseIface, rootUid, SET_DEFAULT, TAG_NONE,
                 31113087 /* rxBytes */,
                 22588 /* rxPackets */,
-                1169942 /* txBytes */,
-                13902 /* txPackets */,
+                17607 /* txBytes */,
+                97 /* txPackets */,
                 0 /* operations */);
 
         final NetworkStats.Entry otherEntry = new NetworkStats.Entry(

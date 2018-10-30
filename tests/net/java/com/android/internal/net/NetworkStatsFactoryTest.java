@@ -159,7 +159,7 @@ public class NetworkStatsFactoryTest {
         assertStatsEntry(stats, "v4-wlan0", 1000, SET_DEFAULT, 0x0, 30812L, 2310L);
         assertStatsEntry(stats, "v4-wlan0", 10102, SET_DEFAULT, 0x0, 10022L, 3330L);
         assertStatsEntry(stats, "v4-wlan0", 10060, SET_DEFAULT, 0x0, 9532772L, 254112L);
-        assertStatsEntry(stats, "wlan0", 0, SET_DEFAULT, 0x0, 15229L, 5766L);
+        assertStatsEntry(stats, "wlan0", 0, SET_DEFAULT, 0x0, 15229L, 0L);
         assertStatsEntry(stats, "wlan0", 1000, SET_DEFAULT, 0x0, 6126L, 2013L);
         assertStatsEntry(stats, "wlan0", 10013, SET_DEFAULT, 0x0, 0L, 144L);
         assertStatsEntry(stats, "wlan0", 10018, SET_DEFAULT, 0x0, 5980263L, 167667L);
@@ -169,6 +169,8 @@ public class NetworkStatsFactoryTest {
         assertStatsEntry(stats, "wlan0", 10103, SET_DEFAULT, 0x0, 0L, 192L);
         assertStatsEntry(stats, "dummy0", 0, SET_DEFAULT, 0x0, 0L, 168L);
         assertStatsEntry(stats, "lo", 0, SET_DEFAULT, 0x0, 1288L, 1288L);
+
+        assertNoStatsEntry(stats, "wlan0", 1029, SET_DEFAULT, 0x0);
 
         NetworkStatsFactory.clearStackedIfaces();
     }
@@ -191,12 +193,12 @@ public class NetworkStatsFactoryTest {
         // Stats snapshot before the download
         stats = parseDetailedStats(R.raw.xt_qtaguid_with_clat_100mb_download_before);
         assertStatsEntry(stats, "v4-wlan0", 10106, SET_FOREGROUND, 0x0, appRxBytesBefore, 5199872L);
-        assertStatsEntry(stats, "wlan0", 0, SET_DEFAULT, 0x0, rootRxBytesBefore, 647888L);
+        assertStatsEntry(stats, "wlan0", 0, SET_DEFAULT, 0x0, rootRxBytesBefore, 0L);
 
         // Stats snapshot after the download
         stats = parseDetailedStats(R.raw.xt_qtaguid_with_clat_100mb_download_after);
         assertStatsEntry(stats, "v4-wlan0", 10106, SET_FOREGROUND, 0x0, appRxBytesAfter, 7867488L);
-        assertStatsEntry(stats, "wlan0", 0, SET_DEFAULT, 0x0, rootRxBytesAfter, 647587L);
+        assertStatsEntry(stats, "wlan0", 0, SET_DEFAULT, 0x0, rootRxBytesAfter, 0L);
 
         NetworkStatsFactory.clearStackedIfaces();
     }
@@ -250,6 +252,15 @@ public class NetworkStatsFactoryTest {
         final NetworkStats.Entry entry = stats.getValues(i, null);
         assertEquals("unexpected rxBytes", rxBytes, entry.rxBytes);
         assertEquals("unexpected txBytes", txBytes, entry.txBytes);
+    }
+
+    private static void assertNoStatsEntry(NetworkStats stats, String iface, int uid, int set,
+            int tag) {
+        final int i = stats.findIndex(iface, uid, set, tag, METERED_NO, ROAMING_NO,
+                DEFAULT_NETWORK_NO);
+        if (i >= 0) {
+            fail("unexpected NetworkStats entry at " + i);
+        }
     }
 
     private static void assertStatsEntry(NetworkStats stats, String iface, int uid, int set,
