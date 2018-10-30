@@ -555,6 +555,79 @@ public class Binder implements IBinder {
     }
 
     /**
+     * Listener to be notified about each proxy-side binder call.
+     *
+     * See {@link setProxyTransactListener}.
+     * @hide
+     */
+    public interface ProxyTransactListener {
+        /**
+         * Called before onTransact.
+         *
+         * @return an object that will be passed back to #onTransactEnded (or null).
+         */
+        Object onTransactStarted(IBinder binder, int transactionCode);
+
+        /**
+         * Called after onTranact (even when an exception is thrown).
+         *
+         * @param session The object return by #onTransactStarted.
+         */
+        void onTransactEnded(@Nullable Object session);
+    }
+
+    /**
+     * Propagates the work source to binder calls executed by the system server.
+     *
+     * <li>By default, this listener will propagate the worksource if the outgoing call happens on
+     * the same thread as the incoming binder call.
+     * <li>Custom attribution can be done by calling {@link ThreadLocalWorkSourceUid#set(int)}.
+     * @hide
+     */
+    public static class PropagateWorkSourceTransactListener implements ProxyTransactListener {
+        @Override
+        public Object onTransactStarted(IBinder binder, int transactionCode) {
+           // Note that {@link Binder#getCallingUid()} is already set to the UID of the current
+           // process when this method is called.
+           //
+           // We use ThreadLocalWorkSourceUid instead. It also allows feature owners to set
+           // {@link ThreadLocalWorkSourceUid#set(int) manually to attribute resources to a UID.
+            int uid = ThreadLocalWorkSourceUid.get();
+            if (uid >= 0) {
+                int originalUid = Binder.setThreadWorkSource(uid);
+                return Integer.valueOf(originalUid);
+            }
+            return null;
+        }
+
+        @Override
+        public void onTransactEnded(Object session) {
+            if (session != null) {
+                int uid = (int) session;
+                Binder.setThreadWorkSource(uid);
+            }
+        }
+    }
+
+    /**
+     * Sets a listener for the transact method on the proxy-side.
+     *
+     * <li>The listener is global. Only fast operations should be done to avoid thread
+     * contentions.
+     * <li>The listener implementation needs to handle synchronization if needed. The methods on the
+     * listener can be called concurrently.
+     * <li>Listener set will be used for new transactions. On-going transaction will still use the
+     * previous listener (if already set).
+     * <li>The listener is called on the critical path of the binder transaction so be careful about
+     * performance.
+     * <li>Never execute another binder transaction inside the listener.
+     * @hide
+     */
+    public static void setProxyTransactListener(@Nullable ProxyTransactListener listener) {
+        BinderProxy.setTransactListener(listener);
+    }
+
+    /**
      * Default implementation is a stub that returns false.  You will want
      * to override this to do the appropriate unmarshalling of transactions.
      *
