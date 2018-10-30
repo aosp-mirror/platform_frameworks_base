@@ -461,6 +461,41 @@ public abstract class DocumentsProvider extends ContentProvider {
     }
 
     /**
+     * Return recently modified documents under the requested root. This will
+     * only be called for roots that advertise
+     * {@link Root#FLAG_SUPPORTS_RECENTS}. The returned documents should be
+     * sorted by {@link Document#COLUMN_LAST_MODIFIED} in descending order of
+     * the most recently modified documents.
+     * <p>
+     * If this method is overriden by the concrete DocumentsProvider and
+     * QUERY_ARGS_LIMIT is specified with a nonnegative int under queryArgs, the
+     * result will be limited by that number and QUERY_ARG_LIMIT will be
+     * specified under EXTRA_HONORED_ARGS. Otherwise, a default 64 limit will
+     * be used and no QUERY_ARG* will be specified under EXTRA_HONORED_ARGS.
+     * <p>
+     * Recent documents do not support change notifications.
+     *
+     * @param projection list of {@link Document} columns to put into the
+     *            cursor. If {@code null} all supported columns should be
+     *            included.
+     * @param queryArgs the extra query arguments.
+     * @param signal used by the caller to signal if the request should be
+     *            cancelled. May be null.
+     * @see DocumentsContract#EXTRA_LOADING
+     */
+    @SuppressWarnings("unused")
+    public Cursor queryRecentDocuments(
+            String rootId, String[] projection, @Nullable Bundle queryArgs,
+            @Nullable CancellationSignal signal)
+            throws FileNotFoundException {
+        Cursor c = queryRecentDocuments(rootId, projection);
+        Bundle extras = new Bundle();
+        c.setExtras(extras);
+        extras.putStringArray(ContentResolver.EXTRA_HONORED_ARGS, new String[0]);
+        return c;
+    }
+
+    /**
      * Return metadata for the single requested document. You should avoid
      * making network requests to keep this request fast.
      *
@@ -774,7 +809,7 @@ public abstract class DocumentsProvider extends ContentProvider {
      * Implementation is provided by the parent class. Cannot be overriden.
      *
      * @see #queryRoots(String[])
-     * @see #queryRecentDocuments(String, String[])
+     * @see #queryRecentDocuments(String, String[], Bundle, CancellationSignal)
      * @see #queryDocument(String, String[])
      * @see #queryChildDocuments(String, String[], String)
      * @see #querySearchDocuments(String, String, String[])
@@ -787,7 +822,8 @@ public abstract class DocumentsProvider extends ContentProvider {
                 case MATCH_ROOTS:
                     return queryRoots(projection);
                 case MATCH_RECENT:
-                    return queryRecentDocuments(getRootId(uri), projection);
+                    return queryRecentDocuments(
+                            getRootId(uri), projection, queryArgs, cancellationSignal);
                 case MATCH_SEARCH:
                     return querySearchDocuments(
                             getRootId(uri), getSearchDocumentsQuery(uri), projection);
