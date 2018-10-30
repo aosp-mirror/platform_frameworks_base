@@ -1052,6 +1052,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             e.writeLong(callStat.maxRequestSizeBytes);
             e.writeLong(callStat.recordedCallCount);
             e.writeInt(callStat.screenInteractive ? 1 : 0);
+            e.writeInt(callStat.callingUid);
             pulledData.add(e);
         }
     }
