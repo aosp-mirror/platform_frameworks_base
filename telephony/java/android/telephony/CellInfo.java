@@ -42,38 +42,51 @@ public abstract class CellInfo implements Parcelable {
      * @hide
      */
     @Retention(RetentionPolicy.SOURCE)
-    @IntDef(prefix = "TYPE_", value = {TYPE_GSM, TYPE_CDMA, TYPE_LTE, TYPE_WCDMA, TYPE_TDSCDMA})
+    @IntDef(prefix = "TYPE_",
+            value = {TYPE_GSM, TYPE_CDMA, TYPE_LTE, TYPE_WCDMA, TYPE_TDSCDMA, TYPE_NR})
     public @interface Type {}
+
     /**
      * Unknown cell identity type
      * @hide
      */
-    public static final int TYPE_UNKNOWN        = 0;
+    public static final int TYPE_UNKNOWN = 0;
+
     /**
      * GSM cell identity type
      * @hide
      */
-    public static final int TYPE_GSM            = 1;
+    public static final int TYPE_GSM = 1;
+
     /**
      * CDMA cell identity type
      * @hide
      */
-    public static final int TYPE_CDMA           = 2;
+    public static final int TYPE_CDMA = 2;
+
     /**
      * LTE cell identity type
      * @hide
      */
-    public static final int TYPE_LTE            = 3;
+    public static final int TYPE_LTE = 3;
+
     /**
      * WCDMA cell identity type
      * @hide
      */
-    public static final int TYPE_WCDMA          = 4;
+    public static final int TYPE_WCDMA = 4;
+
     /**
      * TD-SCDMA cell identity type
      * @hide
      */
-    public static final int TYPE_TDSCDMA        = 5;
+    public static final int TYPE_TDSCDMA = 5;
+
+    /**
+     * 5G cell identity type
+     * @hide
+     */
+    public static final int TYPE_NR = 6;
 
     // Type to distinguish where time stamp gets recorded.
 
@@ -277,6 +290,7 @@ public abstract class CellInfo implements Parcelable {
                     case TYPE_LTE: return CellInfoLte.createFromParcelBody(in);
                     case TYPE_WCDMA: return CellInfoWcdma.createFromParcelBody(in);
                     case TYPE_TDSCDMA: return CellInfoTdscdma.createFromParcelBody(in);
+                    case TYPE_NR: return CellInfoNr.createFromParcelBody(in);
                     default: throw new RuntimeException("Bad CellInfo Parcel");
                 }
         }
