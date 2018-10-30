@@ -37,14 +37,14 @@ public final class CellSignalStrengthWcdma extends CellSignalStrength implements
 
     @UnsupportedAppUsage
     private int mSignalStrength; // in ASU; Valid values are (0-31, 99) as defined in TS 27.007 8.5
-                                 // or Integer.MAX_VALUE if unknown
+                                 // or CellInfo.UNAVAILABLE if unknown
     @UnsupportedAppUsage
     private int mBitErrorRate; // bit error rate (0-7, 99) as defined in TS 27.007 8.5 or
-                               // Integer.MAX_VALUE if unknown
+                               // CellInfo.UNAVAILABLE if unknown
     private int mRscp; // bit error rate (0-96, 255) as defined in TS 27.007 8.69 or
-                       // Integer.MAX_VALUE if unknown
+                       // CellInfo.UNAVAILABLE if unknown
     private int mEcNo; // signal to noise radio (0-49, 255) as defined in TS 27.007 8.69 or
-                       // Integer.MAX_VALUE if unknown
+                       // CellInfo.UNAVAILABLE if unknown
 
     /** @hide */
     public CellSignalStrengthWcdma() {
@@ -81,10 +81,10 @@ public final class CellSignalStrengthWcdma extends CellSignalStrength implements
     /** @hide */
     @Override
     public void setDefaultValues() {
-        mSignalStrength = Integer.MAX_VALUE;
-        mBitErrorRate = Integer.MAX_VALUE;
-        mRscp = Integer.MAX_VALUE;
-        mEcNo = Integer.MAX_VALUE;
+        mSignalStrength = CellInfo.UNAVAILABLE;
+        mBitErrorRate = CellInfo.UNAVAILABLE;
+        mRscp = CellInfo.UNAVAILABLE;
+        mEcNo = CellInfo.UNAVAILABLE;
     }
 
     /**
@@ -119,11 +119,11 @@ public final class CellSignalStrengthWcdma extends CellSignalStrength implements
         int dBm;
 
         int level = mSignalStrength;
-        int asu = (level == 99 ? Integer.MAX_VALUE : level);
-        if (asu != Integer.MAX_VALUE) {
+        int asu = (level == 99 ? CellInfo.UNAVAILABLE : level);
+        if (asu != CellInfo.UNAVAILABLE) {
             dBm = -113 + (2 * asu);
         } else {
-            dBm = Integer.MAX_VALUE;
+            dBm = CellInfo.UNAVAILABLE;
         }
         if (DBG) log("getDbm=" + dBm);
         return dBm;

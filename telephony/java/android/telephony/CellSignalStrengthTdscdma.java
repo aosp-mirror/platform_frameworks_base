@@ -36,11 +36,11 @@ public final class CellSignalStrengthTdscdma extends CellSignalStrength implemen
     private static final int TDSCDMA_SIGNAL_STRENGTH_MODERATE = 5;
 
     private int mSignalStrength; // in ASU; Valid values are (0-31, 99) as defined in TS 27.007 8.5
-                                 // or Integer.MAX_VALUE if unknown
+                                 // or CellInfo.UNAVAILABLE if unknown
     private int mBitErrorRate; // bit error rate (0-7, 99) as defined in TS 27.007 8.5 or
-                               // Integer.MAX_VALUE if unknown
-    private int mRscp; // Pilot power (0-96, 255) as defined in TS 27.007 8.69 or Integer.MAX_VALUE
-                       // if unknown
+                               // CellInfo.UNAVAILABLE if unknown
+    private int mRscp; // Pilot power (0-96, 255) as defined in TS 27.007 8.69 or
+                       // CellInfo.UNAVAILABLE if unknown
 
     /** @hide */
     public CellSignalStrengthTdscdma() {
@@ -75,9 +75,9 @@ public final class CellSignalStrengthTdscdma extends CellSignalStrength implemen
     /** @hide */
     @Override
     public void setDefaultValues() {
-        mSignalStrength = Integer.MAX_VALUE;
-        mBitErrorRate = Integer.MAX_VALUE;
-        mRscp = Integer.MAX_VALUE;
+        mSignalStrength = CellInfo.UNAVAILABLE;
+        mBitErrorRate = CellInfo.UNAVAILABLE;
+        mRscp = CellInfo.UNAVAILABLE;
     }
 
     /**
@@ -118,11 +118,11 @@ public final class CellSignalStrengthTdscdma extends CellSignalStrength implemen
         int dBm;
 
         int level = mSignalStrength;
-        int asu = (level == 99 ? Integer.MAX_VALUE : level);
-        if (asu != Integer.MAX_VALUE) {
+        int asu = (level == 99 ? CellInfo.UNAVAILABLE : level);
+        if (asu != CellInfo.UNAVAILABLE) {
             dBm = -113 + (2 * asu);
         } else {
-            dBm = Integer.MAX_VALUE;
+            dBm = CellInfo.UNAVAILABLE;
         }
         if (DBG) log("getDbm=" + dBm);
         return dBm;
