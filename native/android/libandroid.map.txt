@@ -224,6 +224,7 @@ LIBANDROID {
     ASystemFont_getAxisCount; # introduced=29
     ASystemFont_getAxisTag; # introduced=29
     ASystemFont_getAxisValue; # introduced=29
+    ASystemFont_matchFamilyStyleCharacter; # introduced=29
     ATrace_beginSection; # introduced=23
     ATrace_endSection; # introduced=23
     ATrace_isEnabled; # introduced=23
