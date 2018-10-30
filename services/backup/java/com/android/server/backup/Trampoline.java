@@ -16,7 +16,10 @@
 
 package com.android.server.backup;
 
+import static com.android.server.backup.BackupManagerService.TAG;
+
 import android.annotation.Nullable;
+import android.app.admin.DevicePolicyManager;
 import android.app.backup.BackupManager;
 import android.app.backup.IBackupManager;
 import android.app.backup.IBackupManagerMonitor;
@@ -39,44 +42,52 @@ import android.os.SystemProperties;
 import android.os.Trace;
 import android.os.UserHandle;
 import android.util.Slog;
-
+import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.DumpUtils;
-
 import java.io.File;
 import java.io.FileDescriptor;
 import java.io.IOException;
 import java.io.PrintWriter;
 
-
 /**
  * A proxy to BackupManagerService implementation.
  *
- * This is an external interface to the BackupManagerService which is being accessed via published
- * binder (see BackupManagerService$Lifecycle). This lets us turn down the heavy implementation
- * object on the fly without disturbing binders that have been cached somewhere in the system.
+ * <p>This is an external interface to the BackupManagerService which is being accessed via
+ * published binder (see BackupManagerService$Lifecycle). This lets us turn down the heavy
+ * implementation object on the fly without disturbing binders that have been cached somewhere in
+ * the system.
  *
- * This is where it is decided whether backup subsystem is available. It can be disabled with the
- * following two methods:
+ * <p>Trampoline determines whether the backup service is available. It can be disabled in the
+ * following two ways:
  *
  * <ul>
- * <li> Temporarily - create a file named Trampoline.BACKUP_SUPPRESS_FILENAME, or
- * <li> Product level - set Trampoline.BACKUP_DISABLE_PROPERTY system property to true.
+ *   <li>Temporary - create the file {@link #BACKUP_SUPPRESS_FILENAME}, or
+ *   <li>Permanent - set the system property {@link #BACKUP_DISABLE_PROPERTY} to true.
  * </ul>
+ *
+ * Temporary disabling is controlled by {@link #setBackupServiceActive(int, boolean)} through
+ * privileged callers (currently {@link DevicePolicyManager}). This is called on {@link
+ * UserHandle#USER_SYSTEM} and disables backup for all users.
+ *
+ * <p>Creation of the backup service is done when {@link UserHandle#USER_SYSTEM} is unlocked. The
+ * system user is unlocked before any other users.
  */
 public class Trampoline extends IBackupManager.Stub {
-    static final String TAG = "BackupManagerService";
-
-    // When this file is present, the backup service is inactive
+    // When this file is present, the backup service is inactive.
     private static final String BACKUP_SUPPRESS_FILENAME = "backup-suppress";
 
-    // Product-level suppression of backup/restore
+    // Product-level suppression of backup/restore.
     private static final String BACKUP_DISABLE_PROPERTY = "ro.backup.disable";
 
-    final Context mContext;
-    private final File mSuppressFile;   // existence testing & creating synchronized on 'this'
-    private final boolean mGlobalDisable;
-    private volatile BackupManagerService mService;
+    private final Context mContext;
 
+    @GuardedBy("mStateLock")
+    private final File mSuppressFile;
+
+    private final boolean mGlobalDisable;
+    private final Object mStateLock = new Object();
+
+    private volatile BackupManagerService mService;
     private HandlerThread mHandlerThread;
 
     public Trampoline(Context context) {
@@ -99,78 +110,100 @@ public class Trampoline extends IBackupManager.Stub {
                 BACKUP_SUPPRESS_FILENAME);
     }
 
+    protected Context getContext() {
+        return mContext;
+    }
+
     protected BackupManagerService createBackupManagerService() {
         return BackupManagerService.create(mContext, this, mHandlerThread);
     }
 
-    // internal control API
-    public void initialize(final int whichUser) {
-        // Note that only the owner user is currently involved in backup/restore
-        // TODO: http://b/22388012
-        if (whichUser == UserHandle.USER_SYSTEM) {
-            // Does this product support backup/restore at all?
-            if (mGlobalDisable) {
-                Slog.i(TAG, "Backup/restore not supported");
-                return;
-            }
+    /**
+     * Initialize {@link BackupManagerService} if the backup service is not disabled. Only the
+     * system user can initialize the service.
+     */
+    /* package */ void initializeService(int userId) {
+        if (mGlobalDisable) {
+            Slog.i(TAG, "Backup service not supported");
+            return;
+        }
 
-            synchronized (this) {
-                if (!mSuppressFile.exists()) {
-                    mService = createBackupManagerService();
-                } else {
-                    Slog.i(TAG, "Backup inactive in user " + whichUser);
-                }
+        if (userId != UserHandle.USER_SYSTEM) {
+            Slog.i(TAG, "Cannot initialize backup service for non-system user: " + userId);
+            return;
+        }
+
+        synchronized (mStateLock) {
+            if (!mSuppressFile.exists()) {
+                mService = createBackupManagerService();
+            } else {
+                Slog.i(TAG, "Backup service inactive");
             }
         }
     }
 
+    /**
+     * Called from {@link BackupManagerService$Lifecycle} when the system user is unlocked. Attempts
+     * to initialize {@link BackupManagerService} and set backup state for the system user.
+     *
+     * @see BackupManagerService#unlockSystemUser()
+     */
     void unlockSystemUser() {
         mHandlerThread = new HandlerThread("backup", Process.THREAD_PRIORITY_BACKGROUND);
         mHandlerThread.start();
 
         Handler h = new Handler(mHandlerThread.getLooper());
-        h.post(() -> {
-            Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "backup init");
-            initialize(UserHandle.USER_SYSTEM);
-            Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
+        h.post(
+                () -> {
+                    Trace.traceBegin(Trace.TRACE_TAG_ACTIVITY_MANAGER, "backup init");
+                    initializeService(UserHandle.USER_SYSTEM);
+                    Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
 
-            BackupManagerService svc = mService;
-            Slog.i(TAG, "Unlocking system user; mService=" + mService);
-            if (svc != null) {
-                svc.unlockSystemUser();
-            }
-        });
+                    BackupManagerService service = mService;
+                    if (service != null) {
+                        Slog.i(TAG, "Unlocking system user");
+                        service.unlockSystemUser();
+                    }
+                });
     }
 
-    public void setBackupServiceActive(final int userHandle, boolean makeActive) {
-        // Only the DPM should be changing the active state of backup
-        final int caller = binderGetCallingUid();
-        if (caller != Process.SYSTEM_UID
-                && caller != Process.ROOT_UID) {
+    /**
+     * Only privileged callers should be changing the backup state. This method only acts on {@link
+     * UserHandle#USER_SYSTEM} and is a no-op if passed non-system users. Deactivating backup in the
+     * system user also deactivates backup in all users.
+     */
+    public void setBackupServiceActive(int userId, boolean makeActive) {
+        int caller = binderGetCallingUid();
+        if (caller != Process.SYSTEM_UID && caller != Process.ROOT_UID) {
             throw new SecurityException("No permission to configure backup activity");
         }
 
         if (mGlobalDisable) {
-            Slog.i(TAG, "Backup/restore not supported");
+            Slog.i(TAG, "Backup service not supported");
             return;
         }
-        // TODO: http://b/22388012
-        if (userHandle == UserHandle.USER_SYSTEM) {
-            synchronized (this) {
-                if (makeActive != isBackupServiceActive(userHandle)) {
-                    Slog.i(TAG, "Making backup "
-                            + (makeActive ? "" : "in") + "active in user " + userHandle);
-                    if (makeActive) {
-                        mService = createBackupManagerService();
-                        mSuppressFile.delete();
-                    } else {
-                        mService = null;
-                        try {
-                            mSuppressFile.createNewFile();
-                        } catch (IOException e) {
-                            Slog.e(TAG, "Unable to persist backup service inactivity");
-                        }
-                    }
+
+        if (userId != UserHandle.USER_SYSTEM) {
+            Slog.i(TAG, "Cannot set backup service activity for non-system user: " + userId);
+            return;
+        }
+
+        if (makeActive == isBackupServiceActive(userId)) {
+            Slog.i(TAG, "No change in backup service activity");
+            return;
+        }
+
+        synchronized (mStateLock) {
+            Slog.i(TAG, "Making backup " + (makeActive ? "" : "in") + "active");
+            if (makeActive) {
+                mService = createBackupManagerService();
+                mSuppressFile.delete();
+            } else {
+                mService = null;
+                try {
+                    mSuppressFile.createNewFile();
+                } catch (IOException e) {
+                    Slog.e(TAG, "Unable to persist backup service inactivity");
                 }
             }
         }
@@ -181,14 +214,15 @@ public class Trampoline extends IBackupManager.Stub {
     /**
      * Querying activity state of backup service. Calling this method before initialize yields
      * undefined result.
-     * @param userHandle The user in which the activity state of backup service is queried.
+     *
+     * @param userId The user in which the activity state of backup service is queried.
      * @return true if the service is active.
      */
     @Override
-    public boolean isBackupServiceActive(final int userHandle) {
+    public boolean isBackupServiceActive(int userId) {
         // TODO: http://b/22388012
-        if (userHandle == UserHandle.USER_SYSTEM) {
-            synchronized (this) {
+        if (userId == UserHandle.USER_SYSTEM) {
+            synchronized (mStateLock) {
                 return mService != null;
             }
         }
