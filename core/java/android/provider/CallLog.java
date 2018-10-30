@@ -684,6 +684,9 @@ public class CallLog {
             values.put(PHONE_ACCOUNT_ID, accountId);
             values.put(PHONE_ACCOUNT_ADDRESS, accountAddress);
             values.put(NEW, Integer.valueOf(1));
+            if ((ci != null) && (ci.name != null)) {
+                values.put(CACHED_NAME, ci.name);
+            }
             values.put(ADD_FOR_ALL_USERS, addForAllUsers ? 1 : 0);
 
             if (callType == MISSED_TYPE) {
