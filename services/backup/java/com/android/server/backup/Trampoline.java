@@ -65,18 +65,17 @@ import java.io.PrintWriter;
  */
 public class Trampoline extends IBackupManager.Stub {
     static final String TAG = "BackupManagerService";
-    static final boolean DEBUG_TRAMPOLINE = false;
 
     // When this file is present, the backup service is inactive
-    static final String BACKUP_SUPPRESS_FILENAME = "backup-suppress";
+    private static final String BACKUP_SUPPRESS_FILENAME = "backup-suppress";
 
     // Product-level suppression of backup/restore
-    static final String BACKUP_DISABLE_PROPERTY = "ro.backup.disable";
+    private static final String BACKUP_DISABLE_PROPERTY = "ro.backup.disable";
 
     final Context mContext;
-    final File mSuppressFile;   // existence testing & creating synchronized on 'this'
-    final boolean mGlobalDisable;
-    volatile BackupManagerService mService;
+    private final File mSuppressFile;   // existence testing & creating synchronized on 'this'
+    private final boolean mGlobalDisable;
+    private volatile BackupManagerService mService;
 
     private HandlerThread mHandlerThread;
 
