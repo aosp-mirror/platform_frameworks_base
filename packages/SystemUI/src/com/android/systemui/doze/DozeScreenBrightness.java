@@ -141,7 +141,7 @@ public class DozeScreenBrightness extends BroadcastReceiver implements DozeMachi
     }
 
     private void updateBrightnessAndReady() {
-        if (mRegistered) {
+        if (mRegistered || mDebugBrightnessBucket != -1) {
             int sensorValue = mDebugBrightnessBucket == -1
                     ? mLastSensorValue : mDebugBrightnessBucket;
             int brightness = computeBrightness(sensorValue);
