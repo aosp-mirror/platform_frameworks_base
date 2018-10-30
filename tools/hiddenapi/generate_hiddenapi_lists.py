@@ -15,22 +15,53 @@
 # limitations under the License.
 """
 Generate API lists for non-SDK API enforcement.
-
-usage: generate-hiddenapi-lists.py [-h]
-                                   --input-public INPUT_PUBLIC
-                                   --input-private INPUT_PRIVATE
-                                   [--input-whitelists [INPUT_WHITELISTS [INPUT_WHITELISTS ...]]]
-                                   [--input-greylists [INPUT_GREYLISTS [INPUT_GREYLISTS ...]]]
-                                   [--input-blacklists [INPUT_BLACKLISTS [INPUT_BLACKLISTS ...]]]
-                                   --output-whitelist OUTPUT_WHITELIST
-                                   --output-light-greylist OUTPUT_LIGHT_GREYLIST
-                                   --output-dark-greylist OUTPUT_DARK_GREYLIST
-                                   --output-blacklist OUTPUT_BLACKLIST
 """
 import argparse
 import os
 import sys
 import re
+
+# Names of flags recognized by the `hiddenapi` tool.
+FLAG_WHITELIST = "whitelist"
+FLAG_GREYLIST = "greylist"
+FLAG_BLACKLIST = "blacklist"
+FLAG_GREYLIST_MAX_O = "greylist-max-o"
+
+# List of all known flags.
+FLAGS = [
+    FLAG_WHITELIST,
+    FLAG_GREYLIST,
+    FLAG_BLACKLIST,
+    FLAG_GREYLIST_MAX_O,
+]
+FLAGS_SET = set(FLAGS)
+
+# Suffix used in command line args to express that only known and
+# otherwise unassigned entries should be assign the given flag.
+# For example, the P dark greylist is checked in as it was in P,
+# but signatures have changes since then. The flag instructs this
+# script to skip any entries which do not exist any more.
+FLAG_IGNORE_CONFLICTS_SUFFIX = "-ignore-conflicts"
+
+# Regex patterns of fields/methods used in serialization. These are
+# considered public API despite being hidden.
+SERIALIZATION_PATTERNS = [
+    r'readObject\(Ljava/io/ObjectInputStream;\)V',
+    r'readObjectNoData\(\)V',
+    r'readResolve\(\)Ljava/lang/Object;',
+    r'serialVersionUID:J',
+    r'serialPersistentFields:\[Ljava/io/ObjectStreamField;',
+    r'writeObject\(Ljava/io/ObjectOutputStream;\)V',
+    r'writeReplace\(\)Ljava/lang/Object;',
+]
+
+# Single regex used to match serialization API. It combines all the
+# SERIALIZATION_PATTERNS into a single regular expression.
+SERIALIZATION_REGEX = re.compile(r'.*->(' + '|'.join(SERIALIZATION_PATTERNS) + r')$')
+
+# Predicates to be used with filter_apis.
+IS_UNASSIGNED = lambda api, flags: not flags
+IS_SERIALIZATION = lambda api, flags: SERIALIZATION_REGEX.match(api)
 
 def get_args():
     """Parses command line arguments.
@@ -39,21 +70,21 @@ def get_args():
         Namespace: dictionary of parsed arguments
     """
     parser = argparse.ArgumentParser()
-    parser.add_argument('--input-public', required=True, help='List of all public members')
-    parser.add_argument('--input-private', required=True, help='List of all private members')
-    parser.add_argument(
-        '--input-whitelists', nargs='*',
-        help='Lists of members to force on whitelist')
-    parser.add_argument(
-        '--input-greylists', nargs='*',
-        help='Lists of members to force on light greylist')
-    parser.add_argument(
-        '--input-blacklists', nargs='*',
-        help='Lists of members to force on blacklist')
-    parser.add_argument('--output-whitelist', required=True)
-    parser.add_argument('--output-light-greylist', required=True)
-    parser.add_argument('--output-dark-greylist', required=True)
-    parser.add_argument('--output-blacklist', required=True)
+    parser.add_argument('--output', required=True)
+    parser.add_argument('--public', required=True, help='list of all public entries')
+    parser.add_argument('--private', required=True, help='list of all private entries')
+    parser.add_argument('--csv', nargs='*', default=[], metavar='CSV_FILE',
+        help='CSV files to be merged into output')
+
+    for flag in FLAGS:
+        ignore_conflicts_flag = flag + FLAG_IGNORE_CONFLICTS_SUFFIX
+        parser.add_argument('--' + flag, dest=flag, nargs='*', default=[], metavar='TXT_FILE',
+            help='lists of entries with flag "' + flag + '"')
+        parser.add_argument('--' + ignore_conflicts_flag, dest=ignore_conflicts_flag, nargs='*',
+            default=[], metavar='TXT_FILE',
+            help='lists of entries with flag "' + flag +
+                 '". skip entry if missing or flag conflict.')
+
     return parser.parse_args()
 
 def read_lines(filename):
@@ -65,10 +96,13 @@ def read_lines(filename):
         filename (string): Path to the file to read from.
 
     Returns:
-        list: Lines of the loaded file as a list of strings.
+        Lines of the file as a list of string.
     """
     with open(filename, 'r') as f:
-        return filter(lambda line: not line.startswith('#'), f.readlines())
+        lines = f.readlines();
+    lines = filter(lambda line: not line.startswith('#'), lines)
+    lines = map(lambda line: line.strip(), lines)
+    return set(lines)
 
 def write_lines(filename, lines):
     """Writes list of lines into a file, overwriting the file it it exists.
@@ -77,167 +111,168 @@ def write_lines(filename, lines):
         filename (string): Path to the file to be writting into.
         lines (list): List of strings to write into the file.
     """
+    lines = map(lambda line: line + '\n', lines)
     with open(filename, 'w') as f:
         f.writelines(lines)
 
-def move_between_sets(subset, src, dst, source = "<unknown>"):
-    """Removes a subset of elements from one set and add it to another.
+class FlagsDict:
+    def __init__(self, public_api, private_api):
+        # Bootstrap the entries dictionary.
 
-    Args:
-        subset (set): The subset of `src` to be moved from `src` to `dst`.
-        src (set): Source set. Must be a superset of `subset`.
-        dst (set): Destination set. Must be disjoint with `subset`.
-    """
-    assert src.issuperset(subset), (
-        "Error processing: {}\n"
-        "The following entries were not found:\n"
-        "{}"
-        "Please visit go/hiddenapi for more information.").format(
-            source, "".join(map(lambda x: "  " + str(x), subset.difference(src))))
-    assert dst.isdisjoint(subset)
-    # Order matters if `src` and `subset` are the same object.
-    dst.update(subset)
-    src.difference_update(subset)
+        # Check that the two sets do not overlap.
+        public_api_set = set(public_api)
+        private_api_set = set(private_api)
+        assert public_api_set.isdisjoint(private_api_set), (
+            "Lists of public and private API overlap. " +
+            "This suggests an issue with the `hiddenapi` build tool.")
 
-def get_package_name(signature):
-    """Returns the package name prefix of a class member signature.
+        # Compute the whole key set
+        self._dict_keyset = public_api_set.union(private_api_set)
 
-    Example: "Ljava/lang/String;->hashCode()J" --> "Ljava/lang/"
+        # Create a dict that creates entries for both public and private API,
+        # and assigns public API to the whitelist.
+        self._dict = {}
+        for api in public_api:
+            self._dict[api] = set([ FLAG_WHITELIST ])
+        for api in private_api:
+            self._dict[api] = set()
 
-    Args:
-        signature (string): Member signature
+    def _check_entries_set(self, keys_subset, source):
+        assert isinstance(keys_subset, set)
+        assert keys_subset.issubset(self._dict_keyset), (
+            "Error processing: {}\n"
+            "The following entries were unexpected:\n"
+            "{}"
+            "Please visit go/hiddenapi for more information.").format(
+                source, "".join(map(lambda x: "  " + str(x), keys_subset - self._dict_keyset)))
 
-    Returns
-        string: Package name of the given member
-    """
-    class_name_end = signature.find("->")
-    assert class_name_end != -1, "Invalid signature: {}".format(signature)
-    package_name_end = signature.rfind("/", 0, class_name_end)
-    assert package_name_end != -1, "Invalid signature: {}".format(signature)
-    return signature[:package_name_end + 1]
+    def _check_flags_set(self, flags_subset, source):
+        assert isinstance(flags_subset, set)
+        assert flags_subset.issubset(FLAGS_SET), (
+            "Error processing: {}\n"
+            "The following flags were not recognized: \n"
+            "{}\n"
+            "Please visit go/hiddenapi for more information.").format(
+                source, "\n".join(flags_subset - FLAGS_SET))
 
-def all_package_names(*args):
-    """Returns a set of packages names in given lists of member signatures.
+    def filter_apis(self, filter_fn):
+        """Returns APIs which match a given predicate.
 
-    Example: args = [ set([ "Lpkg1/ClassA;->foo()V", "Lpkg2/ClassB;->bar()J" ]),
-                      set([ "Lpkg1/ClassC;->baz()Z" ]) ]
-             return value = set([ "Lpkg1/", "Lpkg2" ])
+        This is a helper function which allows to filter on both signatures (keys) and
+        flags (values). The built-in filter() invokes the lambda only with dict's keys.
 
-    Args:
-        *args (list): List of sets to iterate over and extract the package names
-                      of its elements (member signatures)
+        Args:
+            filter_fn : Function which takes two arguments (signature/flags) and returns a boolean.
 
-    Returns:
-        set: All package names extracted from the given lists of signatures.
-    """
-    packages = set()
-    for arg in args:
-        packages = packages.union(map(get_package_name, arg))
-    return packages
+        Returns:
+            A set of APIs which match the predicate.
+        """
+        return set(filter(lambda x: filter_fn(x, self._dict[x]), self._dict_keyset))
 
-def move_all(src, dst):
-    """Moves all elements of one set to another.
+    def get_valid_subset_of_unassigned_apis(self, api_subset):
+        """Sanitizes a key set input to only include keys which exist in the dictionary
+        and have not been assigned any flags.
 
-    Args:
-        src (set): Source set. Will become empty.
-        dst (set): Destination set. Will contain all elements of `src`.
-    """
-    move_between_sets(src, src, dst)
+        Args:
+            entries_subset (set/list): Key set to be sanitized.
 
-def move_from_files(filenames, src, dst):
-    """Loads member signatures from a list of files and moves them to a given set.
+        Returns:
+            Sanitized key set.
+        """
+        assert isinstance(api_subset, set)
+        return api_subset.intersection(self.filter_apis(IS_UNASSIGNED))
 
-    Opens files in `filenames`, reads all their lines and moves those from `src`
-    set to `dst` set.
+    def generate_csv(self):
+        """Constructs CSV entries from a dictionary.
 
-    Args:
-        filenames (list): List of paths to files to be loaded.
-        src (set): Set that loaded lines should be moved from.
-        dst (set): Set that loaded lines should be moved to.
-    """
-    if filenames:
-        for filename in filenames:
-            move_between_sets(set(read_lines(filename)), src, dst, filename)
+        Returns:
+            List of lines comprising a CSV file. See "parse_and_merge_csv" for format description.
+        """
+        return sorted(map(lambda api: ",".join([api] + sorted(self._dict[api])), self._dict))
 
-def move_serialization(src, dst):
-    """Moves all members matching serialization API signatures between given sets.
+    def parse_and_merge_csv(self, csv_lines, source = "<unknown>"):
+        """Parses CSV entries and merges them into a given dictionary.
 
-    Args:
-        src (set): Set that will be searched for serialization API and that API
-                   will be removed from it.
-        dst (set): Set that serialization API will be moved to.
-    """
-    serialization_patterns = [
-        r'readObject\(Ljava/io/ObjectInputStream;\)V',
-        r'readObjectNoData\(\)V',
-        r'readResolve\(\)Ljava/lang/Object;',
-        r'serialVersionUID:J',
-        r'serialPersistentFields:\[Ljava/io/ObjectStreamField;',
-        r'writeObject\(Ljava/io/ObjectOutputStream;\)V',
-        r'writeReplace\(\)Ljava/lang/Object;',
-    ]
-    regex = re.compile(r'.*->(' + '|'.join(serialization_patterns) + r')$')
-    move_between_sets(filter(lambda api: regex.match(api), src), src, dst)
+        The expected CSV format is:
+            <api signature>,<flag1>,<flag2>,...,<flagN>
 
-def move_from_packages(packages, src, dst):
-    """Moves all members of given package names from one set to another.
+        Args:
+            csv_lines (list of strings): Lines read from a CSV file.
+            source (string): Origin of `csv_lines`. Will be printed in error messages.
 
-    Args:
-        packages (list): List of string package names.
-        src (set): Set that will be searched for API matching one of the given
-                   package names. Surch API will be removed from the set.
-        dst (set): Set that matching API will be moved to.
-    """
-    move_between_sets(filter(lambda api: get_package_name(api) in packages, src), src, dst)
+        Throws:
+            AssertionError if parsed API signatures of flags are invalid.
+        """
+        # Split CSV lines into arrays of values.
+        csv_values = [ line.split(',') for line in csv_lines ]
+
+        # Check that all entries exist in the dict.
+        csv_keys = set([ csv[0] for csv in csv_values ])
+        self._check_entries_set(csv_keys, source)
+
+        # Check that all flags are known.
+        csv_flags = set(reduce(lambda x, y: set(x).union(y), [ csv[1:] for csv in csv_values ], []))
+        self._check_flags_set(csv_flags, source)
+
+        # Iterate over all CSV lines, find entry in dict and append flags to it.
+        for csv in csv_values:
+            self._dict[csv[0]].update(csv[1:])
+
+    def assign_flag(self, flag, apis, source="<unknown>"):
+        """Assigns a flag to given subset of entries.
+
+        Args:
+            flag (string): One of FLAGS.
+            apis (set): Subset of APIs to recieve the flag.
+            source (string): Origin of `entries_subset`. Will be printed in error messages.
+
+        Throws:
+            AssertionError if parsed API signatures of flags are invalid.
+        """
+        # Check that all APIs exist in the dict.
+        self._check_entries_set(apis, source)
+
+        # Check that the flag is known.
+        self._check_flags_set(set([ flag ]), source)
+
+        # Iterate over the API subset, find each entry in dict and assign the flag to it.
+        for api in apis:
+            self._dict[api].add(flag)
 
 def main(argv):
-    args = get_args()
+    # Parse arguments.
+    args = vars(get_args())
 
-    # Initialize API sets by loading lists of public and private API. Public API
-    # are all members resolvable from SDK API stubs, other members are private.
-    # As an optimization, skip the step of moving public API from a full set of
-    # members and start with a populated whitelist.
-    whitelist = set(read_lines(args.input_public))
-    uncategorized = set(read_lines(args.input_private))
-    light_greylist = set()
-    dark_greylist = set()
-    blacklist = set()
+    flags = FlagsDict(read_lines(args["public"]), read_lines(args["private"]))
 
-    # Assert that there is no overlap between public and private API.
-    assert whitelist.isdisjoint(uncategorized)
-    num_all_api = len(whitelist) + len(uncategorized)
+    # Combine inputs which do not require any particular order.
+    # (1) Assign serialization API to whitelist.
+    flags.assign_flag(FLAG_WHITELIST, flags.filter_apis(IS_SERIALIZATION))
 
-    # Read all files which manually assign members to specific lists.
-    move_from_files(args.input_whitelists, uncategorized, whitelist)
-    move_from_files(args.input_greylists, uncategorized, light_greylist)
-    move_from_files(args.input_blacklists, uncategorized, blacklist)
+    # (2) Merge input CSV files into the dictionary.
+    for filename in args["csv"]:
+        flags.parse_and_merge_csv(read_lines(filename), filename)
 
-    # Iterate over all uncategorized members and move serialization API to whitelist.
-    move_serialization(uncategorized, whitelist)
+    # (3) Merge text files with a known flag into the dictionary.
+    for flag in FLAGS:
+        for filename in args[flag]:
+            flags.assign_flag(flag, read_lines(filename), filename)
 
-    # Extract package names of members from whitelist and light greylist, which
-    # are assumed to have been finalized at this point. Assign all uncategorized
-    # members from the same packages to the dark greylist.
-    dark_greylist_packages = all_package_names(whitelist, light_greylist)
-    move_from_packages(dark_greylist_packages, uncategorized, dark_greylist)
+    # Merge text files where conflicts should be ignored.
+    # This will only assign the given flag if:
+    # (a) the entry exists, and
+    # (b) it has not been assigned any other flag.
+    # Because of (b), this must run after all strict assignments have been performed.
+    for flag in FLAGS:
+        for filename in args[flag + FLAG_IGNORE_CONFLICTS_SUFFIX]:
+            valid_entries = flags.get_valid_subset_of_unassigned_apis(read_lines(filename))
+            flags.assign_flag(flag, valid_entries, filename)
 
-    # Assign all uncategorized members to the blacklist.
-    move_all(uncategorized, blacklist)
+    # Assign all remaining entries to the blacklist.
+    flags.assign_flag(FLAG_BLACKLIST, flags.filter_apis(IS_UNASSIGNED))
 
-    # Assert we have not missed anything.
-    assert whitelist.isdisjoint(light_greylist)
-    assert whitelist.isdisjoint(dark_greylist)
-    assert whitelist.isdisjoint(blacklist)
-    assert light_greylist.isdisjoint(dark_greylist)
-    assert light_greylist.isdisjoint(blacklist)
-    assert dark_greylist.isdisjoint(blacklist)
-    assert num_all_api == len(whitelist) + len(light_greylist) + len(dark_greylist) + len(blacklist)
-
-    # Write final lists to disk.
-    write_lines(args.output_whitelist, whitelist)
-    write_lines(args.output_light_greylist, light_greylist)
-    write_lines(args.output_dark_greylist, dark_greylist)
-    write_lines(args.output_blacklist, blacklist)
+    # Write output.
+    write_lines(args["output"], flags.generate_csv())
 
 if __name__ == "__main__":
     main(sys.argv)
