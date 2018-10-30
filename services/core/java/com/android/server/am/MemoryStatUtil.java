@@ -23,6 +23,8 @@ import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NA
 import android.annotation.Nullable;
 import android.os.FileUtils;
 import android.os.SystemProperties;
+import android.system.Os;
+import android.system.OsConstants;
 import android.util.Slog;
 
 import com.android.internal.annotations.VisibleForTesting;
@@ -71,6 +73,7 @@ public final class MemoryStatUtil {
 
     static final int BYTES_IN_KILOBYTE = 1024;
     static final int PAGE_SIZE = 4096;
+    static final long JIFFY_NANOS = 1_000_000_000 / Os.sysconf(OsConstants._SC_CLK_TCK);
 
     private static final String TAG = TAG_WITH_CLASS_NAME ? "MemoryStatUtil" : TAG_AM;
 
@@ -103,6 +106,7 @@ public final class MemoryStatUtil {
 
     private static final int PGFAULT_INDEX = 9;
     private static final int PGMAJFAULT_INDEX = 11;
+    private static final int START_TIME_INDEX = 21;
     private static final int RSS_IN_PAGES_INDEX = 23;
 
     private MemoryStatUtil() {}
@@ -238,6 +242,7 @@ public final class MemoryStatUtil {
             memoryStat.pgfault = Long.parseLong(splits[PGFAULT_INDEX]);
             memoryStat.pgmajfault = Long.parseLong(splits[PGMAJFAULT_INDEX]);
             memoryStat.rssInBytes = Long.parseLong(splits[RSS_IN_PAGES_INDEX]) * PAGE_SIZE;
+            memoryStat.startTimeNanos = Long.parseLong(splits[START_TIME_INDEX]) * JIFFY_NANOS;
             return memoryStat;
         } catch (NumberFormatException e) {
             Slog.e(TAG, "Failed to parse value", e);
@@ -279,5 +284,7 @@ public final class MemoryStatUtil {
         long swapInBytes;
         /** Number of bytes of peak anonymous and swap cache memory */
         long rssHighWatermarkInBytes;
+        /** Device time when the processes started. */
+        long startTimeNanos;
     }
 }

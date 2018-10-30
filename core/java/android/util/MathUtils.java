@@ -17,6 +17,7 @@
 package android.util;
 
 import android.annotation.UnsupportedAppUsage;
+import android.graphics.Rect;
 
 /**
  * A class that contains utility methods related to numbers.
@@ -226,5 +227,19 @@ public final class MathUtils {
             return a + b;
         }
         throw new IllegalArgumentException("Addition overflow: " + a + " + " + b);
+    }
+
+    /**
+     * Resize a {@link Rect} so one size would be {@param largestSide}.
+     *
+     * @param outToResize Rectangle that will be resized.
+     * @param largestSide Size of the largest side.
+     */
+    public static void fitRect(Rect outToResize, int largestSide) {
+        if (outToResize.isEmpty()) {
+            return;
+        }
+        float maxSize = Math.max(outToResize.width(), outToResize.height());
+        outToResize.scale(largestSide / maxSize);
     }
 }

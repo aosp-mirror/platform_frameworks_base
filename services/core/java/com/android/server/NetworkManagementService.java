@@ -69,6 +69,7 @@ import android.net.NetworkStats;
 import android.net.NetworkUtils;
 import android.net.RouteInfo;
 import android.net.UidRange;
+import android.net.UidRangeParcel;
 import android.net.util.NetdService;
 import android.net.wifi.WifiConfiguration;
 import android.net.wifi.WifiConfiguration.KeyMgmt;
@@ -1743,7 +1744,6 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     public void setAllowOnlyVpnForUids(boolean add, UidRange[] uidRanges)
             throws ServiceSpecificException {
         mContext.enforceCallingOrSelfPermission(NETWORK_STACK, TAG);
-
         try {
             mNetdService.networkRejectNonSecureVpn(add, uidRanges);
         } catch (ServiceSpecificException e) {
@@ -2037,8 +2037,9 @@ public class NetworkManagementService extends INetworkManagementService.Stub
                 setFirewallChainState(chain, enable);
             }
 
+            final String chainName = getFirewallChainName(chain);
             if (chain == FIREWALL_CHAIN_NONE) {
-                throw new IllegalArgumentException("Bad child chain: " + chain);
+                throw new IllegalArgumentException("Bad child chain: " + chainName);
             }
 
             try {
@@ -2052,7 +2053,7 @@ public class NetworkManagementService extends INetworkManagementService.Stub
             // the connection and race with the iptables commands that enable the firewall. All
             // whitelist and blacklist chains allow RSTs through.
             if (enable) {
-                closeSocketsForFirewallChainLocked(chain, getFirewallChainName(chain));
+                closeSocketsForFirewallChainLocked(chain, chainName);
             }
         }
     }
@@ -2214,19 +2215,11 @@ public class NetworkManagementService extends INetworkManagementService.Stub
     }
 
     private int getFirewallRuleType(int chain, int rule) {
-        if (getFirewallType(chain) == FIREWALL_TYPE_WHITELIST) {
-            if (rule == NetworkPolicyManager.FIREWALL_RULE_ALLOW) {
-                return INetd.FIREWALL_RULE_ALLOW;
-            } else {
-                return INetd.FIREWALL_RULE_DENY;
-            }
-        } else { // Blacklist mode
-            if (rule == NetworkPolicyManager.FIREWALL_RULE_DENY) {
-                return INetd.FIREWALL_RULE_DENY;
-            } else {
-                return INetd.FIREWALL_RULE_ALLOW;
-            }
+        if (rule == NetworkPolicyManager.FIREWALL_RULE_DEFAULT) {
+            return getFirewallType(chain) == FIREWALL_TYPE_WHITELIST
+                    ? INetd.FIREWALL_RULE_DENY : INetd.FIREWALL_RULE_ALLOW;
         }
+        return rule;
     }
 
     private static void enforceSystemUid() {

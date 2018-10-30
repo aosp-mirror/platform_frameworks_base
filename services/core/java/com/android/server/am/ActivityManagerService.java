@@ -538,14 +538,23 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     BroadcastQueue mFgBroadcastQueue;
     BroadcastQueue mBgBroadcastQueue;
+    BroadcastQueue mOffloadBroadcastQueue;
     // Convenient for easy iteration over the queues. Foreground is first
     // so that dispatch of foreground broadcasts gets precedence.
-    final BroadcastQueue[] mBroadcastQueues = new BroadcastQueue[2];
+    final BroadcastQueue[] mBroadcastQueues = new BroadcastQueue[3];
 
     BroadcastStats mLastBroadcastStats;
     BroadcastStats mCurBroadcastStats;
 
     BroadcastQueue broadcastQueueForIntent(Intent intent) {
+        if (isOnOffloadQueue(intent.getFlags())) {
+            if (DEBUG_BROADCAST_BACKGROUND) {
+                Slog.i(TAG_BROADCAST,
+                        "Broadcast intent " + intent + " on offload queue");
+            }
+            return mOffloadBroadcastQueue;
+        }
+
         final boolean isFg = (intent.getFlags() & Intent.FLAG_RECEIVER_FOREGROUND) != 0;
         if (DEBUG_BROADCAST_BACKGROUND) Slog.i(TAG_BROADCAST,
                 "Broadcast intent " + intent + " on "
@@ -2166,8 +2175,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                 "foreground", BROADCAST_FG_TIMEOUT, false);
         mBgBroadcastQueue = new BroadcastQueue(this, mHandler,
                 "background", BROADCAST_BG_TIMEOUT, true);
+        mOffloadBroadcastQueue = new BroadcastQueue(this, mHandler,
+                "offload", BROADCAST_BG_TIMEOUT, true);
         mBroadcastQueues[0] = mFgBroadcastQueue;
         mBroadcastQueues[1] = mBgBroadcastQueue;
+        mBroadcastQueues[2] = mOffloadBroadcastQueue;
 
         mServices = new ActiveServices(this);
         mProviderMap = new ProviderMap(this);
@@ -9147,6 +9159,11 @@ public class ActivityManagerService extends IActivityManager.Stub
                 pw.println("-------------------------------------------------------------------------------");
             }
             dumpBinderProxies(pw);
+            pw.println();
+            if (dumpAll) {
+                pw.println("-------------------------------------------------------------------------------");
+            }
+            dumpLmkLocked(pw);
         }
     }
 
@@ -9336,6 +9353,10 @@ public class ActivityManagerService extends IActivityManager.Stub
             } else if ("oom".equals(cmd) || "o".equals(cmd)) {
                 synchronized (this) {
                     dumpOomLocked(fd, pw, args, opti, true);
+                }
+            } else if ("lmk".equals(cmd)) {
+                synchronized (this) {
+                    dumpLmkLocked(pw);
                 }
             } else if ("permissions".equals(cmd) || "perm".equals(cmd)) {
                 synchronized (this) {
@@ -10369,6 +10390,37 @@ public class ActivityManagerService extends IActivityManager.Stub
         mAtmInternal.dumpForOom(pw);
 
         return true;
+    }
+
+    private boolean reportLmkKillAtOrBelow(PrintWriter pw, int oom_adj) {
+        Integer cnt = ProcessList.getLmkdKillCount(0, oom_adj);
+        if (cnt != null) {
+            pw.println("    kills at or below oom_adj " + oom_adj + ": " + cnt);
+            return true;
+        }
+        return false;
+    }
+
+    boolean dumpLmkLocked(PrintWriter pw) {
+        pw.println("ACTIVITY MANAGER LMK KILLS (dumpsys activity lmk)");
+        Integer cnt = ProcessList.getLmkdKillCount(ProcessList.UNKNOWN_ADJ,
+                ProcessList.UNKNOWN_ADJ);
+        if (cnt == null) {
+            return false;
+        }
+        pw.println("  Total number of kills: " + cnt);
+
+        return reportLmkKillAtOrBelow(pw, ProcessList.CACHED_APP_MAX_ADJ) &&
+            reportLmkKillAtOrBelow(pw, ProcessList.CACHED_APP_MIN_ADJ) &&
+            reportLmkKillAtOrBelow(pw, ProcessList.SERVICE_B_ADJ) &&
+            reportLmkKillAtOrBelow(pw, ProcessList.PREVIOUS_APP_ADJ) &&
+            reportLmkKillAtOrBelow(pw, ProcessList.HOME_APP_ADJ) &&
+            reportLmkKillAtOrBelow(pw, ProcessList.SERVICE_ADJ) &&
+            reportLmkKillAtOrBelow(pw, ProcessList.HEAVY_WEIGHT_APP_ADJ) &&
+            reportLmkKillAtOrBelow(pw, ProcessList.BACKUP_APP_ADJ) &&
+            reportLmkKillAtOrBelow(pw, ProcessList.PERCEPTIBLE_APP_ADJ) &&
+            reportLmkKillAtOrBelow(pw, ProcessList.VISIBLE_APP_ADJ) &&
+            reportLmkKillAtOrBelow(pw, ProcessList.FOREGROUND_APP_ADJ);
     }
 
     /**
@@ -13345,7 +13397,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
     boolean isPendingBroadcastProcessLocked(int pid) {
         return mFgBroadcastQueue.isPendingBroadcastProcessLocked(pid)
-                || mBgBroadcastQueue.isPendingBroadcastProcessLocked(pid);
+                || mBgBroadcastQueue.isPendingBroadcastProcessLocked(pid)
+                || mOffloadBroadcastQueue.isPendingBroadcastProcessLocked(pid);
     }
 
     void skipPendingBroadcastLocked(int pid) {
@@ -14587,10 +14640,16 @@ public class ActivityManagerService extends IActivityManager.Stub
         try {
             boolean doNext = false;
             BroadcastRecord r;
+            BroadcastQueue queue;
 
             synchronized(this) {
-                BroadcastQueue queue = (flags & Intent.FLAG_RECEIVER_FOREGROUND) != 0
-                        ? mFgBroadcastQueue : mBgBroadcastQueue;
+                if (isOnOffloadQueue(flags)) {
+                    queue = mOffloadBroadcastQueue;
+                } else {
+                    queue = (flags & Intent.FLAG_RECEIVER_FOREGROUND) != 0
+                            ? mFgBroadcastQueue : mBgBroadcastQueue;
+                }
+
                 r = queue.getMatchingOrderedReceiver(who);
                 if (r != null) {
                     doNext = r.queue.finishReceiverLocked(r, resultCode,
@@ -18620,7 +18679,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                                     memoryStat.rssInBytes,
                                     memoryStat.cacheInBytes,
                                     memoryStat.swapInBytes,
-                                    memoryStat.rssHighWatermarkInBytes);
+                                    memoryStat.rssHighWatermarkInBytes,
+                                    memoryStat.startTimeNanos);
                     processMemoryStates.add(processMemoryState);
                 }
             }
@@ -18643,7 +18703,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 ProcessMemoryState processMemoryState = new ProcessMemoryState(uid, processName,
                         oomScore, memoryStat.pgfault, memoryStat.pgmajfault,
                         memoryStat.rssInBytes, memoryStat.cacheInBytes, memoryStat.swapInBytes,
-                        memoryStat.rssHighWatermarkInBytes);
+                        memoryStat.rssHighWatermarkInBytes, memoryStat.startTimeNanos);
                 processMemoryStates.add(processMemoryState);
             }
             return processMemoryStates;
@@ -19483,5 +19543,9 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             }
         }
+    }
+
+    private boolean isOnOffloadQueue(int flags) {
+        return ((flags & Intent.FLAG_RECEIVER_OFFLOAD) != 0);
     }
 }

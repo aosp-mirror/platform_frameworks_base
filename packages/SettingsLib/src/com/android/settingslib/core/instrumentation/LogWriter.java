@@ -55,6 +55,7 @@ public interface LogWriter {
 
     /**
      * Logs an user action.
+     *
      * @deprecated use {@link #action(int, int, Pair[])}
      */
     @Deprecated
@@ -62,6 +63,7 @@ public interface LogWriter {
 
     /**
      * Logs an user action.
+     *
      * @deprecated use {@link #action(int, boolean, Pair[])}
      */
     @Deprecated
@@ -76,4 +78,10 @@ public interface LogWriter {
      * Logs a count.
      */
     void count(Context context, String name, int value);
+
+    /**
+     * Generically log action into statsd.
+     */
+    default void action(int attribution, int action, int pageId, String key, int value) {
+    }
 }

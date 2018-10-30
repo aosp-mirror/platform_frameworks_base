@@ -99,14 +99,22 @@ import dalvik.system.VMRuntime;
 import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
+import libcore.io.IoUtils;
+
 /**
  * Activity manager code dealing with processes.
+ *
+ * Method naming convention:
+ * <ul>
+ * <li> Methods suffixed with "LS" should be called within the {@link #sLmkdSocketLock} lock.
+ * </ul>
  */
 public final class ProcessList {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "ProcessList" : TAG_AM;
@@ -229,10 +237,12 @@ public final class ProcessList {
     // LMK_PROCPRIO <pid> <uid> <prio>
     // LMK_PROCREMOVE <pid>
     // LMK_PROCPURGE
+    // LMK_GETKILLCNT
     static final byte LMK_TARGET = 0;
     static final byte LMK_PROCPRIO = 1;
     static final byte LMK_PROCREMOVE = 2;
     static final byte LMK_PROCPURGE = 3;
+    static final byte LMK_GETKILLCNT = 4;
 
     ActivityManagerService mService = null;
 
@@ -268,8 +278,16 @@ public final class ProcessList {
 
     private boolean mHaveDisplaySize;
 
+    private static Object sLmkdSocketLock = new Object();
+
+    @GuardedBy("sLmkdSocketLock")
     private static LocalSocket sLmkdSocket;
+
+    @GuardedBy("sLmkdSocketLock")
     private static OutputStream sLmkdOutputStream;
+
+    @GuardedBy("sLmkdSocketLock")
+    private static InputStream sLmkdInputStream;
 
     /**
      * Temporary to avoid allocations.  Protected by main lock.
@@ -505,7 +523,7 @@ public final class ProcessList {
                 buf.putInt(mOomAdj[i]);
             }
 
-            writeLmkd(buf);
+            writeLmkd(buf, null);
             SystemProperties.set("sys.sysctl.extra_free_kbytes", Integer.toString(reserve));
         }
         // GB: 2048,3072,4096,6144,7168,8192
@@ -978,7 +996,7 @@ public final class ProcessList {
         buf.putInt(pid);
         buf.putInt(uid);
         buf.putInt(amt);
-        writeLmkd(buf);
+        writeLmkd(buf, null);
         long now = SystemClock.elapsedRealtime();
         if ((now-start) > 250) {
             Slog.w("ActivityManager", "SLOW OOM ADJ: " + (now-start) + "ms for pid " + pid
@@ -997,16 +1015,38 @@ public final class ProcessList {
         ByteBuffer buf = ByteBuffer.allocate(4 * 2);
         buf.putInt(LMK_PROCREMOVE);
         buf.putInt(pid);
-        writeLmkd(buf);
+        writeLmkd(buf, null);
     }
 
-    private static boolean openLmkdSocket() {
+    /*
+     * {@hide}
+     */
+    public static final Integer getLmkdKillCount(int min_oom_adj, int max_oom_adj) {
+        ByteBuffer buf = ByteBuffer.allocate(4 * 3);
+        ByteBuffer repl = ByteBuffer.allocate(4 * 2);
+        buf.putInt(LMK_GETKILLCNT);
+        buf.putInt(min_oom_adj);
+        buf.putInt(max_oom_adj);
+        if (writeLmkd(buf, repl)) {
+            int i = repl.getInt();
+            if (i != LMK_GETKILLCNT) {
+                Slog.e("ActivityManager", "Failed to get kill count, code mismatch");
+                return null;
+            }
+            return new Integer(repl.getInt());
+        }
+        return null;
+    }
+
+    @GuardedBy("sLmkdSocketLock")
+    private static boolean openLmkdSocketLS() {
         try {
             sLmkdSocket = new LocalSocket(LocalSocket.SOCKET_SEQPACKET);
             sLmkdSocket.connect(
                 new LocalSocketAddress("lmkd",
                         LocalSocketAddress.Namespace.RESERVED));
             sLmkdOutputStream = sLmkdSocket.getOutputStream();
+            sLmkdInputStream = sLmkdSocket.getInputStream();
         } catch (IOException ex) {
             Slog.w(TAG, "lowmemorykiller daemon socket open failed");
             sLmkdSocket = null;
@@ -1017,47 +1057,63 @@ public final class ProcessList {
     }
 
     // Never call directly, use writeLmkd() instead
-    private static boolean writeLmkdCommand(ByteBuffer buf) {
+    @GuardedBy("sLmkdSocketLock")
+    private static boolean writeLmkdCommandLS(ByteBuffer buf) {
         try {
             sLmkdOutputStream.write(buf.array(), 0, buf.position());
         } catch (IOException ex) {
             Slog.w(TAG, "Error writing to lowmemorykiller socket");
-
-            try {
-                sLmkdSocket.close();
-            } catch (IOException ex2) {
-            }
-
+            IoUtils.closeQuietly(sLmkdSocket);
             sLmkdSocket = null;
             return false;
         }
         return true;
     }
 
-    private static void writeLmkd(ByteBuffer buf) {
-
-        for (int i = 0; i < 3; i++) {
-            if (sLmkdSocket == null) {
-                if (openLmkdSocket() == false) {
-                    try {
-                        Thread.sleep(1000);
-                    } catch (InterruptedException ie) {
-                    }
-                    continue;
-                }
-
-                // Purge any previously registered pids
-                ByteBuffer purge_buf = ByteBuffer.allocate(4);
-                purge_buf.putInt(LMK_PROCPURGE);
-                if (writeLmkdCommand(purge_buf) == false) {
-                    // Write failed, skip the rest and retry
-                    continue;
-                }
+    // Never call directly, use writeLmkd() instead
+    @GuardedBy("sLmkdSocketLock")
+    private static boolean readLmkdReplyLS(ByteBuffer buf) {
+        int len;
+        try {
+            len = sLmkdInputStream.read(buf.array(), 0, buf.array().length);
+            if (len == buf.array().length) {
+                return true;
             }
-            if (writeLmkdCommand(buf)) {
-                return;
+        } catch (IOException ex) {
+            Slog.w(TAG, "Error reading from lowmemorykiller socket");
+        }
+
+        IoUtils.closeQuietly(sLmkdSocket);
+        sLmkdSocket = null;
+        return false;
+    }
+
+    private static boolean writeLmkd(ByteBuffer buf, ByteBuffer repl) {
+        synchronized (sLmkdSocketLock) {
+            for (int i = 0; i < 3; i++) {
+                if (sLmkdSocket == null) {
+                    if (openLmkdSocketLS() == false) {
+                        try {
+                            Thread.sleep(1000);
+                        } catch (InterruptedException ie) {
+                        }
+                        continue;
+                    }
+
+                    // Purge any previously registered pids
+                    ByteBuffer purge_buf = ByteBuffer.allocate(4);
+                    purge_buf.putInt(LMK_PROCPURGE);
+                    if (writeLmkdCommandLS(purge_buf) == false) {
+                        // Write failed, skip the rest and retry
+                        continue;
+                    }
+                }
+                if (writeLmkdCommandLS(buf) && (repl == null || readLmkdReplyLS(repl))) {
+                    return true;
+                }
             }
         }
+        return false;
     }
 
     static void killProcessGroup(int uid, int pid) {

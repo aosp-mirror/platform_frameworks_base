@@ -27,6 +27,7 @@ import android.util.Log;
 import android.util.Pair;
 
 import androidx.test.InstrumentationRegistry;
+import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.util.HexDump;
@@ -53,6 +54,7 @@ import java.util.concurrent.TimeUnit;
  * atest $ANDROID_BUILD_TOP/frameworks/base/services/tests/servicestests/src/com/android/server/job/JobStoreTest.java
  */
 @RunWith(AndroidJUnit4.class)
+@SmallTest
 public class JobStoreTest {
     private static final String TAG = "TaskStoreTest";
     private static final String TEST_PREFIX = "_test_";

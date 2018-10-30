@@ -3961,6 +3961,9 @@ public class StatusBar extends SystemUI implements DemoMode,
         @Override
         public void dozeTimeTick() {
             mNotificationPanel.dozeTimeTick();
+            if (mAmbientIndicationContainer instanceof DozeReceiver) {
+                ((DozeReceiver) mAmbientIndicationContainer).dozeTimeTick();
+            }
         }
 
         @Override
@@ -4027,7 +4030,8 @@ public class StatusBar extends SystemUI implements DemoMode,
                 float viewY = screenY - mTmpInt2[1];
                 if (0 <= viewX && viewX <= mAmbientIndicationContainer.getWidth()
                         && 0 <= viewY && viewY <= mAmbientIndicationContainer.getHeight()) {
-                    dispatchDoubleTap(viewX, viewY);
+                    if (mAmbientIndicationContainer instanceof DozeReceiver)
+                    ((DozeReceiver) mAmbientIndicationContainer).onDozeDoubleTap();
                 }
             }
         }
@@ -4040,17 +4044,6 @@ public class StatusBar extends SystemUI implements DemoMode,
         @Override
         public void setAodDimmingScrim(float scrimOpacity) {
             mScrimController.setAodFrontScrimAlpha(scrimOpacity);
-        }
-
-        public void dispatchDoubleTap(float viewX, float viewY) {
-            dispatchTap(mAmbientIndicationContainer, viewX, viewY);
-            dispatchTap(mAmbientIndicationContainer, viewX, viewY);
-        }
-
-        private void dispatchTap(View view, float x, float y) {
-            long now = SystemClock.elapsedRealtime();
-            dispatchTouchEvent(view, x, y, now, MotionEvent.ACTION_DOWN);
-            dispatchTouchEvent(view, x, y, now, MotionEvent.ACTION_UP);
         }
 
         private void dispatchTouchEvent(View view, float x, float y, long now, int action) {
@@ -4278,12 +4271,9 @@ public class StatusBar extends SystemUI implements DemoMode,
         }
     }
 
-    public void startPendingIntentDismissingKeyguard(final PendingIntent intent) {
+    public void executeActionDismissingKeyguard(Runnable action, boolean afterKeyguardGone) {
         if (!mDeviceProvisionedController.isDeviceProvisioned()) return;
 
-        final boolean afterKeyguardGone = intent.isActivity()
-                && PreviewInflater.wouldLaunchResolverActivity(mContext, intent.getIntent(),
-                mLockscreenUserManager.getCurrentUserId());
         dismissKeyguardThenExecute(() -> {
             new Thread(() -> {
                 try {
@@ -4294,22 +4284,32 @@ public class StatusBar extends SystemUI implements DemoMode,
                     ActivityManager.getService().resumeAppSwitches();
                 } catch (RemoteException e) {
                 }
-                try {
-                    intent.send(null, 0, null, null, null, null, getActivityOptions(
-                            null /* animationAdapter */));
-                } catch (PendingIntent.CanceledException e) {
-                    // the stack trace isn't very helpful here.
-                    // Just log the exception message.
-                    Log.w(TAG, "Sending intent failed: " + e);
-
-                    // TODO: Dismiss Keyguard.
-                }
-                if (intent.isActivity()) {
-                    mAssistManager.hideAssist();
-                }
+                action.run();
             }).start();
 
             return collapsePanel();
+        }, afterKeyguardGone);
+    }
+
+    public void startPendingIntentDismissingKeyguard(final PendingIntent intent) {
+        final boolean afterKeyguardGone = intent.isActivity()
+                && PreviewInflater.wouldLaunchResolverActivity(mContext, intent.getIntent(),
+                mLockscreenUserManager.getCurrentUserId());
+
+        executeActionDismissingKeyguard(() -> {
+            try {
+                intent.send(null, 0, null, null, null, null, getActivityOptions(
+                        null /* animationAdapter */));
+            } catch (PendingIntent.CanceledException e) {
+                // the stack trace isn't very helpful here.
+                // Just log the exception message.
+                Log.w(TAG, "Sending intent failed: " + e);
+
+                // TODO: Dismiss Keyguard.
+            }
+            if (intent.isActivity()) {
+                mAssistManager.hideAssist();
+            }
         }, afterKeyguardGone);
     }
 

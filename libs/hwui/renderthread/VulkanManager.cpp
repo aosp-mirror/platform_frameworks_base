@@ -16,8 +16,6 @@
 
 #include "VulkanManager.h"
 
-#include <private/gui/SyncFeatures.h>
-
 #include "Properties.h"
 #include "RenderThread.h"
 #include "renderstate/RenderState.h"
@@ -1033,69 +1031,59 @@ status_t VulkanManager::fenceWait(sp<Fence>& fence) {
         return INVALID_OPERATION;
     }
 
-    if (SyncFeatures::getInstance().useWaitSync() &&
-        SyncFeatures::getInstance().useNativeFenceSync()) {
-        // Block GPU on the fence.
-        int fenceFd = fence->dup();
-        if (fenceFd == -1) {
-            ALOGE("VulkanManager::fenceWait: error dup'ing fence fd: %d", errno);
-            return -errno;
-        }
-
-        VkSemaphoreCreateInfo semaphoreInfo;
-        semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
-        semaphoreInfo.pNext = nullptr;
-        semaphoreInfo.flags = 0;
-        VkSemaphore semaphore;
-        VkResult err = mCreateSemaphore(mDevice, &semaphoreInfo, nullptr, &semaphore);
-        if (VK_SUCCESS != err) {
-            ALOGE("Failed to create import semaphore, err: %d", err);
-            return UNKNOWN_ERROR;
-        }
-        VkImportSemaphoreFdInfoKHR importInfo;
-        importInfo.sType = VK_STRUCTURE_TYPE_IMPORT_SEMAPHORE_FD_INFO_KHR;
-        importInfo.pNext = nullptr;
-        importInfo.semaphore = semaphore;
-        importInfo.flags = VK_SEMAPHORE_IMPORT_TEMPORARY_BIT;
-        importInfo.handleType = VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_SYNC_FD_BIT;
-        importInfo.fd = fenceFd;
-
-        err = mImportSemaphoreFdKHR(mDevice, &importInfo);
-        if (VK_SUCCESS != err) {
-            ALOGE("Failed to import semaphore, err: %d", err);
-            return UNKNOWN_ERROR;
-        }
-
-        LOG_ALWAYS_FATAL_IF(mDummyCB == VK_NULL_HANDLE);
-
-        VkPipelineStageFlags waitDstStageFlags = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
-
-        VkSubmitInfo submitInfo;
-        memset(&submitInfo, 0, sizeof(VkSubmitInfo));
-        submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
-        submitInfo.waitSemaphoreCount = 1;
-        // Wait to make sure aquire semaphore set above has signaled.
-        submitInfo.pWaitSemaphores = &semaphore;
-        submitInfo.pWaitDstStageMask = &waitDstStageFlags;
-        submitInfo.commandBufferCount = 1;
-        submitInfo.pCommandBuffers = &mDummyCB;
-        submitInfo.signalSemaphoreCount = 0;
-
-        mQueueSubmit(mGraphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
-
-        // On Android when we import a semaphore, it is imported using temporary permanence. That
-        // means as soon as we queue the semaphore for a wait it reverts to its previous permanent
-        // state before importing. This means it will now be in an idle state with no pending
-        // signal or wait operations, so it is safe to immediately delete it.
-        mDestroySemaphore(mDevice, semaphore, nullptr);
-    } else {
-        // Block CPU on the fence.
-        status_t err = fence->waitForever("VulkanManager::fenceWait");
-        if (err != NO_ERROR) {
-            ALOGE("VulkanManager::fenceWait: error waiting for fence: %d", err);
-            return err;
-        }
+    // Block GPU on the fence.
+    int fenceFd = fence->dup();
+    if (fenceFd == -1) {
+        ALOGE("VulkanManager::fenceWait: error dup'ing fence fd: %d", errno);
+        return -errno;
     }
+
+    VkSemaphoreCreateInfo semaphoreInfo;
+    semaphoreInfo.sType = VK_STRUCTURE_TYPE_SEMAPHORE_CREATE_INFO;
+    semaphoreInfo.pNext = nullptr;
+    semaphoreInfo.flags = 0;
+    VkSemaphore semaphore;
+    VkResult err = mCreateSemaphore(mDevice, &semaphoreInfo, nullptr, &semaphore);
+    if (VK_SUCCESS != err) {
+        ALOGE("Failed to create import semaphore, err: %d", err);
+        return UNKNOWN_ERROR;
+    }
+    VkImportSemaphoreFdInfoKHR importInfo;
+    importInfo.sType = VK_STRUCTURE_TYPE_IMPORT_SEMAPHORE_FD_INFO_KHR;
+    importInfo.pNext = nullptr;
+    importInfo.semaphore = semaphore;
+    importInfo.flags = VK_SEMAPHORE_IMPORT_TEMPORARY_BIT;
+    importInfo.handleType = VK_EXTERNAL_SEMAPHORE_HANDLE_TYPE_SYNC_FD_BIT;
+    importInfo.fd = fenceFd;
+
+    err = mImportSemaphoreFdKHR(mDevice, &importInfo);
+    if (VK_SUCCESS != err) {
+        ALOGE("Failed to import semaphore, err: %d", err);
+        return UNKNOWN_ERROR;
+    }
+
+    LOG_ALWAYS_FATAL_IF(mDummyCB == VK_NULL_HANDLE);
+
+    VkPipelineStageFlags waitDstStageFlags = VK_PIPELINE_STAGE_TOP_OF_PIPE_BIT;
+
+    VkSubmitInfo submitInfo;
+    memset(&submitInfo, 0, sizeof(VkSubmitInfo));
+    submitInfo.sType = VK_STRUCTURE_TYPE_SUBMIT_INFO;
+    submitInfo.waitSemaphoreCount = 1;
+    // Wait to make sure aquire semaphore set above has signaled.
+    submitInfo.pWaitSemaphores = &semaphore;
+    submitInfo.pWaitDstStageMask = &waitDstStageFlags;
+    submitInfo.commandBufferCount = 1;
+    submitInfo.pCommandBuffers = &mDummyCB;
+    submitInfo.signalSemaphoreCount = 0;
+
+    mQueueSubmit(mGraphicsQueue, 1, &submitInfo, VK_NULL_HANDLE);
+
+    // On Android when we import a semaphore, it is imported using temporary permanence. That
+    // means as soon as we queue the semaphore for a wait it reverts to its previous permanent
+    // state before importing. This means it will now be in an idle state with no pending
+    // signal or wait operations, so it is safe to immediately delete it.
+    mDestroySemaphore(mDevice, semaphore, nullptr);
     return OK;
 }
 
@@ -1103,15 +1091,6 @@ status_t VulkanManager::createReleaseFence(sp<Fence>& nativeFence) {
     if (!hasVkContext()) {
         ALOGE("VulkanManager::createReleaseFence: VkDevice not initialized");
         return INVALID_OPERATION;
-    }
-
-    if (SyncFeatures::getInstance().useFenceSync()) {
-        ALOGE("VulkanManager::createReleaseFence: Vk backend doesn't support non-native fences");
-        return INVALID_OPERATION;
-    }
-
-    if (!SyncFeatures::getInstance().useNativeFenceSync()) {
-        return OK;
     }
 
     VkExportSemaphoreCreateInfo exportInfo;

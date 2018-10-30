@@ -228,6 +228,24 @@ public class PackageParser {
         CHILD_PACKAGE_TAGS.add(TAG_EAT_COMMENT);
     }
 
+    // STOPSHIP(b/112545973): remove once feature enabled by default
+    private static final Set<String> FORCE_AUDIO_PACKAGES;
+    private static final Set<String> FORCE_VIDEO_PACKAGES;
+    private static final Set<String> FORCE_IMAGES_PACKAGES;
+    static {
+        FORCE_AUDIO_PACKAGES = parsePackageList(
+                SystemProperties.get(StorageManager.PROP_FORCE_AUDIO));
+        FORCE_VIDEO_PACKAGES = parsePackageList(
+                SystemProperties.get(StorageManager.PROP_FORCE_VIDEO));
+        FORCE_IMAGES_PACKAGES = parsePackageList(
+                SystemProperties.get(StorageManager.PROP_FORCE_IMAGES));
+    }
+
+    private static Set<String> parsePackageList(String pkgs) {
+        if (TextUtils.isEmpty(pkgs)) return Collections.emptySet();
+        return new ArraySet<String>(Arrays.asList(pkgs.split(",")));
+    }
+
     private static final boolean LOG_UNSAFE_BROADCASTS = false;
 
     /**
@@ -2532,6 +2550,34 @@ public class PackageParser {
                         p.info.protectionLevel &= ~PermissionInfo.PROTECTION_MASK_BASE;
                         p.info.protectionLevel |= PermissionInfo.PROTECTION_DANGEROUS;
                     }
+                }
+            }
+        } else {
+            if (FORCE_AUDIO_PACKAGES.contains(pkg.packageName)) {
+                pkg.requestedPermissions.add(android.Manifest.permission.READ_MEDIA_AUDIO);
+                pkg.requestedPermissions.add(android.Manifest.permission.WRITE_MEDIA_AUDIO);
+            }
+            if (FORCE_VIDEO_PACKAGES.contains(pkg.packageName)) {
+                pkg.requestedPermissions.add(android.Manifest.permission.READ_MEDIA_VIDEO);
+                pkg.requestedPermissions.add(android.Manifest.permission.WRITE_MEDIA_VIDEO);
+            }
+            if (FORCE_IMAGES_PACKAGES.contains(pkg.packageName)) {
+                pkg.requestedPermissions.add(android.Manifest.permission.READ_MEDIA_IMAGES);
+                pkg.requestedPermissions.add(android.Manifest.permission.WRITE_MEDIA_IMAGES);
+            }
+
+            if (SystemProperties.getBoolean(StorageManager.PROP_FORCE_LEGACY, false)) {
+                if (pkg.requestedPermissions
+                        .contains(android.Manifest.permission.READ_EXTERNAL_STORAGE)) {
+                    pkg.requestedPermissions.add(android.Manifest.permission.READ_MEDIA_AUDIO);
+                    pkg.requestedPermissions.add(android.Manifest.permission.READ_MEDIA_VIDEO);
+                    pkg.requestedPermissions.add(android.Manifest.permission.READ_MEDIA_IMAGES);
+                }
+                if (pkg.requestedPermissions
+                        .contains(android.Manifest.permission.WRITE_EXTERNAL_STORAGE)) {
+                    pkg.requestedPermissions.add(android.Manifest.permission.WRITE_MEDIA_AUDIO);
+                    pkg.requestedPermissions.add(android.Manifest.permission.WRITE_MEDIA_VIDEO);
+                    pkg.requestedPermissions.add(android.Manifest.permission.WRITE_MEDIA_IMAGES);
                 }
             }
         }

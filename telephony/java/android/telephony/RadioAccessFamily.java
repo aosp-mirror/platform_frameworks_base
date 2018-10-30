@@ -29,29 +29,32 @@ import com.android.internal.telephony.RILConstants;
  */
 public class RadioAccessFamily implements Parcelable {
 
-    // Radio Access Family
+    /**
+     * TODO: get rid of RAF definition in RadioAccessFamily and
+     * use {@link TelephonyManager.NetworkTypeBitMask}
+     */
     // 2G
-    public static final int RAF_UNKNOWN = (1 <<  ServiceState.RIL_RADIO_TECHNOLOGY_UNKNOWN);
-    public static final int RAF_GSM = (1 << ServiceState.RIL_RADIO_TECHNOLOGY_GSM);
-    public static final int RAF_GPRS = (1 << ServiceState.RIL_RADIO_TECHNOLOGY_GPRS);
-    public static final int RAF_EDGE = (1 << ServiceState.RIL_RADIO_TECHNOLOGY_EDGE);
-    public static final int RAF_IS95A = (1 << ServiceState.RIL_RADIO_TECHNOLOGY_IS95A);
-    public static final int RAF_IS95B = (1 << ServiceState.RIL_RADIO_TECHNOLOGY_IS95B);
-    public static final int RAF_1xRTT = (1 << ServiceState.RIL_RADIO_TECHNOLOGY_1xRTT);
+    public static final int RAF_UNKNOWN = TelephonyManager.NETWORK_TYPE_BITMASK_UNKNOWN;
+    public static final int RAF_GSM = TelephonyManager.NETWORK_TYPE_BITMASK_GSM;
+    public static final int RAF_GPRS = TelephonyManager.NETWORK_TYPE_BITMASK_GPRS;
+    public static final int RAF_EDGE = TelephonyManager.NETWORK_TYPE_BITMASK_EDGE;
+    public static final int RAF_IS95A = TelephonyManager.NETWORK_TYPE_BITMASK_CDMA;
+    public static final int RAF_IS95B = TelephonyManager.NETWORK_TYPE_BITMASK_CDMA;
+    public static final int RAF_1xRTT = TelephonyManager.NETWORK_TYPE_BITMASK_1xRTT;
     // 3G
-    public static final int RAF_EVDO_0 = (1 << ServiceState.RIL_RADIO_TECHNOLOGY_EVDO_0);
-    public static final int RAF_EVDO_A = (1 << ServiceState.RIL_RADIO_TECHNOLOGY_EVDO_A);
-    public static final int RAF_EVDO_B = (1 << ServiceState.RIL_RADIO_TECHNOLOGY_EVDO_B);
-    public static final int RAF_EHRPD = (1 << ServiceState.RIL_RADIO_TECHNOLOGY_EHRPD);
-    public static final int RAF_HSUPA = (1 << ServiceState.RIL_RADIO_TECHNOLOGY_HSUPA);
-    public static final int RAF_HSDPA = (1 << ServiceState.RIL_RADIO_TECHNOLOGY_HSDPA);
-    public static final int RAF_HSPA = (1 << ServiceState.RIL_RADIO_TECHNOLOGY_HSPA);
-    public static final int RAF_HSPAP = (1 << ServiceState.RIL_RADIO_TECHNOLOGY_HSPAP);
-    public static final int RAF_UMTS = (1 << ServiceState.RIL_RADIO_TECHNOLOGY_UMTS);
-    public static final int RAF_TD_SCDMA = (1 << ServiceState.RIL_RADIO_TECHNOLOGY_TD_SCDMA);
+    public static final int RAF_EVDO_0 = TelephonyManager.NETWORK_TYPE_BITMASK_EVDO_0;
+    public static final int RAF_EVDO_A = TelephonyManager.NETWORK_TYPE_BITMASK_EVDO_A;
+    public static final int RAF_EVDO_B = TelephonyManager.NETWORK_TYPE_BITMASK_EVDO_B;
+    public static final int RAF_EHRPD = TelephonyManager.NETWORK_TYPE_BITMASK_EHRPD;
+    public static final int RAF_HSUPA = TelephonyManager.NETWORK_TYPE_BITMASK_HSUPA;
+    public static final int RAF_HSDPA = TelephonyManager.NETWORK_TYPE_BITMASK_HSDPA;
+    public static final int RAF_HSPA = TelephonyManager.NETWORK_TYPE_BITMASK_HSPA;
+    public static final int RAF_HSPAP = TelephonyManager.NETWORK_TYPE_BITMASK_HSPAP;
+    public static final int RAF_UMTS = TelephonyManager.NETWORK_TYPE_BITMASK_UMTS;
+    public static final int RAF_TD_SCDMA = TelephonyManager.NETWORK_TYPE_BITMASK_TD_SCDMA;
     // 4G
-    public static final int RAF_LTE = (1 << ServiceState.RIL_RADIO_TECHNOLOGY_LTE);
-    public static final int RAF_LTE_CA = (1 << ServiceState.RIL_RADIO_TECHNOLOGY_LTE_CA);
+    public static final int RAF_LTE = TelephonyManager.NETWORK_TYPE_BITMASK_LTE;
+    public static final int RAF_LTE_CA = TelephonyManager.NETWORK_TYPE_BITMASK_LTE_CA;
 
     // Grouping of RAFs
     // 2G
@@ -74,9 +77,9 @@ public class RadioAccessFamily implements Parcelable {
      * Constructor.
      *
      * @param phoneId the phone ID
-     * @param radioAccessFamily the phone radio access family defined
-     *        in RadioAccessFamily. It's a bit mask value to represent
-     *        the support type.
+     * @param radioAccessFamily the phone radio access family bitmask based on
+     * {@link TelephonyManager.NetworkTypeBitMask}. It's a bit mask value to represent the support
+     *                          type.
      */
     @UnsupportedAppUsage
     public RadioAccessFamily(int phoneId, int radioAccessFamily) {
@@ -100,7 +103,7 @@ public class RadioAccessFamily implements Parcelable {
      * @return radio access family
      */
     @UnsupportedAppUsage
-    public int getRadioAccessFamily() {
+    public @TelephonyManager.NetworkTypeBitMask int getRadioAccessFamily() {
         return mRadioAccessFamily;
     }
 
@@ -387,5 +390,77 @@ public class RadioAccessFamily implements Parcelable {
             result |= rafType;
         }
         return result;
+    }
+
+    /**
+     * convert RAF from {@link ServiceState.RilRadioTechnology} bitmask to
+     * {@link TelephonyManager.NetworkTypeBitMask}, the bitmask represented by
+     * {@link TelephonyManager.NetworkType}. Reasons are {@link TelephonyManager.NetworkType} are
+     * public while {@link ServiceState.RilRadioTechnology} are hidden. We
+     * don't want to expose two sets of definition to public.
+     *
+     * @param raf bitmask represented by {@link ServiceState.RilRadioTechnology}
+     * @return {@link TelephonyManager.NetworkTypeBitMask}
+     */
+    public static int convertToNetworkTypeBitMask(int raf) {
+        int networkTypeRaf = 0;
+
+        if ((raf & (1 << ServiceState.RIL_RADIO_TECHNOLOGY_GSM)) != 0) {
+            networkTypeRaf |= TelephonyManager.NETWORK_TYPE_BITMASK_GSM;
+        }
+        if ((raf & (1 << ServiceState.RIL_RADIO_TECHNOLOGY_GPRS)) != 0) {
+            networkTypeRaf |= TelephonyManager.NETWORK_TYPE_BITMASK_GPRS;
+        }
+        if ((raf & (1 << ServiceState.RIL_RADIO_TECHNOLOGY_EDGE)) != 0) {
+            networkTypeRaf |= TelephonyManager.NETWORK_TYPE_BITMASK_EDGE;
+        }
+        // convert both IS95A/IS95B to CDMA as network mode doesn't support CDMA
+        if ((raf & (1 << ServiceState.RIL_RADIO_TECHNOLOGY_IS95A)) != 0) {
+            networkTypeRaf |= TelephonyManager.NETWORK_TYPE_BITMASK_CDMA;
+        }
+        if ((raf & (1 << ServiceState.RIL_RADIO_TECHNOLOGY_IS95B)) != 0) {
+            networkTypeRaf |= TelephonyManager.NETWORK_TYPE_BITMASK_CDMA;
+        }
+        if ((raf & (1 << ServiceState.RIL_RADIO_TECHNOLOGY_1xRTT)) != 0) {
+            networkTypeRaf |= TelephonyManager.NETWORK_TYPE_BITMASK_1xRTT;
+        }
+        if ((raf & (1 << ServiceState.RIL_RADIO_TECHNOLOGY_EVDO_0)) != 0) {
+            networkTypeRaf |= TelephonyManager.NETWORK_TYPE_BITMASK_EVDO_0;
+        }
+        if ((raf & (1 << ServiceState.RIL_RADIO_TECHNOLOGY_EVDO_A)) != 0) {
+            networkTypeRaf |= TelephonyManager.NETWORK_TYPE_BITMASK_EVDO_A;
+        }
+        if ((raf & (1 << ServiceState.RIL_RADIO_TECHNOLOGY_EVDO_B)) != 0) {
+            networkTypeRaf |= TelephonyManager.NETWORK_TYPE_BITMASK_EVDO_B;
+        }
+        if ((raf & (1 << ServiceState.RIL_RADIO_TECHNOLOGY_EHRPD)) != 0) {
+            networkTypeRaf |= TelephonyManager.NETWORK_TYPE_BITMASK_EHRPD;
+        }
+        if ((raf & (1 << ServiceState.RIL_RADIO_TECHNOLOGY_HSUPA)) != 0) {
+            networkTypeRaf |= TelephonyManager.NETWORK_TYPE_BITMASK_HSUPA;
+        }
+        if ((raf & (1 << ServiceState.RIL_RADIO_TECHNOLOGY_HSDPA)) != 0) {
+            networkTypeRaf |= TelephonyManager.NETWORK_TYPE_BITMASK_HSDPA;
+        }
+        if ((raf & (1 << ServiceState.RIL_RADIO_TECHNOLOGY_HSPA)) != 0) {
+            networkTypeRaf |= TelephonyManager.NETWORK_TYPE_BITMASK_HSPA;
+        }
+        if ((raf & (1 << ServiceState.RIL_RADIO_TECHNOLOGY_HSPAP)) != 0) {
+            networkTypeRaf |= TelephonyManager.NETWORK_TYPE_BITMASK_HSPAP;
+        }
+        if ((raf & (1 << ServiceState.RIL_RADIO_TECHNOLOGY_UMTS)) != 0) {
+            networkTypeRaf |= TelephonyManager.NETWORK_TYPE_BITMASK_UMTS;
+        }
+        if ((raf & (1 << ServiceState.RIL_RADIO_TECHNOLOGY_TD_SCDMA)) != 0) {
+            networkTypeRaf |= TelephonyManager.NETWORK_TYPE_BITMASK_TD_SCDMA;
+        }
+        if ((raf & (1 << ServiceState.RIL_RADIO_TECHNOLOGY_LTE)) != 0) {
+            networkTypeRaf |= TelephonyManager.NETWORK_TYPE_BITMASK_LTE;
+        }
+        if ((raf & (1 << ServiceState.RIL_RADIO_TECHNOLOGY_LTE_CA)) != 0) {
+            networkTypeRaf |= TelephonyManager.NETWORK_TYPE_BITMASK_LTE_CA;
+        }
+
+        return (networkTypeRaf == 0) ? TelephonyManager.NETWORK_TYPE_UNKNOWN : networkTypeRaf;
     }
 }
