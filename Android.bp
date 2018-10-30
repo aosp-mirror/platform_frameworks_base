@@ -235,8 +235,7 @@ java_defaults {
         "core/java/android/os/IDeviceIdentifiersPolicyService.aidl",
         "core/java/android/os/IDeviceIdleController.aidl",
         "core/java/android/os/IHardwarePropertiesManager.aidl",
-        "core/java/android/os/IIncidentManager.aidl",
-        "core/java/android/os/IIncidentReportStatusListener.aidl",
+        ":libincident_aidl",
         "core/java/android/os/IMaintenanceActivityListener.aidl",
         "core/java/android/os/IMessenger.aidl",
         "core/java/android/os/INetworkActivityListener.aidl",
@@ -249,8 +248,7 @@ java_defaults {
         "core/java/android/os/IRecoverySystemProgressListener.aidl",
         "core/java/android/os/IRemoteCallback.aidl",
         "core/java/android/os/ISchedulingPolicyService.aidl",
-        "core/java/android/os/IStatsCompanionService.aidl",
-        "core/java/android/os/IStatsManager.aidl",
+        ":statsd_aidl",
         "core/java/android/os/ISystemUpdateManager.aidl",
         "core/java/android/os/IThermalEventListener.aidl",
         "core/java/android/os/IThermalService.aidl",
@@ -724,6 +722,22 @@ java_defaults {
 
 }
 
+filegroup {
+    name: "libincident_aidl",
+    srcs: [
+        "core/java/android/os/IIncidentManager.aidl",
+        "core/java/android/os/IIncidentReportStatusListener.aidl",
+    ],
+}
+
+filegroup {
+    name: "statsd_aidl",
+    srcs: [
+        "core/java/android/os/IStatsCompanionService.aidl",
+        "core/java/android/os/IStatsManager.aidl",
+    ],
+}
+
 java_library {
     name: "framework",
     defaults: ["framework-defaults"],
@@ -934,12 +948,14 @@ gensrcs {
         "core/proto/android/os/batterytype.proto",
         "core/proto/android/os/cpufreq.proto",
         "core/proto/android/os/cpuinfo.proto",
+        "core/proto/android/os/data.proto",
         "core/proto/android/os/kernelwake.proto",
         "core/proto/android/os/pagetypeinfo.proto",
         "core/proto/android/os/procrank.proto",
         "core/proto/android/os/ps.proto",
         "core/proto/android/os/system_properties.proto",
         "core/proto/android/util/event_log_tags.proto",
+        "core/proto/android/util/log.proto",
     ],
 
     // Append protoc-gen-cppstream tool's PATH otherwise aprotoc can't find the plugin tool
