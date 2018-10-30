@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2017 The Android Open Source Project
+ * Copyright (C) 2018 The Android Open Source Project
  *
  * Licensed under the Apache License, Version 2.0 (the "License");
  * you may not use this file except in compliance with the License.
@@ -16,13 +16,13 @@
 
 package com.android.server.updates;
 
-public class LangIdInstallReceiver extends ConfigUpdateInstallReceiver {
+public class ConversationActionsInstallReceiver extends ConfigUpdateInstallReceiver {
 
-    public LangIdInstallReceiver() {
+    public ConversationActionsInstallReceiver() {
         super(
-            "/data/misc/textclassifier/",
-            "lang_id.model",
-            "metadata/lang_id",
-            "version");
+                "/data/misc/textclassifier/",
+                "actions_suggestions.model",
+                "metadata/actions_suggestions",
+                "version");
     }
 }
