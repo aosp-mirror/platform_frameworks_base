@@ -291,22 +291,7 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
     }
 
     private static FileDescriptor openInternal(File file, int mode) throws FileNotFoundException {
-        if ((mode & MODE_READ_WRITE) == 0) {
-            throw new IllegalArgumentException(
-                    "Must specify MODE_READ_ONLY, MODE_WRITE_ONLY, or MODE_READ_WRITE");
-        }
-
-        int flags = 0;
-        switch (mode & MODE_READ_WRITE) {
-            case 0:
-            case MODE_READ_ONLY: flags = O_RDONLY; break;
-            case MODE_WRITE_ONLY: flags = O_WRONLY; break;
-            case MODE_READ_WRITE: flags = O_RDWR; break;
-        }
-
-        if ((mode & MODE_CREATE) != 0) flags |= O_CREAT;
-        if ((mode & MODE_TRUNCATE) != 0) flags |= O_TRUNC;
-        if ((mode & MODE_APPEND) != 0) flags |= O_APPEND;
+        final int flags = FileUtils.translateModePfdToPosix(mode);
 
         int realMode = S_IRWXU | S_IRWXG;
         if ((mode & MODE_WORLD_READABLE) != 0) realMode |= S_IROTH;
