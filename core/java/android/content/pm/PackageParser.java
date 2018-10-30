@@ -3929,10 +3929,13 @@ public class PackageParser {
             }
         }
 
-        // Add a hidden app detail activity which forwards user to App Details page.
-        Activity a = generateAppDetailsHiddenActivity(owner, flags, outError,
-                owner.baseHardwareAccelerated);
-        owner.activities.add(a);
+        if (TextUtils.isEmpty(owner.staticSharedLibName)) {
+            // Add a hidden app detail activity to normal apps which forwards user to App Details
+            // page.
+            Activity a = generateAppDetailsHiddenActivity(owner, flags, outError,
+                    owner.baseHardwareAccelerated);
+            owner.activities.add(a);
+        }
 
         if (hasActivityOrder) {
             Collections.sort(owner.activities, (a1, a2) -> Integer.compare(a2.order, a1.order));
