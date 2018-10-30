@@ -40,7 +40,7 @@ public final class CellSignalStrengthGsm extends CellSignalStrength implements P
     @UnsupportedAppUsage
     private int mBitErrorRate;   // bit error rate (0-7, 99) as defined in TS 27.007 8.5
     @UnsupportedAppUsage
-    private int mTimingAdvance; // range from 0-219 or Integer.MAX_VALUE if unknown
+    private int mTimingAdvance; // range from 0-219 or CellInfo.UNAVAILABLE if unknown
 
     /** @hide */
     @UnsupportedAppUsage
@@ -50,7 +50,7 @@ public final class CellSignalStrengthGsm extends CellSignalStrength implements P
 
     /** @hide */
     public CellSignalStrengthGsm(int ss, int ber) {
-        this(ss, ber, Integer.MAX_VALUE);
+        this(ss, ber, CellInfo.UNAVAILABLE);
     }
 
     /** @hide */
@@ -81,9 +81,9 @@ public final class CellSignalStrengthGsm extends CellSignalStrength implements P
     /** @hide */
     @Override
     public void setDefaultValues() {
-        mSignalStrength = Integer.MAX_VALUE;
-        mBitErrorRate = Integer.MAX_VALUE;
-        mTimingAdvance = Integer.MAX_VALUE;
+        mSignalStrength = CellInfo.UNAVAILABLE;
+        mBitErrorRate = CellInfo.UNAVAILABLE;
+        mTimingAdvance = CellInfo.UNAVAILABLE;
     }
 
     /**
@@ -112,8 +112,9 @@ public final class CellSignalStrengthGsm extends CellSignalStrength implements P
 
     /**
      * Get the GSM timing advance between 0..219 symbols (normally 0..63).
-     * Integer.MAX_VALUE is reported when there is no RR connection.
-     * Refer to 3GPP 45.010 Sec 5.8
+     * <p>{@link android.telephony.CellInfo#UNAVAILABLE UNAVAILABLE} is reported when there is no RR
+     * connection. Refer to 3GPP 45.010 Sec 5.8.
+     *
      * @return the current GSM timing advance, if available.
      */
     public int getTimingAdvance() {
@@ -128,11 +129,11 @@ public final class CellSignalStrengthGsm extends CellSignalStrength implements P
         int dBm;
 
         int level = mSignalStrength;
-        int asu = (level == 99 ? Integer.MAX_VALUE : level);
-        if (asu != Integer.MAX_VALUE) {
+        int asu = (level == 99 ? CellInfo.UNAVAILABLE : level);
+        if (asu != CellInfo.UNAVAILABLE) {
             dBm = -113 + (2 * asu);
         } else {
-            dBm = Integer.MAX_VALUE;
+            dBm = CellInfo.UNAVAILABLE;
         }
         if (DBG) log("getDbm=" + dBm);
         return dBm;

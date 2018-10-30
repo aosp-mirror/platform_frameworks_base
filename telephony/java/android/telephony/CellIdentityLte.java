@@ -16,7 +16,6 @@
 
 package android.telephony;
 
-import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.telephony.gsm.GsmCellLocation;
@@ -49,11 +48,11 @@ public final class CellIdentityLte extends CellIdentity {
     @UnsupportedAppUsage
     public CellIdentityLte() {
         super(TAG, CellInfo.TYPE_LTE, null, null, null, null);
-        mCi = Integer.MAX_VALUE;
-        mPci = Integer.MAX_VALUE;
-        mTac = Integer.MAX_VALUE;
-        mEarfcn = Integer.MAX_VALUE;
-        mBandwidth = Integer.MAX_VALUE;
+        mCi = CellInfo.UNAVAILABLE;
+        mPci = CellInfo.UNAVAILABLE;
+        mTac = CellInfo.UNAVAILABLE;
+        mEarfcn = CellInfo.UNAVAILABLE;
+        mBandwidth = CellInfo.UNAVAILABLE;
     }
 
     /**
@@ -68,7 +67,7 @@ public final class CellIdentityLte extends CellIdentity {
      */
     @UnsupportedAppUsage
     public CellIdentityLte(int mcc, int mnc, int ci, int pci, int tac) {
-        this(ci, pci, tac, Integer.MAX_VALUE, Integer.MAX_VALUE, String.valueOf(mcc),
+        this(ci, pci, tac, CellInfo.UNAVAILABLE, CellInfo.UNAVAILABLE, String.valueOf(mcc),
                 String.valueOf(mnc), null, null);
     }
 
@@ -84,7 +83,7 @@ public final class CellIdentityLte extends CellIdentity {
      * @hide
      */
     public CellIdentityLte(int mcc, int mnc, int ci, int pci, int tac, int earfcn) {
-        this(ci, pci, tac, earfcn, Integer.MAX_VALUE, String.valueOf(mcc), String.valueOf(mnc),
+        this(ci, pci, tac, earfcn, CellInfo.UNAVAILABLE, String.valueOf(mcc), String.valueOf(mnc),
                 null, null);
     }
 
@@ -122,74 +121,81 @@ public final class CellIdentityLte extends CellIdentity {
     }
 
     /**
-     * @return 3-digit Mobile Country Code, 0..999, Integer.MAX_VALUE if unknown
+     * @return 3-digit Mobile Country Code, 0..999,
+     *         {@link android.telephony.CellInfo#UNAVAILABLE UNAVAILABLE} if unavailable.
      * @deprecated Use {@link #getMccString} instead.
      */
     @Deprecated
     public int getMcc() {
-        return (mMccStr != null) ? Integer.valueOf(mMccStr) : Integer.MAX_VALUE;
+        return (mMccStr != null) ? Integer.valueOf(mMccStr) : CellInfo.UNAVAILABLE;
     }
 
     /**
-     * @return 2 or 3-digit Mobile Network Code, 0..999, Integer.MAX_VALUE if unknown
+     * @return 2 or 3-digit Mobile Network Code, 0..999,
+     *         {@link android.telephony.CellInfo#UNAVAILABLE UNAVAILABLE} if unavailable.
      * @deprecated Use {@link #getMncString} instead.
      */
     @Deprecated
     public int getMnc() {
-        return (mMncStr != null) ? Integer.valueOf(mMncStr) : Integer.MAX_VALUE;
+        return (mMncStr != null) ? Integer.valueOf(mMncStr) : CellInfo.UNAVAILABLE;
     }
 
     /**
-     * @return 28-bit Cell Identity, Integer.MAX_VALUE if unknown
+     * @return 28-bit Cell Identity,
+     *         {@link android.telephony.CellInfo#UNAVAILABLE UNAVAILABLE} if unavailable.
      */
     public int getCi() {
         return mCi;
     }
 
     /**
-     * @return Physical Cell Id 0..503, Integer.MAX_VALUE if unknown
+     * @return Physical Cell Id 0..503,
+     *         {@link android.telephony.CellInfo#UNAVAILABLE UNAVAILABLE} if unavailable.
      */
     public int getPci() {
         return mPci;
     }
 
     /**
-     * @return 16-bit Tracking Area Code, Integer.MAX_VALUE if unknown
+     * @return 16-bit Tracking Area Code,
+     *         {@link android.telephony.CellInfo#UNAVAILABLE UNAVAILABLE} if unavailable.
      */
     public int getTac() {
         return mTac;
     }
 
     /**
-     * @return 18-bit Absolute RF Channel Number, Integer.MAX_VALUE if unknown
+     * @return 18-bit Absolute RF Channel Number,
+     *         {@link android.telephony.CellInfo#UNAVAILABLE UNAVAILABLE} if unavailable.
      */
     public int getEarfcn() {
         return mEarfcn;
     }
 
     /**
-     * @return Cell bandwidth in kHz, Integer.MAX_VALUE if unknown
+     * @return Cell bandwidth in kHz,
+     *         {@link android.telephony.CellInfo#UNAVAILABLE UNAVAILABLE} if unavailable.
      */
     public int getBandwidth() {
         return mBandwidth;
     }
 
     /**
-     * @return Mobile Country Code in string format, null if unknown
+     * @return Mobile Country Code in string format, null if unavailable.
      */
     public String getMccString() {
         return mMccStr;
     }
 
     /**
-     * @return Mobile Network Code in string format, null if unknown
+     * @return Mobile Network Code in string format, null if unavailable.
      */
     public String getMncString() {
         return mMncStr;
     }
 
     /**
-     * @return a 5 or 6 character string (MCC+MNC), null if any field is unknown
+     * @return a 5 or 6 character string (MCC+MNC), null if any field is unknown.
      */
     public String getMobileNetworkOperator() {
         return (mMccStr == null || mMncStr == null) ? null : mMccStr + mMncStr;
@@ -216,8 +222,8 @@ public final class CellIdentityLte extends CellIdentity {
     @Override
     public GsmCellLocation asCellLocation() {
         GsmCellLocation cl = new GsmCellLocation();
-        int tac = mTac != Integer.MAX_VALUE ? mTac : -1;
-        int cid = mCi != Integer.MAX_VALUE ? mCi : -1;
+        int tac = mTac != CellInfo.UNAVAILABLE ? mTac : -1;
+        int cid = mCi != CellInfo.UNAVAILABLE ? mCi : -1;
         cl.setLacAndCid(tac, cid);
         cl.setPsc(0);
         return cl;
