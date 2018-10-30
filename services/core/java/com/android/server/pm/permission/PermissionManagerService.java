@@ -16,6 +16,7 @@
 
 package com.android.server.pm.permission;
 
+import static android.Manifest.permission.ACCESS_BACKGROUND_LOCATION;
 import static android.Manifest.permission.READ_EXTERNAL_STORAGE;
 import static android.Manifest.permission.WRITE_EXTERNAL_STORAGE;
 import static android.app.AppOpsManager.MODE_ALLOWED;
@@ -1128,8 +1129,8 @@ public class PermissionManagerService {
                                         }
                                     }
                                 } else {
-                                    int revokeOpSuccess = ps.revokeRuntimePermission(bp, userId);
-                                    if (revokeOpSuccess
+                                    int revokeResult = ps.revokeRuntimePermission(bp, userId);
+                                    if (revokeResult
                                             != PermissionsState.PERMISSION_OPERATION_FAILURE) {
 
                                         if (DEBUG_PERMISSIONS) {
@@ -1269,6 +1270,8 @@ public class PermissionManagerService {
             @NonNull PermissionsState origPs,
             @NonNull PermissionsState ps, @NonNull PackageParser.Package pkg,
             @NonNull int[] updatedUserIds) {
+        AppOpsManager appOpsManager = mContext.getSystemService(AppOpsManager.class);
+
         String pkgName = pkg.packageName;
         ArraySet<String> newImplicitPermissions = new ArraySet<>();
 
@@ -1331,17 +1334,33 @@ public class PermissionManagerService {
                                 FLAG_PERMISSION_REVOKE_WHEN_REQUESTED);
                         updatedUserIds = ArrayUtils.appendInt(updatedUserIds, userId);
 
-                        if (!origPs.hasRequestedPermission(sourcePerms)) {
-                            // Both permissions are new, do nothing
-                            if (DEBUG_PERMISSIONS) {
-                                Slog.i(TAG, newPerm + " does not inherit from " + sourcePerms
-                                        + " for " + pkgName + " as split permission is also new");
-                            }
+                        // SPECIAL BEHAVIOR for background location. Foreground only by default.
+                        if (newPerm.equals(ACCESS_BACKGROUND_LOCATION)) {
+                            int numSourcePerms = sourcePerms.size();
+                            for (int sourcePermNum = 0; sourcePermNum < numSourcePerms;
+                                    sourcePermNum++) {
+                                String sourcePerm = sourcePerms.valueAt(sourcePermNum);
 
-                            break;
+                                if (appOpsManager.unsafeCheckOpNoThrow(permissionToOp(sourcePerm),
+                                        getUid(userId, getAppId(pkg.applicationInfo.uid)), pkgName)
+                                        == MODE_ALLOWED) {
+                                    setAppOpMode(sourcePerm, pkg, userId, MODE_FOREGROUND);
+                                }
+                            }
                         } else {
-                            inheritPermissionStateToNewImplicitPermissionLocked(sourcePerms,
-                                    newPerm, ps, pkg, userId);
+                            if (!origPs.hasRequestedPermission(sourcePerms)) {
+                                // Both permissions are new, do nothing
+                                if (DEBUG_PERMISSIONS) {
+                                    Slog.i(TAG, newPerm + " does not inherit from " + sourcePerms
+                                            + " for " + pkgName
+                                            + " as split permission is also new");
+                                }
+
+                                break;
+                            } else {
+                                inheritPermissionStateToNewImplicitPermissionLocked(sourcePerms,
+                                        newPerm, ps, pkg, userId);
+                            }
                         }
                     }
                 }
