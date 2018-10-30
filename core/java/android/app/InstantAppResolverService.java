@@ -240,7 +240,7 @@ public abstract class InstantAppResolverService extends Service {
                 args.arg4 = token;
                 args.arg5 = sanitizedIntent;
                 mHandler.obtainMessage(ServiceHandler.MSG_GET_INSTANT_APP_INTENT_FILTER,
-                        callback).sendToTarget();
+                        args).sendToTarget();
             }
         };
     }
