@@ -101,7 +101,8 @@ public class StatusBarSignalPolicy implements NetworkControllerImpl.SignalCallba
         boolean vpnVisible = mSecurityController.isVpnEnabled();
         int vpnIconId = currentVpnIconId(mSecurityController.isVpnBranded());
 
-        mIconController.setIcon(mSlotVpn, vpnIconId, null);
+        mIconController.setIcon(mSlotVpn, vpnIconId,
+                mContext.getResources().getString(R.string.accessibility_vpn_on));
         mIconController.setIconVisibility(mSlotVpn, vpnVisible);
     }
 
