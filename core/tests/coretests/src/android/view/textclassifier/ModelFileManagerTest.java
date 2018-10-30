@@ -43,7 +43,7 @@ import java.util.stream.Collectors;
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class ModelFileManagerTest {
-
+    private static final Locale DEFAULT_LOCALE = Locale.forLanguageTag("en-US");
     @Mock
     private Supplier<List<ModelFileManager.ModelFile>> mModelFileSupplier;
     private ModelFileManager.ModelFileSupplierImpl mModelFileSupplierImpl;
@@ -71,6 +71,8 @@ public class ModelFileManagerTest {
 
         mRootTestDir.mkdirs();
         mFactoryModelDir.mkdirs();
+
+        Locale.setDefault(DEFAULT_LOCALE);
     }
 
     @After
@@ -134,7 +136,7 @@ public class ModelFileManagerTest {
     }
 
     @Test
-    public void findBestModel_useIndependentWhenNoLanguageModelMatch() {
+    public void findBestModel_noMatchedLanguageModel() {
         Locale locale = Locale.forLanguageTag("ja");
         ModelFileManager.ModelFile languageIndependentModelFile =
                 new ModelFileManager.ModelFile(
@@ -145,6 +147,28 @@ public class ModelFileManagerTest {
                 new ModelFileManager.ModelFile(
                         new File("/path/b"), 1,
                         Collections.singletonList(locale), false);
+
+        when(mModelFileSupplier.get())
+                .thenReturn(
+                        Arrays.asList(languageIndependentModelFile, languageDependentModelFile));
+
+        ModelFileManager.ModelFile bestModelFile =
+                mModelFileManager.findBestModelFile(
+                        LocaleList.forLanguageTags("zh-hk"));
+        assertThat(bestModelFile).isEqualTo(languageIndependentModelFile);
+    }
+
+    @Test
+    public void findBestModel_noMatchedLanguageModel_defaultLocaleModelExists() {
+        ModelFileManager.ModelFile languageIndependentModelFile =
+                new ModelFileManager.ModelFile(
+                        new File("/path/a"), 1,
+                        Collections.emptyList(), true);
+
+        ModelFileManager.ModelFile languageDependentModelFile =
+                new ModelFileManager.ModelFile(
+                        new File("/path/b"), 1,
+                        Collections.singletonList(DEFAULT_LOCALE), false);
 
         when(mModelFileSupplier.get())
                 .thenReturn(
