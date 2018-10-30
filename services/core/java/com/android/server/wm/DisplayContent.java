@@ -120,6 +120,7 @@ import static com.android.server.wm.WindowStateAnimator.DRAW_PENDING;
 import static com.android.server.wm.WindowStateAnimator.READY_TO_SHOW;
 
 import android.annotation.CallSuper;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.content.pm.PackageManager;
 import android.content.res.CompatibilityInfo;
@@ -137,6 +138,7 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.Trace;
+import android.os.UserHandle;
 import android.util.ArraySet;
 import android.util.DisplayMetrics;
 import android.util.Slog;
@@ -162,6 +164,8 @@ import com.android.server.wm.utils.RotationCache;
 import com.android.server.wm.utils.WmDisplayCutout;
 
 import java.io.PrintWriter;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -182,6 +186,18 @@ import java.util.function.Predicate;
 class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowContainer>
         implements WindowManagerPolicy.DisplayContentInfo {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "DisplayContent" : TAG_WM;
+
+    /** The default scaling mode that scales content automatically. */
+    static final int FORCE_SCALING_MODE_AUTO = 0;
+    /** For {@link #setForcedScalingMode} to apply flag {@link Display#FLAG_SCALING_DISABLED}. */
+    static final int FORCE_SCALING_MODE_DISABLED = 1;
+
+    @IntDef(prefix = { "FORCE_SCALING_MODE_" }, value = {
+            FORCE_SCALING_MODE_AUTO,
+            FORCE_SCALING_MODE_DISABLED
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    @interface ForceScalingMode {}
 
     /** Unique identifier of this stack. */
     private final int mDisplayId;
@@ -237,6 +253,11 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * @see WindowManagerService#setForcedDisplayDensityForUser(int, int, int)
      */
     int mBaseDisplayDensity = 0;
+
+    /**
+     * Whether to disable display scaling. This can be set via shell command "adb shell wm scaling".
+     * @see WindowManagerService#setForcedDisplayScalingMode(int, int)
+     */
     boolean mDisplayScalingDisabled;
     private final DisplayInfo mDisplayInfo = new DisplayInfo();
     private final Display mDisplay;
@@ -836,6 +857,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         // {@link DisplayContent} ready for use.
         mDisplayReady = true;
 
+        mService.mAnimator.addDisplayLocked(mDisplayId);
         mInputMonitor = new InputMonitor(service, mDisplayId);
 
         if (mService.mInputManager != null) {
@@ -1790,7 +1812,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         // The display size information is heavily dependent on the resources in the current
         // configuration, so we need to reconfigure it every time the configuration changes.
-        // See {@link PhoneWindowManager#setInitialDisplaySize}...sigh...
+        // See {@link #configureDisplayPolicy}...sigh...
         mService.reconfigureDisplayLocked(this);
 
         final DockedStackDividerController dividerController = getDockedDividerController();
@@ -2027,6 +2049,68 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         updateBounds();
     }
 
+    /**
+     * Forces this display to use the specified density.
+     *
+     * @param density The density in DPI to use. If the value equals to initial density, the setting
+     *                will be cleared.
+     * @param userId The target user to apply. Only meaningful when this is default display. If the
+     *               user id is {@link UserHandle#USER_CURRENT}, it means to apply current settings
+     *               so only need to configure display.
+     */
+    void setForcedDensity(int density, int userId) {
+        final boolean clear = density == mInitialDisplayDensity;
+        final boolean updateCurrent = userId == UserHandle.USER_CURRENT;
+        if (mService.mCurrentUserId == userId || updateCurrent) {
+            mBaseDisplayDensity = density;
+            mService.reconfigureDisplayLocked(this);
+        }
+        if (updateCurrent) {
+            // We are applying existing settings so no need to save it again.
+            return;
+        }
+
+        if (density == mInitialDisplayDensity) {
+            density = 0;
+        }
+        mService.mDisplaySettings.setForcedDensity(this, density, userId);
+    }
+
+    /** @param mode {@link #FORCE_SCALING_MODE_AUTO} or {@link #FORCE_SCALING_MODE_DISABLED}. */
+    void setForcedScalingMode(@ForceScalingMode int mode) {
+        if (mode != FORCE_SCALING_MODE_DISABLED) {
+            mode = FORCE_SCALING_MODE_AUTO;
+        }
+
+        mDisplayScalingDisabled = (mode != FORCE_SCALING_MODE_AUTO);
+        Slog.i(TAG_WM, "Using display scaling mode: " + (mDisplayScalingDisabled ? "off" : "auto"));
+        mService.reconfigureDisplayLocked(this);
+
+        mService.mDisplaySettings.setForcedScalingMode(this, mode);
+    }
+
+    /** If the given width and height equal to initial size, the setting will be cleared. */
+    void setForcedSize(int width, int height) {
+        final boolean clear = mInitialDisplayWidth == width && mInitialDisplayHeight == height;
+        if (!clear) {
+            // Set some sort of reasonable bounds on the size of the display that we will try
+            // to emulate.
+            final int minSize = 200;
+            final int maxScale = 2;
+            width = Math.min(Math.max(width, minSize), mInitialDisplayWidth * maxScale);
+            height = Math.min(Math.max(height, minSize), mInitialDisplayHeight * maxScale);
+        }
+
+        Slog.i(TAG_WM, "Using new display size: " + width + "x" + height);
+        updateBaseDisplayMetrics(width, height, mBaseDisplayDensity);
+        mService.reconfigureDisplayLocked(this);
+
+        if (clear) {
+            width = height = 0;
+        }
+        mService.mDisplaySettings.setForcedSize(this, width, height);
+    }
+
     void getStableRect(Rect out) {
         out.set(mDisplayFrames.mStable);
     }
@@ -2225,7 +2309,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         }
 
         mInputMonitor.onRemoved();
-        mService.onDisplayRemoved(mDisplayId);
+        mService.mWindowPlacerLocked.requestTraversal();
     }
 
     /** Returns true if a removal action is still being deferred. */

@@ -930,7 +930,6 @@ public class WindowManagerService extends IWindowManager.Stub
         mInputManager = inputManager; // Must be before createDisplayContentLocked.
         mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
         mDisplaySettings = new DisplaySettings(this);
-        mDisplaySettings.readSettingsLocked();
 
         mPolicy = policy;
         mAnimator = new WindowAnimator(this);
@@ -3241,7 +3240,7 @@ public class WindowManagerService extends IWindowManager.Stub
                 final int forcedDensity = getForcedDisplayDensityForUserLocked(newUserId);
                 final int targetDensity = forcedDensity != 0 ? forcedDensity
                         : displayContent.mInitialDisplayDensity;
-                setForcedDisplayDensityLocked(displayContent, targetDensity);
+                displayContent.setForcedDensity(targetDensity, UserHandle.USER_CURRENT);
             }
         }
     }
@@ -4415,31 +4414,15 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     public void displayReady() {
-        final int displayCount = mRoot.mChildren.size();
-        for (int i = 0; i < displayCount; ++i) {
-            final DisplayContent display = mRoot.mChildren.get(i);
-            displayReady(display.getDisplayId());
-        }
-
-
-        synchronized(mWindowMap) {
-            final DisplayContent displayContent = getDefaultDisplayContentLocked();
+        synchronized (mWindowMap) {
             if (mMaxUiWidth > 0) {
-                displayContent.setMaxUiWidth(mMaxUiWidth);
+                mRoot.forAllDisplays(displayContent -> displayContent.setMaxUiWidth(mMaxUiWidth));
             }
-            readForcedDisplayPropertiesLocked(displayContent);
+            applyForcedPropertiesForDefaultDisplay();
+            mAnimator.ready();
             mDisplayReady = true;
-        }
-
-        try {
-            mActivityTaskManager.updateConfiguration(null);
-        } catch (RemoteException e) {
-        }
-
-        synchronized(mWindowMap) {
             mIsTouchDevice = mContext.getPackageManager().hasSystemFeature(
                     PackageManager.FEATURE_TOUCHSCREEN);
-            getDefaultDisplayContentLocked().configureDisplayPolicy();
         }
 
         try {
@@ -4448,17 +4431,6 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         updateCircularDisplayMaskIfNeeded();
-    }
-
-    private void displayReady(int displayId) {
-        synchronized(mWindowMap) {
-            final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
-            if (displayContent != null) {
-                mAnimator.addDisplayLocked(displayId);
-                displayContent.initializeDisplayBaseInfo();
-                reconfigureDisplayLocked(displayContent);
-            }
-        }
     }
 
     public void systemReady() {
@@ -5017,20 +4989,9 @@ public class WindowManagerService extends IWindowManager.Stub
         final long ident = Binder.clearCallingIdentity();
         try {
             synchronized(mWindowMap) {
-                // Set some sort of reasonable bounds on the size of the display that we
-                // will try to emulate.
-                final int MIN_WIDTH = 200;
-                final int MIN_HEIGHT = 200;
-                final int MAX_SCALE = 2;
                 final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
                 if (displayContent != null) {
-                    width = Math.min(Math.max(width, MIN_WIDTH),
-                            displayContent.mInitialDisplayWidth * MAX_SCALE);
-                    height = Math.min(Math.max(height, MIN_HEIGHT),
-                            displayContent.mInitialDisplayHeight * MAX_SCALE);
-                    setForcedDisplaySizeLocked(displayContent, width, height);
-                    Settings.Global.putString(mContext.getContentResolver(),
-                            Settings.Global.DISPLAY_SIZE_FORCED, width + "," + height);
+                    displayContent.setForcedSize(width, height);
                 }
             }
         } finally {
@@ -5052,12 +5013,7 @@ public class WindowManagerService extends IWindowManager.Stub
             synchronized(mWindowMap) {
                 final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
                 if (displayContent != null) {
-                    if (mode < 0 || mode > 1) {
-                        mode = 0;
-                    }
-                    setForcedDisplayScalingModeLocked(displayContent, mode);
-                    Settings.Global.putInt(mContext.getContentResolver(),
-                            Settings.Global.DISPLAY_SCALING_FORCE, mode);
+                    displayContent.setForcedScalingMode(mode);
                 }
             }
         } finally {
@@ -5065,13 +5021,10 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
-    private void setForcedDisplayScalingModeLocked(DisplayContent displayContent, int mode) {
-        Slog.i(TAG_WM, "Using display scaling mode: " + (mode == 0 ? "auto" : "off"));
-        displayContent.mDisplayScalingDisabled = (mode != 0);
-        reconfigureDisplayLocked(displayContent);
-    }
-
-    private void readForcedDisplayPropertiesLocked(final DisplayContent displayContent) {
+    /** The global settings only apply to default display. */
+    private void applyForcedPropertiesForDefaultDisplay() {
+        final DisplayContent displayContent = getDefaultDisplayContentLocked();
+        boolean changed = false;
         // Display size.
         String sizeStr = Settings.Global.getString(mContext.getContentResolver(),
                 Settings.Global.DISPLAY_SIZE_FORCED);
@@ -5090,6 +5043,7 @@ public class WindowManagerService extends IWindowManager.Stub
                         Slog.i(TAG_WM, "FORCED DISPLAY SIZE: " + width + "x" + height);
                         displayContent.updateBaseDisplayMetrics(width, height,
                                 displayContent.mBaseDisplayDensity);
+                        changed = true;
                     }
                 } catch (NumberFormatException ex) {
                 }
@@ -5100,6 +5054,7 @@ public class WindowManagerService extends IWindowManager.Stub
         final int density = getForcedDisplayDensityForUserLocked(mCurrentUserId);
         if (density != 0) {
             displayContent.mBaseDisplayDensity = density;
+            changed = true;
         }
 
         // Display scaling mode.
@@ -5108,14 +5063,12 @@ public class WindowManagerService extends IWindowManager.Stub
         if (mode != 0) {
             Slog.i(TAG_WM, "FORCED DISPLAY SCALING DISABLED");
             displayContent.mDisplayScalingDisabled = true;
+            changed = true;
         }
-    }
 
-    // displayContent must not be null
-    private void setForcedDisplaySizeLocked(DisplayContent displayContent, int width, int height) {
-        Slog.i(TAG_WM, "Using new display size: " + width + "x" + height);
-        displayContent.updateBaseDisplayMetrics(width, height, displayContent.mBaseDisplayDensity);
-        reconfigureDisplayLocked(displayContent);
+        if (changed) {
+            reconfigureDisplayLocked(displayContent);
+        }
     }
 
     @Override
@@ -5132,10 +5085,8 @@ public class WindowManagerService extends IWindowManager.Stub
             synchronized(mWindowMap) {
                 final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
                 if (displayContent != null) {
-                    setForcedDisplaySizeLocked(displayContent, displayContent.mInitialDisplayWidth,
+                    displayContent.setForcedSize(displayContent.mInitialDisplayWidth,
                             displayContent.mInitialDisplayHeight);
-                    Settings.Global.putString(mContext.getContentResolver(),
-                            Settings.Global.DISPLAY_SIZE_FORCED, "");
                 }
             }
         } finally {
@@ -5181,12 +5132,9 @@ public class WindowManagerService extends IWindowManager.Stub
         try {
             synchronized(mWindowMap) {
                 final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
-                if (displayContent != null && mCurrentUserId == targetUserId) {
-                    setForcedDisplayDensityLocked(displayContent, density);
+                if (displayContent != null) {
+                    displayContent.setForcedDensity(density, targetUserId);
                 }
-                Settings.Secure.putStringForUser(mContext.getContentResolver(),
-                        Settings.Secure.DISPLAY_DENSITY_FORCED,
-                        Integer.toString(density), targetUserId);
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -5209,12 +5157,10 @@ public class WindowManagerService extends IWindowManager.Stub
         try {
             synchronized(mWindowMap) {
                 final DisplayContent displayContent = mRoot.getDisplayContent(displayId);
-                if (displayContent != null && mCurrentUserId == callingUserId) {
-                    setForcedDisplayDensityLocked(displayContent,
-                            displayContent.mInitialDisplayDensity);
+                if (displayContent != null) {
+                    displayContent.setForcedDensity(displayContent.mInitialDisplayDensity,
+                            callingUserId);
                 }
-                Settings.Secure.putStringForUser(mContext.getContentResolver(),
-                        Settings.Secure.DISPLAY_DENSITY_FORCED, "", callingUserId);
             }
         } finally {
             Binder.restoreCallingIdentity(ident);
@@ -5239,18 +5185,6 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }
         return 0;
-    }
-
-    /**
-     * Forces the given display to the use the specified density.
-     *
-     * @param displayContent the display to modify
-     * @param density the density in DPI to use
-     */
-    private void setForcedDisplayDensityLocked(@NonNull DisplayContent displayContent,
-            int density) {
-        displayContent.mBaseDisplayDensity = density;
-        reconfigureDisplayLocked(displayContent);
     }
 
     void reconfigureDisplayLocked(@NonNull DisplayContent displayContent) {
@@ -5306,9 +5240,7 @@ public class WindowManagerService extends IWindowManager.Stub
         displayInfo.overscanRight = right;
         displayInfo.overscanBottom = bottom;
 
-        mDisplaySettings.setOverscanLocked(displayInfo.uniqueId, displayInfo.name, left, top,
-                right, bottom);
-        mDisplaySettings.writeSettingsLocked();
+        mDisplaySettings.setOverscanLocked(displayInfo, left, top, right, bottom);
 
         reconfigureDisplayLocked(displayContent);
     }
@@ -6505,23 +6437,6 @@ public class WindowManagerService extends IWindowManager.Stub
     // support non-default display.
     DisplayContent getDefaultDisplayContentLocked() {
         return mRoot.getDisplayContent(DEFAULT_DISPLAY);
-    }
-
-    public void onDisplayAdded(int displayId) {
-        synchronized (mWindowMap) {
-            final Display display = mDisplayManager.getDisplay(displayId);
-            if (display != null) {
-                displayReady(displayId);
-            }
-            mWindowPlacerLocked.requestTraversal();
-        }
-    }
-
-    public void onDisplayRemoved(int displayId) {
-        synchronized (mWindowMap) {
-            mAnimator.removeDisplayLocked(displayId);
-            mWindowPlacerLocked.requestTraversal();
-        }
     }
 
     public void onOverlayChanged() {
