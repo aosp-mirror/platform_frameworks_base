@@ -216,6 +216,11 @@ public final class Zygote {
      */
     native protected static void nativeUnmountStorageOnInit();
 
+    private static void callPostForkSystemServerHooks() {
+        // SystemServer specific post fork hooks run before child post fork hooks.
+        VM_HOOKS.postForkSystemServer();
+    }
+
     private static void callPostForkChildHooks(int runtimeFlags, boolean isSystemServer,
             boolean isZygote, String instructionSet) {
         VM_HOOKS.postForkChild(runtimeFlags, isSystemServer, isZygote, instructionSet);
