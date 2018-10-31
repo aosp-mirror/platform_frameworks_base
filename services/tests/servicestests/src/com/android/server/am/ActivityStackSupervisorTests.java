@@ -359,15 +359,12 @@ public class ActivityStackSupervisorTests extends ActivityTestsBase {
     public void testFindTaskToMoveToFrontWhenRecentsOnTop() throws Exception {
         // Create stack/task on default display.
         final ActivityDisplay display = mSupervisor.getDefaultDisplay();
-        final ActivityStack targetStack = display.createStack(WINDOWING_MODE_FULLSCREEN,
-                ACTIVITY_TYPE_STANDARD, false /* onTop */);
-        final TaskRecord targetTask = new TaskBuilder(mSupervisor).setStack(targetStack).build();
+        final TestActivityStack targetStack = new StackBuilder(mSupervisor).setOnTop(false).build();
+        final TaskRecord targetTask = targetStack.getChildAt(0);
 
         // Create Recents on top of the display.
-        final ActivityStack stack = display.createStack(WINDOWING_MODE_FULLSCREEN,
-                ACTIVITY_TYPE_RECENTS, true /* onTop */);
-        final TaskRecord task = new TaskBuilder(mSupervisor).setStack(stack).build();
-        new ActivityBuilder(mService).setTask(task).build();
+        final ActivityStack stack =
+                new StackBuilder(mSupervisor).setActivityType(ACTIVITY_TYPE_RECENTS).build();
 
         final String reason = "findTaskToMoveToFront";
         mSupervisor.findTaskToMoveToFront(targetTask, 0, ActivityOptions.makeBasic(), reason,

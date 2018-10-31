@@ -26,8 +26,8 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMAR
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.app.WindowConfiguration.WINDOWING_MODE_UNDEFINED;
 
+import static com.android.server.am.ActivityStack.ActivityState.STOPPING;
 import static com.android.server.am.ActivityStack.ActivityState.DESTROYING;
-import static com.android.server.am.ActivityStack.ActivityState.FINISHING;
 import static com.android.server.am.ActivityStack.ActivityState.PAUSED;
 import static com.android.server.am.ActivityStack.ActivityState.PAUSING;
 import static com.android.server.am.ActivityStack.ActivityState.RESUMED;
@@ -361,14 +361,12 @@ public class ActivityStackTests extends ActivityTestsBase {
                 translucentStack.topRunningActivityLocked();
         topRunningTranslucentActivity.finishing = true;
 
-        // Home shouldn't be visible since its activity is marked as finishing and it isn't the top
-        // of the stack list.
-        assertFalse(homeStack.shouldBeVisible(null /* starting */));
+        // Home stack should be visible even there are no running activities.
+        assertTrue(homeStack.shouldBeVisible(null /* starting */));
         // Home should be visible if we are starting an activity within it.
         assertTrue(homeStack.shouldBeVisible(topRunningHomeActivity /* starting */));
-        // The translucent stack should be visible since it is the top of the stack list even though
-        // it has its activity marked as finishing.
-        assertTrue(translucentStack.shouldBeVisible(null /* starting */));
+        // The translucent stack shouldn't be visible since its activity marked as finishing.
+        assertFalse(translucentStack.shouldBeVisible(null /* starting */));
     }
 
     @Test
@@ -672,9 +670,10 @@ public class ActivityStackTests extends ActivityTestsBase {
 
         // There is still an activity1 in stack1 so the activity2 should be added to finishing list
         // that will be destroyed until idle.
+        stack2.getTopActivity().visible = true;
         final ActivityRecord activity2 = finishCurrentActivity(stack2);
-        assertEquals(FINISHING, activity2.getState());
-        assertTrue(mSupervisor.mFinishingActivities.contains(activity2));
+        assertEquals(STOPPING, activity2.getState());
+        assertTrue(mSupervisor.mStoppingActivities.contains(activity2));
 
         // The display becomes empty. Since there is no next activity to be idle, the activity
         // should be destroyed immediately with updating configuration to restore original state.

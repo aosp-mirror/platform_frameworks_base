@@ -373,7 +373,8 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
         return getOrCreateStack(windowingMode, activityType, onTop);
     }
 
-    private int getNextStackId() {
+    @VisibleForTesting
+    int getNextStackId() {
         return sNextFreeStackId++;
     }
 

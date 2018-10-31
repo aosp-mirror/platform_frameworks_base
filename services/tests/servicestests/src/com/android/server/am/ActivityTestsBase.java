@@ -39,14 +39,6 @@ import static org.mockito.Mockito.spy;
 
 import android.app.ActivityManagerInternal;
 import android.app.ActivityOptions;
-import android.content.pm.PackageManagerInternal;
-import com.android.server.uri.UriGrantsManagerInternal;
-import com.android.server.wm.ActivityTaskManagerInternal;
-import com.android.server.wm.DisplayWindowController;
-
-import org.junit.Rule;
-import org.mockito.invocation.InvocationOnMock;
-
 import android.app.IApplicationThread;
 import android.content.ComponentName;
 import android.content.Context;
@@ -54,6 +46,7 @@ import android.content.Intent;
 import android.content.pm.ActivityInfo;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
+import android.content.pm.PackageManagerInternal;
 import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
@@ -73,7 +66,10 @@ import com.android.internal.app.IVoiceInteractor;
 import com.android.server.AppOpsService;
 import com.android.server.AttributeCache;
 import com.android.server.ServiceThread;
+import com.android.server.uri.UriGrantsManagerInternal;
+import com.android.server.wm.ActivityTaskManagerInternal;
 import com.android.server.wm.AppWindowContainerController;
+import com.android.server.wm.DisplayWindowController;
 import com.android.server.wm.PinnedStackWindowController;
 import com.android.server.wm.RootWindowContainerController;
 import com.android.server.wm.StackWindowController;
@@ -83,7 +79,9 @@ import com.android.server.wm.WindowTestUtils;
 
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Rule;
 import org.mockito.MockitoAnnotations;
+import org.mockito.invocation.InvocationOnMock;
 
 import java.io.File;
 import java.util.List;
@@ -608,23 +606,9 @@ public class ActivityTestsBase {
         @Override
         <T extends ActivityStack> T createStackUnchecked(int windowingMode, int activityType,
                 int stackId, boolean onTop) {
-            if (windowingMode == WINDOWING_MODE_PINNED) {
-                return (T) new PinnedActivityStack(this, stackId, mSupervisor, onTop) {
-                    @Override
-                    Rect getDefaultPictureInPictureBounds(float aspectRatio) {
-                        return new Rect(50, 50, 100, 100);
-                    }
-
-                    @Override
-                    PinnedStackWindowController createStackWindowController(int displayId,
-                            boolean onTop, Rect outBounds) {
-                        return mock(PinnedStackWindowController.class);
-                    }
-                };
-            } else {
-                return (T) new TestActivityStack(
-                        this, stackId, mSupervisor, windowingMode, activityType, onTop);
-            }
+            return new StackBuilder(mSupervisor).setDisplay(this)
+                    .setWindowingMode(windowingMode).setActivityType(activityType)
+                    .setStackId(stackId).setOnTop(onTop).setCreateActivity(false).build();
         }
 
         @Override
@@ -677,8 +661,19 @@ public class ActivityTestsBase {
         private int mSupportsSplitScreen = SUPPORTS_SPLIT_SCREEN_UNSET;
 
         TestActivityStack(ActivityDisplay display, int stackId, ActivityStackSupervisor supervisor,
-                int windowingMode, int activityType, boolean onTop) {
+                int windowingMode, int activityType, boolean onTop, boolean createActivity) {
             super(display, stackId, supervisor, windowingMode, activityType, onTop);
+            if (createActivity) {
+                new ActivityBuilder(mService).setCreateTask(true).setStack(this).build();
+                if (onTop) {
+                    // We move the task to front again in order to regain focus after activity
+                    // added to the stack. Or {@link ActivityDisplay#mPreferredTopFocusableStack}
+                    // could be other stacks (e.g. home stack).
+                    moveToFront("createActivityStack");
+                } else {
+                    moveToBack("createActivityStack", null);
+                }
+            }
         }
 
         @Override
@@ -749,5 +744,72 @@ public class ActivityTestsBase {
                                  boolean newTask, boolean keepCurTransition,
                                  ActivityOptions options) {
         }
+    }
+
+    protected static class StackBuilder {
+        private final ActivityStackSupervisor mSupervisor;
+        private ActivityDisplay mDisplay;
+        private int mStackId = -1;
+        private int mWindowingMode = WINDOWING_MODE_FULLSCREEN;
+        private int mActivityType = ACTIVITY_TYPE_STANDARD;
+        private boolean mOnTop = true;
+        private boolean mCreateActivity = true;
+
+        StackBuilder(ActivityStackSupervisor supervisor) {
+            mSupervisor = supervisor;
+            mDisplay = mSupervisor.getDefaultDisplay();
+        }
+
+        StackBuilder setWindowingMode(int windowingMode) {
+            mWindowingMode = windowingMode;
+            return this;
+        }
+
+        StackBuilder setActivityType(int activityType) {
+            mActivityType = activityType;
+            return this;
+        }
+
+        StackBuilder setStackId(int stackId) {
+            mStackId = stackId;
+            return this;
+        }
+
+        StackBuilder setDisplay(ActivityDisplay display) {
+            mDisplay = display;
+            return this;
+        }
+
+        StackBuilder setOnTop(boolean onTop) {
+            mOnTop = onTop;
+            return this;
+        }
+
+        StackBuilder setCreateActivity(boolean createActivity) {
+            mCreateActivity = createActivity;
+            return this;
+        }
+
+        <T extends ActivityStack> T build() {
+            final int stackId = mStackId >= 0 ? mStackId : mDisplay.getNextStackId();
+            if (mWindowingMode == WINDOWING_MODE_PINNED) {
+                return (T) new PinnedActivityStack(mDisplay, stackId, mSupervisor, mOnTop) {
+                    @Override
+                    Rect getDefaultPictureInPictureBounds(float aspectRatio) {
+                        return new Rect(50, 50, 100, 100);
+                    }
+
+                    @Override
+                    PinnedStackWindowController createStackWindowController(int displayId,
+                            boolean onTop, Rect outBounds) {
+                        return mock(PinnedStackWindowController.class);
+                    }
+                };
+            } else {
+                return (T) new TestActivityStack(mDisplay, stackId, mSupervisor, mWindowingMode,
+                        mActivityType, mOnTop, mCreateActivity);
+            }
+        }
+
     }
 }
