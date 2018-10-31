@@ -88,4 +88,7 @@
     <string name="anonymous_source_continue" msgid="4375745439457209366">"Nastavi"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"Podešavanja"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Instaliranje/deinstaliranje Wear aplikac."</string>
+    <string name="app_installed_notification_channel_description" msgid="2695385797601574123">"Obaveštenje o instaliranju aplikacije"</string>
+    <string name="notification_installation_success_message" msgid="6450467996056038442">"Instalirana je"</string>
+    <string name="notification_installation_success_status" msgid="3172502643504323321">"Aplikacija „<xliff:g id="APPNAME">%1$s</xliff:g>“ je instalirana"</string>
 </resources>

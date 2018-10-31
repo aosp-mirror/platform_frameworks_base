@@ -54,10 +54,10 @@
     <string name="uninstall_update_title" msgid="824411791011583031">"Desinstalatu eguneratzea"</string>
     <string name="uninstall_activity_text" msgid="1928194674397770771">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> aplikazio honen zati da:"</string>
     <string name="uninstall_application_text" msgid="3816830743706143980">"Aplikazioa desinstalatu nahi duzu?"</string>
-    <string name="uninstall_application_text_all_users" msgid="575491774380227119">"Erabiltzaile "<b>"guztiei"</b>" desinstalatu nahi diezu aplikazioa? Aplikazioa eta bere datu guztiak ezabatuko zaizkie gailuko erabiltzaile "<b>"guztiei"</b>"."</string>
+    <string name="uninstall_application_text_all_users" msgid="575491774380227119">"Erabiltzaile "<b>"guztiei"</b>" desinstalatu nahi diezu aplikazioa? Aplikazioa eta haren datu guztiak ezabatuko zaizkie gailuko erabiltzaile "<b>"guztiei"</b>"."</string>
     <string name="uninstall_application_text_user" msgid="498072714173920526">"<xliff:g id="USERNAME">%1$s</xliff:g> erabiltzaileari desinstalatu nahi diozu aplikazioa?"</string>
     <string name="uninstall_update_text" msgid="863648314632448705">"Aplikazio hau jatorrizko bertsioarekin ordeztu nahi duzu? Datu guztiak ezabatuko dira."</string>
-    <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Aplikazio hau jatorrizko bertsioarekin ordeztu nahi duzu? Datu guztiak ezabatuko dira. Gailuaren erabiltzaile guztiengan izango du eragina, laneko profilak dituztenengan barne."</string>
+    <string name="uninstall_update_text_multiuser" msgid="8992883151333057227">"Aplikazio hau jatorrizko bertsioarekin ordeztu nahi duzu? Datu guztiak ezabatuko dira. Gailuaren erabiltzaile guztiengan izango du eragina, laneko profilak dituztenak barne."</string>
     <string name="uninstalling_notification_channel" msgid="840153394325714653">"Abian diren desinstalatze-eragiketak"</string>
     <string name="uninstall_failure_notification_channel" msgid="1136405866767576588">"Desinstalatu ezin izan direnak"</string>
     <string name="uninstalling" msgid="8709566347688966845">"Desinstalatzen…"</string>
@@ -88,4 +88,7 @@
     <string name="anonymous_source_continue" msgid="4375745439457209366">"Egin aurrera"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"Ezarpenak"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Wear aplikazioak instalatzea/desinstalatzea"</string>
+    <string name="app_installed_notification_channel_description" msgid="2695385797601574123">"Aplikazioa instalatu izanaren jakinarazpena"</string>
+    <string name="notification_installation_success_message" msgid="6450467996056038442">"Instalatu da"</string>
+    <string name="notification_installation_success_status" msgid="3172502643504323321">"Instalatu da \"<xliff:g id="APPNAME">%1$s</xliff:g>\""</string>
 </resources>

@@ -88,4 +88,7 @@
     <string name="anonymous_source_continue" msgid="4375745439457209366">"सुरू ठेवा"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"सेटिंग्ज"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"wear अ‍ॅप्स इंस्टॉल/अनइंस्टॉल करत आहे"</string>
+    <string name="app_installed_notification_channel_description" msgid="2695385797601574123">"अॅप इंस्टॉल सूचना"</string>
+    <string name="notification_installation_success_message" msgid="6450467996056038442">"यशस्वीरित्या इंस्टॉल केले"</string>
+    <string name="notification_installation_success_status" msgid="3172502643504323321">"\"<xliff:g id="APPNAME">%1$s</xliff:g>\" यशस्वीरित्या इंस्टॉल झाले"</string>
 </resources>

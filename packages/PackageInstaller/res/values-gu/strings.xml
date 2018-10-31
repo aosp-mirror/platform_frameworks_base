@@ -88,4 +88,7 @@
     <string name="anonymous_source_continue" msgid="4375745439457209366">"આગળ વધો"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"સેટિંગ"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"એમ્બેડ ઍપ્લિકેશનો ઇન્સ્ટૉલ/અનઇન્સ્ટૉલ"</string>
+    <string name="app_installed_notification_channel_description" msgid="2695385797601574123">"ઍપ ઇન્સ્ટૉલ થવાનું નોટિફિકેશન"</string>
+    <string name="notification_installation_success_message" msgid="6450467996056038442">"સફળતાપૂર્વક ઇન્સ્ટૉલ કરેલ"</string>
+    <string name="notification_installation_success_status" msgid="3172502643504323321">"“<xliff:g id="APPNAME">%1$s</xliff:g>” સફળતાપૂર્વક ઇન્સ્ટૉલ કરેલ"</string>
 </resources>

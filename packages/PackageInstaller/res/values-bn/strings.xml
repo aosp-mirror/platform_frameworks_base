@@ -24,11 +24,11 @@
     <string name="installing_app" msgid="1165095864863849422">"<xliff:g id="PACKAGE_LABEL">%1$s</xliff:g> ইনস্টল করা হচ্ছে…"</string>
     <string name="install_done" msgid="5987363587661783896">"অ্যাপটি ইনস্টল করা হয়ে গেছে।"</string>
     <string name="install_confirm_question" msgid="8176284075816604590">"আপনি কি এই অ্যাপ্লিকেশনটি ইনস্টল করতে চান?"</string>
-    <string name="install_confirm_question_update" msgid="7942235418781274635">"আগে থেকেই আছে এই অ্যাপ্লিকেশনটির একটি আপডেট কি আপনি ইনস্টল করতে চান? আপনার আগে থেকেই আছে এমন ডেটা মুছে যাবে না।"</string>
-    <string name="install_confirm_question_update_system" msgid="4713001702777910263">"এই বিল্ট-ইন অ্যাপ্লিকেশনটির একটি আপডেট কি আপনি ইনস্টল করতে চান? আপনার আগে থেকেই আছে এমন ডেটা মুছে যাবে না।"</string>
+    <string name="install_confirm_question_update" msgid="7942235418781274635">"আগে থেকেই থাকা এই অ্যাপ্লিকেশনটির একটি আপডেট কি আপনি ইনস্টল করতে চান? আপনার আগে থেকে থাকা ডেটা মুছে যাবে না।"</string>
+    <string name="install_confirm_question_update_system" msgid="4713001702777910263">"এই বিল্ট-ইন অ্যাপ্লিকেশনটির একটি আপডেট কি আপনি ইনস্টল করতে চান? আপনার আগে থেকে থাকা ডেটা মুছে যাবে না।"</string>
     <string name="install_failed" msgid="5777824004474125469">"অ্যাপটি ইনস্টল করা হয়নি।"</string>
     <string name="install_failed_blocked" msgid="8512284352994752094">"ইনস্টল হওয়া থেকে প্যাকেজটিকে ব্লক করা হয়েছে।"</string>
-    <string name="install_failed_conflict" msgid="3493184212162521426">"আগে থেকেই আছে এমন একটি প্যাকেজের সাথে প্যাকেজটির সমস্যা সৃষ্টি হওয়ায় অ্যাপটি ইনস্টল করা যায়নি।"</string>
+    <string name="install_failed_conflict" msgid="3493184212162521426">"আগে থেকেই থাকা একটি প্যাকেজের সাথে প্যাকেজটির সমস্যা সৃষ্টি হওয়ায় অ্যাপটি ইনস্টল করা যায়নি।"</string>
     <string name="install_failed_incompatible" product="tablet" msgid="6019021440094927928">"আপনার ট্যাবলেটের সাথে মানানসই না হওয়ায় অ্যাপটি ইনস্টল করা যায়নি।"</string>
     <string name="install_failed_incompatible" product="tv" msgid="2890001324362291683">"এই অ্যাপটি আপনার টিভির সাথে মানানসই নয়।"</string>
     <string name="install_failed_incompatible" product="default" msgid="7254630419511645826">"আপনার ফোনের সাথে মানানসই না হওয়ায় অ্যাপটি ইনস্টল করা যায়নি।"</string>
@@ -70,7 +70,7 @@
     <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"<xliff:g id="USERNAME">%1$s</xliff:g>-এর চালু থাকা ডিভাইস অ্যাডমিন অ্যাপটি আনইনস্টল করা যাচ্ছে না"</string>
     <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"কিছু ব্যবহারকারী বা প্রোফাইলের জন্য এই অ্যাপটি প্রয়োজন কিন্তু অন্যদের জন্য এটি আনইনস্টল করা হয়ে গেছে"</string>
     <string name="uninstall_blocked_profile_owner" msgid="6373897407002404848">"এই অ্যাপটি আপনার প্রোফাইলের জন্য প্রয়োজন বলে এটি আনইনস্টল করা যাবে না।"</string>
-    <string name="uninstall_blocked_device_owner" msgid="6724602931761073901">"এই অ্যাপটি আপনার ডিভাইস অ্যাডমিনিস্ট্রেটরের জন্য প্রয়োজন বলে এটি আনইনস্টল করা যাবে না।"</string>
+    <string name="uninstall_blocked_device_owner" msgid="6724602931761073901">"অ্যাপটি আপনার ডিভাইস অ্যাডমিনিস্ট্রেটরের প্রয়োজন বলে এটি আনইনস্টল করা যাবে না।"</string>
     <string name="manage_device_administrators" msgid="3092696419363842816">"ডিভাইস অ্যাডমিন অ্যাপ পরিচালনা করুন"</string>
     <string name="manage_users" msgid="1243995386982560813">"ব্যবহারকারীদের পরিচালনা করুন"</string>
     <string name="uninstall_failed_msg" msgid="2176744834786696012">"<xliff:g id="APP_NAME">%1$s</xliff:g> আনইনস্টল করা যায়নি।"</string>
@@ -88,4 +88,7 @@
     <string name="anonymous_source_continue" msgid="4375745439457209366">"চালিয়ে যান"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"সেটিংস"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Wear অ্যাপ ইনস্টল/আনইনস্টল করা হচ্ছে"</string>
+    <string name="app_installed_notification_channel_description" msgid="2695385797601574123">"\'অ্যাপ ইনস্টল করা হয়েছে\' বিজ্ঞপ্তি"</string>
+    <string name="notification_installation_success_message" msgid="6450467996056038442">"ইনস্টল করা হয়েছে"</string>
+    <string name="notification_installation_success_status" msgid="3172502643504323321">"\"<xliff:g id="APPNAME">%1$s</xliff:g>\" ইনস্টল করা হয়েছে"</string>
 </resources>
