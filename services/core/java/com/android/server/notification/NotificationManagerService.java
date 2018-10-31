@@ -5457,8 +5457,17 @@ public class NotificationManagerService extends SystemService {
                     try {
                         Thread.sleep(waitMs);
                     } catch (InterruptedException e) { }
-                    mVibrator.vibrate(record.sbn.getUid(), record.sbn.getPackageName(),
-                            effect, "Notification (delayed)", record.getAudioAttributes());
+
+                    // Notifications might be canceled before it actually vibrates due to waitMs,
+                    // so need to check the notification still valide for vibrate.
+                    synchronized (mNotificationLock) {
+                        if (mNotificationsByKey.get(record.getKey()) != null) {
+                            mVibrator.vibrate(record.sbn.getUid(), record.sbn.getOpPkg(),
+                                    effect, "Notification (delayed)", record.getAudioAttributes());
+                        } else {
+                            Slog.e(TAG, "No vibration for canceled notification : " + record.getKey());
+                        }
+                    }
                 }).start();
             } else {
                 mVibrator.vibrate(record.sbn.getUid(), record.sbn.getPackageName(),
