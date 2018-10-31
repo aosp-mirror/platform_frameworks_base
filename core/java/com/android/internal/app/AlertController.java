@@ -191,7 +191,8 @@ public class AlertController {
 
     public static final AlertController create(Context context, DialogInterface di, Window window) {
         final TypedArray a = context.obtainStyledAttributes(
-                null, R.styleable.AlertDialog, R.attr.alertDialogStyle, 0);
+                null, R.styleable.AlertDialog, R.attr.alertDialogStyle,
+                R.style.Theme_DeviceDefault_Settings);
         int controllerType = a.getInt(R.styleable.AlertDialog_controllerType, 0);
         a.recycle();
 
