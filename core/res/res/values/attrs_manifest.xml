@@ -2148,6 +2148,21 @@
         <attr name="visibleToInstantApps" />
         <!-- The code for this component is located in the given split. -->
         <attr name="splitName" />
+        <!-- If true, and this is an {@link android.R.attr#isolatedProcess} service, the service
+             will be spawned from an Application Zygote, instead of the regular Zygote.
+             <p>
+             The Application Zygote will pre-initialize the application's class loader,
+             and call a static callback into the application to allow it to perform
+             application-specific preloads (such as loading a shared library). Therefore,
+             spawning from the Application Zygote will typically reduce the service
+             launch time and reduce its memory usage. The downside of using this flag
+             is that you will have an additional process (the app zygote itself) that
+             is taking up memory. Whether actual memory usage is improved therefore strongly
+             depends on the number of isolated services that an application starts,
+             and how much memory those services save by preloading. Therefore, it is
+             recommended to measure memory usage under typical workloads to determine
+             whether it makes sense to use this flag. -->
+        <attr name="useAppZygote" format="boolean" />
     </declare-styleable>
 
     <!-- The <code>receiver</code> tag declares an
