@@ -16,6 +16,8 @@
 
 package android.os.storage;
 
+import android.os.IVold;
+
 /**
  * Mount service local interface.
  *
@@ -79,4 +81,24 @@ public abstract class StorageManagerInternal {
      * @return The mount mode.
      */
     public abstract int getExternalStorageMountMode(int uid, String packageName);
+
+    /**
+     * A listener for reset events in the StorageManagerService.
+     */
+    public interface ResetListener {
+        /**
+         * A method that should be triggered internally by StorageManagerInternal
+         * when StorageManagerService reset happens.
+         *
+         * @param vold The binder object to vold.
+         */
+        void onReset(IVold vold);
+    }
+
+    /**
+     * Add a listener to listen to reset event in StorageManagerService.
+     *
+     * @param listener The listener that will be notified on reset events.
+     */
+    public abstract void addResetListener(ResetListener listener);
 }
