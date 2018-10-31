@@ -16,9 +16,12 @@
 
 package com.android.hotspot2.osu;
 
+import static android.net.NetworkCapabilities.NET_CAPABILITY_TRUSTED;
+
 import android.annotation.Nullable;
 import android.app.Activity;
 import android.content.Context;
+import android.graphics.Bitmap;
 import android.net.ConnectivityManager;
 import android.net.Network;
 import android.net.NetworkCapabilities;
@@ -27,16 +30,21 @@ import android.net.wifi.WifiManager;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.KeyEvent;
+import android.view.View;
+import android.webkit.WebChromeClient;
 import android.webkit.WebResourceError;
 import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import android.widget.ProgressBar;
 
 import com.android.hotspot2.R;
 
 import java.net.MalformedURLException;
 import java.net.URL;
+
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout;
 
 /**
  * Online Sign Up Login Web View launched during Provision Process of Hotspot 2.0 rel2.
@@ -52,6 +60,8 @@ public class OsuLoginActivity extends Activity {
     private ConnectivityManager.NetworkCallback mNetworkCallback;
     private WifiManager mWifiManager;
     private WebView mWebView;
+    private SwipeRefreshLayout mSwipeRefreshLayout;
+    private ProgressBar mProgressBar;
 
     @Override
     protected void onCreate(@Nullable Bundle savedInstanceState) {
@@ -117,6 +127,9 @@ public class OsuLoginActivity extends Activity {
         }
 
         getActionBar().setDisplayShowHomeEnabled(false);
+        getActionBar().setElevation(0); // remove shadow
+        getActionBar().setTitle(getString(R.string.action_bar_label));
+        getActionBar().setSubtitle("");
         setContentView(R.layout.osu_web_view);
 
         // Exit this app if network disappeared.
@@ -134,7 +147,8 @@ public class OsuLoginActivity extends Activity {
 
         mCm.registerNetworkCallback(
                 new NetworkRequest.Builder().addTransportType(
-                        NetworkCapabilities.TRANSPORT_WIFI).build(),
+                        NetworkCapabilities.TRANSPORT_WIFI).removeCapability(
+                        NET_CAPABILITY_TRUSTED).build(),
                 mNetworkCallback);
 
         mWebView = findViewById(R.id.webview);
@@ -147,12 +161,25 @@ public class OsuLoginActivity extends Activity {
         webSettings.setSupportZoom(true);
         webSettings.setBuiltInZoomControls(true);
         webSettings.setDisplayZoomControls(false);
-
+        mProgressBar = findViewById(R.id.progress_bar);
         mWebView.setWebViewClient(new OsuWebViewClient());
+        mWebView.setWebChromeClient(new WebChromeClient() {
+            @Override
+            public void onProgressChanged(WebView view, int newProgress) {
+                mProgressBar.setProgress(newProgress);
+            }
+        });
+
         if (DBG) {
             Log.d(TAG, "OSU Web View to " + mUrl);
         }
+
         mWebView.loadUrl(mUrl);
+        mSwipeRefreshLayout = findViewById(R.id.swipe_refresh);
+        mSwipeRefreshLayout.setOnRefreshListener(() -> {
+            mWebView.reload();
+            mSwipeRefreshLayout.setRefreshing(true);
+        });
     }
 
     @Override
@@ -191,11 +218,31 @@ public class OsuLoginActivity extends Activity {
         return null;
     }
 
+    private String getHeaderSubtitle(String urlString) {
+        try {
+            URL url = new URL(urlString);
+            return url.getProtocol() + "://" +  url.getHost();
+        } catch (MalformedURLException e) {
+            Log.e(TAG, "Invalid URL " + urlString);
+        }
+        return "";
+    }
+
     private class OsuWebViewClient extends WebViewClient {
         boolean mPageError = false;
 
         @Override
+        public void onPageStarted(WebView view, String urlString, Bitmap favicon) {
+            String subtitle = getHeaderSubtitle(urlString);
+            getActionBar().setSubtitle(subtitle);
+            mProgressBar.setVisibility(View.VISIBLE);
+        }
+
+        @Override
         public void onPageFinished(WebView view, String url) {
+            mProgressBar.setVisibility(View.INVISIBLE);
+            mSwipeRefreshLayout.setRefreshing(false);
+
             // Do not show the page error on UI.
             if (mPageError) {
                 finishAndRemoveTask();
@@ -213,4 +260,5 @@ public class OsuLoginActivity extends Activity {
             }
          }
     }
+
 }

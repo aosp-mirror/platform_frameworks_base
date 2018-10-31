@@ -1,4 +1,6 @@
 <resources>
     <!-- application name [CHAR LIMIT=32] -->
     <string name="app_name">OsuLogin</string>
+    <!-- action bar label [CHAR LIMIT=32] -->
+    <string name="action_bar_label">Online Sign Up</string>
 </resources>
