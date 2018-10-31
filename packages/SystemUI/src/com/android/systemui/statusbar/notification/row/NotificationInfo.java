@@ -72,7 +72,6 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
     private String mPackageName;
     private String mAppName;
     private int mAppUid;
-    private String mDelegatePkg;
     private int mNumUniqueChannelsInRow;
     private NotificationChannel mSingleNotificationChannel;
     private int mStartingUserImportance;
@@ -194,7 +193,6 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
                 (mSbn.getNotification().flags & Notification.FLAG_FOREGROUND_SERVICE) != 0;
         mIsForBlockingHelper = isForBlockingHelper;
         mAppUid = mSbn.getUid();
-        mDelegatePkg = mSbn.getOpPkg();
         mIsDeviceProvisioned = isDeviceProvisioned;
 
         int numTotalChannels = mINotificationManager.getNumNotificationChannelsForPackage(
@@ -236,85 +234,6 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         ((ImageView) findViewById(R.id.pkgicon)).setImageDrawable(pkgicon);
         ((TextView) findViewById(R.id.pkgname)).setText(mAppName);
 
-        // Delegate
-        bindDelegate();
-
-        // Settings button.
-        final View settingsButton = findViewById(R.id.info);
-        if (mAppUid >= 0 && mOnSettingsClickListener != null && mIsDeviceProvisioned) {
-            settingsButton.setVisibility(View.VISIBLE);
-            final int appUidF = mAppUid;
-            settingsButton.setOnClickListener(
-                    (View view) -> {
-                        logBlockingHelperCounter(
-                                NotificationCounters.BLOCKING_HELPER_NOTIF_SETTINGS);
-                        mOnSettingsClickListener.onClick(view,
-                                mNumUniqueChannelsInRow > 1 ? null : mSingleNotificationChannel,
-                                appUidF);
-                    });
-        } else {
-            settingsButton.setVisibility(View.GONE);
-        }
-    }
-
-    private void bindPrompt() throws RemoteException {
-        final TextView blockPrompt = findViewById(R.id.block_prompt);
-        bindName();
-        bindGroup();
-        if (mIsNonblockable) {
-            blockPrompt.setText(R.string.notification_unblockable_desc);
-        } else {
-            if (mNegativeUserSentiment) {
-                blockPrompt.setText(R.string.inline_blocking_helper);
-            }  else if (mIsSingleDefaultChannel || mNumUniqueChannelsInRow > 1) {
-                blockPrompt.setText(R.string.inline_keep_showing_app);
-            } else {
-                blockPrompt.setText(R.string.inline_keep_showing);
-            }
-        }
-    }
-
-    private void bindName() {
-        final TextView channelName = findViewById(R.id.channel_name);
-        if (mIsSingleDefaultChannel || mNumUniqueChannelsInRow > 1) {
-            channelName.setVisibility(View.GONE);
-        } else {
-            channelName.setText(mSingleNotificationChannel.getName());
-        }
-    }
-
-    private void bindDelegate() {
-        TextView delegateView = findViewById(R.id.delegate_name);
-        TextView dividerView = findViewById(R.id.pkg_divider);
-
-        CharSequence delegatePkg = null;
-        if (!TextUtils.equals(mPackageName, mDelegatePkg)) {
-            // this notification was posted by a delegate!
-            ApplicationInfo info;
-            try {
-                info = mPm.getApplicationInfo(
-                        mDelegatePkg,
-                        PackageManager.MATCH_UNINSTALLED_PACKAGES
-                                | PackageManager.MATCH_DISABLED_COMPONENTS
-                                | PackageManager.MATCH_DIRECT_BOOT_UNAWARE
-                                | PackageManager.MATCH_DIRECT_BOOT_AWARE);
-                if (info != null) {
-                    delegatePkg = String.valueOf(mPm.getApplicationLabel(info));
-                }
-            } catch (PackageManager.NameNotFoundException e) {}
-        }
-        if (delegatePkg != null) {
-            delegateView.setText(mContext.getResources().getString(
-                    R.string.notification_delegate_header, delegatePkg));
-            delegateView.setVisibility(View.VISIBLE);
-            dividerView.setVisibility(View.VISIBLE);
-        } else {
-            delegateView.setVisibility(View.GONE);
-            dividerView.setVisibility(View.GONE);
-        }
-    }
-
-    private void bindGroup() throws RemoteException {
         // Set group information if this channel has an associated group.
         CharSequence groupName = null;
         if (mSingleNotificationChannel != null && mSingleNotificationChannel.getGroup() != null) {
@@ -334,6 +253,48 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         } else {
             groupNameView.setVisibility(View.GONE);
             groupDividerView.setVisibility(View.GONE);
+        }
+
+        // Settings button.
+        final View settingsButton = findViewById(R.id.info);
+        if (mAppUid >= 0 && mOnSettingsClickListener != null && mIsDeviceProvisioned) {
+            settingsButton.setVisibility(View.VISIBLE);
+            final int appUidF = mAppUid;
+            settingsButton.setOnClickListener(
+                    (View view) -> {
+                        logBlockingHelperCounter(
+                                NotificationCounters.BLOCKING_HELPER_NOTIF_SETTINGS);
+                        mOnSettingsClickListener.onClick(view,
+                                mNumUniqueChannelsInRow > 1 ? null : mSingleNotificationChannel,
+                                appUidF);
+                    });
+        } else {
+            settingsButton.setVisibility(View.GONE);
+        }
+    }
+
+    private void bindPrompt() {
+        final TextView blockPrompt = findViewById(R.id.block_prompt);
+        bindName();
+        if (mIsNonblockable) {
+            blockPrompt.setText(R.string.notification_unblockable_desc);
+        } else {
+            if (mNegativeUserSentiment) {
+                blockPrompt.setText(R.string.inline_blocking_helper);
+            }  else if (mIsSingleDefaultChannel || mNumUniqueChannelsInRow > 1) {
+                blockPrompt.setText(R.string.inline_keep_showing_app);
+            } else {
+                blockPrompt.setText(R.string.inline_keep_showing);
+            }
+        }
+    }
+
+    private void bindName() {
+        final TextView channelName = findViewById(R.id.channel_name);
+        if (mIsSingleDefaultChannel || mNumUniqueChannelsInRow > 1) {
+            channelName.setVisibility(View.GONE);
+        } else {
+            channelName.setText(mSingleNotificationChannel.getName());
         }
     }
 
