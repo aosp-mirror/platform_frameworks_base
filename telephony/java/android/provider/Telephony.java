@@ -2730,6 +2730,13 @@ public final class Telephony {
                 "content://telephony/carriers/enforce_managed");
 
         /**
+         * The {@code content://} style URL to be called from Telephony to query current APNs.
+         * @hide
+         */
+        public static final Uri SIM_APN_LIST = Uri.parse(
+                "content://telephony/carriers/sim_apn_list");
+
+        /**
          * The column name for ENFORCE_MANAGED_URI, indicates whether DPC-owned APNs are enforced.
          * @hide
          */
