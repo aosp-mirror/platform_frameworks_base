@@ -113,11 +113,12 @@ public class NetworkStatsFactory {
 
     /**
      * Applies 464xlat adjustments with ifaces noted with {@link #noteStackedIface(String, String)}.
-     * @see NetworkStats#apply464xlatAdjustments(NetworkStats, NetworkStats, Map)
+     * @see NetworkStats#apply464xlatAdjustments(NetworkStats, NetworkStats, Map, boolean)
      */
     public static void apply464xlatAdjustments(NetworkStats baseTraffic,
-            NetworkStats stackedTraffic) {
-        NetworkStats.apply464xlatAdjustments(baseTraffic, stackedTraffic, sStackedIfaces);
+            NetworkStats stackedTraffic, boolean useBpfStats) {
+        NetworkStats.apply464xlatAdjustments(baseTraffic, stackedTraffic, sStackedIfaces,
+                useBpfStats);
     }
 
     @VisibleForTesting
@@ -263,7 +264,7 @@ public class NetworkStatsFactory {
 
         // No locking here: apply464xlatAdjustments behaves fine with an add-only ConcurrentHashMap.
         // TODO: remove this and only apply adjustments in NetworkStatsService.
-        stats.apply464xlatAdjustments(sStackedIfaces);
+        stats.apply464xlatAdjustments(sStackedIfaces, mUseBpfStats);
 
         return stats;
     }
