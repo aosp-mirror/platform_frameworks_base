@@ -129,7 +129,6 @@ import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_CLEANUP;
 import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_CONFIGURATION;
-import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_LOCKTASK;
 import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_SWITCH;
 import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_CONFIGURATION;
 import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_LOCKTASK;
@@ -8380,7 +8379,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     throw e.rethrowAsRuntimeException();
                 }
             }
-            mAtmInternal.startHomeActivity(currentUserId, "systemReady");
+            mAtmInternal.startHomeOnAllDisplays(currentUserId, "systemReady");
 
             mAtmInternal.showSystemReadyErrorDialogsIfNeeded();
 

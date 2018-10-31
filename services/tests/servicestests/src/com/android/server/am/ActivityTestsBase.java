@@ -170,6 +170,7 @@ public class ActivityTestsBase {
         // Makes sure the supervisor is using with the spy object.
         atm.mStackSupervisor.setService(atm);
         doReturn(mock(IPackageManager.class)).when(am).getPackageManager();
+        doReturn(mock(IPackageManager.class)).when(atm).getPackageManager();
         PackageManagerInternal mockPackageManager = mock(PackageManagerInternal.class);
         doReturn(mockPackageManager).when(am).getPackageManagerInternalLocked();
         doReturn(null).when(mockPackageManager).getDefaultHomeActivity(anyInt());
@@ -417,6 +418,10 @@ public class ActivityTestsBase {
         private ActivityTaskManagerInternal mInternal;
         private PackageManagerInternal mPmInternal;
 
+        // ActivityStackSupervisor may be created more than once while setting up AMS and ATMS.
+        // We keep the reference in order to prevent creating it twice.
+        private ActivityStackSupervisor mTestStackSupervisor;
+
         TestActivityTaskManagerService(Context context) {
             super(context);
             mSupportsMultiWindow = true;
@@ -447,24 +452,27 @@ public class ActivityTestsBase {
 
         @Override
         final protected ActivityStackSupervisor createStackSupervisor() {
-            final ActivityStackSupervisor supervisor = spy(createTestSupervisor());
-            final KeyguardController keyguardController = mock(KeyguardController.class);
+            if (mTestStackSupervisor == null) {
+                final ActivityStackSupervisor supervisor = spy(createTestSupervisor());
+                final KeyguardController keyguardController = mock(KeyguardController.class);
 
-            // Invoked during {@link ActivityStack} creation.
-            doNothing().when(supervisor).updateUIDsPresentOnDisplay();
-            // Always keep things awake.
-            doReturn(true).when(supervisor).hasAwakeDisplay();
-            // Called when moving activity to pinned stack.
-            doNothing().when(supervisor).ensureActivitiesVisibleLocked(any(), anyInt(), anyBoolean());
-            // Do not schedule idle timeouts
-            doNothing().when(supervisor).scheduleIdleTimeoutLocked(any());
-            // unit test version does not handle launch wake lock
-            doNothing().when(supervisor).acquireLaunchWakelock();
-            doReturn(keyguardController).when(supervisor).getKeyguardController();
+                // Invoked during {@link ActivityStack} creation.
+                doNothing().when(supervisor).updateUIDsPresentOnDisplay();
+                // Always keep things awake.
+                doReturn(true).when(supervisor).hasAwakeDisplay();
+                // Called when moving activity to pinned stack.
+                doNothing().when(supervisor).ensureActivitiesVisibleLocked(any(), anyInt(),
+                        anyBoolean());
+                // Do not schedule idle timeouts
+                doNothing().when(supervisor).scheduleIdleTimeoutLocked(any());
+                // unit test version does not handle launch wake lock
+                doNothing().when(supervisor).acquireLaunchWakelock();
+                doReturn(keyguardController).when(supervisor).getKeyguardController();
 
-            supervisor.initialize();
-
-            return supervisor;
+                supervisor.initialize();
+                mTestStackSupervisor = supervisor;
+            }
+            return mTestStackSupervisor;
         }
 
         protected ActivityStackSupervisor createTestSupervisor() {

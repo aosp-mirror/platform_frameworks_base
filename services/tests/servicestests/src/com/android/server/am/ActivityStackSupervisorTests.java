@@ -26,16 +26,21 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.content.pm.ActivityInfo.FLAG_ALWAYS_FOCUSABLE;
 
+import static com.android.server.am.ActivityDisplay.POSITION_TOP;
 import static com.android.server.am.ActivityStack.REMOVE_TASK_MODE_DESTROYING;
 import static com.android.server.am.ActivityStackSupervisor.MATCH_TASK_IN_STACKS_OR_RECENT_TASKS_AND_RESTORE;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -426,5 +431,33 @@ public class ActivityStackSupervisorTests extends ActivityTestsBase {
         // Verify the target stack should resume its activity.
         verify(targetStack, times(1)).resumeTopActivityUncheckedLocked(
                 eq(activity), eq(null /* targetOptions */));
+    }
+
+
+    /**
+     * Tests that home activities can be started on the displays that supports system decorations.
+     */
+    @Test
+    public void testStartHomeOnAllDisplays() throws Exception {
+        // Create secondary displays.
+        final TestActivityDisplay secondDisplay = spy(createNewActivityDisplay());
+        mSupervisor.addChild(secondDisplay, POSITION_TOP);
+        doReturn(true).when(secondDisplay).supportsSystemDecorations();
+
+        // Create mock tasks and other necessary mocks.
+        TaskBuilder taskBuilder = new TaskBuilder(mService.mStackSupervisor).setCreateStack(false);
+        final TaskRecord.TaskRecordFactory factory = mock(TaskRecord.TaskRecordFactory.class);
+        TaskRecord.setTaskRecordFactory(factory);
+        doAnswer(i -> taskBuilder.build()).when(factory)
+                .create(any(), anyInt(), any(), any(), any(), any());
+        doReturn(true).when(mService.mStackSupervisor)
+                .ensureVisibilityAndConfig(any(), anyInt(), anyBoolean(), anyBoolean());
+        doReturn(true).when(mSupervisor).canStartHomeOnDisplay(any(), anyInt());
+
+        mSupervisor.startHomeOnAllDisplays(0, "testStartHome");
+
+        assertTrue(mSupervisor.getDefaultDisplay().getTopStack().isActivityTypeHome());
+        assertNotNull(secondDisplay.getTopStack());
+        assertTrue(secondDisplay.getTopStack().isActivityTypeHome());
     }
 }

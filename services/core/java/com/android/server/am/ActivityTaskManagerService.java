@@ -85,13 +85,10 @@ import static com.android.server.am.ActivityManagerServiceDumpProcessesProto.HEA
 import static com.android.server.am.ActivityManagerServiceDumpProcessesProto.HOME_PROC;
 import static com.android.server.am.ActivityManagerServiceDumpProcessesProto.LAUNCHING_ACTIVITY;
 import static com.android.server.am.ActivityManagerServiceDumpProcessesProto.PREVIOUS_PROC;
-import static com.android.server.am.ActivityManagerServiceDumpProcessesProto
-        .PREVIOUS_PROC_VISIBLE_TIME_MS;
+import static com.android.server.am.ActivityManagerServiceDumpProcessesProto.PREVIOUS_PROC_VISIBLE_TIME_MS;
 import static com.android.server.am.ActivityManagerServiceDumpProcessesProto.SCREEN_COMPAT_PACKAGES;
-import static com.android.server.am.ActivityManagerServiceDumpProcessesProto.ScreenCompatPackage
-        .MODE;
-import static com.android.server.am.ActivityManagerServiceDumpProcessesProto.ScreenCompatPackage
-        .PACKAGE;
+import static com.android.server.am.ActivityManagerServiceDumpProcessesProto.ScreenCompatPackage.MODE;
+import static com.android.server.am.ActivityManagerServiceDumpProcessesProto.ScreenCompatPackage.PACKAGE;
 import static com.android.server.am.ActivityStack.REMOVE_TASK_MODE_DESTROYING;
 import static com.android.server.am.ActivityStackSupervisor.DEFER_RESUME;
 import static com.android.server.am.ActivityStackSupervisor.MATCH_TASK_IN_STACKS_ONLY;
@@ -5353,65 +5350,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         return intent;
     }
 
-    /**
-     * This starts home activity on displays that can have system decorations and only if the
-     * home activity can have multiple instances.
-     */
-    boolean startHomeActivityLocked(int userId, String reason, int displayId) {
-        if (mFactoryTest == FactoryTest.FACTORY_TEST_LOW_LEVEL && mTopAction == null) {
-            // We are running in factory test mode, but unable to find the factory test app, so just
-            // sit around displaying the error message and don't try to start anything.
-            return false;
-        }
-
-        final Intent intent = getHomeIntent();
-        ActivityInfo aInfo = resolveActivityInfo(intent, STOCK_PM_FLAGS, userId);
-        if (aInfo != null) {
-            intent.setComponent(new ComponentName(aInfo.applicationInfo.packageName, aInfo.name));
-            // Don't do this if the home app is currently being instrumented.
-            aInfo = new ActivityInfo(aInfo);
-            aInfo.applicationInfo = getAppInfoForUser(aInfo.applicationInfo, userId);
-            WindowProcessController app =
-                    getProcessController(aInfo.processName, aInfo.applicationInfo.uid);
-            if (app == null || !app.isInstrumenting()) {
-                intent.setFlags(intent.getFlags() | FLAG_ACTIVITY_NEW_TASK);
-                final int resolvedUserId = UserHandle.getUserId(aInfo.applicationInfo.uid);
-                // For ANR debugging to verify if the user activity is the one that actually
-                // launched.
-                final String myReason = reason + ":" + userId + ":" + resolvedUserId;
-                getActivityStartController().startHomeActivity(intent, aInfo, myReason, displayId);
-            }
-        } else {
-            Slog.wtf(TAG, "No home screen found for " + intent, new Throwable());
-        }
-
-        return true;
-    }
-
-    private ActivityInfo resolveActivityInfo(Intent intent, int flags, int userId) {
-        ActivityInfo ai = null;
-        final ComponentName comp = intent.getComponent();
-        try {
-            if (comp != null) {
-                // Factory test.
-                ai = AppGlobals.getPackageManager().getActivityInfo(comp, flags, userId);
-            } else {
-                ResolveInfo info = AppGlobals.getPackageManager().resolveIntent(
-                        intent,
-                        intent.resolveTypeIfNeeded(mContext.getContentResolver()),
-                        flags, userId);
-
-                if (info != null) {
-                    ai = info.activityInfo;
-                }
-            }
-        } catch (RemoteException e) {
-            // ignore
-        }
-
-        return ai;
-    }
-
     ApplicationInfo getAppInfoForUser(ApplicationInfo info, int userId) {
         if (info == null) return null;
         ApplicationInfo newInfo = new ApplicationInfo(info);
@@ -6127,7 +6065,14 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         @Override
         public boolean startHomeActivity(int userId, String reason) {
             synchronized (mGlobalLock) {
-                return startHomeActivityLocked(userId, reason, DEFAULT_DISPLAY);
+                return mStackSupervisor.startHomeOnDisplay(userId, reason, DEFAULT_DISPLAY);
+            }
+        }
+
+        @Override
+        public boolean startHomeOnAllDisplays(int userId, String reason) {
+            synchronized (mGlobalLock) {
+                return mStackSupervisor.startHomeOnAllDisplays(userId, reason);
             }
         }
 
