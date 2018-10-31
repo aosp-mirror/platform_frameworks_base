@@ -38,8 +38,13 @@ public class InsetsController implements WindowInsetsController {
     private final InsetsState mState = new InsetsState();
     private final Rect mFrame = new Rect();
     private final SparseArray<InsetsSourceConsumer> mSourceConsumers = new SparseArray<>();
+    private final ViewRootImpl mViewRoot;
 
     private final SparseArray<InsetsSourceControl> mTmpControlArray = new SparseArray<>();
+
+    public InsetsController(ViewRootImpl viewRoot) {
+        mViewRoot = viewRoot;
+    }
 
     void onFrameChanged(Rect frame) {
         mFrame.set(frame);
@@ -49,8 +54,14 @@ public class InsetsController implements WindowInsetsController {
         return mState;
     }
 
-    public void setState(InsetsState state) {
+    boolean onStateChanged(InsetsState state) {
+        if (mState.equals(state)) {
+            return false;
+        }
         mState.set(state);
+        applyLocalVisibilityOverride();
+        mViewRoot.notifyInsetsChanged();
+        return true;
     }
 
     /**
@@ -105,15 +116,26 @@ public class InsetsController implements WindowInsetsController {
         }
     }
 
+    private void applyLocalVisibilityOverride() {
+        for (int i = mSourceConsumers.size() - 1; i >= 0; i--) {
+            final InsetsSourceConsumer controller = mSourceConsumers.valueAt(i);
+            controller.applyLocalVisibilityOverride();
+        }
+    }
+
     @VisibleForTesting
     public @NonNull InsetsSourceConsumer getSourceConsumer(@InternalInsetType int type) {
         InsetsSourceConsumer controller = mSourceConsumers.get(type);
         if (controller != null) {
             return controller;
         }
-        controller = new InsetsSourceConsumer(type, mState, Transaction::new);
+        controller = new InsetsSourceConsumer(type, mState, Transaction::new, this);
         mSourceConsumers.put(type, controller);
         return controller;
+    }
+
+    void notifyVisibilityChanged() {
+        mViewRoot.notifyInsetsChanged();
     }
 
     void dump(String prefix, PrintWriter pw) {
