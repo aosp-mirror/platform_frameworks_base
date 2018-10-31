@@ -30,6 +30,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 import java.util.Set;
+import com.android.internal.annotations.GuardedBy;
 
 /**
  * This class encapsulates the permissions for a package or a shared user.
@@ -62,6 +63,9 @@ public final class PermissionsState {
 
     private static final int[] NO_GIDS = {};
 
+    private final Object mLock = new Object();
+
+    @GuardedBy("mLock")
     private ArrayMap<String, PermissionData> mPermissions;
 
     private int[] mGlobalGids = NO_GIDS;
@@ -96,22 +100,25 @@ public final class PermissionsState {
         if (other == this) {
             return;
         }
-        if (mPermissions != null) {
-            if (other.mPermissions == null) {
-                mPermissions = null;
-            } else {
-                mPermissions.clear();
+
+        synchronized (mLock) {
+            if (mPermissions != null) {
+                if (other.mPermissions == null) {
+                    mPermissions = null;
+                } else {
+                    mPermissions.clear();
+                }
             }
-        }
-        if (other.mPermissions != null) {
-            if (mPermissions == null) {
-                mPermissions = new ArrayMap<>();
-            }
-            final int permissionCount = other.mPermissions.size();
-            for (int i = 0; i < permissionCount; i++) {
-                String name = other.mPermissions.keyAt(i);
-                PermissionData permissionData = other.mPermissions.valueAt(i);
-                mPermissions.put(name, new PermissionData(permissionData));
+            if (other.mPermissions != null) {
+                if (mPermissions == null) {
+                    mPermissions = new ArrayMap<>();
+                }
+                final int permissionCount = other.mPermissions.size();
+                for (int i = 0; i < permissionCount; i++) {
+                    String name = other.mPermissions.keyAt(i);
+                    PermissionData permissionData = other.mPermissions.valueAt(i);
+                    mPermissions.put(name, new PermissionData(permissionData));
+                }
             }
         }
 
@@ -154,13 +161,16 @@ public final class PermissionsState {
         }
         final PermissionsState other = (PermissionsState) obj;
 
-        if (mPermissions == null) {
-            if (other.mPermissions != null) {
+        synchronized (mLock) {
+            if (mPermissions == null) {
+                if (other.mPermissions != null) {
+                    return false;
+                }
+            } else if (!mPermissions.equals(other.mPermissions)) {
                 return false;
             }
-        } else if (!mPermissions.equals(other.mPermissions)) {
-            return false;
         }
+
         if (mPermissionReviewRequired == null) {
             if (other.mPermissionReviewRequired != null) {
                 return false;
@@ -267,12 +277,15 @@ public final class PermissionsState {
     public boolean hasPermission(String name, int userId) {
         enforceValidUserId(userId);
 
-        if (mPermissions == null) {
-            return false;
+        synchronized (mLock) {
+            if (mPermissions == null) {
+                return false;
+            }
+            PermissionData permissionData = mPermissions.get(name);
+
+            return permissionData != null && permissionData.isGranted(userId);
         }
 
-        PermissionData permissionData = mPermissions.get(name);
-        return permissionData != null && permissionData.isGranted(userId);
     }
 
     /**
@@ -280,14 +293,17 @@ public final class PermissionsState {
      * whether or not it has been granted.
      */
     public boolean hasRequestedPermission(ArraySet<String> names) {
-        if (mPermissions == null) {
-            return false;
-        }
-        for (int i=names.size()-1; i>=0; i--) {
-            if (mPermissions.get(names.valueAt(i)) != null) {
-                return true;
+        synchronized (mLock) {
+            if (mPermissions == null) {
+                return false;
+            }
+            for (int i=names.size()-1; i>=0; i--) {
+                if (mPermissions.get(names.valueAt(i)) != null) {
+                    return true;
+                }
             }
         }
+
         return false;
     }
 
@@ -308,29 +324,31 @@ public final class PermissionsState {
     public Set<String> getPermissions(int userId) {
         enforceValidUserId(userId);
 
-        if (mPermissions == null) {
-            return Collections.emptySet();
-        }
-
-        Set<String> permissions = new ArraySet<>(mPermissions.size());
-
-        final int permissionCount = mPermissions.size();
-        for (int i = 0; i < permissionCount; i++) {
-            String permission = mPermissions.keyAt(i);
-
-            if (hasInstallPermission(permission)) {
-                permissions.add(permission);
-                continue;
+        synchronized (mLock) {
+            if (mPermissions == null) {
+                return Collections.emptySet();
             }
 
-            if (userId != UserHandle.USER_ALL) {
-                if (hasRuntimePermission(permission, userId)) {
+            Set<String> permissions = new ArraySet<>(mPermissions.size());
+
+            final int permissionCount = mPermissions.size();
+            for (int i = 0; i < permissionCount; i++) {
+                String permission = mPermissions.keyAt(i);
+
+                if (hasInstallPermission(permission)) {
                     permissions.add(permission);
+                    continue;
+                }
+
+                if (userId != UserHandle.USER_ALL) {
+                    if (hasRuntimePermission(permission, userId)) {
+                        permissions.add(permission);
+                    }
                 }
             }
-        }
 
-        return permissions;
+            return permissions;
+        }
     }
 
     /**
@@ -407,14 +425,20 @@ public final class PermissionsState {
 
         final boolean mayChangeFlags = flagValues != 0 || flagMask != 0;
 
-        if (mPermissions == null) {
-            if (!mayChangeFlags) {
-                return false;
+        synchronized (mLock) {
+            if (mPermissions == null) {
+                if (!mayChangeFlags) {
+                    return false;
+                }
+                ensurePermissionData(permission);
             }
-            ensurePermissionData(permission);
         }
 
-        PermissionData permissionData = mPermissions.get(permission.getName());
+        PermissionData permissionData = null;
+        synchronized (mLock) {
+            permissionData = mPermissions.get(permission.getName());
+        }
+
         if (permissionData == null) {
             if (!mayChangeFlags) {
                 return false;
@@ -447,14 +471,17 @@ public final class PermissionsState {
     }
 
     private boolean hasPermissionRequiringReview(int userId) {
-        final int permissionCount = mPermissions.size();
-        for (int i = 0; i < permissionCount; i++) {
-            final PermissionData permission = mPermissions.valueAt(i);
-            if ((permission.getFlags(userId)
-                    & PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED) != 0) {
-                return true;
+        synchronized (mLock) {
+            final int permissionCount = mPermissions.size();
+            for (int i = 0; i < permissionCount; i++) {
+                final PermissionData permission = mPermissions.valueAt(i);
+                if ((permission.getFlags(userId)
+                        & PackageManager.FLAG_PERMISSION_REVIEW_REQUIRED) != 0) {
+                    return true;
+                }
             }
         }
+
         return false;
     }
 
@@ -462,16 +489,19 @@ public final class PermissionsState {
             int userId, int flagMask, int flagValues) {
         enforceValidUserId(userId);
 
-        if (mPermissions == null) {
-            return false;
+        synchronized (mLock) {
+            if (mPermissions == null) {
+                return false;
+            }
+            boolean changed = false;
+            final int permissionCount = mPermissions.size();
+            for (int i = 0; i < permissionCount; i++) {
+                PermissionData permissionData = mPermissions.valueAt(i);
+                changed |= permissionData.updateFlags(userId, flagMask, flagValues);
+            }
+
+            return changed;
         }
-        boolean changed = false;
-        final int permissionCount = mPermissions.size();
-        for (int i = 0; i < permissionCount; i++) {
-            PermissionData permissionData = mPermissions.valueAt(i);
-            changed |= permissionData.updateFlags(userId, flagMask, flagValues);
-        }
-        return changed;
     }
 
     /**
@@ -487,17 +517,19 @@ public final class PermissionsState {
 
         int[] gids = mGlobalGids;
 
-        if (mPermissions != null) {
-            final int permissionCount = mPermissions.size();
-            for (int i = 0; i < permissionCount; i++) {
-                String permission = mPermissions.keyAt(i);
-                if (!hasPermission(permission, userId)) {
-                    continue;
-                }
-                PermissionData permissionData = mPermissions.valueAt(i);
-                final int[] permGids = permissionData.computeGids(userId);
-                if (permGids != NO_GIDS) {
-                    gids = appendInts(gids, permGids);
+        synchronized (mLock) {
+            if (mPermissions != null) {
+                final int permissionCount = mPermissions.size();
+                for (int i = 0; i < permissionCount; i++) {
+                    String permission = mPermissions.keyAt(i);
+                    if (!hasPermission(permission, userId)) {
+                        continue;
+                    }
+                    PermissionData permissionData = mPermissions.valueAt(i);
+                    final int[] permGids = permissionData.computeGids(userId);
+                    if (permGids != NO_GIDS) {
+                        gids = appendInts(gids, permGids);
+                    }
                 }
             }
         }
@@ -527,41 +559,50 @@ public final class PermissionsState {
      */
     public void reset() {
         mGlobalGids = NO_GIDS;
-        mPermissions = null;
+
+        synchronized (mLock) {
+            mPermissions = null;
+        }
+
         mPermissionReviewRequired = null;
     }
 
     private PermissionState getPermissionState(String name, int userId) {
-        if (mPermissions == null) {
-            return null;
+        synchronized (mLock) {
+            if (mPermissions == null) {
+                return null;
+            }
+            PermissionData permissionData = mPermissions.get(name);
+            if (permissionData == null) {
+                return null;
+            }
+
+            return permissionData.getPermissionState(userId);
         }
-        PermissionData permissionData = mPermissions.get(name);
-        if (permissionData == null) {
-            return null;
-        }
-        return permissionData.getPermissionState(userId);
     }
 
     private List<PermissionState> getPermissionStatesInternal(int userId) {
         enforceValidUserId(userId);
 
-        if (mPermissions == null) {
-            return Collections.emptyList();
-        }
-
-        List<PermissionState> permissionStates = new ArrayList<>();
-
-        final int permissionCount = mPermissions.size();
-        for (int i = 0; i < permissionCount; i++) {
-            PermissionData permissionData = mPermissions.valueAt(i);
-
-            PermissionState permissionState = permissionData.getPermissionState(userId);
-            if (permissionState != null) {
-                permissionStates.add(permissionState);
+        synchronized (mLock) {
+            if (mPermissions == null) {
+                return Collections.emptyList();
             }
-        }
 
-        return permissionStates;
+            List<PermissionState> permissionStates = new ArrayList<>();
+
+            final int permissionCount = mPermissions.size();
+            for (int i = 0; i < permissionCount; i++) {
+                PermissionData permissionData = mPermissions.valueAt(i);
+
+                PermissionState permissionState = permissionData.getPermissionState(userId);
+                if (permissionState != null) {
+                    permissionStates.add(permissionState);
+                }
+            }
+
+            return permissionStates;
+        }
     }
 
     private int grantPermission(BasePermission permission, int userId) {
@@ -597,7 +638,10 @@ public final class PermissionsState {
         final boolean hasGids = !ArrayUtils.isEmpty(permission.computeGids(userId));
         final int[] oldGids = hasGids ? computeGids(userId) : NO_GIDS;
 
-        PermissionData permissionData = mPermissions.get(permName);
+        PermissionData permissionData = null;
+        synchronized (mLock) {
+            permissionData = mPermissions.get(permName);
+        }
 
         if (!permissionData.revoke(userId)) {
             return PERMISSION_OPERATION_FAILURE;
@@ -635,25 +679,32 @@ public final class PermissionsState {
 
     private PermissionData ensurePermissionData(BasePermission permission) {
         final String permName = permission.getName();
-        if (mPermissions == null) {
-            mPermissions = new ArrayMap<>();
+
+        synchronized (mLock) {
+            if (mPermissions == null) {
+                mPermissions = new ArrayMap<>();
+            }
+            PermissionData permissionData = mPermissions.get(permName);
+            if (permissionData == null) {
+                permissionData = new PermissionData(permission);
+                mPermissions.put(permName, permissionData);
+            }
+            return permissionData;
         }
-        PermissionData permissionData = mPermissions.get(permName);
-        if (permissionData == null) {
-            permissionData = new PermissionData(permission);
-            mPermissions.put(permName, permissionData);
-        }
-        return permissionData;
+
     }
 
     private void ensureNoPermissionData(String name) {
-        if (mPermissions == null) {
-            return;
+        synchronized (mLock) {
+            if (mPermissions == null) {
+                return;
+            }
+            mPermissions.remove(name);
+            if (mPermissions.isEmpty()) {
+                mPermissions = null;
+            }
         }
-        mPermissions.remove(name);
-        if (mPermissions.isEmpty()) {
-            mPermissions = null;
-        }
+
     }
 
     private static final class PermissionData {

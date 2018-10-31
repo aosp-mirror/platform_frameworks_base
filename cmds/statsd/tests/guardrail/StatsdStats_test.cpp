@@ -126,7 +126,7 @@ TEST(StatsdStatsTest, TestSubStats) {
     stats.noteBroadcastSent(key);
 
     // data drop -> 1
-    stats.noteDataDropped(key);
+    stats.noteDataDropped(key, 123);
 
     // dump report -> 3
     stats.noteMetricsReportSent(key, 0);
@@ -142,6 +142,8 @@ TEST(StatsdStatsTest, TestSubStats) {
     const auto& configReport = report.config_stats(0);
     EXPECT_EQ(2, configReport.broadcast_sent_time_sec_size());
     EXPECT_EQ(1, configReport.data_drop_time_sec_size());
+    EXPECT_EQ(1, configReport.data_drop_bytes_size());
+    EXPECT_EQ(123, configReport.data_drop_bytes(0));
     EXPECT_EQ(3, configReport.dump_report_time_sec_size());
     EXPECT_EQ(3, configReport.dump_report_data_size_size());
     EXPECT_EQ(1, configReport.annotation_size());
@@ -275,7 +277,7 @@ TEST(StatsdStatsTest, TestTimestampThreshold) {
     int32_t newTimestamp = 10000;
 
     // now it should trigger removing oldest timestamp
-    stats.noteDataDropped(key, 10000);
+    stats.noteDataDropped(key, 123, 10000);
     stats.noteBroadcastSent(key, 10000);
     stats.noteMetricsReportSent(key, 0, 10000);
 
@@ -295,6 +297,7 @@ TEST(StatsdStatsTest, TestTimestampThreshold) {
     // the last timestamp is the newest timestamp.
     EXPECT_EQ(newTimestamp, configStats->broadcast_sent_time_sec.back());
     EXPECT_EQ(newTimestamp, configStats->data_drop_time_sec.back());
+    EXPECT_EQ(123, configStats->data_drop_bytes.back());
     EXPECT_EQ(newTimestamp, configStats->dump_report_stats.back().first);
 }
 

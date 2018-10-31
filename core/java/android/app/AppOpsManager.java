@@ -18,6 +18,7 @@ package android.app;
 
 import android.Manifest;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
@@ -33,6 +34,7 @@ import android.os.Parcelable;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserManager;
+import android.provider.Settings;
 import android.util.ArrayMap;
 
 import com.android.internal.app.IAppOpsActiveCallback;
@@ -1537,6 +1539,19 @@ public class AppOpsManager {
     }
 
     /**
+     * Retrieve the permission associated with an operation, or null if there is not one.
+     *
+     * @param op The operation name.
+     *
+     * @hide
+     */
+    @Nullable
+    @SystemApi
+    public static String opToPermission(@NonNull String op) {
+        return opToPermission(strOpToOp(op));
+    }
+
+    /**
      * Retrieve the user restriction associated with an operation, or null if there is not one.
      * @hide
      */
@@ -1570,6 +1585,26 @@ public class AppOpsManager {
      * @hide
      */
     public static int opToDefaultMode(int op) {
+        // STOPSHIP b/118520006: Hardcode the default values once the feature is stable.
+        switch (op) {
+            // SMS permissions
+            case AppOpsManager.OP_SEND_SMS:
+            case AppOpsManager.OP_RECEIVE_SMS:
+            case AppOpsManager.OP_READ_SMS:
+            case AppOpsManager.OP_RECEIVE_WAP_PUSH:
+            case AppOpsManager.OP_RECEIVE_MMS:
+            case AppOpsManager.OP_READ_CELL_BROADCASTS:
+            // CallLog permissions
+            case AppOpsManager.OP_READ_CALL_LOG:
+            case AppOpsManager.OP_WRITE_CALL_LOG:
+            case AppOpsManager.OP_PROCESS_OUTGOING_CALLS: {
+                // ActivityThread.currentApplication() is never null
+                if (Settings.Global.getInt(ActivityThread.currentApplication().getContentResolver(),
+                        Settings.Global.SMS_ACCESS_RESTRICTION_ENABLED, 0) == 1) {
+                    return AppOpsManager.MODE_DEFAULT;
+                }
+            }
+        }
         return sOpDefaultMode[op];
     }
 
@@ -1980,6 +2015,26 @@ public class AppOpsManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Resets given app op in its default mode for app ops in the UID.
+     * This applies to all apps currently in the UID or installed in this UID in the future.
+     *
+     * @param appOp The app op.
+     * @param uid The UID for which to set the app.
+     *
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.MANAGE_APP_OPS_MODES)
+    @SystemApi
+    public void resetUidMode(String appOp, int uid, boolean force) {
+        int code = strOpToOp(appOp);
+        if (!(opAllowsReset(code) || force)) {
+            return;
+        }
+        int mode = opToDefaultMode(code);
+        setUidMode(code, uid, mode);
     }
 
     /** @hide */

@@ -1529,6 +1529,9 @@
     <!-- Notification: Control panel: Label that displays when the app's notifications cannot be blocked. -->
     <string name="notification_unblockable_desc">These notifications can\'t be turned off</string>
 
+    <!-- Notification: Control panel: Label for the app that posted this notification, if it's not the package that the notification was posted for -->
+    <string name="notification_delegate_header">via <xliff:g id="app_name" example="YouTube">%1$s</xliff:g></string>
+
     <!-- Notification Inline controls: describes what the app is doing in the background [CHAR_LIMIT=NONE] -->
     <string name="appops_camera">This app is using the camera.</string>
     <!-- Notification Inline controls: describes what the app is doing in the background [CHAR_LIMIT=NONE] -->
@@ -1850,6 +1853,9 @@
         <item>Show percentage when charging (default)</item>
         <item>Don\'t show this icon</item>
     </string-array>
+
+    <!-- SysUI Tuner: Switch for showing low-priority notification icons in status bar [CHAR LIMIT=NONE] -->
+    <string name="tuner_low_priority">Show low-priority notification icons</string>
 
     <!-- SysUI Tuner: Other section -->
     <string name="other">Other</string>

@@ -28,11 +28,12 @@ public final class CellIdentityTdscdma extends CellIdentity {
     private static final String TAG = CellIdentityTdscdma.class.getSimpleName();
     private static final boolean DBG = false;
 
-    // 16-bit Location Area Code, 0..65535, INT_MAX if unknown.
+    // 16-bit Location Area Code, 0..65535, CellInfo.UNAVAILABLE if unknown.
     private final int mLac;
-    // 28-bit UMTS Cell Identity described in TS 25.331, 0..268435455, INT_MAX if unknown.
+    // 28-bit UMTS Cell Identity described in TS 25.331, 0..268435455, CellInfo.UNAVAILABLE
+    // if unknown.
     private final int mCid;
-    // 8-bit Cell Parameters ID described in TS 25.331, 0..127, INT_MAX if unknown.
+    // 8-bit Cell Parameters ID described in TS 25.331, 0..127, CellInfo.UNAVAILABLE if unknown.
     private final int mCpid;
     // 16-bit UMTS Absolute RF Channel Number described in TS 25.101 sec. 5.4.3
     private final int mUarfcn;
@@ -42,18 +43,20 @@ public final class CellIdentityTdscdma extends CellIdentity {
      */
     public CellIdentityTdscdma() {
         super(TAG, CellInfo.TYPE_TDSCDMA, null, null, null, null);
-        mLac = Integer.MAX_VALUE;
-        mCid = Integer.MAX_VALUE;
-        mCpid = Integer.MAX_VALUE;
-        mUarfcn = Integer.MAX_VALUE;
+        mLac = CellInfo.UNAVAILABLE;
+        mCid = CellInfo.UNAVAILABLE;
+        mCpid = CellInfo.UNAVAILABLE;
+        mUarfcn = CellInfo.UNAVAILABLE;
     }
 
     /**
      * @param mcc 3-digit Mobile Country Code, 0..999
      * @param mnc 2 or 3-digit Mobile Network Code, 0..999
-     * @param lac 16-bit Location Area Code, 0..65535, INT_MAX if unknown
-     * @param cid 28-bit UMTS Cell Identity described in TS 25.331, 0..268435455, INT_MAX if unknown
-     * @param cpid 8-bit Cell Parameters ID described in TS 25.331, 0..127, INT_MAX if unknown
+     * @param lac 16-bit Location Area Code, 0..65535, CellInfo.UNAVAILABLE if unknown
+     * @param cid 28-bit UMTS Cell Identity described in TS 25.331, 0..268435455, CellInfo.
+     *        UNAVAILABLE if unknown
+     * @param cpid 8-bit Cell Parameters ID described in TS 25.331, 0..127, CellInfo.UNAVAILABLE
+     *        if unknown
      * @param uarfcn 16-bit UMTS Absolute RF Channel Number described in TS 25.101 sec. 5.4.3
      *
      * @hide
@@ -65,9 +68,11 @@ public final class CellIdentityTdscdma extends CellIdentity {
     /**
      * @param mcc 3-digit Mobile Country Code in string format
      * @param mnc 2 or 3-digit Mobile Network Code in string format
-     * @param lac 16-bit Location Area Code, 0..65535, INT_MAX if unknown
-     * @param cid 28-bit UMTS Cell Identity described in TS 25.331, 0..268435455, INT_MAX if unknown
-     * @param cpid 8-bit Cell Parameters ID described in TS 25.331, 0..127, INT_MAX if unknown
+     * @param lac 16-bit Location Area Code, 0..65535, CellInfo.UNAVAILABLE if unknown
+     * @param cid 28-bit UMTS Cell Identity described in TS 25.331, 0..268435455,
+     *        CellInfo.UNAVAILABLE if unknown
+     * @param cpid 8-bit Cell Parameters ID described in TS 25.331, 0..127,
+     *        CellInfo.UNAVAILABLE if unknown
      * @param uarfcn 16-bit UMTS Absolute RF Channel Number described in TS 25.101 sec. 5.4.3
      * @param alphal long alpha Operator Name String or Enhanced Operator Name String
      * @param alphas short alpha Operator Name String or Enhanced Operator Name String
@@ -116,21 +121,24 @@ public final class CellIdentityTdscdma extends CellIdentity {
     }
 
     /**
-     * @return 16-bit Location Area Code, 0..65535, INT_MAX if unknown
+     * @return 16-bit Location Area Code, 0..65535,
+     *         {@link android.telephony.CellInfo#UNAVAILABLE UNAVAILABLE} if unavailable.
      */
     public int getLac() {
         return mLac;
     }
 
     /**
-     * @return 28-bit UMTS Cell Identity described in TS 25.331, 0..268435455, INT_MAX if unknown
+     * @return 28-bit UMTS Cell Identity described in TS 25.331, 0..268435455,
+     *         {@link android.telephony.CellInfo#UNAVAILABLE UNAVAILABLE} if unavailable.
      */
     public int getCid() {
         return mCid;
     }
 
     /**
-     * @return 8-bit Cell Parameters ID described in TS 25.331, 0..127, INT_MAX if unknown
+     * @return 8-bit Cell Parameters ID described in TS 25.331, 0..127,
+     *         {@link android.telephony.CellInfo#UNAVAILABLE UNAVAILABLE} if unavailable.
      */
     public int getCpid() {
         return mCpid;
@@ -146,8 +154,8 @@ public final class CellIdentityTdscdma extends CellIdentity {
     @Override
     public GsmCellLocation asCellLocation() {
         GsmCellLocation cl = new GsmCellLocation();
-        int lac = mLac != Integer.MAX_VALUE ? mLac : -1;
-        int cid = mCid != Integer.MAX_VALUE ? mCid : -1;
+        int lac = mLac != CellInfo.UNAVAILABLE ? mLac : -1;
+        int cid = mCid != CellInfo.UNAVAILABLE ? mCid : -1;
         cl.setLacAndCid(lac, cid);
         cl.setPsc(-1); // There is no PSC for TD-SCDMA; not using this for CPI to stem shenanigans
         return cl;

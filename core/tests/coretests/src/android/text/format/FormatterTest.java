@@ -162,7 +162,7 @@ public class FormatterTest {
 
         // Make sure it works on different locales.
         setLocale(Locale.FRANCE);
-        assertEquals("2 j", Formatter.formatShortElapsedTime(mContext, 2 * DAY));
+        assertEquals("2\u202fj", Formatter.formatShortElapsedTime(mContext, 2 * DAY));
     }
 
     @Test

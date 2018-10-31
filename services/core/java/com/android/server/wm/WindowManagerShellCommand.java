@@ -233,9 +233,11 @@ public class WindowManagerShellCommand extends ShellCommand {
     private int runDisplayScaling(PrintWriter pw) throws RemoteException {
         String scalingStr = getNextArgRequired();
         if ("auto".equals(scalingStr)) {
-            mInterface.setForcedDisplayScalingMode(getDisplayId(scalingStr), 0);
+            mInterface.setForcedDisplayScalingMode(getDisplayId(scalingStr),
+                    DisplayContent.FORCE_SCALING_MODE_AUTO);
         } else if ("off".equals(scalingStr)) {
-            mInterface.setForcedDisplayScalingMode(getDisplayId(scalingStr), 1);
+            mInterface.setForcedDisplayScalingMode(getDisplayId(scalingStr),
+                    DisplayContent.FORCE_SCALING_MODE_DISABLED);
         } else {
             getErrPrintWriter().println("Error: scaling must be 'auto' or 'off'");
             return -1;

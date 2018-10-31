@@ -23,8 +23,11 @@ import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.AccessibilityServiceInfo.FeedbackType;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
+import android.annotation.SystemApi;
 import android.annotation.SystemService;
+import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
 import android.content.ComponentName;
 import android.content.Context;
@@ -204,6 +207,7 @@ public final class AccessibilityManager {
      *
      * @hide
      */
+    @TestApi
     public interface AccessibilityServicesStateChangeListener {
 
         /**
@@ -778,6 +782,7 @@ public final class AccessibilityManager {
      *                for a callback on the process's main handler.
      * @hide
      */
+    @TestApi
     public void addAccessibilityServicesStateChangeListener(
             @NonNull AccessibilityServicesStateChangeListener listener, @Nullable Handler handler) {
         synchronized (mLock) {
@@ -793,6 +798,7 @@ public final class AccessibilityManager {
      *
      * @hide
      */
+    @TestApi
     public void removeAccessibilityServicesStateChangeListener(
             @NonNull AccessibilityServicesStateChangeListener listener) {
         synchronized (mLock) {
@@ -1056,6 +1062,9 @@ public final class AccessibilityManager {
      *
      * @hide
      */
+    @SystemApi
+    @TestApi
+    @RequiresPermission(Manifest.permission.MANAGE_ACCESSIBILITY)
     public void performAccessibilityShortcut() {
         final IAccessibilityManager service;
         synchronized (mLock) {
@@ -1137,6 +1146,30 @@ public final class AccessibilityManager {
         } catch (RemoteException re) {
             Log.e(LOG_TAG, "Error setting picture in picture action replacement", re);
         }
+    }
+
+    /**
+     * Get the component name of the service currently assigned to the accessibility shortcut.
+     *
+     * @return The flattened component name
+     * @hide
+     */
+    @TestApi
+    @RequiresPermission(Manifest.permission.MANAGE_ACCESSIBILITY)
+    @Nullable
+    public String getAccessibilityShortcutService() {
+        final IAccessibilityManager service;
+        synchronized (mLock) {
+            service = getServiceLocked();
+        }
+        if (service != null) {
+            try {
+                return service.getAccessibilityShortcutService();
+            } catch (RemoteException re) {
+                re.rethrowFromSystemServer();
+            }
+        }
+        return null;
     }
 
     private IAccessibilityManager getServiceLocked() {

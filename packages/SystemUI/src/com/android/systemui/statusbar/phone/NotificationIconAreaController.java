@@ -1,29 +1,31 @@
 package com.android.systemui.statusbar.phone;
 
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Color;
 import android.graphics.Rect;
-import androidx.annotation.NonNull;
-import androidx.collection.ArrayMap;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.FrameLayout;
 
+import androidx.annotation.NonNull;
+import androidx.collection.ArrayMap;
+
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.util.ContrastColorUtil;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
-import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
-import com.android.systemui.statusbar.notification.NotificationData;
-import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.StatusBarIconView;
+import com.android.systemui.statusbar.notification.NotificationData;
+import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.NotificationUtils;
+import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.policy.DarkIconDispatcher;
 import com.android.systemui.statusbar.policy.DarkIconDispatcher.DarkReceiver;
-import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
+import com.android.systemui.tuner.TunerService;
 
 import java.util.ArrayList;
 import java.util.function.Function;
@@ -33,9 +35,23 @@ import java.util.function.Function;
  * normally reserved for notifications.
  */
 public class NotificationIconAreaController implements DarkReceiver {
+
+    public static final String LOW_PRIORITY = "low_priority";
+
     private final ContrastColorUtil mContrastColorUtil;
     private final NotificationEntryManager mEntryManager;
     private final Runnable mUpdateStatusBarIcons = this::updateStatusBarIcons;
+    private final TunerService.Tunable mTunable = new TunerService.Tunable() {
+        @Override
+        public void onTuningChanged(String key, String newValue) {
+            if (key.equals(LOW_PRIORITY)) {
+                mShowLowPriority = "1".equals(newValue);
+                if (mNotificationScrollLayout != null) {
+                    updateStatusBarIcons();
+                }
+            }
+        }
+    };
 
     private int mIconSize;
     private int mIconHPadding;
@@ -49,12 +65,15 @@ public class NotificationIconAreaController implements DarkReceiver {
     private ViewGroup mNotificationScrollLayout;
     private Context mContext;
     private boolean mFullyDark;
+    private boolean mShowLowPriority;
 
     public NotificationIconAreaController(Context context, StatusBar statusBar) {
         mStatusBar = statusBar;
         mContrastColorUtil = ContrastColorUtil.getInstance(context);
         mContext = context;
         mEntryManager = Dependency.get(NotificationEntryManager.class);
+
+        Dependency.get(TunerService.class).addTunable(mTunable, LOW_PRIORITY);
 
         initializeNotificationAreaViews(context);
     }
@@ -142,8 +161,14 @@ public class NotificationIconAreaController implements DarkReceiver {
     }
 
     protected boolean shouldShowNotificationIcon(NotificationData.Entry entry,
-            boolean showAmbient, boolean hideDismissed, boolean hideRepliedMessages) {
+            boolean showAmbient, boolean showLowPriority, boolean hideDismissed,
+            boolean hideRepliedMessages) {
         if (mEntryManager.getNotificationData().isAmbient(entry.key) && !showAmbient) {
+            return false;
+        }
+        if (!showLowPriority
+                && mEntryManager.getNotificationData().getImportance(entry.key)
+                < NotificationManager.IMPORTANCE_DEFAULT) {
             return false;
         }
         if (!StatusBar.isTopLevelChild(entry)) {
@@ -181,13 +206,14 @@ public class NotificationIconAreaController implements DarkReceiver {
 
     private void updateShelfIcons() {
         updateIconsForLayout(entry -> entry.expandedIcon, mShelfIcons,
-                NotificationShelf.SHOW_AMBIENT_ICONS, false /* hideDismissed */,
-                mFullyDark /* hideRepliedMessages */);
+                NotificationShelf.SHOW_AMBIENT_ICONS, !mFullyDark /* showLowPriority */,
+                false /* hideDismissed */, mFullyDark /* hideRepliedMessages */);
     }
 
     public void updateStatusBarIcons() {
         updateIconsForLayout(entry -> entry.icon, mNotificationIcons,
-                false /* showAmbient */, true /* hideDismissed */, true /* hideRepliedMessages */);
+                false /* showAmbient */, false /* showLowPriority */, true /* hideDismissed */,
+                true /* hideRepliedMessages */);
     }
 
     /**
@@ -200,8 +226,8 @@ public class NotificationIconAreaController implements DarkReceiver {
      * @param hideRepliedMessages should messages that have been replied to be hidden
      */
     private void updateIconsForLayout(Function<NotificationData.Entry, StatusBarIconView> function,
-            NotificationIconContainer hostLayout, boolean showAmbient, boolean hideDismissed,
-            boolean hideRepliedMessages) {
+            NotificationIconContainer hostLayout, boolean showAmbient, boolean showLowPriority,
+            boolean hideDismissed, boolean hideRepliedMessages) {
         ArrayList<StatusBarIconView> toShow = new ArrayList<>(
                 mNotificationScrollLayout.getChildCount());
 
@@ -210,7 +236,7 @@ public class NotificationIconAreaController implements DarkReceiver {
             View view = mNotificationScrollLayout.getChildAt(i);
             if (view instanceof ExpandableNotificationRow) {
                 NotificationData.Entry ent = ((ExpandableNotificationRow) view).getEntry();
-                if (shouldShowNotificationIcon(ent, showAmbient, hideDismissed,
+                if (shouldShowNotificationIcon(ent, showAmbient, showLowPriority, hideDismissed,
                         hideRepliedMessages)) {
                     toShow.add(function.apply(ent));
                 }

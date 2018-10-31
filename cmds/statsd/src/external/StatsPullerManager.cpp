@@ -234,6 +234,11 @@ const std::map<int, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
             {{} /* additive fields */, {} /* non additive fields */,
              5 * NS_PER_SEC /* min cool-down in seconds*/,
              new StatsCompanionServicePuller(android::util::PROCESS_CPU_TIME)}},
+        {android::util::CPU_TIME_PER_THREAD_FREQ,
+         {{7},
+          {2, 3, 4, 5, 6},
+          1 * NS_PER_SEC,
+          new StatsCompanionServicePuller(android::util::CPU_TIME_PER_THREAD_FREQ)}},
 };
 
 StatsPullerManager::StatsPullerManager() : mNextPullTimeNs(NO_ALARM_UPDATE) {

@@ -167,7 +167,6 @@ public abstract class BiometricDialogView extends LinearLayout {
         final ImageView icon = mLayout.findViewById(R.id.biometric_icon);
 
         icon.setContentDescription(getResources().getString(getIconDescriptionResourceId()));
-        mErrorText.setText(getResources().getString(getHintStringResourceId()));
 
         setDismissesDialog(space);
         setDismissesDialog(leftSpace);
@@ -188,6 +187,8 @@ public abstract class BiometricDialogView extends LinearLayout {
     @Override
     public void onAttachedToWindow() {
         super.onAttachedToWindow();
+
+        mErrorText.setText(getHintStringResourceId());
 
         final TextView title = mLayout.findViewById(R.id.title);
         final TextView subtitle = mLayout.findViewById(R.id.subtitle);

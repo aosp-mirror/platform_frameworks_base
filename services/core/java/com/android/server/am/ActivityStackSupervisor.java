@@ -226,9 +226,6 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     static final int RESUME_TOP_ACTIVITY_MSG = FIRST_SUPERVISOR_STACK_MSG + 2;
     static final int SLEEP_TIMEOUT_MSG = FIRST_SUPERVISOR_STACK_MSG + 3;
     static final int LAUNCH_TIMEOUT_MSG = FIRST_SUPERVISOR_STACK_MSG + 4;
-    static final int HANDLE_DISPLAY_ADDED = FIRST_SUPERVISOR_STACK_MSG + 5;
-    static final int HANDLE_DISPLAY_CHANGED = FIRST_SUPERVISOR_STACK_MSG + 6;
-    static final int HANDLE_DISPLAY_REMOVED = FIRST_SUPERVISOR_STACK_MSG + 7;
     static final int LAUNCH_TASK_BEHIND_COMPLETE = FIRST_SUPERVISOR_STACK_MSG + 12;
     static final int REPORT_MULTI_WINDOW_MODE_CHANGED_MSG = FIRST_SUPERVISOR_STACK_MSG + 14;
     static final int REPORT_PIP_MODE_CHANGED_MSG = FIRST_SUPERVISOR_STACK_MSG + 15;
@@ -675,7 +672,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         setWindowContainerController(new RootWindowContainerController(this));
 
         mDisplayManager = mService.mContext.getSystemService(DisplayManager.class);
-        mDisplayManager.registerDisplayListener(this, null);
+        mDisplayManager.registerDisplayListener(this, mHandler);
         mDisplayManagerInternal = LocalServices.getService(DisplayManagerInternal.class);
 
         final Display[] displays = mDisplayManager.getDisplays();
@@ -4108,25 +4105,37 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     @Override
     public void onDisplayAdded(int displayId) {
         if (DEBUG_STACK) Slog.v(TAG, "Display added displayId=" + displayId);
-        mHandler.sendMessage(mHandler.obtainMessage(HANDLE_DISPLAY_ADDED, displayId, 0));
+        synchronized (mService.mGlobalLock) {
+            getActivityDisplayOrCreateLocked(displayId);
+            mService.startHomeActivityLocked(mCurrentUser, "displayAdded", displayId);
+        }
     }
 
     @Override
     public void onDisplayRemoved(int displayId) {
         if (DEBUG_STACK) Slog.v(TAG, "Display removed displayId=" + displayId);
-        mHandler.sendMessage(mHandler.obtainMessage(HANDLE_DISPLAY_REMOVED, displayId, 0));
+        if (displayId == DEFAULT_DISPLAY) {
+            throw new IllegalArgumentException("Can't remove the primary display.");
+        }
+
+        synchronized (mService.mGlobalLock) {
+            final ActivityDisplay activityDisplay = getActivityDisplay(displayId);
+            if (activityDisplay == null) {
+                return;
+            }
+
+            activityDisplay.remove();
+        }
     }
 
     @Override
     public void onDisplayChanged(int displayId) {
         if (DEBUG_STACK) Slog.v(TAG, "Display changed displayId=" + displayId);
-        mHandler.sendMessage(mHandler.obtainMessage(HANDLE_DISPLAY_CHANGED, displayId, 0));
-    }
-
-    private void handleDisplayAdded(int displayId) {
         synchronized (mService.mGlobalLock) {
-            getActivityDisplayOrCreateLocked(displayId);
-            mService.startHomeActivityLocked(mCurrentUser, "displayAdded", displayId);
+            final ActivityDisplay activityDisplay = getActivityDisplay(displayId);
+            if (activityDisplay != null) {
+                activityDisplay.onDisplayChanged();
+            }
         }
     }
 
@@ -4173,7 +4182,6 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         // The display hasn't been added to ActivityManager yet, create a new record now.
         activityDisplay = new ActivityDisplay(this, display);
         addChild(activityDisplay, ActivityDisplay.POSITION_BOTTOM);
-        mWindowManager.onDisplayAdded(displayId);
         return activityDisplay;
     }
 
@@ -4199,47 +4207,6 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         mDefaultMinSizeOfResizeableTaskDp = (int) (minimalSize / dm.density);
     }
 
-    private void handleDisplayRemoved(int displayId) {
-        if (displayId == DEFAULT_DISPLAY) {
-            throw new IllegalArgumentException("Can't remove the primary display.");
-        }
-
-        synchronized (mService.mGlobalLock) {
-            final ActivityDisplay activityDisplay = getActivityDisplay(displayId);
-            if (activityDisplay == null) {
-                return;
-            }
-
-            activityDisplay.remove();
-
-            releaseSleepTokens(activityDisplay);
-        }
-    }
-
-    private void handleDisplayChanged(int displayId) {
-        synchronized (mService.mGlobalLock) {
-            ActivityDisplay activityDisplay = getActivityDisplay(displayId);
-            // TODO: The following code block should be moved into {@link ActivityDisplay}.
-            if (activityDisplay != null) {
-                // The window policy is responsible for stopping activities on the default display
-                if (displayId != Display.DEFAULT_DISPLAY) {
-                    int displayState = activityDisplay.mDisplay.getState();
-                    if (displayState == Display.STATE_OFF && activityDisplay.mOffToken == null) {
-                        activityDisplay.mOffToken =
-                                mService.acquireSleepToken("Display-off", displayId);
-                    } else if (displayState == Display.STATE_ON
-                            && activityDisplay.mOffToken != null) {
-                        activityDisplay.mOffToken.release();
-                        activityDisplay.mOffToken = null;
-                    }
-                }
-
-                activityDisplay.updateBounds();
-            }
-            mWindowManager.onDisplayChanged(displayId);
-        }
-    }
-
     SleepToken createSleepTokenLocked(String tag, int displayId) {
         final ActivityDisplay display = getActivityDisplay(displayId);
         if (display == null) {
@@ -4262,18 +4229,6 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                 mService.updateSleepIfNeededLocked();
             }
         }
-    }
-
-    private void releaseSleepTokens(ActivityDisplay display) {
-        if (display.mAllSleepTokens.isEmpty()) {
-            return;
-        }
-        for (SleepToken token : display.mAllSleepTokens) {
-            mSleepTokens.remove(token);
-        }
-        display.mAllSleepTokens.clear();
-
-        mService.updateSleepIfNeededLocked();
     }
 
     private StackInfo getStackInfo(ActivityStack stack) {
@@ -4596,15 +4551,6 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                             mLaunchingActivity.release();
                         }
                     }
-                } break;
-                case HANDLE_DISPLAY_ADDED: {
-                    handleDisplayAdded(msg.arg1);
-                } break;
-                case HANDLE_DISPLAY_CHANGED: {
-                    handleDisplayChanged(msg.arg1);
-                } break;
-                case HANDLE_DISPLAY_REMOVED: {
-                    handleDisplayRemoved(msg.arg1);
                 } break;
                 case LAUNCH_TASK_BEHIND_COMPLETE: {
                     synchronized (mService.mGlobalLock) {

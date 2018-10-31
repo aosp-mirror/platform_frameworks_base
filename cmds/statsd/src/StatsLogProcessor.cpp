@@ -442,7 +442,7 @@ void StatsLogProcessor::flushIfNecessaryLocked(
     if (totalBytes >
         StatsdStats::kMaxMetricsBytesPerConfig) {  // Too late. We need to start clearing data.
         metricsManager.dropData(timestampNs);
-        StatsdStats::getInstance().noteDataDropped(key);
+        StatsdStats::getInstance().noteDataDropped(key, totalBytes);
         VLOG("StatsD had to toss out metrics for %s", key.ToString().c_str());
     } else if ((totalBytes > StatsdStats::kBytesPerConfigTriggerGetData) ||
                (mOnDiskDataConfigs.find(key) != mOnDiskDataConfigs.end())) {

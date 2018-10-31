@@ -245,10 +245,11 @@ public class StaticLayoutPerfTest {
             state.pauseTiming();
             final StaticLayout layout =
                     StaticLayout.Builder.obtain(text, 0, text.length(), PAINT, TEXT_WIDTH).build();
-            final RecordingCanvas c = node.start(1200, 200);
+            final RecordingCanvas c = node.startRecording(1200, 200);
             state.resumeTiming();
 
             layout.draw(c);
+            node.endRecording();
         }
     }
 
@@ -261,10 +262,11 @@ public class StaticLayoutPerfTest {
             final CharSequence text = mTextUtil.nextRandomParagraph(WORD_LENGTH, STYLE_TEXT);
             final StaticLayout layout =
                     StaticLayout.Builder.obtain(text, 0, text.length(), PAINT, TEXT_WIDTH).build();
-            final RecordingCanvas c = node.start(1200, 200);
+            final RecordingCanvas c = node.startRecording(1200, 200);
             state.resumeTiming();
 
             layout.draw(c);
+            node.endRecording();
         }
     }
 
@@ -277,10 +279,11 @@ public class StaticLayoutPerfTest {
             final CharSequence text = mTextUtil.nextRandomParagraph(WORD_LENGTH, NO_STYLE_TEXT);
             final StaticLayout layout =
                     StaticLayout.Builder.obtain(text, 0, text.length(), PAINT, TEXT_WIDTH).build();
-            final RecordingCanvas c = node.start(1200, 200);
+            final RecordingCanvas c = node.startRecording(1200, 200);
             state.resumeTiming();
 
             layout.draw(c);
+            node.endRecording();
         }
     }
 
@@ -293,11 +296,12 @@ public class StaticLayoutPerfTest {
             final CharSequence text = mTextUtil.nextRandomParagraph(WORD_LENGTH, STYLE_TEXT);
             final StaticLayout layout =
                     StaticLayout.Builder.obtain(text, 0, text.length(), PAINT, TEXT_WIDTH).build();
-            final RecordingCanvas c = node.start(1200, 200);
+            final RecordingCanvas c = node.startRecording(1200, 200);
             Canvas.freeTextLayoutCaches();
             state.resumeTiming();
 
             layout.draw(c);
+            node.endRecording();
         }
     }
 
@@ -310,11 +314,12 @@ public class StaticLayoutPerfTest {
             final CharSequence text = mTextUtil.nextRandomParagraph(WORD_LENGTH, NO_STYLE_TEXT);
             final StaticLayout layout =
                     StaticLayout.Builder.obtain(text, 0, text.length(), PAINT, TEXT_WIDTH).build();
-            final RecordingCanvas c = node.start(1200, 200);
+            final RecordingCanvas c = node.startRecording(1200, 200);
             Canvas.freeTextLayoutCaches();
             state.resumeTiming();
 
             layout.draw(c);
+            node.endRecording();
         }
     }
 
@@ -328,10 +333,11 @@ public class StaticLayoutPerfTest {
                     mTextUtil.nextRandomParagraph(WORD_LENGTH, STYLE_TEXT), PAINT);
             final StaticLayout layout =
                     StaticLayout.Builder.obtain(text, 0, text.length(), PAINT, TEXT_WIDTH).build();
-            final RecordingCanvas c = node.start(1200, 200);
+            final RecordingCanvas c = node.startRecording(1200, 200);
             state.resumeTiming();
 
             layout.draw(c);
+            node.endRecording();
         }
     }
 
@@ -345,10 +351,11 @@ public class StaticLayoutPerfTest {
                     mTextUtil.nextRandomParagraph(WORD_LENGTH, NO_STYLE_TEXT), PAINT);
             final StaticLayout layout =
                     StaticLayout.Builder.obtain(text, 0, text.length(), PAINT, TEXT_WIDTH).build();
-            final RecordingCanvas c = node.start(1200, 200);
+            final RecordingCanvas c = node.startRecording(1200, 200);
             state.resumeTiming();
 
             layout.draw(c);
+            node.endRecording();
         }
     }
 
@@ -362,11 +369,12 @@ public class StaticLayoutPerfTest {
                     mTextUtil.nextRandomParagraph(WORD_LENGTH, STYLE_TEXT), PAINT);
             final StaticLayout layout =
                     StaticLayout.Builder.obtain(text, 0, text.length(), PAINT, TEXT_WIDTH).build();
-            final RecordingCanvas c = node.start(1200, 200);
+            final RecordingCanvas c = node.startRecording(1200, 200);
             Canvas.freeTextLayoutCaches();
             state.resumeTiming();
 
             layout.draw(c);
+            node.endRecording();
         }
     }
 
@@ -380,11 +388,12 @@ public class StaticLayoutPerfTest {
                     mTextUtil.nextRandomParagraph(WORD_LENGTH, NO_STYLE_TEXT), PAINT);
             final StaticLayout layout =
                     StaticLayout.Builder.obtain(text, 0, text.length(), PAINT, TEXT_WIDTH).build();
-            final RecordingCanvas c = node.start(1200, 200);
+            final RecordingCanvas c = node.startRecording(1200, 200);
             Canvas.freeTextLayoutCaches();
             state.resumeTiming();
 
             layout.draw(c);
+            node.endRecording();
         }
     }
 

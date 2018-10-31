@@ -80,6 +80,7 @@ import com.android.internal.app.procstats.ProcessStats;
 import com.android.internal.net.NetworkStatsFactory;
 import com.android.internal.os.BinderCallsStats.ExportedCallStat;
 import com.android.internal.os.KernelCpuSpeedReader;
+import com.android.internal.os.KernelCpuThreadReader;
 import com.android.internal.os.KernelUidCpuActiveTimeReader;
 import com.android.internal.os.KernelUidCpuClusterTimeReader;
 import com.android.internal.os.KernelUidCpuFreqTimeReader;
@@ -191,6 +192,8 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             new KernelUidCpuClusterTimeReader();
     private StoragedUidIoStatsReader mStoragedUidIoStatsReader =
             new StoragedUidIoStatsReader();
+    @Nullable
+    private final KernelCpuThreadReader mKernelCpuThreadReader;
 
     private static IThermalService sThermalService;
     private File mBaseDir =
@@ -265,6 +268,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         handlerThread.start();
         mHandler = new CompanionHandler(handlerThread.getLooper());
 
+        mKernelCpuThreadReader = KernelCpuThreadReader.create();
     }
 
     @Override
@@ -1445,6 +1449,46 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         }
     }
 
+    private void pullCpuTimePerThreadFreq(int tagId, long elapsedNanos, long wallClockNanos,
+            List<StatsLogEventWrapper> pulledData) {
+        if (this.mKernelCpuThreadReader == null) {
+            return;
+        }
+        KernelCpuThreadReader.ProcessCpuUsage processCpuUsage = this.mKernelCpuThreadReader
+                .getCurrentProcessCpuUsage();
+        if (processCpuUsage == null) {
+            return;
+        }
+        int[] cpuFrequencies = mKernelCpuThreadReader.getCpuFrequenciesKhz();
+        for (KernelCpuThreadReader.ThreadCpuUsage threadCpuUsage
+                : processCpuUsage.threadCpuUsages) {
+            if (threadCpuUsage.usageTimesMillis.length != cpuFrequencies.length) {
+                Slog.w(TAG, "Unexpected number of usage times,"
+                        + " expected " + cpuFrequencies.length
+                        + " but got " + threadCpuUsage.usageTimesMillis.length);
+                continue;
+            }
+
+            for (int i = 0; i < threadCpuUsage.usageTimesMillis.length; i++) {
+                // Do not report CPU usage at a frequency when it's zero
+                if (threadCpuUsage.usageTimesMillis[i] == 0) {
+                    continue;
+                }
+
+                StatsLogEventWrapper e =
+                        new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
+                e.writeInt(processCpuUsage.uid);
+                e.writeInt(processCpuUsage.processId);
+                e.writeInt(threadCpuUsage.threadId);
+                e.writeString(processCpuUsage.processName);
+                e.writeString(threadCpuUsage.threadName);
+                e.writeInt(cpuFrequencies[i]);
+                e.writeInt(threadCpuUsage.usageTimesMillis[i]);
+                pulledData.add(e);
+            }
+        }
+    }
+
     /**
      * Pulls various data.
      */
@@ -1581,6 +1625,10 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             }
             case StatsLog.PROCESS_CPU_TIME: {
                 pullProcessCpuTime(tagId, elapsedNanos, wallClockNanos, ret);
+                break;
+            }
+            case StatsLog.CPU_TIME_PER_THREAD_FREQ: {
+                pullCpuTimePerThreadFreq(tagId, elapsedNanos, wallClockNanos, ret);
                 break;
             }
             default:

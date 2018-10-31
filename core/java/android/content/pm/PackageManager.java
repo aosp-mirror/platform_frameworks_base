@@ -5439,6 +5439,28 @@ public abstract class PackageManager {
             ComponentName[] set, ComponentName activity);
 
     /**
+     * Replaces an existing preferred activity mapping to the system, and if that were not present
+     * adds a new preferred activity.  This will be used to automatically select the given activity
+     * component when {@link Context#startActivity(Intent) Context.startActivity()} finds multiple
+     * matching activities and also matches the given filter.
+     *
+     * @param filter The set of intents under which this activity will be made preferred.
+     * @param match The IntentFilter match category that this preference applies to. Should be a
+     *              combination of {@link IntentFilter#MATCH_CATEGORY_MASK} and
+     *              {@link IntentFilter#MATCH_ADJUSTMENT_MASK}).
+     * @param set The set of activities that the user was picking from when this preference was
+     *            made.
+     * @param activity The component name of the activity that is to be preferred.
+     *
+     * @hide
+     */
+    @SystemApi
+    public void replacePreferredActivity(@NonNull IntentFilter filter, int match,
+            @NonNull List<ComponentName> set, @NonNull ComponentName activity) {
+        replacePreferredActivity(filter, match, set.toArray(new ComponentName[0]), activity);
+    }
+
+    /**
      * @hide
      */
     @Deprecated

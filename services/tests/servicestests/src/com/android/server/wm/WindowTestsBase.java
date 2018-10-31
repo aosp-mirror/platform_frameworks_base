@@ -75,6 +75,7 @@ class WindowTestsBase {
     private static int sNextDisplayId = DEFAULT_DISPLAY + 1;
     static int sNextStackId = 1000;
 
+    /** Non-default display. */
     DisplayContent mDisplayContent;
     DisplayInfo mDisplayInfo = new DisplayInfo();
     WindowState mWallpaperWindow;

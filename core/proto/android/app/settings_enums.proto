@@ -56,5 +56,8 @@ enum PageId {
 
   // Settings > Display > Lock screen display > On lock screen
   LOCK_SCREEN_NOTIFICATION_CONTENT = 1584;
+
+  // ConfirmDeviceCredentials > BiometricPrompt
+  BIOMETRIC_FRAGMENT = 1585;
 }
 

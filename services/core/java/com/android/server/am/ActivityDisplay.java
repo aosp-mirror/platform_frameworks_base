@@ -163,6 +163,23 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
         setBounds(0, 0, mTmpDisplaySize.x, mTmpDisplaySize.y);
     }
 
+    void onDisplayChanged() {
+        // The window policy is responsible for stopping activities on the default display.
+        final int displayId = mDisplay.getDisplayId();
+        if (displayId != DEFAULT_DISPLAY) {
+            final int displayState = mDisplay.getState();
+            if (displayState == Display.STATE_OFF && mOffToken == null) {
+                mOffToken = mSupervisor.mService.acquireSleepToken("Display-off", displayId);
+            } else if (displayState == Display.STATE_ON && mOffToken != null) {
+                mOffToken.release();
+                mOffToken = null;
+            }
+        }
+
+        updateBounds();
+        mWindowContainerController.onDisplayChanged();
+    }
+
     void addChild(ActivityStack stack, int position) {
         if (position == POSITION_BOTTOM) {
             position = 0;
@@ -1021,6 +1038,12 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
         releaseSelfIfNeeded();
 
         mSupervisor.getKeyguardController().onDisplayRemoved(mDisplayId);
+
+        if (!mAllSleepTokens.isEmpty()) {
+            mSupervisor.mSleepTokens.removeAll(mAllSleepTokens);
+            mAllSleepTokens.clear();
+            mSupervisor.mService.updateSleepIfNeededLocked();
+        }
     }
 
     private void releaseSelfIfNeeded() {

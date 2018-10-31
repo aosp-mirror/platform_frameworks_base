@@ -15,6 +15,7 @@
  */
 package com.android.systemui.statusbar;
 
+import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.admin.DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED;
 
 import android.app.ActivityManager;
@@ -292,7 +293,8 @@ public class NotificationLockscreenUserManagerImpl implements
             return false;
         }
         return mShowLockscreenNotifications
-                && !getEntryManager().getNotificationData().isAmbient(sbn.getKey());
+                && getEntryManager().getNotificationData().getImportance(sbn.getKey())
+                >= IMPORTANCE_DEFAULT;
     }
 
     private void setShowLockscreenNotifications(boolean show) {

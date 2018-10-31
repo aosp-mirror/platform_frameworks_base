@@ -98,6 +98,11 @@
             android:summary="%s"
             android:entries="@array/clock_options" />
 
+        <com.android.systemui.tuner.TunerSwitch
+            android:key="low_priority"
+            android:title="@string/tuner_low_priority"
+            sysui:defValue="false" />
+
     </PreferenceScreen>
 
     <PreferenceScreen

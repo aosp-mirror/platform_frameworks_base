@@ -6038,6 +6038,7 @@ public final class Settings {
          * shortcut. Must be its flattened {@link ComponentName}.
          * @hide
          */
+        @TestApi
         public static final String ACCESSIBILITY_SHORTCUT_TARGET_SERVICE =
                 "accessibility_shortcut_target_service";
 
@@ -7388,8 +7389,16 @@ public final class Settings {
         public static final String DIALER_DEFAULT_APPLICATION = "dialer_default_application";
 
         /**
-         * Specifies the package name currently configured to be the default application to perform
-         * the user-defined call redirection service with Telecom.
+         * Specifies the component name currently configured to be the default call screening
+         * application
+         * @hide
+         */
+        public static final String CALL_SCREENING_DEFAULT_COMPONENT =
+                "call_screening_default_component";
+
+        /**
+         * Specifies the component name currently configured to be the default application to
+         * perform the user-defined call redirection service with Telecom.
          * @hide
          */
         @UnsupportedAppUsage

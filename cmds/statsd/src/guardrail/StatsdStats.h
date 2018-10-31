@@ -43,6 +43,8 @@ struct ConfigStats {
 
     std::list<int32_t> broadcast_sent_time_sec;
     std::list<int32_t> data_drop_time_sec;
+    // Number of bytes dropped at corresponding time.
+    std::list<int64_t> data_drop_bytes;
     std::list<std::pair<int32_t, int64_t>> dump_report_stats;
 
     // Stores how many times a matcher have been matched. The map size is capped by kMaxConfigCount.
@@ -169,7 +171,7 @@ public:
     /**
      * Report a config's metrics data has been dropped.
      */
-    void noteDataDropped(const ConfigKey& key);
+    void noteDataDropped(const ConfigKey& key, const size_t totalBytes);
 
     /**
      * Report metrics data report has been sent.
@@ -350,7 +352,7 @@ private:
 
     void resetInternalLocked();
 
-    void noteDataDropped(const ConfigKey& key, int32_t timeSec);
+    void noteDataDropped(const ConfigKey& key, const size_t totalBytes, int32_t timeSec);
 
     void noteMetricsReportSent(const ConfigKey& key, const size_t num_bytes, int32_t timeSec);
 

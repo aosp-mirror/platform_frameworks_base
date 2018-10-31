@@ -85,12 +85,12 @@ public final class CellSignalStrengthLte extends CellSignalStrength implements P
     /** @hide */
     @Override
     public void setDefaultValues() {
-        mSignalStrength = Integer.MAX_VALUE;
-        mRsrp = Integer.MAX_VALUE;
-        mRsrq = Integer.MAX_VALUE;
-        mRssnr = Integer.MAX_VALUE;
-        mCqi = Integer.MAX_VALUE;
-        mTimingAdvance = Integer.MAX_VALUE;
+        mSignalStrength = CellInfo.UNAVAILABLE;
+        mRsrp = CellInfo.UNAVAILABLE;
+        mRsrq = CellInfo.UNAVAILABLE;
+        mRssnr = CellInfo.UNAVAILABLE;
+        mCqi = CellInfo.UNAVAILABLE;
+        mTimingAdvance = CellInfo.UNAVAILABLE;
     }
 
     /**
@@ -104,26 +104,27 @@ public final class CellSignalStrengthLte extends CellSignalStrength implements P
         int levelRsrp = 0;
         int levelRssnr = 0;
 
-        if (mRsrp == Integer.MAX_VALUE) levelRsrp = 0;
+        if (mRsrp == CellInfo.UNAVAILABLE) levelRsrp = 0;
         else if (mRsrp >= -95) levelRsrp = SIGNAL_STRENGTH_GREAT;
         else if (mRsrp >= -105) levelRsrp = SIGNAL_STRENGTH_GOOD;
         else if (mRsrp >= -115) levelRsrp = SIGNAL_STRENGTH_MODERATE;
         else levelRsrp = SIGNAL_STRENGTH_POOR;
 
         // See RIL_LTE_SignalStrength in ril.h
-        if (mRssnr == Integer.MAX_VALUE) levelRssnr = 0;
+        if (mRssnr == CellInfo.UNAVAILABLE) levelRssnr = 0;
         else if (mRssnr >= 45) levelRssnr = SIGNAL_STRENGTH_GREAT;
         else if (mRssnr >= 10) levelRssnr = SIGNAL_STRENGTH_GOOD;
         else if (mRssnr >= -30) levelRssnr = SIGNAL_STRENGTH_MODERATE;
         else levelRssnr = SIGNAL_STRENGTH_POOR;
 
         int level;
-        if (mRsrp == Integer.MAX_VALUE)
+        if (mRsrp == CellInfo.UNAVAILABLE) {
             level = levelRssnr;
-        else if (mRssnr == Integer.MAX_VALUE)
+        } else if (mRssnr == CellInfo.UNAVAILABLE) {
             level = levelRsrp;
-        else
+        } else {
             level = (levelRssnr < levelRsrp) ? levelRssnr : levelRsrp;
+        }
 
         if (DBG) log("Lte rsrp level: " + levelRsrp
                 + " snr level: " + levelRssnr + " level: " + level);
@@ -133,7 +134,8 @@ public final class CellSignalStrengthLte extends CellSignalStrength implements P
     /**
      * Get reference signal received quality
      *
-     * @return the RSRQ if available or Integer.MAX_VALUE if unavailable.
+     * @return the RSRQ if available or
+     *         {@link android.telephony.CellInfo#UNAVAILABLE UNAVAILABLE} if unavailable.
      */
     public int getRsrq() {
         return mRsrq;
@@ -142,7 +144,8 @@ public final class CellSignalStrengthLte extends CellSignalStrength implements P
     /**
      * Get reference signal signal-to-noise ratio
      *
-     * @return the RSSNR if available or Integer.MAX_VALUE if unavailable.
+     * @return the RSSNR if available or
+     *         {@link android.telephony.CellInfo#UNAVAILABLE UNAVAILABLE} if unavailable.
      */
     public int getRssnr() {
         return mRssnr;
@@ -160,7 +163,8 @@ public final class CellSignalStrengthLte extends CellSignalStrength implements P
     /**
      * Get channel quality indicator
      *
-     * @return the CQI if available or Integer.MAX_VALUE if unavailable.
+     * @return the CQI if available or
+     *         {@link android.telephony.CellInfo#UNAVAILABLE UNAVAILABLE} if unavailable.
      */
     public int getCqi() {
         return mCqi;
@@ -184,7 +188,7 @@ public final class CellSignalStrengthLte extends CellSignalStrength implements P
     public int getAsuLevel() {
         int lteAsuLevel = 99;
         int lteDbm = getDbm();
-        if (lteDbm == Integer.MAX_VALUE) lteAsuLevel = 99;
+        if (lteDbm == CellInfo.UNAVAILABLE) lteAsuLevel = 99;
         else if (lteDbm <= -140) lteAsuLevel = 0;
         else if (lteDbm >= -43) lteAsuLevel = 97;
         else lteAsuLevel = lteDbm + 140;
@@ -194,10 +198,11 @@ public final class CellSignalStrengthLte extends CellSignalStrength implements P
 
     /**
      * Get the timing advance value for LTE, as a value in range of 0..1282.
-     * Integer.MAX_VALUE is reported when there is no active RRC
-     * connection. Refer to 3GPP 36.213 Sec 4.2.3
+     * {@link android.telephony.CellInfo#UNAVAILABLE UNAVAILABLE} is reported when there is no
+     * active RRC connection. Refer to 3GPP 36.213 Sec 4.2.3
      *
-     * @return the LTE timing advance if available or Integer.MAX_VALUE if unavailable.
+     * @return the LTE timing advance if available or
+     *         {@link android.telephony.CellInfo#UNAVAILABLE UNAVAILABLE} if unavailable.
      */
     public int getTimingAdvance() {
         return mTimingAdvance;
@@ -252,8 +257,8 @@ public final class CellSignalStrengthLte extends CellSignalStrength implements P
         // Need to multiply rsrp and rsrq by -1
         // to ensure consistency when reading values written here
         // unless the values are invalid
-        dest.writeInt(mRsrp * (mRsrp != Integer.MAX_VALUE ? -1 : 1));
-        dest.writeInt(mRsrq * (mRsrq != Integer.MAX_VALUE ? -1 : 1));
+        dest.writeInt(mRsrp * (mRsrp != CellInfo.UNAVAILABLE ? -1 : 1));
+        dest.writeInt(mRsrq * (mRsrq != CellInfo.UNAVAILABLE ? -1 : 1));
         dest.writeInt(mRssnr);
         dest.writeInt(mCqi);
         dest.writeInt(mTimingAdvance);
@@ -268,9 +273,9 @@ public final class CellSignalStrengthLte extends CellSignalStrength implements P
         // rsrp and rsrq are written into the parcel as positive values.
         // Need to convert into negative values unless the values are invalid
         mRsrp = in.readInt();
-        if (mRsrp != Integer.MAX_VALUE) mRsrp *= -1;
+        if (mRsrp != CellInfo.UNAVAILABLE) mRsrp *= -1;
         mRsrq = in.readInt();
-        if (mRsrq != Integer.MAX_VALUE) mRsrq *= -1;
+        if (mRsrq != CellInfo.UNAVAILABLE) mRsrq *= -1;
         mRssnr = in.readInt();
         mCqi = in.readInt();
         mTimingAdvance = in.readInt();

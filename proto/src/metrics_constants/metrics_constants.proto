@@ -6569,6 +6569,11 @@ message MetricsEvent {
     // OS: Q
     LOCK_SCREEN_NOTIFICATION_CONTENT = 1584;
 
+    // ConfirmDeviceCredentials > BiometricPrompt
+    // CATEGORY: SETTINGS
+    // OS: Q
+    BIOMETRIC_FRAGMENT = 1585;
+
     // ---- End Q Constants, all Q constants go above this line ----
 
     // Add new aosp constants above this line.

@@ -269,7 +269,6 @@ public class DisplayRotation {
         if (changed) {
             mService.updateRotation(true /* alwaysSendConfiguration */,
                     false /* forceRelayout */);
-            mService.mDisplaySettings.writeSettingsLocked();
         }
     }
 
