@@ -1641,4 +1641,9 @@ interface ITelephony {
      * Identify if the number is emergency number, based on all the active subscriptions.
      */
     boolean isCurrentEmergencyNumber(String number);
+    
+    /**
+     * Return a list of certs in hex string from loaded carrier privileges access rules.
+     */
+    List<String> getCertsFromCarrierPrivilegeAccessRules(int subId);
 }

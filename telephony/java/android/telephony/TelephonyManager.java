@@ -8274,6 +8274,29 @@ public class TelephonyManager {
     }
 
     /**
+     * Return a list of certs in hex string from loaded carrier privileges access rules.
+     *
+     * @return a list of certificate in hex string. return {@code null} if there is no certs
+     * or privilege rules are not loaded yet.
+     *
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE}
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public List<String> getCertsFromCarrierPrivilegeAccessRules() {
+        try {
+            ITelephony service = getITelephony();
+            if (service != null) {
+                return service.getCertsFromCarrierPrivilegeAccessRules(getSubId());
+            }
+        } catch (RemoteException ex) {
+            // This could happen if binder process crashes.
+        }
+        return null;
+    }
+
+    /**
      * Return the application ID for the uicc application type like {@link #APPTYPE_CSIM}.
      * All uicc applications are uniquely identified by application ID. See ETSI 102.221 and 101.220
      * <p>Requires Permission:
