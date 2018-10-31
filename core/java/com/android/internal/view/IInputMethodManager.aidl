@@ -55,7 +55,8 @@ interface IInputMethodManager {
     // @NonNull
     InputBindResult startInputOrWindowGainedFocus(
             /* @StartInputReason */ int startInputReason,
-            in IInputMethodClient client, in IBinder windowToken, int controlFlags,
+            in IInputMethodClient client, in IBinder windowToken,
+            /* @StartInputFlags */ int startInputFlags,
             /* @android.view.WindowManager.LayoutParams.SoftInputModeFlags */ int softInputMode,
             int windowFlags, in EditorInfo attribute, IInputContext inputContext,
             /* @InputConnectionInspector.MissingMethodFlags */ int missingMethodFlags,

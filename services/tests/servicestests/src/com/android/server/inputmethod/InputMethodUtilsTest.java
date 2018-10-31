@@ -16,9 +16,6 @@
 
 package com.android.server.inputmethod;
 
-import static android.view.inputmethod.InputMethodManager.CONTROL_WINDOW_IS_TEXT_EDITOR;
-import static android.view.inputmethod.InputMethodManager.CONTROL_WINDOW_VIEW_HAS_FOCUS;
-
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.in;
 import static org.hamcrest.Matchers.not;
@@ -44,6 +41,8 @@ import android.view.inputmethod.InputMethodSubtype.InputMethodSubtypeBuilder;
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
+
+import com.android.internal.inputmethod.StartInputFlags;
 
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -1090,21 +1089,19 @@ public class InputMethodUtilsTest {
         assertTrue(InputMethodUtils.isSoftInputModeStateVisibleAllowed(
                 Build.VERSION_CODES.O_MR1, 0));
         assertTrue(InputMethodUtils.isSoftInputModeStateVisibleAllowed(
-                Build.VERSION_CODES.O_MR1, CONTROL_WINDOW_VIEW_HAS_FOCUS));
+                Build.VERSION_CODES.O_MR1, StartInputFlags.VIEW_HAS_FOCUS));
         assertTrue(InputMethodUtils.isSoftInputModeStateVisibleAllowed(
                 Build.VERSION_CODES.O_MR1,
-                CONTROL_WINDOW_VIEW_HAS_FOCUS | CONTROL_WINDOW_IS_TEXT_EDITOR));
+                StartInputFlags.VIEW_HAS_FOCUS | StartInputFlags.IS_TEXT_EDITOR));
 
         // On P+ devices, SOFT_INPUT_STATE_VISIBLE/SOFT_INPUT_STATE_ALWAYS_VISIBLE are allowed only
         // when there is a focused View and its View#onCheckIsTextEditor() returns true.
         assertFalse(InputMethodUtils.isSoftInputModeStateVisibleAllowed(
                 Build.VERSION_CODES.P, 0));
         assertFalse(InputMethodUtils.isSoftInputModeStateVisibleAllowed(
-                Build.VERSION_CODES.P, CONTROL_WINDOW_VIEW_HAS_FOCUS));
+                Build.VERSION_CODES.P, StartInputFlags.VIEW_HAS_FOCUS));
         assertTrue(InputMethodUtils.isSoftInputModeStateVisibleAllowed(
                 Build.VERSION_CODES.P,
-                CONTROL_WINDOW_VIEW_HAS_FOCUS | CONTROL_WINDOW_IS_TEXT_EDITOR));
-
+                StartInputFlags.VIEW_HAS_FOCUS | StartInputFlags.IS_TEXT_EDITOR));
     }
-
 }
