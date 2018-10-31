@@ -114,17 +114,17 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_SWITC
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_VISIBILITY;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
-import static com.android.server.wm.ActivityTaskManagerService.H.REPORT_TIME_TRACKER_MSG;
-import static com.android.server.wm.ActivityTaskManagerService.UiHandler.DISMISS_DIALOG_UI_MSG;
-import static com.android.server.wm.TaskRecord.LOCK_TASK_AUTH_DONT_LOCK;
-import static com.android.server.wm.TaskRecord.REPARENT_KEEP_STACK_AT_FRONT;
-import static com.android.server.wm.TaskRecord.REPARENT_LEAVE_STACK_IN_PLACE;
 import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_CONTENT;
 import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_DATA;
 import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_RECEIVER_EXTRAS;
 import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_STRUCTURE;
+import static com.android.server.wm.ActivityTaskManagerService.H.REPORT_TIME_TRACKER_MSG;
+import static com.android.server.wm.ActivityTaskManagerService.UiHandler.DISMISS_DIALOG_UI_MSG;
 import static com.android.server.wm.RecentsAnimationController.REORDER_KEEP_IN_PLACE;
 import static com.android.server.wm.RecentsAnimationController.REORDER_MOVE_TO_ORIGINAL_POSITION;
+import static com.android.server.wm.TaskRecord.LOCK_TASK_AUTH_DONT_LOCK;
+import static com.android.server.wm.TaskRecord.REPARENT_KEEP_STACK_AT_FRONT;
+import static com.android.server.wm.TaskRecord.REPARENT_LEAVE_STACK_IN_PLACE;
 
 import android.Manifest;
 import android.annotation.NonNull;
@@ -4873,21 +4873,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 mH.sendMessage(msg);
             }
         }
-
-        // Update the configuration with WM first and check if any of the stacks need to be resized
-        // due to the configuration change. If so, resize the stacks now and do any relaunches if
-        // necessary. This way we don't need to relaunch again afterwards in
-        // ensureActivityConfiguration().
-        if (mWindowManager != null) {
-            final int[] resizedStacks =
-                    mWindowManager.setNewDisplayOverrideConfiguration(mTempConfig, displayId);
-            if (resizedStacks != null) {
-                for (int stackId : resizedStacks) {
-                    resizeStackWithBoundsFromWindowManager(stackId, deferResume);
-                }
-            }
-        }
-
         return changes;
     }
 
@@ -5275,28 +5260,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     private String constructResumedTraceName(String packageName) {
         return "focused app: " + packageName;
-    }
-
-    /** Helper method that requests bounds from WM and applies them to stack. */
-    private void resizeStackWithBoundsFromWindowManager(int stackId, boolean deferResume) {
-        final Rect newStackBounds = new Rect();
-        final ActivityStack stack = mStackSupervisor.getStack(stackId);
-
-        // TODO(b/71548119): Revert CL introducing below once cause of mismatch is found.
-        if (stack == null) {
-            final StringWriter writer = new StringWriter();
-            final PrintWriter printWriter = new PrintWriter(writer);
-            mStackSupervisor.dumpDisplays(printWriter);
-            printWriter.flush();
-
-            Log.wtf(TAG, "stack not found:" + stackId + " displays:" + writer);
-        }
-
-        stack.getBoundsForNewConfiguration(newStackBounds);
-        mStackSupervisor.resizeStackLocked(
-                stack, !newStackBounds.isEmpty() ? newStackBounds : null /* bounds */,
-                null /* tempTaskBounds */, null /* tempTaskInsetBounds */,
-                false /* preserveWindows */, false /* allowResizeInDockedMode */, deferResume);
     }
 
     /** Applies latest configuration and/or visibility updates if needed. */

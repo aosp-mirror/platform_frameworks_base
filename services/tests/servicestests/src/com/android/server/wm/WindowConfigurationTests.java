@@ -22,6 +22,7 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOW_CONFIG_ALWAYS_ON_TOP;
 import static android.app.WindowConfiguration.WINDOW_CONFIG_APP_BOUNDS;
+import static android.app.WindowConfiguration.WINDOW_CONFIG_ROTATION;
 import static android.app.WindowConfiguration.WINDOW_CONFIG_WINDOWING_MODE;
 import static android.content.pm.ActivityInfo.CONFIG_WINDOW_CONFIGURATION;
 
@@ -33,6 +34,7 @@ import android.content.res.Configuration;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 import android.view.DisplayInfo;
+import android.view.Surface;
 
 import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
@@ -66,11 +68,13 @@ public class WindowConfigurationTests extends WindowTestsBase {
         final WindowConfiguration winConfig2 = config2.windowConfiguration;
         final Configuration config3 = new Configuration();
         final WindowConfiguration winConfig3 = config3.windowConfiguration;
+        final Configuration config4 = new Configuration();
+        final WindowConfiguration winConfig4 = config4.windowConfiguration;
 
         winConfig1.setAppBounds(0, 1, 1, 0);
         winConfig2.setAppBounds(1, 2, 2, 1);
         winConfig3.setAppBounds(winConfig1.getAppBounds());
-
+        winConfig4.setRotation(Surface.ROTATION_90);
 
         assertEquals(CONFIG_WINDOW_CONFIGURATION, config1.diff(config2));
         assertEquals(0, config1.diffPublicOnly(config2));
@@ -85,6 +89,9 @@ public class WindowConfigurationTests extends WindowTestsBase {
         assertEquals(WINDOW_CONFIG_APP_BOUNDS | WINDOW_CONFIG_WINDOWING_MODE
                 | WINDOW_CONFIG_ALWAYS_ON_TOP,
                 winConfig1.diff(winConfig2, false /* compareUndefined */));
+
+        assertEquals(WINDOW_CONFIG_ROTATION,
+                winConfig1.diff(winConfig4, false /* compareUndefined */));
 
         assertEquals(0, config1.diff(config3));
         assertEquals(0, config1.diffPublicOnly(config3));
@@ -123,10 +130,17 @@ public class WindowConfigurationTests extends WindowTestsBase {
         winConfig2.setAppBounds(0, 2, 3, 4);
         assertNotEquals(config1.compareTo(config2), 0);
         assertNotEquals(winConfig1.compareTo(winConfig2), 0);
+        winConfig2.setAppBounds(winConfig1.getAppBounds());
 
         // No bounds
         assertEquals(config1.compareTo(blankConfig), -1);
         assertEquals(winConfig1.compareTo(blankWinConfig), -1);
+
+        // Different rotation
+        winConfig2.setRotation(Surface.ROTATION_180);
+        assertNotEquals(config1.compareTo(config2), 0);
+        assertNotEquals(winConfig1.compareTo(winConfig2), 0);
+        winConfig2.setRotation(winConfig1.getRotation());
 
         assertEquals(blankConfig.compareTo(config1), 1);
         assertEquals(blankWinConfig.compareTo(winConfig1), 1);

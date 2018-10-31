@@ -1153,14 +1153,19 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     /**
-     * Update rotation of the display with an option to force the update.
+     * Update rotation of the DisplayContent with an option to force the update. This updates
+     * the container's perception of rotation and, depending on the top activities, will freeze
+     * the screen or start seamless rotation. The display itself gets rotated in
+     * {@link #applyRotationLocked} during {@link WindowManagerService#sendNewConfiguration}.
+     *
      * @param forceUpdate Force the rotation update. Sometimes in WM we might skip updating
      *                    orientation because we're waiting for some rotation to finish or display
      *                    to unfreeze, which results in configuration of the previously visible
      *                    activity being applied to a newly visible one. Forcing the rotation
      *                    update allows to workaround this issue.
      * @return {@code true} if the rotation has been changed.  In this case YOU MUST CALL
-     *         {@link WindowManagerService#sendNewConfiguration(int)} TO UNFREEZE THE SCREEN.
+     *         {@link WindowManagerService#sendNewConfiguration(int)} TO COMPLETE THE ROTATION AND
+     *         UNFREEZE THE SCREEN.
      */
     boolean updateRotationUnchecked(boolean forceUpdate) {
         ScreenRotationAnimation screenRotationAnimation;
@@ -1258,7 +1263,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             mService.mWaitingForConfig = true;
         }
 
-        setRotation(rotation);
+        mRotation = rotation;
         mAltOrientation = altOrientation;
 
         mService.mWindowsFreezingScreen = WINDOWS_FREEZING_SCREENS_ACTIVE;
@@ -1272,18 +1277,29 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         if (!rotateSeamlessly) {
             mService.startFreezingDisplayLocked(anim[0], anim[1], this);
             // startFreezingDisplayLocked can reset the ScreenRotationAnimation.
-            screenRotationAnimation = mService.mAnimator.getScreenRotationAnimationLocked(
-                    mDisplayId);
         } else {
             // The screen rotation animation uses a screenshot to freeze the screen
             // while windows resize underneath.
             // When we are rotating seamlessly, we allow the elements to transition
             // to their rotated state independently and without a freeze required.
-            screenRotationAnimation = null;
-
             mService.startSeamlessRotation();
         }
 
+        return true;
+    }
+
+    /**
+     * Applies the rotation transaction. This must be called after {@link #updateRotationUnchecked}
+     * (if it returned {@code true}) to actually finish the rotation.
+     *
+     * @param oldRotation the rotation we are coming from.
+     * @param rotation the rotation to apply.
+     */
+    void applyRotationLocked(final int oldRotation, final int rotation) {
+        mDisplayRotation.setRotation(rotation);
+        final boolean rotateSeamlessly = mService.isRotatingSeamlessly();
+        ScreenRotationAnimation screenRotationAnimation = rotateSeamlessly
+                ? null : mService.mAnimator.getScreenRotationAnimationLocked(mDisplayId);
         // We need to update our screen size information to match the new rotation. If the rotation
         // has actually changed then this method will return true and, according to the comment at
         // the top of the method, the caller is obligated to call computeNewConfigurationLocked().
@@ -1344,8 +1360,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 && isDefaultDisplay) {
             mService.mAccessibilityController.onRotationChangedLocked(this);
         }
-
-        return true;
     }
 
     void configureDisplayPolicy() {
@@ -1455,7 +1469,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                     mCompatDisplayMetrics);
         }
 
-        updateBounds();
         return mDisplayInfo;
     }
 
@@ -1489,11 +1502,14 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      */
     void computeScreenConfiguration(Configuration config) {
         final DisplayInfo displayInfo = updateDisplayAndOrientation(config.uiMode);
+        calculateBounds(displayInfo, mTmpBounds);
+        config.windowConfiguration.setBounds(mTmpBounds);
 
         final int dw = displayInfo.logicalWidth;
         final int dh = displayInfo.logicalHeight;
         config.orientation = (dw <= dh) ? ORIENTATION_PORTRAIT : ORIENTATION_LANDSCAPE;
         config.windowConfiguration.setWindowingMode(getWindowingMode());
+        config.windowConfiguration.setRotation(displayInfo.rotation);
 
         final float density = mDisplayMetrics.density;
         config.screenWidthDp =
@@ -1858,11 +1874,26 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     public void onConfigurationChanged(Configuration newParentConfig) {
         super.onConfigurationChanged(newParentConfig);
 
+        // If there was no pinned stack, we still need to notify the controller of the display info
+        // update as a result of the config change.
+        if (mPinnedStackControllerLocked != null && !hasPinnedStack()) {
+            mPinnedStackControllerLocked.onDisplayInfoChanged(getDisplayInfo());
+        }
+
         // The display size information is heavily dependent on the resources in the current
         // configuration, so we need to reconfigure it every time the configuration changes.
         // See {@link #configureDisplayPolicy}...sigh...
         mService.reconfigureDisplayLocked(this);
 
+    }
+
+    /**
+     * Updates the resources used by docked/pinned controllers. This needs to be called at the
+     * beginning of a configuration update cascade since the metrics from these resources are used
+     * for bounds calculations. Since ActivityDisplay initiates the configuration update, this
+     * should be called from there instead of DisplayContent's onConfigurationChanged.
+     */
+    void preOnConfigurationChanged() {
         final DockedStackDividerController dividerController = getDockedDividerController();
 
         if (dividerController != null) {
@@ -1873,26 +1904,6 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         if (pinnedStackController != null) {
             getPinnedStackController().onConfigurationChanged();
-        }
-    }
-
-    /**
-     * Callback used to trigger bounds update after configuration change and get ids of stacks whose
-     * bounds were updated.
-     */
-    void updateStackBoundsAfterConfigChange(@NonNull List<TaskStack> changedStackList) {
-        for (int i = mTaskStackContainers.getChildCount() - 1; i >= 0; --i) {
-            final TaskStack stack = mTaskStackContainers.getChildAt(i);
-            if (stack.updateBoundsAfterConfigChange()) {
-                changedStackList.add(stack);
-            }
-        }
-
-        // If there was no pinned stack, we still need to notify the controller of the display info
-        // update as a result of the config change.  We do this here to consolidate the flow between
-        // changes when there is and is not a stack.
-        if (!hasPinnedStack()) {
-            mPinnedStackControllerLocked.onDisplayInfoChanged(getDisplayInfo());
         }
     }
 

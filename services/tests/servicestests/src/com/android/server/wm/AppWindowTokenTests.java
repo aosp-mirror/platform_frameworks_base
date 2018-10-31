@@ -190,7 +190,11 @@ public class AppWindowTokenTests extends WindowTestsBase {
 
     private void performRotation(DisplayRotation spiedRotation, int rotationToReport) {
         doReturn(rotationToReport).when(spiedRotation).rotationForOrientation(anyInt(), anyInt());
+        int oldRotation = mDisplayContent.getRotation();
         mWm.updateRotation(false, false);
+        // Must manually apply here since ATM doesn't know about the display during this test
+        // (meaning it can't perform the normal sendNewConfiguration flow).
+        mDisplayContent.applyRotationLocked(oldRotation, mDisplayContent.getRotation());
         // Prevent the next rotation from being deferred by animation.
         mWm.mAnimator.setScreenRotationAnimationLocked(mDisplayContent.getDisplayId(), null);
         mWm.mRoot.performSurfacePlacement(false /* recoveringMemory */);

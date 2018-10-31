@@ -290,12 +290,7 @@ class Task extends WindowContainer<AppWindowToken> {
         if (displayContent != null) {
             rotation = displayContent.getDisplayInfo().rotation;
         } else if (bounds == null) {
-            // Can't set to fullscreen if we don't have a display to get bounds from...
-            return BOUNDS_CHANGE_NONE;
-        }
-
-        if (equivalentOverrideBounds(bounds)) {
-            return BOUNDS_CHANGE_NONE;
+            return super.setBounds(bounds);
         }
 
         final int boundsChange = super.setBounds(bounds);

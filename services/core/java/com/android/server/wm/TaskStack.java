@@ -23,6 +23,9 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.PINNED_WINDOWING_MODE_ELEVATION_IN_DIP;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
+import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
+import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
+import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSET;
 import static android.content.res.Configuration.DENSITY_DPI_UNDEFINED;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
@@ -143,10 +146,6 @@ public class TaskStack extends WindowContainer<Task> implements
     private boolean mCancelCurrentBoundsAnimation = false;
     private Rect mBoundsAnimationTarget = new Rect();
     private Rect mBoundsAnimationSourceHintBounds = new Rect();
-
-    // Temporary storage for the new bounds that should be used after the configuration change.
-    // Will be cleared once the client retrieves the new bounds via getBoundsForNewConfiguration().
-    private final Rect mBoundsAfterRotation = new Rect();
 
     Rect mPreAnimationBounds = new Rect();
 
@@ -293,8 +292,9 @@ public class TaskStack extends WindowContainer<Task> implements
     private int setBounds(Rect existing, Rect bounds) {
         int rotation = Surface.ROTATION_0;
         int density = DENSITY_DPI_UNDEFINED;
-        if (mDisplayContent != null) {
-            mDisplayContent.getBounds(mTmpRect);
+        WindowContainer parent = getParent();
+        if (parent != null) {
+            parent.getBounds(mTmpRect);
             rotation = mDisplayContent.getDisplayInfo().rotation;
             density = mDisplayContent.getDisplayInfo().logicalDensityDpi;
         }
@@ -444,20 +444,33 @@ public class TaskStack extends WindowContainer<Task> implements
         // If the rotation or density didn't match, we'll update it in onConfigurationChanged.
     }
 
-    /** @return true if bounds were updated to some non-empty value. */
-    boolean updateBoundsAfterConfigChange() {
-        if (mDisplayContent == null) {
-            // If the stack is already detached we're not updating anything,
-            // as it's going away soon anyway.
-            return false;
-        }
-
-        if (inPinnedWindowingMode()) {
-            getAnimationOrCurrentBounds(mTmpRect2);
+    /**
+     * Updates the passed-in {@code inOutBounds} based on how it would change when this container's
+     * override configuration is applied to the specified {@code parentConfig} and
+     * {@code prevConfig}. This gets run *after* the override configuration is updated, so it's
+     * safe to rely on wm hierarchy state in here (though eventually this dependence should be
+     * removed).
+     *
+     * This does NOT modify this TaskStack's configuration. However, it does, for the time-being,
+     * update various controller state (pinned/docked).
+     *
+     * @param parentConfig a parent configuration to compute relative to.
+     * @param prevConfig the full configuration used to produce the incoming {@code inOutBounds}.
+     * @param inOutBounds the bounds to update (both input and output).
+     * @return true if bounds were updated to some non-empty value. */
+    boolean updateBoundsForConfigChange(
+            Configuration parentConfig, Configuration prevConfig, Rect inOutBounds) {
+        if (getOverrideWindowingMode() == WINDOWING_MODE_PINNED) {
+            if ((mBoundsAnimatingRequested || mBoundsAnimating)
+                    && !mBoundsAnimationTarget.isEmpty()) {
+                getFinalAnimationBounds(mTmpRect2);
+            } else {
+                mTmpRect2.set(prevConfig.windowConfiguration.getBounds());
+            }
             boolean updated = mDisplayContent.mPinnedStackControllerLocked.onTaskStackBoundsChanged(
                     mTmpRect2, mTmpRect3);
             if (updated) {
-                mBoundsAfterRotation.set(mTmpRect3);
+                inOutBounds.set(mTmpRect3);
 
                 // Once we've set the bounds based on the rotation of the old bounds in the new
                 // orientation, clear the animation target bounds since they are obsolete, and
@@ -465,51 +478,45 @@ public class TaskStack extends WindowContainer<Task> implements
                 mBoundsAnimationTarget.setEmpty();
                 mBoundsAnimationSourceHintBounds.setEmpty();
                 mCancelCurrentBoundsAnimation = true;
-                return true;
             }
+            return updated;
         }
 
-        final int newRotation = getDisplayInfo().rotation;
-        final int newDensity = getDisplayInfo().logicalDensityDpi;
+        final int newRotation = parentConfig.windowConfiguration.getRotation();
+        final int newDensity = parentConfig.densityDpi;
 
-        if (mRotation == newRotation && mDensity == newDensity) {
-            // Nothing to do here as we already update the state in updateDisplayInfo.
+        if (prevConfig.windowConfiguration.getRotation() == newRotation
+                && prevConfig.densityDpi == newDensity) {
             return false;
         }
 
         if (matchParentBounds()) {
-            // Update stack bounds again since rotation changed since updateDisplayInfo().
-            setBounds(null);
-            // Return false since we don't need the client to resize.
             return false;
         }
 
-        mTmpRect2.set(getRawBounds());
-        mDisplayContent.rotateBounds(mRotation, newRotation, mTmpRect2);
-        if (inSplitScreenPrimaryWindowingMode()) {
-            final Configuration parentConfig = getParent().getConfiguration();
-            repositionSplitScreenStackAfterRotation(parentConfig, true /* primary */, mTmpRect2);
+        mDisplayContent.rotateBounds(parentConfig.windowConfiguration.getBounds(),
+                prevConfig.windowConfiguration.getRotation(), newRotation, inOutBounds);
+        if (getOverrideWindowingMode() == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
+                || getOverrideWindowingMode() == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY) {
+            boolean primary = getOverrideWindowingMode() == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
+            repositionSplitScreenStackAfterRotation(parentConfig, primary, inOutBounds);
             final DisplayCutout cutout = mDisplayContent.getDisplayInfo().displayCutout;
-            snapDockedStackAfterRotation(parentConfig, cutout, mTmpRect2);
-            final int newDockSide = getDockSide(mDisplayContent, parentConfig, mTmpRect2);
+            snapDockedStackAfterRotation(parentConfig, cutout, inOutBounds);
+            if (primary) {
+                final int newDockSide = getDockSide(mDisplayContent, parentConfig, inOutBounds);
 
-            // Update the dock create mode and clear the dock create bounds, these
-            // might change after a rotation and the original values will be invalid.
-            mService.setDockedStackCreateStateLocked(
-                    (newDockSide == DOCKED_LEFT || newDockSide == DOCKED_TOP)
-                            ? SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT
-                            : SPLIT_SCREEN_CREATE_MODE_BOTTOM_OR_RIGHT,
-                    null);
-            mDisplayContent.getDockedDividerController().notifyDockSideChanged(newDockSide);
+                // Update the dock create mode and clear the dock create bounds, these
+                // might change after a rotation and the original values will be invalid.
+                mService.setDockedStackCreateStateLocked(
+                        (newDockSide == DOCKED_LEFT || newDockSide == DOCKED_TOP)
+                                ? SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT
+                                : SPLIT_SCREEN_CREATE_MODE_BOTTOM_OR_RIGHT,
+                        null);
+                mDisplayContent.getDockedDividerController().notifyDockSideChanged(newDockSide);
+            }
         }
 
-        mBoundsAfterRotation.set(mTmpRect2);
         return true;
-    }
-
-    void getBoundsForNewConfiguration(Rect outBounds) {
-        outBounds.set(mBoundsAfterRotation);
-        mBoundsAfterRotation.setEmpty();
     }
 
     /**
@@ -528,7 +535,7 @@ public class TaskStack extends WindowContainer<Task> implements
         if (mDisplayContent.getDockedDividerController()
                 .canPrimaryStackDockTo(primaryDockSide,
                         parentConfig.windowConfiguration.getBounds(),
-                        mDisplayContent.getDisplayInfo().rotation)) {
+                        parentConfig.windowConfiguration.getRotation())) {
             return;
         }
         final Rect parentBounds = parentConfig.windowConfiguration.getBounds();
@@ -571,7 +578,7 @@ public class TaskStack extends WindowContainer<Task> implements
         final int displayHeight = parentConfig.windowConfiguration.getBounds().height();
 
         // Snap the position to a target.
-        final int rotation = mDisplayContent.getDisplayInfo().rotation;
+        final int rotation = parentConfig.windowConfiguration.getRotation();
         final int orientation = parentConfig.orientation;
         mService.mPolicy.getStableInsetsLw(rotation, displayWidth, displayHeight,
                 displayCutout, outBounds);
@@ -1503,7 +1510,7 @@ public class TaskStack extends WindowContainer<Task> implements
         }
         return dc.getDockedDividerController().getDockSide(bounds,
                 parentConfig.windowConfiguration.getBounds(),
-                parentConfig.orientation, dc.getDisplayInfo().rotation);
+                parentConfig.orientation, parentConfig.windowConfiguration.getRotation());
     }
 
     boolean hasTaskForUser(int userId) {
