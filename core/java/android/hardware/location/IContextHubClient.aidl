@@ -31,8 +31,8 @@ interface IContextHubClient {
     void close();
 
     // Registers a PendingIntent with the client
-    boolean registerIntent(in PendingIntent intent, long nanoAppId);
+    boolean registerIntent(in PendingIntent pendingIntent, long nanoAppId);
 
     // Unregisters a PendingIntent from the client
-    boolean unregisterIntent(in PendingIntent intent);
+    boolean unregisterIntent(in PendingIntent pendingIntent);
 }
