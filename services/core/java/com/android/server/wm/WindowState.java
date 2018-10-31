@@ -103,7 +103,6 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_WALLPAPER_LIGHT;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
-import static com.android.server.wm.WindowManagerService.H.SEND_NEW_CONFIGURATION;
 import static com.android.server.wm.WindowManagerService.MAX_ANIMATION_DURATION;
 import static com.android.server.wm.WindowManagerService.TYPE_LAYER_MULTIPLIER;
 import static com.android.server.wm.WindowManagerService.TYPE_LAYER_OFFSET;
@@ -1942,8 +1941,11 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             removeImmediately();
             // Removing a visible window will effect the computed orientation
             // So just update orientation if needed.
-            if (wasVisible && mService.updateOrientationFromAppTokensLocked(displayId)) {
-                mService.mH.obtainMessage(SEND_NEW_CONFIGURATION, displayId).sendToTarget();
+            if (wasVisible) {
+                final DisplayContent displayContent = getDisplayContent();
+                if (displayContent.updateOrientationFromAppTokens()) {
+                    displayContent.sendNewConfiguration();
+                }
             }
             mService.updateFocusedWindowLocked(isFocused()
                             ? UPDATE_FOCUS_REMOVING_FOCUS

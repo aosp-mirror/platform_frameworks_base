@@ -42,7 +42,6 @@ import static com.android.server.wm.WindowManagerDebugConfig.SHOW_TRANSACTIONS;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_KEEP_SCREEN_ON;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
-import static com.android.server.wm.WindowManagerService.H.SEND_NEW_CONFIGURATION;
 import static com.android.server.wm.WindowManagerService.H.WINDOW_FREEZE_TIMEOUT;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_PLACING_SURFACES;
@@ -911,10 +910,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
         boolean changed = false;
         for (int i = mChildren.size() - 1; i >= 0; i--) {
             final DisplayContent displayContent = mChildren.get(i);
-            if (displayContent.updateRotationUnchecked()) {
+            if (displayContent.updateRotationAndSendNewConfigIfNeeded()) {
                 changed = true;
-                mService.mH.obtainMessage(SEND_NEW_CONFIGURATION, displayContent.getDisplayId())
-                        .sendToTarget();
             }
         }
         return changed;
