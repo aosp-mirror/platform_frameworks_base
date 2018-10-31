@@ -4367,6 +4367,13 @@ public abstract class Context {
     public static final String APP_BINDING_SERVICE = "app_binding";
 
     /**
+     * Use with {@link #getSystemService(String)} to retrieve an
+     * {@link android.telephony.rcs.RcsManager}.
+     * @hide
+     */
+    public static final String TELEPHONY_RCS_SERVICE = "ircs";
+
+    /**
      * Determine whether the given permission is allowed for a particular
      * process and user ID running in the system.
      *
