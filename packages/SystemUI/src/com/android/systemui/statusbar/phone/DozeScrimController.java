@@ -17,7 +17,6 @@
 package com.android.systemui.statusbar.phone;
 
 import android.annotation.NonNull;
-import android.content.Context;
 import android.os.Handler;
 import android.util.Log;
 
@@ -33,7 +32,6 @@ public class DozeScrimController {
 
     private final DozeParameters mDozeParameters;
     private final Handler mHandler = new Handler();
-    private final ScrimController mScrimController;
 
     private boolean mDozing;
     private DozeHost.PulseCallback mPulseCallback;
@@ -83,9 +81,7 @@ public class DozeScrimController {
         }
     };
 
-    public DozeScrimController(ScrimController scrimController, Context context,
-            DozeParameters dozeParameters) {
-        mScrimController = scrimController;
+    public DozeScrimController(DozeParameters dozeParameters) {
         mDozeParameters = dozeParameters;
     }
 
@@ -117,8 +113,6 @@ public class DozeScrimController {
         // be invoked when we're done so that the caller can drop the pulse wakelock.
         mPulseCallback = callback;
         mPulseReason = reason;
-
-        mScrimController.transitionTo(ScrimState.PULSING, mScrimCallback);
     }
 
     public void pulseOutNow() {
@@ -180,13 +174,11 @@ public class DozeScrimController {
             mHandler.removeCallbacks(mPulseOutExtended);
             if (DEBUG) Log.d(TAG, "Pulse out, mDozing=" + mDozing);
             if (!mDozing) return;
-            mScrimController.transitionTo(ScrimState.AOD,
-                    new ScrimController.Callback() {
-                        @Override
-                        public void onDisplayBlanked() {
-                            pulseFinished();
-                        }
-                    });
+            pulseFinished();
         }
     };
+
+    public ScrimController.Callback getScrimCallback() {
+        return mScrimCallback;
+    }
 }

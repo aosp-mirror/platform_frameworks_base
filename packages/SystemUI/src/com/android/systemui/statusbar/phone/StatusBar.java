@@ -882,8 +882,7 @@ public class StatusBar extends SystemUI implements DemoMode,
                 mContext.getSystemService(AlarmManager.class));
         mNotificationPanel.initDependencies(this, mGroupManager, mNotificationShelf,
                 mHeadsUpManager, mNotificationIconAreaController, mScrimController);
-        mDozeScrimController = new DozeScrimController(mScrimController, context,
-                DozeParameters.getInstance(context));
+        mDozeScrimController = new DozeScrimController(DozeParameters.getInstance(context));
 
         mBackdrop = mStatusBarWindow.findViewById(R.id.backdrop);
         mBackdropFront = mBackdrop.findViewById(R.id.backdrop_front);
@@ -1519,7 +1518,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     }
 
     public boolean isPulsing() {
-        return mDozeScrimController != null && mDozeScrimController.isPulsing();
+        return mAmbientPulseManager.hasNotifications();
     }
 
     public boolean isLaunchTransitionFadingAway() {
@@ -3648,7 +3647,6 @@ public class StatusBar extends SystemUI implements DemoMode,
             mNotificationPanel.setTouchAndAnimationDisabled(false);
             updateVisibleToUser();
             updateIsKeyguard();
-            updateScrimController();
         }
     };
 
@@ -3834,8 +3832,9 @@ public class StatusBar extends SystemUI implements DemoMode,
         } else if (mBrightnessMirrorVisible) {
             mScrimController.transitionTo(ScrimState.BRIGHTNESS_MIRROR);
         } else if (isPulsing()) {
-            // Handled in DozeScrimController#setPulsing
-        } else if (mDozing) {
+            mScrimController.transitionTo(ScrimState.PULSING,
+                    mDozeScrimController.getScrimCallback());
+        } else if (mDozing && !wakeAndUnlocking) {
             mScrimController.transitionTo(ScrimState.AOD);
         } else if (mIsKeyguard && !wakeAndUnlocking) {
             mScrimController.transitionTo(mNotificationPanel.isSemiAwake()
@@ -3928,8 +3927,12 @@ public class StatusBar extends SystemUI implements DemoMode,
                     mNotificationPanel.setPulsing(pulsing);
                     mVisualStabilityManager.setPulsing(pulsing);
                     mIgnoreTouchWhilePulsing = false;
+                    updateScrimController();
                 }
             }, reason);
+            // DozeScrimController is in pulse state, now let's ask ScrimController to start
+            // pulsing and draw the black frame, if necessary.
+            updateScrimController();
         }
 
         @Override
