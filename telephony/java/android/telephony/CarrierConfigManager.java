@@ -2231,6 +2231,13 @@ public class CarrierConfigManager {
     public static final String KEY_CALL_WAITING_OVER_UT_WARNING_BOOL =
             "call_waiting_over_ut_warning_bool";
 
+    /**
+     * Flag indicating whether to support "Network default" option in Caller ID settings for Calling
+     * Line Identification Restriction (CLIR).
+     */
+    public static final String KEY_SUPPORT_CLIR_NETWORK_DEFAULT_BOOL =
+            "support_clir_network_default_bool";
+
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
 
@@ -2579,6 +2586,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_CALL_BARRING_OVER_UT_WARNING_BOOL, false);
         sDefaults.putBoolean(KEY_CALLER_ID_OVER_UT_WARNING_BOOL, false);
         sDefaults.putBoolean(KEY_CALL_WAITING_OVER_UT_WARNING_BOOL, false);
+        sDefaults.putBoolean(KEY_SUPPORT_CLIR_NETWORK_DEFAULT_BOOL, true);
     }
 
     /**
