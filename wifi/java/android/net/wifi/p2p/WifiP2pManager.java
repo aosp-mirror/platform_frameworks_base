@@ -1126,6 +1126,38 @@ public class WifiP2pManager {
     }
 
     /**
+     * Create a p2p group with the current device as the group owner. This essentially creates
+     * an access point that can accept connections from legacy clients as well as other p2p
+     * devices.
+     *
+     * <p> An app should use {@link WifiP2pConfig#Builder} to build the configuration
+     * for a group.
+     *
+     * <p class="note"><strong>Note:</strong>
+     * This function would normally not be used unless the current device needs
+     * to form a p2p group as a Group Owner and allow peers to join it as either
+     * Group Clients or legacy Wi-Fi STAs.
+     *
+     * <p> The function call immediately returns after sending a group creation request
+     * to the framework. The application is notified of a success or failure to initiate
+     * group creation through listener callbacks {@link ActionListener#onSuccess} or
+     * {@link ActionListener#onFailure}.
+     *
+     * <p> Application can request for the group details with {@link #requestGroupInfo}.
+     *
+     * @param c is the channel created at {@link #initialize}.
+     * @param config the configuration of a p2p group.
+     * @param listener for callbacks on success or failure. Can be null.
+     */
+    public void createGroup(@NonNull Channel c,
+            @Nullable WifiP2pConfig config,
+            @Nullable ActionListener listener) {
+        checkChannel(c);
+        c.mAsyncChannel.sendMessage(CREATE_GROUP, 0,
+                c.putListener(listener), config);
+    }
+
+    /**
      * Remove the current p2p group.
      *
      * <p> The function call immediately returns after sending a group removal request
