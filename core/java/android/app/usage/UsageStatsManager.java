@@ -18,6 +18,7 @@ package android.app.usage;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
@@ -595,7 +596,7 @@ public final class UsageStatsManager {
      *                       exceeded by the group of apps. The delivered Intent will also contain
      *                       the extras {@link #EXTRA_OBSERVER_ID}, {@link #EXTRA_TIME_LIMIT} and
      *                       {@link #EXTRA_TIME_USED}. Cannot be null.
-     * @throws SecurityException if the caller doesn't have the OBSERVE_APP_USAGE permission or
+     * @throws SecurityException if the caller doesn't have the OBSERVE_APP_USAGE permission and
      *                           is not the profile owner of this user.
      */
     @SystemApi
@@ -616,7 +617,7 @@ public final class UsageStatsManager {
      * to any observer registered by this application. Unregistering an observer that was already
      * unregistered or never registered will have no effect.
      * @param observerId The id of the observer that was previously registered.
-     * @throws SecurityException if the caller doesn't have the OBSERVE_APP_USAGE permission or is
+     * @throws SecurityException if the caller doesn't have the OBSERVE_APP_USAGE permission and is
      *                           not the profile owner of this user.
      */
     @SystemApi
@@ -624,6 +625,81 @@ public final class UsageStatsManager {
     public void unregisterAppUsageObserver(int observerId) {
         try {
             mService.unregisterAppUsageObserver(observerId, mContext.getOpPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Register a usage session observer that receives a callback on the provided {@code
+     * limitReachedCallbackIntent} when the sum of usages of apps in the packages array exceeds
+     * the {@code timeLimit} specified within a usage session. After the {@code timeLimit} has
+     * been reached, the usage session observer will receive a callback on the provided {@code
+     * sessionEndCallbackIntent} when the usage session ends. Registering another session
+     * observer against a {@code sessionObserverId} that has already been registered will
+     * override the previous session observer.
+     *
+     * @param sessionObserverId A unique id associated with the group of apps to be
+     *                          monitored. There can be multiple groups with common
+     *                          packages and different time limits.
+     * @param packages The list of packages to observe for foreground activity time. Cannot be null
+     *                 and must include at least one package.
+     * @param timeLimit The total time the set of apps can be used continuously before the {@code
+     *                  limitReachedCallbackIntent} is delivered. Must be at least one minute.
+     * @param timeUnit The unit for time specified in {@code timeLimit}. Cannot be null.
+     * @param sessionThresholdTime The time that can take place between usage sessions before the
+     *                             next session is considered a new session. Must be non-negative.
+     * @param sessionThresholdTimeUnit The unit for time specified in {@code sessionThreshold}.
+     *                                 Cannot be null.
+     * @param limitReachedCallbackIntent The {@link PendingIntent} that will be dispatched when the
+     *                                   time limit is exceeded by the group of apps. The delivered
+     *                                   Intent will also contain the extras {@link
+     *                                   #EXTRA_OBSERVER_ID}, {@link #EXTRA_TIME_LIMIT} and {@link
+     *                                   #EXTRA_TIME_USED}. Cannot be null.
+     * @param sessionEndCallbackIntent The {@link PendingIntent}  that will be dispatched when the
+     *                                 session has ended after the time limit has been exceeded. The
+     *                                 session is considered at its end after the {@code observed}
+     *                                 usage has stopped and an additional {@code
+     *                                 sessionThresholdTime} has passed. The delivered Intent will
+     *                                 also contain the extras {@link #EXTRA_OBSERVER_ID} and {@link
+     *                                 #EXTRA_TIME_USED}. Can be null.
+     * @throws SecurityException if the caller doesn't have the OBSERVE_APP_USAGE permission and
+     *                           is not the profile owner of this user.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.OBSERVE_APP_USAGE)
+    public void registerUsageSessionObserver(int sessionObserverId, @NonNull String[] packages,
+            long timeLimit, @NonNull TimeUnit timeUnit, long sessionThresholdTime,
+            @NonNull TimeUnit sessionThresholdTimeUnit,
+            @NonNull PendingIntent limitReachedCallbackIntent,
+            @Nullable PendingIntent sessionEndCallbackIntent) {
+        try {
+            mService.registerUsageSessionObserver(sessionObserverId, packages,
+                    timeUnit.toMillis(timeLimit),
+                    sessionThresholdTimeUnit.toMillis(sessionThresholdTime),
+                    limitReachedCallbackIntent, sessionEndCallbackIntent,
+                    mContext.getOpPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Unregister the usage session observer specified by the {@code sessionObserverId}. This will
+     * only apply to any app session observer registered by this application. Unregistering an
+     * observer that was already unregistered or never registered will have no effect.
+     *
+     * @param sessionObserverId The id of the observer that was previously registered.
+     * @throws SecurityException if the caller doesn't have the OBSERVE_APP_USAGE permission and
+     *                           is not the profile owner of this user.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.OBSERVE_APP_USAGE)
+    public void unregisterUsageSessionObserver(int sessionObserverId) {
+        try {
+            mService.unregisterUsageSessionObserver(sessionObserverId, mContext.getOpPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

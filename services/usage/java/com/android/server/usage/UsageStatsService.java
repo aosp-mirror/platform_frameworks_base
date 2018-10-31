@@ -165,16 +165,36 @@ public class UsageStatsService extends SystemService implements
         mAppStandby = new AppStandbyController(getContext(), BackgroundThread.get().getLooper());
 
         mAppTimeLimit = new AppTimeLimitController(
-                (observerId, userId, timeLimit, timeElapsed, callbackIntent) -> {
-                    Intent intent = new Intent();
-                    intent.putExtra(UsageStatsManager.EXTRA_OBSERVER_ID, observerId);
-                    intent.putExtra(UsageStatsManager.EXTRA_TIME_LIMIT, timeLimit);
-                    intent.putExtra(UsageStatsManager.EXTRA_TIME_USED, timeElapsed);
-                    try {
-                        callbackIntent.send(getContext(), 0, intent);
-                    } catch (PendingIntent.CanceledException e) {
-                        Slog.w(TAG, "Couldn't deliver callback: "
-                                + callbackIntent);
+                new AppTimeLimitController.TimeLimitCallbackListener() {
+                    @Override
+                    public void onLimitReached(int observerId, int userId, long timeLimit,
+                            long timeElapsed, PendingIntent callbackIntent) {
+                        if (callbackIntent == null) return;
+                        Intent intent = new Intent();
+                        intent.putExtra(UsageStatsManager.EXTRA_OBSERVER_ID, observerId);
+                        intent.putExtra(UsageStatsManager.EXTRA_TIME_LIMIT, timeLimit);
+                        intent.putExtra(UsageStatsManager.EXTRA_TIME_USED, timeElapsed);
+                        try {
+                            callbackIntent.send(getContext(), 0, intent);
+                        } catch (PendingIntent.CanceledException e) {
+                            Slog.w(TAG, "Couldn't deliver callback: "
+                                    + callbackIntent);
+                        }
+                    }
+
+                    @Override
+                    public void onSessionEnd(int observerId, int userId, long timeElapsed,
+                            PendingIntent callbackIntent) {
+                        if (callbackIntent == null) return;
+                        Intent intent = new Intent();
+                        intent.putExtra(UsageStatsManager.EXTRA_OBSERVER_ID, observerId);
+                        intent.putExtra(UsageStatsManager.EXTRA_TIME_USED, timeElapsed);
+                        try {
+                            callbackIntent.send(getContext(), 0, intent);
+                        } catch (PendingIntent.CanceledException e) {
+                            Slog.w(TAG, "Couldn't deliver callback: "
+                                    + callbackIntent);
+                        }
                     }
                 }, mHandler.getLooper());
 
@@ -412,12 +432,18 @@ public class UsageStatsService extends SystemService implements
             mAppStandby.reportEvent(event, elapsedRealtime, userId);
             switch (event.mEventType) {
                 case Event.MOVE_TO_FOREGROUND:
-                    mAppTimeLimit.moveToForeground(event.getPackageName(), event.getClassName(),
-                            userId);
+                    try {
+                        mAppTimeLimit.noteUsageStart(event.getPackageName(), userId);
+                    } catch (IllegalArgumentException iae) {
+                        Slog.e(TAG, "Failed to note usage start", iae);
+                    }
                     break;
                 case Event.MOVE_TO_BACKGROUND:
-                    mAppTimeLimit.moveToBackground(event.getPackageName(), event.getClassName(),
-                            userId);
+                    try {
+                        mAppTimeLimit.noteUsageStop(event.getPackageName(), userId);
+                    } catch (IllegalArgumentException iae) {
+                        Slog.e(TAG, "Failed to note usage stop", iae);
+                    }
                     break;
             }
         }
@@ -1151,16 +1177,70 @@ public class UsageStatsService extends SystemService implements
                 Binder.restoreCallingIdentity(token);
             }
         }
+
+        @Override
+        public void registerUsageSessionObserver(int sessionObserverId, String[] observed,
+                long timeLimitMs, long sessionThresholdTimeMs,
+                PendingIntent limitReachedCallbackIntent, PendingIntent sessionEndCallbackIntent,
+                String callingPackage) {
+            if (!hasObserverPermission(callingPackage)) {
+                throw new SecurityException("Caller doesn't have OBSERVE_APP_USAGE permission");
+            }
+
+            if (observed == null || observed.length == 0) {
+                throw new IllegalArgumentException("Must specify at least one observed entity");
+            }
+            if (limitReachedCallbackIntent == null) {
+                throw new NullPointerException("limitReachedCallbackIntent can't be null");
+            }
+            final int callingUid = Binder.getCallingUid();
+            final int userId = UserHandle.getUserId(callingUid);
+            final long token = Binder.clearCallingIdentity();
+            try {
+                UsageStatsService.this.registerUsageSessionObserver(callingUid, sessionObserverId,
+                        observed, timeLimitMs, sessionThresholdTimeMs, limitReachedCallbackIntent,
+                        sessionEndCallbackIntent, userId);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
+
+        @Override
+        public void unregisterUsageSessionObserver(int sessionObserverId, String callingPackage) {
+            if (!hasObserverPermission(callingPackage)) {
+                throw new SecurityException("Caller doesn't have OBSERVE_APP_USAGE permission");
+            }
+
+            final int callingUid = Binder.getCallingUid();
+            final int userId = UserHandle.getUserId(callingUid);
+            final long token = Binder.clearCallingIdentity();
+            try {
+                UsageStatsService.this.unregisterUsageSessionObserver(callingUid, sessionObserverId, userId);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
     }
 
     void registerAppUsageObserver(int callingUid, int observerId, String[] packages,
             long timeLimitMs, PendingIntent callbackIntent, int userId) {
-        mAppTimeLimit.addObserver(callingUid, observerId, packages, timeLimitMs, callbackIntent,
+        mAppTimeLimit.addAppUsageObserver(callingUid, observerId, packages, timeLimitMs, callbackIntent,
                 userId);
     }
 
     void unregisterAppUsageObserver(int callingUid, int observerId, int userId) {
-        mAppTimeLimit.removeObserver(callingUid, observerId, userId);
+        mAppTimeLimit.removeAppUsageObserver(callingUid, observerId, userId);
+    }
+
+    void registerUsageSessionObserver(int callingUid, int observerId, String[] observed,
+            long timeLimitMs, long sessionThresholdTime, PendingIntent limitReachedCallbackIntent,
+            PendingIntent sessionEndCallbackIntent, int userId) {
+        mAppTimeLimit.addUsageSessionObserver(callingUid, observerId, observed, timeLimitMs,
+                sessionThresholdTime, limitReachedCallbackIntent, sessionEndCallbackIntent, userId);
+    }
+
+    void unregisterUsageSessionObserver(int callingUid, int sessionObserverId, int userId) {
+        mAppTimeLimit.removeUsageSessionObserver(callingUid, sessionObserverId, userId);
     }
 
     /**
