@@ -21,15 +21,6 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="7164937344850004466">"Sistēmas UI"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Notīrīt"</string>
-    <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Noņemšana no saraksta"</string>
-    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Lietotnes informācija"</string>
-    <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Jūsu pēdējie ekrāni tiek rādīti šeit."</string>
-    <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Nerādīt nesen izmantotās lietotnes"</string>
-    <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
-      <item quantity="zero">%d ekrānu sadaļā Kopsavilkums</item>
-      <item quantity="one">%d ekrāns sadaļā Kopsavilkums</item>
-      <item quantity="other">%d ekrāni sadaļā Kopsavilkums</item>
-    </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Nav paziņojumu"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Notiekošs"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Paziņojumi"</string>
@@ -102,7 +93,6 @@
     <string name="phone_label" msgid="2320074140205331708">"atvērt tālruni"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"atvērt balss palīgu"</string>
     <string name="camera_label" msgid="7261107956054836961">"atvērt kameru"</string>
-    <string name="recents_caption_resize" msgid="3517056471774958200">"Atlasiet jaunu uzdevumu izkārtojumu"</string>
     <string name="cancel" msgid="6442560571259935130">"Atcelt"</string>
     <string name="accessibility_biometric_dialog_help_area" msgid="8953787076940186847">"Palīdzības ziņojuma apgabals"</string>
     <string name="biometric_dialog_confirm" msgid="6468457350041712674">"Apstiprināt"</string>
@@ -189,11 +179,6 @@
     <skip />
     <!-- no translation found for accessibility_work_mode (702887484664647430) -->
     <skip />
-    <string name="accessibility_recents_item_will_be_dismissed" msgid="395770242498031481">"Nerādīt lietotni <xliff:g id="APP">%s</xliff:g>"</string>
-    <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"Lietotne <xliff:g id="APP">%s</xliff:g> vairs netiek rādīta."</string>
-    <string name="accessibility_recents_all_items_dismissed" msgid="4464697366179168836">"Visas nesen izmantotās lietojumprogrammas tika noņemtas."</string>
-    <string name="accessibility_recents_item_open_app_info" msgid="5107479759905883540">"Atveriet lietojumprogrammas <xliff:g id="APP">%s</xliff:g> informāciju."</string>
-    <string name="accessibility_recents_item_launched" msgid="7616039892382525203">"Notiek lietotnes <xliff:g id="APP">%s</xliff:g> palaišana."</string>
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"Paziņojums netiek rādīts."</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"Paziņojumu panelis"</string>
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"Ātrie iestatījumi"</string>
@@ -358,23 +343,8 @@
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC ir atspējoti"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC ir iespējoti"</string>
-    <string name="recents_empty_message" msgid="808480104164008572">"Nav nesenu vienumu"</string>
-    <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"Visi uzdevumi ir notīrīti"</string>
-    <string name="recents_app_info_button_label" msgid="2890317189376000030">"Informācija par lietojumprogrammu"</string>
-    <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"Piespraust ekrānu"</string>
-    <string name="recents_search_bar_label" msgid="8074997400187836677">"Meklēt"</string>
-    <string name="recents_launch_error_message" msgid="2969287838120550506">"Nevarēja palaist lietotni <xliff:g id="APP">%s</xliff:g>."</string>
-    <string name="recents_launch_disabled_message" msgid="1624523193008871793">"Lietotne <xliff:g id="APP">%s</xliff:g> ir atspējota drošajā režīmā."</string>
-    <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Notīrīt visu"</string>
-    <string name="recents_drag_hint_message" msgid="2649739267073203985">"Velciet šeit, lai izmantotu ekrāna sadalīšanu"</string>
     <string name="recents_swipe_up_onboarding" msgid="3824607135920170001">"Velciet augšup, lai pārslēgtu lietotnes"</string>
     <string name="recents_quick_scrub_onboarding" msgid="2778062804333285789">"Lai ātri pārslēgtu lietotnes, velciet pa labi"</string>
-    <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Horizontāls dalījums"</string>
-    <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Vertikāls dalījums"</string>
-    <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Pielāgots dalījums"</string>
-    <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"Sadalīt ekrānu augšdaļā"</string>
-    <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"Sadalīt ekrānu kreisajā pusē"</string>
-    <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"Sadalīt ekrānu labajā pusē"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7171470775439860480">"Pārskata pārslēgšana"</string>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Akumulators uzlādēts"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"Notiek uzlāde"</string>
@@ -622,6 +592,8 @@
     <string name="inline_minimize_button" msgid="966233327974702195">"Minimizēt"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Vai turpināt rādīt paziņojumus no šīs lietotnes?"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"Šos paziņojumus nevar izslēgt."</string>
+    <!-- no translation found for notification_delegate_header (9167022191405284627) -->
+    <skip />
     <string name="appops_camera" msgid="8100147441602585776">"Šajā lietotnē tiek izmantota kamera."</string>
     <string name="appops_microphone" msgid="741508267659494555">"Šajā lietotnē tiek izmantots mikrofons."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"Šī lietotne tiek rādīta ekrānā pāri citām lietotnēm."</string>
@@ -758,6 +730,8 @@
     <item msgid="2139628951880142927">"Rādīt procentuālo vērtību uzlādes laikā (noklusējums)"</item>
     <item msgid="3327323682209964956">"Nerādīt šo ikonu"</item>
   </string-array>
+    <!-- no translation found for tuner_low_priority (1325884786608312358) -->
+    <skip />
     <string name="other" msgid="4060683095962566764">"Citi"</string>
     <string name="accessibility_divider" msgid="5903423481953635044">"Ekrāna sadalītājs"</string>
     <string name="accessibility_action_divider_left_full" msgid="2801570521881574972">"Kreisā daļa pa visu ekrānu"</string>

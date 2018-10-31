@@ -21,14 +21,6 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="7164937344850004466">"L\'interface"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Effacer"</string>
-    <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Supprimer de la liste"</string>
-    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Infos application"</string>
-    <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Vos écrans récents s\'affichent ici"</string>
-    <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Masquer les applications récentes"</string>
-    <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
-      <item quantity="one">%d écran dans Aperçu</item>
-      <item quantity="other">%d écrans dans Aperçu</item>
-    </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Aucune notification"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"En cours"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Notifications"</string>
@@ -101,7 +93,6 @@
     <string name="phone_label" msgid="2320074140205331708">"ouvrir le téléphone"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"ouvrir l\'assistance vocale"</string>
     <string name="camera_label" msgid="7261107956054836961">"ouvrir l\'appareil photo"</string>
-    <string name="recents_caption_resize" msgid="3517056471774958200">"Sélectionner un nouveau plan de tâche"</string>
     <string name="cancel" msgid="6442560571259935130">"Annuler"</string>
     <string name="accessibility_biometric_dialog_help_area" msgid="8953787076940186847">"Zone de message d\'aide"</string>
     <string name="biometric_dialog_confirm" msgid="6468457350041712674">"Confirmer"</string>
@@ -188,11 +179,6 @@
     <skip />
     <!-- no translation found for accessibility_work_mode (702887484664647430) -->
     <skip />
-    <string name="accessibility_recents_item_will_be_dismissed" msgid="395770242498031481">"Supprimer <xliff:g id="APP">%s</xliff:g>"</string>
-    <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"Application \"<xliff:g id="APP">%s</xliff:g>\" ignorée."</string>
-    <string name="accessibility_recents_all_items_dismissed" msgid="4464697366179168836">"Toutes les applications récentes ont été supprimées."</string>
-    <string name="accessibility_recents_item_open_app_info" msgid="5107479759905883540">"Ouvre les informations sur l\'application <xliff:g id="APP">%s</xliff:g>."</string>
-    <string name="accessibility_recents_item_launched" msgid="7616039892382525203">"Lancement de <xliff:g id="APP">%s</xliff:g>"</string>
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"Notification masquée"</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"Volet des notifications"</string>
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"Paramètres rapides"</string>
@@ -355,23 +341,8 @@
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"La technologie NFC est désactivée"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"La technologie NFC est activée"</string>
-    <string name="recents_empty_message" msgid="808480104164008572">"Aucun élément récent"</string>
-    <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"Vous avez tout effacé."</string>
-    <string name="recents_app_info_button_label" msgid="2890317189376000030">"Infos application"</string>
-    <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"épinglage d\'écran"</string>
-    <string name="recents_search_bar_label" msgid="8074997400187836677">"rechercher"</string>
-    <string name="recents_launch_error_message" msgid="2969287838120550506">"Impossible de lancer <xliff:g id="APP">%s</xliff:g>."</string>
-    <string name="recents_launch_disabled_message" msgid="1624523193008871793">"L\'application <xliff:g id="APP">%s</xliff:g> est désactivée en mode sécurisé."</string>
-    <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Tout fermer"</string>
-    <string name="recents_drag_hint_message" msgid="2649739267073203985">"Faire glisser ici pour utiliser l\'écran partagé"</string>
     <string name="recents_swipe_up_onboarding" msgid="3824607135920170001">"Balayer l\'écran vers le haut pour changer d\'application"</string>
     <string name="recents_quick_scrub_onboarding" msgid="2778062804333285789">"Déplacer vers la droite pour changer rapidement d\'application"</string>
-    <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Séparation horizontale"</string>
-    <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Séparation verticale"</string>
-    <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Séparation personnalisée"</string>
-    <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"Partager l\'écran en haut"</string>
-    <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"Partager l\'écran sur la gauche"</string>
-    <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"Partager l\'écran sur la droite"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7171470775439860480">"Activer/Désactiver l\'aperçu"</string>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Chargé"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"En charge"</string>
@@ -618,6 +589,8 @@
     <string name="inline_minimize_button" msgid="966233327974702195">"Réduire"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Continuer d\'afficher les notifications de cette application ?"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"Ces notifications ne peuvent pas être désactivées"</string>
+    <!-- no translation found for notification_delegate_header (9167022191405284627) -->
+    <skip />
     <string name="appops_camera" msgid="8100147441602585776">"Cette application utilise la caméra."</string>
     <string name="appops_microphone" msgid="741508267659494555">"Cette application utilise le micro."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"Cette application se superpose aux autres applications sur l\'écran."</string>
@@ -752,6 +725,8 @@
     <item msgid="2139628951880142927">"Afficher le pourcentage lorsque l\'appareil est en charge (option par défaut)"</item>
     <item msgid="3327323682209964956">"Ne plus afficher cette icône"</item>
   </string-array>
+    <!-- no translation found for tuner_low_priority (1325884786608312358) -->
+    <skip />
     <string name="other" msgid="4060683095962566764">"Autre"</string>
     <string name="accessibility_divider" msgid="5903423481953635044">"Séparateur d\'écran partagé"</string>
     <string name="accessibility_action_divider_left_full" msgid="2801570521881574972">"Écran de gauche en plein écran"</string>
