@@ -119,6 +119,10 @@ public class BluetoothEventManager {
         addHandler(TelephonyManager.ACTION_PHONE_STATE_CHANGED,
                 new AudioModeChangedHandler());
 
+        // ACL connection changed broadcasts
+        addHandler(BluetoothDevice.ACTION_ACL_CONNECTED, new AclStateChangedHandler());
+        addHandler(BluetoothDevice.ACTION_ACL_DISCONNECTED, new AclStateChangedHandler());
+
         registerAdapterIntentReceiver();
     }
 
@@ -232,6 +236,15 @@ public class BluetoothEventManager {
         synchronized (mCallbacks) {
             for (BluetoothCallback callback : mCallbacks) {
                 callback.onActiveDeviceChanged(activeDevice, bluetoothProfile);
+            }
+        }
+    }
+
+    private void dispatchAclStateChanged(CachedBluetoothDevice activeDevice,
+            int state) {
+        synchronized (mCallbacks) {
+            for (BluetoothCallback callback : mCallbacks) {
+                callback.onAclConnectionStateChanged(activeDevice, state);
             }
         }
     }
@@ -444,6 +457,32 @@ public class BluetoothEventManager {
                 return;
             }
             dispatchActiveDeviceChanged(activeDevice, bluetoothProfile);
+        }
+    }
+
+    private class AclStateChangedHandler implements Handler {
+        @Override
+        public void onReceive(Context context, Intent intent, BluetoothDevice device) {
+            final String action = intent.getAction();
+            if (action == null) {
+                Log.w(TAG, "AclStateChangedHandler: action is null");
+                return;
+            }
+            final CachedBluetoothDevice activeDevice = mDeviceManager.findDevice(device);
+            final int state;
+            switch (action) {
+                case BluetoothDevice.ACTION_ACL_CONNECTED:
+                    state = BluetoothAdapter.STATE_CONNECTED;
+                    break;
+                case BluetoothDevice.ACTION_ACL_DISCONNECTED:
+                    state = BluetoothAdapter.STATE_DISCONNECTED;
+                    break;
+                default:
+                    Log.w(TAG, "ActiveDeviceChangedHandler: unknown action " + action);
+                    return;
+
+            }
+            dispatchAclStateChanged(activeDevice, state);
         }
     }
 
