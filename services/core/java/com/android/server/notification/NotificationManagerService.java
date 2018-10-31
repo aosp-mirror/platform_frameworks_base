@@ -86,6 +86,7 @@ import static com.android.server.utils.PriorityDump.PRIORITY_ARG_CRITICAL;
 import static com.android.server.utils.PriorityDump.PRIORITY_ARG_NORMAL;
 
 import android.Manifest;
+import android.Manifest.permission;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.app.ActivityManager;
@@ -398,6 +399,10 @@ public class NotificationManagerService extends SystemService {
     private static final String TAG_NOTIFICATION_POLICY = "notification-policy";
     private static final String ATTR_VERSION = "version";
 
+    private static final String LOCKSCREEN_ALLOW_SECURE_NOTIFICATIONS_TAG =
+            "allow-secure-notifications-on-lockscreen";
+    private static final String LOCKSCREEN_ALLOW_SECURE_NOTIFICATIONS_VALUE = "value";
+
     private RankingHelper mRankingHelper;
     private PreferencesHelper mPreferencesHelper;
 
@@ -406,6 +411,7 @@ public class NotificationManagerService extends SystemService {
     private NotificationAssistants mAssistants;
     private ConditionProviders mConditionProviders;
     private NotificationUsageStats mUsageStats;
+    private boolean mLockScreenAllowSecureNotifications;
 
     private static final int MY_UID = Process.myUid();
     private static final int MY_PID = Process.myPid();
@@ -552,6 +558,11 @@ public class NotificationManagerService extends SystemService {
                 mConditionProviders.readXml(parser, mAllowedManagedServicePackages);
                 migratedManagedServices = true;
             }
+            if (LOCKSCREEN_ALLOW_SECURE_NOTIFICATIONS_TAG.equals(parser.getName())) {
+                mLockScreenAllowSecureNotifications =
+                        safeBoolean(parser.getAttributeValue(null,
+                                        LOCKSCREEN_ALLOW_SECURE_NOTIFICATIONS_VALUE), true);
+            }
         }
 
         if (!migratedManagedServices) {
@@ -626,6 +637,7 @@ public class NotificationManagerService extends SystemService {
         mListeners.writeXml(out, forBackup);
         mAssistants.writeXml(out, forBackup);
         mConditionProviders.writeXml(out, forBackup);
+        writeSecureNotificationsPolicy(out);
         out.endTag(null, TAG_NOTIFICATION_POLICY);
         out.endDocument();
     }
@@ -3691,6 +3703,31 @@ public class NotificationManagerService extends SystemService {
             groups.addAll(mPreferencesHelper.getNotificationChannelGroups(
                     pkg, getUidForPackageAndUser(pkg, user)));
             return new ParceledListSlice<>(groups);
+        }
+
+        @Override
+        public void setPrivateNotificationsAllowed(boolean allow) {
+            if (PackageManager.PERMISSION_GRANTED
+                    != getContext().checkCallingPermission(
+                            permission.CONTROL_KEYGUARD_SECURE_NOTIFICATIONS)) {
+                throw new SecurityException(
+                        "Requires CONTROL_KEYGUARD_SECURE_NOTIFICATIONS permission");
+            }
+            if (allow != mLockScreenAllowSecureNotifications) {
+                mLockScreenAllowSecureNotifications = allow;
+                savePolicyFile();
+            }
+        }
+
+        @Override
+        public boolean getPrivateNotificationsAllowed() {
+            if (PackageManager.PERMISSION_GRANTED
+                    != getContext().checkCallingPermission(
+                            permission.CONTROL_KEYGUARD_SECURE_NOTIFICATIONS)) {
+                throw new SecurityException(
+                        "Requires CONTROL_KEYGUARD_SECURE_NOTIFICATIONS permission");
+            }
+            return mLockScreenAllowSecureNotifications;
         }
 
         private void verifyPrivilegedListener(INotificationListener token, UserHandle user,
@@ -7561,5 +7598,17 @@ public class NotificationManagerService extends SystemService {
         public void onHelp() {
             getOutPrintWriter().println(USAGE);
         }
+    }
+
+    private void writeSecureNotificationsPolicy(XmlSerializer out) throws IOException {
+        out.startTag(null, LOCKSCREEN_ALLOW_SECURE_NOTIFICATIONS_TAG);
+        out.attribute(null, LOCKSCREEN_ALLOW_SECURE_NOTIFICATIONS_VALUE,
+                Boolean.toString(mLockScreenAllowSecureNotifications));
+        out.endTag(null, LOCKSCREEN_ALLOW_SECURE_NOTIFICATIONS_TAG);
+    }
+
+    private static boolean safeBoolean(String val, boolean defValue) {
+        if (TextUtils.isEmpty(val)) return defValue;
+        return Boolean.parseBoolean(val);
     }
 }
