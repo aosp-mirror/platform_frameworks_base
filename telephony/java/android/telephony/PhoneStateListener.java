@@ -301,6 +301,15 @@ public class PhoneStateListener {
     @SystemApi
     public static final int LISTEN_RADIO_POWER_STATE_CHANGED               = 0x00800000;
 
+    /**
+     * Listen for changes to emergency number list based on all active subscriptions.
+     *
+     * <p>Requires permission {@link android.Manifest.permission#READ_PHONE_STATE} or
+     * {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE} or the calling
+     * app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     */
+    public static final int LISTEN_EMERGENCY_NUMBER_LIST                   = 0x01000000;
+
     /*
      * Subscription used to listen to the phone state changes
      * @hide
