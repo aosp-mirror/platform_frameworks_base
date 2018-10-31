@@ -138,7 +138,8 @@ bool Scan(const std::vector<std::string>& args, std::ostream& out_error) {
   std::stringstream stream;
   for (auto iter = interesting_apks.cbegin(); iter != interesting_apks.cend(); ++iter) {
     const std::string idmap_path = Idmap::CanonicalIdmapPathFor(output_directory, *iter);
-    if (!Verify(std::vector<std::string>({"--idmap-path", idmap_path}), out_error) &&
+    std::stringstream dev_null;
+    if (!Verify(std::vector<std::string>({"--idmap-path", idmap_path}), dev_null) &&
         !Create(std::vector<std::string>({
                     "--target-apk-path",
                     target_apk_path,
