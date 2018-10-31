@@ -66,7 +66,7 @@ abstract class HdmiCecLocalDeviceSource extends HdmiCecLocalDevice {
     @LocalActivePort
     protected int mLocalActivePort = Constants.CEC_SWITCH_HOME;
 
-    // Whether the Routing Coutrol feature is enabled or not. True by default.
+    // Whether the Routing Coutrol feature is enabled or not. False by default.
     @GuardedBy("mLock")
     protected boolean mRoutingControlFeatureEnabled;
 
