@@ -157,8 +157,8 @@ import android.view.Surface;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 import android.view.SurfaceSession;
-import android.view.WindowManagerPolicyConstants.PointerEventListener;
 import android.view.WindowManager;
+import android.view.WindowManagerPolicyConstants.PointerEventListener;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ToBooleanFunction;
@@ -1525,7 +1525,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         config.compatScreenWidthDp = (int)(config.screenWidthDp / mCompatibleScreenScale);
         config.compatScreenHeightDp = (int)(config.screenHeightDp / mCompatibleScreenScale);
         config.compatSmallestScreenWidthDp = computeCompatSmallestWidth(rotated, config.uiMode, dw,
-                dh, mDisplayId);
+                dh, displayInfo.displayCutout, mDisplayId);
         config.densityDpi = displayInfo.logicalDensityDpi;
 
         config.colorMode =
@@ -1602,7 +1602,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     private int computeCompatSmallestWidth(boolean rotated, int uiMode, int dw, int dh,
-            int displayId) {
+            DisplayCutout displayCutout, int displayId) {
         mTmpDisplayMetrics.setTo(mDisplayMetrics);
         final DisplayMetrics tmpDm = mTmpDisplayMetrics;
         final int unrotDw, unrotDh;
@@ -1614,22 +1614,22 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             unrotDh = dh;
         }
         int sw = reduceCompatConfigWidthSize(0, Surface.ROTATION_0, uiMode, tmpDm, unrotDw, unrotDh,
-                displayId);
+                displayCutout, displayId);
         sw = reduceCompatConfigWidthSize(sw, Surface.ROTATION_90, uiMode, tmpDm, unrotDh, unrotDw,
-                displayId);
+                displayCutout, displayId);
         sw = reduceCompatConfigWidthSize(sw, Surface.ROTATION_180, uiMode, tmpDm, unrotDw, unrotDh,
-                displayId);
+                displayCutout, displayId);
         sw = reduceCompatConfigWidthSize(sw, Surface.ROTATION_270, uiMode, tmpDm, unrotDh, unrotDw,
-                displayId);
+                displayCutout, displayId);
         return sw;
     }
 
     private int reduceCompatConfigWidthSize(int curSize, int rotation, int uiMode,
-            DisplayMetrics dm, int dw, int dh, int displayId) {
+            DisplayMetrics dm, int dw, int dh, DisplayCutout displayCutout, int displayId) {
         dm.noncompatWidthPixels = mService.mPolicy.getNonDecorDisplayWidth(dw, dh, rotation, uiMode,
-                displayId, mDisplayInfo.displayCutout);
+                displayId, displayCutout);
         dm.noncompatHeightPixels = mService.mPolicy.getNonDecorDisplayHeight(dw, dh, rotation,
-                uiMode, displayId, mDisplayInfo.displayCutout);
+                uiMode, displayId, displayCutout);
         float scale = CompatibilityInfo.computeCompatibleScaling(dm, null);
         int size = (int)(((dm.noncompatWidthPixels / scale) / dm.density) + .5f);
         if (curSize == 0 || size < curSize) {
@@ -1667,24 +1667,24 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
                 unrotDw);
         int sl = Configuration.resetScreenLayout(outConfig.screenLayout);
         sl = reduceConfigLayout(sl, Surface.ROTATION_0, density, unrotDw, unrotDh, uiMode,
-                displayId);
+                displayInfo.displayCutout, displayId);
         sl = reduceConfigLayout(sl, Surface.ROTATION_90, density, unrotDh, unrotDw, uiMode,
-                displayId);
+                displayInfo.displayCutout, displayId);
         sl = reduceConfigLayout(sl, Surface.ROTATION_180, density, unrotDw, unrotDh, uiMode,
-                displayId);
+                displayInfo.displayCutout, displayId);
         sl = reduceConfigLayout(sl, Surface.ROTATION_270, density, unrotDh, unrotDw, uiMode,
-                displayId);
+                displayInfo.displayCutout, displayId);
         outConfig.smallestScreenWidthDp = (int)(displayInfo.smallestNominalAppWidth / density);
         outConfig.screenLayout = sl;
     }
 
     private int reduceConfigLayout(int curLayout, int rotation, float density, int dw, int dh,
-            int uiMode, int displayId) {
+            int uiMode, DisplayCutout displayCutout, int displayId) {
         // Get the app screen size at this rotation.
         int w = mService.mPolicy.getNonDecorDisplayWidth(dw, dh, rotation, uiMode, displayId,
-                mDisplayInfo.displayCutout);
+                displayCutout);
         int h = mService.mPolicy.getNonDecorDisplayHeight(dw, dh, rotation, uiMode, displayId,
-                mDisplayInfo.displayCutout);
+                displayCutout);
 
         // Compute the screen layout size class for this rotation.
         int longSize = w;
@@ -1892,7 +1892,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         // update as a result of the config change.  We do this here to consolidate the flow between
         // changes when there is and is not a stack.
         if (!hasPinnedStack()) {
-            mPinnedStackControllerLocked.onDisplayInfoChanged();
+            mPinnedStackControllerLocked.onDisplayInfoChanged(getDisplayInfo());
         }
     }
 
@@ -2494,11 +2494,15 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
     void rotateBounds(int oldRotation, int newRotation, Rect bounds) {
         getBounds(mTmpRect, newRotation);
+        rotateBounds(mTmpRect, oldRotation, newRotation, bounds);
+    }
 
+    void rotateBounds(Rect parentBounds, int oldRotation, int newRotation, Rect bounds) {
         // Compute a transform matrix to undo the coordinate space transformation,
         // and present the window at the same physical position it previously occupied.
         final int deltaRotation = deltaRotation(newRotation, oldRotation);
-        createRotationMatrix(deltaRotation, mTmpRect.width(), mTmpRect.height(), mTmpMatrix);
+        createRotationMatrix(
+                deltaRotation, parentBounds.width(), parentBounds.height(), mTmpMatrix);
 
         mTmpRectF.set(bounds);
         mTmpMatrix.mapRect(mTmpRectF);
@@ -3426,27 +3430,27 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     }
 
     private void updateBounds() {
-        calculateBounds(mTmpBounds);
+        calculateBounds(mDisplayInfo, mTmpBounds);
         setBounds(mTmpBounds);
     }
 
     // Determines the current display bounds based on the current state
-    private void calculateBounds(Rect out) {
+    private void calculateBounds(DisplayInfo displayInfo, Rect out) {
         // Uses same calculation as in LogicalDisplay#configureDisplayInTransactionLocked.
-        final int orientation = mDisplayInfo.rotation;
-        boolean rotated = (orientation == ROTATION_90 || orientation == ROTATION_270);
+        final int rotation = displayInfo.rotation;
+        boolean rotated = (rotation == ROTATION_90 || rotation == ROTATION_270);
         final int physWidth = rotated ? mBaseDisplayHeight : mBaseDisplayWidth;
         final int physHeight = rotated ? mBaseDisplayWidth : mBaseDisplayHeight;
-        int width = mDisplayInfo.logicalWidth;
+        int width = displayInfo.logicalWidth;
         int left = (physWidth - width) / 2;
-        int height = mDisplayInfo.logicalHeight;
+        int height = displayInfo.logicalHeight;
         int top = (physHeight - height) / 2;
         out.set(left, top, left + width, top + height);
     }
 
     @Override
     public void getBounds(Rect out) {
-        calculateBounds(out);
+        calculateBounds(mDisplayInfo, out);
     }
 
     private void getBounds(Rect out, int orientation) {

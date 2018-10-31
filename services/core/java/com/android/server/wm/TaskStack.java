@@ -61,6 +61,7 @@ import android.util.EventLog;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.proto.ProtoOutputStream;
+import android.view.DisplayCutout;
 import android.view.DisplayInfo;
 import android.view.Surface;
 import android.view.SurfaceControl;
@@ -486,9 +487,11 @@ public class TaskStack extends WindowContainer<Task> implements
         mTmpRect2.set(getRawBounds());
         mDisplayContent.rotateBounds(mRotation, newRotation, mTmpRect2);
         if (inSplitScreenPrimaryWindowingMode()) {
-            repositionPrimarySplitScreenStackAfterRotation(mTmpRect2);
-            snapDockedStackAfterRotation(mTmpRect2);
-            final int newDockSide = getDockSide(mTmpRect2);
+            final Configuration parentConfig = getParent().getConfiguration();
+            repositionSplitScreenStackAfterRotation(parentConfig, true /* primary */, mTmpRect2);
+            final DisplayCutout cutout = mDisplayContent.getDisplayInfo().displayCutout;
+            snapDockedStackAfterRotation(parentConfig, cutout, mTmpRect2);
+            final int newDockSide = getDockSide(mDisplayContent, parentConfig, mTmpRect2);
 
             // Update the dock create mode and clear the dock create bounds, these
             // might change after a rotation and the original values will be invalid.
@@ -513,23 +516,30 @@ public class TaskStack extends WindowContainer<Task> implements
      * Some primary split screen sides are not allowed by the policy. This method queries the policy
      * and moves the primary stack around if needed.
      *
-     * @param inOutBounds the bounds of the primary stack to adjust
+     * @param parentConfig the configuration of the stack's parent.
+     * @param primary true if adjusting the primary docked stack, false for secondary.
+     * @param inOutBounds the bounds of the stack to adjust.
      */
-    private void repositionPrimarySplitScreenStackAfterRotation(Rect inOutBounds) {
-        int dockSide = getDockSide(inOutBounds);
-        if (mDisplayContent.getDockedDividerController().canPrimaryStackDockTo(dockSide)) {
+    void repositionSplitScreenStackAfterRotation(Configuration parentConfig, boolean primary,
+            Rect inOutBounds) {
+        final int dockSide = getDockSide(mDisplayContent, parentConfig, inOutBounds);
+        final int otherDockSide = DockedDividerUtils.invertDockSide(dockSide);
+        final int primaryDockSide = primary ? dockSide : otherDockSide;
+        if (mDisplayContent.getDockedDividerController()
+                .canPrimaryStackDockTo(primaryDockSide,
+                        parentConfig.windowConfiguration.getBounds(),
+                        mDisplayContent.getDisplayInfo().rotation)) {
             return;
         }
-        mDisplayContent.getBounds(mTmpRect);
-        dockSide = DockedDividerUtils.invertDockSide(dockSide);
-        switch (dockSide) {
+        final Rect parentBounds = parentConfig.windowConfiguration.getBounds();
+        switch (otherDockSide) {
             case DOCKED_LEFT:
                 int movement = inOutBounds.left;
                 inOutBounds.left -= movement;
                 inOutBounds.right -= movement;
                 break;
             case DOCKED_RIGHT:
-                movement = mTmpRect.right - inOutBounds.right;
+                movement = parentBounds.right - inOutBounds.right;
                 inOutBounds.left += movement;
                 inOutBounds.right += movement;
                 break;
@@ -539,7 +549,7 @@ public class TaskStack extends WindowContainer<Task> implements
                 inOutBounds.bottom -= movement;
                 break;
             case DOCKED_BOTTOM:
-                movement = mTmpRect.bottom - inOutBounds.bottom;
+                movement = parentBounds.bottom - inOutBounds.bottom;
                 inOutBounds.top += movement;
                 inOutBounds.bottom += movement;
                 break;
@@ -549,22 +559,22 @@ public class TaskStack extends WindowContainer<Task> implements
     /**
      * Snaps the bounds after rotation to the closest snap target for the docked stack.
      */
-    private void snapDockedStackAfterRotation(Rect outBounds) {
+    void snapDockedStackAfterRotation(Configuration parentConfig, DisplayCutout displayCutout,
+            Rect outBounds) {
 
         // Calculate the current position.
-        final DisplayInfo displayInfo = mDisplayContent.getDisplayInfo();
         final int dividerSize = mDisplayContent.getDockedDividerController().getContentWidth();
-        final int dockSide = getDockSide(outBounds);
+        final int dockSide = getDockSide(parentConfig, outBounds);
         final int dividerPosition = DockedDividerUtils.calculatePositionForBounds(outBounds,
                 dockSide, dividerSize);
-        final int displayWidth = displayInfo.logicalWidth;
-        final int displayHeight = displayInfo.logicalHeight;
+        final int displayWidth = parentConfig.windowConfiguration.getBounds().width();
+        final int displayHeight = parentConfig.windowConfiguration.getBounds().height();
 
         // Snap the position to a target.
-        final int rotation = displayInfo.rotation;
-        final int orientation = mDisplayContent.getConfiguration().orientation;
+        final int rotation = mDisplayContent.getDisplayInfo().rotation;
+        final int orientation = parentConfig.orientation;
         mService.mPolicy.getStableInsetsLw(rotation, displayWidth, displayHeight,
-                displayInfo.displayCutout, outBounds);
+                displayCutout, outBounds);
         final DividerSnapAlgorithm algorithm = new DividerSnapAlgorithm(
                 mService.mContext.getResources(), displayWidth, displayHeight,
                 dividerSize, orientation == Configuration.ORIENTATION_PORTRAIT, outBounds,
@@ -573,7 +583,7 @@ public class TaskStack extends WindowContainer<Task> implements
 
         // Recalculate the bounds based on the position of the target.
         DockedDividerUtils.calculateBoundsForPosition(target.position, dockSide,
-                outBounds, displayInfo.logicalWidth, displayInfo.logicalHeight,
+                outBounds, displayWidth, displayHeight,
                 dividerSize);
     }
 
@@ -1473,27 +1483,27 @@ public class TaskStack extends WindowContainer<Task> implements
      * information which side of the screen was the dock anchored.
      */
     int getDockSide() {
-        return getDockSide(getRawBounds());
+        return getDockSide(mDisplayContent.getConfiguration(), getRawBounds());
     }
 
     int getDockSideForDisplay(DisplayContent dc) {
-        return getDockSide(dc, getRawBounds());
+        return getDockSide(dc, dc.getConfiguration(), getRawBounds());
     }
 
-    private int getDockSide(Rect bounds) {
+    int getDockSide(Configuration parentConfig, Rect bounds) {
         if (mDisplayContent == null) {
             return DOCKED_INVALID;
         }
-        return getDockSide(mDisplayContent, bounds);
+        return getDockSide(mDisplayContent, parentConfig, bounds);
     }
 
-    private int getDockSide(DisplayContent dc, Rect bounds) {
+    private int getDockSide(DisplayContent dc, Configuration parentConfig, Rect bounds) {
         if (!inSplitScreenWindowingMode()) {
             return DOCKED_INVALID;
         }
-        dc.getBounds(mTmpRect);
-        final int orientation = dc.getConfiguration().orientation;
-        return dc.getDockedDividerController().getDockSide(bounds, mTmpRect, orientation);
+        return dc.getDockedDividerController().getDockSide(bounds,
+                parentConfig.windowConfiguration.getBounds(),
+                parentConfig.orientation, dc.getDisplayInfo().rotation);
     }
 
     boolean hasTaskForUser(int userId) {
