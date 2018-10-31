@@ -88,4 +88,7 @@
     <string name="anonymous_source_continue" msgid="4375745439457209366">"തുടരുക"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"ക്രമീകരണം"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Wear ആപ്പ് ഇൻസ്‌റ്റാൾ/അൺ ഇൻസ്‌റ്റാൾ ചെയ്യുന്നു"</string>
+    <string name="app_installed_notification_channel_description" msgid="2695385797601574123">"ആപ്പ് ഇൻസ്‌റ്റാൾ ചെയ്‌ത അറിയിപ്പ്"</string>
+    <string name="notification_installation_success_message" msgid="6450467996056038442">"ഇൻസ്‌റ്റാൾ ചെയ്‌തു"</string>
+    <string name="notification_installation_success_status" msgid="3172502643504323321">"\"<xliff:g id="APPNAME">%1$s</xliff:g>\" ഇൻസ്‌റ്റാൾ ചെയ്‌തു"</string>
 </resources>

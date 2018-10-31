@@ -88,4 +88,7 @@
     <string name="anonymous_source_continue" msgid="4375745439457209366">"Magpatuloy"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"Mga Setting"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Ini-install/ina-uninstall ang wear app"</string>
+    <string name="app_installed_notification_channel_description" msgid="2695385797601574123">"Notification na na-install ang app"</string>
+    <string name="notification_installation_success_message" msgid="6450467996056038442">"Matagumpay na na-install"</string>
+    <string name="notification_installation_success_status" msgid="3172502643504323321">"Matagumpay na na-install ang “<xliff:g id="APPNAME">%1$s</xliff:g>”"</string>
 </resources>

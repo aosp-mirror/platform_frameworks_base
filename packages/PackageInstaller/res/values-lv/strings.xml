@@ -88,4 +88,7 @@
     <string name="anonymous_source_continue" msgid="4375745439457209366">"Tālāk"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"Iestatījumi"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Wear lietotņu instalēšana/atinstalēšana"</string>
+    <string name="app_installed_notification_channel_description" msgid="2695385797601574123">"Paziņojums par instalētu lietotni"</string>
+    <string name="notification_installation_success_message" msgid="6450467996056038442">"Sekmīgi instalēta"</string>
+    <string name="notification_installation_success_status" msgid="3172502643504323321">"Lietotne “<xliff:g id="APPNAME">%1$s</xliff:g>” sekmīgi instalēta"</string>
 </resources>

@@ -88,4 +88,7 @@
     <string name="anonymous_source_continue" msgid="4375745439457209366">"ສືບຕໍ່"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"ການຕັ້ງຄ່າ"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"ການຕິດຕັ້ງ/ຖອນການຕິດຕັ້ງແອັບ Wear"</string>
+    <string name="app_installed_notification_channel_description" msgid="2695385797601574123">"ການແຈ້ງເຕືອນແອັບທີ່ຕິດຕັ້ງແລ້ວ"</string>
+    <string name="notification_installation_success_message" msgid="6450467996056038442">"ຕິດຕັ້ງສຳເລັດແລ້ວ"</string>
+    <string name="notification_installation_success_status" msgid="3172502643504323321">"ຕິດຕັ້ງ \"<xliff:g id="APPNAME">%1$s</xliff:g>\" ສຳເລັດແລ້ວ"</string>
 </resources>
