@@ -92,7 +92,7 @@ class AccessibilityServiceConnection extends AbstractAccessibilityServiceConnect
         final long identity = Binder.clearCallingIdentity();
         try {
             int flags = Context.BIND_AUTO_CREATE | Context.BIND_FOREGROUND_SERVICE_WHILE_AWAKE;
-            if (userState.mBindInstantServiceAllowed) {
+            if (userState.getBindInstantServiceAllowed()) {
                 flags |= Context.BIND_ALLOW_INSTANT;
             }
             if (mService == null && mContext.bindServiceAsUser(
