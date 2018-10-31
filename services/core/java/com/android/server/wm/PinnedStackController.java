@@ -20,10 +20,10 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.util.TypedValue.COMPLEX_UNIT_DIP;
 
-import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
-import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.PinnedStackControllerProto.DEFAULT_BOUNDS;
 import static com.android.server.wm.PinnedStackControllerProto.MOVEMENT_BOUNDS;
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.app.RemoteAction;
 import android.content.pm.ParceledListSlice;
