@@ -113,7 +113,6 @@ import com.android.systemui.statusbar.notification.row.NotificationGuts;
 import com.android.systemui.statusbar.notification.row.NotificationGutsManager;
 import com.android.systemui.statusbar.notification.row.NotificationSnooze;
 import com.android.systemui.statusbar.notification.row.StackScrollerDecorView;
-import com.android.systemui.statusbar.phone.DozeParameters;
 import com.android.systemui.statusbar.phone.HeadsUpAppearanceController;
 import com.android.systemui.statusbar.phone.HeadsUpManagerPhone;
 import com.android.systemui.statusbar.phone.HeadsUpTouchHelper;
@@ -673,37 +672,29 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
 
     @ShadeViewRefactor(RefactorComponent.DECORATOR)
     private void drawBackground(Canvas canvas) {
-        final int lockScreenLeft = mSidePaddings;
-        final int lockScreenRight = getWidth() - mSidePaddings;
-        final int lockScreenTop = mCurrentBounds.top;
-        final int lockScreenBottom = mCurrentBounds.bottom;
-        final int darkLeft = getWidth() / 2;
-        final int darkTop = mRegularTopPadding;
+        int lockScreenLeft = mSidePaddings;
+        int lockScreenRight = getWidth() - mSidePaddings;
+        int lockScreenTop = mCurrentBounds.top;
+        int lockScreenBottom = mCurrentBounds.bottom;
+        int darkLeft = getWidth() / 2;
+        int darkTop = mRegularTopPadding;
 
-        if (mAmbientState.hasPulsingNotifications()) {
-            // No divider, we have a notification icon instead
-        } else if (mAmbientState.isFullyDark()) {
-            // Only draw divider on AOD if we actually have notifications
-            if (mFirstVisibleBackgroundChild != null) {
-                canvas.drawRect(darkLeft, darkTop, darkLeft, darkTop, mBackgroundPaint);
-            }
-        } else {
-            float yProgress = 1 - mInterpolatedDarkAmount;
-            float xProgress = mDarkXInterpolator.getInterpolation(
-                    (1 - mLinearDarkAmount) * mBackgroundXFactor);
+        float yProgress = 1 - mInterpolatedDarkAmount;
+        float xProgress = mDarkXInterpolator.getInterpolation(
+                (1 - mLinearDarkAmount) * mBackgroundXFactor);
 
-            mBackgroundAnimationRect.set(
-                    (int) MathUtils.lerp(darkLeft, lockScreenLeft, xProgress),
-                    (int) MathUtils.lerp(darkTop, lockScreenTop, yProgress),
-                    (int) MathUtils.lerp(darkLeft, lockScreenRight, xProgress),
-                    (int) MathUtils.lerp(darkTop, lockScreenBottom, yProgress));
+        mBackgroundAnimationRect.set(
+                (int) MathUtils.lerp(darkLeft, lockScreenLeft, xProgress),
+                (int) MathUtils.lerp(darkTop, lockScreenTop, yProgress),
+                (int) MathUtils.lerp(darkLeft, lockScreenRight, xProgress),
+                (int) MathUtils.lerp(darkTop, lockScreenBottom, yProgress));
 
-            if (!mAmbientState.isDark() || mFirstVisibleBackgroundChild != null) {
-                canvas.drawRoundRect(mBackgroundAnimationRect.left, mBackgroundAnimationRect.top,
-                        mBackgroundAnimationRect.right, mBackgroundAnimationRect.bottom,
-                        mCornerRadius, mCornerRadius, mBackgroundPaint);
-            }
+        if (!mAmbientState.isDark() || mFirstVisibleBackgroundChild != null) {
+            canvas.drawRoundRect(mBackgroundAnimationRect.left, mBackgroundAnimationRect.top,
+                    mBackgroundAnimationRect.right, mBackgroundAnimationRect.bottom,
+                    mCornerRadius, mCornerRadius, mBackgroundPaint);
         }
+
         updateClipping();
     }
 
@@ -1110,14 +1101,13 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
 
     @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     public void updateClipping() {
-        boolean animatingClipping = mInterpolatedDarkAmount > 0 && mInterpolatedDarkAmount < 1;
         boolean clipped = mRequestedClipBounds != null && !mInHeadsUpPinnedMode
                 && !mHeadsUpAnimatingAway;
         if (mIsClipped != clipped) {
             mIsClipped = clipped;
         }
 
-        if (animatingClipping) {
+        if (mAmbientState.isDarkAtAll()) {
             setClipBounds(mBackgroundAnimationRect);
         } else if (clipped) {
             setClipBounds(mRequestedClipBounds);
@@ -4257,13 +4247,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         boolean nowDarkAtAll = mAmbientState.isDarkAtAll();
         if (nowFullyDark != wasFullyDark) {
             updateContentHeight();
-            DozeParameters dozeParameters = DozeParameters.getInstance(mContext);
-            if (nowFullyDark && dozeParameters.shouldControlScreenOff()) {
-                mShelf.fadeInTranslating();
-            }
-            if (mIconAreaController != null) {
-                mIconAreaController.setFullyDark(nowFullyDark);
-            }
+        }
+        if (mIconAreaController != null) {
+            mIconAreaController.setDarkAmount(interpolatedDarkAmount);
         }
         if (!wasDarkAtAll && nowDarkAtAll) {
             resetExposedMenuView(true /* animate */, true /* animate */);
