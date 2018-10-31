@@ -14,18 +14,22 @@
  * limitations under the License.
  */
 
-package android.telephony;
+package android.telephony.rcs;
 
+import android.annotation.SystemService;
+import android.content.Context;
 import android.os.RemoteException;
 import android.os.ServiceManager;
+import android.telephony.Rlog;
 
-import com.android.internal.telephony.IRcs;
+import com.android.internal.telephony.rcs.IRcs;
 
 /**
  * RcsManager is the application interface to RcsProvider and provides access methods to
  * RCS related database tables.
  * @hide - TODO make this public
  */
+@SystemService(Context.TELEPHONY_RCS_SERVICE)
 public class RcsManager {
     private static final String TAG = "RcsManager";
     private static final boolean VDBG = false;
