@@ -16,9 +16,9 @@
 
 package android.telephony.ims.stub;
 
+import android.annotation.IntDef;
 import android.annotation.SystemApi;
 import android.content.Context;
-import android.content.Intent;
 import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.telephony.ims.aidl.IImsConfig;
@@ -28,6 +28,8 @@ import android.util.Log;
 import com.android.ims.ImsConfig;
 import com.android.internal.annotations.VisibleForTesting;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.lang.ref.WeakReference;
 import java.util.HashMap;
 
@@ -215,41 +217,6 @@ public class ImsConfigImplBase {
     }
 
     /**
-     * Callback that the framework uses for receiving Configuration change updates.
-     * {@hide}
-     */
-    public static class Callback extends IImsConfigCallback.Stub {
-
-        @Override
-        public final void onIntConfigChanged(int item, int value) throws RemoteException {
-            onConfigChanged(item, value);
-        }
-
-        @Override
-        public final void onStringConfigChanged(int item, String value) throws RemoteException {
-            onConfigChanged(item, value);
-        }
-
-        /**
-         * Called when the IMS configuration has changed.
-         * @param item the IMS configuration key constant, as defined in ImsConfig.
-         * @param value the new integer value of the IMS configuration constant.
-         */
-        public void onConfigChanged(int item, int value) {
-            // Base Implementation
-        }
-
-        /**
-         * Called when the IMS configuration has changed.
-         * @param item the IMS configuration key constant, as defined in ImsConfig.
-         * @param value the new String value of the IMS configuration constant.
-         */
-        public void onConfigChanged(int item, String value) {
-            // Base Implementation
-        }
-    }
-
-    /**
      * The configuration requested resulted in an unknown result. This may happen if the
      * IMS configurations are unavailable.
      */
@@ -262,6 +229,16 @@ public class ImsConfigImplBase {
      * Setting the configuration value failed.
      */
     public static final int CONFIG_RESULT_FAILED =  1;
+
+    /**
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = "CONFIG_RESULT_", value = {
+            CONFIG_RESULT_SUCCESS,
+            CONFIG_RESULT_FAILED
+    })
+    public @interface SetConfigResult {}
 
     private final RemoteCallbackList<IImsConfigCallback> mCallbacks = new RemoteCallbackList<>();
     ImsConfigStub mImsConfigStub;
@@ -279,17 +256,16 @@ public class ImsConfigImplBase {
     }
 
     /**
-     * Adds a {@link Callback} to the list of callbacks notified when a value in the configuration
-     * changes.
+     * Adds a {@link android.telephony.ims.ProvisioningManager.Callback} to the list of callbacks
+     * notified when a value in the configuration changes.
      * @param c callback to add.
      */
     private void addImsConfigCallback(IImsConfigCallback c) {
         mCallbacks.register(c);
     }
     /**
-     * Removes a {@link Callback} to the list of callbacks notified when a value in the
-     * configuration changes.
-     *
+     * Removes a {@link android.telephony.ims.ProvisioningManager.Callback} to the list of callbacks
+     * notified when a value in the configuration changes.
      * @param c callback to remove.
      */
     private void removeImsConfigCallback(IImsConfigCallback c) {
@@ -370,10 +346,9 @@ public class ImsConfigImplBase {
      *
      * @param item an integer key.
      * @param value an integer containing the configuration value.
-     * @return the result of setting the configuration value, defined as either
-     * {@link #CONFIG_RESULT_FAILED} or {@link #CONFIG_RESULT_SUCCESS}.
+     * @return the result of setting the configuration value.
      */
-    public int setConfig(int item, int value) {
+    public @SetConfigResult int setConfig(int item, int value) {
         // Base Implementation - To be overridden.
         return CONFIG_RESULT_FAILED;
     }
@@ -383,10 +358,9 @@ public class ImsConfigImplBase {
      *
      * @param item an integer key.
      * @param value a String containing the new configuration value.
-     * @return Result of setting the configuration value, defined as either
-     * {@link #CONFIG_RESULT_FAILED} or {@link #CONFIG_RESULT_SUCCESS}.
+     * @return Result of setting the configuration value.
      */
-    public int setConfig(int item, String value) {
+    public @SetConfigResult int setConfig(int item, String value) {
         // Base Implementation - To be overridden.
         return CONFIG_RESULT_FAILED;
     }
