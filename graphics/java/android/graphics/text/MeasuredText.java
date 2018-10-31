@@ -48,9 +48,6 @@ import libcore.util.NativeAllocationRegistry;
  * </p>
  */
 public class MeasuredText {
-    private static final NativeAllocationRegistry sRegistry = new NativeAllocationRegistry(
-            MeasuredText.class.getClassLoader(), nGetReleaseFunc(), 1024);
-
     private long mNativePtr;
     private @NonNull char[] mChars;
 
@@ -166,6 +163,9 @@ public class MeasuredText {
      * Note: The appendStyle and appendReplacementRun should be called to cover the text length.
      */
     public static class Builder {
+        private static final NativeAllocationRegistry sRegistry = new NativeAllocationRegistry(
+                MeasuredText.class.getClassLoader(), nGetReleaseFunc(), 1024);
+
         private long mNativePtr;
 
         private final @NonNull char[] mText;
