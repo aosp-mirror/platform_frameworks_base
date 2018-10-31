@@ -81,6 +81,7 @@ static pid_t gSystemServerPid = 0;
 
 static const char kZygoteClassName[] = "com/android/internal/os/Zygote";
 static jclass gZygoteClass;
+static jmethodID gCallPostForkSystemServerHooks;
 static jmethodID gCallPostForkChildHooks;
 
 static bool g_is_security_enforced = true;
@@ -728,6 +729,18 @@ static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray javaGi
   // Unset the SIGCHLD handler, but keep ignoring SIGHUP (rationale in SetSignalHandlers).
   UnsetChldSignalHandler();
 
+  if (is_system_server) {
+    env->CallStaticVoidMethod(gZygoteClass, gCallPostForkSystemServerHooks);
+    if (env->ExceptionCheck()) {
+      fail_fn("Error calling post fork system server hooks.");
+    }
+    // TODO(oth): Remove hardcoded label here (b/117874058).
+    static const char* kSystemServerLabel = "u:r:system_server:s0";
+    if (selinux_android_setcon(kSystemServerLabel) != 0) {
+      fail_fn(CREATE_ERROR("selinux_android_setcon(%s)", kSystemServerLabel));
+    }
+  }
+
   env->CallStaticVoidMethod(gZygoteClass, gCallPostForkChildHooks, runtime_flags,
                             is_system_server, is_child_zygote, instructionSet);
   if (env->ExceptionCheck()) {
@@ -1020,6 +1033,9 @@ static const JNINativeMethod gMethods[] = {
 
 int register_com_android_internal_os_Zygote(JNIEnv* env) {
   gZygoteClass = MakeGlobalRefOrDie(env, FindClassOrDie(env, kZygoteClassName));
+  gCallPostForkSystemServerHooks = GetStaticMethodIDOrDie(env, gZygoteClass,
+                                                          "callPostForkSystemServerHooks",
+                                                          "()V");
   gCallPostForkChildHooks = GetStaticMethodIDOrDie(env, gZygoteClass, "callPostForkChildHooks",
                                                    "(IZZLjava/lang/String;)V");
 
