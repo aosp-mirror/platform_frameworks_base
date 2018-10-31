@@ -1341,7 +1341,7 @@ static jboolean android_location_GnssLocationProvider_init(JNIEnv* env, jobject 
 
     sp<IGnssXtraCallback> gnssXtraCbIface = new GnssXtraCallback();
     if (gnssXtraIface == nullptr) {
-        ALOGE("Unable to initialize GNSS Xtra interface\n");
+        ALOGI("Unable to initialize GNSS Xtra interface\n");
     } else {
         result = gnssXtraIface->setCallback(gnssXtraCbIface);
         if (!result.isOk() || !result) {
