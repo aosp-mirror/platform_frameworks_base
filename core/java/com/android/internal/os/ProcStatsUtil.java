@@ -20,6 +20,8 @@ import android.annotation.Nullable;
 import android.os.StrictMode;
 import android.util.Slog;
 
+import com.android.internal.annotations.VisibleForTesting;
+
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -27,7 +29,8 @@ import java.io.IOException;
 /**
  * Utility functions for reading {@code proc} files
  */
-final class ProcStatsUtil {
+@VisibleForTesting(visibility = VisibleForTesting.Visibility.PROTECTED)
+public final class ProcStatsUtil {
 
     private static final String TAG = "ProcStatsUtil";
 
@@ -48,8 +51,9 @@ final class ProcStatsUtil {
      *
      * @param path path of the file to read
      */
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PROTECTED)
     @Nullable
-    static String readNullSeparatedFile(String path) {
+    public static String readNullSeparatedFile(String path) {
         String contents = readSingleLineProcFile(path);
         if (contents == null) {
             return null;
@@ -72,8 +76,9 @@ final class ProcStatsUtil {
      *
      * @param path path of the file to read
      */
+    @VisibleForTesting(visibility = VisibleForTesting.Visibility.PROTECTED)
     @Nullable
-    static String readSingleLineProcFile(String path) {
+    public static String readSingleLineProcFile(String path) {
         return readTerminatedProcFile(path, (byte) '\n');
     }
 
