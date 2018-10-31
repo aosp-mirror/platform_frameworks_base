@@ -525,7 +525,10 @@ public class IpSecServiceParameterizedTest {
 
         IpSecTransformResponse createTransformResp =
                 mIpSecService.createTransform(ipSecConfig, new Binder(), "blessedPackage");
-        ParcelFileDescriptor pfd = ParcelFileDescriptor.fromSocket(new Socket());
+
+        Socket socket = new Socket();
+        socket.bind(null);
+        ParcelFileDescriptor pfd = ParcelFileDescriptor.fromSocket(socket);
 
         int resourceId = createTransformResp.resourceId;
         mIpSecService.applyTransportModeTransform(pfd, IpSecManager.DIRECTION_OUT, resourceId);
@@ -542,7 +545,9 @@ public class IpSecServiceParameterizedTest {
 
     @Test
     public void testRemoveTransportModeTransform() throws Exception {
-        ParcelFileDescriptor pfd = ParcelFileDescriptor.fromSocket(new Socket());
+        Socket socket = new Socket();
+        socket.bind(null);
+        ParcelFileDescriptor pfd = ParcelFileDescriptor.fromSocket(socket);
         mIpSecService.removeTransportModeTransforms(pfd);
 
         verify(mMockNetd).ipSecRemoveTransportModeTransform(pfd.getFileDescriptor());
