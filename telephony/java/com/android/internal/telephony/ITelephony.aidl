@@ -1311,6 +1311,18 @@ interface ITelephony {
     String getSubscriptionCarrierName(int subId);
 
     /**
+     * Returns MNO carrier id of the current subscription’s MCCMNC.
+     * <p>MNO carrier id can be solely identified by subscription mccmnc. This is mainly used
+     * for MNO fallback when exact carrier id {@link #getSimCarrierId()}
+     * configurations are not found.
+     *
+     * @return MNO carrier id of the current subscription. Return the value same as carrier id
+     * {@link #getSimCarrierId()}, if MNO carrier id cannot be identified.
+     * @hide
+     */
+    int getSubscriptionMNOCarrierId(int subId);
+
+    /**
      * Action set from carrier signalling broadcast receivers to enable/disable metered apns
      * Permissions android.Manifest.permission.MODIFY_PHONE_STATE is required
      * @param subId the subscription ID that this action applies to.
