@@ -1124,6 +1124,8 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
         pw.println("mTvSystemAudioModeSupport: " + mTvSystemAudioModeSupport);
         pw.println("mArcEstablished: " + mArcEstablished);
         pw.println("mArcIntentUsed: " + mArcIntentUsed);
+        pw.println("mRoutingPort: " + getRoutingPort());
+        pw.println("mLocalActivePort: " + getLocalActivePort());
         HdmiUtils.dumpMap(pw, "mTvInputs:", mTvInputs);
         HdmiUtils.dumpSparseArray(pw, "mDeviceInfos:", mDeviceInfos);
         pw.decreaseIndent();
