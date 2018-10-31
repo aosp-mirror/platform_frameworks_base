@@ -167,7 +167,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
                     0,
                     NotificationManager.IMPORTANCE_DEFAULT,
                     null, null,
-                    null, null, null, true, sentiment, false, false, null, null);
+                    null, null, null, true, sentiment, false, false, false, null, null);
             return true;
         }).when(mRankingMap).getRanking(eq(key), any(NotificationListenerService.Ranking.class));
     }
@@ -186,7 +186,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
                     null, null,
                     null, null, null, true,
                     NotificationListenerService.Ranking.USER_SENTIMENT_NEUTRAL, false, false,
-                    smartActions, null);
+                    false, smartActions, null);
             return true;
         }).when(mRankingMap).getRanking(eq(key), any(NotificationListenerService.Ranking.class));
     }

@@ -6564,6 +6564,7 @@ public class NotificationManagerService extends SystemService {
         Bundle smartActions = new Bundle();
         Bundle smartReplies = new Bundle();
         Bundle audiblyAlerted = new Bundle();
+        Bundle noisy = new Bundle();
         for (int i = 0; i < N; i++) {
             NotificationRecord record = mNotificationList.get(i);
             if (!isVisibleToListener(record.sbn, info)) {
@@ -6594,6 +6595,7 @@ public class NotificationManagerService extends SystemService {
             smartActions.putParcelableArrayList(key, record.getSmartActions());
             smartReplies.putCharSequenceArrayList(key, record.getSmartReplies());
             audiblyAlerted.putBoolean(key, record.getAudiblyAlerted());
+            noisy.putBoolean(key, record.getSound() != null || record.getVibration() != null);
         }
         final int M = keys.size();
         String[] keysAr = keys.toArray(new String[M]);
@@ -6605,7 +6607,7 @@ public class NotificationManagerService extends SystemService {
         return new NotificationRankingUpdate(keysAr, interceptedKeysAr, visibilityOverrides,
                 suppressedVisualEffects, importanceAr, explanation, overrideGroupKeys,
                 channels, overridePeople, snoozeCriteria, showBadge, userSentiment, hidden,
-                smartActions, smartReplies, audiblyAlerted);
+                smartActions, smartReplies, audiblyAlerted, noisy);
     }
 
     boolean hasCompanionDevice(ManagedServiceInfo info) {

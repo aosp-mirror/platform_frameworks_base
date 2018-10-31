@@ -1540,6 +1540,12 @@
     <!-- Notification inline controls: Shown when a channel's notifications are minimized -->
     <string name="notification_channel_minimized">These notifications will be minimized</string>
 
+    <!-- Notification inline controls: Shown when a channel's notifications are silenced [CHAR_LIMIT=100] -->
+    <string name="notification_channel_silenced">These notifications will be shown silently</string>
+
+    <!-- Notification inline controls: Shown when a channel's notifications are set to alert [CHAR_LIMIT=100] -->
+    <string name="notification_channel_unsilenced">These notifications will alert you</string>
+
     <!-- Notification Inline controls: continue receiving notifications prompt, channel level -->
     <string name="inline_blocking_helper">You usually dismiss these notifications.
     \nKeep showing them?</string>
@@ -1555,6 +1561,12 @@
 
     <!-- Notification inline controls: minimize notifications button -->
     <string name="inline_minimize_button">Minimize</string>
+
+    <!-- Notification inline controls: show notifications silently button [CHAR_LIMIT=25] -->
+    <string name="inline_silent_button_silent">Show silently</string>
+
+    <!-- Notification inline controls: show and alert button [CHAR_LIMIT=25] -->
+    <string name="inline_silent_button_alert">Show and alert</string>
 
     <!-- Notification Inline controls: continue receiving notifications prompt, app level -->
     <string name="inline_keep_showing_app">Keep showing notifications from this app?</string>

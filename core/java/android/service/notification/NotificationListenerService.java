@@ -1462,6 +1462,7 @@ public abstract class NotificationListenerService extends Service {
         private @UserSentiment int mUserSentiment = USER_SENTIMENT_NEUTRAL;
         private boolean mHidden;
         private boolean mAudiblyAlerted;
+        private boolean mNoisy;
         private ArrayList<Notification.Action> mSmartActions;
         private ArrayList<CharSequence> mSmartReplies;
 
@@ -1636,6 +1637,11 @@ public abstract class NotificationListenerService extends Service {
             return mAudiblyAlerted;
         }
 
+        /** @hide */
+        public boolean isNoisy() {
+            return mNoisy;
+        }
+
         /**
          * @hide
          */
@@ -1646,7 +1652,8 @@ public abstract class NotificationListenerService extends Service {
                 NotificationChannel channel, ArrayList<String> overridePeople,
                 ArrayList<SnoozeCriterion> snoozeCriteria, boolean showBadge,
                 int userSentiment, boolean hidden, boolean audiblyAlerted,
-                ArrayList<Notification.Action> smartActions, ArrayList<CharSequence> smartReplies) {
+                boolean noisy, ArrayList<Notification.Action> smartActions,
+                ArrayList<CharSequence> smartReplies) {
             mKey = key;
             mRank = rank;
             mIsAmbient = importance < NotificationManager.IMPORTANCE_LOW;
@@ -1663,6 +1670,7 @@ public abstract class NotificationListenerService extends Service {
             mUserSentiment = userSentiment;
             mHidden = hidden;
             mAudiblyAlerted = audiblyAlerted;
+            mNoisy = noisy;
             mSmartActions = smartActions;
             mSmartReplies = smartReplies;
         }
@@ -1715,6 +1723,7 @@ public abstract class NotificationListenerService extends Service {
         private ArrayMap<String, Integer> mUserSentiment;
         private ArrayMap<String, Boolean> mHidden;
         private ArrayMap<String, Boolean> mAudiblyAlerted;
+        private ArrayMap<String, Boolean> mNoisy;
         private ArrayMap<String, ArrayList<Notification.Action>> mSmartActions;
         private ArrayMap<String, ArrayList<CharSequence>> mSmartReplies;
 
@@ -1746,7 +1755,8 @@ public abstract class NotificationListenerService extends Service {
                     getImportance(key), getImportanceExplanation(key), getOverrideGroupKey(key),
                     getChannel(key), getOverridePeople(key), getSnoozeCriteria(key),
                     getShowBadge(key), getUserSentiment(key), getHidden(key),
-                    getAudiblyAlerted(key), getSmartActions(key), getSmartReplies(key));
+                    getAudiblyAlerted(key), getNoisy(key), getSmartActions(key),
+                    getSmartReplies(key));
             return rank >= 0;
         }
 
@@ -1894,6 +1904,16 @@ public abstract class NotificationListenerService extends Service {
             return audiblyAlerted == null ? false : audiblyAlerted.booleanValue();
         }
 
+        private boolean getNoisy(String key) {
+            synchronized (this) {
+                if (mNoisy == null) {
+                    buildNoisyLocked();
+                }
+            }
+            Boolean noisy = mNoisy.get(key);
+            return noisy == null ? false : noisy.booleanValue();
+        }
+
         private ArrayList<Notification.Action> getSmartActions(String key) {
             synchronized (this) {
                 if (mSmartActions == null) {
@@ -2031,6 +2051,11 @@ public abstract class NotificationListenerService extends Service {
         // Locked by 'this'
         private void buildAudiblyAlertedLocked() {
             mAudiblyAlerted = buildBooleanMapFromBundle(mRankingUpdate.getAudiblyAlerted());
+        }
+
+        // Locked by 'this'
+        private void buildNoisyLocked() {
+            mNoisy = buildBooleanMapFromBundle(mRankingUpdate.getNoisy());
         }
 
         // Locked by 'this'

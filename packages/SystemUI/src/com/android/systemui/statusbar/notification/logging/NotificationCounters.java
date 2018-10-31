@@ -30,6 +30,9 @@ public class NotificationCounters {
     /** Counter tag for when the user hits 'stop notifications' in the blocking helper. */
     public static final String BLOCKING_HELPER_STOP_NOTIFICATIONS =
             "blocking_helper_stop_notifications";
+    /** Counter tag for when the user hits 'show silently' in the blocking helper. */
+    public static final String BLOCKING_HELPER_TOGGLE_SILENT =
+            "blocking_helper_toggle_silent";
     /** Counter tag for when the user hits 'keep showing' in the blocking helper. */
     public static final String BLOCKING_HELPER_KEEP_SHOWING =
             "blocking_helper_keep_showing";

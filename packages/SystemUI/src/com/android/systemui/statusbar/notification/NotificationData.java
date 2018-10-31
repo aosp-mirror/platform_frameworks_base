@@ -102,6 +102,8 @@ public class NotificationData {
         public StatusBarNotification notification;
         public NotificationChannel channel;
         public boolean audiblyAlerted;
+        public boolean noisy;
+        public int importance;
         public StatusBarIconView icon;
         public StatusBarIconView expandedIcon;
         public ExpandableNotificationRow row; // the outer expanded view
@@ -155,6 +157,8 @@ public class NotificationData {
         public void populateFromRanking(@NonNull Ranking ranking) {
             channel = ranking.getChannel();
             audiblyAlerted = ranking.audiblyAlerted();
+            noisy = ranking.isNoisy();
+            importance = ranking.getImportance();
             snoozeCriteria = ranking.getSnoozeCriteria();
             userSentiment = ranking.getUserSentiment();
             smartActions = ranking.getSmartActions() == null

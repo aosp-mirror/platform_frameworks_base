@@ -28,7 +28,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.net.Uri;
-import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.provider.Settings;
@@ -46,15 +45,13 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
 import com.android.systemui.plugins.ActivityStarter;
-import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
-import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin.MenuItem;
 import com.android.systemui.statusbar.NotificationLifetimeExtender;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
-import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.NotificationPresenter;
 import com.android.systemui.statusbar.StatusBarState;
 import com.android.systemui.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.row.NotificationInfo.CheckSaveListener;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -298,7 +295,9 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
                 mDeviceProvisionedController.isDeviceProvisioned(),
                 row.getIsNonblockable(),
                 isForBlockingHelper,
-                row.getEntry().userSentiment == USER_SENTIMENT_NEGATIVE);
+                row.getEntry().userSentiment == USER_SENTIMENT_NEGATIVE,
+                row.getEntry().noisy,
+                row.getEntry().importance);
 
     }
 
