@@ -172,7 +172,7 @@
     <string name="carrier_network_change_mode" msgid="8149202439957837762">"Skiptir um farsímakerfi"</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"Opna upplýsingar um rafhlöðu"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"<xliff:g id="NUMBER">%d</xliff:g> prósent á rafhlöðu."</string>
-    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"Rafhlaða í hleðslu, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> prósent."</string>
+    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"Rafhlaða í hleðslu, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%%."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Kerfisstillingar."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Tilkynningar."</string>
     <string name="accessibility_overflow_action" msgid="5681882033274783311">"Sjá allar tilkynningar"</string>

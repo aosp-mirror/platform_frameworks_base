@@ -172,9 +172,7 @@
     <string name="carrier_network_change_mode" msgid="8149202439957837762">"流動網絡供應商網絡正在變更"</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"開啟電池詳細資料"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"電池電量為百分之 <xliff:g id="NUMBER">%d</xliff:g>。"</string>
-    <!-- String.format failed for translation -->
-    <!-- no translation found for accessibility_battery_level_charging (1147587904439319646) -->
-    <skip />
+    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"正在充電：<xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%%。"</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"系統設定"</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"通知。"</string>
     <string name="accessibility_overflow_action" msgid="5681882033274783311">"睇所有通知"</string>
@@ -820,8 +818,8 @@
     <string name="notification_channel_general" msgid="4525309436693914482">"一般訊息"</string>
     <string name="notification_channel_storage" msgid="3077205683020695313">"儲存空間"</string>
     <string name="notification_channel_hints" msgid="7323870212489152689">"提示"</string>
-    <string name="instant_apps" msgid="6647570248119804907">"即時應用程式"</string>
-    <string name="instant_apps_message" msgid="8116608994995104836">"即時應用程式無需安裝即可使用。"</string>
+    <string name="instant_apps" msgid="6647570248119804907">"免安裝應用程式"</string>
+    <string name="instant_apps_message" msgid="8116608994995104836">"免安裝應用程式無需安裝即可使用。"</string>
     <string name="app_info" msgid="6856026610594615344">"應用程式資料"</string>
     <string name="go_to_web" msgid="2650669128861626071">"前往瀏覽器"</string>
     <string name="mobile_data" msgid="7094582042819250762">"流動數據"</string>
