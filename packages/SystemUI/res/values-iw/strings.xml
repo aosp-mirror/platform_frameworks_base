@@ -21,17 +21,7 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="7164937344850004466">"ממשק משתמש של המערכת"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"ניקוי"</string>
-    <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"הסר מהרשימה"</string>
-    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"פרטי אפליקציה"</string>
-    <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"המסכים האחרונים מופיעים כאן"</string>
-    <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"סגור אפליקציות אחרונות"</string>
-    <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
-      <item quantity="two">‏%d מסכים ב’סקירה‘</item>
-      <item quantity="many">‏%d מסכים ב’סקירה‘</item>
-      <item quantity="other">‏%d מסכים ב’סקירה‘</item>
-      <item quantity="one">מסך אחד ב’סקירה‘</item>
-    </plurals>
-    <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"אין הודעות"</string>
+    <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"אין התראות"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"מתמשך"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"התראות"</string>
     <string name="battery_low_title" msgid="9187898087363540349">"ייתכן שהסוללה תתרוקן בקרוב"</string>
@@ -103,7 +93,6 @@
     <string name="phone_label" msgid="2320074140205331708">"פתח את הטלפון"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"פתח את המסייע הקולי"</string>
     <string name="camera_label" msgid="7261107956054836961">"פתח את המצלמה"</string>
-    <string name="recents_caption_resize" msgid="3517056471774958200">"בחר פריסה חדשה להצגת משימות"</string>
     <string name="cancel" msgid="6442560571259935130">"ביטול"</string>
     <string name="accessibility_biometric_dialog_help_area" msgid="8953787076940186847">"אזור הודעת עזרה"</string>
     <string name="biometric_dialog_confirm" msgid="6468457350041712674">"אישור"</string>
@@ -179,7 +168,7 @@
     <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"טעינת סוללה, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%%."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"הגדרות מערכת"</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"התראות"</string>
-    <string name="accessibility_overflow_action" msgid="5681882033274783311">"הצגת כל ההודעות"</string>
+    <string name="accessibility_overflow_action" msgid="5681882033274783311">"הצגת כל ההתראות"</string>
     <string name="accessibility_remove_notification" msgid="3603099514902182350">"מחיקת התראה"</string>
     <string name="accessibility_gps_enabled" msgid="3511469499240123019">"‏GPS מופעל."</string>
     <string name="accessibility_gps_acquiring" msgid="8959333351058967158">"‏השגת GPS."</string>
@@ -190,11 +179,6 @@
     <skip />
     <!-- no translation found for accessibility_work_mode (702887484664647430) -->
     <skip />
-    <string name="accessibility_recents_item_will_be_dismissed" msgid="395770242498031481">"סגור את <xliff:g id="APP">%s</xliff:g>."</string>
-    <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"<xliff:g id="APP">%s</xliff:g> נדחה."</string>
-    <string name="accessibility_recents_all_items_dismissed" msgid="4464697366179168836">"כל האפליקציות האחרונות נסגרו."</string>
-    <string name="accessibility_recents_item_open_app_info" msgid="5107479759905883540">"פתח מידע על האפליקציה <xliff:g id="APP">%s</xliff:g>."</string>
-    <string name="accessibility_recents_item_launched" msgid="7616039892382525203">"מפעיל את <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"התראה נדחתה."</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"לוח התראות."</string>
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"הגדרות מהירות."</string>
@@ -263,10 +247,10 @@
     <string name="notification_group_overflow_indicator" msgid="1863231301642314183">"+ <xliff:g id="NUMBER">%s</xliff:g>"</string>
     <string name="notification_group_overflow_indicator_ambient" msgid="879560382990377886">"<xliff:g id="NOTIFICATION_TITLE">%1$s</xliff:g>, +<xliff:g id="OVERFLOW">%2$s</xliff:g>"</string>
     <plurals name="notification_group_overflow_description" formatted="false" msgid="4579313201268495404">
-      <item quantity="two">יש בפנים עוד <xliff:g id="NUMBER_1">%s</xliff:g> הודעות.</item>
-      <item quantity="many">יש בפנים עוד <xliff:g id="NUMBER_1">%s</xliff:g> הודעות.</item>
-      <item quantity="other">יש בפנים עוד <xliff:g id="NUMBER_1">%s</xliff:g> הודעות.</item>
-      <item quantity="one">יש בפנים עוד הודעה <xliff:g id="NUMBER_0">%s</xliff:g>.</item>
+      <item quantity="two">עוד <xliff:g id="NUMBER_1">%s</xliff:g> התראות נוספות.</item>
+      <item quantity="many">עוד <xliff:g id="NUMBER_1">%s</xliff:g> התראות.</item>
+      <item quantity="other">עוד <xliff:g id="NUMBER_1">%s</xliff:g> התראות נוספות.</item>
+      <item quantity="one">יש התראה נוספת.<xliff:g id="NUMBER_0">%s</xliff:g>.</item>
     </plurals>
     <string name="status_bar_notification_inspect_item_title" msgid="5668348142410115323">"הגדרת התראות"</string>
     <string name="status_bar_notification_app_settings_title" msgid="5525260160341558869">"הגדרות <xliff:g id="APP_NAME">%s</xliff:g>"</string>
@@ -361,23 +345,8 @@
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"‏NFC מושבת"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"‏NFC מופעל"</string>
-    <string name="recents_empty_message" msgid="808480104164008572">"אין פריטים אחרונים"</string>
-    <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"מחקת הכול"</string>
-    <string name="recents_app_info_button_label" msgid="2890317189376000030">"מידע על האפליקציה"</string>
-    <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"הצמדת מסך"</string>
-    <string name="recents_search_bar_label" msgid="8074997400187836677">"חיפוש"</string>
-    <string name="recents_launch_error_message" msgid="2969287838120550506">"לא ניתן היה להפעיל את <xliff:g id="APP">%s</xliff:g>."</string>
-    <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> מושבת במצב בטוח."</string>
-    <string name="recents_stack_action_button_label" msgid="6593727103310426253">"נקה הכל"</string>
-    <string name="recents_drag_hint_message" msgid="2649739267073203985">"גרור לכאן כדי להשתמש במסך מפוצל"</string>
     <string name="recents_swipe_up_onboarding" msgid="3824607135920170001">"יש להחליק מעלה כדי להחליף אפליקציות"</string>
     <string name="recents_quick_scrub_onboarding" msgid="2778062804333285789">"יש לגרור ימינה כדי לעבור במהירות בין אפליקציות"</string>
-    <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"פיצול אופקי"</string>
-    <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"פיצול אנכי"</string>
-    <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"פיצול מותאם אישית"</string>
-    <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"פיצול מסך למעלה"</string>
-    <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"פיצול מסך לשמאל"</string>
-    <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"פיצול מסך לימין"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7171470775439860480">"החלפת מצב של מסכים אחרונים"</string>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"טעון"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"טוען"</string>
@@ -514,7 +483,7 @@
     <string name="keyguard_indication_trust_granted" msgid="4985003749105182372">"הנעילה בוטלה על ידי <xliff:g id="USER_NAME">%1$s</xliff:g>"</string>
     <string name="keyguard_indication_trust_managed" msgid="8319646760022357585">"<xliff:g id="TRUST_AGENT">%1$s</xliff:g> פועל"</string>
     <string name="keyguard_indication_trust_disabled" msgid="7412534203633528135">"המכשיר יישאר נעול עד שתבטל את נעילתו באופן ידני"</string>
-    <string name="hidden_notifications_title" msgid="7139628534207443290">"קבל הודעות מהר יותר"</string>
+    <string name="hidden_notifications_title" msgid="7139628534207443290">"קבלה מהירה של התראות"</string>
     <string name="hidden_notifications_text" msgid="2326409389088668981">"צפה בהן לפני שתבטל נעילה"</string>
     <string name="hidden_notifications_cancel" msgid="3690709735122344913">"לא, תודה"</string>
     <string name="hidden_notifications_setup" msgid="41079514801976810">"הגדר"</string>
@@ -608,14 +577,14 @@
     <string name="enable_bluetooth_title" msgid="5027037706500635269">"‏האם להפעיל את ה-Bluetooth?"</string>
     <string name="enable_bluetooth_message" msgid="9106595990708985385">"‏כדי לחבר את המקלדת לטאבלט, תחילה עליך להפעיל את ה-Bluetooth."</string>
     <string name="enable_bluetooth_confirmation_ok" msgid="6258074250948309715">"הפעל"</string>
-    <string name="show_silently" msgid="6841966539811264192">"הצג הודעות בלי להשמיע צליל"</string>
-    <string name="block" msgid="2734508760962682611">"חסום את כל ההודעות"</string>
+    <string name="show_silently" msgid="6841966539811264192">"הצגת התראות בלי להשמיע צליל"</string>
+    <string name="block" msgid="2734508760962682611">"חסימת כל ההודעות"</string>
     <string name="do_not_silence" msgid="6878060322594892441">"לא להשתיק"</string>
     <string name="do_not_silence_block" msgid="4070647971382232311">"לא להשתיק או לחסום"</string>
     <string name="tuner_full_importance_settings" msgid="3207312268609236827">"פקדים של הודעות הפעלה"</string>
     <string name="tuner_full_importance_settings_on" msgid="7545060756610299966">"פועל"</string>
     <string name="tuner_full_importance_settings_off" msgid="8208165412614935229">"כבוי"</string>
-    <string name="power_notification_controls_description" msgid="4372459941671353358">"בעזרת פקדים של התראות הפעלה, אפשר להגדיר רמת חשיבות מ-0 עד 5 להתראות אפליקציה. \n\n"<b>"רמה 5"</b>" \n- הצגה בראש רשימת ההודעות \n- אפשר הפרעה במסך מלא \n- תמיד אפשר הצצה \n\n"<b>"רמה 4"</b>" \n- מנע הפרעה במסך מלא \n- תמיד אפשר הצצה \n\n"<b>"רמה 3"</b>" \n- מנע הפרעה במסך מלא \n- אף פעם אל תאפשר הצצה \n\n"<b>"רמה 2"</b>" \n- מנע הפרעה במסך מלא \n- אף פעם אל תאפשר הצצה \n- אף פעם אל תאפשר קול ורטט \n\n"<b>"רמה 1"</b>" \n- מניעת הפרעה במסך מלא \n- אף פעם אל תאפשר הצצה \n- אף פעם אל תאפשר קול ורטט \n- הסתרה ממסך הנעילה ומשורת הסטטוס \n- הצגה בתחתית רשימת ההתראות \n\n"<b>"רמה 0"</b>" \n- חסימה את כל ההתראות מהאפליקציה"</string>
+    <string name="power_notification_controls_description" msgid="4372459941671353358">"בעזרת פקדים של התראות הפעלה, אפשר להגדיר רמת חשיבות מ-0 עד 5 להתראות אפליקציה. \n\n"<b>"רמה 5"</b>" \n- הצגה בראש רשימת ההתראות \n- אפשר הפרעה במסך מלא \n- תמיד אפשר הצצה \n\n"<b>"רמה 4"</b>" \n- מנע הפרעה במסך מלא \n- תמיד אפשר הצצה \n\n"<b>"רמה 3"</b>" \n- מנע הפרעה במסך מלא \n- אף פעם אל תאפשר הצצה \n\n"<b>"רמה 2"</b>" \n- מנע הפרעה במסך מלא \n- אף פעם אל תאפשר הצצה \n- אף פעם אל תאפשר קול ורטט \n\n"<b>"רמה 1"</b>" \n- מניעת הפרעה במסך מלא \n- אף פעם אל תאפשר הצצה \n- אף פעם אל תאפשר קול ורטט \n- הסתרה ממסך הנעילה ומשורת הסטטוס \n- הצגה בתחתית רשימת ההתראות \n\n"<b>"רמה 0"</b>" \n- חסימה את כל ההתראות מהאפליקציה"</string>
     <string name="notification_header_default_channel" msgid="7506845022070889909">"התראות"</string>
     <string name="notification_channel_disabled" msgid="344536703863700565">"ההודעות האלה לא יוצגו לך יותר"</string>
     <string name="notification_channel_minimized" msgid="1664411570378910931">"ההודעות האלה ימוזערו"</string>
@@ -626,6 +595,8 @@
     <string name="inline_minimize_button" msgid="966233327974702195">"מזעור"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"שנמשיך להציג לך הודעות מהאפליקציה הזאת?"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"לא ניתן לכבות את ההודעות האלה"</string>
+    <!-- no translation found for notification_delegate_header (9167022191405284627) -->
+    <skip />
     <string name="appops_camera" msgid="8100147441602585776">"האפליקציה הזו משתמשת במצלמה."</string>
     <string name="appops_microphone" msgid="741508267659494555">"האפליקציה הזו משתמשת במיקרופון."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"האפליקציה הזו מוצגת מעל אפליקציות אחרות במסך."</string>
@@ -644,7 +615,7 @@
     <string name="inline_undo" msgid="558916737624706010">"ביטול"</string>
     <string name="notification_menu_accessibility" msgid="2046162834248888553">"<xliff:g id="APP_NAME">%1$s</xliff:g> <xliff:g id="MENU_DESCRIPTION">%2$s</xliff:g>"</string>
     <string name="notification_menu_gear_description" msgid="2204480013726775108">"בקרת התראות"</string>
-    <string name="notification_menu_snooze_description" msgid="3653669438131034525">"אפשרויות של דחיית הודעות לטיפול בהמשך"</string>
+    <string name="notification_menu_snooze_description" msgid="3653669438131034525">"אפשרויות של דחיית התראות לטיפול בהמשך"</string>
     <string name="notification_menu_snooze_action" msgid="1112254519029621372">"הפעלת נודניק"</string>
     <string name="snooze_undo" msgid="6074877317002985129">"ביטול"</string>
     <string name="snoozed_for_time" msgid="2390718332980204462">"נדחה לטיפול בעוד <xliff:g id="TIME_AMOUNT">%1$s</xliff:g>"</string>
@@ -764,6 +735,8 @@
     <item msgid="2139628951880142927">"הצג באחוזים בזמן טעינה (ברירת מחדל)"</item>
     <item msgid="3327323682209964956">"אל תציג את הסמל הזה"</item>
   </string-array>
+    <!-- no translation found for tuner_low_priority (1325884786608312358) -->
+    <skip />
     <string name="other" msgid="4060683095962566764">"אחר"</string>
     <string name="accessibility_divider" msgid="5903423481953635044">"מחלק מסך מפוצל"</string>
     <string name="accessibility_action_divider_left_full" msgid="2801570521881574972">"מסך שמאלי מלא"</string>

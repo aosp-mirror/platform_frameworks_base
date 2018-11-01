@@ -21,14 +21,6 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="7164937344850004466">"Системен ПИ"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Изчистване"</string>
-    <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Премахване от списъка"</string>
-    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Информация за приложението"</string>
-    <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Скорошните ви екрани се показват тук"</string>
-    <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Отхвърляне на скорошните приложения"</string>
-    <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
-      <item quantity="other">%d екрана в панела за общ преглед</item>
-      <item quantity="one">1 екран в панела за общ преглед</item>
-    </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Няма известия"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"В момента"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Известия"</string>
@@ -101,7 +93,6 @@
     <string name="phone_label" msgid="2320074140205331708">"отваряне на телефона"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"отваряне на гласовата помощ"</string>
     <string name="camera_label" msgid="7261107956054836961">"отваряне на камерата"</string>
-    <string name="recents_caption_resize" msgid="3517056471774958200">"Избиране на ново оформление за задачите"</string>
     <string name="cancel" msgid="6442560571259935130">"Отказ"</string>
     <string name="accessibility_biometric_dialog_help_area" msgid="8953787076940186847">"Област за помощно съобщение"</string>
     <string name="biometric_dialog_confirm" msgid="6468457350041712674">"Потвърждаване"</string>
@@ -188,11 +179,6 @@
     <skip />
     <!-- no translation found for accessibility_work_mode (702887484664647430) -->
     <skip />
-    <string name="accessibility_recents_item_will_be_dismissed" msgid="395770242498031481">"Отхвърляне на <xliff:g id="APP">%s</xliff:g>."</string>
-    <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"Приложението <xliff:g id="APP">%s</xliff:g> е отхвърлено."</string>
-    <string name="accessibility_recents_all_items_dismissed" msgid="4464697366179168836">"Всички скорошни приложения са отхвърлени."</string>
-    <string name="accessibility_recents_item_open_app_info" msgid="5107479759905883540">"Отворете информацията за приложението <xliff:g id="APP">%s</xliff:g>."</string>
-    <string name="accessibility_recents_item_launched" msgid="7616039892382525203">"<xliff:g id="APP">%s</xliff:g> се стартира."</string>
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"Известието е отхвърлено."</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"Падащ панел с известия."</string>
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"Бързи настройки."</string>
@@ -355,23 +341,8 @@
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"КБП"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"КБП е деактивирана"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"КБП е активирана"</string>
-    <string name="recents_empty_message" msgid="808480104164008572">"Няма скорошни елементи"</string>
-    <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"Изчистихте всичко"</string>
-    <string name="recents_app_info_button_label" msgid="2890317189376000030">"Информация за приложението"</string>
-    <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"фиксиране на екрана"</string>
-    <string name="recents_search_bar_label" msgid="8074997400187836677">"търсене"</string>
-    <string name="recents_launch_error_message" msgid="2969287838120550506">"<xliff:g id="APP">%s</xliff:g> не можа да стартира."</string>
-    <string name="recents_launch_disabled_message" msgid="1624523193008871793">"Приложението <xliff:g id="APP">%s</xliff:g> е деактивирано в безопасния режим."</string>
-    <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Изчистване на всичко"</string>
-    <string name="recents_drag_hint_message" msgid="2649739267073203985">"Преместете тук с плъзгане, за да използвате режим за разделен екран"</string>
     <string name="recents_swipe_up_onboarding" msgid="3824607135920170001">"Прекарайте пръст нагоре, за да превключите между приложенията"</string>
     <string name="recents_quick_scrub_onboarding" msgid="2778062804333285789">"Плъзнете надясно за бързо превключване между приложенията"</string>
-    <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Хоризонтално разделяне"</string>
-    <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Вертикално разделяне"</string>
-    <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Персонализирано разделяне"</string>
-    <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"Разделяне на екрана нагоре"</string>
-    <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"Разделяне на екрана наляво"</string>
-    <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"Разделяне на екрана надясно"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7171470775439860480">"Превключване на общия преглед"</string>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Заредена"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"Зарежда се"</string>
@@ -618,6 +589,8 @@
     <string name="inline_minimize_button" msgid="966233327974702195">"Намаляване"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Да продължат ли да се показват известията от това приложение?"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"Тези известия не могат да бъдат изключени"</string>
+    <!-- no translation found for notification_delegate_header (9167022191405284627) -->
+    <skip />
     <string name="appops_camera" msgid="8100147441602585776">"Това приложение използва камерата."</string>
     <string name="appops_microphone" msgid="741508267659494555">"Това приложение използва микрофона."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"Това приложение се показва върху други приложения на екрана."</string>
@@ -752,6 +725,8 @@
     <item msgid="2139628951880142927">"Процентът да се показва при зареждане (по подразбиране)"</item>
     <item msgid="3327323682209964956">"Тази икона да не се показва"</item>
   </string-array>
+    <!-- no translation found for tuner_low_priority (1325884786608312358) -->
+    <skip />
     <string name="other" msgid="4060683095962566764">"Друго"</string>
     <string name="accessibility_divider" msgid="5903423481953635044">"Разделител в режима за разделен екран"</string>
     <string name="accessibility_action_divider_left_full" msgid="2801570521881574972">"Ляв екран: Показване на цял екран"</string>
