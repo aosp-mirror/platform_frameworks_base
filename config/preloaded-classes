@@ -1240,6 +1240,12 @@ android.graphics.fonts.FontVariationAxis
 android.graphics.pdf.PdfDocument
 android.graphics.pdf.PdfEditor
 android.graphics.pdf.PdfRenderer
+android.graphics.text.LineBreaker
+android.graphics.text.LineBreaker$Builder
+android.graphics.text.LineBreaker$ParagraphConstraints
+android.graphics.text.LineBreaker$Result
+android.graphics.text.MeasuredText
+android.graphics.text.MeasuredText$Builder
 android.hardware.Camera
 android.hardware.Camera$CameraInfo
 android.hardware.Camera$Face
