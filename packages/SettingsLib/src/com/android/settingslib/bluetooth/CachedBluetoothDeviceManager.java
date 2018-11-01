@@ -50,7 +50,7 @@ public class CachedBluetoothDeviceManager {
     }
 
     public synchronized Collection<CachedBluetoothDevice> getCachedDevicesCopy() {
-        return new ArrayList<CachedBluetoothDevice>(mCachedDevices);
+        return new ArrayList<>(mCachedDevices);
     }
 
     public static boolean onDeviceDisappeared(CachedBluetoothDevice cachedDevice) {
