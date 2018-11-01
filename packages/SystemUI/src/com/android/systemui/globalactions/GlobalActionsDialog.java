@@ -82,6 +82,7 @@ import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.telephony.TelephonyProperties;
 import com.android.internal.util.EmergencyAffordanceManager;
+import com.android.internal.util.ScreenRecordHelper;
 import com.android.internal.util.ScreenshotHelper;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.systemui.Dependency;
@@ -158,6 +159,7 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     private final boolean mShowSilentToggle;
     private final EmergencyAffordanceManager mEmergencyAffordanceManager;
     private final ScreenshotHelper mScreenshotHelper;
+    private final ScreenRecordHelper mScreenRecordHelper;
 
     /**
      * @param context everything needs a context :(
@@ -199,6 +201,7 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
 
         mEmergencyAffordanceManager = new EmergencyAffordanceManager(context);
         mScreenshotHelper = new ScreenshotHelper(context);
+        mScreenRecordHelper = new ScreenRecordHelper(context);
 
         Dependency.get(ConfigurationController.class).addCallback(this);
     }
@@ -522,7 +525,7 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
     }
 
 
-    private class ScreenshotAction extends SinglePressAction {
+    private class ScreenshotAction extends SinglePressAction implements LongPressAction {
         public ScreenshotAction() {
             super(R.drawable.ic_screenshot, R.string.global_action_screenshot);
         }
@@ -551,6 +554,16 @@ class GlobalActionsDialog implements DialogInterface.OnDismissListener,
         @Override
         public boolean showBeforeProvisioning() {
             return false;
+        }
+
+        @Override
+        public boolean onLongPress() {
+            if (FeatureFlagUtils.isEnabled(mContext, FeatureFlagUtils.SCREENRECORD_LONG_PRESS)) {
+                mScreenRecordHelper.launchRecordPrompt();
+            } else {
+                onPress();
+            }
+            return true;
         }
     }
 
