@@ -66,7 +66,7 @@ public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callba
         public void handleMessage(Message msg) {
             switch(msg.what) {
                 case MSG_SHOW_DIALOG:
-                    handleShowDialog((SomeArgs) msg.obj);
+                    handleShowDialog((SomeArgs) msg.obj, false /* skipAnimation */);
                     break;
                 case MSG_BIOMETRIC_AUTHENTICATED:
                     handleBiometricAuthenticated();
@@ -178,7 +178,7 @@ public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callba
         mHandler.obtainMessage(MSG_HIDE_DIALOG, false /* userCanceled */).sendToTarget();
     }
 
-    private void handleShowDialog(SomeArgs args) {
+    private void handleShowDialog(SomeArgs args, boolean skipAnimation) {
         mCurrentDialogArgs = args;
         final int type = args.argi1;
         mCurrentDialog = mDialogs.get(type);
@@ -195,6 +195,7 @@ public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callba
         mReceiver = (IBiometricPromptReceiver) args.arg2;
         mCurrentDialog.setBundle((Bundle)args.arg1);
         mCurrentDialog.setRequireConfirmation((boolean)args.arg3);
+        mCurrentDialog.setSkipIntro(skipAnimation);
         mWindowManager.addView(mCurrentDialog, mCurrentDialog.getLayoutParams());
         mDialogShowing = true;
     }
@@ -278,15 +279,15 @@ public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callba
 
     @Override
     protected void onConfigurationChanged(Configuration newConfig) {
+        super.onConfigurationChanged(newConfig);
+        final boolean wasShowing = mDialogShowing;
         if (mDialogShowing) {
             mCurrentDialog.forceRemove();
+            mDialogShowing = false;
         }
         createDialogs();
-        if (mDialogShowing) {
-            mCurrentDialog = mDialogs.get(mCurrentDialogArgs.argi1);
-            mCurrentDialog.forceRemove();  // Prevents intro animation when reattaching.
-            mDialogShowing = false;
-            handleShowDialog(mCurrentDialogArgs);
+        if (wasShowing) {
+            handleShowDialog(mCurrentDialogArgs, true /* skipAnimation */);
         }
     }
 }

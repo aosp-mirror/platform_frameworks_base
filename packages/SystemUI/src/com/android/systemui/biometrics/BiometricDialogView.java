@@ -66,7 +66,7 @@ public abstract class BiometricDialogView extends LinearLayout {
     private final float mAnimationTranslationOffset;
     private final int mErrorColor;
     private final int mTextColor;
-    private final float mDisplayWidth;
+    private final float mDialogWidth;
     private final DialogViewCallback mCallback;
 
     private ViewGroup mLayout;
@@ -76,6 +76,7 @@ public abstract class BiometricDialogView extends LinearLayout {
     private int mLastState;
     private boolean mAnimatingAway;
     private boolean mWasForceRemoved;
+    private boolean mSkipIntro;
     protected boolean mRequireConfirmation;
 
     protected abstract void updateIcon(int lastState, int newState);
@@ -131,7 +132,7 @@ public abstract class BiometricDialogView extends LinearLayout {
 
         DisplayMetrics metrics = new DisplayMetrics();
         mWindowManager.getDefaultDisplay().getMetrics(metrics);
-        mDisplayWidth = metrics.widthPixels;
+        mDialogWidth = Math.min(metrics.widthPixels, metrics.heightPixels);
 
         // Create the dialog
         LayoutInflater factory = LayoutInflater.from(getContext());
@@ -198,8 +199,7 @@ public abstract class BiometricDialogView extends LinearLayout {
         final Button negative = mLayout.findViewById(R.id.button2);
         final Button positive = mLayout.findViewById(R.id.button1);
 
-        mDialog.getLayoutParams().width = (int) mDisplayWidth;
-
+        mDialog.getLayoutParams().width = (int) mDialogWidth;
         mLastState = STATE_NONE;
         updateState(STATE_AUTHENTICATING);
 
@@ -228,20 +228,21 @@ public abstract class BiometricDialogView extends LinearLayout {
 
         negative.setText(mBundle.getCharSequence(BiometricPrompt.KEY_NEGATIVE_TEXT));
 
-        if (!mWasForceRemoved) {
-            // Dim the background and slide the dialog up
-            mDialog.setTranslationY(mAnimationTranslationOffset);
-            mLayout.setAlpha(0f);
-            postOnAnimation(mShowAnimationRunnable);
-        } else {
+        if (mWasForceRemoved || mSkipIntro) {
             // Show the dialog immediately
             mLayout.animate().cancel();
             mDialog.animate().cancel();
             mDialog.setAlpha(1.0f);
             mDialog.setTranslationY(0);
             mLayout.setAlpha(1.0f);
+        } else {
+            // Dim the background and slide the dialog up
+            mDialog.setTranslationY(mAnimationTranslationOffset);
+            mLayout.setAlpha(0f);
+            postOnAnimation(mShowAnimationRunnable);
         }
         mWasForceRemoved = false;
+        mSkipIntro = false;
     }
 
     private void setDismissesDialog(View v) {
@@ -294,6 +295,13 @@ public abstract class BiometricDialogView extends LinearLayout {
         mWindowManager.removeView(BiometricDialogView.this);
         mAnimatingAway = false;
         mWasForceRemoved = true;
+    }
+
+    /**
+     * Skip the intro animation
+     */
+    public void setSkipIntro(boolean skip) {
+        mSkipIntro = skip;
     }
 
     public boolean isAnimatingAway() {
