@@ -208,7 +208,7 @@ public final class SystemFonts {
                 b.addFont(font);
             }
         }
-        return b == null ? null : b.build(languageTags, variant);
+        return b == null ? null : b.build(languageTags, variant, false /* isCustomFallback */);
     }
 
     private static void appendNamedFamily(@NonNull FontConfig.Family xmlFamily,
