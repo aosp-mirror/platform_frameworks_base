@@ -53,4 +53,15 @@ public class InputMethodDebugTest {
                                 | LayoutParams.SOFT_INPUT_ADJUST_RESIZE
                                 | LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION));
     }
+
+    @Test
+    public void testStartInputFlagsToString() {
+        // TODO: add more tests
+        assertEquals("(none)", InputMethodDebug.startInputFlagsToString(0));
+        assertEquals("IS_TEXT_EDITOR",
+                InputMethodDebug.startInputFlagsToString(StartInputFlags.IS_TEXT_EDITOR));
+        assertEquals("VIEW_HAS_FOCUS|INITIAL_CONNECTION",
+                InputMethodDebug.startInputFlagsToString(
+                        StartInputFlags.VIEW_HAS_FOCUS | StartInputFlags.INITIAL_CONNECTION));
+    }
 }

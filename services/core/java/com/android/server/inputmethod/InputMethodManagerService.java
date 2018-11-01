@@ -136,6 +136,7 @@ import com.android.internal.content.PackageMonitor;
 import com.android.internal.inputmethod.IInputContentUriToken;
 import com.android.internal.inputmethod.IInputMethodPrivilegedOperations;
 import com.android.internal.inputmethod.InputMethodDebug;
+import com.android.internal.inputmethod.StartInputFlags;
 import com.android.internal.inputmethod.StartInputReason;
 import com.android.internal.inputmethod.UnbindReason;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
@@ -1916,8 +1917,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     @GuardedBy("mMethodMap")
     @NonNull
     InputBindResult startInputUncheckedLocked(@NonNull ClientState cs, IInputContext inputContext,
-            @MissingMethodFlags int missingMethods, @NonNull EditorInfo attribute, int controlFlags,
-            @StartInputReason int startInputReason) {
+            @MissingMethodFlags int missingMethods, @NonNull EditorInfo attribute,
+            @StartInputFlags int startInputFlags, @StartInputReason int startInputReason) {
         // If no method is currently selected, do nothing.
         if (mCurMethodId == null) {
             return InputBindResult.NO_IME;
@@ -1979,7 +1980,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 // Fast case: if we are already connected to the input method,
                 // then just return it.
                 return attachNewInputLocked(startInputReason,
-                        (controlFlags&InputMethodManager.CONTROL_START_INITIAL) != 0);
+                        (startInputFlags & StartInputFlags.INITIAL_CONNECTION) != 0);
             }
             if (mHaveConnection) {
                 if (mCurMethod != null) {
@@ -2794,15 +2795,15 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     @Override
     public InputBindResult startInputOrWindowGainedFocus(
             @StartInputReason int startInputReason, IInputMethodClient client, IBinder windowToken,
-            int controlFlags, @SoftInputModeFlags int softInputMode, int windowFlags,
-            @Nullable EditorInfo attribute, IInputContext inputContext,
+            @StartInputFlags int startInputFlags, @SoftInputModeFlags int softInputMode,
+            int windowFlags, @Nullable EditorInfo attribute, IInputContext inputContext,
             @MissingMethodFlags int missingMethods, int unverifiedTargetSdkVersion) {
         if (windowToken == null) {
             Slog.e(TAG, "windowToken cannot be null.");
             return InputBindResult.NULL;
         }
         final InputBindResult result = startInputOrWindowGainedFocusInternal(startInputReason,
-                client, windowToken, controlFlags, softInputMode, windowFlags, attribute,
+                client, windowToken, startInputFlags, softInputMode, windowFlags, attribute,
                 inputContext, missingMethods, unverifiedTargetSdkVersion);
         if (result == null) {
             // This must never happen, but just in case.
@@ -2818,9 +2819,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     @NonNull
     private InputBindResult startInputOrWindowGainedFocusInternal(
             @StartInputReason int startInputReason, IInputMethodClient client,
-            @NonNull IBinder windowToken, int controlFlags, @SoftInputModeFlags int softInputMode,
-            int windowFlags, EditorInfo attribute, IInputContext inputContext,
-            @MissingMethodFlags int missingMethods, int unverifiedTargetSdkVersion) {
+            @NonNull IBinder windowToken, @StartInputFlags int startInputFlags,
+            @SoftInputModeFlags int softInputMode, int windowFlags, EditorInfo attribute,
+            IInputContext inputContext, @MissingMethodFlags int missingMethods,
+            int unverifiedTargetSdkVersion) {
         // Needs to check the validity before clearing calling identity
         final boolean calledFromValidUser = calledFromValidUser();
         InputBindResult res = null;
@@ -2836,7 +2838,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         + " missingMethods="
                         + InputConnectionInspector.getMissingMethodFlagsAsString(missingMethods)
                         + " attribute=" + attribute
-                        + " controlFlags=#" + Integer.toHexString(controlFlags)
+                        + " startInputFlags="
+                        + InputMethodDebug.startInputFlagsToString(startInputFlags)
                         + " softInputMode=" + InputMethodDebug.softInputModeToString(softInputMode)
                         + " windowFlags=#" + Integer.toHexString(windowFlags)
                         + " unverifiedTargetSdkVersion=" + unverifiedTargetSdkVersion);
@@ -2882,7 +2885,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     }
                     if (attribute != null) {
                         return startInputUncheckedLocked(cs, inputContext, missingMethods,
-                                attribute, controlFlags, startInputReason);
+                                attribute, startInputFlags, startInputReason);
                     }
                     return new InputBindResult(
                             InputBindResult.ResultCode.SUCCESS_REPORT_WINDOW_FOCUS_ONLY,
@@ -2905,7 +2908,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                         || mRes.getConfiguration().isLayoutSizeAtLeast(
                                 Configuration.SCREENLAYOUT_SIZE_LARGE);
                 final boolean isTextEditor =
-                        (controlFlags&InputMethodManager.CONTROL_WINDOW_IS_TEXT_EDITOR) != 0;
+                        (startInputFlags & StartInputFlags.IS_TEXT_EDITOR) != 0;
 
                 // We want to start input before showing the IME, but after closing
                 // it.  We want to do this after closing it to help the IME disappear
@@ -2943,8 +2946,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                             // is more room for the target window + IME.
                             if (DEBUG) Slog.v(TAG, "Unspecified window will show input");
                             if (attribute != null) {
-                                res = startInputUncheckedLocked(cs, inputContext,
-                                        missingMethods, attribute, controlFlags, startInputReason);
+                                res = startInputUncheckedLocked(cs, inputContext, missingMethods,
+                                        attribute, startInputFlags, startInputReason);
                                 didStart = true;
                             }
                             showCurrentInputLocked(InputMethodManager.SHOW_IMPLICIT, null);
@@ -2969,10 +2972,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                                 WindowManager.LayoutParams.SOFT_INPUT_IS_FORWARD_NAVIGATION) != 0) {
                             if (DEBUG) Slog.v(TAG, "Window asks to show input going forward");
                             if (InputMethodUtils.isSoftInputModeStateVisibleAllowed(
-                                    unverifiedTargetSdkVersion, controlFlags)) {
+                                    unverifiedTargetSdkVersion, startInputFlags)) {
                                 if (attribute != null) {
                                     res = startInputUncheckedLocked(cs, inputContext,
-                                            missingMethods, attribute, controlFlags,
+                                            missingMethods, attribute, startInputFlags,
                                             startInputReason);
                                     didStart = true;
                                 }
@@ -2987,10 +2990,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                     case WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE:
                         if (DEBUG) Slog.v(TAG, "Window asks to always show input");
                         if (InputMethodUtils.isSoftInputModeStateVisibleAllowed(
-                                unverifiedTargetSdkVersion, controlFlags)) {
+                                unverifiedTargetSdkVersion, startInputFlags)) {
                             if (attribute != null) {
                                 res = startInputUncheckedLocked(cs, inputContext, missingMethods,
-                                        attribute, controlFlags, startInputReason);
+                                        attribute, startInputFlags, startInputReason);
                                 didStart = true;
                             }
                             showCurrentInputLocked(InputMethodManager.SHOW_IMPLICIT, null);
@@ -3005,11 +3008,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 if (!didStart) {
                     if (attribute != null) {
                         if (!DebugFlags.FLAG_OPTIMIZE_START_INPUT.value()
-                                || (controlFlags
-                                & InputMethodManager.CONTROL_WINDOW_IS_TEXT_EDITOR) != 0) {
+                                || (startInputFlags & StartInputFlags.IS_TEXT_EDITOR) != 0) {
                             res = startInputUncheckedLocked(cs, inputContext, missingMethods,
                                     attribute,
-                                    controlFlags, startInputReason);
+                                    startInputFlags, startInputReason);
                         } else {
                             res = InputBindResult.NO_EDITOR;
                         }

@@ -153,4 +153,28 @@ public final class InputMethodDebug {
 
         return joiner.setEmptyValue("(none)").toString();
     }
+
+    /**
+     * Converts {@link StartInputFlags} to {@link String} for debug logging.
+     *
+     * @param startInputFlags integer constant for {@link StartInputFlags}.
+     * @return {@link String} message corresponds for the given {@code startInputFlags}.
+     */
+    public static String startInputFlagsToString(@StartInputFlags int startInputFlags) {
+        final StringJoiner joiner = new StringJoiner("|");
+        if ((startInputFlags & StartInputFlags.VIEW_HAS_FOCUS) != 0) {
+            joiner.add("VIEW_HAS_FOCUS");
+        }
+        if ((startInputFlags & StartInputFlags.IS_TEXT_EDITOR) != 0) {
+            joiner.add("IS_TEXT_EDITOR");
+        }
+        if ((startInputFlags & StartInputFlags.FIRST_WINDOW_FOCUS_GAIN) != 0) {
+            joiner.add("FIRST_WINDOW_FOCUS_GAIN");
+        }
+        if ((startInputFlags & StartInputFlags.INITIAL_CONNECTION) != 0) {
+            joiner.add("INITIAL_CONNECTION");
+        }
+
+        return joiner.setEmptyValue("(none)").toString();
+    }
 }
