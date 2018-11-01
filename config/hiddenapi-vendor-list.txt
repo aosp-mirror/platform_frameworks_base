@@ -247,7 +247,3 @@ Lcom/android/internal/location/ILocationProvider;->setRequest(Lcom/android/inter
 Lcom/android/internal/R$styleable;->NumberPicker:[I
 Lcom/android/internal/R$styleable;->TwoLineListItem:[I
 Lcom/android/internal/telephony/ITelephony;->getDataEnabled(I)Z
-Ljava/lang/System;->arraycopy([BI[BII)V
-Ljava/net/Inet4Address;->ALL:Ljava/net/InetAddress;
-Ljava/net/Inet4Address;->ANY:Ljava/net/InetAddress;
-Ljava/net/Inet6Address;->ANY:Ljava/net/InetAddress;
