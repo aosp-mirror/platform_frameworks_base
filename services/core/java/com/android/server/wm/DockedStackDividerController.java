@@ -531,7 +531,7 @@ public class DockedStackDividerController {
             final TaskStack stack =
                     mDisplayContent.getSplitScreenPrimaryStackIgnoringVisibility();
             final long transitionDuration = isAnimationMaximizing()
-                    ? mService.mAppTransition.getLastClipRevealTransitionDuration()
+                    ? mDisplayContent.mAppTransition.getLastClipRevealTransitionDuration()
                     : DEFAULT_APP_TRANSITION_DURATION;
             mAnimationDuration = (long)
                     (transitionDuration * mService.getTransitionAnimationScaleLocked());
@@ -950,7 +950,7 @@ public class DockedStackDividerController {
             return naturalAmount;
         }
         final int minimizeDistance = stack.getMinimizeDistance();
-        float startPrime = mService.mAppTransition.getLastClipRevealMaxTranslation()
+        final float startPrime = mDisplayContent.mAppTransition.getLastClipRevealMaxTranslation()
                 / (float) minimizeDistance;
         final float amountPrime = t * mAnimationTarget + (1 - t) * startPrime;
         final float t2 = Math.min(t / mMaximizeMeetFraction, 1);
@@ -963,12 +963,12 @@ public class DockedStackDividerController {
      */
     private float getClipRevealMeetFraction(TaskStack stack) {
         if (!isAnimationMaximizing() || stack == null ||
-                !mService.mAppTransition.hadClipRevealAnimation()) {
+                !mDisplayContent.mAppTransition.hadClipRevealAnimation()) {
             return 1f;
         }
         final int minimizeDistance = stack.getMinimizeDistance();
-        final float fraction = Math.abs(mService.mAppTransition.getLastClipRevealMaxTranslation())
-                / (float) minimizeDistance;
+        final float fraction = Math.abs(mDisplayContent.mAppTransition
+                .getLastClipRevealMaxTranslation()) / (float) minimizeDistance;
         final float t = Math.max(0, Math.min(1, (fraction - CLIP_REVEAL_MEET_FRACTION_MIN)
                 / (CLIP_REVEAL_MEET_FRACTION_MAX - CLIP_REVEAL_MEET_FRACTION_MIN)));
         return CLIP_REVEAL_MEET_EARLIEST

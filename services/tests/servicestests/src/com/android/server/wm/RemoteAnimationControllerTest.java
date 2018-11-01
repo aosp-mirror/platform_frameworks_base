@@ -85,7 +85,7 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
     @Test
     public void testRun() throws Exception {
         final WindowState win = createWindow(null /* parent */, TYPE_BASE_APPLICATION, "testWin");
-        sWm.mOpeningApps.add(win.mAppToken);
+        mDisplayContent.mOpeningApps.add(win.mAppToken);
         try {
             final AnimationAdapter adapter = mController.createAnimationAdapter(win.mAppToken,
                     new Point(50, 100), new Rect(50, 100, 150, 150));
@@ -113,7 +113,7 @@ public class RemoteAnimationControllerTest extends WindowTestsBase {
             finishedCaptor.getValue().onAnimationFinished();
             verify(mFinishedCallback).onAnimationFinished(eq(adapter));
         } finally {
-            sWm.mOpeningApps.clear();
+            mDisplayContent.mOpeningApps.clear();
         }
     }
 

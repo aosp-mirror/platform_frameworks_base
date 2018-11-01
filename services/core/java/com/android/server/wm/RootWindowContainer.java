@@ -576,17 +576,15 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
         mSustainedPerformanceModeCurrent = false;
         mService.mTransactionSequence++;
 
-        // TODO(multi-display):
+        // TODO(multi-display): recents animation & wallpaper need support multi-display.
         final DisplayContent defaultDisplay = mService.getDefaultDisplayContentLocked();
-        final DisplayInfo defaultInfo = defaultDisplay.getDisplayInfo();
-        final int defaultDw = defaultInfo.logicalWidth;
-        final int defaultDh = defaultInfo.logicalHeight;
+        final WindowSurfacePlacer surfacePlacer = mService.mWindowPlacerLocked;
 
         if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
                 ">>> OPEN TRANSACTION performLayoutAndPlaceSurfaces");
         mService.openSurfaceTransaction();
         try {
-            applySurfaceChangesTransaction(recoveringMemory, defaultDw, defaultDh);
+            applySurfaceChangesTransaction(recoveringMemory);
         } catch (RuntimeException e) {
             Slog.wtf(TAG, "Unhandled exception in Window Manager", e);
         } finally {
@@ -594,39 +592,13 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
             if (SHOW_LIGHT_TRANSACTIONS) Slog.i(TAG,
                     "<<< CLOSE TRANSACTION performLayoutAndPlaceSurfaces");
         }
-
         mService.mAnimator.executeAfterPrepareSurfacesRunnables();
 
-        final WindowSurfacePlacer surfacePlacer = mService.mWindowPlacerLocked;
-
-        // If we are ready to perform an app transition, check through all of the app tokens to be
-        // shown and see if they are ready to go.
-        if (mService.mAppTransition.isReady()) {
-            // This needs to be split into two expressions, as handleAppTransitionReadyLocked may
-            // modify dc.pendingLayoutChanges, which would get lost when writing
-            // defaultDisplay.pendingLayoutChanges |= handleAppTransitionReadyLocked()
-            final int layoutChanges = surfacePlacer.handleAppTransitionReadyLocked();
-            defaultDisplay.pendingLayoutChanges |= layoutChanges;
-            if (DEBUG_LAYOUT_REPEATS)
-                surfacePlacer.debugLayoutRepeats("after handleAppTransitionReadyLocked",
-                        defaultDisplay.pendingLayoutChanges);
-        }
-
-        if (!isAppAnimating() && mService.mAppTransition.isRunning()) {
-            // We have finished the animation of an app transition. To do this, we have delayed a
-            // lot of operations like showing and hiding apps, moving apps in Z-order, etc. The app
-            // token list reflects the correct Z-order, but the window list may now be out of sync
-            // with it. So here we will just rebuild the entire app window list. Fun!
-            defaultDisplay.pendingLayoutChanges |=
-                    mService.handleAnimatingStoppedAndTransitionLocked();
-            if (DEBUG_LAYOUT_REPEATS)
-                surfacePlacer.debugLayoutRepeats("after handleAnimStopAndXitionLock",
-                        defaultDisplay.pendingLayoutChanges);
-        }
+        checkAppTransitionReady(surfacePlacer);
 
         // Defer starting the recents animation until the wallpaper has drawn
         final RecentsAnimationController recentsAnimationController =
-            mService.getRecentsAnimationController();
+                mService.getRecentsAnimationController();
         if (recentsAnimationController != null) {
             recentsAnimationController.checkAnimationReady(mWallpaperController);
         }
@@ -732,8 +704,8 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
             mUpdateRotation = updateRotationUnchecked();
         }
 
-        if (mService.mWaitingForDrawnCallback != null ||
-                (mOrientationChangeComplete && !defaultDisplay.isLayoutNeeded()
+        if (mService.mWaitingForDrawnCallback != null
+                || (mOrientationChangeComplete && !isLayoutNeeded()
                         && !mUpdateRotation)) {
             mService.checkDrawnWindowsLocked();
         }
@@ -741,7 +713,7 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
         final int N = mService.mPendingRemove.size();
         if (N > 0) {
             if (mService.mPendingRemoveTmp.length < N) {
-                mService.mPendingRemoveTmp = new WindowState[N+10];
+                mService.mPendingRemoveTmp = new WindowState[N + 10];
             }
             mService.mPendingRemove.toArray(mService.mPendingRemoveTmp);
             mService.mPendingRemove.clear();
@@ -783,12 +755,47 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
                 "performSurfacePlacementInner exit: animating=" + mService.mAnimator.isAnimating());
     }
 
-    private void applySurfaceChangesTransaction(boolean recoveringMemory, int defaultDw,
-            int defaultDh) {
+    private void checkAppTransitionReady(WindowSurfacePlacer surfacePlacer) {
+        // Trace all displays app transition by Z-order for pending layout change.
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            final DisplayContent curDisplay = mChildren.get(i);
+
+            // If we are ready to perform an app transition, check through all of the app tokens
+            // to be shown and see if they are ready to go.
+            if (curDisplay.mAppTransition.isReady()) {
+                // handleAppTransitionReady may modify curDisplay.pendingLayoutChanges.
+                curDisplay.mAppTransitionController.handleAppTransitionReady();
+                if (DEBUG_LAYOUT_REPEATS) {
+                    surfacePlacer.debugLayoutRepeats("after handleAppTransitionReady",
+                            curDisplay.pendingLayoutChanges);
+                }
+            }
+
+            if (!curDisplay.isAppAnimating() && curDisplay.mAppTransition.isRunning()) {
+                // We have finished the animation of an app transition. To do this, we have
+                // delayed a lot of operations like showing and hiding apps, moving apps in
+                // Z-order, etc.
+                // The app token list reflects the correct Z-order, but the window list may now
+                // be out of sync with it. So here we will just rebuild the entire app window
+                // list. Fun!
+                curDisplay.handleAnimatingStoppedAndTransition();
+                if (DEBUG_LAYOUT_REPEATS) {
+                    surfacePlacer.debugLayoutRepeats("after handleAnimStopAndXitionLock",
+                            curDisplay.pendingLayoutChanges);
+                }
+            }
+        }
+    }
+
+    private void applySurfaceChangesTransaction(boolean recoveringMemory) {
         mHoldScreenWindow = null;
         mObscuringWindow = null;
 
         // TODO(multi-display): Support these features on secondary screens.
+        final DisplayContent defaultDc = mService.getDefaultDisplayContentLocked();
+        final DisplayInfo defaultInfo = defaultDc.getDisplayInfo();
+        final int defaultDw = defaultInfo.logicalWidth;
+        final int defaultDh = defaultInfo.logicalHeight;
         if (mService.mWatermark != null) {
             mService.mWatermark.positionSurface(defaultDw, defaultDh);
         }

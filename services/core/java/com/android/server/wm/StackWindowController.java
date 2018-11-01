@@ -140,10 +140,11 @@ public class StackWindowController
             }
             mContainer.positionChildAt(POSITION_TOP, childTask, includingParents);
 
-            if (mService.mAppTransition.isTransitionSet()) {
+            final DisplayContent displayContent = mContainer.getDisplayContent();
+            if (displayContent.mAppTransition.isTransitionSet()) {
                 childTask.setSendingToBottom(false);
             }
-            mContainer.getDisplayContent().layoutAndAssignWindowLayersIfNeeded();
+            displayContent.layoutAndAssignWindowLayersIfNeeded();
         }
     }
 
@@ -162,7 +163,7 @@ public class StackWindowController
             }
             mContainer.positionChildAt(POSITION_BOTTOM, childTask, includingParents);
 
-            if (mService.mAppTransition.isTransitionSet()) {
+            if (mContainer.getDisplayContent().mAppTransition.isTransitionSet()) {
                 childTask.setSendingToBottom(true);
             }
             mContainer.getDisplayContent().layoutAndAssignWindowLayersIfNeeded();

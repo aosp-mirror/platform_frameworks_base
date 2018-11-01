@@ -60,8 +60,11 @@ class UnknownAppVisibilityController {
 
     private final WindowManagerService mService;
 
-    UnknownAppVisibilityController(WindowManagerService service) {
+    private final DisplayContent mDisplayContent;
+
+    UnknownAppVisibilityController(WindowManagerService service, DisplayContent displayContent) {
         mService = service;
+        mDisplayContent = displayContent;
     }
 
     boolean allResolved() {
@@ -128,7 +131,8 @@ class UnknownAppVisibilityController {
         int state = mUnknownApps.get(appWindow);
         if (state == UNKNOWN_STATE_WAITING_RELAYOUT) {
             mUnknownApps.put(appWindow, UNKNOWN_STATE_WAITING_VISIBILITY_UPDATE);
-            mService.notifyKeyguardFlagsChanged(this::notifyVisibilitiesUpdated);
+            mService.notifyKeyguardFlagsChanged(this::notifyVisibilitiesUpdated,
+                    appWindow.getDisplayContent().getDisplayId());
         }
     }
 

@@ -467,7 +467,8 @@ public class RecentsAnimationController implements DeathRecipient {
         // so if we are actually transitioning there, notify again here
         if (mTargetAppToken != null) {
             if (reorderMode == REORDER_MOVE_TO_TOP || reorderMode == REORDER_KEEP_IN_PLACE) {
-                mService.mAppTransition.notifyAppTransitionFinishedLocked(mTargetAppToken.token);
+                mService.mRoot.getDisplayContent(mDisplayId)
+                        .mAppTransition.notifyAppTransitionFinishedLocked(mTargetAppToken.token);
             }
         }
     }

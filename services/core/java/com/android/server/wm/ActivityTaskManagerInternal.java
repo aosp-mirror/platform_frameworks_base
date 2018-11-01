@@ -228,8 +228,9 @@ public abstract class ActivityTaskManagerInternal {
      * @param callback Callback to run after activity visibilities have been reevaluated. This can
      *                 be used from window manager so that when the callback is called, it's
      *                 guaranteed that all apps have their visibility updated accordingly.
+     * @param displayId The id of the display where the keyguard flags changed.
      */
-    public abstract void notifyKeyguardFlagsChanged(@Nullable Runnable callback);
+    public abstract void notifyKeyguardFlagsChanged(@Nullable Runnable callback, int displayId);
 
     /**
      * Called when the trusted state of Keyguard has changed.

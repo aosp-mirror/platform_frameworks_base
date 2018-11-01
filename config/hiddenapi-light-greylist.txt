@@ -1418,7 +1418,6 @@ Landroid/view/IWindowManager;->getBaseDisplaySize(ILandroid/graphics/Point;)V
 Landroid/view/IWindowManager;->getDockedStackSide()I
 Landroid/view/IWindowManager;->getInitialDisplayDensity(I)I
 Landroid/view/IWindowManager;->getInitialDisplaySize(ILandroid/graphics/Point;)V
-Landroid/view/IWindowManager;->getPendingAppTransition()I
 Landroid/view/IWindowManager;->hasNavigationBar()Z
 Landroid/view/IWindowManager;->isKeyguardLocked()Z
 Landroid/view/IWindowManager;->isKeyguardSecure()Z

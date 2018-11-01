@@ -41,6 +41,8 @@ import android.os.RemoteException;
 import android.os.Trace;
 import android.util.Slog;
 import android.view.IRecentsAnimationRunner;
+
+import com.android.server.wm.DisplayWindowController;
 import com.android.server.wm.RecentsAnimationController;
 import com.android.server.wm.RecentsAnimationController.RecentsAnimationCallbacks;
 import com.android.server.wm.WindowManagerService;
@@ -85,10 +87,13 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
                 + " assistDataReceiver=" + assistDataReceiver);
         Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER, "RecentsAnimation#startRecentsActivity");
 
+        // TODO(multi-display) currently only support recents animation in default display.
+        final DisplayWindowController dwc =
+                mStackSupervisor.getDefaultDisplay().getWindowContainerController();
         if (!mWindowManager.canStartRecentsAnimation()) {
             notifyAnimationCancelBeforeStart(recentsAnimationRunner);
             if (DEBUG) Slog.d(TAG, "Can't start recents animation, nextAppTransition="
-                        + mWindowManager.getPendingAppTransition());
+                        + dwc.getPendingAppTransition());
             return;
         }
 

@@ -1641,7 +1641,7 @@ public class TaskStack extends WindowContainer<Task> implements
             return;
         }
 
-        mService.mBoundsAnimationController.onAllWindowsDrawn();
+        getDisplayContent().mBoundsAnimationController.onAllWindowsDrawn();
     }
 
     @Override  // AnimatesBounds
