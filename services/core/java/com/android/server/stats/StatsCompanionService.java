@@ -1004,6 +1004,7 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
             e.writeLong(processMemoryState.cacheInBytes);
             e.writeLong(processMemoryState.swapInBytes);
             e.writeLong(processMemoryState.rssHighWatermarkInBytes);
+            e.writeLong(processMemoryState.startTimeNanos);
             pulledData.add(e);
         }
     }
