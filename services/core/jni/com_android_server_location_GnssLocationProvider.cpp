@@ -1301,7 +1301,7 @@ static jboolean android_location_GnssLocationProvider_is_supported(
     return (gnssHal != nullptr) ?  JNI_TRUE : JNI_FALSE;
 }
 
-static jboolean android_location_GnssLocationProvider_is_agps_ril_supported(
+static jboolean android_location_GnssNetworkConnectivityHandler_is_agps_ril_supported(
         JNIEnv* /* env */, jclass /* clazz */) {
     return (agnssRilIface != nullptr) ? JNI_TRUE : JNI_FALSE;
 }
@@ -1573,7 +1573,7 @@ static void android_location_GnssLocationProvider_inject_xtra_data(JNIEnv* env, 
     env->ReleasePrimitiveArrayCritical(data, bytes, JNI_ABORT);
 }
 
-static void android_location_GnssLocationProvider_agps_data_conn_open(
+static void android_location_GnssNetworkConnectivityHandler_agps_data_conn_open(
         JNIEnv* env, jobject /* obj */, jstring apn, jint apnIpType) {
     if (agnssIface == nullptr) {
         ALOGE("no AGPS interface in agps_data_conn_open");
@@ -1593,7 +1593,7 @@ static void android_location_GnssLocationProvider_agps_data_conn_open(
     env->ReleaseStringUTFChars(apn, apnStr);
 }
 
-static void android_location_GnssLocationProvider_agps_data_conn_closed(JNIEnv* /* env */,
+static void android_location_GnssNetworkConnectivityHandler_agps_data_conn_closed(JNIEnv* /* env */,
                                                                        jobject /* obj */) {
     if (agnssIface == nullptr) {
         ALOGE("%s: AGPS interface not supported", __func__);
@@ -1606,7 +1606,7 @@ static void android_location_GnssLocationProvider_agps_data_conn_closed(JNIEnv* 
     }
 }
 
-static void android_location_GnssLocationProvider_agps_data_conn_failed(JNIEnv* /* env */,
+static void android_location_GnssNetworkConnectivityHandler_agps_data_conn_failed(JNIEnv* /* env */,
                                                                        jobject /* obj */) {
     if (agnssIface == nullptr) {
         ALOGE("%s: AGPS interface not supported", __func__);
@@ -1720,7 +1720,7 @@ static jstring android_location_GnssLocationProvider_get_internal_state(JNIEnv* 
     return result;
 }
 
-static void android_location_GnssLocationProvider_update_network_state(JNIEnv* env,
+static void android_location_GnssNetworkConnectivityHandler_update_network_state(JNIEnv* env,
                                                                        jobject /* obj */,
                                                                        jboolean connected,
                                                                        jint type,
@@ -2120,8 +2120,6 @@ static const JNINativeMethod sMethods[] = {
             android_location_GnssLocationProvider_class_init_native)},
     {"native_is_supported", "()Z", reinterpret_cast<void *>(
             android_location_GnssLocationProvider_is_supported)},
-    {"native_is_agps_ril_supported", "()Z",
-            reinterpret_cast<void *>(android_location_GnssLocationProvider_is_agps_ril_supported)},
     {"native_is_gnss_configuration_supported", "()Z",
             reinterpret_cast<void *>(
                     android_location_gpsLocationProvider_is_gnss_configuration_supported)},
@@ -2153,15 +2151,6 @@ static const JNINativeMethod sMethods[] = {
     {"native_inject_xtra_data",
             "([BI)V",
             reinterpret_cast<void *>(android_location_GnssLocationProvider_inject_xtra_data)},
-    {"native_agps_data_conn_open",
-            "(Ljava/lang/String;I)V",
-            reinterpret_cast<void *>(android_location_GnssLocationProvider_agps_data_conn_open)},
-    {"native_agps_data_conn_closed",
-            "()V",
-            reinterpret_cast<void *>(android_location_GnssLocationProvider_agps_data_conn_closed)},
-    {"native_agps_data_conn_failed",
-            "()V",
-            reinterpret_cast<void *>(android_location_GnssLocationProvider_agps_data_conn_failed)},
     {"native_agps_set_id",
             "(ILjava/lang/String;)V",
             reinterpret_cast<void *>(android_location_GnssLocationProvider_agps_set_id)},
@@ -2178,9 +2167,6 @@ static const JNINativeMethod sMethods[] = {
     {"native_get_internal_state",
             "()Ljava/lang/String;",
             reinterpret_cast<void *>(android_location_GnssLocationProvider_get_internal_state)},
-    {"native_update_network_state",
-            "(ZIZZLjava/lang/String;Ljava/lang/String;)V",
-            reinterpret_cast<void *>(android_location_GnssLocationProvider_update_network_state)},
     {"native_set_supl_es",
             "(I)Z",
             reinterpret_cast<void *>(android_location_GnssLocationProvider_set_supl_es)},
@@ -2280,6 +2266,24 @@ static const JNINativeMethod sNavigationMessageMethods[] = {
                     android_location_GnssNavigationMessageProvider_stop_navigation_message_collection)},
 };
 
+static const JNINativeMethod sNetworkConnectivityMethods[] = {
+     /* name, signature, funcPtr */
+    {"native_is_agps_ril_supported", "()Z",
+            reinterpret_cast<void *>(android_location_GnssNetworkConnectivityHandler_is_agps_ril_supported)},
+    {"native_update_network_state",
+            "(ZIZZLjava/lang/String;Ljava/lang/String;)V",
+            reinterpret_cast<void *>(android_location_GnssNetworkConnectivityHandler_update_network_state)},
+    {"native_agps_data_conn_open",
+            "(Ljava/lang/String;I)V",
+            reinterpret_cast<void *>(android_location_GnssNetworkConnectivityHandler_agps_data_conn_open)},
+    {"native_agps_data_conn_closed",
+            "()V",
+            reinterpret_cast<void *>(android_location_GnssNetworkConnectivityHandler_agps_data_conn_closed)},
+    {"native_agps_data_conn_failed",
+            "()V",
+            reinterpret_cast<void *>(android_location_GnssNetworkConnectivityHandler_agps_data_conn_failed)},
+};
+
 int register_android_server_location_GnssLocationProvider(JNIEnv* env) {
     jniRegisterNativeMethods(
             env,
@@ -2301,6 +2305,11 @@ int register_android_server_location_GnssLocationProvider(JNIEnv* env) {
             "com/android/server/location/GnssNavigationMessageProvider",
             sNavigationMessageMethods,
             NELEM(sNavigationMessageMethods));
+    jniRegisterNativeMethods(
+            env,
+            "com/android/server/location/GnssNetworkConnectivityHandler",
+            sNetworkConnectivityMethods,
+            NELEM(sNetworkConnectivityMethods));
     return jniRegisterNativeMethods(
             env,
             "com/android/server/location/GnssLocationProvider",
