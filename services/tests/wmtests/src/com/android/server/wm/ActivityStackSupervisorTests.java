@@ -458,4 +458,23 @@ public class ActivityStackSupervisorTests extends ActivityTestsBase {
         assertNotNull(secondDisplay.getTopStack());
         assertTrue(secondDisplay.getTopStack().isActivityTypeHome());
     }
+
+    /**
+     * Tests that home activities won't be started before booting when display added.
+     */
+    @Test
+    public void testNotStartHomeBeforeBoot() throws Exception {
+        final int displayId = 1;
+        final boolean isBooting = mService.mAmInternal.isBooting();
+        final boolean isBooted = mService.mAmInternal.isBooted();
+        try {
+            mService.mAmInternal.setBooting(false);
+            mService.mAmInternal.setBooted(false);
+            mSupervisor.onDisplayAdded(displayId);
+            verify(mSupervisor, never()).startHomeOnDisplay(anyInt(), any(), anyInt());
+        } finally {
+            mService.mAmInternal.setBooting(isBooting);
+            mService.mAmInternal.setBooted(isBooted);
+        }
+    }
 }
