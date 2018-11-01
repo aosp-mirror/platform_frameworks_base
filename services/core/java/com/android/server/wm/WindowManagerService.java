@@ -2286,7 +2286,7 @@ public class WindowManagerService extends IWindowManager.Stub
         }
 
         synchronized (mGlobalLock) {
-            final DisplayContent dc = mRoot.getDisplayContent(displayId);
+            final DisplayContent dc = getDisplayContentOrCreate(displayId, null /* token */);
             if (dc == null) {
                 Slog.w(TAG_WM, "addWindowToken: Attempted to add token: " + binder
                         + " for non-exiting displayId=" + displayId);
