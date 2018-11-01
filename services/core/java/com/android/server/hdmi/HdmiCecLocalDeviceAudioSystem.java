@@ -99,13 +99,10 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
             mService.readBooleanSetting(Global.HDMI_CEC_SWITCH_ENABLED, false);
         mSystemAudioControlFeatureEnabled =
             mService.readBooleanSetting(Global.HDMI_SYSTEM_AUDIO_CONTROL_ENABLED, true);
-        // TODO(amyjojo): make the map ro property.
-        mTvInputs.put(Constants.CEC_SWITCH_HDMI1,
-                "com.droidlogic.tvinput/.services.Hdmi1InputService/HW5");
-        mTvInputs.put(Constants.CEC_SWITCH_HDMI2,
-                "com.droidlogic.tvinput/.services.Hdmi2InputService/HW6");
-        mTvInputs.put(Constants.CEC_SWITCH_HDMI3,
-                "com.droidlogic.tvinput/.services.Hdmi3InputService/HW7");
+        // TODO(amyjojo): Maintain a portId to TvinputId map.
+        mTvInputs.put(2, "com.droidlogic.tvinput/.services.Hdmi1InputService/HW5");
+        mTvInputs.put(4, "com.droidlogic.tvinput/.services.Hdmi2InputService/HW6");
+        mTvInputs.put(1, "com.droidlogic.tvinput/.services.Hdmi3InputService/HW7");
     }
 
     /**
@@ -748,7 +745,7 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
      */
     private void setSystemAudioMode(boolean newSystemAudioMode) {
         int targetPhysicalAddress = getActiveSource().physicalAddress;
-        int port = getLocalPortFromPhysicalAddress(targetPhysicalAddress);
+        int port = mService.pathToPortId(targetPhysicalAddress);
         if (newSystemAudioMode && port >= 0) {
             switchToAudioInput();
         }
@@ -947,7 +944,7 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
 
     @Override
     protected void switchInputOnReceivingNewActivePath(int physicalAddress) {
-        int port = getLocalPortFromPhysicalAddress(physicalAddress);
+        int port = mService.pathToPortId(physicalAddress);
         if (isSystemAudioActivated() && port < 0) {
             // If system audio mode is on and the new active source is not under the current device,
             // Will switch to ARC input.
@@ -1019,7 +1016,7 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
 
     @Override
     protected void handleRoutingChangeAndInformation(int physicalAddress, HdmiCecMessage message) {
-        int port = getLocalPortFromPhysicalAddress(physicalAddress);
+        int port = mService.pathToPortId(physicalAddress);
         // Routing change or information sent from switches under the current device can be ignored.
         if (port > 0) {
             return;
