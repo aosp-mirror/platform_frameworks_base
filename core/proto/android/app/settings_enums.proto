@@ -59,5 +59,8 @@ enum PageId {
 
   // ConfirmDeviceCredentials > BiometricPrompt
   BIOMETRIC_FRAGMENT = 1585;
+
+  // OPEN: Biometric Enrollment (android.settings.BIOMETRIC_ENROLL action intent)
+  BIOMETRIC_ENROLL_ACTIVITY = 1586;
 }
 
