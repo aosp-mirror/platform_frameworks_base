@@ -65,8 +65,9 @@ public class SignalStrength implements Parcelable {
     };
 
     /**
-     * Use Integer.MAX_VALUE because -1 is a valid value in signal strength.
-     * @hide
+     * Indicates the invalid measures of signal strength.
+     *
+     * For example, this can be returned by {@link #getEvdoDbm()} or {@link #getCdmaDbm()}
      */
     public static final int INVALID = Integer.MAX_VALUE;
 
@@ -173,9 +174,9 @@ public class SignalStrength implements Parcelable {
     public SignalStrength(boolean gsmFlag) {
         mGsmSignalStrength = 99;
         mGsmBitErrorRate = -1;
-        mCdmaDbm = -1;
+        mCdmaDbm = INVALID;
         mCdmaEcio = -1;
-        mEvdoDbm = -1;
+        mEvdoDbm = INVALID;
         mEvdoEcio = -1;
         mEvdoSnr = -1;
         mLteSignalStrength = 99;
@@ -542,6 +543,8 @@ public class SignalStrength implements Parcelable {
 
     /**
      * Get the CDMA RSSI value in dBm
+     *
+     * @return the CDMA RSSI value or {@link #INVALID} if invalid
      */
     public int getCdmaDbm() {
         return this.mCdmaDbm;
@@ -556,6 +559,8 @@ public class SignalStrength implements Parcelable {
 
     /**
      * Get the EVDO RSSI value in dBm
+     *
+     * @return the EVDO RSSI value or {@link #INVALID} if invalid
      */
     public int getEvdoDbm() {
         return this.mEvdoDbm;
