@@ -26,16 +26,21 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.content.pm.ActivityInfo.FLAG_ALWAYS_FOCUSABLE;
 
+import static com.android.server.am.ActivityDisplay.POSITION_TOP;
 import static com.android.server.am.ActivityStack.REMOVE_TASK_MODE_DESTROYING;
 import static com.android.server.am.ActivityStackSupervisor.MATCH_TASK_IN_STACKS_OR_RECENT_TASKS_AND_RESTORE;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.never;
@@ -359,15 +364,12 @@ public class ActivityStackSupervisorTests extends ActivityTestsBase {
     public void testFindTaskToMoveToFrontWhenRecentsOnTop() throws Exception {
         // Create stack/task on default display.
         final ActivityDisplay display = mSupervisor.getDefaultDisplay();
-        final ActivityStack targetStack = display.createStack(WINDOWING_MODE_FULLSCREEN,
-                ACTIVITY_TYPE_STANDARD, false /* onTop */);
-        final TaskRecord targetTask = new TaskBuilder(mSupervisor).setStack(targetStack).build();
+        final TestActivityStack targetStack = new StackBuilder(mSupervisor).setOnTop(false).build();
+        final TaskRecord targetTask = targetStack.getChildAt(0);
 
         // Create Recents on top of the display.
-        final ActivityStack stack = display.createStack(WINDOWING_MODE_FULLSCREEN,
-                ACTIVITY_TYPE_RECENTS, true /* onTop */);
-        final TaskRecord task = new TaskBuilder(mSupervisor).setStack(stack).build();
-        new ActivityBuilder(mService).setTask(task).build();
+        final ActivityStack stack =
+                new StackBuilder(mSupervisor).setActivityType(ACTIVITY_TYPE_RECENTS).build();
 
         final String reason = "findTaskToMoveToFront";
         mSupervisor.findTaskToMoveToFront(targetTask, 0, ActivityOptions.makeBasic(), reason,
@@ -429,5 +431,33 @@ public class ActivityStackSupervisorTests extends ActivityTestsBase {
         // Verify the target stack should resume its activity.
         verify(targetStack, times(1)).resumeTopActivityUncheckedLocked(
                 eq(activity), eq(null /* targetOptions */));
+    }
+
+
+    /**
+     * Tests that home activities can be started on the displays that supports system decorations.
+     */
+    @Test
+    public void testStartHomeOnAllDisplays() throws Exception {
+        // Create secondary displays.
+        final TestActivityDisplay secondDisplay = spy(createNewActivityDisplay());
+        mSupervisor.addChild(secondDisplay, POSITION_TOP);
+        doReturn(true).when(secondDisplay).supportsSystemDecorations();
+
+        // Create mock tasks and other necessary mocks.
+        TaskBuilder taskBuilder = new TaskBuilder(mService.mStackSupervisor).setCreateStack(false);
+        final TaskRecord.TaskRecordFactory factory = mock(TaskRecord.TaskRecordFactory.class);
+        TaskRecord.setTaskRecordFactory(factory);
+        doAnswer(i -> taskBuilder.build()).when(factory)
+                .create(any(), anyInt(), any(), any(), any(), any());
+        doReturn(true).when(mService.mStackSupervisor)
+                .ensureVisibilityAndConfig(any(), anyInt(), anyBoolean(), anyBoolean());
+        doReturn(true).when(mSupervisor).canStartHomeOnDisplay(any(), anyInt());
+
+        mSupervisor.startHomeOnAllDisplays(0, "testStartHome");
+
+        assertTrue(mSupervisor.getDefaultDisplay().getTopStack().isActivityTypeHome());
+        assertNotNull(secondDisplay.getTopStack());
+        assertTrue(secondDisplay.getTopStack().isActivityTypeHome());
     }
 }

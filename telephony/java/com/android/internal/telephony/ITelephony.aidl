@@ -49,6 +49,7 @@ import com.android.internal.telephony.CellNetworkScanResult;
 import com.android.internal.telephony.OperatorInfo;
 
 import java.util.List;
+import java.util.Map;
 
 import android.telephony.UiccSlotInfo;
 
@@ -1615,4 +1616,14 @@ interface ITelephony {
      * return true if TTY over VoLTE is enabled for the subscription specified.
      */
     boolean isTtyOverVolteEnabled(int subId);
+
+    /**
+     * Return the emergency number list from all the active subscriptions.
+     */
+    Map getCurrentEmergencyNumberList(String callingPackage);
+
+    /**
+     * Identify if the number is emergency number, based on all the active subscriptions.
+     */
+    boolean isCurrentEmergencyNumber(String number);
 }

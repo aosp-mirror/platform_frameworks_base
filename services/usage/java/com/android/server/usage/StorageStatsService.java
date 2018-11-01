@@ -33,6 +33,7 @@ import android.content.pm.PackageStats;
 import android.content.pm.UserInfo;
 import android.net.Uri;
 import android.os.Binder;
+import android.os.Build;
 import android.os.Environment;
 import android.os.FileUtils;
 import android.os.Handler;
@@ -165,7 +166,8 @@ public class StorageStatsService extends IStorageStatsManager.Stub {
     @Override
     public boolean isReservedSupported(String volumeUuid, String callingPackage) {
         if (volumeUuid == StorageManager.UUID_PRIVATE_INTERNAL) {
-            return SystemProperties.getBoolean(StorageManager.PROP_HAS_RESERVED, false);
+            return SystemProperties.getBoolean(StorageManager.PROP_HAS_RESERVED, false)
+                    || Build.IS_CONTAINER;
         } else {
             return false;
         }

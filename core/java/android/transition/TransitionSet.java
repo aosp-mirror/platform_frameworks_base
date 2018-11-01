@@ -163,8 +163,7 @@ public class TransitionSet extends Transition {
      */
     public TransitionSet addTransition(Transition transition) {
         if (transition != null) {
-            mTransitions.add(transition);
-            transition.mParent = this;
+            addTransitionInternal(transition);
             if (mDuration >= 0) {
                 transition.setDuration(mDuration);
             }
@@ -182,6 +181,11 @@ public class TransitionSet extends Transition {
             }
         }
         return this;
+    }
+
+    private void addTransitionInternal(Transition transition) {
+        mTransitions.add(transition);
+        transition.mParent = this;
     }
 
     /**
@@ -355,8 +359,10 @@ public class TransitionSet extends Transition {
     public void setPathMotion(PathMotion pathMotion) {
         super.setPathMotion(pathMotion);
         mChangeFlags |= FLAG_CHANGE_PATH_MOTION;
-        for (int i = 0; i < mTransitions.size(); i++) {
-            mTransitions.get(i).setPathMotion(pathMotion);
+        if (mTransitions != null) {
+            for (int i = 0; i < mTransitions.size(); i++) {
+                mTransitions.get(i).setPathMotion(pathMotion);
+            }
         }
     }
 
@@ -604,7 +610,7 @@ public class TransitionSet extends Transition {
         clone.mTransitions = new ArrayList<Transition>();
         int numTransitions = mTransitions.size();
         for (int i = 0; i < numTransitions; ++i) {
-            clone.addTransition((Transition) mTransitions.get(i).clone());
+            clone.addTransitionInternal((Transition) mTransitions.get(i).clone());
         }
         return clone;
     }

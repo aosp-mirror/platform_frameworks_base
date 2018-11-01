@@ -17,7 +17,6 @@
 package com.android.server;
 
 import android.Manifest;
-import android.app.ActivityManagerInternal;
 import android.app.AppOpsManager;
 import android.app.PendingIntent;
 import android.content.ComponentName;
@@ -337,6 +336,7 @@ public class MmsServiceBroker extends SystemService {
             mContext.enforceCallingPermission(Manifest.permission.SEND_SMS, "Send MMS message");
             if (getAppOpsManager().noteOp(AppOpsManager.OP_SEND_SMS, Binder.getCallingUid(),
                     callingPkg) != AppOpsManager.MODE_ALLOWED) {
+                Slog.e(TAG, callingPkg + " is not allowed to call sendMessage()");
                 return;
             }
             contentUri = adjustUriForUserAndGrantPermission(contentUri,
@@ -355,6 +355,7 @@ public class MmsServiceBroker extends SystemService {
                     "Download MMS message");
             if (getAppOpsManager().noteOp(AppOpsManager.OP_RECEIVE_MMS, Binder.getCallingUid(),
                     callingPkg) != AppOpsManager.MODE_ALLOWED) {
+                Slog.e(TAG, callingPkg + " is not allowed to call downloadMessage()");
                 return;
             }
             contentUri = adjustUriForUserAndGrantPermission(contentUri,

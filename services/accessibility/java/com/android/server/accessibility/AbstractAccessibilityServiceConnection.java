@@ -457,13 +457,12 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         final int interrogatingPid = Binder.getCallingPid();
         callback = mSystemSupport.replaceCallbackIfNeeded(callback, resolvedWindowId, interactionId,
                 interrogatingPid, interrogatingTid);
-        final int callingUid = Binder.getCallingUid();
         final long identityToken = Binder.clearCallingIdentity();
         try {
             connection.getRemote().findAccessibilityNodeInfosByViewId(accessibilityNodeId,
                     viewIdResName, partialInteractiveRegion, interactionId, callback, mFetchFlags,
                     interrogatingPid, interrogatingTid, spec);
-            return mSecurityPolicy.computeValidReportedPackages(callingUid,
+            return mSecurityPolicy.computeValidReportedPackages(
                     connection.getPackageName(), connection.getUid());
         } catch (RemoteException re) {
             if (DEBUG) {
@@ -514,13 +513,12 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         final int interrogatingPid = Binder.getCallingPid();
         callback = mSystemSupport.replaceCallbackIfNeeded(callback, resolvedWindowId, interactionId,
                 interrogatingPid, interrogatingTid);
-        final int callingUid = Binder.getCallingUid();
         final long identityToken = Binder.clearCallingIdentity();
         try {
             connection.getRemote().findAccessibilityNodeInfosByText(accessibilityNodeId,
                     text, partialInteractiveRegion, interactionId, callback, mFetchFlags,
                     interrogatingPid, interrogatingTid, spec);
-            return mSecurityPolicy.computeValidReportedPackages(callingUid,
+            return mSecurityPolicy.computeValidReportedPackages(
                     connection.getPackageName(), connection.getUid());
         } catch (RemoteException re) {
             if (DEBUG) {
@@ -571,13 +569,12 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         final int interrogatingPid = Binder.getCallingPid();
         callback = mSystemSupport.replaceCallbackIfNeeded(callback, resolvedWindowId, interactionId,
                 interrogatingPid, interrogatingTid);
-        final int callingUid = Binder.getCallingUid();
         final long identityToken = Binder.clearCallingIdentity();
         try {
             connection.getRemote().findAccessibilityNodeInfoByAccessibilityId(
                     accessibilityNodeId, partialInteractiveRegion, interactionId, callback,
                     mFetchFlags | flags, interrogatingPid, interrogatingTid, spec, arguments);
-            return mSecurityPolicy.computeValidReportedPackages(callingUid,
+            return mSecurityPolicy.computeValidReportedPackages(
                     connection.getPackageName(), connection.getUid());
         } catch (RemoteException re) {
             if (DEBUG) {
@@ -628,13 +625,12 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         final int interrogatingPid = Binder.getCallingPid();
         callback = mSystemSupport.replaceCallbackIfNeeded(callback, resolvedWindowId, interactionId,
                 interrogatingPid, interrogatingTid);
-        final int callingUid = Binder.getCallingUid();
         final long identityToken = Binder.clearCallingIdentity();
         try {
             connection.getRemote().findFocus(accessibilityNodeId, focusType,
                     partialInteractiveRegion, interactionId, callback, mFetchFlags,
                     interrogatingPid, interrogatingTid, spec);
-            return mSecurityPolicy.computeValidReportedPackages(callingUid,
+            return mSecurityPolicy.computeValidReportedPackages(
                     connection.getPackageName(), connection.getUid());
         } catch (RemoteException re) {
             if (DEBUG) {
@@ -684,13 +680,12 @@ abstract class AbstractAccessibilityServiceConnection extends IAccessibilityServ
         final int interrogatingPid = Binder.getCallingPid();
         callback = mSystemSupport.replaceCallbackIfNeeded(callback, resolvedWindowId, interactionId,
                 interrogatingPid, interrogatingTid);
-        final int callingUid = Binder.getCallingUid();
         final long identityToken = Binder.clearCallingIdentity();
         try {
             connection.getRemote().focusSearch(accessibilityNodeId, direction,
                     partialInteractiveRegion, interactionId, callback, mFetchFlags,
                     interrogatingPid, interrogatingTid, spec);
-            return mSecurityPolicy.computeValidReportedPackages(callingUid,
+            return mSecurityPolicy.computeValidReportedPackages(
                     connection.getPackageName(), connection.getUid());
         } catch (RemoteException re) {
             if (DEBUG) {

@@ -88,4 +88,7 @@
     <string name="anonymous_source_continue" msgid="4375745439457209366">"Tovább"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"Beállítások"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Wear-alkalmazások telepítése/törlése"</string>
+    <string name="app_installed_notification_channel_description" msgid="2695385797601574123">"Alkalmazás telepítve értesítés"</string>
+    <string name="notification_installation_success_message" msgid="6450467996056038442">"Sikeresen telepítve"</string>
+    <string name="notification_installation_success_status" msgid="3172502643504323321">"A(z) <xliff:g id="APPNAME">%1$s</xliff:g> alkalmazás sikeresen telepítve"</string>
 </resources>

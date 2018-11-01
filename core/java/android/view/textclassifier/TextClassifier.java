@@ -325,6 +325,17 @@ public interface TextClassifier {
     }
 
     /**
+     * Suggests and returns a list of actions according to the given conversation.
+     */
+    @WorkerThread
+    default ConversationActions suggestConversationActions(
+            @NonNull ConversationActions.Request request) {
+        Preconditions.checkNotNull(request);
+        Utils.checkMainThread();
+        return new ConversationActions(Collections.emptyList());
+    }
+
+    /**
      * Reports a selection event.
      *
      * <p><strong>NOTE: </strong>If a TextClassifier has been destroyed, calls to this method should

@@ -79,10 +79,9 @@ public class ActivityRecordTests extends ActivityTestsBase {
         super.setUp();
 
         setupActivityTaskManagerService();
-        mStack = mSupervisor.getDefaultDisplay().createStack(
-                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
-        mTask = new TaskBuilder(mSupervisor).setStack(mStack).build();
-        mActivity = new ActivityBuilder(mService).setTask(mTask).build();
+        mStack = new StackBuilder(mSupervisor).build();
+        mTask = mStack.getChildAt(0);
+        mActivity = mTask.getTopActivity();
     }
 
     @Test

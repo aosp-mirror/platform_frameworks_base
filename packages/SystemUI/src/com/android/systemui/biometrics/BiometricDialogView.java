@@ -17,7 +17,7 @@
 package com.android.systemui.biometrics;
 
 import android.content.Context;
-import android.graphics.Color;
+import android.content.res.TypedArray;
 import android.graphics.PixelFormat;
 import android.hardware.biometrics.BiometricPrompt;
 import android.os.Binder;
@@ -122,10 +122,12 @@ public abstract class BiometricDialogView extends LinearLayout {
         mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
         mAnimationTranslationOffset = getResources()
                 .getDimension(R.dimen.biometric_dialog_animation_translation_offset);
-        mErrorColor = Color.parseColor(
-                getResources().getString(R.color.biometric_dialog_error_color));
-        mTextColor = Color.parseColor(
-                getResources().getString(R.color.biometric_dialog_text_light_color));
+
+        TypedArray array = getContext().obtainStyledAttributes(
+                new int[]{android.R.attr.colorError, android.R.attr.textColorSecondary});
+        mErrorColor = array.getColor(0, 0);
+        mTextColor = array.getColor(1, 0);
+        array.recycle();
 
         DisplayMetrics metrics = new DisplayMetrics();
         mWindowManager.getDefaultDisplay().getMetrics(metrics);

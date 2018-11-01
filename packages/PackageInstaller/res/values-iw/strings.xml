@@ -88,4 +88,7 @@
     <string name="anonymous_source_continue" msgid="4375745439457209366">"המשך"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"הגדרות"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"‏מתקין/מסיר התקנה של אפליקציות Wear"</string>
+    <string name="app_installed_notification_channel_description" msgid="2695385797601574123">"התראה על התקנת האפליקציה"</string>
+    <string name="notification_installation_success_message" msgid="6450467996056038442">"הותקנה בהצלחה"</string>
+    <string name="notification_installation_success_status" msgid="3172502643504323321">"האפליקציה \"<xliff:g id="APPNAME">%1$s</xliff:g>\" הותקנה בהצלחה"</string>
 </resources>

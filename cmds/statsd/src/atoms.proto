@@ -2540,10 +2540,17 @@ message Temperature {
  * Binder stats will be reset every time the data is pulled. It means it can only be pulled by one
  * config on the device.
  *
- * Next tag: 14
+ * Next tag: 15
  */
 message BinderCalls {
+    // UID of the process responsible for the binder transaction. It will be set if the process
+    // executing the binder transaction attribute the transaction to another uid using
+    // Binder.setThreadWorkSource().
+    //
+    // If not set, the value will be -1.
     optional int32 uid = 1 [(is_uid) = true];
+    // UID of the process executing the binder transaction.
+    optional int32 direct_caller_uid = 14;
     // Fully qualified class name of the API call.
     //
     // This is a system server class name.

@@ -20,8 +20,8 @@ import static android.app.ActivityManager.START_SUCCESS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
-
 import static android.os.FactoryTest.FACTORY_TEST_LOW_LEVEL;
+
 import static com.android.server.am.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.am.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 
@@ -35,7 +35,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.ResolveInfo;
 import android.os.Binder;
-import android.os.FactoryTest;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -167,10 +166,6 @@ public class ActivityStartController {
     }
 
     void startHomeActivity(Intent intent, ActivityInfo aInfo, String reason, int displayId) {
-        if (!mSupervisor.canStartHomeOnDisplay(aInfo, displayId)) {
-            return;
-        }
-
         final ActivityOptions options = ActivityOptions.makeBasic();
         options.setLaunchWindowingMode(WINDOWING_MODE_FULLSCREEN);
         options.setLaunchActivityType(ACTIVITY_TYPE_HOME);

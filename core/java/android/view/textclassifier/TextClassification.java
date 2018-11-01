@@ -33,6 +33,7 @@ import android.graphics.drawable.AdaptiveIconDrawable;
 import android.graphics.drawable.BitmapDrawable;
 import android.graphics.drawable.Drawable;
 import android.graphics.drawable.Icon;
+import android.os.Bundle;
 import android.os.LocaleList;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -126,6 +127,7 @@ public final class TextClassification implements Parcelable {
     @NonNull private final List<RemoteAction> mActions;
     @NonNull private final EntityConfidence mEntityConfidence;
     @Nullable private final String mId;
+    @NonNull private final Bundle mExtras;
 
     private TextClassification(
             @Nullable String text,
@@ -135,7 +137,8 @@ public final class TextClassification implements Parcelable {
             @Nullable OnClickListener legacyOnClickListener,
             @NonNull List<RemoteAction> actions,
             @NonNull Map<String, Float> entityConfidence,
-            @Nullable String id) {
+            @Nullable String id,
+            @NonNull Bundle extras) {
         mText = text;
         mLegacyIcon = legacyIcon;
         mLegacyLabel = legacyLabel;
@@ -144,6 +147,7 @@ public final class TextClassification implements Parcelable {
         mActions = Collections.unmodifiableList(actions);
         mEntityConfidence = new EntityConfidence(entityConfidence);
         mId = id;
+        mExtras = extras;
     }
 
     /**
@@ -255,6 +259,18 @@ public final class TextClassification implements Parcelable {
         return mId;
     }
 
+    /**
+     * Returns the extended data.
+     *
+     * <p><b>NOTE: </b>Each call to this method returns a new bundle copy so clients should
+     * prefer to hold a reference to the returned bundle rather than frequently calling this
+     * method.
+     */
+    @NonNull
+    public Bundle getExtras() {
+        return mExtras.deepCopy();
+    }
+
     @Override
     public String toString() {
         return String.format(Locale.US,
@@ -359,6 +375,7 @@ public final class TextClassification implements Parcelable {
         @Nullable private Intent mLegacyIntent;
         @Nullable private OnClickListener mLegacyOnClickListener;
         @Nullable private String mId;
+        @Nullable private Bundle mExtras;
 
         /**
          * Sets the classified text.
@@ -471,12 +488,22 @@ public final class TextClassification implements Parcelable {
         }
 
         /**
+         * Sets the extended data.
+         */
+        @NonNull
+        public Builder setExtras(@Nullable Bundle extras) {
+            mExtras = extras;
+            return this;
+        }
+
+        /**
          * Builds and returns a {@link TextClassification} object.
          */
         @NonNull
         public TextClassification build() {
             return new TextClassification(mText, mLegacyIcon, mLegacyLabel, mLegacyIntent,
-                    mLegacyOnClickListener, mActions, mEntityConfidence, mId);
+                    mLegacyOnClickListener, mActions, mEntityConfidence, mId,
+                    mExtras == null ? Bundle.EMPTY : mExtras.deepCopy());
         }
     }
 
@@ -490,18 +517,21 @@ public final class TextClassification implements Parcelable {
         private final int mEndIndex;
         @Nullable private final LocaleList mDefaultLocales;
         @Nullable private final ZonedDateTime mReferenceTime;
+        @NonNull private final Bundle mExtras;
 
         private Request(
                 CharSequence text,
                 int startIndex,
                 int endIndex,
                 LocaleList defaultLocales,
-                ZonedDateTime referenceTime) {
+                ZonedDateTime referenceTime,
+                Bundle extras) {
             mText = text;
             mStartIndex = startIndex;
             mEndIndex = endIndex;
             mDefaultLocales = defaultLocales;
             mReferenceTime = referenceTime;
+            mExtras = extras;
         }
 
         /**
@@ -548,6 +578,18 @@ public final class TextClassification implements Parcelable {
         }
 
         /**
+         * Returns the extended data.
+         *
+         * <p><b>NOTE: </b>Each call to this method returns a new bundle copy so clients should
+         * prefer to hold a reference to the returned bundle rather than frequently calling this
+         * method.
+         */
+        @NonNull
+        public Bundle getExtras() {
+            return mExtras.deepCopy();
+        }
+
+        /**
          * A builder for building TextClassification requests.
          */
         public static final class Builder {
@@ -555,6 +597,7 @@ public final class TextClassification implements Parcelable {
             private final CharSequence mText;
             private final int mStartIndex;
             private final int mEndIndex;
+            private Bundle mExtras;
 
             @Nullable private LocaleList mDefaultLocales;
             @Nullable private ZonedDateTime mReferenceTime;
@@ -602,11 +645,23 @@ public final class TextClassification implements Parcelable {
             }
 
             /**
+             * Sets the extended data.
+             *
+             * @return this builder
+             */
+            @NonNull
+            public Builder setExtras(@Nullable Bundle extras) {
+                mExtras = extras;
+                return this;
+            }
+
+            /**
              * Builds and returns the request object.
              */
             @NonNull
             public Request build() {
-                return new Request(mText, mStartIndex, mEndIndex, mDefaultLocales, mReferenceTime);
+                return new Request(mText, mStartIndex, mEndIndex, mDefaultLocales, mReferenceTime,
+                        mExtras == null ? Bundle.EMPTY : mExtras.deepCopy());
             }
         }
 
@@ -628,6 +683,7 @@ public final class TextClassification implements Parcelable {
             if (mReferenceTime != null) {
                 dest.writeString(mReferenceTime.toString());
             }
+            dest.writeBundle(mExtras);
         }
 
         public static final Parcelable.Creator<Request> CREATOR =
@@ -649,6 +705,7 @@ public final class TextClassification implements Parcelable {
             mEndIndex = in.readInt();
             mDefaultLocales = in.readInt() == 0 ? null : LocaleList.CREATOR.createFromParcel(in);
             mReferenceTime = in.readInt() == 0 ? null : ZonedDateTime.parse(in.readString());
+            mExtras = in.readBundle();
         }
     }
 
@@ -664,6 +721,7 @@ public final class TextClassification implements Parcelable {
         dest.writeTypedList(mActions);
         mEntityConfidence.writeToParcel(dest, flags);
         dest.writeString(mId);
+        dest.writeBundle(mExtras);
     }
 
     public static final Parcelable.Creator<TextClassification> CREATOR =
@@ -695,6 +753,7 @@ public final class TextClassification implements Parcelable {
         mLegacyIntent = null; // mLegacyIntent is not parcelled.
         mEntityConfidence = EntityConfidence.CREATOR.createFromParcel(in);
         mId = in.readString();
+        mExtras = in.readBundle();
     }
 
     // Best effort attempt to try to load a drawable from the provided icon.
@@ -716,68 +775,5 @@ public final class TextClassification implements Parcelable {
                                 icon.getDataBytes(), icon.getDataOffset(), icon.getDataLength()));
         }
         return null;
-    }
-
-    // TODO: Remove once apps can build against the latest sdk.
-    /**
-     * Optional input parameters for generating TextClassification.
-     * @hide
-     */
-    public static final class Options {
-
-        @Nullable private final TextClassificationSessionId mSessionId;
-        @Nullable private final Request mRequest;
-        @Nullable private LocaleList mDefaultLocales;
-        @Nullable private ZonedDateTime mReferenceTime;
-
-        public Options() {
-            this(null, null);
-        }
-
-        private Options(
-                @Nullable TextClassificationSessionId sessionId, @Nullable Request request) {
-            mSessionId = sessionId;
-            mRequest = request;
-        }
-
-        /** Helper to create Options from a Request. */
-        public static Options from(TextClassificationSessionId sessionId, Request request) {
-            final Options options = new Options(sessionId, request);
-            options.setDefaultLocales(request.getDefaultLocales());
-            options.setReferenceTime(request.getReferenceTime());
-            return options;
-        }
-
-        /** @param defaultLocales ordered list of locale preferences. */
-        public Options setDefaultLocales(@Nullable LocaleList defaultLocales) {
-            mDefaultLocales = defaultLocales;
-            return this;
-        }
-
-        /** @param referenceTime refrence time used for interpreting relatives dates */
-        public Options setReferenceTime(@Nullable ZonedDateTime referenceTime) {
-            mReferenceTime = referenceTime;
-            return this;
-        }
-
-        @Nullable
-        public LocaleList getDefaultLocales() {
-            return mDefaultLocales;
-        }
-
-        @Nullable
-        public ZonedDateTime getReferenceTime() {
-            return mReferenceTime;
-        }
-
-        @Nullable
-        public Request getRequest() {
-            return mRequest;
-        }
-
-        @Nullable
-        public TextClassificationSessionId getSessionId() {
-            return mSessionId;
-        }
     }
 }

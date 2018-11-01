@@ -48,41 +48,7 @@ import static android.view.WindowManager.TRANSIT_TASK_TO_FRONT;
 
 import static com.android.server.am.ActivityDisplay.POSITION_BOTTOM;
 import static com.android.server.am.ActivityDisplay.POSITION_TOP;
-import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_ADD_REMOVE;
-import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_ALL;
-import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_APP;
-import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_CLEANUP;
-import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_CONTAINERS;
-import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_PAUSE;
-import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_RELEASE;
-import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_RESULTS;
-import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_SAVED_STATE;
-import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_STACK;
-import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_STATES;
-import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_SWITCH;
-import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_TASKS;
-import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_TRANSITION;
-import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_USER_LEAVING;
-import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_VISIBILITY;
-import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_ADD_REMOVE;
-import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_APP;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_CLEANUP;
-import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_CONTAINERS;
-import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_PAUSE;
-import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_RELEASE;
-import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_RESULTS;
-import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_SAVED_STATE;
-import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_STACK;
-import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_STATES;
-import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_SWITCH;
-import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_TASKS;
-import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_TRANSITION;
-import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_USER_LEAVING;
-import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_VISIBILITY;
-import static com.android.server.am.ActivityTaskManagerDebugConfig.TAG_ATM;
-import static com.android.server.am.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
-import static com.android.server.am.ActivityTaskManagerService.RELAUNCH_REASON_FREE_RESIZE;
-import static com.android.server.am.ActivityTaskManagerService.RELAUNCH_REASON_WINDOWING_MODE_RESIZE;
 import static com.android.server.am.ActivityStack.ActivityState.DESTROYED;
 import static com.android.server.am.ActivityStack.ActivityState.DESTROYING;
 import static com.android.server.am.ActivityStack.ActivityState.FINISHING;
@@ -102,8 +68,42 @@ import static com.android.server.am.ActivityStackSupervisor.FindTaskResult;
 import static com.android.server.am.ActivityStackSupervisor.PAUSE_IMMEDIATELY;
 import static com.android.server.am.ActivityStackSupervisor.PRESERVE_WINDOWS;
 import static com.android.server.am.ActivityStackSupervisor.REMOVE_FROM_RECENTS;
-
+import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_ADD_REMOVE;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_ALL;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_APP;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_CLEANUP;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_CONTAINERS;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_PAUSE;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_RELEASE;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_RESULTS;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_SAVED_STATE;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_STACK;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_STATES;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_SWITCH;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_TASKS;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_TRANSITION;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_USER_LEAVING;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_VISIBILITY;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_ADD_REMOVE;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_APP;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_CONTAINERS;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_PAUSE;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_RELEASE;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_RESULTS;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_SAVED_STATE;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_STACK;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_STATES;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_SWITCH;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_TASKS;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_TRANSITION;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_USER_LEAVING;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_VISIBILITY;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.TAG_ATM;
+import static com.android.server.am.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.ActivityTaskManagerService.H.FIRST_ACTIVITY_STACK_MSG;
+import static com.android.server.am.ActivityTaskManagerService.RELAUNCH_REASON_FREE_RESIZE;
+import static com.android.server.am.ActivityTaskManagerService.RELAUNCH_REASON_WINDOWING_MODE_RESIZE;
+
 import static java.lang.Integer.MAX_VALUE;
 
 import android.app.Activity;
@@ -1807,13 +1807,6 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             return false;
         }
 
-        final ActivityRecord top = topRunningActivityLocked();
-        if (top == null && isInStackLocked(starting) == null && !isTopStackOnDisplay()) {
-            // Shouldn't be visible if you don't have any running activities, not starting one, and
-            // not the top stack on display.
-            return false;
-        }
-
         final ActivityDisplay display = getDisplay();
         boolean gotSplitScreenStack = false;
         boolean gotOpaqueSplitScreenPrimary = false;
@@ -1822,9 +1815,16 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         final boolean isAssistantType = isActivityTypeAssistant();
         for (int i = display.getChildCount() - 1; i >= 0; --i) {
             final ActivityStack other = display.getChildAt(i);
+            final boolean hasRunningActivities = other.topRunningActivityLocked() != null;
             if (other == this) {
-                // Should be visible if there is no other stack occluding it.
-                return true;
+                // Should be visible if there is no other stack occluding it, unless it doesn't
+                // have any running activities, not starting one and not home stack.
+                return hasRunningActivities || isInStackLocked(starting) != null
+                        || isActivityTypeHome();
+            }
+
+            if (!hasRunningActivities) {
+                continue;
             }
 
             final int otherWindowingMode = other.getWindowingMode();

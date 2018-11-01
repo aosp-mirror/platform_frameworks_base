@@ -348,11 +348,24 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
     }
 
     boolean getBindInstantServiceAllowed(int userId) {
-        return  mSecurityPolicy.getBindInstantServiceAllowed(userId);
+        final UserState userState = getUserState(userId);
+        if (userState == null) return false;
+        return userState.getBindInstantServiceAllowed();
     }
 
     void setBindInstantServiceAllowed(int userId, boolean allowed) {
-        mSecurityPolicy.setBindInstantServiceAllowed(userId, allowed);
+        UserState userState;
+        synchronized (mLock) {
+            userState = getUserState(userId);
+            if (userState == null) {
+                if (!allowed) {
+                    return;
+                }
+                userState = new UserState(userId);
+                mUserStates.put(userId, userState);
+            }
+        }
+        userState.setBindInstantServiceAllowed(allowed);
     }
 
     private void registerBroadcastReceivers() {
@@ -1316,7 +1329,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 | PackageManager.MATCH_DIRECT_BOOT_AWARE
                 | PackageManager.MATCH_DIRECT_BOOT_UNAWARE;
 
-        if (userState.mBindInstantServiceAllowed) {
+        if (userState.getBindInstantServiceAllowed()) {
             flags |= PackageManager.MATCH_INSTANT;
         }
 
@@ -3158,9 +3171,15 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             return packageNames[0];
         }
 
-        String[] computeValidReportedPackages(int callingUid,
-                String targetPackage, int targetUid) {
-            if (UserHandle.getAppId(callingUid) == Process.SYSTEM_UID) {
+        /**
+         * Get a list of package names an app may report, including any widget packages it owns.
+         *
+         * @param targetPackage The known valid target package
+         * @param targetUid The uid of the target app
+         * @return
+         */
+        String[] computeValidReportedPackages(String targetPackage, int targetUid) {
+            if (UserHandle.getAppId(targetUid) == Process.SYSTEM_UID) {
                 // Empty array means any package is Okay
                 return EmptyArray.STRING;
             }
@@ -3182,32 +3201,6 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
                 }
             }
             return uidPackages;
-        }
-
-        private boolean getBindInstantServiceAllowed(int userId) {
-            mContext.enforceCallingOrSelfPermission(
-                    Manifest.permission.MANAGE_BIND_INSTANT_SERVICE,
-                    "getBindInstantServiceAllowed");
-            UserState state = mUserStates.get(userId);
-            return (state != null) && state.mBindInstantServiceAllowed;
-        }
-
-        private void setBindInstantServiceAllowed(int userId, boolean allowed) {
-            mContext.enforceCallingOrSelfPermission(
-                    Manifest.permission.MANAGE_BIND_INSTANT_SERVICE,
-                    "setBindInstantServiceAllowed");
-            UserState state = mUserStates.get(userId);
-            if (state == null) {
-                if (!allowed) {
-                    return;
-                }
-                state = new UserState(userId);
-                mUserStates.put(userId, state);
-            }
-            if (state.mBindInstantServiceAllowed != allowed) {
-                state.mBindInstantServiceAllowed = allowed;
-                onUserStateChangedLocked(state);
-            }
         }
 
         public void clearWindowsLocked() {
@@ -3819,7 +3812,7 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
         public boolean mUserMinimumUiTimeoutEnabled;
         public int mUserMinimumUiTimeout;
 
-        public boolean mBindInstantServiceAllowed;
+        private boolean mBindInstantServiceAllowed;
 
         public UserState(int userId) {
             mUserId = userId;
@@ -4050,6 +4043,24 @@ public class AccessibilityManagerService extends IAccessibilityManager.Stub
             return (Settings.Secure.getInt(mContext.getContentResolver(),
                     Settings.Secure.ACCESSIBILITY_SOFT_KEYBOARD_MODE, 0)
                     & SHOW_MODE_HARD_KEYBOARD_ORIGINAL_VALUE) != 0;
+        }
+
+        public boolean getBindInstantServiceAllowed() {
+            synchronized (mLock) {
+                return mBindInstantServiceAllowed;
+            }
+        }
+
+        public void setBindInstantServiceAllowed(boolean allowed) {
+            synchronized (mLock) {
+                mContext.enforceCallingOrSelfPermission(
+                        Manifest.permission.MANAGE_BIND_INSTANT_SERVICE,
+                        "setBindInstantServiceAllowed");
+                if (allowed) {
+                    mBindInstantServiceAllowed = allowed;
+                    onUserStateChangedLocked(this);
+                }
+            }
         }
     }
 

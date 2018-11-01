@@ -51,7 +51,7 @@
     <string name="generic_error_dlg_title" msgid="5863195085927067752">"Սխալ"</string>
     <string name="generic_error_dlg_text" msgid="5287861443265795232">"Չհաջողվեց ապատեղադրել հավելվածը:"</string>
     <string name="uninstall_application_title" msgid="4045420072401428123">"Հավելվածի ապատեղադրում"</string>
-    <string name="uninstall_update_title" msgid="824411791011583031">"Թարմացման ապատեղադրում"</string>
+    <string name="uninstall_update_title" msgid="824411791011583031">"Ապատեղադրել թարմացումը"</string>
     <string name="uninstall_activity_text" msgid="1928194674397770771">"<xliff:g id="ACTIVITY_NAME">%1$s</xliff:g> գործողությունը հետևյալ հավելվածի մասն է`"</string>
     <string name="uninstall_application_text" msgid="3816830743706143980">"Ուզո՞ւմ եք ապատեղադրել այս հավելվածը։"</string>
     <string name="uninstall_application_text_all_users" msgid="575491774380227119">"Ապատեղադրե՞լ այս հավելվածը "<b>"բոլոր"</b>" օգտատերերի համար: Հավելվածը և դրա տվյալները կհեռացվեն սարքի "<b>"բոլոր"</b>" օգտատերերից:"</string>
@@ -88,4 +88,7 @@
     <string name="anonymous_source_continue" msgid="4375745439457209366">"Շարունակել"</string>
     <string name="external_sources_settings" msgid="4046964413071713807">"Կարգավորումներ"</string>
     <string name="wear_app_channel" msgid="1960809674709107850">"Wear հավելվածների տեղադրում/ապատեղադրում"</string>
+    <string name="app_installed_notification_channel_description" msgid="2695385797601574123">"Ծանուցում հավելվածի տեղադրման մասին"</string>
+    <string name="notification_installation_success_message" msgid="6450467996056038442">"Տեղադրվեց"</string>
+    <string name="notification_installation_success_status" msgid="3172502643504323321">"<xliff:g id="APPNAME">%1$s</xliff:g> հավելվածը տեղադրվեց"</string>
 </resources>
