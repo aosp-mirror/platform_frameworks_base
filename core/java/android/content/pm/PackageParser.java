@@ -3547,6 +3547,8 @@ public class PackageParser {
                 com.android.internal.R.styleable.AndroidManifestApplication_debuggable,
                 false)) {
             ai.flags |= ApplicationInfo.FLAG_DEBUGGABLE;
+            // Debuggable implies profileable
+            ai.privateFlags |= ApplicationInfo.PRIVATE_FLAG_PROFILEABLE_BY_SHELL;
         }
 
         if (sa.getBoolean(
@@ -3912,6 +3914,14 @@ public class PackageParser {
             } else if (tagName.equals("uses-package")) {
                 // Dependencies for app installers; we don't currently try to
                 // enforce this.
+                XmlUtils.skipCurrentTag(parser);
+            } else if (tagName.equals("profileable")) {
+                sa = res.obtainAttributes(parser,
+                        com.android.internal.R.styleable.AndroidManifestProfileable);
+                if (sa.getBoolean(
+                        com.android.internal.R.styleable.AndroidManifestProfileable_shell, false)) {
+                    ai.privateFlags |= ApplicationInfo.PRIVATE_FLAG_PROFILEABLE_BY_SHELL;
+                }
                 XmlUtils.skipCurrentTag(parser);
 
             } else {
