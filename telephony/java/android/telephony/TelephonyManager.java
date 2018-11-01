@@ -20,6 +20,7 @@ import static android.content.Context.TELECOM_SERVICE;
 
 import static com.android.internal.util.Preconditions.checkNotNull;
 
+import android.Manifest;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -5173,6 +5174,9 @@ public class TelephonyManager {
      * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the calling
      * app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
+     * TODO: remove this one. use {@link #rebootRadio()} for reset type 1 and
+     * {@link #resetRadioConfig()} for reset type 3
+     *
      * @param resetType reset type: 1: reload NV reset, 2: erase NV reset, 3: factory NV reset
      * @return true on success; false on any failure.
      *
@@ -5182,12 +5186,74 @@ public class TelephonyManager {
     public boolean nvResetConfig(int resetType) {
         try {
             ITelephony telephony = getITelephony();
-            if (telephony != null)
-                return telephony.nvResetConfig(resetType);
+            if (telephony != null) {
+                if (resetType == 1 /*1: reload NV reset */) {
+                    return telephony.rebootModem(getSlotIndex());
+                } else if (resetType == 3 /*3: factory NV reset */) {
+                    return telephony.resetModemConfig(getSlotIndex());
+                } else {
+                    Rlog.e(TAG, "nvResetConfig unsupported reset type");
+                }
+            }
         } catch (RemoteException ex) {
             Rlog.e(TAG, "nvResetConfig RemoteException", ex);
         } catch (NullPointerException ex) {
             Rlog.e(TAG, "nvResetConfig NPE", ex);
+        }
+        return false;
+    }
+
+    /**
+     * Rollback modem configurations to factory default except some config which are in whitelist.
+     * Used for device configuration by some CDMA operators.
+     *
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the calling
+     * app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     *
+     * @return {@code true} on success; {@code false} on any failure.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
+    @SystemApi
+    public boolean resetRadioConfig() {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.resetModemConfig(getSlotIndex());
+            }
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "resetRadioConfig RemoteException", ex);
+        } catch (NullPointerException ex) {
+            Rlog.e(TAG, "resetRadioConfig NPE", ex);
+        }
+        return false;
+    }
+
+    /**
+     * Generate a radio modem reset. Used for device configuration by some CDMA operators.
+     *
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the calling
+     * app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     *
+     * @return {@code true} on success; {@code false} on any failure.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
+    @SystemApi
+    public boolean rebootRadio() {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.rebootModem(getSlotIndex());
+            }
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "rebootRadio RemoteException", ex);
+        } catch (NullPointerException ex) {
+            Rlog.e(TAG, "rebootRadio NPE", ex);
         }
         return false;
     }
