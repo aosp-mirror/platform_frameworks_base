@@ -8997,8 +8997,7 @@ public class TelephonyManager {
      * <p>The subscriptions which the returned list would be based on, are all the active
      * subscriptions, no matter which subscription could be used to create TelephonyManager.
      *
-     * <p>Requires permission {@link android.Manifest.permission#READ_PHONE_STATE} or
-     * {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE} or the calling
+     * <p>Requires permission {@link android.Manifest.permission#READ_PHONE_STATE} or the calling
      * app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
      * @return Map including the key as the active subscription ID (Note: if there is no active
@@ -9030,8 +9029,7 @@ public class TelephonyManager {
      * <p>The subscriptions which the returned list would be based on, are all the active
      * subscriptions, no matter which subscription could be used to create TelephonyManager.
      *
-     * <p>Requires permission {@link android.Manifest.permission#READ_PHONE_STATE} or
-     * {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE} or the calling
+     * <p>Requires permission {@link android.Manifest.permission#READ_PHONE_STATE} or the calling
      * app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
      * @param categories the emergency service categories which are the bitwise-OR combination of
