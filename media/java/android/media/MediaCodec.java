@@ -27,7 +27,6 @@ import android.media.MediaCodecInfo.CodecCapabilities;
 import android.os.Build;
 import android.os.Bundle;
 import android.os.Handler;
-import android.os.IBinder;
 import android.os.IHwBinder;
 import android.os.Looper;
 import android.os.Message;
@@ -1425,6 +1424,24 @@ import java.util.concurrent.locks.ReentrantLock;
     <td>&#9094;</td>
     <td>&#9094;</td>
     <td>&#9094;</td>
+   </tr>
+   <tr>
+    <td>(29+)</td>
+    <td>29+</td>
+    <td>29+</td>
+    <td>29+</td>
+    <td>(29+)</td>
+    <td>(29+)</td>
+    <td>-</td>
+    <td class=fn>{@link #setAudioPresentation setAudioPresentation}</td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
+    <td></td>
    </tr>
    <tr>
     <td>-</td>
@@ -3258,6 +3275,19 @@ final public class MediaCodec {
      * @throws IllegalStateException if in the Released state.
      */
     public native final void setVideoScalingMode(@VideoScalingMode int mode);
+
+    /**
+     * Sets the audio presentation.
+     * @param presentation see {@link AudioPresentation}. In particular, id should be set.
+     */
+    public void setAudioPresentation(@NonNull AudioPresentation presentation) {
+        if (presentation == null) {
+            throw new IllegalArgumentException("audio presentation is null");
+        }
+        native_setAudioPresentation(presentation.getPresentationId(), presentation.getProgramId());
+    }
+
+    private native void native_setAudioPresentation(int presentationId, int programId);
 
     /**
      * Get the component name. If the codec was created by createDecoderByType
