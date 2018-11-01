@@ -1455,7 +1455,6 @@ Landroid/webkit/IWebViewUpdateService;->getCurrentWebViewPackageName()Ljava/lang
 Landroid/webkit/IWebViewUpdateService;->getValidWebViewPackages()[Landroid/webkit/WebViewProviderInfo;
 Landroid/webkit/IWebViewUpdateService;->isFallbackPackage(Ljava/lang/String;)Z
 Landroid/widget/RelativeLayout$DependencyGraph$Node;-><init>()V
-Landroid/widget/RemoteViews$OnClickHandler;-><init>()V
 Landroid/widget/ScrollBarDrawable;-><init>()V
 Lcom/android/ims/ImsConfigListener$Stub;-><init>()V
 Lcom/android/ims/internal/IImsCallSession$Stub;-><init>()V

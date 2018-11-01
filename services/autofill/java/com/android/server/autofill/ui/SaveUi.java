@@ -304,39 +304,36 @@ final class SaveUi {
             }
         }
 
-        final RemoteViews.OnClickHandler handler = new RemoteViews.OnClickHandler() {
-            @Override
-            public boolean onClickHandler(View view, PendingIntent pendingIntent,
-                    Intent intent) {
-                final LogMaker log =
-                        newLogMaker(MetricsEvent.AUTOFILL_SAVE_LINK_TAPPED, type);
-                // We need to hide the Save UI before launching the pending intent, and
-                // restore back it once the activity is finished, and that's achieved by
-                // adding a custom extra in the activity intent.
-                final boolean isValid = isValidLink(pendingIntent, intent);
-                if (!isValid) {
-                    log.setType(MetricsEvent.TYPE_UNKNOWN);
-                    mMetricsLogger.write(log);
-                    return false;
-                }
-                if (sVerbose) Slog.v(TAG, "Intercepting custom description intent");
-                final IBinder token = mPendingUi.getToken();
-                intent.putExtra(AutofillManager.EXTRA_RESTORE_SESSION_TOKEN, token);
-                try {
-                    mPendingUi.client.startIntentSender(pendingIntent.getIntentSender(),
-                            intent);
-                    mPendingUi.setState(PendingUi.STATE_PENDING);
-                    if (sDebug) Slog.d(TAG, "hiding UI until restored with token " + token);
-                    hide();
-                    log.setType(MetricsEvent.TYPE_OPEN);
-                    mMetricsLogger.write(log);
-                    return true;
-                } catch (RemoteException e) {
-                    Slog.w(TAG, "error triggering pending intent: " + intent);
-                    log.setType(MetricsEvent.TYPE_FAILURE);
-                    mMetricsLogger.write(log);
-                    return false;
-                }
+        final RemoteViews.OnClickHandler handler = (view, pendingIntent, response) -> {
+            Intent intent = response.getLaunchOptions(view).first;
+            final LogMaker log =
+                    newLogMaker(MetricsEvent.AUTOFILL_SAVE_LINK_TAPPED, type);
+            // We need to hide the Save UI before launching the pending intent, and
+            // restore back it once the activity is finished, and that's achieved by
+            // adding a custom extra in the activity intent.
+            final boolean isValid = isValidLink(pendingIntent, intent);
+            if (!isValid) {
+                log.setType(MetricsEvent.TYPE_UNKNOWN);
+                mMetricsLogger.write(log);
+                return false;
+            }
+            if (sVerbose) Slog.v(TAG, "Intercepting custom description intent");
+            final IBinder token = mPendingUi.getToken();
+            intent.putExtra(AutofillManager.EXTRA_RESTORE_SESSION_TOKEN, token);
+            try {
+                mPendingUi.client.startIntentSender(pendingIntent.getIntentSender(),
+                        intent);
+                mPendingUi.setState(PendingUi.STATE_PENDING);
+                if (sDebug) Slog.d(TAG, "hiding UI until restored with token " + token);
+                hide();
+                log.setType(MetricsEvent.TYPE_OPEN);
+                mMetricsLogger.write(log);
+                return true;
+            } catch (RemoteException e) {
+                Slog.w(TAG, "error triggering pending intent: " + intent);
+                log.setType(MetricsEvent.TYPE_FAILURE);
+                mMetricsLogger.write(log);
+                return false;
             }
         };
 
