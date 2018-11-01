@@ -816,7 +816,7 @@ void GnssMeasurementCallback::translateGnssMeasurement_V1_0(
         measurement->pseudorangeRateUncertaintyMps);
     SET(AccumulatedDeltaRangeState,
         (static_cast<int32_t>(measurement->accumulatedDeltaRangeState) &
-        !ADR_STATE_HALF_CYCLE_REPORTED)); // Half Cycle state not reported from Hardware in V1_0
+        ~ADR_STATE_HALF_CYCLE_REPORTED)); // Half Cycle state not reported from Hardware in V1_0
     SET(AccumulatedDeltaRangeMeters, measurement->accumulatedDeltaRangeM);
     SET(AccumulatedDeltaRangeUncertaintyMeters,
         measurement->accumulatedDeltaRangeUncertaintyM);
