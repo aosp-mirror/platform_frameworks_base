@@ -21,6 +21,8 @@ import android.annotation.Nullable;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.UnsupportedAppUsage;
+import android.app.Activity;
+import android.app.AppGlobals;
 import android.content.ClipData;
 import android.content.ContentProviderClient;
 import android.content.ContentResolver;
@@ -37,21 +39,27 @@ import android.graphics.Point;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.CancellationSignal;
-import android.os.Environment;
 import android.os.OperationCanceledException;
 import android.os.RemoteException;
+import android.os.storage.StorageManager;
+import android.os.storage.StorageVolume;
+import android.os.storage.VolumeInfo;
 import android.service.media.CameraPrewarmService;
 import android.util.ArrayMap;
+import android.util.ArraySet;
 import android.util.Log;
 
 import com.android.internal.annotations.GuardedBy;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 /**
  * The Media provider contains meta data for all available media on both internal
@@ -65,7 +73,8 @@ public final class MediaStore {
     /** A content:// style uri to the authority for the media provider */
     public static final Uri AUTHORITY_URI = Uri.parse("content://" + AUTHORITY);
 
-    private static final String CONTENT_AUTHORITY_SLASH = "content://" + AUTHORITY + "/";
+    private static final String VOLUME_INTERNAL = "internal";
+    private static final String VOLUME_EXTERNAL = "external";
 
     /**
      * The method name used by the media scanner and mtp to tell the media provider to
@@ -266,7 +275,7 @@ public final class MediaStore {
      * any personal content like existing photos or videos on the device. The
      * applications should be careful not to share any photo or video with other
      * applications or internet. The activity should use {@link
-     * android.view.WindowManager.LayoutParams#FLAG_SHOW_WHEN_LOCKED} to display
+     * Activity#setShowWhenLocked} to display
      * on top of the lock screen while secured. There is no activity stack when
      * this flag is used, so launching more than one activity is strongly
      * discouraged.
@@ -311,8 +320,8 @@ public final class MediaStore {
      * it when the device is secured (e.g. with a pin, password, pattern, or face unlock).
      * Applications responding to this intent must not expose any personal content like existing
      * photos or videos on the device. The applications should be careful not to share any photo
-     * or video with other applications or internet. The activity should use {@link
-     * android.view.WindowManager.LayoutParams#FLAG_SHOW_WHEN_LOCKED} to display on top of the
+     * or video with other applications or Internet. The activity should use {@link
+     * Activity#setShowWhenLocked} to display on top of the
      * lock screen while secured. There is no activity stack when this flag is used, so
      * launching more than one activity is strongly discouraged.
      * <p>
@@ -362,6 +371,55 @@ public final class MediaStore {
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public final static String ACTION_VIDEO_CAPTURE = "android.media.action.VIDEO_CAPTURE";
+
+    /**
+     * Standard action that can be sent to review the given media file.
+     * <p>
+     * The launched application is expected to provide a large-scale view of the
+     * given media file, while allowing the user to quickly access other
+     * recently captured media files.
+     * <p>
+     * Input: {@link Intent#getData} is URI of the primary media item to
+     * initially display.
+     *
+     * @see #ACTION_REVIEW_SECURE
+     * @see #EXTRA_BRIGHTNESS
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public final static String ACTION_REVIEW = "android.provider.action.REVIEW";
+
+    /**
+     * Standard action that can be sent to review the given media file when the
+     * device is secured (e.g. with a pin, password, pattern, or face unlock).
+     * The applications should be careful not to share any media with other
+     * applications or Internet. The activity should use
+     * {@link Activity#setShowWhenLocked} to display on top of the lock screen
+     * while secured. There is no activity stack when this flag is used, so
+     * launching more than one activity is strongly discouraged.
+     * <p>
+     * The launched application is expected to provide a large-scale view of the
+     * given primary media file, while only allowing the user to quickly access
+     * other media from an explicit secondary list.
+     * <p>
+     * Input: {@link Intent#getData} is URI of the primary media item to
+     * initially display. {@link Intent#getClipData} is the limited list of
+     * secondary media items that the user is allowed to review. If
+     * {@link Intent#getClipData} is undefined, then no other media access
+     * should be allowed.
+     *
+     * @see #EXTRA_BRIGHTNESS
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public final static String ACTION_REVIEW_SECURE = "android.provider.action.REVIEW_SECURE";
+
+    /**
+     * When defined, the launched application is requested to set the given
+     * brightness value via
+     * {@link android.view.WindowManager.LayoutParams#screenBrightness} to help
+     * ensure a smooth transition when launching {@Link #ACTION_REVIEW} or
+     * {@link #ACTION_REVIEW_SECURE} intents.
+     */
+    public final static String EXTRA_BRIGHTNESS = "android.provider.extra.BRIGHTNESS";
 
     /**
      * The name of the Intent-extra used to control the quality of a recorded video. This is an
@@ -418,6 +476,23 @@ public final class MediaStore {
          */
         @Deprecated
         public static final String DATA = "_data";
+
+        /**
+         * Hash of the file on disk.
+         * <p>
+         * Contains a 20-byte binary blob which is the SHA-1 hash of the file as
+         * persisted on disk. For performance reasons, the hash may not be
+         * immediately available, in which case a {@code NULL} value will be
+         * returned. If the underlying file is modified, this value will be
+         * cleared and recalculated.
+         * <p>
+         * If you require the hash of a specific item, you can call
+         * {@link ContentResolver#canonicalize(Uri)}, which will block until the
+         * hash is calculated.
+         * <p>
+         * Type: BLOB
+         */
+        public static final String HASH = "_hash";
 
         /**
          * The size of the file in bytes
@@ -509,8 +584,7 @@ public final class MediaStore {
          * @return the URI to the files table on the given volume
          */
         public static Uri getContentUri(String volumeName) {
-            return Uri.parse(CONTENT_AUTHORITY_SLASH + volumeName +
-                    "/file");
+            return AUTHORITY_URI.buildUpon().appendPath(volumeName).appendPath("file").build();
         }
 
         /**
@@ -523,8 +597,7 @@ public final class MediaStore {
          */
         public static final Uri getContentUri(String volumeName,
                 long rowId) {
-            return Uri.parse(CONTENT_AUTHORITY_SLASH + volumeName
-                    + "/file/" + rowId);
+            return ContentUris.withAppendedId(getContentUri(volumeName), rowId);
         }
 
         /**
@@ -533,8 +606,7 @@ public final class MediaStore {
          */
         @UnsupportedAppUsage
         public static Uri getMtpObjectsUri(String volumeName) {
-            return Uri.parse(CONTENT_AUTHORITY_SLASH + volumeName +
-                    "/object");
+            return AUTHORITY_URI.buildUpon().appendPath(volumeName).appendPath("object").build();
         }
 
         /**
@@ -544,8 +616,7 @@ public final class MediaStore {
         @UnsupportedAppUsage
         public static final Uri getMtpObjectsUri(String volumeName,
                 long fileId) {
-            return Uri.parse(CONTENT_AUTHORITY_SLASH + volumeName
-                    + "/object/" + fileId);
+            return ContentUris.withAppendedId(getMtpObjectsUri(volumeName), fileId);
         }
 
         /**
@@ -555,8 +626,8 @@ public final class MediaStore {
         @UnsupportedAppUsage
         public static final Uri getMtpReferencesUri(String volumeName,
                 long fileId) {
-            return Uri.parse(CONTENT_AUTHORITY_SLASH + volumeName
-                    + "/object/" + fileId + "/references");
+            return getMtpObjectsUri(volumeName, fileId).buildUpon().appendPath("references")
+                    .build();
         }
 
         /**
@@ -564,7 +635,7 @@ public final class MediaStore {
          * @hide
          */
         public static final Uri getDirectoryUri(String volumeName) {
-            return Uri.parse(CONTENT_AUTHORITY_SLASH + volumeName + "/dir");
+            return AUTHORITY_URI.buildUpon().appendPath(volumeName).appendPath("dir").build();
         }
 
         /**
@@ -777,7 +848,7 @@ public final class MediaStore {
              * <P>Type: INTEGER</P>
              *
              * @deprecated all thumbnails should be obtained via
-             *             {@link Images.Thumbnails#getThumbnail}, as this
+             *             {@link MediaStore.Images.Thumbnails#getThumbnail}, as this
              *             value is no longer supported.
              */
             @Deprecated
@@ -921,8 +992,8 @@ public final class MediaStore {
              * @return the URI to the image media table on the given volume
              */
             public static Uri getContentUri(String volumeName) {
-                return Uri.parse(CONTENT_AUTHORITY_SLASH + volumeName +
-                        "/images/media");
+                return AUTHORITY_URI.buildUpon().appendPath(volumeName).appendPath("images")
+                        .appendPath("media").build();
             }
 
             /**
@@ -1063,8 +1134,8 @@ public final class MediaStore {
              * @return the URI to the image media table on the given volume
              */
             public static Uri getContentUri(String volumeName) {
-                return Uri.parse(CONTENT_AUTHORITY_SLASH + volumeName +
-                        "/images/thumbnails");
+                return AUTHORITY_URI.buildUpon().appendPath(volumeName).appendPath("images")
+                        .appendPath("thumbnails").build();
             }
 
             /**
@@ -1371,14 +1442,29 @@ public final class MediaStore {
              * @return the URI to the audio media table on the given volume
              */
             public static Uri getContentUri(String volumeName) {
-                return Uri.parse(CONTENT_AUTHORITY_SLASH + volumeName +
-                        "/audio/media");
+                return AUTHORITY_URI.buildUpon().appendPath(volumeName).appendPath("audio")
+                        .appendPath("media").build();
             }
 
-            public static Uri getContentUriForPath(String path) {
-                return (path.startsWith(
-                        Environment.getStorageDirectory().getAbsolutePath() + "/")
-                        ? EXTERNAL_CONTENT_URI : INTERNAL_CONTENT_URI);
+            /**
+             * Get the content:// style URI for the given audio media file.
+             *
+             * @deprecated Apps may not have filesystem permissions to directly
+             *             access this path.
+             */
+            public static @Nullable Uri getContentUriForPath(@NonNull String path) {
+                final StorageManager sm = AppGlobals.getInitialApplication()
+                        .getSystemService(StorageManager.class);
+                final StorageVolume sv = sm.getStorageVolume(new File(path));
+                if (sv != null) {
+                    if (sv.isPrimary()) {
+                        return EXTERNAL_CONTENT_URI;
+                    } else {
+                        return getContentUri(sv.getUuid());
+                    }
+                } else {
+                    return INTERNAL_CONTENT_URI;
+                }
             }
 
             /**
@@ -1454,8 +1540,8 @@ public final class MediaStore {
              * @return the URI to the audio genres table on the given volume
              */
             public static Uri getContentUri(String volumeName) {
-                return Uri.parse(CONTENT_AUTHORITY_SLASH + volumeName +
-                        "/audio/genres");
+                return AUTHORITY_URI.buildUpon().appendPath(volumeName).appendPath("audio")
+                        .appendPath("genres").build();
             }
 
             /**
@@ -1467,8 +1553,8 @@ public final class MediaStore {
              * with the given the volume and audioID
              */
             public static Uri getContentUriForAudioId(String volumeName, int audioId) {
-                return Uri.parse(CONTENT_AUTHORITY_SLASH + volumeName +
-                        "/audio/media/" + audioId + "/genres");
+                return ContentUris.withAppendedId(Audio.Media.getContentUri(volumeName), audioId)
+                        .buildUpon().appendPath("genres").build();
             }
 
             /**
@@ -1504,10 +1590,10 @@ public final class MediaStore {
              */
             public static final class Members implements AudioColumns {
 
-                public static final Uri getContentUri(String volumeName,
-                        long genreId) {
-                    return Uri.parse(CONTENT_AUTHORITY_SLASH + volumeName
-                            + "/audio/genres/" + genreId + "/members");
+                public static final Uri getContentUri(String volumeName, long genreId) {
+                    return ContentUris
+                            .withAppendedId(Audio.Genres.getContentUri(volumeName), genreId)
+                            .buildUpon().appendPath("members").build();
                 }
 
                 /**
@@ -1595,8 +1681,8 @@ public final class MediaStore {
              * @return the URI to the audio playlists table on the given volume
              */
             public static Uri getContentUri(String volumeName) {
-                return Uri.parse(CONTENT_AUTHORITY_SLASH + volumeName +
-                        "/audio/playlists");
+                return AUTHORITY_URI.buildUpon().appendPath(volumeName).appendPath("audio")
+                        .appendPath("playlists").build();
             }
 
             /**
@@ -1631,10 +1717,10 @@ public final class MediaStore {
              * Sub-directory of each playlist containing all members.
              */
             public static final class Members implements AudioColumns {
-                public static final Uri getContentUri(String volumeName,
-                        long playlistId) {
-                    return Uri.parse(CONTENT_AUTHORITY_SLASH + volumeName
-                            + "/audio/playlists/" + playlistId + "/members");
+                public static final Uri getContentUri(String volumeName, long playlistId) {
+                    return ContentUris
+                            .withAppendedId(Audio.Playlists.getContentUri(volumeName), playlistId)
+                            .buildUpon().appendPath("members").build();
                 }
 
                 /**
@@ -1734,8 +1820,8 @@ public final class MediaStore {
              * @return the URI to the audio artists table on the given volume
              */
             public static Uri getContentUri(String volumeName) {
-                return Uri.parse(CONTENT_AUTHORITY_SLASH + volumeName +
-                        "/audio/artists");
+                return AUTHORITY_URI.buildUpon().appendPath(volumeName).appendPath("audio")
+                        .appendPath("artists").build();
             }
 
             /**
@@ -1771,10 +1857,10 @@ public final class MediaStore {
              * a song by the artist appears.
              */
             public static final class Albums implements AlbumColumns {
-                public static final Uri getContentUri(String volumeName,
-                        long artistId) {
-                    return Uri.parse(CONTENT_AUTHORITY_SLASH + volumeName
-                            + "/audio/artists/" + artistId + "/albums");
+                public static final Uri getContentUri(String volumeName,long artistId) {
+                    return ContentUris
+                            .withAppendedId(Audio.Artists.getContentUri(volumeName), artistId)
+                            .buildUpon().appendPath("albums").build();
                 }
             }
         }
@@ -1869,8 +1955,8 @@ public final class MediaStore {
              * @return the URI to the audio albums table on the given volume
              */
             public static Uri getContentUri(String volumeName) {
-                return Uri.parse(CONTENT_AUTHORITY_SLASH + volumeName +
-                        "/audio/albums");
+                return AUTHORITY_URI.buildUpon().appendPath(volumeName).appendPath("audio")
+                        .appendPath("albums").build();
             }
 
             /**
@@ -2004,7 +2090,7 @@ public final class MediaStore {
              * <P>Type: INTEGER</P>
              *
              * @deprecated all thumbnails should be obtained via
-             *             {@link Images.Thumbnails#getThumbnail}, as this
+             *             {@link MediaStore.Images.Thumbnails#getThumbnail}, as this
              *             value is no longer supported.
              */
             @Deprecated
@@ -2064,8 +2150,8 @@ public final class MediaStore {
              * @return the URI to the video media table on the given volume
              */
             public static Uri getContentUri(String volumeName) {
-                return Uri.parse(CONTENT_AUTHORITY_SLASH + volumeName +
-                        "/video/media");
+                return AUTHORITY_URI.buildUpon().appendPath(volumeName).appendPath("video")
+                        .appendPath("media").build();
             }
 
             /**
@@ -2188,8 +2274,8 @@ public final class MediaStore {
              * @return the URI to the image media table on the given volume
              */
             public static Uri getContentUri(String volumeName) {
-                return Uri.parse(CONTENT_AUTHORITY_SLASH + volumeName +
-                        "/video/thumbnails");
+                return AUTHORITY_URI.buildUpon().appendPath(volumeName).appendPath("video")
+                        .appendPath("thumbnails").build();
             }
 
             /**
@@ -2257,6 +2343,30 @@ public final class MediaStore {
     }
 
     /**
+     * Return list of all volume names currently available. This includes a
+     * unique name for each shared storage device that is currently mounted.
+     * <p>
+     * Each name can be passed to APIs like
+     * {@link MediaStore.Images.Media#getContentUri(String)} to query media at
+     * that location.
+     */
+    public static @NonNull Set<String> getAllVolumeNames(Context context) {
+        final StorageManager sm = context.getSystemService(StorageManager.class);
+        final Set<String> volumeNames = new ArraySet<>();
+        volumeNames.add(VOLUME_INTERNAL);
+        for (VolumeInfo vi : sm.getVolumes()) {
+            if (vi.isMountedReadable()) {
+                if (vi.isPrimary()) {
+                    volumeNames.add(VOLUME_EXTERNAL);
+                } else {
+                    volumeNames.add(vi.getFsUuid());
+                }
+            }
+        }
+        return volumeNames;
+    }
+
+    /**
      * Return the volume name that the given {@link Uri} references.
      */
     public static @NonNull String getVolumeName(@NonNull Uri uri) {
@@ -2272,7 +2382,7 @@ public final class MediaStore {
      * Uri for querying the state of the media scanner.
      */
     public static Uri getMediaScannerUri() {
-        return Uri.parse(CONTENT_AUTHORITY_SLASH + "none/media_scanner");
+        return AUTHORITY_URI.buildUpon().appendPath("none").appendPath("media_scanner").build();
     }
 
     /**
@@ -2297,16 +2407,10 @@ public final class MediaStore {
      * @return A version string, or null if the version could not be determined.
      */
     public static String getVersion(Context context) {
-        Cursor c = context.getContentResolver().query(
-                Uri.parse(CONTENT_AUTHORITY_SLASH + "none/version"),
-                null, null, null, null);
-        if (c != null) {
-            try {
-                if (c.moveToFirst()) {
-                    return c.getString(0);
-                }
-            } finally {
-                c.close();
+        final Uri uri = AUTHORITY_URI.buildUpon().appendPath("none").appendPath("version").build();
+        try (Cursor c = context.getContentResolver().query(uri, null, null, null, null)) {
+            if (c.moveToFirst()) {
+                return c.getString(0);
             }
         }
         return null;
