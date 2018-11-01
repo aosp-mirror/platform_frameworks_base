@@ -1,6 +1,7 @@
 package com.android.systemui.statusbar.policy;
 
 import android.annotation.ColorInt;
+import android.app.Notification;
 import android.app.PendingIntent;
 import android.app.RemoteInput;
 import android.content.Context;
@@ -19,6 +20,7 @@ import android.text.TextPaint;
 import android.text.method.TransformationMethod;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.Size;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
@@ -30,6 +32,7 @@ import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ContrastColorUtil;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.plugins.ActivityStarter.OnDismissAction;
 import com.android.systemui.statusbar.SmartReplyController;
 import com.android.systemui.statusbar.notification.NotificationData;
@@ -38,14 +41,15 @@ import com.android.systemui.statusbar.phone.KeyguardDismissUtil;
 
 import java.text.BreakIterator;
 import java.util.Comparator;
+import java.util.List;
 import java.util.PriorityQueue;
 
-/** View which displays smart reply buttons in notifications. */
+/** View which displays smart reply and smart actions buttons in notifications. */
 public class SmartReplyView extends ViewGroup {
 
     private static final String TAG = "SmartReplyView";
 
-    private static final int MEASURE_SPEC_ANY_WIDTH =
+    private static final int MEASURE_SPEC_ANY_LENGTH =
             MeasureSpec.makeMeasureSpec(0, MeasureSpec.UNSPECIFIED);
 
     private static final Comparator<View> DECREASING_MEASURED_WIDTH_WITHOUT_PADDING_COMPARATOR =
@@ -97,6 +101,8 @@ public class SmartReplyView extends ViewGroup {
     private final int mRippleColor;
     private final int mStrokeWidth;
     private final double mMinStrokeContrast;
+
+    private ActivityStarter mActivityStarter;
 
     public SmartReplyView(Context context, AttributeSet attrs) {
         super(context, attrs);
@@ -168,13 +174,24 @@ public class SmartReplyView extends ViewGroup {
                 Math.max(getChildCount(), 1), DECREASING_MEASURED_WIDTH_WITHOUT_PADDING_COMPARATOR);
     }
 
-    public void setRepliesFromRemoteInput(
-            RemoteInput remoteInput, PendingIntent pendingIntent,
-            SmartReplyController smartReplyController, NotificationData.Entry entry,
-            View smartReplyContainer, CharSequence[] choices) {
-        mSmartReplyContainer = smartReplyContainer;
+    /**
+     * Reset the smart suggestions view to allow adding new replies and actions.
+     */
+    public void resetSmartSuggestions(View newSmartReplyContainer) {
+        mSmartReplyContainer = newSmartReplyContainer;
         removeAllViews();
         mCurrentBackgroundColor = mDefaultBackgroundColor;
+    }
+
+    /**
+     * Add smart replies to this view, using the provided {@link RemoteInput} and
+     * {@link PendingIntent} to respond when the user taps a smart reply. Only the replies that fit
+     * into the notification are shown.
+     */
+    public void addRepliesFromRemoteInput(
+            RemoteInput remoteInput, PendingIntent pendingIntent,
+            SmartReplyController smartReplyController, NotificationData.Entry entry,
+            CharSequence[] choices) {
         if (remoteInput != null && pendingIntent != null) {
             if (choices != null) {
                 for (int i = 0; i < choices.length; ++i) {
@@ -183,6 +200,22 @@ public class SmartReplyView extends ViewGroup {
                             smartReplyController, entry);
                     addView(replyButton);
                 }
+            }
+        }
+        reallocateCandidateButtonQueueForSqueezing();
+    }
+
+    /**
+     * Add smart actions to be shown next to smart replies. Only the actions that fit into the
+     * notification are shown.
+     */
+    public void addSmartActions(List<Notification.Action> smartActions) {
+        int numSmartActions = smartActions.size();
+        for (int n = 0; n < numSmartActions; n++) {
+            Notification.Action action = smartActions.get(n);
+            if (action.actionIntent != null) {
+                Button actionButton = inflateActionButton(getContext(), this, action);
+                addView(actionButton);
             }
         }
         reallocateCandidateButtonQueueForSqueezing();
@@ -234,6 +267,48 @@ public class SmartReplyView extends ViewGroup {
         return b;
     }
 
+    @VisibleForTesting
+    Button inflateActionButton(Context context, ViewGroup root, Notification.Action action) {
+        Button button = (Button) LayoutInflater.from(context).inflate(
+                R.layout.smart_action_button, root, false);
+        button.setText(action.title);
+
+        Drawable iconDrawable = action.getIcon().loadDrawable(context);
+        // Add the action icon to the Smart Action button.
+        Size newIconSize = calculateIconSizeFromSingleLineButton(context, root,
+                new Size(iconDrawable.getIntrinsicWidth(), iconDrawable.getIntrinsicHeight()));
+        iconDrawable.setBounds(0, 0, newIconSize.getWidth(), newIconSize.getHeight());
+        button.setCompoundDrawables(iconDrawable, null, null, null);
+
+        button.setOnClickListener(view ->
+                getActivityStarter().startPendingIntentDismissingKeyguard(action.actionIntent));
+
+        // TODO(b/119010281): handle accessibility
+
+        return button;
+    }
+
+    private static Size calculateIconSizeFromSingleLineButton(Context context, ViewGroup root,
+            Size originalIconSize) {
+        Button button = (Button) LayoutInflater.from(context).inflate(
+                R.layout.smart_action_button, root, false);
+        // Add simple text here to ensure the button displays one line of text.
+        button.setText("a");
+        return calculateIconSizeFromButtonHeight(button, originalIconSize);
+    }
+
+    // Given a button with text on a single line - we want to add an icon to that button. This
+    // method calculates the icon height to use to avoid making the button grow in height.
+    private static Size calculateIconSizeFromButtonHeight(Button button, Size originalIconSize) {
+        // A completely permissive measure spec should make the button text single-line.
+        button.measure(MEASURE_SPEC_ANY_LENGTH, MEASURE_SPEC_ANY_LENGTH);
+        int buttonHeight = button.getMeasuredHeight();
+        int newIconHeight = buttonHeight / 2;
+        int newIconWidth = (int) (originalIconSize.getWidth()
+                * ((double) newIconHeight) / originalIconSize.getHeight());
+        return new Size(newIconWidth, newIconHeight);
+    }
+
     @Override
     public LayoutParams generateLayoutParams(AttributeSet attrs) {
         return new LayoutParams(mContext, attrs);
@@ -277,7 +352,7 @@ public class SmartReplyView extends ViewGroup {
 
             child.setPadding(buttonPaddingHorizontal, child.getPaddingTop(),
                     buttonPaddingHorizontal, child.getPaddingBottom());
-            child.measure(MEASURE_SPEC_ANY_WIDTH, heightMeasureSpec);
+            child.measure(MEASURE_SPEC_ANY_LENGTH, heightMeasureSpec);
 
             final int lineCount = ((Button) child).getLineCount();
             if (lineCount < 1 || lineCount > 2) {
@@ -437,6 +512,18 @@ public class SmartReplyView extends ViewGroup {
         return (int) Math.ceil(optimalTextWidth);
     }
 
+    /**
+     * Returns the combined width of the left drawable (the action icon) and the padding between the
+     * drawable and the button text.
+     */
+    private int getLeftCompoundDrawableWidthWithPadding(Button button) {
+        Drawable[] drawables = button.getCompoundDrawables();
+        Drawable leftDrawable = drawables[0];
+        if (leftDrawable == null) return 0;
+
+        return leftDrawable.getBounds().width() + button.getCompoundDrawablePadding();
+    }
+
     private int squeezeButtonToTextWidth(Button button, int heightMeasureSpec, int textWidth) {
         int oldWidth = button.getMeasuredWidth();
         if (button.getPaddingLeft() != mDoubleLineButtonPaddingHorizontal) {
@@ -449,7 +536,8 @@ public class SmartReplyView extends ViewGroup {
         button.setPadding(mDoubleLineButtonPaddingHorizontal, button.getPaddingTop(),
                 mDoubleLineButtonPaddingHorizontal, button.getPaddingBottom());
         final int widthMeasureSpec = MeasureSpec.makeMeasureSpec(
-                2 * mDoubleLineButtonPaddingHorizontal + textWidth, MeasureSpec.AT_MOST);
+                2 * mDoubleLineButtonPaddingHorizontal + textWidth
+                      + getLeftCompoundDrawableWidthWithPadding(button), MeasureSpec.AT_MOST);
         button.measure(widthMeasureSpec, heightMeasureSpec);
 
         final int newWidth = button.getMeasuredWidth();
@@ -605,6 +693,13 @@ public class SmartReplyView extends ViewGroup {
             button.setBackground(drawable);
         }
         button.setTextColor(textColor);
+    }
+
+    private ActivityStarter getActivityStarter() {
+        if (mActivityStarter == null) {
+            mActivityStarter = Dependency.get(ActivityStarter.class);
+        }
+        return mActivityStarter;
     }
 
     @VisibleForTesting

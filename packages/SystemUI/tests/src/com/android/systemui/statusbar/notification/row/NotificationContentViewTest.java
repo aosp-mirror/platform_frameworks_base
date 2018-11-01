@@ -16,6 +16,11 @@
 
 package com.android.systemui.statusbar.notification.row;
 
+import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.equalTo;
+import static org.hamcrest.Matchers.is;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyFloat;
 import static org.mockito.Mockito.doNothing;
@@ -28,29 +33,62 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import android.app.AppOpsManager;
+import android.app.Notification;
+import android.app.PendingIntent;
+import android.app.RemoteInput;
+import android.content.Intent;
+import android.graphics.drawable.Icon;
+import android.service.notification.StatusBarNotification;
 import android.support.test.annotation.UiThreadTest;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
 import android.util.ArraySet;
+import android.util.Pair;
 import android.view.NotificationHeaderView;
 import android.view.View;
 
+import com.android.systemui.R;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.statusbar.notification.NotificationData;
+import com.android.systemui.statusbar.policy.SmartReplyConstants;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @SmallTest
 @RunWith(AndroidJUnit4.class)
 public class NotificationContentViewTest extends SysuiTestCase {
 
+    private static final String TEST_ACTION = "com.android.SMART_REPLY_VIEW_ACTION";
+
     NotificationContentView mView;
+
+    @Mock
+    SmartReplyConstants mSmartReplyConstants;
+    @Mock
+    StatusBarNotification mStatusBarNotification;
+    @Mock
+    Notification mNotification;
+    NotificationData.Entry mEntry;
+    @Mock
+    RemoteInput mRemoteInput;
+    @Mock
+    RemoteInput mFreeFormRemoteInput;
+
+    private Icon mActionIcon;
+
 
     @Before
     @UiThreadTest
     public void setup() {
+        MockitoAnnotations.initMocks(this);
+
         mView = new NotificationContentView(mContext, null);
         ExpandableNotificationRow row = new ExpandableNotificationRow(mContext, null);
         ExpandableNotificationRow mockRow = spy(row);
@@ -67,6 +105,12 @@ public class NotificationContentViewTest extends SysuiTestCase {
 
         mView.measure(View.MeasureSpec.UNSPECIFIED, View.MeasureSpec.UNSPECIFIED);
         mView.layout(0, 0, mView.getMeasuredWidth(), mView.getMeasuredHeight());
+
+        // Smart replies
+        when(mStatusBarNotification.getNotification()).thenReturn(mNotification);
+        mEntry = new NotificationData.Entry(mStatusBarNotification);
+        when(mSmartReplyConstants.isEnabled()).thenReturn(true);
+        mActionIcon = Icon.createWithResource(mContext, R.drawable.ic_person);
     }
 
     private View createViewWithHeight(int height) {
@@ -82,7 +126,7 @@ public class NotificationContentViewTest extends SysuiTestCase {
         mView.setDark(true, false, 0);
         mView.setDark(false, true, 0);
         mView.setHeadsUpAnimatingAway(true);
-        Assert.assertFalse(mView.isAnimatingVisibleType());
+        assertFalse(mView.isAnimatingVisibleType());
     }
 
     @Test
@@ -114,5 +158,162 @@ public class NotificationContentViewTest extends SysuiTestCase {
         verify(mockExpanded, times(1)).showAppOpsIcons(ops);
         verify(mockAmbient, never()).showAppOpsIcons(ops);
         verify(mockHeadsUp, times(1)).showAppOpsIcons(any());
+    }
+
+    private void setupAppGeneratedReplies(CharSequence[] smartReplyTitles) {
+        Notification.Action freeFormAction =
+                new Notification.Action.Builder(null, "Freeform Test Action", null).build();
+        setupAppGeneratedReplies(smartReplyTitles, freeFormAction);
+    }
+
+    private void setupAppGeneratedReplies(
+            CharSequence[] smartReplyTitles,
+            Notification.Action freeFormRemoteInputAction) {
+        Notification.Action action =
+                new Notification.Action.Builder(null, "Test Action", null).build();
+        when(mRemoteInput.getChoices()).thenReturn(smartReplyTitles);
+        Pair<RemoteInput, Notification.Action> remoteInputActionPair =
+                Pair.create(mRemoteInput, action);
+        when(mNotification.findRemoteInputActionPair(false)).thenReturn(remoteInputActionPair);
+
+        Pair<RemoteInput, Notification.Action> freeFormRemoteInputActionPair =
+                Pair.create(mFreeFormRemoteInput, freeFormRemoteInputAction);
+        when(mNotification.findRemoteInputActionPair(true)).thenReturn(
+                freeFormRemoteInputActionPair);
+    }
+
+    @Test
+    public void chooseSmartRepliesAndActions_smartRepliesOff_noAppGeneratedSmartReplies() {
+        setupAppGeneratedReplies(new String[] {"Reply1", "Reply2"});
+        when(mSmartReplyConstants.isEnabled()).thenReturn(false);
+
+        NotificationContentView.SmartRepliesAndActions repliesAndActions =
+                NotificationContentView.chooseSmartRepliesAndActions(mSmartReplyConstants, mEntry);
+
+        assertFalse(repliesAndActions.smartRepliesExist());
+    }
+
+    @Test
+    public void chooseSmartRepliesAndActions_appGeneratedSmartReplies() {
+        CharSequence[] smartReplies = new String[] {"Reply1", "Reply2"};
+        setupAppGeneratedReplies(smartReplies);
+        when(mSmartReplyConstants.requiresTargetingP()).thenReturn(false);
+
+        NotificationContentView.SmartRepliesAndActions repliesAndActions =
+                NotificationContentView.chooseSmartRepliesAndActions(mSmartReplyConstants, mEntry);
+
+        assertThat(repliesAndActions.smartReplies, equalTo(smartReplies));
+    }
+
+    @Test
+    public void chooseSmartRepliesAndActions_appGeneratedSmartRepliesAndActions() {
+        CharSequence[] smartReplies = new String[] {"Reply1", "Reply2"};
+        setupAppGeneratedReplies(smartReplies);
+        when(mSmartReplyConstants.requiresTargetingP()).thenReturn(false);
+
+        List<Notification.Action> smartActions =
+                createActions(new String[] {"Test Action 1", "Test Action 2"});
+        when(mNotification.getContextualActions()).thenReturn(smartActions);
+
+        NotificationContentView.SmartRepliesAndActions repliesAndActions =
+                NotificationContentView.chooseSmartRepliesAndActions(mSmartReplyConstants, mEntry);
+
+        assertThat(repliesAndActions.smartReplies, equalTo(smartReplies));
+        assertThat(repliesAndActions.smartActions, equalTo(smartActions));
+    }
+
+    @Test
+    public void chooseSmartRepliesAndActions_sysGeneratedSmartReplies() {
+        Notification.Action freeFormAction = createActionBuilder("Freeform Action")
+                .setAllowGeneratedReplies(true)
+                .build();
+        // Pass a null-array as app-generated smart replies, so that we use NAS-generated smart
+        // replies.
+        setupAppGeneratedReplies(null, freeFormAction);
+
+        mEntry.smartReplies =
+                new String[] {"Sys Smart Reply 1", "Sys Smart Reply 2"};
+        NotificationContentView.SmartRepliesAndActions repliesAndActions =
+                NotificationContentView.chooseSmartRepliesAndActions(mSmartReplyConstants, mEntry);
+
+        assertThat(repliesAndActions.smartReplies, equalTo(mEntry.smartReplies));
+        assertThat(repliesAndActions.smartActions, is(empty()));
+    }
+
+    @Test
+    public void chooseSmartRepliesAndActions_noSysGeneratedSmartRepliesIfNotAllowed() {
+        Notification.Action freeFormAction = createActionBuilder("Freeform Action")
+                .setAllowGeneratedReplies(false)
+                .build();
+        // Pass a null-array as app-generated smart replies, so that we use NAS-generated smart
+        // replies.
+        setupAppGeneratedReplies(null, freeFormAction);
+
+        mEntry.smartReplies =
+                new String[] {"Sys Smart Reply 1", "Sys Smart Reply 2"};
+        NotificationContentView.SmartRepliesAndActions repliesAndActions =
+                NotificationContentView.chooseSmartRepliesAndActions(mSmartReplyConstants, mEntry);
+
+        assertThat(repliesAndActions.smartReplies, equalTo(null));
+        assertThat(repliesAndActions.smartActions, is(empty()));
+    }
+
+    @Test
+    public void chooseSmartRepliesAndActions_sysGeneratedSmartActions() {
+        // Pass a null-array as app-generated smart replies, so that we use NAS-generated smart
+        // actions.
+        setupAppGeneratedReplies(null);
+
+        mEntry.systemGeneratedSmartActions =
+                createActions(new String[] {"Sys Smart Action 1", "Sys Smart Action 2"});
+        NotificationContentView.SmartRepliesAndActions repliesAndActions =
+                NotificationContentView.chooseSmartRepliesAndActions(mSmartReplyConstants, mEntry);
+
+        assertThat(repliesAndActions.smartReplies, equalTo(null));
+        assertThat(repliesAndActions.smartActions, equalTo(mEntry.systemGeneratedSmartActions));
+    }
+
+    @Test
+    public void chooseSmartRepliesAndActions_appGenPreferredOverSysGen() {
+        Notification.Action freeFormAction = createActionBuilder("Freeform Action")
+                .setAllowGeneratedReplies(true)
+                .build();
+        CharSequence[] appGenSmartReplies = new String[] {"Reply1", "Reply2"};
+        // Pass a null-array as app-generated smart replies, so that we use NAS-generated smart
+        // replies.
+        setupAppGeneratedReplies(appGenSmartReplies, freeFormAction);
+        when(mSmartReplyConstants.requiresTargetingP()).thenReturn(false);
+
+        List<Notification.Action> appGenSmartActions =
+                createActions(new String[] {"Test Action 1", "Test Action 2"});
+        when(mNotification.getContextualActions()).thenReturn(appGenSmartActions);
+
+        mEntry.smartReplies = new String[] {"Sys Smart Reply 1", "Sys Smart Reply 2"};
+        mEntry.systemGeneratedSmartActions =
+                createActions(new String[] {"Sys Smart Action 1", "Sys Smart Action 2"});
+
+        NotificationContentView.SmartRepliesAndActions repliesAndActions =
+                NotificationContentView.chooseSmartRepliesAndActions(mSmartReplyConstants, mEntry);
+
+        assertThat(repliesAndActions.smartReplies, equalTo(appGenSmartReplies));
+        assertThat(repliesAndActions.smartActions, equalTo(appGenSmartActions));
+    }
+
+    private Notification.Action.Builder createActionBuilder(String actionTitle) {
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(mContext, 0,
+                new Intent(TEST_ACTION), 0);
+        return new Notification.Action.Builder(mActionIcon, actionTitle, pendingIntent);
+    }
+
+    private Notification.Action createAction(String actionTitle) {
+        return createActionBuilder(actionTitle).build();
+    }
+
+    private List<Notification.Action> createActions(String[] actionTitles) {
+        List<Notification.Action> actions = new ArrayList<>();
+        for (String title : actionTitles) {
+            actions.add(createAction(title));
+        }
+        return actions;
     }
 }
