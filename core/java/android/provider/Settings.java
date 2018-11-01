@@ -1815,27 +1815,39 @@ public final class Settings {
 
 
     /**
-     * User has not started setup personalization.
+     * Indicates that the user has not started setup personalization.
+     * One of the possible states for {@link Secure#USER_SETUP_PERSONALIZATION_STATE}.
+     *
      * @hide
      */
+    @SystemApi
     public static final int USER_SETUP_PERSONALIZATION_NOT_STARTED = 0;
 
     /**
-     * User has not yet completed setup personalization.
+     * Indicates that the user has not yet completed setup personalization.
+     * One of the possible states for {@link Secure#USER_SETUP_PERSONALIZATION_STATE}.
+     *
      * @hide
      */
+    @SystemApi
     public static final int USER_SETUP_PERSONALIZATION_STARTED = 1;
 
     /**
-     * User has snoozed personalization and will complete it later.
+     * Indicates that the user has snoozed personalization and will complete it later.
+     * One of the possible states for {@link Secure#USER_SETUP_PERSONALIZATION_STATE}.
+     *
      * @hide
      */
+    @SystemApi
     public static final int USER_SETUP_PERSONALIZATION_PAUSED = 2;
 
     /**
-     * User has completed setup personalization.
+     * Indicates that the user has completed setup personalization.
+     * One of the possible states for {@link Secure#USER_SETUP_PERSONALIZATION_STATE}.
+     *
      * @hide
      */
+    @SystemApi
     public static final int USER_SETUP_PERSONALIZATION_COMPLETE = 10;
 
     /** @hide */
@@ -5614,18 +5626,23 @@ public final class Settings {
         public static final String DEVICE_PROVISIONED = Global.DEVICE_PROVISIONED;
 
         /**
-         * Whether the current user has been set up via setup wizard (0 = false, 1 = true)
+         * Indicates whether the current user has completed setup via the setup wizard.
+         * <p>
+         * Type: int (0 for false, 1 for true)
+         *
          * @hide
          */
+        @SystemApi
         @TestApi
         public static final String USER_SETUP_COMPLETE = "user_setup_complete";
 
         /**
-         * The current state of device personalization.
+         * Defines the user's current state of device personalization.
+         * The possible states are defined in {@link UserSetupPersonalization}.
          *
          * @hide
-         * @see UserSetupPersonalization
          */
+        @SystemApi
         public static final String USER_SETUP_PERSONALIZATION_STATE =
                 "user_setup_personalization_state";
 
@@ -5639,10 +5656,14 @@ public final class Settings {
         public static final String TV_USER_SETUP_COMPLETE = "tv_user_setup_complete";
 
         /**
-         * Prefix for category name that marks whether a suggested action from that category was
-         * completed.
+         * The prefix for a category name that indicates whether a suggested action from that
+         * category was marked as completed.
+         * <p>
+         * Type: int (0 for false, 1 for true)
+         *
          * @hide
          */
+        @SystemApi
         public static final String COMPLETED_CATEGORY_PREFIX = "suggested.completed_category.";
 
         /**
@@ -5914,11 +5935,14 @@ public final class Settings {
             "lock_screen_owner_info_enabled";
 
         /**
-         * When set by a user, allows notifications to be shown atop a securely locked screen
-         * in their full "private" form (same as when the device is unlocked).
+         * Indicates whether the user has allowed notifications to be shown atop a securely locked
+         * screen in their full "private" form (same as when the device is unlocked).
+         * <p>
+         * Type: int (0 for false, 1 for true)
+         *
          * @hide
          */
-        @UnsupportedAppUsage
+        @SystemApi
         public static final String LOCK_SCREEN_ALLOW_PRIVATE_NOTIFICATIONS =
                 "lock_screen_allow_private_notifications";
 
@@ -6944,8 +6968,9 @@ public final class Settings {
         public static final String BACKUP_TRANSPORT = "backup_transport";
 
         /**
-         * Version for which the setup wizard was last shown.  Bumped for
-         * each release when there is new setup information to show.
+         * Indicates the version for which the setup wizard was last shown. The version gets
+         * bumped for each release when there is new setup information to show.
+         *
          * @hide
          */
         @SystemApi
@@ -7261,9 +7286,13 @@ public final class Settings {
         private static final Validator DOZE_ENABLED_VALIDATOR = BOOLEAN_VALIDATOR;
 
         /**
-         * Whether doze should be always on.
+         * Indicates whether doze should be always on.
+         * <p>
+         * Type: int (0 for false, 1 for true)
+         *
          * @hide
          */
+        @SystemApi
         public static final String DOZE_ALWAYS_ON = "doze_always_on";
 
         private static final Validator DOZE_ALWAYS_ON_VALIDATOR = BOOLEAN_VALIDATOR;
@@ -7581,10 +7610,13 @@ public final class Settings {
         public static final String UNSAFE_VOLUME_MUSIC_ACTIVE_MS = "unsafe_volume_music_active_ms";
 
         /**
-         * This preference enables notification display on the lockscreen.
+         * Indicates whether notification display on the lock screen is enabled.
+         * <p>
+         * Type: int (0 for false, 1 for true)
+         *
          * @hide
          */
-        @UnsupportedAppUsage
+        @SystemApi
         public static final String LOCK_SCREEN_SHOW_NOTIFICATIONS =
                 "lock_screen_show_notifications";
 
@@ -7778,10 +7810,13 @@ public final class Settings {
                 BOOLEAN_VALIDATOR;
 
         /**
-         * Whether Assist Gesture Deferred Setup has been completed
+         * Indicates whether the Assist Gesture Deferred Setup has been completed.
+         * <p>
+         * Type: int (0 for false, 1 for true)
          *
          * @hide
          */
+        @SystemApi
         public static final String ASSIST_GESTURE_SETUP_COMPLETE = "assist_gesture_setup_complete";
 
         /**
@@ -8424,6 +8459,8 @@ public final class Settings {
             VALIDATORS.put(CHARGING_VIBRATION_ENABLED, BOOLEAN_VALIDATOR);
             VALIDATORS.put(ACCESSIBILITY_MINIMUM_UI_TIMEOUT_ENABLED, BOOLEAN_VALIDATOR);
             VALIDATORS.put(ACCESSIBILITY_MINIMUM_UI_TIMEOUT_MS, NON_NEGATIVE_INTEGER_VALIDATOR);
+            VALIDATORS.put(USER_SETUP_COMPLETE, BOOLEAN_VALIDATOR);
+            VALIDATORS.put(ASSIST_GESTURE_SETUP_COMPLETE, BOOLEAN_VALIDATOR);
         }
 
         /**
@@ -9129,16 +9166,19 @@ public final class Settings {
         */
        public static final String DEVICE_PROVISIONED = "device_provisioned";
 
-       /**
-        * Whether mobile data should be allowed while the device is being provisioned.
-        * This allows the provisioning process to turn off mobile data before the user
-        * has an opportunity to set things up, preventing other processes from burning
-        * precious bytes before wifi is setup.
-        * (0 = false, 1 = true)
-        * @hide
-        */
-       public static final String DEVICE_PROVISIONING_MOBILE_DATA_ENABLED =
-               "device_provisioning_mobile_data";
+        /**
+         * Indicates whether mobile data should be allowed while the device is being provisioned.
+         * This allows the provisioning process to turn off mobile data before the user
+         * has an opportunity to set things up, preventing other processes from burning
+         * precious bytes before wifi is setup.
+         * <p>
+         * Type: int (0 for false, 1 for true)
+         *
+         * @hide
+         */
+        @SystemApi
+        public static final String DEVICE_PROVISIONING_MOBILE_DATA_ENABLED =
+                "device_provisioning_mobile_data";
 
        /**
         * The saved value for WindowManagerService.setForcedDisplaySize().
@@ -12113,13 +12153,14 @@ public final class Settings {
         public static final String NETWORK_SCORING_PROVISIONED = "network_scoring_provisioned";
 
         /**
-         * Whether the user wants to be prompted for password to decrypt the device on boot.
-         * This only matters if the storage is encrypted.
+         * Indicates whether the user wants to be prompted for password to decrypt the device on
+         * boot. This only matters if the storage is encrypted.
          * <p>
          * Type: int (0 for false, 1 for true)
+         *
          * @hide
          */
-        @UnsupportedAppUsage
+        @SystemApi
         public static final String REQUIRE_PASSWORD_TO_DECRYPT = "require_password_to_decrypt";
 
         /**
@@ -12303,12 +12344,14 @@ public final class Settings {
         public static final String SAFE_BOOT_DISALLOWED = "safe_boot_disallowed";
 
         /**
-         * Whether this device is currently in retail demo mode. If true, device
+         * Indicates whether this device is currently in retail demo mode. If true, the device
          * usage is severely limited.
          * <p>
          * Type: int (0 for false, 1 for true)
+         *
          * @hide
          */
+        @SystemApi
         public static final String DEVICE_DEMO_MODE = "device_demo_mode";
 
         /**
@@ -12630,6 +12673,9 @@ public final class Settings {
             VALIDATORS.put(APP_AUTO_RESTRICTION_ENABLED, APP_AUTO_RESTRICTION_ENABLED_VALIDATOR);
             VALIDATORS.put(ZEN_DURATION, ZEN_DURATION_VALIDATOR);
             VALIDATORS.put(CHARGING_VIBRATION_ENABLED, CHARGING_VIBRATION_ENABLED_VALIDATOR);
+            VALIDATORS.put(DEVICE_PROVISIONING_MOBILE_DATA_ENABLED, BOOLEAN_VALIDATOR);
+            VALIDATORS.put(REQUIRE_PASSWORD_TO_DECRYPT, BOOLEAN_VALIDATOR);
+            VALIDATORS.put(DEVICE_DEMO_MODE, BOOLEAN_VALIDATOR);
         }
 
         /**
