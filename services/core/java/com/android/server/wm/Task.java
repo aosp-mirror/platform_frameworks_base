@@ -237,7 +237,7 @@ class Task extends WindowContainer<AppWindowToken> {
         super.onParentSet();
 
         // Update task bounds if needed.
-        updateDisplayInfo(getDisplayContent());
+        adjustBoundsForDisplayChangeIfNeeded(getDisplayContent());
 
         if (getWindowConfiguration().windowsAreScaleable()) {
             // We force windows out of SCALING_MODE_FREEZE so that we can continue to animate them
@@ -303,6 +303,7 @@ class Task extends WindowContainer<AppWindowToken> {
     @Override
     void onDisplayChanged(DisplayContent dc) {
         updateSurfaceSize(dc);
+        adjustBoundsForDisplayChangeIfNeeded(dc);
         super.onDisplayChanged(dc);
     }
 
@@ -501,7 +502,7 @@ class Task extends WindowContainer<AppWindowToken> {
         return mDragResizeMode;
     }
 
-    void updateDisplayInfo(final DisplayContent displayContent) {
+    private void adjustBoundsForDisplayChangeIfNeeded(final DisplayContent displayContent) {
         if (displayContent == null) {
             return;
         }

@@ -42,8 +42,10 @@ import android.view.MagnificationSpec;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Builder;
 import android.view.SurfaceSession;
+
 import com.android.internal.util.ToBooleanFunction;
 import com.android.server.wm.SurfaceAnimator.Animatable;
+
 import java.io.PrintWriter;
 import java.util.Comparator;
 import java.util.LinkedList;
@@ -501,8 +503,10 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
     }
 
     /**
-     * Notify that the display this container is on has changed.
-     * @param dc The new display this container is on.
+     * Notify that the display this container is on has changed. This could be either this container
+     * is moved to a new display, or some configurations on the display it is on changes.
+     *
+     * @param dc The display this container is on after changes.
      */
     void onDisplayChanged(DisplayContent dc) {
         for (int i = mChildren.size() - 1; i >= 0; --i) {
