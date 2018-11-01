@@ -19,6 +19,8 @@ package com.android.internal.inputmethod;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams.SoftInputModeFlags;
 
+import java.util.StringJoiner;
+
 /**
  * Provides useful methods for debugging.
  */
@@ -96,7 +98,7 @@ public final class InputMethodDebug {
      * @return {@link String} message corresponds for the given {@code softInputMode}.
      */
     public static String softInputModeToString(@SoftInputModeFlags int softInputMode) {
-        final StringBuilder sb = new StringBuilder();
+        final StringJoiner joiner = new StringJoiner("|");
         final int state = softInputMode & WindowManager.LayoutParams.SOFT_INPUT_MASK_STATE;
         final int adjust = softInputMode & WindowManager.LayoutParams.SOFT_INPUT_MASK_ADJUST;
         final boolean isForwardNav =
@@ -104,55 +106,51 @@ public final class InputMethodDebug {
 
         switch (state) {
             case WindowManager.LayoutParams.SOFT_INPUT_STATE_UNSPECIFIED:
-                sb.append("STATE_UNSPECIFIED");
+                joiner.add("STATE_UNSPECIFIED");
                 break;
             case WindowManager.LayoutParams.SOFT_INPUT_STATE_UNCHANGED:
-                sb.append("STATE_UNCHANGED");
+                joiner.add("STATE_UNCHANGED");
                 break;
             case WindowManager.LayoutParams.SOFT_INPUT_STATE_HIDDEN:
-                sb.append("STATE_HIDDEN");
+                joiner.add("STATE_HIDDEN");
                 break;
             case WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_HIDDEN:
-                sb.append("STATE_ALWAYS_HIDDEN");
+                joiner.add("STATE_ALWAYS_HIDDEN");
                 break;
             case WindowManager.LayoutParams.SOFT_INPUT_STATE_VISIBLE:
-                sb.append("STATE_VISIBLE");
+                joiner.add("STATE_VISIBLE");
                 break;
             case WindowManager.LayoutParams.SOFT_INPUT_STATE_ALWAYS_VISIBLE:
-                sb.append("STATE_ALWAYS_VISIBLE");
+                joiner.add("STATE_ALWAYS_VISIBLE");
                 break;
             default:
-                sb.append("STATE_UNKNOWN(");
-                sb.append(state);
-                sb.append(")");
+                joiner.add("STATE_UNKNOWN(" + state + ")");
                 break;
         }
 
         switch (adjust) {
             case WindowManager.LayoutParams.SOFT_INPUT_ADJUST_UNSPECIFIED:
-                sb.append("|ADJUST_UNSPECIFIED");
+                joiner.add("ADJUST_UNSPECIFIED");
                 break;
             case WindowManager.LayoutParams.SOFT_INPUT_ADJUST_RESIZE:
-                sb.append("|ADJUST_RESIZE");
+                joiner.add("ADJUST_RESIZE");
                 break;
             case WindowManager.LayoutParams.SOFT_INPUT_ADJUST_PAN:
-                sb.append("|ADJUST_PAN");
+                joiner.add("ADJUST_PAN");
                 break;
             case WindowManager.LayoutParams.SOFT_INPUT_ADJUST_NOTHING:
-                sb.append("|ADJUST_NOTHING");
+                joiner.add("ADJUST_NOTHING");
                 break;
             default:
-                sb.append("|ADJUST_UNKNOWN(");
-                sb.append(adjust);
-                sb.append(")");
+                joiner.add("ADJUST_UNKNOWN(" + adjust + ")");
                 break;
         }
 
         if (isForwardNav) {
             // This is a special bit that is set by the system only during the window navigation.
-            sb.append("|IS_FORWARD_NAVIGATION");
+            joiner.add("IS_FORWARD_NAVIGATION");
         }
 
-        return sb.toString();
+        return joiner.setEmptyValue("(none)").toString();
     }
 }
