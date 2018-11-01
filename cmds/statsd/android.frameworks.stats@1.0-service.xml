@@ -1,0 +1,11 @@
+<manifest version="1.0" type="framework">
+    <hal>
+        <name>android.frameworks.stats</name>
+        <transport>hwbinder</transport>
+        <version>1.0</version>
+        <interface>
+            <name>IStats</name>
+            <instance>default</instance>
+        </interface>
+    </hal>
+</manifest>
