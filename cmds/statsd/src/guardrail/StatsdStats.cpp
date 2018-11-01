@@ -335,7 +335,8 @@ void StatsdStats::noteRegisteredPeriodicAlarmChanged() {
 
 void StatsdStats::updateMinPullIntervalSec(int pullAtomId, long intervalSec) {
     lock_guard<std::mutex> lock(mLock);
-    mPulledAtomStats[pullAtomId].minPullIntervalSec = intervalSec;
+    mPulledAtomStats[pullAtomId].minPullIntervalSec =
+            std::min(mPulledAtomStats[pullAtomId].minPullIntervalSec, intervalSec);
 }
 
 void StatsdStats::notePull(int pullAtomId) {
@@ -346,6 +347,24 @@ void StatsdStats::notePull(int pullAtomId) {
 void StatsdStats::notePullFromCache(int pullAtomId) {
     lock_guard<std::mutex> lock(mLock);
     mPulledAtomStats[pullAtomId].totalPullFromCache++;
+}
+
+void StatsdStats::notePullTime(int pullAtomId, int64_t pullTimeNs) {
+    lock_guard<std::mutex> lock(mLock);
+    auto& pullStats = mPulledAtomStats[pullAtomId];
+    pullStats.maxPullTimeNs = std::max(pullStats.maxPullTimeNs, pullTimeNs);
+    pullStats.avgPullTimeNs = (pullStats.avgPullTimeNs * pullStats.numPullTime + pullTimeNs) /
+                              (pullStats.numPullTime + 1);
+    pullStats.numPullTime += 1;
+}
+
+void StatsdStats::notePullDelay(int pullAtomId, int64_t pullDelayNs) {
+    lock_guard<std::mutex> lock(mLock);
+    auto& pullStats = mPulledAtomStats[pullAtomId];
+    pullStats.maxPullDelayNs = std::max(pullStats.maxPullDelayNs, pullDelayNs);
+    pullStats.avgPullDelayNs = (pullStats.avgPullDelayNs * pullStats.numPullDelay + pullDelayNs) /
+                               (pullStats.numPullDelay + 1);
+    pullStats.numPullDelay += 1;
 }
 
 void StatsdStats::noteAtomLogged(int atomId, int32_t timeSec) {
@@ -393,6 +412,16 @@ void StatsdStats::resetInternalLocked() {
         config.second->metric_stats.clear();
         config.second->metric_dimension_in_condition_stats.clear();
         config.second->alert_stats.clear();
+    }
+    for (auto& pullStats : mPulledAtomStats) {
+        pullStats.second.totalPull = 0;
+        pullStats.second.totalPullFromCache = 0;
+        pullStats.second.avgPullTimeNs = 0;
+        pullStats.second.maxPullTimeNs = 0;
+        pullStats.second.numPullTime = 0;
+        pullStats.second.avgPullDelayNs = 0;
+        pullStats.second.maxPullDelayNs = 0;
+        pullStats.second.numPullDelay = 0;
     }
 }
 
@@ -498,8 +527,14 @@ void StatsdStats::dumpStats(int out) const {
 
     dprintf(out, "********Pulled Atom stats***********\n");
     for (const auto& pair : mPulledAtomStats) {
-        dprintf(out, "Atom %d->%ld, %ld, %ld\n", (int)pair.first, (long)pair.second.totalPull,
-                (long)pair.second.totalPullFromCache, (long)pair.second.minPullIntervalSec);
+        dprintf(out,
+                "Atom %d->(total pull)%ld, (pull from cache)%ld, (min pull interval)%ld, (average "
+                "pull time nanos)%lld, (max pull time nanos)%lld, (average pull delay nanos)%lld, "
+                "(max pull delay nanos)%lld\n",
+                (int)pair.first, (long)pair.second.totalPull, (long)pair.second.totalPullFromCache,
+                (long)pair.second.minPullIntervalSec, (long long)pair.second.avgPullTimeNs,
+                (long long)pair.second.maxPullTimeNs, (long long)pair.second.avgPullDelayNs,
+                (long long)pair.second.maxPullDelayNs);
     }
 
     if (mAnomalyAlarmRegisteredStats > 0) {
