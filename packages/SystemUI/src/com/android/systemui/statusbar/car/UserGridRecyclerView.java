@@ -223,7 +223,7 @@ public class UserGridRecyclerView extends PagedListView implements
 
                 if (userRecord.mIsStartGuestSession) {
                     notifyUserSelected(userRecord);
-                    mCarUserManagerHelper.startNewGuestSession(mGuestName);
+                    mCarUserManagerHelper.startGuestSession(mGuestName);
                     return;
                 }
 
