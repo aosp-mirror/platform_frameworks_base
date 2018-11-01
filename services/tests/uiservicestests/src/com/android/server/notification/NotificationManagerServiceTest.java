@@ -288,7 +288,6 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_NORMAL);
         when(mPackageManagerClient.hasSystemFeature(FEATURE_WATCH)).thenReturn(false);
         when(mUgmInternal.newUriPermissionOwner(anyString())).thenReturn(mPermOwner);
-        when(mPackageManager.getNameForUid(mUid)).thenReturn(PKG);
 
         // write to a test file; the system file isn't readable from tests
         mFile = new File(mContext.getCacheDir(), "test.xml");
@@ -1736,8 +1735,7 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
     }
 
     @Test
-    public void testGetNotificationChannelFromPrivilegedListener_assistant_noAccess()
-            throws Exception {
+    public void testGetNotificationChannelFromPrivilegedListener_assistant_noAccess() throws Exception {
         mService.setPreferencesHelper(mPreferencesHelper);
         when(mCompanionMgr.getAssociations(PKG, mUid)).thenReturn(new ArrayList<>());
         when(mAssistants.isServiceTokenValidLocked(any())).thenReturn(false);
@@ -3461,12 +3459,11 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         ApplicationInfo info = new ApplicationInfo();
         info.privateFlags = ApplicationInfo.PRIVATE_FLAG_INSTANT;
         when(mPackageManager.getApplicationInfo(anyString(), anyInt(), eq(0))).thenReturn(info);
-        when(mPackageManager.getNameForUid(anyInt())).thenReturn("any");
 
-        assertTrue(mService.isCallerInstantApp(45770, 0));
+        assertTrue(mService.isCallerInstantApp("any", 45770, 0));
 
         info.privateFlags = 0;
-        assertFalse(mService.isCallerInstantApp(575370, 0));
+        assertFalse(mService.isCallerInstantApp("any", 575370, 0));
     }
 
     @Test
@@ -3475,9 +3472,8 @@ public class NotificationManagerServiceTest extends UiServiceTestCase {
         info.privateFlags = ApplicationInfo.PRIVATE_FLAG_INSTANT;
         when(mPackageManager.getApplicationInfo(anyString(), anyInt(), eq(10))).thenReturn(info);
         when(mPackageManager.getApplicationInfo(anyString(), anyInt(), eq(0))).thenReturn(null);
-        when(mPackageManager.getNameForUid(anyInt())).thenReturn("any");
 
-        assertTrue(mService.isCallerInstantApp(68638450, 10));
+        assertTrue(mService.isCallerInstantApp("any", 68638450, 10));
     }
 
     @Test
