@@ -115,6 +115,7 @@ import com.android.server.pm.UserManagerService;
 import com.android.server.policy.PhoneWindowManager;
 import com.android.server.power.PowerManagerService;
 import com.android.server.power.ShutdownThread;
+import com.android.server.power.ThermalManagerService;
 import com.android.server.restrictions.RestrictionsManagerService;
 import com.android.server.security.KeyAttestationApplicationIdProviderService;
 import com.android.server.security.KeyChainSystemService;
@@ -605,6 +606,10 @@ public final class SystemServer {
         // the permissions for those calls).
         traceBeginAndSlog("StartPowerManager");
         mPowerManagerService = mSystemServiceManager.startService(PowerManagerService.class);
+        traceEnd();
+
+        traceBeginAndSlog("StartThermalManager");
+        mSystemServiceManager.startService(ThermalManagerService.class);
         traceEnd();
 
         // Now that the power manager has been started, let the activity manager

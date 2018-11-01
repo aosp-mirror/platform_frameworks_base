@@ -399,8 +399,8 @@ public class PowerUI extends SystemUI {
             if (b != null) {
                 mThermalService = IThermalService.Stub.asInterface(b);
                 try {
-                    mThermalService.registerThermalEventListener(
-                        new ThermalEventListener());
+                    mThermalService.registerThermalEventListenerWithType(
+                            new ThermalEventListener(), Temperature.TYPE_SKIN);
                 } catch (RemoteException e) {
                     // Should never happen.
                 }
@@ -552,7 +552,7 @@ public class PowerUI extends SystemUI {
 
     // Thermal event received from vendor thermal management subsystem
     private final class ThermalEventListener extends IThermalEventListener.Stub {
-        @Override public void notifyThrottling(boolean isThrottling, Temperature temp) {
+        @Override public void notifyThrottling(Temperature temp) {
             // Trigger an update of the temperature warning.  Only one
             // callback can be enabled at a time, so remove any existing
             // callback; updateTemperatureWarning will schedule another one.

@@ -4227,6 +4227,15 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.os.ThermalService} for accessing the thermal service.
+     *
+     * @see #getSystemService(String)
+     * @hide
+     */
+    public static final String THERMAL_SERVICE = "thermalservice";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.content.pm.ShortcutManager} for accessing the launcher shortcut service.
      *
      * @see #getSystemService(String)

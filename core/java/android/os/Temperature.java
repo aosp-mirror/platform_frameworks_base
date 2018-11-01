@@ -16,6 +16,13 @@
 
 package android.os;
 
+import android.annotation.IntDef;
+import android.hardware.thermal.V2_0.TemperatureType;
+import android.hardware.thermal.V2_0.ThrottlingSeverity;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+
 /**
  * Temperature values used by IThermalService.
  */
@@ -24,24 +31,89 @@ package android.os;
  * @hide
  */
 public class Temperature implements Parcelable {
-    /* Temperature value */
+    /** Temperature value */
     private float mValue;
-    /* A temperature type from HardwarePropertiesManager */
+    /** A temperature type from ThermalHAL */
     private int mType;
+    /** Name of this temperature */
+    private String mName;
+    /** The level of the sensor is currently in throttling */
+    private int mStatus;
 
-    public Temperature() {
-        this(HardwarePropertiesManager.UNDEFINED_TEMPERATURE,
-            Integer.MIN_VALUE);
+    /** @hide */
+    @IntDef(prefix = { "THROTTLING_" }, value = {
+            THROTTLING_NONE,
+            THROTTLING_LIGHT,
+            THROTTLING_MODERATE,
+            THROTTLING_SEVERE,
+            THROTTLING_CRITICAL,
+            THROTTLING_WARNING,
+            THROTTLING_SHUTDOWN,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ThrottlingStatus {}
+
+    /** Keep in sync with hardware/interfaces/thermal/2.0/types.hal */
+    public static final int THROTTLING_NONE = ThrottlingSeverity.NONE;
+    public static final int THROTTLING_LIGHT = ThrottlingSeverity.LIGHT;
+    public static final int THROTTLING_MODERATE = ThrottlingSeverity.MODERATE;
+    public static final int THROTTLING_SEVERE = ThrottlingSeverity.SEVERE;
+    public static final int THROTTLING_CRITICAL = ThrottlingSeverity.CRITICAL;
+    public static final int THROTTLING_WARNING = ThrottlingSeverity.WARNING;
+    public static final int THROTTLING_SHUTDOWN = ThrottlingSeverity.SHUTDOWN;
+
+    /** @hide */
+    @IntDef(prefix = { "TYPE_" }, value = {
+            TYPE_UNKNOWN,
+            TYPE_CPU,
+            TYPE_GPU,
+            TYPE_BATTERY,
+            TYPE_SKIN,
+            TYPE_USB_PORT,
+            TYPE_POWER_AMPLIFIER,
+            TYPE_BCL_VOLTAGE,
+            TYPE_BCL_CURRENT,
+            TYPE_BCL_PERCENTAGE,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Type {}
+
+    /* Keep in sync with hardware/interfaces/thermal/2.0/types.hal */
+    public static final int TYPE_UNKNOWN = TemperatureType.UNKNOWN;
+    public static final int TYPE_CPU = TemperatureType.CPU;
+    public static final int TYPE_GPU = TemperatureType.GPU;
+    public static final int TYPE_BATTERY = TemperatureType.BATTERY;
+    public static final int TYPE_SKIN = TemperatureType.SKIN;
+    public static final int TYPE_USB_PORT = TemperatureType.USB_PORT;
+    public static final int TYPE_POWER_AMPLIFIER = TemperatureType.POWER_AMPLIFIER;
+    public static final int TYPE_BCL_VOLTAGE = TemperatureType.BCL_VOLTAGE;
+    public static final int TYPE_BCL_CURRENT = TemperatureType.BCL_CURRENT;
+    public static final int TYPE_BCL_PERCENTAGE = TemperatureType.BCL_PERCENTAGE;
+
+    /**
+     * Verify a valid temperature type.
+     *
+     * @return true if a temperature type is valid otherwise false.
+     */
+    public static boolean isValidType(int type) {
+        return type >= TYPE_UNKNOWN && type <= TYPE_BCL_PERCENTAGE;
     }
 
-    public Temperature(float value, int type) {
+    public Temperature() {
+        this(Float.NaN, TYPE_UNKNOWN, "", THROTTLING_NONE);
+    }
+
+    public Temperature(float value, @Type int type, String name, int status) {
         mValue = value;
-        mType = type;
+        mType = isValidType(type) ? type : TYPE_UNKNOWN;
+        mName = name;
+        mStatus = status;
     }
 
     /**
      * Return the temperature value.
-     * @return a temperature value in floating point.
+     *
+     * @return a temperature value in floating point could be NaN.
      */
     public float getValue() {
         return mValue;
@@ -49,18 +121,30 @@ public class Temperature implements Parcelable {
 
     /**
      * Return the temperature type.
-     * @return a temperature type:
-     *         HardwarePropertiesManager.DEVICE_TEMPERATURE_CPU, etc.
+     *
+     * @return a temperature type: TYPE_*
      */
-    public int getType() {
+    public @Type int getType() {
         return mType;
     }
 
-    /*
-     * Parcel read/write code must be kept in sync with
-     * frameworks/native/services/thermalservice/aidl/android/os/
-     * Temperature.cpp
+    /**
+     * Return the temperature name.
+     *
+     * @return a temperature name as String.
      */
+    public String getName() {
+        return mName;
+    }
+
+    /**
+     * Return the temperature throttling status.
+     *
+     * @return a temperature throttling status: THROTTLING_*
+     */
+    public @ThrottlingStatus int getStatus() {
+        return mStatus;
+    }
 
     private Temperature(Parcel p) {
         readFromParcel(p);
@@ -68,31 +152,36 @@ public class Temperature implements Parcelable {
 
     /**
      * Fill in Temperature members from a Parcel.
+     *
      * @param p the parceled Temperature object.
      */
     public void readFromParcel(Parcel p) {
         mValue = p.readFloat();
         mType = p.readInt();
+        mName = p.readString();
+        mStatus = p.readInt();
     }
 
     @Override
     public void writeToParcel(Parcel p, int flags) {
         p.writeFloat(mValue);
         p.writeInt(mType);
+        p.writeString(mName);
+        p.writeInt(mStatus);
     }
 
     public static final Parcelable.Creator<Temperature> CREATOR =
             new Parcelable.Creator<Temperature>() {
-        @Override
-        public Temperature createFromParcel(Parcel p) {
-            return new Temperature(p);
-        }
+                @Override
+                public Temperature createFromParcel(Parcel p) {
+                    return new Temperature(p);
+                }
 
-        @Override
-        public Temperature[] newArray(int size) {
-            return new Temperature[size];
-        }
-    };
+                @Override
+                public Temperature[] newArray(int size) {
+                    return new Temperature[size];
+                }
+            };
 
     @Override
     public int describeContents() {
