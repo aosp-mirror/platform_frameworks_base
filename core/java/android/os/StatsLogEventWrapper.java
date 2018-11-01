@@ -43,6 +43,7 @@ public final class StatsLogEventWrapper implements Parcelable {
     int mTag;
     long mElapsedTimeNs;
     long mWallClockTimeNs;
+    WorkSource mWorkSource = null;
 
     public StatsLogEventWrapper(int tag, long elapsedTimeNs, long wallClockTimeNs) {
         this.mTag = tag;
@@ -69,6 +70,17 @@ public final class StatsLogEventWrapper implements Parcelable {
                     throw new RuntimeException("Not implemented");
                 }
             };
+
+    /**
+     * Set work source if any.
+     */
+    public void setWorkSource(WorkSource ws) {
+        if (ws.getWorkChains() == null || ws.getWorkChains().size() == 0) {
+            Slog.w(TAG, "Empty worksource!");
+            return;
+        }
+        mWorkSource = ws;
+    }
 
     /**
      * Write a int value.
@@ -119,11 +131,6 @@ public final class StatsLogEventWrapper implements Parcelable {
         mValues.add(val ? 1 : 0);
     }
 
-    /**
-     * Writes the stored fields to a byte array. Will first write a new-line character to denote
-     * END_LIST before writing contents to byte array.
-     */
-
     public void writeToParcel(Parcel out, int flags) {
         if (DEBUG) {
             Slog.d(TAG,
@@ -133,6 +140,34 @@ public final class StatsLogEventWrapper implements Parcelable {
         out.writeInt(mTag);
         out.writeLong(mElapsedTimeNs);
         out.writeLong(mWallClockTimeNs);
+        if (mWorkSource != null) {
+            ArrayList<android.os.WorkSource.WorkChain> workChains = mWorkSource.getWorkChains();
+            // number of chains
+            out.writeInt(workChains.size());
+            for (int i = 0; i < workChains.size(); i++) {
+                android.os.WorkSource.WorkChain wc = workChains.get(i);
+                if (wc.getSize() == 0) {
+                    Slog.w(TAG, "Empty work chain.");
+                    out.writeInt(0);
+                    continue;
+                }
+                if (wc.getUids().length != wc.getTags().length
+                        || wc.getUids().length != wc.getSize()) {
+                    Slog.w(TAG, "Malformated work chain.");
+                    out.writeInt(0);
+                    continue;
+                }
+                // number of nodes
+                out.writeInt(wc.getSize());
+                for (int j = 0; j < wc.getSize(); j++) {
+                    out.writeInt(wc.getUids()[j]);
+                    out.writeString(wc.getTags()[j] == null ? "" : wc.getTags()[j]);
+                }
+            }
+        } else {
+            // no chains
+            out.writeInt(0);
+        }
         out.writeInt(mTypes.size());
         for (int i = 0; i < mTypes.size(); i++) {
             out.writeInt(mTypes.get(i));

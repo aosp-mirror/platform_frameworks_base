@@ -58,6 +58,31 @@ status_t StatsLogEventWrapper::readFromParcel(const Parcel* in) {
     ALOGE("statsd could not read wall clock time from parcel");
     return res;
   }
+  int numWorkChain = 0;
+  if ((res = in->readInt32(&numWorkChain)) != OK) {
+    ALOGE("statsd could not read number of work chains from parcel");
+    return res;
+  }
+  if (numWorkChain > 0) {
+    for (int i = 0; i < numWorkChain; i++) {
+      int numNodes = 0;
+      if ((res = in->readInt32(&numNodes)) != OK) {
+        ALOGE(
+            "statsd could not read number of nodes in work chain from parcel");
+        return res;
+      }
+      if (numNodes == 0) {
+        ALOGE("empty work chain");
+        return BAD_VALUE;
+      }
+      WorkChain wc;
+      for (int j = 0; j < numNodes; j++) {
+        wc.uids.push_back(in->readInt32());
+        wc.tags.push_back(std::string(String8(in->readString16()).string()));
+      }
+      mWorkChains.push_back(wc);
+    }
+  }
   int dataSize = 0;
   if ((res = in->readInt32(&dataSize)) != OK) {
     ALOGE("statsd could not read data size from parcel");

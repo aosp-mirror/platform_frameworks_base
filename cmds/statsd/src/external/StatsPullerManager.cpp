@@ -54,52 +54,42 @@ const std::map<int, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
         // wifi_bytes_transfer
         {android::util::WIFI_BYTES_TRANSFER,
          {{2, 3, 4, 5},
-          {},
           1 * NS_PER_SEC,
           new StatsCompanionServicePuller(android::util::WIFI_BYTES_TRANSFER)}},
         // wifi_bytes_transfer_by_fg_bg
         {android::util::WIFI_BYTES_TRANSFER_BY_FG_BG,
          {{3, 4, 5, 6},
-          {2},
           1 * NS_PER_SEC,
           new StatsCompanionServicePuller(android::util::WIFI_BYTES_TRANSFER_BY_FG_BG)}},
         // mobile_bytes_transfer
         {android::util::MOBILE_BYTES_TRANSFER,
          {{2, 3, 4, 5},
-          {},
           1 * NS_PER_SEC,
           new StatsCompanionServicePuller(android::util::MOBILE_BYTES_TRANSFER)}},
         // mobile_bytes_transfer_by_fg_bg
         {android::util::MOBILE_BYTES_TRANSFER_BY_FG_BG,
          {{3, 4, 5, 6},
-          {2},
           1 * NS_PER_SEC,
           new StatsCompanionServicePuller(android::util::MOBILE_BYTES_TRANSFER_BY_FG_BG)}},
         // bluetooth_bytes_transfer
         {android::util::BLUETOOTH_BYTES_TRANSFER,
          {{2, 3},
-          {},
           1 * NS_PER_SEC,
           new StatsCompanionServicePuller(android::util::BLUETOOTH_BYTES_TRANSFER)}},
         // kernel_wakelock
         {android::util::KERNEL_WAKELOCK,
-         {{}, {}, 1 * NS_PER_SEC, new StatsCompanionServicePuller(android::util::KERNEL_WAKELOCK)}},
+         {{}, 1 * NS_PER_SEC, new StatsCompanionServicePuller(android::util::KERNEL_WAKELOCK)}},
         // subsystem_sleep_state
         {android::util::SUBSYSTEM_SLEEP_STATE,
-         {{}, {}, 1 * NS_PER_SEC, new SubsystemSleepStatePuller()}},
+         {{}, 1 * NS_PER_SEC, new SubsystemSleepStatePuller()}},
         // on_device_power_measurement
-        {android::util::ON_DEVICE_POWER_MEASUREMENT,
-         {{}, {}, 1 * NS_PER_SEC, new PowerStatsPuller()}},
+        {android::util::ON_DEVICE_POWER_MEASUREMENT, {{}, 1 * NS_PER_SEC, new PowerStatsPuller()}},
         // cpu_time_per_freq
         {android::util::CPU_TIME_PER_FREQ,
-         {{3},
-          {2},
-          1 * NS_PER_SEC,
-          new StatsCompanionServicePuller(android::util::CPU_TIME_PER_FREQ)}},
+         {{3}, 1 * NS_PER_SEC, new StatsCompanionServicePuller(android::util::CPU_TIME_PER_FREQ)}},
         // cpu_time_per_uid
         {android::util::CPU_TIME_PER_UID,
          {{2, 3},
-          {},
           1 * NS_PER_SEC,
           new StatsCompanionServicePuller(android::util::CPU_TIME_PER_UID)}},
         // cpu_time_per_uid_freq
@@ -107,162 +97,135 @@ const std::map<int, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
         // frameworks/base/core/java/com/android/internal/os/KernelCpuProcReader
         {android::util::CPU_TIME_PER_UID_FREQ,
          {{4},
-          {2, 3},
           1 * NS_PER_SEC,
           new StatsCompanionServicePuller(android::util::CPU_TIME_PER_UID_FREQ)}},
         // cpu_active_time
         // the throttling is 3sec, handled in
         // frameworks/base/core/java/com/android/internal/os/KernelCpuProcReader
         {android::util::CPU_ACTIVE_TIME,
-         {{2},
-          {},
-          1 * NS_PER_SEC,
-          new StatsCompanionServicePuller(android::util::CPU_ACTIVE_TIME)}},
+         {{2}, 1 * NS_PER_SEC, new StatsCompanionServicePuller(android::util::CPU_ACTIVE_TIME)}},
         // cpu_cluster_time
         // the throttling is 3sec, handled in
         // frameworks/base/core/java/com/android/internal/os/KernelCpuProcReader
         {android::util::CPU_CLUSTER_TIME,
-         {{3},
-          {2},
-          1 * NS_PER_SEC,
-          new StatsCompanionServicePuller(android::util::CPU_CLUSTER_TIME)}},
+         {{3}, 1 * NS_PER_SEC, new StatsCompanionServicePuller(android::util::CPU_CLUSTER_TIME)}},
         // wifi_activity_energy_info
         {android::util::WIFI_ACTIVITY_INFO,
-         {{},
-          {},
-          1 * NS_PER_SEC,
-          new StatsCompanionServicePuller(android::util::WIFI_ACTIVITY_INFO)}},
+         {{}, 1 * NS_PER_SEC, new StatsCompanionServicePuller(android::util::WIFI_ACTIVITY_INFO)}},
         // modem_activity_info
         {android::util::MODEM_ACTIVITY_INFO,
-         {{},
-          {},
-          1 * NS_PER_SEC,
-          new StatsCompanionServicePuller(android::util::MODEM_ACTIVITY_INFO)}},
+         {{}, 1 * NS_PER_SEC, new StatsCompanionServicePuller(android::util::MODEM_ACTIVITY_INFO)}},
         // bluetooth_activity_info
         {android::util::BLUETOOTH_ACTIVITY_INFO,
          {{},
-          {},
           1 * NS_PER_SEC,
           new StatsCompanionServicePuller(android::util::BLUETOOTH_ACTIVITY_INFO)}},
         // system_elapsed_realtime
         {android::util::SYSTEM_ELAPSED_REALTIME,
          {{},
-          {},
           1 * NS_PER_SEC,
           new StatsCompanionServicePuller(android::util::SYSTEM_ELAPSED_REALTIME)}},
         // system_uptime
         {android::util::SYSTEM_UPTIME,
-         {{}, {}, 1 * NS_PER_SEC, new StatsCompanionServicePuller(android::util::SYSTEM_UPTIME)}},
+         {{}, 1 * NS_PER_SEC, new StatsCompanionServicePuller(android::util::SYSTEM_UPTIME)}},
         // remaining_battery_capacity
         {android::util::REMAINING_BATTERY_CAPACITY,
          {{},
-          {},
           1 * NS_PER_SEC,
           new ResourceHealthManagerPuller(android::util::REMAINING_BATTERY_CAPACITY)}},
         // full_battery_capacity
         {android::util::FULL_BATTERY_CAPACITY,
          {{},
-          {},
           1 * NS_PER_SEC,
           new ResourceHealthManagerPuller(android::util::FULL_BATTERY_CAPACITY)}},
         // battery_voltage
         {android::util::BATTERY_VOLTAGE,
-         {{}, {}, 1 * NS_PER_SEC, new ResourceHealthManagerPuller(android::util::BATTERY_VOLTAGE)}},
-         // battery_voltage
+         {{}, 1 * NS_PER_SEC, new ResourceHealthManagerPuller(android::util::BATTERY_VOLTAGE)}},
+         // battery_level
         {android::util::BATTERY_LEVEL,
-         {{}, {}, 1 * NS_PER_SEC, new ResourceHealthManagerPuller(android::util::BATTERY_LEVEL)}},
+         {{}, 1 * NS_PER_SEC, new ResourceHealthManagerPuller(android::util::BATTERY_LEVEL)}},
         // process_memory_state
         {android::util::PROCESS_MEMORY_STATE,
          {{4, 5, 6, 7, 8, 9},
-          {2, 3, 10},
           1 * NS_PER_SEC,
           new StatsCompanionServicePuller(android::util::PROCESS_MEMORY_STATE)}},
         // native_process_memory_state
         {android::util::NATIVE_PROCESS_MEMORY_STATE,
          {{3, 4, 5, 6},
-          {2, 7},
           1 * NS_PER_SEC,
           new StatsCompanionServicePuller(android::util::NATIVE_PROCESS_MEMORY_STATE)}},
         {android::util::PROCESS_MEMORY_HIGH_WATER_MARK,
          {{3},
-          {2},
           1 * NS_PER_SEC,
           new StatsCompanionServicePuller(android::util::PROCESS_MEMORY_HIGH_WATER_MARK)}},
         // temperature
-        {android::util::TEMPERATURE, {{}, {}, 1 * NS_PER_SEC, new ResourceThermalManagerPuller()}},
+        {android::util::TEMPERATURE, {{}, 1 * NS_PER_SEC, new ResourceThermalManagerPuller()}},
         // binder_calls
         {android::util::BINDER_CALLS,
          {{4, 5, 6, 8, 12},
-          {2, 3, 7, 9, 10, 11, 13},
           1 * NS_PER_SEC,
           new StatsCompanionServicePuller(android::util::BINDER_CALLS)}},
         // binder_calls_exceptions
         {android::util::BINDER_CALLS_EXCEPTIONS,
          {{},
-          {},
           1 * NS_PER_SEC,
           new StatsCompanionServicePuller(android::util::BINDER_CALLS_EXCEPTIONS)}},
         // looper_stats
         {android::util::LOOPER_STATS,
          {{5, 6, 7, 8, 9},
-          {2, 3, 4, 10},
           1 * NS_PER_SEC,
           new StatsCompanionServicePuller(android::util::LOOPER_STATS)}},
         // Disk Stats
         {android::util::DISK_STATS,
-         {{}, {}, 1 * NS_PER_SEC, new StatsCompanionServicePuller(android::util::DISK_STATS)}},
+         {{}, 1 * NS_PER_SEC, new StatsCompanionServicePuller(android::util::DISK_STATS)}},
         // Directory usage
         {android::util::DIRECTORY_USAGE,
-         {{}, {}, 1 * NS_PER_SEC, new StatsCompanionServicePuller(android::util::DIRECTORY_USAGE)}},
+         {{}, 1 * NS_PER_SEC, new StatsCompanionServicePuller(android::util::DIRECTORY_USAGE)}},
         // Size of app's code, data, and cache
         {android::util::APP_SIZE,
-         {{}, {}, 1 * NS_PER_SEC, new StatsCompanionServicePuller(android::util::APP_SIZE)}},
+         {{}, 1 * NS_PER_SEC, new StatsCompanionServicePuller(android::util::APP_SIZE)}},
         // Size of specific categories of files. Eg. Music.
         {android::util::CATEGORY_SIZE,
-         {{}, {}, 1 * NS_PER_SEC, new StatsCompanionServicePuller(android::util::CATEGORY_SIZE)}},
+         {{}, 1 * NS_PER_SEC, new StatsCompanionServicePuller(android::util::CATEGORY_SIZE)}},
         // Number of fingerprints registered to each user.
         {android::util::NUM_FINGERPRINTS,
-         {{},
-          {},
-          1 * NS_PER_SEC,
-          new StatsCompanionServicePuller(android::util::NUM_FINGERPRINTS)}},
+         {{}, 1 * NS_PER_SEC, new StatsCompanionServicePuller(android::util::NUM_FINGERPRINTS)}},
         // ProcStats.
         {android::util::PROC_STATS,
-         {{}, {}, 1 * NS_PER_SEC, new StatsCompanionServicePuller(android::util::PROC_STATS)}},
+         {{}, 1 * NS_PER_SEC, new StatsCompanionServicePuller(android::util::PROC_STATS)}},
         // ProcStatsPkgProc.
         {android::util::PROC_STATS_PKG_PROC,
-         {{}, {}, 1 * NS_PER_SEC, new StatsCompanionServicePuller(android::util::PROC_STATS_PKG_PROC)}},
+         {{}, 1 * NS_PER_SEC, new StatsCompanionServicePuller(android::util::PROC_STATS_PKG_PROC)}},
         // Disk I/O stats per uid.
         {android::util::DISK_IO,
-         {{2,3,4,5,6,7,8,9,10,11},
-          {},
+         {{2, 3, 4, 5, 6, 7, 8, 9, 10, 11},
           3 * NS_PER_SEC,
           new StatsCompanionServicePuller(android::util::DISK_IO)}},
         // PowerProfile constants for power model calculations.
         {android::util::POWER_PROFILE,
-         {{}, {}, 1 * NS_PER_SEC, new StatsCompanionServicePuller(android::util::POWER_PROFILE)}},
+         {{}, 1 * NS_PER_SEC, new StatsCompanionServicePuller(android::util::POWER_PROFILE)}},
         // Process cpu stats. Min cool-down is 5 sec, inline with what AcitivityManagerService uses.
         {android::util::PROCESS_CPU_TIME,
-            {{} /* additive fields */, {} /* non additive fields */,
-             5 * NS_PER_SEC /* min cool-down in seconds*/,
-             new StatsCompanionServicePuller(android::util::PROCESS_CPU_TIME)}},
+         {{} /* additive fields */,
+          5 * NS_PER_SEC /* min cool-down in seconds*/,
+          new StatsCompanionServicePuller(android::util::PROCESS_CPU_TIME)}},
         {android::util::CPU_TIME_PER_THREAD_FREQ,
          {{7},
-          {2, 3, 4, 5, 6},
           1 * NS_PER_SEC,
           new StatsCompanionServicePuller(android::util::CPU_TIME_PER_THREAD_FREQ)}},
         // DeviceCalculatedPowerUse.
         {android::util::DEVICE_CALCULATED_POWER_USE,
-         {{}, {}, 1 * NS_PER_SEC,
+         {{},
+          1 * NS_PER_SEC,
           new StatsCompanionServicePuller(android::util::DEVICE_CALCULATED_POWER_USE)}},
         // DeviceCalculatedPowerBlameUid.
         {android::util::DEVICE_CALCULATED_POWER_BLAME_UID,
-         {{}, {}, // BatteryStats already merged isolated with host ids so it's unnecessary here.
+         {{},  // BatteryStats already merged isolated with host ids so it's unnecessary here.
           1 * NS_PER_SEC,
           new StatsCompanionServicePuller(android::util::DEVICE_CALCULATED_POWER_BLAME_UID)}},
         // DeviceCalculatedPowerBlameOther.
         {android::util::DEVICE_CALCULATED_POWER_BLAME_OTHER,
-         {{}, {},
+         {{},
           1 * NS_PER_SEC,
           new StatsCompanionServicePuller(android::util::DEVICE_CALCULATED_POWER_BLAME_OTHER)}},
 };
