@@ -31,7 +31,7 @@ import com.android.settingslib.SettingsLibRobolectricTestRunner;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.robolectric.shadows.ShadowApplication;
+import org.robolectric.RuntimeEnvironment;
 
 @RunWith(SettingsLibRobolectricTestRunner.class)
 public class FooterPreferenceTest {
@@ -40,7 +40,7 @@ public class FooterPreferenceTest {
 
     @Before
     public void setUp() {
-        mContext = ShadowApplication.getInstance().getApplicationContext();
+        mContext = RuntimeEnvironment.application;
     }
 
     @Test
