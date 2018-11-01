@@ -249,6 +249,7 @@ public class Binder implements IBinder {
      * If the current thread is not currently executing an incoming transaction,
      * then its own pid is returned.
      */
+    @CriticalNative
     public static final native int getCallingPid();
 
     /**
@@ -258,6 +259,7 @@ public class Binder implements IBinder {
      * permissions.  If the current thread is not currently executing an
      * incoming transaction, then its own uid is returned.
      */
+    @CriticalNative
     public static final native int getCallingUid();
 
     /**
@@ -288,6 +290,7 @@ public class Binder implements IBinder {
      * @see #getCallingUid()
      * @see #restoreCallingIdentity(long)
      */
+    @CriticalNative
     public static final native long clearCallingIdentity();
 
     /**
@@ -364,6 +367,7 @@ public class Binder implements IBinder {
      * @see StrictMode
      * @hide
      */
+    @CriticalNative
     public static final native void setThreadStrictModePolicy(int policyMask);
 
     /**
@@ -372,6 +376,7 @@ public class Binder implements IBinder {
      * @see #setThreadStrictModePolicy
      * @hide
      */
+    @CriticalNative
     public static final native int getThreadStrictModePolicy();
 
     /**
