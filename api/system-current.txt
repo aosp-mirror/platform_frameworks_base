@@ -5307,6 +5307,8 @@ package android.telephony {
     method public boolean isVideoCallingEnabled();
     method public deprecated boolean isVisualVoicemailEnabled(android.telecom.PhoneAccountHandle);
     method public boolean needsOtaServiceProvisioning();
+    method public boolean rebootRadio();
+    method public boolean resetRadioConfig();
     method public int setAllowedCarriers(int, java.util.List<android.service.carrier.CarrierIdentifier>);
     method public void setCarrierDataEnabled(boolean);
     method public void setDataActivationState(int);
