@@ -396,8 +396,9 @@ public final class MediaProjectionManagerService extends SystemService
             }
             synchronized (mLock) {
                 if (isValidMediaProjection(asBinder())) {
-                    throw new IllegalStateException(
-                            "Cannot start already started MediaProjection");
+                    Slog.w(TAG, "UID " + Binder.getCallingUid()
+                            + " attempted to start already started MediaProjection");
+                    return;
                 }
                 mCallback = callback;
                 registerCallback(mCallback);
