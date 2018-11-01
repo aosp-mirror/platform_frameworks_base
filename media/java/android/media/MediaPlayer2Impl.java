@@ -192,8 +192,8 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
      * beginning.
      */
     @Override
-    public void play() {
-        addTask(new Task(CALL_COMPLETED_PLAY, false) {
+    public Object play() {
+        return addTask(new Task(CALL_COMPLETED_PLAY, false) {
             @Override
             void process() {
                 stayAwake(true);
@@ -213,8 +213,8 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
      * buffered.
      */
     @Override
-    public void prepare() {
-        addTask(new Task(CALL_COMPLETED_PREPARE, true) {
+    public Object prepare() {
+        return addTask(new Task(CALL_COMPLETED_PREPARE, true) {
             @Override
             void process() {
                 _prepare();
@@ -228,8 +228,8 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
      * Pauses playback. Call play() to resume.
      */
     @Override
-    public void pause() {
-        addTask(new Task(CALL_COMPLETED_PAUSE, false) {
+    public Object pause() {
+        return addTask(new Task(CALL_COMPLETED_PAUSE, false) {
             @Override
             void process() {
                 stayAwake(false);
@@ -247,8 +247,8 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
      * @throws IllegalStateException if it is called in an invalid state
      */
     @Override
-    public void skipToNext() {
-        addTask(new Task(CALL_COMPLETED_SKIP_TO_NEXT, false) {
+    public Object skipToNext() {
+        return addTask(new Task(CALL_COMPLETED_SKIP_TO_NEXT, false) {
             @Override
             void process() {
                 if (getState() == PLAYER_STATE_PLAYING) {
@@ -307,8 +307,8 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
      * @throws IllegalArgumentException if the attributes are null or invalid.
      */
     @Override
-    public void setAudioAttributes(@NonNull AudioAttributes attributes) {
-        addTask(new Task(CALL_COMPLETED_SET_AUDIO_ATTRIBUTES, false) {
+    public Object setAudioAttributes(@NonNull AudioAttributes attributes) {
+        return addTask(new Task(CALL_COMPLETED_SET_AUDIO_ATTRIBUTES, false) {
             @Override
             void process() {
                 if (attributes == null) {
@@ -332,8 +332,8 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
      * @param dsd the descriptor of data source you want to play
      */
     @Override
-    public void setDataSource(@NonNull DataSourceDesc dsd) {
-        addTask(new Task(CALL_COMPLETED_SET_DATA_SOURCE, false) {
+    public Object setDataSource(@NonNull DataSourceDesc dsd) {
+        return addTask(new Task(CALL_COMPLETED_SET_DATA_SOURCE, false) {
             @Override
             void process() throws IOException {
                 checkArgument(dsd != null, "the DataSourceDesc cannot be null");
@@ -358,8 +358,8 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
      * @param dsd the descriptor of data source you want to play after current one
      */
     @Override
-    public void setNextDataSource(@NonNull DataSourceDesc dsd) {
-        addTask(new Task(CALL_COMPLETED_SET_NEXT_DATA_SOURCE, false) {
+    public Object setNextDataSource(@NonNull DataSourceDesc dsd) {
+        return addTask(new Task(CALL_COMPLETED_SET_NEXT_DATA_SOURCE, false) {
             @Override
             void process() {
                 checkArgument(dsd != null, "the DataSourceDesc cannot be null");
@@ -380,8 +380,8 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
      * @param dsds the list of data sources you want to play after current one
      */
     @Override
-    public void setNextDataSources(@NonNull List<DataSourceDesc> dsds) {
-        addTask(new Task(CALL_COMPLETED_SET_NEXT_DATA_SOURCES, false) {
+    public Object setNextDataSources(@NonNull List<DataSourceDesc> dsds) {
+        return addTask(new Task(CALL_COMPLETED_SET_NEXT_DATA_SOURCES, false) {
             @Override
             void process() {
                 if (dsds == null || dsds.size() == 0) {
@@ -405,8 +405,8 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
     }
 
     @Override
-    public void clearNextDataSources() {
-        addTask(new Task(CALL_COMPLETED_CLEAR_NEXT_DATA_SOURCES, false) {
+    public Object clearNextDataSources() {
+        return addTask(new Task(CALL_COMPLETED_CLEAR_NEXT_DATA_SOURCES, false) {
             @Override
             void process() {
                 synchronized (mSrcLock) {
@@ -433,8 +433,8 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
      * @param loop true if the current data source is meant to loop.
      */
     @Override
-    public void loopCurrent(boolean loop) {
-        addTask(new Task(CALL_COMPLETED_LOOP_CURRENT, false) {
+    public Object loopCurrent(boolean loop) {
+        return addTask(new Task(CALL_COMPLETED_LOOP_CURRENT, false) {
             @Override
             void process() {
                 // TODO: set the looping mode, send notification
@@ -455,8 +455,8 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
      * @param volume a value between 0.0f and {@link #getMaxPlayerVolume()}.
      */
     @Override
-    public void setPlayerVolume(float volume) {
-        addTask(new Task(CALL_COMPLETED_SET_PLAYER_VOLUME, false) {
+    public Object setPlayerVolume(float volume) {
+        return addTask(new Task(CALL_COMPLETED_SET_PLAYER_VOLUME, false) {
             @Override
             void process() {
                 mVolume = volume;
@@ -532,8 +532,8 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
     private native byte[] _invoke(byte[] request);
 
     @Override
-    public void notifyWhenCommandLabelReached(Object label) {
-        addTask(new Task(CALL_COMPLETED_NOTIFY_WHEN_COMMAND_LABEL_REACHED, false) {
+    public Object notifyWhenCommandLabelReached(Object label) {
+        return addTask(new Task(CALL_COMPLETED_NOTIFY_WHEN_COMMAND_LABEL_REACHED, false) {
             @Override
             void process() {
                 sendEvent(new EventNotifier() {
@@ -547,57 +547,27 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
         });
     }
 
-    /**
-     * Sets the {@link SurfaceHolder} to use for displaying the video
-     * portion of the media.
-     *
-     * Either a surface holder or surface must be set if a display or video sink
-     * is needed.  Not calling this method or {@link #setSurface(Surface)}
-     * when playing back a video will result in only the audio track being played.
-     * A null surface holder or surface will result in only the audio track being
-     * played.
-     *
-     * @param sh the SurfaceHolder to use for video display
-     * @throws IllegalStateException if the internal player engine has not been
-     * initialized or has been released.
-     * @hide
-     */
     @Override
-    public void setDisplay(SurfaceHolder sh) {
-        mSurfaceHolder = sh;
-        Surface surface;
-        if (sh != null) {
-            surface = sh.getSurface();
-        } else {
-            surface = null;
-        }
-        _setVideoSurface(surface);
-        updateSurfaceScreenOn();
+    public Object setDisplay(SurfaceHolder sh) {
+        return addTask(new Task(CALL_COMPLETED_SET_DISPLAY, false) {
+            @Override
+            void process() {
+                mSurfaceHolder = sh;
+                Surface surface;
+                if (sh != null) {
+                    surface = sh.getSurface();
+                } else {
+                    surface = null;
+                }
+                _setVideoSurface(surface);
+                updateSurfaceScreenOn();
+            }
+        });
     }
 
-    /**
-     * Sets the {@link Surface} to be used as the sink for the video portion of
-     * the media. This is similar to {@link #setDisplay(SurfaceHolder)}, but
-     * does not support {@link #setScreenOnWhilePlaying(boolean)}.  Setting a
-     * Surface will un-set any Surface or SurfaceHolder that was previously set.
-     * A null surface will result in only the audio track being played.
-     *
-     * If the Surface sends frames to a {@link SurfaceTexture}, the timestamps
-     * returned from {@link SurfaceTexture#getTimestamp()} will have an
-     * unspecified zero point.  These timestamps cannot be directly compared
-     * between different media sources, different instances of the same media
-     * source, or multiple runs of the same program.  The timestamp is normally
-     * monotonically increasing and is unaffected by time-of-day adjustments,
-     * but it is reset when the position is set.
-     *
-     * @param surface The {@link Surface} to be used for the video portion of
-     * the media.
-     * @throws IllegalStateException if the internal player engine has not been
-     * initialized or has been released.
-     */
     @Override
-    public void setSurface(Surface surface) {
-        addTask(new Task(CALL_COMPLETED_SET_SURFACE, false) {
+    public Object setSurface(Surface surface) {
+        return addTask(new Task(CALL_COMPLETED_SET_SURFACE, false) {
             @Override
             void process() {
                 if (mScreenOnWhilePlaying && surface != null) {
@@ -630,8 +600,8 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
      * @hide
      */
     @Override
-    public void setVideoScalingMode(int mode) {
-        addTask(new Task(CALL_COMPLETED_SET_VIDEO_SCALING_MODE, false) {
+    public Object setVideoScalingMode(int mode) {
+        return addTask(new Task(CALL_COMPLETED_SET_VIDEO_SCALING_MODE, false) {
             @Override
             void process() {
                 if (!isVideoScalingModeSupported(mode)) {
@@ -648,18 +618,26 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
         });
     }
 
-    /**
-     * Discards all pending commands.
-     */
     @Override
-    public void clearPendingCommands() {
+    public boolean cancelCommand(Object token) {
+        synchronized (mTaskLock) {
+            return mPendingTasks.remove(token);
+        }
     }
 
-    private void addTask(Task task) {
+    @Override
+    public void clearPendingCommands() {
+        synchronized (mTaskLock) {
+            mPendingTasks.clear();
+        }
+    }
+
+    private Object addTask(Task task) {
         synchronized (mTaskLock) {
             mPendingTasks.add(task);
             processPendingTask_l();
         }
+        return task;
     }
 
     @GuardedBy("mTaskLock")
@@ -1282,23 +1260,9 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
     @NonNull
     public native BufferingParams getBufferingParams();
 
-    /**
-     * Sets buffering management params.
-     * The object sets its internal BufferingParams to the input, except that the input is
-     * invalid or not supported.
-     * Call it only after {@code setDataSource} has been called.
-     * The input is a hint to MediaPlayer2.
-     *
-     * @param params the buffering management params.
-     *
-     * @throws IllegalStateException if the internal player engine has not been
-     * initialized or has been released, or {@code setDataSource} has not been called.
-     * @throws IllegalArgumentException if params is invalid or not supported.
-     * @hide
-     */
     @Override
-    public void setBufferingParams(@NonNull BufferingParams params) {
-        addTask(new Task(CALL_COMPLETED_SET_BUFFERING_PARAMS, false) {
+    public Object setBufferingParams(@NonNull BufferingParams params) {
+        return addTask(new Task(CALL_COMPLETED_SET_BUFFERING_PARAMS, false) {
             @Override
             void process() {
                 checkArgument(params != null, "the BufferingParams cannot be null");
@@ -1345,24 +1309,9 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
         return params;
     }
 
-    /**
-     * Sets playback rate using {@link PlaybackParams}. The object sets its internal
-     * PlaybackParams to the input, except that the object remembers previous speed
-     * when input speed is zero. This allows the object to resume at previous speed
-     * when play() is called. Calling it before the object is prepared does not change
-     * the object state. After the object is prepared, calling it with zero speed is
-     * equivalent to calling pause(). After the object is prepared, calling it with
-     * non-zero speed is equivalent to calling play().
-     *
-     * @param params the playback params.
-     *
-     * @throws IllegalStateException if the internal player engine has not been
-     * initialized or has been released.
-     * @throws IllegalArgumentException if params is not supported.
-     */
     @Override
-    public void setPlaybackParams(@NonNull PlaybackParams params) {
-        addTask(new Task(CALL_COMPLETED_SET_PLAYBACK_PARAMS, false) {
+    public Object setPlaybackParams(@NonNull PlaybackParams params) {
+        return addTask(new Task(CALL_COMPLETED_SET_PLAYBACK_PARAMS, false) {
             @Override
             void process() {
                 checkArgument(params != null, "the PlaybackParams cannot be null");
@@ -1394,8 +1343,8 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
      * @throws IllegalArgumentException if params are not supported.
      */
     @Override
-    public void setSyncParams(@NonNull SyncParams params) {
-        addTask(new Task(CALL_COMPLETED_SET_SYNC_PARAMS, false) {
+    public Object setSyncParams(@NonNull SyncParams params) {
+        return addTask(new Task(CALL_COMPLETED_SET_SYNC_PARAMS, false) {
             @Override
             void process() {
                 checkArgument(params != null, "the SyncParams cannot be null");
@@ -1449,8 +1398,8 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
      * @throws IllegalArgumentException if the mode is invalid.
      */
     @Override
-    public void seekTo(final long msec, @SeekMode int mode) {
-        addTask(new Task(CALL_COMPLETED_SEEK_TO, true) {
+    public Object seekTo(final long msec, @SeekMode int mode) {
+        return addTask(new Task(CALL_COMPLETED_SEEK_TO, true) {
             @Override
             void process() {
                 if (mode < SEEK_PREVIOUS_SYNC || mode > SEEK_CLOSEST) {
@@ -1582,8 +1531,8 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
      * @throws IllegalArgumentException if the sessionId is invalid.
      */
     @Override
-    public void setAudioSessionId(int sessionId) {
-        addTask(new Task(CALL_COMPLETED_SET_AUDIO_SESSION_ID, false) {
+    public Object setAudioSessionId(int sessionId) {
+        return addTask(new Task(CALL_COMPLETED_SET_AUDIO_SESSION_ID, false) {
             @Override
             void process() {
                 _setAudioSessionId(sessionId);
@@ -1617,8 +1566,8 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
      * @param effectId system wide unique id of the effect to attach
      */
     @Override
-    public void attachAuxEffect(int effectId) {
-        addTask(new Task(CALL_COMPLETED_ATTACH_AUX_EFFECT, false) {
+    public Object attachAuxEffect(int effectId) {
+        return addTask(new Task(CALL_COMPLETED_ATTACH_AUX_EFFECT, false) {
             @Override
             void process() {
                 _attachAuxEffect(effectId);
@@ -1641,8 +1590,8 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
      * @param level send level scalar
      */
     @Override
-    public void setAuxEffectSendLevel(float level) {
-        addTask(new Task(CALL_COMPLETED_SET_AUX_EFFECT_SEND_LEVEL, false) {
+    public Object setAuxEffectSendLevel(float level) {
+        return addTask(new Task(CALL_COMPLETED_SET_AUX_EFFECT_SEND_LEVEL, false) {
             @Override
             void process() {
                 _setAuxEffectSendLevel(level);
@@ -1858,8 +1807,8 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
      * @see android.media.MediaPlayer2#getTrackInfo
      */
     @Override
-    public void selectTrack(int index) {
-        addTask(new Task(CALL_COMPLETED_SELECT_TRACK, false) {
+    public Object selectTrack(int index) {
+        return addTask(new Task(CALL_COMPLETED_SELECT_TRACK, false) {
             @Override
             void process() {
                 selectOrDeselectTrack(index, true /* select */);
@@ -1882,8 +1831,8 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
      * @see android.media.MediaPlayer2#getTrackInfo
      */
     @Override
-    public void deselectTrack(int index) {
-        addTask(new Task(CALL_COMPLETED_DESELECT_TRACK, false) {
+    public Object deselectTrack(int index) {
+        return addTask(new Task(CALL_COMPLETED_DESELECT_TRACK, false) {
             @Override
             void process() {
                 selectOrDeselectTrack(index, false /* select */);
@@ -2526,8 +2475,8 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
     }
 
     @Override
-    public void prepareDrm(@NonNull UUID uuid) {
-        addTask(new Task(CALL_COMPLETED_PREPARE_DRM, true) {
+    public Object prepareDrm(@NonNull UUID uuid) {
+        return addTask(new Task(CALL_COMPLETED_PREPARE_DRM, true) {
             @Override
             void process() {
                 int status = PREPARE_DRM_STATUS_SUCCESS;
@@ -2682,57 +2631,40 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
         }  // synchronized
     }
 
-
-    private native void _releaseDrm();
-
-    /**
-     * Releases the DRM session
-     * <p>
-     * The player has to have an active DRM session and be in stopped, or prepared
-     * state before this call is made.
-     * A {@code reset()} call will release the DRM session implicitly.
-     *
-     * @throws NoDrmSchemeException if there is no active DRM session to release
-     */
     @Override
     public void releaseDrm()
-            throws NoDrmSchemeException
-    {
-        addTask(new Task(CALL_COMPLETED_RELEASE_DRM, false) {
-            @Override
-            void process() throws NoDrmSchemeException {
-                synchronized (mDrmLock) {
-                    Log.v(TAG, "releaseDrm:");
+            throws NoDrmSchemeException {
+        synchronized (mDrmLock) {
+            Log.v(TAG, "releaseDrm:");
 
-                    if (!mActiveDrmScheme) {
-                        Log.e(TAG, "releaseDrm(): No active DRM scheme to release.");
-                        throw new NoDrmSchemeExceptionImpl(
-                                "releaseDrm: No active DRM scheme to release.");
-                    }
-
-                    try {
-                        // we don't have the player's state in this layer. The below call raises
-                        // exception if we're in a non-stopped/prepared state.
-
-                        // for cleaning native/mediaserver crypto object
-                        _releaseDrm();
-
-                        // for cleaning client-side MediaDrm object; only called if above has succeeded
-                        cleanDrmObj();
-
-                        mActiveDrmScheme = false;
-                    } catch (IllegalStateException e) {
-                        Log.w(TAG, "releaseDrm: Exception ", e);
-                        throw new IllegalStateException(
-                                "releaseDrm: The player is not in a valid state.");
-                    } catch (Exception e) {
-                        Log.e(TAG, "releaseDrm: Exception ", e);
-                    }
-                }   // synchronized
+            if (!mActiveDrmScheme) {
+                Log.e(TAG, "releaseDrm(): No active DRM scheme to release.");
+                throw new NoDrmSchemeExceptionImpl(
+                        "releaseDrm: No active DRM scheme to release.");
             }
-        });
+
+            try {
+                // we don't have the player's state in this layer. The below call raises
+                // exception if we're in a non-stopped/prepared state.
+
+                // for cleaning native/mediaserver crypto object
+                _releaseDrm();
+
+                // for cleaning client-side MediaDrm object; only called if above has succeeded
+                cleanDrmObj();
+
+                mActiveDrmScheme = false;
+            } catch (IllegalStateException e) {
+                Log.w(TAG, "releaseDrm: Exception ", e);
+                throw new IllegalStateException(
+                        "releaseDrm: The player is not in a valid state.");
+            } catch (Exception e) {
+                Log.e(TAG, "releaseDrm: Exception ", e);
+            }
+        }  // synchronized
     }
 
+    private native void _releaseDrm();
 
     /**
      * A key request/response exchange occurs between the app and a license server
@@ -2823,7 +2755,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
      * provided to the DRM engine plugin using provideDrmKeyResponse. When the
      * response is for an offline key request, a key-set identifier is returned that
      * can be used to later restore the keys to a new session with the method
-     * {@ link # restoreDrmKeys}.
+     * {@link # restoreDrmKeys}.
      * When the response is for a streaming or release request, null is returned.
      *
      * @param keySetId When the response is for a release request, keySetId identifies
@@ -2876,42 +2808,26 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
         }   // synchronized
     }
 
-
-    /**
-     * Restore persisted offline keys into a new session.  keySetId identifies the
-     * keys to load, obtained from a prior call to {@link #provideDrmKeyResponse}.
-     *
-     * @param keySetId identifies the saved key set to restore
-     */
     @Override
     public void restoreDrmKeys(@NonNull byte[] keySetId)
-            throws NoDrmSchemeException
-    {
-        addTask(new Task(CALL_COMPLETED_RESTORE_DRM_KEYS, false) {
-            @Override
-            void process() throws NoDrmSchemeException {
-                Log.v(TAG, "restoreDrmKeys: keySetId: " + keySetId);
+            throws NoDrmSchemeException {
+        Log.v(TAG, "restoreDrmKeys: keySetId: " + keySetId);
 
-                synchronized (mDrmLock) {
-
-                    if (!mActiveDrmScheme) {
-                        Log.w(TAG, "restoreDrmKeys NoDrmSchemeException");
-                        throw new NoDrmSchemeExceptionImpl(
-                                "restoreDrmKeys: Has to set a DRM scheme first.");
-                    }
-
-                    try {
-                        mDrmObj.restoreKeys(mDrmSessionId, keySetId);
-                    } catch (Exception e) {
-                        Log.w(TAG, "restoreKeys Exception " + e);
-                        throw e;
-                    }
-
-                }   // synchronized
+        synchronized (mDrmLock) {
+            if (!mActiveDrmScheme) {
+                Log.w(TAG, "restoreDrmKeys NoDrmSchemeException");
+                throw new NoDrmSchemeExceptionImpl(
+                        "restoreDrmKeys: Has to set a DRM scheme first.");
             }
-        });
-    }
 
+            try {
+                mDrmObj.restoreKeys(mDrmSessionId, keySetId);
+            } catch (Exception e) {
+                Log.w(TAG, "restoreKeys Exception " + e);
+                throw e;
+            }
+        }  // synchronized
+    }
 
     /**
      * Read a DRM engine plugin String property value, given the property name string.
@@ -3601,7 +3517,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
         private void sendCompleteNotification(int status) {
             // In {@link #notifyWhenCommandLabelReached} case, a separate callback
             // {@link #onCommandLabelReached} is already called in {@code process()}.
-            // CALL_COMPLETED_PREPARE_DRM is sent via DrmEventCallback
+            // CALL_COMPLETED_PREPARE_DRM is sent via DrmEventCallback#onDrmPrepared
             if (mMediaCallType == CALL_COMPLETED_NOTIFY_WHEN_COMMAND_LABEL_REACHED
                     || mMediaCallType == CALL_COMPLETED_PREPARE_DRM) {
                 return;
