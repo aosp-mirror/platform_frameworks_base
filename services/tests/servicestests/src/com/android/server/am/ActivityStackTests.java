@@ -38,9 +38,9 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
@@ -250,6 +250,26 @@ public class ActivityStackTests extends ActivityTestsBase {
         assertEquals(task.getTopActivity(false /* includeOverlays */), r);
         assertEquals(task.getTopActivity(true /* includeOverlays */), taskOverlay);
         assertNotNull(result.mRecord);
+    }
+
+    @Test
+    public void testMoveStackToBackIncludingParent() {
+        final ActivityDisplay display = addNewActivityDisplayAt(ActivityDisplay.POSITION_TOP);
+        final ActivityStack stack1 = createStackForShouldBeVisibleTest(display,
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
+        final ActivityStack stack2 = createStackForShouldBeVisibleTest(display,
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD, true /* onTop */);
+
+        // Do not move display to back because there is still another stack.
+        stack2.moveToBack("testMoveStackToBackIncludingParent", stack2.topTask());
+        verify(stack2.getWindowContainerController()).positionChildAtBottom(any(),
+                eq(false) /* includingParents */);
+
+        // Also move display to back because there is only one stack left.
+        display.removeChild(stack1);
+        stack2.moveToBack("testMoveStackToBackIncludingParent", stack2.topTask());
+        verify(stack2.getWindowContainerController()).positionChildAtBottom(any(),
+                eq(true) /* includingParents */);
     }
 
     @Test
