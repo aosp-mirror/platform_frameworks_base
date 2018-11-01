@@ -50,6 +50,7 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.telephony.euicc.EuiccManager;
+import android.telephony.ims.ImsMmTelManager;
 import android.util.DisplayMetrics;
 import android.util.Log;
 
@@ -133,7 +134,7 @@ public class SubscriptionManager {
      * A content {@link Uri} used to receive updates on wfc enabled user setting.
      * <p>
      * Use this {@link Uri} with a {@link ContentObserver} to be notified of changes to the
-     * subscription wfc enabled {@link SubscriptionManager#WFC_IMS_ENABLED}
+     * subscription wfc enabled {@link ImsMmTelManager#isVoWiFiSettingEnabled()}
      * while your app is running. You can also use a {@link JobService} to ensure your app
      * is notified of changes to the {@link Uri} even when it is not running.
      * Note, however, that using a {@link JobService} does not guarantee timely delivery of
@@ -146,10 +147,28 @@ public class SubscriptionManager {
     public static final Uri WFC_ENABLED_CONTENT_URI = Uri.withAppendedPath(CONTENT_URI, "wfc");
 
     /**
-     * A content {@link Uri} used to receive updates on enhanced 4g user setting.
+     * A content {@link Uri} used to receive updates on advanced calling user setting.
      * <p>
      * Use this {@link Uri} with a {@link ContentObserver} to be notified of changes to the
-     * subscription enhanced 4G enabled {@link SubscriptionManager#ENHANCED_4G_MODE_ENABLED}
+     * subscription advanced calling enabled
+     * {@link ImsMmTelManager#isAdvancedCallingSettingEnabled()} while your app is running.
+     * You can also use a {@link JobService} to ensure your app is notified of changes to the
+     * {@link Uri} even when it is not running.
+     * Note, however, that using a {@link JobService} does not guarantee timely delivery of
+     * updates to the {@link Uri}.
+     * To be notified of changes to a specific subId, append subId to the URI
+     * {@link Uri#withAppendedPath(Uri, String)}.
+     * @hide
+     */
+    @SystemApi
+    public static final Uri ADVANCED_CALLING_ENABLED_CONTENT_URI = Uri.withAppendedPath(
+            CONTENT_URI, "advanced_calling");
+
+    /**
+     * A content {@link Uri} used to receive updates on wfc mode setting.
+     * <p>
+     * Use this {@link Uri} with a {@link ContentObserver} to be notified of changes to the
+     * subscription wfc mode {@link ImsMmTelManager#getVoWiFiModeSetting()}
      * while your app is running. You can also use a {@link JobService} to ensure your app
      * is notified of changes to the {@link Uri} even when it is not running.
      * Note, however, that using a {@link JobService} does not guarantee timely delivery of
@@ -159,9 +178,59 @@ public class SubscriptionManager {
      * @hide
      */
     @SystemApi
-    public static final Uri ENHANCED_4G_ENABLED_CONTENT_URI = Uri.withAppendedPath(
-            CONTENT_URI, "enhanced_4g");
+    public static final Uri WFC_MODE_CONTENT_URI = Uri.withAppendedPath(CONTENT_URI, "wfc_mode");
 
+    /**
+     * A content {@link Uri} used to receive updates on wfc roaming mode setting.
+     * <p>
+     * Use this {@link Uri} with a {@link ContentObserver} to be notified of changes to the
+     * subscription wfc roaming mode {@link ImsMmTelManager#getVoWiFiRoamingModeSetting()}
+     * while your app is running. You can also use a {@link JobService} to ensure your app
+     * is notified of changes to the {@link Uri} even when it is not running.
+     * Note, however, that using a {@link JobService} does not guarantee timely delivery of
+     * updates to the {@link Uri}.
+     * To be notified of changes to a specific subId, append subId to the URI
+     * {@link Uri#withAppendedPath(Uri, String)}.
+     * @hide
+     */
+    @SystemApi
+    public static final Uri WFC_ROAMING_MODE_CONTENT_URI = Uri.withAppendedPath(
+            CONTENT_URI, "wfc_roaming_mode");
+
+    /**
+     * A content {@link Uri} used to receive updates on vt(video telephony over IMS) enabled
+     * setting.
+     * <p>
+     * Use this {@link Uri} with a {@link ContentObserver} to be notified of changes to the
+     * subscription vt enabled {@link ImsMmTelManager#isVtSettingEnabled()}
+     * while your app is running. You can also use a {@link JobService} to ensure your app
+     * is notified of changes to the {@link Uri} even when it is not running.
+     * Note, however, that using a {@link JobService} does not guarantee timely delivery of
+     * updates to the {@link Uri}.
+     * To be notified of changes to a specific subId, append subId to the URI
+     * {@link Uri#withAppendedPath(Uri, String)}.
+     * @hide
+     */
+    @SystemApi
+    public static final Uri VT_ENABLED_CONTENT_URI = Uri.withAppendedPath(
+            CONTENT_URI, "vt_enabled");
+
+    /**
+     * A content {@link Uri} used to receive updates on wfc roaming enabled setting.
+     * <p>
+     * Use this {@link Uri} with a {@link ContentObserver} to be notified of changes to the
+     * subscription wfc roaming enabled {@link ImsMmTelManager#isVoWiFiRoamingSettingEnabled()}
+     * while your app is running. You can also use a {@link JobService} to ensure your app
+     * is notified of changes to the {@link Uri} even when it is not running.
+     * Note, however, that using a {@link JobService} does not guarantee timely delivery of
+     * updates to the {@link Uri}.
+     * To be notified of changes to a specific subId, append subId to the URI
+     * {@link Uri#withAppendedPath(Uri, String)}.
+     * @hide
+     */
+    @SystemApi
+    public static final Uri WFC_ROAMING_ENABLED_CONTENT_URI = Uri.withAppendedPath(
+            CONTENT_URI, "wfc_roaming_enabled");
 
     /**
      * TelephonyProvider unique key column name is the subscription id.
