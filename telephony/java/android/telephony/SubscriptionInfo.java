@@ -143,9 +143,11 @@ public class SubscriptionInfo implements Parcelable {
     private boolean mIsOpportunistic;
 
     /**
-     * SubId of the parent subscription, if there is one.
+     * A UUID assigned to the subscription group. It returns
+     * null if not assigned.
      */
-    private int mParentSubId;
+    @Nullable
+    private String mGroupUUID;
 
     /**
      * @hide
@@ -156,7 +158,7 @@ public class SubscriptionInfo implements Parcelable {
             @Nullable UiccAccessRule[] accessRules, String cardId) {
         this(id, iccId, simSlotIndex, displayName, carrierName, nameSource, iconTint, number,
                 roaming, icon, mcc, mnc, countryIso, isEmbedded, accessRules, cardId,
-                false, SubscriptionManager.INVALID_SUBSCRIPTION_ID);
+                false, null);
     }
 
     /**
@@ -166,7 +168,7 @@ public class SubscriptionInfo implements Parcelable {
             CharSequence carrierName, int nameSource, int iconTint, String number, int roaming,
             Bitmap icon, String mcc, String mnc, String countryIso, boolean isEmbedded,
             @Nullable UiccAccessRule[] accessRules, String cardId, boolean isOpportunistic,
-            int parentSubId) {
+            @Nullable String groupUUID) {
         this.mId = id;
         this.mIccId = iccId;
         this.mSimSlotIndex = simSlotIndex;
@@ -184,7 +186,7 @@ public class SubscriptionInfo implements Parcelable {
         this.mAccessRules = accessRules;
         this.mCardId = cardId;
         this.mIsOpportunistic = isOpportunistic;
-        this.mParentSubId = parentSubId;
+        this.mGroupUUID = groupUUID;
     }
 
     /**
@@ -388,16 +390,16 @@ public class SubscriptionInfo implements Parcelable {
     }
 
     /**
-     * Used in scenarios where a child subscription is bundled with a primary parent subscription.
-     * The child subscription will typically be opportunistic (see {@link #isOpportunistic()})
-     * and will be used to provide data services where available, with the parent being the primary
-     * fallback subscription.
+     * Used in scenarios where different subscriptions are bundled as a group.
+     * It's typically a primary and an opportunistic subscription. (see {@link #isOpportunistic()})
+     * Such that those subscriptions will have some affiliated behaviors such as opportunistic
+     * subscription may be invisible to the user.
      *
-     * @return subId of parent subscription if it’s bundled with a primary subscription.
-     * If there isn't one, {@link SubscriptionManager#INVALID_SUBSCRIPTION_ID}
+     * @return group UUID a String of group UUID if it belongs to a group. Otherwise
+     * it will return null.
      */
-    public int getParentSubId() {
-        return mParentSubId;
+    public String getGroupUuid() {
+        return mGroupUUID;
     }
 
     /**
@@ -493,11 +495,11 @@ public class SubscriptionInfo implements Parcelable {
             UiccAccessRule[] accessRules = source.createTypedArray(UiccAccessRule.CREATOR);
             String cardId = source.readString();
             boolean isOpportunistic = source.readBoolean();
-            int parentSubId = source.readInt();
+            String groupUUID = source.readString();
 
             return new SubscriptionInfo(id, iccId, simSlotIndex, displayName, carrierName,
                     nameSource, iconTint, number, dataRoaming, iconBitmap, mcc, mnc, countryIso,
-                    isEmbedded, accessRules, cardId, isOpportunistic, parentSubId);
+                    isEmbedded, accessRules, cardId, isOpportunistic, groupUUID);
         }
 
         @Override
@@ -525,7 +527,7 @@ public class SubscriptionInfo implements Parcelable {
         dest.writeTypedArray(mAccessRules, flags);
         dest.writeString(mCardId);
         dest.writeBoolean(mIsOpportunistic);
-        dest.writeInt(mParentSubId);
+        dest.writeString(mGroupUUID);
     }
 
     @Override
@@ -559,13 +561,13 @@ public class SubscriptionInfo implements Parcelable {
                 + " mnc " + mMnc + "mCountryIso=" + mCountryIso + " isEmbedded " + mIsEmbedded
                 + " accessRules " + Arrays.toString(mAccessRules)
                 + " cardId=" + cardIdToPrint + " isOpportunistic " + mIsOpportunistic
-                + " parentSubId=" + mParentSubId + "}";
+                + " mGroupUUID=" + mGroupUUID + "}";
     }
 
     @Override
     public int hashCode() {
         return Objects.hash(mId, mSimSlotIndex, mNameSource, mIconTint, mDataRoaming, mIsEmbedded,
-                mIsOpportunistic, mParentSubId, mIccId, mNumber, mMcc, mMnc, mCountryIso,
+                mIsOpportunistic, mGroupUUID, mIccId, mNumber, mMcc, mMnc, mCountryIso,
                 mCardId, mDisplayName, mCarrierName, mAccessRules);
     }
 
@@ -588,7 +590,7 @@ public class SubscriptionInfo implements Parcelable {
                 && mDataRoaming == toCompare.mDataRoaming
                 && mIsEmbedded == toCompare.mIsEmbedded
                 && mIsOpportunistic == toCompare.mIsOpportunistic
-                && mParentSubId == toCompare.mParentSubId
+                && Objects.equals(mGroupUUID, toCompare.mGroupUUID)
                 && Objects.equals(mIccId, toCompare.mIccId)
                 && Objects.equals(mNumber, toCompare.mNumber)
                 && Objects.equals(mMcc, toCompare.mMcc)

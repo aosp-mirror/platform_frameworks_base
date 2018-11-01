@@ -118,7 +118,6 @@ public class SubscriptionManager {
     @UnsupportedAppUsage
     public static final Uri CONTENT_URI = Uri.parse("content://telephony/siminfo");
 
-
     /**
      * Generates a content {@link Uri} used to receive updates on simInfo change
      * on the given subscriptionId
@@ -506,6 +505,15 @@ public class SubscriptionManager {
      * @hide
      */
     public static final String PARENT_SUB_ID = "parent_sub_id";
+
+    /**
+     * TelephonyProvider column name for group ID. Subscriptions with same group ID
+     * are considered bundled together, and should behave as a single subscription at
+     * certain scenarios.
+     *
+     * @hide
+     */
+    public static final String GROUP_UUID = "group_uuid";
 
     /**
      * Broadcast Action: The user has changed one of the default subs related to
@@ -2296,19 +2304,40 @@ public class SubscriptionManager {
     }
 
     /**
-     * Set parent subId by simInfo index
+     * Inform SubscriptionManager that subscriptions in the list are bundled
+     * as a group. Typically it's a primary subscription and an opportunistic
+     * subscription. It should only affect multi-SIM scenarios where primary
+     * and opportunistic subscriptions can be activated together.
+     * Being in the same group means they might be activated or deactivated
+     * together, some of them may be invisible to the users, etc.
      *
-     * @param parentSubId subId of its parent subscription.
-     * @param subId the unique SubscriptionInfo index in database
-     * @return the number of records updated
-     * @hide
+     * Caller will either have {@link android.Manifest.permission.MODIFY_PHONE_STATE}
+     * permission or can manage all subscriptions in the list, according to their
+     * acess rules.
+     *
+     * @param subIdList list of subId that will be in the same group
+     * @return groupUUID a UUID assigned to the subscription group. It returns
+     * null if fails.
      *
      */
     @RequiresPermission(android.Manifest.permission.MODIFY_PHONE_STATE)
-    public int setParentSubId(int parentSubId, int subId) {
-        if (VDBG) logd("[setParentSubId]+ parentSubId:" + parentSubId + " subId:" + subId);
-        return setSubscriptionPropertyHelper(subId, "parentSubId",
-                (iSub)-> iSub.setParentSubId(parentSubId, subId));
+    public String setSubscriptionGroup(int[] subIdList) {
+        String pkgForDebug = mContext != null ? mContext.getOpPackageName() : "<unknown>";
+        if (VDBG) {
+            logd("[setSubscriptionGroup]+ subIdList:" + Arrays.toString(subIdList));
+        }
+
+        String groupUUID = null;
+        try {
+            ISub iSub = ISub.Stub.asInterface(ServiceManager.getService("isub"));
+            if (iSub != null) {
+                groupUUID = iSub.setSubscriptionGroup(subIdList, pkgForDebug);
+            }
+        } catch (RemoteException ex) {
+            // ignore it
+        }
+
+        return groupUUID;
     }
 
     private interface CallISubMethodHelper {
