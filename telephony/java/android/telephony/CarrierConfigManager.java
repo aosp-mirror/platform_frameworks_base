@@ -2239,6 +2239,13 @@ public class CarrierConfigManager {
     public static final String KEY_SUPPORT_CLIR_NETWORK_DEFAULT_BOOL =
             "support_clir_network_default_bool";
 
+    /**
+     * Determines whether the carrier want to support emergency dialer shortcut.
+     * @hide
+     */
+    public static final String KEY_SUPPORT_EMERGENCY_DIALER_SHORTCUT_BOOL =
+            "support_emergency_dialer_shortcut_bool";
+
     /** The default value for every variable. */
     private final static PersistableBundle sDefaults;
 
@@ -2588,6 +2595,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_CALLER_ID_OVER_UT_WARNING_BOOL, false);
         sDefaults.putBoolean(KEY_CALL_WAITING_OVER_UT_WARNING_BOOL, false);
         sDefaults.putBoolean(KEY_SUPPORT_CLIR_NETWORK_DEFAULT_BOOL, true);
+        sDefaults.putBoolean(KEY_SUPPORT_EMERGENCY_DIALER_SHORTCUT_BOOL, true);
     }
 
     /**
