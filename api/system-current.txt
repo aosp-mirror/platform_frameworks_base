@@ -810,9 +810,12 @@ package android.app.role {
 
   public final class RoleManager {
     method public void addRoleHolderAsUser(java.lang.String, java.lang.String, android.os.UserHandle, java.util.concurrent.Executor, android.app.role.RoleManagerCallback);
+    method public boolean addRoleHolderFromController(java.lang.String, java.lang.String);
     method public void clearRoleHoldersAsUser(java.lang.String, android.os.UserHandle, java.util.concurrent.Executor, android.app.role.RoleManagerCallback);
-    method public java.util.Set<java.lang.String> getRoleHoldersAsUser(java.lang.String, android.os.UserHandle);
+    method public java.util.List<java.lang.String> getRoleHolders(java.lang.String);
+    method public java.util.List<java.lang.String> getRoleHoldersAsUser(java.lang.String, android.os.UserHandle);
     method public void removeRoleHolderAsUser(java.lang.String, java.lang.String, android.os.UserHandle, java.util.concurrent.Executor, android.app.role.RoleManagerCallback);
+    method public boolean removeRoleHolderFromController(java.lang.String, java.lang.String);
     field public static final java.lang.String EXTRA_REQUEST_ROLE_NAME = "android.app.role.extra.REQUEST_ROLE_NAME";
   }
 
