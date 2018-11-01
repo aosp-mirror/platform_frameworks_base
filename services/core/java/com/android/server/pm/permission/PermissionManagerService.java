@@ -152,6 +152,13 @@ public class PermissionManagerService {
     @GuardedBy("mLock")
     private boolean mSystemReady;
 
+    /**
+     * For each foreground/background permission the mapping:
+     * Background permission -> foreground permissions
+     */
+    @GuardedBy("mLock")
+    private ArrayMap<String, List<String>> mBackgroundPermissions;
+
     PermissionManagerService(Context context,
             @Nullable DefaultPermissionGrantedCallback defaultGrantCallback,
             @NonNull Object externalLock) {
@@ -1770,6 +1777,28 @@ public class PermissionManagerService {
         // and make sure there are no dangling permissions.
         flags = updatePermissions(changingPkgName, changingPkg, flags);
 
+        synchronized (mLock) {
+            if (mBackgroundPermissions == null) {
+                // Cache background -> foreground permission mapping.
+                // Only system declares background permissions, hence mapping does never change.
+                mBackgroundPermissions = new ArrayMap<>();
+                for (BasePermission bp : mSettings.getAllPermissionsLocked()) {
+                    if (bp.perm.info != null && bp.perm.info.backgroundPermission != null) {
+                        String fgPerm = bp.name;
+                        String bgPerm = bp.perm.info.backgroundPermission;
+
+                        List<String> fgPerms = mBackgroundPermissions.get(bgPerm);
+                        if (fgPerms == null) {
+                            fgPerms = new ArrayList<>();
+                            mBackgroundPermissions.put(bgPerm, fgPerms);
+                        }
+
+                        fgPerms.add(fgPerm);
+                    }
+                }
+            }
+        }
+
         Trace.traceBegin(TRACE_TAG_PACKAGE_MANAGER, "restorePermissionState");
         // Now update the permissions for all packages, in particular
         // replace the granted permissions of the system packages.
@@ -2085,6 +2114,17 @@ public class PermissionManagerService {
         log.addTaggedData(MetricsEvent.FIELD_PERMISSION, name);
 
         mMetricsLogger.write(log);
+    }
+
+    /**
+     * Get the mapping of background permissions to their foreground permissions.
+     *
+     * <p>Only initialized in the system server.
+     *
+     * @return the map &lt;bg permission -> list&lt;fg perm&gt;&gt;
+     */
+    public @Nullable ArrayMap<String, List<String>> getBackgroundPermissions() {
+        return mBackgroundPermissions;
     }
 
     private class PermissionManagerInternalImpl extends PermissionManagerInternal {
