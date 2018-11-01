@@ -144,6 +144,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
 
     private OverviewProxyService mOverviewProxyService;
 
+    private boolean mIsOnDefaultDisplay = true;
     public boolean mHomeBlockedThisTouch;
 
     private final OverviewProxyListener mOverviewProxyListener = new OverviewProxyListener() {
@@ -241,6 +242,11 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
     public void onViewCreated(View view, @Nullable Bundle savedInstanceState) {
         super.onViewCreated(view, savedInstanceState);
         mNavigationBarView = (NavigationBarView) view;
+        final Display display = view.getDisplay();
+        // It may not have display when running unit test.
+        if (display != null) {
+            mIsOnDefaultDisplay = display.getDisplayId() == Display.DEFAULT_DISPLAY;
+        }
 
         mNavigationBarView.setComponents(mStatusBar.getPanel());
         mNavigationBarView.setDisabledFlags(mDisabledFlags1);
@@ -253,8 +259,6 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
         prepareNavigationBarView();
         checkNavBarModes();
 
-        setDisabled2Flags(mDisabledFlags2);
-
         IntentFilter filter = new IntentFilter(Intent.ACTION_SCREEN_OFF);
         filter.addAction(Intent.ACTION_SCREEN_ON);
         filter.addAction(Intent.ACTION_USER_SWITCHED);
@@ -262,16 +266,23 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
         notifyNavigationBarScreenOn();
         mOverviewProxyService.addCallback(mOverviewProxyListener);
 
-        RotationContextButton rotationButton = mNavigationBarView.getRotateSuggestionButton();
-        rotationButton.setListener(mRotationButtonListener);
-        rotationButton.addRotationCallback(mRotationWatcher);
+        // Currently there is no accelerometer sensor on non-default display.
+        if (mIsOnDefaultDisplay) {
+            final RotationContextButton rotationButton =
+                    mNavigationBarView.getRotateSuggestionButton();
+            rotationButton.setListener(mRotationButtonListener);
+            rotationButton.addRotationCallback(mRotationWatcher);
 
-        // Reset user rotation pref to match that of the WindowManager if starting in locked mode
-        // This will automatically happen when switching from auto-rotate to locked mode
-        if (rotationButton.isRotationLocked()) {
-            final int winRotation = mWindowManager.getDefaultDisplay().getRotation();
-            rotationButton.setRotationLockedAtAngle(winRotation);
+            // Reset user rotation pref to match that of the WindowManager if starting in locked
+            // mode. This will automatically happen when switching from auto-rotate to locked mode.
+            if (display != null && rotationButton.isRotationLocked()) {
+                final int winRotation = display.getRotation();
+                rotationButton.setRotationLockedAtAngle(winRotation);
+            }
+        } else {
+            mDisabledFlags2 |= StatusBarManager.DISABLE2_ROTATE_SUGGESTIONS;
         }
+        setDisabled2Flags(mDisabledFlags2);
     }
 
     @Override
@@ -389,7 +400,7 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
 
     @Override
     public void onRotationProposal(final int rotation, boolean isValid) {
-        final int winRotation = mWindowManager.getDefaultDisplay().getRotation();
+        final int winRotation = mNavigationBarView.getDisplay().getRotation();
         final boolean rotateSuggestionsDisabled = RotationContextButton
                 .hasDisable2RotateSuggestionFlag(mDisabledFlags2);
         if (RotationContextButton.DEBUG_ROTATION) {
@@ -477,10 +488,13 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
             updateScreenPinningGestures();
         }
 
-        final int masked2 = state2 & (StatusBarManager.DISABLE2_ROTATE_SUGGESTIONS);
-        if (masked2 != mDisabledFlags2) {
-            mDisabledFlags2 = masked2;
-            setDisabled2Flags(masked2);
+        // Only default display supports rotation suggestions.
+        if (mIsOnDefaultDisplay) {
+            final int masked2 = state2 & (StatusBarManager.DISABLE2_ROTATE_SUGGESTIONS);
+            if (masked2 != mDisabledFlags2) {
+                mDisabledFlags2 = masked2;
+                setDisabled2Flags(masked2);
+            }
         }
     }
 
@@ -881,13 +895,23 @@ public class NavigationBarFragment extends Fragment implements Callbacks {
         if (DEBUG) Log.v(TAG, "addNavigationBar: about to add " + navigationBarView);
         if (navigationBarView == null) return null;
 
+        final NavigationBarFragment fragment = new NavigationBarFragment();
+        navigationBarView.addOnAttachStateChangeListener(new View.OnAttachStateChangeListener() {
+            @Override
+            public void onViewAttachedToWindow(View v) {
+                final FragmentHostManager fragmentHost = FragmentHostManager.get(v);
+                fragmentHost.getFragmentManager().beginTransaction()
+                        .replace(R.id.navigation_bar_frame, fragment, TAG)
+                        .commit();
+                fragmentHost.addTagListener(TAG, listener);
+            }
+
+            @Override
+            public void onViewDetachedFromWindow(View v) {
+                FragmentHostManager.removeAndDestroy(v);
+            }
+        });
         context.getSystemService(WindowManager.class).addView(navigationBarView, lp);
-        FragmentHostManager fragmentHost = FragmentHostManager.get(navigationBarView);
-        NavigationBarFragment fragment = new NavigationBarFragment();
-        fragmentHost.getFragmentManager().beginTransaction()
-                .replace(R.id.navigation_bar_frame, fragment, TAG)
-                .commit();
-        fragmentHost.addTagListener(TAG, listener);
         return navigationBarView;
     }
 }

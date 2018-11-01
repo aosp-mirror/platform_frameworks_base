@@ -264,8 +264,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     public NavigationBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
 
-        mDisplay = ((WindowManager) context.getSystemService(
-                Context.WINDOW_SERVICE)).getDefaultDisplay();
+        mDisplay = context.getDisplay();
 
         mVertical = false;
         mLongClickableAccessibilityButton = false;
