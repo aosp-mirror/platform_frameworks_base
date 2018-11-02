@@ -62,6 +62,11 @@ public class FakePluginManager implements PluginManager {
     }
 
     @Override
+    public String[] getWhitelistedPlugins() {
+        return new String[0];
+    }
+
+    @Override
     public <T extends Plugin> T getOneShotPlugin(Class<T> cls) {
         return null;
     }

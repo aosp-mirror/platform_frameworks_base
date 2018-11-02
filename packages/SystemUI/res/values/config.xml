@@ -461,5 +461,7 @@
     <bool name="config_pipEnableDismissDragToEdge">true</bool>
 
     <!-- SystemUI Plugins that can be loaded on user builds. -->
-    <string-array name="config_pluginWhitelist" translatable="false" />
+    <string-array name="config_pluginWhitelist" translatable="false">
+        <item>com.android.systemui</item>
+    </string-array>
 </resources>

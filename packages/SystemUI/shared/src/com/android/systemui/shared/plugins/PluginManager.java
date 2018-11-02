@@ -27,6 +27,8 @@ public interface PluginManager {
     // must be one of the channels created in NotificationChannels.java
     String NOTIFICATION_CHANNEL_ID = "ALR";
 
+    String[] getWhitelistedPlugins();
+
     <T extends Plugin> T getOneShotPlugin(Class<T> cls);
     <T extends Plugin> T getOneShotPlugin(String action, Class<?> cls);
 

@@ -22,6 +22,7 @@ import static org.mockito.Matchers.anyInt;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -122,7 +123,7 @@ public class PluginInstanceManagerTest extends SysuiTestCase {
         waitForIdleSync(mPluginInstanceManager.mPluginHandler);
         waitForIdleSync(mPluginInstanceManager.mMainHandler);
 
-        verify(mMockListener, Mockito.never()).onPluginConnected(any(), any());
+        verify(mMockListener, never()).onPluginConnected(any(), any());
     }
 
     @Test
@@ -162,7 +163,7 @@ public class PluginInstanceManagerTest extends SysuiTestCase {
         waitForIdleSync(mPluginInstanceManager.mMainHandler);
 
         // Plugin shouldn't be connected because it is the wrong version.
-        verify(mMockListener, Mockito.never()).onPluginConnected(any(), any());
+        verify(mMockListener, never()).onPluginConnected(any(), any());
         verify(nm).notifyAsUser(eq(TestPlugin.class.getName()), eq(SystemMessage.NOTE_PLUGIN),
                 any(), eq(UserHandle.ALL));
     }
@@ -200,7 +201,7 @@ public class PluginInstanceManagerTest extends SysuiTestCase {
         waitForIdleSync(mPluginInstanceManager.mMainHandler);;
 
         // Non-debuggable build should receive no plugins.
-        verify(mMockListener, Mockito.never()).onPluginConnected(any(), any());
+        verify(mMockListener, never()).onPluginConnected(any(), any());
     }
 
     @Test
@@ -229,7 +230,7 @@ public class PluginInstanceManagerTest extends SysuiTestCase {
         // Start with an unrelated class.
         boolean result = mPluginInstanceManager.checkAndDisable(Activity.class.getName());
         assertFalse(result);
-        verify(mMockPm, Mockito.never()).setComponentEnabledSetting(
+        verify(mMockPm, never()).setComponentEnabledSetting(
                 ArgumentCaptor.forClass(ComponentName.class).capture(),
                 ArgumentCaptor.forClass(int.class).capture(),
                 ArgumentCaptor.forClass(int.class).capture());
@@ -250,6 +251,21 @@ public class PluginInstanceManagerTest extends SysuiTestCase {
         mPluginInstanceManager.disableAll();
 
         verify(mMockPm).setComponentEnabledSetting(
+                ArgumentCaptor.forClass(ComponentName.class).capture(),
+                ArgumentCaptor.forClass(int.class).capture(),
+                ArgumentCaptor.forClass(int.class).capture());
+    }
+
+    @Test
+    public void testDisableWhitelisted() throws Exception {
+        mPluginInstanceManager = new PluginInstanceManager(mContextWrapper, mMockPm, "myAction",
+                mMockListener, true, mHandlerThread.getLooper(), mMockVersionInfo,
+                mMockManager, false, new String[] {WHITELISTED_PACKAGE});
+        createPlugin(); // Get into valid created state.
+
+        mPluginInstanceManager.disableAll();
+
+        verify(mMockPm, never()).setComponentEnabledSetting(
                 ArgumentCaptor.forClass(ComponentName.class).capture(),
                 ArgumentCaptor.forClass(int.class).capture(),
                 ArgumentCaptor.forClass(int.class).capture());
