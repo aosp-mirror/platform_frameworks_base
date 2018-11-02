@@ -27,14 +27,15 @@ import static android.view.WindowManager.DOCKED_INVALID;
 import static android.view.WindowManager.DOCKED_LEFT;
 import static android.view.WindowManager.DOCKED_RIGHT;
 import static android.view.WindowManager.DOCKED_TOP;
+import static android.view.WindowManager.TRANSIT_NONE;
+
 import static com.android.server.wm.AppTransition.DEFAULT_APP_TRANSITION_DURATION;
 import static com.android.server.wm.AppTransition.TOUCH_RESPONSE_INTERPOLATOR;
-import static android.view.WindowManager.TRANSIT_NONE;
+import static com.android.server.wm.DockedStackDividerControllerProto.MINIMIZED_DOCK;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.H.NOTIFY_DOCKED_STACK_MINIMIZED_CHANGED;
 import static com.android.server.wm.WindowManagerService.LAYER_OFFSET_DIM;
-import static com.android.server.wm.DockedStackDividerControllerProto.MINIMIZED_DOCK;
 
 import android.content.Context;
 import android.content.res.Configuration;
