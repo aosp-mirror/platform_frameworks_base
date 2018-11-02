@@ -2061,6 +2061,12 @@ android_media_AudioSystem_setA11yServicesUids(JNIEnv *env, jobject thiz, jintArr
     return (jint)nativeToJavaStatus(status);
 }
 
+static jboolean
+android_media_AudioSystem_isHapticPlaybackSupported(JNIEnv *env, jobject thiz)
+{
+    return AudioSystem::isHapticPlaybackSupported();
+}
+
 // ----------------------------------------------------------------------------
 
 static const JNINativeMethod gMethods[] = {
@@ -2123,6 +2129,7 @@ static const JNINativeMethod gMethods[] = {
     {"setSurroundFormatEnabled", "(IZ)I", (void *)android_media_AudioSystem_setSurroundFormatEnabled},
     {"setAssistantUid", "(I)I", (void *)android_media_AudioSystem_setAssistantUid},
     {"setA11yServicesUids", "([I)I", (void *)android_media_AudioSystem_setA11yServicesUids},
+    {"isHapticPlaybackSupported", "()Z", (void *)android_media_AudioSystem_isHapticPlaybackSupported},
 };
 
 static const JNINativeMethod gEventHandlerMethods[] = {
