@@ -292,9 +292,16 @@ public class NotificationLockscreenUserManagerImpl implements
             Log.wtf(TAG, "mEntryManager was null!", new Throwable());
             return false;
         }
-        return mShowLockscreenNotifications
-                && getEntryManager().getNotificationData().getImportance(sbn.getKey())
-                >= IMPORTANCE_DEFAULT;
+        boolean exceedsPriorityThreshold;
+        if (AUTO_DEMOTE_NOTIFICATIONS) {
+            exceedsPriorityThreshold =
+                    getEntryManager().getNotificationData().getImportance(sbn.getKey())
+                            >= IMPORTANCE_DEFAULT;
+        } else {
+            exceedsPriorityThreshold =
+                    !getEntryManager().getNotificationData().isAmbient(sbn.getKey());
+        }
+        return mShowLockscreenNotifications && exceedsPriorityThreshold;
     }
 
     private void setShowLockscreenNotifications(boolean show) {
