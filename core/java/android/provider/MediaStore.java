@@ -16,6 +16,7 @@
 
 package android.provider;
 
+import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SdkConstant;
@@ -39,12 +40,16 @@ import android.graphics.Point;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.CancellationSignal;
+import android.os.Environment;
 import android.os.OperationCanceledException;
+import android.os.ParcelFileDescriptor;
 import android.os.RemoteException;
+import android.os.UserHandle;
 import android.os.storage.StorageManager;
 import android.os.storage.StorageVolume;
 import android.os.storage.VolumeInfo;
 import android.service.media.CameraPrewarmService;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.Log;
@@ -57,8 +62,8 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 /**
@@ -107,6 +112,15 @@ public final class MediaStore {
      * @hide
      */
     public static final String PARAM_DELETE_DATA = "deletedata";
+
+    /** {@hide} */
+    public static final String PARAM_PRIMARY = "primary";
+    /** {@hide} */
+    public static final String PARAM_SECONDARY = "secondary";
+    /** {@hide} */
+    public static final String PARAM_INCLUDE_PENDING = "includePending";
+    /** {@hide} */
+    public static final String PARAM_PROGRESS = "progress";
 
     /**
      * Activity Action: Launch a music player.
@@ -452,9 +466,200 @@ public final class MediaStore {
     public static final String UNKNOWN_STRING = "<unknown>";
 
     /**
+     * Update the given {@link Uri} to also include any pending media items from
+     * calls such as
+     * {@link ContentResolver#query(Uri, String[], Bundle, CancellationSignal)}.
+     * By default no pending items are returned.
+     *
+     * @see MediaColumns#IS_PENDING
+     */
+    public static @NonNull Uri setIncludePending(@NonNull Uri uri) {
+        return uri.buildUpon().appendQueryParameter(PARAM_INCLUDE_PENDING, "1").build();
+    }
+
+    /**
+     * Create a new pending media item using the given parameters. Pending items
+     * are expected to have a short lifetime, and owners should either
+     * {@link PendingSession#publish()} or {@link PendingSession#abandon()} a
+     * pending item within a few hours after first creating it.
+     *
+     * @return token which can be passed to {@link #openPending(Context, Uri)}
+     *         to work with this pending item.
+     */
+    public static @NonNull Uri createPending(@NonNull Context context,
+            @NonNull PendingParams params) {
+        final Uri.Builder builder = params.insertUri.buildUpon();
+        if (!TextUtils.isEmpty(params.primaryDirectory)) {
+            builder.appendQueryParameter(PARAM_PRIMARY, params.primaryDirectory);
+        }
+        if (!TextUtils.isEmpty(params.secondaryDirectory)) {
+            builder.appendQueryParameter(PARAM_SECONDARY, params.secondaryDirectory);
+        }
+        return context.getContentResolver().insert(builder.build(), params.insertValues);
+    }
+
+    /**
+     * Open a pending media item to make progress on it. You can open a pending
+     * item multiple times before finally calling either
+     * {@link PendingSession#publish()} or {@link PendingSession#abandon()}.
+     *
+     * @param uri token which was previously returned from
+     *            {@link #createPending(Context, PendingParams)}.
+     */
+    public static @NonNull PendingSession openPending(@NonNull Context context, @NonNull Uri uri) {
+        return new PendingSession(context, uri);
+    }
+
+    /**
+     * Parameters that describe a pending media item.
+     */
+    public static class PendingParams {
+        /** {@hide} */
+        public final Uri insertUri;
+        /** {@hide} */
+        public final ContentValues insertValues;
+        /** {@hide} */
+        public String primaryDirectory;
+        /** {@hide} */
+        public String secondaryDirectory;
+
+        /**
+         * Create parameters that describe a pending media item.
+         *
+         * @param insertUri the {@code content://} Uri where this pending item
+         *            should be inserted when finally published. For example, to
+         *            publish an image, use
+         *            {@link MediaStore.Images.Media#getContentUri(String)}.
+         */
+        public PendingParams(@NonNull Uri insertUri, @NonNull String displayName,
+                @NonNull String mimeType) {
+            this.insertUri = Objects.requireNonNull(insertUri);
+            final long now = System.currentTimeMillis() / 1000;
+            this.insertValues = new ContentValues();
+            this.insertValues.put(MediaColumns.DISPLAY_NAME, Objects.requireNonNull(displayName));
+            this.insertValues.put(MediaColumns.MIME_TYPE, Objects.requireNonNull(mimeType));
+            this.insertValues.put(MediaColumns.DATE_ADDED, now);
+            this.insertValues.put(MediaColumns.DATE_MODIFIED, now);
+            this.insertValues.put(MediaColumns.IS_PENDING, 1);
+        }
+
+        /**
+         * Optionally set the primary directory under which this pending item
+         * should be persisted. Only specific well-defined directories from
+         * {@link Environment} are allowed based on the media type being
+         * inserted.
+         * <p>
+         * For example, when creating pending {@link MediaStore.Images.Media}
+         * items, only {@link Environment#DIRECTORY_PICTURES} or
+         * {@link Environment#DIRECTORY_DCIM} are allowed.
+         * <p>
+         * You may leave this value undefined to store the media in a default
+         * location. For example, when this value is left undefined, pending
+         * {@link MediaStore.Audio.Media} items are stored under
+         * {@link Environment#DIRECTORY_MUSIC}.
+         */
+        public void setPrimaryDirectory(@Nullable String primaryDirectory) {
+            this.primaryDirectory = primaryDirectory;
+        }
+
+        /**
+         * Optionally set the secondary directory under which this pending item
+         * should be persisted. Any valid directory name is allowed.
+         * <p>
+         * You may leave this value undefined to store the media as a direct
+         * descendant of the {@link #setPrimaryDirectory(String)} location.
+         */
+        public void setSecondaryDirectory(@Nullable String secondaryDirectory) {
+            this.secondaryDirectory = secondaryDirectory;
+        }
+    }
+
+    /**
+     * Session actively working on a pending media item. Pending items are
+     * expected to have a short lifetime, and owners should either
+     * {@link PendingSession#publish()} or {@link PendingSession#abandon()} a
+     * pending item within a few hours after first creating it.
+     */
+    public static class PendingSession implements AutoCloseable {
+        /** {@hide} */
+        private final Context mContext;
+        /** {@hide} */
+        private final Uri mUri;
+
+        /** {@hide} */
+        public PendingSession(Context context, Uri uri) {
+            mContext = Objects.requireNonNull(context);
+            mUri = Objects.requireNonNull(uri);
+        }
+
+        /**
+         * Open the underlying file representing this media item. When a media
+         * item is successfully completed, you should
+         * {@link ParcelFileDescriptor#close()} and then {@link #publish()} it.
+         *
+         * @see #notifyProgress(int)
+         */
+        public @NonNull ParcelFileDescriptor open() throws FileNotFoundException {
+            return mContext.getContentResolver().openFileDescriptor(mUri, "rw");
+        }
+
+        /**
+         * Open the underlying file representing this media item. When a media
+         * item is successfully completed, you should
+         * {@link OutputStream#close()} and then {@link #publish()} it.
+         *
+         * @see #notifyProgress(int)
+         */
+        public @NonNull OutputStream openOutputStream() throws FileNotFoundException {
+            return mContext.getContentResolver().openOutputStream(mUri);
+        }
+
+        /**
+         * Notify of current progress on this pending media item. Gallery
+         * applications may choose to surface progress information of this
+         * pending item.
+         *
+         * @param progress a percentage between 0 and 100.
+         */
+        public void notifyProgress(@IntRange(from = 0, to = 100) int progress) {
+            final Uri withProgress = mUri.buildUpon()
+                    .appendQueryParameter(PARAM_PROGRESS, Integer.toString(progress)).build();
+            mContext.getContentResolver().notifyChange(withProgress, null, 0);
+        }
+
+        /**
+         * When this media item is successfully completed, call this method to
+         * publish and make the final item visible to the user.
+         *
+         * @return the final {@code content://} Uri representing the newly
+         *         published media.
+         */
+        public @NonNull Uri publish() {
+            final ContentValues values = new ContentValues();
+            values.put(MediaColumns.IS_PENDING, 0);
+            mContext.getContentResolver().update(mUri, values, null, null);
+            return mUri;
+        }
+
+        /**
+         * When this media item has failed to be completed, call this method to
+         * destroy the pending item record and any data related to it.
+         */
+        public void abandon() {
+            mContext.getContentResolver().delete(mUri, null, null);
+        }
+
+        @Override
+        public void close() {
+            // No resources to close, but at least we can inform people that no
+            // progress is being actively made.
+            notifyProgress(-1);
+        }
+    }
+
+    /**
      * Common fields for most MediaProvider tables
      */
-
     public interface MediaColumns extends BaseColumns {
         /**
          * Path to the file on disk.
@@ -552,6 +757,17 @@ public final class MediaStore {
         public static final String IS_DRM = "is_drm";
 
         /**
+         * Flag indicating if a media item is pending, and still being inserted
+         * by its owner.
+         * <p>
+         * Type: BOOLEAN
+         *
+         * @see MediaStore#createPending(Context, PendingParams)
+         * @see MediaStore#QUERY_ARG_INCLUDE_PENDING
+         */
+        public static final String IS_PENDING = "is_pending";
+
+        /**
          * The width of the image/video in pixels.
          */
         public static final String WIDTH = "width";
@@ -562,11 +778,13 @@ public final class MediaStore {
         public static final String HEIGHT = "height";
 
         /**
-         * Package that contributed this media.
-         * @hide
+         * Package name that contributed this media. The value may be
+         * {@code NULL} if ownership cannot be reliably determined.
+         * <p>
+         * Type: TEXT
          */
         public static final String OWNER_PACKAGE_NAME = "owner_package_name";
-     }
+    }
 
     /**
      * Media provider table containing an index of all files in the media storage,
@@ -2376,6 +2594,30 @@ public final class MediaStore {
         } else {
             throw new IllegalArgumentException("Not a media Uri: " + uri);
         }
+    }
+
+    /** {@hide} */
+    public static @NonNull File getVolumePath(@NonNull String volumeName)
+            throws FileNotFoundException {
+        Objects.requireNonNull(volumeName);
+
+        if (VOLUME_INTERNAL.equals(volumeName)) {
+            return Environment.getDataDirectory();
+        } else if (VOLUME_EXTERNAL.equals(volumeName)) {
+            return Environment.getExternalStorageDirectory();
+        }
+
+        final StorageManager sm = AppGlobals.getInitialApplication()
+                .getSystemService(StorageManager.class);
+        for (VolumeInfo vi : sm.getVolumes()) {
+            if (Objects.equals(vi.getFsUuid(), volumeName)) {
+                final File path = vi.getPathForUser(UserHandle.myUserId());
+                if (path == null) {
+                    throw new FileNotFoundException("Failed to find path for " + vi);
+                }
+            }
+        }
+        throw new FileNotFoundException("Failed to find path for " + volumeName);
     }
 
     /**
