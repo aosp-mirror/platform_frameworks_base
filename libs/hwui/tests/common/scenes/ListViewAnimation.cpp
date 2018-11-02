@@ -46,7 +46,6 @@ class ListViewAnimation : public TestListViewSceneBase {
                 SkColorGetR(randomColor) + SkColorGetG(randomColor) + SkColorGetB(randomColor) <
                 128 * 3;
         paint.setColor(bgDark ? Color::White : Color::Grey_700);
-        paint.setTextAlign(SkPaint::kCenter_Align);
         paint.setTextSize(size / 2);
         char charToShow = 'A' + (rand() % 26);
         const SkPoint pos[] = {{SkIntToScalar(size / 2),
