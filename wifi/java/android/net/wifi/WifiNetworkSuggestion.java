@@ -18,7 +18,6 @@ package android.net.wifi;
 
 import static com.android.internal.util.Preconditions.checkNotNull;
 
-import android.app.PendingIntent;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -32,7 +31,7 @@ import java.util.Objects;
  * of this object.
  *<p>
  * Apps can provide a list of such networks to the platform using
- * {@link WifiManager#addNetworkSuggestions(List, PendingIntent)}.
+ * {@link WifiManager#addNetworkSuggestions(List)}.
  */
 public final class WifiNetworkSuggestion implements Parcelable {
     /**
@@ -43,9 +42,6 @@ public final class WifiNetworkSuggestion implements Parcelable {
 
     /**
      * Whether app needs to log in to captive portal to obtain Internet access.
-     * This will dictate if the associated pending intent in
-     * {@link WifiManager#addNetworkSuggestions(List, PendingIntent)} needs to be sent after
-     * successfully connecting to the network.
      * @hide
      */
     public final boolean isAppInteractionRequired;
