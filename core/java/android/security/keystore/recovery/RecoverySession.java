@@ -22,6 +22,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
+import android.security.keystore.KeyPermanentlyInvalidatedException;
 import android.util.ArrayMap;
 import android.util.Log;
 
@@ -218,7 +219,7 @@ public class RecoverySession implements AutoCloseable {
             Key key;
             try {
                 key = mRecoveryController.getKeyFromGrant(grantAlias);
-            } catch (UnrecoverableKeyException e) {
+            } catch (KeyPermanentlyInvalidatedException | UnrecoverableKeyException e) {
                 throw new InternalRecoveryServiceException(
                         String.format(
                                 Locale.US,
