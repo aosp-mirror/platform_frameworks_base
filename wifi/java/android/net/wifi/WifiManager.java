@@ -1482,8 +1482,11 @@ public class WifiManager {
      */
     @RequiresPermission(android.Manifest.permission.CHANGE_WIFI_STATE)
     public boolean addNetworkSuggestions(@NonNull List<WifiNetworkSuggestion> networkSuggestions) {
-        // TODO(b/115504887): Implementation
-        return false;
+        try {
+            return mService.addNetworkSuggestions(networkSuggestions, mContext.getOpPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
 
@@ -1502,8 +1505,12 @@ public class WifiManager {
     @RequiresPermission(android.Manifest.permission.CHANGE_WIFI_STATE)
     public boolean removeNetworkSuggestions(
             @NonNull List<WifiNetworkSuggestion> networkSuggestions) {
-        // TODO(b/115504887): Implementation
-        return false;
+        try {
+            return mService.removeNetworkSuggestions(
+                    networkSuggestions, mContext.getOpPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
     }
 
     /**
