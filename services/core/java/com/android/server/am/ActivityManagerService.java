@@ -6509,6 +6509,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         // Wait for the provider to be published...
         final long timeout = SystemClock.uptimeMillis() + CONTENT_PROVIDER_WAIT_TIMEOUT;
+        boolean timedOut = false;
         synchronized (cpr) {
             while (cpr.provider == null) {
                 if (cpr.launchingApp == null) {
@@ -6532,12 +6533,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                     cpr.wait(wait);
                     if (cpr.provider == null) {
-                        Slog.wtf(TAG, "Timeout waiting for provider "
-                                + cpi.applicationInfo.packageName + "/"
-                                + cpi.applicationInfo.uid + " for provider "
-                                + name
-                                + " providerRunning=" + providerRunning);
-                        return null;
+                        timedOut = true;
+                        break;
                     }
                 } catch (InterruptedException ex) {
                 } finally {
@@ -6547,7 +6544,26 @@ public class ActivityManagerService extends IActivityManager.Stub
                 }
             }
         }
-        return cpr != null ? cpr.newHolder(conn) : null;
+        if (timedOut) {
+            // Note we do it afer releasing the lock.
+            String callerName = "unknown";
+            synchronized (this) {
+                final ProcessRecord record = mProcessList.getLRURecordForAppLocked(caller);
+                if (record != null) {
+                    callerName = record.processName;
+                }
+            }
+
+            Slog.wtf(TAG, "Timeout waiting for provider "
+                    + cpi.applicationInfo.packageName + "/"
+                    + cpi.applicationInfo.uid + " for provider "
+                    + name
+                    + " providerRunning=" + providerRunning
+                    + " caller=" + callerName + "/" + Binder.getCallingUid());
+            return null;
+        }
+
+        return cpr.newHolder(conn);
     }
 
     private static final class StartActivityRunnable implements Runnable {
