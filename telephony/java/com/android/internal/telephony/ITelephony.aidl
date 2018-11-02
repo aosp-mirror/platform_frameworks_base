@@ -1054,6 +1054,8 @@ interface ITelephony {
      */
     boolean isTtyModeSupported();
 
+    boolean isRttSupported(int subscriptionId);
+
     /**
      * Whether the phone supports hearing aid compatibility.
      *

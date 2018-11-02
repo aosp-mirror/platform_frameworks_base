@@ -7445,6 +7445,27 @@ public class TelephonyManager {
     }
 
     /**
+     * Determines whether the device currently supports RTT (Real-time text). Based both on carrier
+     * support for the feature and device firmware support.
+     *
+     * @return {@code true} if the device and carrier both support RTT, {@code false} otherwise.
+     * @hide
+     */
+    @TestApi
+    public boolean isRttSupported() {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.isRttSupported(mSubId);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#isRttSupported", e);
+        } catch (SecurityException e) {
+            Log.e(TAG, "Permission error calling ITelephony#isWorldPhone", e);
+        }
+        return false;
+    }
+    /**
      * Whether the phone supports hearing aid compatibility.
      *
      * @return {@code true} if the device supports hearing aid compatibility, and {@code false}
