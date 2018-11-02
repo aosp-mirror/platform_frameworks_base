@@ -59,7 +59,7 @@ public class ZenModeExtractorTest extends UiServiceTestCase {
         assertFalse(r.isIntercepted());
 
         when(mZenModeHelper.shouldIntercept(any())).thenReturn(true);
-        when(mZenModeHelper.getNotificationPolicy()).thenReturn(
+        when(mZenModeHelper.getConsolidatedNotificationPolicy()).thenReturn(
                 new NotificationManager.Policy(0,0,0));
 
         extractor.process(r);
@@ -74,7 +74,7 @@ public class ZenModeExtractorTest extends UiServiceTestCase {
         NotificationRecord r = generateRecord();
 
         when(mZenModeHelper.shouldIntercept(any())).thenReturn(false);
-        when(mZenModeHelper.getNotificationPolicy()).thenReturn(
+        when(mZenModeHelper.getConsolidatedNotificationPolicy()).thenReturn(
                 new NotificationManager.Policy(0,0,0));
 
         extractor.process(r);
@@ -89,7 +89,7 @@ public class ZenModeExtractorTest extends UiServiceTestCase {
         NotificationRecord r = generateRecord();
 
         when(mZenModeHelper.shouldIntercept(any())).thenReturn(true);
-        when(mZenModeHelper.getNotificationPolicy()).thenReturn(
+        when(mZenModeHelper.getConsolidatedNotificationPolicy()).thenReturn(
                 new NotificationManager.Policy(0,0,0, SUPPRESSED_EFFECT_PEEK
                         | SUPPRESSED_EFFECT_NOTIFICATION_LIST));
 

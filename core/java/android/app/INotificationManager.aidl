@@ -146,6 +146,7 @@ interface INotificationManager
 
     int getZenMode();
     ZenModeConfig getZenModeConfig();
+    NotificationManager.Policy getConsolidatedNotificationPolicy();
     oneway void setZenMode(int mode, in Uri conditionId, String reason);
     oneway void notifyConditions(String pkg, in IConditionProvider provider, in Condition[] conditions);
     boolean isNotificationPolicyAccessGranted(String pkg);

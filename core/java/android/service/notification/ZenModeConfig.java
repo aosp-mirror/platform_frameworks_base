@@ -69,9 +69,9 @@ import java.util.UUID;
 public class ZenModeConfig implements Parcelable {
     private static String TAG = "ZenModeConfig";
 
-    public static final int SOURCE_ANYONE = 0;
-    public static final int SOURCE_CONTACT = 1;
-    public static final int SOURCE_STAR = 2;
+    public static final int SOURCE_ANYONE = Policy.PRIORITY_SENDERS_ANY;
+    public static final int SOURCE_CONTACT = Policy.PRIORITY_SENDERS_CONTACTS;
+    public static final int SOURCE_STAR = Policy.PRIORITY_SENDERS_STARRED;
     public static final int MAX_SOURCE = SOURCE_STAR;
     private static final int DEFAULT_SOURCE = SOURCE_CONTACT;
     private static final int DEFAULT_CALLS_SOURCE = SOURCE_STAR;
@@ -777,24 +777,6 @@ public class ZenModeConfig implements Parcelable {
     };
 
     /**
-     * @return notification policy based on manual and automatic rules
-     */
-    public Policy getConsolidatedNotificationPolicy() {
-        ZenPolicy policy = new ZenPolicy();
-
-        // assumption: manual rule always uses the default policy
-        for (ZenRule rule : automaticRules.values()) {
-            if (rule.isAutomaticActive()) {
-                if (rule.zenMode == Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS) {
-                    policy.apply(rule.zenPolicy);
-                }
-            }
-        }
-
-        return toNotificationPolicy(policy);
-    }
-
-    /**
      * Converts a zenPolicy to a notificationPolicy using this ZenModeConfig's values as its
      * defaults for all unset values in zenPolicy
      */
@@ -891,7 +873,7 @@ public class ZenModeConfig implements Parcelable {
         }
 
         return new NotificationManager.Policy(priorityCategories, callSenders,
-                messageSenders, suppressedVisualEffects);
+                messageSenders, suppressedVisualEffects, defaultPolicy.state);
     }
 
     private boolean isPriorityCategoryEnabled(int categoryType, Policy policy) {
@@ -945,6 +927,7 @@ public class ZenModeConfig implements Parcelable {
         }
         priorityCallSenders = sourceToPrioritySenders(allowCallsFrom, priorityCallSenders);
         priorityMessageSenders = sourceToPrioritySenders(allowMessagesFrom, priorityMessageSenders);
+
         return new Policy(priorityCategories, priorityCallSenders, priorityMessageSenders,
                 suppressedVisualEffects, areChannelsBypassingDnd
                 ? Policy.STATE_CHANNELS_BYPASSING_DND : 0);
@@ -1732,13 +1715,25 @@ public class ZenModeConfig implements Parcelable {
     }
 
     /**
+     * Determines whether dnd behavior should mute all sounds controlled by ringer
+     */
+    public static boolean areAllZenBehaviorSoundsMuted(NotificationManager.Policy
+            policy) {
+        boolean allowAlarms = (policy.priorityCategories & Policy.PRIORITY_CATEGORY_ALARMS) != 0;
+        boolean allowMedia = (policy.priorityCategories & Policy.PRIORITY_CATEGORY_MEDIA) != 0;
+        boolean allowSystem = (policy.priorityCategories & Policy.PRIORITY_CATEGORY_SYSTEM) != 0;
+        return !allowAlarms && !allowMedia && !allowSystem
+                && areAllPriorityOnlyNotificationZenSoundsMuted(policy);
+    }
+
+    /**
      * Determines if DND is currently overriding the ringer
      */
-    public static boolean isZenOverridingRinger(int zen, ZenModeConfig zenConfig) {
+    public static boolean isZenOverridingRinger(int zen, Policy consolidatedPolicy) {
         return zen == Global.ZEN_MODE_NO_INTERRUPTIONS
                 || zen == Global.ZEN_MODE_ALARMS
                 || (zen == Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS
-                && ZenModeConfig.areAllPriorityOnlyNotificationZenSoundsMuted(zenConfig));
+                && ZenModeConfig.areAllPriorityOnlyNotificationZenSoundsMuted(consolidatedPolicy));
     }
 
     /**

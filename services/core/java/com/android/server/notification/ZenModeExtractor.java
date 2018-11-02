@@ -16,9 +16,6 @@
 
 package com.android.server.notification;
 
-import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_SCREEN_OFF;
-import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_SCREEN_ON;
-
 import android.content.Context;
 import android.util.Log;
 import android.util.Slog;
@@ -50,7 +47,7 @@ public class ZenModeExtractor implements NotificationSignalExtractor {
         record.setIntercepted(mZenModeHelper.shouldIntercept(record));
         if (record.isIntercepted()) {
             record.setSuppressedVisualEffects(
-                    mZenModeHelper.getNotificationPolicy().suppressedVisualEffects);
+                    mZenModeHelper.getConsolidatedNotificationPolicy().suppressedVisualEffects);
         } else {
             record.setSuppressedVisualEffects(0);
         }

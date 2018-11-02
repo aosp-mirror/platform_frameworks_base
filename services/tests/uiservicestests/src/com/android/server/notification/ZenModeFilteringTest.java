@@ -32,6 +32,7 @@ import static org.mockito.Mockito.when;
 import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
+import android.app.NotificationManager.Policy;
 import android.media.AudioAttributes;
 import android.service.notification.StatusBarNotification;
 import android.service.notification.ZenModeConfig;
@@ -121,11 +122,10 @@ public class ZenModeFilteringTest extends UiServiceTestCase {
         NotificationRecord r = getNotificationRecord();
         when(r.sbn.getPackageName()).thenReturn("android");
         when(r.sbn.getId()).thenReturn(SystemMessage.NOTE_ZEN_UPGRADE);
-        ZenModeConfig config = mock(ZenModeConfig.class);
-        config.suppressedVisualEffects = NotificationManager.Policy.getAllSuppressedVisualEffects()
-                - SUPPRESSED_EFFECT_STATUS_BAR;
+        Policy policy = new Policy(0, 0, 0, Policy.getAllSuppressedVisualEffects()
+                - SUPPRESSED_EFFECT_STATUS_BAR);
 
-        assertTrue(mZenModeFiltering.shouldIntercept(ZEN_MODE_IMPORTANT_INTERRUPTIONS, config, r));
+        assertTrue(mZenModeFiltering.shouldIntercept(ZEN_MODE_IMPORTANT_INTERRUPTIONS, policy, r));
     }
 
     @Test
@@ -133,10 +133,9 @@ public class ZenModeFilteringTest extends UiServiceTestCase {
         NotificationRecord r = getNotificationRecord();
         when(r.sbn.getPackageName()).thenReturn("android");
         when(r.sbn.getId()).thenReturn(SystemMessage.NOTE_ACCOUNT_CREDENTIAL_PERMISSION);
-        ZenModeConfig config = mock(ZenModeConfig.class);
-        config.suppressedVisualEffects = NotificationManager.Policy.getAllSuppressedVisualEffects();
+        Policy policy = new Policy(0, 0, 0, Policy.getAllSuppressedVisualEffects());
 
-        assertTrue(mZenModeFiltering.shouldIntercept(ZEN_MODE_IMPORTANT_INTERRUPTIONS, config, r));
+        assertTrue(mZenModeFiltering.shouldIntercept(ZEN_MODE_IMPORTANT_INTERRUPTIONS, policy, r));
     }
 
     @Test
@@ -144,10 +143,9 @@ public class ZenModeFilteringTest extends UiServiceTestCase {
         NotificationRecord r = getNotificationRecord();
         when(r.sbn.getPackageName()).thenReturn("android2");
         when(r.sbn.getId()).thenReturn(SystemMessage.NOTE_ZEN_UPGRADE);
-        ZenModeConfig config = mock(ZenModeConfig.class);
-        config.suppressedVisualEffects = NotificationManager.Policy.getAllSuppressedVisualEffects();
+        Policy policy = new Policy(0, 0, 0, Policy.getAllSuppressedVisualEffects());
 
-        assertTrue(mZenModeFiltering.shouldIntercept(ZEN_MODE_IMPORTANT_INTERRUPTIONS, config, r));
+        assertTrue(mZenModeFiltering.shouldIntercept(ZEN_MODE_IMPORTANT_INTERRUPTIONS, policy, r));
     }
 
     @Test
@@ -155,21 +153,20 @@ public class ZenModeFilteringTest extends UiServiceTestCase {
         NotificationRecord r = getNotificationRecord();
         when(r.sbn.getPackageName()).thenReturn("android");
         when(r.sbn.getId()).thenReturn(SystemMessage.NOTE_ZEN_UPGRADE);
-        ZenModeConfig config = mock(ZenModeConfig.class);
-        config.suppressedVisualEffects = NotificationManager.Policy.getAllSuppressedVisualEffects();
+        Policy policy = new Policy(0, 0, 0, Policy.getAllSuppressedVisualEffects());
 
-        assertFalse(mZenModeFiltering.shouldIntercept(ZEN_MODE_IMPORTANT_INTERRUPTIONS, config, r));
-        assertFalse(mZenModeFiltering.shouldIntercept(ZEN_MODE_ALARMS, config, r));
-        assertFalse(mZenModeFiltering.shouldIntercept(ZEN_MODE_NO_INTERRUPTIONS, config, r));
+        assertFalse(mZenModeFiltering.shouldIntercept(ZEN_MODE_IMPORTANT_INTERRUPTIONS, policy, r));
+        assertFalse(mZenModeFiltering.shouldIntercept(ZEN_MODE_ALARMS, policy, r));
+        assertFalse(mZenModeFiltering.shouldIntercept(ZEN_MODE_NO_INTERRUPTIONS, policy, r));
     }
 
     @Test
     public void testSuppressAnything_yes_ZenModeOff() {
         NotificationRecord r = getNotificationRecord();
         when(r.sbn.getPackageName()).thenReturn("bananas");
-        ZenModeConfig config = mock(ZenModeConfig.class);
+        Policy policy = new Policy(0, 0, 0, Policy.getAllSuppressedVisualEffects());
 
-        assertFalse(mZenModeFiltering.shouldIntercept(ZEN_MODE_OFF, config, r));
+        assertFalse(mZenModeFiltering.shouldIntercept(ZEN_MODE_OFF, policy, r));
     }
 
     @Test
@@ -177,11 +174,11 @@ public class ZenModeFilteringTest extends UiServiceTestCase {
         NotificationRecord r = getNotificationRecord();
         r.setCriticality(CriticalNotificationExtractor.CRITICAL);
         when(r.sbn.getPackageName()).thenReturn("bananas");
-        ZenModeConfig config = mock(ZenModeConfig.class);
+        Policy policy = new Policy(0, 0, 0, Policy.getAllSuppressedVisualEffects());
 
-        assertFalse(mZenModeFiltering.shouldIntercept(ZEN_MODE_NO_INTERRUPTIONS, config, r));
+        assertFalse(mZenModeFiltering.shouldIntercept(ZEN_MODE_NO_INTERRUPTIONS, policy, r));
 
         r.setCriticality(CriticalNotificationExtractor.CRITICAL_LOW);
-        assertFalse(mZenModeFiltering.shouldIntercept(ZEN_MODE_NO_INTERRUPTIONS, config, r));
+        assertFalse(mZenModeFiltering.shouldIntercept(ZEN_MODE_NO_INTERRUPTIONS, policy, r));
     }
 }
