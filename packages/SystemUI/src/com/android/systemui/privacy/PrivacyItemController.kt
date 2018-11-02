@@ -95,7 +95,7 @@ class PrivacyItemController(val context: Context, val callback: Callback) {
             else -> return null
         }
         val app = PrivacyApplication(appOpItem.packageName, context)
-        return PrivacyItem(type, app, appOpItem.timeStarted)
+        return PrivacyItem(type, app)
     }
 
     // Used by containing class to get notified of changes

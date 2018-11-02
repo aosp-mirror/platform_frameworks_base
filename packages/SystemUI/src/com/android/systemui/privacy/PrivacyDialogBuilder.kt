@@ -15,59 +15,53 @@
 package com.android.systemui.privacy
 
 import android.content.Context
+import android.graphics.drawable.Drawable
 import com.android.systemui.R
-import java.lang.Math.max
 
 class PrivacyDialogBuilder(val context: Context, itemsList: List<PrivacyItem>) {
-    companion object {
-        val MILLIS_IN_MINUTE: Long = 1000 * 60
-    }
 
-    private val itemsByType: Map<PrivacyType, List<PrivacyItem>>
+    val appsAndTypes: List<Pair<PrivacyApplication, List<PrivacyType>>>
+    val types: List<PrivacyType>
     val app: PrivacyApplication?
+    private val separator = context.getString(R.string.ongoing_privacy_dialog_separator)
+    private val lastSeparator = context.getString(R.string.ongoing_privacy_dialog_last_separator)
 
     init {
-        itemsByType = itemsList.groupBy { it.privacyType }
-        val apps = itemsList.map { it.application }.distinct()
-        val singleApp = apps.size == 1
-        app = if (singleApp) apps.get(0) else null
+        appsAndTypes = itemsList.groupBy({ it.application }, { it.privacyType })
+                .toList()
+                .sortedWith(compareBy({ -it.second.size }, { it.first }))
+        types = itemsList.map { it.privacyType }.distinct().sorted()
+        val singleApp = appsAndTypes.size == 1
+        app = if (singleApp) appsAndTypes[0].first else null
     }
 
-    private fun buildTextForItem(type: PrivacyType, now: Long): String {
-        val items = itemsByType.getOrDefault(type, emptyList<PrivacyItem>())
-        return when (items.size) {
-            0 -> throw IllegalStateException("List cannot be empty")
-            1 -> {
-                val item = items.get(0)
-                val minutesUsed = max(((now - item.timeStarted) / MILLIS_IN_MINUTE).toInt(), 1)
-                context.getString(R.string.ongoing_privacy_dialog_app_item,
-                        item.application.applicationName, type.getName(context), minutesUsed)
-            }
-            else -> {
-                val apps = items.map { it.application.applicationName }.joinToString()
-                context.getString(R.string.ongoing_privacy_dialog_apps_item,
-                        apps, type.getName(context))
-            }
+    fun generateIconsForApp(types: List<PrivacyType>): List<Drawable> {
+        return types.sorted().map { it.getIcon(context) }
+    }
+
+    fun generateIcons() = types.map { it.getIcon(context) }
+
+    private fun <T> List<T>.joinWithAnd(): StringBuilder {
+        return subList(0, size - 1).joinTo(StringBuilder(), separator = separator).apply {
+            append(lastSeparator)
+            append(this@joinWithAnd.last())
         }
     }
 
-    private fun buildTextForApp(types: Set<PrivacyType>): List<String> {
-        app?.let {
-            val typesText = types.map { it.getName(context) }.sorted().joinToString()
-            return listOf(context.getString(R.string.ongoing_privacy_dialog_single_app,
-                    it.applicationName, typesText))
-        } ?: throw IllegalStateException("There has to be a single app")
+    fun joinTypes(): String {
+        return when (types.size) {
+            0 -> ""
+            1 -> types[0].getName(context)
+            else -> types.map { it.getName(context) }.joinWithAnd().toString()
+        }
     }
 
-    fun generateText(now: Long): List<String> {
-        if (app == null || itemsByType.keys.size == 1) {
-            return itemsByType.keys.map { buildTextForItem(it, now) }
+    fun getDialogTitle(): String {
+        if (app != null) {
+            return context.getString(R.string.ongoing_privacy_dialog_single_app_title, joinTypes())
         } else {
-            return buildTextForApp(itemsByType.keys)
+            return context.getString(R.string.ongoing_privacy_dialog_multiple_apps_title,
+                    joinTypes())
         }
     }
-
-    fun generateTypesText() = itemsByType.keys.map { it.getName(context) }.sorted().joinToString()
-
-    fun generateIcons() = itemsByType.keys.map { it.getIcon(context) }
 }

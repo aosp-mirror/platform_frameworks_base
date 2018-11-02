@@ -940,18 +940,34 @@
          that just start below the notch. -->
     <dimen name="display_cutout_touchable_region_size">12dp</dimen>
 
+    <!-- Padding below Ongoing App Ops dialog title -->
+    <dimen name="ongoing_appops_dialog_sep">16dp</dimen>
+    <!--Padding around text items in Ongoing App Ops dialog -->
+    <dimen name="ongoing_appops_dialog_text_padding">16dp</dimen>
     <!-- Height of icons in Ongoing App Ops dialog. Both App Op icon and application icon -->
-    <dimen name="ongoing_appops_dialog_icon_height">48dp</dimen>
+    <dimen name="ongoing_appops_dialog_icon_height">28dp</dimen>
     <!-- Margin between text lines in Ongoing App Ops dialog -->
     <dimen name="ongoing_appops_dialog_text_margin">15dp</dimen>
+    <!-- Side padding of title in Ongoing App Ops dialog -->
+    <dimen name="ongoing_appops_dialog_title_padding">10dp</dimen>
     <!-- Padding around Ongoing App Ops dialog content -->
     <dimen name="ongoing_appops_dialog_content_padding">24dp</dimen>
-    <!-- Margins around the Ongoing App Ops chip. In landscape, the side margins are 0 -->
+    <!-- Side margins around the Ongoing App Ops chip-->
     <dimen name="ongoing_appops_chip_margin">12dp</dimen>
+    <!-- Top and bottom margins around the Ongoing App Ops chip -->
+    <dimen name="ongoing_appops_top_chip_margin">12dp</dimen>
     <!-- Start and End padding for Ongoing App Ops chip -->
     <dimen name="ongoing_appops_chip_side_padding">6dp</dimen>
     <!-- Padding between background of Ongoing App Ops chip and content -->
-    <dimen name="ongoing_appops_chip_bg_padding">4dp</dimen>
+    <dimen name="ongoing_appops_chip_bg_padding">0dp</dimen>
+    <!-- Margin between icons of Ongoing App Ops chip -->
+    <dimen name="ongoing_appops_chip_icon_margin">4dp</dimen>
+    <!-- Icon size of Ongoing App Ops chip -->
+    <dimen name="ongoing_appops_chip_icon_size">18dp</dimen>
     <!-- Radius of Ongoing App Ops chip corners -->
     <dimen name="ongoing_appops_chip_bg_corner_radius">12dp</dimen>
+    <!-- Text size for Ongoing App Ops dialog title -->
+    <dimen name="ongoing_appops_dialog_title_size">24sp</dimen>
+    <!-- Text size for Ongoing App Ops dialog items -->
+    <dimen name="ongoing_appops_dialog_item_size">20sp</dimen>
 </resources>

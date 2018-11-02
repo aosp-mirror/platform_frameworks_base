@@ -29,16 +29,21 @@ enum class PrivacyType(val nameId: Int, val iconId: Int) {
 
     fun getName(context: Context) = context.resources.getString(nameId)
 
-    fun getIcon(context: Context) = context.resources.getDrawable(iconId, null)
+    fun getIcon(context: Context) = context.resources.getDrawable(iconId, context.theme)
 }
 
 data class PrivacyItem(
     val privacyType: PrivacyType,
-    val application: PrivacyApplication,
-    val timeStarted: Long
+    val application: PrivacyApplication
 )
 
-data class PrivacyApplication(val packageName: String, val context: Context) {
+data class PrivacyApplication(val packageName: String, val context: Context)
+    : Comparable<PrivacyApplication> {
+
+    override fun compareTo(other: PrivacyApplication): Int {
+        return applicationName.compareTo(other.applicationName)
+    }
+
     var icon: Drawable? = null
     var applicationName: String
 
