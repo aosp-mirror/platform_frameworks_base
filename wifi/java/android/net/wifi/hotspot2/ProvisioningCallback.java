@@ -160,9 +160,9 @@ public abstract class ProvisioningCallback {
     public static final int OSU_STATUS_AP_CONNECTED = 2;
 
     /**
-     * The status code for provisioning flow to indicate the server connection is completed.
+     * The status code for provisioning flow to indicate connecting to the server.
      */
-    public static final int OSU_STATUS_SERVER_CONNECTED = 3;
+    public static final int OSU_STATUS_SERVER_CONNECTING = 3;
 
     /**
      * The status code for provisioning flow to indicate the server certificate is validated.
@@ -170,9 +170,9 @@ public abstract class ProvisioningCallback {
     public static final int OSU_STATUS_SERVER_VALIDATED = 4;
 
     /**
-     * The status code for provisioning flow to indicate the service provider is verified.
+     * The status code for provisioning flow to indicate the server is connected
      */
-    public static final int OSU_STATUS_SERVICE_PROVIDER_VERIFIED = 5;
+    public static final int OSU_STATUS_SERVER_CONNECTED = 5;
 
     /**
      * The status code for provisioning flow to indicate starting the first SOAP exchange.
