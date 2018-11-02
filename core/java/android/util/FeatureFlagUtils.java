@@ -48,7 +48,7 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put("settings_audio_switcher", "true");
         DEFAULT_FLAGS.put("settings_systemui_theme", "true");
         DEFAULT_FLAGS.put(EMERGENCY_DIAL_SHORTCUTS, "false");
-        DEFAULT_FLAGS.put(HEARING_AID_SETTINGS, "true");
+        DEFAULT_FLAGS.put(HEARING_AID_SETTINGS, "false");
     }
 
     /**
