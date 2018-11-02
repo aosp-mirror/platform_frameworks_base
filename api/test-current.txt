@@ -1323,6 +1323,14 @@ package android.transition {
 
 }
 
+package android.util {
+
+  public final class ArraySet<E> implements java.util.Collection java.util.Set {
+    method public E valueAtUnchecked(int);
+  }
+
+}
+
 package android.util.proto {
 
   public final class EncodedBuffer {
