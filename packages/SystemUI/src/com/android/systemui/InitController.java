@@ -22,6 +22,11 @@ import java.util.ArrayList;
  */
 public class InitController {
 
+    /**
+     * If a task is added after all tasks are executed, then we've done something terribly wrong
+     */
+    private boolean mTasksExecuted = false;
+
     private final ArrayList<Runnable> mTasks = new ArrayList<>();
 
     /**
@@ -29,6 +34,9 @@ public class InitController {
      * @param runnable the task to be executed
      */
     public void addPostInitTask(Runnable runnable) {
+        if (mTasksExecuted) {
+            throw new IllegalStateException("post init tasks have already been executed!");
+        }
         mTasks.add(runnable);
     }
 
@@ -39,5 +47,7 @@ public class InitController {
         while (!mTasks.isEmpty()) {
             mTasks.remove(0).run();
         }
+
+        mTasksExecuted = true;
     }
 }
