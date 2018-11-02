@@ -35,6 +35,7 @@ import android.util.Slog;
 import android.util.jar.StrictJarFile;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.ArrayUtils;
 import com.android.server.pm.Installer;
 import com.android.server.pm.Installer.InstallerException;
@@ -153,7 +154,7 @@ public class DexManager {
      * @param classPaths the class paths corresponding to the class loaders names from
      *     {@param classLoadersNames}. The the first element corresponds to the first class loader
      *     and so on. A classpath is represented as a list of dex files separated by
-     *     {@code File.pathSeparator}.
+     *     {@code File.pathSeparator}, or null if the class loader's classpath is not known.
      *     The dex files found in the first class path will be recorded in the usage file.
      * @param loaderIsa the ISA of the app loading the dex files
      * @param loaderUserId the user id which runs the code loading the dex files
@@ -169,7 +170,8 @@ public class DexManager {
         }
     }
 
-    private void notifyDexLoadInternal(ApplicationInfo loadingAppInfo,
+    @VisibleForTesting
+    /*package*/ void notifyDexLoadInternal(ApplicationInfo loadingAppInfo,
             List<String> classLoaderNames, List<String> classPaths, String loaderIsa,
             int loaderUserId) {
         if (classLoaderNames.size() != classPaths.size()) {
@@ -186,8 +188,14 @@ public class DexManager {
             return;
         }
 
+        // The first classpath should never be null because the first classloader
+        // should always be an instance of BaseDexClassLoader.
+        String firstClassPath = classPaths.get(0);
+        if (firstClassPath == null) {
+            return;
+        }
         // The classpath is represented as a list of dex files separated by File.pathSeparator.
-        String[] dexPathsToRegister = classPaths.get(0).split(File.pathSeparator);
+        String[] dexPathsToRegister = firstClassPath.split(File.pathSeparator);
 
         // Encode the class loader contexts for the dexPathsToRegister.
         String[] classLoaderContexts = DexoptUtils.processContextForDexLoad(

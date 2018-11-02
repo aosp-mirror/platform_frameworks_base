@@ -318,7 +318,8 @@ public final class DexoptUtils {
         // is fine (they come over binder). Even if something changes we expect the sizes to be
         // very small and it shouldn't matter much.
         for (int i = 1; i < classLoadersNames.size(); i++) {
-            if (!ClassLoaderFactory.isValidClassLoaderName(classLoadersNames.get(i))) {
+            if (!ClassLoaderFactory.isValidClassLoaderName(classLoadersNames.get(i))
+                || classPaths.get(i) == null) {
                 return null;
             }
             String classpath = encodeClasspath(classPaths.get(i).split(File.pathSeparator));

@@ -475,7 +475,7 @@ interface IPackageManager {
      * @param classPaths the class paths corresponding to the class loaders names from
      *     {@param classLoadersNames}. The the first element corresponds to the first class loader
      *     and so on. A classpath is represented as a list of dex files separated by
-     *     {@code File.pathSeparator}.
+     *     {@code File.pathSeparator}, or null if the class loader's classpath is not known.
      *     The dex files found in the first class path will be recorded in the usage file.
      * @param loaderIsa the ISA of the loader process
      */
