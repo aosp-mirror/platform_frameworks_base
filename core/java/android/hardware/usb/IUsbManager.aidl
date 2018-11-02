@@ -111,17 +111,6 @@ interface IUsbManager
      */
     ParcelFileDescriptor getControlFd(long function);
 
-    /* Allow USB debugging from the attached host. If alwaysAllow is true, add the
-     * the public key to list of host keys that the user has approved.
-     */
-    void allowUsbDebugging(boolean alwaysAllow, String publicKey);
-
-    /* Deny USB debugging from the attached host */
-    void denyUsbDebugging();
-
-    /* Clear public keys installed for secure USB debugging */
-    void clearUsbDebuggingKeys();
-
     /* Gets the list of USB ports. */
     UsbPort[] getPorts();
 

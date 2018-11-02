@@ -48,6 +48,8 @@ import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
 import android.content.pm.ShortcutManager;
 import android.content.res.Resources;
+import android.debug.AdbManager;
+import android.debug.IAdbManager;
 import android.hardware.ConsumerIrManager;
 import android.hardware.ISerialManager;
 import android.hardware.SensorManager;
@@ -582,6 +584,15 @@ final class SystemServiceRegistry {
                 IBinder b = ServiceManager.getServiceOrThrow(Context.USB_SERVICE);
                 return new UsbManager(ctx, IUsbManager.Stub.asInterface(b));
             }});
+
+        registerService(Context.ADB_SERVICE, AdbManager.class,
+                new CachedServiceFetcher<AdbManager>() {
+                    @Override
+                    public AdbManager createService(ContextImpl ctx)
+                                throws ServiceNotFoundException {
+                        IBinder b = ServiceManager.getServiceOrThrow(Context.ADB_SERVICE);
+                        return new AdbManager(ctx, IAdbManager.Stub.asInterface(b));
+                    }});
 
         registerService(Context.SERIAL_SERVICE, SerialManager.class,
                 new CachedServiceFetcher<SerialManager>() {
