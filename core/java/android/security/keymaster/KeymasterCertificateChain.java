@@ -54,6 +54,14 @@ public class KeymasterCertificateChain implements Parcelable {
         readFromParcel(in);
     }
 
+    /**
+     * Makes a shallow copy of other by copying the reference to the certificate chain list.
+     * @param other
+     */
+    public void shallowCopyFrom(KeymasterCertificateChain other) {
+        this.mCertificates = other.mCertificates;
+    }
+
     public List<byte[]> getCertificates() {
         return mCertificates;
     }
