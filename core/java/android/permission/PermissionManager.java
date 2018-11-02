@@ -16,16 +16,15 @@
 
 package android.permission;
 
-import android.Manifest;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.content.Context;
 
 import com.android.internal.annotations.Immutable;
+import com.android.server.SystemConfig;
 
-import java.util.Arrays;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 
@@ -42,28 +41,8 @@ public final class PermissionManager {
      *
      * @hide
      */
-    public static final List<SplitPermissionInfo> SPLIT_PERMISSIONS = Arrays.asList(
-            // READ_EXTERNAL_STORAGE is always required when an app requests
-            // WRITE_EXTERNAL_STORAGE, because we can't have an app that has
-            // write access without read access.  The hack here with the target
-            // target SDK version ensures that this grant is always done.
-            new SplitPermissionInfo(android.Manifest.permission.WRITE_EXTERNAL_STORAGE,
-                    Collections.singletonList(android.Manifest.permission.READ_EXTERNAL_STORAGE),
-                    android.os.Build.VERSION_CODES.CUR_DEVELOPMENT + 1),
-            new SplitPermissionInfo(android.Manifest.permission.READ_CONTACTS,
-                    Collections.singletonList(android.Manifest.permission.READ_CALL_LOG),
-                    android.os.Build.VERSION_CODES.JELLY_BEAN),
-            new SplitPermissionInfo(android.Manifest.permission.WRITE_CONTACTS,
-                    Collections.singletonList(android.Manifest.permission.WRITE_CALL_LOG),
-                    android.os.Build.VERSION_CODES.JELLY_BEAN),
-            new SplitPermissionInfo(Manifest.permission.ACCESS_FINE_LOCATION,
-                    Collections.singletonList(
-                            android.Manifest.permission.ACCESS_BACKGROUND_LOCATION),
-                    android.os.Build.VERSION_CODES.P0),
-            new SplitPermissionInfo(Manifest.permission.ACCESS_COARSE_LOCATION,
-                    Collections.singletonList(
-                            android.Manifest.permission.ACCESS_BACKGROUND_LOCATION),
-                    android.os.Build.VERSION_CODES.P0));
+    public static final ArrayList<SplitPermissionInfo> SPLIT_PERMISSIONS =
+            SystemConfig.getInstance().getSplitPermissions();
 
     private final @NonNull Context mContext;
 
@@ -145,9 +124,18 @@ public final class PermissionManager {
             return mTargetSdk;
         }
 
-        private SplitPermissionInfo(@NonNull String rootPerm, @NonNull List<String> newPerms,
+        /**
+         * Constructs a split permission.
+         *
+         * @param splitPerm old permission that will be split
+         * @param newPerms list of new permissions that {@code rootPerm} will be split into
+         * @param targetSdk apps targetting SDK versions below this will have {@code rootPerm}
+         * split into {@code newPerms}
+         * @hide
+         */
+        public SplitPermissionInfo(@NonNull String splitPerm, @NonNull List<String> newPerms,
                 int targetSdk) {
-            mSplitPerm = rootPerm;
+            mSplitPerm = splitPerm;
             mNewPerms = newPerms;
             mTargetSdk = targetSdk;
         }
