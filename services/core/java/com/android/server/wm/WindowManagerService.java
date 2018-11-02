@@ -208,6 +208,7 @@ import android.view.IWindowSessionCallback;
 import android.view.InputChannel;
 import android.view.InputDevice;
 import android.view.InputEventReceiver;
+import android.view.InsetsState;
 import android.view.KeyEvent;
 import android.view.MagnificationSpec;
 import android.view.MotionEvent;
@@ -218,7 +219,6 @@ import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.view.View;
 import android.view.WindowContentFrameStats;
-import android.view.InsetsState;
 import android.view.WindowManager;
 import android.view.WindowManager.LayoutParams;
 import android.view.WindowManager.RemoveContentMode;
@@ -7454,6 +7454,31 @@ public class WindowManagerService extends IWindowManager.Stub
         synchronized (mGlobalLock) {
             if (mPolicy.setAodShowing(aodShowing)) {
                 mWindowPlacerLocked.performSurfacePlacement();
+            }
+        }
+    }
+
+    @Override
+    public void reparentDisplayContent(int displayId, IBinder surfaceControlHandle) {
+        final Display display = mDisplayManager.getDisplay(displayId);
+        if (display == null) {
+            throw new IllegalArgumentException(
+                    "Can't reparent display for non-existent displayId: " + displayId);
+        }
+
+        final int callingUid = Binder.getCallingUid();
+        final int displayOwnerUid = display.getOwnerUid();
+        if (callingUid != displayOwnerUid) {
+            throw new SecurityException("Only owner of the display can reparent surfaces to it.");
+        }
+
+        synchronized (mGlobalLock) {
+            long token = Binder.clearCallingIdentity();
+            try {
+                DisplayContent displayContent = getDisplayContentOrCreate(displayId, null);
+                displayContent.reparentDisplayContent(surfaceControlHandle);
+            } finally {
+                Binder.restoreCallingIdentity(token);
             }
         }
     }
