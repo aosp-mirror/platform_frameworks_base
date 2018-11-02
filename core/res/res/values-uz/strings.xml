@@ -100,7 +100,7 @@
     <string name="peerTtyModeVco" msgid="1742404978686538049">"Teng huquqli ishtirokchi teletayp rejimini VCO (gapiradi, eshitolmaydi) qilib o‘zgartirdi"</string>
     <string name="peerTtyModeOff" msgid="3280819717850602205">"Teng huquqli ishtirokchi teletayp rejimini OFF (o‘chirilgan) qilib o‘zgartirdi"</string>
     <string name="serviceClassVoice" msgid="1258393812335258019">"Ovozli aloqa"</string>
-    <string name="serviceClassData" msgid="872456782077937893">"Ma’lumot"</string>
+    <string name="serviceClassData" msgid="872456782077937893">"Internet"</string>
     <string name="serviceClassFAX" msgid="5566624998840486475">"FAKS"</string>
     <string name="serviceClassSMS" msgid="2015460373701527489">"SMS"</string>
     <string name="serviceClassDataAsync" msgid="4523454783498551468">"Asinx"</string>

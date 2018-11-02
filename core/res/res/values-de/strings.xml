@@ -70,7 +70,7 @@
     <string name="ThreeWCMmi" msgid="9051047170321190368">"Dreierkonferenz"</string>
     <string name="RuacMmi" msgid="7827887459138308886">"Ablehnung unerwünschter Anrufe"</string>
     <string name="CndMmi" msgid="3116446237081575808">"Rufnummernübermittlung"</string>
-    <string name="DndMmi" msgid="1265478932418334331">"Nicht stören"</string>
+    <string name="DndMmi" msgid="1265478932418334331">"Bitte nicht stören"</string>
     <string name="CLIRDefaultOnNextCallOn" msgid="429415409145781923">"Anrufer-ID ist standardmäßig beschränkt. Nächster Anruf: Beschränkt"</string>
     <string name="CLIRDefaultOnNextCallOff" msgid="3092918006077864624">"Anrufer-ID ist standardmäßig beschränkt. Nächster Anruf: Nicht beschränkt"</string>
     <string name="CLIRDefaultOffNextCallOn" msgid="6179425182856418465">"Anrufer-ID ist standardmäßig nicht beschränkt. Nächster Anruf: Beschränkt"</string>
@@ -573,8 +573,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"Ermöglicht dem Eigentümer die Bindung an die Oberfläche eines Mobilfunkanbieter-Messaging-Dienstes auf oberster Ebene. Für normale Apps sollte dies nie erforderlich sein."</string>
     <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"An Mobilfunkanbieter-Dienste binden"</string>
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"Ermöglicht dem Eigentümer die Bindung an Mobilfunkanbieter-Dienste. Für normale Apps sollte dies nicht erforderlich sein."</string>
-    <string name="permlab_access_notification_policy" msgid="4247510821662059671">"Auf \"Nicht stören\" zugreifen"</string>
-    <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Ermöglicht der App Lese- und Schreibzugriff auf die \"Nicht stören\"-Konfiguration"</string>
+    <string name="permlab_access_notification_policy" msgid="4247510821662059671">"Auf \"Bitte nicht stören\" zugreifen"</string>
+    <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Ermöglicht der App Lese- und Schreibzugriff auf die \"Bitte nicht stören\"-Konfiguration"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Passwortregeln festlegen"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Zulässige Länge und Zeichen für Passwörter für die Displaysperre festlegen"</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Versuche zum Entsperren des Displays überwachen"</string>
@@ -1736,10 +1736,10 @@
     <string name="zen_mode_until" msgid="7336308492289875088">"Bis <xliff:g id="FORMATTEDTIME">%1$s</xliff:g>"</string>
     <string name="zen_mode_alarm" msgid="9128205721301330797">"Bis <xliff:g id="FORMATTEDTIME">%1$s</xliff:g> (nächste Weckzeit)"</string>
     <string name="zen_mode_forever" msgid="931849471004038757">"Bis zur Deaktivierung"</string>
-    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Bis zur Deaktivierung von \"Nicht stören\""</string>
+    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"Bis zur Deaktivierung von \"Bitte nicht stören\""</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"Minimieren"</string>
-    <string name="zen_mode_feature_name" msgid="5254089399895895004">"Nicht stören"</string>
+    <string name="zen_mode_feature_name" msgid="5254089399895895004">"Bitte nicht stören"</string>
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"Ruhezeit"</string>
     <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"Abends unter der Woche"</string>
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"Wochenende"</string>
