@@ -18,6 +18,7 @@ package android.net;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -27,6 +28,8 @@ import com.android.internal.util.Preconditions;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.net.Inet6Address;
+import java.net.UnknownHostException;
 import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Random;
@@ -407,5 +410,35 @@ public final class MacAddress implements Parcelable {
         Preconditions.checkNotNull(baseAddress);
         Preconditions.checkNotNull(mask);
         return (mAddr & mask.mAddr) == (baseAddress.mAddr & mask.mAddr);
+    }
+
+    /**
+     * Create a link-local Inet6Address from the MAC address. The EUI-48 MAC address is converted
+     * to an EUI-64 MAC address per RFC 4291. The resulting EUI-64 is used to construct a link-local
+     * IPv6 address per RFC 4862.
+     *
+     * @return A link-local Inet6Address constructed from the MAC address.
+     * @hide
+     */
+    public @Nullable Inet6Address getLinkLocalIpv6FromEui48Mac() {
+        byte[] macEui48Bytes = toByteArray();
+        byte[] addr = new byte[16];
+
+        addr[0] = (byte) 0xfe;
+        addr[1] = (byte) 0x80;
+        addr[8] = (byte) (macEui48Bytes[0] ^ (byte) 0x02); // flip the link-local bit
+        addr[9] = macEui48Bytes[1];
+        addr[10] = macEui48Bytes[2];
+        addr[11] = (byte) 0xff;
+        addr[12] = (byte) 0xfe;
+        addr[13] = macEui48Bytes[3];
+        addr[14] = macEui48Bytes[4];
+        addr[15] = macEui48Bytes[5];
+
+        try {
+            return Inet6Address.getByAddress(null, addr, 0);
+        } catch (UnknownHostException e) {
+            return null;
+        }
     }
 }
