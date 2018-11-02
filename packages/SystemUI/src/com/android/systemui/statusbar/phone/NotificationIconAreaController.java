@@ -20,6 +20,7 @@ import com.android.internal.util.ContrastColorUtil;
 import com.android.internal.widget.ViewClippingUtil;
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.StatusBarIconView;
 import com.android.systemui.statusbar.notification.NotificationData;
@@ -48,7 +49,8 @@ public class NotificationIconAreaController implements DarkReceiver {
         @Override
         public void onTuningChanged(String key, String newValue) {
             if (key.equals(LOW_PRIORITY)) {
-                mShowLowPriority = "1".equals(newValue);
+                mShowLowPriority = "1".equals(newValue)
+                        || !NotificationLockscreenUserManager.AUTO_DEMOTE_NOTIFICATIONS;
                 if (mNotificationScrollLayout != null) {
                     updateStatusBarIcons();
                 }
@@ -234,7 +236,8 @@ public class NotificationIconAreaController implements DarkReceiver {
 
     public void updateStatusBarIcons() {
         updateIconsForLayout(entry -> entry.icon, mNotificationIcons,
-                false /* showAmbient */, false /* showLowPriority */, true /* hideDismissed */,
+                false /* showAmbient */, mShowLowPriority /* showLowPriority */,
+                true /* hideDismissed */,
                 true /* hideRepliedMessages */);
     }
 
