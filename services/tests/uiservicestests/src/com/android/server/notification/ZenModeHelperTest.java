@@ -21,13 +21,14 @@ import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_FULL_SCRE
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_LIGHTS;
 import static android.app.NotificationManager.Policy.SUPPRESSED_EFFECT_PEEK;
 
-import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertEquals;
+import static junit.framework.Assert.assertFalse;
 import static junit.framework.TestCase.assertTrue;
 
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
+import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.doNothing;
@@ -45,13 +46,14 @@ import android.app.NotificationManager.Policy;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.content.res.Resources;
 import android.content.res.XmlResourceParser;
 import android.media.AudioAttributes;
 import android.media.AudioManager;
 import android.media.AudioManagerInternal;
-import android.media.VolumePolicy;
 import android.media.AudioSystem;
+import android.media.VolumePolicy;
 import android.net.Uri;
 import android.provider.Settings;
 import android.provider.Settings.Global;
@@ -67,9 +69,9 @@ import android.util.Xml;
 
 import com.android.internal.R;
 import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
-import com.android.server.notification.ManagedServices.UserProfiles;
 import com.android.internal.util.FastXmlSerializer;
 import com.android.server.UiServiceTestCase;
+import com.android.server.notification.ManagedServices.UserProfiles;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -87,11 +89,15 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.Reader;
+import java.util.Objects;
 
 @SmallTest
 @RunWith(AndroidTestingRunner.class)
 @TestableLooper.RunWithLooper
 public class ZenModeHelperTest extends UiServiceTestCase {
+
+    private static final String EVENTS_DEFAULT_RULE_ID = "EVENTS_DEFAULT_RULE";
+    private static final String SCHEDULE_DEFAULT_RULE_ID = "EVERY_NIGHT_DEFAULT_RULE";
 
     ConditionProviders mConditionProviders;
     @Mock NotificationManager mNotificationManager;
@@ -108,7 +114,6 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         mTestableLooper = TestableLooper.get(this);
         mContext = spy(getContext());
         mContentResolver = mContext.getContentResolver();
-
         mResources = spy(mContext.getResources());
         try {
             when(mResources.getXml(R.xml.default_zen_mode_config)).thenReturn(
@@ -132,12 +137,13 @@ public class ZenModeHelperTest extends UiServiceTestCase {
                 + "reminders=\"false\" events=\"false\" callsFrom=\"1\" messagesFrom=\"2\" "
                 + "visualScreenOff=\"true\" alarms=\"true\" "
                 + "media=\"true\" system=\"false\" />\n"
-                + "<automatic ruleId=\"EVENTS_DEFAULT_RULE\" enabled=\"false\" snoozing=\"false\""
+                + "<automatic ruleId=\"" + EVENTS_DEFAULT_RULE_ID
+                + "\" enabled=\"false\" snoozing=\"false\""
                 + " name=\"Event\" zen=\"1\""
                 + " component=\"android/com.android.server.notification.EventConditionProvider\""
                 + " conditionId=\"condition://android/event?userId=-10000&amp;calendar=&amp;"
                 + "reply=1\"/>\n"
-                + "<automatic ruleId=\"EVERY_NIGHT_DEFAULT_RULE\" enabled=\"false\""
+                + "<automatic ruleId=\"" + SCHEDULE_DEFAULT_RULE_ID + "\" enabled=\"false\""
                 + " snoozing=\"false\" name=\"Sleeping\" zen=\"1\""
                 + " component=\"android/com.android.server.notification.ScheduleConditionProvider\""
                 + " conditionId=\"condition://android/schedule?days=1.2.3.4.5.6.7 &amp;start=22.0"
@@ -770,8 +776,8 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         mZenModeHelperSpy.readXml(parser, false);
 
         assertEquals(SUPPRESSED_EFFECT_FULL_SCREEN_INTENT
-                | SUPPRESSED_EFFECT_LIGHTS
-                | SUPPRESSED_EFFECT_PEEK,
+                        | SUPPRESSED_EFFECT_LIGHTS
+                        | SUPPRESSED_EFFECT_PEEK,
                 mZenModeHelperSpy.mConfig.suppressedVisualEffects);
 
         xml = "<zen version=\"6\" user=\"0\">\n"
@@ -1005,6 +1011,90 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         config.automaticRules = new ArrayMap<>();
         mZenModeHelperSpy.mConfig = config;
         mZenModeHelperSpy.updateDefaultZenRules(); // shouldn't throw null pointer
+    }
+
+    @Test
+    public void testDoNotUpdateModifiedDefaultAutoRule() {
+        // mDefaultConfig is set to default config in setup by getDefaultConfigParser
+        when(mContext.checkCallingPermission(anyString()))
+                .thenReturn(PackageManager.PERMISSION_GRANTED);
+
+        // shouldn't update rule that's been modified
+        ZenModeConfig.ZenRule updatedDefaultRule = new ZenModeConfig.ZenRule();
+        updatedDefaultRule.modified = true;
+        updatedDefaultRule.enabled = false;
+        updatedDefaultRule.creationTime = 0;
+        updatedDefaultRule.id = SCHEDULE_DEFAULT_RULE_ID;
+        updatedDefaultRule.name = "Schedule Default Rule";
+        updatedDefaultRule.zenMode = Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+        updatedDefaultRule.conditionId = ZenModeConfig.toScheduleConditionId(new ScheduleInfo());
+        updatedDefaultRule.component = new ComponentName("android", "ScheduleConditionProvider");
+
+        ArrayMap<String, ZenModeConfig.ZenRule> autoRules = new ArrayMap<>();
+        autoRules.put(SCHEDULE_DEFAULT_RULE_ID, updatedDefaultRule);
+        mZenModeHelperSpy.mConfig.automaticRules = autoRules;
+
+        mZenModeHelperSpy.updateDefaultZenRules();
+        assertEquals(updatedDefaultRule,
+                mZenModeHelperSpy.mConfig.automaticRules.get(SCHEDULE_DEFAULT_RULE_ID));
+    }
+
+    @Test
+    public void testDoNotUpdateEnabledDefaultAutoRule() {
+        // mDefaultConfig is set to default config in setup by getDefaultConfigParser
+        when(mContext.checkCallingPermission(anyString()))
+                .thenReturn(PackageManager.PERMISSION_GRANTED);
+
+        // shouldn't update the rule that's enabled
+        ZenModeConfig.ZenRule updatedDefaultRule = new ZenModeConfig.ZenRule();
+        updatedDefaultRule.enabled = true;
+        updatedDefaultRule.modified = false;
+        updatedDefaultRule.creationTime = 0;
+        updatedDefaultRule.id = SCHEDULE_DEFAULT_RULE_ID;
+        updatedDefaultRule.name = "Schedule Default Rule";
+        updatedDefaultRule.zenMode = Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+        updatedDefaultRule.conditionId = ZenModeConfig.toScheduleConditionId(new ScheduleInfo());
+        updatedDefaultRule.component = new ComponentName("android", "ScheduleConditionProvider");
+
+        ArrayMap<String, ZenModeConfig.ZenRule> autoRules = new ArrayMap<>();
+        autoRules.put(SCHEDULE_DEFAULT_RULE_ID, updatedDefaultRule);
+        mZenModeHelperSpy.mConfig.automaticRules = autoRules;
+
+        mZenModeHelperSpy.updateDefaultZenRules();
+        assertEquals(updatedDefaultRule,
+                mZenModeHelperSpy.mConfig.automaticRules.get(SCHEDULE_DEFAULT_RULE_ID));
+    }
+
+    @Test
+    public void testUpdateDefaultAutoRule() {
+        // mDefaultConfig is set to default config in setup by getDefaultConfigParser
+        final String defaultRuleName = "rule name test";
+        when(mContext.checkCallingPermission(anyString()))
+                .thenReturn(PackageManager.PERMISSION_GRANTED);
+
+        // will update rule that is not enabled and modified
+        ZenModeConfig.ZenRule customDefaultRule = new ZenModeConfig.ZenRule();
+        customDefaultRule.enabled = false;
+        customDefaultRule.modified = false;
+        customDefaultRule.creationTime = 0;
+        customDefaultRule.id = SCHEDULE_DEFAULT_RULE_ID;
+        customDefaultRule.name = "Schedule Default Rule";
+        customDefaultRule.zenMode = Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
+        customDefaultRule.conditionId = ZenModeConfig.toScheduleConditionId(new ScheduleInfo());
+        customDefaultRule.component = new ComponentName("android", "ScheduleConditionProvider");
+
+        ArrayMap<String, ZenModeConfig.ZenRule> autoRules = new ArrayMap<>();
+        autoRules.put(SCHEDULE_DEFAULT_RULE_ID, customDefaultRule);
+        mZenModeHelperSpy.mConfig.automaticRules = autoRules;
+
+        mZenModeHelperSpy.updateDefaultZenRules();
+        ZenModeConfig.ZenRule ruleAfterUpdating =
+                mZenModeHelperSpy.mConfig.automaticRules.get(SCHEDULE_DEFAULT_RULE_ID);
+        assertEquals(customDefaultRule.enabled, ruleAfterUpdating.enabled);
+        assertEquals(customDefaultRule.modified, ruleAfterUpdating.modified);
+        assertEquals(customDefaultRule.id, ruleAfterUpdating.id);
+        assertEquals(customDefaultRule.conditionId, ruleAfterUpdating.conditionId);
+        assertFalse(Objects.equals(defaultRuleName, ruleAfterUpdating.name)); // update name
     }
 
     private void setupZenConfig() {
