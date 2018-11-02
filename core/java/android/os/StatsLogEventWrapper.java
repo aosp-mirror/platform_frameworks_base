@@ -65,11 +65,17 @@ public final class StatsLogEventWrapper implements Parcelable {
     public static final Parcelable.Creator<StatsLogEventWrapper> CREATOR = new
             Parcelable.Creator<StatsLogEventWrapper>() {
                 public StatsLogEventWrapper createFromParcel(Parcel in) {
-                    return new StatsLogEventWrapper(in);
+                    android.util.EventLog.writeEvent(0x534e4554, "112550251",
+                            android.os.Binder.getCallingUid(), "");
+                    // Purposefully leaving this method not implemented.
+                    throw new RuntimeException("Not implemented");
                 }
 
                 public StatsLogEventWrapper[] newArray(int size) {
-                    return new StatsLogEventWrapper[size];
+                    android.util.EventLog.writeEvent(0x534e4554, "112550251",
+                            android.os.Binder.getCallingUid(), "");
+                    // Purposefully leaving this method not implemented.
+                    throw new RuntimeException("Not implemented");
                 }
             };
 
@@ -120,10 +126,6 @@ public final class StatsLogEventWrapper implements Parcelable {
         mStorage.write(bytes, 0, bytes.length);
     }
 
-    private StatsLogEventWrapper(Parcel in) {
-        readFromParcel(in);
-    }
-
     /**
      * Writes the stored fields to a byte array. Will first write a new-line character to denote
      * END_LIST before writing contents to byte array.
@@ -131,13 +133,6 @@ public final class StatsLogEventWrapper implements Parcelable {
     public void writeToParcel(Parcel out, int flags) {
         mStorage.write(10); // new-line character is same as END_LIST
         out.writeByteArray(mStorage.toByteArray());
-    }
-
-    /**
-     * Not implemented.
-     */
-    public void readFromParcel(Parcel in) {
-        // Not needed since this java class is for sending to statsd only.
     }
 
     /**
