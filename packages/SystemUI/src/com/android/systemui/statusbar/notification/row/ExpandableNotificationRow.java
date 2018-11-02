@@ -1499,9 +1499,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     private void updateIconVisibilities() {
-        boolean visible = isChildInGroup()
-                || isBelowSpeedBump()
-                || mIconsVisible;
+        boolean visible = isChildInGroup() || mIconsVisible;
         for (NotificationContentView l : mLayouts) {
             l.setIconsVisible(visible);
         }
