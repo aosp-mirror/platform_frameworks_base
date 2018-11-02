@@ -1269,12 +1269,12 @@ public class WifiManager {
         /**
          * Invoked when a network request initiated by an app matches some networks in scan results.
          * This may be invoked multiple times for a single network request as the platform finds new
-         * networks in scan results.
+         * matching networks in scan results.
          *
-         * @param wifiConfigurations List of {@link WifiConfiguration} objects corresponding to the
-         *                           networks matching the request.
+         * @param scanResults List of {@link ScanResult} objects corresponding to the networks
+         *                    matching the request.
          */
-        void onMatch(@NonNull List<WifiConfiguration> wifiConfigurations);
+        void onMatch(@NonNull List<ScanResult> scanResults);
 
         /**
          * Invoked on a successful connection with the network that the user selected
@@ -1363,13 +1363,13 @@ public class WifiManager {
         }
 
         @Override
-        public void onMatch(List<WifiConfiguration> wifiConfigurations) {
+        public void onMatch(List<ScanResult> scanResults) {
             if (mVerboseLoggingEnabled) {
-                Log.v(TAG, "NetworkRequestMatchCallbackProxy: onMatch wificonfigurations: "
-                        + wifiConfigurations);
+                Log.v(TAG, "NetworkRequestMatchCallbackProxy: onMatch scanResults: "
+                        + scanResults);
             }
             mHandler.post(() -> {
-                mCallback.onMatch(wifiConfigurations);
+                mCallback.onMatch(scanResults);
             });
         }
 

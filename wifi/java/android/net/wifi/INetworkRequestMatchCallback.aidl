@@ -17,6 +17,7 @@
 package android.net.wifi;
 
 import android.net.wifi.INetworkRequestUserSelectionCallback;
+import android.net.wifi.ScanResult;
 import android.net.wifi.WifiConfiguration;
 
 /**
@@ -28,7 +29,7 @@ oneway interface INetworkRequestMatchCallback
 {
    void onUserSelectionCallbackRegistration(in INetworkRequestUserSelectionCallback userSelectionCallback);
 
-   void onMatch(in List<WifiConfiguration> wificonfigurations);
+   void onMatch(in List<ScanResult> scanResults);
 
    void onUserSelectionConnectSuccess(in WifiConfiguration wificonfiguration);
 
