@@ -132,7 +132,6 @@ cc_library_shared {
         "libmediaplayer2-protos",
         "libmediandk_utils",
         "libmediautils",
-        "libnetd_client",  // for setNetworkForUser
         "libprotobuf-cpp-lite",
         "libstagefright_esds",
         "libstagefright_foundation",
@@ -141,7 +140,7 @@ cc_library_shared {
         "libstagefright_mpeg2support",
         "libstagefright_nuplayer2",
         "libstagefright_player2",
-        "libstagefright_rtsp",
+        "libstagefright_rtsp_player2",
         "libstagefright_timedtext2",
         "libmedia2_jni_core",
     ],
