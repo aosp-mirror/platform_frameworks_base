@@ -140,7 +140,7 @@ GaugeMetricProducer::GaugeMetricProducer(const ConfigKey& key, const GaugeMetric
 
     // Adjust start for partial bucket
     mCurrentBucketStartTimeNs = startTimeNs;
-    if (mIsPulled) {
+    if (mIsPulled && mSamplingType == GaugeMetric::RANDOM_ONE_SAMPLE) {
         pullAndMatchEventsLocked(startTimeNs);
     }
 
