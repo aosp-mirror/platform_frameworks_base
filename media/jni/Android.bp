@@ -123,7 +123,6 @@ cc_library_shared {
         "libcutils",
         "libmedia_helper",
         "libmedia_player2_util",
-        "libmediadrm",
         "libmediaextractor",
         "libmediametrics",
         "libmediaplayer2",
