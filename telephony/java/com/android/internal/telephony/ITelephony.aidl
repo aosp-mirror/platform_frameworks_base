@@ -1617,4 +1617,9 @@ interface ITelephony {
      * return true if TTY over VoLTE is enabled for the subscription specified.
      */
     boolean isTtyOverVolteEnabled(int subId);
+
+    /**
+     * Return a list of certs in hex string from loaded carrier privileges access rules.
+     */
+    List<String> getCertsFromCarrierPrivilegeAccessRules(int subId);
 }
