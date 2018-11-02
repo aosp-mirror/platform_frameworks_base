@@ -190,6 +190,7 @@ message Atom {
         ProcessCpuTime process_cpu_time = 10035;
         NativeProcessMemoryState native_process_memory_state = 10036;
         CpuTimePerThreadFreq cpu_time_per_thread_freq = 10037;
+        OnDevicePowerMeasurement on_device_power_measurement = 10038;
     }
 
     // DO NOT USE field numbers above 100,000 in AOSP.
@@ -2259,6 +2260,27 @@ message SubsystemSleepState {
     optional uint64 count = 3;
     // The length of time spent in, or spent voting for, the sleep state
     optional uint64 time_millis = 4;
+}
+
+/**
+ * Pulls on-device power measurement information.
+ * Data defined by hardware/interfaces/power/stats/1.0/types.hal.
+ * Pulled from:
+ *   frameworks/base/cmds/statsd/src/external/PowerStatsPuller.cpp
+ */
+message OnDevicePowerMeasurement {
+    // Name of the subsystem (to which the rail belongs).
+    optional string subsystem_name = 1;
+
+    // Rail name. The rail lies within the subsystem.
+    optional string rail_name = 2;
+
+    // Time (in ms since boot) at which the rail energy value was measured.
+    // This may differ slightly from the time that statsd logs this information.
+    optional uint64 measurement_timestamp_millis = 3;
+
+    // Accumulated energy used via the rail since device boot in uWs.
+    optional uint64 energy_microwatt_secs = 4;
 }
 
 /**
