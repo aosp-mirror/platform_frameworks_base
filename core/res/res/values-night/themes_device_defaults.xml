@@ -52,6 +52,9 @@ easier.
     <!-- DeviceDefault theme for a window that should look like the Settings app.  -->
     <style name="Theme.DeviceDefault.Settings" parent="Theme.DeviceDefault">
         <item name="colorPrimaryDark">@color/primary_dark_device_default_settings</item>
+        <item name="colorBackground">@color/primary_dark_device_default_settings</item>
+
+        <item name="listDivider">@color/list_divider_color_dark</item>
     </style>
 
     <!-- Theme for the dialog shown when an app crashes or ANRs. -->
