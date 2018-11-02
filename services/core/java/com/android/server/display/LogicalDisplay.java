@@ -57,8 +57,6 @@ import java.util.Objects;
  * </p>
  */
 final class LogicalDisplay {
-    private static final String PROP_MASKING_INSET_TOP = "persist.sys.displayinset.top";
-
     private final DisplayInfo mBaseDisplayInfo = new DisplayInfo();
 
     // The layer stack we use when the display has been blanked to prevent any
