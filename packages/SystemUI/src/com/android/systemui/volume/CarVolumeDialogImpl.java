@@ -539,9 +539,9 @@ public class CarVolumeDialogImpl implements VolumeDialog {
       if (value != volumeItem.progress) {
         volumeItem.listItem.setProgress(value);
         volumeItem.progress = value;
-        if ((flags & AudioManager.FLAG_SHOW_UI) != 0) {
-          show(Events.SHOW_REASON_VOLUME_CHANGED);
-        }
+      }
+      if ((flags & AudioManager.FLAG_SHOW_UI) != 0) {
+        show(Events.SHOW_REASON_VOLUME_CHANGED);
       }
     }
 
