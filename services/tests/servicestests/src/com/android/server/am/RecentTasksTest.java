@@ -30,6 +30,7 @@ import static android.content.Intent.FLAG_ACTIVITY_NEW_DOCUMENT;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.view.Display.DEFAULT_DISPLAY;
 
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
@@ -55,7 +56,6 @@ import android.os.RemoteException;
 import android.os.SystemClock;
 import android.platform.test.annotations.Presubmit;
 import android.util.MutableLong;
-import android.util.SparseArray;
 import android.util.SparseBooleanArray;
 
 import androidx.test.InstrumentationRegistry;
@@ -662,6 +662,39 @@ public class RecentTasksTest extends ActivityTestsBase {
         // Remove all the visible tasks and ensure that they are removed
         mRecentTasks.removeAllVisibleTasks();
         assertTrimmed(t1, t2, t3, t4, t5, t6, t7);
+    }
+
+    @Test
+    public void testNotRestoreRecentTaskApis() {
+        final TaskRecord task = createTaskBuilder(".Task").build();
+        final int taskId = task.taskId;
+        mRecentTasks.add(task);
+        // Only keep the task in RecentTasks.
+        task.removeWindowContainer();
+        mStack.remove();
+
+        // The following APIs should not restore task from recents to the active list.
+        assertNotRestoreTask(() -> mService.setFocusedTask(taskId));
+        assertNotRestoreTask(() -> mService.startSystemLockTaskMode(taskId));
+        assertNotRestoreTask(() -> mService.cancelTaskWindowTransition(taskId));
+        assertNotRestoreTask(
+                () -> mService.resizeTask(taskId, null /* bounds */, 0 /* resizeMode */));
+        assertNotRestoreTask(
+                () -> mService.setTaskWindowingMode(taskId, WINDOWING_MODE_FULLSCREEN,
+                        false/* toTop */));
+        assertNotRestoreTask(
+                () -> mService.setTaskWindowingModeSplitScreenPrimary(taskId,
+                        SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT,
+                        false /* toTop */, false /* animate */, null /* initialBounds */,
+                        true /* showRecents */));
+    }
+
+    private void assertNotRestoreTask(Runnable action) {
+        // Verify stack count doesn't change because task with fullscreen mode and standard type
+        // would have its own stack.
+        final int orignalStackCount = mDisplay.getChildCount();
+        action.run();
+        assertEquals(orignalStackCount, mDisplay.getChildCount());
     }
 
     @Test

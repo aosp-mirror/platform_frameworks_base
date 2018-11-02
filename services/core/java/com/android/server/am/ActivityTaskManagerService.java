@@ -1806,7 +1806,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         final long callingId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
-                final TaskRecord task = mStackSupervisor.anyTaskForIdLocked(taskId);
+                final TaskRecord task = mStackSupervisor.anyTaskForIdLocked(taskId,
+                        MATCH_TASK_IN_STACKS_ONLY);
                 if (task == null) {
                     return;
                 }
@@ -1966,7 +1967,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         synchronized (mGlobalLock) {
             final long ident = Binder.clearCallingIdentity();
             try {
-                final TaskRecord task = mStackSupervisor.anyTaskForIdLocked(taskId);
+                final TaskRecord task = mStackSupervisor.anyTaskForIdLocked(taskId,
+                        MATCH_TASK_IN_STACKS_ONLY);
                 if (task == null) {
                     Slog.w(TAG, "setTaskWindowingMode: No task for id=" + taskId);
                     return;
@@ -2297,7 +2299,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         synchronized (mGlobalLock) {
             final long ident = Binder.clearCallingIdentity();
             try {
-                final TaskRecord task = mStackSupervisor.anyTaskForIdLocked(taskId);
+                final TaskRecord task = mStackSupervisor.anyTaskForIdLocked(taskId,
+                        MATCH_TASK_IN_STACKS_ONLY);
                 if (task == null) {
                     Slog.w(TAG, "setTaskWindowingModeSplitScreenPrimary: No task for id=" + taskId);
                     return false;
@@ -2432,13 +2435,17 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     @Override
-    public void startSystemLockTaskMode(int taskId) throws RemoteException {
+    public void startSystemLockTaskMode(int taskId) {
         mAmInternal.enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "startSystemLockTaskMode");
         // This makes inner call to look as if it was initiated by system.
         long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
-                final TaskRecord task = mStackSupervisor.anyTaskForIdLocked(taskId);
+                final TaskRecord task = mStackSupervisor.anyTaskForIdLocked(taskId,
+                        MATCH_TASK_IN_STACKS_ONLY);
+                if (task == null) {
+                    return;
+                }
 
                 // When starting lock task mode the stack must be in front and focused
                 task.getStack().moveToFront("startSystemLockTaskMode");
@@ -2796,7 +2803,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
-                TaskRecord task = mStackSupervisor.anyTaskForIdLocked(taskId);
+                final TaskRecord task = mStackSupervisor.anyTaskForIdLocked(taskId,
+                        MATCH_TASK_IN_STACKS_ONLY);
                 if (task == null) {
                     Slog.w(TAG, "resizeTask: taskId=" + taskId + " not found");
                     return;
