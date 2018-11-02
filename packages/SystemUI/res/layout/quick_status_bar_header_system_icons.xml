@@ -46,6 +46,8 @@
         android:layout_weight="1"
         android:gravity="center_vertical|center_horizontal" />
 
+    <include layout="@layout/ongoing_privacy_chip" />
+
     <com.android.systemui.BatteryMeterView
         android:id="@+id/battery"
         android:layout_height="match_parent"
