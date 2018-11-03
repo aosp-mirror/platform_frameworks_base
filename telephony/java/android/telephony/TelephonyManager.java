@@ -1212,6 +1212,33 @@ public class TelephonyManager {
             "android.telephony.action.SUBSCRIPTION_CARRIER_IDENTITY_CHANGED";
 
     /**
+     * Broadcast Action: The subscription precise carrier identity has changed.
+     * Similar like {@link #ACTION_SUBSCRIPTION_CARRIER_IDENTITY_CHANGED}, this intent will be sent
+     * on the event of {@link #ACTION_SUBSCRIPTION_CARRIER_IDENTITY_CHANGED}. However, its possible
+     * that precise carrier identity changes while
+     * {@link #ACTION_SUBSCRIPTION_CARRIER_IDENTITY_CHANGED} remains the same e.g, the same
+     * subscription switches to different IMSI could potentially change its precise carrier id.
+     *
+     * The intent will have the following extra values:
+     * <ul>
+     *   <li>{@link #EXTRA_PRECISE_CARRIER_ID} The up-to-date precise carrier id of the
+     *   current subscription.
+     *   </li>
+     *   <li>{@link #EXTRA_PRECISE_CARRIER_NAME} The up-to-date carrier name of the current
+     *   subscription.
+     *   </li>
+     *   <li>{@link #EXTRA_SUBSCRIPTION_ID} The subscription id associated with the changed carrier
+     *   identity.
+     *   </li>
+     * </ul>
+     * <p class="note">This is a protected intent that can only be sent by the system.
+     * @hide
+     */
+    @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+    public static final String ACTION_SUBSCRIPTION_PRECISE_CARRIER_IDENTITY_CHANGED =
+            "android.telephony.action.SUBSCRIPTION_PRECISE_CARRIER_IDENTITY_CHANGED";
+
+    /**
      * An int extra used with {@link #ACTION_SUBSCRIPTION_CARRIER_IDENTITY_CHANGED} which indicates
      * the updated carrier id {@link TelephonyManager#getSimCarrierId()} of
      * the current subscription.
@@ -1238,6 +1265,28 @@ public class TelephonyManager {
      * usually the brand name of the subsidiary (e.g. T-Mobile).
      */
     public static final String EXTRA_CARRIER_NAME = "android.telephony.extra.CARRIER_NAME";
+
+    /**
+     * An int extra used with {@link #ACTION_SUBSCRIPTION_PRECISE_CARRIER_IDENTITY_CHANGED} which
+     * indicates the updated precise carrier id {@link TelephonyManager#getSimPreciseCarrierId()} of
+     * the current subscription. Note, its possible precise carrier id changes while
+     * {@link #ACTION_SUBSCRIPTION_CARRIER_IDENTITY_CHANGED} remains the same e.g, when
+     * subscription switch to different IMSI.
+     * <p>Will be {@link TelephonyManager#UNKNOWN_CARRIER_ID} if the subscription is unavailable or
+     * the carrier cannot be identified.
+     * @hide
+     */
+    public static final String EXTRA_PRECISE_CARRIER_ID =
+            "android.telephony.extra.PRECISE_CARRIER_ID";
+
+    /**
+     * An string extra used with {@link #ACTION_SUBSCRIPTION_PRECISE_CARRIER_IDENTITY_CHANGED} which
+     * indicates the updated precise carrier name of the current subscription.
+     * {@see TelephonyManager#getSimPreciseCarrierIdName()}
+     * <p>it's a user-facing name of the precise carrier id {@link #EXTRA_PRECISE_CARRIER_ID},
+     * @hide
+     */
+    public static final String EXTRA_PRECISE_CARRIER_NAME = "android.telephony.extra.CARRIER_NAME";
 
     /**
      * An int extra used with {@link #ACTION_SUBSCRIPTION_CARRIER_IDENTITY_CHANGED} to indicate the
@@ -8291,6 +8340,62 @@ public class TelephonyManager {
             ITelephony service = getITelephony();
             if (service != null) {
                 return service.getSubscriptionCarrierName(getSubId());
+            }
+        } catch (RemoteException ex) {
+            // This could happen if binder process crashes.
+        }
+        return null;
+    }
+
+    /**
+     * Returns fine-grained carrier id of the current subscription.
+     *
+     * <p>The precise carrier id can be used to further differentiate a carrier by different
+     * networks, by prepaid v.s.postpaid or even by 4G v.s.3G plan. Each carrier has a unique
+     * carrier id {@link #getSimCarrierId()} but can have multiple precise carrier id. e.g,
+     * {@link #getSimCarrierId()} will always return Tracfone (id 2022) for a Tracfone SIM, while
+     * {@link #getSimPreciseCarrierId()} can return Tracfone AT&T or Tracfone T-Mobile based on the
+     * current subscription IMSI.
+     *
+     * <p>For carriers without any fine-grained carrier ids, return {@link #getSimCarrierId()}
+     * <p>Precise carrier ids are defined in the same way as carrier id
+     * <a href="https://android.googlesource.com/platform/packages/providers/TelephonyProvider/+/master/assets/carrier_list.textpb">here</a>
+     * except each with a "parent" id linking to its top-level carrier id.
+     *
+     * @return Returns fine-grained carrier id of the current subscription.
+     * Return {@link #UNKNOWN_CARRIER_ID} if the subscription is unavailable or the carrier cannot
+     * be identified.
+     *
+     * @hide
+     */
+    public int getSimPreciseCarrierId() {
+        try {
+            ITelephony service = getITelephony();
+            if (service != null) {
+                return service.getSubscriptionPreciseCarrierId(getSubId());
+            }
+        } catch (RemoteException ex) {
+            // This could happen if binder process crashes.
+        }
+        return UNKNOWN_CARRIER_ID;
+    }
+
+    /**
+     * Similar like {@link #getSimCarrierIdName()}, returns user-facing name of the
+     * precise carrier id {@link #getSimPreciseCarrierId()}
+     *
+     * <p>The returned name is unlocalized.
+     *
+     * @return user-facing name of the subscription precise carrier id. Return {@code null} if the
+     * subscription is unavailable or the carrier cannot be identified.
+     *
+     * @hide
+     */
+    public CharSequence getSimPreciseCarrierIdName() {
+        try {
+            ITelephony service = getITelephony();
+            if (service != null) {
+                return service.getSubscriptionPreciseCarrierName(getSubId());
             }
         } catch (RemoteException ex) {
             // This could happen if binder process crashes.
