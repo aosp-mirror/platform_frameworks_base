@@ -17,20 +17,29 @@
 package android.media;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.nio.ByteBuffer;
+import java.util.AbstractSet;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 /**
- * Encapsulates the information describing the format of media data,
- * be it audio or video.
- *
- * The format of the media data is specified as string/value pairs.
- *
+ * Encapsulates the information describing the format of media data, be it audio or video, as
+ * well as optional feature metadata.
+ * <p>
+ * The format of the media data is specified as key/value pairs. Keys are strings. Values can
+ * be integer, long, float, String or ByteBuffer.
+ * <p>
+ * The feature metadata is specificed as string/boolean pairs.
+ * <p>
  * Keys common to all audio/video formats, <b>all keys not marked optional are mandatory</b>:
  *
  * <table>
@@ -938,7 +947,6 @@ public final class MediaFormat {
      */
     public static final String KEY_CA_SESSION_ID = "ca-session-id";
 
-
     /**
      * A key describing the private data in the CA_descriptor associated with a media track.
      * <p>
@@ -950,7 +958,7 @@ public final class MediaFormat {
      */
     public static final String KEY_CA_PRIVATE_DATA = "ca-private-data";
 
-    /* package private */ MediaFormat(Map<String, Object> map) {
+    /* package private */ MediaFormat(@NonNull Map<String, Object> map) {
         mMap = map;
     }
 
@@ -969,8 +977,55 @@ public final class MediaFormat {
     /**
      * Returns true iff a key of the given name exists in the format.
      */
-    public final boolean containsKey(String name) {
+    public final boolean containsKey(@NonNull String name) {
         return mMap.containsKey(name);
+    }
+
+    /**
+     * Returns true iff a feature of the given name exists in the format.
+     */
+    public final boolean containsFeature(@NonNull String name) {
+        return mMap.containsKey(KEY_FEATURE_ + name);
+    }
+
+    public static final int TYPE_NULL = 0;
+    public static final int TYPE_INTEGER = 1;
+    public static final int TYPE_LONG = 2;
+    public static final int TYPE_FLOAT = 3;
+    public static final int TYPE_STRING = 4;
+    public static final int TYPE_BYTE_BUFFER = 5;
+
+    /** @hide */
+    @IntDef({
+        TYPE_NULL,
+        TYPE_INTEGER,
+        TYPE_LONG,
+        TYPE_FLOAT,
+        TYPE_STRING,
+        TYPE_BYTE_BUFFER
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface Type {}
+
+    /**
+     * Returns the value type for a key. If the key does not exist, it returns TYPE_NULL.
+     */
+    public final @Type int getValueTypeForKey(@NonNull String name) {
+        Object value = mMap.get(name);
+        if (value == null) {
+            return TYPE_NULL;
+        } else if (value instanceof Integer) {
+            return TYPE_INTEGER;
+        } else if (value instanceof Long) {
+            return TYPE_LONG;
+        } else if (value instanceof Float) {
+            return TYPE_FLOAT;
+        } else if (value instanceof String) {
+            return TYPE_STRING;
+        } else if (value instanceof ByteBuffer) {
+            return TYPE_BYTE_BUFFER;
+        }
+        throw new RuntimeException("invalid value for key");
     }
 
     /**
@@ -989,52 +1044,150 @@ public final class MediaFormat {
     public static final String KEY_FEATURE_ = "feature-";
 
     /**
-     * Returns the value of an integer key.
+     * Returns the value of a numeric key. This is provided as a convenience method for keys
+     * that may take multiple numeric types, such as {@link KEY_FRAME_RATE}, or {@link
+     * KEY_I_FRAME_INTERVAL}.
+     *
+     * @return null if the key does not exist or the stored value for the key is null
+     * @throw ClassCastException if the stored value for the key is ByteBuffer or String
      */
-    public final int getInteger(String name) {
+    public final @Nullable Number getNumber(@NonNull String name) {
+        return ((Number)mMap.get(name));
+    }
+
+    /**
+     * Returns the value of a numeric key, or the default value if the key is missing.
+     *
+     * @return defaultValue if the key does not exist or the stored value for the key is null
+     * @throw ClassCastException if the stored value for the key is ByteBuffer or String
+     */
+    public final @NonNull Number getNumber(@NonNull String name, @NonNull Number defaultValue) {
+        Number ret = getNumber(name);
+        return ret == null ? defaultValue : ret;
+    }
+
+    /**
+     * Returns the value of an integer key.
+     *
+     * @throw NullPointerException if the key does not exist or the stored value for the key is null
+     * @throw ClassCastException if the stored value for the key is long, float, ByteBuffer or
+     *        String
+     */
+    public final int getInteger(@NonNull String name) {
         return ((Integer)mMap.get(name)).intValue();
     }
 
     /**
-     * Returns the value of an integer key, or the default value if the
-     * key is missing or is for another type value.
-     * @hide
+     * Returns the value of an integer key, or the default value if the key is missing.
+     *
+     * @return defaultValue if the key does not exist or the stored value for the key is null
+     * @throw ClassCastException if the stored value for the key is long, float, ByteBuffer or
+     *        String
      */
-    public final int getInteger(String name, int defaultValue) {
+    public final int getInteger(@NonNull String name, int defaultValue) {
         try {
             return getInteger(name);
+        } catch (NullPointerException  e) {
+            /* no such field or field is null */
+            return defaultValue;
         }
-        catch (NullPointerException  e) { /* no such field */ }
-        catch (ClassCastException e) { /* field of different type */ }
-        return defaultValue;
     }
 
     /**
      * Returns the value of a long key.
+     *
+     * @throw NullPointerException if the key does not exist or the stored value for the key is null
+     * @throw ClassCastException if the stored value for the key is int, float, ByteBuffer or
+     *        String
      */
-    public final long getLong(String name) {
+    public final long getLong(@NonNull String name) {
         return ((Long)mMap.get(name)).longValue();
     }
 
     /**
-     * Returns the value of a float key.
+     * Returns the value of an long key, or the default value if the key is missing.
+     *
+     * @return defaultValue if the key does not exist or the stored value for the key is null
+     * @throw ClassCastException if the stored value for the key is int, float, ByteBuffer or
+     *        String
      */
-    public final float getFloat(String name) {
+    public final long getLong(@NonNull String name, long defaultValue) {
+        try {
+            return getLong(name);
+        } catch (NullPointerException  e) {
+            /* no such field or field is null */
+            return defaultValue;
+        }
+    }
+
+    /**
+     * Returns the value of a float key.
+     *
+     * @throw NullPointerException if the key does not exist or the stored value for the key is null
+     * @throw ClassCastException if the stored value for the key is int, long, ByteBuffer or
+     *        String
+     */
+    public final float getFloat(@NonNull String name) {
         return ((Float)mMap.get(name)).floatValue();
     }
 
     /**
-     * Returns the value of a string key.
+     * Returns the value of an float key, or the default value if the key is missing.
+     *
+     * @return defaultValue if the key does not exist or the stored value for the key is null
+     * @throw ClassCastException if the stored value for the key is int, long, ByteBuffer or
+     *        String
      */
-    public final String getString(String name) {
+    public final float getFloat(@NonNull String name, float defaultValue) {
+        try {
+            return getFloat(name);
+        } catch (NullPointerException  e) {
+            /* no such field or field is null */
+            return defaultValue;
+        }
+    }
+
+    /**
+     * Returns the value of a string key.
+     *
+     * @return null if the key does not exist or the stored value for the key is null
+     * @throw ClassCastException if the stored value for the key is int, long, float or ByteBuffer
+     */
+    public final @Nullable String getString(@NonNull String name) {
         return (String)mMap.get(name);
     }
 
     /**
-     * Returns the value of a ByteBuffer key.
+     * Returns the value of an string key, or the default value if the key is missing.
+     *
+     * @return defaultValue if the key does not exist or the stored value for the key is null
+     * @throw ClassCastException if the stored value for the key is int, long, float or ByteBuffer
      */
-    public final ByteBuffer getByteBuffer(String name) {
+    public final @NonNull String getString(@NonNull String name, @NonNull String defaultValue) {
+        String ret = getString(name);
+        return ret == null ? defaultValue : ret;
+    }
+
+    /**
+     * Returns the value of a ByteBuffer key.
+     *
+     * @return null if the key does not exist or the stored value for the key is null
+     * @throw ClassCastException if the stored value for the key is int, long, float or String
+     */
+    public final @Nullable ByteBuffer getByteBuffer(@NonNull String name) {
         return (ByteBuffer)mMap.get(name);
+    }
+
+    /**
+     * Returns the value of a ByteBuffer key, or the default value if the key is missing.
+     *
+     * @return defaultValue if the key does not exist or the stored value for the key is null
+     * @throw ClassCastException if the stored value for the key is int, long, float or String
+     */
+    public final @NonNull ByteBuffer getByteBuffer(
+            @NonNull String name, @NonNull ByteBuffer defaultValue) {
+        ByteBuffer ret = getByteBuffer(name);
+        return ret == null ? defaultValue : ret;
     }
 
     /**
@@ -1046,7 +1199,7 @@ public final class MediaFormat {
      * @throws IllegalArgumentException if the feature was neither set to be enabled
      *        nor to be disabled.
      */
-    public boolean getFeatureEnabled(String feature) {
+    public boolean getFeatureEnabled(@NonNull String feature) {
         Integer enabled = (Integer)mMap.get(KEY_FEATURE_ + feature);
         if (enabled == null) {
             throw new IllegalArgumentException("feature is not specified");
@@ -1057,36 +1210,236 @@ public final class MediaFormat {
     /**
      * Sets the value of an integer key.
      */
-    public final void setInteger(String name, int value) {
+    public final void setInteger(@NonNull String name, int value) {
         mMap.put(name, Integer.valueOf(value));
     }
 
     /**
      * Sets the value of a long key.
      */
-    public final void setLong(String name, long value) {
+    public final void setLong(@NonNull String name, long value) {
         mMap.put(name, Long.valueOf(value));
     }
 
     /**
      * Sets the value of a float key.
      */
-    public final void setFloat(String name, float value) {
+    public final void setFloat(@NonNull String name, float value) {
         mMap.put(name, new Float(value));
     }
 
     /**
      * Sets the value of a string key.
+     * <p>
+     * If value is {@code null}, it sets a null value that behaves similarly to a missing key.
+     * This could be used prior to API level {@link android os.Build.VERSION_CODES#Q} to effectively
+     * remove a key.
      */
-    public final void setString(String name, String value) {
+    public final void setString(@NonNull String name, @Nullable String value) {
         mMap.put(name, value);
     }
 
     /**
      * Sets the value of a ByteBuffer key.
+     * <p>
+     * If value is {@code null}, it sets a null value that behaves similarly to a missing key.
+     * This could be used prior to API level {@link android os.Build.VERSION_CODES#Q} to effectively
+     * remove a key.
      */
-    public final void setByteBuffer(String name, ByteBuffer bytes) {
+    public final void setByteBuffer(@NonNull String name, @Nullable ByteBuffer bytes) {
         mMap.put(name, bytes);
+    }
+
+    /**
+     * Removes a value of a given key if present. Has no effect if the key is not present.
+     */
+    public final void removeKey(@NonNull String name) {
+        // exclude feature mappings
+        if (!name.startsWith(KEY_FEATURE_)) {
+            mMap.remove(name);
+        }
+    }
+
+    /**
+     * Removes a given feature setting if present. Has no effect if the feature setting is not
+     * present.
+     */
+    public final void removeFeature(@NonNull String name) {
+        mMap.remove(KEY_FEATURE_ + name);
+    }
+
+    /**
+     * A Partial set view for a portion of the keys in a MediaFormat object.
+     *
+     * This class is needed as we want to return a portion of the actual format keys in getKeys()
+     * and another portion of the keys in getFeatures(), and still allow the view properties.
+     */
+    private abstract class FilteredMappedKeySet extends AbstractSet<String> {
+        private Set<String> mKeys;
+
+        // Returns true if this set should include this key
+        abstract protected boolean keepKey(String key);
+
+        // Maps a key from the underlying key set into its new value in this key set
+        abstract protected String mapKeyToItem(String key);
+
+        // Maps a key from this key set into its original value in the underlying key set
+        abstract protected String mapItemToKey(String item);
+
+        public FilteredMappedKeySet() {
+            mKeys = mMap.keySet();
+        }
+
+        // speed up contains and remove from abstract implementation (that would iterate
+        // over each element)
+        @Override
+        public boolean contains(Object o) {
+            if (o instanceof String) {
+                String key = mapItemToKey((String)o);
+                return keepKey(key) && mKeys.contains(key);
+            }
+            return false;
+        }
+
+        @Override
+        public boolean remove(Object o) {
+            if (o instanceof String) {
+                String key = mapItemToKey((String)o);
+                if (keepKey(key) && mKeys.remove(key)) {
+                    mMap.remove(key);
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        private class KeyIterator implements Iterator<String> {
+            Iterator<String> mIterator;
+            String mLast;
+
+            public KeyIterator() {
+                // We must create a copy of the filtered stream, as remove operation has to modify
+                // the underlying data structure (mMap), so the iterator's operation is undefined.
+                // Use a list as it is likely less memory consuming than the other alternative: set.
+                mIterator =
+                    mKeys.stream().filter(k -> keepKey(k)).collect(Collectors.toList()).iterator();
+            }
+
+            @Override
+            public boolean hasNext() {
+                return mIterator.hasNext();
+            }
+
+            @Override
+            public String next() {
+                mLast = mIterator.next();
+                return mapKeyToItem(mLast);
+            }
+
+            @Override
+            public void remove() {
+                mIterator.remove();
+                mMap.remove(mLast);
+            }
+        }
+
+        @Override
+        public Iterator<String> iterator() {
+            return new KeyIterator();
+        }
+
+        @Override
+        public int size() {
+            return (int)mKeys.stream().filter(k -> keepKey(k)).count();
+        }
+    }
+
+    /**
+     * A Partial set view for a portion of the keys in a MediaFormat object for keys that
+     * don't start with a prefix, such as "feature-"
+     */
+    private class UnprefixedKeySet extends FilteredMappedKeySet {
+        private String mPrefix;
+
+        public UnprefixedKeySet(String prefix) {
+            super();
+            mPrefix = prefix;
+        }
+
+        protected boolean keepKey(String key) {
+            return !key.startsWith(mPrefix);
+        }
+
+        protected String mapKeyToItem(String key) {
+            return key;
+        }
+
+        protected String mapItemToKey(String item) {
+            return item;
+        }
+    }
+
+    /**
+     * A Partial set view for a portion of the keys in a MediaFormat object for keys that
+     * start with a prefix, such as "feature-", with the prefix removed
+     */
+    private class PrefixedKeySetWithPrefixRemoved extends FilteredMappedKeySet {
+        private String mPrefix;
+        private int mPrefixLength;
+
+        public PrefixedKeySetWithPrefixRemoved(String prefix) {
+            super();
+            mPrefix = prefix;
+            mPrefixLength = prefix.length();
+        }
+
+        protected boolean keepKey(String key) {
+            return key.startsWith(mPrefix);
+        }
+
+        protected String mapKeyToItem(String key) {
+            return key.substring(mPrefixLength);
+        }
+
+        protected String mapItemToKey(String item) {
+            return mPrefix + item;
+        }
+    }
+
+
+   /**
+     * Returns a {@link java.util.Set Set} view of the keys contained in this MediaFormat.
+     *
+     * The set is backed by the MediaFormat object, so changes to the format are reflected in the
+     * set, and vice-versa. If the format is modified while an iteration over the set is in progress
+     * (except through the iterator's own remove operation), the results of the iteration are
+     * undefined. The set supports element removal, which removes the corresponding mapping from the
+     * format, via the Iterator.remove, Set.remove, removeAll, retainAll, and clear operations.
+     * It does not support the add or addAll operations.
+     */
+    public final @NonNull java.util.Set<String> getKeys() {
+        return new UnprefixedKeySet(KEY_FEATURE_);
+    }
+
+   /**
+     * Returns a {@link java.util.Set Set} view of the features contained in this MediaFormat.
+     *
+     * The set is backed by the MediaFormat object, so changes to the format are reflected in the
+     * set, and vice-versa. If the format is modified while an iteration over the set is in progress
+     * (except through the iterator's own remove operation), the results of the iteration are
+     * undefined. The set supports element removal, which removes the corresponding mapping from the
+     * format, via the Iterator.remove, Set.remove, removeAll, retainAll, and clear operations.
+     * It does not support the add or addAll operations.
+     */
+    public final @NonNull java.util.Set<String> getFeatures() {
+        return new PrefixedKeySetWithPrefixRemoved(KEY_FEATURE_);
+    }
+
+    /**
+     * Create a copy of a media format object.
+     */
+    public MediaFormat(@NonNull MediaFormat other) {
+        mMap.putAll(other.mMap);
     }
 
     /**
@@ -1102,7 +1455,7 @@ public final class MediaFormat {
      * @see MediaCodecList#findEncoderForFormat
      * @see MediaCodecInfo.CodecCapabilities#isFormatSupported
      */
-    public void setFeatureEnabled(String feature, boolean enabled) {
+    public void setFeatureEnabled(@NonNull String feature, boolean enabled) {
         setInteger(KEY_FEATURE_ + feature, enabled ? 1 : 0);
     }
 
@@ -1112,8 +1465,8 @@ public final class MediaFormat {
      * @param sampleRate The sampling rate of the content.
      * @param channelCount The number of audio channels in the content.
      */
-    public static final MediaFormat createAudioFormat(
-            String mime,
+    public static final @NonNull MediaFormat createAudioFormat(
+            @NonNull String mime,
             int sampleRate,
             int channelCount) {
         MediaFormat format = new MediaFormat();
@@ -1132,8 +1485,8 @@ public final class MediaFormat {
      *        in the content.  (This will also work if there are multiple language
      *        tracks in the content.)
      */
-    public static final MediaFormat createSubtitleFormat(
-            String mime,
+    public static final @NonNull MediaFormat createSubtitleFormat(
+            @NonNull String mime,
             String language) {
         MediaFormat format = new MediaFormat();
         format.setString(KEY_MIME, mime);
@@ -1148,8 +1501,8 @@ public final class MediaFormat {
      * @param width The width of the content (in pixels)
      * @param height The height of the content (in pixels)
      */
-    public static final MediaFormat createVideoFormat(
-            String mime,
+    public static final @NonNull MediaFormat createVideoFormat(
+            @NonNull String mime,
             int width,
             int height) {
         MediaFormat format = new MediaFormat();
@@ -1161,7 +1514,7 @@ public final class MediaFormat {
     }
 
     @Override
-    public String toString() {
+    public @NonNull String toString() {
         return mMap.toString();
     }
 }
