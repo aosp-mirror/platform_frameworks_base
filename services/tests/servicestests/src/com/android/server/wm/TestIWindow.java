@@ -11,12 +11,10 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
 package com.android.server.wm;
-
-import com.android.internal.os.IResultReceiver;
 
 import android.graphics.Rect;
 import android.os.Bundle;
@@ -27,87 +25,71 @@ import android.view.DisplayCutout;
 import android.view.DragEvent;
 import android.view.IWindow;
 
+import com.android.internal.os.IResultReceiver;
+
 public class TestIWindow extends IWindow.Stub {
     @Override
     public void executeCommand(String command, String parameters,
-            ParcelFileDescriptor descriptor)
-            throws RemoteException {
-
+            ParcelFileDescriptor descriptor) throws RemoteException {
     }
 
     @Override
     public void resized(Rect frame, Rect overscanInsets, Rect contentInsets, Rect visibleInsets,
             Rect stableInsets, Rect outsets, boolean reportDraw, MergedConfiguration mergedConfig,
             Rect backDropFrame, boolean forceLayout, boolean alwaysConsumeNavBar, int displayId,
-            DisplayCutout.ParcelableWrapper displayCutout)
-            throws RemoteException {
-
+            DisplayCutout.ParcelableWrapper displayCutout) throws RemoteException {
     }
 
     @Override
     public void moved(int newX, int newY) throws RemoteException {
-
     }
 
     @Override
     public void dispatchAppVisibility(boolean visible) throws RemoteException {
-
     }
 
     @Override
     public void dispatchGetNewSurface() throws RemoteException {
-
     }
 
     @Override
-    public void windowFocusChanged(boolean hasFocus, boolean inTouchMode)
-            throws RemoteException {
-
+    public void windowFocusChanged(boolean hasFocus, boolean inTouchMode) throws RemoteException {
     }
 
     @Override
     public void closeSystemDialogs(String reason) throws RemoteException {
-
     }
 
     @Override
-    public void dispatchWallpaperOffsets(float x, float y, float xStep, float yStep,
-            boolean sync)
+    public void dispatchWallpaperOffsets(float x, float y, float xStep, float yStep, boolean sync)
             throws RemoteException {
-
     }
 
     @Override
     public void dispatchWallpaperCommand(String action, int x, int y, int z, Bundle extras,
             boolean sync) throws RemoteException {
-
     }
 
     @Override
     public void dispatchDragEvent(DragEvent event) throws RemoteException {
-
     }
 
     @Override
     public void updatePointerIcon(float x, float y) throws RemoteException {
-
     }
 
     @Override
     public void dispatchSystemUiVisibilityChanged(int seq, int globalVisibility, int localValue,
             int localChanges) throws RemoteException {
-
     }
 
     @Override
     public void dispatchWindowShown() throws RemoteException {
-
     }
 
     @Override
     public void requestAppKeyboardShortcuts(IResultReceiver receiver, int deviceId)
             throws RemoteException {
-
     }
 
     @Override

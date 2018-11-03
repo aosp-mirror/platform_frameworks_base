@@ -19,6 +19,8 @@ package com.android.server.wm;
 import static android.testing.DexmakerShareClassLoaderRule.runWithDexmakerShareClassLoader;
 import static android.view.Display.DEFAULT_DISPLAY;
 
+import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
+
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import static org.mockito.ArgumentMatchers.any;
@@ -50,8 +52,6 @@ import org.mockito.invocation.InvocationOnMock;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
-
-import androidx.test.InstrumentationRegistry;
 
 /**
  * A test rule that sets up a fresh WindowManagerService instance before each test and makes sure
@@ -89,7 +89,7 @@ public class WindowManagerServiceRule implements TestRule {
             }
 
             private void setUp() {
-                final Context context = InstrumentationRegistry.getTargetContext();
+                final Context context = getInstrumentation().getTargetContext();
 
                 removeServices();
 

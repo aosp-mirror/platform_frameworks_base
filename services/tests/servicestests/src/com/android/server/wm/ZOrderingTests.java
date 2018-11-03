@@ -11,7 +11,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
 package com.android.server.wm;
@@ -38,27 +38,30 @@ import android.platform.test.annotations.Presubmit;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 
+import androidx.test.filters.FlakyTest;
+import androidx.test.filters.SmallTest;
+
 import org.junit.After;
 import org.junit.Test;
 
 import java.util.HashMap;
 import java.util.LinkedList;
 
-import androidx.test.filters.FlakyTest;
-import androidx.test.filters.SmallTest;
-
 /**
- * Tests for the {@link WindowLayersController} class.
+ * Tests for the {@link DisplayContent#assignChildLayers(SurfaceControl.Transaction)} method.
  *
  * Build/Install/Run:
- *  atest FrameworksServicesTests:com.android.server.wm.ZOrderingTests
+ *  atest FrameworksServicesTests:ZOrderingTests
  */
-@SmallTest
 @FlakyTest(bugId = 74078662)
+@SmallTest
 @Presubmit
 public class ZOrderingTests extends WindowTestsBase {
 
-    private class LayerRecordingTransaction extends SurfaceControl.Transaction {
+    private static class LayerRecordingTransaction extends SurfaceControl.Transaction {
+        // We have WM use our Hierarchy recording subclass of SurfaceControl.Builder
+        // such that we can keep track of the parents of Surfaces as they are constructed.
+        private final HashMap<SurfaceControl, SurfaceControl> mParentFor = new HashMap<>();
         HashMap<SurfaceControl, Integer> mLayersForControl = new HashMap<>();
         HashMap<SurfaceControl, SurfaceControl> mRelativeLayersForControl = new HashMap<>();
 
@@ -85,17 +88,28 @@ public class ZOrderingTests extends WindowTestsBase {
         private SurfaceControl getRelativeLayer(SurfaceControl sc) {
             return mRelativeLayersForControl.get(sc);
         }
+
+        void addParentFor(SurfaceControl child, SurfaceControl parent) {
+            mParentFor.put(child, parent);
+        }
+
+        SurfaceControl getParentFor(SurfaceControl child) {
+            return mParentFor.get(child);
+        }
+
+        @Override
+        public void close() {
+
+        }
     }
 
-    // We have WM use our Hierarchy recording subclass of SurfaceControl.Builder
-    // such that we can keep track of the parents of Surfaces as they are constructed.
-    private HashMap<SurfaceControl, SurfaceControl> mParentFor = new HashMap<>();
+    private static class HierarchyRecorder extends SurfaceControl.Builder {
+        private LayerRecordingTransaction mTransaction;
+        private SurfaceControl mPendingParent;
 
-    private class HierarchyRecorder extends SurfaceControl.Builder {
-        SurfaceControl mPendingParent;
-
-        HierarchyRecorder(SurfaceSession s) {
+        HierarchyRecorder(SurfaceSession s, LayerRecordingTransaction transaction) {
             super(s);
+            mTransaction = transaction;
         }
 
         @Override
@@ -106,16 +120,26 @@ public class ZOrderingTests extends WindowTestsBase {
 
         @Override
         public SurfaceControl build() {
-            SurfaceControl sc = super.build();
-            mParentFor.put(sc, mPendingParent);
+            final SurfaceControl sc = super.build();
+            mTransaction.addParentFor(sc, mPendingParent);
+            mTransaction = null;
             mPendingParent = null;
             return sc;
         }
     }
 
-    private class HierarchyRecordingBuilderFactory implements SurfaceBuilderFactory {
+    private static class HierarchyRecordingBuilderFactory implements SurfaceBuilderFactory {
+        private LayerRecordingTransaction mTransaction;
+
+        HierarchyRecordingBuilderFactory(LayerRecordingTransaction transaction) {
+            mTransaction = transaction;
+        }
+
+        @Override
         public SurfaceControl.Builder make(SurfaceSession s) {
-            return new HierarchyRecorder(s);
+            final LayerRecordingTransaction transaction = mTransaction;
+            mTransaction = null;
+            return new HierarchyRecorder(s, transaction);
         }
     }
 
@@ -127,18 +151,17 @@ public class ZOrderingTests extends WindowTestsBase {
         // which is after construction of the DisplayContent, meaning the HierarchyRecorder
         // would miss construction of the top-level layers.
         mTransaction = new LayerRecordingTransaction();
-        sWm.mSurfaceBuilderFactory = new HierarchyRecordingBuilderFactory();
-        sWm.mTransactionFactory = () -> mTransaction;
+        mWm.mSurfaceBuilderFactory = new HierarchyRecordingBuilderFactory(mTransaction);
+        mWm.mTransactionFactory = () -> mTransaction;
     }
 
     @After
-    public void after() {
+    public void tearDown() {
         mTransaction.close();
-        mParentFor.keySet().forEach(SurfaceControl::destroy);
-        mParentFor.clear();
     }
 
-    LinkedList<SurfaceControl> getAncestors(LayerRecordingTransaction t, SurfaceControl sc) {
+    private static LinkedList<SurfaceControl> getAncestors(LayerRecordingTransaction t,
+            SurfaceControl sc) {
         LinkedList<SurfaceControl> p = new LinkedList<>();
         SurfaceControl current = sc;
         do {
@@ -148,23 +171,22 @@ public class ZOrderingTests extends WindowTestsBase {
             if (rs != null) {
                 current = rs;
             } else {
-                current = mParentFor.get(current);
+                current = t.getParentFor(current);
             }
         } while (current != null);
         return p;
     }
 
 
-    void assertZOrderGreaterThan(LayerRecordingTransaction t, SurfaceControl left,
+    private static void assertZOrderGreaterThan(LayerRecordingTransaction t, SurfaceControl left,
             SurfaceControl right) {
         final LinkedList<SurfaceControl> leftParentChain = getAncestors(t, left);
         final LinkedList<SurfaceControl> rightParentChain = getAncestors(t, right);
 
-        SurfaceControl commonAncestor = null;
         SurfaceControl leftTop = leftParentChain.peekLast();
         SurfaceControl rightTop = rightParentChain.peekLast();
         while (leftTop != null && rightTop != null && leftTop == rightTop) {
-            commonAncestor = leftParentChain.removeLast();
+            leftParentChain.removeLast();
             rightParentChain.removeLast();
             leftTop = leftParentChain.peekLast();
             rightTop = rightParentChain.peekLast();
@@ -189,7 +211,7 @@ public class ZOrderingTests extends WindowTestsBase {
 
     @Test
     public void testAssignWindowLayers_ForImeWithNoTarget() {
-        sWm.mInputMethodTarget = null;
+        mWm.mInputMethodTarget = null;
         mDisplayContent.assignChildLayers(mTransaction);
 
         // The Ime has an higher base layer than app windows and lower base layer than system
@@ -207,7 +229,7 @@ public class ZOrderingTests extends WindowTestsBase {
     @Test
     public void testAssignWindowLayers_ForImeWithAppTarget() {
         final WindowState imeAppTarget = createWindow("imeAppTarget");
-        sWm.mInputMethodTarget = imeAppTarget;
+        mWm.mInputMethodTarget = imeAppTarget;
 
         mDisplayContent.assignChildLayers(mTransaction);
 
@@ -233,7 +255,7 @@ public class ZOrderingTests extends WindowTestsBase {
                 TYPE_APPLICATION_MEDIA_OVERLAY, imeAppTarget.mToken,
                 "imeAppTargetChildBelowWindow");
 
-        sWm.mInputMethodTarget = imeAppTarget;
+        mWm.mInputMethodTarget = imeAppTarget;
         mDisplayContent.assignChildLayers(mTransaction);
 
         // Ime should be above all app windows except for child windows that are z-ordered above it
@@ -255,7 +277,7 @@ public class ZOrderingTests extends WindowTestsBase {
         final WindowState imeAppTarget = createWindow("imeAppTarget");
         final WindowState appAboveImeTarget = createWindow("appAboveImeTarget");
 
-        sWm.mInputMethodTarget = imeAppTarget;
+        mWm.mInputMethodTarget = imeAppTarget;
         mDisplayContent.assignChildLayers(mTransaction);
 
         // Ime should be above all app windows except for non-fullscreen app window above it and
@@ -278,7 +300,7 @@ public class ZOrderingTests extends WindowTestsBase {
                 mDisplayContent, "imeSystemOverlayTarget",
                 true /* ownerCanAddInternalSystemWindow */);
 
-        sWm.mInputMethodTarget = imeSystemOverlayTarget;
+        mWm.mInputMethodTarget = imeSystemOverlayTarget;
         mDisplayContent.assignChildLayers(mTransaction);
 
         // The IME target base layer is higher than all window except for the nav bar window, so the
@@ -301,7 +323,7 @@ public class ZOrderingTests extends WindowTestsBase {
 
     @Test
     public void testAssignWindowLayers_ForStatusBarImeTarget() {
-        sWm.mInputMethodTarget = mStatusBarWindow;
+        mWm.mInputMethodTarget = mStatusBarWindow;
         mDisplayContent.assignChildLayers(mTransaction);
 
         assertWindowHigher(mImeWindow, mChildAppWindowAbove);
@@ -322,8 +344,8 @@ public class ZOrderingTests extends WindowTestsBase {
         final WindowState dockedStackWindow = createWindowOnStack(null,
                 WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, ACTIVITY_TYPE_STANDARD, TYPE_BASE_APPLICATION,
                 mDisplayContent, "dockedStackWindow");
-        final WindowState assistantStackWindow = createWindowOnStack(null, WINDOWING_MODE_FULLSCREEN,
-                ACTIVITY_TYPE_ASSISTANT, TYPE_BASE_APPLICATION,
+        final WindowState assistantStackWindow = createWindowOnStack(null,
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_ASSISTANT, TYPE_BASE_APPLICATION,
                 mDisplayContent, "assistantStackWindow");
         final WindowState homeActivityWindow = createWindowOnStack(null, WINDOWING_MODE_FULLSCREEN,
                 ACTIVITY_TYPE_HOME, TYPE_BASE_APPLICATION,
@@ -368,7 +390,8 @@ public class ZOrderingTests extends WindowTestsBase {
         final WindowState anyWindow = createWindow("anyWindow");
         final WindowState child = createWindow(anyWindow, TYPE_APPLICATION_MEDIA, mDisplayContent,
                 "TypeApplicationMediaChild");
-        final WindowState mediaOverlayChild = createWindow(anyWindow, TYPE_APPLICATION_MEDIA_OVERLAY,
+        final WindowState mediaOverlayChild = createWindow(anyWindow,
+                TYPE_APPLICATION_MEDIA_OVERLAY,
                 mDisplayContent, "TypeApplicationMediaOverlayChild");
 
         mDisplayContent.assignChildLayers(mTransaction);
@@ -388,8 +411,8 @@ public class ZOrderingTests extends WindowTestsBase {
         final WindowState splitScreenSecondaryWindow = createWindowOnStack(null,
                 WINDOWING_MODE_SPLIT_SCREEN_SECONDARY, ACTIVITY_TYPE_STANDARD,
                 TYPE_BASE_APPLICATION, mDisplayContent, "splitScreenSecondaryWindow");
-        final WindowState assistantStackWindow = createWindowOnStack(null, WINDOWING_MODE_FULLSCREEN,
-                ACTIVITY_TYPE_ASSISTANT, TYPE_BASE_APPLICATION,
+        final WindowState assistantStackWindow = createWindowOnStack(null,
+                WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_ASSISTANT, TYPE_BASE_APPLICATION,
                 mDisplayContent, "assistantStackWindow");
 
         mDisplayContent.assignChildLayers(mTransaction);

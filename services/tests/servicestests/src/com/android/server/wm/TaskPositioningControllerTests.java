@@ -11,7 +11,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
 package com.android.server.wm;
@@ -32,70 +32,66 @@ import android.view.InputChannel;
 
 import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 /**
  * Tests for the {@link TaskPositioningController} class.
  *
- * atest com.android.server.wm.TaskPositioningControllerTests
+ * Build/Install/Run:
+ *  atest FrameworksServicesTests:TaskPositioningControllerTests
  */
-@SmallTest
 @FlakyTest(bugId = 117924387)
-@RunWith(AndroidJUnit4.class)
+@SmallTest
 @Presubmit
 public class TaskPositioningControllerTests extends WindowTestsBase {
     private static final int TIMEOUT_MS = 1000;
+
     private TaskPositioningController mTarget;
     private WindowState mWindow;
 
     @Before
     public void setUp() throws Exception {
-        super.setUp();
+        assertNotNull(mWm.mTaskPositioningController);
+        mTarget = mWm.mTaskPositioningController;
 
-        assertNotNull(sWm.mTaskPositioningController);
-        mTarget = sWm.mTaskPositioningController;
-
-        when(sWm.mInputManager.transferTouchFocus(
+        when(mWm.mInputManager.transferTouchFocus(
                 any(InputChannel.class),
                 any(InputChannel.class))).thenReturn(true);
 
         mWindow = createWindow(null, TYPE_BASE_APPLICATION, "window");
         mWindow.mInputChannel = new InputChannel();
-        synchronized (sWm.mGlobalLock) {
-            sWm.mWindowMap.put(mWindow.mClient.asBinder(), mWindow);
+        synchronized (mWm.mGlobalLock) {
+            mWm.mWindowMap.put(mWindow.mClient.asBinder(), mWindow);
         }
     }
 
     @Test
-    public void testStartAndFinishPositioning() throws Exception {
-        synchronized (sWm.mGlobalLock) {
+    public void testStartAndFinishPositioning() {
+        synchronized (mWm.mGlobalLock) {
             assertFalse(mTarget.isPositioningLocked());
             assertNull(mTarget.getDragWindowHandleLocked());
         }
 
         assertTrue(mTarget.startMovingTask(mWindow.mClient, 0, 0));
 
-        synchronized (sWm.mGlobalLock) {
+        synchronized (mWm.mGlobalLock) {
             assertTrue(mTarget.isPositioningLocked());
             assertNotNull(mTarget.getDragWindowHandleLocked());
         }
 
         mTarget.finishTaskPositioning();
         // Wait until the looper processes finishTaskPositioning.
-        assertTrue(sWm.mH.runWithScissors(() -> {}, TIMEOUT_MS));
+        assertTrue(mWm.mH.runWithScissors(() -> { }, TIMEOUT_MS));
 
         assertFalse(mTarget.isPositioningLocked());
         assertNull(mTarget.getDragWindowHandleLocked());
     }
 
     @Test
-    public void testHandleTapOutsideTask() throws Exception {
-        synchronized (sWm.mGlobalLock) {
-
+    public void testHandleTapOutsideTask() {
+        synchronized (mWm.mGlobalLock) {
             assertFalse(mTarget.isPositioningLocked());
             assertNull(mTarget.getDragWindowHandleLocked());
         }
@@ -106,16 +102,16 @@ public class TaskPositioningControllerTests extends WindowTestsBase {
 
         mTarget.handleTapOutsideTask(content, 0, 0);
         // Wait until the looper processes finishTaskPositioning.
-        assertTrue(sWm.mH.runWithScissors(() -> {}, TIMEOUT_MS));
+        assertTrue(mWm.mH.runWithScissors(() -> { }, TIMEOUT_MS));
 
-        synchronized (sWm.mGlobalLock) {
+        synchronized (mWm.mGlobalLock) {
             assertTrue(mTarget.isPositioningLocked());
             assertNotNull(mTarget.getDragWindowHandleLocked());
         }
 
         mTarget.finishTaskPositioning();
         // Wait until the looper processes finishTaskPositioning.
-        assertTrue(sWm.mH.runWithScissors(() -> {}, TIMEOUT_MS));
+        assertTrue(mWm.mH.runWithScissors(() -> { }, TIMEOUT_MS));
 
         assertFalse(mTarget.isPositioningLocked());
         assertNull(mTarget.getDragWindowHandleLocked());

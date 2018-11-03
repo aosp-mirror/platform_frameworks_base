@@ -11,7 +11,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
 package com.android.server.wm;
@@ -46,10 +46,8 @@ import android.view.SurfaceSession;
 
 import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import java.util.Comparator;
 
@@ -57,24 +55,23 @@ import java.util.Comparator;
  * Test class for {@link WindowContainer}.
  *
  * Build/Install/Run:
- *  atest FrameworksServicesTests:com.android.server.wm.WindowContainerTests
+ *  atest FrameworksServicesTests:WindowContainerTests
  */
 @SmallTest
 @Presubmit
 @FlakyTest(bugId = 74078662)
-@RunWith(AndroidJUnit4.class)
 public class WindowContainerTests extends WindowTestsBase {
 
     @Test
-    public void testCreation() throws Exception {
-        final TestWindowContainer w = new TestWindowContainerBuilder().setLayer(0).build();
+    public void testCreation() {
+        final TestWindowContainer w = new TestWindowContainerBuilder(mWm).setLayer(0).build();
         assertNull("window must have no parent", w.getParentWindow());
         assertEquals("window must have no children", 0, w.getChildrenCount());
     }
 
     @Test
-    public void testAdd() throws Exception {
-        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder();
+    public void testAdd() {
+        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder(mWm);
         final TestWindowContainer root = builder.setLayer(0).build();
 
         final TestWindowContainer layer1 = root.addChildWindow(builder.setLayer(1));
@@ -113,23 +110,24 @@ public class WindowContainerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testAddChildSetsSurfacePosition() throws Exception {
-        MockSurfaceBuildingContainer top = new MockSurfaceBuildingContainer();
+    public void testAddChildSetsSurfacePosition() {
+        try (MockSurfaceBuildingContainer top = new MockSurfaceBuildingContainer(mWm)) {
 
-        final SurfaceControl.Transaction transaction = mock(SurfaceControl.Transaction.class);
-        sWm.mTransactionFactory = () -> transaction;
+            final SurfaceControl.Transaction transaction = mock(SurfaceControl.Transaction.class);
+            mWm.mTransactionFactory = () -> transaction;
 
-        WindowContainer child = new WindowContainer(sWm);
-        child.setBounds(1, 1, 10, 10);
+            WindowContainer child = new WindowContainer(mWm);
+            child.setBounds(1, 1, 10, 10);
 
-        verify(transaction, never()).setPosition(any(), anyFloat(), anyFloat());
-        top.addChild(child, 0);
-        verify(transaction, times(1)).setPosition(any(), eq(1.f), eq(1.f));
+            verify(transaction, never()).setPosition(any(), anyFloat(), anyFloat());
+            top.addChild(child, 0);
+            verify(transaction, times(1)).setPosition(any(), eq(1.f), eq(1.f));
+        }
     }
 
     @Test
-    public void testAdd_AlreadyHasParent() throws Exception {
-        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder();
+    public void testAdd_AlreadyHasParent() {
+        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder(mWm);
         final TestWindowContainer root = builder.setLayer(0).build();
 
         final TestWindowContainer child1 = root.addChildWindow();
@@ -153,8 +151,8 @@ public class WindowContainerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testHasChild() throws Exception {
-        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder();
+    public void testHasChild() {
+        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder(mWm);
         final TestWindowContainer root = builder.setLayer(0).build();
 
         final TestWindowContainer child1 = root.addChildWindow();
@@ -183,8 +181,8 @@ public class WindowContainerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testRemoveImmediately() throws Exception {
-        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder();
+    public void testRemoveImmediately() {
+        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder(mWm);
         final TestWindowContainer root = builder.setLayer(0).build();
 
         final TestWindowContainer child1 = root.addChildWindow();
@@ -218,9 +216,9 @@ public class WindowContainerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testRemoveImmediately_WithController() throws Exception {
-        final WindowContainer container = new WindowContainer(sWm);
-        final WindowContainerController controller = new WindowContainerController(null, sWm);
+    public void testRemoveImmediately_WithController() {
+        final WindowContainer container = new WindowContainer(mWm);
+        final WindowContainerController controller = new WindowContainerController<>(null, mWm);
 
         container.setController(controller);
         assertEquals(controller, container.getController());
@@ -232,9 +230,9 @@ public class WindowContainerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testSetController() throws Exception {
-        final WindowContainerController controller = new WindowContainerController(null, sWm);
-        final WindowContainer container = new WindowContainer(sWm);
+    public void testSetController() {
+        final WindowContainerController controller = new WindowContainerController<>(null, mWm);
+        final WindowContainer container = new WindowContainer(mWm);
 
         container.setController(controller);
         assertEquals(controller, container.getController());
@@ -243,7 +241,7 @@ public class WindowContainerTests extends WindowTestsBase {
         // Assert we can't change the controller to another one once set
         boolean gotException = false;
         try {
-            container.setController(new WindowContainerController(null, sWm));
+            container.setController(new WindowContainerController<>(null, mWm));
         } catch (IllegalArgumentException e) {
             gotException = true;
         }
@@ -256,8 +254,8 @@ public class WindowContainerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testAddChildByIndex() throws Exception {
-        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder();
+    public void testAddChildByIndex() {
+        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder(mWm);
         final TestWindowContainer root = builder.setLayer(0).build();
 
         final TestWindowContainer child = root.addChildWindow();
@@ -283,8 +281,8 @@ public class WindowContainerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testPositionChildAt() throws Exception {
-        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder();
+    public void testPositionChildAt() {
+        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder(mWm);
         final TestWindowContainer root = builder.setLayer(0).build();
 
         final TestWindowContainer child1 = root.addChildWindow();
@@ -307,8 +305,8 @@ public class WindowContainerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testPositionChildAtIncludeParents() throws Exception {
-        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder();
+    public void testPositionChildAtIncludeParents() {
+        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder(mWm);
         final TestWindowContainer root = builder.setLayer(0).build();
 
         final TestWindowContainer child1 = root.addChildWindow();
@@ -349,12 +347,11 @@ public class WindowContainerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testPositionChildAtInvalid() throws Exception {
-        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder();
+    public void testPositionChildAtInvalid() {
+        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder(mWm);
         final TestWindowContainer root = builder.setLayer(0).build();
 
         final TestWindowContainer child1 = root.addChildWindow();
-        final TestWindowContainer child2 = root.addChildWindow();
 
         boolean gotException = false;
         try {
@@ -376,8 +373,8 @@ public class WindowContainerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testIsAnimating() throws Exception {
-        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder();
+    public void testIsAnimating() {
+        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder(mWm);
         final TestWindowContainer root = builder.setLayer(0).build();
 
         final TestWindowContainer child1 = root.addChildWindow(builder.setIsAnimating(true));
@@ -402,8 +399,8 @@ public class WindowContainerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testIsVisible() throws Exception {
-        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder();
+    public void testIsVisible() {
+        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder(mWm);
         final TestWindowContainer root = builder.setLayer(0).build();
 
         final TestWindowContainer child1 = root.addChildWindow(builder.setIsVisible(true));
@@ -422,7 +419,7 @@ public class WindowContainerTests extends WindowTestsBase {
 
     @Test
     public void testOverrideConfigurationAncestorNotification() {
-        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder();
+        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder(mWm);
         final TestWindowContainer grandparent = builder.setLayer(0).build();
 
         final TestWindowContainer parent = grandparent.addChildWindow();
@@ -433,8 +430,8 @@ public class WindowContainerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testRemoveChild() throws Exception {
-        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder();
+    public void testRemoveChild() {
+        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder(mWm);
         final TestWindowContainer root = builder.setLayer(0).build();
         final TestWindowContainer child1 = root.addChildWindow();
         final TestWindowContainer child2 = root.addChildWindow();
@@ -460,7 +457,7 @@ public class WindowContainerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testGetOrientation_childSpecified() throws Exception {
+    public void testGetOrientation_childSpecified() {
         testGetOrientation_childSpecifiedConfig(false, SCREEN_ORIENTATION_LANDSCAPE,
             SCREEN_ORIENTATION_LANDSCAPE);
         testGetOrientation_childSpecifiedConfig(false, SCREEN_ORIENTATION_UNSET,
@@ -469,7 +466,7 @@ public class WindowContainerTests extends WindowTestsBase {
 
     private void testGetOrientation_childSpecifiedConfig(boolean childVisible, int childOrientation,
         int expectedOrientation) {
-        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder();
+        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder(mWm);
         final TestWindowContainer root = builder.setLayer(0).build();
         root.setFillsParent(true);
 
@@ -486,16 +483,16 @@ public class WindowContainerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testGetOrientation_Unset() throws Exception {
-        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder();
+    public void testGetOrientation_Unset() {
+        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder(mWm);
         final TestWindowContainer root = builder.setLayer(0).setIsVisible(true).build();
         // Unspecified well because we didn't specify anything...
         assertEquals(SCREEN_ORIENTATION_UNSPECIFIED, root.getOrientation());
     }
 
     @Test
-    public void testGetOrientation_InvisibleParentUnsetVisibleChildren() throws Exception {
-        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder();
+    public void testGetOrientation_InvisibleParentUnsetVisibleChildren() {
+        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder(mWm);
         final TestWindowContainer root = builder.setLayer(0).setIsVisible(true).build();
 
         builder.setIsVisible(false).setLayer(-1);
@@ -516,12 +513,11 @@ public class WindowContainerTests extends WindowTestsBase {
         visibleUnset.setOrientation(SCREEN_ORIENTATION_UNSET);
         assertEquals(SCREEN_ORIENTATION_UNSET, visibleUnset.getOrientation());
         assertEquals(SCREEN_ORIENTATION_LANDSCAPE, root.getOrientation());
-
     }
 
     @Test
-    public void testGetOrientation_setBehind() throws Exception {
-        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder();
+    public void testGetOrientation_setBehind() {
+        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder(mWm);
         final TestWindowContainer root = builder.setLayer(0).setIsVisible(true).build();
 
         builder.setIsVisible(true).setLayer(-1);
@@ -541,8 +537,8 @@ public class WindowContainerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testGetOrientation_fillsParent() throws Exception {
-        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder();
+    public void testGetOrientation_fillsParent() {
+        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder(mWm);
         final TestWindowContainer root = builder.setLayer(0).setIsVisible(true).build();
 
         builder.setIsVisible(true).setLayer(-1);
@@ -577,8 +573,8 @@ public class WindowContainerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testCompareTo() throws Exception {
-        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder();
+    public void testCompareTo() {
+        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder(mWm);
         final TestWindowContainer root = builder.setLayer(0).build();
 
         final TestWindowContainer child1 = root.addChildWindow();
@@ -588,8 +584,6 @@ public class WindowContainerTests extends WindowTestsBase {
         final TestWindowContainer child2 = root.addChildWindow();
         final TestWindowContainer child21 = child2.addChildWindow();
         final TestWindowContainer child22 = child2.addChildWindow();
-        final TestWindowContainer child23 = child2.addChildWindow();
-        final TestWindowContainer child221 = child22.addChildWindow();
         final TestWindowContainer child222 = child22.addChildWindow();
         final TestWindowContainer child223 = child22.addChildWindow();
         final TestWindowContainer child2221 = child222.addChildWindow();
@@ -620,8 +614,8 @@ public class WindowContainerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testPrefixOrderIndex() throws Exception {
-        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder();
+    public void testPrefixOrderIndex() {
+        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder(mWm);
         final TestWindowContainer root = builder.build();
 
         final TestWindowContainer child1 = root.addChildWindow();
@@ -654,8 +648,8 @@ public class WindowContainerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testPrefixOrder_addEntireSubtree() throws Exception {
-        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder();
+    public void testPrefixOrder_addEntireSubtree() {
+        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder(mWm);
         final TestWindowContainer root = builder.build();
         final TestWindowContainer subtree = builder.build();
         final TestWindowContainer subtree2 = builder.build();
@@ -677,8 +671,8 @@ public class WindowContainerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testPrefixOrder_remove() throws Exception {
-        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder();
+    public void testPrefixOrder_remove() {
+        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder(mWm);
         final TestWindowContainer root = builder.build();
 
         final TestWindowContainer child1 = root.addChildWindow();
@@ -705,8 +699,8 @@ public class WindowContainerTests extends WindowTestsBase {
      * is invoked with overridden bounds.
      */
     @Test
-    public void testOnParentResizePropagation() throws Exception {
-        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder();
+    public void testOnParentResizePropagation() {
+        final TestWindowContainerBuilder builder = new TestWindowContainerBuilder(mWm);
         final TestWindowContainer root = builder.build();
 
         final TestWindowContainer child = root.addChildWindow();
@@ -731,7 +725,7 @@ public class WindowContainerTests extends WindowTestsBase {
     }
 
     /* Used so we can gain access to some protected members of the {@link WindowContainer} class */
-    private class TestWindowContainer extends WindowContainer<TestWindowContainer> {
+    private static class TestWindowContainer extends WindowContainer<TestWindowContainer> {
         private final int mLayer;
         private boolean mIsAnimating;
         private boolean mIsVisible;
@@ -745,7 +739,7 @@ public class WindowContainerTests extends WindowTestsBase {
          * Compares 2 window layers and returns -1 if the first is lesser than the second in terms
          * of z-order and 1 otherwise.
          */
-        private final Comparator<TestWindowContainer> mWindowSubLayerComparator = (w1, w2) -> {
+        private static final Comparator<TestWindowContainer> SUBLAYER_COMPARATOR = (w1, w2) -> {
             final int layer1 = w1.mLayer;
             final int layer2 = w2.mLayer;
             if (layer1 < layer2 || (layer1 == layer2 && layer2 < 0 )) {
@@ -753,12 +747,14 @@ public class WindowContainerTests extends WindowTestsBase {
                 // the negative one should go below others; the positive one should go above others.
                 return -1;
             }
+            if (layer1 == layer2) return 0;
             return 1;
         };
 
-        TestWindowContainer(int layer, boolean isAnimating, boolean isVisible,
-            Integer orientation) {
-            super(sWm);
+        TestWindowContainer(WindowManagerService wm, int layer, boolean isAnimating,
+                boolean isVisible, Integer orientation) {
+            super(wm);
+
             mLayer = layer;
             mIsAnimating = isAnimating;
             mIsVisible = isVisible;
@@ -775,18 +771,18 @@ public class WindowContainerTests extends WindowTestsBase {
         }
 
         TestWindowContainer addChildWindow(TestWindowContainer child) {
-            addChild(child, mWindowSubLayerComparator);
+            addChild(child, SUBLAYER_COMPARATOR);
             return child;
         }
 
         TestWindowContainer addChildWindow(TestWindowContainerBuilder childBuilder) {
             TestWindowContainer child = childBuilder.build();
-            addChild(child, mWindowSubLayerComparator);
+            addChild(child, SUBLAYER_COMPARATOR);
             return child;
         }
 
         TestWindowContainer addChildWindow() {
-            return addChildWindow(new TestWindowContainerBuilder().setLayer(1));
+            return addChildWindow(new TestWindowContainerBuilder(mService).setLayer(1));
         }
 
         @Override
@@ -830,14 +826,19 @@ public class WindowContainerTests extends WindowTestsBase {
         }
     }
 
-    private class TestWindowContainerBuilder {
+    private static class TestWindowContainerBuilder {
+        private final WindowManagerService mWm;
         private int mLayer;
         private boolean mIsAnimating;
         private boolean mIsVisible;
         private Integer mOrientation;
 
-        public TestWindowContainerBuilder() {
-            reset();
+        TestWindowContainerBuilder(WindowManagerService wm) {
+            mWm = wm;
+            mLayer = 0;
+            mIsAnimating = false;
+            mIsVisible = false;
+            mOrientation = null;
         }
 
         TestWindowContainerBuilder setLayer(int layer) {
@@ -860,27 +861,20 @@ public class WindowContainerTests extends WindowTestsBase {
             return this;
         }
 
-        TestWindowContainerBuilder reset() {
-            mLayer = 0;
-            mIsAnimating = false;
-            mIsVisible = false;
-            mOrientation = null;
-            return this;
-        }
-
         TestWindowContainer build() {
-            return new TestWindowContainer(mLayer, mIsAnimating, mIsVisible, mOrientation);
+            return new TestWindowContainer(mWm, mLayer, mIsAnimating, mIsVisible, mOrientation);
         }
     }
 
-    private class MockSurfaceBuildingContainer extends WindowContainer<WindowContainer> {
-        final SurfaceSession mSession = new SurfaceSession();
+    private static class MockSurfaceBuildingContainer extends WindowContainer<WindowContainer>
+            implements AutoCloseable {
+        private final SurfaceSession mSession = new SurfaceSession();
 
-        MockSurfaceBuildingContainer() {
-            super(sWm);
+        MockSurfaceBuildingContainer(WindowManagerService wm) {
+            super(wm);
         }
 
-        class MockSurfaceBuilder extends SurfaceControl.Builder {
+        static class MockSurfaceBuilder extends SurfaceControl.Builder {
             MockSurfaceBuilder(SurfaceSession ss) {
                 super(ss);
             }
@@ -894,6 +888,11 @@ public class WindowContainerTests extends WindowTestsBase {
         @Override
         SurfaceControl.Builder makeChildSurface(WindowContainer child) {
             return new MockSurfaceBuilder(mSession);
+        }
+
+        @Override
+        public void close() {
+            mSession.kill();
         }
     }
 }

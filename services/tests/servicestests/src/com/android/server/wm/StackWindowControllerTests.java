@@ -11,7 +11,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
 package com.android.server.wm;
@@ -25,10 +25,8 @@ import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 /**
  * Test class for {@link StackWindowController}.
@@ -38,10 +36,9 @@ import org.junit.runner.RunWith;
  */
 @SmallTest
 @Presubmit
-@RunWith(AndroidJUnit4.class)
 public class StackWindowControllerTests extends WindowTestsBase {
     @Test
-    public void testRemoveContainer() throws Exception {
+    public void testRemoveContainer() {
         final StackWindowController stackController =
                 createStackControllerOnDisplay(mDisplayContent);
         final WindowTestUtils.TestTaskWindowContainerController taskController =
@@ -61,7 +58,7 @@ public class StackWindowControllerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testRemoveContainer_deferRemoval() throws Exception {
+    public void testRemoveContainer_deferRemoval() {
         final StackWindowController stackController =
                 createStackControllerOnDisplay(mDisplayContent);
         final WindowTestUtils.TestTaskWindowContainerController taskController =
@@ -87,7 +84,7 @@ public class StackWindowControllerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testReparent() throws Exception {
+    public void testReparent() {
         // Create first stack on primary display.
         final StackWindowController stack1Controller =
                 createStackControllerOnDisplay(mDisplayContent);

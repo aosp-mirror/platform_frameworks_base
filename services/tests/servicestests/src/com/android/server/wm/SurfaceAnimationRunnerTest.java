@@ -11,7 +11,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
 package com.android.server.wm;
@@ -26,6 +26,8 @@ import static org.mockito.Mockito.atLeastOnce;
 import static org.mockito.Mockito.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import static java.util.concurrent.TimeUnit.SECONDS;
 
 import android.animation.AnimationHandler.AnimationFrameCallbackProvider;
 import android.animation.ValueAnimator;
@@ -42,30 +44,27 @@ import android.view.animation.TranslateAnimation;
 
 import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.wm.LocalAnimationAdapter.AnimationSpec;
 
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
-
-import static java.util.concurrent.TimeUnit.SECONDS;
 
 import java.util.concurrent.CountDownLatch;
 
 /**
  * Test class for {@link SurfaceAnimationRunner}.
  *
- * atest FrameworksServicesTests:com.android.server.wm.SurfaceAnimationRunnerTest
+ * Build/Install/Run:
+ *  atest FrameworksServicesTests:SurfaceAnimationRunnerTest
  */
 @SmallTest
 @Presubmit
-@RunWith(AndroidJUnit4.class)
 public class SurfaceAnimationRunnerTest extends WindowTestsBase {
 
     @Mock SurfaceControl mMockSurface;
@@ -79,7 +78,8 @@ public class SurfaceAnimationRunnerTest extends WindowTestsBase {
 
     @Before
     public void setUp() throws Exception {
-        super.setUp();
+        MockitoAnnotations.initMocks(this);
+
         mFinishCallbackLatch = new CountDownLatch(1);
         mSurfaceAnimationRunner = new SurfaceAnimationRunner(null /* callbackProvider */, null,
                 mMockTransaction, mMockPowerManager);
@@ -112,7 +112,7 @@ public class SurfaceAnimationRunnerTest extends WindowTestsBase {
     }
 
     @Test
-    public void testCancel_notStarted() throws Exception {
+    public void testCancel_notStarted() {
         mSurfaceAnimationRunner = new SurfaceAnimationRunner(new NoOpFrameCallbackProvider(), null,
                 mMockTransaction, mMockPowerManager);
         mSurfaceAnimationRunner

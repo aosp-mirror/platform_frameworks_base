@@ -11,7 +11,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
 package com.android.server.wm;
@@ -29,11 +29,9 @@ import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
@@ -41,12 +39,11 @@ import org.mockito.MockitoAnnotations;
  * Tests for the {@link TaskStack} class.
  *
  * Build/Install/Run:
- *  atest FrameworksServicesTests:com.android.server.wm.AnimatingAppWindowTokenRegistryTest
+ *  atest FrameworksServicesTests:AnimatingAppWindowTokenRegistryTest
  */
 @SmallTest
 @Presubmit
 @FlakyTest(detail = "Promote once confirmed non-flaky")
-@RunWith(AndroidJUnit4.class)
 public class AnimatingAppWindowTokenRegistryTest extends WindowTestsBase {
 
     @Mock
@@ -56,14 +53,14 @@ public class AnimatingAppWindowTokenRegistryTest extends WindowTestsBase {
     Runnable mMockEndDeferFinishCallback1;
     @Mock
     Runnable mMockEndDeferFinishCallback2;
+
     @Before
     public void setUp() throws Exception {
-        super.setUp();
         MockitoAnnotations.initMocks(this);
     }
 
     @Test
-    public void testDeferring() throws Exception {
+    public void testDeferring() {
         final AppWindowToken window1 = createAppWindowToken(mDisplayContent,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
         final AppWindowToken window2 = createAppWindow(window1.getTask(), ACTIVITY_TYPE_STANDARD,
@@ -85,7 +82,7 @@ public class AnimatingAppWindowTokenRegistryTest extends WindowTestsBase {
     }
 
     @Test
-    public void testContainerRemoved() throws Exception {
+    public void testContainerRemoved() {
         final AppWindowToken window1 = createAppWindowToken(mDisplayContent,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
         final AppWindowToken window2 = createAppWindow(window1.getTask(), ACTIVITY_TYPE_STANDARD,

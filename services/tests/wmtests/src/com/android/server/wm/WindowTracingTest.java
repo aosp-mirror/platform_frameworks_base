@@ -16,6 +16,8 @@
 
 package com.android.server.wm;
 
+import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
+
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -29,21 +31,21 @@ import static org.mockito.Mockito.verifyZeroInteractions;
 
 import android.content.Context;
 import android.platform.test.annotations.Presubmit;
+import android.testing.DexmakerShareClassLoaderRule;
 import android.util.proto.ProtoOutputStream;
 
-import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import com.android.internal.util.Preconditions;
-import com.android.server.wm.WindowManagerTraceProto;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Ignore;
+import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -55,41 +57,44 @@ import java.nio.charset.StandardCharsets;
  * Test class for {@link WindowTracing}.
  *
  * Build/Install/Run:
- *  bit FrameworksServicesTests:com.android.server.wm.WindowTracingTest
+ *  atest FrameworksServicesTests:WindowTracingTest
  */
-@SmallTest
 @FlakyTest(bugId = 74078662)
-// TODO(b/116597907): Re-enable this test in postsubmit after the bug is fixed.
-// @Presubmit
-@RunWith(AndroidJUnit4.class)
-public class WindowTracingTest extends WindowTestsBase {
+@SmallTest
+@Presubmit
+public class WindowTracingTest {
 
-    private static final byte[] MAGIC_HEADER = new byte[] {
-        0x9, 0x57, 0x49, 0x4e, 0x54, 0x52, 0x41, 0x43, 0x45,
+    private static final byte[] MAGIC_HEADER = new byte[]{
+            0x9, 0x57, 0x49, 0x4e, 0x54, 0x52, 0x41, 0x43, 0x45,
     };
 
-    private Context mTestContext;
-    private WindowTracing mWindowTracing;
+    @Rule
+    public final DexmakerShareClassLoaderRule mDexmakerShareClassLoaderRule =
+            new DexmakerShareClassLoaderRule();
+
+    @Mock
     private WindowManagerService mWmMock;
+    private WindowTracing mWindowTracing;
     private File mFile;
 
-    @Override
     @Before
     public void setUp() throws Exception {
-        super.setUp();
+        MockitoAnnotations.initMocks(this);
 
-        mWmMock = mock(WindowManagerService.class);
-
-        mTestContext = InstrumentationRegistry.getContext();
-
-        mFile = mTestContext.getFileStreamPath("tracing_test.dat");
+        final Context testContext = getInstrumentation().getContext();
+        mFile = testContext.getFileStreamPath("tracing_test.dat");
         mFile.delete();
 
         mWindowTracing = new WindowTracing(mFile);
     }
 
+    @After
+    public void tearDown() throws Exception {
+        mFile.delete();
+    }
+
     @Test
-    public void isEnabled_returnsFalseByDefault() throws Exception {
+    public void isEnabled_returnsFalseByDefault() {
         assertFalse(mWindowTracing.isEnabled());
     }
 
@@ -107,7 +112,7 @@ public class WindowTracingTest extends WindowTestsBase {
     }
 
     @Test
-    public void trace_discared_whenNotTracing() throws Exception {
+    public void trace_discared_whenNotTracing() {
         mWindowTracing.traceStateLocked("where", mWmMock);
         verifyZeroInteractions(mWmMock);
     }
@@ -132,12 +137,12 @@ public class WindowTracingTest extends WindowTestsBase {
         }
     }
 
-    @Test
     @Ignore("Figure out why this test is crashing when setting up mWmMock.")
+    @Test
     public void tracing_endsUpInFile() throws Exception {
         mWindowTracing.startTrace(mock(PrintWriter.class));
 
-        doAnswer((inv) -> {
+        doAnswer(inv -> {
             inv.<ProtoOutputStream>getArgument(0).write(
                     WindowManagerTraceProto.WHERE, "TEST_WM_PROTO");
             return null;
@@ -157,22 +162,14 @@ public class WindowTracingTest extends WindowTestsBase {
         }
     }
 
-    @Override
-    @After
-    public void tearDown() throws Exception {
-        super.tearDown();
-
-        mFile.delete();
-    }
-
     /** Return true if {@code needle} appears anywhere in {@code haystack[0..length]} */
-    boolean containsBytes(byte[] haystack, int haystackLenght, byte[] needle) {
-        Preconditions.checkArgument(haystackLenght > 0);
+    private static boolean containsBytes(byte[] haystack, int haystackLength, byte[] needle) {
+        Preconditions.checkArgument(haystackLength > 0);
         Preconditions.checkArgument(needle.length > 0);
 
-        outer: for (int i = 0; i <= haystackLenght - needle.length; i++) {
+        outer: for (int i = 0; i <= haystackLength - needle.length; i++) {
             for (int j = 0; j < needle.length; j++) {
-                if (haystack[i+j] != needle[j]) {
+                if (haystack[i + j] != needle[j]) {
                     continue outer;
                 }
             }

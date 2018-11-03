@@ -21,6 +21,8 @@ import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.content.res.Configuration.EMPTY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_STARTING;
 
+import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -29,10 +31,8 @@ import static org.junit.Assert.fail;
 
 import android.platform.test.annotations.Presubmit;
 
-import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.wm.WindowTestUtils.TestTaskWindowContainerController;
 
@@ -41,16 +41,17 @@ import org.junit.Test;
 /**
  * Test class for {@link AppWindowContainerController}.
  *
- * atest FrameworksServicesTests:com.android.server.wm.AppWindowContainerControllerTests
+ * atest FrameworksServicesTests:AppWindowContainerControllerTests
  */
+@FlakyTest(bugId = 74078662)
 @SmallTest
 @Presubmit
-@FlakyTest(bugId = 74078662)
-@org.junit.runner.RunWith(AndroidJUnit4.class)
 public class AppWindowContainerControllerTests extends WindowTestsBase {
 
+    private final String mPackageName = getInstrumentation().getTargetContext().getPackageName();
+
     @Test
-    public void testRemoveContainer() throws Exception {
+    public void testRemoveContainer() {
         final WindowTestUtils.TestAppWindowContainerController controller =
                 createAppWindowController();
 
@@ -68,7 +69,7 @@ public class AppWindowContainerControllerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testSetOrientation() throws Exception {
+    public void testSetOrientation() {
         final WindowTestUtils.TestAppWindowContainerController controller =
                 createAppWindowController();
 
@@ -84,7 +85,7 @@ public class AppWindowContainerControllerTests extends WindowTestsBase {
         assertEquals(SCREEN_ORIENTATION_UNSPECIFIED, controller.getOrientation());
 
         // Reset display frozen state
-        sWm.mDisplayFrozen = false;
+        mWm.mDisplayFrozen = false;
     }
 
     private void assertHasStartingWindow(AppWindowToken atoken) {
@@ -103,10 +104,10 @@ public class AppWindowContainerControllerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testCreateRemoveStartingWindow() throws Exception {
+    public void testCreateRemoveStartingWindow() {
         final WindowTestUtils.TestAppWindowContainerController controller =
                 createAppWindowController();
-        controller.addStartingWindow(InstrumentationRegistry.getContext().getPackageName(),
+        controller.addStartingWindow(mPackageName,
                 android.R.style.Theme, null, "Test", 0, 0, 0, 0, null, true, true, false, true,
                 false, false);
         waitUntilHandlersIdle();
@@ -118,34 +119,34 @@ public class AppWindowContainerControllerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testAddRemoveRace() throws Exception {
-
+    public void testAddRemoveRace() {
         // There was once a race condition between adding and removing starting windows
         for (int i = 0; i < 1000; i++) {
             final WindowTestUtils.TestAppWindowContainerController controller =
                     createAppWindowController();
-            controller.addStartingWindow(InstrumentationRegistry.getContext().getPackageName(),
+            controller.addStartingWindow(mPackageName,
                     android.R.style.Theme, null, "Test", 0, 0, 0, 0, null, true, true, false, true,
                     false, false);
             controller.removeStartingWindow();
             waitUntilHandlersIdle();
             assertNoStartingWindow(controller.getAppWindowToken(mDisplayContent));
 
-            controller.getAppWindowToken(mDisplayContent).getParent().getParent().removeImmediately();
+            controller.getAppWindowToken(
+                    mDisplayContent).getParent().getParent().removeImmediately();
         }
     }
 
     @Test
-    public void testTransferStartingWindow() throws Exception {
+    public void testTransferStartingWindow() {
         final WindowTestUtils.TestAppWindowContainerController controller1 =
                 createAppWindowController();
         final WindowTestUtils.TestAppWindowContainerController controller2 =
                 createAppWindowController();
-        controller1.addStartingWindow(InstrumentationRegistry.getContext().getPackageName(),
+        controller1.addStartingWindow(mPackageName,
                 android.R.style.Theme, null, "Test", 0, 0, 0, 0, null, true, true, false, true,
                 false, false);
         waitUntilHandlersIdle();
-        controller2.addStartingWindow(InstrumentationRegistry.getContext().getPackageName(),
+        controller2.addStartingWindow(mPackageName,
                 android.R.style.Theme, null, "Test", 0, 0, 0, 0, controller1.mToken.asBinder(),
                 true, true, false, true, false, false);
         waitUntilHandlersIdle();
@@ -154,19 +155,19 @@ public class AppWindowContainerControllerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testTransferStartingWindowWhileCreating() throws Exception {
+    public void testTransferStartingWindowWhileCreating() {
         final WindowTestUtils.TestAppWindowContainerController controller1 =
                 createAppWindowController();
         final WindowTestUtils.TestAppWindowContainerController controller2 =
                 createAppWindowController();
-        ((TestWindowManagerPolicy) sWm.mPolicy).setRunnableWhenAddingSplashScreen(() -> {
+        ((TestWindowManagerPolicy) mWm.mPolicy).setRunnableWhenAddingSplashScreen(() -> {
 
             // Surprise, ...! Transfer window in the middle of the creation flow.
-            controller2.addStartingWindow(InstrumentationRegistry.getContext().getPackageName(),
+            controller2.addStartingWindow(mPackageName,
                     android.R.style.Theme, null, "Test", 0, 0, 0, 0, controller1.mToken.asBinder(),
                     true, true, false, true, false, false);
         });
-        controller1.addStartingWindow(InstrumentationRegistry.getContext().getPackageName(),
+        controller1.addStartingWindow(mPackageName,
                 android.R.style.Theme, null, "Test", 0, 0, 0, 0, null, true, true, false, true,
                 false, false);
         waitUntilHandlersIdle();
@@ -175,7 +176,7 @@ public class AppWindowContainerControllerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testTryTransferStartingWindowFromHiddenAboveToken() throws Exception {
+    public void testTryTransferStartingWindowFromHiddenAboveToken() {
 
         // Add two tasks on top of each other.
         TestTaskWindowContainerController taskController =
@@ -186,7 +187,7 @@ public class AppWindowContainerControllerTests extends WindowTestsBase {
                 createAppWindowController(taskController);
 
         // Add a starting window.
-        controllerTop.addStartingWindow(InstrumentationRegistry.getContext().getPackageName(),
+        controllerTop.addStartingWindow(mPackageName,
                 android.R.style.Theme, null, "Test", 0, 0, 0, 0, null, true, true, false, true,
                 false, false);
         waitUntilHandlersIdle();
@@ -202,7 +203,7 @@ public class AppWindowContainerControllerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testReparent() throws Exception {
+    public void testReparent() {
         final StackWindowController stackController =
             createStackControllerOnDisplay(mDisplayContent);
         final WindowTestUtils.TestTaskWindowContainerController taskController1 =
