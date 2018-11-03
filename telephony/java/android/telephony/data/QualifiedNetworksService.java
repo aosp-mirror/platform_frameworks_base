@@ -121,27 +121,28 @@ public abstract class QualifiedNetworksService extends Service {
         /**
          * Update the qualified networks list. Network availability updater must invoke this method
          * whenever the qualified networks changes. If this method is never invoked for certain
-         * APN type, then frameworks will always use the default (i.e. cellular) data and network
+         * APN types, then frameworks will always use the default (i.e. cellular) data and network
          * service.
          *
-         * @param apnType APN type of the qualified networks
+         * @param apnTypes APN types of the qualified networks. This must be a bitmask combination
+         * of {@link ApnSetting.ApnType}.
          * @param qualifiedNetworkTypes List of network types which are qualified for data
          * connection setup for {@link @apnType} in the preferred order. Each element in the array
          * is a {@link AccessNetworkType}. An empty list or null indicates no networks are qualified
          * for data setup.
          */
-        public final void updateQualifiedNetworkTypes(@ApnType int apnType,
+        public final void updateQualifiedNetworkTypes(@ApnType int apnTypes,
                                                       int[] qualifiedNetworkTypes) {
-            mHandler.obtainMessage(QNS_UPDATE_QUALIFIED_NETWORKS, mSlotIndex, apnType,
+            mHandler.obtainMessage(QNS_UPDATE_QUALIFIED_NETWORKS, mSlotIndex, apnTypes,
                     qualifiedNetworkTypes).sendToTarget();
         }
 
-        private void onUpdateQualifiedNetworkTypes(@ApnType int apnType,
+        private void onUpdateQualifiedNetworkTypes(@ApnType int apnTypes,
                                                    int[] qualifiedNetworkTypes) {
-            mQualifiedNetworkTypesList.put(apnType, qualifiedNetworkTypes);
+            mQualifiedNetworkTypesList.put(apnTypes, qualifiedNetworkTypes);
             if (mCallback != null) {
                 try {
-                    mCallback.onQualifiedNetworkTypesChanged(apnType, qualifiedNetworkTypes);
+                    mCallback.onQualifiedNetworkTypesChanged(apnTypes, qualifiedNetworkTypes);
                 } catch (RemoteException e) {
                     loge("Failed to call onQualifiedNetworksChanged. " + e);
                 }
