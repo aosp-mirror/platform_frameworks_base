@@ -753,16 +753,18 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
         // PROPERTY_SYSTEM_AUDIO_MODE_MUTING_ENABLE is false when device never needs to be muted.
         boolean currentMuteStatus =
                 mService.getAudioManager().isStreamMute(AudioManager.STREAM_MUSIC);
-        if (SystemProperties.getBoolean(
-                Constants.PROPERTY_SYSTEM_AUDIO_MODE_MUTING_ENABLE, true)
-                && currentMuteStatus == newSystemAudioMode) {
-            mService.getAudioManager()
-                    .adjustStreamVolume(
-                            AudioManager.STREAM_MUSIC,
-                            newSystemAudioMode
-                                    ? AudioManager.ADJUST_UNMUTE
-                                    : AudioManager.ADJUST_MUTE,
-                                    0);
+        if (currentMuteStatus == newSystemAudioMode) {
+            if (SystemProperties.getBoolean(
+                    Constants.PROPERTY_SYSTEM_AUDIO_MODE_MUTING_ENABLE, true)
+                            || newSystemAudioMode) {
+                mService.getAudioManager()
+                        .adjustStreamVolume(
+                                AudioManager.STREAM_MUSIC,
+                                newSystemAudioMode
+                                        ? AudioManager.ADJUST_UNMUTE
+                                        : AudioManager.ADJUST_MUTE,
+                                0);
+            }
         }
         updateAudioManagerForSystemAudio(newSystemAudioMode);
         synchronized (mLock) {
