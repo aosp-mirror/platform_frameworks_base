@@ -29,6 +29,8 @@ import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.view.View;
 
+import com.android.internal.util.ArrayUtils;
+import com.android.systemui.Dependency;
 import com.android.systemui.R;
 import com.android.systemui.plugins.PluginEnablerImpl;
 import com.android.systemui.shared.plugins.PluginEnabler;
@@ -77,6 +79,7 @@ public class PluginFragment extends PreferenceFragment {
     }
 
     private void loadPrefs() {
+        PluginManager manager = Dependency.get(PluginManager.class);
         PreferenceScreen screen = getPreferenceManager().createPreferenceScreen(getContext());
         screen.setOrderingAsAdded(false);
         Context prefContext = getPreferenceManager().getContext();
@@ -103,6 +106,10 @@ public class PluginFragment extends PreferenceFragment {
                 PackageManager.MATCH_DISABLED_COMPONENTS | PackageManager.GET_SERVICES);
         apps.forEach(app -> {
             if (!plugins.containsKey(app.packageName)) return;
+            if (ArrayUtils.contains(manager.getWhitelistedPlugins(), app.packageName)) {
+                // Don't manage whitelisted plugins, they are part of the OS.
+                return;
+            }
             SwitchPreference pref = new PluginPreference(prefContext, app, mPluginEnabler);
             pref.setSummary("Plugins: " + toString(plugins.get(app.packageName)));
             screen.addPreference(pref);
