@@ -15,6 +15,7 @@
 package com.android.systemui.statusbar;
 
 import android.content.pm.UserInfo;
+import android.os.SystemProperties;
 import android.service.notification.StatusBarNotification;
 import android.util.SparseArray;
 
@@ -24,6 +25,8 @@ public interface NotificationLockscreenUserManager {
     String PERMISSION_SELF = "com.android.systemui.permission.SELF";
     String NOTIFICATION_UNLOCKED_BY_WORK_CHALLENGE_ACTION
             = "com.android.systemui.statusbar.work_challenge_unlocked_notification_action";
+
+    boolean AUTO_DEMOTE_NOTIFICATIONS = SystemProperties.getBoolean("debug.demote_notifs", false);
 
     boolean shouldAllowLockscreenRemoteInput();
 
