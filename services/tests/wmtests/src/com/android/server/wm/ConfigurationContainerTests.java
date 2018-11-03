@@ -11,13 +11,12 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
 package com.android.server.wm;
 
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
-import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
@@ -36,10 +35,8 @@ import android.content.res.Configuration;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,15 +45,14 @@ import java.util.List;
  * Test class for {@link ConfigurationContainer}.
  *
  * Build/Install/Run:
- *  bit FrameworksServicesTests:com.android.server.wm.ConfigurationContainerTests
+ *  atest WmTests:ConfigurationContainerTests
  */
 @SmallTest
 @Presubmit
-@RunWith(AndroidJUnit4.class)
 public class ConfigurationContainerTests {
 
     @Test
-    public void testConfigurationInit() throws Exception {
+    public void testConfigurationInit() {
         // Check root container initial config.
         final TestConfigurationContainer root = new TestConfigurationContainer();
         assertEquals(EMPTY, root.getOverrideConfiguration());
@@ -93,7 +89,7 @@ public class ConfigurationContainerTests {
     }
 
     @Test
-    public void testConfigurationChangeOnAddRemove() throws Exception {
+    public void testConfigurationChangeOnAddRemove() {
         // Init root's config.
         final TestConfigurationContainer root = new TestConfigurationContainer();
         final Configuration rootOverrideConfig = new Configuration();
@@ -135,7 +131,7 @@ public class ConfigurationContainerTests {
     }
 
     @Test
-    public void testConfigurationChangePropagation() throws Exception {
+    public void testConfigurationChangePropagation() {
         // Builds 3-level vertical hierarchy with one configuration container on each level.
         // In addition to different overrides on each level, everyone in hierarchy will have one
         // common overridden value - orientation;
@@ -212,7 +208,7 @@ public class ConfigurationContainerTests {
     }
 
     @Test
-    public void testSetWindowingMode() throws Exception {
+    public void testSetWindowingMode() {
         final TestConfigurationContainer root = new TestConfigurationContainer();
         root.setWindowingMode(WINDOWING_MODE_UNDEFINED);
         final TestConfigurationContainer child = root.addChild();
@@ -226,7 +222,7 @@ public class ConfigurationContainerTests {
     }
 
     @Test
-    public void testSetActivityType() throws Exception {
+    public void testSetActivityType() {
         final TestConfigurationContainer root = new TestConfigurationContainer();
         root.setActivityType(ACTIVITY_TYPE_UNDEFINED);
         final TestConfigurationContainer child = root.addChild();
@@ -272,7 +268,7 @@ public class ConfigurationContainerTests {
     }
 
     @Test
-    public void testRegisterConfigurationChangeListener() throws Exception {
+    public void testRegisterConfigurationChangeListener() {
         final TestConfigurationContainer container = new TestConfigurationContainer();
         final TestConfigurationChangeListener listener = new TestConfigurationChangeListener();
         final Configuration config = new Configuration();
@@ -328,10 +324,11 @@ public class ConfigurationContainerTests {
         }
     }
 
-    private class TestConfigurationChangeListener implements ConfigurationContainerListener {
+    private static class TestConfigurationChangeListener implements ConfigurationContainerListener {
 
         final Configuration mOverrideConfiguration = new Configuration();
 
+        @Override
         public void onOverrideConfigurationChanged(Configuration overrideConfiguration) {
             mOverrideConfiguration.setTo(overrideConfiguration);
         }

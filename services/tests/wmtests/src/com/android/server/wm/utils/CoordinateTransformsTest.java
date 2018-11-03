@@ -23,8 +23,6 @@ import static android.view.Surface.ROTATION_90;
 
 import static com.android.server.wm.utils.CoordinateTransforms.transformLogicalToPhysicalCoordinates;
 import static com.android.server.wm.utils.CoordinateTransforms.transformPhysicalToLogicalCoordinates;
-
-
 import static com.android.server.wm.utils.CoordinateTransforms.transformToRotation;
 
 import static org.hamcrest.Matchers.is;
@@ -40,6 +38,10 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ErrorCollector;
 
+/**
+ * Build/Install/Run:
+ *  atest WmTests:CoordinateTransformsTest
+ */
 public class CoordinateTransformsTest {
 
     private static final int W = 200;

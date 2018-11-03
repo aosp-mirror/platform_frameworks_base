@@ -11,7 +11,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
 package com.android.server.wm;
@@ -33,6 +33,8 @@ import static android.view.WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH;
 import static android.view.WindowManager.LayoutParams.PRIVATE_FLAG_IS_SCREEN_DECOR;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 
+import static com.google.common.truth.Truth.assertThat;
+
 import static org.junit.Assert.assertEquals;
 
 import android.app.Activity;
@@ -46,6 +48,7 @@ import android.hardware.display.DisplayManager;
 import android.hardware.display.VirtualDisplay;
 import android.media.ImageReader;
 import android.os.Handler;
+import android.os.SystemClock;
 import android.platform.test.annotations.Presubmit;
 import android.util.Pair;
 import android.view.Display;
@@ -57,13 +60,10 @@ import android.widget.TextView;
 
 import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.After;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import java.util.ArrayList;
 import java.util.function.BooleanSupplier;
@@ -72,13 +72,12 @@ import java.util.function.BooleanSupplier;
  * Tests for the {@link android.view.WindowManager.LayoutParams#PRIVATE_FLAG_IS_SCREEN_DECOR} flag.
  *
  * Build/Install/Run:
- *  atest FrameworksServicesTests:com.android.server.wm.ScreenDecorWindowTests
+ *  atest WmTests:ScreenDecorWindowTests
  */
 // TODO: Add test for FLAG_FULLSCREEN which hides the status bar and also other flags.
 // TODO: Test non-Activity windows.
 @SmallTest
 @Presubmit
-@RunWith(AndroidJUnit4.class)
 public class ScreenDecorWindowTests {
 
     private final Context mContext = InstrumentationRegistry.getTargetContext();
@@ -120,7 +119,7 @@ public class ScreenDecorWindowTests {
     }
 
     @Test
-    public void testScreenSides() throws Exception {
+    public void testScreenSides() {
         // Decor on top
         final View decorWindow = createDecorWindow(TOP, MATCH_PARENT, mDecorThickness);
         assertInsetGreaterOrEqual(mTestActivity, TOP, mDecorThickness);
@@ -139,7 +138,7 @@ public class ScreenDecorWindowTests {
     }
 
     @Test
-    public void testMultipleDecors() throws Exception {
+    public void testMultipleDecors() {
         // Test 2 decor windows on-top.
         createDecorWindow(TOP, MATCH_PARENT, mHalfDecorThickness);
         assertInsetGreaterOrEqual(mTestActivity, TOP, mHalfDecorThickness);
@@ -153,7 +152,7 @@ public class ScreenDecorWindowTests {
     }
 
     @Test
-    public void testFlagChange() throws Exception {
+    public void testFlagChange() {
         WindowInsets initialInsets = getInsets(mTestActivity);
 
         final View decorWindow = createDecorWindow(TOP, MATCH_PARENT, mDecorThickness);
@@ -174,7 +173,7 @@ public class ScreenDecorWindowTests {
     }
 
     @Test
-    public void testRemoval() throws Exception {
+    public void testRemoval() {
         WindowInsets initialInsets = getInsets(mTestActivity);
 
         final View decorWindow = createDecorWindow(TOP, MATCH_PARENT, mDecorThickness);
@@ -256,7 +255,7 @@ public class ScreenDecorWindowTests {
     /**
      * Asserts the top inset of {@param activity} is equal to {@param expected} waiting as needed.
      */
-    private void assertTopInsetEquals(Activity activity, int expected) throws Exception {
+    private void assertTopInsetEquals(Activity activity, int expected) {
         waitForTopInsetEqual(activity, expected);
         assertEquals(expected, getInsets(activity).getSystemWindowInsetTop());
     }
@@ -269,16 +268,23 @@ public class ScreenDecorWindowTests {
      * Asserts the inset at {@param side} of {@param activity} is equal to {@param expected}
      * waiting as needed.
      */
-    private void assertInsetGreaterOrEqual(Activity activity, int side, int expected)
-            throws Exception {
+    private void assertInsetGreaterOrEqual(Activity activity, int side, int expected) {
         waitForInsetGreaterOrEqual(activity, side, expected);
 
         final WindowInsets insets = getInsets(activity);
         switch (side) {
-            case TOP: assertGreaterOrEqual(insets.getSystemWindowInsetTop(), expected); break;
-            case BOTTOM: assertGreaterOrEqual(insets.getSystemWindowInsetBottom(), expected); break;
-            case LEFT: assertGreaterOrEqual(insets.getSystemWindowInsetLeft(), expected); break;
-            case RIGHT: assertGreaterOrEqual(insets.getSystemWindowInsetRight(), expected); break;
+            case TOP:
+                assertThat(insets.getSystemWindowInsetTop()).isAtLeast(expected);
+                break;
+            case BOTTOM:
+                assertThat(insets.getSystemWindowInsetBottom()).isAtLeast(expected);
+                break;
+            case LEFT:
+                assertThat(insets.getSystemWindowInsetLeft()).isAtLeast(expected);
+                break;
+            case RIGHT:
+                assertThat(insets.getSystemWindowInsetRight()).isAtLeast(expected);
+                break;
         }
     }
 
@@ -295,22 +301,13 @@ public class ScreenDecorWindowTests {
         });
     }
 
-    /** Asserts that the first entry is greater than or equal to the second entry. */
-    private void assertGreaterOrEqual(int first, int second) throws Exception {
-        Assert.assertTrue("Excepted " + first + " >= " + second, first >= second);
-    }
-
     private void waitFor(BooleanSupplier waitCondition) {
         int retriesLeft = 5;
         do {
             if (waitCondition.getAsBoolean()) {
                 break;
             }
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException e) {
-                // Well I guess we are not waiting...
-            }
+            SystemClock.sleep(500);
         } while (retriesLeft-- > 0);
     }
 
