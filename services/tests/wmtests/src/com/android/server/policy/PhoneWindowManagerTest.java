@@ -47,12 +47,13 @@ import android.platform.test.annotations.Presubmit;
 import android.view.WindowManager;
 
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
-@RunWith(AndroidJUnit4.class)
+/**
+ * Build/Install/Run:
+ *  atest WmTests:PhoneWindowManagerTest
+ */
 @SmallTest
 @Presubmit
 public class PhoneWindowManagerTest {
@@ -95,7 +96,7 @@ public class PhoneWindowManagerTest {
 
 
     @Test
-    public void testChooseNavigationColorWindowLw() throws Exception {
+    public void testChooseNavigationColorWindowLw() {
         final FakeWindowState opaque = createOpaqueFullscreen(false);
 
         final FakeWindowState dimmingImTarget = createDimmingDialogWindow(true);
@@ -147,14 +148,14 @@ public class PhoneWindowManagerTest {
     }
 
     @Test
-    public void testUpdateLightNavigationBarLw() throws Exception {
+    public void testUpdateLightNavigationBarLw() {
         final FakeWindowState opaqueDarkNavBar = createOpaqueFullscreen(false);
         final FakeWindowState opaqueLightNavBar = createOpaqueFullscreen(true);
 
         final FakeWindowState dimming = createDimmingDialogWindow(false);
 
-        final FakeWindowState imeDrawDarkNavBar = createInputMethodWindow(true,true, false);
-        final FakeWindowState imeDrawLightNavBar = createInputMethodWindow(true,true, true);
+        final FakeWindowState imeDrawDarkNavBar = createInputMethodWindow(true, true, false);
+        final FakeWindowState imeDrawLightNavBar = createInputMethodWindow(true, true, true);
 
         assertEquals(SYSTEM_UI_FLAG_LIGHT_NAVIGATION_BAR,
                 PhoneWindowManager.updateLightNavigationBarLw(
@@ -204,7 +205,7 @@ public class PhoneWindowManagerTest {
     }
 
     @Test
-    public void testIsDockSideAllowedDockTop() throws Exception {
+    public void testIsDockSideAllowedDockTop() {
         // Docked top is always allowed
         assertTrue(PhoneWindowManager.isDockSideAllowed(DOCKED_TOP, DOCKED_LEFT, NAV_BAR_BOTTOM,
                 true /* navigationBarCanMove */));
@@ -213,14 +214,14 @@ public class PhoneWindowManagerTest {
     }
 
     @Test
-    public void testIsDockSideAllowedDockBottom() throws Exception {
+    public void testIsDockSideAllowedDockBottom() {
         // Cannot dock bottom
         assertFalse(PhoneWindowManager.isDockSideAllowed(DOCKED_BOTTOM, DOCKED_LEFT, NAV_BAR_BOTTOM,
                 true /* navigationBarCanMove */));
     }
 
     @Test
-    public void testIsDockSideAllowedNavigationBarMovable() throws Exception {
+    public void testIsDockSideAllowedNavigationBarMovable() {
         assertFalse(PhoneWindowManager.isDockSideAllowed(DOCKED_LEFT, DOCKED_LEFT, NAV_BAR_BOTTOM,
                 true /* navigationBarCanMove */));
         assertFalse(PhoneWindowManager.isDockSideAllowed(DOCKED_LEFT, DOCKED_LEFT, NAV_BAR_LEFT,
@@ -236,7 +237,7 @@ public class PhoneWindowManagerTest {
     }
 
     @Test
-    public void testIsDockSideAllowedNavigationBarNotMovable() throws Exception {
+    public void testIsDockSideAllowedNavigationBarNotMovable() {
         // Navigation bar is not movable such as tablets
         assertTrue(PhoneWindowManager.isDockSideAllowed(DOCKED_LEFT, DOCKED_LEFT, NAV_BAR_BOTTOM,
                 false /* navigationBarCanMove */));

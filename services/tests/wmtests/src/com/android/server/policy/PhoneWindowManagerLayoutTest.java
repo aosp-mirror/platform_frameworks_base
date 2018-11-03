@@ -43,13 +43,14 @@ import android.view.DisplayCutout;
 import android.view.WindowManager;
 
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
-@RunWith(AndroidJUnit4.class)
+/**
+ * Build/Install/Run:
+ *  atest WmTests:PhoneWindowManagerLayoutTest
+ */
 @SmallTest
 @Presubmit
 public class PhoneWindowManagerLayoutTest extends PhoneWindowManagerTestBase {
@@ -69,7 +70,7 @@ public class PhoneWindowManagerLayoutTest extends PhoneWindowManagerTestBase {
     }
 
     @Test
-    public void layoutWindowLw_appDrawsBars() throws Exception {
+    public void layoutWindowLw_appDrawsBars() {
         mAppWindow.attrs.flags |= FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
         mPolicy.addWindow(mAppWindow);
 
@@ -84,7 +85,7 @@ public class PhoneWindowManagerLayoutTest extends PhoneWindowManagerTestBase {
     }
 
     @Test
-    public void layoutWindowLw_appWontDrawBars() throws Exception {
+    public void layoutWindowLw_appWontDrawBars() {
         mAppWindow.attrs.flags &= ~FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
         mPolicy.addWindow(mAppWindow);
 
@@ -99,7 +100,7 @@ public class PhoneWindowManagerLayoutTest extends PhoneWindowManagerTestBase {
     }
 
     @Test
-    public void layoutWindowLw_appWontDrawBars_forceStatus() throws Exception {
+    public void layoutWindowLw_appWontDrawBars_forceStatus() {
         mAppWindow.attrs.flags &= ~FLAG_DRAWS_SYSTEM_BAR_BACKGROUNDS;
         mAppWindow.attrs.privateFlags |= PRIVATE_FLAG_FORCE_DRAW_STATUS_BAR_BACKGROUND;
         mPolicy.addWindow(mAppWindow);

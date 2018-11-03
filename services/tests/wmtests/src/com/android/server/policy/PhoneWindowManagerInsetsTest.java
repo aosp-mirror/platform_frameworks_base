@@ -29,15 +29,16 @@ import android.view.Display;
 import android.view.DisplayInfo;
 
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ErrorCollector;
-import org.junit.runner.RunWith;
 
-@RunWith(AndroidJUnit4.class)
+/**
+ * Build/Install/Run:
+ *  atest WmTests:PhoneWindowManagerInsetsTest
+ */
 @SmallTest
 @Presubmit
 public class PhoneWindowManagerInsetsTest extends PhoneWindowManagerTestBase {
@@ -52,7 +53,7 @@ public class PhoneWindowManagerInsetsTest extends PhoneWindowManagerTestBase {
     }
 
     @Test
-    public void portrait() throws Exception {
+    public void portrait() {
         DisplayInfo di = displayInfoForRotation(ROTATION_0, false /* withCutout */);
 
         verifyStableInsets(di, 0, STATUS_BAR_HEIGHT, 0, NAV_BAR_HEIGHT);
@@ -61,7 +62,7 @@ public class PhoneWindowManagerInsetsTest extends PhoneWindowManagerTestBase {
     }
 
     @Test
-    public void portrait_withCutout() throws Exception {
+    public void portrait_withCutout() {
         DisplayInfo di = displayInfoForRotation(ROTATION_0, true /* withCutout */);
 
         verifyStableInsets(di, 0, STATUS_BAR_HEIGHT, 0, NAV_BAR_HEIGHT);
@@ -70,7 +71,7 @@ public class PhoneWindowManagerInsetsTest extends PhoneWindowManagerTestBase {
     }
 
     @Test
-    public void landscape() throws Exception {
+    public void landscape() {
         DisplayInfo di = displayInfoForRotation(ROTATION_90, false /* withCutout */);
 
         verifyStableInsets(di, 0, STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT, 0);
@@ -79,7 +80,7 @@ public class PhoneWindowManagerInsetsTest extends PhoneWindowManagerTestBase {
     }
 
     @Test
-    public void landscape_withCutout() throws Exception {
+    public void landscape_withCutout() {
         DisplayInfo di = displayInfoForRotation(ROTATION_90, true /* withCutout */);
 
         verifyStableInsets(di, DISPLAY_CUTOUT_HEIGHT, STATUS_BAR_HEIGHT, NAV_BAR_HEIGHT, 0);
@@ -88,7 +89,7 @@ public class PhoneWindowManagerInsetsTest extends PhoneWindowManagerTestBase {
     }
 
     @Test
-    public void seascape() throws Exception {
+    public void seascape() {
         DisplayInfo di = displayInfoForRotation(ROTATION_270, false /* withCutout */);
 
         verifyStableInsets(di, NAV_BAR_HEIGHT, STATUS_BAR_HEIGHT, 0, 0);
@@ -97,7 +98,7 @@ public class PhoneWindowManagerInsetsTest extends PhoneWindowManagerTestBase {
     }
 
     @Test
-    public void seascape_withCutout() throws Exception {
+    public void seascape_withCutout() {
         DisplayInfo di = displayInfoForRotation(ROTATION_270, true /* withCutout */);
 
         verifyStableInsets(di, NAV_BAR_HEIGHT, STATUS_BAR_HEIGHT, DISPLAY_CUTOUT_HEIGHT, 0);
@@ -106,7 +107,7 @@ public class PhoneWindowManagerInsetsTest extends PhoneWindowManagerTestBase {
     }
 
     @Test
-    public void upsideDown() throws Exception {
+    public void upsideDown() {
         DisplayInfo di = displayInfoForRotation(ROTATION_180, false /* withCutout */);
 
         verifyStableInsets(di, 0, STATUS_BAR_HEIGHT, 0, NAV_BAR_HEIGHT);
@@ -115,7 +116,7 @@ public class PhoneWindowManagerInsetsTest extends PhoneWindowManagerTestBase {
     }
 
     @Test
-    public void upsideDown_withCutout() throws Exception {
+    public void upsideDown_withCutout() {
         DisplayInfo di = displayInfoForRotation(ROTATION_180, true /* withCutout */);
 
         verifyStableInsets(di, 0, STATUS_BAR_HEIGHT, 0, NAV_BAR_HEIGHT + DISPLAY_CUTOUT_HEIGHT);

@@ -24,8 +24,11 @@ import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
+import android.content.Context;
 import android.content.res.Configuration;
 import android.graphics.Rect;
+import android.view.Display;
+import android.view.Surface;
 
 import org.mockito.invocation.InvocationOnMock;
 
@@ -42,6 +45,37 @@ public class WindowTestUtils {
         final WindowHashMap windowMap = new WindowHashMap();
         when(service.getWindowManagerLock()).thenReturn(windowMap);
         return service;
+    }
+
+    /** An extension of {@link DisplayContent} to gain package scoped access. */
+    public static class TestDisplayContent extends DisplayContent {
+
+        private TestDisplayContent(Display display, WindowManagerService service,
+                WallpaperController wallpaperController, DisplayWindowController controller) {
+            super(display, service, wallpaperController, controller);
+        }
+
+        /** Create a mocked default {@link DisplayContent}. */
+        public static TestDisplayContent create(Context context) {
+            final TestDisplayContent displayContent = mock(TestDisplayContent.class);
+            displayContent.isDefaultDisplay = true;
+
+            final DisplayPolicy displayPolicy = mock(DisplayPolicy.class);
+            when(displayPolicy.navigationBarCanMove()).thenReturn(true);
+            when(displayPolicy.hasNavigationBar()).thenReturn(true);
+
+            final DisplayRotation displayRotation = new DisplayRotation(
+                    mock(WindowManagerService.class), displayContent, displayPolicy,
+                    context, new Object());
+            displayRotation.mPortraitRotation = Surface.ROTATION_0;
+            displayRotation.mLandscapeRotation = Surface.ROTATION_90;
+            displayRotation.mUpsideDownRotation = Surface.ROTATION_180;
+            displayRotation.mSeascapeRotation = Surface.ROTATION_270;
+
+            when(displayContent.getDisplayRotation()).thenReturn(displayRotation);
+
+            return displayContent;
+        }
     }
 
     /**
