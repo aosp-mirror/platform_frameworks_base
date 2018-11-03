@@ -23,7 +23,7 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
     services.core \
     services.devicepolicy \
     frameworks-base-testutils \
-    androidx-test \
+    androidx.test.runner \
     mockito-target-extended-minus-junit4 \
     ShortcutManagerTestUtils \
     compatibility-device-util \
