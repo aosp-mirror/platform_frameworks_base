@@ -68,6 +68,7 @@ import android.os.UserManagerInternal;
 import android.platform.test.annotations.Presubmit;
 import android.util.Log;
 
+import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
 
 import com.android.server.pm.UserManagerService;
@@ -148,6 +149,7 @@ public class UserControllerTest {
         startForegroundUserAssertions();
     }
 
+    @FlakyTest(bugId = 118932054)
     @Test
     public void testStartUser_background() {
         mUserController.startUser(TEST_USER_ID, false /* foreground */);
