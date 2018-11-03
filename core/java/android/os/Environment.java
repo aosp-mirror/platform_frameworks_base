@@ -641,6 +641,13 @@ public class Environment {
     public static String DIRECTORY_DOCUMENTS = "Documents";
 
     /**
+     * Standard directory in which to place screenshots that have been taken by
+     * the user. Typically used as a secondary directory under
+     * {@link #DIRECTORY_PICTURES}.
+     */
+    public static String DIRECTORY_SCREENSHOTS = "Screenshots";
+
+    /**
      * List of standard storage directories.
      * <p>
      * Each of its values have its own constant:
