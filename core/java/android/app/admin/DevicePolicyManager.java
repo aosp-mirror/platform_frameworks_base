@@ -3845,6 +3845,11 @@ public class DevicePolicyManager {
     public static final int KEYGUARD_DISABLE_IRIS = 1 << 8;
 
     /**
+     * NOTE: Please remember to update the DevicePolicyManagerTest's testKeyguardDisabledFeatures
+     * CTS test when adding to the list above.
+     */
+
+    /**
      * Disable all biometric authentication on keyguard secure screens (e.g. PIN/Pattern/Password).
      */
     public static final int KEYGUARD_DISABLE_BIOMETRICS =
