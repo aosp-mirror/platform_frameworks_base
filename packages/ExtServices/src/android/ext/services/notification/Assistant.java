@@ -38,6 +38,7 @@ import android.os.AsyncTask;
 import android.os.Bundle;
 import android.os.Environment;
 import android.os.Handler;
+import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.os.storage.StorageManager;
 import android.provider.Settings;
@@ -77,6 +78,10 @@ import java.util.Map;
 public class Assistant extends NotificationAssistantService {
     private static final String TAG = "ExtAssistant";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
+    public static final boolean AUTO_DEMOTE_NOTIFICATIONS = SystemProperties.getBoolean(
+            "debug.demote_notifs", false);
+    public static final boolean AGE_NOTIFICATIONS = SystemProperties.getBoolean(
+            "debug.age_notifs", false);
 
     private static final String TAG_ASSISTANT = "assistant";
     private static final String TAG_IMPRESSION = "impression-set";
@@ -230,16 +235,19 @@ public class Assistant extends NotificationAssistantService {
             @NonNull ArrayList<Notification.Action> smartActions,
             @NonNull ArrayList<CharSequence> smartReplies) {
         Bundle signals = new Bundle();
-        if (!smartActions.isEmpty()) {
-            signals.putParcelableArrayList(Adjustment.KEY_SMART_ACTIONS, smartActions);
-        }
-        if (!smartReplies.isEmpty()) {
-            signals.putCharSequenceArrayList(Adjustment.KEY_SMART_REPLIES, smartReplies);
-        }
-        if (mNotificationCategorizer.shouldSilence(entry)) {
-            final int importance = entry.getImportance() < IMPORTANCE_LOW ? entry.getImportance()
-                    : IMPORTANCE_LOW;
-            signals.putInt(KEY_IMPORTANCE, importance);
+
+        if (AUTO_DEMOTE_NOTIFICATIONS) {
+            if (!smartActions.isEmpty()) {
+                signals.putParcelableArrayList(Adjustment.KEY_SMART_ACTIONS, smartActions);
+            }
+            if (!smartReplies.isEmpty()) {
+                signals.putCharSequenceArrayList(Adjustment.KEY_SMART_REPLIES, smartReplies);
+            }
+            if (mNotificationCategorizer.shouldSilence(entry)) {
+                final int importance = entry.getImportance() < IMPORTANCE_LOW
+                        ? entry.getImportance() : IMPORTANCE_LOW;
+                signals.putInt(KEY_IMPORTANCE, importance);
+            }
         }
 
         return new Adjustment(
@@ -445,13 +453,15 @@ public class Assistant extends NotificationAssistantService {
     protected final class AgingCallback implements Callback {
         @Override
         public void sendAdjustment(String key, int newImportance) {
-            NotificationEntry entry = mLiveNotifications.get(key);
-            if (entry != null) {
-                Bundle bundle = new Bundle();
-                bundle.putInt(KEY_IMPORTANCE, newImportance);
-                Adjustment adjustment = new Adjustment(entry.getSbn().getPackageName(), key, bundle,
-                        "aging", entry.getSbn().getUserId());
-                adjustNotification(adjustment);
+            if (AGE_NOTIFICATIONS) {
+                NotificationEntry entry = mLiveNotifications.get(key);
+                if (entry != null) {
+                    Bundle bundle = new Bundle();
+                    bundle.putInt(KEY_IMPORTANCE, newImportance);
+                    Adjustment adjustment = new Adjustment(entry.getSbn().getPackageName(), key,
+                            bundle, "aging", entry.getSbn().getUserId());
+                    adjustNotification(adjustment);
+                }
             }
         }
     }
