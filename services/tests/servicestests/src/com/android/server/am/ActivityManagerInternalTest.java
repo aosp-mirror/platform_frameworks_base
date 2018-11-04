@@ -33,7 +33,7 @@ import org.mockito.MockitoAnnotations;
  * Test class for {@link ActivityManagerInternal}.
  *
  * Build/Install/Run:
- *  atest WmTests:ActivityManagerInternalTest
+ *  atest FrameworksServicesTests:ActivityManagerInternalTest
  */
 public class ActivityManagerInternalTest {
     private static final int TEST_UID1 = 111;

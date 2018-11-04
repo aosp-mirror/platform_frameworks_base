@@ -34,7 +34,7 @@ import java.io.File;
 
 /**
  * Build/Install/Run:
- *  atest WmTests:AppErrorDialogTest
+ *  atest FrameworksServicesTests:AppErrorDialogTest
  */
 @SmallTest
 @FlakyTest(bugId = 113616538)

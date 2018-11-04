@@ -38,7 +38,7 @@ import java.util.List;
  * Tests for {@link ActivityManager}.
  *
  * Build/Install/Run:
- *  atest WmTests:ActivityManagerTest
+ *  atest FrameworksServicesTests:ActivityManagerTest
  */
 @FlakyTest(detail = "Promote to presubmit if stable")
 @Presubmit

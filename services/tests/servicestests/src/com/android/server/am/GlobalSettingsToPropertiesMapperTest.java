@@ -40,7 +40,7 @@ import java.util.Map;
  * Tests for {@link GlobalSettingsToPropertiesMapper}
  *
  * Build/Install/Run:
- *  atest WmTests:GlobalSettingsToPropertiesMapperTest
+ *  atest FrameworksServicesTests:GlobalSettingsToPropertiesMapperTest
  */
 @SmallTest
 public class GlobalSettingsToPropertiesMapperTest {

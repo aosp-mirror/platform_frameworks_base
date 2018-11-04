@@ -38,7 +38,7 @@ import java.util.List;
  * Test class for {@link BroadcastRecord}.
  *
  * Build/Install/Run:
- *  atest WmTests:BroadcastRecordTest
+ *  atest FrameworksServicesTests:BroadcastRecordTest
  */
 @SmallTest
 @Presubmit

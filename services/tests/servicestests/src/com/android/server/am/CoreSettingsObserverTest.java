@@ -49,7 +49,7 @@ import java.io.File;
  * Test class for {@link CoreSettingsObserver}.
  *
  * Build/Install/Run:
- *  atest WmTests:CoreSettingsObserverTest
+ *  atest FrameworksServicesTests:CoreSettingsObserverTest
  */
 @SmallTest
 public class CoreSettingsObserverTest {
