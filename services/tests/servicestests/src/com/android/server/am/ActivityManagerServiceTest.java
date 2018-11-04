@@ -89,7 +89,7 @@ import java.util.function.Function;
  * Test class for {@link ActivityManagerService}.
  *
  * Build/Install/Run:
- *  atest WmTests:ActivityManagerServiceTest
+ *  atest FrameworksServicesTests:ActivityManagerServiceTest
  */
 @SmallTest
 @FlakyTest(bugId = 113616538)

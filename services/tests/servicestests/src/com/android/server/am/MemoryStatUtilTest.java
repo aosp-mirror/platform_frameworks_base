@@ -36,7 +36,7 @@ import java.util.Collections;
 
 /**
  * Build/Install/Run:
- *  atest WmTests:MemoryStatUtilTest
+ *  atest FrameworksServicesTests:MemoryStatUtilTest
  */
 @SmallTest
 public class MemoryStatUtilTest {

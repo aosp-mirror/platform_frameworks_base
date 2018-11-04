@@ -88,7 +88,7 @@ import java.util.Set;
  * Tests for {@link UserController}.
  *
  * Build/Install/Run:
- *  atest WmTests:UserControllerTest
+ *  atest FrameworksServicesTests:UserControllerTest
  */
 @SmallTest
 @Presubmit
