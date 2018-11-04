@@ -129,8 +129,8 @@ class TaskSnapshotController {
         mPersister.start();
     }
 
-    void onTransitionStarting() {
-        handleClosingApps(mService.mClosingApps);
+    void onTransitionStarting(DisplayContent displayContent) {
+        handleClosingApps(displayContent.mClosingApps);
     }
 
     /**

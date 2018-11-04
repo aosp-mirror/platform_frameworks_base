@@ -16,18 +16,11 @@
 
 package com.android.settingslib.license;
 
-import static com.android.settingslib.license.LicenseHtmlLoaderCompat.generateHtmlFile;
-import static com.android.settingslib.license.LicenseHtmlLoaderCompat.getCachedHtmlFile;
-import static com.android.settingslib.license.LicenseHtmlLoaderCompat.getVaildXmlFiles;
-import static com.android.settingslib.license.LicenseHtmlLoaderCompat.isCachedHtmlFileOutdated;
-
 import android.content.Context;
-import android.util.Log;
 
 import com.android.settingslib.utils.AsyncLoader;
 
 import java.io.File;
-import java.util.List;
 
 /**
  * LicenseHtmlLoader is a loader which loads a license html file from default license xml files.
@@ -44,27 +37,10 @@ public class LicenseHtmlLoader extends AsyncLoader<File> {
 
     @Override
     public File loadInBackground() {
-        return generateHtmlFromDefaultXmlFiles();
+        return new LicenseHtmlLoaderCompat(mContext).loadInBackground();
     }
 
     @Override
     protected void onDiscardResult(File f) {
     }
-
-    private File generateHtmlFromDefaultXmlFiles() {
-        final List<File> xmlFiles = getVaildXmlFiles();
-        if (xmlFiles.isEmpty()) {
-            Log.e(TAG, "No notice file exists.");
-            return null;
-        }
-
-        File cachedHtmlFile = getCachedHtmlFile(mContext);
-        if (!isCachedHtmlFileOutdated(xmlFiles, cachedHtmlFile)
-                || generateHtmlFile(mContext, xmlFiles, cachedHtmlFile)) {
-            return cachedHtmlFile;
-        }
-
-        return null;
-    }
-
 }

@@ -166,6 +166,7 @@ public class AppTransition implements Dump {
 
     private final Context mContext;
     private final WindowManagerService mService;
+    private final DisplayContent mDisplayContent;
 
     private @TransitionType int mNextAppTransition = TRANSIT_UNSET;
     private @TransitionFlags int mNextAppTransitionFlags = 0;
@@ -257,10 +258,11 @@ public class AppTransition implements Dump {
     final Handler mHandler;
     final Runnable mHandleAppTransitionTimeoutRunnable = () -> handleAppTransitionTimeout();
 
-    AppTransition(Context context, WindowManagerService service) {
+    AppTransition(Context context, WindowManagerService service, DisplayContent displayContent) {
         mContext = context;
         mService = service;
         mHandler = new Handler(service.mH.getLooper());
+        mDisplayContent = displayContent;
         mLinearOutSlowInInterpolator = AnimationUtils.loadInterpolator(context,
                 com.android.internal.R.interpolator.linear_out_slow_in);
         mFastOutLinearInInterpolator = AnimationUtils.loadInterpolator(context,
@@ -426,7 +428,7 @@ public class AppTransition implements Dump {
                         ? topOpeningAnim.getStatusBarTransitionsStartTime()
                         : SystemClock.uptimeMillis(),
                 AnimationAdapter.STATUS_BAR_TRANSITION_DURATION);
-        mService.getDefaultDisplayContentLocked().getDockedDividerController()
+        mDisplayContent.getDockedDividerController()
                 .notifyAppTransitionStarting(openingApps, transit);
 
         if (mRemoteAnimationController != null) {
@@ -2142,7 +2144,8 @@ public class AppTransition implements Dump {
                 + " transit=" + appTransitionToString(transit)
                 + " " + this
                 + " alwaysKeepCurrent=" + alwaysKeepCurrent
-                + " Callers=" + Debug.getCallers(3));
+                + " displayId=" + mDisplayContent.getDisplayId()
+                + " Callers=" + Debug.getCallers(5));
         final boolean allowSetCrashing = !isKeyguardTransit(mNextAppTransition)
                 && transit == TRANSIT_CRASHING_ACTIVITY_CLOSE;
         if (forceOverride || isKeyguardTransit(transit) || !isTransitionSet()
@@ -2218,14 +2221,18 @@ public class AppTransition implements Dump {
 
     private void handleAppTransitionTimeout() {
         synchronized (mService.mWindowMap) {
-            if (isTransitionSet() || !mService.mOpeningApps.isEmpty()
-                    || !mService.mClosingApps.isEmpty()) {
+            final DisplayContent dc = mDisplayContent;
+            if (dc == null) {
+                return;
+            }
+            if (isTransitionSet() || !dc.mOpeningApps.isEmpty() || !dc.mClosingApps.isEmpty()) {
                 if (DEBUG_APP_TRANSITIONS) {
                     Slog.v(TAG_WM, "*** APP TRANSITION TIMEOUT."
+                            + " displayId=" + dc.getDisplayId()
                             + " isTransitionSet()="
-                            + mService.mAppTransition.isTransitionSet()
-                            + " mOpeningApps.size()=" + mService.mOpeningApps.size()
-                            + " mClosingApps.size()=" + mService.mClosingApps.size());
+                            + dc.mAppTransition.isTransitionSet()
+                            + " mOpeningApps.size()=" + dc.mOpeningApps.size()
+                            + " mClosingApps.size()=" + dc.mClosingApps.size());
                 }
                 setTimeout();
                 mService.mWindowPlacerLocked.performSurfacePlacement();

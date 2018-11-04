@@ -20,6 +20,7 @@ import static android.content.Context.TELECOM_SERVICE;
 
 import static com.android.internal.util.Preconditions.checkNotNull;
 
+import android.Manifest;
 import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
@@ -5173,6 +5174,9 @@ public class TelephonyManager {
      * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the calling
      * app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
+     * TODO: remove this one. use {@link #rebootRadio()} for reset type 1 and
+     * {@link #resetRadioConfig()} for reset type 3
+     *
      * @param resetType reset type: 1: reload NV reset, 2: erase NV reset, 3: factory NV reset
      * @return true on success; false on any failure.
      *
@@ -5182,12 +5186,74 @@ public class TelephonyManager {
     public boolean nvResetConfig(int resetType) {
         try {
             ITelephony telephony = getITelephony();
-            if (telephony != null)
-                return telephony.nvResetConfig(resetType);
+            if (telephony != null) {
+                if (resetType == 1 /*1: reload NV reset */) {
+                    return telephony.rebootModem(getSlotIndex());
+                } else if (resetType == 3 /*3: factory NV reset */) {
+                    return telephony.resetModemConfig(getSlotIndex());
+                } else {
+                    Rlog.e(TAG, "nvResetConfig unsupported reset type");
+                }
+            }
         } catch (RemoteException ex) {
             Rlog.e(TAG, "nvResetConfig RemoteException", ex);
         } catch (NullPointerException ex) {
             Rlog.e(TAG, "nvResetConfig NPE", ex);
+        }
+        return false;
+    }
+
+    /**
+     * Rollback modem configurations to factory default except some config which are in whitelist.
+     * Used for device configuration by some CDMA operators.
+     *
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the calling
+     * app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     *
+     * @return {@code true} on success; {@code false} on any failure.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
+    @SystemApi
+    public boolean resetRadioConfig() {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.resetModemConfig(getSlotIndex());
+            }
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "resetRadioConfig RemoteException", ex);
+        } catch (NullPointerException ex) {
+            Rlog.e(TAG, "resetRadioConfig NPE", ex);
+        }
+        return false;
+    }
+
+    /**
+     * Generate a radio modem reset. Used for device configuration by some CDMA operators.
+     *
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the calling
+     * app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     *
+     * @return {@code true} on success; {@code false} on any failure.
+     *
+     * @hide
+     */
+    @RequiresPermission(Manifest.permission.MODIFY_PHONE_STATE)
+    @SystemApi
+    public boolean rebootRadio() {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.rebootModem(getSlotIndex());
+            }
+        } catch (RemoteException ex) {
+            Rlog.e(TAG, "rebootRadio RemoteException", ex);
+        } catch (NullPointerException ex) {
+            Rlog.e(TAG, "rebootRadio NPE", ex);
         }
         return false;
     }
@@ -6260,7 +6326,7 @@ public class TelephonyManager {
 
     /**
      * Check TETHER_DUN_REQUIRED and TETHER_DUN_APN settings, net.tethering.noprovisioning
-     * SystemProperty, and config_tether_apndata to decide whether DUN APN is required for
+     * SystemProperty to decide whether DUN APN is required for
      * tethering.
      *
      * @return 0: Not required. 1: required. 2: Not set.
@@ -7379,6 +7445,27 @@ public class TelephonyManager {
     }
 
     /**
+     * Determines whether the device currently supports RTT (Real-time text). Based both on carrier
+     * support for the feature and device firmware support.
+     *
+     * @return {@code true} if the device and carrier both support RTT, {@code false} otherwise.
+     * @hide
+     */
+    @TestApi
+    public boolean isRttSupported() {
+        try {
+            ITelephony telephony = getITelephony();
+            if (telephony != null) {
+                return telephony.isRttSupported(mSubId);
+            }
+        } catch (RemoteException e) {
+            Log.e(TAG, "Error calling ITelephony#isRttSupported", e);
+        } catch (SecurityException e) {
+            Log.e(TAG, "Permission error calling ITelephony#isWorldPhone", e);
+        }
+        return false;
+    }
+    /**
      * Whether the phone supports hearing aid compatibility.
      *
      * @return {@code true} if the device supports hearing aid compatibility, and {@code false}
@@ -8208,6 +8295,29 @@ public class TelephonyManager {
     }
 
     /**
+     * Return a list of certs in hex string from loaded carrier privileges access rules.
+     *
+     * @return a list of certificate in hex string. return {@code null} if there is no certs
+     * or privilege rules are not loaded yet.
+     *
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE}
+     * @hide
+     */
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public List<String> getCertsFromCarrierPrivilegeAccessRules() {
+        try {
+            ITelephony service = getITelephony();
+            if (service != null) {
+                return service.getCertsFromCarrierPrivilegeAccessRules(getSubId());
+            }
+        } catch (RemoteException ex) {
+            // This could happen if binder process crashes.
+        }
+        return null;
+    }
+
+    /**
      * Return the application ID for the uicc application type like {@link #APPTYPE_CSIM}.
      * All uicc applications are uniquely identified by application ID. See ETSI 102.221 and 101.220
      * <p>Requires Permission:
@@ -8997,8 +9107,7 @@ public class TelephonyManager {
      * <p>The subscriptions which the returned list would be based on, are all the active
      * subscriptions, no matter which subscription could be used to create TelephonyManager.
      *
-     * <p>Requires permission {@link android.Manifest.permission#READ_PHONE_STATE} or
-     * {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE} or the calling
+     * <p>Requires permission {@link android.Manifest.permission#READ_PHONE_STATE} or the calling
      * app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
      * @return Map including the key as the active subscription ID (Note: if there is no active
@@ -9030,8 +9139,7 @@ public class TelephonyManager {
      * <p>The subscriptions which the returned list would be based on, are all the active
      * subscriptions, no matter which subscription could be used to create TelephonyManager.
      *
-     * <p>Requires permission {@link android.Manifest.permission#READ_PHONE_STATE} or
-     * {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE} or the calling
+     * <p>Requires permission {@link android.Manifest.permission#READ_PHONE_STATE} or the calling
      * app has carrier privileges (see {@link #hasCarrierPrivileges}).
      *
      * @param categories the emergency service categories which are the bitwise-OR combination of

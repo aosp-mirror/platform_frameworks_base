@@ -1016,6 +1016,7 @@ static jint convertAudioPortFromNative(JNIEnv *env,
     jintArray jFormats = NULL;
     jobjectArray jGains = NULL;
     jobject jHandle = NULL;
+    jobject jAudioPortConfig = NULL;
     jstring jDeviceName = NULL;
     bool useInMask;
     size_t numPositionMasks = 0;
@@ -1194,7 +1195,6 @@ static jint convertAudioPortFromNative(JNIEnv *env,
         goto exit;
     }
 
-    jobject jAudioPortConfig;
     jStatus = convertAudioPortConfigFromNative(env,
                                                        *jAudioPort,
                                                        &jAudioPortConfig,
@@ -1229,6 +1229,9 @@ exit:
     }
     if (jHandle != NULL) {
         env->DeleteLocalRef(jHandle);
+    }
+    if (jAudioPortConfig != NULL) {
+        env->DeleteLocalRef(jAudioPortConfig);
     }
 
     return jStatus;
@@ -1300,12 +1303,15 @@ android_media_AudioSystem_listAudioPorts(JNIEnv *env, jobject clazz,
     }
 
     for (size_t i = 0; i < numPorts; i++) {
-        jobject jAudioPort;
+        jobject jAudioPort = NULL;
         jStatus = convertAudioPortFromNative(env, &jAudioPort, &nPorts[i]);
         if (jStatus != AUDIO_JAVA_SUCCESS) {
             goto exit;
         }
         env->CallBooleanMethod(jPorts, gArrayListMethods.add, jAudioPort);
+        if (jAudioPort != NULL) {
+            env->DeleteLocalRef(jAudioPort);
+        }
     }
 
 exit:

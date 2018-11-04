@@ -45,7 +45,6 @@ message WindowManagerServiceDumpProto {
     optional bool display_frozen = 6;
     optional int32 rotation = 7;
     optional int32 last_orientation = 8;
-    optional AppTransitionProto app_transition = 9;
 }
 
 /* represents RootWindowContainer object */
@@ -159,6 +158,7 @@ message DisplayContentProto {
     optional DisplayFramesProto display_frames = 13;
     optional int32 surface_size = 14;
     optional string focused_app = 15;
+    optional AppTransitionProto app_transition = 16;
 }
 
 /* represents DisplayFrames */

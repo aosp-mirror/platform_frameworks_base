@@ -2917,6 +2917,7 @@
         <public name="isSplitRequired" />
         <public name="textLocale" />
         <public name="settingsSliceUri" />
+        <public name="shell" />
     </public-group>
 
     <public-group type="drawable" first-id="0x010800b4">

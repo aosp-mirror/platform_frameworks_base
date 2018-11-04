@@ -73,7 +73,7 @@ public class LicenseHtmlLoaderCompat extends AsyncLoaderCompat<File> {
         return null;
     }
 
-    static List<File> getVaildXmlFiles() {
+    private List<File> getVaildXmlFiles() {
         final List<File> xmlFiles = new ArrayList();
         for (final String xmlPath : DEFAULT_LICENSE_XML_PATHS) {
             File file = new File(xmlPath);
@@ -84,11 +84,11 @@ public class LicenseHtmlLoaderCompat extends AsyncLoaderCompat<File> {
         return xmlFiles;
     }
 
-    static File getCachedHtmlFile(Context context) {
+    private File getCachedHtmlFile(Context context) {
         return new File(context.getCacheDir(), NOTICE_HTML_FILE_NAME);
     }
 
-    static boolean isCachedHtmlFileOutdated(List<File> xmlFiles, File cachedHtmlFile) {
+    private boolean isCachedHtmlFileOutdated(List<File> xmlFiles, File cachedHtmlFile) {
         boolean outdated = true;
         if (cachedHtmlFile.exists() && cachedHtmlFile.length() != 0) {
             outdated = false;
@@ -102,7 +102,7 @@ public class LicenseHtmlLoaderCompat extends AsyncLoaderCompat<File> {
         return outdated;
     }
 
-    static boolean generateHtmlFile(Context context, List<File> xmlFiles, File htmlFile) {
+    private boolean generateHtmlFile(Context context, List<File> xmlFiles, File htmlFile) {
         return LicenseHtmlGeneratorFromXml.generateHtml(xmlFiles, htmlFile,
                 context.getString(R.string.notice_header));
     }

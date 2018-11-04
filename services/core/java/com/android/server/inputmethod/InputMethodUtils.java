@@ -16,9 +16,6 @@
 
 package com.android.server.inputmethod;
 
-import static android.view.inputmethod.InputMethodManager.CONTROL_WINDOW_IS_TEXT_EDITOR;
-import static android.view.inputmethod.InputMethodManager.CONTROL_WINDOW_VIEW_HAS_FOCUS;
-
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
@@ -44,6 +41,7 @@ import android.view.textservice.TextServicesManager;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.internal.inputmethod.StartInputFlags;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -1299,15 +1297,15 @@ final class InputMethodUtils {
     }
 
     public static boolean isSoftInputModeStateVisibleAllowed(
-            int targetSdkVersion, int controlFlags) {
+            int targetSdkVersion, @StartInputFlags int startInputFlags) {
         if (targetSdkVersion < Build.VERSION_CODES.P) {
             // for compatibility.
             return true;
         }
-        if ((controlFlags & CONTROL_WINDOW_VIEW_HAS_FOCUS) == 0) {
+        if ((startInputFlags & StartInputFlags.VIEW_HAS_FOCUS) == 0) {
             return false;
         }
-        if ((controlFlags & CONTROL_WINDOW_IS_TEXT_EDITOR) == 0) {
+        if ((startInputFlags & StartInputFlags.IS_TEXT_EDITOR) == 0) {
             return false;
         }
         return true;

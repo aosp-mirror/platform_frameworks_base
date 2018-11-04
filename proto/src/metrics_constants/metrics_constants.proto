@@ -6574,6 +6574,11 @@ message MetricsEvent {
     // OS: Q
     BIOMETRIC_FRAGMENT = 1585;
 
+    // OPEN: Biometric Enrollment (android.settings.BIOMETRIC_ENROLL action intent)
+    // CATEGORY: SETTINGS
+    // OS: Q
+    BIOMETRIC_ENROLL_ACTIVITY = 1586;
+
     // ---- End Q Constants, all Q constants go above this line ----
 
     // Add new aosp constants above this line.

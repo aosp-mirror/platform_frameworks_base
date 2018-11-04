@@ -21,6 +21,7 @@ import android.animation.AnimatorListenerAdapter;
 import android.annotation.ColorInt;
 import android.app.ActivityManager;
 import android.app.AlarmManager;
+import android.app.Dialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -31,20 +32,22 @@ import android.graphics.Color;
 import android.graphics.Rect;
 import android.media.AudioManager;
 import android.os.Handler;
+import android.os.Looper;
 import android.provider.AlarmClock;
 import android.service.notification.ZenModeConfig;
-import android.widget.FrameLayout;
-import androidx.annotation.VisibleForTesting;
 import android.text.format.DateUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Pair;
 import android.view.View;
 import android.view.WindowInsets;
+import android.view.WindowManager;
+import android.widget.FrameLayout;
 import android.widget.ImageView;
-import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
 import android.widget.TextView;
+
+import androidx.annotation.VisibleForTesting;
 
 import com.android.settingslib.Utils;
 import com.android.systemui.BatteryMeterView;
@@ -52,12 +55,15 @@ import com.android.systemui.Dependency;
 import com.android.systemui.Prefs;
 import com.android.systemui.R;
 import com.android.systemui.plugins.ActivityStarter;
+import com.android.systemui.privacy.OngoingPrivacyChip;
+import com.android.systemui.privacy.OngoingPrivacyDialog;
 import com.android.systemui.qs.QSDetail.Callback;
 import com.android.systemui.statusbar.phone.PhoneStatusBarView;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
 import com.android.systemui.statusbar.phone.StatusBarIconController.TintedIconManager;
-import com.android.systemui.statusbar.policy.Clock;
 import com.android.systemui.statusbar.phone.StatusIconContainer;
+import com.android.systemui.statusbar.phone.SystemUIDialog;
+import com.android.systemui.statusbar.policy.Clock;
 import com.android.systemui.statusbar.policy.DarkIconDispatcher;
 import com.android.systemui.statusbar.policy.DarkIconDispatcher.DarkReceiver;
 import com.android.systemui.statusbar.policy.DateView;
@@ -118,6 +124,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements
     private BatteryMeterView mBatteryMeterView;
     private Clock mClockView;
     private DateView mDateView;
+    private OngoingPrivacyChip mPrivacyChip;
 
     private NextAlarmController mAlarmController;
     private ZenModeController mZenController;
@@ -185,6 +192,8 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         mClockView = findViewById(R.id.clock);
         mClockView.setOnClickListener(this);
         mDateView = findViewById(R.id.date);
+        mPrivacyChip = findViewById(R.id.privacy_chip);
+        mPrivacyChip.setOnClickListener(this);
     }
 
     private void updateStatusText() {
@@ -205,7 +214,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements
 
         boolean ringerVisible = false;
         if (!ZenModeConfig.isZenOverridingRinger(mZenController.getZen(),
-                mZenController.getConfig())) {
+                mZenController.getConsolidatedPolicy())) {
             if (mRingerMode == AudioManager.RINGER_MODE_VIBRATE) {
                 mRingerModeIcon.setImageResource(R.drawable.stat_sys_ringer_vibrate);
                 mRingerModeTextView.setText(R.string.qs_status_phone_vibrate);
@@ -263,6 +272,13 @@ public class QuickStatusBarHeader extends RelativeLayout implements
                 newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE;
         mBatteryMeterView.useWallpaperTextColor(shouldUseWallpaperTextColor);
         mClockView.useWallpaperTextColor(shouldUseWallpaperTextColor);
+
+        MarginLayoutParams lm = (MarginLayoutParams) mPrivacyChip.getLayoutParams();
+        int sideMargins = lm.leftMargin;
+        int topBottomMargins = (newConfig.orientation == Configuration.ORIENTATION_LANDSCAPE)
+                ? 0 : sideMargins;
+        lm.setMargins(sideMargins, topBottomMargins, sideMargins, topBottomMargins);
+        mPrivacyChip.setLayoutParams(lm);
     }
 
     @Override
@@ -421,6 +437,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements
             return;
         }
         mHeaderQsPanel.setListening(listening);
+        mPrivacyChip.setListening(listening);
         mListening = listening;
 
         if (listening) {
@@ -443,6 +460,19 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         } else if (v == mBatteryMeterView) {
             Dependency.get(ActivityStarter.class).postStartActivityDismissingKeyguard(new Intent(
                     Intent.ACTION_POWER_USAGE_SUMMARY),0);
+        } else if (v == mPrivacyChip) {
+            Handler mUiHandler = new Handler(Looper.getMainLooper());
+            mUiHandler.post(() -> {
+                Dialog mDialog = new OngoingPrivacyDialog(mContext,
+                        mPrivacyChip.getBuilder()).createDialog();
+                mDialog.getWindow().setType(
+                        WindowManager.LayoutParams.TYPE_KEYGUARD_DIALOG);
+                SystemUIDialog.setShowForAllUsers(mDialog, true);
+                SystemUIDialog.registerDismissListener(mDialog);
+                SystemUIDialog.setWindowOnTop(mDialog);
+                mUiHandler.post(() -> mDialog.show());
+                mHost.collapsePanels();
+            });
         }
     }
 

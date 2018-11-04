@@ -25,6 +25,7 @@ import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_OEM;
 import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_PRODUCT;
 import static android.content.pm.ApplicationInfo.PRIVATE_FLAG_VENDOR;
 import static android.content.pm.PackageManager.GET_PERMISSIONS;
+import static android.os.Process.SYSTEM_UID;
 
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -55,26 +56,41 @@ public class PermissionMonitorTest {
     private static final String PARTITION_OEM = "oem";
     private static final String PARTITION_PRODUCT = "product";
     private static final String PARTITION_VENDOR = "vendor";
+    private static final int VERSION_P = Build.VERSION_CODES.P;
+    private static final int VERSION_Q = Build.VERSION_CODES.Q;
 
     @Mock private Context mContext;
     @Mock private PackageManager mPackageManager;
 
     private PermissionMonitor mPermissionMonitor;
+    private int mMockFirstSdkInt;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         when(mContext.getPackageManager()).thenReturn(mPackageManager);
-        when(mPackageManager.getPackagesForUid(MOCK_UID)).thenReturn(MOCK_PACKAGE_NAMES);
-        mPermissionMonitor = new PermissionMonitor(mContext, null);
+        when(mPackageManager.getPackagesForUid(anyInt())).thenReturn(MOCK_PACKAGE_NAMES);
+        // Try to use spy() here for stubbing getDeviceFirstSdkInt value but the spies are loaded
+        // by a custom class loader that's different from the loader used for loading the real
+        // thing. That means those two classes are not in the same package, so a package private
+        // method is not accessible. Hence, using override method to control FIRST_SDK_INT value
+        // instead of spy function for testing.
+        mPermissionMonitor = new PermissionMonitor(mContext, null) {
+            @Override
+            int getDeviceFirstSdkInt() {
+                return mMockFirstSdkInt;
+            }
+        };
     }
 
-    private void expectPermission(String[] permissions, String partition,
-            int targetSdkVersion) throws Exception {
-        final PackageInfo packageInfo = packageInfoWithPermissions(permissions, partition);
+    private boolean hasBgPermission(String partition, int targetSdkVersion, int uid,
+            String... permission) throws Exception {
+        final PackageInfo packageInfo = packageInfoWithPermissions(permission, partition);
         packageInfo.applicationInfo.targetSdkVersion = targetSdkVersion;
+        packageInfo.applicationInfo.uid = uid;
         when(mPackageManager.getPackageInfoAsUser(
                 eq(MOCK_PACKAGE_NAMES[0]), eq(GET_PERMISSIONS), anyInt())).thenReturn(packageInfo);
+        return mPermissionMonitor.hasUseBackgroundNetworksPermission(uid);
     }
 
     private PackageInfo packageInfoWithPermissions(String[] permissions, String partition) {
@@ -136,51 +152,44 @@ public class PermissionMonitorTest {
 
     @Test
     public void testHasUseBackgroundNetworksPermission() throws Exception {
-        expectPermission(new String[] { CHANGE_NETWORK_STATE },
-            PARTITION_SYSTEM, Build.VERSION_CODES.P);
-        assertTrue(mPermissionMonitor.hasUseBackgroundNetworksPermission(MOCK_UID));
-        expectPermission(new String[] { NETWORK_STACK }, PARTITION_SYSTEM, Build.VERSION_CODES.P);
-        assertTrue(mPermissionMonitor.hasUseBackgroundNetworksPermission(MOCK_UID));
-        expectPermission(new String[] { CONNECTIVITY_INTERNAL },
-            PARTITION_SYSTEM, Build.VERSION_CODES.P);
-        assertTrue(mPermissionMonitor.hasUseBackgroundNetworksPermission(MOCK_UID));
-        expectPermission(new String[] { CONNECTIVITY_USE_RESTRICTED_NETWORKS },
-            PARTITION_SYSTEM, Build.VERSION_CODES.P);
-        assertTrue(mPermissionMonitor.hasUseBackgroundNetworksPermission(MOCK_UID));
+        assertFalse(hasBgPermission(PARTITION_SYSTEM, VERSION_P, MOCK_UID));
+        assertTrue(hasBgPermission(PARTITION_SYSTEM, VERSION_P, MOCK_UID, CHANGE_NETWORK_STATE));
+        assertTrue(hasBgPermission(PARTITION_SYSTEM, VERSION_P, MOCK_UID, NETWORK_STACK));
+        assertTrue(hasBgPermission(PARTITION_SYSTEM, VERSION_P, MOCK_UID, CONNECTIVITY_INTERNAL));
+        assertTrue(hasBgPermission(PARTITION_SYSTEM, VERSION_P, MOCK_UID,
+                CONNECTIVITY_USE_RESTRICTED_NETWORKS));
+        assertFalse(hasBgPermission(PARTITION_SYSTEM, VERSION_P, MOCK_UID, CHANGE_WIFI_STATE));
 
-        expectPermission(new String[] { CHANGE_NETWORK_STATE },
-            PARTITION_VENDOR, Build.VERSION_CODES.P);
-        assertTrue(mPermissionMonitor.hasUseBackgroundNetworksPermission(MOCK_UID));
-        expectPermission(new String[] { NETWORK_STACK },
-            PARTITION_VENDOR, Build.VERSION_CODES.P);
-        assertTrue(mPermissionMonitor.hasUseBackgroundNetworksPermission(MOCK_UID));
-        expectPermission(new String[] { CONNECTIVITY_INTERNAL },
-            PARTITION_VENDOR, Build.VERSION_CODES.P);
-        assertTrue(mPermissionMonitor.hasUseBackgroundNetworksPermission(MOCK_UID));
-        expectPermission(new String[] { CONNECTIVITY_USE_RESTRICTED_NETWORKS },
-            PARTITION_VENDOR, Build.VERSION_CODES.P);
-        assertTrue(mPermissionMonitor.hasUseBackgroundNetworksPermission(MOCK_UID));
+        assertFalse(hasBgPermission(PARTITION_SYSTEM, VERSION_Q, MOCK_UID));
+        assertFalse(hasBgPermission(PARTITION_SYSTEM, VERSION_Q, MOCK_UID, CHANGE_WIFI_STATE));
+    }
 
-        expectPermission(new String[] {}, PARTITION_SYSTEM, Build.VERSION_CODES.P);
-        assertFalse(mPermissionMonitor.hasUseBackgroundNetworksPermission(MOCK_UID));
-        expectPermission(new String[] { CHANGE_WIFI_STATE },
-            PARTITION_SYSTEM, Build.VERSION_CODES.P);
-        assertFalse(mPermissionMonitor.hasUseBackgroundNetworksPermission(MOCK_UID));
-        expectPermission(new String[] {}, PARTITION_VENDOR, Build.VERSION_CODES.P);
-        assertTrue(mPermissionMonitor.hasUseBackgroundNetworksPermission(MOCK_UID));
-        expectPermission(new String[] { CHANGE_WIFI_STATE },
-            PARTITION_VENDOR, Build.VERSION_CODES.P);
-        assertTrue(mPermissionMonitor.hasUseBackgroundNetworksPermission(MOCK_UID));
+    @Test
+    public void testHasUseBackgroundNetworksPermissionSystemUid() throws Exception {
+        mMockFirstSdkInt = VERSION_P;
+        assertTrue(hasBgPermission(PARTITION_SYSTEM, VERSION_P, SYSTEM_UID));
+        assertTrue(hasBgPermission(PARTITION_SYSTEM, VERSION_P, SYSTEM_UID, CHANGE_WIFI_STATE));
+        assertTrue(hasBgPermission(PARTITION_SYSTEM, VERSION_P, SYSTEM_UID,
+                CONNECTIVITY_USE_RESTRICTED_NETWORKS));
 
-        expectPermission(new String[] {}, PARTITION_SYSTEM, Build.VERSION_CODES.Q);
-        assertFalse(mPermissionMonitor.hasUseBackgroundNetworksPermission(MOCK_UID));
-        expectPermission(new String[] { CHANGE_WIFI_STATE },
-            PARTITION_SYSTEM, Build.VERSION_CODES.Q);
-        assertFalse(mPermissionMonitor.hasUseBackgroundNetworksPermission(MOCK_UID));
-        expectPermission(new String[] {}, PARTITION_VENDOR, Build.VERSION_CODES.Q);
-        assertFalse(mPermissionMonitor.hasUseBackgroundNetworksPermission(MOCK_UID));
-        expectPermission(new String[] { CHANGE_WIFI_STATE },
-            PARTITION_VENDOR, Build.VERSION_CODES.Q);
-        assertFalse(mPermissionMonitor.hasUseBackgroundNetworksPermission(MOCK_UID));
+        mMockFirstSdkInt = VERSION_Q;
+        assertFalse(hasBgPermission(PARTITION_SYSTEM, VERSION_Q, SYSTEM_UID));
+        assertFalse(hasBgPermission(PARTITION_SYSTEM, VERSION_Q, SYSTEM_UID, CHANGE_WIFI_STATE));
+        assertTrue(hasBgPermission(PARTITION_SYSTEM, VERSION_Q, SYSTEM_UID,
+                CONNECTIVITY_USE_RESTRICTED_NETWORKS));
+    }
+
+    @Test
+    public void testHasUseBackgroundNetworksPermissionVendorApp() throws Exception {
+        assertTrue(hasBgPermission(PARTITION_VENDOR, VERSION_P, MOCK_UID));
+        assertTrue(hasBgPermission(PARTITION_VENDOR, VERSION_P, MOCK_UID, CHANGE_NETWORK_STATE));
+        assertTrue(hasBgPermission(PARTITION_VENDOR, VERSION_P, MOCK_UID, NETWORK_STACK));
+        assertTrue(hasBgPermission(PARTITION_VENDOR, VERSION_P, MOCK_UID, CONNECTIVITY_INTERNAL));
+        assertTrue(hasBgPermission(PARTITION_VENDOR, VERSION_P, MOCK_UID,
+                CONNECTIVITY_USE_RESTRICTED_NETWORKS));
+        assertTrue(hasBgPermission(PARTITION_VENDOR, VERSION_P, MOCK_UID, CHANGE_WIFI_STATE));
+
+        assertFalse(hasBgPermission(PARTITION_VENDOR, VERSION_Q, MOCK_UID));
+        assertFalse(hasBgPermission(PARTITION_VENDOR, VERSION_Q, MOCK_UID, CHANGE_WIFI_STATE));
     }
 }

@@ -1364,7 +1364,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
     @Override
     boolean hasContentToDisplay() {
         if (!mAppFreezing && isDrawnLw() && (mViewVisibility == View.VISIBLE
-                || (isAnimating() && !mService.mAppTransition.isTransitionSet()))) {
+                || (isAnimating() && !getDisplayContent().mAppTransition.isTransitionSet()))) {
             return true;
         }
 
@@ -1473,7 +1473,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
      * of a transition that has not yet been started.
      */
     boolean isReadyForDisplay() {
-        if (mToken.waitingToShow && mService.mAppTransition.isTransitionSet()) {
+        if (mToken.waitingToShow && getDisplayContent().mAppTransition.isTransitionSet()) {
             return false;
         }
         final boolean parentAndClientVisible = !isParentWindowHidden()

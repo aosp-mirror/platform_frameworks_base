@@ -263,14 +263,32 @@ public:
     void setUidMapChanges(int changes);
     void setCurrentUidMapMemory(int bytes);
 
-    // Update minimum interval between pulls for an pulled atom
+    /*
+     * Updates minimum interval between pulls for an pulled atom.
+     */
     void updateMinPullIntervalSec(int pullAtomId, long intervalSec);
 
-    // Notify pull request for an atom
+    /*
+     * Notes an atom is pulled.
+     */
     void notePull(int pullAtomId);
 
-    // Notify pull request for an atom served from cached data
+    /*
+     * Notes an atom is served from puller cache.
+     */
     void notePullFromCache(int pullAtomId);
+
+    /*
+     * Records time for actual pulling, not including those served from cache and not including
+     * statsd processing delays.
+     */
+    void notePullTime(int pullAtomId, int64_t pullTimeNs);
+
+    /*
+     * Records pull delay for a pulled atom, including those served from cache and including statsd
+     * processing delays.
+     */
+    void notePullDelay(int pullAtomId, int64_t pullDelayNs);
 
     /*
      * Records when system server restarts.
@@ -302,9 +320,15 @@ public:
     void dumpStats(int outFd) const;
 
     typedef struct {
-        long totalPull;
-        long totalPullFromCache;
-        long minPullIntervalSec;
+        long totalPull = 0;
+        long totalPullFromCache = 0;
+        long minPullIntervalSec = LONG_MAX;
+        int64_t avgPullTimeNs = 0;
+        int64_t maxPullTimeNs = 0;
+        long numPullTime = 0;
+        int64_t avgPullDelayNs = 0;
+        int64_t maxPullDelayNs = 0;
+        long numPullDelay = 0;
     } PulledAtomStats;
 
 private:
@@ -368,6 +392,7 @@ private:
     FRIEND_TEST(StatsdStatsTest, TestTimestampThreshold);
     FRIEND_TEST(StatsdStatsTest, TestAnomalyMonitor);
     FRIEND_TEST(StatsdStatsTest, TestSystemServerCrash);
+    FRIEND_TEST(StatsdStatsTest, TestPullAtomStats);
 };
 
 }  // namespace statsd

@@ -19,9 +19,11 @@ package android.net;
 import android.annotation.UnsupportedAppUsage;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.text.TextUtils;
 
 import com.google.android.collect.Sets;
 
+import java.net.InetAddress;
 import java.util.HashSet;
 
 /**
@@ -34,8 +36,10 @@ public class InterfaceConfiguration implements Parcelable {
     private LinkAddress mAddr;
     private HashSet<String> mFlags = Sets.newHashSet();
 
-    private static final String FLAG_UP = "up";
-    private static final String FLAG_DOWN = "down";
+    private static final String FLAG_UP = INetd.IF_STATE_UP;
+    private static final String FLAG_DOWN = INetd.IF_STATE_DOWN;
+
+    private static final  String[] EMPTY_STRING_ARRAY = new String[0];
 
     @Override
     public String toString() {
@@ -109,6 +113,40 @@ public class InterfaceConfiguration implements Parcelable {
 
     public void setHardwareAddress(String hwAddr) {
         mHwAddr = hwAddr;
+    }
+
+    /**
+     * Construct InterfaceConfiguration from InterfaceConfigurationParcel.
+     */
+    public static InterfaceConfiguration fromParcel(InterfaceConfigurationParcel p) {
+        InterfaceConfiguration cfg = new InterfaceConfiguration();
+        cfg.setHardwareAddress(p.hwAddr);
+
+        final InetAddress addr = NetworkUtils.numericToInetAddress(p.ipv4Addr);
+        cfg.setLinkAddress(new LinkAddress(addr, p.prefixLength));
+        for (String flag : p.flags) {
+            cfg.setFlag(flag);
+        }
+
+        return cfg;
+    }
+
+    /**
+     * Convert InterfaceConfiguration to InterfaceConfigurationParcel with given ifname.
+     */
+    public InterfaceConfigurationParcel toParcel(String iface) {
+        InterfaceConfigurationParcel cfgParcel = new InterfaceConfigurationParcel();
+        cfgParcel.ifName = iface;
+        if (!TextUtils.isEmpty(mHwAddr)) {
+            cfgParcel.hwAddr = mHwAddr;
+        } else {
+            cfgParcel.hwAddr = "";
+        }
+        cfgParcel.ipv4Addr = mAddr.getAddress().getHostAddress();
+        cfgParcel.prefixLength = mAddr.getPrefixLength();
+        cfgParcel.flags = mFlags.toArray(EMPTY_STRING_ARRAY);
+
+        return cfgParcel;
     }
 
     /**

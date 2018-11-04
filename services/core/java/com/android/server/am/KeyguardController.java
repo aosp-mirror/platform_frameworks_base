@@ -48,6 +48,7 @@ import android.util.proto.ProtoOutputStream;
 import com.android.internal.policy.IKeyguardDismissCallback;
 import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.wm.ActivityTaskManagerInternal.SleepToken;
+import com.android.server.wm.DisplayWindowController;
 import com.android.server.wm.WindowManagerService;
 
 import java.io.PrintWriter;
@@ -160,9 +161,10 @@ class KeyguardController {
         mWindowManager.deferSurfaceLayout();
         try {
             setKeyguardGoingAway(true);
-            mWindowManager.prepareAppTransition(TRANSIT_KEYGUARD_GOING_AWAY,
-                    false /* alwaysKeepCurrent */, convertTransitFlags(flags),
-                    false /* forceOverride */);
+            mStackSupervisor.getDefaultDisplay().getWindowContainerController()
+                    .prepareAppTransition(TRANSIT_KEYGUARD_GOING_AWAY,
+                            false /* alwaysKeepCurrent */, convertTransitFlags(flags),
+                            false /* forceOverride */);
             updateKeyguardSleepToken();
 
             // Some stack visibility might change (e.g. docked stack)
@@ -285,8 +287,10 @@ class KeyguardController {
         if (isKeyguardLocked()) {
             mWindowManager.deferSurfaceLayout();
             try {
-                mWindowManager.prepareAppTransition(resolveOccludeTransit(),
-                        false /* alwaysKeepCurrent */, 0 /* flags */, true /* forceOverride */);
+                mStackSupervisor.getDefaultDisplay().getWindowContainerController()
+                        .prepareAppTransition(resolveOccludeTransit(),
+                                false /* alwaysKeepCurrent */, 0 /* flags */,
+                                true /* forceOverride */);
                 updateKeyguardSleepToken();
                 mStackSupervisor.ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
                 mWindowManager.executeAppTransition();
@@ -310,10 +314,12 @@ class KeyguardController {
 
             // If we are about to unocclude the Keyguard, but we can dismiss it without security,
             // we immediately dismiss the Keyguard so the activity gets shown without a flicker.
+            final DisplayWindowController dwc =
+                    mStackSupervisor.getDefaultDisplay().getWindowContainerController();
             if (mKeyguardShowing && canDismissKeyguard()
-                    && mWindowManager.getPendingAppTransition() == TRANSIT_KEYGUARD_UNOCCLUDE) {
-                mWindowManager.prepareAppTransition(mBeforeUnoccludeTransit,
-                        false /* alwaysKeepCurrent */, 0 /* flags */, true /* forceOverride */);
+                    && dwc.getPendingAppTransition() == TRANSIT_KEYGUARD_UNOCCLUDE) {
+                dwc.prepareAppTransition(mBeforeUnoccludeTransit, false /* alwaysKeepCurrent */,
+                        0 /* flags */, true /* forceOverride */);
                 mStackSupervisor.ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
                 mWindowManager.executeAppTransition();
             }
@@ -332,8 +338,10 @@ class KeyguardController {
     }
 
     private int resolveOccludeTransit() {
+        final DisplayWindowController dwc =
+                mStackSupervisor.getDefaultDisplay().getWindowContainerController();
         if (mBeforeUnoccludeTransit != TRANSIT_UNSET
-                && mWindowManager.getPendingAppTransition() == TRANSIT_KEYGUARD_UNOCCLUDE
+                && dwc.getPendingAppTransition() == TRANSIT_KEYGUARD_UNOCCLUDE
                 // TODO(b/113840485): Handle app transition for individual display.
                 && isDisplayOccluded(DEFAULT_DISPLAY)) {
 
@@ -344,7 +352,7 @@ class KeyguardController {
         } else if (!isDisplayOccluded(DEFAULT_DISPLAY)) {
 
             // Save transit in case we dismiss/occlude Keyguard shortly after.
-            mBeforeUnoccludeTransit = mWindowManager.getPendingAppTransition();
+            mBeforeUnoccludeTransit = dwc.getPendingAppTransition();
             return TRANSIT_KEYGUARD_UNOCCLUDE;
         } else {
             return TRANSIT_KEYGUARD_OCCLUDE;

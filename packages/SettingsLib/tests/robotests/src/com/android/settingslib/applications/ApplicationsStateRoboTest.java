@@ -86,21 +86,21 @@ public class ApplicationsStateRoboTest {
     @Mock
     private StorageStatsManager mStorageStatsManager;
 
-    @Implements(value = IconDrawableFactory.class, inheritImplementationMethods = true)
+    @Implements(value = IconDrawableFactory.class)
     public static class ShadowIconDrawableFactory {
 
         @Implementation
-        public Drawable getBadgedIcon(ApplicationInfo appInfo) {
+        protected Drawable getBadgedIcon(ApplicationInfo appInfo) {
             return new ColorDrawable(0);
         }
     }
 
-    @Implements(value = ApplicationPackageManager.class, inheritImplementationMethods = true)
+    @Implements(value = ApplicationPackageManager.class)
     public static class ShadowPackageManager extends
             org.robolectric.shadows.ShadowApplicationPackageManager {
 
         @Implementation
-        public ComponentName getHomeActivities(List<ResolveInfo> outActivities) {
+        protected ComponentName getHomeActivities(List<ResolveInfo> outActivities) {
             ResolveInfo resolveInfo = new ResolveInfo();
             resolveInfo.activityInfo = new ActivityInfo();
             resolveInfo.activityInfo.packageName = HOME_PACKAGE_NAME;
@@ -139,6 +139,7 @@ public class ApplicationsStateRoboTest {
         when(mStorageStatsManager.queryStatsForPackage(ArgumentMatchers.any(UUID.class),
                 anyString(), ArgumentMatchers.any(UserHandle.class))).thenReturn(storageStats);
 
+        ApplicationsState.sInstance = null;
         mApplicationsState = ApplicationsState.getInstance(RuntimeEnvironment.application);
         mApplicationsState.clearEntries();
     }
@@ -189,8 +190,8 @@ public class ApplicationsStateRoboTest {
         Session session = mApplicationsState.newSession(mCallbacks);
         session.onResume();
 
-        addApp(HOME_PACKAGE_NAME,1);
-        addApp(LAUNCHABLE_PACKAGE_NAME,2);
+        addApp(HOME_PACKAGE_NAME, 1);
+        addApp(LAUNCHABLE_PACKAGE_NAME, 2);
         session.rebuild(ApplicationsState.FILTER_EVERYTHING, ApplicationsState.SIZE_COMPARATOR);
         processAllMessages();
         verify(mCallbacks).onRebuildComplete(mAppEntriesCaptor.capture());
@@ -219,7 +220,7 @@ public class ApplicationsStateRoboTest {
         session.setSessionFlags(ApplicationsState.FLAG_SESSION_REQUEST_ICONS);
         session.onResume();
 
-        addApp(LAUNCHABLE_PACKAGE_NAME,1);
+        addApp(LAUNCHABLE_PACKAGE_NAME, 1);
         session.rebuild(ApplicationsState.FILTER_EVERYTHING, ApplicationsState.SIZE_COMPARATOR);
         processAllMessages();
         verify(mCallbacks).onRebuildComplete(mAppEntriesCaptor.capture());
@@ -240,7 +241,7 @@ public class ApplicationsStateRoboTest {
         session.setSessionFlags(ApplicationsState.FLAG_SESSION_REQUEST_SIZES);
         session.onResume();
 
-        addApp(LAUNCHABLE_PACKAGE_NAME,1);
+        addApp(LAUNCHABLE_PACKAGE_NAME, 1);
         session.rebuild(ApplicationsState.FILTER_EVERYTHING, ApplicationsState.SIZE_COMPARATOR);
         processAllMessages();
         verify(mCallbacks).onRebuildComplete(mAppEntriesCaptor.capture());
@@ -261,7 +262,7 @@ public class ApplicationsStateRoboTest {
         session.setSessionFlags(ApplicationsState.FLAG_SESSION_REQUEST_HOME_APP);
         session.onResume();
 
-        addApp(HOME_PACKAGE_NAME,1);
+        addApp(HOME_PACKAGE_NAME, 1);
         session.rebuild(ApplicationsState.FILTER_EVERYTHING, ApplicationsState.SIZE_COMPARATOR);
         processAllMessages();
         verify(mCallbacks).onRebuildComplete(mAppEntriesCaptor.capture());
@@ -283,7 +284,7 @@ public class ApplicationsStateRoboTest {
         session.setSessionFlags(ApplicationsState.FLAG_SESSION_REQUEST_LEANBACK_LAUNCHER);
         session.onResume();
 
-        addApp(LAUNCHABLE_PACKAGE_NAME,1);
+        addApp(LAUNCHABLE_PACKAGE_NAME, 1);
         session.rebuild(ApplicationsState.FILTER_EVERYTHING, ApplicationsState.SIZE_COMPARATOR);
         processAllMessages();
         verify(mCallbacks).onRebuildComplete(mAppEntriesCaptor.capture());

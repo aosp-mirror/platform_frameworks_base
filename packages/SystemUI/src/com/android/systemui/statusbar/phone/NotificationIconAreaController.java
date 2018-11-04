@@ -230,7 +230,7 @@ public class NotificationIconAreaController implements DarkReceiver {
 
     private void updateShelfIcons() {
         updateIconsForLayout(entry -> entry.expandedIcon, mShelfIcons,
-                false /* showAmbient */, !mFullyDark /* showLowPriority */,
+                true /* showAmbient */, !mFullyDark /* showLowPriority */,
                 false /* hideDismissed */, mFullyDark /* hideRepliedMessages */);
     }
 

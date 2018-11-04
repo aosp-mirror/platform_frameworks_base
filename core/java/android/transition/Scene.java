@@ -16,6 +16,8 @@
 
 package android.transition;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.util.SparseArray;
@@ -196,22 +198,24 @@ public final class Scene {
      * information is used by Scene to determine whether there is a previous
      * scene which should be exited before the new scene is entered.
      *
-     * @param view The view on which the current scene is being set
+     * @param sceneRoot The view on which the current scene is being set
      */
     @UnsupportedAppUsage
-    static void setCurrentScene(View view, Scene scene) {
-        view.setTagInternal(com.android.internal.R.id.current_scene, scene);
+    static void setCurrentScene(@NonNull View sceneRoot, @Nullable Scene scene) {
+        sceneRoot.setTagInternal(com.android.internal.R.id.current_scene, scene);
     }
 
     /**
      * Gets the current {@link Scene} set on the given view. A scene is set on a view
      * only if that view is the scene root.
      *
+     * @param sceneRoot The view on which the current scene will be returned
      * @return The current Scene set on this view. A value of null indicates that
      * no Scene is currently set.
      */
-    static Scene getCurrentScene(View view) {
-        return (Scene) view.getTag(com.android.internal.R.id.current_scene);
+    @Nullable
+    public static Scene getCurrentScene(@NonNull View sceneRoot) {
+        return (Scene) sceneRoot.getTag(com.android.internal.R.id.current_scene);
     }
 
     /**

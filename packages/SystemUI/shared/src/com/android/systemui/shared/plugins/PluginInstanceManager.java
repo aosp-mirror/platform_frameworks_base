@@ -158,6 +158,10 @@ public class PluginInstanceManager<T extends Plugin> {
         // If a plugin is detected in the stack of a crash then this will be called for that
         // plugin, if the plugin causing a crash cannot be identified, they are all disabled
         // assuming one of them must be bad.
+        if (mWhitelistedPlugins.contains(info.mPackage)) {
+            // Don't disable whitelisted plugins as they are a part of the OS.
+            return;
+        }
         Log.w(TAG, "Disabling plugin " + info.mPackage + "/" + info.mClass);
         mManager.getPluginEnabler().setEnabled(new ComponentName(info.mPackage, info.mClass),
                 false);

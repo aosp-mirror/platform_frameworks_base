@@ -16,6 +16,15 @@
 
 package com.android.server.wm;
 
+import static android.app.ActivityOptions.ANIM_CLIP_REVEAL;
+import static android.app.ActivityOptions.ANIM_CUSTOM;
+import static android.app.ActivityOptions.ANIM_OPEN_CROSS_PROFILE_APPS;
+import static android.app.ActivityOptions.ANIM_REMOTE_ANIMATION;
+import static android.app.ActivityOptions.ANIM_SCALE_UP;
+import static android.app.ActivityOptions.ANIM_THUMBNAIL_ASPECT_SCALE_DOWN;
+import static android.app.ActivityOptions.ANIM_THUMBNAIL_ASPECT_SCALE_UP;
+import static android.app.ActivityOptions.ANIM_THUMBNAIL_SCALE_DOWN;
+import static android.app.ActivityOptions.ANIM_THUMBNAIL_SCALE_UP;
 import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
 import static android.view.WindowManager.LayoutParams.FLAG_SHOW_WALLPAPER;
 
@@ -30,14 +39,20 @@ import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_VISIBILITY;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.app.ActivityManager.TaskSnapshot;
+import android.app.ActivityOptions;
+import android.content.Intent;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
+import android.graphics.GraphicBuffer;
+import android.graphics.Rect;
 import android.os.Debug;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
 import android.util.Slog;
+import android.view.AppTransitionAnimationSpec;
+import android.view.IAppTransitionAnimationSpecsFuture;
 import android.view.IApplicationToken;
 import android.view.RemoteAnimationDefinition;
 import android.view.WindowManager;
@@ -324,6 +339,7 @@ public class AppWindowContainerController
             }
 
             final AppWindowToken wtoken = mContainer;
+            final AppTransition appTransition = mContainer.getDisplayContent().mAppTransition;
 
             // Don't set visibility to false if we were already not visible. This prevents WM from
             // adding the app to the closing app list which doesn't make sense for something that is
@@ -344,12 +360,13 @@ public class AppWindowContainerController
             }
 
             if (DEBUG_APP_TRANSITIONS || DEBUG_ORIENTATION) Slog.v(TAG_WM, "setAppVisibility("
-                    + mToken + ", visible=" + visible + "): " + mService.mAppTransition
+                    + mToken + ", visible=" + visible + "): " + appTransition
                     + " hidden=" + wtoken.isHidden() + " hiddenRequested="
                     + wtoken.hiddenRequested + " Callers=" + Debug.getCallers(6));
 
-            mService.mOpeningApps.remove(wtoken);
-            mService.mClosingApps.remove(wtoken);
+            final DisplayContent displayContent = mContainer.getDisplayContent();
+            displayContent.mOpeningApps.remove(wtoken);
+            displayContent.mClosingApps.remove(wtoken);
             wtoken.waitingToShow = false;
             wtoken.hiddenRequested = !visible;
             wtoken.mDeferHidingClient = deferHidingClient;
@@ -360,12 +377,12 @@ public class AppWindowContainerController
                 // if made visible again.
                 wtoken.removeDeadWindows();
             } else {
-                if (!mService.mAppTransition.isTransitionSet()
-                        && mService.mAppTransition.isReady()) {
+                if (!appTransition.isTransitionSet()
+                        && appTransition.isReady()) {
                     // Add the app mOpeningApps if transition is unset but ready. This means
                     // we're doing a screen freeze, and the unfreeze will wait for all opening
                     // apps to be ready.
-                    mService.mOpeningApps.add(wtoken);
+                    displayContent.mOpeningApps.add(wtoken);
                 }
                 wtoken.startingMoved = false;
                 // If the token is currently hidden (should be the common case), or has been
@@ -395,16 +412,16 @@ public class AppWindowContainerController
 
             // If we are preparing an app transition, then delay changing
             // the visibility of this token until we execute that transition.
-            if (wtoken.okToAnimate() && mService.mAppTransition.isTransitionSet()) {
+            if (wtoken.okToAnimate() && appTransition.isTransitionSet()) {
                 wtoken.inPendingTransaction = true;
                 if (visible) {
-                    mService.mOpeningApps.add(wtoken);
+                    displayContent.mOpeningApps.add(wtoken);
                     wtoken.mEnteringAnimation = true;
                 } else {
-                    mService.mClosingApps.add(wtoken);
+                    displayContent.mClosingApps.add(wtoken);
                     wtoken.mEnteringAnimation = false;
                 }
-                if (mService.mAppTransition.getAppTransition()
+                if (appTransition.getAppTransition()
                         == WindowManager.TRANSIT_TASK_OPEN_BEHIND) {
                     // We're launchingBehind, add the launching activity to mOpeningApps.
                     final WindowState win = mContainer.getDisplayContent().findFocusedWindow();
@@ -415,7 +432,7 @@ public class AppWindowContainerController
                                     + " adding " + focusedToken + " to mOpeningApps");
                             // Force animation to be loaded.
                             focusedToken.setHidden(true);
-                            mService.mOpeningApps.add(focusedToken);
+                            displayContent.mOpeningApps.add(focusedToken);
                         }
                     }
                 }
@@ -434,7 +451,8 @@ public class AppWindowContainerController
     public void notifyUnknownVisibilityLaunched() {
         synchronized(mWindowMap) {
             if (mContainer != null) {
-                mService.mUnknownAppVisibilityController.notifyLaunched(mContainer);
+                mContainer.getDisplayContent().mUnknownAppVisibilityController.notifyLaunched(
+                        mContainer);
             }
         }
     }
@@ -547,7 +565,8 @@ public class AppWindowContainerController
     private int getStartingWindowType(boolean newTask, boolean taskSwitch, boolean processRunning,
             boolean allowTaskSnapshot, boolean activityCreated, boolean fromRecents,
             TaskSnapshot snapshot) {
-        if (mService.mAppTransition.getAppTransition() == TRANSIT_DOCK_TASK_FROM_RECENTS) {
+        if (mContainer.getDisplayContent().mAppTransition.getAppTransition()
+                == TRANSIT_DOCK_TASK_FROM_RECENTS) {
             // TODO(b/34099271): Remove this statement to add back the starting window and figure
             // out why it causes flickering, the starting window appears over the thumbnail while
             // the docked from recents transition occurs
@@ -750,6 +769,104 @@ public class AppWindowContainerController
     /** Calls directly into activity manager so window manager lock shouldn't held. */
     boolean keyDispatchingTimedOut(String reason, int windowPid) {
         return mListener != null && mListener.keyDispatchingTimedOut(reason, windowPid);
+    }
+
+    /**
+     * Apply override app transition base on options & animation type.
+     */
+    public void applyOptionsLocked(ActivityOptions pendingOptions, Intent intent) {
+        synchronized (mWindowMap) {
+            final int animationType = pendingOptions.getAnimationType();
+            final DisplayContent displayContent = mContainer.getDisplayContent();
+            switch (animationType) {
+                case ANIM_CUSTOM:
+                    displayContent.mAppTransition.overridePendingAppTransition(
+                            pendingOptions.getPackageName(),
+                            pendingOptions.getCustomEnterResId(),
+                            pendingOptions.getCustomExitResId(),
+                            pendingOptions.getOnAnimationStartListener());
+                    break;
+                case ANIM_CLIP_REVEAL:
+                    displayContent.mAppTransition.overridePendingAppTransitionClipReveal(
+                            pendingOptions.getStartX(), pendingOptions.getStartY(),
+                            pendingOptions.getWidth(), pendingOptions.getHeight());
+                    if (intent.getSourceBounds() == null) {
+                        intent.setSourceBounds(new Rect(pendingOptions.getStartX(),
+                                pendingOptions.getStartY(),
+                                pendingOptions.getStartX() + pendingOptions.getWidth(),
+                                pendingOptions.getStartY() + pendingOptions.getHeight()));
+                    }
+                    break;
+                case ANIM_SCALE_UP:
+                    displayContent.mAppTransition.overridePendingAppTransitionScaleUp(
+                            pendingOptions.getStartX(), pendingOptions.getStartY(),
+                            pendingOptions.getWidth(), pendingOptions.getHeight());
+                    if (intent.getSourceBounds() == null) {
+                        intent.setSourceBounds(new Rect(pendingOptions.getStartX(),
+                                pendingOptions.getStartY(),
+                                pendingOptions.getStartX() + pendingOptions.getWidth(),
+                                pendingOptions.getStartY() + pendingOptions.getHeight()));
+                    }
+                    break;
+                case ANIM_THUMBNAIL_SCALE_UP:
+                case ANIM_THUMBNAIL_SCALE_DOWN:
+                    final boolean scaleUp = (animationType == ANIM_THUMBNAIL_SCALE_UP);
+                    final GraphicBuffer buffer = pendingOptions.getThumbnail();
+                    displayContent.mAppTransition.overridePendingAppTransitionThumb(buffer,
+                            pendingOptions.getStartX(), pendingOptions.getStartY(),
+                            pendingOptions.getOnAnimationStartListener(),
+                            scaleUp);
+                    if (intent.getSourceBounds() == null && buffer != null) {
+                        intent.setSourceBounds(new Rect(pendingOptions.getStartX(),
+                                pendingOptions.getStartY(),
+                                pendingOptions.getStartX() + buffer.getWidth(),
+                                pendingOptions.getStartY() + buffer.getHeight()));
+                    }
+                    break;
+                case ANIM_THUMBNAIL_ASPECT_SCALE_UP:
+                case ANIM_THUMBNAIL_ASPECT_SCALE_DOWN:
+                    final AppTransitionAnimationSpec[] specs = pendingOptions.getAnimSpecs();
+                    final IAppTransitionAnimationSpecsFuture specsFuture =
+                            pendingOptions.getSpecsFuture();
+                    if (specsFuture != null) {
+                        // TODO(multidisplay): Shouldn't be really used anymore from next CL.
+                        displayContent.mAppTransition.overridePendingAppTransitionMultiThumbFuture(
+                                specsFuture, pendingOptions.getOnAnimationStartListener(),
+                                animationType == ANIM_THUMBNAIL_ASPECT_SCALE_UP);
+                    } else if (animationType == ANIM_THUMBNAIL_ASPECT_SCALE_DOWN
+                            && specs != null) {
+                        displayContent.mAppTransition.overridePendingAppTransitionMultiThumb(
+                                specs, pendingOptions.getOnAnimationStartListener(),
+                                pendingOptions.getAnimationFinishedListener(), false);
+                    } else {
+                        displayContent.mAppTransition.overridePendingAppTransitionAspectScaledThumb(
+                                pendingOptions.getThumbnail(),
+                                pendingOptions.getStartX(), pendingOptions.getStartY(),
+                                pendingOptions.getWidth(), pendingOptions.getHeight(),
+                                pendingOptions.getOnAnimationStartListener(),
+                                (animationType == ANIM_THUMBNAIL_ASPECT_SCALE_UP));
+                        if (intent.getSourceBounds() == null) {
+                            intent.setSourceBounds(new Rect(pendingOptions.getStartX(),
+                                    pendingOptions.getStartY(),
+                                    pendingOptions.getStartX() + pendingOptions.getWidth(),
+                                    pendingOptions.getStartY() + pendingOptions.getHeight()));
+                        }
+                    }
+                    break;
+                case ANIM_OPEN_CROSS_PROFILE_APPS:
+                    displayContent.mAppTransition
+                            .overridePendingAppTransitionStartCrossProfileApps();
+                    break;
+                case ANIM_REMOTE_ANIMATION:
+                    // TODO(multidisplay): Will pass displayId and adjust dependencies from next CL.
+                    displayContent.mAppTransition.overridePendingAppTransitionRemote(
+                            pendingOptions.getRemoteAnimationAdapter());
+                    break;
+                default:
+                    Slog.e(TAG_WM, "applyOptionsLocked: Unknown animationType=" + animationType);
+                    break;
+            }
+        }
     }
 
     /**

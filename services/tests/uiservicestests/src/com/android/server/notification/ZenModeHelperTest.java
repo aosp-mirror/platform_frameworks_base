@@ -41,6 +41,7 @@ import static org.mockito.Mockito.when;
 import android.app.AppGlobals;
 import android.app.AppOpsManager;
 import android.app.NotificationManager;
+import android.app.NotificationManager.Policy;
 import android.content.ComponentName;
 import android.content.ContentResolver;
 import android.content.Context;
@@ -165,7 +166,8 @@ public class ZenModeHelperTest extends UiServiceTestCase {
     @Test
     public void testZenOff_NoMuteApplied() {
         mZenModeHelperSpy.mZenMode = Settings.Global.ZEN_MODE_OFF;
-        assertTrue(mZenModeHelperSpy.mConfig.allowAlarms);
+        mZenModeHelperSpy.mConsolidatedPolicy = new Policy(Policy.PRIORITY_CATEGORY_ALARMS |
+                Policy.PRIORITY_CATEGORY_MEDIA, 0, 0, 0, 0);
         mZenModeHelperSpy.applyRestrictions();
 
         doNothing().when(mZenModeHelperSpy).applyRestrictions(anyBoolean(), anyInt());
@@ -178,8 +180,9 @@ public class ZenModeHelperTest extends UiServiceTestCase {
     @Test
     public void testZenOn_AllowAlarmsMedia_NoAlarmMediaMuteApplied() {
         mZenModeHelperSpy.mZenMode = Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
-        assertTrue(mZenModeHelperSpy.mConfig.allowAlarms);
-        assertTrue(mZenModeHelperSpy.mConfig.allowMedia);
+        mZenModeHelperSpy.mConsolidatedPolicy = new Policy(Policy.PRIORITY_CATEGORY_ALARMS |
+                Policy.PRIORITY_CATEGORY_MEDIA, 0, 0, 0, 0);
+
         mZenModeHelperSpy.applyRestrictions();
         verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(false,
                 AudioAttributes.USAGE_ALARM);
@@ -190,12 +193,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
     @Test
     public void testZenOn_DisallowAlarmsMedia_AlarmMediaMuteApplied() {
         mZenModeHelperSpy.mZenMode = Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
-        mZenModeHelperSpy.mConfig.allowAlarms = false;
-        mZenModeHelperSpy.mConfig.allowMedia = false;
-        mZenModeHelperSpy.mConfig.allowSystem = false;
-        assertFalse(mZenModeHelperSpy.mConfig.allowAlarms);
-        assertFalse(mZenModeHelperSpy.mConfig.allowMedia);
-        assertFalse(mZenModeHelperSpy.mConfig.allowSystem);
+        mZenModeHelperSpy.mConsolidatedPolicy = new Policy(0, 0, 0, 0, 0);
         mZenModeHelperSpy.applyRestrictions();
         verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(true,
                 AudioAttributes.USAGE_ALARM);
@@ -210,6 +208,8 @@ public class ZenModeHelperTest extends UiServiceTestCase {
     @Test
     public void testTotalSilence() {
         mZenModeHelperSpy.mZenMode = Settings.Global.ZEN_MODE_NO_INTERRUPTIONS;
+        mZenModeHelperSpy.mConsolidatedPolicy = new Policy(Policy.PRIORITY_CATEGORY_ALARMS |
+                Policy.PRIORITY_CATEGORY_MEDIA, 0, 0, 0, 0);
         mZenModeHelperSpy.applyRestrictions();
 
         // Total silence will silence alarms, media and system noises (but not vibrations)
@@ -230,11 +230,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
     @Test
     public void testAlarmsOnly_alarmMediaMuteNotApplied() {
         mZenModeHelperSpy.mZenMode = Settings.Global.ZEN_MODE_ALARMS;
-        mZenModeHelperSpy.mConfig.allowAlarms = false;
-        mZenModeHelperSpy.mConfig.allowSystem = false;
-        mZenModeHelperSpy.mConfig.allowMedia = false;
-        assertFalse(mZenModeHelperSpy.mConfig.allowAlarms);
-        assertFalse(mZenModeHelperSpy.mConfig.allowMedia);
+        mZenModeHelperSpy.mConsolidatedPolicy = new Policy(0, 0, 0, 0, 0);
         mZenModeHelperSpy.applyRestrictions();
 
         // Alarms only mode will not silence alarms
@@ -257,8 +253,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
     @Test
     public void testAlarmsOnly_callsMuteApplied() {
         mZenModeHelperSpy.mZenMode = Settings.Global.ZEN_MODE_ALARMS;
-        mZenModeHelperSpy.mConfig.allowCalls = true;
-        assertTrue(mZenModeHelperSpy.mConfig.allowCalls);
+        mZenModeHelperSpy.mConsolidatedPolicy = new Policy(0, 0, 0, 0, 0);
         mZenModeHelperSpy.applyRestrictions();
 
         // Alarms only mode will silence calls despite priority-mode config
@@ -272,21 +267,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
     public void testAlarmsOnly_allZenConfigToggledCannotBypass_alarmMuteNotApplied() {
         // Only audio attributes with SUPPRESIBLE_NEVER can bypass
         mZenModeHelperSpy.mZenMode = Settings.Global.ZEN_MODE_ALARMS;
-        mZenModeHelperSpy.mConfig.allowAlarms = false;
-        mZenModeHelperSpy.mConfig.allowMedia = false;
-        mZenModeHelperSpy.mConfig.allowSystem = false;
-        mZenModeHelperSpy.mConfig.allowReminders = false;
-        mZenModeHelperSpy.mConfig.allowCalls = false;
-        mZenModeHelperSpy.mConfig.allowMessages = false;
-        mZenModeHelperSpy.mConfig.allowEvents = false;
-        mZenModeHelperSpy.mConfig.allowRepeatCallers= false;
-        assertFalse(mZenModeHelperSpy.mConfig.allowAlarms);
-        assertFalse(mZenModeHelperSpy.mConfig.allowMedia);
-        assertFalse(mZenModeHelperSpy.mConfig.allowReminders);
-        assertFalse(mZenModeHelperSpy.mConfig.allowCalls);
-        assertFalse(mZenModeHelperSpy.mConfig.allowMessages);
-        assertFalse(mZenModeHelperSpy.mConfig.allowEvents);
-        assertFalse(mZenModeHelperSpy.mConfig.allowRepeatCallers);
+        mZenModeHelperSpy.mConsolidatedPolicy = new Policy(0, 0, 0, 0, 0);
         mZenModeHelperSpy.applyRestrictions();
 
         verify(mZenModeHelperSpy, atLeastOnce()).applyRestrictions(false,
@@ -298,21 +279,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         // Only audio attributes with SUPPRESIBLE_NEVER can bypass
         // with special case USAGE_ASSISTANCE_SONIFICATION
         mZenModeHelperSpy.mZenMode = Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
-        mZenModeHelperSpy.mConfig.allowAlarms = false;
-        mZenModeHelperSpy.mConfig.allowMedia = false;
-        mZenModeHelperSpy.mConfig.allowSystem = false;
-        mZenModeHelperSpy.mConfig.allowReminders = false;
-        mZenModeHelperSpy.mConfig.allowCalls = false;
-        mZenModeHelperSpy.mConfig.allowMessages = false;
-        mZenModeHelperSpy.mConfig.allowEvents = false;
-        mZenModeHelperSpy.mConfig.allowRepeatCallers= false;
-        assertFalse(mZenModeHelperSpy.mConfig.allowAlarms);
-        assertFalse(mZenModeHelperSpy.mConfig.allowMedia);
-        assertFalse(mZenModeHelperSpy.mConfig.allowReminders);
-        assertFalse(mZenModeHelperSpy.mConfig.allowCalls);
-        assertFalse(mZenModeHelperSpy.mConfig.allowMessages);
-        assertFalse(mZenModeHelperSpy.mConfig.allowEvents);
-        assertFalse(mZenModeHelperSpy.mConfig.allowRepeatCallers);
+        mZenModeHelperSpy.mConsolidatedPolicy = new Policy(0, 0, 0, 0, 0);
         mZenModeHelperSpy.applyRestrictions();
 
         for (int usage : AudioAttributes.SDK_USAGES) {
@@ -338,6 +305,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         Settings.Secure.putInt(mContentResolver, Settings.Secure.SHOW_ZEN_UPGRADE_NOTIFICATION, 1);
         Settings.Secure.putInt(mContentResolver, Settings.Secure.ZEN_SETTINGS_UPDATED, 0);
         mZenModeHelperSpy.mIsBootComplete = true;
+        mZenModeHelperSpy.mConsolidatedPolicy = new Policy(0, 0, 0, 0, 0);
         mZenModeHelperSpy.setZenModeSetting(Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS);
 
         verify(mZenModeHelperSpy, times(1)).createZenUpgradeNotification();
@@ -548,6 +516,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
     @Test
     public void testSilentRingerSavedInZenOff_startsZenOff() {
         AudioManagerInternal mAudioManager = mock(AudioManagerInternal.class);
+        mZenModeHelperSpy.mConfig = new ZenModeConfig();
         mZenModeHelperSpy.mAudioManager = mAudioManager;
 
         // apply zen off multiple times - verify ringer is not set to normal
@@ -568,6 +537,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         AudioManagerInternal mAudioManager = mock(AudioManagerInternal.class);
         mZenModeHelperSpy.mAudioManager = mAudioManager;
         mZenModeHelperSpy.mZenMode = Global.ZEN_MODE_OFF;
+        mZenModeHelperSpy.mConfig = new ZenModeConfig();
 
         // previously set silent ringer
         ZenModeHelper.RingerModeDelegate ringerModeDelegate =
@@ -581,7 +551,6 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         // apply zen off multiple times - verify ringer is not set to normal
         when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_SILENT);
         mZenModeHelperSpy.mZenMode = Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
-        mZenModeHelperSpy.mConfig = null; // will evaluate config to zen mode off
         for (int i = 0; i < 3; i++) {
             // if zen doesn't change, zen should not reapply itself to the ringer
             mZenModeHelperSpy.evaluateZenMode("test", true);
@@ -596,6 +565,7 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         AudioManagerInternal mAudioManager = mock(AudioManagerInternal.class);
         mZenModeHelperSpy.mAudioManager = mAudioManager;
         mZenModeHelperSpy.mZenMode = Global.ZEN_MODE_OFF;
+        mZenModeHelperSpy.mConfig = new ZenModeConfig();
 
         // previously set silent ringer
         ZenModeHelper.RingerModeDelegate ringerModeDelegate =
@@ -609,7 +579,6 @@ public class ZenModeHelperTest extends UiServiceTestCase {
         // apply zen off multiple times - verify ringer is not set to normal
         when(mAudioManager.getRingerModeInternal()).thenReturn(AudioManager.RINGER_MODE_VIBRATE);
         mZenModeHelperSpy.mZenMode = Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS;
-        mZenModeHelperSpy.mConfig = null; // will evaluate config to zen mode off
         for (int i = 0; i < 3; i++) {
             // if zen doesn't change, zen should not reapply itself to the ringer
             mZenModeHelperSpy.evaluateZenMode("test", true);

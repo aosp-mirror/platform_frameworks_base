@@ -37,6 +37,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.robolectric.RuntimeEnvironment;
 import org.robolectric.shadows.ShadowApplication;
 
 @RunWith(SettingsLibRobolectricTestRunner.class)
@@ -58,7 +59,7 @@ public class FooterPreferenceMixinTest {
         mLifecycle = new Lifecycle(mLifecycleOwner);
         when(mFragment.getPreferenceManager()).thenReturn(mock(PreferenceManager.class));
         when(mFragment.getPreferenceManager().getContext())
-                .thenReturn(ShadowApplication.getInstance().getApplicationContext());
+                .thenReturn(RuntimeEnvironment.application);
         mMixin = new FooterPreferenceMixin(mFragment, mLifecycle);
     }
 

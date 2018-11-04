@@ -156,6 +156,7 @@ import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.Watchdog;
 import com.android.server.am.ActivityManagerService.ItemMatcher;
 import com.android.server.wm.ConfigurationContainer;
+import com.android.server.wm.DisplayWindowController;
 import com.android.server.wm.StackWindowController;
 import com.android.server.wm.StackWindowListener;
 import com.android.server.wm.WindowManagerService;
@@ -820,8 +821,13 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     }
 
     void positionChildWindowContainerAtBottom(TaskRecord child) {
+        // If there are other focusable stacks on the display, the z-order of the display should not
+        // be changed just because a task was placed at the bottom. E.g. if it is moving the topmost
+        // task to bottom, the next focusable stack on the same display should be focused.
+        final ActivityStack nextFocusableStack = getDisplay().getNextFocusableStack(
+                child.getStack(), true /* ignoreCurrent */);
         mWindowContainerController.positionChildAtBottom(child.getWindowContainerController(),
-                true /* includingParents */);
+                nextFocusableStack == null /* includingParents */);
     }
 
     /**
@@ -1132,8 +1138,6 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
 
         getDisplay().positionChildAtBottom(this, reason);
         if (task != null) {
-            // TODO(b/111541062): We probably don't want to change display z-order to bottom just
-            // because one of its stacks moved to bottom.
             insertTaskAtBottom(task);
         }
     }
@@ -2615,17 +2619,18 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         // that the previous one will be hidden soon.  This way it can know
         // to ignore it when computing the desired screen orientation.
         boolean anim = true;
+        final DisplayWindowController dwc = getDisplay().getWindowContainerController();
         if (prev != null) {
             if (prev.finishing) {
                 if (DEBUG_TRANSITION) Slog.v(TAG_TRANSITION,
                         "Prepare close transition: prev=" + prev);
                 if (mStackSupervisor.mNoAnimActivities.contains(prev)) {
                     anim = false;
-                    mWindowManager.prepareAppTransition(TRANSIT_NONE, false);
+                    dwc.prepareAppTransition(TRANSIT_NONE, false);
                 } else {
-                    mWindowManager.prepareAppTransition(prev.getTask() == next.getTask()
-                            ? TRANSIT_ACTIVITY_CLOSE
-                            : TRANSIT_TASK_CLOSE, false);
+                    dwc.prepareAppTransition(
+                            prev.getTask() == next.getTask() ? TRANSIT_ACTIVITY_CLOSE
+                                    : TRANSIT_TASK_CLOSE, false);
                 }
                 prev.setVisibility(false);
             } else {
@@ -2633,22 +2638,21 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                         "Prepare open transition: prev=" + prev);
                 if (mStackSupervisor.mNoAnimActivities.contains(next)) {
                     anim = false;
-                    mWindowManager.prepareAppTransition(TRANSIT_NONE, false);
+                    dwc.prepareAppTransition(TRANSIT_NONE, false);
                 } else {
-                    mWindowManager.prepareAppTransition(prev.getTask() == next.getTask()
-                            ? TRANSIT_ACTIVITY_OPEN
-                            : next.mLaunchTaskBehind
-                                    ? TRANSIT_TASK_OPEN_BEHIND
-                                    : TRANSIT_TASK_OPEN, false);
+                    dwc.prepareAppTransition(
+                            prev.getTask() == next.getTask() ? TRANSIT_ACTIVITY_OPEN
+                                    : next.mLaunchTaskBehind ? TRANSIT_TASK_OPEN_BEHIND
+                                            : TRANSIT_TASK_OPEN, false);
                 }
             }
         } else {
             if (DEBUG_TRANSITION) Slog.v(TAG_TRANSITION, "Prepare open transition: no previous");
             if (mStackSupervisor.mNoAnimActivities.contains(next)) {
                 anim = false;
-                mWindowManager.prepareAppTransition(TRANSIT_NONE, false);
+                dwc.prepareAppTransition(TRANSIT_NONE, false);
             } else {
-                mWindowManager.prepareAppTransition(TRANSIT_ACTIVITY_OPEN, false);
+                dwc.prepareAppTransition(TRANSIT_ACTIVITY_OPEN, false);
             }
         }
 
@@ -2777,7 +2781,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                     next.clearOptionsLocked();
                     transaction.setLifecycleStateRequest(
                             ResumeActivityItem.obtain(next.app.getReportedProcState(),
-                                    mService.isNextTransitionForward()));
+                                    getDisplay().getWindowContainerController()
+                                            .isNextTransitionForward()));
                     mService.getLifecycleManager().scheduleTransaction(transaction);
 
                     if (DEBUG_STATES) Slog.d(TAG_STATES, "resumeTopActivityLocked: Resumed "
@@ -2912,7 +2917,6 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     }
 
     private void insertTaskAtBottom(TaskRecord task) {
-        // Unlike insertTaskAtPosition, this will also position parents of the windowcontroller.
         mTaskHistory.remove(task);
         final int position = getAdjustedPositionForTask(task, 0, null);
         mTaskHistory.add(position, task);
@@ -2984,10 +2988,11 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         task.setFrontOfTask();
 
         if (!isHomeOrRecentsStack() || numActivities() > 0) {
+            final DisplayWindowController dwc = getDisplay().getWindowContainerController();
             if (DEBUG_TRANSITION) Slog.v(TAG_TRANSITION,
                     "Prepare open transition: starting " + r);
             if ((r.intent.getFlags() & Intent.FLAG_ACTIVITY_NO_ANIMATION) != 0) {
-                mWindowManager.prepareAppTransition(TRANSIT_NONE, keepCurTransition);
+                dwc.prepareAppTransition(TRANSIT_NONE, keepCurTransition);
                 mStackSupervisor.mNoAnimActivities.add(r);
             } else {
                 int transit = TRANSIT_ACTIVITY_OPEN;
@@ -3006,7 +3011,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                         transit = TRANSIT_TASK_OPEN;
                     }
                 }
-                mWindowManager.prepareAppTransition(transit, keepCurTransition);
+                dwc.prepareAppTransition(transit, keepCurTransition);
                 mStackSupervisor.mNoAnimActivities.remove(r);
             }
             boolean doShow = true;
@@ -3635,8 +3640,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         int taskNdx = mTaskHistory.indexOf(finishedTask);
         final TaskRecord task = finishedTask;
         int activityNdx = task.mActivities.indexOf(r);
-        mWindowManager.prepareAppTransition(TRANSIT_CRASHING_ACTIVITY_CLOSE,
-                false /* alwaysKeepCurrent */);
+        getDisplay().getWindowContainerController().prepareAppTransition(
+                TRANSIT_CRASHING_ACTIVITY_CLOSE, false /* alwaysKeepCurrent */);
         finishActivityLocked(r, Activity.RESULT_CANCELED, null, reason, false);
         finishedTask = task;
         // Also terminate any activities below it that aren't yet
@@ -3801,7 +3806,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                     mService.getTaskChangeNotificationController().notifyTaskRemovalStarted(
                             task.taskId);
                 }
-                mWindowManager.prepareAppTransition(transit, false);
+                getDisplay().getWindowContainerController().prepareAppTransition(transit, false);
 
                 // Tell window manager to prepare for this one to be removed.
                 r.setVisibility(false);
@@ -3856,9 +3861,10 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     }
 
     private void prepareActivityHideTransitionAnimation(ActivityRecord r, int transit) {
-        mWindowManager.prepareAppTransition(transit, false);
+        final DisplayWindowController dwc = getDisplay().getWindowContainerController();
+        dwc.prepareAppTransition(transit, false);
         r.setVisibility(false);
-        mWindowManager.executeAppTransition();
+        dwc.executeAppTransition();
         if (!mStackSupervisor.mActivitiesWaitingForVisibleActivity.contains(r)) {
             mStackSupervisor.mActivitiesWaitingForVisibleActivity.add(r);
         }
@@ -4602,7 +4608,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                 ActivityOptions.abort(options);
             }
         }
-        mWindowManager.prepareAppTransition(transit, false);
+        getDisplay().getWindowContainerController().prepareAppTransition(transit, false);
     }
 
     private void updateTaskMovement(TaskRecord task, boolean toFront) {
@@ -4671,7 +4677,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
 
             if (DEBUG_TRANSITION) Slog.v(TAG_TRANSITION, "Prepare to front transition: task=" + tr);
             if (noAnimation) {
-                mWindowManager.prepareAppTransition(TRANSIT_NONE, false);
+                getDisplay().getWindowContainerController().prepareAppTransition(
+                        TRANSIT_NONE, false);
                 if (r != null) {
                     mStackSupervisor.mNoAnimActivities.add(r);
                 }
@@ -4753,7 +4760,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         mTaskHistory.add(0, tr);
         updateTaskMovement(tr, false);
 
-        mWindowManager.prepareAppTransition(TRANSIT_TASK_TO_BACK, false);
+        getDisplay().getWindowContainerController().prepareAppTransition(
+                TRANSIT_TASK_TO_BACK, false);
         moveToBack("moveTaskToBackLocked", tr);
 
         if (inPinnedWindowingMode()) {
@@ -5077,8 +5085,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                             + r.intent.getComponent().flattenToShortString());
                     // Force the destroy to skip right to removal.
                     r.app = null;
-                    mWindowManager.prepareAppTransition(TRANSIT_CRASHING_ACTIVITY_CLOSE,
-                            false /* alwaysKeepCurrent */);
+                    getDisplay().getWindowContainerController().prepareAppTransition(
+                            TRANSIT_CRASHING_ACTIVITY_CLOSE, false /* alwaysKeepCurrent */);
                     finishCurrentActivityLocked(r, FINISH_IMMEDIATELY, false,
                             "handleAppCrashedLocked");
                 }
@@ -5410,7 +5418,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     }
 
     void executeAppTransition(ActivityOptions options) {
-        mWindowManager.executeAppTransition();
+        getDisplay().getWindowContainerController().executeAppTransition();
         ActivityOptions.abort(options);
     }
 

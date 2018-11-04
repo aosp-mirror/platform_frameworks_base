@@ -244,6 +244,39 @@ TEST(StatsdStatsTest, TestAtomLog) {
     EXPECT_TRUE(sensorAtomGood);
 }
 
+TEST(StatsdStatsTest, TestPullAtomStats) {
+    StatsdStats stats;
+
+    stats.updateMinPullIntervalSec(android::util::DISK_SPACE, 3333L);
+    stats.updateMinPullIntervalSec(android::util::DISK_SPACE, 2222L);
+    stats.updateMinPullIntervalSec(android::util::DISK_SPACE, 4444L);
+
+    stats.notePull(android::util::DISK_SPACE);
+    stats.notePullTime(android::util::DISK_SPACE, 1111L);
+    stats.notePullDelay(android::util::DISK_SPACE, 1111L);
+    stats.notePull(android::util::DISK_SPACE);
+    stats.notePullTime(android::util::DISK_SPACE, 3333L);
+    stats.notePullDelay(android::util::DISK_SPACE, 3335L);
+    stats.notePull(android::util::DISK_SPACE);
+    stats.notePullFromCache(android::util::DISK_SPACE);
+
+    vector<uint8_t> output;
+    stats.dumpStats(&output, false);
+    StatsdStatsReport report;
+    bool good = report.ParseFromArray(&output[0], output.size());
+    EXPECT_TRUE(good);
+
+    EXPECT_EQ(1, report.pulled_atom_stats_size());
+
+    EXPECT_EQ(android::util::DISK_SPACE, report.pulled_atom_stats(0).atom_id());
+    EXPECT_EQ(3, report.pulled_atom_stats(0).total_pull());
+    EXPECT_EQ(1, report.pulled_atom_stats(0).total_pull_from_cache());
+    EXPECT_EQ(2222L, report.pulled_atom_stats(0).min_pull_interval_sec());
+    EXPECT_EQ(2222L, report.pulled_atom_stats(0).average_pull_time_nanos());
+    EXPECT_EQ(3333L, report.pulled_atom_stats(0).max_pull_time_nanos());
+    EXPECT_EQ(2223L, report.pulled_atom_stats(0).average_pull_delay_nanos());
+    EXPECT_EQ(3335L, report.pulled_atom_stats(0).max_pull_delay_nanos());
+}
 
 TEST(StatsdStatsTest, TestAnomalyMonitor) {
     StatsdStats stats;

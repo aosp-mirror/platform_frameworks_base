@@ -65,11 +65,8 @@ import static android.provider.Settings.System.FONT_SCALE;
 import static android.service.voice.VoiceInteractionSession.SHOW_SOURCE_APPLICATION;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
-import static android.view.WindowManager.TRANSIT_ACTIVITY_OPEN;
 import static android.view.WindowManager.TRANSIT_NONE;
 import static android.view.WindowManager.TRANSIT_TASK_IN_PLACE;
-import static android.view.WindowManager.TRANSIT_TASK_OPEN;
-import static android.view.WindowManager.TRANSIT_TASK_TO_FRONT;
 
 import static com.android.server.am.ActivityManagerService.ANR_TRACE_DIR;
 import static com.android.server.am.ActivityManagerService.MY_PID;
@@ -256,6 +253,7 @@ import com.android.server.pm.UserManagerService;
 import com.android.server.uri.UriGrantsManagerInternal;
 import com.android.server.vr.VrManagerInternal;
 import com.android.server.wm.ActivityTaskManagerInternal;
+import com.android.server.wm.DisplayWindowController;
 import com.android.server.wm.PinnedStackWindowController;
 import com.android.server.wm.WindowManagerService;
 
@@ -1619,8 +1617,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
             if (self.isState(
                     ActivityStack.ActivityState.RESUMED, ActivityStack.ActivityState.PAUSING)) {
-                mWindowManager.overridePendingAppTransition(packageName,
-                        enterAnim, exitAnim, null);
+                self.getDisplay().getWindowContainerController().overridePendingAppTransition(
+                        packageName, enterAnim, exitAnim, null);
             }
 
             Binder.restoreCallingIdentity(origId);
@@ -1808,7 +1806,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         final long callingId = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
-                final TaskRecord task = mStackSupervisor.anyTaskForIdLocked(taskId);
+                final TaskRecord task = mStackSupervisor.anyTaskForIdLocked(taskId,
+                        MATCH_TASK_IN_STACKS_ONLY);
                 if (task == null) {
                     return;
                 }
@@ -1968,7 +1967,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         synchronized (mGlobalLock) {
             final long ident = Binder.clearCallingIdentity();
             try {
-                final TaskRecord task = mStackSupervisor.anyTaskForIdLocked(taskId);
+                final TaskRecord task = mStackSupervisor.anyTaskForIdLocked(taskId,
+                        MATCH_TASK_IN_STACKS_ONLY);
                 if (task == null) {
                     Slog.w(TAG, "setTaskWindowingMode: No task for id=" + taskId);
                     return;
@@ -2299,7 +2299,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         synchronized (mGlobalLock) {
             final long ident = Binder.clearCallingIdentity();
             try {
-                final TaskRecord task = mStackSupervisor.anyTaskForIdLocked(taskId);
+                final TaskRecord task = mStackSupervisor.anyTaskForIdLocked(taskId,
+                        MATCH_TASK_IN_STACKS_ONLY);
                 if (task == null) {
                     Slog.w(TAG, "setTaskWindowingModeSplitScreenPrimary: No task for id=" + taskId);
                     return false;
@@ -2434,13 +2435,17 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     }
 
     @Override
-    public void startSystemLockTaskMode(int taskId) throws RemoteException {
+    public void startSystemLockTaskMode(int taskId) {
         mAmInternal.enforceCallingPermission(MANAGE_ACTIVITY_STACKS, "startSystemLockTaskMode");
         // This makes inner call to look as if it was initiated by system.
         long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
-                final TaskRecord task = mStackSupervisor.anyTaskForIdLocked(taskId);
+                final TaskRecord task = mStackSupervisor.anyTaskForIdLocked(taskId,
+                        MATCH_TASK_IN_STACKS_ONLY);
+                if (task == null) {
+                    return;
+                }
 
                 // When starting lock task mode the stack must be in front and focused
                 task.getStack().moveToFront("startSystemLockTaskMode");
@@ -2798,7 +2803,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         long ident = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
-                TaskRecord task = mStackSupervisor.anyTaskForIdLocked(taskId);
+                final TaskRecord task = mStackSupervisor.anyTaskForIdLocked(taskId,
+                        MATCH_TASK_IN_STACKS_ONLY);
                 if (task == null) {
                     Slog.w(TAG, "resizeTask: taskId=" + taskId + " not found");
                     return;
@@ -2938,10 +2944,16 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             throw new IllegalArgumentException("Expected in-place ActivityOption " +
                     "with valid animation");
         }
-        mWindowManager.prepareAppTransition(TRANSIT_TASK_IN_PLACE, false);
-        mWindowManager.overridePendingAppTransitionInPlace(activityOptions.getPackageName(),
-                activityOptions.getCustomInPlaceResId());
-        mWindowManager.executeAppTransition();
+        // Get top display of front most application.
+        final ActivityStack focusedStack = getTopDisplayFocusedStack();
+        if (focusedStack != null) {
+            final DisplayWindowController dwc =
+                    focusedStack.getDisplay().getWindowContainerController();
+            dwc.prepareAppTransition(TRANSIT_TASK_IN_PLACE, false);
+            dwc.overridePendingAppTransitionInPlace(activityOptions.getPackageName(),
+                    activityOptions.getCustomInPlaceResId());
+            dwc.executeAppTransition();
+        }
     }
 
     @Override
@@ -4381,13 +4393,6 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         return mKeyguardController.isKeyguardLocked();
     }
 
-    boolean isNextTransitionForward() {
-        int transit = mWindowManager.getPendingAppTransition();
-        return transit == TRANSIT_ACTIVITY_OPEN
-                || transit == TRANSIT_TASK_OPEN
-                || transit == TRANSIT_TASK_TO_FRONT;
-    }
-
     void dumpLastANRLocked(PrintWriter pw) {
         pw.println("ACTIVITY MANAGER LAST ANR (dumpsys activity lastanr)");
         if (mLastANRState == null) {
@@ -5639,23 +5644,23 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
 
         @Override
-        public void notifyKeyguardFlagsChanged(@Nullable Runnable callback) {
+        public void notifyKeyguardFlagsChanged(@Nullable Runnable callback, int displayId) {
             synchronized (mGlobalLock) {
 
                 // We might change the visibilities here, so prepare an empty app transition which
                 // might be overridden later if we actually change visibilities.
-                final boolean wasTransitionSet =
-                        mWindowManager.getPendingAppTransition() != TRANSIT_NONE;
+                final DisplayWindowController dwc = mStackSupervisor.getActivityDisplay(displayId)
+                        .getWindowContainerController();
+                final boolean wasTransitionSet = dwc.getPendingAppTransition() != TRANSIT_NONE;
                 if (!wasTransitionSet) {
-                    mWindowManager.prepareAppTransition(TRANSIT_NONE,
-                            false /* alwaysKeepCurrent */);
+                    dwc.prepareAppTransition(TRANSIT_NONE, false /* alwaysKeepCurrent */);
                 }
                 mStackSupervisor.ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
 
                 // If there was a transition set already we don't want to interfere with it as we
                 // might be starting it too early.
                 if (!wasTransitionSet) {
-                    mWindowManager.executeAppTransition();
+                    dwc.executeAppTransition();
                 }
             }
             if (callback != null) {

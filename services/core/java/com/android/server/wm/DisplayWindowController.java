@@ -16,6 +16,10 @@
 
 package com.android.server.wm;
 
+import static android.view.WindowManager.TRANSIT_ACTIVITY_OPEN;
+import static android.view.WindowManager.TRANSIT_TASK_OPEN;
+import static android.view.WindowManager.TRANSIT_TASK_TO_FRONT;
+
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_DISPLAY;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_FOCUS_LIGHT;
 import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STACK;
@@ -23,10 +27,17 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.UPDATE_FOCUS_NORMAL;
 
 import android.content.res.Configuration;
+import android.graphics.GraphicBuffer;
 import android.os.Binder;
 import android.os.IBinder;
+import android.os.IRemoteCallback;
 import android.util.Slog;
+import android.view.AppTransitionAnimationSpec;
 import android.view.Display;
+import android.view.WindowManager;
+import android.view.WindowManager.TransitionType;
+
+import com.android.internal.annotations.VisibleForTesting;
 
 /**
  * Controller for the display container. This is created by activity manager to link activity
@@ -54,6 +65,12 @@ public class DisplayWindowController
                         + " dc=" + mRoot.getDisplayContent(mDisplayId));
             }
         }
+    }
+
+    @VisibleForTesting
+    public DisplayWindowController(Display display, WindowManagerService service) {
+        super(null, service);
+        mDisplayId = display.getDisplayId();
     }
 
     @Override
@@ -177,6 +194,124 @@ public class DisplayWindowController
                         true /*updateInputWindows*/);
             }
         }
+    }
+
+    public void prepareAppTransition(@WindowManager.TransitionType int transit,
+            boolean alwaysKeepCurrent) {
+        prepareAppTransition(transit, alwaysKeepCurrent, 0 /* flags */, false /* forceOverride */);
+    }
+
+    /**
+     * @param transit What kind of transition is happening. Use one of the constants
+     *                AppTransition.TRANSIT_*.
+     * @param alwaysKeepCurrent If true and a transition is already set, new transition will NOT
+     *                          be set.
+     * @param flags Additional flags for the app transition, Use a combination of the constants
+     *              AppTransition.TRANSIT_FLAG_*.
+     * @param forceOverride Always override the transit, not matter what was set previously.
+     */
+    public void prepareAppTransition(@WindowManager.TransitionType int transit,
+            boolean alwaysKeepCurrent, @WindowManager.TransitionFlags int flags,
+            boolean forceOverride) {
+        synchronized (mWindowMap) {
+            mRoot.getDisplayContent(mDisplayId).prepareAppTransition(transit, alwaysKeepCurrent,
+                    flags, forceOverride);
+        }
+    }
+
+    public void executeAppTransition() {
+        synchronized (mWindowMap) {
+            mRoot.getDisplayContent(mDisplayId).executeAppTransition();
+        }
+    }
+
+    public void overridePendingAppTransition(String packageName,
+            int enterAnim, int exitAnim, IRemoteCallback startedCallback) {
+        synchronized (mWindowMap) {
+            mRoot.getDisplayContent(mDisplayId).mAppTransition.overridePendingAppTransition(
+                    packageName, enterAnim, exitAnim, startedCallback);
+        }
+    }
+
+    public void overridePendingAppTransitionScaleUp(int startX, int startY, int startWidth,
+            int startHeight) {
+        synchronized (mWindowMap) {
+            mRoot.getDisplayContent(mDisplayId).mAppTransition.overridePendingAppTransitionScaleUp(
+                    startX, startY, startWidth, startHeight);
+        }
+    }
+
+    public void overridePendingAppTransitionClipReveal(int startX, int startY,
+            int startWidth, int startHeight) {
+        synchronized (mWindowMap) {
+            mRoot.getDisplayContent(mDisplayId)
+                    .mAppTransition.overridePendingAppTransitionClipReveal(startX, startY,
+                    startWidth, startHeight);
+        }
+    }
+
+    public void overridePendingAppTransitionThumb(GraphicBuffer srcThumb, int startX,
+            int startY, IRemoteCallback startedCallback, boolean scaleUp) {
+        synchronized (mWindowMap) {
+            mRoot.getDisplayContent(mDisplayId)
+                    .mAppTransition.overridePendingAppTransitionThumb(srcThumb, startX, startY,
+                    startedCallback, scaleUp);
+        }
+    }
+
+    public void overridePendingAppTransitionAspectScaledThumb(GraphicBuffer srcThumb, int startX,
+            int startY, int targetWidth, int targetHeight, IRemoteCallback startedCallback,
+            boolean scaleUp) {
+        synchronized (mWindowMap) {
+            mRoot.getDisplayContent(mDisplayId)
+                    .mAppTransition.overridePendingAppTransitionAspectScaledThumb(srcThumb, startX,
+                    startY, targetWidth, targetHeight, startedCallback, scaleUp);
+        }
+    }
+
+    public void overridePendingAppTransitionMultiThumb(AppTransitionAnimationSpec[] specs,
+            IRemoteCallback onAnimationStartedCallback, IRemoteCallback onAnimationFinishedCallback,
+            boolean scaleUp) {
+        synchronized (mWindowMap) {
+            mRoot.getDisplayContent(mDisplayId)
+                    .mAppTransition.overridePendingAppTransitionMultiThumb(specs,
+                    onAnimationStartedCallback, onAnimationFinishedCallback, scaleUp);
+        }
+    }
+
+    public void overridePendingAppTransitionStartCrossProfileApps() {
+        synchronized (mWindowMap) {
+            mRoot.getDisplayContent(mDisplayId)
+                    .mAppTransition.overridePendingAppTransitionStartCrossProfileApps();
+        }
+    }
+
+    public void overridePendingAppTransitionInPlace(String packageName, int anim) {
+        synchronized (mWindowMap) {
+            mRoot.getDisplayContent(mDisplayId)
+                    .mAppTransition.overrideInPlaceAppTransition(packageName, anim);
+        }
+    }
+
+    /**
+     * Get Pending App transition of display.
+     *
+     * @return The pending app transition of the display.
+     */
+    public @TransitionType int getPendingAppTransition() {
+        synchronized (mWindowMap) {
+            return mRoot.getDisplayContent(mDisplayId).mAppTransition.getAppTransition();
+        }
+    }
+
+    /**
+     * Check if pending app transition is for activity / task launch.
+     */
+    public boolean isNextTransitionForward() {
+        final int transit = getPendingAppTransition();
+        return transit == TRANSIT_ACTIVITY_OPEN
+                || transit == TRANSIT_TASK_OPEN
+                || transit == TRANSIT_TASK_TO_FRONT;
     }
 
     @Override

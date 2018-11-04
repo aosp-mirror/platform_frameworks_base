@@ -591,15 +591,15 @@ public class BackupManagerService {
             if (DEBUG) {
                 Slog.i(TAG, "Backup enable apparently not migrated");
             }
-            final ContentResolver r = sInstance.mContext.getContentResolver();
-            final int enableState = Settings.Secure.getIntForUser(r,
+            ContentResolver resolver = sInstance.getContext().getContentResolver();
+            int enableState = Settings.Secure.getIntForUser(resolver,
                     Settings.Secure.BACKUP_ENABLED, -1, UserHandle.USER_SYSTEM);
             if (enableState >= 0) {
                 if (DEBUG) {
                     Slog.i(TAG, "Migrating enable state " + (enableState != 0));
                 }
                 writeBackupEnableState(enableState != 0, UserHandle.USER_SYSTEM);
-                Settings.Secure.putStringForUser(r,
+                Settings.Secure.putStringForUser(resolver,
                         Settings.Secure.BACKUP_ENABLED, null, UserHandle.USER_SYSTEM);
             } else {
                 if (DEBUG) {
@@ -2790,8 +2790,8 @@ public class BackupManagerService {
             Slog.e(TAG, "Unable to record backup enable state; reverting to disabled: "
                     + e.getMessage());
 
-            final ContentResolver r = sInstance.mContext.getContentResolver();
-            Settings.Secure.putStringForUser(r,
+            ContentResolver resolver = sInstance.getContext().getContentResolver();
+            Settings.Secure.putStringForUser(resolver,
                     Settings.Secure.BACKUP_ENABLED, null, userId);
             enableFile.delete();
             stage.delete();

@@ -243,6 +243,8 @@ public final class SystemServer {
             "com.android.server.timezonedetector.TimeZoneDetectorService$Lifecycle";
     private static final String ACCESSIBILITY_MANAGER_SERVICE_CLASS =
             "com.android.server.accessibility.AccessibilityManagerService$Lifecycle";
+    private static final String ADB_SERVICE_CLASS =
+            "com.android.server.adb.AdbService$Lifecycle";
 
     private static final String PERSISTENT_DATA_BLOCK_PROP = "ro.frp.pst";
 
@@ -1371,6 +1373,15 @@ public final class SystemServer {
                 mSystemServiceManager.startService(USB_SERVICE_CLASS);
                 traceEnd();
             }
+
+            // Start ADB Debugging Service
+            traceBeginAndSlog("StartAdbService");
+            try {
+                mSystemServiceManager.startService(ADB_SERVICE_CLASS);
+            } catch (Throwable e) {
+                Slog.e(TAG, "Failure starting AdbService");
+            }
+            traceEnd();
 
             if (!isWatch) {
                 traceBeginAndSlog("StartSerialService");

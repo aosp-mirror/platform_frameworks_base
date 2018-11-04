@@ -131,8 +131,6 @@ import com.android.internal.app.ToolbarActionBar;
 import com.android.internal.app.WindowDecorActionBar;
 import com.android.internal.policy.PhoneWindow;
 
-import dalvik.system.VMRuntime;
-
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
@@ -7266,31 +7264,6 @@ public class Activity extends ContextThemeWrapper
                           setPositiveButton(android.R.string.ok, null).
                           setCancelable(false).
                           show();
-                } else {
-                    Toast.makeText(this, appName + "\n" + warning, Toast.LENGTH_LONG).show();
-                }
-            }
-        }
-
-        // This property is set for all non-user builds except final release
-        boolean isApiWarningEnabled = SystemProperties.getInt("ro.art.hiddenapi.warning", 0) == 1;
-
-        if (isAppDebuggable || isApiWarningEnabled) {
-            if (!mMainThread.mHiddenApiWarningShown && VMRuntime.getRuntime().hasUsedHiddenApi()) {
-                // Only show the warning once per process.
-                mMainThread.mHiddenApiWarningShown = true;
-
-                String appName = getApplicationInfo().loadLabel(getPackageManager())
-                        .toString();
-                String warning = "Detected problems with API compatibility\n"
-                                 + "(visit g.co/dev/appcompat for more info)";
-                if (isAppDebuggable) {
-                    new AlertDialog.Builder(this)
-                        .setTitle(appName)
-                        .setMessage(warning)
-                        .setPositiveButton(android.R.string.ok, null)
-                        .setCancelable(false)
-                        .show();
                 } else {
                     Toast.makeText(this, appName + "\n" + warning, Toast.LENGTH_LONG).show();
                 }

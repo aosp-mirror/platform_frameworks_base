@@ -818,6 +818,10 @@ public final class ZenPolicy implements Parcelable {
      * @hide
      */
     public void apply(ZenPolicy policyToApply) {
+        if (policyToApply == null) {
+            return;
+        }
+
         // apply priority categories
         for (int category = 0; category < mPriorityCategories.size(); category++) {
             if (mPriorityCategories.get(category) == STATE_DISALLOW) {

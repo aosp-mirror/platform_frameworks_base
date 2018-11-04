@@ -2735,4 +2735,10 @@
         <attr name="name" format="string" />
     </declare-styleable>
 
+
+    <declare-styleable name="AndroidManifestProfileable" parent="AndroidManifestApplication">
+        <!-- Flag indicating whether the application can be profiled by the shell user,
+             even when running on a device that is running in user mode. -->
+        <attr name="shell" format="boolean" />
+    </declare-styleable>
 </resources>

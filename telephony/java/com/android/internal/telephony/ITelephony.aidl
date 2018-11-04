@@ -639,15 +639,30 @@ interface ITelephony {
     boolean nvWriteCdmaPrl(in byte[] preferredRoamingList);
 
     /**
-     * Perform the specified type of NV config reset. The radio will be taken offline
-     * and the device must be rebooted after the operation. Used for device
-     * configuration by some CDMA operators.
+     * Rollback modem configurations to factory default except some config which are in whitelist.
+     * Used for device configuration by some CDMA operators.
      *
-     * @param resetType the type of reset to perform (1 == factory reset; 2 == NV-only reset).
-     * @return true on success; false on any failure.
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the calling
+     * app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     *
+     * @param slotIndex - device slot.
+     * @return {@code true} on success; {@code false} on any failure.
      */
-    boolean nvResetConfig(int resetType);
+    boolean resetModemConfig(int slotIndex);
 
+    /**
+     * Generate a radio modem reset. Used for device configuration by some CDMA operators.
+     * Different than {@link #setRadioPower(boolean)}, modem reboot will power down sim card.
+     *
+     * <p>Requires Permission:
+     * {@link android.Manifest.permission#MODIFY_PHONE_STATE MODIFY_PHONE_STATE} or that the calling
+     * app has carrier privileges (see {@link #hasCarrierPrivileges}).
+     *
+     * @param slotIndex - device slot.
+     * @return {@code true} on success; {@code false} on any failure.
+     */
+    boolean rebootModem(int slotIndex);
     /*
      * Get the calculated preferred network type.
      * Used for device configuration by some CDMA operators.
@@ -668,7 +683,7 @@ interface ITelephony {
 
     /**
      * Check TETHER_DUN_REQUIRED and TETHER_DUN_APN settings, net.tethering.noprovisioning
-     * SystemProperty, and config_tether_apndata to decide whether DUN APN is required for
+     * SystemProperty to decide whether DUN APN is required for
      * tethering.
      *
      * @return 0: Not required. 1: required. 2: Not set.
@@ -1038,6 +1053,8 @@ interface ITelephony {
      * @return {@code true} if the device supports TTY mode.
      */
     boolean isTtyModeSupported();
+
+    boolean isRttSupported(int subscriptionId);
 
     /**
      * Whether the phone supports hearing aid compatibility.
@@ -1626,4 +1643,9 @@ interface ITelephony {
      * Identify if the number is emergency number, based on all the active subscriptions.
      */
     boolean isCurrentEmergencyNumber(String number);
+    
+    /**
+     * Return a list of certs in hex string from loaded carrier privileges access rules.
+     */
+    List<String> getCertsFromCarrierPrivilegeAccessRules(int subId);
 }

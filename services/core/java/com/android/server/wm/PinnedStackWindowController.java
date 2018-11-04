@@ -117,11 +117,12 @@ public class PinnedStackWindowController extends StackWindowController {
             final Rect finalToBounds = toBounds;
             final @SchedulePipModeChangedState int finalSchedulePipModeChangedState =
                 schedulePipModeChangedState;
-            mService.mBoundsAnimationController.getHandler().post(() -> {
+            final DisplayContent displayContent = mContainer.getDisplayContent();
+            displayContent.mBoundsAnimationController.getHandler().post(() -> {
                 if (mContainer == null) {
                     return;
                 }
-                mService.mBoundsAnimationController.animateBounds(mContainer, fromBounds,
+                displayContent.mBoundsAnimationController.animateBounds(mContainer, fromBounds,
                         finalToBounds, animationDuration, finalSchedulePipModeChangedState,
                         fromFullscreen, toFullscreen);
             });

@@ -488,6 +488,7 @@
     <protected-broadcast android:name="android.telephony.action.CARRIER_CONFIG_CHANGED" />
     <protected-broadcast android:name="android.telephony.action.DEFAULT_SUBSCRIPTION_CHANGED" />
     <protected-broadcast android:name="android.telephony.action.DEFAULT_SMS_SUBSCRIPTION_CHANGED" />
+    <protected-broadcast android:name="android.telephony.action.SECRET_CODE" />
     <protected-broadcast android:name="android.telephony.action.SHOW_VOICEMAIL_NOTIFICATION" />
     <protected-broadcast android:name="android.telephony.action.SUBSCRIPTION_PLANS_CHANGED" />
 
@@ -1789,6 +1790,12 @@
     <!-- @SystemApi Allows an application to manage preferences and permissions for USB devices
          @hide -->
     <permission android:name="android.permission.MANAGE_USB"
+        android:protectionLevel="signature|privileged" />
+
+    <!-- @SystemApi Allows an application to manage Android Debug Bridge settings.
+         <p>Not for use by third-party applications.
+         @hide -->
+    <permission android:name="android.permission.MANAGE_DEBUGGING"
         android:protectionLevel="signature|privileged" />
 
     <!-- @SystemApi Allows an application to access the MTP USB kernel driver.

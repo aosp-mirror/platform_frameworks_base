@@ -18,16 +18,7 @@ package com.android.server.am;
 
 import static android.app.ActivityManager.LOCK_TASK_MODE_NONE;
 import static android.app.ActivityManager.TaskDescription.ATTR_TASKDESCRIPTION_PREFIX;
-import static android.app.ActivityOptions.ANIM_CLIP_REVEAL;
-import static android.app.ActivityOptions.ANIM_CUSTOM;
-import static android.app.ActivityOptions.ANIM_OPEN_CROSS_PROFILE_APPS;
-import static android.app.ActivityOptions.ANIM_REMOTE_ANIMATION;
-import static android.app.ActivityOptions.ANIM_SCALE_UP;
 import static android.app.ActivityOptions.ANIM_SCENE_TRANSITION;
-import static android.app.ActivityOptions.ANIM_THUMBNAIL_ASPECT_SCALE_DOWN;
-import static android.app.ActivityOptions.ANIM_THUMBNAIL_ASPECT_SCALE_UP;
-import static android.app.ActivityOptions.ANIM_THUMBNAIL_SCALE_DOWN;
-import static android.app.ActivityOptions.ANIM_THUMBNAIL_SCALE_UP;
 import static android.app.ActivityTaskManager.INVALID_STACK_ID;
 import static android.app.AppOpsManager.MODE_ALLOWED;
 import static android.app.AppOpsManager.OP_PICTURE_IN_PICTURE;
@@ -156,7 +147,6 @@ import android.content.pm.ApplicationInfo;
 import android.content.res.CompatibilityInfo;
 import android.content.res.Configuration;
 import android.graphics.Bitmap;
-import android.graphics.GraphicBuffer;
 import android.graphics.Rect;
 import android.os.Binder;
 import android.os.Build;
@@ -177,8 +167,6 @@ import android.util.MergedConfiguration;
 import android.util.Slog;
 import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
-import android.view.AppTransitionAnimationSpec;
-import android.view.IAppTransitionAnimationSpecsFuture;
 import android.view.IApplicationToken;
 import android.view.RemoteAnimationDefinition;
 import android.view.WindowManager.LayoutParams;
@@ -1502,93 +1490,7 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
     void applyOptionsLocked() {
         if (pendingOptions != null
                 && pendingOptions.getAnimationType() != ANIM_SCENE_TRANSITION) {
-            final int animationType = pendingOptions.getAnimationType();
-            switch (animationType) {
-                case ANIM_CUSTOM:
-                    service.mWindowManager.overridePendingAppTransition(
-                            pendingOptions.getPackageName(),
-                            pendingOptions.getCustomEnterResId(),
-                            pendingOptions.getCustomExitResId(),
-                            pendingOptions.getOnAnimationStartListener());
-                    break;
-                case ANIM_CLIP_REVEAL:
-                    service.mWindowManager.overridePendingAppTransitionClipReveal(
-                            pendingOptions.getStartX(), pendingOptions.getStartY(),
-                            pendingOptions.getWidth(), pendingOptions.getHeight());
-                    if (intent.getSourceBounds() == null) {
-                        intent.setSourceBounds(new Rect(pendingOptions.getStartX(),
-                                pendingOptions.getStartY(),
-                                pendingOptions.getStartX()+pendingOptions.getWidth(),
-                                pendingOptions.getStartY()+pendingOptions.getHeight()));
-                    }
-                    break;
-                case ANIM_SCALE_UP:
-                    service.mWindowManager.overridePendingAppTransitionScaleUp(
-                            pendingOptions.getStartX(), pendingOptions.getStartY(),
-                            pendingOptions.getWidth(), pendingOptions.getHeight());
-                    if (intent.getSourceBounds() == null) {
-                        intent.setSourceBounds(new Rect(pendingOptions.getStartX(),
-                                pendingOptions.getStartY(),
-                                pendingOptions.getStartX()+pendingOptions.getWidth(),
-                                pendingOptions.getStartY()+pendingOptions.getHeight()));
-                    }
-                    break;
-                case ANIM_THUMBNAIL_SCALE_UP:
-                case ANIM_THUMBNAIL_SCALE_DOWN:
-                    final boolean scaleUp = (animationType == ANIM_THUMBNAIL_SCALE_UP);
-                    final GraphicBuffer buffer = pendingOptions.getThumbnail();
-                    service.mWindowManager.overridePendingAppTransitionThumb(buffer,
-                            pendingOptions.getStartX(), pendingOptions.getStartY(),
-                            pendingOptions.getOnAnimationStartListener(),
-                            scaleUp);
-                    if (intent.getSourceBounds() == null && buffer != null) {
-                        intent.setSourceBounds(new Rect(pendingOptions.getStartX(),
-                                pendingOptions.getStartY(),
-                                pendingOptions.getStartX() + buffer.getWidth(),
-                                pendingOptions.getStartY() + buffer.getHeight()));
-                    }
-                    break;
-                case ANIM_THUMBNAIL_ASPECT_SCALE_UP:
-                case ANIM_THUMBNAIL_ASPECT_SCALE_DOWN:
-                    final AppTransitionAnimationSpec[] specs = pendingOptions.getAnimSpecs();
-                    final IAppTransitionAnimationSpecsFuture specsFuture =
-                            pendingOptions.getSpecsFuture();
-                    if (specsFuture != null) {
-                        service.mWindowManager.overridePendingAppTransitionMultiThumbFuture(
-                                specsFuture, pendingOptions.getOnAnimationStartListener(),
-                                animationType == ANIM_THUMBNAIL_ASPECT_SCALE_UP);
-                    } else if (animationType == ANIM_THUMBNAIL_ASPECT_SCALE_DOWN
-                            && specs != null) {
-                        service.mWindowManager.overridePendingAppTransitionMultiThumb(
-                                specs, pendingOptions.getOnAnimationStartListener(),
-                                pendingOptions.getAnimationFinishedListener(), false);
-                    } else {
-                        service.mWindowManager.overridePendingAppTransitionAspectScaledThumb(
-                                pendingOptions.getThumbnail(),
-                                pendingOptions.getStartX(), pendingOptions.getStartY(),
-                                pendingOptions.getWidth(), pendingOptions.getHeight(),
-                                pendingOptions.getOnAnimationStartListener(),
-                                (animationType == ANIM_THUMBNAIL_ASPECT_SCALE_UP));
-                        if (intent.getSourceBounds() == null) {
-                            intent.setSourceBounds(new Rect(pendingOptions.getStartX(),
-                                    pendingOptions.getStartY(),
-                                    pendingOptions.getStartX() + pendingOptions.getWidth(),
-                                    pendingOptions.getStartY() + pendingOptions.getHeight()));
-                        }
-                    }
-                    break;
-                case ANIM_OPEN_CROSS_PROFILE_APPS:
-                    service.mWindowManager.overridePendingAppTransitionStartCrossProfileApps();
-                    break;
-                case ANIM_REMOTE_ANIMATION:
-                    service.mWindowManager.overridePendingAppTransitionRemote(
-                            pendingOptions.getRemoteAnimationAdapter());
-                    break;
-                default:
-                    Slog.e(TAG, "applyOptionsLocked: Unknown animationType=" + animationType);
-                    break;
-            }
-
+            mWindowContainerController.applyOptionsLocked(pendingOptions, intent);
             if (task == null) {
                 clearOptionsLocked(false /* withAbort */);
             } else {
@@ -2768,7 +2670,8 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
                     preserveWindow);
             final ActivityLifecycleItem lifecycleItem;
             if (andResume) {
-                lifecycleItem = ResumeActivityItem.obtain(service.isNextTransitionForward());
+                lifecycleItem = ResumeActivityItem.obtain(
+                        getDisplay().getWindowContainerController().isNextTransitionForward());
             } else {
                 lifecycleItem = PauseActivityItem.obtain();
             }

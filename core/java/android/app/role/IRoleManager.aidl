@@ -36,4 +36,8 @@ interface IRoleManager {
             in IRoleManagerCallback callback);
 
     void clearRoleHoldersAsUser(in String roleName, int userId, in IRoleManagerCallback callback);
+
+    boolean addRoleHolderFromController(in String roleName, in String packageName);
+
+    boolean removeRoleHolderFromController(in String roleName, in String packageName);
 }

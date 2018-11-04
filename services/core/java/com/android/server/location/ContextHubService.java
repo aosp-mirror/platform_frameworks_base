@@ -415,10 +415,12 @@ public class ContextHubService extends IContextHubService.Stub {
         checkPermissions();
 
         ArrayList<Integer> foundInstances = new ArrayList<>();
-        for (NanoAppInstanceInfo info : mNanoAppStateManager.getNanoAppInstanceInfoCollection()) {
-            if (filter.testMatch(info)) {
-                foundInstances.add(info.getHandle());
-            }
+        if (filter != null) {
+            mNanoAppStateManager.foreachNanoAppInstanceInfo((info) -> {
+                if (filter.testMatch(info)) {
+                    foundInstances.add(info.getHandle());
+                }
+            });
         }
 
         int[] retArray = new int[foundInstances.size()];
@@ -767,9 +769,7 @@ public class ContextHubService extends IContextHubService.Stub {
         pw.println("");
         pw.println("=================== NANOAPPS ====================");
         // Dump nanoAppHash
-        for (NanoAppInstanceInfo info : mNanoAppStateManager.getNanoAppInstanceInfoCollection()) {
-            pw.println(info);
-        }
+        mNanoAppStateManager.foreachNanoAppInstanceInfo((info) -> pw.println(info));
 
         // dump eventLog
     }

@@ -657,6 +657,7 @@ static int getPixelFormatFromInternalFormat(uint32_t internalFormat) {
     switch (internalFormat) {
         // For sized internal format.
         case GL_RGBA16F:
+        case GL_SRGB8_ALPHA8:
             return GL_RGBA;
         // Base internal formats and pixel formats are still the same, see Table 1 in
         // https://www.khronos.org/registry/OpenGL-Refpages/es3.1/html/glTexImage2D.xhtml

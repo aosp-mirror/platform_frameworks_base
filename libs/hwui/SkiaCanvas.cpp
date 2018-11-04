@@ -732,14 +732,10 @@ void SkiaCanvas::drawGlyphs(ReadGlyphFunc glyphFunc, int count, const SkPaint& p
                             float y, float boundsLeft, float boundsTop, float boundsRight,
                             float boundsBottom, float totalAdvance) {
     if (count <= 0 || paint.nothingToDraw()) return;
-    // Set align to left for drawing, as we don't want individual
-    // glyphs centered or right-aligned; the offset above takes
-    // care of all alignment.
     SkPaint paintCopy(paint);
     if (mPaintFilter) {
         mPaintFilter->filter(&paintCopy);
     }
-    paintCopy.setTextAlign(SkPaint::kLeft_Align);
     SkASSERT(paintCopy.getTextEncoding() == SkPaint::kGlyphID_TextEncoding);
     // Stroke with a hairline is drawn on HW with a fill style for compatibility with Android O and
     // older.
@@ -763,14 +759,10 @@ void SkiaCanvas::drawGlyphs(ReadGlyphFunc glyphFunc, int count, const SkPaint& p
 void SkiaCanvas::drawLayoutOnPath(const minikin::Layout& layout, float hOffset, float vOffset,
                                   const SkPaint& paint, const SkPath& path, size_t start,
                                   size_t end) {
-    // Set align to left for drawing, as we don't want individual
-    // glyphs centered or right-aligned; the offsets take care of
-    // that portion of the alignment.
     SkPaint paintCopy(paint);
     if (mPaintFilter) {
         mPaintFilter->filter(&paintCopy);
     }
-    paintCopy.setTextAlign(SkPaint::kLeft_Align);
     SkASSERT(paintCopy.getTextEncoding() == SkPaint::kGlyphID_TextEncoding);
 
     const int N = end - start;

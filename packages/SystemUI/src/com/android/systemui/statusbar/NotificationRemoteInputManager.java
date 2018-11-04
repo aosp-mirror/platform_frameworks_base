@@ -35,6 +35,7 @@ import android.service.notification.StatusBarNotification;
 import android.text.TextUtils;
 import android.util.ArraySet;
 import android.util.Log;
+import android.util.Pair;
 import android.view.MotionEvent;
 import android.view.View;
 import android.view.ViewGroup;
@@ -47,7 +48,6 @@ import com.android.internal.statusbar.IStatusBarService;
 import com.android.internal.statusbar.NotificationVisibility;
 import com.android.systemui.Dependency;
 import com.android.systemui.Dumpable;
-import com.android.systemui.InitController;
 import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
@@ -122,7 +122,7 @@ public class NotificationRemoteInputManager implements Dumpable {
 
         @Override
         public boolean onClickHandler(
-                final View view, final PendingIntent pendingIntent, final Intent fillInIntent) {
+                View view, PendingIntent pendingIntent, RemoteViews.RemoteResponse response) {
             getShadeController().wakeUpIfDozing(SystemClock.uptimeMillis(), view);
 
             if (handleRemoteInput(view, pendingIntent)) {
@@ -141,8 +141,12 @@ public class NotificationRemoteInputManager implements Dumpable {
                 ActivityManager.getService().resumeAppSwitches();
             } catch (RemoteException e) {
             }
-            return mCallback.handleRemoteViewClick(view, pendingIntent, fillInIntent,
-                    () -> super.onClickHandler(view, pendingIntent, fillInIntent));
+            return mCallback.handleRemoteViewClick(pendingIntent, () -> {
+                Pair<Intent, ActivityOptions> options = response.getLaunchOptions(view);
+                options.second.setLaunchWindowingMode(
+                        WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY);
+                return RemoteViews.startPendingIntent(view, pendingIntent, options);
+            });
         }
 
         private void logActionClick(View view) {
@@ -178,13 +182,6 @@ public class NotificationRemoteInputManager implements Dumpable {
                 parent = parent.getParent();
             }
             return null;
-        }
-
-        @Override
-        protected ActivityOptions getActivityOptions(Context context) {
-            ActivityOptions options = super.getActivityOptions(context);
-            options.setLaunchWindowingMode(WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY);
-            return options;
         }
 
         private boolean handleRemoteInput(View view, PendingIntent pendingIntent) {
@@ -661,14 +658,11 @@ public class NotificationRemoteInputManager implements Dumpable {
          * Performs any special handling for a remote view click. The default behaviour can be
          * called through the defaultHandler parameter.
          *
-         * @param view
          * @param pendingIntent
-         * @param fillInIntent
          * @param defaultHandler
          * @return  true iff the click was handled
          */
-        boolean handleRemoteViewClick(View view, PendingIntent pendingIntent, Intent fillInIntent,
-                ClickHandler defaultHandler);
+        boolean handleRemoteViewClick(PendingIntent pendingIntent, ClickHandler defaultHandler);
     }
 
     /**

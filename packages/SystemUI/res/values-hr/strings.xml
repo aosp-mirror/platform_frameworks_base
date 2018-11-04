@@ -21,15 +21,6 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="7164937344850004466">"UI sustava"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Očisti"</string>
-    <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Ukloni s popisa"</string>
-    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Informacije o aplikaciji"</string>
-    <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Ovdje se pojavljuju vaši nedavni zasloni"</string>
-    <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Odbaci nedavne aplikacije"</string>
-    <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
-      <item quantity="one">%d zaslon u Pregledu</item>
-      <item quantity="few">%d zaslona u Pregledu</item>
-      <item quantity="other">%d zaslona u Pregledu</item>
-    </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Bez obavijesti"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"U tijeku"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Obavijesti"</string>
@@ -102,7 +93,6 @@
     <string name="phone_label" msgid="2320074140205331708">"otvaranje telefona"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"otvaranje glasovne pomoći"</string>
     <string name="camera_label" msgid="7261107956054836961">"otvaranje fotoaparata"</string>
-    <string name="recents_caption_resize" msgid="3517056471774958200">"Odaberite novi izgled zadataka"</string>
     <string name="cancel" msgid="6442560571259935130">"Odustani"</string>
     <string name="accessibility_biometric_dialog_help_area" msgid="8953787076940186847">"Područje poruke za pomoć"</string>
     <string name="biometric_dialog_confirm" msgid="6468457350041712674">"Potvrdi"</string>
@@ -189,11 +179,6 @@
     <skip />
     <!-- no translation found for accessibility_work_mode (702887484664647430) -->
     <skip />
-    <string name="accessibility_recents_item_will_be_dismissed" msgid="395770242498031481">"Odbacivanje aplikacije <xliff:g id="APP">%s</xliff:g>."</string>
-    <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"Aplikacija <xliff:g id="APP">%s</xliff:g> odbačena je."</string>
-    <string name="accessibility_recents_all_items_dismissed" msgid="4464697366179168836">"Odbačene su sve nedavne aplikacije."</string>
-    <string name="accessibility_recents_item_open_app_info" msgid="5107479759905883540">"Otvaranje informacija o aplikaciji <xliff:g id="APP">%s</xliff:g>."</string>
-    <string name="accessibility_recents_item_launched" msgid="7616039892382525203">"Pokretanje aplikacije <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"Obavijest je odbačena."</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"Zaslon obavijesti."</string>
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"Brze postavke."</string>
@@ -358,23 +343,8 @@
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC je onemogućen"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC je omogućen"</string>
-    <string name="recents_empty_message" msgid="808480104164008572">"Nema nedavnih stavki"</string>
-    <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"Izbrisali ste sve"</string>
-    <string name="recents_app_info_button_label" msgid="2890317189376000030">"Informacije o aplikaciji"</string>
-    <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"prikvačivanje zaslona"</string>
-    <string name="recents_search_bar_label" msgid="8074997400187836677">"pretraži"</string>
-    <string name="recents_launch_error_message" msgid="2969287838120550506">"Aplikacija <xliff:g id="APP">%s</xliff:g> nije pokrenuta."</string>
-    <string name="recents_launch_disabled_message" msgid="1624523193008871793">"Aplikacija <xliff:g id="APP">%s</xliff:g> onemogućena je u sigurnom načinu."</string>
-    <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Izbriši sve"</string>
-    <string name="recents_drag_hint_message" msgid="2649739267073203985">"Povucite ovdje da biste upotrebljavali podijeljeni zaslon"</string>
     <string name="recents_swipe_up_onboarding" msgid="3824607135920170001">"Prijeđite prstom prema gore da biste promijenili aplikaciju"</string>
     <string name="recents_quick_scrub_onboarding" msgid="2778062804333285789">"Povucite udesno da biste brzo promijenili aplikaciju"</string>
-    <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Podijeli vodoravno"</string>
-    <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Podijeli okomito"</string>
-    <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Podijeli prilagođeno"</string>
-    <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"Podijeli zaslon na vrhu"</string>
-    <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"Podijeli zaslon slijeva"</string>
-    <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"Podijeli zaslon zdesna"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7171470775439860480">"Uključivanje/isključivanje pregleda"</string>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Napunjeno"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"Punjenje"</string>
@@ -622,6 +592,7 @@
     <string name="inline_minimize_button" msgid="966233327974702195">"Minimiziraj"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Želite li da se obavijesti te aplikacije nastave prikazivati?"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"Te se obavijesti ne mogu isključiti"</string>
+    <string name="notification_delegate_header" msgid="9167022191405284627">"putem aplikacije <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="appops_camera" msgid="8100147441602585776">"Ova aplikacija upotrebljava kameru."</string>
     <string name="appops_microphone" msgid="741508267659494555">"Ova aplikacija upotrebljava mikrofon."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"Ova se aplikacija prikazuje preko drugih aplikacija na zaslonu."</string>
@@ -758,6 +729,7 @@
     <item msgid="2139628951880142927">"Prikazuj postotak tijekom punjenja (zadano)"</item>
     <item msgid="3327323682209964956">"Ne prikazuj tu ikonu"</item>
   </string-array>
+    <string name="tuner_low_priority" msgid="1325884786608312358">"Prikaži ikone obavijesti niskog prioriteta"</string>
     <string name="other" msgid="4060683095962566764">"Ostalo"</string>
     <string name="accessibility_divider" msgid="5903423481953635044">"Razdjelnik podijeljenog zaslona"</string>
     <string name="accessibility_action_divider_left_full" msgid="2801570521881574972">"Lijevi zaslon u cijeli zaslon"</string>

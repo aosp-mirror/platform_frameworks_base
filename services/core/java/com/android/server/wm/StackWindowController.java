@@ -16,6 +16,11 @@
 
 package com.android.server.wm;
 
+import static com.android.server.wm.WindowContainer.POSITION_BOTTOM;
+import static com.android.server.wm.WindowContainer.POSITION_TOP;
+import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STACK;
+import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
+
 import android.app.WindowConfiguration;
 import android.content.res.Configuration;
 import android.graphics.Rect;
@@ -30,11 +35,6 @@ import android.view.DisplayInfo;
 import com.android.internal.annotations.VisibleForTesting;
 
 import java.lang.ref.WeakReference;
-
-import static com.android.server.wm.WindowContainer.POSITION_BOTTOM;
-import static com.android.server.wm.WindowContainer.POSITION_TOP;
-import static com.android.server.wm.WindowManagerDebugConfig.DEBUG_STACK;
-import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 /**
  * Controller for the stack container. This is created by activity manager to link activity stacks
@@ -140,10 +140,11 @@ public class StackWindowController
             }
             mContainer.positionChildAt(POSITION_TOP, childTask, includingParents);
 
-            if (mService.mAppTransition.isTransitionSet()) {
+            final DisplayContent displayContent = mContainer.getDisplayContent();
+            if (displayContent.mAppTransition.isTransitionSet()) {
                 childTask.setSendingToBottom(false);
             }
-            mContainer.getDisplayContent().layoutAndAssignWindowLayersIfNeeded();
+            displayContent.layoutAndAssignWindowLayersIfNeeded();
         }
     }
 
@@ -162,7 +163,7 @@ public class StackWindowController
             }
             mContainer.positionChildAt(POSITION_BOTTOM, childTask, includingParents);
 
-            if (mService.mAppTransition.isTransitionSet()) {
+            if (mContainer.getDisplayContent().mAppTransition.isTransitionSet()) {
                 childTask.setSendingToBottom(true);
             }
             mContainer.getDisplayContent().layoutAndAssignWindowLayersIfNeeded();

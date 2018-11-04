@@ -17,6 +17,7 @@
 package com.android.internal.app;
 
 import android.app.AppOpsManager;
+import android.content.pm.ParceledListSlice;
 import android.os.Bundle;
 import com.android.internal.app.IAppOpsCallback;
 import com.android.internal.app.IAppOpsActiveCallback;
@@ -40,6 +41,10 @@ interface IAppOpsService {
     int checkPackage(int uid, String packageName);
     List<AppOpsManager.PackageOps> getPackagesForOps(in int[] ops);
     List<AppOpsManager.PackageOps> getOpsForPackage(int uid, String packageName, in int[] ops);
+    ParceledListSlice getAllHistoricalPackagesOps(in String[] ops,
+            long beginTimeMillis, long endTimeMillis);
+    AppOpsManager.HistoricalPackageOps getHistoricalPackagesOps(int uid, String packageName,
+            in String[] ops, long beginTimeMillis, long endTimeMillis);
     List<AppOpsManager.PackageOps> getUidOps(int uid, in int[] ops);
     void setUidMode(int code, int uid, int mode);
     void setMode(int code, int uid, String packageName, int mode);

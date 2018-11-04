@@ -40,50 +40,50 @@ public class UnknownAppVisibilityControllerTest extends WindowTestsBase {
     @Before
     public void setUp() throws Exception {
         super.setUp();
-        sWm.mUnknownAppVisibilityController.clear();
+        mDisplayContent.mUnknownAppVisibilityController.clear();
     }
 
     @Test
     public void testFlow() throws Exception {
         final AppWindowToken token = WindowTestUtils.createTestAppWindowToken(mDisplayContent);
-        sWm.mUnknownAppVisibilityController.notifyLaunched(token);
-        sWm.mUnknownAppVisibilityController.notifyAppResumedFinished(token);
-        sWm.mUnknownAppVisibilityController.notifyRelayouted(token);
+        mDisplayContent.mUnknownAppVisibilityController.notifyLaunched(token);
+        mDisplayContent.mUnknownAppVisibilityController.notifyAppResumedFinished(token);
+        mDisplayContent.mUnknownAppVisibilityController.notifyRelayouted(token);
 
         // Make sure our handler processed the message.
         Thread.sleep(100);
-        assertTrue(sWm.mUnknownAppVisibilityController.allResolved());
+        assertTrue(mDisplayContent.mUnknownAppVisibilityController.allResolved());
     }
 
     @Test
     public void testMultiple() throws Exception {
         final AppWindowToken token1 = WindowTestUtils.createTestAppWindowToken(mDisplayContent);
         final AppWindowToken token2 = WindowTestUtils.createTestAppWindowToken(mDisplayContent);
-        sWm.mUnknownAppVisibilityController.notifyLaunched(token1);
-        sWm.mUnknownAppVisibilityController.notifyAppResumedFinished(token1);
-        sWm.mUnknownAppVisibilityController.notifyLaunched(token2);
-        sWm.mUnknownAppVisibilityController.notifyRelayouted(token1);
-        sWm.mUnknownAppVisibilityController.notifyAppResumedFinished(token2);
-        sWm.mUnknownAppVisibilityController.notifyRelayouted(token2);
+        mDisplayContent.mUnknownAppVisibilityController.notifyLaunched(token1);
+        mDisplayContent.mUnknownAppVisibilityController.notifyAppResumedFinished(token1);
+        mDisplayContent.mUnknownAppVisibilityController.notifyLaunched(token2);
+        mDisplayContent.mUnknownAppVisibilityController.notifyRelayouted(token1);
+        mDisplayContent.mUnknownAppVisibilityController.notifyAppResumedFinished(token2);
+        mDisplayContent.mUnknownAppVisibilityController.notifyRelayouted(token2);
 
         // Make sure our handler processed the message.
         Thread.sleep(100);
-        assertTrue(sWm.mUnknownAppVisibilityController.allResolved());
+        assertTrue(mDisplayContent.mUnknownAppVisibilityController.allResolved());
     }
 
     @Test
     public void testClear() throws Exception {
         final AppWindowToken token = WindowTestUtils.createTestAppWindowToken(mDisplayContent);
-        sWm.mUnknownAppVisibilityController.notifyLaunched(token);
-        sWm.mUnknownAppVisibilityController.clear();;
-        assertTrue(sWm.mUnknownAppVisibilityController.allResolved());
+        mDisplayContent.mUnknownAppVisibilityController.notifyLaunched(token);
+        mDisplayContent.mUnknownAppVisibilityController.clear();;
+        assertTrue(mDisplayContent.mUnknownAppVisibilityController.allResolved());
     }
 
     @Test
     public void testAppRemoved() throws Exception {
         final AppWindowToken token = WindowTestUtils.createTestAppWindowToken(mDisplayContent);
-        sWm.mUnknownAppVisibilityController.notifyLaunched(token);
-        sWm.mUnknownAppVisibilityController.appRemovedOrHidden(token);
-        assertTrue(sWm.mUnknownAppVisibilityController.allResolved());
+        mDisplayContent.mUnknownAppVisibilityController.notifyLaunched(token);
+        mDisplayContent.mUnknownAppVisibilityController.appRemovedOrHidden(token);
+        assertTrue(mDisplayContent.mUnknownAppVisibilityController.allResolved());
     }
 }

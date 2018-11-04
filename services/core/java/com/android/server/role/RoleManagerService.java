@@ -249,7 +249,40 @@ public class RoleManagerService extends SystemService {
             userId = handleIncomingUser(userId, "clearRoleHoldersAsUser");
             getContext().enforceCallingOrSelfPermission(Manifest.permission.MANAGE_ROLE_HOLDERS,
                     "clearRoleHoldersAsUser");
+
             getControllerService(userId).onClearRoleHolders(roleName, callback);
+        }
+
+        @Override
+        public boolean addRoleHolderFromController(@NonNull String roleName,
+                @NonNull String packageName) {
+            Preconditions.checkStringNotEmpty(roleName, "roleName cannot be null or empty");
+            Preconditions.checkStringNotEmpty(packageName, "packageName cannot be null or empty");
+            getContext().enforceCallingOrSelfPermission(
+                    RoleManager.PERMISSION_MANAGE_ROLE_HOLDERS_FROM_CONTROLLER,
+                    "addRoleHolderFromController");
+
+            int userId = UserHandle.getCallingUserId();
+            synchronized (mLock) {
+                RoleUserState userState = getUserStateLocked(userId);
+                return userState.addRoleHolderLocked(roleName, packageName);
+            }
+        }
+
+        @Override
+        public boolean removeRoleHolderFromController(@NonNull String roleName,
+                @NonNull String packageName) {
+            Preconditions.checkStringNotEmpty(roleName, "roleName cannot be null or empty");
+            Preconditions.checkStringNotEmpty(packageName, "packageName cannot be null or empty");
+            getContext().enforceCallingOrSelfPermission(
+                    RoleManager.PERMISSION_MANAGE_ROLE_HOLDERS_FROM_CONTROLLER,
+                    "removeRoleHolderFromController");
+
+            int userId = UserHandle.getCallingUserId();
+            synchronized (mLock) {
+                RoleUserState userState = getUserStateLocked(userId);
+                return userState.removeRoleHolderLocked(roleName, packageName);
+            }
         }
 
         @CheckResult

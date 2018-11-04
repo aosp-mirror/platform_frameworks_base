@@ -78,6 +78,8 @@ package android.app {
   }
 
   public class AppOpsManager {
+    method public java.util.List<android.app.AppOpsManager.HistoricalPackageOps> getAllHistoricPackagesOps(java.lang.String[], long, long);
+    method public android.app.AppOpsManager.HistoricalPackageOps getHistoricalPackagesOps(int, java.lang.String, java.lang.String[], long, long);
     method public static int getNumOps();
     method public static java.lang.String[] getOpStrs();
     method public boolean isOperationActive(int, int, java.lang.String);
@@ -133,6 +135,33 @@ package android.app {
     field public static final java.lang.String OPSTR_WRITE_WALLPAPER = "android:write_wallpaper";
     field public static final int OP_RECORD_AUDIO = 27; // 0x1b
     field public static final int OP_SYSTEM_ALERT_WINDOW = 24; // 0x18
+  }
+
+  public static final class AppOpsManager.HistoricalOpEntry implements android.os.Parcelable {
+    method public int describeContents();
+    method public long getAccessCount(int);
+    method public long getAccessDuration(int);
+    method public long getBackgroundAccessCount();
+    method public long getBackgroundAccessDuration();
+    method public long getBackgroundRejectCount();
+    method public long getForegroundAccessCount();
+    method public long getForegroundAccessDuration();
+    method public long getForegroundRejectCount();
+    method public java.lang.String getOp();
+    method public long getRejectCount(int);
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.app.AppOpsManager.HistoricalOpEntry> CREATOR;
+  }
+
+  public static final class AppOpsManager.HistoricalPackageOps implements android.os.Parcelable {
+    method public int describeContents();
+    method public android.app.AppOpsManager.HistoricalOpEntry getEntry(java.lang.String);
+    method public android.app.AppOpsManager.HistoricalOpEntry getEntryAt(int);
+    method public int getEntryCount();
+    method public java.lang.String getPackageName();
+    method public int getUid();
+    method public void writeToParcel(android.os.Parcel, int);
+    field public static final android.os.Parcelable.Creator<android.app.AppOpsManager.HistoricalPackageOps> CREATOR;
   }
 
   public static abstract interface AppOpsManager.OnOpActiveChangedListener {
@@ -576,12 +605,6 @@ package android.media {
     method public static int channelCountFromOutChannelMask(int);
     method public static int getBytesPerSample(int);
     method public static boolean isEncodingLinearPcm(int);
-  }
-
-  public final class AudioPresentation {
-    ctor public AudioPresentation(int, int, java.util.Map<java.lang.String, java.lang.String>, java.lang.String, int, boolean, boolean, boolean);
-    method public int getPresentationId();
-    method public int getProgramId();
   }
 
   public final class BufferingParams implements android.os.Parcelable {
@@ -1213,6 +1236,7 @@ package android.telephony {
 
   public class TelephonyManager {
     method public int getCarrierIdListVersion();
+    method public boolean isRttSupported();
     method public void refreshUiccProfile();
     method public void setCarrierTestOverride(java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String);
     field public static final int UNKNOWN_CARRIER_ID_LIST_VERSION = -1; // 0xffffffff
@@ -1324,6 +1348,14 @@ package android.transition {
 
   public class TransitionManager {
     method public android.transition.Transition getTransition(android.transition.Scene);
+  }
+
+}
+
+package android.util {
+
+  public final class ArraySet<E> implements java.util.Collection java.util.Set {
+    method public E valueAtUnchecked(int);
   }
 
 }

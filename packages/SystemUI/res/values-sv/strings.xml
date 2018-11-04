@@ -21,14 +21,6 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="7164937344850004466">"Gränssnitt"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Ta bort"</string>
-    <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Ta bort från listan"</string>
-    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Info om appen"</string>
-    <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Dina senaste skärmar visas här"</string>
-    <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Avvisa nya appar"</string>
-    <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
-      <item quantity="other">%d skärmar i översikten</item>
-      <item quantity="one">En skärm i översikten</item>
-    </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Inga aviseringar"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Pågående"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Aviseringar"</string>
@@ -101,7 +93,6 @@
     <string name="phone_label" msgid="2320074140205331708">"öppna mobilen"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"öppna röstassistenten"</string>
     <string name="camera_label" msgid="7261107956054836961">"öppna kameran"</string>
-    <string name="recents_caption_resize" msgid="3517056471774958200">"Välj en ny layout för uppgiften"</string>
     <string name="cancel" msgid="6442560571259935130">"Avbryt"</string>
     <string name="accessibility_biometric_dialog_help_area" msgid="8953787076940186847">"Område för hjälpmeddelande"</string>
     <string name="biometric_dialog_confirm" msgid="6468457350041712674">"Bekräfta"</string>
@@ -188,11 +179,6 @@
     <skip />
     <!-- no translation found for accessibility_work_mode (702887484664647430) -->
     <skip />
-    <string name="accessibility_recents_item_will_be_dismissed" msgid="395770242498031481">"Ta bort <xliff:g id="APP">%s</xliff:g> från listan."</string>
-    <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"<xliff:g id="APP">%s</xliff:g> togs bort permanent."</string>
-    <string name="accessibility_recents_all_items_dismissed" msgid="4464697366179168836">"Alla appar har tagits bort från listan Senaste."</string>
-    <string name="accessibility_recents_item_open_app_info" msgid="5107479759905883540">"Öppna appinformation för <xliff:g id="APP">%s</xliff:g>."</string>
-    <string name="accessibility_recents_item_launched" msgid="7616039892382525203">"Startar <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"Meddelandet ignorerades."</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"Meddelandepanel."</string>
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"Snabbinställningar."</string>
@@ -355,23 +341,8 @@
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC är inaktiverat"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC är aktiverat"</string>
-    <string name="recents_empty_message" msgid="808480104164008572">"Listan med de senaste åtgärderna är tom"</string>
-    <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"Du har tömt listan"</string>
-    <string name="recents_app_info_button_label" msgid="2890317189376000030">"Appinformation"</string>
-    <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"fästa skärmen"</string>
-    <string name="recents_search_bar_label" msgid="8074997400187836677">"sök"</string>
-    <string name="recents_launch_error_message" msgid="2969287838120550506">"Det gick inte att starta appen <xliff:g id="APP">%s</xliff:g>."</string>
-    <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> är inaktiverad i säkert läge."</string>
-    <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Rensa alla"</string>
-    <string name="recents_drag_hint_message" msgid="2649739267073203985">"Dra hit för att dela upp skärmen"</string>
     <string name="recents_swipe_up_onboarding" msgid="3824607135920170001">"Byt appar genom att svepa uppåt"</string>
     <string name="recents_quick_scrub_onboarding" msgid="2778062804333285789">"Tryck och dra åt höger för att snabbt byta mellan appar"</string>
-    <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Dela horisontellt"</string>
-    <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Dela vertikalt"</string>
-    <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Dela anpassad"</string>
-    <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"Delad skärm till överkanten"</string>
-    <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"Delad skärm åt vänster"</string>
-    <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"Delad skärm åt höger"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7171470775439860480">"Aktivera och inaktivera översikten"</string>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Laddat"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"Laddar"</string>
@@ -618,6 +589,8 @@
     <string name="inline_minimize_button" msgid="966233327974702195">"Minimera"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Vill du fortsätta visa aviseringar för den här appen?"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"De här aviseringarna kan inte inaktiveras"</string>
+    <!-- no translation found for notification_delegate_header (9167022191405284627) -->
+    <skip />
     <string name="appops_camera" msgid="8100147441602585776">"Kameran används av appen."</string>
     <string name="appops_microphone" msgid="741508267659494555">"Mikrofonen används av appen."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"Appen visas över andra appar på skärmen."</string>
@@ -752,6 +725,8 @@
     <item msgid="2139628951880142927">"Visa procent under laddning (standard)"</item>
     <item msgid="3327323682209964956">"Visa inte den här ikonen"</item>
   </string-array>
+    <!-- no translation found for tuner_low_priority (1325884786608312358) -->
+    <skip />
     <string name="other" msgid="4060683095962566764">"Annat"</string>
     <string name="accessibility_divider" msgid="5903423481953635044">"Avdelare för delad skärm"</string>
     <string name="accessibility_action_divider_left_full" msgid="2801570521881574972">"Helskärm på vänster skärm"</string>

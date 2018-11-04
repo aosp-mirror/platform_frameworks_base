@@ -81,9 +81,6 @@ cc_library_shared {
         "-Wno-error=deprecated-declarations",
         "-Wunused",
         "-Wunreachable-code",
-        // Allow implicit fallthroughs in android_media_MediaScanner.cpp and
-        // android_mtp_MtpDatabase.cpp until they are fixed.
-        "-Wno-error=implicit-fallthrough",
     ],
 }
 
@@ -126,14 +123,12 @@ cc_library_shared {
         "libcutils",
         "libmedia_helper",
         "libmedia_player2_util",
-        "libmediadrm",
         "libmediaextractor",
         "libmediametrics",
         "libmediaplayer2",
         "libmediaplayer2-protos",
         "libmediandk_utils",
         "libmediautils",
-        "libnetd_client",  // for setNetworkForUser
         "libprotobuf-cpp-lite",
         "libstagefright_esds",
         "libstagefright_foundation",
@@ -142,7 +137,7 @@ cc_library_shared {
         "libstagefright_mpeg2support",
         "libstagefright_nuplayer2",
         "libstagefright_player2",
-        "libstagefright_rtsp",
+        "libstagefright_rtsp_player2",
         "libstagefright_timedtext2",
         "libmedia2_jni_core",
     ],

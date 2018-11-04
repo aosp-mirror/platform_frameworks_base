@@ -5878,13 +5878,16 @@ public final class ActivityThread extends ClientTransactionHandler {
             }
         }
 
-        // Allow application-generated systrace messages if we're debuggable.
-        boolean isAppDebuggable = (data.appInfo.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
-        Trace.setAppTracingAllowed(isAppDebuggable);
-        ThreadedRenderer.setDebuggingEnabled(isAppDebuggable || Build.IS_DEBUGGABLE);
-        if (isAppDebuggable && data.enableBinderTracking) {
+        // Allow binder tracing, and application-generated systrace messages if we're profileable.
+        boolean isAppProfileable = data.appInfo.isProfileableByShell();
+        Trace.setAppTracingAllowed(isAppProfileable);
+        if (isAppProfileable && data.enableBinderTracking) {
             Binder.enableTracing();
         }
+
+        // Allow renderer debugging features if we're debuggable.
+        boolean isAppDebuggable = (data.appInfo.flags & ApplicationInfo.FLAG_DEBUGGABLE) != 0;
+        ThreadedRenderer.setDebuggingEnabled(isAppDebuggable || Build.IS_DEBUGGABLE);
 
         /**
          * Initialize the default http proxy in this process for the reasons we set the time zone.

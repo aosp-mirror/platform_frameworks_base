@@ -16,6 +16,8 @@
 
 package com.android.server.wm;
 
+import static android.view.Display.DEFAULT_DISPLAY;
+
 import static com.android.server.wm.BoundsAnimationController.NO_PIP_MODE_CHANGED_CALLBACKS;
 import static com.android.server.wm.BoundsAnimationController.SCHEDULE_PIP_MODE_CHANGED_ON_END;
 import static com.android.server.wm.BoundsAnimationController.SCHEDULE_PIP_MODE_CHANGED_ON_START;
@@ -90,7 +92,7 @@ public class BoundsAnimationControllerTests extends WindowTestsBase {
         private AppTransitionListener mListener;
 
         MockAppTransition(Context context) {
-            super(context, sWm);
+            super(context, sWm, mDisplayContent);
         }
 
         @Override

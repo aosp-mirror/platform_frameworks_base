@@ -825,6 +825,18 @@ public class NotificationManager {
     /**
      * @hide
      */
+    public NotificationManager.Policy getConsolidatedNotificationPolicy() {
+        INotificationManager service = getService();
+        try {
+            return service.getConsolidatedNotificationPolicy();
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * @hide
+     */
     public int getRuleInstanceCount(ComponentName owner) {
         INotificationManager service = getService();
         try {
@@ -1062,7 +1074,7 @@ public class NotificationManager {
     }
 
     /**
-     * Gets the current notification policy.
+     * Gets the current user-specified default notification policy.
      *
      * <p>
      */
@@ -1621,6 +1633,71 @@ public class NotificationManager {
                 return new Policy[size];
             }
         };
+
+        /** @hide **/
+        public boolean allowAlarms() {
+            return (priorityCategories & PRIORITY_CATEGORY_ALARMS) != 0;
+        }
+
+        /** @hide **/
+        public boolean allowMedia() {
+            return (priorityCategories & PRIORITY_CATEGORY_MEDIA) != 0;
+        }
+
+        /** @hide **/
+        public boolean allowSystem() {
+            return (priorityCategories & PRIORITY_CATEGORY_SYSTEM) != 0;
+        }
+
+        /** @hide **/
+        public boolean allowRepeatCallers() {
+            return (priorityCategories & PRIORITY_CATEGORY_REPEAT_CALLERS) != 0;
+        }
+
+        /** @hide **/
+        public boolean allowCalls() {
+            return (priorityCategories & PRIORITY_CATEGORY_CALLS) != 0;
+        }
+
+        /** @hide **/
+        public boolean allowMessages() {
+            return (priorityCategories & PRIORITY_CATEGORY_MESSAGES) != 0;
+        }
+
+        /** @hide **/
+        public boolean allowEvents() {
+            return (priorityCategories & PRIORITY_CATEGORY_EVENTS) != 0;
+        }
+
+        /** @hide **/
+        public boolean allowReminders() {
+            return (priorityCategories & PRIORITY_CATEGORY_REMINDERS) != 0;
+        }
+
+        /** @hide **/
+        public int allowCallsFrom() {
+            return priorityCallSenders;
+        }
+
+        /** @hide **/
+        public int allowMessagesFrom() {
+            return priorityMessageSenders;
+        }
+
+        /**
+         * returns a deep copy of this policy
+         * @hide
+         */
+        public Policy copy() {
+            final Parcel parcel = Parcel.obtain();
+            try {
+                writeToParcel(parcel, 0);
+                parcel.setDataPosition(0);
+                return new Policy(parcel);
+            } finally {
+                parcel.recycle();
+            }
+        }
     }
 
     /**
@@ -1708,5 +1785,4 @@ public class NotificationManager {
             default: return defValue;
         }
     }
-
 }

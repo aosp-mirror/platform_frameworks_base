@@ -405,6 +405,8 @@ public class NotificationShelf extends ActivatableNotificationView implements
             int top = (int) (maxTop - shelfIconPosition);
             Rect clipRect = new Rect(0, top, icon.getWidth(), Math.max(top, icon.getHeight()));
             icon.setClipBounds(clipRect);
+        } else {
+            icon.setClipBounds(null);
         }
     }
 

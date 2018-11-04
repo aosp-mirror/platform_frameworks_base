@@ -106,6 +106,9 @@ public class RemoteRoleControllerService {
         private final Queue<Call> mPendingCalls = new ArrayDeque<>();
 
         @NonNull
+        private final Handler mMainHandler = Handler.getMain();
+
+        @NonNull
         private final Runnable mUnbindRunnable = this::unbind;
 
         Connection(@UserIdInt int userId, @NonNull Context context) {
@@ -142,7 +145,7 @@ public class RemoteRoleControllerService {
         }
 
         public void enqueueCall(@NonNull Call call) {
-            Handler.getMain().post(PooledLambda.obtainRunnable(this::executeCall, call));
+            mMainHandler.post(PooledLambda.obtainRunnable(this::executeCall, call));
         }
 
         @MainThread
@@ -158,7 +161,7 @@ public class RemoteRoleControllerService {
 
         @MainThread
         private void ensureBound() {
-            Handler.getMain().removeCallbacks(mUnbindRunnable);
+            mMainHandler.removeCallbacks(mUnbindRunnable);
             if (!mBound) {
                 Intent intent = new Intent(RoleControllerService.SERVICE_INTERFACE);
                 intent.setPackage(mContext.getPackageManager()
@@ -169,9 +172,8 @@ public class RemoteRoleControllerService {
         }
 
         private void scheduleUnbind() {
-            Handler mainHandler = Handler.getMain();
-            mainHandler.removeCallbacks(mUnbindRunnable);
-            mainHandler.postDelayed(mUnbindRunnable, UNBIND_DELAY_MILLIS);
+            mMainHandler.removeCallbacks(mUnbindRunnable);
+            mMainHandler.postDelayed(mUnbindRunnable, UNBIND_DELAY_MILLIS);
         }
 
         @MainThread

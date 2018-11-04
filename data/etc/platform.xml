@@ -178,6 +178,28 @@
     <assign-permission name="android.permission.STATSCOMPANION" uid="statsd" />
     <assign-permission name="android.permission.UPDATE_APP_OPS_STATS" uid="statsd" />
 
+    <split-permission name="android.permission.WRITE_EXTERNAL_STORAGE">
+        <new-permission name="android.permission.READ_EXTERNAL_STORAGE" />
+    </split-permission>
+    <split-permission name="android.permission.READ_CONTACTS"
+                      targetSdk="16">
+        <new-permission name="android.permission.READ_CALL_LOG" />
+    </split-permission>
+    <split-permission name="android.permission.WRITE_CONTACTS"
+                      targetSdk="16">
+        <new-permission name="android.permission.WRITE_CALL_LOG" />
+    </split-permission>
+    <!-- STOPSHIP(b/118882117): change targetSdk to Q when SDK version finalised -->
+    <split-permission name="android.permission.ACCESS_FINE_LOCATION"
+                      targetSdk="10000">
+        <new-permission name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+    </split-permission>
+    <!-- STOPSHIP(b/118882117): change targetSdk to Q when SDK version finalised -->
+    <split-permission name="android.permission.ACCESS_COARSE_LOCATION"
+                      targetSdk="10000">
+        <new-permission name="android.permission.ACCESS_BACKGROUND_LOCATION" />
+    </split-permission>
+
     <!-- This is a list of all the libraries available for application
          code to link against. -->
 

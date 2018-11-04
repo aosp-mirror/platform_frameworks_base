@@ -370,6 +370,10 @@ message StatsdStatsReport {
         optional int64 total_pull = 2;
         optional int64 total_pull_from_cache = 3;
         optional int64 min_pull_interval_sec = 4;
+        optional int64 average_pull_time_nanos = 5;
+        optional int64 max_pull_time_nanos = 6;
+        optional int64 average_pull_delay_nanos = 7;
+        optional int64 max_pull_delay_nanos = 8;
     }
     repeated PulledAtomStats pulled_atom_stats = 10;
 

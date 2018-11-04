@@ -635,6 +635,13 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      */
     public static final int PRIVATE_FLAG_USES_NON_SDK_API = 1 << 22;
 
+    /**
+     * Indicates whether this application can be profiled by the shell user,
+     * even when running on a device that is running in user mode.
+     * @hide
+     */
+    public static final int PRIVATE_FLAG_PROFILEABLE_BY_SHELL = 1 << 23;
+
     /** @hide */
     @IntDef(flag = true, prefix = { "PRIVATE_FLAG_" }, value = {
             PRIVATE_FLAG_ACTIVITIES_RESIZE_MODE_RESIZEABLE,
@@ -654,6 +661,7 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
             PRIVATE_FLAG_PRIVILEGED,
             PRIVATE_FLAG_PRODUCT,
             PRIVATE_FLAG_PRODUCT_SERVICES,
+            PRIVATE_FLAG_PROFILEABLE_BY_SHELL,
             PRIVATE_FLAG_REQUIRED_FOR_SYSTEM_USER,
             PRIVATE_FLAG_SIGNED_WITH_PLATFORM_KEY,
             PRIVATE_FLAG_STATIC_SHARED_LIBRARY,
@@ -1926,6 +1934,14 @@ public class ApplicationInfo extends PackageItemInfo implements Parcelable {
      */
     public boolean isVirtualPreload() {
         return (privateFlags & PRIVATE_FLAG_VIRTUAL_PRELOAD) != 0;
+    }
+
+    /**
+     * Returns whether or not this application can be profiled by the shell user,
+     * even when running on a device that is running in user mode.
+     */
+    public boolean isProfileableByShell() {
+        return (privateFlags & PRIVATE_FLAG_PROFILEABLE_BY_SHELL) != 0;
     }
 
     /**

@@ -203,15 +203,11 @@ final class FillUi {
                     .getInteger(com.android.internal.R.integer.autofill_max_visible_datasets);
         }
 
-        final RemoteViews.OnClickHandler interceptionHandler = new RemoteViews.OnClickHandler() {
-            @Override
-            public boolean onClickHandler(View view, PendingIntent pendingIntent,
-                    Intent fillInIntent) {
-                if (pendingIntent != null) {
-                    mCallback.startIntentSender(pendingIntent.getIntentSender());
-                }
-                return true;
+        final RemoteViews.OnClickHandler interceptionHandler = (view, pendingIntent, r) -> {
+            if (pendingIntent != null) {
+                mCallback.startIntentSender(pendingIntent.getIntentSender());
             }
+            return true;
         };
 
         if (response.getAuthentication() != null) {
@@ -369,13 +365,9 @@ final class FillUi {
      * Creates a remoteview interceptor used to block clicks.
      */
     private RemoteViews.OnClickHandler newClickBlocker() {
-        return new RemoteViews.OnClickHandler() {
-            @Override
-            public boolean onClickHandler(View view, PendingIntent pendingIntent,
-                    Intent fillInIntent) {
-                if (sVerbose) Slog.v(TAG, "Ignoring click on " + view);
-                return true;
-            }
+        return (view, pendingIntent, response) -> {
+            if (sVerbose) Slog.v(TAG, "Ignoring click on " + view);
+            return true;
         };
     }
 

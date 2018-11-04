@@ -21,11 +21,11 @@ import android.hardware.contexthub.V1_0.HubAppInfo;
 import android.hardware.location.NanoAppInstanceInfo;
 import android.util.Log;
 
-import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.function.Consumer;
 
 /**
  * Manages the state of loaded nanoapps at the Context Hubs.
@@ -70,11 +70,15 @@ import java.util.List;
     }
 
     /**
-     * @return a collection of NanoAppInstanceInfo objects in the cache
+     * Invokes a Consumer operation for each NanoAppInstanceInfo entry in the cache
+     *
+     * @param consumer the Consumer operation to perform
      */
     /* package */
-    synchronized Collection<NanoAppInstanceInfo> getNanoAppInstanceInfoCollection() {
-        return mNanoAppHash.values();
+    synchronized void foreachNanoAppInstanceInfo(Consumer<NanoAppInstanceInfo> consumer) {
+        for (NanoAppInstanceInfo info : mNanoAppHash.values()) {
+            consumer.accept(info);
+        }
     }
 
     /**

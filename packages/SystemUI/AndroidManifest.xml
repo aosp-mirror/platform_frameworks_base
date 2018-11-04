@@ -136,6 +136,10 @@
     <!-- Screen Capturing -->
     <uses-permission android:name="android.permission.MANAGE_MEDIA_PROJECTION" />
 
+    <!-- Screen Recording -->
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.RECORD_AUDIO" />
+
     <!-- Assist -->
     <uses-permission android:name="android.permission.ACCESS_VOICE_INTERACTION_SERVICE" />
 
@@ -212,6 +216,9 @@
     <!-- Permission necessary to change car audio volume through CarAudioManager -->
     <uses-permission android:name="android.car.permission.CAR_CONTROL_AUDIO_VOLUME" />
 
+    <!-- Permission to control Android Debug Bridge (ADB) -->
+    <uses-permission android:name="android.permission.MANAGE_DEBUGGING" />
+
     <uses-permission android:name="android.permission.HIDE_NON_SYSTEM_OVERLAY_WINDOWS" />
 
     <protected-broadcast android:name="com.android.settingslib.action.REGISTER_SLICE_RECEIVER" />
@@ -266,6 +273,10 @@
                 <action android:name="com.android.systemui.screenshot.SHOW_ERROR" />
             </intent-filter>
         </receiver>
+
+        <activity android:name=".screenrecord.ScreenRecordDialog"
+            android:theme="@style/ScreenRecord" />
+        <service android:name=".screenrecord.RecordingService" />
 
         <receiver android:name=".SysuiRestartReceiver"
             android:exported="false">
@@ -368,9 +379,9 @@
             android:excludeFromRecents="true">
         </activity>
 
-        <!-- started from UsbDebuggingManager -->
+        <!-- started from AdbDebuggingManager -->
         <activity android:name=".usb.UsbDebuggingActivity"
-            android:permission="android.permission.MANAGE_USB"
+            android:permission="android.permission.MANAGE_DEBUGGING"
             android:theme="@style/Theme.SystemUI.Dialog.Alert"
             android:finishOnCloseSystemDialogs="true"
             android:excludeFromRecents="true">

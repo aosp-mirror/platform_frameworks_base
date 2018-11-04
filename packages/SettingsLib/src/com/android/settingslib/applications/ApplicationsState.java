@@ -254,7 +254,8 @@ public class ApplicationsState {
                                 user.isAdmin() ? mAdminRetrieveFlags : mRetrieveFlags,
                                 user.id);
                 mApplications.addAll(list.getList());
-            } catch (RemoteException e) {
+            } catch (Exception e) {
+                Log.e(TAG, "Error during doResumeIfNeededLocked", e);
             }
         }
 

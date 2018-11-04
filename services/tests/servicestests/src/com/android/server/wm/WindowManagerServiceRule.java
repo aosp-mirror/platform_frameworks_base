@@ -33,6 +33,7 @@ import android.content.Context;
 import android.hardware.display.DisplayManagerInternal;
 import android.os.PowerManagerInternal;
 import android.os.PowerSaveState;
+import android.view.Display;
 import android.view.InputChannel;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
@@ -114,7 +115,7 @@ public class WindowManagerServiceRule implements TestRule {
                         runnable.run();
                     }
                     return null;
-                }).when(atm).notifyKeyguardFlagsChanged(any());
+                }).when(atm).notifyKeyguardFlagsChanged(any(), anyInt());
 
                 InputManagerService ims = mock(InputManagerService.class);
                 // InputChannel is final and can't be mocked.
@@ -142,11 +143,11 @@ public class WindowManagerServiceRule implements TestRule {
 
                 mService.onInitReady();
 
+                final Display display = mService.mDisplayManager.getDisplay(DEFAULT_DISPLAY);
+                final DisplayWindowController dcw = new DisplayWindowController(display, mService);
                 // Display creation is driven by the ActivityManagerService via ActivityStackSupervisor.
                 // We emulate those steps here.
-                mService.mRoot.createDisplayContent(
-                        mService.mDisplayManager.getDisplay(DEFAULT_DISPLAY),
-                        mock(DisplayWindowController.class));
+                mService.mRoot.createDisplayContent(display, dcw);
             }
 
             private void removeServices() {

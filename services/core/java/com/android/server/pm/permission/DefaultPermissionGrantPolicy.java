@@ -344,40 +344,43 @@ public final class DefaultPermissionGrantPolicy {
     @SafeVarargs
     private final void grantIgnoringSystemPackage(String packageName, int userId,
             Set<String>... permissionGroups) {
-        grantPermissionsToSystemPackage(packageName, userId, false, true, permissionGroups);
+        grantPermissionsToPackage(
+                packageName, userId, true /* ignoreSystemPackage */, permissionGroups);
     }
 
     @SafeVarargs
     private final void grantSystemFixedPermissionsToSystemPackage(String packageName, int userId,
             Set<String>... permissionGroups) {
-        grantPermissionsToSystemPackage(packageName, userId, true, false, permissionGroups);
+        grantPermissionsToSystemPackage(
+                packageName, userId, true /* systemFixed */, permissionGroups);
     }
 
     @SafeVarargs
     private final void grantPermissionsToSystemPackage(
             String packageName, int userId, Set<String>... permissionGroups) {
-        grantPermissionsToSystemPackage(packageName, userId, false, false, permissionGroups);
+        grantPermissionsToSystemPackage(
+                packageName, userId, false /* systemFixed */, permissionGroups);
     }
 
     @SafeVarargs
     private final void grantPermissionsToSystemPackage(String packageName, int userId,
-            boolean systemFixed, boolean ignoreSystemPackage, Set<String>... permissionGroups) {
-        if (!ignoreSystemPackage && !isSystemPackage(packageName)) {
+            boolean systemFixed, Set<String>... permissionGroups) {
+        if (!isSystemPackage(packageName)) {
             return;
         }
-        grantRuntimePermissionsToPackage(getSystemPackageInfo(packageName),
-                userId, systemFixed, ignoreSystemPackage, permissionGroups);
+        grantPermissionsToPackage(getSystemPackageInfo(packageName),
+                userId, systemFixed, false /* ignoreSystemPackage */, permissionGroups);
     }
 
     @SafeVarargs
-    private final void grantRuntimePermissionsToPackage(String packageName, int userId,
-            boolean systemFixed, boolean ignoreSystemPackage, Set<String>... permissionGroups) {
-        grantRuntimePermissionsToPackage(getPackageInfo(packageName),
-                userId, systemFixed, ignoreSystemPackage, permissionGroups);
+    private final void grantPermissionsToPackage(String packageName, int userId,
+            boolean ignoreSystemPackage, Set<String>... permissionGroups) {
+        grantPermissionsToPackage(getPackageInfo(packageName),
+                userId, false /* systemFixed */, ignoreSystemPackage, permissionGroups);
     }
 
     @SafeVarargs
-    private final void grantRuntimePermissionsToPackage(PackageInfo packageName, int userId,
+    private final void grantPermissionsToPackage(PackageInfo packageName, int userId,
             boolean systemFixed, boolean ignoreSystemPackage, Set<String>... permissionGroups) {
         if (packageName == null) return;
         if (doesPackageSupportRuntimePermissions(packageName)) {
@@ -589,9 +592,8 @@ public final class DefaultPermissionGrantPolicy {
                 browserPackage = null;
             }
         }
-        grantRuntimePermissionsToPackage(browserPackage, userId,
-                false /* systemFixed */, false /* ignoreSystemPackage */,
-                LOCATION_PERMISSIONS);
+        grantPermissionsToPackage(browserPackage, userId,
+                false /* ignoreSystemPackage */, LOCATION_PERMISSIONS);
 
         // Voice interaction
         if (voiceInteractPackageNames != null) {
@@ -786,7 +788,7 @@ public final class DefaultPermissionGrantPolicy {
             return;
         }
         Log.i(TAG, "Granting permissions to sim call manager for user:" + userId);
-        grantRuntimePermissionsToPackage(packageName, userId, false, false,
+        grantPermissionsToPackage(packageName, userId, false /* ignoreSystemPackage */,
                 PHONE_PERMISSIONS, MICROPHONE_PERMISSIONS);
     }
 

@@ -46,6 +46,7 @@ bool StatsPuller::Pull(const int64_t elapsedTimeNs, std::vector<std::shared_ptr<
     if (elapsedTimeNs - mLastPullTimeNs < mCoolDownNs) {
         (*data) = mCachedData;
         StatsdStats::getInstance().notePullFromCache(mTagId);
+        StatsdStats::getInstance().notePullDelay(mTagId, getElapsedRealtimeNs() - elapsedTimeNs);
         return true;
     }
     if (mMinPullIntervalNs > elapsedTimeNs - mLastPullTimeNs) {
@@ -55,7 +56,9 @@ bool StatsPuller::Pull(const int64_t elapsedTimeNs, std::vector<std::shared_ptr<
     }
     mCachedData.clear();
     mLastPullTimeNs = elapsedTimeNs;
+    int64_t pullStartTimeNs = getElapsedRealtimeNs();
     bool ret = PullInternal(&mCachedData);
+    StatsdStats::getInstance().notePullTime(mTagId, getElapsedRealtimeNs() - pullStartTimeNs);
     for (const shared_ptr<LogEvent>& data : mCachedData) {
         data->setElapsedTimestampNs(elapsedTimeNs);
         data->setLogdWallClockTimestampNs(wallClockTimeNs);
@@ -64,6 +67,7 @@ bool StatsPuller::Pull(const int64_t elapsedTimeNs, std::vector<std::shared_ptr<
       mergeIsolatedUidsToHostUid(mCachedData, mUidMap, mTagId);
       (*data) = mCachedData;
     }
+    StatsdStats::getInstance().notePullDelay(mTagId, getElapsedRealtimeNs() - elapsedTimeNs);
     return ret;
 }
 

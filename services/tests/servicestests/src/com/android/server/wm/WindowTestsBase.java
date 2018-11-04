@@ -181,9 +181,12 @@ class WindowTestsBase {
                         displayContent.removeImmediately();
                     }
                 }
+                // Remove app transition & window freeze timeout callbacks to prevent unnecessary
+                // actions after test.
+                sWm.getDefaultDisplayContentLocked().mAppTransition
+                        .removeAppTransitionTimeoutCallbacks();
+                sWm.mH.removeMessages(WindowManagerService.H.WINDOW_FREEZE_TIMEOUT);
                 sWm.mInputMethodTarget = null;
-                sWm.mClosingApps.clear();
-                sWm.mOpeningApps.clear();
             }
 
             // Wait until everything is really cleaned up.
@@ -351,6 +354,32 @@ class WindowTestsBase {
         synchronized (sWm.mWindowMap) {
             return new DisplayContent(display, sWm, mWallpaperController,
                     mock(DisplayWindowController.class));
+        }
+    }
+
+    /**
+     * Creates a {@link DisplayContent} with given display state and adds it to the system.
+     *
+     * Unlike {@link #createNewDisplay()} that uses a mock {@link DisplayWindowController} to
+     * initialize {@link DisplayContent}, this method used real controller object when the test
+     * need to verify its related flows.
+     *
+     * @param displayState For initializing the state of the display. See
+     *                     {@link Display#getState()}.
+     */
+    DisplayContent createNewDisplayWithController(int displayState) {
+        // Leverage main display info & initialize it with display state for given displayId.
+        DisplayInfo displayInfo = new DisplayInfo();
+        displayInfo.copyFrom(mDisplayInfo);
+        displayInfo.state = displayState;
+        final int displayId = sNextDisplayId++;
+        final Display display = new Display(DisplayManagerGlobal.getInstance(), displayId,
+                displayInfo, DEFAULT_DISPLAY_ADJUSTMENTS);
+        final DisplayWindowController dcw = new DisplayWindowController(display, sWm);
+        synchronized (sWm.mWindowMap) {
+            // Display creation is driven by DisplayWindowController via ActivityStackSupervisor.
+            // We skip those steps here.
+            return sWm.mRoot.createDisplayContent(display, dcw);
         }
     }
 

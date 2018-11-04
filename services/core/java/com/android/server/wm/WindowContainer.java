@@ -826,6 +826,12 @@ class WindowContainer<E extends WindowContainer> extends ConfigurationContainer<
         wrapper.release();
     }
 
+    void forAllAppWindows(Consumer<AppWindowToken> callback) {
+        for (int i = mChildren.size() - 1; i >= 0; --i) {
+            mChildren.get(i).forAllAppWindows(callback);
+        }
+    }
+
     /**
      * For all tasks at or below this container call the callback.
      *

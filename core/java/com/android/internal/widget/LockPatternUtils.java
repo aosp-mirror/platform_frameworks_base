@@ -55,21 +55,21 @@ import android.util.SparseLongArray;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.server.LocalServices;
+
 import com.google.android.collect.Lists;
 
 import libcore.util.HexEncoding;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.SecureRandom;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 import java.util.StringJoiner;
+
 /**
  * Utilities for the lock pattern and its settings.
  */
@@ -1527,7 +1527,7 @@ public class LockPatternUtils {
     /**
      * @see StrongAuthTracker#isFingerprintAllowedForUser
      */
-    public boolean isFingerprintAllowedForUser(int userId) {
+    public boolean isBiometricAllowedForUser(int userId) {
         return (getStrongAuthForUser(userId) & ~StrongAuthTracker.ALLOWING_BIOMETRIC) == 0;
     }
 

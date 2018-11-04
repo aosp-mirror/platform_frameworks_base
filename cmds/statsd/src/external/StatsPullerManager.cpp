@@ -167,13 +167,13 @@ const std::map<int, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
         // process_memory_state
         {android::util::PROCESS_MEMORY_STATE,
          {{4, 5, 6, 7, 8, 9},
-          {2, 3},
+          {2, 3, 10},
           1 * NS_PER_SEC,
           new StatsCompanionServicePuller(android::util::PROCESS_MEMORY_STATE)}},
         // native_process_memory_state
         {android::util::NATIVE_PROCESS_MEMORY_STATE,
-         {{3, 4, 5, 6, 7},
-          {2},
+         {{3, 4, 5, 6},
+          {2, 7},
           1 * NS_PER_SEC,
           new StatsCompanionServicePuller(android::util::NATIVE_PROCESS_MEMORY_STATE)}},
         // temperature

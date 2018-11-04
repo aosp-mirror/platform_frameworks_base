@@ -29,6 +29,11 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include <hwui/MinikinSkia.h>
+#include <minikin/FontCollection.h>
+#include <minikin/LocaleList.h>
+#include <minikin/SystemFonts.h>
+
 struct XmlCharDeleter {
     void operator()(xmlChar* b) { xmlFree(b); }
 };
@@ -190,6 +195,41 @@ ASystemFontIterator* ASystemFontIterator_open() {
 
 void ASystemFontIterator_close(ASystemFontIterator* ite) {
     delete ite;
+}
+
+ASystemFont* ASystemFont_matchFamilyStyleCharacter(
+        const char* _Nonnull familyName,
+        uint16_t weight,
+        bool italic,
+        const char* _Nonnull languageTags,
+        const uint16_t* _Nonnull text,
+        uint32_t textLength,
+        uint32_t* _Nullable runLength) {
+    std::shared_ptr<minikin::FontCollection> fc =
+            minikin::SystemFonts::findFontCollection(familyName);
+    std::vector<minikin::FontCollection::Run> runs =
+            fc->itemize(minikin::U16StringPiece(text, textLength),
+                        minikin::FontStyle(weight, static_cast<minikin::FontStyle::Slant>(italic)),
+                        minikin::registerLocaleList(languageTags),
+                        minikin::FamilyVariant::DEFAULT);
+
+    const minikin::Font* font = runs[0].fakedFont.font;
+    std::unique_ptr<ASystemFont> result = std::make_unique<ASystemFont>();
+    const android::MinikinFontSkia* minikinFontSkia =
+            reinterpret_cast<android::MinikinFontSkia*>(font->typeface().get());
+    result->mFilePath = minikinFontSkia->getFilePath();
+    result->mWeight = font->style().weight();
+    result->mItalic = font->style().slant() == minikin::FontStyle::Slant::ITALIC;
+    result->mCollectionIndex = minikinFontSkia->GetFontIndex();
+    const std::vector<minikin::FontVariation>& axes = minikinFontSkia->GetAxes();
+    result->mAxes.reserve(axes.size());
+    for (auto axis : axes) {
+        result->mAxes.push_back(std::make_pair(axis.axisTag, axis.value));
+    }
+    if (runLength != nullptr) {
+        *runLength = runs[0].end;
+    }
+    return result.release();
 }
 
 xmlNode* findNextFontNode(const XmlDocUniquePtr& xmlDoc, xmlNode* fontNode) {

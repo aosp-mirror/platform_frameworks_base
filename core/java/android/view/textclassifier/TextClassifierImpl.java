@@ -58,16 +58,12 @@ import java.time.ZonedDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
-import java.util.StringJoiner;
 import java.util.concurrent.TimeUnit;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * Default implementation of the {@link TextClassifier} interface.
@@ -81,13 +77,18 @@ import java.util.regex.Pattern;
 public final class TextClassifierImpl implements TextClassifier {
 
     private static final String LOG_TAG = DEFAULT_LOG_TAG;
-    private static final String MODEL_DIR = "/etc/textclassifier/";
-    private static final String MODEL_FILE_REGEX = "textclassifier\\.(.*)\\.model";
-    private static final String UPDATED_MODEL_FILE_PATH =
-            "/data/misc/textclassifier/textclassifier.model";
-    private static final String LANG_ID_MODEL_FILE_PATH = "/etc/textclassifier/lang_id.model";
-    private static final String UPDATED_LANG_ID_MODEL_FILE_PATH =
-            "/data/misc/textclassifier/lang_id.model";
+
+    private static final File FACTORY_MODEL_DIR = new File("/etc/textclassifier/");
+    // Annotator
+    private static final String ANNOTATOR_FACTORY_MODEL_FILENAME_REGEX =
+            "textclassifier\\.(.*)\\.model";
+    private static final File ANNOTATOR_UPDATED_MODEL_FILE =
+            new File("/data/misc/textclassifier/textclassifier.model");
+
+    // LangID
+    private static final String LANG_ID_FACTORY_MODEL_FILENAME_REGEX = "lang_id.model";
+    private static final File UPDATED_LANG_ID_MODEL_FILE =
+            new File("/data/misc/textclassifier/lang_id.model");
 
     private final Context mContext;
     private final TextClassifier mFallback;
@@ -95,9 +96,7 @@ public final class TextClassifierImpl implements TextClassifier {
 
     private final Object mLock = new Object();
     @GuardedBy("mLock") // Do not access outside this lock.
-    private List<ModelFile> mAllModelFiles;
-    @GuardedBy("mLock") // Do not access outside this lock.
-    private ModelFile mModel;
+    private ModelFileManager.ModelFile mAnnotatorModelInUse;
     @GuardedBy("mLock") // Do not access outside this lock.
     private AnnotatorModel mAnnotatorImpl;
     @GuardedBy("mLock") // Do not access outside this lock.
@@ -109,12 +108,29 @@ public final class TextClassifierImpl implements TextClassifier {
 
     private final TextClassificationConstants mSettings;
 
+    private final ModelFileManager mAnnotatorModelFileManager;
+    private final ModelFileManager mLangIdModelFileManager;
+
     public TextClassifierImpl(
             Context context, TextClassificationConstants settings, TextClassifier fallback) {
         mContext = Preconditions.checkNotNull(context);
         mFallback = Preconditions.checkNotNull(fallback);
         mSettings = Preconditions.checkNotNull(settings);
         mGenerateLinksLogger = new GenerateLinksLogger(mSettings.getGenerateLinksLogSampleRate());
+        mAnnotatorModelFileManager = new ModelFileManager(
+                new ModelFileManager.ModelFileSupplierImpl(
+                        FACTORY_MODEL_DIR,
+                        ANNOTATOR_FACTORY_MODEL_FILENAME_REGEX,
+                        ANNOTATOR_UPDATED_MODEL_FILE,
+                        AnnotatorModel::getVersion,
+                        AnnotatorModel::getLocales));
+        mLangIdModelFileManager = new ModelFileManager(
+                new ModelFileManager.ModelFileSupplierImpl(
+                        FACTORY_MODEL_DIR,
+                        LANG_ID_FACTORY_MODEL_FILENAME_REGEX,
+                        UPDATED_LANG_ID_MODEL_FILE,
+                        fd -> -1, // TODO: Replace this with LangIdModel.getVersion(fd)
+                        fd -> ModelFileManager.ModelFile.LANGUAGE_INDEPENDENT));
     }
 
     public TextClassifierImpl(Context context, TextClassificationConstants settings) {
@@ -334,22 +350,24 @@ public final class TextClassifierImpl implements TextClassifier {
             throws FileNotFoundException {
         synchronized (mLock) {
             localeList = localeList == null ? LocaleList.getEmptyLocaleList() : localeList;
-            final ModelFile bestModel = findBestModelLocked(localeList);
+            final ModelFileManager.ModelFile bestModel =
+                    mAnnotatorModelFileManager.findBestModelFile(localeList);
             if (bestModel == null) {
-                throw new FileNotFoundException("No model for " + localeList.toLanguageTags());
+                throw new FileNotFoundException(
+                        "No annotator model for " + localeList.toLanguageTags());
             }
-            if (mAnnotatorImpl == null || !Objects.equals(mModel, bestModel)) {
+            if (mAnnotatorImpl == null || !Objects.equals(mAnnotatorModelInUse, bestModel)) {
                 Log.d(DEFAULT_LOG_TAG, "Loading " + bestModel);
                 destroyAnnotatorImplIfExistsLocked();
-                final ParcelFileDescriptor fd = ParcelFileDescriptor.open(
+                final ParcelFileDescriptor pfd = ParcelFileDescriptor.open(
                         new File(bestModel.getPath()), ParcelFileDescriptor.MODE_READ_ONLY);
                 try {
-                    if (fd != null) {
-                        mAnnotatorImpl = new AnnotatorModel(fd.getFd());
-                        mModel = bestModel;
+                    if (pfd != null) {
+                        mAnnotatorImpl = new AnnotatorModel(pfd.getFd());
+                        mAnnotatorModelInUse = bestModel;
                     }
                 } finally {
-                    maybeCloseAndLogError(fd);
+                    maybeCloseAndLogError(pfd);
                 }
             }
             return mAnnotatorImpl;
@@ -367,40 +385,19 @@ public final class TextClassifierImpl implements TextClassifier {
     private LangIdModel getLangIdImpl() throws FileNotFoundException {
         synchronized (mLock) {
             if (mLangIdImpl == null) {
-                ParcelFileDescriptor factoryFd = null;
-                ParcelFileDescriptor updateFd = null;
+                final ModelFileManager.ModelFile bestModel =
+                        mLangIdModelFileManager.findBestModelFile(LocaleList.getEmptyLocaleList());
+                if (bestModel == null) {
+                    throw new FileNotFoundException("No LangID model is found");
+                }
+                final ParcelFileDescriptor pfd = ParcelFileDescriptor.open(
+                        new File(bestModel.getPath()), ParcelFileDescriptor.MODE_READ_ONLY);
                 try {
-                    int factoryVersion = -1;
-                    int updateVersion = factoryVersion;
-                    final File factoryFile = new File(LANG_ID_MODEL_FILE_PATH);
-                    if (factoryFile.exists()) {
-                        factoryFd = ParcelFileDescriptor.open(
-                                factoryFile, ParcelFileDescriptor.MODE_READ_ONLY);
-                        // TODO: Uncomment when method is implemented:
-                        // if (factoryFd != null) {
-                        //     factoryVersion = LangIdModel.getVersion(factoryFd.getFd());
-                        // }
-                    }
-                    final File updateFile = new File(UPDATED_LANG_ID_MODEL_FILE_PATH);
-                    if (updateFile.exists()) {
-                        updateFd = ParcelFileDescriptor.open(
-                                updateFile, ParcelFileDescriptor.MODE_READ_ONLY);
-                        // TODO: Uncomment when method is implemented:
-                        // if (updateFd != null) {
-                        //     updateVersion = LangIdModel.getVersion(updateFd.getFd());
-                        // }
-                    }
-
-                    if (updateVersion > factoryVersion) {
-                        mLangIdImpl = new LangIdModel(updateFd.getFd());
-                    } else if (factoryFd != null) {
-                        mLangIdImpl = new LangIdModel(factoryFd.getFd());
-                    } else {
-                        throw new FileNotFoundException("Language detection model not found");
+                    if (pfd != null) {
+                        mLangIdImpl = new LangIdModel(pfd.getFd());
                     }
                 } finally {
-                    maybeCloseAndLogError(factoryFd);
-                    maybeCloseAndLogError(updateFd);
+                    maybeCloseAndLogError(pfd);
                 }
             }
             return mLangIdImpl;
@@ -409,73 +406,14 @@ public final class TextClassifierImpl implements TextClassifier {
 
     private String createId(String text, int start, int end) {
         synchronized (mLock) {
-            return SelectionSessionLogger.createId(text, start, end, mContext, mModel.getVersion(),
-                    mModel.getSupportedLocales());
+            return SelectionSessionLogger.createId(text, start, end, mContext,
+                    mAnnotatorModelInUse.getVersion(),
+                    mAnnotatorModelInUse.getSupportedLocales());
         }
     }
 
     private static String concatenateLocales(@Nullable LocaleList locales) {
         return (locales == null) ? "" : locales.toLanguageTags();
-    }
-
-    /**
-     * Finds the most appropriate model to use for the given target locale list.
-     *
-     * The basic logic is: we ignore all models that don't support any of the target locales. For
-     * the remaining candidates, we take the update model unless its version number is lower than
-     * the factory version. It's assumed that factory models do not have overlapping locale ranges
-     * and conflict resolution between these models hence doesn't matter.
-     */
-    @GuardedBy("mLock") // Do not call outside this lock.
-    @Nullable
-    private ModelFile findBestModelLocked(LocaleList localeList) {
-        // Specified localeList takes priority over the system default, so it is listed first.
-        final String languages = localeList.isEmpty()
-                ? LocaleList.getDefault().toLanguageTags()
-                : localeList.toLanguageTags() + "," + LocaleList.getDefault().toLanguageTags();
-        final List<Locale.LanguageRange> languageRangeList = Locale.LanguageRange.parse(languages);
-
-        ModelFile bestModel = null;
-        for (ModelFile model : listAllModelsLocked()) {
-            if (model.isAnyLanguageSupported(languageRangeList)) {
-                if (model.isPreferredTo(bestModel)) {
-                    bestModel = model;
-                }
-            }
-        }
-        return bestModel;
-    }
-
-    /** Returns a list of all model files available, in order of precedence. */
-    @GuardedBy("mLock") // Do not call outside this lock.
-    private List<ModelFile> listAllModelsLocked() {
-        if (mAllModelFiles == null) {
-            final List<ModelFile> allModels = new ArrayList<>();
-            // The update model has the highest precedence.
-            if (new File(UPDATED_MODEL_FILE_PATH).exists()) {
-                final ModelFile updatedModel = ModelFile.fromPath(UPDATED_MODEL_FILE_PATH);
-                if (updatedModel != null) {
-                    allModels.add(updatedModel);
-                }
-            }
-            // Factory models should never have overlapping locales, so the order doesn't matter.
-            final File modelsDir = new File(MODEL_DIR);
-            if (modelsDir.exists() && modelsDir.isDirectory()) {
-                final File[] modelFiles = modelsDir.listFiles();
-                final Pattern modelFilenamePattern = Pattern.compile(MODEL_FILE_REGEX);
-                for (File modelFile : modelFiles) {
-                    final Matcher matcher = modelFilenamePattern.matcher(modelFile.getName());
-                    if (matcher.matches() && modelFile.isFile()) {
-                        final ModelFile model = ModelFile.fromPath(modelFile.getAbsolutePath());
-                        if (model != null) {
-                            allModels.add(model);
-                        }
-                    }
-                }
-            }
-            mAllModelFiles = allModels;
-        }
-        return mAllModelFiles;
     }
 
     private TextClassification createClassificationResult(
@@ -523,12 +461,18 @@ public final class TextClassifierImpl implements TextClassifier {
     @Override
     public void dump(@NonNull IndentingPrintWriter printWriter) {
         synchronized (mLock) {
-            listAllModelsLocked();
             printWriter.println("TextClassifierImpl:");
             printWriter.increaseIndent();
-            printWriter.println("Model file(s):");
+            printWriter.println("Annotator model file(s):");
             printWriter.increaseIndent();
-            for (ModelFile modelFile : mAllModelFiles) {
+            for (ModelFileManager.ModelFile modelFile :
+                    mAnnotatorModelFileManager.listModelFiles()) {
+                printWriter.println(modelFile.toString());
+            }
+            printWriter.decreaseIndent();
+            printWriter.println("LangID model file(s):");
+            for (ModelFileManager.ModelFile modelFile :
+                    mLangIdModelFileManager.listModelFiles()) {
                 printWriter.println(modelFile.toString());
             }
             printWriter.decreaseIndent();
@@ -550,126 +494,6 @@ public final class TextClassifierImpl implements TextClassifier {
             fd.close();
         } catch (IOException e) {
             Log.e(LOG_TAG, "Error closing file.", e);
-        }
-    }
-
-    /**
-     * Describes TextClassifier model files on disk.
-     */
-    private static final class ModelFile {
-
-        private final String mPath;
-        private final String mName;
-        private final int mVersion;
-        private final List<Locale> mSupportedLocales;
-        private final boolean mLanguageIndependent;
-
-        /** Returns null if the path did not point to a compatible model. */
-        static @Nullable ModelFile fromPath(String path) {
-            final File file = new File(path);
-            if (!file.exists()) {
-                return null;
-            }
-            ParcelFileDescriptor modelFd = null;
-            try {
-                modelFd = ParcelFileDescriptor.open(file, ParcelFileDescriptor.MODE_READ_ONLY);
-                if (modelFd == null) {
-                    return null;
-                }
-                final int version = AnnotatorModel.getVersion(modelFd.getFd());
-                final String supportedLocalesStr = AnnotatorModel.getLocales(modelFd.getFd());
-                if (supportedLocalesStr.isEmpty()) {
-                    Log.d(DEFAULT_LOG_TAG, "Ignoring " + file.getAbsolutePath());
-                    return null;
-                }
-                final boolean languageIndependent = supportedLocalesStr.equals("*");
-                final List<Locale> supportedLocales = new ArrayList<>();
-                for (String langTag : supportedLocalesStr.split(",")) {
-                    supportedLocales.add(Locale.forLanguageTag(langTag));
-                }
-                return new ModelFile(path, file.getName(), version, supportedLocales,
-                                     languageIndependent);
-            } catch (FileNotFoundException e) {
-                Log.e(DEFAULT_LOG_TAG, "Failed to peek " + file.getAbsolutePath(), e);
-                return null;
-            } finally {
-                maybeCloseAndLogError(modelFd);
-            }
-        }
-
-        /** The absolute path to the model file. */
-        String getPath() {
-            return mPath;
-        }
-
-        /** A name to use for id generation. Effectively the name of the model file. */
-        String getName() {
-            return mName;
-        }
-
-        /** Returns the version tag in the model's metadata. */
-        int getVersion() {
-            return mVersion;
-        }
-
-        /** Returns whether the language supports any language in the given ranges. */
-        boolean isAnyLanguageSupported(List<Locale.LanguageRange> languageRanges) {
-            return mLanguageIndependent || Locale.lookup(languageRanges, mSupportedLocales) != null;
-        }
-
-        /** All locales supported by the model. */
-        List<Locale> getSupportedLocales() {
-            return Collections.unmodifiableList(mSupportedLocales);
-        }
-
-        public boolean isPreferredTo(ModelFile model) {
-            // A model is preferred to no model.
-            if (model == null) {
-                return true;
-            }
-
-            // A language-specific model is preferred to a language independent
-            // model.
-            if (!mLanguageIndependent && model.mLanguageIndependent) {
-                return true;
-            }
-
-            // A higher-version model is preferred.
-            if (getVersion() > model.getVersion()) {
-                return true;
-            }
-            return false;
-        }
-
-        @Override
-        public boolean equals(Object other) {
-            if (this == other) {
-                return true;
-            }
-            if (other instanceof ModelFile) {
-                final ModelFile otherModel = (ModelFile) other;
-                return mPath.equals(otherModel.mPath);
-            }
-            return false;
-        }
-
-        @Override
-        public String toString() {
-            final StringJoiner localesJoiner = new StringJoiner(",");
-            for (Locale locale : mSupportedLocales) {
-                localesJoiner.add(locale.toLanguageTag());
-            }
-            return String.format(Locale.US, "ModelFile { path=%s name=%s version=%d locales=%s }",
-                    mPath, mName, mVersion, localesJoiner.toString());
-        }
-
-        private ModelFile(String path, String name, int version, List<Locale> supportedLocales,
-                          boolean languageIndependent) {
-            mPath = path;
-            mName = name;
-            mVersion = version;
-            mSupportedLocales = supportedLocales;
-            mLanguageIndependent = languageIndependent;
         }
     }
 

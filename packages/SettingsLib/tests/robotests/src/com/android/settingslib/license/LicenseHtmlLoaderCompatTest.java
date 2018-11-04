@@ -112,7 +112,6 @@ public class LicenseHtmlLoaderCompatTest {
     @Implements(LicenseHtmlLoaderCompat.class)
     public static class ShadowLicenseHtmlLoaderCompat {
 
-
         public static List<File> sValidXmlFiles;
         public static File sCachedHtmlFile;
         public static boolean sIsCachedHtmlFileOutdated;
@@ -127,22 +126,24 @@ public class LicenseHtmlLoaderCompatTest {
         }
 
         @Implementation
-        static List<File> getVaildXmlFiles() {
+        protected List<File> getVaildXmlFiles() {
             return sValidXmlFiles;
         }
 
         @Implementation
-        static File getCachedHtmlFile(Context context) {
+        protected File getCachedHtmlFile(Context context) {
             return sCachedHtmlFile;
         }
 
         @Implementation
-        static boolean isCachedHtmlFileOutdated(List<File> xmlFiles, File cachedHtmlFile) {
+        protected boolean isCachedHtmlFileOutdated(List<File> xmlFiles,
+                File cachedHtmlFile) {
             return sIsCachedHtmlFileOutdated;
         }
 
         @Implementation
-        static boolean generateHtmlFile(Context context, List<File> xmlFiles, File htmlFile) {
+        protected boolean generateHtmlFile(Context context, List<File> xmlFiles,
+                File htmlFile) {
             return sGenerateHtmlFileSucceeded;
         }
     }

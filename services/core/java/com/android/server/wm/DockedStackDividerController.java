@@ -27,14 +27,15 @@ import static android.view.WindowManager.DOCKED_INVALID;
 import static android.view.WindowManager.DOCKED_LEFT;
 import static android.view.WindowManager.DOCKED_RIGHT;
 import static android.view.WindowManager.DOCKED_TOP;
+import static android.view.WindowManager.TRANSIT_NONE;
+
 import static com.android.server.wm.AppTransition.DEFAULT_APP_TRANSITION_DURATION;
 import static com.android.server.wm.AppTransition.TOUCH_RESPONSE_INTERPOLATOR;
-import static android.view.WindowManager.TRANSIT_NONE;
+import static com.android.server.wm.DockedStackDividerControllerProto.MINIMIZED_DOCK;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 import static com.android.server.wm.WindowManagerService.H.NOTIFY_DOCKED_STACK_MINIMIZED_CHANGED;
 import static com.android.server.wm.WindowManagerService.LAYER_OFFSET_DIM;
-import static com.android.server.wm.DockedStackDividerControllerProto.MINIMIZED_DOCK;
 
 import android.content.Context;
 import android.content.res.Configuration;
@@ -531,7 +532,7 @@ public class DockedStackDividerController {
             final TaskStack stack =
                     mDisplayContent.getSplitScreenPrimaryStackIgnoringVisibility();
             final long transitionDuration = isAnimationMaximizing()
-                    ? mService.mAppTransition.getLastClipRevealTransitionDuration()
+                    ? mDisplayContent.mAppTransition.getLastClipRevealTransitionDuration()
                     : DEFAULT_APP_TRANSITION_DURATION;
             mAnimationDuration = (long)
                     (transitionDuration * mService.getTransitionAnimationScaleLocked());
@@ -950,7 +951,7 @@ public class DockedStackDividerController {
             return naturalAmount;
         }
         final int minimizeDistance = stack.getMinimizeDistance();
-        float startPrime = mService.mAppTransition.getLastClipRevealMaxTranslation()
+        final float startPrime = mDisplayContent.mAppTransition.getLastClipRevealMaxTranslation()
                 / (float) minimizeDistance;
         final float amountPrime = t * mAnimationTarget + (1 - t) * startPrime;
         final float t2 = Math.min(t / mMaximizeMeetFraction, 1);
@@ -963,12 +964,12 @@ public class DockedStackDividerController {
      */
     private float getClipRevealMeetFraction(TaskStack stack) {
         if (!isAnimationMaximizing() || stack == null ||
-                !mService.mAppTransition.hadClipRevealAnimation()) {
+                !mDisplayContent.mAppTransition.hadClipRevealAnimation()) {
             return 1f;
         }
         final int minimizeDistance = stack.getMinimizeDistance();
-        final float fraction = Math.abs(mService.mAppTransition.getLastClipRevealMaxTranslation())
-                / (float) minimizeDistance;
+        final float fraction = Math.abs(mDisplayContent.mAppTransition
+                .getLastClipRevealMaxTranslation()) / (float) minimizeDistance;
         final float t = Math.max(0, Math.min(1, (fraction - CLIP_REVEAL_MEET_FRACTION_MIN)
                 / (CLIP_REVEAL_MEET_FRACTION_MAX - CLIP_REVEAL_MEET_FRACTION_MIN)));
         return CLIP_REVEAL_MEET_EARLIEST

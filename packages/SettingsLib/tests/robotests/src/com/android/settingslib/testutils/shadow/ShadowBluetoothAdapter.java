@@ -25,7 +25,7 @@ import org.robolectric.annotation.Implements;
 
 import java.util.List;
 
-@Implements(value = BluetoothAdapter.class, inheritImplementationMethods = true)
+@Implements(value = BluetoothAdapter.class)
 public class ShadowBluetoothAdapter extends org.robolectric.shadows.ShadowBluetoothAdapter {
 
     private List<Integer> mSupportedProfiles;

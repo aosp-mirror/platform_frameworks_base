@@ -210,6 +210,10 @@ public class PluginManagerImpl extends BroadcastReceiver implements PluginManage
             Uri uri = intent.getData();
             ComponentName component = ComponentName.unflattenFromString(
                     uri.toString().substring(10));
+            if (mWhitelistedPlugins.contains(component.getPackageName())) {
+                // Don't disable whitelisted plugins as they are a part of the OS.
+                return;
+            }
             getPluginEnabler().setEnabled(component, false);
             mContext.getSystemService(NotificationManager.class).cancel(component.getClassName(),
                     SystemMessage.NOTE_PLUGIN);

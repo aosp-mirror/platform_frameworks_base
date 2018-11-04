@@ -21,14 +21,6 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="7164937344850004466">"સિસ્ટમ UI"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"સાફ કરો"</string>
-    <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"સૂચિમાંથી દૂર કરો"</string>
-    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"ઍપ્લિકેશન માહિતી"</string>
-    <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"તમારી તાજેતરની સ્ક્રીન્સ અહીં દેખાય છે"</string>
-    <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"તાજેતરની ઍપ્લિકેશનો કાઢી નાખો."</string>
-    <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
-      <item quantity="one">વિહંગાવલોકનમાં %d સ્ક્રીન્સ</item>
-      <item quantity="other">વિહંગાવલોકનમાં %d સ્ક્રીન્સ</item>
-    </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"કોઈ સૂચનાઓ નથી"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"ચાલુ"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"નોટિફિકેશનો"</string>
@@ -101,7 +93,6 @@
     <string name="phone_label" msgid="2320074140205331708">"ફોન ખોલો"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"વૉઇસ સહાય ખોલો"</string>
     <string name="camera_label" msgid="7261107956054836961">"કૅમેરો ખોલો"</string>
-    <string name="recents_caption_resize" msgid="3517056471774958200">"નવું કાર્ય લેઆઉટ પસંદ કરો"</string>
     <string name="cancel" msgid="6442560571259935130">"રદ કરો"</string>
     <string name="accessibility_biometric_dialog_help_area" msgid="8953787076940186847">"સહાય સંદેશનું ક્ષેત્ર"</string>
     <string name="biometric_dialog_confirm" msgid="6468457350041712674">"કન્ફર્મ કરો"</string>
@@ -188,11 +179,6 @@
     <skip />
     <!-- no translation found for accessibility_work_mode (702887484664647430) -->
     <skip />
-    <string name="accessibility_recents_item_will_be_dismissed" msgid="395770242498031481">"<xliff:g id="APP">%s</xliff:g> કાઢી નાખો."</string>
-    <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"<xliff:g id="APP">%s</xliff:g> કાઢી નાખી."</string>
-    <string name="accessibility_recents_all_items_dismissed" msgid="4464697366179168836">"તમામ તાજેતરની ઍપ્લિકેશનો કાઢી નાખી."</string>
-    <string name="accessibility_recents_item_open_app_info" msgid="5107479759905883540">"<xliff:g id="APP">%s</xliff:g> ઍપ્લિકેશન માહિતી ખોલો."</string>
-    <string name="accessibility_recents_item_launched" msgid="7616039892382525203">"<xliff:g id="APP">%s</xliff:g> પ્રારંભ કરી રહ્યું છે."</string>
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"સૂચના કાઢી નાખી."</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"નોટિફિકેશન શેડ."</string>
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"ઝડપી સેટિંગ્સ."</string>
@@ -355,23 +341,8 @@
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"NFC અક્ષમ કરેલ છે"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"NFC સક્ષમ કરેલ છે"</string>
-    <string name="recents_empty_message" msgid="808480104164008572">"કોઇ તાજેતરની આઇટમ્સ નથી"</string>
-    <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"તમે બધું સાફ કર્યું"</string>
-    <string name="recents_app_info_button_label" msgid="2890317189376000030">"ઍપ્લિકેશન માહિતી"</string>
-    <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"સ્ક્રીન પિનિંગ"</string>
-    <string name="recents_search_bar_label" msgid="8074997400187836677">"શોધ"</string>
-    <string name="recents_launch_error_message" msgid="2969287838120550506">"<xliff:g id="APP">%s</xliff:g> પ્રારંભ કરી શકાયું નથી."</string>
-    <string name="recents_launch_disabled_message" msgid="1624523193008871793">"સુરક્ષિત મોડમાં <xliff:g id="APP">%s</xliff:g> અક્ષમ કરેલ છે."</string>
-    <string name="recents_stack_action_button_label" msgid="6593727103310426253">"બધું સાફ કરો"</string>
-    <string name="recents_drag_hint_message" msgid="2649739267073203985">"વિભાજિત સ્ક્રીનનો ઉપયોગ કરવા માટે અહીં ખેંચો"</string>
     <string name="recents_swipe_up_onboarding" msgid="3824607135920170001">"ઍપ સ્વિચ કરવા માટે ઉપરની તરફ સ્વાઇપ કરો"</string>
     <string name="recents_quick_scrub_onboarding" msgid="2778062804333285789">"ઍપને ઝડપથી સ્વિચ કરવા માટે જમણે ખેંચો"</string>
-    <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"આડું વિભક્ત કરો"</string>
-    <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"ઊભું વિભક્ત કરો"</string>
-    <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"કસ્ટમ વિભક્ત કરો"</string>
-    <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"સ્ક્રીનને ઉપરની તરફ વિભાજિત કરો"</string>
-    <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"સ્ક્રીનને ડાબી તરફ વિભાજિત કરો"</string>
-    <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"સ્ક્રીનને જમણી તરફ વિભાજિત કરો"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7171470775439860480">"ઝલકને ટૉગલ કરો"</string>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"ચાર્જ થઈ ગયું"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"ચાર્જ થઈ રહ્યું છે"</string>
@@ -618,6 +589,8 @@
     <string name="inline_minimize_button" msgid="966233327974702195">"નાનું કરો"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"આ ઍપમાંથી નોટિફિકેશન બતાવવાનું ચાલુ રાખીએ?"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"આ નોટિફિકેશન બંધ કરી શકશો નહીં"</string>
+    <!-- no translation found for notification_delegate_header (9167022191405284627) -->
+    <skip />
     <string name="appops_camera" msgid="8100147441602585776">"આ ઍપ કૅમેરાનો ઉપયોગ કરી રહી છે."</string>
     <string name="appops_microphone" msgid="741508267659494555">"આ ઍપ માઇક્રોફોનનો ઉપયોગ કરી રહી છે."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"આ ઍપ તમારી સ્ક્રીન પરની અન્ય ઍપની ઉપર પ્રદર્શિત થઈ રહી છે."</string>
@@ -752,6 +725,8 @@
     <item msgid="2139628951880142927">"ચાર્જ થાય ત્યારે ટકાવારી બતાવો (ડિફોલ્ટ)"</item>
     <item msgid="3327323682209964956">"આ આઇકન બતાવશો નહીં"</item>
   </string-array>
+    <!-- no translation found for tuner_low_priority (1325884786608312358) -->
+    <skip />
     <string name="other" msgid="4060683095962566764">"અન્ય"</string>
     <string name="accessibility_divider" msgid="5903423481953635044">"સ્પ્લિટ-સ્ક્રીન વિભાજક"</string>
     <string name="accessibility_action_divider_left_full" msgid="2801570521881574972">"ડાબી પૂર્ણ સ્ક્રીન"</string>

@@ -40,7 +40,7 @@
 #include <cinttypes>
 #include <iomanip>
 
-static jobject mCallbacksObj = NULL;
+static jobject mCallbacksObj = nullptr;
 
 static jmethodID method_reportLocation;
 static jmethodID method_reportStatus;
@@ -717,7 +717,7 @@ Return<void> GnssNavigationMessageCallback::gnssNavigationMessageCb(
 
     std::vector<uint8_t> navigationData = message.data;
     uint8_t* data = &(navigationData[0]);
-    if (dataLength == 0 || data == NULL) {
+    if (dataLength == 0 || data == nullptr) {
       ALOGE("Invalid Navigation Message found: data=%p, length=%zd", data,
             dataLength);
       return Void();
@@ -749,7 +749,7 @@ struct GnssMeasurementCallback : public IGnssMeasurementCallback_V1_1 {
     Return<void> GnssMeasurementCb(const IGnssMeasurementCallback_V1_0::GnssData& data) override;
  private:
     void translateGnssMeasurement_V1_0(
-            JNIEnv* env, const IGnssMeasurementCallback_V1_0::GnssMeasurement* measurement,
+            const IGnssMeasurementCallback_V1_0::GnssMeasurement* measurement,
             JavaObject& object);
     jobjectArray translateGnssMeasurements(
             JNIEnv* env,
@@ -772,7 +772,7 @@ Return<void> GnssMeasurementCallback::gnssMeasurementCb(
     clock = translateGnssClock(env, &data.clock);
 
     measurementArray = translateGnssMeasurements(
-        env, data.measurements.data(), NULL, data.measurements.size());
+        env, data.measurements.data(), nullptr, data.measurements.size());
     setMeasurementData(env, clock, measurementArray);
 
     env->DeleteLocalRef(clock);
@@ -789,7 +789,7 @@ Return<void> GnssMeasurementCallback::GnssMeasurementCb(
 
     clock = translateGnssClock(env, &data.clock);
     measurementArray = translateGnssMeasurements(
-        env, NULL, data.measurements.data(), data.measurementCount);
+        env, nullptr, data.measurements.data(), data.measurementCount);
     setMeasurementData(env, clock, measurementArray);
 
     env->DeleteLocalRef(clock);
@@ -799,7 +799,7 @@ Return<void> GnssMeasurementCallback::GnssMeasurementCb(
 
 // preallocate object as: JavaObject object(env, "android/location/GnssMeasurement");
 void GnssMeasurementCallback::translateGnssMeasurement_V1_0(
-        JNIEnv* env, const IGnssMeasurementCallback_V1_0::GnssMeasurement* measurement,
+        const IGnssMeasurementCallback_V1_0::GnssMeasurement* measurement,
         JavaObject& object) {
     uint32_t flags = static_cast<uint32_t>(measurement->flags);
 
@@ -816,7 +816,7 @@ void GnssMeasurementCallback::translateGnssMeasurement_V1_0(
         measurement->pseudorangeRateUncertaintyMps);
     SET(AccumulatedDeltaRangeState,
         (static_cast<int32_t>(measurement->accumulatedDeltaRangeState) &
-        !ADR_STATE_HALF_CYCLE_REPORTED)); // Half Cycle state not reported from Hardware in V1_0
+        ~ADR_STATE_HALF_CYCLE_REPORTED)); // Half Cycle state not reported from Hardware in V1_0
     SET(AccumulatedDeltaRangeMeters, measurement->accumulatedDeltaRangeM);
     SET(AccumulatedDeltaRangeUncertaintyMeters,
         measurement->accumulatedDeltaRangeUncertaintyM);
@@ -883,26 +883,26 @@ jobjectArray GnssMeasurementCallback::translateGnssMeasurements(JNIEnv* env,
          const IGnssMeasurementCallback_V1_0::GnssMeasurement* measurements_v1_0,
          size_t count) {
     if (count == 0) {
-        return NULL;
+        return nullptr;
     }
 
     jclass gnssMeasurementClass = env->FindClass("android/location/GnssMeasurement");
     jobjectArray gnssMeasurementArray = env->NewObjectArray(
             count,
             gnssMeasurementClass,
-            NULL /* initialElement */);
+            nullptr /* initialElement */);
 
     for (uint16_t i = 0; i < count; ++i) {
         JavaObject object(env, "android/location/GnssMeasurement");
-        if (measurements_v1_1 != NULL) {
-            translateGnssMeasurement_V1_0(env, &(measurements_v1_1[i].v1_0), object);
+        if (measurements_v1_1 != nullptr) {
+            translateGnssMeasurement_V1_0(&(measurements_v1_1[i].v1_0), object);
 
             // Set the V1_1 flag, and mark that new field has valid information for Java Layer
             SET(AccumulatedDeltaRangeState,
                     (static_cast<int32_t>(measurements_v1_1[i].accumulatedDeltaRangeState) |
                     ADR_STATE_HALF_CYCLE_REPORTED));
         } else {
-            translateGnssMeasurement_V1_0(env, &(measurements_v1_0[i]), object);
+            translateGnssMeasurement_V1_0(&(measurements_v1_0[i]), object);
         }
 
         env->SetObjectArrayElement(gnssMeasurementArray, i, object.get());
@@ -987,14 +987,12 @@ struct AGnssCallback : public IAGnssCallback {
 Return<void> AGnssCallback::agnssStatusIpV6Cb(
         const IAGnssCallback::AGnssStatusIpV6& agps_status) {
     JNIEnv* env = getJniEnv();
-    jbyteArray byteArray = NULL;
-    bool isSupported = false;
+    jbyteArray byteArray = nullptr;
 
     byteArray = env->NewByteArray(16);
-    if (byteArray != NULL) {
+    if (byteArray != nullptr) {
         env->SetByteArrayRegion(byteArray, 0, 16,
                                 (const jbyte*)(agps_status.ipV6Addr.data()));
-        isSupported = true;
     } else {
         ALOGE("Unable to allocate byte array for IPv6 address.");
     }
@@ -1006,7 +1004,7 @@ Return<void> AGnssCallback::agnssStatusIpV6Cb(
         ALOGD("AGPS IP is v6: %s", str);
     }
 
-    jsize byteArrayLength = byteArray != NULL ? env->GetArrayLength(byteArray) : 0;
+    jsize byteArrayLength = byteArray != nullptr ? env->GetArrayLength(byteArray) : 0;
     ALOGV("Passing AGPS IP addr: size %d", byteArrayLength);
     env->CallVoidMethod(mCallbacksObj, method_reportAGpsStatus,
                         agps_status.type, agps_status.status, byteArray);
@@ -1023,7 +1021,7 @@ Return<void> AGnssCallback::agnssStatusIpV6Cb(
 Return<void> AGnssCallback::agnssStatusIpV4Cb(
         const IAGnssCallback::AGnssStatusIpV4& agps_status) {
     JNIEnv* env = getJniEnv();
-    jbyteArray byteArray = NULL;
+    jbyteArray byteArray = nullptr;
 
     uint32_t ipAddr = agps_status.ipV4Addr;
     byteArray = convertToIpV4(ipAddr);
@@ -1039,7 +1037,7 @@ Return<void> AGnssCallback::agnssStatusIpV4Cb(
     }
 
     jsize byteArrayLength =
-      byteArray != NULL ? env->GetArrayLength(byteArray) : 0;
+      byteArray != nullptr ? env->GetArrayLength(byteArray) : 0;
     ALOGV("Passing AGPS IP addr: size %d", byteArrayLength);
     env->CallVoidMethod(mCallbacksObj, method_reportAGpsStatus,
                       agps_status.type, agps_status.status, byteArray);
@@ -1054,14 +1052,14 @@ Return<void> AGnssCallback::agnssStatusIpV4Cb(
 
 jbyteArray AGnssCallback::convertToIpV4(uint32_t ip) {
     if (INADDR_NONE == ip) {
-        return NULL;
+        return nullptr;
     }
 
     JNIEnv* env = getJniEnv();
     jbyteArray byteArray = env->NewByteArray(4);
-    if (byteArray == NULL) {
+    if (byteArray == nullptr) {
         ALOGE("Unable to allocate byte array for IPv4 address");
-        return NULL;
+        return nullptr;
     }
 
     jbyte ipv4[4];
@@ -1483,7 +1481,7 @@ static void android_location_GnssLocationProvider_agps_set_id(JNIEnv *env, jobje
         return;
     }
 
-    const char *setid = env->GetStringUTFChars(setid_string, NULL);
+    const char *setid = env->GetStringUTFChars(setid_string, nullptr);
     agnssRilIface->setSetId((IAGnssRil::SetIDType)type, setid);
     env->ReleaseStringUTFChars(setid_string, setid);
 }
@@ -1579,12 +1577,12 @@ static void android_location_GnssLocationProvider_agps_data_conn_open(
         ALOGE("no AGPS interface in agps_data_conn_open");
         return;
     }
-    if (apn == NULL) {
-        jniThrowException(env, "java/lang/IllegalArgumentException", NULL);
+    if (apn == nullptr) {
+        jniThrowException(env, "java/lang/IllegalArgumentException", nullptr);
         return;
     }
 
-    const char *apnStr = env->GetStringUTFChars(apn, NULL);
+    const char *apnStr = env->GetStringUTFChars(apn, nullptr);
 
     auto result = agnssIface->dataConnOpen(apnStr, static_cast<IAGnss::ApnIpType>(apnIpType));
     if (!result.isOk() || !result){
@@ -1626,7 +1624,7 @@ static void android_location_GnssLocationProvider_set_agps_server(JNIEnv* env, j
         return;
     }
 
-    const char *c_hostname = env->GetStringUTFChars(hostname, NULL);
+    const char *c_hostname = env->GetStringUTFChars(hostname, nullptr);
     auto result = agnssIface->setServer(static_cast<IAGnssCallback::AGnssType>(type),
                                        c_hostname,
                                        port);
@@ -1649,7 +1647,7 @@ static void android_location_GnssLocationProvider_send_ni_response(JNIEnv* /* en
 
 static jstring android_location_GnssLocationProvider_get_internal_state(JNIEnv* env,
                                                                        jobject /* obj */) {
-    jstring result = NULL;
+    jstring result = nullptr;
     /*
      * TODO(b/33089503) : Create a jobject to represent GnssDebug.
      */
@@ -1736,7 +1734,7 @@ static void android_location_GnssLocationProvider_update_network_state(JNIEnv* e
             ALOGE("updateNetworkState failed");
         }
 
-        const char *c_apn = env->GetStringUTFChars(apn, NULL);
+        const char *c_apn = env->GetStringUTFChars(apn, nullptr);
         result = agnssRilIface->updateNetworkAvailability(available, c_apn);
         if (!result.isOk() || !result) {
             ALOGE("updateNetworkAvailability failed");
@@ -2019,15 +2017,15 @@ static jboolean android_location_GnssLocationProvider_set_satellite_blacklist(
     }
 
     jint *constellation_array = env->GetIntArrayElements(constellations, 0);
-    if (NULL == constellation_array) {
-        ALOGI("GetIntArrayElements returns NULL.");
+    if (nullptr == constellation_array) {
+        ALOGI("GetIntArrayElements returns nullptr.");
         return JNI_FALSE;
     }
     jsize length = env->GetArrayLength(constellations);
 
     jint *sv_id_array = env->GetIntArrayElements(sv_ids, 0);
-    if (NULL == sv_id_array) {
-        ALOGI("GetIntArrayElements returns NULL.");
+    if (nullptr == sv_id_array) {
+        ALOGI("GetIntArrayElements returns nullptr.");
         return JNI_FALSE;
     }
 

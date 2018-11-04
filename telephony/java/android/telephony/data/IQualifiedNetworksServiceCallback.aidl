@@ -22,5 +22,5 @@ package android.telephony.data;
  */
 oneway interface IQualifiedNetworksServiceCallback
 {
-    void onQualifiedNetworkTypesChanged(int apnType, in int[] qualifiedNetworkTypesList);
+    void onQualifiedNetworkTypesChanged(int apnTypes, in int[] qualifiedNetworkTypes);
 }

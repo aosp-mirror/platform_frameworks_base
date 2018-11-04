@@ -18,11 +18,14 @@ package com.android.settingslib.development;
 
 import static com.google.common.truth.Truth.assertThat;
 
+import android.os.UserManager;
 import android.content.Context;
 import android.provider.Settings;
 
 import com.android.settingslib.SettingsLibRobolectricTestRunner;
-import com.android.settingslib.testutils.shadow.ShadowUserManager;
+
+import org.robolectric.shadows.ShadowUserManager;
+import org.robolectric.shadow.api.Shadow;
 
 import org.junit.After;
 import org.junit.Before;
@@ -32,20 +35,16 @@ import org.robolectric.RuntimeEnvironment;
 import org.robolectric.annotation.Config;
 
 @RunWith(SettingsLibRobolectricTestRunner.class)
-@Config(shadows = ShadowUserManager.class)
 public class DevelopmentSettingsEnablerTest {
 
     private Context mContext;
+    private ShadowUserManager mUserManager;
 
     @Before
     public void setUp() {
         mContext = RuntimeEnvironment.application;
-        ShadowUserManager.getShadow().setIsAdminUser(true);
-    }
-
-    @After
-    public void tearDown() {
-        ShadowUserManager.getShadow().reset();
+        mUserManager = Shadow.extract(mContext.getSystemService(UserManager.class));
+        mUserManager.setIsAdminUser(true);
     }
 
     @Test
@@ -76,7 +75,7 @@ public class DevelopmentSettingsEnablerTest {
     public void isEnabled_settingsOn_noRestriction_notAdmin_shouldReturnFalse() {
         Settings.Global.putInt(mContext.getContentResolver(),
                 Settings.Global.DEVELOPMENT_SETTINGS_ENABLED, 1);
-        ShadowUserManager.getShadow().setIsAdminUser(false);
+        mUserManager.setIsAdminUser(false);
 
         assertThat(DevelopmentSettingsEnabler.isDevelopmentSettingsEnabled(mContext)).isFalse();
     }

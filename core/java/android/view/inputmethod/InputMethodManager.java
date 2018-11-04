@@ -62,6 +62,7 @@ import android.view.autofill.AutofillManager;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.inputmethod.InputMethodDebug;
 import com.android.internal.inputmethod.InputMethodPrivilegedOperationsRegistry;
+import com.android.internal.inputmethod.StartInputFlags;
 import com.android.internal.inputmethod.StartInputReason;
 import com.android.internal.inputmethod.UnbindReason;
 import com.android.internal.os.SomeArgs;
@@ -292,30 +293,6 @@ public final class InputMethodManager {
      */
     @GuardedBy("sLock")
     private static final SparseArray<InputMethodManager> sInstanceMap = new SparseArray<>();
-
-    /**
-     * @hide Flag for IInputMethodManager.windowGainedFocus: a view in
-     * the window has input focus.
-     */
-    public static final int CONTROL_WINDOW_VIEW_HAS_FOCUS = 1<<0;
-
-    /**
-     * @hide Flag for IInputMethodManager.windowGainedFocus: the focus
-     * is a text editor.
-     */
-    public static final int CONTROL_WINDOW_IS_TEXT_EDITOR = 1<<1;
-
-    /**
-     * @hide Flag for IInputMethodManager.windowGainedFocus: this is the first
-     * time the window has gotten focus.
-     */
-    public static final int CONTROL_WINDOW_FIRST = 1<<2;
-
-    /**
-     * @hide Flag for IInputMethodManager.startInput: this is the first
-     * time the window has gotten focus.
-     */
-    public static final int CONTROL_START_INITIAL = 1<<8;
 
     /**
      * Timeout in milliseconds for delivering a key to an IME.
@@ -1446,8 +1423,8 @@ public final class InputMethodManager {
     }
 
     boolean startInputInner(@StartInputReason int startInputReason,
-            @Nullable IBinder windowGainingFocus, int controlFlags, int softInputMode,
-            int windowFlags) {
+            @Nullable IBinder windowGainingFocus, @StartInputFlags int startInputFlags,
+            @SoftInputModeFlags int softInputMode, int windowFlags) {
         final View view;
         synchronized (mH) {
             view = mServedView;
@@ -1469,9 +1446,9 @@ public final class InputMethodManager {
                 Log.e(TAG, "ABORT input: ServedView must be attached to a Window");
                 return false;
             }
-            controlFlags |= CONTROL_WINDOW_VIEW_HAS_FOCUS;
+            startInputFlags |= StartInputFlags.VIEW_HAS_FOCUS;
             if (view.onCheckIsTextEditor()) {
-                controlFlags |= CONTROL_WINDOW_IS_TEXT_EDITOR;
+                startInputFlags |= StartInputFlags.IS_TEXT_EDITOR;
             }
             softInputMode = view.getViewRootImpl().mWindowAttributes.softInputMode;
             windowFlags = view.getViewRootImpl().mWindowAttributes.flags;
@@ -1526,7 +1503,7 @@ public final class InputMethodManager {
             // If we already have a text box, then this view is already
             // connected so we want to restart it.
             if (mCurrentTextBoxAttribute == null) {
-                controlFlags |= CONTROL_START_INITIAL;
+                startInputFlags |= StartInputFlags.INITIAL_CONNECTION;
             }
 
             // Hook 'em up and let 'er rip.
@@ -1564,11 +1541,11 @@ public final class InputMethodManager {
 
             try {
                 if (DEBUG) Log.v(TAG, "START INPUT: view=" + dumpViewInfo(view) + " ic="
-                        + ic + " tba=" + tba + " controlFlags=#"
-                        + Integer.toHexString(controlFlags));
+                        + ic + " tba=" + tba + " startInputFlags="
+                        + InputMethodDebug.startInputFlagsToString(startInputFlags));
                 final InputBindResult res = mService.startInputOrWindowGainedFocus(
-                        startInputReason, mClient, windowGainingFocus, controlFlags, softInputMode,
-                        windowFlags, tba, servedContext, missingMethodFlags,
+                        startInputReason, mClient, windowGainingFocus, startInputFlags,
+                        softInputMode, windowFlags, tba, servedContext, missingMethodFlags,
                         view.getContext().getApplicationInfo().targetSdkVersion);
                 if (DEBUG) Log.v(TAG, "Starting input: Bind result=" + res);
                 if (res == null) {
@@ -1576,7 +1553,8 @@ public final class InputMethodManager {
                             + " null. startInputReason="
                             + InputMethodDebug.startInputReasonToString(startInputReason)
                             + " editorInfo=" + tba
-                            + " controlFlags=#" + Integer.toHexString(controlFlags));
+                            + " startInputFlags="
+                            + InputMethodDebug.startInputFlagsToString(startInputFlags));
                     return false;
                 }
                 if (res.id != null) {
@@ -1783,15 +1761,15 @@ public final class InputMethodManager {
             focusInLocked(focusedView != null ? focusedView : rootView);
         }
 
-        int controlFlags = 0;
+        int startInputFlags = 0;
         if (focusedView != null) {
-            controlFlags |= CONTROL_WINDOW_VIEW_HAS_FOCUS;
+            startInputFlags |= StartInputFlags.VIEW_HAS_FOCUS;
             if (focusedView.onCheckIsTextEditor()) {
-                controlFlags |= CONTROL_WINDOW_IS_TEXT_EDITOR;
+                startInputFlags |= StartInputFlags.IS_TEXT_EDITOR;
             }
         }
         if (first) {
-            controlFlags |= CONTROL_WINDOW_FIRST;
+            startInputFlags |= StartInputFlags.FIRST_WINDOW_FOCUS_GAIN;
         }
 
         if (checkFocusNoStartInput(forceNewFocus)) {
@@ -1800,7 +1778,7 @@ public final class InputMethodManager {
             // about the window gaining focus, to help make the transition
             // smooth.
             if (startInputInner(StartInputReason.WINDOW_FOCUS_GAIN, rootView.getWindowToken(),
-                    controlFlags, softInputMode, windowFlags)) {
+                    startInputFlags, softInputMode, windowFlags)) {
                 return;
             }
         }
@@ -1812,8 +1790,8 @@ public final class InputMethodManager {
                 if (DEBUG) Log.v(TAG, "Reporting focus gain, without startInput");
                 mService.startInputOrWindowGainedFocus(
                         StartInputReason.WINDOW_FOCUS_GAIN_REPORT_ONLY, mClient,
-                        rootView.getWindowToken(), controlFlags, softInputMode, windowFlags, null,
-                        null, 0 /* missingMethodFlags */,
+                        rootView.getWindowToken(), startInputFlags, softInputMode, windowFlags,
+                        null, null, 0 /* missingMethodFlags */,
                         rootView.getContext().getApplicationInfo().targetSdkVersion);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();

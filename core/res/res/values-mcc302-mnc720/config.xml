@@ -20,19 +20,6 @@
 <!-- These resources are around just to allow their values to be customized
      for different hardware and product builds.  Do not translate. -->
 <resources xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-
-    <!-- String containing the apn value for tethering.  May be overriden by secure settings
-         TETHER_DUN_APN.  Value is a comma separated series of strings:
-         "name,apn,proxy,port,username,password,server,mmsc,mmsproxy,mmsport,mcc,mnc,auth,type",
-         Or string format of ApnSettingV3.
-         note that empty fields can be ommitted: "name,apn,,,,,,,,,310,260,,DUN" -->
-    <string-array translatable="false" name="config_tether_apndata">
-        <item>Rogers LTE Tethering,ltedata.apn,,,,,,,,,302,720,,DUN</item>
-        <item>[ApnSettingV3]chatr Tethering,chatrisp.apn,,,,,,,,,302,720,,DUN,,,true,0,,,,,,,imsi,302720x94</item>
-        <item>[ApnSettingV3]Tbaytel Tethering,ltedata.apn,,,,,,,,,302,720,,DUN,IPV4V6,IP,true,0,,,,,,,gid,BA</item>
-        <item>[ApnSettingV3]Cityfone Tethering,ltedata.apn,,,,,,,,,302,720,,DUN,IPV4V6,IP,true,0,,,,,,,spn,CITYFONE</item>
-    </string-array>
-
     <!-- Configure mobile network MTU. Carrier specific value is set here.
     -->
     <integer name="config_mobile_mtu">1430</integer>

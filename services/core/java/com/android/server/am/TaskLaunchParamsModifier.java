@@ -135,7 +135,7 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         }
 
         // STEP 1: Determine the display to launch the activity/task.
-        final int displayId = getPreferredLaunchDisplay(options, source, currentParams);
+        final int displayId = getPreferredLaunchDisplay(task, options, source, currentParams);
         outParams.mPreferredDisplayId = displayId;
         ActivityDisplay display = mSupervisor.getActivityDisplay(displayId);
         if (DEBUG) {
@@ -268,8 +268,8 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
         return RESULT_CONTINUE;
     }
 
-    private int getPreferredLaunchDisplay(@Nullable ActivityOptions options,
-            ActivityRecord source, LaunchParams currentParams) {
+    private int getPreferredLaunchDisplay(@Nullable TaskRecord task,
+            @Nullable ActivityOptions options, ActivityRecord source, LaunchParams currentParams) {
         int displayId = INVALID_DISPLAY;
         final int optionLaunchId = options != null ? options.getLaunchDisplayId() : INVALID_DISPLAY;
         if (optionLaunchId != INVALID_DISPLAY) {
@@ -281,6 +281,13 @@ class TaskLaunchParamsModifier implements LaunchParamsModifier {
             final int sourceDisplayId = source.getDisplayId();
             if (DEBUG) appendLog("display-from-source=" + sourceDisplayId);
             displayId = sourceDisplayId;
+        }
+
+        ActivityStack stack =
+                (displayId == INVALID_DISPLAY && task != null) ? task.getStack() : null;
+        if (stack != null) {
+            if (DEBUG) appendLog("display-from-task=" + stack.mDisplayId);
+            displayId = stack.mDisplayId;
         }
 
         if (displayId != INVALID_DISPLAY && mSupervisor.getActivityDisplay(displayId) == null) {

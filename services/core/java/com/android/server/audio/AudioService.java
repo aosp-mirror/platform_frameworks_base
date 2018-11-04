@@ -4293,7 +4293,7 @@ public class AudioService extends IAudioService.Stub
             return false;
         }
 
-        NotificationManager.Policy zenPolicy = mNm.getNotificationPolicy();
+        NotificationManager.Policy zenPolicy = mNm.getConsolidatedNotificationPolicy();
         final boolean muteAlarms = (zenPolicy.priorityCategories
                 & NotificationManager.Policy.PRIORITY_CATEGORY_ALARMS) == 0;
         final boolean muteMedia = (zenPolicy.priorityCategories
@@ -4301,7 +4301,8 @@ public class AudioService extends IAudioService.Stub
         final boolean muteSystem = (zenPolicy.priorityCategories
                 & NotificationManager.Policy.PRIORITY_CATEGORY_SYSTEM) == 0;
         final boolean muteNotificationAndRing = ZenModeConfig
-                .areAllPriorityOnlyNotificationZenSoundsMuted(mNm.getNotificationPolicy());
+                .areAllPriorityOnlyNotificationZenSoundsMuted(
+                        mNm.getConsolidatedNotificationPolicy());
         return muteAlarms && isAlarm(streamType)
                 || muteMedia && isMedia(streamType)
                 || muteSystem && isSystem(streamType)
@@ -4323,7 +4324,7 @@ public class AudioService extends IAudioService.Stub
     private boolean updateZenModeAffectedStreams() {
         int zenModeAffectedStreams = 0;
         if (mSystemReady && mNm.getZenMode() == Settings.Global.ZEN_MODE_IMPORTANT_INTERRUPTIONS) {
-            NotificationManager.Policy zenPolicy = mNm.getNotificationPolicy();
+            NotificationManager.Policy zenPolicy = mNm.getConsolidatedNotificationPolicy();
             if ((zenPolicy.priorityCategories
                     & NotificationManager.Policy.PRIORITY_CATEGORY_ALARMS) == 0) {
                 zenModeAffectedStreams |= 1 << AudioManager.STREAM_ALARM;

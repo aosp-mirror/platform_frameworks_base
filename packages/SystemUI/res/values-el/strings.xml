@@ -21,14 +21,6 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="7164937344850004466">"UI συστήματ."</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Διαγραφή"</string>
-    <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Κατάργηση από τη λίστα"</string>
-    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Πληροφορίες εφαρμογής"</string>
-    <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Οι πρόσφατες οθόνες σας εμφανίζονται εδώ"</string>
-    <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Παράβλεψη πρόσφατων εφαρμογών"</string>
-    <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
-      <item quantity="other">%d οθόνες στην Επισκόπηση</item>
-      <item quantity="one">1 οθόνη στην Επισκόπηση</item>
-    </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Δεν υπάρχουν ειδοποιήσεις"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Εν εξελίξει"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Ειδοποιήσεις"</string>
@@ -101,7 +93,6 @@
     <string name="phone_label" msgid="2320074140205331708">"άνοιγμα τηλεφώνου"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"άνοιγμα φωνητικής υποβοήθησης"</string>
     <string name="camera_label" msgid="7261107956054836961">"άνοιγμα φωτογραφικής μηχανής"</string>
-    <string name="recents_caption_resize" msgid="3517056471774958200">"Επιλέξτε τη νέα διάταξη εργασίας"</string>
     <string name="cancel" msgid="6442560571259935130">"Ακύρωση"</string>
     <string name="accessibility_biometric_dialog_help_area" msgid="8953787076940186847">"Περιοχή μηνυμάτων βοήθειας"</string>
     <string name="biometric_dialog_confirm" msgid="6468457350041712674">"Επιβεβαίωση"</string>
@@ -188,11 +179,6 @@
     <skip />
     <!-- no translation found for accessibility_work_mode (702887484664647430) -->
     <skip />
-    <string name="accessibility_recents_item_will_be_dismissed" msgid="395770242498031481">"Παράβλεψη <xliff:g id="APP">%s</xliff:g>."</string>
-    <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"Απορρίφθηκαν <xliff:g id="APP">%s</xliff:g>."</string>
-    <string name="accessibility_recents_all_items_dismissed" msgid="4464697366179168836">"Έγινε παράβλεψη όλων των πρόσφατων εφαρμογών."</string>
-    <string name="accessibility_recents_item_open_app_info" msgid="5107479759905883540">"Άνοιγμα πληροφοριών εφαρμογής <xliff:g id="APP">%s</xliff:g>."</string>
-    <string name="accessibility_recents_item_launched" msgid="7616039892382525203">"Έναρξη <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"Η ειδοποίηση έχει απορριφθεί."</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"Πλαίσιο σκίασης ειδοποιήσεων."</string>
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"Γρήγορες ρυθμίσεις."</string>
@@ -355,23 +341,8 @@
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"Το NFC είναι απενεργοποιημένο"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"Το NFC είναι ενεργοποιημένο"</string>
-    <string name="recents_empty_message" msgid="808480104164008572">"Δεν υπάρχουν πρόσφατα στοιχεία"</string>
-    <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"Έχει γίνει διαγραφή όλων των στοιχείων"</string>
-    <string name="recents_app_info_button_label" msgid="2890317189376000030">"Πληροφορίες εφαρμογής"</string>
-    <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"καρφίτσωμα οθόνης"</string>
-    <string name="recents_search_bar_label" msgid="8074997400187836677">"αναζήτηση"</string>
-    <string name="recents_launch_error_message" msgid="2969287838120550506">"Δεν ήταν δυνατή η εκκίνηση της εφαρμογής <xliff:g id="APP">%s</xliff:g>."</string>
-    <string name="recents_launch_disabled_message" msgid="1624523193008871793">"Η εφαρμογή <xliff:g id="APP">%s</xliff:g> έχει απενεργοποιηθεί στην ασφαλή λειτουργία."</string>
-    <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Διαγραφή όλων"</string>
-    <string name="recents_drag_hint_message" msgid="2649739267073203985">"Σύρετε εδώ για να χρησιμοποιήσετε τον διαχωρισμό οθόνης"</string>
     <string name="recents_swipe_up_onboarding" msgid="3824607135920170001">"Σύρετε προς τα επάνω για εναλλαγή των εφαρμογών"</string>
     <string name="recents_quick_scrub_onboarding" msgid="2778062804333285789">"Σύρετε προς τα δεξιά για γρήγορη εναλλαγή εφαρμογών"</string>
-    <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Οριζόντιος διαχωρισμός"</string>
-    <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Κάθετος διαχωρισμός"</string>
-    <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Προσαρμοσμένος διαχωρισμός"</string>
-    <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"Διαχωρισμός οθόνης στην κορυφή"</string>
-    <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"Διαχωρισμός οθόνης στα αριστερά"</string>
-    <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"Διαχωρισμός οθόνης στα δεξιά"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7171470775439860480">"Εναλλαγή επισκόπησης"</string>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Φορτίστηκε"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"Φόρτιση"</string>
@@ -618,6 +589,8 @@
     <string name="inline_minimize_button" msgid="966233327974702195">"Ελαχιστοποίηση"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Να συνεχίσουν να εμφανίζονται ειδοποιήσεις από αυτήν την εφαρμογή;"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"Αδύνατη η απενεργοποίηση αυτών των ειδοποιήσεων"</string>
+    <!-- no translation found for notification_delegate_header (9167022191405284627) -->
+    <skip />
     <string name="appops_camera" msgid="8100147441602585776">"Αυτή η εφαρμογή χρησιμοποιεί την κάμερα."</string>
     <string name="appops_microphone" msgid="741508267659494555">"Αυτή η εφαρμογή χρησιμοποιεί το μικρόφωνο."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"Αυτή η εφαρμογή εμφανίζεται πάνω σε άλλες εφαρμογές στην οθόνη σας."</string>
@@ -752,6 +725,8 @@
     <item msgid="2139628951880142927">"Να εμφανίζεται ποσοστό κατά τη φόρτιση (προεπιλογή)"</item>
     <item msgid="3327323682209964956">"Να μην εμφανίζεται αυτό το εικονίδιο"</item>
   </string-array>
+    <!-- no translation found for tuner_low_priority (1325884786608312358) -->
+    <skip />
     <string name="other" msgid="4060683095962566764">"Άλλο"</string>
     <string name="accessibility_divider" msgid="5903423481953635044">"Διαχωριστικό οθόνης"</string>
     <string name="accessibility_action_divider_left_full" msgid="2801570521881574972">"Αριστερή πλήρης οθόνη"</string>

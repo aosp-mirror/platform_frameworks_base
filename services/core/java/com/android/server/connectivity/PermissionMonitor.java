@@ -23,6 +23,8 @@ import static android.Manifest.permission.NETWORK_STACK;
 import static android.content.pm.ApplicationInfo.FLAG_SYSTEM;
 import static android.content.pm.ApplicationInfo.FLAG_UPDATED_SYSTEM_APP;
 import static android.content.pm.PackageManager.GET_PERMISSIONS;
+import static android.os.Process.INVALID_UID;
+import static android.os.Process.SYSTEM_UID;
 
 import android.annotation.NonNull;
 import android.content.BroadcastReceiver;
@@ -64,6 +66,7 @@ public class PermissionMonitor {
     private static final boolean DBG = true;
     private static final Boolean SYSTEM = Boolean.TRUE;
     private static final Boolean NETWORK = Boolean.FALSE;
+    private static final int VERSION_Q = Build.VERSION_CODES.Q;
 
     private final Context mContext;
     private final PackageManager mPackageManager;
@@ -87,7 +90,7 @@ public class PermissionMonitor {
             public void onReceive(Context context, Intent intent) {
                 String action = intent.getAction();
                 int user = intent.getIntExtra(Intent.EXTRA_USER_HANDLE, UserHandle.USER_NULL);
-                int appUid = intent.getIntExtra(Intent.EXTRA_UID, -1);
+                int appUid = intent.getIntExtra(Intent.EXTRA_UID, INVALID_UID);
                 Uri appData = intent.getData();
                 String appName = appData != null ? appData.getSchemeSpecificPart() : null;
 
@@ -127,7 +130,7 @@ public class PermissionMonitor {
         }
 
         for (PackageInfo app : apps) {
-            int uid = app.applicationInfo != null ? app.applicationInfo.uid : -1;
+            int uid = app.applicationInfo != null ? app.applicationInfo.uid : INVALID_UID;
             if (uid < 0) {
                 continue;
             }
@@ -162,6 +165,11 @@ public class PermissionMonitor {
     }
 
     @VisibleForTesting
+    int getDeviceFirstSdkInt() {
+        return Build.VERSION.FIRST_SDK_INT;
+    }
+
+    @VisibleForTesting
     boolean hasPermission(PackageInfo app, String permission) {
         if (app.requestedPermissions != null) {
             for (String p : app.requestedPermissions) {
@@ -180,10 +188,17 @@ public class PermissionMonitor {
     private boolean hasRestrictedNetworkPermission(PackageInfo app) {
         // TODO : remove this check in the future(b/31479477). All apps should just
         // request the appropriate permission for their use case since android Q.
-        if (app.applicationInfo != null
-                && app.applicationInfo.targetSdkVersion < Build.VERSION_CODES.Q
-                && isVendorApp(app.applicationInfo)) {
-            return true;
+        if (app.applicationInfo != null) {
+            // Backward compatibility for b/114245686, on devices that launched before Q daemons
+            // and apps running as the system UID are exempted from this check.
+            if (app.applicationInfo.uid == SYSTEM_UID && getDeviceFirstSdkInt() < VERSION_Q) {
+                return true;
+            }
+
+            if (app.applicationInfo.targetSdkVersion < VERSION_Q
+                    && isVendorApp(app.applicationInfo)) {
+                return true;
+            }
         }
         return hasPermission(app, CONNECTIVITY_INTERNAL)
                 || hasPermission(app, CONNECTIVITY_USE_RESTRICTED_NETWORKS);

@@ -27,7 +27,6 @@ import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mockitoSession;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spy;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.spyOn;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.timeout;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.verify;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
 import static com.android.server.AlarmManagerService.Constants.KEY_ALLOW_WHILE_IDLE_LONG_TIME;
@@ -40,14 +39,15 @@ import static com.android.server.AlarmManagerService.Constants.KEY_MIN_FUTURITY;
 import static com.android.server.AlarmManagerService.Constants.KEY_MIN_INTERVAL;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertTrue;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.ArgumentMatchers.anyInt;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.isNull;
+import static org.mockito.Mockito.atLeastOnce;
 
 import android.app.ActivityManager;
 import android.app.AlarmManager;
@@ -61,7 +61,6 @@ import android.content.Intent;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.PowerManager;
-import android.os.SystemClock;
 import android.os.UserHandle;
 import android.provider.Settings;
 import android.util.Log;
@@ -92,7 +91,6 @@ public class AlarmManagerServiceTest {
     private static final String TEST_CALLING_PACKAGE = "com.android.framework.test-package";
     private static final int SYSTEM_UI_UID = 123456789;
     private static final int TEST_CALLING_UID = 12345;
-    private static final long DEFAULT_TIMEOUT = 5_000;
 
     private AlarmManagerService mService;
     @Mock
@@ -126,10 +124,11 @@ public class AlarmManagerServiceTest {
             mElapsed = millisElapsed;
         }
 
-        synchronized long expire() {
+        synchronized void expire() throws InterruptedException {
             mExpired = true;
-            notify();
-            return mElapsed;
+            notifyAll();
+            // Now wait for the alarm thread to finish execution.
+            wait();
         }
     }
 
@@ -146,6 +145,7 @@ public class AlarmManagerServiceTest {
         @Override
         int waitForAlarm() {
             synchronized (mTestTimer) {
+                mTestTimer.notifyAll();
                 if (!mTestTimer.mExpired) {
                     try {
                         mTestTimer.wait();
@@ -268,15 +268,16 @@ public class AlarmManagerServiceTest {
         final PendingIntent alarmPi = getNewMockPendingIntent();
         setTestAlarm(ELAPSED_REALTIME_WAKEUP, triggerTime, alarmPi);
 
-        mNowElapsedTest = mTestTimer.expire();
+        mNowElapsedTest = mTestTimer.getElapsed();
+        mTestTimer.expire();
 
         final ArgumentCaptor<PendingIntent.OnFinished> onFinishedCaptor =
                 ArgumentCaptor.forClass(PendingIntent.OnFinished.class);
-        verify(alarmPi, timeout(DEFAULT_TIMEOUT)).send(any(Context.class), eq(0),
-                any(Intent.class), onFinishedCaptor.capture(), any(Handler.class), isNull(), any());
-        verify(mWakeLock, timeout(DEFAULT_TIMEOUT)).acquire();
+        verify(alarmPi).send(any(Context.class), eq(0), any(Intent.class),
+                onFinishedCaptor.capture(), any(Handler.class), isNull(), any());
+        verify(mWakeLock).acquire();
         onFinishedCaptor.getValue().onSendFinished(alarmPi, null, 0, null, null);
-        verify(mWakeLock, timeout(DEFAULT_TIMEOUT)).release();
+        verify(mWakeLock).release();
     }
 
     @Test
@@ -351,57 +352,58 @@ public class AlarmManagerServiceTest {
 
         when(mUsageStatsManagerInternal.getAppStandbyBucket(eq(TEST_CALLING_PACKAGE), anyInt(),
                 anyLong())).thenReturn(STANDBY_BUCKET_WORKING_SET);
-        mNowElapsedTest = mTestTimer.expire();
-        verify(mUsageStatsManagerInternal, timeout(DEFAULT_TIMEOUT).atLeastOnce())
+
+        mNowElapsedTest = mTestTimer.getElapsed();
+        mTestTimer.expire();
+
+        verify(mUsageStatsManagerInternal, atLeastOnce())
                 .getAppStandbyBucket(eq(TEST_CALLING_PACKAGE),
                         eq(UserHandle.getUserId(TEST_CALLING_UID)), anyLong());
         final long expectedNextTrigger = mNowElapsedTest
                 + mService.getMinDelayForBucketLocked(STANDBY_BUCKET_WORKING_SET);
-        assertTrue("Incorrect next alarm trigger. Expected " + expectedNextTrigger + " found: "
-                + mTestTimer.getElapsed(), pollingCheck(DEFAULT_TIMEOUT,
-                () -> (mTestTimer.getElapsed() == expectedNextTrigger)));
+        assertEquals("Incorrect next alarm trigger", expectedNextTrigger, mTestTimer.getElapsed());
     }
 
     @Test
-    public void testStandbyBucketDelay_frequent() {
+    public void testStandbyBucketDelay_frequent() throws Exception {
         setTestAlarm(ELAPSED_REALTIME_WAKEUP, mNowElapsedTest + 5, getNewMockPendingIntent());
         setTestAlarm(ELAPSED_REALTIME_WAKEUP, mNowElapsedTest + 6, getNewMockPendingIntent());
         assertEquals(mNowElapsedTest + 5, mTestTimer.getElapsed());
 
         when(mUsageStatsManagerInternal.getAppStandbyBucket(eq(TEST_CALLING_PACKAGE), anyInt(),
                 anyLong())).thenReturn(STANDBY_BUCKET_FREQUENT);
-        mNowElapsedTest = mTestTimer.expire();
-        verify(mUsageStatsManagerInternal, timeout(DEFAULT_TIMEOUT).atLeastOnce())
+        mNowElapsedTest = mTestTimer.getElapsed();
+        mTestTimer.expire();
+
+        verify(mUsageStatsManagerInternal, atLeastOnce())
                 .getAppStandbyBucket(eq(TEST_CALLING_PACKAGE),
                         eq(UserHandle.getUserId(TEST_CALLING_UID)), anyLong());
         final long expectedNextTrigger = mNowElapsedTest
                 + mService.getMinDelayForBucketLocked(STANDBY_BUCKET_FREQUENT);
-        assertTrue("Incorrect next alarm trigger. Expected " + expectedNextTrigger + " found: "
-                + mTestTimer.getElapsed(), pollingCheck(DEFAULT_TIMEOUT,
-                () -> (mTestTimer.getElapsed() == expectedNextTrigger)));
+        assertEquals("Incorrect next alarm trigger.", expectedNextTrigger, mTestTimer.getElapsed());
     }
 
     @Test
-    public void testStandbyBucketDelay_rare() {
+    public void testStandbyBucketDelay_rare() throws Exception {
         setTestAlarm(ELAPSED_REALTIME_WAKEUP, mNowElapsedTest + 5, getNewMockPendingIntent());
         setTestAlarm(ELAPSED_REALTIME_WAKEUP, mNowElapsedTest + 6, getNewMockPendingIntent());
         assertEquals(mNowElapsedTest + 5, mTestTimer.getElapsed());
 
         when(mUsageStatsManagerInternal.getAppStandbyBucket(eq(TEST_CALLING_PACKAGE), anyInt(),
                 anyLong())).thenReturn(STANDBY_BUCKET_RARE);
-        mNowElapsedTest = mTestTimer.expire();
-        verify(mUsageStatsManagerInternal, timeout(DEFAULT_TIMEOUT).atLeastOnce())
+        mNowElapsedTest = mTestTimer.getElapsed();
+        mTestTimer.expire();
+
+        verify(mUsageStatsManagerInternal, atLeastOnce())
                 .getAppStandbyBucket(eq(TEST_CALLING_PACKAGE),
                         eq(UserHandle.getUserId(TEST_CALLING_UID)), anyLong());
         final long expectedNextTrigger = mNowElapsedTest
                 + mService.getMinDelayForBucketLocked(STANDBY_BUCKET_RARE);
-        assertTrue("Incorrect next alarm trigger. Expected " + expectedNextTrigger + " found: "
-                + mTestTimer.getElapsed(), pollingCheck(DEFAULT_TIMEOUT,
-                () -> (mTestTimer.getElapsed() == expectedNextTrigger)));
+        assertEquals("Incorrect next alarm trigger.", expectedNextTrigger, mTestTimer.getElapsed());
     }
 
     @Test
-    public void testAlarmRestrictedInBatterSaver() throws PendingIntent.CanceledException {
+    public void testAlarmRestrictedInBatterSaver() throws Exception {
         final ArgumentCaptor<AppStateTracker.Listener> listenerArgumentCaptor =
                 ArgumentCaptor.forClass(AppStateTracker.Listener.class);
         verify(mAppStateTracker).addListener(listenerArgumentCaptor.capture());
@@ -416,8 +418,9 @@ public class AlarmManagerServiceTest {
                 mService.mPendingBackgroundAlarms;
         assertNull(restrictedAlarms.get(TEST_CALLING_UID));
 
-        mNowElapsedTest = mTestTimer.expire();
-        pollingCheck(DEFAULT_TIMEOUT, () -> (restrictedAlarms.get(TEST_CALLING_UID) != null));
+        mNowElapsedTest = mTestTimer.getElapsed();
+        mTestTimer.expire();
+        assertNotNull(restrictedAlarms.get(TEST_CALLING_UID));
 
         listenerArgumentCaptor.getValue().unblockAlarmsForUid(TEST_CALLING_UID);
         verify(alarmPi).send(any(Context.class), eq(0), any(Intent.class), any(),
@@ -430,26 +433,5 @@ public class AlarmManagerServiceTest {
         if (mMockingSession != null) {
             mMockingSession.finishMocking();
         }
-    }
-
-    private boolean pollingCheck(long timeout, Condition condition) {
-        final long deadline = SystemClock.uptimeMillis() + timeout;
-        boolean interrupted = false;
-        while (!condition.check() && SystemClock.uptimeMillis() < deadline) {
-            try {
-                Thread.sleep(500);
-            } catch (InterruptedException ie) {
-                interrupted = true;
-            }
-        }
-        if (interrupted) {
-            Thread.currentThread().interrupt();
-        }
-        return condition.check();
-    }
-
-    @FunctionalInterface
-    interface Condition {
-        boolean check();
     }
 }

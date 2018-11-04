@@ -21,6 +21,7 @@ import android.annotation.DimenRes;
 import android.annotation.NonNull;
 import android.annotation.StyleRes;
 import android.annotation.UnsupportedAppUsage;
+import android.app.Activity;
 import android.app.ActivityOptions;
 import android.app.ActivityThread;
 import android.app.Application;
@@ -56,13 +57,14 @@ import android.os.StrictMode;
 import android.os.UserHandle;
 import android.text.TextUtils;
 import android.util.ArrayMap;
+import android.util.IntArray;
 import android.util.Log;
+import android.util.Pair;
 import android.view.ContextThemeWrapper;
 import android.view.LayoutInflater;
 import android.view.LayoutInflater.Filter;
 import android.view.RemotableViewMethod;
 import android.view.View;
-import android.view.View.OnClickListener;
 import android.view.ViewGroup;
 import android.view.ViewStub;
 import android.widget.AdapterView.OnItemClickListener;
@@ -129,13 +131,19 @@ public class RemoteViews implements Parcelable, Filter {
     static final String EXTRA_REMOTEADAPTER_APPWIDGET_ID = "remoteAdapterAppWidgetId";
 
     /**
+     * The intent extra that contains the bounds for all shared elements.
+     */
+    public static final String EXTRA_SHARED_ELEMENT_BOUNDS =
+            "android.widget.extra.SHARED_ELEMENT_BOUNDS";
+
+    /**
      * Maximum depth of nested views calls from {@link #addView(int, RemoteViews)} and
      * {@link #RemoteViews(RemoteViews, RemoteViews)}.
      */
     private static final int MAX_NESTED_VIEWS = 10;
 
     // The unique identifiers for each custom {@link Action}.
-    private static final int SET_ON_CLICK_PENDING_INTENT_TAG = 1;
+    private static final int SET_ON_CLICK_RESPONSE_TAG = 1;
     private static final int REFLECTION_ACTION_TAG = 2;
     private static final int SET_DRAWABLE_TINT_TAG = 3;
     private static final int VIEW_GROUP_ACTION_ADD_TAG = 4;
@@ -143,7 +151,6 @@ public class RemoteViews implements Parcelable, Filter {
     private static final int SET_EMPTY_VIEW_ACTION_TAG = 6;
     private static final int VIEW_GROUP_ACTION_REMOVE_TAG = 7;
     private static final int SET_PENDING_INTENT_TEMPLATE_TAG = 8;
-    private static final int SET_ON_CLICK_FILL_IN_INTENT_TAG = 9;
     private static final int SET_REMOTE_VIEW_ADAPTER_INTENT_TAG = 10;
     private static final int TEXT_VIEW_DRAWABLE_ACTION_TAG = 11;
     private static final int BITMAP_REFLECTION_ACTION_TAG = 12;
@@ -228,7 +235,8 @@ public class RemoteViews implements Parcelable, Filter {
     /** Class cookies of the Parcel this instance was read from. */
     private final Map<Class, Object> mClassCookies;
 
-    private static final OnClickHandler DEFAULT_ON_CLICK_HANDLER = new OnClickHandler();
+    private static final OnClickHandler DEFAULT_ON_CLICK_HANDLER = (view, pendingIntent, response)
+            -> startPendingIntent(view, pendingIntent, response.getLaunchOptions(view));
 
     private static final ArrayMap<MethodKey, MethodArgs> sMethods = new ArrayMap<>();
 
@@ -362,57 +370,10 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     /** @hide */
-    public static class OnClickHandler {
-
-        @UnsupportedAppUsage
-        public boolean onClickHandler(View view, PendingIntent pendingIntent, Intent fillInIntent) {
-            try {
-                // TODO: Unregister this handler if PendingIntent.FLAG_ONE_SHOT?
-                Context context = view.getContext();
-                ActivityOptions opts = getActivityOptions(context);
-                // The NEW_TASK flags are applied through the activity options and not as a part of
-                // the call to startIntentSender() to ensure that they are consistently applied to
-                // both mutable and immutable PendingIntents.
-                context.startIntentSender(
-                        pendingIntent.getIntentSender(), fillInIntent,
-                        0, 0, 0, opts.toBundle());
-            } catch (IntentSender.SendIntentException e) {
-                android.util.Log.e(LOG_TAG, "Cannot send pending intent: ", e);
-                return false;
-            } catch (Exception e) {
-                android.util.Log.e(LOG_TAG, "Cannot send pending intent due to " +
-                        "unknown exception: ", e);
-                return false;
-            }
-            return true;
-        }
+    public interface OnClickHandler {
 
         /** @hide */
-        protected ActivityOptions getActivityOptions(Context context) {
-            if (context.getResources().getBoolean(
-                    com.android.internal.R.bool.config_overrideRemoteViewsActivityTransition)) {
-                TypedArray windowStyle = context.getTheme().obtainStyledAttributes(
-                        com.android.internal.R.styleable.Window);
-                int windowAnimations = windowStyle.getResourceId(
-                        com.android.internal.R.styleable.Window_windowAnimationStyle, 0);
-                TypedArray windowAnimationStyle = context.obtainStyledAttributes(
-                        windowAnimations, com.android.internal.R.styleable.WindowAnimation);
-                int enterAnimationId = windowAnimationStyle.getResourceId(com.android.internal.R
-                        .styleable.WindowAnimation_activityOpenRemoteViewsEnterAnimation, 0);
-                windowStyle.recycle();
-                windowAnimationStyle.recycle();
-
-                if (enterAnimationId != 0) {
-                    final ActivityOptions opts = ActivityOptions.makeCustomAnimation(context,
-                            enterAnimationId, 0);
-                    opts.setPendingIntentLaunchFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-                    return opts;
-                }
-            }
-            final ActivityOptions opts = ActivityOptions.makeBasic();
-            opts.setPendingIntentLaunchFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-            return opts;
-        }
+        boolean onClickHandler(View view, PendingIntent pendingIntent, RemoteResponse response);
     }
 
     /**
@@ -630,86 +591,6 @@ public class RemoteViews implements Parcelable, Filter {
         }
     }
 
-    private class SetOnClickFillInIntent extends Action {
-        public SetOnClickFillInIntent(int id, Intent fillInIntent) {
-            this.viewId = id;
-            this.fillInIntent = fillInIntent;
-        }
-
-        public SetOnClickFillInIntent(Parcel parcel) {
-            viewId = parcel.readInt();
-            fillInIntent = parcel.readTypedObject(Intent.CREATOR);
-        }
-
-        public void writeToParcel(Parcel dest, int flags) {
-            dest.writeInt(viewId);
-            dest.writeTypedObject(fillInIntent, 0 /* no flags */);
-        }
-
-        @Override
-        public void apply(View root, ViewGroup rootParent, final OnClickHandler handler) {
-            final View target = root.findViewById(viewId);
-            if (target == null) return;
-
-            if (!mIsWidgetCollectionChild) {
-                Log.e(LOG_TAG, "The method setOnClickFillInIntent is available " +
-                        "only from RemoteViewsFactory (ie. on collection items).");
-                return;
-            }
-            if (target == root) {
-                target.setTagInternal(com.android.internal.R.id.fillInIntent, fillInIntent);
-            } else if (fillInIntent != null) {
-                OnClickListener listener = new OnClickListener() {
-                    public void onClick(View v) {
-                        // Insure that this view is a child of an AdapterView
-                        View parent = (View) v.getParent();
-                        // Break the for loop on the first encounter of:
-                        //    1) an AdapterView,
-                        //    2) an AppWidgetHostView that is not a RemoteViewsFrameLayout, or
-                        //    3) a null parent.
-                        // 2) and 3) are unexpected and catch the case where a child is not
-                        // correctly parented in an AdapterView.
-                        while (parent != null && !(parent instanceof AdapterView<?>)
-                                && !((parent instanceof AppWidgetHostView) &&
-                                    !(parent instanceof RemoteViewsAdapter.RemoteViewsFrameLayout))) {
-                            parent = (View) parent.getParent();
-                        }
-
-                        if (!(parent instanceof AdapterView<?>)) {
-                            // Somehow they've managed to get this far without having
-                            // and AdapterView as a parent.
-                            Log.e(LOG_TAG, "Collection item doesn't have AdapterView parent");
-                            return;
-                        }
-
-                        // Insure that a template pending intent has been set on an ancestor
-                        if (!(parent.getTag() instanceof PendingIntent)) {
-                            Log.e(LOG_TAG, "Attempting setOnClickFillInIntent without" +
-                                    " calling setPendingIntentTemplate on parent.");
-                            return;
-                        }
-
-                        PendingIntent pendingIntent = (PendingIntent) parent.getTag();
-
-                        final Rect rect = getSourceBounds(v);
-
-                        fillInIntent.setSourceBounds(rect);
-                        handler.onClickHandler(v, pendingIntent, fillInIntent);
-                    }
-
-                };
-                target.setOnClickListener(listener);
-            }
-        }
-
-        @Override
-        public int getActionTag() {
-            return SET_ON_CLICK_FILL_IN_INTENT_TAG;
-        }
-
-        Intent fillInIntent;
-    }
-
     private class SetPendingIntentTemplate extends Action {
         public SetPendingIntentTemplate(int id, PendingIntent pendingIntentTemplate) {
             this.viewId = id;
@@ -749,22 +630,17 @@ public class RemoteViews implements Parcelable, Filter {
                             }
                             if (vg == null) return;
 
-                            Intent fillInIntent = null;
+                            RemoteResponse response = null;
                             int childCount = vg.getChildCount();
                             for (int i = 0; i < childCount; i++) {
                                 Object tag = vg.getChildAt(i).getTag(com.android.internal.R.id.fillInIntent);
-                                if (tag instanceof Intent) {
-                                    fillInIntent = (Intent) tag;
+                                if (tag instanceof RemoteResponse) {
+                                    response = (RemoteResponse) tag;
                                     break;
                                 }
                             }
-                            if (fillInIntent == null) return;
-
-                            final Rect rect = getSourceBounds(view);
-
-                            final Intent intent = new Intent();
-                            intent.setSourceBounds(rect);
-                            handler.onClickHandler(view, pendingIntentTemplate, fillInIntent);
+                            if (response == null) return;
+                            response.handleViewClick(view, handler);
                         }
                     }
                 };
@@ -922,20 +798,22 @@ public class RemoteViews implements Parcelable, Filter {
      * {@link android.view.View#setOnClickListener(android.view.View.OnClickListener)}
      * to launch the provided {@link PendingIntent}.
      */
-    private class SetOnClickPendingIntent extends Action {
-        public SetOnClickPendingIntent(int id, PendingIntent pendingIntent) {
+    private class SetOnClickResponse extends Action {
+
+        SetOnClickResponse(int id, RemoteResponse response) {
             this.viewId = id;
-            this.pendingIntent = pendingIntent;
+            this.mResponse = response;
         }
 
-        public SetOnClickPendingIntent(Parcel parcel) {
+        SetOnClickResponse(Parcel parcel) {
             viewId = parcel.readInt();
-            pendingIntent = PendingIntent.readPendingIntentOrNullFromParcel(parcel);
+            mResponse = new RemoteResponse();
+            mResponse.readFromParcel(parcel);
         }
 
         public void writeToParcel(Parcel dest, int flags) {
             dest.writeInt(viewId);
-            PendingIntent.writePendingIntentOrNullToParcel(pendingIntent, dest);
+            mResponse.writeToParcel(dest, flags);
         }
 
         @Override
@@ -943,50 +821,54 @@ public class RemoteViews implements Parcelable, Filter {
             final View target = root.findViewById(viewId);
             if (target == null) return;
 
-            // If the view is an AdapterView, setting a PendingIntent on click doesn't make much
-            // sense, do they mean to set a PendingIntent template for the AdapterView's children?
-            if (mIsWidgetCollectionChild) {
-                Log.w(LOG_TAG, "Cannot setOnClickPendingIntent for collection item " +
-                        "(id: " + viewId + ")");
-                ApplicationInfo appInfo = root.getContext().getApplicationInfo();
+            if (mResponse.mPendingIntent != null) {
+                // If the view is an AdapterView, setting a PendingIntent on click doesn't make
+                // much sense, do they mean to set a PendingIntent template for the
+                // AdapterView's children?
+                if (mIsWidgetCollectionChild) {
+                    Log.w(LOG_TAG, "Cannot SetOnClickResponse for collection item "
+                            + "(id: " + viewId + ")");
+                    ApplicationInfo appInfo = root.getContext().getApplicationInfo();
 
-                // We let this slide for HC and ICS so as to not break compatibility. It should have
-                // been disabled from the outset, but was left open by accident.
-                if (appInfo != null &&
-                        appInfo.targetSdkVersion >= Build.VERSION_CODES.JELLY_BEAN) {
+                    // We let this slide for HC and ICS so as to not break compatibility. It should
+                    // have been disabled from the outset, but was left open by accident.
+                    if (appInfo != null
+                            && appInfo.targetSdkVersion >= Build.VERSION_CODES.JELLY_BEAN) {
+                        return;
+                    }
+                }
+                target.setTagInternal(R.id.pending_intent_tag, mResponse.mPendingIntent);
+            } else if (mResponse.mFillIntent != null) {
+                if (!mIsWidgetCollectionChild) {
+                    Log.e(LOG_TAG, "The method setOnClickFillInIntent is available "
+                            + "only from RemoteViewsFactory (ie. on collection items).");
                     return;
                 }
+                if (target == root) {
+                    // Target is a root node of an AdapterView child. Set the response in the tag.
+                    // Actual click handling is done by OnItemClickListener in
+                    // SetPendingIntentTemplate, which uses this tag information.
+                    target.setTagInternal(com.android.internal.R.id.fillInIntent, mResponse);
+                    return;
+                }
+            } else {
+                // No intent to apply
+                target.setOnClickListener(null);
+                return;
             }
-
-            // If the pendingIntent is null, we clear the onClickListener
-            OnClickListener listener = null;
-            if (pendingIntent != null) {
-                listener = new OnClickListener() {
-                    public void onClick(View v) {
-                        // Find target view location in screen coordinates and
-                        // fill into PendingIntent before sending.
-                        final Rect rect = getSourceBounds(v);
-
-                        final Intent intent = new Intent();
-                        intent.setSourceBounds(rect);
-                        handler.onClickHandler(v, pendingIntent, intent);
-                    }
-                };
-            }
-            target.setTagInternal(R.id.pending_intent_tag, pendingIntent);
-            target.setOnClickListener(listener);
+            target.setOnClickListener(v -> mResponse.handleViewClick(v, handler));
         }
 
         @Override
         public int getActionTag() {
-            return SET_ON_CLICK_PENDING_INTENT_TAG;
+            return SET_ON_CLICK_RESPONSE_TAG;
         }
 
-        @UnsupportedAppUsage
-        PendingIntent pendingIntent;
+        final RemoteResponse mResponse;
     }
 
-    private static Rect getSourceBounds(View v) {
+    /** @hide **/
+    public static Rect getSourceBounds(View v) {
         final float appScale = v.getContext().getResources()
                 .getCompatibilityInfo().applicationScale;
         final int[] pos = new int[2];
@@ -2413,8 +2295,8 @@ public class RemoteViews implements Parcelable, Filter {
     private Action getActionFromParcel(Parcel parcel, int depth) {
         int tag = parcel.readInt();
         switch (tag) {
-            case SET_ON_CLICK_PENDING_INTENT_TAG:
-                return new SetOnClickPendingIntent(parcel);
+            case SET_ON_CLICK_RESPONSE_TAG:
+                return new SetOnClickResponse(parcel);
             case SET_DRAWABLE_TINT_TAG:
                 return new SetDrawableTint(parcel);
             case REFLECTION_ACTION_TAG:
@@ -2430,8 +2312,6 @@ public class RemoteViews implements Parcelable, Filter {
                 return new SetEmptyView(parcel);
             case SET_PENDING_INTENT_TEMPLATE_TAG:
                 return new SetPendingIntentTemplate(parcel);
-            case SET_ON_CLICK_FILL_IN_INTENT_TAG:
-                return new SetOnClickFillInIntent(parcel);
             case SET_REMOTE_VIEW_ADAPTER_INTENT_TAG:
                 return new SetRemoteViewsAdapterIntent(parcel);
             case TEXT_VIEW_DRAWABLE_ACTION_TAG:
@@ -2834,7 +2714,7 @@ public class RemoteViews implements Parcelable, Filter {
      * to launch the provided {@link PendingIntent}. The source bounds
      * ({@link Intent#getSourceBounds()}) of the intent will be set to the bounds of the clicked
      * view in screen space.
-     * Note that any activity options associated with the pendingIntent may get overridden
+     * Note that any activity options associated with the mPendingIntent may get overridden
      * before starting the intent.
      *
      * When setting the on-click action of items within collections (eg. {@link ListView},
@@ -2846,7 +2726,19 @@ public class RemoteViews implements Parcelable, Filter {
      * @param pendingIntent The {@link PendingIntent} to send when user clicks
      */
     public void setOnClickPendingIntent(int viewId, PendingIntent pendingIntent) {
-        addAction(new SetOnClickPendingIntent(viewId, pendingIntent));
+        setOnClickResponse(viewId, RemoteResponse.fromPendingIntent(pendingIntent));
+    }
+
+    /**
+     * Equivalent of calling
+     * {@link android.view.View#setOnClickListener(android.view.View.OnClickListener)}
+     * to launch the provided {@link RemoteResponse}.
+     *
+     * @param viewId The id of the view that will trigger the {@link RemoteResponse} when clicked
+     * @param response The {@link RemoteResponse} to send when user clicks
+     */
+    public void setOnClickResponse(int viewId, RemoteResponse response) {
+        addAction(new SetOnClickResponse(viewId, response));
     }
 
     /**
@@ -2883,7 +2775,7 @@ public class RemoteViews implements Parcelable, Filter {
      *        in order to determine the on-click behavior of the view specified by viewId
      */
     public void setOnClickFillInIntent(int viewId, Intent fillInIntent) {
-        addAction(new SetOnClickFillInIntent(viewId, fillInIntent));
+        setOnClickResponse(viewId, RemoteResponse.fromFillInIntent(fillInIntent));
     }
 
     /**
@@ -3902,5 +3794,214 @@ public class RemoteViews implements Parcelable, Filter {
                 }
             }
         }
+    }
+
+    /**
+     * Class representing a response to an action performed on any element of a RemoteViews.
+     */
+    public static class RemoteResponse {
+
+        private PendingIntent mPendingIntent;
+        private Intent mFillIntent;
+
+        private IntArray mViewIds;
+        private ArrayList<String> mElementNames;
+
+        /**
+         * Creates a response which sends a pending intent as part of the response. The source
+         * bounds ({@link Intent#getSourceBounds()}) of the intent will be set to the bounds of the
+         * target view in screen space.
+         * Note that any activity options associated with the mPendingIntent may get overridden
+         * before starting the intent.
+         *
+         * @param pendingIntent The {@link PendingIntent} to send as part of the response
+         */
+        public static RemoteResponse fromPendingIntent(PendingIntent pendingIntent) {
+            RemoteResponse response = new RemoteResponse();
+            response.mPendingIntent = pendingIntent;
+            return response;
+        }
+
+        /**
+         * When using collections (eg. {@link ListView}, {@link StackView} etc.) in widgets, it is
+         * very costly to set PendingIntents on the individual items, and is hence not permitted.
+         * Instead a single PendingIntent template can be set on the collection, see {@link
+         * RemoteViews#setPendingIntentTemplate(int, PendingIntent)}, and the individual on-click
+         * action of a given item can be distinguished by setting a fillInIntent on that item. The
+         * fillInIntent is then combined with the PendingIntent template in order to determine the
+         * final intent which will be executed when the item is clicked. This works as follows: any
+         * fields which are left blank in the PendingIntent template, but are provided by the
+         * fillInIntent will be overwritten, and the resulting PendingIntent will be used. The rest
+         * of the PendingIntent template will then be filled in with the associated fields that are
+         * set in fillInIntent. See {@link Intent#fillIn(Intent, int)} for more details.
+         * Creates a response which sends a pending intent as part of the response. The source
+         * bounds ({@link Intent#getSourceBounds()}) of the intent will be set to the bounds of the
+         * target view in screen space.
+         * Note that any activity options associated with the mPendingIntent may get overridden
+         * before starting the intent.
+         *
+         * @param fillIntent The intent which will be combined with the parent's PendingIntent in
+         *                  order to determine the behavior of the response
+         *
+         * @see RemoteViews#setPendingIntentTemplate(int, PendingIntent)
+         * @see RemoteViews#setOnClickFillInIntent(int, Intent)
+         * @return
+         */
+        public static RemoteResponse fromFillInIntent(Intent fillIntent) {
+            RemoteResponse response = new RemoteResponse();
+            response.mFillIntent = fillIntent;
+            return response;
+        }
+
+        /**
+         * Adds a shared element to be transferred as part of the transition between Activities
+         * using cross-Activity scene animations. The position of the first element will be used as
+         * the epicenter for the exit Transition. The position of the associated shared element in
+         * the launched Activity will be the epicenter of its entering Transition.
+         *
+         * @param viewId The id of the view to be shared as part of the transition
+         * @param sharedElementName The shared element name for this view
+         *
+         * @see ActivityOptions#makeSceneTransitionAnimation(Activity, Pair[])
+         */
+        public RemoteResponse addSharedElement(int viewId, String sharedElementName) {
+            if (mViewIds == null) {
+                mViewIds = new IntArray();
+                mElementNames = new ArrayList<>();
+            }
+            mViewIds.add(viewId);
+            mElementNames.add(sharedElementName);
+            return this;
+        }
+
+        private void writeToParcel(Parcel dest, int flags) {
+            PendingIntent.writePendingIntentOrNullToParcel(mPendingIntent, dest);
+            if (mPendingIntent == null) {
+                // Only write the intent if pending intent is null
+                dest.writeTypedObject(mFillIntent, flags);
+            }
+            dest.writeIntArray(mViewIds == null ? null : mViewIds.toArray());
+            dest.writeStringList(mElementNames);
+        }
+
+        private void readFromParcel(Parcel parcel) {
+            mPendingIntent = PendingIntent.readPendingIntentOrNullFromParcel(parcel);
+            if (mPendingIntent == null) {
+                mFillIntent = parcel.readTypedObject(Intent.CREATOR);
+            }
+            int[] viewIds = parcel.createIntArray();
+            mViewIds = viewIds == null ? null : IntArray.wrap(viewIds);
+            mElementNames = parcel.createStringArrayList();
+        }
+
+        private void handleViewClick(View v, OnClickHandler handler) {
+            final PendingIntent pi;
+            if (mPendingIntent != null) {
+                pi = mPendingIntent;
+            } else if (mFillIntent != null) {
+                // Insure that this view is a child of an AdapterView
+                View parent = (View) v.getParent();
+                // Break the for loop on the first encounter of:
+                //    1) an AdapterView,
+                //    2) an AppWidgetHostView that is not a RemoteViewsFrameLayout, or
+                //    3) a null parent.
+                // 2) and 3) are unexpected and catch the case where a child is not
+                // correctly parented in an AdapterView.
+                while (parent != null && !(parent instanceof AdapterView<?>)
+                        && !((parent instanceof AppWidgetHostView)
+                        && !(parent instanceof RemoteViewsAdapter.RemoteViewsFrameLayout))) {
+                    parent = (View) parent.getParent();
+                }
+
+                if (!(parent instanceof AdapterView<?>)) {
+                    // Somehow they've managed to get this far without having
+                    // and AdapterView as a parent.
+                    Log.e(LOG_TAG, "Collection item doesn't have AdapterView parent");
+                    return;
+                }
+                // Insure that a template pending intent has been set on an ancestor
+                if (!(parent.getTag() instanceof PendingIntent)) {
+                    Log.e(LOG_TAG, "Attempting setOnClickFillInIntent without"
+                            + " calling setPendingIntentTemplate on parent.");
+                    return;
+                }
+
+                pi = (PendingIntent) parent.getTag();
+            } else {
+                Log.e(LOG_TAG, "Response has neither pendingIntent nor fillInIntent");
+                return;
+            }
+
+            handler.onClickHandler(v, pi, this);
+        }
+
+        /** @hide */
+        public Pair<Intent, ActivityOptions> getLaunchOptions(View view) {
+            Intent intent = mPendingIntent != null ? new Intent() : new Intent(mFillIntent);
+            intent.setSourceBounds(getSourceBounds(view));
+
+            ActivityOptions opts = null;
+
+            Context context = view.getContext();
+            if (context.getResources().getBoolean(
+                    com.android.internal.R.bool.config_overrideRemoteViewsActivityTransition)) {
+                TypedArray windowStyle = context.getTheme().obtainStyledAttributes(
+                        com.android.internal.R.styleable.Window);
+                int windowAnimations = windowStyle.getResourceId(
+                        com.android.internal.R.styleable.Window_windowAnimationStyle, 0);
+                TypedArray windowAnimationStyle = context.obtainStyledAttributes(
+                        windowAnimations, com.android.internal.R.styleable.WindowAnimation);
+                int enterAnimationId = windowAnimationStyle.getResourceId(com.android.internal.R
+                        .styleable.WindowAnimation_activityOpenRemoteViewsEnterAnimation, 0);
+                windowStyle.recycle();
+                windowAnimationStyle.recycle();
+
+                if (enterAnimationId != 0) {
+                    opts = ActivityOptions.makeCustomAnimation(context,
+                            enterAnimationId, 0);
+                    opts.setPendingIntentLaunchFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+                }
+            }
+
+            if (opts == null && mViewIds != null && mElementNames != null) {
+                View parent = (View) view.getParent();
+                while (parent != null && !(parent instanceof AppWidgetHostView)) {
+                    parent = (View) parent.getParent();
+                }
+                if (parent instanceof AppWidgetHostView) {
+                    opts = ((AppWidgetHostView) parent).createSharedElementActivityOptions(
+                            mViewIds.toArray(),
+                            mElementNames.toArray(new String[mElementNames.size()]), intent);
+                }
+            }
+
+            if (opts == null) {
+                opts = ActivityOptions.makeBasic();
+                opts.setPendingIntentLaunchFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+            }
+            return Pair.create(intent, opts);
+        }
+    }
+
+    /** @hide */
+    public static boolean startPendingIntent(View view, PendingIntent pendingIntent,
+            Pair<Intent, ActivityOptions> options) {
+        try {
+            // TODO: Unregister this handler if PendingIntent.FLAG_ONE_SHOT?
+            Context context = view.getContext();
+            // The NEW_TASK flags are applied through the activity options and not as a part of
+            // the call to startIntentSender() to ensure that they are consistently applied to
+            // both mutable and immutable PendingIntents.
+            context.startIntentSender(
+                    pendingIntent.getIntentSender(), options.first,
+                    0, 0, 0, options.second.toBundle());
+        } catch (IntentSender.SendIntentException e) {
+            Log.e(LOG_TAG, "Cannot send pending intent: ", e);
+            return false;
+        } catch (Exception e) {
+            Log.e(LOG_TAG, "Cannot send pending intent due to unknown exception: ", e);
+            return false;
+        }
+        return true;
     }
 }

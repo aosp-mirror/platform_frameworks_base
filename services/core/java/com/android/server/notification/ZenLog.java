@@ -63,6 +63,7 @@ public class ZenLog {
     private static final int TYPE_SUPPRESSOR_CHANGED = 14;
     private static final int TYPE_LISTENER_HINTS_CHANGED = 15;
     private static final int TYPE_SET_NOTIFICATION_POLICY = 16;
+    private static final int TYPE_SET_CONSOLIDATED_ZEN_POLICY = 17;
 
     private static int sNext;
     private static int sSize;
@@ -101,6 +102,14 @@ public class ZenLog {
 
     public static void traceSetZenMode(int zenMode, String reason) {
         append(TYPE_SET_ZEN_MODE, zenModeToString(zenMode) + "," + reason);
+    }
+
+    /**
+     * trace setting the consolidated zen policy
+     */
+    public static void traceSetConsolidatedZenPolicy(NotificationManager.Policy policy,
+            String reason) {
+        append(TYPE_SET_CONSOLIDATED_ZEN_POLICY, policy.toString() + "," + reason);
     }
 
     public static void traceUpdateZenMode(int fromMode, int toMode) {

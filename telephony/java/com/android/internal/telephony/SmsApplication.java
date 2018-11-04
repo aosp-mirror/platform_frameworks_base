@@ -562,8 +562,7 @@ public final class SmsApplication {
                         + AppOpsManager.modeToName(appOp) + ": "
                         + (updateIfNeeded ? " (fixing)" : " (no permission to fix)"));
                 if (updateIfNeeded) {
-                    setExclusiveAppop(applicationData.mPackageName, appOps, appOp,
-                            AppOpsManager.MODE_ALLOWED, applicationData.mUid);
+                    appOps.setUidMode(appOp, applicationData.mUid, AppOpsManager.MODE_ALLOWED);
                 } else {
                     return false;
                 }
@@ -732,14 +731,6 @@ public final class SmsApplication {
     private static void setExclusiveAppops(String pkg, AppOpsManager appOpsManager, int uid,
             int mode) {
         for (int appop : DEFAULT_APP_EXCLUSIVE_APPOPS) {
-            setExclusiveAppop(pkg, appOpsManager, appop, mode, uid);
-        }
-    }
-
-    private static void setExclusiveAppop(String pkg, AppOpsManager appOpsManager, int appop,
-            int mode, int uid) {
-        // IGNORED means user explicitly revoked permission in settings, so avoid overriding it.
-        if (appOpsManager.checkOpNoThrow(appop, uid, pkg) != AppOpsManager.MODE_IGNORED) {
             appOpsManager.setUidMode(appop, uid, mode);
         }
     }

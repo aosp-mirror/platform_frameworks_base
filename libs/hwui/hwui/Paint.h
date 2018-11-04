@@ -86,6 +86,14 @@ public:
 
     const Typeface* getAndroidTypeface() const { return mTypeface; }
 
+    enum Align {
+        kLeft_Align,
+        kCenter_Align,
+        kRight_Align,
+    };
+    Align getTextAlign() const { return mAlign; }
+    void setTextAlign(Align align) { mAlign = align; }
+
 private:
     float mLetterSpacing = 0;
     float mWordSpacing = 0;
@@ -98,6 +106,7 @@ private:
     // object. Thus, following pointer can never be a dangling pointer. Note that
     // nullptr is valid: it means the default typeface.
     const Typeface* mTypeface = nullptr;
+    Align mAlign = kLeft_Align;
 };
 
 }  // namespace android

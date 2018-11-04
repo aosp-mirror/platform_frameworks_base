@@ -21,14 +21,6 @@
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="app_label" msgid="7164937344850004466">"Kerfisviðmót"</string>
     <string name="status_bar_clear_all_button" msgid="7774721344716731603">"Hreinsa"</string>
-    <string name="status_bar_recent_remove_item_title" msgid="6026395868129852968">"Fjarlægja af lista"</string>
-    <string name="status_bar_recent_inspect_item_title" msgid="7793624864528818569">"Upplýsingar um forrit"</string>
-    <string name="status_bar_no_recent_apps" msgid="7374907845131203189">"Nýlegar skjámyndir birtast hér"</string>
-    <string name="status_bar_accessibility_dismiss_recents" msgid="4576076075226540105">"Hunsa nýleg forrit"</string>
-    <plurals name="status_bar_accessibility_recent_apps" formatted="false" msgid="9138535907802238759">
-      <item quantity="one">%d skjámynd í yfirliti</item>
-      <item quantity="other">%d skjámyndir í yfirliti</item>
-    </plurals>
     <string name="status_bar_no_notifications_title" msgid="4755261167193833213">"Engar tilkynningar"</string>
     <string name="status_bar_ongoing_events_title" msgid="1682504513316879202">"Áframhaldandi"</string>
     <string name="status_bar_latest_events_title" msgid="6594767438577593172">"Tilkynningar"</string>
@@ -101,7 +93,6 @@
     <string name="phone_label" msgid="2320074140205331708">"opna síma"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"opna raddaðstoð"</string>
     <string name="camera_label" msgid="7261107956054836961">"opna myndavél"</string>
-    <string name="recents_caption_resize" msgid="3517056471774958200">"Velja nýtt útlit verkefna"</string>
     <string name="cancel" msgid="6442560571259935130">"Hætta við"</string>
     <string name="accessibility_biometric_dialog_help_area" msgid="8953787076940186847">"Svæði hjálparskilaboða"</string>
     <string name="biometric_dialog_confirm" msgid="6468457350041712674">"Staðfesta"</string>
@@ -188,11 +179,6 @@
     <skip />
     <!-- no translation found for accessibility_work_mode (702887484664647430) -->
     <skip />
-    <string name="accessibility_recents_item_will_be_dismissed" msgid="395770242498031481">"Hunsa <xliff:g id="APP">%s</xliff:g>."</string>
-    <string name="accessibility_recents_item_dismissed" msgid="6803574935084867070">"<xliff:g id="APP">%s</xliff:g> vísað frá."</string>
-    <string name="accessibility_recents_all_items_dismissed" msgid="4464697366179168836">"Öll nýleg forrit fjarlægð."</string>
-    <string name="accessibility_recents_item_open_app_info" msgid="5107479759905883540">"Opna forritsupplýsingar <xliff:g id="APP">%s</xliff:g>."</string>
-    <string name="accessibility_recents_item_launched" msgid="7616039892382525203">"Ræsir <xliff:g id="APP">%s</xliff:g>."</string>
     <string name="accessibility_notification_dismissed" msgid="854211387186306927">"Tilkynningu lokað."</string>
     <string name="accessibility_desc_notification_shade" msgid="4690274844447504208">"Tilkynningasvæði."</string>
     <string name="accessibility_desc_quick_settings" msgid="6186378411582437046">"Flýtistillingar."</string>
@@ -355,23 +341,8 @@
     <string name="quick_settings_nfc_label" msgid="9012153754816969325">"NFC"</string>
     <string name="quick_settings_nfc_off" msgid="6883274004315134333">"Slökkt á NFC"</string>
     <string name="quick_settings_nfc_on" msgid="6680317193676884311">"Kveikt á NFC"</string>
-    <string name="recents_empty_message" msgid="808480104164008572">"Engin nýleg atriði"</string>
-    <string name="recents_empty_message_dismissed_all" msgid="2791312568666558651">"Þú hefur hreinsað allt"</string>
-    <string name="recents_app_info_button_label" msgid="2890317189376000030">"Forritsupplýsingar"</string>
-    <string name="recents_lock_to_app_button_label" msgid="6942899049072506044">"skjáfesting"</string>
-    <string name="recents_search_bar_label" msgid="8074997400187836677">"leita"</string>
-    <string name="recents_launch_error_message" msgid="2969287838120550506">"Ekki var hægt að ræsa <xliff:g id="APP">%s</xliff:g>."</string>
-    <string name="recents_launch_disabled_message" msgid="1624523193008871793">"Slökkt er á <xliff:g id="APP">%s</xliff:g> í öruggri stillingu."</string>
-    <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Hreinsa allt"</string>
-    <string name="recents_drag_hint_message" msgid="2649739267073203985">"Dragðu hingað til að skipta skjánum"</string>
     <string name="recents_swipe_up_onboarding" msgid="3824607135920170001">"Strjúktu upp til að skipta á milli forrita"</string>
     <string name="recents_quick_scrub_onboarding" msgid="2778062804333285789">"Dragðu til hægri til að skipta hratt á milli forrita"</string>
-    <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Lárétt skipting"</string>
-    <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Lóðrétt skipting"</string>
-    <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Sérsniðin skipting"</string>
-    <string name="recents_accessibility_split_screen_top" msgid="9056056469282256287">"Skipta skjá að ofanverðu"</string>
-    <string name="recents_accessibility_split_screen_left" msgid="8987144699630620019">"Skipta skjá til vinstri"</string>
-    <string name="recents_accessibility_split_screen_right" msgid="275069779299592867">"Skipta skjá til hægri"</string>
     <string name="quick_step_accessibility_toggle_overview" msgid="7171470775439860480">"Kveikja/slökkva á yfirliti"</string>
     <string name="expanded_header_battery_charged" msgid="5945855970267657951">"Fullhlaðin"</string>
     <string name="expanded_header_battery_charging" msgid="205623198487189724">"Í hleðslu"</string>
@@ -618,6 +589,7 @@
     <string name="inline_minimize_button" msgid="966233327974702195">"Minnka"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Sýna áfram tilkynningar frá þessu forriti?"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"Ekki er hægt að slökkva á þessum tilkynningum"</string>
+    <string name="notification_delegate_header" msgid="9167022191405284627">"með <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="appops_camera" msgid="8100147441602585776">"Þetta forrit er að nota myndavélina."</string>
     <string name="appops_microphone" msgid="741508267659494555">"Þetta forrit er að nota hljóðnemann."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"Þetta forrit er að birta efni yfir öðrum forritum á skjánum þínum."</string>
@@ -752,6 +724,7 @@
     <item msgid="2139628951880142927">"Sýna hlutfall meðan á hleðslu stendur (sjálfgefið)"</item>
     <item msgid="3327323682209964956">"Ekki sýna þetta tákn"</item>
   </string-array>
+    <string name="tuner_low_priority" msgid="1325884786608312358">"Sýna tákn fyrir tilkynningar með litlum forgangi"</string>
     <string name="other" msgid="4060683095962566764">"Annað"</string>
     <string name="accessibility_divider" msgid="5903423481953635044">"Skjáskipting"</string>
     <string name="accessibility_action_divider_left_full" msgid="2801570521881574972">"Vinstri á öllum skjánum"</string>
