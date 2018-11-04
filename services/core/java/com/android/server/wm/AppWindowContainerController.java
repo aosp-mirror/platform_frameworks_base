@@ -135,7 +135,7 @@ public class AppWindowContainerController
             final StartingData startingData;
             final AppWindowToken container;
 
-            synchronized (mWindowMap) {
+            synchronized (mGlobalLock) {
                 if (mContainer == null) {
                     if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM, "mContainer was null while trying to"
                             + " add starting window");
@@ -169,7 +169,7 @@ public class AppWindowContainerController
             }
             if (surface != null) {
                 boolean abort = false;
-                synchronized (mWindowMap) {
+                synchronized (mGlobalLock) {
                     // If the window was successfully added, then
                     // we need to remove it.
                     if (container.removed || container.startingData == null) {
@@ -219,7 +219,7 @@ public class AppWindowContainerController
         super(listener, service);
         mHandler = new H(service.mH.getLooper());
         mToken = token;
-        synchronized(mWindowMap) {
+        synchronized (mGlobalLock) {
             AppWindowToken atoken = mRoot.getAppWindowToken(mToken.asBinder());
             if (atoken != null) {
                 // TODO: Should this throw an exception instead?
@@ -256,7 +256,7 @@ public class AppWindowContainerController
     }
 
     public void removeContainer(int displayId) {
-        synchronized(mWindowMap) {
+        synchronized (mGlobalLock) {
             final DisplayContent dc = mRoot.getDisplayContent(displayId);
             if (dc == null) {
                 Slog.w(TAG_WM, "removeAppToken: Attempted to remove binder token: "
@@ -274,7 +274,7 @@ public class AppWindowContainerController
     }
 
     public void reparent(TaskWindowContainerController taskController, int position) {
-        synchronized (mWindowMap) {
+        synchronized (mGlobalLock) {
             if (DEBUG_ADD_REMOVE) Slog.i(TAG_WM, "reparent: moving app token=" + mToken
                     + " to task=" + taskController + " at " + position);
             if (mContainer == null) {
@@ -294,7 +294,7 @@ public class AppWindowContainerController
 
     public Configuration setOrientation(int requestedOrientation, int displayId,
             Configuration displayConfig, boolean freezeScreenIfNeeded) {
-        synchronized(mWindowMap) {
+        synchronized (mGlobalLock) {
             if (mContainer == null) {
                 Slog.w(TAG_WM,
                         "Attempted to set orientation of non-existing app token: " + mToken);
@@ -310,7 +310,7 @@ public class AppWindowContainerController
     }
 
     public int getOrientation() {
-        synchronized(mWindowMap) {
+        synchronized (mGlobalLock) {
             if (mContainer == null) {
                 return SCREEN_ORIENTATION_UNSPECIFIED;
             }
@@ -320,7 +320,7 @@ public class AppWindowContainerController
     }
 
     public void setDisablePreviewScreenshots(boolean disable) {
-        synchronized (mWindowMap) {
+        synchronized (mGlobalLock) {
             if (mContainer == null) {
                 Slog.w(TAG_WM, "Attempted to set disable screenshots of non-existing app"
                         + " token: " + mToken);
@@ -331,7 +331,7 @@ public class AppWindowContainerController
     }
 
     public void setVisibility(boolean visible, boolean deferHidingClient) {
-        synchronized(mWindowMap) {
+        synchronized (mGlobalLock) {
             if (mContainer == null) {
                 Slog.w(TAG_WM, "Attempted to set visibility of non-existing app token: "
                         + mToken);
@@ -449,7 +449,7 @@ public class AppWindowContainerController
      * of Keyguard flags it's going to set on its windows.
      */
     public void notifyUnknownVisibilityLaunched() {
-        synchronized(mWindowMap) {
+        synchronized (mGlobalLock) {
             if (mContainer != null) {
                 mContainer.getDisplayContent().mUnknownAppVisibilityController.notifyLaunched(
                         mContainer);
@@ -461,7 +461,7 @@ public class AppWindowContainerController
             CharSequence nonLocalizedLabel, int labelRes, int icon, int logo, int windowFlags,
             IBinder transferFrom, boolean newTask, boolean taskSwitch, boolean processRunning,
             boolean allowTaskSnapshot, boolean activityCreated, boolean fromRecents) {
-        synchronized(mWindowMap) {
+        synchronized (mGlobalLock) {
             if (DEBUG_STARTING_WINDOW) Slog.v(TAG_WM, "setAppStartingWindow: token=" + mToken
                     + " pkg=" + pkg + " transferFrom=" + transferFrom + " newTask=" + newTask
                     + " taskSwitch=" + taskSwitch + " processRunning=" + processRunning
@@ -611,7 +611,7 @@ public class AppWindowContainerController
     }
 
     public void removeStartingWindow() {
-        synchronized (mWindowMap) {
+        synchronized (mGlobalLock) {
             if (mContainer.startingWindow == null) {
                 if (mContainer.startingData != null) {
                     // Starting window has not been added yet, but it is scheduled to be added.
@@ -664,7 +664,7 @@ public class AppWindowContainerController
     }
 
     public void pauseKeyDispatching() {
-        synchronized (mWindowMap) {
+        synchronized (mGlobalLock) {
             if (mContainer != null) {
                 mContainer.getDisplayContent().getInputMonitor().pauseDispatchingLw(mContainer);
             }
@@ -672,7 +672,7 @@ public class AppWindowContainerController
     }
 
     public void resumeKeyDispatching() {
-        synchronized (mWindowMap) {
+        synchronized (mGlobalLock) {
             if (mContainer != null) {
                 mContainer.getDisplayContent().getInputMonitor().resumeDispatchingLw(mContainer);
             }
@@ -680,7 +680,7 @@ public class AppWindowContainerController
     }
 
     public void notifyAppResumed(boolean wasStopped) {
-        synchronized(mWindowMap) {
+        synchronized (mGlobalLock) {
             if (mContainer == null) {
                 Slog.w(TAG_WM, "Attempted to notify resumed of non-existing app token: " + mToken);
                 return;
@@ -690,7 +690,7 @@ public class AppWindowContainerController
     }
 
     public void notifyAppStopping() {
-        synchronized(mWindowMap) {
+        synchronized (mGlobalLock) {
             if (mContainer == null) {
                 Slog.w(TAG_WM, "Attempted to notify stopping on non-existing app token: "
                         + mToken);
@@ -701,7 +701,7 @@ public class AppWindowContainerController
     }
 
     public void notifyAppStopped() {
-        synchronized(mWindowMap) {
+        synchronized (mGlobalLock) {
             if (mContainer == null) {
                 Slog.w(TAG_WM, "Attempted to notify stopped of non-existing app token: "
                         + mToken);
@@ -712,7 +712,7 @@ public class AppWindowContainerController
     }
 
     public void startFreezingScreen(int configChanges) {
-        synchronized(mWindowMap) {
+        synchronized (mGlobalLock) {
             if (mContainer == null) {
                 Slog.w(TAG_WM,
                         "Attempted to freeze screen with non-existing app token: " + mContainer);
@@ -729,7 +729,7 @@ public class AppWindowContainerController
     }
 
     public void stopFreezingScreen(boolean force) {
-        synchronized(mWindowMap) {
+        synchronized (mGlobalLock) {
             if (mContainer == null) {
                 return;
             }
@@ -740,7 +740,7 @@ public class AppWindowContainerController
     }
 
     public void registerRemoteAnimations(RemoteAnimationDefinition definition) {
-        synchronized (mWindowMap) {
+        synchronized (mGlobalLock) {
             if (mContainer == null) {
                 Slog.w(TAG_WM, "Attempted to register remote animations with non-existing app"
                         + " token: " + mToken);
@@ -775,7 +775,7 @@ public class AppWindowContainerController
      * Apply override app transition base on options & animation type.
      */
     public void applyOptionsLocked(ActivityOptions pendingOptions, Intent intent) {
-        synchronized (mWindowMap) {
+        synchronized (mGlobalLock) {
             final int animationType = pendingOptions.getAnimationType();
             final DisplayContent displayContent = mContainer.getDisplayContent();
             switch (animationType) {
@@ -875,7 +875,7 @@ public class AppWindowContainerController
      * signal on the WM side.
      */
     public void setWillCloseOrEnterPip(boolean willCloseOrEnterPip) {
-        synchronized (mWindowMap) {
+        synchronized (mGlobalLock) {
             if (mContainer == null) {
                 return;
             }

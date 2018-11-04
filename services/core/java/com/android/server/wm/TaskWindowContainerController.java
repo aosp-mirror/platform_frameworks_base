@@ -65,7 +65,7 @@ public class TaskWindowContainerController
         mTaskId = taskId;
         mHandler = new H(new WeakReference<>(this), service.mH.getLooper());
 
-        synchronized(mWindowMap) {
+        synchronized (mGlobalLock) {
             if (DEBUG_STACK) Slog.i(TAG_WM, "TaskWindowContainerController: taskId=" + taskId
                     + " stack=" + stackController + " bounds=" + bounds);
 
@@ -93,7 +93,7 @@ public class TaskWindowContainerController
 
     @Override
     public void removeContainer() {
-        synchronized(mWindowMap) {
+        synchronized (mGlobalLock) {
             if (mContainer == null) {
                 if (DEBUG_STACK) Slog.i(TAG_WM, "removeTask: could not find taskId=" + mTaskId);
                 return;
@@ -108,7 +108,7 @@ public class TaskWindowContainerController
     }
 
     public void positionChildAt(AppWindowContainerController childController, int position) {
-        synchronized(mService.mWindowMap) {
+        synchronized (mService.mGlobalLock) {
             final AppWindowToken aToken = childController.mContainer;
             if (aToken == null) {
                 Slog.w(TAG_WM,
@@ -125,7 +125,7 @@ public class TaskWindowContainerController
     }
 
     public void reparent(StackWindowController stackController, int position, boolean moveParents) {
-        synchronized (mWindowMap) {
+        synchronized (mGlobalLock) {
             if (DEBUG_STACK) Slog.i(TAG_WM, "reparent: moving taskId=" + mTaskId
                     + " to stack=" + stackController + " at " + position);
             if (mContainer == null) {
@@ -144,7 +144,7 @@ public class TaskWindowContainerController
     }
 
     public void setResizeable(int resizeMode) {
-        synchronized (mWindowMap) {
+        synchronized (mGlobalLock) {
             if (mContainer != null) {
                 mContainer.setResizeable(resizeMode);
             }
@@ -152,7 +152,7 @@ public class TaskWindowContainerController
     }
 
     public void resize(boolean relayout, boolean forced) {
-        synchronized (mWindowMap) {
+        synchronized (mGlobalLock) {
             if (mContainer == null) {
                 throw new IllegalArgumentException("resizeTask: taskId " + mTaskId + " not found.");
             }
@@ -165,7 +165,7 @@ public class TaskWindowContainerController
     }
 
     public void getBounds(Rect bounds) {
-        synchronized (mWindowMap) {
+        synchronized (mGlobalLock) {
             if (mContainer != null) {
                 mContainer.getBounds(bounds);
                 return;
@@ -180,7 +180,7 @@ public class TaskWindowContainerController
      * @param resizing Whether to put the task into drag resize mode.
      */
     public void setTaskDockedResizing(boolean resizing) {
-        synchronized (mWindowMap) {
+        synchronized (mGlobalLock) {
             if (mContainer == null) {
                 Slog.w(TAG_WM, "setTaskDockedResizing: taskId " + mTaskId + " not found.");
                 return;
@@ -190,7 +190,7 @@ public class TaskWindowContainerController
     }
 
     public void cancelWindowTransition() {
-        synchronized (mWindowMap) {
+        synchronized (mGlobalLock) {
             if (mContainer == null) {
                 Slog.w(TAG_WM, "cancelWindowTransition: taskId " + mTaskId + " not found.");
                 return;
@@ -200,7 +200,7 @@ public class TaskWindowContainerController
     }
 
     public void setTaskDescription(TaskDescription taskDescription) {
-        synchronized (mWindowMap) {
+        synchronized (mGlobalLock) {
             if (mContainer == null) {
                 Slog.w(TAG_WM, "setTaskDescription: taskId " + mTaskId + " not found.");
                 return;
@@ -210,7 +210,7 @@ public class TaskWindowContainerController
     }
 
     public boolean isDragResizing() {
-        synchronized (mWindowMap) {
+        synchronized (mGlobalLock) {
             return mContainer.isDragResizing();
         }
     }

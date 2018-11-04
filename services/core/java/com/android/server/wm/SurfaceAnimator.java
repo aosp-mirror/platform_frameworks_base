@@ -71,7 +71,7 @@ class SurfaceAnimator {
     private OnAnimationFinishedCallback getFinishedCallback(
             @Nullable Runnable animationFinishedCallback) {
         return anim -> {
-            synchronized (mService.mWindowMap) {
+            synchronized (mService.mGlobalLock) {
                 final SurfaceAnimator target = mService.mAnimationTransferMap.remove(anim);
                 if (target != null) {
                     target.mInnerAnimationFinishedCallback.onAnimationFinished(anim);

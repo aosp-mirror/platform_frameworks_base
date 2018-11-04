@@ -121,7 +121,7 @@ public class DragDropControllerTests extends WindowTestsBase {
         doReturn(mWindow).when(mDisplayContent).getTouchableWinAtPointLocked(0, 0);
         when(sWm.mInputManager.transferTouchFocus(any(), any())).thenReturn(true);
 
-        synchronized (sWm.mWindowMap) {
+        synchronized (sWm.mGlobalLock) {
             sWm.mWindowMap.put(mWindow.mClient.asBinder(), mWindow);
         }
     }
@@ -131,7 +131,7 @@ public class DragDropControllerTests extends WindowTestsBase {
     public void tearDown() throws Exception {
         LocalServices.removeServiceForTest(UserManagerInternal.class);
         final CountDownLatch latch;
-        synchronized (sWm.mWindowMap) {
+        synchronized (sWm.mGlobalLock) {
             if (!mTarget.dragDropActiveLocked()) {
                 return;
             }

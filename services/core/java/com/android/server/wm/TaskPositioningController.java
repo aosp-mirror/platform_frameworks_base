@@ -61,7 +61,7 @@ class TaskPositioningController {
 
     boolean startMovingTask(IWindow window, float startX, float startY) {
         WindowState win = null;
-        synchronized (mService.mWindowMap) {
+        synchronized (mService.mGlobalLock) {
             win = mService.windowForClientLocked(null, window, false);
             // win shouldn't be null here, pass it down to startPositioningLocked
             // to get warning if it's null.
@@ -79,7 +79,7 @@ class TaskPositioningController {
     void handleTapOutsideTask(DisplayContent displayContent, int x, int y) {
         mHandler.post(() -> {
             int taskId = -1;
-            synchronized (mService.mWindowMap) {
+            synchronized (mService.mGlobalLock) {
                 final Task task = displayContent.findTaskForResizePoint(x, y);
                 if (task != null) {
                     if (!startPositioningLocked(task.getTopVisibleAppMainWindow(), true /*resize*/,
@@ -152,7 +152,7 @@ class TaskPositioningController {
         mHandler.post(() -> {
             if (DEBUG_TASK_POSITIONING) Slog.d(TAG_WM, "finishPositioning");
 
-            synchronized (mService.mWindowMap) {
+            synchronized (mService.mGlobalLock) {
                 if (mTaskPositioner != null) {
                     mTaskPositioner.unregister();
                     mTaskPositioner = null;

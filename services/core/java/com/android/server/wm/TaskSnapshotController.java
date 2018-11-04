@@ -436,7 +436,7 @@ class TaskSnapshotController {
         // We can't take a snapshot when screen is off, so take a snapshot now!
         mHandler.post(() -> {
             try {
-                synchronized (mService.mWindowMap) {
+                synchronized (mService.mGlobalLock) {
                     mTmpTasks.clear();
                     mService.mRoot.forAllTasks(task -> {
                         if (task.isVisible()) {

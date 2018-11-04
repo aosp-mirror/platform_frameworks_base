@@ -24,7 +24,7 @@ import org.junit.runner.RunWith;
 public class RootWindowContainerTests extends WindowTestsBase {
     @Test
     public void testSetDisplayOverrideConfigurationIfNeeded() throws Exception {
-        synchronized (sWm.mWindowMap) {
+        synchronized (sWm.mGlobalLock) {
             // Add first stack we expect to be updated with configuration change.
             final TaskStack stack = createTaskStackOnDisplay(mDisplayContent);
             stack.getOverrideConfiguration().windowConfiguration.setBounds(new Rect(0, 0, 5, 5));

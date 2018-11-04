@@ -1622,7 +1622,7 @@ public class TaskStack extends WindowContainer<Task> implements
 
     public boolean setPinnedStackSize(Rect stackBounds, Rect tempTaskBounds) {
         // Hold the lock since this is called from the BoundsAnimator running on the UiThread
-        synchronized (mService.mWindowMap) {
+        synchronized (mService.mGlobalLock) {
             if (mCancelCurrentBoundsAnimation) {
                 return false;
             }
@@ -1647,7 +1647,7 @@ public class TaskStack extends WindowContainer<Task> implements
     @Override  // AnimatesBounds
     public boolean onAnimationStart(boolean schedulePipModeChangedCallback, boolean forceUpdate) {
         // Hold the lock since this is called from the BoundsAnimator running on the UiThread
-        synchronized (mService.mWindowMap) {
+        synchronized (mService.mGlobalLock) {
             if (!isAttached()) {
                 // Don't run the animation if the stack is already detached
                 return false;
@@ -1726,7 +1726,7 @@ public class TaskStack extends WindowContainer<Task> implements
 
     @Override
     public boolean isAttached() {
-        synchronized (mService.mWindowMap) {
+        synchronized (mService.mGlobalLock) {
             return mDisplayContent != null;
         }
     }
@@ -1735,7 +1735,7 @@ public class TaskStack extends WindowContainer<Task> implements
      * Called immediately prior to resizing the tasks at the end of the pinned stack animation.
      */
     public void onPipAnimationEndResize() {
-        synchronized (mService.mWindowMap) {
+        synchronized (mService.mGlobalLock) {
             mBoundsAnimating = false;
             for (int i = 0; i < mChildren.size(); i++) {
                 final Task t = mChildren.get(i);
@@ -1747,7 +1747,7 @@ public class TaskStack extends WindowContainer<Task> implements
 
     @Override
     public boolean shouldDeferStartOnMoveToFullscreen() {
-        synchronized (mService.mWindowMap) {
+        synchronized (mService.mGlobalLock) {
             // Workaround for the recents animation -- normally we need to wait for the new activity
             // to show before starting the PiP animation, but because we start and show the home
             // activity early for the recents animation prior to the PiP animation starting, there

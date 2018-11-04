@@ -32,7 +32,7 @@ public class WallpaperControllerTests extends WindowTestsBase {
     public void testWallpaperScreenshot() {
         WindowSurfaceController windowSurfaceController = mock(WindowSurfaceController.class);
 
-        synchronized (sWm.mWindowMap) {
+        synchronized (sWm.mGlobalLock) {
             // No wallpaper
             final DisplayContent dc = createNewDisplay();
             Bitmap wallpaperBitmap = sWm.mRoot.mWallpaperController.screenshotWallpaperLocked();

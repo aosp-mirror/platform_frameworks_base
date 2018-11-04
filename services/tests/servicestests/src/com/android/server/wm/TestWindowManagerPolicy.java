@@ -150,7 +150,7 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
         final com.android.server.wm.WindowState window;
         final AppWindowToken atoken;
         final WindowManagerService wm = mWmSupplier.get();
-        synchronized (wm.mWindowMap) {
+        synchronized (wm.mGlobalLock) {
             atoken = wm.mRoot.getAppWindowToken(appToken);
             IWindow iWindow = mock(IWindow.class);
             doReturn(mock(IBinder.class)).when(iWindow).asBinder();
@@ -164,7 +164,7 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
             mRunnableWhenAddingSplashScreen = null;
         }
         return () -> {
-            synchronized (wm.mWindowMap) {
+            synchronized (wm.mGlobalLock) {
                 atoken.removeChild(window);
                 atoken.startingWindow = null;
             }

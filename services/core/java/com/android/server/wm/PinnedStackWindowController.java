@@ -47,7 +47,7 @@ public class PinnedStackWindowController extends StackWindowController {
      *         default bounds.
      */
     public Rect getPictureInPictureBounds(float aspectRatio, Rect stackBounds) {
-        synchronized (mWindowMap) {
+        synchronized (mGlobalLock) {
             if (!mService.mSupportsPictureInPicture || mContainer == null) {
                 return null;
             }
@@ -78,7 +78,7 @@ public class PinnedStackWindowController extends StackWindowController {
      */
     public void animateResizePinnedStack(Rect toBounds, Rect sourceHintBounds,
             int animationDuration, boolean fromFullscreen) {
-        synchronized (mWindowMap) {
+        synchronized (mGlobalLock) {
             if (mContainer == null) {
                 throw new IllegalArgumentException("Pinned stack container not found :(");
             }
@@ -133,7 +133,7 @@ public class PinnedStackWindowController extends StackWindowController {
      * Sets the current picture-in-picture aspect ratio.
      */
     public void setPictureInPictureAspectRatio(float aspectRatio) {
-        synchronized (mWindowMap) {
+        synchronized (mGlobalLock) {
             if (!mService.mSupportsPictureInPicture || mContainer == null) {
                 return;
             }
@@ -160,7 +160,7 @@ public class PinnedStackWindowController extends StackWindowController {
      * Sets the current picture-in-picture actions.
      */
     public void setPictureInPictureActions(List<RemoteAction> actions) {
-        synchronized (mWindowMap) {
+        synchronized (mGlobalLock) {
             if (!mService.mSupportsPictureInPicture || mContainer == null) {
                 return;
             }
@@ -174,7 +174,7 @@ public class PinnedStackWindowController extends StackWindowController {
      * from fullscreen to non-fullscreen bounds.
      */
     public boolean deferScheduleMultiWindowModeChanged() {
-        synchronized (mWindowMap) {
+        synchronized (mGlobalLock) {
             return mContainer.deferScheduleMultiWindowModeChanged();
         }
     }
@@ -183,7 +183,7 @@ public class PinnedStackWindowController extends StackWindowController {
      * @return whether the bounds are currently animating to fullscreen.
      */
     public boolean isAnimatingBoundsToFullscreen() {
-        synchronized (mWindowMap) {
+        synchronized (mGlobalLock) {
             return mContainer.isAnimatingBoundsToFullscreen();
         }
     }
@@ -192,7 +192,7 @@ public class PinnedStackWindowController extends StackWindowController {
      * @return whether the stack can be resized from the bounds animation.
      */
     public boolean pinnedStackResizeDisallowed() {
-        synchronized (mWindowMap) {
+        synchronized (mGlobalLock) {
             return mContainer.pinnedStackResizeDisallowed();
         }
     }
