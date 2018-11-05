@@ -151,7 +151,21 @@ public final class Font {
          * @param path the file name of the font data in the asset directory
          */
         public Builder(@NonNull AssetManager am, @NonNull String path) {
-            final long nativeAsset = nGetNativeAsset(am, path, true /* is asset */, 0 /* cookie */);
+            this(am, path, true /* is asset */, 0 /* cookie */);
+        }
+
+        /**
+         * Constructs a builder from an asset manager and a file path in an asset directory.
+         *
+         * @param am the application's asset manager
+         * @param path the file name of the font data in the asset directory
+         * @param isAsset true if the undelying data is in asset
+         * @param cookie set asset cookie
+         * @hide
+         */
+        public Builder(@NonNull AssetManager am, @NonNull String path, boolean isAsset,
+                int cookie) {
+            final long nativeAsset = nGetNativeAsset(am, path, isAsset, cookie);
             if (nativeAsset == 0) {
                 mException = new FileNotFoundException("Unable to open " + path);
                 return;
@@ -293,7 +307,7 @@ public final class Font {
          * will resolve the style by reading font tables.
          *
          * For example, if you want to use italic font as upright font, call {@code
-         * setSlant(false)} explicitly.
+         * setSlant(FontStyle.FONT_SLANT_UPRIGHT)} explicitly.
          *
          * @return this builder
          */
@@ -447,23 +461,14 @@ public final class Font {
     }
 
     /**
-     * Get a weight value associated with this font.
+     * Get a style associated with this font.
      *
      * @see Builder#setWeight(int)
-     * @return a weight value
+     * @see Builder#setSlant(int)
+     * @return a font style
      */
-    public @IntRange(from = 0, to = 1000)int getWeight() {
-        return mFontStyle.getWeight();
-    }
-
-    /**
-     * Get a slant value associated with this font.
-     *
-     * @see Builder#setSlant(boolean)
-     * @return a slant value
-     */
-    public @FontStyle.FontSlant int getSlant() {
-        return mFontStyle.getSlant();
+    public FontStyle getStyle() {
+        return mFontStyle;
     }
 
     /**
