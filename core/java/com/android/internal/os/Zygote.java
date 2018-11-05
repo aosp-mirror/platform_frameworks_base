@@ -98,6 +98,12 @@ public final class Zygote {
      */
     public static final String CHILD_ZYGOTE_SOCKET_NAME_ARG = "--zygote-socket=";
 
+    /**
+     * An extraArg passed when a zygote process is forking a child-zygote, specifying the
+     * requested ABI for the child Zygote.
+     */
+    public static final String CHILD_ZYGOTE_ABI_LIST_ARG = "--abi-list=";
+
     private Zygote() {}
 
     /** Called for some security initialization before any fork. */

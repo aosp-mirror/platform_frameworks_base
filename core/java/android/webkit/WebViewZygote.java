@@ -159,6 +159,7 @@ public class WebViewZygote {
                     0,  // runtimeFlags
                     "webview_zygote",  // seInfo
                     sPackage.applicationInfo.primaryCpuAbi,  // abi
+                    TextUtils.join(",", Build.SUPPORTED_ABIS),
                     null);  // instructionSet
 
             // All the work below is usually done by LoadedApk, but the zygote can't talk to

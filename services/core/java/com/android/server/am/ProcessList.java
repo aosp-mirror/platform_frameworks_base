@@ -34,6 +34,8 @@ import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_PSS;
 import static com.android.server.am.ActivityManagerDebugConfig.DEBUG_UID_OBSERVERS;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.am.ActivityManagerService.KILL_APP_ZYGOTE_DELAY_MS;
+import static com.android.server.am.ActivityManagerService.KILL_APP_ZYGOTE_MSG;
 import static com.android.server.am.ActivityManagerService.PERSISTENT_MASK;
 import static com.android.server.am.ActivityManagerService.PROC_START_TIMEOUT;
 import static com.android.server.am.ActivityManagerService.PROC_START_TIMEOUT_MSG;
@@ -58,6 +60,7 @@ import android.graphics.Point;
 import android.net.LocalSocket;
 import android.net.LocalSocketAddress;
 import android.net.Uri;
+import android.os.AppZygote;
 import android.os.Binder;
 import android.os.Build;
 import android.os.Bundle;
@@ -75,6 +78,7 @@ import android.os.UserHandle;
 import android.os.storage.StorageManager;
 import android.os.storage.StorageManagerInternal;
 import android.text.TextUtils;
+import android.util.ArrayMap;
 import android.util.EventLog;
 import android.util.LongSparseArray;
 import android.util.Slog;
@@ -352,6 +356,17 @@ public final class ProcessList {
      * The currently running isolated processes.
      */
     final SparseArray<ProcessRecord> mIsolatedProcesses = new SparseArray<>();
+
+    /**
+     * The currently running application zygotes.
+     */
+    final ProcessMap<AppZygote> mAppZygotes = new ProcessMap<AppZygote>();
+
+    /**
+     * The processes that are forked off an application zygote.
+     */
+    final ArrayMap<AppZygote, ArrayList<ProcessRecord>> mAppZygoteProcesses =
+            new ArrayMap<AppZygote, ArrayList<ProcessRecord>>();
 
     /**
      * Counter for assigning isolated process uids, to avoid frequently reusing the
@@ -1505,6 +1520,54 @@ public final class ProcessList {
         }
     }
 
+    @GuardedBy("mService")
+    public void killAppZygoteIfNeededLocked(AppZygote appZygote) {
+        final ApplicationInfo appInfo = appZygote.getAppInfo();
+        ArrayList<ProcessRecord> zygoteProcesses = mAppZygoteProcesses.get(appZygote);
+        if (zygoteProcesses.size() == 0) { // Only remove if no longer in use now
+            mAppZygotes.remove(appInfo.processName, appInfo.uid);
+            mAppZygoteProcesses.remove(appZygote);
+            appZygote.stopZygote();
+        }
+    }
+
+    @GuardedBy("mService")
+    private void removeProcessFromAppZygoteLocked(final ProcessRecord app) {
+        final AppZygote appZygote = mAppZygotes.get(app.info.processName, app.info.uid);
+        if (appZygote != null) {
+            ArrayList<ProcessRecord> zygoteProcesses = mAppZygoteProcesses.get(appZygote);
+            zygoteProcesses.remove(app);
+            if (zygoteProcesses.size() == 0) {
+                Message msg = mService.mHandler.obtainMessage(KILL_APP_ZYGOTE_MSG);
+                msg.obj = appZygote;
+                mService.mHandler.sendMessageDelayed(msg, KILL_APP_ZYGOTE_DELAY_MS);
+            }
+        }
+    }
+
+    private AppZygote createAppZygoteForProcessIfNeeded(final ProcessRecord app) {
+        synchronized (mService) {
+            AppZygote appZygote = mAppZygotes.get(app.info.processName, app.info.uid);
+            final ArrayList<ProcessRecord> zygoteProcessList;
+            if (appZygote == null) {
+                appZygote = new AppZygote(app.info);
+                mAppZygotes.put(app.info.processName, app.info.uid, appZygote);
+                zygoteProcessList = new ArrayList<ProcessRecord>();
+                mAppZygoteProcesses.put(appZygote, zygoteProcessList);
+            } else {
+                mService.mHandler.removeMessages(KILL_APP_ZYGOTE_MSG, appZygote);
+                zygoteProcessList = mAppZygoteProcesses.get(appZygote);
+            }
+            // Note that we already add the app to mAppZygoteProcesses here;
+            // this is so that another thread can't come in and kill the zygote
+            // before we've even tried to start the process. If the process launch
+            // goes wrong, we'll clean this up in removeProcessNameLocked()
+            zygoteProcessList.add(app);
+
+            return appZygote;
+        }
+    }
+
     private Process.ProcessStartResult startProcess(String hostingType, String entryPoint,
             ProcessRecord app, int uid, int[] gids, int runtimeFlags, int mountExternal,
             String seInfo, String requiredAbi, String instructionSet, String invokeWith,
@@ -1520,6 +1583,15 @@ public final class ProcessList {
             final Process.ProcessStartResult startResult;
             if (hostingType.equals("webview_service")) {
                 startResult = startWebView(entryPoint,
+                        app.processName, uid, uid, gids, runtimeFlags, mountExternal,
+                        app.info.targetSdkVersion, seInfo, requiredAbi, instructionSet,
+                        app.info.dataDir, null, app.info.packageName,
+                        packageNames, visibleVolIds,
+                        new String[] {PROC_START_SEQ_IDENT + app.startSeq});
+            } else if (hostingType.equals("app_zygote")) {
+                final AppZygote appZygote = createAppZygoteForProcessIfNeeded(app);
+
+                startResult = appZygote.getProcess().start(entryPoint,
                         app.processName, uid, uid, gids, runtimeFlags, mountExternal,
                         app.info.targetSdkVersion, seInfo, requiredAbi, instructionSet,
                         app.info.dataDir, null, app.info.packageName,
@@ -2093,6 +2165,12 @@ public final class ProcessList {
             old.uidRecord = null;
         }
         mIsolatedProcesses.remove(uid);
+        // Remove the (expected) ProcessRecord from the app zygote
+        final ProcessRecord record = expecting != null ? expecting : old;
+        if (record != null && record.isolated) {
+            removeProcessFromAppZygoteLocked(record);
+        }
+
         return old;
     }
 

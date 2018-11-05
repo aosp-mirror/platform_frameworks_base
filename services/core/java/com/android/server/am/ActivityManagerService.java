@@ -235,6 +235,7 @@ import android.media.audiofx.AudioEffect;
 import android.net.Proxy;
 import android.net.ProxyInfo;
 import android.net.Uri;
+import android.os.AppZygote;
 import android.os.BatteryStats;
 import android.os.Binder;
 import android.os.BinderProxy;
@@ -452,6 +453,9 @@ public class ActivityManagerService extends IActivityManager.Stub
     // before we decide it must be hung.
     static final int CONTENT_PROVIDER_PUBLISH_TIMEOUT = 10*1000;
 
+    // How long we wait to kill an application zygote, after the last process using
+    // it has gone away.
+    static final int KILL_APP_ZYGOTE_DELAY_MS = 5 * 1000;
     /**
      * How long we wait for an provider to be published. Should be longer than
      * {@link #CONTENT_PROVIDER_PUBLISH_TIMEOUT}.
@@ -1441,6 +1445,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     static final int PUSH_TEMP_WHITELIST_UI_MSG = 68;
     static final int SERVICE_FOREGROUND_CRASH_MSG = 69;
     static final int DISPATCH_OOM_ADJ_OBSERVER_MSG = 70;
+    static final int KILL_APP_ZYGOTE_MSG = 71;
 
     static final int FIRST_BROADCAST_QUEUE_MSG = 200;
 
@@ -1644,6 +1649,12 @@ public class ActivityManagerService extends IActivityManager.Stub
                             false, userId, reason);
                 }
             } break;
+                case KILL_APP_ZYGOTE_MSG: {
+                    synchronized (ActivityManagerService.this) {
+                        final AppZygote appZygote = (AppZygote) msg.obj;
+                        mProcessList.killAppZygoteIfNeededLocked(appZygote);
+                    }
+                } break;
             case CHECK_EXCESSIVE_POWER_USE_MSG: {
                 synchronized (ActivityManagerService.this) {
                     checkExcessivePowerUsageLocked();
