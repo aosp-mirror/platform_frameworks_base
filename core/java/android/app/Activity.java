@@ -120,6 +120,7 @@ import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillManager.AutofillClient;
 import android.view.autofill.AutofillPopupWindow;
 import android.view.autofill.IAutofillWindowPresenter;
+import android.view.intelligence.IntelligenceManager;
 import android.widget.AdapterView;
 import android.widget.Toast;
 import android.widget.Toolbar;
@@ -821,6 +822,10 @@ public class Activity extends ContextThemeWrapper
     /** The autofill manager. Always access via {@link #getAutofillManager()}. */
     @Nullable private AutofillManager mAutofillManager;
 
+    /** The screen observation manager. Always access via {@link #getIntelligenceManager()}. */
+    @Nullable private IntelligenceManager mIntelligenceManager;
+
+
     static final class NonConfigurationInstances {
         Object activity;
         HashMap<String, Object> children;
@@ -994,7 +999,7 @@ public class Activity extends ContextThemeWrapper
     }
 
     /**
-     * (Create and) return the autofill manager
+     * (Creates, sets and) returns the autofill manager
      *
      * @return The autofill manager
      */
@@ -1004,6 +1009,18 @@ public class Activity extends ContextThemeWrapper
         }
 
         return mAutofillManager;
+    }
+
+    /**
+     * (Creates, sets, and ) returns the intelligence manager
+     *
+     * @return The intelligence manager
+     */
+    @NonNull private IntelligenceManager getIntelligenceManager() {
+        if (mIntelligenceManager == null) {
+            mIntelligenceManager = getSystemService(IntelligenceManager.class);
+        }
+        return mIntelligenceManager;
     }
 
     @Override
@@ -1081,6 +1098,12 @@ public class Activity extends ContextThemeWrapper
         }
         mRestoredFromBundle = savedInstanceState != null;
         mCalled = true;
+
+        if (getIntelligenceManager() != null) {
+            //TODO(b/111276913): decide whether the screen_obs session id should be saved / restored
+            // in the activity bundle.
+            mIntelligenceManager.onActivityCreated(mToken, getComponentName());
+        }
     }
 
     /**
@@ -2047,6 +2070,10 @@ public class Activity extends ContextThemeWrapper
         }
 
         getApplication().dispatchActivityDestroyed(this);
+
+        if (getIntelligenceManager() != null) {
+            mIntelligenceManager.onActivityDestroyed();
+        }
     }
 
     /**
@@ -6403,9 +6430,16 @@ public class Activity extends ContextThemeWrapper
 
     void dumpInner(@NonNull String prefix, @Nullable FileDescriptor fd,
             @NonNull PrintWriter writer, @Nullable String[] args) {
-        if (args != null && args.length > 0 && args[0].equals("--autofill")) {
-            dumpAutofillManager(prefix, writer);
-            return;
+        if (args != null && args.length > 0) {
+            // Handle special cases
+            switch (args[0]) {
+                case "--autofill":
+                    dumpAutofillManager(prefix, writer);
+                    return;
+                case "--intelligence":
+                    dumpIntelligenceManager(prefix, writer);
+                    return;
+            }
         }
         writer.print(prefix); writer.print("Local Activity ");
                 writer.print(Integer.toHexString(System.identityHashCode(this)));
@@ -6435,6 +6469,7 @@ public class Activity extends ContextThemeWrapper
         mHandler.getLooper().dump(new PrintWriterPrinter(writer), prefix);
 
         dumpAutofillManager(prefix, writer);
+        dumpIntelligenceManager(prefix, writer);
 
         ResourcesManager.getInstance().dump(prefix, writer);
     }
@@ -6447,6 +6482,15 @@ public class Activity extends ContextThemeWrapper
             writer.println(isAutofillCompatibilityEnabled());
         } else {
             writer.print(prefix); writer.println("No AutofillManager");
+        }
+    }
+
+    void dumpIntelligenceManager(String prefix, PrintWriter writer) {
+        final IntelligenceManager im = getIntelligenceManager();
+        if (im != null) {
+            im.dump(prefix, writer);
+        } else {
+            writer.print(prefix); writer.println("No IntelligenceManager");
         }
     }
 

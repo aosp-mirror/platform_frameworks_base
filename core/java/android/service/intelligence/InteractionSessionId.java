@@ -20,13 +20,39 @@ import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import java.io.PrintWriter;
+
 // TODO(b/111276913): add javadocs / implement equals/hashcode/string
 /** @hide */
 @SystemApi
 public final class InteractionSessionId implements Parcelable {
 
+    private final int mGlobalId;
+
+    // TODO(b/111276913): remove if not needed
+    private final int mLocalId;
+
     /** @hide */
-    public InteractionSessionId() {
+    public InteractionSessionId(int globalId, int localId) {
+        mGlobalId = globalId;
+        mLocalId = localId;
+    }
+
+    /** @hide */
+    public int getGlobalId() {
+        return mGlobalId;
+    }
+
+    /** @hide */
+    // TODO(b/111276913): dump to proto as well
+    public void dump(PrintWriter pw) {
+        pw.print("globalId="); pw.print(mGlobalId);
+        pw.print("localId="); pw.print(mLocalId);
+    }
+
+    @Override
+    public String toString() {
+        return "SessionId[globalId=" + mGlobalId + ", localId=" + mLocalId + "]";
     }
 
     @Override
@@ -36,6 +62,8 @@ public final class InteractionSessionId implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
+        parcel.writeInt(mGlobalId);
+        parcel.writeInt(mLocalId);
     }
 
     public static final Parcelable.Creator<InteractionSessionId> CREATOR =
@@ -43,8 +71,9 @@ public final class InteractionSessionId implements Parcelable {
 
         @Override
         public InteractionSessionId createFromParcel(Parcel parcel) {
-            // TODO(b/111276913): implement
-            return null;
+            final int globalId = parcel.readInt();
+            final int localId = parcel.readInt();
+            return new InteractionSessionId(globalId, localId);
         }
 
         @Override

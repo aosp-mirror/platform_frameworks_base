@@ -149,7 +149,6 @@ public final class ContentCaptureEvent implements Parcelable {
         return null;
     }
 
-
     @Override
     public int describeContents() {
         return 0;
@@ -157,6 +156,7 @@ public final class ContentCaptureEvent implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
+        // TODO(b/111276913): implement
     }
 
     public static final Parcelable.Creator<ContentCaptureEvent> CREATOR =

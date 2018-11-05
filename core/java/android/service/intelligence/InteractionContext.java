@@ -23,6 +23,9 @@ import android.content.ComponentName;
 import android.os.Parcel;
 import android.os.Parcelable;
 
+import com.android.internal.util.Preconditions;
+
+import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
@@ -32,7 +35,7 @@ import java.lang.annotation.RetentionPolicy;
 public final class InteractionContext implements Parcelable {
 
     /**
-     * Flag used to indicate that the app explicitly disabled contents capture for the activity
+     * Flag used to indicate that the app explicitly disabled content capture for the activity
      * (using
      * {@link android.view.intelligence.IntelligenceManager#disableContentCapture()}),
      * in which case the service will just receive activity-level events.
@@ -54,24 +57,34 @@ public final class InteractionContext implements Parcelable {
     @Retention(RetentionPolicy.SOURCE)
     @interface ContextCreationFlags{}
 
+    // TODO(b/111276913): create new object for taskId + componentName / reuse on other places
+    private final @NonNull ComponentName mComponentName;
+    private final int mTaskId;
+    private final int mDisplayId;
+    private final int mFlags;
+
+
     /** @hide */
-    InteractionContext() {
+    public InteractionContext(@NonNull ComponentName componentName, int taskId, int displayId,
+            int flags) {
+        mComponentName = Preconditions.checkNotNull(componentName);
+        mTaskId = taskId;
+        mDisplayId = displayId;
+        mFlags = flags;
     }
 
     /**
      * Gets the id of the {@link TaskInfo task} associated with this context.
      */
     public int getTaskId() {
-        //TODO(b/111276913): implement
-        return 108;
+        return mTaskId;
     }
 
     /**
      * Gets the activity associated with this context.
      */
     public @NonNull ComponentName getActivityComponent() {
-        //TODO(b/111276913): implement
-        return null;
+        return mComponentName;
     }
 
     /**
@@ -79,8 +92,7 @@ public final class InteractionContext implements Parcelable {
      * {G android.hardware.display.DisplayManager#getDisplay(int) DisplayManager.getDisplay()}.
      */
     public int getDisplayId() {
-        //TODO(b/111276913): implement
-        return 42;
+        return mDisplayId;
     }
 
     /**
@@ -90,8 +102,26 @@ public final class InteractionContext implements Parcelable {
      * {@link #FLAG_DISABLED_BY_APP}.
      */
     public @ContextCreationFlags int getFlags() {
-        //TODO(b/111276913): implement
-        return 42;
+        return mFlags;
+    }
+
+    /**
+     * @hide
+     */
+    // TODO(b/111276913): dump to proto as well
+    public void dump(PrintWriter pw) {
+        pw.print("comp="); pw.print(mComponentName.flattenToShortString());
+        pw.print(", taskId="); pw.print(mTaskId);
+        pw.print(", displayId="); pw.print(mDisplayId);
+        if (mFlags > 0) {
+            pw.print(", flags="); pw.print(mFlags);
+        }
+    }
+
+    @Override
+    public String toString() {
+        return "Context[act=" + mComponentName.flattenToShortString() + ", taskId=" + mTaskId
+                + ", displayId=" + mDisplayId + ", flags=" + mFlags + "]";
     }
 
     @Override
@@ -101,6 +131,10 @@ public final class InteractionContext implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
+        parcel.writeParcelable(mComponentName, flags);
+        parcel.writeInt(mTaskId);
+        parcel.writeInt(mDisplayId);
+        parcel.writeInt(mFlags);
     }
 
     public static final Parcelable.Creator<InteractionContext> CREATOR =
@@ -108,8 +142,11 @@ public final class InteractionContext implements Parcelable {
 
         @Override
         public InteractionContext createFromParcel(Parcel parcel) {
-            // TODO(b/111276913): implement
-            return null;
+            final ComponentName componentName = parcel.readParcelable(null);
+            final int taskId = parcel.readInt();
+            final int displayId = parcel.readInt();
+            final int flags = parcel.readInt();
+            return new InteractionContext(componentName, taskId, displayId, flags);
         }
 
         @Override
