@@ -1035,8 +1035,6 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
 
         releaseSelfIfNeeded();
 
-        mSupervisor.getKeyguardController().onDisplayRemoved(mDisplayId);
-
         if (!mAllSleepTokens.isEmpty()) {
             mSupervisor.mSleepTokens.removeAll(mAllSleepTokens);
             mAllSleepTokens.clear();
@@ -1049,6 +1047,7 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
             mWindowContainerController.removeContainer();
             mWindowContainerController = null;
             mSupervisor.removeChild(this);
+            mSupervisor.getKeyguardController().onDisplayRemoved(mDisplayId);
         }
     }
 
