@@ -819,6 +819,15 @@ public final class Settings {
             "android.settings.action.MANAGE_WRITE_SETTINGS";
 
     /**
+     * Activity Action: Show screen for controlling app usage properties for an app.
+     * Input: Intent's extra EXTRA_PACKAGE_NAME must specify the application package name.
+     * Output: Nothing.
+     */
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_APP_USAGE_SETTINGS =
+            "android.settings.action.APP_USAGE_SETTINGS";
+
+    /**
      * Activity Action: Show screen of details about a particular application.
      * <p>
      * In some cases, a matching Activity may not exist, so ensure you
