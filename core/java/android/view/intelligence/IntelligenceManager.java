@@ -44,7 +44,7 @@ public final class IntelligenceManager {
     }
 
     /**
-     * Returns the component name of the {@link android.service.intelligence.IntelligenceService}
+     * Returns the component name of the {@code android.service.intelligence.IntelligenceService}
      * that is enabled for the current user.
      */
     @Nullable
