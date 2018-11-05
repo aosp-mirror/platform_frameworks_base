@@ -51,13 +51,14 @@ import android.util.ArraySet;
 import android.view.View;
 import android.widget.ImageView;
 
+import androidx.annotation.Nullable;
+
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.ContrastColorUtil;
 import com.android.systemui.Dependency;
 import com.android.systemui.ForegroundServiceController;
-import com.android.systemui.InitController;
 import com.android.systemui.statusbar.InflationTask;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationMediaManager;
@@ -74,8 +75,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
-
-import androidx.annotation.Nullable;
 
 /**
  * The list of currently displaying notifications.
@@ -560,6 +559,20 @@ public class NotificationData {
                 }
             }
         }
+    }
+
+    /**
+     * Returns true if this notification should be displayed in the high-priority notifications
+     * section (and on the lockscreen and status bar).
+     */
+    public boolean isHighPriority(StatusBarNotification statusBarNotification) {
+        if (mRankingMap != null) {
+            getRanking(statusBarNotification.getKey(), mTmpRanking);
+            return mTmpRanking.getImportance() >= NotificationManager.IMPORTANCE_DEFAULT
+                    || statusBarNotification.getNotification().isForegroundService()
+                    || statusBarNotification.getNotification().hasMediaSession();
+        }
+        return false;
     }
 
     public boolean isAmbient(String key) {

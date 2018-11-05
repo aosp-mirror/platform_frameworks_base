@@ -15,7 +15,6 @@
  */
 package com.android.systemui.statusbar;
 
-import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.admin.DevicePolicyManager.ACTION_DEVICE_POLICY_MANAGER_STATE_CHANGED;
 
 import android.app.ActivityManager;
@@ -295,9 +294,7 @@ public class NotificationLockscreenUserManagerImpl implements
         }
         boolean exceedsPriorityThreshold;
         if (NotificationUtils.useNewInterruptionModel(mContext)) {
-            exceedsPriorityThreshold =
-                    getEntryManager().getNotificationData().getImportance(sbn.getKey())
-                            >= IMPORTANCE_DEFAULT;
+            exceedsPriorityThreshold = getEntryManager().getNotificationData().isHighPriority(sbn);
         } else {
             exceedsPriorityThreshold =
                     !getEntryManager().getNotificationData().isAmbient(sbn.getKey());

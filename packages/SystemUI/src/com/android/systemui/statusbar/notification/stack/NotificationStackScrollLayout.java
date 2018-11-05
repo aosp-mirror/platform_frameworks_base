@@ -16,8 +16,6 @@
 
 package com.android.systemui.statusbar.notification.stack;
 
-import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
-
 import static com.android.systemui.statusbar.notification.ActivityLaunchAnimator
         .ExpandAnimationParameters;
 import static com.android.systemui.statusbar.phone.NotificationIconAreaController.LOW_PRIORITY;
@@ -28,7 +26,6 @@ import android.animation.TimeAnimator;
 import android.animation.ValueAnimator;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.NotificationManager;
 import android.app.WallpaperManager;
 import android.content.Context;
 import android.content.Intent;
@@ -2315,8 +2312,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             View child = getChildAt(i);
             if (child.getVisibility() != View.GONE && child instanceof ExpandableNotificationRow) {
                 ExpandableNotificationRow row = (ExpandableNotificationRow) child;
-                if (mEntryManager.getNotificationData().getImportance(
-                        row.getStatusBarNotification().getKey()) < IMPORTANCE_DEFAULT) {
+                if (mEntryManager.getNotificationData().isHighPriority(
+                        row.getStatusBarNotification())) {
                     break;
                 } else {
                     lastChildBeforeGap = row;
@@ -2334,8 +2331,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             View child = getChildAt(i);
             if (child.getVisibility() != View.GONE && child instanceof ExpandableNotificationRow) {
                 ExpandableNotificationRow row = (ExpandableNotificationRow) child;
-                if (mEntryManager.getNotificationData().getImportance(
-                        row.getStatusBarNotification().getKey()) < IMPORTANCE_DEFAULT) {
+                if (!mEntryManager.getNotificationData().isHighPriority(
+                        row.getStatusBarNotification())) {
                     return row;
                 }
             }
@@ -5218,9 +5215,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                 beforeSpeedBump = !mEntryManager.getNotificationData().isAmbient(
                         row.getStatusBarNotification().getKey());
             } else {
-                beforeSpeedBump = mEntryManager.getNotificationData().getImportance(
-                        row.getStatusBarNotification().getKey())
-                        >= NotificationManager.IMPORTANCE_DEFAULT;
+                beforeSpeedBump = mEntryManager.getNotificationData().isHighPriority(
+                        row.getStatusBarNotification());
             }
             if (beforeSpeedBump) {
                 speedBumpIndex = currentIndex;
@@ -5244,8 +5240,8 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
                     continue;
                 }
                 ExpandableNotificationRow row = (ExpandableNotificationRow) view;
-                if (mEntryManager.getNotificationData().getImportance(
-                        row.getStatusBarNotification().getKey()) < IMPORTANCE_DEFAULT) {
+                if (!mEntryManager.getNotificationData().isHighPriority(
+                        row.getStatusBarNotification())) {
                     if (currentIndex > 0) {
                         gapIndex = currentIndex;
                     }

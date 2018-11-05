@@ -5936,8 +5936,9 @@ public class Notification implements Parcelable
 
     /**
      * @return whether this notification is a foreground service notification
+     * @hide
      */
-    private boolean isForegroundService() {
+    public boolean isForegroundService() {
         return (flags & Notification.FLAG_FOREGROUND_SERVICE) != 0;
     }
 

@@ -35,7 +35,6 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import android.app.NotificationManager;
 import android.os.Handler;
 import android.os.IPowerManager;
 import android.os.Looper;
@@ -343,8 +342,7 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
                     RETURNS_DEEP_STUBS);
             String key = Integer.toString(i);
             when(row.getStatusBarNotification().getKey()).thenReturn(key);
-            when(mNotificationData.getImportance(key)).thenReturn(
-                    NotificationManager.IMPORTANCE_DEFAULT);
+            when(mNotificationData.isHighPriority(row.getStatusBarNotification())).thenReturn(true);
             when(mStackScroller.getChildAt(i)).thenReturn(row);
         }
 
@@ -360,8 +358,8 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
                     RETURNS_DEEP_STUBS);
             String key = Integer.toString(i);
             when(row.getStatusBarNotification().getKey()).thenReturn(key);
-            when(mNotificationData.getImportance(key)).thenReturn(
-                    NotificationManager.IMPORTANCE_LOW);
+            when(mNotificationData.isHighPriority(row.getStatusBarNotification()))
+                    .thenReturn(false);
             when(mStackScroller.getChildAt(i)).thenReturn(row);
         }
 
@@ -377,9 +375,8 @@ public class NotificationStackScrollLayoutTest extends SysuiTestCase {
                     RETURNS_DEEP_STUBS);
             String key = Integer.toString(i);
             when(row.getStatusBarNotification().getKey()).thenReturn(key);
-            when(mNotificationData.getImportance(key)).thenReturn(
-                    i < 3 ? NotificationManager.IMPORTANCE_MAX
-                            : NotificationManager.IMPORTANCE_LOW);
+            when(mNotificationData.isHighPriority(row.getStatusBarNotification()))
+                    .thenReturn(i < 3);
             when(mStackScroller.getChildAt(i)).thenReturn(row);
         }
 

@@ -2,7 +2,6 @@ package com.android.systemui.statusbar.phone;
 
 import static com.android.systemui.doze.util.BurnInHelperKt.getBurnInOffset;
 
-import android.app.NotificationManager;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.Color;
@@ -190,8 +189,7 @@ public class NotificationIconAreaController implements DarkReceiver {
             return false;
         }
         if (!showLowPriority
-                && mEntryManager.getNotificationData().getImportance(entry.key)
-                < NotificationManager.IMPORTANCE_DEFAULT) {
+                && !mEntryManager.getNotificationData().isHighPriority(entry.notification)) {
             return false;
         }
         if (!StatusBar.isTopLevelChild(entry)) {
