@@ -420,7 +420,7 @@
     <string name="help_feedback_label" msgid="6815040660801785649">"Usaidizi na maoni"</string>
     <string name="content_description_menu_button" msgid="8182594799812351266">"Menyu"</string>
     <string name="retail_demo_reset_message" msgid="118771671364131297">"Weka nenosiri ili urejeshe mipangilio ya kiwandani ikiwa katika hali ya onyesho."</string>
-    <string name="retail_demo_reset_next" msgid="8356731459226304963">"Inayofuata"</string>
+    <string name="retail_demo_reset_next" msgid="8356731459226304963">"Endelea"</string>
     <string name="retail_demo_reset_title" msgid="696589204029930100">"Nenosiri linahitajika"</string>
     <string name="active_input_method_subtypes" msgid="3596398805424733238">"Mbinu zinazotumika"</string>
     <string name="use_system_language_to_select_input_method_subtypes" msgid="5747329075020379587">"Tumia lugha za mfumo"</string>

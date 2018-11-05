@@ -88,7 +88,7 @@
     <string name="no_connection_to_printer" msgid="2159246915977282728">"प्रिंटरवर कोणतेही कनेक्‍शन नाही"</string>
     <string name="reason_unknown" msgid="5507940196503246139">"अज्ञात"</string>
     <string name="print_service_security_warning_title" msgid="2160752291246775320">"<xliff:g id="SERVICE">%1$s</xliff:g> वापरायची?"</string>
-    <string name="print_service_security_warning_summary" msgid="1427434625361692006">"आपला दस्तऐवज प्रिंटरपर्यंत पोहचण्‍यापूर्वी एक किंवा अधिक सर्व्हरद्वारे जाऊ शकतो."</string>
+    <string name="print_service_security_warning_summary" msgid="1427434625361692006">"तुमचा दस्तऐवज प्रिंटरपर्यंत पोहचण्‍यापूर्वी एक किंवा अधिक सर्व्हरद्वारे जाऊ शकतो."</string>
   <string-array name="color_mode_labels">
     <item msgid="7602948745415174937">"कृष्‍ण धवल"</item>
     <item msgid="2762241247228983754">"रंग"</item>
