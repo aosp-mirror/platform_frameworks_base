@@ -2271,6 +2271,7 @@ HPLcom/android/server/wm/DisplayContent;->lambda$new$8(Lcom/android/server/wm/Di
 HPLcom/android/server/wm/DisplayContent;->prepareSurfaces()V
 HPLcom/android/server/wm/DisplayContent;->resetAnimationBackgroundAnimator()V
 HPLcom/android/server/wm/DisplayContent;->skipTraverseChild(Lcom/android/server/wm/WindowContainer;)Z
+HPLcom/android/server/wm/DisplayContent;->updateOrientationFromAppTokens(Z)Z
 HPLcom/android/server/wm/DisplayContent;->updateTouchExcludeRegion()V
 HPLcom/android/server/wm/DockedStackDividerController;->isResizing()Z
 HPLcom/android/server/wm/DragDropController;->dragDropActiveLocked()Z
@@ -2451,7 +2452,6 @@ HPLcom/android/server/wm/WindowManagerService;->relayoutWindow(Lcom/android/serv
 HPLcom/android/server/wm/WindowManagerService;->resetPriorityAfterLockedSection()V
 HPLcom/android/server/wm/WindowManagerService;->scheduleAnimationLocked()V
 HPLcom/android/server/wm/WindowManagerService;->traceStateLocked(Ljava/lang/String;)V
-HPLcom/android/server/wm/WindowManagerService;->updateOrientationFromAppTokensLocked(IZ)Z
 HPLcom/android/server/wm/WindowManagerService;->windowForClientLocked(Lcom/android/server/wm/Session;Landroid/os/IBinder;Z)Lcom/android/server/wm/WindowState;
 HPLcom/android/server/wm/WindowManagerThreadPriorityBooster;->boost()V
 HPLcom/android/server/wm/WindowManagerThreadPriorityBooster;->reset()V
@@ -18137,6 +18137,7 @@ PLcom/android/server/wm/DisplayContent;->updateBaseDisplayMetricsIfNeeded()V
 PLcom/android/server/wm/DisplayContent;->updateBounds()V
 PLcom/android/server/wm/DisplayContent;->updateDisplayAndOrientation(I)Landroid/view/DisplayInfo;
 PLcom/android/server/wm/DisplayContent;->updateDisplayInfo()V
+PLcom/android/server/wm/DisplayContent;->updateOrientationFromAppTokens()Z
 PLcom/android/server/wm/DisplayContent;->updateRotationUnchecked()Z
 PLcom/android/server/wm/DisplayContent;->updateRotationUnchecked(Z)Z
 PLcom/android/server/wm/DisplayContent;->updateStackBoundsAfterConfigChange(Ljava/util/List;)V
@@ -18906,7 +18907,6 @@ PLcom/android/server/wm/WindowManagerService;->updateFocusedWindowLocked(IZ)Z
 PLcom/android/server/wm/WindowManagerService;->updateNonSystemOverlayWindowsVisibilityIfNeeded(Lcom/android/server/wm/WindowState;Z)V
 PLcom/android/server/wm/WindowManagerService;->updateOrientationFromAppTokens(Landroid/content/res/Configuration;Landroid/os/IBinder;I)Landroid/content/res/Configuration;
 PLcom/android/server/wm/WindowManagerService;->updateOrientationFromAppTokens(Landroid/content/res/Configuration;Landroid/os/IBinder;IZ)Landroid/content/res/Configuration;
-PLcom/android/server/wm/WindowManagerService;->updateOrientationFromAppTokensLocked(I)Z
 PLcom/android/server/wm/WindowManagerService;->updateOrientationFromAppTokensLocked(Landroid/content/res/Configuration;Landroid/os/IBinder;IZ)Landroid/content/res/Configuration;
 PLcom/android/server/wm/WindowManagerService;->updatePointerIcon(Landroid/view/IWindow;)V
 PLcom/android/server/wm/WindowManagerService;->updateRotation(ZZ)V

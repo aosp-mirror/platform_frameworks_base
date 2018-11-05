@@ -314,7 +314,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
      * Last applied orientation of the display.
      * Constants as per {@link android.content.pm.ActivityInfo.ScreenOrientation}.
      *
-     * @see WindowManagerService#updateOrientationFromAppTokensLocked(boolean, int)
+     * @see #updateOrientationFromAppTokens()
      */
     private int mLastOrientation = SCREEN_ORIENTATION_UNSPECIFIED;
 
@@ -1045,16 +1045,8 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         return mLastOrientation;
     }
 
-    void setLastOrientation(int orientation) {
-        mLastOrientation = orientation;
-    }
-
     boolean getAltOrientation() {
         return mAltOrientation;
-    }
-
-    void setAltOrientation(boolean altOrientation) {
-        mAltOrientation = altOrientation;
     }
 
     int getLastWindowForcedOrientation() {
@@ -1109,6 +1101,34 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         return true;
     }
 
+    /** Notify the configuration change of this display. */
+    void sendNewConfiguration() {
+        mService.mH.obtainMessage(SEND_NEW_CONFIGURATION, this).sendToTarget();
+    }
+
+    /**
+     * Determine the new desired orientation of this display.
+     *
+     * The orientation is computed from non-application windows first. If none of the
+     * non-application windows specify orientation, the orientation is computed from application
+     * tokens.
+     *
+     * @return {@code true} if the orientation is changed.
+     */
+    boolean updateOrientationFromAppTokens() {
+        return updateOrientationFromAppTokens(false /* forceUpdate */);
+    }
+
+    boolean updateOrientationFromAppTokens(boolean forceUpdate) {
+        final int req = getOrientation();
+        if (req != mLastOrientation || forceUpdate) {
+            mLastOrientation = req;
+            mDisplayRotation.setCurrentOrientation(req);
+            return updateRotationUnchecked(forceUpdate);
+        }
+        return false;
+    }
+
     /**
      * Update rotation of the display and send configuration if the rotation is changed.
      *
@@ -1117,7 +1137,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
     boolean updateRotationAndSendNewConfigIfNeeded() {
         final boolean changed = updateRotationUnchecked(false /* forceUpdate */);
         if (changed) {
-            mService.mH.obtainMessage(SEND_NEW_CONFIGURATION, mDisplayId).sendToTarget();
+            sendNewConfiguration();
         }
         return changed;
     }
@@ -2343,6 +2363,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
             mWindowingLayer.release();
             mOverlayLayer.release();
         } finally {
+            mDisplayReady = false;
             mRemovingDisplay = false;
         }
 
@@ -3348,9 +3369,9 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
             if ((pendingLayoutChanges & FINISH_LAYOUT_REDO_CONFIG) != 0) {
                 if (DEBUG_LAYOUT) Slog.v(TAG, "Computing new config from layout");
-                if (mService.updateOrientationFromAppTokensLocked(mDisplayId)) {
+                if (updateOrientationFromAppTokens()) {
                     setLayoutNeeded();
-                    mService.mH.obtainMessage(SEND_NEW_CONFIGURATION, mDisplayId).sendToTarget();
+                    sendNewConfiguration();
                 }
             }
 
