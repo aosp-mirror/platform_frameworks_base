@@ -1574,6 +1574,8 @@ message AppCrashOccurred {
         FOREGROUND = 2;
     }
     optional ForegroundState foreground_state = 7;
+
+    optional android.server.ErrorSource error_source = 8;
 }
 
 /**
@@ -1592,6 +1594,8 @@ message WTFOccurred {
 
     // The pid if available. -1 means not available.
     optional sint32 pid = 4;
+
+    optional android.server.ErrorSource error_source = 5;
 }
 
 /**
@@ -1629,6 +1633,10 @@ message ANROccurred {
         FOREGROUND = 2;
     }
     optional ForegroundState foreground_state = 6;
+
+    optional android.server.ErrorSource error_source = 7;
+
+    optional string package_name = 8;
 }
 
 /**

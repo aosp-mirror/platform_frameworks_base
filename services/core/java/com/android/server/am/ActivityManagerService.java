@@ -8568,7 +8568,8 @@ public class ActivityManagerService extends IActivityManager.Stub
                 r != null ? (r.isInterestingToUserLocked()
                         ? StatsLog.APP_CRASH_OCCURRED__FOREGROUND_STATE__FOREGROUND
                         : StatsLog.APP_CRASH_OCCURRED__FOREGROUND_STATE__BACKGROUND)
-                        : StatsLog.APP_CRASH_OCCURRED__FOREGROUND_STATE__UNKNOWN
+                        : StatsLog.APP_CRASH_OCCURRED__FOREGROUND_STATE__UNKNOWN,
+                (r != null) ? r.getProcessClassEnum() : 0
         );
 
         final int relaunchReason = r == null ? RELAUNCH_REASON_NONE
@@ -8751,7 +8752,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 processName, r == null ? -1 : r.info.flags, tag, crashInfo.exceptionMessage);
 
         StatsLog.write(StatsLog.WTF_OCCURRED, callingUid, tag, processName,
-                callingPid);
+                callingPid, (r != null) ? r.getProcessClassEnum() : 0);
 
         addErrorToDropBox("wtf", r, processName, null, null, null, tag, null, null, crashInfo);
 
