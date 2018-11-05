@@ -28,19 +28,20 @@ import android.util.ArraySet;
 import android.util.Slog;
 import android.view.WindowManager;
 import android.view.autofill.AutofillId;
-import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillValue;
 
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.ArrayUtils;
 
 import java.io.PrintWriter;
+import java.util.ArrayDeque;
 import java.util.ArrayList;
-import java.util.LinkedList;
 
 public final class Helper {
 
     private static final String TAG = "AutofillHelper";
+
+    // TODO(b/117779333): get rid of sDebug / sVerbose and always use the service variables instead
 
     /**
      * Defines a logging flag that can be dynamically changed at runtime using
@@ -55,23 +56,6 @@ public final class Helper {
      * {@link android.provider.Settings.Global#AUTOFILL_LOGGING_LEVEL}.
      */
     public static boolean sVerbose = false;
-
-    /**
-     * Maximum number of partitions that can be allowed in a session.
-     *
-     * <p>Can be modified using {@code cmd autofill set max_partitions} or through
-     * {@link android.provider.Settings.Global#AUTOFILL_MAX_PARTITIONS_SIZE}.
-     */
-    static int sPartitionMaxCount = AutofillManager.DEFAULT_MAX_PARTITIONS_SIZE;
-
-    /**
-     * Maximum number of visible datasets in the dataset picker UI, or {@code 0} to use default
-     * value from resources.
-     *
-     * <p>Can be modified using {@code cmd autofill set max_visible_datasets} or through
-     * {@link android.provider.Settings.Global#AUTOFILL_MAX_VISIBLE_DATASETS}.
-     */
-    public static int sVisibleDatasetsMaxCount = 0;
 
     /**
      * When non-null, overrides whether the UI should be shown on full-screen mode.
@@ -162,7 +146,7 @@ public final class Helper {
 
     private static ViewNode findViewNode(@NonNull AssistStructure structure,
             @NonNull ViewNodeFilter filter) {
-        final LinkedList<ViewNode> nodesToProcess = new LinkedList<>();
+        final ArrayDeque<ViewNode> nodesToProcess = new ArrayDeque<>();
         final int numWindowNodes = structure.getWindowNodeCount();
         for (int i = 0; i < numWindowNodes; i++) {
             nodesToProcess.add(structure.getWindowNodeAt(i).getRootViewNode());
