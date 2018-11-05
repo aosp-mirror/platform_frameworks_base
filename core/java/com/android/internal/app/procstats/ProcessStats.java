@@ -1396,6 +1396,11 @@ public final class ProcessStats implements Parcelable {
         return as;
     }
 
+    // See b/118826162 -- to avoid logspaming, we rate limit the WTF.
+    private static final long INVERSE_PROC_STATE_WTF_MIN_INTERVAL_MS = 10_000L;
+    private long mNextInverseProcStateWtfUptime;
+    private int mSkippedInverseProcStateWtfCount;
+
     public void updateTrackingAssociationsLocked(int curSeq, long now) {
         final int NUM = mTrackingAssociations.size();
         for (int i = NUM - 1; i >= 0; i--) {
@@ -1417,12 +1422,24 @@ public final class ProcessStats implements Parcelable {
                     } else {
                         act.stopActive(now);
                         if (act.mProcState < procState) {
-                            Slog.w(TAG, "Tracking association " + act + " whose proc state "
-                                    + act.mProcState + " is better than process " + proc
-                                    + " proc state " + procState);
+                            final long nowUptime = SystemClock.uptimeMillis();
+                            if (mNextInverseProcStateWtfUptime > nowUptime) {
+                                mSkippedInverseProcStateWtfCount++;
+                            } else {
+                                // TODO We still see it during boot related to GMS-core.
+                                // b/118826162
+                                Slog.wtf(TAG, "Tracking association " + act + " whose proc state "
+                                        + act.mProcState + " is better than process " + proc
+                                        + " proc state " + procState
+                                        + " (" +  mSkippedInverseProcStateWtfCount + " skipped)");
+                                mSkippedInverseProcStateWtfCount = 0;
+                                mNextInverseProcStateWtfUptime =
+                                        nowUptime + INVERSE_PROC_STATE_WTF_MIN_INTERVAL_MS;
+                            }
                         }
                     }
                 } else {
+                    // Don't need rate limiting on it.
                     Slog.wtf(TAG, "Tracking association without process: " + act
                             + " in " + act.getAssociationState());
                 }

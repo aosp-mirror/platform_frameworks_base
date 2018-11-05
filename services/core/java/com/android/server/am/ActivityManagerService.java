@@ -17343,8 +17343,6 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
 
-        mProcessStats.updateTrackingAssociationsLocked(mAdjSeq, now);
-
         incrementProcStateSeqAndNotifyAppsLocked();
 
         mNumServiceProcs = mNewNumServiceProcs;
@@ -17605,6 +17603,9 @@ public class ActivityManagerService extends IActivityManager.Stub
         if (mProcessStats.shouldWriteNowLocked(now)) {
             mHandler.post(new ProcStatsRunnable(ActivityManagerService.this, mProcessStats));
         }
+
+        // Run this after making sure all procstates are updated.
+        mProcessStats.updateTrackingAssociationsLocked(mAdjSeq, now);
 
         if (DEBUG_OOM_ADJ) {
             final long duration = SystemClock.uptimeMillis() - now;
