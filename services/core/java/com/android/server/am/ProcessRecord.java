@@ -1123,8 +1123,9 @@ final class ProcessRecord implements WindowProcessListener {
     @Override
     public void clearProfilerIfNeeded() {
         synchronized (mService) {
-            if (mService.mProfileProc == null || mService.mProfilerInfo == null
-                    || mService.mProfileProc != this) {
+            if (mService.mProfileData.getProfileProc() == null
+                    || mService.mProfileData.getProfilerInfo() == null
+                    || mService.mProfileData.getProfileProc() != this) {
                 return;
             }
             mService.clearProfilerLocked();
@@ -1198,32 +1199,15 @@ final class ProcessRecord implements WindowProcessListener {
     }
 
     @Override
-    public ProfilerInfo onStartActivity(int topProcessState) {
+    public void onStartActivity(int topProcessState, boolean setProfileProc) {
         synchronized (mService) {
-            ProfilerInfo profilerInfo = null;
-            if (mService.mProfileApp != null && mService.mProfileApp.equals(processName)) {
-                if (mService.mProfileProc == null || mService.mProfileProc == this) {
-                    mService.mProfileProc = this;
-                    final ProfilerInfo profilerInfoSvc = mService.mProfilerInfo;
-                    if (profilerInfoSvc != null && profilerInfoSvc.profileFile != null) {
-                        if (profilerInfoSvc.profileFd != null) {
-                            try {
-                                profilerInfoSvc.profileFd = profilerInfoSvc.profileFd.dup();
-                            } catch (IOException e) {
-                                profilerInfoSvc.closeFd();
-                            }
-                        }
-
-                        profilerInfo = new ProfilerInfo(profilerInfoSvc);
-                    }
-                }
+            if (setProfileProc) {
+                mService.mProfileData.setProfileProc(this);
             }
 
             hasShownUi = true;
             setPendingUiClean(true);
             forceProcessStateUpTo(topProcessState);
-
-            return profilerInfo;
         }
     }
 

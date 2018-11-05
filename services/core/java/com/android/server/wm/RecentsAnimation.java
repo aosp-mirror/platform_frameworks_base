@@ -42,7 +42,6 @@ import android.os.Trace;
 import android.util.Slog;
 import android.view.IRecentsAnimationRunner;
 
-import com.android.server.wm.AssistDataReceiverProxy;
 import com.android.server.am.AssistDataRequester;
 import com.android.server.wm.RecentsAnimationController.RecentsAnimationCallbacks;
 
@@ -124,7 +123,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
 
         mStackSupervisor.getActivityMetricsLogger().notifyActivityLaunching(intent);
 
-        mService.mAmInternal.setRunningRemoteAnimation(mCallingPid, true);
+        mService.mH.post(() -> mService.mAmInternal.setRunningRemoteAnimation(mCallingPid, true));
 
         mWindowManager.deferSurfaceLayout();
         try {
@@ -234,7 +233,8 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
                 mStackSupervisor.sendPowerHintForLaunchEndIfNeeded();
             }
 
-            mService.mAmInternal.setRunningRemoteAnimation(mCallingPid, false);
+            mService.mH.post(
+                    () -> mService.mAmInternal.setRunningRemoteAnimation(mCallingPid, false));
 
             mWindowManager.inSurfaceTransaction(() -> {
                 Trace.traceBegin(TRACE_TAG_ACTIVITY_MANAGER,

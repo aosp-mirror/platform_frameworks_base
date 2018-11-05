@@ -134,6 +134,7 @@ import com.android.server.usage.UsageStatsService;
 import com.android.server.vr.VrManagerService;
 import com.android.server.webkit.WebViewUpdateService;
 import com.android.server.wm.ActivityTaskManagerService;
+import com.android.server.wm.WindowManagerGlobalLock;
 import com.android.server.wm.WindowManagerService;
 
 import dalvik.system.VMRuntime;
@@ -275,6 +276,7 @@ public final class SystemServer {
     // TODO: remove all of these references by improving dependency resolution and boot phases
     private PowerManagerService mPowerManagerService;
     private ActivityManagerService mActivityManagerService;
+    private WindowManagerGlobalLock mWindowManagerGlobalLock;
     private WebViewUpdateService mWebViewUpdateService;
     private DisplayManagerService mDisplayManagerService;
     private PackageManagerService mPackageManagerService;
@@ -597,6 +599,7 @@ public final class SystemServer {
                 mSystemServiceManager, atm);
         mActivityManagerService.setSystemServiceManager(mSystemServiceManager);
         mActivityManagerService.setInstaller(installer);
+        mWindowManagerGlobalLock = atm.getGlobalLock();
         traceEnd();
 
         // Power manager needs to be started early because other services need it.
@@ -921,7 +924,7 @@ public final class SystemServer {
             ConcurrentUtils.waitForFutureNoInterrupt(mSensorServiceStart, START_SENSOR_SERVICE);
             mSensorServiceStart = null;
             wm = WindowManagerService.main(context, inputManager, !mFirstBoot, mOnlyCore,
-                    new PhoneWindowManager());
+                    new PhoneWindowManager(), mWindowManagerGlobalLock);
             ServiceManager.addService(Context.WINDOW_SERVICE, wm, /* allowIsolated= */ false,
                     DUMP_FLAG_PRIORITY_CRITICAL | DUMP_FLAG_PROTO);
             ServiceManager.addService(Context.INPUT_SERVICE, inputManager,

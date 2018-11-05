@@ -1134,9 +1134,46 @@ public class ActivityManagerService extends IActivityManager.Stub
     boolean mOrigWaitForDebugger = false;
     boolean mAlwaysFinishActivities = false;
 
-    String mProfileApp = null;
-    ProcessRecord mProfileProc = null;
-    ProfilerInfo mProfilerInfo = null;
+    class ProfileData {
+        private String mProfileApp = null;
+        private ProcessRecord mProfileProc = null;
+        private ProfilerInfo mProfilerInfo = null;
+
+        void setProfileApp(String profileApp) {
+            mProfileApp = profileApp;
+            if (mAtmInternal != null) {
+                mAtmInternal.setProfileApp(profileApp);
+            }
+        }
+
+        String getProfileApp() {
+            return mProfileApp;
+        }
+
+        void setProfileProc(ProcessRecord profileProc) {
+            mProfileProc = profileProc;
+            if (mAtmInternal != null) {
+                mAtmInternal.setProfileProc(
+                        profileProc.getWindowProcessController());
+            }
+        }
+
+        ProcessRecord getProfileProc() {
+            return mProfileProc;
+        }
+
+        void setProfilerInfo(ProfilerInfo profilerInfo) {
+            mProfilerInfo = profilerInfo;
+            if (mAtmInternal != null) {
+                mAtmInternal.setProfilerInfo(profilerInfo);
+            }
+        }
+
+        ProfilerInfo getProfilerInfo() {
+            return mProfilerInfo;
+        }
+    }
+    final ProfileData mProfileData = new ProfileData();
 
     /**
      * Stores a map of process name -> agent string. When a process is started and mAgentAppMap
@@ -2225,8 +2262,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mIntentFirewall = new IntentFirewall(new IntentFirewallInterface(), mHandler);
 
         mActivityTaskManager = atm;
-        mActivityTaskManager.setActivityManagerService(this, mHandlerThread.getLooper(),
-                mIntentFirewall, mPendingIntentController);
+        mActivityTaskManager.setActivityManagerService(mIntentFirewall, mPendingIntentController);
         mAtmInternal = LocalServices.getService(ActivityTaskManagerInternal.class);
 
         mProcessCpuThread = new Thread("CpuTracker") {
@@ -3129,7 +3165,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
 
-        if (mProfileProc == app) {
+        if (mProfileData.getProfileProc() == app) {
             clearProfilerLocked();
         }
 
@@ -4410,16 +4446,18 @@ public class ActivityManagerService extends IActivityManager.Stub
 
             ProfilerInfo profilerInfo = null;
             String preBindAgent = null;
-            if (mProfileApp != null && mProfileApp.equals(processName)) {
-                mProfileProc = app;
-                if (mProfilerInfo != null) {
+            if (mProfileData.getProfileApp() != null
+                    && mProfileData.getProfileApp().equals(processName)) {
+                mProfileData.setProfileProc(app);
+                if (mProfileData.getProfilerInfo() != null) {
                     // Send a profiler info object to the app if either a file is given, or
                     // an agent should be loaded at bind-time.
-                    boolean needsInfo = mProfilerInfo.profileFile != null
-                            || mProfilerInfo.attachAgentDuringBind;
-                    profilerInfo = needsInfo ? new ProfilerInfo(mProfilerInfo) : null;
-                    if (mProfilerInfo.agent != null) {
-                        preBindAgent = mProfilerInfo.agent;
+                    boolean needsInfo = mProfileData.getProfilerInfo().profileFile != null
+                            || mProfileData.getProfilerInfo().attachAgentDuringBind;
+                    profilerInfo = needsInfo
+                            ? new ProfilerInfo(mProfileData.getProfilerInfo()) : null;
+                    if (mProfileData.getProfilerInfo().agent != null) {
+                        preBindAgent = mProfileData.getProfilerInfo().agent;
                     }
                 }
             } else if (instr != null && instr.mProfileFile != null) {
@@ -4443,7 +4481,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
             if (profilerInfo != null && profilerInfo.profileFd != null) {
                 profilerInfo.profileFd = profilerInfo.profileFd.dup();
-                if (TextUtils.equals(mProfileApp, processName) && mProfilerInfo != null) {
+                if (TextUtils.equals(mProfileData.getProfileApp(), processName)
+                        && mProfileData.getProfilerInfo() != null) {
                     clearProfilerLocked();
                 }
             }
@@ -7444,17 +7483,17 @@ public class ActivityManagerService extends IActivityManager.Stub
                     throw new SecurityException("Process not debuggable: " + app.packageName);
                 }
             }
-            mProfileApp = processName;
+            mProfileData.setProfileApp(processName);
 
-            if (mProfilerInfo != null) {
-                if (mProfilerInfo.profileFd != null) {
+            if (mProfileData.getProfilerInfo() != null) {
+                if (mProfileData.getProfilerInfo().profileFd != null) {
                     try {
-                        mProfilerInfo.profileFd.close();
+                        mProfileData.getProfilerInfo().profileFd.close();
                     } catch (IOException e) {
                     }
                 }
             }
-            mProfilerInfo = new ProfilerInfo(profilerInfo);
+            mProfileData.setProfilerInfo(new ProfilerInfo(profilerInfo));
             mProfileType = 0;
         }
     }
@@ -9971,20 +10010,25 @@ public class ActivityManagerService extends IActivityManager.Stub
                 pw.println("  mTrackAllocationApp=" + mTrackAllocationApp);
             }
         }
-        if (mProfileApp != null || mProfileProc != null || (mProfilerInfo != null &&
-                (mProfilerInfo.profileFile != null || mProfilerInfo.profileFd != null))) {
-            if (dumpPackage == null || dumpPackage.equals(mProfileApp)) {
+        if (mProfileData.getProfileApp() != null || mProfileData.getProfileProc() != null
+                || (mProfileData.getProfilerInfo() != null &&
+                (mProfileData.getProfilerInfo().profileFile != null
+                        || mProfileData.getProfilerInfo().profileFd != null))) {
+            if (dumpPackage == null || dumpPackage.equals(mProfileData.getProfileApp())) {
                 if (needSep) {
                     pw.println();
                     needSep = false;
                 }
-                pw.println("  mProfileApp=" + mProfileApp + " mProfileProc=" + mProfileProc);
-                if (mProfilerInfo != null) {
-                    pw.println("  mProfileFile=" + mProfilerInfo.profileFile + " mProfileFd=" +
-                            mProfilerInfo.profileFd);
-                    pw.println("  mSamplingInterval=" + mProfilerInfo.samplingInterval +
-                            " mAutoStopProfiler=" + mProfilerInfo.autoStopProfiler +
-                            " mStreamingOutput=" + mProfilerInfo.streamingOutput);
+                pw.println("  mProfileApp=" + mProfileData.getProfileApp()
+                        + " mProfileProc=" + mProfileData.getProfileProc());
+                if (mProfileData.getProfilerInfo() != null) {
+                    pw.println("  mProfileFile=" + mProfileData.getProfilerInfo().profileFile
+                            + " mProfileFd=" + mProfileData.getProfilerInfo().profileFd);
+                    pw.println("  mSamplingInterval="
+                            + mProfileData.getProfilerInfo().samplingInterval +
+                            " mAutoStopProfiler="
+                            + mProfileData.getProfilerInfo().autoStopProfiler +
+                            " mStreamingOutput=" + mProfileData.getProfilerInfo().streamingOutput);
                     pw.println("  mProfileType=" + mProfileType);
                 }
             }
@@ -10264,19 +10308,26 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         if (mTrackAllocationApp != null) {
             if (dumpPackage == null || dumpPackage.equals(mTrackAllocationApp)) {
-                proto.write(ActivityManagerServiceDumpProcessesProto.TRACK_ALLOCATION_APP, mTrackAllocationApp);
+                proto.write(ActivityManagerServiceDumpProcessesProto.TRACK_ALLOCATION_APP,
+                        mTrackAllocationApp);
             }
         }
 
-        if (mProfileApp != null || mProfileProc != null || (mProfilerInfo != null &&
-                (mProfilerInfo.profileFile != null || mProfilerInfo.profileFd != null))) {
-            if (dumpPackage == null || dumpPackage.equals(mProfileApp)) {
+        if (mProfileData.getProfileApp() != null || mProfileData.getProfileProc() != null
+                || (mProfileData.getProfilerInfo() != null &&
+                (mProfileData.getProfilerInfo().profileFile != null
+                        || mProfileData.getProfilerInfo().profileFd != null))) {
+            if (dumpPackage == null || dumpPackage.equals(mProfileData.getProfileApp())) {
                 final long token = proto.start(ActivityManagerServiceDumpProcessesProto.PROFILE);
-                proto.write(ActivityManagerServiceDumpProcessesProto.Profile.APP_NAME, mProfileApp);
-                mProfileProc.writeToProto(proto,ActivityManagerServiceDumpProcessesProto.Profile.PROC);
-                if (mProfilerInfo != null) {
-                    mProfilerInfo.writeToProto(proto, ActivityManagerServiceDumpProcessesProto.Profile.INFO);
-                    proto.write(ActivityManagerServiceDumpProcessesProto.Profile.TYPE, mProfileType);
+                proto.write(ActivityManagerServiceDumpProcessesProto.Profile.APP_NAME,
+                        mProfileData.getProfileApp());
+                mProfileData.getProfileProc().writeToProto(proto,
+                        ActivityManagerServiceDumpProcessesProto.Profile.PROC);
+                if (mProfileData.getProfilerInfo() != null) {
+                    mProfileData.getProfilerInfo().writeToProto(proto,
+                            ActivityManagerServiceDumpProcessesProto.Profile.INFO);
+                    proto.write(ActivityManagerServiceDumpProcessesProto.Profile.TYPE,
+                            mProfileType);
                 }
                 proto.end(token);
             }
@@ -18033,8 +18084,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     private void stopProfilerLocked(ProcessRecord proc, int profileType) {
-        if (proc == null || proc == mProfileProc) {
-            proc = mProfileProc;
+        if (proc == null || proc == mProfileData.getProfileProc()) {
+            proc = mProfileData.getProfileProc();
             profileType = mProfileType;
             clearProfilerLocked();
         }
@@ -18049,15 +18100,16 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     void clearProfilerLocked() {
-        if (mProfilerInfo !=null && mProfilerInfo.profileFd != null) {
+        if (mProfileData.getProfilerInfo() != null
+                && mProfileData.getProfilerInfo().profileFd != null) {
             try {
-                mProfilerInfo.profileFd.close();
+                mProfileData.getProfilerInfo().profileFd.close();
             } catch (IOException e) {
             }
         }
-        mProfileApp = null;
-        mProfileProc = null;
-        mProfilerInfo = null;
+        mProfileData.setProfileApp(null);
+        mProfileData.setProfileProc(null);
+        mProfileData.setProfilerInfo(null);
     }
 
     public boolean profileControl(String process, int userId, boolean start,
@@ -18089,7 +18141,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (start) {
                     stopProfilerLocked(null, 0);
                     setProfileApp(proc.info, proc.processName, profilerInfo);
-                    mProfileProc = proc;
+                    mProfileData.setProfileProc(proc);
                     mProfileType = profileType;
                     ParcelFileDescriptor fd = profilerInfo.profileFd;
                     try {
@@ -18101,10 +18153,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                     proc.thread.profilerControl(start, profilerInfo, profileType);
                     fd = null;
                     try {
-                        mProfilerInfo.profileFd.close();
+                        mProfileData.getProfilerInfo().profileFd.close();
                     } catch (IOException e) {
                     }
-                    mProfilerInfo.profileFd = null;
+                    mProfileData.getProfilerInfo().profileFd = null;
 
                     if (proc.pid == MY_PID) {
                         // When profiling the system server itself, avoid closing the file
