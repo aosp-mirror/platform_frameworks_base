@@ -789,7 +789,15 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         return startHomeOnDisplay(mCurrentUser, myReason, displayId);
     }
 
-    boolean canStartHomeOnDisplay(ActivityInfo homeInfo, int displayId) {
+    /**
+     * Check if home activity start should be allowed on a display.
+     * @param homeInfo {@code ActivityInfo} of the home activity that is going to be launched.
+     * @param displayId The id of the target display.
+     * @param allowInstrumenting Whether launching home should be allowed if being instrumented.
+     * @return {@code true} if allow to launch, {@code false} otherwise.
+     */
+    boolean canStartHomeOnDisplay(ActivityInfo homeInfo, int displayId,
+            boolean allowInstrumenting) {
         if (mService.mFactoryTest == FactoryTest.FACTORY_TEST_LOW_LEVEL
                 && mService.mTopAction == null) {
             // We are running in factory test mode, but unable to find the factory test app, so
@@ -799,7 +807,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
         final WindowProcessController app =
                 mService.getProcessController(homeInfo.processName, homeInfo.applicationInfo.uid);
-        if (app != null && app.isInstrumenting()) {
+        if (!allowInstrumenting && app != null && app.isInstrumenting()) {
             // Don't do this if the home app is currently being instrumented.
             return false;
         }
@@ -4240,7 +4248,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             return false;
         }
 
-        if (!canStartHomeOnDisplay(aInfo, displayId)) {
+        if (!canStartHomeOnDisplay(aInfo, displayId, false /* allowInstrumenting */)) {
             return false;
         }
 

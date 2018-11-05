@@ -25,11 +25,11 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN_OR_SPLIT
 import static android.app.WindowConfiguration.WINDOWING_MODE_PINNED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_SPLIT_SCREEN_PRIMARY;
 import static android.content.pm.ActivityInfo.FLAG_ALWAYS_FOCUSABLE;
+import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.android.server.wm.ActivityDisplay.POSITION_TOP;
 import static com.android.server.wm.ActivityStack.REMOVE_TASK_MODE_DESTROYING;
 import static com.android.server.wm.ActivityStackSupervisor.MATCH_TASK_IN_STACKS_OR_RECENT_TASKS_AND_RESTORE;
-
 
 import static com.google.common.truth.Truth.assertThat;
 
@@ -54,6 +54,8 @@ import static org.mockito.Mockito.verify;
 
 import android.app.ActivityOptions;
 import android.app.WaitResult;
+import android.content.pm.ActivityInfo;
+import android.content.pm.ApplicationInfo;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 
@@ -436,7 +438,7 @@ public class ActivityStackSupervisorTests extends ActivityTestsBase {
      * Tests that home activities can be started on the displays that supports system decorations.
      */
     @Test
-    public void testStartHomeOnAllDisplays() throws Exception {
+    public void testStartHomeOnAllDisplays() {
         // Create secondary displays.
         final TestActivityDisplay secondDisplay = spy(createNewActivityDisplay());
         mSupervisor.addChild(secondDisplay, POSITION_TOP);
@@ -450,7 +452,7 @@ public class ActivityStackSupervisorTests extends ActivityTestsBase {
                 .create(any(), anyInt(), any(), any(), any(), any());
         doReturn(true).when(mService.mStackSupervisor)
                 .ensureVisibilityAndConfig(any(), anyInt(), anyBoolean(), anyBoolean());
-        doReturn(true).when(mSupervisor).canStartHomeOnDisplay(any(), anyInt());
+        doReturn(true).when(mSupervisor).canStartHomeOnDisplay(any(), anyInt(), anyBoolean());
 
         mSupervisor.startHomeOnAllDisplays(0, "testStartHome");
 
@@ -463,7 +465,7 @@ public class ActivityStackSupervisorTests extends ActivityTestsBase {
      * Tests that home activities won't be started before booting when display added.
      */
     @Test
-    public void testNotStartHomeBeforeBoot() throws Exception {
+    public void testNotStartHomeBeforeBoot() {
         final int displayId = 1;
         final boolean isBooting = mService.mAmInternal.isBooting();
         final boolean isBooted = mService.mAmInternal.isBooted();
@@ -476,5 +478,31 @@ public class ActivityStackSupervisorTests extends ActivityTestsBase {
             mService.mAmInternal.setBooting(isBooting);
             mService.mAmInternal.setBooted(isBooted);
         }
+    }
+
+    /**
+     * Tests whether home can be started if being instrumented.
+     */
+    @Test
+    public void testCanStartHomeWhenInstrumented() {
+        final ActivityInfo info = new ActivityInfo();
+        info.applicationInfo = new ApplicationInfo();
+        final WindowProcessController app = mock(WindowProcessController.class);
+        doReturn(app).when(mService).getProcessController(any(), anyInt());
+
+        // Can not start home if we don't want to start home while home is being instrumented.
+        doReturn(true).when(app).isInstrumenting();
+        assertFalse(mSupervisor.canStartHomeOnDisplay(info, DEFAULT_DISPLAY,
+                false /* allowInstrumenting*/));
+
+        // Can start home for other cases.
+        assertTrue(mSupervisor.canStartHomeOnDisplay(info, DEFAULT_DISPLAY,
+                true /* allowInstrumenting*/));
+
+        doReturn(false).when(app).isInstrumenting();
+        assertTrue(mSupervisor.canStartHomeOnDisplay(info, DEFAULT_DISPLAY,
+                false /* allowInstrumenting*/));
+        assertTrue(mSupervisor.canStartHomeOnDisplay(info, DEFAULT_DISPLAY,
+                true /* allowInstrumenting*/));
     }
 }
