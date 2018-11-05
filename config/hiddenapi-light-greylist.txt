@@ -2206,10 +2206,8 @@ Lcom/android/okhttp/Response;->message:Ljava/lang/String;
 Lcom/android/okhttp/Response;->networkResponse:Lcom/android/okhttp/Response;
 Lcom/android/okhttp/Response;->protocol:Lcom/android/okhttp/Protocol;
 Lcom/android/org/conscrypt/AbstractConscryptSocket;->getAlpnSelectedProtocol()[B
-Lcom/android/org/conscrypt/AbstractConscryptSocket;->getApplicationProtocol()Ljava/lang/String;
 Lcom/android/org/conscrypt/AbstractConscryptSocket;->getApplicationProtocols()[Ljava/lang/String;
 Lcom/android/org/conscrypt/AbstractConscryptSocket;->getChannelId()[B
-Lcom/android/org/conscrypt/AbstractConscryptSocket;->getHandshakeApplicationProtocol()Ljava/lang/String;
 Lcom/android/org/conscrypt/AbstractConscryptSocket;->getHostname()Ljava/lang/String;
 Lcom/android/org/conscrypt/AbstractConscryptSocket;->getHostnameOrIP()Ljava/lang/String;
 Lcom/android/org/conscrypt/AbstractConscryptSocket;->getNpnSelectedProtocol()[B
