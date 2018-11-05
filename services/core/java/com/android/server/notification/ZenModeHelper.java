@@ -96,7 +96,7 @@ public class ZenModeHelper {
     private final SettingsObserver mSettingsObserver;
     @VisibleForTesting protected final AppOpsManager mAppOps;
     @VisibleForTesting protected final NotificationManager mNotificationManager;
-    protected ZenModeConfig mDefaultConfig;
+    @VisibleForTesting protected ZenModeConfig mDefaultConfig;
     private final ArrayList<Callback> mCallbacks = new ArrayList<Callback>();
     private final ZenModeFiltering mFiltering;
     protected final RingerModeDelegate mRingerModeDelegate = new
@@ -309,9 +309,6 @@ public class ZenModeHelper {
             newConfig = mConfig.copy();
             ZenRule rule = new ZenRule();
             populateZenRule(automaticZenRule, rule, true);
-            if (newConfig.automaticRules.put(rule.id, rule) != null) {
-                rule.modified = true;
-            }
             if (setConfigLocked(newConfig, reason, rule.component, true)) {
                 return rule.id;
             } else {
@@ -341,9 +338,6 @@ public class ZenModeHelper {
                 }
             }
             populateZenRule(automaticZenRule, rule, false);
-            if (newConfig.automaticRules.put(ruleId, rule) != null) {
-                rule.modified = true;
-            }
             return setConfigLocked(newConfig, reason, rule.component, true);
         }
     }
@@ -431,13 +425,16 @@ public class ZenModeHelper {
         updateDefaultAutomaticRuleNames();
         for (ZenRule defaultRule : mDefaultConfig.automaticRules.values()) {
             ZenRule currRule = mConfig.automaticRules.get(defaultRule.id);
-            // if default rule wasn't modified, use localized name instead of previous
-            if (currRule != null && !currRule.modified && !defaultRule.name.equals(currRule.name)) {
-                if (canManageAutomaticZenRule(defaultRule)) {
+            // if default rule wasn't user-modified nor enabled, use localized name
+            // instead of previous system name
+            if (currRule != null && !currRule.modified && !currRule.enabled
+                    && !defaultRule.name.equals(currRule.name)) {
+                if (canManageAutomaticZenRule(currRule)) {
                     if (DEBUG) Slog.d(TAG, "Locale change - updating default zen rule name "
                             + "from " + currRule.name + " to " + defaultRule.name);
                     // update default rule (if locale changed, name of rule will change)
-                    updateAutomaticZenRule(defaultRule.id, createAutomaticZenRule(defaultRule),
+                    currRule.name = defaultRule.name;
+                    updateAutomaticZenRule(defaultRule.id, createAutomaticZenRule(currRule),
                             "locale changed");
                 }
             }
@@ -481,6 +478,7 @@ public class ZenModeHelper {
         rule.condition = null;
         rule.conditionId = automaticZenRule.getConditionId();
         rule.enabled = automaticZenRule.isEnabled();
+        rule.modified = automaticZenRule.isModified();
         if (automaticZenRule.getZenPolicy() != null) {
             rule.zenPolicy = automaticZenRule.getZenPolicy();
         }
