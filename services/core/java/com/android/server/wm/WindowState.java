@@ -4476,8 +4476,9 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     @Override
     boolean needsZBoost() {
-        if (mIsImWindow && mService.mInputMethodTarget != null) {
-            final AppWindowToken appToken = mService.mInputMethodTarget.mAppToken;
+        final WindowState inputMethodTarget = getDisplayContent().mInputMethodTarget;
+        if (mIsImWindow && inputMethodTarget != null) {
+            final AppWindowToken appToken = inputMethodTarget.mAppToken;
             if (appToken != null) {
                 return appToken.needsZBoost();
             }
@@ -4607,7 +4608,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
             // Likewise if we share a token with the Input method target and are ordered
             // above it but not necessarily a child (e.g. a Dialog) then we also need
             // this promotion.
-            final WindowState imeTarget = mService.mInputMethodTarget;
+            final WindowState imeTarget = getDisplayContent().mInputMethodTarget;
             boolean inTokenWithAndAboveImeTarget = imeTarget != null && imeTarget != this
                     && imeTarget.mToken == mToken && imeTarget.compareTo(this) <= 0;
             return inTokenWithAndAboveImeTarget;
@@ -4684,7 +4685,7 @@ class WindowState extends WindowContainer<WindowState> implements WindowManagerP
 
     @Override
     public boolean isInputMethodTarget() {
-        return mService.mInputMethodTarget == this;
+        return getDisplayContent().mInputMethodTarget == this;
     }
 
     long getFrameNumber() {

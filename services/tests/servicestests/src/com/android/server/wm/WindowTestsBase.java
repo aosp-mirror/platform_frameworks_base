@@ -192,7 +192,7 @@ class WindowTestsBase {
                 mWm.getDefaultDisplayContentLocked().mAppTransition
                         .removeAppTransitionTimeoutCallbacks();
                 mWm.mH.removeMessages(WindowManagerService.H.WINDOW_FREEZE_TIMEOUT);
-                mWm.mInputMethodTarget = null;
+                mDisplayContent.mInputMethodTarget = null;
             }
 
             // Wait until everything is really cleaned up.

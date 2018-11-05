@@ -609,13 +609,6 @@ public class WindowManagerService extends IWindowManager.Stub
      */
     final Handler mAnimationHandler = new Handler(AnimationThread.getHandler().getLooper());
 
-    /** This just indicates the window the input method is on top of, not
-     * necessarily the window its input is going to. */
-    WindowState mInputMethodTarget = null;
-
-    /** If true hold off on modifying the animation layer of mInputMethodTarget */
-    boolean mInputMethodTargetWaitingAnim;
-
     boolean mHardKeyboardAvailable;
     WindowManagerInternal.OnHardKeyboardStatusChangeListener mHardKeyboardStatusChangeListener;
     SettingsObserver mSettingsObserver;
@@ -5920,9 +5913,13 @@ public class WindowManagerService extends IWindowManager.Stub
         pw.print("  mGlobalConfiguration="); pw.println(mRoot.getConfiguration());
         pw.print("  mHasPermanentDpad="); pw.println(mHasPermanentDpad);
         mRoot.dumpTopFocusedDisplayId(pw);
-        if (mInputMethodTarget != null) {
-            pw.print("  mInputMethodTarget="); pw.println(mInputMethodTarget);
-        }
+        mRoot.forAllDisplays(dc -> {
+            final WindowState inputMethodTarget = dc.mInputMethodTarget;
+            if (inputMethodTarget != null) {
+                pw.print("  mInputMethodTarget in display# "); pw.print(dc.getDisplayId());
+                pw.print(' '); pw.println(inputMethodTarget);
+            }
+        });
         pw.print("  mInTouchMode="); pw.println(mInTouchMode);
         pw.print("  mLastDisplayFreezeDuration=");
                 TimeUtils.formatDuration(mLastDisplayFreezeDuration, pw);

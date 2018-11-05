@@ -211,7 +211,7 @@ public class ZOrderingTests extends WindowTestsBase {
 
     @Test
     public void testAssignWindowLayers_ForImeWithNoTarget() {
-        mWm.mInputMethodTarget = null;
+        mDisplayContent.mInputMethodTarget = null;
         mDisplayContent.assignChildLayers(mTransaction);
 
         // The Ime has an higher base layer than app windows and lower base layer than system
@@ -229,7 +229,7 @@ public class ZOrderingTests extends WindowTestsBase {
     @Test
     public void testAssignWindowLayers_ForImeWithAppTarget() {
         final WindowState imeAppTarget = createWindow("imeAppTarget");
-        mWm.mInputMethodTarget = imeAppTarget;
+        mDisplayContent.mInputMethodTarget = imeAppTarget;
 
         mDisplayContent.assignChildLayers(mTransaction);
 
@@ -255,7 +255,7 @@ public class ZOrderingTests extends WindowTestsBase {
                 TYPE_APPLICATION_MEDIA_OVERLAY, imeAppTarget.mToken,
                 "imeAppTargetChildBelowWindow");
 
-        mWm.mInputMethodTarget = imeAppTarget;
+        mDisplayContent.mInputMethodTarget = imeAppTarget;
         mDisplayContent.assignChildLayers(mTransaction);
 
         // Ime should be above all app windows except for child windows that are z-ordered above it
@@ -277,7 +277,7 @@ public class ZOrderingTests extends WindowTestsBase {
         final WindowState imeAppTarget = createWindow("imeAppTarget");
         final WindowState appAboveImeTarget = createWindow("appAboveImeTarget");
 
-        mWm.mInputMethodTarget = imeAppTarget;
+        mDisplayContent.mInputMethodTarget = imeAppTarget;
         mDisplayContent.assignChildLayers(mTransaction);
 
         // Ime should be above all app windows except for non-fullscreen app window above it and
@@ -300,7 +300,7 @@ public class ZOrderingTests extends WindowTestsBase {
                 mDisplayContent, "imeSystemOverlayTarget",
                 true /* ownerCanAddInternalSystemWindow */);
 
-        mWm.mInputMethodTarget = imeSystemOverlayTarget;
+        mDisplayContent.mInputMethodTarget = imeSystemOverlayTarget;
         mDisplayContent.assignChildLayers(mTransaction);
 
         // The IME target base layer is higher than all window except for the nav bar window, so the
@@ -323,7 +323,7 @@ public class ZOrderingTests extends WindowTestsBase {
 
     @Test
     public void testAssignWindowLayers_ForStatusBarImeTarget() {
-        mWm.mInputMethodTarget = mStatusBarWindow;
+        mDisplayContent.mInputMethodTarget = mStatusBarWindow;
         mDisplayContent.assignChildLayers(mTransaction);
 
         assertWindowHigher(mImeWindow, mChildAppWindowAbove);
