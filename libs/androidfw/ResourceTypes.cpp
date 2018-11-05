@@ -6998,18 +6998,28 @@ status_t DynamicRefTable::lookupResourceId(uint32_t* resId) const {
 }
 
 status_t DynamicRefTable::lookupResourceValue(Res_value* value) const {
-    uint8_t resolvedType;
+    uint8_t resolvedType = Res_value::TYPE_REFERENCE;
+    switch (value->dataType) {
+        case Res_value::TYPE_ATTRIBUTE:
+            resolvedType = Res_value::TYPE_ATTRIBUTE;
+        // fallthrough
+        case Res_value::TYPE_REFERENCE:
+            // Only resolve non-dynamic references and attributes if the package is loaded as a
+            // library or if a shared library is attempting to retrieve its own resource
+            if (!(mAppAsLib || (Res_GETPACKAGE(value->data) + 1) == 0)) {
+                return NO_ERROR;
+            }
 
-    if (value->dataType == Res_value::TYPE_ATTRIBUTE
-        || value->dataType == Res_value::TYPE_DYNAMIC_ATTRIBUTE) {
-        resolvedType = Res_value::TYPE_ATTRIBUTE;
-
-    } else if (value->dataType == Res_value::TYPE_REFERENCE
-               || value->dataType == Res_value::TYPE_DYNAMIC_REFERENCE) {
-        resolvedType = Res_value::TYPE_REFERENCE;
-
-    } else {
-        return NO_ERROR;
+        // If the package is loaded as shared library, the resource reference
+        // also need to be fixed.
+        break;
+        case Res_value::TYPE_DYNAMIC_ATTRIBUTE:
+            resolvedType = Res_value::TYPE_ATTRIBUTE;
+        // fallthrough
+        case Res_value::TYPE_DYNAMIC_REFERENCE:
+            break;
+        default:
+            return NO_ERROR;
     }
 
     status_t err = lookupResourceId(&value->data);

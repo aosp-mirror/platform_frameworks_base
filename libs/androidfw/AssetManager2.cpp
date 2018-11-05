@@ -162,6 +162,13 @@ void AssetManager2::DumpToLog() const {
     LOG(INFO) << base::StringPrintf("PG (%02x): ",
                                     package_group.dynamic_ref_table.mAssignedPackageId)
               << list;
+
+    for (size_t i = 0; i < 256; i++) {
+      if (package_group.dynamic_ref_table.mLookupTable[i] != 0) {
+        LOG(INFO) << base::StringPrintf("    e[0x%02x] -> 0x%02x", (uint8_t) i,
+                                        package_group.dynamic_ref_table.mLookupTable[i]);
+      }
+    }
   }
 }
 
