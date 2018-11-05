@@ -1226,10 +1226,6 @@ static void android_media_AudioTrack_disableDeviceCallback(
     pJniStorage->mDeviceCallback.clear();
 }
 
-static jint android_media_AudioTrack_get_FCC_8(JNIEnv *env, jobject thiz) {
-    return FCC_8;
-}
-
 // Pass through the arguments to the AudioFlinger track implementation.
 static jint android_media_AudioTrack_apply_volume_shaper(JNIEnv *env, jobject thiz,
         jobject jconfig, jobject joperation) {
@@ -1351,7 +1347,6 @@ static const JNINativeMethod gMethods[] = {
     {"native_getRoutedDeviceId", "()I", (void *)android_media_AudioTrack_getRoutedDeviceId},
     {"native_enableDeviceCallback", "()V", (void *)android_media_AudioTrack_enableDeviceCallback},
     {"native_disableDeviceCallback", "()V", (void *)android_media_AudioTrack_disableDeviceCallback},
-    {"native_get_FCC_8",     "()I",      (void *)android_media_AudioTrack_get_FCC_8},
     {"native_applyVolumeShaper",
             "(Landroid/media/VolumeShaper$Configuration;Landroid/media/VolumeShaper$Operation;)I",
                                          (void *)android_media_AudioTrack_apply_volume_shaper},
