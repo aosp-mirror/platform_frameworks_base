@@ -1924,7 +1924,7 @@ public class AppTransition implements Dump {
                 } catch (RemoteException e) {
                     Slog.w(TAG, "Failed to fetch app transition specs: " + e);
                 }
-                synchronized (mService.mWindowMap) {
+                synchronized (mService.mGlobalLock) {
                     mNextAppTransitionAnimationsSpecsPending = false;
                     overridePendingAppTransitionMultiThumb(specs,
                             mNextAppTransitionFutureCallback, null /* finishedCallback */,
@@ -2220,7 +2220,7 @@ public class AppTransition implements Dump {
     }
 
     private void handleAppTransitionTimeout() {
-        synchronized (mService.mWindowMap) {
+        synchronized (mService.mGlobalLock) {
             final DisplayContent dc = mDisplayContent;
             if (dc == null) {
                 return;

@@ -39,6 +39,7 @@ import android.util.TimeUtils;
 
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.util.function.pooled.PooledLambda;
+import com.android.server.wm.SafeActivityOptions;
 
 import java.io.PrintWriter;
 import java.lang.ref.WeakReference;
@@ -50,7 +51,7 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
     final PendingIntentController controller;
     final Key key;
     final int uid;
-    final WeakReference<PendingIntentRecord> ref;
+    public final WeakReference<PendingIntentRecord> ref;
     boolean sent = false;
     boolean canceled = false;
     private ArrayMap<IBinder, Long> whitelistDuration;
@@ -248,7 +249,7 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
                 requiredPermission, null, null, 0, 0, 0, options);
     }
 
-    int sendInner(int code, Intent intent, String resolvedType, IBinder whitelistToken,
+    public int sendInner(int code, Intent intent, String resolvedType, IBinder whitelistToken,
             IIntentReceiver finishedReceiver, String requiredPermission, IBinder resultTo,
             String resultWho, int requestCode, int flagsMask, int flagsValues, Bundle options) {
         if (intent != null) intent.setDefusable(true);
@@ -450,7 +451,7 @@ public final class PendingIntentRecord extends IIntentSender.Stub {
         }
     }
 
-    void dump(PrintWriter pw, String prefix) {
+    public void dump(PrintWriter pw, String prefix) {
         pw.print(prefix); pw.print("uid="); pw.print(uid);
                 pw.print(" packageName="); pw.print(key.packageName);
                 pw.print(" type="); pw.print(key.typeName());

@@ -95,6 +95,7 @@ import android.util.TimeUtils;
 import android.util.proto.ProtoOutputStream;
 import android.webkit.WebViewZygote;
 import com.android.server.uri.NeededUriGrants;
+import com.android.server.wm.ActivityServiceConnectionsHolder;
 
 public final class ActiveServices {
     private static final String TAG = TAG_WITH_CLASS_NAME ? "ActiveServices" : TAG_AM;

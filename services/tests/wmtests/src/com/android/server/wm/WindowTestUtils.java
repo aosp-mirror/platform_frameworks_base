@@ -21,6 +21,7 @@ import static org.mockito.Mockito.anyBoolean;
 import static org.mockito.Mockito.anyFloat;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -37,13 +38,13 @@ import org.mockito.invocation.InvocationOnMock;
  * to WindowManager related test functionality.
  */
 public class WindowTestUtils {
-    /**
-     * Retrieves an instance of a mock {@link WindowManagerService}.
-     */
-    public static WindowManagerService getMockWindowManagerService() {
+    private static int sNextTaskId = 0;
+
+    /** Retrieves an instance of a mock {@link WindowManagerService}. */
+    static WindowManagerService getMockWindowManagerService() {
         final WindowManagerService service = mock(WindowManagerService.class);
-        final WindowHashMap windowMap = new WindowHashMap();
-        when(service.getWindowManagerLock()).thenReturn(windowMap);
+        final WindowManagerGlobalLock lock = new WindowManagerGlobalLock();
+        doReturn(lock).when(service).getWindowManagerLock();
         return service;
     }
 

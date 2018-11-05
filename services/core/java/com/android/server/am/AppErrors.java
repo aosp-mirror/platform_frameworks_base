@@ -17,12 +17,13 @@
 package com.android.server.am;
 
 import static android.app.ActivityTaskManager.INVALID_TASK_ID;
+import static android.content.pm.ApplicationInfo.FLAG_SYSTEM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.ActivityManagerService.MY_PID;
 import static com.android.server.am.ActivityManagerService.SYSTEM_DEBUGGABLE;
-import static com.android.server.am.ActivityTaskManagerService.RELAUNCH_REASON_FREE_RESIZE;
-import static com.android.server.am.ActivityTaskManagerService.RELAUNCH_REASON_NONE;
+import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_FREE_RESIZE;
+import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_NONE;
 
 import android.app.ActivityManager;
 import android.app.ActivityOptions;
@@ -37,7 +38,6 @@ import android.net.Uri;
 import android.os.Binder;
 import android.os.Message;
 import android.os.Process;
-import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.SystemProperties;
 import android.os.UserHandle;
@@ -54,12 +54,11 @@ import com.android.internal.app.ProcessMap;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto;
 import com.android.server.RescueParty;
-import com.android.server.Watchdog;
+import com.android.server.wm.WindowProcessController;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.Collections;
-import java.util.Set;
 
 /**
  * Controls error conditions in applications.
@@ -619,7 +618,7 @@ class AppErrors {
         report.installerPackageName = r.errorReportReceiver.getPackageName();
         report.processName = r.processName;
         report.time = timeMillis;
-        report.systemApp = (r.info.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
+        report.systemApp = (r.info.flags & FLAG_SYSTEM) != 0;
 
         if (r.isCrashing() || r.forceCrashReport) {
             report.type = ApplicationErrorReport.TYPE_CRASH;
@@ -732,7 +731,7 @@ class AppErrors {
         final WindowProcessController proc = app.getWindowProcessController();
         final WindowProcessController homeProc = mService.mAtmInternal.getHomeProcess();
         if (proc == homeProc && proc.hasActivities()
-                && (homeProc.mInfo.flags & ApplicationInfo.FLAG_SYSTEM) == 0) {
+                && (((ProcessRecord) homeProc.mOwner).info.flags & FLAG_SYSTEM) == 0) {
             proc.clearPackagePreferredForHomeActivities();
         }
 

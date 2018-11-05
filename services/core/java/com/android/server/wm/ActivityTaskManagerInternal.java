@@ -36,12 +36,8 @@ import android.util.SparseIntArray;
 import android.util.proto.ProtoOutputStream;
 
 import com.android.internal.app.IVoiceInteractor;
-import com.android.server.am.ActivityServiceConnectionsHolder;
 import com.android.server.am.PendingIntentRecord;
-import com.android.server.am.SafeActivityOptions;
-import com.android.server.am.TaskRecord;
 import com.android.server.am.UserState;
-import com.android.server.am.WindowProcessController;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;

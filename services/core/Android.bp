@@ -55,7 +55,7 @@ java_genrule {
     srcs: [":services.core.unboosted"],
     tools: ["lockedregioncodeinjection"],
     cmd: "$(location lockedregioncodeinjection) " +
-        "  --targets \"Lcom/android/server/am/ActivityManagerService;,Lcom/android/server/wm/WindowHashMap;\" " +
+        "  --targets \"Lcom/android/server/am/ActivityManagerService;,Lcom/android/server/wm/WindowManagerGlobalLock;\" " +
         "  --pre \"com/android/server/am/ActivityManagerService.boostPriorityForLockedSection,com/android/server/wm/WindowManagerService.boostPriorityForLockedSection\" " +
         "  --post \"com/android/server/am/ActivityManagerService.resetPriorityAfterLockedSection,com/android/server/wm/WindowManagerService.resetPriorityAfterLockedSection\" " +
         "  -o $(out) " +

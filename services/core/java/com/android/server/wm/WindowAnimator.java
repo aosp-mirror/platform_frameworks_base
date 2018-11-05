@@ -94,7 +94,7 @@ public class WindowAnimator {
                 () -> mChoreographer = Choreographer.getSfInstance(), 0 /* timeout */);
 
         mAnimationFrameCallback = frameTimeNs -> {
-            synchronized (mService.mWindowMap) {
+            synchronized (mService.mGlobalLock) {
                 mAnimationFrameCallbackScheduled = false;
             }
             animate(frameTimeNs);
@@ -130,7 +130,7 @@ public class WindowAnimator {
      */
     private void animate(long frameTimeNs) {
 
-        synchronized (mService.mWindowMap) {
+        synchronized (mService.mGlobalLock) {
             if (!mInitialized) {
                 return;
             }
@@ -139,7 +139,7 @@ public class WindowAnimator {
             scheduleAnimation();
         }
 
-        synchronized (mService.mWindowMap) {
+        synchronized (mService.mGlobalLock) {
             mCurrentTime = frameTimeNs / TimeUtils.NANOS_PER_MS;
             mBulkUpdateParams = SET_ORIENTATION_CHANGE_COMPLETE;
             mAnimating = false;

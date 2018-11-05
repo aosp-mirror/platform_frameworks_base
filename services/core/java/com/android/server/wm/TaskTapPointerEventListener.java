@@ -47,7 +47,7 @@ public class TaskTapPointerEventListener implements PointerEventListener {
         mDisplayContent = displayContent;
         mHandler = new Handler(mService.mH.getLooper());
         mMoveDisplayToTop = () -> {
-            synchronized (mService.mWindowMap) {
+            synchronized (mService.mGlobalLock) {
                 mDisplayContent.getParent().positionChildAt(WindowContainer.POSITION_TOP,
                         mDisplayContent, true /* includingParents */);
             }

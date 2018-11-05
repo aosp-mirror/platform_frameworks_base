@@ -64,7 +64,7 @@ import com.android.internal.util.ConcurrentUtils;
 import com.android.internal.util.EmergencyAffordanceManager;
 import com.android.internal.widget.ILockSettings;
 import com.android.server.am.ActivityManagerService;
-import com.android.server.am.ActivityTaskManagerService;
+import com.android.server.wm.ActivityTaskManagerService;
 import com.android.server.appbinding.AppBindingService;
 import com.android.server.audio.AudioService;
 import com.android.server.biometrics.BiometricService;

@@ -96,7 +96,7 @@ final class InputMonitor {
 
         @Override
         public void dismiss() {
-            synchronized (mService.mWindowMap) {
+            synchronized (mService.mGlobalLock) {
                 if (mInputMonitor.destroyInputConsumer(mWindowHandle.name)) {
                     mInputEventReceiver.dispose();
                 }

@@ -159,7 +159,7 @@ class TaskPositioner {
                         if (DEBUG_TASK_POSITIONING){
                             Slog.w(TAG, "ACTION_MOVE @ {" + newX + ", " + newY + "}");
                         }
-                        synchronized (mService.mWindowMap) {
+                        synchronized (mService.mGlobalLock) {
                             mDragEnded = notifyMoveLocked(newX, newY);
                             mTask.getDimBounds(mTmpRect);
                         }
@@ -192,7 +192,7 @@ class TaskPositioner {
 
                 if (mDragEnded) {
                     final boolean wasResizing = mResizing;
-                    synchronized (mService.mWindowMap) {
+                    synchronized (mService.mGlobalLock) {
                         endDragLocked();
                         mTask.getDimBounds(mTmpRect);
                     }
@@ -397,7 +397,7 @@ class TaskPositioner {
         // bounds yet. This will guarantee that the app starts the backdrop renderer before
         // configuration changes which could cause an activity restart.
         if (mResizing) {
-            synchronized (mService.mWindowMap) {
+            synchronized (mService.mGlobalLock) {
                 notifyMoveLocked(startX, startY);
             }
 

@@ -127,23 +127,23 @@ import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_SERVICE;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_UID_OBSERVERS;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
-import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_CLEANUP;
-import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_CONFIGURATION;
-import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_SWITCH;
-import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_CONFIGURATION;
-import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_LOCKTASK;
-import static com.android.server.am.ActivityTaskManagerDebugConfig.POSTFIX_SWITCH;
-import static com.android.server.am.ActivityTaskManagerService.DUMP_ACTIVITIES_CMD;
-import static com.android.server.am.ActivityTaskManagerService.DUMP_ACTIVITIES_SHORT_CMD;
-import static com.android.server.am.ActivityTaskManagerService.DUMP_CONTAINERS_CMD;
-import static com.android.server.am.ActivityTaskManagerService.DUMP_LASTANR_CMD;
-import static com.android.server.am.ActivityTaskManagerService.DUMP_LASTANR_TRACES_CMD;
-import static com.android.server.am.ActivityTaskManagerService.DUMP_RECENTS_CMD;
-import static com.android.server.am.ActivityTaskManagerService.DUMP_RECENTS_SHORT_CMD;
-import static com.android.server.am.ActivityTaskManagerService.DUMP_STARTER_CMD;
-import static com.android.server.am.ActivityTaskManagerService.KEY_DISPATCHING_TIMEOUT_MS;
-import static com.android.server.am.ActivityTaskManagerService.RELAUNCH_REASON_NONE;
-import static com.android.server.am.ActivityTaskManagerService.relaunchReasonToString;
+import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_CLEANUP;
+import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_CONFIGURATION;
+import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_SWITCH;
+import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_CONFIGURATION;
+import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_LOCKTASK;
+import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_SWITCH;
+import static com.android.server.wm.ActivityTaskManagerService.DUMP_ACTIVITIES_CMD;
+import static com.android.server.wm.ActivityTaskManagerService.DUMP_ACTIVITIES_SHORT_CMD;
+import static com.android.server.wm.ActivityTaskManagerService.DUMP_CONTAINERS_CMD;
+import static com.android.server.wm.ActivityTaskManagerService.DUMP_LASTANR_CMD;
+import static com.android.server.wm.ActivityTaskManagerService.DUMP_LASTANR_TRACES_CMD;
+import static com.android.server.wm.ActivityTaskManagerService.DUMP_RECENTS_CMD;
+import static com.android.server.wm.ActivityTaskManagerService.DUMP_RECENTS_SHORT_CMD;
+import static com.android.server.wm.ActivityTaskManagerService.DUMP_STARTER_CMD;
+import static com.android.server.wm.ActivityTaskManagerService.KEY_DISPATCHING_TIMEOUT_MS;
+import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_NONE;
+import static com.android.server.wm.ActivityTaskManagerService.relaunchReasonToString;
 import static com.android.server.am.MemoryStatUtil.MEMORY_STAT_INTERESTING_NATIVE_PROCESSES;
 import static com.android.server.am.MemoryStatUtil.hasMemcg;
 import static com.android.server.am.MemoryStatUtil.readCmdlineFromProcfs;
@@ -352,8 +352,11 @@ import com.android.server.uri.GrantUri;
 import com.android.server.uri.UriGrantsManagerInternal;
 import com.android.server.utils.PriorityDump;
 import com.android.server.vr.VrManagerInternal;
+import com.android.server.wm.ActivityServiceConnectionsHolder;
 import com.android.server.wm.ActivityTaskManagerInternal;
+import com.android.server.wm.ActivityTaskManagerService;
 import com.android.server.wm.WindowManagerService;
+import com.android.server.wm.WindowProcessController;
 
 import dalvik.system.VMRuntime;
 
@@ -567,7 +570,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     String mDeviceOwnerName;
 
     final UserController mUserController;
-    final PendingIntentController mPendingIntentController;
+    @VisibleForTesting
+    public final PendingIntentController mPendingIntentController;
 
     final AppErrors mAppErrors;
 
@@ -1276,10 +1280,14 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     int mBootPhase;
 
-    WindowManagerService mWindowManager;
-    ActivityTaskManagerService mActivityTaskManager;
-    ActivityTaskManagerInternal mAtmInternal;
-    UriGrantsManagerInternal mUgmInternal;
+    @VisibleForTesting
+    public WindowManagerService mWindowManager;
+    @VisibleForTesting
+    public ActivityTaskManagerService mActivityTaskManager;
+    @VisibleForTesting
+    public ActivityTaskManagerInternal mAtmInternal;
+    @VisibleForTesting
+    public UriGrantsManagerInternal mUgmInternal;
     final ActivityThread mSystemThread;
 
     private final class AppDeathRecipient implements IBinder.DeathRecipient {
@@ -1349,7 +1357,8 @@ public class ActivityManagerService extends IActivityManager.Stub
      */
     private boolean mUserIsMonkey;
 
-    final ServiceThread mHandlerThread;
+    @VisibleForTesting
+    public final ServiceThread mHandlerThread;
     final MainHandler mHandler;
     final Handler mUiHandler;
     final ServiceThread mProcStartHandlerThread;
@@ -2111,7 +2120,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      * given to initialize the dependency members.
      */
     @VisibleForTesting
-    ActivityManagerService(Injector injector, ServiceThread handlerThread) {
+    public ActivityManagerService(Injector injector, ServiceThread handlerThread) {
         final boolean hasHandlerThread = handlerThread != null;
         mInjector = injector;
         mContext = mInjector.getContext();
@@ -5556,7 +5565,8 @@ public class ActivityManagerService extends IActivityManager.Stub
         return pi;
     }
 
-    void grantEphemeralAccessLocked(int userId, Intent intent,
+    @VisibleForTesting
+    public void grantEphemeralAccessLocked(int userId, Intent intent,
             int targetAppId, int ephemeralAppId) {
         getPackageManagerInternalLocked().
                 grantEphemeralAccess(userId, intent, targetAppId, ephemeralAppId);
@@ -6622,11 +6632,13 @@ public class ActivityManagerService extends IActivityManager.Stub
      * PackageManager could be unavailable at construction time and therefore needs to be accessed
      * on demand.
      */
-    IPackageManager getPackageManager() {
+    @VisibleForTesting
+    public IPackageManager getPackageManager() {
         return AppGlobals.getPackageManager();
     }
 
-    PackageManagerInternal getPackageManagerInternalLocked() {
+    @VisibleForTesting
+    public PackageManagerInternal getPackageManagerInternalLocked() {
         if (mPackageManagerInt == null) {
             mPackageManagerInt = LocalServices.getService(PackageManagerInternal.class);
         }
@@ -7698,7 +7710,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      *
      * @return {@code true} if this succeeded.
      */
-    static boolean scheduleAsRegularPriority(int tid, boolean suppressLogs) {
+    public static boolean scheduleAsRegularPriority(int tid, boolean suppressLogs) {
         try {
             Process.setThreadScheduler(tid, Process.SCHED_OTHER, 0);
             return true;
@@ -7722,7 +7734,7 @@ public class ActivityManagerService extends IActivityManager.Stub
      *
      * @return {@code true} if this succeeded.
      */
-    static boolean scheduleAsFifoPriority(int tid, boolean suppressLogs) {
+    public static boolean scheduleAsFifoPriority(int tid, boolean suppressLogs) {
         try {
             Process.setThreadScheduler(tid, Process.SCHED_FIFO | Process.SCHED_RESET_ON_FORK, 1);
             return true;
@@ -10474,11 +10486,11 @@ public class ActivityManagerService extends IActivityManager.Stub
         ArrayList<Integer> objects;
         boolean all;
 
-        ItemMatcher() {
+        public ItemMatcher() {
             all = true;
         }
 
-        void build(String name) {
+        public void build(String name) {
             ComponentName componentName = ComponentName.unflattenFromString(name);
             if (componentName != null) {
                 if (components == null) {
@@ -10507,7 +10519,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
 
-        int build(String[] args, int opti) {
+        public int build(String[] args, int opti) {
             for (; opti<args.length; opti++) {
                 String name = args[opti];
                 if ("--".equals(name)) {
@@ -10518,7 +10530,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             return opti;
         }
 
-        boolean match(Object object, ComponentName comp) {
+        public boolean match(Object object, ComponentName comp) {
             if (all) {
                 return true;
             }
@@ -18480,7 +18492,7 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @VisibleForTesting
-    final class LocalService extends ActivityManagerInternal {
+    public final class LocalService extends ActivityManagerInternal {
         @Override
         public String checkContentProviderAccess(String authority, int userId) {
             return ActivityManagerService.this.checkContentProviderAccess(authority, userId);

@@ -53,7 +53,7 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
             return;
         }
 
-        synchronized (mService.mWindowMap) {
+        synchronized (mService.mGlobalLock) {
             WindowState windowState = (WindowState) inputWindowHandle.windowState;
             if (windowState != null) {
                 Slog.i(TAG_WM, "WINDOW DIED " + windowState);
@@ -74,7 +74,7 @@ final class InputManagerCallback implements InputManagerService.WindowManagerCal
         AppWindowToken appWindowToken = null;
         WindowState windowState = null;
         boolean aboveSystem = false;
-        synchronized (mService.mWindowMap) {
+        synchronized (mService.mGlobalLock) {
             if (inputWindowHandle != null) {
                 windowState = (WindowState) inputWindowHandle.windowState;
                 if (windowState != null) {

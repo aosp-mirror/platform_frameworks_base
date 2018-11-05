@@ -40,6 +40,7 @@ import static org.mockito.Mockito.anyBoolean;
 import static org.mockito.Mockito.anyFloat;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -50,15 +51,13 @@ import org.mockito.invocation.InvocationOnMock;
  * to WindowManager related test functionality.
  */
 public class WindowTestUtils {
-    public static int sNextTaskId = 0;
+    private static int sNextTaskId = 0;
 
-    /**
-     * Retrieves an instance of a mock {@link WindowManagerService}.
-     */
-    public static WindowManagerService getMockWindowManagerService() {
+    /** Retrieves an instance of a mock {@link WindowManagerService}. */
+    static WindowManagerService getMockWindowManagerService() {
         final WindowManagerService service = mock(WindowManagerService.class);
-        final WindowHashMap windowMap = new WindowHashMap();
-        when(service.getWindowManagerLock()).thenReturn(windowMap);
+        final WindowManagerGlobalLock lock = new WindowManagerGlobalLock();
+        doReturn(lock).when(service).getWindowManagerLock();
         return service;
     }
 
@@ -116,7 +115,7 @@ public class WindowTestUtils {
     /** Creates a {@link Task} and adds it to the specified {@link TaskStack}. */
     public static Task createTaskInStack(WindowManagerService service, TaskStack stack,
             int userId) {
-        synchronized (service.mWindowMap) {
+        synchronized (service.mGlobalLock) {
             final Task newTask = new Task(sNextTaskId++, stack, userId, service, 0, false,
                     new ActivityManager.TaskDescription(), null);
             stack.addTask(newTask, POSITION_TOP);
@@ -140,7 +139,7 @@ public class WindowTestUtils {
     }
 
     static TestAppWindowToken createTestAppWindowToken(DisplayContent dc) {
-        synchronized (dc.mService.mWindowMap) {
+        synchronized (dc.mService.mGlobalLock) {
             return new TestAppWindowToken(dc);
         }
     }
@@ -213,7 +212,7 @@ public class WindowTestUtils {
 
     static TestWindowToken createTestWindowToken(int type, DisplayContent dc,
             boolean persistOnEmpty) {
-        synchronized (dc.mService.mWindowMap) {
+        synchronized (dc.mService.mGlobalLock) {
             return new TestWindowToken(type, dc, persistOnEmpty);
         }
     }

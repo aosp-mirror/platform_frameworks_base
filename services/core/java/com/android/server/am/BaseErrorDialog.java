@@ -26,7 +26,7 @@ import android.view.KeyEvent;
 import android.view.WindowManager;
 import android.widget.Button;
 
-class BaseErrorDialog extends AlertDialog {
+public class BaseErrorDialog extends AlertDialog {
     private static final int ENABLE_BUTTONS = 0;
     private static final int DISABLE_BUTTONS = 1;
 

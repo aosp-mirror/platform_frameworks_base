@@ -61,7 +61,7 @@ class WindowSurfacePlacer {
         mService = service;
         mWallpaperControllerLocked = mService.mRoot.mWallpaperController;
         mPerformSurfacePlacement = () -> {
-            synchronized (mService.mWindowMap) {
+            synchronized (mService.mGlobalLock) {
                 performSurfacePlacement();
             }
         };

@@ -227,7 +227,7 @@ class Task extends WindowContainer<AppWindowToken> {
         }
     }
 
-    /** @see com.android.server.am.ActivityTaskManagerService#positionTaskInStack(int, int, int). */
+    /** @see ActivityTaskManagerService#positionTaskInStack(int, int, int). */
     void positionAt(int position) {
         mStack.positionChildAt(position, this, false /* includingParents */);
     }

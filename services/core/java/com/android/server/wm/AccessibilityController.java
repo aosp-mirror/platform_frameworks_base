@@ -735,7 +735,7 @@ final class AccessibilityController {
                 }
 
                 public void setShown(boolean shown, boolean animate) {
-                    synchronized (mService.mWindowMap) {
+                    synchronized (mService.mGlobalLock) {
                         if (mShown == shown) {
                             return;
                         }
@@ -750,13 +750,13 @@ final class AccessibilityController {
                 @SuppressWarnings("unused")
                 // Called reflectively from an animator.
                 public int getAlpha() {
-                    synchronized (mService.mWindowMap) {
+                    synchronized (mService.mGlobalLock) {
                         return mAlpha;
                     }
                 }
 
                 public void setAlpha(int alpha) {
-                    synchronized (mService.mWindowMap) {
+                    synchronized (mService.mGlobalLock) {
                         if (mAlpha == alpha) {
                             return;
                         }
@@ -769,7 +769,7 @@ final class AccessibilityController {
                 }
 
                 public void setBounds(Region bounds) {
-                    synchronized (mService.mWindowMap) {
+                    synchronized (mService.mGlobalLock) {
                         if (mBounds.equals(bounds)) {
                             return;
                         }
@@ -782,7 +782,7 @@ final class AccessibilityController {
                 }
 
                 public void updateSize() {
-                    synchronized (mService.mWindowMap) {
+                    synchronized (mService.mGlobalLock) {
                         mWindowManager.getDefaultDisplay().getRealSize(mTempPoint);
                         mSurfaceControl.setSize(mTempPoint.x, mTempPoint.y);
                         invalidate(mDirtyRect);
@@ -801,7 +801,7 @@ final class AccessibilityController {
 
                 /** NOTE: This has to be called within a surface transaction. */
                 public void drawIfNeeded() {
-                    synchronized (mService.mWindowMap) {
+                    synchronized (mService.mGlobalLock) {
                         if (!mInvalidated) {
                             return;
                         }
@@ -948,7 +948,7 @@ final class AccessibilityController {
                     } break;
 
                     case MESSAGE_SHOW_MAGNIFIED_REGION_BOUNDS_IF_NEEDED : {
-                        synchronized (mService.mWindowMap) {
+                        synchronized (mService.mGlobalLock) {
                             if (mMagnifedViewport.isMagnifyingLocked()
                                     || isForceShowingMagnifiableBoundsLocked()) {
                                 mMagnifedViewport.setMagnifiedRegionBorderShownLocked(true, true);
@@ -1039,7 +1039,7 @@ final class AccessibilityController {
             boolean windowsChanged = false;
             List<WindowInfo> windows = new ArrayList<WindowInfo>();
 
-            synchronized (mService.mWindowMap) {
+            synchronized (mService.mGlobalLock) {
                 // Do not send the windows if there is no current focus as
                 // the window manager is still looking for where to put it.
                 // We will do the work when we get a focus change callback.

@@ -149,7 +149,7 @@ class TaskSnapshotSurface implements StartingSurface {
         final int windowFlags;
         final int windowPrivateFlags;
         final int currentOrientation;
-        synchronized (service.mWindowMap) {
+        synchronized (service.mGlobalLock) {
             final WindowState mainWindow = token.findMainWindow();
             final Task task = token.getTask();
             if (task == null) {
@@ -248,7 +248,7 @@ class TaskSnapshotSurface implements StartingSurface {
 
     @Override
     public void remove() {
-        synchronized (mService.mWindowMap) {
+        synchronized (mService.mGlobalLock) {
             final long now = SystemClock.uptimeMillis();
             if (mSizeMismatch && now - mShownTime < SIZE_MISMATCH_MINIMUM_TIME_MS) {
                 mHandler.postAtTime(this::remove, mShownTime + SIZE_MISMATCH_MINIMUM_TIME_MS);
@@ -288,7 +288,7 @@ class TaskSnapshotSurface implements StartingSurface {
         } else {
             drawSizeMatchSnapshot(buffer);
         }
-        synchronized (mService.mWindowMap) {
+        synchronized (mService.mGlobalLock) {
             mShownTime = SystemClock.uptimeMillis();
             mHasDrawn = true;
         }
@@ -422,7 +422,7 @@ class TaskSnapshotSurface implements StartingSurface {
                 case MSG_REPORT_DRAW:
                     final boolean hasDrawn;
                     final TaskSnapshotSurface surface = (TaskSnapshotSurface) msg.obj;
-                    synchronized (surface.mService.mWindowMap) {
+                    synchronized (surface.mService.mGlobalLock) {
                         hasDrawn = surface.mHasDrawn;
                     }
                     if (hasDrawn) {

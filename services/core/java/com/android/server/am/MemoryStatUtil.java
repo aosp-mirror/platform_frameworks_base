@@ -16,7 +16,7 @@
 
 package com.android.server.am;
 
-import static com.android.server.am.ActivityTaskManagerDebugConfig.DEBUG_METRICS;
+import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_METRICS;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
 
@@ -273,18 +273,18 @@ public final class MemoryStatUtil {
 
     public static final class MemoryStat {
         /** Number of page faults */
-        long pgfault;
+        public long pgfault;
         /** Number of major page faults */
-        long pgmajfault;
+        public long pgmajfault;
         /** Number of bytes of anonymous and swap cache memory */
-        long rssInBytes;
+        public long rssInBytes;
         /** Number of bytes of page cache memory */
-        long cacheInBytes;
+        public long cacheInBytes;
         /** Number of bytes of swap usage */
-        long swapInBytes;
+        public long swapInBytes;
         /** Number of bytes of peak anonymous and swap cache memory */
-        long rssHighWatermarkInBytes;
+        public long rssHighWatermarkInBytes;
         /** Device time when the processes started. */
-        long startTimeNanos;
+        public long startTimeNanos;
     }
 }

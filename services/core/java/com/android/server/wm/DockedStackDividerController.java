@@ -821,7 +821,7 @@ public class DockedStackDividerController {
                 mService.mWaitingForDrawnCallback.run();
             }
             mService.mWaitingForDrawnCallback = () -> {
-                synchronized (mService.mWindowMap) {
+                synchronized (mService.mGlobalLock) {
                     mAnimationStartDelayed = false;
                     if (mDelayedImeWin != null) {
                         mDelayedImeWin.endDelayingAnimationStart();

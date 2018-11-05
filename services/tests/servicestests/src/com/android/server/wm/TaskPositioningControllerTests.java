@@ -65,21 +65,21 @@ public class TaskPositioningControllerTests extends WindowTestsBase {
 
         mWindow = createWindow(null, TYPE_BASE_APPLICATION, "window");
         mWindow.mInputChannel = new InputChannel();
-        synchronized (sWm.mWindowMap) {
+        synchronized (sWm.mGlobalLock) {
             sWm.mWindowMap.put(mWindow.mClient.asBinder(), mWindow);
         }
     }
 
     @Test
     public void testStartAndFinishPositioning() throws Exception {
-        synchronized (sWm.mWindowMap) {
+        synchronized (sWm.mGlobalLock) {
             assertFalse(mTarget.isPositioningLocked());
             assertNull(mTarget.getDragWindowHandleLocked());
         }
 
         assertTrue(mTarget.startMovingTask(mWindow.mClient, 0, 0));
 
-        synchronized (sWm.mWindowMap) {
+        synchronized (sWm.mGlobalLock) {
             assertTrue(mTarget.isPositioningLocked());
             assertNotNull(mTarget.getDragWindowHandleLocked());
         }
@@ -94,7 +94,7 @@ public class TaskPositioningControllerTests extends WindowTestsBase {
 
     @Test
     public void testHandleTapOutsideTask() throws Exception {
-        synchronized (sWm.mWindowMap) {
+        synchronized (sWm.mGlobalLock) {
 
             assertFalse(mTarget.isPositioningLocked());
             assertNull(mTarget.getDragWindowHandleLocked());
@@ -108,7 +108,7 @@ public class TaskPositioningControllerTests extends WindowTestsBase {
         // Wait until the looper processes finishTaskPositioning.
         assertTrue(sWm.mH.runWithScissors(() -> {}, TIMEOUT_MS));
 
-        synchronized (sWm.mWindowMap) {
+        synchronized (sWm.mGlobalLock) {
             assertTrue(mTarget.isPositioningLocked());
             assertNotNull(mTarget.getDragWindowHandleLocked());
         }

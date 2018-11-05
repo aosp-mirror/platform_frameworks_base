@@ -340,7 +340,7 @@ class WallpaperController {
                             try {
                                 if (DEBUG_WALLPAPER) Slog.v(TAG,
                                         "Waiting for offset complete...");
-                                mService.mWindowMap.wait(WALLPAPER_TIMEOUT);
+                                mService.mGlobalLock.wait(WALLPAPER_TIMEOUT);
                             } catch (InterruptedException e) {
                             }
                             if (DEBUG_WALLPAPER) Slog.v(TAG, "Offset complete!");
@@ -452,7 +452,7 @@ class WallpaperController {
         if (mWaitingOnWallpaper != null &&
                 mWaitingOnWallpaper.mClient.asBinder() == window) {
             mWaitingOnWallpaper = null;
-            mService.mWindowMap.notifyAll();
+            mService.mGlobalLock.notifyAll();
         }
     }
 
@@ -460,7 +460,7 @@ class WallpaperController {
         if (mWaitingOnWallpaper != null &&
                 mWaitingOnWallpaper.mClient.asBinder() == window) {
             mWaitingOnWallpaper = null;
-            mService.mWindowMap.notifyAll();
+            mService.mGlobalLock.notifyAll();
         }
     }
 
