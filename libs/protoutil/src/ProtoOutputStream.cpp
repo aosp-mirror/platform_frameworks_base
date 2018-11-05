@@ -116,6 +116,34 @@ ProtoOutputStream::write(uint64_t fieldId, int val)
 }
 
 bool
+ProtoOutputStream::write(uint64_t fieldId, long val)
+{
+    if (mCompact) return false;
+    const uint32_t id = (uint32_t)fieldId;
+    switch (fieldId & FIELD_TYPE_MASK) {
+        case FIELD_TYPE_DOUBLE:   writeDoubleImpl(id, (double)val);           break;
+        case FIELD_TYPE_FLOAT:    writeFloatImpl(id, (float)val);             break;
+        case FIELD_TYPE_INT64:    writeInt64Impl(id, (long long)val);         break;
+        case FIELD_TYPE_UINT64:   writeUint64Impl(id, (uint64_t)val);         break;
+        case FIELD_TYPE_INT32:    writeInt32Impl(id, (int)val);               break;
+        case FIELD_TYPE_FIXED64:  writeFixed64Impl(id, (uint64_t)val);        break;
+        case FIELD_TYPE_FIXED32:  writeFixed32Impl(id, (uint32_t)val);        break;
+        case FIELD_TYPE_UINT32:   writeUint32Impl(id, (uint32_t)val);         break;
+        case FIELD_TYPE_SFIXED32: writeSFixed32Impl(id, (int)val);            break;
+        case FIELD_TYPE_SFIXED64: writeSFixed64Impl(id, (long long)val);      break;
+        case FIELD_TYPE_SINT32:   writeZigzagInt32Impl(id, (int)val);         break;
+        case FIELD_TYPE_SINT64:   writeZigzagInt64Impl(id, (long long)val);   break;
+        case FIELD_TYPE_ENUM:     writeEnumImpl(id, (int)val);                break;
+        case FIELD_TYPE_BOOL:     writeBoolImpl(id, val != 0);                break;
+        default:
+            ALOGW("Field type %d is not supported when writing long val.",
+                    (int)((fieldId & FIELD_TYPE_MASK) >> FIELD_TYPE_SHIFT));
+            return false;
+    }
+    return true;
+}
+
+bool
 ProtoOutputStream::write(uint64_t fieldId, long long val)
 {
     return internalWrite(fieldId, val, "long long");
