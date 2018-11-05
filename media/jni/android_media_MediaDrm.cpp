@@ -543,7 +543,7 @@ static String8 JStringToString8(JNIEnv *env, jstring const &jstr) {
     import jav.util.Iterator;
 
     HashMap<k, v> hm;
-    Set<Entry<k, v> > s = hm.entrySet();
+    Set<Entry<k, v>> s = hm.entrySet();
     Iterator i = s.iterator();
     Entry e = s.next();
 */
@@ -613,10 +613,10 @@ static jobject KeyedVectorToHashMap (JNIEnv *env, KeyedVector<String8, String8> 
 }
 
 static jobject ListOfVectorsToArrayListOfByteArray(JNIEnv *env,
-                                                   List<Vector<uint8_t> > list) {
+                                                   List<Vector<uint8_t>> list) {
     jclass clazz = gFields.arraylistClassId;
     jobject arrayList = env->NewObject(clazz, gFields.arraylist.init);
-    List<Vector<uint8_t> >::iterator iter = list.begin();
+    List<Vector<uint8_t>>::iterator iter = list.begin();
     while (iter != list.end()) {
         jbyteArray byteArray = VectorToJByteArray(env, *iter);
         env->CallBooleanMethod(arrayList, gFields.arraylist.add, byteArray);
@@ -1216,7 +1216,7 @@ static jobject android_media_MediaDrm_getSecureStops(
         return NULL;
     }
 
-    List<Vector<uint8_t> > secureStops;
+    List<Vector<uint8_t>> secureStops;
 
     status_t err = drm->getSecureStops(secureStops);
 
@@ -1237,7 +1237,7 @@ static jobject android_media_MediaDrm_getSecureStopIds(
         return NULL;
     }
 
-    List<Vector<uint8_t> > secureStopIds;
+    List<Vector<uint8_t>> secureStopIds;
 
     status_t err = drm->getSecureStopIds(secureStopIds);
 
