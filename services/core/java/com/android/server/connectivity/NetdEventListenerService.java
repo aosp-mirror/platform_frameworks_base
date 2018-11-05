@@ -208,7 +208,8 @@ public class NetdEventListenerService extends INetdEventListener.Stub {
 
         for (INetdEventCallback callback : mNetdEventCallbackList) {
             if (callback != null) {
-                callback.onDnsEvent(hostname, ipAddresses, ipAddressesCount, timestamp, uid);
+                callback.onDnsEvent(netId, eventType, returnCode, hostname, ipAddresses,
+                        ipAddressesCount, timestamp, uid);
             }
         }
     }
