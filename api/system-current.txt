@@ -5113,6 +5113,7 @@ package android.telephony {
     method public int getDomain();
     method public int getRegState();
     method public int getRejectCause();
+    method public int getRoamingType();
     method public int getTransportType();
     method public boolean isEmergencyEnabled();
     method public boolean isRoaming();
@@ -5170,6 +5171,10 @@ package android.telephony {
     method public deprecated android.telephony.NetworkRegistrationState getNetworkRegistrationStates(int, int);
     method public java.util.List<android.telephony.NetworkRegistrationState> getNetworkRegistrationStatesForDomain(int);
     method public java.util.List<android.telephony.NetworkRegistrationState> getNetworkRegistrationStatesForTransportType(int);
+    field public static final int ROAMING_TYPE_DOMESTIC = 2; // 0x2
+    field public static final int ROAMING_TYPE_INTERNATIONAL = 3; // 0x3
+    field public static final int ROAMING_TYPE_NOT_ROAMING = 0; // 0x0
+    field public static final int ROAMING_TYPE_UNKNOWN = 1; // 0x1
   }
 
   public final class SmsManager {
