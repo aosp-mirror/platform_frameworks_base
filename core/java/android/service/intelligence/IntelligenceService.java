@@ -70,6 +70,14 @@ public abstract class IntelligenceService extends Service {
                                 IntelligenceService.this, sessionId));
             }
         }
+        @Override
+        public void onContentCaptureEvents(InteractionSessionId sessionId,
+                List<ContentCaptureEvent> events) {
+            mHandler.sendMessage(
+                    obtainMessage(IntelligenceService::onContentCaptureEvent,
+                            IntelligenceService.this, sessionId, events));
+
+        }
     };
 
     @CallSuper
@@ -105,6 +113,7 @@ public abstract class IntelligenceService extends Service {
      * @param sessionId the session's Id
      * @param events the events
      */
+     // TODO(b/111276913): rename to onContentCaptureEvents
     public abstract void onContentCaptureEvent(@NonNull InteractionSessionId sessionId,
             @NonNull List<ContentCaptureEvent> events);
 

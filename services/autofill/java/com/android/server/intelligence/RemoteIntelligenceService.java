@@ -27,8 +27,11 @@ import android.service.intelligence.InteractionContext;
 import android.service.intelligence.InteractionSessionId;
 import android.text.format.DateUtils;
 import android.util.Slog;
+import android.view.intelligence.ContentCaptureEvent;
 
 import com.android.server.AbstractRemoteService;
+
+import java.util.List;
 
 final class RemoteIntelligenceService extends AbstractRemoteService {
 
@@ -79,44 +82,89 @@ final class RemoteIntelligenceService extends AbstractRemoteService {
         scheduleRequest(new PendingSessionLifecycleRequest(this, context, sessionId));
     }
 
-    private static final class PendingSessionLifecycleRequest
+    /**
+     * Called by {@link ContentCaptureSession} to send a batch of events to the service.
+     */
+    public void onContentCaptureEventsRequest(@NonNull InteractionSessionId sessionId,
+            @NonNull List<ContentCaptureEvent> events) {
+        cancelScheduledUnbind();
+        scheduleRequest(new PendingOnContentCaptureEventsRequest(this, sessionId, events));
+    }
+
+
+    private abstract static class MyPendingRequest
             extends PendingRequest<RemoteIntelligenceService> {
+        protected final InteractionSessionId mSessionId;
 
-        private final InteractionContext mContext;
-        private final InteractionSessionId mSessionId;
-
-        protected PendingSessionLifecycleRequest(@NonNull RemoteIntelligenceService service,
-                @Nullable InteractionContext context, @NonNull InteractionSessionId sessionId) {
+        private MyPendingRequest(@NonNull RemoteIntelligenceService service,
+                @NonNull InteractionSessionId sessionId) {
             super(service);
-            mContext = context;
             mSessionId = sessionId;
         }
 
         @Override // from PendingRequest
-        public void run() {
+        protected final void onTimeout(RemoteIntelligenceService remoteService) {
+            Slog.w(TAG, "timed out handling " + getClass().getSimpleName() + " for "
+                    + mSessionId);
+            remoteService.mCallbacks.onFailureOrTimeout(/* timedOut= */ true);
+        }
+
+        @Override // from PendingRequest
+        public final void run() {
             final RemoteIntelligenceService remoteService = getService();
             if (remoteService != null) {
                 try {
-                    remoteService.mService.onSessionLifecycle(mContext, mSessionId);
+                    myRun(remoteService);
+                    // We don't expect the service to call us back, so we finish right away.
+                    finish();
                 } catch (RemoteException e) {
-                    Slog.w(TAG, "exception handling PendingSessionLifecycleRequest for "
+                    Slog.w(TAG, "exception handling " + getClass().getSimpleName() + " for "
                             + mSessionId + ": " + e);
-                    remoteService.mCallbacks
-                        .onSessionLifecycleRequestFailureOrTimeout(/* timedOut= */ false);
+                    remoteService.mCallbacks.onFailureOrTimeout(/* timedOut= */ false);
                 }
             }
         }
 
-        @Override // from PendingRequest
-        protected void onTimeout(RemoteIntelligenceService remoteService) {
-            Slog.w(TAG, "timed out handling PendingSessionLifecycleRequest for "
-                    + mSessionId);
-            remoteService.mCallbacks
-                .onSessionLifecycleRequestFailureOrTimeout(/* timedOut= */ true);
+        protected abstract void myRun(@NonNull RemoteIntelligenceService service)
+                throws RemoteException;
+
+    }
+
+    private static final class PendingSessionLifecycleRequest extends MyPendingRequest {
+
+        private final InteractionContext mContext;
+
+        protected PendingSessionLifecycleRequest(@NonNull RemoteIntelligenceService service,
+                @Nullable InteractionContext context, @NonNull InteractionSessionId sessionId) {
+            super(service, sessionId);
+            mContext = context;
+        }
+
+        @Override // from MyPendingRequest
+        public void myRun(@NonNull RemoteIntelligenceService remoteService) throws RemoteException {
+            remoteService.mService.onSessionLifecycle(mContext, mSessionId);
+        }
+    }
+
+    private static final class PendingOnContentCaptureEventsRequest extends MyPendingRequest {
+
+        private final List<ContentCaptureEvent> mEvents;
+
+        protected PendingOnContentCaptureEventsRequest(@NonNull RemoteIntelligenceService service,
+                @NonNull InteractionSessionId sessionId,
+                @NonNull List<ContentCaptureEvent> events) {
+            super(service, sessionId);
+            mEvents = events;
+        }
+
+        @Override // from MyPendingRequest
+        public void myRun(@NonNull RemoteIntelligenceService remoteService) throws RemoteException {
+            remoteService.mService.onContentCaptureEvents(mSessionId, mEvents);
         }
     }
 
     public interface RemoteIntelligenceServiceCallbacks extends VultureCallback {
-        void onSessionLifecycleRequestFailureOrTimeout(boolean timedOut);
+        // To keep it simple, we use the same callback for all failures / timeouts.
+        void onFailureOrTimeout(boolean timedOut);
     }
 }

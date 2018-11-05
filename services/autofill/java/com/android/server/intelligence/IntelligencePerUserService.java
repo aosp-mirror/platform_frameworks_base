@@ -27,12 +27,14 @@ import android.os.IBinder;
 import android.os.RemoteException;
 import android.util.ArrayMap;
 import android.util.Slog;
+import android.view.intelligence.ContentCaptureEvent;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.IResultReceiver;
 import com.android.server.AbstractPerUserSystemService;
 
 import java.io.PrintWriter;
+import java.util.List;
 
 /**
  * Per-user instance of {@link IntelligenceManagerService}.
@@ -142,6 +144,20 @@ final class IntelligencePerUserService
     }
 
     @GuardedBy("mLock")
+    public void sendEventsLocked(@NonNull ComponentName componentName,
+            @NonNull List<ContentCaptureEvent> events) {
+        final ContentCaptureSession session = mSessions.get(componentName);
+        if (session == null) {
+            Slog.w(TAG, "sendEventsLocked(): no session for " + componentName);
+            return;
+        }
+        if (mMaster.verbose) {
+            Slog.v(TAG, "sendEventsLocked(): comp=" + componentName + "; events =" + events.size());
+        }
+        session.sendEventsLocked(events);
+    }
+
+    @GuardedBy("mLock")
     public void removeSessionLocked(@NonNull ComponentName key) {
         mSessions.remove(key);
     }
@@ -171,4 +187,5 @@ final class IntelligencePerUserService
             Slog.w(TAG, "Error async reporting result to client: " + e);
         }
     }
+
 }

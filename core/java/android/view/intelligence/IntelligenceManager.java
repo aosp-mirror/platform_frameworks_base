@@ -24,13 +24,17 @@ import android.content.Context;
 import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.os.SystemClock;
 import android.util.Log;
+import android.view.intelligence.ContentCaptureEvent.EventType;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.util.Preconditions;
 
 import java.io.PrintWriter;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Set;
 
 /**
@@ -155,6 +159,38 @@ public final class IntelligenceManager {
                                 }
                             }
                         });
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Used for intermediate events (i.e, other than created and destroyed).
+     *
+     * @hide
+     */
+    public void onActivityLifecycleEvent(@EventType int type) {
+        if (!isContentCaptureEnabled()) return;
+
+        //TODO(b/111276913): should buffer event (and call service on handler thread), instead of
+        // calling right away
+        final ContentCaptureEvent event = new ContentCaptureEvent(type, SystemClock.uptimeMillis(),
+                0);
+        final List<ContentCaptureEvent> events = Arrays.asList(event);
+
+        synchronized (mLock) {
+            //TODO(b/111276913): check session state; for example, how to handle if it's waiting for
+            // remote id
+
+            if (VERBOSE) {
+                Log.v(TAG, "onActivityLifecycleEvent() for " + mComponentName.flattenToShortString()
+                        + ": " + ContentCaptureEvent.getTypeAsString(type));
+            }
+
+            try {
+                mService.sendEvents(mContext.getUserId(), mApplicationToken, mComponentName,
+                        mLocalSessionId, mRemoteSessionId, events);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }

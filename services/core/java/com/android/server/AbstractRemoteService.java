@@ -366,11 +366,12 @@ public abstract class AbstractRemoteService implements DeathRecipient {
                     mCompleted = true;
                 }
 
-                Slog.w(mTag, "timed out");
                 final S remoteService = mWeakService.get();
                 if (remoteService != null) {
-                    Slog.w(mTag, " timed out after " + service.getRemoteRequestMillis() + " ms");
+                    Slog.w(mTag, "timed out after " + service.getRemoteRequestMillis() + " ms");
                     onTimeout(remoteService);
+                } else {
+                    Slog.w(mTag, "timed out (no service)");
                 }
             };
             mServiceHandler.postAtTime(mTimeoutTrigger,

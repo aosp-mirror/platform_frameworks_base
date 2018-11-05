@@ -17,8 +17,14 @@
 package android.view.intelligence;
 
 import android.content.ComponentName;
+
 import android.os.IBinder;
+
+import android.view.intelligence.ContentCaptureEvent;
+
 import com.android.internal.os.IResultReceiver;
+
+import java.util.List;
 
 /**
  * {@hide}
@@ -33,6 +39,14 @@ oneway interface IIntelligenceManager {
     /**
       * Finishes a session.
       */
+    // TODO(b/111276913): pass just (global) session id
     void finishSession(int userId, IBinder activityToken, in ComponentName componentName,
                        int localSessionId, int globalSessionId);
+
+    /**
+      * Sends a batch of events
+      */
+    // TODO(b/111276913): pass just (global) session id
+    void sendEvents(int userId, IBinder activityToken, in ComponentName componentName,
+                    int localSessionId, int globalSessionId, in List<ContentCaptureEvent> events);
 }

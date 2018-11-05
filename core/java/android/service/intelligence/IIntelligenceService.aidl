@@ -19,6 +19,11 @@ package android.service.intelligence;
 import android.service.intelligence.InteractionSessionId;
 import android.service.intelligence.InteractionContext;
 
+import android.view.intelligence.ContentCaptureEvent;
+
+import java.util.List;
+
+
 /**
  * Interface from the system to an intelligence service.
  *
@@ -28,4 +33,7 @@ oneway interface IIntelligenceService {
 
     // Called when session is created (context not null) or destroyed (context null)
     void onSessionLifecycle(in InteractionContext context, in InteractionSessionId sessionId);
+
+    void onContentCaptureEvents(in InteractionSessionId sessionId,
+                                in List<ContentCaptureEvent> events);
 }

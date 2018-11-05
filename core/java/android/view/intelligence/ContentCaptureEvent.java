@@ -30,6 +30,11 @@ import java.lang.annotation.RetentionPolicy;
 @SystemApi
 public final class ContentCaptureEvent implements Parcelable {
 
+    /** @hide */
+    public static final int TYPE_ACTIVITY_DESTROYED = -2;
+    /** @hide */
+    public static final int TYPE_ACTIVITY_CREATED = -1;
+
     /**
      * Called when the activity is started.
      */
@@ -85,10 +90,18 @@ public final class ContentCaptureEvent implements Parcelable {
             TYPE_VIEW_TEXT_CHANGED
     })
     @Retention(RetentionPolicy.SOURCE)
-    @interface EventType{}
+    public @interface EventType{}
+
+    private final int mType;
+    private final long mEventTime;
+    private final int mFlags;
+
 
     /** @hide */
-    ContentCaptureEvent() {
+    public ContentCaptureEvent(int type, long eventTime, int flags) {
+        mType = type;
+        mEventTime = eventTime;
+        mFlags = flags;
     }
 
     /**
@@ -99,14 +112,14 @@ public final class ContentCaptureEvent implements Parcelable {
      * {@link #TYPE_VIEW_ADDED}, {@link #TYPE_VIEW_REMOVED}, or {@link #TYPE_VIEW_TEXT_CHANGED}.
      */
     public @EventType int getType() {
-        return 42;
+        return mType;
     }
 
     /**
      * Gets when the event was generated, in ms.
      */
     public long getEventTime() {
-        return 48151623;
+        return mEventTime;
     }
 
     /**
@@ -116,7 +129,7 @@ public final class ContentCaptureEvent implements Parcelable {
      * {@link android.view.intelligence.IntelligenceManager#FLAG_USER_INPUT}.
      */
     public int getFlags() {
-        return 0;
+        return mFlags;
     }
 
     /**
@@ -150,13 +163,25 @@ public final class ContentCaptureEvent implements Parcelable {
     }
 
     @Override
+    public String toString() {
+        final StringBuilder string = new StringBuilder("ContentCaptureEvent[type=")
+                .append(getTypeAsString(mType)).append(", time=").append(mEventTime);
+        if (mFlags > 0) {
+            string.append(", flags=").append(mFlags);
+        }
+        return string.append(']').toString();
+    }
+
+    @Override
     public int describeContents() {
         return 0;
     }
 
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
-        // TODO(b/111276913): implement
+        parcel.writeInt(mType);
+        parcel.writeLong(mEventTime);
+        parcel.writeInt(mFlags);
     }
 
     public static final Parcelable.Creator<ContentCaptureEvent> CREATOR =
@@ -164,8 +189,10 @@ public final class ContentCaptureEvent implements Parcelable {
 
         @Override
         public ContentCaptureEvent createFromParcel(Parcel parcel) {
-            // TODO(b/111276913): implement
-            return null;
+            final int type = parcel.readInt();
+            final long eventTime  = parcel.readLong();
+            final int flags = parcel.readInt();
+            return new ContentCaptureEvent(type, eventTime, flags);
         }
 
         @Override
@@ -173,4 +200,27 @@ public final class ContentCaptureEvent implements Parcelable {
             return new ContentCaptureEvent[size];
         }
     };
+
+
+    /** @hide */
+    public static String getTypeAsString(@EventType int type) {
+        switch (type) {
+            case TYPE_ACTIVITY_STARTED:
+                return "ACTIVITY_STARTED";
+            case TYPE_ACTIVITY_RESUMED:
+                return "ACTIVITY_RESUMED";
+            case TYPE_ACTIVITY_PAUSED:
+                return "ACTIVITY_PAUSED";
+            case TYPE_ACTIVITY_STOPPED:
+                return "ACTIVITY_STOPPED";
+            case TYPE_VIEW_ADDED:
+                return "VIEW_ADDED";
+            case TYPE_VIEW_REMOVED:
+                return "VIEW_REMOVED";
+            case TYPE_VIEW_TEXT_CHANGED:
+                return "VIEW_TEXT_CHANGED";
+            default:
+                return "UKNOWN_TYPE: " + type;
+        }
+    }
 }
