@@ -23,9 +23,7 @@ import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.graphics.SurfaceTexture;
-import android.net.Uri;
 import android.os.Handler;
-import android.os.Parcel;
 import android.os.PersistableBundle;
 import android.view.Surface;
 import android.view.SurfaceHolder;
@@ -34,7 +32,6 @@ import dalvik.system.CloseGuard;
 
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
@@ -241,47 +238,6 @@ public abstract class MediaPlayer2 implements AutoCloseable
         return new MediaPlayer2Impl(context);
     }
 
-    private static final String[] decodeMediaPlayer2Uri(String location) {
-        Uri uri = Uri.parse(location);
-        if (!"mediaplayer2".equals(uri.getScheme())) {
-            return new String[] {location};
-        }
-
-        List<String> uris = uri.getQueryParameters("uri");
-        if (uris.isEmpty()) {
-            return new String[] {location};
-        }
-
-        List<String> keys = uri.getQueryParameters("key");
-        List<String> values = uri.getQueryParameters("value");
-        if (keys.size() != values.size()) {
-            return new String[] {uris.get(0)};
-        }
-
-        List<String> ls = new ArrayList();
-        ls.add(uris.get(0));
-        for (int i = 0; i < keys.size() ; i++) {
-            ls.add(keys.get(i));
-            ls.add(values.get(i));
-        }
-
-        return ls.toArray(new String[ls.size()]);
-    }
-
-    private static final String encodeMediaPlayer2Uri(String uri, String[] keys, String[] values) {
-        Uri.Builder builder = new Uri.Builder();
-        builder.scheme("mediaplayer2").path("/").appendQueryParameter("uri", uri);
-        if (keys == null || values == null || keys.length != values.length) {
-            return builder.build().toString();
-        }
-        for (int i = 0; i < keys.length ; i++) {
-            builder
-                .appendQueryParameter("key", keys[i])
-                .appendQueryParameter("value", values[i]);
-        }
-        return builder.build().toString();
-    }
-
     /**
      * @hide
      */
@@ -289,12 +245,6 @@ public abstract class MediaPlayer2 implements AutoCloseable
     public MediaPlayer2() {
         mGuard.open("close");
     }
-
-    /**
-     * Returns a {@link MediaPlayerBase} implementation which runs based on
-     * this MediaPlayer2 instance.
-     */
-    public abstract MediaPlayerBase getMediaPlayerBase();
 
     /**
      * Releases the resources held by this {@code MediaPlayer2} object.
@@ -342,8 +292,7 @@ public abstract class MediaPlayer2 implements AutoCloseable
      * Starts or resumes playback. If playback had previously been paused,
      * playback will continue from where it was paused. If playback had
      * reached end of stream and been paused, or never started before,
-     * playback will start at the beginning. If the source had not been
-     * prepared, the player will prepare the source and play.
+     * playback will start at the beginning.
      *
      * @return a token which can be used to cancel the operation later with {@link #cancel}.
      */
@@ -404,9 +353,8 @@ public abstract class MediaPlayer2 implements AutoCloseable
 
     /**
      * Gets the current buffered media source position received through progressive downloading.
-     * The received buffering percentage indicates how much of the content has been buffered
-     * or played. For example a buffering update of 80 percent when half the content
-     * has already been played indicates that the next 30 percent of the
+     * For example a buffering update of 8000 milliseconds when 5000 milliseconds of the content
+     * has already been played indicates that the next 3000 milliseconds of the
      * content to play has been buffered.
      *
      * @return the current buffered media source position in milliseconds
@@ -416,7 +364,6 @@ public abstract class MediaPlayer2 implements AutoCloseable
     /**
      * MediaPlayer2 has not been prepared or just has been reset.
      * In this state, MediaPlayer2 doesn't fetch data.
-     * @hide
      */
     public static final int PLAYER_STATE_IDLE = 1001;
 
@@ -424,26 +371,23 @@ public abstract class MediaPlayer2 implements AutoCloseable
      * MediaPlayer2 has been just prepared.
      * In this state, MediaPlayer2 just fetches data from media source,
      * but doesn't actively render data.
-     * @hide
      */
     public static final int PLAYER_STATE_PREPARED = 1002;
 
     /**
      * MediaPlayer2 is paused.
-     * In this state, MediaPlayer2 doesn't actively render data.
-     * @hide
+     * In this state, MediaPlayer2 has allocated resources to construct playback
+     * pipeline, but it doesn't actively render data.
      */
     public static final int PLAYER_STATE_PAUSED = 1003;
 
     /**
      * MediaPlayer2 is actively playing back data.
-     * @hide
      */
     public static final int PLAYER_STATE_PLAYING = 1004;
 
     /**
      * MediaPlayer2 has hit some fatal error and cannot continue playback.
-     * @hide
      */
     public static final int PLAYER_STATE_ERROR = 1005;
 
@@ -469,7 +413,7 @@ public abstract class MediaPlayer2 implements AutoCloseable
     /**
      * Sets the audio attributes for this MediaPlayer2.
      * See {@link AudioAttributes} for how to build and configure an instance of this class.
-     * You must call this method before {@link #prepare()} in order
+     * You must call this method before {@link #play()} and {@link #pause()} in order
      * for the audio attributes to become effective thereafter.
      * @param attributes a non-null set of audio attributes
      * @return a token which can be used to cancel the operation later with {@link #cancel}.
@@ -547,7 +491,7 @@ public abstract class MediaPlayer2 implements AutoCloseable
     public abstract Object setPlayerVolume(float volume);
 
     /**
-     * Returns the current volume of this player to this player.
+     * Returns the current volume of this player.
      * Note that it does not take into account the associated stream volume.
      * @return the player volume.
      */
@@ -561,24 +505,9 @@ public abstract class MediaPlayer2 implements AutoCloseable
     }
 
     /**
-     * Create a request parcel which can be routed to the native media
-     * player using {@link #invoke(Parcel, Parcel)}. The Parcel
-     * returned has the proper InterfaceToken set. The caller should
-     * not overwrite that token, i.e it can only append data to the
-     * Parcel.
-     *
-     * @return A parcel suitable to hold a request for the native
-     * player.
-     * {@hide}
-     */
-    public Parcel newRequest() {
-        return null;
-    }
-
-    /**
      * Insert a task in the command queue to help the client to identify whether a batch
      * of commands has been finished. When this command is processed, a notification
-     * {@code EventCallback.onCommandLabelReached} will be fired with the
+     * {@link EventCallback#onCommandLabelReached onCommandLabelReached} will be fired with the
      * given {@code label}.
      *
      * @see EventCallback#onCommandLabelReached
@@ -595,16 +524,13 @@ public abstract class MediaPlayer2 implements AutoCloseable
      * portion of the media.
      *
      * Either a surface holder or surface must be set if a display or video sink
-     * is needed.  Not calling this method or {@link #setSurface(Surface)}
+     * is needed. Not calling this method or {@link #setSurface(Surface)}
      * when playing back a video will result in only the audio track being played.
      * A null surface holder or surface will result in only the audio track being
      * played.
      *
      * @param sh the SurfaceHolder to use for video display
-     * @throws IllegalStateException if the internal player engine has not been
-     * initialized or has been released.
      * @return a token which can be used to cancel the operation later with {@link #cancel}.
-     * @hide
      */
     public abstract Object setDisplay(SurfaceHolder sh);
 
@@ -624,56 +550,44 @@ public abstract class MediaPlayer2 implements AutoCloseable
      *
      * @param surface The {@link Surface} to be used for the video portion of
      * the media.
-     * @throws IllegalStateException if the internal player engine has not been
-     * initialized or has been released.
      * @return a token which can be used to cancel the operation later with {@link #cancel}.
      */
     // This is an asynchronous call.
     public abstract Object setSurface(Surface surface);
 
-    /* Do not change these video scaling mode values below without updating
-     * their counterparts in system/window.h! Please do not forget to update
-     * {@link #isVideoScalingModeSupported} when new video scaling modes
-     * are added.
-     */
     /**
-     * Specifies a video scaling mode. The content is stretched to the
-     * surface rendering area. When the surface has the same aspect ratio
-     * as the content, the aspect ratio of the content is maintained;
-     * otherwise, the aspect ratio of the content is not maintained when video
-     * is being rendered.
-     * There is no content cropping with this video scaling mode.
-     */
-    public static final int VIDEO_SCALING_MODE_SCALE_TO_FIT = 1;
-
-    /**
-     * Specifies a video scaling mode. The content is scaled, maintaining
-     * its aspect ratio. The whole surface area is always used. When the
-     * aspect ratio of the content is the same as the surface, no content
-     * is cropped; otherwise, content is cropped to fit the surface.
-     * @hide
-     */
-    public static final int VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING = 2;
-
-    /**
-     * Sets video scaling mode. To make the target video scaling mode
-     * effective during playback, this method must be called after
-     * data source is set. If not called, the default video
-     * scaling mode is {@link #VIDEO_SCALING_MODE_SCALE_TO_FIT}.
+     * Set the low-level power management behavior for this MediaPlayer2. This
+     * can be used when the MediaPlayer2 is not playing through a SurfaceHolder
+     * set with {@link #setDisplay(SurfaceHolder)} and thus can use the
+     * high-level {@link #setScreenOnWhilePlaying(boolean)} feature.
      *
-     * <p> The supported video scaling modes are:
-     * <ul>
-     * <li> {@link #VIDEO_SCALING_MODE_SCALE_TO_FIT}
-     * </ul>
+     * <p>This function has the MediaPlayer2 access the low-level power manager
+     * service to control the device's power usage while playing is occurring.
+     * The parameter is a combination of {@link android.os.PowerManager} wake flags.
+     * Use of this method requires {@link android.Manifest.permission#WAKE_LOCK}
+     * permission.
+     * By default, no attempt is made to keep the device awake during playback.
      *
-     * @param mode target video scaling mode. Must be one of the supported
-     * video scaling modes; otherwise, IllegalArgumentException will be thrown.
+     * @param context the Context to use
+     * @param mode    the power/wake mode to set
      * @return a token which can be used to cancel the operation later with {@link #cancel}.
-     *
-     * @see MediaPlayer2#VIDEO_SCALING_MODE_SCALE_TO_FIT
-     * @hide
+     * @see android.os.PowerManager
      */
-    public abstract Object setVideoScalingMode(int mode);
+    // This is an asynchronous call.
+    public abstract Object setWakeMode(Context context, int mode);
+
+    /**
+     * Control whether we should use the attached SurfaceHolder to keep the
+     * screen on while video playback is occurring.  This is the preferred
+     * method over {@link #setWakeMode} where possible, since it doesn't
+     * require that the application have permission for low-level wake lock
+     * access.
+     *
+     * @param screenOn Supply true to keep the screen on, false to allow it to turn off.
+     * @return a token which can be used to cancel the operation later with {@link #cancel}.
+     */
+    // This is an asynchronous call.
+    public abstract Object setScreenOnWhilePlaying(boolean screenOn);
 
     /**
      * Cancels a pending command.
@@ -702,7 +616,7 @@ public abstract class MediaPlayer2 implements AutoCloseable
      * @return true if succesful, false if the specified {@link AudioDeviceInfo} is non-null and
      * does not correspond to a valid audio device.
      */
-    // This is an asynchronous call.
+    // This is a synchronous call.
     @Override
     public abstract boolean setPreferredDevice(AudioDeviceInfo deviceInfo);
 
@@ -745,36 +659,6 @@ public abstract class MediaPlayer2 implements AutoCloseable
     @Override
     public abstract void removeOnRoutingChangedListener(
             AudioRouting.OnRoutingChangedListener listener);
-
-    /**
-     * Set the low-level power management behavior for this MediaPlayer2.
-     *
-     * <p>This function has the MediaPlayer2 access the low-level power manager
-     * service to control the device's power usage while playing is occurring.
-     * The parameter is a combination of {@link android.os.PowerManager} wake flags.
-     * Use of this method requires {@link android.Manifest.permission#WAKE_LOCK}
-     * permission.
-     * By default, no attempt is made to keep the device awake during playback.
-     *
-     * @param context the Context to use
-     * @param mode    the power/wake mode to set
-     * @see android.os.PowerManager
-     * @hide
-     */
-    public abstract void setWakeMode(Context context, int mode);
-
-    /**
-     * Control whether we should use the attached SurfaceHolder to keep the
-     * screen on while video playback is occurring.  This is the preferred
-     * method over {@link #setWakeMode} where possible, since it doesn't
-     * require that the application have permission for low-level wake lock
-     * access.
-     *
-     * @param screenOn Supply true to keep the screen on, false to allow it
-     * to turn off.
-     * @hide
-     */
-    public abstract void setScreenOnWhilePlaying(boolean screenOn);
 
     /**
      * Returns the width of the video.
@@ -1719,17 +1603,20 @@ public abstract class MediaPlayer2 implements AutoCloseable
      */
     public static final int CALL_COMPLETED_SET_BUFFERING_PARAMS = 31;
 
-    /** The player just completed a call {@link #setVideoScalingMode}.
-     * @see EventCallback#onCallCompleted
-     * @hide
-     */
-    public static final int CALL_COMPLETED_SET_VIDEO_SCALING_MODE = 32;
-
     /** The player just completed a call {@link #setDisplay}.
      * @see EventCallback#onCallCompleted
-     * @hide
      */
     public static final int CALL_COMPLETED_SET_DISPLAY = 33;
+
+    /** The player just completed a call {@link #setWakeMode}.
+     * @see EventCallback#onCallCompleted
+     */
+    public static final int CALL_COMPLETED_SET_WAKE_MODE = 34;
+
+    /** The player just completed a call {@link #setScreenOnWhilePlaying}.
+     * @see EventCallback#onCallCompleted
+     */
+    public static final int CALL_COMPLETED_SET_SCREEN_ON_WHILE_PLAYING = 35;
 
     /**
      * The start of the methods which have separate call complete callback.
@@ -1776,8 +1663,9 @@ public abstract class MediaPlayer2 implements AutoCloseable
             CALL_COMPLETED_SKIP_TO_NEXT,
             CALL_COMPLETED_CLEAR_NEXT_DATA_SOURCES,
             CALL_COMPLETED_SET_BUFFERING_PARAMS,
-            CALL_COMPLETED_SET_VIDEO_SCALING_MODE,
             CALL_COMPLETED_SET_DISPLAY,
+            CALL_COMPLETED_SET_WAKE_MODE,
+            CALL_COMPLETED_SET_SCREEN_ON_WHILE_PLAYING,
             CALL_COMPLETED_NOTIFY_WHEN_COMMAND_LABEL_REACHED,
             CALL_COMPLETED_PREPARE_DRM,
     })

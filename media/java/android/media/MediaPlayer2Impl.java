@@ -19,11 +19,11 @@ package android.media;
 import android.annotation.CallbackExecutor;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.content.ContentProvider;
+import android.app.ActivityManager;
+import android.app.ActivityManager.RunningAppProcessInfo;
 import android.content.ContentResolver;
 import android.content.Context;
 import android.content.res.AssetFileDescriptor;
-import android.graphics.SurfaceTexture;
 import android.graphics.Rect;
 import android.media.MediaPlayer2Proto.PlayerMessage;
 import android.media.MediaPlayer2Proto.Value;
@@ -34,8 +34,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.PersistableBundle;
 import android.os.PowerManager;
-import android.os.SystemProperties;
-import android.provider.Settings;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Pair;
@@ -78,18 +76,22 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
         native_init();
     }
 
+    private static final int NEXT_SOURCE_STATE_ERROR = -1;
+    private static final int NEXT_SOURCE_STATE_INIT = 0;
+    private static final int NEXT_SOURCE_STATE_PREPARING = 1;
+    private static final int NEXT_SOURCE_STATE_PREPARED = 2;
+
     private final static String TAG = "MediaPlayer2Impl";
 
     private Context mContext;
 
-    private long mNativeContext; // accessed by native methods
+    private long mNativeContext;  // accessed by native methods
     private long mNativeSurfaceTexture;  // accessed by native methods
-    private int mListenerContext; // accessed by native methods
+    private int mListenerContext;  // accessed by native methods
     private SurfaceHolder mSurfaceHolder;
     private PowerManager.WakeLock mWakeLock = null;
     private boolean mScreenOnWhilePlaying;
     private boolean mStayAwake;
-    private int mStreamType = AudioManager.USE_DEFAULT_STREAM_TYPE;
 
     private final Object mSrcLock = new Object();
     //--- guarded by |mSrcLock| start
@@ -134,7 +136,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
 
     /**
      * Default constructor.
-     * <p>When done with the MediaPlayer2Impl, you should call  {@link #close()},
+     * <p>When done with the MediaPlayer2Impl, you should call {@link #close()},
      * to free the resources. If not released, too many MediaPlayer2Impl instances may
      * result in an exception.</p>
      */
@@ -152,45 +154,11 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
     }
 
     @Override
-    public MediaPlayerBase getMediaPlayerBase() {
-        return null;
-    }
-
-    /**
-     * Releases the resources held by this {@code MediaPlayer2} object.
-     *
-     * It is considered good practice to call this method when you're
-     * done using the MediaPlayer2. In particular, whenever an Activity
-     * of an application is paused (its onPause() method is called),
-     * or stopped (its onStop() method is called), this method should be
-     * invoked to release the MediaPlayer2 object, unless the application
-     * has a special need to keep the object around. In addition to
-     * unnecessary resources (such as memory and instances of codecs)
-     * being held, failure to call this method immediately if a
-     * MediaPlayer2 object is no longer needed may also lead to
-     * continuous battery consumption for mobile devices, and playback
-     * failure for other applications if no multiple instances of the
-     * same codec are supported on a device. Even if multiple instances
-     * of the same codec are supported, some performance degradation
-     * may be expected when unnecessary multiple instances are used
-     * at the same time.
-     *
-     * {@code close()} may be safely called after a prior {@code close()}.
-     * This class implements the Java {@code AutoCloseable} interface and
-     * may be used with try-with-resources.
-     */
-    @Override
     public void close() {
         super.close();
         release();
     }
 
-    /**
-     * Starts or resumes playback. If playback had previously been paused,
-     * playback will continue from where it was paused. If playback had
-     * been stopped, or never started before, playback will start at the
-     * beginning.
-     */
     @Override
     public Object play() {
         return addTask(new Task(CALL_COMPLETED_PLAY, false) {
@@ -204,14 +172,6 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
 
     private native void _start() throws IllegalStateException;
 
-    /**
-     * Prepares the player for playback, asynchronously.
-     *
-     * After setting the datasource and the display surface, you need to either
-     * call prepare(). For streams, you should call prepare(),
-     * which returns immediately, rather than blocking until enough data has been
-     * buffered.
-     */
     @Override
     public Object prepare() {
         return addTask(new Task(CALL_COMPLETED_PREPARE, true) {
@@ -224,9 +184,6 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
 
     public native void _prepare();
 
-    /**
-     * Pauses playback. Call play() to resume.
-     */
     @Override
     public Object pause() {
         return addTask(new Task(CALL_COMPLETED_PAUSE, false) {
@@ -241,11 +198,6 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
 
     private native void _pause() throws IllegalStateException;
 
-    /**
-     * Tries to play next data source if applicable.
-     *
-     * @throws IllegalStateException if it is called in an invalid state
-     */
     @Override
     public Object skipToNext() {
         return addTask(new Task(CALL_COMPLETED_SKIP_TO_NEXT, false) {
@@ -259,32 +211,12 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
         });
     }
 
-    /**
-     * Gets the current playback position.
-     *
-     * @return the current position in milliseconds
-     */
     @Override
     public native long getCurrentPosition();
 
-    /**
-     * Gets the duration of the file.
-     *
-     * @return the duration in milliseconds, if no duration is available
-     *         (for example, if streaming live content), -1 is returned.
-     */
     @Override
     public native long getDuration();
 
-    /**
-     * Gets the current buffered media source position received through progressive downloading.
-     * The received buffering percentage indicates how much of the content has been buffered
-     * or played. For example a buffering update of 80 percent when half the content
-     * has already been played indicates that the next 30 percent of the
-     * content to play has been buffered.
-     *
-     * @return the current buffered media source position in milliseconds
-     */
     @Override
     public long getBufferedPosition() {
         // Use cached buffered percent for now.
@@ -298,14 +230,6 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
 
     private native int native_getState();
 
-    /**
-     * Sets the audio attributes for this MediaPlayer2.
-     * See {@link AudioAttributes} for how to build and configure an instance of this class.
-     * You must call this method before {@link #prepare()} in order
-     * for the audio attributes to become effective thereafter.
-     * @param attributes a non-null set of audio attributes
-     * @throws IllegalArgumentException if the attributes are null or invalid.
-     */
     @Override
     public Object setAudioAttributes(@NonNull AudioAttributes attributes) {
         return addTask(new Task(CALL_COMPLETED_SET_AUDIO_ATTRIBUTES, false) {
@@ -326,11 +250,6 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
         return attributes;
     }
 
-    /**
-     * Sets the data source as described by a DataSourceDesc.
-     *
-     * @param dsd the descriptor of data source you want to play
-     */
     @Override
     public Object setDataSource(@NonNull DataSourceDesc dsd) {
         return addTask(new Task(CALL_COMPLETED_SET_DATA_SOURCE, false) {
@@ -351,12 +270,6 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
         });
     }
 
-    /**
-     * Sets a single data source as described by a DataSourceDesc which will be played
-     * after current data source is finished.
-     *
-     * @param dsd the descriptor of data source you want to play after current one
-     */
     @Override
     public Object setNextDataSource(@NonNull DataSourceDesc dsd) {
         return addTask(new Task(CALL_COMPLETED_SET_NEXT_DATA_SOURCE, false) {
@@ -374,11 +287,6 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
         });
     }
 
-    /**
-     * Sets a list of data sources to be played sequentially after current data source is done.
-     *
-     * @param dsds the list of data sources you want to play after current one
-     */
     @Override
     public Object setNextDataSources(@NonNull List<DataSourceDesc> dsds) {
         return addTask(new Task(CALL_COMPLETED_SET_NEXT_DATA_SOURCES, false) {
@@ -428,16 +336,11 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
         }
     }
 
-    /**
-     * Configures the player to loop on the current data source.
-     * @param loop true if the current data source is meant to loop.
-     */
     @Override
     public Object loopCurrent(boolean loop) {
         return addTask(new Task(CALL_COMPLETED_LOOP_CURRENT, false) {
             @Override
             void process() {
-                // TODO: set the looping mode, send notification
                 setLooping(loop);
             }
         });
@@ -445,56 +348,28 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
 
     private native void setLooping(boolean looping);
 
-    /**
-     * Sets the volume of the audio of the media to play, expressed as a linear multiplier
-     * on the audio samples.
-     * Note that this volume is specific to the player, and is separate from stream volume
-     * used across the platform.<br>
-     * A value of 0.0f indicates muting, a value of 1.0f is the nominal unattenuated and unamplified
-     * gain. See {@link #getMaxPlayerVolume()} for the volume range supported by this player.
-     * @param volume a value between 0.0f and {@link #getMaxPlayerVolume()}.
-     */
     @Override
     public Object setPlayerVolume(float volume) {
         return addTask(new Task(CALL_COMPLETED_SET_PLAYER_VOLUME, false) {
             @Override
             void process() {
                 mVolume = volume;
-                _setVolume(volume);
+                native_setVolume(volume);
             }
         });
     }
 
-    private native void _setVolume(float volume);
+    private native void native_setVolume(float volume);
 
-    /**
-     * Returns the current volume of this player to this player.
-     * Note that it does not take into account the associated stream volume.
-     * @return the player volume.
-     */
     @Override
     public float getPlayerVolume() {
         return mVolume;
     }
 
-    /**
-     * @return the maximum volume that can be used in {@link #setPlayerVolume(float)}.
-     */
     @Override
     public float getMaxPlayerVolume() {
         return 1.0f;
     }
-
-    private static final int NEXT_SOURCE_STATE_ERROR = -1;
-    private static final int NEXT_SOURCE_STATE_INIT = 0;
-    private static final int NEXT_SOURCE_STATE_PREPARING = 1;
-    private static final int NEXT_SOURCE_STATE_PREPARED = 2;
-
-    /*
-     * Update the MediaPlayer2Impl SurfaceTexture.
-     * Call after setting a new display surface.
-     */
-    private native void _setVideoSurface(Surface surface);
 
     /* Do not change these values (starting with INVOKE_ID) without updating
      * their counterparts in include/media/mediaplayer2.h!
@@ -504,7 +379,6 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
     private static final int INVOKE_ID_ADD_EXTERNAL_SOURCE_FD = 3;
     private static final int INVOKE_ID_SELECT_TRACK = 4;
     private static final int INVOKE_ID_DESELECT_TRACK = 5;
-    private static final int INVOKE_ID_SET_VIDEO_SCALE_MODE = 6;
     private static final int INVOKE_ID_GET_SELECTED_TRACK = 7;
 
     /**
@@ -518,7 +392,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
      * native player.
      */
     private PlayerMessage invoke(PlayerMessage msg) {
-        byte[] ret = _invoke(msg.toByteArray());
+        byte[] ret = native_invoke(msg.toByteArray());
         if (ret == null) {
             return null;
         }
@@ -529,7 +403,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
         }
     }
 
-    private native byte[] _invoke(byte[] request);
+    private native byte[] native_invoke(byte[] request);
 
     @Override
     public Object notifyWhenCommandLabelReached(Object label) {
@@ -559,7 +433,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                 } else {
                     surface = null;
                 }
-                _setVideoSurface(surface);
+                native_setVideoSurface(surface);
                 updateSurfaceScreenOn();
             }
         });
@@ -574,49 +448,13 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                     Log.w(TAG, "setScreenOnWhilePlaying(true) is ineffective for Surface");
                 }
                 mSurfaceHolder = null;
-                _setVideoSurface(surface);
+                native_setVideoSurface(surface);
                 updateSurfaceScreenOn();
             }
         });
     }
 
-    /**
-     * Sets video scaling mode. To make the target video scaling mode
-     * effective during playback, this method must be called after
-     * data source is set. If not called, the default video
-     * scaling mode is {@link #VIDEO_SCALING_MODE_SCALE_TO_FIT}.
-     *
-     * <p> The supported video scaling modes are:
-     * <ul>
-     * <li> {@link #VIDEO_SCALING_MODE_SCALE_TO_FIT}
-     * <li> {@link #VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING}
-     * </ul>
-     *
-     * @param mode target video scaling mode. Must be one of the supported
-     * video scaling modes; otherwise, IllegalArgumentException will be thrown.
-     *
-     * @see MediaPlayer2#VIDEO_SCALING_MODE_SCALE_TO_FIT
-     * @see MediaPlayer2#VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING
-     * @hide
-     */
-    @Override
-    public Object setVideoScalingMode(int mode) {
-        return addTask(new Task(CALL_COMPLETED_SET_VIDEO_SCALING_MODE, false) {
-            @Override
-            void process() {
-                if (!isVideoScalingModeSupported(mode)) {
-                    final String msg = "Scaling mode " + mode + " is not supported";
-                    throw new IllegalArgumentException(msg);
-                }
-                PlayerMessage request = PlayerMessage.newBuilder()
-                        .addValues(Value.newBuilder()
-                                .setInt32Value(INVOKE_ID_SET_VIDEO_SCALE_MODE))
-                        .addValues(Value.newBuilder().setInt32Value(mode))
-                        .build();
-                invoke(request);
-            }
-        });
-    }
+    private native void native_setVideoSurface(Surface surface);
 
     @Override
     public boolean cancelCommand(Object token) {
@@ -629,26 +467,6 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
     public void clearPendingCommands() {
         synchronized (mTaskLock) {
             mPendingTasks.clear();
-        }
-    }
-
-    private Object addTask(Task task) {
-        synchronized (mTaskLock) {
-            mPendingTasks.add(task);
-            processPendingTask_l();
-        }
-        return task;
-    }
-
-    @GuardedBy("mTaskLock")
-    private void processPendingTask_l() {
-        if (mCurrentTask != null) {
-            return;
-        }
-        if (!mPendingTasks.isEmpty()) {
-            Task task = mPendingTasks.remove(0);
-            mCurrentTask = task;
-            mTaskHandler.post(task);
         }
     }
 
@@ -875,9 +693,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
             boolean isCurrent, long srcId, Media2DataSource dataSource,
             long startPos, long endPos);
 
-    /**
-     * @return true if there is a next data source, false otherwise.
-     */
+    // return true if there is a next data source, false otherwise.
     // This function should be always called on |mHandlerThread|.
     private boolean prepareNextDataSource() {
         if (Looper.myLooper() != mHandlerThread.getLooper()) {
@@ -975,30 +791,11 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
 
     private native void nativePlayNextDataSource(long srcId);
 
-
-    private int getAudioStreamType() {
-        if (mStreamType == AudioManager.USE_DEFAULT_STREAM_TYPE) {
-            mStreamType = _getAudioStreamType();
-        }
-        return mStreamType;
-    }
-
-    private native int _getAudioStreamType() throws IllegalStateException;
-
-
     //--------------------------------------------------------------------------
     // Explicit Routing
     //--------------------
     private AudioDeviceInfo mPreferredDevice = null;
 
-    /**
-     * Specifies an audio device (via an {@link AudioDeviceInfo} object) to route
-     * the output from this MediaPlayer2.
-     * @param deviceInfo The {@link AudioDeviceInfo} specifying the audio sink or source.
-     *  If deviceInfo is null, default routing is restored.
-     * @return true if succesful, false if the specified {@link AudioDeviceInfo} is non-null and
-     * does not correspond to a valid audio device.
-     */
     @Override
     public boolean setPreferredDevice(AudioDeviceInfo deviceInfo) {
         if (deviceInfo != null && !deviceInfo.isSink()) {
@@ -1014,10 +811,6 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
         return status;
     }
 
-    /**
-     * Returns the selected output specified by {@link #setPreferredDevice}. Note that this
-     * is not guaranteed to correspond to the actual device being used for playback.
-     */
     @Override
     public AudioDeviceInfo getPreferredDevice() {
         synchronized (this) {
@@ -1025,12 +818,6 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
         }
     }
 
-    /**
-     * Returns an {@link AudioDeviceInfo} identifying the current routing of this MediaPlayer2
-     * Note: The query is only valid if the MediaPlayer2 is currently playing.
-     * If the player is not playing, the returned device can be null or correspond to previously
-     * selected device when the player was last active.
-     */
     @Override
     public AudioDeviceInfo getRoutedDevice() {
         int deviceId = native_getRoutedDeviceId();
@@ -1047,9 +834,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
         return null;
     }
 
-    /*
-     * Call BEFORE adding a routing callback handler or AFTER removing a routing callback handler.
-     */
+    // Call BEFORE adding a routing callback handler or AFTER removing a routing callback handler.
     @GuardedBy("mRoutingChangeListeners")
     private void enableNativeRoutingCallbacksLocked(boolean enabled) {
         if (mRoutingChangeListeners.size() == 0) {
@@ -1057,23 +842,12 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
         }
     }
 
-    /**
-     * The list of AudioRouting.OnRoutingChangedListener interfaces added (with
-     * {@link #addOnRoutingChangedListener(android.media.AudioRouting.OnRoutingChangedListener, Handler)}
-     * by an app to receive (re)routing notifications.
-     */
+    // The list of AudioRouting.OnRoutingChangedListener interfaces added with
+    // addOnRoutingChangedListener by an app to receive (re)routing notifications.
     @GuardedBy("mRoutingChangeListeners")
     private ArrayMap<AudioRouting.OnRoutingChangedListener,
             NativeRoutingEventHandlerDelegate> mRoutingChangeListeners = new ArrayMap<>();
 
-    /**
-     * Adds an {@link AudioRouting.OnRoutingChangedListener} to receive notifications of routing
-     * changes on this MediaPlayer2.
-     * @param listener The {@link AudioRouting.OnRoutingChangedListener} interface to receive
-     * notifications of rerouting events.
-     * @param handler  Specifies the {@link Handler} object for the thread on which to execute
-     * the callback. If <code>null</code>, the handler on the main looper will be used.
-     */
     @Override
     public void addOnRoutingChangedListener(AudioRouting.OnRoutingChangedListener listener,
             Handler handler) {
@@ -1087,12 +861,6 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
         }
     }
 
-    /**
-     * Removes an {@link AudioRouting.OnRoutingChangedListener} which has been previously added
-     * to receive rerouting notifications.
-     * @param listener The previously added {@link AudioRouting.OnRoutingChangedListener} interface
-     * to remove.
-     */
     @Override
     public void removeOnRoutingChangedListener(AudioRouting.OnRoutingChangedListener listener) {
         synchronized (mRoutingChangeListeners) {
@@ -1107,70 +875,59 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
     private native final int native_getRoutedDeviceId();
     private native final void native_enableDeviceCallback(boolean enabled);
 
-    /**
-     * Set the low-level power management behavior for this MediaPlayer2.  This
-     * can be used when the MediaPlayer2 is not playing through a SurfaceHolder
-     * set with {@link #setDisplay(SurfaceHolder)} and thus can use the
-     * high-level {@link #setScreenOnWhilePlaying(boolean)} feature.
-     *
-     * <p>This function has the MediaPlayer2 access the low-level power manager
-     * service to control the device's power usage while playing is occurring.
-     * The parameter is a combination of {@link android.os.PowerManager} wake flags.
-     * Use of this method requires {@link android.Manifest.permission#WAKE_LOCK}
-     * permission.
-     * By default, no attempt is made to keep the device awake during playback.
-     *
-     * @param context the Context to use
-     * @param mode    the power/wake mode to set
-     * @see android.os.PowerManager
-     * @hide
-     */
     @Override
-    public void setWakeMode(Context context, int mode) {
-        boolean washeld = false;
+    public Object setWakeMode(Context context, int mode) {
+        return addTask(new Task(CALL_COMPLETED_SET_WAKE_MODE, false) {
+            @Override
+            void process() {
+                boolean washeld = false;
 
-        /* Disable persistant wakelocks in media player based on property */
-        if (SystemProperties.getBoolean("audio.offload.ignore_setawake", false) == true) {
-            Log.w(TAG, "IGNORING setWakeMode " + mode);
-            return;
-        }
+                if (mWakeLock != null) {
+                    if (mWakeLock.isHeld()) {
+                        washeld = true;
+                        mWakeLock.release();
+                    }
+                    mWakeLock = null;
+                }
 
-        if (mWakeLock != null) {
-            if (mWakeLock.isHeld()) {
-                washeld = true;
-                mWakeLock.release();
+                PowerManager pm = (PowerManager) context.getSystemService(Context.POWER_SERVICE);
+                ActivityManager am =
+                        (ActivityManager) context.getSystemService(Context.ACTIVITY_SERVICE);
+                List<RunningAppProcessInfo> runningAppsProcInfo = am.getRunningAppProcesses();
+                int pid = android.os.Process.myPid();
+                String name = "pid " + String.valueOf(pid);
+                if (runningAppsProcInfo != null) {
+                    for (RunningAppProcessInfo procInfo : runningAppsProcInfo) {
+                        if (procInfo.pid == pid) {
+                            name = procInfo.processName;
+                            break;
+                        }
+                    }
+                }
+                mWakeLock = pm.newWakeLock(mode | PowerManager.ON_AFTER_RELEASE, name);
+                mWakeLock.setReferenceCounted(false);
+                if (washeld) {
+                    mWakeLock.acquire();
+                }
             }
-            mWakeLock = null;
-        }
-
-        PowerManager pm = (PowerManager)context.getSystemService(Context.POWER_SERVICE);
-        mWakeLock = pm.newWakeLock(mode|PowerManager.ON_AFTER_RELEASE, MediaPlayer2Impl.class.getName());
-        mWakeLock.setReferenceCounted(false);
-        if (washeld) {
-            mWakeLock.acquire();
-        }
+        });
     }
 
-    /**
-     * Control whether we should use the attached SurfaceHolder to keep the
-     * screen on while video playback is occurring.  This is the preferred
-     * method over {@link #setWakeMode} where possible, since it doesn't
-     * require that the application have permission for low-level wake lock
-     * access.
-     *
-     * @param screenOn Supply true to keep the screen on, false to allow it
-     * to turn off.
-     * @hide
-     */
     @Override
-    public void setScreenOnWhilePlaying(boolean screenOn) {
-        if (mScreenOnWhilePlaying != screenOn) {
-            if (screenOn && mSurfaceHolder == null) {
-                Log.w(TAG, "setScreenOnWhilePlaying(true) is ineffective without a SurfaceHolder");
+    public Object setScreenOnWhilePlaying(boolean screenOn) {
+        return addTask(new Task(CALL_COMPLETED_SET_SCREEN_ON_WHILE_PLAYING, false) {
+            @Override
+            void process() {
+                if (mScreenOnWhilePlaying != screenOn) {
+                    if (screenOn && mSurfaceHolder == null) {
+                        Log.w(TAG, "setScreenOnWhilePlaying(true) is ineffective"
+                                + " without a SurfaceHolder");
+                    }
+                    mScreenOnWhilePlaying = screenOn;
+                    updateSurfaceScreenOn();
+                }
             }
-            mScreenOnWhilePlaying = screenOn;
-            updateSurfaceScreenOn();
-        }
+        });
     }
 
     private void stayAwake(boolean awake) {
@@ -1191,42 +948,12 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
         }
     }
 
-    /**
-     * Returns the width of the video.
-     *
-     * @return the width of the video, or 0 if there is no video,
-     * no display surface was set, or the width has not been determined
-     * yet. The {@code EventCallback} can be registered via
-     * {@link #setEventCallback(Executor, EventCallback)} to provide a
-     * notification {@code EventCallback.onVideoSizeChanged} when the width
-     * is available.
-     */
     @Override
     public native int getVideoWidth();
 
-    /**
-     * Returns the height of the video.
-     *
-     * @return the height of the video, or 0 if there is no video,
-     * no display surface was set, or the height has not been determined
-     * yet. The {@code EventCallback} can be registered via
-     * {@link #setEventCallback(Executor, EventCallback)} to provide a
-     * notification {@code EventCallback.onVideoSizeChanged} when the height
-     * is available.
-     */
     @Override
     public native int getVideoHeight();
 
-    /**
-     * Return Metrics data about the current player.
-     *
-     * @return a {@link PersistableBundle} containing the set of attributes and values
-     * available for the media being handled by this instance of MediaPlayer2
-     * The attributes are descibed in {@link MetricsConstants}.
-     *
-     *  Additional vendor-specific fields may also be present in
-     *  the return value.
-     */
     @Override
     public PersistableBundle getMetrics() {
         PersistableBundle bundle = native_getMetrics();
@@ -1235,27 +962,9 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
 
     private native PersistableBundle native_getMetrics();
 
-    /**
-     * Checks whether the MediaPlayer2 is playing.
-     *
-     * @return true if currently playing, false otherwise
-     * @throws IllegalStateException if the internal player engine has not been
-     * initialized or has been released.
-     * @hide
-     */
     @Override
     public native boolean isPlaying();
 
-    /**
-     * Gets the current buffering management params used by the source component.
-     * Calling it only after {@code setDataSource} has been called.
-     * Each type of data source might have different set of default params.
-     *
-     * @return the current buffering management params used by the source component.
-     * @throws IllegalStateException if the internal player engine has not been
-     * initialized, or {@code setDataSource} has not been called.
-     * @hide
-     */
     @Override
     @NonNull
     public native BufferingParams getBufferingParams();
@@ -3388,13 +3097,6 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
 
     // Modular DRM end
 
-    /*
-     * Test whether a given video scaling mode is supported.
-     */
-    private boolean isVideoScalingModeSupported(int mode) {
-        return (mode == VIDEO_SCALING_MODE_SCALE_TO_FIT ||
-                mode == VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING);
-    }
 
     private static class TimedTextUtil {
         // These keys must be in sync with the keys in TextDescription2.h
@@ -3447,6 +3149,26 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                 }
             }
             return new TimedText(textChars, textBounds);
+        }
+    }
+
+    private Object addTask(Task task) {
+        synchronized (mTaskLock) {
+            mPendingTasks.add(task);
+            processPendingTask_l();
+        }
+        return task;
+    }
+
+    @GuardedBy("mTaskLock")
+    private void processPendingTask_l() {
+        if (mCurrentTask != null) {
+            return;
+        }
+        if (!mPendingTasks.isEmpty()) {
+            Task task = mPendingTasks.remove(0);
+            mCurrentTask = task;
+            mTaskHandler.post(task);
         }
     }
 
