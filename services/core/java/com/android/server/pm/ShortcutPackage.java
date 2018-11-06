@@ -111,6 +111,11 @@ class ShortcutPackage extends ShortcutPackageItem {
     final private ArrayMap<String, ShortcutInfo> mShortcuts = new ArrayMap<>();
 
     /**
+     * All the share targets from the package
+     */
+    private final ArrayList<ShareTargetInfo> mShareTargets = new ArrayList<>(0);
+
+    /**
      * # of times the package has called rate-limited APIs.
      */
     private int mApiCallCount;
@@ -739,15 +744,16 @@ class ShortcutPackage extends ShortcutPackageItem {
         List<ShortcutInfo> newManifestShortcutList = null;
         try {
             newManifestShortcutList = ShortcutParser.parseShortcuts(mShortcutUser.mService,
-                    getPackageName(), getPackageUserId());
+                    getPackageName(), getPackageUserId(), mShareTargets);
         } catch (IOException|XmlPullParserException e) {
             Slog.e(TAG, "Failed to load shortcuts from AndroidManifest.xml.", e);
         }
         final int manifestShortcutSize = newManifestShortcutList == null ? 0
                 : newManifestShortcutList.size();
         if (ShortcutService.DEBUG) {
-            Slog.d(TAG, String.format("Package %s has %d manifest shortcut(s)",
-                    getPackageName(), manifestShortcutSize));
+            Slog.d(TAG,
+                    String.format("Package %s has %d manifest shortcut(s), and %d share target(s)",
+                            getPackageName(), manifestShortcutSize, mShareTargets.size()));
         }
         if (isNewApp && (manifestShortcutSize == 0)) {
             // If it's a new app, and it doesn't have manifest shortcuts, then nothing to do.
@@ -1655,6 +1661,11 @@ class ShortcutPackage extends ShortcutPackageItem {
     @VisibleForTesting
     List<ShortcutInfo> getAllShortcutsForTest() {
         return new ArrayList<>(mShortcuts.values());
+    }
+
+    @VisibleForTesting
+    List<ShareTargetInfo> getAllShareTargetsForTest() {
+        return new ArrayList<>(mShareTargets);
     }
 
     @Override
