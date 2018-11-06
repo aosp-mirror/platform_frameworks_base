@@ -231,7 +231,7 @@
     <string name="private_dns_mode_off" msgid="8236575187318721684">"Ανενεργή"</string>
     <string name="private_dns_mode_opportunistic" msgid="8314986739896927399">"Αυτόματα"</string>
     <string name="private_dns_mode_provider" msgid="8354935160639360804">"Όνομα κεντρικού υπολογιστή παρόχου DNS"</string>
-    <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Εισαγάγετε το όνομα κεντρικού υπολογιστή του παρόχου DNS"</string>
+    <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Όνομα κεντρικού υπολογιστή του παρόχου DNS"</string>
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"Δεν ήταν δυνατή η σύνδεση"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Εμφάνιση επιλογών για πιστοποίηση ασύρματης οθόνης"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Αύξηση επιπέδου καταγ. Wi-Fi, εμφάνιση ανά SSID RSSI στο εργαλείο επιλογής Wi-Fi"</string>
