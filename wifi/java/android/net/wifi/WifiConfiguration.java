@@ -47,7 +47,11 @@ import java.util.HashMap;
 /**
  * A class representing a configured Wi-Fi network, including the
  * security configuration.
+ *
+ * @deprecated Use {@link WifiNetworkConfigBuilder} to create {@link NetworkSpecifier} and
+ * {@link WifiNetworkSuggestion}. This will become a system use only object in the future.
  */
+@Deprecated
 public class WifiConfiguration implements Parcelable {
     private static final String TAG = "WifiConfiguration";
     /**

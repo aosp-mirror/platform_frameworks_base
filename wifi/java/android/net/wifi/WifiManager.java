@@ -25,19 +25,17 @@ import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.UnsupportedAppUsage;
+import android.app.PendingIntent;
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
 import android.net.ConnectivityManager;
 import android.net.DhcpInfo;
 import android.net.Network;
-import android.net.NetworkCapabilities;
-import android.net.NetworkRequest;
 import android.net.wifi.hotspot2.IProvisioningCallback;
 import android.net.wifi.hotspot2.OsuProvider;
 import android.net.wifi.hotspot2.PasspointConfiguration;
 import android.net.wifi.hotspot2.ProvisioningCallback;
 import android.os.Binder;
-import android.os.Build;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
@@ -52,7 +50,6 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.AsyncChannel;
 import com.android.internal.util.Protocol;
-import com.android.server.net.NetworkPinner;
 
 import dalvik.system.CloseGuard;
 
@@ -1035,7 +1032,17 @@ public class WifiManager {
      * </ul>
      * @return a list of network configurations in the form of a list
      * of {@link WifiConfiguration} objects.
+     *
+     * @deprecated
+     * a) See {@link WifiNetworkConfigBuilder#buildNetworkSpecifier()} for new
+     * mechanism to trigger connection to a Wi-Fi network.
+     * b) See {@link #addNetworkSuggestions(List, PendingIntent)},
+     * {@link #removeNetworkSuggestions(List)} for new API to add Wi-Fi networks for consideration
+     * when auto-connecting to wifi.
+     * <b>Compatibility Note:</b> For applications targeting
+     * {@link android.os.Build.VERSION_CODES#Q} or above, this API will always return an empty list.
      */
+    @Deprecated
     public List<WifiConfiguration> getConfiguredNetworks() {
         try {
             ParceledListSlice<WifiConfiguration> parceledList =
@@ -1135,7 +1142,17 @@ public class WifiManager {
      * @return the ID of the newly created network description. This is used in
      *         other operations to specified the network to be acted upon.
      *         Returns {@code -1} on failure.
+     *
+     * @deprecated
+     * a) See {@link WifiNetworkConfigBuilder#buildNetworkSpecifier()} for new
+     * mechanism to trigger connection to a Wi-Fi network.
+     * b) See {@link #addNetworkSuggestions(List, PendingIntent)},
+     * {@link #removeNetworkSuggestions(List)} for new API to add Wi-Fi networks for consideration
+     * when auto-connecting to wifi.
+     * <b>Compatibility Note:</b> For applications targeting
+     * {@link android.os.Build.VERSION_CODES#Q} or above, this API will always return {@code -1}.
      */
+    @Deprecated
     public int addNetwork(WifiConfiguration config) {
         if (config == null) {
             return -1;
@@ -1160,7 +1177,17 @@ public class WifiManager {
      *         Returns {@code -1} on failure, including when the {@code networkId}
      *         field of the {@code WifiConfiguration} does not refer to an
      *         existing network.
+     *
+     * @deprecated
+     * a) See {@link WifiNetworkConfigBuilder#buildNetworkSpecifier()} for new
+     * mechanism to trigger connection to a Wi-Fi network.
+     * b) See {@link #addNetworkSuggestions(List, PendingIntent)},
+     * {@link #removeNetworkSuggestions(List)} for new API to add Wi-Fi networks for consideration
+     * when auto-connecting to wifi.
+     * <b>Compatibility Note:</b> For applications targeting
+     * {@link android.os.Build.VERSION_CODES#Q} or above, this API will always return {@code -1}.
      */
+    @Deprecated
     public int updateNetwork(WifiConfiguration config) {
         if (config == null || config.networkId < 0) {
             return -1;
@@ -1182,6 +1209,302 @@ public class WifiManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
+    }
+
+    /**
+     * Interface for indicating user selection from the list of networks presented in the
+     * {@link NetworkRequestMatchCallback#onMatch(List)}.
+     *
+     * The platform will implement this callback and pass it along with the
+     * {@link NetworkRequestMatchCallback#onUserSelectionCallbackRegistration(
+     * NetworkRequestUserSelectionCallback)}. The UI component handling
+     * {@link NetworkRequestMatchCallback} will invoke {@link #select(WifiConfiguration)} or
+     * {@link #reject()} to return the user's selection back to the platform via this callback.
+     * @hide
+     */
+    @SystemApi
+    public interface NetworkRequestUserSelectionCallback {
+        /**
+         * User selected this network to connect to.
+         * @param wifiConfiguration WifiConfiguration object corresponding to the network
+         *                          user selected.
+         */
+        void select(@NonNull WifiConfiguration wifiConfiguration);
+
+        /**
+         * User rejected the app's request.
+         */
+        void reject();
+    }
+
+    /**
+     * Interface for network request callback. Should be implemented by applications and passed when
+     * calling {@link #registerNetworkRequestMatchCallback(NetworkRequestMatchCallback, Handler)}.
+     *
+     * This is meant to be implemented by a UI component to present the user with a list of networks
+     * matching the app's request. The user is allowed to pick one of these networks to connect to
+     * or reject the request by the app.
+     * @hide
+     */
+    @SystemApi
+    public interface NetworkRequestMatchCallback {
+        /**
+         * Invoked to register a callback to be invoked to convey user selection. The callback
+         * object paased in this method is to be invoked by the UI component after the service sends
+         * a list of matching scan networks using {@link #onMatch(List)} and user picks a network
+         * from that list.
+         *
+         * @param userSelectionCallback Callback object to send back the user selection.
+         */
+        void onUserSelectionCallbackRegistration(
+                @NonNull NetworkRequestUserSelectionCallback userSelectionCallback);
+
+        /**
+         * Invoked when a network request initiated by an app matches some networks in scan results.
+         * This may be invoked multiple times for a single network request as the platform finds new
+         * networks in scan results.
+         *
+         * @param wifiConfigurations List of {@link WifiConfiguration} objects corresponding to the
+         *                           networks matching the request.
+         */
+        void onMatch(@NonNull List<WifiConfiguration> wifiConfigurations);
+
+        /**
+         * Invoked on a successful connection with the network that the user selected
+         * via {@link NetworkRequestUserSelectionCallback}.
+         *
+         * @param wifiConfiguration WifiConfiguration object corresponding to the network that the
+         *                          user selected.
+         */
+        void onUserSelectionConnectSuccess(@NonNull WifiConfiguration wifiConfiguration);
+
+        /**
+         * Invoked on failure to establish connection with the network that the user selected
+         * via {@link NetworkRequestUserSelectionCallback}.
+         *
+         * @param wifiConfiguration WifiConfiguration object corresponding to the network
+         *                          user selected.
+         */
+        void onUserSelectionConnectFailure(@NonNull WifiConfiguration wifiConfiguration);
+    }
+
+    /**
+     * Callback proxy for NetworkRequestUserSelectionCallback objects.
+     * @hide
+     */
+    private class NetworkRequestUserSelectionCallbackProxy implements
+            NetworkRequestUserSelectionCallback {
+        private final INetworkRequestUserSelectionCallback mCallback;
+
+        NetworkRequestUserSelectionCallbackProxy(
+                INetworkRequestUserSelectionCallback callback) {
+            mCallback = callback;
+        }
+
+        @Override
+        public void select(@NonNull WifiConfiguration wifiConfiguration) {
+            if (mVerboseLoggingEnabled) {
+                Log.v(TAG, "NetworkRequestUserSelectionCallbackProxy: select "
+                        + "wificonfiguration: " + wifiConfiguration);
+            }
+            try {
+                mCallback.select(wifiConfiguration);
+            } catch (RemoteException e) {
+                Log.e(TAG, "Failed to invoke onSelected", e);
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        @Override
+        public void reject() {
+            if (mVerboseLoggingEnabled) {
+                Log.v(TAG, "NetworkRequestUserSelectionCallbackProxy: reject");
+            }
+            try {
+                mCallback.reject();
+            } catch (RemoteException e) {
+                Log.e(TAG, "Failed to invoke onRejected", e);
+                throw e.rethrowFromSystemServer();
+            }
+        }
+    }
+
+    /**
+     * Callback proxy for NetworkRequestMatchCallback objects.
+     * @hide
+     */
+    private class NetworkRequestMatchCallbackProxy extends INetworkRequestMatchCallback.Stub {
+        private final Handler mHandler;
+        private final NetworkRequestMatchCallback mCallback;
+
+        NetworkRequestMatchCallbackProxy(Looper looper, NetworkRequestMatchCallback callback) {
+            mHandler = new Handler(looper);
+            mCallback = callback;
+        }
+
+        @Override
+        public void onUserSelectionCallbackRegistration(
+                INetworkRequestUserSelectionCallback userSelectionCallback) {
+            if (mVerboseLoggingEnabled) {
+                Log.v(TAG, "NetworkRequestMatchCallbackProxy: "
+                        + "onUserSelectionCallbackRegistration callback: " + userSelectionCallback);
+            }
+            mHandler.post(() -> {
+                mCallback.onUserSelectionCallbackRegistration(
+                        new NetworkRequestUserSelectionCallbackProxy(userSelectionCallback));
+            });
+        }
+
+        @Override
+        public void onMatch(List<WifiConfiguration> wifiConfigurations) {
+            if (mVerboseLoggingEnabled) {
+                Log.v(TAG, "NetworkRequestMatchCallbackProxy: onMatch wificonfigurations: "
+                        + wifiConfigurations);
+            }
+            mHandler.post(() -> {
+                mCallback.onMatch(wifiConfigurations);
+            });
+        }
+
+        @Override
+        public void onUserSelectionConnectSuccess(WifiConfiguration wifiConfiguration) {
+            if (mVerboseLoggingEnabled) {
+                Log.v(TAG, "NetworkRequestMatchCallbackProxy: onUserSelectionConnectSuccess "
+                        + " wificonfiguration: " + wifiConfiguration);
+            }
+            mHandler.post(() -> {
+                mCallback.onUserSelectionConnectSuccess(wifiConfiguration);
+            });
+        }
+
+        @Override
+        public void onUserSelectionConnectFailure(WifiConfiguration wifiConfiguration) {
+            if (mVerboseLoggingEnabled) {
+                Log.v(TAG, "NetworkRequestMatchCallbackProxy: onUserSelectionConnectFailure"
+                        + " wificonfiguration: " + wifiConfiguration);
+            }
+            mHandler.post(() -> {
+                mCallback.onUserSelectionConnectFailure(wifiConfiguration);
+            });
+        }
+    }
+
+    /**
+     * Registers a callback for NetworkRequest matches. See {@link NetworkRequestMatchCallback}.
+     * Caller can unregister a previously registered callback using
+     * {@link #unregisterNetworkRequestMatchCallback(NetworkRequestMatchCallback)}
+     * <p>
+     * Applications should have the
+     * {@link android.Manifest.permission#NETWORK_SETTINGS} permission. Callers
+     * without the permission will trigger a {@link java.lang.SecurityException}.
+     * <p>
+     *
+     * @param callback Callback for network match events
+     * @param handler  The Handler on whose thread to execute the callbacks of the {@code callback}
+     *                 object. If null, then the application's main thread will be used.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
+    public void registerNetworkRequestMatchCallback(@NonNull NetworkRequestMatchCallback callback,
+                                                    @Nullable Handler handler) {
+        if (callback == null) throw new IllegalArgumentException("callback cannot be null");
+        Log.v(TAG, "registerNetworkRequestMatchCallback: callback=" + callback
+                + ", handler=" + handler);
+
+        Looper looper = (handler == null) ? mContext.getMainLooper() : handler.getLooper();
+        Binder binder = new Binder();
+        try {
+            mService.registerNetworkRequestMatchCallback(
+                    binder, new NetworkRequestMatchCallbackProxy(looper, callback),
+                    callback.hashCode());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Unregisters a callback for NetworkRequest matches. See {@link NetworkRequestMatchCallback}.
+     * <p>
+     * Applications should have the
+     * {@link android.Manifest.permission#NETWORK_SETTINGS} permission. Callers
+     * without the permission will trigger a {@link java.lang.SecurityException}.
+     * <p>
+     *
+     * @param callback Callback for network match events
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
+    public void unregisterNetworkRequestMatchCallback(
+            @NonNull NetworkRequestMatchCallback callback) {
+        if (callback == null) throw new IllegalArgumentException("callback cannot be null");
+        Log.v(TAG, "unregisterNetworkRequestMatchCallback: callback=" + callback);
+
+        try {
+            mService.unregisterNetworkRequestMatchCallback(callback.hashCode());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Provide a list of network suggestions to the device. See {@link WifiNetworkSuggestion}
+     * for a detailed explanation of the parameters.
+     *<p>
+     * When the device decides to connect to one of the provided network suggestions, platform fires
+     * the associated {@code pendingIntent} if
+     * {@link WifiNetworkSuggestion#isAppInteractionRequired} is {@code true} and the
+     * provided {@code pendingIntent} is non-null.
+     *<p>
+     * Registration of a non-null pending intent {@code pendingIntent} requires
+     * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION ACCESS_COARSE_LOCATION} or
+     * {@link android.Manifest.permission#ACCESS_FINE_LOCATION ACCESS_FINE_LOCATION} permission.
+     *<p>
+     * NOTE:
+     * <li> These networks are just a suggestion to the platform. The platform will ultimately
+     * decide on which network the device connects to. </li>
+     * <li> When an app is uninstalled, all its suggested networks are discarded. If the device is
+     * currently connected to a suggested network which is being removed then the device will
+     * disconnect from that network.</li>
+     * <li> No in-place modification of existing suggestions are allowed. Apps are expected to
+     * remove suggestions using {@link #removeNetworkSuggestions(List)} and then add the modified
+     * suggestion back using this API.</li>
+     *
+     * @param networkSuggestions List of network suggestions provided by the app.
+     * @param pendingIntent Pending intent to be fired post connection for networks. These will be
+     *                      fired only when connecting to a network which has the
+     *                      {@link WifiNetworkSuggestion#isAppInteractionRequired} flag set.
+     *                      Pending intent must hold a foreground service, else will be rejected.
+     *                      (i.e {@link PendingIntent#isForegroundService()} should return true)
+     * @return true on success, false if any of the suggestions match (See
+     * {@link WifiNetworkSuggestion#equals(Object)} any previously provided suggestions by the app.
+     * @throws {@link SecurityException} if the caller is missing required permissions.
+     */
+    public boolean addNetworkSuggestions(
+            @NonNull List<WifiNetworkSuggestion> networkSuggestions,
+            @Nullable PendingIntent pendingIntent) {
+        // TODO(b/115504887): Implementation
+        return false;
+    }
+
+
+    /**
+     * Remove a subset of or all of networks from previously provided suggestions by the app to the
+     * device.
+     * See {@link WifiNetworkSuggestion} for a detailed explanation of the parameters.
+     * See {@link WifiNetworkSuggestion#equals(Object)} for the equivalence evaluation used.
+     *
+     * @param networkSuggestions List of network suggestions to be removed. Pass an empty list
+     *                           to remove all the previous suggestions provided by the app.
+     * @return true on success, false if any of the suggestions do not match any suggestions
+     * previously provided by the app. Any matching suggestions are removed from the device and
+     * will not be considered for any further connection attempts.
+     */
+    public boolean removeNetworkSuggestions(
+            @NonNull List<WifiNetworkSuggestion> networkSuggestions) {
+        // TODO(b/115504887): Implementation
+        return false;
     }
 
     /**
@@ -1299,7 +1622,17 @@ public class WifiManager {
      * @param netId the ID of the network as returned by {@link #addNetwork} or {@link
      *        #getConfiguredNetworks}.
      * @return {@code true} if the operation succeeded
+     *
+     * @deprecated
+     * a) See {@link WifiNetworkConfigBuilder#buildNetworkSpecifier()} for new
+     * mechanism to trigger connection to a Wi-Fi network.
+     * b) See {@link #addNetworkSuggestions(List, PendingIntent)},
+     * {@link #removeNetworkSuggestions(List)} for new API to add Wi-Fi networks for consideration
+     * when auto-connecting to wifi.
+     * <b>Compatibility Note:</b> For applications targeting
+     * {@link android.os.Build.VERSION_CODES#Q} or above, this API will always return false.
      */
+    @Deprecated
     public boolean removeNetwork(int netId) {
         try {
             return mService.removeNetwork(netId, mContext.getOpPackageName());
@@ -1314,10 +1647,8 @@ public class WifiManager {
      * network is initiated. This may result in the asynchronous delivery
      * of state change events.
      * <p>
-     * <b>Note:</b> If an application's target SDK version is
-     * {@link android.os.Build.VERSION_CODES#LOLLIPOP} or newer, network
-     * communication may not use Wi-Fi even if Wi-Fi is connected; traffic may
-     * instead be sent through another network, such as cellular data,
+     * <b>Note:</b> Network communication may not use Wi-Fi even if Wi-Fi is connected;
+     * traffic may instead be sent through another network, such as cellular data,
      * Bluetooth tethering, or Ethernet. For example, traffic will never use a
      * Wi-Fi network that does not provide Internet access (e.g. a wireless
      * printer), if another network that does offer Internet access (e.g.
@@ -1335,29 +1666,24 @@ public class WifiManager {
      * @param attemptConnect The way to select a particular network to connect to is specify
      *        {@code true} for this parameter.
      * @return {@code true} if the operation succeeded
+     *
+     * @deprecated
+     * a) See {@link WifiNetworkConfigBuilder#buildNetworkSpecifier()} for new
+     * mechanism to trigger connection to a Wi-Fi network.
+     * b) See {@link #addNetworkSuggestions(List, PendingIntent)},
+     * {@link #removeNetworkSuggestions(List)} for new API to add Wi-Fi networks for consideration
+     * when auto-connecting to wifi.
+     * <b>Compatibility Note:</b> For applications targeting
+     * {@link android.os.Build.VERSION_CODES#Q} or above, this API will always return false.
      */
+    @Deprecated
     public boolean enableNetwork(int netId, boolean attemptConnect) {
-        final boolean pin = attemptConnect && mTargetSdkVersion < Build.VERSION_CODES.LOLLIPOP;
-        if (pin) {
-            NetworkRequest request = new NetworkRequest.Builder()
-                    .clearCapabilities()
-                    .addCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN)
-                    .addTransportType(NetworkCapabilities.TRANSPORT_WIFI)
-                    .build();
-            NetworkPinner.pin(mContext, request);
-        }
-
         boolean success;
         try {
             success = mService.enableNetwork(netId, attemptConnect, mContext.getOpPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
-
-        if (pin && !success) {
-            NetworkPinner.unpin();
-        }
-
         return success;
     }
 
@@ -1372,7 +1698,17 @@ public class WifiManager {
      * @param netId the ID of the network as returned by {@link #addNetwork} or {@link
      *        #getConfiguredNetworks}.
      * @return {@code true} if the operation succeeded
+     *
+     * @deprecated
+     * a) See {@link WifiNetworkConfigBuilder#buildNetworkSpecifier()} for new
+     * mechanism to trigger connection to a Wi-Fi network.
+     * b) See {@link #addNetworkSuggestions(List, PendingIntent)},
+     * {@link #removeNetworkSuggestions(List)} for new API to add Wi-Fi networks for consideration
+     * when auto-connecting to wifi.
+     * <b>Compatibility Note:</b> For applications targeting
+     * {@link android.os.Build.VERSION_CODES#Q} or above, this API will always return false.
      */
+    @Deprecated
     public boolean disableNetwork(int netId) {
         try {
             return mService.disableNetwork(netId, mContext.getOpPackageName());
@@ -1385,7 +1721,17 @@ public class WifiManager {
      * Disassociate from the currently active access point. This may result
      * in the asynchronous delivery of state change events.
      * @return {@code true} if the operation succeeded
+     *
+     * @deprecated
+     * a) See {@link WifiNetworkConfigBuilder#buildNetworkSpecifier()} for new
+     * mechanism to trigger connection to a Wi-Fi network.
+     * b) See {@link #addNetworkSuggestions(List, PendingIntent)},
+     * {@link #removeNetworkSuggestions(List)} for new API to add Wi-Fi networks for consideration
+     * when auto-connecting to wifi.
+     * <b>Compatibility Note:</b> For applications targeting
+     * {@link android.os.Build.VERSION_CODES#Q} or above, this API will always return false.
      */
+    @Deprecated
     public boolean disconnect() {
         try {
             mService.disconnect(mContext.getOpPackageName());
@@ -1400,7 +1746,17 @@ public class WifiManager {
      * disconnected. This may result in the asynchronous delivery of state
      * change events.
      * @return {@code true} if the operation succeeded
+     *
+     * @deprecated
+     * a) See {@link WifiNetworkConfigBuilder#buildNetworkSpecifier()} for new
+     * mechanism to trigger connection to a Wi-Fi network.
+     * b) See {@link #addNetworkSuggestions(List, PendingIntent)},
+     * {@link #removeNetworkSuggestions(List)} for new API to add Wi-Fi networks for consideration
+     * when auto-connecting to wifi.
+     * <b>Compatibility Note:</b> For applications targeting
+     * {@link android.os.Build.VERSION_CODES#Q} or above, this API will always return false.
      */
+    @Deprecated
     public boolean reconnect() {
         try {
             mService.reconnect(mContext.getOpPackageName());
@@ -1415,7 +1771,17 @@ public class WifiManager {
      * connected. This may result in the asynchronous delivery of state
      * change events.
      * @return {@code true} if the operation succeeded
+     *
+     * @deprecated
+     * a) See {@link WifiNetworkConfigBuilder#buildNetworkSpecifier()} for new
+     * mechanism to trigger connection to a Wi-Fi network.
+     * b) See {@link #addNetworkSuggestions(List, PendingIntent)},
+     * {@link #removeNetworkSuggestions(List)} for new API to add Wi-Fi networks for consideration
+     * when auto-connecting to wifi.
+     * <b>Compatibility Note:</b> For applications targeting
+     * {@link android.os.Build.VERSION_CODES#Q} or above, this API will always return false.
      */
+    @Deprecated
     public boolean reassociate() {
         try {
             mService.reassociate(mContext.getOpPackageName());
@@ -1821,7 +2187,12 @@ public class WifiManager {
      * @return {@code false} if the request cannot be satisfied; {@code true} indicates that wifi is
      *         either already in the requested state, or in progress toward the requested state.
      * @throws  {@link java.lang.SecurityException} if the caller is missing required permissions.
+     *
+     * @deprecated Starting with Build.VERSION_CODES#Q, applications are not allowed to
+     * enable/disable Wi-Fi regardless of application's target SDK. This API will have no effect
+     * and will always return false.
      */
+    @Deprecated
     public boolean setWifiEnabled(boolean enabled) {
         try {
             return mService.setWifiEnabled(mContext.getOpPackageName(), enabled);
