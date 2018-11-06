@@ -399,20 +399,6 @@ public class PackageDexUsageTests {
     }
 
     @Test
-    public void testRecordClassLoaderContextUnsupportedContext() {
-        // Record a secondary dex file.
-        assertTrue(record(mFooSecondary1User0));
-        // Now update its context.
-        TestData unsupportedContext = mFooSecondary1User0.updateClassLoaderContext(
-                PackageDexUsage.UNSUPPORTED_CLASS_LOADER_CONTEXT);
-        assertTrue(record(unsupportedContext));
-
-        assertPackageDexUsage(null, unsupportedContext);
-        writeAndReadBack();
-        assertPackageDexUsage(null, unsupportedContext);
-    }
-
-    @Test
     public void testRecordClassLoaderContextTransitionFromUnknown() {
         // Record a secondary dex file.
         TestData unknownContext = mFooSecondary1User0.updateClassLoaderContext(
@@ -440,26 +426,38 @@ public class PackageDexUsageTests {
         PackageDexUsage.DexUseInfo validContext = new DexUseInfo(isUsedByOtherApps, userId,
                 "valid_context", "arm");
         assertFalse(validContext.isUnknownClassLoaderContext());
-        assertFalse(validContext.isUnsupportedClassLoaderContext());
         assertFalse(validContext.isVariableClassLoaderContext());
-
-        PackageDexUsage.DexUseInfo unsupportedContext = new DexUseInfo(isUsedByOtherApps, userId,
-                PackageDexUsage.UNSUPPORTED_CLASS_LOADER_CONTEXT, "arm");
-        assertFalse(unsupportedContext.isUnknownClassLoaderContext());
-        assertTrue(unsupportedContext.isUnsupportedClassLoaderContext());
-        assertFalse(unsupportedContext.isVariableClassLoaderContext());
 
         PackageDexUsage.DexUseInfo variableContext = new DexUseInfo(isUsedByOtherApps, userId,
                 PackageDexUsage.VARIABLE_CLASS_LOADER_CONTEXT, "arm");
         assertFalse(variableContext.isUnknownClassLoaderContext());
-        assertFalse(variableContext.isUnsupportedClassLoaderContext());
         assertTrue(variableContext.isVariableClassLoaderContext());
 
         PackageDexUsage.DexUseInfo unknownContext = new DexUseInfo(isUsedByOtherApps, userId,
                 PackageDexUsage.UNKNOWN_CLASS_LOADER_CONTEXT, "arm");
         assertTrue(unknownContext.isUnknownClassLoaderContext());
-        assertFalse(unknownContext.isUnsupportedClassLoaderContext());
         assertFalse(unknownContext.isVariableClassLoaderContext());
+    }
+
+    @Test
+    public void testUnsupportedClassLoaderDiscardedOnRead() throws Exception {
+        String content = "PACKAGE_MANAGER__PACKAGE_DEX_USAGE__2\n"
+                + mBarSecondary1User0.mPackageName + "\n"
+                + "#" + mBarSecondary1User0.mDexFile + "\n"
+                + "0,0," + mBarSecondary1User0.mLoaderIsa + "\n"
+                + "@\n"
+                + "=UnsupportedClassLoaderContext=\n"
+
+                + mFooSecondary1User0.mPackageName + "\n"
+                + "#" + mFooSecondary1User0.mDexFile + "\n"
+                + "0,0," + mFooSecondary1User0.mLoaderIsa + "\n"
+                + "@\n"
+                + mFooSecondary1User0.mClassLoaderContext + "\n";
+
+        mPackageDexUsage.read(new StringReader(content));
+
+        assertPackageDexUsage(mFooBaseUser0, mFooSecondary1User0);
+        assertPackageDexUsage(mBarBaseUser0);
     }
 
     @Test

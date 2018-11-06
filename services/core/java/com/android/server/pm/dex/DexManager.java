@@ -30,6 +30,7 @@ import android.os.storage.StorageManager;
 import android.os.SystemProperties;
 import android.os.UserHandle;
 import android.provider.Settings.Global;
+import android.util.Log;
 import android.util.Slog;
 import android.util.jar.StrictJarFile;
 
@@ -74,7 +75,7 @@ public class DexManager {
     private static final String PROPERTY_NAME_PM_DEXOPT_PRIV_APPS_OOB_LIST =
             "pm.dexopt.priv-apps-oob-list";
 
-    private static final boolean DEBUG = false;
+    private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
     private final Context mContext;
 
@@ -192,6 +193,16 @@ public class DexManager {
         String[] classLoaderContexts = DexoptUtils.processContextForDexLoad(
                 classLoaderNames, classPaths);
 
+        // A null classLoaderContexts means that there are unsupported class loaders in the
+        // chain.
+        if (classLoaderContexts == null) {
+            if (DEBUG) {
+                Slog.i(TAG, loadingAppInfo.packageName +
+                        " uses unsupported class loader in " + classLoaderNames);
+            }
+            return;
+        }
+
         int dexPathIndex = 0;
         for (String dexPath : dexPathsToRegister) {
             // Find the owning package name.
@@ -219,14 +230,10 @@ public class DexManager {
                 }
 
                 // Record dex file usage. If the current usage is a new pattern (e.g. new secondary,
-                // or UsedBytOtherApps), record will return true and we trigger an async write
+                // or UsedByOtherApps), record will return true and we trigger an async write
                 // to disk to make sure we don't loose the data in case of a reboot.
 
-                // A null classLoaderContexts means that there are unsupported class loaders in the
-                // chain.
-                String classLoaderContext = classLoaderContexts == null
-                        ? PackageDexUsage.UNSUPPORTED_CLASS_LOADER_CONTEXT
-                        : classLoaderContexts[dexPathIndex];
+                String classLoaderContext = classLoaderContexts[dexPathIndex];
                 if (mPackageDexUsage.record(searchResult.mOwningPackageName,
                         dexPath, loaderUserId, loaderIsa, isUsedByOtherApps, primaryOrSplit,
                         loadingAppInfo.packageName, classLoaderContext)) {
