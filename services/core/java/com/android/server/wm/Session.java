@@ -430,6 +430,18 @@ class Session extends IWindowSession.Stub implements IBinder.DeathRecipient {
         }
     }
 
+    @Override
+    public void insetsModified(IWindow window, InsetsState state) {
+        synchronized (mService.mWindowMap) {
+            final WindowState windowState = mService.windowForClientLocked(this, window,
+                    false /* throwOnError */);
+            if (windowState != null) {
+                windowState.getDisplayContent().getInsetsStateController().onInsetsModified(
+                        windowState, state);
+            }
+        }
+    }
+
     void windowAddedLocked(String packageName) {
         mPackageName = packageName;
         mRelayoutTag = "relayoutWindow: " + mPackageName;

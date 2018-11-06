@@ -21,6 +21,7 @@ import android.annotation.Nullable;
 import android.graphics.Point;
 import android.graphics.Rect;
 import android.util.proto.ProtoOutputStream;
+import android.view.InsetsState;
 import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 import android.view.InsetsSource;
@@ -47,8 +48,18 @@ class InsetsSourceProvider {
     private WindowState mWin;
     private TriConsumer<DisplayFrames, WindowState, Rect> mFrameProvider;
 
+    /** The visibility override from the current controlling window. */
+    private boolean mClientVisible;
+
+    /**
+     * Whether the window is available and considered visible as in {@link WindowState#isVisible}.
+     */
+    private boolean mServerVisible;
+
+
     InsetsSourceProvider(InsetsSource source, InsetsStateController stateController,
             DisplayContent displayContent) {
+        mClientVisible = InsetsState.getDefaultVisibly(source.getType());
         mSource = source;
         mDisplayContent = displayContent;
         mStateController = stateController;
@@ -73,10 +84,9 @@ class InsetsSourceProvider {
         mWin = win;
         mFrameProvider = frameProvider;
         if (win == null) {
-            mSource.setVisible(false);
+            setServerVisible(false);
             mSource.setFrame(new Rect());
         } else {
-            mSource.setVisible(true);
             mWin.setInsetProvider(this);
         }
     }
@@ -96,7 +106,7 @@ class InsetsSourceProvider {
             mTmpRect.inset(mWin.mGivenContentInsets);
         }
         mSource.setFrame(mTmpRect);
-        mSource.setVisible(mWin.isVisible() && !mWin.mGivenInsetsPending);
+        setServerVisible(mWin.isVisible() && !mWin.mGivenInsetsPending);
 
     }
 
@@ -113,6 +123,29 @@ class InsetsSourceProvider {
                 false /* TODO hidden */);
         mControllingWin = target;
         mControl = new InsetsSourceControl(mSource.getType(), mAdapter.mCapturedLeash);
+        setClientVisible(InsetsState.getDefaultVisibly(mSource.getType()));
+    }
+
+    boolean onInsetsModified(WindowState caller, InsetsSource modifiedSource) {
+        if (mControllingWin != caller || modifiedSource.isVisible() == mClientVisible) {
+            return false;
+        }
+        setClientVisible(modifiedSource.isVisible());
+        return true;
+    }
+
+    private void setClientVisible(boolean clientVisible) {
+        mClientVisible = clientVisible;
+        updateVisibility();
+    }
+
+    private void setServerVisible(boolean serverVisible) {
+        mServerVisible = serverVisible;
+        updateVisibility();
+    }
+
+    private void updateVisibility() {
+        mSource.setVisible(mServerVisible && mClientVisible);
     }
 
     InsetsSourceControl getControl() {
@@ -125,6 +158,7 @@ class InsetsSourceProvider {
             // Cancelling the animation will invoke onAnimationCancelled, resetting all the fields.
             mWin.cancelAnimation();
         }
+        setClientVisible(InsetsState.getDefaultVisibly(mSource.getType()));
     }
 
     private class ControlAdapter implements AnimationAdapter {

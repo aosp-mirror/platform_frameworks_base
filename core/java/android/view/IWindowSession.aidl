@@ -250,4 +250,10 @@ interface IWindowSession {
      */
     void updateTapExcludeRegion(IWindow window, int regionId, int left, int top, int width,
             int height);
+
+    /**
+     * Called when the client has changed the local insets state, and now the server should reflect
+     * that new state.
+     */
+    void insetsModified(IWindow window, in InsetsState state);
 }

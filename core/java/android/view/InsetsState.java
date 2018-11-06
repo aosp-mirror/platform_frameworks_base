@@ -32,6 +32,7 @@ import android.view.WindowInsets.Type.InsetType;
 import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
+import java.util.ArrayList;
 
 /**
  * Holder for state of system windows that cause window insets for all other windows in the system.
@@ -200,6 +201,18 @@ public class InsetsState implements Parcelable {
         }
     }
 
+    public void addSource(InsetsSource source) {
+        mSources.put(source.getType(), source);
+    }
+
+    public int getSourcesCount() {
+        return mSources.size();
+    }
+
+    public InsetsSource sourceAt(int index) {
+        return mSources.valueAt(index);
+    }
+
     public static @InternalInsetType ArraySet<Integer> toInternalType(@InsetType int insetTypes) {
         final ArraySet<Integer> result = new ArraySet<>();
         if ((insetTypes & Type.TOP_BAR) != 0) {
@@ -214,6 +227,20 @@ public class InsetsState implements Parcelable {
             result.add(TYPE_IME);
         }
         return result;
+    }
+
+    public static boolean getDefaultVisibly(@InsetType int type) {
+        switch (type) {
+            case TYPE_TOP_BAR:
+            case TYPE_SIDE_BAR_1:
+            case TYPE_SIDE_BAR_2:
+            case TYPE_SIDE_BAR_3:
+                return true;
+            case TYPE_IME:
+                return false;
+            default:
+                return true;
+        }
     }
 
     public void dump(String prefix, PrintWriter pw) {
