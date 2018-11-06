@@ -17,9 +17,8 @@
 package android.view.intelligence;
 
 import android.content.ComponentName;
-
 import android.os.IBinder;
-
+import android.service.intelligence.InteractionSessionId;
 import android.view.intelligence.ContentCaptureEvent;
 
 import com.android.internal.os.IResultReceiver;
@@ -34,19 +33,16 @@ oneway interface IIntelligenceManager {
       * Starts a session, sending the "remote" sessionId to the receiver.
       */
     void startSession(int userId, IBinder activityToken, in ComponentName componentName,
-                      int localSessionId, int flags, in IResultReceiver result);
+                      in InteractionSessionId sessionId, int flags, in IResultReceiver result);
 
     /**
       * Finishes a session.
       */
-    // TODO(b/111276913): pass just (global) session id
-    void finishSession(int userId, IBinder activityToken, in ComponentName componentName,
-                       int localSessionId, int globalSessionId);
+    void finishSession(int userId, in InteractionSessionId sessionId);
 
     /**
       * Sends a batch of events
       */
-    // TODO(b/111276913): pass just (global) session id
-    void sendEvents(int userId, IBinder activityToken, in ComponentName componentName,
-                    int localSessionId, int globalSessionId, in List<ContentCaptureEvent> events);
+    void sendEvents(int userId, in InteractionSessionId sessionId,
+                    in List<ContentCaptureEvent> events);
 }

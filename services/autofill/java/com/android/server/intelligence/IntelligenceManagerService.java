@@ -24,6 +24,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.os.IBinder;
 import android.os.UserManager;
+import android.service.intelligence.InteractionSessionId;
 import android.view.intelligence.ContentCaptureEvent;
 import android.view.intelligence.IIntelligenceManager;
 
@@ -87,9 +88,11 @@ public final class IntelligenceManagerService
 
         @Override
         public void startSession(int userId, @NonNull IBinder activityToken,
-                @NonNull ComponentName componentName, int localSessionId, int flags,
-                @NonNull IResultReceiver result) {
+                @NonNull ComponentName componentName, @NonNull InteractionSessionId sessionId,
+                int flags, @NonNull IResultReceiver result) {
             Preconditions.checkNotNull(activityToken);
+            Preconditions.checkNotNull(componentName);
+            Preconditions.checkNotNull(sessionId);
 
             // TODO(b/111276913): refactor getTaskIdForActivity() to also return ComponentName,
             // so we don't pass it on startSession (same for Autofill)
@@ -101,31 +104,29 @@ public final class IntelligenceManagerService
             synchronized (mLock) {
                 final IntelligencePerUserService service = getServiceForUserLocked(userId);
                 service.startSessionLocked(activityToken, componentName, taskId, displayId,
-                        localSessionId, flags, result);
+                        sessionId, flags, result);
             }
         }
 
         @Override
-        public void sendEvents(int userId, @NonNull IBinder activityToken,
-                @NonNull ComponentName componentName, int localSessionId, int globalSessionId,
-                List<ContentCaptureEvent> events) {
+        public void sendEvents(int userId, @NonNull InteractionSessionId sessionId,
+                @NonNull List<ContentCaptureEvent> events) {
+            Preconditions.checkNotNull(sessionId);
             Preconditions.checkNotNull(events);
 
             synchronized (mLock) {
                 final IntelligencePerUserService service = getServiceForUserLocked(userId);
-                service.sendEventsLocked(componentName, events);
+                service.sendEventsLocked(sessionId, events);
             }
         }
 
         @Override
-        public void finishSession(int userId, @NonNull IBinder activityToken,
-                @NonNull ComponentName componentName, int localSessionId, int globalSessionId) {
-            Preconditions.checkNotNull(activityToken);
+        public void finishSession(int userId, @NonNull InteractionSessionId sessionId) {
+            Preconditions.checkNotNull(sessionId);
 
             synchronized (mLock) {
                 final IntelligencePerUserService service = getServiceForUserLocked(userId);
-                service.finishSessionLocked(activityToken, componentName, localSessionId,
-                        globalSessionId);
+                service.finishSessionLocked(sessionId);
             }
         }
 
