@@ -34,8 +34,6 @@
 #include "stats_util.h"
 #include "statslog.h"
 
-#include <inttypes.h>
-
 using std::set;
 using std::string;
 using std::unordered_map;
@@ -534,7 +532,7 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config,
     for (int i = 0; i < config.no_report_metric_size(); ++i) {
         const auto no_report_metric = config.no_report_metric(i);
         if (metricMap.find(no_report_metric) == metricMap.end()) {
-            ALOGW("no_report_metric %" PRId64 " not exist", no_report_metric);
+            ALOGW("no_report_metric %lld not exist", no_report_metric);
             return false;
         }
         noReportMetricIds.insert(no_report_metric);
