@@ -1010,29 +1010,50 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
 
     void remove() {
         final boolean destroyContentOnRemoval = shouldDestroyContentOnRemove();
+        ActivityStack lastReparentedStack = null;
+        mPreferredTopFocusableStack = null;
 
         // Stacks could be reparented from the removed display to other display. While
         // reparenting the last stack of the removed display, the remove display is ready to be
         // released (no more ActivityStack). But, we cannot release it at that moment or the
         // related WindowContainer and WindowContainerController will also be removed. So, we
         // set display as removed after reparenting stack finished.
-        for (int i = mStacks.size() - 1; i >= 0; --i) {
-            final ActivityStack stack = mStacks.get(i);
-            // Always finish non-standard type stacks.
-            if (destroyContentOnRemoval || !stack.isActivityTypeStandardOrUndefined()) {
-                stack.finishAllActivitiesLocked(true /* immediately */);
-            } else {
-                // If default display is in split-window mode, set windowing mode of the stack to
-                // split-screen secondary. Otherwise, set the windowing mode to undefined by
-                // default to let stack inherited the windowing mode from the new display.
-                int windowingMode = mSupervisor.getDefaultDisplay().hasSplitScreenPrimaryStack()
-                        ? WINDOWING_MODE_SPLIT_SCREEN_SECONDARY : WINDOWING_MODE_UNDEFINED;
-                mSupervisor.moveStackToDisplayLocked(stack.mStackId, DEFAULT_DISPLAY, true);
-                stack.setWindowingMode(windowingMode);
+        final ActivityDisplay toDisplay = mSupervisor.getDefaultDisplay();
+        mSupervisor.beginDeferResume();
+        try {
+            int numStacks = mStacks.size();
+            // Keep the order from bottom to top.
+            for (int stackNdx = 0; stackNdx < numStacks; stackNdx++) {
+                final ActivityStack stack = mStacks.get(stackNdx);
+                // Always finish non-standard type stacks.
+                if (destroyContentOnRemoval || !stack.isActivityTypeStandardOrUndefined()) {
+                    stack.finishAllActivitiesLocked(true /* immediately */);
+                } else {
+                    // If default display is in split-window mode, set windowing mode of the stack
+                    // to split-screen secondary. Otherwise, set the windowing mode to undefined by
+                    // default to let stack inherited the windowing mode from the new display.
+                    final int windowingMode = toDisplay.hasSplitScreenPrimaryStack()
+                            ? WINDOWING_MODE_SPLIT_SCREEN_SECONDARY
+                            : WINDOWING_MODE_UNDEFINED;
+                    stack.reparent(toDisplay, true /* onTop */, true /* displayRemoved */);
+                    stack.setWindowingMode(windowingMode);
+                    lastReparentedStack = stack;
+                }
+                // Stacks may be removed from this display. Ensure each stack will be processed and
+                // the loop will end.
+                stackNdx -= numStacks - mStacks.size();
+                numStacks = mStacks.size();
             }
+        } finally {
+            mSupervisor.endDeferResume();
         }
         mRemoved = true;
 
+        // Only update focus/visibility for the last one because there may be many stacks are
+        // reparented and the intermediate states are unnecessary.
+        if (lastReparentedStack != null) {
+            lastReparentedStack.postReparent();
+        }
         releaseSelfIfNeeded();
 
         mSupervisor.getKeyguardController().onDisplayRemoved(mDisplayId);
@@ -1071,7 +1092,8 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
                 || mDisplayId == mSupervisor.mService.mVr2dDisplayId;
     }
 
-    private boolean shouldDestroyContentOnRemove() {
+    @VisibleForTesting
+    boolean shouldDestroyContentOnRemove() {
         return mDisplay.getRemoveMode() == REMOVE_MODE_DESTROY_CONTENT;
     }
 

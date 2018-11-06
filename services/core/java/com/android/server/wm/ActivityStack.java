@@ -729,7 +729,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     }
 
     /** Adds the stack to specified display and calls WindowManager to do the same. */
-    void reparent(ActivityDisplay activityDisplay, boolean onTop) {
+    void reparent(ActivityDisplay activityDisplay, boolean onTop, boolean displayRemoved) {
         // TODO: We should probably resolve the windowing mode for the stack on the new display here
         // so that it end up in a compatible mode in the new display. e.g. split-screen secondary.
         removeFromDisplay();
@@ -738,6 +738,13 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         mTmpRect2.setEmpty();
         mWindowContainerController.reparent(activityDisplay.mDisplayId, mTmpRect2, onTop);
         postAddToDisplay(activityDisplay, mTmpRect2.isEmpty() ? null : mTmpRect2, onTop);
+        if (!displayRemoved) {
+            postReparent();
+        }
+    }
+
+    /** Resume next focusable stack after reparenting to another display. */
+    void postReparent() {
         adjustFocusToNextFocusableStack("reparent", true /* allowFocusSelf */);
         mStackSupervisor.resumeFocusedStacksTopActivitiesLocked();
         // Update visibility of activities before notifying WM. This way it won't try to resize
@@ -1151,7 +1158,8 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     }
 
     final boolean isAttached() {
-        return getParent() != null;
+        final ActivityDisplay display = getDisplay();
+        return display != null && !display.isRemoved();
     }
 
     /**
