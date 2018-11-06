@@ -398,7 +398,7 @@ bool BinaryResourceParser::ParseType(const ResourceTablePackage* package,
       if (type_spec_flags & ResTable_typeSpec::SPEC_OVERLAYABLE) {
         Overlayable overlayable;
         overlayable.source = source_.WithLine(0);
-        if (!table_->SetOverlayableMangled(name, overlayable, diag_)) {
+        if (!table_->AddOverlayableMangled(name, overlayable, diag_)) {
           return false;
         }
       }
