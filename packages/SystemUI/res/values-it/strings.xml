@@ -271,7 +271,7 @@
     <string name="accessibility_rotation_lock_on_landscape_changed" msgid="3135965553707519743">"Ora lo schermo è bloccato nell\'orientamento orizzontale."</string>
     <string name="accessibility_rotation_lock_on_portrait_changed" msgid="8922481981834012126">"Ora lo schermo è bloccato nell\'orientamento verticale."</string>
     <string name="dessert_case" msgid="1295161776223959221">"Vetrina di dolci"</string>
-    <string name="start_dreams" msgid="5640361424498338327">"Screensaver"</string>
+    <string name="start_dreams" msgid="5640361424498338327">"Salvaschermo"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"Ethernet"</string>
     <string name="quick_settings_header_onboarding_text" msgid="8030309023792936283">"Tocca e tieni premuta ciascuna icona per visualizzare altre opzioni"</string>
     <string name="quick_settings_dnd_label" msgid="8735855737575028208">"Non disturbare"</string>
