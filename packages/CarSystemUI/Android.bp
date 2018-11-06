@@ -45,6 +45,7 @@ android_app {
         "androidx.slice_slice-builders",
         "androidx.arch.core_core-runtime",
         "androidx.lifecycle_lifecycle-extensions",
+        "car-theme-lib-bp",
         "SystemUI-tags",
         "SystemUI-proto",
     ],
