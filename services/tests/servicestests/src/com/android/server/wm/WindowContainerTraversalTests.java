@@ -11,7 +11,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
 package com.android.server.wm;
@@ -28,23 +28,23 @@ import static org.mockito.Mockito.verify;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import java.util.function.Consumer;
 
 /**
  * Tests for {@link WindowContainer#forAllWindows} and various implementations.
+ *
+ * Build/Install/Run:
+ *  atest FrameworksServicesTests:WindowContainerTraversalTests
  */
 @SmallTest
 @Presubmit
-@RunWith(AndroidJUnit4.class)
 public class WindowContainerTraversalTests extends WindowTestsBase {
 
     @Test
-    public void testDockedDividerPosition() throws Exception {
+    public void testDockedDividerPosition() {
         final WindowState splitScreenWindow = createWindowOnStack(null,
                 WINDOWING_MODE_SPLIT_SCREEN_PRIMARY, ACTIVITY_TYPE_STANDARD, TYPE_BASE_APPLICATION,
                 mDisplayContent, "splitScreenWindow");
@@ -52,7 +52,7 @@ public class WindowContainerTraversalTests extends WindowTestsBase {
                 WINDOWING_MODE_SPLIT_SCREEN_SECONDARY, ACTIVITY_TYPE_STANDARD,
                 TYPE_BASE_APPLICATION, mDisplayContent, "splitScreenSecondaryWindow");
 
-        sWm.mInputMethodTarget = splitScreenWindow;
+        mWm.mInputMethodTarget = splitScreenWindow;
 
         Consumer<WindowState> c = mock(Consumer.class);
         mDisplayContent.forAllWindows(c, false);

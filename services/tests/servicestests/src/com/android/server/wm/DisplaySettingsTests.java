@@ -12,10 +12,11 @@
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
  * limitations under the License.
- *
  */
 
 package com.android.server.wm;
+
+import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -31,15 +32,13 @@ import android.view.Display;
 import android.view.DisplayInfo;
 import android.view.Surface;
 
-import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.policy.WindowManagerPolicy;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import java.io.File;
 
@@ -47,14 +46,13 @@ import java.io.File;
  * Tests for the {@link DisplaySettings} class.
  *
  * Build/Install/Run:
- *  atest FrameworksServicesTests:com.android.server.wm.DisplaySettingsTests
+ *  atest FrameworksServicesTests:DisplaySettingsTests
  */
 @SmallTest
 @Presubmit
-@RunWith(AndroidJUnit4.class)
 public class DisplaySettingsTests extends WindowTestsBase {
 
-    private File mTestFolder;
+    private static final File TEST_FOLDER = getInstrumentation().getTargetContext().getCacheDir();
     private DisplaySettings mTarget;
 
     private DisplayContent mPrimaryDisplay;
@@ -62,19 +60,21 @@ public class DisplaySettingsTests extends WindowTestsBase {
 
     @Before
     public void setUp() throws Exception {
-        super.setUp();
+        deleteRecursively(TEST_FOLDER);
 
-        mTestFolder = InstrumentationRegistry.getContext().getCacheDir();
-        deleteRecursively(mTestFolder);
+        mWm.setSupportsFreeformWindowManagement(false);
+        mWm.setIsPc(false);
 
-        sWm.setSupportsFreeformWindowManagement(false);
-        sWm.setIsPc(false);
+        mTarget = new DisplaySettings(mWm, TEST_FOLDER);
 
-        mTarget = new DisplaySettings(sWm, mTestFolder);
-
-        mPrimaryDisplay = sWm.getDefaultDisplayContentLocked();
+        mPrimaryDisplay = mWm.getDefaultDisplayContentLocked();
         mSecondaryDisplay = mDisplayContent;
         assertNotEquals(Display.DEFAULT_DISPLAY, mSecondaryDisplay.getDisplayId());
+    }
+
+    @After
+    public void tearDown() {
+        deleteRecursively(TEST_FOLDER);
     }
 
     @Test
@@ -87,7 +87,7 @@ public class DisplaySettingsTests extends WindowTestsBase {
 
     @Test
     public void testPrimaryDisplayDefaultToFullscreenWithFreeformSupportNonPc() {
-        sWm.setSupportsFreeformWindowManagement(true);
+        mWm.setSupportsFreeformWindowManagement(true);
 
         mTarget.applySettingsToDisplayLocked(mPrimaryDisplay);
 
@@ -97,8 +97,8 @@ public class DisplaySettingsTests extends WindowTestsBase {
 
     @Test
     public void testPrimaryDisplayDefaultToFreeformWithFreeformIsPc() {
-        sWm.setSupportsFreeformWindowManagement(true);
-        sWm.setIsPc(true);
+        mWm.setSupportsFreeformWindowManagement(true);
+        mWm.setIsPc(true);
 
         mTarget.applySettingsToDisplayLocked(mPrimaryDisplay);
 
@@ -116,7 +116,7 @@ public class DisplaySettingsTests extends WindowTestsBase {
 
     @Test
     public void testSecondaryDisplayDefaultToFreeformWithFreeformSupportNonPc() {
-        sWm.setSupportsFreeformWindowManagement(true);
+        mWm.setSupportsFreeformWindowManagement(true);
 
         mTarget.applySettingsToDisplayLocked(mSecondaryDisplay);
 
@@ -126,8 +126,8 @@ public class DisplaySettingsTests extends WindowTestsBase {
 
     @Test
     public void testSecondaryDisplayDefaultToFreeformWithFreeformSupportIsPc() {
-        sWm.setSupportsFreeformWindowManagement(true);
-        sWm.setIsPc(true);
+        mWm.setSupportsFreeformWindowManagement(true);
+        mWm.setIsPc(true);
 
         mTarget.applySettingsToDisplayLocked(mSecondaryDisplay);
 
@@ -157,7 +157,7 @@ public class DisplaySettingsTests extends WindowTestsBase {
         doAnswer(invocation -> {
             ((DisplayInfo) invocation.getArguments()[1]).copyFrom(originalInfo);
             return null;
-        }).when(sWm.mDisplayManagerInternal).getNonOverrideDisplayInfo(anyInt(), any());
+        }).when(mWm.mDisplayManagerInternal).getNonOverrideDisplayInfo(anyInt(), any());
 
         mTarget.setForcedSize(mSecondaryDisplay, 1000 /* width */, 2000 /* height */);
         applySettingsToDisplayByNewInstance(mSecondaryDisplay);
@@ -165,7 +165,7 @@ public class DisplaySettingsTests extends WindowTestsBase {
         assertEquals(1000 /* width */, mSecondaryDisplay.mBaseDisplayWidth);
         assertEquals(2000 /* height */, mSecondaryDisplay.mBaseDisplayHeight);
 
-        sWm.clearForcedDisplaySize(mSecondaryDisplay.getDisplayId());
+        mWm.clearForcedDisplaySize(mSecondaryDisplay.getDisplayId());
         assertEquals(mSecondaryDisplay.mInitialDisplayWidth, mSecondaryDisplay.mBaseDisplayWidth);
         assertEquals(mSecondaryDisplay.mInitialDisplayHeight, mSecondaryDisplay.mBaseDisplayHeight);
     }
@@ -177,7 +177,7 @@ public class DisplaySettingsTests extends WindowTestsBase {
 
         assertEquals(600 /* density */, mSecondaryDisplay.mBaseDisplayDensity);
 
-        sWm.clearForcedDisplayDensityForUser(mSecondaryDisplay.getDisplayId(), 0 /* userId */);
+        mWm.clearForcedDisplayDensityForUser(mSecondaryDisplay.getDisplayId(), 0 /* userId */);
         assertEquals(mSecondaryDisplay.mInitialDisplayDensity,
                 mSecondaryDisplay.mBaseDisplayDensity);
     }
@@ -189,7 +189,7 @@ public class DisplaySettingsTests extends WindowTestsBase {
 
         assertTrue(mSecondaryDisplay.mDisplayScalingDisabled);
 
-        sWm.setForcedDisplayScalingMode(mSecondaryDisplay.getDisplayId(),
+        mWm.setForcedDisplayScalingMode(mSecondaryDisplay.getDisplayId(),
                 DisplayContent.FORCE_SCALING_MODE_AUTO);
         assertFalse(mSecondaryDisplay.mDisplayScalingDisabled);
     }
@@ -298,20 +298,20 @@ public class DisplaySettingsTests extends WindowTestsBase {
      * that also means the previous state must be written correctly.
      */
     private void applySettingsToDisplayByNewInstance(DisplayContent display) {
-        new DisplaySettings(sWm, mTestFolder).applySettingsToDisplayLocked(display);
+        new DisplaySettings(mWm, TEST_FOLDER).applySettingsToDisplayLocked(display);
     }
 
     private static boolean deleteRecursively(File file) {
+        boolean fullyDeleted = true;
         if (file.isFile()) {
             return file.delete();
+        } else if (file.isDirectory()) {
+            final File[] files = file.listFiles();
+            for (File child : files) {
+                fullyDeleted &= deleteRecursively(child);
+            }
+            fullyDeleted &= file.delete();
         }
-
-        boolean fullyDeleted = true;
-        final File[] files = file.listFiles();
-        for (File child : files) {
-            fullyDeleted &= deleteRecursively(child);
-        }
-        fullyDeleted &= file.delete();
         return fullyDeleted;
     }
 }

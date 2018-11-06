@@ -11,7 +11,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
 package com.android.server.wm;
@@ -35,14 +35,13 @@ import android.view.SurfaceSession;
 
 import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.wm.SurfaceAnimator.Animatable;
 import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
 
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -50,11 +49,11 @@ import org.mockito.MockitoAnnotations;
 /**
  * Test class for {@link SurfaceAnimatorTest}.
  *
- * atest FrameworksServicesTests:com.android.server.wm.SurfaceAnimatorTest
+ * Build/Install/Run:
+ *  atest FrameworksServicesTests:SurfaceAnimatorTest
  */
 @SmallTest
 @Presubmit
-@RunWith(AndroidJUnit4.class)
 public class SurfaceAnimatorTest extends WindowTestsBase {
 
     @Mock AnimationAdapter mSpec;
@@ -68,15 +67,24 @@ public class SurfaceAnimatorTest extends WindowTestsBase {
 
     @Before
     public void setUp() throws Exception {
-        super.setUp();
         MockitoAnnotations.initMocks(this);
-        mAnimatable = new MyAnimatable();
-        mAnimatable2 = new MyAnimatable();
-        mDeferFinishAnimatable = new DeferFinishAnimatable();
+
+        mAnimatable = new MyAnimatable(mWm, mSession, mTransaction);
+        mAnimatable2 = new MyAnimatable(mWm, mSession, mTransaction);
+        mDeferFinishAnimatable = new DeferFinishAnimatable(mWm, mSession, mTransaction);
+    }
+
+    @After
+    public void tearDown() {
+        mAnimatable = null;
+        mAnimatable2 = null;
+        mDeferFinishAnimatable = null;
+        mSession.kill();
+        mSession = null;
     }
 
     @Test
-    public void testRunAnimation() throws Exception {
+    public void testRunAnimation() {
         mAnimatable.mSurfaceAnimator.startAnimation(mTransaction, mSpec, true /* hidden */);
         final ArgumentCaptor<OnAnimationFinishedCallback> callbackCaptor = ArgumentCaptor.forClass(
                 OnAnimationFinishedCallback.class);
@@ -92,7 +100,7 @@ public class SurfaceAnimatorTest extends WindowTestsBase {
     }
 
     @Test
-    public void testOverrideAnimation() throws Exception {
+    public void testOverrideAnimation() {
         mAnimatable.mSurfaceAnimator.startAnimation(mTransaction, mSpec, true /* hidden */);
         final SurfaceControl firstLeash = mAnimatable.mLeash;
         mAnimatable.mSurfaceAnimator.startAnimation(mTransaction, mSpec2, true /* hidden */);
@@ -117,7 +125,7 @@ public class SurfaceAnimatorTest extends WindowTestsBase {
     }
 
     @Test
-    public void testCancelAnimation() throws Exception {
+    public void testCancelAnimation() {
         mAnimatable.mSurfaceAnimator.startAnimation(mTransaction, mSpec, true /* hidden */);
         assertAnimating(mAnimatable);
         mAnimatable.mSurfaceAnimator.cancelAnimation();
@@ -128,7 +136,7 @@ public class SurfaceAnimatorTest extends WindowTestsBase {
     }
 
     @Test
-    public void testDelayingAnimationStart() throws Exception {
+    public void testDelayingAnimationStart() {
         mAnimatable.mSurfaceAnimator.startDelayingAnimationStart();
         mAnimatable.mSurfaceAnimator.startAnimation(mTransaction, mSpec, true /* hidden */);
         verifyZeroInteractions(mSpec);
@@ -139,7 +147,7 @@ public class SurfaceAnimatorTest extends WindowTestsBase {
     }
 
     @Test
-    public void testDelayingAnimationStartAndCancelled() throws Exception {
+    public void testDelayingAnimationStartAndCancelled() {
         mAnimatable.mSurfaceAnimator.startDelayingAnimationStart();
         mAnimatable.mSurfaceAnimator.startAnimation(mTransaction, mSpec, true /* hidden */);
         mAnimatable.mSurfaceAnimator.cancelAnimation();
@@ -150,7 +158,7 @@ public class SurfaceAnimatorTest extends WindowTestsBase {
     }
 
     @Test
-    public void testTransferAnimation() throws Exception {
+    public void testTransferAnimation() {
         mAnimatable.mSurfaceAnimator.startAnimation(mTransaction, mSpec, true /* hidden */);
 
         final ArgumentCaptor<OnAnimationFinishedCallback> callbackCaptor = ArgumentCaptor.forClass(
@@ -171,7 +179,7 @@ public class SurfaceAnimatorTest extends WindowTestsBase {
 
     @Test
     @FlakyTest(detail = "Promote once confirmed non-flaky")
-    public void testDeferFinish() throws Exception {
+    public void testDeferFinish() {
 
         // Start animation
         mDeferFinishAnimatable.mSurfaceAnimator.startAnimation(mTransaction, mSpec,
@@ -186,7 +194,7 @@ public class SurfaceAnimatorTest extends WindowTestsBase {
         assertAnimating(mDeferFinishAnimatable);
 
         // Now end defer finishing.
-        mDeferFinishAnimatable.endDeferFinishCallback.run();
+        mDeferFinishAnimatable.mEndDeferFinishCallback.run();
         assertNotAnimating(mAnimatable2);
         assertTrue(mDeferFinishAnimatable.mFinishedCallbackCalled);
         verify(mTransaction).destroy(eq(mDeferFinishAnimatable.mLeash));
@@ -202,26 +210,30 @@ public class SurfaceAnimatorTest extends WindowTestsBase {
         assertNull(animatable.mSurfaceAnimator.getAnimation());
     }
 
-    private class MyAnimatable implements Animatable {
+    private static class MyAnimatable implements Animatable {
 
+        private final SurfaceSession mSession;
+        private final Transaction mTransaction;
         final SurfaceControl mParent;
         final SurfaceControl mSurface;
         final SurfaceAnimator mSurfaceAnimator;
         SurfaceControl mLeash;
         boolean mFinishedCallbackCalled;
 
-        MyAnimatable() {
-            mParent = sWm.makeSurfaceBuilder(mSession)
+        MyAnimatable(WindowManagerService wm, SurfaceSession session, Transaction transaction) {
+            mSession = session;
+            mTransaction = transaction;
+            mParent = wm.makeSurfaceBuilder(mSession)
                     .setName("test surface parent")
                     .setSize(3000, 3000)
                     .build();
-            mSurface = sWm.makeSurfaceBuilder(mSession)
+            mSurface = wm.makeSurfaceBuilder(mSession)
                     .setName("test surface")
                     .setSize(1, 1)
                     .build();
             mFinishedCallbackCalled = false;
             mLeash = null;
-            mSurfaceAnimator = new SurfaceAnimator(this, mFinishedCallback, sWm);
+            mSurfaceAnimator = new SurfaceAnimator(this, mFinishedCallback, wm);
         }
 
         @Override
@@ -281,13 +293,18 @@ public class SurfaceAnimatorTest extends WindowTestsBase {
         private final Runnable mFinishedCallback = () -> mFinishedCallbackCalled = true;
     }
 
-    private class DeferFinishAnimatable extends MyAnimatable {
+    private static class DeferFinishAnimatable extends MyAnimatable {
 
-        Runnable endDeferFinishCallback;
+        Runnable mEndDeferFinishCallback;
+
+        DeferFinishAnimatable(WindowManagerService wm, SurfaceSession session,
+                Transaction transaction) {
+            super(wm, session, transaction);
+        }
 
         @Override
         public boolean shouldDeferAnimationFinish(Runnable endDeferFinishCallback) {
-            this.endDeferFinishCallback = endDeferFinishCallback;
+            mEndDeferFinishCallback = endDeferFinishCallback;
             return true;
         }
     }

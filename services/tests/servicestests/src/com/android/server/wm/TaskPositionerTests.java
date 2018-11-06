@@ -11,7 +11,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
 package com.android.server.wm;
@@ -35,24 +35,22 @@ import android.util.Log;
 import android.view.Display;
 
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mockito;
 
 /**
  * Tests for the {@link TaskPositioner} class.
  *
- * runtest frameworks-services -c com.android.server.wm.TaskPositionerTests
+ * Build/Install/Run:
+ *  atest FrameworksServicesTests:TaskPositionerTests
  */
 @SmallTest
-@RunWith(AndroidJUnit4.class)
 public class TaskPositionerTests extends WindowTestsBase {
 
-    private final boolean DEBUGGING = false;
-    private final String TAG = "TaskPositionerTest";
+    private static final boolean DEBUGGING = false;
+    private static final String TAG = "TaskPositionerTest";
 
     private final static int MOUSE_DELTA_X = 5;
     private final static int MOUSE_DELTA_Y = 5;
@@ -65,8 +63,6 @@ public class TaskPositionerTests extends WindowTestsBase {
 
     @Before
     public void setUp() throws Exception {
-        super.setUp();
-
         TaskPositioner.setFactory(null);
 
         final Display display = mDisplayContent.getDisplay();
@@ -77,7 +73,7 @@ public class TaskPositionerTests extends WindowTestsBase {
         mMinVisibleWidth = dipToPixel(MINIMUM_VISIBLE_WIDTH_IN_DP, dm);
         mMinVisibleHeight = dipToPixel(MINIMUM_VISIBLE_HEIGHT_IN_DP, dm);
 
-        mPositioner = new TaskPositioner(sWm, Mockito.mock(IActivityTaskManager.class));
+        mPositioner = new TaskPositioner(mWm, Mockito.mock(IActivityTaskManager.class));
         mPositioner.register(mDisplayContent);
 
         mWindow = Mockito.spy(createWindow(null, TYPE_BASE_APPLICATION, "window"));
@@ -94,7 +90,7 @@ public class TaskPositionerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testOverrideFactory() throws Exception {
+    public void testOverrideFactory() {
         final boolean[] created = new boolean[1];
         created[0] = false;
         TaskPositioner.setFactory(new TaskPositioner.Factory() {
@@ -105,7 +101,7 @@ public class TaskPositionerTests extends WindowTestsBase {
             }
         });
 
-        assertNull(TaskPositioner.create(sWm));
+        assertNull(TaskPositioner.create(mWm));
         assertTrue(created[0]);
     }
 
@@ -114,7 +110,7 @@ public class TaskPositionerTests extends WindowTestsBase {
      * as does some basic tests (e.g. dragging in Y only will keep X stable).
      */
     @Test
-    public void testBasicFreeWindowResizing() throws Exception {
+    public void testBasicFreeWindowResizing() {
         final Rect r = new Rect(100, 220, 700, 520);
         final int midY = (r.top + r.bottom) / 2;
         mDimBounds.set(r);
@@ -175,7 +171,7 @@ public class TaskPositionerTests extends WindowTestsBase {
      * This tests that by dragging any edge, the fixed / opposite edge(s) remains anchored.
      */
     @Test
-    public void testFreeWindowResizingTestAllEdges() throws Exception {
+    public void testFreeWindowResizingTestAllEdges() {
         final Rect r = new Rect(100, 220, 700, 520);
         final int midX = (r.left + r.right) / 2;
         final int midY = (r.top + r.bottom) / 2;
@@ -260,7 +256,7 @@ public class TaskPositionerTests extends WindowTestsBase {
      * right things upon resizing when dragged from the top left corner.
      */
     @Test
-    public void testLandscapePreservedWindowResizingDragTopLeft() throws Exception {
+    public void testLandscapePreservedWindowResizingDragTopLeft() {
         final Rect r = new Rect(100, 220, 700, 520);
         mDimBounds.set(r);
 
@@ -298,7 +294,7 @@ public class TaskPositionerTests extends WindowTestsBase {
      * right things upon resizing when dragged from the left corner.
      */
     @Test
-    public void testLandscapePreservedWindowResizingDragLeft() throws Exception {
+    public void testLandscapePreservedWindowResizingDragLeft() {
         final Rect r = new Rect(100, 220, 700, 520);
         final int midY = (r.top + r.bottom) / 2;
         mDimBounds.set(r);
@@ -339,7 +335,7 @@ public class TaskPositionerTests extends WindowTestsBase {
      * right things upon resizing when dragged from the top corner.
      */
     @Test
-    public void testLandscapePreservedWindowResizingDragTop() throws Exception {
+    public void testLandscapePreservedWindowResizingDragTop() {
         final Rect r = new Rect(100, 220, 700, 520);
         final int midX = (r.left + r.right) / 2;
         mDimBounds.set(r);
@@ -376,7 +372,7 @@ public class TaskPositionerTests extends WindowTestsBase {
      * right things upon resizing when dragged from the top left corner.
      */
     @Test
-    public void testPortraitPreservedWindowResizingDragTopLeft() throws Exception {
+    public void testPortraitPreservedWindowResizingDragTopLeft() {
         final Rect r = new Rect(330, 100, 630, 600);
         mDimBounds.set(r);
 
@@ -409,7 +405,7 @@ public class TaskPositionerTests extends WindowTestsBase {
      * right things upon resizing when dragged from the left corner.
      */
     @Test
-    public void testPortraitPreservedWindowResizingDragLeft() throws Exception {
+    public void testPortraitPreservedWindowResizingDragLeft() {
         final Rect r = new Rect(330, 100, 630, 600);
         final int midY = (r.top + r.bottom) / 2;
         mDimBounds.set(r);
@@ -452,7 +448,7 @@ public class TaskPositionerTests extends WindowTestsBase {
      * right things upon resizing when dragged from the top corner.
      */
     @Test
-    public void testPortraitPreservedWindowResizingDragTop() throws Exception {
+    public void testPortraitPreservedWindowResizingDragTop() {
         final Rect r = new Rect(330, 100, 630, 600);
         final int midX = (r.left + r.right) / 2;
         mDimBounds.set(r);
@@ -485,7 +481,7 @@ public class TaskPositionerTests extends WindowTestsBase {
                 mPositioner.getWindowDragBounds());
     }
 
-    private void assertBoundsEquals(Rect expected, Rect actual) {
+    private static void assertBoundsEquals(Rect expected, Rect actual) {
         if (DEBUGGING) {
             if (!expected.equals(actual)) {
                 Log.e(TAG, "rect(" + actual.toString() + ") != isRect(" + actual.toString()

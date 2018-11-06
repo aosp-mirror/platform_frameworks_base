@@ -11,7 +11,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
 package com.android.server.wm;
@@ -34,23 +34,22 @@ import android.util.ArraySet;
 import android.view.View;
 
 import androidx.test.filters.MediumTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.wm.TaskSnapshotPersister.RemoveObsoleteFilesQueueItem;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 import java.io.File;
+import java.util.function.Predicate;
 
 /**
  * Test class for {@link TaskSnapshotPersister} and {@link TaskSnapshotLoader}
  *
- * atest FrameworksServicesTests:TaskSnapshotPersisterLoaderTest
+ * Build/Install/Run:
+ *  atest FrameworksServicesTests:TaskSnapshotPersisterLoaderTest
  */
 @MediumTest
 @Presubmit
-@RunWith(AndroidJUnit4.class)
 public class TaskSnapshotPersisterLoaderTest extends TaskSnapshotPersisterTestBase {
 
     private static final Rect TEST_INSETS = new Rect(10, 20, 30, 40);
@@ -59,9 +58,9 @@ public class TaskSnapshotPersisterLoaderTest extends TaskSnapshotPersisterTestBa
     public void testPersistAndLoadSnapshot() {
         mPersister.persistSnapshot(1 , mTestUserId, createSnapshot());
         mPersister.waitForQueueEmpty();
-        final File[] files = new File[] { new File(sFilesDir.getPath() + "/snapshots/1.proto"),
-                new File(sFilesDir.getPath() + "/snapshots/1.jpg"),
-                new File(sFilesDir.getPath() + "/snapshots/1_reduced.jpg")};
+        final File[] files = new File[] { new File(FILES_DIR.getPath() + "/snapshots/1.proto"),
+                new File(FILES_DIR.getPath() + "/snapshots/1.jpg"),
+                new File(FILES_DIR.getPath() + "/snapshots/1_reduced.jpg")};
         assertTrueForFiles(files, File::exists, " must exist");
         final TaskSnapshot snapshot = mLoader.loadTask(1, mTestUserId, false /* reduced */);
         assertNotNull(snapshot);
@@ -70,9 +69,10 @@ public class TaskSnapshotPersisterLoaderTest extends TaskSnapshotPersisterTestBa
         assertEquals(Configuration.ORIENTATION_PORTRAIT, snapshot.getOrientation());
     }
 
-    private void assertTrueForFiles(File[] files, Predicate<File> predicate, String message) {
+    private static void assertTrueForFiles(File[] files, Predicate<File> predicate,
+            String message) {
         for (File file : files) {
-            assertTrue(file.getName() + message, predicate.apply(file));
+            assertTrue(file.getName() + message, predicate.test(file));
         }
     }
 
@@ -81,9 +81,9 @@ public class TaskSnapshotPersisterLoaderTest extends TaskSnapshotPersisterTestBa
         mPersister.persistSnapshot(1, mTestUserId, createSnapshot());
         mPersister.onTaskRemovedFromRecents(1, mTestUserId);
         mPersister.waitForQueueEmpty();
-        assertFalse(new File(sFilesDir.getPath() + "/snapshots/1.proto").exists());
-        assertFalse(new File(sFilesDir.getPath() + "/snapshots/1.jpg").exists());
-        assertFalse(new File(sFilesDir.getPath() + "/snapshots/1_reduced.jpg").exists());
+        assertFalse(new File(FILES_DIR.getPath() + "/snapshots/1.proto").exists());
+        assertFalse(new File(FILES_DIR.getPath() + "/snapshots/1.jpg").exists());
+        assertFalse(new File(FILES_DIR.getPath() + "/snapshots/1_reduced.jpg").exists());
     }
 
     /**
@@ -120,12 +120,12 @@ public class TaskSnapshotPersisterLoaderTest extends TaskSnapshotPersisterTestBa
 
         // Make sure 1,2 were purged but removeObsoleteFiles wasn't.
         final File[] existsFiles = new File[] {
-                new File(sFilesDir.getPath() + "/snapshots/3.proto"),
-                new File(sFilesDir.getPath() + "/snapshots/4.proto")};
+                new File(FILES_DIR.getPath() + "/snapshots/3.proto"),
+                new File(FILES_DIR.getPath() + "/snapshots/4.proto")};
         final File[] nonExistsFiles = new File[] {
-                new File(sFilesDir.getPath() + "/snapshots/100.proto"),
-                new File(sFilesDir.getPath() + "/snapshots/1.proto"),
-                new File(sFilesDir.getPath() + "/snapshots/1.proto")};
+                new File(FILES_DIR.getPath() + "/snapshots/100.proto"),
+                new File(FILES_DIR.getPath() + "/snapshots/1.proto"),
+                new File(FILES_DIR.getPath() + "/snapshots/1.proto")};
         assertTrueForFiles(existsFiles, File::exists, " must exist");
         assertTrueForFiles(nonExistsFiles, file -> !file.exists(), " must not exist");
     }
@@ -149,10 +149,10 @@ public class TaskSnapshotPersisterLoaderTest extends TaskSnapshotPersisterTestBa
         assertTrue(a.isReducedResolution());
         mPersister.persistSnapshot(1 , mTestUserId, a);
         mPersister.waitForQueueEmpty();
-        final File[] files = new File[] { new File(sFilesDir.getPath() + "/snapshots/1.proto"),
-                new File(sFilesDir.getPath() + "/snapshots/1_reduced.jpg")};
+        final File[] files = new File[] { new File(FILES_DIR.getPath() + "/snapshots/1.proto"),
+                new File(FILES_DIR.getPath() + "/snapshots/1_reduced.jpg")};
         final File[] nonExistsFiles = new File[] {
-                new File(sFilesDir.getPath() + "/snapshots/1.jpg"),
+                new File(FILES_DIR.getPath() + "/snapshots/1.jpg"),
         };
         assertTrueForFiles(files, File::exists, " must exist");
         assertTrueForFiles(nonExistsFiles, file -> !file.exists(), " must not exist");
@@ -195,8 +195,8 @@ public class TaskSnapshotPersisterLoaderTest extends TaskSnapshotPersisterTestBa
         TaskSnapshot b = new TaskSnapshotBuilder()
                 .setWindowingMode(WINDOWING_MODE_PINNED)
                 .build();
-        assertTrue(a.getWindowingMode() == WINDOWING_MODE_FULLSCREEN);
-        assertTrue(b.getWindowingMode() == WINDOWING_MODE_PINNED);
+        assertEquals(WINDOWING_MODE_FULLSCREEN, a.getWindowingMode());
+        assertEquals(WINDOWING_MODE_PINNED, b.getWindowingMode());
         mPersister.persistSnapshot(1, mTestUserId, a);
         mPersister.persistSnapshot(2, mTestUserId, b);
         mPersister.waitForQueueEmpty();
@@ -204,8 +204,8 @@ public class TaskSnapshotPersisterLoaderTest extends TaskSnapshotPersisterTestBa
         final TaskSnapshot snapshotB = mLoader.loadTask(2, mTestUserId, false /* reduced */);
         assertNotNull(snapshotA);
         assertNotNull(snapshotB);
-        assertTrue(snapshotA.getWindowingMode() == WINDOWING_MODE_FULLSCREEN);
-        assertTrue(snapshotB.getWindowingMode() == WINDOWING_MODE_PINNED);
+        assertEquals(WINDOWING_MODE_FULLSCREEN, snapshotA.getWindowingMode());
+        assertEquals(WINDOWING_MODE_PINNED, snapshotB.getWindowingMode());
     }
 
     @Test
@@ -239,8 +239,8 @@ public class TaskSnapshotPersisterLoaderTest extends TaskSnapshotPersisterTestBa
         TaskSnapshot b = new TaskSnapshotBuilder()
                 .setSystemUiVisibility(lightBarFlags)
                 .build();
-        assertTrue(a.getSystemUiVisibility() == 0);
-        assertTrue(b.getSystemUiVisibility() == lightBarFlags);
+        assertEquals(0, a.getSystemUiVisibility());
+        assertEquals(lightBarFlags, b.getSystemUiVisibility());
         mPersister.persistSnapshot(1, mTestUserId, a);
         mPersister.persistSnapshot(2, mTestUserId, b);
         mPersister.waitForQueueEmpty();
@@ -248,8 +248,8 @@ public class TaskSnapshotPersisterLoaderTest extends TaskSnapshotPersisterTestBa
         final TaskSnapshot snapshotB = mLoader.loadTask(2, mTestUserId, false /* reduced */);
         assertNotNull(snapshotA);
         assertNotNull(snapshotB);
-        assertTrue(snapshotA.getSystemUiVisibility() == 0);
-        assertTrue(snapshotB.getSystemUiVisibility() == lightBarFlags);
+        assertEquals(0, snapshotA.getSystemUiVisibility());
+        assertEquals(lightBarFlags, snapshotB.getSystemUiVisibility());
     }
 
     @Test
@@ -261,13 +261,13 @@ public class TaskSnapshotPersisterLoaderTest extends TaskSnapshotPersisterTestBa
         mPersister.removeObsoleteFiles(taskIds, new int[] { mTestUserId });
         mPersister.waitForQueueEmpty();
         final File[] existsFiles = new File[] {
-                new File(sFilesDir.getPath() + "/snapshots/1.proto"),
-                new File(sFilesDir.getPath() + "/snapshots/1.jpg"),
-                new File(sFilesDir.getPath() + "/snapshots/1_reduced.jpg") };
+                new File(FILES_DIR.getPath() + "/snapshots/1.proto"),
+                new File(FILES_DIR.getPath() + "/snapshots/1.jpg"),
+                new File(FILES_DIR.getPath() + "/snapshots/1_reduced.jpg") };
         final File[] nonExistsFiles = new File[] {
-                new File(sFilesDir.getPath() + "/snapshots/2.proto"),
-                new File(sFilesDir.getPath() + "/snapshots/2.jpg"),
-                new File(sFilesDir.getPath() + "/snapshots/2_reduced.jpg")};
+                new File(FILES_DIR.getPath() + "/snapshots/2.proto"),
+                new File(FILES_DIR.getPath() + "/snapshots/2.jpg"),
+                new File(FILES_DIR.getPath() + "/snapshots/2_reduced.jpg")};
         assertTrueForFiles(existsFiles, File::exists, " must exist");
         assertTrueForFiles(nonExistsFiles, file -> !file.exists(), " must not exist");
     }
@@ -281,24 +281,12 @@ public class TaskSnapshotPersisterLoaderTest extends TaskSnapshotPersisterTestBa
         mPersister.persistSnapshot(2, mTestUserId, createSnapshot());
         mPersister.waitForQueueEmpty();
         final File[] existsFiles = new File[] {
-                new File(sFilesDir.getPath() + "/snapshots/1.proto"),
-                new File(sFilesDir.getPath() + "/snapshots/1.jpg"),
-                new File(sFilesDir.getPath() + "/snapshots/1_reduced.jpg"),
-                new File(sFilesDir.getPath() + "/snapshots/2.proto"),
-                new File(sFilesDir.getPath() + "/snapshots/2.jpg"),
-                new File(sFilesDir.getPath() + "/snapshots/2_reduced.jpg")};
+                new File(FILES_DIR.getPath() + "/snapshots/1.proto"),
+                new File(FILES_DIR.getPath() + "/snapshots/1.jpg"),
+                new File(FILES_DIR.getPath() + "/snapshots/1_reduced.jpg"),
+                new File(FILES_DIR.getPath() + "/snapshots/2.proto"),
+                new File(FILES_DIR.getPath() + "/snapshots/2.jpg"),
+                new File(FILES_DIR.getPath() + "/snapshots/2_reduced.jpg")};
         assertTrueForFiles(existsFiles, File::exists, " must exist");
-    }
-
-    /**
-     * Private predicate definition.
-     *
-     * This is needed because com.android.internal.util.Predicate is deprecated
-     * and can only be used with classes fron android.test.runner. This cannot
-     * use java.util.function.Predicate because that is not present on all API
-     * versions that this test must run on.
-     */
-    private interface Predicate<T> {
-        boolean apply(T t);
     }
 }

@@ -11,10 +11,25 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
 package com.android.server.wm;
+
+import static android.app.AppOpsManager.OP_NONE;
+import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
+import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
+
+import static com.android.server.wm.WindowContainer.POSITION_TOP;
+
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyBoolean;
+import static org.mockito.Mockito.anyFloat;
+import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.doAnswer;
+import static org.mockito.Mockito.doReturn;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import android.app.ActivityManager;
 import android.content.Context;
@@ -26,23 +41,8 @@ import android.view.Display;
 import android.view.IApplicationToken;
 import android.view.IWindow;
 import android.view.Surface;
-import android.view.SurfaceControl;
 import android.view.SurfaceControl.Transaction;
 import android.view.WindowManager;
-
-import static android.app.AppOpsManager.OP_NONE;
-import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
-import static android.content.pm.ActivityInfo.SCREEN_ORIENTATION_UNSPECIFIED;
-
-import static com.android.server.wm.WindowContainer.POSITION_TOP;
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.anyBoolean;
-import static org.mockito.Mockito.anyFloat;
-import static org.mockito.Mockito.anyInt;
-import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
 
 import org.mockito.invocation.InvocationOnMock;
 
@@ -277,35 +277,33 @@ public class WindowTestUtils {
      */
     public static class TestTaskWindowContainerController extends TaskWindowContainerController {
 
+        static final TaskWindowContainerListener NOP_LISTENER = new TaskWindowContainerListener() {
+            @Override
+            public void registerConfigurationChangeListener(
+                    ConfigurationContainerListener listener) {
+            }
+
+            @Override
+            public void unregisterConfigurationChangeListener(
+                    ConfigurationContainerListener listener) {
+            }
+
+            @Override
+            public void onSnapshotChanged(ActivityManager.TaskSnapshot snapshot) {
+            }
+
+            @Override
+            public void requestResize(Rect bounds, int resizeMode) {
+            }
+        };
+
         TestTaskWindowContainerController(WindowTestsBase testsBase) {
             this(testsBase.createStackControllerOnDisplay(testsBase.mDisplayContent));
         }
 
         TestTaskWindowContainerController(StackWindowController stackController) {
-            super(sNextTaskId++, new TaskWindowContainerListener() {
-                        @Override
-                        public void registerConfigurationChangeListener(
-                                ConfigurationContainerListener listener) {
-
-                        }
-
-                        @Override
-                        public void unregisterConfigurationChangeListener(
-                                ConfigurationContainerListener listener) {
-
-                        }
-
-                        @Override
-                        public void onSnapshotChanged(ActivityManager.TaskSnapshot snapshot) {
-
-                        }
-
-                        @Override
-                        public void requestResize(Rect bounds, int resizeMode) {
-
-                        }
-                    }, stackController, 0 /* userId */, null /* bounds */, RESIZE_MODE_UNRESIZEABLE,
-                    false /* supportsPictureInPicture */, true /* toTop*/,
+            super(sNextTaskId++, NOP_LISTENER, stackController, 0 /* userId */, null /* bounds */,
+                    RESIZE_MODE_UNRESIZEABLE, false /* supportsPictureInPicture */, true /* toTop*/,
                     true /* showForAllUsers */, new ActivityManager.TaskDescription(),
                     stackController.mService);
         }

@@ -11,7 +11,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
 package com.android.server.wm;
@@ -24,32 +24,32 @@ import static junit.framework.Assert.assertNull;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 /**
  * Test class for {@link TaskSnapshotCache}.
  *
- * runtest frameworks-services -c com.android.server.wm.TaskSnapshotCacheTest
+ * Build/Install/Run:
+ *  atest FrameworksServicesTests:TaskSnapshotCacheTest
  */
 @SmallTest
 @Presubmit
-@RunWith(AndroidJUnit4.class)
 public class TaskSnapshotCacheTest extends TaskSnapshotPersisterTestBase {
 
     private TaskSnapshotCache mCache;
 
+    @Override
     @Before
-    public void setUp() throws Exception {
+    public void setUp() {
         super.setUp();
-        mCache = new TaskSnapshotCache(sWm, mLoader);
+
+        mCache = new TaskSnapshotCache(mWm, mLoader);
     }
 
     @Test
-    public void testAppRemoved() throws Exception {
+    public void testAppRemoved() {
         final WindowState window = createWindow(null, FIRST_APPLICATION_WINDOW, "window");
         mCache.putSnapshot(window.getTask(), createSnapshot());
         assertNotNull(mCache.getSnapshot(window.getTask().mTaskId, 0 /* userId */,
@@ -60,7 +60,7 @@ public class TaskSnapshotCacheTest extends TaskSnapshotPersisterTestBase {
     }
 
     @Test
-    public void testAppDied() throws Exception {
+    public void testAppDied() {
         final WindowState window = createWindow(null, FIRST_APPLICATION_WINDOW, "window");
         mCache.putSnapshot(window.getTask(), createSnapshot());
         assertNotNull(mCache.getSnapshot(window.getTask().mTaskId, 0 /* userId */,
@@ -71,7 +71,7 @@ public class TaskSnapshotCacheTest extends TaskSnapshotPersisterTestBase {
     }
 
     @Test
-    public void testTaskRemoved() throws Exception {
+    public void testTaskRemoved() {
         final WindowState window = createWindow(null, FIRST_APPLICATION_WINDOW, "window");
         mCache.putSnapshot(window.getTask(), createSnapshot());
         assertNotNull(mCache.getSnapshot(window.getTask().mTaskId, 0 /* userId */,
@@ -82,32 +82,32 @@ public class TaskSnapshotCacheTest extends TaskSnapshotPersisterTestBase {
     }
 
     @Test
-    public void testReduced_notCached() throws Exception {
+    public void testReduced_notCached() {
         final WindowState window = createWindow(null, FIRST_APPLICATION_WINDOW, "window");
-        mPersister.persistSnapshot(window.getTask().mTaskId, sWm.mCurrentUserId, createSnapshot());
+        mPersister.persistSnapshot(window.getTask().mTaskId, mWm.mCurrentUserId, createSnapshot());
         mPersister.waitForQueueEmpty();
-        assertNull(mCache.getSnapshot(window.getTask().mTaskId, sWm.mCurrentUserId,
+        assertNull(mCache.getSnapshot(window.getTask().mTaskId, mWm.mCurrentUserId,
                 false /* restoreFromDisk */, false /* reducedResolution */));
 
         // Load it from disk
-        assertNotNull(mCache.getSnapshot(window.getTask().mTaskId, sWm.mCurrentUserId,
+        assertNotNull(mCache.getSnapshot(window.getTask().mTaskId, mWm.mCurrentUserId,
                 true /* restoreFromDisk */, true /* reducedResolution */));
 
         // Make sure it's not in the cache now.
-        assertNull(mCache.getSnapshot(window.getTask().mTaskId, sWm.mCurrentUserId,
+        assertNull(mCache.getSnapshot(window.getTask().mTaskId, mWm.mCurrentUserId,
                 false /* restoreFromDisk */, false /* reducedResolution */));
     }
 
     @Test
-    public void testRestoreFromDisk() throws Exception {
+    public void testRestoreFromDisk() {
         final WindowState window = createWindow(null, FIRST_APPLICATION_WINDOW, "window");
-        mPersister.persistSnapshot(window.getTask().mTaskId, sWm.mCurrentUserId, createSnapshot());
+        mPersister.persistSnapshot(window.getTask().mTaskId, mWm.mCurrentUserId, createSnapshot());
         mPersister.waitForQueueEmpty();
-        assertNull(mCache.getSnapshot(window.getTask().mTaskId, sWm.mCurrentUserId,
+        assertNull(mCache.getSnapshot(window.getTask().mTaskId, mWm.mCurrentUserId,
                 false /* restoreFromDisk */, false /* reducedResolution */));
 
         // Load it from disk
-        assertNotNull(mCache.getSnapshot(window.getTask().mTaskId, sWm.mCurrentUserId,
+        assertNotNull(mCache.getSnapshot(window.getTask().mTaskId, mWm.mCurrentUserId,
                 true /* restoreFromDisk */, false /* reducedResolution */));
     }
 }

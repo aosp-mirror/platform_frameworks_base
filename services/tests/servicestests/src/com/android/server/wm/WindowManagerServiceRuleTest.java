@@ -22,13 +22,14 @@ import static org.junit.Assert.assertThat;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
-@RunWith(AndroidJUnit4.class)
+/**
+ * Build/InstallRun:
+ *  atest FrameworksServicesTests:WindowManagerServiceRuleTest
+ */
 @Presubmit
 @SmallTest
 public class WindowManagerServiceRuleTest {

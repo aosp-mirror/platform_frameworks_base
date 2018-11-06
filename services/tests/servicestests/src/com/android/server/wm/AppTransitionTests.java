@@ -11,7 +11,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
 package com.android.server.wm;
@@ -32,81 +32,75 @@ import static org.mockito.ArgumentMatchers.anyBoolean;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.spy;
 
-import android.content.Context;
 import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 import android.view.Display;
 import android.view.IApplicationToken;
 
-import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 /**
  * Test class for {@link AppTransition}.
  *
- * atest AppTransitionTests
+ * Build/Install/Run:
+ *  atest FrameworksServicesTests:AppTransitionTests
  */
 @SmallTest
 @Presubmit
-@RunWith(AndroidJUnit4.class)
 public class AppTransitionTests extends WindowTestsBase {
 
     private DisplayContent mDc;
 
     @Before
     public void setUp() throws Exception {
-        super.setUp();
-        final Context context = InstrumentationRegistry.getTargetContext();
-        mDc = sWm.getDefaultDisplayContentLocked();
+        mDc = mWm.getDefaultDisplayContentLocked();
         // For unit test,  we don't need to test performSurfacePlacement to prevent some
         // abnormal interaction with surfaceflinger native side.
-        sWm.mRoot = spy(sWm.mRoot);
-        doNothing().when(sWm.mRoot).performSurfacePlacement(anyBoolean());
+        mWm.mRoot = spy(mWm.mRoot);
+        doNothing().when(mWm.mRoot).performSurfacePlacement(anyBoolean());
     }
 
     @Test
-    public void testKeyguardOverride() throws Exception {
-        sWm.prepareAppTransition(TRANSIT_ACTIVITY_OPEN, false /* alwaysKeepCurrent */);
-        sWm.prepareAppTransition(TRANSIT_KEYGUARD_GOING_AWAY, false /* alwaysKeepCurrent */);
+    public void testKeyguardOverride() {
+        mWm.prepareAppTransition(TRANSIT_ACTIVITY_OPEN, false /* alwaysKeepCurrent */);
+        mWm.prepareAppTransition(TRANSIT_KEYGUARD_GOING_AWAY, false /* alwaysKeepCurrent */);
         assertEquals(TRANSIT_KEYGUARD_GOING_AWAY, mDc.mAppTransition.getAppTransition());
     }
 
     @Test
-    public void testKeyguardKeep() throws Exception {
-        sWm.prepareAppTransition(TRANSIT_KEYGUARD_GOING_AWAY, false /* alwaysKeepCurrent */);
-        sWm.prepareAppTransition(TRANSIT_ACTIVITY_OPEN, false /* alwaysKeepCurrent */);
+    public void testKeyguardKeep() {
+        mWm.prepareAppTransition(TRANSIT_KEYGUARD_GOING_AWAY, false /* alwaysKeepCurrent */);
+        mWm.prepareAppTransition(TRANSIT_ACTIVITY_OPEN, false /* alwaysKeepCurrent */);
         assertEquals(TRANSIT_KEYGUARD_GOING_AWAY, mDc.mAppTransition.getAppTransition());
     }
 
     @Test
-    public void testForceOverride() throws Exception {
-        sWm.prepareAppTransition(TRANSIT_KEYGUARD_UNOCCLUDE, false /* alwaysKeepCurrent */);
+    public void testForceOverride() {
+        mWm.prepareAppTransition(TRANSIT_KEYGUARD_UNOCCLUDE, false /* alwaysKeepCurrent */);
         mDc.getController().prepareAppTransition(TRANSIT_ACTIVITY_OPEN,
                 false /* alwaysKeepCurrent */, 0 /* flags */, true /* forceOverride */);
         assertEquals(TRANSIT_ACTIVITY_OPEN, mDc.mAppTransition.getAppTransition());
     }
 
     @Test
-    public void testCrashing() throws Exception {
-        sWm.prepareAppTransition(TRANSIT_ACTIVITY_OPEN, false /* alwaysKeepCurrent */);
-        sWm.prepareAppTransition(TRANSIT_CRASHING_ACTIVITY_CLOSE, false /* alwaysKeepCurrent */);
+    public void testCrashing() {
+        mWm.prepareAppTransition(TRANSIT_ACTIVITY_OPEN, false /* alwaysKeepCurrent */);
+        mWm.prepareAppTransition(TRANSIT_CRASHING_ACTIVITY_CLOSE, false /* alwaysKeepCurrent */);
         assertEquals(TRANSIT_CRASHING_ACTIVITY_CLOSE, mDc.mAppTransition.getAppTransition());
     }
 
     @Test
-    public void testKeepKeyguard_withCrashing() throws Exception {
-        sWm.prepareAppTransition(TRANSIT_KEYGUARD_GOING_AWAY, false /* alwaysKeepCurrent */);
-        sWm.prepareAppTransition(TRANSIT_CRASHING_ACTIVITY_CLOSE, false /* alwaysKeepCurrent */);
+    public void testKeepKeyguard_withCrashing() {
+        mWm.prepareAppTransition(TRANSIT_KEYGUARD_GOING_AWAY, false /* alwaysKeepCurrent */);
+        mWm.prepareAppTransition(TRANSIT_CRASHING_ACTIVITY_CLOSE, false /* alwaysKeepCurrent */);
         assertEquals(TRANSIT_KEYGUARD_GOING_AWAY, mDc.mAppTransition.getAppTransition());
     }
 
     @Test
-    public void testAppTransitionStateForMultiDisplay() throws Exception {
+    public void testAppTransitionStateForMultiDisplay() {
         // Create 2 displays & presume both display the state is ON for ready to display & animate.
         final DisplayContent dc1 = createNewDisplayWithController(Display.STATE_ON);
         final DisplayContent dc2 = createNewDisplayWithController(Display.STATE_ON);
@@ -149,7 +143,7 @@ public class AppTransitionTests extends WindowTestsBase {
     }
 
     @Test
-    public void testCleanAppTransitionWhenTaskStackReparent() throws Exception {
+    public void testCleanAppTransitionWhenTaskStackReparent() {
         // Create 2 displays & presume both display the state is ON for ready to display & animate.
         final DisplayContent dc1 = createNewDisplayWithController(Display.STATE_ON);
         final DisplayContent dc2 = createNewDisplayWithController(Display.STATE_ON);

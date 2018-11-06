@@ -11,7 +11,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
 package com.android.server.wm;
@@ -25,24 +25,21 @@ import static org.junit.Assert.assertNull;
 import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 /**
  * Tests for the {@link TaskStack} class.
  *
  * Build/Install/Run:
- *  bit FrameworksServicesTests:com.android.server.wm.TaskStackTests
+ *  atest FrameworksServicesTests:TaskStackTests
  */
 @SmallTest
 @Presubmit
-@RunWith(AndroidJUnit4.class)
 public class TaskStackTests extends WindowTestsBase {
 
     @Test
-    public void testStackPositionChildAt() throws Exception {
+    public void testStackPositionChildAt() {
         final TaskStack stack = createTaskStackOnDisplay(mDisplayContent);
         final Task task1 = createTaskInStack(stack, 0 /* userId */);
         final Task task2 = createTaskInStack(stack, 1 /* userId */);
@@ -59,7 +56,7 @@ public class TaskStackTests extends WindowTestsBase {
     }
 
     @Test
-    public void testClosingAppDifferentStackOrientation() throws Exception {
+    public void testClosingAppDifferentStackOrientation() {
         final TaskStack stack = createTaskStackOnDisplay(mDisplayContent);
         final Task task1 = createTaskInStack(stack, 0 /* userId */);
         WindowTestUtils.TestAppWindowToken appWindowToken1 =
@@ -79,7 +76,7 @@ public class TaskStackTests extends WindowTestsBase {
     }
 
     @Test
-    public void testMoveTaskToBackDifferentStackOrientation() throws Exception {
+    public void testMoveTaskToBackDifferentStackOrientation() {
         final TaskStack stack = createTaskStackOnDisplay(mDisplayContent);
         final Task task1 = createTaskInStack(stack, 0 /* userId */);
         WindowTestUtils.TestAppWindowToken appWindowToken1 =
@@ -99,7 +96,7 @@ public class TaskStackTests extends WindowTestsBase {
     }
 
     @Test
-    public void testStackRemoveImmediately() throws Exception {
+    public void testStackRemoveImmediately() {
         final TaskStack stack = createTaskStackOnDisplay(mDisplayContent);
         final Task task = createTaskInStack(stack, 0 /* userId */);
         assertEquals(stack, task.mStack);

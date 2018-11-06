@@ -11,7 +11,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
 package com.android.server.wm;
@@ -40,23 +40,24 @@ import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 import android.view.View;
 
-import com.android.internal.annotations.GuardedBy;
+import androidx.test.filters.SmallTest;
+
 import com.android.server.LocalServices;
 
 import org.junit.After;
+import org.junit.AfterClass;
 import org.junit.Before;
+import org.junit.BeforeClass;
 import org.junit.Test;
 
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
-import androidx.test.filters.SmallTest;
-
 /**
  * Tests for the {@link DragDropController} class.
  *
  * Build/Install/Run:
- *  atest FrameworksServicesTests:com.android.server.wm.DragDropControllerTests
+ *  atest FrameworksServicesTests:DragDropControllerTests
  */
 @SmallTest
 @Presubmit
@@ -67,7 +68,6 @@ public class DragDropControllerTests extends WindowTestsBase {
     private IBinder mToken;
 
     static class TestDragDropController extends DragDropController {
-        @GuardedBy("sWm.mWindowMap")
         private Runnable mCloseCallback;
 
         TestDragDropController(WindowManagerService service, Looper looper) {
@@ -107,31 +107,34 @@ public class DragDropControllerTests extends WindowTestsBase {
         return window;
     }
 
-    @Override
-    @Before
-    public void setUp() throws Exception {
+    @BeforeClass
+    public static void setUpOnce() {
         final UserManagerInternal userManager = mock(UserManagerInternal.class);
         LocalServices.addService(UserManagerInternal.class, userManager);
+    }
 
-        super.setUp();
+    @AfterClass
+    public static void tearDownOnce() {
+        LocalServices.removeServiceForTest(UserManagerInternal.class);
+    }
 
-        mTarget = new TestDragDropController(sWm, sWm.mH.getLooper());
+    @Before
+    public void setUp() throws Exception {
+        mTarget = new TestDragDropController(mWm, mWm.mH.getLooper());
         mDisplayContent = spy(mDisplayContent);
         mWindow = createDropTargetWindow("Drag test window", 0);
         doReturn(mWindow).when(mDisplayContent).getTouchableWinAtPointLocked(0, 0);
-        when(sWm.mInputManager.transferTouchFocus(any(), any())).thenReturn(true);
+        when(mWm.mInputManager.transferTouchFocus(any(), any())).thenReturn(true);
 
-        synchronized (sWm.mGlobalLock) {
-            sWm.mWindowMap.put(mWindow.mClient.asBinder(), mWindow);
+        synchronized (mWm.mGlobalLock) {
+            mWm.mWindowMap.put(mWindow.mClient.asBinder(), mWindow);
         }
     }
 
-    @Override
     @After
     public void tearDown() throws Exception {
-        LocalServices.removeServiceForTest(UserManagerInternal.class);
         final CountDownLatch latch;
-        synchronized (sWm.mGlobalLock) {
+        synchronized (mWm.mGlobalLock) {
             if (!mTarget.dragDropActiveLocked()) {
                 return;
             }
@@ -142,8 +145,6 @@ public class DragDropControllerTests extends WindowTestsBase {
             mTarget.setOnClosedCallbackLocked(latch::countDown);
         }
         assertTrue(latch.await(TIMEOUT_MS, TimeUnit.MILLISECONDS));
-
-        super.tearDown();
     }
 
     @Test
@@ -174,7 +175,7 @@ public class DragDropControllerTests extends WindowTestsBase {
                     .setFormat(PixelFormat.TRANSLUCENT)
                     .build();
 
-            assertTrue(sWm.mInputManager.transferTouchFocus(null, null));
+            assertTrue(mWm.mInputManager.transferTouchFocus(null, null));
             mToken = mTarget.performDrag(
                     new SurfaceSession(), 0, 0, mWindow.mClient, flag, surface, 0, 0, 0, 0, 0,
                     data);

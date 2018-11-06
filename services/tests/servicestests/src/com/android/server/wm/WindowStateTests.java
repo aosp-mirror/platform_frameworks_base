@@ -11,7 +11,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
 package com.android.server.wm;
@@ -58,32 +58,28 @@ import android.view.DisplayCutout;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
 
+import androidx.test.filters.FlakyTest;
+import androidx.test.filters.SmallTest;
+
 import com.android.server.wm.utils.WmDisplayCutout;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
-import java.util.Arrays;
 import java.util.LinkedList;
-
-import androidx.test.filters.FlakyTest;
-import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 /**
  * Tests for the {@link WindowState} class.
  *
- * atest FrameworksServicesTests:com.android.server.wm.WindowStateTests
+ * Build/Install/Run:
+ *  atest FrameworksServicesTests:WindowStateTests
  */
-@SmallTest
 @FlakyTest(bugId = 74078662)
-// TODO(b/116597907): Re-enable this test in postsubmit after the bug is fixed.
-// @Presubmit
-@RunWith(AndroidJUnit4.class)
+@SmallTest
+@Presubmit
 public class WindowStateTests extends WindowTestsBase {
 
     @Test
-    public void testIsParentWindowHidden() throws Exception {
+    public void testIsParentWindowHidden() {
         final WindowState parentWindow = createWindow(null, TYPE_APPLICATION, "parentWindow");
         final WindowState child1 = createWindow(parentWindow, FIRST_SUB_WINDOW, "child1");
         final WindowState child2 = createWindow(parentWindow, FIRST_SUB_WINDOW, "child2");
@@ -98,11 +94,10 @@ public class WindowStateTests extends WindowTestsBase {
         assertFalse(parentWindow.isParentWindowHidden());
         assertFalse(child1.isParentWindowHidden());
         assertFalse(child2.isParentWindowHidden());
-
     }
 
     @Test
-    public void testIsChildWindow() throws Exception {
+    public void testIsChildWindow() {
         final WindowState parentWindow = createWindow(null, TYPE_APPLICATION, "parentWindow");
         final WindowState child1 = createWindow(parentWindow, FIRST_SUB_WINDOW, "child1");
         final WindowState child2 = createWindow(parentWindow, FIRST_SUB_WINDOW, "child2");
@@ -115,7 +110,7 @@ public class WindowStateTests extends WindowTestsBase {
     }
 
     @Test
-    public void testHasChild() throws Exception {
+    public void testHasChild() {
         final WindowState win1 = createWindow(null, TYPE_APPLICATION, "win1");
         final WindowState win11 = createWindow(win1, FIRST_SUB_WINDOW, "win11");
         final WindowState win12 = createWindow(win1, FIRST_SUB_WINDOW, "win12");
@@ -136,7 +131,7 @@ public class WindowStateTests extends WindowTestsBase {
     }
 
     @Test
-    public void testGetParentWindow() throws Exception {
+    public void testGetParentWindow() {
         final WindowState parentWindow = createWindow(null, TYPE_APPLICATION, "parentWindow");
         final WindowState child1 = createWindow(parentWindow, FIRST_SUB_WINDOW, "child1");
         final WindowState child2 = createWindow(parentWindow, FIRST_SUB_WINDOW, "child2");
@@ -157,7 +152,7 @@ public class WindowStateTests extends WindowTestsBase {
     }
 
     @Test
-    public void testGetTopParentWindow() throws Exception {
+    public void testGetTopParentWindow() {
         final WindowState root = createWindow(null, TYPE_APPLICATION, "root");
         final WindowState child1 = createWindow(root, FIRST_SUB_WINDOW, "child1");
         final WindowState child2 = createWindow(child1, FIRST_SUB_WINDOW, "child2");
@@ -183,7 +178,7 @@ public class WindowStateTests extends WindowTestsBase {
     }
 
     @Test
-    public void testCanBeImeTarget() throws Exception {
+    public void testCanBeImeTarget() {
         final WindowState appWindow = createWindow(null, TYPE_APPLICATION, "appWindow");
         final WindowState imeWindow = createWindow(null, TYPE_INPUT_METHOD, "imeWindow");
 
@@ -219,7 +214,7 @@ public class WindowStateTests extends WindowTestsBase {
     }
 
     @Test
-    public void testGetWindow() throws Exception {
+    public void testGetWindow() {
         final WindowState root = createWindow(null, TYPE_APPLICATION, "root");
         final WindowState mediaChild = createWindow(root, TYPE_APPLICATION_MEDIA, "mediaChild");
         final WindowState mediaOverlayChild = createWindow(root,
@@ -231,7 +226,7 @@ public class WindowStateTests extends WindowTestsBase {
         final WindowState aboveSubPanelChild = createWindow(root,
                 TYPE_APPLICATION_ABOVE_SUB_PANEL, "aboveSubPanelChild");
 
-        final LinkedList<WindowState> windows = new LinkedList();
+        final LinkedList<WindowState> windows = new LinkedList<>();
 
         root.getWindow(w -> {
             windows.addLast(w);
@@ -249,7 +244,7 @@ public class WindowStateTests extends WindowTestsBase {
     }
 
     @Test
-    public void testPrepareWindowToDisplayDuringRelayout() throws Exception {
+    public void testPrepareWindowToDisplayDuringRelayout() {
         testPrepareWindowToDisplayDuringRelayout(false /*wasVisible*/);
         testPrepareWindowToDisplayDuringRelayout(true /*wasVisible*/);
 
@@ -262,14 +257,14 @@ public class WindowStateTests extends WindowTestsBase {
         final WindowState second = createWindow(null, TYPE_APPLICATION, appWindowToken, "second");
         second.mAttrs.flags |= WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON;
 
-        reset(mPowerManagerWrapper);
+        reset(sPowerManagerWrapper);
         first.prepareWindowToDisplayDuringRelayout(false /*wasVisible*/);
-        verify(mPowerManagerWrapper, never()).wakeUp(anyLong(), anyString());
+        verify(sPowerManagerWrapper, never()).wakeUp(anyLong(), anyString());
         assertTrue(appWindowToken.canTurnScreenOn());
 
-        reset(mPowerManagerWrapper);
+        reset(sPowerManagerWrapper);
         second.prepareWindowToDisplayDuringRelayout(false /*wasVisible*/);
-        verify(mPowerManagerWrapper).wakeUp(anyLong(), anyString());
+        verify(sPowerManagerWrapper).wakeUp(anyLong(), anyString());
         assertFalse(appWindowToken.canTurnScreenOn());
 
         // Call prepareWindowToDisplayDuringRelayout for two window that have FLAG_TURN_SCREEN_ON
@@ -278,14 +273,14 @@ public class WindowStateTests extends WindowTestsBase {
         first.mAttrs.flags |= WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON;
         second.mAttrs.flags |= WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON;
 
-        reset(mPowerManagerWrapper);
+        reset(sPowerManagerWrapper);
         first.prepareWindowToDisplayDuringRelayout(false /*wasVisible*/);
-        verify(mPowerManagerWrapper).wakeUp(anyLong(), anyString());
+        verify(sPowerManagerWrapper).wakeUp(anyLong(), anyString());
         assertFalse(appWindowToken.canTurnScreenOn());
 
-        reset(mPowerManagerWrapper);
+        reset(sPowerManagerWrapper);
         second.prepareWindowToDisplayDuringRelayout(false /*wasVisible*/);
-        verify(mPowerManagerWrapper, never()).wakeUp(anyLong(), anyString());
+        verify(sPowerManagerWrapper, never()).wakeUp(anyLong(), anyString());
         assertFalse(appWindowToken.canTurnScreenOn());
 
         // Call prepareWindowToDisplayDuringRelayout for a windows that are not children of an
@@ -299,17 +294,17 @@ public class WindowStateTests extends WindowTestsBase {
         firstWindow.mAttrs.flags |= WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON;
         secondWindow.mAttrs.flags |= WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON;
 
-        reset(mPowerManagerWrapper);
+        reset(sPowerManagerWrapper);
         firstWindow.prepareWindowToDisplayDuringRelayout(false /*wasVisible*/);
-        verify(mPowerManagerWrapper).wakeUp(anyLong(), anyString());
+        verify(sPowerManagerWrapper).wakeUp(anyLong(), anyString());
 
-        reset(mPowerManagerWrapper);
+        reset(sPowerManagerWrapper);
         secondWindow.prepareWindowToDisplayDuringRelayout(false /*wasVisible*/);
-        verify(mPowerManagerWrapper).wakeUp(anyLong(), anyString());
+        verify(sPowerManagerWrapper).wakeUp(anyLong(), anyString());
     }
 
     @Test
-    public void testCanAffectSystemUiFlags() throws Exception {
+    public void testCanAffectSystemUiFlags() {
         final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
         app.mToken.setHidden(false);
         assertTrue(app.canAffectSystemUiFlags());
@@ -318,11 +313,10 @@ public class WindowStateTests extends WindowTestsBase {
         app.mToken.setHidden(false);
         app.mAttrs.alpha = 0.0f;
         assertFalse(app.canAffectSystemUiFlags());
-
     }
 
     @Test
-    public void testCanAffectSystemUiFlags_disallow() throws Exception {
+    public void testCanAffectSystemUiFlags_disallow() {
         final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
         app.mToken.setHidden(false);
         assertTrue(app.canAffectSystemUiFlags());
@@ -331,7 +325,7 @@ public class WindowStateTests extends WindowTestsBase {
     }
 
     @Test
-    public void testIsSelfOrAncestorWindowAnimating() throws Exception {
+    public void testIsSelfOrAncestorWindowAnimating() {
         final WindowState root = createWindow(null, TYPE_APPLICATION, "root");
         final WindowState child1 = createWindow(root, FIRST_SUB_WINDOW, "child1");
         final WindowState child2 = createWindow(child1, FIRST_SUB_WINDOW, "child2");
@@ -344,7 +338,7 @@ public class WindowStateTests extends WindowTestsBase {
     }
 
     @Test
-    public void testLayoutSeqResetOnReparent() throws Exception {
+    public void testLayoutSeqResetOnReparent() {
         final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
         app.mLayoutSeq = 1;
         mDisplayContent.mLayoutSeq = 1;
@@ -355,7 +349,7 @@ public class WindowStateTests extends WindowTestsBase {
     }
 
     @Test
-    public void testDisplayIdUpdatedOnReparent() throws Exception {
+    public void testDisplayIdUpdatedOnReparent() {
         final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
         // fake a different display
         app.mInputWindowHandle.displayId = mDisplayContent.getDisplayId() + 1;
@@ -418,11 +412,11 @@ public class WindowStateTests extends WindowTestsBase {
     }
 
     private void testPrepareWindowToDisplayDuringRelayout(boolean wasVisible) {
-        reset(mPowerManagerWrapper);
+        reset(sPowerManagerWrapper);
         final WindowState root = createWindow(null, TYPE_APPLICATION, "root");
         root.mAttrs.flags |= WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON;
 
         root.prepareWindowToDisplayDuringRelayout(wasVisible /*wasVisible*/);
-        verify(mPowerManagerWrapper).wakeUp(anyLong(), anyString());
+        verify(sPowerManagerWrapper).wakeUp(anyLong(), anyString());
     }
 }

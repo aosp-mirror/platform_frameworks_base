@@ -11,7 +11,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
 package com.android.server.wm;
@@ -27,17 +27,17 @@ import static org.junit.Assert.assertTrue;
 
 import android.platform.test.annotations.Presubmit;
 
+import androidx.test.filters.SmallTest;
+
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
-import androidx.test.filters.SmallTest;
 
 /**
  * Tests for the {@link DisplayContent.TaskStackContainers} container in {@link DisplayContent}.
  *
  * Build/Install/Run:
- *  atest FrameworksServicesTests:com.android.server.wm.TaskStackContainersTests
+ *  atest FrameworksServicesTests:TaskStackContainersTests
  */
 @SmallTest
 @Presubmit
@@ -45,11 +45,8 @@ public class TaskStackContainersTests extends WindowTestsBase {
 
     private TaskStack mPinnedStack;
 
-    @Override
     @Before
     public void setUp() throws Exception {
-        super.setUp();
-
         mPinnedStack = createStackControllerOnStackOnDisplay(
                 WINDOWING_MODE_PINNED, ACTIVITY_TYPE_STANDARD, mDisplayContent).mContainer;
         // Stack should contain visible app window to be considered visible.
@@ -61,12 +58,9 @@ public class TaskStackContainersTests extends WindowTestsBase {
         assertTrue(mPinnedStack.isVisible());
     }
 
-    @Override
     @After
     public void tearDown() throws Exception {
         mPinnedStack.removeImmediately();
-
-        super.tearDown();
     }
 
     @Test
@@ -121,14 +115,14 @@ public class TaskStackContainersTests extends WindowTestsBase {
         final Task task = createTaskInStack(stack, 0 /* userId */);
 
         // Add another display at top.
-        sWm.mRoot.positionChildAt(WindowContainer.POSITION_TOP, createNewDisplay(),
+        mWm.mRoot.positionChildAt(WindowContainer.POSITION_TOP, createNewDisplay(),
                 false /* includingParents */);
 
         // Move the task of {@code mDisplayContent} to top.
         stack.positionChildAt(WindowContainer.POSITION_TOP, task, true /* includingParents */);
-        final int indexOfDisplayWithPinnedStack = sWm.mRoot.mChildren.indexOf(mDisplayContent);
+        final int indexOfDisplayWithPinnedStack = mWm.mRoot.mChildren.indexOf(mDisplayContent);
 
         assertEquals("The testing DisplayContent should be moved to top with task",
-                sWm.mRoot.getChildCount() - 1, indexOfDisplayWithPinnedStack);
+                mWm.mRoot.getChildCount() - 1, indexOfDisplayWithPinnedStack);
     }
 }

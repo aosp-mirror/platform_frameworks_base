@@ -36,26 +36,24 @@ import android.view.DisplayInfo;
 
 import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
+import org.junit.Before;
 import org.junit.Test;
 
 /**
  * Test class to for {@link android.app.WindowConfiguration}.
  *
  * Build/Install/Run:
- *  bit FrameworksServicesTests:com.android.server.wm.WindowConfigurationTests
+ *  atest FrameworksServicesTests:WindowConfigurationTests
  */
-@SmallTest
 @FlakyTest(bugId = 74078662)
+@SmallTest
 @Presubmit
-@org.junit.runner.RunWith(AndroidJUnit4.class)
 public class WindowConfigurationTests extends WindowTestsBase {
     private Rect mParentBounds;
 
-    @Override
+    @Before
     public void setUp() throws Exception {
-        super.setUp();
         mParentBounds = new Rect(10 /*left*/, 30 /*top*/, 80 /*right*/, 60 /*bottom*/);
     }
 
@@ -95,7 +93,7 @@ public class WindowConfigurationTests extends WindowTestsBase {
 
     /** Tests {@link android.app.WindowConfiguration#compareTo(WindowConfiguration)}. */
     @Test
-    public void testConfigurationCompareTo() throws Exception {
+    public void testConfigurationCompareTo() {
         final Configuration blankConfig = new Configuration();
         final WindowConfiguration blankWinConfig = new WindowConfiguration();
 
@@ -135,7 +133,7 @@ public class WindowConfigurationTests extends WindowTestsBase {
     }
 
     @Test
-    public void testSetActivityType() throws Exception {
+    public void testSetActivityType() {
         final WindowConfiguration config = new WindowConfiguration();
         config.setActivityType(ACTIVITY_TYPE_HOME);
         assertEquals(ACTIVITY_TYPE_HOME, config.getActivityType());
@@ -147,12 +145,12 @@ public class WindowConfigurationTests extends WindowTestsBase {
 
     /** Ensures the configuration app bounds at the root level match the app dimensions. */
     @Test
-    public void testAppBounds_RootConfigurationBounds() throws Exception {
+    public void testAppBounds_RootConfigurationBounds() {
         final DisplayInfo info = mDisplayContent.getDisplayInfo();
         info.appWidth = 1024;
         info.appHeight = 768;
 
-        final Rect appBounds = sWm.computeNewConfiguration(
+        final Rect appBounds = mWm.computeNewConfiguration(
                 mDisplayContent.getDisplayId()).windowConfiguration.getAppBounds();
         // The bounds should always be positioned in the top left.
         assertEquals(appBounds.left, 0);
@@ -165,7 +163,7 @@ public class WindowConfigurationTests extends WindowTestsBase {
 
     /** Ensures that bounds are clipped to their parent. */
     @Test
-    public void testAppBounds_BoundsClipping() throws Exception {
+    public void testAppBounds_BoundsClipping() {
         final Rect shiftedBounds = new Rect(mParentBounds);
         shiftedBounds.offset(10, 10);
         final Rect expectedBounds = new Rect(mParentBounds);
@@ -176,7 +174,7 @@ public class WindowConfigurationTests extends WindowTestsBase {
 
     /** Ensures that empty bounds are not propagated to the configuration. */
     @Test
-    public void testAppBounds_EmptyBounds() throws Exception {
+    public void testAppBounds_EmptyBounds() {
         final Rect emptyBounds = new Rect();
         testStackBoundsConfiguration(WINDOWING_MODE_FULLSCREEN, mParentBounds, emptyBounds,
                 null /*ExpectedBounds*/);
@@ -184,7 +182,7 @@ public class WindowConfigurationTests extends WindowTestsBase {
 
     /** Ensures that bounds on freeform stacks are not clipped. */
     @Test
-    public void testAppBounds_FreeFormBounds() throws Exception {
+    public void testAppBounds_FreeFormBounds() {
         final Rect freeFormBounds = new Rect(mParentBounds);
         freeFormBounds.offset(10, 10);
         testStackBoundsConfiguration(WINDOWING_MODE_FREEFORM, mParentBounds, freeFormBounds,
@@ -193,7 +191,7 @@ public class WindowConfigurationTests extends WindowTestsBase {
 
     /** Ensures that fully contained bounds are not clipped. */
     @Test
-    public void testAppBounds_ContainedBounds() throws Exception {
+    public void testAppBounds_ContainedBounds() {
         final Rect insetBounds = new Rect(mParentBounds);
         insetBounds.inset(5, 5, 5, 5);
         testStackBoundsConfiguration(
@@ -202,7 +200,7 @@ public class WindowConfigurationTests extends WindowTestsBase {
 
     /** Ensures that full screen free form bounds are clipped */
     @Test
-    public void testAppBounds_FullScreenFreeFormBounds() throws Exception {
+    public void testAppBounds_FullScreenFreeFormBounds() {
         final Rect fullScreenBounds = new Rect(0, 0, mDisplayInfo.logicalWidth,
                 mDisplayInfo.logicalHeight);
         testStackBoundsConfiguration(WINDOWING_MODE_FULLSCREEN, mParentBounds, fullScreenBounds,
