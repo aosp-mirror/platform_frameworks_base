@@ -124,6 +124,7 @@ public class AppStandbyControllerTests {
 
     static class MyInjector extends AppStandbyController.Injector {
         long mElapsedRealtime;
+        boolean mIsAppIdleEnabled = true;
         boolean mIsCharging;
         List<String> mPowerSaveWhitelistExceptIdle = new ArrayList<>();
         boolean mDisplayOn;
@@ -155,7 +156,7 @@ public class AppStandbyControllerTests {
 
         @Override
         boolean isAppIdleEnabled() {
-            return true;
+            return mIsAppIdleEnabled;
         }
 
         @Override
@@ -266,6 +267,13 @@ public class AppStandbyControllerTests {
         }
     }
 
+    private void setAppIdleEnabled(AppStandbyController controller, boolean enabled) {
+        mInjector.mIsAppIdleEnabled = enabled;
+        if (controller != null) {
+            controller.setAppIdleEnabled(enabled);
+        }
+    }
+
     private AppStandbyController setupController() throws Exception {
         mInjector.mElapsedRealtime = 0;
         setupPm(mInjector.getContext().getPackageManager());
@@ -335,7 +343,7 @@ public class AppStandbyControllerTests {
         public void onParoleStateChanged(boolean isParoleOn) {
             synchronized (this) {
                 // Only record information if it is being looked for
-                if (mLatch.getCount() > 0) {
+                if (mLatch != null && mLatch.getCount() > 0) {
                     mOnParole = isParoleOn;
                     mLastParoleChangeTime = getCurrentTime();
                     mLatch.countDown();
@@ -394,6 +402,74 @@ public class AppStandbyControllerTests {
         assertEquals(STABLE_CHARGING_THRESHOLD,
                 paroleListener.getLastParoleChangeTime() - startTime,
                 marginOfError);
+    }
+
+    @Test
+    public void testEnabledState() throws Exception {
+        TestParoleListener paroleListener = new TestParoleListener();
+        mController.addListener(paroleListener);
+        long lastUpdateTime;
+
+        // Test that listeners are notified if enabled changes when the device is not in parole.
+        setChargingState(mController, false);
+
+        // Start off not enabled. Device is effectively on permanent parole.
+        setAppIdleEnabled(mController, false);
+
+        // Enable controller
+        paroleListener.rearmLatch();
+        setAppIdleEnabled(mController, true);
+        paroleListener.awaitOnLatch(STABLE_CHARGING_THRESHOLD * 3 / 2);
+        assertFalse(paroleListener.mOnParole);
+        lastUpdateTime = paroleListener.getLastParoleChangeTime();
+
+        paroleListener.rearmLatch();
+        setAppIdleEnabled(mController, true);
+        paroleListener.awaitOnLatch(STABLE_CHARGING_THRESHOLD * 3 / 2);
+        assertFalse(paroleListener.mOnParole);
+        // Make sure AppStandbyController doesn't notify listeners when there's no change.
+        assertEquals(lastUpdateTime, paroleListener.getLastParoleChangeTime());
+
+        // Disable controller
+        paroleListener.rearmLatch();
+        setAppIdleEnabled(mController, false);
+        paroleListener.awaitOnLatch(STABLE_CHARGING_THRESHOLD * 3 / 2);
+        assertTrue(paroleListener.mOnParole);
+        lastUpdateTime = paroleListener.getLastParoleChangeTime();
+
+        paroleListener.rearmLatch();
+        setAppIdleEnabled(mController, false);
+        paroleListener.awaitOnLatch(STABLE_CHARGING_THRESHOLD * 3 / 2);
+        assertTrue(paroleListener.mOnParole);
+        // Make sure AppStandbyController doesn't notify listeners when there's no change.
+        assertEquals(lastUpdateTime, paroleListener.getLastParoleChangeTime());
+
+
+        // Test that listeners aren't notified if enabled status changes when the device is already
+        // in parole.
+
+        // A device is in parole whenever it's charging.
+        setChargingState(mController, true);
+
+        // Start off not enabled.
+        paroleListener.rearmLatch();
+        setAppIdleEnabled(mController, false);
+        paroleListener.awaitOnLatch(STABLE_CHARGING_THRESHOLD * 3 / 2);
+        assertTrue(paroleListener.mOnParole);
+        lastUpdateTime = paroleListener.getLastParoleChangeTime();
+
+        // Test that toggling doesn't notify the listener.
+        paroleListener.rearmLatch();
+        setAppIdleEnabled(mController, true);
+        paroleListener.awaitOnLatch(STABLE_CHARGING_THRESHOLD * 3 / 2);
+        assertTrue(paroleListener.mOnParole);
+        assertEquals(lastUpdateTime, paroleListener.getLastParoleChangeTime());
+
+        paroleListener.rearmLatch();
+        setAppIdleEnabled(mController, false);
+        paroleListener.awaitOnLatch(STABLE_CHARGING_THRESHOLD * 3 / 2);
+        assertTrue(paroleListener.mOnParole);
+        assertEquals(lastUpdateTime, paroleListener.getLastParoleChangeTime());
     }
 
     private void assertTimeout(AppStandbyController controller, long elapsedTime, int bucket) {
