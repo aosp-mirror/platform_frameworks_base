@@ -25,6 +25,7 @@
 #include "pipeline/skia/AnimatedDrawables.h"
 #include "pipeline/skia/GLFunctorDrawable.h"
 #include "pipeline/skia/VkInteropFunctorDrawable.h"
+#include "pipeline/skia/VkFunctorDrawable.h"
 
 namespace android {
 namespace uirenderer {
@@ -124,6 +125,8 @@ void SkiaRecordingCanvas::callDrawGLFunction(Functor* functor,
                                              uirenderer::GlFunctorLifecycleListener* listener) {
     FunctorDrawable* functorDrawable;
     if (Properties::getRenderPipelineType() == RenderPipelineType::SkiaVulkan) {
+        // TODO(cblume) use VkFunctorDrawable instead of VkInteropFunctorDrawable here when the
+        // interop is disabled/moved.
         functorDrawable = mDisplayList->allocateDrawable<VkInteropFunctorDrawable>(functor,
                 listener, asSkCanvas());
     } else {
