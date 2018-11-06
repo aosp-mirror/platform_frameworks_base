@@ -236,13 +236,13 @@ public class Assistant extends NotificationAssistantService {
             @NonNull ArrayList<CharSequence> smartReplies) {
         Bundle signals = new Bundle();
 
+        if (!smartActions.isEmpty()) {
+            signals.putParcelableArrayList(Adjustment.KEY_SMART_ACTIONS, smartActions);
+        }
+        if (!smartReplies.isEmpty()) {
+            signals.putCharSequenceArrayList(Adjustment.KEY_SMART_REPLIES, smartReplies);
+        }
         if (AUTO_DEMOTE_NOTIFICATIONS) {
-            if (!smartActions.isEmpty()) {
-                signals.putParcelableArrayList(Adjustment.KEY_SMART_ACTIONS, smartActions);
-            }
-            if (!smartReplies.isEmpty()) {
-                signals.putCharSequenceArrayList(Adjustment.KEY_SMART_REPLIES, smartReplies);
-            }
             if (mNotificationCategorizer.shouldSilence(entry)) {
                 final int importance = entry.getImportance() < IMPORTANCE_LOW
                         ? entry.getImportance() : IMPORTANCE_LOW;
