@@ -40,7 +40,6 @@ import android.content.pm.ProviderInfo;
 import android.content.pm.ResolveInfo;
 import android.media.RingtoneManager;
 import android.net.Uri;
-import android.os.Binder;
 import android.os.Build;
 import android.os.Environment;
 import android.os.Handler;
@@ -880,9 +879,8 @@ public final class DefaultPermissionGrantPolicy {
     }
 
     private String getDefaultSystemHandlerActivityPackage(Intent intent, int userId) {
-        ResolveInfo handler = mServiceInternal.resolveIntent(intent,
-                intent.resolveType(mContext.getContentResolver()), DEFAULT_INTENT_QUERY_FLAGS,
-                userId, false, Binder.getCallingUid());
+        ResolveInfo handler = mContext.getPackageManager().resolveActivityAsUser(
+                intent, DEFAULT_INTENT_QUERY_FLAGS, userId);
         if (handler == null || handler.activityInfo == null) {
             return null;
         }
@@ -899,8 +897,8 @@ public final class DefaultPermissionGrantPolicy {
 
     private String getDefaultSystemHandlerServicePackage(
             Intent intent, int userId) {
-        List<ResolveInfo> handlers = mServiceInternal.queryIntentServices(
-                intent, DEFAULT_INTENT_QUERY_FLAGS, Binder.getCallingUid(), userId);
+        List<ResolveInfo> handlers = mContext.getPackageManager().queryIntentServicesAsUser(
+                intent, DEFAULT_INTENT_QUERY_FLAGS, userId);
         if (handlers == null) {
             return null;
         }
@@ -924,10 +922,8 @@ public final class DefaultPermissionGrantPolicy {
         for (String syncAdapterPackageName : syncAdapterPackageNames) {
             homeIntent.setPackage(syncAdapterPackageName);
 
-            ResolveInfo homeActivity = mServiceInternal.resolveIntent(homeIntent,
-                    homeIntent.resolveType(mContext.getContentResolver()),
-                    DEFAULT_INTENT_QUERY_FLAGS,
-                    userId, false, Binder.getCallingUid());
+            ResolveInfo homeActivity = mContext.getPackageManager().resolveActivityAsUser(
+                    homeIntent, DEFAULT_INTENT_QUERY_FLAGS, userId);
             if (homeActivity != null) {
                 continue;
             }
@@ -941,7 +937,7 @@ public final class DefaultPermissionGrantPolicy {
     }
 
     private String getDefaultProviderAuthorityPackage(String authority, int userId) {
-        ProviderInfo provider = mServiceInternal.resolveContentProvider(
+        ProviderInfo provider = mContext.getPackageManager().resolveContentProviderAsUser(
                 authority, DEFAULT_INTENT_QUERY_FLAGS, userId);
         if (provider != null) {
             return provider.packageName;
@@ -980,8 +976,9 @@ public final class DefaultPermissionGrantPolicy {
                 continue;
             }
 
-            final int flags = mServiceInternal.getPermissionFlagsTEMP(
-                    permission, packageName, userId);
+            UserHandle user = UserHandle.of(userId);
+            final int flags = mContext.getPackageManager()
+                    .getPermissionFlags(permission, packageName, user);
 
             // We didn't get this through the default grant policy. Move along.
             if ((flags & PackageManager.FLAG_PERMISSION_GRANTED_BY_DEFAULT) == 0) {
@@ -997,7 +994,7 @@ public final class DefaultPermissionGrantPolicy {
             if ((flags & PackageManager.FLAG_PERMISSION_SYSTEM_FIXED) != 0 && !systemFixed) {
                 continue;
             }
-            mServiceInternal.revokeRuntimePermission(packageName, permission, userId, false);
+            mContext.getPackageManager().revokeRuntimePermission(packageName, permission, user);
 
             if (DEBUG) {
                 Log.i(TAG, "revoked " + (systemFixed ? "fixed " : "not fixed ")
@@ -1007,8 +1004,8 @@ public final class DefaultPermissionGrantPolicy {
             // Remove the GRANTED_BY_DEFAULT flag without touching the others.
             // Note that we do not revoke FLAG_PERMISSION_SYSTEM_FIXED. That bit remains
             // sticky once set.
-            mServiceInternal.updatePermissionFlagsTEMP(permission, packageName,
-                    PackageManager.FLAG_PERMISSION_GRANTED_BY_DEFAULT, 0, userId);
+            mContext.getPackageManager().updatePermissionFlags(permission, packageName,
+                    PackageManager.FLAG_PERMISSION_GRANTED_BY_DEFAULT, 0, user);
         }
     }
 
@@ -1077,8 +1074,9 @@ public final class DefaultPermissionGrantPolicy {
             }
 
             if (permissions.contains(permission)) {
-                final int flags = mServiceInternal.getPermissionFlagsTEMP(
-                        permission, pkg.packageName, userId);
+                UserHandle user = UserHandle.of(userId);
+                final int flags = mContext.getPackageManager().getPermissionFlags(
+                        permission, pkg.packageName, user);
 
                 // If any flags are set to the permission, then it is either set in
                 // its current state by the system or device/profile owner or the user.
@@ -1094,8 +1092,8 @@ public final class DefaultPermissionGrantPolicy {
                         continue;
                     }
 
-                    mServiceInternal.grantRuntimePermission(
-                            pkg.packageName, permission, userId, false);
+                    mContext.getPackageManager()
+                            .grantRuntimePermission(pkg.packageName, permission, user);
                     if (DEBUG) {
                         Log.i(TAG, "Granted " + (systemFixed ? "fixed " : "not fixed ")
                                 + permission + " to default handler " + pkg);
@@ -1106,8 +1104,8 @@ public final class DefaultPermissionGrantPolicy {
                         newFlags |= PackageManager.FLAG_PERMISSION_SYSTEM_FIXED;
                     }
 
-                    mServiceInternal.updatePermissionFlagsTEMP(permission, pkg.packageName,
-                            newFlags, newFlags, userId);
+                    mContext.getPackageManager().updatePermissionFlags(permission, pkg.packageName,
+                            newFlags, newFlags, user);
                 }
 
                 // If a component gets a permission for being the default handler A
@@ -1119,8 +1117,8 @@ public final class DefaultPermissionGrantPolicy {
                         Log.i(TAG, "Granted not fixed " + permission + " to default handler "
                                 + pkg);
                     }
-                    mServiceInternal.updatePermissionFlagsTEMP(permission, pkg.packageName,
-                            PackageManager.FLAG_PERMISSION_SYSTEM_FIXED, 0, userId);
+                    mContext.getPackageManager().updatePermissionFlags(permission, pkg.packageName,
+                            PackageManager.FLAG_PERMISSION_SYSTEM_FIXED, 0, user);
                 }
             }
         }
@@ -1137,10 +1135,12 @@ public final class DefaultPermissionGrantPolicy {
 
     private PackageInfo getPackageInfo(String pkg,
             @PackageManager.PackageInfoFlags int extraFlags) {
-        return mServiceInternal.getPackageInfo(pkg,
-                DEFAULT_PACKAGE_INFO_QUERY_FLAGS | extraFlags,
-                //TODO is this the right filterCallingUid?
-                UserHandle.USER_SYSTEM, UserHandle.USER_SYSTEM);
+        try {
+            return mContext.getPackageManager().getPackageInfo(pkg,
+                    DEFAULT_PACKAGE_INFO_QUERY_FLAGS | extraFlags);
+        } catch (NameNotFoundException e) {
+            return null;
+        }
     }
 
     private boolean isSysComponentOrPersistentPlatformSignedPrivApp(PackageInfo pkg) {
