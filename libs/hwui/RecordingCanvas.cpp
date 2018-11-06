@@ -759,6 +759,8 @@ RecordingCanvas::RecordingCanvas() : INHERITED(1, 1), fDL(nullptr) {}
 void RecordingCanvas::reset(DisplayListData* dl, const SkIRect& bounds) {
     this->resetCanvas(bounds.right(), bounds.bottom());
     fDL = dl;
+    mClipMayBeComplex = false;
+    mSaveCount = mComplexSaveCount = 0;
 }
 
 sk_sp<SkSurface> RecordingCanvas::onNewSurface(const SkImageInfo&, const SkSurfaceProps&) {
@@ -770,6 +772,7 @@ void RecordingCanvas::onFlush() {
 }
 
 void RecordingCanvas::willSave() {
+    mSaveCount++;
     fDL->save();
 }
 SkCanvas::SaveLayerStrategy RecordingCanvas::getSaveLayerStrategy(const SaveLayerRec& rec) {
@@ -778,6 +781,11 @@ SkCanvas::SaveLayerStrategy RecordingCanvas::getSaveLayerStrategy(const SaveLaye
     return SkCanvas::kNoLayer_SaveLayerStrategy;
 }
 void RecordingCanvas::willRestore() {
+    mSaveCount--;
+    if (mSaveCount < mComplexSaveCount) {
+        mClipMayBeComplex = false;
+        mComplexSaveCount = 0;
+    }
     fDL->restore();
 }
 
@@ -798,17 +806,27 @@ void RecordingCanvas::didTranslate(SkScalar dx, SkScalar dy) {
 
 void RecordingCanvas::onClipRect(const SkRect& rect, SkClipOp op, ClipEdgeStyle style) {
     fDL->clipRect(rect, op, style == kSoft_ClipEdgeStyle);
+    if (!getTotalMatrix().isScaleTranslate()) {
+        setClipMayBeComplex();
+    }
     this->INHERITED::onClipRect(rect, op, style);
 }
 void RecordingCanvas::onClipRRect(const SkRRect& rrect, SkClipOp op, ClipEdgeStyle style) {
+    if (rrect.getType() > SkRRect::kRect_Type || !getTotalMatrix().isScaleTranslate()) {
+        setClipMayBeComplex();
+    }
     fDL->clipRRect(rrect, op, style == kSoft_ClipEdgeStyle);
     this->INHERITED::onClipRRect(rrect, op, style);
 }
 void RecordingCanvas::onClipPath(const SkPath& path, SkClipOp op, ClipEdgeStyle style) {
+    setClipMayBeComplex();
     fDL->clipPath(path, op, style == kSoft_ClipEdgeStyle);
     this->INHERITED::onClipPath(path, op, style);
 }
 void RecordingCanvas::onClipRegion(const SkRegion& region, SkClipOp op) {
+    if (region.isComplex() || !getTotalMatrix().isScaleTranslate()) {
+        setClipMayBeComplex();
+    }
     fDL->clipRegion(region, op);
     this->INHERITED::onClipRegion(region, op);
 }

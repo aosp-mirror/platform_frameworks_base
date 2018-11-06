@@ -73,7 +73,6 @@ bool SkiaDisplayList::prepareListAndChildren(
         RenderNode* childNode = child.getRenderNode();
         Matrix4 mat4(child.getRecordedMatrix());
         info.damageAccumulator->pushTransform(&mat4);
-        // TODO: a layer is needed if the canvas is rotated or has a non-rect clip
         info.hasBackwardProjectedNodes = false;
         childFn(childNode, observer, info, functorsNeedLayer);
         hasBackwardProjectedNodesSubtree |= info.hasBackwardProjectedNodes;
