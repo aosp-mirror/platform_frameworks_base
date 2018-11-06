@@ -27,6 +27,7 @@ import "frameworks/base/core/proto/android/app/job/enums.proto";
 import "frameworks/base/core/proto/android/bluetooth/enums.proto";
 import "frameworks/base/core/proto/android/os/enums.proto";
 import "frameworks/base/core/proto/android/server/enums.proto";
+import "frameworks/base/core/proto/android/server/location/enums.proto";
 import "frameworks/base/core/proto/android/service/procstats_enum.proto";
 import "frameworks/base/core/proto/android/stats/enums.proto";
 import "frameworks/base/core/proto/android/stats/launcher/launcher.proto";
@@ -118,7 +119,7 @@ message Atom {
         ResourceConfigurationChanged resource_configuration_changed = 66;
         BluetoothEnabledStateChanged bluetooth_enabled_state_changed = 67;
         BluetoothConnectionStateChanged bluetooth_connection_state_changed = 68;
-        // 69 is blank but need not be.
+        GpsSignalQualityChanged gps_signal_quality_changed = 69;
         UsbConnectorStateChanged usb_connector_state_changed = 70;
         SpeakerImpedanceReported speaker_impedance_reported = 71;
         HardwareFailed hardware_failed = 72;
@@ -486,7 +487,6 @@ message SensorStateChanged {
     optional State state = 3;
 }
 
-
 /**
  * Logs when GPS state changes.
  *
@@ -501,6 +501,16 @@ message GpsScanStateChanged {
         ON = 1;
     }
     optional State state = 2;
+}
+
+/**
+ * Logs when GPS signal quality.
+ *
+ * Logged from:
+ *   /frameworks/base/location/java/com/android/internal/location/gnssmetrics/GnssMetrics.java
+ */
+message GpsSignalQualityChanged {
+    optional android.server.location.GpsSignalQualityEnum level = 1;
 }
 
 

@@ -20,9 +20,12 @@ import android.os.SystemClock;
 import android.os.connectivity.GpsBatteryStats;
 import android.os.SystemProperties;
 
+import android.server.location.ServerLocationProtoEnums;
+
 import android.text.format.DateUtils;
 import android.util.Base64;
 import android.util.Log;
+import android.util.StatsLog;
 import android.util.TimeUtils;
 
 import java.util.Arrays;
@@ -39,11 +42,17 @@ public class GnssMetrics {
 
   private static final String TAG = GnssMetrics.class.getSimpleName();
 
+  /* Constant which indicates GPS signal quality is as yet unknown */
+  public static final int GPS_SIGNAL_QUALITY_UNKNOWN =
+          ServerLocationProtoEnums.GPS_SIGNAL_QUALITY_UNKNOWN; // -1
+
   /* Constant which indicates GPS signal quality is poor */
-  public static final int GPS_SIGNAL_QUALITY_POOR = 0;
+  public static final int GPS_SIGNAL_QUALITY_POOR =
+      ServerLocationProtoEnums.GPS_SIGNAL_QUALITY_POOR; // 0
 
   /* Constant which indicates GPS signal quality is good */
-  public static final int GPS_SIGNAL_QUALITY_GOOD = 1;
+  public static final int GPS_SIGNAL_QUALITY_GOOD =
+      ServerLocationProtoEnums.GPS_SIGNAL_QUALITY_GOOD; // 1
 
   /* Number of GPS signal quality levels */
   public static final int NUM_GPS_SIGNAL_QUALITY_LEVELS = GPS_SIGNAL_QUALITY_GOOD + 1;
@@ -329,11 +338,15 @@ public class GnssMetrics {
     /* Last reported Top Four Average CN0 */
     private double mLastAverageCn0;
 
+    /* Last reported signal quality bin (based on Top Four Average CN0) */
+    private int mLastSignalLevel;
+
     public GnssPowerMetrics(IBatteryStats stats) {
       mBatteryStats = stats;
       // Used to initialize the variable to a very small value (unachievable in practice) so that
       // the first CNO report will trigger an update to BatteryStats
       mLastAverageCn0 = -100.0;
+      mLastSignalLevel = GPS_SIGNAL_QUALITY_UNKNOWN;
     }
 
     /**
@@ -384,8 +397,13 @@ public class GnssMetrics {
       if (Math.abs(avgCn0 - mLastAverageCn0) < REPORTING_THRESHOLD_DB_HZ) {
         return;
       }
+      int signalLevel = getSignalLevel(avgCn0);
+      if (signalLevel != mLastSignalLevel) {
+        StatsLog.write(StatsLog.GPS_SIGNAL_QUALITY_CHANGED, signalLevel);
+        mLastSignalLevel = signalLevel;
+      }
       try {
-        mBatteryStats.noteGpsSignalQuality(getSignalLevel(avgCn0));
+        mBatteryStats.noteGpsSignalQuality(signalLevel);
         mLastAverageCn0 = avgCn0;
       } catch (Exception e) {
         Log.w(TAG, "Exception", e);
