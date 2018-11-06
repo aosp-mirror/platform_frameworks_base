@@ -1087,6 +1087,10 @@ public class HdmiCecLocalDeviceAudioSystem extends HdmiCecLocalDeviceSource {
     @ServiceThreadOnly
     private void launchDeviceDiscovery() {
         assertRunOnServiceThread();
+        if (hasAction(DeviceDiscoveryAction.class)) {
+            Slog.i(TAG, "Device Discovery Action is in progress. Restarting.");
+            removeAction(DeviceDiscoveryAction.class);
+        }
         DeviceDiscoveryAction action = new DeviceDiscoveryAction(this,
                 new DeviceDiscoveryCallback() {
                     @Override
