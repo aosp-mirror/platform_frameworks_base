@@ -17,12 +17,9 @@ package android.ext.services.autofill;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.util.Log;
 import android.view.autofill.AutofillValue;
 
 import com.android.internal.annotations.VisibleForTesting;
-
-import java.util.List;
 
 final class EditDistanceScorer {
 
@@ -31,15 +28,14 @@ final class EditDistanceScorer {
     // TODO(b/70291841): STOPSHIP - set to false before launching
     private static final boolean DEBUG = true;
 
-    static final String DEFAULT_ALGORITHM = "EDIT_DISTANCE";
-
     /**
      * Gets the field classification score of 2 values based on the edit distance between them.
      *
      * <p>The score is defined as: @(max_length - edit_distance) / max_length
      */
     @VisibleForTesting
-    static float getScore(@Nullable AutofillValue actualValue, @Nullable String userDataValue) {
+    static float calculateScore(@Nullable AutofillValue actualValue,
+            @Nullable String userDataValue) {
         if (actualValue == null || !actualValue.isText() || userDataValue == null) return 0;
 
         final String actualValueText = actualValue.getTextValue().toString();
@@ -122,27 +118,6 @@ final class EditDistanceScorer {
         }
 
         return d[m][n];
-    }
-    /**
-     * Gets the scores in a batch.
-     */
-    static float[][] getScores(@NonNull List<AutofillValue> actualValues,
-            @NonNull List<String> userDataValues) {
-        final int actualValuesSize = actualValues.size();
-        final int userDataValuesSize = userDataValues.size();
-        if (DEBUG) {
-            Log.d(TAG, "getScores() will return a " + actualValuesSize + "x"
-                    + userDataValuesSize + " matrix for " + DEFAULT_ALGORITHM);
-        }
-        final float[][] scores = new float[actualValuesSize][userDataValuesSize];
-
-        for (int i = 0; i < actualValuesSize; i++) {
-            for (int j = 0; j < userDataValuesSize; j++) {
-                final float score = getScore(actualValues.get(i), userDataValues.get(j));
-                scores[i][j] = score;
-            }
-        }
-        return scores;
     }
 
 }

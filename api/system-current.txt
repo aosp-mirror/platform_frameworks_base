@@ -4871,7 +4871,10 @@ package android.service.autofill {
 
   public abstract class AutofillFieldClassificationService extends android.app.Service {
     method public android.os.IBinder onBind(android.content.Intent);
-    method public float[][] onGetScores(java.lang.String, android.os.Bundle, java.util.List<android.view.autofill.AutofillValue>, java.util.List<java.lang.String>);
+    method public float[][] onCalculateScores(java.util.List<android.view.autofill.AutofillValue>, java.util.List<java.lang.String>, java.util.List<java.lang.String>, java.lang.String, android.os.Bundle, java.util.Map, java.util.Map);
+    method public deprecated float[][] onGetScores(java.lang.String, android.os.Bundle, java.util.List<android.view.autofill.AutofillValue>, java.util.List<java.lang.String>);
+    field public static final java.lang.String REQUIRED_ALGORITHM_EDIT_DISTANCE = "EDIT_DISTANCE";
+    field public static final java.lang.String REQUIRED_ALGORITHM_EXACT_MATCH = "EXACT_MATCH";
     field public static final java.lang.String SERVICE_INTERFACE = "android.service.autofill.AutofillFieldClassificationService";
     field public static final java.lang.String SERVICE_META_DATA_KEY_AVAILABLE_ALGORITHMS = "android.autofill.field_classification.available_algorithms";
     field public static final java.lang.String SERVICE_META_DATA_KEY_DEFAULT_ALGORITHM = "android.autofill.field_classification.default_algorithm";
