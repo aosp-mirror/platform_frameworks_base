@@ -164,7 +164,7 @@ Draws decorations about the screen in software (e.g. rounded corners, cutouts).
 
 ### [com.android.systemui.biometrics.BiometricDialogImpl](/packages/SystemUI/src/com/android/systemui/biometrics/BiometricDialogImpl.java)
 
-Fingerprint UI.
+Biometric UI.
 
 ---
 

@@ -68,6 +68,7 @@ import com.android.server.wm.ActivityTaskManagerService;
 import com.android.server.appbinding.AppBindingService;
 import com.android.server.audio.AudioService;
 import com.android.server.biometrics.BiometricService;
+import com.android.server.biometrics.iris.IrisService;
 import com.android.server.broadcastradio.BroadcastRadioService;
 import com.android.server.camera.CameraServiceProxy;
 import com.android.server.clipboard.ClipboardService;
@@ -1589,6 +1590,8 @@ public final class SystemServer {
 
             final boolean hasFeatureFace
                     = mPackageManager.hasSystemFeature(PackageManager.FEATURE_FACE);
+            final boolean hasFeatureIris
+                    = mPackageManager.hasSystemFeature(PackageManager.FEATURE_IRIS);
             final boolean hasFeatureFingerprint
                     = mPackageManager.hasSystemFeature(PackageManager.FEATURE_FINGERPRINT);
 
@@ -1598,13 +1601,19 @@ public final class SystemServer {
                 traceEnd();
             }
 
+            if (hasFeatureIris) {
+                traceBeginAndSlog("StartIrisSensor");
+                mSystemServiceManager.startService(IrisService.class);
+                traceEnd();
+            }
+
             if (hasFeatureFingerprint) {
                 traceBeginAndSlog("StartFingerprintSensor");
                 mSystemServiceManager.startService(FingerprintService.class);
                 traceEnd();
             }
 
-            if (hasFeatureFace || hasFeatureFingerprint) {
+            if (hasFeatureFace || hasFeatureIris || hasFeatureFingerprint) {
                 // Start this service after all biometric services.
                 traceBeginAndSlog("StartBiometricPromptService");
                 mSystemServiceManager.startService(BiometricService.class);
