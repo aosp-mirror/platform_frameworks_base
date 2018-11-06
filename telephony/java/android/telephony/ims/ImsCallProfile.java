@@ -16,16 +16,19 @@
 
 package android.telephony.ims;
 
+import android.annotation.IntDef;
 import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
 import android.os.Bundle;
 import android.os.Parcel;
 import android.os.Parcelable;
-import android.os.PersistableBundle;
 import android.telecom.VideoProfile;
 import android.util.Log;
 
 import com.android.internal.telephony.PhoneConstants;
+
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 
 /**
  * Parcelable object to handle IMS call profile.
@@ -206,16 +209,35 @@ public final class ImsCallProfile implements Parcelable {
     public static final int DIALSTRING_USSD = 2;
 
     /**
-     * Values for causes that restrict call types
+     * Call is not restricted on peer side and High Definition media is supported
      */
-    // Default cause not restricted at peer and HD is supported
     public static final int CALL_RESTRICT_CAUSE_NONE = 0;
-    // Service not supported by RAT at peer
+
+    /**
+     * High Definition media is not supported on the peer side due to the Radio Access Technology
+     * (RAT) it is are connected to.
+     */
     public static final int CALL_RESTRICT_CAUSE_RAT = 1;
-    // Service Disabled at peer
+
+    /**
+     * The service has been disabled on the peer side.
+     */
     public static final int CALL_RESTRICT_CAUSE_DISABLED = 2;
-    // HD is not supported
+
+    /**
+     * High definition media is not currently supported.
+     */
     public static final int CALL_RESTRICT_CAUSE_HD = 3;
+
+    /**@hide*/
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(prefix = "CALL_RESTRICT_CAUSE_", value = {
+            CALL_RESTRICT_CAUSE_NONE,
+            CALL_RESTRICT_CAUSE_RAT,
+            CALL_RESTRICT_CAUSE_DISABLED,
+            CALL_RESTRICT_CAUSE_HD
+    })
+    public @interface CallRestrictCause {}
 
     /**
      * String extra properties
@@ -270,7 +292,7 @@ public final class ImsCallProfile implements Parcelable {
     public int mCallType;
     /** @hide */
     @UnsupportedAppUsage
-    public int mRestrictCause = CALL_RESTRICT_CAUSE_NONE;
+    public @CallRestrictCause int mRestrictCause = CALL_RESTRICT_CAUSE_NONE;
 
     /**
      * Extras associated with this {@link ImsCallProfile}.
@@ -285,7 +307,7 @@ public final class ImsCallProfile implements Parcelable {
      *     <li>{@code long[]}</li>
      *     <li>{@code double[]}</li>
      *     <li>{@code String[]}</li>
-     *     <li>{@link PersistableBundle}</li>
+     *     <li>{@link android.os.PersistableBundle}</li>
      *     <li>{@link Boolean} (and boolean)</li>
      *     <li>{@code boolean[]}</li>
      *     <li>Other {@link Parcelable} classes in the {@code android.*} namespace.</li>
@@ -426,6 +448,14 @@ public final class ImsCallProfile implements Parcelable {
         }
     }
 
+    /**
+     * Set the call restrict cause, which provides the reason why a call has been restricted from
+     * using High Definition media.
+     */
+    public void setCallRestrictCause(@CallRestrictCause int cause) {
+        mRestrictCause = cause;
+    }
+
     public void updateCallType(ImsCallProfile profile) {
         mCallType = profile.mCallType;
     }
@@ -494,7 +524,11 @@ public final class ImsCallProfile implements Parcelable {
         return mCallType;
     }
 
-    public int getRestrictCause() {
+    /**
+     * @return The call restrict cause, which provides the reason why a call has been restricted
+     * from using High Definition media.
+     */
+    public @CallRestrictCause int getRestrictCause() {
         return mRestrictCause;
     }
 

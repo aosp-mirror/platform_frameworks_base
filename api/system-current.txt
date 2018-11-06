@@ -5668,6 +5668,7 @@ package android.telephony.ims {
     method public void setCallExtra(java.lang.String, java.lang.String);
     method public void setCallExtraBoolean(java.lang.String, boolean);
     method public void setCallExtraInt(java.lang.String, int);
+    method public void setCallRestrictCause(int);
     method public void updateCallExtras(android.telephony.ims.ImsCallProfile);
     method public void updateCallType(android.telephony.ims.ImsCallProfile);
     method public void updateMediaProfile(android.telephony.ims.ImsCallProfile);
