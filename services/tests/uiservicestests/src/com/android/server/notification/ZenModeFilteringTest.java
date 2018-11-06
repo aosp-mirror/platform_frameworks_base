@@ -70,7 +70,8 @@ public class ZenModeFilteringTest extends UiServiceTestCase {
 
     private NotificationRecord getNotificationRecord(NotificationChannel c) {
         StatusBarNotification sbn = mock(StatusBarNotification.class);
-        when(sbn.getNotification()).thenReturn(mock(Notification.class));
+        Notification notification = mock(Notification.class);
+        when(sbn.getNotification()).thenReturn(notification);
         return new NotificationRecord(mContext, sbn, c);
     }
 
