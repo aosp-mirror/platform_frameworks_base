@@ -27,7 +27,6 @@ import static android.view.autofill.AutofillManager.ACTION_VIEW_EXITED;
 import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
 import static com.android.server.autofill.Helper.getNumericValue;
 import static com.android.server.autofill.Helper.sDebug;
-import static com.android.server.autofill.Helper.sPartitionMaxCount;
 import static com.android.server.autofill.Helper.sVerbose;
 import static com.android.server.autofill.Helper.toArray;
 import static com.android.server.autofill.ViewState.STATE_RESTARTED_SESSION;
@@ -65,7 +64,6 @@ import android.service.autofill.AutofillService;
 import android.service.autofill.Dataset;
 import android.service.autofill.FieldClassification;
 import android.service.autofill.FieldClassification.Match;
-import android.text.TextUtils;
 import android.service.autofill.FillContext;
 import android.service.autofill.FillRequest;
 import android.service.autofill.FillResponse;
@@ -75,10 +73,10 @@ import android.service.autofill.SaveInfo;
 import android.service.autofill.SaveRequest;
 import android.service.autofill.UserData;
 import android.service.autofill.ValueFinder;
+import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.LocalLog;
-import android.util.Pair;
 import android.util.Slog;
 import android.util.SparseArray;
 import android.util.TimeUtils;
@@ -94,6 +92,7 @@ import com.android.internal.annotations.GuardedBy;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.internal.util.ArrayUtils;
+import com.android.server.AbstractRemoteService;
 import com.android.server.autofill.ui.AutoFillUI;
 import com.android.server.autofill.ui.PendingUi;
 
@@ -903,9 +902,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 this, authenticationId, intent, fillInIntent));
     }
 
-    // FillServiceCallbacks
+    // VultureCallback
     @Override
-    public void onServiceDied(RemoteFillService service) {
+    public void onServiceDied(AbstractRemoteService service) {
         Slog.w(TAG, "removing session because service died");
         forceRemoveSelfLocked();
     }
@@ -2095,9 +2094,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
         }
 
         final int numResponses = mResponses.size();
-        if (numResponses >= sPartitionMaxCount) {
+        if (numResponses >= AutofillManagerService.getPartitionMaxCount()) {
             Slog.e(TAG, "Not starting a new partition on " + id + " because session " + this.id
-                    + " reached maximum of " + sPartitionMaxCount);
+                    + " reached maximum of " + AutofillManagerService.getPartitionMaxCount());
             return false;
         }
 
@@ -2289,7 +2288,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 requestNewFillResponseOnViewEnteredIfNecessaryLocked(id, viewState, flags);
 
                 // Remove the UI if the ViewState has changed.
-                if (mCurrentViewId != viewState.id) {
+                if (!Objects.equals(mCurrentViewId, viewState.id)) {
                     mUi.hideFillUi(this);
                     mCurrentViewId = viewState.id;
                 }
@@ -2298,7 +2297,7 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
                 viewState.update(value, virtualBounds, flags);
                 break;
             case ACTION_VIEW_EXITED:
-                if (mCurrentViewId == viewState.id) {
+                if (Objects.equals(mCurrentViewId, viewState.id)) {
                     if (sVerbose) Slog.d(TAG, "Exiting view " + id);
                     mUi.hideFillUi(this);
                     mCurrentViewId = null;
@@ -3077,7 +3076,9 @@ final class Session implements RemoteFillService.FillServiceCallbacks, ViewState
 
     private void wtf(@Nullable Exception e, String fmt, Object...args) {
         final String message = String.format(fmt, args);
-        mWtfHistory.log(message);
+        synchronized (mLock) {
+            mWtfHistory.log(message);
+        }
 
         if (e != null) {
             Slog.wtf(TAG, message, e);

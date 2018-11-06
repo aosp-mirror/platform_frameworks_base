@@ -1064,6 +1064,17 @@ public final class AssetManager implements AutoCloseable {
         }
     }
 
+    @UnsupportedAppUsage
+    void setThemeTo(long dstThemePtr, @NonNull AssetManager srcAssetManager, long srcThemePtr) {
+        synchronized (this) {
+            ensureValidLocked();
+            synchronized (srcAssetManager) {
+                srcAssetManager.ensureValidLocked();
+                nativeThemeCopy(mObject, dstThemePtr, srcAssetManager.mObject, srcThemePtr);
+            }
+        }
+    }
+
     @Override
     protected void finalize() throws Throwable {
         if (DEBUG_REFS && mNumRefs != 0) {
@@ -1375,7 +1386,8 @@ public final class AssetManager implements AutoCloseable {
     private static native void nativeThemeDestroy(long themePtr);
     private static native void nativeThemeApplyStyle(long ptr, long themePtr, @StyleRes int resId,
             boolean force);
-    static native void nativeThemeCopy(long destThemePtr, long sourceThemePtr);
+    private static native void nativeThemeCopy(long dstAssetManagerPtr, long dstThemePtr,
+            long srcAssetManagerPtr, long srcThemePtr);
     static native void nativeThemeClear(long themePtr);
     private static native int nativeThemeGetAttributeValue(long ptr, long themePtr,
             @AttrRes int resId, @NonNull TypedValue outValue, boolean resolve);

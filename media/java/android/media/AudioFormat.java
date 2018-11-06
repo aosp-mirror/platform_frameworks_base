@@ -273,6 +273,11 @@ public final class AudioFormat implements Parcelable {
      * supports {@link #ENCODING_E_AC3} but not {@link #ENCODING_E_AC3_JOC}.
      **/
     public static final int ENCODING_E_AC3_JOC = 18;
+    /** Audio data format: Dolby MAT (Metadata-enhanced Audio Transmission)
+     * Dolby MAT bitstreams are used to transmit Dolby TrueHD, channel-based PCM, or PCM with
+     * metadata (object audio) over HDMI (e.g. Dolby Atmos content).
+     **/
+    public static final int ENCODING_DOLBY_MAT = 19;
 
     /** @hide */
     public static String toLogFriendlyEncoding(int enc) {
@@ -313,6 +318,8 @@ public final class AudioFormat implements Parcelable {
                 return "ENCODING_AC4";
             case ENCODING_E_AC3_JOC:
                 return "ENCODING_E_AC3_JOC";
+            case ENCODING_DOLBY_MAT:
+                return "ENCODING_DOLBY_MAT";
             default :
                 return "invalid encoding " + enc;
         }
@@ -520,26 +527,27 @@ public final class AudioFormat implements Parcelable {
     public static boolean isValidEncoding(int audioFormat)
     {
         switch (audioFormat) {
-        case ENCODING_PCM_16BIT:
-        case ENCODING_PCM_8BIT:
-        case ENCODING_PCM_FLOAT:
-        case ENCODING_AC3:
-        case ENCODING_E_AC3:
-        case ENCODING_DTS:
-        case ENCODING_DTS_HD:
-        case ENCODING_MP3:
-        case ENCODING_AAC_LC:
-        case ENCODING_AAC_HE_V1:
-        case ENCODING_AAC_HE_V2:
-        case ENCODING_IEC61937:
-        case ENCODING_DOLBY_TRUEHD:
-        case ENCODING_AAC_ELD:
-        case ENCODING_AAC_XHE:
-        case ENCODING_AC4:
-        case ENCODING_E_AC3_JOC:
-            return true;
-        default:
-            return false;
+            case ENCODING_PCM_16BIT:
+            case ENCODING_PCM_8BIT:
+            case ENCODING_PCM_FLOAT:
+            case ENCODING_AC3:
+            case ENCODING_E_AC3:
+            case ENCODING_DTS:
+            case ENCODING_DTS_HD:
+            case ENCODING_MP3:
+            case ENCODING_AAC_LC:
+            case ENCODING_AAC_HE_V1:
+            case ENCODING_AAC_HE_V2:
+            case ENCODING_IEC61937:
+            case ENCODING_DOLBY_TRUEHD:
+            case ENCODING_AAC_ELD:
+            case ENCODING_AAC_XHE:
+            case ENCODING_AC4:
+            case ENCODING_E_AC3_JOC:
+            case ENCODING_DOLBY_MAT:
+                return true;
+            default:
+                return false;
         }
     }
 
@@ -547,26 +555,27 @@ public final class AudioFormat implements Parcelable {
     public static boolean isPublicEncoding(int audioFormat)
     {
         switch (audioFormat) {
-        case ENCODING_PCM_16BIT:
-        case ENCODING_PCM_8BIT:
-        case ENCODING_PCM_FLOAT:
-        case ENCODING_AC3:
-        case ENCODING_E_AC3:
-        case ENCODING_DTS:
-        case ENCODING_DTS_HD:
-        case ENCODING_MP3:
-        case ENCODING_AAC_LC:
-        case ENCODING_AAC_HE_V1:
-        case ENCODING_AAC_HE_V2:
-        case ENCODING_IEC61937:
-        case ENCODING_DOLBY_TRUEHD:
-        case ENCODING_AAC_ELD:
-        case ENCODING_AAC_XHE:
-        case ENCODING_AC4:
-        case ENCODING_E_AC3_JOC:
-            return true;
-        default:
-            return false;
+            case ENCODING_PCM_16BIT:
+            case ENCODING_PCM_8BIT:
+            case ENCODING_PCM_FLOAT:
+            case ENCODING_AC3:
+            case ENCODING_E_AC3:
+            case ENCODING_DTS:
+            case ENCODING_DTS_HD:
+            case ENCODING_MP3:
+            case ENCODING_AAC_LC:
+            case ENCODING_AAC_HE_V1:
+            case ENCODING_AAC_HE_V2:
+            case ENCODING_IEC61937:
+            case ENCODING_DOLBY_TRUEHD:
+            case ENCODING_AAC_ELD:
+            case ENCODING_AAC_XHE:
+            case ENCODING_AC4:
+            case ENCODING_E_AC3_JOC:
+            case ENCODING_DOLBY_MAT:
+                return true;
+            default:
+                return false;
         }
     }
 
@@ -575,29 +584,30 @@ public final class AudioFormat implements Parcelable {
     public static boolean isEncodingLinearPcm(int audioFormat)
     {
         switch (audioFormat) {
-        case ENCODING_PCM_16BIT:
-        case ENCODING_PCM_8BIT:
-        case ENCODING_PCM_FLOAT:
-        case ENCODING_DEFAULT:
-            return true;
-        case ENCODING_AC3:
-        case ENCODING_E_AC3:
-        case ENCODING_DTS:
-        case ENCODING_DTS_HD:
-        case ENCODING_MP3:
-        case ENCODING_AAC_LC:
-        case ENCODING_AAC_HE_V1:
-        case ENCODING_AAC_HE_V2:
-        case ENCODING_IEC61937: // wrapped in PCM but compressed
-        case ENCODING_DOLBY_TRUEHD:
-        case ENCODING_AAC_ELD:
-        case ENCODING_AAC_XHE:
-        case ENCODING_AC4:
-        case ENCODING_E_AC3_JOC:
-            return false;
-        case ENCODING_INVALID:
-        default:
-            throw new IllegalArgumentException("Bad audio format " + audioFormat);
+            case ENCODING_PCM_16BIT:
+            case ENCODING_PCM_8BIT:
+            case ENCODING_PCM_FLOAT:
+            case ENCODING_DEFAULT:
+                return true;
+            case ENCODING_AC3:
+            case ENCODING_E_AC3:
+            case ENCODING_DTS:
+            case ENCODING_DTS_HD:
+            case ENCODING_MP3:
+            case ENCODING_AAC_LC:
+            case ENCODING_AAC_HE_V1:
+            case ENCODING_AAC_HE_V2:
+            case ENCODING_IEC61937: // wrapped in PCM but compressed
+            case ENCODING_DOLBY_TRUEHD:
+            case ENCODING_AAC_ELD:
+            case ENCODING_AAC_XHE:
+            case ENCODING_AC4:
+            case ENCODING_E_AC3_JOC:
+            case ENCODING_DOLBY_MAT:
+                return false;
+            case ENCODING_INVALID:
+            default:
+                throw new IllegalArgumentException("Bad audio format " + audioFormat);
         }
     }
 
@@ -605,29 +615,30 @@ public final class AudioFormat implements Parcelable {
     public static boolean isEncodingLinearFrames(int audioFormat)
     {
         switch (audioFormat) {
-        case ENCODING_PCM_16BIT:
-        case ENCODING_PCM_8BIT:
-        case ENCODING_PCM_FLOAT:
-        case ENCODING_IEC61937: // same size as stereo PCM
-        case ENCODING_DEFAULT:
-            return true;
-        case ENCODING_AC3:
-        case ENCODING_E_AC3:
-        case ENCODING_DTS:
-        case ENCODING_DTS_HD:
-        case ENCODING_MP3:
-        case ENCODING_AAC_LC:
-        case ENCODING_AAC_HE_V1:
-        case ENCODING_AAC_HE_V2:
-        case ENCODING_DOLBY_TRUEHD:
-        case ENCODING_AAC_ELD:
-        case ENCODING_AAC_XHE:
-        case ENCODING_AC4:
-        case ENCODING_E_AC3_JOC:
-            return false;
-        case ENCODING_INVALID:
-        default:
-            throw new IllegalArgumentException("Bad audio format " + audioFormat);
+            case ENCODING_PCM_16BIT:
+            case ENCODING_PCM_8BIT:
+            case ENCODING_PCM_FLOAT:
+            case ENCODING_IEC61937: // same size as stereo PCM
+            case ENCODING_DEFAULT:
+                return true;
+            case ENCODING_AC3:
+            case ENCODING_E_AC3:
+            case ENCODING_DTS:
+            case ENCODING_DTS_HD:
+            case ENCODING_MP3:
+            case ENCODING_AAC_LC:
+            case ENCODING_AAC_HE_V1:
+            case ENCODING_AAC_HE_V2:
+            case ENCODING_DOLBY_TRUEHD:
+            case ENCODING_AAC_ELD:
+            case ENCODING_AAC_XHE:
+            case ENCODING_AC4:
+            case ENCODING_E_AC3_JOC:
+            case ENCODING_DOLBY_MAT:
+                return false;
+            case ENCODING_INVALID:
+            default:
+                throw new IllegalArgumentException("Bad audio format " + audioFormat);
         }
     }
     /**
@@ -867,6 +878,7 @@ public final class AudioFormat implements Parcelable {
                 case ENCODING_AAC_XHE:
                 case ENCODING_AC4:
                 case ENCODING_E_AC3_JOC:
+                case ENCODING_DOLBY_MAT:
                     mEncoding = encoding;
                     break;
                 case ENCODING_INVALID:
@@ -1083,7 +1095,8 @@ public final class AudioFormat implements Parcelable {
         ENCODING_AAC_ELD,
         ENCODING_AAC_XHE,
         ENCODING_AC4,
-        ENCODING_E_AC3_JOC }
+        ENCODING_E_AC3_JOC,
+        ENCODING_DOLBY_MAT }
     )
     @Retention(RetentionPolicy.SOURCE)
     public @interface Encoding {}
@@ -1098,6 +1111,7 @@ public final class AudioFormat implements Parcelable {
             ENCODING_DOLBY_TRUEHD,
             ENCODING_AC4,
             ENCODING_E_AC3_JOC,
+            ENCODING_DOLBY_MAT,
     };
 
     /** @hide */
@@ -1109,7 +1123,8 @@ public final class AudioFormat implements Parcelable {
             ENCODING_AAC_LC,
             ENCODING_DOLBY_TRUEHD,
             ENCODING_AC4,
-            ENCODING_E_AC3_JOC }
+            ENCODING_E_AC3_JOC,
+            ENCODING_DOLBY_MAT }
     )
     @Retention(RetentionPolicy.SOURCE)
     public @interface SurroundSoundEncoding {}
@@ -1141,6 +1156,8 @@ public final class AudioFormat implements Parcelable {
                 return "Dolby AC-4";
             case ENCODING_E_AC3_JOC:
                 return "Dolby Atmos in Dolby Digital Plus";
+            case ENCODING_DOLBY_MAT:
+                return "Dolby MAT";
             default:
                 return "Unknown surround sound format";
         }

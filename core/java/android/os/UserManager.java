@@ -936,6 +936,21 @@ public class UserManager {
     public static final String DISALLOW_AUTOFILL = "no_autofill";
 
     /**
+     * Specifies if the contents of a user's screen is not allowed to be captured for artificial
+     * intelligence purposes.
+     *
+     * <p>Device owner and profile owner can set this restriction. When it is set by device owner,
+     * only the target user will be affected.
+     *
+     * <p>The default value is <code>false</code>.
+     *
+     * @see DevicePolicyManager#addUserRestriction(ComponentName, String)
+     * @see DevicePolicyManager#clearUserRestriction(ComponentName, String)
+     * @see #getUserRestrictions()
+     */
+    public static final String DISALLOW_INTELLIGENCE_CAPTURE = "no_intelligence_capture";
+
+    /**
      * Specifies if user switching is blocked on the current user.
      *
      * <p> This restriction can only be set by the device owner, it will be applied to all users.

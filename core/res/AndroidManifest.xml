@@ -401,6 +401,7 @@
     <protected-broadcast android:name="android.telecom.action.DEFAULT_DIALER_CHANGED" />
     <protected-broadcast android:name="android.provider.action.DEFAULT_SMS_PACKAGE_CHANGED" />
     <protected-broadcast android:name="android.provider.action.SMS_MMS_DB_CREATED" />
+    <protected-broadcast android:name="android.provider.action.SMS_MMS_DB_LOST" />
     <protected-broadcast android:name="android.intent.action.CONTENT_CHANGED" />
     <protected-broadcast android:name="android.provider.Telephony.MMS_DOWNLOADED" />
 
@@ -3016,6 +3017,14 @@
          <p>Protection level: signature
     -->
     <permission android:name="android.permission.BIND_TEXTCLASSIFIER_SERVICE"
+                android:protectionLevel="signature" />
+
+    <!-- Must be required by a android.service.intelligence.IntelligenceService,
+         to ensure that only the system can bind to it.
+         @SystemApi @hide This is not a third-party API (intended for OEMs and system apps).
+         <p>Protection level: signature
+    -->
+    <permission android:name="android.permission.BIND_INTELLIGENCE_SERVICE"
                 android:protectionLevel="signature" />
 
     <!-- Must be required by hotword enrollment application,

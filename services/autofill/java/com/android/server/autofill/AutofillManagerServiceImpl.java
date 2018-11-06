@@ -25,19 +25,14 @@ import static com.android.server.autofill.Helper.sVerbose;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
-import android.app.ActivityTaskManager;
 import android.app.ActivityManagerInternal;
-import android.app.AppGlobals;
+import android.app.ActivityTaskManager;
 import android.app.IActivityTaskManager;
 import android.content.ComponentName;
-import android.content.Context;
-import android.content.pm.ApplicationInfo;
-import android.content.pm.PackageItemInfo;
 import android.content.pm.PackageManager;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ServiceInfo;
 import android.graphics.Rect;
-import android.graphics.drawable.Drawable;
 import android.metrics.LogMaker;
 import android.os.AsyncTask;
 import android.os.Binder;
@@ -49,7 +44,6 @@ import android.os.RemoteCallbackList;
 import android.os.RemoteException;
 import android.os.SystemClock;
 import android.os.UserHandle;
-import android.os.UserManager;
 import android.provider.Settings;
 import android.service.autofill.AutofillService;
 import android.service.autofill.AutofillServiceInfo;
@@ -60,7 +54,6 @@ import android.service.autofill.FillEventHistory.Event;
 import android.service.autofill.FillResponse;
 import android.service.autofill.IAutoFillService;
 import android.service.autofill.UserData;
-import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.ArraySet;
 import android.util.DebugUtils;
@@ -77,6 +70,7 @@ import com.android.internal.R;
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.logging.MetricsLogger;
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
+import com.android.server.AbstractPerUserSystemService;
 import com.android.server.LocalServices;
 import com.android.server.autofill.AutofillManagerService.AutofillCompatState;
 import com.android.server.autofill.ui.AutoFillUI;
@@ -91,7 +85,8 @@ import java.util.Random;
  * app's {@link IAutoFillService} implementation.
  *
  */
-final class AutofillManagerServiceImpl {
+final class AutofillManagerServiceImpl
+        extends AbstractPerUserSystemService<AutofillManagerServiceImpl> {
 
     private static final String TAG = "AutofillManagerServiceImpl";
     private static final int MAX_SESSION_ID_CREATE_TRIES = 2048;
@@ -99,9 +94,6 @@ final class AutofillManagerServiceImpl {
     /** Minimum interval to prune abandoned sessions */
     private static final int MAX_ABANDONED_SESSION_MILLIS = 30000;
 
-    private final int mUserId;
-    private final Context mContext;
-    private final Object mLock;
     private final AutoFillUI mUi;
     private final MetricsLogger mMetricsLogger = new MetricsLogger();
 
@@ -132,22 +124,10 @@ final class AutofillManagerServiceImpl {
     private ArrayMap<ComponentName, Long> mDisabledActivities;
 
     /**
-     * Whether service was disabled for user due to {@link UserManager} restrictions.
-     */
-    @GuardedBy("mLock")
-    private boolean mDisabled;
-
-    /**
      * Data used for field classification.
      */
     @GuardedBy("mLock")
     private UserData mUserData;
-
-    /**
-     * Caches whether the setup completed for the current user.
-     */
-    @GuardedBy("mLock")
-    private boolean mSetupComplete;
 
     private final Handler mHandler = new Handler(Looper.getMainLooper(), null, true);
 
@@ -170,116 +150,27 @@ final class AutofillManagerServiceImpl {
     /** When was {@link PruneTask} last executed? */
     private long mLastPrune = 0;
 
-    AutofillManagerServiceImpl(Context context, Object lock, LocalLog requestsHistory,
+    AutofillManagerServiceImpl(AutofillManagerService master, Object lock, LocalLog requestsHistory,
             LocalLog uiLatencyHistory, LocalLog wtfHistory, int userId, AutoFillUI ui,
             AutofillCompatState autofillCompatState, boolean disabled) {
-        mContext = context;
-        mLock = lock;
+        super(master, lock, userId);
+
         mRequestsHistory = requestsHistory;
         mUiLatencyHistory = uiLatencyHistory;
         mWtfHistory = wtfHistory;
-        mUserId = userId;
         mUi = ui;
-        mFieldClassificationStrategy = new FieldClassificationStrategy(context, userId);
+        mFieldClassificationStrategy = new FieldClassificationStrategy(getContext(), userId);
         mAutofillCompatState = autofillCompatState;
         updateLocked(disabled);
     }
 
     @GuardedBy("mLock")
-    private int getServiceUidLocked() {
-        if (mInfo == null) {
-            Slog.w(TAG,  "getServiceUidLocked(): no mInfo");
-            return -1;
-        }
-        return mInfo.getServiceInfo().applicationInfo.uid;
-    }
-
-
-    @Nullable
-    String[] getUrlBarResourceIdsForCompatMode(@NonNull String packageName) {
-        return mAutofillCompatState.getUrlBarResourceIds(packageName, mUserId);
-    }
-
-    @Nullable
-    String getServicePackageName() {
-        final ComponentName serviceComponent = getServiceComponentName();
-        if (serviceComponent != null) {
-            return serviceComponent.getPackageName();
-        }
-        return null;
-    }
-
-    @Nullable
-    ComponentName getServiceComponentName() {
-        synchronized (mLock) {
-            if (mInfo == null) {
-                return null;
-            }
-            return mInfo.getServiceInfo().getComponentName();
-        }
-    }
-
-    int getTargedSdkLocked() {
-        if (mInfo == null) {
-            return 0;
-        }
-        return mInfo.getServiceInfo().applicationInfo.targetSdkVersion;
-    }
-
-    private boolean isSetupCompletedLocked() {
-        final String setupComplete = Settings.Secure.getStringForUser(
-                mContext.getContentResolver(), Settings.Secure.USER_SETUP_COMPLETE, mUserId);
-        return "1".equals(setupComplete);
-    }
-
-    private String getComponentNameFromSettings() {
-        return Settings.Secure.getStringForUser(
-                mContext.getContentResolver(), Settings.Secure.AUTOFILL_SERVICE, mUserId);
-    }
-
-    @GuardedBy("mLock")
-    void updateLocked(boolean disabled) {
-        final boolean wasEnabled = isEnabledLocked();
-        if (sVerbose) {
-            Slog.v(TAG, "updateLocked(u=" + mUserId + "): wasEnabled=" + wasEnabled
-                    + ", mSetupComplete= " + mSetupComplete
-                    + ", disabled=" + disabled + ", mDisabled=" + mDisabled);
-        }
-        mSetupComplete = isSetupCompletedLocked();
-        mDisabled = disabled;
-        ComponentName serviceComponent = null;
-        ServiceInfo serviceInfo = null;
-        final String componentName = getComponentNameFromSettings();
-        if (!TextUtils.isEmpty(componentName)) {
-            try {
-                serviceComponent = ComponentName.unflattenFromString(componentName);
-                serviceInfo = AppGlobals.getPackageManager().getServiceInfo(serviceComponent,
-                        0, mUserId);
-                if (serviceInfo == null) {
-                    Slog.e(TAG, "Bad AutofillService name: " + componentName);
-                }
-            } catch (RuntimeException | RemoteException e) {
-                Slog.e(TAG, "Error getting service info for '" + componentName + "': " + e);
-                serviceInfo = null;
-            }
-        }
-        try {
-            if (serviceInfo != null) {
-                mInfo = new AutofillServiceInfo(mContext, serviceComponent, mUserId);
-                if (sDebug) Slog.d(TAG, "Set component for user " + mUserId + " as " + mInfo);
-            } else {
-                mInfo = null;
-                if (sDebug) {
-                    Slog.d(TAG, "Reset component for user " + mUserId + " (" + componentName + ")");
-                }
-            }
-        } catch (Exception e) {
-            Slog.e(TAG, "Bad AutofillServiceInfo for '" + componentName + "': " + e);
-            mInfo = null;
-        }
-        final boolean isEnabled = isEnabledLocked();
-        if (wasEnabled != isEnabled) {
-            if (!isEnabled) {
+    @Override // from PerUserSystemService
+    protected boolean updateLocked(boolean disabled) {
+        destroySessionsLocked();
+        final boolean enabledChanged = super.updateLocked(disabled);
+        if (enabledChanged) {
+            if (!isEnabledLocked()) {
                 final int sessionCount = mSessions.size();
                 for (int i = sessionCount - 1; i >= 0; i--) {
                     final Session session = mSessions.valueAt(i);
@@ -288,6 +179,19 @@ final class AutofillManagerServiceImpl {
             }
             sendStateToClients(false);
         }
+        return enabledChanged;
+    }
+
+    @Override // from PerUserSystemService
+    protected ServiceInfo newServiceInfo(@NonNull ComponentName serviceComponent)
+            throws NameNotFoundException {
+        mInfo = new AutofillServiceInfo(getContext(), serviceComponent, mUserId);
+        return mInfo.getServiceInfo();
+    }
+
+    @Nullable
+    String[] getUrlBarResourceIdsForCompatMode(@NonNull String packageName) {
+        return mAutofillCompatState.getUrlBarResourceIds(packageName, mUserId);
     }
 
     @GuardedBy("mLock")
@@ -469,7 +373,7 @@ final class AutofillManagerServiceImpl {
             if (componentName.equals(ComponentName.unflattenFromString(autoFillService))) {
                 mMetricsLogger.action(MetricsEvent.AUTOFILL_SERVICE_DISABLED_SELF,
                         componentName.getPackageName());
-                Settings.Secure.putStringForUser(mContext.getContentResolver(),
+                Settings.Secure.putStringForUser(getContext().getContentResolver(),
                         Settings.Secure.AUTOFILL_SERVICE, null, mUserId);
                 destroySessionsLocked();
             } else {
@@ -501,7 +405,7 @@ final class AutofillManagerServiceImpl {
 
         assertCallerLocked(componentName, compatMode);
 
-        final Session newSession = new Session(this, mUi, mContext, mHandler, mUserId, mLock,
+        final Session newSession = new Session(this, mUi, getContext(), mHandler, mUserId, mLock,
                 sessionId, taskId, uid, activityToken, appCallbackToken, hasCallback,
                 mUiLatencyHistory, mWtfHistory, mInfo.getServiceInfo().getComponentName(),
                 componentName, compatMode, bindInstantServiceAllowed, flags);
@@ -515,7 +419,7 @@ final class AutofillManagerServiceImpl {
      */
     private void assertCallerLocked(@NonNull ComponentName componentName, boolean compatMode) {
         final String packageName = componentName.getPackageName();
-        final PackageManager pm = mContext.getPackageManager();
+        final PackageManager pm = getContext().getPackageManager();
         final int callingUid = Binder.getCallingUid();
         final int packageUid;
         try {
@@ -651,7 +555,8 @@ final class AutofillManagerServiceImpl {
     }
 
     @GuardedBy("mLock")
-    void handlePackageUpdateLocked(String packageName) {
+    @Override // from PerUserSystemService
+    protected void handlePackageUpdateLocked(@NonNull String packageName) {
         final ServiceInfo serviceInfo = mFieldClassificationStrategy.getServiceInfo();
         if (serviceInfo != null && serviceInfo.packageName.equals(packageName)) {
             resetExtServiceLocked();
@@ -688,29 +593,6 @@ final class AutofillManagerServiceImpl {
             mClients.kill();
             mClients = null;
         }
-    }
-
-    /**
-     * Gets the user-visibile name of the service this service binds to, or {@code null} if the
-     * service is disabled.
-     */
-    @Nullable
-    @GuardedBy("mLock")
-    public CharSequence getServiceLabelLocked() {
-        return mInfo == null ? null : mInfo.getServiceInfo().loadSafeLabel(
-                mContext.getPackageManager(), 0 /* do not ellipsize */,
-                PackageItemInfo.SAFE_LABEL_FLAG_FIRST_LINE | PackageItemInfo.SAFE_LABEL_FLAG_TRIM);
-    }
-
-    /**
-     * Gets the icon of the service this service binds to, or {@code null} if the service is
-     * disabled.
-     */
-    @NonNull
-    @Nullable
-    @GuardedBy("mLock")
-    Drawable getServiceIconLocked() {
-        return mInfo == null ? null : mInfo.getServiceInfo().loadIcon(mContext.getPackageManager());
     }
 
     /**
@@ -941,11 +823,13 @@ final class AutofillManagerServiceImpl {
         return true;
     }
 
+    @Override
     @GuardedBy("mLock")
-    void dumpLocked(String prefix, PrintWriter pw) {
+    protected void dumpLocked(String prefix, PrintWriter pw) {
+        super.dumpLocked(prefix, pw);
+
         final String prefix2 = prefix + "  ";
 
-        pw.print(prefix); pw.print("User: "); pw.println(mUserId);
         pw.print(prefix); pw.print("UID: "); pw.println(getServiceUidLocked());
         pw.print(prefix); pw.print("Autofill Service Info: ");
         if (mInfo == null) {
@@ -958,9 +842,8 @@ final class AutofillManagerServiceImpl {
         }
         pw.print(prefix); pw.print("Component from settings: ");
             pw.println(getComponentNameFromSettings());
-        pw.print(prefix); pw.print("Default component: ");
-            pw.println(mContext.getString(R.string.config_defaultAutofillService));
-        pw.print(prefix); pw.print("Disabled: "); pw.println(mDisabled);
+        pw.print(prefix); pw.print("Default component: "); pw.println(getContext()
+                .getString(R.string.config_defaultAutofillService));
         pw.print(prefix); pw.print("Field classification enabled: ");
             pw.println(isFieldClassificationEnabledLocked());
         pw.print(prefix); pw.print("Compat pkgs: ");
@@ -970,7 +853,6 @@ final class AutofillManagerServiceImpl {
         } else {
             pw.println(compatPkgs);
         }
-        pw.print(prefix); pw.print("Setup complete: "); pw.println(mSetupComplete);
         pw.print(prefix); pw.print("Last prune: "); pw.println(mLastPrune);
 
         pw.print(prefix); pw.print("Disabled apps: ");
@@ -1158,11 +1040,6 @@ final class AutofillManagerServiceImpl {
         return true;
     }
 
-    @GuardedBy("mLock")
-    boolean isEnabledLocked() {
-        return mSetupComplete && mInfo != null && !mDisabled;
-    }
-
     /**
      * Called by {@link Session} when service asked to disable autofill for an app.
      */
@@ -1270,7 +1147,7 @@ final class AutofillManagerServiceImpl {
     // Called by internally, no need to check UID.
     boolean isFieldClassificationEnabledLocked() {
         return Settings.Secure.getIntForUser(
-                mContext.getContentResolver(),
+                getContext().getContentResolver(),
                 Settings.Secure.AUTOFILL_FEATURE_FIELD_CLASSIFICATION, 1,
                 mUserId) == 1;
     }

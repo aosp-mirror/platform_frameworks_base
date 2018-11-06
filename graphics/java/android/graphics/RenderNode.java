@@ -21,6 +21,7 @@ import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.view.NativeVectorDrawableAnimator;
 import android.view.RenderNodeAnimator;
+import android.view.Surface;
 import android.view.View;
 
 import dalvik.annotation.optimization.CriticalNative;
@@ -137,7 +138,28 @@ import java.lang.annotation.RetentionPolicy;
  * that the RenderNode is only used on the same thread it is drawn with. For example when using
  * RenderNode with a custom View, then that RenderNode must only be used from the UI thread.</p>
  *
- * @hide
+ * <h3>When to re-render</h3>
+ * <p>Many of the RenderNode mutation methods, such as {@link #setTranslationX(float)}, return
+ * a boolean indicating if the value actually changed or not. This is useful in detecting
+ * if a new frame should be rendered or not. A typical usage would look like:
+ * <pre class="prettyprint">
+ *     public void translateTo(int x, int y) {
+ *         boolean needsUpdate = myRenderNode.setTranslationX(x);
+ *         needsUpdate |= myRenderNode.setTranslationY(y);
+ *         if (needsUpdate) {
+ *             myOwningView.invalidate();
+ *         }
+ *     }
+ * </pre>
+ * This is marginally faster than doing a more explicit up-front check if the value changed by
+ * comparing the desired value against {@link #getTranslationX()} as it minimizes JNI transitions.
+ * The actual mechanism of requesting a new frame to be rendered will depend on how this
+ * RenderNode is being drawn. If it's drawn to a containing View, as in the above snippet,
+ * then simply invalidating that View works. If instead the RenderNode is being drawn to a Canvas
+ * directly such as with {@link Surface#lockHardwareCanvas()} then a new frame needs to be drawn
+ * by calling {@link Surface#lockHardwareCanvas()}, re-drawing the root RenderNode or whatever
+ * top-level content is desired, and finally calling {@link Surface#unlockCanvasAndPost(Canvas)}.
+ * </p>
  */
 public class RenderNode {
 
@@ -147,7 +169,9 @@ public class RenderNode {
                 RenderNode.class.getClassLoader(), nGetNativeFinalizer(), 1024);
     }
 
-    /** Not for general use; use only if you are ThreadedRenderer or RecordingCanvas.
+    /**
+     * Not for general use; use only if you are ThreadedRenderer or RecordingCanvas.
+     *
      * @hide
      */
     public final long mNativeRenderNode;
@@ -174,9 +198,13 @@ public class RenderNode {
      * drawing operations, and store / apply render properties when drawn.
      *
      * @param name The name of the RenderNode, used for debugging purpose. May be null.
-     *
      * @return A new RenderNode.
      */
+    public static @NonNull RenderNode create(@Nullable String name) {
+        return new RenderNode(name, null);
+    }
+
+    /** @hide */
     public static RenderNode create(String name, @Nullable AnimationHost animationHost) {
         return new RenderNode(name, animationHost);
     }
@@ -186,6 +214,8 @@ public class RenderNode {
      *
      * Note: This will *NOT* incRef() on the native object, however it will
      * decRef() when it is destroyed. The caller should have already incRef'd it
+     *
+     * @hide
      */
     public static RenderNode adopt(long nativePtr) {
         return new RenderNode(nativePtr);
@@ -220,6 +250,8 @@ public class RenderNode {
 
     /**
      * Enable callbacks for position changes.
+     *
+     * @hide
      */
     public void requestPositionUpdates(PositionUpdateListener listener) {
         nRequestPositionUpdates(mNativeRenderNode, listener);
@@ -234,15 +266,13 @@ public class RenderNode {
      * {@link #endRecording()} must be called when the recording is finished in order to apply
      * the updated display list.
      *
-     * @param width The width of the recording viewport. This will not alter the width of the
-     *              RenderNode itself, that must be set with {@link #setLeft(int)} and
-     *              {@link #setRight(int)}
+     * @param width  The width of the recording viewport. This will not alter the width of the
+     *               RenderNode itself, that must be set with {@link #setLeft(int)} and
+     *               {@link #setRight(int)}
      * @param height The height of the recording viewport. This will not alter the height of the
      *               RenderNode itself, that must be set with {@link #setTop(int)} and
      *               {@link #setBottom(int)}.
-     *
      * @return A canvas to record drawing operations.
-     *
      * @see #endRecording()
      * @see #hasDisplayList()
      */
@@ -261,20 +291,20 @@ public class RenderNode {
      * with {@link #setLeftTopRightBottom(int, int, int, int)}.
      */
     public RecordingCanvas startRecording() {
-        return RecordingCanvas.obtain(this,
-                nGetWidth(mNativeRenderNode), nGetHeight(mNativeRenderNode));
+        return startRecording(nGetWidth(mNativeRenderNode), nGetHeight(mNativeRenderNode));
     }
 
     /**
-     * @deprecated use {@link #startRecording(int, int)} instead
      * @hide
+     * @deprecated use {@link #startRecording(int, int)} instead
      */
     @Deprecated
     public RecordingCanvas start(int width, int height) {
         return startRecording(width, height);
     }
 
-    /**`
+    /**
+     * `
      * Ends the recording for this display list. Calling this method marks
      * the display list valid and {@link #hasDisplayList()} will return true.
      *
@@ -294,8 +324,8 @@ public class RenderNode {
     }
 
     /**
-     * @deprecated use {@link #endRecording()} instead
      * @hide
+     * @deprecated use {@link #endRecording()} instead
      */
     @Deprecated
     public void end(RecordingCanvas canvas) {
@@ -373,21 +403,52 @@ public class RenderNode {
     ///////////////////////////////////////////////////////////////////////////
 
     /**
-     * TODO
+     * @hide
+     * @deprecated use {@link #setUseCompositingLayer(boolean, Paint)} instead
      */
+    @Deprecated
     public boolean setLayerType(int layerType) {
         return nSetLayerType(mNativeRenderNode, layerType);
     }
 
     /**
-     * TODO
+     * @hide
+     * @deprecated use {@link #setUseCompositingLayer(boolean, Paint)} instead
      */
+    @Deprecated
     public boolean setLayerPaint(@Nullable Paint paint) {
         return nSetLayerPaint(mNativeRenderNode, paint != null ? paint.getNativeInstance() : 0);
     }
 
     /**
+     * Controls whether or not to force this RenderNode to render to an intermediate buffer.
+     * Internally RenderNode will already promote itself to a composition layer if it's useful
+     * for performance or required for the current combination of {@link #setAlpha(float)} and
+     * {@link #setHasOverlappingRendering(boolean)}.
+     *
+     * The usage of this is instead to allow for either overriding of the internal behavior
+     * if it's measured to be necessary for the particular rendering content in question or, more
+     * usefully, to add a composition effect to the RenderNode via the optional paint parameter.
+     *
+     * Note: When a RenderNode is using a compositing layer it will also result in
+     * clipToBounds=true behavior.
+     *
+     * @param forceToLayer if true this forces the RenderNode to use an intermediate buffer.
+     *                     Default & generally recommended value is false.
+     * @param paint        The blend mode, alpha, and ColorFilter to apply to the compositing layer.
+     *                     Only applies if forceToLayer is true.
+     * @return true if anything changed, false otherwise
+     */
+    public boolean setUseCompositingLayer(boolean forceToLayer, @Nullable Paint paint) {
+        boolean didChange = nSetLayerType(mNativeRenderNode, forceToLayer ? 2 : 0);
+        didChange |= nSetLayerPaint(mNativeRenderNode,
+                paint != null ? paint.getNativeInstance() : 0);
+        return didChange;
+    }
+
+    /**
      * Sets the clip bounds of the RenderNode.
+     *
      * @param rect the bounds to clip to. If null, the clip bounds are reset
      * @return True if the clip bounds changed, false otherwise
      */
@@ -410,19 +471,19 @@ public class RenderNode {
     }
 
     /**
-     * Sets whether the display list should be drawn immediately after the
-     * closest ancestor display list containing a projection receiver.
+     * Sets whether the RenderNode should be drawn immediately after the
+     * closest ancestor RenderNode containing a projection receiver.
      *
      * @param shouldProject true if the display list should be projected onto a
-     *            containing volume.
+     *                      containing volume.
      */
     public boolean setProjectBackwards(boolean shouldProject) {
         return nSetProjectBackwards(mNativeRenderNode, shouldProject);
     }
 
     /**
-     * Sets whether the display list is a projection receiver - that its parent
-     * DisplayList should draw any descendent DisplayLists with
+     * Sets whether the RenderNode is a projection receiver - that its parent
+     * RenderNode should draw any descendent RenderNodes with
      * ProjectBackwards=true directly on top of it. Default value is false.
      */
     public boolean setProjectionReceiver(boolean shouldRecieve) {
@@ -433,14 +494,18 @@ public class RenderNode {
      * Sets the outline, defining the shape that casts a shadow, and the path to
      * be clipped if setClipToOutline is set.
      *
-     * Deep copies the data into native to simplify reference ownership.
+     * This will make a copy of the provided {@link Outline}, so any future modifications
+     * to the outline will need to call {@link #setOutline(Outline)} with the modified
+     * outline for those changes to be applied.
+     *
+     * @param outline The outline to use for this RenderNode.
      */
     public boolean setOutline(@Nullable Outline outline) {
         if (outline == null) {
             return nSetOutlineNone(mNativeRenderNode);
         }
 
-        switch(outline.mMode) {
+        switch (outline.mMode) {
             case Outline.MODE_EMPTY:
                 return nSetOutlineEmpty(mNativeRenderNode);
             case Outline.MODE_ROUND_RECT:
@@ -457,28 +522,63 @@ public class RenderNode {
     }
 
     /**
+     * Checks if the RenderNode has a shadow. That is, if the combination of {@link #getElevation()}
+     * and {@link #getTranslationZ()} is greater than zero, there is an {@link Outline} set with
+     * a valid shadow caster path, and the provided outline has a non-zero
+     * {@link Outline#getAlpha()}.
+     *
      * @return True if this RenderNode has a shadow, false otherwise
      */
     public boolean hasShadow() {
         return nHasShadow(mNativeRenderNode);
     }
 
-    /** setSpotShadowColor */
+    /**
+     * Sets the color of the spot shadow that is drawn when the RenderNode has a positive Z or
+     * elevation value and is drawn inside of a {@link Canvas#enableZ()} section.
+     * <p>
+     * By default the shadow color is black. Generally, this color will be opaque so the intensity
+     * of the shadow is consistent between different RenderNodes with different colors.
+     * <p>
+     * The opacity of the final spot shadow is a function of the shadow caster height, the
+     * alpha channel of the outlineSpotShadowColor (typically opaque), and the
+     * {@link android.R.attr#spotShadowAlpha} theme attribute
+     *
+     * @param color The color this RenderNode will cast for its elevation spot shadow.
+     */
     public boolean setSpotShadowColor(int color) {
         return nSetSpotShadowColor(mNativeRenderNode, color);
     }
 
-    /** setAmbientShadowColor */
-    public boolean setAmbientShadowColor(int color) {
-        return nSetAmbientShadowColor(mNativeRenderNode, color);
-    }
-
-    /** getSpotShadowColor */
+    /**
+     * @return The shadow color set by {@link #setSpotShadowColor(int)}, or black if nothing
+     * was set
+     */
     public int getSpotShadowColor() {
         return nGetSpotShadowColor(mNativeRenderNode);
     }
 
-    /** getAmbientShadowColor */
+    /**
+     * Sets the color of the ambient shadow that is drawn when the RenderNode has a positive Z or
+     * elevation value and is drawn inside of a {@link Canvas#enableZ()} section.
+     * <p>
+     * By default the shadow color is black. Generally, this color will be opaque so the intensity
+     * of the shadow is consistent between different RenderNodes with different colors.
+     * <p>
+     * The opacity of the final ambient shadow is a function of the shadow caster height, the
+     * alpha channel of the outlineAmbientShadowColor (typically opaque), and the
+     * {@link android.R.attr#ambientShadowAlpha} theme attribute.
+     *
+     * @param color The color this RenderNode will cast for its elevation shadow.
+     */
+    public boolean setAmbientShadowColor(int color) {
+        return nSetAmbientShadowColor(mNativeRenderNode, color);
+    }
+
+    /**
+     * @return The shadow color set by {@link #setAmbientShadowColor(int)}, or black if
+     * nothing was set
+     */
     public int getAmbientShadowColor() {
         return nGetAmbientShadowColor(mNativeRenderNode);
     }
@@ -503,6 +603,8 @@ public class RenderNode {
 
     /**
      * Controls the RenderNode's circular reveal clip.
+     *
+     * @hide
      */
     public boolean setRevealClip(boolean shouldClip,
             float x, float y, float radius) {
@@ -514,6 +616,7 @@ public class RenderNode {
      * transforms (such as {@link #setScaleX(float)}, {@link #setRotation(float)}, etc.)
      *
      * @param matrix A transform matrix to apply to this display list
+     * @hide TODO Do we want this?
      */
     public boolean setStaticMatrix(Matrix matrix) {
         return nSetStaticMatrix(mNativeRenderNode, matrix.native_instance);
@@ -526,6 +629,7 @@ public class RenderNode {
      * for the matrix parameter.
      *
      * @param matrix The matrix, null indicates that the matrix should be cleared.
+     * @hide TODO Do we want this?
      */
     public boolean setAnimationMatrix(Matrix matrix) {
         return nSetAnimationMatrix(mNativeRenderNode,
@@ -536,7 +640,6 @@ public class RenderNode {
      * Sets the translucency level for the display list.
      *
      * @param alpha The translucency of the display list, must be a value between 0.0f and 1.0f
-     *
      * @see View#setAlpha(float)
      * @see #getAlpha()
      */
@@ -548,7 +651,6 @@ public class RenderNode {
      * Returns the translucency level of this display list.
      *
      * @return A value between 0.0f and 1.0f
-     *
      * @see #setAlpha(float)
      */
     public float getAlpha() {
@@ -562,7 +664,6 @@ public class RenderNode {
      *
      * @param hasOverlappingRendering False if the content is guaranteed to be non-overlapping,
      *                                true otherwise.
-     *
      * @see android.view.View#hasOverlappingRendering()
      * @see #hasOverlappingRendering()
      */
@@ -573,17 +674,28 @@ public class RenderNode {
     /** @hide */
     @IntDef({USAGE_BACKGROUND})
     @Retention(RetentionPolicy.SOURCE)
-    public @interface UsageHint {}
+    public @interface UsageHint {
+    }
 
-    /** The default usage hint */
+    /**
+     * The default usage hint
+     *
+     * @hide
+     */
     public static final int USAGE_UNKNOWN = 0;
 
-    /** Usage is background content */
+    /**
+     * Usage is background content
+     *
+     * @hide
+     */
     public static final int USAGE_BACKGROUND = 1;
 
     /**
      * Provides a hint on what this RenderNode's display list content contains. This hint is used
      * for automatic content transforms to improve accessibility or similar.
+     *
+     * @hide
      */
     public void setUsageHint(@UsageHint int usageHint) {
         nSetUsageHint(mNativeRenderNode, usageHint);
@@ -593,7 +705,6 @@ public class RenderNode {
      * Indicates whether the content of this display list overlaps.
      *
      * @return True if this display list renders content which overlaps, false otherwise.
-     *
      * @see #setHasOverlappingRendering(boolean)
      */
     public boolean hasOverlappingRendering() {
@@ -623,7 +734,6 @@ public class RenderNode {
      * Sets the translation value for the display list on the X axis.
      *
      * @param translationX The X axis translation value of the display list, in pixels
-     *
      * @see View#setTranslationX(float)
      * @see #getTranslationX()
      */
@@ -644,7 +754,6 @@ public class RenderNode {
      * Sets the translation value for the display list on the Y axis.
      *
      * @param translationY The Y axis translation value of the display list, in pixels
-     *
      * @see View#setTranslationY(float)
      * @see #getTranslationY()
      */
@@ -684,7 +793,6 @@ public class RenderNode {
      * Sets the rotation value for the display list around the Z axis.
      *
      * @param rotation The rotation value of the display list, in degrees
-     *
      * @see View#setRotation(float)
      * @see #getRotation()
      */
@@ -705,7 +813,6 @@ public class RenderNode {
      * Sets the rotation value for the display list around the X axis.
      *
      * @param rotationX The rotation value of the display list, in degrees
-     *
      * @see View#setRotationX(float)
      * @see #getRotationX()
      */
@@ -726,7 +833,6 @@ public class RenderNode {
      * Sets the rotation value for the display list around the Y axis.
      *
      * @param rotationY The rotation value of the display list, in degrees
-     *
      * @see View#setRotationY(float)
      * @see #getRotationY()
      */
@@ -747,7 +853,6 @@ public class RenderNode {
      * Sets the scale value for the display list on the X axis.
      *
      * @param scaleX The scale value of the display list
-     *
      * @see View#setScaleX(float)
      * @see #getScaleX()
      */
@@ -768,7 +873,6 @@ public class RenderNode {
      * Sets the scale value for the display list on the Y axis.
      *
      * @param scaleY The scale value of the display list
-     *
      * @see View#setScaleY(float)
      * @see #getScaleY()
      */
@@ -789,7 +893,6 @@ public class RenderNode {
      * Sets the pivot value for the display list on the X axis
      *
      * @param pivotX The pivot value of the display list on the X axis, in pixels
-     *
      * @see View#setPivotX(float)
      * @see #getPivotX()
      */
@@ -810,7 +913,6 @@ public class RenderNode {
      * Sets the pivot value for the display list on the Y axis
      *
      * @param pivotY The pivot value of the display list on the Y axis, in pixels
-     *
      * @see View#setPivotY(float)
      * @see #getPivotY()
      */
@@ -827,135 +929,222 @@ public class RenderNode {
         return nGetPivotY(mNativeRenderNode);
     }
 
+    /**
+     * @return Whether or not a pivot was explicitly set with {@link #setPivotX(float)} or
+     * {@link #setPivotY(float)}. If no pivot has been set then the pivot will be the center
+     * of the RenderNode.
+     */
     public boolean isPivotExplicitlySet() {
         return nIsPivotExplicitlySet(mNativeRenderNode);
     }
 
-    /** lint */
+    /**
+     * Clears any pivot previously set by a call to  {@link #setPivotX(float)} or
+     * {@link #setPivotY(float)}. After calling this {@link #isPivotExplicitlySet()} will be false
+     * and the pivot used for rotation will return to default of being centered on the view.
+     */
     public boolean resetPivot() {
         return nResetPivot(mNativeRenderNode);
     }
 
     /**
-     * Sets the camera distance for the display list. Refer to
-     * {@link View#setCameraDistance(float)} for more information on how to
-     * use this property.
+     * <p>Sets the distance along the Z axis (orthogonal to the X/Y plane on which
+     * RenderNodes are drawn) from the camera to this RenderNode. The camera's distance
+     * affects 3D transformations, for instance rotations around the X and Y
+     * axis. If the rotationX or rotationY properties are changed and this view is
+     * large (more than half the size of the screen), it is recommended to always
+     * use a camera distance that's greater than the height (X axis rotation) or
+     * the width (Y axis rotation) of this view.</p>
      *
-     * @param distance The distance in Z of the camera of the display list
+     * <p>The distance of the camera from the drawing plane can have an affect on the
+     * perspective distortion of the RenderNode when it is rotated around the x or y axis.
+     * For example, a large distance will result in a large viewing angle, and there
+     * will not be much perspective distortion of the view as it rotates. A short
+     * distance may cause much more perspective distortion upon rotation, and can
+     * also result in some drawing artifacts if the rotated view ends up partially
+     * behind the camera (which is why the recommendation is to use a distance at
+     * least as far as the size of the view, if the view is to be rotated.)</p>
      *
-     * @see View#setCameraDistance(float)
-     * @see #getCameraDistance()
+     * <p>The distance is expressed in pixels and must always be positive</p>
+     *
+     * @param distance The distance in pixels, must always be positive
+     * @see #setRotationX(float)
+     * @see #setRotationY(float)
      */
     public boolean setCameraDistance(float distance) {
-        return nSetCameraDistance(mNativeRenderNode, distance);
+        if (!Float.isFinite(distance) || distance < 0.0f) {
+            throw new IllegalArgumentException("distance must be finite & positive, given="
+                    + distance);
+        }
+        // Native actually wants this to be negative not positive, so we flip it.
+        return nSetCameraDistance(mNativeRenderNode, -distance);
     }
 
     /**
-     * Returns the distance in Z of the camera of the display list.
+     * Returns the distance in Z of the camera for this RenderNode
      *
+     * @return the distance along the Z axis in pixels.
      * @see #setCameraDistance(float)
      */
     public float getCameraDistance() {
-        return nGetCameraDistance(mNativeRenderNode);
+        return -nGetCameraDistance(mNativeRenderNode);
     }
 
     /**
-     * Sets the left position for the display list.
+     * Sets the left position for the RenderNode.
      *
-     * @param left The left position, in pixels, of the display list
-     *
-     * @see View#setLeft(int)
+     * @param left The left position, in pixels, of the RenderNode
+     * @return true if the value changed, false otherwise
      */
     public boolean setLeft(int left) {
         return nSetLeft(mNativeRenderNode, left);
     }
 
     /**
-     * Sets the top position for the display list.
+     * Sets the top position for the RenderNode.
      *
-     * @param top The top position, in pixels, of the display list
-     *
-     * @see View#setTop(int)
+     * @param top The top position, in pixels, of the RenderNode
+     * @return true if the value changed, false otherwise.
      */
     public boolean setTop(int top) {
         return nSetTop(mNativeRenderNode, top);
     }
 
     /**
-     * Sets the right position for the display list.
+     * Sets the right position for the RenderNode.
      *
-     * @param right The right position, in pixels, of the display list
-     *
-     * @see View#setRight(int)
+     * @param right The right position, in pixels, of the RenderNode
+     * @return true if the value changed, false otherwise.
      */
     public boolean setRight(int right) {
         return nSetRight(mNativeRenderNode, right);
     }
 
     /**
-     * Sets the bottom position for the display list.
+     * Sets the bottom position for the RenderNode.
      *
-     * @param bottom The bottom position, in pixels, of the display list
-     *
-     * @see View#setBottom(int)
+     * @param bottom The bottom position, in pixels, of the RenderNode
+     * @return true if the value changed, false otherwise.
      */
     public boolean setBottom(int bottom) {
         return nSetBottom(mNativeRenderNode, bottom);
     }
 
     /**
-     * Sets the left and top positions for the display list
+     * Gets the left position for the RenderNode.
      *
-     * @param left The left position of the display list, in pixels
-     * @param top The top position of the display list, in pixels
-     * @param right The right position of the display list, in pixels
-     * @param bottom The bottom position of the display list, in pixels
+     * See {@link #setLeft(int)}
      *
-     * @see View#setLeft(int)
-     * @see View#setTop(int)
-     * @see View#setRight(int)
-     * @see View#setBottom(int)
+     * @return the left position in pixels
+     */
+    public int getLeft() {
+        return nGetLeft(mNativeRenderNode);
+    }
+
+    /**
+     * Gets the top position for the RenderNode.
+     *
+     * See {@link #setTop(int)}
+     *
+     * @return the top position in pixels
+     */
+    public int getTop() {
+        return nGetTop(mNativeRenderNode);
+    }
+
+    /**
+     * Gets the right position for the RenderNode.
+     *
+     * See {@link #setRight(int)}
+     *
+     * @return the right position in pixels
+     */
+    public int getRight() {
+        return nGetRight(mNativeRenderNode);
+    }
+
+    /**
+     * Gets the bottom position for the RenderNode.
+     *
+     * See {@link #setBottom(int)}
+     *
+     * @return the bottom position in pixels
+     */
+    public int getBottom() {
+        return nGetBottom(mNativeRenderNode);
+    }
+
+    /**
+     * Gets the width of the RenderNode, which is the right - left.
+     *
+     * @return the width of the RenderNode
+     */
+    public int getWidth() {
+        return nGetWidth(mNativeRenderNode);
+    }
+
+    /**
+     * Gets the height of the RenderNode, which is the bottom - top.
+     *
+     * @return the height of the RenderNode
+     */
+    public int getHeight() {
+        return nGetHeight(mNativeRenderNode);
+    }
+
+    /**
+     * Sets the left, top, right, and bottom of the RenderNode.
+     *
+     * @param left   The left position of the RenderNode, in pixels
+     * @param top    The top position of the RenderNode, in pixels
+     * @param right  The right position of the RenderNode, in pixels
+     * @param bottom The bottom position of the RenderNode, in pixels
+     * @return true if any values changed, false otherwise.
+     * @see #setLeft(int)
+     * @see #setTop(int)
+     * @see #setRight(int)
+     * @see #setBottom(int)
      */
     public boolean setLeftTopRightBottom(int left, int top, int right, int bottom) {
         return nSetLeftTopRightBottom(mNativeRenderNode, left, top, right, bottom);
     }
 
     /**
-     * Offsets the left and right positions for the display list
+     * Offsets the left and right positions for the RenderNode
      *
-     * @param offset The amount that the left and right positions of the display
-     *               list are offset, in pixels
-     *
-     * @see View#offsetLeftAndRight(int)
+     * @param offset The amount that the left and right positions are offset in pixels
+     * @return true if any values changed, false otherwise.
      */
     public boolean offsetLeftAndRight(int offset) {
         return nOffsetLeftAndRight(mNativeRenderNode, offset);
     }
 
     /**
-     * Offsets the top and bottom values for the display list
+     * Offsets the top and bottom values for the RenderNode
      *
-     * @param offset The amount that the top and bottom positions of the display
-     *               list are offset, in pixels
-     *
-     * @see View#offsetTopAndBottom(int)
+     * @param offset The amount that the left and right positions are offset in pixels
+     * @return true if any values changed, false otherwise.
      */
     public boolean offsetTopAndBottom(int offset) {
         return nOffsetTopAndBottom(mNativeRenderNode, offset);
     }
 
     /**
-     * Outputs the display list to the log. This method exists for use by
+     * Outputs the RenderNode to the log. This method exists for use by
      * tools to output display lists for selected nodes to the log.
+     *
+     * @hide TODO: Expose? Should the shape of this be different than forced dump to logcat?
      */
     public void output() {
         nOutput(mNativeRenderNode);
     }
 
     /**
-     * Gets the size of the DisplayList for debug purposes.
+     * Gets the approximate memory usage of the RenderNode for debug purposes. Does not include
+     * the memory usage of any child RenderNodes nor any bitmaps, only the memory usage of
+     * this RenderNode and any data it owns.
      */
-    public int getDebugSize() {
+    public int computeApproximateMemoryUsage() {
         return nGetDebugSize(mNativeRenderNode);
     }
 
@@ -995,13 +1184,16 @@ public class RenderNode {
      * For now this interface exists to de-couple RenderNode from anything View-specific in a
      * bit of a kludge.
      *
-     * @hide */
+     * @hide
+     */
     public interface AnimationHost {
-        /** checkstyle */
+        /** @hide */
         void registerAnimatingRenderNode(RenderNode animator);
-        /** checkstyle */
+
+        /** @hide */
         void registerVectorDrawableAnimator(NativeVectorDrawableAnimator animator);
-        /** checkstyle */
+
+        /** @hide */
         boolean isAttached();
     }
 
@@ -1039,14 +1231,18 @@ public class RenderNode {
     private static native long nCreate(String name);
 
     private static native long nGetNativeFinalizer();
+
     private static native void nOutput(long renderNode);
+
     private static native int nGetDebugSize(long renderNode);
+
     private static native void nRequestPositionUpdates(long renderNode,
             PositionUpdateListener callback);
 
     // Animations
 
     private static native void nAddAnimator(long renderNode, long animatorPtr);
+
     private static native void nEndAllAnimators(long renderNode);
 
 
@@ -1069,8 +1265,10 @@ public class RenderNode {
 
     @CriticalNative
     private static native void nGetTransformMatrix(long renderNode, long nativeMatrix);
+
     @CriticalNative
     private static native void nGetInverseTransformMatrix(long renderNode, long nativeMatrix);
+
     @CriticalNative
     private static native boolean nHasIdentityMatrix(long renderNode);
 
@@ -1078,135 +1276,208 @@ public class RenderNode {
 
     @CriticalNative
     private static native boolean nOffsetTopAndBottom(long renderNode, int offset);
+
     @CriticalNative
     private static native boolean nOffsetLeftAndRight(long renderNode, int offset);
+
     @CriticalNative
     private static native boolean nSetLeftTopRightBottom(long renderNode, int left, int top,
             int right, int bottom);
-    @CriticalNative
-    private static native boolean nSetBottom(long renderNode, int bottom);
-    @CriticalNative
-    private static native boolean nSetRight(long renderNode, int right);
-    @CriticalNative
-    private static native boolean nSetTop(long renderNode, int top);
+
     @CriticalNative
     private static native boolean nSetLeft(long renderNode, int left);
+
+    @CriticalNative
+    private static native boolean nSetTop(long renderNode, int top);
+
+    @CriticalNative
+    private static native boolean nSetRight(long renderNode, int right);
+
+    @CriticalNative
+    private static native boolean nSetBottom(long renderNode, int bottom);
+
+    @CriticalNative
+    private static native int nGetLeft(long renderNode);
+
+    @CriticalNative
+    private static native int nGetTop(long renderNode);
+
+    @CriticalNative
+    private static native int nGetRight(long renderNode);
+
+    @CriticalNative
+    private static native int nGetBottom(long renderNode);
+
     @CriticalNative
     private static native boolean nSetCameraDistance(long renderNode, float distance);
+
     @CriticalNative
     private static native boolean nSetPivotY(long renderNode, float pivotY);
+
     @CriticalNative
     private static native boolean nSetPivotX(long renderNode, float pivotX);
+
     @CriticalNative
     private static native boolean nResetPivot(long renderNode);
+
     @CriticalNative
     private static native boolean nSetLayerType(long renderNode, int layerType);
+
     @CriticalNative
     private static native boolean nSetLayerPaint(long renderNode, long paint);
+
     @CriticalNative
     private static native boolean nSetClipToBounds(long renderNode, boolean clipToBounds);
+
     @CriticalNative
     private static native boolean nSetClipBounds(long renderNode, int left, int top,
             int right, int bottom);
+
     @CriticalNative
     private static native boolean nSetClipBoundsEmpty(long renderNode);
+
     @CriticalNative
     private static native boolean nSetProjectBackwards(long renderNode, boolean shouldProject);
+
     @CriticalNative
     private static native boolean nSetProjectionReceiver(long renderNode, boolean shouldRecieve);
+
     @CriticalNative
     private static native boolean nSetOutlineRoundRect(long renderNode, int left, int top,
             int right, int bottom, float radius, float alpha);
+
     @CriticalNative
     private static native boolean nSetOutlineConvexPath(long renderNode, long nativePath,
             float alpha);
+
     @CriticalNative
     private static native boolean nSetOutlineEmpty(long renderNode);
+
     @CriticalNative
     private static native boolean nSetOutlineNone(long renderNode);
+
     @CriticalNative
     private static native boolean nHasShadow(long renderNode);
+
     @CriticalNative
     private static native boolean nSetSpotShadowColor(long renderNode, int color);
+
     @CriticalNative
     private static native boolean nSetAmbientShadowColor(long renderNode, int color);
+
     @CriticalNative
     private static native int nGetSpotShadowColor(long renderNode);
+
     @CriticalNative
     private static native int nGetAmbientShadowColor(long renderNode);
+
     @CriticalNative
     private static native boolean nSetClipToOutline(long renderNode, boolean clipToOutline);
+
     @CriticalNative
     private static native boolean nSetRevealClip(long renderNode,
             boolean shouldClip, float x, float y, float radius);
+
     @CriticalNative
     private static native boolean nSetAlpha(long renderNode, float alpha);
+
     @CriticalNative
     private static native boolean nSetHasOverlappingRendering(long renderNode,
             boolean hasOverlappingRendering);
+
     @CriticalNative
     private static native void nSetUsageHint(long renderNode, int usageHint);
+
     @CriticalNative
     private static native boolean nSetElevation(long renderNode, float lift);
+
     @CriticalNative
     private static native boolean nSetTranslationX(long renderNode, float translationX);
+
     @CriticalNative
     private static native boolean nSetTranslationY(long renderNode, float translationY);
+
     @CriticalNative
     private static native boolean nSetTranslationZ(long renderNode, float translationZ);
+
     @CriticalNative
     private static native boolean nSetRotation(long renderNode, float rotation);
+
     @CriticalNative
     private static native boolean nSetRotationX(long renderNode, float rotationX);
+
     @CriticalNative
     private static native boolean nSetRotationY(long renderNode, float rotationY);
+
     @CriticalNative
     private static native boolean nSetScaleX(long renderNode, float scaleX);
+
     @CriticalNative
     private static native boolean nSetScaleY(long renderNode, float scaleY);
+
     @CriticalNative
     private static native boolean nSetStaticMatrix(long renderNode, long nativeMatrix);
+
     @CriticalNative
     private static native boolean nSetAnimationMatrix(long renderNode, long animationMatrix);
 
     @CriticalNative
     private static native boolean nHasOverlappingRendering(long renderNode);
+
     @CriticalNative
     private static native boolean nGetClipToOutline(long renderNode);
+
     @CriticalNative
     private static native float nGetAlpha(long renderNode);
+
     @CriticalNative
     private static native float nGetCameraDistance(long renderNode);
+
     @CriticalNative
     private static native float nGetScaleX(long renderNode);
+
     @CriticalNative
     private static native float nGetScaleY(long renderNode);
+
     @CriticalNative
     private static native float nGetElevation(long renderNode);
+
     @CriticalNative
     private static native float nGetTranslationX(long renderNode);
+
     @CriticalNative
     private static native float nGetTranslationY(long renderNode);
+
     @CriticalNative
     private static native float nGetTranslationZ(long renderNode);
+
     @CriticalNative
     private static native float nGetRotation(long renderNode);
+
     @CriticalNative
     private static native float nGetRotationX(long renderNode);
+
     @CriticalNative
     private static native float nGetRotationY(long renderNode);
+
     @CriticalNative
     private static native boolean nIsPivotExplicitlySet(long renderNode);
+
     @CriticalNative
     private static native float nGetPivotX(long renderNode);
+
     @CriticalNative
     private static native float nGetPivotY(long renderNode);
+
     @CriticalNative
     private static native int nGetWidth(long renderNode);
+
     @CriticalNative
     private static native int nGetHeight(long renderNode);
+
     @CriticalNative
     private static native boolean nSetAllowForceDark(long renderNode, boolean allowForceDark);
+
     @CriticalNative
     private static native boolean nGetAllowForceDark(long renderNode);
 }

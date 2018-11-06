@@ -31,7 +31,10 @@ import java.util.Objects;
  * Rule instance information for zen mode.
  */
 public final class AutomaticZenRule implements Parcelable {
-
+    /* @hide */
+    private static final int ENABLED = 1;
+    /* @hide */
+    private static final int DISABLED = 0;
     private boolean enabled = false;
     private String name;
     private @InterruptionFilter int interruptionFilter;
@@ -39,6 +42,7 @@ public final class AutomaticZenRule implements Parcelable {
     private ComponentName owner;
     private long creationTime;
     private ZenPolicy mZenPolicy;
+    private boolean mModified = false;
 
     /**
      * Creates an automatic zen rule.
@@ -101,8 +105,8 @@ public final class AutomaticZenRule implements Parcelable {
     }
 
     public AutomaticZenRule(Parcel source) {
-        enabled = source.readInt() == 1;
-        if (source.readInt() == 1) {
+        enabled = source.readInt() == ENABLED;
+        if (source.readInt() == ENABLED) {
             name = source.readString();
         }
         interruptionFilter = source.readInt();
@@ -110,6 +114,7 @@ public final class AutomaticZenRule implements Parcelable {
         owner = source.readParcelable(null);
         creationTime = source.readLong();
         mZenPolicy = source.readParcelable(null);
+        mModified = source.readInt() == ENABLED;
     }
 
     /**
@@ -145,6 +150,14 @@ public final class AutomaticZenRule implements Parcelable {
      */
     public boolean isEnabled() {
         return enabled;
+    }
+
+    /**
+     * Returns whether this rule's name has been modified by the user.
+     * @hide
+     */
+    public boolean isModified() {
+        return mModified;
     }
 
     /**
@@ -191,6 +204,14 @@ public final class AutomaticZenRule implements Parcelable {
     }
 
     /**
+     * Sets modified state of this rule.
+     * @hide
+     */
+    public void setModified(boolean modified) {
+        this.mModified = modified;
+    }
+
+    /**
      * Sets the zen policy.
      */
     public void setZenPolicy(ZenPolicy zenPolicy) {
@@ -204,7 +225,7 @@ public final class AutomaticZenRule implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel dest, int flags) {
-        dest.writeInt(enabled ? 1 : 0);
+        dest.writeInt(enabled ? ENABLED : DISABLED);
         if (name != null) {
             dest.writeInt(1);
             dest.writeString(name);
@@ -216,6 +237,7 @@ public final class AutomaticZenRule implements Parcelable {
         dest.writeParcelable(owner, 0);
         dest.writeLong(creationTime);
         dest.writeParcelable(mZenPolicy, 0);
+        dest.writeInt(mModified ? ENABLED : DISABLED);
     }
 
     @Override
@@ -237,6 +259,7 @@ public final class AutomaticZenRule implements Parcelable {
         if (o == this) return true;
         final AutomaticZenRule other = (AutomaticZenRule) o;
         return other.enabled == enabled
+                && other.mModified == mModified
                 && Objects.equals(other.name, name)
                 && other.interruptionFilter == interruptionFilter
                 && Objects.equals(other.conditionId, conditionId)
@@ -248,7 +271,7 @@ public final class AutomaticZenRule implements Parcelable {
     @Override
     public int hashCode() {
         return Objects.hash(enabled, name, interruptionFilter, conditionId, owner, creationTime,
-                mZenPolicy);
+                mZenPolicy, mModified);
     }
 
     public static final Parcelable.Creator<AutomaticZenRule> CREATOR

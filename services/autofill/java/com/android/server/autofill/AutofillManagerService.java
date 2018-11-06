@@ -21,14 +21,11 @@ import static android.content.Context.AUTOFILL_MANAGER_SERVICE;
 
 import static com.android.server.autofill.Helper.sDebug;
 import static com.android.server.autofill.Helper.sFullScreenMode;
-import static com.android.server.autofill.Helper.sPartitionMaxCount;
-import static com.android.server.autofill.Helper.sVisibleDatasetsMaxCount;
 import static com.android.server.autofill.Helper.sVerbose;
 
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.UserIdInt;
-import android.app.ActivityManager;
 import android.app.ActivityManagerInternal;
 import android.app.ActivityThread;
 import android.content.BroadcastReceiver;
@@ -38,13 +35,10 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
-import android.content.pm.UserInfo;
 import android.database.ContentObserver;
 import android.graphics.Rect;
-import android.net.Uri;
 import android.os.Binder;
 import android.os.Bundle;
-import android.os.Handler;
 import android.os.IBinder;
 import android.os.Parcelable;
 import android.os.RemoteCallback;
@@ -53,7 +47,6 @@ import android.os.ResultReceiver;
 import android.os.ShellCallback;
 import android.os.UserHandle;
 import android.os.UserManager;
-import android.os.UserManagerInternal;
 import android.provider.Settings;
 import android.service.autofill.FillEventHistory;
 import android.service.autofill.UserData;
@@ -63,7 +56,6 @@ import android.util.ArrayMap;
 import android.util.LocalLog;
 import android.util.Slog;
 import android.util.SparseArray;
-import android.util.SparseBooleanArray;
 import android.view.autofill.AutofillId;
 import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillManagerInternal;
@@ -73,14 +65,12 @@ import android.view.autofill.IAutoFillManagerClient;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.annotations.VisibleForTesting;
-import com.android.internal.content.PackageMonitor;
-import com.android.internal.os.BackgroundThread;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.util.DumpUtils;
 import com.android.internal.util.Preconditions;
+import com.android.server.AbstractMasterSystemService;
 import com.android.server.FgThread;
 import com.android.server.LocalServices;
-import com.android.server.SystemService;
 import com.android.server.autofill.ui.AutoFillUI;
 
 import java.io.FileDescriptor;
@@ -98,9 +88,12 @@ import java.util.Objects;
  * {@link AutofillManagerServiceImpl} per user; the real work is done by
  * {@link AutofillManagerServiceImpl} itself.
  */
-public final class AutofillManagerService extends SystemService {
+public final class AutofillManagerService
+        extends AbstractMasterSystemService<AutofillManagerServiceImpl> {
 
     private static final String TAG = "AutofillManagerService";
+
+    private static final Object sLock = AutofillManagerService.class;
 
     static final String RECEIVER_BUNDLE_EXTRA_SESSIONS = "sessions";
 
@@ -109,26 +102,27 @@ public final class AutofillManagerService extends SystemService {
     private static final char COMPAT_PACKAGE_URL_IDS_BLOCK_BEGIN = '[';
     private static final char COMPAT_PACKAGE_URL_IDS_BLOCK_END = ']';
 
-    private final Context mContext;
+
+    /**
+     * Maximum number of partitions that can be allowed in a session.
+     *
+     * <p>Can be modified using {@code cmd autofill set max_partitions} or through
+     * {@link android.provider.Settings.Global#AUTOFILL_MAX_PARTITIONS_SIZE}.
+     */
+    @GuardedBy("sLock")
+    private static int sPartitionMaxCount = AutofillManager.DEFAULT_MAX_PARTITIONS_SIZE;
+
+    /**
+     * Maximum number of visible datasets in the dataset picker UI, or {@code 0} to use default
+     * value from resources.
+     *
+     * <p>Can be modified using {@code cmd autofill set max_visible_datasets} or through
+     * {@link android.provider.Settings.Global#AUTOFILL_MAX_VISIBLE_DATASETS}.
+     */
+    @GuardedBy("sLock")
+    private static int sVisibleDatasetsMaxCount = 0;
+
     private final AutoFillUI mUi;
-
-    private final Object mLock = new Object();
-
-    /**
-     * Cache of {@link AutofillManagerServiceImpl} per user id.
-     * <p>
-     * It has to be mapped by user id because the same current user could have simultaneous sessions
-     * associated to different user profiles (for example, in a multi-window environment or when
-     * device has work profiles).
-     */
-    @GuardedBy("mLock")
-    private SparseArray<AutofillManagerServiceImpl> mServicesCache = new SparseArray<>();
-
-    /**
-     * Users disabled due to {@link UserManager} restrictions.
-     */
-    @GuardedBy("mLock")
-    private final SparseBooleanArray mDisabledUsers = new SparseBooleanArray();
 
     private final LocalLog mRequestsHistory = new LocalLog(20);
     private final LocalLog mUiLatencyHistory = new LocalLog(20);
@@ -148,22 +142,19 @@ public final class AutofillManagerService extends SystemService {
                 // beneath it is brought back to top. Ideally, we should just hide the UI and
                 // bring it back when the activity resumes.
                 synchronized (mLock) {
-                    for (int i = 0; i < mServicesCache.size(); i++) {
-                        mServicesCache.valueAt(i).destroyFinishedSessionsLocked();
-                    }
+                    visitServicesLocked((s) -> s.destroyFinishedSessionsLocked());
                 }
-
                 mUi.hideAll(null);
             }
         }
     };
 
+    // TODO(b/117779333): move to superclass / create super-class for ShellCommand
     @GuardedBy("mLock")
     private boolean mAllowInstantService;
 
     public AutofillManagerService(Context context) {
-        super(context);
-        mContext = context;
+        super(context, UserManager.DISALLOW_AUTOFILL);
         mUi = new AutoFillUI(ActivityThread.currentActivityThread().getSystemUiContext());
 
         setLogLevelFromSettings();
@@ -172,199 +163,91 @@ public final class AutofillManagerService extends SystemService {
 
         final IntentFilter filter = new IntentFilter();
         filter.addAction(Intent.ACTION_CLOSE_SYSTEM_DIALOGS);
-        mContext.registerReceiver(mBroadcastReceiver, filter, null, FgThread.getHandler());
+        context.registerReceiver(mBroadcastReceiver, filter, null, FgThread.getHandler());
+    }
 
-        // Hookup with UserManager to disable service when necessary.
-        final UserManager um = context.getSystemService(UserManager.class);
-        final UserManagerInternal umi = LocalServices.getService(UserManagerInternal.class);
-        final List<UserInfo> users = um.getUsers();
-        for (int i = 0; i < users.size(); i++) {
-            final int userId = users.get(i).id;
-            final boolean disabled = umi.getUserRestriction(userId, UserManager.DISALLOW_AUTOFILL);
-            if (disabled) {
-                Slog.i(TAG, "Disabling Autofill for user " + userId);
-                mDisabledUsers.put(userId, disabled);
-            }
+    @Override // from MasterSystemService
+    protected String getServiceSettingsProperty() {
+        return Settings.Secure.AUTOFILL_SERVICE;
+    }
+
+    @Override // from MasterSystemService
+    protected void registerForExtraSettingsChanges(@NonNull ContentResolver resolver,
+            @NonNull ContentObserver observer) {
+        resolver.registerContentObserver(Settings.Global.getUriFor(
+                Settings.Global.AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES), false, observer,
+                UserHandle.USER_ALL);
+        resolver.registerContentObserver(Settings.Global.getUriFor(
+                Settings.Global.AUTOFILL_LOGGING_LEVEL), false, observer,
+                UserHandle.USER_ALL);
+        resolver.registerContentObserver(Settings.Global.getUriFor(
+                Settings.Global.AUTOFILL_MAX_PARTITIONS_SIZE), false, observer,
+                UserHandle.USER_ALL);
+        resolver.registerContentObserver(Settings.Global.getUriFor(
+                Settings.Global.AUTOFILL_MAX_VISIBLE_DATASETS), false, observer,
+                UserHandle.USER_ALL);
+    }
+
+    @Override // from MasterSystemService
+    protected void onSettingsChanged(int userId, @NonNull String property) {
+        switch (property) {
+            case Settings.Global.AUTOFILL_LOGGING_LEVEL:
+                setLogLevelFromSettings();
+                break;
+            case Settings.Global.AUTOFILL_MAX_PARTITIONS_SIZE:
+                setMaxPartitionsFromSettings();
+                break;
+            case Settings.Global.AUTOFILL_MAX_VISIBLE_DATASETS:
+                setMaxVisibleDatasetsFromSettings();
+                break;
+            default:
+                Slog.w(TAG, "Unexpected property (" + property + "); updating cache instead");
+                // fall through
+            case Settings.Global.AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES:
+                synchronized (mLock) {
+                    updateCachedServiceLocked(userId);
+                }
         }
-        umi.addUserRestrictionsListener((userId, newRestrictions, prevRestrictions) -> {
-            final boolean disabledNow =
-                    newRestrictions.getBoolean(UserManager.DISALLOW_AUTOFILL, false);
-            synchronized (mLock) {
-                final boolean disabledBefore = mDisabledUsers.get(userId);
-                if (disabledBefore == disabledNow) {
-                    // Nothing changed, do nothing.
-                    if (sDebug) {
-                        Slog.d(TAG, "Autofill restriction did not change for user " + userId);
-                        return;
-                    }
-                }
-                Slog.i(TAG, "Updating Autofill for user " + userId + ": disabled=" + disabledNow);
-                mDisabledUsers.put(userId, disabledNow);
-                updateCachedServiceLocked(userId, disabledNow);
-            }
-        });
-        startTrackingPackageChanges();
     }
 
-    private void startTrackingPackageChanges() {
-        PackageMonitor monitor = new PackageMonitor() {
-            @Override
-            public void onSomePackagesChanged() {
-                synchronized (mLock) {
-                    updateCachedServiceLocked(getChangingUserId());
-                }
-            }
-
-            @Override
-            public void onPackageUpdateFinished(String packageName, int uid) {
-                synchronized (mLock) {
-                    final String activePackageName = getActiveAutofillServicePackageName();
-                    if (packageName.equals(activePackageName)) {
-                        removeCachedServiceLocked(getChangingUserId());
-                    } else {
-                        handlePackageUpdateLocked(packageName);
-                    }
-                }
-            }
-
-            @Override
-            public void onPackageRemoved(String packageName, int uid) {
-                synchronized (mLock) {
-                    final int userId = getChangingUserId();
-                    final AutofillManagerServiceImpl userState = peekServiceForUserLocked(userId);
-                    if (userState != null) {
-                        final ComponentName componentName = userState.getServiceComponentName();
-                        if (componentName != null) {
-                            if (packageName.equals(componentName.getPackageName())) {
-                                handleActiveAutofillServiceRemoved(userId);
-                            }
-                        }
-                    }
-                }
-            }
-
-            @Override
-            public boolean onHandleForceStop(Intent intent, String[] packages,
-                    int uid, boolean doit) {
-                synchronized (mLock) {
-                    final String activePackageName = getActiveAutofillServicePackageName();
-                    for (String pkg : packages) {
-                        if (pkg.equals(activePackageName)) {
-                            if (!doit) {
-                                return true;
-                            }
-                            removeCachedServiceLocked(getChangingUserId());
-                        } else {
-                          handlePackageUpdateLocked(pkg);
-                        }
-                    }
-                }
-                return false;
-            }
-
-            private void handleActiveAutofillServiceRemoved(int userId) {
-                removeCachedServiceLocked(userId);
-                Settings.Secure.putStringForUser(mContext.getContentResolver(),
-                        Settings.Secure.AUTOFILL_SERVICE, null, userId);
-            }
-
-            private String getActiveAutofillServicePackageName() {
-                final int userId = getChangingUserId();
-                final AutofillManagerServiceImpl userState = peekServiceForUserLocked(userId);
-                if (userState == null) {
-                    return null;
-                }
-                final ComponentName serviceComponent = userState.getServiceComponentName();
-                if (serviceComponent == null) {
-                    return null;
-                }
-                return serviceComponent.getPackageName();
-            }
-
-            @GuardedBy("mLock")
-            private void handlePackageUpdateLocked(String packageName) {
-                final int size = mServicesCache.size();
-                for (int i = 0; i < size; i++) {
-                    mServicesCache.valueAt(i).handlePackageUpdateLocked(packageName);
-                }
-            }
-        };
-
-        // package changes
-        monitor.register(mContext, null,  UserHandle.ALL, true);
+    @Override // from MasterSystemService
+    protected AutofillManagerServiceImpl newServiceLocked(int resolvedUserId, boolean disabled) {
+        return new AutofillManagerServiceImpl(this, mLock, mRequestsHistory,
+                mUiLatencyHistory, mWtfHistory, resolvedUserId, mUi, mAutofillCompatState,
+                disabled);
     }
 
-    @Override
+    @Override // MasterSystemService
+    protected AutofillManagerServiceImpl removeCachedServiceLocked(int userId) {
+        final AutofillManagerServiceImpl service = super.removeCachedServiceLocked(userId);
+        if (service != null) {
+            service.destroyLocked();
+            mAutofillCompatState.removeCompatibilityModeRequests(userId);
+        }
+        return service;
+    }
+
+    @Override // from MasterSystemService
+    protected void onServiceEnabledLocked(@NonNull AutofillManagerServiceImpl service, int userId) {
+        addCompatibilityModeRequestsLocked(service, userId);
+    }
+
+    @Override // from SystemService
     public void onStart() {
         publishBinderService(AUTOFILL_MANAGER_SERVICE, new AutoFillManagerServiceStub());
         publishLocalService(AutofillManagerInternal.class, mLocalService);
     }
 
-    @Override
-    public void onBootPhase(int phase) {
-        if (phase == PHASE_THIRD_PARTY_APPS_CAN_START) {
-            new SettingsObserver(BackgroundThread.getHandler());
-        }
-    }
-
-    @Override
-    public void onUnlockUser(int userId) {
-        synchronized (mLock) {
-            updateCachedServiceLocked(userId);
-        }
-    }
-
-    @Override
+    @Override // from SystemService
     public void onSwitchUser(int userHandle) {
         if (sDebug) Slog.d(TAG, "Hiding UI when user switched");
         mUi.hideAll(null);
     }
 
-    @Override
-    public void onCleanupUser(int userId) {
-        synchronized (mLock) {
-            removeCachedServiceLocked(userId);
-        }
-    }
-
-    /**
-     * Gets the service instance for an user.
-     *
-     * @return service instance.
-     */
-    @GuardedBy("mLock")
-    @NonNull
-    AutofillManagerServiceImpl getServiceForUserLocked(int userId) {
-        final int resolvedUserId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
-                Binder.getCallingUid(), userId, false, false, null, null);
-        AutofillManagerServiceImpl service = mServicesCache.get(resolvedUserId);
-        if (service == null) {
-            service = new AutofillManagerServiceImpl(mContext, mLock, mRequestsHistory,
-                    mUiLatencyHistory, mWtfHistory, resolvedUserId, mUi,
-                    mAutofillCompatState, mDisabledUsers.get(resolvedUserId));
-            mServicesCache.put(userId, service);
-            addCompatibilityModeRequestsLocked(service, userId);
-        }
-        return service;
-    }
-
-    /**
-     * Peeks the service instance for a user.
-     *
-     * @return service instance or {@code null} if not already present
-     */
-    @GuardedBy("mLock")
-    @Nullable
-    AutofillManagerServiceImpl peekServiceForUserLocked(int userId) {
-        final int resolvedUserId = ActivityManager.handleIncomingUser(Binder.getCallingPid(),
-                Binder.getCallingUid(), userId, false, false, null, null);
-        return mServicesCache.get(resolvedUserId);
-    }
-
     // Called by Shell command.
     void destroySessions(int userId, IResultReceiver receiver) {
         Slog.i(TAG, "destroySessions() for userId " + userId);
-        mContext.enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
+        getContext().enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
 
         synchronized (mLock) {
             if (userId != UserHandle.USER_ALL) {
@@ -373,10 +256,7 @@ public final class AutofillManagerService extends SystemService {
                     service.destroySessionsLocked();
                 }
             } else {
-                final int size = mServicesCache.size();
-                for (int i = 0; i < size; i++) {
-                    mServicesCache.valueAt(i).destroySessionsLocked();
-                }
+                visitServicesLocked((s) -> s.destroySessionsLocked());
             }
         }
 
@@ -390,7 +270,7 @@ public final class AutofillManagerService extends SystemService {
     // Called by Shell command.
     void listSessions(int userId, IResultReceiver receiver) {
         Slog.i(TAG, "listSessions() for userId " + userId);
-        mContext.enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
+        getContext().enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
 
         final Bundle resultData = new Bundle();
         final ArrayList<String> sessions = new ArrayList<>();
@@ -402,10 +282,7 @@ public final class AutofillManagerService extends SystemService {
                     service.listSessionsLocked(sessions);
                 }
             } else {
-                final int size = mServicesCache.size();
-                for (int i = 0; i < size; i++) {
-                    mServicesCache.valueAt(i).listSessionsLocked(sessions);
-                }
+                visitServicesLocked((s) -> s.listSessionsLocked(sessions));
             }
         }
 
@@ -420,25 +297,22 @@ public final class AutofillManagerService extends SystemService {
     // Called by Shell command.
     void reset() {
         Slog.i(TAG, "reset()");
-        mContext.enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
+        getContext().enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
 
         synchronized (mLock) {
-            final int size = mServicesCache.size();
-            for (int i = 0; i < size; i++) {
-                mServicesCache.valueAt(i).destroyLocked();
-            }
-            mServicesCache.clear();
+            visitServicesLocked((s) -> s.destroyLocked());
+            clearCacheLocked();
         }
     }
 
     // Called by Shell command.
     void setLogLevel(int level) {
         Slog.i(TAG, "setLogLevel(): " + level);
-        mContext.enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
+        getContext().enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
 
         final long token = Binder.clearCallingIdentity();
         try {
-            Settings.Global.putInt(mContext.getContentResolver(),
+            Settings.Global.putInt(getContext().getContentResolver(),
                     Settings.Global.AUTOFILL_LOGGING_LEVEL, level);
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -447,7 +321,7 @@ public final class AutofillManagerService extends SystemService {
 
     private void setLogLevelFromSettings() {
         final int level = Settings.Global.getInt(
-                mContext.getContentResolver(),
+                getContext().getContentResolver(),
                 Settings.Global.AUTOFILL_LOGGING_LEVEL, AutofillManager.DEFAULT_LOGGING_LEVEL);
         boolean debug = false;
         boolean verbose = false;
@@ -465,14 +339,13 @@ public final class AutofillManagerService extends SystemService {
                     + ", verbose=" + verbose);
         }
         synchronized (mLock) {
-            setDebugLocked(debug);
-            setVerboseLocked(verbose);
+            setLoggingLevelsLocked(debug, verbose);
         }
     }
 
     // Called by Shell command.
     int getLogLevel() {
-        mContext.enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
+        getContext().enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
 
         synchronized (mLock) {
             if (sVerbose) return AutofillManager.FLAG_ADD_CLIENT_VERBOSE;
@@ -483,7 +356,7 @@ public final class AutofillManagerService extends SystemService {
 
     // Called by Shell command.
     int getMaxPartitions() {
-        mContext.enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
+        getContext().enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
 
         synchronized (mLock) {
             return sPartitionMaxCount;
@@ -492,12 +365,12 @@ public final class AutofillManagerService extends SystemService {
 
     // Called by Shell command.
     void setMaxPartitions(int max) {
-        mContext.enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
+        getContext().enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
         Slog.i(TAG, "setMaxPartitions(): " + max);
 
         final long token = Binder.clearCallingIdentity();
         try {
-            Settings.Global.putInt(mContext.getContentResolver(),
+            Settings.Global.putInt(getContext().getContentResolver(),
                     Settings.Global.AUTOFILL_MAX_PARTITIONS_SIZE, max);
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -505,33 +378,33 @@ public final class AutofillManagerService extends SystemService {
     }
 
     private void setMaxPartitionsFromSettings() {
-        final int max = Settings.Global.getInt(mContext.getContentResolver(),
+        final int max = Settings.Global.getInt(getContext().getContentResolver(),
                 Settings.Global.AUTOFILL_MAX_PARTITIONS_SIZE,
                 AutofillManager.DEFAULT_MAX_PARTITIONS_SIZE);
         if (sDebug) Slog.d(TAG, "setMaxPartitionsFromSettings(): " + max);
 
-        synchronized (mLock) {
+        synchronized (sLock) {
             sPartitionMaxCount = max;
         }
     }
 
     // Called by Shell command.
     int getMaxVisibleDatasets() {
-        mContext.enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
+        getContext().enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
 
-        synchronized (mLock) {
+        synchronized (sLock) {
             return sVisibleDatasetsMaxCount;
         }
     }
 
     // Called by Shell command.
     void setMaxVisibleDatasets(int max) {
-        mContext.enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
+        getContext().enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
         Slog.i(TAG, "setMaxVisibleDatasets(): " + max);
 
         final long token = Binder.clearCallingIdentity();
         try {
-            Settings.Global.putInt(mContext.getContentResolver(),
+            Settings.Global.putInt(getContext().getContentResolver(),
                     Settings.Global.AUTOFILL_MAX_VISIBLE_DATASETS, max);
         } finally {
             Binder.restoreCallingIdentity(token);
@@ -539,11 +412,11 @@ public final class AutofillManagerService extends SystemService {
     }
 
     private void setMaxVisibleDatasetsFromSettings() {
-        final int max = Settings.Global.getInt(mContext.getContentResolver(),
+        final int max = Settings.Global.getInt(getContext().getContentResolver(),
                 Settings.Global.AUTOFILL_MAX_VISIBLE_DATASETS, 0);
 
         if (sDebug) Slog.d(TAG, "setMaxVisibleDatasetsFromSettings(): " + max);
-        synchronized (mLock) {
+        synchronized (sLock) {
             sVisibleDatasetsMaxCount = max;
         }
     }
@@ -551,10 +424,10 @@ public final class AutofillManagerService extends SystemService {
     // Called by Shell command.
     void getScore(@Nullable String algorithmName, @NonNull String value1,
             @NonNull String value2, @NonNull RemoteCallback callback) {
-        mContext.enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
+        getContext().enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
 
         final FieldClassificationStrategy strategy =
-                new FieldClassificationStrategy(mContext, UserHandle.USER_CURRENT);
+                new FieldClassificationStrategy(getContext(), UserHandle.USER_CURRENT);
 
         strategy.getScores(callback, algorithmName, null,
                 Arrays.asList(AutofillValue.forText(value1)), new String[] { value2 });
@@ -562,19 +435,19 @@ public final class AutofillManagerService extends SystemService {
 
     // Called by Shell command.
     Boolean getFullScreenMode() {
-        mContext.enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
+        getContext().enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
         return sFullScreenMode;
     }
 
     // Called by Shell command.
     void setFullScreenMode(@Nullable Boolean mode) {
-        mContext.enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
+        getContext().enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
         sFullScreenMode = mode;
     }
 
     // Called by Shell command.
     boolean getAllowInstantService() {
-        mContext.enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
+        getContext().enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
         synchronized (mLock) {
             return mAllowInstantService;
         }
@@ -582,59 +455,21 @@ public final class AutofillManagerService extends SystemService {
 
     // Called by Shell command.
     void setAllowInstantService(boolean mode) {
-        mContext.enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
+        getContext().enforceCallingPermission(MANAGE_AUTO_FILL, TAG);
         Slog.i(TAG, "setAllowInstantService(): " + mode);
         synchronized (mLock) {
             mAllowInstantService = mode;
         }
     }
 
-    private void setDebugLocked(boolean debug) {
+    private void setLoggingLevelsLocked(boolean debug, boolean verbose) {
         com.android.server.autofill.Helper.sDebug = debug;
         android.view.autofill.Helper.sDebug = debug;
-    }
+        this.debug = debug;
 
-    private void setVerboseLocked(boolean verbose) {
         com.android.server.autofill.Helper.sVerbose = verbose;
         android.view.autofill.Helper.sVerbose = verbose;
-    }
-
-    /**
-     * Removes a cached service for a given user.
-     */
-    @GuardedBy("mLock")
-    private void removeCachedServiceLocked(int userId) {
-        final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
-        if (service != null) {
-            mServicesCache.delete(userId);
-            service.destroyLocked();
-            mAutofillCompatState.removeCompatibilityModeRequests(userId);
-        }
-    }
-
-    /**
-     * Updates a cached service for a given user.
-     */
-    @GuardedBy("mLock")
-    private void updateCachedServiceLocked(int userId) {
-        updateCachedServiceLocked(userId, mDisabledUsers.get(userId));
-    }
-
-    /**
-     * Updates a cached service for a given user.
-     */
-    @GuardedBy("mLock")
-    private void updateCachedServiceLocked(int userId, boolean disabled) {
-        AutofillManagerServiceImpl service = getServiceForUserLocked(userId);
-        if (service != null) {
-            service.destroySessionsLocked();
-            service.updateLocked(disabled);
-            if (!service.isEnabledLocked()) {
-                removeCachedServiceLocked(userId);
-            } else {
-                addCompatibilityModeRequestsLocked(service, userId);
-            }
-        }
+        this.verbose = verbose;
     }
 
     private void addCompatibilityModeRequestsLocked(@NonNull AutofillManagerServiceImpl service
@@ -664,7 +499,7 @@ public final class AutofillManagerService extends SystemService {
 
     private String getWhitelistedCompatModePackagesFromSettings() {
         return Settings.Global.getString(
-                mContext.getContentResolver(),
+                getContext().getContentResolver(),
                 Settings.Global.AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES);
     }
 
@@ -756,6 +591,24 @@ public final class AutofillManagerService extends SystemService {
             }
         }
         return compatPackages;
+    }
+
+    /**
+     * Gets the maximum number of partitions / fill requests.
+     */
+    public static int getPartitionMaxCount() {
+        synchronized (sLock) {
+            return sPartitionMaxCount;
+        }
+    }
+
+    /**
+     * Gets the maxium number of datasets visible in the UI.
+     */
+    public static int getVisibleDatasetsMaxCount() {
+        synchronized (sLock) {
+            return sVisibleDatasetsMaxCount;
+        }
     }
 
     private final class LocalService extends AutofillManagerInternal {
@@ -889,20 +742,24 @@ public final class AutofillManagerService extends SystemService {
         }
 
         private void dump(String prefix, PrintWriter pw) {
-             if (mUserSpecs == null) {
-                 pw.println("N/A");
-                 return;
-             }
-             pw.println();
-             final String prefix2 = prefix + "  ";
-             for (int i = 0; i < mUserSpecs.size(); i++) {
-                 final int user = mUserSpecs.keyAt(i);
-                 pw.print(prefix); pw.print("User: "); pw.println(user);
-                 final ArrayMap<String, PackageCompatState> perUser = mUserSpecs.valueAt(i);
-                 for (int j = 0; j < perUser.size(); j++) {
-                     final String packageName = perUser.keyAt(j);
-                     final PackageCompatState state = perUser.valueAt(j);
-                     pw.print(prefix2); pw.print(packageName); pw.print(": "); pw.println(state);
+            synchronized (mLock) {
+                if (mUserSpecs == null) {
+                    pw.println("N/A");
+                    return;
+                }
+                pw.println();
+                final String prefix2 = prefix + "  ";
+                for (int i = 0; i < mUserSpecs.size(); i++) {
+                    final int user = mUserSpecs.keyAt(i);
+                    pw.print(prefix);
+                    pw.print("User: ");
+                    pw.println(user);
+                    final ArrayMap<String, PackageCompatState> perUser = mUserSpecs.valueAt(i);
+                    for (int j = 0; j < perUser.size(); j++) {
+                        final String packageName = perUser.keyAt(j);
+                        final PackageCompatState state = perUser.valueAt(j);
+                        pw.print(prefix2); pw.print(packageName); pw.print(": "); pw.println(state);
+                    }
                 }
             }
         }
@@ -971,7 +828,7 @@ public final class AutofillManagerService extends SystemService {
             Preconditions.checkArgument(userId == UserHandle.getUserId(getCallingUid()), "userId");
 
             try {
-                mContext.getPackageManager().getPackageInfoAsUser(packageName, 0, userId);
+                getContext().getPackageManager().getPackageInfoAsUser(packageName, 0, userId);
             } catch (PackageManager.NameNotFoundException e) {
                 throw new IllegalArgumentException(packageName + " is not a valid package", e);
             }
@@ -1139,7 +996,7 @@ public final class AutofillManagerService extends SystemService {
 
             boolean restored = false;
             synchronized (mLock) {
-                final AutofillManagerServiceImpl service = mServicesCache.get(userId);
+                final AutofillManagerServiceImpl service = peekServiceForUserLocked(userId);
                 if (service != null) {
                     restored = service.restoreSession(sessionId, getCallingUid(), activityToken,
                             appCallback);
@@ -1216,7 +1073,7 @@ public final class AutofillManagerService extends SystemService {
         public void isServiceSupported(int userId, @NonNull IResultReceiver receiver) {
             boolean supported = false;
             synchronized (mLock) {
-                supported = !mDisabledUsers.get(userId);
+                supported = !isDisabledLocked(userId);
             }
             send(receiver, supported);
         }
@@ -1253,7 +1110,7 @@ public final class AutofillManagerService extends SystemService {
 
         @Override
         public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
-            if (!DumpUtils.checkDumpPermission(mContext, TAG, pw)) return;
+            if (!DumpUtils.checkDumpPermission(getContext(), TAG, pw)) return;
 
             boolean showHistory = true;
             boolean uiOnly = false;
@@ -1280,102 +1137,48 @@ public final class AutofillManagerService extends SystemService {
                 return;
             }
 
-            boolean oldDebug = sDebug;
             final String prefix = "  ";
-            final String prefix2 = "    ";
+            boolean realDebug = sDebug;
+            boolean realVerbose = sVerbose;
             try {
+                sDebug = sVerbose = true;
                 synchronized (mLock) {
-                    oldDebug = sDebug;
-                    setDebugLocked(true);
-                    pw.print("Debug mode: "); pw.println(oldDebug);
-                    pw.print("Verbose mode: "); pw.println(sVerbose);
-                    pw.print("Disabled users: "); pw.println(mDisabledUsers);
+                    pw.print("sDebug: "); pw.print(realDebug);
+                    pw.print(" sVerbose: "); pw.println(realVerbose);
+                    // Dump per-user services
+                    dumpLocked("", pw);
                     pw.print("Max partitions per session: "); pw.println(sPartitionMaxCount);
                     pw.print("Max visible datasets: "); pw.println(sVisibleDatasetsMaxCount);
                     if (sFullScreenMode != null) {
                         pw.print("Overridden full-screen mode: "); pw.println(sFullScreenMode);
                     }
                     pw.println("User data constraints: "); UserData.dumpConstraints(prefix, pw);
-                    final int size = mServicesCache.size();
-                    pw.print("Cached services: ");
-                    if (size == 0) {
-                        pw.println("none");
-                    } else {
-                        pw.println(size);
-                        for (int i = 0; i < size; i++) {
-                            pw.print("\nService at index "); pw.println(i);
-                            final AutofillManagerServiceImpl impl = mServicesCache.valueAt(i);
-                            impl.dumpLocked(prefix, pw);
-                        }
-                    }
                     mUi.dump(pw);
                     pw.print("Autofill Compat State: ");
-                    mAutofillCompatState.dump(prefix2, pw);
-                    pw.print(prefix2); pw.print("from settings: ");
+                    mAutofillCompatState.dump(prefix, pw);
+                    pw.print("from settings: ");
                     pw.println(getWhitelistedCompatModePackagesFromSettings());
                     pw.print("Allow instant service: "); pw.println(mAllowInstantService);
-                }
-                if (showHistory) {
-                    pw.println(); pw.println("Requests history:"); pw.println();
-                    mRequestsHistory.reverseDump(fd, pw, args);
-                    pw.println(); pw.println("UI latency history:"); pw.println();
-                    mUiLatencyHistory.reverseDump(fd, pw, args);
-                    pw.println(); pw.println("WTF history:"); pw.println();
-                    mWtfHistory.reverseDump(fd, pw, args);
+                    if (showHistory) {
+                        pw.println(); pw.println("Requests history:"); pw.println();
+                        mRequestsHistory.reverseDump(fd, pw, args);
+                        pw.println(); pw.println("UI latency history:"); pw.println();
+                        mUiLatencyHistory.reverseDump(fd, pw, args);
+                        pw.println(); pw.println("WTF history:"); pw.println();
+                        mWtfHistory.reverseDump(fd, pw, args);
+                    }
                 }
             } finally {
-                setDebugLocked(oldDebug);
+                sDebug = realDebug;
+                sVerbose = realVerbose;
             }
         }
 
         @Override
         public void onShellCommand(FileDescriptor in, FileDescriptor out, FileDescriptor err,
                 String[] args, ShellCallback callback, ResultReceiver resultReceiver) {
-            (new AutofillManagerServiceShellCommand(AutofillManagerService.this)).exec(
+            new AutofillManagerServiceShellCommand(AutofillManagerService.this).exec(
                     this, in, out, err, args, callback, resultReceiver);
-        }
-    }
-
-    private final class SettingsObserver extends ContentObserver {
-        SettingsObserver(Handler handler) {
-            super(handler);
-            ContentResolver resolver = mContext.getContentResolver();
-            resolver.registerContentObserver(Settings.Secure.getUriFor(
-                    Settings.Secure.AUTOFILL_SERVICE), false, this, UserHandle.USER_ALL);
-            resolver.registerContentObserver(Settings.Secure.getUriFor(
-                    Settings.Secure.USER_SETUP_COMPLETE), false, this, UserHandle.USER_ALL);
-            resolver.registerContentObserver(Settings.Global.getUriFor(
-                    Settings.Global.AUTOFILL_COMPAT_MODE_ALLOWED_PACKAGES), false, this,
-                    UserHandle.USER_ALL);
-            resolver.registerContentObserver(Settings.Global.getUriFor(
-                    Settings.Global.AUTOFILL_LOGGING_LEVEL), false, this,
-                    UserHandle.USER_ALL);
-            resolver.registerContentObserver(Settings.Global.getUriFor(
-                    Settings.Global.AUTOFILL_MAX_PARTITIONS_SIZE), false, this,
-                    UserHandle.USER_ALL);
-            resolver.registerContentObserver(Settings.Global.getUriFor(
-                    Settings.Global.AUTOFILL_MAX_VISIBLE_DATASETS), false, this,
-                    UserHandle.USER_ALL);
-        }
-
-        @Override
-        public void onChange(boolean selfChange, Uri uri, int userId) {
-            if (sVerbose) Slog.v(TAG, "onChange(): uri=" + uri + ", userId=" + userId);
-            switch (uri.getLastPathSegment()) {
-                case Settings.Global.AUTOFILL_LOGGING_LEVEL:
-                    setLogLevelFromSettings();
-                    break;
-                case Settings.Global.AUTOFILL_MAX_PARTITIONS_SIZE:
-                    setMaxPartitionsFromSettings();
-                    break;
-                case Settings.Global.AUTOFILL_MAX_VISIBLE_DATASETS:
-                    setMaxVisibleDatasetsFromSettings();
-                    break;
-                default:
-                synchronized (mLock) {
-                    updateCachedServiceLocked(userId);
-                }
-            }
         }
     }
 }
