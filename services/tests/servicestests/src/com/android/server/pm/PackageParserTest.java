@@ -38,11 +38,11 @@ import androidx.test.filters.MediumTest;
 import androidx.test.filters.SmallTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import libcore.io.IoUtils;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-
-import libcore.io.IoUtils;
 
 import java.io.File;
 import java.lang.reflect.Array;
@@ -490,7 +490,7 @@ public class PackageParserTest {
         pkg.usesLibraryFiles = new String[] { "foo13"};
 
         pkg.usesLibraryInfos = new ArrayList<>();
-        pkg.usesLibraryInfos.add(new SharedLibraryInfo(null, null, null, 0L, 0, null, null));
+        pkg.usesLibraryInfos.add(new SharedLibraryInfo(null, null, null, 0L, 0, null, null, null));
 
         pkg.mOriginalPackages = new ArrayList<>();
         pkg.mOriginalPackages.add("foo14");
