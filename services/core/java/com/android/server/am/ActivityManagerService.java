@@ -3852,7 +3852,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         final int callingPid = Binder.getCallingPid();
         final int callingUid = Binder.getCallingUid();
-        final int userId = UserHandle.getUserId(callingUid);
+        final int callingUserId = UserHandle.getUserId(callingUid);
         final boolean allUsers = ActivityManager.checkUidPermission(INTERACT_ACROSS_USERS_FULL,
                 callingUid) == PackageManager.PERMISSION_GRANTED;
         // Check REAL_GET_TASKS to see if they are allowed to access other uids
@@ -3870,11 +3870,17 @@ public class ActivityManagerService extends IActivityManager.Stub
                     oomAdj = proc != null ? proc.setAdj : 0;
                 }
             }
-            if (!allUids || (!allUsers && (proc == null
-                    || UserHandle.getUserId(proc.uid) != userId))) {
-                // The caller is not allow to get information about this other process...
-                // just leave it empty.
-                continue;
+            final int targetUid = (proc != null) ? proc.uid : -1;
+            final int targetUserId = (proc != null) ? UserHandle.getUserId(targetUid) : -1;
+
+            if (callingUid != targetUid) {
+                if (!allUids) {
+                    continue; // Not allowed to see other UIDs.
+                }
+
+                if (!allUsers && (targetUserId != callingUserId)) {
+                    continue; // Not allowed to see other users.
+                }
             }
             if (proc != null && proc.lastMemInfoTime >= lastNow && proc.lastMemInfo != null) {
                 // It hasn't been long enough that we want to take another sample; return
