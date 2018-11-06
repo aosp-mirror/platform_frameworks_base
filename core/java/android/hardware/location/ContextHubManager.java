@@ -808,7 +808,7 @@ public final class ContextHubManager {
      *
      * @throws IllegalArgumentException if hubInfo does not represent a valid hub, or pendingIntent
      *                                  was not associated with a client
-     * @throws IllegalStateException    if there were too many registered clients at the service
+     * @throws IllegalStateException    if the client is already registered to a valid callback
      * @throws NullPointerException     if pendingIntent, hubInfo, callback, or executor is null
      *
      * @hide
@@ -818,8 +818,24 @@ public final class ContextHubManager {
             @NonNull PendingIntent pendingIntent, @NonNull ContextHubInfo hubInfo,
             @NonNull ContextHubClientCallback callback,
             @NonNull @CallbackExecutor Executor executor) {
-        // TODO: Implement this
-        throw new UnsupportedOperationException("Not implemented yet");
+        Preconditions.checkNotNull(pendingIntent, "PendingIntent cannot be null");
+        Preconditions.checkNotNull(callback, "Callback cannot be null");
+        Preconditions.checkNotNull(hubInfo, "ContextHubInfo cannot be null");
+        Preconditions.checkNotNull(executor, "Executor cannot be null");
+
+        ContextHubClient client = new ContextHubClient(hubInfo);
+        IContextHubClientCallback clientInterface = createClientCallback(
+                client, callback, executor);
+
+        IContextHubClient clientProxy;
+        try {
+            clientProxy = mService.bindClient(pendingIntent, clientInterface, hubInfo.getId());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+
+        client.setClientProxy(clientProxy);
+        return client;
     }
 
     /**
@@ -833,7 +849,7 @@ public final class ContextHubManager {
      *
      * @throws IllegalArgumentException if hubInfo does not represent a valid hub, or pendingIntent
      *                                  was not associated with a client
-     * @throws IllegalStateException    if there were too many registered clients at the service
+     * @throws IllegalStateException    if the client is already registered to a valid callback
      * @throws NullPointerException     if pendingIntent, hubInfo, or callback is null
      *
      * @hide
