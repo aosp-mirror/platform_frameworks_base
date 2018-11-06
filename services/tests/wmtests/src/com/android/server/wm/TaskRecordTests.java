@@ -19,9 +19,12 @@ package com.android.server.wm;
 import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.content.Intent.FLAG_ACTIVITY_TASK_ON_HOME;
 
+import static org.hamcrest.Matchers.not;
+import static org.hamcrest.Matchers.sameInstance;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import android.app.ActivityManager;
@@ -90,6 +93,18 @@ public class TaskRecordTests extends ActivityTestsBase {
     @Test
     public void testDefaultTaskFactoryNotNull() throws Exception {
         assertNotNull(TaskRecord.getTaskRecordFactory());
+    }
+
+    /** Ensure we have no chance to modify the original intent. */
+    @Test
+    public void testCopyBaseIntentForTaskInfo() {
+        final TaskRecord task = createTaskRecord(1);
+        task.lastTaskDescription = new ActivityManager.TaskDescription();
+        final ActivityManager.RecentTaskInfo info = new ActivityManager.RecentTaskInfo();
+        task.fillTaskInfo(info, new TaskRecord.TaskActivitiesReport());
+
+        // The intent of info should be a copy so assert that they are different instances.
+        assertThat(info.baseIntent, not(sameInstance(task.getBaseIntent())));
     }
 
     @Test
