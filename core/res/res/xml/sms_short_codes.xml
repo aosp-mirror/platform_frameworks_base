@@ -187,7 +187,7 @@
     <shortcode country="my" pattern="\\d{5}" premium="32298|33776" free="22099|28288" />
 
     <!-- The Netherlands, 4 digits, known premium codes listed, plus EU -->
-    <shortcode country="nl" pattern="\\d{4}" premium="4466|5040" free="116\\d{3}|2223|6225|2223" />
+    <shortcode country="nl" pattern="\\d{4}" premium="4466|5040" free="116\\d{3}|2223|6225|2223|1662" />
 
     <!-- Nigeria -->
     <shortcode country="ng" pattern="\\d{1,5}" free="2441" />
