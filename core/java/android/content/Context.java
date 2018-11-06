@@ -3865,6 +3865,14 @@ public abstract class Context {
     public static final String AUTOFILL_MANAGER_SERVICE = "autofill";
 
     /**
+     * Official published name of the intelligence service.
+     *
+     * @hide
+     * @see #getSystemService(String)
+     */
+    public static final String INTELLIGENCE_MANAGER_SERVICE = "intelligence";
+
+    /**
      * Use with {@link #getSystemService(String)} to access the
      * {@link com.android.server.voiceinteraction.SoundTriggerService}.
      *

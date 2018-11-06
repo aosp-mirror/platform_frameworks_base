@@ -15,16 +15,24 @@
  */
 package android.service.intelligence;
 
+import static com.android.internal.util.function.pooled.PooledLambda.obtainMessage;
+
+import android.annotation.CallSuper;
 import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.app.Service;
 import android.content.Intent;
+import android.os.Handler;
+import android.os.IBinder;
+import android.os.Looper;
+import android.os.RemoteException;
+import android.util.Log;
 import android.view.intelligence.ContentCaptureEvent;
 
 import java.util.List;
 
 /**
- * A service used to captures the content of the screen.
+ * A service used to capture the content of the screen.
  *
  * <p>The data collected by this service can be analyzed and combined with other sources to provide
  * contextual data in other areas of the system such as Autofill.
@@ -34,6 +42,8 @@ import java.util.List;
 @SystemApi
 public abstract class IntelligenceService extends Service {
 
+    private static final String TAG = "IntelligenceService";
+
     /**
      * The {@link Intent} that must be declared as handled by the service.
      * To be supported, the service must also require the
@@ -42,6 +52,42 @@ public abstract class IntelligenceService extends Service {
      */
     public static final String SERVICE_INTERFACE =
             "android.service.intelligence.IntelligenceService";
+
+    private Handler mHandler;
+
+    private final IIntelligenceService mInterface = new IIntelligenceService.Stub() {
+
+        @Override
+        public void onSessionLifecycle(InteractionContext context, InteractionSessionId sessionId)
+                throws RemoteException {
+            if (context != null) {
+                mHandler.sendMessage(
+                        obtainMessage(IntelligenceService::onCreateInteractionSession,
+                                IntelligenceService.this, context, sessionId));
+            } else {
+                mHandler.sendMessage(
+                        obtainMessage(IntelligenceService::onDestroyInteractionSession,
+                                IntelligenceService.this, sessionId));
+            }
+        }
+    };
+
+    @CallSuper
+    @Override
+    public void onCreate() {
+        super.onCreate();
+        mHandler = new Handler(Looper.getMainLooper(), null, true);
+    }
+
+    /** @hide */
+    @Override
+    public final IBinder onBind(Intent intent) {
+        if (SERVICE_INTERFACE.equals(intent.getAction())) {
+            return mInterface.asBinder();
+        }
+        Log.w(TAG, "Tried to bind to wrong intent: " + intent);
+        return null;
+    }
 
     /**
      * Creates a new interaction session.
@@ -63,7 +109,7 @@ public abstract class IntelligenceService extends Service {
             @NonNull List<ContentCaptureEvent> events);
 
     /**
-     * Destroys the content capture session identified by the specified {@code sessionId}.
+     * Destroys the interaction session.
      *
      * @param sessionId the id of the session to destroy
      */
