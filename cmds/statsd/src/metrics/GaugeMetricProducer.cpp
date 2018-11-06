@@ -182,6 +182,7 @@ void GaugeMetricProducer::clearPastBucketsLocked(const int64_t dumpTimeNs) {
 
 void GaugeMetricProducer::onDumpReportLocked(const int64_t dumpTimeNs,
                                              const bool include_current_partial_bucket,
+                                             const bool erase_data,
                                              std::set<string> *str_set,
                                              ProtoOutputStream* protoOutput) {
     VLOG("Gauge metric %lld report now...", (long long)mMetricId);
@@ -226,7 +227,6 @@ void GaugeMetricProducer::onDumpReportLocked(const int64_t dumpTimeNs,
                            (long long)(NanoToMillis(pair.second)));
         protoOutput->end(wrapperToken);
     }
-    mSkippedBuckets.clear();
 
     for (const auto& pair : mPastBuckets) {
         const MetricDimensionKey& dimensionKey = pair.first;
@@ -304,7 +304,11 @@ void GaugeMetricProducer::onDumpReportLocked(const int64_t dumpTimeNs,
     }
     protoOutput->end(protoToken);
 
-    mPastBuckets.clear();
+
+    if (erase_data) {
+        mPastBuckets.clear();
+        mSkippedBuckets.clear();
+    }
 }
 
 void GaugeMetricProducer::pullAndMatchEventsLocked(const int64_t timestampNs) {

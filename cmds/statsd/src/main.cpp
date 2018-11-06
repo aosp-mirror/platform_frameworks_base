@@ -82,7 +82,9 @@ int main(int /*argc*/, char** /*argv*/) {
 
     // Create the service
     gStatsService = new StatsService(looper);
-    if (defaultServiceManager()->addService(String16("stats"), gStatsService) != 0) {
+    if (defaultServiceManager()->addService(String16("stats"), gStatsService, false,
+                IServiceManager::DUMP_FLAG_PRIORITY_NORMAL | IServiceManager::DUMP_FLAG_PROTO)
+            != 0) {
         ALOGE("Failed to add service as AIDL service");
         return -1;
     }

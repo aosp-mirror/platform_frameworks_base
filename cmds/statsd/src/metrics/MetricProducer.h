@@ -133,10 +133,12 @@ public:
     // This method clears all the past buckets.
     void onDumpReport(const int64_t dumpTimeNs,
                       const bool include_current_partial_bucket,
+                      const bool erase_data,
                       std::set<string> *str_set,
                       android::util::ProtoOutputStream* protoOutput) {
         std::lock_guard<std::mutex> lock(mMutex);
-        return onDumpReportLocked(dumpTimeNs, include_current_partial_bucket, str_set, protoOutput);
+        return onDumpReportLocked(dumpTimeNs, include_current_partial_bucket, erase_data,
+                str_set, protoOutput);
     }
 
     void clearPastBuckets(const int64_t dumpTimeNs) {
@@ -210,6 +212,7 @@ protected:
                                                   const int64_t eventTime) = 0;
     virtual void onDumpReportLocked(const int64_t dumpTimeNs,
                                     const bool include_current_partial_bucket,
+                                    const bool erase_data,
                                     std::set<string> *str_set,
                                     android::util::ProtoOutputStream* protoOutput) = 0;
     virtual void clearPastBucketsLocked(const int64_t dumpTimeNs) = 0;

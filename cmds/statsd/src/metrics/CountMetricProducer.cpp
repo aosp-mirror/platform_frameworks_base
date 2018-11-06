@@ -143,6 +143,7 @@ void CountMetricProducer::clearPastBucketsLocked(const int64_t dumpTimeNs) {
 
 void CountMetricProducer::onDumpReportLocked(const int64_t dumpTimeNs,
                                              const bool include_current_partial_bucket,
+                                             const bool erase_data,
                                              std::set<string> *str_set,
                                              ProtoOutputStream* protoOutput) {
     if (include_current_partial_bucket) {
@@ -230,7 +231,9 @@ void CountMetricProducer::onDumpReportLocked(const int64_t dumpTimeNs,
 
     protoOutput->end(protoToken);
 
-    mPastBuckets.clear();
+    if (erase_data) {
+        mPastBuckets.clear();
+    }
 }
 
 void CountMetricProducer::dropDataLocked(const int64_t dropTimeNs) {
