@@ -318,6 +318,7 @@ import com.android.internal.os.ByteTransferPipe;
 import com.android.internal.os.IResultReceiver;
 import com.android.internal.os.ProcessCpuTracker;
 import com.android.internal.os.TransferPipe;
+import com.android.internal.os.Zygote;
 import com.android.internal.telephony.TelephonyIntents;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.DumpUtils;
@@ -19174,6 +19175,17 @@ public class ActivityManagerService extends IActivityManager.Stub
                     }
                     wmLock.notify();
                 }
+            }
+        }
+
+        @Override
+        public boolean isAppStorageSandboxed(int pid, int uid) {
+            if (!SystemProperties.getBoolean(StorageManager.PROP_ISOLATED_STORAGE, false)) {
+                return false;
+            }
+            synchronized (mPidsSelfLocked) {
+                final ProcessRecord pr = mPidsSelfLocked.get(pid);
+                return pr == null || pr.mountMode != Zygote.MOUNT_EXTERNAL_FULL;
             }
         }
     }

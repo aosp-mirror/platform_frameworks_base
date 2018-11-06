@@ -28,7 +28,6 @@ import android.app.ActivityManager;
 import android.app.ApplicationErrorReport;
 import android.app.Dialog;
 import android.app.IApplicationThread;
-import android.app.ProfilerInfo;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.pm.ApplicationInfo;
@@ -57,11 +56,11 @@ import com.android.internal.app.procstats.ProcessState;
 import com.android.internal.app.procstats.ProcessStats;
 import com.android.internal.os.BatteryStatsImpl;
 import com.android.internal.os.ProcessCpuTracker;
+import com.android.internal.os.Zygote;
 import com.android.server.wm.WindowProcessController;
 import com.android.server.wm.WindowProcessListener;
 
 import java.io.File;
-import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -263,6 +262,7 @@ final class ProcessRecord implements WindowProcessListener {
     boolean pendingStart;       // Process start is pending.
     long startSeq;              // Seq no. indicating the latest process start associated with
                                 // this process record.
+    int mountMode;              // Indicates how the external storage was mounted for this process.
 
     // These reports are generated & stored when an app gets into an error condition.
     // They will be "null" when all is OK.
@@ -443,6 +443,8 @@ final class ProcessRecord implements WindowProcessListener {
             pw.print(prefix); pw.print("pendingStart="); pw.println(pendingStart);
         }
         pw.print(prefix); pw.print("startSeq="); pw.println(startSeq);
+        pw.print(prefix); pw.print("mountMode="); pw.println(
+                DebugUtils.valueToString(Zygote.class, "MOUNT_EXTERNAL_", mountMode));
         if (setProcState > ActivityManager.PROCESS_STATE_SERVICE) {
             pw.print(prefix); pw.print("lastCpuTime="); pw.print(lastCpuTime);
                     if (lastCpuTime > 0) {
