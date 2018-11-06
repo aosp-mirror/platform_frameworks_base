@@ -272,7 +272,7 @@ void StatsLogProcessor::dumpStates(int out, bool verbose) {
 }
 
 /*
- * onDumpReport dumps serialized ConfigMetricsReportList into outData.
+ * onDumpReport dumps serialized ConfigMetricsReportList into proto.
  */
 void StatsLogProcessor::onDumpReport(const ConfigKey& key, const int64_t dumpTimeStampNs,
                                      const bool include_current_partial_bucket,
