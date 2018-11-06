@@ -1107,7 +1107,9 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             mIsClipped = clipped;
         }
 
-        if (mAmbientState.isDarkAtAll()) {
+        if (mPulsing) {
+            setClipBounds(null);
+        } else if (mAmbientState.isDarkAtAll()) {
             setClipBounds(mBackgroundAnimationRect);
         } else if (clipped) {
             setClipBounds(mRequestedClipBounds);
