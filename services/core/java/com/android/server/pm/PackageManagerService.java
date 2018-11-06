@@ -15215,13 +15215,7 @@ public class PackageManagerService extends IPackageManager.Stub
                             pkgList.add(oldPackage.applicationInfo.packageName);
                             sendResourcesChangedBroadcast(false, true, pkgList, uidArray, null);
                         }
-
-                        clearAppDataLIF(pkg, UserHandle.USER_ALL, StorageManager.FLAG_STORAGE_DE
-                                | StorageManager.FLAG_STORAGE_CE
-                                | Installer.FLAG_CLEAR_CODE_CACHE_ONLY);
                     }
-
-
 
                     // Update the in-memory copy of the previous code paths.
                     PackageSetting ps1 = mSettings.mPackages.get(
@@ -15426,7 +15420,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
     /**
      * On successful install, executes remaining steps after commit completes and the package lock
-     * is released.
+     * is released. These are typically more expensive or require calls to installd, which often
+     * locks on {@link #mPackages}.
      */
     private void executePostCommitSteps(CommitRequest commitRequest) {
         for (ReconciledPackage reconciledPkg : commitRequest.reconciledPackages.values()) {
@@ -16155,7 +16150,6 @@ public class PackageManagerService extends IPackageManager.Stub
         try {
             final PackageParser.Package existingPackage;
             String renamedPackage = null;
-            boolean clearCodeCache = false;
             boolean sysPkg = false;
             String targetVolumeUuid = volumeUuid;
             int targetScanFlags = scanFlags;
@@ -16376,7 +16370,6 @@ public class PackageManagerService extends IPackageManager.Stub
                         Slog.d(TAG, "replaceSystemPackageLI: new=" + pkg
                                 + ", old=" + oldPackage);
                     }
-                    clearCodeCache = true;
                     res.setReturnCode(PackageManager.INSTALL_SUCCEEDED);
                     pkg.setApplicationInfoFlags(ApplicationInfo.FLAG_UPDATED_SYSTEM_APP,
                             ApplicationInfo.FLAG_UPDATED_SYSTEM_APP);
@@ -16432,7 +16425,7 @@ public class PackageManagerService extends IPackageManager.Stub
             shouldCloseFreezerBeforeReturn = false;
             return new PrepareResult(args.installReason, targetVolumeUuid, installerPackageName,
                     args.user, replace, targetScanFlags, targetParseFlags, existingPackage, pkg,
-                    clearCodeCache, sysPkg, renamedPackage, freezer);
+                    replace /* clearCodeCache */, sysPkg, renamedPackage, freezer);
         } finally {
             if (shouldCloseFreezerBeforeReturn) {
                 freezer.close();
