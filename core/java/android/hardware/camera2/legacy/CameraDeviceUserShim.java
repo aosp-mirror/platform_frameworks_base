@@ -28,6 +28,7 @@ import android.hardware.camera2.impl.CameraMetadataNative;
 import android.hardware.camera2.impl.CaptureResultExtras;
 import android.hardware.camera2.impl.PhysicalCaptureResultInfo;
 import android.hardware.camera2.params.OutputConfiguration;
+import android.hardware.camera2.params.SessionConfiguration;
 import android.hardware.camera2.utils.SubmitInfo;
 import android.os.ConditionVariable;
 import android.os.IBinder;
@@ -477,6 +478,12 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
             }
         }
         return mLegacyDevice.cancelRequest(requestId);
+    }
+
+    @Override
+    public boolean isSessionConfigurationSupported(SessionConfiguration sessionConfig) {
+        // TODO: Add support for this in legacy mode
+        throw new UnsupportedOperationException("Session configuration query not supported!");
     }
 
     @Override
