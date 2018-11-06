@@ -402,15 +402,7 @@ public class DexManagerTests {
         List<String> secondaries = mBarUser0UnsupportedClassLoader.getSecondaryDexPaths();
         notifyDexLoad(mBarUser0UnsupportedClassLoader, secondaries, mUser0);
 
-        PackageUseInfo pui = getPackageUseInfo(mBarUser0UnsupportedClassLoader);
-        assertIsUsedByOtherApps(mBarUser0UnsupportedClassLoader, pui, false);
-        assertEquals(secondaries.size(), pui.getDexUseInfoMap().size());
-        // We expect that all the contexts are unsupported.
-        String[] expectedContexts =
-                Collections.nCopies(secondaries.size(),
-                        PackageDexUsage.UNSUPPORTED_CLASS_LOADER_CONTEXT).toArray(new String[0]);
-        assertSecondaryUse(mBarUser0UnsupportedClassLoader, pui, secondaries,
-                /*isUsedByOtherApps*/false, mUser0, expectedContexts);
+        assertNoUseInfo(mBarUser0UnsupportedClassLoader);
     }
 
     @Test
@@ -439,27 +431,18 @@ public class DexManagerTests {
     }
 
     @Test
-    public void testNotifyUnsupportedClassLoaderDoesNotChange() {
-        List<String> secondaries = mBarUser0UnsupportedClassLoader.getSecondaryDexPaths();
+    public void testNotifyUnsupportedClassLoaderDoesNotChangeExisting() {
+        List<String> secondaries = mBarUser0.getSecondaryDexPaths();
+
+        notifyDexLoad(mBarUser0, secondaries, mUser0);
+        PackageUseInfo pui = getPackageUseInfo(mBarUser0);
+        assertSecondaryUse(mBarUser0, pui, secondaries, /*isUsedByOtherApps*/false, mUser0);
+
+        // Record bar secondaries again with an unsupported class loader. This should not change the
+        // context.
         notifyDexLoad(mBarUser0UnsupportedClassLoader, secondaries, mUser0);
-
-        PackageUseInfo pui = getPackageUseInfo(mBarUser0UnsupportedClassLoader);
-        assertIsUsedByOtherApps(mBarUser0UnsupportedClassLoader, pui, false);
-        assertEquals(secondaries.size(), pui.getDexUseInfoMap().size());
-        // We expect that all the contexts are unsupported.
-        String[] expectedContexts =
-                Collections.nCopies(secondaries.size(),
-                        PackageDexUsage.UNSUPPORTED_CLASS_LOADER_CONTEXT).toArray(new String[0]);
-        assertSecondaryUse(mBarUser0UnsupportedClassLoader, pui, secondaries,
-                /*isUsedByOtherApps*/false, mUser0, expectedContexts);
-
-        // Record bar secondaries again with a different class loader. This will change the context.
-        // However, because the context was already marked as unsupported we should not chage it.
-        notifyDexLoad(mBarUser0DelegateLastClassLoader, secondaries, mUser0);
-        pui = getPackageUseInfo(mBarUser0UnsupportedClassLoader);
-        assertSecondaryUse(mBarUser0UnsupportedClassLoader, pui, secondaries,
-                /*isUsedByOtherApps*/false, mUser0, expectedContexts);
-
+        pui = getPackageUseInfo(mBarUser0);
+        assertSecondaryUse(mBarUser0, pui, secondaries, /*isUsedByOtherApps*/false, mUser0);
     }
 
     @Test
