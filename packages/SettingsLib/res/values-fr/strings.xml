@@ -70,7 +70,7 @@
     <string name="bluetooth_active_no_battery_level" msgid="8380223546730241956">"Actif"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"Multimédia"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"Appels téléphoniques"</string>
-    <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Transfert de fichier"</string>
+    <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Transfert de fichiers"</string>
     <string name="bluetooth_profile_hid" msgid="3680729023366986480">"Périphérique d\'entrée"</string>
     <string name="bluetooth_profile_pan" msgid="3391606497945147673">"Accès Internet"</string>
     <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"Partage de contacts"</string>

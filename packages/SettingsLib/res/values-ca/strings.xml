@@ -70,7 +70,7 @@
     <string name="bluetooth_active_no_battery_level" msgid="8380223546730241956">"Actiu"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"Àudio multimèdia"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"Trucades telefòniques"</string>
-    <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Transferència del fitxer"</string>
+    <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Transferència de fitxers"</string>
     <string name="bluetooth_profile_hid" msgid="3680729023366986480">"Dispositiu d\'entrada"</string>
     <string name="bluetooth_profile_pan" msgid="3391606497945147673">"Accés a Internet"</string>
     <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"Compartir contactes"</string>
@@ -395,7 +395,7 @@
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"s\'està carregant"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"No s\'està carregant"</string>
     <string name="battery_info_status_not_charging" msgid="8523453668342598579">"El dispositiu està endollat però en aquests moments no es pot carregar"</string>
-    <string name="battery_info_status_full" msgid="2824614753861462808">"Plena"</string>
+    <string name="battery_info_status_full" msgid="2824614753861462808">"Completa"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Controlat per l\'administrador"</string>
     <string name="enabled_by_admin" msgid="5302986023578399263">"Activada per l\'administrador"</string>
     <string name="disabled_by_admin" msgid="8505398946020816620">"Desactivada per l\'administrador"</string>
