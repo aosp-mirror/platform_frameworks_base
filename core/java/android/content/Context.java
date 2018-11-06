@@ -3706,6 +3706,17 @@ public abstract class Context {
 
     /**
      * Use with {@link #getSystemService(String)} to retrieve a
+     * {@link android.hardware.iris.IrisManager} for handling management
+     * of iris authentication.
+     *
+     * @hide
+     * @see #getSystemService
+     * @see android.hardware.iris.IrisManager
+     */
+    public static final String IRIS_SERVICE = "iris";
+
+    /**
+     * Use with {@link #getSystemService(String)} to retrieve a
      * {@link android.hardware.biometrics.BiometricManager} for handling management
      * of face authentication.
      *

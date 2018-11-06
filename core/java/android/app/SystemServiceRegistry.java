@@ -66,6 +66,8 @@ import android.hardware.fingerprint.IFingerprintService;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.IHdmiControlService;
 import android.hardware.input.InputManager;
+import android.hardware.iris.IrisManager;
+import android.hardware.iris.IIrisService;
 import android.hardware.location.ContextHubManager;
 import android.hardware.radio.RadioManager;
 import android.hardware.usb.IUsbManager;
@@ -833,6 +835,18 @@ final class SystemServiceRegistry {
                         }
                         IFaceService service = IFaceService.Stub.asInterface(binder);
                         return new FaceManager(ctx.getOuterContext(), service);
+                    }
+                });
+
+        registerService(Context.IRIS_SERVICE, IrisManager.class,
+                new CachedServiceFetcher<IrisManager>() {
+                    @Override
+                    public IrisManager createService(ContextImpl ctx)
+                        throws ServiceNotFoundException {
+                        final IBinder binder =
+                                ServiceManager.getServiceOrThrow(Context.IRIS_SERVICE);
+                        IIrisService service = IIrisService.Stub.asInterface(binder);
+                        return new IrisManager(ctx.getOuterContext(), service);
                     }
                 });
 
