@@ -265,8 +265,8 @@ final public class SettingsService extends Binder {
             }
             if (mUser < 0) {
                 mUser = UserHandle.USER_SYSTEM;
-            } else if (mVerb == CommandVerb.DELETE || mVerb == CommandVerb.LIST) {
-                perr.println("--user not supported for delete and list.");
+            } else if (mVerb == CommandVerb.LIST) {
+                perr.println("--user not supported for list.");
                 return -1;
             }
             UserManager userManager = UserManager.get(mProvider.getContext());
@@ -392,22 +392,27 @@ final public class SettingsService extends Binder {
 
         int deleteForUser(IContentProvider provider, int userHandle,
                 final String table, final String key) {
-            Uri targetUri;
-            if ("system".equals(table)) targetUri = Settings.System.getUriFor(key);
-            else if ("secure".equals(table)) targetUri = Settings.Secure.getUriFor(key);
-            else if ("global".equals(table)) targetUri = Settings.Global.getUriFor(key);
-            else {
+            final String callDeleteCommand;
+            if ("system".equals(table)) {
+                callDeleteCommand = Settings.CALL_METHOD_DELETE_SYSTEM;
+            } else if ("secure".equals(table)) {
+                callDeleteCommand = Settings.CALL_METHOD_DELETE_SECURE;
+            } else if ("global".equals(table)) {
+                callDeleteCommand = Settings.CALL_METHOD_DELETE_GLOBAL;
+            } else {
                 getErrPrintWriter().println("Invalid table; no delete performed");
                 throw new IllegalArgumentException("Invalid table " + table);
             }
 
-            int num = 0;
             try {
-                num = provider.delete(resolveCallingPackage(), targetUri, null, null);
+                Bundle arg = new Bundle();
+                arg.putInt(Settings.CALL_METHOD_USER_KEY, userHandle);
+                Bundle result =
+                        provider.call(resolveCallingPackage(), callDeleteCommand, key, arg);
+                return result.getInt(SettingsProvider.RESULT_ROWS_DELETED);
             } catch (RemoteException e) {
                 throw new RuntimeException("Failed in IPC", e);
             }
-            return num;
         }
 
         void resetForUser(IContentProvider provider, int userHandle,
@@ -473,7 +478,7 @@ final public class SettingsService extends Binder {
                 pw.println("      Change the contents of KEY to VALUE.");
                 pw.println("      TAG to associate with the setting.");
                 pw.println("      {default} to set as the default, case-insensitive only for global/secure namespace");
-                pw.println("  delete NAMESPACE KEY");
+                pw.println("  delete [--user <USER_ID> | current] NAMESPACE KEY");
                 pw.println("      Delete the entry for KEY.");
                 pw.println("  reset [--user <USER_ID> | current] NAMESPACE {PACKAGE_NAME | RESET_MODE}");
                 pw.println("      Reset the global/secure table for a package with mode.");
