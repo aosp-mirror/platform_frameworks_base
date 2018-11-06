@@ -702,7 +702,6 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
                 && !mPresenter.isPresenterFullyCollapsed();
         row.setUseIncreasedCollapsedHeight(useIncreasedCollapsedHeight);
         row.setUseIncreasedHeadsUpHeight(useIncreasedHeadsUp);
-        row.setSmartActions(entry.smartActions);
         row.setEntry(entry);
 
         row.updateInflationFlag(FLAG_CONTENT_VIEW_HEADS_UP, shouldHeadsUp(entry));

@@ -22,9 +22,9 @@ import android.app.RemoteInput;
 import android.graphics.drawable.Icon;
 import android.text.TextUtils;
 
-import com.android.systemui.statusbar.notification.NotificationData;
-
 import androidx.annotation.VisibleForTesting;
+
+import com.android.systemui.statusbar.notification.NotificationData;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -53,7 +53,8 @@ public class NotificationUiAdjustment {
 
     public static NotificationUiAdjustment extractFromNotificationEntry(
             NotificationData.Entry entry) {
-        return new NotificationUiAdjustment(entry.key, entry.smartActions, entry.smartReplies);
+        return new NotificationUiAdjustment(
+                entry.key, entry.systemGeneratedSmartActions, entry.smartReplies);
     }
 
     public static boolean needReinflate(
