@@ -15,22 +15,13 @@ package com.android.systemui.statusbar.notification.stack;
 
 import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
-import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertTrue;
 
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyBoolean;
-import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.anyLong;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.atLeastOnce;
-import static org.mockito.Mockito.clearInvocations;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doNothing;
 import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.mockitoSession;
-import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -38,49 +29,34 @@ import static org.mockito.Mockito.when;
 
 import android.animation.Animator;
 import android.animation.ValueAnimator.AnimatorUpdateListener;
-import android.content.Context;
-import android.graphics.Rect;
 import android.os.Handler;
-import android.os.IPowerManager;
-import android.os.Looper;
-import android.os.PowerManager;
 import android.service.notification.StatusBarNotification;
-import android.support.test.annotation.UiThreadTest;
 import android.support.test.filters.SmallTest;
 import android.support.test.runner.AndroidJUnit4;
-import android.testing.TestableLooper.RunWithLooper;
+import android.testing.UiThreadTest;
 import android.view.MotionEvent;
-import android.view.VelocityTracker;
 import android.view.View;
-import android.view.MotionEvent;
 
 import com.android.systemui.SwipeHelper;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.plugins.statusbar.NotificationSwipeActionHelper.SnoozeOption;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
-import com.android.systemui.statusbar.notification.row.NotificationMenuRow;
 
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.ArgumentCaptor;
-import org.mockito.Mock;
-import org.mockito.MockitoSession;
-import org.mockito.invocation.InvocationOnMock;
 import org.mockito.junit.MockitoJUnit;
 import org.mockito.junit.MockitoRule;
 import org.mockito.stubbing.Answer;
-
-import java.util.ArrayList;
 
 /**
  * Tests for {@link NotificationSwipeHelper}.
  */
 @SmallTest
 @RunWith(AndroidJUnit4.class)
+@UiThreadTest
 public class NotificationSwipeHelperTest extends SysuiTestCase {
 
     private NotificationSwipeHelper mSwipeHelper;
@@ -96,7 +72,6 @@ public class NotificationSwipeHelperTest extends SysuiTestCase {
     @Rule public MockitoRule mockito = MockitoJUnit.rule();
 
     @Before
-    @UiThreadTest
     public void setUp() throws Exception {
         mCallback = mock(NotificationSwipeHelper.NotificationCallback.class);
         mListener = mock(NotificationMenuRowPlugin.OnMenuEventListener.class);
