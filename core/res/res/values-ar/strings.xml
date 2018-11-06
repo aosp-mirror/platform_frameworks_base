@@ -1437,7 +1437,7 @@
     <string name="forward_intent_to_work" msgid="621480743856004612">"أنت تستخدم هذا التطبيق في ملفك الشخصي للعمل"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"طريقة الإرسال"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"مزامنة"</string>
-    <string name="accessibility_binding_label" msgid="4148120742096474641">"إمكانية الدخول"</string>
+    <string name="accessibility_binding_label" msgid="4148120742096474641">"إمكانية الوصول"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"الخلفية"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"تغيير الخلفية"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"برنامج تلقّي الإشعارات الصوتية"</string>
