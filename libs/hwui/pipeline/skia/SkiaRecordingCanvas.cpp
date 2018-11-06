@@ -24,7 +24,7 @@
 #include "RenderNode.h"
 #include "pipeline/skia/AnimatedDrawables.h"
 #include "pipeline/skia/GLFunctorDrawable.h"
-#include "pipeline/skia/VkFunctorDrawable.h"
+#include "pipeline/skia/VkInteropFunctorDrawable.h"
 
 namespace android {
 namespace uirenderer {
@@ -124,8 +124,8 @@ void SkiaRecordingCanvas::callDrawGLFunction(Functor* functor,
                                              uirenderer::GlFunctorLifecycleListener* listener) {
     FunctorDrawable* functorDrawable;
     if (Properties::getRenderPipelineType() == RenderPipelineType::SkiaVulkan) {
-        functorDrawable = mDisplayList->allocateDrawable<VkFunctorDrawable>(functor, listener,
-                asSkCanvas());
+        functorDrawable = mDisplayList->allocateDrawable<VkInteropFunctorDrawable>(functor,
+                listener, asSkCanvas());
     } else {
         functorDrawable = mDisplayList->allocateDrawable<GLFunctorDrawable>(functor, listener,
                 asSkCanvas());

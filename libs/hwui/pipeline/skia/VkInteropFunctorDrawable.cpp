@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-#include "VkFunctorDrawable.h"
+#include "VkInteropFunctorDrawable.h"
 #include <private/hwui/DrawGlInfo.h>
 
 #include "renderthread/EglManager.h"
@@ -64,7 +64,7 @@ private:
     }
 };
 
-void VkFunctorDrawable::vkInvokeFunctor(Functor* functor) {
+void VkInteropFunctorDrawable::vkInvokeFunctor(Functor* functor) {
     ScopedDrawRequest _drawRequest{};
     sGLDrawThread->queue().runSync([&]() {
         EGLDisplay display = sEglManager.eglDisplay();
@@ -78,7 +78,7 @@ void VkFunctorDrawable::vkInvokeFunctor(Functor* functor) {
 
 #define FENCE_TIMEOUT 2000000000
 
-void VkFunctorDrawable::onDraw(SkCanvas* canvas) {
+void VkInteropFunctorDrawable::onDraw(SkCanvas* canvas) {
     ATRACE_CALL();
 
     if (canvas->getGrContext() == nullptr) {
@@ -202,7 +202,7 @@ void VkFunctorDrawable::onDraw(SkCanvas* canvas) {
     canvas->restore();
 }
 
-VkFunctorDrawable::~VkFunctorDrawable() {
+VkInteropFunctorDrawable::~VkInteropFunctorDrawable() {
     if (mListener.get() != nullptr) {
         ScopedDrawRequest _drawRequest{};
         sGLDrawThread->queue().runSync([&]() {
@@ -211,7 +211,7 @@ VkFunctorDrawable::~VkFunctorDrawable() {
     }
 }
 
-void VkFunctorDrawable::syncFunctor() const {
+void VkInteropFunctorDrawable::syncFunctor() const {
     ScopedDrawRequest _drawRequest{};
     sGLDrawThread->queue().runSync([&]() {
          (*mFunctor)(DrawGlInfo::kModeSync, nullptr);
