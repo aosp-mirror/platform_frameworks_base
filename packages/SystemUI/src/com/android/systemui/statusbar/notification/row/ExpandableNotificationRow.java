@@ -16,6 +16,7 @@
 
 package com.android.systemui.statusbar.notification.row;
 
+import static com.android.systemui.statusbar.StatusBarState.SHADE;
 import static com.android.systemui.statusbar.notification.ActivityLaunchAnimator
         .ExpandAnimationParameters;
 import static com.android.systemui.statusbar.notification.row.NotificationContentView
@@ -339,6 +340,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     private SystemNotificationAsyncTask mSystemNotificationAsyncTask =
             new SystemNotificationAsyncTask();
+    private int mStatusBarState = -1;
 
     /**
      * Returns whether the given {@code statusBarNotification} is a system notification.
@@ -2256,6 +2258,9 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     @Override
     public int getIntrinsicHeight() {
+        if (isShownAsBubble()) {
+            return getMaxExpandHeight();
+        }
         if (isUserLocked()) {
             return getActualHeight();
         }
@@ -2284,6 +2289,20 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
 
     private boolean isHeadsUpAllowed() {
         return !mOnKeyguard && !mOnAmbient;
+    }
+
+    private boolean isShownAsBubble() {
+        return mEntry.isBubble() && (mStatusBarState == SHADE || mStatusBarState == -1);
+    }
+
+    /**
+     * Set the current status bar state.
+     * @param state should be from {@link com.android.systemui.statusbar.StatusBarState}.
+     */
+    public void setStatusBarState(int state) {
+        if (mStatusBarState != state) {
+            mStatusBarState = state;
+        }
     }
 
     @Override

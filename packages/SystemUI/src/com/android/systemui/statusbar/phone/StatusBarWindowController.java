@@ -138,6 +138,10 @@ public class StatusBarWindowController implements Callback, Dumpable, Configurat
         onThemeChanged();
     }
 
+    public View getStatusBarView() {
+        return mStatusBarView;
+    }
+
     public void setDozeScreenBrightness(int value) {
         mScreenBrightnessDoze = value / 255f;
     }

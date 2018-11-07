@@ -27,6 +27,7 @@ import com.android.internal.util.function.TriConsumer;
 import com.android.internal.widget.LockPatternUtils;
 import com.android.keyguard.ViewMediatorCallback;
 import com.android.systemui.Dependency.DependencyProvider;
+import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.classifier.FalsingManager;
 import com.android.systemui.keyguard.DismissCallbackRegistry;
 import com.android.systemui.qs.QSTileHost;
@@ -155,5 +156,6 @@ public class SystemUIFactory {
         providers.put(SmartReplyController.class, () -> new SmartReplyController());
         providers.put(RemoteInputQuickSettingsDisabler.class,
                 () -> new RemoteInputQuickSettingsDisabler(context));
+        providers.put(BubbleController.class, () -> new BubbleController(context));
     }
 }
