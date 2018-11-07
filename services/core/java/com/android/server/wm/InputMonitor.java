@@ -40,14 +40,11 @@ import android.os.UserHandle;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Slog;
+import android.view.InputApplicationHandle;
 import android.view.InputChannel;
 import android.view.InputEventReceiver;
-import android.view.KeyEvent;
-import android.view.WindowManager;
-import android.view.InputApplicationHandle;
 import android.view.InputWindowHandle;
 
-import com.android.server.input.InputManagerService;
 import com.android.server.policy.WindowManagerPolicy;
 
 import java.io.PrintWriter;
@@ -401,10 +398,10 @@ final class InputMonitor {
             mTmpRect.setEmpty();
             mDisableWallpaperTouchEvents = false;
             this.inDrag = inDrag;
-            wallpaperController = mService.mRoot.mWallpaperController;
+            final DisplayContent dc = mService.mRoot.getDisplayContent(mDisplayId);
+            wallpaperController = dc.mWallpaperController;
 
-            mService.mRoot.getDisplayContent(mDisplayId).forAllWindows(this,
-                    true /* traverseTopToBottom */);
+            dc.forAllWindows(this, true /* traverseTopToBottom */);
             if (mAddWallpaperInputConsumerHandle) {
                 // No visible wallpaper found, add the wallpaper input consumer at the end.
                 addInputWindowHandle(wallpaperInputConsumer.mWindowHandle);

@@ -27,7 +27,6 @@ import static org.mockito.Mockito.anyBoolean;
 import static org.mockito.Mockito.anyFloat;
 import static org.mockito.Mockito.anyInt;
 import static org.mockito.Mockito.doAnswer;
-import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.when;
 
@@ -58,8 +57,8 @@ public class WindowTestUtils {
     public static class TestDisplayContent extends DisplayContent {
 
         private TestDisplayContent(Display display, WindowManagerService service,
-                WallpaperController wallpaperController, DisplayWindowController controller) {
-            super(display, service, wallpaperController, controller);
+                DisplayWindowController controller) {
+            super(display, service, controller);
         }
 
         /** Create a mocked default {@link DisplayContent}. */

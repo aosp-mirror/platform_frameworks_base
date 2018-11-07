@@ -42,8 +42,8 @@ public class WindowTestUtils {
     public static class TestDisplayContent extends DisplayContent {
 
         private TestDisplayContent(Display display, WindowManagerService service,
-                WallpaperController wallpaperController, DisplayWindowController controller) {
-            super(display, service, wallpaperController, controller);
+                DisplayWindowController controller) {
+            super(display, service, controller);
         }
 
         /**

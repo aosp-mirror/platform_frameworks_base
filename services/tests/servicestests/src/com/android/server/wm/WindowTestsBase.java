@@ -90,7 +90,6 @@ class WindowTestsBase {
     WindowState mChildAppWindowAbove;
     WindowState mChildAppWindowBelow;
     HashSet<WindowState> mCommonWindows;
-    WallpaperController mWallpaperController;
 
     @Rule
     public final DexmakerShareClassLoaderRule mDexmakerShareClassLoaderRule =
@@ -118,8 +117,6 @@ class WindowTestsBase {
 
             mWm = mWmRule.getWindowManagerService();
             beforeCreateDisplay();
-
-            mWallpaperController = new WallpaperController(mWm);
 
             context.getDisplay().getDisplayInfo(mDisplayInfo);
             mDisplayContent = createNewDisplay();
@@ -363,8 +360,7 @@ class WindowTestsBase {
         final Display display = new Display(DisplayManagerGlobal.getInstance(), displayId,
                 displayInfo, DEFAULT_DISPLAY_ADJUSTMENTS);
         synchronized (mWm.mGlobalLock) {
-            return new DisplayContent(display, mWm, mWallpaperController,
-                    mock(DisplayWindowController.class));
+            return new DisplayContent(display, mWm, mock(DisplayWindowController.class));
         }
     }
 

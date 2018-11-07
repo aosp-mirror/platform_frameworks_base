@@ -3462,7 +3462,9 @@ public class WindowManagerService extends IWindowManager.Stub
         try {
             Trace.traceBegin(TRACE_TAG_WINDOW_MANAGER, "screenshotWallpaper");
             synchronized (mGlobalLock) {
-                return mRoot.mWallpaperController.screenshotWallpaperLocked();
+                // TODO(b/115486823) Screenshot at secondary displays if needed.
+                final DisplayContent dc = mRoot.getDisplayContent(DEFAULT_DISPLAY);
+                return dc.mWallpaperController.screenshotWallpaperLocked();
             }
         } finally {
             Trace.traceEnd(TRACE_TAG_WINDOW_MANAGER);
@@ -4694,7 +4696,10 @@ public class WindowManagerService extends IWindowManager.Stub
                 break;
                 case WALLPAPER_DRAW_PENDING_TIMEOUT: {
                     synchronized (mGlobalLock) {
-                        if (mRoot.mWallpaperController.processWallpaperDrawPendingTimeout()) {
+                        final WallpaperController wallpaperController =
+                                (WallpaperController) msg.obj;
+                        if (wallpaperController != null
+                                && wallpaperController.processWallpaperDrawPendingTimeout()) {
                             mWindowPlacerLocked.performSurfacePlacement();
                         }
                     }
@@ -5975,7 +5980,6 @@ public class WindowManagerService extends IWindowManager.Stub
                 pw.print("  mInputMethodWindow="); pw.println(imeWindow);
             }
             mWindowPlacerLocked.dump(pw, "  ");
-            mRoot.mWallpaperController.dump(pw, "  ");
             pw.print("  mSystemBooted="); pw.print(mSystemBooted);
                     pw.print(" mDisplayEnabled="); pw.println(mDisplayEnabled);
 
