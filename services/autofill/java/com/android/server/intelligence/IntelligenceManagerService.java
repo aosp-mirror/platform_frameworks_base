@@ -24,6 +24,7 @@ import android.content.ComponentName;
 import android.content.Context;
 import android.os.IBinder;
 import android.os.UserManager;
+import android.view.intelligence.ContentCaptureEvent;
 import android.view.intelligence.IIntelligenceManager;
 
 import com.android.internal.annotations.GuardedBy;
@@ -35,6 +36,7 @@ import com.android.server.LocalServices;
 
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
+import java.util.List;
 
 /**
  * A service used to observe the contents of the screen.
@@ -100,6 +102,18 @@ public final class IntelligenceManagerService
                 final IntelligencePerUserService service = getServiceForUserLocked(userId);
                 service.startSessionLocked(activityToken, componentName, taskId, displayId,
                         localSessionId, flags, result);
+            }
+        }
+
+        @Override
+        public void sendEvents(int userId, @NonNull IBinder activityToken,
+                @NonNull ComponentName componentName, int localSessionId, int globalSessionId,
+                List<ContentCaptureEvent> events) {
+            Preconditions.checkNotNull(events);
+
+            synchronized (mLock) {
+                final IntelligencePerUserService service = getServiceForUserLocked(userId);
+                service.sendEventsLocked(componentName, events);
             }
         }
 

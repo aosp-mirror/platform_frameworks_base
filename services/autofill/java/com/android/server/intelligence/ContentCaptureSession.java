@@ -23,12 +23,14 @@ import android.service.intelligence.IntelligenceService;
 import android.service.intelligence.InteractionContext;
 import android.service.intelligence.InteractionSessionId;
 import android.util.Slog;
+import android.view.intelligence.ContentCaptureEvent;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.server.AbstractRemoteService;
 import com.android.server.intelligence.RemoteIntelligenceService.RemoteIntelligenceServiceCallbacks;
 
 import java.io.PrintWriter;
+import java.util.List;
 
 final class ContentCaptureSession implements RemoteIntelligenceServiceCallbacks {
 
@@ -66,6 +68,13 @@ final class ContentCaptureSession implements RemoteIntelligenceServiceCallbacks 
     }
 
     /**
+     * Notifies the {@link IntelligenceService} of a batch of events.
+     */
+    public void sendEventsLocked(List<ContentCaptureEvent> events) {
+        mRemoteService.onContentCaptureEventsRequest(mId, events);
+    }
+
+    /**
      * Cleans up the session and remove itself from the service.
      *
      * @param notifyRemoteService whether it should trigger a {@link
@@ -95,10 +104,10 @@ final class ContentCaptureSession implements RemoteIntelligenceServiceCallbacks 
     }
 
     @Override // from RemoteScreenObservationServiceCallbacks
-    public void onSessionLifecycleRequestFailureOrTimeout(boolean timedOut) {
+    public void onFailureOrTimeout(boolean timedOut) {
         // TODO(b/111276913): log metrics on whether timed out or not
         if (mService.isDebug()) {
-            Slog.d(TAG, "onSessionLifecycleRequestFailure(" + mId + "): timed out=" + timedOut);
+            Slog.d(TAG, "onFailureOrTimeout(" + mId + "): timed out=" + timedOut);
         }
         synchronized (mLock) {
             removeSelfLocked(/* notifyRemoteService= */ false);

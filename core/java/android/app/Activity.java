@@ -120,6 +120,7 @@ import android.view.autofill.AutofillManager;
 import android.view.autofill.AutofillManager.AutofillClient;
 import android.view.autofill.AutofillPopupWindow;
 import android.view.autofill.IAutofillWindowPresenter;
+import android.view.intelligence.ContentCaptureEvent;
 import android.view.intelligence.IntelligenceManager;
 import android.widget.AdapterView;
 import android.widget.Toast;
@@ -1023,6 +1024,31 @@ public class Activity extends ContextThemeWrapper
         return mIntelligenceManager;
     }
 
+    private void notifyIntelligenceManagerIfNeeded(@ContentCaptureEvent.EventType int event) {
+        final IntelligenceManager im = getIntelligenceManager();
+        if (im == null || !im.isContentCaptureEnabled()) {
+            return;
+        }
+        switch (event) {
+            case ContentCaptureEvent.TYPE_ACTIVITY_CREATED:
+                //TODO(b/111276913): decide whether the InteractionSessionId should be
+                // saved / restored in the activity bundle.
+                im.onActivityCreated(mToken, getComponentName());
+                break;
+            case ContentCaptureEvent.TYPE_ACTIVITY_DESTROYED:
+                im.onActivityDestroyed();
+                break;
+            case ContentCaptureEvent.TYPE_ACTIVITY_STARTED:
+            case ContentCaptureEvent.TYPE_ACTIVITY_RESUMED:
+            case ContentCaptureEvent.TYPE_ACTIVITY_PAUSED:
+            case ContentCaptureEvent.TYPE_ACTIVITY_STOPPED:
+                im.onActivityLifecycleEvent(event);
+                break;
+            default:
+                Log.w(TAG, "notifyIntelligenceManagerIfNeeded(): invalid type " + event);
+        }
+    }
+
     @Override
     protected void attachBaseContext(Context newBase) {
         super.attachBaseContext(newBase);
@@ -1099,11 +1125,7 @@ public class Activity extends ContextThemeWrapper
         mRestoredFromBundle = savedInstanceState != null;
         mCalled = true;
 
-        if (getIntelligenceManager() != null) {
-            //TODO(b/111276913): decide whether the screen_obs session id should be saved / restored
-            // in the activity bundle.
-            mIntelligenceManager.onActivityCreated(mToken, getComponentName());
-        }
+        notifyIntelligenceManagerIfNeeded(ContentCaptureEvent.TYPE_ACTIVITY_CREATED);
     }
 
     /**
@@ -1337,6 +1359,7 @@ public class Activity extends ContextThemeWrapper
         if (mAutoFillResetNeeded) {
             getAutofillManager().onVisibleForAutofill();
         }
+        notifyIntelligenceManagerIfNeeded(ContentCaptureEvent.TYPE_ACTIVITY_STARTED);
     }
 
     /**
@@ -1419,6 +1442,7 @@ public class Activity extends ContextThemeWrapper
                 }
             }
         }
+        notifyIntelligenceManagerIfNeeded(ContentCaptureEvent.TYPE_ACTIVITY_RESUMED);
         mCalled = true;
     }
 
@@ -1812,6 +1836,7 @@ public class Activity extends ContextThemeWrapper
                 mAutoFillIgnoreFirstResumePause = false;
             }
         }
+        notifyIntelligenceManagerIfNeeded(ContentCaptureEvent.TYPE_ACTIVITY_PAUSED);
         mCalled = true;
     }
 
@@ -2000,6 +2025,7 @@ public class Activity extends ContextThemeWrapper
                 getAutofillManager().onPendingSaveUi(AutofillManager.PENDING_UI_OPERATION_CANCEL,
                         mIntent.getIBinderExtra(AutofillManager.EXTRA_RESTORE_SESSION_TOKEN));
             }
+            notifyIntelligenceManagerIfNeeded(ContentCaptureEvent.TYPE_ACTIVITY_STOPPED);
         }
     }
 
@@ -2071,9 +2097,8 @@ public class Activity extends ContextThemeWrapper
 
         getApplication().dispatchActivityDestroyed(this);
 
-        if (getIntelligenceManager() != null) {
-            mIntelligenceManager.onActivityDestroyed();
-        }
+        notifyIntelligenceManagerIfNeeded(ContentCaptureEvent.TYPE_ACTIVITY_DESTROYED);
+
     }
 
     /**
