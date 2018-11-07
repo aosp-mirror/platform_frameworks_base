@@ -209,7 +209,14 @@ public final class SmsApplication {
      * Support smsto Uri scheme.
      */
     public static Collection<SmsApplicationData> getApplicationCollection(Context context) {
-        int userId = getIncomingUserId(context);
+        return getApplicationCollectionAsUser(context, getIncomingUserId(context));
+    }
+
+    /**
+     * Same as {@link #getApplicationCollection} but it takes a target user ID.
+     */
+    public static Collection<SmsApplicationData> getApplicationCollectionAsUser(Context context,
+            int userId) {
         final long token = Binder.clearCallingIdentity();
         try {
             return getApplicationCollectionInternal(context, userId);
@@ -535,13 +542,20 @@ public final class SmsApplication {
      * needs to have permission to set AppOps and write to secure settings.
      */
     public static void setDefaultApplication(String packageName, Context context) {
+        setDefaultApplicationAsUser(packageName, context, getIncomingUserId(context));
+    }
+
+    /**
+     * Same as {@link #setDefaultApplication} but takes a target user id.
+     */
+    public static void setDefaultApplicationAsUser(String packageName, Context context,
+            int userId) {
         TelephonyManager tm = (TelephonyManager)context.getSystemService(Context.TELEPHONY_SERVICE);
         if (!tm.isSmsCapable()) {
             // No phone, no SMS
             return;
         }
 
-        final int userId = getIncomingUserId(context);
         final long token = Binder.clearCallingIdentity();
         try {
             setDefaultApplicationInternal(packageName, context, userId);
@@ -552,6 +566,8 @@ public final class SmsApplication {
 
     private static void setDefaultApplicationInternal(String packageName, Context context,
             int userId) {
+        final UserHandle userHandle = UserHandle.of(userId);
+
         // Get old package name
         String oldPackageName = Settings.Secure.getStringForUser(context.getContentResolver(),
                 Settings.Secure.SMS_DEFAULT_APPLICATION, userId);
@@ -628,7 +644,7 @@ public final class SmsApplication {
                 if (DEBUG_MULTIUSER) {
                     Log.i(LOG_TAG, "setDefaultApplicationInternal old=" + oldAppData.mPackageName);
                 }
-                context.sendBroadcast(oldAppIntent);
+                context.sendBroadcastAsUser(oldAppIntent, userHandle);
             }
             // Notify the new sms app that it's now the default (if the new sms app has a receiver
             // to handle the changed default sms intent).
@@ -646,8 +662,16 @@ public final class SmsApplication {
                 if (DEBUG_MULTIUSER) {
                     Log.i(LOG_TAG, "setDefaultApplicationInternal new=" + packageName);
                 }
-                context.sendBroadcast(intent);
+                context.sendBroadcastAsUser(intent, userHandle);
             }
+
+            // Send an implicit broadcast for the system server.
+            // (or anyone with MONITOR_DEFAULT_SMS_PACKAGE, really.)
+            final Intent intent =
+                    new Intent(Telephony.Sms.Intents.ACTION_DEFAULT_SMS_PACKAGE_CHANGED_INTERNAL);
+            context.sendBroadcastAsUser(intent, userHandle,
+                    permission.MONITOR_DEFAULT_SMS_PACKAGE);
+
             MetricsLogger.action(context, MetricsEvent.ACTION_DEFAULT_SMS_APP_CHANGED,
                     applicationData.mPackageName);
         }
@@ -799,7 +823,18 @@ public final class SmsApplication {
      * @return component name of the app and class to deliver SMS messages to
      */
     public static ComponentName getDefaultSmsApplication(Context context, boolean updateIfNeeded) {
-        int userId = getIncomingUserId(context);
+        return getDefaultSmsApplicationAsUser(context, updateIfNeeded, getIncomingUserId(context));
+    }
+
+    /**
+     * Gets the default SMS application on a given user
+     * @param context context from the calling app
+     * @param updateIfNeeded update the default app if there is no valid default app configured.
+     * @param userId target user ID.
+     * @return component name of the app and class to deliver SMS messages to
+     */
+    public static ComponentName getDefaultSmsApplicationAsUser(Context context,
+            boolean updateIfNeeded, int userId) {
         final long token = Binder.clearCallingIdentity();
         try {
             ComponentName component = null;
