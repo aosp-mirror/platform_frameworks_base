@@ -435,7 +435,7 @@ public class WifiNetworkConfigBuilder {
      *      context.getSystemService(Context.CONNECTIVITY_SERVICE);
      * final NetworkCallback networkCallback = new NetworkCallback() {
      *      ...
-     *      @Override
+     *      {@literal @}Override
      *      void onAvailable(...) {}
      *      // etc.
      * };
