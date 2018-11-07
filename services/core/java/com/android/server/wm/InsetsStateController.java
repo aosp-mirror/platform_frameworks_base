@@ -218,5 +218,11 @@ class InsetsStateController {
     void dump(String prefix, PrintWriter pw) {
         pw.println(prefix + "WindowInsetsStateController");
         mState.dump(prefix + "  ", pw);
+        pw.println(prefix + "  " + "Control map:");
+        for (int i = mTypeWinControlMap.size() - 1; i >= 0; i--) {
+            pw.print(prefix + "  ");
+            pw.println(InsetsState.typeToString(mTypeWinControlMap.keyAt(i)) + " -> "
+                    + mTypeWinControlMap.valueAt(i));
+        }
     }
 }

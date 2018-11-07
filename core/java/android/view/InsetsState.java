@@ -250,7 +250,7 @@ public class InsetsState implements Parcelable {
         }
     }
 
-    static String typeToString(int type) {
+    public static String typeToString(int type) {
         switch (type) {
             case TYPE_TOP_BAR:
                 return "TYPE_TOP_BAR";

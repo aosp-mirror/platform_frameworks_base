@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.hardware.camera2.params.OutputConfiguration.ROTATION_90;
+import static android.view.InsetsState.TYPE_TOP_BAR;
 import static android.view.Surface.ROTATION_0;
 import static android.view.WindowManager.LayoutParams.FIRST_SUB_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_ALT_FOCUSABLE_IM;
@@ -31,6 +32,7 @@ import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_MEDIA_OVE
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY;
 import static android.view.WindowManager.LayoutParams.TYPE_APPLICATION_SUB_PANEL;
 import static android.view.WindowManager.LayoutParams.TYPE_INPUT_METHOD;
+import static android.view.WindowManager.LayoutParams.TYPE_STATUS_BAR;
 
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.never;
@@ -56,6 +58,7 @@ import android.graphics.Rect;
 import android.platform.test.annotations.Presubmit;
 import android.util.Size;
 import android.view.DisplayCutout;
+import android.view.InsetsSource;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
 
@@ -323,6 +326,20 @@ public class WindowStateTests extends WindowTestsBase {
         assertTrue(app.canAffectSystemUiFlags());
         app.getTask().setCanAffectSystemUiFlags(false);
         assertFalse(app.canAffectSystemUiFlags());
+    }
+
+    @Test
+    public void testVisibleWithInsetsProvider() throws Exception {
+        final WindowState topBar = createWindow(null, TYPE_STATUS_BAR, "topBar");
+        final WindowState app = createWindow(null, TYPE_APPLICATION, "app");
+        topBar.mHasSurface = true;
+        assertTrue(topBar.isVisible());
+        mDisplayContent.getInsetsStateController().getSourceProvider(TYPE_TOP_BAR)
+                .setWindow(topBar, null);
+        mDisplayContent.getInsetsStateController().onBarControllingWindowChanged(app);
+        mDisplayContent.getInsetsStateController().getSourceProvider(TYPE_TOP_BAR)
+                .onInsetsModified(app, new InsetsSource(TYPE_TOP_BAR));
+        assertFalse(topBar.isVisible());
     }
 
     @Test
