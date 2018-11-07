@@ -235,7 +235,8 @@ public abstract class DisplayManagerInternal {
         // If true, enables automatic brightness control.
         public boolean useAutoBrightness;
 
-        // If true, scales the brightness to half of desired.
+        // If true, scales the brightness to a fraction of desired (as defined by
+        // screenLowPowerBrightnessFactor).
         public boolean lowPowerMode;
 
         // The factor to adjust the screen brightness in low power mode in the range
