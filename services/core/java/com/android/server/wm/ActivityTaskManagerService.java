@@ -6870,5 +6870,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 mProfilerInfo = profilerInfo;
             }
         }
+
+        @Override
+        public ActivityMetricsLaunchObserverRegistry getLaunchObserverRegistry() {
+            synchronized (mGlobalLock) {
+                return mStackSupervisor.getActivityMetricsLogger().getLaunchObserverRegistry();
+            }
+        }
     }
 }

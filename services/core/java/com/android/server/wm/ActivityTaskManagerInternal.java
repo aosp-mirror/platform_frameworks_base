@@ -473,4 +473,6 @@ public abstract class ActivityTaskManagerInternal {
     public abstract void setProfileApp(String profileApp);
     public abstract void setProfileProc(WindowProcessController wpc);
     public abstract void setProfilerInfo(ProfilerInfo profilerInfo);
+
+    public abstract ActivityMetricsLaunchObserverRegistry getLaunchObserverRegistry();
 }

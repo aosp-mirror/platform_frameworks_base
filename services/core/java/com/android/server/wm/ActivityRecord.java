@@ -2946,8 +2946,11 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
         proto.end(token);
     }
 
-    public void writeToProto(ProtoOutputStream proto, long fieldId) {
-        final long token = proto.start(fieldId);
+    /**
+     * Write all fields to an {@code ActivityRecordProto}. This assumes the
+     * {@code ActivityRecordProto} is the outer-most proto data.
+     */
+    void writeToProto(ProtoOutputStream proto) {
         super.writeToProto(proto, CONFIGURATION_CONTAINER, false /* trim */);
         writeIdentifierToProto(proto, IDENTIFIER);
         proto.write(STATE, mState.toString());
@@ -2957,6 +2960,11 @@ final class ActivityRecord extends ConfigurationContainer implements AppWindowCo
             proto.write(PROC_ID, app.getPid());
         }
         proto.write(TRANSLUCENT, !fullscreen);
+    }
+
+    public void writeToProto(ProtoOutputStream proto, long fieldId) {
+        final long token = proto.start(fieldId);
+        writeToProto(proto);
         proto.end(token);
     }
 }

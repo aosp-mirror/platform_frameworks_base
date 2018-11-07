@@ -42,7 +42,7 @@ import java.lang.annotation.RetentionPolicy;
  * It must then transition to either {@code CANCELLED} with {@link #onActivityLaunchCancelled}
  * or into {@code FINISHED} with {@link #onActivityLaunchFinished}. These are terminal states.
  *
- * Note that the {@link ActivityRecord} provided as a parameter to some state transitions isn't
+ * Note that the {@code ActivityRecordProto} provided as a parameter to some state transitions isn't
  * necessarily the same within a single launch sequence: it is only the top-most activity at the
  * time (if any). Trampoline activities coalesce several activity starts into a single launch
  * sequence.
@@ -94,6 +94,14 @@ public interface ActivityMetricsLaunchObserver {
     public static final int TEMPERATURE_HOT = 3;
 
     /**
+     * Typedef marker that a {@code byte[]} actually contains an
+     * <a href="proto/android/server/activitymanagerservice.proto">ActivityRecordProto</a>
+     * in the protobuf format.
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @interface ActivityRecordProto {}
+
+    /**
      * Notifies the observer that a new launch sequence has begun as a result of a new intent.
      *
      * Once a launch sequence begins, the resolved activity will either subsequently start with
@@ -135,7 +143,7 @@ public interface ActivityMetricsLaunchObserver {
      * Multiple calls to this method cannot occur without first terminating the current
      * launch sequence.
      */
-    public void onActivityLaunched(@NonNull ActivityRecord activity,
+    public void onActivityLaunched(@NonNull @ActivityRecordProto byte[] activity,
                                    @Temperature int temperature);
 
     /**
@@ -157,7 +165,7 @@ public interface ActivityMetricsLaunchObserver {
      *          in the case of a trampoline, multiple activities could've been started
      *          and only the latest activity is reported here.
      */
-    public void onActivityLaunchCancelled(@Nullable ActivityRecord abortingActivity);
+    public void onActivityLaunchCancelled(@Nullable @ActivityRecordProto byte[] abortingActivity);
 
     /**
      * Notifies the observer that the current launch sequence has been successfully finished.
@@ -178,5 +186,5 @@ public interface ActivityMetricsLaunchObserver {
      *          and only the latest activity that was top-most during first-frame drawn
      *          is reported here.
      */
-    public void onActivityLaunchFinished(@NonNull ActivityRecord finalActivity);
+    public void onActivityLaunchFinished(@NonNull @ActivityRecordProto byte[] finalActivity);
 }
