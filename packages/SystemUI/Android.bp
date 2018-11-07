@@ -66,7 +66,7 @@ android_library {
     libs: [
         "telephony-common",
         "android.car",
-        "android.car.user",
+        "android.car.userlib",
     ],
 
     aaptflags: [
@@ -120,7 +120,7 @@ android_library {
         "android.test.runner",
         "telephony-common",
         "android.car",
-        "android.car.user",
+        "android.car.userlib",
         "android.test.base",
     ],
     aaptflags: [
@@ -146,7 +146,7 @@ android_app {
     libs: [
         "telephony-common",
         "android.car",
-        "android.car.user",
+        "android.car.userlib",
     ],
 
     dxflags: ["--multi-dex"],
@@ -183,7 +183,7 @@ android_app {
     libs: [
         "telephony-common",
         "android.car",
-        "android.car.user",
+        "android.car.userlib",
     ],
 
     srcs: [

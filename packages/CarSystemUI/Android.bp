@@ -30,7 +30,7 @@ android_app {
         "SystemUIPluginLib",
         "SystemUISharedLib",
         "SettingsLib",
-        "android.car.user",
+        "android.car.userlib",
         "androidx.car_car",
         "androidx.legacy_legacy-support-v4",
         "androidx.recyclerview_recyclerview",
