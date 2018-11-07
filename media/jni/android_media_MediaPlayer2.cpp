@@ -790,40 +790,6 @@ android_media_MediaPlayer2_getState(JNIEnv *env, jobject thiz)
     return (jint)mp->getState();
 }
 
-static jint
-android_media_MediaPlayer2_getVideoWidth(JNIEnv *env, jobject thiz)
-{
-    sp<MediaPlayer2> mp = getMediaPlayer(env, thiz);
-    if (mp == NULL ) {
-        jniThrowException(env, "java/lang/IllegalStateException", NULL);
-        return 0;
-    }
-    int w;
-    if (0 != mp->getVideoWidth(&w)) {
-        ALOGE("getVideoWidth failed");
-        w = 0;
-    }
-    ALOGV("getVideoWidth: %d", w);
-    return (jint) w;
-}
-
-static jint
-android_media_MediaPlayer2_getVideoHeight(JNIEnv *env, jobject thiz)
-{
-    sp<MediaPlayer2> mp = getMediaPlayer(env, thiz);
-    if (mp == NULL ) {
-        jniThrowException(env, "java/lang/IllegalStateException", NULL);
-        return 0;
-    }
-    int h;
-    if (0 != mp->getVideoHeight(&h)) {
-        ALOGE("getVideoHeight failed");
-        h = 0;
-    }
-    ALOGV("getVideoHeight: %d", h);
-    return (jint) h;
-}
-
 static jobject
 android_media_MediaPlayer2_native_getMetrics(JNIEnv *env, jobject thiz)
 {
@@ -1459,8 +1425,6 @@ static const JNINativeMethod gMethods[] = {
     {"_prepare",            "()V",                              (void *)android_media_MediaPlayer2_prepare},
     {"_start",              "()V",                              (void *)android_media_MediaPlayer2_start},
     {"native_getState",     "()I",                              (void *)android_media_MediaPlayer2_getState},
-    {"getVideoWidth",       "()I",                              (void *)android_media_MediaPlayer2_getVideoWidth},
-    {"getVideoHeight",      "()I",                              (void *)android_media_MediaPlayer2_getVideoHeight},
     {"native_getMetrics",   "()Landroid/os/PersistableBundle;", (void *)android_media_MediaPlayer2_native_getMetrics},
     {"_setPlaybackParams", "(Landroid/media/PlaybackParams;)V", (void *)android_media_MediaPlayer2_setPlaybackParams},
     {"getPlaybackParams", "()Landroid/media/PlaybackParams;", (void *)android_media_MediaPlayer2_getPlaybackParams},
