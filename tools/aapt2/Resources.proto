@@ -133,13 +133,25 @@ message AllowNew {
   string comment = 2;
 }
 
-// Whether a resource is overlayable by runtime resource overlays (RRO).
+// Represents a declaration that a resource is overayable at runtime.
 message Overlayable {
+  enum Policy {
+    NONE = 0;
+    PUBLIC = 1;
+    SYSTEM = 2;
+    VENDOR = 3;
+    PRODUCT = 4;
+    PRODUCT_SERVICES = 5;
+  }
+
   // Where this declaration was defined in source.
   Source source = 1;
 
   // Any comment associated with the declaration.
   string comment = 2;
+
+  // The policy of the overlayable declaration
+  Policy policy = 3;
 }
 
 // An entry ID in the range [0x0000, 0xffff].
@@ -169,7 +181,7 @@ message Entry {
   AllowNew allow_new = 4;
 
   // Whether this resource can be overlaid by a runtime resource overlay (RRO).
-  Overlayable overlayable = 5;
+  repeated Overlayable overlayable = 5;
 
   // The set of values defined for this entry, each corresponding to a different
   // configuration/variant.

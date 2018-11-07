@@ -1184,6 +1184,16 @@ public class ApnSetting implements Parcelable {
     }
 
     /**
+     * @param apnType APN type
+     * @return APN type in string format
+     * @hide
+     */
+    public static String getApnTypeString(int apnType) {
+        String apnTypeString = APN_TYPE_INT_MAP.get(apnType);
+        return apnTypeString == null ? "Unknown" : apnTypeString;
+    }
+
+    /**
      * @param types comma delimited list of APN types.
      * @return bitmask of APN types.
      * @hide

@@ -213,9 +213,14 @@ private:
                                          uint32_t serial);
 
     /**
-     * Text or proto output of dumpsys.
+     * Proto output of statsd report data dumpsys, wrapped in a StatsDataDumpProto.
      */
-    void dump_impl(int outFd, bool verbose, bool proto);
+    void dumpIncidentSection(int outFd);
+
+    /**
+     * Text or proto output of statsdStats dumpsys.
+     */
+    void dumpStatsdStats(int outFd, bool verbose, bool proto);
 
     /**
      * Print usage information for the commands
@@ -240,7 +245,7 @@ private:
     /**
      * Print the event log.
      */
-    status_t cmd_dump_report(int outFd, int err, const Vector<String8>& args);
+    status_t cmd_dump_report(int outFd, const Vector<String8>& args);
 
     /**
      * Print the mapping of uids to package names.

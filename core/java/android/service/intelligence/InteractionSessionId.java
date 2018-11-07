@@ -16,17 +16,85 @@
 
 package android.service.intelligence;
 
+import android.annotation.NonNull;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
+
+import java.io.PrintWriter;
+import java.util.UUID;
 
 // TODO(b/111276913): add javadocs / implement equals/hashcode/string
 /** @hide */
 @SystemApi
 public final class InteractionSessionId implements Parcelable {
 
-    /** @hide */
+    private final @NonNull String mValue;
+
+    /**
+     * Creates a new instance.
+     *
+     * @hide
+     */
     public InteractionSessionId() {
+        this(UUID.randomUUID().toString());
+    }
+
+    /**
+     * Creates a new instance.
+     *
+     * @param value The internal value.
+     *
+     * @hide
+     */
+    public InteractionSessionId(@NonNull String value) {
+        mValue = value;
+    }
+
+    /**
+     * @hide
+     */
+    public String getValue() {
+        return mValue;
+    }
+
+    @Override
+    public int hashCode() {
+        final int prime = 31;
+        int result = 1;
+        result = prime * result + ((mValue == null) ? 0 : mValue.hashCode());
+        return result;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null) return false;
+        if (getClass() != obj.getClass()) return false;
+        final InteractionSessionId other = (InteractionSessionId) obj;
+        if (mValue == null) {
+            if (other.mValue != null) return false;
+        } else if (!mValue.equals(other.mValue)) {
+            return false;
+        }
+        return true;
+    }
+
+    /**
+     * @inheritdoc
+     *
+     * <p><b>NOTE: </b>this method is only useful for debugging purposes and is not guaranteed to
+     * be stable, hence it should not be used to identify the session.
+     */
+    @Override
+    public String toString() {
+        return mValue;
+    }
+
+    /** @hide */
+    // TODO(b/111276913): dump to proto as well
+    public void dump(PrintWriter pw) {
+        pw.print(mValue);
     }
 
     @Override
@@ -36,6 +104,7 @@ public final class InteractionSessionId implements Parcelable {
 
     @Override
     public void writeToParcel(Parcel parcel, int flags) {
+        parcel.writeString(mValue);
     }
 
     public static final Parcelable.Creator<InteractionSessionId> CREATOR =
@@ -43,8 +112,7 @@ public final class InteractionSessionId implements Parcelable {
 
         @Override
         public InteractionSessionId createFromParcel(Parcel parcel) {
-            // TODO(b/111276913): implement
-            return null;
+            return new InteractionSessionId(parcel.readString());
         }
 
         @Override

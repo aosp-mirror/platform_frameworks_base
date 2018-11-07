@@ -11,7 +11,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
 package com.android.server.wm;
@@ -28,7 +28,6 @@ import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
 
@@ -36,18 +35,17 @@ import org.junit.Test;
  * Test class for {@link WindowContainerController}.
  *
  * Build/Install/Run:
- *  bit FrameworksServicesTests:com.android.server.wm.WindowContainerControllerTests
+ *  atest FrameworksServicesTests:WindowContainerControllerTests
  */
+@FlakyTest(bugId = 74078662)
 @SmallTest
 @Presubmit
-@FlakyTest(bugId = 74078662)
-@org.junit.runner.RunWith(AndroidJUnit4.class)
 public class WindowContainerControllerTests extends WindowTestsBase {
 
     @Test
-    public void testCreation() throws Exception {
-        final WindowContainerController controller = new WindowContainerController(null, sWm);
-        final WindowContainer container = new WindowContainer(sWm);
+    public void testCreation() {
+        final WindowContainerController controller = new WindowContainerController<>(null, mWm);
+        final WindowContainer container = new WindowContainer(mWm);
 
         container.setController(controller);
         assertEquals(controller, container.getController());
@@ -55,9 +53,9 @@ public class WindowContainerControllerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testSetContainer() throws Exception {
-        final WindowContainerController controller = new WindowContainerController(null, sWm);
-        final WindowContainer container = new WindowContainer(sWm);
+    public void testSetContainer() {
+        final WindowContainerController controller = new WindowContainerController<>(null, mWm);
+        final WindowContainer container = new WindowContainer(mWm);
 
         controller.setContainer(container);
         assertEquals(controller.mContainer, container);
@@ -65,7 +63,7 @@ public class WindowContainerControllerTests extends WindowTestsBase {
         // Assert we can't change the container to another one once set
         boolean gotException = false;
         try {
-            controller.setContainer(new WindowContainer(sWm));
+            controller.setContainer(new WindowContainer(mWm));
         } catch (IllegalArgumentException e) {
             gotException = true;
         }
@@ -77,9 +75,9 @@ public class WindowContainerControllerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testRemoveContainer() throws Exception {
-        final WindowContainerController controller = new WindowContainerController(null, sWm);
-        final WindowContainer container = new WindowContainer(sWm);
+    public void testRemoveContainer() {
+        final WindowContainerController controller = new WindowContainerController<>(null, mWm);
+        final WindowContainer container = new WindowContainer(mWm);
 
         controller.setContainer(container);
         assertEquals(controller.mContainer, container);
@@ -89,9 +87,9 @@ public class WindowContainerControllerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testOnOverrideConfigurationChanged() throws Exception {
-        final WindowContainerController controller = new WindowContainerController(null, sWm);
-        final WindowContainer container = new WindowContainer(sWm);
+    public void testOnOverrideConfigurationChanged() {
+        final WindowContainerController controller = new WindowContainerController<>(null, mWm);
+        final WindowContainer container = new WindowContainer(mWm);
 
         controller.setContainer(container);
         assertEquals(controller.mContainer, container);

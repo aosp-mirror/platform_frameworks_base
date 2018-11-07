@@ -65,6 +65,11 @@ public class InstallCarrierAppActivity extends Activity implements View.OnClickL
         Button downloadButton = findViewById(R.id.download_button);
         downloadButton.setOnClickListener(this);
 
+        // Show/hide illo depending on whether one was provided in a resource overlay
+        boolean showIllo = getResources().getBoolean(R.bool.show_sim_app_dialog_illo);
+        View illoContainer = findViewById(R.id.illo_container);
+        illoContainer.setVisibility(showIllo ? View.VISIBLE : View.GONE);
+
         // Include carrier name in description text if its present in the intent
         Intent intent = getIntent();
         if (intent != null) {

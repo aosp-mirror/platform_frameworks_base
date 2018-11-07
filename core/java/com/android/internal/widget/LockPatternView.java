@@ -69,7 +69,7 @@ public class LockPatternView extends View {
     private static final int ASPECT_LOCK_HEIGHT = 2; // Fixed height; width will be minimum of (w,h)
 
     private static final boolean PROFILE_DRAWING = false;
-    private static final float LINE_FADE_ALPHA_MULTIPLIER = 3.5f;
+    private static final float LINE_FADE_ALPHA_MULTIPLIER = 1.5f;
     private final CellState[][] mCellStates;
 
     private final int mDotSize;

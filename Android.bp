@@ -181,6 +181,7 @@ java_defaults {
         "core/java/android/hardware/input/IInputManager.aidl",
         "core/java/android/hardware/input/IInputDevicesChangedListener.aidl",
         "core/java/android/hardware/input/ITabletModeChangedListener.aidl",
+        "core/java/android/hardware/iris/IIrisService.aidl",
         "core/java/android/hardware/location/IActivityRecognitionHardware.aidl",
         "core/java/android/hardware/location/IActivityRecognitionHardwareClient.aidl",
         "core/java/android/hardware/location/IActivityRecognitionHardwareSink.aidl",
@@ -286,6 +287,8 @@ java_defaults {
         "core/java/android/service/euicc/ISwitchToSubscriptionCallback.aidl",
         "core/java/android/service/euicc/IUpdateSubscriptionNicknameCallback.aidl",
         "core/java/android/service/gatekeeper/IGateKeeperService.aidl",
+        "core/java/android/service/intelligence/IIntelligenceService.aidl",
+
         "core/java/android/service/notification/INotificationListener.aidl",
         "core/java/android/service/notification/IStatusBarNotificationHolder.aidl",
         "core/java/android/service/notification/IConditionListener.aidl",
@@ -342,6 +345,7 @@ java_defaults {
         "core/java/android/view/autofill/IAutoFillManager.aidl",
         "core/java/android/view/autofill/IAutoFillManagerClient.aidl",
         "core/java/android/view/autofill/IAutofillWindowPresenter.aidl",
+        "core/java/android/view/intelligence/IIntelligenceManager.aidl",
         "core/java/android/view/IApplicationToken.aidl",
         "core/java/android/view/IAppTransitionAnimationSpecsFuture.aidl",
         "core/java/android/view/IDockedStackListener.aidl",
@@ -594,6 +598,8 @@ java_defaults {
         "telephony/java/com/android/internal/telephony/euicc/ISetDefaultSmdpAddressCallback.aidl",
         "telephony/java/com/android/internal/telephony/euicc/ISetNicknameCallback.aidl",
         "telephony/java/com/android/internal/telephony/euicc/ISwitchToProfileCallback.aidl",
+        "wifi/java/android/net/wifi/INetworkRequestMatchCallback.aidl",
+        "wifi/java/android/net/wifi/INetworkRequestUserSelectionCallback.aidl",
         "wifi/java/android/net/wifi/ISoftApCallback.aidl",
         "wifi/java/android/net/wifi/ITrafficStateCallback.aidl",
         "wifi/java/android/net/wifi/IWifiManager.aidl",
@@ -692,6 +698,7 @@ java_defaults {
     ],
 
     static_libs: [
+        "apex_aidl_interface-java",
         "framework-protos",
         "mediaplayer2-protos",
         "android.hidl.base-V1.0-java",

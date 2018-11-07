@@ -85,6 +85,11 @@ import static android.content.pm.PackageManager.MOVE_FAILED_SYSTEM_PACKAGE;
 import static android.content.pm.PackageManager.PERMISSION_DENIED;
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.content.pm.PackageParser.isApkFile;
+import static android.content.pm.SharedLibraryNames.ANDROID_HIDL_BASE;
+import static android.content.pm.SharedLibraryNames.ANDROID_HIDL_MANAGER;
+import static android.content.pm.SharedLibraryNames.ANDROID_TEST_BASE;
+import static android.content.pm.SharedLibraryNames.ANDROID_TEST_MOCK;
+import static android.content.pm.SharedLibraryNames.ANDROID_TEST_RUNNER;
 import static android.os.Trace.TRACE_TAG_PACKAGE_MANAGER;
 import static android.os.storage.StorageManager.FLAG_STORAGE_CE;
 import static android.os.storage.StorageManager.FLAG_STORAGE_DE;
@@ -366,6 +371,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.TimeUnit;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 
 /**
@@ -2090,6 +2096,28 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
+    @GuardedBy("mPackages")
+    private void setupBuiltinSharedLibraryDependenciesLocked() {
+        // Builtin libraries don't have versions.
+        long version = SharedLibraryInfo.VERSION_UNDEFINED;
+
+        SharedLibraryInfo libraryInfo = getSharedLibraryInfoLPr(ANDROID_HIDL_MANAGER, version);
+        if (libraryInfo != null) {
+            libraryInfo.addDependency(getSharedLibraryInfoLPr(ANDROID_HIDL_BASE, version));
+        }
+
+        libraryInfo = getSharedLibraryInfoLPr(ANDROID_TEST_RUNNER, version);
+        if (libraryInfo != null) {
+            libraryInfo.addDependency(getSharedLibraryInfoLPr(ANDROID_TEST_MOCK, version));
+            libraryInfo.addDependency(getSharedLibraryInfoLPr(ANDROID_TEST_BASE, version));
+        }
+
+        libraryInfo = getSharedLibraryInfoLPr(ANDROID_TEST_MOCK, version);
+        if (libraryInfo != null) {
+            libraryInfo.addDependency(getSharedLibraryInfoLPr(ANDROID_TEST_BASE, version));
+        }
+    }
+
     public PackageManagerService(Context context, Installer installer,
             boolean factoryTest, boolean onlyCore) {
         LockGuard.installLock(mPackages, LockGuard.INDEX_PACKAGES);
@@ -2205,6 +2233,9 @@ public class PackageManagerService extends IPackageManager.Stub
                 addSharedLibraryLPw(path, null, name, SharedLibraryInfo.VERSION_UNDEFINED,
                         SharedLibraryInfo.TYPE_BUILTIN, PLATFORM_PACKAGE_NAME, 0);
             }
+            // Builtin libraries cannot encode their dependency where they are
+            // defined, so fix that now.
+            setupBuiltinSharedLibraryDependenciesLocked();
 
             SELinuxMMAC.readInstallPolicy();
 
@@ -4867,7 +4898,10 @@ public class PackageManagerService extends IPackageManager.Stub
                     SharedLibraryInfo resLibInfo = new SharedLibraryInfo(libInfo.getPath(),
                             libInfo.getPackageName(), libInfo.getName(), libInfo.getLongVersion(),
                             libInfo.getType(), libInfo.getDeclaringPackage(),
-                            getPackagesUsingSharedLibraryLPr(libInfo, flags, userId));
+                            getPackagesUsingSharedLibraryLPr(libInfo, flags, userId),
+                            (libInfo.getDependencies() == null
+                                    ? null
+                                    : new ArrayList(libInfo.getDependencies())));
 
                     if (result == null) {
                         result = new ArrayList<>();
@@ -9598,16 +9632,34 @@ public class PackageManagerService extends IPackageManager.Stub
     }
 
     @GuardedBy("mPackages")
-    private void addSharedLibraryLPr(Set<String> usesLibraryFiles,
-            SharedLibraryInfo file,
-            PackageParser.Package changingLib) {
+    private void applyDefiningSharedLibraryUpdateLocked(
+            PackageParser.Package pkg, SharedLibraryInfo libInfo,
+            BiConsumer<SharedLibraryInfo, SharedLibraryInfo> action) {
+        if (pkg.isLibrary()) {
+            if (pkg.staticSharedLibName != null) {
+                SharedLibraryInfo definedLibrary = getSharedLibraryInfoLPr(
+                        pkg.staticSharedLibName, pkg.staticSharedLibVersion);
+                action.accept(definedLibrary, libInfo);
+            } else {
+                for (String libraryName : pkg.libraryNames) {
+                    SharedLibraryInfo definedLibrary = getSharedLibraryInfoLPr(
+                            libraryName, SharedLibraryInfo.VERSION_UNDEFINED);
+                    action.accept(definedLibrary, libInfo);
+                }
+            }
+        }
+    }
 
-        if (file.getPath() != null) {
-            usesLibraryFiles.add(file.getPath());
+    @GuardedBy("mPackages")
+    private void addSharedLibraryLPr(PackageParser.Package pkg, Set<String> usesLibraryFiles,
+            SharedLibraryInfo libInfo, PackageParser.Package changingLib) {
+
+        if (libInfo.getPath() != null) {
+            usesLibraryFiles.add(libInfo.getPath());
             return;
         }
-        PackageParser.Package p = mPackages.get(file.getPackageName());
-        if (changingLib != null && changingLib.packageName.equals(file.getPackageName())) {
+        PackageParser.Package p = mPackages.get(libInfo.getPackageName());
+        if (changingLib != null && changingLib.packageName.equals(libInfo.getPackageName())) {
             // If we are doing this while in the middle of updating a library apk,
             // then we need to make sure to use that new apk for determining the
             // dependencies here.  (We haven't yet finished committing the new apk
@@ -9618,6 +9670,10 @@ public class PackageManagerService extends IPackageManager.Stub
         }
         if (p != null) {
             usesLibraryFiles.addAll(p.getAllCodePaths());
+            // If the package provides libraries, add the dependency to them.
+            applyDefiningSharedLibraryUpdateLocked(pkg, libInfo, (definingLibrary, dependency) -> {
+                definingLibrary.addDependency(dependency);
+            });
             if (p.usesLibraryFiles != null) {
                 Collections.addAll(usesLibraryFiles, p.usesLibraryFiles);
             }
@@ -9630,6 +9686,12 @@ public class PackageManagerService extends IPackageManager.Stub
         if (pkg == null) {
             return;
         }
+
+        // If the package provides libraries, clear their old dependencies.
+        // This method will set them up again.
+        applyDefiningSharedLibraryUpdateLocked(pkg, null, (definingLibrary, dependency) -> {
+            definingLibrary.clearDependencies();
+        });
         // The collection used here must maintain the order of addition (so
         // that libraries are searched in the correct order) and must have no
         // duplicates.
@@ -9656,7 +9718,7 @@ public class PackageManagerService extends IPackageManager.Stub
             // usesLibraryFiles while eliminating duplicates.
             Set<String> usesLibraryFiles = new LinkedHashSet<>();
             for (SharedLibraryInfo libInfo : usesLibraryInfos) {
-                addSharedLibraryLPr(usesLibraryFiles, libInfo, changingLib);
+                addSharedLibraryLPr(pkg, usesLibraryFiles, libInfo, changingLib);
             }
             pkg.usesLibraryFiles = usesLibraryFiles.toArray(new String[usesLibraryFiles.size()]);
         } else {
@@ -11201,7 +11263,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
         SharedLibraryInfo libraryInfo = new SharedLibraryInfo(path, apk, name,
                 version, type, new VersionedPackage(declaringPackageName, declaringVersionCode),
-                null);
+                null, null);
         versionedLib.put(version, libraryInfo);
         return true;
     }
@@ -15153,13 +15215,7 @@ public class PackageManagerService extends IPackageManager.Stub
                             pkgList.add(oldPackage.applicationInfo.packageName);
                             sendResourcesChangedBroadcast(false, true, pkgList, uidArray, null);
                         }
-
-                        clearAppDataLIF(pkg, UserHandle.USER_ALL, StorageManager.FLAG_STORAGE_DE
-                                | StorageManager.FLAG_STORAGE_CE
-                                | Installer.FLAG_CLEAR_CODE_CACHE_ONLY);
                     }
-
-
 
                     // Update the in-memory copy of the previous code paths.
                     PackageSetting ps1 = mSettings.mPackages.get(
@@ -15364,7 +15420,8 @@ public class PackageManagerService extends IPackageManager.Stub
 
     /**
      * On successful install, executes remaining steps after commit completes and the package lock
-     * is released.
+     * is released. These are typically more expensive or require calls to installd, which often
+     * locks on {@link #mPackages}.
      */
     private void executePostCommitSteps(CommitRequest commitRequest) {
         for (ReconciledPackage reconciledPkg : commitRequest.reconciledPackages.values()) {
@@ -16093,7 +16150,6 @@ public class PackageManagerService extends IPackageManager.Stub
         try {
             final PackageParser.Package existingPackage;
             String renamedPackage = null;
-            boolean clearCodeCache = false;
             boolean sysPkg = false;
             String targetVolumeUuid = volumeUuid;
             int targetScanFlags = scanFlags;
@@ -16314,7 +16370,6 @@ public class PackageManagerService extends IPackageManager.Stub
                         Slog.d(TAG, "replaceSystemPackageLI: new=" + pkg
                                 + ", old=" + oldPackage);
                     }
-                    clearCodeCache = true;
                     res.setReturnCode(PackageManager.INSTALL_SUCCEEDED);
                     pkg.setApplicationInfoFlags(ApplicationInfo.FLAG_UPDATED_SYSTEM_APP,
                             ApplicationInfo.FLAG_UPDATED_SYSTEM_APP);
@@ -16370,7 +16425,7 @@ public class PackageManagerService extends IPackageManager.Stub
             shouldCloseFreezerBeforeReturn = false;
             return new PrepareResult(args.installReason, targetVolumeUuid, installerPackageName,
                     args.user, replace, targetScanFlags, targetParseFlags, existingPackage, pkg,
-                    clearCodeCache, sysPkg, renamedPackage, freezer);
+                    replace /* clearCodeCache */, sysPkg, renamedPackage, freezer);
         } finally {
             if (shouldCloseFreezerBeforeReturn) {
                 freezer.close();

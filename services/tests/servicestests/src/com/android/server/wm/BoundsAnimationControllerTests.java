@@ -11,12 +11,12 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
 package com.android.server.wm;
 
-import static android.view.Display.DEFAULT_DISPLAY;
+import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
 import static com.android.server.wm.BoundsAnimationController.NO_PIP_MODE_CHANGED_CALLBACKS;
 import static com.android.server.wm.BoundsAnimationController.SCHEDULE_PIP_MODE_CHANGED_ON_END;
@@ -24,11 +24,11 @@ import static com.android.server.wm.BoundsAnimationController.SCHEDULE_PIP_MODE_
 import static com.android.server.wm.BoundsAnimationController.SchedulePipModeChangedState;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
-import static org.junit.Assert.fail;
 
 import android.animation.ValueAnimator;
 import android.content.Context;
@@ -37,16 +37,14 @@ import android.os.Handler;
 import android.os.Looper;
 import android.platform.test.annotations.Presubmit;
 
-import androidx.test.InstrumentationRegistry;
 import androidx.test.annotation.UiThreadTest;
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.wm.BoundsAnimationController.BoundsAnimator;
 import com.android.server.wm.WindowManagerInternal.AppTransitionListener;
 
+import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 /**
  * Test class for {@link BoundsAnimationController} to ensure that it sends the right callbacks
@@ -59,21 +57,20 @@ import org.junit.runner.RunWith;
  * appropriately.
  *
  * Build/Install/Run:
- *  bit FrameworksServicesTests:com.android.server.wm.BoundsAnimationControllerTests
+ *  atest FrameworksServicesTests:BoundsAnimationControllerTests
  */
 @SmallTest
 @Presubmit
-@RunWith(AndroidJUnit4.class)
 public class BoundsAnimationControllerTests extends WindowTestsBase {
 
     /**
      * Mock value animator to simulate updates with.
      */
-    private class MockValueAnimator extends ValueAnimator {
+    private static class MockValueAnimator extends ValueAnimator {
 
         private float mFraction;
 
-        public MockValueAnimator getWithValue(float fraction) {
+        MockValueAnimator getWithValue(float fraction) {
             mFraction = fraction;
             return this;
         }
@@ -87,12 +84,12 @@ public class BoundsAnimationControllerTests extends WindowTestsBase {
     /**
      * Mock app transition to fire notifications to the bounds animator.
      */
-    private class MockAppTransition extends AppTransition {
+    private static class MockAppTransition extends AppTransition {
 
         private AppTransitionListener mListener;
 
-        MockAppTransition(Context context) {
-            super(context, sWm, mDisplayContent);
+        MockAppTransition(Context context, WindowManagerService wm, DisplayContent displayContent) {
+            super(context, wm, displayContent);
         }
 
         @Override
@@ -120,7 +117,7 @@ public class BoundsAnimationControllerTests extends WindowTestsBase {
     /**
      * A test animate bounds user to track callbacks from the bounds animation.
      */
-    private class TestBoundsAnimationTarget implements BoundsAnimationTarget {
+    private static class TestBoundsAnimationTarget implements BoundsAnimationTarget {
 
         boolean mAwaitingAnimationStart;
         boolean mMovedToFullscreen;
@@ -193,21 +190,23 @@ public class BoundsAnimationControllerTests extends WindowTestsBase {
     /**
      * Drives the animations, makes common assertions along the way.
      */
-    private class BoundsAnimationDriver {
+    private static class BoundsAnimationDriver {
 
-        private BoundsAnimationController mController;
-        private TestBoundsAnimationTarget mTarget;
+        private final BoundsAnimationController mController;
+        private final TestBoundsAnimationTarget mTarget;
+        private final MockValueAnimator mMockAnimator;
+
         private BoundsAnimator mAnimator;
-
         private Rect mFrom;
         private Rect mTo;
         private Rect mLargerBounds;
         private Rect mExpectedFinalBounds;
 
         BoundsAnimationDriver(BoundsAnimationController controller,
-                TestBoundsAnimationTarget target) {
+                TestBoundsAnimationTarget target, MockValueAnimator mockValueAnimator) {
             mController = controller;
             mTarget = target;
+            mMockAnimator = mockValueAnimator;
         }
 
         BoundsAnimationDriver start(Rect from, Rect to) {
@@ -222,7 +221,7 @@ public class BoundsAnimationControllerTests extends WindowTestsBase {
 
             // Started, not running
             assertTrue(mTarget.mAwaitingAnimationStart);
-            assertTrue(!mTarget.mAnimationStarted);
+            assertFalse(mTarget.mAnimationStarted);
 
             startImpl(from, to);
 
@@ -236,7 +235,7 @@ public class BoundsAnimationControllerTests extends WindowTestsBase {
             }
 
             // Started and running
-            assertTrue(!mTarget.mAwaitingAnimationStart);
+            assertFalse(mTarget.mAwaitingAnimationStart);
             assertTrue(mTarget.mAnimationStarted);
 
             return this;
@@ -268,7 +267,7 @@ public class BoundsAnimationControllerTests extends WindowTestsBase {
                 assertTrue(mTarget.mForcePipModeChangedCallback);
             } else {
                 // No animation start for replacing animation
-                assertTrue(!mTarget.mAnimationStarted);
+                assertFalse(mTarget.mAnimationStarted);
             }
             mTarget.mAnimationStarted = true;
             return this;
@@ -297,7 +296,7 @@ public class BoundsAnimationControllerTests extends WindowTestsBase {
 
             // Animating to larger size
             if (mFrom.equals(mLargerBounds)) {
-                assertTrue(!mAnimator.animatingToLargerSize());
+                assertFalse(mAnimator.animatingToLargerSize());
             } else if (mTo.equals(mLargerBounds)) {
                 assertTrue(mAnimator.animatingToLargerSize());
             }
@@ -339,10 +338,10 @@ public class BoundsAnimationControllerTests extends WindowTestsBase {
             mAnimator.onAnimationUpdate(mMockAnimator.getWithValue(0.5f));
 
             // Not started, not running, cancel reset
-            assertTrue(!mTarget.mCancelRequested);
+            assertFalse(mTarget.mCancelRequested);
 
             // Stack/task bounds not updated
-            assertTrue(!mTarget.mBoundsUpdated);
+            assertFalse(mTarget.mBoundsUpdated);
 
             // Callback made
             assertTrue(mTarget.mAnimationEnded);
@@ -372,14 +371,10 @@ public class BoundsAnimationControllerTests extends WindowTestsBase {
             return this;
         }
 
-        private Rect getLargerBounds(Rect r1, Rect r2) {
+        private static Rect getLargerBounds(Rect r1, Rect r2) {
             int r1Area = r1.width() * r1.height();
             int r2Area = r2.width() * r2.height();
-            if (r1Area <= r2Area) {
-                return r2;
-            } else {
-                return r1;
-            }
+            return (r1Area <= r2Area) ? r2 : r1;
         }
     }
 
@@ -395,32 +390,29 @@ public class BoundsAnimationControllerTests extends WindowTestsBase {
 
     // Common
     private MockAppTransition mMockAppTransition;
-    private MockValueAnimator mMockAnimator;
     private TestBoundsAnimationTarget mTarget;
     private BoundsAnimationController mController;
     private BoundsAnimationDriver mDriver;
 
     // Temp
-    private Rect mTmpRect = new Rect();
+    private static final Rect sTmpRect = new Rect();
 
-    @Override
+    @Before
     public void setUp() throws Exception {
-        super.setUp();
-
-        final Context context = InstrumentationRegistry.getTargetContext();
+        final Context context = getInstrumentation().getTargetContext();
         final Handler handler = new Handler(Looper.getMainLooper());
-        mMockAppTransition = new MockAppTransition(context);
-        mMockAnimator = new MockValueAnimator();
+        mMockAppTransition = new MockAppTransition(context, mWm, mDisplayContent);
         mTarget = new TestBoundsAnimationTarget();
         mController = new BoundsAnimationController(context, mMockAppTransition, handler, null);
-        mDriver = new BoundsAnimationDriver(mController, mTarget);
+        final MockValueAnimator mockValueAnimator = new MockValueAnimator();
+        mDriver = new BoundsAnimationDriver(mController, mTarget, mockValueAnimator);
     }
 
     /** BASE TRANSITIONS **/
 
     @UiThreadTest
     @Test
-    public void testFullscreenToFloatingTransition() throws Exception {
+    public void testFullscreenToFloatingTransition() {
         mDriver.start(BOUNDS_FULL, BOUNDS_FLOATING)
                 .expectStarted(!SCHEDULE_PIP_MODE_CHANGED)
                 .update(0f)
@@ -432,7 +424,7 @@ public class BoundsAnimationControllerTests extends WindowTestsBase {
 
     @UiThreadTest
     @Test
-    public void testFloatingToFullscreenTransition() throws Exception {
+    public void testFloatingToFullscreenTransition() {
         mDriver.start(BOUNDS_FLOATING, BOUNDS_FULL)
                 .expectStarted(SCHEDULE_PIP_MODE_CHANGED)
                 .update(0f)
@@ -444,7 +436,7 @@ public class BoundsAnimationControllerTests extends WindowTestsBase {
 
     @UiThreadTest
     @Test
-    public void testFloatingToSmallerFloatingTransition() throws Exception {
+    public void testFloatingToSmallerFloatingTransition() {
         mDriver.start(BOUNDS_FLOATING, BOUNDS_SMALLER_FLOATING)
                 .expectStarted(!SCHEDULE_PIP_MODE_CHANGED)
                 .update(0f)
@@ -456,7 +448,7 @@ public class BoundsAnimationControllerTests extends WindowTestsBase {
 
     @UiThreadTest
     @Test
-    public void testFloatingToLargerFloatingTransition() throws Exception {
+    public void testFloatingToLargerFloatingTransition() {
         mDriver.start(BOUNDS_SMALLER_FLOATING, BOUNDS_FLOATING)
                 .expectStarted(!SCHEDULE_PIP_MODE_CHANGED)
                 .update(0f)
@@ -470,7 +462,7 @@ public class BoundsAnimationControllerTests extends WindowTestsBase {
 
     @UiThreadTest
     @Test
-    public void testFullscreenToFloatingCancelFromTarget() throws Exception {
+    public void testFullscreenToFloatingCancelFromTarget() {
         mDriver.start(BOUNDS_FULL, BOUNDS_FLOATING)
                 .expectStarted(!SCHEDULE_PIP_MODE_CHANGED)
                 .update(0.25f)
@@ -480,7 +472,7 @@ public class BoundsAnimationControllerTests extends WindowTestsBase {
 
     @UiThreadTest
     @Test
-    public void testFullscreenToFloatingCancelFromAnimationToSameBounds() throws Exception {
+    public void testFullscreenToFloatingCancelFromAnimationToSameBounds() {
         mDriver.start(BOUNDS_FULL, BOUNDS_FLOATING)
                 .expectStarted(!SCHEDULE_PIP_MODE_CHANGED)
                 .update(0.25f)
@@ -491,7 +483,7 @@ public class BoundsAnimationControllerTests extends WindowTestsBase {
 
     @UiThreadTest
     @Test
-    public void testFullscreenToFloatingCancelFromAnimationToFloatingBounds() throws Exception {
+    public void testFullscreenToFloatingCancelFromAnimationToFloatingBounds() {
         mDriver.start(BOUNDS_FULL, BOUNDS_FLOATING)
                 .expectStarted(!SCHEDULE_PIP_MODE_CHANGED)
                 .update(0.25f)
@@ -503,7 +495,7 @@ public class BoundsAnimationControllerTests extends WindowTestsBase {
 
     @UiThreadTest
     @Test
-    public void testFullscreenToFloatingCancelFromAnimationToFullscreenBounds() throws Exception {
+    public void testFullscreenToFloatingCancelFromAnimationToFullscreenBounds() {
         // When animating from fullscreen and the animation is interruped, we expect the animation
         // start callback to be made, with a forced pip mode change callback
         mDriver.start(BOUNDS_FULL, BOUNDS_FLOATING)
@@ -518,7 +510,7 @@ public class BoundsAnimationControllerTests extends WindowTestsBase {
 
     @UiThreadTest
     @Test
-    public void testFloatingToFullscreenCancelFromTarget() throws Exception {
+    public void testFloatingToFullscreenCancelFromTarget() {
         mDriver.start(BOUNDS_FLOATING, BOUNDS_FULL)
                 .expectStarted(SCHEDULE_PIP_MODE_CHANGED)
                 .update(0.25f)
@@ -528,7 +520,7 @@ public class BoundsAnimationControllerTests extends WindowTestsBase {
 
     @UiThreadTest
     @Test
-    public void testFloatingToFullscreenCancelFromAnimationToSameBounds() throws Exception {
+    public void testFloatingToFullscreenCancelFromAnimationToSameBounds() {
         mDriver.start(BOUNDS_FLOATING, BOUNDS_FULL)
                 .expectStarted(SCHEDULE_PIP_MODE_CHANGED)
                 .update(0.25f)
@@ -539,7 +531,7 @@ public class BoundsAnimationControllerTests extends WindowTestsBase {
 
     @UiThreadTest
     @Test
-    public void testFloatingToFullscreenCancelFromAnimationToFloatingBounds() throws Exception {
+    public void testFloatingToFullscreenCancelFromAnimationToFloatingBounds() {
         mDriver.start(BOUNDS_FLOATING, BOUNDS_FULL)
                 .expectStarted(SCHEDULE_PIP_MODE_CHANGED)
                 .update(0.25f)
@@ -553,7 +545,7 @@ public class BoundsAnimationControllerTests extends WindowTestsBase {
 
     @UiThreadTest
     @Test
-    public void testFloatingToSmallerFloatingCancelFromTarget() throws Exception {
+    public void testFloatingToSmallerFloatingCancelFromTarget() {
         mDriver.start(BOUNDS_FLOATING, BOUNDS_SMALLER_FLOATING)
                 .expectStarted(!SCHEDULE_PIP_MODE_CHANGED)
                 .update(0.25f)
@@ -563,7 +555,7 @@ public class BoundsAnimationControllerTests extends WindowTestsBase {
 
     @UiThreadTest
     @Test
-    public void testFloatingToLargerFloatingCancelFromTarget() throws Exception {
+    public void testFloatingToLargerFloatingCancelFromTarget() {
         mDriver.start(BOUNDS_SMALLER_FLOATING, BOUNDS_FLOATING)
                 .expectStarted(!SCHEDULE_PIP_MODE_CHANGED)
                 .update(0.25f)
@@ -575,7 +567,7 @@ public class BoundsAnimationControllerTests extends WindowTestsBase {
 
     @UiThreadTest
     @Test
-    public void testBoundsAreCopied() throws Exception {
+    public void testBoundsAreCopied() {
         Rect from = new Rect(0, 0, 100, 100);
         Rect to = new Rect(25, 25, 75, 75);
         mDriver.start(from, to)
@@ -588,9 +580,9 @@ public class BoundsAnimationControllerTests extends WindowTestsBase {
     /**
      * @return whether the task and stack bounds would be the same if they were at the same offset.
      */
-    private boolean assertEqualSizeAtOffset(Rect stackBounds, Rect taskBounds) {
-        mTmpRect.set(taskBounds);
-        mTmpRect.offsetTo(stackBounds.left, stackBounds.top);
-        return stackBounds.equals(mTmpRect);
+    private static boolean assertEqualSizeAtOffset(Rect stackBounds, Rect taskBounds) {
+        sTmpRect.set(taskBounds);
+        sTmpRect.offsetTo(stackBounds.left, stackBounds.top);
+        return stackBounds.equals(sTmpRect);
     }
 }

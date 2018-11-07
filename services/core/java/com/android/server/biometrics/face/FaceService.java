@@ -70,7 +70,7 @@ import java.util.List;
 /**
  * A service to manage multiple clients that want to access the face HAL API.
  * The service is responsible for maintaining a list of clients and dispatching all
- * face -related events.
+ * face-related events.
  *
  * @hide
  */

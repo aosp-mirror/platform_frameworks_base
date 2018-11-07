@@ -11,7 +11,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
 package com.android.server.wm;
@@ -26,15 +26,14 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 
-import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
-
 import android.view.SurfaceControl;
+
+import androidx.test.filters.SmallTest;
 
 import com.android.server.wm.WindowTestUtils.TestAppWindowToken;
 
+import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -43,10 +42,9 @@ import org.mockito.MockitoAnnotations;
  * Animation related tests for the {@link AppWindowToken} class.
  *
  * Build/Install/Run:
- * atest FrameworksServicesTests:com.android.server.wm.AppWindowTokenAnimationTests
+ *  atest FrameworksServicesTests:AppWindowTokenAnimationTests
  */
 @SmallTest
-@RunWith(AndroidJUnit4.class)
 public class AppWindowTokenAnimationTests extends WindowTestsBase {
 
     private TestAppWindowToken mToken;
@@ -56,9 +54,8 @@ public class AppWindowTokenAnimationTests extends WindowTestsBase {
     @Mock
     private AnimationAdapter mSpec;
 
-    @Override
+    @Before
     public void setUp() throws Exception {
-        super.setUp();
         MockitoAnnotations.initMocks(this);
 
         mToken = createTestAppWindowToken(mDisplayContent, WINDOWING_MODE_FULLSCREEN,
@@ -67,7 +64,7 @@ public class AppWindowTokenAnimationTests extends WindowTestsBase {
     }
 
     @Test
-    public void clipAfterAnim_boundsLayerIsCreated() throws Exception {
+    public void clipAfterAnim_boundsLayerIsCreated() {
         mToken.mNeedsAnimationBoundsLayer = true;
 
         mToken.mSurfaceAnimator.startAnimation(mTransaction, mSpec, true /* hidden */);
@@ -78,7 +75,7 @@ public class AppWindowTokenAnimationTests extends WindowTestsBase {
     }
 
     @Test
-    public void clipAfterAnim_boundsLayerIsDestroyed() throws Exception {
+    public void clipAfterAnim_boundsLayerIsDestroyed() {
         mToken.mNeedsAnimationBoundsLayer = true;
         mToken.mSurfaceAnimator.startAnimation(mTransaction, mSpec, true /* hidden */);
         final SurfaceControl leash = mToken.mSurfaceAnimator.mLeash;
@@ -95,7 +92,7 @@ public class AppWindowTokenAnimationTests extends WindowTestsBase {
     }
 
     @Test
-    public void clipAfterAnimCancelled_boundsLayerIsDestroyed() throws Exception {
+    public void clipAfterAnimCancelled_boundsLayerIsDestroyed() {
         mToken.mNeedsAnimationBoundsLayer = true;
         mToken.mSurfaceAnimator.startAnimation(mTransaction, mSpec, true /* hidden */);
         final SurfaceControl leash = mToken.mSurfaceAnimator.mLeash;
@@ -108,7 +105,7 @@ public class AppWindowTokenAnimationTests extends WindowTestsBase {
     }
 
     @Test
-    public void clipNoneAnim_boundsLayerIsNotCreated() throws Exception {
+    public void clipNoneAnim_boundsLayerIsNotCreated() {
         mToken.mNeedsAnimationBoundsLayer = false;
 
         mToken.mSurfaceAnimator.startAnimation(mTransaction, mSpec, true /* hidden */);

@@ -105,6 +105,7 @@ void EventMetricProducer::clearPastBucketsLocked(const int64_t dumpTimeNs) {
 
 void EventMetricProducer::onDumpReportLocked(const int64_t dumpTimeNs,
                                              const bool include_current_partial_bucket,
+                                             const bool erase_data,
                                              std::set<string> *str_set,
                                              ProtoOutputStream* protoOutput) {
     if (mProto->size() <= 0) {
@@ -120,7 +121,9 @@ void EventMetricProducer::onDumpReportLocked(const int64_t dumpTimeNs,
     protoOutput->write(FIELD_TYPE_MESSAGE | FIELD_ID_EVENT_METRICS,
                        reinterpret_cast<char*>(buffer.get()->data()), buffer.get()->size());
 
-    mProto->clear();
+    if (erase_data) {
+        mProto->clear();
+    }
 }
 
 void EventMetricProducer::onConditionChangedLocked(const bool conditionMet,

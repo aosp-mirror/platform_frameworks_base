@@ -11,7 +11,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
 package com.android.server.wm;
@@ -20,6 +20,8 @@ import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.content.res.Configuration.ORIENTATION_PORTRAIT;
 import static android.graphics.GraphicBuffer.USAGE_HW_TEXTURE;
 import static android.graphics.GraphicBuffer.USAGE_SW_READ_RARELY;
+
+import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
 import android.app.ActivityManager.TaskSnapshot;
 import android.graphics.Canvas;
@@ -31,11 +33,8 @@ import android.os.UserManager;
 
 import org.junit.After;
 import org.junit.Before;
-import org.junit.BeforeClass;
 
 import java.io.File;
-
-import androidx.test.InstrumentationRegistry;
 
 /**
  * Base class for tests that use a {@link TaskSnapshotPersister}.
@@ -43,39 +42,28 @@ import androidx.test.InstrumentationRegistry;
 class TaskSnapshotPersisterTestBase extends WindowTestsBase {
 
     private static final Rect TEST_INSETS = new Rect(10, 20, 30, 40);
+    static final File FILES_DIR = getInstrumentation().getTargetContext().getFilesDir();
 
     TaskSnapshotPersister mPersister;
     TaskSnapshotLoader mLoader;
     int mTestUserId;
-    static File sFilesDir;
 
-    @BeforeClass
-    public static void setUpUser() {
-        sFilesDir = InstrumentationRegistry.getContext().getFilesDir();
-    }
-
-    @Override
     @Before
-    public void setUp() throws Exception {
-        super.setUp();
-
-        final UserManager um = UserManager.get(InstrumentationRegistry.getContext());
+    public void setUp() {
+        final UserManager um = UserManager.get(getInstrumentation().getTargetContext());
         mTestUserId = um.getUserHandle();
-        mPersister = new TaskSnapshotPersister(userId -> sFilesDir);
+        mPersister = new TaskSnapshotPersister(userId -> FILES_DIR);
         mLoader = new TaskSnapshotLoader(mPersister);
         mPersister.start();
     }
 
-    @Override
     @After
-    public void tearDown() throws Exception {
+    public void tearDown() {
         cleanDirectory();
-
-        super.tearDown();
     }
 
     private void cleanDirectory() {
-        final File[] files = new File(sFilesDir, "snapshots").listFiles();
+        final File[] files = new File(FILES_DIR, "snapshots").listFiles();
         if (files == null) {
             return;
         }
@@ -99,7 +87,7 @@ class TaskSnapshotPersisterTestBase extends WindowTestsBase {
     /**
      * Builds a TaskSnapshot.
      */
-    class TaskSnapshotBuilder {
+    static class TaskSnapshotBuilder {
 
         private float mScale = 1f;
         private boolean mIsRealSnapshot = true;
@@ -107,32 +95,32 @@ class TaskSnapshotPersisterTestBase extends WindowTestsBase {
         private int mWindowingMode = WINDOWING_MODE_FULLSCREEN;
         private int mSystemUiVisibility = 0;
 
-        public TaskSnapshotBuilder setScale(float scale) {
+        TaskSnapshotBuilder setScale(float scale) {
             mScale = scale;
             return this;
         }
 
-        public TaskSnapshotBuilder setIsRealSnapshot(boolean isRealSnapshot) {
+        TaskSnapshotBuilder setIsRealSnapshot(boolean isRealSnapshot) {
             mIsRealSnapshot = isRealSnapshot;
             return this;
         }
 
-        public TaskSnapshotBuilder setIsTranslucent(boolean isTranslucent) {
+        TaskSnapshotBuilder setIsTranslucent(boolean isTranslucent) {
             mIsTranslucent = isTranslucent;
             return this;
         }
 
-        public TaskSnapshotBuilder setWindowingMode(int windowingMode) {
+        TaskSnapshotBuilder setWindowingMode(int windowingMode) {
             mWindowingMode = windowingMode;
             return this;
         }
 
-        public TaskSnapshotBuilder setSystemUiVisibility(int systemUiVisibility) {
+        TaskSnapshotBuilder setSystemUiVisibility(int systemUiVisibility) {
             mSystemUiVisibility = systemUiVisibility;
             return this;
         }
 
-        public TaskSnapshot build() {
+        TaskSnapshot build() {
             final GraphicBuffer buffer = GraphicBuffer.create(100, 100, PixelFormat.RGBA_8888,
                     USAGE_HW_TEXTURE | USAGE_SW_READ_RARELY | USAGE_SW_READ_RARELY);
             Canvas c = buffer.lockCanvas();
@@ -142,6 +130,5 @@ class TaskSnapshotPersisterTestBase extends WindowTestsBase {
                     mScale < 1f /* reducedResolution */, mScale, mIsRealSnapshot, mWindowingMode,
                     mSystemUiVisibility, mIsTranslucent);
         }
-
     }
 }

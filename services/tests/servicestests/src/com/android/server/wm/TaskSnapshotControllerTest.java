@@ -11,7 +11,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
 package com.android.server.wm;
@@ -20,7 +20,8 @@ import static android.view.WindowManager.LayoutParams.FIRST_APPLICATION_WINDOW;
 import static android.view.WindowManager.LayoutParams.FLAG_SECURE;
 import static android.view.WindowManager.TRANSIT_UNSET;
 
-import static com.android.server.wm.TaskSnapshotController.*;
+import static com.android.server.wm.TaskSnapshotController.SNAPSHOT_MODE_APP_THEME;
+import static com.android.server.wm.TaskSnapshotController.SNAPSHOT_MODE_REAL;
 
 import static junit.framework.Assert.assertEquals;
 
@@ -28,25 +29,23 @@ import android.platform.test.annotations.Presubmit;
 import android.util.ArraySet;
 
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import com.google.android.collect.Sets;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 /**
  * Test class for {@link TaskSnapshotController}.
  *
- * runtest frameworks-services -c com.android.server.wm.TaskSnapshotControllerTest
+ * Build/Install/Run:
+ *  *  atest FrameworksServicesTests:TaskSnapshotControllerTest
  */
 @SmallTest
 @Presubmit
-@RunWith(AndroidJUnit4.class)
 public class TaskSnapshotControllerTest extends WindowTestsBase {
 
     @Test
-    public void testGetClosingApps_closing() throws Exception {
+    public void testGetClosingApps_closing() {
         final WindowState closingWindow = createWindow(null, FIRST_APPLICATION_WINDOW,
                 "closingWindow");
         closingWindow.mAppToken.setVisibility(null, false /* visible */, TRANSIT_UNSET,
@@ -54,13 +53,13 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
         final ArraySet<AppWindowToken> closingApps = new ArraySet<>();
         closingApps.add(closingWindow.mAppToken);
         final ArraySet<Task> closingTasks = new ArraySet<>();
-        sWm.mTaskSnapshotController.getClosingTasks(closingApps, closingTasks);
+        mWm.mTaskSnapshotController.getClosingTasks(closingApps, closingTasks);
         assertEquals(1, closingTasks.size());
         assertEquals(closingWindow.mAppToken.getTask(), closingTasks.valueAt(0));
     }
 
     @Test
-    public void testGetClosingApps_notClosing() throws Exception {
+    public void testGetClosingApps_notClosing() {
         final WindowState closingWindow = createWindow(null, FIRST_APPLICATION_WINDOW,
                 "closingWindow");
         final WindowState openingWindow = createAppWindow(closingWindow.getTask(),
@@ -72,12 +71,12 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
         final ArraySet<AppWindowToken> closingApps = new ArraySet<>();
         closingApps.add(closingWindow.mAppToken);
         final ArraySet<Task> closingTasks = new ArraySet<>();
-        sWm.mTaskSnapshotController.getClosingTasks(closingApps, closingTasks);
+        mWm.mTaskSnapshotController.getClosingTasks(closingApps, closingTasks);
         assertEquals(0, closingTasks.size());
     }
 
     @Test
-    public void testGetClosingApps_skipClosingAppsSnapshotTasks() throws Exception {
+    public void testGetClosingApps_skipClosingAppsSnapshotTasks() {
         final WindowState closingWindow = createWindow(null, FIRST_APPLICATION_WINDOW,
                 "closingWindow");
         closingWindow.mAppToken.setVisibility(null, false /* visible */, TRANSIT_UNSET,
@@ -85,29 +84,29 @@ public class TaskSnapshotControllerTest extends WindowTestsBase {
         final ArraySet<AppWindowToken> closingApps = new ArraySet<>();
         closingApps.add(closingWindow.mAppToken);
         final ArraySet<Task> closingTasks = new ArraySet<>();
-        sWm.mTaskSnapshotController.addSkipClosingAppSnapshotTasks(
+        mWm.mTaskSnapshotController.addSkipClosingAppSnapshotTasks(
                 Sets.newArraySet(closingWindow.mAppToken.getTask()));
-        sWm.mTaskSnapshotController.getClosingTasks(closingApps, closingTasks);
+        mWm.mTaskSnapshotController.getClosingTasks(closingApps, closingTasks);
         assertEquals(0, closingTasks.size());
     }
 
     @Test
-    public void testGetSnapshotMode() throws Exception {
+    public void testGetSnapshotMode() {
         final WindowState disabledWindow = createWindow(null,
                 FIRST_APPLICATION_WINDOW, mDisplayContent, "disabledWindow");
         disabledWindow.mAppToken.setDisablePreviewScreenshots(true);
         assertEquals(SNAPSHOT_MODE_APP_THEME,
-                sWm.mTaskSnapshotController.getSnapshotMode(disabledWindow.getTask()));
+                mWm.mTaskSnapshotController.getSnapshotMode(disabledWindow.getTask()));
 
         final WindowState normalWindow = createWindow(null,
                 FIRST_APPLICATION_WINDOW, mDisplayContent, "normalWindow");
         assertEquals(SNAPSHOT_MODE_REAL,
-                sWm.mTaskSnapshotController.getSnapshotMode(normalWindow.getTask()));
+                mWm.mTaskSnapshotController.getSnapshotMode(normalWindow.getTask()));
 
         final WindowState secureWindow = createWindow(null,
                 FIRST_APPLICATION_WINDOW, mDisplayContent, "secureWindow");
         secureWindow.mAttrs.flags |= FLAG_SECURE;
         assertEquals(SNAPSHOT_MODE_APP_THEME,
-                sWm.mTaskSnapshotController.getSnapshotMode(secureWindow.getTask()));
+                mWm.mTaskSnapshotController.getSnapshotMode(secureWindow.getTask()));
     }
 }

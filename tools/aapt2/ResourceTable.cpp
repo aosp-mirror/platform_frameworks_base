@@ -625,17 +625,17 @@ bool ResourceTable::SetAllowNewImpl(const ResourceNameRef& name, const AllowNew&
   return true;
 }
 
-bool ResourceTable::SetOverlayable(const ResourceNameRef& name, const Overlayable& overlayable,
+bool ResourceTable::AddOverlayable(const ResourceNameRef& name, const Overlayable& overlayable,
                                    IDiagnostics* diag) {
-  return SetOverlayableImpl(name, overlayable, ResourceNameValidator, diag);
+  return AddOverlayableImpl(name, overlayable, ResourceNameValidator, diag);
 }
 
-bool ResourceTable::SetOverlayableMangled(const ResourceNameRef& name,
+bool ResourceTable::AddOverlayableMangled(const ResourceNameRef& name,
                                           const Overlayable& overlayable, IDiagnostics* diag) {
-  return SetOverlayableImpl(name, overlayable, SkipNameValidator, diag);
+  return AddOverlayableImpl(name, overlayable, SkipNameValidator, diag);
 }
 
-bool ResourceTable::SetOverlayableImpl(const ResourceNameRef& name, const Overlayable& overlayable,
+bool ResourceTable::AddOverlayableImpl(const ResourceNameRef& name, const Overlayable& overlayable,
                                        NameValidator name_validator, IDiagnostics* diag) {
   CHECK(diag != nullptr);
 
@@ -646,13 +646,28 @@ bool ResourceTable::SetOverlayableImpl(const ResourceNameRef& name, const Overla
   ResourceTablePackage* package = FindOrCreatePackage(name.package);
   ResourceTableType* type = package->FindOrCreateType(name.type);
   ResourceEntry* entry = type->FindOrCreateEntry(name.entry);
-  if (entry->overlayable) {
-    diag->Error(DiagMessage(overlayable.source)
-                << "duplicate overlayable declaration for resource '" << name << "'");
-    diag->Error(DiagMessage(entry->overlayable.value().source) << "previous declaration here");
-    return false;
+
+  for (auto& overlayable_declaration : entry->overlayable_declarations) {
+    // An overlayable resource cannot be declared twice with the same policy
+    if (overlayable.policy == overlayable_declaration.policy) {
+      diag->Error(DiagMessage(overlayable.source)
+                    << "duplicate overlayable declaration for resource '" << name << "'");
+      diag->Error(DiagMessage(overlayable_declaration.source) << "previous declaration here");
+      return false;
+    }
+
+    // An overlayable resource cannot be declared once with a policy and without a policy because
+    // the policy becomes unused
+    if (!overlayable.policy || !overlayable_declaration.policy) {
+      diag->Error(DiagMessage(overlayable.source)
+                    << "overlayable resource '" << name << "'"
+                    << " declared once with a policy and once with no policy");
+      diag->Error(DiagMessage(overlayable_declaration.source) << "previous declaration here");
+      return false;
+    }
   }
-  entry->overlayable = overlayable;
+
+  entry->overlayable_declarations.push_back(overlayable);
   return true;
 }
 
@@ -688,7 +703,7 @@ std::unique_ptr<ResourceTable> ResourceTable::Clone() const {
         new_entry->id = entry->id;
         new_entry->visibility = entry->visibility;
         new_entry->allow_new = entry->allow_new;
-        new_entry->overlayable = entry->overlayable;
+        new_entry->overlayable_declarations = entry->overlayable_declarations;
 
         for (const auto& config_value : entry->values) {
           ResourceConfigValue* new_value =

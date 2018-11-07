@@ -11,7 +11,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
 package com.android.server.wm;
@@ -30,25 +30,22 @@ import android.platform.test.annotations.Presubmit;
 
 import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 /**
  * Tests for the {@link WindowToken} class.
  *
  * Build/Install/Run:
- *  bit FrameworksServicesTests:com.android.server.wm.WindowTokenTests
+ *  atest FrameworksServicesTests:WindowTokenTests
  */
-@SmallTest
 @FlakyTest(bugId = 74078662)
+@SmallTest
 @Presubmit
-@RunWith(AndroidJUnit4.class)
 public class WindowTokenTests extends WindowTestsBase {
 
     @Test
-    public void testAddWindow() throws Exception {
+    public void testAddWindow() {
         final WindowTestUtils.TestWindowToken token =
                 WindowTestUtils.createTestWindowToken(0, mDisplayContent);
 
@@ -78,7 +75,7 @@ public class WindowTokenTests extends WindowTestsBase {
     }
 
     @Test
-    public void testChildRemoval() throws Exception {
+    public void testChildRemoval() {
         final DisplayContent dc = mDisplayContent;
         final WindowTestUtils.TestWindowToken token = WindowTestUtils.createTestWindowToken(0, dc);
 
@@ -102,7 +99,7 @@ public class WindowTokenTests extends WindowTestsBase {
      * Tokens should only be removed from the system when all their windows are gone.
      */
     @Test
-    public void testTokenRemovalProcess() throws Exception {
+    public void testTokenRemovalProcess() {
         final WindowTestUtils.TestWindowToken token = WindowTestUtils.createTestWindowToken(
                 TYPE_TOAST, mDisplayContent, true /* persistOnEmpty */);
 

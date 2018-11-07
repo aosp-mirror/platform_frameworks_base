@@ -16,6 +16,12 @@
 
 package com.android.server;
 
+import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_CRITICAL;
+import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_HIGH;
+import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_NORMAL;
+import static android.os.IServiceManager.DUMP_FLAG_PROTO;
+import static android.view.Display.DEFAULT_DISPLAY;
+
 import android.app.ActivityThread;
 import android.app.INotificationManager;
 import android.app.usage.UsageStatsManagerInternal;
@@ -64,10 +70,12 @@ import com.android.internal.util.ConcurrentUtils;
 import com.android.internal.util.EmergencyAffordanceManager;
 import com.android.internal.widget.ILockSettings;
 import com.android.server.am.ActivityManagerService;
-import com.android.server.wm.ActivityTaskManagerService;
 import com.android.server.appbinding.AppBindingService;
 import com.android.server.audio.AudioService;
 import com.android.server.biometrics.BiometricService;
+import com.android.server.biometrics.face.FaceService;
+import com.android.server.biometrics.fingerprint.FingerprintService;
+import com.android.server.biometrics.iris.IrisService;
 import com.android.server.broadcastradio.BroadcastRadioService;
 import com.android.server.camera.CameraServiceProxy;
 import com.android.server.clipboard.ClipboardService;
@@ -78,8 +86,6 @@ import com.android.server.display.ColorDisplayService;
 import com.android.server.display.DisplayManagerService;
 import com.android.server.dreams.DreamManagerService;
 import com.android.server.emergency.EmergencyAffordanceService;
-import com.android.server.biometrics.face.FaceService;
-import com.android.server.biometrics.fingerprint.FingerprintService;
 import com.android.server.hdmi.HdmiControlService;
 import com.android.server.input.InputManagerService;
 import com.android.server.inputmethod.InputMethodManagerService;
@@ -87,8 +93,8 @@ import com.android.server.job.JobSchedulerService;
 import com.android.server.lights.LightsService;
 import com.android.server.media.MediaResourceMonitorService;
 import com.android.server.media.MediaRouterService;
-import com.android.server.media.MediaUpdateService;
 import com.android.server.media.MediaSessionService;
+import com.android.server.media.MediaUpdateService;
 import com.android.server.media.projection.MediaProjectionManagerService;
 import com.android.server.net.NetworkPolicyManagerService;
 import com.android.server.net.NetworkStatsService;
@@ -127,6 +133,7 @@ import com.android.server.uri.UriGrantsManagerService;
 import com.android.server.usage.UsageStatsService;
 import com.android.server.vr.VrManagerService;
 import com.android.server.webkit.WebViewUpdateService;
+import com.android.server.wm.ActivityTaskManagerService;
 import com.android.server.wm.WindowManagerService;
 
 import dalvik.system.VMRuntime;
@@ -137,12 +144,6 @@ import java.util.Locale;
 import java.util.Timer;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.Future;
-
-import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_CRITICAL;
-import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_HIGH;
-import static android.os.IServiceManager.DUMP_FLAG_PRIORITY_NORMAL;
-import static android.os.IServiceManager.DUMP_FLAG_PROTO;
-import static android.view.Display.DEFAULT_DISPLAY;
 
 public final class SystemServer {
     private static final String TAG = "SystemServer";
@@ -229,6 +230,8 @@ public final class SystemServer {
             "com.android.server.wallpaper.WallpaperManagerService$Lifecycle";
     private static final String AUTO_FILL_MANAGER_SERVICE_CLASS =
             "com.android.server.autofill.AutofillManagerService";
+    private static final String INTELLIGENCE_MANAGER_SERVICE_CLASS =
+            "com.android.server.intelligence.IntelligenceManagerService";
     private static final String TIME_ZONE_RULES_MANAGER_SERVICE_CLASS =
             "com.android.server.timezone.RulesManagerService$Lifecycle";
     private static final String IOT_SERVICE_CLASS =
@@ -794,6 +797,8 @@ public final class SystemServer {
 
         boolean disableSystemTextClassifier = SystemProperties.getBoolean(
                 "config.disable_systemtextclassifier", false);
+        boolean disableIntelligence = SystemProperties.getBoolean(
+                "config.disable_intelligence", false);
         boolean disableNetworkTime = SystemProperties.getBoolean("config.disable_networktime",
                 false);
         boolean disableCameraService = SystemProperties.getBoolean("config.disable_cameraservice",
@@ -1589,6 +1594,8 @@ public final class SystemServer {
 
             final boolean hasFeatureFace
                     = mPackageManager.hasSystemFeature(PackageManager.FEATURE_FACE);
+            final boolean hasFeatureIris
+                    = mPackageManager.hasSystemFeature(PackageManager.FEATURE_IRIS);
             final boolean hasFeatureFingerprint
                     = mPackageManager.hasSystemFeature(PackageManager.FEATURE_FINGERPRINT);
 
@@ -1598,13 +1605,19 @@ public final class SystemServer {
                 traceEnd();
             }
 
+            if (hasFeatureIris) {
+                traceBeginAndSlog("StartIrisSensor");
+                mSystemServiceManager.startService(IrisService.class);
+                traceEnd();
+            }
+
             if (hasFeatureFingerprint) {
                 traceBeginAndSlog("StartFingerprintSensor");
                 mSystemServiceManager.startService(FingerprintService.class);
                 traceEnd();
             }
 
-            if (hasFeatureFace || hasFeatureFingerprint) {
+            if (hasFeatureFace || hasFeatureIris || hasFeatureFingerprint) {
                 // Start this service after all biometric services.
                 traceBeginAndSlog("StartBiometricPromptService");
                 mSystemServiceManager.startService(BiometricService.class);
@@ -1725,6 +1738,12 @@ public final class SystemServer {
         if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_AUTOFILL)) {
             traceBeginAndSlog("StartAutoFillService");
             mSystemServiceManager.startService(AUTO_FILL_MANAGER_SERVICE_CLASS);
+            traceEnd();
+        }
+
+        if (!disableIntelligence) {
+            traceBeginAndSlog("StartIntelligenceService");
+            mSystemServiceManager.startService(INTELLIGENCE_MANAGER_SERVICE_CLASS);
             traceEnd();
         }
 

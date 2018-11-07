@@ -159,25 +159,12 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
 
     /* package */ ContextHubClientBroker(
             Context context, IContexthub contextHubProxy, ContextHubClientManager clientManager,
-            ContextHubInfo contextHubInfo, short hostEndPointId,
-            IContextHubClientCallback callback) {
+            ContextHubInfo contextHubInfo, short hostEndPointId) {
         mContext = context;
         mContextHubProxy = contextHubProxy;
         mClientManager = clientManager;
         mAttachedContextHubInfo = contextHubInfo;
         mHostEndPointId = hostEndPointId;
-        mCallbackInterface = callback;
-    }
-
-    /**
-     * Attaches a death recipient for this client
-     *
-     * @throws RemoteException if the client has already died
-     */
-    /* package */ synchronized void attachDeathRecipient() throws RemoteException {
-        if (mCallbackInterface != null) {
-            mCallbackInterface.asBinder().linkToDeath(this, 0 /* flags */);
-        }
     }
 
     /**
@@ -245,9 +232,15 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
     public boolean unregisterIntent(PendingIntent pendingIntent) {
         ContextHubServiceUtil.checkPermissions(mContext);
 
+        boolean success = false;
         synchronized (this) {
-            return mPendingIntentRequest.unregister(pendingIntent);
+            success = mPendingIntentRequest.unregister(pendingIntent);
+            if (mCallbackInterface == null) {
+                close();
+            }
         }
+
+        return success;
     }
 
     /**
@@ -273,6 +266,37 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
     @Override
     public void binderDied() {
         close();
+    }
+
+    /**
+     * Sets the callback interface for this client, only if the callback is currently unregistered.
+     *
+     * Also attaches a death recipient to a ContextHubClientBroker object. If unsuccessful, the
+     * connection is closed.
+     *
+     * @param callback the callback interface
+     * @return true if the callback was successfully set, false otherwise
+     *
+     * @throws IllegalStateException if the client has already been registered to a callback
+     */
+    /* package */
+    synchronized boolean setCallback(IContextHubClientCallback callback) {
+        boolean success = false;
+        if (mCallbackInterface != null) {
+            throw new IllegalStateException("Client is already registered with a callback");
+        } else {
+            mCallbackInterface = callback;
+            try {
+                mCallbackInterface.asBinder().linkToDeath(this, 0 /* flags */);
+                success = true;
+            } catch (RemoteException e) {
+                // The client process has died, so we close the connection.
+                Log.e(TAG, "Failed to attach death recipient to client");
+                close();
+            }
+        }
+
+        return success;
     }
 
     /**
@@ -347,6 +371,18 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
     }
 
     /**
+     * @param intent the PendingIntent to compare to
+     * @return true if the given PendingIntent is currently registered, false otherwise
+     */
+    /* package */ boolean hasPendingIntent(PendingIntent intent) {
+        PendingIntent pendingIntent = null;
+        synchronized (this) {
+            pendingIntent = mPendingIntentRequest.getPendingIntent();
+        }
+        return (pendingIntent != null) && pendingIntent.equals(intent);
+    }
+
+    /**
      * Helper function to invoke a specified client callback, if the connection is open.
      *
      * @param consumer the consumer specifying the callback to invoke
@@ -407,6 +443,9 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
                 Log.w(TAG, "PendingIntent has been canceled, unregistering from client"
                         + " (host endpoint ID " + mHostEndPointId + ")");
                 mPendingIntentRequest.clear();
+                if (mCallbackInterface == null) {
+                    close();
+                }
             }
         }
     }

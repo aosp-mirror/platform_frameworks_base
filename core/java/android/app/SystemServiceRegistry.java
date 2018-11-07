@@ -66,6 +66,8 @@ import android.hardware.fingerprint.IFingerprintService;
 import android.hardware.hdmi.HdmiControlManager;
 import android.hardware.hdmi.IHdmiControlService;
 import android.hardware.input.InputManager;
+import android.hardware.iris.IIrisService;
+import android.hardware.iris.IrisManager;
 import android.hardware.location.ContextHubManager;
 import android.hardware.radio.RadioManager;
 import android.hardware.usb.IUsbManager;
@@ -161,6 +163,8 @@ import android.view.accessibility.CaptioningManager;
 import android.view.autofill.AutofillManager;
 import android.view.autofill.IAutoFillManager;
 import android.view.inputmethod.InputMethodManager;
+import android.view.intelligence.IIntelligenceManager;
+import android.view.intelligence.IntelligenceManager;
 import android.view.textclassifier.TextClassificationManager;
 import android.view.textservice.TextServicesManager;
 
@@ -836,6 +840,18 @@ final class SystemServiceRegistry {
                     }
                 });
 
+        registerService(Context.IRIS_SERVICE, IrisManager.class,
+                new CachedServiceFetcher<IrisManager>() {
+                    @Override
+                    public IrisManager createService(ContextImpl ctx)
+                        throws ServiceNotFoundException {
+                        final IBinder binder =
+                                ServiceManager.getServiceOrThrow(Context.IRIS_SERVICE);
+                        IIrisService service = IIrisService.Stub.asInterface(binder);
+                        return new IrisManager(ctx.getOuterContext(), service);
+                    }
+                });
+
         registerService(Context.BIOMETRIC_SERVICE, BiometricManager.class,
                 new CachedServiceFetcher<BiometricManager>() {
                     @Override
@@ -1016,6 +1032,17 @@ final class SystemServiceRegistry {
                 IBinder b = ServiceManager.getService(Context.AUTOFILL_MANAGER_SERVICE);
                 IAutoFillManager service = IAutoFillManager.Stub.asInterface(b);
                 return new AutofillManager(ctx.getOuterContext(), service);
+            }});
+
+        registerService(Context.INTELLIGENCE_MANAGER_SERVICE, IntelligenceManager.class,
+                new CachedServiceFetcher<IntelligenceManager>() {
+            @Override
+            public IntelligenceManager createService(ContextImpl ctx)
+                    throws ServiceNotFoundException {
+                // Get the services without throwing as this is an optional feature
+                IBinder b = ServiceManager.getService(Context.INTELLIGENCE_MANAGER_SERVICE);
+                IIntelligenceManager service = IIntelligenceManager.Stub.asInterface(b);
+                return new IntelligenceManager(ctx.getOuterContext(), service);
             }});
 
         registerService(Context.VR_SERVICE, VrManager.class, new CachedServiceFetcher<VrManager>() {

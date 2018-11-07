@@ -11,7 +11,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
 package com.android.server.wm;
@@ -47,31 +47,27 @@ import android.view.WindowManager;
 
 import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
+import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 /**
  * Tests for the {@link AppWindowToken} class.
  *
  * Build/Install/Run:
- *  atest FrameworksServicesTests:com.android.server.wm.AppWindowTokenTests
+ *  atest FrameworksServicesTests:AppWindowTokenTests
  */
+@FlakyTest(bugId = 68267650)
 @SmallTest
-// TODO: b/68267650
-// @Presubmit
-@RunWith(AndroidJUnit4.class)
+@Presubmit
 public class AppWindowTokenTests extends WindowTestsBase {
 
     TaskStack mStack;
     Task mTask;
     WindowTestUtils.TestAppWindowToken mToken;
 
-    @Override
+    @Before
     public void setUp() throws Exception {
-        super.setUp();
-
         mStack = createTaskStackOnDisplay(mDisplayContent);
         mTask = createTaskInStack(mStack, 0 /* userId */);
         mToken = WindowTestUtils.createTestAppWindowToken(mDisplayContent);
@@ -81,7 +77,7 @@ public class AppWindowTokenTests extends WindowTestsBase {
 
     @Test
     @Presubmit
-    public void testAddWindow_Order() throws Exception {
+    public void testAddWindow_Order() {
         assertEquals(0, mToken.getWindowsCount());
 
         final WindowState win1 = createWindow(null, TYPE_APPLICATION, mToken, "win1");
@@ -107,7 +103,7 @@ public class AppWindowTokenTests extends WindowTestsBase {
 
     @Test
     @Presubmit
-    public void testFindMainWindow() throws Exception {
+    public void testFindMainWindow() {
         assertNull(mToken.findMainWindow());
 
         final WindowState window1 = createWindow(null, TYPE_BASE_APPLICATION, mToken, "window1");
@@ -123,7 +119,7 @@ public class AppWindowTokenTests extends WindowTestsBase {
 
     @Test
     @Presubmit
-    public void testGetTopFullscreenWindow() throws Exception {
+    public void testGetTopFullscreenWindow() {
         assertNull(mToken.getTopFullscreenWindow());
 
         final WindowState window1 = createWindow(null, TYPE_BASE_APPLICATION, mToken, "window1");
@@ -138,10 +134,10 @@ public class AppWindowTokenTests extends WindowTestsBase {
     }
 
     @Test
-    public void testLandscapeSeascapeRotationByApp() throws Exception {
+    public void testLandscapeSeascapeRotationByApp() {
         // Some plumbing to get the service ready for rotation updates.
-        sWm.mDisplayReady = true;
-        sWm.mDisplayEnabled = true;
+        mWm.mDisplayReady = true;
+        mWm.mDisplayEnabled = true;
 
         final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(
                 TYPE_BASE_APPLICATION);
@@ -151,26 +147,26 @@ public class AppWindowTokenTests extends WindowTestsBase {
 
         // Set initial orientation and update.
         mToken.setOrientation(SCREEN_ORIENTATION_LANDSCAPE);
-        sWm.updateOrientationFromAppTokens(mDisplayContent.getOverrideConfiguration(), null,
+        mWm.updateOrientationFromAppTokens(mDisplayContent.getOverrideConfiguration(), null,
                 mDisplayContent.getDisplayId());
         assertEquals(SCREEN_ORIENTATION_LANDSCAPE, mDisplayContent.getLastOrientation());
         appWindow.resizeReported = false;
 
         // Update the orientation to perform 180 degree rotation and check that resize was reported.
         mToken.setOrientation(SCREEN_ORIENTATION_REVERSE_LANDSCAPE);
-        sWm.updateOrientationFromAppTokens(mDisplayContent.getOverrideConfiguration(), null,
+        mWm.updateOrientationFromAppTokens(mDisplayContent.getOverrideConfiguration(), null,
                 mDisplayContent.getDisplayId());
-        sWm.mRoot.performSurfacePlacement(false /* recoveringMemory */);
+        mWm.mRoot.performSurfacePlacement(false /* recoveringMemory */);
         assertEquals(SCREEN_ORIENTATION_REVERSE_LANDSCAPE, mDisplayContent.getLastOrientation());
         assertTrue(appWindow.resizeReported);
         appWindow.removeImmediately();
     }
 
     @Test
-    public void testLandscapeSeascapeRotationByPolicy() throws Exception {
+    public void testLandscapeSeascapeRotationByPolicy() {
         // Some plumbing to get the service ready for rotation updates.
-        sWm.mDisplayReady = true;
-        sWm.mDisplayEnabled = true;
+        mWm.mDisplayReady = true;
+        mWm.mDisplayEnabled = true;
 
         final DisplayRotation spiedRotation = spy(mDisplayContent.getDisplayRotation());
         mDisplayContent.setDisplayRotation(spiedRotation);
@@ -194,15 +190,15 @@ public class AppWindowTokenTests extends WindowTestsBase {
 
     private void performRotation(DisplayRotation spiedRotation, int rotationToReport) {
         doReturn(rotationToReport).when(spiedRotation).rotationForOrientation(anyInt(), anyInt());
-        sWm.updateRotation(false, false);
+        mWm.updateRotation(false, false);
         // Prevent the next rotation from being deferred by animation.
-        sWm.mAnimator.setScreenRotationAnimationLocked(mDisplayContent.getDisplayId(), null);
-        sWm.mRoot.performSurfacePlacement(false /* recoveringMemory */);
+        mWm.mAnimator.setScreenRotationAnimationLocked(mDisplayContent.getDisplayId(), null);
+        mWm.mRoot.performSurfacePlacement(false /* recoveringMemory */);
     }
 
     @Test
     @Presubmit
-    public void testGetOrientation() throws Exception {
+    public void testGetOrientation() {
         mToken.setOrientation(SCREEN_ORIENTATION_LANDSCAPE);
 
         mToken.setFillsParent(false);
@@ -220,7 +216,7 @@ public class AppWindowTokenTests extends WindowTestsBase {
 
     @Test
     @Presubmit
-    public void testKeyguardFlagsDuringRelaunch() throws Exception {
+    public void testKeyguardFlagsDuringRelaunch() {
         final WindowManager.LayoutParams attrs = new WindowManager.LayoutParams(
                 TYPE_BASE_APPLICATION);
         attrs.flags |= FLAG_SHOW_WHEN_LOCKED | FLAG_DISMISS_KEYGUARD;
@@ -246,7 +242,7 @@ public class AppWindowTokenTests extends WindowTestsBase {
 
     @Test
     @FlakyTest(detail = "Promote once confirmed non-flaky")
-    public void testStuckExitingWindow() throws Exception {
+    public void testStuckExitingWindow() {
         final WindowState closingWindow = createWindow(null, FIRST_APPLICATION_WINDOW,
                 "closingWindow");
         closingWindow.mAnimatingExit = true;

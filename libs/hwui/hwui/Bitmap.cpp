@@ -286,7 +286,6 @@ void Bitmap::setAlphaType(SkAlphaType alphaType) {
 }
 
 void Bitmap::getSkBitmap(SkBitmap* outBitmap) {
-    outBitmap->setHasHardwareMipMap(mHasHardwareMipMap);
     if (isHardware()) {
         outBitmap->allocPixels(SkImageInfo::Make(info().width(), info().height(),
                                                  info().colorType(), info().alphaType(), nullptr));
@@ -321,7 +320,6 @@ sk_sp<SkImage> Bitmap::makeImage(sk_sp<SkColorFilter>* outputColorFilter) {
         SkBitmap skiaBitmap;
         skiaBitmap.setInfo(info(), rowBytes());
         skiaBitmap.setPixelRef(sk_ref_sp(this), 0, 0);
-        skiaBitmap.setHasHardwareMipMap(mHasHardwareMipMap);
         // Note we don't cache in this case, because the raster image holds a pointer to this Bitmap
         // internally and ~Bitmap won't be invoked.
         // TODO: refactor Bitmap to not derive from SkPixelRef, which would allow caching here.

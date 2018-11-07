@@ -1231,6 +1231,47 @@ public class CarrierConfigManager {
     public static final String KEY_SHOW_PRECISE_FAILED_CAUSE_BOOL =
             "show_precise_failed_cause_bool";
 
+    /**
+     * Boolean to decide whether lte is enabled.
+     * @hide
+     */
+    public static final String KEY_LTE_ENABLED_BOOL = "lte_enabled_bool";
+
+    /**
+     * Boolean to decide whether TD-SCDMA is supported.
+     * @hide
+     */
+    public static final String KEY_SUPPORT_TDSCDMA_BOOL = "support_tdscdma_bool";
+
+    /**
+     * A list of mcc/mnc that support TD-SCDMA for device when connect to the roaming network.
+     * @hide
+     */
+    public static final String KEY_SUPPORT_TDSCDMA_ROAMING_NETWORKS_STRING_ARRAY =
+            "support_tdscdma_roaming_networks_string_array";
+
+    /**
+     * Boolean to decide whether world mode is enabled.
+     * @hide
+     */
+    public static final String KEY_WORLD_MODE_ENABLED_BOOL = "world_mode_enabled_bool";
+
+    /**
+     * Package name of the carrier settings activity.
+     * @see {@link #KEY_CARRIER_SETTINGS_ACTIVITY_CLASS_NAME_STRING}.
+     * @hide
+     */
+    public static final String KEY_CARRIER_SETTINGS_ACTIVITY_PACKAGE_NAME_STRING =
+            "carrier_settings_activity_package_name_string";
+
+    /**
+     * Class name of the carrier settings activity.
+     * @see {@link #KEY_CARRIER_SETTINGS_ACTIVITY_PACKAGE_NAME_STRING}.
+     * @hide
+     */
+    public static final String KEY_CARRIER_SETTINGS_ACTIVITY_CLASS_NAME_STRING =
+            "carrier_settings_activity_class_name_string";
+
     // These variables are used by the MMS service and exposed through another API,
     // SmsManager. The variable names and string values are copied from there.
     public static final String KEY_MMS_ALIAS_ENABLED_BOOL = "aliasEnabled";
@@ -2570,6 +2611,12 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_ALWAYS_SHOW_DATA_RAT_ICON_BOOL, false);
         sDefaults.putBoolean(KEY_SHOW_4G_FOR_LTE_DATA_ICON_BOOL, false);
         sDefaults.putBoolean(KEY_HIDE_LTE_PLUS_DATA_ICON_BOOL, true);
+        sDefaults.putBoolean(KEY_LTE_ENABLED_BOOL, true);
+        sDefaults.putBoolean(KEY_SUPPORT_TDSCDMA_BOOL, false);
+        sDefaults.putStringArray(KEY_SUPPORT_TDSCDMA_ROAMING_NETWORKS_STRING_ARRAY, null);
+        sDefaults.putBoolean(KEY_WORLD_MODE_ENABLED_BOOL, false);
+        sDefaults.putString(KEY_CARRIER_SETTINGS_ACTIVITY_PACKAGE_NAME_STRING, "");
+        sDefaults.putString(KEY_CARRIER_SETTINGS_ACTIVITY_CLASS_NAME_STRING, "");
         sDefaults.putBoolean(KEY_CARRIER_CONFIG_APPLIED_BOOL, false);
         sDefaults.putBoolean(KEY_CHECK_PRICING_WITH_CARRIER_FOR_DATA_ROAMING_BOOL, false);
         sDefaults.putIntArray(KEY_LTE_RSRP_THRESHOLDS_INT_ARRAY,

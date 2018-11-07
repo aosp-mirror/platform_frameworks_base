@@ -11,7 +11,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
 package com.android.server.wm;
@@ -32,26 +32,22 @@ import android.platform.test.annotations.Presubmit;
 import android.view.SurfaceControl;
 import android.view.SurfaceSession;
 
-import androidx.test.runner.AndroidJUnit4;
-
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 
 /**
  * Build/Install/Run:
- * atest FrameworksServicesTests:com.android.server.wm.DimmerTests;
+ *  atest FrameworksServicesTests:DimmerTests;
  */
 @Presubmit
-@RunWith(AndroidJUnit4.class)
 public class DimmerTests extends WindowTestsBase {
 
-    private class TestWindowContainer extends WindowContainer<TestWindowContainer> {
+    private static class TestWindowContainer extends WindowContainer<TestWindowContainer> {
         final SurfaceControl mControl = mock(SurfaceControl.class);
         final SurfaceControl.Transaction mTransaction = mock(SurfaceControl.Transaction.class);
 
-        TestWindowContainer() {
-            super(sWm);
+        TestWindowContainer(WindowManagerService wm) {
+            super(wm);
         }
 
         @Override
@@ -65,13 +61,13 @@ public class DimmerTests extends WindowTestsBase {
         }
     }
 
-    private class MockSurfaceBuildingContainer extends WindowContainer<TestWindowContainer> {
+    private static class MockSurfaceBuildingContainer extends WindowContainer<TestWindowContainer> {
         final SurfaceSession mSession = new SurfaceSession();
         final SurfaceControl mHostControl = mock(SurfaceControl.class);
         final SurfaceControl.Transaction mHostTransaction = mock(SurfaceControl.Transaction.class);
 
-        MockSurfaceBuildingContainer() {
-            super(sWm);
+        MockSurfaceBuildingContainer(WindowManagerService wm) {
+            super(wm);
         }
 
         class MockSurfaceBuilder extends SurfaceControl.Builder {
@@ -116,15 +112,14 @@ public class DimmerTests extends WindowTestsBase {
 
     @Before
     public void setUp() throws Exception {
-        super.setUp();
-        mHost = new MockSurfaceBuildingContainer();
+        mHost = new MockSurfaceBuildingContainer(mWm);
         mSurfaceAnimatorStarter = spy(new SurfaceAnimatorStarterImpl());
         mTransaction = mock(SurfaceControl.Transaction.class);
         mDimmer = new Dimmer(mHost, mSurfaceAnimatorStarter);
     }
 
     @Test
-    public void testDimAboveNoChildCreatesSurface() throws Exception {
+    public void testDimAboveNoChildCreatesSurface() {
         final float alpha = 0.8f;
         mDimmer.dimAbove(mTransaction, alpha);
 
@@ -137,7 +132,7 @@ public class DimmerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testDimAboveNoChildRedundantlyUpdatesAlphaOnExistingSurface() throws Exception {
+    public void testDimAboveNoChildRedundantlyUpdatesAlphaOnExistingSurface() {
         float alpha = 0.8f;
         mDimmer.dimAbove(mTransaction, alpha);
         final SurfaceControl firstSurface = getDimLayer();
@@ -150,7 +145,7 @@ public class DimmerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testUpdateDimsAppliesSize() throws Exception {
+    public void testUpdateDimsAppliesSize() {
         mDimmer.dimAbove(mTransaction, 0.8f);
 
         int width = 100;
@@ -163,7 +158,7 @@ public class DimmerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testDimAboveNoChildNotReset() throws Exception {
+    public void testDimAboveNoChildNotReset() {
         mDimmer.dimAbove(mTransaction, 0.8f);
         SurfaceControl dimLayer = getDimLayer();
         mDimmer.resetDimStates();
@@ -174,8 +169,8 @@ public class DimmerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testDimAboveWithChildCreatesSurfaceAboveChild() throws Exception {
-        TestWindowContainer child = new TestWindowContainer();
+    public void testDimAboveWithChildCreatesSurfaceAboveChild() {
+        TestWindowContainer child = new TestWindowContainer(mWm);
         mHost.addChild(child, 0);
 
         final float alpha = 0.8f;
@@ -189,8 +184,8 @@ public class DimmerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testDimBelowWithChildSurfaceCreatesSurfaceBelowChild() throws Exception {
-        TestWindowContainer child = new TestWindowContainer();
+    public void testDimBelowWithChildSurfaceCreatesSurfaceBelowChild() {
+        TestWindowContainer child = new TestWindowContainer(mWm);
         mHost.addChild(child, 0);
 
         final float alpha = 0.8f;
@@ -204,8 +199,8 @@ public class DimmerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testDimBelowWithChildSurfaceDestroyedWhenReset() throws Exception {
-        TestWindowContainer child = new TestWindowContainer();
+    public void testDimBelowWithChildSurfaceDestroyedWhenReset() {
+        TestWindowContainer child = new TestWindowContainer(mWm);
         mHost.addChild(child, 0);
 
         final float alpha = 0.8f;
@@ -220,8 +215,8 @@ public class DimmerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testDimBelowWithChildSurfaceNotDestroyedWhenPersisted() throws Exception {
-        TestWindowContainer child = new TestWindowContainer();
+    public void testDimBelowWithChildSurfaceNotDestroyedWhenPersisted() {
+        TestWindowContainer child = new TestWindowContainer(mWm);
         mHost.addChild(child, 0);
 
         final float alpha = 0.8f;
@@ -236,9 +231,9 @@ public class DimmerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testDimUpdateWhileDimming() throws Exception {
+    public void testDimUpdateWhileDimming() {
         Rect bounds = new Rect();
-        TestWindowContainer child = new TestWindowContainer();
+        TestWindowContainer child = new TestWindowContainer(mWm);
         mHost.addChild(child, 0);
 
         final float alpha = 0.8f;
@@ -258,8 +253,8 @@ public class DimmerTests extends WindowTestsBase {
     }
 
     @Test
-    public void testRemoveDimImmediately() throws Exception {
-        TestWindowContainer child = new TestWindowContainer();
+    public void testRemoveDimImmediately() {
+        TestWindowContainer child = new TestWindowContainer(mWm);
         mHost.addChild(child, 0);
 
         mDimmer.dimAbove(mTransaction, child, 1);

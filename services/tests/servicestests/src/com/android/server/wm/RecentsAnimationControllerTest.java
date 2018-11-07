@@ -11,7 +11,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
 package com.android.server.wm;
@@ -24,9 +24,9 @@ import static android.view.Display.DEFAULT_DISPLAY;
 import static com.android.server.wm.RecentsAnimationController.REORDER_KEEP_IN_PLACE;
 import static com.android.server.wm.RecentsAnimationController.REORDER_MOVE_TO_ORIGINAL_POSITION;
 
-import static org.junit.Assert.fail;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.atLeast;
 import static org.mockito.Mockito.verify;
@@ -42,22 +42,20 @@ import android.view.SurfaceControl;
 
 import androidx.test.filters.FlakyTest;
 import androidx.test.filters.SmallTest;
-import androidx.test.runner.AndroidJUnit4;
 
 import com.android.server.wm.SurfaceAnimator.OnAnimationFinishedCallback;
 
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
 /**
- * atest FrameworksServicesTests:com.android.server.wm.RecentsAnimationControllerTest
+ * Build/Install/Run:
+ *  atest FrameworksServicesTests:RecentsAnimationControllerTest
  */
 @SmallTest
 @Presubmit
-@RunWith(AndroidJUnit4.class)
 public class RecentsAnimationControllerTest extends WindowTestsBase {
 
     @Mock SurfaceControl mMockLeash;
@@ -69,10 +67,10 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
 
     @Before
     public void setUp() throws Exception {
-        super.setUp();
         MockitoAnnotations.initMocks(this);
+
         when(mMockRunner.asBinder()).thenReturn(new Binder());
-        mController = new RecentsAnimationController(sWm, mMockRunner, mAnimationCallbacks,
+        mController = new RecentsAnimationController(mWm, mMockRunner, mAnimationCallbacks,
                 DEFAULT_DISPLAY);
     }
 
@@ -96,7 +94,7 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
     }
 
     @Test
-    public void testCancelAfterRemove_expectIgnored() throws Exception {
+    public void testCancelAfterRemove_expectIgnored() {
         final AppWindowToken appWindow = createAppWindowToken(mDisplayContent,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD);
         AnimationAdapter adapter = mController.addAnimation(appWindow.getTask(),
@@ -114,10 +112,10 @@ public class RecentsAnimationControllerTest extends WindowTestsBase {
         }
     }
 
-    @Test
     @FlakyTest(bugId = 117117823)
-    public void testIncludedApps_expectTargetAndVisible() throws Exception {
-        sWm.setRecentsAnimationController(mController);
+    @Test
+    public void testIncludedApps_expectTargetAndVisible() {
+        mWm.setRecentsAnimationController(mController);
         final AppWindowToken homeAppWindow = createAppWindowToken(mDisplayContent,
                 WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_HOME);
         final AppWindowToken appWindow = createAppWindowToken(mDisplayContent,

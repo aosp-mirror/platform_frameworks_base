@@ -1258,8 +1258,6 @@ public class VibratorService extends IVibratorService.Stub
 
     private final class VibratorShellCommand extends ShellCommand {
 
-        private static final long MAX_VIBRATION_MS = 200;
-
         private final IBinder mToken;
 
         private VibratorShellCommand(IBinder token) {
@@ -1303,9 +1301,6 @@ public class VibratorService extends IVibratorService.Stub
                 }
 
                 final long duration = Long.parseLong(getNextArgRequired());
-                if (duration > MAX_VIBRATION_MS) {
-                    throw new IllegalArgumentException("maximum duration is " + MAX_VIBRATION_MS);
-                }
                 String description = getNextArg();
                 if (description == null) {
                     description = "Shell command";

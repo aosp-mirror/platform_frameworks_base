@@ -11,7 +11,7 @@
  * distributed under the License is distributed on an "AS IS" BASIS,
  * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
  * See the License for the specific language governing permissions and
- * limitations under the License
+ * limitations under the License.
  */
 
 package com.android.server.wm;
@@ -46,8 +46,6 @@ import java.io.PrintWriter;
 import java.util.function.Supplier;
 
 class TestWindowManagerPolicy implements WindowManagerPolicy {
-    private static final String TAG = "TestWindowManagerPolicy";
-
     private final Supplier<WindowManagerService> mWmSupplier;
 
     int rotationToReport = 0;
@@ -55,21 +53,18 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
 
     private Runnable mRunnableWhenAddingSplashScreen;
 
-    public TestWindowManagerPolicy(Supplier<WindowManagerService> wmSupplier) {
-
+    TestWindowManagerPolicy(Supplier<WindowManagerService> wmSupplier) {
         mWmSupplier = wmSupplier;
     }
 
     @Override
     public void registerShortcutKey(long shortcutCode, IShortcutService shortcutKeyReceiver)
             throws RemoteException {
-
     }
 
     @Override
     public void init(Context context, IWindowManager windowManager,
             WindowManagerFuncs windowManagerFuncs) {
-
     }
 
     public void setDefaultDisplay(DisplayContentInfo displayContentInfo) {
@@ -93,7 +88,6 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     @Override
     public void adjustConfigurationLw(Configuration config, int keyboardPresence,
             int navigationPresence) {
-
     }
 
     @Override
@@ -179,7 +173,6 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
 
     @Override
     public void removeWindowLw(WindowState win) {
-
     }
 
     @Override
@@ -189,7 +182,6 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
 
     @Override
     public void selectRotationAnimationLw(int[] anim) {
-
     }
 
     @Override
@@ -220,14 +212,12 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public long interceptKeyBeforeDispatching(WindowState win, KeyEvent event,
-            int policyFlags) {
+    public long interceptKeyBeforeDispatching(WindowState win, KeyEvent event, int policyFlags) {
         return 0;
     }
 
     @Override
-    public KeyEvent dispatchUnhandledKey(WindowState win, KeyEvent event,
-            int policyFlags) {
+    public KeyEvent dispatchUnhandledKey(WindowState win, KeyEvent event, int policyFlags) {
         return null;
     }
 
@@ -238,12 +228,11 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
 
     @Override
     public void beginPostLayoutPolicyLw(int displayWidth, int displayHeight) {
-
     }
 
     @Override
-    public void applyPostLayoutPolicyLw(WindowState win,
-            WindowManager.LayoutParams attrs, WindowState attached, WindowState imeTarget) {
+    public void applyPostLayoutPolicyLw(WindowState win, WindowManager.LayoutParams attrs,
+            WindowState attached, WindowState imeTarget) {
     }
 
     @Override
@@ -257,49 +246,40 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     @Override
-    public int focusChangedLw(WindowState lastFocus,
-            WindowState newFocus) {
+    public int focusChangedLw(WindowState lastFocus, WindowState newFocus) {
         return 0;
     }
 
     @Override
     public void startedWakingUp() {
-
     }
 
     @Override
     public void finishedWakingUp() {
-
     }
 
     @Override
     public void startedGoingToSleep(int why) {
-
     }
 
     @Override
     public void finishedGoingToSleep(int why) {
-
     }
 
     @Override
     public void screenTurningOn(ScreenOnListener screenOnListener) {
-
     }
 
     @Override
     public void screenTurnedOn() {
-
     }
 
     @Override
     public void screenTurningOff(ScreenOffListener screenOffListener) {
-
     }
 
     @Override
     public void screenTurnedOff() {
-
     }
 
     @Override
@@ -314,22 +294,18 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
 
     @Override
     public void notifyLidSwitchChanged(long whenNanos, boolean lidOpen) {
-
     }
 
     @Override
     public void notifyCameraLensCoverSwitchChanged(long whenNanos, boolean lensCovered) {
-
     }
 
     @Override
     public void enableKeyguard(boolean enabled) {
-
     }
 
     @Override
     public void exitKeyguardSecurely(OnKeyguardExitResult callback) {
-
     }
 
     @Override
@@ -382,53 +358,44 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     }
 
     public void setSafeMode(boolean safeMode) {
-
     }
 
     @Override
     public void systemReady() {
-
     }
 
     @Override
     public void systemBooted() {
-
     }
 
     @Override
     public void showBootMessage(CharSequence msg, boolean always) {
-
     }
 
     @Override
     public void hideBootMessages() {
-
     }
 
     @Override
     public void userActivity() {
-
     }
 
     @Override
     public void enableScreenAfterBoot() {
-
     }
 
     @Override
-    public boolean performHapticFeedbackLw(WindowState win, int effectId,
-            boolean always, String reason) {
+    public boolean performHapticFeedbackLw(WindowState win, int effectId, boolean always,
+            String reason) {
         return false;
     }
 
     @Override
     public void keepScreenOnStartedLw() {
-
     }
 
     @Override
     public void keepScreenOnStoppedLw() {
-
     }
 
     @Override
@@ -443,37 +410,30 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
 
     @Override
     public void lockNow(Bundle options) {
-
     }
 
     @Override
     public void showRecentApps() {
-
     }
 
     @Override
     public void showGlobalActions() {
-
     }
 
     @Override
     public void setCurrentUserLw(int newUserId) {
-
     }
 
     @Override
     public void setSwitchingUser(boolean switching) {
-
     }
 
     @Override
     public void writeToProto(ProtoOutputStream proto, long fieldId) {
-
     }
 
     @Override
     public void dump(String prefix, PrintWriter writer, String[] args) {
-
     }
 
     @Override
@@ -483,13 +443,11 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
 
     @Override
     public void startKeyguardExitAnimation(long startTime, long fadeoutDuration) {
-
     }
 
     @Override
     public void getStableInsetsLw(int displayRotation, int displayWidth, int displayHeight,
             DisplayCutout cutout, Rect outInsets) {
-
     }
 
     @Override
@@ -506,7 +464,6 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
     @Override
     public void getNonDecorInsetsLw(int displayRotation, int displayWidth, int displayHeight,
             DisplayCutout cutout, Rect outInsets) {
-
     }
 
     @Override
@@ -517,7 +474,6 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
 
     @Override
     public void onConfigurationChanged(DisplayContentInfo displayContentInfo) {
-
     }
 
     @Override
@@ -528,12 +484,10 @@ class TestWindowManagerPolicy implements WindowManagerPolicy {
 
     @Override
     public void setPipVisibilityLw(boolean visible) {
-
     }
 
     @Override
     public void setRecentsVisibilityLw(boolean visible) {
-
     }
 
     @Override
