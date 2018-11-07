@@ -107,7 +107,9 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Random;
 
-public class PackageInstallerService extends IPackageInstaller.Stub {
+/** The service responsible for installing packages. */
+public class PackageInstallerService extends IPackageInstaller.Stub implements
+        PackageSessionProvider {
     private static final String TAG = "PackageInstaller";
     private static final boolean LOGD = false;
 
@@ -296,6 +298,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
             in.setInput(fis, StandardCharsets.UTF_8.name());
 
             int type;
+            PackageInstallerSession currentSession = null;
             while ((type = in.next()) != END_DOCUMENT) {
                 if (type == START_TAG) {
                     final String tag = in.getName();
@@ -303,8 +306,10 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
                         final PackageInstallerSession session;
                         try {
                             session = PackageInstallerSession.readFromXml(in, mInternalCallback,
-                                    mContext, mPm, mInstallThread.getLooper(), mSessionsDir);
+                                    mContext, mPm, mInstallThread.getLooper(), mSessionsDir, this);
+                            currentSession = session;
                         } catch (Exception e) {
+                            currentSession = null;
                             Slog.e(TAG, "Could not read session", e);
                             continue;
                         }
@@ -329,6 +334,10 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
                             addHistoricalSessionLocked(session);
                         }
                         mAllocatedSessions.put(session.sessionId, true);
+                    } else if (currentSession != null
+                            && PackageInstallerSession.TAG_CHILD_SESSION.equals(tag)) {
+                        currentSession.addChildSessionIdInternal(
+                                PackageInstallerSession.readChildSessionIdFromXml(in));
                     }
                 }
             }
@@ -436,70 +445,72 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
             }
         }
 
-        // Only system components can circumvent runtime permissions when installing.
-        if ((params.installFlags & PackageManager.INSTALL_GRANT_RUNTIME_PERMISSIONS) != 0
-                && mContext.checkCallingOrSelfPermission(Manifest.permission
-                .INSTALL_GRANT_RUNTIME_PERMISSIONS) == PackageManager.PERMISSION_DENIED) {
-            throw new SecurityException("You need the "
-                    + "android.permission.INSTALL_GRANT_RUNTIME_PERMISSIONS permission "
-                    + "to use the PackageManager.INSTALL_GRANT_RUNTIME_PERMISSIONS flag");
-        }
-
-        if ((params.installFlags & PackageManager.INSTALL_FORWARD_LOCK) != 0
-                || (params.installFlags & PackageManager.INSTALL_EXTERNAL) != 0) {
-            throw new IllegalArgumentException(
-                    "New installs into ASEC containers no longer supported");
-        }
-
-        // Defensively resize giant app icons
-        if (params.appIcon != null) {
-            final ActivityManager am = (ActivityManager) mContext.getSystemService(
-                    Context.ACTIVITY_SERVICE);
-            final int iconSize = am.getLauncherLargeIconSize();
-            if ((params.appIcon.getWidth() > iconSize * 2)
-                    || (params.appIcon.getHeight() > iconSize * 2)) {
-                params.appIcon = Bitmap.createScaledBitmap(params.appIcon, iconSize, iconSize,
-                        true);
-            }
-        }
-
-        switch (params.mode) {
-            case SessionParams.MODE_FULL_INSTALL:
-            case SessionParams.MODE_INHERIT_EXISTING:
-                break;
-            default:
-                throw new IllegalArgumentException("Invalid install mode: " + params.mode);
-        }
-
-        // If caller requested explicit location, sanity check it, otherwise
-        // resolve the best internal or adopted location.
-        if ((params.installFlags & PackageManager.INSTALL_INTERNAL) != 0) {
-            if (!PackageHelper.fitsOnInternal(mContext, params)) {
-                throw new IOException("No suitable internal storage available");
+        if (!params.isMultiPackage) {
+            // Only system components can circumvent runtime permissions when installing.
+            if ((params.installFlags & PackageManager.INSTALL_GRANT_RUNTIME_PERMISSIONS) != 0
+                    && mContext.checkCallingOrSelfPermission(Manifest.permission
+                    .INSTALL_GRANT_RUNTIME_PERMISSIONS) == PackageManager.PERMISSION_DENIED) {
+                throw new SecurityException("You need the "
+                        + "android.permission.INSTALL_GRANT_RUNTIME_PERMISSIONS permission "
+                        + "to use the PackageManager.INSTALL_GRANT_RUNTIME_PERMISSIONS flag");
             }
 
-        } else if ((params.installFlags & PackageManager.INSTALL_EXTERNAL) != 0) {
-            if (!PackageHelper.fitsOnExternal(mContext, params)) {
-                throw new IOException("No suitable external storage available");
+            if ((params.installFlags & PackageManager.INSTALL_FORWARD_LOCK) != 0
+                    || (params.installFlags & PackageManager.INSTALL_EXTERNAL) != 0) {
+                throw new IllegalArgumentException(
+                        "New installs into ASEC containers no longer supported");
             }
 
-        } else if ((params.installFlags & PackageManager.INSTALL_FORCE_VOLUME_UUID) != 0) {
-            // For now, installs to adopted media are treated as internal from
-            // an install flag point-of-view.
-            params.setInstallFlagsInternal();
+            // Defensively resize giant app icons
+            if (params.appIcon != null) {
+                final ActivityManager am = (ActivityManager) mContext.getSystemService(
+                        Context.ACTIVITY_SERVICE);
+                final int iconSize = am.getLauncherLargeIconSize();
+                if ((params.appIcon.getWidth() > iconSize * 2)
+                        || (params.appIcon.getHeight() > iconSize * 2)) {
+                    params.appIcon = Bitmap.createScaledBitmap(params.appIcon, iconSize, iconSize,
+                            true);
+                }
+            }
 
-        } else {
-            // For now, installs to adopted media are treated as internal from
-            // an install flag point-of-view.
-            params.setInstallFlagsInternal();
+            switch (params.mode) {
+                case SessionParams.MODE_FULL_INSTALL:
+                case SessionParams.MODE_INHERIT_EXISTING:
+                    break;
+                default:
+                    throw new IllegalArgumentException("Invalid install mode: " + params.mode);
+            }
 
-            // Resolve best location for install, based on combination of
-            // requested install flags, delta size, and manifest settings.
-            final long ident = Binder.clearCallingIdentity();
-            try {
-                params.volumeUuid = PackageHelper.resolveInstallVolume(mContext, params);
-            } finally {
-                Binder.restoreCallingIdentity(ident);
+            // If caller requested explicit location, sanity check it, otherwise
+            // resolve the best internal or adopted location.
+            if ((params.installFlags & PackageManager.INSTALL_INTERNAL) != 0) {
+                if (!PackageHelper.fitsOnInternal(mContext, params)) {
+                    throw new IOException("No suitable internal storage available");
+                }
+
+            } else if ((params.installFlags & PackageManager.INSTALL_EXTERNAL) != 0) {
+                if (!PackageHelper.fitsOnExternal(mContext, params)) {
+                    throw new IOException("No suitable external storage available");
+                }
+
+            } else if ((params.installFlags & PackageManager.INSTALL_FORCE_VOLUME_UUID) != 0) {
+                // For now, installs to adopted media are treated as internal from
+                // an install flag point-of-view.
+                params.setInstallFlagsInternal();
+
+            } else {
+                // For now, installs to adopted media are treated as internal from
+                // an install flag point-of-view.
+                params.setInstallFlagsInternal();
+
+                // Resolve best location for install, based on combination of
+                // requested install flags, delta size, and manifest settings.
+                final long ident = Binder.clearCallingIdentity();
+                try {
+                    params.volumeUuid = PackageHelper.resolveInstallVolume(mContext, params);
+                } finally {
+                    Binder.restoreCallingIdentity(ident);
+                }
             }
         }
 
@@ -525,17 +536,19 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
         // We're staging to exactly one location
         File stageDir = null;
         String stageCid = null;
-        if ((params.installFlags & PackageManager.INSTALL_INTERNAL) != 0) {
-            final boolean isInstant =
-                    (params.installFlags & PackageManager.INSTALL_INSTANT_APP) != 0;
-            stageDir = buildStageDir(params.volumeUuid, sessionId, isInstant);
-        } else {
-            stageCid = buildExternalStageCid(sessionId);
+        if (!params.isMultiPackage) {
+            if ((params.installFlags & PackageManager.INSTALL_INTERNAL) != 0) {
+                final boolean isInstant =
+                        (params.installFlags & PackageManager.INSTALL_INSTANT_APP) != 0;
+                stageDir = buildStageDir(params.volumeUuid, sessionId, isInstant);
+            } else {
+                stageCid = buildExternalStageCid(sessionId);
+            }
         }
-
-        session = new PackageInstallerSession(mInternalCallback, mContext, mPm,
-                mInstallThread.getLooper(), sessionId, userId, installerPackageName, callingUid,
-                params, createdMillis, stageDir, stageCid, false, false);
+        session = new PackageInstallerSession(mInternalCallback, mContext, mPm, this,
+                mInstallThread.getLooper(), sessionId, userId, installerPackageName,
+                callingUid, params, createdMillis, stageDir, stageCid, false, false, null,
+                SessionInfo.INVALID_ID);
 
         synchronized (mSessions) {
             mSessions.put(sessionId, session);
@@ -678,7 +691,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
         synchronized (mSessions) {
             for (int i = 0; i < mSessions.size(); i++) {
                 final PackageInstallerSession session = mSessions.valueAt(i);
-                if (session.userId == userId) {
+                if (session.userId == userId && !session.hasParentSessionId()) {
                     result.add(session.generateInfo(false));
                 }
             }
@@ -699,7 +712,7 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
 
                 SessionInfo info = session.generateInfo(false);
                 if (Objects.equals(info.getInstallerPackageName(), installerPackageName)
-                        && session.userId == userId) {
+                        && session.userId == userId && !session.hasParentSessionId()) {
                     result.add(info);
                 }
             }
@@ -779,6 +792,13 @@ public class PackageInstallerService extends IPackageInstaller.Stub {
     @Override
     public void unregisterCallback(IPackageInstallerCallback callback) {
         mCallbacks.unregister(callback);
+    }
+
+    @Override
+    public PackageInstallerSession getSession(int sessionId) {
+        synchronized (mSessions) {
+            return mSessions.get(sessionId);
+        }
     }
 
     private static int getSessionCount(SparseArray<PackageInstallerSession> sessions,
