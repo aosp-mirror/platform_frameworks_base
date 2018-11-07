@@ -128,7 +128,8 @@ public class DragDownHelper implements Gefingerpoken {
                 }
                 return true;
             case MotionEvent.ACTION_UP:
-                if (!isFalseTouch() && mDragDownCallback.onDraggedDown(mStartingChild,
+                if (!mFalsingManager.isUnlockingDisabled() && !isFalseTouch()
+                        && mDragDownCallback.onDraggedDown(mStartingChild,
                         (int) (y - mInitialTouchY))) {
                     if (mStartingChild == null) {
                         cancelExpansion();

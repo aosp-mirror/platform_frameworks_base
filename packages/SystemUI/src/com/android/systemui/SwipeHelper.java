@@ -679,6 +679,7 @@ public class SwipeHelper implements Gefingerpoken {
     public boolean isDismissGesture(MotionEvent ev) {
         float translation = getTranslation(mCurrView);
         return ev.getActionMasked() == MotionEvent.ACTION_UP
+                && !mFalsingManager.isUnlockingDisabled()
                 && !isFalseGesture(ev) && (swipedFastEnough() || swipedFarEnough())
                 && mCallback.canChildBeDismissedInDirection(mCurrView, translation > 0);
     }
