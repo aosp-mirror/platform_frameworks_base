@@ -628,24 +628,108 @@ TEST_F(TableFlattenerTest, ObfuscatingResourceNamesWithWhitelistSucceeds) {
 }
 
 TEST_F(TableFlattenerTest, FlattenOverlayable) {
+  std::string name = "com.app.test:integer/overlayable";
   std::unique_ptr<ResourceTable> table =
       test::ResourceTableBuilder()
           .SetPackageId("com.app.test", 0x7f)
-          .AddSimple("com.app.test:integer/overlayable", ResourceId(0x7f020000))
+          .AddSimple(name, ResourceId(0x7f020000))
+          .AddOverlayable(name, Overlayable::Policy::kProduct)
+          .AddOverlayable(name, Overlayable::Policy::kSystem)
+          .AddOverlayable(name, Overlayable::Policy::kVendor)
           .Build();
 
-  ASSERT_TRUE(table->AddOverlayable(test::ParseNameOrDie("com.app.test:integer/overlayable"),
-                                    Overlayable{}, test::GetDiagnostics()));
+  ResourceTable output_table;
+  ASSERT_TRUE(Flatten(context_.get(), {}, table.get(), &output_table));
 
-  ResTable res_table;
-  ASSERT_TRUE(Flatten(context_.get(), {}, table.get(), &res_table));
-
-  const StringPiece16 overlayable_name(u"com.app.test:integer/overlayable");
-  uint32_t spec_flags = 0u;
-  ASSERT_THAT(res_table.identifierForName(overlayable_name.data(), overlayable_name.size(), nullptr,
-                                          0u, nullptr, 0u, &spec_flags),
-              Gt(0u));
-  EXPECT_TRUE(spec_flags & android::ResTable_typeSpec::SPEC_OVERLAYABLE);
+  auto search_result = output_table.FindResource(test::ParseNameOrDie(name));
+  ASSERT_TRUE(search_result);
+  ASSERT_THAT(search_result.value().entry, NotNull());
+  EXPECT_EQ(search_result.value().entry->overlayable_declarations.size(), 3);
+  EXPECT_TRUE(search_result.value().entry->overlayable_declarations[0].policy);
+  EXPECT_EQ(search_result.value().entry->overlayable_declarations[0].policy,
+            Overlayable::Policy::kSystem);
+  EXPECT_TRUE(search_result.value().entry->overlayable_declarations[1].policy);
+  EXPECT_EQ(search_result.value().entry->overlayable_declarations[1].policy,
+            Overlayable::Policy::kVendor);
+  EXPECT_TRUE(search_result.value().entry->overlayable_declarations[2].policy);
+  EXPECT_EQ(search_result.value().entry->overlayable_declarations[2].policy,
+            Overlayable::Policy::kProduct);
 }
+
+TEST_F(TableFlattenerTest, FlattenMultipleOverlayablePolicies) {
+  std::string name_zero = "com.app.test:integer/overlayable_zero";
+  std::string name_one = "com.app.test:integer/overlayable_one";
+  std::string name_two = "com.app.test:integer/overlayable_two";
+  std::string name_three = "com.app.test:integer/overlayable_three";
+  std::unique_ptr<ResourceTable> table =
+      test::ResourceTableBuilder()
+          .SetPackageId("com.app.test", 0x7f)
+          .AddSimple(name_zero, ResourceId(0x7f020000))
+          .AddOverlayable(name_zero, Overlayable::Policy::kProduct)
+          .AddOverlayable(name_zero, Overlayable::Policy::kSystem)
+          .AddOverlayable(name_zero, Overlayable::Policy::kProductServices)
+          .AddSimple(name_one, ResourceId(0x7f020001))
+          .AddOverlayable(name_one, Overlayable::Policy::kPublic)
+          .AddOverlayable(name_one, Overlayable::Policy::kSystem)
+          .AddSimple(name_two, ResourceId(0x7f020002))
+          .AddOverlayable(name_two, Overlayable::Policy::kProduct)
+          .AddOverlayable(name_two, Overlayable::Policy::kSystem)
+          .AddOverlayable(name_two, Overlayable::Policy::kProductServices)
+          .AddSimple(name_three, ResourceId(0x7f020003))
+          .AddOverlayable(name_three, {})
+          .Build();
+
+  ResourceTable output_table;
+  ASSERT_TRUE(Flatten(context_.get(), {}, table.get(), &output_table));
+
+  auto search_result = output_table.FindResource(test::ParseNameOrDie(name_zero));
+  ASSERT_TRUE(search_result);
+  ASSERT_THAT(search_result.value().entry, NotNull());
+  EXPECT_EQ(search_result.value().entry->overlayable_declarations.size(), 3);
+  EXPECT_TRUE(search_result.value().entry->overlayable_declarations[0].policy);
+  EXPECT_EQ(search_result.value().entry->overlayable_declarations[0].policy,
+            Overlayable::Policy::kSystem);
+  EXPECT_TRUE(search_result.value().entry->overlayable_declarations[1].policy);
+  EXPECT_EQ(search_result.value().entry->overlayable_declarations[1].policy,
+            Overlayable::Policy::kProduct);
+  EXPECT_TRUE(search_result.value().entry->overlayable_declarations[2].policy);
+  EXPECT_EQ(search_result.value().entry->overlayable_declarations[2].policy,
+            Overlayable::Policy::kProductServices);
+
+  search_result = output_table.FindResource(test::ParseNameOrDie(name_one));
+  ASSERT_TRUE(search_result);
+  ASSERT_THAT(search_result.value().entry, NotNull());
+  EXPECT_EQ(search_result.value().entry->overlayable_declarations.size(), 2);
+  EXPECT_TRUE(search_result.value().entry->overlayable_declarations[0].policy);
+  EXPECT_EQ(search_result.value().entry->overlayable_declarations[0].policy,
+            Overlayable::Policy::kPublic);
+  EXPECT_TRUE(search_result.value().entry->overlayable_declarations[1].policy);
+  EXPECT_EQ(search_result.value().entry->overlayable_declarations[1].policy,
+            Overlayable::Policy::kSystem);
+
+  search_result = output_table.FindResource(test::ParseNameOrDie(name_two));
+  ASSERT_TRUE(search_result);
+  ASSERT_THAT(search_result.value().entry, NotNull());
+  EXPECT_EQ(search_result.value().entry->overlayable_declarations.size(), 3);
+  EXPECT_TRUE(search_result.value().entry->overlayable_declarations[0].policy);
+  EXPECT_EQ(search_result.value().entry->overlayable_declarations[0].policy,
+            Overlayable::Policy::kSystem);
+  EXPECT_TRUE(search_result.value().entry->overlayable_declarations[1].policy);
+  EXPECT_EQ(search_result.value().entry->overlayable_declarations[1].policy,
+            Overlayable::Policy::kProduct);
+  EXPECT_TRUE(search_result.value().entry->overlayable_declarations[2].policy);
+  EXPECT_EQ(search_result.value().entry->overlayable_declarations[2].policy,
+            Overlayable::Policy::kProductServices);
+
+  search_result = output_table.FindResource(test::ParseNameOrDie(name_three));
+  ASSERT_TRUE(search_result);
+  ASSERT_THAT(search_result.value().entry, NotNull());
+  EXPECT_EQ(search_result.value().entry->overlayable_declarations.size(), 1);
+  EXPECT_TRUE(search_result.value().entry->overlayable_declarations[0].policy);
+  EXPECT_EQ(search_result.value().entry->overlayable_declarations[0].policy,
+            Overlayable::Policy::kPublic);
+
+}
+
 
 }  // namespace aapt

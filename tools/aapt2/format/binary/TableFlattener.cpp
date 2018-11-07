@@ -24,6 +24,7 @@
 #include "android-base/logging.h"
 #include "android-base/macros.h"
 #include "android-base/stringprintf.h"
+#include "androidfw/ResourceUtils.h"
 
 #include "ResourceTable.h"
 #include "ResourceValues.h"
@@ -216,6 +217,11 @@ class MapFlattenVisitor : public ValueVisitor {
   size_t entry_count_ = 0;
 };
 
+struct PolicyChunk {
+  uint32_t policy_flags;
+  std::set<ResourceId> ids;
+};
+
 class PackageFlattener {
  public:
   PackageFlattener(IAaptContext* context, ResourceTablePackage* package,
@@ -266,6 +272,8 @@ class PackageFlattener {
     if (package_->id.value() == 0x00 || !shared_libs_->empty()) {
       FlattenLibrarySpec(buffer);
     }
+
+    FlattenOverlayable(buffer);
 
     pkg_writer.Finish();
     return true;
@@ -413,6 +421,97 @@ class PackageFlattener {
     return sorted_entries;
   }
 
+  void FlattenOverlayable(BigBuffer* buffer) {
+    std::vector<PolicyChunk> policies;
+
+    CHECK(bool(package_->id)) << "package must have an ID set when flattening <overlayable>";
+    for (auto& type : package_->types) {
+      CHECK(bool(type->id)) << "type must have an ID set when flattening <overlayable>";
+      for (auto& entry : type->entries) {
+        CHECK(bool(type->id)) << "entry must have an ID set when flattening <overlayable>";
+
+        // TODO(b/120298168): Convert the policies vector to a policy set or bitmask
+        if (!entry->overlayable_declarations.empty()) {
+          uint16_t policy_flags = 0;
+          for (Overlayable overlayable : entry->overlayable_declarations) {
+            if (overlayable.policy) {
+              switch (overlayable.policy.value()) {
+                case Overlayable::Policy::kPublic:
+                  policy_flags |= ResTable_overlayable_policy_header::POLICY_PUBLIC;
+                  break;
+                case Overlayable::Policy::kSystem:
+                  policy_flags |= ResTable_overlayable_policy_header::POLICY_SYSTEM_PARTITION;
+                  break;
+                case Overlayable::Policy::kVendor:
+                  policy_flags |= ResTable_overlayable_policy_header::POLICY_VENDOR_PARTITION;
+                  break;
+                case Overlayable::Policy::kProduct:
+                  policy_flags |= ResTable_overlayable_policy_header::POLICY_PRODUCT_PARTITION;
+                  break;
+                case Overlayable::Policy::kProductServices:
+                  policy_flags |=
+                      ResTable_overlayable_policy_header::POLICY_PRODUCT_SERVICES_PARTITION;
+                  break;
+              }
+            } else {
+              // Encode overlayable entries defined without a policy as publicly overlayable
+              policy_flags |= ResTable_overlayable_policy_header::POLICY_PUBLIC;
+            }
+          }
+
+          // Find the overlayable policy chunk with the same policies as the entry
+          PolicyChunk* policy_chunk = nullptr;
+          for (PolicyChunk& policy : policies) {
+            if (policy.policy_flags == policy_flags) {
+              policy_chunk = &policy;
+              break;
+            }
+          }
+
+          // Create a new policy chunk if an existing one with the same policy cannot be found
+          if (policy_chunk == nullptr) {
+            PolicyChunk p;
+            p.policy_flags = policy_flags;
+            policies.push_back(p);
+            policy_chunk = &policies.back();
+          }
+
+          policy_chunk->ids.insert(android::make_resid(package_->id.value(), type->id.value(),
+                                                       entry->id.value()));
+        }
+      }
+    }
+
+    if (policies.empty()) {
+      // Only write the overlayable chunk if the APK has overlayable entries
+      return;
+    }
+
+    ChunkWriter writer(buffer);
+    writer.StartChunk<ResTable_overlayable_header>(RES_TABLE_OVERLAYABLE_TYPE);
+
+    // Write each policy block for the overlayable
+    for (PolicyChunk& policy : policies) {
+      ChunkWriter policy_writer(buffer);
+      ResTable_overlayable_policy_header* policy_type =
+          policy_writer.StartChunk<ResTable_overlayable_policy_header>(
+              RES_TABLE_OVERLAYABLE_POLICY_TYPE);
+      policy_type->policy_flags = util::HostToDevice32(policy.policy_flags);
+      policy_type->entry_count = util::HostToDevice32(static_cast<uint32_t>(policy.ids.size()));
+
+      // Write the ids after the policy header
+      ResTable_ref* id_block = policy_writer.NextBlock<ResTable_ref>(policy.ids.size());
+      for (const ResourceId& id : policy.ids) {
+        id_block->ident = util::HostToDevice32(id.id);
+        id_block++;
+      }
+
+      policy_writer.Finish();
+    }
+
+    writer.Finish();
+  }
+
   bool FlattenTypeSpec(ResourceTableType* type, std::vector<ResourceEntry*>* sorted_entries,
                        BigBuffer* buffer) {
     ChunkWriter type_spec_writer(buffer);
@@ -444,11 +543,6 @@ class PackageFlattener {
 
       if (entry->visibility.level == Visibility::Level::kPublic) {
         config_masks[entry->id.value()] |= util::HostToDevice32(ResTable_typeSpec::SPEC_PUBLIC);
-      }
-
-      if (!entry->overlayable_declarations.empty()) {
-        config_masks[entry->id.value()] |=
-            util::HostToDevice32(ResTable_typeSpec::SPEC_OVERLAYABLE);
       }
 
       const size_t config_count = entry->values.size();

@@ -368,7 +368,16 @@ bool ReferenceLinker::Consume(IAaptContext* context, ResourceTable* table) {
         // Symbol state information may be lost if there is no value for the resource.
         if (entry->visibility.level != Visibility::Level::kUndefined && entry->values.empty()) {
           context->GetDiagnostics()->Error(DiagMessage(entry->visibility.source)
-                                           << "no definition for declared symbol '" << name << "'");
+                                               << "no definition for declared symbol '" << name
+                                               << "'");
+          error = true;
+        }
+
+        // Ensure that definitions for values declared as overlayable exist
+        if (!entry->overlayable_declarations.empty() && entry->values.empty()) {
+          context->GetDiagnostics()->Error(DiagMessage(entry->overlayable_declarations[0].source)
+                                           << "no definition for overlayable symbol '"
+                                           << name << "'");
           error = true;
         }
 
