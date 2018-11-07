@@ -300,8 +300,8 @@ package android.app {
     method public static java.lang.String[] getOpStrs();
     method public java.util.List<android.app.AppOpsManager.PackageOps> getOpsForPackage(int, java.lang.String, int[]);
     method public java.util.List<android.app.AppOpsManager.PackageOps> getPackagesForOpStrs(java.lang.String[]);
+    method public static int opToDefaultMode(java.lang.String);
     method public static java.lang.String opToPermission(java.lang.String);
-    method public void resetUidMode(java.lang.String, int, boolean);
     method public void setMode(java.lang.String, int, java.lang.String, int);
     method public void setUidMode(java.lang.String, int, int);
     field public static final java.lang.String OPSTR_ACCEPT_HANDOVER = "android:accept_handover";
