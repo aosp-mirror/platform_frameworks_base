@@ -279,6 +279,11 @@ public:
     void notePullFromCache(int pullAtomId);
 
     /*
+     * Notify data error for pulled atom.
+     */
+    void notePullDataError(int pullAtomId);
+
+    /*
      * Records time for actual pulling, not including those served from cache and not including
      * statsd processing delays.
      */
@@ -329,6 +334,7 @@ public:
         int64_t avgPullDelayNs = 0;
         int64_t maxPullDelayNs = 0;
         long numPullDelay = 0;
+        long dataError = 0;
     } PulledAtomStats;
 
 private:

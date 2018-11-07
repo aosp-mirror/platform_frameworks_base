@@ -18,6 +18,7 @@
 #include "Log.h"
 #include "FieldValue.h"
 #include "HashableDimensionKey.h"
+#include "math.h"
 
 namespace android {
 namespace os {
@@ -171,6 +172,25 @@ std::string Value::toString() const {
             return "bytes of size " + std::to_string(storage_value.size()) + "[ST]";
         default:
             return "[UNKNOWN]";
+    }
+}
+
+bool Value::isZero() const {
+    switch (type) {
+        case INT:
+            return int_value == 0;
+        case LONG:
+            return long_value == 0;
+        case FLOAT:
+            return fabs(float_value) <= std::numeric_limits<float>::epsilon();
+        case DOUBLE:
+            return fabs(double_value) <= std::numeric_limits<double>::epsilon();
+        case STRING:
+            return str_value.size() == 0;
+        case STORAGE:
+            return storage_value.size() == 0;
+        default:
+            return false;
     }
 }
 
