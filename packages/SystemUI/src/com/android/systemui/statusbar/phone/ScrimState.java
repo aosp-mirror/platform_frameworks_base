@@ -219,6 +219,14 @@ public enum ScrimState {
     public void prepare(ScrimState previousState) {
     }
 
+    /**
+     * Check if lockscreen wallpaper or music album art exists.
+     * @return true if lockscreen wallpaper or music album art exists.
+     */
+    public boolean hasBackdrop() {
+        return mHasBackdrop;
+    }
+
     public int getIndex() {
         return mIndex;
     }
