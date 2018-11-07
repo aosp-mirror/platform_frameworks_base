@@ -197,6 +197,7 @@ public class SettingsBackupTest {
                     Settings.Global.DESK_DOCK_SOUND,
                     Settings.Global.DESK_UNDOCK_SOUND,
                     Settings.Global.DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT,
+                    Settings.Global.DEVELOPMENT_FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS,
                     Settings.Global.DEVELOPMENT_FORCE_RESIZABLE_ACTIVITIES,
                     Settings.Global.DEVELOPMENT_FORCE_RTL,
                     Settings.Global.DEVELOPMENT_SETTINGS_ENABLED,

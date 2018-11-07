@@ -481,6 +481,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Global.EMULATE_DISPLAY_CUTOUT,
                 GlobalSettingsProto.Development.EMULATE_DISPLAY_CUTOUT);
+        dumpSetting(s, p,
+                Settings.Global.DEVELOPMENT_FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS,
+                GlobalSettingsProto.Development.FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS);
         p.end(developmentToken);
 
         final long deviceToken = p.start(GlobalSettingsProto.DEVICE);

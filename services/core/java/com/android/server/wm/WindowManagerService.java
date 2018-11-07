@@ -29,6 +29,7 @@ import static android.content.pm.PackageManager.PERMISSION_GRANTED;
 import static android.os.Process.SYSTEM_UID;
 import static android.os.Process.myPid;
 import static android.os.Trace.TRACE_TAG_WINDOW_MANAGER;
+import static android.provider.Settings.Global.DEVELOPMENT_FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.DOCKED_INVALID;
@@ -538,12 +539,21 @@ public class WindowManagerService extends IWindowManager.Stub
     int mDockedStackCreateMode = SPLIT_SCREEN_CREATE_MODE_TOP_OR_LEFT;
     Rect mDockedStackCreateBounds;
 
-    boolean mForceResizableTasks = false;
-    boolean mSupportsPictureInPicture = false;
-    boolean mSupportsFreeformWindowManagement = false;
-    boolean mIsPc = false;
+    boolean mForceResizableTasks;
+    boolean mSupportsPictureInPicture;
+    boolean mSupportsFreeformWindowManagement;
+    boolean mIsPc;
+    /**
+     * Flag that indicates that desktop mode is forced for public secondary screens.
+     *
+     * This includes several settings:
+     * - Set freeform windowing mode on external screen if it's supported and enabled.
+     * - Enable system decorations and IME on external screen.
+     * - TODO: Show mouse pointer on external screen.
+     */
+    boolean mForceDesktopModeOnExternalDisplays;
 
-    boolean mDisableTransitionAnimation = false;
+    boolean mDisableTransitionAnimation;
 
     int getDragLayerLocked() {
         return mPolicy.getWindowLayerFromTypeLw(TYPE_DRAG) * TYPE_LAYER_MULTIPLIER + TYPE_LAYER_OFFSET;
@@ -976,16 +986,20 @@ public class WindowManagerService extends IWindowManager.Stub
             }
         }, UserHandle.ALL, suspendPackagesFilter, null, null);
 
+        final ContentResolver resolver = context.getContentResolver();
         // Get persisted window scale setting
-        mWindowAnimationScaleSetting = Settings.Global.getFloat(context.getContentResolver(),
+        mWindowAnimationScaleSetting = Settings.Global.getFloat(resolver,
                 Settings.Global.WINDOW_ANIMATION_SCALE, mWindowAnimationScaleSetting);
-        mTransitionAnimationScaleSetting = Settings.Global.getFloat(context.getContentResolver(),
+        mTransitionAnimationScaleSetting = Settings.Global.getFloat(resolver,
                 Settings.Global.TRANSITION_ANIMATION_SCALE,
                 context.getResources().getFloat(
                         R.dimen.config_appTransitionAnimationDurationScaleDefault));
 
-        setAnimatorDurationScale(Settings.Global.getFloat(context.getContentResolver(),
+        setAnimatorDurationScale(Settings.Global.getFloat(resolver,
                 Settings.Global.ANIMATOR_DURATION_SCALE, mAnimatorDurationScaleSetting));
+
+        mForceDesktopModeOnExternalDisplays = Settings.Global.getInt(resolver,
+                DEVELOPMENT_FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS, 0) != 0;
 
         IntentFilter filter = new IntentFilter();
         // Track changes to DevicePolicyManager state so we can enable/disable keyguard.
@@ -6406,6 +6420,12 @@ public class WindowManagerService extends IWindowManager.Stub
         }
     }
 
+    void setForceDesktopModeOnExternalDisplays(boolean forceDesktopModeOnExternalDisplays) {
+        synchronized (mWindowMap) {
+            mForceDesktopModeOnExternalDisplays = forceDesktopModeOnExternalDisplays;
+        }
+    }
+
     public void setIsPc(boolean isPc) {
         synchronized (mGlobalLock) {
             mIsPc = isPc;
@@ -6584,10 +6604,10 @@ public class WindowManagerService extends IWindowManager.Stub
         final long token = Binder.clearCallingIdentity();
         try {
             synchronized (mGlobalLock) {
-                final DisplayContent dc = getDisplayContentOrCreate(displayId, null);
+                final DisplayContent dc = getDisplayContentOrCreate(displayId, null /* token */);
                 if (dc == null) {
                     throw new IllegalArgumentException(
-                            "Trying to register a non existent display.");
+                            "Trying to configure a non existent display.");
                 }
                 // We usually set the override info in DisplayManager so that we get consistent
                 // values when displays are changing. However, we don't do this for displays that

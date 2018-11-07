@@ -4651,4 +4651,16 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
 
         pendingLayoutChanges |= changes;
     }
+
+    /**
+     * @see Display#FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS
+     */
+    boolean supportsSystemDecorations() {
+        // TODO(b/114338689): Read the setting from DisplaySettings.
+        return mDisplay.supportsSystemDecorations()
+                // TODO (b/111363427): Remove this and set the new FLAG_SHOULD_SHOW_LAUNCHER flag
+                // (b/114338689) whenever vr 2d display id is set.
+                || mDisplayId == mService.mVr2dDisplayId
+                || mService.mForceDesktopModeOnExternalDisplays;
+    }
 }
