@@ -4620,8 +4620,8 @@ public class CaptureResult extends CameraMetadata<CaptureResult.Key<?>> {
      * will not slow down capture rate when applying correction. FAST may be the same as OFF if
      * any correction at all would slow down capture rate.  Every output stream will have a
      * similar amount of enhancement applied.</p>
-     * <p>The correction only applies to processed outputs such as YUV, JPEG, or DEPTH16; it is not
-     * applied to any RAW output.</p>
+     * <p>The correction only applies to processed outputs such as YUV, Y8, JPEG, or DEPTH16; it is
+     * not applied to any RAW output.</p>
      * <p>This control will be on by default on devices that support this control. Applications
      * disabling distortion correction need to pay extra attention with the coordinate system of
      * metering regions, crop region, and face rectangles. When distortion correction is OFF,
