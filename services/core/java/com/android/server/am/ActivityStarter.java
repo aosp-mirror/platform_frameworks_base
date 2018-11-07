@@ -1174,6 +1174,9 @@ class ActivityStarter {
                 mService.updateConfigurationLocked(globalConfig, null, false);
             }
 
+            // Notify ActivityMetricsLogger that the activity has launched. ActivityMetricsLogger
+            // will then wait for the windows to be drawn and populate WaitResult.
+            mSupervisor.getActivityMetricsLogger().notifyActivityLaunched(res, outRecord[0]);
             if (outResult != null) {
                 outResult.result = res;
 
@@ -1198,7 +1201,6 @@ class ActivityStarter {
                         outResult.timeout = false;
                         outResult.who = r.realActivity;
                         outResult.totalTime = 0;
-                        outResult.thisTime = 0;
                         break;
                     }
                     case START_TASK_TO_FRONT: {
@@ -1208,10 +1210,9 @@ class ActivityStarter {
                             outResult.timeout = false;
                             outResult.who = r.realActivity;
                             outResult.totalTime = 0;
-                            outResult.thisTime = 0;
                         } else {
-                            outResult.thisTime = SystemClock.uptimeMillis();
-                            mSupervisor.waitActivityVisible(r.realActivity, outResult);
+                            final long startTimeMs = SystemClock.uptimeMillis();
+                            mSupervisor.waitActivityVisible(r.realActivity, outResult, startTimeMs);
                             // Note: the timeout variable is not currently not ever set.
                             do {
                                 try {
@@ -1225,7 +1226,6 @@ class ActivityStarter {
                 }
             }
 
-            mSupervisor.getActivityMetricsLogger().notifyActivityLaunched(res, outRecord[0]);
             return res;
         }
     }

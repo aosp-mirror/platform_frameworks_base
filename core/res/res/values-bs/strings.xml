@@ -261,7 +261,7 @@
     <string name="notification_channel_vpn" msgid="8330103431055860618">"Status VPN-a"</string>
     <string name="notification_channel_device_admin" msgid="1568154104368069249">"Administracija uređaja"</string>
     <string name="notification_channel_alerts" msgid="4496839309318519037">"Upozorenja"</string>
-    <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Promotivna demonstracija u maloprodaji"</string>
+    <string name="notification_channel_retail_mode" msgid="6088920674914038779">"Prodajna demonstracija"</string>
     <string name="notification_channel_usb" msgid="9006850475328924681">"USB veza"</string>
     <string name="notification_channel_heavy_weight_app" msgid="6218742927792852607">"Pokrenuta je aplikacija"</string>
     <string name="notification_channel_foreground_service" msgid="3931987440602669158">"Aplikacije koje troše bateriju"</string>
