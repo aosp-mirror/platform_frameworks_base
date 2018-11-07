@@ -77,7 +77,6 @@ import java.util.List;
  */
 public class LauncherAppsService extends SystemService {
 
-    private static final boolean SHOW_HIDDEN_APP_ENABLED = false;
     private final LauncherAppsImpl mLauncherAppsImpl;
 
     public LauncherAppsService(Context context) {
@@ -310,7 +309,8 @@ public class LauncherAppsService extends SystemService {
                             .addCategory(Intent.CATEGORY_LAUNCHER)
                             .setPackage(packageName),
                     user);
-            if (!SHOW_HIDDEN_APP_ENABLED) {
+            if (Settings.Global.getInt(mContext.getContentResolver(),
+                    Settings.Global.SHOW_HIDDEN_LAUNCHER_ICON_APPS_ENABLED, 0) == 0) {
                 return launcherActivities;
             }
 
