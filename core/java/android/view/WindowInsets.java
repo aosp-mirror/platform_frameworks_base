@@ -384,6 +384,7 @@ public final class WindowInsets {
                 displayCutoutCopyConstructorArgument(this));
     }
 
+    // TODO(b/119190588): replace @code with @link below
     /**
      * Returns a copy of this WindowInsets with selected system window insets replaced
      * with new values.
@@ -398,7 +399,7 @@ public final class WindowInsets {
      * @param right New right inset in pixels
      * @param bottom New bottom inset in pixels
      * @return A modified copy of this WindowInsets
-     * @deprecated use {@link Builder#Builder(WindowInsets)} with
+     * @deprecated use {@code Builder#Builder(WindowInsets)} with
      *             {@link Builder#setSystemWindowInsets(Insets)} instead.
      */
     @Deprecated
@@ -414,6 +415,7 @@ public final class WindowInsets {
         return new Builder(this).setSystemWindowInsets(Insets.of(left, top, right, bottom)).build();
     }
 
+    // TODO(b/119190588): replace @code with @link below
     /**
      * Returns a copy of this WindowInsets with selected system window insets replaced
      * with new values.
@@ -426,7 +428,7 @@ public final class WindowInsets {
      * @param systemWindowInsets New system window insets. Each field is the inset in pixels
      *                           for that edge
      * @return A modified copy of this WindowInsets
-     * @deprecated use {@link Builder#Builder(WindowInsets)} with
+     * @deprecated use {@code Builder#Builder(WindowInsets)} with
      *             {@link Builder#setSystemWindowInsets(Insets)} instead.
      */
     @Deprecated
