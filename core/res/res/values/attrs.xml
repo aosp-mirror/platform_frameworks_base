@@ -7935,7 +7935,9 @@
              wallpaper. -->
         <attr name="showMetadataInPreview" format="boolean" />
 
-        <!-- Wallpapers optimized and capable of drawing in ambient mode will return true. -->
+        <!-- Wallpapers optimized and capable of drawing in ambient mode will return true.
+             This feature requires the android.permission.AMBIENT_WALLPAPER permission.
+             @hide @SystemApi -->
         <attr name="supportsAmbientMode" format="boolean" />
 
         <!-- Uri that specifies a settings Slice for this wallpaper. -->

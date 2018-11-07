@@ -4217,6 +4217,10 @@
          @hide -->
     <permission android:name="android.permission.RECEIVE_DEVICE_CUSTOMIZATION_READY"
         android:protectionLevel="signature|preinstalled" />
+    <!-- @SystemApi Allows wallpaper to be rendered in ambient mode.
+         @hide -->
+    <permission android:name="android.permission.AMBIENT_WALLPAPER"
+                android:protectionLevel="signature|preinstalled" />
 
     <application android:process="system"
                  android:persistent="true"

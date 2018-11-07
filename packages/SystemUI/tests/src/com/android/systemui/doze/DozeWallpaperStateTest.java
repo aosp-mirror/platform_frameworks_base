@@ -16,9 +16,8 @@
 
 package com.android.systemui.doze;
 
-import static org.mockito.ArgumentMatchers.anyBoolean;
+import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -27,8 +26,8 @@ import android.app.IWallpaperManager;
 import android.os.RemoteException;
 import android.support.test.filters.SmallTest;
 
-import com.android.keyguard.KeyguardUpdateMonitor;
 import com.android.systemui.SysuiTestCase;
+import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.phone.DozeParameters;
 
 import org.junit.Before;
@@ -59,14 +58,14 @@ public class DozeWallpaperStateTest extends SysuiTestCase {
 
         mDozeWallpaperState.transitionTo(DozeMachine.State.UNINITIALIZED,
                 DozeMachine.State.DOZE_AOD);
-        verify(mIWallpaperManager).setInAmbientMode(eq(true), anyBoolean());
+        verify(mIWallpaperManager).setInAmbientMode(eq(true), anyLong());
         mDozeWallpaperState.transitionTo(DozeMachine.State.DOZE_AOD, DozeMachine.State.FINISH);
-        verify(mIWallpaperManager).setInAmbientMode(eq(false), anyBoolean());
+        verify(mIWallpaperManager).setInAmbientMode(eq(false), anyLong());
 
         // Make sure we're sending false when AoD is off
         reset(mDozeParameters);
         mDozeWallpaperState.transitionTo(DozeMachine.State.FINISH, DozeMachine.State.DOZE_AOD);
-        verify(mIWallpaperManager).setInAmbientMode(eq(false), anyBoolean());
+        verify(mIWallpaperManager).setInAmbientMode(eq(false), anyLong());
     }
 
     @Test
@@ -78,10 +77,12 @@ public class DozeWallpaperStateTest extends SysuiTestCase {
 
         mDozeWallpaperState.transitionTo(DozeMachine.State.UNINITIALIZED,
                 DozeMachine.State.DOZE_AOD);
-        verify(mIWallpaperManager).setInAmbientMode(eq(true), eq(true));
+        verify(mIWallpaperManager).setInAmbientMode(eq(true),
+                eq((long) StackStateAnimator.ANIMATION_DURATION_WAKEUP));
 
         mDozeWallpaperState.transitionTo(DozeMachine.State.DOZE_AOD, DozeMachine.State.FINISH);
-        verify(mIWallpaperManager).setInAmbientMode(eq(false), eq(true));
+        verify(mIWallpaperManager).setInAmbientMode(eq(false),
+                eq((long) StackStateAnimator.ANIMATION_DURATION_WAKEUP));
     }
 
     @Test
@@ -93,24 +94,24 @@ public class DozeWallpaperStateTest extends SysuiTestCase {
 
         mDozeWallpaperState.transitionTo(DozeMachine.State.UNINITIALIZED,
                 DozeMachine.State.DOZE_AOD);
-        verify(mIWallpaperManager).setInAmbientMode(eq(true), eq(false));
+        verify(mIWallpaperManager).setInAmbientMode(eq(true), eq(0L));
 
         mDozeWallpaperState.transitionTo(DozeMachine.State.DOZE_AOD, DozeMachine.State.FINISH);
-        verify(mIWallpaperManager).setInAmbientMode(eq(false), eq(false));
+        verify(mIWallpaperManager).setInAmbientMode(eq(false), eq(0L));
     }
 
     @Test
     public void testTransitionTo_requestPulseIsAmbientMode() throws RemoteException {
         mDozeWallpaperState.transitionTo(DozeMachine.State.DOZE,
                 DozeMachine.State.DOZE_REQUEST_PULSE);
-        verify(mIWallpaperManager).setInAmbientMode(eq(true), eq(false));
+        verify(mIWallpaperManager).setInAmbientMode(eq(true), eq(0L));
     }
 
     @Test
     public void testTransitionTo_pulseIsAmbientMode() throws RemoteException {
         mDozeWallpaperState.transitionTo(DozeMachine.State.DOZE_REQUEST_PULSE,
                 DozeMachine.State.DOZE_PULSING);
-        verify(mIWallpaperManager).setInAmbientMode(eq(true), eq(false));
+        verify(mIWallpaperManager).setInAmbientMode(eq(true), eq(0L));
     }
 
     @Test
@@ -120,6 +121,7 @@ public class DozeWallpaperStateTest extends SysuiTestCase {
         reset(mIWallpaperManager);
         mDozeWallpaperState.transitionTo(DozeMachine.State.DOZE_PULSING,
                 DozeMachine.State.FINISH);
-        verify(mIWallpaperManager).setInAmbientMode(eq(false), eq(true));
+        verify(mIWallpaperManager).setInAmbientMode(eq(false),
+                eq((long) StackStateAnimator.ANIMATION_DURATION_WAKEUP));
     }
 }

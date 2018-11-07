@@ -17,6 +17,7 @@ package android {
     field public static final java.lang.String ACTIVITY_EMBEDDING = "android.permission.ACTIVITY_EMBEDDING";
     field public static final java.lang.String ALLOCATE_AGGRESSIVE = "android.permission.ALLOCATE_AGGRESSIVE";
     field public static final java.lang.String ALLOW_ANY_CODEC_FOR_PLAYBACK = "android.permission.ALLOW_ANY_CODEC_FOR_PLAYBACK";
+    field public static final java.lang.String AMBIENT_WALLPAPER = "android.permission.AMBIENT_WALLPAPER";
     field public static final java.lang.String BACKUP = "android.permission.BACKUP";
     field public static final java.lang.String BATTERY_STATS = "android.permission.BATTERY_STATS";
     field public static final java.lang.String BIND_APPWIDGET = "android.permission.BIND_APPWIDGET";
@@ -224,6 +225,7 @@ package android {
     field public static final int isVrOnly = 16844152; // 0x1010578
     field public static final int requiredSystemPropertyName = 16844133; // 0x1010565
     field public static final int requiredSystemPropertyValue = 16844134; // 0x1010566
+    field public static final int supportsAmbientMode = 16844173; // 0x101058d
     field public static final int userRestriction = 16844164; // 0x1010584
   }
 
@@ -553,6 +555,10 @@ package android.app {
     ctor public VrStateCallback();
     method public void onPersistentVrStateChanged(boolean);
     method public void onVrStateChanged(boolean);
+  }
+
+  public final class WallpaperInfo implements android.os.Parcelable {
+    method public boolean supportsAmbientMode();
   }
 
   public class WallpaperManager {
@@ -5330,6 +5336,15 @@ package android.service.trust {
     field public static final int TOKEN_STATE_ACTIVE = 1; // 0x1
     field public static final int TOKEN_STATE_INACTIVE = 0; // 0x0
     field public static final java.lang.String TRUST_AGENT_META_DATA = "android.service.trust.trustagent";
+  }
+
+}
+
+package android.service.wallpaper {
+
+  public class WallpaperService.Engine {
+    method public boolean isInAmbientMode();
+    method public void onAmbientModeChanged(boolean, long);
   }
 
 }
