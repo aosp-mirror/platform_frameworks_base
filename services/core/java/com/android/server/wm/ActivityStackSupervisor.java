@@ -59,6 +59,13 @@ import static android.view.Display.INVALID_DISPLAY;
 import static android.view.Display.TYPE_VIRTUAL;
 import static android.view.WindowManager.TRANSIT_DOCK_TASK_FROM_RECENTS;
 
+import static com.android.server.am.ActivityStackSupervisorProto.CONFIGURATION_CONTAINER;
+import static com.android.server.am.ActivityStackSupervisorProto.DISPLAYS;
+import static com.android.server.am.ActivityStackSupervisorProto.FOCUSED_STACK_ID;
+import static com.android.server.am.ActivityStackSupervisorProto.IS_HOME_RECENTS_COMPONENT;
+import static com.android.server.am.ActivityStackSupervisorProto.KEYGUARD_CONTROLLER;
+import static com.android.server.am.ActivityStackSupervisorProto.PENDING_ACTIVITIES;
+import static com.android.server.am.ActivityStackSupervisorProto.RESUMED_ACTIVITY;
 import static com.android.server.wm.ActivityStack.ActivityState.DESTROYED;
 import static com.android.server.wm.ActivityStack.ActivityState.INITIALIZING;
 import static com.android.server.wm.ActivityStack.ActivityState.PAUSED;
@@ -67,13 +74,6 @@ import static com.android.server.wm.ActivityStack.ActivityState.RESUMED;
 import static com.android.server.wm.ActivityStack.ActivityState.STOPPED;
 import static com.android.server.wm.ActivityStack.ActivityState.STOPPING;
 import static com.android.server.wm.ActivityStack.REMOVE_TASK_MODE_MOVING;
-import static com.android.server.am.ActivityStackSupervisorProto.CONFIGURATION_CONTAINER;
-import static com.android.server.am.ActivityStackSupervisorProto.DISPLAYS;
-import static com.android.server.am.ActivityStackSupervisorProto.FOCUSED_STACK_ID;
-import static com.android.server.am.ActivityStackSupervisorProto.IS_HOME_RECENTS_COMPONENT;
-import static com.android.server.am.ActivityStackSupervisorProto.KEYGUARD_CONTROLLER;
-import static com.android.server.am.ActivityStackSupervisorProto.PENDING_ACTIVITIES;
-import static com.android.server.am.ActivityStackSupervisorProto.RESUMED_ACTIVITY;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_ALL;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_IDLE;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_PAUSE;
@@ -1049,20 +1049,26 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
     boolean allResumedActivitiesIdle() {
         for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
+            // TODO(b/117135575): Check resumed activities on all visible stacks.
             final ActivityDisplay display = mActivityDisplays.get(displayNdx);
-            for (int stackNdx = display.getChildCount() - 1; stackNdx >= 0; --stackNdx) {
-                // We cannot only check the top stack on each display since there might have
-                // always-on-top stacks (e.g. pinned stack).
-                final ActivityStack stack = display.getChildAt(stackNdx);
-                if (stack.numActivities() == 0) {
-                    continue;
+            if (display.isSleeping()) {
+                // No resumed activities while display is sleeping.
+                continue;
+            }
+
+            // If the focused stack is not null or not empty, there should have some activities
+            // resuming or resumed. Make sure these activities are idle.
+            final ActivityStack stack = display.getFocusedStack();
+            if (stack == null || stack.numActivities() == 0) {
+                continue;
+            }
+            final ActivityRecord resumedActivity = stack.getResumedActivity();
+            if (resumedActivity == null || !resumedActivity.idle) {
+                if (DEBUG_STATES) {
+                    Slog.d(TAG_STATES, "allResumedActivitiesIdle: stack="
+                            + stack.mStackId + " " + resumedActivity + " not idle");
                 }
-                final ActivityRecord resumedActivity = stack.getResumedActivity();
-                if (resumedActivity != null && !resumedActivity.idle) {
-                    if (DEBUG_STATES) Slog.d(TAG_STATES, "allResumedActivitiesIdle: stack="
-                             + stack.mStackId + " " + resumedActivity + " not idle");
-                    return false;
-                }
+                return false;
             }
         }
         // Send launch end powerhint when idle
