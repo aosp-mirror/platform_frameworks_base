@@ -12130,8 +12130,7 @@ public class PackageManagerService extends IPackageManager.Stub
     void cleanPackageDataStructuresLILPw(PackageParser.Package pkg, boolean chatty) {
         mComponentResolver.removeAllComponents(pkg, chatty);
 
-        final ArrayList<String> allPackageNames = new ArrayList<>(mPackages.keySet());
-        mPermissionManager.removeAllPermissions(pkg, allPackageNames, mPermissionCallback, chatty);
+        mPermissionManager.removeAllPermissions(pkg, chatty);
 
         final int instrumentationSize = pkg.instrumentation.size();
         StringBuilder r = null;
