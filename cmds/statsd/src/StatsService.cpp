@@ -881,6 +881,13 @@ void StatsService::Startup() {
     mConfigManager->Startup();
 }
 
+void StatsService::Terminate() {
+    ALOGI("StatsService::Terminating");
+    if (mProcessor != nullptr) {
+        mProcessor->WriteDataToDisk(TERMINATION_SIGNAL_RECEIVED);
+    }
+}
+
 void StatsService::OnLogEvent(LogEvent* event, bool reconnectionStarts) {
     mProcessor->OnLogEvent(event, reconnectionStarts);
 }
