@@ -61,6 +61,7 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
     private BubbleView mExpandedBubble;
     private Point mCollapsedPosition;
     private BubbleTouchHandler mTouchHandler;
+    private BubbleController.BubbleExpandListener mExpandListener;
 
     private boolean mViewUpdatedRequested = false;
     private boolean mIsAnimating = false;
@@ -176,6 +177,13 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
     }
 
     /**
+     * Sets the listener to notify when the bubble stack is expanded.
+     */
+    public void setExpandListener(BubbleController.BubbleExpandListener listener) {
+        mExpandListener = listener;
+    }
+
+    /**
      * Whether the stack of bubbles is expanded or not.
      */
     public boolean isExpanded() {
@@ -225,6 +233,9 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
         }
         mIsExpanded = wasExpanded && mBubbleContainer.getChildCount() > 0;
         requestUpdate();
+        if (wasExpanded && !mIsExpanded && mExpandListener != null) {
+            mExpandListener.onBubbleExpandChanged(mIsExpanded, 1 /* amount */);
+        }
     }
 
     /**
@@ -275,6 +286,9 @@ public class BubbleStackView extends FrameLayout implements BubbleTouchHandler.F
             mExpandedBubble = shouldExpand ? getTopBubble() : null;
             updateExpandedBubble();
 
+            if (mExpandListener != null) {
+                mExpandListener.onBubbleExpandChanged(mIsExpanded, 1 /* amount */);
+            }
             if (shouldExpand) {
                 // Save current position so that we might return there
                 savePosition();

@@ -60,6 +60,7 @@ public class BubbleController {
     private Context mContext;
     private BubbleDismissListener mDismissListener;
     private BubbleStateChangeListener mStateChangeListener;
+    private BubbleExpandListener mExpandListener;
 
     private Map<String, BubbleView> mBubbles = new HashMap<>();
     private BubbleStackView mStackView;
@@ -96,6 +97,19 @@ public class BubbleController {
         void onHasBubblesChanged(boolean hasBubbles);
     }
 
+    /**
+     * Listener to find out about stack expansion / collapse events.
+     */
+    public interface BubbleExpandListener {
+        /**
+         * Called when the expansion state of the bubble stack changes.
+         *
+         * @param isExpanding whether it's expanding or collapsing
+         * @param amount fraction of how expanded or collapsed it is, 1 being fully, 0 at the start
+         */
+        void onBubbleExpandChanged(boolean isExpanding, float amount);
+    }
+
     public BubbleController(Context context) {
         mContext = context;
         WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
@@ -116,6 +130,16 @@ public class BubbleController {
      */
     public void setBubbleStateChangeListener(BubbleStateChangeListener listener) {
         mStateChangeListener = listener;
+    }
+
+    /**
+     * Set a listener to be notified of bubble expand events.
+     */
+    public void setExpandListener(BubbleExpandListener listener) {
+        mExpandListener = listener;
+        if (mStackView != null) {
+            mStackView.setExpandListener(mExpandListener);
+        }
     }
 
     /**
@@ -185,6 +209,9 @@ public class BubbleController {
                 int bubblePosition = sbv.indexOfChild(sbv.findViewById(R.id.scrim_behind)) + 1;
                 sbv.addView(mStackView, bubblePosition,
                         new FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT));
+                if (mExpandListener != null) {
+                    mStackView.setExpandListener(mExpandListener);
+                }
             }
             mStackView.addBubble(bubble);
             if (setPosition) {
