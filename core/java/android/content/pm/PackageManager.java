@@ -915,11 +915,6 @@ public abstract class PackageManager {
     public static final int INSTALL_REASON_USER = 4;
 
     /**
-     * @hide
-     */
-    public static final int INSTALL_UNKNOWN = 0;
-
-    /**
      * Installation return code: this is passed in the {@link PackageInstaller#EXTRA_LEGACY_STATUS}
      * on success.
      *
