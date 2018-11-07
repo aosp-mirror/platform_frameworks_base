@@ -16,6 +16,8 @@
 
 package com.android.systemui.bubbles;
 
+import static com.android.systemui.pip.phone.PipDismissViewController.SHOW_TARGET_DELAY;
+
 import android.content.Context;
 import android.graphics.Point;
 import android.os.Handler;
@@ -124,6 +126,9 @@ public class BubbleTouchHandler implements View.OnTouchListener {
             case MotionEvent.ACTION_DOWN:
                 trackMovement(event);
 
+                mDismissViewController.createDismissTarget();
+                mHandler.postDelayed(mShowDismissAffordance, SHOW_TARGET_DELAY);
+
                 mBubbleDownPosX = startPos.x;
                 mBubbleDownPosY = startPos.y;
                 mDownX = rawX;
@@ -154,6 +159,8 @@ public class BubbleTouchHandler implements View.OnTouchListener {
                     }
                     floatingView.setPosition(x, y);
                 }
+                // TODO - when we're in the target stick to it / animate in some way?
+                mInDismissTarget = mDismissViewController.updateTarget((View) floatingView);
                 break;
 
             case MotionEvent.ACTION_CANCEL:
