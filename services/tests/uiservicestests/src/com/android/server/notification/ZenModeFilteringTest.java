@@ -31,9 +31,11 @@ import static org.mockito.Mockito.when;
 
 import android.app.Notification;
 import android.app.NotificationChannel;
+import android.app.NotificationManager;
 import android.app.NotificationManager.Policy;
 import android.media.AudioAttributes;
 import android.service.notification.StatusBarNotification;
+import android.service.notification.ZenModeConfig;
 import android.test.suitebuilder.annotation.SmallTest;
 import android.testing.AndroidTestingRunner;
 import android.testing.TestableLooper;
@@ -43,7 +45,6 @@ import com.android.internal.util.NotificationMessagingUtil;
 import com.android.server.UiServiceTestCase;
 
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
@@ -74,7 +75,6 @@ public class ZenModeFilteringTest extends UiServiceTestCase {
         return new NotificationRecord(mContext, sbn, c);
     }
 
-    @Ignore
     @Test
     public void testIsMessage() {
         NotificationRecord r = getNotificationRecord();
@@ -86,7 +86,6 @@ public class ZenModeFilteringTest extends UiServiceTestCase {
         assertFalse(mZenModeFiltering.isMessage(r));
     }
 
-    @Ignore
     @Test
     public void testIsAlarm() {
         NotificationChannel c = mock(NotificationChannel.class);
@@ -101,7 +100,6 @@ public class ZenModeFilteringTest extends UiServiceTestCase {
         assertTrue(mZenModeFiltering.isAlarm(r));
     }
 
-    @Ignore
     @Test
     public void testIsAlarm_wrongCategory() {
         NotificationRecord r = getNotificationRecord();
@@ -109,7 +107,6 @@ public class ZenModeFilteringTest extends UiServiceTestCase {
         assertFalse(mZenModeFiltering.isAlarm(r));
     }
 
-    @Ignore
     @Test
     public void testIsAlarm_wrongUsage() {
         NotificationChannel c = mock(NotificationChannel.class);
@@ -120,7 +117,6 @@ public class ZenModeFilteringTest extends UiServiceTestCase {
         assertFalse(mZenModeFiltering.isAlarm(r));
     }
 
-    @Ignore
     @Test
     public void testSuppressDNDInfo_yes_VisEffectsAllowed() {
         NotificationRecord r = getNotificationRecord();
@@ -132,7 +128,6 @@ public class ZenModeFilteringTest extends UiServiceTestCase {
         assertTrue(mZenModeFiltering.shouldIntercept(ZEN_MODE_IMPORTANT_INTERRUPTIONS, policy, r));
     }
 
-    @Ignore
     @Test
     public void testSuppressDNDInfo_yes_WrongId() {
         NotificationRecord r = getNotificationRecord();
@@ -143,7 +138,6 @@ public class ZenModeFilteringTest extends UiServiceTestCase {
         assertTrue(mZenModeFiltering.shouldIntercept(ZEN_MODE_IMPORTANT_INTERRUPTIONS, policy, r));
     }
 
-    @Ignore
     @Test
     public void testSuppressDNDInfo_yes_WrongPackage() {
         NotificationRecord r = getNotificationRecord();
@@ -154,7 +148,6 @@ public class ZenModeFilteringTest extends UiServiceTestCase {
         assertTrue(mZenModeFiltering.shouldIntercept(ZEN_MODE_IMPORTANT_INTERRUPTIONS, policy, r));
     }
 
-    @Ignore
     @Test
     public void testSuppressDNDInfo_no() {
         NotificationRecord r = getNotificationRecord();
@@ -167,7 +160,6 @@ public class ZenModeFilteringTest extends UiServiceTestCase {
         assertFalse(mZenModeFiltering.shouldIntercept(ZEN_MODE_NO_INTERRUPTIONS, policy, r));
     }
 
-    @Ignore
     @Test
     public void testSuppressAnything_yes_ZenModeOff() {
         NotificationRecord r = getNotificationRecord();
@@ -177,7 +169,6 @@ public class ZenModeFilteringTest extends UiServiceTestCase {
         assertFalse(mZenModeFiltering.shouldIntercept(ZEN_MODE_OFF, policy, r));
     }
 
-    @Ignore
     @Test
     public void testSuppressAnything_bypass_ZenModeOn() {
         NotificationRecord r = getNotificationRecord();
