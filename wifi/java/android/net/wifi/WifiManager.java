@@ -1476,7 +1476,6 @@ public class WifiManager {
      *                      fired only when connecting to a network that was created with
      *                      {@link WifiNetworkConfigBuilder#setIsAppInteractionRequired()} flag set.
      *                      Pending intent must hold a foreground service, else will be rejected.
-     *                      (i.e {@link PendingIntent#isForegroundService()} should return true)
      * @return true on success, false if any of the suggestions match (See
      * {@link WifiNetworkSuggestion#equals(Object)} any previously provided suggestions by the app.
      * @throws {@link SecurityException} if the caller is missing required permissions.
