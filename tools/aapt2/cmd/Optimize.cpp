@@ -41,6 +41,7 @@
 #include "optimize/MultiApkGenerator.h"
 #include "optimize/ResourceDeduper.h"
 #include "optimize/ResourceFilter.h"
+#include "optimize/ResourcePathShortener.h"
 #include "optimize/VersionCollapser.h"
 #include "split/TableSplitter.h"
 #include "util/Files.h"
@@ -52,6 +53,7 @@ using ::android::ConfigDescription;
 using ::android::ResTable_config;
 using ::android::StringPiece;
 using ::android::base::ReadFileToString;
+using ::android::base::WriteStringToFile;
 using ::android::base::StringAppendF;
 using ::android::base::StringPrintf;
 
@@ -141,6 +143,21 @@ class Optimizer {
     if (!deduper.Consume(context_, apk->GetResourceTable())) {
       context_->GetDiagnostics()->Error(DiagMessage() << "failed deduping resources");
       return 1;
+    }
+
+    if (options_.shorten_resource_paths) {
+      ResourcePathShortener shortener(options_.table_flattener_options.shortened_path_map);
+      if (!shortener.Consume(context_, apk->GetResourceTable())) {
+        context_->GetDiagnostics()->Error(DiagMessage() << "failed shortening resource paths");
+        return 1;
+      }
+      if (options_.shortened_paths_map_path
+          && !WriteShortenedPathsMap(options_.table_flattener_options.shortened_path_map,
+                                      options_.shortened_paths_map_path.value())) {
+        context_->GetDiagnostics()->Error(DiagMessage()
+                                          << "failed to write shortened resource paths to file");
+        return 1;
+      }
     }
 
     // Adjust the SplitConstraints so that their SDK version is stripped if it is less than or
@@ -262,6 +279,15 @@ class Optimizer {
     io::BigBufferInputStream table_buffer_in(&table_buffer);
     return io::CopyInputStreamToArchive(context_, &table_buffer_in, "resources.arsc",
                                         ArchiveEntry::kAlign, writer);
+  }
+
+  bool WriteShortenedPathsMap(const std::map<std::string, std::string> &path_map,
+                               const std::string &file_path) {
+    std::stringstream ss;
+    for (auto it = path_map.cbegin(); it != path_map.cend(); ++it) {
+      ss << it->first << " -> " << it->second << "\n";
+    }
+    return WriteStringToFile(ss.str(), file_path);
   }
 
   OptimizeOptions options_;
