@@ -59,6 +59,13 @@ import static android.view.Display.INVALID_DISPLAY;
 import static android.view.Display.TYPE_VIRTUAL;
 import static android.view.WindowManager.TRANSIT_DOCK_TASK_FROM_RECENTS;
 
+import static com.android.server.am.ActivityStackSupervisorProto.CONFIGURATION_CONTAINER;
+import static com.android.server.am.ActivityStackSupervisorProto.DISPLAYS;
+import static com.android.server.am.ActivityStackSupervisorProto.FOCUSED_STACK_ID;
+import static com.android.server.am.ActivityStackSupervisorProto.IS_HOME_RECENTS_COMPONENT;
+import static com.android.server.am.ActivityStackSupervisorProto.KEYGUARD_CONTROLLER;
+import static com.android.server.am.ActivityStackSupervisorProto.PENDING_ACTIVITIES;
+import static com.android.server.am.ActivityStackSupervisorProto.RESUMED_ACTIVITY;
 import static com.android.server.wm.ActivityStack.ActivityState.DESTROYED;
 import static com.android.server.wm.ActivityStack.ActivityState.INITIALIZING;
 import static com.android.server.wm.ActivityStack.ActivityState.PAUSED;
@@ -67,13 +74,6 @@ import static com.android.server.wm.ActivityStack.ActivityState.RESUMED;
 import static com.android.server.wm.ActivityStack.ActivityState.STOPPED;
 import static com.android.server.wm.ActivityStack.ActivityState.STOPPING;
 import static com.android.server.wm.ActivityStack.REMOVE_TASK_MODE_MOVING;
-import static com.android.server.am.ActivityStackSupervisorProto.CONFIGURATION_CONTAINER;
-import static com.android.server.am.ActivityStackSupervisorProto.DISPLAYS;
-import static com.android.server.am.ActivityStackSupervisorProto.FOCUSED_STACK_ID;
-import static com.android.server.am.ActivityStackSupervisorProto.IS_HOME_RECENTS_COMPONENT;
-import static com.android.server.am.ActivityStackSupervisorProto.KEYGUARD_CONTROLLER;
-import static com.android.server.am.ActivityStackSupervisorProto.PENDING_ACTIVITIES;
-import static com.android.server.am.ActivityStackSupervisorProto.RESUMED_ACTIVITY;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_ALL;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_IDLE;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_PAUSE;
@@ -1976,8 +1976,9 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
             //Slog.i(TAG, "IDLE: mBooted=" + mBooted + ", fromTimeout=" + fromTimeout);
 
-            // Make sure we can finish booting when all resumed activities are idle.
-            if ((!mService.isBooted() && allResumedActivitiesIdle()) || fromTimeout) {
+            // Check if able to finish booting when device is booting and all resumed activities
+            // are idle.
+            if ((mService.isBooting() && allResumedActivitiesIdle()) || fromTimeout) {
                 booting = checkFinishBootingLocked();
             }
 
@@ -4136,7 +4137,12 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         if (DEBUG_STACK) Slog.v(TAG, "Display added displayId=" + displayId);
         synchronized (mService.mGlobalLock) {
             getActivityDisplayOrCreateLocked(displayId);
-            startHomeOnDisplay(mCurrentUser, "displayAdded", displayId);
+            // Do not start home before booting, or it may accidentally finish booting before it
+            // starts. Instead, we expect home activities to be launched when the system is ready
+            // (ActivityManagerService#systemReady).
+            if (mService.isBooted() || mService.isBooting()) {
+                startHomeOnDisplay(mCurrentUser, "displayAdded", displayId);
+            }
         }
     }
 
