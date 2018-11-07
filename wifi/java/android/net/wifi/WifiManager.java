@@ -1454,8 +1454,8 @@ public class WifiManager {
      *<p>
      * When the device decides to connect to one of the provided network suggestions, platform fires
      * the associated {@code pendingIntent} if
-     * {@link WifiNetworkSuggestion#isAppInteractionRequired} is {@code true} and the
-     * provided {@code pendingIntent} is non-null.
+     * the network was created with {@link WifiNetworkConfigBuilder#setIsAppInteractionRequired()}
+     * flag set and the provided {@code pendingIntent} is non-null.
      *<p>
      * Registration of a non-null pending intent {@code pendingIntent} requires
      * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION ACCESS_COARSE_LOCATION} or
@@ -1473,8 +1473,8 @@ public class WifiManager {
      *
      * @param networkSuggestions List of network suggestions provided by the app.
      * @param pendingIntent Pending intent to be fired post connection for networks. These will be
-     *                      fired only when connecting to a network which has the
-     *                      {@link WifiNetworkSuggestion#isAppInteractionRequired} flag set.
+     *                      fired only when connecting to a network that was created with
+     *                      {@link WifiNetworkConfigBuilder#setIsAppInteractionRequired()} flag set.
      *                      Pending intent must hold a foreground service, else will be rejected.
      *                      (i.e {@link PendingIntent#isForegroundService()} should return true)
      * @return true on success, false if any of the suggestions match (See
