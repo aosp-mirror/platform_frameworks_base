@@ -536,7 +536,8 @@ public class NotificationIconContainer extends AlphaOptimizedFrameLayout {
             return 0;
         }
 
-        int translation = (int) (mLastVisibleIconState.xTranslation + mIconSize);
+        int translation = (int) (isLayoutRtl() ? getWidth() - mLastVisibleIconState.xTranslation
+                : mLastVisibleIconState.xTranslation + mIconSize);
         // There's a chance that last translation goes beyond the edge maybe
         return Math.min(getWidth(), translation);
     }
