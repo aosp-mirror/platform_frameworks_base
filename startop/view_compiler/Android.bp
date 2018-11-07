@@ -16,10 +16,15 @@
 
 cc_defaults {
     name: "viewcompiler_defaults",
+    header_libs: [
+        "libbase_headers",
+    ],
     shared_libs: [
+        "libbase",
         "libdexfile",
         "slicer",
     ],
+    cppflags: ["-std=c++17"],
 }
 
 cc_library_host_static {
@@ -30,9 +35,6 @@ cc_library_host_static {
         "java_lang_builder.cc",
         "util.cc",
     ],
-    static_libs: [
-        "libbase",
-    ],
 }
 
 cc_binary_host {
@@ -42,7 +44,6 @@ cc_binary_host {
         "main.cc",
     ],
     static_libs: [
-        "libbase",
         "libtinyxml2",
         "libgflags",
         "libviewcompiler",
@@ -59,4 +60,5 @@ cc_test_host {
     static_libs: [
         "libviewcompiler",
     ],
+    test_suites: ["general-tests"],
 }
