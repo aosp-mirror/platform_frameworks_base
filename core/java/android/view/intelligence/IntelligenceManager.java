@@ -25,6 +25,7 @@ import android.os.Bundle;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.SystemClock;
+import android.service.intelligence.InteractionSessionId;
 import android.util.Log;
 import android.view.intelligence.ContentCaptureEvent.EventType;
 
@@ -55,9 +56,6 @@ public final class IntelligenceManager {
     public static final int FLAG_USER_INPUT = 0x1;
 
 
-    /** @hide */
-    public static final int NO_SESSION = 0;
-
     /**
      * Initial state, when there is no session.
      *
@@ -66,11 +64,11 @@ public final class IntelligenceManager {
     public static final int STATE_UNKNOWN = 0;
 
     /**
-     * Service's startSession() was called, but remote session id was not returned yet.
+     * Service's startSession() was called, but server didn't confirm it was created yet.
      *
      * @hide
      */
-    public static final int STATE_WAITING_FOR_SESSION_ID = 1;
+    public static final int STATE_WAITING_FOR_SERVER = 1;
 
     /**
      * Session is active.
@@ -79,8 +77,6 @@ public final class IntelligenceManager {
      */
     public static final int STATE_ACTIVE = 2;
 
-    private static int sNextSessionId;
-
     private final Context mContext;
 
     @Nullable
@@ -88,14 +84,9 @@ public final class IntelligenceManager {
 
     private final Object mLock = new Object();
 
-    // TODO(b/111276913): localSessionId might be an overkill, perhaps just the global id is enough.
-    // Let's keep both for now, and revisit once we decide whether the session id will be persisted
-    // when the activity's process is killed
+    @Nullable
     @GuardedBy("mLock")
-    private int mLocalSessionId = NO_SESSION;
-
-    @GuardedBy("mLock")
-    private int mRemoteSessionId = NO_SESSION;
+    private InteractionSessionId mId;
 
     @GuardedBy("mLock")
     private int mState = STATE_UNKNOWN;
@@ -124,27 +115,25 @@ public final class IntelligenceManager {
                         + getStateAsStringLocked());
                 return;
             }
-            mState = STATE_WAITING_FOR_SESSION_ID;
-            mLocalSessionId = ++sNextSessionId;
-            mRemoteSessionId = NO_SESSION;
+            mState = STATE_WAITING_FOR_SERVER;
+            mId = new InteractionSessionId();
             mApplicationToken = token;
             mComponentName = componentName;
 
             if (VERBOSE) {
                 Log.v(TAG, "onActivityStarted(): token=" + token + ", act=" + componentName
-                        + ", localSessionId=" + mLocalSessionId);
+                        + ", id=" + mId);
             }
             final int flags = 0; // TODO(b/111276913): get proper flags
 
             try {
                 mService.startSession(mContext.getUserId(), mApplicationToken, componentName,
-                        mLocalSessionId, flags, new IResultReceiver.Stub() {
+                        mId, flags, new IResultReceiver.Stub() {
                             @Override
                             public void send(int resultCode, Bundle resultData)
                                     throws RemoteException {
                                 synchronized (mLock) {
                                     if (resultCode > 0) {
-                                        mRemoteSessionId = resultCode;
                                         mState = STATE_ACTIVE;
                                     } else {
                                         // TODO(b/111276913): handle other cases like disabled by
@@ -153,7 +142,7 @@ public final class IntelligenceManager {
                                     }
                                     if (VERBOSE) {
                                         Log.v(TAG, "onActivityStarted() result: code=" + resultCode
-                                                + ", remoteSession=" + mRemoteSessionId
+                                                + ", id=" + mId
                                                 + ", state=" + getStateAsStringLocked());
                                     }
                                 }
@@ -189,8 +178,7 @@ public final class IntelligenceManager {
             }
 
             try {
-                mService.sendEvents(mContext.getUserId(), mApplicationToken, mComponentName,
-                        mLocalSessionId, mRemoteSessionId, events);
+                mService.sendEvents(mContext.getUserId(), mId, events);
             } catch (RemoteException e) {
                 throw e.rethrowFromSystemServer();
             }
@@ -207,15 +195,13 @@ public final class IntelligenceManager {
 
             if (VERBOSE) {
                 Log.v(TAG, "onActivityDestroyed(): state=" + getStateAsStringLocked()
-                        + ", localSessionId=" + mLocalSessionId
-                        + ", mRemoteSessionId=" + mRemoteSessionId);
+                        + ", mId=" + mId);
             }
 
             try {
-                mService.finishSession(mContext.getUserId(), mApplicationToken, mComponentName,
-                        mLocalSessionId, mRemoteSessionId);
+                mService.finishSession(mContext.getUserId(), mId);
                 mState = STATE_UNKNOWN;
-                mLocalSessionId = mRemoteSessionId = NO_SESSION;
+                mId = null;
                 mApplicationToken = null;
                 mComponentName = null;
             } catch (RemoteException e) {
@@ -334,12 +320,11 @@ public final class IntelligenceManager {
             pw.print(prefix2); pw.print("mService: "); pw.println(mService);
             pw.print(prefix2); pw.print("user: "); pw.println(mContext.getUserId());
             pw.print(prefix2); pw.print("enabled: "); pw.println(isContentCaptureEnabled());
-            pw.print(prefix2); pw.print("mLocalSessionId: "); pw.println(mLocalSessionId);
-            pw.print(prefix2); pw.print("mRemoteSessionId: "); pw.println(mRemoteSessionId);
-            pw.print(prefix2); pw.print("mState: "); pw.print(mState); pw.print(" (");
+            pw.print(prefix2); pw.print("id: "); pw.println(mId);
+            pw.print(prefix2); pw.print("state: "); pw.print(mState); pw.print(" (");
             pw.print(getStateAsStringLocked()); pw.println(")");
-            pw.print(prefix2); pw.print("mAppToken: "); pw.println(mApplicationToken);
-            pw.print(prefix2); pw.print("mComponentName: "); pw.println(mComponentName);
+            pw.print(prefix2); pw.print("appToken: "); pw.println(mApplicationToken);
+            pw.print(prefix2); pw.print("componentName: "); pw.println(mComponentName);
         }
     }
 
@@ -353,8 +338,8 @@ public final class IntelligenceManager {
         switch (state) {
             case STATE_UNKNOWN:
                 return "UNKNOWN";
-            case STATE_WAITING_FOR_SESSION_ID:
-                return "WAITING_FOR_SESSION_ID";
+            case STATE_WAITING_FOR_SERVER:
+                return "WAITING_FOR_SERVER";
             case STATE_ACTIVE:
                 return "ACTIVE";
             default:

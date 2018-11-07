@@ -26,6 +26,7 @@ import android.util.Slog;
 import android.view.intelligence.ContentCaptureEvent;
 
 import com.android.internal.annotations.GuardedBy;
+import com.android.internal.util.Preconditions;
 import com.android.server.AbstractRemoteService;
 import com.android.server.intelligence.RemoteIntelligenceService.RemoteIntelligenceServiceCallbacks;
 
@@ -47,15 +48,15 @@ final class ContentCaptureSession implements RemoteIntelligenceServiceCallbacks 
     ContentCaptureSession(@NonNull Context context, int userId, @NonNull Object lock,
             @NonNull IBinder activityToken, @NonNull IntelligencePerUserService service,
             @NonNull ComponentName serviceComponentName, @NonNull ComponentName appComponentName,
-            int taskId, int displayId, int localSessionId, int globalSessionId, int flags,
+            int taskId, int displayId, @NonNull InteractionSessionId sessionId, int flags,
             boolean bindInstantServiceAllowed, boolean verbose) {
         mLock = lock;
         mActivityToken = activityToken;
         mService = service;
+        mId = Preconditions.checkNotNull(sessionId);
         mRemoteService = new RemoteIntelligenceService(context,
                 IntelligenceService.SERVICE_INTERFACE, serviceComponentName, userId, this,
                 bindInstantServiceAllowed, verbose);
-        mId = new InteractionSessionId(globalSessionId, localSessionId);
         mInterationContext = new InteractionContext(appComponentName, taskId, displayId, flags);
     }
 
@@ -88,7 +89,7 @@ final class ContentCaptureSession implements RemoteIntelligenceServiceCallbacks 
                 mRemoteService.onSessionLifecycleRequest(/* context= */ null, mId);
             }
         } finally {
-            mService.removeSessionLocked(mInterationContext.getActivityComponent());
+            mService.removeSessionLocked(mId);
         }
     }
 
@@ -114,17 +115,15 @@ final class ContentCaptureSession implements RemoteIntelligenceServiceCallbacks 
         }
     }
 
-    /**
-     * Gets global id, unique per {@link IntelligencePerUserService}.
-     */
-    public int getGlobalSessionId() {
-        return mId.getGlobalId();
-    }
-
     @GuardedBy("mLock")
     public void dumpLocked(@NonNull String prefix, @NonNull PrintWriter pw) {
         pw.print(prefix); pw.print("id: ");  mId.dump(pw); pw.println();
         pw.print(prefix); pw.print("context: ");  mInterationContext.dump(pw); pw.println();
         pw.print(prefix); pw.print("activity token: "); pw.println(mActivityToken);
+    }
+
+    @Override
+    public String toString() {
+        return "ContentCaptureSession[id=" + mId.getValue() + ", act=" + mActivityToken + "]";
     }
 }

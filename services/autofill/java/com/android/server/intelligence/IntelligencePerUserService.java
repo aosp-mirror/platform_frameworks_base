@@ -25,9 +25,11 @@ import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.pm.ServiceInfo;
 import android.os.IBinder;
 import android.os.RemoteException;
+import android.service.intelligence.InteractionSessionId;
 import android.util.ArrayMap;
 import android.util.Slog;
 import android.view.intelligence.ContentCaptureEvent;
+import android.view.intelligence.IntelligenceManager;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.os.IResultReceiver;
@@ -44,11 +46,9 @@ final class IntelligencePerUserService
 
     private static final String TAG = "IntelligencePerUserService";
 
-    private static int sNextSessionId;
-
-    // TODO(b/111276913): should key by componentName + taskId or ActivityToken
     @GuardedBy("mLock")
-    private final ArrayMap<ComponentName, ContentCaptureSession> mSessions = new ArrayMap<>();
+    private final ArrayMap<InteractionSessionId, ContentCaptureSession> mSessions =
+            new ArrayMap<>();
 
     // TODO(b/111276913): add mechanism to prune stale sessions, similar to Autofill's
 
@@ -85,8 +85,9 @@ final class IntelligencePerUserService
     // TODO(b/111276913): log metrics
     @GuardedBy("mLock")
     public void startSessionLocked(@NonNull IBinder activityToken,
-            @NonNull ComponentName componentName, int taskId, int displayId, int localSessionId,
-            int flags, @NonNull IResultReceiver resultReceiver) {
+            @NonNull ComponentName componentName, int taskId, int displayId,
+            @NonNull InteractionSessionId sessionId, int flags,
+            @NonNull IResultReceiver resultReceiver) {
         final ComponentName serviceComponentName = getServiceComponentName();
         if (serviceComponentName == null) {
             // TODO(b/111276913): this happens when the system service is starting, we should
@@ -96,16 +97,16 @@ final class IntelligencePerUserService
             return;
         }
 
-        ContentCaptureSession session = mSessions.get(componentName);
+        ContentCaptureSession session = mSessions.get(sessionId);
         if (session != null) {
             if (mMaster.debug) {
-                Slog.d(TAG, "startSession(): reusing session " + session.getGlobalSessionId()
-                        + " for " + componentName);
+                Slog.d(TAG, "startSession(): reusing session " + sessionId + " for "
+                        + componentName);
             }
             // TODO(b/111276913): check if local ids match and decide what to do if they don't
             // TODO(b/111276913): should we call session.notifySessionStartedLocked() again??
             // if not, move notifySessionStartedLocked() into session constructor
-            sendToClient(resultReceiver, session.getGlobalSessionId());
+            sendToClient(resultReceiver, IntelligenceManager.STATE_ACTIVE);
             return;
         }
 
@@ -113,59 +114,53 @@ final class IntelligencePerUserService
         final boolean bindInstantServiceAllowed = false;
 
         session = new ContentCaptureSession(getContext(), mUserId, mLock, activityToken,
-                this, serviceComponentName, componentName, taskId, displayId, localSessionId,
-                ++sNextSessionId, flags, bindInstantServiceAllowed, mMaster.verbose);
+                this, serviceComponentName, componentName, taskId, displayId, sessionId, flags,
+                bindInstantServiceAllowed, mMaster.verbose);
         if (mMaster.verbose) {
-            Slog.v(TAG, "startSession(): new session for " + componentName + "; globalId ="
-                    + session.getGlobalSessionId());
+            Slog.v(TAG, "startSession(): new session for " + componentName + " and id "
+                    + sessionId);
         }
-        mSessions.put(componentName, session);
+        mSessions.put(sessionId, session);
         session.notifySessionStartedLocked();
-        sendToClient(resultReceiver, session.getGlobalSessionId());
+        sendToClient(resultReceiver, IntelligenceManager.STATE_ACTIVE);
     }
 
     // TODO(b/111276913): log metrics
     @GuardedBy("mLock")
-    public void finishSessionLocked(@NonNull IBinder activityToken,
-            @NonNull ComponentName componentName, int localSessionId, int globalSessionId) {
-        final ContentCaptureSession session = mSessions.get(componentName);
+    public void finishSessionLocked(@NonNull InteractionSessionId sessionId) {
+        final ContentCaptureSession session = mSessions.get(sessionId);
         if (session == null) {
-            Slog.w(TAG, "finishSession(): no session for " + componentName);
+            Slog.w(TAG, "finishSession(): no session with id" + sessionId);
             return;
         }
         if (mMaster.verbose) {
-            Slog.v(TAG, "finishSession(): comp=" + componentName + "; globalId ="
-                    + session.getGlobalSessionId());
+            Slog.v(TAG, "finishSession(): " + session);
         }
-        // TODO(b/111276913): check if all arguments match existing session and throw exception if
-        // not. Or just use componentName if we change AIDL to pass just ApplicationToken and
-        // retrieve componentName from AMInternal
         session.removeSelfLocked(true);
     }
 
     @GuardedBy("mLock")
-    public void sendEventsLocked(@NonNull ComponentName componentName,
+    public void sendEventsLocked(@NonNull InteractionSessionId sessionId,
             @NonNull List<ContentCaptureEvent> events) {
-        final ContentCaptureSession session = mSessions.get(componentName);
+        final ContentCaptureSession session = mSessions.get(sessionId);
         if (session == null) {
-            Slog.w(TAG, "sendEventsLocked(): no session for " + componentName);
+            Slog.w(TAG, "sendEvents(): no session for " + sessionId);
             return;
         }
         if (mMaster.verbose) {
-            Slog.v(TAG, "sendEventsLocked(): comp=" + componentName + "; events =" + events.size());
+            Slog.v(TAG, "sendEvents(): id=" + sessionId + "; events =" + events.size());
         }
         session.sendEventsLocked(events);
     }
 
     @GuardedBy("mLock")
-    public void removeSessionLocked(@NonNull ComponentName key) {
-        mSessions.remove(key);
+    public void removeSessionLocked(@NonNull InteractionSessionId sessionId) {
+        mSessions.remove(sessionId);
     }
 
     @Override
     protected void dumpLocked(String prefix, PrintWriter pw) {
         super.dumpLocked(prefix, pw);
-        pw.print(prefix); pw.print("next id: "); pw.println(sNextSessionId);
         if (mSessions.isEmpty()) {
             pw.print(prefix); pw.println("no sessions");
         } else {
@@ -187,5 +182,4 @@ final class IntelligencePerUserService
             Slog.w(TAG, "Error async reporting result to client: " + e);
         }
     }
-
 }
