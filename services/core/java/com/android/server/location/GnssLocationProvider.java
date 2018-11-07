@@ -192,7 +192,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     private static final int ADD_LISTENER = 8;
     private static final int REMOVE_LISTENER = 9;
     private static final int DOWNLOAD_XTRA_DATA_FINISHED = 11;
-    private static final int SUBSCRIPTION_OR_SIM_CHANGED = 12;
+    private static final int SUBSCRIPTION_OR_CARRIER_CONFIG_CHANGED = 12;
     private static final int INITIALIZE_HANDLER = 13;
     private static final int REQUEST_SUPL_CONNECTION = 14;
     private static final int RELEASE_SUPL_CONNECTION = 15;
@@ -415,9 +415,6 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
     private final static String ALARM_WAKEUP = "com.android.internal.location.ALARM_WAKEUP";
     private final static String ALARM_TIMEOUT = "com.android.internal.location.ALARM_TIMEOUT";
 
-    // SIM/Carrier info.
-    private final static String SIM_STATE_CHANGED = "android.intent.action.SIM_STATE_CHANGED";
-
     // Persist property for LPP_PROFILE
     private final static String LPP_PROFILE = "persist.sys.gps.lpp";
 
@@ -487,18 +484,20 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                 case Intent.ACTION_SCREEN_ON:
                     updateLowPowerMode();
                     break;
-                case SIM_STATE_CHANGED:
-                    subscriptionOrSimChanged(context);
+                case CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED:
+                    subscriptionOrCarrierConfigChanged(context);
                     break;
             }
         }
     };
 
+    // TODO(b/119326010): replace OnSubscriptionsChangedListener with
+    // ACTION_DEFAULT_DATA_SUBSCRIPTION_CHANGED broadcast reseiver.
     private final OnSubscriptionsChangedListener mOnSubscriptionsChangedListener =
             new OnSubscriptionsChangedListener() {
                 @Override
                 public void onSubscriptionsChanged() {
-                    sendMessage(SUBSCRIPTION_OR_SIM_CHANGED, 0, null);
+                    sendMessage(SUBSCRIPTION_OR_CARRIER_CONFIG_CHANGED, 0, null);
                 }
             };
 
@@ -510,7 +509,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         mHandler.post(() -> native_set_satellite_blacklist(constellations, svids));
     }
 
-    private void subscriptionOrSimChanged(Context context) {
+    private void subscriptionOrCarrierConfigChanged(Context context) {
         if (DEBUG) Log.d(TAG, "received SIM related action: ");
         TelephonyManager phone = (TelephonyManager)
                 mContext.getSystemService(Context.TELEPHONY_SERVICE);
@@ -525,12 +524,12 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                     PersistableBundle b = configManager.getConfig();
                     if (b != null) {
                         isKeepLppProfile =
-                                b.getBoolean(CarrierConfigManager.KEY_PERSIST_LPP_MODE_BOOL);
+                                b.getBoolean(CarrierConfigManager.Gps.KEY_PERSIST_LPP_MODE_BOOL);
                     }
                 }
                 if (isKeepLppProfile) {
                     // load current properties for the carrier
-                    loadPropertiesFromResource(context, mProperties);
+                    loadPropertiesFromCarrierConfig(context, mProperties);
                     String lpp_profile = mProperties.getProperty("LPP_PROFILE");
                     // set the persist property LPP_PROFILE for the value
                     if (lpp_profile != null) {
@@ -575,7 +574,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
 
     private void reloadGpsProperties(Context context, Properties properties) {
         if (DEBUG) Log.d(TAG, "Reset GPS properties, previous size = " + properties.size());
-        loadPropertiesFromResource(context, properties);
+        loadPropertiesFromCarrierConfig(context, properties);
 
         String lpp_prof = SystemProperties.get(LPP_PROFILE);
         if (!TextUtils.isEmpty(lpp_prof)) {
@@ -585,7 +584,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         /*
          * Overlay carrier properties from a debug configuration file.
          */
-        loadPropertiesFromFile(properties);
+        loadPropertiesFromGpsDebugConfig(properties);
         // TODO: we should get rid of C2K specific setting.
         setSuplHostPort(properties.getProperty("SUPL_HOST"),
                 properties.getProperty("SUPL_PORT"));
@@ -655,25 +654,34 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
         }
     }
 
-    private void loadPropertiesFromResource(Context context,
-            Properties properties) {
-        String[] configValues = context.getResources().getStringArray(
-                com.android.internal.R.array.config_gpsParameters);
-        for (String item : configValues) {
-            if (DEBUG) Log.d(TAG, "GpsParamsResource: " + item);
-            // We need to support "KEY =", but not "=VALUE".
-            int index = item.indexOf("=");
-            if (index > 0 && index + 1 < item.length()) {
-                String key = item.substring(0, index);
-                String value = item.substring(index + 1);
-                properties.setProperty(key.trim().toUpperCase(), value);
-            } else {
-                Log.w(TAG, "malformed contents: " + item);
+    private void loadPropertiesFromCarrierConfig(Context context, Properties properties) {
+        CarrierConfigManager configManager = (CarrierConfigManager)
+                mContext.getSystemService(Context.CARRIER_CONFIG_SERVICE);
+        if (configManager == null) {
+            return;
+        }
+        PersistableBundle configs = configManager.getConfigForSubId(
+                SubscriptionManager.getDefaultDataSubscriptionId());
+        if (configs == null) {
+            if (DEBUG) Log.d(TAG, "SIM not ready, use default carrier config.");
+            configs = CarrierConfigManager.getDefaultConfig();
+        }
+        for (String configKey : configs.keySet()) {
+            if (configKey.startsWith(CarrierConfigManager.Gps.KEY_PREFIX)) {
+                String key = configKey
+                        .substring(CarrierConfigManager.Gps.KEY_PREFIX.length())
+                        .toUpperCase();
+                Object value = configs.get(configKey);
+                if (value instanceof String) {
+                    // All GPS properties are of String type; convert so.
+                    if (DEBUG) Log.d(TAG, "Gps config: " + key + " = " + value);
+                    properties.setProperty(key, (String) value);
+                }
             }
         }
     }
 
-    private void loadPropertiesFromFile(Properties properties) {
+    private void loadPropertiesFromGpsDebugConfig(Properties properties) {
         try {
             File file = new File(DEBUG_PROPERTIES_FILE);
             FileInputStream stream = null;
@@ -2018,8 +2026,8 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                 case UPDATE_LOCATION:
                     handleUpdateLocation((Location) msg.obj);
                     break;
-                case SUBSCRIPTION_OR_SIM_CHANGED:
-                    subscriptionOrSimChanged(mContext);
+                case SUBSCRIPTION_OR_CARRIER_CONFIG_CHANGED:
+                    subscriptionOrCarrierConfigChanged(mContext);
                     break;
                 case INITIALIZE_HANDLER:
                     handleInitialize();
@@ -2086,7 +2094,7 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
             intentFilter.addAction(PowerManager.ACTION_DEVICE_IDLE_MODE_CHANGED);
             intentFilter.addAction(Intent.ACTION_SCREEN_OFF);
             intentFilter.addAction(Intent.ACTION_SCREEN_ON);
-            intentFilter.addAction(SIM_STATE_CHANGED);
+            intentFilter.addAction(CarrierConfigManager.ACTION_CARRIER_CONFIG_CHANGED);
             mContext.registerReceiver(mBroadcastReceiver, intentFilter, null, this);
 
             mNetworkConnectivityHandler.registerNetworkCallbacks();
@@ -2168,8 +2176,8 @@ public class GnssLocationProvider extends AbstractLocationProvider implements
                 return "DOWNLOAD_XTRA_DATA_FINISHED";
             case UPDATE_LOCATION:
                 return "UPDATE_LOCATION";
-            case SUBSCRIPTION_OR_SIM_CHANGED:
-                return "SUBSCRIPTION_OR_SIM_CHANGED";
+            case SUBSCRIPTION_OR_CARRIER_CONFIG_CHANGED:
+                return "SUBSCRIPTION_OR_CARRIER_CONFIG_CHANGED";
             case INITIALIZE_HANDLER:
                 return "INITIALIZE_HANDLER";
             case REPORT_LOCATION:

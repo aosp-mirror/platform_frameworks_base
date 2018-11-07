@@ -1269,7 +1269,6 @@
   <java-symbol type="array" name="config_telephonyEuiccDeviceCapabilities" />
   <java-symbol type="array" name="config_telephonyHardware" />
   <java-symbol type="array" name="config_keySystemUuidMapping" />
-  <java-symbol type="array" name="config_gpsParameters" />
   <java-symbol type="array" name="required_apps_managed_user" />
   <java-symbol type="array" name="required_apps_managed_profile" />
   <java-symbol type="array" name="required_apps_managed_device" />
