@@ -16,7 +16,7 @@
 
 package com.android.systemui.bubbles;
 
-import static android.view.View.GONE;
+import static android.view.View.INVISIBLE;
 import static android.view.View.VISIBLE;
 import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
@@ -26,6 +26,7 @@ import android.app.Notification;
 import android.app.NotificationManager;
 import android.content.Context;
 import android.graphics.Point;
+import android.graphics.Rect;
 import android.service.notification.StatusBarNotification;
 import android.view.ViewGroup;
 import android.view.WindowManager;
@@ -58,6 +59,7 @@ public class BubbleController {
 
     private Context mContext;
     private BubbleDismissListener mDismissListener;
+    private BubbleStateChangeListener mStateChangeListener;
 
     private Map<String, BubbleView> mBubbles = new HashMap<>();
     private BubbleStackView mStackView;
@@ -65,6 +67,9 @@ public class BubbleController {
 
     // Bubbles get added to the status bar view
     private StatusBarWindowController mStatusBarWindowController;
+
+    // Used for determining view rect for touch interaction
+    private Rect mTempRect = new Rect();
 
     /**
      * Listener to find out about bubble / bubble stack dismissal events.
@@ -81,6 +86,16 @@ public class BubbleController {
         void onBubbleDismissed(String key);
     }
 
+    /**
+     * Listener to be notified when some states of the bubbles change.
+     */
+    public interface BubbleStateChangeListener {
+        /**
+         * Called when the stack has bubbles or no longer has bubbles.
+         */
+        void onHasBubblesChanged(boolean hasBubbles);
+    }
+
     public BubbleController(Context context) {
         mContext = context;
         WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
@@ -94,6 +109,13 @@ public class BubbleController {
      */
     public void setDismissListener(BubbleDismissListener listener) {
         mDismissListener = listener;
+    }
+
+    /**
+     * Set a listener to be notified when some states of the bubbles change.
+     */
+    public void setBubbleStateChangeListener(BubbleStateChangeListener listener) {
+        mStateChangeListener = listener;
     }
 
     /**
@@ -124,7 +146,9 @@ public class BubbleController {
      * Tell the stack of bubbles to be dismissed, this will remove all of the bubbles in the stack.
      */
     public void dismissStack() {
-        mStackView.setVisibility(GONE);
+        if (mStackView == null) {
+            return;
+        }
         Point startPoint = getStartPoint(mStackView.getStackWidth(), mDisplaySize);
         // Reset the position of the stack (TODO - or should we save / respect last user position?)
         mStackView.setPosition(startPoint.x, startPoint.y);
@@ -134,6 +158,7 @@ public class BubbleController {
         if (mDismissListener != null) {
             mDismissListener.onStackDismissed();
         }
+        updateBubblesShowing();
     }
 
     /**
@@ -150,25 +175,25 @@ public class BubbleController {
             bubble.setNotif(notif);
             mBubbles.put(bubble.getKey(), bubble);
 
-            boolean setPosition = false;
+            boolean setPosition = mStackView != null && mStackView.getVisibility() != VISIBLE;
             if (mStackView == null) {
                 setPosition = true;
                 mStackView = new BubbleStackView(mContext);
-                ViewGroup sbv = (ViewGroup) mStatusBarWindowController.getStatusBarView();
+                ViewGroup sbv = mStatusBarWindowController.getStatusBarView();
                 // XXX: Bug when you expand the shade on top of expanded bubble, there is no scrim
                 // between bubble and the shade
                 int bubblePosition = sbv.indexOfChild(sbv.findViewById(R.id.scrim_behind)) + 1;
                 sbv.addView(mStackView, bubblePosition,
                         new FrameLayout.LayoutParams(WRAP_CONTENT, WRAP_CONTENT));
             }
-            mStackView.setVisibility(VISIBLE);
             mStackView.addBubble(bubble);
-
             if (setPosition) {
                 // Need to add the bubble to the stack before we can know the width
                 Point startPoint = getStartPoint(mStackView.getStackWidth(), mDisplaySize);
                 mStackView.setPosition(startPoint.x, startPoint.y);
+                mStackView.setVisibility(VISIBLE);
             }
+            updateBubblesShowing();
         }
     }
 
@@ -177,12 +202,31 @@ public class BubbleController {
      */
     public void removeBubble(String key) {
         BubbleView bv = mBubbles.get(key);
-        if (bv != null) {
+        if (mStackView != null && bv != null) {
             mStackView.removeBubble(bv);
             bv.getEntry().setBubbleDismissed(true);
         }
         if (mDismissListener != null) {
             mDismissListener.onBubbleDismissed(key);
+        }
+        updateBubblesShowing();
+    }
+
+    private void updateBubblesShowing() {
+        boolean hasBubblesShowing = false;
+        for (BubbleView bv : mBubbles.values()) {
+            if (!bv.getEntry().isBubbleDismissed()) {
+                hasBubblesShowing = true;
+                break;
+            }
+        }
+        boolean hadBubbles = mStatusBarWindowController.getBubblesShowing();
+        mStatusBarWindowController.setBubblesShowing(hasBubblesShowing);
+        if (mStackView != null && !hasBubblesShowing) {
+            mStackView.setVisibility(INVISIBLE);
+        }
+        if (mStateChangeListener != null && hadBubbles != hasBubblesShowing) {
+            mStateChangeListener.onHasBubblesChanged(hasBubblesShowing);
         }
     }
 
@@ -205,14 +249,25 @@ public class BubbleController {
         for (BubbleView view : viewsToRemove) {
             mBubbles.remove(view.getKey());
             mStackView.removeBubble(view);
-            if (mBubbles.size() == 0) {
-                ((ViewGroup) mStatusBarWindowController.getStatusBarView()).removeView(mStackView);
-                mStackView = null;
-            }
         }
         if (mStackView != null) {
-            mStackView.setVisibility(visible ? VISIBLE : GONE);
+            mStackView.setVisibility(visible ? VISIBLE : INVISIBLE);
+            if (!visible) {
+                collapseStack();
+            }
         }
+        updateBubblesShowing();
+    }
+
+    /**
+     * Rect indicating the touchable region for the bubble stack / expanded stack.
+     */
+    public Rect getTouchableRegion() {
+        if (mStackView == null || mStackView.getVisibility() != VISIBLE) {
+            return null;
+        }
+        mStackView.getBoundsOnScreen(mTempRect);
+        return mTempRect;
     }
 
     // TODO: factor in PIP location / maybe last place user had it

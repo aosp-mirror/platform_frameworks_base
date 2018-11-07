@@ -65,7 +65,7 @@ public class StatusBarWindowController implements Callback, Dumpable, Configurat
     private final WindowManager mWindowManager;
     private final IActivityManager mActivityManager;
     private final DozeParameters mDozeParameters;
-    private View mStatusBarView;
+    private ViewGroup mStatusBarView;
     private WindowManager.LayoutParams mLp;
     private WindowManager.LayoutParams mLpChanged;
     private boolean mHasTopUi;
@@ -109,7 +109,7 @@ public class StatusBarWindowController implements Callback, Dumpable, Configurat
      * @param statusBarView The view to add.
      * @param barHeight The height of the status bar in collapsed state.
      */
-    public void add(View statusBarView, int barHeight) {
+    public void add(ViewGroup statusBarView, int barHeight) {
 
         // Now that the status bar window encompasses the sliding panel and its
         // translucent backdrop, the entire thing is made TRANSLUCENT and is
@@ -138,7 +138,7 @@ public class StatusBarWindowController implements Callback, Dumpable, Configurat
         onThemeChanged();
     }
 
-    public View getStatusBarView() {
+    public ViewGroup getStatusBarView() {
         return mStatusBarView;
     }
 
@@ -236,7 +236,7 @@ public class StatusBarWindowController implements Callback, Dumpable, Configurat
     private boolean isExpanded(State state) {
         return !state.forceCollapsed && (state.isKeyguardShowingAndNotOccluded()
                 || state.panelVisible || state.keyguardFadingAway || state.bouncerShowing
-                || state.headsUpShowing
+                || state.headsUpShowing || state.bubblesShowing
                 || state.scrimsVisibility != ScrimController.VISIBILITY_FULLY_TRANSPARENT);
     }
 
@@ -473,6 +473,21 @@ public class StatusBarWindowController implements Callback, Dumpable, Configurat
         apply(mCurrentState);
     }
 
+    /**
+     * Sets whether there are bubbles showing on the screen.
+     */
+    public void setBubblesShowing(boolean bubblesShowing) {
+        mCurrentState.bubblesShowing = bubblesShowing;
+        apply(mCurrentState);
+    }
+
+    /**
+     * The bubbles showing state for the status bar.
+     */
+    public boolean getBubblesShowing() {
+        return mCurrentState.bubblesShowing;
+    }
+
     public void setStateListener(OtherwisedCollapsedListener listener) {
         mListener = listener;
     }
@@ -525,6 +540,7 @@ public class StatusBarWindowController implements Callback, Dumpable, Configurat
         boolean backdropShowing;
         boolean wallpaperSupportsAmbientMode;
         boolean notTouchable;
+        boolean bubblesShowing;
 
         /**
          * The {@link StatusBar} state from the status bar.
