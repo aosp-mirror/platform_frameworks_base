@@ -1124,7 +1124,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
      */
     @ShadeViewRefactor(RefactorComponent.COORDINATOR)
     private float getExpandTranslationStart() {
-        return -mTopPadding + getMinExpansionHeight();
+        return -mTopPadding + getMinExpansionHeight() - mShelf.getIntrinsicHeight();
     }
 
     /**
