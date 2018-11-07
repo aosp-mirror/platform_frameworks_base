@@ -457,7 +457,7 @@ public class ActivityStackTests extends ActivityTestsBase {
         final TestActivityStack fullscreenStack2 = createStackForShouldBeVisibleTest(
                 mDefaultDisplay, WINDOWING_MODE_FULLSCREEN, ACTIVITY_TYPE_STANDARD,
                 true /* onTop */);
-        final TestActivityStack pinnedStack = createStackForShouldBeVisibleTest(mDefaultDisplay,
+        final ActivityStack pinnedStack = createStackForShouldBeVisibleTest(mDefaultDisplay,
                 WINDOWING_MODE_PINNED, ACTIVITY_TYPE_STANDARD, true /* onTop */);
 
         homeStack.setIsTranslucent(false);
