@@ -286,44 +286,51 @@ public final class TelephonyPermissions {
             int uid, String callingPackage, String message) {
         Log.wtf(LOG_TAG,
                 "reportAccessDeniedToReadIdentifiers:" + callingPackage + ":" + message);
-        // if the device identifier check is relaxed then revert to the READ_PHONE_STATE permission
-        // check that was previously required to access device identifiers.
-        boolean relaxDeviceIdentifierCheck = Settings.Global.getInt(context.getContentResolver(),
-                Settings.Global.PRIVILEGED_DEVICE_IDENTIFIER_CHECK_ENABLED, 0) == 0;
-        if (relaxDeviceIdentifierCheck) {
-            return checkReadPhoneState(context, subId, pid, uid, callingPackage, message);
-        } else {
+        // If the device identifier check is enabled then enforce the new access requirements for
+        // both 1P and 3P apps.
+        boolean enableDeviceIdentifierCheck = Settings.Global.getInt(context.getContentResolver(),
+                Settings.Global.PRIVILEGED_DEVICE_IDENTIFIER_CHECK_ENABLED, 0) == 1;
+        // Check if the application is a 3P app; if so then a separate setting is required to relax
+        // the check to begin flagging problems with 3P apps early.
+        boolean relax3PDeviceIdentifierCheck = Settings.Global.getInt(context.getContentResolver(),
+                Settings.Global.PRIVILEGED_DEVICE_IDENTIFIER_3P_CHECK_RELAXED, 0) == 1;
+        boolean is3PApp = true;
+        ApplicationInfo callingPackageInfo = null;
+        try {
+            callingPackageInfo = context.getPackageManager().getApplicationInfo(callingPackage, 0);
+            if (callingPackageInfo.isSystemApp()) {
+                is3PApp = false;
+            }
+        } catch (PackageManager.NameNotFoundException e) {
+            // If the application info for the calling package could not be found then assume the
+            // calling app is a 3P app to detect any issues with the check
+        }
+        if (enableDeviceIdentifierCheck || (is3PApp && !relax3PDeviceIdentifierCheck)) {
             boolean targetQBehaviorDisabled = Settings.Global.getInt(context.getContentResolver(),
                     Settings.Global.PRIVILEGED_DEVICE_IDENTIFIER_TARGET_Q_BEHAVIOR_ENABLED, 0) == 0;
             if (callingPackage != null) {
-                try {
-                    // if the target SDK is pre-Q or the target Q behavior is disabled then check if
-                    // the calling package would have previously had access to device identifiers.
-                    ApplicationInfo callingPackageInfo =
-                            context.getPackageManager().getApplicationInfo(
-                                    callingPackage, 0);
-                    if (callingPackageInfo != null && (
-                            callingPackageInfo.targetSdkVersion < Build.VERSION_CODES.Q
-                                    || targetQBehaviorDisabled)) {
-                        if (context.checkPermission(
-                                android.Manifest.permission.READ_PHONE_STATE,
-                                pid,
-                                uid) == PackageManager.PERMISSION_GRANTED) {
-                            return false;
-                        }
-                        if (SubscriptionManager.isValidSubscriptionId(subId)
-                                && getCarrierPrivilegeStatus(TELEPHONY_SUPPLIER, subId, uid)
-                                == TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS) {
-                            return false;
-                        }
+                // if the target SDK is pre-Q or the target Q behavior is disabled then check if
+                // the calling package would have previously had access to device identifiers.
+                if (callingPackageInfo != null && (
+                        callingPackageInfo.targetSdkVersion < Build.VERSION_CODES.Q
+                                || targetQBehaviorDisabled)) {
+                    if (context.checkPermission(
+                            android.Manifest.permission.READ_PHONE_STATE,
+                            pid,
+                            uid) == PackageManager.PERMISSION_GRANTED) {
+                        return false;
                     }
-                } catch (PackageManager.NameNotFoundException e) {
-                    // If the application info for the calling package could not be found then
-                    // default to throwing the SecurityException.
+                    if (SubscriptionManager.isValidSubscriptionId(subId)
+                            && getCarrierPrivilegeStatus(TELEPHONY_SUPPLIER, subId, uid)
+                            == TelephonyManager.CARRIER_PRIVILEGE_STATUS_HAS_ACCESS) {
+                        return false;
+                    }
                 }
             }
             throw new SecurityException(message + ": The user " + uid
                     + " does not meet the requirements to access device identifiers.");
+        } else {
+            return checkReadPhoneState(context, subId, pid, uid, callingPackage, message);
         }
     }
 
