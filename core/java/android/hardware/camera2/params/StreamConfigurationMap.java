@@ -98,6 +98,43 @@ public final class StreamConfigurationMap {
             HighSpeedVideoConfiguration[] highSpeedVideoConfigurations,
             ReprocessFormatsMap inputOutputFormatsMap,
             boolean listHighResolution) {
+        this(configurations, minFrameDurations, stallDurations,
+                    depthConfigurations, depthMinFrameDurations, depthStallDurations,
+                    highSpeedVideoConfigurations, inputOutputFormatsMap, listHighResolution,
+                    /*enforceImplementationDefined*/ true);
+    }
+
+    /**
+     * Create a new {@link StreamConfigurationMap}.
+     *
+     * <p>The array parameters ownership is passed to this object after creation; do not
+     * write to them after this constructor is invoked.</p>
+     *
+     * @param configurations a non-{@code null} array of {@link StreamConfiguration}
+     * @param minFrameDurations a non-{@code null} array of {@link StreamConfigurationDuration}
+     * @param stallDurations a non-{@code null} array of {@link StreamConfigurationDuration}
+     * @param highSpeedVideoConfigurations an array of {@link HighSpeedVideoConfiguration}, null if
+     *        camera device does not support high speed video recording
+     * @param listHighResolution a flag indicating whether the device supports BURST_CAPTURE
+     *        and thus needs a separate list of slow high-resolution output sizes
+     * @param enforceImplementationDefined a flag indicating whether
+     *        IMPLEMENTATION_DEFINED format configuration must be present
+     * @throws NullPointerException if any of the arguments except highSpeedVideoConfigurations
+     *         were {@code null} or any subelements were {@code null}
+     *
+     * @hide
+     */
+    public StreamConfigurationMap(
+            StreamConfiguration[] configurations,
+            StreamConfigurationDuration[] minFrameDurations,
+            StreamConfigurationDuration[] stallDurations,
+            StreamConfiguration[] depthConfigurations,
+            StreamConfigurationDuration[] depthMinFrameDurations,
+            StreamConfigurationDuration[] depthStallDurations,
+            HighSpeedVideoConfiguration[] highSpeedVideoConfigurations,
+            ReprocessFormatsMap inputOutputFormatsMap,
+            boolean listHighResolution,
+            boolean enforceImplementationDefined) {
 
         if (configurations == null) {
             // If no color configurations exist, ensure depth ones do
@@ -169,7 +206,7 @@ public final class StreamConfigurationMap {
                     mDepthOutputFormats.get(config.getFormat()) + 1);
         }
 
-        if (configurations != null &&
+        if (configurations != null && enforceImplementationDefined &&
                 mOutputFormats.indexOfKey(HAL_PIXEL_FORMAT_IMPLEMENTATION_DEFINED) < 0) {
             throw new AssertionError(
                     "At least one stream configuration for IMPLEMENTATION_DEFINED must exist");
@@ -208,7 +245,7 @@ public final class StreamConfigurationMap {
      * @see ImageFormat
      * @see PixelFormat
      */
-    public final int[] getOutputFormats() {
+    public int[] getOutputFormats() {
         return getPublicFormats(/*output*/true);
     }
 
@@ -232,7 +269,7 @@ public final class StreamConfigurationMap {
      * @see ImageFormat
      * @see PixelFormat
      */
-    public final int[] getValidOutputFormatsForInput(int inputFormat) {
+    public int[] getValidOutputFormatsForInput(int inputFormat) {
         if (mInputOutputFormatsMap == null) {
             return new int[0];
         }
@@ -250,7 +287,7 @@ public final class StreamConfigurationMap {
      * @see ImageFormat
      * @see PixelFormat
      */
-    public final int[] getInputFormats() {
+    public int[] getInputFormats() {
         return getPublicFormats(/*output*/false);
     }
 
@@ -422,6 +459,34 @@ public final class StreamConfigurationMap {
                 }
             }
         }
+        return false;
+    }
+
+    /**
+     * Determine whether or not the particular stream configuration is suitable to be included
+     * in a {@link CameraDevice#createCaptureSession capture session} as an output.
+     *
+     * @param size stream configuration size
+     * @param format stream configuration format
+     * @return {@code true} if this is supported, {@code false} otherwise
+     *
+     * @see CameraDevice#createCaptureSession
+     * @see #isOutputSupportedFor(Class)
+     * @hide
+     */
+    public boolean isOutputSupportedFor(Size size, int format) {
+        int internalFormat = imageFormatToInternal(format);
+        int dataspace = imageFormatToDataspace(format);
+
+        StreamConfiguration[] configs =
+            dataspace != HAL_DATASPACE_DEPTH ? mConfigurations : mDepthConfigurations;
+        for (StreamConfiguration config : configs) {
+            if ((config.getFormat() == internalFormat) && config.isOutput() &&
+                    config.getSize().equals(size)) {
+                return true;
+            }
+        }
+
         return false;
     }
 
@@ -1062,8 +1127,9 @@ public final class StreamConfigurationMap {
      * @see ImageFormat
      * @see PixelFormat
      * @see #checkArgumentFormat
+     * @hide
      */
-    static int imageFormatToPublic(int format) {
+    public static int imageFormatToPublic(int format) {
         switch (format) {
             case HAL_PIXEL_FORMAT_BLOB:
                 return ImageFormat.JPEG;
@@ -1105,8 +1171,9 @@ public final class StreamConfigurationMap {
      * @see ImageFormat
      * @see PixelFormat
      * @see #checkArgumentFormat
+     * @hide
      */
-    static int depthFormatToPublic(int format) {
+    public static int depthFormatToPublic(int format) {
         switch (format) {
             case HAL_PIXEL_FORMAT_BLOB:
                 return ImageFormat.DEPTH_POINT_CLOUD;
