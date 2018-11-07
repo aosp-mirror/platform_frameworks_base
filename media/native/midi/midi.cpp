@@ -338,7 +338,8 @@ public:
             numMessageBytes = std::min(maxBytes, numMessageBytes);
             memcpy(buffer, readBuffer + 1, numMessageBytes);
             if (timestampPtr != nullptr) {
-                *timestampPtr = *(uint64_t*)(readBuffer + readCount - sizeof(uint64_t));
+                memcpy(timestampPtr, readBuffer + readCount - sizeof(uint64_t),
+                        sizeof(*timestampPtr));
             }
         }
         *numBytesReceivedPtr = numMessageBytes;
