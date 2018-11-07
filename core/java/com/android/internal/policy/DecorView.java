@@ -1001,7 +1001,7 @@ public class DecorView extends FrameLayout implements RootViewSurfaceTaker, Wind
                         insets.getSystemWindowInsetRight(), 0);
             }
         }
-        mFrameOffsets.set(insets.getSystemWindowInsets());
+        mFrameOffsets.set(insets.getSystemWindowInsetsAsRect());
         insets = updateColorViews(insets, true /* animate */);
         insets = updateStatusGuard(insets);
         if (getForeground() != null) {
