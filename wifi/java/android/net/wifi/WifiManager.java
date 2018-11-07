@@ -1855,7 +1855,12 @@ public class WifiManager {
     public static final int WIFI_FEATURE_SCAN_RAND        = 0x2000000; // Random MAC & Probe seq
     /** @hide */
     public static final int WIFI_FEATURE_TX_POWER_LIMIT   = 0x4000000; // Set Tx power limit
-
+    /** @hide */
+    public static final int WIFI_FEATURE_WPA3_SAE         = 0x8000000; // WPA3-Personal SAE
+    /** @hide */
+    public static final int WIFI_FEATURE_WPA3_SUITE_B     = 0x10000000; // WPA3-Enterprise Suite-B
+    /** @hide */
+    public static final int WIFI_FEATURE_OWE              = 0x20000000; // Enhanced Open
 
     private int getSupportedFeatures() {
         try {
@@ -4247,5 +4252,32 @@ public class WifiManager {
      */
     private void updateVerboseLoggingEnabledFromService() {
         mVerboseLoggingEnabled = getVerboseLoggingLevel() > 0;
+    }
+
+    /**
+     * @return true if this device supports WPA3-Personal SAE
+     * @hide
+     */
+    @SystemApi
+    public boolean isWpa3SaeSupported() {
+        return isFeatureSupported(WIFI_FEATURE_WPA3_SAE);
+    }
+
+    /**
+     * @return true if this device supports WPA3-Enterprise Suite-B-192
+     * @hide
+     */
+    @SystemApi
+    public boolean isWpa3SuiteBSupported() {
+        return isFeatureSupported(WIFI_FEATURE_WPA3_SUITE_B);
+    }
+
+    /**
+     * @return true if this device supports Wi-Fi Enhanced Open (OWE)
+     * @hide
+     */
+    @SystemApi
+    public boolean isOweSupported() {
+        return isFeatureSupported(WIFI_FEATURE_OWE);
     }
 }
