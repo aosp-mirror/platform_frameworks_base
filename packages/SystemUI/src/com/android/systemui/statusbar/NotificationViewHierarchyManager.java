@@ -16,6 +16,8 @@
 
 package com.android.systemui.statusbar;
 
+import static com.android.systemui.statusbar.StatusBarState.SHADE;
+
 import android.content.Context;
 import android.content.res.Resources;
 import android.os.Trace;
@@ -25,6 +27,7 @@ import android.view.ViewGroup;
 
 import com.android.systemui.Dependency;
 import com.android.systemui.R;
+import com.android.systemui.bubbles.BubbleController;
 import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
 import com.android.systemui.statusbar.notification.VisualStabilityManager;
@@ -62,6 +65,7 @@ public class NotificationViewHierarchyManager {
             Dependency.get(StatusBarStateController.class);
     private final NotificationEntryManager mEntryManager =
             Dependency.get(NotificationEntryManager.class);
+    private final BubbleController mBubbleController = Dependency.get(BubbleController.class);
 
     // Lazy
     private ShadeController mShadeController;
@@ -75,6 +79,41 @@ public class NotificationViewHierarchyManager {
 
     private NotificationPresenter mPresenter;
     private NotificationListContainer mListContainer;
+    private StatusBarStateListener mStatusBarStateListener;
+
+    /**
+     * Listens for the current state of the status bar and updates the visibility state
+     * of bubbles as needed.
+     */
+    public class StatusBarStateListener implements StatusBarStateController.StateListener {
+        private int mState;
+        private BubbleController mController;
+
+        public StatusBarStateListener(BubbleController controller) {
+            mController = controller;
+        }
+
+        /**
+         * Returns the current status bar state.
+         */
+        public int getCurrentState() {
+            return mState;
+        }
+
+        @Override
+        public void onStateChanged(int newState) {
+            mState = newState;
+            // Order here matters because we need to remove the expandable notification row
+            // from it's current parent (NSSL or bubble) before it can be added to the new parent
+            if (mState == SHADE) {
+                updateNotificationViews();
+                mController.updateVisibility(true);
+            } else {
+                mController.updateVisibility(false);
+                updateNotificationViews();
+            }
+        }
+    }
 
     private ShadeController getShadeController() {
         if (mShadeController == null) {
@@ -87,6 +126,9 @@ public class NotificationViewHierarchyManager {
         Resources res = context.getResources();
         mAlwaysExpandNonGroupedNotification =
                 res.getBoolean(R.bool.config_alwaysExpandNonGroupedNotifications);
+        mStatusBarStateListener = new StatusBarStateListener(mBubbleController);
+        mEntryManager.setStatusBarStateListener(mStatusBarStateListener);
+        Dependency.get(StatusBarStateController.class).addListener(mStatusBarStateListener);
     }
 
     public void setUpWithPresenter(NotificationPresenter presenter,
@@ -102,6 +144,7 @@ public class NotificationViewHierarchyManager {
         ArrayList<NotificationData.Entry> activeNotifications = mEntryManager.getNotificationData()
                 .getActiveNotifications();
         ArrayList<ExpandableNotificationRow> toShow = new ArrayList<>(activeNotifications.size());
+        ArrayList<NotificationData.Entry> toBubble = new ArrayList<>();
         final int N = activeNotifications.size();
         for (int i = 0; i < N; i++) {
             NotificationData.Entry ent = activeNotifications.get(i);
@@ -110,6 +153,14 @@ public class NotificationViewHierarchyManager {
                 // temporarily become children if they were isolated before.
                 continue;
             }
+            ent.row.setStatusBarState(mStatusBarStateListener.getCurrentState());
+            boolean showAsBubble = ent.isBubble() && !ent.isBubbleDismissed()
+                    && mStatusBarStateListener.getCurrentState() == SHADE;
+            if (showAsBubble) {
+                toBubble.add(ent);
+                continue;
+            }
+
             int userId = ent.notification.getUserId();
 
             // Display public version of the notification if we need to redact.
@@ -208,6 +259,12 @@ public class NotificationViewHierarchyManager {
             }
             j++;
 
+        }
+
+        for (int i = 0; i < toBubble.size(); i++) {
+            // TODO: might make sense to leave them in the shade and just reposition them
+            NotificationData.Entry ent = toBubble.get(i);
+            mBubbleController.addBubble(ent);
         }
 
         mVisualStabilityManager.onReorderingFinished();

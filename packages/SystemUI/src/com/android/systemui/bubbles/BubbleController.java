@@ -22,8 +22,11 @@ import static android.view.ViewGroup.LayoutParams.WRAP_CONTENT;
 
 import static com.android.systemui.bubbles.BubbleMovementHelper.EDGE_OVERLAP;
 
+import android.app.Notification;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.graphics.Point;
+import android.service.notification.StatusBarNotification;
 import android.view.ViewGroup;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
@@ -33,6 +36,7 @@ import com.android.systemui.R;
 import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.phone.StatusBarWindowController;
 
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -47,7 +51,13 @@ public class BubbleController {
 
     private static final String TAG = "BubbleController";
 
+    // Enables some subset of notifs to automatically become bubbles
+    public static final boolean DEBUG_ENABLE_AUTO_BUBBLE = false;
+    // When a bubble is dismissed, recreate it as a notification
+    public static final boolean DEBUG_DEMOTE_TO_NOTIF = false;
+
     private Context mContext;
+    private BubbleDismissListener mDismissListener;
 
     private Map<String, BubbleView> mBubbles = new HashMap<>();
     private BubbleStackView mStackView;
@@ -56,12 +66,34 @@ public class BubbleController {
     // Bubbles get added to the status bar view
     private StatusBarWindowController mStatusBarWindowController;
 
+    /**
+     * Listener to find out about bubble / bubble stack dismissal events.
+     */
+    public interface BubbleDismissListener {
+        /**
+         * Called when the entire stack of bubbles is dismissed by the user.
+         */
+        void onStackDismissed();
+
+        /**
+         * Called when a specific bubble is dismissed by the user.
+         */
+        void onBubbleDismissed(String key);
+    }
+
     public BubbleController(Context context) {
         mContext = context;
         WindowManager wm = (WindowManager) context.getSystemService(Context.WINDOW_SERVICE);
         mDisplaySize = new Point();
         wm.getDefaultDisplay().getSize(mDisplaySize);
         mStatusBarWindowController = Dependency.get(StatusBarWindowController.class);
+    }
+
+    /**
+     * Set a listener to be notified of bubble dismissal events.
+     */
+    public void setDismissListener(BubbleDismissListener listener) {
+        mDismissListener = listener;
     }
 
     /**
@@ -98,6 +130,9 @@ public class BubbleController {
         mStackView.setPosition(startPoint.x, startPoint.y);
         for (String key: mBubbles.keySet()) {
             removeBubble(key);
+        }
+        if (mDismissListener != null) {
+            mDismissListener.onStackDismissed();
         }
     }
 
@@ -146,6 +181,38 @@ public class BubbleController {
             mStackView.removeBubble(bv);
             bv.getEntry().setBubbleDismissed(true);
         }
+        if (mDismissListener != null) {
+            mDismissListener.onBubbleDismissed(key);
+        }
+    }
+
+    /**
+     * Sets the visibility of the bubbles, doesn't un-bubble them, just changes visibility.
+     */
+    public void updateVisibility(boolean visible) {
+        if (mStackView == null) {
+            return;
+        }
+        ArrayList<BubbleView> viewsToRemove = new ArrayList<>();
+        for (BubbleView bv : mBubbles.values()) {
+            NotificationData.Entry entry = bv.getEntry();
+            if (entry != null) {
+                if (entry.row.isRemoved() || entry.isBubbleDismissed() || entry.row.isDismissed()) {
+                    viewsToRemove.add(bv);
+                }
+            }
+        }
+        for (BubbleView view : viewsToRemove) {
+            mBubbles.remove(view.getKey());
+            mStackView.removeBubble(view);
+            if (mBubbles.size() == 0) {
+                ((ViewGroup) mStatusBarWindowController.getStatusBarView()).removeView(mStackView);
+                mStackView = null;
+            }
+        }
+        if (mStackView != null) {
+            mStackView.setVisibility(visible ? VISIBLE : GONE);
+        }
     }
 
     // TODO: factor in PIP location / maybe last place user had it
@@ -166,4 +233,30 @@ public class BubbleController {
         return new Point(EDGE_OVERLAP, size);
     }
 
+    /**
+     * Whether the notification should bubble or not.
+     */
+    public static boolean shouldAutoBubble(NotificationData.Entry entry, int priority,
+            boolean canAppOverlay) {
+        if (!DEBUG_ENABLE_AUTO_BUBBLE || entry.isBubbleDismissed()) {
+            return false;
+        }
+        StatusBarNotification n = entry.notification;
+        boolean hasRemoteInput = false;
+        if (n.getNotification().actions != null) {
+            for (Notification.Action action : n.getNotification().actions) {
+                if (action.getRemoteInputs() != null) {
+                    hasRemoteInput = true;
+                    break;
+                }
+            }
+        }
+        Class<? extends Notification.Style> style = n.getNotification().getNotificationStyle();
+        boolean shouldBubble = priority >= NotificationManager.IMPORTANCE_HIGH
+                || Notification.MessagingStyle.class.equals(style)
+                || Notification.CATEGORY_MESSAGE.equals(n.getNotification().category)
+                || hasRemoteInput
+                || canAppOverlay;
+        return shouldBubble && !entry.isBubbleDismissed();
+    }
 }
