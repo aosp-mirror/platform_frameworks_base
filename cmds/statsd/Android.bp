@@ -205,10 +205,6 @@ cc_test {
     ],
 
     srcs: [
-        // atom_field_options.proto needs field_options.proto, but that is
-        // not included in libprotobuf-cpp-lite, so compile it here.
-        ":libprotobuf-internal-protos",
-
         "src/atom_field_options.proto",
         "src/atoms.proto",
         "src/stats_log.proto",
@@ -263,11 +259,11 @@ cc_test {
     ],
 
     proto: {
-        type: "lite",
+        type: "full",
         include_dirs: ["external/protobuf/src"],
     },
 
-    shared_libs: ["libprotobuf-cpp-lite"],
+    shared_libs: ["libprotobuf-cpp-full"],
 
 }
 
@@ -280,10 +276,6 @@ cc_benchmark {
     defaults: ["statsd_defaults"],
 
     srcs: [
-        // atom_field_options.proto needs field_options.proto, but that is
-        // not included in libprotobuf-cpp-lite, so compile it here.
-        ":libprotobuf-internal-protos",
-
         "src/atom_field_options.proto",
         "src/atoms.proto",
         "src/stats_log.proto",
@@ -298,7 +290,7 @@ cc_benchmark {
     ],
 
     proto: {
-        type: "lite",
+        type: "full",
         include_dirs: ["external/protobuf/src"],
     },
 
@@ -320,7 +312,7 @@ cc_benchmark {
     shared_libs: [
         "libgtest_prod",
         "libstatslog",
-        "libprotobuf-cpp-lite",
+        "libprotobuf-cpp-full",
     ],
 }
 
