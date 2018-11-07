@@ -814,13 +814,19 @@ public class KeyEvent extends InputEvent implements Parcelable {
     public static final int KEYCODE_ALL_APPS = 284;
     /** Key code constant: Refresh key. */
     public static final int KEYCODE_REFRESH = 285;
+    /** Key code constant: Thumbs up key. Apps can use this to let user upvote content. */
+    public static final int KEYCODE_THUMBS_UP = 286;
+    /** Key code constant: Thumbs down key. Apps can use this to let user downvote content. */
+    public static final int KEYCODE_THUMBS_DOWN = 287;
+    /** Key code constant: Consumed by system to switch current viewer profile. */
+    public static final int KEYCODE_PROFILE_SWITCH = 288;
 
     /**
      * Integer value of the last KEYCODE. Increases as new keycodes are added to KeyEvent.
      * @hide
      */
     @TestApi
-    public static final int LAST_KEYCODE = KEYCODE_REFRESH;
+    public static final int LAST_KEYCODE = KEYCODE_PROFILE_SWITCH;
 
     // NOTE: If you add a new keycode here you must also add it to:
     //  isSystem()
