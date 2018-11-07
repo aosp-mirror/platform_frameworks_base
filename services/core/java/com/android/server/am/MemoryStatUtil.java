@@ -16,9 +16,9 @@
 
 package com.android.server.am;
 
-import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_METRICS;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_METRICS;
 
 import android.annotation.Nullable;
 import android.os.FileUtils;
@@ -45,7 +45,7 @@ public final class MemoryStatUtil {
      * <p>Processes are matched by their cmdline in procfs. Example: cat /proc/pid/cmdline returns
      * /system/bin/statsd for the stats daemon.
      */
-    static final String[] MEMORY_STAT_INTERESTING_NATIVE_PROCESSES = new String[]{
+    public static final String[] MEMORY_STAT_INTERESTING_NATIVE_PROCESSES = new String[]{
             "/system/bin/statsd",  // Stats daemon.
             "/system/bin/surfaceflinger",
             "/system/bin/apexd",  // APEX daemon.
@@ -146,7 +146,7 @@ public final class MemoryStatUtil {
      * Returns null if file is not found in procfs or if file has unrecognized contents.
      */
     @Nullable
-    static MemoryStat readMemoryStatFromProcfs(int pid) {
+    public static MemoryStat readMemoryStatFromProcfs(int pid) {
         final String statPath = String.format(Locale.US, PROC_STAT_FILE_FMT, pid);
         MemoryStat stat = parseMemoryStatFromProcfs(readFileContents(statPath));
         if (stat == null) {
@@ -163,7 +163,7 @@ public final class MemoryStatUtil {
      * Returns content of /proc/pid/cmdline (e.g. /system/bin/statsd) or an empty string
      * if the file is not available.
      */
-    static String readCmdlineFromProcfs(int pid) {
+    public static String readCmdlineFromProcfs(int pid) {
         String path = String.format(Locale.US, PROC_CMDLINE_FILE_FMT, pid);
         String cmdline = readFileContents(path);
         return cmdline != null ? cmdline : "";

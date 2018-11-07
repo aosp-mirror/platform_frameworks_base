@@ -15,7 +15,13 @@
  */
 package com.android.server.stats;
 
+import static android.os.Process.getPidsForCommands;
+import static android.os.Process.getUidForPid;
+
 import static com.android.internal.util.Preconditions.checkNotNull;
+import static com.android.server.am.MemoryStatUtil.MEMORY_STAT_INTERESTING_NATIVE_PROCESSES;
+import static com.android.server.am.MemoryStatUtil.readCmdlineFromProcfs;
+import static com.android.server.am.MemoryStatUtil.readMemoryStatFromProcfs;
 
 import android.annotation.Nullable;
 import android.app.ActivityManagerInternal;
@@ -96,6 +102,7 @@ import com.android.server.BinderCallsStatsService;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.SystemServiceManager;
+import com.android.server.am.MemoryStatUtil.MemoryStat;
 import com.android.server.storage.DiskStatsFileLogger;
 import com.android.server.storage.DiskStatsLoggingService;
 
@@ -1012,17 +1019,23 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     private void pullNativeProcessMemoryState(
             int tagId, long elapsedNanos, long wallClockNanos,
             List<StatsLogEventWrapper> pulledData) {
-        List<ProcessMemoryState> processMemoryStates = LocalServices.getService(
-                ActivityManagerInternal.class).getMemoryStateForNativeProcesses();
-        for (ProcessMemoryState processMemoryState : processMemoryStates) {
+        int[] pids = getPidsForCommands(MEMORY_STAT_INTERESTING_NATIVE_PROCESSES);
+        for (int i = 0; i < pids.length; i++) {
+            int pid = pids[i];
+            MemoryStat memoryStat = readMemoryStatFromProcfs(pid);
+            if (memoryStat == null) {
+                continue;
+            }
+            int uid = getUidForPid(pid);
+            String processName = readCmdlineFromProcfs(pid);
             StatsLogEventWrapper e = new StatsLogEventWrapper(tagId, elapsedNanos, wallClockNanos);
-            e.writeInt(processMemoryState.uid);
-            e.writeString(processMemoryState.processName);
-            e.writeLong(processMemoryState.pgfault);
-            e.writeLong(processMemoryState.pgmajfault);
-            e.writeLong(processMemoryState.rssInBytes);
-            e.writeLong(processMemoryState.rssHighWatermarkInBytes);
-            e.writeLong(processMemoryState.startTimeNanos);
+            e.writeInt(uid);
+            e.writeString(processName);
+            e.writeLong(memoryStat.pgfault);
+            e.writeLong(memoryStat.pgmajfault);
+            e.writeLong(memoryStat.rssInBytes);
+            e.writeLong(memoryStat.rssHighWatermarkInBytes);
+            e.writeLong(memoryStat.startTimeNanos);
             pulledData.add(e);
         }
     }
