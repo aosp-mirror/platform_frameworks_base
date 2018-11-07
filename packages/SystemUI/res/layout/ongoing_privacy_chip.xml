@@ -21,7 +21,8 @@
     android:layout_width="wrap_content"
     android:layout_height="match_parent"
     android:layout_margin="@dimen/ongoing_appops_chip_margin"
-    android:gravity="center_vertical|end"
+    android:gravity="center_vertical|center_horizontal"
+    android:layout_gravity="center_vertical|end"
     android:orientation="horizontal"
     android:paddingStart="@dimen/ongoing_appops_chip_side_padding"
     android:paddingEnd="@dimen/ongoing_appops_chip_side_padding"
@@ -32,13 +33,17 @@
             android:id="@+id/icons_container"
             android:layout_height="match_parent"
             android:layout_width="wrap_content"
-            android:gravity="center_vertical|start"
+            android:layout_gravity="center_vertical|start"
+            android:gravity="center_vertical"
             />
 
         <TextView
             android:id="@+id/app_name"
             android:layout_height="match_parent"
             android:layout_width="wrap_content"
-            android:gravity="center_vertical|end"
+            android:singleLine="true"
+            android:ellipsize="end"
+            android:layout_gravity="center_vertical|end"
+            android:gravity="center_vertical"
         />
 </com.android.systemui.privacy.OngoingPrivacyChip>
