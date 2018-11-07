@@ -122,7 +122,7 @@ class RecentsAnimation implements RecentsAnimationCallbacks,
                     targetActivity);
         }
 
-        mStackSupervisor.getActivityMetricsLogger().notifyActivityLaunching();
+        mStackSupervisor.getActivityMetricsLogger().notifyActivityLaunching(intent);
 
         mService.mAmInternal.setRunningRemoteAnimation(mCallingPid, true);
 

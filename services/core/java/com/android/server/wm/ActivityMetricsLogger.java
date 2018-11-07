@@ -80,6 +80,7 @@ import static com.android.server.am.MemoryStatUtil.MemoryStat;
 import static com.android.server.am.MemoryStatUtil.readMemoryStatFromFilesystem;
 import static com.android.server.wm.ActivityTaskManagerInternal.APP_TRANSITION_TIMEOUT;
 
+import android.app.WindowConfiguration.WindowingMode;
 import android.content.Context;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
@@ -141,21 +142,33 @@ class ActivityMetricsLogger {
     private final Context mContext;
     private final MetricsLogger mMetricsLogger = new MetricsLogger();
 
+    // set to INVALID_START_TIME in reset.
+    // set to valid value in notifyActivityLaunching
     private long mCurrentTransitionStartTime = INVALID_START_TIME;
     private long mLastTransitionStartTime = INVALID_START_TIME;
 
     private int mCurrentTransitionDeviceUptime;
     private int mCurrentTransitionDelayMs;
+
+    /** If the any app transitions have been logged as starting, after the latest reset. */
     private boolean mLoggedTransitionStarting;
 
+    /** Map : @WindowingMode int => WindowingModeTransitionInfo */
     private final SparseArray<WindowingModeTransitionInfo> mWindowingModeTransitionInfo =
             new SparseArray<>();
+    /** Map : @WindowingMode int => WindowingModeTransitionInfo */
     private final SparseArray<WindowingModeTransitionInfo> mLastWindowingModeTransitionInfo =
             new SparseArray<>();
     private final H mHandler;
 
     private ArtManagerInternal mArtManagerInternal;
     private final StringBuilder mStringBuilder = new StringBuilder();
+
+    /**
+     * Due to the global single concurrent launch sequence, all calls to this observer must be made
+     * in-order on the same thread to fulfill the "happens-before" guarantee in LaunchObserver.
+     */
+    private final ActivityMetricsLaunchObserver mLaunchObserver = null;
 
     private final class H extends Handler {
 
@@ -175,6 +188,7 @@ class ActivityMetricsLogger {
     }
 
     private final class WindowingModeTransitionInfo {
+        /** The latest activity to have been launched. */
         private ActivityRecord launchedActivity;
         private int startResult;
         private boolean currentTransitionProcessRunning;
@@ -273,7 +287,7 @@ class ActivityMetricsLogger {
             return;
         }
 
-        int windowingMode = stack.getWindowingMode();
+        @WindowingMode int windowingMode = stack.getWindowingMode();
         if (windowingMode == WINDOWING_MODE_PINNED) {
             stack = mSupervisor.findStackBehind(stack);
             windowingMode = stack.getWindowingMode();
@@ -301,11 +315,19 @@ class ActivityMetricsLogger {
      * Notifies the tracker at the earliest possible point when we are starting to launch an
      * activity.
      */
-    void notifyActivityLaunching() {
+    void notifyActivityLaunching(Intent intent) {
+        if (DEBUG_METRICS) {
+            Slog.i(TAG, String.format("notifyActivityLaunching: active:%b, intent:%s",
+                                      isAnyTransitionActive(),
+                                      intent));
+        }
+
         if (!isAnyTransitionActive()) {
-            if (DEBUG_METRICS) Slog.i(TAG, "notifyActivityLaunching");
+
             mCurrentTransitionStartTime = SystemClock.uptimeMillis();
             mLastTransitionStartTime = mCurrentTransitionStartTime;
+
+            launchObserverNotifyIntentStarted(intent);
         }
     }
 
@@ -350,7 +372,9 @@ class ActivityMetricsLogger {
                 + " processRunning=" + processRunning
                 + " processSwitch=" + processSwitch);
 
-        final int windowingMode = launchedActivity != null
+        // If we are already in an existing transition, only update the activity name, but not the
+        // other attributes.
+        final @WindowingMode int windowingMode = launchedActivity != null
                 ? launchedActivity.getWindowingMode()
                 : WINDOWING_MODE_UNDEFINED;
         final WindowingModeTransitionInfo info = mWindowingModeTransitionInfo.get(windowingMode);
@@ -361,13 +385,15 @@ class ActivityMetricsLogger {
 
         if (launchedActivity != null && launchedActivity.nowVisible) {
             // Launched activity is already visible. We cannot measure windows drawn delay.
-            reset(true /* abort */, info);
+            reset(true /* abort */, info, "launched activity already visible");
             return;
         }
 
         if (launchedActivity != null && info != null) {
             // If we are already in an existing transition, only update the activity name, but not
             // the other attributes.
+
+            // Coalesce multiple (trampoline) activities from a single sequence together.
             info.launchedActivity = launchedActivity;
             return;
         }
@@ -377,7 +403,7 @@ class ActivityMetricsLogger {
         if ((!isLoggableResultCode(resultCode) || launchedActivity == null || !processSwitch
                 || windowingMode == WINDOWING_MODE_UNDEFINED) && !otherWindowModesLaunching) {
             // Failed to launch or it was not a process switch, so we don't care about the timing.
-            reset(true /* abort */, info);
+            reset(true /* abort */, info, "failed to launch or not a process switch");
             return;
         } else if (otherWindowModesLaunching) {
             // Don't log this windowing mode but continue with the other windowing modes.
@@ -386,6 +412,8 @@ class ActivityMetricsLogger {
 
         if (DEBUG_METRICS) Slog.i(TAG, "notifyActivityLaunched successful");
 
+        // A new launch sequence [with the windowingMode] has begun.
+        // Start tracking it.
         final WindowingModeTransitionInfo newInfo = new WindowingModeTransitionInfo();
         newInfo.launchedActivity = launchedActivity;
         newInfo.currentTransitionProcessRunning = processRunning;
@@ -394,6 +422,7 @@ class ActivityMetricsLogger {
         mLastWindowingModeTransitionInfo.put(windowingMode, newInfo);
         mCurrentTransitionDeviceUptime = (int) (SystemClock.uptimeMillis() / 1000);
         startTraces(newInfo);
+        launchObserverNotifyActivityLaunched(newInfo);
     }
 
     /**
@@ -407,7 +436,8 @@ class ActivityMetricsLogger {
     /**
      * Notifies the tracker that all windows of the app have been drawn.
      */
-    WindowingModeTransitionInfoSnapshot notifyWindowsDrawn(int windowingMode, long timestamp) {
+    WindowingModeTransitionInfoSnapshot notifyWindowsDrawn(@WindowingMode int windowingMode,
+                                                           long timestamp) {
         if (DEBUG_METRICS) Slog.i(TAG, "notifyWindowsDrawn windowingMode=" + windowingMode);
 
         final WindowingModeTransitionInfo info = mWindowingModeTransitionInfo.get(windowingMode);
@@ -419,7 +449,7 @@ class ActivityMetricsLogger {
         final WindowingModeTransitionInfoSnapshot infoSnapshot =
                 new WindowingModeTransitionInfoSnapshot(info);
         if (allWindowsDrawn() && mLoggedTransitionStarting) {
-            reset(false /* abort */, info);
+            reset(false /* abort */, info, "notifyWindowsDrawn - all windows drawn");
         }
         return infoSnapshot;
     }
@@ -427,7 +457,7 @@ class ActivityMetricsLogger {
     /**
      * Notifies the tracker that the starting window was drawn.
      */
-    void notifyStartingWindowDrawn(int windowingMode, long timestamp) {
+    void notifyStartingWindowDrawn(@WindowingMode int windowingMode, long timestamp) {
         final WindowingModeTransitionInfo info = mWindowingModeTransitionInfo.get(windowingMode);
         if (info == null || info.loggedStartingWindowDrawn) {
             return;
@@ -444,22 +474,28 @@ class ActivityMetricsLogger {
      */
     void notifyTransitionStarting(SparseIntArray windowingModeToReason, long timestamp) {
         if (!isAnyTransitionActive() || mLoggedTransitionStarting) {
+            // Ignore calls to this made after a reset and prior to notifyActivityLaunching.
+
+            // Ignore any subsequent notifyTransitionStarting until the next reset.
             return;
         }
         if (DEBUG_METRICS) Slog.i(TAG, "notifyTransitionStarting");
         mCurrentTransitionDelayMs = calculateDelay(timestamp);
         mLoggedTransitionStarting = true;
+
+        WindowingModeTransitionInfo foundInfo = null;
         for (int index = windowingModeToReason.size() - 1; index >= 0; index--) {
-            final int windowingMode = windowingModeToReason.keyAt(index);
+            final @WindowingMode int windowingMode = windowingModeToReason.keyAt(index);
             final WindowingModeTransitionInfo info = mWindowingModeTransitionInfo.get(
                     windowingMode);
             if (info == null) {
                 continue;
             }
             info.reason = windowingModeToReason.valueAt(index);
+            foundInfo = info;
         }
         if (allWindowsDrawn()) {
-            reset(false /* abort */, null /* WindowingModeTransitionInfo */);
+            reset(false /* abort */, foundInfo, "notifyTransitionStarting - all windows drawn");
         }
     }
 
@@ -498,7 +534,7 @@ class ActivityMetricsLogger {
                 logAppTransitionCancel(info);
                 mWindowingModeTransitionInfo.remove(r.getWindowingMode());
                 if (mWindowingModeTransitionInfo.size() == 0) {
-                    reset(true /* abort */, info);
+                    reset(true /* abort */, info, "notifyVisibilityChanged to invisible");
                 }
             }
         }
@@ -534,12 +570,25 @@ class ActivityMetricsLogger {
                 && mWindowingModeTransitionInfo.size() > 0;
     }
 
-    private void reset(boolean abort, WindowingModeTransitionInfo info) {
-        if (DEBUG_METRICS) Slog.i(TAG, "reset abort=" + abort);
+    private void reset(boolean abort, WindowingModeTransitionInfo info, String cause) {
+        if (DEBUG_METRICS) Slog.i(TAG, "reset abort=" + abort + ",cause=" + cause);
         if (!abort && isAnyTransitionActive()) {
             logAppTransitionMultiEvents();
         }
         stopLaunchTrace(info);
+
+        // Ignore reset-after reset.
+        if (isAnyTransitionActive()) {
+            // LaunchObserver callbacks.
+            if (abort) {
+                launchObserverNotifyActivityLaunchCancelled(info);
+            } else {
+                launchObserverNotifyActivityLaunchFinished(info);
+            }
+        } else {
+            launchObserverNotifyIntentFailed();
+        }
+
         mCurrentTransitionStartTime = INVALID_START_TIME;
         mCurrentTransitionDelayMs = INVALID_DELAY;
         mLoggedTransitionStarting = false;
@@ -572,6 +621,13 @@ class ActivityMetricsLogger {
                 info.launchedActivity.packageName,
                 convertAppStartTransitionType(type),
                 info.launchedActivity.info.name);
+        if (DEBUG_METRICS) {
+            Slog.i(TAG, String.format("APP_START_CANCELED(%s, %s, %s, %s)",
+                    info.launchedActivity.appInfo.uid,
+                    info.launchedActivity.packageName,
+                    convertAppStartTransitionType(type),
+                    info.launchedActivity.info.name));
+        }
     }
 
     private void logAppTransitionMultiEvents() {
@@ -656,6 +712,17 @@ class ActivityMetricsLogger {
                 launchToken,
                 packageOptimizationInfo.getCompilationReason(),
                 packageOptimizationInfo.getCompilationFilter());
+
+        if (DEBUG_METRICS) {
+            Slog.i(TAG, String.format("APP_START_OCCURRED(%s, %s, %s, %s, %s)",
+                    info.applicationInfo.uid,
+                    info.packageName,
+                    convertAppStartTransitionType(info.type),
+                    info.launchedActivityName,
+                    info.launchedActivityLaunchedFromPackage));
+        }
+
+
         logAppStartMemoryStateCapture(info);
     }
 
@@ -921,6 +988,78 @@ class ActivityMetricsLogger {
             Trace.asyncTraceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER, "launching: "
                     + info.launchedActivity.packageName, 0);
             info.launchTraceActive = false;
+        }
+    }
+
+    /** Notify the {@link ActivityMetricsLaunchObserver} that a new launch sequence has begun. */
+    private void launchObserverNotifyIntentStarted(Intent intent) {
+        if (mLaunchObserver != null) {
+            // Beginning a launch is timing sensitive and so should be observed as soon as possible.
+            mLaunchObserver.onIntentStarted(intent);
+        }
+    }
+
+    /**
+     * Notify the {@link ActivityMetricsLaunchObserver} that the previous launch sequence has
+     * aborted due to intent failure (e.g. intent resolve failed or security error, etc) or
+     * intent being delivered to the top running activity.
+     */
+    private void launchObserverNotifyIntentFailed() {
+        if (mLaunchObserver != null) {
+            mLaunchObserver.onIntentFailed();
+        }
+    }
+
+    /**
+     * Notify the {@link ActivityMetricsLaunchObserver} that the current launch sequence's activity
+     * has started.
+     */
+    private void launchObserverNotifyActivityLaunched(WindowingModeTransitionInfo info) {
+        @ActivityMetricsLaunchObserver.Temperature int temperature =
+                convertTransitionTypeToLaunchObserverTemperature(getTransitionType(info));
+
+        if (mLaunchObserver != null) {
+            // Beginning a launch is timing sensitive and so should be observed as soon as possible.
+            mLaunchObserver.onActivityLaunched(info.launchedActivity,
+                                               temperature);
+        }
+    }
+
+    /**
+     * Notify the {@link ActivityMetricsLaunchObserver} that the current launch sequence is
+     * cancelled.
+     */
+    private void launchObserverNotifyActivityLaunchCancelled(WindowingModeTransitionInfo info) {
+        final ActivityRecord launchedActivity = info != null ? info.launchedActivity : null;
+
+        if (mLaunchObserver != null) {
+            mLaunchObserver.onActivityLaunchCancelled(launchedActivity);
+        }
+    }
+
+    /**
+     * Notify the {@link ActivityMetricsLaunchObserver} that the current launch sequence's activity
+     * has fully finished (successfully).
+     */
+    private void launchObserverNotifyActivityLaunchFinished(WindowingModeTransitionInfo info) {
+        final ActivityRecord launchedActivity = info.launchedActivity;
+
+        if (mLaunchObserver != null) {
+            mLaunchObserver.onActivityLaunchFinished(launchedActivity);
+        }
+    }
+
+    private static @ActivityMetricsLaunchObserver.Temperature int
+            convertTransitionTypeToLaunchObserverTemperature(int transitionType) {
+        switch (transitionType) {
+            case TYPE_TRANSITION_WARM_LAUNCH:
+                return ActivityMetricsLaunchObserver.TEMPERATURE_WARM;
+            case TYPE_TRANSITION_HOT_LAUNCH:
+                return ActivityMetricsLaunchObserver.TEMPERATURE_HOT;
+            case TYPE_TRANSITION_COLD_LAUNCH:
+                return ActivityMetricsLaunchObserver.TEMPERATURE_COLD;
+            default:
+                return -1;
         }
     }
 }
