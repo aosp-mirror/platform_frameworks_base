@@ -959,7 +959,7 @@ public class PackageInstallerSession extends IPackageInstallerSession.Stub {
         try {
             IApexService apex = IApexService.Stub.asInterface(
                     ServiceManager.getService("apexservice"));
-            apex.installPackage(mResolvedBaseFile.toString());
+            apex.stagePackage(mResolvedBaseFile.toString());
         } catch (Throwable e) {
             // Convert all exceptions into package manager exceptions as only those are handled
             // in the code above
