@@ -17,6 +17,8 @@
 package com.android.keyguard;
 
 import static android.app.slice.Slice.HINT_LIST_ITEM;
+import static android.view.Display.DEFAULT_DISPLAY;
+import static android.view.Display.INVALID_DISPLAY;
 
 import android.animation.LayoutTransition;
 import android.animation.ObjectAnimator;
@@ -80,6 +82,7 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
     private float mDarkAmount = 0;
 
     private LiveData<Slice> mLiveData;
+    private int mDisplayId = INVALID_DISPLAY;
     private int mIconSize;
     /**
      * Runnable called whenever the view contents change.
@@ -129,6 +132,7 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
     protected void onAttachedToWindow() {
         super.onAttachedToWindow();
 
+        mDisplayId = getDisplay().getDisplayId();
         // Make sure we always have the most current slice
         mLiveData.observeForever(this);
         Dependency.get(ConfigurationController.class).addCallback(this);
@@ -138,7 +142,10 @@ public class KeyguardSliceView extends LinearLayout implements View.OnClickListe
     protected void onDetachedFromWindow() {
         super.onDetachedFromWindow();
 
-        mLiveData.removeObserver(this);
+        // TODO(b/117344873) Remove below work around after this issue be fixed.
+        if (mDisplayId == DEFAULT_DISPLAY) {
+            mLiveData.removeObserver(this);
+        }
         Dependency.get(ConfigurationController.class).removeCallback(this);
     }
 

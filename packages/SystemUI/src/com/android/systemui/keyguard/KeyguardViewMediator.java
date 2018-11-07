@@ -17,7 +17,6 @@
 package com.android.systemui.keyguard;
 
 import static android.provider.Settings.System.SCREEN_OFF_TIMEOUT;
-import static android.view.Display.INVALID_DISPLAY;
 
 import static com.android.internal.telephony.IccCardConstants.State.ABSENT;
 import static com.android.internal.telephony.IccCardConstants.State.PIN_REQUIRED;
@@ -95,6 +94,7 @@ import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
 import java.io.FileDescriptor;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 /**
  * Mediates requests related to the keyguard.  This includes queries about the
@@ -246,8 +246,8 @@ public class KeyguardViewMediator extends SystemUI {
     // AOD is enabled and status bar is in AOD state.
     private boolean mAodShowing;
 
-    // display id of the secondary display on which we have put a keyguard window
-    private int mSecondaryDisplayShowing = INVALID_DISPLAY;
+    // display ids of the external display on which we have put a keyguard window
+    private int[] mSecondaryDisplaysShowing;
 
     /** Cached value of #isInputRestricted */
     private boolean mInputRestricted;
@@ -700,9 +700,9 @@ public class KeyguardViewMediator extends SystemUI {
         }
 
         @Override
-        public void onSecondaryDisplayShowingChanged(int displayId) {
+        public void onSecondaryDisplayShowingChanged(int[] displayIds) {
             synchronized (KeyguardViewMediator.this) {
-                setShowingLocked(mShowing, mAodShowing, displayId, false);
+                setShowingLocked(mShowing, mAodShowing, displayIds, false);
             }
         }
     };
@@ -749,10 +749,10 @@ public class KeyguardViewMediator extends SystemUI {
             setShowingLocked(!shouldWaitForProvisioning()
                     && !mLockPatternUtils.isLockScreenDisabled(
                             KeyguardUpdateMonitor.getCurrentUser()),
-                    mAodShowing, mSecondaryDisplayShowing, true /* forceCallbacks */);
+                    mAodShowing, mSecondaryDisplaysShowing, true /* forceCallbacks */);
         } else {
             // The system's keyguard is disabled or missing.
-            setShowingLocked(false, mAodShowing, mSecondaryDisplayShowing, true);
+            setShowingLocked(false, mAodShowing, mSecondaryDisplaysShowing, true);
         }
 
         mStatusBarKeyguardViewManager =
@@ -1776,11 +1776,11 @@ public class KeyguardViewMediator extends SystemUI {
     }
 
     private void updateActivityLockScreenState(boolean showing, boolean aodShowing,
-            int secondaryDisplayShowing) {
+            int[] secondaryDisplaysShowing) {
         mUiOffloadThread.submit(() -> {
             try {
                 ActivityTaskManager.getService().setLockScreenShown(showing, aodShowing,
-                        secondaryDisplayShowing);
+                        secondaryDisplaysShowing);
             } catch (RemoteException e) {
             }
         });
@@ -1895,7 +1895,8 @@ public class KeyguardViewMediator extends SystemUI {
 
             if (!mHiding) {
                 // Tell ActivityManager that we canceled the keyguardExitAnimation.
-                setShowingLocked(mShowing, mAodShowing, mSecondaryDisplayShowing, true /* force */);
+                setShowingLocked(mShowing, mAodShowing, mSecondaryDisplaysShowing,
+                        true /* force */);
                 return;
             }
             mHiding = false;
@@ -2164,22 +2165,23 @@ public class KeyguardViewMediator extends SystemUI {
     }
 
     private void setShowingLocked(boolean showing, boolean aodShowing) {
-        setShowingLocked(showing, aodShowing, mSecondaryDisplayShowing,
+        setShowingLocked(showing, aodShowing, mSecondaryDisplaysShowing,
                 false /* forceCallbacks */);
     }
 
-    private void setShowingLocked(boolean showing, boolean aodShowing, int secondaryDisplayShowing,
-            boolean forceCallbacks) {
+    private void setShowingLocked(boolean showing, boolean aodShowing,
+            int[] secondaryDisplaysShowing, boolean forceCallbacks) {
         final boolean notifyDefaultDisplayCallbacks = showing != mShowing
                 || aodShowing != mAodShowing || forceCallbacks;
-        if (notifyDefaultDisplayCallbacks || secondaryDisplayShowing != mSecondaryDisplayShowing) {
+        if (notifyDefaultDisplayCallbacks
+                || !Arrays.equals(secondaryDisplaysShowing, mSecondaryDisplaysShowing)) {
             mShowing = showing;
             mAodShowing = aodShowing;
-            mSecondaryDisplayShowing = secondaryDisplayShowing;
+            mSecondaryDisplaysShowing = secondaryDisplaysShowing;
             if (notifyDefaultDisplayCallbacks) {
                 notifyDefaultDisplayCallbacks(showing);
             }
-            updateActivityLockScreenState(showing, aodShowing, secondaryDisplayShowing);
+            updateActivityLockScreenState(showing, aodShowing, secondaryDisplaysShowing);
         }
     }
 

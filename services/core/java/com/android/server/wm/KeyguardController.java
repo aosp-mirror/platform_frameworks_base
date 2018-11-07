@@ -18,7 +18,6 @@ package com.android.server.wm;
 
 import static android.os.Trace.TRACE_TAG_ACTIVITY_MANAGER;
 import static android.view.Display.DEFAULT_DISPLAY;
-import static android.view.Display.INVALID_DISPLAY;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_NO_ANIMATION;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_TO_SHADE;
 import static android.view.WindowManager.TRANSIT_FLAG_KEYGUARD_GOING_AWAY_WITH_WALLPAPER;
@@ -30,13 +29,13 @@ import static android.view.WindowManagerPolicyConstants.KEYGUARD_GOING_AWAY_FLAG
 import static android.view.WindowManagerPolicyConstants.KEYGUARD_GOING_AWAY_FLAG_TO_SHADE;
 import static android.view.WindowManagerPolicyConstants.KEYGUARD_GOING_AWAY_FLAG_WITH_WALLPAPER;
 
-import static com.android.server.wm.ActivityStackSupervisor.PRESERVE_WINDOWS;
-import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
-import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.am.KeyguardControllerProto.KEYGUARD_OCCLUDED_STATES;
 import static com.android.server.am.KeyguardControllerProto.KEYGUARD_SHOWING;
 import static com.android.server.am.KeyguardOccludedProto.DISPLAY_ID;
 import static com.android.server.am.KeyguardOccludedProto.KEYGUARD_OCCLUDED;
+import static com.android.server.wm.ActivityStackSupervisor.PRESERVE_WINDOWS;
+import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
+import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 
 import android.os.IBinder;
 import android.os.RemoteException;
@@ -50,6 +49,7 @@ import com.android.server.policy.WindowManagerPolicy;
 import com.android.server.wm.ActivityTaskManagerInternal.SleepToken;
 
 import java.io.PrintWriter;
+import java.util.Arrays;
 
 /**
  * Controls Keyguard occluding, dismissing and transitions depending on what kind of activities are
@@ -67,10 +67,9 @@ class KeyguardController {
     private boolean mAodShowing;
     private boolean mKeyguardGoingAway;
     private boolean mDismissalRequested;
+    private int[] mSecondaryDisplayIdsShowing;
     private int mBeforeUnoccludeTransit;
     private int mVisibilityTransactionDepth;
-    // TODO(b/111955725): Support multiple external displays
-    private int mSecondaryDisplayShowing = INVALID_DISPLAY;
     private final SparseArray<KeyguardDisplayState> mDisplayStates = new SparseArray<>();
     private final ActivityTaskManagerService mService;
 
@@ -90,7 +89,9 @@ class KeyguardController {
      */
     boolean isKeyguardOrAodShowing(int displayId) {
         return (mKeyguardShowing || mAodShowing) && !mKeyguardGoingAway
-                && !isDisplayOccluded(displayId);
+                && (displayId == DEFAULT_DISPLAY
+                        ? !isDisplayOccluded(DEFAULT_DISPLAY)
+                        : isShowingOnSecondaryDisplay(displayId));
     }
 
     /**
@@ -98,7 +99,10 @@ class KeyguardController {
      *         display, false otherwise
      */
     boolean isKeyguardShowing(int displayId) {
-        return mKeyguardShowing && !mKeyguardGoingAway && !isDisplayOccluded(displayId);
+        return mKeyguardShowing && !mKeyguardGoingAway
+                && (displayId == DEFAULT_DISPLAY
+                        ? !isDisplayOccluded(DEFAULT_DISPLAY)
+                        : isShowingOnSecondaryDisplay(displayId));
     }
 
     /**
@@ -120,16 +124,17 @@ class KeyguardController {
      * Update the Keyguard showing state.
      */
     void setKeyguardShown(boolean keyguardShowing, boolean aodShowing,
-            int secondaryDisplayShowing) {
+            int[] secondaryDisplaysShowing) {
         boolean showingChanged = keyguardShowing != mKeyguardShowing || aodShowing != mAodShowing;
         // If keyguard is going away, but SystemUI aborted the transition, need to reset state.
         showingChanged |= mKeyguardGoingAway && keyguardShowing;
-        if (!showingChanged && secondaryDisplayShowing == mSecondaryDisplayShowing) {
+        if (!showingChanged && Arrays.equals(secondaryDisplaysShowing,
+                mSecondaryDisplayIdsShowing)) {
             return;
         }
         mKeyguardShowing = keyguardShowing;
         mAodShowing = aodShowing;
-        mSecondaryDisplayShowing = secondaryDisplayShowing;
+        mSecondaryDisplayIdsShowing = secondaryDisplaysShowing;
         mWindowManager.setAodShowing(aodShowing);
         if (showingChanged) {
             dismissDockedStackIfNeeded();
@@ -143,6 +148,14 @@ class KeyguardController {
         }
         mStackSupervisor.ensureActivitiesVisibleLocked(null, 0, !PRESERVE_WINDOWS);
         updateKeyguardSleepToken();
+    }
+
+    private boolean isShowingOnSecondaryDisplay(int displayId) {
+        if (mSecondaryDisplayIdsShowing == null) return false;
+        for (int showingId : mSecondaryDisplayIdsShowing) {
+            if (displayId == showingId) return true;
+        }
+        return false;
     }
 
     /**
@@ -386,16 +399,18 @@ class KeyguardController {
     }
 
     private KeyguardDisplayState getDisplay(int displayId) {
-        if (mDisplayStates.get(displayId) == null) {
-            mDisplayStates.append(displayId,
-                    new KeyguardDisplayState(mService, displayId));
+        KeyguardDisplayState state = mDisplayStates.get(displayId);
+        if (state == null) {
+            state = new KeyguardDisplayState(mService, displayId);
+            mDisplayStates.append(displayId, state);
         }
-        return mDisplayStates.get(displayId);
+        return state;
     }
 
     void onDisplayRemoved(int displayId) {
-        if (mDisplayStates.get(displayId) != null) {
-            mDisplayStates.get(displayId).onRemoved();
+        final KeyguardDisplayState state = mDisplayStates.get(displayId);
+        if (state != null) {
+            state.onRemoved();
             mDisplayStates.remove(displayId);
         }
     }
@@ -456,7 +471,8 @@ class KeyguardController {
                 mOccluded |= controller.mWindowManager.isShowingDream();
             }
 
-            // TODO(b/113840485): Handle app transition for individual display.
+            // TODO(b/113840485): Handle app transition for individual display, and apply occluded
+            // state change to secondary displays.
             // For now, only default display can change occluded.
             if (lastOccluded != mOccluded && mDisplayId == DEFAULT_DISPLAY) {
                 controller.handleOccludedChanged();

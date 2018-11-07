@@ -96,9 +96,9 @@ public interface ViewMediatorCallback {
     int getBouncerPromptReason();
 
     /**
-     * Invoked when the secondary display showing a keyguard window changes.
+     * Invoked when the secondary displays showing a keyguard window changes.
      */
-    void onSecondaryDisplayShowingChanged(int displayId);
+    void onSecondaryDisplayShowingChanged(int[] displayId);
 
     /**
      * Consumes a message that was enqueued to be displayed on the next time the bouncer shows up.

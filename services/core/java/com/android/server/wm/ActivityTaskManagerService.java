@@ -114,17 +114,17 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_SWITC
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_VISIBILITY;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
-import static com.android.server.wm.ActivityTaskManagerService.H.REPORT_TIME_TRACKER_MSG;
-import static com.android.server.wm.ActivityTaskManagerService.UiHandler.DISMISS_DIALOG_UI_MSG;
-import static com.android.server.wm.TaskRecord.LOCK_TASK_AUTH_DONT_LOCK;
-import static com.android.server.wm.TaskRecord.REPARENT_KEEP_STACK_AT_FRONT;
-import static com.android.server.wm.TaskRecord.REPARENT_LEAVE_STACK_IN_PLACE;
 import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_CONTENT;
 import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_DATA;
 import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_RECEIVER_EXTRAS;
 import static com.android.server.wm.ActivityTaskManagerInternal.ASSIST_KEY_STRUCTURE;
+import static com.android.server.wm.ActivityTaskManagerService.H.REPORT_TIME_TRACKER_MSG;
+import static com.android.server.wm.ActivityTaskManagerService.UiHandler.DISMISS_DIALOG_UI_MSG;
 import static com.android.server.wm.RecentsAnimationController.REORDER_KEEP_IN_PLACE;
 import static com.android.server.wm.RecentsAnimationController.REORDER_MOVE_TO_ORIGINAL_POSITION;
+import static com.android.server.wm.TaskRecord.LOCK_TASK_AUTH_DONT_LOCK;
+import static com.android.server.wm.TaskRecord.REPARENT_KEEP_STACK_AT_FRONT;
+import static com.android.server.wm.TaskRecord.REPARENT_LEAVE_STACK_IN_PLACE;
 
 import android.Manifest;
 import android.annotation.NonNull;
@@ -2885,7 +2885,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
     @Override
     public void setLockScreenShown(boolean keyguardShowing, boolean aodShowing,
-            int secondaryDisplayShowing) {
+            int[] secondaryDisplaysShowing) {
         if (checkCallingPermission(android.Manifest.permission.DEVICE_POWER)
                 != PackageManager.PERMISSION_GRANTED) {
             throw new SecurityException("Requires permission "
@@ -2903,7 +2903,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             }
             try {
                 mKeyguardController.setKeyguardShown(keyguardShowing, aodShowing,
-                        secondaryDisplayShowing);
+                        secondaryDisplaysShowing);
             } finally {
                 Binder.restoreCallingIdentity(ident);
             }
