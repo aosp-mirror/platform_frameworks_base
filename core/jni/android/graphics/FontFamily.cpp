@@ -83,7 +83,8 @@ static jlong FontFamily_create(jlong builderPtr) {
         return 0;
     }
     std::shared_ptr<minikin::FontFamily> family = std::make_shared<minikin::FontFamily>(
-            builder->langId, builder->variant, std::move(builder->fonts));
+            builder->langId, builder->variant, std::move(builder->fonts),
+            true /* isCustomFallback */);
     if (family->getCoverage().length() == 0) {
         return 0;
     }
