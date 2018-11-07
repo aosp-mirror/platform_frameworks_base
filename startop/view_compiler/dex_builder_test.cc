@@ -40,6 +40,12 @@ bool EncodeAndVerify(DexBuilder* dex_file) {
   return loaded_dex_file != nullptr;
 }
 
+// Write out and verify a DEX file that corresponds to:
+//
+// package dextest;
+// public class DexTest {
+//     public static void foo() {}
+// }
 TEST(DexBuilderTest, VerifyDexWithClassMethod) {
   DexBuilder dex_file;
 
@@ -67,6 +73,12 @@ TEST(DexBuilderTest, VerifyBadDexWithClassMethod) {
   EXPECT_FALSE(EncodeAndVerify(&dex_file));
 }
 
+// Write out and verify a DEX file that corresponds to:
+//
+// package dextest;
+// public class DexTest {
+//     public static int foo() { return 5; }
+// }
 TEST(DexBuilderTest, VerifyDexReturn5) {
   DexBuilder dex_file;
 
@@ -76,6 +88,54 @@ TEST(DexBuilderTest, VerifyDexReturn5) {
   auto r = method.MakeRegister();
   method.BuildConst4(r, 5);
   method.BuildReturn(r);
+  method.Encode();
+
+  EXPECT_TRUE(EncodeAndVerify(&dex_file));
+}
+
+// Write out and verify a DEX file that corresponds to:
+//
+// package dextest;
+// public class DexTest {
+//     public static int foo(int x) { return x; }
+// }
+TEST(DexBuilderTest, VerifyDexReturnIntParam) {
+  DexBuilder dex_file;
+
+  auto cbuilder{dex_file.MakeClass("dextest.DexTest")};
+
+  auto method{
+      cbuilder.CreateMethod("foo", Prototype{TypeDescriptor::Int(), TypeDescriptor::Int()})};
+  method.BuildReturn(Value::Parameter(0));
+  method.Encode();
+
+  EXPECT_TRUE(EncodeAndVerify(&dex_file));
+}
+
+// Write out and verify a DEX file that corresponds to:
+//
+// package dextest;
+// public class DexTest {
+//     public static int foo(String s) { return s.length(); }
+// }
+TEST(DexBuilderTest, VerifyDexCallStringLength) {
+  DexBuilder dex_file;
+
+  auto cbuilder{dex_file.MakeClass("dextest.DexTest")};
+
+  MethodBuilder method{cbuilder.CreateMethod(
+      "foo", Prototype{TypeDescriptor::Int(), TypeDescriptor::FromClassname("java.lang.String")})};
+
+  Value result = method.MakeRegister();
+
+  MethodDeclData string_length =
+      dex_file.GetOrDeclareMethod(TypeDescriptor::FromClassname("java.lang.String"),
+                                  "length",
+                                  Prototype{TypeDescriptor::Int()});
+
+  method.AddInstruction(Instruction::InvokeVirtual(string_length.id, result, Value::Parameter(0)));
+  method.BuildReturn(result);
+
   method.Encode();
 
   EXPECT_TRUE(EncodeAndVerify(&dex_file));

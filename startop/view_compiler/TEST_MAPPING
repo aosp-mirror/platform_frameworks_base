@@ -1,7 +1,0 @@
-{
-  "presubmit": [
-    {
-      "name": "view-compiler-tests"
-    }
-  ]
-}
