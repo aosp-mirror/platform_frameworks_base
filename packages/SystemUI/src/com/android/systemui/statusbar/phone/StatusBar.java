@@ -22,7 +22,6 @@ import static android.app.StatusBarManager.WINDOW_STATE_HIDDEN;
 import static android.app.StatusBarManager.WINDOW_STATE_SHOWING;
 import static android.app.StatusBarManager.windowStateToString;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY;
-import static android.view.Display.DEFAULT_DISPLAY;
 
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_ASLEEP;
 import static com.android.systemui.keyguard.WakefulnessLifecycle.WAKEFULNESS_AWAKE;
@@ -72,7 +71,6 @@ import android.graphics.Point;
 import android.graphics.PointF;
 import android.graphics.Rect;
 import android.hardware.display.DisplayManager;
-import android.hardware.display.DisplayManager.DisplayListener;
 import android.media.AudioAttributes;
 import android.metrics.LogMaker;
 import android.net.Uri;
@@ -99,7 +97,6 @@ import android.util.DisplayMetrics;
 import android.util.EventLog;
 import android.util.Log;
 import android.util.Slog;
-import android.util.SparseArray;
 import android.view.Display;
 import android.view.IWindowManager;
 import android.view.KeyEvent;
@@ -172,6 +169,7 @@ import com.android.systemui.statusbar.AmbientPulseManager;
 import com.android.systemui.statusbar.BackDropView;
 import com.android.systemui.statusbar.CommandQueue;
 import com.android.systemui.statusbar.CrossFadeHelper;
+import com.android.systemui.statusbar.DisplayNavigationBarController;
 import com.android.systemui.statusbar.EmptyShadeView;
 import com.android.systemui.statusbar.GestureRecorder;
 import com.android.systemui.statusbar.KeyboardShortcuts;
@@ -567,32 +565,6 @@ public class StatusBar extends SystemUI implements DemoMode,
     private NavigationBarFragment mNavigationBar;
     private View mNavigationBarView;
 
-    /** A displayId - nav bar mapping */
-    private SparseArray<NavigationBarFragment> mExternalNavigationBarMap = new SparseArray<>();
-
-    // TODO(b/115978725): Move it to DisplayNavigationBarController
-    private final DisplayListener mDisplayListener = new DisplayListener() {
-        @Override
-        public void onDisplayAdded(int displayId) {
-            final Display display = mDisplayManager.getDisplay(displayId);
-            addExternalNavigationBar(display);
-        }
-
-        @Override
-        public void onDisplayRemoved(int displayId) {
-            final NavigationBarFragment navBar = mExternalNavigationBarMap.get(displayId);
-            if (navBar != null) {
-                final View navigationView = navBar.getView().getRootView();
-                WindowManagerGlobal.getInstance().removeView(navigationView, true);
-                mExternalNavigationBarMap.remove(displayId);
-            }
-        }
-
-        @Override
-        public void onDisplayChanged(int displayId) {
-        }
-    };
-
     private HeadsUpAppearanceController mHeadsUpAppearanceController;
     private boolean mVibrateOnOpening;
     private VibratorHelper mVibratorHelper;
@@ -639,6 +611,7 @@ public class StatusBar extends SystemUI implements DemoMode,
         mKeyguardViewMediator = getComponent(KeyguardViewMediator.class);
         mColorExtractor = Dependency.get(SysuiColorExtractor.class);
         mDeviceProvisionedController = Dependency.get(DeviceProvisionedController.class);
+        mNavigationBarController = Dependency.get(DisplayNavigationBarController.class);
 
         mColorExtractor.addOnColorsChangedListener(this);
         mStatusBarStateController.addListener(this, StatusBarStateController.RANK_STATUS_BAR);
@@ -649,9 +622,6 @@ public class StatusBar extends SystemUI implements DemoMode,
 
         mDisplay = mWindowManager.getDefaultDisplay();
         updateDisplaySize();
-
-        // get display service to detect display status
-        mDisplayManager = (DisplayManager) mContext.getSystemService(Context.DISPLAY_SERVICE);
 
         Resources res = mContext.getResources();
         mVibrateOnOpening = mContext.getResources().getBoolean(
@@ -695,7 +665,6 @@ public class StatusBar extends SystemUI implements DemoMode,
             // If the system process isn't there we're doomed anyway.
         }
 
-        mDisplayManager.registerDisplayListener(mDisplayListener, mHandler);
         createAndAddWindows();
 
         // Make sure we always have the most current wallpaper info.
@@ -1084,33 +1053,6 @@ public class StatusBar extends SystemUI implements DemoMode,
             }
             mNavigationBar.setCurrentSysuiVisibility(mSystemUiVisibility);
         });
-
-        // Add external navigation bars if more than one displays exist.
-        final Display[] displays = mDisplayManager.getDisplays();
-        for (Display display : displays) {
-            addExternalNavigationBar(display);
-        }
-    }
-
-    /**
-     * Add a phone navigation bar on an external display if the display supports system decorations.
-     *
-     * @param display the display to add navigation bar on
-     */
-    protected void addExternalNavigationBar(Display display) {
-        if (display == null || display.getDisplayId() == DEFAULT_DISPLAY
-                || !display.supportsSystemDecorations()) {
-            return;
-        }
-
-        final int displayId = display.getDisplayId();
-        final Context externalDisplayContext = mContext.createDisplayContext(display);
-        NavigationBarFragment.create(externalDisplayContext,
-                (tag, fragment) -> {
-                    final NavigationBarFragment navBar = (NavigationBarFragment) fragment;
-                    navBar.setCurrentSysuiVisibility(mSystemUiVisibility);
-                    mExternalNavigationBarMap.append(displayId, navBar);
-                });
     }
 
     /**
@@ -2925,16 +2867,7 @@ public class StatusBar extends SystemUI implements DemoMode,
             mWindowManager.removeViewImmediate(mNavigationBarView);
             mNavigationBarView = null;
         }
-        mDisplayManager.unregisterDisplayListener(mDisplayListener);
-        if (mExternalNavigationBarMap.size() > 0) {
-            for (int i = 0; i < mExternalNavigationBarMap.size(); i++) {
-                final View navigationWindow = mExternalNavigationBarMap.valueAt(i)
-                        .getView().getRootView();
-                WindowManagerGlobal.getInstance()
-                        .removeView(navigationWindow, true /* immediate */);
-            }
-            mExternalNavigationBarMap.clear();
-        }
+        mNavigationBarController.destroy();
         mContext.unregisterReceiver(mBroadcastReceiver);
         mContext.unregisterReceiver(mDemoReceiver);
         mAssistManager.destroy();
@@ -4178,6 +4111,8 @@ public class StatusBar extends SystemUI implements DemoMode,
     protected KeyguardManager mKeyguardManager;
     private DeviceProvisionedController mDeviceProvisionedController
             = Dependency.get(DeviceProvisionedController.class);
+
+    protected DisplayNavigationBarController mNavigationBarController;
 
     // UI-specific methods
 
