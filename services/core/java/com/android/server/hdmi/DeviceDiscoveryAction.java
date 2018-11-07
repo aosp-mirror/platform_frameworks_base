@@ -333,6 +333,7 @@ final class DeviceDiscoveryAction extends HdmiCecFeatureAction {
         current.mPhysicalAddress = HdmiUtils.twoBytesToInt(params);
         current.mPortId = getPortId(current.mPhysicalAddress);
         current.mDeviceType = params[2] & 0xFF;
+        current.mDisplayName = HdmiUtils.getDefaultDeviceName(current.mDeviceType);
 
         // TODO(amyjojo): check if non-TV device needs to update cec switch info.
         // This is to manager CEC device separately in case they don't have address.
@@ -511,7 +512,10 @@ final class DeviceDiscoveryAction extends HdmiCecFeatureAction {
         }
         mTimeoutRetry = 0;
         Slog.v(TAG, "Timeout[State=" + mState + ", Processed=" + mProcessedDeviceCount);
-        if (mState != STATE_WAITING_FOR_POWER) {
+        if (mState != STATE_WAITING_FOR_POWER && mState != STATE_WAITING_FOR_OSD_NAME) {
+            // We don't need to remove the device info if the power status is unknown.
+            // Some device does not have preferred OSD name and does not respond to Give OSD name.
+            // Like LG TV. We can give it default device name and not remove it.
             removeDevice(mProcessedDeviceCount);
         } else {
             increaseProcessedDeviceCount();
