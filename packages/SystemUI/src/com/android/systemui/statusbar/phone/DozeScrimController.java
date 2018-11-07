@@ -20,13 +20,17 @@ import android.annotation.NonNull;
 import android.os.Handler;
 import android.util.Log;
 
+import com.android.internal.annotations.VisibleForTesting;
+import com.android.systemui.Dependency;
 import com.android.systemui.doze.DozeHost;
 import com.android.systemui.doze.DozeLog;
+import com.android.systemui.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.StatusBarStateController.StateListener;
 
 /**
  * Controller which handles all the doze animations of the scrims.
  */
-public class DozeScrimController {
+public class DozeScrimController implements StateListener {
     private static final String TAG = "DozeScrimController";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
 
@@ -83,8 +87,11 @@ public class DozeScrimController {
 
     public DozeScrimController(DozeParameters dozeParameters) {
         mDozeParameters = dozeParameters;
+        //Never expected to be destroyed
+        Dependency.get(StatusBarStateController.class).addListener(this);
     }
 
+    @VisibleForTesting
     public void setDozing(boolean dozing) {
         if (mDozing == dozing) return;
         mDozing = dozing;
@@ -180,5 +187,15 @@ public class DozeScrimController {
 
     public ScrimController.Callback getScrimCallback() {
         return mScrimCallback;
+    }
+
+    @Override
+    public void onStateChanged(int newState) {
+        // don't care
+    }
+
+    @Override
+    public void onDozingChanged(boolean isDozing) {
+        setDozing(isDozing);
     }
 }
