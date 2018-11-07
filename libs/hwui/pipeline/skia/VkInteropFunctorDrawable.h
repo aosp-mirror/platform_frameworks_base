@@ -30,11 +30,12 @@ namespace skiapipeline {
  * This drawable wraps a Vulkan functor enabling it to be recorded into a list
  * of Skia drawing commands.
  */
-class VkFunctorDrawable : public FunctorDrawable {
+class VkInteropFunctorDrawable : public FunctorDrawable {
 public:
-    VkFunctorDrawable(Functor* functor, GlFunctorLifecycleListener* listener, SkCanvas* canvas)
+    VkInteropFunctorDrawable(Functor* functor, GlFunctorLifecycleListener* listener,
+            SkCanvas* canvas)
             : FunctorDrawable(functor, listener, canvas) {}
-    virtual ~VkFunctorDrawable();
+    virtual ~VkInteropFunctorDrawable();
 
     void syncFunctor() const override;
 
