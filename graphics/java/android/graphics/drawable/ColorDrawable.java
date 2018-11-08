@@ -149,9 +149,13 @@ public class ColorDrawable extends Drawable {
     }
 
     /**
-     * Returns the alpha value of this drawable's color.
+     * Returns the alpha value of this drawable's color. Note this may not be the same alpha value
+     * provided in {@link Drawable#setAlpha(int)}. Instead this will return the alpha of the color
+     * combined with the alpha provided by setAlpha
      *
      * @return A value between 0 and 255.
+     *
+     * @see ColorDrawable#setAlpha(int)
      */
     @Override
     public int getAlpha() {
@@ -159,7 +163,9 @@ public class ColorDrawable extends Drawable {
     }
 
     /**
-     * Sets the color's alpha value.
+     * Applies the given alpha to the underlying color. Note if the color already has
+     * an alpha applied to it, this will apply this alpha to the existing value instead of
+     * overwriting it.
      *
      * @param alpha The alpha value to set, between 0 and 255.
      */
