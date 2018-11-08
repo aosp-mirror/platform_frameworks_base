@@ -8198,6 +8198,12 @@ public final class Settings {
                 "packages_to_clear_data_before_full_restore";
 
         /**
+         * Setting to determine whether to use the new notification priority handling features.
+         * @hide
+         */
+        public static final String NOTIFICATION_NEW_INTERRUPTION_MODEL = "new_interruption_model";
+
+        /**
          * This are the settings to be backed up.
          *
          * NOTE: Settings are backed up and restored in the order they appear
@@ -8311,6 +8317,7 @@ public final class Settings {
             CHARGING_VIBRATION_ENABLED,
             ACCESSIBILITY_MINIMUM_UI_TIMEOUT_ENABLED,
             ACCESSIBILITY_MINIMUM_UI_TIMEOUT_MS,
+            NOTIFICATION_NEW_INTERRUPTION_MODEL,
         };
 
         /**
@@ -8470,6 +8477,7 @@ public final class Settings {
             VALIDATORS.put(ACCESSIBILITY_MINIMUM_UI_TIMEOUT_MS, NON_NEGATIVE_INTEGER_VALIDATOR);
             VALIDATORS.put(USER_SETUP_COMPLETE, BOOLEAN_VALIDATOR);
             VALIDATORS.put(ASSIST_GESTURE_SETUP_COMPLETE, BOOLEAN_VALIDATOR);
+            VALIDATORS.put(NOTIFICATION_NEW_INTERRUPTION_MODEL, BOOLEAN_VALIDATOR);
         }
 
         /**

@@ -49,6 +49,7 @@ import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
+import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.policy.DeviceProvisionedController;
 import com.android.systemui.statusbar.policy.KeyguardMonitor;
 
@@ -293,7 +294,7 @@ public class NotificationLockscreenUserManagerImpl implements
             return false;
         }
         boolean exceedsPriorityThreshold;
-        if (AUTO_DEMOTE_NOTIFICATIONS) {
+        if (NotificationUtils.useNewInterruptionModel(mContext)) {
             exceedsPriorityThreshold =
                     getEntryManager().getNotificationData().getImportance(sbn.getKey())
                             >= IMPORTANCE_DEFAULT;
