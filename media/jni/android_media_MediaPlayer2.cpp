@@ -1324,15 +1324,30 @@ static jint android_media_MediaPlayer2_getRoutedDeviceId(JNIEnv *env, jobject th
     return mp->getRoutedDeviceId();
 }
 
-static void android_media_MediaPlayer2_enableDeviceCallback(
-        JNIEnv* env, jobject thiz, jboolean enabled)
+static void android_media_MediaPlayer2_addDeviceCallback(
+        JNIEnv* env, jobject thiz, jobject routingDelegate)
 {
     sp<MediaPlayer2> mp = getMediaPlayer(env, thiz);
     if (mp == NULL) {
         return;
     }
 
-    status_t status = mp->enableAudioDeviceCallback(enabled);
+    status_t status = mp->addAudioDeviceCallback(routingDelegate);
+    if (status != NO_ERROR) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        ALOGE("enable device callback failed: %d", status);
+    }
+}
+
+static void android_media_MediaPlayer2_removeDeviceCallback(
+        JNIEnv* env, jobject thiz, jobject listener)
+{
+    sp<MediaPlayer2> mp = getMediaPlayer(env, thiz);
+    if (mp == NULL) {
+        return;
+    }
+
+    status_t status = mp->removeAudioDeviceCallback(listener);
     if (status != NO_ERROR) {
         jniThrowException(env, "java/lang/IllegalStateException", NULL);
         ALOGE("enable device callback failed: %d", status);
@@ -1457,7 +1472,9 @@ static const JNINativeMethod gMethods[] = {
     // AudioRouting
     {"native_setOutputDevice", "(I)Z",                          (void *)android_media_MediaPlayer2_setOutputDevice},
     {"native_getRoutedDeviceId", "()I",                         (void *)android_media_MediaPlayer2_getRoutedDeviceId},
-    {"native_enableDeviceCallback", "(Z)V",                     (void *)android_media_MediaPlayer2_enableDeviceCallback},
+    {"native_addDeviceCallback", "(Landroid/media/RoutingDelegate;)V", (void *)android_media_MediaPlayer2_addDeviceCallback},
+    {"native_removeDeviceCallback", "(Landroid/media/AudioRouting$OnRoutingChangedListener;)V",
+            (void *)android_media_MediaPlayer2_removeDeviceCallback},
 
     // StreamEventCallback for JAudioTrack
     {"native_stream_event_onTearDown",                "(JJ)V",  (void *)android_media_MediaPlayer2_native_on_tear_down},

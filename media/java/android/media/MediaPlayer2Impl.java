@@ -34,7 +34,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.PersistableBundle;
 import android.os.PowerManager;
-import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Pair;
 import android.view.Surface;
@@ -835,46 +834,29 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
         return null;
     }
 
-    // Call BEFORE adding a routing callback handler or AFTER removing a routing callback handler.
-    @GuardedBy("mRoutingChangeListeners")
-    private void enableNativeRoutingCallbacksLocked(boolean enabled) {
-        if (mRoutingChangeListeners.size() == 0) {
-            native_enableDeviceCallback(enabled);
-        }
-    }
-
-    // The list of AudioRouting.OnRoutingChangedListener interfaces added with
-    // addOnRoutingChangedListener by an app to receive (re)routing notifications.
-    @GuardedBy("mRoutingChangeListeners")
-    private ArrayMap<AudioRouting.OnRoutingChangedListener,
-            NativeRoutingEventHandlerDelegate> mRoutingChangeListeners = new ArrayMap<>();
-
     @Override
     public void addOnRoutingChangedListener(AudioRouting.OnRoutingChangedListener listener,
             Handler handler) {
-        synchronized (mRoutingChangeListeners) {
-            if (listener != null && !mRoutingChangeListeners.containsKey(listener)) {
-                enableNativeRoutingCallbacksLocked(true);
-                mRoutingChangeListeners.put(
-                        listener, new NativeRoutingEventHandlerDelegate(this, listener,
-                                handler != null ? handler : mTaskHandler));
-            }
+        if (listener == null) {
+            throw new IllegalArgumentException("addOnRoutingChangedListener: listener is NULL");
         }
+        RoutingDelegate routingDelegate = new RoutingDelegate(this, listener, handler);
+        native_addDeviceCallback(routingDelegate);
     }
 
     @Override
     public void removeOnRoutingChangedListener(AudioRouting.OnRoutingChangedListener listener) {
-        synchronized (mRoutingChangeListeners) {
-            if (mRoutingChangeListeners.containsKey(listener)) {
-                mRoutingChangeListeners.remove(listener);
-                enableNativeRoutingCallbacksLocked(false);
-            }
+        if (listener == null) {
+            throw new IllegalArgumentException("removeOnRoutingChangedListener: listener is NULL");
         }
+        native_removeDeviceCallback(listener);
     }
 
     private native final boolean native_setOutputDevice(int deviceId);
     private native final int native_getRoutedDeviceId();
-    private native final void native_enableDeviceCallback(boolean enabled);
+    private native void native_addDeviceCallback(RoutingDelegate rd);
+    private native void native_removeDeviceCallback(
+            AudioRouting.OnRoutingChangedListener listener);
 
     @Override
     public Object setWakeMode(Context context, int mode) {
@@ -1614,7 +1596,6 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
     private static final int MEDIA_SUBTITLE_DATA = 201;
     private static final int MEDIA_META_DATA = 202;
     private static final int MEDIA_DRM_INFO = 210;
-    private static final int MEDIA_AUDIO_ROUTING_CHANGED = 10000;
 
     private class TaskHandler extends Handler {
         private MediaPlayer2Impl mMediaPlayer;
@@ -1944,18 +1925,6 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                 case MEDIA_NOP: // interface test message - ignore
                 {
                     break;
-                }
-
-                case MEDIA_AUDIO_ROUTING_CHANGED:
-                {
-                    AudioManager.resetAudioPortGeneration();
-                    synchronized (mRoutingChangeListeners) {
-                        for (NativeRoutingEventHandlerDelegate delegate
-                                : mRoutingChangeListeners.values()) {
-                            delegate.notifyClient();
-                        }
-                    }
-                    return;
                 }
 
                 default:
