@@ -16,6 +16,7 @@
 
 package android.provider;
 
+import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
 import android.annotation.SdkConstant.SdkConstantType;
 import android.annotation.TestApi;
@@ -1177,6 +1178,31 @@ public final class Telephony {
              */
             public static final String EXTRA_IS_INITIAL_CREATE =
                     "android.provider.extra.IS_INITIAL_CREATE";
+
+            /**
+             * Broadcast intent action indicating that the telephony provider SMS MMS database is
+             * corrupted. A boolean is specified in {@link #EXTRA_IS_CORRUPTED} to indicate if the
+             * database is corrupted. Requires the
+             * {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE permission.
+             *
+             * @hide
+             */
+            @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
+            @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+            public static final String ACTION_SMS_MMS_DB_LOST =
+                    "android.provider.action.SMS_MMS_DB_LOST";
+
+            /**
+             * Boolean flag passed as an extra with {@link #ACTION_SMS_MMS_DB_LOST} to indicate
+             * whether the DB got corrupted or not.
+             *
+             * @see #ACTION_SMS_MMS_DB_LOST
+             *
+             * @hide
+             */
+            public static final String EXTRA_IS_CORRUPTED =
+                    "android.provider.extra.IS_CORRUPTED";
+
             /**
              * Read the PDUs out of an {@link #SMS_RECEIVED_ACTION} or a
              * {@link #DATA_SMS_RECEIVED_ACTION} intent.
