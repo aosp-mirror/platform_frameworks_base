@@ -36,6 +36,7 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.channels.FileChannel;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -59,6 +60,8 @@ abstract public class VerityUtils {
     /** The maximum size of signature file.  This is just to avoid potential abuse. */
     private static final int MAX_SIGNATURE_FILE_SIZE_BYTES = 8192;
 
+    private static final int COMMON_LINUX_PAGE_SIZE_IN_BYTES = 4096;
+
     private static final boolean DEBUG = false;
 
     /** Returns true if the given file looks like containing an fs-verity signature. */
@@ -69,6 +72,48 @@ abstract public class VerityUtils {
     /** Returns the fs-verity signature file path of the given file. */
     public static String getFsveritySignatureFilePath(String filePath) {
         return filePath + FSVERITY_SIGNATURE_FILE_EXTENSION;
+    }
+
+    /** Generates Merkle tree and fs-verity metadata then enables fs-verity. */
+    public static void setUpFsverity(@NonNull String filePath, String signaturePath)
+            throws IOException, DigestException, NoSuchAlgorithmException {
+        final PKCS7 pkcs7 = new PKCS7(Files.readAllBytes(Paths.get(signaturePath)));
+        final byte[] expectedMeasurement = pkcs7.getContentInfo().getContentBytes();
+        if (DEBUG) {
+            Slog.d(TAG, "Enabling fs-verity with signed fs-verity measurement "
+                    + bytesToString(expectedMeasurement));
+            Slog.d(TAG, "PKCS#7 info: " + pkcs7);
+        }
+
+        final TrackedBufferFactory bufferFactory = new TrackedBufferFactory();
+        final byte[] actualMeasurement = generateFsverityMetadata(filePath, signaturePath,
+                bufferFactory);
+        try (RandomAccessFile raf = new RandomAccessFile(filePath, "rw")) {
+            FileChannel ch = raf.getChannel();
+            ch.position(roundUpToNextMultiple(ch.size(), COMMON_LINUX_PAGE_SIZE_IN_BYTES));
+            ByteBuffer buffer = bufferFactory.getBuffer();
+
+            long offset = buffer.position();
+            long size = buffer.limit();
+            while (offset < size) {
+                long s = ch.write(buffer);
+                offset += s;
+                size -= s;
+            }
+        }
+
+        if (!Arrays.equals(expectedMeasurement, actualMeasurement)) {
+            throw new SecurityException("fs-verity measurement mismatch: "
+                    + bytesToString(actualMeasurement) + " != "
+                    + bytesToString(expectedMeasurement));
+        }
+
+        // This can fail if the public key is not already in .fs-verity kernel keyring.
+        int errno = enableFsverityNative(filePath);
+        if (errno != 0) {
+            throw new IOException("Failed to enable fs-verity on " + filePath + ": "
+                    + Os.strerror(errno));
+        }
     }
 
     /** Returns whether the file has fs-verity enabled. */
@@ -87,36 +132,18 @@ abstract public class VerityUtils {
     }
 
     /**
-     * Generates Merkle tree and fs-verity metadata.
+     * Generates legacy Merkle tree and fs-verity metadata with Signing Block skipped.
      *
      * @return {@code SetupResult} that contains the result code, and when success, the
      *         {@code FileDescriptor} to read all the data from.
      */
-    public static SetupResult generateApkVeritySetupData(@NonNull String apkPath,
-            String signaturePath, boolean skipSigningBlock) {
+    public static SetupResult generateApkVeritySetupData(@NonNull String apkPath) {
         if (DEBUG) {
-            Slog.d(TAG, "Trying to install apk verity to " + apkPath + " with signature file "
-                    + signaturePath);
+            Slog.d(TAG, "Trying to install legacy apk verity to " + apkPath);
         }
         SharedMemory shm = null;
         try {
-            byte[] signedVerityHash;
-            if (skipSigningBlock) {
-                signedVerityHash = ApkSignatureVerifier.getVerityRootHash(apkPath);
-            } else {
-                Path path = Paths.get(signaturePath);
-                if (Files.exists(path)) {
-                    // TODO(112037636): fail early if the signing key is not in .fs-verity keyring.
-                    PKCS7 pkcs7 = new PKCS7(Files.readAllBytes(path));
-                    signedVerityHash = pkcs7.getContentInfo().getContentBytes();
-                    if (DEBUG) {
-                        Slog.d(TAG, "fs-verity measurement = " + bytesToString(signedVerityHash));
-                    }
-                } else {
-                    signedVerityHash = null;
-                }
-            }
-
+            final byte[] signedVerityHash = ApkSignatureVerifier.getVerityRootHash(apkPath);
             if (signedVerityHash == null) {
                 if (DEBUG) {
                     Slog.d(TAG, "Skip verity tree generation since there is no signed root hash");
@@ -124,8 +151,8 @@ abstract public class VerityUtils {
                 return SetupResult.skipped();
             }
 
-            Pair<SharedMemory, Integer> result = generateFsVerityIntoSharedMemory(apkPath,
-                    signaturePath, signedVerityHash, skipSigningBlock);
+            Pair<SharedMemory, Integer> result =
+                    generateFsVerityIntoSharedMemory(apkPath, signedVerityHash);
             shm = result.first;
             int contentSize = result.second;
             FileDescriptor rfd = shm.getFileDescriptor();
@@ -156,7 +183,7 @@ abstract public class VerityUtils {
      * {@see ApkSignatureVerifier#getVerityRootHash(String)}.
      */
     public static byte[] getVerityRootHash(@NonNull String apkPath)
-            throws IOException, SignatureNotFoundException, SecurityException {
+            throws IOException, SignatureNotFoundException {
         return ApkSignatureVerifier.getVerityRootHash(apkPath);
     }
 
@@ -172,9 +199,8 @@ abstract public class VerityUtils {
      *         includes SHA-256 of fs-verity descriptor and authenticated extensions.
      */
     private static byte[] generateFsverityMetadata(String filePath, String signaturePath,
-            @NonNull TrackedShmBufferFactory trackedBufferFactory)
-            throws IOException, SignatureNotFoundException, SecurityException, DigestException,
-                   NoSuchAlgorithmException {
+            @NonNull ByteBufferFactory trackedBufferFactory)
+            throws IOException, DigestException, NoSuchAlgorithmException {
         try (RandomAccessFile file = new RandomAccessFile(filePath, "r")) {
             VerityBuilder.VerityResult result = VerityBuilder.generateFsVerityTree(
                     file, trackedBufferFactory);
@@ -184,6 +210,7 @@ abstract public class VerityUtils {
 
             final byte[] measurement = generateFsverityDescriptorAndMeasurement(file,
                     result.rootHash, signaturePath, buffer);
+            buffer.flip();
             return constructFsveritySignedDataNative(measurement);
         }
     }
@@ -243,6 +270,7 @@ abstract public class VerityUtils {
         return md.digest();
     }
 
+    private static native int enableFsverityNative(@NonNull String filePath);
     private static native int measureFsverityNative(@NonNull String filePath);
     private static native byte[] constructFsveritySignedDataNative(@NonNull byte[] measurement);
     private static native byte[] constructFsverityDescriptorNative(long fileSize);
@@ -256,18 +284,13 @@ abstract public class VerityUtils {
      * for fsverity setup. The data is aligned to the beginning of {@code SharedMemory}, and has
      * length equals to the returned {@code Integer}.
      */
-    private static Pair<SharedMemory, Integer> generateFsVerityIntoSharedMemory(
-            String apkPath, String signaturePath, @NonNull byte[] expectedRootHash,
-            boolean skipSigningBlock)
-            throws IOException, SecurityException, DigestException, NoSuchAlgorithmException,
+    private static Pair<SharedMemory, Integer> generateFsVerityIntoSharedMemory(String apkPath,
+            @NonNull byte[] expectedRootHash)
+            throws IOException, DigestException, NoSuchAlgorithmException,
                    SignatureNotFoundException {
         TrackedShmBufferFactory shmBufferFactory = new TrackedShmBufferFactory();
-        byte[] generatedRootHash;
-        if (skipSigningBlock) {
-            generatedRootHash = ApkSignatureVerifier.generateApkVerity(apkPath, shmBufferFactory);
-        } else {
-            generatedRootHash = generateFsverityMetadata(apkPath, signaturePath, shmBufferFactory);
-        }
+        byte[] generatedRootHash =
+                ApkSignatureVerifier.generateApkVerity(apkPath, shmBufferFactory);
         // We only generate Merkle tree once here, so it's important to make sure the root hash
         // matches the signed one in the apk.
         if (!Arrays.equals(expectedRootHash, generatedRootHash)) {
@@ -345,7 +368,7 @@ abstract public class VerityUtils {
         private ByteBuffer mBuffer;
 
         @Override
-        public ByteBuffer create(int capacity) throws SecurityException {
+        public ByteBuffer create(int capacity) {
             try {
                 if (DEBUG) Slog.d(TAG, "Creating shared memory for apk verity");
                 // NB: This method is supposed to be called once according to the contract with
@@ -377,5 +400,31 @@ abstract public class VerityUtils {
         public int getBufferLimit() {
             return mBuffer == null ? -1 : mBuffer.limit();
         }
+    }
+
+    /** A {@code ByteBufferFactory} that tracks the {@code ByteBuffer} it creates. */
+    private static class TrackedBufferFactory implements ByteBufferFactory {
+        private ByteBuffer mBuffer;
+
+        @Override
+        public ByteBuffer create(int capacity) {
+            if (mBuffer != null) {
+                throw new IllegalStateException("Multiple instantiation from this factory");
+            }
+            mBuffer = ByteBuffer.allocate(capacity);
+            return mBuffer;
+        }
+
+        public ByteBuffer getBuffer() {
+            return mBuffer;
+        }
+    }
+
+    /** Round up the number to the next multiple of the divisor. */
+    private static long roundUpToNextMultiple(long number, long divisor) {
+        if (number > (Long.MAX_VALUE - divisor)) {
+            throw new IllegalArgumentException("arithmetic overflow");
+        }
+        return ((number + (divisor - 1)) / divisor) * divisor;
     }
 }
