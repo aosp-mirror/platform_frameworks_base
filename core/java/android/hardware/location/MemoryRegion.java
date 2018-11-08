@@ -16,6 +16,7 @@
 
 package android.hardware.location;
 
+import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -103,6 +104,25 @@ public class MemoryRegion implements Parcelable{
         String retVal = "[ " + mSizeBytesFree + "/ " + mSizeBytes + " ] : " + mask;
 
         return retVal;
+    }
+
+    @Override
+    public boolean equals(@Nullable Object object) {
+        if (object == this) {
+            return true;
+        }
+
+        boolean isEqual = false;
+        if (object instanceof MemoryRegion) {
+            MemoryRegion other = (MemoryRegion) object;
+            isEqual = (other.getCapacityBytes() == mSizeBytes)
+                    && (other.getFreeCapacityBytes() == mSizeBytesFree)
+                    && (other.isReadable() == mIsReadable)
+                    && (other.isWritable() == mIsWritable)
+                    && (other.isExecutable() == mIsExecutable);
+        }
+
+        return isEqual;
     }
 
     @Override
