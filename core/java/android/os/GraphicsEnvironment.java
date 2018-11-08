@@ -32,6 +32,8 @@ import dalvik.system.VMRuntime;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileDescriptor;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -55,8 +57,8 @@ public class GraphicsEnvironment {
     private static final String PROPERTY_GFX_DRIVER = "ro.gfx.driver.0";
     private static final String PROPERTY_GFX_DRIVER_WHITELIST = "ro.gfx.driver.whitelist.0";
     private static final String ANGLE_PACKAGE_NAME = "com.android.angle";
-    private static final String GLES_MODE_METADATA_KEY = "com.android.angle.GLES_MODE";
     private static final String ANGLE_RULES_FILE = "a4a_rules.json";
+    private static final String ANGLE_TEMP_RULES = "debug.angle.rules";
 
     private ClassLoader mClassLoader;
     private String mLayerPath;
@@ -207,36 +209,9 @@ public class GraphicsEnvironment {
                 && (!angleEnabledApp.isEmpty() && !packageName.isEmpty())
                 && angleEnabledApp.equals(packageName)) {
 
-            if (DEBUG) Log.v(TAG, packageName + " opted in for ANGLE via Developer Setting");
+            Log.i(TAG, packageName + " opted in for ANGLE via Developer Setting");
 
             devOptIn = true;
-        }
-
-        ApplicationInfo appInfo;
-        try {
-            appInfo = context.getPackageManager().getApplicationInfo(packageName,
-                PackageManager.GET_META_DATA);
-        } catch (PackageManager.NameNotFoundException e) {
-            Log.w(TAG, "Failed to get info about current application: " + packageName);
-            return;
-        }
-
-        String appPref = "dontcare";
-        final BaseBundle metadata = appInfo.metaData;
-        if (metadata != null) {
-            final String glesMode = metadata.getString(GLES_MODE_METADATA_KEY);
-            if (glesMode != null) {
-                if (glesMode.equals("angle")) {
-                    appPref = "angle";
-                    if (DEBUG) Log.v(TAG, packageName + " opted for ANGLE via AndroidManifest");
-                } else if (glesMode.equals("native")) {
-                    appPref = "native";
-                    if (DEBUG) Log.v(TAG, packageName + " opted for NATIVE via AndroidManifest");
-                } else {
-                    Log.w(TAG, "Unrecognized GLES_MODE (\"" + glesMode + "\") for " + packageName
-                               + ". Supported values are \"angle\" or \"native\"");
-                }
-            }
         }
 
         ApplicationInfo angleInfo;
@@ -261,39 +236,76 @@ public class GraphicsEnvironment {
 
         if (DEBUG) Log.v(TAG, "ANGLE package libs: " + paths);
 
-        // Pass the rules file to loader for ANGLE decisions
-        AssetManager angleAssets = null;
-        try {
-            angleAssets =
-                context.getPackageManager().getResourcesForApplication(angleInfo).getAssets();
-        } catch (PackageManager.NameNotFoundException e) {
-            Log.w(TAG, "Failed to get AssetManager for '" + ANGLE_PACKAGE_NAME + "'");
-            return;
-        }
-
-        AssetFileDescriptor assetsFd = null;
-        try {
-            assetsFd = angleAssets.openFd(ANGLE_RULES_FILE);
-        } catch (IOException e) {
-            Log.w(TAG, "Failed to get AssetFileDescriptor for " + ANGLE_RULES_FILE + " from "
-                       + "'" + ANGLE_PACKAGE_NAME + "'");
-            return;
-        }
-
+        // Look up rules file to pass to ANGLE
         FileDescriptor rulesFd = null;
         long rulesOffset = 0;
         long rulesLength = 0;
-        if (assetsFd != null) {
-            rulesFd = assetsFd.getFileDescriptor();
-            rulesOffset = assetsFd.getStartOffset();
-            rulesLength = assetsFd.getLength();
-        } else {
-            Log.w(TAG, "Failed to get file descriptor for " + ANGLE_RULES_FILE);
-            return;
+
+        // Check for temporary rules if debuggable or root
+        if (isDebuggable(context) || (getCanLoadSystemLibraries() == 1)) {
+            String angleTempRules = SystemProperties.get(ANGLE_TEMP_RULES);
+            if (angleTempRules != null && !angleTempRules.isEmpty()) {
+                Log.i(TAG, "Detected system property " + ANGLE_TEMP_RULES + ": " + angleTempRules);
+                File tempRulesFile = new File(angleTempRules);
+                if (tempRulesFile.exists()) {
+                    Log.i(TAG, angleTempRules + " exists, loading file.");
+                    FileInputStream stream = null;
+                    try {
+                        stream = new FileInputStream(angleTempRules);
+                    } catch (FileNotFoundException e) {
+                        Log.w(TAG, "Unable to create stream for temp ANGLE rules");
+                    }
+
+                    if (stream != null) {
+                        try {
+                            rulesFd = stream.getFD();
+                            rulesOffset = 0;
+                            rulesLength = stream.getChannel().size();
+                            Log.i(TAG, "Loaded temporary ANGLE rules from " + angleTempRules);
+                        } catch (IOException e) {
+                            Log.w(TAG, "Failed to get input stream for " + angleTempRules);
+                        }
+                    }
+                }
+            }
+        }
+
+        // If no temp rules, load the real ones from the APK
+        if (rulesFd == null) {
+
+            // Pass the rules file to loader for ANGLE decisions
+            AssetManager angleAssets = null;
+            try {
+                angleAssets =
+                    context.getPackageManager().getResourcesForApplication(angleInfo).getAssets();
+            } catch (PackageManager.NameNotFoundException e) {
+                Log.w(TAG, "Failed to get AssetManager for '" + ANGLE_PACKAGE_NAME + "'");
+                return;
+            }
+
+            AssetFileDescriptor assetsFd = null;
+            try {
+                assetsFd = angleAssets.openFd(ANGLE_RULES_FILE);
+            } catch (IOException e) {
+                Log.w(TAG, "Failed to get AssetFileDescriptor for " + ANGLE_RULES_FILE + " from "
+                           + "'" + ANGLE_PACKAGE_NAME + "'");
+                return;
+            }
+
+            if (assetsFd != null) {
+                rulesFd = assetsFd.getFileDescriptor();
+                rulesOffset = assetsFd.getStartOffset();
+                rulesLength = assetsFd.getLength();
+            } else {
+                Log.w(TAG, "Failed to get file descriptor for " + ANGLE_RULES_FILE);
+                return;
+            }
         }
 
         // Further opt-in logic is handled in native, so pass relevant info down
-        setAngleInfo(paths, packageName, appPref, devOptIn,
+        // TODO: Move the ANGLE selection logic earlier so we don't need to keep these
+        //       file descriptors open.
+        setAngleInfo(paths, packageName, devOptIn,
                      rulesFd, rulesOffset, rulesLength);
     }
 
@@ -434,7 +446,7 @@ public class GraphicsEnvironment {
     private static native void setDebugLayers(String layers);
     private static native void setDebugLayersGLES(String layers);
     private static native void setDriverPath(String path);
-    private static native void setAngleInfo(String path, String appPackage, String appPref,
+    private static native void setAngleInfo(String path, String appPackage,
                                             boolean devOptIn, FileDescriptor rulesFd,
                                             long rulesOffset, long rulesLength);
 }
