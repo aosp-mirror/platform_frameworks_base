@@ -298,7 +298,7 @@ public:
     /**
      * Records statsd skipped an event.
      */
-    void noteLogLost(int32_t wallClockTimeSec, int32_t count);
+    void noteLogLost(int32_t wallClockTimeSec, int32_t count, int lastError);
 
     /**
      * Reset the historical stats. Including all stats in icebox, and the tracked stats about
@@ -358,8 +358,18 @@ private:
     // Maps PullAtomId to its stats. The size is capped by the puller atom counts.
     std::map<int, PulledAtomStats> mPulledAtomStats;
 
+    struct LogLossStats {
+        LogLossStats(int32_t sec, int32_t count, int32_t error)
+            : mWallClockSec(sec), mCount(count), mLastError(error) {
+        }
+        int32_t mWallClockSec;
+        int32_t mCount;
+        // error code defined in linux/errno.h
+        int32_t mLastError;
+    };
+
     // Timestamps when we detect log loss, and the number of logs lost.
-    std::list<std::pair<int32_t, int32_t>> mLogLossStats;
+    std::list<LogLossStats> mLogLossStats;
 
     std::list<int32_t> mSystemServerRestartSec;
 
