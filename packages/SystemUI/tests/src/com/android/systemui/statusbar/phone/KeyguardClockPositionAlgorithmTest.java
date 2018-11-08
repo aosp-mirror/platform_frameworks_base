@@ -93,8 +93,8 @@ public class KeyguardClockPositionAlgorithmTest extends SysuiTestCase {
         mKeyguardStatusHeight = SCREEN_HEIGHT;
         // WHEN the clock position algorithm is run
         positionClock();
-        // THEN the clock Y position overflows the parent.
-        assertThat(mClockPosition.clockY).isEqualTo(-1000);
+        // THEN the clock Y position doesn't overflow the screen.
+        assertThat(mClockPosition.clockY).isEqualTo(0);
         // AND the clock is opaque and positioned on the left.
         assertThat(mClockPosition.clockX).isEqualTo(0);
         assertThat(mClockPosition.clockAlpha).isEqualTo(OPAQUE);
