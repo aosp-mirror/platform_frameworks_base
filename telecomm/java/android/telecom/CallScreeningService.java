@@ -18,6 +18,7 @@ package android.telecom;
 
 import android.annotation.SdkConstant;
 import android.app.Service;
+import android.content.ComponentName;
 import android.content.Intent;
 import android.os.Handler;
 import android.os.IBinder;
@@ -229,7 +230,8 @@ public abstract class CallScreeningService extends Service {
                         callDetails.getTelecomCallId(),
                         response.getRejectCall(),
                         !response.getSkipCallLog(),
-                        !response.getSkipNotification());
+                        !response.getSkipNotification(),
+                        new ComponentName(getPackageName(), getClass().getName()));
             } else {
                 mCallScreeningAdapter.allowCall(callDetails.getTelecomCallId());
             }
