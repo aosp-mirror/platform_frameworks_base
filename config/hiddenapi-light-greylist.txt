@@ -4381,10 +4381,8 @@ Lcom/android/org/bouncycastle/x509/X509V3CertificateGenerator;->setSignatureAlgo
 Lcom/android/org/bouncycastle/x509/X509V3CertificateGenerator;->setSubjectDN(Lcom/android/org/bouncycastle/asn1/x509/X509Name;)V
 Lcom/android/org/bouncycastle/x509/X509V3CertificateGenerator;->setSubjectDN(Ljavax/security/auth/x500/X500Principal;)V
 Lcom/android/org/conscrypt/AbstractConscryptSocket;->getAlpnSelectedProtocol()[B
-Lcom/android/org/conscrypt/AbstractConscryptSocket;->getApplicationProtocol()Ljava/lang/String;
 Lcom/android/org/conscrypt/AbstractConscryptSocket;->getApplicationProtocols()[Ljava/lang/String;
 Lcom/android/org/conscrypt/AbstractConscryptSocket;->getChannelId()[B
-Lcom/android/org/conscrypt/AbstractConscryptSocket;->getHandshakeApplicationProtocol()Ljava/lang/String;
 Lcom/android/org/conscrypt/AbstractConscryptSocket;->getHostname()Ljava/lang/String;
 Lcom/android/org/conscrypt/AbstractConscryptSocket;->getHostnameOrIP()Ljava/lang/String;
 Lcom/android/org/conscrypt/AbstractConscryptSocket;->getNpnSelectedProtocol()[B
