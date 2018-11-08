@@ -1155,7 +1155,7 @@ public class HdmiControlService extends SystemService {
         String displayName = Build.MODEL;
         return new HdmiDeviceInfo(logicalAddress,
                 getPhysicalAddress(), pathToPortId(getPhysicalAddress()), deviceType,
-                getVendorId(), displayName);
+                getVendorId(), displayName, powerStatus);
     }
 
     @ServiceThreadOnly
@@ -1374,6 +1374,33 @@ public class HdmiControlService extends SystemService {
             HdmiCecLocalDeviceTv tv = tv();
             if (tv == null) {
                 Slog.w(TAG, "Local tv device not available");
+                if (isPlaybackDevice()) {
+                    // if playback device itself is the active source,
+                    // return its own device info.
+                    if (playback() != null && playback().mIsActiveSource) {
+                        return playback().getDeviceInfo();
+                    }
+                    // Otherwise get the active source and look for it from the device list
+                    ActiveSource activeSource = mActiveSource;
+                    // If the active source is not set yet, return null
+                    if (!activeSource.isValid()) {
+                        return null;
+                    }
+                    if (audioSystem() != null) {
+                        HdmiCecLocalDeviceAudioSystem audioSystem = audioSystem();
+                        for (HdmiDeviceInfo info : audioSystem.getSafeCecDevicesLocked()) {
+                            if (info.getLogicalAddress() == activeSource.logicalAddress) {
+                                return info;
+                            }
+                        }
+                    }
+                    // If the device info is not in the list yet, return a device info with minimum
+                    // information from mActiveSource.
+                    return new HdmiDeviceInfo(activeSource.logicalAddress,
+                        activeSource.physicalAddress, pathToPortId(activeSource.physicalAddress),
+                        HdmiUtils.getTypeFromAddress(activeSource.logicalAddress), 0,
+                        HdmiUtils.getDefaultDeviceName(activeSource.logicalAddress));
+                }
                 return null;
             }
             ActiveSource activeSource = tv.getActiveSource();

@@ -66,6 +66,7 @@ abstract class HdmiCecLocalDevice {
     protected final int mDeviceType;
     protected int mAddress;
     protected int mPreferredAddress;
+    @GuardedBy("mLock")
     protected HdmiDeviceInfo mDeviceInfo;
     protected int mLastKeycode = HdmiCecKeycode.UNSUPPORTED_KEYCODE;
     protected int mLastKeyRepeatCount = 0;
@@ -717,16 +718,18 @@ abstract class HdmiCecLocalDevice {
         return mDeviceType;
     }
 
-    @ServiceThreadOnly
+    @GuardedBy("mLock")
     HdmiDeviceInfo getDeviceInfo() {
-        assertRunOnServiceThread();
-        return mDeviceInfo;
+        synchronized (mLock) {
+            return mDeviceInfo;
+        }
     }
 
-    @ServiceThreadOnly
+    @GuardedBy("mLock")
     void setDeviceInfo(HdmiDeviceInfo info) {
-        assertRunOnServiceThread();
-        mDeviceInfo = info;
+        synchronized (mLock) {
+            mDeviceInfo = info;
+        }
     }
 
     // Returns true if the logical address is same as the argument.
