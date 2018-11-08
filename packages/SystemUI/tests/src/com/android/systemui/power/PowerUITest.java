@@ -17,7 +17,6 @@ package com.android.systemui.power;
 import static android.os.HardwarePropertiesManager.DEVICE_TEMPERATURE_SKIN;
 import static android.os.HardwarePropertiesManager.TEMPERATURE_CURRENT;
 import static android.os.HardwarePropertiesManager.TEMPERATURE_SHUTDOWN;
-import static android.os.HardwarePropertiesManager.TEMPERATURE_THROTTLING;
 import static android.provider.Settings.Global.SHOW_TEMPERATURE_WARNING;
 
 import static junit.framework.Assert.assertFalse;
@@ -70,7 +69,6 @@ public class PowerUITest extends SysuiTestCase {
     private static final long ABOVE_CHARGE_CYCLE_THRESHOLD = Duration.ofHours(8).toMillis();
     private static final int OLD_BATTERY_LEVEL_NINE = 9;
     private static final int OLD_BATTERY_LEVEL_10 = 10;
-    private static final int DEFAULT_OVERHEAT_ALARM_THRESHOLD = 58;
     private HardwarePropertiesManager mHardProps;
     private WarningsUI mMockWarnings;
     private PowerUI mPowerUI;
@@ -155,68 +153,8 @@ public class PowerUITest extends SysuiTestCase {
         verify(mMockWarnings, never()).showHighTemperatureWarning();
 
         setCurrentTemp(56); // Above threshold.
-        mPowerUI.updateTemperature();
+        mPowerUI.updateTemperatureWarning();
         verify(mMockWarnings).showHighTemperatureWarning();
-    }
-
-    @Test
-    public void testNoConfig_NoAlarms() {
-        setOverThreshold();
-        Boolean overheat = false;
-        TestableResources resources = mContext.getOrCreateTestableResources();
-        resources.addOverride(R.integer.config_showTemperatureWarning, 0);
-        resources.addOverride(R.integer.config_alarmTemperature, 55);
-
-        mPowerUI.start();
-        verify(mMockWarnings, never()).notifyHighTemperatureAlarm(overheat);
-    }
-
-    @Test
-    public void testConfig_NoAlarms() {
-        setUnderThreshold();
-        Boolean overheat = false;
-        TestableResources resources = mContext.getOrCreateTestableResources();
-        resources.addOverride(R.integer.config_showTemperatureAlarm, 1);
-        resources.addOverride(R.integer.config_alarmTemperature, 58);
-
-        mPowerUI.start();
-        verify(mMockWarnings, never()).notifyHighTemperatureAlarm(overheat);
-    }
-
-    @Test
-    public void testConfig_Alarms() {
-        setOverThreshold();
-        Boolean overheat = true;
-        TestableResources resources = mContext.getOrCreateTestableResources();
-        resources.addOverride(R.integer.config_showTemperatureAlarm, 1);
-        resources.addOverride(R.integer.config_alarmTemperature, 58);
-
-        mPowerUI.start();
-        verify(mMockWarnings).notifyHighTemperatureAlarm(overheat);
-    }
-
-    @Test
-    public void testHardPropsThrottlingThreshold_Alarms() {
-        setThrottlingThreshold(DEFAULT_OVERHEAT_ALARM_THRESHOLD);
-        setOverThreshold();
-        Boolean overheat = true;
-        TestableResources resources = mContext.getOrCreateTestableResources();
-        resources.addOverride(R.integer.config_showTemperatureAlarm, 1);
-
-        mPowerUI.start();
-        verify(mMockWarnings).notifyHighTemperatureAlarm(overheat);
-    }
-
-    @Test
-    public void testHardPropsThrottlingThreshold_NoAlarms() {
-        setThrottlingThreshold(DEFAULT_OVERHEAT_ALARM_THRESHOLD);
-        setUnderThreshold();
-        Boolean overheat = false;
-        TestableResources resources = mContext.getOrCreateTestableResources();
-        resources.addOverride(R.integer.config_showTemperatureAlarm, 1);
-
-        mPowerUI.start();
-        verify(mMockWarnings, never()).notifyHighTemperatureAlarm(overheat);
     }
 
     @Test
@@ -558,11 +496,6 @@ public class PowerUITest extends SysuiTestCase {
     private void setCurrentTemp(float temp) {
         when(mHardProps.getDeviceTemperatures(DEVICE_TEMPERATURE_SKIN, TEMPERATURE_CURRENT))
                 .thenReturn(new float[] { temp });
-    }
-
-    private void setThrottlingThreshold(float temp) {
-        when(mHardProps.getDeviceTemperatures(DEVICE_TEMPERATURE_SKIN, TEMPERATURE_THROTTLING))
-                .thenReturn(new float[] { temp, temp });
     }
 
     private void setOverThreshold() {
