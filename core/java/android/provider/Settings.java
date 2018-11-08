@@ -11759,6 +11759,13 @@ public final class Settings {
         public static final String ANGLE_ENABLED_APP = "angle_enabled_app";
 
         /**
+         * App that is selected to use updated graphics driver.
+         * @hide
+         */
+        public static final String UPDATED_GFX_DRIVER_DEV_OPT_IN_APP =
+                "updated_gfx_driver_dev_opt_in_app";
+
+        /**
          * Ordered GPU debug layer list for Vulkan
          * i.e. <layer1>:<layer2>:...:<layerN>
          * @hide

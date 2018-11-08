@@ -457,6 +457,7 @@ public class SettingsBackupTest {
                     Settings.Global.GPU_DEBUG_LAYERS,
                     Settings.Global.GPU_DEBUG_LAYERS_GLES,
                     Settings.Global.ANGLE_ENABLED_APP,
+                    Settings.Global.UPDATED_GFX_DRIVER_DEV_OPT_IN_APP,
                     Settings.Global.GPU_DEBUG_LAYER_APP,
                     Settings.Global.ENABLE_GNSS_RAW_MEAS_FULL_TRACKING,
                     Settings.Global.INSTALL_CARRIER_APP_NOTIFICATION_PERSISTENT,

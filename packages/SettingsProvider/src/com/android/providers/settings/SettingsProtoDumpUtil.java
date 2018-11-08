@@ -678,6 +678,9 @@ class SettingsProtoDumpUtil {
         dumpSetting(s, p,
                 Settings.Global.GPU_DEBUG_LAYERS_GLES,
                 GlobalSettingsProto.Gpu.DEBUG_LAYERS_GLES);
+        dumpSetting(s, p,
+                Settings.Global.UPDATED_GFX_DRIVER_DEV_OPT_IN_APP,
+                GlobalSettingsProto.Gpu.UPDATED_GFX_DRIVER_DEV_OPT_IN_APP);
         p.end(gpuToken);
 
         final long hdmiToken = p.start(GlobalSettingsProto.HDMI);
