@@ -2523,10 +2523,11 @@ public class KeyEvent extends InputEvent implements Parcelable {
     }
 
     /**
-     * Retrieve the repeat count of the event.  For both key up and key down
-     * events, this is the number of times the key has repeated with the first
-     * down starting at 0 and counting up from there.  For multiple key
-     * events, this is the number of down/up pairs that have occurred.
+     * Retrieve the repeat count of the event.  For key down events,
+     * this is the number of times the key has repeated with the first
+     * down starting at 0 and counting up from there.  For key up events,
+     * this is always equal to zero. For multiple key events,
+     * this is the number of down/up pairs that have occurred.
      *
      * @return The number of times the key has repeated.
      */
