@@ -199,6 +199,7 @@ public class Environment {
      * @hide
      */
     @SystemApi
+    @TestApi
     public static File getProductDirectory() {
         return DIR_PRODUCT_ROOT;
     }
