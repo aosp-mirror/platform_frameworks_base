@@ -1256,7 +1256,6 @@ stubs_defaults {
         "ext",
         "framework",
         "voip-common",
-        "android.test.mock.impl",
     ],
     local_sourcepaths: frameworks_base_subdirs,
     installable: false,

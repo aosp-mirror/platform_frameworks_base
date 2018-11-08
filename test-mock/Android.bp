@@ -30,3 +30,19 @@ java_sdk_library {
     srcs_lib_whitelist_pkgs: ["android"],
     compile_dex: true,
 }
+
+// Build the android.test.mock_static library
+// ==========================================
+// This is only intended for inclusion in the legacy-android-test.
+// Must not be used elewhere.
+java_library_static {
+    name: "android.test.mock_static",
+
+    java_version: "1.8",
+    srcs: ["src/**/*.java"],
+
+    no_framework_libs: true,
+    libs: [
+        "framework",
+    ],
+}
