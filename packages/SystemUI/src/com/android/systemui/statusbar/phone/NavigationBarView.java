@@ -63,6 +63,7 @@ import android.view.accessibility.AccessibilityNodeInfo.AccessibilityAction;
 import android.view.inputmethod.InputMethodManager;
 import android.widget.FrameLayout;
 
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.Dependency;
 import com.android.systemui.DockedStackExistsListener;
 import com.android.systemui.Interpolators;
@@ -96,7 +97,6 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
     final static boolean ALTERNATE_CAR_MODE_UI = false;
 
-    final Display mDisplay;
     View mCurrentView = null;
     View[] mRotatedViews = new View[4];
 
@@ -280,8 +280,6 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
 
     public NavigationBarView(Context context, AttributeSet attrs) {
         super(context, attrs);
-
-        mDisplay = context.getDisplay();
 
         mVertical = false;
         mLongClickableAccessibilityButton = false;
@@ -652,8 +650,8 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         Log.i(TAG, "updateNavButtonIcons (b/113914868): home disabled=" + disableHome
                 + " mDisabledFlags=" + mDisabledFlags);
 
-        // Always disable recents when alternate car mode UI is active.
-        boolean disableRecent = mUseCarModeUi || !isOverviewEnabled();
+        // Always disable recents when alternate car mode UI is active and for secondary displays.
+        boolean disableRecent = isRecentsButtonDisabled();
 
         boolean disableBack = QuickStepController.shouldhideBackButton(getContext())
                 || (((mDisabledFlags & View.STATUS_BAR_DISABLE_BACK) != 0) && !useAltBack);
@@ -687,6 +685,16 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         getBackButton().setVisibility(disableBack      ? View.INVISIBLE : View.VISIBLE);
         getHomeButton().setVisibility(disableHome      ? View.INVISIBLE : View.VISIBLE);
         getRecentsButton().setVisibility(disableRecent ? View.INVISIBLE : View.VISIBLE);
+    }
+
+    @VisibleForTesting
+    boolean isRecentsButtonDisabled() {
+        return mUseCarModeUi || !isOverviewEnabled()
+                || getContext().getDisplayId() != Display.DEFAULT_DISPLAY;
+    }
+
+    private Display getContextDisplay() {
+        return getContext().getDisplay();
     }
 
     public boolean inScreenPinning() {
@@ -890,7 +898,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
     }
 
     private void updateCurrentView() {
-        final int rot = mDisplay.getRotation();
+        final int rot = getContextDisplay().getRotation();
         for (int i=0; i<4; i++) {
             mRotatedViews[i].setVisibility(View.GONE);
         }
@@ -954,7 +962,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         int navBarPos = NAV_BAR_INVALID;
         try {
             navBarPos = WindowManagerGlobal.getWindowManagerService().getNavBarPosition(
-                    mDisplay.getDisplayId());
+                    getContext().getDisplayId());
         } catch (RemoteException e) {
             Slog.e(TAG, "Failed to get nav bar position.", e);
         }
@@ -1128,7 +1136,7 @@ public class NavigationBarView extends FrameLayout implements PluginListener<Nav
         pw.println("NavigationBarView {");
         final Rect r = new Rect();
         final Point size = new Point();
-        mDisplay.getRealSize(size);
+        getContextDisplay().getRealSize(size);
 
         pw.println(String.format("      this: " + StatusBar.viewInfo(this)
                         + " " + visibilityToString(getVisibility())));
