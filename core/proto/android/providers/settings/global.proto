@@ -725,8 +725,10 @@ message GlobalSettingsProto {
     optional SettingProto set_install_location = 103 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto shortcut_manager_constants = 104;
     optional SettingProto show_first_crash_dialog = 105 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto show_hidden_launcher_icon_apps_enabled = 141 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto show_restart_in_crash_dialog = 106 [ (android.privacy).dest = DEST_AUTOMATIC ];
     optional SettingProto show_mute_in_crash_dialog = 107 [ (android.privacy).dest = DEST_AUTOMATIC ];
+    optional SettingProto show_new_app_installed_notification_enabled = 142 [ (android.privacy).dest = DEST_AUTOMATIC ];
 
     message SmartSelection {
         option (android.msg_privacy).dest = DEST_EXPLICIT;
@@ -966,5 +968,5 @@ message GlobalSettingsProto {
 
     // Please insert fields in alphabetical order and group them into messages
     // if possible (to avoid reaching the method limit).
-    // Next tag = 141;
+    // Next tag = 143;
 }

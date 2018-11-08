@@ -64,9 +64,28 @@ public class BatterySaverPolicy extends ContentObserver {
     private static final String KEY_VIBRATION_DISABLED = "vibration_disabled";
     private static final String KEY_ANIMATION_DISABLED = "animation_disabled";
     private static final String KEY_SOUNDTRIGGER_DISABLED = "soundtrigger_disabled";
-    private static final String KEY_FIREWALL_DISABLED = "firewall_disabled";
+
+    /**
+     * Disable turning on the network firewall when Battery Saver is turned on.
+     * If set to false, the firewall WILL be turned on when Battery Saver is turned on.
+     * If set to true, the firewall WILL NOT be turned on when Battery Saver is turned on.
+     */
+    private static final String KEY_ACTIVATE_FIREWALL_DISABLED = "firewall_disabled";
+
+    /**
+     * Disable turning on the special low power screen brightness dimming when Battery Saver is
+     * turned on.
+     * If set to false, the screen brightness dimming WILL be turned on by Battery Saver.
+     * If set to true, the screen brightness WILL NOT be turned on by Battery Saver.
+     */
     private static final String KEY_ADJUST_BRIGHTNESS_DISABLED = "adjust_brightness_disabled";
-    private static final String KEY_DATASAVER_DISABLED = "datasaver_disabled";
+
+    /**
+     * Disable turning on Data Saver when Battery Saver is turned on.
+     * If set to false, Data Saver WILL be turned on when Battery Saver is turned on.
+     * If set to true, Data Saver WILL NOT be turned on when Battery Saver is turned on.
+     */
+    private static final String KEY_ACTIVATE_DATASAVER_DISABLED = "datasaver_disabled";
     private static final String KEY_LAUNCH_BOOST_DISABLED = "launch_boost_disabled";
     private static final String KEY_ADJUST_BRIGHTNESS_FACTOR = "adjust_brightness_factor";
     private static final String KEY_FULLBACKUP_DEFERRED = "fullbackup_deferred";
@@ -154,31 +173,32 @@ public class BatterySaverPolicy extends ContentObserver {
     private boolean mKeyValueBackupDeferred;
 
     /**
-     * {@code true} if network policy firewall is disabled in battery saver mode.
+     * {@code true} if network policy firewall should be turned on in battery saver mode.
      *
      * @see Settings.Global#BATTERY_SAVER_CONSTANTS
-     * @see #KEY_FIREWALL_DISABLED
+     * @see #KEY_ACTIVATE_FIREWALL_DISABLED
      */
     @GuardedBy("mLock")
-    private boolean mFireWallDisabled;
+    private boolean mEnableFirewall;
 
     /**
-     * {@code true} if adjust brightness is disabled in battery saver mode.
+     * {@code true} if low power mode brightness adjustment should be turned on in battery saver
+     * mode.
      *
      * @see Settings.Global#BATTERY_SAVER_CONSTANTS
      * @see #KEY_ADJUST_BRIGHTNESS_DISABLED
      */
     @GuardedBy("mLock")
-    private boolean mAdjustBrightnessDisabled;
+    private boolean mEnableAdjustBrightness;
 
     /**
-     * {@code true} if data saver is disabled in battery saver mode.
+     * {@code true} if data saver should be turned on in battery saver mode.
      *
      * @see Settings.Global#BATTERY_SAVER_CONSTANTS
-     * @see #KEY_DATASAVER_DISABLED
+     * @see #KEY_ACTIVATE_DATASAVER_DISABLED
      */
     @GuardedBy("mLock")
-    private boolean mDataSaverDisabled;
+    private boolean mEnableDataSaver;
 
     /**
      * {@code true} if launch boost should be disabled on battery saver.
@@ -391,10 +411,10 @@ public class BatterySaverPolicy extends ContentObserver {
         mSoundTriggerDisabled = parser.getBoolean(KEY_SOUNDTRIGGER_DISABLED, true);
         mFullBackupDeferred = parser.getBoolean(KEY_FULLBACKUP_DEFERRED, true);
         mKeyValueBackupDeferred = parser.getBoolean(KEY_KEYVALUE_DEFERRED, true);
-        mFireWallDisabled = parser.getBoolean(KEY_FIREWALL_DISABLED, false);
-        mAdjustBrightnessDisabled = parser.getBoolean(KEY_ADJUST_BRIGHTNESS_DISABLED, true);
+        mEnableFirewall = !parser.getBoolean(KEY_ACTIVATE_FIREWALL_DISABLED, false);
+        mEnableAdjustBrightness = !parser.getBoolean(KEY_ADJUST_BRIGHTNESS_DISABLED, true);
         mAdjustBrightnessFactor = parser.getFloat(KEY_ADJUST_BRIGHTNESS_FACTOR, 0.5f);
-        mDataSaverDisabled = parser.getBoolean(KEY_DATASAVER_DISABLED, true);
+        mEnableDataSaver = !parser.getBoolean(KEY_ACTIVATE_DATASAVER_DISABLED, true);
         mLaunchBoostDisabled = parser.getBoolean(KEY_LAUNCH_BOOST_DISABLED, true);
         mForceAllAppsStandby = parser.getBoolean(KEY_FORCE_ALL_APPS_STANDBY, true);
         mForceBackgroundCheck = parser.getBoolean(KEY_FORCE_BACKGROUND_CHECK, true);
@@ -436,9 +456,9 @@ public class BatterySaverPolicy extends ContentObserver {
         if (mSoundTriggerDisabled) sb.append("s");
         if (mFullBackupDeferred) sb.append("F");
         if (mKeyValueBackupDeferred) sb.append("K");
-        if (!mFireWallDisabled) sb.append("f");
-        if (!mDataSaverDisabled) sb.append("d");
-        if (!mAdjustBrightnessDisabled) sb.append("b");
+        if (mEnableFirewall) sb.append("f");
+        if (mEnableDataSaver) sb.append("d");
+        if (mEnableAdjustBrightness) sb.append("b");
 
         if (mLaunchBoostDisabled) sb.append("l");
         if (mOptionalSensorsDisabled) sb.append("S");
@@ -485,14 +505,14 @@ public class BatterySaverPolicy extends ContentObserver {
                     return builder.setBatterySaverEnabled(mKeyValueBackupDeferred)
                             .build();
                 case ServiceType.NETWORK_FIREWALL:
-                    return builder.setBatterySaverEnabled(!mFireWallDisabled)
+                    return builder.setBatterySaverEnabled(mEnableFirewall)
                             .build();
                 case ServiceType.SCREEN_BRIGHTNESS:
-                    return builder.setBatterySaverEnabled(!mAdjustBrightnessDisabled)
+                    return builder.setBatterySaverEnabled(mEnableAdjustBrightness)
                             .setBrightnessFactor(mAdjustBrightnessFactor)
                             .build();
                 case ServiceType.DATA_SAVER:
-                    return builder.setBatterySaverEnabled(!mDataSaverDisabled)
+                    return builder.setBatterySaverEnabled(mEnableDataSaver)
                             .build();
                 case ServiceType.SOUND:
                     return builder.setBatterySaverEnabled(mSoundTriggerDisabled)
@@ -565,10 +585,10 @@ public class BatterySaverPolicy extends ContentObserver {
             pw.println("  " + KEY_ANIMATION_DISABLED + "=" + mAnimationDisabled);
             pw.println("  " + KEY_FULLBACKUP_DEFERRED + "=" + mFullBackupDeferred);
             pw.println("  " + KEY_KEYVALUE_DEFERRED + "=" + mKeyValueBackupDeferred);
-            pw.println("  " + KEY_FIREWALL_DISABLED + "=" + mFireWallDisabled);
-            pw.println("  " + KEY_DATASAVER_DISABLED + "=" + mDataSaverDisabled);
+            pw.println("  " + KEY_ACTIVATE_FIREWALL_DISABLED + "=" + !mEnableFirewall);
+            pw.println("  " + KEY_ACTIVATE_DATASAVER_DISABLED + "=" + !mEnableDataSaver);
             pw.println("  " + KEY_LAUNCH_BOOST_DISABLED + "=" + mLaunchBoostDisabled);
-            pw.println("  " + KEY_ADJUST_BRIGHTNESS_DISABLED + "=" + mAdjustBrightnessDisabled);
+            pw.println("  " + KEY_ADJUST_BRIGHTNESS_DISABLED + "=" + !mEnableAdjustBrightness);
             pw.println("  " + KEY_ADJUST_BRIGHTNESS_FACTOR + "=" + mAdjustBrightnessFactor);
             pw.println("  " + KEY_GPS_MODE + "=" + mGpsMode);
             pw.println("  " + KEY_FORCE_ALL_APPS_STANDBY + "=" + mForceAllAppsStandby);

@@ -127,6 +127,11 @@ import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_SERVICE;
 import static com.android.server.am.ActivityManagerDebugConfig.POSTFIX_UID_OBSERVERS;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_AM;
 import static com.android.server.am.ActivityManagerDebugConfig.TAG_WITH_CLASS_NAME;
+import static com.android.server.am.MemoryStatUtil.MEMORY_STAT_INTERESTING_NATIVE_PROCESSES;
+import static com.android.server.am.MemoryStatUtil.hasMemcg;
+import static com.android.server.am.MemoryStatUtil.readCmdlineFromProcfs;
+import static com.android.server.am.MemoryStatUtil.readMemoryStatFromFilesystem;
+import static com.android.server.am.MemoryStatUtil.readMemoryStatFromProcfs;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_CLEANUP;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_CONFIGURATION;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_SWITCH;
@@ -144,11 +149,6 @@ import static com.android.server.wm.ActivityTaskManagerService.DUMP_STARTER_CMD;
 import static com.android.server.wm.ActivityTaskManagerService.KEY_DISPATCHING_TIMEOUT_MS;
 import static com.android.server.wm.ActivityTaskManagerService.RELAUNCH_REASON_NONE;
 import static com.android.server.wm.ActivityTaskManagerService.relaunchReasonToString;
-import static com.android.server.am.MemoryStatUtil.MEMORY_STAT_INTERESTING_NATIVE_PROCESSES;
-import static com.android.server.am.MemoryStatUtil.hasMemcg;
-import static com.android.server.am.MemoryStatUtil.readCmdlineFromProcfs;
-import static com.android.server.am.MemoryStatUtil.readMemoryStatFromFilesystem;
-import static com.android.server.am.MemoryStatUtil.readMemoryStatFromProcfs;
 
 import android.Manifest;
 import android.Manifest.permission;
@@ -3852,7 +3852,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         final int callingPid = Binder.getCallingPid();
         final int callingUid = Binder.getCallingUid();
-        final int userId = UserHandle.getUserId(callingUid);
+        final int callingUserId = UserHandle.getUserId(callingUid);
         final boolean allUsers = ActivityManager.checkUidPermission(INTERACT_ACROSS_USERS_FULL,
                 callingUid) == PackageManager.PERMISSION_GRANTED;
         // Check REAL_GET_TASKS to see if they are allowed to access other uids
@@ -3870,11 +3870,17 @@ public class ActivityManagerService extends IActivityManager.Stub
                     oomAdj = proc != null ? proc.setAdj : 0;
                 }
             }
-            if (!allUids || (!allUsers && (proc == null
-                    || UserHandle.getUserId(proc.uid) != userId))) {
-                // The caller is not allow to get information about this other process...
-                // just leave it empty.
-                continue;
+            final int targetUid = (proc != null) ? proc.uid : -1;
+            final int targetUserId = (proc != null) ? UserHandle.getUserId(targetUid) : -1;
+
+            if (callingUid != targetUid) {
+                if (!allUids) {
+                    continue; // Not allowed to see other UIDs.
+                }
+
+                if (!allUsers && (targetUserId != callingUserId)) {
+                    continue; // Not allowed to see other users.
+                }
             }
             if (proc != null && proc.lastMemInfoTime >= lastNow && proc.lastMemInfo != null) {
                 // It hasn't been long enough that we want to take another sample; return
@@ -7317,13 +7323,6 @@ public class ActivityManagerService extends IActivityManager.Stub
         }
 
         return timedout;
-    }
-
-    @Override
-    public void setLockScreenShown(boolean keyguardShowing, boolean aodShowing,
-            int secondaryDisplayShowing) {
-        mActivityTaskManager.setLockScreenShown(
-                keyguardShowing, aodShowing, secondaryDisplayShowing);
     }
 
     @Override

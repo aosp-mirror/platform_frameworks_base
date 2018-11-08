@@ -11499,6 +11499,24 @@ public final class Settings {
         public static final String NETWORK_WATCHLIST_ENABLED = "network_watchlist_enabled";
 
         /**
+         * Whether or not show hidden launcher icon apps feature is enabled.
+         * Type: int (0 for false, 1 for true)
+         * Default: 0
+         * @hide
+         */
+        public static final String SHOW_HIDDEN_LAUNCHER_ICON_APPS_ENABLED =
+                "show_hidden_icon_apps_enabled";
+
+        /**
+         * Whether or not show new app installed notification is enabled.
+         * Type: int (0 for false, 1 for true)
+         * Default: 0
+         * @hide
+         */
+        public static final String SHOW_NEW_APP_INSTALLED_NOTIFICATION_ENABLED =
+                "show_new_app_installed_notification_enabled";
+
+        /**
          * Flag to keep background restricted profiles running after exiting. If disabled,
          * the restricted profile can be put into stopped state as soon as the user leaves it.
          * Type: int (0 for false, 1 for true)
@@ -12488,6 +12506,17 @@ public final class Settings {
          */
         public static final String PRIVILEGED_DEVICE_IDENTIFIER_TARGET_Q_BEHAVIOR_ENABLED =
                 "privileged_device_identifier_target_q_behavior_enabled";
+
+        /**
+         * If set to 1, the device identifier check will be relaxed to the previous READ_PHONE_STATE
+         * permission check for 3P apps.
+         *
+         * STOPSHIP: Remove this once we ship with the new device identifier check enabled.
+         *
+         * @hide
+         */
+        public static final String PRIVILEGED_DEVICE_IDENTIFIER_3P_CHECK_RELAXED =
+                "privileged_device_identifier_3p_check_relaxed";
 
         /**
          * If set to 1, SettingsProvider's restoreAnyVersion="true" attribute will be ignored

@@ -208,10 +208,12 @@ package android.app {
     method public int getActivityType();
     method public android.graphics.Rect getAppBounds();
     method public android.graphics.Rect getBounds();
+    method public int getRotation();
     method public int getWindowingMode();
     method public void setActivityType(int);
     method public void setAppBounds(android.graphics.Rect);
     method public void setBounds(android.graphics.Rect);
+    method public void setRotation(int);
     method public void setTo(android.app.WindowConfiguration);
     method public void setWindowingMode(int);
     method public void writeToParcel(android.os.Parcel, int);
@@ -220,6 +222,7 @@ package android.app {
     field public static final int ACTIVITY_TYPE_RECENTS = 3; // 0x3
     field public static final int ACTIVITY_TYPE_STANDARD = 1; // 0x1
     field public static final int ACTIVITY_TYPE_UNDEFINED = 0; // 0x0
+    field public static final int ROTATION_UNDEFINED = -1; // 0xffffffff
     field public static final int WINDOWING_MODE_FREEFORM = 5; // 0x5
     field public static final int WINDOWING_MODE_FULLSCREEN = 1; // 0x1
     field public static final int WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY = 4; // 0x4

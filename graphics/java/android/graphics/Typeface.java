@@ -566,7 +566,7 @@ public class Typeface {
                 final CustomFallbackBuilder builder = new CustomFallbackBuilder(family)
                         .setStyle(new FontStyle(weight, slant));
                 if (mFallbackFamilyName != null) {
-                    builder.setFallback(mFallbackFamilyName);
+                    builder.setSystemFallback(mFallbackFamilyName);
                 }
                 final Typeface typeface = builder.build();
                 if (key != null) {
@@ -583,6 +583,14 @@ public class Typeface {
 
     /**
      * A builder class for creating new Typeface instance.
+     *
+     * There are two font fallback mechanisms, custom font fallback and system font fallback.
+     * The custom font fallback is a simple ordered list. The text renderer tries to see if it can
+     * render a character with the first font and if that font does not support the character, try
+     * next one and so on. It will keep trying until end of the custom fallback chain. The maximum
+     * length of the custom fallback chain is 64.
+     * The system font fallback is a system pre-defined fallback chain. The system fallback is
+     * processed only when no matching font is found in the custom font fallback.
      *
      * <p>
      * Examples,
@@ -617,15 +625,29 @@ public class Typeface {
      * Font font = new Font.Builder("your_font_file.ttf").build();
      * FontFamily family = new FontFamily.Builder(font).build();
      * Typeface typeface = new Typeface.CustomFallbackBuilder(family)
-     *     .setFallback("serif")  // Set serif font family as the fallback.
+     *     .setSystemFallback("serif")  // Set serif font family as the fallback.
+     *     .build();
+     * </code>
+     * </pre>
+     * 4) Create Typeface from single ttf file and set another ttf file for the fallback.
+     * <pre>
+     * <code>
+     * Font font = new Font.Builder("English.ttf").build();
+     * FontFamily family = new FontFamily.Builder(font).build();
+     *
+     * Font fallbackFont = new Font.Builder("Arabic.ttf").build();
+     * FontFamily fallbackFamily = new FontFamily.Builder(fallbackFont).build();
+     * Typeface typeface = new Typeface.CustomFallbackBuilder(family)
+     *     .addCustomFallback(fallbackFamily)  // Specify fallback family.
+     *     .setSystemFallback("serif")  // Set serif font family as the fallback.
      *     .build();
      * </code>
      * </pre>
      * </p>
      */
     public static class CustomFallbackBuilder {
-        // TODO: Remove package modifier once android.graphics.FontFamily is deprecated.
-        private final android.graphics.fonts.FontFamily mFamily;
+        private static final int MAX_CUSTOM_FALLBACK = 64;
+        private final ArrayList<FontFamily> mFamilies = new ArrayList<>();
         private String mFallbackName = null;
         private @Nullable FontStyle mStyle;
 
@@ -634,19 +656,20 @@ public class Typeface {
          *
          * @param family a family object
          */
-        // TODO: Remove package modifier once android.graphics.FontFamily is deprecated.
-        public CustomFallbackBuilder(@NonNull android.graphics.fonts.FontFamily family) {
+        public CustomFallbackBuilder(@NonNull FontFamily family) {
             Preconditions.checkNotNull(family);
-            mFamily = family;
+            mFamilies.add(family);
         }
 
         /**
          * Sets a system fallback by name.
          *
+         * For more information about fallback, see class description.
+         *
          * @param familyName a family name to be used for fallback if the provided fonts can not be
          *                   used
          */
-        public CustomFallbackBuilder setFallback(@NonNull String familyName) {
+        public CustomFallbackBuilder setSystemFallback(@NonNull String familyName) {
             Preconditions.checkNotNull(familyName);
             mFallbackName = familyName;
             return this;
@@ -667,19 +690,40 @@ public class Typeface {
         }
 
         /**
+         * Append a font family to the end of the custom font fallback.
+         *
+         * You can set up to 64 custom fallback families including the first font family you passed
+         * to the constructor.
+         * For more information about fallback, see class description.
+         *
+         * @param family a fallback family
+         * @throws IllegalArgumentException if you give more than 64 custom fallback families
+         */
+        public CustomFallbackBuilder addCustomFallback(@NonNull FontFamily family) {
+            Preconditions.checkNotNull(family);
+            Preconditions.checkArgument(mFamilies.size() < MAX_CUSTOM_FALLBACK,
+                    "Custom fallback limit exceeded(" + MAX_CUSTOM_FALLBACK + ")");
+            mFamilies.add(family);
+            return this;
+        }
+
+        /**
          * Create the Typeface based on the configured values.
          *
          * @return the Typeface object
          */
         public Typeface build() {
+            final int userFallbackSize = mFamilies.size();
             final FontFamily[] fallback = SystemFonts.getSystemFallback(mFallbackName);
-            final FontFamily[] fullFamilies = new FontFamily[fallback.length + 1];
-            final long[] ptrArray = new long[fallback.length + 1];
-            ptrArray[0] = mFamily.getNativePtr();
-            fullFamilies[0] = mFamily;
+            final FontFamily[] fullFamilies = new FontFamily[fallback.length + userFallbackSize];
+            final long[] ptrArray = new long[fallback.length + userFallbackSize];
+            for (int i = 0; i < userFallbackSize; ++i) {
+                ptrArray[i] = mFamilies.get(i).getNativePtr();
+                fullFamilies[i] = mFamilies.get(i);
+            }
             for (int i = 0; i < fallback.length; ++i) {
-                ptrArray[i + 1] = fallback[i].getNativePtr();
-                fullFamilies[i + 1] = fallback[i];
+                ptrArray[i + userFallbackSize] = fallback[i].getNativePtr();
+                fullFamilies[i + userFallbackSize] = fallback[i];
             }
             final int weight = mStyle == null ? 400 : mStyle.getWeight();
             final int italic =

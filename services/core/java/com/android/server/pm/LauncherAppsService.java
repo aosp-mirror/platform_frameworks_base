@@ -77,7 +77,6 @@ import java.util.List;
  */
 public class LauncherAppsService extends SystemService {
 
-    private static final boolean SHOW_HIDDEN_APP_ENABLED = false;
     private final LauncherAppsImpl mLauncherAppsImpl;
 
     public LauncherAppsService(Context context) {
@@ -310,22 +309,28 @@ public class LauncherAppsService extends SystemService {
                             .addCategory(Intent.CATEGORY_LAUNCHER)
                             .setPackage(packageName),
                     user);
-            if (!SHOW_HIDDEN_APP_ENABLED) {
+            if (Settings.Global.getInt(mContext.getContentResolver(),
+                    Settings.Global.SHOW_HIDDEN_LAUNCHER_ICON_APPS_ENABLED, 0) == 0) {
                 return launcherActivities;
             }
 
             final int callingUid = injectBinderCallingUid();
             final ArrayList<ResolveInfo> result = new ArrayList<>(launcherActivities.getList());
+            final PackageManagerInternal pmInt =
+                    LocalServices.getService(PackageManagerInternal.class);
             if (packageName != null) {
-                // If target package has launcher activities, then return those launcher
-                // activities. Otherwise, return hidden activity that forwards user to app
-                // details page.
+                // If this hidden app should not be shown, return the original list.
+                // Otherwise, inject hidden activity that forwards user to app details page.
                 if (result.size() > 0) {
                     return launcherActivities;
                 }
-                ResolveInfo info = getHiddenAppActivityInfo(packageName, callingUid, user);
-                if (info != null) {
-                    result.add(info);
+                ApplicationInfo appInfo = pmInt.getApplicationInfo(packageName, /*flags*/ 0,
+                        callingUid, user.getIdentifier());
+                if (shouldShowHiddenApp(appInfo)) {
+                    ResolveInfo info = getHiddenAppActivityInfo(packageName, callingUid, user);
+                    if (info != null) {
+                        result.add(info);
+                    }
                 }
                 return new ParceledListSlice<>(result);
             }
@@ -336,8 +341,6 @@ public class LauncherAppsService extends SystemService {
                 for (ResolveInfo info : result) {
                     visiblePackages.add(info.activityInfo.packageName);
                 }
-                final PackageManagerInternal pmInt =
-                        LocalServices.getService(PackageManagerInternal.class);
                 List<ApplicationInfo> installedPackages = pmInt.getInstalledApplications(0,
                         user.getIdentifier(), callingUid);
                 for (ApplicationInfo applicationInfo : installedPackages) {

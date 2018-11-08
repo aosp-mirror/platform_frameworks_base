@@ -28,6 +28,7 @@
 
 #include "SkBlurDrawLooper.h"
 #include "SkColorFilter.h"
+#include "SkFontTypes.h"
 #include "SkMaskFilter.h"
 #include "SkPath.h"
 #include "SkPathEffect.h"
@@ -684,13 +685,13 @@ namespace PaintGlue {
     }
 
     static jint getHinting(jlong paintHandle) {
-        return reinterpret_cast<Paint*>(paintHandle)->getHinting()
-                == Paint::kNo_Hinting ? 0 : 1;
+        return (SkFontHinting)reinterpret_cast<Paint*>(paintHandle)->getHinting()
+                == kNo_SkFontHinting ? 0 : 1;
     }
 
     static void setHinting(jlong paintHandle, jint mode) {
         reinterpret_cast<Paint*>(paintHandle)->setHinting(
-                mode == 0 ? Paint::kNo_Hinting : Paint::kNormal_Hinting);
+                mode == 0 ? kNo_SkFontHinting : kNormal_SkFontHinting);
     }
 
     static void setAntiAlias(jlong paintHandle, jboolean aa) {

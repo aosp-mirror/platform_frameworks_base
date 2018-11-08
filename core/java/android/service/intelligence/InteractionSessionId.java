@@ -81,7 +81,7 @@ public final class InteractionSessionId implements Parcelable {
     }
 
     /**
-     * @inheritdoc
+     * {@inheritDoc}
      *
      * <p><b>NOTE: </b>this method is only useful for debugging purposes and is not guaranteed to
      * be stable, hence it should not be used to identify the session.

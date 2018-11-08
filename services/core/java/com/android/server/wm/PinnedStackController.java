@@ -314,8 +314,8 @@ class PinnedStackController {
      * onTaskStackBoundsChanged() to be called.  But we still should update our known display info
      * with the new state so that we can update SystemUI.
      */
-    synchronized void onDisplayInfoChanged() {
-        mDisplayInfo.copyFrom(mDisplayContent.getDisplayInfo());
+    synchronized void onDisplayInfoChanged(DisplayInfo displayInfo) {
+        mDisplayInfo.copyFrom(displayInfo);
         notifyMovementBoundsChanged(false /* fromImeAdjustment */, false /* fromShelfAdjustment */);
     }
 

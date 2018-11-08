@@ -9852,12 +9852,12 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
             // We weren't called from within a direct call to fitSystemWindows,
             // call into it as a fallback in case we're in a class that overrides it
             // and has logic to perform.
-            if (fitSystemWindows(insets.getSystemWindowInsets())) {
+            if (fitSystemWindows(insets.getSystemWindowInsetsAsRect())) {
                 return insets.consumeSystemWindowInsets();
             }
         } else {
             // We were called from within a direct call to fitSystemWindows.
-            if (fitSystemWindowsInt(insets.getSystemWindowInsets())) {
+            if (fitSystemWindowsInt(insets.getSystemWindowInsetsAsRect())) {
                 return insets.consumeSystemWindowInsets();
             }
         }
@@ -9960,7 +9960,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
     protected boolean computeFitSystemWindows(Rect inoutInsets, Rect outLocalInsets) {
         WindowInsets innerInsets = computeSystemWindowInsets(new WindowInsets(inoutInsets),
                 outLocalInsets);
-        inoutInsets.set(innerInsets.getSystemWindowInsets());
+        inoutInsets.set(innerInsets.getSystemWindowInsetsAsRect());
         return innerInsets.isSystemWindowInsetsConsumed();
     }
 
@@ -9979,7 +9979,7 @@ public class View implements Drawable.Callback, KeyEvent.Callback,
                 || mAttachInfo == null
                 || ((mAttachInfo.mSystemUiVisibility & SYSTEM_UI_LAYOUT_FLAGS) == 0
                 && !mAttachInfo.mOverscanRequested)) {
-            outLocalInsets.set(in.getSystemWindowInsets());
+            outLocalInsets.set(in.getSystemWindowInsetsAsRect());
             return in.consumeSystemWindowInsets().inset(outLocalInsets);
         } else {
             // The application wants to take care of fitting system window for

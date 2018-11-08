@@ -21,6 +21,7 @@ import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_UNDEFINED;
+import static android.app.WindowConfiguration.ROTATION_UNDEFINED;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN_OR_SPLIT_SCREEN_SECONDARY;
@@ -51,6 +52,7 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLAS
 import android.annotation.Nullable;
 import android.app.ActivityOptions;
 import android.app.WindowConfiguration;
+import android.content.res.Configuration;
 import android.graphics.Point;
 import android.os.UserHandle;
 import android.util.IntArray;
@@ -156,7 +158,7 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
     }
 
     void updateBounds() {
-        mDisplay.getSize(mTmpDisplaySize);
+        mDisplay.getRealSize(mTmpDisplaySize);
         setBounds(0, 0, mTmpDisplaySize.x, mTmpDisplaySize.y);
     }
 
@@ -936,6 +938,25 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
 
     int getIndexOf(ActivityStack stack) {
         return mStacks.indexOf(stack);
+    }
+
+    @Override
+    public void onOverrideConfigurationChanged(Configuration overrideConfiguration) {
+        final int currRotation = getOverrideConfiguration().windowConfiguration.getRotation();
+        if (currRotation != ROTATION_UNDEFINED
+                && currRotation != overrideConfiguration.windowConfiguration.getRotation()
+                && getWindowContainerController() != null) {
+            getWindowContainerController().applyRotation(currRotation,
+                    overrideConfiguration.windowConfiguration.getRotation());
+        }
+        super.onOverrideConfigurationChanged(overrideConfiguration);
+    }
+
+    @Override
+    public void onConfigurationChanged(Configuration newParentConfig) {
+        // update resources before cascade so that docked/pinned stacks use the correct info
+        getWindowContainerController().preOnConfigurationChanged();
+        super.onConfigurationChanged(newParentConfig);
     }
 
     void onLockTaskPackagesUpdated() {

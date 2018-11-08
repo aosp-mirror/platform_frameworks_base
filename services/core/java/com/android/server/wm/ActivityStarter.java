@@ -996,7 +996,7 @@ class ActivityStarter {
         if (intent != null && intent.hasFileDescriptors()) {
             throw new IllegalArgumentException("File descriptors passed in Intent");
         }
-        mSupervisor.getActivityMetricsLogger().notifyActivityLaunching();
+        mSupervisor.getActivityMetricsLogger().notifyActivityLaunching(intent);
         boolean componentSpecified = intent.getComponent() != null;
 
         final int realCallingPid = Binder.getCallingPid();

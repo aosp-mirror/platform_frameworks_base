@@ -57,7 +57,7 @@ static void FontFamily_Builder_addFont(jlong builderPtr, jlong fontPtr) {
 
 // Regular JNI
 static jlong FontFamily_Builder_build(JNIEnv* env, jobject clazz, jlong builderPtr,
-            jstring langTags, jint variant) {
+            jstring langTags, jint variant, jboolean isCustomFallback) {
     std::unique_ptr<NativeFamilyBuilder> builder(toBuilder(builderPtr));
     uint32_t localeId;
     if (langTags == nullptr) {
@@ -67,7 +67,8 @@ static jlong FontFamily_Builder_build(JNIEnv* env, jobject clazz, jlong builderP
         localeId = minikin::registerLocaleList(str.c_str());
     }
     std::shared_ptr<minikin::FontFamily> family = std::make_shared<minikin::FontFamily>(
-            localeId, static_cast<minikin::FamilyVariant>(variant), std::move(builder->fonts));
+            localeId, static_cast<minikin::FamilyVariant>(variant), std::move(builder->fonts),
+            isCustomFallback);
     if (family->getCoverage().length() == 0) {
         // No coverage means minikin rejected given font for some reasons.
         jniThrowException(env, "java/lang/IllegalArgumentException",
@@ -87,7 +88,7 @@ static jlong FontFamily_Builder_GetReleaseFunc() {
 static const JNINativeMethod gFontFamilyBuilderMethods[] = {
     { "nInitBuilder", "()J", (void*) FontFamily_Builder_initBuilder },
     { "nAddFont", "(JJ)V", (void*) FontFamily_Builder_addFont },
-    { "nBuild", "(JLjava/lang/String;I)J", (void*) FontFamily_Builder_build },
+    { "nBuild", "(JLjava/lang/String;IZ)J", (void*) FontFamily_Builder_build },
 
     { "nGetReleaseNativeFamily", "()J", (void*) FontFamily_Builder_GetReleaseFunc },
 };

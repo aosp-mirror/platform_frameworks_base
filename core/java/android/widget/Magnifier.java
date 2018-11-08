@@ -28,6 +28,7 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Bitmap;
 import android.graphics.Color;
+import android.graphics.Insets;
 import android.graphics.Outline;
 import android.graphics.Paint;
 import android.graphics.PixelFormat;
@@ -568,7 +569,7 @@ public final class Magnifier {
     private Point getCurrentClampedWindowCoordinates() {
         final Rect windowBounds;
         if (mParentSurface.mIsMainWindowSurface) {
-            final Rect systemInsets = mView.getRootWindowInsets().getSystemWindowInsets();
+            final Insets systemInsets = mView.getRootWindowInsets().getSystemWindowInsets();
             windowBounds = new Rect(systemInsets.left, systemInsets.top,
                     mParentSurface.mWidth - systemInsets.right,
                     mParentSurface.mHeight - systemInsets.bottom);

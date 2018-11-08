@@ -5643,6 +5643,11 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
         public boolean canChildBeDismissed(View v) {
             return NotificationStackScrollLayout.this.canChildBeDismissed(v);
         }
+
+        @Override
+        public boolean canChildBeDismissedInDirection(View v, boolean isRightOrDown) {
+            return (isLayoutRtl() ? !isRightOrDown : isRightOrDown) && canChildBeDismissed(v);
+        }
     };
 
     // ---------------------- DragDownHelper.OnDragDownListener ------------------------------------

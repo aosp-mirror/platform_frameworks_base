@@ -201,6 +201,9 @@ public class FalsingManager implements SensorEventListener {
         return mHumanInteractionClassifier.isEnabled() || mDataCollector.isEnabled();
     }
 
+    public boolean isUnlockingDisabled() {
+        return mDataCollector.isUnlockingDisabled();
+    }
     /**
      * @return true if the classifier determined that this is not a human interacting with the phone
      */

@@ -139,7 +139,7 @@ std::shared_ptr<minikin::MinikinFont> MinikinFontSkia::createFontWithVariation(
 
 uint32_t MinikinFontSkia::packPaintFlags(const SkPaint* paint) {
     uint32_t flags = paint->getFlags();
-    SkPaint::Hinting hinting = paint->getHinting();
+    SkFontHinting hinting = (SkFontHinting)paint->getHinting();
     // select only flags that might affect text layout
     flags &= (SkPaint::kAntiAlias_Flag | SkPaint::kFakeBoldText_Flag | SkPaint::kLinearText_Flag |
               SkPaint::kSubpixelText_Flag | SkPaint::kEmbeddedBitmapText_Flag |
@@ -150,7 +150,7 @@ uint32_t MinikinFontSkia::packPaintFlags(const SkPaint* paint) {
 
 void MinikinFontSkia::unpackPaintFlags(SkPaint* paint, uint32_t paintFlags) {
     paint->setFlags(paintFlags & SkPaint::kAllFlags);
-    paint->setHinting(static_cast<SkPaint::Hinting>(paintFlags >> 16));
+    paint->setHinting(static_cast<SkFontHinting>(paintFlags >> 16));
 }
 
 void MinikinFontSkia::populateSkPaint(SkPaint* paint, const MinikinFont* font,

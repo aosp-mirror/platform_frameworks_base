@@ -155,7 +155,10 @@ public class WifiConfigurationTest {
     @Test
     public void testIsOpenNetwork_NotOpen_HasAuthType() {
         for (int keyMgmt = 0; keyMgmt < WifiConfiguration.KeyMgmt.strings.length; keyMgmt++) {
-            if (keyMgmt == WifiConfiguration.KeyMgmt.NONE) continue;
+            if (keyMgmt == WifiConfiguration.KeyMgmt.NONE
+                    || keyMgmt == WifiConfiguration.KeyMgmt.OWE) {
+                continue;
+            }
             WifiConfiguration config = new WifiConfiguration();
             config.allowedKeyManagement.clear();
             config.allowedKeyManagement.set(keyMgmt);

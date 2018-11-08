@@ -20,6 +20,7 @@ import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.provider.Settings;
 import android.util.Log;
 
 /**
@@ -29,11 +30,11 @@ public class PackageInstalledReceiver extends BroadcastReceiver {
     private static final String TAG = PackageInstalledReceiver.class.getSimpleName();
 
     private static final boolean DEBUG = false;
-    private static final boolean APP_INSTALLED_NOTIFICATION_ENABLED = false;
 
     @Override
     public void onReceive(Context context, Intent intent) {
-        if (!APP_INSTALLED_NOTIFICATION_ENABLED) {
+        if (Settings.Global.getInt(context.getContentResolver(),
+                Settings.Global.SHOW_NEW_APP_INSTALLED_NOTIFICATION_ENABLED, 0) == 0) {
             return;
         }
 

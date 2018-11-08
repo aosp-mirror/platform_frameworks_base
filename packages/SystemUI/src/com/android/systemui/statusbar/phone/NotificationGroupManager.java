@@ -16,22 +16,24 @@
 
 package com.android.systemui.statusbar.phone;
 
-import android.annotation.NonNull;
 import android.app.Notification;
 import android.os.SystemClock;
 import android.service.notification.StatusBarNotification;
-import androidx.annotation.Nullable;
 import android.util.Log;
 
+import androidx.annotation.NonNull;
+import androidx.annotation.Nullable;
+
+import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.Dependency;
 import com.android.systemui.statusbar.AlertingNotificationManager;
 import com.android.systemui.statusbar.AmbientPulseManager;
 import com.android.systemui.statusbar.AmbientPulseManager.OnAmbientChangedListener;
 import com.android.systemui.statusbar.StatusBarState;
-import com.android.systemui.statusbar.StatusBarStateController.StateListener;
-import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
-import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.StatusBarStateController;
+import com.android.systemui.statusbar.StatusBarStateController.StateListener;
+import com.android.systemui.statusbar.notification.NotificationData;
+import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.policy.HeadsUpManager;
 import com.android.systemui.statusbar.policy.OnHeadsUpChangedListener;
 
@@ -48,7 +50,7 @@ import java.util.Objects;
  * A class to handle notifications and their corresponding groups.
  */
 public class NotificationGroupManager implements OnHeadsUpChangedListener,
-        OnAmbientChangedListener {
+        OnAmbientChangedListener, StateListener {
 
     private static final String TAG = "NotificationGroupManager";
     private static final long ALERT_TRANSFER_TIMEOUT = 300;
@@ -62,10 +64,8 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener,
     private boolean mIsUpdatingUnchangedGroup;
     private HashMap<String, NotificationData.Entry> mPendingNotifications;
 
-    private final StateListener mStateListener = this::setStatusBarState;
-
     public NotificationGroupManager() {
-        Dependency.get(StatusBarStateController.class).addListener(mStateListener);
+        Dependency.get(StatusBarStateController.class).addListener(this);
     }
 
     public void setOnGroupChangeListener(OnGroupChangeListener listener) {
@@ -185,6 +185,7 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener,
      * specific alert state logic based off when the state changes.
      * @param isDozing if the device is dozing.
      */
+    @VisibleForTesting
     public void setDozing(boolean isDozing) {
         if (mIsDozing != isDozing) {
             for (NotificationGroup group : mGroupMap.values()) {
@@ -730,6 +731,16 @@ public class NotificationGroupManager implements OnHeadsUpChangedListener,
 
     public void setPendingEntries(HashMap<String, NotificationData.Entry> pendingNotifications) {
         mPendingNotifications = pendingNotifications;
+    }
+
+    @Override
+    public void onStateChanged(int newState) {
+        setStatusBarState(newState);
+    }
+
+    @Override
+    public void onDozingChanged(boolean isDozing) {
+        setDozing(isDozing);
     }
 
     public static class NotificationGroup {

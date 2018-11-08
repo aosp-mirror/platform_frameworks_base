@@ -362,9 +362,15 @@ void StatsdStats::notePullDelay(int pullAtomId, int64_t pullDelayNs) {
     lock_guard<std::mutex> lock(mLock);
     auto& pullStats = mPulledAtomStats[pullAtomId];
     pullStats.maxPullDelayNs = std::max(pullStats.maxPullDelayNs, pullDelayNs);
-    pullStats.avgPullDelayNs = (pullStats.avgPullDelayNs * pullStats.numPullDelay + pullDelayNs) /
-                               (pullStats.numPullDelay + 1);
+    pullStats.avgPullDelayNs =
+        (pullStats.avgPullDelayNs * pullStats.numPullDelay + pullDelayNs) /
+            (pullStats.numPullDelay + 1);
     pullStats.numPullDelay += 1;
+}
+
+void StatsdStats::notePullDataError(int pullAtomId) {
+    lock_guard<std::mutex> lock(mLock);
+    mPulledAtomStats[pullAtomId].dataError++;
 }
 
 void StatsdStats::noteAtomLogged(int atomId, int32_t timeSec) {
@@ -422,6 +428,7 @@ void StatsdStats::resetInternalLocked() {
         pullStats.second.avgPullDelayNs = 0;
         pullStats.second.maxPullDelayNs = 0;
         pullStats.second.numPullDelay = 0;
+        pullStats.second.dataError = 0;
     }
 }
 
@@ -530,11 +537,11 @@ void StatsdStats::dumpStats(int out) const {
         dprintf(out,
                 "Atom %d->(total pull)%ld, (pull from cache)%ld, (min pull interval)%ld, (average "
                 "pull time nanos)%lld, (max pull time nanos)%lld, (average pull delay nanos)%lld, "
-                "(max pull delay nanos)%lld\n",
+                "(max pull delay nanos)%lld, (data error)%ld\n",
                 (int)pair.first, (long)pair.second.totalPull, (long)pair.second.totalPullFromCache,
                 (long)pair.second.minPullIntervalSec, (long long)pair.second.avgPullTimeNs,
                 (long long)pair.second.maxPullTimeNs, (long long)pair.second.avgPullDelayNs,
-                (long long)pair.second.maxPullDelayNs);
+                (long long)pair.second.maxPullDelayNs, pair.second.dataError);
     }
 
     if (mAnomalyAlarmRegisteredStats > 0) {

@@ -22,12 +22,14 @@ import android.annotation.UnsupportedAppUsage;
 import android.hardware.camera2.impl.CameraMetadataNative;
 import android.hardware.camera2.impl.PublicKey;
 import android.hardware.camera2.impl.SyntheticKey;
+import android.hardware.camera2.params.RecommendedStreamConfigurationMap;
 import android.hardware.camera2.params.SessionConfiguration;
 import android.hardware.camera2.utils.ArrayUtils;
 import android.hardware.camera2.utils.TypeReference;
 import android.util.Rational;
 
 import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -193,6 +195,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     private List<CaptureRequest.Key<?>> mAvailableSessionKeys;
     private List<CaptureRequest.Key<?>> mAvailablePhysicalRequestKeys;
     private List<CaptureResult.Key<?>> mAvailableResultKeys;
+    private ArrayList<RecommendedStreamConfigurationMap> mRecommendedConfigurations;
 
     /**
      * Takes ownership of the passed-in properties object
@@ -313,6 +316,103 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     }
 
     /**
+     * <p>Retrieve camera device recommended stream configuration map
+     * {@link RecommendedStreamConfigurationMap} for a given use case.</p>
+     *
+     * <p>The stream configurations advertised here are efficient in terms of power and performance
+     * for common use cases like preview, video, snapshot, etc. The recommended maps are usually
+     * only small subsets of the exhaustive list provided in
+     * {@link #SCALER_STREAM_CONFIGURATION_MAP} and suggested for a particular use case by the
+     * camera device implementation. For further information about the expected configurations in
+     * various scenarios please refer to:
+     * <ul>
+     * <li>{@link RecommendedStreamConfigurationMap#USECASE_PREVIEW}</li>
+     * <li>{@link RecommendedStreamConfigurationMap#USECASE_RECORD}</li>
+     * <li>{@link RecommendedStreamConfigurationMap#USECASE_VIDEO_SNAPSHOT}</li>
+     * <li>{@link RecommendedStreamConfigurationMap#USECASE_SNAPSHOT}</li>
+     * <li>{@link RecommendedStreamConfigurationMap#USECASE_RAW}</li>
+     * <li>{@link RecommendedStreamConfigurationMap#USECASE_ZSL}</li>
+     * </ul>
+     * </p>
+     *
+     * <p>For example on how this can be used by camera clients to find out the maximum recommended
+     * preview and snapshot resolution, consider the following pseudo-code:
+     * </p>
+     * <pre><code>
+     * public static Size getMaxSize(Size... sizes) {
+     *     if (sizes == null || sizes.length == 0) {
+     *         throw new IllegalArgumentException("sizes was empty");
+     *     }
+     *
+     *     Size sz = sizes[0];
+     *     for (Size size : sizes) {
+     *         if (size.getWidth() * size.getHeight() &gt; sz.getWidth() * sz.getHeight()) {
+     *             sz = size;
+     *         }
+     *     }
+     *
+     *     return sz;
+     * }
+     *
+     * CameraCharacteristics characteristics =
+     *         cameraManager.getCameraCharacteristics(cameraId);
+     * RecommendedStreamConfigurationMap previewConfig =
+     *         characteristics.getRecommendedStreamConfigurationMap(
+     *                  RecommendedStreamConfigurationMap.USECASE_PREVIEW);
+     * RecommendedStreamConfigurationMap snapshotConfig =
+     *         characteristics.getRecommendedStreamConfigurationMap(
+     *                  RecommendedStreamConfigurationMap.USECASE_SNAPSHOT);
+     *
+     * if ((previewConfig != null) &amp;&amp; (snapshotConfig != null)) {
+     *
+     *      Set<Size> snapshotSizeSet = snapshotConfig.getOutputSizes(
+     *              ImageFormat.JPEG);
+     *      Size[] snapshotSizes = new Size[snapshotSizeSet.size()];
+     *      snapshotSizes = snapshotSizeSet.toArray(snapshotSizes);
+     *      Size suggestedMaxJpegSize = getMaxSize(snapshotSizes);
+     *
+     *      Set<Size> previewSizeSet = snapshotConfig.getOutputSizes(
+     *              ImageFormat.PRIVATE);
+     *      Size[] previewSizes = new Size[previewSizeSet.size()];
+     *      previewSizes = previewSizeSet.toArray(previewSizes);
+     *      Size suggestedMaxPreviewSize = getMaxSize(previewSizes);
+     * }
+     *
+     * </code></pre>
+     *
+     * <p>Similar logic can be used for other use cases as well.</p>
+     *
+     * <p>Support for recommended stream configurations is optional. In case there a no
+     * suggested configurations for the particular use case, please refer to
+     * {@link #SCALER_STREAM_CONFIGURATION_MAP} for the exhaustive available list.</p>
+     *
+     * @param usecase Use case id.
+     *
+     * @throws IllegalArgumentException In case the use case argument is invalid.
+     * @return Valid {@link RecommendedStreamConfigurationMap} or null in case the camera device
+     *         doesn't have any recommendation for this use case or the recommended configurations
+     *         are invalid.
+     */
+    public RecommendedStreamConfigurationMap getRecommendedStreamConfigurationMap(
+            @RecommendedStreamConfigurationMap.RecommendedUsecase int usecase) {
+        if (((usecase >= RecommendedStreamConfigurationMap.USECASE_PREVIEW) &&
+                (usecase <= RecommendedStreamConfigurationMap.USECASE_RAW)) ||
+                ((usecase >= RecommendedStreamConfigurationMap.USECASE_VENDOR_START) &&
+                (usecase < RecommendedStreamConfigurationMap.MAX_USECASE_COUNT))) {
+            if (mRecommendedConfigurations == null) {
+                mRecommendedConfigurations = mProperties.getRecommendedStreamConfigurations();
+                if (mRecommendedConfigurations == null) {
+                    return null;
+                }
+            }
+
+            return mRecommendedConfigurations.get(usecase);
+        }
+
+        throw new IllegalArgumentException(String.format("Invalid use case: %d", usecase));
+    }
+
+    /**
      * <p>Returns a subset of {@link #getAvailableCaptureRequestKeys} keys that the
      * camera device can pass as part of the capture session initialization.</p>
      *
@@ -329,7 +429,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * but clients should be aware and expect delays during their application.
      * An example usage scenario could look like this:</p>
      * <ul>
-     * <li>The camera client starts by quering the session parameter key list via
+     * <li>The camera client starts by querying the session parameter key list via
      *   {@link android.hardware.camera2.CameraCharacteristics#getAvailableSessionKeys }.</li>
      * <li>Before triggering the capture session create sequence, a capture request
      *   must be built via {@link CameraDevice#createCaptureRequest } using an
@@ -1583,7 +1683,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *   {@link android.graphics.ImageFormat#RAW12 RAW12}.</li>
      * <li>Processed (but not-stalling): any non-RAW format without a stall duration.  Typically
      *   {@link android.graphics.ImageFormat#YUV_420_888 YUV_420_888},
-     *   {@link android.graphics.ImageFormat#NV21 NV21}, or {@link android.graphics.ImageFormat#YV12 YV12}.</li>
+     *   {@link android.graphics.ImageFormat#NV21 NV21}, {@link android.graphics.ImageFormat#YV12 YV12}, or {@link android.graphics.ImageFormat#Y8 Y8} .</li>
      * </ul>
      * <p><b>Range of valid values:</b><br></p>
      * <p>For processed (and stalling) format streams, &gt;= 1.</p>
@@ -1646,6 +1746,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <li>{@link android.graphics.ImageFormat#NV21 NV21}</li>
      * <li>{@link android.graphics.ImageFormat#YV12 YV12}</li>
      * <li>Implementation-defined formats, i.e. {@link android.hardware.camera2.params.StreamConfigurationMap#isOutputSupportedFor(Class) }</li>
+     * <li>{@link android.graphics.ImageFormat#Y8 Y8}</li>
      * </ul>
      * <p>For full guarantees, query {@link android.hardware.camera2.params.StreamConfigurationMap#getOutputStallDuration } with a
      * processed format -- it will return 0 for a non-stalling stream.</p>
@@ -2122,6 +2223,35 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * or output will never hurt maximum frame rate (i.e.  {@link android.hardware.camera2.params.StreamConfigurationMap#getOutputStallDuration getOutputStallDuration(ImageFormat.PRIVATE, size)} is always 0),</p>
      * <p>Attempting to configure an input stream with output streams not
      * listed as available in this map is not valid.</p>
+     * <p>Additionally, if the camera device is MONOCHROME with Y8 support, it will also support
+     * the following map of formats if its dependent capability
+     * ({@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities}) is supported:</p>
+     * <table>
+     * <thead>
+     * <tr>
+     * <th align="left">Input Format</th>
+     * <th align="left">Output Format</th>
+     * <th align="left">Capability</th>
+     * </tr>
+     * </thead>
+     * <tbody>
+     * <tr>
+     * <td align="left">{@link android.graphics.ImageFormat#PRIVATE }</td>
+     * <td align="left">{@link android.graphics.ImageFormat#Y8 }</td>
+     * <td align="left">PRIVATE_REPROCESSING</td>
+     * </tr>
+     * <tr>
+     * <td align="left">{@link android.graphics.ImageFormat#Y8 }</td>
+     * <td align="left">{@link android.graphics.ImageFormat#JPEG }</td>
+     * <td align="left">YUV_REPROCESSING</td>
+     * </tr>
+     * <tr>
+     * <td align="left">{@link android.graphics.ImageFormat#Y8 }</td>
+     * <td align="left">{@link android.graphics.ImageFormat#Y8 }</td>
+     * <td align="left">YUV_REPROCESSING</td>
+     * </tr>
+     * </tbody>
+     * </table>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      *
      * @see CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES
@@ -2297,6 +2427,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <li>{@link android.graphics.ImageFormat#YUV_420_888 }</li>
      * <li>{@link android.graphics.ImageFormat#RAW10 }</li>
      * <li>{@link android.graphics.ImageFormat#RAW12 }</li>
+     * <li>{@link android.graphics.ImageFormat#Y8 }</li>
      * </ul>
      * <p>All other formats may or may not have an allowed stall duration on
      * a per-capability basis; refer to {@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES android.request.availableCapabilities}
@@ -2445,6 +2576,37 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     @PublicKey
     public static final Key<Integer> SCALER_CROPPING_TYPE =
             new Key<Integer>("android.scaler.croppingType", int.class);
+
+    /**
+     * <p>Recommended stream configurations for common client use cases.</p>
+     * <p>Optional subset of the android.scaler.availableStreamConfigurations that contains
+     * similar tuples listed as
+     * (i.e. width, height, format, output/input stream, usecase bit field).
+     * Camera devices will be able to suggest particular stream configurations which are
+     * power and performance efficient for specific use cases. For more information about
+     * retrieving the suggestions see
+     * {@link android.hardware.camera2.CameraCharacteristics#getRecommendedStreamConfigurationMap }.</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * @hide
+     */
+    public static final Key<android.hardware.camera2.params.RecommendedStreamConfiguration[]> SCALER_AVAILABLE_RECOMMENDED_STREAM_CONFIGURATIONS =
+            new Key<android.hardware.camera2.params.RecommendedStreamConfiguration[]>("android.scaler.availableRecommendedStreamConfigurations", android.hardware.camera2.params.RecommendedStreamConfiguration[].class);
+
+    /**
+     * <p>Recommended mappings of image formats that are supported by this
+     * camera device for input streams, to their corresponding output formats.</p>
+     * <p>This is a recommended subset of the complete list of mappings found in
+     * android.scaler.availableInputOutputFormatsMap. The same requirements apply here as well.
+     * The list however doesn't need to contain all available and supported mappings. Instead of
+     * this developers must list only recommended and efficient entries.
+     * If set, the information will be available in the ZERO_SHUTTER_LAG recommended stream
+     * configuration see
+     * {@link android.hardware.camera2.CameraCharacteristics#getRecommendedStreamConfigurationMap }.</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * @hide
+     */
+    public static final Key<android.hardware.camera2.params.ReprocessFormatsMap> SCALER_AVAILABLE_RECOMMENDED_INPUT_OUTPUT_FORMATS_MAP =
+            new Key<android.hardware.camera2.params.ReprocessFormatsMap>("android.scaler.availableRecommendedInputOutputFormatsMap", android.hardware.camera2.params.ReprocessFormatsMap.class);
 
     /**
      * <p>The area of the image sensor which corresponds to active pixels after any geometric
@@ -3485,6 +3647,21 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     @PublicKey
     public static final Key<Boolean> DEPTH_DEPTH_IS_EXCLUSIVE =
             new Key<Boolean>("android.depth.depthIsExclusive", boolean.class);
+
+    /**
+     * <p>Recommended depth stream configurations for common client use cases.</p>
+     * <p>Optional subset of the android.depth.availableDepthStreamConfigurations that
+     * contains similar tuples listed as
+     * (i.e. width, height, format, output/input stream, usecase bit field).
+     * Camera devices will be able to suggest particular depth stream configurations which are
+     * power and performance efficient for specific use cases. For more information about
+     * retrieving the suggestions see
+     * {@link android.hardware.camera2.CameraCharacteristics#getRecommendedStreamConfigurationMap }.</p>
+     * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
+     * @hide
+     */
+    public static final Key<android.hardware.camera2.params.RecommendedStreamConfiguration[]> DEPTH_AVAILABLE_RECOMMENDED_DEPTH_STREAM_CONFIGURATIONS =
+            new Key<android.hardware.camera2.params.RecommendedStreamConfiguration[]>("android.depth.availableRecommendedDepthStreamConfigurations", android.hardware.camera2.params.RecommendedStreamConfiguration[].class);
 
     /**
      * <p>String containing the ids of the underlying physical cameras.</p>

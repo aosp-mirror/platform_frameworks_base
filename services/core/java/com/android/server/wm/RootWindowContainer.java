@@ -54,6 +54,7 @@ import static com.android.server.wm.WindowSurfacePlacer.SET_WALLPAPER_ACTION_PEN
 import static com.android.server.wm.WindowSurfacePlacer.SET_WALLPAPER_MAY_CHANGE;
 
 import android.annotation.CallSuper;
+import android.annotation.NonNull;
 import android.content.res.Configuration;
 import android.hardware.power.V1_0.PowerHint;
 import android.os.Binder;
@@ -75,12 +76,10 @@ import android.view.DisplayInfo;
 import android.view.SurfaceControl;
 import android.view.WindowManager;
 
-import com.android.internal.util.ArrayUtils;
 import com.android.server.EventLogTags;
 
 import java.io.PrintWriter;
 import java.util.ArrayList;
-import java.util.List;
 import java.util.function.Consumer;
 
 /** Root {@link WindowContainer} for the device. */
@@ -114,9 +113,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
     // changes 1 by 1 without disturbing global state.
     boolean mOrientationChangeComplete = true;
     boolean mWallpaperActionPending = false;
-
-    private final ArrayList<TaskStack> mTmpStackList = new ArrayList();
-    private final ArrayList<Integer> mTmpStackIds = new ArrayList<>();
 
     final WallpaperController mWallpaperController;
 
@@ -313,57 +309,33 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
     }
 
     /**
-     * Set new display override config and return array of ids of stacks that were changed during
-     * update. If called for the default display, global configuration will also be updated. Stacks
-     * that are marked for deferred removal are excluded from the returned array.
+     * Set new display override config. If called for the default display, global configuration
+     * will also be updated.
      */
-    int[] setDisplayOverrideConfigurationIfNeeded(Configuration newConfiguration, int displayId) {
-        final DisplayContent displayContent = getDisplayContent(displayId);
-        if (displayContent == null) {
-            throw new IllegalArgumentException("Display not found for id: " + displayId);
-        }
+    void setDisplayOverrideConfigurationIfNeeded(Configuration newConfiguration,
+            @NonNull DisplayContent displayContent) {
 
         final Configuration currentConfig = displayContent.getOverrideConfiguration();
         final boolean configChanged = currentConfig.diff(newConfiguration) != 0;
         if (!configChanged) {
-            return null;
+            return;
         }
 
         displayContent.onOverrideConfigurationChanged(newConfiguration);
 
-        mTmpStackList.clear();
-        if (displayId == DEFAULT_DISPLAY) {
+        if (displayContent.getDisplayId() == DEFAULT_DISPLAY) {
             // Override configuration of the default display duplicates global config. In this case
             // we also want to update the global config.
-            setGlobalConfigurationIfNeeded(newConfiguration, mTmpStackList);
-        } else {
-            updateStackBoundsAfterConfigChange(displayId, mTmpStackList);
+            setGlobalConfigurationIfNeeded(newConfiguration);
         }
-
-        mTmpStackIds.clear();
-        final int stackCount = mTmpStackList.size();
-
-        for (int i = 0; i < stackCount; ++i) {
-            final TaskStack stack = mTmpStackList.get(i);
-
-            // We only include stacks that are not marked for removal as they do not exist outside
-            // of WindowManager at this point.
-            if (!stack.mDeferRemoval) {
-                mTmpStackIds.add(stack.mStackId);
-            }
-        }
-
-        return mTmpStackIds.isEmpty() ? null : ArrayUtils.convertToIntArray(mTmpStackIds);
     }
 
-    private void setGlobalConfigurationIfNeeded(Configuration newConfiguration,
-            List<TaskStack> changedStacks) {
+    private void setGlobalConfigurationIfNeeded(Configuration newConfiguration) {
         final boolean configChanged = getConfiguration().diff(newConfiguration) != 0;
         if (!configChanged) {
             return;
         }
         onConfigurationChanged(newConfiguration);
-        updateStackBoundsAfterConfigChange(changedStacks);
     }
 
     @Override
@@ -372,24 +344,6 @@ class RootWindowContainer extends WindowContainer<DisplayContent> {
         super.onConfigurationChanged(newParentConfig);
 
         forAllDisplays(mDisplayContentConfigChangesConsumer);
-    }
-
-    /**
-     * Callback used to trigger bounds update after configuration change and get ids of stacks whose
-     * bounds were updated.
-     */
-    private void updateStackBoundsAfterConfigChange(List<TaskStack> changedStacks) {
-        final int numDisplays = mChildren.size();
-        for (int i = 0; i < numDisplays; ++i) {
-            final DisplayContent dc = mChildren.get(i);
-            dc.updateStackBoundsAfterConfigChange(changedStacks);
-        }
-    }
-
-    /** Same as {@link #updateStackBoundsAfterConfigChange()} but only for a specific display. */
-    private void updateStackBoundsAfterConfigChange(int displayId, List<TaskStack> changedStacks) {
-        final DisplayContent dc = getDisplayContent(displayId);
-        dc.updateStackBoundsAfterConfigChange(changedStacks);
     }
 
     private void prepareFreezingTaskBounds() {

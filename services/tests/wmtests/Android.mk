@@ -23,6 +23,7 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
     truth-prebuilt \
     testables \
     ub-uiautomator \
+    hamcrest-library
 
 LOCAL_JAVA_LIBRARIES := \
     android.test.mock \

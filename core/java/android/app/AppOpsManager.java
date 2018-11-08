@@ -1612,6 +1612,20 @@ public class AppOpsManager {
     }
 
     /**
+     * Retrieve the default mode for the app op.
+     *
+     * @param appOp The app op name
+     *
+     * @return the default mode for the app op
+     *
+     * @hide
+     */
+    @SystemApi
+    public static int opToDefaultMode(@NonNull String appOp) {
+        return opToDefaultMode(strOpToOp(appOp));
+    }
+
+    /**
      * Retrieve the human readable mode.
      * @hide
      */
@@ -2481,26 +2495,6 @@ public class AppOpsManager {
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
-    }
-
-    /**
-     * Resets given app op in its default mode for app ops in the UID.
-     * This applies to all apps currently in the UID or installed in this UID in the future.
-     *
-     * @param appOp The app op.
-     * @param uid The UID for which to set the app.
-     *
-     * @hide
-     */
-    @RequiresPermission(android.Manifest.permission.MANAGE_APP_OPS_MODES)
-    @SystemApi
-    public void resetUidMode(String appOp, int uid, boolean force) {
-        int code = strOpToOp(appOp);
-        if (!(opAllowsReset(code) || force)) {
-            return;
-        }
-        int mode = opToDefaultMode(code);
-        setUidMode(code, uid, mode);
     }
 
     /** @hide */

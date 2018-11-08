@@ -22,7 +22,7 @@
 #include "SkiaProfileRenderer.h"
 #include "renderstate/RenderState.h"
 #include "renderthread/Frame.h"
-#include "VkFunctorDrawable.h"
+#include "VkInteropFunctorDrawable.h"
 
 #include <SkSurface.h>
 #include <SkTypes.h>
@@ -144,7 +144,7 @@ bool SkiaVulkanPipeline::isContextReady() {
 }
 
 void SkiaVulkanPipeline::invokeFunctor(const RenderThread& thread, Functor* functor) {
-    VkFunctorDrawable::vkInvokeFunctor(functor);
+    VkInteropFunctorDrawable::vkInvokeFunctor(functor);
 }
 
 sk_sp<Bitmap> SkiaVulkanPipeline::allocateHardwareBitmap(renderthread::RenderThread& renderThread,

@@ -20,7 +20,9 @@
 #include <sys/mount.h>
 #include <linux/fs.h>
 
+#include <functional>
 #include <list>
+#include <optional>
 #include <sstream>
 #include <string>
 
@@ -69,6 +71,8 @@
 #include "nativebridge/native_bridge.h"
 
 namespace {
+
+using namespace std::placeholders;
 
 using android::String8;
 using android::base::StringAppendF;
@@ -651,12 +655,12 @@ void SetThreadName(const char* thread_name) {
 static FileDescriptorTable* gOpenFdTable = NULL;
 
 static bool FillFileDescriptorVector(JNIEnv* env,
-                                     jintArray java_fds,
+                                     jintArray managed_fds,
                                      std::vector<int>* fds,
                                      std::string* error_msg) {
   CHECK(fds != nullptr);
-  if (java_fds != nullptr) {
-    ScopedIntArrayRO ar(env, java_fds);
+  if (managed_fds != nullptr) {
+    ScopedIntArrayRO ar(env, managed_fds);
     if (ar.get() == nullptr) {
       *error_msg = "Bad fd array";
       return false;
@@ -669,246 +673,46 @@ static bool FillFileDescriptorVector(JNIEnv* env,
   return true;
 }
 
-// Utility routine to specialize a zygote child process.
-static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray javaGids,
-                             jint runtime_flags, jobjectArray javaRlimits,
-                             jlong permittedCapabilities, jlong effectiveCapabilities,
-                             jint mount_external, jstring java_se_info, jstring java_se_name,
-                             bool is_system_server, bool is_child_zygote, jstring instructionSet,
-                             jstring dataDir, jstring packageName, jobjectArray packagesForUid,
-                             jobjectArray visibleVolIds) {
-  std::string error_msg;
-
-  auto fail_fn = [env, java_se_name, is_system_server](const std::string& msg)
-      __attribute__ ((noreturn)) {
-    const char* se_name_c_str = nullptr;
-    std::unique_ptr<ScopedUtfChars> se_name;
-    if (java_se_name != nullptr) {
-      se_name.reset(new ScopedUtfChars(env, java_se_name));
-      se_name_c_str = se_name->c_str();
-    }
-    if (se_name_c_str == nullptr && is_system_server) {
-      se_name_c_str = "system_server";
-    }
-    const std::string& error_msg = (se_name_c_str == nullptr)
-        ? msg
-        : StringPrintf("(%s) %s", se_name_c_str, msg.c_str());
-    env->FatalError(error_msg.c_str());
-    __builtin_unreachable();
-  };
-
-  // Keep capabilities across UID change, unless we're staying root.
-  if (uid != 0) {
-    if (!EnableKeepCapabilities(&error_msg)) {
-      fail_fn(error_msg);
+[[noreturn]]
+static void ZygoteFailure(JNIEnv* env,
+                          const char* process_name,
+                          jstring managed_process_name,
+                          const std::string& msg) {
+  std::unique_ptr<ScopedUtfChars> scoped_managed_process_name_ptr = nullptr;
+  if (managed_process_name != nullptr) {
+    scoped_managed_process_name_ptr.reset(new ScopedUtfChars(env, managed_process_name));
+    if (scoped_managed_process_name_ptr->c_str() != nullptr) {
+      process_name = scoped_managed_process_name_ptr->c_str();
     }
   }
 
-  if (!SetInheritable(permittedCapabilities, &error_msg)) {
-    fail_fn(error_msg);
-  }
-  if (!DropCapabilitiesBoundingSet(&error_msg)) {
-    fail_fn(error_msg);
-  }
+  const std::string& error_msg =
+      (process_name == nullptr) ? msg : StringPrintf("(%s) %s", process_name, msg.c_str());
 
-  bool use_native_bridge = !is_system_server && (instructionSet != NULL)
-      && android::NativeBridgeAvailable();
-  if (use_native_bridge) {
-    ScopedUtfChars isa_string(env, instructionSet);
-    use_native_bridge = android::NeedsNativeBridge(isa_string.c_str());
-  }
-  if (use_native_bridge && dataDir == NULL) {
-    // dataDir should never be null if we need to use a native bridge.
-    // In general, dataDir will never be null for normal applications. It can only happen in
-    // special cases (for isolated processes which are not associated with any app). These are
-    // launched by the framework and should not be emulated anyway.
-    use_native_bridge = false;
-    ALOGW("Native bridge will not be used because dataDir == NULL.");
-  }
+  env->FatalError(error_msg.c_str());
+  __builtin_unreachable();
+}
 
-  std::string package_name_str("");
-  if (packageName != nullptr) {
-    ScopedUtfChars package(env, packageName);
-    package_name_str = package.c_str();
-  } else if (is_system_server) {
-    package_name_str = "android";
-  }
-  std::vector<std::string> packages_for_uid;
-  if (packagesForUid != nullptr) {
-    jsize count = env->GetArrayLength(packagesForUid);
-    for (jsize i = 0; i < count; ++i) {
-      jstring package_for_uid = (jstring) env->GetObjectArrayElement(packagesForUid, i);
-      ScopedUtfChars package(env, package_for_uid);
-      packages_for_uid.push_back(package.c_str());
-    }
-  }
-  std::vector<std::string> visible_vol_ids;
-  if (visibleVolIds != nullptr) {
-    jsize count = env->GetArrayLength(visibleVolIds);
-    for (jsize i = 0; i < count; ++i) {
-      jstring visible_vol_id = (jstring) env->GetObjectArrayElement(visibleVolIds, i);
-      ScopedUtfChars vol(env, visible_vol_id);
-      visible_vol_ids.push_back(vol.c_str());
-    }
-  }
-  bool success = MountEmulatedStorage(uid, mount_external, use_native_bridge, &error_msg,
-      package_name_str, packages_for_uid, visible_vol_ids);
-  if (!success) {
-    ALOGW("Failed to mount emulated storage: %s (%s)", error_msg.c_str(), strerror(errno));
-    if (errno == ENOTCONN || errno == EROFS) {
-      // When device is actively encrypting, we get ENOTCONN here
-      // since FUSE was mounted before the framework restarted.
-      // When encrypted device is booting, we get EROFS since
-      // FUSE hasn't been created yet by init.
-      // In either case, continue without external storage.
+static std::optional<std::string> ExtractJString(JNIEnv* env,
+                                                 const char* process_name,
+                                                 jstring managed_process_name,
+                                                 jstring managed_string) {
+  if (managed_string == nullptr) {
+    return std::optional<std::string>();
+  } else {
+    ScopedUtfChars scoped_string_chars(env, managed_string);
+
+    if (scoped_string_chars.c_str() != nullptr) {
+      return std::optional<std::string>(scoped_string_chars.c_str());
     } else {
-      fail_fn(error_msg);
+      ZygoteFailure(env, process_name, managed_process_name, "Failed to extract JString.");
     }
-  }
-
-  // If this zygote isn't root, it won't be able to create a process group,
-  // since the directory is owned by root.
-  if (!is_system_server && getuid() == 0) {
-      int rc = createProcessGroup(uid, getpid());
-      if (rc != 0) {
-          if (rc == -EROFS) {
-              ALOGW("createProcessGroup failed, kernel missing CONFIG_CGROUP_CPUACCT?");
-          } else {
-              ALOGE("createProcessGroup(%d, %d) failed: %s", uid, 0/*pid*/, strerror(-rc));
-          }
-      }
-  }
-
-  if (!SetGids(env, javaGids, &error_msg)) {
-    fail_fn(error_msg);
-  }
-
-  if (!SetRLimits(env, javaRlimits, &error_msg)) {
-    fail_fn(error_msg);
-  }
-
-  if (use_native_bridge) {
-    ScopedUtfChars isa_string(env, instructionSet);
-    ScopedUtfChars data_dir(env, dataDir);
-    android::PreInitializeNativeBridge(data_dir.c_str(), isa_string.c_str());
-  }
-
-  int rc = setresgid(gid, gid, gid);
-  if (rc == -1) {
-    fail_fn(CREATE_ERROR("setresgid(%d) failed: %s", gid, strerror(errno)));
-  }
-
-  // Must be called when the new process still has CAP_SYS_ADMIN, in this case, before changing
-  // uid from 0, which clears capabilities.  The other alternative is to call
-  // prctl(PR_SET_NO_NEW_PRIVS, 1) afterward, but that breaks SELinux domain transition (see
-  // b/71859146).  As the result, privileged syscalls used below still need to be accessible in
-  // app process.
-  SetUpSeccompFilter(uid);
-
-  rc = setresuid(uid, uid, uid);
-  if (rc == -1) {
-    fail_fn(CREATE_ERROR("setresuid(%d) failed: %s", uid, strerror(errno)));
-  }
-
-  // The "dumpable" flag of a process, which controls core dump generation, is
-  // overwritten by the value in /proc/sys/fs/suid_dumpable when the effective
-  // user or group ID changes. See proc(5) for possible values. In most cases,
-  // the value is 0, so core dumps are disabled for zygote children. However,
-  // when running in a Chrome OS container, the value is already set to 2,
-  // which allows the external crash reporter to collect all core dumps. Since
-  // only system crashes are interested, core dump is disabled for app
-  // processes. This also ensures compliance with CTS.
-  int dumpable = prctl(PR_GET_DUMPABLE);
-  if (dumpable == -1) {
-      ALOGE("prctl(PR_GET_DUMPABLE) failed: %s", strerror(errno));
-      RuntimeAbort(env, __LINE__, "prctl(PR_GET_DUMPABLE) failed");
-  }
-  if (dumpable == 2 && uid >= AID_APP) {
-    if (prctl(PR_SET_DUMPABLE, 0, 0, 0, 0) == -1) {
-      ALOGE("prctl(PR_SET_DUMPABLE, 0) failed: %s", strerror(errno));
-      RuntimeAbort(env, __LINE__, "prctl(PR_SET_DUMPABLE, 0) failed");
-    }
-  }
-
-  if (NeedsNoRandomizeWorkaround()) {
-      // Work around ARM kernel ASLR lossage (http://b/5817320).
-      int old_personality = personality(0xffffffff);
-      int new_personality = personality(old_personality | ADDR_NO_RANDOMIZE);
-      if (new_personality == -1) {
-          ALOGW("personality(%d) failed: %s", new_personality, strerror(errno));
-      }
-  }
-
-  if (!SetCapabilities(permittedCapabilities, effectiveCapabilities, permittedCapabilities,
-                       &error_msg)) {
-    fail_fn(error_msg);
-  }
-
-  if (!SetSchedulerPolicy(&error_msg)) {
-    fail_fn(error_msg);
-  }
-
-  const char* se_info_c_str = NULL;
-  ScopedUtfChars* se_info = NULL;
-  if (java_se_info != NULL) {
-      se_info = new ScopedUtfChars(env, java_se_info);
-      se_info_c_str = se_info->c_str();
-      if (se_info_c_str == NULL) {
-        fail_fn("se_info_c_str == NULL");
-      }
-  }
-  const char* se_name_c_str = NULL;
-  ScopedUtfChars* se_name = NULL;
-  if (java_se_name != NULL) {
-      se_name = new ScopedUtfChars(env, java_se_name);
-      se_name_c_str = se_name->c_str();
-      if (se_name_c_str == NULL) {
-        fail_fn("se_name_c_str == NULL");
-      }
-  }
-  rc = selinux_android_setcontext(uid, is_system_server, se_info_c_str, se_name_c_str);
-  if (rc == -1) {
-    fail_fn(CREATE_ERROR("selinux_android_setcontext(%d, %d, \"%s\", \"%s\") failed", uid,
-          is_system_server, se_info_c_str, se_name_c_str));
-  }
-
-  // Make it easier to debug audit logs by setting the main thread's name to the
-  // nice name rather than "app_process".
-  if (se_name_c_str == NULL && is_system_server) {
-    se_name_c_str = "system_server";
-  }
-  if (se_name_c_str != NULL) {
-    SetThreadName(se_name_c_str);
-  }
-
-  delete se_info;
-  delete se_name;
-
-  // Unset the SIGCHLD handler, but keep ignoring SIGHUP (rationale in SetSignalHandlers).
-  UnsetChldSignalHandler();
-
-  if (is_system_server) {
-    env->CallStaticVoidMethod(gZygoteClass, gCallPostForkSystemServerHooks);
-    if (env->ExceptionCheck()) {
-      fail_fn("Error calling post fork system server hooks.");
-    }
-    // TODO(oth): Remove hardcoded label here (b/117874058).
-    static const char* kSystemServerLabel = "u:r:system_server:s0";
-    if (selinux_android_setcon(kSystemServerLabel) != 0) {
-      fail_fn(CREATE_ERROR("selinux_android_setcon(%s)", kSystemServerLabel));
-    }
-  }
-
-  env->CallStaticVoidMethod(gZygoteClass, gCallPostForkChildHooks, runtime_flags,
-                            is_system_server, is_child_zygote, instructionSet);
-  if (env->ExceptionCheck()) {
-    fail_fn("Error calling post fork hooks.");
   }
 }
 
-// Utility routine to fork zygote and specialize the child process.
-static pid_t ForkCommon(JNIEnv* env, jstring java_se_name, bool is_system_server,
-                        jintArray fdsToClose, jintArray fdsToIgnore) {
+// Utility routine to fork a zygote.
+static pid_t ForkCommon(JNIEnv* env, bool is_system_server,
+                        jintArray managed_fds_to_close, jintArray managed_fds_to_ignore) {
   SetSignalHandlers();
 
   // Block SIGCHLD prior to fork.
@@ -916,23 +720,9 @@ static pid_t ForkCommon(JNIEnv* env, jstring java_se_name, bool is_system_server
   sigemptyset(&sigchld);
   sigaddset(&sigchld, SIGCHLD);
 
-  auto fail_fn = [env, java_se_name, is_system_server](const std::string& msg)
-      __attribute__ ((noreturn)) {
-    const char* se_name_c_str = nullptr;
-    std::unique_ptr<ScopedUtfChars> se_name;
-    if (java_se_name != nullptr) {
-      se_name.reset(new ScopedUtfChars(env, java_se_name));
-      se_name_c_str = se_name->c_str();
-    }
-    if (se_name_c_str == nullptr && is_system_server) {
-      se_name_c_str = "system_server";
-    }
-    const std::string& error_msg = (se_name_c_str == nullptr)
-        ? msg
-        : StringPrintf("(%s) %s", se_name_c_str, msg.c_str());
-    env->FatalError(error_msg.c_str());
-    __builtin_unreachable();
-  };
+  // Curry a failure function.
+  auto fail_fn = std::bind(ZygoteFailure, env, is_system_server ? "system_server" : "zygote",
+                           nullptr, _1);
 
   // Temporarily block SIGCHLD during forks. The SIGCHLD handler might
   // log, which would result in the logging FDs we close being reopened.
@@ -948,18 +738,18 @@ static pid_t ForkCommon(JNIEnv* env, jstring java_se_name, bool is_system_server
   __android_log_close();
   stats_log_close();
 
+  // If this is the first fork for this zygote, create the open FD table.  If
+  // it isn't, we just need to check whether the list of open files has changed
+  // (and it shouldn't in the normal case).
   std::string error_msg;
-
-  // If this is the first fork for this zygote, create the open FD table.
-  // If it isn't, we just need to check whether the list of open files has
-  // changed (and it shouldn't in the normal case).
   std::vector<int> fds_to_ignore;
-  if (!FillFileDescriptorVector(env, fdsToIgnore, &fds_to_ignore, &error_msg)) {
+  if (!FillFileDescriptorVector(env, managed_fds_to_ignore, &fds_to_ignore, &error_msg)) {
     fail_fn(error_msg);
   }
-  if (gOpenFdTable == NULL) {
+
+  if (gOpenFdTable == nullptr) {
     gOpenFdTable = FileDescriptorTable::Create(fds_to_ignore, &error_msg);
-    if (gOpenFdTable == NULL) {
+    if (gOpenFdTable == nullptr) {
       fail_fn(error_msg);
     }
   } else if (!gOpenFdTable->Restat(fds_to_ignore, &error_msg)) {
@@ -975,7 +765,7 @@ static pid_t ForkCommon(JNIEnv* env, jstring java_se_name, bool is_system_server
     PreApplicationInit();
 
     // Clean up any descriptors which must be closed immediately
-    if (!DetachDescriptors(env, fdsToClose, &error_msg)) {
+    if (!DetachDescriptors(env, managed_fds_to_close, &error_msg)) {
       fail_fn(error_msg);
     }
 
@@ -993,7 +783,234 @@ static pid_t ForkCommon(JNIEnv* env, jstring java_se_name, bool is_system_server
   if (sigprocmask(SIG_UNBLOCK, &sigchld, nullptr) == -1) {
     fail_fn(CREATE_ERROR("sigprocmask(SIG_SETMASK, { SIGCHLD }) failed: %s", strerror(errno)));
   }
+
   return pid;
+}
+
+// Utility routine to specialize a zygote child process.
+static void SpecializeCommon(JNIEnv* env, uid_t uid, gid_t gid, jintArray gids,
+                             jint runtime_flags, jobjectArray rlimits,
+                             jlong permitted_capabilities, jlong effective_capabilities,
+                             jint mount_external, jstring managed_se_info,
+                             jstring managed_nice_name, bool is_system_server,
+                             bool is_child_zygote, jstring managed_instruction_set,
+                             jstring managed_app_data_dir, jstring managed_package_name,
+                             jobjectArray managed_pacakges_for_uid,
+                             jobjectArray managed_visible_vol_ids) {
+  auto fail_fn = std::bind(ZygoteFailure, env, is_system_server ? "system_server" : "zygote",
+                           managed_nice_name, _1);
+  auto extract_fn = std::bind(ExtractJString, env, is_system_server ? "system_server" : "zygote",
+                              managed_nice_name, _1);
+
+  auto se_info = extract_fn(managed_se_info);
+  auto nice_name = extract_fn(managed_nice_name);
+  auto instruction_set = extract_fn(managed_instruction_set);
+  auto app_data_dir = extract_fn(managed_app_data_dir);
+  auto package_name = extract_fn(managed_package_name);
+
+  std::string error_msg;
+
+  // Keep capabilities across UID change, unless we're staying root.
+  if (uid != 0) {
+    if (!EnableKeepCapabilities(&error_msg)) {
+      fail_fn(error_msg);
+    }
+  }
+
+  if (!SetInheritable(permitted_capabilities, &error_msg)) {
+    fail_fn(error_msg);
+  }
+
+  if (!DropCapabilitiesBoundingSet(&error_msg)) {
+    fail_fn(error_msg);
+  }
+
+  bool use_native_bridge = !is_system_server &&
+                           instruction_set.has_value() &&
+                           android::NativeBridgeAvailable() &&
+                           android::NeedsNativeBridge(instruction_set.value().c_str());
+
+  if (use_native_bridge && !app_data_dir.has_value()) {
+    // The app_data_dir variable should never be empty if we need to use a
+    // native bridge.  In general, app_data_dir will never be empty for normal
+    // applications.  It can only happen in special cases (for isolated
+    // processes which are not associated with any app).  These are launched by
+    // the framework and should not be emulated anyway.
+    use_native_bridge = false;
+    ALOGW("Native bridge will not be used because managed_app_data_dir == nullptr.");
+  }
+
+  if (!package_name.has_value()) {
+    if (is_system_server) {
+      package_name.emplace("android");
+    } else {
+      package_name.emplace("");
+    }
+  }
+
+  std::vector<std::string> packages_for_uid;
+  if (managed_pacakges_for_uid != nullptr) {
+    jsize count = env->GetArrayLength(managed_pacakges_for_uid);
+    for (jsize package_index = 0; package_index < count; ++package_index) {
+      jstring managed_package_for_uid =
+          (jstring) env->GetObjectArrayElement(managed_pacakges_for_uid, package_index);
+
+      auto package_for_uid = extract_fn(managed_package_for_uid);
+      if (LIKELY(package_for_uid.has_value())) {
+        packages_for_uid.emplace_back(std::move(package_for_uid.value()));
+      } else {
+        fail_fn("Null string found in managed packages_for_uid.");
+      }
+    }
+  }
+
+  std::vector<std::string> visible_vol_ids;
+  if (managed_visible_vol_ids != nullptr) {
+    jsize count = env->GetArrayLength(managed_visible_vol_ids);
+    for (jsize vol_id_index = 0; vol_id_index < count; ++vol_id_index) {
+      jstring managed_visible_vol_id =
+          (jstring) env->GetObjectArrayElement(managed_visible_vol_ids, vol_id_index);
+
+      auto visible_vol_id = extract_fn(managed_visible_vol_id);
+      if (LIKELY(visible_vol_id.has_value())) {
+        visible_vol_ids.emplace_back(std::move(visible_vol_id.value()));
+      } else {
+        fail_fn("Null string found in managed visible_vol_ids.");
+      }
+    }
+  }
+
+  if (!MountEmulatedStorage(uid, mount_external, use_native_bridge, &error_msg,
+                            package_name.value(), packages_for_uid, visible_vol_ids)) {
+    ALOGW("Failed to mount emulated storage: %s (%s)", error_msg.c_str(), strerror(errno));
+    if (errno == ENOTCONN || errno == EROFS) {
+      // When device is actively encrypting, we get ENOTCONN here
+      // since FUSE was mounted before the framework restarted.
+      // When encrypted device is booting, we get EROFS since
+      // FUSE hasn't been created yet by init.
+      // In either case, continue without external storage.
+    } else {
+      fail_fn(error_msg);
+    }
+  }
+
+  // If this zygote isn't root, it won't be able to create a process group,
+  // since the directory is owned by root.
+  if (!is_system_server && getuid() == 0) {
+    int rc = createProcessGroup(uid, getpid());
+    if (rc == -EROFS) {
+      ALOGW("createProcessGroup failed, kernel missing CONFIG_CGROUP_CPUACCT?");
+    } else if (rc != 0) {
+      ALOGE("createProcessGroup(%d, %d) failed: %s", uid, /* pid= */ 0, strerror(-rc));
+    }
+  }
+
+  if (!SetGids(env, gids, &error_msg)) {
+    fail_fn(error_msg);
+  }
+
+  if (!SetRLimits(env, rlimits, &error_msg)) {
+    fail_fn(error_msg);
+  }
+
+  if (use_native_bridge) {
+    // Due to the logic behind use_native_bridge we know that both app_data_dir
+    // and instruction_set contain values.
+    android::PreInitializeNativeBridge(app_data_dir.value().c_str(),
+                                       instruction_set.value().c_str());
+  }
+
+  if (setresgid(gid, gid, gid) == -1) {
+    fail_fn(CREATE_ERROR("setresgid(%d) failed: %s", gid, strerror(errno)));
+  }
+
+  // Must be called when the new process still has CAP_SYS_ADMIN, in this case,
+  // before changing uid from 0, which clears capabilities.  The other
+  // alternative is to call prctl(PR_SET_NO_NEW_PRIVS, 1) afterward, but that
+  // breaks SELinux domain transition (see b/71859146).  As the result,
+  // privileged syscalls used below still need to be accessible in app process.
+  SetUpSeccompFilter(uid);
+
+  if (setresuid(uid, uid, uid) == -1) {
+    fail_fn(CREATE_ERROR("setresuid(%d) failed: %s", uid, strerror(errno)));
+  }
+
+  // The "dumpable" flag of a process, which controls core dump generation, is
+  // overwritten by the value in /proc/sys/fs/suid_dumpable when the effective
+  // user or group ID changes. See proc(5) for possible values. In most cases,
+  // the value is 0, so core dumps are disabled for zygote children. However,
+  // when running in a Chrome OS container, the value is already set to 2,
+  // which allows the external crash reporter to collect all core dumps. Since
+  // only system crashes are interested, core dump is disabled for app
+  // processes. This also ensures compliance with CTS.
+  int dumpable = prctl(PR_GET_DUMPABLE);
+  if (dumpable == -1) {
+    ALOGE("prctl(PR_GET_DUMPABLE) failed: %s", strerror(errno));
+    RuntimeAbort(env, __LINE__, "prctl(PR_GET_DUMPABLE) failed");
+  }
+
+  if (dumpable == 2 && uid >= AID_APP) {
+    if (prctl(PR_SET_DUMPABLE, 0, 0, 0, 0) == -1) {
+      ALOGE("prctl(PR_SET_DUMPABLE, 0) failed: %s", strerror(errno));
+      RuntimeAbort(env, __LINE__, "prctl(PR_SET_DUMPABLE, 0) failed");
+    }
+  }
+
+  if (NeedsNoRandomizeWorkaround()) {
+    // Work around ARM kernel ASLR lossage (http://b/5817320).
+    int old_personality = personality(0xffffffff);
+    int new_personality = personality(old_personality | ADDR_NO_RANDOMIZE);
+    if (new_personality == -1) {
+      ALOGW("personality(%d) failed: %s", new_personality, strerror(errno));
+    }
+  }
+
+  if (!SetCapabilities(permitted_capabilities, effective_capabilities, permitted_capabilities,
+                       &error_msg)) {
+    fail_fn(error_msg);
+  }
+
+  if (!SetSchedulerPolicy(&error_msg)) {
+    fail_fn(error_msg);
+  }
+
+  const char* se_info_ptr = se_info.has_value() ? se_info.value().c_str() : nullptr;
+  const char* nice_name_ptr = nice_name.has_value() ? nice_name.value().c_str() : nullptr;
+
+  if (selinux_android_setcontext(uid, is_system_server, se_info_ptr, nice_name_ptr) == -1) {
+    fail_fn(CREATE_ERROR("selinux_android_setcontext(%d, %d, \"%s\", \"%s\") failed",
+                         uid, is_system_server, se_info_ptr, nice_name_ptr));
+  }
+
+  // Make it easier to debug audit logs by setting the main thread's name to the
+  // nice name rather than "app_process".
+  if (nice_name.has_value()) {
+    SetThreadName(nice_name.value().c_str());
+  } else if (is_system_server) {
+    SetThreadName("system_server");
+  }
+
+  // Unset the SIGCHLD handler, but keep ignoring SIGHUP (rationale in SetSignalHandlers).
+  UnsetChldSignalHandler();
+
+  if (is_system_server) {
+    env->CallStaticVoidMethod(gZygoteClass, gCallPostForkSystemServerHooks);
+    if (env->ExceptionCheck()) {
+      fail_fn("Error calling post fork system server hooks.");
+    }
+    // TODO(oth): Remove hardcoded label here (b/117874058).
+    static const char* kSystemServerLabel = "u:r:system_server:s0";
+    if (selinux_android_setcon(kSystemServerLabel) != 0) {
+      fail_fn(CREATE_ERROR("selinux_android_setcon(%s)", kSystemServerLabel));
+    }
+  }
+
+  env->CallStaticVoidMethod(gZygoteClass, gCallPostForkChildHooks, runtime_flags,
+                            is_system_server, is_child_zygote, managed_instruction_set);
+
+  if (env->ExceptionCheck()) {
+    fail_fn("Error calling post fork hooks.");
+  }
 }
 
 static uint64_t GetEffectiveCapabilityMask(JNIEnv* env) {
@@ -1008,16 +1025,82 @@ static uint64_t GetEffectiveCapabilityMask(JNIEnv* env) {
         RuntimeAbort(env, __LINE__, "capget failed");
     }
 
-    return capdata[0].effective |
-           (static_cast<uint64_t>(capdata[1].effective) << 32);
+    return capdata[0].effective | (static_cast<uint64_t>(capdata[1].effective) << 32);
+}
+
+static jlong CalculateCapabilities(JNIEnv* env, jint uid, jint gid, jintArray gids,
+                                   bool is_child_zygote) {
+  jlong capabilities = 0;
+
+  /*
+   *  Grant the following capabilities to the Bluetooth user:
+   *    - CAP_WAKE_ALARM
+   *    - CAP_NET_RAW
+   *    - CAP_NET_BIND_SERVICE (for DHCP client functionality)
+   *    - CAP_SYS_NICE (for setting RT priority for audio-related threads)
+   */
+
+  if (multiuser_get_app_id(uid) == AID_BLUETOOTH) {
+    capabilities |= (1LL << CAP_WAKE_ALARM);
+    capabilities |= (1LL << CAP_NET_RAW);
+    capabilities |= (1LL << CAP_NET_BIND_SERVICE);
+    capabilities |= (1LL << CAP_SYS_NICE);
+  }
+
+  /*
+   * Grant CAP_BLOCK_SUSPEND to processes that belong to GID "wakelock"
+   */
+
+  bool gid_wakelock_found = false;
+  if (gid == AID_WAKELOCK) {
+    gid_wakelock_found = true;
+  } else if (gids != nullptr) {
+    jsize gids_num = env->GetArrayLength(gids);
+    ScopedIntArrayRO native_gid_proxy(env, gids);
+
+    if (native_gid_proxy.get() == nullptr) {
+      RuntimeAbort(env, __LINE__, "Bad gids array");
+    }
+
+    for (int gid_index = gids_num; --gids_num >= 0;) {
+      if (native_gid_proxy[gid_index] == AID_WAKELOCK) {
+        gid_wakelock_found = true;
+        break;
+      }
+    }
+  }
+
+  if (gid_wakelock_found) {
+    capabilities |= (1LL << CAP_BLOCK_SUSPEND);
+  }
+
+  /*
+   * Grant child Zygote processes the following capabilities:
+   *   - CAP_SETUID (change UID of child processes)
+   *   - CAP_SETGID (change GID of child processes)
+   *   - CAP_SETPCAP (change capabilities of child processes)
+   */
+
+  if (is_child_zygote) {
+    capabilities |= (1LL << CAP_SETUID);
+    capabilities |= (1LL << CAP_SETGID);
+    capabilities |= (1LL << CAP_SETPCAP);
+  }
+
+  /*
+   * Containers run without some capabilities, so drop any caps that are not
+   * available.
+   */
+
+  return capabilities & GetEffectiveCapabilityMask(env);
 }
 }  // anonymous namespace
 
 namespace android {
 
 static void com_android_internal_os_Zygote_nativeSecurityInit(JNIEnv*, jclass) {
-  // security_getenforce is not allowed on app process. Initialize and cache the value before
-  // zygote forks.
+  // security_getenforce is not allowed on app process. Initialize and cache
+  // the value before zygote forks.
   g_is_security_enforced = security_getenforce();
 }
 
@@ -1028,78 +1111,35 @@ static void com_android_internal_os_Zygote_nativePreApplicationInit(JNIEnv*, jcl
 static jint com_android_internal_os_Zygote_nativeForkAndSpecialize(
         JNIEnv* env, jclass, jint uid, jint gid, jintArray gids,
         jint runtime_flags, jobjectArray rlimits,
-        jint mount_external, jstring se_info, jstring se_name,
-        jintArray fdsToClose, jintArray fdsToIgnore, jboolean is_child_zygote,
-        jstring instructionSet, jstring appDataDir, jstring packageName,
-        jobjectArray packagesForUid, jobjectArray visibleVolIds) {
-    jlong capabilities = 0;
+        jint mount_external, jstring se_info, jstring nice_name,
+        jintArray fds_to_close, jintArray fds_to_ignore, jboolean is_child_zygote,
+        jstring instruction_set, jstring app_data_dir, jstring package_name,
+        jobjectArray packages_for_uid, jobjectArray visible_vol_ids) {
+    jlong capabilities = CalculateCapabilities(env, uid, gid, gids, is_child_zygote);
 
-    // Grant CAP_WAKE_ALARM to the Bluetooth process.
-    // Additionally, allow bluetooth to open packet sockets so it can start the DHCP client.
-    // Grant CAP_SYS_NICE to allow Bluetooth to set RT priority for
-    // audio-related threads.
-    // TODO: consider making such functionality an RPC to netd.
-    if (multiuser_get_app_id(uid) == AID_BLUETOOTH) {
-      capabilities |= (1LL << CAP_WAKE_ALARM);
-      capabilities |= (1LL << CAP_NET_RAW);
-      capabilities |= (1LL << CAP_NET_BIND_SERVICE);
-      capabilities |= (1LL << CAP_SYS_NICE);
-    }
-
-    // Grant CAP_BLOCK_SUSPEND to processes that belong to GID "wakelock"
-    bool gid_wakelock_found = false;
-    if (gid == AID_WAKELOCK) {
-      gid_wakelock_found = true;
-    } else if (gids != NULL) {
-      jsize gids_num = env->GetArrayLength(gids);
-      ScopedIntArrayRO ar(env, gids);
-      if (ar.get() == NULL) {
-        RuntimeAbort(env, __LINE__, "Bad gids array");
-      }
-      for (int i = 0; i < gids_num; i++) {
-        if (ar[i] == AID_WAKELOCK) {
-          gid_wakelock_found = true;
-          break;
-        }
-      }
-    }
-    if (gid_wakelock_found) {
-      capabilities |= (1LL << CAP_BLOCK_SUSPEND);
-    }
-
-    // If forking a child zygote process, that zygote will need to be able to change
-    // the UID and GID of processes it forks, as well as drop those capabilities.
-    if (is_child_zygote) {
-      capabilities |= (1LL << CAP_SETUID);
-      capabilities |= (1LL << CAP_SETGID);
-      capabilities |= (1LL << CAP_SETPCAP);
-    }
-
-    // Containers run without some capabilities, so drop any caps that are not
-    // available.
-    capabilities &= GetEffectiveCapabilityMask(env);
-
-    pid_t pid = ForkCommon(env, se_name, false, fdsToClose, fdsToIgnore);
+    pid_t pid = ForkCommon(env, false, fds_to_close, fds_to_ignore);
     if (pid == 0) {
       SpecializeCommon(env, uid, gid, gids, runtime_flags, rlimits,
                        capabilities, capabilities,
-                       mount_external, se_info, se_name, false,
-                       is_child_zygote == JNI_TRUE, instructionSet, appDataDir, packageName,
-                       packagesForUid, visibleVolIds);
+                       mount_external, se_info, nice_name, false,
+                       is_child_zygote == JNI_TRUE, instruction_set, app_data_dir,
+                       package_name, packages_for_uid, visible_vol_ids);
     }
     return pid;
 }
 
 static jint com_android_internal_os_Zygote_nativeForkSystemServer(
         JNIEnv* env, jclass, uid_t uid, gid_t gid, jintArray gids,
-        jint runtime_flags, jobjectArray rlimits, jlong permittedCapabilities,
-        jlong effectiveCapabilities) {
-  pid_t pid = ForkCommon(env, NULL, true, NULL, NULL);
+        jint runtime_flags, jobjectArray rlimits, jlong permitted_capabilities,
+        jlong effective_capabilities) {
+  pid_t pid = ForkCommon(env, true,
+                         /* managed_fds_to_close= */ nullptr,
+                         /* managed_fds_to_ignore= */ nullptr);
   if (pid == 0) {
       SpecializeCommon(env, uid, gid, gids, runtime_flags, rlimits,
-                       permittedCapabilities, effectiveCapabilities,
-                       MOUNT_EXTERNAL_DEFAULT, NULL, NULL, true,
-                       false, NULL, NULL, nullptr, nullptr, nullptr);
+                       permitted_capabilities, effective_capabilities,
+                       MOUNT_EXTERNAL_DEFAULT, nullptr, nullptr, true,
+                       false, nullptr, nullptr, nullptr, nullptr, nullptr);
   } else if (pid > 0) {
       // The zygote process checks whether the child process has died or not.
       ALOGI("System server process %d has been created", pid);
@@ -1133,7 +1173,7 @@ static void com_android_internal_os_Zygote_nativeAllowFileAcrossFork(
     ScopedUtfChars path_native(env, path);
     const char* path_cstr = path_native.c_str();
     if (!path_cstr) {
-        RuntimeAbort(env, __LINE__, "path_cstr == NULL");
+        RuntimeAbort(env, __LINE__, "path_cstr == nullptr");
     }
     FileDescriptorWhitelist::Get()->Allow(path_cstr);
 }

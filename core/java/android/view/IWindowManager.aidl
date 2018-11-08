@@ -111,9 +111,6 @@ interface IWindowManager
     // caller must call setNewConfiguration() sometime later.
     Configuration updateOrientationFromAppTokens(in Configuration currentConfig,
             IBinder freezeThisOneIfNeeded, int displayId);
-    // Notify window manager of the new display override configuration. Returns an array of stack
-    // ids that were affected by the update, ActivityManager should resize these stacks.
-    int[] setNewDisplayOverrideConfiguration(in Configuration overrideConfig, int displayId);
 
     void startFreezingScreen(int exitAnim, int enterAnim);
     void stopFreezingScreen();

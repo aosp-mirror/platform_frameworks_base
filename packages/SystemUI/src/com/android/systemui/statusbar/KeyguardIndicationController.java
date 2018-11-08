@@ -51,6 +51,7 @@ import com.android.settingslib.Utils;
 import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.statusbar.StatusBarStateController.StateListener;
 import com.android.systemui.statusbar.phone.KeyguardIndicationTextView;
 import com.android.systemui.statusbar.phone.LockIcon;
 import com.android.systemui.statusbar.phone.StatusBarKeyguardViewManager;
@@ -66,7 +67,7 @@ import java.util.IllegalFormatConversionException;
 /**
  * Controls the indications and error messages shown on the Keyguard
  */
-public class KeyguardIndicationController {
+public class KeyguardIndicationController implements StateListener {
 
     private static final String TAG = "KeyguardIndication";
     private static final boolean DEBUG_CHARGING_SPEED = false;
@@ -154,6 +155,19 @@ public class KeyguardIndicationController {
         mContext.registerReceiverAsUser(mTickReceiver, UserHandle.SYSTEM,
                 new IntentFilter(Intent.ACTION_TIME_TICK), null,
                 Dependency.get(Dependency.TIME_TICK_HANDLER));
+
+        Dependency.get(StatusBarStateController.class).addListener(this);
+    }
+
+    /**
+     * Used by {@link com.android.systemui.statusbar.phone.StatusBar} to give the indication
+     * controller a chance to unregister itself as a receiver.
+     *
+     * //TODO: This can probably be converted to a fragment and not have to be manually recreated
+     */
+    public void destroy() {
+        mContext.unregisterReceiver(mTickReceiver);
+        Dependency.get(StatusBarStateController.class).removeListener(this);
     }
 
     /**
@@ -516,6 +530,16 @@ public class KeyguardIndicationController {
         }
         mDarkAmount = darkAmount;
         updateAlphas();
+    }
+
+    @Override
+    public void onStateChanged(int newState) {
+        // don't care
+    }
+
+    @Override
+    public void onDozingChanged(boolean isDozing) {
+        setDozing(isDozing);
     }
 
     protected class BaseKeyguardCallback extends KeyguardUpdateMonitorCallback {

@@ -270,6 +270,17 @@ message ValueMetric {
   optional int64 min_bucket_size_nanos = 10;
 
   optional bool use_absolute_value_on_reset = 11 [default = false];
+
+  optional bool use_diff = 12;
+
+  enum ValueDirection {
+      INCREASING = 1;
+      DECREASING = 2;
+      ANY = 3;
+  }
+  optional ValueDirection value_direction = 13 [default = INCREASING];
+
+  optional bool skip_zero_diff_output = 14 [default = true];
 }
 
 message Alert {

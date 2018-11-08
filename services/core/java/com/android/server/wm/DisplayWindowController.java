@@ -88,9 +88,34 @@ public class DisplayWindowController
 
     @Override
     public void onOverrideConfigurationChanged(Configuration overrideConfiguration) {
-        // TODO: The container receives override configuration changes through other means. enabling
-        // callbacks through the controller causes layout issues. Investigate consolidating
-        // override configuration propagation to just here.
+        synchronized (mGlobalLock) {
+            if (mContainer != null) {
+                mContainer.mService.setNewDisplayOverrideConfiguration(overrideConfiguration,
+                        mContainer);
+            }
+        }
+    }
+
+    /**
+     * Updates the docked/pinned controller resources to the current system context.
+     */
+    public void preOnConfigurationChanged() {
+        synchronized (mGlobalLock) {
+            if (mContainer != null) {
+                mContainer.preOnConfigurationChanged();
+            }
+        }
+    }
+
+  /**
+   * @see DisplayContent#applyRotationLocked(int, int)
+   */
+    public void applyRotation(int oldRotation, int newRotation) {
+        synchronized (mGlobalLock) {
+            if (mContainer != null) {
+                mContainer.applyRotationLocked(oldRotation, newRotation);
+            }
+        }
     }
 
     public int getDisplayId() {

@@ -1454,8 +1454,8 @@ public class WifiManager {
      *<p>
      * When the device decides to connect to one of the provided network suggestions, platform fires
      * the associated {@code pendingIntent} if
-     * {@link WifiNetworkSuggestion#isAppInteractionRequired} is {@code true} and the
-     * provided {@code pendingIntent} is non-null.
+     * the network was created with {@link WifiNetworkConfigBuilder#setIsAppInteractionRequired()}
+     * flag set and the provided {@code pendingIntent} is non-null.
      *<p>
      * Registration of a non-null pending intent {@code pendingIntent} requires
      * {@link android.Manifest.permission#ACCESS_COARSE_LOCATION ACCESS_COARSE_LOCATION} or
@@ -1473,10 +1473,9 @@ public class WifiManager {
      *
      * @param networkSuggestions List of network suggestions provided by the app.
      * @param pendingIntent Pending intent to be fired post connection for networks. These will be
-     *                      fired only when connecting to a network which has the
-     *                      {@link WifiNetworkSuggestion#isAppInteractionRequired} flag set.
+     *                      fired only when connecting to a network that was created with
+     *                      {@link WifiNetworkConfigBuilder#setIsAppInteractionRequired()} flag set.
      *                      Pending intent must hold a foreground service, else will be rejected.
-     *                      (i.e {@link PendingIntent#isForegroundService()} should return true)
      * @return true on success, false if any of the suggestions match (See
      * {@link WifiNetworkSuggestion#equals(Object)} any previously provided suggestions by the app.
      * @throws {@link SecurityException} if the caller is missing required permissions.
@@ -1856,7 +1855,12 @@ public class WifiManager {
     public static final int WIFI_FEATURE_SCAN_RAND        = 0x2000000; // Random MAC & Probe seq
     /** @hide */
     public static final int WIFI_FEATURE_TX_POWER_LIMIT   = 0x4000000; // Set Tx power limit
-
+    /** @hide */
+    public static final int WIFI_FEATURE_WPA3_SAE         = 0x8000000; // WPA3-Personal SAE
+    /** @hide */
+    public static final int WIFI_FEATURE_WPA3_SUITE_B     = 0x10000000; // WPA3-Enterprise Suite-B
+    /** @hide */
+    public static final int WIFI_FEATURE_OWE              = 0x20000000; // Enhanced Open
 
     private int getSupportedFeatures() {
         try {
@@ -2081,7 +2085,10 @@ public class WifiManager {
      * even when Wi-Fi is turned off.
      *
      * To change this setting, see {@link #ACTION_REQUEST_SCAN_ALWAYS_AVAILABLE}.
+     * @deprecated The ability for apps to trigger scan requests will be removed in a future
+     * release.
      */
+    @Deprecated
     public boolean isScanAlwaysAvailable() {
         try {
             return mService.isScanAlwaysAvailable();
@@ -4245,5 +4252,32 @@ public class WifiManager {
      */
     private void updateVerboseLoggingEnabledFromService() {
         mVerboseLoggingEnabled = getVerboseLoggingLevel() > 0;
+    }
+
+    /**
+     * @return true if this device supports WPA3-Personal SAE
+     * @hide
+     */
+    @SystemApi
+    public boolean isWpa3SaeSupported() {
+        return isFeatureSupported(WIFI_FEATURE_WPA3_SAE);
+    }
+
+    /**
+     * @return true if this device supports WPA3-Enterprise Suite-B-192
+     * @hide
+     */
+    @SystemApi
+    public boolean isWpa3SuiteBSupported() {
+        return isFeatureSupported(WIFI_FEATURE_WPA3_SUITE_B);
+    }
+
+    /**
+     * @return true if this device supports Wi-Fi Enhanced Open (OWE)
+     * @hide
+     */
+    @SystemApi
+    public boolean isOweSupported() {
+        return isFeatureSupported(WIFI_FEATURE_OWE);
     }
 }

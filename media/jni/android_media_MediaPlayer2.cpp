@@ -893,20 +893,6 @@ android_media_MediaPlayer2_reset(JNIEnv *env, jobject thiz)
     process_media_player_call( env, thiz, mp->reset(), NULL, NULL );
 }
 
-static jint
-android_media_MediaPlayer2_getAudioStreamType(JNIEnv *env, jobject thiz)
-{
-    sp<MediaPlayer2> mp = getMediaPlayer(env, thiz);
-    if (mp == NULL ) {
-        jniThrowException(env, "java/lang/IllegalStateException", NULL);
-        return 0;
-    }
-    audio_stream_type_t streamtype;
-    process_media_player_call( env, thiz, mp->getAudioStreamType(&streamtype), NULL, NULL );
-    ALOGV("getAudioStreamType: %d (streamtype)", streamtype);
-    return (jint) streamtype;
-}
-
 static jboolean
 android_media_MediaPlayer2_setParameter(JNIEnv *env, jobject thiz, jint key, jobject)
 {
@@ -1467,7 +1453,7 @@ static const JNINativeMethod gMethods[] = {
         (void *)android_media_MediaPlayer2_handleDataSourceCallback
     },
     {"nativePlayNextDataSource", "(J)V",                        (void *)android_media_MediaPlayer2_playNextDataSource},
-    {"_setVideoSurface",    "(Landroid/view/Surface;)V",        (void *)android_media_MediaPlayer2_setVideoSurface},
+    {"native_setVideoSurface", "(Landroid/view/Surface;)V",     (void *)android_media_MediaPlayer2_setVideoSurface},
     {"getBufferingParams", "()Landroid/media/BufferingParams;", (void *)android_media_MediaPlayer2_getBufferingParams},
     {"_setBufferingParams", "(Landroid/media/BufferingParams;)V", (void *)android_media_MediaPlayer2_setBufferingParams},
     {"_prepare",            "()V",                              (void *)android_media_MediaPlayer2_prepare},
@@ -1487,13 +1473,12 @@ static const JNINativeMethod gMethods[] = {
     {"getDuration",         "()J",                              (void *)android_media_MediaPlayer2_getDuration},
     {"_release",            "()V",                              (void *)android_media_MediaPlayer2_release},
     {"_reset",              "()V",                              (void *)android_media_MediaPlayer2_reset},
-    {"_getAudioStreamType", "()I",                              (void *)android_media_MediaPlayer2_getAudioStreamType},
     {"setParameter",        "(ILjava/lang/Object;)Z",          (void *)android_media_MediaPlayer2_setParameter},
     {"getParameter",        "(I)Ljava/lang/Object;",           (void *)android_media_MediaPlayer2_getParameter},
     {"setLooping",          "(Z)V",                             (void *)android_media_MediaPlayer2_setLooping},
     {"isLooping",           "()Z",                              (void *)android_media_MediaPlayer2_isLooping},
-    {"_setVolume",          "(F)V",                             (void *)android_media_MediaPlayer2_setVolume},
-    {"_invoke",             "([B)[B",                           (void *)android_media_MediaPlayer2_invoke},
+    {"native_setVolume",    "(F)V",                             (void *)android_media_MediaPlayer2_setVolume},
+    {"native_invoke",       "([B)[B",                           (void *)android_media_MediaPlayer2_invoke},
     {"native_init",         "()V",                              (void *)android_media_MediaPlayer2_native_init},
     {"native_setup",        "(Ljava/lang/Object;)V",            (void *)android_media_MediaPlayer2_native_setup},
     {"native_finalize",     "()V",                              (void *)android_media_MediaPlayer2_native_finalize},
