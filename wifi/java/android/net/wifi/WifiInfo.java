@@ -110,6 +110,8 @@ public class WifiInfo implements Parcelable {
 
     private boolean mEphemeral;
 
+    private boolean mTrusted;
+
     /**
      * Running total count of lost (not ACKed) transmitted unicast data packets.
      * @hide
@@ -215,6 +217,7 @@ public class WifiInfo implements Parcelable {
             mMacAddress = source.mMacAddress;
             mMeteredHint = source.mMeteredHint;
             mEphemeral = source.mEphemeral;
+            mTrusted = source.mTrusted;
             txBad = source.txBad;
             txRetries = source.txRetries;
             txSuccess = source.txSuccess;
@@ -397,6 +400,17 @@ public class WifiInfo implements Parcelable {
         return mEphemeral;
     }
 
+    /** {@hide} */
+    public void setTrusted(boolean trusted) {
+        mTrusted = trusted;
+    }
+
+    /** {@hide} */
+    public boolean isTrusted() {
+        return mTrusted;
+    }
+
+
     /** @hide */
     @UnsupportedAppUsage
     public void setNetworkId(int id) {
@@ -539,6 +553,7 @@ public class WifiInfo implements Parcelable {
         dest.writeString(mMacAddress);
         dest.writeInt(mMeteredHint ? 1 : 0);
         dest.writeInt(mEphemeral ? 1 : 0);
+        dest.writeInt(mTrusted ? 1 : 0);
         dest.writeInt(score);
         dest.writeLong(txSuccess);
         dest.writeDouble(txSuccessRate);
@@ -573,6 +588,7 @@ public class WifiInfo implements Parcelable {
                 info.mMacAddress = in.readString();
                 info.mMeteredHint = in.readInt() != 0;
                 info.mEphemeral = in.readInt() != 0;
+                info.mTrusted = in.readInt() != 0;
                 info.score = in.readInt();
                 info.txSuccess = in.readLong();
                 info.txSuccessRate = in.readDouble();

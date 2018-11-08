@@ -57,6 +57,7 @@ public class WifiConfigurationTest {
         String cookie = "C O.o |<IE";
         WifiConfiguration config = new WifiConfiguration();
         config.setPasspointManagementObjectTree(cookie);
+        config.trusted = false;
         MacAddress macBeforeParcel = config.getOrCreateRandomizedMacAddress();
         Parcel parcelW = Parcel.obtain();
         config.writeToParcel(parcelW, 0);
@@ -71,6 +72,7 @@ public class WifiConfigurationTest {
         // lacking a useful config.equals, check two fields near the end.
         assertEquals(cookie, reconfig.getMoTree());
         assertEquals(macBeforeParcel, reconfig.getOrCreateRandomizedMacAddress());
+        assertFalse(reconfig.trusted);
 
         Parcel parcelWW = Parcel.obtain();
         reconfig.writeToParcel(parcelWW, 0);

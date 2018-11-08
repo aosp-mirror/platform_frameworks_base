@@ -18,6 +18,7 @@ package android.net.wifi;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import android.os.Parcel;
 import android.support.test.filters.SmallTest;
@@ -44,6 +45,7 @@ public class WifiInfoTest {
         writeWifiInfo.txRetries = TEST_TX_RETRIES;
         writeWifiInfo.txBad = TEST_TX_BAD;
         writeWifiInfo.rxSuccess = TEST_RX_SUCCESS;
+        writeWifiInfo.setTrusted(true);
 
         Parcel parcel = Parcel.obtain();
         writeWifiInfo.writeToParcel(parcel, 0);
@@ -56,5 +58,6 @@ public class WifiInfoTest {
         assertEquals(TEST_TX_RETRIES, readWifiInfo.txRetries);
         assertEquals(TEST_TX_BAD, readWifiInfo.txBad);
         assertEquals(TEST_RX_SUCCESS, readWifiInfo.rxSuccess);
+        assertTrue(readWifiInfo.isTrusted());
     }
 }
