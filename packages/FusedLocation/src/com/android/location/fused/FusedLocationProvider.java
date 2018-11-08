@@ -16,26 +16,23 @@
 
 package com.android.location.fused;
 
-
-import java.io.FileDescriptor;
-import java.io.PrintWriter;
-
-import com.android.location.provider.LocationProviderBase;
-import com.android.location.provider.ProviderPropertiesUnbundled;
-import com.android.location.provider.ProviderRequestUnbundled;
-
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.location.Criteria;
-import android.location.LocationProvider;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.UserHandle;
 import android.os.WorkSource;
+
+import com.android.location.provider.LocationProviderBase;
+import com.android.location.provider.ProviderPropertiesUnbundled;
+import com.android.location.provider.ProviderRequestUnbundled;
+
+import java.io.FileDescriptor;
+import java.io.PrintWriter;
 
 public class FusedLocationProvider extends LocationProviderBase implements FusionEngine.Callback {
     private static final String TAG = "FusedLocationProvider";
@@ -48,7 +45,6 @@ public class FusedLocationProvider extends LocationProviderBase implements Fusio
     private static final int MSG_DISABLE = 2;
     private static final int MSG_SET_REQUEST = 3;
 
-    private final Context mContext;
     private final FusionEngine mEngine;
 
     private static class RequestWrapper {
@@ -62,13 +58,12 @@ public class FusedLocationProvider extends LocationProviderBase implements Fusio
 
     public FusedLocationProvider(Context context) {
         super(TAG, PROPERTIES);
-        mContext = context;
         mEngine = new FusionEngine(context, Looper.myLooper());
 
         // listen for user change
         IntentFilter intentFilter = new IntentFilter();
         intentFilter.addAction(Intent.ACTION_USER_SWITCHED);
-        mContext.registerReceiverAsUser(new BroadcastReceiver() {
+        context.registerReceiverAsUser(new BroadcastReceiver() {
             @Override
             public void onReceive(Context context, Intent intent) {
                 String action = intent.getAction();
@@ -121,15 +116,5 @@ public class FusedLocationProvider extends LocationProviderBase implements Fusio
     public void onDump(FileDescriptor fd, PrintWriter pw, String[] args) {
         // perform synchronously
         mEngine.dump(fd, pw, args);
-    }
-
-    @Override
-    public int onGetStatus(Bundle extras) {
-        return LocationProvider.AVAILABLE;
-    }
-
-    @Override
-    public long onGetStatusUpdateTime() {
-        return 0;
     }
 }

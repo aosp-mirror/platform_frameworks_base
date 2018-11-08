@@ -17,6 +17,7 @@
 package com.android.server;
 
 import static android.content.pm.PackageManager.PERMISSION_GRANTED;
+import static android.provider.Settings.Global.LOCATION_DISABLE_STATUS_CALLBACKS;
 
 import android.Manifest;
 import android.annotation.NonNull;
@@ -2990,7 +2991,7 @@ public class LocationManagerService extends ILocationManager.Stub {
         ArrayList<Receiver> deadReceivers = null;
         ArrayList<UpdateRecord> deadUpdateRecords = null;
 
-        // Broadcast location or status to all listeners
+        // Broadcast location to all listeners
         for (UpdateRecord r : records) {
             Receiver receiver = r.mReceiver;
             boolean receiverDead = false;
@@ -3049,14 +3050,19 @@ public class LocationManagerService extends ILocationManager.Stub {
                 }
             }
 
-            long prevStatusUpdateTime = r.mLastStatusBroadcast;
-            if ((newStatusUpdateTime > prevStatusUpdateTime) &&
-                    (prevStatusUpdateTime != 0 || status != LocationProvider.AVAILABLE)) {
+            // TODO: location provider status callbacks have been disabled and deprecated, and are
+            // guarded behind this setting now. should be removed completely post-Q
+            if (Settings.Global.getInt(mContext.getContentResolver(),
+                    LOCATION_DISABLE_STATUS_CALLBACKS, 1) == 0) {
+                long prevStatusUpdateTime = r.mLastStatusBroadcast;
+                if ((newStatusUpdateTime > prevStatusUpdateTime)
+                        && (prevStatusUpdateTime != 0 || status != LocationProvider.AVAILABLE)) {
 
-                r.mLastStatusBroadcast = newStatusUpdateTime;
-                if (!receiver.callStatusChangedLocked(provider, status, extras)) {
-                    receiverDead = true;
-                    Slog.w(TAG, "RemoteException calling onStatusChanged on " + receiver);
+                    r.mLastStatusBroadcast = newStatusUpdateTime;
+                    if (!receiver.callStatusChangedLocked(provider, status, extras)) {
+                        receiverDead = true;
+                        Slog.w(TAG, "RemoteException calling onStatusChanged on " + receiver);
+                    }
                 }
             }
 
@@ -3276,7 +3282,6 @@ public class LocationManagerService extends ILocationManager.Stub {
             // we don't leave anything dangling.
             clearTestProviderEnabled(provider, opPackageName);
             clearTestProviderLocation(provider, opPackageName);
-            clearTestProviderStatus(provider, opPackageName);
 
             MockProvider mockProvider = mMockProviders.remove(provider);
             if (mockProvider == null) {
@@ -3405,21 +3410,6 @@ public class LocationManagerService extends ILocationManager.Stub {
                 throw new IllegalArgumentException("Provider \"" + provider + "\" unknown");
             }
             mockProvider.setStatus(status, extras, updateTime);
-        }
-    }
-
-    @Override
-    public void clearTestProviderStatus(String provider, String opPackageName) {
-        if (!canCallerAccessMockLocation(opPackageName)) {
-            return;
-        }
-
-        synchronized (mLock) {
-            MockProvider mockProvider = mMockProviders.get(provider);
-            if (mockProvider == null) {
-                throw new IllegalArgumentException("Provider \"" + provider + "\" unknown");
-            }
-            mockProvider.clearStatus();
         }
     }
 

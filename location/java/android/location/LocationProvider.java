@@ -34,8 +34,23 @@ import com.android.internal.location.ProviderProperties;
  * user-specified criteria.
  */
 public class LocationProvider {
+
+    /**
+     * @deprecated Location provider statuses are no longer supported.
+     */
+    @Deprecated
     public static final int OUT_OF_SERVICE = 0;
+
+    /**
+     * @deprecated Location provider statuses are no longer supported.
+     */
+    @Deprecated
     public static final int TEMPORARILY_UNAVAILABLE = 1;
+
+    /**
+     * @deprecated Location provider statuses are no longer supported.
+     */
+    @Deprecated
     public static final int AVAILABLE = 2;
 
     /**
