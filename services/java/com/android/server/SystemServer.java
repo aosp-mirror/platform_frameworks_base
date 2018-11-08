@@ -816,6 +816,9 @@ public final class SystemServer {
         boolean isWatch = context.getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_WATCH);
 
+        boolean isArc = context.getPackageManager().hasSystemFeature(
+                "org.chromium.arc");
+
         boolean enableVrService = context.getPackageManager().hasSystemFeature(
                 PackageManager.FEATURE_VR_MODE_HIGH_PERFORMANCE);
 
@@ -1338,7 +1341,17 @@ public final class SystemServer {
             }
 
             traceBeginAndSlog("StartAudioService");
-            mSystemServiceManager.startService(AudioService.Lifecycle.class);
+            if (!isArc) {
+                mSystemServiceManager.startService(AudioService.Lifecycle.class);
+            } else {
+                String className = context.getResources()
+                        .getString(R.string.config_deviceSpecificAudioService);
+                try {
+                    mSystemServiceManager.startService(className + "$Lifecycle");
+                } catch (Throwable e) {
+                    reportWtf("starting " + className, e);
+                }
+            }
             traceEnd();
 
             if (mPackageManager.hasSystemFeature(PackageManager.FEATURE_BROADCAST_RADIO)) {
