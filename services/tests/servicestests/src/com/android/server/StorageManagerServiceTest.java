@@ -28,8 +28,9 @@ import android.content.pm.PackageManagerInternal;
 import android.os.UserHandle;
 import android.os.UserManagerInternal;
 import android.os.storage.StorageManagerInternal;
-import android.support.test.filters.SmallTest;
-import android.support.test.runner.AndroidJUnit4;
+
+import androidx.test.filters.SmallTest;
+import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.Before;
 import org.junit.Test;

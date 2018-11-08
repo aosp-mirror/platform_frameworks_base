@@ -33,7 +33,8 @@ LOCAL_STATIC_JAVA_LIBRARIES := \
     testables \
     testng \
     ub-uiautomator\
-    platformprotosnano
+    platformprotosnano \
+    hamcrest-library
 
 LOCAL_AIDL_INCLUDES := $(LOCAL_PATH)/aidl
 
