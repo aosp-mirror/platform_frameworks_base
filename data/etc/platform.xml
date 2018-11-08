@@ -223,12 +223,12 @@
          code to link against. -->
 
     <library name="android.test.base"
-            file="/system/framework/android.test.base.impl.jar" />
+            file="/system/framework/android.test.base.jar" />
     <library name="android.test.mock"
-            file="/system/framework/android.test.mock.impl.jar"
+            file="/system/framework/android.test.mock.jar"
             dependency="android.test.base" />
     <library name="android.test.runner"
-            file="/system/framework/android.test.runner.impl.jar"
+            file="/system/framework/android.test.runner.jar"
             dependency="android.test.base:android.test.mock" />
 
     <!-- In BOOT_JARS historically, and now added to legacy applications. -->
