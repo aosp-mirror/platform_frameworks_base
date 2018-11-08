@@ -2698,136 +2698,129 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
                     || (lastFocusedStack.mLastPausedActivity != null
                     && !lastFocusedStack.mLastPausedActivity.fullscreen));
 
-            // The contained logic must be synchronized, since we are both changing the visibility
-            // and updating the {@link Configuration}. {@link ActivityRecord#setVisibility} will
-            // ultimately cause the client code to schedule a layout. Since layouts retrieve the
-            // current {@link Configuration}, we must ensure that the below code updates it before
-            // the layout can occur.
-            synchronized(mWindowManager.getWindowManagerLock()) {
-                // This activity is now becoming visible.
-                if (!next.visible || next.stopped || lastActivityTranslucent) {
+            // This activity is now becoming visible.
+            if (!next.visible || next.stopped || lastActivityTranslucent) {
+                next.setVisibility(true);
+            }
+
+            // schedule launch ticks to collect information about slow apps.
+            next.startLaunchTickingLocked();
+
+            ActivityRecord lastResumedActivity =
+                    lastFocusedStack == null ? null : lastFocusedStack.mResumedActivity;
+            final ActivityState lastState = next.getState();
+
+            mService.updateCpuStats();
+
+            if (DEBUG_STATES) Slog.v(TAG_STATES, "Moving to RESUMED: " + next
+                    + " (in existing)");
+
+            next.setState(RESUMED, "resumeTopActivityInnerLocked");
+
+            next.app.updateProcessInfo(false /* updateServiceConnectionActivities */,
+                    true /* updateLru */, true /* activityChange */, true /* updateOomAdj */);
+            updateLRUListLocked(next);
+
+            // Have the window manager re-evaluate the orientation of
+            // the screen based on the new activity order.
+            boolean notUpdated = true;
+
+            if (isFocusedStackOnDisplay()) {
+                // We have special rotation behavior when here is some active activity that
+                // requests specific orientation or Keyguard is locked. Make sure all activity
+                // visibilities are set correctly as well as the transition is updated if needed
+                // to get the correct rotation behavior. Otherwise the following call to update
+                // the orientation may cause incorrect configurations delivered to client as a
+                // result of invisible window resize.
+                // TODO: Remove this once visibilities are set correctly immediately when
+                // starting an activity.
+                notUpdated = !mStackSupervisor.ensureVisibilityAndConfig(next, mDisplayId,
+                        true /* markFrozenIfConfigChanged */, false /* deferResume */);
+            }
+
+            if (notUpdated) {
+                // The configuration update wasn't able to keep the existing
+                // instance of the activity, and instead started a new one.
+                // We should be all done, but let's just make sure our activity
+                // is still at the top and schedule another run if something
+                // weird happened.
+                ActivityRecord nextNext = topRunningActivityLocked();
+                if (DEBUG_SWITCH || DEBUG_STATES) Slog.i(TAG_STATES,
+                        "Activity config changed during resume: " + next
+                                + ", new next: " + nextNext);
+                if (nextNext != next) {
+                    // Do over!
+                    mStackSupervisor.scheduleResumeTopActivities();
+                }
+                if (!next.visible || next.stopped) {
                     next.setVisibility(true);
                 }
+                next.completeResumeLocked();
+                if (DEBUG_STACK) mStackSupervisor.validateTopActivitiesLocked();
+                return true;
+            }
 
-                // schedule launch ticks to collect information about slow apps.
-                next.startLaunchTickingLocked();
-
-                ActivityRecord lastResumedActivity =
-                        lastFocusedStack == null ? null : lastFocusedStack.mResumedActivity;
-                final ActivityState lastState = next.getState();
-
-                mService.updateCpuStats();
-
-                if (DEBUG_STATES) Slog.v(TAG_STATES, "Moving to RESUMED: " + next
-                        + " (in existing)");
-
-                next.setState(RESUMED, "resumeTopActivityInnerLocked");
-
-                next.app.updateProcessInfo(false /* updateServiceConnectionActivities */,
-                        true /* updateLru */, true /* activityChange */, true /* updateOomAdj */);
-                updateLRUListLocked(next);
-
-                // Have the window manager re-evaluate the orientation of
-                // the screen based on the new activity order.
-                boolean notUpdated = true;
-
-                if (isFocusedStackOnDisplay()) {
-                    // We have special rotation behavior when here is some active activity that
-                    // requests specific orientation or Keyguard is locked. Make sure all activity
-                    // visibilities are set correctly as well as the transition is updated if needed
-                    // to get the correct rotation behavior. Otherwise the following call to update
-                    // the orientation may cause incorrect configurations delivered to client as a
-                    // result of invisible window resize.
-                    // TODO: Remove this once visibilities are set correctly immediately when
-                    // starting an activity.
-                    notUpdated = !mStackSupervisor.ensureVisibilityAndConfig(next, mDisplayId,
-                            true /* markFrozenIfConfigChanged */, false /* deferResume */);
+            try {
+                final ClientTransaction transaction =
+                        ClientTransaction.obtain(next.app.getThread(), next.appToken);
+                // Deliver all pending results.
+                ArrayList<ResultInfo> a = next.results;
+                if (a != null) {
+                    final int N = a.size();
+                    if (!next.finishing && N > 0) {
+                        if (DEBUG_RESULTS) Slog.v(TAG_RESULTS,
+                                "Delivering results to " + next + ": " + a);
+                        transaction.addCallback(ActivityResultItem.obtain(a));
+                    }
                 }
 
-                if (notUpdated) {
-                    // The configuration update wasn't able to keep the existing
-                    // instance of the activity, and instead started a new one.
-                    // We should be all done, but let's just make sure our activity
-                    // is still at the top and schedule another run if something
-                    // weird happened.
-                    ActivityRecord nextNext = topRunningActivityLocked();
-                    if (DEBUG_SWITCH || DEBUG_STATES) Slog.i(TAG_STATES,
-                            "Activity config changed during resume: " + next
-                                    + ", new next: " + nextNext);
-                    if (nextNext != next) {
-                        // Do over!
-                        mStackSupervisor.scheduleResumeTopActivities();
-                    }
-                    if (!next.visible || next.stopped) {
-                        next.setVisibility(true);
-                    }
-                    next.completeResumeLocked();
-                    if (DEBUG_STACK) mStackSupervisor.validateTopActivitiesLocked();
-                    return true;
+                if (next.newIntents != null) {
+                    transaction.addCallback(NewIntentItem.obtain(next.newIntents,
+                            false /* andPause */));
                 }
 
-                try {
-                    final ClientTransaction transaction =
-                            ClientTransaction.obtain(next.app.getThread(), next.appToken);
-                    // Deliver all pending results.
-                    ArrayList<ResultInfo> a = next.results;
-                    if (a != null) {
-                        final int N = a.size();
-                        if (!next.finishing && N > 0) {
-                            if (DEBUG_RESULTS) Slog.v(TAG_RESULTS,
-                                    "Delivering results to " + next + ": " + a);
-                            transaction.addCallback(ActivityResultItem.obtain(a));
-                        }
-                    }
+                // Well the app will no longer be stopped.
+                // Clear app token stopped state in window manager if needed.
+                next.notifyAppResumed(next.stopped);
 
-                    if (next.newIntents != null) {
-                        transaction.addCallback(NewIntentItem.obtain(next.newIntents,
-                                false /* andPause */));
-                    }
+                EventLog.writeEvent(EventLogTags.AM_RESUME_ACTIVITY, next.userId,
+                        System.identityHashCode(next), next.getTask().taskId,
+                        next.shortComponentName);
 
-                    // Well the app will no longer be stopped.
-                    // Clear app token stopped state in window manager if needed.
-                    next.notifyAppResumed(next.stopped);
+                next.sleeping = false;
+                mService.getAppWarningsLocked().onResumeActivity(next);
+                next.app.setPendingUiCleanAndForceProcessStateUpTo(mService.mTopProcessState);
+                next.clearOptionsLocked();
+                transaction.setLifecycleStateRequest(
+                        ResumeActivityItem.obtain(next.app.getReportedProcState(),
+                                getDisplay().getWindowContainerController()
+                                        .isNextTransitionForward()));
+                mService.getLifecycleManager().scheduleTransaction(transaction);
 
-                    EventLog.writeEvent(EventLogTags.AM_RESUME_ACTIVITY, next.userId,
-                            System.identityHashCode(next), next.getTask().taskId,
-                            next.shortComponentName);
+                if (DEBUG_STATES) Slog.d(TAG_STATES, "resumeTopActivityLocked: Resumed "
+                        + next);
+            } catch (Exception e) {
+                // Whoops, need to restart this activity!
+                if (DEBUG_STATES) Slog.v(TAG_STATES, "Resume failed; resetting state to "
+                        + lastState + ": " + next);
+                next.setState(lastState, "resumeTopActivityInnerLocked");
 
-                    next.sleeping = false;
-                    mService.getAppWarningsLocked().onResumeActivity(next);
-                    next.app.setPendingUiCleanAndForceProcessStateUpTo(mService.mTopProcessState);
-                    next.clearOptionsLocked();
-                    transaction.setLifecycleStateRequest(
-                            ResumeActivityItem.obtain(next.app.getReportedProcState(),
-                                    getDisplay().getWindowContainerController()
-                                            .isNextTransitionForward()));
-                    mService.getLifecycleManager().scheduleTransaction(transaction);
-
-                    if (DEBUG_STATES) Slog.d(TAG_STATES, "resumeTopActivityLocked: Resumed "
-                            + next);
-                } catch (Exception e) {
-                    // Whoops, need to restart this activity!
-                    if (DEBUG_STATES) Slog.v(TAG_STATES, "Resume failed; resetting state to "
-                            + lastState + ": " + next);
-                    next.setState(lastState, "resumeTopActivityInnerLocked");
-
-                    // lastResumedActivity being non-null implies there is a lastStack present.
-                    if (lastResumedActivity != null) {
-                        lastResumedActivity.setState(RESUMED, "resumeTopActivityInnerLocked");
-                    }
-
-                    Slog.i(TAG, "Restarting because process died: " + next);
-                    if (!next.hasBeenLaunched) {
-                        next.hasBeenLaunched = true;
-                    } else  if (SHOW_APP_STARTING_PREVIEW && lastFocusedStack != null
-                            && lastFocusedStack.isTopStackOnDisplay()) {
-                        next.showStartingWindow(null /* prev */, false /* newTask */,
-                                false /* taskSwitch */);
-                    }
-                    mStackSupervisor.startSpecificActivityLocked(next, true, false);
-                    if (DEBUG_STACK) mStackSupervisor.validateTopActivitiesLocked();
-                    return true;
+                // lastResumedActivity being non-null implies there is a lastStack present.
+                if (lastResumedActivity != null) {
+                    lastResumedActivity.setState(RESUMED, "resumeTopActivityInnerLocked");
                 }
+
+                Slog.i(TAG, "Restarting because process died: " + next);
+                if (!next.hasBeenLaunched) {
+                    next.hasBeenLaunched = true;
+                } else  if (SHOW_APP_STARTING_PREVIEW && lastFocusedStack != null
+                        && lastFocusedStack.isTopStackOnDisplay()) {
+                    next.showStartingWindow(null /* prev */, false /* newTask */,
+                            false /* taskSwitch */);
+                }
+                mStackSupervisor.startSpecificActivityLocked(next, true, false);
+                if (DEBUG_STACK) mStackSupervisor.validateTopActivitiesLocked();
+                return true;
             }
 
             // From this point on, if something goes wrong there is no way
@@ -4860,35 +4853,33 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         mTmpBounds.clear();
         mTmpInsetBounds.clear();
 
-        synchronized (mWindowManager.getWindowManagerLock()) {
-            for (int i = mTaskHistory.size() - 1; i >= 0; i--) {
-                final TaskRecord task = mTaskHistory.get(i);
-                if (task.isResizeable()) {
-                    if (inFreeformWindowingMode()) {
-                        // TODO(b/71028874): Can be removed since each freeform task is its own
-                        //                   stack.
-                        // For freeform stack we don't adjust the size of the tasks to match that
-                        // of the stack, but we do try to make sure the tasks are still contained
-                        // with the bounds of the stack.
-                        if (task.getOverrideBounds() != null) {
-                            mTmpRect2.set(task.getOverrideBounds());
-                            fitWithinBounds(mTmpRect2, bounds);
-                            task.updateOverrideConfiguration(mTmpRect2);
-                        }
-                    } else {
-                        task.updateOverrideConfiguration(taskBounds, insetBounds);
+        for (int i = mTaskHistory.size() - 1; i >= 0; i--) {
+            final TaskRecord task = mTaskHistory.get(i);
+            if (task.isResizeable()) {
+                if (inFreeformWindowingMode()) {
+                    // TODO(b/71028874): Can be removed since each freeform task is its own
+                    //                   stack.
+                    // For freeform stack we don't adjust the size of the tasks to match that
+                    // of the stack, but we do try to make sure the tasks are still contained
+                    // with the bounds of the stack.
+                    if (task.getOverrideBounds() != null) {
+                        mTmpRect2.set(task.getOverrideBounds());
+                        fitWithinBounds(mTmpRect2, bounds);
+                        task.updateOverrideConfiguration(mTmpRect2);
                     }
-                }
-
-                mTmpBounds.put(task.taskId, task.getOverrideBounds());
-                if (tempTaskInsetBounds != null) {
-                    mTmpInsetBounds.put(task.taskId, tempTaskInsetBounds);
+                } else {
+                    task.updateOverrideConfiguration(taskBounds, insetBounds);
                 }
             }
 
-            mWindowContainerController.resize(bounds, mTmpBounds, mTmpInsetBounds);
-            setBounds(bounds);
+            mTmpBounds.put(task.taskId, task.getOverrideBounds());
+            if (tempTaskInsetBounds != null) {
+                mTmpInsetBounds.put(task.taskId, tempTaskInsetBounds);
+            }
         }
+
+        mWindowContainerController.resize(bounds, mTmpBounds, mTmpInsetBounds);
+        setBounds(bounds);
     }
 
     void onPipAnimationEndResize() {

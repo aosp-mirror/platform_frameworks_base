@@ -190,7 +190,6 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.IUserManager;
 import android.os.LocaleList;
-import android.os.Looper;
 import android.os.Message;
 import android.os.PersistableBundle;
 import android.os.PowerManager;
@@ -247,9 +246,11 @@ import com.android.internal.util.Preconditions;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.AppOpsService;
 import com.android.server.AttributeCache;
+import com.android.server.DisplayThread;
 import com.android.server.LocalServices;
 import com.android.server.SystemService;
 import com.android.server.SystemServiceManager;
+import com.android.server.UiThread;
 import com.android.server.Watchdog;
 import com.android.server.am.ActivityManagerService;
 import com.android.server.am.ActivityManagerServiceDumpActivitiesProto;
@@ -347,7 +348,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     IntentFirewall mIntentFirewall;
 
     /* Global service lock used by the package the owns this service. */
-    Object mGlobalLock;
+    final WindowManagerGlobalLock mGlobalLock = new WindowManagerGlobalLock();
     ActivityStackSupervisor mStackSupervisor;
     WindowManagerService mWindowManager;
     private UserManagerService mUserManager;
@@ -465,6 +466,11 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
     ComponentName mTopComponent;
     String mTopAction = Intent.ACTION_MAIN;
     String mTopData;
+
+    /** Profiling app information. */
+    String mProfileApp = null;
+    WindowProcessController mProfileProc = null;
+    ProfilerInfo mProfilerInfo = null;
 
     /**
      * Dump of the activity state at the time of the last ANR. Cleared after
@@ -716,11 +722,13 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         }
     }
 
-    // TODO: Will be converted to WM lock once transition is complete.
-    public void setActivityManagerService(Object globalLock, Looper looper,
-            IntentFirewall intentFirewall, PendingIntentController intentController) {
-        mGlobalLock = globalLock;
-        mH = new H(looper);
+    public WindowManagerGlobalLock getGlobalLock() {
+        return mGlobalLock;
+    }
+
+    public void setActivityManagerService(IntentFirewall intentFirewall,
+            PendingIntentController intentController) {
+        mH = new H();
         mUiHandler = new UiHandler();
         mIntentFirewall = intentFirewall;
         final File systemDir = SystemServiceManager.ensureSystemDir();
@@ -5450,8 +5458,8 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         static final int FIRST_ACTIVITY_STACK_MSG = 100;
         static final int FIRST_SUPERVISOR_STACK_MSG = 200;
 
-        public H(Looper looper) {
-            super(looper, null, true);
+        public H() {
+            super(DisplayThread.get().getLooper());
         }
 
         @Override
@@ -5469,7 +5477,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         static final int DISMISS_DIALOG_UI_MSG = 1;
 
         public UiHandler() {
-            super(com.android.server.UiThread.get().getLooper(), null, true);
+            super(UiThread.get().getLooper(), null, true);
         }
 
         @Override
@@ -6723,6 +6731,27 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                         mAmInternal.getCurrentUserId())
                         && !(UserManager.isDeviceInDemoMode(mContext)
                         && mAmInternal.getCurrentUser().isDemo());
+            }
+        }
+
+        @Override
+        public void setProfileApp(String profileApp) {
+            synchronized (mGlobalLock) {
+                mProfileApp = profileApp;
+            }
+        }
+
+        @Override
+        public void setProfileProc(WindowProcessController wpc) {
+            synchronized (mGlobalLock) {
+                mProfileProc = wpc;
+            }
+        }
+
+        @Override
+        public void setProfilerInfo(ProfilerInfo profilerInfo) {
+            synchronized (mGlobalLock) {
+                mProfilerInfo = profilerInfo;
             }
         }
     }

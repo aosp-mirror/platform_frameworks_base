@@ -441,7 +441,7 @@ public class WindowManagerService extends IWindowManager.Stub
     final WindowHashMap mWindowMap = new WindowHashMap();
 
     /** Global service lock used by the package the owns this service. */
-    WindowManagerGlobalLock mGlobalLock = new WindowManagerGlobalLock();
+    final WindowManagerGlobalLock mGlobalLock;
 
     /**
      * List of app window tokens that are waiting for replacing windows. If the
@@ -855,9 +855,11 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     public static WindowManagerService main(final Context context, final InputManagerService im,
-            final boolean showBootMsgs, final boolean onlyCore, WindowManagerPolicy policy) {
+            final boolean showBootMsgs, final boolean onlyCore, WindowManagerPolicy policy,
+            final WindowManagerGlobalLock globalLock) {
         DisplayThread.getHandler().runWithScissors(() ->
-                sInstance = new WindowManagerService(context, im, showBootMsgs, onlyCore, policy),
+                sInstance = new WindowManagerService(context, im, showBootMsgs, onlyCore, policy,
+                        globalLock),
                 0);
         return sInstance;
     }
@@ -879,8 +881,10 @@ public class WindowManagerService extends IWindowManager.Stub
     }
 
     private WindowManagerService(Context context, InputManagerService inputManager,
-            boolean showBootMsgs, boolean onlyCore, WindowManagerPolicy policy) {
+            boolean showBootMsgs, boolean onlyCore, WindowManagerPolicy policy,
+            WindowManagerGlobalLock globalLock) {
         installLock(this, INDEX_WINDOW);
+        mGlobalLock = globalLock;
         mContext = context;
         mAllowBootMessages = showBootMsgs;
         mOnlyCore = onlyCore;
@@ -2622,21 +2626,16 @@ public class WindowManagerService extends IWindowManager.Stub
     /**
      * Starts deferring layout passes. Useful when doing multiple changes but to optimize
      * performance, only one layout pass should be done. This can be called multiple times, and
-     * layouting will be resumed once the last caller has called {@link #continueSurfaceLayout}
+     * layouting will be resumed once the last caller has called
+     * {@link #continueSurfaceLayout}.
      */
-    public void deferSurfaceLayout() {
-        synchronized (mGlobalLock) {
-            mWindowPlacerLocked.deferLayout();
-        }
+    void deferSurfaceLayout() {
+        mWindowPlacerLocked.deferLayout();
     }
 
-    /**
-     * Resumes layout passes after deferring them. See {@link #deferSurfaceLayout()}
-     */
-    public void continueSurfaceLayout() {
-        synchronized (mGlobalLock) {
-            mWindowPlacerLocked.continueLayout();
-        }
+    /** Resumes layout passes after deferring them. See {@link #deferSurfaceLayout()} */
+    void continueSurfaceLayout() {
+        mWindowPlacerLocked.continueLayout();
     }
 
     /**
@@ -6895,7 +6894,7 @@ public class WindowManagerService extends IWindowManager.Stub
             if (DEBUG_DISPLAY) {
                 Slog.d(TAG, "setVr2dDisplayId called for: " + vr2dDisplayId);
             }
-            synchronized (WindowManagerService.this) {
+            synchronized (mGlobalLock) {
                 mVr2dDisplayId = vr2dDisplayId;
             }
         }
@@ -7020,10 +7019,6 @@ public class WindowManagerService extends IWindowManager.Stub
      * WARNING: This interrupts surface updates, be careful! Don't
      * execute within the transaction for longer than you would
      * execute on an animation thread.
-     * WARNING: This holds the WindowManager lock, so if exec will acquire
-     * the ActivityManager lock, you should hold it BEFORE calling this
-     * otherwise there is a risk of deadlock if another thread holding the AM
-     * lock waits on the WM lock.
      * WARNING: This method contains locks known to the State of California
      * to cause Deadlocks and other conditions.
      *
@@ -7044,19 +7039,12 @@ public class WindowManagerService extends IWindowManager.Stub
      * deferSurfaceLayout may be a little too broad, in particular the total
      * enclosure of startActivityUnchecked which could run for quite some time.
      */
-    public void inSurfaceTransaction(Runnable exec) {
-        // We hold the WindowManger lock to ensure relayoutWindow
-        // does not return while a Surface transaction is opening.
-        // The client depends on us to have resized the surface
-        // by that point (b/36462635)
-
-        synchronized (mGlobalLock) {
-            SurfaceControl.openTransaction();
-            try {
-                exec.run();
-            } finally {
-                SurfaceControl.closeTransaction();
-            }
+    void inSurfaceTransaction(Runnable exec) {
+        SurfaceControl.openTransaction();
+        try {
+            exec.run();
+        } finally {
+            SurfaceControl.closeTransaction();
         }
     }
 

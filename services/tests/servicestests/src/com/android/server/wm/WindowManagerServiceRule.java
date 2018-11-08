@@ -124,9 +124,10 @@ public class WindowManagerServiceRule implements TestRule {
                     doReturn(input[1]).when(ims).monitorInput(anyString(), anyInt());
                 }
 
-                mService = WindowManagerService.main(context, ims, false,
-                        false, mPolicy = new TestWindowManagerPolicy(
-                                WindowManagerServiceRule.this::getWindowManagerService));
+                mService = WindowManagerService.main(context, ims, false, false,
+                        mPolicy = new TestWindowManagerPolicy(
+                                WindowManagerServiceRule.this::getWindowManagerService),
+                        new WindowManagerGlobalLock());
                 mService.mTransactionFactory = () -> {
                     final SurfaceControl.Transaction transaction = new SurfaceControl.Transaction();
                     mSurfaceTransactions.add(new WeakReference<>(transaction));

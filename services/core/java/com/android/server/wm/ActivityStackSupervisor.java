@@ -2051,7 +2051,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             }
         }
 
-        mService.mAmInternal.trimApplications();
+        mService.mH.post(() -> mService.mAmInternal.trimApplications());
         //dump();
         //mWindowManager.dump();
 
