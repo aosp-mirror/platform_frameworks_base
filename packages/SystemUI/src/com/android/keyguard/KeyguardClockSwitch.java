@@ -143,6 +143,15 @@ public class KeyguardClockSwitch extends FrameLayout {
     }
 
     /**
+     * Notifies that time tick alarm from doze service fired.
+     */
+    public void dozeTimeTick() {
+        if (mClockPlugin != null) {
+            mClockPlugin.dozeTimeTick();
+        }
+    }
+
+    /**
      * When plugin changes, set all kept parameters into newer plugin.
      */
     private void initPluginParams() {

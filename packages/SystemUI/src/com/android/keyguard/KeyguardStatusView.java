@@ -47,7 +47,6 @@ import com.android.internal.widget.ViewClippingUtil;
 import com.android.systemui.Dependency;
 import com.android.systemui.Interpolators;
 import com.android.systemui.statusbar.policy.ConfigurationController;
-import com.android.systemui.util.wakelock.KeepAwakeAnimationListener;
 
 import com.google.android.collect.Sets;
 
@@ -276,6 +275,7 @@ public class KeyguardStatusView extends GridLayout implements
     public void dozeTimeTick() {
         refreshTime();
         mKeyguardSlice.refresh();
+        mClockView.dozeTimeTick();
     }
 
     private void refreshTime() {
