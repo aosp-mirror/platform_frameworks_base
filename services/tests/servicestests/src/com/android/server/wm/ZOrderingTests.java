@@ -122,7 +122,6 @@ public class ZOrderingTests extends WindowTestsBase {
         public SurfaceControl build() {
             final SurfaceControl sc = super.build();
             mTransaction.addParentFor(sc, mPendingParent);
-            mTransaction = null;
             mPendingParent = null;
             return sc;
         }
@@ -138,7 +137,6 @@ public class ZOrderingTests extends WindowTestsBase {
         @Override
         public SurfaceControl.Builder make(SurfaceSession s) {
             final LayerRecordingTransaction transaction = mTransaction;
-            mTransaction = null;
             return new HierarchyRecorder(s, transaction);
         }
     }
