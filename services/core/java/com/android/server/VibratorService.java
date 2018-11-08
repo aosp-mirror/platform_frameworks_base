@@ -1193,6 +1193,8 @@ public class VibratorService extends IVibratorService.Stub
                 if (i >= timings.length) {
                     if (repeatIndex >= 0) {
                         i = repeatIndex;
+                        // prevent infinite loop
+                        repeatIndex = -1;
                     } else {
                         break;
                     }
@@ -1268,8 +1270,13 @@ public class VibratorService extends IVibratorService.Stub
         public int onCommand(String cmd) {
             if ("vibrate".equals(cmd)) {
                 return runVibrate();
+            } else if ("waveform".equals(cmd)) {
+                return runWaveform();
             } else if ("prebaked".equals(cmd)) {
                 return runPrebaked();
+            } else if ("cancel".equals(cmd)) {
+                cancelVibrate(mToken);
+                return 0;
             }
             return handleDefaultCommands(cmd);
         }
@@ -1316,6 +1323,62 @@ public class VibratorService extends IVibratorService.Stub
             }
         }
 
+        private int runWaveform() {
+            Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "runWaveform");
+            try {
+                if (checkDoNotDisturb()) {
+                    return 0;
+                }
+
+                String description = "Shell command";
+                int repeat = -1;
+                ArrayList<Integer> amplitudesList = null;
+
+                String opt;
+                while ((opt = getNextOption()) != null) {
+                    switch (opt) {
+                        case "-d":
+                            description = getNextArgRequired();
+                            break;
+                        case "-r":
+                            repeat = Integer.parseInt(getNextArgRequired());
+                            break;
+                        case "-a":
+                            if (amplitudesList == null) {
+                                amplitudesList = new ArrayList<Integer>();
+                            }
+                            break;
+                    }
+                }
+
+                ArrayList<Long> timingsList = new ArrayList<Long>();
+
+                String arg;
+                while ((arg = getNextArg()) != null) {
+                    if (amplitudesList != null && amplitudesList.size() < timingsList.size()) {
+                        amplitudesList.add(Integer.parseInt(arg));
+                    } else {
+                        timingsList.add(Long.parseLong(arg));
+                    }
+                }
+
+                VibrationEffect effect;
+                long[] timings = timingsList.stream().mapToLong(Long::longValue).toArray();
+                if (amplitudesList == null) {
+                    effect = VibrationEffect.createWaveform(timings, repeat);
+                } else {
+                    int[] amplitudes =
+                            amplitudesList.stream().mapToInt(Integer::intValue).toArray();
+                    effect = VibrationEffect.createWaveform(timings, amplitudes, repeat);
+                }
+                vibrate(Binder.getCallingUid(), description, effect, AudioAttributes.USAGE_UNKNOWN,
+                        "Shell Command", mToken);
+                return 0;
+            } finally {
+                Trace.traceEnd(Trace.TRACE_TAG_VIBRATOR);
+            }
+        }
+
         private int runPrebaked() {
             Trace.traceBegin(Trace.TRACE_TAG_VIBRATOR, "runPrebaked");
             try {
@@ -1350,9 +1413,19 @@ public class VibratorService extends IVibratorService.Stub
                 pw.println("  vibrate duration [description]");
                 pw.println("    Vibrates for duration milliseconds; ignored when device is on DND ");
                 pw.println("    (Do Not Disturb) mode.");
+                pw.println("  waveform [-d description] [-r index] [-a] duration [amplitude] ...");
+                pw.println("    Vibrates for durations and amplitudes in list;");
+                pw.println("    ignored when device is on DND (Do Not Disturb) mode.");
+                pw.println("    If -r is provided, the waveform loops back to the specified");
+                pw.println("    index (e.g. 0 loops from the beginning)");
+                pw.println("    If -a is provided, the command accepts duration-amplitude pairs;");
+                pw.println("    otherwise, it accepts durations only and alternates off/on");
+                pw.println("    Duration is in milliseconds; amplitude is a scale of 1-255.");
                 pw.println("  prebaked effect-id [description]");
                 pw.println("    Vibrates with prebaked effect; ignored when device is on DND ");
                 pw.println("    (Do Not Disturb) mode.");
+                pw.println("  cancel");
+                pw.println("    Cancels any active vibration");
                 pw.println("");
             }
         }
