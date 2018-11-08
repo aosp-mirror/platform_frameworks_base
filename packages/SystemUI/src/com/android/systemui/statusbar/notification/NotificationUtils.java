@@ -74,7 +74,7 @@ public class NotificationUtils {
 
     /** Returns the value of the new interruption model setting. */
     public static boolean useNewInterruptionModel(Context context) {
-        return Settings.System.getInt(context.getContentResolver(),
+        return Settings.Secure.getInt(context.getContentResolver(),
                 NOTIFICATION_NEW_INTERRUPTION_MODEL, 0) != 0;
     }
 }
