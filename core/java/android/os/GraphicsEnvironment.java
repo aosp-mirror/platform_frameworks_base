@@ -33,8 +33,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.util.HashSet;
-import java.util.Set;
 
 /** @hide */
 public class GraphicsEnvironment {
@@ -60,9 +58,9 @@ public class GraphicsEnvironment {
     /**
      * Set up GraphicsEnvironment
      */
-    public void setup(Context context) {
+    public void setup(Context context, Bundle coreSettings) {
         setupGpuLayers(context);
-        chooseDriver(context);
+        chooseDriver(context, coreSettings);
     }
 
     /**
@@ -141,11 +139,12 @@ public class GraphicsEnvironment {
     /**
      * Choose whether the current process should use the builtin or an updated driver.
      */
-    private static void chooseDriver(Context context) {
+    private static void chooseDriver(Context context, Bundle coreSettings) {
         String driverPackageName = SystemProperties.get(PROPERTY_GFX_DRIVER);
         if (driverPackageName == null || driverPackageName.isEmpty()) {
             return;
         }
+
         // To minimize risk of driver updates crippling the device beyond user repair, never use an
         // updated driver for privileged or non-updated system apps. Presumably pre-installed apps
         // were tested thoroughly with the pre-installed driver.
@@ -154,12 +153,16 @@ public class GraphicsEnvironment {
             if (DEBUG) Log.v(TAG, "ignoring driver package for privileged/non-updated system app");
             return;
         }
-        Set<String> whitelist = loadWhitelist(context, driverPackageName);
 
-        // Empty whitelist implies no updatable graphics driver. Typically, the pre-installed
-        // updatable graphics driver is supposed to be a place holder and contains no graphics
-        // driver and whitelist.
-        if (whitelist == null || whitelist.isEmpty()) {
+        String applicationPackageName = context.getPackageName();
+        String devOptInApplicationName = coreSettings.getString(
+                Settings.Global.UPDATED_GFX_DRIVER_DEV_OPT_IN_APP);
+        boolean devOptIn = applicationPackageName.equals(devOptInApplicationName);
+        boolean whitelisted = onWhitelist(context, driverPackageName, ai.packageName);
+        if (!devOptIn && !whitelisted) {
+            if (DEBUG) {
+                Log.w(TAG, applicationPackageName + " is not on the whitelist.");
+            }
             return;
         }
 
@@ -169,12 +172,6 @@ public class GraphicsEnvironment {
                     PackageManager.MATCH_SYSTEM_ONLY);
         } catch (PackageManager.NameNotFoundException e) {
             Log.w(TAG, "driver package '" + driverPackageName + "' not installed");
-            return;
-        }
-        if (!whitelist.contains(context.getPackageName())) {
-            if (DEBUG) {
-                Log.w(TAG, context.getPackageName() + " is not on the whitelist.");
-            }
             return;
         }
 
@@ -242,10 +239,18 @@ public class GraphicsEnvironment {
         return null;
     }
 
-    private static Set<String> loadWhitelist(Context context, String driverPackageName) {
+    private static boolean onWhitelist(Context context, String driverPackageName,
+            String applicationPackageName) {
         String whitelistName = SystemProperties.get(PROPERTY_GFX_DRIVER_WHITELIST);
+
+        // Empty whitelist implies no updatable graphics driver. Typically, the pre-installed
+        // updatable graphics driver is supposed to be a place holder and contains no graphics
+        // driver and whitelist.
         if (whitelistName == null || whitelistName.isEmpty()) {
-            return null;
+            if (DEBUG) {
+                Log.w(TAG, "No whitelist found.");
+            }
+            return false;
         }
         try {
             Context driverContext = context.createPackageContext(driverPackageName,
@@ -253,11 +258,11 @@ public class GraphicsEnvironment {
             AssetManager assets = driverContext.getAssets();
             InputStream stream = assets.open(whitelistName);
             BufferedReader reader = new BufferedReader(new InputStreamReader(stream));
-            Set<String> whitelist = new HashSet<>();
-            for (String line; (line = reader.readLine()) != null; ) {
-                whitelist.add(line);
+            for (String packageName; (packageName = reader.readLine()) != null; ) {
+                if (packageName.equals(applicationPackageName)) {
+                    return true;
+                }
             }
-            return whitelist;
         } catch (PackageManager.NameNotFoundException e) {
             if (DEBUG) {
                 Log.w(TAG, "driver package '" + driverPackageName + "' not installed");
@@ -267,7 +272,7 @@ public class GraphicsEnvironment {
                 Log.w(TAG, "Failed to load whitelist driver package, abort.");
             }
         }
-        return null;
+        return false;
     }
 
     private static native void setLayerPaths(ClassLoader classLoader, String layerPaths);

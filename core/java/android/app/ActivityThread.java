@@ -5594,7 +5594,7 @@ public final class ActivityThread extends ClientTransactionHandler {
             }
         }
 
-        GraphicsEnvironment.getInstance().setup(context);
+        GraphicsEnvironment.getInstance().setup(context, mCoreSettings);
         Trace.traceEnd(Trace.TRACE_TAG_ACTIVITY_MANAGER);
     }
 
