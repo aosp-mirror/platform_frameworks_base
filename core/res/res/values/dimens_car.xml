@@ -44,9 +44,10 @@
     <dimen name="car_headline3_size">24sp</dimen>
     <dimen name="car_headline4_size">20sp</dimen>
     <dimen name="car_body1_size">32sp</dimen>
-    <dimen name="car_body2_size">26sp</dimen>
-    <dimen name="car_body3_size">16sp</dimen>
-    <dimen name="car_body4_size">14sp</dimen>
+    <dimen name="car_body2_size">28sp</dimen>
+    <dimen name="car_body3_size">26sp</dimen>
+    <dimen name="car_body4_size">24sp</dimen>
+    <!-- car_body5_size is deprecated -->
     <dimen name="car_body5_size">18sp</dimen>
     <dimen name="car_label1_size">26sp</dimen>
     <dimen name="car_label2_size">64sp</dimen>
@@ -85,6 +86,7 @@
     <dimen name="car_borderless_button_horizontal_padding">0dp</dimen>
     <dimen name="car_button_radius">@dimen/car_radius_1</dimen>
     <dimen name="car_pill_button_size">56dp</dimen>
+    <dimen name="car_touch_target_size">76dp</dimen>
 
     <!-- Seekbar -->
     <dimen name="car_seekbar_height">6dp</dimen>
