@@ -233,7 +233,7 @@ cc_library_shared {
     ],
 
     shared_libs: [
-        "libbpf",
+        "libbpf_android",
         "libnetdbpf",
         "libnetdutils",
         "libmemtrack",
