@@ -42,6 +42,7 @@ import android.widget.TextView;
 
 import com.android.systemui.Interpolators;
 import com.android.systemui.R;
+import com.android.systemui.util.leak.RotationUtils;
 
 /**
  * Abstract base class. Shows a dialog for BiometricPrompt.
@@ -199,7 +200,10 @@ public abstract class BiometricDialogView extends LinearLayout {
         final Button negative = mLayout.findViewById(R.id.button2);
         final Button positive = mLayout.findViewById(R.id.button1);
 
-        mDialog.getLayoutParams().width = (int) mDialogWidth;
+        if (RotationUtils.getRotation(mContext) != RotationUtils.ROTATION_NONE) {
+            mDialog.getLayoutParams().width = (int) mDialogWidth;
+        }
+
         mLastState = STATE_NONE;
         updateState(STATE_AUTHENTICATING);
 

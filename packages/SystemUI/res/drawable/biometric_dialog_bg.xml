@@ -21,6 +21,6 @@
     <corners android:radius="1dp"
         android:topLeftRadius="@dimen/biometric_dialog_corner_size"
         android:topRightRadius="@dimen/biometric_dialog_corner_size"
-        android:bottomLeftRadius="0dp"
-        android:bottomRightRadius="0dp"/>
+        android:bottomLeftRadius="@dimen/biometric_dialog_corner_size"
+        android:bottomRightRadius="@dimen/biometric_dialog_corner_size"/>
 </shape>
