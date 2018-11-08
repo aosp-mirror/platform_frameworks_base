@@ -82,7 +82,7 @@ void VkInteropFunctorDrawable::onDraw(SkCanvas* canvas) {
     ATRACE_CALL();
 
     if (canvas->getGrContext() == nullptr) {
-        SkDEBUGF(("Attempting to draw VkFunctor into an unsupported surface"));
+        SkDEBUGF(("Attempting to draw VkInteropFunctor into an unsupported surface"));
         return;
     }
 
@@ -99,10 +99,11 @@ void VkInteropFunctorDrawable::onDraw(SkCanvas* canvas) {
                  ColorTypeToPixelFormat(surfaceInfo.colorType()),
                  GraphicBuffer::USAGE_HW_TEXTURE | GraphicBuffer::USAGE_SW_WRITE_NEVER |
                          GraphicBuffer::USAGE_SW_READ_NEVER | GraphicBuffer::USAGE_HW_RENDER,
-                 std::string("VkFunctorDrawable::onDraw pid [") + std::to_string(getpid()) + "]");
+                 std::string("VkInteropFunctorDrawable::onDraw pid [") + std::to_string(getpid()) +
+                         "]");
         status_t error = mFrameBuffer->initCheck();
         if (error < 0) {
-            ALOGW("VkFunctorDrawable::onDraw() failed in GraphicBuffer.create()");
+            ALOGW("VkInteropFunctorDrawable::onDraw() failed in GraphicBuffer.create()");
             return;
         }
 
