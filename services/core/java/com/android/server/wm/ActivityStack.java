@@ -46,6 +46,13 @@ import static android.view.WindowManager.TRANSIT_TASK_OPEN_BEHIND;
 import static android.view.WindowManager.TRANSIT_TASK_TO_BACK;
 import static android.view.WindowManager.TRANSIT_TASK_TO_FRONT;
 
+import static com.android.server.am.ActivityStackProto.BOUNDS;
+import static com.android.server.am.ActivityStackProto.CONFIGURATION_CONTAINER;
+import static com.android.server.am.ActivityStackProto.DISPLAY_ID;
+import static com.android.server.am.ActivityStackProto.FULLSCREEN;
+import static com.android.server.am.ActivityStackProto.ID;
+import static com.android.server.am.ActivityStackProto.RESUMED_ACTIVITY;
+import static com.android.server.am.ActivityStackProto.TASKS;
 import static com.android.server.wm.ActivityDisplay.POSITION_BOTTOM;
 import static com.android.server.wm.ActivityDisplay.POSITION_TOP;
 import static com.android.server.wm.ActivityStack.ActivityState.DESTROYED;
@@ -56,13 +63,6 @@ import static com.android.server.wm.ActivityStack.ActivityState.PAUSING;
 import static com.android.server.wm.ActivityStack.ActivityState.RESUMED;
 import static com.android.server.wm.ActivityStack.ActivityState.STOPPED;
 import static com.android.server.wm.ActivityStack.ActivityState.STOPPING;
-import static com.android.server.am.ActivityStackProto.BOUNDS;
-import static com.android.server.am.ActivityStackProto.CONFIGURATION_CONTAINER;
-import static com.android.server.am.ActivityStackProto.DISPLAY_ID;
-import static com.android.server.am.ActivityStackProto.FULLSCREEN;
-import static com.android.server.am.ActivityStackProto.ID;
-import static com.android.server.am.ActivityStackProto.RESUMED_ACTIVITY;
-import static com.android.server.am.ActivityStackProto.TASKS;
 import static com.android.server.wm.ActivityStackSupervisor.FindTaskResult;
 import static com.android.server.wm.ActivityStackSupervisor.PAUSE_IMMEDIATELY;
 import static com.android.server.wm.ActivityStackSupervisor.PRESERVE_WINDOWS;
@@ -513,13 +513,22 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     public void onConfigurationChanged(Configuration newParentConfig) {
         final int prevWindowingMode = getWindowingMode();
         final boolean prevIsAlwaysOnTop = isAlwaysOnTop();
-        super.onConfigurationChanged(newParentConfig);
         final ActivityDisplay display = getDisplay();
+
+        getBounds(mTmpRect2);
+        final boolean hasNewBounds = display != null && getWindowContainerController() != null
+                && getWindowContainerController().updateBoundsForConfigChange(
+                        newParentConfig, getConfiguration(), mTmpRect2);
+
+        super.onConfigurationChanged(newParentConfig);
         if (display == null) {
           return;
         }
         if (prevWindowingMode != getWindowingMode()) {
             display.onStackWindowingModeChanged(this);
+        }
+        if (hasNewBounds) {
+            resize(mTmpRect2, null /* tempTaskBounds */, null /* tempTaskInsetBounds */);
         }
         if (prevIsAlwaysOnTop != isAlwaysOnTop()) {
             // Since always on top is only on when the stack is freeform or pinned, the state
@@ -752,6 +761,12 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
      * @param bounds Updated bounds.
      */
     private void postAddToDisplay(ActivityDisplay activityDisplay, Rect bounds, boolean onTop) {
+        if (mDisplayId != activityDisplay.mDisplayId) {
+            // rotations are relative to the display, so pretend like our current rotation is
+            // the same as the new display so we don't try to rotate bounds.
+            getConfiguration().windowConfiguration.setRotation(
+                    activityDisplay.getWindowConfiguration().getRotation());
+        }
         mDisplayId = activityDisplay.mDisplayId;
         setBounds(bounds);
         onParentChanged();
@@ -808,10 +823,6 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             return;
         }
         outBounds.setEmpty();
-    }
-
-    void getBoundsForNewConfiguration(Rect outBounds) {
-        mWindowContainerController.getBoundsForNewConfiguration(outBounds);
     }
 
     void positionChildWindowContainerAtTop(TaskRecord child) {

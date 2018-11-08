@@ -2403,20 +2403,13 @@ public class WindowManagerService extends IWindowManager.Stub
         return config;
     }
 
-    @Override
-    public int[] setNewDisplayOverrideConfiguration(Configuration overrideConfig, int displayId) {
-        if (!checkCallingPermission(MANAGE_APP_TOKENS, "setNewDisplayOverrideConfiguration()")) {
-            throw new SecurityException("Requires MANAGE_APP_TOKENS permission");
+    void setNewDisplayOverrideConfiguration(Configuration overrideConfig, DisplayContent dc) {
+        if (mWaitingForConfig) {
+            mWaitingForConfig = false;
+            mLastFinishedFreezeSource = "new-config";
         }
 
-        synchronized (mGlobalLock) {
-            if (mWaitingForConfig) {
-                mWaitingForConfig = false;
-                mLastFinishedFreezeSource = "new-config";
-            }
-
-            return mRoot.setDisplayOverrideConfigurationIfNeeded(overrideConfig, displayId);
-        }
+        mRoot.setDisplayOverrideConfigurationIfNeeded(overrideConfig, dc);
     }
 
     // TODO(multi-display): remove when no default display use case.
@@ -7137,6 +7130,10 @@ public class WindowManagerService extends IWindowManager.Stub
         mSeamlessRotationCount = 0;
 
         mRotatingSeamlessly = true;
+    }
+
+    boolean isRotatingSeamlessly() {
+        return mRotatingSeamlessly;
     }
 
     void finishSeamlessRotation() {

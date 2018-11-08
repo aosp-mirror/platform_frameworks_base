@@ -245,12 +245,6 @@ public class StackWindowController
         }
     }
 
-    public void getBoundsForNewConfiguration(Rect outBounds) {
-        synchronized (mGlobalLock) {
-            mContainer.getBoundsForNewConfiguration(outBounds);
-        }
-    }
-
     /**
      * Adjusts the screen size in dp's for the {@param config} for the given params. The provided
      * params represent the desired state of a configuration change. Since this utility is used
@@ -376,6 +370,14 @@ public class StackWindowController
 
     void requestResize(Rect bounds) {
         mHandler.obtainMessage(H.REQUEST_RESIZE, bounds).sendToTarget();
+    }
+
+    /** @see TaskStack.updateBoundsForConfigChange(Configuration, Configuration, Rect) */
+    public boolean updateBoundsForConfigChange(
+            Configuration parentConfig, Configuration prevConfig, Rect outBounds) {
+        synchronized (mGlobalLock) {
+            return mContainer.updateBoundsForConfigChange(parentConfig, prevConfig, outBounds);
+        }
     }
 
     @Override
