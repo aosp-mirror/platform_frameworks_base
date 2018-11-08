@@ -18,10 +18,10 @@ package android.media;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
-import android.annotation.Nullable;
 import android.annotation.UnsupportedAppUsage;
 import android.media.MediaCodec;
 import android.media.MediaCodec.BufferInfo;
+
 import dalvik.system.CloseGuard;
 
 import java.io.FileDescriptor;
@@ -269,8 +269,10 @@ final public class MediaMuxer {
         public static final int MUXER_OUTPUT_3GPP   = MUXER_OUTPUT_FIRST + 2;
         /** HEIF media file format*/
         public static final int MUXER_OUTPUT_HEIF   = MUXER_OUTPUT_FIRST + 3;
+        /** Ogg media file format*/
+        public static final int MUXER_OUTPUT_OGG   = MUXER_OUTPUT_FIRST + 4;
         /** @hide */
-        public static final int MUXER_OUTPUT_LAST   = MUXER_OUTPUT_HEIF;
+        public static final int MUXER_OUTPUT_LAST   = MUXER_OUTPUT_OGG;
     };
 
     /** @hide */
@@ -279,6 +281,7 @@ final public class MediaMuxer {
         OutputFormat.MUXER_OUTPUT_WEBM,
         OutputFormat.MUXER_OUTPUT_3GPP,
         OutputFormat.MUXER_OUTPUT_HEIF,
+        OutputFormat.MUXER_OUTPUT_OGG,
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface Format {}

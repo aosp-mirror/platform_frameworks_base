@@ -22,16 +22,16 @@ import android.annotation.SystemApi;
 import android.annotation.UnsupportedAppUsage;
 import android.app.ActivityThread;
 import android.hardware.Camera;
-import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.Message;
 import android.os.PersistableBundle;
-import android.text.TextUtils;
 import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Pair;
 import android.view.Surface;
+
+import com.android.internal.annotations.GuardedBy;
 
 import java.io.File;
 import java.io.FileDescriptor;
@@ -40,8 +40,6 @@ import java.io.RandomAccessFile;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.List;
-
-import com.android.internal.annotations.GuardedBy;
 
 /**
  * Used to record audio and video. The recording control is based on a
@@ -450,6 +448,9 @@ public class MediaRecorder implements AudioRouting
 
         /** VP8/VORBIS data in a WEBM container */
         public static final int WEBM = 9;
+
+        /** Opus data in a Ogg container */
+        public static final int OGG = 11;
     };
 
     /**
@@ -474,6 +475,8 @@ public class MediaRecorder implements AudioRouting
         public static final int AAC_ELD = 5;
         /** Ogg Vorbis audio codec */
         public static final int VORBIS = 6;
+        /** Opus audio codec */
+        public static final int OPUS = 7;
     }
 
     /**
