@@ -1674,4 +1674,20 @@ message WifiLinkLayerUsageStats {
 
   // Total time the wifi radio is scanning in ms over the logging duration.
   optional int64 radio_scan_time_ms = 5;
+
+  // Total time the wifi radio spent doing nan scans in ms over the logging duration.
+  optional int64 radio_nan_scan_time_ms = 6;
+
+  // Total time the wifi radio spent doing background scans in ms over the logging duration.
+  optional int64 radio_background_scan_time_ms = 7;
+
+  // Total time the wifi radio spent doing roam scans in ms over the logging duration.
+  optional int64 radio_roam_scan_time_ms = 8;
+
+  // Total time the wifi radio spent doing pno scans in ms over the logging duration.
+  optional int64 radio_pno_scan_time_ms = 9;
+
+  // Total time the wifi radio spent doing hotspot 2.0 scans and GAS exchange
+  // in ms over the logging duration.
+  optional int64 radio_hs20_scan_time_ms = 10;
 }
