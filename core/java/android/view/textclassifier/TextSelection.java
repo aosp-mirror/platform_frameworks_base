@@ -20,6 +20,7 @@ import android.annotation.FloatRange;
 import android.annotation.IntRange;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
+import android.os.Bundle;
 import android.os.LocaleList;
 import android.os.Parcel;
 import android.os.Parcelable;
@@ -41,13 +42,16 @@ public final class TextSelection implements Parcelable {
     private final int mEndIndex;
     private final EntityConfidence mEntityConfidence;
     @Nullable private final String mId;
+    private final Bundle mExtras;
 
     private TextSelection(
-            int startIndex, int endIndex, Map<String, Float> entityConfidence, String id) {
+            int startIndex, int endIndex, Map<String, Float> entityConfidence, String id,
+            Bundle extras) {
         mStartIndex = startIndex;
         mEndIndex = endIndex;
         mEntityConfidence = new EntityConfidence(entityConfidence);
         mId = id;
+        mExtras = extras;
     }
 
     /**
@@ -103,6 +107,18 @@ public final class TextSelection implements Parcelable {
         return mId;
     }
 
+    /**
+     * Returns the extended data.
+     *
+     * <p><b>NOTE: </b>Each call to this method returns a new bundle copy so clients should
+     * prefer to hold a reference to the returned bundle rather than frequently calling this
+     * method.
+     */
+    @NonNull
+    public Bundle getExtras() {
+        return mExtras.deepCopy();
+    }
+
     @Override
     public String toString() {
         return String.format(
@@ -120,6 +136,8 @@ public final class TextSelection implements Parcelable {
         private final int mEndIndex;
         private final Map<String, Float> mEntityConfidence = new ArrayMap<>();
         @Nullable private String mId;
+        @Nullable
+        private Bundle mExtras;
 
         /**
          * Creates a builder used to build {@link TextSelection} objects.
@@ -160,12 +178,23 @@ public final class TextSelection implements Parcelable {
         }
 
         /**
+         * Sets the extended data.
+         *
+         * @return this builder
+         */
+        public Builder setExtras(@Nullable Bundle extras) {
+            mExtras = extras;
+            return this;
+        }
+
+        /**
          * Builds and returns {@link TextSelection} object.
          */
         @NonNull
         public TextSelection build() {
             return new TextSelection(
-                    mStartIndex, mEndIndex, mEntityConfidence, mId);
+                    mStartIndex, mEndIndex, mEntityConfidence, mId,
+                    mExtras == null ? Bundle.EMPTY : mExtras.deepCopy());
         }
     }
 
@@ -179,18 +208,21 @@ public final class TextSelection implements Parcelable {
         private final int mEndIndex;
         @Nullable private final LocaleList mDefaultLocales;
         private final boolean mDarkLaunchAllowed;
+        private final Bundle mExtras;
 
         private Request(
                 CharSequence text,
                 int startIndex,
                 int endIndex,
                 LocaleList defaultLocales,
-                boolean darkLaunchAllowed) {
+                boolean darkLaunchAllowed,
+                Bundle extras) {
             mText = text;
             mStartIndex = startIndex;
             mEndIndex = endIndex;
             mDefaultLocales = defaultLocales;
             mDarkLaunchAllowed = darkLaunchAllowed;
+            mExtras = extras;
         }
 
         /**
@@ -238,6 +270,18 @@ public final class TextSelection implements Parcelable {
         }
 
         /**
+         * Returns the extended data.
+         *
+         * <p><b>NOTE: </b>Each call to this method returns a new bundle copy so clients should
+         * prefer to hold a reference to the returned bundle rather than frequently calling this
+         * method.
+         */
+        @NonNull
+        public Bundle getExtras() {
+            return mExtras.deepCopy();
+        }
+
+        /**
          * A builder for building TextSelection requests.
          */
         public static final class Builder {
@@ -248,6 +292,7 @@ public final class TextSelection implements Parcelable {
 
             @Nullable private LocaleList mDefaultLocales;
             private boolean mDarkLaunchAllowed;
+            private Bundle mExtras;
 
             /**
              * @param text text providing context for the selected text (which is specified by the
@@ -296,12 +341,23 @@ public final class TextSelection implements Parcelable {
             }
 
             /**
+             * Sets the extended data.
+             *
+             * @return this builder
+             */
+            public Builder setExtras(@Nullable Bundle extras) {
+                mExtras = extras;
+                return this;
+            }
+
+            /**
              * Builds and returns the request object.
              */
             @NonNull
             public Request build() {
                 return new Request(mText, mStartIndex, mEndIndex,
-                        mDefaultLocales, mDarkLaunchAllowed);
+                        mDefaultLocales, mDarkLaunchAllowed,
+                        mExtras == null ? Bundle.EMPTY : mExtras.deepCopy());
             }
         }
 
@@ -319,6 +375,7 @@ public final class TextSelection implements Parcelable {
             if (mDefaultLocales != null) {
                 mDefaultLocales.writeToParcel(dest, flags);
             }
+            dest.writeBundle(mExtras);
         }
 
         public static final Parcelable.Creator<Request> CREATOR =
@@ -340,6 +397,7 @@ public final class TextSelection implements Parcelable {
             mEndIndex = in.readInt();
             mDefaultLocales = in.readInt() == 0 ? null : LocaleList.CREATOR.createFromParcel(in);
             mDarkLaunchAllowed = false;
+            mExtras = in.readBundle();
         }
     }
 
@@ -354,6 +412,7 @@ public final class TextSelection implements Parcelable {
         dest.writeInt(mEndIndex);
         mEntityConfidence.writeToParcel(dest, flags);
         dest.writeString(mId);
+        dest.writeBundle(mExtras);
     }
 
     public static final Parcelable.Creator<TextSelection> CREATOR =
@@ -374,5 +433,6 @@ public final class TextSelection implements Parcelable {
         mEndIndex = in.readInt();
         mEntityConfidence = EntityConfidence.CREATOR.createFromParcel(in);
         mId = in.readString();
+        mExtras = in.readBundle();
     }
 }
