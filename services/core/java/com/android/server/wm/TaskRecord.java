@@ -1960,7 +1960,7 @@ public class TaskRecord extends ConfigurationContainer implements TaskWindowCont
         info.stackId = getStackId();
         info.taskId = taskId;
         info.isRunning = getTopActivity() != null;
-        info.baseIntent = getBaseIntent();
+        info.baseIntent = new Intent(getBaseIntent());
         info.baseActivity = reuseActivitiesReport.base != null
                 ? reuseActivitiesReport.base.intent.getComponent()
                 : null;
