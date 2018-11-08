@@ -40,7 +40,6 @@ import android.hardware.usb.UsbConstants;
 import android.hardware.usb.UsbDevice;
 import android.hardware.usb.UsbInterface;
 import android.hardware.usb.UsbManager;
-import android.os.Binder;
 import android.os.UserHandle;
 import android.service.usb.UsbAccessoryAttachedActivities;
 import android.service.usb.UsbDeviceAttachedActivities;
@@ -190,9 +189,8 @@ class UsbUserSettingsManager {
                                          @Nullable UsbAccessory accessory,
                                          boolean canBeDefault,
                                          String packageName,
-                                         PendingIntent pi) {
-        final int uid = Binder.getCallingUid();
-
+                                         PendingIntent pi,
+                                         int uid) {
         // compare uid with packageName to foil apps pretending to be someone else
         try {
             ApplicationInfo aInfo = mPackageManager.getApplicationInfo(packageName, 0);
@@ -235,7 +233,8 @@ class UsbUserSettingsManager {
             }
         }
 
-        requestPermissionDialog(device, null, canBeDefault(device, packageName), packageName, pi);
+        requestPermissionDialog(device, null, canBeDefault(device, packageName), packageName, pi,
+                uid);
     }
 
     public void requestPermission(UsbAccessory accessory, String packageName, PendingIntent pi,
@@ -253,8 +252,8 @@ class UsbUserSettingsManager {
             return;
         }
 
-        requestPermissionDialog(null, accessory,
-                canBeDefault(accessory, packageName), packageName, pi);
+        requestPermissionDialog(null, accessory, canBeDefault(accessory, packageName), packageName,
+                pi, uid);
     }
 
     public void grantDevicePermission(UsbDevice device, int uid) {
