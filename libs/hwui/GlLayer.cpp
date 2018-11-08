@@ -72,5 +72,13 @@ void GlLayer::generateTexture() {
     }
 }
 
+SkBlendMode GlLayer::getMode() const {
+    if (texture.blend || mode != SkBlendMode::kSrcOver) {
+        return mode;
+    } else {
+        return SkBlendMode::kSrc;
+    }
+}
+
 };  // namespace uirenderer
 };  // namespace android
