@@ -1049,20 +1049,26 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
     boolean allResumedActivitiesIdle() {
         for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
+            // TODO(b/117135575): Check resumed activities on all visible stacks.
             final ActivityDisplay display = mActivityDisplays.get(displayNdx);
-            for (int stackNdx = display.getChildCount() - 1; stackNdx >= 0; --stackNdx) {
-                // We cannot only check the top stack on each display since there might have
-                // always-on-top stacks (e.g. pinned stack).
-                final ActivityStack stack = display.getChildAt(stackNdx);
-                if (stack.numActivities() == 0) {
-                    continue;
+            if (display.isSleeping()) {
+                // No resumed activities while display is sleeping.
+                continue;
+            }
+
+            // If the focused stack is not null or not empty, there should have some activities
+            // resuming or resumed. Make sure these activities are idle.
+            final ActivityStack stack = display.getFocusedStack();
+            if (stack == null || stack.numActivities() == 0) {
+                continue;
+            }
+            final ActivityRecord resumedActivity = stack.getResumedActivity();
+            if (resumedActivity == null || !resumedActivity.idle) {
+                if (DEBUG_STATES) {
+                    Slog.d(TAG_STATES, "allResumedActivitiesIdle: stack="
+                            + stack.mStackId + " " + resumedActivity + " not idle");
                 }
-                final ActivityRecord resumedActivity = stack.getResumedActivity();
-                if (resumedActivity != null && !resumedActivity.idle) {
-                    if (DEBUG_STATES) Slog.d(TAG_STATES, "allResumedActivitiesIdle: stack="
-                             + stack.mStackId + " " + resumedActivity + " not idle");
-                    return false;
-                }
+                return false;
             }
         }
         // Send launch end powerhint when idle
