@@ -1156,11 +1156,16 @@ public class FileUtils {
     public static @Nullable File createDir(File baseDir, String name) {
         final File dir = new File(baseDir, name);
 
+        return createDir(dir) ? dir : null;
+    }
+
+    /** @hide */
+    public static boolean createDir(File dir) {
         if (dir.exists()) {
-            return dir.isDirectory() ? dir : null;
+            return dir.isDirectory();
         }
 
-        return dir.mkdir() ? dir : null;
+        return dir.mkdir();
     }
 
     /**

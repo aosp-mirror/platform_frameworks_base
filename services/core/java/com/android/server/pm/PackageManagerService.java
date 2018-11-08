@@ -3257,9 +3257,8 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         // The base directory for the package parser cache lives under /data/system/.
-        final File cacheBaseDir = FileUtils.createDir(Environment.getDataSystemDirectory(),
-                "package_cache");
-        if (cacheBaseDir == null) {
+        final File cacheBaseDir = Environment.getPackageCacheDirectory();
+        if (!FileUtils.createDir(cacheBaseDir)) {
             return null;
         }
 
