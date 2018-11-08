@@ -57,9 +57,6 @@ public class BatterySaverPolicy extends ContentObserver {
 
     public static final boolean DEBUG = false; // DO NOT SUBMIT WITH TRUE.
 
-    // Secure setting for GPS behavior when battery saver mode is on.
-    public static final String SECURE_KEY_GPS_MODE = "batterySaverGpsMode";
-
     private static final String KEY_GPS_MODE = "gps_mode";
     private static final String KEY_VIBRATION_DISABLED = "vibration_disabled";
     private static final String KEY_ANIMATION_DISABLED = "animation_disabled";
@@ -289,10 +286,6 @@ public class BatterySaverPolicy extends ContentObserver {
             Slog.wtf(TAG, "Bad battery saver constants: " + setting);
         }
 
-        // Get default value from Settings.Secure
-        final int defaultGpsMode = Settings.Secure.getInt(mContentResolver, SECURE_KEY_GPS_MODE,
-                sDefaultPolicy.gpsMode);
-
         float adjustBrightnessFactor = parser.getFloat(KEY_ADJUST_BRIGHTNESS_FACTOR,
                 sDefaultPolicy.adjustBrightnessFactor);
         boolean deferFullBackup = parser.getBoolean(KEY_FULLBACKUP_DEFERRED,
@@ -322,7 +315,7 @@ public class BatterySaverPolicy extends ContentObserver {
                 sDefaultPolicy.forceAllAppsStandby);
         boolean forceBackgroundCheck = parser.getBoolean(KEY_FORCE_BACKGROUND_CHECK,
                 sDefaultPolicy.forceBackgroundCheck);
-        int gpsMode = parser.getInt(KEY_GPS_MODE, defaultGpsMode);
+        int gpsMode = parser.getInt(KEY_GPS_MODE, sDefaultPolicy.gpsMode);
         boolean sendTronLog = parser.getBoolean(KEY_SEND_TRON_LOG, sDefaultPolicy.sendTronLog);
 
         mCurrPolicy = new Policy(
