@@ -110,18 +110,20 @@ class Value {
   static constexpr Value Local(size_t id) { return Value{id, Kind::kLocalRegister}; }
   static constexpr Value Parameter(size_t id) { return Value{id, Kind::kParameter}; }
   static constexpr Value Immediate(size_t value) { return Value{value, Kind::kImmediate}; }
+  static constexpr Value String(size_t value) { return Value{value, Kind::kString}; }
   static constexpr Value Label(size_t id) { return Value{id, Kind::kLabel}; }
 
   bool is_register() const { return kind_ == Kind::kLocalRegister; }
   bool is_parameter() const { return kind_ == Kind::kParameter; }
   bool is_variable() const { return is_register() || is_parameter(); }
   bool is_immediate() const { return kind_ == Kind::kImmediate; }
+  bool is_string() const { return kind_ == Kind::kString; }
   bool is_label() const { return kind_ == Kind::kLabel; }
 
   size_t value() const { return value_; }
 
  private:
-  enum class Kind { kLocalRegister, kParameter, kImmediate, kLabel };
+  enum class Kind { kLocalRegister, kParameter, kImmediate, kString, kLabel };
 
   const size_t value_;
   const Kind kind_;
@@ -137,7 +139,7 @@ class Instruction {
  public:
   // The operation performed by this instruction. These are virtual instructions that do not
   // correspond exactly to DEX instructions.
-  enum class Op { kReturn, kMove, kInvokeVirtual, kBindLabel, kBranchEqz };
+  enum class Op { kReturn, kReturnObject, kMove, kInvokeVirtual, kBindLabel, kBranchEqz };
 
   ////////////////////////
   // Named Constructors //
@@ -210,16 +212,22 @@ class MethodBuilder {
 
   // return-void
   void BuildReturn();
-  void BuildReturn(Value src);
+  void BuildReturn(Value src, bool is_object = false);
   // const/4
   void BuildConst4(Value target, int value);
+  void BuildConstString(Value target, const std::string& value);
 
   // TODO: add builders for more instructions
 
  private:
   void EncodeInstructions();
   void EncodeInstruction(const Instruction& instruction);
-  void EncodeReturn(const Instruction& instruction);
+
+  // Encodes a return instruction. For instructions with no return value, the opcode field is
+  // ignored. Otherwise, this specifies which return instruction will be used (return,
+  // return-object, etc.)
+  void EncodeReturn(const Instruction& instruction, ::art::Instruction::Code opcode);
+
   void EncodeMove(const Instruction& instruction);
   void EncodeInvokeVirtual(const Instruction& instruction);
   void EncodeBranch(art::Instruction::Code op, const Instruction& instruction);
