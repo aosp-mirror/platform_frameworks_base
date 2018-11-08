@@ -1,0 +1,9 @@
+owner: Platform
+module: "android.uirenderer"
+prop {
+    api_name: "use_vulkan"
+    type: Boolean
+    prop_name: "ro.hwui.use_vulkan"
+    scope: Public
+    access: Readonly
+}
