@@ -19,6 +19,7 @@ package com.android.internal.telephony;
 import android.os.Parcel;
 import android.os.Parcelable;
 import android.telephony.CellInfo;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -103,6 +104,17 @@ public final class NetworkScanResult implements Parcelable {
         return (scanStatus == nsr.scanStatus
                 && scanError == nsr.scanError
                 && networkInfos.equals(nsr.networkInfos));
+    }
+
+    @Override
+    public String toString() {
+        return new StringBuilder()
+            .append("{")
+            .append("scanStatus=" + scanStatus)
+            .append(", scanError=" + scanError)
+            .append(", networkInfos=" + networkInfos)
+            .append("}")
+            .toString();
     }
 
     @Override
