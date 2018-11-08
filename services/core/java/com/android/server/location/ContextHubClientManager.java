@@ -24,7 +24,6 @@ import android.hardware.location.ContextHubInfo;
 import android.hardware.location.IContextHubClient;
 import android.hardware.location.IContextHubClientCallback;
 import android.hardware.location.NanoAppMessage;
-import android.os.RemoteException;
 import android.util.Log;
 
 import java.util.concurrent.ConcurrentHashMap;
@@ -201,6 +200,20 @@ import java.util.function.Consumer;
      */
     /* package */ void onNanoAppAborted(int contextHubId, long nanoAppId, int abortCode) {
         forEachClientOfHub(contextHubId, client -> client.onNanoAppAborted(nanoAppId, abortCode));
+    }
+
+    /**
+     * @param pendingIntent the PendingIntent to check
+     * @return true if the given PendingIntent is registered by a client, false otherwise
+     */
+    /* package */ boolean isPendingIntentRegistered(PendingIntent pendingIntent) {
+        for (ContextHubClientBroker broker : mHostEndPointIdToClientMap.values()) {
+            if (broker.hasPendingIntent(pendingIntent)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
     /**

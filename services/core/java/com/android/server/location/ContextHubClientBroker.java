@@ -211,6 +211,10 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
     @Override
     public boolean registerIntent(PendingIntent pendingIntent, long nanoAppId) {
         ContextHubServiceUtil.checkPermissions(mContext);
+        if (mClientManager.isPendingIntentRegistered(pendingIntent)) {
+            Log.e(TAG, "Failed to register PendingIntent: already registered");
+            return false;
+        }
 
         boolean success = false;
         synchronized (this) {
