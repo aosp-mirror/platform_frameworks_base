@@ -19,6 +19,8 @@ package android.os;
 import android.os.IThermalEventListener;
 import android.os.Temperature;
 
+import java.util.List;
+
 /**
  * {@hide}
  */
@@ -30,22 +32,29 @@ interface IThermalService {
       */
     void registerThermalEventListener(in IThermalEventListener listener);
     /**
+      * Register a listener for thermal events on given temperature type.
+      * @param listener the IThermalEventListener to be notified.
+      * @param type the temperature type IThermalEventListener to be notified.
+      * {@hide}
+      */
+    void registerThermalEventListenerWithType(in IThermalEventListener listener, in int type);
+    /**
       * Unregister a previously-registered listener for thermal events.
       * @param listener the IThermalEventListener to no longer be notified.
       * {@hide}
       */
     void unregisterThermalEventListener(in IThermalEventListener listener);
     /**
-      * Send a thermal throttling start/stop notification to all listeners.
-      * @param temperature the temperature at which the event was generated.
+      * Get current temperature with its throttling status.
+      * @return list of android.os.Temperature
       * {@hide}
       */
-    oneway void notifyThrottling(
-        in boolean isThrottling, in Temperature temperature);
+    List<Temperature> getCurrentTemperatures();
     /**
-      * Return whether system performance is currently thermal throttling.
-      * @return true if thermal throttling is currently in effect
+      * Get current temperature with its throttling status on given temperature type.
+      * @param type the temperature type to query.
+      * @return list of android.os.Temperature
       * {@hide}
       */
-    boolean isThrottling();
+    List<Temperature> getCurrentTemperaturesWithType(in int type);
 }

@@ -706,6 +706,8 @@ java_defaults {
         "android.hardware.contexthub-V1.0-java",
         "android.hardware.health-V1.0-java-constants",
         "android.hardware.thermal-V1.0-java-constants",
+        "android.hardware.thermal-V1.1-java",
+        "android.hardware.thermal-V2.0-java",
         "android.hardware.tv.input-V1.0-java-constants",
         "android.hardware.usb-V1.0-java-constants",
         "android.hardware.usb-V1.1-java-constants",

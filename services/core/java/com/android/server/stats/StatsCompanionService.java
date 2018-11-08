@@ -253,8 +253,8 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         if (b != null) {
             sThermalService = IThermalService.Stub.asInterface(b);
             try {
-                sThermalService.registerThermalEventListener(
-                        new ThermalEventListener());
+                sThermalService.registerThermalEventListenerWithType(
+                        new ThermalEventListener(), Temperature.TYPE_SKIN);
                 Slog.i(TAG, "register thermal listener successfully");
             } catch (RemoteException e) {
                 // Should never happen.
@@ -1853,7 +1853,8 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     // Thermal event received from vendor thermal management subsystem
     private static final class ThermalEventListener extends IThermalEventListener.Stub {
         @Override
-        public void notifyThrottling(boolean isThrottling, Temperature temp) {
+        public void notifyThrottling(Temperature temp) {
+            boolean isThrottling = temp.getStatus() >= Temperature.THROTTLING_SEVERE;
             StatsLog.write(StatsLog.THERMAL_THROTTLING, temp.getType(),
                     isThrottling ? 1 : 0, temp.getValue());
         }

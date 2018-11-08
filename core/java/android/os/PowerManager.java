@@ -477,6 +477,13 @@ public final class PowerManager {
     public static final String SHUTDOWN_BATTERY_THERMAL_STATE = "thermal,battery";
 
     /**
+     * The value to pass as the 'reason' argument to android_reboot() when device temperature
+     * is too high.
+     * @hide
+     */
+    public static final String SHUTDOWN_THERMAL_STATE = "thermal";
+
+    /**
      * The value to pass as the 'reason' argument to android_reboot() when device is running
      * critically low on battery.
      * @hide
