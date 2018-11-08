@@ -3173,7 +3173,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                     + " to its current displayId=" + displayId);
         }
 
-        stack.reparent(activityDisplay, onTop);
+        stack.reparent(activityDisplay, onTop, false /* displayRemoved */);
         // TODO(multi-display): resize stacks properly if moved from split-screen.
     }
 
@@ -4568,14 +4568,14 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     /**
      * Begin deferring resume to avoid duplicate resumes in one pass.
      */
-    private void beginDeferResume() {
+    void beginDeferResume() {
         mDeferResumeCount++;
     }
 
     /**
      * End deferring resume and determine if resume can be called.
      */
-    private void endDeferResume() {
+    void endDeferResume() {
         mDeferResumeCount--;
     }
 
