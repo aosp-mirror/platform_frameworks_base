@@ -30,6 +30,7 @@ import android.os.Process;
 import android.os.RemoteException;
 import android.os.ServiceManager;
 import android.os.UserHandle;
+import android.security.KeyStoreException;
 import android.security.keymaster.ExportResult;
 import android.security.keymaster.KeyCharacteristics;
 import android.security.keymaster.KeymasterArguments;
@@ -40,14 +41,21 @@ import android.security.keymaster.OperationResult;
 import android.security.keystore.KeyExpiredException;
 import android.security.keystore.KeyNotYetValidException;
 import android.security.keystore.KeyPermanentlyInvalidatedException;
+import android.security.keystore.KeyProperties;
+import android.security.keystore.KeyProtection;
 import android.security.keystore.StrongBoxUnavailableException;
 import android.security.keystore.UserNotAuthenticatedException;
 import android.util.Log;
-
+import com.android.org.bouncycastle.asn1.ASN1InputStream;
+import com.android.org.bouncycastle.asn1.pkcs.PrivateKeyInfo;
 import java.math.BigInteger;
+import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.security.InvalidKeyException;
 import java.util.List;
 import java.util.Locale;
+import sun.security.util.ObjectIdentifier;
+import sun.security.x509.AlgorithmId;
 
 /**
  * @hide This should not be made public in its present form because it
@@ -355,53 +363,6 @@ public class KeyStore {
         return isEmpty(UserHandle.myUserId());
     }
 
-    public boolean generate(String key, int uid, int keyType, int keySize, int flags,
-            byte[][] args) {
-        try {
-            return mBinder.generate(key, uid, keyType, keySize, flags,
-                    new KeystoreArguments(args)) == NO_ERROR;
-        } catch (RemoteException e) {
-            Log.w(TAG, "Cannot connect to keystore", e);
-            return false;
-        }
-    }
-
-    public boolean importKey(String keyName, byte[] key, int uid, int flags) {
-        try {
-            return mBinder.import_key(keyName, key, uid, flags) == NO_ERROR;
-        } catch (RemoteException e) {
-            Log.w(TAG, "Cannot connect to keystore", e);
-            return false;
-        }
-    }
-
-    public byte[] sign(String key, byte[] data) {
-        try {
-            return mBinder.sign(key, data);
-        } catch (RemoteException e) {
-            Log.w(TAG, "Cannot connect to keystore", e);
-            return null;
-        } catch (android.os.ServiceSpecificException e) {
-            Log.w(TAG, "KeyStore exception", e);
-            return null;
-        }
-
-    }
-
-    public boolean verify(String key, byte[] data, byte[] signature) {
-        try {
-            signature = signature != null ? signature : new byte[0];
-            return mBinder.verify(key, data, signature) == NO_ERROR;
-        } catch (RemoteException e) {
-            Log.w(TAG, "Cannot connect to keystore", e);
-            return false;
-        } catch (android.os.ServiceSpecificException e) {
-            Log.w(TAG, "KeyStore exception", e);
-            return false;
-        }
-
-    }
-
     public String grant(String key, int uid) {
         try {
             String grantAlias =  mBinder.grant(key, uid);
@@ -530,6 +491,65 @@ public class KeyStore {
         return importKey(alias, args, format, keyData, UID_SELF, flags, outCharacteristics);
     }
 
+    private String getAlgorithmFromPKCS8(byte[] keyData) {
+        try {
+            final ASN1InputStream bIn = new ASN1InputStream(new ByteArrayInputStream(keyData));
+            final PrivateKeyInfo pki = PrivateKeyInfo.getInstance(bIn.readObject());
+            final String algOid = pki.getPrivateKeyAlgorithm().getAlgorithm().getId();
+            return new AlgorithmId(new ObjectIdentifier(algOid)).getName();
+        } catch (IOException e) {
+            Log.e(TAG, "getAlgorithmFromPKCS8 Failed to parse key data");
+            Log.e(TAG, Log.getStackTraceString(e));
+            return null;
+        }
+    }
+
+    private KeymasterArguments makeLegacyArguments(String algorithm) {
+        KeymasterArguments args = new KeymasterArguments();
+        args.addEnum(KeymasterDefs.KM_TAG_ALGORITHM,
+                KeyProperties.KeyAlgorithm.toKeymasterAsymmetricKeyAlgorithm(algorithm));
+        args.addEnum(KeymasterDefs.KM_TAG_PURPOSE, KeymasterDefs.KM_PURPOSE_SIGN);
+        args.addEnum(KeymasterDefs.KM_TAG_PURPOSE, KeymasterDefs.KM_PURPOSE_VERIFY);
+        args.addEnum(KeymasterDefs.KM_TAG_PURPOSE, KeymasterDefs.KM_PURPOSE_ENCRYPT);
+        args.addEnum(KeymasterDefs.KM_TAG_PURPOSE, KeymasterDefs.KM_PURPOSE_DECRYPT);
+        args.addEnum(KeymasterDefs.KM_TAG_PADDING, KeymasterDefs.KM_PAD_NONE);
+        if (algorithm.equalsIgnoreCase(KeyProperties.KEY_ALGORITHM_RSA)) {
+            args.addEnum(KeymasterDefs.KM_TAG_PADDING, KeymasterDefs.KM_PAD_RSA_OAEP);
+            args.addEnum(KeymasterDefs.KM_TAG_PADDING, KeymasterDefs.KM_PAD_RSA_PKCS1_1_5_ENCRYPT);
+            args.addEnum(KeymasterDefs.KM_TAG_PADDING, KeymasterDefs.KM_PAD_RSA_PKCS1_1_5_SIGN);
+            args.addEnum(KeymasterDefs.KM_TAG_PADDING, KeymasterDefs.KM_PAD_RSA_PSS);
+        }
+        args.addEnum(KeymasterDefs.KM_TAG_DIGEST, KeymasterDefs.KM_DIGEST_NONE);
+        args.addEnum(KeymasterDefs.KM_TAG_DIGEST, KeymasterDefs.KM_DIGEST_MD5);
+        args.addEnum(KeymasterDefs.KM_TAG_DIGEST, KeymasterDefs.KM_DIGEST_SHA1);
+        args.addEnum(KeymasterDefs.KM_TAG_DIGEST, KeymasterDefs.KM_DIGEST_SHA_2_224);
+        args.addEnum(KeymasterDefs.KM_TAG_DIGEST, KeymasterDefs.KM_DIGEST_SHA_2_256);
+        args.addEnum(KeymasterDefs.KM_TAG_DIGEST, KeymasterDefs.KM_DIGEST_SHA_2_384);
+        args.addEnum(KeymasterDefs.KM_TAG_DIGEST, KeymasterDefs.KM_DIGEST_SHA_2_512);
+        args.addBoolean(KeymasterDefs.KM_TAG_NO_AUTH_REQUIRED);
+        args.addUnsignedLong(KeymasterDefs.KM_TAG_ORIGINATION_EXPIRE_DATETIME,
+                             KeymasterArguments.UINT64_MAX_VALUE);
+        args.addUnsignedLong(KeymasterDefs.KM_TAG_USAGE_EXPIRE_DATETIME,
+                             KeymasterArguments.UINT64_MAX_VALUE);
+        args.addUnsignedLong(KeymasterDefs.KM_TAG_ACTIVE_DATETIME, BigInteger.ZERO);
+        return args;
+    }
+
+    public boolean importKey(String alias, byte[] keyData, int uid, int flags) {
+        String algorithm = getAlgorithmFromPKCS8(keyData);
+        if (algorithm == null) return false;
+        KeymasterArguments args = makeLegacyArguments(algorithm);
+        KeyCharacteristics out = new KeyCharacteristics();
+        int result =  importKey(alias, args, KeymasterDefs.KM_KEY_FORMAT_PKCS8, keyData, uid,
+                                flags, out);
+        if (result != NO_ERROR) {
+            Log.e(TAG, Log.getStackTraceString(
+                    new KeyStoreException(result, "legacy key import failed")));
+            return false;
+        }
+        return true;
+    }
+
     public int importWrappedKey(String wrappedKeyAlias, byte[] wrappedKey,
             String wrappingKeyAlias,
             byte[] maskingKey, KeymasterArguments args, long rootSid, long fingerprintSid, int uid,
@@ -612,21 +632,6 @@ public class KeyStore {
         } catch (RemoteException e) {
             Log.w(TAG, "Cannot connect to keystore", e);
             return SYSTEM_ERROR;
-        }
-    }
-
-    /**
-     * Check if the operation referenced by {@code token} is currently authorized.
-     *
-     * @param token An operation token returned by a call to
-     * {@link #begin(String, int, boolean, KeymasterArguments, byte[], KeymasterArguments) begin}.
-     */
-    public boolean isOperationAuthorized(IBinder token) {
-        try {
-            return mBinder.isOperationAuthorized(token);
-        } catch (RemoteException e) {
-            Log.w(TAG, "Cannot connect to keystore", e);
-            return false;
         }
     }
 

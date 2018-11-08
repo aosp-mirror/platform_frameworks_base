@@ -1433,15 +1433,11 @@ Landroid/security/IKeystoreService;->exist(Ljava/lang/String;I)I
 Landroid/security/IKeystoreService;->generateKey(Ljava/lang/String;Landroid/security/keymaster/KeymasterArguments;[BIILandroid/security/keymaster/KeyCharacteristics;)I
 Landroid/security/IKeystoreService;->get(Ljava/lang/String;I)[B
 Landroid/security/IKeystoreService;->getState(I)I
-Landroid/security/IKeystoreService;->get_pubkey(Ljava/lang/String;)[B
-Landroid/security/IKeystoreService;->import_key(Ljava/lang/String;[BII)I
 Landroid/security/IKeystoreService;->insert(Ljava/lang/String;[BII)I
 Landroid/security/IKeystoreService;->is_hardware_backed(Ljava/lang/String;)I
 Landroid/security/IKeystoreService;->list(Ljava/lang/String;I)[Ljava/lang/String;
 Landroid/security/IKeystoreService;->reset()I
-Landroid/security/IKeystoreService;->sign(Ljava/lang/String;[B)[B
 Landroid/security/IKeystoreService;->ungrant(Ljava/lang/String;I)I
-Landroid/security/IKeystoreService;->verify(Ljava/lang/String;[B[B)I
 Landroid/security/keymaster/KeymasterBlobArgument;-><init>(ILandroid/os/Parcel;)V
 Landroid/security/keymaster/KeymasterBlobArgument;-><init>(I[B)V
 Landroid/security/keymaster/KeymasterBlobArgument;->blob:[B
