@@ -2588,6 +2588,18 @@
     <string name="config_customAdbPublicKeyConfirmationSecondaryUserComponent"
             >com.android.systemui/com.android.systemui.usb.UsbDebuggingSecondaryUserActivity</string>
 
+    <!-- Name of the activity or service that prompts the user to reject, accept, or whitelist
+         a wireless network for wireless debugging.
+         Can be customized for other product types -->
+    <string name="config_customAdbWifiNetworkConfirmationComponent"
+            >com.android.systemui/com.android.systemui.wifi.WifiDebuggingActivity</string>
+
+    <!-- Name of the activity that prompts the secondary user to acknowledge she/he needs to
+         switch to the primary user to enable wireless debugging.
+         Can be customized for other product types -->
+    <string name="config_customAdbWifiNetworkConfirmationSecondaryUserComponent"
+            >com.android.systemui/com.android.systemui.wifi.WifiDebuggingSecondaryUserActivity</string>
+
     <!-- Component name of the activity that shows the usb containment status. -->
     <string name="config_usbContaminantActivity" translatable="false"
             >com.android.systemui/com.android.systemui.usb.UsbContaminantActivity</string>
