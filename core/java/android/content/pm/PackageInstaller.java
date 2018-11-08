@@ -365,12 +365,14 @@ public class PackageInstaller {
      */
     public @NonNull Session openSession(int sessionId) throws IOException {
         try {
-            return new Session(mInstaller.openSession(sessionId));
+            try {
+                return new Session(mInstaller.openSession(sessionId));
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
         } catch (RuntimeException e) {
             ExceptionUtils.maybeUnwrapIOException(e);
             throw e;
-        } catch (RemoteException e) {
-            throw e.rethrowFromSystemServer();
         }
     }
 
@@ -769,9 +771,18 @@ public class PackageInstaller {
      * If an APK included in this session is already defined by the existing
      * installation (for example, the same split name), the APK in this session
      * will replace the existing APK.
+     * <p>
+     * In such a case that multiple packages need to be commited simultaneously,
+     * multiple sessions can be referenced by a single multi-package session.
+     * This session is created with no package name and calling
+     * {@link SessionParams#setMultiPackage()} with {@code true}. The
+     * individual session IDs can be added with {@link #addChildSessionId(int)}
+     * and commit of the multi-package session will result in all child sessions
+     * being committed atomically.
      */
     public static class Session implements Closeable {
-        private IPackageInstallerSession mSession;
+        /** {@hide} */
+        protected final IPackageInstallerSession mSession;
 
         /** {@hide} */
         public Session(IPackageInstallerSession session) {
@@ -1080,6 +1091,71 @@ public class PackageInstaller {
                 throw e.rethrowFromSystemServer();
             }
         }
+
+        /**
+         * @return {@code true} if this session will commit more than one package when it is
+         * committed.
+         */
+        public boolean isMultiPackage() {
+            try {
+                return mSession.isMultiPackage();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        /**
+         * @return the session ID of the multi-package session that this belongs to or
+         * {@link SessionInfo#INVALID_ID} if it does not belong to a multi-package session.
+         */
+        public int getParentSessionId() {
+            try {
+                return mSession.getParentSessionId();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        /**
+         * @return the set of session IDs that will be committed atomically when this session is
+         * committed if this is a multi-package session or null if none exist.
+         */
+        @NonNull
+        public int[] getChildSessionIds() {
+            try {
+                return mSession.getChildSessionIds();
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        /**
+         * Adds a session ID to the set of sessions that will be committed atomically
+         * when this session is committed.
+         *
+         * @param sessionId the session ID to add to this multi-package session.
+         */
+        public void addChildSessionId(int sessionId) {
+            try {
+                mSession.addChildSessionId(sessionId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
+
+        /**
+         * Removes a session ID from the set of sessions that will be committed
+         * atomically when this session is committed.
+         *
+         * @param sessionId the session ID to remove from this multi-package session.
+         */
+        public void removeChildSessionId(int sessionId) {
+            try {
+                mSession.removeChildSessionId(sessionId);
+            } catch (RemoteException e) {
+                throw e.rethrowFromSystemServer();
+            }
+        }
     }
 
     /**
@@ -1149,6 +1225,8 @@ public class PackageInstaller {
         public String[] grantedRuntimePermissions;
         /** {@hide} */
         public String installerPackageName;
+        /** {@hide} */
+        public boolean isMultiPackage;
 
         /**
          * Construct parameters for a new package install session.
@@ -1178,6 +1256,7 @@ public class PackageInstaller {
             volumeUuid = source.readString();
             grantedRuntimePermissions = source.readStringArray();
             installerPackageName = source.readString();
+            isMultiPackage = source.readBoolean();
         }
 
         /**
@@ -1392,6 +1471,18 @@ public class PackageInstaller {
             this.installerPackageName = installerPackageName;
         }
 
+        /**
+         * Set this session to be the parent of a multi-package install.
+         *
+         * A multi-package install session contains no APKs and only references other install
+         * sessions via ID. When a multi-package session is committed, all of its children
+         * are committed to the system in an atomic manner. If any children fail to install,
+         * all of them do, including the multi-package session.
+         */
+        public void setMultiPackage() {
+            this.isMultiPackage = true;
+        }
+
         /** {@hide} */
         public void dump(IndentingPrintWriter pw) {
             pw.printPair("mode", mode);
@@ -1408,6 +1499,7 @@ public class PackageInstaller {
             pw.printPair("volumeUuid", volumeUuid);
             pw.printPair("grantedRuntimePermissions", grantedRuntimePermissions);
             pw.printPair("installerPackageName", installerPackageName);
+            pw.printPair("isMultiPackage", isMultiPackage);
             pw.println();
         }
 
@@ -1433,6 +1525,7 @@ public class PackageInstaller {
             dest.writeString(volumeUuid);
             dest.writeStringArray(grantedRuntimePermissions);
             dest.writeString(installerPackageName);
+            dest.writeBoolean(isMultiPackage);
         }
 
         public static final Parcelable.Creator<SessionParams>
@@ -1454,6 +1547,12 @@ public class PackageInstaller {
      */
     public static class SessionInfo implements Parcelable {
 
+        /**
+         * A session ID that does not exist or is invalid.
+         */
+        public static final int INVALID_ID = -1;
+        /** {@hide} */
+        private static final int[] NO_SESSIONS = {};
         /** {@hide} */
         @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 115609023)
         public int sessionId;
@@ -1503,6 +1602,12 @@ public class PackageInstaller {
         public String[] grantedRuntimePermissions;
         /** {@hide} */
         public int installFlags;
+        /** {@hide} */
+        public boolean isMultiPackage;
+        /** {@hide} */
+        public int parentSessionId = INVALID_ID;
+        /** {@hide} */
+        public int[] childSessionIds = NO_SESSIONS;
 
         /** {@hide} */
         @UnsupportedAppUsage
@@ -1531,6 +1636,12 @@ public class PackageInstaller {
             referrerUri = source.readParcelable(null);
             grantedRuntimePermissions = source.readStringArray();
             installFlags = source.readInt();
+            isMultiPackage = source.readBoolean();
+            parentSessionId = source.readInt();
+            childSessionIds = source.createIntArray();
+            if (childSessionIds == null) {
+                childSessionIds = NO_SESSIONS;
+            }
         }
 
         /**
@@ -1784,6 +1895,30 @@ public class PackageInstaller {
             return createDetailsIntent();
         }
 
+        /**
+         * Returns true if this session is a multi-package session containing references to other
+         * sessions.
+         */
+        public boolean isMultiPackage() {
+            return isMultiPackage;
+        }
+
+        /**
+         * Returns the parent multi-package session ID if this session belongs to one,
+         * {@link #INVALID_ID} otherwise.
+         */
+        public int getParentSessionId() {
+            return parentSessionId;
+        }
+
+        /**
+         * Returns the set of session IDs that will be committed when this session is commited if
+         * this session is a multi-package session.
+         */
+        public int[] getChildSessionIds() {
+            return childSessionIds;
+        }
+
         @Override
         public int describeContents() {
             return 0;
@@ -1811,6 +1946,9 @@ public class PackageInstaller {
             dest.writeParcelable(referrerUri, flags);
             dest.writeStringArray(grantedRuntimePermissions);
             dest.writeInt(installFlags);
+            dest.writeBoolean(isMultiPackage);
+            dest.writeInt(parentSessionId);
+            dest.writeIntArray(childSessionIds);
         }
 
         public static final Parcelable.Creator<SessionInfo>
