@@ -94,15 +94,15 @@ TEST_F(IdmapTest, OverlaidResourceHasSameName) {
             target_table_.add(overlay_data_.data(), overlay_data_.size(), data_, data_size_));
 
   ResTable::resource_name res_name;
-  ASSERT_TRUE(target_table_.getResourceName(R::array::integerArray1, false, &res_name));
+  ASSERT_TRUE(target_table_.getResourceName(R::array::integerArray1, true, &res_name));
 
   ASSERT_TRUE(res_name.package != NULL);
   ASSERT_TRUE(res_name.type != NULL);
-  ASSERT_TRUE(res_name.name != NULL);
+  ASSERT_TRUE(res_name.name8 != NULL);
 
   EXPECT_EQ(String16("com.android.basic"), String16(res_name.package, res_name.packageLen));
   EXPECT_EQ(String16("array"), String16(res_name.type, res_name.typeLen));
-  EXPECT_EQ(String16("integerArray1"), String16(res_name.name, res_name.nameLen));
+  EXPECT_EQ(String8("integerArray1"), String8(res_name.name8, res_name.nameLen));
 }
 
 constexpr const uint32_t kNonOverlaidResourceId = 0x7fff0000u;
