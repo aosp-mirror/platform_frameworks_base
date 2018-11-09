@@ -4256,27 +4256,21 @@ public class WifiManager {
 
     /**
      * @return true if this device supports WPA3-Personal SAE
-     * @hide
      */
-    @SystemApi
     public boolean isWpa3SaeSupported() {
         return isFeatureSupported(WIFI_FEATURE_WPA3_SAE);
     }
 
     /**
      * @return true if this device supports WPA3-Enterprise Suite-B-192
-     * @hide
      */
-    @SystemApi
     public boolean isWpa3SuiteBSupported() {
         return isFeatureSupported(WIFI_FEATURE_WPA3_SUITE_B);
     }
 
     /**
      * @return true if this device supports Wi-Fi Enhanced Open (OWE)
-     * @hide
      */
-    @SystemApi
     public boolean isOweSupported() {
         return isFeatureSupported(WIFI_FEATURE_OWE);
     }
