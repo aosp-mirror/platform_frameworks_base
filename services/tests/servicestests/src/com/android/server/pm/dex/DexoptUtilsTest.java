@@ -353,6 +353,18 @@ public class DexoptUtilsTest {
     }
 
     @Test
+    public void testProcessContextForDexLoadNoClassPath() {
+        List<String> classLoaders = Arrays.asList(
+                DELEGATE_LAST_CLASS_LOADER_NAME,
+                PATH_CLASS_LOADER_NAME);
+        List<String> classPaths = Arrays.asList(
+                String.join(File.pathSeparator, "foo.dex", "bar.dex"),
+                null);
+        String[] context = DexoptUtils.processContextForDexLoad(classLoaders, classPaths);
+        assertNull(context);
+    }
+
+    @Test
     public void testProcessContextForDexLoadIllegalCallEmptyList() {
         boolean gotException = false;
         try {
