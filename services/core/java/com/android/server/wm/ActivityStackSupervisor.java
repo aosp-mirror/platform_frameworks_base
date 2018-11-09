@@ -59,6 +59,13 @@ import static android.view.Display.INVALID_DISPLAY;
 import static android.view.Display.TYPE_VIRTUAL;
 import static android.view.WindowManager.TRANSIT_DOCK_TASK_FROM_RECENTS;
 
+import static com.android.server.am.ActivityStackSupervisorProto.CONFIGURATION_CONTAINER;
+import static com.android.server.am.ActivityStackSupervisorProto.DISPLAYS;
+import static com.android.server.am.ActivityStackSupervisorProto.FOCUSED_STACK_ID;
+import static com.android.server.am.ActivityStackSupervisorProto.IS_HOME_RECENTS_COMPONENT;
+import static com.android.server.am.ActivityStackSupervisorProto.KEYGUARD_CONTROLLER;
+import static com.android.server.am.ActivityStackSupervisorProto.PENDING_ACTIVITIES;
+import static com.android.server.am.ActivityStackSupervisorProto.RESUMED_ACTIVITY;
 import static com.android.server.wm.ActivityStack.ActivityState.DESTROYED;
 import static com.android.server.wm.ActivityStack.ActivityState.INITIALIZING;
 import static com.android.server.wm.ActivityStack.ActivityState.PAUSED;
@@ -67,13 +74,6 @@ import static com.android.server.wm.ActivityStack.ActivityState.RESUMED;
 import static com.android.server.wm.ActivityStack.ActivityState.STOPPED;
 import static com.android.server.wm.ActivityStack.ActivityState.STOPPING;
 import static com.android.server.wm.ActivityStack.REMOVE_TASK_MODE_MOVING;
-import static com.android.server.am.ActivityStackSupervisorProto.CONFIGURATION_CONTAINER;
-import static com.android.server.am.ActivityStackSupervisorProto.DISPLAYS;
-import static com.android.server.am.ActivityStackSupervisorProto.FOCUSED_STACK_ID;
-import static com.android.server.am.ActivityStackSupervisorProto.IS_HOME_RECENTS_COMPONENT;
-import static com.android.server.am.ActivityStackSupervisorProto.KEYGUARD_CONTROLLER;
-import static com.android.server.am.ActivityStackSupervisorProto.PENDING_ACTIVITIES;
-import static com.android.server.am.ActivityStackSupervisorProto.RESUMED_ACTIVITY;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_ALL;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_IDLE;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_PAUSE;
@@ -1621,6 +1621,13 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
             // If a dead object exception was thrown -- fall through to
             // restart the application.
+        }
+
+        // Suppress transition until the new activity becomes ready, otherwise the keyguard can
+        // appear for a short amount of time before the new process with the new activity had the
+        // ability to set its showWhenLocked flags.
+        if (getKeyguardController().isKeyguardLocked()) {
+            r.notifyUnknownVisibilityLaunched();
         }
 
         // Post message to start process to avoid possible deadlock of calling into AMS with the
