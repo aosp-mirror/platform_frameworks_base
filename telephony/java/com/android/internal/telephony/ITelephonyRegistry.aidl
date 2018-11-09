@@ -25,7 +25,6 @@ import android.telephony.PhoneCapability;
 import android.telephony.PhysicalChannelConfig;
 import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
-import android.telephony.VoLteServiceState;
 import com.android.internal.telephony.IPhoneStateListener;
 import com.android.internal.telephony.IOnSubscriptionsChangedListener;
 
@@ -70,7 +69,7 @@ interface ITelephonyRegistry {
     void notifyPreciseDataConnectionFailed(String reason, String apnType, String apn,
             String failCause);
     void notifyCellInfoForSubscriber(in int subId, in List<CellInfo> cellInfo);
-    void notifyVoLteServiceStateChanged(in VoLteServiceState lteState);
+    void notifySrvccStateChanged(in int subId, in int lteState);
     void notifySimActivationStateChangedForPhoneId(in int phoneId, in int subId,
             int activationState, int activationType);
     void notifyOemHookRawEventForSubscriber(in int subId, in byte[] rawData);
