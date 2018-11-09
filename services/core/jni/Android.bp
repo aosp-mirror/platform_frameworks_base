@@ -96,7 +96,7 @@ cc_defaults {
         "libhwbinder",
         "libutils",
         "libhwui",
-        "libbpf",
+        "libbpf_android",
         "libnetdbpf",
         "libnetdutils",
         "android.hardware.audio.common@2.0",
