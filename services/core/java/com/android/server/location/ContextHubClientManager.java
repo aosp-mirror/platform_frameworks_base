@@ -112,6 +112,40 @@ import java.util.function.Consumer;
     }
 
     /**
+     * Registers a new client with the service.
+     *
+     * @param pendingIntent  the callback interface of the client to register
+     * @param contextHubInfo the object describing the hub this client is attached to
+     * @param nanoAppId      the ID of the nanoapp to receive Intent events for
+     *
+     * @return the client interface
+     *
+     * @throws IllegalArgumentException the PendingIntent was already registered for a different
+     *                                  ContextHubClient
+     * @throws IllegalStateException    if there were too many registered clients at the service
+     */
+    /* package */ IContextHubClient registerClient(
+            ContextHubInfo contextHubInfo, PendingIntent pendingIntent, long nanoAppId) {
+        ContextHubClientBroker broker;
+        String registerString = "Regenerated";
+        synchronized (this) {
+            broker = getClientBroker(contextHubInfo.getId(), pendingIntent, nanoAppId);
+
+            if (broker == null) {
+                short hostEndPointId = getHostEndPointId();
+                broker = new ContextHubClientBroker(
+                        mContext, mContextHubProxy, this /* clientManager */, contextHubInfo,
+                        hostEndPointId, pendingIntent, nanoAppId);
+                mHostEndPointIdToClientMap.put(hostEndPointId, broker);
+                registerString = "Registered";
+            }
+        }
+
+        Log.d(TAG, registerString + " client with host endpoint ID " + broker.getHostEndPointId());
+        return IContextHubClient.Stub.asInterface(broker);
+    }
+
+    /**
      * Handles a message sent from a nanoapp.
      *
      * @param contextHubId the ID of the hub where the nanoapp sent the message from
@@ -187,20 +221,6 @@ import java.util.function.Consumer;
     }
 
     /**
-     * @param pendingIntent the PendingIntent to check
-     * @return true if the given PendingIntent is registered by a client, false otherwise
-     */
-    /* package */ boolean isPendingIntentRegistered(PendingIntent pendingIntent) {
-        for (ContextHubClientBroker broker : mHostEndPointIdToClientMap.values()) {
-            if (broker.hasPendingIntent(pendingIntent)) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
-    /**
      * Returns an available host endpoint ID.
      *
      * @returns an available host endpoint ID
@@ -256,9 +276,10 @@ import java.util.function.Consumer;
      * @param contextHubId  the ID of the Context Hub the client is attached to
      * @return the matching ContextHubClientBroker, null if not found
      */
-    private ContextHubClientBroker getClientBroker(PendingIntent pendingIntent, int contextHubId) {
+    private ContextHubClientBroker getClientBroker(
+            int contextHubId, PendingIntent pendingIntent, long nanoAppId) {
         for (ContextHubClientBroker broker : mHostEndPointIdToClientMap.values()) {
-            if (broker.hasPendingIntent(pendingIntent)
+            if (broker.hasPendingIntent(pendingIntent, nanoAppId)
                     && broker.getAttachedContextHubId() == contextHubId) {
                 return broker;
             }

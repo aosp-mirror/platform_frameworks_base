@@ -834,7 +834,21 @@ public final class ContextHubManager {
     @RequiresPermission(android.Manifest.permission.LOCATION_HARDWARE)
     @NonNull public ContextHubClient createClient(
             @NonNull ContextHubInfo hubInfo, @NonNull PendingIntent pendingIntent, long nanoAppId) {
-        throw new UnsupportedOperationException("Not implemented yet");
+        Preconditions.checkNotNull(pendingIntent);
+        Preconditions.checkNotNull(hubInfo);
+
+        ContextHubClient client = new ContextHubClient(hubInfo);
+
+        IContextHubClient clientProxy;
+        try {
+            clientProxy = mService.createPendingIntentClient(
+                    hubInfo.getId(), pendingIntent, nanoAppId);
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+
+        client.setClientProxy(clientProxy);
+        return client;
     }
 
     /**
