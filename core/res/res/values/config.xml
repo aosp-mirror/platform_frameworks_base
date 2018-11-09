@@ -2793,7 +2793,7 @@
         <item>LPP_PROFILE=0</item>
         <item>USE_EMERGENCY_PDN_FOR_EMERGENCY_SUPL=1</item>
         <item>A_GLONASS_POS_PROTOCOL_SELECT=0</item>
-        <item>GPS_LOCK=0</item>
+        <item>GPS_LOCK=3</item>
     </string-array>
 
     <!-- Sprint need a 70 ms delay for 3way call -->
