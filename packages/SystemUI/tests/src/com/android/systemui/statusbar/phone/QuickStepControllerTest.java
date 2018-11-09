@@ -38,6 +38,7 @@ import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
+import android.content.Context;
 import com.android.systemui.R;
 import com.android.systemui.recents.OverviewProxyService;
 import com.android.systemui.shared.recents.IOverviewProxy;
@@ -472,8 +473,11 @@ public class QuickStepControllerTest extends SysuiTestCase {
 
     @Test
     public void testHitTargetDragged() throws Exception {
+        final int navbarWidth = 1000;
+        final int navbarHeight = 1000;
         ButtonDispatcher button = mock(ButtonDispatcher.class);
-        View buttonView = spy(new View(mContext));
+        FakeLocationView buttonView = spy(new FakeLocationView(mContext, navbarWidth / 2,
+                navbarHeight / 2));
         doReturn(buttonView).when(button).getCurrentView();
 
         NavigationGestureAction action = mockAction(true);
@@ -484,6 +488,8 @@ public class QuickStepControllerTest extends SysuiTestCase {
         doReturn(true).when(action).requiresDragWithHitTarget();
         doReturn(HIT_TARGET_HOME).when(mNavigationBarView).getDownHitTarget();
         doReturn(button).when(mNavigationBarView).getHomeButton();
+        doReturn(navbarWidth).when(mNavigationBarView).getWidth();
+        doReturn(navbarHeight).when(mNavigationBarView).getHeight();
 
         // Portrait
         assertGestureDragsHitTargetAllDirections(buttonView, false /* isRTL */, NAV_BAR_BOTTOM);
@@ -614,5 +620,22 @@ public class QuickStepControllerTest extends SysuiTestCase {
         assertFalse(touch(MotionEvent.ACTION_UP, x2, y2));
         assertNull(mController.getCurrentAction());
         verify(action, times(1)).endGesture();
+    }
+
+    static class FakeLocationView extends View {
+        private final int mX;
+        private final int mY;
+
+        public FakeLocationView(Context context, int x, int y) {
+            super(context);
+            mX = x;
+            mY = y;
+        }
+
+        @Override
+        public void getLocationInWindow(int[] outLocation) {
+            outLocation[0] = mX;
+            outLocation[1] = mY;
+        }
     }
 }
