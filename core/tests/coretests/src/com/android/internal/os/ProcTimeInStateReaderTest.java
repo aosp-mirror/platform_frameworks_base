@@ -70,6 +70,23 @@ public class ProcTimeInStateReaderTest {
     }
 
     @Test
+    public void testHeaderFormat() throws IOException {
+        final Path initialTimeInStateFile = mProcDirectory.toPath().resolve(
+                "initial-time-in-state");
+        Files.write(initialTimeInStateFile, "header1\n1 2\nheader2:\n3 4\n5 6\n7 8\n".getBytes());
+        final ProcTimeInStateReader reader = new ProcTimeInStateReader(initialTimeInStateFile);
+
+        assertArrayEquals(
+                "Reported frequencies are correct",
+                new long[]{1, 3, 5, 7},
+                reader.getFrequenciesKhz());
+        assertArrayEquals(
+                "Reported usage times are correct",
+                new long[]{20, 40, 60, 80},
+                reader.getUsageTimesMillis(initialTimeInStateFile));
+    }
+
+    @Test
     public void testDifferentFile() throws IOException {
         Path initialTimeInStateFile = mProcDirectory.toPath().resolve("initial-time-in-state");
         Files.write(initialTimeInStateFile, "1 2\n3 4\n5 6\n7 8\n".getBytes());
