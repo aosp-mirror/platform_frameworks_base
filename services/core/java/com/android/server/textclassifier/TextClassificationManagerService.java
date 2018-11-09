@@ -28,18 +28,22 @@ import android.os.Binder;
 import android.os.IBinder;
 import android.os.RemoteException;
 import android.os.UserHandle;
+import android.service.textclassifier.IConversationActionsCallback;
 import android.service.textclassifier.ITextClassificationCallback;
 import android.service.textclassifier.ITextClassifierService;
+import android.service.textclassifier.ITextLanguageCallback;
 import android.service.textclassifier.ITextLinksCallback;
 import android.service.textclassifier.ITextSelectionCallback;
 import android.service.textclassifier.TextClassifierService;
 import android.util.Slog;
 import android.util.SparseArray;
+import android.view.textclassifier.ConversationActions;
 import android.view.textclassifier.SelectionEvent;
 import android.view.textclassifier.TextClassification;
 import android.view.textclassifier.TextClassificationContext;
 import android.view.textclassifier.TextClassificationManager;
 import android.view.textclassifier.TextClassificationSessionId;
+import android.view.textclassifier.TextLanguage;
 import android.view.textclassifier.TextLinks;
 import android.view.textclassifier.TextSelection;
 
@@ -205,6 +209,50 @@ public final class TextClassificationManagerService extends ITextClassifierServi
                 userState.mPendingRequests.add(new PendingRequest(
                         () -> onSelectionEvent(sessionId, event),
                         null /* onServiceFailure */, null /* binder */, this, userState));
+            }
+        }
+    }
+
+    @Override
+    public void onDetectLanguage(
+            TextClassificationSessionId sessionId,
+            TextLanguage.Request request,
+            ITextLanguageCallback callback) throws RemoteException {
+        Preconditions.checkNotNull(request);
+        Preconditions.checkNotNull(callback);
+
+        synchronized (mLock) {
+            UserState userState = getCallingUserStateLocked();
+            if (!userState.bindLocked()) {
+                callback.onFailure();
+            } else if (userState.isBoundLocked()) {
+                userState.mService.onDetectLanguage(sessionId, request, callback);
+            } else {
+                userState.mPendingRequests.add(new PendingRequest(
+                        () -> onDetectLanguage(sessionId, request, callback),
+                        callback::onFailure, callback.asBinder(), this, userState));
+            }
+        }
+    }
+
+    @Override
+    public void onSuggestConversationActions(
+            TextClassificationSessionId sessionId,
+            ConversationActions.Request request,
+            IConversationActionsCallback callback) throws RemoteException {
+        Preconditions.checkNotNull(request);
+        Preconditions.checkNotNull(callback);
+
+        synchronized (mLock) {
+            UserState userState = getCallingUserStateLocked();
+            if (!userState.bindLocked()) {
+                callback.onFailure();
+            } else if (userState.isBoundLocked()) {
+                userState.mService.onSuggestConversationActions(sessionId, request, callback);
+            } else {
+                userState.mPendingRequests.add(new PendingRequest(
+                        () -> onSuggestConversationActions(sessionId, request, callback),
+                        callback::onFailure, callback.asBinder(), this, userState));
             }
         }
     }

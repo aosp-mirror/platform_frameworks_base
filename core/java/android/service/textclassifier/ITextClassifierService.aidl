@@ -16,14 +16,18 @@
 
 package android.service.textclassifier;
 
+import android.service.textclassifier.IConversationActionsCallback;
 import android.service.textclassifier.ITextClassificationCallback;
+import android.service.textclassifier.ITextLanguageCallback;
 import android.service.textclassifier.ITextLinksCallback;
 import android.service.textclassifier.ITextSelectionCallback;
+import android.view.textclassifier.ConversationActions;
 import android.view.textclassifier.SelectionEvent;
 import android.view.textclassifier.TextClassification;
 import android.view.textclassifier.TextClassificationContext;
 import android.view.textclassifier.TextClassificationSessionId;
 import android.view.textclassifier.TextLinks;
+import android.view.textclassifier.TextLanguage;
 import android.view.textclassifier.TextSelection;
 
 /**
@@ -58,4 +62,14 @@ oneway interface ITextClassifierService {
 
     void onDestroyTextClassificationSession(
             in TextClassificationSessionId sessionId);
+
+    void onDetectLanguage(
+            in TextClassificationSessionId sessionId,
+            in TextLanguage.Request request,
+            in ITextLanguageCallback callback);
+
+    void onSuggestConversationActions(
+            in TextClassificationSessionId sessionId,
+            in ConversationActions.Request request,
+            in IConversationActionsCallback callback);
 }
