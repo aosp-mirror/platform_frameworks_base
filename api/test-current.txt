@@ -599,6 +599,7 @@ package android.content {
     method public void setAutofillOptions(@Nullable android.content.AutofillOptions);
     method public void setContentCaptureOptions(@Nullable android.content.ContentCaptureOptions);
     field public static final String ROLLBACK_SERVICE = "rollback";
+    field public static final String TEST_NETWORK_SERVICE = "test_network";
   }
 
   public class ContextWrapper extends android.content.Context {

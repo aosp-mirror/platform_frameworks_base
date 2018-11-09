@@ -299,6 +299,15 @@ public class ConnectivityService extends IConnectivityManager.Stub
     private INetworkPolicyManager mPolicyManager;
     private NetworkPolicyManagerInternal mPolicyManagerInternal;
 
+    /**
+     * TestNetworkService (lazily) created upon first usage. Locked to prevent creation of multiple
+     * instances.
+     */
+    @GuardedBy("mTNSLock")
+    private TestNetworkService mTNS;
+
+    private final Object mTNSLock = new Object();
+
     private String mCurrentTcpBufferSizes;
 
     private static final SparseArray<String> sMagicDecoderRing = MessageUtils.findMessageNames(
@@ -6956,6 +6965,24 @@ public class ConnectivityService extends IConnectivityManager.Stub
         synchronized (mVpns) {
             Vpn vpn = getVpnIfOwner();
             return vpn != null && vpn.getLockdown();
+        }
+    }
+
+    /**
+     * Returns a IBinder to a TestNetworkService. Will be lazily created as needed.
+     *
+     * <p>The TestNetworkService must be run in the system server due to TUN creation.
+     */
+    @Override
+    public IBinder startOrGetTestNetworkService() {
+        synchronized (mTNSLock) {
+            TestNetworkService.enforceTestNetworkPermissions(mContext);
+
+            if (mTNS == null) {
+                mTNS = new TestNetworkService(mContext, mNMS);
+            }
+
+            return mTNS;
         }
     }
 }
