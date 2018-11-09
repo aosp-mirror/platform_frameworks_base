@@ -619,6 +619,11 @@ public class HdmiControlService extends SystemService {
                     break;
                 case Global.HDMI_CEC_SWITCH_ENABLED:
                     if (isAudioSystemDevice()) {
+                        if (audioSystem() == null) {
+                            Slog.w(TAG, "Switch device has not registered yet."
+                                    + " Can't turn routing on.");
+                            break;
+                        }
                         audioSystem().setRoutingControlFeatureEnables(enabled);
                     }
                     break;
