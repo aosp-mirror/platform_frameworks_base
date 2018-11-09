@@ -413,6 +413,12 @@ public abstract class ImsFeature {
      */
     public final void addCapabilityCallback(IImsCapabilityCallback c) {
         mCapabilityCallbacks.register(c);
+        try {
+            // Notify the Capability callback that was just registered of the current capabilities.
+            c.onCapabilitiesStatusChanged(queryCapabilityStatus().mCapabilities);
+        } catch (RemoteException e) {
+            Log.w(LOG_TAG, "addCapabilityCallback: error accessing callback: " + e.getMessage());
+        }
     }
 
     /**
