@@ -104,12 +104,18 @@ public class RoleManagerService extends SystemService {
     @Override
     public void onStart() {
         publishBinderService(Context.ROLE_SERVICE, new Stub());
+        //TODO add watch for new user creation and run default grants for them
     }
 
     @Override
     public void onStartUser(@UserIdInt int userId) {
         synchronized (mLock) {
+            //TODO only call into PermissionController if it or system upgreaded (for boot time)
+            // (add package changes watch;
+            //     we can detect upgrade using build fingerprint and app version)
             getUserStateLocked(userId);
+            //TODO call permission grant policy here
+            Slog.i(LOG_TAG, "Granting default permissions...");
         }
     }
 
