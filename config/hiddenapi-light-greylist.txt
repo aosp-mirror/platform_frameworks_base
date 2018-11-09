@@ -3567,7 +3567,6 @@ Lcom/android/internal/telephony/SubscriptionController;->getDefaultDataSubId()I
 Lcom/android/internal/telephony/SubscriptionController;->getDefaultSmsSubId()I
 Lcom/android/internal/telephony/SubscriptionController;->getDefaultSubId()I
 Lcom/android/internal/telephony/SubscriptionController;->getDefaultVoiceSubId()I
-Lcom/android/internal/telephony/SubscriptionController;->getDummySubIds(I)[I
 Lcom/android/internal/telephony/SubscriptionController;->getInstance()Lcom/android/internal/telephony/SubscriptionController;
 Lcom/android/internal/telephony/SubscriptionController;->getPhoneId(I)I
 Lcom/android/internal/telephony/SubscriptionController;->getSubId(I)[I
