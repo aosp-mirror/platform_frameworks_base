@@ -16,8 +16,6 @@
 
 package com.android.systemui.statusbar.notification;
 
-import static com.android.systemui.statusbar.ExpandableNotificationRow
-        .DEFAULT_HEADER_VISIBLE_AMOUNT;
 import static com.android.systemui.statusbar.notification.TransformState.TRANSFORM_Y;
 
 import android.app.Notification;
@@ -125,9 +123,6 @@ public class NotificationHeaderViewWrapper extends NotificationViewWrapper {
 
         // Reinspect the notification.
         resolveHeaderViews();
-        if (row.getHeaderVisibleAmount() != DEFAULT_HEADER_VISIBLE_AMOUNT) {
-            setHeaderVisibleAmount(row.getHeaderVisibleAmount());
-        }
         updateTransformedTypes();
         addRemainingTransformTypes();
         updateCropToPaddingForImageViews();
