@@ -69,13 +69,12 @@ public:
     ANDROID_API bool loadSystemProperties();
     ANDROID_API void setName(const char* name);
 
-    ANDROID_API void initialize(const sp<Surface>& surface);
-    ANDROID_API void allocateBuffers(const sp<Surface>& surface);
-    ANDROID_API void updateSurface(const sp<Surface>& surface);
-    ANDROID_API bool pauseSurface(const sp<Surface>& surface);
+    ANDROID_API void setSurface(const sp<Surface>& surface);
+    ANDROID_API void allocateBuffers();
+    ANDROID_API bool pause();
     ANDROID_API void setStopped(bool stopped);
-    ANDROID_API void setup(float lightRadius, uint8_t ambientShadowAlpha, uint8_t spotShadowAlpha);
-    ANDROID_API void setLightCenter(const Vector3& lightCenter);
+    ANDROID_API void setLightAlpha(uint8_t ambientShadowAlpha, uint8_t spotShadowAlpha);
+    ANDROID_API void setLightGeometry(const Vector3& lightCenter, float lightRadius);
     ANDROID_API void setOpaque(bool opaque);
     ANDROID_API void setWideGamut(bool wideGamut);
     ANDROID_API int64_t* frameInfo();

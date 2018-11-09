@@ -3240,7 +3240,7 @@ android.view.FocusFinder$1
 android.view.FocusFinder$FocusSorter
 android.view.FocusFinder$UserSpecifiedFocusComparator
 android.view.FocusFinder$UserSpecifiedFocusComparator$NextFocusGetter
-android.view.FrameInfo
+android.graphics.FrameInfo
 android.view.FrameMetrics
 android.view.FrameMetricsObserver
 android.view.FrameStats

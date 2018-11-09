@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package android.view;
+package android.graphics;
 
 import android.annotation.LongDef;
 
@@ -33,14 +33,14 @@ import java.lang.annotation.RetentionPolicy;
  * long layout & measure took it's displayListRecordStart - performTraversalsStart.
  *
  * These constants must be kept in sync with FrameInfo.h in libhwui and are
- * used for indexing into AttachInfo's mFrameInfo long[], which is intended
+ * used for indexing into AttachInfo's frameInfo long[], which is intended
  * to be quick to pass down to native via JNI, hence a pre-packed format
  *
  * @hide
  */
-final class FrameInfo {
+public final class FrameInfo {
 
-    long[] mFrameInfo = new long[9];
+    public long[] frameInfo = new long[9];
 
     // Various flags set to provide extra metadata about the current frame
     private static final int FLAGS = 0;
@@ -48,8 +48,11 @@ final class FrameInfo {
     // Is this the first-draw following a window layout?
     public static final long FLAG_WINDOW_LAYOUT_CHANGED = 1;
 
+    // A renderer associated with just a Surface, not with a ViewRootImpl instance.
+    public static final long FLAG_SURFACE_CANVAS = 1 << 2;
+
     @LongDef(flag = true, value = {
-            FLAG_WINDOW_LAYOUT_CHANGED })
+            FLAG_WINDOW_LAYOUT_CHANGED, FLAG_SURFACE_CANVAS })
     @Retention(RetentionPolicy.SOURCE)
     public @interface FrameInfoFlags {}
 
@@ -78,41 +81,48 @@ final class FrameInfo {
     // When View:draw() started
     private static final int DRAW_START = 8;
 
+    /** checkstyle */
     public void setVsync(long intendedVsync, long usedVsync) {
-        mFrameInfo[INTENDED_VSYNC] = intendedVsync;
-        mFrameInfo[VSYNC] = usedVsync;
-        mFrameInfo[OLDEST_INPUT_EVENT] = Long.MAX_VALUE;
-        mFrameInfo[NEWEST_INPUT_EVENT] = 0;
-        mFrameInfo[FLAGS] = 0;
+        frameInfo[INTENDED_VSYNC] = intendedVsync;
+        frameInfo[VSYNC] = usedVsync;
+        frameInfo[OLDEST_INPUT_EVENT] = Long.MAX_VALUE;
+        frameInfo[NEWEST_INPUT_EVENT] = 0;
+        frameInfo[FLAGS] = 0;
     }
 
+    /** checkstyle */
     public void updateInputEventTime(long inputEventTime, long inputEventOldestTime) {
-        if (inputEventOldestTime < mFrameInfo[OLDEST_INPUT_EVENT]) {
-            mFrameInfo[OLDEST_INPUT_EVENT] = inputEventOldestTime;
+        if (inputEventOldestTime < frameInfo[OLDEST_INPUT_EVENT]) {
+            frameInfo[OLDEST_INPUT_EVENT] = inputEventOldestTime;
         }
-        if (inputEventTime > mFrameInfo[NEWEST_INPUT_EVENT]) {
-            mFrameInfo[NEWEST_INPUT_EVENT] = inputEventTime;
+        if (inputEventTime > frameInfo[NEWEST_INPUT_EVENT]) {
+            frameInfo[NEWEST_INPUT_EVENT] = inputEventTime;
         }
     }
 
+    /** checkstyle */
     public void markInputHandlingStart() {
-        mFrameInfo[HANDLE_INPUT_START] = System.nanoTime();
+        frameInfo[HANDLE_INPUT_START] = System.nanoTime();
     }
 
+    /** checkstyle */
     public void markAnimationsStart() {
-        mFrameInfo[ANIMATION_START] = System.nanoTime();
+        frameInfo[ANIMATION_START] = System.nanoTime();
     }
 
+    /** checkstyle */
     public void markPerformTraversalsStart() {
-        mFrameInfo[PERFORM_TRAVERSALS_START] = System.nanoTime();
+        frameInfo[PERFORM_TRAVERSALS_START] = System.nanoTime();
     }
 
+    /** checkstyle */
     public void markDrawStart() {
-        mFrameInfo[DRAW_START] = System.nanoTime();
+        frameInfo[DRAW_START] = System.nanoTime();
     }
 
+    /** checkstyle */
     public void addFlags(@FrameInfoFlags long flags) {
-        mFrameInfo[FLAGS] |= flags;
+        frameInfo[FLAGS] |= flags;
     }
 
 }

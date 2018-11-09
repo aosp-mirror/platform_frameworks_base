@@ -21,6 +21,7 @@ import static android.view.DisplayEventReceiver.VSYNC_SOURCE_SURFACE_FLINGER;
 
 import android.annotation.TestApi;
 import android.annotation.UnsupportedAppUsage;
+import android.graphics.FrameInfo;
 import android.hardware.display.DisplayManagerGlobal;
 import android.os.Build;
 import android.os.Handler;

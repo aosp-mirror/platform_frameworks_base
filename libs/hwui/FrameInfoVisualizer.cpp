@@ -66,6 +66,7 @@ static int dpToPx(int dp, float density) {
 
 FrameInfoVisualizer::FrameInfoVisualizer(FrameInfoSource& source) : mFrameSource(source) {
     setDensity(1);
+    consumeProperties();
 }
 
 FrameInfoVisualizer::~FrameInfoVisualizer() {

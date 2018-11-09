@@ -180,14 +180,20 @@ void CanvasContext::setStopped(bool stopped) {
     }
 }
 
-void CanvasContext::setup(float lightRadius, uint8_t ambientShadowAlpha, uint8_t spotShadowAlpha) {
-    mLightGeometry.radius = lightRadius;
+void CanvasContext::allocateBuffers() {
+    if (mNativeSurface) {
+        mNativeSurface->allocateBuffers();
+    }
+}
+
+void CanvasContext::setLightAlpha(uint8_t ambientShadowAlpha, uint8_t spotShadowAlpha) {
     mLightInfo.ambientShadowAlpha = ambientShadowAlpha;
     mLightInfo.spotShadowAlpha = spotShadowAlpha;
 }
 
-void CanvasContext::setLightCenter(const Vector3& lightCenter) {
+void CanvasContext::setLightGeometry(const Vector3& lightCenter, float lightRadius) {
     mLightGeometry.center = lightCenter;
+    mLightGeometry.radius = lightRadius;
 }
 
 void CanvasContext::setOpaque(bool opaque) {

@@ -113,9 +113,10 @@ public:
     bool pauseSurface();
     void setStopped(bool stopped);
     bool hasSurface() { return mNativeSurface.get(); }
+    void allocateBuffers();
 
-    void setup(float lightRadius, uint8_t ambientShadowAlpha, uint8_t spotShadowAlpha);
-    void setLightCenter(const Vector3& lightCenter);
+    void setLightAlpha(uint8_t ambientShadowAlpha, uint8_t spotShadowAlpha);
+    void setLightGeometry(const Vector3& lightCenter, float lightRadius);
     void setOpaque(bool opaque);
     void setWideGamut(bool wideGamut);
     bool makeCurrent();

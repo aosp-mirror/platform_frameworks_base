@@ -46,6 +46,8 @@ import android.content.res.Resources;
 import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.Color;
+import android.graphics.FrameInfo;
+import android.graphics.HardwareRenderer.FrameDrawingCallback;
 import android.graphics.Matrix;
 import android.graphics.PixelFormat;
 import android.graphics.Point;
@@ -84,7 +86,6 @@ import android.util.TimeUtils;
 import android.util.TypedValue;
 import android.view.Surface.OutOfResourcesException;
 import android.view.SurfaceControl.Transaction;
-import android.view.ThreadedRenderer.FrameDrawingCallback;
 import android.view.View.AttachInfo;
 import android.view.View.FocusDirection;
 import android.view.View.MeasureSpec;
@@ -2148,7 +2149,7 @@ public final class ViewRootImpl implements ViewParent,
                     // relayoutWindow may decide to destroy mSurface. As that decision
                     // happens in WindowManager service, we need to be defensive here
                     // and stop using the surface in case it gets destroyed.
-                    if (mAttachInfo.mThreadedRenderer.pauseSurface(mSurface)) {
+                    if (mAttachInfo.mThreadedRenderer.pause()) {
                         // Animations were running so we need to push a frame
                         // to resume them
                         mDirty.set(0, 0, mWidth, mHeight);
@@ -2266,7 +2267,7 @@ public final class ViewRootImpl implements ViewParent,
                                         & View.PFLAG_REQUEST_TRANSPARENT_REGIONS) == 0) {
                                     // Don't pre-allocate if transparent regions
                                     // are requested as they may not be needed
-                                    mAttachInfo.mThreadedRenderer.allocateBuffers(mSurface);
+                                    mAttachInfo.mThreadedRenderer.allocateBuffers();
                                 }
                             } catch (OutOfResourcesException e) {
                                 handleOutOfResourcesException(e);
