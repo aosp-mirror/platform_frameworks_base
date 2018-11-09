@@ -65,6 +65,15 @@ public class MetricsFeatureProvider {
         }
     }
 
+    /**
+     * Logs a generic Settings event.
+     */
+    public void action(int attribution, int action, int pageId, String key, int value) {
+        for (LogWriter writer : mLoggerWriters) {
+            writer.action(attribution, action, pageId, key, value);
+        }
+    }
+
     public void action(Context context, int category, int value) {
         for (LogWriter writer : mLoggerWriters) {
             writer.action(context, category, value);
