@@ -16,6 +16,7 @@
 
 package android.app;
 
+import android.annotation.TestApi;
 import android.content.Intent;
 import android.os.Bundle;
 
@@ -24,7 +25,9 @@ import android.os.Bundle;
  *
  * @hide
  */
+@TestApi
 public class AppDetailsActivity extends Activity {
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
