@@ -23,3 +23,31 @@ This tool is still in its early stages and has a number of limitations.
   application.
 * This only works for apps that do not use a custom layout inflater.
 * Other limitations yet to be discovered.
+
+## DexBuilder Tests
+
+The DexBuilder has several low-level end to end tests to verify generated DEX
+code validates, runs, and has the correct behavior. There are, unfortunately, a
+number of pieces that must be added to generate new tests. Here are the
+components:
+
+* `dex_testcase_generator` - Written in C++ using `DexBuilder`. This runs as a
+  build step produce the DEX files that will be tested on device. See the
+  `genrule` named `generate_dex_testcases` in `Android.bp`. These files are then
+  copied over to the device by TradeFed when running tests.
+* `DexBuilderTest` - This is a Java Language test harness that loads the
+  generated DEX files and exercises methods in the file.
+
+To add a new DEX file test, follow these steps:
+1. Modify `dex_testcase_generator` to produce the DEX file.
+2. Add the filename to the `out` list of the `generate_dex_testcases` rule in
+   `Android.bp`.
+3. Add a new `push` option to `AndroidTest.xml` to copy the DEX file to the
+   device.
+4. Modify `DexBuilderTest.java` to load and exercise the new test.
+
+In each case, you should be able to cargo-cult the existing test cases.
+
+In general, you can probably get by without adding a new generated DEX file, and
+instead add more methods to the files that are already generated. In this case,
+you can skip all of steps 2 and 3 above, and simplify steps 1 and 4.
