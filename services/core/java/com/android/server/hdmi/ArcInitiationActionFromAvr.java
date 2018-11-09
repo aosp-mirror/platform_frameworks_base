@@ -51,6 +51,13 @@ public class ArcInitiationActionFromAvr extends HdmiCecFeatureAction {
         }
         switch (cmd.getOpcode()) {
             case Constants.MESSAGE_FEATURE_ABORT:
+                if ((cmd.getParams()[0] & 0xFF) == Constants.MESSAGE_INITIATE_ARC) {
+                    audioSystem().setArcStatus(false);
+                    finish();
+                    return true;
+                } else {
+                    return false;
+                }
             case Constants.MESSAGE_REPORT_ARC_TERMINATED:
                 audioSystem().setArcStatus(false);
                 finish();
