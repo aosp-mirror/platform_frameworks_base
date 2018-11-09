@@ -47,7 +47,7 @@ interface IUiAutomationConnection {
             in ParcelFileDescriptor source);
     void grantRuntimePermission(String packageName, String permission, int userId);
     void revokeRuntimePermission(String packageName, String permission, int userId);
-    void adoptShellPermissionIdentity(int uid);
+    void adoptShellPermissionIdentity(int uid, in String[] permissions);
     void dropShellPermissionIdentity();
     // Called from the system process.
     oneway void shutdown();

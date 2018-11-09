@@ -19386,7 +19386,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public void startDelegateShellPermissionIdentity(int delegateUid) {
+    public void startDelegateShellPermissionIdentity(int delegateUid,
+            @Nullable String[] permissions) {
         if (UserHandle.getCallingAppId() != Process.SHELL_UID
                 && UserHandle.getCallingAppId() != Process.ROOT_UID) {
             throw new SecurityException("Only the shell can delegate its permissions");
@@ -19405,11 +19406,13 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (!(mAppOpsService.getAppOpsServiceDelegate() instanceof ShellDelegate)) {
                     throw new IllegalStateException("Bad shell delegate state");
                 }
-                if (((ShellDelegate) mAppOpsService.getAppOpsServiceDelegate())
-                        .getDelegateUid() != delegateUid) {
+                final ShellDelegate delegate = (ShellDelegate) mAppOpsService
+                        .getAppOpsServiceDelegate();
+                if (delegate.getDelegateUid() != delegateUid) {
                     throw new SecurityException("Shell can delegate permissions only "
                             + "to one instrumentation at a time");
                 }
+                delegate.setPermissions(permissions);
                 return;
             }
 
@@ -19427,7 +19430,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
                 // Hook them up...
                 final ShellDelegate shellDelegate = new ShellDelegate(
-                        instr.mTargetInfo.packageName, delegateUid);
+                        instr.mTargetInfo.packageName, delegateUid, permissions);
                 mAppOpsService.setAppOpsServiceDelegate(shellDelegate);
                 getPackageManagerInternalLocked().setCheckPermissionDelegate(shellDelegate);
                 return;
@@ -19450,20 +19453,26 @@ public class ActivityManagerService extends IActivityManager.Stub
     private class ShellDelegate implements CheckOpsDelegate, CheckPermissionDelegate {
         private final String mTargetPackageName;
         private final int mTargetUid;
+        private @Nullable String[] mPermissions;
 
-        ShellDelegate(String targetPacakgeName, int targetUid) {
+        ShellDelegate(String targetPacakgeName, int targetUid, @Nullable String[] permissions) {
             mTargetPackageName = targetPacakgeName;
             mTargetUid = targetUid;
+            mPermissions = permissions;
         }
 
         int getDelegateUid() {
             return mTargetUid;
         }
 
+        void setPermissions(@Nullable String[] permissions) {
+            mPermissions = permissions;
+        }
+
         @Override
         public int checkOperation(int code, int uid, String packageName,
                 TriFunction<Integer, Integer, String, Integer> superImpl) {
-            if (uid == mTargetUid) {
+            if (uid == mTargetUid && isTargetOp(code)) {
                 final long identity = Binder.clearCallingIdentity();
                 try {
                     return superImpl.apply(code, Process.SHELL_UID,
@@ -19478,7 +19487,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         public int checkAudioOperation(int code, int usage, int uid, String packageName,
                 QuadFunction<Integer, Integer, Integer, String, Integer> superImpl) {
-            if (uid == mTargetUid) {
+            if (uid == mTargetUid && isTargetOp(code)) {
                 final long identity = Binder.clearCallingIdentity();
                 try {
                     return superImpl.apply(code, usage, Process.SHELL_UID,
@@ -19493,7 +19502,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         public int noteOperation(int code, int uid, String packageName,
                 TriFunction<Integer, Integer, String, Integer> superImpl) {
-            if (uid == mTargetUid) {
+            if (uid == mTargetUid && isTargetOp(code)) {
                 final long identity = Binder.clearCallingIdentity();
                 try {
                     return mAppOpsService.noteProxyOperation(code, Process.SHELL_UID,
@@ -19508,7 +19517,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         public int checkPermission(String permName, String pkgName, int userId,
                 TriFunction<String, String, Integer, Integer> superImpl) {
-            if (mTargetPackageName.equals(pkgName)) {
+            if (mTargetPackageName.equals(pkgName) && isTargetPermission(permName)) {
                 return superImpl.apply(permName, "com.android.shell", userId);
             }
             return superImpl.apply(permName, pkgName, userId);
@@ -19517,10 +19526,28 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         public int checkUidPermission(String permName, int uid,
                 BiFunction<String, Integer, Integer> superImpl) {
-            if (uid == mTargetUid) {
+            if (uid == mTargetUid  && isTargetPermission(permName)) {
                 return superImpl.apply(permName, Process.SHELL_UID);
             }
             return superImpl.apply(permName, uid);
+        }
+
+        private boolean isTargetOp(int code) {
+            // null permissions means all ops are targeted
+            if (mPermissions == null) {
+                return true;
+            }
+            // no permission for the op means the op is targeted
+            final String permission = AppOpsManager.opToPermission(code);
+            if (permission == null) {
+                return true;
+            }
+            return isTargetPermission(permission);
+        }
+
+        private boolean isTargetPermission(@NonNull String permission) {
+            // null permissions means all permissions are targeted
+            return (mPermissions == null || ArrayUtils.contains(mPermissions, permission));
         }
     }
 
