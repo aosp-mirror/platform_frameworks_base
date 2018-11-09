@@ -64,5 +64,8 @@ enum PageId {
 
     // OPEN: Biometric Enrollment (android.settings.BIOMETRIC_ENROLL action intent)
     BIOMETRIC_ENROLL_ACTIVITY = 1586;
+
+    // OPEN: Settings > Privacy
+    TOP_LEVEL_PRIVACY = 1587;
 }
 
