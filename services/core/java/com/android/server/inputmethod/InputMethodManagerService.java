@@ -291,6 +291,8 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     private static final class DebugFlags {
         static final DebugFlag FLAG_OPTIMIZE_START_INPUT =
                 new DebugFlag("debug.optimize_startinput", false);
+        static final DebugFlag FLAG_PRE_RENDER_IME_VIEWS =
+                new DebugFlag("persist.pre_render_ime_views", false);
     }
 
     @UserIdInt
@@ -307,6 +309,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
     final boolean mHasFeature;
     private final ArrayMap<String, List<InputMethodSubtype>> mAdditionalSubtypeMap =
             new ArrayMap<>();
+    private final boolean mIsLowRam;
     private final HardKeyboardListener mHardKeyboardListener;
     private final AppOpsManager mAppOpsManager;
     private final UserManager mUserManager;
@@ -428,6 +431,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         final ClientDeathRecipient clientDeathRecipient;
 
         boolean sessionRequested;
+        // Determines if IMEs should be pre-rendered.
+        // DebugFlag can be flipped anytime. This flag is kept per-client to maintain behavior
+        // through the life of the current client.
+        boolean shouldPreRenderIme;
         SessionState curSession;
 
         @Override
@@ -642,6 +649,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
      * <dt>{@link InputMethodService#IME_VISIBLE}</dt>
      * <dd>
      *   If this bit is ON, some of IME view, e.g. software input, candidate view, is visible.
+     * </dd>
+     * dt>{@link InputMethodService#IME_INVISIBLE}</dt>
+     * <dd> If this bit is ON, IME is ready with views from last EditorInfo but is
+     *    currently invisible.
      * </dd>
      * </dl>
      * <em>Do not update this value outside of setImeWindowStatus.</em>
@@ -1414,6 +1425,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         mSlotIme = mContext.getString(com.android.internal.R.string.status_bar_ime);
         mHardKeyboardBehavior = mContext.getResources().getInteger(
                 com.android.internal.R.integer.config_externalHardKeyboardBehavior);
+        mIsLowRam = ActivityManager.isLowRamDeviceStatic();
 
         Bundle extras = new Bundle();
         extras.putBoolean(Notification.EXTRA_ALLOW_DURING_SETUP, true);
@@ -2352,7 +2364,10 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         if (mSwitchingDialog != null) return false;
         if (mWindowManagerInternal.isKeyguardShowingAndNotOccluded()
                 && mKeyguardManager != null && mKeyguardManager.isKeyguardSecure()) return false;
-        if ((visibility & InputMethodService.IME_ACTIVE) == 0) return false;
+        if ((visibility & InputMethodService.IME_ACTIVE) == 0
+                || (visibility & InputMethodService.IME_INVISIBLE) != 0) {
+            return false;
+        }
         if (mWindowManagerInternal.isHardKeyboardAvailable()) {
             if (mHardKeyboardBehavior == HardKeyboardBehavior.WIRELESS_AFFORDANCE) {
                 // When physical keyboard is attached, we show the ime switcher (or notification if
@@ -2460,6 +2475,12 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         if (mCurToken == null) {
             return;
         }
+        if (DEBUG) {
+            Slog.d(TAG, "IME window vis: " + vis
+                    + " active: " + (vis & InputMethodService.IME_ACTIVE)
+                    + " inv: " + (vis & InputMethodService.IME_INVISIBLE));
+        }
+
         // TODO: Move this clearing calling identity block to setImeWindowStatus after making sure
         // all updateSystemUi happens on system previlege.
         final long ident = Binder.clearCallingIdentity();
@@ -2918,6 +2939,14 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 if (PER_PROFILE_IME_ENABLED && userId != mSettings.getCurrentUserId()) {
                     switchUserLocked(userId);
                 }
+                // Master feature flag that overrides other conditions and forces IME preRendering.
+                if (DEBUG) {
+                    Slog.v(TAG, "IME PreRendering MASTER flag: "
+                            + DebugFlags.FLAG_PRE_RENDER_IME_VIEWS.value()
+                            + ", LowRam: " + mIsLowRam);
+                }
+                // pre-rendering not supported on low-ram devices.
+                cs.shouldPreRenderIme = DebugFlags.FLAG_PRE_RENDER_IME_VIEWS.value() && !mIsLowRam;
 
                 if (mCurFocusedWindow == windowToken) {
                     if (DEBUG) {
@@ -3581,7 +3610,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
                 try {
                     setEnabledSessionInMainThread(session);
                     session.method.startInput(startInputToken, inputContext, missingMethods,
-                            editorInfo, restarting);
+                            editorInfo, restarting, session.client.shouldPreRenderIme);
                 } catch (RemoteException e) {
                 }
                 args.recycle();
@@ -4543,6 +4572,7 @@ public class InputMethodManagerService extends IInputMethodManager.Stub
         @ShellCommandResult
         private int refreshDebugProperties() {
             DebugFlags.FLAG_OPTIMIZE_START_INPUT.refresh();
+            DebugFlags.FLAG_PRE_RENDER_IME_VIEWS.refresh();
             return ShellCommandResult.SUCCESS;
         }
 
