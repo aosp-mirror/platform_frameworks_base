@@ -1627,7 +1627,7 @@ public final class SystemServer {
 
             if (hasFeatureFace || hasFeatureIris || hasFeatureFingerprint) {
                 // Start this service after all biometric services.
-                traceBeginAndSlog("StartBiometricPromptService");
+                traceBeginAndSlog("StartBiometricService");
                 mSystemServiceManager.startService(BiometricService.class);
                 traceEnd();
             }
