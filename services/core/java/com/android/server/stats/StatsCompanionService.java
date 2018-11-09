@@ -1208,7 +1208,10 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
     private static final class ThermalEventListener extends IThermalEventListener.Stub {
         @Override public void notifyThrottling(boolean isThrottling, Temperature temp) {
             StatsLog.write(StatsLog.THERMAL_THROTTLING, temp.getType(),
-                    isThrottling ? 1 : 0, temp.getValue());
+                    isThrottling ?
+                            StatsLog.THERMAL_THROTTLING_STATE_CHANGED__STATE__START :
+                            StatsLog.THERMAL_THROTTLING_STATE_CHANGED__STATE__STOP,
+                    temp.getValue());
         }
     }
 }
