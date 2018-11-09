@@ -418,9 +418,6 @@ public final class MediaDrm implements AutoCloseable {
 
         /**
          * Returns the status code for the key
-         * @return one of {@link #STATUS_USABLE}, {@link #STATUS_EXPIRED},
-         * {@link #STATUS_OUTPUT_NOT_ALLOWED}, {@link #STATUS_PENDING}
-         * or {@link #STATUS_INTERNAL_ERROR}.
          */
         @KeyStatusCode
         public int getStatusCode() { return mStatusCode; }
@@ -654,13 +651,7 @@ public final class MediaDrm implements AutoCloseable {
      * can be queried using {@link #getSecurityLevel}. A session
      * ID is returned.
      *
-     * @param level the new security level, one of
-     * {@link #SECURITY_LEVEL_SW_SECURE_CRYPTO},
-     * {@link #SECURITY_LEVEL_SW_SECURE_DECODE},
-     * {@link #SECURITY_LEVEL_HW_SECURE_CRYPTO},
-     * {@link #SECURITY_LEVEL_HW_SECURE_DECODE} or
-     * {@link #SECURITY_LEVEL_HW_SECURE_ALL}.
-     *
+     * @param level the new security level
      * @throws NotProvisionedException if provisioning is needed
      * @throws ResourceBusyException if required resources are in use
      * @throws IllegalArgumentException if the requested security level is
@@ -790,9 +781,6 @@ public final class MediaDrm implements AutoCloseable {
 
         /**
          * Get the type of the request
-         * @return one of {@link #REQUEST_TYPE_INITIAL},
-         * {@link #REQUEST_TYPE_RENEWAL}, {@link #REQUEST_TYPE_RELEASE},
-         * {@link #REQUEST_TYPE_NONE} or {@link #REQUEST_TYPE_UPDATE}
          */
         @RequestType
         public int getRequestType() { return mRequestType; }
@@ -1051,8 +1039,7 @@ public final class MediaDrm implements AutoCloseable {
      * an inactive offline license are not usable for decryption.
      *
      * @param keySetId selects the offline license
-     * @return the offline license state, one of {@link #OFFLINE_LICENSE_USABLE},
-     * {@link #OFFLINE_LICENSE_INACTIVE} or {@link #OFFLINE_LICENSE_STATE_UNKNOWN}.
+     * @return the offline license state
      * @throws IllegalArgumentException if the keySetId does not refer to an
      * offline license.
      */
@@ -1191,9 +1178,7 @@ public final class MediaDrm implements AutoCloseable {
      * enforcing compliance with HDCP requirements. Trusted enforcement of
      * HDCP policies must be handled by the DRM system.
      * <p>
-     * @return one of {@link #HDCP_LEVEL_UNKNOWN}, {@link #HDCP_NONE},
-     * {@link #HDCP_V1}, {@link #HDCP_V2}, {@link #HDCP_V2_1}, {@link #HDCP_V2_2}
-     * or {@link #HDCP_NO_DIGITAL_OUTPUT}.
+     * @return the connected HDCP level
      */
     @HdcpLevel
     public native int getConnectedHdcpLevel();
@@ -1204,9 +1189,7 @@ public final class MediaDrm implements AutoCloseable {
      * that may be connected. If multiple HDCP-capable interfaces are present,
      * it indicates the highest of the maximum HDCP levels of all interfaces.
      * <p>
-     * @return one of {@link #HDCP_LEVEL_UNKNOWN}, {@link #HDCP_NONE},
-     * {@link #HDCP_V1}, {@link #HDCP_V2}, {@link #HDCP_V2_1}, {@link #HDCP_V2_2}
-     * or {@link #HDCP_NO_DIGITAL_OUTPUT}.
+     * @return the maximum supported HDCP level
      */
     @HdcpLevel
     public native int getMaxHdcpLevel();
@@ -1296,10 +1279,7 @@ public final class MediaDrm implements AutoCloseable {
      * time a session is opened using {@link #openSession}.
      * @param sessionId the session to query.
      * <p>
-     * @return one of {@link #SECURITY_LEVEL_UNKNOWN},
-     * {@link #SECURITY_LEVEL_SW_SECURE_CRYPTO}, {@link #SECURITY_LEVEL_SW_SECURE_DECODE},
-     * {@link #SECURITY_LEVEL_HW_SECURE_CRYPTO}, {@link #SECURITY_LEVEL_HW_SECURE_DECODE} or
-     * {@link #SECURITY_LEVEL_HW_SECURE_ALL}.
+     * @return the security level of the session
      */
     @SecurityLevel
     public native int getSecurityLevel(@NonNull byte[] sessionId);
