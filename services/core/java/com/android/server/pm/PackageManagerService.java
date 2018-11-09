@@ -17774,30 +17774,58 @@ public class PackageManagerService extends IPackageManager.Stub
         return true;
     }
 
+    private static class DeletePackageAction {
+        public final PackageSetting deletingPs;
+
+        private DeletePackageAction(PackageSetting deletingPs) {
+            this.deletingPs = deletingPs;
+        }
+    }
+
+    /**
+     * @return a {@link DeletePackageAction} if the provided package may be deleted, {@code null}
+     * otherwise.
+     */
+    @Nullable
+    private DeletePackageAction mayDeletePackageLIF(@NonNull String packageName) {
+        synchronized (mPackages) {
+            final PackageSetting ps;
+            ps = mSettings.mPackages.get(packageName);
+            if (ps == null) {
+                return null;
+            }
+            return new DeletePackageAction(ps);
+        }
+    }
+
     /*
      * This method handles package deletion in general
      */
-    private boolean deletePackageLIF(String packageName, UserHandle user,
+    private boolean deletePackageLIF(@NonNull String packageName, UserHandle user,
             boolean deleteCodeAndResources, int[] allUserHandles, int flags,
             PackageRemovedInfo outInfo, boolean writeSettings,
             PackageParser.Package replacingPackage) {
-        if (packageName == null) {
-            Slog.w(TAG, "Attempt to delete null packageName.");
+        final DeletePackageAction action = mayDeletePackageLIF(packageName);
+        if (null == action) {
             return false;
         }
 
         if (DEBUG_REMOVE) Slog.d(TAG, "deletePackageLI: " + packageName + " user " + user);
 
-        PackageSetting ps;
-        synchronized (mPackages) {
-            ps = mSettings.mPackages.get(packageName);
-            if (ps == null) {
-                Slog.w(TAG, "Package named '" + packageName + "' doesn't exist.");
-                return false;
-            }
+        return executeDeletePackageLIF(action, packageName, user, deleteCodeAndResources,
+                allUserHandles, flags, outInfo, writeSettings, replacingPackage);
+    }
 
-            if (ps.parentPackageName != null && (!isSystemApp(ps)
-                    || (flags & PackageManager.DELETE_SYSTEM_APP) != 0)) {
+    private boolean executeDeletePackageLIF(DeletePackageAction action,
+            String packageName, UserHandle user, boolean deleteCodeAndResources,
+            int[] allUserHandles, int flags, PackageRemovedInfo outInfo,
+            boolean writeSettings, PackageParser.Package replacingPackage) {
+        final PackageSetting ps = action.deletingPs;
+        final boolean systemApp = isSystemApp(ps);
+        synchronized (mPackages) {
+
+            if (ps.parentPackageName != null
+                    && (!systemApp || (flags & PackageManager.DELETE_SYSTEM_APP) != 0)) {
                 if (DEBUG_REMOVE) {
                     Slog.d(TAG, "Uninstalled child package:" + packageName + " for user:"
                             + ((user == null) ? UserHandle.USER_ALL : user));
@@ -17805,9 +17833,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 final int removedUserId = (user != null) ? user.getIdentifier()
                         : UserHandle.USER_ALL;
 
-                if (!clearPackageStateForUserLIF(ps, removedUserId, outInfo)) {
-                    return false;
-                }
+                clearPackageStateForUserLIF(ps, removedUserId, outInfo);
                 markPackageUninstalledForUserLPw(ps, user);
                 scheduleWritePackageRestrictionsLocked(user);
                 return true;
@@ -17820,7 +17846,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
 
-        if (((!isSystemApp(ps) || (flags&PackageManager.DELETE_SYSTEM_APP) != 0) && user != null
+        if (((!systemApp || (flags & PackageManager.DELETE_SYSTEM_APP) != 0) && user != null
                 && user.getIdentifier() != UserHandle.USER_ALL)) {
             // The caller is asking that the package only be deleted for a single
             // user.  To do this, we just mark its uninstalled state and delete
@@ -17829,7 +17855,7 @@ public class PackageManagerService extends IPackageManager.Stub
             // semantics than normal for uninstalling system apps.
             markPackageUninstalledForUserLPw(ps, user);
 
-            if (!isSystemApp(ps)) {
+            if (!systemApp) {
                 // Do not uninstall the APK if an app should be cached
                 boolean keepUninstalledPackage = shouldKeepUninstalledPackageLPr(packageName);
                 if (ps.isAnyInstalled(sUserManager.getUserIds()) || keepUninstalledPackage) {
@@ -17837,9 +17863,7 @@ public class PackageManagerService extends IPackageManager.Stub
                     // we need to do is clear this user's data and save that
                     // it is uninstalled.
                     if (DEBUG_REMOVE) Slog.d(TAG, "Still installed by other users");
-                    if (!clearPackageStateForUserLIF(ps, user.getIdentifier(), outInfo)) {
-                        return false;
-                    }
+                    clearPackageStateForUserLIF(ps, user.getIdentifier(), outInfo);
                     scheduleWritePackageRestrictionsLocked(user);
                     return true;
                 } else {
@@ -17855,9 +17879,7 @@ public class PackageManagerService extends IPackageManager.Stub
                 // we need to do is clear this user's data and save that
                 // it is uninstalled.
                 if (DEBUG_REMOVE) Slog.d(TAG, "Deleting system app");
-                if (!clearPackageStateForUserLIF(ps, user.getIdentifier(), outInfo)) {
-                    return false;
-                }
+                clearPackageStateForUserLIF(ps, user.getIdentifier(), outInfo);
                 scheduleWritePackageRestrictionsLocked(user);
                 return true;
             }
@@ -17883,8 +17905,9 @@ public class PackageManagerService extends IPackageManager.Stub
             }
         }
 
-        boolean ret = false;
-        if (isSystemApp(ps)) {
+        // TODO(b/109941548): break reasons for ret = false out into mayDelete method
+        final boolean ret;
+        if (systemApp) {
             if (DEBUG_REMOVE) Slog.d(TAG, "Removing system package: " + ps.name);
             // When an updated system application is deleted we delete the existing resources
             // as well and fall back to existing code in system partition
@@ -17913,7 +17936,7 @@ public class PackageManagerService extends IPackageManager.Stub
             // If we uninstalled an update to a system app there may be some
             // child packages that appeared as they are declared in the system
             // app but were not declared in the update.
-            if (isSystemApp(ps)) {
+            if (systemApp) {
                 synchronized (mPackages) {
                     PackageSetting updatedPs = mSettings.getPackageLPr(ps.name);
                     final int childCount = (updatedPs.childPackageNames != null)
@@ -17974,7 +17997,7 @@ public class PackageManagerService extends IPackageManager.Stub
         mSettings.writeKernelMappingLPr(ps);
     }
 
-    private boolean clearPackageStateForUserLIF(PackageSetting ps, int userId,
+    private void clearPackageStateForUserLIF(PackageSetting ps, int userId,
             PackageRemovedInfo outInfo) {
         final PackageParser.Package pkg;
         synchronized (mPackages) {
@@ -18010,8 +18033,6 @@ public class PackageManagerService extends IPackageManager.Stub
             outInfo.removedUsers = userIds;
             outInfo.broadcastUsers = userIds;
         }
-
-        return true;
     }
 
     @Override
