@@ -54,11 +54,6 @@ public interface LogWriter {
     void action(Context context, int category, String pkg, Pair<Integer, Object>... taggedData);
 
     /**
-     * Logs a count.
-     */
-    void count(Context context, String name, int value);
-
-    /**
      * Generically log action.
      */
     void action(int attribution, int action, int pageId, String key, int value);

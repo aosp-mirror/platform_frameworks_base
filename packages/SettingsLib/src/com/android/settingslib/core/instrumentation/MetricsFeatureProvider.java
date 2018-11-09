@@ -90,12 +90,6 @@ public class MetricsFeatureProvider {
         }
     }
 
-    public void count(Context context, String name, int value) {
-        for (LogWriter writer : mLoggerWriters) {
-            writer.count(context, name, value);
-        }
-    }
-
     public int getMetricsCategory(Object object) {
         if (object == null || !(object instanceof Instrumentable)) {
             return MetricsEvent.VIEW_UNKNOWN;

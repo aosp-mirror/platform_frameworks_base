@@ -74,11 +74,6 @@ public class EventLogWriter implements LogWriter {
     }
 
     @Override
-    public void count(Context context, String name, int value) {
-        MetricsLogger.count(context, name, value);
-    }
-
-    @Override
     public void action(int attribution, int action, int pageId, String key, int value) {
         final LogMaker logMaker = new LogMaker(action)
                 .setType(MetricsProto.MetricsEvent.TYPE_ACTION);
