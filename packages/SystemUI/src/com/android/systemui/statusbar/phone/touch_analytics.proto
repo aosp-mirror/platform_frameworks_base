@@ -134,4 +134,6 @@ message Session {
     optional int32 touchAreaHeight = 10;
     optional Type type = 11;
     repeated PhoneEvent phoneEvents = 12;
+
+    optional string device_id = 13;
 }
