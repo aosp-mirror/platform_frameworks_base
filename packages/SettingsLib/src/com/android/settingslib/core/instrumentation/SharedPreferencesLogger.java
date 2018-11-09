@@ -116,8 +116,6 @@ public class SharedPreferencesLogger implements SharedPreferences {
             mPreferenceKeySet.add(prefKey);
             return;
         }
-        // TODO: Remove count logging to save some resource.
-        mMetricsFeature.count(mContext, buildCountName(prefKey, value), 1);
 
         final Pair<Integer, Object> valueData;
         if (value instanceof Long) {
