@@ -91,7 +91,7 @@ message Atom {
         ChargingStateChanged charging_state_changed = 31;
         PluggedStateChanged plugged_state_changed = 32;
         InteractiveStateChanged interactive_state_changed = 33;
-        // 34 is available
+        TouchEventReported touch_event_reported = 34;
         WakeupAlarmOccurred wakeup_alarm_occurred = 35;
         KernelWakeupReported kernel_wakeup_reported = 36;
         WifiLockStateChanged wifi_lock_state_changed = 37;
@@ -1732,6 +1732,33 @@ message SettingsUIChanged {
      * The new value of the changed preference.
      */
     optional int64 changed_preference_int_value = 5;
+}
+
+/**
+ * Logs basic timing information about touch events.
+ * Reported at most every 5 minutes while device is being interacted with.
+ *
+ * Logged from:
+ *   frameworks/native/services/inputflinger
+ */
+message TouchEventReported {
+    /**
+     * The fields latency_{min|max|mean|stdev} represent minimum, maximum, mean,
+     * and the standard deviation of latency between the kernel and framework
+     * for touchscreen events. The units are microseconds.
+     *
+     * The number is measured as the difference between the time at which
+     * the input event was received in the evdev driver,
+     * and the time at which the input event was received in EventHub.
+     */
+    // Minimum value
+    optional float latency_min_micros = 1;
+    // Maximum value
+    optional float latency_max_micros = 2;
+    // Average value
+    optional float latency_mean_micros = 3;
+    // Standard deviation
+    optional float latency_stdev_micros = 4;
 }
 
 /**
