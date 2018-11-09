@@ -887,7 +887,7 @@ public final class AccessibilityManager {
      *
      * @param originalTimeout The timeout appropriate for users with no accessibility needs.
      * @param uiContentFlags The combination of flags {@link #FLAG_CONTENT_ICONS},
-     *                       {@link #FLAG_CONTENT_TEXT} or {@Link #CONTENT_CONTROLS} to
+     *                       {@link #FLAG_CONTENT_TEXT} or {@link #FLAG_CONTENT_CONTROLS} to
      *                       indicate the contents of UI.
      * @return The recommended UI timeout for the current user in milliseconds.
      */
