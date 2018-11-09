@@ -1643,11 +1643,11 @@ class SettingsProtoDumpUtil {
                 Settings.Secure.TOUCH_EXPLORATION_GRANTED_ACCESSIBILITY_SERVICES,
                 SecureSettingsProto.Accessibility.TOUCH_EXPLORATION_GRANTED_ACCESSIBILITY_SERVICES);
         dumpSetting(s, p,
-                Settings.Secure.ACCESSIBILITY_MINIMUM_UI_TIMEOUT_ENABLED,
-                SecureSettingsProto.Accessibility.MINIMUM_UI_TIMEOUT_ENABLED);
+                Settings.Secure.ACCESSIBILITY_NON_INTERACTIVE_UI_TIMEOUT_MS,
+                SecureSettingsProto.Accessibility.NON_INTERACTIVE_UI_TIMEOUT_MS);
         dumpSetting(s, p,
-                Settings.Secure.ACCESSIBILITY_MINIMUM_UI_TIMEOUT_MS,
-                SecureSettingsProto.Accessibility.MINIMUM_UI_TIMEOUT_MS);
+                Settings.Secure.ACCESSIBILITY_INTERACTIVE_UI_TIMEOUT_MS,
+                SecureSettingsProto.Accessibility.INTERACTIVE_UI_TIMEOUT_MS);
         p.end(accessibilityToken);
 
         dumpSetting(s, p,

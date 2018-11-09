@@ -76,7 +76,8 @@ import java.util.List;
  * @attr ref android.R.styleable#AccessibilityService_notificationTimeout
  * @attr ref android.R.styleable#AccessibilityService_packageNames
  * @attr ref android.R.styleable#AccessibilityService_settingsActivity
- * @attr ref android.R.styleable#AccessibilityService_minimumUiTimeout
+ * @attr ref android.R.styleable#AccessibilityService_nonInteractiveUiTimeout
+ * @attr ref android.R.styleable#AccessibilityService_interactiveUiTimeout
  * @see AccessibilityService
  * @see android.view.accessibility.AccessibilityEvent
  * @see android.view.accessibility.AccessibilityManager
@@ -434,11 +435,14 @@ public class AccessibilityServiceInfo implements Parcelable {
     public boolean crashed;
 
     /**
-     * The minimum timeout in milliseconds that UI controls need to remain on the screen.
-     *
-     * @see #setMinimumUiTimeoutMillis
+     * A recommended timeout in milliseconds for non-interactive controls.
      */
-    private int mMinimumUiTimeout;
+    private int mNonInteractiveUiTimeout;
+
+    /**
+     * A recommended timeout in milliseconds for interactive controls.
+     */
+    private int mInteractiveUiTimeout;
 
     /**
      * The component name the accessibility service.
@@ -544,8 +548,11 @@ public class AccessibilityServiceInfo implements Parcelable {
             notificationTimeout = asAttributes.getInt(
                     com.android.internal.R.styleable.AccessibilityService_notificationTimeout,
                     0);
-            mMinimumUiTimeout = asAttributes.getInt(
-                    com.android.internal.R.styleable.AccessibilityService_minimumUiTimeout,
+            mNonInteractiveUiTimeout = asAttributes.getInt(
+                    com.android.internal.R.styleable.AccessibilityService_nonInteractiveUiTimeout,
+                    0);
+            mInteractiveUiTimeout = asAttributes.getInt(
+                    com.android.internal.R.styleable.AccessibilityService_interactiveUiTimeout,
                     0);
             flags = asAttributes.getInt(
                     com.android.internal.R.styleable.AccessibilityService_accessibilityFlags, 0);
@@ -616,7 +623,8 @@ public class AccessibilityServiceInfo implements Parcelable {
         packageNames = other.packageNames;
         feedbackType = other.feedbackType;
         notificationTimeout = other.notificationTimeout;
-        mMinimumUiTimeout = other.mMinimumUiTimeout;
+        mNonInteractiveUiTimeout = other.mNonInteractiveUiTimeout;
+        mInteractiveUiTimeout = other.mInteractiveUiTimeout;
         flags = other.flags;
     }
 
@@ -775,26 +783,57 @@ public class AccessibilityServiceInfo implements Parcelable {
     }
 
     /**
-     * Set the minimum time that controls need to remain on the screen to support the user.
+     * Set the recommended time that non-interactive controls need to remain on the screen to
+     * support the user.
      * <p>
-     *    <strong>This value can be dynamically set at runtime by
-     *    {@link AccessibilityService#setServiceInfo(AccessibilityServiceInfo)}.</strong>
+     *     <strong>This value can be dynamically set at runtime by
+     *     {@link AccessibilityService#setServiceInfo(AccessibilityServiceInfo)}.</strong>
      * </p>
      *
      * @param timeout The timeout in milliseconds.
+     *
+     * @see android.R.styleable#AccessibilityService_nonInteractiveUiTimeout
      */
-    public void setMinimumUiTimeoutMillis(int timeout) {
-        mMinimumUiTimeout = timeout;
+    public void setNonInteractiveUiTimeoutMillis(int timeout) {
+        mNonInteractiveUiTimeout = timeout;
     }
 
     /**
-     * Get the minimum ui timeout.
+     * Get the recommended timeout for non-interactive controls.
      *
-     * @see #setMinimumUiTimeoutMillis
      * @return The timeout in milliseconds.
+     *
+     * @see #setNonInteractiveUiTimeoutMillis(int)
      */
-    public int getMinimumUiTimeoutMillis() {
-        return mMinimumUiTimeout;
+    public int getNonInteractiveUiTimeoutMillis() {
+        return mNonInteractiveUiTimeout;
+    }
+
+    /**
+     * Set the recommended time that interactive controls need to remain on the screen to
+     * support the user.
+     * <p>
+     *     <strong>This value can be dynamically set at runtime by
+     *     {@link AccessibilityService#setServiceInfo(AccessibilityServiceInfo)}.</strong>
+     * </p>
+     *
+     * @param timeout The timeout in milliseconds.
+     *
+     * @see android.R.styleable#AccessibilityService_interactiveUiTimeout
+     */
+    public void setInteractiveUiTimeoutMillis(int timeout) {
+        mInteractiveUiTimeout = timeout;
+    }
+
+    /**
+     * Get the recommended timeout for interactive controls.
+     *
+     * @return The timeout in milliseconds.
+     *
+     * @see #setInteractiveUiTimeoutMillis(int)
+     */
+    public int getInteractiveUiTimeoutMillis() {
+        return mInteractiveUiTimeout;
     }
 
     /** {@hide} */
@@ -815,7 +854,8 @@ public class AccessibilityServiceInfo implements Parcelable {
         parcel.writeStringArray(packageNames);
         parcel.writeInt(feedbackType);
         parcel.writeLong(notificationTimeout);
-        parcel.writeInt(mMinimumUiTimeout);
+        parcel.writeInt(mNonInteractiveUiTimeout);
+        parcel.writeInt(mInteractiveUiTimeout);
         parcel.writeInt(flags);
         parcel.writeInt(crashed ? 1 : 0);
         parcel.writeParcelable(mComponentName, flagz);
@@ -833,7 +873,8 @@ public class AccessibilityServiceInfo implements Parcelable {
         packageNames = parcel.readStringArray();
         feedbackType = parcel.readInt();
         notificationTimeout = parcel.readLong();
-        mMinimumUiTimeout = parcel.readInt();
+        mNonInteractiveUiTimeout = parcel.readInt();
+        mInteractiveUiTimeout = parcel.readInt();
         flags = parcel.readInt();
         crashed = parcel.readInt() != 0;
         mComponentName = parcel.readParcelable(this.getClass().getClassLoader());
@@ -884,7 +925,9 @@ public class AccessibilityServiceInfo implements Parcelable {
         stringBuilder.append(", ");
         stringBuilder.append("notificationTimeout: ").append(notificationTimeout);
         stringBuilder.append(", ");
-        stringBuilder.append("minimumUiTimeout: ").append(mMinimumUiTimeout);
+        stringBuilder.append("nonInteractiveUiTimeout: ").append(mNonInteractiveUiTimeout);
+        stringBuilder.append(", ");
+        stringBuilder.append("interactiveUiTimeout: ").append(mInteractiveUiTimeout);
         stringBuilder.append(", ");
         appendFlags(stringBuilder, flags);
         stringBuilder.append(", ");
