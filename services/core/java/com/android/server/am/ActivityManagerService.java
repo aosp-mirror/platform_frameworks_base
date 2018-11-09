@@ -3046,35 +3046,18 @@ public class ActivityManagerService extends IActivityManager.Stub
     public final int startActivityAsUser(IApplicationThread caller, String callingPackage,
             Intent intent, String resolvedType, IBinder resultTo, String resultWho, int requestCode,
             int startFlags, ProfilerInfo profilerInfo, Bundle bOptions, int userId) {
-        synchronized (this) {
-            /**
-             * Flags like {@link android.app.ActivityManager#START_FLAG_DEBUG} maybe be set on this
-             * call when called/invoked from the shell command. To avoid deadlock, we go ahead and
-             * acquire the AMS lock now since ATMS will need to synchronously call back into AMS
-             * later to modify process settings due to the flags.
-             * TODO(b/80414790): Investigate a better way of untangling this.
-             */
+
             return mActivityTaskManager.startActivityAsUser(caller, callingPackage, intent,
                     resolvedType, resultTo, resultWho, requestCode, startFlags, profilerInfo,
                     bOptions, userId);
-        }
     }
 
     WaitResult startActivityAndWait(IApplicationThread caller, String callingPackage,
             Intent intent, String resolvedType, IBinder resultTo, String resultWho, int requestCode,
             int startFlags, ProfilerInfo profilerInfo, Bundle bOptions, int userId) {
-        synchronized (this) {
-            /**
-             * Flags like {@link android.app.ActivityManager#START_FLAG_DEBUG} maybe be set on this
-             * call when called/invoked from the shell command. To avoid deadlock, we go ahead and
-             * acquire the AMS lock now since ATMS will need to synchronously call back into AMS
-             * later to modify process settings due to the flags.
-             * TODO(b/80414790): Investigate a better way of untangling this.
-             */
             return mActivityTaskManager.startActivityAndWait(caller, callingPackage, intent,
                     resolvedType, resultTo, resultWho, requestCode, startFlags, profilerInfo,
                     bOptions, userId);
-        }
     }
 
     @Override
@@ -19166,22 +19149,30 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         @Override
         public void setDebugFlagsForStartingActivity(ActivityInfo aInfo, int startFlags,
-                ProfilerInfo profilerInfo) {
+                ProfilerInfo profilerInfo, Object wmLock) {
             synchronized (ActivityManagerService.this) {
-                if ((startFlags & ActivityManager.START_FLAG_DEBUG) != 0) {
-                    setDebugApp(aInfo.processName, true, false);
-                }
+                /**
+                 * This function is called from the window manager context and needs to be executed
+                 * synchronously.  To avoid deadlock, we pass a message to AMS to execute the
+                 * function and notify the passed in lock when it has been completed.
+                 */
+                synchronized (wmLock) {
+                    if ((startFlags & ActivityManager.START_FLAG_DEBUG) != 0) {
+                        setDebugApp(aInfo.processName, true, false);
+                    }
 
-                if ((startFlags & ActivityManager.START_FLAG_NATIVE_DEBUGGING) != 0) {
-                    setNativeDebuggingAppLocked(aInfo.applicationInfo, aInfo.processName);
-                }
+                    if ((startFlags & ActivityManager.START_FLAG_NATIVE_DEBUGGING) != 0) {
+                        setNativeDebuggingAppLocked(aInfo.applicationInfo, aInfo.processName);
+                    }
 
-                if ((startFlags & ActivityManager.START_FLAG_TRACK_ALLOCATION) != 0) {
-                    setTrackAllocationApp(aInfo.applicationInfo, aInfo.processName);
-                }
+                    if ((startFlags & ActivityManager.START_FLAG_TRACK_ALLOCATION) != 0) {
+                        setTrackAllocationApp(aInfo.applicationInfo, aInfo.processName);
+                    }
 
-                if (profilerInfo != null) {
-                    setProfileApp(aInfo.applicationInfo, aInfo.processName, profilerInfo);
+                    if (profilerInfo != null) {
+                        setProfileApp(aInfo.applicationInfo, aInfo.processName, profilerInfo);
+                    }
+                    wmLock.notify();
                 }
             }
         }

@@ -1272,15 +1272,24 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             if (!aInfo.processName.equals("system")) {
                 if ((startFlags & (START_FLAG_DEBUG | START_FLAG_NATIVE_DEBUGGING
                         | START_FLAG_TRACK_ALLOCATION)) != 0 || profilerInfo != null) {
-                    /**
-                     * Assume safe to call into AMS synchronously because the call that set these
-                     * flags should have originated from AMS which will already have its lock held.
-                     * @see ActivityManagerService#startActivityAndWait(IApplicationThread, String,
-                     * Intent, String, IBinder, String, int, int, ProfilerInfo, Bundle, int)
-                     * TODO(b/80414790): Investigate a better way of untangling this.
-                     */
-                    mService.mAmInternal.setDebugFlagsForStartingActivity(
-                            aInfo, startFlags, profilerInfo);
+
+                     // Mimic an AMS synchronous call by passing a message to AMS and wait for AMS
+                     // to notify us that the task has completed.
+                     // TODO(b/80414790) look into further untangling for the situation where the
+                     // caller is on the same thread as the handler we are posting to.
+                    synchronized (mService.mGlobalLock) {
+                        // Post message to AMS.
+                        final Message msg = PooledLambda.obtainMessage(
+                                ActivityManagerInternal::setDebugFlagsForStartingActivity,
+                                mService.mAmInternal, aInfo, startFlags, profilerInfo,
+                                mService.mGlobalLock);
+                        mService.mH.sendMessage(msg);
+                        try {
+                            mService.mGlobalLock.wait();
+                        } catch (InterruptedException ignore) {
+
+                        }
+                    }
                 }
             }
             final String intentLaunchToken = intent.getLaunchToken();
