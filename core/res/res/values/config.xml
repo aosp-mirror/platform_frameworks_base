@@ -3592,4 +3592,9 @@
     <!-- Component name for default assistant on this device -->
     <string name="config_defaultAssistantComponentName">#+UNSET</string>
 
+    <!-- Class name for the InputEvent compatibility processor override.
+         Empty string means use the default compatibility processor
+         (android.view.InputEventCompatProcessor). -->
+    <string name="config_inputEventCompatProcessorOverrideClassName" translatable="false"></string>
+
 </resources>

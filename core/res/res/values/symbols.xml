@@ -301,6 +301,7 @@
   <java-symbol type="bool" name="config_enableWallpaperService" />
   <java-symbol type="bool" name="config_checkWallpaperAtBoot" />
   <java-symbol type="string" name="config_wallpaperManagerServiceName" />
+  <java-symbol type="string" name="config_inputEventCompatProcessorOverrideClassName" />
   <java-symbol type="bool" name="config_enableUpdateableTimeZoneRules" />
   <java-symbol type="bool" name="config_timeZoneRulesUpdateTrackingEnabled" />
   <java-symbol type="string" name="config_timeZoneRulesUpdaterPackage" />

@@ -124,6 +124,7 @@ import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Queue;
 import java.util.concurrent.CountDownLatch;
 
@@ -543,6 +544,8 @@ public final class ViewRootImpl implements ViewParent,
 
     private boolean mNeedsRendererSetup;
 
+    private final InputEventCompatProcessor mInputCompatProcessor;
+
     /**
      * Consistency verifier for debugging purposes.
      */
@@ -597,6 +600,25 @@ public final class ViewRootImpl implements ViewParent,
         mFallbackEventHandler = new PhoneFallbackEventHandler(context);
         mChoreographer = Choreographer.getInstance();
         mDisplayManager = (DisplayManager)context.getSystemService(Context.DISPLAY_SERVICE);
+
+        String processorOverrideName = context.getResources().getString(
+                                    R.string.config_inputEventCompatProcessorOverrideClassName);
+        if (processorOverrideName.isEmpty()) {
+            // No compatibility processor override, using default.
+            mInputCompatProcessor = new InputEventCompatProcessor(context);
+        } else {
+            InputEventCompatProcessor compatProcessor = null;
+            try {
+                final Class<? extends InputEventCompatProcessor> klass =
+                        (Class<? extends InputEventCompatProcessor>) Class.forName(
+                                processorOverrideName);
+                compatProcessor = klass.getConstructor(Context.class).newInstance(context);
+            } catch (Exception e) {
+                Log.e(TAG, "Unable to create the InputEventCompatProcessor. ", e);
+            } finally {
+                mInputCompatProcessor = compatProcessor;
+            }
+        }
 
         if (!sCompatibilityDone) {
             sAlwaysAssignFocus = mTargetSdkVersion < Build.VERSION_CODES.P;
@@ -7166,6 +7188,7 @@ public final class ViewRootImpl implements ViewParent,
         public static final int FLAG_FINISHED_HANDLED = 1 << 3;
         public static final int FLAG_RESYNTHESIZED = 1 << 4;
         public static final int FLAG_UNHANDLED = 1 << 5;
+        public static final int FLAG_MODIFIED_FOR_COMPATIBILITY = 1 << 6;
 
         public QueuedInputEvent mNext;
 
@@ -7258,7 +7281,6 @@ public final class ViewRootImpl implements ViewParent,
     @UnsupportedAppUsage
     void enqueueInputEvent(InputEvent event,
             InputEventReceiver receiver, int flags, boolean processImmediately) {
-        adjustInputEventForCompatibility(event);
         QueuedInputEvent q = obtainQueuedInputEvent(event, receiver, flags);
 
         // Always enqueue the input event in order, regardless of its time stamp.
@@ -7361,25 +7383,27 @@ public final class ViewRootImpl implements ViewParent,
 
         if (q.mReceiver != null) {
             boolean handled = (q.mFlags & QueuedInputEvent.FLAG_FINISHED_HANDLED) != 0;
-            q.mReceiver.finishInputEvent(q.mEvent, handled);
+            boolean modified = (q.mFlags & QueuedInputEvent.FLAG_MODIFIED_FOR_COMPATIBILITY) != 0;
+            if (modified) {
+                Trace.traceBegin(Trace.TRACE_TAG_VIEW, "processInputEventBeforeFinish");
+                InputEvent processedEvent;
+                try {
+                    processedEvent =
+                            mInputCompatProcessor.processInputEventBeforeFinish(q.mEvent);
+                } finally {
+                    Trace.traceEnd(Trace.TRACE_TAG_VIEW);
+                }
+                if (processedEvent != null) {
+                    q.mReceiver.finishInputEvent(processedEvent, handled);
+                }
+            } else {
+                q.mReceiver.finishInputEvent(q.mEvent, handled);
+            }
         } else {
             q.mEvent.recycleIfNeededAfterDispatch();
         }
 
         recycleQueuedInputEvent(q);
-    }
-
-    private void adjustInputEventForCompatibility(InputEvent e) {
-        if (mTargetSdkVersion < Build.VERSION_CODES.M && e instanceof MotionEvent) {
-            MotionEvent motion = (MotionEvent) e;
-            final int mask =
-                MotionEvent.BUTTON_STYLUS_PRIMARY | MotionEvent.BUTTON_STYLUS_SECONDARY;
-            final int buttonState = motion.getButtonState();
-            final int compatButtonState = (buttonState & mask) >> 4;
-            if (compatButtonState != 0) {
-                motion.setButtonState(buttonState | compatButtonState);
-            }
-        }
     }
 
     static boolean isTerminalInputEvent(InputEvent event) {
@@ -7452,7 +7476,28 @@ public final class ViewRootImpl implements ViewParent,
 
         @Override
         public void onInputEvent(InputEvent event) {
-            enqueueInputEvent(event, this, 0, true);
+            Trace.traceBegin(Trace.TRACE_TAG_VIEW, "processInputEventForCompatibility");
+            List<InputEvent> processedEvents;
+            try {
+                processedEvents =
+                    mInputCompatProcessor.processInputEventForCompatibility(event);
+            } finally {
+                Trace.traceEnd(Trace.TRACE_TAG_VIEW);
+            }
+            if (processedEvents != null) {
+                if (processedEvents.isEmpty()) {
+                    // InputEvent consumed by mInputCompatProcessor
+                    finishInputEvent(event, true);
+                } else {
+                    for (int i = 0; i < processedEvents.size(); i++) {
+                        enqueueInputEvent(
+                                processedEvents.get(i), this,
+                                QueuedInputEvent.FLAG_MODIFIED_FOR_COMPATIBILITY, true);
+                    }
+                }
+            } else {
+                enqueueInputEvent(event, this, 0, true);
+            }
         }
 
         @Override
