@@ -17,8 +17,6 @@
 package com.android.systemui.statusbar.phone;
 
 import android.content.Context;
-import android.os.Bundle;
-import android.os.Parcelable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
@@ -29,8 +27,6 @@ public abstract class PanelBar extends FrameLayout {
     public static final boolean DEBUG = false;
     public static final String TAG = PanelBar.class.getSimpleName();
     private static final boolean SPEW = false;
-    private static final String PANEL_BAR_SUPER_PARCELABLE = "panel_bar_super_parcelable";
-    private static final String STATE = "state";
     private boolean mBouncerShowing;
     private boolean mExpanded;
     protected float mPanelFraction;
@@ -53,26 +49,8 @@ public abstract class PanelBar extends FrameLayout {
         mState = state;
     }
 
-    @Override
-    protected Parcelable onSaveInstanceState() {
-        Bundle bundle = new Bundle();
-        bundle.putParcelable(PANEL_BAR_SUPER_PARCELABLE, super.onSaveInstanceState());
-        bundle.putInt(STATE, mState);
-        return bundle;
-    }
-
-    @Override
-    protected void onRestoreInstanceState(Parcelable state) {
-        if (state == null || !(state instanceof Bundle)) {
-            super.onRestoreInstanceState(state);
-            return;
-        }
-
-        Bundle bundle = (Bundle) state;
-        super.onRestoreInstanceState(bundle.getParcelable(PANEL_BAR_SUPER_PARCELABLE));
-        if (((Bundle) state).containsKey(STATE)) {
-            go(bundle.getInt(STATE, STATE_CLOSED));
-        }
+    public int getState() {
+        return mState;
     }
 
     public PanelBar(Context context, AttributeSet attrs) {
