@@ -53,12 +53,6 @@ public class MetricsFeatureProvider {
         }
     }
 
-    public void actionWithSource(Context context, int source, int category) {
-        for (LogWriter writer : mLoggerWriters) {
-            writer.actionWithSource(context, source, category);
-        }
-    }
-
     public void action(Context context, int category, Pair<Integer, Object>... taggedData) {
         for (LogWriter writer : mLoggerWriters) {
             writer.action(context, category, taggedData);
