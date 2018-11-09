@@ -248,6 +248,10 @@
         <item>@string/wfcSpnFormat_spn_wifi</item>
         <item>@string/wfcSpnFormat_wifi_calling_bar_spn</item>
         <item>@string/wfcSpnFormat_spn_vowifi</item>
+        <item>@string/wfcSpnFormat_wifi_calling</item>
+        <item>@string/wfcSpnFormat_wifi</item>
+        <item>@string/wfcSpnFormat_wifi_calling_wo_hyphen</item>
+        <item>@string/wfcSpnFormat_vowifi</item>
     </string-array>
 
     <!-- Spn during Wi-Fi Calling: "<operator>" -->
@@ -264,6 +268,14 @@
     <string name="wfcSpnFormat_wifi_calling_bar_spn">WiFi Calling | <xliff:g id="spn" example="Operator">%s</xliff:g></string>
     <!-- Spn during Wi-Fi Calling: "<operator> VoWifi" -->
     <string name="wfcSpnFormat_spn_vowifi"><xliff:g id="spn" example="Operator">%s</xliff:g> VoWifi</string>
+    <!-- Spn during Wi-Fi Calling: "Wi-Fi Calling" -->
+    <string name="wfcSpnFormat_wifi_calling">Wi-Fi Calling</string>
+    <!-- Spn during Wi-Fi Calling: "Wi-Fi" -->
+    <string name="wfcSpnFormat_wifi">Wi-Fi</string>
+    <!-- Spn during Wi-Fi Calling: "WiFi Calling" (without hyphen) -->
+    <string name="wfcSpnFormat_wifi_calling_wo_hyphen">WiFi Calling</string>
+    <!-- Spn during Wi-Fi Calling: "VoWifi" -->
+    <string name="wfcSpnFormat_vowifi">VoWifi</string>
 
     <!-- WFC, summary for Disabled -->
     <string name="wifi_calling_off_summary">Off</string>
