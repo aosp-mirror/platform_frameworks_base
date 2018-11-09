@@ -68,7 +68,7 @@
         android:orientation="vertical">
 
         <com.android.keyguard.AlphaOptimizedImageButton
-            android:id="@+id/notifications"
+            android:id="@+id/note"
             android:layout_height="wrap_content"
             android:layout_width="match_parent"
             android:src="@drawable/car_ic_notification"

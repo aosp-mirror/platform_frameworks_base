@@ -35,7 +35,7 @@
         android:layout_centerVertical="true"
         android:layout_width="@dimen/car_qs_footer_icon_width"
         android:layout_height="@dimen/car_qs_footer_icon_height"
-        android:background="@drawable/ripple_drawable"
+        android:background="?android:attr/selectableItemBackground"
         android:focusable="true">
 
         <ImageView
