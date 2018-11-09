@@ -16,6 +16,7 @@
 
 package com.android.server;
 
+import static android.app.AppOpsManager.OP_PLAY_AUDIO;
 import static android.app.AppOpsManager.UID_STATE_BACKGROUND;
 import static android.app.AppOpsManager.UID_STATE_CACHED;
 import static android.app.AppOpsManager.UID_STATE_FOREGROUND;
@@ -36,8 +37,11 @@ import android.app.AppOpsManager.HistoricalOpEntry;
 import android.app.AppOpsManager.HistoricalPackageOps;
 import android.app.AppOpsManagerInternal;
 import android.app.AppOpsManagerInternal.CheckOpsDelegate;
+import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
@@ -644,6 +648,26 @@ public class AppOpsService extends IAppOpsService.Stub {
                 scheduleFastWriteLocked();
             }
         }
+
+        final IntentFilter packageSuspendFilter = new IntentFilter();
+        packageSuspendFilter.addAction(Intent.ACTION_PACKAGES_UNSUSPENDED);
+        packageSuspendFilter.addAction(Intent.ACTION_PACKAGES_SUSPENDED);
+        mContext.registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                final int[] changedUids = intent.getIntArrayExtra(Intent.EXTRA_CHANGED_UID_LIST);
+                final String[] changedPkgs = intent.getStringArrayExtra(
+                        Intent.EXTRA_CHANGED_PACKAGE_LIST);
+                final ArraySet<ModeCallback> callbacks = mOpModeWatchers.get(OP_PLAY_AUDIO);
+                for (int i = 0; i < changedUids.length; i++) {
+                    final int changedUid = changedUids[i];
+                    final String changedPkg = changedPkgs[i];
+                    // We trust packagemanager to insert matching uid and packageNames in the extras
+                    mHandler.sendMessage(PooledLambda.obtainMessage(AppOpsService::notifyOpChanged,
+                            AppOpsService.this, callbacks, OP_PLAY_AUDIO, changedUid, changedPkg));
+                }
+            }
+        }, packageSuspendFilter);
 
         PackageManagerInternal packageManagerInternal = LocalServices.getService(
                 PackageManagerInternal.class);

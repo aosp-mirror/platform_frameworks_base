@@ -5825,16 +5825,16 @@ public abstract class PackageManager {
      * {@code android.permission.SUSPEND_APPS} can put any app on the device into a suspended state.
      *
      * <p>While in this state, the application's notifications will be hidden, any of its started
-     * activities will be stopped and it will not be able to show toasts or dialogs or ring the
-     * device. When the user tries to launch a suspended app, the system will, instead, show a
+     * activities will be stopped and it will not be able to show toasts or dialogs or play audio.
+     * When the user tries to launch a suspended app, the system will, instead, show a
      * dialog to the user informing them that they cannot use this app while it is suspended.
      *
      * <p>When an app is put into this state, the broadcast action
      * {@link Intent#ACTION_MY_PACKAGE_SUSPENDED} will be delivered to any of its broadcast
      * receivers that included this action in their intent-filters, <em>including manifest
      * receivers.</em> Similarly, a broadcast action {@link Intent#ACTION_MY_PACKAGE_UNSUSPENDED}
-     * is delivered when a previously suspended app is taken out of this state.
-     * </p>
+     * is delivered when a previously suspended app is taken out of this state. Apps are expected to
+     * use these to gracefully deal with transitions to and from this state.
      *
      * @return {@code true} if the calling package has been suspended, {@code false} otherwise.
      *
