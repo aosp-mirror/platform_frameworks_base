@@ -2122,7 +2122,8 @@ public class PermissionManagerService {
                 // Only system declares background permissions, hence mapping does never change.
                 mBackgroundPermissions = new ArrayMap<>();
                 for (BasePermission bp : mSettings.getAllPermissionsLocked()) {
-                    if (bp.perm.info != null && bp.perm.info.backgroundPermission != null) {
+                    if (bp.perm != null && bp.perm.info != null
+                            && bp.perm.info.backgroundPermission != null) {
                         String fgPerm = bp.name;
                         String bgPerm = bp.perm.info.backgroundPermission;
 
