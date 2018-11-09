@@ -165,7 +165,7 @@ public class PermissionMonitor {
     }
 
     @VisibleForTesting
-    int getDeviceFirstSdkInt() {
+    protected int getDeviceFirstSdkInt() {
         return Build.VERSION.FIRST_SDK_INT;
     }
 

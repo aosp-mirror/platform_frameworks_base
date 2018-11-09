@@ -30,7 +30,9 @@ import static android.os.Process.SYSTEM_UID;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.anyInt;
+import static org.mockito.Mockito.doReturn;
 import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.when;
 
 import android.content.Context;
@@ -63,24 +65,13 @@ public class PermissionMonitorTest {
     @Mock private PackageManager mPackageManager;
 
     private PermissionMonitor mPermissionMonitor;
-    private int mMockFirstSdkInt;
 
     @Before
     public void setUp() throws Exception {
         MockitoAnnotations.initMocks(this);
         when(mContext.getPackageManager()).thenReturn(mPackageManager);
         when(mPackageManager.getPackagesForUid(anyInt())).thenReturn(MOCK_PACKAGE_NAMES);
-        // Try to use spy() here for stubbing getDeviceFirstSdkInt value but the spies are loaded
-        // by a custom class loader that's different from the loader used for loading the real
-        // thing. That means those two classes are not in the same package, so a package private
-        // method is not accessible. Hence, using override method to control FIRST_SDK_INT value
-        // instead of spy function for testing.
-        mPermissionMonitor = new PermissionMonitor(mContext, null) {
-            @Override
-            int getDeviceFirstSdkInt() {
-                return mMockFirstSdkInt;
-            }
-        };
+        mPermissionMonitor = spy(new PermissionMonitor(mContext, null));
     }
 
     private boolean hasBgPermission(String partition, int targetSdkVersion, int uid,
@@ -166,13 +157,13 @@ public class PermissionMonitorTest {
 
     @Test
     public void testHasUseBackgroundNetworksPermissionSystemUid() throws Exception {
-        mMockFirstSdkInt = VERSION_P;
+        doReturn(VERSION_P).when(mPermissionMonitor).getDeviceFirstSdkInt();
         assertTrue(hasBgPermission(PARTITION_SYSTEM, VERSION_P, SYSTEM_UID));
         assertTrue(hasBgPermission(PARTITION_SYSTEM, VERSION_P, SYSTEM_UID, CHANGE_WIFI_STATE));
         assertTrue(hasBgPermission(PARTITION_SYSTEM, VERSION_P, SYSTEM_UID,
                 CONNECTIVITY_USE_RESTRICTED_NETWORKS));
 
-        mMockFirstSdkInt = VERSION_Q;
+        doReturn(VERSION_Q).when(mPermissionMonitor).getDeviceFirstSdkInt();
         assertFalse(hasBgPermission(PARTITION_SYSTEM, VERSION_Q, SYSTEM_UID));
         assertFalse(hasBgPermission(PARTITION_SYSTEM, VERSION_Q, SYSTEM_UID, CHANGE_WIFI_STATE));
         assertTrue(hasBgPermission(PARTITION_SYSTEM, VERSION_Q, SYSTEM_UID,
