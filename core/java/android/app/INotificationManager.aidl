@@ -88,6 +88,8 @@ interface INotificationManager
     ParceledListSlice getRecentNotifyingAppsForUser(int userId);
     int getBlockedAppCount(int userId);
     boolean areChannelsBypassingDnd();
+    int getAppsBypassingDndCount(int uid);
+    ParceledListSlice getNotificationChannelsBypassingDnd(String pkg, int userId);
 
     // TODO: Remove this when callers have been migrated to the equivalent
     // INotificationListener method.
