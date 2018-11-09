@@ -24,7 +24,6 @@ import android.view.View;
 import android.view.ViewGroup;
 
 import com.android.systemui.Dependency;
-import com.android.systemui.InitController;
 import com.android.systemui.R;
 import com.android.systemui.statusbar.notification.NotificationData;
 import com.android.systemui.statusbar.notification.NotificationEntryManager;
@@ -380,6 +379,7 @@ public class NotificationViewHierarchyManager {
             }
 
             row.showAppOpsIcons(entry.mActiveAppOps);
+            row.setAudiblyAlerted(entry.audiblyAlerted);
         }
 
         Trace.beginSection("NotificationPresenter#onUpdateRowStates");

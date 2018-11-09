@@ -51,13 +51,14 @@ import android.util.ArraySet;
 import android.view.View;
 import android.widget.ImageView;
 
+import androidx.annotation.Nullable;
+
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.ContrastColorUtil;
 import com.android.systemui.Dependency;
 import com.android.systemui.ForegroundServiceController;
-import com.android.systemui.InitController;
 import com.android.systemui.statusbar.InflationTask;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationMediaManager;
@@ -74,8 +75,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
-
-import androidx.annotation.Nullable;
 
 /**
  * The list of currently displaying notifications.
@@ -102,6 +101,7 @@ public class NotificationData {
         public String key;
         public StatusBarNotification notification;
         public NotificationChannel channel;
+        public boolean audiblyAlerted;
         public StatusBarIconView icon;
         public StatusBarIconView expandedIcon;
         public ExpandableNotificationRow row; // the outer expanded view
@@ -154,6 +154,7 @@ public class NotificationData {
 
         public void populateFromRanking(@NonNull Ranking ranking) {
             channel = ranking.getChannel();
+            audiblyAlerted = ranking.audiblyAlerted();
             snoozeCriteria = ranking.getSnoozeCriteria();
             userSentiment = ranking.getUserSentiment();
             smartActions = ranking.getSmartActions() == null

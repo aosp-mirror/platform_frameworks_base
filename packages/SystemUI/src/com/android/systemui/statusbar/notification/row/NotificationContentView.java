@@ -1551,6 +1551,19 @@ public class NotificationContentView extends FrameLayout {
         }
     }
 
+    /** Sets whether the notification being displayed audibly alerted the user. */
+    public void setAudiblyAlerted(boolean audiblyAlerted) {
+        if (mContractedChild != null && mContractedWrapper.getNotificationHeader() != null) {
+            mContractedWrapper.getNotificationHeader().setAudiblyAlerted(audiblyAlerted);
+        }
+        if (mExpandedChild != null && mExpandedWrapper.getNotificationHeader() != null) {
+            mExpandedWrapper.getNotificationHeader().setAudiblyAlerted(audiblyAlerted);
+        }
+        if (mHeadsUpChild != null && mHeadsUpWrapper.getNotificationHeader() != null) {
+            mHeadsUpWrapper.getNotificationHeader().setAudiblyAlerted(audiblyAlerted);
+        }
+    }
+
     public NotificationHeaderView getContractedNotificationHeader() {
         if (mContractedChild != null) {
             return mContractedWrapper.getNotificationHeader();
