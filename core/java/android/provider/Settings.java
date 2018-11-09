@@ -9174,6 +9174,13 @@ public final class Settings {
         public static final String DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT
                 = "enable_freeform_support";
 
+        /**
+         * Whether to enable experimental desktop mode on secondary displays.
+         * @hide
+         */
+        public static final String DEVELOPMENT_FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS =
+                "force_desktop_mode_on_external_displays";
+
        /**
         * Whether user has enabled development settings.
         */

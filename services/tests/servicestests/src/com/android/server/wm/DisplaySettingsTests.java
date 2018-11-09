@@ -64,6 +64,7 @@ public class DisplaySettingsTests extends WindowTestsBase {
 
         mWm.setSupportsFreeformWindowManagement(false);
         mWm.setIsPc(false);
+        mWm.setForceDesktopModeOnExternalDisplays(false);
 
         mTarget = new DisplaySettings(mWm, TEST_FOLDER);
 
@@ -78,7 +79,7 @@ public class DisplaySettingsTests extends WindowTestsBase {
     }
 
     @Test
-    public void testPrimaryDisplayDefaultToFullscreenWithoutFreeformSupport() {
+    public void testPrimaryDisplayDefaultToFullscreen_NoFreeformSupport() {
         mTarget.applySettingsToDisplayLocked(mPrimaryDisplay);
 
         assertEquals(WindowConfiguration.WINDOWING_MODE_FULLSCREEN,
@@ -86,7 +87,7 @@ public class DisplaySettingsTests extends WindowTestsBase {
     }
 
     @Test
-    public void testPrimaryDisplayDefaultToFullscreenWithFreeformSupportNonPc() {
+    public void testPrimaryDisplayDefaultToFullscreen_HasFreeformSupport_NonPc_NoDesktopMode() {
         mWm.setSupportsFreeformWindowManagement(true);
 
         mTarget.applySettingsToDisplayLocked(mPrimaryDisplay);
@@ -96,7 +97,18 @@ public class DisplaySettingsTests extends WindowTestsBase {
     }
 
     @Test
-    public void testPrimaryDisplayDefaultToFreeformWithFreeformIsPc() {
+    public void testPrimaryDisplayDefaultToFullscreen_HasFreeformSupport_NonPc_HasDesktopMode() {
+        mWm.setSupportsFreeformWindowManagement(true);
+        mWm.setForceDesktopModeOnExternalDisplays(true);
+
+        mTarget.applySettingsToDisplayLocked(mPrimaryDisplay);
+
+        assertEquals(WindowConfiguration.WINDOWING_MODE_FULLSCREEN,
+                mPrimaryDisplay.getWindowingMode());
+    }
+
+    @Test
+    public void testPrimaryDisplayDefaultToFreeform_HasFreeformSupport_IsPc() {
         mWm.setSupportsFreeformWindowManagement(true);
         mWm.setIsPc(true);
 
@@ -107,7 +119,7 @@ public class DisplaySettingsTests extends WindowTestsBase {
     }
 
     @Test
-    public void testSecondaryDisplayDefaultToFullscreenWithoutFreeformSupport() {
+    public void testSecondaryDisplayDefaultToFullscreen_NoFreeformSupport() {
         mTarget.applySettingsToDisplayLocked(mSecondaryDisplay);
 
         assertEquals(WindowConfiguration.WINDOWING_MODE_FULLSCREEN,
@@ -115,8 +127,19 @@ public class DisplaySettingsTests extends WindowTestsBase {
     }
 
     @Test
-    public void testSecondaryDisplayDefaultToFreeformWithFreeformSupportNonPc() {
+    public void testSecondaryDisplayDefaultToFreeform_HasFreeformSupport_NonPc_NoDesktopMode() {
         mWm.setSupportsFreeformWindowManagement(true);
+
+        mTarget.applySettingsToDisplayLocked(mSecondaryDisplay);
+
+        assertEquals(WindowConfiguration.WINDOWING_MODE_FULLSCREEN,
+                mSecondaryDisplay.getWindowingMode());
+    }
+
+    @Test
+    public void testSecondaryDisplayDefaultToFreeform_HasFreeformSupport_NonPc_HasDesktopMode() {
+        mWm.setSupportsFreeformWindowManagement(true);
+        mWm.setForceDesktopModeOnExternalDisplays(true);
 
         mTarget.applySettingsToDisplayLocked(mSecondaryDisplay);
 
@@ -125,7 +148,7 @@ public class DisplaySettingsTests extends WindowTestsBase {
     }
 
     @Test
-    public void testSecondaryDisplayDefaultToFreeformWithFreeformSupportIsPc() {
+    public void testSecondaryDisplayDefaultToFreeform_HasFreeformSupport_IsPc() {
         mWm.setSupportsFreeformWindowManagement(true);
         mWm.setIsPc(true);
 

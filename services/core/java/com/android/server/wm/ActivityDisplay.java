@@ -1103,13 +1103,12 @@ class ActivityDisplay extends ConfigurationContainer<ActivityStack>
     }
 
     /**
+     * Checks if system decorations should be shown on this display.
+     *
      * @see Display#FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS
      */
     boolean supportsSystemDecorations() {
-        return mDisplay.supportsSystemDecorations()
-                // TODO (b/111363427): Remove this and set the new FLAG_SHOULD_SHOW_LAUNCHER flag
-                // (b/114338689) whenever vr 2d display id is set.
-                || mDisplayId == mSupervisor.mService.mVr2dDisplayId;
+        return mWindowContainerController.supportsSystemDecorations();
     }
 
     @VisibleForTesting

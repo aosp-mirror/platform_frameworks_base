@@ -339,6 +339,17 @@ public class DisplayWindowController
                 || transit == TRANSIT_TASK_TO_FRONT;
     }
 
+    /**
+     * Checks if system decorations should be shown on this display.
+     *
+     * @see Display#FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS
+     */
+    public boolean supportsSystemDecorations() {
+        synchronized (mGlobalLock) {
+            return mContainer.supportsSystemDecorations();
+        }
+    }
+
     @Override
     public String toString() {
         return "{DisplayWindowController displayId=" + mDisplayId + "}";
