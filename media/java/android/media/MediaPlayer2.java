@@ -294,7 +294,7 @@ public abstract class MediaPlayer2 implements AutoCloseable
      * reached end of stream and been paused, or never started before,
      * playback will start at the beginning.
      *
-     * @return a token which can be used to cancel the operation later with {@link #cancel}.
+     * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
      */
     // This is an asynchronous call.
     public abstract Object play();
@@ -305,21 +305,21 @@ public abstract class MediaPlayer2 implements AutoCloseable
      * After setting the datasource and the display surface, you need to
      * call prepare().
      *
-     * @return a token which can be used to cancel the operation later with {@link #cancel}.
+     * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
      */
     // This is an asynchronous call.
     public abstract Object prepare();
 
     /**
      * Pauses playback. Call play() to resume.
-     * @return a token which can be used to cancel the operation later with {@link #cancel}.
+     * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
      */
     // This is an asynchronous call.
     public abstract Object pause();
 
     /**
      * Tries to play next data source if applicable.
-     * @return a token which can be used to cancel the operation later with {@link #cancel}.
+     * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
      */
     // This is an asynchronous call.
     public abstract Object skipToNext();
@@ -404,7 +404,7 @@ public abstract class MediaPlayer2 implements AutoCloseable
      * You must call this method before {@link #play()} and {@link #pause()} in order
      * for the audio attributes to become effective thereafter.
      * @param attributes a non-null set of audio attributes
-     * @return a token which can be used to cancel the operation later with {@link #cancel}.
+     * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
      */
     // This is an asynchronous call.
     public abstract Object setAudioAttributes(@NonNull AudioAttributes attributes);
@@ -419,7 +419,7 @@ public abstract class MediaPlayer2 implements AutoCloseable
      * Sets the data source as described by a DataSourceDesc.
      *
      * @param dsd the descriptor of data source you want to play
-     * @return a token which can be used to cancel the operation later with {@link #cancel}.
+     * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
      */
     // This is an asynchronous call.
     public abstract Object setDataSource(@NonNull DataSourceDesc dsd);
@@ -429,7 +429,7 @@ public abstract class MediaPlayer2 implements AutoCloseable
      * after current data source is finished.
      *
      * @param dsd the descriptor of data source you want to play after current one
-     * @return a token which can be used to cancel the operation later with {@link #cancel}.
+     * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
      */
     // This is an asynchronous call.
     public abstract Object setNextDataSource(@NonNull DataSourceDesc dsd);
@@ -438,14 +438,14 @@ public abstract class MediaPlayer2 implements AutoCloseable
      * Sets a list of data sources to be played sequentially after current data source is done.
      *
      * @param dsds the list of data sources you want to play after current one
-     * @return a token which can be used to cancel the operation later with {@link #cancel}.
+     * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
      */
     // This is an asynchronous call.
     public abstract Object setNextDataSources(@NonNull List<DataSourceDesc> dsds);
 
     /**
      * Removes all data sources pending to be played.
-     * @return a token which can be used to cancel the operation later with {@link #cancel}.
+     * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
      */
     // This is an asynchronous call.
     public abstract Object clearNextDataSources();
@@ -460,7 +460,7 @@ public abstract class MediaPlayer2 implements AutoCloseable
     /**
      * Configures the player to loop on the current data source.
      * @param loop true if the current data source is meant to loop.
-     * @return a token which can be used to cancel the operation later with {@link #cancel}.
+     * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
      */
     // This is an asynchronous call.
     public abstract Object loopCurrent(boolean loop);
@@ -473,7 +473,7 @@ public abstract class MediaPlayer2 implements AutoCloseable
      * A value of 0.0f indicates muting, a value of 1.0f is the nominal unattenuated and unamplified
      * gain. See {@link #getMaxPlayerVolume()} for the volume range supported by this player.
      * @param volume a value between 0.0f and {@link #getMaxPlayerVolume()}.
-     * @return a token which can be used to cancel the operation later with {@link #cancel}.
+     * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
      */
     // This is an asynchronous call.
     public abstract Object setPlayerVolume(float volume);
@@ -502,7 +502,7 @@ public abstract class MediaPlayer2 implements AutoCloseable
      *
      * @param label An application specific Object used to help to identify the completeness
      * of a batch of commands.
-     * @return a token which can be used to cancel the operation later with {@link #cancel}.
+     * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
      */
     // This is an asynchronous call.
     public abstract Object notifyWhenCommandLabelReached(@NonNull Object label);
@@ -518,7 +518,7 @@ public abstract class MediaPlayer2 implements AutoCloseable
      * played.
      *
      * @param sh the SurfaceHolder to use for video display
-     * @return a token which can be used to cancel the operation later with {@link #cancel}.
+     * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
      */
     public abstract Object setDisplay(SurfaceHolder sh);
 
@@ -538,7 +538,7 @@ public abstract class MediaPlayer2 implements AutoCloseable
      *
      * @param surface The {@link Surface} to be used for the video portion of
      * the media.
-     * @return a token which can be used to cancel the operation later with {@link #cancel}.
+     * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
      */
     // This is an asynchronous call.
     public abstract Object setSurface(Surface surface);
@@ -558,7 +558,7 @@ public abstract class MediaPlayer2 implements AutoCloseable
      *
      * @param context the Context to use
      * @param mode    the power/wake mode to set
-     * @return a token which can be used to cancel the operation later with {@link #cancel}.
+     * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
      * @see android.os.PowerManager
      */
     // This is an asynchronous call.
@@ -572,7 +572,7 @@ public abstract class MediaPlayer2 implements AutoCloseable
      * access.
      *
      * @param screenOn Supply true to keep the screen on, false to allow it to turn off.
-     * @return a token which can be used to cancel the operation later with {@link #cancel}.
+     * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
      */
     // This is an asynchronous call.
     public abstract Object setScreenOnWhilePlaying(boolean screenOn);
@@ -667,20 +667,9 @@ public abstract class MediaPlayer2 implements AutoCloseable
      * available for the media being handled by this instance of MediaPlayer2
      * The attributes are descibed in {@link MetricsConstants}.
      *
-     *  Additional vendor-specific fields may also be present in
-     *  the return value.
+     * Additional vendor-specific fields may also be present in the return value.
      */
     public abstract PersistableBundle getMetrics();
-
-    /**
-     * Checks whether the MediaPlayer2 is playing.
-     *
-     * @return true if currently playing, false otherwise
-     * @throws IllegalStateException if the internal player engine has not been
-     * initialized or has been released.
-     * @hide
-     */
-    public abstract boolean isPlaying();
 
     /**
      * Gets the current buffering management params used by the source component.
@@ -690,10 +679,10 @@ public abstract class MediaPlayer2 implements AutoCloseable
      * @return the current buffering management params used by the source component.
      * @throws IllegalStateException if the internal player engine has not been
      * initialized, or {@code setDataSource} has not been called.
-     * @hide
      */
+    // TODO: make it public when ready
     @NonNull
-    public BufferingParams getBufferingParams() {
+    BufferingParams getBufferingParams() {
         return new BufferingParams.Builder().build();
     }
 
@@ -705,80 +694,11 @@ public abstract class MediaPlayer2 implements AutoCloseable
      * The input is a hint to MediaPlayer2.
      *
      * @param params the buffering management params.
-     * @return a token which can be used to cancel the operation later with {@link #cancel}.
-     *
-     * @hide
+     * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
      */
+    // TODO: make it public when ready
     // This is an asynchronous call.
-    public abstract Object setBufferingParams(@NonNull BufferingParams params);
-
-    /**
-     * Change playback speed of audio by resampling the audio.
-     * <p>
-     * Specifies resampling as audio mode for variable rate playback, i.e.,
-     * resample the waveform based on the requested playback rate to get
-     * a new waveform, and play back the new waveform at the original sampling
-     * frequency.
-     * When rate is larger than 1.0, pitch becomes higher.
-     * When rate is smaller than 1.0, pitch becomes lower.
-     *
-     * @hide
-     */
-    public static final int PLAYBACK_RATE_AUDIO_MODE_RESAMPLE = 2;
-
-    /**
-     * Change playback speed of audio without changing its pitch.
-     * <p>
-     * Specifies time stretching as audio mode for variable rate playback.
-     * Time stretching changes the duration of the audio samples without
-     * affecting its pitch.
-     * <p>
-     * This mode is only supported for a limited range of playback speed factors,
-     * e.g. between 1/2x and 2x.
-     *
-     * @hide
-     */
-    public static final int PLAYBACK_RATE_AUDIO_MODE_STRETCH = 1;
-
-    /**
-     * Change playback speed of audio without changing its pitch, and
-     * possibly mute audio if time stretching is not supported for the playback
-     * speed.
-     * <p>
-     * Try to keep audio pitch when changing the playback rate, but allow the
-     * system to determine how to change audio playback if the rate is out
-     * of range.
-     *
-     * @hide
-     */
-    public static final int PLAYBACK_RATE_AUDIO_MODE_DEFAULT = 0;
-
-    /** @hide */
-    @IntDef(flag = false, prefix = "PLAYBACK_RATE_AUDIO_MODE", value = {
-            PLAYBACK_RATE_AUDIO_MODE_DEFAULT,
-            PLAYBACK_RATE_AUDIO_MODE_STRETCH,
-            PLAYBACK_RATE_AUDIO_MODE_RESAMPLE,
-    })
-    @Retention(RetentionPolicy.SOURCE)
-    public @interface PlaybackRateAudioMode {}
-
-    /**
-     * Sets playback rate and audio mode.
-     *
-     * @param rate the ratio between desired playback rate and normal one.
-     * @param audioMode audio playback mode. Must be one of the supported
-     * audio modes.
-     *
-     * @throws IllegalStateException if the internal player engine has not been
-     * initialized.
-     * @throws IllegalArgumentException if audioMode is not supported.
-     *
-     * @hide
-     */
-    @NonNull
-    public PlaybackParams easyPlaybackParams(float rate, @PlaybackRateAudioMode int audioMode) {
-        return new PlaybackParams();
-    }
+    abstract Object setBufferingParams(@NonNull BufferingParams params);
 
     /**
      * Sets playback rate using {@link PlaybackParams}. The object sets its internal
@@ -787,7 +707,7 @@ public abstract class MediaPlayer2 implements AutoCloseable
      * the object state.
      *
      * @param params the playback params.
-     * @return a token which can be used to cancel the operation later with {@link #cancel}.
+     * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
      */
     // This is an asynchronous call.
     public abstract Object setPlaybackParams(@NonNull PlaybackParams params);
@@ -796,6 +716,7 @@ public abstract class MediaPlayer2 implements AutoCloseable
      * Gets the playback params, containing the current playback rate.
      *
      * @return the playback params.
+     * @throws IllegalStateException if the internal player engine has not been initialized.
      */
     @NonNull
     public abstract PlaybackParams getPlaybackParams();
@@ -804,7 +725,7 @@ public abstract class MediaPlayer2 implements AutoCloseable
      * Sets A/V sync mode.
      *
      * @param params the A/V sync params to apply
-     * @return a token which can be used to cancel the operation later with {@link #cancel}.
+     * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
      */
     // This is an asynchronous call.
     public abstract Object setSyncParams(@NonNull SyncParams params);
@@ -813,6 +734,7 @@ public abstract class MediaPlayer2 implements AutoCloseable
      * Gets the A/V sync mode.
      *
      * @return the A/V sync params
+     * @throws IllegalStateException if the internal player engine has not been initialized.
      */
     @NonNull
     public abstract SyncParams getSyncParams();
@@ -822,7 +744,7 @@ public abstract class MediaPlayer2 implements AutoCloseable
      * Same as {@link #seekTo(long, int)} with {@code mode = SEEK_PREVIOUS_SYNC}.
      *
      * @param msec the offset in milliseconds from the start to seek to
-     * @return a token which can be used to cancel the operation later with {@link #cancel}.
+     * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
      */
     // This is an asynchronous call.
     public Object seekTo(long msec) {
@@ -882,7 +804,8 @@ public abstract class MediaPlayer2 implements AutoCloseable
     /**
      * Moves the media to specified time position by considering the given mode.
      * <p>
-     * When seekTo is finished, the user will be notified via OnSeekComplete supplied by the user.
+     * When seekTo is finished, the user will be notified via
+     * {@link EventCallback#onCallCompleted} with {@link #CALL_COMPLETED_SEEK_TO}.
      * There is at most one active seekTo processed at any time. If there is a to-be-completed
      * seekTo, new seekTo requests will be queued in such a way that only the last request
      * is kept. When current seekTo is completed, the queued request will be processed if
@@ -895,7 +818,7 @@ public abstract class MediaPlayer2 implements AutoCloseable
      * If msec is negative, time position zero will be used.
      * If msec is larger than duration, duration will be used.
      * @param mode the mode indicating where exactly to seek to.
-     * @return a token which can be used to cancel the operation later with {@link #cancel}.
+     * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
      */
     // This is an asynchronous call.
     public abstract Object seekTo(long msec, @SeekMode int mode);
@@ -953,7 +876,7 @@ public abstract class MediaPlayer2 implements AutoCloseable
      * However, it is possible to force this player to be part of an already existing audio session
      * by calling this method.
      * This method must be called before one of the overloaded <code> setDataSource </code> methods.
-     * @return a token which can be used to cancel the operation later with {@link #cancel}.
+     * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
      */
     // This is an asynchronous call.
     public abstract Object setAudioSessionId(int sessionId);
@@ -979,7 +902,7 @@ public abstract class MediaPlayer2 implements AutoCloseable
      * <p>This method must be called after one of the overloaded <code> setDataSource </code>
      * methods.
      * @param effectId system wide unique id of the effect to attach
-     * @return a token which can be used to cancel the operation later with {@link #cancel}.
+     * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
      */
     // This is an asynchronous call.
     public abstract Object attachAuxEffect(int effectId);
@@ -996,7 +919,7 @@ public abstract class MediaPlayer2 implements AutoCloseable
      * x == 0 -> level = 0
      * 0 < x <= R -> level = 10^(72*(x-R)/20/R)
      * @param level send level scalar
-     * @return a token which can be used to cancel the operation later with {@link #cancel}.
+     * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
      */
     // This is an asynchronous call.
     public abstract Object setAuxEffectSendLevel(float level);
@@ -1122,7 +1045,7 @@ public abstract class MediaPlayer2 implements AutoCloseable
      * @param index the index of the track to be selected. The valid range of the index
      * is 0..total number of track - 1. The total number of tracks as well as the type of
      * each individual track can be found by calling {@link #getTrackInfo()} method.
-     * @return a token which can be used to cancel the operation later with {@link #cancel}.
+     * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
      *
      * @see MediaPlayer2#getTrackInfo
      */
@@ -1139,7 +1062,7 @@ public abstract class MediaPlayer2 implements AutoCloseable
      * @param index the index of the track to be deselected. The valid range of the index
      * is 0..total number of tracks - 1. The total number of tracks as well as the type of
      * each individual track can be found by calling {@link #getTrackInfo()} method.
-     * @return a token which can be used to cancel the operation later with {@link #cancel}.
+     * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
      *
      * @see MediaPlayer2#getTrackInfo
      */
@@ -1872,7 +1795,7 @@ public abstract class MediaPlayer2 implements AutoCloseable
      * from the source through {@code getDrmInfo} or registering a
      * {@link DrmEventCallback#onDrmInfo}.
      *
-     * @return a token which can be used to cancel the operation later with {@link #cancel}.
+     * @return a token which can be used to cancel the operation later with {@link #cancelCommand}.
      */
     // This is an asynchronous call.
     public abstract Object prepareDrm(@NonNull UUID uuid);
