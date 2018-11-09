@@ -1753,6 +1753,30 @@ public class Intent implements Parcelable, Cloneable {
             "android.intent.action.MANAGE_APP_PERMISSIONS";
 
     /**
+     * Activity action: Launch UI to manage a specific permissions of an app.
+     * <p>
+     * Input: {@link #EXTRA_PACKAGE_NAME} specifies the package whose permission
+     * will be managed by the launched UI.
+     * </p>
+     * <p>
+     * Input: {@link #EXTRA_PERMISSION_NAME} specifies the (individual) permission
+     * that should be managed by the launched UI.
+     * </p>
+     * <p>
+     * Output: Nothing.
+     * </p>
+     *
+     * @see #EXTRA_PACKAGE_NAME
+     * @see #EXTRA_PERMISSION_NAME
+     *
+     * @hide
+     */
+    @SystemApi
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_MANAGE_APP_PERMISSION =
+            "android.intent.action.MANAGE_APP_PERMISSION";
+
+    /**
      * Activity action: Launch UI to manage permissions.
      * <p>
      * Input: Nothing.
@@ -1882,8 +1906,8 @@ public class Intent implements Parcelable, Cloneable {
     /**
      * Activity action: Launch UI to manage which apps have a given permission.
      * <p>
-     * Input: {@link #EXTRA_PERMISSION_NAME} specifies the permission access
-     * to which will be managed by the launched UI.
+     * Input: {@link #EXTRA_PERMISSION_NAME} specifies the permission group
+     * which will be managed by the launched UI.
      * </p>
      * <p>
      * Output: Nothing.
