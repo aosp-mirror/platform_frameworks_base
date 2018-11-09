@@ -236,6 +236,9 @@ static bool FlattenXml(IAaptContext* context, const xml::XmlResource& xml_res,
 
     case OutputFormat::kProto: {
       pb::XmlNode pb_node;
+      // Strip whitespace text nodes from tha AndroidManifest.xml
+      SerializeXmlOptions options;
+      options.remove_empty_text_nodes = (path == kAndroidManifestPath);
       SerializeXmlResourceToPb(xml_res, &pb_node);
       return io::CopyProtoToArchive(context, &pb_node, path.to_string(), ArchiveEntry::kCompress,
                                     writer);
@@ -1543,7 +1546,7 @@ class Linker {
   bool WriteApk(IArchiveWriter* writer, proguard::KeepSet* keep_set, xml::XmlResource* manifest,
                 ResourceTable* table) {
     const bool keep_raw_values = context_->GetPackageType() == PackageType::kStaticLib;
-    bool result = FlattenXml(context_, *manifest, "AndroidManifest.xml", keep_raw_values,
+    bool result = FlattenXml(context_, *manifest, kAndroidManifestPath, keep_raw_values,
                              true /*utf16*/, options_.output_format, writer);
     if (!result) {
       return false;

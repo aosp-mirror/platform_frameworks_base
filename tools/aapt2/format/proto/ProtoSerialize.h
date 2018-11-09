@@ -30,6 +30,11 @@
 
 namespace aapt {
 
+struct SerializeXmlOptions {
+  /** Remove text nodes that only contain whitespace. */
+  bool remove_empty_text_nodes = false;
+};
+
 // Serializes a Value to its protobuf representation. An optional StringPool will hold the
 // source path string.
 void SerializeValueToPb(const Value& value, pb::Value* out_value, StringPool* src_pool = nullptr);
@@ -39,10 +44,12 @@ void SerializeValueToPb(const Value& value, pb::Value* out_value, StringPool* sr
 void SerializeItemToPb(const Item& item, pb::Item* out_item);
 
 // Serializes an XML element into its protobuf representation.
-void SerializeXmlToPb(const xml::Element& el, pb::XmlNode* out_node);
+void SerializeXmlToPb(const xml::Element& el, pb::XmlNode* out_node,
+                      const SerializeXmlOptions options = {});
 
 // Serializes an XmlResource into its protobuf representation. The ResourceFile is NOT serialized.
-void SerializeXmlResourceToPb(const xml::XmlResource& resource, pb::XmlNode* out_node);
+void SerializeXmlResourceToPb(const xml::XmlResource& resource, pb::XmlNode* out_node,
+                              const SerializeXmlOptions options = {});
 
 // Serializes a StringPool into its protobuf representation, which is really just the binary
 // ResStringPool representation stuffed into a bytes field.
