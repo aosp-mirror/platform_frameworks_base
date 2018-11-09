@@ -61,11 +61,6 @@ interface IContextHubService {
     // Creates a client to send and receive messages
     IContextHubClient createClient(in IContextHubClientCallback client, int contextHubId);
 
-    // Binds an existing client to a new callback interface, provided a previously registered
-    // PendingIntent
-    IContextHubClient bindClient(
-            in PendingIntent pendingIntent, in IContextHubClientCallback client, int contextHubId);
-
     // Returns a list of ContextHub objects of available hubs
     List<ContextHubInfo> getContextHubs();
 

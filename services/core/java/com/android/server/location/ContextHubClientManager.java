@@ -98,36 +98,6 @@ import java.util.function.Consumer;
     }
 
     /**
-     * Binds a existing and registered client with a new callback interface, provided a previously
-     * registered PendingIntent.
-     *
-     * @param pendingIntent  a previously registered PendingIntent for a registered client
-     * @param clientCallback the callback interface of the client to bind to
-     * @param contextHubId   the ID of the hub this client is attached to
-     *
-     * @return the client interface
-     *
-     * @throws IllegalArgumentException if no matching client is found
-     * @throws IllegalStateException    if the client has already been registered to a callback
-     */
-    /* package */ IContextHubClient bindClient(
-            PendingIntent pendingIntent, IContextHubClientCallback clientCallback,
-            int contextHubId) {
-        ContextHubClientBroker broker = getClientBroker(pendingIntent, contextHubId);
-        if (broker == null) {
-            throw new IllegalArgumentException("Could not find client of Context Hub (ID = "
-                    + contextHubId + ") with PendingIntent");
-        }
-
-        if (!broker.setCallback(clientCallback)) {
-            return null; // Client process has died, so we return null
-        }
-
-        Log.d(TAG, "Re-registered client with host endpoint ID " + broker.getHostEndPointId());
-        return IContextHubClient.Stub.asInterface(broker);
-    }
-
-    /**
      * Handles a message sent from a nanoapp.
      *
      * @param contextHubId the ID of the hub where the nanoapp sent the message from

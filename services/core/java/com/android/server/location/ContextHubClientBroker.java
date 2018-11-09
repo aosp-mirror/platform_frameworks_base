@@ -130,31 +130,6 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
         public void clear() {
             mPendingIntent = null;
         }
-
-        public boolean register(PendingIntent pendingIntent, long nanoAppId) {
-            boolean success = false;
-            if (hasPendingIntent()) {
-                Log.e(TAG, "Failed to register PendingIntent: registered PendingIntent exists");
-            } else {
-                mNanoAppId = nanoAppId;
-                mPendingIntent = pendingIntent;
-                success = true;
-            }
-
-            return success;
-        }
-
-        public boolean unregister(PendingIntent pendingIntent) {
-            boolean success = false;
-            if (!hasPendingIntent() || !mPendingIntent.equals(pendingIntent)) {
-                Log.e(TAG, "Failed to unregister PendingIntent: PendingIntent is not registered");
-            } else {
-                mPendingIntent = null;
-                success = true;
-            }
-
-            return success;
-        }
     }
 
     /* package */ ContextHubClientBroker(
@@ -201,50 +176,6 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
         }
 
         return ContextHubServiceUtil.toTransactionResult(result);
-    }
-
-    /**
-     * @param pendingIntent the intent to register
-     * @param nanoAppId     the ID of the nanoapp to send events for
-     * @return true on success, false otherwise
-     */
-    @Override
-    public boolean registerIntent(PendingIntent pendingIntent, long nanoAppId) {
-        ContextHubServiceUtil.checkPermissions(mContext);
-        if (mClientManager.isPendingIntentRegistered(pendingIntent)) {
-            Log.e(TAG, "Failed to register PendingIntent: already registered");
-            return false;
-        }
-
-        boolean success = false;
-        synchronized (this) {
-            if (mCallbackInterface == null) {
-                Log.e(TAG, "Failed to register PendingIntent: client connection is closed");
-            } else {
-                success = mPendingIntentRequest.register(pendingIntent, nanoAppId);
-            }
-        }
-
-        return success;
-    }
-
-    /**
-     * @param pendingIntent the intent to unregister
-     * @return true on success, false otherwise
-     */
-    @Override
-    public boolean unregisterIntent(PendingIntent pendingIntent) {
-        ContextHubServiceUtil.checkPermissions(mContext);
-
-        boolean success = false;
-        synchronized (this) {
-            success = mPendingIntentRequest.unregister(pendingIntent);
-            if (mCallbackInterface == null) {
-                close();
-            }
-        }
-
-        return success;
     }
 
     /**
