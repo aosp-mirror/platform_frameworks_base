@@ -24,6 +24,8 @@ import android.content.Context;
 import android.content.ContextWrapper;
 import android.content.Intent;
 import android.content.pm.ApplicationInfo;
+import android.content.pm.LauncherActivityInfo;
+import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager.NameNotFoundException;
 import android.content.res.Resources;
 import android.graphics.Color;
@@ -622,6 +624,7 @@ public class AppWidgetHostView extends FrameLayout {
                     }
                 }
                 defaultView = inflater.inflate(layoutId, this, false);
+                defaultView.setOnClickListener(this::onDefaultViewClicked);
             } else {
                 Log.w(TAG, "can't inflate defaultView because mInfo is missing");
             }
@@ -639,6 +642,19 @@ public class AppWidgetHostView extends FrameLayout {
         }
 
         return defaultView;
+    }
+
+    private void onDefaultViewClicked(View view) {
+        if (mInfo != null) {
+            LauncherApps launcherApps = getContext().getSystemService(LauncherApps.class);
+            List<LauncherActivityInfo> activities = launcherApps.getActivityList(
+                    mInfo.provider.getPackageName(), mInfo.getProfile());
+            if (!activities.isEmpty()) {
+                LauncherActivityInfo ai = activities.get(0);
+                launcherApps.startMainActivity(ai.getComponentName(), ai.getUser(),
+                        RemoteViews.getSourceBounds(view), null);
+            }
+        }
     }
 
     /**
