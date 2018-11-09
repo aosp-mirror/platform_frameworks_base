@@ -62,3 +62,22 @@ cc_test_host {
     ],
     test_suites: ["general-tests"],
 }
+
+cc_binary_host {
+    name: "dex_testcase_generator",
+    defaults: ["viewcompiler_defaults"],
+    srcs: ["dex_testcase_generator.cc"],
+    static_libs: [
+        "libviewcompiler",
+    ],
+}
+
+genrule {
+    name: "generate_dex_testcases",
+    tools: [":dex_testcase_generator"],
+    cmd: "$(location :dex_testcase_generator) $(genDir)",
+    out: [
+        "simple.dex",
+        "trivial.dex",
+    ],
+}
