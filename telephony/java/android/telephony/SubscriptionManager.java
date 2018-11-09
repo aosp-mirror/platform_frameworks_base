@@ -1407,8 +1407,9 @@ public class SubscriptionManager {
 
     /**
      * Get an array of Subscription Ids for specified slot Index.
-     * @param slotIndex the slot Index.
-     * @return subscription Ids or null if the given slot Index is not valid.
+     * @param slotIndex the slot index.
+     * @return subscription Ids or null if the given slot Index is not valid or there are no active
+     * subscriptions in the slot.
      */
     @Nullable
     public static int[] getSubscriptionIds(int slotIndex) {
