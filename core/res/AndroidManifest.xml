@@ -4220,6 +4220,10 @@
     <permission android:name="android.permission.MANAGE_ACCESSIBILITY"
                 android:protectionLevel="signature|setup" />
 
+    <!-- Allows financial apps to read filtered sms messages. -->
+    <permission android:name="android.permission.SMS_FINANCIAL_TRANSACTIONS"
+        android:protectionLevel="signature|appop" />
+
     <application android:process="system"
                  android:persistent="true"
                  android:hasCode="false"
