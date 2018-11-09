@@ -16,9 +16,13 @@
 
 package android.net.wifi.p2p;
 
+import android.annotation.NonNull;
+import android.annotation.Nullable;
+import android.annotation.RequiresPermission;
 import android.annotation.SdkConstant;
-import android.annotation.SystemService;
 import android.annotation.SdkConstant.SdkConstantType;
+import android.annotation.SystemApi;
+import android.annotation.SystemService;
 import android.annotation.UnsupportedAppUsage;
 import android.content.Context;
 import android.net.wifi.WpsInfo;
@@ -480,6 +484,12 @@ public class WifiP2pManager {
     /** @hide */
     public static final int REPORT_NFC_HANDOVER_FAILED              = BASE + 81;
 
+    /** @hide */
+    public static final int FACTORY_RESET                           = BASE + 82;
+    /** @hide */
+    public static final int FACTORY_RESET_FAILED                    = BASE + 83;
+    /** @hide */
+    public static final int FACTORY_RESET_SUCCEEDED                 = BASE + 84;
 
     /**
      * Create a new WifiP2pManager instance. Applications use
@@ -776,6 +786,7 @@ public class WifiP2pManager {
                     case STOP_LISTEN_FAILED:
                     case SET_CHANNEL_FAILED:
                     case REPORT_NFC_HANDOVER_FAILED:
+                    case FACTORY_RESET_FAILED:
                         if (listener != null) {
                             ((ActionListener) listener).onFailure(message.arg1);
                         }
@@ -802,6 +813,7 @@ public class WifiP2pManager {
                     case STOP_LISTEN_SUCCEEDED:
                     case SET_CHANNEL_SUCCEEDED:
                     case REPORT_NFC_HANDOVER_SUCCEEDED:
+                    case FACTORY_RESET_SUCCEEDED:
                         if (listener != null) {
                             ((ActionListener) listener).onSuccess();
                         }
@@ -1521,4 +1533,21 @@ public class WifiP2pManager {
         c.mAsyncChannel.sendMessage(RESPONDER_REPORT_NFC_HANDOVER, 0,
                 c.putListener(listener), bundle);
     }
+
+    /**
+     * Removes all saved p2p groups.
+     * @param c is the channel created at {@link #initialize}.
+     * @param listener for callback on success or failure. Can be null.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.NETWORK_SETTINGS)
+    public void factoryReset(@NonNull Channel c, @Nullable ActionListener listener) {
+        checkChannel(c);
+        Bundle callingPackage = new Bundle();
+        callingPackage.putString(CALLING_PACKAGE, c.mContext.getOpPackageName());
+        c.mAsyncChannel.sendMessage(FACTORY_RESET, 0, c.putListener(listener),
+                callingPackage);
+    }
+
 }

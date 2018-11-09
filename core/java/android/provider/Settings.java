@@ -4895,6 +4895,7 @@ public final class Settings {
             MOVED_TO_GLOBAL.add(Settings.Global.WIFI_NETWORK_SHOW_RSSI);
             MOVED_TO_GLOBAL.add(Settings.Global.WIFI_WATCHDOG_ON);
             MOVED_TO_GLOBAL.add(Settings.Global.WIFI_WATCHDOG_POOR_NETWORK_TEST_ENABLED);
+            MOVED_TO_GLOBAL.add(Settings.Global.WIFI_P2P_PENDING_FACTORY_RESET);
             MOVED_TO_GLOBAL.add(Settings.Global.WIMAX_NETWORKS_AVAILABLE_NOTIFICATION_ON);
             MOVED_TO_GLOBAL.add(Settings.Global.PACKAGE_VERIFIER_ENABLE);
             MOVED_TO_GLOBAL.add(Settings.Global.PACKAGE_VERIFIER_TIMEOUT);
@@ -9993,6 +9994,15 @@ public final class Settings {
          */
         public static final String WIFI_RTT_BACKGROUND_EXEC_GAP_MS =
                 "wifi_rtt_background_exec_gap_ms";
+
+        /**
+         * Indicate whether factory reset request is pending.
+         *
+         * Type: int (0 for false, 1 for true)
+         * @hide
+         */
+        public static final String WIFI_P2P_PENDING_FACTORY_RESET =
+                "wifi_p2p_pending_factory_reset";
 
         /**
          * Whether soft AP will shut down after a timeout period when no devices are connected.
