@@ -87,7 +87,7 @@ import java.util.Set;
     }
 
     @Override
-    public void report(List<BaseDexClassLoader> classLoadersChain, List<String> classPaths) {
+    public void report(List<ClassLoader> classLoadersChain, List<String> classPaths) {
         if (classLoadersChain.size() != classPaths.size()) {
             Slog.wtf(TAG, "Bad call to DexLoadReporter: argument size mismatch");
             return;
@@ -113,12 +113,12 @@ import java.util.Set;
         registerSecondaryDexForProfiling(dexPathsForRegistration);
     }
 
-    private void notifyPackageManager(List<BaseDexClassLoader> classLoadersChain,
+    private void notifyPackageManager(List<ClassLoader> classLoadersChain,
             List<String> classPaths) {
         // Get the class loader names for the binder call.
         List<String> classLoadersNames = new ArrayList<>(classPaths.size());
-        for (BaseDexClassLoader bdc : classLoadersChain) {
-            classLoadersNames.add(bdc.getClass().getName());
+        for (ClassLoader classLoader : classLoadersChain) {
+            classLoadersNames.add(classLoader.getClass().getName());
         }
         String packageName = ActivityThread.currentPackageName();
         try {
