@@ -61,6 +61,7 @@ final class CoreSettingsObserver extends ContentObserver {
         sGlobalSettingToTypeMap.put(Settings.Global.GPU_DEBUG_LAYERS, String.class);
         sGlobalSettingToTypeMap.put(Settings.Global.GPU_DEBUG_LAYERS_GLES, String.class);
         sGlobalSettingToTypeMap.put(Settings.Global.GPU_DEBUG_LAYER_APP, String.class);
+        sGlobalSettingToTypeMap.put(Settings.Global.SMS_ACCESS_RESTRICTION_ENABLED, int.class);
         // add other global settings here...
     }
 

@@ -28,7 +28,9 @@ import android.annotation.UnsupportedAppUsage;
 import android.app.usage.UsageStatsManager;
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
+import android.database.ContentObserver;
 import android.media.AudioAttributes.AttributeUsage;
+import android.net.Uri;
 import android.os.Binder;
 import android.os.IBinder;
 import android.os.Parcel;
@@ -36,6 +38,7 @@ import android.os.Parcelable;
 import android.os.Process;
 import android.os.RemoteException;
 import android.os.UserManager;
+import android.provider.Settings;
 import android.util.ArrayMap;
 
 import com.android.internal.app.IAppOpsActiveCallback;
@@ -50,6 +53,7 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
+import java.util.concurrent.atomic.AtomicInteger;
 
 /**
  * API for interacting with "application operation" tracking.
@@ -1608,7 +1612,54 @@ public class AppOpsManager {
      * @hide
      */
     public static int opToDefaultMode(int op) {
+        // STOPSHIP b/118520006: Hardcode the default values once the feature is stable.
+        switch (op) {
+            // SMS permissions
+            case AppOpsManager.OP_SEND_SMS:
+            case AppOpsManager.OP_RECEIVE_SMS:
+            case AppOpsManager.OP_READ_SMS:
+            case AppOpsManager.OP_RECEIVE_WAP_PUSH:
+            case AppOpsManager.OP_RECEIVE_MMS:
+            case AppOpsManager.OP_READ_CELL_BROADCASTS:
+            // CallLog permissions
+            case AppOpsManager.OP_READ_CALL_LOG:
+            case AppOpsManager.OP_WRITE_CALL_LOG:
+            case AppOpsManager.OP_PROCESS_OUTGOING_CALLS: {
+                if (sSmsAndCallLogRestrictionEnabled.get() < 0) {
+                    startWatchingSmsRestrictionEnabled();
+                }
+                if (sSmsAndCallLogRestrictionEnabled.get() == 1) {
+                    return AppOpsManager.MODE_DEFAULT;
+                }
+            }
+        }
         return sOpDefaultMode[op];
+    }
+
+    // STOPSHIP b/118520006: Hardcode the default values once the feature is stable.
+    private static final AtomicInteger sSmsAndCallLogRestrictionEnabled = new AtomicInteger(-1);
+
+    // STOPSHIP b/118520006: Hardcode the default values once the feature is stable.
+    private static void startWatchingSmsRestrictionEnabled() {
+        final Context context = ActivityThread.currentApplication();
+        if (context == null) {
+            // Should never happen
+            return;
+        }
+
+        sSmsAndCallLogRestrictionEnabled.set(ActivityThread.currentActivityThread()
+                    .getIntCoreSetting(Settings.Global.SMS_ACCESS_RESTRICTION_ENABLED, 0));
+
+        final Uri uri = Settings.Global.getUriFor(Settings.Global.SMS_ACCESS_RESTRICTION_ENABLED);
+        context.getContentResolver().registerContentObserver(uri, false, new ContentObserver(
+                context.getMainThreadHandler()) {
+            @Override
+            public void onChange(boolean selfChange) {
+                sSmsAndCallLogRestrictionEnabled.set(Settings.Global.getInt(
+                        context.getContentResolver(),
+                        Settings.Global.SMS_ACCESS_RESTRICTION_ENABLED, 0));
+            }
+        });
     }
 
     /**
