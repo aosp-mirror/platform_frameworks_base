@@ -152,6 +152,13 @@
                 android:layout_marginStart="@dimen/notification_guts_button_horizontal_spacing"
                 style="@style/TextAppearance.NotificationInfo.Button" />
             <TextView
+                android:id="@+id/toggle_silent"
+                android:text="@string/inline_silent_button_silent"
+                android:layout_width="wrap_content"
+                android:layout_height="match_parent"
+                android:layout_marginStart="@dimen/notification_guts_button_horizontal_spacing"
+                style="@style/TextAppearance.NotificationInfo.Button" />
+            <TextView
                 android:id="@+id/keep"
                 android:minWidth="48dp"
                 android:text="@string/inline_keep_button"

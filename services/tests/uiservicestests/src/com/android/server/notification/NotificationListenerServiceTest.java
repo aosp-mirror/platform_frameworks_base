@@ -114,6 +114,7 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
         Bundle smartActions = new Bundle();
         Bundle smartReplies = new Bundle();
         Bundle audiblyAlerted = new Bundle();
+        Bundle noisy = new Bundle();
 
         for (int i = 0; i < mKeys.length; i++) {
             String key = mKeys[i];
@@ -134,12 +135,13 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
             smartActions.putParcelableArrayList(key, getSmartActions(key, i));
             smartReplies.putCharSequenceArrayList(key, getSmartReplies(key, i));
             audiblyAlerted.putBoolean(key, audiblyAlerted(i));
+            noisy.putBoolean(key, getNoisy(i));
         }
         NotificationRankingUpdate update = new NotificationRankingUpdate(mKeys,
                 interceptedKeys.toArray(new String[0]), visibilityOverrides,
                 suppressedVisualEffects, importance, explanation, overrideGroupKeys,
                 channels, overridePeople, snoozeCriteria, showBadge, userSentiment, mHidden,
-                smartActions, smartReplies, audiblyAlerted);
+                smartActions, smartReplies, audiblyAlerted, noisy);
         return update;
     }
 
@@ -193,6 +195,10 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
 
     private boolean audiblyAlerted(int index) {
         return index < 2;
+    }
+
+    private boolean getNoisy(int index) {
+        return index < 1;
     }
 
     private ArrayList<String> getPeople(String key, int index) {

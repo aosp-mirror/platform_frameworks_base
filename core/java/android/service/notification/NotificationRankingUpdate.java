@@ -40,13 +40,14 @@ public class NotificationRankingUpdate implements Parcelable {
     private final Bundle mSmartActions;
     private final Bundle mSmartReplies;
     private final Bundle mAudiblyAlerted;
+    private final Bundle mNoisy;
 
     public NotificationRankingUpdate(String[] keys, String[] interceptedKeys,
             Bundle visibilityOverrides, Bundle suppressedVisualEffects,
             int[] importance, Bundle explanation, Bundle overrideGroupKeys,
             Bundle channels, Bundle overridePeople, Bundle snoozeCriteria,
             Bundle showBadge, Bundle userSentiment, Bundle hidden, Bundle smartActions,
-            Bundle smartReplies, Bundle audiblyAlerted) {
+            Bundle smartReplies, Bundle audiblyAlerted, Bundle noisy) {
         mKeys = keys;
         mInterceptedKeys = interceptedKeys;
         mVisibilityOverrides = visibilityOverrides;
@@ -63,6 +64,7 @@ public class NotificationRankingUpdate implements Parcelable {
         mSmartActions = smartActions;
         mSmartReplies = smartReplies;
         mAudiblyAlerted = audiblyAlerted;
+        mNoisy = noisy;
     }
 
     public NotificationRankingUpdate(Parcel in) {
@@ -83,6 +85,7 @@ public class NotificationRankingUpdate implements Parcelable {
         mSmartActions = in.readBundle();
         mSmartReplies = in.readBundle();
         mAudiblyAlerted = in.readBundle();
+        mNoisy = in.readBundle();
     }
 
     @Override
@@ -108,6 +111,7 @@ public class NotificationRankingUpdate implements Parcelable {
         out.writeBundle(mSmartActions);
         out.writeBundle(mSmartReplies);
         out.writeBundle(mAudiblyAlerted);
+        out.writeBundle(mNoisy);
     }
 
     public static final Parcelable.Creator<NotificationRankingUpdate> CREATOR
@@ -183,5 +187,9 @@ public class NotificationRankingUpdate implements Parcelable {
 
     public Bundle getAudiblyAlerted() {
         return mAudiblyAlerted;
+    }
+
+    public Bundle getNoisy() {
+        return mNoisy;
     }
 }
