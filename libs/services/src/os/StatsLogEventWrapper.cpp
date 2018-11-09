@@ -85,9 +85,6 @@ status_t StatsLogEventWrapper::readFromParcel(const Parcel* in) {
       case StatsLogValue::FLOAT:
         mElements.push_back(StatsLogValue(in->readFloat()));
         break;
-      case StatsLogValue::DOUBLE:
-        mElements.push_back(StatsLogValue(in->readDouble()));
-        break;
       case StatsLogValue::STORAGE:
         mElements.push_back(StatsLogValue());
         mElements.back().setType(StatsLogValue::STORAGE);

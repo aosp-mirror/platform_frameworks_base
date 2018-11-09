@@ -192,6 +192,9 @@ message Atom {
         NativeProcessMemoryState native_process_memory_state = 10036;
         CpuTimePerThreadFreq cpu_time_per_thread_freq = 10037;
         OnDevicePowerMeasurement on_device_power_measurement = 10038;
+        DeviceCalculatedPowerUse device_calculated_power_use = 10039;
+        DeviceCalculatedPowerBlameUid device_calculated_power_blame_uid = 10040;
+        DeviceCalculatedPowerBlameOther device_calculated_power_blame_other = 10041;
     }
 
     // DO NOT USE field numbers above 100,000 in AOSP.
@@ -3197,4 +3200,64 @@ message CpuTimePerThreadFreq {
     optional uint32 frequency_khz = 6;
     // Time spent in frequency in milliseconds, since thread start.
     optional uint32 time_millis = 7;
+}
+
+/**
+ * Pulls on-device BatteryStats power use calculations for the overall device.
+ */
+message DeviceCalculatedPowerUse {
+    // Power used by the device in mAh, as computed by BatteryStats, since BatteryStats last reset
+    // (i.e. roughly since device was last significantly charged).
+    // Currently, this is BatteryStatsHelper.getComputedPower() (not getTotalPower()).
+    optional float computed_power_milli_amp_hours = 1;
+}
+
+/**
+ * Pulls on-device BatteryStats power use calculations broken down by uid.
+ * This atom should be complemented by DeviceCalculatedPowerBlameOther, which contains the power use
+ * that is attributed to non-uid items. They must all be included to get the total power use.
+ */
+message DeviceCalculatedPowerBlameUid {
+    // Uid being blamed. Note: isolated uids have already been mapped to host uid.
+    optional int32 uid = 1 [(is_uid) = true];
+
+    // Power used by this uid in mAh, as computed by BatteryStats, since BatteryStats last reset
+    // (i.e. roughly since device was last significantly charged).
+    optional float power_milli_amp_hours = 2;
+}
+
+/**
+ * Pulls on-device BatteryStats power use calculations that are not due to a uid, broken down by
+ * drain type.
+ * This atom should be complemented by DeviceCalculatedPowerBlameUid, which contains the blame that
+ * is attributed uids. They must all be included to get the total power use.
+ */
+message DeviceCalculatedPowerBlameOther {
+    // The type of item whose power use is being reported.
+    enum DrainType {
+        AMBIENT_DISPLAY = 0;
+        // reserved 1; reserved "APP"; // Logged instead in DeviceCalculatedPowerBlameUid.
+        BLUETOOTH = 2;
+        CAMERA = 3;
+        // Cell-standby
+        CELL = 4;
+        FLASHLIGHT = 5;
+        IDLE = 6;
+        MEMORY = 7;
+        // Amount that total computed drain exceeded the drain estimated using the
+        // battery level changes and capacity.
+        OVERCOUNTED = 8;
+        PHONE = 9;
+        SCREEN = 10;
+        // Amount that total computed drain was below the drain estimated using the
+        // battery level changes and capacity.
+        UNACCOUNTED = 11;
+        // reserved 12; reserved "USER"; // Entire drain for a user. This is NOT supported.
+        WIFI = 13;
+    }
+    optional DrainType drain_type = 1;
+
+    // Power used by this item in mAh, as computed by BatteryStats, since BatteryStats last reset
+    // (i.e. roughly since device was last significantly charged).
+    optional float power_milli_amp_hours = 2;
 }
