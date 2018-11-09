@@ -258,6 +258,52 @@ class MethodBuilder {
   void EncodeBranch(art::Instruction::Code op, const Instruction& instruction);
   void EncodeNew(const Instruction& instruction);
 
+  // Low-level instruction format encoding. See
+  // https://source.android.com/devices/tech/dalvik/instruction-formats for documentation of
+  // formats.
+
+  inline void Encode10x(art::Instruction::Code opcode) {
+    // 00|op
+    buffer_.push_back(opcode);
+  }
+
+  inline void Encode11x(art::Instruction::Code opcode, uint8_t a) {
+    // aa|op
+    buffer_.push_back((a << 8) | opcode);
+  }
+
+  inline void Encode11n(art::Instruction::Code opcode, uint8_t a, int8_t b) {
+    // b|a|op
+
+    // Make sure the fields are in bounds (4 bits for a, 4 bits for b).
+    CHECK_LT(a, 16);
+    CHECK_LE(-8, b);
+    CHECK_LT(b, 8);
+
+    buffer_.push_back(((b & 0xf) << 12) | (a << 8) | opcode);
+  }
+
+  inline void Encode21c(art::Instruction::Code opcode, uint8_t a, uint16_t b) {
+    // aa|op|bbbb
+    buffer_.push_back((a << 8) | opcode);
+    buffer_.push_back(b);
+  }
+
+  inline void Encode35c(art::Instruction::Code opcode, size_t a, uint16_t b, uint8_t c, uint8_t d,
+                        uint8_t e, uint8_t f, uint8_t g) {
+    // a|g|op|bbbb|f|e|d|c
+
+    CHECK_LE(a, 5);
+    CHECK_LT(c, 16);
+    CHECK_LT(d, 16);
+    CHECK_LT(e, 16);
+    CHECK_LT(f, 16);
+    CHECK_LT(g, 16);
+    buffer_.push_back((a << 12) | (g << 8) | opcode);
+    buffer_.push_back(b);
+    buffer_.push_back((f << 12) | (e << 8) | (d << 4) | c);
+  }
+
   // Converts a register or parameter to its DEX register number.
   size_t RegisterValue(const Value& value) const;
 
