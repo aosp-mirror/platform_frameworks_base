@@ -435,9 +435,13 @@ public abstract class CameraDevice implements AutoCloseable {
      * </table><br>
      * </p>
      *
+     * <p>Clients can access the above mandatory stream combination tables via
+     * {@link android.hardware.camera2.params.MandatoryStreamCombination}.</p>
+     *
      * <p>Since the capabilities of camera devices vary greatly, a given camera device may support
      * target combinations with sizes outside of these guarantees, but this can only be tested for
-     * by attempting to create a session with such targets.</p>
+     * by calling {@link #isSessionConfigurationSupported} or attempting to create a session with
+     * such targets.</p>
      *
      * @param outputs The new set of Surfaces that should be made available as
      *                targets for captured image data.
@@ -618,6 +622,9 @@ public abstract class CameraDevice implements AutoCloseable {
      * <tr> <td>{@code PRIV}/{@code YUV}</td><td id="rb">{@code MAXIMUM}</td> <td>Same as input</td><td id="rb">{@code MAXIMUM}</td> <td>{@code PRIV}</td><td id="rb">{@code PREVIEW}</td> <td>{@code PRIV}</td><td id="rb">{@code 640x480}</td> <td>{@code RAW}</td><td id="rb">{@code MAXIMUM}</td> <td>{@code JPEG}</td><td id="rb">{@code MAXIMUM}</td><td>In-app viewfinder analysis with ZSL, RAW, and JPEG reprocessing output.</td> </tr>
      * </table><br>
      * </p>
+     *
+     * <p>Clients can access the above mandatory stream combination tables via
+     * {@link android.hardware.camera2.params.MandatoryStreamCombination}.</p>
      *
      * @param inputConfig The configuration for the input {@link Surface}
      * @param outputs The new set of Surfaces that should be made available as
@@ -979,6 +986,12 @@ public abstract class CameraDevice implements AutoCloseable {
      * <p>The method can be called at any point before, during and after active capture session.
      * It must not impact normal camera behavior in any way and must complete significantly
      * faster than creating a regular or constrained capture session.</p>
+     *
+     * <p>Although this method is faster than creating a new capture session, it is not intended
+     * to be used for exploring the entire space of supported stream combinations. The available
+     * mandatory stream combinations
+     * {@link android.hardware.camera2.params.MandatoryStreamCombination} are better suited for this
+     * purpose.</p>
      *
      * <p>Note that session parameters will be ignored and calls to
      * {@link SessionConfiguration#setSessionParameters} are not required.</p>

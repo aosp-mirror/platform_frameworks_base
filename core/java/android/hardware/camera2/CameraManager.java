@@ -40,6 +40,9 @@ import android.os.ServiceSpecificException;
 import android.os.SystemProperties;
 import android.util.ArrayMap;
 import android.util.Log;
+import android.util.Size;
+import android.view.Display;
+import android.view.WindowManager;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -231,6 +234,30 @@ public final class CameraManager {
         CameraManagerGlobal.get().unregisterTorchCallback(callback);
     }
 
+    private Size getDisplaySize() {
+        Size ret = new Size(0, 0);
+
+        try {
+            WindowManager windowManager =
+                    (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
+            Display display = windowManager.getDefaultDisplay();
+
+            int width = display.getWidth();
+            int height = display.getHeight();
+
+            if (height > width) {
+                height = width;
+                width = display.getHeight();
+            }
+
+            ret = new Size(width, height);
+        } catch (Exception e) {
+            Log.e(TAG, "getDisplaySize Failed. " + e.toString());
+        }
+
+        return ret;
+    }
+
     /**
      * <p>Query the capabilities of a camera device. These capabilities are
      * immutable for a given camera.</p>
@@ -269,6 +296,8 @@ public final class CameraManager {
                         "Camera service is currently unavailable");
             }
             try {
+                Size displaySize = getDisplaySize();
+
                 // First check isHiddenPhysicalCamera to avoid supportsCamera2ApiLocked throwing
                 // exception in case cameraId is a hidden physical camera.
                 if (!isHiddenPhysicalCamera(cameraId) && !supportsCamera2ApiLocked(cameraId)) {
@@ -280,10 +309,19 @@ public final class CameraManager {
 
                     CameraInfo info = cameraService.getCameraInfo(id);
 
-                    characteristics = LegacyMetadataMapper.createCharacteristics(parameters, info);
+                    characteristics = LegacyMetadataMapper.createCharacteristics(parameters, info,
+                            id, displaySize);
                 } else {
                     // Normal path: Get the camera characteristics directly from the camera service
                     CameraMetadataNative info = cameraService.getCameraCharacteristics(cameraId);
+                    if (!isHiddenPhysicalCamera(cameraId)) {
+                        try {
+                            info.setCameraId(Integer.parseInt(cameraId));
+                        } catch (NumberFormatException e) {
+                            Log.e(TAG, "Failed to parse camera Id " + cameraId + " to integer");
+                        }
+                    }
+                    info.setDisplaySize(displaySize);
 
                     characteristics = new CameraCharacteristics(info);
                 }
@@ -363,7 +401,8 @@ public final class CameraManager {
                     }
 
                     Log.i(TAG, "Using legacy camera HAL.");
-                    cameraUser = CameraDeviceUserShim.connectBinderShim(callbacks, id);
+                    cameraUser = CameraDeviceUserShim.connectBinderShim(callbacks, id,
+                            getDisplaySize());
                 }
             } catch (ServiceSpecificException e) {
                 if (e.errorCode == ICameraService.ERROR_DEPRECATED_HAL) {

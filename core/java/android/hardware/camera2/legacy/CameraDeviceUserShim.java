@@ -39,6 +39,7 @@ import android.os.Message;
 import android.os.RemoteException;
 import android.os.ServiceSpecificException;
 import android.util.Log;
+import android.util.Size;
 import android.util.SparseArray;
 import android.view.Surface;
 
@@ -356,7 +357,7 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
     }
 
     public static CameraDeviceUserShim connectBinderShim(ICameraDeviceCallbacks callbacks,
-                                                         int cameraId) {
+                                                         int cameraId, Size displaySize) {
         if (DEBUG) {
             Log.d(TAG, "Opening shim Camera device");
         }
@@ -393,7 +394,8 @@ public class CameraDeviceUserShim implements ICameraDeviceUser {
         }
 
         CameraCharacteristics characteristics =
-                LegacyMetadataMapper.createCharacteristics(legacyParameters, info);
+                LegacyMetadataMapper.createCharacteristics(legacyParameters, info, cameraId,
+                        displaySize);
         LegacyCameraDevice device = new LegacyCameraDevice(
                 cameraId, legacyCamera, characteristics, threadCallbacks);
         return new CameraDeviceUserShim(cameraId, device, characteristics, init, threadCallbacks);
