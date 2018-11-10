@@ -68,12 +68,18 @@ public abstract class KeyguardPinBasedInputView extends KeyguardAbsKeyInputView
     protected void setPasswordEntryEnabled(boolean enabled) {
         mPasswordEntry.setEnabled(enabled);
         mOkButton.setEnabled(enabled);
+        if (enabled && !mPasswordEntry.hasFocus()) {
+            mPasswordEntry.requestFocus();
+        }
     }
 
     @Override
     protected void setPasswordEntryInputEnabled(boolean enabled) {
         mPasswordEntry.setEnabled(enabled);
         mOkButton.setEnabled(enabled);
+        if (enabled && !mPasswordEntry.hasFocus()) {
+            mPasswordEntry.requestFocus();
+        }
     }
 
     @Override
