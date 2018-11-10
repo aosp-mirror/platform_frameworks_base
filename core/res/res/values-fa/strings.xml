@@ -1048,7 +1048,7 @@
     <string name="volume_music" msgid="5421651157138628171">"میزان صدای رسانه"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="9165984379394601533">"پخش از طریق بلوتوث"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="8310739960973156272">"آهنگ زنگ روی بی‌صدا تنظیم شد"</string>
-    <string name="volume_call" msgid="3941680041282788711">"میزان صدای هنگام تماس"</string>
+    <string name="volume_call" msgid="3941680041282788711">"صدا حینِ تماس"</string>
     <string name="volume_bluetooth_call" msgid="2002891926351151534">"میزان صدای تماس بلوتوث"</string>
     <string name="volume_alarm" msgid="1985191616042689100">"میزان صدای هشدار"</string>
     <string name="volume_notification" msgid="2422265656744276715">"میزان صدای اعلان"</string>

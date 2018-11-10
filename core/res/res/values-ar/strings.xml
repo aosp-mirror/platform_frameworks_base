@@ -168,10 +168,10 @@
     <string name="contentServiceSync" msgid="8353523060269335667">"مزامنة"</string>
     <string name="contentServiceSyncNotificationTitle" msgid="397743349191901458">"مزامنة"</string>
     <string name="contentServiceTooManyDeletesNotificationDesc" msgid="8100981435080696431">"عمليات حذف <xliff:g id="CONTENT_TYPE">%s</xliff:g> كثيرة للغاية."</string>
-    <string name="low_memory" product="tablet" msgid="6494019234102154896">"سعة تخزين الجهاز اللوحي ممتلئة! احذف بعض الملفات لإخلاء مساحة."</string>
-    <string name="low_memory" product="watch" msgid="4415914910770005166">"سعة تخزين المشاهدة ممتلئة! احذف بعض الملفات لتحرير مساحة."</string>
-    <string name="low_memory" product="tv" msgid="516619861191025923">"سعة تخزين التلفزيون ممتلئة. يمكنك حذف بعض الملفات لتوفير مساحة فارغة."</string>
-    <string name="low_memory" product="default" msgid="3475999286680000541">"سعة تخزين الهاتف ممتلئة. احذف بعض الملفات لإخلاء مساحة."</string>
+    <string name="low_memory" product="tablet" msgid="6494019234102154896">"مساحة تخزين الجهاز اللوحي ممتلئة! احذف بعض الملفات لإخلاء مساحة."</string>
+    <string name="low_memory" product="watch" msgid="4415914910770005166">"مساحة تخزين المشاهدة ممتلئة! احذف بعض الملفات لتحرير مساحة."</string>
+    <string name="low_memory" product="tv" msgid="516619861191025923">"مساحة تخزين التلفزيون ممتلئة. يمكنك حذف بعض الملفات لتوفير مساحة فارغة."</string>
+    <string name="low_memory" product="default" msgid="3475999286680000541">"مساحة تخزين الهاتف ممتلئة. احذف بعض الملفات لإخلاء مساحة."</string>
     <plurals name="ssl_ca_cert_warning" formatted="false" msgid="5106721205300213569">
       <item quantity="zero">تم تثبيت شهادة المرجع المصدق</item>
       <item quantity="two">تم تثبيت شهادتي المرجع المصدق</item>
@@ -554,7 +554,7 @@
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"تعيين تشفير التخزين"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"يمكنك طلب تشفير بيانات التطبيق المخزنة."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"إيقاف الكاميرات"</string>
-    <string name="policydesc_disableCamera" msgid="2306349042834754597">"يمكنك منح استخدام جميع كاميرات الجهاز."</string>
+    <string name="policydesc_disableCamera" msgid="2306349042834754597">"يمكنك منع استخدام جميع كاميرات الجهاز."</string>
     <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"إيقاف بعض ميزات قفل الشاشة"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"منع استخدام بعض ميزات قفل الشاشة."</string>
   <string-array name="phoneTypes">
@@ -1046,7 +1046,7 @@
     <string name="editTextMenuTitle" msgid="4909135564941815494">"إجراءات النص"</string>
     <string name="low_internal_storage_view_title" msgid="5576272496365684834">"مساحة التخزين منخفضة"</string>
     <string name="low_internal_storage_view_text" msgid="6640505817617414371">"قد لا تعمل بعض وظائف النظام"</string>
-    <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"ليست هناك سعة تخزينية كافية للنظام. تأكد من أنه لديك مساحة خالية تبلغ ٢٥٠ ميغابايت وأعد التشغيل."</string>
+    <string name="low_internal_storage_view_text_no_boot" msgid="6935190099204693424">"ليست هناك مساحة تخزين كافية للنظام. تأكد من أنه لديك مساحة خالية تبلغ ٢٥٠ ميغابايت وأعد التشغيل."</string>
     <string name="app_running_notification_title" msgid="8718335121060787914">"<xliff:g id="APP_NAME">%1$s</xliff:g> قيد التشغيل"</string>
     <string name="app_running_notification_text" msgid="1197581823314971177">"انقر للحصول على مزيد من المعلومات أو لإيقاف التطبيق."</string>
     <string name="ok" msgid="5970060430562524910">"حسنًا"</string>
@@ -1115,7 +1115,7 @@
     <string name="smv_process" msgid="5120397012047462446">"‏انتهكت العملية <xliff:g id="PROCESS">%1$s</xliff:g> سياسة StrictMode المفروضة ذاتيًا."</string>
     <string name="android_upgrading_title" msgid="1584192285441405746">"‏جارٍ ترقية Android..."</string>
     <string name="android_start_title" msgid="8418054686415318207">"‏جارٍ تشغيل Android…"</string>
-    <string name="android_upgrading_fstrim" msgid="8036718871534640010">"جارٍ تحسين سعة التخزين."</string>
+    <string name="android_upgrading_fstrim" msgid="8036718871534640010">"جارٍ تحسين مساحة التخزين."</string>
     <string name="android_upgrading_notification_title" msgid="8428357096969413169">"‏جارٍ إتمام تحديث Android…"</string>
     <string name="android_upgrading_notification_body" msgid="5761201379457064286">"قد لا تعمل بعض التطبيقات بشكل مناسب إلا بعد انتهاء الترقية"</string>
     <string name="app_upgrading_toast" msgid="3008139776215597053">"جارٍ ترقية <xliff:g id="APPLICATION">%1$s</xliff:g>…"</string>
@@ -1330,7 +1330,7 @@
     <string name="forward_intent_to_work" msgid="621480743856004612">"أنت تستخدم هذا التطبيق في ملفك الشخصي للعمل"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"طريقة الإرسال"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"مزامنة"</string>
-    <string name="accessibility_binding_label" msgid="4148120742096474641">"إمكانية الدخول"</string>
+    <string name="accessibility_binding_label" msgid="4148120742096474641">"إمكانية الوصول"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"الخلفية"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"تغيير الخلفية"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"برنامج تلقّي الإشعارات الصوتية"</string>
@@ -1426,7 +1426,7 @@
     <string name="action_menu_overflow_description" msgid="2295659037509008453">"المزيد من الخيارات"</string>
     <string name="action_bar_home_description_format" msgid="7965984360903693903">"%1$s، %2$s"</string>
     <string name="action_bar_home_subtitle_description_format" msgid="6985546530471780727">"%1$s، %2$s، %3$s"</string>
-    <string name="storage_internal" msgid="3570990907910199483">"سعة التخزين المشتركة الداخلية"</string>
+    <string name="storage_internal" msgid="3570990907910199483">"مساحة التخزين المشتركة الداخلية"</string>
     <string name="storage_sd_card" msgid="3282948861378286745">"‏بطاقة SD"</string>
     <string name="storage_sd_card_label" msgid="6347111320774379257">"‏بطاقة SD من <xliff:g id="MANUFACTURER">%s</xliff:g>"</string>
     <string name="storage_usb_drive" msgid="6261899683292244209">"‏محرك أقراص USB"</string>
