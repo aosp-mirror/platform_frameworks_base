@@ -5797,6 +5797,30 @@ public abstract class PackageManager {
     }
 
     /**
+     * Returns whether or not a given package can be suspended via a call to {@link
+     * #setPackagesSuspended(String[], boolean, PersistableBundle, PersistableBundle,
+     * SuspendDialogInfo) setPackagesSuspended}. The platform prevents suspending certain critical
+     * packages to keep the device in a functioning state, e.g. the default dialer.
+     * Apps need to hold {@link Manifest.permission#SUSPEND_APPS SUSPEND_APPS} to call this api.
+     *
+     * <p>
+     * Note that this set of critical packages can change with time, so <em>a value of {@code true}
+     * returned by this api does not guarantee that a following call to {@link
+     * #setPackagesSuspended(String[], boolean, PersistableBundle, PersistableBundle,
+     * SuspendDialogInfo) setPackagesSuspended} for the same package will succeed</em>, especially
+     * if considerable time elapsed between the two calls.
+     *
+     * @param packageName The package to check.
+     * @return {@code true} if the given package can be suspended, {@code false} otherwise.
+     * @hide
+     */
+    @SystemApi
+    @RequiresPermission(Manifest.permission.SUSPEND_APPS)
+    public boolean canSuspendPackage(@NonNull String packageName) {
+        throw new UnsupportedOperationException("canSuspendPackage not implemented");
+    }
+
+    /**
      * @see #setPackagesSuspended(String[], boolean, PersistableBundle, PersistableBundle, String)
      * @param packageName The name of the package to get the suspended status of.
      * @param userId The user id.

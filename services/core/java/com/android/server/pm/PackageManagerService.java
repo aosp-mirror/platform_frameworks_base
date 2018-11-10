@@ -12928,6 +12928,25 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
+    @Override
+    public boolean canSuspendPackageForUser(String packageName, int userId) {
+        mContext.enforceCallingOrSelfPermission(Manifest.permission.SUSPEND_APPS,
+                "canSuspendPackageForUser");
+        final int callingUid = Binder.getCallingUid();
+        if (UserHandle.getUserId(callingUid) != userId) {
+            throw new SecurityException("Calling uid " + callingUid
+                    + " cannot query canSuspendPackageForUser for user " + userId);
+        }
+        final long identity = Binder.clearCallingIdentity();
+        try {
+            synchronized (mPackages) {
+                return canSuspendPackageForUserLocked(packageName, userId);
+            }
+        } finally {
+            Binder.restoreCallingIdentity(identity);
+        }
+    }
+
     @GuardedBy("mPackages")
     private boolean canSuspendPackageForUserLocked(String packageName, int userId) {
         if (isPackageDeviceAdmin(packageName, userId)) {
@@ -12991,7 +13010,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
 
         if (PLATFORM_PACKAGE_NAME.equals(packageName)) {
-            Slog.w(TAG, "Cannot suspend package: " + packageName);
+            Slog.w(TAG, "Cannot suspend the platform package: " + packageName);
             return false;
         }
 
