@@ -23,6 +23,7 @@ import android.app.admin.DevicePolicyManager;
 import android.app.admin.IDevicePolicyManager;
 import android.app.job.IJobScheduler;
 import android.app.job.JobScheduler;
+import android.app.role.RoleManager;
 import android.app.slice.SliceManager;
 import android.app.timedetector.TimeDetector;
 import android.app.timezone.RulesManager;
@@ -1119,6 +1120,14 @@ final class SystemServiceRegistry {
                     @Override
                     public PermissionManager createService(ContextImpl ctx) {
                         return new PermissionManager(ctx.getOuterContext());
+                    }});
+
+        registerService(Context.ROLE_SERVICE, RoleManager.class,
+                new CachedServiceFetcher<RoleManager>() {
+                    @Override
+                    public RoleManager createService(ContextImpl ctx)
+                            throws ServiceNotFoundException {
+                        return new RoleManager(ctx.getOuterContext());
                     }});
     }
 
