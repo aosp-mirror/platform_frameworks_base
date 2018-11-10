@@ -177,6 +177,9 @@ private:
 
     long mLastPullerCacheClearTimeSec = 0;
 
+    // Last time we wrote data to disk.
+    int64_t mLastWriteTimeNs = 0;
+
 #ifdef VERY_VERBOSE_PRINTING
     bool mPrintAllLogs = false;
 #endif
