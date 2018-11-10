@@ -161,7 +161,7 @@ import java.lang.annotation.RetentionPolicy;
  * top-level content is desired, and finally calling {@link Surface#unlockCanvasAndPost(Canvas)}.
  * </p>
  */
-public class RenderNode {
+public final class RenderNode {
 
     // Use a Holder to allow static initialization in the boot image.
     private static class NoImagePreloadHolder {
@@ -178,6 +178,16 @@ public class RenderNode {
     private final AnimationHost mAnimationHost;
     private RecordingCanvas mCurrentRecordingCanvas;
 
+    /**
+     * Creates a new RenderNode that can be used to record batches of
+     * drawing operations, and store / apply render properties when drawn.
+     *
+     * @param name The name of the RenderNode, used for debugging purpose. May be null.
+     */
+    public RenderNode(String name) {
+        this(name, null);
+    }
+
     private RenderNode(String name, AnimationHost animationHost) {
         mNativeRenderNode = nCreate(name);
         NoImagePreloadHolder.sRegistry.registerNativeAllocation(this, mNativeRenderNode);
@@ -191,17 +201,6 @@ public class RenderNode {
         mNativeRenderNode = nativePtr;
         NoImagePreloadHolder.sRegistry.registerNativeAllocation(this, mNativeRenderNode);
         mAnimationHost = null;
-    }
-
-    /**
-     * Creates a new RenderNode that can be used to record batches of
-     * drawing operations, and store / apply render properties when drawn.
-     *
-     * @param name The name of the RenderNode, used for debugging purpose. May be null.
-     * @return A new RenderNode.
-     */
-    public static @NonNull RenderNode create(@Nullable String name) {
-        return new RenderNode(name, null);
     }
 
     /** @hide */
