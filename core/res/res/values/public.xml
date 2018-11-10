@@ -2926,6 +2926,10 @@
     </public-group>
 
     <public-group type="id" first-id="0x01020046">
+      <public name="accessibilityActionPageUp" />
+      <public name="accessibilityActionPageDown" />
+      <public name="accessibilityActionPageLeft" />
+      <public name="accessibilityActionPageRight" />
     </public-group>
 
     <public-group type="string" first-id="0x0104001b">
