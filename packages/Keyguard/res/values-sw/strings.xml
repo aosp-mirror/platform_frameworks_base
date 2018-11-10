@@ -60,7 +60,7 @@
     <string name="kg_pattern_instructions" msgid="398978611683075868">"Chora ruwaza yako"</string>
     <string name="kg_sim_pin_instructions" msgid="2319508550934557331">"Ingiza PIN ya SIM"</string>
     <string name="kg_sim_pin_instructions_multi" msgid="7818515973197201434">"Weka PIN ya SIM ya \"<xliff:g id="CARRIER">%1$s</xliff:g>\""</string>
-    <string name="kg_pin_instructions" msgid="2377242233495111557">"Ingiza PIN"</string>
+    <string name="kg_pin_instructions" msgid="2377242233495111557">"Weka PIN"</string>
     <string name="kg_password_instructions" msgid="5753646556186936819">"Weka Nenosiri"</string>
     <string name="kg_puk_enter_puk_hint" msgid="453227143861735537">"SIM sasa imelemazwa. Ingiza msimbo wa PUK ili kuendelea. Wasiliana na mtoa huduma kwa maelezo."</string>
     <string name="kg_puk_enter_puk_hint_multi" msgid="363822494559783025">"SIM \"<xliff:g id="CARRIER">%1$s</xliff:g>\" sasa imezimwa. Weka msimbo wa PUK ili uendelee. Wasiliana na mtoa huduma kwa maelezo."</string>
