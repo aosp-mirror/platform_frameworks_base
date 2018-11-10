@@ -1856,7 +1856,10 @@ public class StatsCompanionService extends IStatsCompanionService.Stub {
         public void notifyThrottling(Temperature temp) {
             boolean isThrottling = temp.getStatus() >= Temperature.THROTTLING_SEVERE;
             StatsLog.write(StatsLog.THERMAL_THROTTLING, temp.getType(),
-                    isThrottling ? 1 : 0, temp.getValue());
+                    isThrottling ?
+                            StatsLog.THERMAL_THROTTLING_STATE_CHANGED__STATE__START :
+                            StatsLog.THERMAL_THROTTLING_STATE_CHANGED__STATE__STOP,
+                    temp.getValue());
         }
     }
 }
