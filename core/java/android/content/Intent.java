@@ -1727,10 +1727,14 @@ public class Intent implements Parcelable, Cloneable {
             = "android.intent.extra.UNINSTALL_ALL_USERS";
 
     /**
-     * A string associated with a {@link #ACTION_UPGRADE_SETUP} activity
-     * describing the last run version of the platform that was setup.
+     * A string that associates with a metadata entry, indicating the last run version of the
+     * platform that was setup.
+     *
+     * @see #ACTION_UPGRADE_SETUP
+     *
      * @hide
      */
+    @SystemApi
     public static final String METADATA_SETUP_VERSION = "android.SETUP_VERSION";
 
     /**
