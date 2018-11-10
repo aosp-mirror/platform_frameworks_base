@@ -209,11 +209,11 @@ public class StatusBarTest extends SysuiTestCase {
                 mNotificationLogger, mVisualStabilityManager, mViewHierarchyManager,
                 mEntryManager, mScrimController, mBiometricUnlockController,
                 mKeyguardViewMediator, mRemoteInputManager, mock(NotificationGroupManager.class),
-                mock(FalsingManager.class), mock(StatusBarWindowController.class),
-                mock(NotificationIconAreaController.class), mock(DozeScrimController.class),
-                mock(NotificationShelf.class), mLockscreenUserManager,
-                mCommandQueue,
-                mNotificationPresenter, mock(BubbleController.class));
+                mock(NotificationGroupAlertTransferHelper.class), mock(FalsingManager.class),
+                mock(StatusBarWindowController.class), mock(NotificationIconAreaController.class),
+                mock(DozeScrimController.class), mock(NotificationShelf.class),
+                mLockscreenUserManager, mCommandQueue, mNotificationPresenter,
+                mock(BubbleController.class));
         mStatusBar.mContext = mContext;
         mStatusBar.mComponents = mContext.getComponents();
         mStatusBar.putComponent(StatusBar.class, mStatusBar);
@@ -634,6 +634,7 @@ public class StatusBarTest extends SysuiTestCase {
                 KeyguardViewMediator keyguardViewMediator,
                 NotificationRemoteInputManager notificationRemoteInputManager,
                 NotificationGroupManager notificationGroupManager,
+                NotificationGroupAlertTransferHelper notificationGroupAlertTransferHelper,
                 FalsingManager falsingManager,
                 StatusBarWindowController statusBarWindowController,
                 NotificationIconAreaController notificationIconAreaController,
@@ -662,6 +663,7 @@ public class StatusBarTest extends SysuiTestCase {
             mKeyguardViewMediator = keyguardViewMediator;
             mRemoteInputManager = notificationRemoteInputManager;
             mGroupManager = notificationGroupManager;
+            mGroupAlertTransferHelper = notificationGroupAlertTransferHelper;
             mFalsingManager = falsingManager;
             mStatusBarWindowController = statusBarWindowController;
             mNotificationIconAreaController = notificationIconAreaController;

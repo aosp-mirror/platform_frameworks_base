@@ -84,6 +84,7 @@ import com.android.systemui.statusbar.notification.row.NotificationInflater;
 import com.android.systemui.statusbar.notification.row.NotificationInflater.InflationFlag;
 import com.android.systemui.statusbar.notification.row.RowInflaterTask;
 import com.android.systemui.statusbar.notification.stack.NotificationListContainer;
+import com.android.systemui.statusbar.phone.NotificationGroupAlertTransferHelper;
 import com.android.systemui.statusbar.phone.NotificationGroupManager;
 import com.android.systemui.statusbar.phone.ShadeController;
 import com.android.systemui.statusbar.phone.StatusBar;
@@ -117,6 +118,8 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
 
     private final NotificationGroupManager mGroupManager =
             Dependency.get(NotificationGroupManager.class);
+    private final NotificationGroupAlertTransferHelper mGroupAlertTransferHelper =
+            Dependency.get(NotificationGroupAlertTransferHelper.class);
     private final NotificationGutsManager mGutsManager =
             Dependency.get(NotificationGutsManager.class);
     private final MetricsLogger mMetricsLogger = Dependency.get(MetricsLogger.class);
@@ -247,7 +250,8 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
     }
 
     private void onPostInit() {
-        mGroupManager.setPendingEntries(mPendingNotifications);
+        mGroupAlertTransferHelper.setPendingEntries(mPendingNotifications);
+        mGroupManager.addOnGroupChangeListener(mGroupAlertTransferHelper);
     }
 
     /**
@@ -506,6 +510,7 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
         NotificationData.Entry addedEntry = mNotificationData.get(key);
         if (addedEntry != null) {
             addedEntry.abortTask();
+            mGroupAlertTransferHelper.onInflationAborted(addedEntry);
         }
     }
 
@@ -554,13 +559,18 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
         mPendingNotifications.remove(entry.key);
         // If there was an async task started after the removal, we don't want to add it back to
         // the list, otherwise we might get leaks.
-        boolean isNew = mNotificationData.get(entry.key) == null;
-        if (isNew && !entry.row.isRemoved()) {
-            showAlertingView(entry, inflatedFlags);
-            addEntry(entry);
-        } else if (!isNew && entry.row.hasLowPriorityStateUpdated()) {
-            mVisualStabilityManager.onLowPriorityUpdated(entry);
-            mPresenter.updateNotificationViews();
+        if (!entry.row.isRemoved()) {
+            boolean isNew = mNotificationData.get(entry.key) == null;
+            if (isNew) {
+                showAlertingView(entry, inflatedFlags);
+                addEntry(entry);
+            } else {
+                if (entry.row.hasLowPriorityStateUpdated()) {
+                    mVisualStabilityManager.onLowPriorityUpdated(entry);
+                    mPresenter.updateNotificationViews();
+                }
+                mGroupAlertTransferHelper.onInflationFinished(entry);
+            }
         }
         entry.row.setLowPriorityStateUpdated(false);
     }
@@ -823,7 +833,7 @@ public class NotificationEntryManager implements Dumpable, NotificationInflater.
                 mNotificationData.getImportance(key));
 
         mPendingNotifications.put(key, shadeEntry);
-        mGroupManager.onPendingEntryAdded(shadeEntry);
+        mGroupAlertTransferHelper.onPendingEntryAdded(shadeEntry);
     }
 
     @VisibleForTesting

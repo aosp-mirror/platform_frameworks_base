@@ -1,0 +1,204 @@
+/*
+ * Copyright (C) 2018 The Android Open Source Project
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package com.android.systemui.statusbar.phone;
+
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
+import android.app.Notification;
+import android.support.test.filters.SmallTest;
+import android.testing.AndroidTestingRunner;
+import android.testing.TestableLooper;
+
+import com.android.systemui.SysuiTestCase;
+import com.android.systemui.statusbar.AmbientPulseManager;
+import com.android.systemui.statusbar.notification.NotificationData;
+import com.android.systemui.statusbar.notification.NotificationData.Entry;
+import com.android.systemui.statusbar.policy.HeadsUpManager;
+
+import org.junit.Before;
+import org.junit.Rule;
+import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.junit.MockitoJUnit;
+import org.mockito.junit.MockitoRule;
+
+import java.util.HashMap;
+
+@SmallTest
+@RunWith(AndroidTestingRunner.class)
+@TestableLooper.RunWithLooper
+public class NotificationGroupAlertTransferHelperTest extends SysuiTestCase {
+    @Rule
+    public MockitoRule rule = MockitoJUnit.rule();
+
+    private NotificationGroupAlertTransferHelper mGroupAlertTransferHelper;
+    private NotificationGroupManager mGroupManager;
+    private AmbientPulseManager mAmbientPulseManager;
+    private HeadsUpManager mHeadsUpManager;
+    private final HashMap<String, Entry> mPendingEntries = new HashMap<>();
+    private final NotificationGroupTestHelper mGroupTestHelper =
+            new NotificationGroupTestHelper(mContext);
+
+
+    @Before
+    public void setup() {
+        mAmbientPulseManager = new AmbientPulseManager(mContext);
+        mDependency.injectTestDependency(AmbientPulseManager.class, mAmbientPulseManager);
+        mHeadsUpManager = new HeadsUpManager(mContext) {};
+
+        mGroupManager = new NotificationGroupManager();
+        mDependency.injectTestDependency(NotificationGroupManager.class, mGroupManager);
+        mGroupManager.setHeadsUpManager(mHeadsUpManager);
+
+        mGroupAlertTransferHelper = new NotificationGroupAlertTransferHelper();
+        mGroupAlertTransferHelper.setHeadsUpManager(mHeadsUpManager);
+        mGroupAlertTransferHelper.setPendingEntries(mPendingEntries);
+
+        mGroupManager.addOnGroupChangeListener(mGroupAlertTransferHelper);
+        mHeadsUpManager.addListener(mGroupAlertTransferHelper);
+        mAmbientPulseManager.addListener(mGroupAlertTransferHelper);
+    }
+
+    @Test
+    public void testSuppressedSummaryHeadsUpTransfersToChild() {
+        Entry summaryEntry = mGroupTestHelper.createSummaryNotification();
+        mHeadsUpManager.showNotification(summaryEntry);
+        Entry childEntry = mGroupTestHelper.createChildNotification();
+
+        // Summary will be suppressed because there is only one child.
+        mGroupManager.onEntryAdded(summaryEntry);
+        mGroupManager.onEntryAdded(childEntry);
+
+        // A suppressed summary should transfer its alert state to the child.
+        assertFalse(mHeadsUpManager.isAlerting(summaryEntry.key));
+        assertTrue(mHeadsUpManager.isAlerting(childEntry.key));
+    }
+
+    @Test
+    public void testSuppressedSummaryHeadsUpTransfersToChildButBackAgain() {
+        NotificationData.Entry summaryEntry =
+                mGroupTestHelper.createSummaryNotification(Notification.GROUP_ALERT_SUMMARY);
+        NotificationData.Entry childEntry =
+                mGroupTestHelper.createChildNotification(Notification.GROUP_ALERT_SUMMARY);
+        NotificationData.Entry childEntry2 =
+                mGroupTestHelper.createChildNotification(Notification.GROUP_ALERT_SUMMARY);
+        mHeadsUpManager.showNotification(summaryEntry);
+        // Trigger a transfer of alert state from summary to child.
+        mGroupManager.onEntryAdded(summaryEntry);
+        mGroupManager.onEntryAdded(childEntry);
+
+        // Add second child notification so that summary is no longer suppressed.
+        mPendingEntries.put(childEntry2.key, childEntry2);
+        mGroupAlertTransferHelper.onPendingEntryAdded(childEntry2);
+        mGroupManager.onEntryAdded(childEntry2);
+
+        // The alert state should transfer back to the summary as there is now more than one
+        // child and the summary should no longer be suppressed.
+        assertTrue(mHeadsUpManager.isAlerting(summaryEntry.key));
+        assertFalse(mHeadsUpManager.isAlerting(childEntry.key));
+    }
+
+    @Test
+    public void testSuppressedSummaryHeadsUpDoesntTransferBackOnDozingChanged() {
+        NotificationData.Entry summaryEntry =
+                mGroupTestHelper.createSummaryNotification(Notification.GROUP_ALERT_SUMMARY);
+        NotificationData.Entry childEntry =
+                mGroupTestHelper.createChildNotification(Notification.GROUP_ALERT_SUMMARY);
+        NotificationData.Entry childEntry2 =
+                mGroupTestHelper.createChildNotification(Notification.GROUP_ALERT_SUMMARY);
+        mHeadsUpManager.showNotification(summaryEntry);
+        // Trigger a transfer of alert state from summary to child.
+        mGroupManager.onEntryAdded(summaryEntry);
+        mGroupManager.onEntryAdded(childEntry);
+
+        // Set dozing to true.
+        mGroupAlertTransferHelper.onDozingChanged(true);
+
+        // Add second child notification so that summary is no longer suppressed.
+        mPendingEntries.put(childEntry2.key, childEntry2);
+        mGroupAlertTransferHelper.onPendingEntryAdded(childEntry2);
+        mGroupManager.onEntryAdded(childEntry2);
+
+        // Dozing changed so no reason to re-alert summary.
+        assertFalse(mHeadsUpManager.isAlerting(summaryEntry.key));
+    }
+
+    @Test
+    public void testSuppressedSummaryHeadsUpTransferDoesNotAlertChildIfUninflated() {
+        Entry summaryEntry = mGroupTestHelper.createSummaryNotification();
+        mHeadsUpManager.showNotification(summaryEntry);
+        Entry childEntry = mGroupTestHelper.createChildNotification();
+        when(childEntry.row.isInflationFlagSet(mHeadsUpManager.getContentFlag())).thenReturn(false);
+
+        mGroupManager.onEntryAdded(summaryEntry);
+        mGroupManager.onEntryAdded(childEntry);
+
+        // Alert is immediately removed from summary, but we do not show child yet either as its
+        // content is not inflated.
+        assertFalse(mHeadsUpManager.isAlerting(summaryEntry.key));
+        assertFalse(mHeadsUpManager.isAlerting(childEntry.key));
+    }
+
+    @Test
+    public void testSuppressedSummaryHeadsUpTransferAlertsChildOnInflation() {
+        Entry summaryEntry = mGroupTestHelper.createSummaryNotification();
+        mHeadsUpManager.showNotification(summaryEntry);
+        Entry childEntry = mGroupTestHelper.createChildNotification();
+        when(childEntry.row.isInflationFlagSet(mHeadsUpManager.getContentFlag())).thenReturn(false);
+
+        mGroupManager.onEntryAdded(summaryEntry);
+        mGroupManager.onEntryAdded(childEntry);
+
+        when(childEntry.row.isInflationFlagSet(mHeadsUpManager.getContentFlag())).thenReturn(true);
+        mGroupAlertTransferHelper.onInflationFinished(childEntry);
+
+        // Alert is immediately removed from summary, and we show child as its content is inflated.
+        assertFalse(mHeadsUpManager.isAlerting(summaryEntry.key));
+        assertTrue(mHeadsUpManager.isAlerting(childEntry.key));
+    }
+
+    @Test
+    public void testSuppressedSummaryHeadsUpTransferBackAbortsChildInflation() {
+        NotificationData.Entry summaryEntry =
+                mGroupTestHelper.createSummaryNotification(Notification.GROUP_ALERT_SUMMARY);
+        NotificationData.Entry childEntry =
+                mGroupTestHelper.createChildNotification(Notification.GROUP_ALERT_SUMMARY);
+        when(childEntry.row.isInflationFlagSet(mHeadsUpManager.getContentFlag())).thenReturn(false);
+        NotificationData.Entry childEntry2 =
+                mGroupTestHelper.createChildNotification(Notification.GROUP_ALERT_SUMMARY);
+        mHeadsUpManager.showNotification(summaryEntry);
+        // Trigger a transfer of alert state from summary to child.
+        mGroupManager.onEntryAdded(summaryEntry);
+        mGroupManager.onEntryAdded(childEntry);
+
+        // Add second child notification so that summary is no longer suppressed.
+        mPendingEntries.put(childEntry2.key, childEntry2);
+        mGroupAlertTransferHelper.onPendingEntryAdded(childEntry2);
+        mGroupManager.onEntryAdded(childEntry2);
+
+        // Child entry finishes its inflation.
+        when(childEntry.row.isInflationFlagSet(mHeadsUpManager.getContentFlag())).thenReturn(true);
+        mGroupAlertTransferHelper.onInflationFinished(childEntry);
+
+        verify(childEntry.row, times(1)).freeContentViewWhenSafe(mHeadsUpManager.getContentFlag());
+        assertFalse(mHeadsUpManager.isAlerting(childEntry.key));
+    }
+}

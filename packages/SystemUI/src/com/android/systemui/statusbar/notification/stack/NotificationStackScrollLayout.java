@@ -4557,7 +4557,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     @ShadeViewRefactor(RefactorComponent.SHADE_VIEW)
     public void setGroupManager(NotificationGroupManager groupManager) {
         this.mGroupManager = groupManager;
-        mGroupManager.setOnGroupChangeListener(mOnGroupChangeListener);
+        mGroupManager.addOnGroupChangeListener(mOnGroupChangeListener);
     }
 
     @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)

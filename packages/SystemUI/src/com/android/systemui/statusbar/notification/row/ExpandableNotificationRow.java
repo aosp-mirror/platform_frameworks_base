@@ -464,7 +464,7 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
     }
 
     /**
-     * Inflate views based off the inflation flags set.  Inflation happens asynchronously.
+     * Inflate views based off the inflation flags set. Inflation happens asynchronously.
      */
     public void inflateViews() {
         mNotificationInflater.inflateNotificationViews();
@@ -508,6 +508,16 @@ public class ExpandableNotificationRow extends ActivatableNotificationView
      */
     public void updateInflationFlag(@InflationFlag int flag, boolean shouldInflate) {
         mNotificationInflater.updateInflationFlag(flag, shouldInflate);
+    }
+
+    /**
+     * Whether or not a content view should be inflated.
+     *
+     * @param flag the flag corresponding to the content view
+     * @return true if the flag is set, false otherwise
+     */
+    public boolean isInflationFlagSet(@InflationFlag int flag) {
+        return mNotificationInflater.isInflationFlagSet(flag);
     }
 
     /**

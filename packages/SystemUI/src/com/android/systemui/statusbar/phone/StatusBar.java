@@ -596,6 +596,7 @@ public class StatusBar extends SystemUI implements DemoMode,
     @Override
     public void start() {
         mGroupManager = Dependency.get(NotificationGroupManager.class);
+        mGroupAlertTransferHelper = Dependency.get(NotificationGroupAlertTransferHelper.class);
         mVisualStabilityManager = Dependency.get(VisualStabilityManager.class);
         mNotificationLogger = Dependency.get(NotificationLogger.class);
         mRemoteInputManager = Dependency.get(NotificationRemoteInputManager.class);
@@ -832,11 +833,14 @@ public class StatusBar extends SystemUI implements DemoMode,
         mHeadsUpManager.addListener(this);
         mHeadsUpManager.addListener(mNotificationPanel);
         mHeadsUpManager.addListener(mGroupManager);
+        mHeadsUpManager.addListener(mGroupAlertTransferHelper);
         mHeadsUpManager.addListener(mVisualStabilityManager);
         mAmbientPulseManager.addListener(this);
         mAmbientPulseManager.addListener(mGroupManager);
+        mAmbientPulseManager.addListener(mGroupAlertTransferHelper);
         mNotificationPanel.setHeadsUpManager(mHeadsUpManager);
         mGroupManager.setHeadsUpManager(mHeadsUpManager);
+        mGroupAlertTransferHelper.setHeadsUpManager(mHeadsUpManager);
         putComponent(HeadsUpManager.class, mHeadsUpManager);
 
 
@@ -4104,6 +4108,8 @@ public class StatusBar extends SystemUI implements DemoMode,
     protected ViewGroup mStackScroller;
 
     protected NotificationGroupManager mGroupManager;
+
+    protected NotificationGroupAlertTransferHelper mGroupAlertTransferHelper;
 
 
     // for heads up notifications

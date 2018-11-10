@@ -53,7 +53,6 @@ import com.android.systemui.statusbar.notification.stack.NotificationChildrenCon
 
 import org.junit.Assert;
 import org.junit.Before;
-import org.junit.Ignore;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -140,10 +139,7 @@ public class ExpandableNotificationRowTest extends SysuiTestCase {
         verify(row).updateShelfIconColor();
     }
 
-    // TODO: Ignoring as a temporary workaround until heads up views can be safely freed.
-    // See http://b/117933032
     @Test
-    @Ignore
     public void testFreeContentViewWhenSafe() throws Exception {
         ExpandableNotificationRow row = mNotificationTestHelper.createRow(FLAG_CONTENT_VIEW_ALL);
 

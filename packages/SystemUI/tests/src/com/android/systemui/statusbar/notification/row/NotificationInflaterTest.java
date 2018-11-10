@@ -117,10 +117,7 @@ public class NotificationInflaterTest extends SysuiTestCase {
         verify(mRow).onNotificationUpdated();
     }
 
-    // TODO: Ignoring as a temporary workaround until ambient views can be safely freed.
-    // See http://b/117894786
     @Test
-    @Ignore
     public void testInflationOnlyInflatesSetFlags() throws Exception {
         mNotificationInflater.updateInflationFlag(FLAG_CONTENT_VIEW_HEADS_UP,
                 true /* shouldInflate */);
