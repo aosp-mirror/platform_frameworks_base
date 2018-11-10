@@ -160,7 +160,7 @@
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"मोबाइल और इंटरनेट सेवा देने वाली कंपनी का नेटवर्क बदला जा रहा है."</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"बैटरी का विवरण खोलें"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"<xliff:g id="NUMBER">%d</xliff:g> प्रति‍शत बैटरी."</string>
-    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"बैटरी चार्ज हो रही है, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> प्रतिशत."</string>
+    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"बैटरी चार्ज हो रही है, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%%."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"सिस्टम सेटिंग."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"सूचनाएं."</string>
     <string name="accessibility_remove_notification" msgid="3603099514902182350">"सूचना साफ़ करें"</string>

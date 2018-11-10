@@ -160,7 +160,7 @@
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"કેરીઅર નેટવર્કમાં ફેરફાર થઈ રહ્યો છે."</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"બૅટરીની વિગતો ખોલો"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"બૅટરી <xliff:g id="NUMBER">%d</xliff:g> ટકા."</string>
-    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"બૅટરી ચાર્જ થઈ રહી છે, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> ટકા."</string>
+    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"બૅટરી ચાર્જ થઈ રહી છે, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%%."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"સિસ્ટમ સેટિંગ્સ."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"નોટિફિકેશનો."</string>
     <string name="accessibility_remove_notification" msgid="3603099514902182350">"સૂચના સાફ કરો."</string>

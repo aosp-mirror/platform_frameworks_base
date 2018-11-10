@@ -160,7 +160,7 @@
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"കാരിയർ നെറ്റ്‌വർക്ക് മാറ്റൽ."</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"ബാറ്ററി വിശദാംശങ്ങൾ തുറക്കുക"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"ബാറ്ററി <xliff:g id="NUMBER">%d</xliff:g> ശതമാനം."</string>
-    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"ബാറ്ററി ചാർജുചെയ്യുന്നു, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> ശതമാനം."</string>
+    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"ബാറ്ററി ചാർജുചെയ്യുന്നു, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%%."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"സിസ്‌റ്റം ക്രമീകരണങ്ങൾ."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"അറിയിപ്പുകൾ."</string>
     <string name="accessibility_remove_notification" msgid="3603099514902182350">"വിവരം മായ്‌ക്കുക."</string>

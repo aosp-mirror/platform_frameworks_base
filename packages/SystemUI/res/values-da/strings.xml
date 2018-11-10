@@ -160,7 +160,7 @@
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Mobilnetværket skiftes."</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"Åbn oplysninger om batteri"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Batteri <xliff:g id="NUMBER">%d</xliff:g> procent."</string>
-    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"Batteriet oplades. <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> procent."</string>
+    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"Batteriet oplades. <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> %%."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Systemindstillinger."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Underretninger."</string>
     <string name="accessibility_remove_notification" msgid="3603099514902182350">"Ryd underretning."</string>
@@ -330,8 +330,8 @@
     <string name="recents_launch_error_message" msgid="2969287838120550506">"<xliff:g id="APP">%s</xliff:g> kunne ikke startes."</string>
     <string name="recents_launch_disabled_message" msgid="1624523193008871793">"<xliff:g id="APP">%s</xliff:g> er deaktiveret i sikker tilstand."</string>
     <string name="recents_stack_action_button_label" msgid="6593727103310426253">"Ryd alle"</string>
-    <string name="recents_incompatible_app_message" msgid="5075812958564082451">"Appen understøtter ikke delt skærm"</string>
-    <string name="recents_drag_hint_message" msgid="2649739267073203985">"Træk hertil for at bruge delt skærm"</string>
+    <string name="recents_incompatible_app_message" msgid="5075812958564082451">"Appen understøtter ikke opdelt skærm"</string>
+    <string name="recents_drag_hint_message" msgid="2649739267073203985">"Træk hertil for at bruge opdelt skærm"</string>
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="8848514474543427332">"Opdel vandret"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="9075292233696180813">"Opdel lodret"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="4177837597513701943">"Opdel brugerdefineret"</string>
@@ -618,7 +618,7 @@
     <item msgid="3327323682209964956">"Vis ikke dette ikon"</item>
   </string-array>
     <string name="other" msgid="4060683095962566764">"Andet"</string>
-    <string name="accessibility_divider" msgid="5903423481953635044">"Adskiller til delt skærm"</string>
+    <string name="accessibility_divider" msgid="5903423481953635044">"Adskiller til opdelt skærm"</string>
     <string name="accessibility_action_divider_left_full" msgid="2801570521881574972">"Vis venstre del i fuld skærm"</string>
     <string name="accessibility_action_divider_left_70" msgid="3612060638991687254">"Venstre 70 %"</string>
     <string name="accessibility_action_divider_left_50" msgid="1248083470322193075">"Venstre 50 %"</string>
@@ -639,8 +639,8 @@
     <string name="accessibility_qs_edit_tile_moved" msgid="4343693412689365038">"<xliff:g id="TILE_NAME">%1$s</xliff:g> blev flyttet til position <xliff:g id="POSITION">%2$d</xliff:g>"</string>
     <string name="accessibility_desc_quick_settings_edit" msgid="8073587401747016103">"Redigeringsværktøj for Hurtige indstillinger."</string>
     <string name="accessibility_desc_notification_icon" msgid="8352414185263916335">"<xliff:g id="ID_1">%1$s</xliff:g>-underretning: <xliff:g id="ID_2">%2$s</xliff:g>"</string>
-    <string name="dock_forced_resizable" msgid="5914261505436217520">"Appen fungerer muligvis ikke i delt skærm."</string>
-    <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Appen understøtter ikke delt skærm."</string>
+    <string name="dock_forced_resizable" msgid="5914261505436217520">"Appen fungerer muligvis ikke i opdelt skærm."</string>
+    <string name="dock_non_resizeble_failed_to_dock_text" msgid="3871617304250207291">"Appen understøtter ikke opdelt skærm."</string>
     <string name="accessibility_quick_settings_settings" msgid="6132460890024942157">"Åbn Indstillinger."</string>
     <string name="accessibility_quick_settings_expand" msgid="2375165227880477530">"Åbn Hurtige indstillinger."</string>
     <string name="accessibility_quick_settings_collapse" msgid="1792625797142648105">"Luk Hurtige indstillinger."</string>

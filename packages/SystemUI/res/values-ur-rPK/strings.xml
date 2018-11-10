@@ -160,7 +160,7 @@
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"کیریئر نیٹ ورک تبدیل ہو رہا ہے۔"</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"بیٹری کی تفصیلات کھولیں"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"بیٹری <xliff:g id="NUMBER">%d</xliff:g> فیصد۔"</string>
-    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"بیٹری چارجنگ، <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> فیصد۔"</string>
+    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"بیٹری چارج ہو رہی ہے، <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%%"</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"سسٹم کی ترتیبات۔"</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"اطلاعات۔"</string>
     <string name="accessibility_remove_notification" msgid="3603099514902182350">"اطلاع صاف کریں۔"</string>

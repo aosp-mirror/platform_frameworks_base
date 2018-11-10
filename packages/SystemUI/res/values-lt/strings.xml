@@ -63,7 +63,7 @@
     <string name="always_use_device" msgid="1450287437017315906">"Šiam USB įreng. naudoti pagal numat. nustatymus"</string>
     <string name="always_use_accessory" msgid="1210954576979621596">"Šiam USB priedui naudoti pagal numat. nustatymus"</string>
     <string name="usb_debugging_title" msgid="4513918393387141949">"Leisti USB derinimą?"</string>
-    <string name="usb_debugging_message" msgid="2220143855912376496">"Šio kompiuterio RSA rakto kontrolinis kodas yra:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
+    <string name="usb_debugging_message" msgid="2220143855912376496">"Šio kompiuterio RSA rakto piršto antspaudas yra:\n<xliff:g id="FINGERPRINT">%1$s</xliff:g>"</string>
     <string name="usb_debugging_always" msgid="303335496705863070">"Visada leisti iš šio kompiuterio"</string>
     <string name="usb_debugging_secondary_user_title" msgid="6353808721761220421">"USB derinimas neleidžiamas"</string>
     <string name="usb_debugging_secondary_user_message" msgid="8572228137833020196">"Šiuo metu prie įrenginio prisijungęs naudotojas negali įjungti USB derinimo. Norėdami naudoti šią funkciją, perjunkite į pagrindinį administratoriaus naudotoją."</string>
@@ -91,8 +91,8 @@
     <string name="accessibility_phone_button" msgid="6738112589538563574">"Telefonas"</string>
     <string name="accessibility_voice_assist_button" msgid="487611083884852965">"Voice Assist"</string>
     <string name="accessibility_unlock_button" msgid="128158454631118828">"Atrakinti"</string>
-    <string name="accessibility_unlock_button_fingerprint" msgid="8214125623493923751">"Atrakinimo mygtukas, laukiama kontrolinio kodo"</string>
-    <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"Atrakinti nenaudojant kontrolinio kodo"</string>
+    <string name="accessibility_unlock_button_fingerprint" msgid="8214125623493923751">"Atrakinimo mygtukas, laukiama piršto antspaudo"</string>
+    <string name="accessibility_unlock_without_fingerprint" msgid="7541705575183694446">"Atrakinti nenaudojant piršto antspaudo"</string>
     <string name="unlock_label" msgid="8779712358041029439">"atrakinti"</string>
     <string name="phone_label" msgid="2320074140205331708">"atidaryti telefoną"</string>
     <string name="voice_assist_label" msgid="3956854378310019854">"atidaryti „Voice Assist“"</string>
@@ -162,7 +162,7 @@
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Keičiamas operatoriaus tinklas."</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"Atidaryti išsamią akumuliatoriaus informaciją"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Akumuliatorius: <xliff:g id="NUMBER">%d</xliff:g> proc."</string>
-    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"Įkraunamas akumuliatorius, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> proc."</string>
+    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"Įkraunamas akumuliatorius, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%%."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Sistemos nustatymai"</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Pranešimai."</string>
     <string name="accessibility_remove_notification" msgid="3603099514902182350">"Išvalyti pranešimą."</string>

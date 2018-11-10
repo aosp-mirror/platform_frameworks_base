@@ -160,7 +160,7 @@
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Carrier şəbəkə dəyişir."</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"Batareya detallarını açın"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Batareya <xliff:g id="NUMBER">%d</xliff:g> faizdir."</string>
-    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"Batareya doldurulur, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g> faiz."</string>
+    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"Batareya doldurulur, <xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%% faiz."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Sistem parametrləri"</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Bildirişlər."</string>
     <string name="accessibility_remove_notification" msgid="3603099514902182350">"Bildirişi təmizlə."</string>

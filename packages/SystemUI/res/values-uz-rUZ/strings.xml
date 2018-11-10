@@ -115,7 +115,7 @@
     <string name="accessibility_data_one_bar" msgid="1415625833238273628">"Ma’lumotlar bitta panelda."</string>
     <string name="accessibility_data_two_bars" msgid="6166018492360432091">"Ma’lumotlar ikkita panelda."</string>
     <string name="accessibility_data_three_bars" msgid="9167670452395038520">"Ma’lumotlar uchta panelda."</string>
-    <string name="accessibility_data_signal_full" msgid="2708384608124519369">"Ma’lumot uzatish signali to‘liq."</string>
+    <string name="accessibility_data_signal_full" msgid="2708384608124519369">"Internet signali butun."</string>
     <string name="accessibility_wifi_name" msgid="7202151365171148501">"Ulangan: <xliff:g id="WIFI">%s</xliff:g>."</string>
     <string name="accessibility_bluetooth_name" msgid="8441517146585531676">"Ulangan: <xliff:g id="BLUETOOTH">%s</xliff:g>."</string>
     <string name="accessibility_cast_name" msgid="4026393061247081201">"Bunga ulangan: <xliff:g id="CAST">%s</xliff:g>."</string>
@@ -150,7 +150,7 @@
     <string name="accessibility_data_connection_roaming" msgid="5977362333466556094">"Rouming"</string>
     <string name="accessibility_data_connection_edge" msgid="4477457051631979278">"Edge"</string>
     <string name="accessibility_data_connection_wifi" msgid="2324496756590645221">"Wi-Fi"</string>
-    <string name="accessibility_no_sim" msgid="8274017118472455155">"SIM karta yo‘q."</string>
+    <string name="accessibility_no_sim" msgid="8274017118472455155">"SIM karta solinmagan."</string>
     <string name="accessibility_cell_data" msgid="7080312242791850520">"Mobil internet"</string>
     <string name="accessibility_cell_data_on" msgid="4310018593519761767">"Mobil internet yoniq"</string>
     <string name="accessibility_cell_data_off" msgid="8000803571751407635">"Mobil internet o‘chiq"</string>
@@ -160,9 +160,7 @@
     <string name="accessibility_carrier_network_change_mode" msgid="4017301580441304305">"Mobil tarmoqni o‘zgartirish"</string>
     <string name="accessibility_battery_details" msgid="7645516654955025422">"Batareya quvvati sarfi haqida ma’lumot"</string>
     <string name="accessibility_battery_level" msgid="7451474187113371965">"Batareya <xliff:g id="NUMBER">%d</xliff:g> foiz."</string>
-    <!-- String.format failed for translation -->
-    <!-- no translation found for accessibility_battery_level_charging (1147587904439319646) -->
-    <skip />
+    <string name="accessibility_battery_level_charging" msgid="1147587904439319646">"Batareya quvvat olmoqda (<xliff:g id="BATTERY_PERCENTAGE">%d</xliff:g>%%)."</string>
     <string name="accessibility_settings_button" msgid="799583911231893380">"Tizim sozlamalari."</string>
     <string name="accessibility_notifications_button" msgid="4498000369779421892">"Eslatmalar."</string>
     <string name="accessibility_remove_notification" msgid="3603099514902182350">"Eslatmalarni tozalash."</string>
@@ -242,7 +240,7 @@
     <string name="data_usage_disabled_dialog_title" msgid="3932437232199671967">"Internetdan foydalanish to‘xtatib qo‘yildi"</string>
     <string name="data_usage_disabled_dialog" msgid="1841738975235283398">"O‘rnatilgan trafik sarflab bo‘lindi. Endi mobil internetdan foydalana olmaysiz.\n\nDavom ettiradigan bo‘lsangiz, trafik uchun to‘lov olinishi mumkin."</string>
     <string name="data_usage_disabled_dialog_enable" msgid="1412395410306390593">"Davom etish"</string>
-    <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Internetga ulanmagan"</string>
+    <string name="status_bar_settings_signal_meter_disconnected" msgid="1940231521274147771">"Internetga ulanmagansiz"</string>
     <string name="status_bar_settings_signal_meter_wifi_nossid" msgid="6557486452774597820">"Wi-Fi ulandi"</string>
     <string name="gps_notification_searching_text" msgid="8574247005642736060">"GPS qidirilmoqda"</string>
     <string name="gps_notification_found_text" msgid="4619274244146446464">"GPS yordamida manzilni o‘rnatish"</string>
@@ -281,7 +279,7 @@
     <string name="quick_settings_rotation_locked_landscape_label" msgid="8553157770061178719">"Eniga"</string>
     <string name="quick_settings_ime_label" msgid="7073463064369468429">"Kiritish usuli"</string>
     <string name="quick_settings_location_label" msgid="5011327048748762257">"Joylashuv"</string>
-    <string name="quick_settings_location_off_label" msgid="7464544086507331459">"Joylashuv xizmati o‘chiq"</string>
+    <string name="quick_settings_location_off_label" msgid="7464544086507331459">"Joylashuvni aniqlash xizmati yoqilmagan"</string>
     <string name="quick_settings_media_device_label" msgid="1302906836372603762">"Media qurilma"</string>
     <string name="quick_settings_rssi_label" msgid="7725671335550695589">"RSSI"</string>
     <string name="quick_settings_rssi_emergency_only" msgid="2713774041672886750">"Favqulodda chaqiruvlar"</string>
