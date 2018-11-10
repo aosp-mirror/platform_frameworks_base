@@ -664,6 +664,11 @@ public class Typeface {
         /**
          * Sets a system fallback by name.
          *
+         * You can specify generic font familiy names or OEM specific family names. If the system
+         * don't have a specified fallback, the default fallback is used instead.
+         * For more information about generic font families, see <a
+         * href="https://www.w3.org/TR/css-fonts-4/#generic-font-families">CSS specification</a>
+         *
          * For more information about fallback, see class description.
          *
          * @param familyName a family name to be used for fallback if the provided fonts can not be
