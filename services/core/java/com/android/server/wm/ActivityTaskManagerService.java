@@ -5625,8 +5625,12 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
 
                 // We might change the visibilities here, so prepare an empty app transition which
                 // might be overridden later if we actually change visibilities.
-                final DisplayWindowController dwc = mStackSupervisor.getActivityDisplay(displayId)
-                        .getWindowContainerController();
+                final ActivityDisplay activityDisplay =
+                        mStackSupervisor.getActivityDisplay(displayId);
+                if (activityDisplay == null) {
+                    return;
+                }
+                final DisplayWindowController dwc = activityDisplay.getWindowContainerController();
                 final boolean wasTransitionSet = dwc.getPendingAppTransition() != TRANSIT_NONE;
                 if (!wasTransitionSet) {
                     dwc.prepareAppTransition(TRANSIT_NONE, false /* alwaysKeepCurrent */);
