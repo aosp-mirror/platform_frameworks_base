@@ -142,6 +142,16 @@ public class NotificationData {
          */
         private boolean hasSentReply;
 
+        /**
+         * Whether this notification should be displayed as a bubble.
+         */
+        private boolean mIsBubble;
+
+        /**
+         * Whether the user has dismissed this notification when it was in bubble form.
+         */
+        private boolean mUserDismissedBubble;
+
         public Entry(StatusBarNotification n) {
             this(n, null);
         }
@@ -174,6 +184,22 @@ public class NotificationData {
 
         public boolean hasInterrupted() {
             return interruption;
+        }
+
+        public void setIsBubble(boolean bubbleable) {
+            mIsBubble = bubbleable;
+        }
+
+        public boolean isBubble() {
+            return mIsBubble;
+        }
+
+        public void setBubbleDismissed(boolean userDismissed) {
+            mUserDismissedBubble = userDismissed;
+        }
+
+        public boolean isBubbleDismissed() {
+            return mUserDismissedBubble;
         }
 
         /**
