@@ -343,13 +343,14 @@ public class TextViewPrecomputedTextPerfTest {
             textView.setText(text);
             textView.measure(width, height);
             textView.layout(0, 0, textView.getMeasuredWidth(), textView.getMeasuredHeight());
-            final RecordingCanvas c = node.start(
+            final RecordingCanvas c = node.startRecording(
                 textView.getMeasuredWidth(), textView.getMeasuredHeight());
             textView.nullLayouts();
             Canvas.freeTextLayoutCaches();
             state.resumeTiming();
 
             textView.onDraw(c);
+            node.endRecording();
         }
     }
 
@@ -369,13 +370,14 @@ public class TextViewPrecomputedTextPerfTest {
             textView.setText(text);
             textView.measure(width, height);
             textView.layout(0, 0, textView.getMeasuredWidth(), textView.getMeasuredHeight());
-            final RecordingCanvas c = node.start(
+            final RecordingCanvas c = node.startRecording(
                 textView.getMeasuredWidth(), textView.getMeasuredHeight());
             textView.nullLayouts();
             Canvas.freeTextLayoutCaches();
             state.resumeTiming();
 
             textView.onDraw(c);
+            node.endRecording();
         }
     }
 
@@ -397,13 +399,14 @@ public class TextViewPrecomputedTextPerfTest {
             textView.setText(text);
             textView.measure(width, height);
             textView.layout(0, 0, textView.getMeasuredWidth(), textView.getMeasuredHeight());
-            final RecordingCanvas c = node.start(
+            final RecordingCanvas c = node.startRecording(
                 textView.getMeasuredWidth(), textView.getMeasuredHeight());
             textView.nullLayouts();
             Canvas.freeTextLayoutCaches();
             state.resumeTiming();
 
             textView.onDraw(c);
+            node.endRecording();
         }
     }
 
@@ -426,13 +429,14 @@ public class TextViewPrecomputedTextPerfTest {
             textView.setText(text);
             textView.measure(width, height);
             textView.layout(0, 0, textView.getMeasuredWidth(), textView.getMeasuredHeight());
-            final RecordingCanvas c = node.start(
+            final RecordingCanvas c = node.startRecording(
                 textView.getMeasuredWidth(), textView.getMeasuredHeight());
             textView.nullLayouts();
             Canvas.freeTextLayoutCaches();
             state.resumeTiming();
 
             textView.onDraw(c);
+            node.endRecording();
         }
     }
 }
