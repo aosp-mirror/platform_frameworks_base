@@ -2832,7 +2832,7 @@ message MetricsEvent {
     // ACTION: Logs the end to end time taken by all provisioning tasks.
     PROVISIONING_TOTAL_TASK_TIME_MS = 627;
 
-    // OPEN: Settings > Privacy
+    // OPEN: Settings > Security
     // CATEGORY: SETTINGS
     // OS: O
     ENTERPRISE_PRIVACY_SETTINGS = 628;
@@ -6578,6 +6578,11 @@ message MetricsEvent {
     // CATEGORY: SETTINGS
     // OS: Q
     BIOMETRIC_ENROLL_ACTIVITY = 1586;
+
+    // OPEN: Settings > Privacy
+    // CATEGORY: SETTINGS
+    // OS: Q
+    TOP_LEVEL_PRIVACY = 1587;
 
     // ---- End Q Constants, all Q constants go above this line ----
 

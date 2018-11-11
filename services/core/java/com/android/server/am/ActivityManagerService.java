@@ -1134,9 +1134,46 @@ public class ActivityManagerService extends IActivityManager.Stub
     boolean mOrigWaitForDebugger = false;
     boolean mAlwaysFinishActivities = false;
 
-    String mProfileApp = null;
-    ProcessRecord mProfileProc = null;
-    ProfilerInfo mProfilerInfo = null;
+    class ProfileData {
+        private String mProfileApp = null;
+        private ProcessRecord mProfileProc = null;
+        private ProfilerInfo mProfilerInfo = null;
+
+        void setProfileApp(String profileApp) {
+            mProfileApp = profileApp;
+            if (mAtmInternal != null) {
+                mAtmInternal.setProfileApp(profileApp);
+            }
+        }
+
+        String getProfileApp() {
+            return mProfileApp;
+        }
+
+        void setProfileProc(ProcessRecord profileProc) {
+            mProfileProc = profileProc;
+            if (mAtmInternal != null) {
+                mAtmInternal.setProfileProc(
+                        profileProc.getWindowProcessController());
+            }
+        }
+
+        ProcessRecord getProfileProc() {
+            return mProfileProc;
+        }
+
+        void setProfilerInfo(ProfilerInfo profilerInfo) {
+            mProfilerInfo = profilerInfo;
+            if (mAtmInternal != null) {
+                mAtmInternal.setProfilerInfo(profilerInfo);
+            }
+        }
+
+        ProfilerInfo getProfilerInfo() {
+            return mProfilerInfo;
+        }
+    }
+    final ProfileData mProfileData = new ProfileData();
 
     /**
      * Stores a map of process name -> agent string. When a process is started and mAgentAppMap
@@ -2225,8 +2262,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         mIntentFirewall = new IntentFirewall(new IntentFirewallInterface(), mHandler);
 
         mActivityTaskManager = atm;
-        mActivityTaskManager.setActivityManagerService(this, mHandlerThread.getLooper(),
-                mIntentFirewall, mPendingIntentController);
+        mActivityTaskManager.setActivityManagerService(mIntentFirewall, mPendingIntentController);
         mAtmInternal = LocalServices.getService(ActivityTaskManagerInternal.class);
 
         mProcessCpuThread = new Thread("CpuTracker") {
@@ -3010,35 +3046,18 @@ public class ActivityManagerService extends IActivityManager.Stub
     public final int startActivityAsUser(IApplicationThread caller, String callingPackage,
             Intent intent, String resolvedType, IBinder resultTo, String resultWho, int requestCode,
             int startFlags, ProfilerInfo profilerInfo, Bundle bOptions, int userId) {
-        synchronized (this) {
-            /**
-             * Flags like {@link android.app.ActivityManager#START_FLAG_DEBUG} maybe be set on this
-             * call when called/invoked from the shell command. To avoid deadlock, we go ahead and
-             * acquire the AMS lock now since ATMS will need to synchronously call back into AMS
-             * later to modify process settings due to the flags.
-             * TODO(b/80414790): Investigate a better way of untangling this.
-             */
+
             return mActivityTaskManager.startActivityAsUser(caller, callingPackage, intent,
                     resolvedType, resultTo, resultWho, requestCode, startFlags, profilerInfo,
                     bOptions, userId);
-        }
     }
 
     WaitResult startActivityAndWait(IApplicationThread caller, String callingPackage,
             Intent intent, String resolvedType, IBinder resultTo, String resultWho, int requestCode,
             int startFlags, ProfilerInfo profilerInfo, Bundle bOptions, int userId) {
-        synchronized (this) {
-            /**
-             * Flags like {@link android.app.ActivityManager#START_FLAG_DEBUG} maybe be set on this
-             * call when called/invoked from the shell command. To avoid deadlock, we go ahead and
-             * acquire the AMS lock now since ATMS will need to synchronously call back into AMS
-             * later to modify process settings due to the flags.
-             * TODO(b/80414790): Investigate a better way of untangling this.
-             */
             return mActivityTaskManager.startActivityAndWait(caller, callingPackage, intent,
                     resolvedType, resultTo, resultWho, requestCode, startFlags, profilerInfo,
                     bOptions, userId);
-        }
     }
 
     @Override
@@ -3129,7 +3148,7 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
         }
 
-        if (mProfileProc == app) {
+        if (mProfileData.getProfileProc() == app) {
             clearProfilerLocked();
         }
 
@@ -4416,16 +4435,18 @@ public class ActivityManagerService extends IActivityManager.Stub
 
             ProfilerInfo profilerInfo = null;
             String preBindAgent = null;
-            if (mProfileApp != null && mProfileApp.equals(processName)) {
-                mProfileProc = app;
-                if (mProfilerInfo != null) {
+            if (mProfileData.getProfileApp() != null
+                    && mProfileData.getProfileApp().equals(processName)) {
+                mProfileData.setProfileProc(app);
+                if (mProfileData.getProfilerInfo() != null) {
                     // Send a profiler info object to the app if either a file is given, or
                     // an agent should be loaded at bind-time.
-                    boolean needsInfo = mProfilerInfo.profileFile != null
-                            || mProfilerInfo.attachAgentDuringBind;
-                    profilerInfo = needsInfo ? new ProfilerInfo(mProfilerInfo) : null;
-                    if (mProfilerInfo.agent != null) {
-                        preBindAgent = mProfilerInfo.agent;
+                    boolean needsInfo = mProfileData.getProfilerInfo().profileFile != null
+                            || mProfileData.getProfilerInfo().attachAgentDuringBind;
+                    profilerInfo = needsInfo
+                            ? new ProfilerInfo(mProfileData.getProfilerInfo()) : null;
+                    if (mProfileData.getProfilerInfo().agent != null) {
+                        preBindAgent = mProfileData.getProfilerInfo().agent;
                     }
                 }
             } else if (instr != null && instr.mProfileFile != null) {
@@ -4449,7 +4470,8 @@ public class ActivityManagerService extends IActivityManager.Stub
 
             if (profilerInfo != null && profilerInfo.profileFd != null) {
                 profilerInfo.profileFd = profilerInfo.profileFd.dup();
-                if (TextUtils.equals(mProfileApp, processName) && mProfilerInfo != null) {
+                if (TextUtils.equals(mProfileData.getProfileApp(), processName)
+                        && mProfileData.getProfilerInfo() != null) {
                     clearProfilerLocked();
                 }
             }
@@ -7450,17 +7472,17 @@ public class ActivityManagerService extends IActivityManager.Stub
                     throw new SecurityException("Process not debuggable: " + app.packageName);
                 }
             }
-            mProfileApp = processName;
+            mProfileData.setProfileApp(processName);
 
-            if (mProfilerInfo != null) {
-                if (mProfilerInfo.profileFd != null) {
+            if (mProfileData.getProfilerInfo() != null) {
+                if (mProfileData.getProfilerInfo().profileFd != null) {
                     try {
-                        mProfilerInfo.profileFd.close();
+                        mProfileData.getProfilerInfo().profileFd.close();
                     } catch (IOException e) {
                     }
                 }
             }
-            mProfilerInfo = new ProfilerInfo(profilerInfo);
+            mProfileData.setProfilerInfo(new ProfilerInfo(profilerInfo));
             mProfileType = 0;
         }
     }
@@ -9977,20 +9999,25 @@ public class ActivityManagerService extends IActivityManager.Stub
                 pw.println("  mTrackAllocationApp=" + mTrackAllocationApp);
             }
         }
-        if (mProfileApp != null || mProfileProc != null || (mProfilerInfo != null &&
-                (mProfilerInfo.profileFile != null || mProfilerInfo.profileFd != null))) {
-            if (dumpPackage == null || dumpPackage.equals(mProfileApp)) {
+        if (mProfileData.getProfileApp() != null || mProfileData.getProfileProc() != null
+                || (mProfileData.getProfilerInfo() != null &&
+                (mProfileData.getProfilerInfo().profileFile != null
+                        || mProfileData.getProfilerInfo().profileFd != null))) {
+            if (dumpPackage == null || dumpPackage.equals(mProfileData.getProfileApp())) {
                 if (needSep) {
                     pw.println();
                     needSep = false;
                 }
-                pw.println("  mProfileApp=" + mProfileApp + " mProfileProc=" + mProfileProc);
-                if (mProfilerInfo != null) {
-                    pw.println("  mProfileFile=" + mProfilerInfo.profileFile + " mProfileFd=" +
-                            mProfilerInfo.profileFd);
-                    pw.println("  mSamplingInterval=" + mProfilerInfo.samplingInterval +
-                            " mAutoStopProfiler=" + mProfilerInfo.autoStopProfiler +
-                            " mStreamingOutput=" + mProfilerInfo.streamingOutput);
+                pw.println("  mProfileApp=" + mProfileData.getProfileApp()
+                        + " mProfileProc=" + mProfileData.getProfileProc());
+                if (mProfileData.getProfilerInfo() != null) {
+                    pw.println("  mProfileFile=" + mProfileData.getProfilerInfo().profileFile
+                            + " mProfileFd=" + mProfileData.getProfilerInfo().profileFd);
+                    pw.println("  mSamplingInterval="
+                            + mProfileData.getProfilerInfo().samplingInterval +
+                            " mAutoStopProfiler="
+                            + mProfileData.getProfilerInfo().autoStopProfiler +
+                            " mStreamingOutput=" + mProfileData.getProfilerInfo().streamingOutput);
                     pw.println("  mProfileType=" + mProfileType);
                 }
             }
@@ -10270,19 +10297,26 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         if (mTrackAllocationApp != null) {
             if (dumpPackage == null || dumpPackage.equals(mTrackAllocationApp)) {
-                proto.write(ActivityManagerServiceDumpProcessesProto.TRACK_ALLOCATION_APP, mTrackAllocationApp);
+                proto.write(ActivityManagerServiceDumpProcessesProto.TRACK_ALLOCATION_APP,
+                        mTrackAllocationApp);
             }
         }
 
-        if (mProfileApp != null || mProfileProc != null || (mProfilerInfo != null &&
-                (mProfilerInfo.profileFile != null || mProfilerInfo.profileFd != null))) {
-            if (dumpPackage == null || dumpPackage.equals(mProfileApp)) {
+        if (mProfileData.getProfileApp() != null || mProfileData.getProfileProc() != null
+                || (mProfileData.getProfilerInfo() != null &&
+                (mProfileData.getProfilerInfo().profileFile != null
+                        || mProfileData.getProfilerInfo().profileFd != null))) {
+            if (dumpPackage == null || dumpPackage.equals(mProfileData.getProfileApp())) {
                 final long token = proto.start(ActivityManagerServiceDumpProcessesProto.PROFILE);
-                proto.write(ActivityManagerServiceDumpProcessesProto.Profile.APP_NAME, mProfileApp);
-                mProfileProc.writeToProto(proto,ActivityManagerServiceDumpProcessesProto.Profile.PROC);
-                if (mProfilerInfo != null) {
-                    mProfilerInfo.writeToProto(proto, ActivityManagerServiceDumpProcessesProto.Profile.INFO);
-                    proto.write(ActivityManagerServiceDumpProcessesProto.Profile.TYPE, mProfileType);
+                proto.write(ActivityManagerServiceDumpProcessesProto.Profile.APP_NAME,
+                        mProfileData.getProfileApp());
+                mProfileData.getProfileProc().writeToProto(proto,
+                        ActivityManagerServiceDumpProcessesProto.Profile.PROC);
+                if (mProfileData.getProfilerInfo() != null) {
+                    mProfileData.getProfilerInfo().writeToProto(proto,
+                            ActivityManagerServiceDumpProcessesProto.Profile.INFO);
+                    proto.write(ActivityManagerServiceDumpProcessesProto.Profile.TYPE,
+                            mProfileType);
                 }
                 proto.end(token);
             }
@@ -18039,8 +18073,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     private void stopProfilerLocked(ProcessRecord proc, int profileType) {
-        if (proc == null || proc == mProfileProc) {
-            proc = mProfileProc;
+        if (proc == null || proc == mProfileData.getProfileProc()) {
+            proc = mProfileData.getProfileProc();
             profileType = mProfileType;
             clearProfilerLocked();
         }
@@ -18055,15 +18089,16 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     void clearProfilerLocked() {
-        if (mProfilerInfo !=null && mProfilerInfo.profileFd != null) {
+        if (mProfileData.getProfilerInfo() != null
+                && mProfileData.getProfilerInfo().profileFd != null) {
             try {
-                mProfilerInfo.profileFd.close();
+                mProfileData.getProfilerInfo().profileFd.close();
             } catch (IOException e) {
             }
         }
-        mProfileApp = null;
-        mProfileProc = null;
-        mProfilerInfo = null;
+        mProfileData.setProfileApp(null);
+        mProfileData.setProfileProc(null);
+        mProfileData.setProfilerInfo(null);
     }
 
     public boolean profileControl(String process, int userId, boolean start,
@@ -18095,7 +18130,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (start) {
                     stopProfilerLocked(null, 0);
                     setProfileApp(proc.info, proc.processName, profilerInfo);
-                    mProfileProc = proc;
+                    mProfileData.setProfileProc(proc);
                     mProfileType = profileType;
                     ParcelFileDescriptor fd = profilerInfo.profileFd;
                     try {
@@ -18107,10 +18142,10 @@ public class ActivityManagerService extends IActivityManager.Stub
                     proc.thread.profilerControl(start, profilerInfo, profileType);
                     fd = null;
                     try {
-                        mProfilerInfo.profileFd.close();
+                        mProfileData.getProfilerInfo().profileFd.close();
                     } catch (IOException e) {
                     }
-                    mProfilerInfo.profileFd = null;
+                    mProfileData.getProfilerInfo().profileFd = null;
 
                     if (proc.pid == MY_PID) {
                         // When profiling the system server itself, avoid closing the file
@@ -19114,22 +19149,30 @@ public class ActivityManagerService extends IActivityManager.Stub
 
         @Override
         public void setDebugFlagsForStartingActivity(ActivityInfo aInfo, int startFlags,
-                ProfilerInfo profilerInfo) {
+                ProfilerInfo profilerInfo, Object wmLock) {
             synchronized (ActivityManagerService.this) {
-                if ((startFlags & ActivityManager.START_FLAG_DEBUG) != 0) {
-                    setDebugApp(aInfo.processName, true, false);
-                }
+                /**
+                 * This function is called from the window manager context and needs to be executed
+                 * synchronously.  To avoid deadlock, we pass a message to AMS to execute the
+                 * function and notify the passed in lock when it has been completed.
+                 */
+                synchronized (wmLock) {
+                    if ((startFlags & ActivityManager.START_FLAG_DEBUG) != 0) {
+                        setDebugApp(aInfo.processName, true, false);
+                    }
 
-                if ((startFlags & ActivityManager.START_FLAG_NATIVE_DEBUGGING) != 0) {
-                    setNativeDebuggingAppLocked(aInfo.applicationInfo, aInfo.processName);
-                }
+                    if ((startFlags & ActivityManager.START_FLAG_NATIVE_DEBUGGING) != 0) {
+                        setNativeDebuggingAppLocked(aInfo.applicationInfo, aInfo.processName);
+                    }
 
-                if ((startFlags & ActivityManager.START_FLAG_TRACK_ALLOCATION) != 0) {
-                    setTrackAllocationApp(aInfo.applicationInfo, aInfo.processName);
-                }
+                    if ((startFlags & ActivityManager.START_FLAG_TRACK_ALLOCATION) != 0) {
+                        setTrackAllocationApp(aInfo.applicationInfo, aInfo.processName);
+                    }
 
-                if (profilerInfo != null) {
-                    setProfileApp(aInfo.applicationInfo, aInfo.processName, profilerInfo);
+                    if (profilerInfo != null) {
+                        setProfileApp(aInfo.applicationInfo, aInfo.processName, profilerInfo);
+                    }
+                    wmLock.notify();
                 }
             }
         }
@@ -19421,7 +19464,8 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     @Override
-    public void startDelegateShellPermissionIdentity(int delegateUid) {
+    public void startDelegateShellPermissionIdentity(int delegateUid,
+            @Nullable String[] permissions) {
         if (UserHandle.getCallingAppId() != Process.SHELL_UID
                 && UserHandle.getCallingAppId() != Process.ROOT_UID) {
             throw new SecurityException("Only the shell can delegate its permissions");
@@ -19440,11 +19484,13 @@ public class ActivityManagerService extends IActivityManager.Stub
                 if (!(mAppOpsService.getAppOpsServiceDelegate() instanceof ShellDelegate)) {
                     throw new IllegalStateException("Bad shell delegate state");
                 }
-                if (((ShellDelegate) mAppOpsService.getAppOpsServiceDelegate())
-                        .getDelegateUid() != delegateUid) {
+                final ShellDelegate delegate = (ShellDelegate) mAppOpsService
+                        .getAppOpsServiceDelegate();
+                if (delegate.getDelegateUid() != delegateUid) {
                     throw new SecurityException("Shell can delegate permissions only "
                             + "to one instrumentation at a time");
                 }
+                delegate.setPermissions(permissions);
                 return;
             }
 
@@ -19462,7 +19508,7 @@ public class ActivityManagerService extends IActivityManager.Stub
 
                 // Hook them up...
                 final ShellDelegate shellDelegate = new ShellDelegate(
-                        instr.mTargetInfo.packageName, delegateUid);
+                        instr.mTargetInfo.packageName, delegateUid, permissions);
                 mAppOpsService.setAppOpsServiceDelegate(shellDelegate);
                 getPackageManagerInternalLocked().setCheckPermissionDelegate(shellDelegate);
                 return;
@@ -19485,20 +19531,26 @@ public class ActivityManagerService extends IActivityManager.Stub
     private class ShellDelegate implements CheckOpsDelegate, CheckPermissionDelegate {
         private final String mTargetPackageName;
         private final int mTargetUid;
+        private @Nullable String[] mPermissions;
 
-        ShellDelegate(String targetPacakgeName, int targetUid) {
+        ShellDelegate(String targetPacakgeName, int targetUid, @Nullable String[] permissions) {
             mTargetPackageName = targetPacakgeName;
             mTargetUid = targetUid;
+            mPermissions = permissions;
         }
 
         int getDelegateUid() {
             return mTargetUid;
         }
 
+        void setPermissions(@Nullable String[] permissions) {
+            mPermissions = permissions;
+        }
+
         @Override
         public int checkOperation(int code, int uid, String packageName,
                 TriFunction<Integer, Integer, String, Integer> superImpl) {
-            if (uid == mTargetUid) {
+            if (uid == mTargetUid && isTargetOp(code)) {
                 final long identity = Binder.clearCallingIdentity();
                 try {
                     return superImpl.apply(code, Process.SHELL_UID,
@@ -19513,7 +19565,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         public int checkAudioOperation(int code, int usage, int uid, String packageName,
                 QuadFunction<Integer, Integer, Integer, String, Integer> superImpl) {
-            if (uid == mTargetUid) {
+            if (uid == mTargetUid && isTargetOp(code)) {
                 final long identity = Binder.clearCallingIdentity();
                 try {
                     return superImpl.apply(code, usage, Process.SHELL_UID,
@@ -19528,7 +19580,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         public int noteOperation(int code, int uid, String packageName,
                 TriFunction<Integer, Integer, String, Integer> superImpl) {
-            if (uid == mTargetUid) {
+            if (uid == mTargetUid && isTargetOp(code)) {
                 final long identity = Binder.clearCallingIdentity();
                 try {
                     return mAppOpsService.noteProxyOperation(code, Process.SHELL_UID,
@@ -19543,7 +19595,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         public int checkPermission(String permName, String pkgName, int userId,
                 TriFunction<String, String, Integer, Integer> superImpl) {
-            if (mTargetPackageName.equals(pkgName)) {
+            if (mTargetPackageName.equals(pkgName) && isTargetPermission(permName)) {
                 return superImpl.apply(permName, "com.android.shell", userId);
             }
             return superImpl.apply(permName, pkgName, userId);
@@ -19552,10 +19604,28 @@ public class ActivityManagerService extends IActivityManager.Stub
         @Override
         public int checkUidPermission(String permName, int uid,
                 BiFunction<String, Integer, Integer> superImpl) {
-            if (uid == mTargetUid) {
+            if (uid == mTargetUid  && isTargetPermission(permName)) {
                 return superImpl.apply(permName, Process.SHELL_UID);
             }
             return superImpl.apply(permName, uid);
+        }
+
+        private boolean isTargetOp(int code) {
+            // null permissions means all ops are targeted
+            if (mPermissions == null) {
+                return true;
+            }
+            // no permission for the op means the op is targeted
+            final String permission = AppOpsManager.opToPermission(code);
+            if (permission == null) {
+                return true;
+            }
+            return isTargetPermission(permission);
+        }
+
+        private boolean isTargetPermission(@NonNull String permission) {
+            // null permissions means all permissions are targeted
+            return (mPermissions == null || ArrayUtils.contains(mPermissions, permission));
         }
     }
 

@@ -325,18 +325,6 @@ public abstract class MediaPlayer2 implements AutoCloseable
     public abstract Object skipToNext();
 
     /**
-     * Moves the media to specified time position.
-     * Same as {@link #seekTo(long, int)} with {@code mode = SEEK_PREVIOUS_SYNC}.
-     *
-     * @param msec the offset in milliseconds from the start to seek to
-     * @return a token which can be used to cancel the operation later with {@link #cancel}.
-     */
-    // This is an asynchronous call.
-    public Object seekTo(long msec) {
-        return seekTo(msec, SEEK_PREVIOUS_SYNC /* mode */);
-    }
-
-    /**
      * Gets the current playback position.
      *
      * @return the current position in milliseconds
@@ -661,28 +649,16 @@ public abstract class MediaPlayer2 implements AutoCloseable
             AudioRouting.OnRoutingChangedListener listener);
 
     /**
-     * Returns the width of the video.
+     * Returns the size of the video.
      *
-     * @return the width of the video, or 0 if there is no video,
-     * no display surface was set, or the width has not been determined
-     * yet. The {@code EventCallback} can be registered via
+     * @return the size of the video. The width and height of size could be 0 if there is no video,
+     * no display surface was set, or the size has not been determined yet.
+     * The {@code EventCallback} can be registered via
      * {@link #setEventCallback(Executor, EventCallback)} to provide a
-     * notification {@code EventCallback.onVideoSizeChanged} when the width
+     * notification {@code EventCallback.onVideoSizeChanged} when the size
      * is available.
      */
-    public abstract int getVideoWidth();
-
-    /**
-     * Returns the height of the video.
-     *
-     * @return the height of the video, or 0 if there is no video,
-     * no display surface was set, or the height has not been determined
-     * yet. The {@code EventCallback} can be registered via
-     * {@link #setEventCallback(Executor, EventCallback)} to provide a
-     * notification {@code EventCallback.onVideoSizeChanged} when the height is
-     * available.
-     */
-    public abstract int getVideoHeight();
+    public abstract VideoSize getVideoSize();
 
     /**
      * Return Metrics data about the current player.
@@ -840,6 +816,18 @@ public abstract class MediaPlayer2 implements AutoCloseable
      */
     @NonNull
     public abstract SyncParams getSyncParams();
+
+    /**
+     * Moves the media to specified time position.
+     * Same as {@link #seekTo(long, int)} with {@code mode = SEEK_PREVIOUS_SYNC}.
+     *
+     * @param msec the offset in milliseconds from the start to seek to
+     * @return a token which can be used to cancel the operation later with {@link #cancel}.
+     */
+    // This is an asynchronous call.
+    public Object seekTo(long msec) {
+        return seekTo(msec, SEEK_PREVIOUS_SYNC /* mode */);
+    }
 
     /**
      * Seek modes used in method seekTo(long, int) to move media position
@@ -1171,11 +1159,10 @@ public abstract class MediaPlayer2 implements AutoCloseable
          *
          * @param mp the MediaPlayer2 associated with this callback
          * @param dsd the DataSourceDesc of this data source
-         * @param width the width of the video
-         * @param height the height of the video
+         * @param size the size of the video
          */
         public void onVideoSizeChanged(
-                MediaPlayer2 mp, DataSourceDesc dsd, int width, int height) { }
+                MediaPlayer2 mp, DataSourceDesc dsd, VideoSize size) { }
 
         /**
          * Called to indicate an avaliable timed text

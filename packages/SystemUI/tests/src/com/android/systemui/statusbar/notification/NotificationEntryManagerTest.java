@@ -19,7 +19,6 @@ package com.android.systemui.statusbar.notification;
 import static junit.framework.Assert.assertNotNull;
 import static junit.framework.Assert.assertNull;
 import static junit.framework.Assert.assertTrue;
-import static junit.framework.Assert.assertFalse;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.ArgumentMatchers.any;
@@ -168,7 +167,7 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
                     0,
                     NotificationManager.IMPORTANCE_DEFAULT,
                     null, null,
-                    null, null, null, true, sentiment, false, null, null);
+                    null, null, null, true, sentiment, false, false, false, null, null);
             return true;
         }).when(mRankingMap).getRanking(eq(key), any(NotificationListenerService.Ranking.class));
     }
@@ -186,8 +185,8 @@ public class NotificationEntryManagerTest extends SysuiTestCase {
                     NotificationManager.IMPORTANCE_DEFAULT,
                     null, null,
                     null, null, null, true,
-                    NotificationListenerService.Ranking.USER_SENTIMENT_NEUTRAL, false,
-                    smartActions, null);
+                    NotificationListenerService.Ranking.USER_SENTIMENT_NEUTRAL, false, false,
+                    false, smartActions, null);
             return true;
         }).when(mRankingMap).getRanking(eq(key), any(NotificationListenerService.Ranking.class));
     }

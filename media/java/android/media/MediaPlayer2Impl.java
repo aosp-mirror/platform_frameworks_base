@@ -34,7 +34,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.PersistableBundle;
 import android.os.PowerManager;
-import android.util.ArrayMap;
 import android.util.Log;
 import android.util.Pair;
 import android.view.Surface;
@@ -107,6 +106,7 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
     private AtomicInteger mBufferedPercentageCurrent = new AtomicInteger(0);
     private AtomicInteger mBufferedPercentageNext = new AtomicInteger(0);
     private volatile float mVolume = 1.0f;
+    private VideoSize mVideoSize = new VideoSize(0, 0);
 
     // Modular DRM
     private final Object mDrmLock = new Object();
@@ -834,46 +834,29 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
         return null;
     }
 
-    // Call BEFORE adding a routing callback handler or AFTER removing a routing callback handler.
-    @GuardedBy("mRoutingChangeListeners")
-    private void enableNativeRoutingCallbacksLocked(boolean enabled) {
-        if (mRoutingChangeListeners.size() == 0) {
-            native_enableDeviceCallback(enabled);
-        }
-    }
-
-    // The list of AudioRouting.OnRoutingChangedListener interfaces added with
-    // addOnRoutingChangedListener by an app to receive (re)routing notifications.
-    @GuardedBy("mRoutingChangeListeners")
-    private ArrayMap<AudioRouting.OnRoutingChangedListener,
-            NativeRoutingEventHandlerDelegate> mRoutingChangeListeners = new ArrayMap<>();
-
     @Override
     public void addOnRoutingChangedListener(AudioRouting.OnRoutingChangedListener listener,
             Handler handler) {
-        synchronized (mRoutingChangeListeners) {
-            if (listener != null && !mRoutingChangeListeners.containsKey(listener)) {
-                enableNativeRoutingCallbacksLocked(true);
-                mRoutingChangeListeners.put(
-                        listener, new NativeRoutingEventHandlerDelegate(this, listener,
-                                handler != null ? handler : mTaskHandler));
-            }
+        if (listener == null) {
+            throw new IllegalArgumentException("addOnRoutingChangedListener: listener is NULL");
         }
+        RoutingDelegate routingDelegate = new RoutingDelegate(this, listener, handler);
+        native_addDeviceCallback(routingDelegate);
     }
 
     @Override
     public void removeOnRoutingChangedListener(AudioRouting.OnRoutingChangedListener listener) {
-        synchronized (mRoutingChangeListeners) {
-            if (mRoutingChangeListeners.containsKey(listener)) {
-                mRoutingChangeListeners.remove(listener);
-                enableNativeRoutingCallbacksLocked(false);
-            }
+        if (listener == null) {
+            throw new IllegalArgumentException("removeOnRoutingChangedListener: listener is NULL");
         }
+        native_removeDeviceCallback(listener);
     }
 
     private native final boolean native_setOutputDevice(int deviceId);
     private native final int native_getRoutedDeviceId();
-    private native final void native_enableDeviceCallback(boolean enabled);
+    private native void native_addDeviceCallback(RoutingDelegate rd);
+    private native void native_removeDeviceCallback(
+            AudioRouting.OnRoutingChangedListener listener);
 
     @Override
     public Object setWakeMode(Context context, int mode) {
@@ -949,10 +932,9 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
     }
 
     @Override
-    public native int getVideoWidth();
-
-    @Override
-    public native int getVideoHeight();
+    public VideoSize getVideoSize() {
+        return mVideoSize;
+    }
 
     @Override
     public PersistableBundle getMetrics() {
@@ -1614,7 +1596,6 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
     private static final int MEDIA_SUBTITLE_DATA = 201;
     private static final int MEDIA_META_DATA = 202;
     private static final int MEDIA_DRM_INFO = 210;
-    private static final int MEDIA_AUDIO_ROUTING_CHANGED = 10000;
 
     private class TaskHandler extends Handler {
         private MediaPlayer2Impl mMediaPlayer;
@@ -1653,80 +1634,175 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
             }
 
             switch(msg.what) {
-            case MEDIA_PREPARED:
-            {
-                if (dsd != null) {
+                case MEDIA_PREPARED:
+                {
+                    if (dsd != null) {
+                        sendEvent(new EventNotifier() {
+                            @Override
+                            public void notify(EventCallback callback) {
+                                callback.onInfo(
+                                        mMediaPlayer, dsd, MEDIA_INFO_PREPARED, 0);
+                            }
+                        });
+                    }
+
+                    synchronized (mSrcLock) {
+                        Log.i(TAG, "MEDIA_PREPARED: srcId=" + srcId
+                                + ", currentSrcId=" + mCurrentSrcId + ", nextSrcId=" + mNextSrcId);
+
+                        if (isCurrentSrcId) {
+                            prepareNextDataSource();
+                        } else if (isNextSrcId) {
+                            mNextSourceState = NEXT_SOURCE_STATE_PREPARED;
+                            if (mNextSourcePlayPending) {
+                                playNextDataSource();
+                            }
+                        }
+                    }
+
+                    synchronized (mTaskLock) {
+                        if (mCurrentTask != null
+                                && mCurrentTask.mMediaCallType == CALL_COMPLETED_PREPARE
+                                && mCurrentTask.mDSD == dsd
+                                && mCurrentTask.mNeedToWaitForEventToComplete) {
+                            mCurrentTask.sendCompleteNotification(CALL_STATUS_NO_ERROR);
+                            mCurrentTask = null;
+                            processPendingTask_l();
+                        }
+                    }
+                    return;
+                }
+
+                case MEDIA_DRM_INFO:
+                {
+                    if (msg.obj == null) {
+                        Log.w(TAG, "MEDIA_DRM_INFO msg.obj=NULL");
+                    } else if (msg.obj instanceof byte[]) {
+                        // The PlayerMessage was parsed already in postEventFromNative
+                        final DrmInfoImpl drmInfo;
+
+                        synchronized (mDrmLock) {
+                            if (mDrmInfoImpl != null) {
+                                drmInfo = mDrmInfoImpl.makeCopy();
+                            } else {
+                                drmInfo = null;
+                            }
+                        }
+
+                        // notifying the client outside the lock
+                        if (drmInfo != null) {
+                            sendDrmEvent(new DrmEventNotifier() {
+                                @Override
+                                public void notify(DrmEventCallback callback) {
+                                    callback.onDrmInfo(
+                                            mMediaPlayer, dsd, drmInfo);
+                                }
+                            });
+                        }
+                    } else {
+                        Log.w(TAG, "MEDIA_DRM_INFO msg.obj of unexpected type " + msg.obj);
+                    }
+                    return;
+                }
+
+                case MEDIA_PLAYBACK_COMPLETE:
+                {
+                    if (isCurrentSrcId) {
+                        sendEvent(new EventNotifier() {
+                            @Override
+                            public void notify(EventCallback callback) {
+                                callback.onInfo(
+                                        mMediaPlayer, dsd, MEDIA_INFO_DATA_SOURCE_END, 0);
+                            }
+                        });
+                        stayAwake(false);
+
+                        synchronized (mSrcLock) {
+                            mNextSourcePlayPending = true;
+
+                            Log.i(TAG, "MEDIA_PLAYBACK_COMPLETE: srcId=" + srcId
+                                    + ", currentSrcId=" + mCurrentSrcId
+                                    + ", nextSrcId=" + mNextSrcId);
+                        }
+
+                        playNextDataSource();
+                    }
+
+                    return;
+                }
+
+                case MEDIA_STOPPED:
+                case MEDIA_STARTED:
+                case MEDIA_PAUSED:
+                case MEDIA_SKIPPED:
+                case MEDIA_NOTIFY_TIME:
+                {
+                    // Do nothing. The client should have enough information with
+                    // {@link EventCallback#onMediaTimeDiscontinuity}.
+                    break;
+                }
+
+                case MEDIA_BUFFERING_UPDATE:
+                {
+                    final int percent = msg.arg1;
                     sendEvent(new EventNotifier() {
                         @Override
                         public void notify(EventCallback callback) {
                             callback.onInfo(
-                                    mMediaPlayer, dsd, MEDIA_INFO_PREPARED, 0);
+                                    mMediaPlayer, dsd, MEDIA_INFO_BUFFERING_UPDATE, percent);
                         }
                     });
-                }
 
-                synchronized (mSrcLock) {
-                    Log.i(TAG, "MEDIA_PREPARED: srcId=" + srcId
-                            + ", currentSrcId=" + mCurrentSrcId + ", nextSrcId=" + mNextSrcId);
-
-                    if (isCurrentSrcId) {
-                        prepareNextDataSource();
-                    } else if (isNextSrcId) {
-                        mNextSourceState = NEXT_SOURCE_STATE_PREPARED;
-                        if (mNextSourcePlayPending) {
-                            playNextDataSource();
+                    synchronized (mSrcLock) {
+                        if (isCurrentSrcId) {
+                            mBufferedPercentageCurrent.set(percent);
+                        } else if (isNextSrcId) {
+                            mBufferedPercentageNext.set(percent);
                         }
                     }
+                    return;
                 }
 
-                synchronized (mTaskLock) {
-                    if (mCurrentTask != null
-                            && mCurrentTask.mMediaCallType == CALL_COMPLETED_PREPARE
-                            && mCurrentTask.mDSD == dsd
-                            && mCurrentTask.mNeedToWaitForEventToComplete) {
-                        mCurrentTask.sendCompleteNotification(CALL_STATUS_NO_ERROR);
-                        mCurrentTask = null;
-                        processPendingTask_l();
-                    }
-                }
-                return;
-            }
-
-            case MEDIA_DRM_INFO:
-            {
-                if (msg.obj == null) {
-                    Log.w(TAG, "MEDIA_DRM_INFO msg.obj=NULL");
-                } else if (msg.obj instanceof byte[]) {
-                    // The PlayerMessage was parsed already in postEventFromNative
-                    final DrmInfoImpl drmInfo;
-
-                    synchronized (mDrmLock) {
-                        if (mDrmInfoImpl != null) {
-                            drmInfo = mDrmInfoImpl.makeCopy();
-                        } else {
-                            drmInfo = null;
+                case MEDIA_SEEK_COMPLETE:
+                {
+                    synchronized (mTaskLock) {
+                        if (mCurrentTask != null
+                                && mCurrentTask.mMediaCallType == CALL_COMPLETED_SEEK_TO
+                                && mCurrentTask.mNeedToWaitForEventToComplete) {
+                            mCurrentTask.sendCompleteNotification(CALL_STATUS_NO_ERROR);
+                            mCurrentTask = null;
+                            processPendingTask_l();
                         }
                     }
-
-                    // notifying the client outside the lock
-                    if (drmInfo != null) {
-                        sendDrmEvent(new DrmEventNotifier() {
-                            @Override
-                            public void notify(DrmEventCallback callback) {
-                                callback.onDrmInfo(
-                                        mMediaPlayer, dsd, drmInfo);
-                            }
-                        });
-                    }
-                } else {
-                    Log.w(TAG, "MEDIA_DRM_INFO msg.obj of unexpected type " + msg.obj);
+                    return;
                 }
-                return;
-            }
 
-            case MEDIA_PLAYBACK_COMPLETE:
-            {
-                if (isCurrentSrcId) {
+                case MEDIA_SET_VIDEO_SIZE:
+                {
+                    final int width = msg.arg1;
+                    final int height = msg.arg2;
+
+                    mVideoSize = new VideoSize(width, height);
+                    sendEvent(new EventNotifier() {
+                        @Override
+                        public void notify(EventCallback callback) {
+                            callback.onVideoSizeChanged(
+                                    mMediaPlayer, dsd, mVideoSize);
+                        }
+                    });
+                    return;
+                }
+
+                case MEDIA_ERROR:
+                {
+                    Log.e(TAG, "Error (" + msg.arg1 + "," + msg.arg2 + ")");
+                    sendEvent(new EventNotifier() {
+                        @Override
+                        public void notify(EventCallback callback) {
+                            callback.onError(
+                                    mMediaPlayer, dsd, what, extra);
+                        }
+                    });
                     sendEvent(new EventNotifier() {
                         @Override
                         public void notify(EventCallback callback) {
@@ -1735,231 +1811,127 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                         }
                     });
                     stayAwake(false);
-
-                    synchronized (mSrcLock) {
-                        mNextSourcePlayPending = true;
-
-                        Log.i(TAG, "MEDIA_PLAYBACK_COMPLETE: srcId=" + srcId
-                                + ", currentSrcId=" + mCurrentSrcId + ", nextSrcId=" + mNextSrcId);
-                    }
-
-                    playNextDataSource();
+                    return;
                 }
 
-                return;
-            }
-
-            case MEDIA_STOPPED:
-            case MEDIA_STARTED:
-            case MEDIA_PAUSED:
-            case MEDIA_SKIPPED:
-            case MEDIA_NOTIFY_TIME:
-            {
-                // Do nothing. The client should have enough information with
-                // {@link EventCallback#onMediaTimeDiscontinuity}.
-                break;
-            }
-
-            case MEDIA_BUFFERING_UPDATE:
-            {
-                final int percent = msg.arg1;
-                sendEvent(new EventNotifier() {
-                    @Override
-                    public void notify(EventCallback callback) {
-                        callback.onInfo(
-                                mMediaPlayer, dsd, MEDIA_INFO_BUFFERING_UPDATE, percent);
+                case MEDIA_INFO:
+                {
+                    switch (msg.arg1) {
+                        case MEDIA_INFO_VIDEO_TRACK_LAGGING:
+                            Log.i(TAG, "Info (" + msg.arg1 + "," + msg.arg2 + ")");
+                            break;
                     }
-                });
 
-                synchronized (mSrcLock) {
-                    if (isCurrentSrcId) {
-                        mBufferedPercentageCurrent.set(percent);
-                    } else if (isNextSrcId) {
-                        mBufferedPercentageNext.set(percent);
-                    }
-                }
-                return;
-            }
-
-            case MEDIA_SEEK_COMPLETE:
-            {
-                synchronized (mTaskLock) {
-                    if (mCurrentTask != null
-                            && mCurrentTask.mMediaCallType == CALL_COMPLETED_SEEK_TO
-                            && mCurrentTask.mNeedToWaitForEventToComplete) {
-                        mCurrentTask.sendCompleteNotification(CALL_STATUS_NO_ERROR);
-                        mCurrentTask = null;
-                        processPendingTask_l();
-                    }
-                }
-                return;
-            }
-
-            case MEDIA_SET_VIDEO_SIZE:
-            {
-                final int width = msg.arg1;
-                final int height = msg.arg2;
-                sendEvent(new EventNotifier() {
-                    @Override
-                    public void notify(EventCallback callback) {
-                        callback.onVideoSizeChanged(
-                                mMediaPlayer, dsd, width, height);
-                    }
-                });
-                return;
-            }
-
-            case MEDIA_ERROR:
-            {
-                Log.e(TAG, "Error (" + msg.arg1 + "," + msg.arg2 + ")");
-                sendEvent(new EventNotifier() {
-                    @Override
-                    public void notify(EventCallback callback) {
-                        callback.onError(
-                                mMediaPlayer, dsd, what, extra);
-                    }
-                });
-                sendEvent(new EventNotifier() {
-                    @Override
-                    public void notify(EventCallback callback) {
-                        callback.onInfo(
-                                mMediaPlayer, dsd, MEDIA_INFO_DATA_SOURCE_END, 0);
-                    }
-                });
-                stayAwake(false);
-                return;
-            }
-
-            case MEDIA_INFO:
-            {
-                switch (msg.arg1) {
-                    case MEDIA_INFO_VIDEO_TRACK_LAGGING:
-                        Log.i(TAG, "Info (" + msg.arg1 + "," + msg.arg2 + ")");
-                        break;
-                }
-
-                sendEvent(new EventNotifier() {
-                    @Override
-                    public void notify(EventCallback callback) {
-                        callback.onInfo(
-                                mMediaPlayer, dsd, what, extra);
-                    }
-                });
-
-                if (msg.arg1 == MEDIA_INFO_DATA_SOURCE_START) {
-                    if (isCurrentSrcId) {
-                        prepareNextDataSource();
-                    }
-                }
-
-                // No real default action so far.
-                return;
-            }
-
-            case MEDIA_TIMED_TEXT:
-            {
-                final TimedText text;
-                if (msg.obj instanceof byte[]) {
-                    PlayerMessage playerMsg;
-                    try {
-                        playerMsg = PlayerMessage.parseFrom((byte[]) msg.obj);
-                    } catch (InvalidProtocolBufferException e) {
-                        Log.w(TAG, "Failed to parse timed text.", e);
-                        return;
-                    }
-                    text = TimedTextUtil.parsePlayerMessage(playerMsg);
-                } else {
-                    text = null;
-                }
-
-                sendEvent(new EventNotifier() {
-                    @Override
-                    public void notify(EventCallback callback) {
-                        callback.onTimedText(
-                                mMediaPlayer, dsd, text);
-                    }
-                });
-                return;
-            }
-
-            case MEDIA_SUBTITLE_DATA:
-            {
-                if (msg.obj instanceof byte[]) {
-                    PlayerMessage playerMsg;
-                    try {
-                        playerMsg = PlayerMessage.parseFrom((byte[]) msg.obj);
-                    } catch (InvalidProtocolBufferException e) {
-                        Log.w(TAG, "Failed to parse subtitle data.", e);
-                        return;
-                    }
-                    Iterator<Value> in = playerMsg.getValuesList().iterator();
-                    SubtitleData data = new SubtitleData(
-                            in.next().getInt32Value(),  // trackIndex
-                            in.next().getInt64Value(),  // startTimeUs
-                            in.next().getInt64Value(),  // durationUs
-                            in.next().getBytesValue().toByteArray());  // data
                     sendEvent(new EventNotifier() {
                         @Override
                         public void notify(EventCallback callback) {
-                            callback.onSubtitleData(
+                            callback.onInfo(
+                                    mMediaPlayer, dsd, what, extra);
+                        }
+                    });
+
+                    if (msg.arg1 == MEDIA_INFO_DATA_SOURCE_START) {
+                        if (isCurrentSrcId) {
+                            prepareNextDataSource();
+                        }
+                    }
+
+                    // No real default action so far.
+                    return;
+                }
+
+                case MEDIA_TIMED_TEXT:
+                {
+                    final TimedText text;
+                    if (msg.obj instanceof byte[]) {
+                        PlayerMessage playerMsg;
+                        try {
+                            playerMsg = PlayerMessage.parseFrom((byte[]) msg.obj);
+                        } catch (InvalidProtocolBufferException e) {
+                            Log.w(TAG, "Failed to parse timed text.", e);
+                            return;
+                        }
+                        text = TimedTextUtil.parsePlayerMessage(playerMsg);
+                    } else {
+                        text = null;
+                    }
+
+                    sendEvent(new EventNotifier() {
+                        @Override
+                        public void notify(EventCallback callback) {
+                            callback.onTimedText(
+                                    mMediaPlayer, dsd, text);
+                        }
+                    });
+                    return;
+                }
+
+                case MEDIA_SUBTITLE_DATA:
+                {
+                    if (msg.obj instanceof byte[]) {
+                        PlayerMessage playerMsg;
+                        try {
+                            playerMsg = PlayerMessage.parseFrom((byte[]) msg.obj);
+                        } catch (InvalidProtocolBufferException e) {
+                            Log.w(TAG, "Failed to parse subtitle data.", e);
+                            return;
+                        }
+                        Iterator<Value> in = playerMsg.getValuesList().iterator();
+                        SubtitleData data = new SubtitleData(
+                                in.next().getInt32Value(),  // trackIndex
+                                in.next().getInt64Value(),  // startTimeUs
+                                in.next().getInt64Value(),  // durationUs
+                                in.next().getBytesValue().toByteArray());  // data
+                        sendEvent(new EventNotifier() {
+                            @Override
+                            public void notify(EventCallback callback) {
+                                callback.onSubtitleData(
+                                        mMediaPlayer, dsd, data);
+                            }
+                        });
+                    }
+                    return;
+                }
+
+                case MEDIA_META_DATA:
+                {
+                    final TimedMetaData data;
+                    if (msg.obj instanceof byte[]) {
+                        PlayerMessage playerMsg;
+                        try {
+                            playerMsg = PlayerMessage.parseFrom((byte[]) msg.obj);
+                        } catch (InvalidProtocolBufferException e) {
+                            Log.w(TAG, "Failed to parse timed meta data.", e);
+                            return;
+                        }
+                        Iterator<Value> in = playerMsg.getValuesList().iterator();
+                        data = new TimedMetaData(
+                                in.next().getInt64Value(),  // timestampUs
+                                in.next().getBytesValue().toByteArray());  // metaData
+                    } else {
+                        data = null;
+                    }
+
+                    sendEvent(new EventNotifier() {
+                        @Override
+                        public void notify(EventCallback callback) {
+                            callback.onTimedMetaDataAvailable(
                                     mMediaPlayer, dsd, data);
                         }
                     });
-                }
-                return;
-            }
-
-            case MEDIA_META_DATA:
-            {
-                final TimedMetaData data;
-                if (msg.obj instanceof byte[]) {
-                    PlayerMessage playerMsg;
-                    try {
-                        playerMsg = PlayerMessage.parseFrom((byte[]) msg.obj);
-                    } catch (InvalidProtocolBufferException e) {
-                        Log.w(TAG, "Failed to parse timed meta data.", e);
-                        return;
-                    }
-                    Iterator<Value> in = playerMsg.getValuesList().iterator();
-                    data = new TimedMetaData(
-                            in.next().getInt64Value(),  // timestampUs
-                            in.next().getBytesValue().toByteArray());  // metaData
-                } else {
-                    data = null;
+                    return;
                 }
 
-                sendEvent(new EventNotifier() {
-                    @Override
-                    public void notify(EventCallback callback) {
-                        callback.onTimedMetaDataAvailable(
-                                mMediaPlayer, dsd, data);
-                    }
-                });
-                return;
-            }
-
-            case MEDIA_NOP: // interface test message - ignore
-            {
-                break;
-            }
-
-            case MEDIA_AUDIO_ROUTING_CHANGED:
-            {
-                AudioManager.resetAudioPortGeneration();
-                synchronized (mRoutingChangeListeners) {
-                    for (NativeRoutingEventHandlerDelegate delegate
-                            : mRoutingChangeListeners.values()) {
-                        delegate.notifyClient();
-                    }
+                case MEDIA_NOP: // interface test message - ignore
+                {
+                    break;
                 }
-                return;
-            }
 
-            default:
-            {
-                Log.e(TAG, "Unknown message type " + msg.what);
-                return;
-            }
+                default:
+                {
+                    Log.e(TAG, "Unknown message type " + msg.what);
+                    return;
+                }
             }
         }
     }

@@ -790,40 +790,6 @@ android_media_MediaPlayer2_getState(JNIEnv *env, jobject thiz)
     return (jint)mp->getState();
 }
 
-static jint
-android_media_MediaPlayer2_getVideoWidth(JNIEnv *env, jobject thiz)
-{
-    sp<MediaPlayer2> mp = getMediaPlayer(env, thiz);
-    if (mp == NULL ) {
-        jniThrowException(env, "java/lang/IllegalStateException", NULL);
-        return 0;
-    }
-    int w;
-    if (0 != mp->getVideoWidth(&w)) {
-        ALOGE("getVideoWidth failed");
-        w = 0;
-    }
-    ALOGV("getVideoWidth: %d", w);
-    return (jint) w;
-}
-
-static jint
-android_media_MediaPlayer2_getVideoHeight(JNIEnv *env, jobject thiz)
-{
-    sp<MediaPlayer2> mp = getMediaPlayer(env, thiz);
-    if (mp == NULL ) {
-        jniThrowException(env, "java/lang/IllegalStateException", NULL);
-        return 0;
-    }
-    int h;
-    if (0 != mp->getVideoHeight(&h)) {
-        ALOGE("getVideoHeight failed");
-        h = 0;
-    }
-    ALOGV("getVideoHeight: %d", h);
-    return (jint) h;
-}
-
 static jobject
 android_media_MediaPlayer2_native_getMetrics(JNIEnv *env, jobject thiz)
 {
@@ -1358,15 +1324,30 @@ static jint android_media_MediaPlayer2_getRoutedDeviceId(JNIEnv *env, jobject th
     return mp->getRoutedDeviceId();
 }
 
-static void android_media_MediaPlayer2_enableDeviceCallback(
-        JNIEnv* env, jobject thiz, jboolean enabled)
+static void android_media_MediaPlayer2_addDeviceCallback(
+        JNIEnv* env, jobject thiz, jobject routingDelegate)
 {
     sp<MediaPlayer2> mp = getMediaPlayer(env, thiz);
     if (mp == NULL) {
         return;
     }
 
-    status_t status = mp->enableAudioDeviceCallback(enabled);
+    status_t status = mp->addAudioDeviceCallback(routingDelegate);
+    if (status != NO_ERROR) {
+        jniThrowException(env, "java/lang/IllegalStateException", NULL);
+        ALOGE("enable device callback failed: %d", status);
+    }
+}
+
+static void android_media_MediaPlayer2_removeDeviceCallback(
+        JNIEnv* env, jobject thiz, jobject listener)
+{
+    sp<MediaPlayer2> mp = getMediaPlayer(env, thiz);
+    if (mp == NULL) {
+        return;
+    }
+
+    status_t status = mp->removeAudioDeviceCallback(listener);
     if (status != NO_ERROR) {
         jniThrowException(env, "java/lang/IllegalStateException", NULL);
         ALOGE("enable device callback failed: %d", status);
@@ -1459,8 +1440,6 @@ static const JNINativeMethod gMethods[] = {
     {"_prepare",            "()V",                              (void *)android_media_MediaPlayer2_prepare},
     {"_start",              "()V",                              (void *)android_media_MediaPlayer2_start},
     {"native_getState",     "()I",                              (void *)android_media_MediaPlayer2_getState},
-    {"getVideoWidth",       "()I",                              (void *)android_media_MediaPlayer2_getVideoWidth},
-    {"getVideoHeight",      "()I",                              (void *)android_media_MediaPlayer2_getVideoHeight},
     {"native_getMetrics",   "()Landroid/os/PersistableBundle;", (void *)android_media_MediaPlayer2_native_getMetrics},
     {"_setPlaybackParams", "(Landroid/media/PlaybackParams;)V", (void *)android_media_MediaPlayer2_setPlaybackParams},
     {"getPlaybackParams", "()Landroid/media/PlaybackParams;", (void *)android_media_MediaPlayer2_getPlaybackParams},
@@ -1493,7 +1472,9 @@ static const JNINativeMethod gMethods[] = {
     // AudioRouting
     {"native_setOutputDevice", "(I)Z",                          (void *)android_media_MediaPlayer2_setOutputDevice},
     {"native_getRoutedDeviceId", "()I",                         (void *)android_media_MediaPlayer2_getRoutedDeviceId},
-    {"native_enableDeviceCallback", "(Z)V",                     (void *)android_media_MediaPlayer2_enableDeviceCallback},
+    {"native_addDeviceCallback", "(Landroid/media/RoutingDelegate;)V", (void *)android_media_MediaPlayer2_addDeviceCallback},
+    {"native_removeDeviceCallback", "(Landroid/media/AudioRouting$OnRoutingChangedListener;)V",
+            (void *)android_media_MediaPlayer2_removeDeviceCallback},
 
     // StreamEventCallback for JAudioTrack
     {"native_stream_event_onTearDown",                "(JJ)V",  (void *)android_media_MediaPlayer2_native_on_tear_down},

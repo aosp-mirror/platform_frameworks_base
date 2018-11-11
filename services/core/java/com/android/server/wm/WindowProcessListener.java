@@ -16,7 +16,6 @@
 
 package com.android.server.wm;
 
-import android.app.ProfilerInfo;
 import android.util.proto.ProtoOutputStream;
 
 /**
@@ -58,7 +57,7 @@ public interface WindowProcessListener {
     void addPackage(String pkg, long versionCode);
 
     /** Called when we are in the process on starting an activity. */
-    ProfilerInfo onStartActivity(int topProcessState);
+    void onStartActivity(int topProcessState, boolean setProfileProc);
 
     /** App died :(...oh well */
     void appDied();

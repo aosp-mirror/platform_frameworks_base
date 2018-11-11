@@ -53,6 +53,7 @@ import static android.content.pm.ActivityInfo.LAUNCH_SINGLE_TOP;
 import static android.view.Display.DEFAULT_DISPLAY;
 import static android.view.Display.INVALID_DISPLAY;
 
+import static com.android.server.am.EventLogTags.AM_NEW_INTENT;
 import static com.android.server.wm.ActivityStack.ActivityState.RESUMED;
 import static com.android.server.wm.ActivityStackSupervisor.DEFER_RESUME;
 import static com.android.server.wm.ActivityStackSupervisor.ON_TOP;
@@ -72,7 +73,6 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_USER_
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.ActivityTaskManagerService.ANIMATE;
-import static com.android.server.am.EventLogTags.AM_NEW_INTENT;
 import static com.android.server.wm.TaskRecord.REPARENT_KEEP_STACK_AT_FRONT;
 import static com.android.server.wm.TaskRecord.REPARENT_MOVE_STACK_TO_FRONT;
 
@@ -114,9 +114,9 @@ import com.android.internal.app.HeavyWeightSwitcherActivity;
 import com.android.internal.app.IVoiceInteractor;
 import com.android.server.am.EventLogTags;
 import com.android.server.am.PendingIntentRecord;
+import com.android.server.pm.InstantAppResolver;
 import com.android.server.wm.ActivityStackSupervisor.PendingActivityLaunch;
 import com.android.server.wm.LaunchParamsController.LaunchParams;
-import com.android.server.pm.InstantAppResolver;
 
 import java.io.PrintWriter;
 import java.text.DateFormat;
@@ -1284,8 +1284,8 @@ class ActivityStarter {
         // Do not start home activity if it cannot be launched on preferred display. We are not
         // doing this in ActivityStackSupervisor#canPlaceEntityOnDisplay because it might
         // fallback to launch on other displays.
-        if (r.isActivityTypeHome()
-                && !mSupervisor.canStartHomeOnDisplay(r.info, mPreferredDisplayId)) {
+        if (r.isActivityTypeHome() && !mSupervisor.canStartHomeOnDisplay(r.info,
+                mPreferredDisplayId, true /* allowInstrumenting */)) {
             Slog.w(TAG, "Cannot launch home on display " + mPreferredDisplayId);
             return START_CANCELED;
         }

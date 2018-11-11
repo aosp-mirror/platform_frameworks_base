@@ -270,6 +270,7 @@ message GlobalSettingsProto {
         optional SettingProto enable_freeform_windows_support = 3 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto force_rtl = 4 [ (android.privacy).dest = DEST_AUTOMATIC ];
         optional SettingProto emulate_display_cutout = 5 [ (android.privacy).dest = DEST_AUTOMATIC ];
+        optional SettingProto force_desktop_mode_on_external_displays = 6 [ (android.privacy).dest = DEST_AUTOMATIC ];
     }
     optional Development development = 39;
 
@@ -404,6 +405,9 @@ message GlobalSettingsProto {
         // Ordered GPU debug layer list for GLES
         // i.e. <layer1>:<layer2>:...:<layerN>
         optional SettingProto debug_layers_gles = 5;
+        // App opt in to load updated graphics driver instead of
+        // native graphcis driver through developer options.
+        optional SettingProto updated_gfx_driver_dev_opt_in_app = 6;
     }
     optional Gpu gpu = 59;
 

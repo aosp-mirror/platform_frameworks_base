@@ -115,6 +115,7 @@ import com.android.server.pm.UserManagerService;
 import com.android.server.policy.PhoneWindowManager;
 import com.android.server.power.PowerManagerService;
 import com.android.server.power.ShutdownThread;
+import com.android.server.power.ThermalManagerService;
 import com.android.server.restrictions.RestrictionsManagerService;
 import com.android.server.security.KeyAttestationApplicationIdProviderService;
 import com.android.server.security.KeyChainSystemService;
@@ -134,6 +135,7 @@ import com.android.server.usage.UsageStatsService;
 import com.android.server.vr.VrManagerService;
 import com.android.server.webkit.WebViewUpdateService;
 import com.android.server.wm.ActivityTaskManagerService;
+import com.android.server.wm.WindowManagerGlobalLock;
 import com.android.server.wm.WindowManagerService;
 
 import dalvik.system.VMRuntime;
@@ -275,6 +277,7 @@ public final class SystemServer {
     // TODO: remove all of these references by improving dependency resolution and boot phases
     private PowerManagerService mPowerManagerService;
     private ActivityManagerService mActivityManagerService;
+    private WindowManagerGlobalLock mWindowManagerGlobalLock;
     private WebViewUpdateService mWebViewUpdateService;
     private DisplayManagerService mDisplayManagerService;
     private PackageManagerService mPackageManagerService;
@@ -597,6 +600,7 @@ public final class SystemServer {
                 mSystemServiceManager, atm);
         mActivityManagerService.setSystemServiceManager(mSystemServiceManager);
         mActivityManagerService.setInstaller(installer);
+        mWindowManagerGlobalLock = atm.getGlobalLock();
         traceEnd();
 
         // Power manager needs to be started early because other services need it.
@@ -605,6 +609,10 @@ public final class SystemServer {
         // the permissions for those calls).
         traceBeginAndSlog("StartPowerManager");
         mPowerManagerService = mSystemServiceManager.startService(PowerManagerService.class);
+        traceEnd();
+
+        traceBeginAndSlog("StartThermalManager");
+        mSystemServiceManager.startService(ThermalManagerService.class);
         traceEnd();
 
         // Now that the power manager has been started, let the activity manager
@@ -921,7 +929,7 @@ public final class SystemServer {
             ConcurrentUtils.waitForFutureNoInterrupt(mSensorServiceStart, START_SENSOR_SERVICE);
             mSensorServiceStart = null;
             wm = WindowManagerService.main(context, inputManager, !mFirstBoot, mOnlyCore,
-                    new PhoneWindowManager());
+                    new PhoneWindowManager(), mWindowManagerGlobalLock);
             ServiceManager.addService(Context.WINDOW_SERVICE, wm, /* allowIsolated= */ false,
                     DUMP_FLAG_PRIORITY_CRITICAL | DUMP_FLAG_PROTO);
             ServiceManager.addService(Context.INPUT_SERVICE, inputManager,
@@ -1619,7 +1627,7 @@ public final class SystemServer {
 
             if (hasFeatureFace || hasFeatureIris || hasFeatureFingerprint) {
                 // Start this service after all biometric services.
-                traceBeginAndSlog("StartBiometricPromptService");
+                traceBeginAndSlog("StartBiometricService");
                 mSystemServiceManager.startService(BiometricService.class);
                 traceEnd();
             }

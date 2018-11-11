@@ -185,15 +185,12 @@ class DisplaySettings {
         }
         // No record is present so use default windowing mode policy.
         if (windowingMode == WindowConfiguration.WINDOWING_MODE_UNDEFINED) {
-            if (displayId == Display.DEFAULT_DISPLAY) {
-                windowingMode = (mService.mIsPc && mService.mSupportsFreeformWindowManagement)
-                        ? WindowConfiguration.WINDOWING_MODE_FREEFORM
-                        : WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
-            } else {
-                windowingMode = mService.mSupportsFreeformWindowManagement
-                        ? WindowConfiguration.WINDOWING_MODE_FREEFORM
-                        : WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
-            }
+            final boolean forceDesktopMode = mService.mForceDesktopModeOnExternalDisplays
+                    && displayId != Display.DEFAULT_DISPLAY;
+            windowingMode = mService.mSupportsFreeformWindowManagement
+                    && (mService.mIsPc || forceDesktopMode)
+                    ? WindowConfiguration.WINDOWING_MODE_FREEFORM
+                    : WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
         }
         return windowingMode;
     }

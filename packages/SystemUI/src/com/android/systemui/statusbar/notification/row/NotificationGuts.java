@@ -23,13 +23,14 @@ import android.content.res.TypedArray;
 import android.graphics.Canvas;
 import android.graphics.drawable.Drawable;
 import android.os.Handler;
-import androidx.annotation.Nullable;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewAnimationUtils;
 import android.view.accessibility.AccessibilityEvent;
 import android.widget.FrameLayout;
+
+import androidx.annotation.Nullable;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.Dependency;
@@ -98,6 +99,11 @@ public class NotificationGuts extends FrameLayout {
          * Return whether something changed and needs to be saved, possibly requiring a bouncer.
          */
         boolean shouldBeSaved();
+
+        /**
+         * Called when the guts view has finished its close animation.
+         */
+        default void onFinishedClosing() {}
     }
 
     public interface OnGutsClosedListener {
@@ -304,7 +310,7 @@ public class NotificationGuts extends FrameLayout {
                         x, y, r, 0);
                 a.setDuration(StackStateAnimator.ANIMATION_DURATION_STANDARD);
                 a.setInterpolator(Interpolators.FAST_OUT_LINEAR_IN);
-                a.addListener(new AnimateCloseListener(this /* view */));
+                a.addListener(new AnimateCloseListener(this /* view */, mGutsContent));
                 a.start();
             } else {
                 // Fade in the blocking helper.
@@ -312,11 +318,12 @@ public class NotificationGuts extends FrameLayout {
                         .alpha(0f)
                         .setDuration(StackStateAnimator.ANIMATION_DURATION_BLOCKING_HELPER_FADE)
                         .setInterpolator(Interpolators.ALPHA_OUT)
-                        .setListener(new AnimateCloseListener(this /* view */))
+                        .setListener(new AnimateCloseListener(this, /* view */mGutsContent))
                         .start();
             }
         } else {
             Log.w(TAG, "Failed to animate guts close");
+            mGutsContent.onFinishedClosing();
         }
     }
 
@@ -414,15 +421,18 @@ public class NotificationGuts extends FrameLayout {
     /** Listener for animations executed in {@link #animateClose(int, int, boolean)}. */
     private static class AnimateCloseListener extends AnimatorListenerAdapter {
         final View mView;
+        private final GutsContent mGutsContent;
 
-        private AnimateCloseListener(View view) {
+        private AnimateCloseListener(View view, GutsContent gutsContent) {
             mView = view;
+            mGutsContent = gutsContent;
         }
 
         @Override
         public void onAnimationEnd(Animator animation) {
             super.onAnimationEnd(animation);
             mView.setVisibility(View.GONE);
+            mGutsContent.onFinishedClosing();
         }
     }
 }

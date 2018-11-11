@@ -38,15 +38,6 @@ import org.mockito.invocation.InvocationOnMock;
  * to WindowManager related test functionality.
  */
 public class WindowTestUtils {
-    private static int sNextTaskId = 0;
-
-    /** Retrieves an instance of a mock {@link WindowManagerService}. */
-    static WindowManagerService getMockWindowManagerService() {
-        final WindowManagerService service = mock(WindowManagerService.class);
-        final WindowManagerGlobalLock lock = new WindowManagerGlobalLock();
-        doReturn(lock).when(service).getWindowManagerLock();
-        return service;
-    }
 
     /** An extension of {@link DisplayContent} to gain package scoped access. */
     public static class TestDisplayContent extends DisplayContent {

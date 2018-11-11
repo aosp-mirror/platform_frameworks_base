@@ -65,6 +65,25 @@ public class MetricsFeatureProvider {
         }
     }
 
+    /**
+     * Logs a generic Settings event.
+     */
+    public void action(Context context, int category, String pkg,
+            Pair<Integer, Object>... taggedData) {
+        for (LogWriter writer : mLoggerWriters) {
+            writer.action(context, category, pkg, taggedData);
+        }
+    }
+
+    /**
+     * Logs a generic Settings event.
+     */
+    public void action(int attribution, int action, int pageId, String key, int value) {
+        for (LogWriter writer : mLoggerWriters) {
+            writer.action(attribution, action, pageId, key, value);
+        }
+    }
+
     public void action(Context context, int category, int value) {
         for (LogWriter writer : mLoggerWriters) {
             writer.action(context, category, value);
@@ -74,13 +93,6 @@ public class MetricsFeatureProvider {
     public void action(Context context, int category, boolean value) {
         for (LogWriter writer : mLoggerWriters) {
             writer.action(context, category, value);
-        }
-    }
-
-    public void action(Context context, int category, String pkg,
-            Pair<Integer, Object>... taggedData) {
-        for (LogWriter writer : mLoggerWriters) {
-            writer.action(context, category, pkg, taggedData);
         }
     }
 

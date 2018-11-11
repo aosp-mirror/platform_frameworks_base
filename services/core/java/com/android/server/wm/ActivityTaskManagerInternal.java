@@ -22,6 +22,7 @@ import android.annotation.UserIdInt;
 import android.app.AppProtoEnums;
 import android.app.IActivityManager;
 import android.app.IApplicationThread;
+import android.app.ProfilerInfo;
 import android.content.ComponentName;
 import android.content.IIntentSender;
 import android.content.Intent;
@@ -468,4 +469,8 @@ public abstract class ActivityTaskManagerInternal {
     public abstract void clearLockedTasks(String reason);
     public abstract void updateUserConfiguration();
     public abstract boolean canShowErrorDialogs();
+
+    public abstract void setProfileApp(String profileApp);
+    public abstract void setProfileProc(WindowProcessController wpc);
+    public abstract void setProfilerInfo(ProfilerInfo profilerInfo);
 }

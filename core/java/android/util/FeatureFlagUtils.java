@@ -42,11 +42,10 @@ public class FeatureFlagUtils {
     private static final Map<String, String> DEFAULT_FLAGS;
     static {
         DEFAULT_FLAGS = new HashMap<>();
-        DEFAULT_FLAGS.put("settings_bluetooth_while_driving", "false");
         DEFAULT_FLAGS.put("settings_audio_switcher", "true");
         DEFAULT_FLAGS.put("settings_systemui_theme", "true");
         DEFAULT_FLAGS.put("settings_dynamic_homepage", "false");
-        DEFAULT_FLAGS.put("settings_mobile_network_v2", "false");
+        DEFAULT_FLAGS.put("settings_mobile_network_v2", "true");
         DEFAULT_FLAGS.put("settings_data_usage_v2", "false");
         DEFAULT_FLAGS.put("settings_seamless_transfer", "false");
         DEFAULT_FLAGS.put(HEARING_AID_SETTINGS, "false");

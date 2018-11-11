@@ -1709,13 +1709,13 @@ public:
 
     struct resource_name
     {
-        const char16_t* package;
+        const char16_t* package = NULL;
         size_t packageLen;
-        const char16_t* type;
-        const char* type8;
+        const char16_t* type = NULL;
+        const char* type8 = NULL;
         size_t typeLen;
-        const char16_t* name;
-        const char* name8;
+        const char16_t* name = NULL;
+        const char* name8 = NULL;
         size_t nameLen;
     };
 

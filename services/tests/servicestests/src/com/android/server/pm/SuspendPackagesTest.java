@@ -16,6 +16,10 @@
 
 package com.android.server.pm;
 
+import static android.app.AppOpsManager.MODE_ALLOWED;
+import static android.app.AppOpsManager.MODE_IGNORED;
+import static android.app.AppOpsManager.OP_PLAY_AUDIO;
+
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
@@ -35,12 +39,14 @@ import android.content.pm.LauncherApps;
 import android.content.pm.PackageManager;
 import android.content.pm.SuspendDialogInfo;
 import android.content.res.Resources;
+import android.media.AudioAttributes;
 import android.os.BaseBundle;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.Looper;
 import android.os.PersistableBundle;
 import android.os.RemoteException;
+import android.os.ServiceManager;
 import android.os.UserHandle;
 import android.support.test.uiautomator.By;
 import android.support.test.uiautomator.UiDevice;
@@ -54,6 +60,8 @@ import androidx.test.InstrumentationRegistry;
 import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
 
+import com.android.internal.app.IAppOpsCallback;
+import com.android.internal.app.IAppOpsService;
 import com.android.servicestests.apps.suspendtestapp.SuspendTestActivity;
 import com.android.servicestests.apps.suspendtestapp.SuspendTestReceiver;
 
@@ -548,6 +556,32 @@ public class SuspendPackagesTest {
         assertTrue("Profile-owner could not be set", setProfileOwner());
         intentFromApp = mAppCommsReceiver.receiveIntentFromApp();
         assertEquals(ACTION_REPORT_MY_PACKAGE_UNSUSPENDED, intentFromApp.getAction());
+    }
+
+    @Test
+    public void testAudioOpBlockedOnSuspend() throws Exception {
+        final IAppOpsService iAppOps = IAppOpsService.Stub.asInterface(
+                ServiceManager.getService(Context.APP_OPS_SERVICE));
+        final CountDownLatch latch = new CountDownLatch(1);
+        final IAppOpsCallback watcher = new IAppOpsCallback.Stub() {
+            @Override
+            public void opChanged(int op, int uid, String packageName) {
+                if (op == OP_PLAY_AUDIO && packageName.equals(TEST_APP_PACKAGE_NAME)) {
+                    latch.countDown();
+                }
+            }
+        };
+        iAppOps.startWatchingMode(OP_PLAY_AUDIO, TEST_APP_PACKAGE_NAME, watcher);
+        final int testPackageUid = mPackageManager.getPackageUid(TEST_APP_PACKAGE_NAME, 0);
+        int audioOpMode = iAppOps.checkAudioOperation(OP_PLAY_AUDIO,
+                AudioAttributes.USAGE_UNKNOWN, testPackageUid, TEST_APP_PACKAGE_NAME);
+        assertEquals("Audio muted for unsuspended package", MODE_ALLOWED, audioOpMode);
+        suspendTestPackage(null, null, null);
+        assertTrue("AppOpsWatcher did not callback", latch.await(5, TimeUnit.SECONDS));
+        audioOpMode = iAppOps.checkAudioOperation(OP_PLAY_AUDIO,
+                AudioAttributes.USAGE_UNKNOWN, testPackageUid, TEST_APP_PACKAGE_NAME);
+        assertEquals("Audio not muted for suspended package", MODE_IGNORED, audioOpMode);
+        iAppOps.stopWatchingMode(watcher);
     }
 
     @After

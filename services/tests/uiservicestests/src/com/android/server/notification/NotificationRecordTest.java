@@ -801,4 +801,16 @@ public class NotificationRecordTest extends UiServiceTestCase {
         assertEquals(1.0f, record.getContactAffinity());
         assertEquals(IMPORTANCE_LOW, record.getImportance());
     }
+
+    @Test
+    public void testSetAudiblyAlerted() {
+        StatusBarNotification sbn = getNotification(PKG_O, true /* noisy */,
+                true /* defaultSound */, false /* buzzy */, false /* defaultBuzz */,
+                false /* lights */, false /* defaultLights */, groupId /* group */);
+        NotificationRecord record = new NotificationRecord(mMockContext, sbn, channel);
+
+        record.setAudiblyAlerted(true);
+
+        assertTrue(record.getAudiblyAlerted());
+    }
 }

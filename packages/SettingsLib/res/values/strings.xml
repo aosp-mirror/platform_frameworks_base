@@ -21,35 +21,47 @@
     <!-- Toast message when Wi-Fi cannot scan for networks -->
     <string name="wifi_fail_to_scan">Can\'t scan for networks</string>
     <!-- Do not translate.  Concise terminology for wifi with WEP security -->
-    <string name="wifi_security_short_wep">WEP</string>
+    <string name="wifi_security_short_wep" translatable="false">WEP</string>
     <!-- Do not translate.  Concise terminology for wifi with WPA security -->
-    <string name="wifi_security_short_wpa">WPA</string>
+    <string name="wifi_security_short_wpa" translatable="false">WPA</string>
     <!-- Do not translate.  Concise terminology for wifi with WPA2 security -->
-    <string name="wifi_security_short_wpa2">WPA2</string>
+    <string name="wifi_security_short_wpa2" translatable="false">WPA2</string>
     <!-- Do not translate.  Concise terminology for wifi with both WPA/WPA2 security -->
-    <string name="wifi_security_short_wpa_wpa2">WPA/WPA2</string>
+    <string name="wifi_security_short_wpa_wpa2" translatable="false">WPA/WPA2</string>
     <!-- Do not translate.  Concise terminology for wifi with unknown PSK type -->
-    <string name="wifi_security_short_psk_generic">@string/wifi_security_short_wpa_wpa2</string>
+    <string name="wifi_security_short_psk_generic" translatable="false">@string/wifi_security_short_wpa_wpa2</string>
     <!-- Do not translate.  Concise terminology for wifi with 802.1x EAP security -->
-    <string name="wifi_security_short_eap">802.1x</string>
+    <string name="wifi_security_short_eap" translatable="false">802.1x</string>
+    <!-- Do not translate.  Concise terminology for wifi with WPA3 security -->
+    <string name="wifi_security_short_sae" translatable="false">WPA3</string>
+    <!-- Do not translate.  Concise terminology for wifi with OWE security -->
+    <string name="wifi_security_short_owe" translatable="false">OWE</string>
+    <!-- Do not translate.  Concise terminology for wifi with 802.1x EAP Suite-B security -->
+    <string name="wifi_security_short_eap_suiteb" translatable="false">Suite-B</string>
 
     <!-- Used in Wi-Fi settings dialogs when Wi-Fi does not have any security. -->
-    <string name="wifi_security_none">None</string>
+    <string name="wifi_security_none" translatable="false">None</string>
 
     <!-- Do not translate.  Terminology for wifi with WEP security -->
-    <string name="wifi_security_wep">WEP</string>
+    <string name="wifi_security_wep" translatable="false">WEP</string>
     <!-- Do not translate.  Terminology for wifi with WPA security -->
-    <string name="wifi_security_wpa">WPA PSK</string>
+    <string name="wifi_security_wpa" translatable="false">WPA-Personal</string>
     <!-- Do not translate.  Terminology for wifi with WPA2 security -->
-    <string name="wifi_security_wpa2">WPA2 PSK</string>
+    <string name="wifi_security_wpa2" translatable="false">WPA2-Personal</string>
     <!-- Do not translate.  Terminology for wifi with both WPA/WPA2 security, or unknown -->
-    <string name="wifi_security_wpa_wpa2">WPA/WPA2 PSK</string>
+    <string name="wifi_security_wpa_wpa2" translatable="false">WPA/WPA2-Personal</string>
     <!-- Do not translate.  Terminology for wifi with unknown PSK type -->
-    <string name="wifi_security_psk_generic">@string/wifi_security_wpa_wpa2</string>
+    <string name="wifi_security_psk_generic" translatable="false">@string/wifi_security_wpa_wpa2</string>
     <!-- Do not translate.  Concise terminology for wifi with 802.1x EAP security -->
-    <string name="wifi_security_eap">802.1x EAP</string>
+    <string name="wifi_security_eap" translatable="false">WPA/WPA2-Enterprise</string>
     <!-- Do not translate.  Concise terminology for Passpoint network -->
-    <string name="wifi_security_passpoint">Passpoint</string>
+    <string name="wifi_security_passpoint" translatable="false">Passpoint</string>
+    <!-- Do not translate.  Terminology for wifi with WPA3 security -->
+    <string name="wifi_security_sae" translatable="false">WPA3-Personal</string>
+    <!-- Do not translate.  Terminology for wifi with OWE security -->
+    <string name="wifi_security_owe" translatable="false">Enhanced Open</string>
+    <!-- Do not translate.  Concise terminology for wifi with 802.1x EAP Suite-B security -->
+    <string name="wifi_security_eap_suiteb" translatable="false">WPA3-Enterprise</string>
 
     <!-- Summary for the remembered network. -->
     <string name="wifi_remembered">Saved</string>
@@ -1118,4 +1130,7 @@
 
     <!-- The notice header of Third-party licenses. not translatable -->
     <string name="notice_header" translatable="false"></string>
+
+    <!-- UI debug setting: opt in to use updated graphics driver? [CHAR LIMIT=100] -->
+    <string name="updated_gfx_driver_dev_opt_in_app_summary">Opt in app to use updated graphcis driver in developement</string>
 </resources>

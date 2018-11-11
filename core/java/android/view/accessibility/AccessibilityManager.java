@@ -21,6 +21,7 @@ import static android.accessibilityservice.AccessibilityServiceInfo.FLAG_ENABLE_
 import android.Manifest;
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.AccessibilityServiceInfo.FeedbackType;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.RequiresPermission;
@@ -54,6 +55,8 @@ import android.view.accessibility.AccessibilityEvent.EventType;
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.util.IntPair;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -117,6 +120,39 @@ public final class AccessibilityManager {
     public static final String ACTION_CHOOSE_ACCESSIBILITY_BUTTON =
             "com.android.internal.intent.action.CHOOSE_ACCESSIBILITY_BUTTON";
 
+    /**
+     * Annotations for content flag of UI.
+     * @hide
+     */
+    @Retention(RetentionPolicy.SOURCE)
+    @IntDef(flag = true, prefix = { "FLAG_CONTENT_" }, value = {
+            FLAG_CONTENT_ICONS,
+            FLAG_CONTENT_TEXT,
+            FLAG_CONTENT_CONTROLS
+    })
+    public @interface ContentFlag {}
+
+    /**
+     * Use this flag to indicate the content of a UI that times out contains icons.
+     *
+     * @see #getRecommendedTimeoutMillis(int, int)
+     */
+    public static final int FLAG_CONTENT_ICONS = 1;
+
+    /**
+     * Use this flag to indicate the content of a UI that times out contains text.
+     *
+     * @see #getRecommendedTimeoutMillis(int, int)
+     */
+    public static final int FLAG_CONTENT_TEXT = 2;
+
+    /**
+     * Use this flag to indicate the content of a UI that times out contains interactive controls.
+     *
+     * @see #getRecommendedTimeoutMillis(int, int)
+     */
+    public static final int FLAG_CONTENT_CONTROLS = 4;
+
     @UnsupportedAppUsage
     static final Object sInstanceSync = new Object();
 
@@ -142,7 +178,8 @@ public final class AccessibilityManager {
 
     int mRelevantEventTypes = AccessibilityEvent.TYPES_ALL_MASK;
 
-    int mMinimumUiTimeout;
+    int mInteractiveUiTimeout;
+    int mNonInteractiveUiTimeout;
 
     boolean mIsTouchExplorationEnabled;
 
@@ -304,7 +341,9 @@ public final class AccessibilityManager {
         }
 
         @Override
-        public void notifyServicesStateChanged() {
+        public void notifyServicesStateChanged(long updatedUiTimeout) {
+            updateUiTimeout(updatedUiTimeout);
+
             final ArrayMap<AccessibilityServicesStateChangeListener, Handler> listeners;
             synchronized (mLock) {
                 if (mServicesStateChangeListeners.isEmpty()) {
@@ -325,11 +364,6 @@ public final class AccessibilityManager {
         @Override
         public void setRelevantEventTypes(int eventTypes) {
             mRelevantEventTypes = eventTypes;
-        }
-
-        @Override
-        public void setMinimumUiTimeout(int uiTimeout) {
-            mMinimumUiTimeout = uiTimeout;
         }
     };
 
@@ -840,16 +874,35 @@ public final class AccessibilityManager {
     }
 
     /**
-     * Get the minimum timeout for changes to the UI needed by this user. Controls should remain
+     * Get the recommended timeout for changes to the UI needed by this user. Controls should remain
      * on the screen for at least this long to give users time to react. Some users may need
      * extra time to review the controls, or to reach them, or to activate assistive technology
      * to activate the controls automatically.
+     * <p>
+     * Use the combination of content flags to indicate contents of UI. For example, use
+     * {@code FLAG_CONTENT_ICONS | FLAG_CONTENT_TEXT} for message notification which contains
+     * icons and text, or use {@code FLAG_CONTENT_TEXT | FLAG_CONTENT_CONTROLS} for button dialog
+     * which contains text and button controls.
+     * <p/>
      *
-     * @return The minimum ui timeout for the current user in milliseconds.
-     * {@link Integer#MAX_VALUE} if timeout is infinite.
+     * @param originalTimeout The timeout appropriate for users with no accessibility needs.
+     * @param uiContentFlags The combination of flags {@link #FLAG_CONTENT_ICONS},
+     *                       {@link #FLAG_CONTENT_TEXT} or {@link #FLAG_CONTENT_CONTROLS} to
+     *                       indicate the contents of UI.
+     * @return The recommended UI timeout for the current user in milliseconds.
      */
-    public int getMinimumUiTimeoutMillis() {
-        return mMinimumUiTimeout;
+    public int getRecommendedTimeoutMillis(int originalTimeout, @ContentFlag int uiContentFlags) {
+        boolean hasControls = (uiContentFlags & FLAG_CONTENT_CONTROLS) != 0;
+        boolean hasIconsOrText = (uiContentFlags & FLAG_CONTENT_ICONS) != 0
+                || (uiContentFlags & FLAG_CONTENT_TEXT) != 0;
+        int recommendedTimeout = originalTimeout;
+        if (hasControls) {
+            recommendedTimeout = Math.max(recommendedTimeout, mInteractiveUiTimeout);
+        }
+        if (hasIconsOrText) {
+            recommendedTimeout = Math.max(recommendedTimeout, mNonInteractiveUiTimeout);
+        }
+        return recommendedTimeout;
     }
 
     /**
@@ -1192,7 +1245,7 @@ public final class AccessibilityManager {
             final long userStateAndRelevantEvents = service.addClient(mClient, mUserId);
             setStateLocked(IntPair.first(userStateAndRelevantEvents));
             mRelevantEventTypes = IntPair.second(userStateAndRelevantEvents);
-            mMinimumUiTimeout = service.getMinimumUiTimeout();
+            updateUiTimeout(service.getRecommendedTimeoutMillis());
             mService = service;
         } catch (RemoteException re) {
             Log.e(LOG_TAG, "AccessibilityManagerService is dead", re);
@@ -1263,6 +1316,17 @@ public final class AccessibilityManager {
             listeners.valueAt(i).post(() ->
                     listener.onHighTextContrastStateChanged(isHighTextContrastEnabled));
         }
+    }
+
+    /**
+     * Update interactive and non-interactive UI timeout.
+     *
+     * @param uiTimeout A pair of {@code int}s. First integer for interactive one, and second
+     *                  integer for non-interactive one.
+     */
+    private void updateUiTimeout(long uiTimeout) {
+        mInteractiveUiTimeout = IntPair.first(uiTimeout);
+        mNonInteractiveUiTimeout = IntPair.second(uiTimeout);
     }
 
     /**

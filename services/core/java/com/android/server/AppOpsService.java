@@ -16,6 +16,7 @@
 
 package com.android.server;
 
+import static android.app.AppOpsManager.OP_PLAY_AUDIO;
 import static android.app.AppOpsManager.UID_STATE_BACKGROUND;
 import static android.app.AppOpsManager.UID_STATE_CACHED;
 import static android.app.AppOpsManager.UID_STATE_FOREGROUND;
@@ -36,8 +37,11 @@ import android.app.AppOpsManager.HistoricalOpEntry;
 import android.app.AppOpsManager.HistoricalPackageOps;
 import android.app.AppOpsManagerInternal;
 import android.app.AppOpsManagerInternal.CheckOpsDelegate;
+import android.content.BroadcastReceiver;
 import android.content.ContentResolver;
 import android.content.Context;
+import android.content.Intent;
+import android.content.IntentFilter;
 import android.content.pm.ApplicationInfo;
 import android.content.pm.IPackageManager;
 import android.content.pm.PackageManager;
@@ -645,6 +649,26 @@ public class AppOpsService extends IAppOpsService.Stub {
             }
         }
 
+        final IntentFilter packageSuspendFilter = new IntentFilter();
+        packageSuspendFilter.addAction(Intent.ACTION_PACKAGES_UNSUSPENDED);
+        packageSuspendFilter.addAction(Intent.ACTION_PACKAGES_SUSPENDED);
+        mContext.registerReceiver(new BroadcastReceiver() {
+            @Override
+            public void onReceive(Context context, Intent intent) {
+                final int[] changedUids = intent.getIntArrayExtra(Intent.EXTRA_CHANGED_UID_LIST);
+                final String[] changedPkgs = intent.getStringArrayExtra(
+                        Intent.EXTRA_CHANGED_PACKAGE_LIST);
+                final ArraySet<ModeCallback> callbacks = mOpModeWatchers.get(OP_PLAY_AUDIO);
+                for (int i = 0; i < changedUids.length; i++) {
+                    final int changedUid = changedUids[i];
+                    final String changedPkg = changedPkgs[i];
+                    // We trust packagemanager to insert matching uid and packageNames in the extras
+                    mHandler.sendMessage(PooledLambda.obtainMessage(AppOpsService::notifyOpChanged,
+                            AppOpsService.this, callbacks, OP_PLAY_AUDIO, changedUid, changedPkg));
+                }
+            }
+        }, packageSuspendFilter);
+
         PackageManagerInternal packageManagerInternal = LocalServices.getService(
                 PackageManagerInternal.class);
         packageManagerInternal.setExternalSourcesPolicy(
@@ -1210,13 +1234,29 @@ public class AppOpsService extends IAppOpsService.Stub {
 
     @Override
     public void setMode(int code, int uid, String packageName, int mode) {
+        setMode(code, uid, packageName, mode, true, false);
+    }
+
+    /**
+     * Sets the mode for a certain op and uid.
+     *
+     * @param code The op code to set
+     * @param uid The UID for which to set
+     * @param packageName The package for which to set
+     * @param mode The new mode to set
+     * @param verifyUid Iff {@code true}, check that the package name belongs to the uid
+     * @param isPrivileged Whether the package is privileged. (Only used if {@code verifyUid ==
+     *                     false})
+     */
+    private void setMode(int code, int uid, @NonNull String packageName, int mode,
+            boolean verifyUid, boolean isPrivileged) {
         enforceManageAppOpsModes(Binder.getCallingPid(), Binder.getCallingUid(), uid);
         verifyIncomingOp(code);
         ArraySet<ModeCallback> repCbs = null;
         code = AppOpsManager.opToSwitch(code);
         synchronized (this) {
             UidState uidState = getUidStateLocked(uid, false);
-            Op op = getOpLocked(code, uid, packageName, true);
+            Op op = getOpLocked(code, uid, packageName, true, verifyUid, isPrivileged);
             if (op != null) {
                 if (op.mode != mode) {
                     op.mode = mode;
@@ -1575,7 +1615,7 @@ public class AppOpsService extends IAppOpsService.Stub {
                     && uidState.opModes.indexOfKey(code) >= 0) {
                 return uidState.opModes.get(code);
             }
-            Op op = getOpLocked(code, uid, resolvedPackageName, false);
+            Op op = getOpLocked(code, uid, resolvedPackageName, false, true, false);
             if (op == null) {
                 return AppOpsManager.opToDefaultMode(code);
             }
@@ -1918,7 +1958,7 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
         ClientState client = (ClientState) token;
         synchronized (this) {
-            Op op = getOpLocked(code, uid, resolvedPackageName, true);
+            Op op = getOpLocked(code, uid, resolvedPackageName, true, true, false);
             if (op == null) {
                 return;
             }
@@ -2172,6 +2212,43 @@ public class AppOpsService extends IAppOpsService.Stub {
         return ops;
     }
 
+    /**
+     * Get the state of all ops for a package, <b>don't verify that package belongs to uid</b>.
+     *
+     * <p>Usually callers should use {@link #getOpLocked} and not call this directly.
+     *
+     * @param uid The uid the of the package
+     * @param packageName The package name for which to get the state for
+     * @param edit Iff {@code true} create the {@link Ops} object if not yet created
+     * @param isPrivileged Whether the package is privileged or not
+     *
+     * @return The {@link Ops state} of all ops for the package
+     */
+    private @Nullable Ops getOpsRawNoVerifyLocked(int uid, @NonNull String packageName,
+            boolean edit, boolean isPrivileged) {
+        UidState uidState = getUidStateLocked(uid, edit);
+        if (uidState == null) {
+            return null;
+        }
+
+        if (uidState.pkgOps == null) {
+            if (!edit) {
+                return null;
+            }
+            uidState.pkgOps = new ArrayMap<>();
+        }
+
+        Ops ops = uidState.pkgOps.get(packageName);
+        if (ops == null) {
+            if (!edit) {
+                return null;
+            }
+            ops = new Ops(packageName, uidState, isPrivileged);
+            uidState.pkgOps.put(packageName, ops);
+        }
+        return ops;
+    }
+
     private void scheduleWriteLocked() {
         if (!mWriteScheduled) {
             mWriteScheduled = true;
@@ -2188,9 +2265,29 @@ public class AppOpsService extends IAppOpsService.Stub {
         }
     }
 
-    private Op getOpLocked(int code, int uid, String packageName, boolean edit) {
-        Ops ops = getOpsRawLocked(uid, packageName, edit,
-                false /* uidMismatchExpected */);
+    /**
+     * Get the state of an op for a uid.
+     *
+     * @param code The code of the op
+     * @param uid The uid the of the package
+     * @param packageName The package name for which to get the state for
+     * @param edit Iff {@code true} create the {@link Op} object if not yet created
+     * @param verifyUid Iff {@code true} check that the package belongs to the uid
+     * @param isPrivileged Whether the package is privileged or not (only used if {@code verifyUid
+     *                     == false})
+     *
+     * @return The {@link Op state} of the op
+     */
+    private @Nullable Op getOpLocked(int code, int uid, @NonNull String packageName, boolean edit,
+            boolean verifyUid, boolean isPrivileged) {
+        Ops ops;
+
+        if (verifyUid) {
+            ops = getOpsRawLocked(uid, packageName, edit, false /* uidMismatchExpected */);
+        }  else {
+            ops = getOpsRawNoVerifyLocked(uid, packageName, edit, isPrivileged);
+        }
+
         if (ops == null) {
             return null;
         }
@@ -3947,6 +4044,12 @@ public class AppOpsService extends IAppOpsService.Stub {
             synchronized (AppOpsService.this) {
                 mProfileOwners = owners;
             }
+        }
+
+        @Override
+        public void setMode(int code, int uid, @NonNull String packageName, int mode,
+                boolean isPrivileged) {
+            AppOpsService.this.setMode(code, uid, packageName, mode, false, isPrivileged);
         }
     }
 }

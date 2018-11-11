@@ -686,31 +686,20 @@ static void android_view_ThreadedRenderer_setName(JNIEnv* env, jobject clazz,
     env->ReleaseStringUTFChars(jname, name);
 }
 
-static void android_view_ThreadedRenderer_initialize(JNIEnv* env, jobject clazz,
-        jlong proxyPtr, jobject jsurface) {
-    RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
-    sp<Surface> surface = android_view_Surface_getSurface(env, jsurface);
-    proxy->initialize(surface);
-}
-
-static void android_view_ThreadedRenderer_updateSurface(JNIEnv* env, jobject clazz,
+static void android_view_ThreadedRenderer_setSurface(JNIEnv* env, jobject clazz,
         jlong proxyPtr, jobject jsurface) {
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
     sp<Surface> surface;
     if (jsurface) {
         surface = android_view_Surface_getSurface(env, jsurface);
     }
-    proxy->updateSurface(surface);
+    proxy->setSurface(surface);
 }
 
-static jboolean android_view_ThreadedRenderer_pauseSurface(JNIEnv* env, jobject clazz,
-        jlong proxyPtr, jobject jsurface) {
+static jboolean android_view_ThreadedRenderer_pause(JNIEnv* env, jobject clazz,
+        jlong proxyPtr) {
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
-    sp<Surface> surface;
-    if (jsurface) {
-        surface = android_view_Surface_getSurface(env, jsurface);
-    }
-    return proxy->pauseSurface(surface);
+    return proxy->pause();
 }
 
 static void android_view_ThreadedRenderer_setStopped(JNIEnv* env, jobject clazz,
@@ -719,16 +708,16 @@ static void android_view_ThreadedRenderer_setStopped(JNIEnv* env, jobject clazz,
     proxy->setStopped(stopped);
 }
 
-static void android_view_ThreadedRenderer_setup(JNIEnv* env, jobject clazz, jlong proxyPtr,
-        jfloat lightRadius, jint ambientShadowAlpha, jint spotShadowAlpha) {
+static void android_view_ThreadedRenderer_setLightAlpha(JNIEnv* env, jobject clazz, jlong proxyPtr,
+        jfloat ambientShadowAlpha, jfloat spotShadowAlpha) {
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
-    proxy->setup(lightRadius, ambientShadowAlpha, spotShadowAlpha);
+    proxy->setLightAlpha((uint8_t) (255 * ambientShadowAlpha), (uint8_t) (255 * spotShadowAlpha));
 }
 
-static void android_view_ThreadedRenderer_setLightCenter(JNIEnv* env, jobject clazz,
-        jlong proxyPtr, jfloat lightX, jfloat lightY, jfloat lightZ) {
+static void android_view_ThreadedRenderer_setLightGeometry(JNIEnv* env, jobject clazz,
+        jlong proxyPtr, jfloat lightX, jfloat lightY, jfloat lightZ, jfloat lightRadius) {
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
-    proxy->setLightCenter((Vector3){lightX, lightY, lightZ});
+    proxy->setLightGeometry((Vector3){lightX, lightY, lightZ}, lightRadius);
 }
 
 static void android_view_ThreadedRenderer_setOpaque(JNIEnv* env, jobject clazz,
@@ -990,13 +979,12 @@ static jobject android_view_ThreadedRenderer_createHardwareBitmapFromRenderNode(
     {
         ContextFactory factory;
         RenderProxy proxy{true, renderNode, &factory};
-        proxy.loadSystemProperties();
         proxy.setSwapBehavior(SwapBehavior::kSwap_discardBuffer);
-        proxy.initialize(surface);
+        proxy.setSurface(surface);
         // Shadows can't be used via this interface, so just set the light source
         // to all 0s.
-        proxy.setup(0, 0, 0);
-        proxy.setLightCenter((Vector3){0, 0, 0});
+        proxy.setLightAlpha(0, 0);
+        proxy.setLightGeometry((Vector3){0, 0, 0}, 0);
         nsecs_t vsync = systemTime(CLOCK_MONOTONIC);
         UiFrameInfoBuilder(proxy.frameInfo())
                 .setVsync(vsync, vsync)
@@ -1058,10 +1046,9 @@ static void android_view_ThreadedRenderer_setContextPriority(JNIEnv*, jclass,
 }
 
 static void android_view_ThreadedRenderer_allocateBuffers(JNIEnv* env, jobject clazz,
-        jlong proxyPtr, jobject jsurface) {
+        jlong proxyPtr) {
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(proxyPtr);
-    sp<Surface> surface = android_view_Surface_getSurface(env, jsurface);
-    proxy->allocateBuffers(surface);
+    proxy->allocateBuffers();
 }
 
 static void android_view_ThreadedRenderer_setForceDark(JNIEnv* env, jobject clazz,
@@ -1118,7 +1105,7 @@ static void android_view_ThreadedRenderer_setupShadersDiskCache(JNIEnv* env, job
 // JNI Glue
 // ----------------------------------------------------------------------------
 
-const char* const kClassPathName = "android/view/ThreadedRenderer";
+const char* const kClassPathName = "android/graphics/HardwareRenderer";
 
 static const JNINativeMethod gMethods[] = {
     { "nRotateProcessStatsBuffer", "()V", (void*) android_view_ThreadedRenderer_rotateProcessStatsBuffer },
@@ -1129,12 +1116,11 @@ static const JNINativeMethod gMethods[] = {
     { "nDeleteProxy", "(J)V", (void*) android_view_ThreadedRenderer_deleteProxy },
     { "nLoadSystemProperties", "(J)Z", (void*) android_view_ThreadedRenderer_loadSystemProperties },
     { "nSetName", "(JLjava/lang/String;)V", (void*) android_view_ThreadedRenderer_setName },
-    { "nInitialize", "(JLandroid/view/Surface;)V", (void*) android_view_ThreadedRenderer_initialize },
-    { "nUpdateSurface", "(JLandroid/view/Surface;)V", (void*) android_view_ThreadedRenderer_updateSurface },
-    { "nPauseSurface", "(JLandroid/view/Surface;)Z", (void*) android_view_ThreadedRenderer_pauseSurface },
+    { "nSetSurface", "(JLandroid/view/Surface;)V", (void*) android_view_ThreadedRenderer_setSurface },
+    { "nPause", "(J)Z", (void*) android_view_ThreadedRenderer_pause },
     { "nSetStopped", "(JZ)V", (void*) android_view_ThreadedRenderer_setStopped },
-    { "nSetup", "(JFII)V", (void*) android_view_ThreadedRenderer_setup },
-    { "nSetLightCenter", "(JFFF)V", (void*) android_view_ThreadedRenderer_setLightCenter },
+    { "nSetLightAlpha", "(JFF)V", (void*) android_view_ThreadedRenderer_setLightAlpha },
+    { "nSetLightGeometry", "(JFFFF)V", (void*) android_view_ThreadedRenderer_setLightGeometry },
     { "nSetOpaque", "(JZ)V", (void*) android_view_ThreadedRenderer_setOpaque },
     { "nSetWideGamut", "(JZ)V", (void*) android_view_ThreadedRenderer_setWideGamut },
     { "nSyncAndDrawFrame", "(J[JI)I", (void*) android_view_ThreadedRenderer_syncAndDrawFrame },
@@ -1161,9 +1147,9 @@ static const JNINativeMethod gMethods[] = {
     { "nRemoveRenderNode", "(JJ)V", (void*) android_view_ThreadedRenderer_removeRenderNode},
     { "nDrawRenderNode", "(JJ)V", (void*) android_view_ThreadedRendererd_drawRenderNode},
     { "nSetContentDrawBounds", "(JIIII)V", (void*)android_view_ThreadedRenderer_setContentDrawBounds},
-    { "nSetFrameCallback", "(JLandroid/view/ThreadedRenderer$FrameDrawingCallback;)V",
+    { "nSetFrameCallback", "(JLandroid/graphics/HardwareRenderer$FrameDrawingCallback;)V",
             (void*)android_view_ThreadedRenderer_setFrameCallback},
-    { "nSetFrameCompleteCallback", "(JLandroid/view/ThreadedRenderer$FrameCompleteCallback;)V",
+    { "nSetFrameCompleteCallback", "(JLandroid/graphics/HardwareRenderer$FrameCompleteCallback;)V",
             (void*)android_view_ThreadedRenderer_setFrameCompleteCallback },
     { "nAddFrameMetricsObserver",
             "(JLandroid/view/FrameMetricsObserver;)J",
@@ -1182,7 +1168,7 @@ static const JNINativeMethod gMethods[] = {
     { "nSetDebuggingEnabled", "(Z)V", (void*)android_view_ThreadedRenderer_setDebuggingEnabled },
     { "nSetIsolatedProcess", "(Z)V", (void*)android_view_ThreadedRenderer_setIsolatedProcess },
     { "nSetContextPriority", "(I)V", (void*)android_view_ThreadedRenderer_setContextPriority },
-    { "nAllocateBuffers", "(JLandroid/view/Surface;)V", (void*)android_view_ThreadedRenderer_allocateBuffers },
+    { "nAllocateBuffers", "(J)V", (void*)android_view_ThreadedRenderer_allocateBuffers },
     { "nSetForceDark", "(JZ)V", (void*)android_view_ThreadedRenderer_setForceDark },
 };
 
@@ -1215,12 +1201,12 @@ int register_android_view_ThreadedRenderer(JNIEnv* env) {
             env, metricsClass, "mTimingData", "[J");
 
     jclass frameCallbackClass = FindClassOrDie(env,
-            "android/view/ThreadedRenderer$FrameDrawingCallback");
+            "android/graphics/HardwareRenderer$FrameDrawingCallback");
     gFrameDrawingCallback.onFrameDraw = GetMethodIDOrDie(env, frameCallbackClass,
             "onFrameDraw", "(J)V");
 
     jclass frameCompleteClass = FindClassOrDie(env,
-            "android/view/ThreadedRenderer$FrameCompleteCallback");
+            "android/graphics/HardwareRenderer$FrameCompleteCallback");
     gFrameCompleteCallback.onFrameComplete = GetMethodIDOrDie(env, frameCompleteClass,
             "onFrameComplete", "(J)V");
 

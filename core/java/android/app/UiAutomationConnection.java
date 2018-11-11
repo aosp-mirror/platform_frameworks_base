@@ -18,7 +18,7 @@ package android.app;
 
 import android.accessibilityservice.AccessibilityServiceInfo;
 import android.accessibilityservice.IAccessibilityServiceClient;
-import android.annotation.UnsupportedAppUsage;
+import android.annotation.Nullable;
 import android.content.Context;
 import android.content.pm.IPackageManager;
 import android.graphics.Bitmap;
@@ -279,7 +279,8 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
     }
 
     @Override
-    public void adoptShellPermissionIdentity(int uid) throws RemoteException {
+    public void adoptShellPermissionIdentity(int uid, @Nullable String[] permissions)
+            throws RemoteException {
         synchronized (mLock) {
             throwIfCalledByNotTrustedUidLocked();
             throwIfShutdownLocked();
@@ -287,7 +288,7 @@ public final class UiAutomationConnection extends IUiAutomationConnection.Stub {
         }
         final long identity = Binder.clearCallingIdentity();
         try {
-            mActivityManager.startDelegateShellPermissionIdentity(uid);
+            mActivityManager.startDelegateShellPermissionIdentity(uid, permissions);
         } finally {
             Binder.restoreCallingIdentity(identity);
         }

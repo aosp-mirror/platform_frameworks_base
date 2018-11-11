@@ -170,6 +170,7 @@ public final class NotificationRecord {
     private final NotificationStats mStats;
     private int mUserSentiment;
     private boolean mIsInterruptive;
+    private boolean mAudiblyAlerted;
     private boolean mTextChanged;
     private boolean mRecordedInterruption;
     private int mNumberOfSmartRepliesAdded;
@@ -1023,6 +1024,10 @@ public final class NotificationRecord {
         }
     }
 
+    public void setAudiblyAlerted(boolean audiblyAlerted) {
+        mAudiblyAlerted = audiblyAlerted;
+    }
+
     public void setTextChanged(boolean textChanged) {
         mTextChanged = textChanged;
     }
@@ -1037,6 +1042,11 @@ public final class NotificationRecord {
 
     public boolean isInterruptive() {
         return mIsInterruptive;
+    }
+
+    /** Returns true if the notification audibly alerted the user. */
+    public boolean getAudiblyAlerted() {
+        return mAudiblyAlerted;
     }
 
     protected void setPeopleOverride(ArrayList<String> people) {

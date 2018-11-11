@@ -475,7 +475,7 @@ interface IActivityManager {
      * instrumentation at a time. An active instrumentation is one running and
      * started from the shell.
      */
-    void startDelegateShellPermissionIdentity(int uid);
+    void startDelegateShellPermissionIdentity(int uid, in String[] permissions);
 
     /**
      * Method for the shell UID to stop deletating its permission identity to an

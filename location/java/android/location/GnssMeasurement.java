@@ -16,8 +16,8 @@
 
 package android.location;
 
-import android.annotation.TestApi;
 import android.annotation.IntDef;
+import android.annotation.TestApi;
 import android.os.Parcel;
 import android.os.Parcelable;
 
@@ -685,6 +685,12 @@ public final class GnssMeasurement implements Parcelable {
      *
      * <p>This includes ensuring that all half-cycle ambiguities are resolved before this value is
      * reported as {@link #ADR_STATE_VALID}.
+     *
+     * <p>The alignment of the phase measurement will not be adjusted by the receiver so the
+     * in-phase and quadrature phase components will have a quarter cycle offset as they do when
+     * transmitted from the satellites. If the measurement is from a combination of the in-phase
+     * and quadrature phase components, then the alignment of the phase measurement will be aligned
+     * to the in-phase component.
      */
     public double getAccumulatedDeltaRangeMeters() {
         return mAccumulatedDeltaRangeMeters;

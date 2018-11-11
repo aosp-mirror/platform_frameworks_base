@@ -934,11 +934,13 @@ public abstract class Drawable {
      * do account for the value of {@link #setAlpha}, but the general behavior is dependent
      * upon the implementation of the subclass.
      *
+     * @deprecated This method is no longer used in graphics optimizations
+     *
      * @return int The opacity class of the Drawable.
      *
      * @see android.graphics.PixelFormat
      */
-    public abstract @PixelFormat.Opacity int getOpacity();
+    @Deprecated public abstract @PixelFormat.Opacity int getOpacity();
 
     /**
      * Return the appropriate opacity value for two source opacities.  If

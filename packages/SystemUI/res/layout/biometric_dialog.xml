@@ -31,7 +31,8 @@
 
     <LinearLayout
         android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
 
         <!-- This is not a Space since Spaces cannot be clicked. The width of this changes depending
          on horizontal/portrait orientation -->
@@ -43,11 +44,13 @@
 
         <LinearLayout
             android:id="@+id/dialog"
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="vertical"
-            android:elevation="2dp"
-            android:background="@drawable/biometric_dialog_bg">
+            android:background="@drawable/biometric_dialog_bg"
+            android:layout_marginBottom="@dimen/biometric_dialog_border_padding"
+            android:layout_marginLeft="@dimen/biometric_dialog_border_padding"
+            android:layout_marginRight="@dimen/biometric_dialog_border_padding">
 
             <TextView
                 android:id="@+id/title"

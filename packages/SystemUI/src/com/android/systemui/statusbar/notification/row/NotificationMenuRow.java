@@ -16,16 +16,7 @@
 
 package com.android.systemui.statusbar.notification.row;
 
-import java.util.ArrayList;
-
 import static com.android.systemui.SwipeHelper.SWIPED_FAR_ENOUGH_SIZE_FRACTION;
-
-import com.android.systemui.Interpolators;
-import com.android.systemui.R;
-import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
-import com.android.systemui.statusbar.AlphaOptimizedImageView;
-import com.android.systemui.statusbar.notification.row.NotificationGuts.GutsContent;
-import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -45,6 +36,15 @@ import android.widget.FrameLayout;
 import android.widget.FrameLayout.LayoutParams;
 
 import com.android.internal.annotations.VisibleForTesting;
+import com.android.systemui.Interpolators;
+import com.android.systemui.R;
+import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
+import com.android.systemui.statusbar.AlphaOptimizedImageView;
+import com.android.systemui.statusbar.notification.row.NotificationGuts.GutsContent;
+import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
+
+import java.util.ArrayList;
+import java.util.List;
 
 public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnClickListener,
         ExpandableNotificationRow.LayoutListener {
@@ -70,7 +70,8 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
     private MenuItem mInfoItem;
     private MenuItem mAppOpsItem;
     private MenuItem mSnoozeItem;
-    private ArrayList<MenuItem> mMenuItems;
+    private ArrayList<MenuItem> mLeftMenuItems;
+    private ArrayList<MenuItem> mRightMenuItems;
     private OnMenuEventListener mMenuListener;
 
     private ValueAnimator mFadeAnimator;
@@ -107,12 +108,13 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
         mContext = context;
         mShouldShowMenu = context.getResources().getBoolean(R.bool.config_showNotificationGear);
         mHandler = new Handler(Looper.getMainLooper());
-        mMenuItems = new ArrayList<>();
+        mLeftMenuItems = new ArrayList<>();
+        mRightMenuItems = new ArrayList<>();
     }
 
     @Override
     public ArrayList<MenuItem> getMenuItems(Context context) {
-        return mMenuItems;
+        return mOnLeft ? mLeftMenuItems : mRightMenuItems;
     }
 
     @Override
@@ -231,7 +233,8 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
         final Resources res = mContext.getResources();
         mHorizSpaceForIcon = res.getDimensionPixelSize(R.dimen.notification_menu_icon_size);
         mVertSpaceForIcons = res.getDimensionPixelSize(R.dimen.notification_min_height);
-        mMenuItems.clear();
+        mLeftMenuItems.clear();
+        mRightMenuItems.clear();
         // Construct the menu items based on the notification
         if (mParent != null && mParent.getStatusBarNotification() != null) {
             int flags = mParent.getStatusBarNotification().getNotification().flags;
@@ -239,24 +242,19 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
             if (!isForeground) {
                 // Only show snooze for non-foreground notifications
                 mSnoozeItem = createSnoozeItem(mContext);
-                mMenuItems.add(mSnoozeItem);
+                mLeftMenuItems.add(mSnoozeItem);
+                mRightMenuItems.add(mSnoozeItem);
             }
         }
         mInfoItem = createInfoItem(mContext);
-        mMenuItems.add(mInfoItem);
+        mLeftMenuItems.add(mInfoItem);
+        mRightMenuItems.add(mInfoItem);
 
         mAppOpsItem = createAppOpsItem(mContext);
-        mMenuItems.add(mAppOpsItem);
+        mLeftMenuItems.add(mAppOpsItem);
+        mRightMenuItems.add(mAppOpsItem);
 
-        // Construct the menu views
-        if (mMenuContainer != null) {
-            mMenuContainer.removeAllViews();
-        } else {
-            mMenuContainer = new FrameLayout(mContext);
-        }
-        for (int i = 0; i < mMenuItems.size(); i++) {
-            addMenuView(mMenuItems.get(i), mMenuContainer);
-        }
+        populateMenuViews();
         if (resetState) {
             resetState(false /* notify */);
         } else {
@@ -265,6 +263,18 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
             if (!mIsUserTouching) {
                 onSnapOpen();
             }
+        }
+    }
+
+    private void populateMenuViews() {
+        if (mMenuContainer != null) {
+            mMenuContainer.removeAllViews();
+        } else {
+            mMenuContainer = new FrameLayout(mContext);
+        }
+        List<MenuItem> menuItems = mOnLeft ? mLeftMenuItems : mRightMenuItems;
+        for (int i = 0; i < menuItems.size(); i++) {
+            addMenuView(menuItems.get(i), mMenuContainer);
         }
     }
 
@@ -386,10 +396,16 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
         if (appName == null) {
             return;
         }
+        setAppName(appName, mLeftMenuItems);
+        setAppName(appName, mRightMenuItems);
+    }
+
+    private void setAppName(String appName,
+            ArrayList<MenuItem> menuItems) {
         Resources res = mContext.getResources();
-        final int count = mMenuItems.size();
+        final int count = menuItems.size();
         for (int i = 0; i < count; i++) {
-            MenuItem item = mMenuItems.get(i);
+            MenuItem item = menuItems.get(i);
             String description = String.format(
                     res.getString(R.string.notification_menu_accessibility),
                     appName, item.getContentDescription());
@@ -402,7 +418,9 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
 
     @Override
     public void onParentHeightUpdate() {
-        if (mParent == null || mMenuItems.size() == 0 || mMenuContainer == null) {
+        if (mParent == null
+                || (mLeftMenuItems.isEmpty() && mRightMenuItems.isEmpty())
+                || mMenuContainer == null) {
             return;
         }
         int parentHeight = mParent.getActualHeight();
@@ -443,13 +461,14 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
         }
         v.getLocationOnScreen(mIconLocation);
         mParent.getLocationOnScreen(mParentLocation);
-        final int centerX = (int) (mHorizSpaceForIcon / 2);
+        final int centerX = mHorizSpaceForIcon / 2;
         final int centerY = v.getHeight() / 2;
         final int x = mIconLocation[0] - mParentLocation[0] + centerX;
         final int y = mIconLocation[1] - mParentLocation[1] + centerY;
         final int index = mMenuContainer.indexOfChild(v);
         if (mMenuListener != null) {
-            mMenuListener.onMenuClicked(mParent, x, y, mMenuItems.get(index));
+            mMenuListener.onMenuClicked(mParent, x, y,
+                    (mOnLeft ? mLeftMenuItems : mRightMenuItems).get(index));
         }
     }
 
@@ -469,6 +488,11 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
             // Do nothing
             return;
         }
+        boolean wasOnLeft = mOnLeft;
+        mOnLeft = showOnLeft;
+        if (wasOnLeft != showOnLeft) {
+            populateMenuViews();
+        }
         final int count = mMenuContainer.getChildCount();
         for (int i = 0; i < count; i++) {
             final View v = mMenuContainer.getChildAt(i);
@@ -476,7 +500,6 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
             final float right = mParent.getWidth() - (mHorizSpaceForIcon * (i + 1));
             v.setX(showOnLeft ? left : right);
         }
-        mOnLeft = showOnLeft;
         mIconsPlaced = true;
     }
 
@@ -603,6 +626,7 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
     private void addMenuView(MenuItem item, ViewGroup parent) {
         View menuView = item.getMenuView();
         if (menuView != null) {
+            menuView.setAlpha(mAlpha);
             parent.addView(menuView);
             menuView.setOnClickListener(this);
             FrameLayout.LayoutParams lp = (LayoutParams) menuView.getLayoutParams();

@@ -2435,7 +2435,7 @@ public class PackageParser {
         }
 
         final int NP = PackageParser.NEW_PERMISSIONS.length;
-        StringBuilder implicitPerms = null;
+        StringBuilder newPermsMsg = null;
         for (int ip=0; ip<NP; ip++) {
             final PackageParser.NewPermissionInfo npi
                     = PackageParser.NEW_PERMISSIONS[ip];
@@ -2443,19 +2443,20 @@ public class PackageParser {
                 break;
             }
             if (!pkg.requestedPermissions.contains(npi.name)) {
-                if (implicitPerms == null) {
-                    implicitPerms = new StringBuilder(128);
-                    implicitPerms.append(pkg.packageName);
-                    implicitPerms.append(": compat added ");
+                if (newPermsMsg == null) {
+                    newPermsMsg = new StringBuilder(128);
+                    newPermsMsg.append(pkg.packageName);
+                    newPermsMsg.append(": compat added ");
                 } else {
-                    implicitPerms.append(' ');
+                    newPermsMsg.append(' ');
                 }
-                implicitPerms.append(npi.name);
+                newPermsMsg.append(npi.name);
                 pkg.requestedPermissions.add(npi.name);
+                pkg.implicitPermissions.add(npi.name);
             }
         }
-        if (implicitPerms != null) {
-            Slog.i(TAG, implicitPerms.toString());
+        if (newPermsMsg != null) {
+            Slog.i(TAG, newPermsMsg.toString());
         }
 
 
@@ -2472,6 +2473,7 @@ public class PackageParser {
                 final String perm = newPerms.get(in);
                 if (!pkg.requestedPermissions.contains(perm)) {
                     pkg.requestedPermissions.add(perm);
+                    pkg.implicitPermissions.add(perm);
                 }
             }
         }
@@ -6394,6 +6396,9 @@ public class PackageParser {
         @UnsupportedAppUsage
         public final ArrayList<String> requestedPermissions = new ArrayList<String>();
 
+        /** Permissions requested but not in the manifest. */
+        public final ArrayList<String> implicitPermissions = new ArrayList<>();
+
         @UnsupportedAppUsage
         public ArrayList<String> protectedBroadcasts;
 
@@ -6923,6 +6928,8 @@ public class PackageParser {
 
             dest.readStringList(requestedPermissions);
             internStringArrayList(requestedPermissions);
+            dest.readStringList(implicitPermissions);
+            internStringArrayList(implicitPermissions);
             protectedBroadcasts = dest.createStringArrayList();
             internStringArrayList(protectedBroadcasts);
 
@@ -7087,6 +7094,7 @@ public class PackageParser {
             dest.writeParcelableList(instrumentation, flags);
 
             dest.writeStringList(requestedPermissions);
+            dest.writeStringList(implicitPermissions);
             dest.writeStringList(protectedBroadcasts);
 
             // TODO: This doesn't work: b/64295061

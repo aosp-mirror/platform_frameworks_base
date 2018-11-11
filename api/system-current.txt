@@ -1052,6 +1052,7 @@ package android.content {
     field public static final java.lang.String ACTION_INSTALL_INSTANT_APP_PACKAGE = "android.intent.action.INSTALL_INSTANT_APP_PACKAGE";
     field public static final java.lang.String ACTION_INSTANT_APP_RESOLVER_SETTINGS = "android.intent.action.INSTANT_APP_RESOLVER_SETTINGS";
     field public static final java.lang.String ACTION_INTENT_FILTER_NEEDS_VERIFICATION = "android.intent.action.INTENT_FILTER_NEEDS_VERIFICATION";
+    field public static final java.lang.String ACTION_MANAGE_APP_PERMISSION = "android.intent.action.MANAGE_APP_PERMISSION";
     field public static final java.lang.String ACTION_MANAGE_APP_PERMISSIONS = "android.intent.action.MANAGE_APP_PERMISSIONS";
     field public static final java.lang.String ACTION_MANAGE_PERMISSIONS = "android.intent.action.MANAGE_PERMISSIONS";
     field public static final java.lang.String ACTION_MANAGE_PERMISSION_APPS = "android.intent.action.MANAGE_PERMISSION_APPS";
@@ -1087,6 +1088,7 @@ package android.content {
     field public static final java.lang.String EXTRA_RESULT_NEEDED = "android.intent.extra.RESULT_NEEDED";
     field public static final java.lang.String EXTRA_UNKNOWN_INSTANT_APP = "android.intent.extra.UNKNOWN_INSTANT_APP";
     field public static final java.lang.String EXTRA_VERIFICATION_BUNDLE = "android.intent.extra.VERIFICATION_BUNDLE";
+    field public static final java.lang.String METADATA_SETUP_VERSION = "android.SETUP_VERSION";
   }
 
   public class IntentFilter implements android.os.Parcelable {
@@ -2719,6 +2721,7 @@ package android.location {
   public class LocationManager {
     method public deprecated boolean addGpsMeasurementListener(android.location.GpsMeasurementsEvent.Listener);
     method public deprecated boolean addGpsNavigationMessageListener(android.location.GpsNavigationMessageEvent.Listener);
+    method public android.app.PendingIntent createManageLocationPermissionIntent(java.lang.String, java.lang.String);
     method public void flushGnssBatch();
     method public int getGnssBatchSize();
     method public java.lang.String getNetworkProviderPackage();
@@ -3645,9 +3648,9 @@ package android.net.wifi {
     method public boolean isPortableHotspotSupported();
     method public boolean isWifiApEnabled();
     method public boolean isWifiScannerSupported();
-    method public void registerNetworkRequestMatchCallback(android.net.wifi.WifiManager.NetworkRequestMatchCallback, android.os.Handler);
     method public boolean isWpa3SaeSupported();
     method public boolean isWpa3SuiteBSupported();
+    method public void registerNetworkRequestMatchCallback(android.net.wifi.WifiManager.NetworkRequestMatchCallback, android.os.Handler);
     method public boolean setWifiApConfiguration(android.net.wifi.WifiConfiguration);
     method public boolean startScan(android.os.WorkSource);
     method public void unregisterNetworkRequestMatchCallback(android.net.wifi.WifiManager.NetworkRequestMatchCallback);
@@ -3828,6 +3831,14 @@ package android.net.wifi.aware {
 
   public class WifiAwareSession implements java.lang.AutoCloseable {
     method public android.net.NetworkSpecifier createNetworkSpecifierPmk(int, byte[], byte[]);
+  }
+
+}
+
+package android.net.wifi.p2p {
+
+  public class WifiP2pManager {
+    method public void factoryReset(android.net.wifi.p2p.WifiP2pManager.Channel, android.net.wifi.p2p.WifiP2pManager.ActionListener);
   }
 
 }
@@ -5560,8 +5571,12 @@ package android.telephony {
     method public void setSubscriptionPlans(int, java.util.List<android.telephony.SubscriptionPlan>);
     field public static final java.lang.String ACTION_MANAGE_SUBSCRIPTION_PLANS = "android.telephony.action.MANAGE_SUBSCRIPTION_PLANS";
     field public static final java.lang.String ACTION_REFRESH_SUBSCRIPTION_PLANS = "android.telephony.action.REFRESH_SUBSCRIPTION_PLANS";
-    field public static final android.net.Uri ENHANCED_4G_ENABLED_CONTENT_URI;
+    field public static final android.net.Uri ADVANCED_CALLING_ENABLED_CONTENT_URI;
+    field public static final android.net.Uri VT_ENABLED_CONTENT_URI;
     field public static final android.net.Uri WFC_ENABLED_CONTENT_URI;
+    field public static final android.net.Uri WFC_MODE_CONTENT_URI;
+    field public static final android.net.Uri WFC_ROAMING_ENABLED_CONTENT_URI;
+    field public static final android.net.Uri WFC_ROAMING_MODE_CONTENT_URI;
   }
 
   public final class SubscriptionPlan implements android.os.Parcelable {

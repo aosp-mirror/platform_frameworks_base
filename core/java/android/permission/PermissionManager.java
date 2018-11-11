@@ -67,15 +67,14 @@ public final class PermissionManager {
      * such an old app asks for a location permission (i.e. the
      * {@link SplitPermissionInfo#getSplitPermission()}), then the
      * {@link Manifest.permission#ACCESS_BACKGROUND_LOCATION} permission (inside
-     * {@{@link SplitPermissionInfo#getNewPermissions}) is added.
+     * {@link SplitPermissionInfo#getNewPermissions}) is added.
      *
      * <p>Note: Regular apps do not have to worry about this. The platform and permission controller
      * automatically add the new permissions where needed.
      *
      * @return All permissions that are split.
      */
-    public @NonNull
-    List<SplitPermissionInfo> getSplitPermissions() {
+    public @NonNull List<SplitPermissionInfo> getSplitPermissions() {
         return SPLIT_PERMISSIONS;
     }
 

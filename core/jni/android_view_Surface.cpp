@@ -556,18 +556,18 @@ static jlong create(JNIEnv* env, jclass clazz, jlong rootNodePtr, jlong surfaceP
         proxy->setWideGamut(true);
     }
     proxy->setSwapBehavior(SwapBehavior::kSwap_discardBuffer);
-    proxy->initialize(surface);
+    proxy->setSurface(surface);
     // Shadows can't be used via this interface, so just set the light source
     // to all 0s.
-    proxy->setup(0, 0, 0);
-    proxy->setLightCenter((Vector3){0, 0, 0});
+    proxy->setLightAlpha(0, 0);
+    proxy->setLightGeometry((Vector3){0, 0, 0}, 0);
     return (jlong) proxy;
 }
 
 static void setSurface(JNIEnv* env, jclass clazz, jlong rendererPtr, jlong surfacePtr) {
     RenderProxy* proxy = reinterpret_cast<RenderProxy*>(rendererPtr);
     sp<Surface> surface(reinterpret_cast<Surface*>(surfacePtr));
-    proxy->updateSurface(surface);
+    proxy->setSurface(surface);
 }
 
 static void draw(JNIEnv* env, jclass clazz, jlong rendererPtr) {

@@ -18,6 +18,7 @@ package com.android.settingslib.core.instrumentation;
 
 import android.content.Context;
 import android.metrics.LogMaker;
+import android.text.TextUtils;
 import android.util.Pair;
 
 import com.android.internal.logging.MetricsLogger;
@@ -30,6 +31,7 @@ public class EventLogWriter implements LogWriter {
 
     private final MetricsLogger mMetricsLogger = new MetricsLogger();
 
+    @Override
     public void visible(Context context, int source, int category) {
         final LogMaker logMaker = new LogMaker(category)
                 .setType(MetricsProto.MetricsEvent.TYPE_OPEN)
@@ -37,32 +39,17 @@ public class EventLogWriter implements LogWriter {
         MetricsLogger.action(logMaker);
     }
 
+    @Override
     public void hidden(Context context, int category) {
         MetricsLogger.hidden(context, category);
     }
 
-    public void action(int category, int value, Pair<Integer, Object>... taggedData) {
-        if (taggedData == null || taggedData.length == 0) {
-            mMetricsLogger.action(category, value);
-        } else {
-            final LogMaker logMaker = new LogMaker(category)
-                    .setType(MetricsProto.MetricsEvent.TYPE_ACTION)
-                    .setSubtype(value);
-            for (Pair<Integer, Object> pair : taggedData) {
-                logMaker.addTaggedData(pair.first, pair.second);
-            }
-            mMetricsLogger.write(logMaker);
-        }
-    }
-
-    public void action(int category, boolean value, Pair<Integer, Object>... taggedData) {
-        action(category, value ? 1 : 0, taggedData);
-    }
-
+    @Override
     public void action(Context context, int category, Pair<Integer, Object>... taggedData) {
         action(context, category, "", taggedData);
     }
 
+    @Override
     public void actionWithSource(Context context, int source, int category) {
         final LogMaker logMaker = new LogMaker(category)
                 .setType(MetricsProto.MetricsEvent.TYPE_ACTION);
@@ -72,18 +59,17 @@ public class EventLogWriter implements LogWriter {
         MetricsLogger.action(logMaker);
     }
 
-    /** @deprecated use {@link #action(int, int, Pair[])} */
-    @Deprecated
+    @Override
     public void action(Context context, int category, int value) {
         MetricsLogger.action(context, category, value);
     }
 
-    /** @deprecated use {@link #action(int, boolean, Pair[])} */
-    @Deprecated
+    @Override
     public void action(Context context, int category, boolean value) {
         MetricsLogger.action(context, category, value);
     }
 
+    @Override
     public void action(Context context, int category, String pkg,
             Pair<Integer, Object>... taggedData) {
         if (taggedData == null || taggedData.length == 0) {
@@ -99,7 +85,25 @@ public class EventLogWriter implements LogWriter {
         }
     }
 
+    @Override
     public void count(Context context, String name, int value) {
         MetricsLogger.count(context, name, value);
+    }
+
+    @Override
+    public void action(int attribution, int action, int pageId, String key, int value) {
+        final LogMaker logMaker = new LogMaker(action)
+                .setType(MetricsProto.MetricsEvent.TYPE_ACTION);
+        if (attribution != MetricsProto.MetricsEvent.VIEW_UNKNOWN) {
+            logMaker.addTaggedData(MetricsProto.MetricsEvent.FIELD_CONTEXT, pageId);
+        }
+        if (!TextUtils.isEmpty(key)) {
+            logMaker.addTaggedData(MetricsProto.MetricsEvent.FIELD_SETTINGS_PREFERENCE_CHANGE_NAME,
+                    key);
+            logMaker.addTaggedData(
+                    MetricsProto.MetricsEvent.FIELD_SETTINGS_PREFERENCE_CHANGE_INT_VALUE,
+                    value);
+        }
+        MetricsLogger.action(logMaker);
     }
 }

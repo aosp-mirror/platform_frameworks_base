@@ -35,6 +35,11 @@ import android.util.Log;
 import android.view.MotionEvent;
 import android.widget.Toast;
 
+import com.android.systemui.Dependency;
+import com.android.systemui.plugins.FalsingPlugin;
+import com.android.systemui.plugins.PluginListener;
+import com.android.systemui.shared.plugins.PluginManager;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -75,10 +80,22 @@ public class DataCollector implements SensorEventListener {
 
     private static DataCollector sInstance = null;
 
+    private FalsingPlugin mFalsingPlugin = null;
+
     protected final ContentObserver mSettingsObserver = new ContentObserver(mHandler) {
         @Override
         public void onChange(boolean selfChange) {
             updateConfiguration();
+        }
+    };
+
+    private final PluginListener mPluginListener = new PluginListener<FalsingPlugin>() {
+        public void onPluginConnected(FalsingPlugin plugin, Context context) {
+            mFalsingPlugin = plugin;
+        }
+
+        public void onPluginDisconnected(FalsingPlugin plugin) {
+            mFalsingPlugin = null;
         }
     };
 
@@ -106,6 +123,8 @@ public class DataCollector implements SensorEventListener {
                 UserHandle.USER_ALL);
 
         updateConfiguration();
+
+        Dependency.get(PluginManager.class).addPluginListener(mPluginListener, FalsingPlugin.class);
     }
 
     public static DataCollector getInstance(Context context) {
@@ -191,24 +210,28 @@ public class DataCollector implements SensorEventListener {
             @Override
             public void run() {
                 byte[] b = Session.toByteArray(currentSession.toProto());
-                String dir = mContext.getFilesDir().getAbsolutePath();
-                if (currentSession.getResult() != Session.SUCCESS) {
-                    if (!mDisableUnlocking && !mCollectBadTouches) {
-                        return;
+
+                if (mFalsingPlugin != null) {
+                    mFalsingPlugin.dataCollected(currentSession.getResult() == Session.SUCCESS, b);
+                } else {
+                    String dir = mContext.getFilesDir().getAbsolutePath();
+                    if (currentSession.getResult() != Session.SUCCESS) {
+                        if (!mDisableUnlocking && !mCollectBadTouches) {
+                            return;
+                        }
+                        dir += "/bad_touches";
+                    } else if (!mDisableUnlocking) {
+                        dir += "/good_touches";
                     }
-                    dir += "/bad_touches";
-                } else if (!mDisableUnlocking) {
-                    dir += "/good_touches";
-                }
 
-                File file = new File(dir);
-                file.mkdir();
-                File touch = new File(file, "trace_" + System.currentTimeMillis());
-
-                try {
-                    new FileOutputStream(touch).write(b);
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
+                    File file = new File(dir);
+                    file.mkdir();
+                    File touch = new File(file, "trace_" + System.currentTimeMillis());
+                    try {
+                        new FileOutputStream(touch).write(b);
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
+                    }
                 }
             }
         });

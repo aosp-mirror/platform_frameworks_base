@@ -51,13 +51,14 @@ import android.util.ArraySet;
 import android.view.View;
 import android.widget.ImageView;
 
+import androidx.annotation.Nullable;
+
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.internal.statusbar.StatusBarIcon;
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.ContrastColorUtil;
 import com.android.systemui.Dependency;
 import com.android.systemui.ForegroundServiceController;
-import com.android.systemui.InitController;
 import com.android.systemui.statusbar.InflationTask;
 import com.android.systemui.statusbar.NotificationLockscreenUserManager;
 import com.android.systemui.statusbar.NotificationMediaManager;
@@ -74,8 +75,6 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Objects;
-
-import androidx.annotation.Nullable;
 
 /**
  * The list of currently displaying notifications.
@@ -102,6 +101,9 @@ public class NotificationData {
         public String key;
         public StatusBarNotification notification;
         public NotificationChannel channel;
+        public boolean audiblyAlerted;
+        public boolean noisy;
+        public int importance;
         public StatusBarIconView icon;
         public StatusBarIconView expandedIcon;
         public ExpandableNotificationRow row; // the outer expanded view
@@ -140,6 +142,16 @@ public class NotificationData {
          */
         private boolean hasSentReply;
 
+        /**
+         * Whether this notification should be displayed as a bubble.
+         */
+        private boolean mIsBubble;
+
+        /**
+         * Whether the user has dismissed this notification when it was in bubble form.
+         */
+        private boolean mUserDismissedBubble;
+
         public Entry(StatusBarNotification n) {
             this(n, null);
         }
@@ -154,6 +166,9 @@ public class NotificationData {
 
         public void populateFromRanking(@NonNull Ranking ranking) {
             channel = ranking.getChannel();
+            audiblyAlerted = ranking.audiblyAlerted();
+            noisy = ranking.isNoisy();
+            importance = ranking.getImportance();
             snoozeCriteria = ranking.getSnoozeCriteria();
             userSentiment = ranking.getUserSentiment();
             smartActions = ranking.getSmartActions() == null
@@ -169,6 +184,22 @@ public class NotificationData {
 
         public boolean hasInterrupted() {
             return interruption;
+        }
+
+        public void setIsBubble(boolean bubbleable) {
+            mIsBubble = bubbleable;
+        }
+
+        public boolean isBubble() {
+            return mIsBubble;
+        }
+
+        public void setBubbleDismissed(boolean userDismissed) {
+            mUserDismissedBubble = userDismissed;
+        }
+
+        public boolean isBubbleDismissed() {
+            return mUserDismissedBubble;
         }
 
         /**

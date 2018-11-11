@@ -4756,6 +4756,10 @@ public class NotificationManagerService extends SystemService {
                     applyZenModeLocked(r);
                     mRankingHelper.sort(mNotificationList);
 
+                    if (!r.isHidden()) {
+                        buzzBeepBlinkLocked(r);
+                    }
+
                     if (notification.getSmallIcon() != null) {
                         StatusBarNotification oldSbn = (old != null) ? old.sbn : null;
                         mListeners.notifyPostedLocked(r, old);
@@ -4788,9 +4792,6 @@ public class NotificationManagerService extends SystemService {
                                 + n.getPackageName());
                     }
 
-                    if (!r.isHidden()) {
-                        buzzBeepBlinkLocked(r);
-                    }
                     maybeRecordInterruptionLocked(r);
                 } finally {
                     int N = mEnqueuedNotifications.size();
@@ -5157,6 +5158,7 @@ public class NotificationManagerService extends SystemService {
                     .setSubtype((buzz ? 1 : 0) | (beep ? 2 : 0) | (blink ? 4 : 0)));
             EventLogTags.writeNotificationAlert(key, buzz ? 1 : 0, beep ? 1 : 0, blink ? 1 : 0);
         }
+        record.setAudiblyAlerted(buzz || beep);
     }
 
     @GuardedBy("mNotificationLock")
@@ -6561,6 +6563,8 @@ public class NotificationManagerService extends SystemService {
         Bundle hidden = new Bundle();
         Bundle smartActions = new Bundle();
         Bundle smartReplies = new Bundle();
+        Bundle audiblyAlerted = new Bundle();
+        Bundle noisy = new Bundle();
         for (int i = 0; i < N; i++) {
             NotificationRecord record = mNotificationList.get(i);
             if (!isVisibleToListener(record.sbn, info)) {
@@ -6590,6 +6594,8 @@ public class NotificationManagerService extends SystemService {
             hidden.putBoolean(key, record.isHidden());
             smartActions.putParcelableArrayList(key, record.getSmartActions());
             smartReplies.putCharSequenceArrayList(key, record.getSmartReplies());
+            audiblyAlerted.putBoolean(key, record.getAudiblyAlerted());
+            noisy.putBoolean(key, record.getSound() != null || record.getVibration() != null);
         }
         final int M = keys.size();
         String[] keysAr = keys.toArray(new String[M]);
@@ -6601,7 +6607,7 @@ public class NotificationManagerService extends SystemService {
         return new NotificationRankingUpdate(keysAr, interceptedKeysAr, visibilityOverrides,
                 suppressedVisualEffects, importanceAr, explanation, overrideGroupKeys,
                 channels, overridePeople, snoozeCriteria, showBadge, userSentiment, hidden,
-                smartActions, smartReplies);
+                smartActions, smartReplies, audiblyAlerted, noisy);
     }
 
     boolean hasCompanionDevice(ManagedServiceInfo info) {

@@ -1079,22 +1079,42 @@ public class CarrierConfigManager {
             "wfc_operator_error_codes_string_array";
 
     /**
-     * Indexes of SPN format strings in wfcSpnFormats and wfcDataSpnFormats.
+     * Indexes of SPN format strings in wfcSpnFormats.
      *
      * <p>Available options are:
      * <ul>
-     * <li> 0: %s</li>
-     * <li> 1: %s Wi-Fi Calling</li>
-     * <li> 2: WLAN Call</li>
-     * <li> 3: %s WLAN Call</li>
-     * <li> 4: %s Wi-Fi</li>
-     * <li> 5: WiFi Calling | %s</li>
-     * <li> 6: %s VoWifi</li>
+     * <li>  0: %s</li>
+     * <li>  1: %s Wi-Fi Calling</li>
+     * <li>  2: WLAN Call</li>
+     * <li>  3: %s WLAN Call</li>
+     * <li>  4: %s Wi-Fi</li>
+     * <li>  5: WiFi Calling | %s</li>
+     * <li>  6: %s VoWifi</li>
+     * <li>  7: Wi-Fi Calling</li>
+     * <li>  8: Wi-Fi</li>
+     * <li>  9: WiFi Calling</li>
+     * <li> 10: VoWifi</li>
      * @hide
      */
     public static final String KEY_WFC_SPN_FORMAT_IDX_INT = "wfc_spn_format_idx_int";
-    /** @hide */
+
+    /**
+     * Indexes of data SPN format strings in wfcSpnFormats.
+     *
+     * @see KEY_WFC_SPN_FORMAT_IDX_INT for available options.
+     * @hide
+     */
     public static final String KEY_WFC_DATA_SPN_FORMAT_IDX_INT = "wfc_data_spn_format_idx_int";
+
+    /**
+     * Indexes of SPN format strings in wfcSpnFormats used during flight mode.
+     *
+     * Set to -1 to use the value from KEY_WFC_SPN_FORMAT_IDX_INT also in this case.
+     * @see KEY_WFC_SPN_FORMAT_IDX_INT for other available options.
+     * @hide
+     */
+    public static final String KEY_WFC_FLIGHT_MODE_SPN_FORMAT_IDX_INT =
+            "wfc_flight_mode_spn_format_idx_int";
 
     /**
      * Use root locale when reading wfcSpnFormats.
@@ -1257,20 +1277,11 @@ public class CarrierConfigManager {
     public static final String KEY_WORLD_MODE_ENABLED_BOOL = "world_mode_enabled_bool";
 
     /**
-     * Package name of the carrier settings activity.
-     * @see {@link #KEY_CARRIER_SETTINGS_ACTIVITY_CLASS_NAME_STRING}.
+     * Flatten {@link android.content.ComponentName} of the carrier's settings activity.
      * @hide
      */
-    public static final String KEY_CARRIER_SETTINGS_ACTIVITY_PACKAGE_NAME_STRING =
-            "carrier_settings_activity_package_name_string";
-
-    /**
-     * Class name of the carrier settings activity.
-     * @see {@link #KEY_CARRIER_SETTINGS_ACTIVITY_PACKAGE_NAME_STRING}.
-     * @hide
-     */
-    public static final String KEY_CARRIER_SETTINGS_ACTIVITY_CLASS_NAME_STRING =
-            "carrier_settings_activity_class_name_string";
+    public static final String KEY_CARRIER_SETTINGS_ACTIVITY_COMPONENT_NAME_STRING =
+            "carrier_settings_activity_component_name_string";
 
     // These variables are used by the MMS service and exposed through another API,
     // SmsManager. The variable names and string values are copied from there.
@@ -2465,6 +2476,7 @@ public class CarrierConfigManager {
         sDefaults.putStringArray(KEY_WFC_OPERATOR_ERROR_CODES_STRING_ARRAY, null);
         sDefaults.putInt(KEY_WFC_SPN_FORMAT_IDX_INT, 0);
         sDefaults.putInt(KEY_WFC_DATA_SPN_FORMAT_IDX_INT, 0);
+        sDefaults.putInt(KEY_WFC_FLIGHT_MODE_SPN_FORMAT_IDX_INT, -1);
         sDefaults.putBoolean(KEY_WFC_SPN_USE_ROOT_LOCALE, false);
         sDefaults.putString(KEY_WFC_EMERGENCY_ADDRESS_CARRIER_APP_STRING, "");
         sDefaults.putBoolean(KEY_CONFIG_WIFI_DISABLE_IN_ECBM, false);
@@ -2615,8 +2627,7 @@ public class CarrierConfigManager {
         sDefaults.putBoolean(KEY_SUPPORT_TDSCDMA_BOOL, false);
         sDefaults.putStringArray(KEY_SUPPORT_TDSCDMA_ROAMING_NETWORKS_STRING_ARRAY, null);
         sDefaults.putBoolean(KEY_WORLD_MODE_ENABLED_BOOL, false);
-        sDefaults.putString(KEY_CARRIER_SETTINGS_ACTIVITY_PACKAGE_NAME_STRING, "");
-        sDefaults.putString(KEY_CARRIER_SETTINGS_ACTIVITY_CLASS_NAME_STRING, "");
+        sDefaults.putString(KEY_CARRIER_SETTINGS_ACTIVITY_COMPONENT_NAME_STRING, "");
         sDefaults.putBoolean(KEY_CARRIER_CONFIG_APPLIED_BOOL, false);
         sDefaults.putBoolean(KEY_CHECK_PRICING_WITH_CARRIER_FOR_DATA_ROAMING_BOOL, false);
         sDefaults.putIntArray(KEY_LTE_RSRP_THRESHOLDS_INT_ARRAY,

@@ -38,12 +38,10 @@ import android.content.Intent;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.IBinder;
-import android.os.Parcel;
 import android.service.notification.NotificationListenerService;
 import android.service.notification.NotificationListenerService.Ranking;
 import android.service.notification.NotificationRankingUpdate;
 import android.service.notification.SnoozeCriterion;
-import android.service.notification.StatusBarNotification;
 import android.support.test.runner.AndroidJUnit4;
 import android.test.suitebuilder.annotation.SmallTest;
 
@@ -94,6 +92,7 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
             assertEquals(getShowBadge(i), ranking.canShowBadge());
             assertEquals(getUserSentiment(i), ranking.getUserSentiment());
             assertEquals(getHidden(i), ranking.isSuspended());
+            assertEquals(audiblyAlerted(i), ranking.audiblyAlerted());
             assertActionsEqual(getSmartActions(key, i), ranking.getSmartActions());
             assertEquals(getSmartReplies(key, i), ranking.getSmartReplies());
         }
@@ -114,6 +113,8 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
         Bundle mHidden = new Bundle();
         Bundle smartActions = new Bundle();
         Bundle smartReplies = new Bundle();
+        Bundle audiblyAlerted = new Bundle();
+        Bundle noisy = new Bundle();
 
         for (int i = 0; i < mKeys.length; i++) {
             String key = mKeys[i];
@@ -133,12 +134,14 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
             mHidden.putBoolean(key, getHidden(i));
             smartActions.putParcelableArrayList(key, getSmartActions(key, i));
             smartReplies.putCharSequenceArrayList(key, getSmartReplies(key, i));
+            audiblyAlerted.putBoolean(key, audiblyAlerted(i));
+            noisy.putBoolean(key, getNoisy(i));
         }
         NotificationRankingUpdate update = new NotificationRankingUpdate(mKeys,
                 interceptedKeys.toArray(new String[0]), visibilityOverrides,
                 suppressedVisualEffects, importance, explanation, overrideGroupKeys,
                 channels, overridePeople, snoozeCriteria, showBadge, userSentiment, mHidden,
-                smartActions, smartReplies);
+                smartActions, smartReplies, audiblyAlerted, noisy);
         return update;
     }
 
@@ -188,6 +191,14 @@ public class NotificationListenerServiceTest extends UiServiceTestCase {
 
     private boolean getHidden(int index) {
         return index % 2 == 0;
+    }
+
+    private boolean audiblyAlerted(int index) {
+        return index < 2;
+    }
+
+    private boolean getNoisy(int index) {
+        return index < 1;
     }
 
     private ArrayList<String> getPeople(String key, int index) {

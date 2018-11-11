@@ -706,6 +706,8 @@ java_defaults {
         "android.hardware.contexthub-V1.0-java",
         "android.hardware.health-V1.0-java-constants",
         "android.hardware.thermal-V1.0-java-constants",
+        "android.hardware.thermal-V1.1-java",
+        "android.hardware.thermal-V2.0-java",
         "android.hardware.tv.input-V1.0-java-constants",
         "android.hardware.usb-V1.0-java-constants",
         "android.hardware.usb-V1.1-java-constants",
@@ -761,6 +763,16 @@ java_library {
     // b/25860419: annotation processors must be explicitly specified for grok
     annotation_processor_classes: [
         "android.processor.unsupportedappusage.UsedByAppsProcessor",
+    ],
+}
+
+// A host library containing the inspector annotations for inspector-annotation-processor.
+java_library_host {
+    name: "inspector-annotation",
+    srcs: [
+        "core/java/android/view/inspector/InspectableChildren.java",
+        "core/java/android/view/inspector/InspectableNodeName.java",
+        "core/java/android/view/inspector/InspectableProperty.java",
     ],
 }
 

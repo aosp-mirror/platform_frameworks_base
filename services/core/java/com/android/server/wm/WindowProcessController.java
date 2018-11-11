@@ -56,6 +56,7 @@ import com.android.internal.app.HeavyWeightSwitcherActivity;
 import com.android.internal.util.function.pooled.PooledLambda;
 import com.android.server.Watchdog;
 
+import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 
@@ -690,24 +691,52 @@ public class WindowProcessController extends ConfigurationContainer<Configuratio
     }
 
     void addPackage(String pkg, long versionCode) {
-        // TODO(b/80414790): Calling directly into AM for now which can lead to deadlock once we are
-        // using WM lock. Need to figure-out if it is okay to do this asynchronously.
         if (mListener == null) return;
-        mListener.addPackage(pkg, versionCode);
+        // Posting on handler so WM lock isn't held when we call into AM.
+        final Message m = PooledLambda.obtainMessage(
+                WindowProcessListener::addPackage, mListener, pkg, versionCode);
+        mAtm.mH.sendMessage(m);
     }
 
     ProfilerInfo onStartActivity(int topProcessState) {
-        // TODO(b/80414790): Calling directly into AM for now which can lead to deadlock once we are
-        // using WM lock. Need to figure-out if it is okay to do this asynchronously.
-        if (mListener == null) return null;
-        return mListener.onStartActivity(topProcessState);
+        ProfilerInfo profilerInfo = null;
+        boolean setProfileProc = false;
+        if (mAtm.mProfileApp != null
+                && mAtm.mProfileApp.equals(mName)) {
+            if (mAtm.mProfileProc == null || mAtm.mProfileProc == this) {
+                setProfileProc = true;
+                final ProfilerInfo profilerInfoSvc = mAtm.mProfilerInfo;
+                if (profilerInfoSvc != null && profilerInfoSvc.profileFile != null) {
+                    if (profilerInfoSvc.profileFd != null) {
+                        try {
+                            profilerInfoSvc.profileFd = profilerInfoSvc.profileFd.dup();
+                        } catch (IOException e) {
+                            profilerInfoSvc.closeFd();
+                        }
+                    }
+
+                    profilerInfo = new ProfilerInfo(profilerInfoSvc);
+                }
+            }
+        }
+
+
+        if (mListener != null) {
+            // Posting on handler so WM lock isn't held when we call into AM.
+            final Message m = PooledLambda.obtainMessage(WindowProcessListener::onStartActivity,
+                    mListener, topProcessState, setProfileProc);
+            mAtm.mH.sendMessage(m);
+        }
+
+        return profilerInfo;
     }
 
     public void appDied() {
-        // TODO(b/80414790): Calling directly into AM for now which can lead to deadlock once we are
-        // using WM lock. Need to figure-out if it is okay to do this asynchronously.
         if (mListener == null) return;
-        mListener.appDied();
+        // Posting on handler so WM lock isn't held when we call into AM.
+        final Message m = PooledLambda.obtainMessage(
+                WindowProcessListener::appDied, mListener);
+        mAtm.mH.sendMessage(m);
     }
 
     void registerDisplayConfigurationListenerLocked(ActivityDisplay activityDisplay) {

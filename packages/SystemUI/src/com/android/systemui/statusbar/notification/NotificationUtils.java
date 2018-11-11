@@ -16,8 +16,11 @@
 
 package com.android.systemui.statusbar.notification;
 
+import static android.provider.Settings.Secure.NOTIFICATION_NEW_INTERRUPTION_MODEL;
+
 import android.content.Context;
 import android.graphics.Color;
+import android.provider.Settings;
 import android.view.View;
 import android.widget.ImageView;
 
@@ -67,5 +70,11 @@ public class NotificationUtils {
         float factor = Math.max(1.0f, context.getResources().getDisplayMetrics().scaledDensity /
                 context.getResources().getDisplayMetrics().density);
         return (int) (dimensionPixelSize * factor);
+    }
+
+    /** Returns the value of the new interruption model setting. */
+    public static boolean useNewInterruptionModel(Context context) {
+        return Settings.Secure.getInt(context.getContentResolver(),
+                NOTIFICATION_NEW_INTERRUPTION_MODEL, 0) != 0;
     }
 }

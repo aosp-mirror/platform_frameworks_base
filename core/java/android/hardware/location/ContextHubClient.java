@@ -107,9 +107,10 @@ public class ContextHubClient implements Closeable {
      * This method should be used if the caller wants to receive notifications even after the
      * process exits. The client must have an open connection with the Context Hub Service (i.e. it
      * cannot have been closed through the {@link #close()} method). Only one PendingIntent can be
-     * registered at a time for a single ContextHubClient. If registered successfully, intents will
-     * be delivered regarding events for the specified nanoapp from the attached Context Hub. Any
-     * unicast messages for this client will also be delivered. The intent will have an extra
+     * registered at a time for a single ContextHubClient, and the PendingIntent cannot be
+     * registered if already registered by a ContextHubClient. If registered successfully, intents
+     * will be delivered regarding events for the specified nanoapp from the attached Context Hub.
+     * Any unicast messages for this client will also be delivered. The intent will have an extra
      * {@link ContextHubManager.EXTRA_CONTEXT_HUB_INFO} of type {@link ContextHubInfo}, which
      * describes the Context Hub the intent event was for. The intent will also have an extra
      * {@link ContextHubManager.EXTRA_EVENT_TYPE} of type {@link ContextHubManager.Event}, which

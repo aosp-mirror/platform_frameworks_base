@@ -22,6 +22,7 @@ import static android.Manifest.permission.USE_BIOMETRIC_INTERNAL;
 import android.annotation.IntDef;
 import android.annotation.RequiresPermission;
 import android.content.Context;
+import android.content.pm.PackageManager;
 import android.os.RemoteException;
 import android.util.Slog;
 
@@ -64,6 +65,19 @@ public class BiometricManager {
 
     private final Context mContext;
     private final IBiometricService mService;
+    private final boolean mHasHardware;
+
+    /**
+     * @param context
+     * @return
+     * @hide
+     */
+    public static boolean hasBiometrics(Context context) {
+        final PackageManager pm = context.getPackageManager();
+        return pm.hasSystemFeature(PackageManager.FEATURE_FINGERPRINT)
+                || pm.hasSystemFeature(PackageManager.FEATURE_IRIS)
+                || pm.hasSystemFeature(PackageManager.FEATURE_FACE);
+    }
 
     /**
      * @hide
@@ -73,6 +87,8 @@ public class BiometricManager {
     public BiometricManager(Context context, IBiometricService service) {
         mContext = context;
         mService = service;
+
+        mHasHardware = hasBiometrics(context);
     }
 
     /**
@@ -93,8 +109,12 @@ public class BiometricManager {
                 throw e.rethrowFromSystemServer();
             }
         } else {
-            Slog.w(TAG, "hasEnrolledBiometrics(): Service not connected");
-            return BIOMETRIC_ERROR_UNAVAILABLE;
+            if (!mHasHardware) {
+                return BIOMETRIC_ERROR_NO_HARDWARE;
+            } else {
+                Slog.w(TAG, "hasEnrolledBiometrics(): Service not connected");
+                return BIOMETRIC_ERROR_UNAVAILABLE;
+            }
         }
     }
 

@@ -3240,7 +3240,7 @@ android.view.FocusFinder$1
 android.view.FocusFinder$FocusSorter
 android.view.FocusFinder$UserSpecifiedFocusComparator
 android.view.FocusFinder$UserSpecifiedFocusComparator$NextFocusGetter
-android.view.FrameInfo
+android.graphics.FrameInfo
 android.view.FrameMetrics
 android.view.FrameMetricsObserver
 android.view.FrameStats
@@ -4117,6 +4117,8 @@ com.android.internal.util.StateMachine$SmHandler$StateInfo
 com.android.internal.util.VirtualRefBasePtr
 com.android.internal.util.XmlUtils
 com.android.internal.util.XmlUtils$WriteMapCallback
+com.android.internal.util.function.HeptConsumer
+com.android.internal.util.function.HeptFunction
 com.android.internal.util.function.HexConsumer
 com.android.internal.util.function.HexFunction
 com.android.internal.util.function.QuadConsumer

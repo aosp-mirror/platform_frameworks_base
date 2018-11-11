@@ -23,6 +23,7 @@ import android.app.admin.DevicePolicyManager;
 import android.app.admin.IDevicePolicyManager;
 import android.app.job.IJobScheduler;
 import android.app.job.JobScheduler;
+import android.app.role.RoleManager;
 import android.app.slice.SliceManager;
 import android.app.timedetector.TimeDetector;
 import android.app.timezone.RulesManager;
@@ -857,11 +858,17 @@ final class SystemServiceRegistry {
                     @Override
                     public BiometricManager createService(ContextImpl ctx)
                             throws ServiceNotFoundException {
-                        final IBinder binder =
-                                ServiceManager.getServiceOrThrow(Context.BIOMETRIC_SERVICE);
-                        final IBiometricService service =
-                                IBiometricService.Stub.asInterface(binder);
-                        return new BiometricManager(ctx.getOuterContext(), service);
+                        if (BiometricManager.hasBiometrics(ctx)) {
+                            final IBinder binder =
+                                    ServiceManager.getServiceOrThrow(Context.BIOMETRIC_SERVICE);
+                            final IBiometricService service =
+                                    IBiometricService.Stub.asInterface(binder);
+                            return new BiometricManager(ctx.getOuterContext(), service);
+                        } else {
+                            // Allow access to the manager when service is null. This saves memory
+                            // on devices without biometric hardware.
+                            return new BiometricManager(ctx.getOuterContext(), null);
+                        }
                     }
                 });
 
@@ -1113,6 +1120,14 @@ final class SystemServiceRegistry {
                     @Override
                     public PermissionManager createService(ContextImpl ctx) {
                         return new PermissionManager(ctx.getOuterContext());
+                    }});
+
+        registerService(Context.ROLE_SERVICE, RoleManager.class,
+                new CachedServiceFetcher<RoleManager>() {
+                    @Override
+                    public RoleManager createService(ContextImpl ctx)
+                            throws ServiceNotFoundException {
+                        return new RoleManager(ctx.getOuterContext());
                     }});
     }
 

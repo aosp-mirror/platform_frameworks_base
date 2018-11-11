@@ -1727,10 +1727,14 @@ public class Intent implements Parcelable, Cloneable {
             = "android.intent.extra.UNINSTALL_ALL_USERS";
 
     /**
-     * A string associated with a {@link #ACTION_UPGRADE_SETUP} activity
-     * describing the last run version of the platform that was setup.
+     * A string that associates with a metadata entry, indicating the last run version of the
+     * platform that was setup.
+     *
+     * @see #ACTION_UPGRADE_SETUP
+     *
      * @hide
      */
+    @SystemApi
     public static final String METADATA_SETUP_VERSION = "android.SETUP_VERSION";
 
     /**
@@ -1751,6 +1755,30 @@ public class Intent implements Parcelable, Cloneable {
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
     public static final String ACTION_MANAGE_APP_PERMISSIONS =
             "android.intent.action.MANAGE_APP_PERMISSIONS";
+
+    /**
+     * Activity action: Launch UI to manage a specific permissions of an app.
+     * <p>
+     * Input: {@link #EXTRA_PACKAGE_NAME} specifies the package whose permission
+     * will be managed by the launched UI.
+     * </p>
+     * <p>
+     * Input: {@link #EXTRA_PERMISSION_NAME} specifies the (individual) permission
+     * that should be managed by the launched UI.
+     * </p>
+     * <p>
+     * Output: Nothing.
+     * </p>
+     *
+     * @see #EXTRA_PACKAGE_NAME
+     * @see #EXTRA_PERMISSION_NAME
+     *
+     * @hide
+     */
+    @SystemApi
+    @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    public static final String ACTION_MANAGE_APP_PERMISSION =
+            "android.intent.action.MANAGE_APP_PERMISSION";
 
     /**
      * Activity action: Launch UI to manage permissions.
@@ -1882,8 +1910,8 @@ public class Intent implements Parcelable, Cloneable {
     /**
      * Activity action: Launch UI to manage which apps have a given permission.
      * <p>
-     * Input: {@link #EXTRA_PERMISSION_NAME} specifies the permission access
-     * to which will be managed by the launched UI.
+     * Input: {@link #EXTRA_PERMISSION_NAME} specifies the permission group
+     * which will be managed by the launched UI.
      * </p>
      * <p>
      * Output: Nothing.

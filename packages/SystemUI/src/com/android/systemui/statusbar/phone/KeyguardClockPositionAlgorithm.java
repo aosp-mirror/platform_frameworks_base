@@ -187,6 +187,7 @@ public class KeyguardClockPositionAlgorithm {
         if (mPulsing) {
             clockYDark -= mPulsingPadding;
         }
+        clockYDark = MathUtils.max(0, clockYDark);
 
         float clockYRegular = getExpandedClockPosition();
         float clockYBouncer = -mKeyguardStatusHeight;

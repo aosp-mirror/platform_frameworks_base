@@ -1600,8 +1600,11 @@ public final class Settings {
      * Applications typically use this action to ask the user to revert the "Do not ask again"
      * status of directory access requests made by
      * {@link android.os.storage.StorageVolume#createAccessIntent(String)}.
+     * @deprecated use {@link #ACTION_APPLICATION_DETAILS_SETTINGS} to manage storage permissions
+     *             for a specific application
      */
     @SdkConstant(SdkConstantType.ACTIVITY_INTENT_ACTION)
+    @Deprecated
     public static final String ACTION_STORAGE_VOLUME_ACCESS_SETTINGS =
             "android.settings.STORAGE_VOLUME_ACCESS_SETTINGS";
 
@@ -4892,6 +4895,7 @@ public final class Settings {
             MOVED_TO_GLOBAL.add(Settings.Global.WIFI_NETWORK_SHOW_RSSI);
             MOVED_TO_GLOBAL.add(Settings.Global.WIFI_WATCHDOG_ON);
             MOVED_TO_GLOBAL.add(Settings.Global.WIFI_WATCHDOG_POOR_NETWORK_TEST_ENABLED);
+            MOVED_TO_GLOBAL.add(Settings.Global.WIFI_P2P_PENDING_FACTORY_RESET);
             MOVED_TO_GLOBAL.add(Settings.Global.WIMAX_NETWORKS_AVAILABLE_NOTIFICATION_ON);
             MOVED_TO_GLOBAL.add(Settings.Global.PACKAGE_VERIFIER_ENABLE);
             MOVED_TO_GLOBAL.add(Settings.Global.PACKAGE_VERIFIER_TIMEOUT);
@@ -6564,23 +6568,22 @@ public final class Settings {
         public static final String MULTI_PRESS_TIMEOUT = "multi_press_timeout";
 
         /**
-         * Whether the user specifies a minimum ui timeout to override minimum ui timeout of
-         * accessibility service
+         * Setting that specifies recommended timeout in milliseconds for controls
+         * which don't need user's interactions.
          *
-         * Type: int (0 for false, 1 for true)
          * @hide
          */
-        public static final String ACCESSIBILITY_MINIMUM_UI_TIMEOUT_ENABLED =
-                "accessibility_minimum_ui_timeout_enabled";
+        public static final String ACCESSIBILITY_NON_INTERACTIVE_UI_TIMEOUT_MS =
+                "accessibility_non_interactive_ui_timeout_ms";
 
         /**
-         * Setting that specifies ui minimum timeout in milliseconds.
+         * Setting that specifies recommended timeout in milliseconds for controls
+         * which need user's interactions.
          *
-         * @see #ACCESSIBILITY_MINIMUM_UI_TIMEOUT_ENABLED
          * @hide
          */
-        public static final String ACCESSIBILITY_MINIMUM_UI_TIMEOUT_MS =
-                "accessibility_minimum_ui_timeout_ms";
+        public static final String ACCESSIBILITY_INTERACTIVE_UI_TIMEOUT_MS =
+                "accessibility_interactive_ui_timeout_ms";
 
         /**
          * List of the enabled print services.
@@ -8198,6 +8201,12 @@ public final class Settings {
                 "packages_to_clear_data_before_full_restore";
 
         /**
+         * Setting to determine whether to use the new notification priority handling features.
+         * @hide
+         */
+        public static final String NOTIFICATION_NEW_INTERRUPTION_MODEL = "new_interruption_model";
+
+        /**
          * This are the settings to be backed up.
          *
          * NOTE: Settings are backed up and restored in the order they appear
@@ -8309,8 +8318,9 @@ public final class Settings {
             ZEN_SETTINGS_SUGGESTION_VIEWED,
             CHARGING_SOUNDS_ENABLED,
             CHARGING_VIBRATION_ENABLED,
-            ACCESSIBILITY_MINIMUM_UI_TIMEOUT_ENABLED,
-            ACCESSIBILITY_MINIMUM_UI_TIMEOUT_MS,
+            ACCESSIBILITY_NON_INTERACTIVE_UI_TIMEOUT_MS,
+            ACCESSIBILITY_INTERACTIVE_UI_TIMEOUT_MS,
+            NOTIFICATION_NEW_INTERRUPTION_MODEL,
         };
 
         /**
@@ -8466,10 +8476,12 @@ public final class Settings {
             VALIDATORS.put(ZEN_SETTINGS_SUGGESTION_VIEWED, BOOLEAN_VALIDATOR);
             VALIDATORS.put(CHARGING_SOUNDS_ENABLED, BOOLEAN_VALIDATOR);
             VALIDATORS.put(CHARGING_VIBRATION_ENABLED, BOOLEAN_VALIDATOR);
-            VALIDATORS.put(ACCESSIBILITY_MINIMUM_UI_TIMEOUT_ENABLED, BOOLEAN_VALIDATOR);
-            VALIDATORS.put(ACCESSIBILITY_MINIMUM_UI_TIMEOUT_MS, NON_NEGATIVE_INTEGER_VALIDATOR);
+            VALIDATORS.put(ACCESSIBILITY_NON_INTERACTIVE_UI_TIMEOUT_MS,
+                    NON_NEGATIVE_INTEGER_VALIDATOR);
+            VALIDATORS.put(ACCESSIBILITY_INTERACTIVE_UI_TIMEOUT_MS, NON_NEGATIVE_INTEGER_VALIDATOR);
             VALIDATORS.put(USER_SETUP_COMPLETE, BOOLEAN_VALIDATOR);
             VALIDATORS.put(ASSIST_GESTURE_SETUP_COMPLETE, BOOLEAN_VALIDATOR);
+            VALIDATORS.put(NOTIFICATION_NEW_INTERRUPTION_MODEL, BOOLEAN_VALIDATOR);
         }
 
         /**
@@ -9161,6 +9173,13 @@ public final class Settings {
          */
         public static final String DEVELOPMENT_ENABLE_FREEFORM_WINDOWS_SUPPORT
                 = "enable_freeform_support";
+
+        /**
+         * Whether to enable experimental desktop mode on secondary displays.
+         * @hide
+         */
+        public static final String DEVELOPMENT_FORCE_DESKTOP_MODE_ON_EXTERNAL_DISPLAYS =
+                "force_desktop_mode_on_external_displays";
 
        /**
         * Whether user has enabled development settings.
@@ -9982,6 +10001,15 @@ public final class Settings {
          */
         public static final String WIFI_RTT_BACKGROUND_EXEC_GAP_MS =
                 "wifi_rtt_background_exec_gap_ms";
+
+        /**
+         * Indicate whether factory reset request is pending.
+         *
+         * Type: int (0 for false, 1 for true)
+         * @hide
+         */
+        public static final String WIFI_P2P_PENDING_FACTORY_RESET =
+                "wifi_p2p_pending_factory_reset";
 
         /**
          * Whether soft AP will shut down after a timeout period when no devices are connected.
@@ -11729,6 +11757,13 @@ public final class Settings {
          * @hide
          */
         public static final String ANGLE_ENABLED_APP = "angle_enabled_app";
+
+        /**
+         * App that is selected to use updated graphics driver.
+         * @hide
+         */
+        public static final String UPDATED_GFX_DRIVER_DEV_OPT_IN_APP =
+                "updated_gfx_driver_dev_opt_in_app";
 
         /**
          * Ordered GPU debug layer list for Vulkan

@@ -15,6 +15,7 @@
  */
 package android.ext.services.notification;
 
+import static android.app.Notification.CATEGORY_MESSAGE;
 import static android.app.NotificationChannel.USER_LOCKED_IMPORTANCE;
 import static android.app.NotificationManager.IMPORTANCE_DEFAULT;
 import static android.app.NotificationManager.IMPORTANCE_HIGH;
@@ -148,6 +149,18 @@ public class NotificationEntry {
         return Objects.equals(getNotification().category, category);
     }
 
+    /**
+     * Similar to {@link #isCategory(String)}, but checking the public version of the notification,
+     * if available.
+     */
+    public boolean isPublicVersionCategory(String category) {
+        Notification publicVersion = getNotification().publicVersion;
+        if (publicVersion == null) {
+            return false;
+        }
+        return Objects.equals(publicVersion.category, category);
+    }
+
     public boolean isAudioAttributesUsage(int usage) {
         return mAttributes != null && mAttributes.getUsage() == usage;
     }
@@ -175,9 +188,9 @@ public class NotificationEntry {
     }
 
     protected boolean isMessaging() {
-        return isCategory(Notification.CATEGORY_MESSAGE)
-                || hasStyle(Notification.MessagingStyle.class)
-                || hasInlineReply();
+        return isCategory(CATEGORY_MESSAGE)
+                || isPublicVersionCategory(CATEGORY_MESSAGE)
+                || hasStyle(Notification.MessagingStyle.class);
     }
 
     public boolean hasInlineReply() {

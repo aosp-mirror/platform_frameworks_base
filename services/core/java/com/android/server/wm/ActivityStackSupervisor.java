@@ -789,7 +789,15 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
         return startHomeOnDisplay(mCurrentUser, myReason, displayId);
     }
 
-    boolean canStartHomeOnDisplay(ActivityInfo homeInfo, int displayId) {
+    /**
+     * Check if home activity start should be allowed on a display.
+     * @param homeInfo {@code ActivityInfo} of the home activity that is going to be launched.
+     * @param displayId The id of the target display.
+     * @param allowInstrumenting Whether launching home should be allowed if being instrumented.
+     * @return {@code true} if allow to launch, {@code false} otherwise.
+     */
+    boolean canStartHomeOnDisplay(ActivityInfo homeInfo, int displayId,
+            boolean allowInstrumenting) {
         if (mService.mFactoryTest == FactoryTest.FACTORY_TEST_LOW_LEVEL
                 && mService.mTopAction == null) {
             // We are running in factory test mode, but unable to find the factory test app, so
@@ -799,7 +807,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
         final WindowProcessController app =
                 mService.getProcessController(homeInfo.processName, homeInfo.applicationInfo.uid);
-        if (app != null && app.isInstrumenting()) {
+        if (!allowInstrumenting && app != null && app.isInstrumenting()) {
             // Don't do this if the home app is currently being instrumented.
             return false;
         }
@@ -1049,20 +1057,26 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
 
     boolean allResumedActivitiesIdle() {
         for (int displayNdx = mActivityDisplays.size() - 1; displayNdx >= 0; --displayNdx) {
+            // TODO(b/117135575): Check resumed activities on all visible stacks.
             final ActivityDisplay display = mActivityDisplays.get(displayNdx);
-            for (int stackNdx = display.getChildCount() - 1; stackNdx >= 0; --stackNdx) {
-                // We cannot only check the top stack on each display since there might have
-                // always-on-top stacks (e.g. pinned stack).
-                final ActivityStack stack = display.getChildAt(stackNdx);
-                if (stack.numActivities() == 0) {
-                    continue;
+            if (display.isSleeping()) {
+                // No resumed activities while display is sleeping.
+                continue;
+            }
+
+            // If the focused stack is not null or not empty, there should have some activities
+            // resuming or resumed. Make sure these activities are idle.
+            final ActivityStack stack = display.getFocusedStack();
+            if (stack == null || stack.numActivities() == 0) {
+                continue;
+            }
+            final ActivityRecord resumedActivity = stack.getResumedActivity();
+            if (resumedActivity == null || !resumedActivity.idle) {
+                if (DEBUG_STATES) {
+                    Slog.d(TAG_STATES, "allResumedActivitiesIdle: stack="
+                            + stack.mStackId + " " + resumedActivity + " not idle");
                 }
-                final ActivityRecord resumedActivity = stack.getResumedActivity();
-                if (resumedActivity != null && !resumedActivity.idle) {
-                    if (DEBUG_STATES) Slog.d(TAG_STATES, "allResumedActivitiesIdle: stack="
-                             + stack.mStackId + " " + resumedActivity + " not idle");
-                    return false;
-                }
+                return false;
             }
         }
         // Send launch end powerhint when idle
@@ -1266,15 +1280,24 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             if (!aInfo.processName.equals("system")) {
                 if ((startFlags & (START_FLAG_DEBUG | START_FLAG_NATIVE_DEBUGGING
                         | START_FLAG_TRACK_ALLOCATION)) != 0 || profilerInfo != null) {
-                    /**
-                     * Assume safe to call into AMS synchronously because the call that set these
-                     * flags should have originated from AMS which will already have its lock held.
-                     * @see ActivityManagerService#startActivityAndWait(IApplicationThread, String,
-                     * Intent, String, IBinder, String, int, int, ProfilerInfo, Bundle, int)
-                     * TODO(b/80414790): Investigate a better way of untangling this.
-                     */
-                    mService.mAmInternal.setDebugFlagsForStartingActivity(
-                            aInfo, startFlags, profilerInfo);
+
+                     // Mimic an AMS synchronous call by passing a message to AMS and wait for AMS
+                     // to notify us that the task has completed.
+                     // TODO(b/80414790) look into further untangling for the situation where the
+                     // caller is on the same thread as the handler we are posting to.
+                    synchronized (mService.mGlobalLock) {
+                        // Post message to AMS.
+                        final Message msg = PooledLambda.obtainMessage(
+                                ActivityManagerInternal::setDebugFlagsForStartingActivity,
+                                mService.mAmInternal, aInfo, startFlags, profilerInfo,
+                                mService.mGlobalLock);
+                        mService.mH.sendMessage(msg);
+                        try {
+                            mService.mGlobalLock.wait();
+                        } catch (InterruptedException ignore) {
+
+                        }
+                    }
                 }
             }
             final String intentLaunchToken = intent.getLaunchToken();
@@ -2051,7 +2074,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             }
         }
 
-        mService.mAmInternal.trimApplications();
+        mService.mH.post(() -> mService.mAmInternal.trimApplications());
         //dump();
         //mWindowManager.dump();
 
@@ -2612,8 +2635,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     }
 
     ActivityRecord getDefaultDisplayHomeActivityForUser(int userId) {
-        getActivityDisplay(DEFAULT_DISPLAY).getHomeActivityForUser(userId);
-        return null;
+        return getActivityDisplay(DEFAULT_DISPLAY).getHomeActivityForUser(userId);
     }
 
     void resizeStackLocked(ActivityStack stack, Rect bounds, Rect tempTaskBounds,
@@ -3173,7 +3195,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
                     + " to its current displayId=" + displayId);
         }
 
-        stack.reparent(activityDisplay, onTop);
+        stack.reparent(activityDisplay, onTop, false /* displayRemoved */);
         // TODO(multi-display): resize stacks properly if moved from split-screen.
     }
 
@@ -4240,7 +4262,7 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             return false;
         }
 
-        if (!canStartHomeOnDisplay(aInfo, displayId)) {
+        if (!canStartHomeOnDisplay(aInfo, displayId, false /* allowInstrumenting */)) {
             return false;
         }
 
@@ -4568,14 +4590,14 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
     /**
      * Begin deferring resume to avoid duplicate resumes in one pass.
      */
-    private void beginDeferResume() {
+    void beginDeferResume() {
         mDeferResumeCount++;
     }
 
     /**
      * End deferring resume and determine if resume can be called.
      */
-    private void endDeferResume() {
+    void endDeferResume() {
         mDeferResumeCount--;
     }
 

@@ -153,8 +153,7 @@ class ActivityTestsBase {
 
     void setupActivityManagerService(
             TestActivityManagerService am, TestActivityTaskManagerService atm) {
-        atm.setActivityManagerService(am, am.mHandlerThread.getLooper(), am.mIntentFirewall,
-                am.mPendingIntentController);
+        atm.setActivityManagerService(am.mIntentFirewall, am.mPendingIntentController);
         atm.mAmInternal = am.getLocalService();
         am.mAtmInternal = atm.getLocalService();
         // Makes sure the supervisor is using with the spy object.
@@ -629,7 +628,7 @@ class ActivityTestsBase {
     }
 
     private static WindowManagerService prepareMockWindowManager() {
-        final WindowManagerService service = WindowTestUtils.getMockWindowManagerService();
+        final WindowManagerService service = mock(WindowManagerService.class);
 
         doAnswer((InvocationOnMock invocationOnMock) -> {
             final Runnable runnable = invocationOnMock.<Runnable>getArgument(0);

@@ -915,6 +915,11 @@ public abstract class PackageManager {
     public static final int INSTALL_REASON_USER = 4;
 
     /**
+     * @hide
+     */
+    public static final int INSTALL_UNKNOWN = 0;
+
+    /**
      * Installation return code: this is passed in the {@link PackageInstaller#EXTRA_LEGACY_STATUS}
      * on success.
      *
@@ -2943,6 +2948,15 @@ public abstract class PackageManager {
     public static final int FLAG_PERMISSION_REVIEW_REQUIRED =  1 << 6;
 
     /**
+     * Permission flag: The permission has not been explicitly requested by
+     * the app but has been added automatically by the system. Revoke once
+     * the app does explicitly request it.
+     *
+     * @hide
+     */
+    public static final int FLAG_PERMISSION_REVOKE_WHEN_REQUESTED =  1 << 7;
+
+    /**
      * Mask for all permission flags.
      *
      * @hide
@@ -3593,7 +3607,10 @@ public abstract class PackageManager {
             FLAG_PERMISSION_POLICY_FIXED,
             FLAG_PERMISSION_REVOKE_ON_UPGRADE,
             FLAG_PERMISSION_SYSTEM_FIXED,
-            FLAG_PERMISSION_GRANTED_BY_DEFAULT
+            FLAG_PERMISSION_GRANTED_BY_DEFAULT,
+            /*
+            FLAG_PERMISSION_REVOKE_WHEN_REQUESED
+            */
     })
     @Retention(RetentionPolicy.SOURCE)
     public @interface PermissionFlags {}
@@ -5808,16 +5825,16 @@ public abstract class PackageManager {
      * {@code android.permission.SUSPEND_APPS} can put any app on the device into a suspended state.
      *
      * <p>While in this state, the application's notifications will be hidden, any of its started
-     * activities will be stopped and it will not be able to show toasts or dialogs or ring the
-     * device. When the user tries to launch a suspended app, the system will, instead, show a
+     * activities will be stopped and it will not be able to show toasts or dialogs or play audio.
+     * When the user tries to launch a suspended app, the system will, instead, show a
      * dialog to the user informing them that they cannot use this app while it is suspended.
      *
      * <p>When an app is put into this state, the broadcast action
      * {@link Intent#ACTION_MY_PACKAGE_SUSPENDED} will be delivered to any of its broadcast
      * receivers that included this action in their intent-filters, <em>including manifest
      * receivers.</em> Similarly, a broadcast action {@link Intent#ACTION_MY_PACKAGE_UNSUSPENDED}
-     * is delivered when a previously suspended app is taken out of this state.
-     * </p>
+     * is delivered when a previously suspended app is taken out of this state. Apps are expected to
+     * use these to gracefully deal with transitions to and from this state.
      *
      * @return {@code true} if the calling package has been suspended, {@code false} otherwise.
      *
@@ -6133,6 +6150,7 @@ public abstract class PackageManager {
             case FLAG_PERMISSION_REVOKE_ON_UPGRADE: return "REVOKE_ON_UPGRADE";
             case FLAG_PERMISSION_USER_FIXED: return "USER_FIXED";
             case FLAG_PERMISSION_REVIEW_REQUIRED: return "REVIEW_REQUIRED";
+            case FLAG_PERMISSION_REVOKE_WHEN_REQUESTED: return "REVOKE_WHEN_REQUESTED";
             default: return Integer.toString(flag);
         }
     }

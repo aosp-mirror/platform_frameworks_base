@@ -248,6 +248,7 @@ void TableSplitter::SplitTable(ResourceTable* original_table) {
             if (!split_entry->id) {
               split_entry->id = entry->id;
               split_entry->visibility = entry->visibility;
+              split_entry->overlayable_declarations = entry->overlayable_declarations;
             }
 
             // Copy the selected values into the new Split Entry.

@@ -24,6 +24,9 @@ import android.util.Pools;
 
 import com.android.internal.util.ArrayUtils;
 import com.android.internal.util.BitUtils;
+import com.android.internal.util.function.HeptConsumer;
+import com.android.internal.util.function.HeptFunction;
+import com.android.internal.util.function.HeptPredicate;
 import com.android.internal.util.function.HexConsumer;
 import com.android.internal.util.function.HexFunction;
 import com.android.internal.util.function.HexPredicate;
@@ -51,12 +54,12 @@ import java.util.function.Supplier;
  * @hide
  */
 final class PooledLambdaImpl<R> extends OmniFunction<Object,
-        Object, Object, Object, Object, Object, R> {
+        Object, Object, Object, Object, Object, Object, R> {
 
     private static final boolean DEBUG = false;
     private static final String LOG_TAG = "PooledLambdaImpl";
 
-    private static final int MAX_ARGS = 5;
+    private static final int MAX_ARGS = 7;
 
     private static final int MAX_POOL_SIZE = 50;
 
@@ -122,7 +125,7 @@ final class PooledLambdaImpl<R> extends OmniFunction<Object,
 
     /**
      * Bit schema:
-     * AAAABCDEEEEEEFFFFFF
+     * AAAAAAABCDEEEEEEFFFFFF
      *
      * Where:
      * A - whether {@link #mArgs arg} at corresponding index was specified at
@@ -158,17 +161,17 @@ final class PooledLambdaImpl<R> extends OmniFunction<Object,
     }
 
     @Override
-    R invoke(Object a1, Object a2, Object a3, Object a4, Object a5, Object a6) {
+    R invoke(Object a1, Object a2, Object a3, Object a4, Object a5, Object a6, Object a7) {
         checkNotRecycled();
         if (DEBUG) {
             Log.i(LOG_TAG, this + ".invoke("
                     + commaSeparateFirstN(
-                            new Object[] { a1, a2, a3, a4, a5, a6 },
+                            new Object[] { a1, a2, a3, a4, a5, a6, a7 },
                             LambdaType.decodeArgCount(getFlags(MASK_EXPOSED_AS)))
                     + ")");
         }
         final boolean notUsed = fillInArg(a1) && fillInArg(a2) && fillInArg(a3)
-                && fillInArg(a4) && fillInArg(a5) && fillInArg(a6);
+                && fillInArg(a4) && fillInArg(a5) && fillInArg(a6) && fillInArg(a7);
         int argCount = LambdaType.decodeArgCount(getFlags(MASK_FUNC_TYPE));
         if (argCount != LambdaType.MASK_ARG_COUNT) {
             for (int i = 0; i < argCount; i++) {
@@ -333,6 +336,27 @@ final class PooledLambdaImpl<R> extends OmniFunction<Object,
                     }
                 }
             }
+
+            case 7: {
+                switch (returnType) {
+                    case LambdaType.ReturnType.VOID: {
+                        ((HeptConsumer) mFunc).accept(popArg(0), popArg(1),
+                                popArg(2), popArg(3), popArg(4),
+                                popArg(5), popArg(6));
+                        return null;
+                    }
+                    case LambdaType.ReturnType.BOOLEAN: {
+                        return (R) (Object) ((HeptPredicate) mFunc).test(popArg(0),
+                                popArg(1), popArg(2), popArg(3),
+                                popArg(4), popArg(5), popArg(6));
+                    }
+                    case LambdaType.ReturnType.OBJECT: {
+                        return (R) ((HeptFunction) mFunc).apply(popArg(0), popArg(1),
+                                popArg(2), popArg(3), popArg(4),
+                                popArg(5), popArg(6));
+                    }
+                }
+            }
         }
         throw new IllegalStateException("Unknown function type: " + LambdaType.toString(funcType));
     }
@@ -396,7 +420,7 @@ final class PooledLambdaImpl<R> extends OmniFunction<Object,
      */
     static <E extends PooledLambda> E acquire(Pool pool, Object func,
             int fNumArgs, int numPlaceholders, int fReturnType,
-            Object a, Object b, Object c, Object d, Object e, Object f) {
+            Object a, Object b, Object c, Object d, Object e, Object f, Object g) {
         PooledLambdaImpl r = acquire(pool);
         if (DEBUG) {
             Log.i(LOG_TAG,
@@ -411,6 +435,7 @@ final class PooledLambdaImpl<R> extends OmniFunction<Object,
                             + ", d = " + d
                             + ", e = " + e
                             + ", f = " + f
+                            + ", g = " + g
                             + ")");
         }
         r.mFunc = func;
@@ -423,6 +448,7 @@ final class PooledLambdaImpl<R> extends OmniFunction<Object,
         setIfInBounds(r.mArgs, 3, d);
         setIfInBounds(r.mArgs, 4, e);
         setIfInBounds(r.mArgs, 5, f);
+        setIfInBounds(r.mArgs, 6, g);
         return (E) r;
     }
 
@@ -448,12 +474,12 @@ final class PooledLambdaImpl<R> extends OmniFunction<Object,
     }
 
     @Override
-    public OmniFunction<Object, Object, Object, Object, Object, Object, R> negate() {
+    public OmniFunction<Object, Object, Object, Object, Object, Object, Object, R> negate() {
         throw new UnsupportedOperationException();
     }
 
     @Override
-    public <V> OmniFunction<Object, Object, Object, Object, Object, Object, V> andThen(
+    public <V> OmniFunction<Object, Object, Object, Object, Object, Object, Object, V> andThen(
             Function<? super R, ? extends V> after) {
         throw new UnsupportedOperationException();
     }
@@ -474,7 +500,7 @@ final class PooledLambdaImpl<R> extends OmniFunction<Object,
     }
 
     @Override
-    public OmniFunction<Object, Object, Object, Object, Object, Object, R> recycleOnUse() {
+    public OmniFunction<Object, Object, Object, Object, Object, Object, Object, R> recycleOnUse() {
         if (DEBUG) Log.i(LOG_TAG, this + ".recycleOnUse()");
         mFlags |= FLAG_RECYCLE_ON_USE;
         return this;
@@ -519,10 +545,10 @@ final class PooledLambdaImpl<R> extends OmniFunction<Object,
      * Contract for encoding a supported lambda type in {@link #MASK_BIT_COUNT} bits
      */
     static class LambdaType {
-        public static final int MASK_ARG_COUNT = 0b111;
-        public static final int MASK_RETURN_TYPE = 0b111000;
+        public static final int MASK_ARG_COUNT = 0b1111;
+        public static final int MASK_RETURN_TYPE = 0b1110000;
         public static final int MASK = MASK_ARG_COUNT | MASK_RETURN_TYPE;
-        public static final int MASK_BIT_COUNT = 6;
+        public static final int MASK_BIT_COUNT = 7;
 
         static int encode(int argCount, int returnType) {
             return mask(MASK_ARG_COUNT, argCount) | mask(MASK_RETURN_TYPE, returnType);
@@ -557,6 +583,7 @@ final class PooledLambdaImpl<R> extends OmniFunction<Object,
                 case 4: return "Quad";
                 case 5: return "Quint";
                 case 6: return "Hex";
+                case 7: return "Hept";
                 default: throw new IllegalArgumentException("" + argCount);
             }
         }
