@@ -1306,22 +1306,22 @@ static void android_media_MediaPlayer2_releaseDrm(JNIEnv *env, jobject thiz)
 
 /////////////////////////////////////////////////////////////////////////////////////
 // AudioRouting begin
-static jboolean android_media_MediaPlayer2_setOutputDevice(JNIEnv *env, jobject thiz, jint device_id)
+static jboolean android_media_MediaPlayer2_setPreferredDevice(JNIEnv *env, jobject thiz, jobject device)
 {
     sp<MediaPlayer2> mp = getMediaPlayer(env, thiz);
     if (mp == NULL) {
         return false;
     }
-    return mp->setOutputDevice(device_id) == NO_ERROR;
+    return mp->setPreferredDevice(device) == NO_ERROR;
 }
 
-static jint android_media_MediaPlayer2_getRoutedDeviceId(JNIEnv *env, jobject thiz)
+static jobject android_media_MediaPlayer2_getRoutedDevice(JNIEnv *env, jobject thiz)
 {
     sp<MediaPlayer2> mp = getMediaPlayer(env, thiz);
     if (mp == NULL) {
-        return AUDIO_PORT_HANDLE_NONE;
+        return nullptr;
     }
-    return mp->getRoutedDeviceId();
+    return mp->getRoutedDevice();
 }
 
 static void android_media_MediaPlayer2_addDeviceCallback(
@@ -1470,8 +1470,8 @@ static const JNINativeMethod gMethods[] = {
     { "_releaseDrm", "()V",                                     (void *)android_media_MediaPlayer2_releaseDrm },
 
     // AudioRouting
-    {"native_setOutputDevice", "(I)Z",                          (void *)android_media_MediaPlayer2_setOutputDevice},
-    {"native_getRoutedDeviceId", "()I",                         (void *)android_media_MediaPlayer2_getRoutedDeviceId},
+    {"native_setPreferredDevice", "(Landroid/media/AudioDeviceInfo;)Z", (void *)android_media_MediaPlayer2_setPreferredDevice},
+    {"getRoutedDevice", "()Landroid/media/AudioDeviceInfo;", (void *)android_media_MediaPlayer2_getRoutedDevice},
     {"native_addDeviceCallback", "(Landroid/media/RoutingDelegate;)V", (void *)android_media_MediaPlayer2_addDeviceCallback},
     {"native_removeDeviceCallback", "(Landroid/media/AudioRouting$OnRoutingChangedListener;)V",
             (void *)android_media_MediaPlayer2_removeDeviceCallback},
