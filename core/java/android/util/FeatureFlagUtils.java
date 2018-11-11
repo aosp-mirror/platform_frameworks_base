@@ -46,7 +46,7 @@ public class FeatureFlagUtils {
         DEFAULT_FLAGS.put("settings_data_usage_v2", "true");
         DEFAULT_FLAGS.put("settings_audio_switcher", "true");
         DEFAULT_FLAGS.put("settings_systemui_theme", "true");
-        DEFAULT_FLAGS.put(HEARING_AID_SETTINGS, "true");
+        DEFAULT_FLAGS.put(HEARING_AID_SETTINGS, "false");
     }
 
     /**

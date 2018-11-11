@@ -372,7 +372,7 @@ class ActivityMetricsLogger {
             return;
         }
 
-        if (launchedActivity != null && launchedActivity.nowVisible) {
+        if (launchedActivity != null && launchedActivity.drawn) {
             // Launched activity is already visible. We cannot measure windows drawn delay.
             reset(true /* abort */, info);
             return;
