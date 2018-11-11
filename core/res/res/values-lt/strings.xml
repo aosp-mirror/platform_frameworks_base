@@ -138,6 +138,14 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> „Wi-Fi“"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"„Wi-Fi“ skambinimas | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> „VoWifi“"</string>
+    <!-- no translation found for wfcSpnFormat_wifi_calling (4990486735013125329) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_wifi (1892673884655959773) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_wifi_calling_wo_hyphen (1336669776254502831) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_vowifi (1765176406171272629) -->
+    <skip />
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Išjungta"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Pageidautinas „Wi-Fi“ ryšys"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Pirmenybė mobiliojo ryšio tinklui"</string>
@@ -423,10 +431,10 @@
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Programai leidžiama pasiekti papildomas vietovės nustatymo paslaugų teikėjų komandas. Dėl to programa gali trukdyti veikti GPS ar kitiems vietovės nustatymo šaltiniams."</string>
     <string name="permlab_accessFineLocation" msgid="6265109654698562427">"pasiekti tikslią vietovę, tik kai programa veikia priekiniame plane"</string>
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"Ši programa gali gauti tikslius jūsų vietovės duomenis bet kuriuo metu, kai veikia priekiniame plane. Šios vietovės paslaugos turi būti įjungtos ir pasiekiamos telefone, kad programa galėtų jas naudoti. Tai gali padidinti akumuliatoriaus energijos suvartojimą."</string>
-    <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"pasiekti apytikslę vietą (nustatytą atsižvelgiant į tinklą)"</string>
-    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Ši programa gali gauti jūsų vietos informaciją naudodamasi tinklo šaltinių, pvz., mobiliojo ryšio bokštų ir „Wi-Fi“ tinklų, duomenimis. Šios vietovės paslaugos turi būti įjungtos ir pasiekiamos planšetiniame kompiuteryje, kad programa galėtų jas naudoti."</string>
-    <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"Ši programa gali gauti jūsų vietos informaciją naudodamasi tinklo šaltinių, pvz., mobiliojo ryšio bokštų ir „Wi-Fi“ tinklų, duomenimis. Šios vietovės paslaugos turi būti įjungtos ir pasiekiamos TV, kad programa galėtų jas naudoti."</string>
-    <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"Ši programa gali gauti jūsų vietos informaciją naudodamasi tinklo šaltinių, pvz., mobiliojo ryšio bokštų ir „Wi-Fi“ tinklų, duomenimis. Šios vietovės paslaugos turi būti įjungtos ir pasiekiamos telefone, kad programa galėtų jas naudoti."</string>
+    <string name="permlab_accessCoarseLocation" msgid="3707180371693213469">"pasiekti apytikslę vietovę (pagal tinklo duomenis), tik kai programa veikia priekiniame plane"</string>
+    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="8594719010575779120">"Ši programa gali gauti jūsų vietos informaciją naudodamasi tinklo šaltinių, pvz., mobiliojo ryšio bokštų ir „Wi-Fi“ tinklų, duomenimis, bet tik kai ji yra naudojama priekiniame plane. Šios vietovės paslaugos turi būti įjungtos ir pasiekiamos planšetiniame kompiuteryje, kad programa galėtų jas naudoti."</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="3027871910200890806">"Ši programa gali gauti jūsų vietos informaciją naudodamasi tinklo šaltinių, pvz., mobiliojo ryšio bokštų ir „Wi-Fi“ tinklų, duomenimis, bet tik kai ji yra naudojama priekiniame plane. Šios vietovės paslaugos turi būti įjungtos ir pasiekiamos TV, kad programa galėtų jas naudoti."</string>
+    <string name="permdesc_accessCoarseLocation" product="default" msgid="854896049371048754">"Ši programa gali gauti jūsų vietos informaciją naudodamasi tinklo šaltinių, pvz., mobiliojo ryšio bokštų ir „Wi-Fi“ tinklų, duomenimis, bet tik kai ji yra naudojama priekiniame plane. Šios vietovės paslaugos turi būti įjungtos ir pasiekiamos telefone, kad programa galėtų jas naudoti."</string>
     <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"prieiga prie vietovės fone"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"Jei papildomai suteikiama prieiga prie apytikslės arba tikslios vietovės, programa gali pasiekti vietovės duomenis veikdama fone."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"keisti garso nustatymus"</string>
@@ -1891,6 +1899,8 @@
     <string name="stk_cc_ss_to_ussd" msgid="5614626512855868785">"SS užklausa pakeista į USSD užklausą"</string>
     <string name="stk_cc_ss_to_ss" msgid="7716729801537709054">"Pakeista į naują SS užklausą"</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Darbo profilis"</string>
+    <!-- no translation found for notification_alerted_content_description (1296617716556420585) -->
+    <skip />
     <string name="expand_button_content_description_collapsed" msgid="3609784019345534652">"Išskleisti"</string>
     <string name="expand_button_content_description_expanded" msgid="8520652707158554895">"Sutraukti"</string>
     <string name="expand_action_accessibility" msgid="5307730695723718254">"perjungti išskleidimą"</string>

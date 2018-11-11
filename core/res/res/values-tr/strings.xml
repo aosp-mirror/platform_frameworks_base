@@ -136,6 +136,14 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> Kablosuz"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Kablosuz Çağrı | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> VoWifi"</string>
+    <!-- no translation found for wfcSpnFormat_wifi_calling (4990486735013125329) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_wifi (1892673884655959773) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_wifi_calling_wo_hyphen (1336669776254502831) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_vowifi (1765176406171272629) -->
+    <skip />
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Kapalı"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Kablosuz bağlantı tercihli"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Mobil tercihli"</string>
@@ -417,10 +425,10 @@
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Uygulamanın, ekstra konum sağlayıcı komutlarına erişmesine izin verir. Bu izin, uygulamanın GPS veya diğer konum kaynaklarının çalışmasını kesmesine olanak sağlayabilir."</string>
     <string name="permlab_accessFineLocation" msgid="6265109654698562427">"yalnızca ön planda kesin konuma erişme"</string>
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"Bu uygulama yalnızca ön plandayken kesin konumunuzu alabilir. Uygulamanın bu hizmetleri kullanabilmesi için telefonunuzda bu konum hizmetleri açık ve kullanılabilir olmalıdır. Bu, pil tüketimini artırabilir."</string>
-    <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"konum bilgilerine yaklaşık olarak erişme (ağ tabanlı)"</string>
-    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Bu uygulama baz istasyonu ve kablosuz ağ gibi ağ kaynaklarını kullanarak konumunuzu belirleyebilir. Uygulamanın bu hizmetleri kullanabilmesi için tabletinizde bu konum hizmetleri açık ve kullanılabilir olmalıdır."</string>
-    <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"Bu uygulama baz istasyonu ve kablosuz ağ gibi ağ kaynaklarını kullanarak konumunuzu belirleyebilir. Uygulamanın bu hizmetleri kullanabilmesi için TV\'nizde bu konum hizmetleri açık ve kullanılabilir olmalıdır."</string>
-    <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"Bu uygulama baz istasyonu ve kablosuz ağ gibi ağ kaynaklarını kullanarak konumunuzu belirleyebilir. Uygulamanın bu hizmetleri kullanabilmesi için telefonunuzda bu konum hizmetleri açık ve kullanılabilir olmalıdır."</string>
+    <string name="permlab_accessCoarseLocation" msgid="3707180371693213469">"yalnızca ön planda yaklaşık konuma (ağa dayalı) erişme"</string>
+    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="8594719010575779120">"Bu uygulama baz istasyonları ve kablosuz ağlar gibi ağ kaynaklarını dikkate alarak konumunuzu bulabilir, ancak bunu yalnızca ön plandayken yapabilir. Uygulamanın bu hizmetleri kullanabilmesi için tabletinizde bu konum hizmetleri açık ve kullanılabilir olmalıdır."</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="3027871910200890806">"Bu uygulama baz istasyonları ve kablosuz ağlar gibi ağ kaynaklarını dikkate alarak konumunuzu bulabilir, ancak bunu yalnızca ön plandayken yapabilir. Uygulamanın bu hizmetleri kullanabilmesi için TV\'nizde bu konum hizmetleri açık ve kullanılabilir olmalıdır."</string>
+    <string name="permdesc_accessCoarseLocation" product="default" msgid="854896049371048754">"Bu uygulama baz istasyonları ve kablosuz ağlar gibi ağ kaynaklarını dikkate alarak konumunuzu bulabilir, ancak bunu yalnızca ön plandayken yapabilir. Uygulamanın bu hizmetleri kullanabilmesi için telefonunuzda bu konum hizmetleri açık ve kullanılabilir olmalıdır."</string>
     <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"konum bilgisine arka planda eriş"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"Bu izin, yaklaşık veya tam konum erişimine ek olarak verilirse uygulama, konum bilgisine arka planda çalışırken erişebilir."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"ses ayarlarınızı değiştirin"</string>
@@ -1194,7 +1202,7 @@
     <string name="dump_heap_title" msgid="5864292264307651673">"Yığın dökümü paylaşılsın mı?"</string>
     <string name="dump_heap_text" msgid="4809417337240334941">"<xliff:g id="PROC">%1$s</xliff:g>, <xliff:g id="SIZE">%2$s</xliff:g> olan işlem bellek sınırını aştı. İşlemin geliştiricisiyle paylaşabileceğiniz bir bellek yığını dökümü hazır. Dikkat: Bu bellek yığını dökümü, uygulamanın erişebildiği tüm kişisel bilgilerinizi içerebilir."</string>
     <string name="sendText" msgid="5209874571959469142">"Kısa mesaj için bir işlem seçin"</string>
-    <string name="volume_ringtone" msgid="6885421406845734650">"Zil sesi düzeyi"</string>
+    <string name="volume_ringtone" msgid="6885421406845734650">"Zil ses düzeyi"</string>
     <string name="volume_music" msgid="5421651157138628171">"Medya ses düzeyi"</string>
     <string name="volume_music_hint_playing_through_bluetooth" msgid="9165984379394601533">"Bluetooth üzerinden çalıyor"</string>
     <string name="volume_music_hint_silent_ringtone_selected" msgid="8310739960973156272">"Sessiz zil sesi ayarlandı"</string>
@@ -1204,7 +1212,7 @@
     <string name="volume_notification" msgid="2422265656744276715">"Bildirim ses düzeyi"</string>
     <string name="volume_unknown" msgid="1400219669770445902">"Ses"</string>
     <string name="volume_icon_description_bluetooth" msgid="6538894177255964340">"Bluetooth ses düzeyi"</string>
-    <string name="volume_icon_description_ringer" msgid="3326003847006162496">"Zil sesi düzeyi"</string>
+    <string name="volume_icon_description_ringer" msgid="3326003847006162496">"Zil ses düzeyi"</string>
     <string name="volume_icon_description_incall" msgid="8890073218154543397">"Çağrı ses düzeyi"</string>
     <string name="volume_icon_description_media" msgid="4217311719665194215">"Medya ses düzeyi"</string>
     <string name="volume_icon_description_notification" msgid="7044986546477282274">"Bildirim ses düzeyi"</string>
@@ -1825,6 +1833,8 @@
     <string name="stk_cc_ss_to_ussd" msgid="5614626512855868785">"SS isteği USSD isteği olarak değişti"</string>
     <string name="stk_cc_ss_to_ss" msgid="7716729801537709054">"Yeni SS isteği olarak değişti"</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"İş profili"</string>
+    <!-- no translation found for notification_alerted_content_description (1296617716556420585) -->
+    <skip />
     <string name="expand_button_content_description_collapsed" msgid="3609784019345534652">"Genişlet"</string>
     <string name="expand_button_content_description_expanded" msgid="8520652707158554895">"Daralt"</string>
     <string name="expand_action_accessibility" msgid="5307730695723718254">"genişletmeyi aç/kapat"</string>

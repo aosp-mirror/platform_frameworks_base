@@ -140,6 +140,14 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"‏شبكة Wi-Fi التابعة لـ <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"‏الاتصال عبر شبكة WiFi | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"‏شبكة VoWifi التابعة لـ <xliff:g id="SPN">%s</xliff:g>"</string>
+    <!-- no translation found for wfcSpnFormat_wifi_calling (4990486735013125329) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_wifi (1892673884655959773) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_wifi_calling_wo_hyphen (1336669776254502831) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_vowifi (1765176406171272629) -->
+    <skip />
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"إيقاف"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"‏شبكة Wi-Fi مفضّلة"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"شبكة بيانات الجوال مفضَّلة"</string>
@@ -429,10 +437,10 @@
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"‏للسماح للتطبيق بالدخول إلى أوامر إضافية لموفر الموقع. قد يتيح هذا للتطبيق التداخل مع تشغيل تقنية نظام تحديد المواقع العالمي (GPS) أو مصادر الموقع الأخرى."</string>
     <string name="permlab_accessFineLocation" msgid="6265109654698562427">"الوصول إلى الموقع الجغرافي الدقيق في الواجهة الأمامية فقط"</string>
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"لا يمكن لهذا التطبيق معرفة موقعك الجغرافي بالضبط إلا عندما يعمل في الخلفية. ويجب تفعيل خدمات الموقع الجغرافي هذه وأن تكون متاحة على الهاتف حتى يتمكن التطبيق من استخدامها. وقد يؤدي هذا إلى زيادة استهلاك طاقة البطارية."</string>
-    <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"الوصول إلى الموقع التقريبي (استنادًا إلى الشبكة)"</string>
-    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"‏يمكن لهذا التطبيق معرفة موقعك من خلال مصادر الشبكات مثل أبراج الجوّال وشبكات Wi-Fi. ويجب تشغيل خدمات المواقع هذه وأن تكون متاحة على الجهاز اللوحي حتى يتمكن التطبيق من استخدامها."</string>
-    <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"‏يمكن لهذا التطبيق معرفة موقعك من خلال مصادر الشبكات مثل أبراج الجوّال وشبكات Wi-Fi. ويجب تشغيل خدمات المواقع هذه وأن تكون متاحة على جهاز التلفزيون حتى يتمكن التطبيق من استخدامها."</string>
-    <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"‏يمكن لهذا التطبيق معرفة موقعك من خلال مصادر الشبكات مثل أبراج الجوّال وشبكات Wi-Fi. ويجب تشغيل خدمات المواقع هذه وأن تكون متاحة على الهاتف حتى يتمكن التطبيق من استخدامها."</string>
+    <string name="permlab_accessCoarseLocation" msgid="3707180371693213469">"الوصول إلى الموقع الجغرافي التقريبي (بالاعتماد على الشبكة) في الخلفية فقط"</string>
+    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="8594719010575779120">"‏يمكن لهذا التطبيق معرفة موقعك مستعينًا بمصادر الشبكات مثل الأبراج الخلوية وشبكات Wi-Fi ولكن يجب أن يعمل في الخلفية. ويجب تفعيل خدمات المواقع هذه وتوفّرها على جهازك اللوحي كي يتمكن التطبيق من استخدامها."</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="3027871910200890806">"‏يمكن لهذا التطبيق معرفة موقعك مستعينًا بمصادر الشبكات مثل الأبراج الخلوية وشبكات Wi-Fi ولكن يجب أن يعمل في الخلفية. ويجب تفعيل خدمات المواقع هذه وتوفّرها على جهاز التلفزيون كي يتمكن التطبيق من استخدامها."</string>
+    <string name="permdesc_accessCoarseLocation" product="default" msgid="854896049371048754">"‏يمكن لهذا التطبيق معرفة موقعك مستعينًا بمصادر الشبكات مثل الأبراج الخلوية وشبكات Wi-Fi ولكن يجب أن يعمل في الخلفية. ويجب تفعيل خدمات المواقع هذه وتوفّرها على هاتفك كي يتمكن التطبيق من استخدامها."</string>
     <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"الوصول إلى الموقع الجغرافي في الخلفية"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"إذا تمّ منح إذن التطبيق هذا بالإضافة إلى الموقع الجغرافي التقريبي أو الدقيق، يمكن للتطبيق الوصول إلى الموقع الجغرافي أثناء تشغيله في الخلفية."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"تغيير إعداداتك الصوتية"</string>
@@ -1504,7 +1512,7 @@
     <string name="forward_intent_to_work" msgid="621480743856004612">"أنت تستخدم هذا التطبيق في ملفك الشخصي للعمل"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"طريقة الإرسال"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"مزامنة"</string>
-    <string name="accessibility_binding_label" msgid="4148120742096474641">"إمكانية الدخول"</string>
+    <string name="accessibility_binding_label" msgid="4148120742096474641">"إمكانية الوصول"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"الخلفية"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"تغيير الخلفية"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"برنامج تلقّي الإشعارات الصوتية"</string>
@@ -1957,6 +1965,8 @@
     <string name="stk_cc_ss_to_ussd" msgid="5614626512855868785">"‏تم تغيير طلب SS إلى طلب USSD."</string>
     <string name="stk_cc_ss_to_ss" msgid="7716729801537709054">"‏تم التغيير إلى طلب SS الجديد."</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"الملف الشخصي للعمل"</string>
+    <!-- no translation found for notification_alerted_content_description (1296617716556420585) -->
+    <skip />
     <string name="expand_button_content_description_collapsed" msgid="3609784019345534652">"توسيع"</string>
     <string name="expand_button_content_description_expanded" msgid="8520652707158554895">"تصغير"</string>
     <string name="expand_action_accessibility" msgid="5307730695723718254">"تبديل التوسيع"</string>

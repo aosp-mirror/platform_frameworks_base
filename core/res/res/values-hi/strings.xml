@@ -136,6 +136,14 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> वाई-फ़ाई"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"वाई-फ़ाई कॉलिंग | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> VoWifi"</string>
+    <!-- no translation found for wfcSpnFormat_wifi_calling (4990486735013125329) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_wifi (1892673884655959773) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_wifi_calling_wo_hyphen (1336669776254502831) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_vowifi (1765176406171272629) -->
+    <skip />
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"बंद"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"वाई-फ़ाई को प्राथमिकता"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"मोबाइल को प्राथमिकता"</string>
@@ -417,10 +425,10 @@
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"ऐप को कुछ और जगह की जानकारी देने वाले आदेशों की पहुंच पाने देता है. इससे ऐप जीपीएस या जगह की जानकारी देने वाले दूसरे स्रोतों के काम में रोक-टोक कर सकता है."</string>
     <string name="permlab_accessFineLocation" msgid="6265109654698562427">"ऐप्लिकेशन \'जगह की सटीक जानकारी\' सिर्फ़ सामने खुली होने पर एक्सेस करे"</string>
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"यह ऐप्लिकेशन सिर्फ़ तब आपकी \'जगह की सटीक जानकारी\' का इस्तेमाल कर सकता है जब यह स्क्रीन पर दिखाई दे रहा हो. यह ज़रूरी है कि \'जगह की जानकारी\' वाली ये सेवाएं आपके फ़ोन में मौजूद हों और चालू की गई हों ताकि ऐप्लिकेशन उनका इस्तेमाल कर पाए. ऐसा करने से ज़्यादा बैटरी खर्च हो सकती है."</string>
-    <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"अनुमानित जगह की पहुंच दें (नेटवर्क-आधारित)"</string>
-    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"यह ऐप सेल टावर और वाई-फ़ाई नेटवर्क जैसे नेटवर्क के स्रोतों के आधार पर आपकी जगह का पता कर सकता है. ये जगह की जानकारी आपके टैबलेट पर चालू और मौजूद होनी चाहिए ताकि ऐप उनका इस्तेमाल कर सके."</string>
-    <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"यह ऐप सेल टावर और वाई-फ़ाई नेटवर्क जैसे नेटवर्क के स्रोतों के आधार पर आपकी जगह का पता कर सकता है. ये जगह की जानकारी आपके टीवी पर चालू और मौजूद होनी चाहिए ताकि ऐप उनका इस्तेमाल कर सके."</string>
-    <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"यह ऐप सेल टावर और वाई-फ़ाई नेटवर्क जैसे नेटवर्क के स्रोतों के आधार पर आपकी जगह का पता कर सकता है. ये जगह की जानकारी आपके फ़ोन पर चालू और मौजूद होनी चाहिए ताकि ऐप उनका इस्तेमाल कर सके."</string>
+    <string name="permlab_accessCoarseLocation" msgid="3707180371693213469">"स्क्रीन पर दिखाई देते समय \'जगह की अनुमानित जानकारी\' (नेटवर्क-आधारित) एक्सेस करें"</string>
+    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="8594719010575779120">"यह ऐप्लिकेशन सेल टावर और वाई-फ़ाई नेटवर्क जैसे नेटवर्क स्रोतों के आधार पर आपकी जगह का पता लगा सकता है, लेकिन सिर्फ़ तब जब ऐप्लिकेशन स्क्रीन पर दिखाई दे रहा हो. यह ज़रूरी है कि \'जगह की जानकारी\' वाली ये सेवाएं आपके टैबलेट में मौजूद हों और चालू की गई हों ताकि ऐप्लिकेशन उनका इस्तेमाल कर पाए."</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="3027871910200890806">"यह ऐप्लिकेशन सेल टावर और वाई-फ़ाई नेटवर्क जैसे नेटवर्क स्रोतों के आधार पर आपकी जगह का पता लगा सकता है, लेकिन सिर्फ़ तब जब ऐप्लिकेशन स्क्रीन पर दिखाई दे रहा हो. यह ज़रूरी है कि \'जगह की जानकारी\' वाली ये सेवाएं आपके टीवी पर मौजूद हों और चालू की गई हों ताकि ऐप्लिकेशन उनका इस्तेमाल कर पाए."</string>
+    <string name="permdesc_accessCoarseLocation" product="default" msgid="854896049371048754">"यह ऐप्लिकेशन सेल टावर और वाई-फ़ाई नेटवर्क जैसे नेटवर्क स्रोतों के आधार पर आपकी जगह का पता लगा सकता है, लेकिन सिर्फ़ तब, जब ऐप्लिकेशन स्क्रीन पर दिखाई दे रहा हो. यह ज़रूरी है कि \'जगह की जानकारी\' वाली ये सेवाएं आपके फ़ोन में मौजूद हों और चालू की गई हों ताकि ऐप्लिकेशन उनका इस्तेमाल कर पाए."</string>
     <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"बैकग्राउंड में जगह की जानकारी एक्सेस करना"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"अनुमानित या बिल्कुल सही जगह की जानकारी का एक्सेस करने की अनुमति अलग से दिए जाने पर, बैकग्राउंड में चलने के दौरान ऐप्लिकेशन आपकी जगह की जानकारी एक्सेस कर सकता है."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"अपनी ऑडियो सेटिंग बदलें"</string>
@@ -1825,6 +1833,8 @@
     <string name="stk_cc_ss_to_ussd" msgid="5614626512855868785">"एसएस कोड चलाने के अनुरोध को यूएसएसडी कोड चलाने के अनुरोध में बदला गया"</string>
     <string name="stk_cc_ss_to_ss" msgid="7716729801537709054">"एसएस कोड चलाने के नए अनुरोध में बदला गया"</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"कार्य प्रोफ़ाइल"</string>
+    <!-- no translation found for notification_alerted_content_description (1296617716556420585) -->
+    <skip />
     <string name="expand_button_content_description_collapsed" msgid="3609784019345534652">"विस्तार करें"</string>
     <string name="expand_button_content_description_expanded" msgid="8520652707158554895">"छोटा करें"</string>
     <string name="expand_action_accessibility" msgid="5307730695723718254">"टॉगल विस्तार"</string>

@@ -136,6 +136,14 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"‏WiFi کالنگ | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> VoWifi"</string>
+    <!-- no translation found for wfcSpnFormat_wifi_calling (4990486735013125329) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_wifi (1892673884655959773) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_wifi_calling_wo_hyphen (1336669776254502831) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_vowifi (1765176406171272629) -->
+    <skip />
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"آف"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"‏Wi-Fi ترجیحی"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"موبائل ترجیحی"</string>
@@ -417,10 +425,10 @@
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"‏ایپ کو اضافی مقام فراہم کنندہ کی کمانڈز تک رسائی حاصل کرنے کی اجازت دیتی ہے۔ یہ ایپ کو GPS یا دوسرے مقام کے مآخذ کے عمل کے ساتھ مداخلت کرنے کی اجازت دے سکتی ہے۔"</string>
     <string name="permlab_accessFineLocation" msgid="6265109654698562427">"صرف پیش منظر میں درست مقام تک رسائی حاصل کریں"</string>
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"یہ ایپ جب پس منظر میں ہوتی ہے تبھی یہ آپ کا صحیح مقام حاصل کر سکتی ہے۔ ایپ کو ان مقام کی سروسز کو استعمال کر سکنے کیلئے ان کا آن ہونا اور آپ کے فون پر دستیاب ہونا ضروری ہے۔"</string>
-    <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"تخمینی مقام تک رسائی حاصل کریں (نیٹ ورک پر مبنی)"</string>
-    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"‏نیٹ ورک مآخذات جیسے کہ سیل ٹاورز اور Wi-Fi نیٹ ورکس کی بنیاد پر یہ ایپ آپ کا مقام حاصل کر سکتی ہے۔ ایپ کو ان مقام کی سروسز کو استعمال کرنے کیلئے ان کا آن ہونا اور آپ کے ٹیبلیٹ پر دستیاب ہونا ضروری ہے۔"</string>
-    <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"‏نیٹ ورک مآخذات جیسے کہ سیل ٹاورز اور Wi-Fi نیٹ ورکس کی بنیاد پر یہ ایپ آپ کا مقام حاصل کر سکتی ہے۔ ایپ کو ان مقام کی سروسز کو استعمال کرنے کیلئے ان کا آن ہونا اور آپ کے TV پر دستیاب ہونا ضروری ہے۔"</string>
-    <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"‏نیٹ ورک مآخذات جیسے کہ سیل ٹاورز اور Wi-Fi نیٹ ورکس کی بنیاد پر یہ ایپ آپ کا مقام حاصل کر سکتی ہے۔ ایپ کو ان مقام کی سروسز کو استعمال کرنے کیلئے ان کا آن ہونا اور آپ کے فون پر دستیاب ہونا ضروری ہے۔"</string>
+    <string name="permlab_accessCoarseLocation" msgid="3707180371693213469">"صرف پیش منظر میں (نیٹ ورک پر مبنی) تخمینی مقام تک رسائی حاصل کریں"</string>
+    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="8594719010575779120">"‏نیٹ ورک ماخذات جیسے کہ سیل ٹاورز اور Wi-Fi نیٹ ورکس کی بنیاد پر یہ ایپ آپ کا مقام حاصل کر سکتی ہے لیکن صرف اس وقت جب ایپ پیش منظر میں ہو۔ ایپ کو ان مقام کی سروسز کو استعمال کرنے کے لیے ان کا آن ہونا اور آپ کے ٹیبلیٹ پر دستیاب ہونا ضروری ہے۔"</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="3027871910200890806">"‏نیٹ ورک ماخذات جیسے کہ سیل ٹاورز اور Wi-Fi نیٹ ورکس کی بنیاد پر یہ ایپ آپ کا مقام حاصل کر سکتی ہے لیکن صرف اس وقت جب ایپ پیش منظر میں ہو۔ ایپ کو ان مقام کی سروسز کو استعمال کرنے کے لیے ان کا آن ہونا اور آپ کی ٹی وی پر دستیاب ہونا ضروری ہے۔"</string>
+    <string name="permdesc_accessCoarseLocation" product="default" msgid="854896049371048754">"‏نیٹ ورک ماخذات جیسے کہ سیل ٹاورز اور Wi-Fi نیٹ ورکس کی بنیاد پر یہ ایپ آپ کا مقام حاصل کر سکتی ہے لیکن صرف اس وقت جب ایپ پیش منظر میں ہو۔ ایپ کو ان مقام کی سروسز کو استعمال کرنے کے لیے ان کا آن ہونا اور آپ کے فون پر دستیاب ہونا ضروری ہے۔"</string>
     <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"پس منظر میں مقام کی رسائی حاصل کریں"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"اگر اضافی طور پر اسے تخمینی یا درست مقام تک رسائی کی منظوری دی جاتی ہے تو پس منظر میں چلنے کے دوران ایپ اس مقام تک رسائی حاصل کر سکتی ہے۔"</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"اپنے آڈیو کی ترتیبات کو تبدیل کریں"</string>
@@ -1826,6 +1834,8 @@
     <string name="stk_cc_ss_to_ussd" msgid="5614626512855868785">"‏SS درخواست کو USSD درخواست میں تبدیل کر دیا گیا"</string>
     <string name="stk_cc_ss_to_ss" msgid="7716729801537709054">"‏نئی SS درخواست میں تبدیل کر دیا گیا"</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"دفتری پروفائل"</string>
+    <!-- no translation found for notification_alerted_content_description (1296617716556420585) -->
+    <skip />
     <string name="expand_button_content_description_collapsed" msgid="3609784019345534652">"پھیلائیں"</string>
     <string name="expand_button_content_description_expanded" msgid="8520652707158554895">"سکیڑیں"</string>
     <string name="expand_action_accessibility" msgid="5307730695723718254">"پھیلاؤ کو ٹوگل کریں"</string>

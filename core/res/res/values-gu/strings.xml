@@ -136,6 +136,14 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> વાઇ-ફાઇ"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"વાઇ-ફાઇ કૉલિંગ | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> VoWifi"</string>
+    <!-- no translation found for wfcSpnFormat_wifi_calling (4990486735013125329) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_wifi (1892673884655959773) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_wifi_calling_wo_hyphen (1336669776254502831) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_vowifi (1765176406171272629) -->
+    <skip />
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"બંધ"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"વાઇ-ફાઇ પસંદ કર્યું"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"મોબાઇલને પસંદગી"</string>
@@ -417,10 +425,10 @@
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"એપ્લિકેશનને વધારાના સ્થાન પ્રદાતા આદેશોને ઍક્સેસ કરવાની મંજૂરી આપે છે. આ એપ્લિકેશનને GPS અથવા અન્ય સ્થાન સ્રોતોના ઓપરેશનમાં દખલ કરવાની મંજૂરી આપી શકે છે."</string>
     <string name="permlab_accessFineLocation" msgid="6265109654698562427">"ફૉરગ્રાઉન્ડમાં ફક્ત ચોક્કસ સ્થાન ઍક્સેસ કરો"</string>
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"આ ઍપ ફક્ત બૅકગ્રાઉન્ડમાં હોય ત્યારે જ તમારું ચોક્કસ સ્થાન મેળવી શકે છે. ઍપ આ સ્થાન સેવાઓનો ઉપયોગ કરી શકે તે માટે તમારા ફોન પર આ સેવાઓ ઉપલબ્ધ અને ચાલુ હોવી આવશ્યક છે. આ બૅટરી વપરાશ વધારી શકે છે."</string>
-    <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"અંદાજિત સ્થાન ઍક્સેસ કરો (નેટવર્ક-આધારિત)"</string>
-    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"આ ઍપ્લિકેશન, સેલ ટાવર્સ અને વાઇ-ફાઇ નેટવર્ક્સ જેવા નેટવર્ક સ્રોતોના આધારે તમારું સ્થાન મેળવી શકે છે. ઍપ્લિકેશન દ્વારા આ સ્થાન સેવાઓનો ઉપયોગ કરવામાં સમર્થ થવા માટે તમારા ટેબ્લેટ પર આ ઉપલબ્ધ અને ચાલુ હોવી આવશ્યક છે."</string>
-    <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"આ ઍપ્લિકેશન, સેલ ટાવર્સ અને વાઇ-ફાઇ નેટવર્ક્સ જેવા નેટવર્ક સ્રોતોના આધારે તમારું સ્થાન મેળવી શકે છે. ઍપ્લિકેશન દ્વારા આ સ્થાન સેવાઓનો ઉપયોગ કરવામાં સમર્થ થવા માટે તમારા ટીવી પર આ ઉપલબ્ધ અને ચાલુ હોવી આવશ્યક છે."</string>
-    <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"આ ઍપ્લિકેશન, સેલ ટાવર્સ અને વાઇ-ફાઇ નેટવર્ક્સ જેવા નેટવર્ક સ્રોતોના આધારે તમારું સ્થાન મેળવી શકે છે. ઍપ્લિકેશન દ્વારા આ સ્થાન સેવાઓનો ઉપયોગ કરવામાં સમર્થ થવા માટે તમારા ફોન પર આ ઉપલબ્ધ અને ચાલુ હોવી આવશ્યક છે."</string>
+    <string name="permlab_accessCoarseLocation" msgid="3707180371693213469">"અંદાજિત જગ્યાને (નેટવર્ક આધારિત) માત્ર ફૉરગ્રાઉન્ડમાંથી ઍક્સેસ કરો"</string>
+    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="8594719010575779120">"સેલ ટાવર અને વાઇ-ફાઇ નેટવર્ક જેવા નેટવર્ક સૉર્સનો ઉપયોગ કરીને આ અ‍ૅપ તમારી જગ્યા જાણી શકે છે, પરંતુ આ માત્ર ત્યારે શક્ય છે જ્યારે આ અ‍ૅપ ફૉરગ્રાઉન્ડમાં ચાલુ હોય. ઍપ આ જગ્યાની સેવાઓનો ઉપયોગ કરી શકે તે માટે તમારા ટૅબ્લેટ પર આ સેવાઓ ઉપલબ્ધ અને ચાલુ હોવી આવશ્યક છે."</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="3027871910200890806">"સેલ ટાવર અને વાઇ-ફાઇ નેટવર્ક જેવા નેટવર્ક સૉર્સનો ઉપયોગ કરીને આ અ‍ૅપ તમારી જગ્યા જાણી શકે છે, પરંતુ આ માત્ર ત્યારે શક્ય છે જ્યારે આ અ‍ૅપ ફૉરગ્રાઉન્ડમાં ચાલુ હોય. ઍપ આ જગ્યાની સેવાઓનો ઉપયોગ કરી શકે તે માટે તમારા ટીવી પર આ સેવાઓ ઉપલબ્ધ અને ચાલુ હોવી આવશ્યક છે."</string>
+    <string name="permdesc_accessCoarseLocation" product="default" msgid="854896049371048754">"સેલ ટાવર અને વાઇ-ફાઇ નેટવર્ક જેવા નેટવર્ક સૉર્સનો ઉપયોગ કરીને આ અ‍ૅપ તમારી જગ્યા જાણી શકે છે, પરંતુ આ માત્ર ત્યારે શક્ય છે જ્યારે આ અ‍ૅપ ફૉરગ્રાઉન્ડમાં ચાલુ હોય. ઍપ આ જગ્યાની સેવાઓનો ઉપયોગ કરી શકે તે માટે તમારા ફોન પર આ સેવાઓ ઉપલબ્ધ અને ચાલુ હોવી આવશ્યક છે."</string>
     <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"બૅકગ્રાઉન્ડમાં સ્થાન ઍક્સેસ કરો"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"જો અંદાજિત અથવા ચોક્કસ સ્થાનના ઍક્સેસ ઉપરાંત આને પરવાનગી આપવામાં આવી હશે, તો ઍપ બૅકગ્રાઉન્ડમાં ચાલતી હોય ત્યારે સ્થાનને ઍક્સેસ કરી શકશે."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"તમારી ઑડિઓ સેટિંગ્સ બદલો"</string>
@@ -1826,6 +1834,8 @@
     <string name="stk_cc_ss_to_ussd" msgid="5614626512855868785">"SS વિનંતીને USSD વિનંતીમાં બદલવામાં આવી છે"</string>
     <string name="stk_cc_ss_to_ss" msgid="7716729801537709054">"નવી SS વિનંતીમાં બદલવામાં આવી છે"</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"કાર્યાલયની પ્રોફાઇલ"</string>
+    <!-- no translation found for notification_alerted_content_description (1296617716556420585) -->
+    <skip />
     <string name="expand_button_content_description_collapsed" msgid="3609784019345534652">"વિસ્તૃત કરો"</string>
     <string name="expand_button_content_description_expanded" msgid="8520652707158554895">"સંકુચિત કરો"</string>
     <string name="expand_action_accessibility" msgid="5307730695723718254">"વિસ્તરણ ટૉગલ કરો"</string>

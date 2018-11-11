@@ -137,6 +137,14 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Позивање преко Wi-Fi-ја | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> VoWifi"</string>
+    <!-- no translation found for wfcSpnFormat_wifi_calling (4990486735013125329) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_wifi (1892673884655959773) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_wifi_calling_wo_hyphen (1336669776254502831) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_vowifi (1765176406171272629) -->
+    <skip />
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Искључено"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Предност има Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Желим мобилне податке"</string>
@@ -213,7 +221,7 @@
     <string name="shutdown_confirm" product="watch" msgid="3490275567476369184">"Сат ће се угасити."</string>
     <string name="shutdown_confirm" product="default" msgid="649792175242821353">"Телефон ће се искључити."</string>
     <string name="shutdown_confirm_question" msgid="2906544768881136183">"Да ли желите да искључите телефон?"</string>
-    <string name="reboot_safemode_title" msgid="7054509914500140361">"Поново покрени систем у безбедном режиму"</string>
+    <string name="reboot_safemode_title" msgid="7054509914500140361">"Рестартуј систем у безбедном режиму"</string>
     <string name="reboot_safemode_confirm" msgid="55293944502784668">"Да ли желите да поново покренете систем у безбедном режиму? Ово ће онемогућити све инсталиране апликације независних произвођача. Оне ће бити враћене када поново покренете систем."</string>
     <string name="recent_tasks_title" msgid="3691764623638127888">"Недавно"</string>
     <string name="no_recent_tasks" msgid="8794906658732193473">"Нема недавних апликација."</string>
@@ -420,10 +428,10 @@
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Омогућава апликацији да приступа додатним командама даваоца услуга локације. То може да омогући апликацији да утиче на рад GPS-а или других извора локације."</string>
     <string name="permlab_accessFineLocation" msgid="6265109654698562427">"приступ прецизној локацији само у првом плану"</string>
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"Ова апликација може да одреди вашу тачну локацију само када ради у првом плану. Ове услуге локације морају да буду укључене и доступне на телефону да би апликација могла да их користи. То може да повећа потрошњу батерије."</string>
-    <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"приступ приближној локацији (утврђена преко мреже)"</string>
-    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Ова апликација може да приступи вашој локацији помоћу извора мреже, као што су мобилни предајници и Wi-Fi мреже. Ове услуге локације морају да буду укључене и доступне на таблету да би апликација могла да их користи."</string>
-    <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"Ова апликација може да приступи вашој локацији помоћу извора мреже, као што су мобилни предајници и Wi-Fi мреже. Ове услуге локације морају да буду укључене и доступне на ТВ-у да би апликација могла да их користи."</string>
-    <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"Ова апликација може да приступи вашој локацији помоћу извора мреже, као што су мобилни предајници и Wi-Fi мреже. Ове услуге локације морају да буду укључене и доступне на телефону да би апликација могла да их користи."</string>
+    <string name="permlab_accessCoarseLocation" msgid="3707180371693213469">"приступ приближној локацији (утврђеној преко мреже) само у првом плану"</string>
+    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="8594719010575779120">"Ова апликација може да приступи вашој локацији помоћу извора мреже, као што су мобилни предајници и Wi-Fi мреже, али само када апликација ради у првом плану. Ове услуге локације морају да буду укључене и доступне на таблету да би апликација могла да их користи"</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="3027871910200890806">"Ова апликација може да приступи вашој локацији помоћу извора мреже, као што су мобилни предајници и Wi-Fi мреже, али само када апликација ради у првом плану. Ове услуге локације морају да буду укључене и доступне на телевизору да би апликација могла да их користи."</string>
+    <string name="permdesc_accessCoarseLocation" product="default" msgid="854896049371048754">"Ова апликација може да приступи вашој локацији помоћу извора мреже, као што су мобилни предајници и Wi-Fi мреже, али само када апликација ради у првом плану. Ове услуге локације морају да буду укључене и доступне на телефону да би апликација могла да их користи."</string>
     <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"приступ локацији у позадини"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"Ако се поред приближног или прецизног приступа локација одобри и овај, апликација може да приступа локацији док је покренута у позадини."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"промена аудио подешавања"</string>
@@ -507,11 +515,11 @@
     <string name="permlab_disableKeyguard" msgid="3598496301486439258">"онемогућавање закључавања екрана"</string>
     <string name="permdesc_disableKeyguard" msgid="6034203065077122992">"Дозвољава апликацији да онемогући закључавање тастатуре и све повезане безбедносне мере са лозинкама. На пример, телефон онемогућава закључавање тастатуре при пријему долазног телефонског позива, а затим га поново омогућава по завршетку позива."</string>
     <string name="permlab_useBiometric" msgid="8837753668509919318">"користи биометријски хардвер"</string>
-    <string name="permdesc_useBiometric" msgid="8389855232721612926">"Дозвољава апликацији да користи биометријски хардвер за потврду аутентичности"</string>
+    <string name="permdesc_useBiometric" msgid="8389855232721612926">"Дозвољава апликацији да користи биометријски хардвер за потврду идентитета"</string>
     <string name="permlab_manageFingerprint" msgid="5640858826254575638">"управљај хардвером за отиске прстију"</string>
     <string name="permdesc_manageFingerprint" msgid="178208705828055464">"Дозвољава апликацији да активира методе за додавање и брисање шаблона отисака прстију који ће се користити."</string>
     <string name="permlab_useFingerprint" msgid="3150478619915124905">"користи хардвер за отиске прстију"</string>
-    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Дозвољава апликацији да користи хардвер за отиске прстију ради потврде аутентичности"</string>
+    <string name="permdesc_useFingerprint" msgid="9165097460730684114">"Дозвољава апликацији да користи хардвер за отиске прстију ради потврде идентитета"</string>
     <string name="permlab_audioRead" msgid="6617225220728465565">"читање музичке колекције"</string>
     <string name="permdesc_audioRead" msgid="5034032570243484805">"Дозвољава апликацији да чита музичку колекцију."</string>
     <string name="permlab_audioWrite" msgid="2661772059799779292">"измена музичке колекције"</string>
@@ -898,7 +906,7 @@
     <string name="factorytest_failed" msgid="5410270329114212041">"Фабричко тестирање није успело"</string>
     <string name="factorytest_not_system" msgid="4435201656767276723">"Радња FACTORY_TEST је подржана само за пакете инсталиране у директоријуму /system/app."</string>
     <string name="factorytest_no_action" msgid="872991874799998561">"Није пронађен ниједан пакет који обезбеђује радњу FACTORY_TEST."</string>
-    <string name="factorytest_reboot" msgid="6320168203050791643">"Поново покрени"</string>
+    <string name="factorytest_reboot" msgid="6320168203050791643">"Рестартуј"</string>
     <string name="js_dialog_title" msgid="1987483977834603872">"На страници на адреси „<xliff:g id="TITLE">%s</xliff:g>“ пише:"</string>
     <string name="js_dialog_title_default" msgid="6961903213729667573">"JavaScript"</string>
     <string name="js_dialog_before_unload_title" msgid="2619376555525116593">"Потврда навигације"</string>
@@ -1318,7 +1326,7 @@
     <string name="sim_done_button" msgid="827949989369963775">"Готово"</string>
     <string name="sim_added_title" msgid="3719670512889674693">"SIM картица је додата"</string>
     <string name="sim_added_message" msgid="6599945301141050216">"Рестартујте уређај да бисте могли да приступите мобилној мрежи."</string>
-    <string name="sim_restart_button" msgid="4722407842815232347">"Поново покрени"</string>
+    <string name="sim_restart_button" msgid="4722407842815232347">"Рестартуј"</string>
     <string name="install_carrier_app_notification_title" msgid="9056007111024059888">"Активирајте мобилну услугу"</string>
     <string name="install_carrier_app_notification_text" msgid="3346681446158696001">"Преузмите апликацију мобилног оператера да бисте активирали нови SIM"</string>
     <string name="install_carrier_app_notification_text_app_name" msgid="1196505084835248137">"Преузмите апликацију <xliff:g id="APP_NAME">%1$s</xliff:g> да бисте активирали нову SIM картицу"</string>
@@ -1858,6 +1866,8 @@
     <string name="stk_cc_ss_to_ussd" msgid="5614626512855868785">"SS захтев је промењен у USSD захтев"</string>
     <string name="stk_cc_ss_to_ss" msgid="7716729801537709054">"Промењено је у нови SS захтев"</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Профил за Work"</string>
+    <!-- no translation found for notification_alerted_content_description (1296617716556420585) -->
+    <skip />
     <string name="expand_button_content_description_collapsed" msgid="3609784019345534652">"Прошири"</string>
     <string name="expand_button_content_description_expanded" msgid="8520652707158554895">"Скупи"</string>
     <string name="expand_action_accessibility" msgid="5307730695723718254">"укључите/искључите проширење"</string>

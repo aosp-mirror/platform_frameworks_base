@@ -136,6 +136,14 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g>-Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Wi-Fi-oproepe | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g>-VoWifi"</string>
+    <!-- no translation found for wfcSpnFormat_wifi_calling (4990486735013125329) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_wifi (1892673884655959773) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_wifi_calling_wo_hyphen (1336669776254502831) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_vowifi (1765176406171272629) -->
+    <skip />
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Af"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Verkies Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Verkies mobiel"</string>
@@ -417,10 +425,10 @@
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Gee die program toegang tot ekstra liggingverskaffer-bevele. Dit kan die program dalk toelaat om in te meng met die werking van die GPS of ander liggingbronne."</string>
     <string name="permlab_accessFineLocation" msgid="6265109654698562427">"kry net op die voorgrond toegang tot presiese ligging"</string>
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"Hierdie program kan jou presiese ligging kry net wanneer dit op die voorgrond is. Hierdie liggingdienste moet aangeskakel wees en op jou foon beskikbaar wees sodat die program hulle kan gebruik. Dit kan veroorsaak dat meer batterykrag gebruik word."</string>
-    <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"verkry toegang tot benaderde ligging (netwerkgegrond)"</string>
-    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Hierdie program kan jou ligging kry op grond van jou netwerkhulpbronne soos selfoontorings en Wi-Fi-netwerke. Hierdie liggingdienste moet aangeskakel en op jou tablet beskikbaar wees sodat die program hulle kan gebruik."</string>
-    <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"Hierdie program kan jou ligging kry op grond van jou netwerkhulpbronne soos selfoontorings en Wi-Fi-netwerke. Hierdie liggingdienste moet aangeskakel en op jou TV beskikbaar wees sodat die program hulle kan gebruik."</string>
-    <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"Hierdie program kan jou ligging kry op grond van jou netwerkhulpbronne soos selfoontorings en Wi-Fi-netwerke. Hierdie liggingdienste moet aangeskakel en op jou foon beskikbaar wees sodat die program hulle kan gebruik."</string>
+    <string name="permlab_accessCoarseLocation" msgid="3707180371693213469">"kry benaderde ligging (netwerkgegrond) net op die voorgrond"</string>
+    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="8594719010575779120">"Hierdie program kan jou ligging kry op grond van netwerkhulpbronne soos selfoontorings en Wi-Fi-netwerke, maar net wanneer die program op die voorgrond is. Die program kan hierdie liggingdienste net gebruik as hulle aangeskakel is en op jou tablet beskikbaar is."</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="3027871910200890806">"Hierdie program kan jou ligging kry op grond van netwerkhulpbronne soos selfoontorings en Wi-Fi-netwerke, maar net wanneer die program op die voorgrond is. Die program kan hierdie liggingdienste net gebruik as hulle aangeskakel is en op jou TV beskikbaar is."</string>
+    <string name="permdesc_accessCoarseLocation" product="default" msgid="854896049371048754">"Hierdie program kan jou ligging kry op grond van netwerkhulpbronne soos selfoontorings en Wi-Fi-netwerke, maar net wanneer die program op die voorgrond is. Die program kan hierdie liggingdienste net gebruik as hulle aangeskakel is en op jou foon beskikbaar is."</string>
     <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"kry ligging op die agtergrond"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"As dit bo en behalwe toegang tot die benaderde of presiese ligging verleen word, kan die program die ligging kry terwyl dit op die agtergrond werk."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"verander jou klankinstellings"</string>
@@ -1825,6 +1833,8 @@
     <string name="stk_cc_ss_to_ussd" msgid="5614626512855868785">"SS-versoek is na USSD-versoek toe verander"</string>
     <string name="stk_cc_ss_to_ss" msgid="7716729801537709054">"Na nuwe SS-versoek toe verander"</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Werkprofiel"</string>
+    <!-- no translation found for notification_alerted_content_description (1296617716556420585) -->
+    <skip />
     <string name="expand_button_content_description_collapsed" msgid="3609784019345534652">"Vou uit"</string>
     <string name="expand_button_content_description_expanded" msgid="8520652707158554895">"Vou in"</string>
     <string name="expand_action_accessibility" msgid="5307730695723718254">"wissel uitvou-aksie"</string>

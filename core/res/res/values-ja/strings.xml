@@ -136,6 +136,14 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Wi-Fi 通話 | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> VoWifi"</string>
+    <!-- no translation found for wfcSpnFormat_wifi_calling (4990486735013125329) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_wifi (1892673884655959773) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_wifi_calling_wo_hyphen (1336669776254502831) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_vowifi (1765176406171272629) -->
+    <skip />
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"OFF"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi優先"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"モバイル優先"</string>
@@ -417,10 +425,10 @@
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"位置情報提供元の追加のコマンドにアクセスすることをアプリに許可します。許可すると、アプリがGPSなどの位置情報源の動作を妨害する恐れがあります。"</string>
     <string name="permlab_accessFineLocation" msgid="6265109654698562427">"フォアグラウンドでのみ正確な位置情報にアクセス"</string>
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"このアプリは、フォアグラウンド状態でのみユーザーの正確な位置情報を取得できます。この位置情報サービスは ON の状態にして、スマートフォンでアプリがサービスを利用できるようにする必要があります。これにより、電池の消費量が増える可能性があります。"</string>
-    <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"おおよその位置情報（ネットワーク基地局）へのアクセス"</string>
-    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"このアプリは、ネットワーク位置情報源（携帯基地局や Wi-Fi ネットワークなど）に基づいて、ユーザーの位置情報を取得します。これらの位置情報サービスは ON の状態にして、タブレットでアプリがサービスを利用できるようにする必要があります。"</string>
-    <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"このアプリは、ネットワーク位置情報源（携帯基地局や Wi-Fi ネットワークなど）に基づいて、ユーザーの位置情報を取得します。これらの位置情報サービスは ON の状態にして、テレビでアプリがサービスを利用できるようにする必要があります。"</string>
-    <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"このアプリは、ネットワーク位置情報源（携帯基地局や Wi-Fi ネットワークなど）に基づいて、ユーザーの位置情報を取得します。これらの位置情報サービスは ON の状態にして、スマートフォンでアプリがサービスを利用できるようにする必要があります。"</string>
+    <string name="permlab_accessCoarseLocation" msgid="3707180371693213469">"フォアグラウンドでのみ（ネットワークに基づく）おおよその位置情報にアクセス"</string>
+    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="8594719010575779120">"このアプリは、フォアグラウンドでのみ、ネットワーク位置情報源（携帯基地局や Wi-Fi ネットワークなど）に基づいて、ユーザーの位置情報を取得できます。これらの位置情報サービスは ON の状態にして、タブレットでアプリがサービスを利用できるようにする必要があります。"</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="3027871910200890806">"このアプリは、フォアグラウンドでのみ、ネットワーク位置情報源（携帯基地局や Wi-Fi ネットワークなど）に基づいて、ユーザーの位置情報を取得できます。これらの位置情報サービスは ON の状態にして、テレビでアプリがサービスを利用できるようにする必要があります。"</string>
+    <string name="permdesc_accessCoarseLocation" product="default" msgid="854896049371048754">"このアプリは、フォアグラウンドでのみ、ネットワーク位置情報源（携帯基地局や Wi-Fi ネットワークなど）に基づいて、ユーザーの位置情報を取得できます。これらの位置情報サービスは ON の状態にして、スマートフォンでアプリがサービスを利用できるようにする必要があります。"</string>
     <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"バックグラウンドでの位置情報へのアクセス"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"これが、おおよその位置情報または正確な位置情報へのアクセスの追加権限の場合、アプリはバックグラウンドでの実行中も位置情報にアクセスできます。"</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"音声設定の変更"</string>
@@ -640,8 +648,8 @@
     <string name="permdesc_bindCarrierMessagingService" msgid="2762882888502113944">"携帯通信会社のSMSサービスのトップレベルインターフェースにバインドすることを所有者に許可します。通常のアプリでは不要です。"</string>
     <string name="permlab_bindCarrierServices" msgid="3233108656245526783">"携帯通信会社のサービスへのバインド"</string>
     <string name="permdesc_bindCarrierServices" msgid="1391552602551084192">"携帯通信会社のサービスにバインドすることを所有者に許可します。通常のアプリでは不要です。"</string>
-    <string name="permlab_access_notification_policy" msgid="4247510821662059671">"マナーモードへのアクセス"</string>
-    <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"マナーモード設定の読み取りと書き込みをアプリに許可します。"</string>
+    <string name="permlab_access_notification_policy" msgid="4247510821662059671">"サイレント モードへのアクセス"</string>
+    <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"サイレント モード設定の読み取りと書き込みをアプリに許可します。"</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"パスワードルールの設定"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"画面ロックのパスワードとPINの長さと使用できる文字を制御します。"</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"画面ロック解除試行の監視"</string>
@@ -1804,10 +1812,10 @@
     <string name="zen_mode_until" msgid="7336308492289875088">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>まで"</string>
     <string name="zen_mode_alarm" msgid="9128205721301330797">"<xliff:g id="FORMATTEDTIME">%1$s</xliff:g>（次のアラーム）まで"</string>
     <string name="zen_mode_forever" msgid="931849471004038757">"自分が OFF にするまで"</string>
-    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"マナーモードを OFF にするまで"</string>
+    <string name="zen_mode_forever_dnd" msgid="3792132696572189081">"サイレント モードを OFF にするまで"</string>
     <string name="zen_mode_rule_name_combination" msgid="191109939968076477">"<xliff:g id="FIRST">%1$s</xliff:g>/<xliff:g id="REST">%2$s</xliff:g>"</string>
     <string name="toolbar_collapse_description" msgid="2821479483960330739">"折りたたむ"</string>
-    <string name="zen_mode_feature_name" msgid="5254089399895895004">"マナーモード"</string>
+    <string name="zen_mode_feature_name" msgid="5254089399895895004">"サイレント モード"</string>
     <string name="zen_mode_downtime_feature_name" msgid="2626974636779860146">"ダウンタイム"</string>
     <string name="zen_mode_default_weeknights_name" msgid="3081318299464998143">"平日の夜"</string>
     <string name="zen_mode_default_weekends_name" msgid="2786495801019345244">"週末"</string>
@@ -1825,6 +1833,8 @@
     <string name="stk_cc_ss_to_ussd" msgid="5614626512855868785">"SS リクエストは USSD リクエストに変更されました"</string>
     <string name="stk_cc_ss_to_ss" msgid="7716729801537709054">"新しい SS リクエストに変更されました"</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"仕事用プロファイル"</string>
+    <!-- no translation found for notification_alerted_content_description (1296617716556420585) -->
+    <skip />
     <string name="expand_button_content_description_collapsed" msgid="3609784019345534652">"展開"</string>
     <string name="expand_button_content_description_expanded" msgid="8520652707158554895">"折りたたむ"</string>
     <string name="expand_action_accessibility" msgid="5307730695723718254">"展開の切り替え"</string>
@@ -1948,10 +1958,10 @@
     <string name="volume_dialog_ringer_guidance_vibrate" msgid="8902050240801159042">"着信や通知をバイブレーションで知らせます"</string>
     <string name="volume_dialog_ringer_guidance_silent" msgid="2128975224280276122">"着信音と通知音をミュートします"</string>
     <string name="notification_channel_system_changes" msgid="5072715579030948646">"システムの変更"</string>
-    <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"マナーモード"</string>
-    <string name="zen_upgrade_notification_visd_title" msgid="3288313883409759733">"新機能: マナーモードでは通知が非表示になります"</string>
+    <string name="notification_channel_do_not_disturb" msgid="6766940333105743037">"サイレント モード"</string>
+    <string name="zen_upgrade_notification_visd_title" msgid="3288313883409759733">"新機能: サイレント モードでは通知が非表示になります"</string>
     <string name="zen_upgrade_notification_visd_content" msgid="5533674060311631165">"タップすると、詳細を確認して設定を変更できます。"</string>
-    <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"マナーモードが変わりました"</string>
+    <string name="zen_upgrade_notification_title" msgid="3799603322910377294">"サイレント モードが変わりました"</string>
     <string name="zen_upgrade_notification_content" msgid="1794994264692424562">"タップしてブロック対象をご確認ください。"</string>
     <string name="notification_app_name_system" msgid="4205032194610042794">"システム"</string>
     <string name="notification_app_name_settings" msgid="7751445616365753381">"設定"</string>

@@ -136,6 +136,14 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"Wi‑Fi (<xliff:g id="SPN">%s</xliff:g>)"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Trucades per Wi‑Fi | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"VoWifi (<xliff:g id="SPN">%s</xliff:g>)"</string>
+    <!-- no translation found for wfcSpnFormat_wifi_calling (4990486735013125329) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_wifi (1892673884655959773) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_wifi_calling_wo_hyphen (1336669776254502831) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_vowifi (1765176406171272629) -->
+    <skip />
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Desactivat"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Preferència per la Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Preferència per dades mòbils"</string>
@@ -417,10 +425,10 @@
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Permet que l\'aplicació accedeixi a ordres addicionals del proveïdor d\'ubicacions; per tant, és possible que l\'aplicació pugui interferir en el funcionament del GPS o d\'altres fonts d\'ubicacions."</string>
     <string name="permlab_accessFineLocation" msgid="6265109654698562427">"accedeix a la ubicació exacta només en primer pla"</string>
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"Aquesta aplicació pot obtenir la teva ubicació exacta només quan està en primer pla. Aquests serveis d\'ubicació han d\'estar activats i disponibles al telèfon perquè l\'aplicació els pugui utilitzar, i això pot fer que el consum de bateria augmenti."</string>
-    <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"accedir a la ubicació aproximada (basada en la xarxa)"</string>
-    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Aquesta aplicació pot obtenir la teva ubicació a partir de fonts de xarxa, com ara torres de telefonia mòbil i xarxes Wi-Fi. Aquests serveis d\'ubicació han d\'estar activats i disponibles a la tauleta perquè l\'aplicació els pugui utilitzar."</string>
-    <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"Aquesta aplicació pot obtenir la teva ubicació a partir de fonts de xarxa, com ara torres de telefonia mòbil i xarxes Wi-Fi. Aquests serveis d\'ubicació han d\'estar activats i disponibles al televisor perquè l\'aplicació els pugui utilitzar."</string>
-    <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"Aquesta aplicació pot obtenir la teva ubicació a partir de fonts de xarxa, com ara torres de telefonia mòbil i xarxes Wi-Fi. Aquests serveis d\'ubicació han d\'estar activats i disponibles al telèfon perquè l\'aplicació els pugui utilitzar."</string>
+    <string name="permlab_accessCoarseLocation" msgid="3707180371693213469">"accedeix a la ubicació aproximada (basada en xarxa) només en primer pla"</string>
+    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="8594719010575779120">"Aquesta aplicació pot obtenir la teva ubicació a partir de fonts de xarxa, com ara torres de telefonia mòbil i xarxes Wi‑Fi, però només quan està en primer pla. Aquests serveis d\'ubicació han d\'estar activats i disponibles a la tauleta perquè l\'aplicació els pugui utilitzar."</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="3027871910200890806">"Aquesta aplicació pot obtenir la teva ubicació a partir de fonts de xarxa, com ara torres de telefonia mòbil i xarxes Wi‑Fi, però només quan està en primer pla. Aquests serveis d\'ubicació han d\'estar activats i disponibles al televisor perquè l\'aplicació els pugui utilitzar."</string>
+    <string name="permdesc_accessCoarseLocation" product="default" msgid="854896049371048754">"Aquesta aplicació pot obtenir la teva ubicació a partir de fonts de xarxa, com ara torres de telefonia mòbil i xarxes Wi‑Fi, però només quan està en primer pla. Aquests serveis d\'ubicació han d\'estar activats i disponibles al telèfon perquè l\'aplicació els pugui utilitzar."</string>
     <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"accedir a la ubicació en segon pla"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"Si es concedeix aquest permís, a més de l\'accés a la ubicació aproximada o exacta, l\'aplicació pot accedir a la ubicació mentre s\'executa en segon pla."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"canviar la configuració d\'àudio"</string>
@@ -1825,6 +1833,8 @@
     <string name="stk_cc_ss_to_ussd" msgid="5614626512855868785">"La sol·licitud SS s\'ha canviat per una sol·licitud USSD"</string>
     <string name="stk_cc_ss_to_ss" msgid="7716729801537709054">"S\'ha canviat a una nova sol·licitud SS"</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Perfil professional"</string>
+    <!-- no translation found for notification_alerted_content_description (1296617716556420585) -->
+    <skip />
     <string name="expand_button_content_description_collapsed" msgid="3609784019345534652">"Desplega"</string>
     <string name="expand_button_content_description_expanded" msgid="8520652707158554895">"Replega"</string>
     <string name="expand_action_accessibility" msgid="5307730695723718254">"desplega o replega"</string>

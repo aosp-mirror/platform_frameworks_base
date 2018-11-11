@@ -136,6 +136,14 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Wi-Fi chaqiruv | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> VoWi-Fi"</string>
+    <!-- no translation found for wfcSpnFormat_wifi_calling (4990486735013125329) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_wifi (1892673884655959773) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_wifi_calling_wo_hyphen (1336669776254502831) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_vowifi (1765176406171272629) -->
+    <skip />
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"O‘chiq"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi afzalligi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Mobil internet afzalligi"</string>
@@ -417,10 +425,10 @@
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Ilovaga qo‘shimcha joylashuv xizmati buyruqlaridan foydalanishga ruxsat beradi. Uning yordamida ilova GPS yoki boshqa joylashuv ma’lumoti manbalarining ishlashiga xalaqit qilishi mumkin."</string>
     <string name="permlab_accessFineLocation" msgid="6265109654698562427">"aniq joylashuv axborotini olishga faqat old fonda ruxsat"</string>
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"Bu ilova faqat fon rejimida aniq joylashuv axborotingizdan foydalanishi mumkin. Ilova ushbu joylashuv xizmatlaridan foydalana olishi uchun ular telefoningizda yoniq turishi va ishlashi kerak. Bunda batareya sarfi oshishi mumkin."</string>
-    <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"taxminiy joylashuv (tarmoq asosida) ma’lumotlaridan foydalanishga ruxsat"</string>
-    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Bu ilova Wi-Fi va uyali tarmoq antennalari kabi tarmoq manbalari asosida joylashuvingiz axborotini olishi mumkin. Ilova ushbu joylashuv xizmatlaridan foydalana olishi uchun ular planshetda yoniq bo‘lishi va ishlashi kerak."</string>
-    <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"Bu ilova Wi-Fi va uyali tarmoq antennalari kabi tarmoq manbalari asosida joylashuvingiz axborotini olishi mumkin. Ilova ushbu joylashuv xizmatlaridan foydalana olishi uchun ular televizorda yoniq bo‘lishi va ishlashi kerak."</string>
-    <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"Bu ilova Wi-Fi va uyali tarmoq antennalari kabi tarmoq manbalari asosida joylashuvingiz axborotini olishi mumkin. Ilova ushbu joylashuv xizmatlaridan foydalana olishi uchun ular telefoningizda yoniq bo‘lishi va ishlashi kerak."</string>
+    <string name="permlab_accessCoarseLocation" msgid="3707180371693213469">"faqat faol rejimda taxminiy joylashuv axborotiga (tarmoq asosida) ruxsat"</string>
+    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="8594719010575779120">"Bu ilova faqat faol rejimda ekanida Wi-Fi va uyali tarmoq antennalari kabi tarmoq manbalari asosida joylashuvingiz axborotini olishi mumkin. Ilova ushbu joylashuv xizmatlaridan foydalana olishi uchun ular planshetingizda yoniq bo‘lishi va ishlashi kerak."</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="3027871910200890806">"Bu ilova faqat faol rejimda ekanida Wi-Fi va uyali tarmoq antennalari kabi tarmoq manbalari asosida joylashuvingiz axborotini olishi mumkin. Ilova ushbu joylashuv xizmatlaridan foydalana olishi uchun ular televizoringizda yoniq bo‘lishi va ishlashi kerak."</string>
+    <string name="permdesc_accessCoarseLocation" product="default" msgid="854896049371048754">"Bu ilova faqat faol rejimda ekanida Wi-Fi va uyali tarmoq antennalari kabi tarmoq manbalari asosida joylashuvingiz axborotini olishi mumkin. Ilova ushbu joylashuv xizmatlaridan foydalana olishi uchun ular telefoningizda yoniq bo‘lishi va ishlashi kerak."</string>
     <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"fonda joylashuv axborotidan foydalanish"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"Agar taxminiy yoki aniq joylashuv axborotiga qo‘shimcha tarzda ruxsat berilgan bo‘lsa, ilova ishlayotganda joylashuv axborotidan fonda foydala oladi."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"audio sozlamalaringizni o‘zgartirish"</string>
@@ -1826,6 +1834,8 @@
     <string name="stk_cc_ss_to_ussd" msgid="5614626512855868785">"SS talabi USSD talabiga almashtirildi"</string>
     <string name="stk_cc_ss_to_ss" msgid="7716729801537709054">"Yangi SS talabiga almashtirildi"</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Ishchi profil"</string>
+    <!-- no translation found for notification_alerted_content_description (1296617716556420585) -->
+    <skip />
     <string name="expand_button_content_description_collapsed" msgid="3609784019345534652">"Yoyish"</string>
     <string name="expand_button_content_description_expanded" msgid="8520652707158554895">"Yig‘ish"</string>
     <string name="expand_action_accessibility" msgid="5307730695723718254">"ochish yoki yopish"</string>
