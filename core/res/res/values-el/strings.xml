@@ -136,6 +136,14 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Κλήση Wi-Fi | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> VoWifi"</string>
+    <!-- no translation found for wfcSpnFormat_wifi_calling (4990486735013125329) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_wifi (1892673884655959773) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_wifi_calling_wo_hyphen (1336669776254502831) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_vowifi (1765176406171272629) -->
+    <skip />
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Ανενεργό"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Προτίμηση Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Προτίμηση δικτύου κινητής τηλεφωνίας"</string>
@@ -417,10 +425,10 @@
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Επιτρέπει στην εφαρμογή την πρόσβαση σε επιπλέον εντολές παρόχου τοποθεσίας. Αυτό μπορεί να δώσει τη δυνατότητα στην εφαρμογή να παρέμβει στη λειτουργία του GPS ή άλλων πηγών τοποθεσίας."</string>
     <string name="permlab_accessFineLocation" msgid="6265109654698562427">"πρόσβαση στην ακριβή τοποθεσία μόνο στο προσκήνιο"</string>
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"Αυτή η εφαρμογή μπορεί να ανιχνεύσει την ακριβή τοποθεσία σας όταν βρίσκεται στο προσκήνιο. Αυτές οι υπηρεσίες τοποθεσίας θα πρέπει να είναι ενεργοποιημένες και διαθέσιμες στο τηλέφωνό σας, προκειμένου να μπορεί να τις χρησιμοποιήσει η εφαρμογή. Με την ενεργοποίηση αυτής της ρύθμισης, μπορεί να αυξηθεί η κατανάλωση μπαταρίας."</string>
-    <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"έχει πρόσβαση στην τοποθεσία κατά προσέγγιση (με βάση το δίκτυο)"</string>
-    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Αυτή η εφαρμογή μπορεί να ανιχνεύσει την τοποθεσία σας βάσει πηγών δικτύου, όπως κεραίες κινητής τηλεφωνίας και δίκτυα Wi-Fi. Αυτές οι υπηρεσίες τοποθεσίας θα πρέπει να είναι ενεργοποιημένες και διαθέσιμες στο tablet που χρησιμοποιείτε, προκειμένου να μπορεί να τις χρησιμοποιήσει η εφαρμογή."</string>
-    <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"Αυτή η εφαρμογή μπορεί να ανιχνεύσει την τοποθεσία σας βάσει πηγών δικτύου, όπως κεραίες κινητής τηλεφωνίας και δίκτυα Wi-Fi. Αυτές οι υπηρεσίες τοποθεσίας θα πρέπει να είναι ενεργοποιημένες και διαθέσιμες στην τηλεόρασή σας, προκειμένου να μπορεί να τις χρησιμοποιήσει η εφαρμογή."</string>
-    <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"Αυτή η εφαρμογή μπορεί να ανιχνεύσει την τοποθεσία σας βάσει πηγών δικτύου, όπως κεραίες κινητής τηλεφωνίας και δίκτυα Wi-Fi. Αυτές οι υπηρεσίες τοποθεσίας θα πρέπει να είναι ενεργοποιημένες και διαθέσιμες στο τηλέφωνό σας, προκειμένου να μπορεί να τις χρησιμοποιήσει η εφαρμογή."</string>
+    <string name="permlab_accessCoarseLocation" msgid="3707180371693213469">"πρόσβαση στην κατά προσέγγιση τοποθεσία (βάσει δικτύου) μόνο στο προσκήνιο"</string>
+    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="8594719010575779120">"Αυτή η εφαρμογή μπορεί να ανιχνεύσει την τοποθεσία σας βάσει πηγών δικτύου, όπως κεραίες κινητής τηλεφωνίας και δίκτυα Wi-Fi, αλλά μόνο όταν η εφαρμογή βρίσκεται στο προσκήνιο. Αυτές οι υπηρεσίες τοποθεσίας θα πρέπει να είναι ενεργοποιημένες και διαθέσιμες στο tablet που χρησιμοποιείτε, προκειμένου να μπορεί να τις χρησιμοποιήσει η εφαρμογή."</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="3027871910200890806">"Αυτή η εφαρμογή μπορεί να ανιχνεύσει την τοποθεσία σας βάσει πηγών δικτύου, όπως κεραίες κινητής τηλεφωνίας και δίκτυα Wi-Fi, αλλά μόνο όταν η εφαρμογή βρίσκεται στο προσκήνιο. Αυτές οι υπηρεσίες τοποθεσίας θα πρέπει να είναι ενεργοποιημένες και διαθέσιμες στην τηλεόρασή σας, προκειμένου να μπορεί να τις χρησιμοποιήσει η εφαρμογή."</string>
+    <string name="permdesc_accessCoarseLocation" product="default" msgid="854896049371048754">"Αυτή η εφαρμογή μπορεί να ανιχνεύσει την τοποθεσία σας βάσει πηγών δικτύου, όπως κεραίες κινητής τηλεφωνίας και δίκτυα Wi-Fi, αλλά μόνο όταν η εφαρμογή βρίσκεται στο προσκήνιο. Αυτές οι υπηρεσίες τοποθεσίας θα πρέπει να είναι ενεργοποιημένες και διαθέσιμες στο τηλέφωνό σας, προκειμένου να μπορεί να τις χρησιμοποιήσει η εφαρμογή."</string>
     <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"πρόσβαση στην τοποθεσία στο παρασκήνιο"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"Εάν εκχωρηθεί επιπρόσθετα σε μια καταπροσέγγιση ή ακριβή πρόσβαση τοποθεσίας, η εφαρμογή μπορεί να έχει πρόσβαση στην τοποθεσία κατά την εκτέλεση στο παρασκήνιο."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"αλλάζει τις ρυθμίσεις ήχου"</string>
@@ -1825,6 +1833,8 @@
     <string name="stk_cc_ss_to_ussd" msgid="5614626512855868785">"Το αίτημα SS τροποποιήθηκε σε αίτημα USSD"</string>
     <string name="stk_cc_ss_to_ss" msgid="7716729801537709054">"Τροποποιήθηκε σε νέο αίτημα SS"</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Προφίλ εργασίας"</string>
+    <!-- no translation found for notification_alerted_content_description (1296617716556420585) -->
+    <skip />
     <string name="expand_button_content_description_collapsed" msgid="3609784019345534652">"Ανάπτυξη"</string>
     <string name="expand_button_content_description_expanded" msgid="8520652707158554895">"Σύμπτυξη"</string>
     <string name="expand_action_accessibility" msgid="5307730695723718254">"εναλλαγή επέκτασης"</string>

@@ -136,6 +136,14 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"WiFi Calling | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> VoWifi"</string>
+    <!-- no translation found for wfcSpnFormat_wifi_calling (4990486735013125329) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_wifi (1892673884655959773) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_wifi_calling_wo_hyphen (1336669776254502831) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_vowifi (1765176406171272629) -->
+    <skip />
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"ປິດ"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"ເລືອກໃຊ້ Wi​-Fi ກ່ອນ"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"ຕ້ອງການໃຊ້ມືຖື"</string>
@@ -417,10 +425,10 @@
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"ອະນຸຍາດ​ໃຫ້​ແອັບຯ​ເຂົ້າເຖິງ​ຄຳສັ່ງ​ເພີ່ມເຕີມ​ຂອງ​ຜູ່​ໃຫ້​ບໍລິການ​ສະຖານທີ່. ນີ້​ອາດ​ຈະ​ເປັນ​ການ​ເຮັດ​ໃຫ້​ແອັບຯ ລົບກວນ​ການ​ເຮັດ​ວຽກ​ຂອງ GPS ຫຼື​ແຫລ່ງ​ຂໍ້ມູນ​ສະຖານທີ່​ອື່ນໆ​ໄດ້."</string>
     <string name="permlab_accessFineLocation" msgid="6265109654698562427">"ເຂົ້າເຖິງສະຖານທີ່ແນ່ນອນໃນພື້ນໜ້າເທົ່ານັ້ນ"</string>
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"ແອັບນີ້ສາມາດຮັບເອົາສະຖານທີ່ແນ່ນອນຂອງທ່ານໄດ້ທຸກເວລາທີ່ມັນຢູ່ໃນພື້ນໜ້າ. ການບໍລິການສະຖານທີ່ເຫຼົ່ານີ້ຕ້ອງເປີດຢູ່ ແລະ ສາມາດໃຊ້ໄດ້ໃນໂທລະສັບຂອງທ່ານເພື່ອໃຫ້ແອັບສາມາດໃຊ້ພວກມັນໄດ້. ນີ້ອາດຈະເຮັດໃຫ້ການໃຊ້ແບັດເຕີຣີເພີ່ມຂຶ້ນ."</string>
-    <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"ເຂົ້າ​ຫາທີ່ຕັ້ງໂດຍປະມານ (ອີງໃສ່ເຄືອຂ່າຍ)"</string>
-    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"This app can get your location based on network sources such as cell towers and Wi-Fi networks. These location services must be turned on and available on your tablet for the app to be able to use them."</string>
-    <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"This app can get your location based on network sources such as cell towers and Wi-Fi networks. These location services must be turned on and available on your TV for the app to be able to use them."</string>
-    <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"This app can get your location based on network sources such as cell towers and Wi-Fi networks. These location services must be turned on and available on your phone for the app to be able to use them."</string>
+    <string name="permlab_accessCoarseLocation" msgid="3707180371693213469">"ເຂົ້າເຖິງສະຖານທີ່ໂດຍປະມານ (ອ້າງອີງຈາກເຄືອຂ່າຍ) ສະເພາະໃນພື້ນໜ້າ"</string>
+    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="8594719010575779120">"ແອັບນີ້ສາມາດເບິ່ງສະຖານທີ່ຂອງທ່ານໂດຍອ້າງອີງຈາກແຫລ່ງທີ່ມເຄືອຂ່າຍ ເຊັ່ນ: ເສົາສັນຍານໂທລະສັບ ແລະ ເຄືອຂ່າຍ Wi-Fi ໄດ້, ແຕ່ສະເພາະເມື່ອແອັບເຮັດວຽກໂດຍປາກົດຢູ່ໜ້າເທົ່ານັ້ນ. ບໍລິການສະຖານທີ່ເຫຼົ່ານີ້ຈະຕ້ອງຖືກເປີດໃຊ້ ແລະ ສາມາດໃຊ້ໄດ້ຢູ່ແທັບເລັດຂອງທ່ານ, ແອັບຈຶ່ງຈະສາມາດໃຊ້ພວກມັນໄດ້."</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="3027871910200890806">"ແອັບນີ້ສາມາດເບິ່ງສະຖານທີ່ຂອງທ່ານໂດຍອ້າງອີງຈາກແຫລ່ງທີ່ມເຄືອຂ່າຍ ເຊັ່ນ: ເສົາສັນຍານໂທລະສັບ ແລະ ເຄືອຂ່າຍ Wi-Fi ໄດ້, ແຕ່ສະເພາະເມື່ອແອັບເຮັດວຽກໂດຍປາກົດຢູ່ໜ້າເທົ່ານັ້ນ. ບໍລິການສະຖານທີ່ເຫຼົ່ານີ້ຈະຕ້ອງຖືກເປີດໃຊ້ ແລະ ສາມາດໃຊ້ໄດ້ຢູ່ໂທລະທັດຂອງທ່ານ, ແອັບຈຶ່ງຈະສາມາດໃຊ້ພວກມັນໄດ້."</string>
+    <string name="permdesc_accessCoarseLocation" product="default" msgid="854896049371048754">"ແອັບນີ້ສາມາດເບິ່ງສະຖານທີ່ຂອງທ່ານໂດຍອ້າງອີງຈາກແຫລ່ງທີ່ມເຄືອຂ່າຍ ເຊັ່ນ: ເສົາສັນຍານໂທລະສັບ ແລະ ເຄືອຂ່າຍ Wi-Fi ໄດ້, ແຕ່ສະເພາະເມື່ອແອັບເຮັດວຽກໂດຍປາກົດຢູ່ໜ້າເທົ່ານັ້ນ. ບໍລິການສະຖານທີ່ເຫຼົ່ານີ້ຈະຕ້ອງຖືກເປີດໃຊ້ ແລະ ສາມາດໃຊ້ໄດ້ຢູ່ໂທລະສັບຂອງທ່ານ, ແອັບຈຶ່ງຈະສາມາດໃຊ້ພວກມັນໄດ້."</string>
     <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"ເຂົ້າເຖິງສະຖານທີ່ໃນພື້ນຫຼັງ"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"ຖ້າອະນຸຍາດສິ່ງນີ້ນອກຈາກການເຂົ້າເຖິງສະຖານທີ່ໂດຍປະມານ ຫຼື ທີ່ແນ່ນອນ ແອັບສາມາດເຂົ້າເຖິງສະຖານທີ່ໄດ້ໃນຂະນະທີ່ເປີດໃຊ້ໃນພື້ນຫຼັງ."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"ປ່ຽນການຕັ້ງຄ່າສຽງຂອງທ່ານ"</string>
@@ -1825,6 +1833,8 @@
     <string name="stk_cc_ss_to_ussd" msgid="5614626512855868785">"ປ່ຽນຄຳຂໍ SS ເປັນຄຳຂໍ USSD ແລ້ວ"</string>
     <string name="stk_cc_ss_to_ss" msgid="7716729801537709054">"ປ່ຽນຄຳຂໍ SS ໃໝ່ແລ້ວ"</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"​ໂປຣ​ໄຟລ໌​ບ່ອນ​ເຮັດ​ວຽກ"</string>
+    <!-- no translation found for notification_alerted_content_description (1296617716556420585) -->
+    <skip />
     <string name="expand_button_content_description_collapsed" msgid="3609784019345534652">"ຂະຫຍາຍ"</string>
     <string name="expand_button_content_description_expanded" msgid="8520652707158554895">"ຫຍໍ້ເຂົ້າ"</string>
     <string name="expand_action_accessibility" msgid="5307730695723718254">"ປິດ/ເປີດ ການຂະຫຍາຍ"</string>

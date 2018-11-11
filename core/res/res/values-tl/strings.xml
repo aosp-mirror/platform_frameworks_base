@@ -136,6 +136,14 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"Wi-Fi ng <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Pagtawag Gamit ang Wi-Fi | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"VoWifi ng <xliff:g id="SPN">%s</xliff:g>"</string>
+    <!-- no translation found for wfcSpnFormat_wifi_calling (4990486735013125329) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_wifi (1892673884655959773) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_wifi_calling_wo_hyphen (1336669776254502831) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_vowifi (1765176406171272629) -->
+    <skip />
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Naka-off"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Mas gusto ang Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Mas gusto ang mobile"</string>
@@ -417,10 +425,10 @@
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Nagbibigay-daan sa app na mag-access ng mga karagdagang command ng provider ng lokasyon. Maaari nitong bigyang-daan ang app na gambalain ang pagpapatakbo ng GPS o ng iba pang mga pinagmulan ng lokasyon."</string>
     <string name="permlab_accessFineLocation" msgid="6265109654698562427">"i-access lang ang tumpak na lokasyon sa foreground"</string>
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"Makukuha lang ng app na ito ang iyong eksaktong lokasyon kapag nasa foreground ito. Ang mga serbisyo ng lokasyon na ito ay dapat naka-on at available sa iyong telepono para magamit ng app ang mga ito. Maaaring lumakas ang pagkonsumo ng baterya dahil dito."</string>
-    <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"i-access ang tinatantyang lokasyon (batay sa network)"</string>
-    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Makukuha ng app na ito ang iyong lokasyon batay sa mga pinagmulan ng network gaya ng mga cell tower at Wi-Fi network. Ang mga serbisyo ng lokasyon na ito ay dapat naka-on at available sa iyong tablet para sa app upang magamit ang mga ito."</string>
-    <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"Makukuha ng app na ito ang iyong lokasyon batay sa mga pinagmulan ng network gaya ng mga cell tower at Wi-Fi network. Ang mga serbisyo ng lokasyon na ito ay dapat naka-on at available sa iyong TV para sa app upang magamit ang mga ito."</string>
-    <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"Makukuha ng app na ito ang iyong lokasyon batay sa mga pinagmulan ng network gaya ng mga cell tower at Wi-Fi network. Ang mga serbisyo ng lokasyon na ito ay dapat naka-on at available sa iyong telepono para sa app upang magamit ang mga ito."</string>
+    <string name="permlab_accessCoarseLocation" msgid="3707180371693213469">"i-access lang ang tinatantiyang lokasyon (batay sa network) sa foreground"</string>
+    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="8594719010575779120">"Makukuha ng app na ito ang iyong lokasyon batay sa mga source ng network gaya ng mga cell tower at Wi-Fi network ngunit magagawa lang ito kapag nasa foreground ang app. Ang mga serbisyo ng lokasyon na ito ay dapat naka-on at available sa iyong tablet para magamit ng app ang mga ito."</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="3027871910200890806">"Makukuha ng app na ito ang iyong lokasyon batay sa mga source ng network gaya ng mga cell tower at Wi-Fi network, ngunit magagawa lang ito kapag nasa foreground ang app. Ang mga serbisyo ng lokasyon na ito ay dapat naka-on at available sa iyong TV para magamit ng app ang mga ito."</string>
+    <string name="permdesc_accessCoarseLocation" product="default" msgid="854896049371048754">"Makukuha ng app na ito ang iyong lokasyon batay sa mga source ng network gaya ng mga cell tower at Wi-Fi network, ngunit magagawa lang ito kapag nasa foreground ang app. Ang mga serbisyo ng lokasyon na ito ay dapat naka-on at available sa iyong telepono para magamit ng app ang mga ito."</string>
     <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"i-access ang lokasyon sa background"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"Kung papahintulutan ito bukod pa sa pag-access sa tinataya o tumpak na lokasyon, maaaring i-access ng app ang lokasyon habang tumatakbo sa background."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"baguhin ang mga setting ng iyong audio"</string>
@@ -528,7 +536,7 @@
     <string name="fingerprint_acquired_partial" msgid="735082772341716043">"Hindi buo ang natukoy na fingerprint. Pakisubukang muli."</string>
     <string name="fingerprint_acquired_insufficient" msgid="4596546021310923214">"Hindi maproseso ang fingerprint. Pakisubukang muli."</string>
     <string name="fingerprint_acquired_imager_dirty" msgid="1087209702421076105">"Marumi ang sensor ng fingerprint. Pakilinis at subukang muli."</string>
-    <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Masyadong mabilis ang paggalaw ng daliri. Pakisubukang muli."</string>
+    <string name="fingerprint_acquired_too_fast" msgid="6470642383109155969">"Napakabilis ng paggalaw ng daliri. Pakisubukan ulit."</string>
     <string name="fingerprint_acquired_too_slow" msgid="59250885689661653">"Masyadong mabagal ang paggalaw ng daliri. Pakisubukang muli."</string>
   <string-array name="fingerprint_acquired_vendor">
   </string-array>
@@ -541,7 +549,7 @@
     <string name="fingerprint_error_timeout" msgid="3927186043737732875">"Nag-time out ang fingerprint. Subukang muli."</string>
     <string name="fingerprint_error_canceled" msgid="4402024612660774395">"Nakansela ang operasyong ginagamitan ng fingerprint."</string>
     <string name="fingerprint_error_user_canceled" msgid="7999639584615291494">"Kinansela ng user ang operasyon sa fingerprint."</string>
-    <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Masyadong maraming beses sumubok. Subukang muli sa ibang pagkakataon."</string>
+    <string name="fingerprint_error_lockout" msgid="5536934748136933450">"Napakaraming pagtatangka. Subukan ulit sa ibang pagkakataon."</string>
     <string name="fingerprint_error_lockout_permanent" msgid="5033251797919508137">"Masyadong maraming beses sumubok. Na-disable ang sensor para sa fingerprint."</string>
     <string name="fingerprint_error_unable_to_process" msgid="6107816084103552441">"Subukang muli."</string>
     <string name="fingerprint_error_no_fingerprints" msgid="7654382120628334248">"Walang naka-enroll na fingerprint."</string>
@@ -1416,7 +1424,7 @@
     <string name="forward_intent_to_work" msgid="621480743856004612">"Ginagamit mo ang app na ito sa iyong profile sa trabaho"</string>
     <string name="input_method_binding_label" msgid="1283557179944992649">"Pamamaraan ng pag-input"</string>
     <string name="sync_binding_label" msgid="3687969138375092423">"I-sync"</string>
-    <string name="accessibility_binding_label" msgid="4148120742096474641">"Kakayahang Ma-access"</string>
+    <string name="accessibility_binding_label" msgid="4148120742096474641">"Pagiging Accessible"</string>
     <string name="wallpaper_binding_label" msgid="1240087844304687662">"Wallpaper"</string>
     <string name="chooser_wallpaper" msgid="7873476199295190279">"Baguhin ang wallpaper"</string>
     <string name="notification_listener_binding_label" msgid="2014162835481906429">"Notification listener"</string>
@@ -1825,6 +1833,8 @@
     <string name="stk_cc_ss_to_ussd" msgid="5614626512855868785">"Ginawang USSD na kahilingan ang SS na kahilingan"</string>
     <string name="stk_cc_ss_to_ss" msgid="7716729801537709054">"Ginawang bagong SS na kahilingan"</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Profile sa trabaho"</string>
+    <!-- no translation found for notification_alerted_content_description (1296617716556420585) -->
+    <skip />
     <string name="expand_button_content_description_collapsed" msgid="3609784019345534652">"Palawakin"</string>
     <string name="expand_button_content_description_expanded" msgid="8520652707158554895">"I-collapse"</string>
     <string name="expand_action_accessibility" msgid="5307730695723718254">"i-toggle ang pagpapalawak"</string>

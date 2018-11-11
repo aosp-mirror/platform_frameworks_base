@@ -136,6 +136,14 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Wi-Fi 通話 | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> VoWifi"</string>
+    <!-- no translation found for wfcSpnFormat_wifi_calling (4990486735013125329) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_wifi (1892673884655959773) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_wifi_calling_wo_hyphen (1336669776254502831) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_vowifi (1765176406171272629) -->
+    <skip />
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"關閉"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi 優先"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"行動網路優先"</string>
@@ -417,10 +425,10 @@
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"允許應用程式存取額外位置資訊提供者指令。這項設定可能會造成應用程式干擾 GPS 或其他位置資訊來源的運作。"</string>
     <string name="permlab_accessFineLocation" msgid="6265109654698562427">"僅可在前景中取得精確位置"</string>
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"這個應用程式只能在前景中取得你的確切位置。你必須在手機上開啟這些定位服務，才能讓這個應用程式取得確切位置。請注意，這麼做可能會增加耗電量。"</string>
-    <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"存取概略位置 (以網路為依據)"</string>
-    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"這個應用程式可根據網路來源 (例如基地台和 Wi-Fi 網路) 取得你的位置資訊。你必須在平板電腦上開啟這類定位服務，才能讓這個應用程式取得位置資訊。"</string>
-    <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"這個應用程式可根據網路來源 (例如基地台和 Wi-Fi 網路) 取得你的位置資訊。你必須在電視上開啟這類定位服務，才能讓這個應用程式取得位置資訊。"</string>
-    <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"這個應用程式可根據網路來源 (例如基地台和 Wi-Fi 網路) 取得你的位置資訊。你必須在手機上開啟這類定位服務，才能讓這個應用程式取得位置資訊。"</string>
+    <string name="permlab_accessCoarseLocation" msgid="3707180371693213469">"只有在前景執行時才能根據網路取得概略位置"</string>
+    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="8594719010575779120">"只要這個應用程式在前景執行，就可以根據網路來源 (例如基地台和 Wi-Fi 網路) 取得你的位置資訊。如要讓這個應用程式使用定位服務，你必須在平板電腦上開啟這些服務。"</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="3027871910200890806">"只要這個應用程式在前景執行，就可以根據網路來源 (例如基地台和 Wi-Fi 網路) 取得你的位置資訊。如要讓這個應用程式使用定位服務，你必須在電視上開啟這些服務。"</string>
+    <string name="permdesc_accessCoarseLocation" product="default" msgid="854896049371048754">"只要這個應用程式在前景執行，就可以根據網路來源 (例如基地台和 Wi-Fi 網路) 取得你的位置資訊。如要讓這個應用程式使用定位服務，你必須在手機上開啟這些服務。"</string>
     <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"在背景存取位置資訊"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"除了概略位置或精確位置的存取權外，若您另外授予這項存取權，這個應用程式就能在背景執行時存取位置資訊。"</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"變更音訊設定"</string>
@@ -1825,6 +1833,8 @@
     <string name="stk_cc_ss_to_ussd" msgid="5614626512855868785">"SS 要求已變更為 USSD 要求"</string>
     <string name="stk_cc_ss_to_ss" msgid="7716729801537709054">"已變更為新的 SS 要求"</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"工作資料夾"</string>
+    <!-- no translation found for notification_alerted_content_description (1296617716556420585) -->
+    <skip />
     <string name="expand_button_content_description_collapsed" msgid="3609784019345534652">"展開"</string>
     <string name="expand_button_content_description_expanded" msgid="8520652707158554895">"收合"</string>
     <string name="expand_action_accessibility" msgid="5307730695723718254">"切換展開模式"</string>

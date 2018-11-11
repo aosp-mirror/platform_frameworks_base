@@ -136,6 +136,14 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> ਵਾਈ-ਫਾਈ"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"ਵਾਈ-ਫਾਈ ਕਾਲਿੰਗ | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> VoWifi"</string>
+    <!-- no translation found for wfcSpnFormat_wifi_calling (4990486735013125329) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_wifi (1892673884655959773) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_wifi_calling_wo_hyphen (1336669776254502831) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_vowifi (1765176406171272629) -->
+    <skip />
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"ਬੰਦ"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"ਤਰਜੀਹੀ ਵਾਈ-ਫਾਈ"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"ਮੋਬਾਈਲ ਨੂੰ ਤਰਜੀਹ ਹੈ"</string>
@@ -417,10 +425,10 @@
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"ਐਪ ਨੂੰ ਵਾਧੂ ਟਿਕਾਣਾ ਪ੍ਰਦਾਤਾ ਕਮਾਂਡਾਂ ਤੱਕ ਪਹੁੰਚ ਦੀ ਆਗਿਆ ਦਿੰਦਾ ਹੈ। ਇਹ ਐਪ ਨੂੰ GPS ਜਾਂ ਹੋਰ ਟਿਕਾਣਾ ਸਰੋਤਾਂ ਦੇ ਓਪਰੇਸ਼ਨ ਵਿੱਚ ਵਿਘਨ ਪਾਉਣ ਦੀ ਆਗਿਆ ਦੇ ਸਕਦਾ ਹੈ।"</string>
     <string name="permlab_accessFineLocation" msgid="6265109654698562427">"ਸਿਰਫ਼ ਫੋਰਗ੍ਰਾਊਂਡ ਵਿੱਚ ਸਟੀਕ ਟਿਕਾਣੇ ਤੱਕ ਪਹੁੰਚ ਕਰੋ"</string>
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"ਇਹ ਐਪ ਫੋਰਗ੍ਰਾਉਂਡ ਵਿੱਚ ਹੋਣ \'ਤੇ ਹੀ ਤੁਹਾਡਾ ਸਟੀਕ ਟਿਕਾਣਾ ਪਤਾ ਕਰ ਸਕਦੀ ਹੈ। ਐਪ ਵੱਲੋਂ ਟਿਕਾਣਾ ਸੇਵਾਵਾਂ ਦੀ ਵਰਤੋਂ ਕਰਨ ਲਈ ਇਹ ਸੇਵਾਵਾਂ ਤੁਹਾਡੇ ਫ਼ੋਨ \'ਤੇ ਉਪਲਬਧ ਹੋਣੀਆਂ ਅਤੇ ਚਾਲੂ ਕੀਤੀਆਂ ਹੋਣੀਆਂ ਲਾਜ਼ਮੀ ਹਨ। ਇਸ ਨਾਲ ਬੈਟਰੀ ਦੀ ਖਪਤ ਵਧ ਸਕਦੀ ਹੈ।"</string>
-    <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"ਅੰਦਾਜ਼ਨ ਟਿਕਾਣੇ \'ਤੇ ਪਹੁੰਚ ਕਰੋ (ਨੈੱਟਵਰਕ-ਆਧਾਰਿਤ)"</string>
-    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"ਇਹ ਐਪ ਨੈੱਟਵਰਕ ਸਰੋਤਾਂ ਜਿਵੇਂ ਕਿ ਸੈੱਲ ਟਾਵਰਾਂ ਅਤੇ ਵਾਈ-ਫਾਈ ਨੈੱਟਵਰਕਾਂ \'ਤੇ ਆਧਾਰਿਤ ਤੁਹਾਡਾ ਟਿਕਾਣਾ ਪਤਾ ਕਰ ਸਕਦੀ ਹੈ। ਐਪ ਦੁਆਰਾ ਟਿਕਾਣਾ ਸੇਵਾਵਾਂ ਦੀ ਵਰਤੋਂ ਕੀਤੇ ਜਾਣ ਦੇ ਯੋਗ ਹੋਣ ਲਈ ਇਹ ਸੇਵਾਵਾਂ ਤੁਹਾਡੇ ਟੈਬਲੈੱਟ \'ਤੇ ਉਪਲਬਧ ਹੋਣੀਆਂ ਅਤੇ ਚਾਲੂ ਕੀਤੀਆਂ ਹੋਣੀਆਂ ਲਾਜ਼ਮੀ ਹਨ।"</string>
-    <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"ਇਹ ਐਪ ਨੈੱਟਵਰਕ ਸਰੋਤਾਂ ਜਿਵੇਂ ਕਿ ਸੈੱਲ ਟਾਵਰਾਂ ਅਤੇ ਵਾਈ-ਫਾਈ ਨੈੱਟਵਰਕਾਂ \'ਤੇ ਆਧਾਰਿਤ ਤੁਹਾਡਾ ਟਿਕਾਣਾ ਪਤਾ ਕਰ ਸਕਦੀ ਹੈ। ਐਪ ਵੱਲੋਂ ਟਿਕਾਣਾ ਸੇਵਾਵਾਂ ਦੀ ਵਰਤੋਂ ਕੀਤੇ ਜਾਣ ਦੇ ਯੋਗ ਹੋਣ ਲਈ ਇਹ ਸੇਵਾਵਾਂ ਤੁਹਾਡੇ ਟੀਵੀ \'ਤੇ ਉਪਲਬਧ ਹੋਣੀਆਂ ਅਤੇ ਚਾਲੂ ਕੀਤੀਆਂ ਹੋਣੀਆਂ ਲਾਜ਼ਮੀ ਹਨ।"</string>
-    <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"ਇਹ ਐਪ ਨੈੱਟਵਰਕ ਸਰੋਤਾਂ ਜਿਵੇਂ ਕਿ ਸੈੱਲ ਟਾਵਰਾਂ ਅਤੇ ਵਾਈ-ਫਾਈ ਨੈੱਟਵਰਕਾਂ \'ਤੇ ਆਧਾਰਿਤ ਤੁਹਾਡਾ ਟਿਕਾਣਾ ਪਤਾ ਕਰ ਸਕਦੀ ਹੈ। ਐਪ ਵੱਲੋਂ ਟਿਕਾਣਾ ਸੇਵਾਵਾਂ ਦੀ ਵਰਤੋਂ ਕੀਤੇ ਜਾਣ ਦੇ ਯੋਗ ਹੋਣ ਲਈ ਇਹ ਸੇਵਾਵਾਂ ਤੁਹਾਡੇ ਫ਼ੋਨ \'ਤੇ ਉਪਲਬਧ ਹੋਣੀਆਂ ਅਤੇ ਚਾਲੂ ਕੀਤੀਆਂ ਹੋਣੀਆਂ ਲਾਜ਼ਮੀ ਹਨ।"</string>
+    <string name="permlab_accessCoarseLocation" msgid="3707180371693213469">"ਸਿਰਫ਼ ਫੋਰਗ੍ਰਾਊਂਡ ਵਿੱਚ ਅਨੁਮਾਨਿਤ ਟਿਕਾਣੇ ਤੱਕ ਪਹੁੰਚ ਕਰੋ (ਨੈੱਟਵਰਕ-ਆਧਾਰਿਤ)"</string>
+    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="8594719010575779120">"ਇਹ ਐਪ ਨੈੱਟਵਰਕ ਸਰੋਤਾਂ ਜਿਵੇਂ ਕਿ ਸੈੱਲ ਟਾਵਰਾਂ ਅਤੇ ਵਾਈ-ਫਾਈ ਨੈੱਟਵਰਕਾਂ \'ਤੇ ਆਧਾਰਿਤ ਤੁਹਾਡਾ ਟਿਕਾਣਾ ਪਤਾ ਕਰ ਸਕਦੀ ਹੈ, ਪਰ ਸਿਰਫ਼ ਐਪ ਦੇ ਫੋਰਗ੍ਰਾਊਂਡ ਹੋਣ \'ਤੇ ਹੀ। ਐਪ ਵੱਲੋਂ ਟਿਕਾਣਾ ਸੇਵਾਵਾਂ ਦੀ ਵਰਤੋਂ ਕੀਤੇ ਜਾਣ ਦੇ ਯੋਗ ਹੋਣ ਲਈ ਇਹ ਸੇਵਾਵਾਂ ਤੁਹਾਡੀ ਟੈਬਲੈੱਟ \'ਤੇ ਉਪਲਬਧ ਹੋਣੀਆਂ ਅਤੇ ਚਾਲੂ ਕੀਤੀਆਂ ਹੋਣੀਆਂ ਲਾਜ਼ਮੀ ਹਨ।"</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="3027871910200890806">"ਇਹ ਐਪ ਨੈੱਟਵਰਕ ਸਰੋਤਾਂ ਜਿਵੇਂ ਕਿ ਸੈੱਲ ਟਾਵਰਾਂ ਅਤੇ ਵਾਈ-ਫਾਈ ਨੈੱਟਵਰਕਾਂ \'ਤੇ ਆਧਾਰਿਤ ਤੁਹਾਡਾ ਟਿਕਾਣਾ ਪਤਾ ਕਰ ਸਕਦੀ ਹੈ, ਪਰ ਸਿਰਫ਼ ਐਪ ਦੇ ਫੋਰਗ੍ਰਾਊਂਡ ਹੋਣ \'ਤੇ ਹੀ। ਐਪ ਵੱਲੋਂ ਟਿਕਾਣਾ ਸੇਵਾਵਾਂ ਦੀ ਵਰਤੋਂ ਕੀਤੇ ਜਾਣ ਦੇ ਯੋਗ ਹੋਣ ਲਈ ਇਹ ਸੇਵਾਵਾਂ ਤੁਹਾਡੇ ਟੀਵੀ \'ਤੇ ਉਪਲਬਧ ਹੋਣੀਆਂ ਅਤੇ ਚਾਲੂ ਕੀਤੀਆਂ ਹੋਣੀਆਂ ਲਾਜ਼ਮੀ ਹਨ।"</string>
+    <string name="permdesc_accessCoarseLocation" product="default" msgid="854896049371048754">"ਇਹ ਐਪ ਨੈੱਟਵਰਕ ਸਰੋਤਾਂ ਜਿਵੇਂ ਕਿ ਸੈੱਲ ਟਾਵਰਾਂ ਅਤੇ ਵਾਈ-ਫਾਈ ਨੈੱਟਵਰਕਾਂ \'ਤੇ ਆਧਾਰਿਤ ਤੁਹਾਡਾ ਟਿਕਾਣਾ ਪਤਾ ਕਰ ਸਕਦੀ ਹੈ, ਪਰ ਸਿਰਫ਼ ਐਪ ਦੇ ਫੋਰਗ੍ਰਾਊਂਡ ਹੋਣ \'ਤੇ ਹੀ। ਐਪ ਵੱਲੋਂ ਟਿਕਾਣਾ ਸੇਵਾਵਾਂ ਦੀ ਵਰਤੋਂ ਕੀਤੇ ਜਾਣ ਦੇ ਯੋਗ ਹੋਣ ਲਈ ਇਹ ਸੇਵਾਵਾਂ ਤੁਹਾਡੇ ਫ਼ੋਨ \'ਤੇ ਉਪਲਬਧ ਹੋਣੀਆਂ ਅਤੇ ਚਾਲੂ ਕੀਤੀਆਂ ਹੋਣੀਆਂ ਲਾਜ਼ਮੀ ਹਨ।"</string>
     <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"ਬੈਕਗ੍ਰਾਊਂਡ ਵਿੱਚ ਟਿਕਾਣੇ ਤੱਕ ਪਹੁੰਚ"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"ਐਪ ਨੂੰ ਵਧੀਕ ਤੌਰ \'ਤੇ ਅਨੁਮਾਨਿਤ ਜਾਂ ਸਟੀਕ ਟਿਕਾਣੇ ਤੱਕ ਪਹੁੰਚ ਦੇਣ \'ਤੇ ਇਹ ਬੈਕਗ੍ਰਾਊਂਡ ਵਿੱਚ ਚੱਲਣ ਵੇਲੇ ਟਿਕਾਣੇ ਤੱਕ ਪਹੁੰਚ ਕਰ ਸਕਦੀ ਹੈ।"</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"ਆਪਣੀਆਂ ਆਡੀਓ ਸੈਟਿੰਗਾਂ ਬਦਲੋ"</string>
@@ -1826,6 +1834,8 @@
     <string name="stk_cc_ss_to_ussd" msgid="5614626512855868785">"SS ਬੇਨਤੀ ਨੂੰ USSD ਬੇਨਤੀ ਵਿੱਚ ਬਦਲਿਆ ਗਿਆ"</string>
     <string name="stk_cc_ss_to_ss" msgid="7716729801537709054">"ਨਵੀਂ SS ਬੇਨਤੀ ਵਿੱਚ ਬਦਲਿਆ ਗਿਆ"</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"ਕਾਰਜ ਪ੍ਰੋਫਾਈਲ"</string>
+    <!-- no translation found for notification_alerted_content_description (1296617716556420585) -->
+    <skip />
     <string name="expand_button_content_description_collapsed" msgid="3609784019345534652">"ਵਿਸਤਾਰ ਕਰੋ"</string>
     <string name="expand_button_content_description_expanded" msgid="8520652707158554895">"ਸੁੰਗੇੜੋ"</string>
     <string name="expand_action_accessibility" msgid="5307730695723718254">"ਟੌਗਲ ਵਿਸਤਾਰ"</string>

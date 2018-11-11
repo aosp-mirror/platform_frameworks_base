@@ -138,6 +138,14 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"Wi-Fi ад <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Wi-Fi-тэлефанія | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"VoWi-Fi ад <xliff:g id="SPN">%s</xliff:g>"</string>
+    <!-- no translation found for wfcSpnFormat_wifi_calling (4990486735013125329) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_wifi (1892673884655959773) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_wifi_calling_wo_hyphen (1336669776254502831) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_vowifi (1765176406171272629) -->
+    <skip />
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Выкл."</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Прыярытэт Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Прыярытэт мабільнай сеткі"</string>
@@ -423,10 +431,10 @@
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Дазваляе праграме атрымліваць доступ да дадатковых каманд службаў вызначэння месцазнаходжання. Гэта можа дазволіць праграме ўмешвацца ў функцыянаванне GPS або іншых крыніц даных аб месцазнаходжаннi."</string>
     <string name="permlab_accessFineLocation" msgid="6265109654698562427">"доступ да дакладнага месцазнаходжання толькі ў асноўным рэжыме"</string>
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"Гэта праграма можа атрымліваць звесткі пра ваша дакладнае месцазнаходжанне толькі ў асноўным рэжыме. Службы геалакацыі павінны быць уключаны і даступныя на вашым тэлефоне, каб праграма магла імі карыстацца. Гэта можа павялічыць спажыванне зараду акумулятара."</string>
-    <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"атрымліваць доступ да прыблізнага месцазнаходжання (на аснове даных сеткі)"</string>
-    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Гэта праграма можа атрымліваць звесткі пра ваша месцазнаходжанне на падставе даных сеткавых крыніц, такіх як вышкі сотавай сувязі і сеткі Wi-Fi. Гэтыя сэрвісы вызначэння месцазнаходжання павінны быць уключаны i даступныя на вашым планшэце, каб праграма магла іх выкарыстоўваць."</string>
-    <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"Гэта праграма можа атрымліваць звесткі пра ваша месцазнаходжанне на падставе даных сеткавых крыніц, такіх як вышкі сотавай сувязі і сеткі Wi-Fi. Гэтыя сэрвісы вызначэння месцазнаходжання павінны быць уключаны i даступныя на вашым тэлевізары, каб праграма магла іх выкарыстоўваць."</string>
-    <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"Гэта праграма можа атрымліваць звесткі пра ваша месцазнаходжанне на падставе даных сеткавых крыніц, такіх як вышкі сотавай сувязі і сеткі Wi-Fi. Гэтыя сэрвісы вызначэння месцазнаходжання павінны быць уключаны i даступныя на вашым тэлефоне, каб праграма магла іх выкарыстоўваць."</string>
+    <string name="permlab_accessCoarseLocation" msgid="3707180371693213469">"доступ да прыблізнага месцазнаходжання (на падставе сеткі) толькі ў актыўным рэжыме"</string>
+    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="8594719010575779120">"Гэта праграма можа атрымліваць звесткі пра ваша месцазнаходжанне толькі ў актыўным рэжыме на падставе даных сеткавых крыніц, такіх як вышкі сотавай сувязі і сеткі Wi-Fi. Каб праграма магла карыстацца гэтымі службамі геалакацыі, неабходна ўключыць і зрабіць іх даступнымі на планшэце."</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="3027871910200890806">"Гэта праграма можа атрымліваць звесткі пра ваша месцазнаходжанне толькі ў актыўным рэжыме на падставе даных сеткавых крыніц, такіх як вышкі сотавай сувязі і сеткі Wi-Fi. Каб праграма магла карыстацца гэтымі службамі геалакацыі, неабходна ўключыць і зрабіць іх даступнымі на тэлевізары."</string>
+    <string name="permdesc_accessCoarseLocation" product="default" msgid="854896049371048754">"Гэта праграма можа атрымліваць звесткі пра ваша месцазнаходжанне толькі ў актыўным рэжыме на падставе даных сеткавых крыніц, такіх як вышкі сотавай сувязі і сеткі Wi-Fi. Каб праграма магла карыстацца гэтымі службамі геалакацыі, неабходна ўключыць і зрабіць іх даступнымі на тэлефоне."</string>
     <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"доступ да вызначэння месцазнаходжання ў фонавым рэжыме"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"Акрамя доступу да прыкладнага ці дакладнага месцазнаходжання праграма можа мець доступ да вызначэння геалакацыі ў фонавым рэжыме працы. На гэта патрабуецца дазвол."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"змяняць налады аудыё"</string>
@@ -1891,6 +1899,8 @@
     <string name="stk_cc_ss_to_ussd" msgid="5614626512855868785">"SS-запыт заменены на USSD-запыт"</string>
     <string name="stk_cc_ss_to_ss" msgid="7716729801537709054">"Зроблена замена на новы SS-запыт"</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Працоўны профіль"</string>
+    <!-- no translation found for notification_alerted_content_description (1296617716556420585) -->
+    <skip />
     <string name="expand_button_content_description_collapsed" msgid="3609784019345534652">"Разгарнуць"</string>
     <string name="expand_button_content_description_expanded" msgid="8520652707158554895">"Згарнуць"</string>
     <string name="expand_action_accessibility" msgid="5307730695723718254">"разгарнуць/згарнуць"</string>

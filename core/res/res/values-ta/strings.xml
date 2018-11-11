@@ -136,6 +136,14 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> வைஃபை"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"வைஃபை அழைப்பு | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> VoWifi"</string>
+    <!-- no translation found for wfcSpnFormat_wifi_calling (4990486735013125329) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_wifi (1892673884655959773) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_wifi_calling_wo_hyphen (1336669776254502831) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_vowifi (1765176406171272629) -->
+    <skip />
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"ஆஃப்"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"வைஃபைக்கு முன்னுரிமை"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"மொபைல் தரவிற்கு முன்னுரிமை"</string>
@@ -417,10 +425,10 @@
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"கூடுதல் இட வழங்குநர் கட்டளைகளை அணுகப் பயன்பாட்டை அனுமதிக்கிறது. இது, GPS அல்லது பிற இருப்பிட மூலங்களின் செயல்பாட்டை இடைமறிக்க பயன்பாட்டை அனுமதிக்கலாம்."</string>
     <string name="permlab_accessFineLocation" msgid="6265109654698562427">"முன்புலத்தில் இயங்கும்போது மட்டும் துல்லியமான இருப்பிடத்தைக் கண்டறிதல்"</string>
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"இந்த ஆப்ஸ் முன்புலத்தில் இயங்கும்போது மட்டுமே நீங்கள் இருக்கும் இடத்தைத் துல்லியமாகக் கண்டறியும். உங்கள் மொபைலில், இருப்பிடச் சேவைகளை ஆப்ஸ் பயன்படுத்துவதற்கு வசதியாக, அவை ஆன் செய்யப்பட்டிருக்க வேண்டும். இதனால் பேட்டரி அதிகம் பயன்படுத்தப்படலாம்."</string>
-    <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"தோராயமான இருப்பிடத்தை அணுகுதல் (நெட்வொர்க் அடிப்படையில்)"</string>
-    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"இந்தப் பயன்பாடு நெட்வொர்க் மூலங்களின் (செல் கோபுரங்கள், வைஃபை நெட்வொர்க்குகள் போன்றவை) அடிப்படையில் உங்கள் இருப்பிடத்தைப் பெறலாம். பயன்பாடு பயன்படுத்தும் வகையில், உங்கள் டேப்லெட்டில் இந்த இருப்பிடச் சேவைகள் இயக்கப்பட்டு, கிடைக்கும்படி இருக்க வேண்டும்."</string>
-    <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"இந்தப் பயன்பாடு நெட்வொர்க் மூலங்களின் (செல் கோபுரங்கள், வைஃபை நெட்வொர்க்குகள் போன்றவை) அடிப்படையில் உங்கள் இருப்பிடத்தைப் பெறலாம். பயன்பாடு பயன்படுத்தும் வகையில், உங்கள் டிவியில் இந்த இருப்பிடச் சேவைகள் இயக்கப்பட்டு, கிடைக்கும்படி இருக்க வேண்டும்."</string>
-    <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"இந்தப் பயன்பாடு நெட்வொர்க் மூலங்களின் (செல் கோபுரங்கள், வைஃபை நெட்வொர்க்குகள் போன்றவை) அடிப்படையில் உங்கள் இருப்பிடத்தைப் பெறலாம். பயன்பாடு பயன்படுத்தும் வகையில், உங்கள் மொபைலில் இந்த இருப்பிடச் சேவைகள் இயக்கப்பட்டு, கிடைக்கும்படி இருக்க வேண்டும்."</string>
+    <string name="permlab_accessCoarseLocation" msgid="3707180371693213469">"முன்புலத்தில் இயங்கும்போது மட்டும் தோராயமான இருப்பிடத்தைக் கண்டறிதல் (நெட்வொர்க் அடிப்படையில்)"</string>
+    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="8594719010575779120">"ஆப்ஸ் முன்புலத்தில் இயங்கும்போது மட்டுமே மொபைல் டவர்கள், வைஃபை நெட்வொர்க்குகள் போன்ற நெட்வொர்க் மூலங்கள் மூலம் ஆப்ஸால் உங்கள் இருப்பிடத்தைப் பெற முடியும். உங்கள் டேப்லெட்டில் \'இருப்பிடச் சேவைகளை\' ஆப்ஸ் பயன்படுத்துவதற்கு வசதியாக அவை ஆன் செய்யப்பட்டிருக்க வேண்டும்."</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="3027871910200890806">"ஆப்ஸ் முன்புலத்தில் இயங்கும்போது மட்டுமே மொபைல் டவர்கள், வைஃபை நெட்வொர்க்குகள் போன்ற நெட்வொர்க் மூலங்கள் மூலம் ஆப்ஸால் உங்கள் இருப்பிடத்தைப் பெற முடியும். உங்கள் டிவியில் \'இருப்பிடச் சேவைகளை\' ஆப்ஸ் பயன்படுத்துவதற்கு வசதியாக அவை ஆன் செய்யப்பட்டிருக்க வேண்டும்."</string>
+    <string name="permdesc_accessCoarseLocation" product="default" msgid="854896049371048754">"ஆப்ஸ் முன்புலத்தில் இயங்கும்போது மட்டுமே மொபைல் டவர்கள், வைஃபை நெட்வொர்க்குகள் போன்ற நெட்வொர்க் மூலங்கள் மூலம் ஆப்ஸால் உங்கள் இருப்பிடத்தைப் பெற முடியும். உங்கள் மொபைலில் \'இருப்பிடச் சேவைகளை\' ஆப்ஸ் பயன்படுத்துவதற்கு வசதியாக அவை ஆன் செய்யப்பட்டிருக்க வேண்டும்."</string>
     <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"பின்புலத்தில் இருப்பிடத்தை அணுகுதல்"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"தோராயமான அல்லது துல்லியமான \'இருப்பிட அணுகலுடன்\' சேர்ந்து இதற்கும் அனுமதி வழங்கப்பட்டால், ஆப்ஸ் பின்புலத்தில் இயங்கினாலும் இருப்பிடத்தை அணுக இயலும்."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"எனது ஆடியோ அமைப்புகளை மாற்றுதல்"</string>
@@ -1826,6 +1834,8 @@
     <string name="stk_cc_ss_to_ussd" msgid="5614626512855868785">"SS கோரிக்கை, USSD கோரிக்கைக்கு மாற்றப்பட்டது"</string>
     <string name="stk_cc_ss_to_ss" msgid="7716729801537709054">"புதிய SS கோரிக்கைக்கு மாற்றப்பட்டது"</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"பணி சுயவிவரம்"</string>
+    <!-- no translation found for notification_alerted_content_description (1296617716556420585) -->
+    <skip />
     <string name="expand_button_content_description_collapsed" msgid="3609784019345534652">"விரிவாக்கும்"</string>
     <string name="expand_button_content_description_expanded" msgid="8520652707158554895">"சுருக்கும்"</string>
     <string name="expand_action_accessibility" msgid="5307730695723718254">"விரிவாக்கத்தை நிலைமாற்றும்"</string>

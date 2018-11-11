@@ -138,6 +138,14 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"Wi-Fi <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"‏שיחות WiFi | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"VoWifi <xliff:g id="SPN">%s</xliff:g>"</string>
+    <!-- no translation found for wfcSpnFormat_wifi_calling (4990486735013125329) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_wifi (1892673884655959773) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_wifi_calling_wo_hyphen (1336669776254502831) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_vowifi (1765176406171272629) -->
+    <skip />
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"כבוי"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"‏Wi-Fi מועדף"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"מצב מועדף: רשת סלולרית"</string>
@@ -423,10 +431,10 @@
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"‏מאפשרת לאפליקציה לגשת לפקודות נוספות של ספק המיקום. הרשאה זו עשויה לאפשר לאפליקציה לשבש את פעולת ה-GPS או מקורות מיקום אחרים."</string>
     <string name="permlab_accessFineLocation" msgid="6265109654698562427">"קבלת גישה למיקום מדויק בחזית בלבד"</string>
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"אפליקציה זו יכולה לזהות את המיקום המדויק שלך רק כאשר היא פועלת בחזית. כדי שהאפליקציה תוכל להשתמש בשירותי המיקום, עליהם להיות מופעלים וזמינים בטלפון. ייתכן שפעולה זו תגביר את צריכת הסוללה."</string>
-    <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"גישה אל מיקום משוער (מבוסס רשת)"</string>
-    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"‏אפליקציה זו יכולה לזהות את המיקום שלך על סמך מקורות מיקום ברשת, כגון אנטנות סלולריות ורשתות Wi-Fi. שירותי מיקום אלה חייבים להיות מופעלים וזמינים בטאבלט שלך כדי שהאפליקציה תוכל להשתמש בהם."</string>
-    <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"‏אפליקציה זו יכולה לזהות את המיקום שלך על סמך מקורות מיקום ברשת, כגון אנטנות סלולריות ורשתות Wi-Fi. שירותי מיקום אלה חייבים להיות מופעלים וזמינים בטלוויזיה שלך כדי שהאפליקציה תוכל להשתמש בהם."</string>
-    <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"‏אפליקציה זו יכולה לזהות את המיקום שלך על סמך מקורות מיקום ברשת, כגון אנטנות סלולריות ורשתות Wi-Fi. שירותי מיקום אלה חייבים להיות מופעלים וזמינים בטלפון שלך כדי שהאפליקציה תוכל להשתמש בהם."</string>
+    <string name="permlab_accessCoarseLocation" msgid="3707180371693213469">"קבלת גישה למיקום המשוער (מבוסס-רשת) רק במצב פעיל"</string>
+    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="8594719010575779120">"‏אפליקציה זו יכולה לזהות את המיקום שלך על סמך מקורות מיקום ברשת, כגון אנטנות סלולריות ורשתות Wi-Fi, אבל רק כשהאפליקציה במצב פעיל. שירותי מיקום אלה חייבים להיות מופעלים וזמינים בטאבלט כדי שהאפליקציה תוכל להשתמש בהם."</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="3027871910200890806">"‏אפליקציה זו יכולה לזהות את המיקום שלך על סמך מקורות מיקום ברשת, כגון אנטנות סלולריות ורשתות Wi-Fi, אבל רק כשהאפליקציה במצב פעיל. שירותי מיקום אלה חייבים להיות מופעלים וזמינים בטלוויזיה כדי שהאפליקציה תוכל להשתמש בהם."</string>
+    <string name="permdesc_accessCoarseLocation" product="default" msgid="854896049371048754">"‏אפליקציה זו יכולה לזהות את המיקום שלך על סמך מקורות מיקום ברשת, כגון אנטנות סלולריות ורשתות Wi-Fi, אבל רק כשהאפליקציה במצב פעיל. שירותי מיקום אלה חייבים להיות מופעלים וזמינים בטלפון כדי שהאפליקציה תוכל להשתמש בהם."</string>
     <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"גישה למיקום ברקע"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"אם מתקבל אישור, בנוסף לגישה למיקום משוער או מדויק, תהיה לאפליקציה גישה למיקום גם כשהיא פועלת ברקע."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"שנה את הגדרות האודיו שלך"</string>
@@ -622,8 +630,8 @@
     <string name="permdesc_manageNetworkPolicy" msgid="7537586771559370668">"מאפשר לאפליקציה לנהל מדיניות הרשת להגדיר כללים ספציפיים-לאפליקציה."</string>
     <string name="permlab_modifyNetworkAccounting" msgid="5088217309088729650">"שנה ניהול חשבונות של שימוש ברשת"</string>
     <string name="permdesc_modifyNetworkAccounting" msgid="5443412866746198123">"הרשאה זו מאפשרת לאפליקציה לשנות את אופן החישוב של נתוני שימוש ברשת מול כל אפליקציה. לא מיועד לשימוש באפליקציות רגילות."</string>
-    <string name="permlab_accessNotifications" msgid="7673416487873432268">"גישה להודעות"</string>
-    <string name="permdesc_accessNotifications" msgid="458457742683431387">"מאפשר לאפליקציה לאחזר, לבדוק ולמחוק הודעות, כולל כאלה שפורסמו על ידי אפליקציות אחרות."</string>
+    <string name="permlab_accessNotifications" msgid="7673416487873432268">"גישה להתראות"</string>
+    <string name="permdesc_accessNotifications" msgid="458457742683431387">"מאפשר לאפליקציה לאחזר, לבדוק ולמחוק התראות, כולל כאלה שפורסמו על ידי אפליקציות אחרות."</string>
     <string name="permlab_bindNotificationListenerService" msgid="7057764742211656654">"איגוד לשירות של מאזין להתראות"</string>
     <string name="permdesc_bindNotificationListenerService" msgid="985697918576902986">"הרשאה זו מאפשרת למשתמש לבצע איגוד לממשק הרמה העליונה של שירות מאזין להתראות. הרשאה זו אף פעם אינה נחוצה לאפליקציות רגילים."</string>
     <string name="permlab_bindConditionProviderService" msgid="1180107672332704641">"איגוד לשירות ספק תנאי"</string>
@@ -1891,6 +1899,8 @@
     <string name="stk_cc_ss_to_ussd" msgid="5614626512855868785">"‏בקשת SS שונתה לבקשת USSD"</string>
     <string name="stk_cc_ss_to_ss" msgid="7716729801537709054">"‏היה שינוי לבקשת SS חדשה"</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"פרופיל עבודה"</string>
+    <!-- no translation found for notification_alerted_content_description (1296617716556420585) -->
+    <skip />
     <string name="expand_button_content_description_collapsed" msgid="3609784019345534652">"הרחב"</string>
     <string name="expand_button_content_description_expanded" msgid="8520652707158554895">"כווץ"</string>
     <string name="expand_action_accessibility" msgid="5307730695723718254">"החלפת מצב הרחבה"</string>

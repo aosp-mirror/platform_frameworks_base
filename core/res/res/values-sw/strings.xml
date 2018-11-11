@@ -136,6 +136,14 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"Wi-Fi ya <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Kupiga Simu kupitia WiFi | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"VoWifi ya <xliff:g id="SPN">%s</xliff:g>"</string>
+    <!-- no translation found for wfcSpnFormat_wifi_calling (4990486735013125329) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_wifi (1892673884655959773) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_wifi_calling_wo_hyphen (1336669776254502831) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_vowifi (1765176406171272629) -->
+    <skip />
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Imezimwa"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi inapedelewa"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Mtandao wa simu unapendelewa"</string>
@@ -417,10 +425,10 @@
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Ruhusu programu kufikia amri za ziada za mtoa huduma za mahali. Hii huenda ikaruhusu programu ikatize matumizi ya GPS au vyanzo vingine vya eneo."</string>
     <string name="permlab_accessFineLocation" msgid="6265109654698562427">"kufikia mahali mahususi ikiwa tu programu imefunguliwa kwenye skrini"</string>
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"Programu hii inaweza kupata mahali halisi ikiwa tu umeifungua kwenye skrini. Ni lazima uwashe huduma hizi za mahali na zipatikane kwenye simu yako ili programu iweze kuzitumia. Hatua hii inaweza kuongeza utumiaji wa betri."</string>
-    <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"fikia mahali karibu na hapo (inategemea mtandao)"</string>
-    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Programu hii inaweza kupata eneo lako kulingana na vyanzo vya mtandao kama vile minara ya simu na mitandao ya Wi-Fi. Huduma hizi za mahali lazima ziwashwe na zipatikane kwenye kompyuta yako kibao ili programu iweze kuzitumia."</string>
-    <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"Programu hii inaweza kupata eneo lako kulingana na vyanzo vya mtandao kama vile minara ya simu na mitandao ya Wi-Fi. Huduma hizi za mahali lazima ziwashwe na zipatikane kwenye runinga yako ili programu iweze kuzitumia."</string>
-    <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"Programu hii inaweza kupata eneo lako kulingana na vyanzo vya mtandao kama vile minara ya simu na mitandao ya Wi-Fi. Huduma hizi za mahali lazima ziwashwe na zipatikane kwenye simu yako ili programu iweze kuzitumia."</string>
+    <string name="permlab_accessCoarseLocation" msgid="3707180371693213469">"fikia eneo linalokadiriwa (kulingana na mtandao) wakati tu programu inatumika kwenye skrini"</string>
+    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="8594719010575779120">"Programu hii inaweza kupata eneo lako kulingana na vyanzo vya mtandao kama vile minara ya simu na mitandao ya Wi-Fi, lakini hili hufanyika tu wakati programu inatumika kwenye skrini. Ni lazima uwashe huduma hizi za mahali na zipatikane kwenye simu kibao yako ili programu iweze kuzitumia."</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="3027871910200890806">"Programu hii inaweza kupata eneo lako kulingana na vyanzo vya mtandao kama vile minara ya simu na mitandao ya Wi-Fi, lakini hili hufanyika tu wakati programu inatumika kwenye skrini. Ni lazima uwashe huduma hizi za mahali na zipatikane kwenye TV yako ili programu iweze kuzitumia."</string>
+    <string name="permdesc_accessCoarseLocation" product="default" msgid="854896049371048754">"Programu hii inaweza kupata eneo lako kulingana na vyanzo vya mtandao kama vile minara ya simu na mitandao ya Wi-Fi, lakini hili hufanyika tu wakati programu inatumika kwenye skrini. Ni lazima uwashe huduma hizi za mahali na zipatikane kwenye simu yako ili programu iweze kuzitumia."</string>
     <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"ifikie mahali inapotumika chinichini"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"Kama ruhusa hii itatolewa, mbali na idhini ya kufikia mahali panapokadiriwa au mahali mahususi, programu inaweza kufikia mahali wakati inatumika chinichini."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"badilisha mipangilio yako ya sauti"</string>
@@ -1825,6 +1833,8 @@
     <string name="stk_cc_ss_to_ussd" msgid="5614626512855868785">"Imebadilisha ombi la SS kuwa ombi la USSD"</string>
     <string name="stk_cc_ss_to_ss" msgid="7716729801537709054">"Imebadilisha kuwa ombi jipya la SS"</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Wasifu wa kazini"</string>
+    <!-- no translation found for notification_alerted_content_description (1296617716556420585) -->
+    <skip />
     <string name="expand_button_content_description_collapsed" msgid="3609784019345534652">"Panua"</string>
     <string name="expand_button_content_description_expanded" msgid="8520652707158554895">"Kunja"</string>
     <string name="expand_action_accessibility" msgid="5307730695723718254">"geuza upanuzi"</string>

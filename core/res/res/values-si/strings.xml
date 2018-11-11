@@ -136,6 +136,14 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"WiFi ඇමතුම් | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> VoWifi"</string>
+    <!-- no translation found for wfcSpnFormat_wifi_calling (4990486735013125329) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_wifi (1892673884655959773) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_wifi_calling_wo_hyphen (1336669776254502831) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_vowifi (1765176406171272629) -->
+    <skip />
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"ක්‍රියාවිරහිතයි"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi වඩා කැමතියි"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"ජංගම කැමතියි"</string>
@@ -417,10 +425,10 @@
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"ස්ථානය සපයන අමතර අණ වලට ප්‍රවේශය කිරීමට යෙදුමට අවසර දෙන්න. GPS ක්‍රියාවන් හෝ වෙනත් ස්ථාන මූලාශ්‍ර සමඟ මැදිහත් වීමට මෙයින් යෙදුමට ඉඩ ලැබේ."</string>
     <string name="permlab_accessFineLocation" msgid="6265109654698562427">"පෙරබිම තුළ පමණක් නිශ්චිත ස්ථානය වෙත පිවිසෙන්න"</string>
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"මෙම යෙදුම පෙරබිම තුළ ඇති විට පමණක් එයට ඔබේ නිශ්චිත ස්ථානය ලබා ගත හැකිය. යෙදුමට ඒවා භාවිත කිරීමට හැකි වීමට මෙම ස්ථාන සේවා ක්‍රියාත්මක කර සහ ඔබේ දුරකථනය මත ලබා ගත හැකිව තිබිය යුතුය. මෙය බැටරි පරිභෝජනය වැඩි කළ හැකිය."</string>
-    <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"ආසන්නතම ස්ථානයට (ජාලය-පාදක වූ) පිවිසීම"</string>
-    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"මෙම යෙදුමට ජංගම දුරකථන කුළුණු සහ Wi-Fi ජාල වැනි ජාල මූලාශ්‍ර පදනම්ව ඔබගේ ස්ථානය ලබා ගත හැකිය. යෙදුමට ඒවා භාවිත කිරීමට හැකි වීමට මෙම ස්ථාන සේවා ක්‍රියාත්මක කර සහ ඔබේ ටැබ්ලට් පරිගණකය මත ලබා ගත හැකිව තිබිය යුතුය."</string>
-    <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"මෙම යෙදුමට ජංගම දුරකථන කුළුණු සහ Wi-Fi ජාල වැනි ජාල මූලාශ්‍ර පදනම්ව ඔබගේ ස්ථානය ලබා ගත හැකිය. යෙදුමට ඒවා භාවිත කිරීමට හැකි වීමට මෙම ස්ථාන සේවා ක්‍රියාත්මක කර සහ ඔබේ TV මත ලබා ගත හැකිව තිබිය යුතුය."</string>
-    <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"මෙම යෙදුමට ජංගම දුරකථන කුළුණු සහ Wi-Fi ජාල වැනි ජාල මූලාශ්‍ර පදනම්ව ඔබගේ ස්ථානය ලබා ගත හැකිය. යෙදුමට ඒවා භාවිත කිරීමට හැකි වීමට මෙම ස්ථාන සේවා ක්‍රියාත්මක කර සහ ඔබේ දුරකථනය මත ලබා ගත හැකිව තිබිය යුතුය."</string>
+    <string name="permlab_accessCoarseLocation" msgid="3707180371693213469">"ඉදිරියේ ඇති ආසන්න ස්ථානය (ජාලය පදනම්වූ) පමණක් ප්‍ර වේශ වන්න"</string>
+    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="8594719010575779120">"මෙම යෙදුමට ජංගම දුරකථන කුළුණු සහ Wi-Fi ජාල වැනි ජාල මූලාශ්‍ර පදනම්ව ඔබගේ ස්ථානය ලබා ගත හැකි නමුත් යෙදුම ඉදිරියේ ඇති විට පමණී. යෙදුමට ඒවා භාවිත කිරීමට හැකි වීමට මෙම ස්ථාන සේවා ක්‍රියාත්මක කර ඔබේ ටැබ්ලටය මත ලබා ගත හැකිව තිබිය යුතුය."</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="3027871910200890806">"මෙම යෙදුමට ජංගම දුරකථන කුළුණු සහ Wi-Fi ජාල වැනි ජාල මූලාශ්‍ර පදනම්ව ඔබගේ ස්ථානය ලබා ගත හැකි නමුත් යෙදුම ඉදිරියේ ඇති විට පමණී. යෙදුමට ඒවා භාවිත කිරීමට හැකි වීමට මෙම ස්ථාන සේවා ක්‍රියාත්මක කර ඔබේ TV එක මත ලබා ගත හැකිව තිබිය යුතුය."</string>
+    <string name="permdesc_accessCoarseLocation" product="default" msgid="854896049371048754">"මෙම යෙදුමට ජංගම දුරකථන කුළුණු සහ Wi-Fi ජාල වැනි ජාල මූලාශ්‍ර පදනම්ව ඔබගේ ස්ථානය ලබා ගත හැකි නමුත් යෙදුම ඉදිරියේ ඇති විට පමණී. යෙදුමට ඒවා භාවිත කිරීමට හැකි වීමට මෙම ස්ථාන සේවා ක්‍රියාත්මක කර ඔබේ දුරකථනය මත ලබා ගත හැකිව තිබිය යුතුය."</string>
     <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"පසුබිමේ ස්ථානය ප්‍රවේශ කිරීම"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"මෙය ආසන්න වශයෙන් හෝ නිශ්චිත ස්ථානයක ප්‍රවේශය ලබා දෙන්නේ නම් පසුබිම් ධාවන අතරතුරදී යෙදුමට ස්ථානය වෙත ප්‍රවේශය විය හැක."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"ඔබගේ ශ්‍රව්‍ය සැකසීම් වෙනස් කරන්න"</string>
@@ -1827,6 +1835,8 @@
     <string name="stk_cc_ss_to_ussd" msgid="5614626512855868785">"SS ඉල්ලීම USSD ඉල්ලීමට වෙනස් කරන ලදී"</string>
     <string name="stk_cc_ss_to_ss" msgid="7716729801537709054">"නව SS ඉල්ලීමට වෙනස් කරන ලදී"</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"කාර්යාල පැතිකඩ"</string>
+    <!-- no translation found for notification_alerted_content_description (1296617716556420585) -->
+    <skip />
     <string name="expand_button_content_description_collapsed" msgid="3609784019345534652">"දිග හරින්න"</string>
     <string name="expand_button_content_description_expanded" msgid="8520652707158554895">"හකුළන්න"</string>
     <string name="expand_action_accessibility" msgid="5307730695723718254">"පුළුල් කිරීම ටොගල කරන්න"</string>

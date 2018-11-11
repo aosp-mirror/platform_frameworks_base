@@ -136,6 +136,14 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"የWiFi ጥሪ አደራረግ | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> VoWifi"</string>
+    <!-- no translation found for wfcSpnFormat_wifi_calling (4990486735013125329) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_wifi (1892673884655959773) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_wifi_calling_wo_hyphen (1336669776254502831) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_vowifi (1765176406171272629) -->
+    <skip />
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"ጠፍቷል"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi ተመርጧል"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"የተንቀሳቃሽ ስልክ ተመራጭ ነው"</string>
@@ -417,10 +425,10 @@
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"መተግበሪያው ተጨማሪ የአካባቢ አቅራቢ ትእዛዞችን እንዲደርስ ይፈቅድለታል። ይሄ መተግበሪያው በጂፒኤስ ወይም ሌላ የአካባቢ ምንጮች ስራ ላይ ጣልቃ እንዲገባ ሊፈቅድለት ይችላል።"</string>
     <string name="permlab_accessFineLocation" msgid="6265109654698562427">"መዳረሻ ከፊት ለፊት ብቻ ትክክለኛ ነው"</string>
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"ይህ መተግበሪያ ከፊት ላይ ሆኖ ሲበራ ብቻ ትክክለኛውን መገኛ አካባቢ ማግኘት ይችላል። እነዚህ የመገኛ አካባቢ አገልግሎቶች መተግበሪያው መጠቀም እንዲችል ሊበሩ እና በእርስዎ ስልክ ላይ ሊገኙ የሚችሉ መሆን አለባቸው።"</string>
-    <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"ግምታዊ አካባቢን መድረስ (በአውታረ መረብ ላይ የተመሰረተ)"</string>
-    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"ይህ መተግበሪያ እንደ የሕዋስ ማማዎች እና የWi-Fi አውታረ መረቦች ከመሳሰሉ የአውታረ መረብ ምንጮች ላይ በመመርኮዝ የእርስዎን መገኛ አካባቢ ማግኘት ይችላል። እነዚህ የመገኛ አካባቢ አገልግሎቶች መተግበሪያው መጠቀም እንዲችል ሊበሩ እና በእርስዎ ጡባዊ ላይ ሊገኙ የሚችሉ መሆን አለባቸው።"</string>
-    <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"ይህ መተግበሪያ እንደ የሕዋስ ማማዎች እና የWi-Fi አውታረ መረቦች ከመሳሰሉ የአውታረ መረብ ምንጮች ላይ በመመርኮዝ የእርስዎን መገኛ አካባቢ ማግኘት ይችላል። እነዚህ የመገኛ አካባቢ አገልግሎቶች እርስዎ መጠቀም እንዲችሉ ሊበሩ እና በእርስዎ ቴሌቪዥን ላይ ሊገኙ የሚችሉ መሆን አለባቸው።"</string>
-    <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"ይህ መተግበሪያ እንደ የሕዋስ ማማዎች እና የWi-Fi አውታረ መረቦች ከመሳሰሉ የአውታረ መረብ ምንጮች ላይ በመመርኮዝ የእርስዎን መገኛ አካባቢ ማግኘት ይችላል። እነዚህ የመገኛ አካባቢ አገልግሎቶች መተግበሪያው መጠቀም እንዲችል ሊበሩ እና በእርስዎ ስልክ ላይ ሊገኙ የሚችሉ መሆን አለባቸው።"</string>
+    <string name="permlab_accessCoarseLocation" msgid="3707180371693213469">"ግምታዊ አካባቢ (በአውታረ መረብ ላይ የተመሠረተ) ከፊት ላይ ሲሆን ብቻ መድረስ"</string>
+    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="8594719010575779120">"ይህ መተግበሪያ እንደ የሕዋስ ማማዎች እና የWi-Fi አውታረ መረቦች ባሉ የአውታረ መረብ ምንጮች ላይ በመመስረት የእርስዎን አካባቢ ማግኘት ይችላል፣ ነገር ግን መተግበሪያው ከፊት ሲሆን ብቻ። እነዚህ የአካባቢ አገልግሎቶች መተግበሪያው መጠቀም እንዲችል ሊበሩ እና በእርስዎ ጡባዊ ላይ ሊገኙ የሚችሉ መሆን አለባቸው።"</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="3027871910200890806">"ይህ መተግበሪያ እንደ የሕዋስ ማማዎች እና የWi-Fi አውታረ መረቦች ባሉ የአውታረ መረብ ምንጮች ላይ በመመስረት የእርስዎን አካባቢ ማግኘት ይችላል፣ ነገር ግን መተግበሪያው ከፊት ሲሆን ብቻ። እነዚህ የአካባቢ አገልግሎቶች መተግበሪያው መጠቀም እንዲችል ሊበሩ እና በእርስዎ ቴሌቪዥን ላይ ሊገኙ የሚችሉ መሆን አለባቸው።"</string>
+    <string name="permdesc_accessCoarseLocation" product="default" msgid="854896049371048754">"ይህ መተግበሪያ እንደ የሕዋስ ማማዎች እና የWi-Fi አውታረ መረቦች ባሉ የአውታረ መረብ ምንጮች ላይ በመመስረት የእርስዎን አካባቢ ማግኘት ይችላል፣ ነገር ግን መተግበሪያው ከፊት ሲሆን ብቻ። እነዚህ የአካባቢ አገልግሎቶች መተግበሪያው መጠቀም እንዲችል ሊበሩ እና በእርስዎ ስልክ ላይ ሊገኙ የሚችሉ መሆን አለባቸው።"</string>
     <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"አካባቢን በበስተጀርባ ድረስ"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"ይህ ከግምታዊ ወይም ትክክለኛ አካባቢ በተጨማሪ ከተሰጠ መተግበሪያው በበስተጀርባ እያሄደ ሳለ አካባቢውን መድረስ ይችላል።"</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"የድምፅ ቅንብሮችን ለውጥ"</string>
@@ -1825,6 +1833,8 @@
     <string name="stk_cc_ss_to_ussd" msgid="5614626512855868785">"የSS ጥያቄ ወደ የUSSD ጥያቄ ተለውጧል"</string>
     <string name="stk_cc_ss_to_ss" msgid="7716729801537709054">"ወደ አዲስ የSS ጥያቄ ተለውጧል"</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"የስራ መገለጫ"</string>
+    <!-- no translation found for notification_alerted_content_description (1296617716556420585) -->
+    <skip />
     <string name="expand_button_content_description_collapsed" msgid="3609784019345534652">"ዘርጋ"</string>
     <string name="expand_button_content_description_expanded" msgid="8520652707158554895">"ሰብስብ"</string>
     <string name="expand_action_accessibility" msgid="5307730695723718254">"ዝርጋታን ቀያይር"</string>

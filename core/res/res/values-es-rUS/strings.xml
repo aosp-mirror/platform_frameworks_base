@@ -136,6 +136,14 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"Wi-Fi de <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Llamada por Wi-Fi | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"VoWifi de <xliff:g id="SPN">%s</xliff:g>"</string>
+    <!-- no translation found for wfcSpnFormat_wifi_calling (4990486735013125329) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_wifi (1892673884655959773) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_wifi_calling_wo_hyphen (1336669776254502831) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_vowifi (1765176406171272629) -->
+    <skip />
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Desactivada"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Red Wi-Fi preferida"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Red móvil preferida"</string>
@@ -417,10 +425,10 @@
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Permite que la aplicación acceda a comandos adicionales del proveedor de ubicación. Esto puede permitirle a la aplicación interferir con el funcionamiento del GPS o de otras fuentes de ubicación."</string>
     <string name="permlab_accessFineLocation" msgid="6265109654698562427">"acceder a la ubicación exacta solo en primer plano"</string>
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"Esta app puede obtener tu ubicación exacta solo cuando está en primer plano. Los servicios de ubicación deben estar activados y disponibles en el teléfono para que la app pueda usarlos. Es posible que aumente el consumo de batería."</string>
-    <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"acceder a la ubicación aproximada (según la red)"</string>
-    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Esta app puede obtener tu ubicación a través de fuentes de red, como torres de telefonía móvil y redes Wi-Fi. Estos servicios de ubicación deben estar activados y disponibles en tu tablet para que la app pueda usarlos."</string>
-    <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"Esta app puede obtener tu ubicación a través de fuentes de red, telefonía móvil y redes Wi-Fi. Estos servicios de ubicación deben estar activados y disponibles en tu TV para que la app pueda usarlos."</string>
-    <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"Esta app puede obtener tu ubicación a través de fuentes de red, como torres de celulares y redes Wi-Fi. Estos servicios de ubicación deben estar activados y disponibles en tu teléfono para que la app pueda usarlos."</string>
+    <string name="permlab_accessCoarseLocation" msgid="3707180371693213469">"acceso a la ubicación aproximada (mediante red) solo en primer plano"</string>
+    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="8594719010575779120">"Esta app puede obtener tu ubicación desde fuentes de red, como torres de telefonía celular y redes Wi-Fi, pero solo en primer plano. Los servicios de ubicación deben estar activados y disponibles en tu tablet para que la app pueda usarlos."</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="3027871910200890806">"Esta app puede obtener tu ubicación desde fuentes de red, como torres de telefonía celular y redes Wi-Fi, pero solo en primer plano. Los servicios de ubicación deben estar activados y disponibles en tu TV para que la app pueda usarlos."</string>
+    <string name="permdesc_accessCoarseLocation" product="default" msgid="854896049371048754">"Esta app puede obtener tu ubicación desde fuentes de red, como torres de telefonía celular y redes Wi-Fi, pero solo en primer plano. Los servicios de ubicación deben estar activados y disponibles en tu teléfono para que la app pueda usarlos."</string>
     <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"acceder a la ubicación en segundo plano"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"Si este permiso se otorga de manera adicional para aproximar o precisar el acceso a la ubicación, la app podrá acceder a la ubicación mientras se ejecuta en segundo plano."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"cambiar tu configuración de audio"</string>
@@ -643,11 +651,11 @@
     <string name="permlab_access_notification_policy" msgid="4247510821662059671">"Acceso a la función No interrumpir"</string>
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Permite que la aplicación lea y modifique la configuración de la función No interrumpir."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Establecer reglas de contraseña"</string>
-    <string name="policydesc_limitPassword" msgid="2502021457917874968">"Permite controlar la longitud y los caracteres permitidos en las contraseñas y los PIN para el bloqueo de pantalla."</string>
+    <string name="policydesc_limitPassword" msgid="2502021457917874968">"Controlar la longitud y los caracteres permitidos en las contraseñas y los PIN para el bloqueo de pantalla."</string>
     <string name="policylab_watchLogin" msgid="5091404125971980158">"Supervisa los intentos para desbloquear la pantalla"</string>
     <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Controla la cantidad de contraseñas incorrectas ingresadas al desbloquear la pantalla y bloquea la tablet o borra todos los datos de la tablet si se ingresaron demasiadas contraseñas incorrectas."</string>
     <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"Permite controlar la cantidad de contraseñas incorrectas que se escriben al desbloquear la pantalla y permite bloquear la TV o borrar todos los datos de la TV si se escriben demasiadas contraseñas incorrectas."</string>
-    <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Controla la cantidad de contraseñas ingresadas incorrectamente al desbloquear la pantalla y bloquea el dispositivo o borra todos sus datos si se ingresan demasiadas contraseñas incorrectas."</string>
+    <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Supervisar la cantidad de contraseñas ingresadas incorrectamente al desbloquear la pantalla, y bloquear el dispositivo o borrar todos sus datos si se ingresan demasiadas contraseñas incorrectas."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Permite controlar la cantidad de contraseñas incorrectas que se escriben al desbloquear la pantalla y bloquear la tablet, o borrar todos los datos del usuario, si se ingresan demasiadas contraseñas incorrectas."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Permite controlar la cantidad de contraseñas incorrectas que se escriben al desbloquear la pantalla y bloquear la televisión, o borrar todos los datos del usuario, si se ingresan demasiadas contraseñas incorrectas."</string>
     <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Permite controlar la cantidad de contraseñas incorrectas que se escriben al desbloquear la pantalla y bloquear el teléfono, o borrar todos los datos del usuario, si se ingresan demasiadas contraseñas incorrectas."</string>
@@ -1825,6 +1833,8 @@
     <string name="stk_cc_ss_to_ussd" msgid="5614626512855868785">"Se cambió la solicitud SS por una solicitud USSD"</string>
     <string name="stk_cc_ss_to_ss" msgid="7716729801537709054">"Se cambió a una nueva solicitud SS"</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Perfil de trabajo"</string>
+    <!-- no translation found for notification_alerted_content_description (1296617716556420585) -->
+    <skip />
     <string name="expand_button_content_description_collapsed" msgid="3609784019345534652">"Expandir"</string>
     <string name="expand_button_content_description_expanded" msgid="8520652707158554895">"Contraer"</string>
     <string name="expand_action_accessibility" msgid="5307730695723718254">"activar o desactivar la expansión"</string>

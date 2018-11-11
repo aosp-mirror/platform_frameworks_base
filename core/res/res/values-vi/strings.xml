@@ -136,6 +136,14 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"Wi-Fi <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Gọi qua Wi-Fi | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"VoWifi <xliff:g id="SPN">%s</xliff:g>"</string>
+    <!-- no translation found for wfcSpnFormat_wifi_calling (4990486735013125329) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_wifi (1892673884655959773) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_wifi_calling_wo_hyphen (1336669776254502831) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_vowifi (1765176406171272629) -->
+    <skip />
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Tắt"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Ưu tiên Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Ưu tiên dữ liệu di động"</string>
@@ -417,10 +425,10 @@
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Cho phép ứng dụng truy cập vào các lệnh của nhà cung cấp vị trí bổ sung. Điều này có thể cho phép ứng dụng can thiệp vào hoạt động của Hệ thống định vị toàn cầu (GPS) hoặc các nguồn vị trí khác."</string>
     <string name="permlab_accessFineLocation" msgid="6265109654698562427">"chỉ truy cập vị trí chính xác trong nền trước"</string>
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"Bất cứ khi nào chạy trong nền trước, ứng dụng này có thể nhận thông tin vị trí chính xác của bạn. Để ứng dụng có thể sử các dụng dịch vụ vị trí, điện thoại của bạn phải có các dịch vụ này và dịch vụ ở trạng thái bật. Hoạt động này có thể tăng mức tiêu thụ pin."</string>
-    <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"truy cập vị trí gần đúng (dựa vào mạng)"</string>
-    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Ứng dụng này có thể nhận thông tin vị trí của bạn dựa trên các nguồn mạng như tháp phát sóng di động và mạng Wi-Fi. Các dịch vụ vị trí này phải được bật và khả dụng trên máy tính bảng của bạn để ứng dụng có thể sử dụng chúng."</string>
-    <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"Ứng dụng này có thể nhận thông tin vị trí của bạn dựa trên các nguồn mạng như tháp phát sóng di động và mạng Wi-Fi. Các dịch vụ vị trí này phải được bật và khả dụng trên TV của bạn để ứng dụng có thể sử dụng chúng."</string>
-    <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"Ứng dụng này có thể nhận thông tin vị trí của bạn dựa trên các nguồn mạng như tháp phát sóng di động và mạng Wi-Fi. Các dịch vụ vị trí này phải được bật và khả dụng trên điện thoại của bạn để ứng dụng có thể sử dụng chúng."</string>
+    <string name="permlab_accessCoarseLocation" msgid="3707180371693213469">"chỉ truy cập vị trí gần đúng (dựa trên mạng) trong nền trước"</string>
+    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="8594719010575779120">"Bất cứ khi nào chạy trong nền trước, ứng dụng này có thể nhận thông tin vị trí dựa trên nguồn mạng, chẳng hạn như trạm phát sóng di động và mạng Wi-Fi. Để ứng dụng có thể dùng các dịch vụ vị trí, máy tính bảng của bạn phải có các dịch vụ này ở trạng thái bật."</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="3027871910200890806">"Bất cứ khi nào chạy trong nền trước, ứng dụng này có thể nhận thông tin vị trí dựa trên nguồn mạng, chẳng hạn như trạm phát sóng di động và mạng Wi-Fi. Để ứng dụng có thể dùng các dịch vụ vị trí, TV của bạn phải có các dịch vụ này ở trạng thái bật."</string>
+    <string name="permdesc_accessCoarseLocation" product="default" msgid="854896049371048754">"Bất cứ khi nào chạy trong nền trước, ứng dụng này có thể nhận thông tin vị trí dựa trên nguồn mạng, chẳng hạn như trạm phát sóng di động và mạng Wi-Fi. Để ứng dụng có thể dùng các dịch vụ vị trí, điện thoại của bạn phải có các dịch vụ này ở trạng thái bật."</string>
     <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"truy cập vào vị trí trong nền"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"Nếu bạn cấp cho ứng dụng quyền truy cập bổ sung vào vị trị gần đúng hoặc chính xác, thì ứng dụng có thể truy cập vào vị trí đó khi chạy trong nền."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"thay đổi cài đặt âm thanh của bạn"</string>
@@ -1825,6 +1833,8 @@
     <string name="stk_cc_ss_to_ussd" msgid="5614626512855868785">"Yêu cầu SS đã thay đổi thành yêu cầu USSD"</string>
     <string name="stk_cc_ss_to_ss" msgid="7716729801537709054">"Đã thay đổi thành yêu cầu SS mới"</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Hồ sơ công việc"</string>
+    <!-- no translation found for notification_alerted_content_description (1296617716556420585) -->
+    <skip />
     <string name="expand_button_content_description_collapsed" msgid="3609784019345534652">"Mở rộng"</string>
     <string name="expand_button_content_description_expanded" msgid="8520652707158554895">"Thu gọn"</string>
     <string name="expand_action_accessibility" msgid="5307730695723718254">"chuyển đổi mở rộng"</string>
