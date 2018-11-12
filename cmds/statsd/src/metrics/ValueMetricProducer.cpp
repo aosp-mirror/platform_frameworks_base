@@ -73,12 +73,19 @@ const int FIELD_ID_START_BUCKET_ELAPSED_MILLIS = 5;
 const int FIELD_ID_END_BUCKET_ELAPSED_MILLIS = 6;
 
 // ValueMetric has a minimum bucket size of 10min so that we don't pull too frequently
-ValueMetricProducer::ValueMetricProducer(const ConfigKey& key, const ValueMetric& metric,
+ValueMetricProducer::ValueMetricProducer(const ConfigKey& key,
+                                         const ValueMetric& metric,
                                          const int conditionIndex,
-                                         const sp<ConditionWizard>& wizard, const int pullTagId,
-                                         const int64_t timeBaseNs, const int64_t startTimeNs,
+                                         const sp<ConditionWizard>& conditionWizard,
+                                         const int whatMatcherIndex,
+                                         const sp<EventMatcherWizard>& matcherWizard,
+                                         const int pullTagId,
+                                         const int64_t timeBaseNs,
+                                         const int64_t startTimeNs,
                                          const sp<StatsPullerManager>& pullerManager)
-    : MetricProducer(metric.id(), key, timeBaseNs, conditionIndex, wizard),
+    : MetricProducer(metric.id(), key, timeBaseNs, conditionIndex, conditionWizard),
+      mWhatMatcherIndex(whatMatcherIndex),
+      mEventMatcherWizard(matcherWizard),
       mPullerManager(pullerManager),
       mPullTagId(pullTagId),
       mIsPulled(pullTagId != -1),
@@ -143,7 +150,7 @@ ValueMetricProducer::ValueMetricProducer(const ConfigKey& key, const ValueMetric
     mCurrentBucketStartTimeNs = startTimeNs;
     // Kicks off the puller immediately if condition is true and diff based.
     if (mIsPulled && mCondition && mUseDiff) {
-        pullLocked(startTimeNs);
+        pullAndMatchEventsLocked(startTimeNs);
     }
     VLOG("value metric %lld created. bucket size %lld start_time: %lld", (long long)metric.id(),
          (long long)mBucketSizeNs, (long long)mTimeBaseNs);
@@ -307,7 +314,7 @@ void ValueMetricProducer::onConditionChangedLocked(const bool condition,
 
     // Pull on condition changes.
     if (mIsPulled && (mCondition != condition)) {
-        pullLocked(eventTimeNs);
+        pullAndMatchEventsLocked(eventTimeNs);
     }
 
     // when condition change from true to false, clear diff base
@@ -322,14 +329,17 @@ void ValueMetricProducer::onConditionChangedLocked(const bool condition,
     mCondition = condition;
 }
 
-void ValueMetricProducer::pullLocked(const int64_t timestampNs) {
+void ValueMetricProducer::pullAndMatchEventsLocked(const int64_t timestampNs) {
     vector<std::shared_ptr<LogEvent>> allData;
     if (mPullerManager->Pull(mPullTagId, timestampNs, &allData)) {
         if (allData.size() == 0) {
             return;
         }
         for (const auto& data : allData) {
-            onMatchedLogEventLocked(0, *data);
+            if (mEventMatcherWizard->matchLogEvent(
+                *data, mWhatMatcherIndex) == MatchingState::kMatched) {
+                onMatchedLogEventLocked(mWhatMatcherIndex, *data);
+            }
         }
     }
 }
@@ -340,9 +350,9 @@ int64_t ValueMetricProducer::calcPreviousBucketEndTime(const int64_t currentTime
 
 void ValueMetricProducer::onDataPulled(const std::vector<std::shared_ptr<LogEvent>>& allData) {
     std::lock_guard<std::mutex> lock(mMutex);
-
     if (mCondition) {
         if (allData.size() == 0) {
+            VLOG("Data pulled is empty");
             return;
         }
         // For scheduled pulled data, the effective event time is snap to the nearest
@@ -360,9 +370,14 @@ void ValueMetricProducer::onDataPulled(const std::vector<std::shared_ptr<LogEven
             return;
         }
         for (const auto& data : allData) {
-            data->setElapsedTimestampNs(bucketEndTime);
-            onMatchedLogEventLocked(0, *data);
+            if (mEventMatcherWizard->matchLogEvent(*data, mWhatMatcherIndex) ==
+                MatchingState::kMatched) {
+                data->setElapsedTimestampNs(bucketEndTime);
+                onMatchedLogEventLocked(mWhatMatcherIndex, *data);
+            }
         }
+    } else {
+        VLOG("No need to commit data on condition false.");
     }
 }
 

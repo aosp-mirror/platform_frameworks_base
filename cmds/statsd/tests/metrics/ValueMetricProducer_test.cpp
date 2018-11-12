@@ -12,6 +12,7 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
+#include "src/matchers/SimpleLogMatchingTracker.h"
 #include "src/metrics/ValueMetricProducer.h"
 #include "src/stats_log_util.h"
 #include "metrics_test_helper.h"
@@ -40,6 +41,8 @@ namespace statsd {
 const ConfigKey kConfigKey(0, 12345);
 const int tagId = 1;
 const int64_t metricId = 123;
+const int64_t atomMatcherId = 678;
+const int logEventMatcherIndex = 0;
 const int64_t bucketStartTimeNs = 10000000000;
 const int64_t bucketSizeNs = TimeUnitToBucketSizeInMillis(ONE_MINUTE) * 1000000LL;
 const int64_t bucket2StartTimeNs = bucketStartTimeNs + bucketSizeNs;
@@ -60,14 +63,20 @@ TEST(ValueMetricProducerTest, TestCalcPreviousBucketEndTime) {
     metric.mutable_value_field()->add_child()->set_field(2);
 
     int64_t startTimeBase = 11;
-
+    UidMap uidMap;
+    SimpleAtomMatcher atomMatcher;
+    atomMatcher.set_atom_id(tagId);
+    sp<EventMatcherWizard> eventMatcherWizard =
+            new EventMatcherWizard({new SimpleLogMatchingTracker(
+                    atomMatcherId, logEventMatcherIndex, atomMatcher, uidMap)});
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
 
     // statsd started long ago.
     // The metric starts in the middle of the bucket
     ValueMetricProducer valueProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, wizard,
-                                      -1, startTimeBase, 22, pullerManager);
+                                      logEventMatcherIndex, eventMatcherWizard, -1, startTimeBase,
+                                      22, pullerManager);
 
     EXPECT_EQ(startTimeBase, valueProducer.calcPreviousBucketEndTime(60 * NS_PER_SEC + 10));
     EXPECT_EQ(startTimeBase, valueProducer.calcPreviousBucketEndTime(60 * NS_PER_SEC + 10));
@@ -87,13 +96,20 @@ TEST(ValueMetricProducerTest, TestFirstBucket) {
     metric.mutable_value_field()->set_field(tagId);
     metric.mutable_value_field()->add_child()->set_field(2);
 
+    UidMap uidMap;
+    SimpleAtomMatcher atomMatcher;
+    atomMatcher.set_atom_id(tagId);
+    sp<EventMatcherWizard> eventMatcherWizard =
+            new EventMatcherWizard({new SimpleLogMatchingTracker(
+                    atomMatcherId, logEventMatcherIndex, atomMatcher, uidMap)});
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
 
     // statsd started long ago.
     // The metric starts in the middle of the bucket
     ValueMetricProducer valueProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, wizard,
-                                      -1, 5, 600 * NS_PER_SEC + NS_PER_SEC/2, pullerManager);
+                                      logEventMatcherIndex, eventMatcherWizard, -1, 5,
+                                      600 * NS_PER_SEC + NS_PER_SEC / 2, pullerManager);
 
     EXPECT_EQ(600500000000, valueProducer.mCurrentBucketStartTimeNs);
     EXPECT_EQ(10, valueProducer.mCurrentBucketNum);
@@ -110,6 +126,12 @@ TEST(ValueMetricProducerTest, TestPulledEventsNoCondition) {
     metric.mutable_value_field()->set_field(tagId);
     metric.mutable_value_field()->add_child()->set_field(2);
 
+    UidMap uidMap;
+    SimpleAtomMatcher atomMatcher;
+    atomMatcher.set_atom_id(tagId);
+    sp<EventMatcherWizard> eventMatcherWizard =
+            new EventMatcherWizard({new SimpleLogMatchingTracker(
+                    atomMatcherId, logEventMatcherIndex, atomMatcher, uidMap)});
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
     EXPECT_CALL(*pullerManager, RegisterReceiver(tagId, _, _, _)).WillOnce(Return());
@@ -127,7 +149,8 @@ TEST(ValueMetricProducerTest, TestPulledEventsNoCondition) {
             }));
 
     ValueMetricProducer valueProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, wizard,
-                                      tagId, bucketStartTimeNs, bucketStartTimeNs, pullerManager);
+                                      logEventMatcherIndex, eventMatcherWizard, tagId,
+                                      bucketStartTimeNs, bucketStartTimeNs, pullerManager);
 
     vector<shared_ptr<LogEvent>> allData;
     allData.clear();
@@ -187,6 +210,102 @@ TEST(ValueMetricProducerTest, TestPulledEventsNoCondition) {
 }
 
 /*
+ * Tests pulled atoms with filtering
+ */
+TEST(ValueMetricProducerTest, TestPulledEventsWithFiltering) {
+    ValueMetric metric;
+    metric.set_id(metricId);
+    metric.set_bucket(ONE_MINUTE);
+    metric.mutable_value_field()->set_field(tagId);
+    metric.mutable_value_field()->add_child()->set_field(2);
+
+    UidMap uidMap;
+    SimpleAtomMatcher atomMatcher;
+    atomMatcher.set_atom_id(tagId);
+    auto keyValue = atomMatcher.add_field_value_matcher();
+    keyValue->set_field(1);
+    keyValue->set_eq_int(3);
+    sp<EventMatcherWizard> eventMatcherWizard =
+            new EventMatcherWizard({new SimpleLogMatchingTracker(
+                    atomMatcherId, logEventMatcherIndex, atomMatcher, uidMap)});
+    sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
+    sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
+    EXPECT_CALL(*pullerManager, RegisterReceiver(tagId, _, _, _)).WillOnce(Return());
+    EXPECT_CALL(*pullerManager, UnRegisterReceiver(tagId, _)).WillOnce(Return());
+    EXPECT_CALL(*pullerManager, Pull(tagId, _, _))
+            .WillOnce(Invoke([](int tagId, int64_t timeNs,
+                                vector<std::shared_ptr<LogEvent>>* data) {
+                data->clear();
+                shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucketStartTimeNs);
+                event->write(3);
+                event->write(3);
+                event->init();
+                data->push_back(event);
+                return true;
+            }));
+
+    ValueMetricProducer valueProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, wizard,
+                                      logEventMatcherIndex, eventMatcherWizard, tagId,
+                                      bucketStartTimeNs, bucketStartTimeNs, pullerManager);
+
+    vector<shared_ptr<LogEvent>> allData;
+    allData.clear();
+    shared_ptr<LogEvent> event = make_shared<LogEvent>(tagId, bucket2StartTimeNs + 1);
+    event->write(3);
+    event->write(11);
+    event->init();
+    allData.push_back(event);
+
+    valueProducer.onDataPulled(allData);
+    // has one slice
+    EXPECT_EQ(1UL, valueProducer.mCurrentSlicedBucket.size());
+    ValueMetricProducer::Interval curInterval =
+            valueProducer.mCurrentSlicedBucket.begin()->second[0];
+
+    EXPECT_EQ(true, curInterval.hasBase);
+    EXPECT_EQ(11, curInterval.base.long_value);
+    EXPECT_EQ(true, curInterval.hasValue);
+    EXPECT_EQ(8, curInterval.value.long_value);
+    EXPECT_EQ(0UL, valueProducer.mPastBuckets.size());
+
+    allData.clear();
+    event = make_shared<LogEvent>(tagId, bucket3StartTimeNs + 1);
+    event->write(4);
+    event->write(23);
+    event->init();
+    allData.push_back(event);
+    valueProducer.onDataPulled(allData);
+    // has one slice
+    EXPECT_EQ(1UL, valueProducer.mCurrentSlicedBucket.size());
+    curInterval = valueProducer.mCurrentSlicedBucket.begin()->second[0];
+
+    EXPECT_EQ(true, curInterval.hasBase);
+    EXPECT_EQ(11, curInterval.base.long_value);
+    // no events caused flush of bucket
+    EXPECT_EQ(true, curInterval.hasValue);
+    EXPECT_EQ(8, curInterval.value.long_value);
+    EXPECT_EQ(0UL, valueProducer.mPastBuckets.size());
+
+    allData.clear();
+    event = make_shared<LogEvent>(tagId, bucket4StartTimeNs + 1);
+    event->write(3);
+    event->write(36);
+    event->init();
+    allData.push_back(event);
+    valueProducer.onDataPulled(allData);
+    EXPECT_EQ(1UL, valueProducer.mCurrentSlicedBucket.size());
+    curInterval = valueProducer.mCurrentSlicedBucket.begin()->second[0];
+
+    // the base was reset
+    EXPECT_EQ(true, curInterval.hasBase);
+    EXPECT_EQ(36, curInterval.base.long_value);
+    EXPECT_EQ(false, curInterval.hasValue);
+    EXPECT_EQ(1UL, valueProducer.mPastBuckets.size());
+    EXPECT_EQ(1UL, valueProducer.mPastBuckets.begin()->second.size());
+    EXPECT_EQ(8, valueProducer.mPastBuckets.begin()->second.back().values[0].long_value);
+}
+
+/*
  * Tests pulled atoms with no conditions and take absolute value after reset
  */
 TEST(ValueMetricProducerTest, TestPulledEventsTakeAbsoluteValueOnReset) {
@@ -197,6 +316,12 @@ TEST(ValueMetricProducerTest, TestPulledEventsTakeAbsoluteValueOnReset) {
     metric.mutable_value_field()->add_child()->set_field(2);
     metric.set_use_absolute_value_on_reset(true);
 
+    UidMap uidMap;
+    SimpleAtomMatcher atomMatcher;
+    atomMatcher.set_atom_id(tagId);
+    sp<EventMatcherWizard> eventMatcherWizard =
+            new EventMatcherWizard({new SimpleLogMatchingTracker(
+                    atomMatcherId, logEventMatcherIndex, atomMatcher, uidMap)});
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
     EXPECT_CALL(*pullerManager, RegisterReceiver(tagId, _, _, _)).WillOnce(Return());
@@ -204,7 +329,8 @@ TEST(ValueMetricProducerTest, TestPulledEventsTakeAbsoluteValueOnReset) {
     EXPECT_CALL(*pullerManager, Pull(tagId, _, _)).WillOnce(Return(true));
 
     ValueMetricProducer valueProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, wizard,
-                                      tagId, bucketStartTimeNs, bucketStartTimeNs, pullerManager);
+                                      logEventMatcherIndex, eventMatcherWizard, tagId,
+                                      bucketStartTimeNs, bucketStartTimeNs, pullerManager);
 
     vector<shared_ptr<LogEvent>> allData;
     allData.clear();
@@ -268,6 +394,12 @@ TEST(ValueMetricProducerTest, TestPulledEventsTakeZeroOnReset) {
     metric.mutable_value_field()->set_field(tagId);
     metric.mutable_value_field()->add_child()->set_field(2);
 
+    UidMap uidMap;
+    SimpleAtomMatcher atomMatcher;
+    atomMatcher.set_atom_id(tagId);
+    sp<EventMatcherWizard> eventMatcherWizard =
+            new EventMatcherWizard({new SimpleLogMatchingTracker(
+                    atomMatcherId, logEventMatcherIndex, atomMatcher, uidMap)});
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
     EXPECT_CALL(*pullerManager, RegisterReceiver(tagId, _, _, _)).WillOnce(Return());
@@ -275,7 +407,8 @@ TEST(ValueMetricProducerTest, TestPulledEventsTakeZeroOnReset) {
     EXPECT_CALL(*pullerManager, Pull(tagId, _, _)).WillOnce(Return(false));
 
     ValueMetricProducer valueProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, wizard,
-                                      tagId, bucketStartTimeNs, bucketStartTimeNs, pullerManager);
+                                      logEventMatcherIndex, eventMatcherWizard, tagId,
+                                      bucketStartTimeNs, bucketStartTimeNs, pullerManager);
 
     vector<shared_ptr<LogEvent>> allData;
     allData.clear();
@@ -337,6 +470,12 @@ TEST(ValueMetricProducerTest, TestEventsWithNonSlicedCondition) {
     metric.mutable_value_field()->add_child()->set_field(2);
     metric.set_condition(StringToId("SCREEN_ON"));
 
+    UidMap uidMap;
+    SimpleAtomMatcher atomMatcher;
+    atomMatcher.set_atom_id(tagId);
+    sp<EventMatcherWizard> eventMatcherWizard =
+            new EventMatcherWizard({new SimpleLogMatchingTracker(
+                    atomMatcherId, logEventMatcherIndex, atomMatcher, uidMap)});
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
     EXPECT_CALL(*pullerManager, RegisterReceiver(tagId, _, _, _)).WillOnce(Return());
@@ -364,7 +503,8 @@ TEST(ValueMetricProducerTest, TestEventsWithNonSlicedCondition) {
                 return true;
             }));
 
-    ValueMetricProducer valueProducer(kConfigKey, metric, 1, wizard, tagId, bucketStartTimeNs,
+    ValueMetricProducer valueProducer(kConfigKey, metric, 1, wizard, logEventMatcherIndex,
+                                      eventMatcherWizard, tagId, bucketStartTimeNs,
                                       bucketStartTimeNs, pullerManager);
     valueProducer.onConditionChanged(true, bucketStartTimeNs + 8);
 
@@ -412,10 +552,17 @@ TEST(ValueMetricProducerTest, TestPushedEventsWithUpgrade) {
     metric.mutable_value_field()->set_field(tagId);
     metric.mutable_value_field()->add_child()->set_field(2);
 
+    UidMap uidMap;
+    SimpleAtomMatcher atomMatcher;
+    atomMatcher.set_atom_id(tagId);
+    sp<EventMatcherWizard> eventMatcherWizard =
+            new EventMatcherWizard({new SimpleLogMatchingTracker(
+                    atomMatcherId, logEventMatcherIndex, atomMatcher, uidMap)});
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
-    ValueMetricProducer valueProducer(kConfigKey, metric, -1, wizard, -1, bucketStartTimeNs,
-                                      bucketStartTimeNs, pullerManager);
+    ValueMetricProducer valueProducer(kConfigKey, metric, -1, wizard, logEventMatcherIndex,
+                                      eventMatcherWizard, -1, bucketStartTimeNs, bucketStartTimeNs,
+                                      pullerManager);
 
     shared_ptr<LogEvent> event1 = make_shared<LogEvent>(tagId, bucketStartTimeNs + 10);
     event1->write(1);
@@ -453,6 +600,12 @@ TEST(ValueMetricProducerTest, TestPulledValueWithUpgrade) {
     metric.mutable_value_field()->set_field(tagId);
     metric.mutable_value_field()->add_child()->set_field(2);
 
+    UidMap uidMap;
+    SimpleAtomMatcher atomMatcher;
+    atomMatcher.set_atom_id(tagId);
+    sp<EventMatcherWizard> eventMatcherWizard =
+            new EventMatcherWizard({new SimpleLogMatchingTracker(
+                    atomMatcherId, logEventMatcherIndex, atomMatcher, uidMap)});
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
     EXPECT_CALL(*pullerManager, RegisterReceiver(tagId, _, _, _)).WillOnce(Return());
@@ -469,7 +622,8 @@ TEST(ValueMetricProducerTest, TestPulledValueWithUpgrade) {
                 data->push_back(event);
                 return true;
             }));
-    ValueMetricProducer valueProducer(kConfigKey, metric, -1, wizard, tagId, bucketStartTimeNs,
+    ValueMetricProducer valueProducer(kConfigKey, metric, -1, wizard, logEventMatcherIndex,
+                                      eventMatcherWizard, tagId, bucketStartTimeNs,
                                       bucketStartTimeNs, pullerManager);
 
     vector<shared_ptr<LogEvent>> allData;
@@ -508,6 +662,12 @@ TEST(ValueMetricProducerTest, TestPulledValueWithUpgradeWhileConditionFalse) {
     metric.mutable_value_field()->add_child()->set_field(2);
     metric.set_condition(StringToId("SCREEN_ON"));
 
+    UidMap uidMap;
+    SimpleAtomMatcher atomMatcher;
+    atomMatcher.set_atom_id(tagId);
+    sp<EventMatcherWizard> eventMatcherWizard =
+            new EventMatcherWizard({new SimpleLogMatchingTracker(
+                    atomMatcherId, logEventMatcherIndex, atomMatcher, uidMap)});
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
     EXPECT_CALL(*pullerManager, RegisterReceiver(tagId, _, _, _)).WillOnce(Return());
@@ -533,7 +693,8 @@ TEST(ValueMetricProducerTest, TestPulledValueWithUpgradeWhileConditionFalse) {
                 data->push_back(event);
                 return true;
             }));
-    ValueMetricProducer valueProducer(kConfigKey, metric, 1, wizard, tagId, bucketStartTimeNs,
+    ValueMetricProducer valueProducer(kConfigKey, metric, 1, wizard, logEventMatcherIndex,
+                                      eventMatcherWizard, tagId, bucketStartTimeNs,
                                       bucketStartTimeNs, pullerManager);
     valueProducer.onConditionChanged(true, bucketStartTimeNs + 1);
 
@@ -556,11 +717,18 @@ TEST(ValueMetricProducerTest, TestPushedEventsWithoutCondition) {
     metric.mutable_value_field()->set_field(tagId);
     metric.mutable_value_field()->add_child()->set_field(2);
 
+    UidMap uidMap;
+    SimpleAtomMatcher atomMatcher;
+    atomMatcher.set_atom_id(tagId);
+    sp<EventMatcherWizard> eventMatcherWizard =
+            new EventMatcherWizard({new SimpleLogMatchingTracker(
+                    atomMatcherId, logEventMatcherIndex, atomMatcher, uidMap)});
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
 
-    ValueMetricProducer valueProducer(kConfigKey, metric, -1, wizard, -1, bucketStartTimeNs,
-                                      bucketStartTimeNs, pullerManager);
+    ValueMetricProducer valueProducer(kConfigKey, metric, -1, wizard, logEventMatcherIndex,
+                                      eventMatcherWizard, -1, bucketStartTimeNs, bucketStartTimeNs,
+                                      pullerManager);
 
     shared_ptr<LogEvent> event1 = make_shared<LogEvent>(tagId, bucketStartTimeNs + 10);
     event1->write(1);
@@ -597,11 +765,18 @@ TEST(ValueMetricProducerTest, TestPushedEventsWithCondition) {
     metric.mutable_value_field()->set_field(tagId);
     metric.mutable_value_field()->add_child()->set_field(2);
 
+    UidMap uidMap;
+    SimpleAtomMatcher atomMatcher;
+    atomMatcher.set_atom_id(tagId);
+    sp<EventMatcherWizard> eventMatcherWizard =
+            new EventMatcherWizard({new SimpleLogMatchingTracker(
+                    atomMatcherId, logEventMatcherIndex, atomMatcher, uidMap)});
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
 
-    ValueMetricProducer valueProducer(kConfigKey, metric, 1, wizard, -1, bucketStartTimeNs,
-                                      bucketStartTimeNs, pullerManager);
+    ValueMetricProducer valueProducer(kConfigKey, metric, 1, wizard, logEventMatcherIndex,
+                                      eventMatcherWizard, -1, bucketStartTimeNs, bucketStartTimeNs,
+                                      pullerManager);
 
     shared_ptr<LogEvent> event1 = make_shared<LogEvent>(tagId, bucketStartTimeNs + 10);
     event1->write(1);
@@ -669,11 +844,17 @@ TEST(ValueMetricProducerTest, TestAnomalyDetection) {
     metric.mutable_value_field()->set_field(tagId);
     metric.mutable_value_field()->add_child()->set_field(2);
 
+    UidMap uidMap;
+    SimpleAtomMatcher atomMatcher;
+    atomMatcher.set_atom_id(tagId);
+    sp<EventMatcherWizard> eventMatcherWizard =
+            new EventMatcherWizard({new SimpleLogMatchingTracker(
+                    atomMatcherId, logEventMatcherIndex, atomMatcher, uidMap)});
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
     ValueMetricProducer valueProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, wizard,
-                                      -1 /*not pulled*/, bucketStartTimeNs, bucketStartTimeNs,
-                                      pullerManager);
+                                      logEventMatcherIndex, eventMatcherWizard, -1 /*not pulled*/,
+                                      bucketStartTimeNs, bucketStartTimeNs, pullerManager);
 
     sp<AnomalyTracker> anomalyTracker = valueProducer.addAnomalyTracker(alert, alarmMonitor);
 
@@ -744,6 +925,12 @@ TEST(ValueMetricProducerTest, TestBucketBoundaryNoCondition) {
     metric.mutable_value_field()->set_field(tagId);
     metric.mutable_value_field()->add_child()->set_field(2);
 
+    UidMap uidMap;
+    SimpleAtomMatcher atomMatcher;
+    atomMatcher.set_atom_id(tagId);
+    sp<EventMatcherWizard> eventMatcherWizard =
+            new EventMatcherWizard({new SimpleLogMatchingTracker(
+                    atomMatcherId, logEventMatcherIndex, atomMatcher, uidMap)});
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
     EXPECT_CALL(*pullerManager, RegisterReceiver(tagId, _, _, _)).WillOnce(Return());
@@ -751,7 +938,8 @@ TEST(ValueMetricProducerTest, TestBucketBoundaryNoCondition) {
     EXPECT_CALL(*pullerManager, Pull(tagId, _, _)).WillOnce(Return(true));
 
     ValueMetricProducer valueProducer(kConfigKey, metric, -1 /*-1 meaning no condition*/, wizard,
-                                      tagId, bucketStartTimeNs, bucketStartTimeNs, pullerManager);
+                                      logEventMatcherIndex, eventMatcherWizard, tagId,
+                                      bucketStartTimeNs, bucketStartTimeNs, pullerManager);
 
     vector<shared_ptr<LogEvent>> allData;
     // pull 1
@@ -825,6 +1013,12 @@ TEST(ValueMetricProducerTest, TestBucketBoundaryWithCondition) {
     metric.mutable_value_field()->add_child()->set_field(2);
     metric.set_condition(StringToId("SCREEN_ON"));
 
+    UidMap uidMap;
+    SimpleAtomMatcher atomMatcher;
+    atomMatcher.set_atom_id(tagId);
+    sp<EventMatcherWizard> eventMatcherWizard =
+            new EventMatcherWizard({new SimpleLogMatchingTracker(
+                    atomMatcherId, logEventMatcherIndex, atomMatcher, uidMap)});
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
     EXPECT_CALL(*pullerManager, RegisterReceiver(tagId, _, _, _)).WillOnce(Return());
@@ -854,7 +1048,8 @@ TEST(ValueMetricProducerTest, TestBucketBoundaryWithCondition) {
                 return true;
             }));
 
-    ValueMetricProducer valueProducer(kConfigKey, metric, 1, wizard, tagId, bucketStartTimeNs,
+    ValueMetricProducer valueProducer(kConfigKey, metric, 1, wizard, logEventMatcherIndex,
+                                      eventMatcherWizard, tagId, bucketStartTimeNs,
                                       bucketStartTimeNs, pullerManager);
     valueProducer.onConditionChanged(true, bucketStartTimeNs + 8);
 
@@ -904,6 +1099,12 @@ TEST(ValueMetricProducerTest, TestBucketBoundaryWithCondition2) {
     metric.mutable_value_field()->add_child()->set_field(2);
     metric.set_condition(StringToId("SCREEN_ON"));
 
+    UidMap uidMap;
+    SimpleAtomMatcher atomMatcher;
+    atomMatcher.set_atom_id(tagId);
+    sp<EventMatcherWizard> eventMatcherWizard =
+            new EventMatcherWizard({new SimpleLogMatchingTracker(
+                    atomMatcherId, logEventMatcherIndex, atomMatcher, uidMap)});
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
     EXPECT_CALL(*pullerManager, RegisterReceiver(tagId, _, _, _)).WillRepeatedly(Return());
@@ -944,7 +1145,8 @@ TEST(ValueMetricProducerTest, TestBucketBoundaryWithCondition2) {
                 return true;
             }));
 
-    ValueMetricProducer valueProducer(kConfigKey, metric, 1, wizard, tagId, bucketStartTimeNs,
+    ValueMetricProducer valueProducer(kConfigKey, metric, 1, wizard, logEventMatcherIndex,
+                                      eventMatcherWizard, tagId, bucketStartTimeNs,
                                       bucketStartTimeNs, pullerManager);
     valueProducer.onConditionChanged(true, bucketStartTimeNs + 8);
 
@@ -1000,11 +1202,18 @@ TEST(ValueMetricProducerTest, TestPushedAggregateMin) {
     metric.mutable_value_field()->add_child()->set_field(2);
     metric.set_aggregation_type(ValueMetric::MIN);
 
+    UidMap uidMap;
+    SimpleAtomMatcher atomMatcher;
+    atomMatcher.set_atom_id(tagId);
+    sp<EventMatcherWizard> eventMatcherWizard =
+            new EventMatcherWizard({new SimpleLogMatchingTracker(
+                    atomMatcherId, logEventMatcherIndex, atomMatcher, uidMap)});
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
 
-    ValueMetricProducer valueProducer(kConfigKey, metric, -1, wizard, -1, bucketStartTimeNs,
-                                      bucketStartTimeNs, pullerManager);
+    ValueMetricProducer valueProducer(kConfigKey, metric, -1, wizard, logEventMatcherIndex,
+                                      eventMatcherWizard, -1, bucketStartTimeNs, bucketStartTimeNs,
+                                      pullerManager);
 
     shared_ptr<LogEvent> event1 = make_shared<LogEvent>(tagId, bucketStartTimeNs + 10);
     event1->write(1);
@@ -1042,11 +1251,18 @@ TEST(ValueMetricProducerTest, TestPushedAggregateMax) {
     metric.mutable_value_field()->add_child()->set_field(2);
     metric.set_aggregation_type(ValueMetric::MAX);
 
+    UidMap uidMap;
+    SimpleAtomMatcher atomMatcher;
+    atomMatcher.set_atom_id(tagId);
+    sp<EventMatcherWizard> eventMatcherWizard =
+            new EventMatcherWizard({new SimpleLogMatchingTracker(
+                    atomMatcherId, logEventMatcherIndex, atomMatcher, uidMap)});
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
 
-    ValueMetricProducer valueProducer(kConfigKey, metric, -1, wizard, -1, bucketStartTimeNs,
-                                      bucketStartTimeNs, pullerManager);
+    ValueMetricProducer valueProducer(kConfigKey, metric, -1, wizard, logEventMatcherIndex,
+                                      eventMatcherWizard, -1, bucketStartTimeNs, bucketStartTimeNs,
+                                      pullerManager);
 
     shared_ptr<LogEvent> event1 = make_shared<LogEvent>(tagId, bucketStartTimeNs + 10);
     event1->write(1);
@@ -1084,11 +1300,18 @@ TEST(ValueMetricProducerTest, TestPushedAggregateAvg) {
     metric.mutable_value_field()->add_child()->set_field(2);
     metric.set_aggregation_type(ValueMetric::AVG);
 
+    UidMap uidMap;
+    SimpleAtomMatcher atomMatcher;
+    atomMatcher.set_atom_id(tagId);
+    sp<EventMatcherWizard> eventMatcherWizard =
+            new EventMatcherWizard({new SimpleLogMatchingTracker(
+                    atomMatcherId, logEventMatcherIndex, atomMatcher, uidMap)});
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
 
-    ValueMetricProducer valueProducer(kConfigKey, metric, -1, wizard, -1, bucketStartTimeNs,
-                                      bucketStartTimeNs, pullerManager);
+    ValueMetricProducer valueProducer(kConfigKey, metric, -1, wizard, logEventMatcherIndex,
+                                      eventMatcherWizard, -1, bucketStartTimeNs, bucketStartTimeNs,
+                                      pullerManager);
 
     shared_ptr<LogEvent> event1 = make_shared<LogEvent>(tagId, bucketStartTimeNs + 10);
     event1->write(1);
@@ -1129,11 +1352,18 @@ TEST(ValueMetricProducerTest, TestPushedAggregateSum) {
     metric.mutable_value_field()->add_child()->set_field(2);
     metric.set_aggregation_type(ValueMetric::SUM);
 
+    UidMap uidMap;
+    SimpleAtomMatcher atomMatcher;
+    atomMatcher.set_atom_id(tagId);
+    sp<EventMatcherWizard> eventMatcherWizard =
+            new EventMatcherWizard({new SimpleLogMatchingTracker(
+                    atomMatcherId, logEventMatcherIndex, atomMatcher, uidMap)});
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
 
-    ValueMetricProducer valueProducer(kConfigKey, metric, -1, wizard, -1, bucketStartTimeNs,
-                                      bucketStartTimeNs, pullerManager);
+    ValueMetricProducer valueProducer(kConfigKey, metric, -1, wizard, logEventMatcherIndex,
+                                      eventMatcherWizard, -1, bucketStartTimeNs, bucketStartTimeNs,
+                                      pullerManager);
 
     shared_ptr<LogEvent> event1 = make_shared<LogEvent>(tagId, bucketStartTimeNs + 10);
     event1->write(1);
@@ -1172,11 +1402,18 @@ TEST(ValueMetricProducerTest, TestSkipZeroDiffOutput) {
     metric.set_aggregation_type(ValueMetric::MIN);
     metric.set_use_diff(true);
 
+    UidMap uidMap;
+    SimpleAtomMatcher atomMatcher;
+    atomMatcher.set_atom_id(tagId);
+    sp<EventMatcherWizard> eventMatcherWizard =
+            new EventMatcherWizard({new SimpleLogMatchingTracker(
+                    atomMatcherId, logEventMatcherIndex, atomMatcher, uidMap)});
     sp<MockConditionWizard> wizard = new NaggyMock<MockConditionWizard>();
     sp<MockStatsPullerManager> pullerManager = new StrictMock<MockStatsPullerManager>();
 
-    ValueMetricProducer valueProducer(kConfigKey, metric, -1, wizard, -1, bucketStartTimeNs,
-                                      bucketStartTimeNs, pullerManager);
+    ValueMetricProducer valueProducer(kConfigKey, metric, -1, wizard, logEventMatcherIndex,
+                                      eventMatcherWizard, -1, bucketStartTimeNs, bucketStartTimeNs,
+                                      pullerManager);
 
     shared_ptr<LogEvent> event1 = make_shared<LogEvent>(tagId, bucketStartTimeNs + 10);
     event1->write(1);

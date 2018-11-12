@@ -488,9 +488,9 @@ bool initMetrics(const ConfigKey& key, const StatsdConfig& config, const int64_t
             }
         }
 
-        sp<MetricProducer> valueProducer =
-                new ValueMetricProducer(key, metric, conditionIndex, wizard, pullTagId,
-                                        timeBaseTimeNs, currentTimeNs, pullerManager);
+        sp<MetricProducer> valueProducer = new ValueMetricProducer(
+                key, metric, conditionIndex, wizard, trackerIndex, matcherWizard, pullTagId,
+                timeBaseTimeNs, currentTimeNs, pullerManager);
         allMetricProducers.push_back(valueProducer);
     }
 
