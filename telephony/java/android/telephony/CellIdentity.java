@@ -190,6 +190,7 @@ public abstract class CellIdentity implements Parcelable {
                         case CellInfo.TYPE_LTE: return CellIdentityLte.createFromParcelBody(in);
                         case CellInfo.TYPE_TDSCDMA:
                             return CellIdentityTdscdma.createFromParcelBody(in);
+                        case CellInfo.TYPE_NR: return CellIdentityNr.createFromParcelBody(in);
                         default: throw new IllegalArgumentException("Bad Cell identity Parcel");
                     }
                 }
