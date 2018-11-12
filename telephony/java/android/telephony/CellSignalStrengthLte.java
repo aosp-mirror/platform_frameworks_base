@@ -30,6 +30,25 @@ public final class CellSignalStrengthLte extends CellSignalStrength implements P
     private static final String LOG_TAG = "CellSignalStrengthLte";
     private static final boolean DBG = false;
 
+    /**
+     * Indicates the unknown or undetectable RSSI value in ASU.
+     *
+     * Reference: TS 27.007 8.5 - Signal quality +CSQ
+     */
+    private static final int SIGNAL_STRENGTH_LTE_RSSI_ASU_UNKNOWN = 99;
+    /**
+     * Indicates the maximum valid RSSI value in ASU.
+     *
+     * Reference: TS 27.007 8.5 - Signal quality +CSQ
+     */
+    private static final int SIGNAL_STRENGTH_LTE_RSSI_VALID_ASU_MAX_VALUE = 31;
+    /**
+     * Indicates the minimum valid RSSI value in ASU.
+     *
+     * Reference: TS 27.007 8.5 - Signal quality +CSQ
+     */
+    private static final int SIGNAL_STRENGTH_LTE_RSSI_VALID_ASU_MIN_VALUE = 0;
+
     @UnsupportedAppUsage
     private int mSignalStrength;
     @UnsupportedAppUsage
@@ -138,6 +157,19 @@ public final class CellSignalStrengthLte extends CellSignalStrength implements P
      */
     public int getRsrq() {
         return mRsrq;
+    }
+
+    /**
+     * Get Received Signal Strength Indication (RSSI) in dBm
+     *
+     * The value range is [-113, -51] inclusively or {@link CellInfo#UNAVAILABLE} if unavailable.
+     *
+     * Reference: TS 27.007 8.5 Signal quality +CSQ
+     *
+     * @return the RSSI if available or {@link CellInfo#UNAVAILABLE} if unavailable.
+     */
+    public int getRssi() {
+        return convertRssiAsuToDBm(mSignalStrength);
     }
 
     /**
@@ -307,5 +339,18 @@ public final class CellSignalStrengthLte extends CellSignalStrength implements P
      */
     private static void log(String s) {
         Rlog.w(LOG_TAG, s);
+    }
+
+    private static int convertRssiAsuToDBm(int rssiAsu) {
+        if (rssiAsu != SIGNAL_STRENGTH_LTE_RSSI_ASU_UNKNOWN
+                && (rssiAsu < SIGNAL_STRENGTH_LTE_RSSI_VALID_ASU_MIN_VALUE
+                || rssiAsu > SIGNAL_STRENGTH_LTE_RSSI_VALID_ASU_MAX_VALUE)) {
+            Rlog.e(LOG_TAG, "convertRssiAsuToDBm: invalid RSSI in ASU=" + rssiAsu);
+            return CellInfo.UNAVAILABLE;
+        }
+        if (rssiAsu == SIGNAL_STRENGTH_LTE_RSSI_ASU_UNKNOWN) {
+            return CellInfo.UNAVAILABLE;
+        }
+        return -113 + (2 * rssiAsu);
     }
 }
