@@ -206,45 +206,6 @@ public class Vpn {
     // Handle of the user initiating VPN.
     private final int mUserHandle;
 
-    // Listen to package removal and change events (update/uninstall) for this user
-    private final BroadcastReceiver mPackageIntentReceiver = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            final Uri data = intent.getData();
-            final String packageName = data == null ? null : data.getSchemeSpecificPart();
-            if (packageName == null) {
-                return;
-            }
-
-            synchronized (Vpn.this) {
-                // Avoid race where always-on package has been unset
-                if (!packageName.equals(getAlwaysOnPackage())) {
-                    return;
-                }
-
-                final String action = intent.getAction();
-                Log.i(TAG, "Received broadcast " + action + " for always-on VPN package "
-                        + packageName + " in user " + mUserHandle);
-
-                switch(action) {
-                    case Intent.ACTION_PACKAGE_REPLACED:
-                        // Start vpn after app upgrade
-                        startAlwaysOnVpn();
-                        break;
-                    case Intent.ACTION_PACKAGE_REMOVED:
-                        final boolean isPackageRemoved = !intent.getBooleanExtra(
-                                Intent.EXTRA_REPLACING, false);
-                        if (isPackageRemoved) {
-                            setAlwaysOnPackage(null, false);
-                        }
-                        break;
-                }
-            }
-        }
-    };
-
-    private boolean mIsPackageIntentReceiverRegistered = false;
-
     public Vpn(Looper looper, Context context, INetworkManagementService netService,
             @UserIdInt int userHandle) {
         this(looper, context, netService, userHandle, new SystemServices(context));
@@ -500,38 +461,12 @@ public class Vpn {
             // Prepare this app. The notification will update as a side-effect of updateState().
             prepareInternal(packageName);
         }
-        maybeRegisterPackageChangeReceiverLocked(packageName);
         setVpnForcedLocked(mLockdown);
         return true;
     }
 
     private static boolean isNullOrLegacyVpn(String packageName) {
         return packageName == null || VpnConfig.LEGACY_VPN.equals(packageName);
-    }
-
-    private void unregisterPackageChangeReceiverLocked() {
-        if (mIsPackageIntentReceiverRegistered) {
-            mContext.unregisterReceiver(mPackageIntentReceiver);
-            mIsPackageIntentReceiverRegistered = false;
-        }
-    }
-
-    private void maybeRegisterPackageChangeReceiverLocked(String packageName) {
-        // Unregister IntentFilter listening for previous always-on package change
-        unregisterPackageChangeReceiverLocked();
-
-        if (!isNullOrLegacyVpn(packageName)) {
-            mIsPackageIntentReceiverRegistered = true;
-
-            IntentFilter intentFilter = new IntentFilter();
-            // Protected intent can only be sent by system. No permission required in register.
-            intentFilter.addAction(Intent.ACTION_PACKAGE_REPLACED);
-            intentFilter.addAction(Intent.ACTION_PACKAGE_REMOVED);
-            intentFilter.addDataScheme("package");
-            intentFilter.addDataSchemeSpecificPart(packageName, PatternMatcher.PATTERN_LITERAL);
-            mContext.registerReceiverAsUser(
-                    mPackageIntentReceiver, UserHandle.of(mUserHandle), intentFilter, null, null);
-        }
     }
 
     /**
@@ -1302,7 +1237,6 @@ public class Vpn {
         setLockdown(false);
         mAlwaysOn = false;
 
-        unregisterPackageChangeReceiverLocked();
         // Quit any active connections
         agentDisconnect();
     }
