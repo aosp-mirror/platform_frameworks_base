@@ -70,6 +70,22 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="3637758096565605541">"Pokušajte ponovo napraviti snimku zaslona"</string>
     <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"Zaslon nije snimljen zbog ograničenog prostora za pohranu"</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"Aplikacija ili vaša organizacija ne dopuštaju snimanje zaslona"</string>
+    <string name="screenrecord_name" msgid="4196719243134204796">"Snimanje zaslona"</string>
+    <string name="screenrecord_channel_description" msgid="4630777331970993858">"Tekuća obavijest za sesiju snimanja zaslona"</string>
+    <string name="screenrecord_start_label" msgid="5177739269492196055">"Započni snimanje"</string>
+    <string name="screenrecord_mic_label" msgid="4522870600914810019">"Snimi glasovni zapis"</string>
+    <string name="screenrecord_taps_label" msgid="1776467076607964790">"Prikaži dodire"</string>
+    <string name="screenrecord_stop_label" msgid="2544887572381260038">"Zaustavi"</string>
+    <string name="screenrecord_pause_label" msgid="7162476078856786227">"Pauza"</string>
+    <string name="screenrecord_resume_label" msgid="3605818317015993314">"Nastavi"</string>
+    <string name="screenrecord_cancel_label" msgid="3385204992871088609">"Odustani"</string>
+    <string name="screenrecord_share_label" msgid="4197867360204019389">"Dijeli"</string>
+    <string name="screenrecord_delete_label" msgid="7893716870917824013">"Izbriši"</string>
+    <string name="screenrecord_cancel_success" msgid="7768976011702614782">"Snimanje zaslona otkazano"</string>
+    <string name="screenrecord_save_message" msgid="4733982661301846778">"Snimanje zaslona spremljeno je, dodirnite da biste ga pregledali"</string>
+    <string name="screenrecord_delete_description" msgid="5743190456090354585">"Snimanje zaslona izbrisano"</string>
+    <string name="screenrecord_delete_error" msgid="8154904464563560282">"Pogreška prilikom brisanja snimanja zaslona"</string>
+    <string name="screenrecord_permission_error" msgid="1526755299469001000">"Dohvaćanje dopuštenja nije uspjelo"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Opcije USB prijenosa datoteka"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Učitaj kao media player (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Učitaj kao fotoaparat (PTP)"</string>
@@ -585,14 +601,17 @@
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Obavijesti"</string>
     <string name="notification_channel_disabled" msgid="344536703863700565">"Te vam se obavijesti više neće prikazivati"</string>
     <string name="notification_channel_minimized" msgid="1664411570378910931">"Te će se obavijesti minimizirati"</string>
+    <string name="notification_channel_silenced" msgid="2877199534497961942">"Ove obavijesti prikazivat će se tiho"</string>
+    <string name="notification_channel_unsilenced" msgid="4790904571552394137">"Ove obavijesti imat će zvučni signal"</string>
     <string name="inline_blocking_helper" msgid="3055064577771478591">"Obično odbacujete te obavijesti. \nŽelite li da se nastave prikazivati?"</string>
     <string name="inline_keep_showing" msgid="8945102997083836858">"Želite li da se obavijesti nastave prikazivati?"</string>
     <string name="inline_stop_button" msgid="4172980096860941033">"Zaustavi obavijesti"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"Nastavi prikazivati"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"Minimiziraj"</string>
+    <string name="inline_silent_button_silent" msgid="4411510650503783646">"Prikaži tiho"</string>
+    <string name="inline_silent_button_alert" msgid="2967599358027208807">"Prikaži uz zvučni signal"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Želite li da se obavijesti te aplikacije nastave prikazivati?"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"Te se obavijesti ne mogu isključiti"</string>
-    <string name="notification_delegate_header" msgid="9167022191405284627">"putem aplikacije <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="appops_camera" msgid="8100147441602585776">"Ova aplikacija upotrebljava kameru."</string>
     <string name="appops_microphone" msgid="741508267659494555">"Ova aplikacija upotrebljava mikrofon."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"Ova se aplikacija prikazuje preko drugih aplikacija na zaslonu."</string>
@@ -809,7 +828,7 @@
     <string name="instant_apps_message" msgid="1183313016396018086">"Aplikacija je otvorena bez instaliranja."</string>
     <string name="instant_apps_message_with_help" msgid="6179830437630729747">"Aplikacija je otvorena bez instaliranja. Dodirnite da biste saznali više."</string>
     <string name="app_info" msgid="6856026610594615344">"Informacije o aplikaciji"</string>
-    <string name="go_to_web" msgid="1106022723459948514">"Prijeđi na web"</string>
+    <string name="go_to_web" msgid="2650669128861626071">"Otvori preglednik"</string>
     <string name="mobile_data" msgid="7094582042819250762">"Mobilni podaci"</string>
     <string name="mobile_data_text_format" msgid="3526214522670876454">"<xliff:g id="ID_1">%1$s</xliff:g> – <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"Wi-Fi je isključen"</string>
@@ -841,4 +860,16 @@
     <string name="open_saver_setting_action" msgid="8314624730997322529">"Postavke"</string>
     <string name="auto_saver_okay_action" msgid="2701221740227683650">"Shvaćam"</string>
     <string name="heap_dump_tile_name" msgid="9141031328971226374">"Izdvoji mem. SysUI-a"</string>
+    <string name="ongoing_privacy_chip_content_single_app" msgid="4479560741898690064">"Aplikacija <xliff:g id="APP">%1$s</xliff:g> upotrebljava <xliff:g id="TYPES_LIST">%2$s</xliff:g>."</string>
+    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8640691753867990511">"Aplikacije upotrebljavaju <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
+    <string name="ongoing_privacy_dialog_open_app" msgid="2483886665314567948">"Otvori aplikaciju"</string>
+    <string name="ongoing_privacy_dialog_cancel" msgid="5479124524931216790">"Odustani"</string>
+    <string name="ongoing_privacy_dialog_okay" msgid="5823914553907253532">"U redu"</string>
+    <string name="ongoing_privacy_dialog_open_settings" msgid="6382622467527049074">"Postavke"</string>
+    <string name="ongoing_privacy_dialog_app_item" msgid="486085465491760739">"Aplikacija <xliff:g id="APP">%1$s</xliff:g> upotrebljava <xliff:g id="TYPE">%2$s</xliff:g> unatrag <xliff:g id="TIME">%3$d</xliff:g> min"</string>
+    <string name="ongoing_privacy_dialog_apps_item" msgid="9207187236823950491">"Aplikacije <xliff:g id="APPS">%1$s</xliff:g> upotrebljavaju <xliff:g id="TYPE">%2$s</xliff:g>"</string>
+    <string name="ongoing_privacy_dialog_single_app" msgid="3884812469179810924">"Aplikacija <xliff:g id="APP">%1$s</xliff:g> upotrebljava <xliff:g id="TYPES_LIST">%2$s</xliff:g>"</string>
+    <string name="privacy_type_camera" msgid="1676604631892420333">"fotoaparat"</string>
+    <string name="privacy_type_location" msgid="6435497989657286700">"lokaciju"</string>
+    <string name="privacy_type_microphone" msgid="4153045784928554506">"mikrofon"</string>
 </resources>

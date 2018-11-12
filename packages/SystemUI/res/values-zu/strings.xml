@@ -70,6 +70,22 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="3637758096565605541">"Zama ukuthatha isithombe-skrini futhi"</string>
     <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"Ayikwazi ukulondoloza isithombe-skrini ngenxa yesikhala sesitoreji esikhawulelwe"</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"Ukuthatha izithombe-skrini akuvunyelwe uhlelo lokusebenza noma inhlangano yakho"</string>
+    <string name="screenrecord_name" msgid="4196719243134204796">"Ukurekhoda isikrini"</string>
+    <string name="screenrecord_channel_description" msgid="4630777331970993858">"Isaziso esiqhubekayo seseshini yokurekhoda isikrini"</string>
+    <string name="screenrecord_start_label" msgid="5177739269492196055">"Qala ukurekhoda"</string>
+    <string name="screenrecord_mic_label" msgid="4522870600914810019">"Rekhoda izwi elingaphezulu"</string>
+    <string name="screenrecord_taps_label" msgid="1776467076607964790">"Bonisa amathebhu"</string>
+    <string name="screenrecord_stop_label" msgid="2544887572381260038">"Misa"</string>
+    <string name="screenrecord_pause_label" msgid="7162476078856786227">"Phumula"</string>
+    <string name="screenrecord_resume_label" msgid="3605818317015993314">"Qalisa kabusha"</string>
+    <string name="screenrecord_cancel_label" msgid="3385204992871088609">"Khansela"</string>
+    <string name="screenrecord_share_label" msgid="4197867360204019389">"Yabelana"</string>
+    <string name="screenrecord_delete_label" msgid="7893716870917824013">"Susa"</string>
+    <string name="screenrecord_cancel_success" msgid="7768976011702614782">"Ukurekhoda isikrini kukhanseliwe"</string>
+    <string name="screenrecord_save_message" msgid="4733982661301846778">"Ukurekhoda isikrini kulondoloziwe, thepha ukuze ubuke"</string>
+    <string name="screenrecord_delete_description" msgid="5743190456090354585">"Ukurekhoda isikrini kususiwe"</string>
+    <string name="screenrecord_delete_error" msgid="8154904464563560282">"Iphutha lokususa ukurekhoda isikrini"</string>
+    <string name="screenrecord_permission_error" msgid="1526755299469001000">"Yehlulekile ukuthola izimvume"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Okukhethwa kokudluliswa kwefayela ye-USB"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Lengisa njengesidlali semediya (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Lengisa ikhamera (PTP)"</string>
@@ -582,15 +598,17 @@
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Izaziso"</string>
     <string name="notification_channel_disabled" msgid="344536703863700565">"Ngeke usabona lezi zaziso"</string>
     <string name="notification_channel_minimized" msgid="1664411570378910931">"Lezi zaziso zizokwehlisa"</string>
+    <string name="notification_channel_silenced" msgid="2877199534497961942">"Lezi zaziso zizoboniswa ngokuthulile"</string>
+    <string name="notification_channel_unsilenced" msgid="4790904571552394137">"Lezi zaziso zizokuxwayisa"</string>
     <string name="inline_blocking_helper" msgid="3055064577771478591">"Uvamise ukucashisa lezi zaziso. \nQhubeka ulokhu uzibonisa?"</string>
     <string name="inline_keep_showing" msgid="8945102997083836858">"Qhubeka nokubonisa lezi zaziso?"</string>
     <string name="inline_stop_button" msgid="4172980096860941033">"Misa izaziso"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"Qhubeka nokubonisa"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"Nciphisa"</string>
+    <string name="inline_silent_button_silent" msgid="4411510650503783646">"Bonisa ngokuthulile"</string>
+    <string name="inline_silent_button_alert" msgid="2967599358027208807">"Bonisa futhi xwayisa"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Qhubeka nokubonisa izaziso kusuka kulolu hlelo lokusebenza?"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"Lezi zaziso azikwazi ukuvalwa"</string>
-    <!-- no translation found for notification_delegate_header (9167022191405284627) -->
-    <skip />
     <string name="appops_camera" msgid="8100147441602585776">"Lolu hlelo lokusebenza lusebenzisa ikhamera."</string>
     <string name="appops_microphone" msgid="741508267659494555">"Lolu hlelo lokusebenza lusebenzisa imakrofoni."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"Lolu hlelo lokusebenza luboniswa ngaphezulu kwezinye izinhlelo zokusebenza kusikrini sakho."</string>
@@ -725,8 +743,7 @@
     <item msgid="2139628951880142927">"Bonisa iphesentheji uma ishaja (okuzenzakalelayo)"</item>
     <item msgid="3327323682209964956">"Ungabonisi lesi sithonjana"</item>
   </string-array>
-    <!-- no translation found for tuner_low_priority (1325884786608312358) -->
-    <skip />
+    <string name="tuner_low_priority" msgid="1325884786608312358">"Bonisa izithonjana zesaziso zokubaluleka okuncane"</string>
     <string name="other" msgid="4060683095962566764">"Okunye"</string>
     <string name="accessibility_divider" msgid="5903423481953635044">"Isihlukanisi sokuhlukanisa isikrini"</string>
     <string name="accessibility_action_divider_left_full" msgid="2801570521881574972">"Isikrini esigcwele esingakwesokunxele"</string>
@@ -806,7 +823,7 @@
     <string name="instant_apps_message" msgid="1183313016396018086">"Uhlelo lokusebenza luvulwe ngaphndle kokufakwa."</string>
     <string name="instant_apps_message_with_help" msgid="6179830437630729747">"Uhlelo lokusebenza luvulwe ngaphandle kokufakwa. Thepha ukuze ufunde kabanzi."</string>
     <string name="app_info" msgid="6856026610594615344">"Ulwazi lohlelo lokusebenza"</string>
-    <string name="go_to_web" msgid="1106022723459948514">"Iya kuwebhu"</string>
+    <string name="go_to_web" msgid="2650669128861626071">"Iya kusiphequluli"</string>
     <string name="mobile_data" msgid="7094582042819250762">"Idatha yeselula"</string>
     <string name="mobile_data_text_format" msgid="3526214522670876454">"<xliff:g id="ID_1">%1$s</xliff:g> — <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"I-Wi-Fi ivaliwe"</string>
@@ -838,4 +855,16 @@
     <string name="open_saver_setting_action" msgid="8314624730997322529">"Izilungiselelo"</string>
     <string name="auto_saver_okay_action" msgid="2701221740227683650">"Ngiyezwa"</string>
     <string name="heap_dump_tile_name" msgid="9141031328971226374">"I-Dump SysUI Heap"</string>
+    <string name="ongoing_privacy_chip_content_single_app" msgid="4479560741898690064">"I-<xliff:g id="APP">%1$s</xliff:g> isebenzisa i-<xliff:g id="TYPES_LIST">%2$s</xliff:g> yakho."</string>
+    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8640691753867990511">"Izinhlelo zokusebenza zisebenzisa i-<xliff:g id="TYPES_LIST">%s</xliff:g> yakho."</string>
+    <string name="ongoing_privacy_dialog_open_app" msgid="2483886665314567948">"Vula uhlelo lokusebenza"</string>
+    <string name="ongoing_privacy_dialog_cancel" msgid="5479124524931216790">"Khansela"</string>
+    <string name="ongoing_privacy_dialog_okay" msgid="5823914553907253532">"Kulungile"</string>
+    <string name="ongoing_privacy_dialog_open_settings" msgid="6382622467527049074">"Izilungiselelo"</string>
+    <string name="ongoing_privacy_dialog_app_item" msgid="486085465491760739">"I-<xliff:g id="APP">%1$s</xliff:g> isebenzisa i-<xliff:g id="TYPE">%2$s</xliff:g> yakho ngeminithi lokugcina elingu-<xliff:g id="TIME">%3$d</xliff:g>"</string>
+    <string name="ongoing_privacy_dialog_apps_item" msgid="9207187236823950491">"Ama-<xliff:g id="APPS">%1$s</xliff:g> asebenzisa i-<xliff:g id="TYPE">%2$s</xliff:g> yakho"</string>
+    <string name="ongoing_privacy_dialog_single_app" msgid="3884812469179810924">"I-<xliff:g id="APP">%1$s</xliff:g> isebenzisa i-<xliff:g id="TYPES_LIST">%2$s</xliff:g> yakho"</string>
+    <string name="privacy_type_camera" msgid="1676604631892420333">"ikhamera"</string>
+    <string name="privacy_type_location" msgid="6435497989657286700">"indawo"</string>
+    <string name="privacy_type_microphone" msgid="4153045784928554506">"imakrofoni"</string>
 </resources>

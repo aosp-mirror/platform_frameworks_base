@@ -70,6 +70,22 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="3637758096565605541">"Hãy thử chụp lại màn hình"</string>
     <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"Không thể lưu ảnh chụp màn hình do giới hạn dung lượng bộ nhớ"</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"Ứng dụng hoặc tổ chức của bạn không cho phép chụp ảnh màn hình"</string>
+    <string name="screenrecord_name" msgid="4196719243134204796">"Đang ghi màn hình"</string>
+    <string name="screenrecord_channel_description" msgid="4630777331970993858">"Thông báo đang diễn ra về phiên ghi màn hình"</string>
+    <string name="screenrecord_start_label" msgid="5177739269492196055">"Bắt đầu ghi"</string>
+    <string name="screenrecord_mic_label" msgid="4522870600914810019">"Ghi phần thuyết minh"</string>
+    <string name="screenrecord_taps_label" msgid="1776467076607964790">"Hiển thị số lần nhấn"</string>
+    <string name="screenrecord_stop_label" msgid="2544887572381260038">"Dừng"</string>
+    <string name="screenrecord_pause_label" msgid="7162476078856786227">"Tạm dừng"</string>
+    <string name="screenrecord_resume_label" msgid="3605818317015993314">"Tiếp tục"</string>
+    <string name="screenrecord_cancel_label" msgid="3385204992871088609">"Hủy"</string>
+    <string name="screenrecord_share_label" msgid="4197867360204019389">"Chia sẻ"</string>
+    <string name="screenrecord_delete_label" msgid="7893716870917824013">"Xóa"</string>
+    <string name="screenrecord_cancel_success" msgid="7768976011702614782">"Đã hủy bản ghi màn hình"</string>
+    <string name="screenrecord_save_message" msgid="4733982661301846778">"Đã lưu bản ghi màn hình, nhấn để xem"</string>
+    <string name="screenrecord_delete_description" msgid="5743190456090354585">"Đã xóa bản ghi màn hình"</string>
+    <string name="screenrecord_delete_error" msgid="8154904464563560282">"Lỗi khi xóa bản ghi màn hình"</string>
+    <string name="screenrecord_permission_error" msgid="1526755299469001000">"Không được cấp đủ quyền"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Tùy chọn truyền tệp USB"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Gắn như một trình phát đa phương tiện (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Gắn như một máy ảnh (PTP)"</string>
@@ -582,15 +598,21 @@
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Thông báo"</string>
     <string name="notification_channel_disabled" msgid="344536703863700565">"Bạn sẽ không thấy các thông báo này nữa"</string>
     <string name="notification_channel_minimized" msgid="1664411570378910931">"Các thông báo này sẽ được thu nhỏ"</string>
+    <!-- no translation found for notification_channel_silenced (2877199534497961942) -->
+    <skip />
+    <!-- no translation found for notification_channel_unsilenced (4790904571552394137) -->
+    <skip />
     <string name="inline_blocking_helper" msgid="3055064577771478591">"Bạn thường bỏ qua những thông báo này. \nTiếp tục hiển thị thông báo?"</string>
     <string name="inline_keep_showing" msgid="8945102997083836858">"Tiếp tục hiển thị các thông báo này?"</string>
     <string name="inline_stop_button" msgid="4172980096860941033">"Dừng thông báo"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"Tiếp tục hiển thị"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"Thu nhỏ"</string>
+    <!-- no translation found for inline_silent_button_silent (4411510650503783646) -->
+    <skip />
+    <!-- no translation found for inline_silent_button_alert (2967599358027208807) -->
+    <skip />
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Tiếp tục hiển thị các thông báo từ ứng dụng này?"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"Không thể tắt các thông báo này"</string>
-    <!-- no translation found for notification_delegate_header (9167022191405284627) -->
-    <skip />
     <string name="appops_camera" msgid="8100147441602585776">"Ứng dụng này đang sử dụng máy ảnh."</string>
     <string name="appops_microphone" msgid="741508267659494555">"Ứng dụng này đang sử dụng micrô."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"Ứng dụng này đang hiển thị chồng lên các ứng dụng khác trên màn hình."</string>
@@ -725,8 +747,7 @@
     <item msgid="2139628951880142927">"Hiển thị phần trăm khi sạc (mặc định)"</item>
     <item msgid="3327323682209964956">"Không hiển thị biểu tượng này"</item>
   </string-array>
-    <!-- no translation found for tuner_low_priority (1325884786608312358) -->
-    <skip />
+    <string name="tuner_low_priority" msgid="1325884786608312358">"Hiển thị biểu tượng thông báo có mức ưu tiên thấp"</string>
     <string name="other" msgid="4060683095962566764">"Khác"</string>
     <string name="accessibility_divider" msgid="5903423481953635044">"Bộ chia chia đôi màn hình"</string>
     <string name="accessibility_action_divider_left_full" msgid="2801570521881574972">"Toàn màn hình bên trái"</string>
@@ -806,7 +827,7 @@
     <string name="instant_apps_message" msgid="1183313016396018086">"Ứng dụng được mở mà không cần cài đặt."</string>
     <string name="instant_apps_message_with_help" msgid="6179830437630729747">"Ứng dụng được mở mà không cần cài đặt. Nhấn để tìm hiểu thêm."</string>
     <string name="app_info" msgid="6856026610594615344">"Thông tin ứng dụng"</string>
-    <string name="go_to_web" msgid="1106022723459948514">"Truy cập web"</string>
+    <string name="go_to_web" msgid="2650669128861626071">"Đi tới trình duyệt"</string>
     <string name="mobile_data" msgid="7094582042819250762">"Dữ liệu di động"</string>
     <string name="mobile_data_text_format" msgid="3526214522670876454">"<xliff:g id="ID_1">%1$s</xliff:g> — <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"Wi-Fi tắt"</string>
@@ -838,4 +859,16 @@
     <string name="open_saver_setting_action" msgid="8314624730997322529">"Cài đặt"</string>
     <string name="auto_saver_okay_action" msgid="2701221740227683650">"OK"</string>
     <string name="heap_dump_tile_name" msgid="9141031328971226374">"Trích xuất bộ nhớ SysUI"</string>
+    <string name="ongoing_privacy_chip_content_single_app" msgid="4479560741898690064">"<xliff:g id="APP">%1$s</xliff:g> đang dùng <xliff:g id="TYPES_LIST">%2$s</xliff:g> của bạn."</string>
+    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8640691753867990511">"Các ứng dụng đang dùng <xliff:g id="TYPES_LIST">%s</xliff:g> của bạn."</string>
+    <string name="ongoing_privacy_dialog_open_app" msgid="2483886665314567948">"Mở ứng dụng"</string>
+    <string name="ongoing_privacy_dialog_cancel" msgid="5479124524931216790">"Hủy"</string>
+    <string name="ongoing_privacy_dialog_okay" msgid="5823914553907253532">"OK"</string>
+    <string name="ongoing_privacy_dialog_open_settings" msgid="6382622467527049074">"Cài đặt"</string>
+    <string name="ongoing_privacy_dialog_app_item" msgid="486085465491760739">"<xliff:g id="APP">%1$s</xliff:g> đang dùng <xliff:g id="TYPE">%2$s</xliff:g> của bạn trong <xliff:g id="TIME">%3$d</xliff:g> phút qua"</string>
+    <string name="ongoing_privacy_dialog_apps_item" msgid="9207187236823950491">"<xliff:g id="APPS">%1$s</xliff:g> đang dùng <xliff:g id="TYPE">%2$s</xliff:g> của bạn"</string>
+    <string name="ongoing_privacy_dialog_single_app" msgid="3884812469179810924">"<xliff:g id="APP">%1$s</xliff:g> đang dùng <xliff:g id="TYPES_LIST">%2$s</xliff:g> của bạn"</string>
+    <string name="privacy_type_camera" msgid="1676604631892420333">"máy ảnh"</string>
+    <string name="privacy_type_location" msgid="6435497989657286700">"vị trí"</string>
+    <string name="privacy_type_microphone" msgid="4153045784928554506">"micrô"</string>
 </resources>

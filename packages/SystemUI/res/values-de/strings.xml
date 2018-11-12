@@ -70,6 +70,22 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="3637758096565605541">"Versuche noch einmal, den Screenshot zu erstellen"</string>
     <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"Speichern des Screenshots aufgrund von zu wenig Speicher nicht möglich"</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"Die App oder deine Organisation lässt das Erstellen von Screenshots nicht zu"</string>
+    <string name="screenrecord_name" msgid="4196719243134204796">"Bildschirmaufzeichnung"</string>
+    <string name="screenrecord_channel_description" msgid="4630777331970993858">"Fortlaufende Benachrichtigung für eine Bildschirmaufzeichnung"</string>
+    <string name="screenrecord_start_label" msgid="5177739269492196055">"Aufzeichnung starten"</string>
+    <string name="screenrecord_mic_label" msgid="4522870600914810019">"Voice-over aufnehmen"</string>
+    <string name="screenrecord_taps_label" msgid="1776467076607964790">"Fingertipps anzeigen"</string>
+    <string name="screenrecord_stop_label" msgid="2544887572381260038">"Anhalten"</string>
+    <string name="screenrecord_pause_label" msgid="7162476078856786227">"Pausieren"</string>
+    <string name="screenrecord_resume_label" msgid="3605818317015993314">"Fortsetzen"</string>
+    <string name="screenrecord_cancel_label" msgid="3385204992871088609">"Abbrechen"</string>
+    <string name="screenrecord_share_label" msgid="4197867360204019389">"Teilen"</string>
+    <string name="screenrecord_delete_label" msgid="7893716870917824013">"Löschen"</string>
+    <string name="screenrecord_cancel_success" msgid="7768976011702614782">"Bildschirmaufzeichnung abgebrochen"</string>
+    <string name="screenrecord_save_message" msgid="4733982661301846778">"Bildschirmaufzeichnung gespeichert, zum Ansehen tippen"</string>
+    <string name="screenrecord_delete_description" msgid="5743190456090354585">"Bildschirmaufzeichnung gelöscht"</string>
+    <string name="screenrecord_delete_error" msgid="8154904464563560282">"Fehler beim Löschen der Bildschirmaufzeichnung"</string>
+    <string name="screenrecord_permission_error" msgid="1526755299469001000">"Berechtigungen nicht erhalten"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB-Dateiübertragungsoptionen"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Als Medienplayer (MTP) bereitstellen"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Als Kamera (PTP) bereitstellen"</string>
@@ -586,14 +602,21 @@
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Benachrichtigungen"</string>
     <string name="notification_channel_disabled" msgid="344536703863700565">"Du erhältst diese Benachrichtigungen nicht mehr"</string>
     <string name="notification_channel_minimized" msgid="1664411570378910931">"Diese Benachrichtigungen werden minimiert"</string>
+    <!-- no translation found for notification_channel_silenced (2877199534497961942) -->
+    <skip />
+    <!-- no translation found for notification_channel_unsilenced (4790904571552394137) -->
+    <skip />
     <string name="inline_blocking_helper" msgid="3055064577771478591">"Normalerweise schließt du diese Benachrichtigungen. \nSollen sie trotzdem weiter angezeigt werden?"</string>
     <string name="inline_keep_showing" msgid="8945102997083836858">"Diese Benachrichtigungen weiterhin anzeigen?"</string>
     <string name="inline_stop_button" msgid="4172980096860941033">"Benachrichtigungen nicht mehr anzeigen"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"Weiterhin anzeigen"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"Minimieren"</string>
+    <!-- no translation found for inline_silent_button_silent (4411510650503783646) -->
+    <skip />
+    <!-- no translation found for inline_silent_button_alert (2967599358027208807) -->
+    <skip />
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Benachrichtigungen dieser App weiterhin anzeigen?"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"Diese Benachrichtigungen können nicht deaktiviert werden"</string>
-    <string name="notification_delegate_header" msgid="9167022191405284627">"über <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="appops_camera" msgid="8100147441602585776">"Diese App verwendet die Kamera."</string>
     <string name="appops_microphone" msgid="741508267659494555">"Diese App verwendet das Mikrofon."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"Diese App wird über anderen Apps auf dem Bildschirm angezeigt."</string>
@@ -808,7 +831,7 @@
     <string name="instant_apps_message" msgid="1183313016396018086">"App wurde geöffnet, ohne vorher installiert zu werden."</string>
     <string name="instant_apps_message_with_help" msgid="6179830437630729747">"App wurde geöffnet, ohne vorher installiert zu werden. Tippe, um weitere Informationen zu erhalten."</string>
     <string name="app_info" msgid="6856026610594615344">"App-Informationen"</string>
-    <string name="go_to_web" msgid="1106022723459948514">"Web aufrufen"</string>
+    <string name="go_to_web" msgid="2650669128861626071">"Browser öffnen"</string>
     <string name="mobile_data" msgid="7094582042819250762">"Mobile Daten"</string>
     <string name="mobile_data_text_format" msgid="3526214522670876454">"<xliff:g id="ID_1">%1$s</xliff:g> – <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"WLAN ist deaktiviert"</string>
@@ -840,4 +863,16 @@
     <string name="open_saver_setting_action" msgid="8314624730997322529">"Einstellungen"</string>
     <string name="auto_saver_okay_action" msgid="2701221740227683650">"OK"</string>
     <string name="heap_dump_tile_name" msgid="9141031328971226374">"Dump SysUI Heap"</string>
+    <string name="ongoing_privacy_chip_content_single_app" msgid="4479560741898690064">"<xliff:g id="APP">%1$s</xliff:g> verwendet gerade Folgendes: <xliff:g id="TYPES_LIST">%2$s</xliff:g>."</string>
+    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8640691753867990511">"Apps verwenden gerade Folgendes: <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
+    <string name="ongoing_privacy_dialog_open_app" msgid="2483886665314567948">"App öffnen"</string>
+    <string name="ongoing_privacy_dialog_cancel" msgid="5479124524931216790">"Abbrechen"</string>
+    <string name="ongoing_privacy_dialog_okay" msgid="5823914553907253532">"OK"</string>
+    <string name="ongoing_privacy_dialog_open_settings" msgid="6382622467527049074">"Einstellungen"</string>
+    <string name="ongoing_privacy_dialog_app_item" msgid="486085465491760739">"<xliff:g id="APP">%1$s</xliff:g> verwendet seit <xliff:g id="TIME">%3$d</xliff:g> Minuten Folgendes: <xliff:g id="TYPE">%2$s</xliff:g>"</string>
+    <string name="ongoing_privacy_dialog_apps_item" msgid="9207187236823950491">"<xliff:g id="APPS">%1$s</xliff:g> verwenden gerade Folgendes: <xliff:g id="TYPE">%2$s</xliff:g>"</string>
+    <string name="ongoing_privacy_dialog_single_app" msgid="3884812469179810924">"<xliff:g id="APP">%1$s</xliff:g> verwendet gerade Folgendes: <xliff:g id="TYPES_LIST">%2$s</xliff:g>"</string>
+    <string name="privacy_type_camera" msgid="1676604631892420333">"Kamera"</string>
+    <string name="privacy_type_location" msgid="6435497989657286700">"Standort"</string>
+    <string name="privacy_type_microphone" msgid="4153045784928554506">"Mikrofon"</string>
 </resources>

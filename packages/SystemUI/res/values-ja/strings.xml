@@ -70,6 +70,22 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="3637758096565605541">"スクリーンショットを撮り直してください"</string>
     <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"空き容量が足りないため、スクリーンショットを保存できません"</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"スクリーンショットの作成はアプリまたは組織で許可されていません"</string>
+    <string name="screenrecord_name" msgid="4196719243134204796">"画面の録画"</string>
+    <string name="screenrecord_channel_description" msgid="4630777331970993858">"画面の録画セッション中の通知"</string>
+    <string name="screenrecord_start_label" msgid="5177739269492196055">"録画を開始"</string>
+    <string name="screenrecord_mic_label" msgid="4522870600914810019">"ナレーションの録音"</string>
+    <string name="screenrecord_taps_label" msgid="1776467076607964790">"タップの表示"</string>
+    <string name="screenrecord_stop_label" msgid="2544887572381260038">"停止"</string>
+    <string name="screenrecord_pause_label" msgid="7162476078856786227">"一時停止"</string>
+    <string name="screenrecord_resume_label" msgid="3605818317015993314">"再開"</string>
+    <string name="screenrecord_cancel_label" msgid="3385204992871088609">"キャンセル"</string>
+    <string name="screenrecord_share_label" msgid="4197867360204019389">"共有"</string>
+    <string name="screenrecord_delete_label" msgid="7893716870917824013">"削除"</string>
+    <string name="screenrecord_cancel_success" msgid="7768976011702614782">"画面の録画をキャンセルしました"</string>
+    <string name="screenrecord_save_message" msgid="4733982661301846778">"画面の録画を保存しました。タップで表示できます"</string>
+    <string name="screenrecord_delete_description" msgid="5743190456090354585">"画面の録画を削除しました"</string>
+    <string name="screenrecord_delete_error" msgid="8154904464563560282">"画面の録画の削除中にエラーが発生しました"</string>
+    <string name="screenrecord_permission_error" msgid="1526755299469001000">"権限を取得できませんでした"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USBファイル転送オプション"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"メディアプレーヤー（MTP）としてマウント"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"カメラ（PTP）としてマウント"</string>
@@ -198,9 +214,9 @@
     <string name="accessibility_quick_settings_airplane_changed_on" msgid="8983005603505087728">"機内モードをONにしました。"</string>
     <string name="accessibility_quick_settings_dnd_none_on" msgid="2960643943620637020">"サイレント"</string>
     <string name="accessibility_quick_settings_dnd_alarms_on" msgid="3357131899365865386">"アラームのみ"</string>
-    <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"マナーモード"</string>
-    <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"マナーモードを OFF にしました。"</string>
-    <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"マナーモードを ON にしました。"</string>
+    <string name="accessibility_quick_settings_dnd" msgid="6607873236717185815">"サイレント モード"</string>
+    <string name="accessibility_quick_settings_dnd_changed_off" msgid="898107593453022935">"サイレント モードを OFF にしました。"</string>
+    <string name="accessibility_quick_settings_dnd_changed_on" msgid="4483780856613561039">"サイレント モードを ON にしました。"</string>
     <string name="accessibility_quick_settings_bluetooth" msgid="6341675755803320038">"Bluetooth"</string>
     <string name="accessibility_quick_settings_bluetooth_off" msgid="2133631372372064339">"BluetoothがOFFです。"</string>
     <string name="accessibility_quick_settings_bluetooth_on" msgid="7681999166216621838">"BluetoothがONです。"</string>
@@ -262,7 +278,7 @@
     <string name="start_dreams" msgid="5640361424498338327">"スクリーン セーバー"</string>
     <string name="ethernet_label" msgid="7967563676324087464">"イーサネット"</string>
     <string name="quick_settings_header_onboarding_text" msgid="8030309023792936283">"アイコンを押し続けると、その他の項目が表示されます"</string>
-    <string name="quick_settings_dnd_label" msgid="8735855737575028208">"マナーモード"</string>
+    <string name="quick_settings_dnd_label" msgid="8735855737575028208">"サイレント モード"</string>
     <string name="quick_settings_dnd_priority_label" msgid="483232950670692036">"優先する通知のみ"</string>
     <string name="quick_settings_dnd_alarms_label" msgid="2559229444312445858">"アラームのみ"</string>
     <string name="quick_settings_dnd_none_label" msgid="5025477807123029478">"サイレント"</string>
@@ -415,7 +431,7 @@
     <string name="media_projection_remember_text" msgid="3103510882172746752">"次回から表示しない"</string>
     <string name="clear_all_notifications_text" msgid="814192889771462828">"すべて消去"</string>
     <string name="manage_notifications_text" msgid="2386728145475108753">"管理"</string>
-    <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"マナーモードにより通知は一時停止中です"</string>
+    <string name="dnd_suppressing_shade_text" msgid="1904574852846769301">"サイレント モードにより通知は一時停止中です"</string>
     <string name="media_projection_action_text" msgid="8470872969457985954">"今すぐ開始"</string>
     <string name="empty_shade_text" msgid="708135716272867002">"通知はありません"</string>
     <string name="profile_owned_footer" msgid="8021888108553696069">"プロファイルが監視されている可能性があります"</string>
@@ -582,15 +598,21 @@
     <string name="notification_header_default_channel" msgid="7506845022070889909">"通知"</string>
     <string name="notification_channel_disabled" msgid="344536703863700565">"今後、この通知は表示されません"</string>
     <string name="notification_channel_minimized" msgid="1664411570378910931">"通知を最小化します"</string>
+    <!-- no translation found for notification_channel_silenced (2877199534497961942) -->
+    <skip />
+    <!-- no translation found for notification_channel_unsilenced (4790904571552394137) -->
+    <skip />
     <string name="inline_blocking_helper" msgid="3055064577771478591">"通常、この通知はスワイプして非表示にしています。\n今後も表示しますか？"</string>
     <string name="inline_keep_showing" msgid="8945102997083836858">"この通知を今後も表示しますか？"</string>
     <string name="inline_stop_button" msgid="4172980096860941033">"通知を表示しない"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"今後も表示する"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"最小化"</string>
+    <!-- no translation found for inline_silent_button_silent (4411510650503783646) -->
+    <skip />
+    <!-- no translation found for inline_silent_button_alert (2967599358027208807) -->
+    <skip />
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"このアプリからの通知を今後も表示しますか？"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"この通知を OFF にすることはできません"</string>
-    <!-- no translation found for notification_delegate_header (9167022191405284627) -->
-    <skip />
     <string name="appops_camera" msgid="8100147441602585776">"このアプリはカメラを使用しています。"</string>
     <string name="appops_microphone" msgid="741508267659494555">"このアプリはマイクを使用しています。"</string>
     <string name="appops_overlay" msgid="6165912637560323464">"このアプリは画面上で他のアプリの上に重ねて表示されます。"</string>
@@ -668,9 +690,9 @@
     <string name="keyboard_shortcut_group_applications_youtube" msgid="6555453761294723317">"YouTube"</string>
     <string name="keyboard_shortcut_group_applications_calendar" msgid="9043614299194991263">"カレンダー"</string>
     <string name="tuner_full_zen_title" msgid="4540823317772234308">"音量調節を表示"</string>
-    <string name="volume_and_do_not_disturb" msgid="3373784330208603030">"マナーモード"</string>
+    <string name="volume_and_do_not_disturb" msgid="3373784330208603030">"サイレント モード"</string>
     <string name="volume_dnd_silent" msgid="4363882330723050727">"音量ボタンのショートカット"</string>
-    <string name="volume_up_silent" msgid="7141255269783588286">"音量上げボタンでマナーモードを OFF にする"</string>
+    <string name="volume_up_silent" msgid="7141255269783588286">"音量上げボタンでサイレント モードを OFF にする"</string>
     <string name="battery" msgid="7498329822413202973">"電池"</string>
     <string name="clock" msgid="7416090374234785905">"時計"</string>
     <string name="headset" msgid="4534219457597457353">"ヘッドセット"</string>
@@ -725,8 +747,7 @@
     <item msgid="2139628951880142927">"変更時に割合を表示（デフォルト）"</item>
     <item msgid="3327323682209964956">"このアイコンを表示しない"</item>
   </string-array>
-    <!-- no translation found for tuner_low_priority (1325884786608312358) -->
-    <skip />
+    <string name="tuner_low_priority" msgid="1325884786608312358">"優先度の低い通知アイコンを表示"</string>
     <string name="other" msgid="4060683095962566764">"その他"</string>
     <string name="accessibility_divider" msgid="5903423481953635044">"分割画面の分割線"</string>
     <string name="accessibility_action_divider_left_full" msgid="2801570521881574972">"左全画面"</string>
@@ -806,15 +827,15 @@
     <string name="instant_apps_message" msgid="1183313016396018086">"アプリをインストールせずに開きました。"</string>
     <string name="instant_apps_message_with_help" msgid="6179830437630729747">"アプリをインストールせずに開きました。詳細を見るにはタップしてください。"</string>
     <string name="app_info" msgid="6856026610594615344">"アプリ情報"</string>
-    <string name="go_to_web" msgid="1106022723459948514">"ウェブページを開く"</string>
+    <string name="go_to_web" msgid="2650669128861626071">"ブラウザに移動"</string>
     <string name="mobile_data" msgid="7094582042819250762">"モバイルデータ"</string>
     <string name="mobile_data_text_format" msgid="3526214522670876454">"<xliff:g id="ID_1">%1$s</xliff:g> — <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"Wi-Fi は OFF です"</string>
     <string name="bt_is_off" msgid="2640685272289706392">"Bluetooth は OFF です"</string>
-    <string name="dnd_is_off" msgid="6167780215212497572">"マナーモードは OFF です"</string>
-    <string name="qs_dnd_prompt_auto_rule" msgid="862559028345233052">"マナーモードが自動ルール（<xliff:g id="ID_1">%s</xliff:g>）によって ON になりました。"</string>
-    <string name="qs_dnd_prompt_app" msgid="7978037419334156034">"マナーモードがアプリ（<xliff:g id="ID_1">%s</xliff:g>）によって ON になりました。"</string>
-    <string name="qs_dnd_prompt_auto_rule_app" msgid="2599343675391111951">"マナーモードが自動ルールまたはアプリによって ON になりました。"</string>
+    <string name="dnd_is_off" msgid="6167780215212497572">"サイレント モードは OFF です"</string>
+    <string name="qs_dnd_prompt_auto_rule" msgid="862559028345233052">"サイレント モードが自動ルール（<xliff:g id="ID_1">%s</xliff:g>）によって ON になりました。"</string>
+    <string name="qs_dnd_prompt_app" msgid="7978037419334156034">"サイレント モードがアプリ（<xliff:g id="ID_1">%s</xliff:g>）によって ON になりました。"</string>
+    <string name="qs_dnd_prompt_auto_rule_app" msgid="2599343675391111951">"サイレント モードが自動ルールまたはアプリによって ON になりました。"</string>
     <string name="qs_dnd_until" msgid="3469471136280079874">"終了時間: <xliff:g id="ID_1">%s</xliff:g>"</string>
     <string name="qs_dnd_keep" msgid="1825009164681928736">"設定を維持"</string>
     <string name="qs_dnd_replace" msgid="8019520786644276623">"設定を変更"</string>
@@ -838,4 +859,16 @@
     <string name="open_saver_setting_action" msgid="8314624730997322529">"設定"</string>
     <string name="auto_saver_okay_action" msgid="2701221740227683650">"OK"</string>
     <string name="heap_dump_tile_name" msgid="9141031328971226374">"SysUI ヒープのダンプ"</string>
+    <string name="ongoing_privacy_chip_content_single_app" msgid="4479560741898690064">"<xliff:g id="APP">%1$s</xliff:g>は<xliff:g id="TYPES_LIST">%2$s</xliff:g>を使用しています。"</string>
+    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8640691753867990511">"アプリは<xliff:g id="TYPES_LIST">%s</xliff:g>を使用しています。"</string>
+    <string name="ongoing_privacy_dialog_open_app" msgid="2483886665314567948">"アプリを開く"</string>
+    <string name="ongoing_privacy_dialog_cancel" msgid="5479124524931216790">"キャンセル"</string>
+    <string name="ongoing_privacy_dialog_okay" msgid="5823914553907253532">"OK"</string>
+    <string name="ongoing_privacy_dialog_open_settings" msgid="6382622467527049074">"設定"</string>
+    <string name="ongoing_privacy_dialog_app_item" msgid="486085465491760739">"<xliff:g id="APP">%1$s</xliff:g>は過去 <xliff:g id="TIME">%3$d</xliff:g> 分間に<xliff:g id="TYPE">%2$s</xliff:g>を使用しています"</string>
+    <string name="ongoing_privacy_dialog_apps_item" msgid="9207187236823950491">"<xliff:g id="APPS">%1$s</xliff:g>は<xliff:g id="TYPE">%2$s</xliff:g>を使用しています"</string>
+    <string name="ongoing_privacy_dialog_single_app" msgid="3884812469179810924">"<xliff:g id="APP">%1$s</xliff:g>は<xliff:g id="TYPES_LIST">%2$s</xliff:g>を使用しています"</string>
+    <string name="privacy_type_camera" msgid="1676604631892420333">"カメラ"</string>
+    <string name="privacy_type_location" msgid="6435497989657286700">"現在地情報"</string>
+    <string name="privacy_type_microphone" msgid="4153045784928554506">"マイク"</string>
 </resources>
