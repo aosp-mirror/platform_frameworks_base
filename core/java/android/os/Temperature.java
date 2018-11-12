@@ -25,9 +25,7 @@ import java.lang.annotation.RetentionPolicy;
 
 /**
  * Temperature values used by IThermalService.
- */
-
-/**
+ *
  * @hide
  */
 public class Temperature implements Parcelable {
@@ -40,7 +38,6 @@ public class Temperature implements Parcelable {
     /** The level of the sensor is currently in throttling */
     private int mStatus;
 
-    /** @hide */
     @IntDef(prefix = { "THROTTLING_" }, value = {
             THROTTLING_NONE,
             THROTTLING_LIGHT,
@@ -62,7 +59,6 @@ public class Temperature implements Parcelable {
     public static final int THROTTLING_WARNING = ThrottlingSeverity.WARNING;
     public static final int THROTTLING_SHUTDOWN = ThrottlingSeverity.SHUTDOWN;
 
-    /** @hide */
     @IntDef(prefix = { "TYPE_" }, value = {
             TYPE_UNKNOWN,
             TYPE_CPU,
@@ -95,19 +91,28 @@ public class Temperature implements Parcelable {
      *
      * @return true if a temperature type is valid otherwise false.
      */
-    public static boolean isValidType(int type) {
+    public static boolean isValidType(@Type int type) {
         return type >= TYPE_UNKNOWN && type <= TYPE_BCL_PERCENTAGE;
+    }
+
+    /**
+     * Verify a valid throttling status.
+     *
+     * @return true if a status is valid otherwise false.
+     */
+    public static boolean isValidStatus(@ThrottlingStatus int status) {
+        return status >= THROTTLING_NONE && status <= THROTTLING_SHUTDOWN;
     }
 
     public Temperature() {
         this(Float.NaN, TYPE_UNKNOWN, "", THROTTLING_NONE);
     }
 
-    public Temperature(float value, @Type int type, String name, int status) {
+    public Temperature(float value, @Type int type, String name, @ThrottlingStatus int status) {
         mValue = value;
         mType = isValidType(type) ? type : TYPE_UNKNOWN;
         mName = name;
-        mStatus = status;
+        mStatus = isValidStatus(status) ? status : THROTTLING_NONE;
     }
 
     /**
