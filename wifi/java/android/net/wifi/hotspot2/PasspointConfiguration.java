@@ -20,10 +20,10 @@ import android.net.wifi.hotspot2.pps.Credential;
 import android.net.wifi.hotspot2.pps.HomeSp;
 import android.net.wifi.hotspot2.pps.Policy;
 import android.net.wifi.hotspot2.pps.UpdateParameter;
+import android.os.Parcel;
 import android.os.Parcelable;
 import android.text.TextUtils;
 import android.util.Log;
-import android.os.Parcel;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
@@ -467,24 +467,54 @@ public final class PasspointConfiguration implements Parcelable {
     }
 
     /**
-     * Validate the configuration data.
+     * Validate the R1 configuration data.
      *
      * @return true on success or false on failure
      * @hide
      */
     public boolean validate() {
-        if (mHomeSp == null || !mHomeSp.validate()) {
-            return false;
-        }
-        if (mCredential == null || !mCredential.validate()) {
-            return false;
-        }
-        if (mPolicy != null && !mPolicy.validate()) {
-            return false;
-        }
+        // Optional: PerProviderSubscription/<X+>/SubscriptionUpdate
         if (mSubscriptionUpdate != null && !mSubscriptionUpdate.validate()) {
             return false;
         }
+        return validateForCommonR1andR2(true);
+    }
+
+    /**
+     * Validate the R2 configuration data.
+     *
+     * @return true on success or false on failure
+     * @hide
+     */
+    public boolean validateForR2() {
+        // Required: PerProviderSubscription/UpdateIdentifier
+        if (mUpdateIdentifier == Integer.MIN_VALUE) {
+            return false;
+        }
+
+        // Required: PerProviderSubscription/<X+>/SubscriptionUpdate
+        if (mSubscriptionUpdate == null || !mSubscriptionUpdate.validate()) {
+            return false;
+        }
+        return validateForCommonR1andR2(false);
+    }
+
+    private boolean validateForCommonR1andR2(boolean isR1) {
+        // Required: PerProviderSubscription/<X+>/HomeSP
+        if (mHomeSp == null || !mHomeSp.validate()) {
+            return false;
+        }
+
+        // Required: PerProviderSubscription/<X+>/Credential
+        if (mCredential == null || !mCredential.validate(isR1)) {
+            return false;
+        }
+
+        // Optional: PerProviderSubscription/<X+>/Policy
+        if (mPolicy != null && !mPolicy.validate()) {
+            return false;
+        }
+
         if (mTrustRootCertList != null) {
             for (Map.Entry<String, byte[]> entry : mTrustRootCertList.entrySet()) {
                 String url = entry.getKey();
