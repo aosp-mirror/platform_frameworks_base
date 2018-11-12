@@ -97,7 +97,10 @@ class PinnedActivityStack extends ActivityStack<PinnedStackWindowController>
         // It is guaranteed that the activities requiring the update will be in the pinned stack at
         // this point (either reparented before the animation into PiP, or before reparenting after
         // the animation out of PiP)
-        synchronized (mService) {
+        synchronized (mService.mGlobalLock) {
+            if (!isAttached()) {
+                return;
+            }
             ArrayList<TaskRecord> tasks = getAllTasks();
             for (int i = 0; i < tasks.size(); i++ ) {
                 mStackSupervisor.updatePictureInPictureMode(tasks.get(i), targetStackBounds,

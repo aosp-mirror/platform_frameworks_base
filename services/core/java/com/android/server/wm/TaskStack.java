@@ -1765,6 +1765,11 @@ public class TaskStack extends WindowContainer<Task> implements
     @Override
     public boolean shouldDeferStartOnMoveToFullscreen() {
         synchronized (mService.mGlobalLock) {
+            if (!isAttached()) {
+                // Unnecessary to pause the animation because the stack is detached.
+                return false;
+            }
+
             // Workaround for the recents animation -- normally we need to wait for the new activity
             // to show before starting the PiP animation, but because we start and show the home
             // activity early for the recents animation prior to the PiP animation starting, there
