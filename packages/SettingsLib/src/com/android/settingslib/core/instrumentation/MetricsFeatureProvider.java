@@ -15,6 +15,8 @@
  */
 package com.android.settingslib.core.instrumentation;
 
+import android.app.Activity;
+import android.app.settings.SettingsEnums;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
@@ -30,6 +32,11 @@ import java.util.List;
  * FeatureProvider for metrics.
  */
 public class MetricsFeatureProvider {
+    /**
+     * The metrics category constant for logging source when a setting fragment is opened.
+     */
+    public static final String EXTRA_SOURCE_METRICS_CATEGORY = ":settings:source_metrics";
+
     protected List<LogWriter> mLoggerWriters;
 
     public MetricsFeatureProvider() {
@@ -39,6 +46,25 @@ public class MetricsFeatureProvider {
 
     protected void installLogWriters() {
         mLoggerWriters.add(new EventLogWriter());
+    }
+
+    /**
+     * Returns the attribution id for specified activity. If no attribution is set, returns {@link
+     * SettingsEnums#PAGE_UNKNOWN}.
+     *
+     * <p/> Attribution is a {@link SettingsEnums} page id that indicates where the specified
+     * activity is launched from.
+     */
+    public int getAttribution(Activity activity) {
+        if (activity == null) {
+            return SettingsEnums.PAGE_UNKNOWN;
+        }
+        final Intent intent = activity.getIntent();
+        if (intent == null) {
+            return SettingsEnums.PAGE_UNKNOWN;
+        }
+        return intent.getIntExtra(EXTRA_SOURCE_METRICS_CATEGORY,
+                SettingsEnums.PAGE_UNKNOWN);
     }
 
     public void visible(Context context, int source, int category) {

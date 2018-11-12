@@ -41,11 +41,6 @@ public class VisibilityLoggerMixin implements LifecycleObserver {
     private int mSourceMetricsCategory = MetricsProto.MetricsEvent.VIEW_UNKNOWN;
     private long mVisibleTimestamp;
 
-    /**
-     * The metrics category constant for logging source when a setting fragment is opened.
-     */
-    public static final String EXTRA_SOURCE_METRICS_CATEGORY = ":settings:source_metrics";
-
     private VisibilityLoggerMixin() {
         mMetricsCategory = METRICS_CATEGORY_UNKNOWN;
     }
@@ -82,7 +77,8 @@ public class VisibilityLoggerMixin implements LifecycleObserver {
         if (intent == null) {
             return;
         }
-        mSourceMetricsCategory = intent.getIntExtra(EXTRA_SOURCE_METRICS_CATEGORY,
+        mSourceMetricsCategory = intent.getIntExtra(
+                MetricsFeatureProvider.EXTRA_SOURCE_METRICS_CATEGORY,
                 MetricsProto.MetricsEvent.VIEW_UNKNOWN);
     }
 

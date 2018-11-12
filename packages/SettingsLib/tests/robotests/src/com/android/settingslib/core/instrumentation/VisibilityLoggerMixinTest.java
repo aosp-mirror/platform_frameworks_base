@@ -72,7 +72,7 @@ public class VisibilityLoggerMixinTest {
     @Test
     public void shouldLogVisibleWithSource() {
         final Intent sourceIntent = new Intent()
-                .putExtra(VisibilityLoggerMixin.EXTRA_SOURCE_METRICS_CATEGORY,
+                .putExtra(MetricsFeatureProvider.EXTRA_SOURCE_METRICS_CATEGORY,
                         MetricsProto.MetricsEvent.SETTINGS_GESTURES);
         final Activity activity = mock(Activity.class);
         when(activity.getIntent()).thenReturn(sourceIntent);
