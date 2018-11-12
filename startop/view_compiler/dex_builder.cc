@@ -17,7 +17,6 @@
 #include "dex_builder.h"
 
 #include "dex/descriptors_names.h"
-#include "dex/dex_instruction.h"
 
 #include <fstream>
 #include <memory>
@@ -55,6 +54,12 @@ std::ostream& operator<<(std::ostream& out, const Instruction::Op& opcode) {
       return out;
     case Instruction::Op::kInvokeVirtual:
       out << "kInvokeVirtual";
+      return out;
+    case Instruction::Op::kBindLabel:
+      out << "kBindLabel";
+      return out;
+    case Instruction::Op::kBranchEqz:
+      out << "kBranchEqz";
       return out;
   }
 }
@@ -224,6 +229,11 @@ ir::EncodedMethod* MethodBuilder::Encode() {
 
 Value MethodBuilder::MakeRegister() { return Value::Local(num_registers_++); }
 
+Value MethodBuilder::MakeLabel() {
+  labels_.push_back({});
+  return Value::Label(labels_.size() - 1);
+}
+
 void MethodBuilder::AddInstruction(Instruction instruction) {
   instructions_.push_back(instruction);
 }
@@ -254,6 +264,10 @@ void MethodBuilder::EncodeInstruction(const Instruction& instruction) {
       return EncodeMove(instruction);
     case Instruction::Op::kInvokeVirtual:
       return EncodeInvokeVirtual(instruction);
+    case Instruction::Op::kBindLabel:
+      return BindLabel(instruction.args()[0]);
+    case Instruction::Op::kBranchEqz:
+      return EncodeBranch(art::Instruction::IF_EQZ, instruction);
   }
 }
 
@@ -307,13 +321,59 @@ void MethodBuilder::EncodeInvokeVirtual(const Instruction& instruction) {
   }
 }
 
-size_t MethodBuilder::RegisterValue(Value value) const {
+// Encodes a conditional branch that tests a single argument.
+void MethodBuilder::EncodeBranch(art::Instruction::Code op, const Instruction& instruction) {
+  const auto& args = instruction.args();
+  const auto& test_value = args[0];
+  const auto& branch_target = args[1];
+  CHECK_EQ(2, args.size());
+  CHECK(test_value.is_variable());
+  CHECK(branch_target.is_label());
+
+  size_t instruction_offset = buffer_.size();
+  buffer_.push_back(op | (RegisterValue(test_value) << 8));
+  size_t field_offset = buffer_.size();
+  buffer_.push_back(LabelValue(branch_target, instruction_offset, field_offset));
+}
+
+size_t MethodBuilder::RegisterValue(const Value& value) const {
   if (value.is_register()) {
     return value.value();
   } else if (value.is_parameter()) {
     return value.value() + num_registers_;
   }
   DCHECK(false && "Must be either a parameter or a register");
+  return 0;
+}
+
+void MethodBuilder::BindLabel(const Value& label_id) {
+  CHECK(label_id.is_label());
+
+  LabelData& label = labels_[label_id.value()];
+  CHECK(!label.bound_address.has_value());
+
+  label.bound_address = buffer_.size();
+
+  // patch any forward references to this label.
+  for (const auto& ref : label.references) {
+    buffer_[ref.field_offset] = *label.bound_address - ref.instruction_offset;
+  }
+  // No point keeping these around anymore.
+  label.references.clear();
+}
+
+::dex::u2 MethodBuilder::LabelValue(const Value& label_id, size_t instruction_offset,
+                                    size_t field_offset) {
+  CHECK(label_id.is_label());
+  LabelData& label = labels_[label_id.value()];
+
+  // Short-circuit if the label is already bound.
+  if (label.bound_address.has_value()) {
+    return *label.bound_address - instruction_offset;
+  }
+
+  // Otherwise, save a reference to where we need to back-patch later.
+  label.references.push_front(LabelReference{instruction_offset, field_offset});
   return 0;
 }
 
