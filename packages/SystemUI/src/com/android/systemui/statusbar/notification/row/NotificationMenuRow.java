@@ -17,13 +17,16 @@
 package com.android.systemui.statusbar.notification.row;
 
 import static com.android.systemui.SwipeHelper.SWIPED_FAR_ENOUGH_SIZE_FRACTION;
+import static com.android.systemui.statusbar.notification.row.NotificationInfo.ACTION_BLOCK;
 import static com.android.systemui.statusbar.notification.row.NotificationInfo.ACTION_NONE;
+import static com.android.systemui.statusbar.notification.row.NotificationInfo.ACTION_TOGGLE_SILENT;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
 import android.animation.ValueAnimator;
 import android.annotation.Nullable;
 import android.app.Notification;
+import android.app.NotificationManager;
 import android.content.Context;
 import android.content.res.Resources;
 import android.graphics.drawable.Drawable;
@@ -41,6 +44,7 @@ import com.android.systemui.Interpolators;
 import com.android.systemui.R;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.statusbar.AlphaOptimizedImageView;
+import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.row.NotificationGuts.GutsContent;
 import com.android.systemui.statusbar.notification.row.NotificationInfo.NotificationInfoAction;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
@@ -69,7 +73,7 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
 
     private Context mContext;
     private FrameLayout mMenuContainer;
-    private MenuItem mInfoItem;
+    private NotificationInfoMenuItem mInfoItem;
     private MenuItem mAppOpsItem;
     private MenuItem mSnoozeItem;
     private ArrayList<MenuItem> mLeftMenuItems;
@@ -172,7 +176,9 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
     @Override
     public void createMenu(ViewGroup parent, StatusBarNotification sbn) {
         mParent = (ExpandableNotificationRow) parent;
-        createMenuViews(true /* resetState */);
+        createMenuViews(true /* resetState */,
+                sbn != null && (sbn.getNotification().flags & Notification.FLAG_FOREGROUND_SERVICE)
+                        != 0);
     }
 
     @Override
@@ -216,7 +222,8 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
             // Menu hasn't been created yet, no need to do anything.
             return;
         }
-        createMenuViews(!isMenuVisible() /* resetState */);
+        createMenuViews(!isMenuVisible() /* resetState */,
+                (sbn.getNotification().flags & Notification.FLAG_FOREGROUND_SERVICE) != 0);
     }
 
     @Override
@@ -231,30 +238,47 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
         mParent.removeListener();
     }
 
-    private void createMenuViews(boolean resetState) {
+    private void createMenuViews(boolean resetState, final boolean isForeground) {
         final Resources res = mContext.getResources();
         mHorizSpaceForIcon = res.getDimensionPixelSize(R.dimen.notification_menu_icon_size);
         mVertSpaceForIcons = res.getDimensionPixelSize(R.dimen.notification_min_height);
         mLeftMenuItems.clear();
         mRightMenuItems.clear();
         // Construct the menu items based on the notification
-        if (mParent != null && mParent.getStatusBarNotification() != null) {
-            int flags = mParent.getStatusBarNotification().getNotification().flags;
-            boolean isForeground = (flags & Notification.FLAG_FOREGROUND_SERVICE) != 0;
-            if (!isForeground) {
-                // Only show snooze for non-foreground notifications
-                mSnoozeItem = createSnoozeItem(mContext);
-                mLeftMenuItems.add(mSnoozeItem);
-                mRightMenuItems.add(mSnoozeItem);
-            }
+        if (!isForeground) {
+            // Only show snooze for non-foreground notifications
+            mSnoozeItem = createSnoozeItem(mContext);
+            mLeftMenuItems.add(mSnoozeItem);
         }
         mInfoItem = createInfoItem(mContext);
-        mLeftMenuItems.add(mInfoItem);
-        mRightMenuItems.add(mInfoItem);
+        if (!NotificationUtils.useNewInterruptionModel(mContext)) {
+            mLeftMenuItems.add(mInfoItem);
+        }
 
         mAppOpsItem = createAppOpsItem(mContext);
         mLeftMenuItems.add(mAppOpsItem);
-        mRightMenuItems.add(mAppOpsItem);
+
+        if (NotificationUtils.useNewInterruptionModel(mContext)) {
+            if (!mParent.getIsNonblockable()) {
+                mRightMenuItems.add(createBlockItem(mContext, mInfoItem.getGutsView()));
+            }
+            // TODO(kprevas): this is duplicated logic
+            // but it's currently spread across NotificationGutsManager and NotificationInfo.
+            // Try to consolidate and reuse here.
+            boolean canToggleSilent = !mParent.getIsNonblockable()
+                    && !isForeground
+                    && mParent.getEntry().noisy;
+            if (canToggleSilent) {
+                int channelImportance = mParent.getEntry().channel.getImportance();
+                int effectiveImportance =
+                        channelImportance == NotificationManager.IMPORTANCE_UNSPECIFIED
+                                ? mParent.getEntry().importance : channelImportance;
+                mRightMenuItems.add(createToggleSilentItem(mContext, mInfoItem.getGutsView(),
+                        effectiveImportance < NotificationManager.IMPORTANCE_DEFAULT));
+            }
+        } else {
+            mRightMenuItems.addAll(mLeftMenuItems);
+        }
 
         populateMenuViews();
         if (resetState) {
@@ -597,7 +621,7 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
         // TODO -- handle / allow custom menu items!
     }
 
-    public static MenuItem createSnoozeItem(Context context) {
+    static MenuItem createSnoozeItem(Context context) {
         Resources res = context.getResources();
         NotificationSnooze content = (NotificationSnooze) LayoutInflater.from(context)
                 .inflate(R.layout.notification_snooze, null, false);
@@ -607,22 +631,44 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
         return snooze;
     }
 
-    public static MenuItem createInfoItem(Context context) {
+    static NotificationInfoMenuItem createInfoItem(Context context) {
         Resources res = context.getResources();
         String infoDescription = res.getString(R.string.notification_menu_gear_description);
         NotificationInfo infoContent = (NotificationInfo) LayoutInflater.from(context).inflate(
                 R.layout.notification_info, null, false);
-        MenuItem info = new NotificationInfoMenuItem(context, infoDescription, infoContent,
+        return new NotificationInfoMenuItem(context, infoDescription, infoContent,
                 R.drawable.ic_settings, ACTION_NONE);
-        return info;
     }
 
-    public static MenuItem createAppOpsItem(Context context) {
+    static MenuItem createAppOpsItem(Context context) {
         AppOpsInfo appOpsContent = (AppOpsInfo) LayoutInflater.from(context).inflate(
                 R.layout.app_ops_info, null, false);
         MenuItem info = new NotificationMenuItem(context, null, appOpsContent,
                 -1 /*don't show in slow swipe menu */);
         return info;
+    }
+
+    private static MenuItem createBlockItem(Context context, NotificationInfo gutsView) {
+        return new NotificationInfoMenuItem(
+                context,
+                context.getResources().getString(R.string.inline_stop_button),
+                gutsView,
+                R.drawable.ic_notification_block,
+                ACTION_BLOCK);
+    }
+
+    private static MenuItem createToggleSilentItem(Context context, NotificationInfo gutsView,
+            boolean isCurrentlySilent) {
+        return new NotificationInfoMenuItem(
+                context,
+                isCurrentlySilent
+                        ? context.getResources().getString(R.string.inline_silent_button_alert)
+                        : context.getResources().getString(R.string.inline_silent_button_silent),
+                gutsView,
+                isCurrentlySilent
+                        ? R.drawable.ic_notifications_alert
+                        : R.drawable.ic_notifications_silence,
+                ACTION_TOGGLE_SILENT);
     }
 
     private void addMenuView(MenuItem item, ViewGroup parent) {
@@ -706,7 +752,8 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
          * Add a new 'guts' panel. If iconResId < 0 it will not appear in the slow swipe menu
          * but can still be exposed via other affordances.
          */
-        public NotificationMenuItem(Context context, String s, GutsContent content, int iconResId) {
+        public NotificationMenuItem(Context context, String contentDescription, GutsContent content,
+                int iconResId) {
             Resources res = context.getResources();
             int padding = res.getDimensionPixelSize(R.dimen.notification_menu_icon_padding);
             int tint = res.getColor(R.color.notification_gear_color);
@@ -719,7 +766,7 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
                 iv.setAlpha(1f);
                 mMenuView = iv;
             }
-            mContentDescription = s;
+            mContentDescription = contentDescription;
             mGutsContent = content;
         }
 
@@ -746,11 +793,16 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
         @NotificationInfoAction
         int mAction;
 
-        public NotificationInfoMenuItem(Context context, String s,
+        public NotificationInfoMenuItem(Context context, String contentDescription,
                 NotificationInfo content, int iconResId,
                 @NotificationInfoAction int action) {
-            super(context, s, content, iconResId);
+            super(context, contentDescription, content, iconResId);
             this.mAction = action;
+        }
+
+        @Override
+        public NotificationInfo getGutsView() {
+            return (NotificationInfo) super.getGutsView();
         }
     }
 }
