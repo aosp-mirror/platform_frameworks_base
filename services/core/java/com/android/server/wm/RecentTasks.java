@@ -19,6 +19,7 @@ package com.android.server.wm;
 import static android.app.ActivityManager.FLAG_AND_UNLOCKED;
 import static android.app.ActivityManager.RECENT_IGNORE_UNAVAILABLE;
 import static android.app.ActivityManager.RECENT_WITH_EXCLUDED;
+import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_ASSISTANT;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_RECENTS;
@@ -33,6 +34,7 @@ import static android.content.Intent.FLAG_ACTIVITY_NEW_TASK;
 import static android.os.Process.SYSTEM_UID;
 import static android.view.Display.DEFAULT_DISPLAY;
 
+import static com.android.server.wm.ActivityStackSupervisor.REMOVE_FROM_RECENTS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_RECENTS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_RECENTS_TRIM_TASKS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.DEBUG_TASKS;
@@ -40,8 +42,6 @@ import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_RECEN
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.POSTFIX_TASKS;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_ATM;
 import static com.android.server.wm.ActivityTaskManagerDebugConfig.TAG_WITH_CLASS_NAME;
-import static com.android.server.wm.ActivityStackSupervisor.REMOVE_FROM_RECENTS;
-import static android.app.ActivityTaskManager.INVALID_TASK_ID;
 
 import android.app.ActivityManager;
 import android.app.ActivityTaskManager;
@@ -196,7 +196,8 @@ class RecentTasks {
         final Resources res = service.mContext.getResources();
         mService = service;
         mSupervisor = mService.mStackSupervisor;
-        mTaskPersister = new TaskPersister(systemDir, stackSupervisor, service, this);
+        mTaskPersister = new TaskPersister(systemDir, stackSupervisor, service, this,
+                stackSupervisor.mPersisterQueue);
         mGlobalMaxNumTasks = ActivityTaskManager.getMaxRecentTasksStatic();
         mHasVisibleRecentTasks = res.getBoolean(com.android.internal.R.bool.config_hasRecents);
         loadParametersFromResources(res);
@@ -432,7 +433,6 @@ class RecentTasks {
     void onSystemReadyLocked() {
         loadRecentsComponent(mService.mContext.getResources());
         mTasks.clear();
-        mTaskPersister.onSystemReady();
     }
 
     Bitmap getTaskDescriptionIcon(String path) {

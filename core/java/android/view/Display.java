@@ -455,6 +455,19 @@ public final class Display {
     }
 
     /**
+     * Gets the display unique id.
+     * <p>
+     * Unique id is different from display id because physical displays have stable unique id across
+     * reboots.
+     *
+     * @see com.android.service.display.DisplayDevice#hasStableUniqueId().
+     * @hide
+     */
+    public String getUniqueId() {
+        return mDisplayInfo.uniqueId;
+    }
+
+    /**
      * Returns true if this display is still valid, false if the display has been removed.
      *
      * If the display is invalid, then the methods of this class will

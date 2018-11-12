@@ -653,6 +653,7 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
             mAssistUtils = new AssistUtils(mContext);
             mVrController.onSystemReady();
             mRecentTasks.onSystemReadyLocked();
+            mStackSupervisor.onSystemReady();
         }
     }
 
@@ -908,6 +909,20 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
         public void onStart() {
             publishBinderService(Context.ACTIVITY_TASK_SERVICE, mService);
             mService.start();
+        }
+
+        @Override
+        public void onUnlockUser(int userId) {
+            synchronized (mService.getGlobalLock()) {
+                mService.mStackSupervisor.mLaunchParamsPersister.onUnlockUser(userId);
+            }
+        }
+
+        @Override
+        public void onCleanupUser(int userId) {
+            synchronized (mService.getGlobalLock()) {
+                mService.mStackSupervisor.mLaunchParamsPersister.onCleanupUser(userId);
+            }
         }
 
         public ActivityTaskManagerService getService() {
