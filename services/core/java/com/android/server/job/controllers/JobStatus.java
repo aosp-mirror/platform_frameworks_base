@@ -68,10 +68,10 @@ public final class JobStatus {
     public static final long NO_LATEST_RUNTIME = Long.MAX_VALUE;
     public static final long NO_EARLIEST_RUNTIME = 0L;
 
-    static final int CONSTRAINT_CHARGING = JobInfo.CONSTRAINT_FLAG_CHARGING;
-    static final int CONSTRAINT_IDLE = JobInfo.CONSTRAINT_FLAG_DEVICE_IDLE;
-    static final int CONSTRAINT_BATTERY_NOT_LOW = JobInfo.CONSTRAINT_FLAG_BATTERY_NOT_LOW;
-    static final int CONSTRAINT_STORAGE_NOT_LOW = JobInfo.CONSTRAINT_FLAG_STORAGE_NOT_LOW;
+    static final int CONSTRAINT_CHARGING = JobInfo.CONSTRAINT_FLAG_CHARGING; // 1 < 0
+    static final int CONSTRAINT_IDLE = JobInfo.CONSTRAINT_FLAG_DEVICE_IDLE;  // 1 << 2
+    static final int CONSTRAINT_BATTERY_NOT_LOW = JobInfo.CONSTRAINT_FLAG_BATTERY_NOT_LOW; // 1 << 1
+    static final int CONSTRAINT_STORAGE_NOT_LOW = JobInfo.CONSTRAINT_FLAG_STORAGE_NOT_LOW; // 1 << 3
     static final int CONSTRAINT_TIMING_DELAY = 1<<31;
     static final int CONSTRAINT_DEADLINE = 1<<30;
     static final int CONSTRAINT_CONNECTIVITY = 1<<28;
@@ -975,8 +975,7 @@ public final class JobStatus {
     }
 
     /**
-     * @return Whether or not this job is ready to run, based on its requirements. This is true if
-     * the constraints are satisfied <strong>or</strong> the deadline on the job has expired.
+     * @return Whether or not this job is ready to run, based on its requirements.
      */
     public boolean isReady() {
         // Deadline constraint trumps other constraints (except for periodic jobs where deadline
@@ -1234,16 +1233,18 @@ public final class JobStatus {
         proto.end(token);
     }
 
-    // normalized bucket indices, not the AppStandby constants
-    private String bucketName(int bucket) {
-        switch (bucket) {
+    /**
+     * Returns a bucket name based on the normalized bucket indices, not the AppStandby constants.
+     */
+    String getBucketName() {
+        switch (standbyBucket) {
             case 0: return "ACTIVE";
             case 1: return "WORKING_SET";
             case 2: return "FREQUENT";
             case 3: return "RARE";
             case 4: return "NEVER";
             default:
-                return "Unknown: " + bucket;
+                return "Unknown: " + standbyBucket;
         }
     }
 
@@ -1385,6 +1386,17 @@ public final class JobStatus {
             if ((trackingControllers&TRACKING_TIME) != 0) pw.print(" TIME");
             pw.println();
         }
+
+        pw.print(prefix); pw.println("Implicit constraints:");
+        pw.print(prefix); pw.print("  readyNotDozing: ");
+        pw.println(mReadyNotDozing);
+        pw.print(prefix); pw.print("  readyNotRestrictedInBg: ");
+        pw.println(mReadyNotRestrictedInBg);
+        if (!job.isPeriodic() && hasDeadlineConstraint()) {
+            pw.print(prefix); pw.print("  readyDeadlineSatisfied: ");
+            pw.println(mReadyDeadlineSatisfied);
+        }
+
         if (changedAuthorities != null) {
             pw.print(prefix); pw.println("Changed authorities:");
             for (int i=0; i<changedAuthorities.size(); i++) {
@@ -1413,7 +1425,7 @@ public final class JobStatus {
             }
         }
         pw.print(prefix); pw.print("Standby bucket: ");
-        pw.println(bucketName(standbyBucket));
+        pw.println(getBucketName());
         if (standbyBucket > 0) {
             pw.print(prefix); pw.print("Base heartbeat: ");
             pw.println(baseHeartbeat);
@@ -1563,6 +1575,13 @@ public final class JobStatus {
             proto.write(JobStatusDumpProto.TRACKING_CONTROLLERS,
                     JobStatusDumpProto.TRACKING_TIME);
         }
+
+        // Implicit constraints
+        final long icToken = proto.start(JobStatusDumpProto.IMPLICIT_CONSTRAINTS);
+        proto.write(JobStatusDumpProto.ImplicitConstraints.IS_NOT_DOZING, mReadyNotDozing);
+        proto.write(JobStatusDumpProto.ImplicitConstraints.IS_NOT_RESTRICTED_IN_BG,
+                mReadyNotRestrictedInBg);
+        proto.end(icToken);
 
         if (changedAuthorities != null) {
             for (int k = 0; k < changedAuthorities.size(); k++) {

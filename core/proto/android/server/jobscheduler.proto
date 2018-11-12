@@ -609,6 +609,17 @@ message JobStatusDumpProto {
     repeated Constraint unsatisfied_constraints = 9;
     optional bool is_doze_whitelisted = 10;
 
+    message ImplicitConstraints {
+        // The device isn't Dozing or this job will be in the foreground. This
+        // implicit constraint must be satisfied for the job to run.
+        optional bool is_not_dozing = 1;
+        // The job is not restricted from running in the background (due to
+        // Battery Saver). This implicit constraint must be satisfied for the
+        // job to run.
+        optional bool is_not_restricted_in_bg = 2;
+    }
+    optional ImplicitConstraints implicit_constraints = 25;
+
     enum TrackingController {
         TRACKING_BATTERY = 0;
         TRACKING_CONNECTIVITY = 1;
@@ -662,4 +673,6 @@ message JobStatusDumpProto {
     optional int64 last_failed_run_time = 23;
 
     optional int64 internal_flags = 24;
+
+    // Next tag: 26
 }
