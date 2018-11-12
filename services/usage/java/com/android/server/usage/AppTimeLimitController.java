@@ -23,7 +23,6 @@ import android.os.Looper;
 import android.os.Message;
 import android.os.SystemClock;
 import android.util.ArrayMap;
-import android.util.ArraySet;
 import android.util.Slog;
 import android.util.SparseArray;
 
@@ -62,6 +61,8 @@ public class AppTimeLimitController {
 
     private static final long ONE_MINUTE = 60_000L;
 
+    private static final Integer ONE = new Integer(1);
+
     /** Collection of data for each user that has reported usage */
     @GuardedBy("mLock")
     private final SparseArray<UserData> mUsers = new SparseArray<>();
@@ -79,11 +80,11 @@ public class AppTimeLimitController {
         private @UserIdInt
         int userId;
 
-        /** Set of the currently active entities */
-        private final ArraySet<String> currentlyActive = new ArraySet<>();
+        /** Count of the currently active entities */
+        public final ArrayMap<String, Integer> currentlyActive = new ArrayMap<>();
 
         /** Map from entity name for quick lookup */
-        private final ArrayMap<String, ArrayList<UsageGroup>> observedMap = new ArrayMap<>();
+        public final ArrayMap<String, ArrayList<UsageGroup>> observedMap = new ArrayMap<>();
 
         private UserData(@UserIdInt int userId) {
             this.userId = userId;
@@ -94,7 +95,7 @@ public class AppTimeLimitController {
             // TODO: Consider using a bloom filter here if number of actives becomes large
             final int size = entities.length;
             for (int i = 0; i < size; i++) {
-                if (currentlyActive.contains(entities[i])) {
+                if (currentlyActive.containsKey(entities[i])) {
                     return true;
                 }
             }
@@ -137,7 +138,7 @@ public class AppTimeLimitController {
             pw.print(" Currently Active:");
             final int nActive = currentlyActive.size();
             for (int i = 0; i < nActive; i++) {
-                pw.print(currentlyActive.valueAt(i));
+                pw.print(currentlyActive.keyAt(i));
                 pw.print(", ");
             }
             pw.println();
@@ -233,6 +234,7 @@ public class AppTimeLimitController {
         protected long mUsageTimeMs;
         protected int mActives;
         protected long mLastKnownUsageTimeMs;
+        protected long mLastUsageEndTimeMs;
         protected WeakReference<UserData> mUserRef;
         protected WeakReference<ObserverAppData> mObserverAppRef;
         protected PendingIntent mLimitReachedCallback;
@@ -271,9 +273,15 @@ public class AppTimeLimitController {
         @GuardedBy("mLock")
         void noteUsageStart(long startTimeMs, long currentTimeMs) {
             if (mActives++ == 0) {
+                // If last known usage ended after the start of this usage, there is overlap
+                // between the last usage session and this one. Avoid double counting by only
+                // counting from the end of the last session. This has a rare side effect that some
+                // usage will not be accounted for if the previous session started and stopped
+                // within this current usage.
+                startTimeMs = mLastUsageEndTimeMs > startTimeMs ? mLastUsageEndTimeMs : startTimeMs;
                 mLastKnownUsageTimeMs = startTimeMs;
                 final long timeRemaining =
-                        mTimeLimitMs - mUsageTimeMs + currentTimeMs - startTimeMs;
+                        mTimeLimitMs - mUsageTimeMs - currentTimeMs + startTimeMs;
                 if (timeRemaining > 0) {
                     if (DEBUG) {
                         Slog.d(TAG, "Posting timeout for " + mObserverId + " for "
@@ -287,7 +295,7 @@ public class AppTimeLimitController {
                     mActives = mObserved.length;
                     final UserData user = mUserRef.get();
                     if (user == null) return;
-                    final Object[] array = user.currentlyActive.toArray();
+                    final Object[] array = user.currentlyActive.keySet().toArray();
                     Slog.e(TAG,
                             "Too many noted usage starts! Observed entities: " + Arrays.toString(
                                     mObserved) + "   Active Entities: " + Arrays.toString(array));
@@ -300,6 +308,8 @@ public class AppTimeLimitController {
             if (--mActives == 0) {
                 final boolean limitNotCrossed = mUsageTimeMs < mTimeLimitMs;
                 mUsageTimeMs += stopTimeMs - mLastKnownUsageTimeMs;
+
+                mLastUsageEndTimeMs = stopTimeMs;
                 if (limitNotCrossed && mUsageTimeMs >= mTimeLimitMs) {
                     // Crossed the limit
                     if (DEBUG) Slog.d(TAG, "MTB informing group obs=" + mObserverId);
@@ -312,7 +322,7 @@ public class AppTimeLimitController {
                     mActives = 0;
                     final UserData user = mUserRef.get();
                     if (user == null) return;
-                    final Object[] array = user.currentlyActive.toArray();
+                    final Object[] array = user.currentlyActive.keySet().toArray();
                     Slog.e(TAG,
                             "Too many noted usage stops! Observed entities: " + Arrays.toString(
                                     mObserved) + "   Active Entities: " + Arrays.toString(array));
@@ -409,7 +419,6 @@ public class AppTimeLimitController {
     }
 
     class SessionUsageGroup extends UsageGroup {
-        private long mLastUsageEndTimeMs;
         private long mNewSessionThresholdMs;
         private PendingIntent mSessionEndCallback;
 
@@ -451,7 +460,6 @@ public class AppTimeLimitController {
         public void noteUsageStop(long stopTimeMs) {
             super.noteUsageStop(stopTimeMs);
             if (mActives == 0) {
-                mLastUsageEndTimeMs = stopTimeMs;
                 if (mUsageTimeMs >= mTimeLimitMs) {
                     // Usage has ended. Schedule the session end callback to be triggered once
                     // the new session threshold has been reached
@@ -467,7 +475,10 @@ public class AppTimeLimitController {
             UserData user = mUserRef.get();
             if (user == null) return;
             if (mListener != null) {
-                mListener.onSessionEnd(mObserverId, user.userId, mUsageTimeMs, mSessionEndCallback);
+                mListener.onSessionEnd(mObserverId,
+                                       user.userId,
+                                       mUsageTimeMs,
+                                       mSessionEndCallback);
             }
         }
 
@@ -599,7 +610,7 @@ public class AppTimeLimitController {
         // TODO: Consider using a bloom filter here if number of actives becomes large
         final int size = group.mObserved.length;
         for (int i = 0; i < size; i++) {
-            if (user.currentlyActive.contains(group.mObserved[i])) {
+            if (user.currentlyActive.containsKey(group.mObserved[i])) {
                 // Entity is currently active. Start group's usage.
                 group.noteUsageStart(currentTimeMs);
             }
@@ -717,21 +728,28 @@ public class AppTimeLimitController {
     /**
      * Called when an entity becomes active.
      *
-     * @param name   The entity that became active
-     * @param userId The user
+     * @param name      The entity that became active
+     * @param userId    The user
+     * @param timeAgoMs Time since usage was started
      */
-    public void noteUsageStart(String name, int userId) throws IllegalArgumentException {
+    public void noteUsageStart(String name, int userId, long timeAgoMs)
+            throws IllegalArgumentException {
         synchronized (mLock) {
             UserData user = getOrCreateUserDataLocked(userId);
             if (DEBUG) Slog.d(TAG, "Usage entity " + name + " became active");
-            if (user.currentlyActive.contains(name)) {
-                throw new IllegalArgumentException(
-                        "Unable to start usage for " + name + ", already in use");
+
+            final int index = user.currentlyActive.indexOfKey(name);
+            if (index >= 0) {
+                final Integer count = user.currentlyActive.valueAt(index);
+                if (count != null) {
+                    // There are multiple instances of this entity. Just increment the count.
+                    user.currentlyActive.setValueAt(index, count + 1);
+                    return;
+                }
             }
             final long currentTime = getUptimeMillis();
 
-            // Add to the list of active entities
-            user.currentlyActive.add(name);
+            user.currentlyActive.put(name, ONE);
 
             ArrayList<UsageGroup> groups = user.observedMap.get(name);
             if (groups == null) return;
@@ -739,9 +757,19 @@ public class AppTimeLimitController {
             final int size = groups.size();
             for (int i = 0; i < size; i++) {
                 UsageGroup group = groups.get(i);
-                group.noteUsageStart(currentTime);
+                group.noteUsageStart(currentTime - timeAgoMs, currentTime);
             }
         }
+    }
+
+    /**
+     * Called when an entity becomes active.
+     *
+     * @param name   The entity that became active
+     * @param userId The user
+     */
+    public void noteUsageStart(String name, int userId) throws IllegalArgumentException {
+        noteUsageStart(name, userId, 0);
     }
 
     /**
@@ -754,10 +782,21 @@ public class AppTimeLimitController {
         synchronized (mLock) {
             UserData user = getOrCreateUserDataLocked(userId);
             if (DEBUG) Slog.d(TAG, "Usage entity " + name + " became inactive");
-            if (!user.currentlyActive.remove(name)) {
+
+            final int index = user.currentlyActive.indexOfKey(name);
+            if (index < 0) {
                 throw new IllegalArgumentException(
                         "Unable to stop usage for " + name + ", not in use");
             }
+
+            final Integer count = user.currentlyActive.valueAt(index);
+            if (!count.equals(ONE)) {
+                // There are multiple instances of this entity. Just decrement the count.
+                user.currentlyActive.setValueAt(index, count - 1);
+                return;
+            }
+
+            user.currentlyActive.removeAt(index);
             final long currentTime = getUptimeMillis();
 
             // Check if any of the groups need to watch for this entity
@@ -769,6 +808,7 @@ public class AppTimeLimitController {
                 UsageGroup group = groups.get(i);
                 group.noteUsageStop(currentTime);
             }
+
         }
     }
 
@@ -780,7 +820,8 @@ public class AppTimeLimitController {
 
     @GuardedBy("mLock")
     private void postInformSessionEndListenerLocked(SessionUsageGroup group, long timeout) {
-        mHandler.sendMessageDelayed(mHandler.obtainMessage(MyHandler.MSG_INFORM_SESSION_END, group),
+        mHandler.sendMessageDelayed(
+                mHandler.obtainMessage(MyHandler.MSG_INFORM_SESSION_END, group),
                 timeout);
     }
 
@@ -800,7 +841,27 @@ public class AppTimeLimitController {
         mHandler.removeMessages(MyHandler.MSG_CHECK_TIMEOUT, group);
     }
 
-    void dump(PrintWriter pw) {
+    void dump(String[] args, PrintWriter pw) {
+        if (args != null) {
+            for (int i = 0; i < args.length; i++) {
+                String arg = args[i];
+                if ("actives".equals(arg)) {
+                    synchronized (mLock) {
+                        final int nUsers = mUsers.size();
+                        for (int user = 0; user < nUsers; user++) {
+                            final ArrayMap<String, Integer> actives =
+                                    mUsers.valueAt(user).currentlyActive;
+                            final int nActive = actives.size();
+                            for (int active = 0; active < nActive; active++) {
+                                pw.println(actives.keyAt(active));
+                            }
+                        }
+                    }
+                    return;
+                }
+            }
+        }
+
         synchronized (mLock) {
             pw.println("\n  App Time Limits");
             final int nUsers = mUsers.size();

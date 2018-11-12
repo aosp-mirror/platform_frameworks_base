@@ -917,6 +917,9 @@ package android.app.usage {
     method public java.util.Map<java.lang.String, java.lang.Integer> getAppStandbyBuckets();
     method public void registerAppUsageObserver(int, java.lang.String[], long, java.util.concurrent.TimeUnit, android.app.PendingIntent);
     method public void registerUsageSessionObserver(int, java.lang.String[], long, java.util.concurrent.TimeUnit, long, java.util.concurrent.TimeUnit, android.app.PendingIntent, android.app.PendingIntent);
+    method public void reportUsageStart(android.app.Activity, java.lang.String);
+    method public void reportUsageStart(android.app.Activity, java.lang.String, long);
+    method public void reportUsageStop(android.app.Activity, java.lang.String);
     method public void setAppStandbyBucket(java.lang.String, int);
     method public void setAppStandbyBuckets(java.util.Map<java.lang.String, java.lang.Integer>);
     method public void unregisterAppUsageObserver(int);

@@ -23,6 +23,7 @@ import android.annotation.RequiresPermission;
 import android.annotation.SystemApi;
 import android.annotation.SystemService;
 import android.annotation.UnsupportedAppUsage;
+import android.app.Activity;
 import android.app.PendingIntent;
 import android.content.Context;
 import android.content.pm.ParceledListSlice;
@@ -579,15 +580,18 @@ public final class UsageStatsManager {
     /**
      * @hide
      * Register an app usage limit observer that receives a callback on the provided intent when
-     * the sum of usages of apps in the packages array exceeds the {@code timeLimit} specified. The
-     * observer will automatically be unregistered when the time limit is reached and the intent
-     * is delivered. Registering an {@code observerId} that was already registered will override
-     * the previous one. No more than 1000 unique {@code observerId} may be registered by a single
-     * uid at any one time.
+     * the sum of usages of apps and tokens in the {@code observed} array exceeds the
+     * {@code timeLimit} specified. The structure of a token is a String with the reporting
+     * package's name and a token the reporting app will use, separated by the forward slash
+     * character. Example: com.reporting.package/5OM3*0P4QU3-7OK3N
+     * The observer will automatically be unregistered when the time limit is reached and the
+     * intent is delivered. Registering an {@code observerId} that was already registered will
+     * override the previous one. No more than 1000 unique {@code observerId} may be registered by
+     * a single uid at any one time.
      * @param observerId A unique id associated with the group of apps to be monitored. There can
      *                  be multiple groups with common packages and different time limits.
-     * @param packages The list of packages to observe for foreground activity time. Cannot be null
-     *                 and must include at least one package.
+     * @param observedEntities The list of packages and token to observe for usage time. Cannot be
+     *                         null and must include at least one package or token.
      * @param timeLimit The total time the set of apps can be in the foreground before the
      *                  callbackIntent is delivered. Must be at least one minute.
      * @param timeUnit The unit for time specified in {@code timeLimit}. Cannot be null.
@@ -600,11 +604,11 @@ public final class UsageStatsManager {
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.OBSERVE_APP_USAGE)
-    public void registerAppUsageObserver(int observerId, @NonNull String[] packages, long timeLimit,
-            @NonNull TimeUnit timeUnit, @NonNull PendingIntent callbackIntent) {
+    public void registerAppUsageObserver(int observerId, @NonNull String[] observedEntities,
+            long timeLimit, @NonNull TimeUnit timeUnit, @NonNull PendingIntent callbackIntent) {
         try {
-            mService.registerAppUsageObserver(observerId, packages, timeUnit.toMillis(timeLimit),
-                    callbackIntent, mContext.getOpPackageName());
+            mService.registerAppUsageObserver(observerId, observedEntities,
+                    timeUnit.toMillis(timeLimit), callbackIntent, mContext.getOpPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }
@@ -631,18 +635,21 @@ public final class UsageStatsManager {
 
     /**
      * Register a usage session observer that receives a callback on the provided {@code
-     * limitReachedCallbackIntent} when the sum of usages of apps in the packages array exceeds
-     * the {@code timeLimit} specified within a usage session. After the {@code timeLimit} has
-     * been reached, the usage session observer will receive a callback on the provided {@code
-     * sessionEndCallbackIntent} when the usage session ends. Registering another session
-     * observer against a {@code sessionObserverId} that has already been registered will
-     * override the previous session observer.
+     * limitReachedCallbackIntent} when the sum of usages of apps and tokens in the {@code
+     * observed} array exceeds the {@code timeLimit} specified within a usage session. The
+     * structure of a token is a String with the reporting packages' name and a token the
+     * reporting app will use, separated by the forward slash character.
+     * Example: com.reporting.package/5OM3*0P4QU3-7OK3N
+     * After the {@code timeLimit} has been reached, the usage session observer will receive a
+     * callback on the provided {@code sessionEndCallbackIntent} when the usage session ends.
+     * Registering another session observer against a {@code sessionObserverId} that has already
+     * been registered will override the previous session observer.
      *
      * @param sessionObserverId A unique id associated with the group of apps to be
      *                          monitored. There can be multiple groups with common
      *                          packages and different time limits.
-     * @param packages The list of packages to observe for foreground activity time. Cannot be null
-     *                 and must include at least one package.
+     * @param observedEntities The list of packages and token to observe for usage time. Cannot be
+     *                         null and must include at least one package or token.
      * @param timeLimit The total time the set of apps can be used continuously before the {@code
      *                  limitReachedCallbackIntent} is delivered. Must be at least one minute.
      * @param timeUnit The unit for time specified in {@code timeLimit}. Cannot be null.
@@ -668,13 +675,13 @@ public final class UsageStatsManager {
      */
     @SystemApi
     @RequiresPermission(android.Manifest.permission.OBSERVE_APP_USAGE)
-    public void registerUsageSessionObserver(int sessionObserverId, @NonNull String[] packages,
-            long timeLimit, @NonNull TimeUnit timeUnit, long sessionThresholdTime,
-            @NonNull TimeUnit sessionThresholdTimeUnit,
+    public void registerUsageSessionObserver(int sessionObserverId,
+            @NonNull String[] observedEntities, long timeLimit, @NonNull TimeUnit timeUnit,
+            long sessionThresholdTime,  @NonNull TimeUnit sessionThresholdTimeUnit,
             @NonNull PendingIntent limitReachedCallbackIntent,
             @Nullable PendingIntent sessionEndCallbackIntent) {
         try {
-            mService.registerUsageSessionObserver(sessionObserverId, packages,
+            mService.registerUsageSessionObserver(sessionObserverId, observedEntities,
                     timeUnit.toMillis(timeLimit),
                     sessionThresholdTimeUnit.toMillis(sessionThresholdTime),
                     limitReachedCallbackIntent, sessionEndCallbackIntent,
@@ -699,6 +706,71 @@ public final class UsageStatsManager {
     public void unregisterUsageSessionObserver(int sessionObserverId) {
         try {
             mService.unregisterUsageSessionObserver(sessionObserverId, mContext.getOpPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Report usage associated with a particular {@code token} has started. Tokens are app defined
+     * strings used to represent usage of in-app features. Apps with the {@link
+     * android.Manifest.permission#OBSERVE_APP_USAGE} permission can register time limit observers
+     * to monitor the usage of a token. In app usage can only associated with an {@code activity}
+     * and usage will be considered stopped if the activity stops or crashes.
+     * @see #registerAppUsageObserver
+     * @see #registerUsageSessionObserver
+     *
+     * @param activity The activity {@code token} is associated with.
+     * @param token The token to report usage against.
+     * @hide
+     */
+    @SystemApi
+    public void reportUsageStart(@NonNull Activity activity, @NonNull String token) {
+        try {
+            mService.reportUsageStart(activity.getActivityToken(), token,
+                    mContext.getOpPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Report usage associated with a particular {@code token} had started some amount of time in
+     * the past. Tokens are app defined strings used to represent usage of in-app features. Apps
+     * with the {@link android.Manifest.permission#OBSERVE_APP_USAGE} permission can register time
+     * limit observers to monitor the usage of a token. In app usage can only associated with an
+     * {@code activity} and usage will be considered stopped if the activity stops or crashes.
+     * @see #registerAppUsageObserver
+     * @see #registerUsageSessionObserver
+     *
+     * @param activity The activity {@code token} is associated with.
+     * @param token The token to report usage against.
+     * @param timeAgoMs How long ago the start of usage took place
+     * @hide
+     */
+    @SystemApi
+    public void reportUsageStart(@NonNull Activity activity, @NonNull String token,
+                                 long timeAgoMs) {
+        try {
+            mService.reportPastUsageStart(activity.getActivityToken(), token, timeAgoMs,
+                    mContext.getOpPackageName());
+        } catch (RemoteException e) {
+            throw e.rethrowFromSystemServer();
+        }
+    }
+
+    /**
+     * Report the usage associated with a particular {@code token} has stopped.
+     *
+     * @param activity The activity {@code token} is associated with.
+     * @param token The token to report usage against.
+     * @hide
+     */
+    @SystemApi
+    public void reportUsageStop(@NonNull Activity activity, @NonNull String token) {
+        try {
+            mService.reportUsageStop(activity.getActivityToken(), token,
+                    mContext.getOpPackageName());
         } catch (RemoteException e) {
             throw e.rethrowFromSystemServer();
         }

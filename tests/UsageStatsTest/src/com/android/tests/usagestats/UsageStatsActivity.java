@@ -155,7 +155,7 @@ public class UsageStatsActivity extends ListActivity {
                     intent.setPackage(getPackageName());
                     intent.putExtra(EXTRA_KEY_TIMEOUT, true);
                     mUsageStatsManager.registerAppUsageObserver(1, packages,
-                            30, TimeUnit.SECONDS, PendingIntent.getActivity(UsageStatsActivity.this,
+                            60, TimeUnit.SECONDS, PendingIntent.getActivity(UsageStatsActivity.this,
                                     1, intent, 0));
                 }
             }
