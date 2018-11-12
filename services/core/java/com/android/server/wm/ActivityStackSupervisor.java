@@ -1646,6 +1646,13 @@ public class ActivityStackSupervisor extends ConfigurationContainer implements D
             // restart the application.
         }
 
+        // Suppress transition until the new activity becomes ready, otherwise the keyguard can
+        // appear for a short amount of time before the new process with the new activity had the
+        // ability to set its showWhenLocked flags.
+        if (getKeyguardController().isKeyguardLocked()) {
+            r.notifyUnknownVisibilityLaunched();
+        }
+
         // Post message to start process to avoid possible deadlock of calling into AMS with the
         // ATMS lock held.
         final Message msg = PooledLambda.obtainMessage(
