@@ -16,12 +16,14 @@
 #ifndef DEX_BUILDER_H_
 #define DEX_BUILDER_H_
 
+#include <forward_list>
 #include <map>
 #include <optional>
 #include <string>
 #include <unordered_map>
 #include <vector>
 
+#include "dex/dex_instruction.h"
 #include "slicer/dex_ir.h"
 #include "slicer/writer.h"
 
@@ -108,15 +110,18 @@ class Value {
   static constexpr Value Local(size_t id) { return Value{id, Kind::kLocalRegister}; }
   static constexpr Value Parameter(size_t id) { return Value{id, Kind::kParameter}; }
   static constexpr Value Immediate(size_t value) { return Value{value, Kind::kImmediate}; }
+  static constexpr Value Label(size_t id) { return Value{id, Kind::kLabel}; }
 
   bool is_register() const { return kind_ == Kind::kLocalRegister; }
   bool is_parameter() const { return kind_ == Kind::kParameter; }
+  bool is_variable() const { return is_register() || is_parameter(); }
   bool is_immediate() const { return kind_ == Kind::kImmediate; }
+  bool is_label() const { return kind_ == Kind::kLabel; }
 
   size_t value() const { return value_; }
 
  private:
-  enum class Kind { kLocalRegister, kParameter, kImmediate };
+  enum class Kind { kLocalRegister, kParameter, kImmediate, kLabel };
 
   const size_t value_;
   const Kind kind_;
@@ -132,7 +137,7 @@ class Instruction {
  public:
   // The operation performed by this instruction. These are virtual instructions that do not
   // correspond exactly to DEX instructions.
-  enum class Op { kReturn, kMove, kInvokeVirtual };
+  enum class Op { kReturn, kMove, kInvokeVirtual, kBindLabel, kBranchEqz };
 
   ////////////////////////
   // Named Constructors //
@@ -195,6 +200,8 @@ class MethodBuilder {
   // it's up to the caller to reuse registers as appropriate.
   Value MakeRegister();
 
+  Value MakeLabel();
+
   /////////////////////////////////
   // Instruction builder methods //
   /////////////////////////////////
@@ -215,9 +222,18 @@ class MethodBuilder {
   void EncodeReturn(const Instruction& instruction);
   void EncodeMove(const Instruction& instruction);
   void EncodeInvokeVirtual(const Instruction& instruction);
+  void EncodeBranch(art::Instruction::Code op, const Instruction& instruction);
 
   // Converts a register or parameter to its DEX register number.
-  size_t RegisterValue(Value value) const;
+  size_t RegisterValue(const Value& value) const;
+
+  // Sets a label's address to the current position in the instruction buffer. If there are any
+  // forward references to the label, this function will back-patch them.
+  void BindLabel(const Value& label);
+
+  // Returns the offset of the label relative to the given instruction offset. If the label is not
+  // bound, a reference will be saved and it will automatically be patched when the label is bound.
+  ::dex::u2 LabelValue(const Value& label, size_t instruction_offset, size_t field_offset);
 
   DexBuilder* dex_;
   ir::Class* class_;
@@ -231,6 +247,21 @@ class MethodBuilder {
 
   // How many registers we've allocated
   size_t num_registers_{0};
+
+  // Stores information needed to back-patch a label once it is bound. We need to know the start of
+  // the instruction that refers to the label, and the offset to where the actual label value should
+  // go.
+  struct LabelReference {
+    size_t instruction_offset;
+    size_t field_offset;
+  };
+
+  struct LabelData {
+    std::optional<size_t> bound_address;
+    std::forward_list<LabelReference> references;
+  };
+
+  std::vector<LabelData> labels_;
 };
 
 // A helper to build class definitions.

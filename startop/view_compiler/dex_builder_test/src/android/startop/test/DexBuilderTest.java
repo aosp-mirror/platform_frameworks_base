@@ -65,4 +65,21 @@ public class DexBuilderTest {
     Method method = clazz.getMethod("returnStringLength", String.class);
     Assert.assertEquals(13, method.invoke(null, "Hello, World!"));
   }
+
+  @Test
+  public void returnIfZero() throws Exception {
+    ClassLoader loader = loadDexFile("simple.dex");
+    Class clazz = loader.loadClass("android.startop.test.testcases.SimpleTests");
+    Method method = clazz.getMethod("returnIfZero", int.class);
+    Assert.assertEquals(5, method.invoke(null, 0));
+    Assert.assertEquals(3, method.invoke(null, 17));
+  }
+
+  @Test
+  public void backwardsBranch() throws Exception {
+    ClassLoader loader = loadDexFile("simple.dex");
+    Class clazz = loader.loadClass("android.startop.test.testcases.SimpleTests");
+    Method method = clazz.getMethod("backwardsBranch");
+    Assert.assertEquals(2, method.invoke(null));
+  }
 }
