@@ -280,7 +280,10 @@ public class NotificationMediaManager implements Dumpable {
         if (metaDataChanged) {
             getEntryManager().updateNotifications();
         }
-        mPresenter.updateMediaMetaData(metaDataChanged, true);
+
+        if (mPresenter != null) {
+            mPresenter.updateMediaMetaData(metaDataChanged, true);
+        }
     }
 
     public void clearCurrentMediaNotification() {
