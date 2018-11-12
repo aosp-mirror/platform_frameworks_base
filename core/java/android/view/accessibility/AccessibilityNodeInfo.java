@@ -3838,6 +3838,14 @@ public class AccessibilityNodeInfo implements Parcelable {
                 return "ACTION_SCROLL_DOWN";
             case R.id.accessibilityActionScrollRight:
                 return "ACTION_SCROLL_RIGHT";
+            case R.id.accessibilityActionPageDown:
+                return "ACTION_PAGE_DOWN";
+            case R.id.accessibilityActionPageUp:
+                return "ACTION_PAGE_UP";
+            case R.id.accessibilityActionPageLeft:
+                return "ACTION_PAGE_LEFT";
+            case R.id.accessibilityActionPageRight:
+                return "ACTION_PAGE_RIGHT";
             case R.id.accessibilityActionSetProgress:
                 return "ACTION_SET_PROGRESS";
             case R.id.accessibilityActionContextClick:
@@ -4366,6 +4374,30 @@ public class AccessibilityNodeInfo implements Parcelable {
          */
         public static final AccessibilityAction ACTION_SCROLL_RIGHT =
                 new AccessibilityAction(R.id.accessibilityActionScrollRight);
+
+        /**
+         * Action to move to the page above.
+         */
+        public static final AccessibilityAction ACTION_PAGE_UP =
+                new AccessibilityAction(R.id.accessibilityActionPageUp);
+
+        /**
+         * Action to move to the page below.
+         */
+        public static final AccessibilityAction ACTION_PAGE_DOWN =
+                new AccessibilityAction(R.id.accessibilityActionPageDown);
+
+        /**
+         * Action to move to the page left.
+         */
+        public static final AccessibilityAction ACTION_PAGE_LEFT =
+                new AccessibilityAction(R.id.accessibilityActionPageLeft);
+
+        /**
+         * Action to move to the page right.
+         */
+        public static final AccessibilityAction ACTION_PAGE_RIGHT =
+                new AccessibilityAction(R.id.accessibilityActionPageRight);
 
         /**
          * Action that context clicks the node.
