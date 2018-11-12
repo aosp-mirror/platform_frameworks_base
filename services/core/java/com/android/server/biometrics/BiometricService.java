@@ -246,9 +246,20 @@ public class BiometricService extends SystemService {
         public void authenticate(IBinder token, long sessionId, int userId,
                 IBiometricServiceReceiver receiver, int flags, String opPackageName,
                 Bundle bundle, IBiometricPromptReceiver dialogReceiver) throws RemoteException {
-            // Check the USE_BIOMETRIC permission here. In the BiometricServiceBase, check do the
-            // AppOps and foreground check.
-            checkPermission();
+            final int callingUid = Binder.getCallingUid();
+            final int callingPid = Binder.getCallingPid();
+            final int callingUserId = UserHandle.getCallingUserId();
+
+            // In the BiometricServiceBase, check do the AppOps and foreground check.
+            if (userId == callingUserId) {
+                // Check the USE_BIOMETRIC permission here.
+                checkPermission();
+            } else {
+                // Only allow internal clients to authenticate with a different userId
+                Slog.w(TAG, "User " + callingUserId + " is requesting authentication of userid: "
+                        + userId);
+                checkInternalPermission();
+            }
 
             if (token == null || receiver == null || opPackageName == null || bundle == null
                     || dialogReceiver == null) {
@@ -261,10 +272,6 @@ public class BiometricService extends SystemService {
             if (bundle.getBoolean(BiometricPrompt.KEY_USE_DEFAULT_TITLE, false)) {
                 checkInternalPermission();
             }
-
-            final int callingUid = Binder.getCallingUid();
-            final int callingPid = Binder.getCallingPid();
-            final int callingUserId = UserHandle.getCallingUserId();
 
             mHandler.post(() -> {
                 final Pair<Integer, Integer> result = checkAndGetBiometricModality(callingUserId);
