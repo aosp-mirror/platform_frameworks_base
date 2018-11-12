@@ -19,5 +19,5 @@
 
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
-    <string name="experiment_navigationbar_overlay" msgid="6953777362606036161">"Чакан чабыттоо тилкесин сыноо"</string>
+    <string name="experiment_navigationbar_overlay" msgid="7290469683147348228">"ফ্লোটিং নেভিগেশন বার সম্পর্কিত পরীক্ষা"</string>
 </resources>
