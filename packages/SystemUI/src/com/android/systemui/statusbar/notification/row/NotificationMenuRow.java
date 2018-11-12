@@ -17,6 +17,7 @@
 package com.android.systemui.statusbar.notification.row;
 
 import static com.android.systemui.SwipeHelper.SWIPED_FAR_ENOUGH_SIZE_FRACTION;
+import static com.android.systemui.statusbar.notification.row.NotificationInfo.ACTION_NONE;
 
 import android.animation.Animator;
 import android.animation.AnimatorListenerAdapter;
@@ -41,6 +42,7 @@ import com.android.systemui.R;
 import com.android.systemui.plugins.statusbar.NotificationMenuRowPlugin;
 import com.android.systemui.statusbar.AlphaOptimizedImageView;
 import com.android.systemui.statusbar.notification.row.NotificationGuts.GutsContent;
+import com.android.systemui.statusbar.notification.row.NotificationInfo.NotificationInfoAction;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 
 import java.util.ArrayList;
@@ -610,8 +612,8 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
         String infoDescription = res.getString(R.string.notification_menu_gear_description);
         NotificationInfo infoContent = (NotificationInfo) LayoutInflater.from(context).inflate(
                 R.layout.notification_info, null, false);
-        MenuItem info = new NotificationMenuItem(context, infoDescription, infoContent,
-                R.drawable.ic_settings);
+        MenuItem info = new NotificationInfoMenuItem(context, infoDescription, infoContent,
+                R.drawable.ic_settings, ACTION_NONE);
         return info;
     }
 
@@ -735,6 +737,20 @@ public class NotificationMenuRow implements NotificationMenuRowPlugin, View.OnCl
         @Override
         public String getContentDescription() {
             return mContentDescription;
+        }
+    }
+
+    /** A {@link NotificationMenuItem} with an associated {@link NotificationInfoAction}. */
+    public static class NotificationInfoMenuItem extends NotificationMenuItem {
+
+        @NotificationInfoAction
+        int mAction;
+
+        public NotificationInfoMenuItem(Context context, String s,
+                NotificationInfo content, int iconResId,
+                @NotificationInfoAction int action) {
+            super(context, s, content, iconResId);
+            this.mAction = action;
         }
     }
 }

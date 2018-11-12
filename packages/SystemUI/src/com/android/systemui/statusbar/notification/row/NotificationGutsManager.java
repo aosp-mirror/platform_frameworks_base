@@ -21,6 +21,8 @@ import static android.app.AppOpsManager.OP_SYSTEM_ALERT_WINDOW;
 import static android.service.notification.NotificationListenerService.Ranking
         .USER_SENTIMENT_NEGATIVE;
 
+import static com.android.systemui.statusbar.notification.row.NotificationInfo.ACTION_NONE;
+
 import android.app.INotificationManager;
 import android.app.NotificationChannel;
 import android.content.Context;
@@ -189,7 +191,13 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
             } else if (gutsView instanceof AppOpsInfo) {
                 initializeAppOpsInfo(row, (AppOpsInfo) gutsView);
             } else if (gutsView instanceof NotificationInfo) {
-                initializeNotificationInfo(row, (NotificationInfo) gutsView);
+                int action;
+                if (item instanceof NotificationMenuRow.NotificationInfoMenuItem) {
+                    action = ((NotificationMenuRow.NotificationInfoMenuItem) item).mAction;
+                } else {
+                    action = ACTION_NONE;
+                }
+                initializeNotificationInfo(row, (NotificationInfo) gutsView, action);
             }
             return true;
         } catch (Exception e) {
@@ -246,14 +254,15 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
 
     /**
      * Sets up the {@link NotificationInfo} inside the notification row's guts.
-     *
      * @param row view to set up the guts for
      * @param notificationInfoView view to set up/bind within {@code row}
+     * @param action The action to take immediately upon binding, if any.
      */
     @VisibleForTesting
     void initializeNotificationInfo(
             final ExpandableNotificationRow row,
-            NotificationInfo notificationInfoView) throws Exception {
+            NotificationInfo notificationInfoView,
+            @NotificationInfo.NotificationInfoAction int action) throws Exception {
         NotificationGuts guts = row.getGuts();
         StatusBarNotification sbn = row.getStatusBarNotification();
         String packageName = sbn.getPackageName();
@@ -297,7 +306,8 @@ public class NotificationGutsManager implements Dumpable, NotificationLifetimeEx
                 isForBlockingHelper,
                 row.getEntry().userSentiment == USER_SENTIMENT_NEGATIVE,
                 row.getEntry().noisy,
-                row.getEntry().importance);
+                row.getEntry().importance,
+                action);
 
     }
 

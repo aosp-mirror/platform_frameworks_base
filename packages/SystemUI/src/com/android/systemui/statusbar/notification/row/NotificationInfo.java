@@ -71,16 +71,19 @@ import java.util.List;
 public class NotificationInfo extends LinearLayout implements NotificationGuts.GutsContent {
     private static final String TAG = "InfoGuts";
 
-    @IntDef(prefix = { "SWAP_CONTENT_" }, value = {
-            SWAP_CONTENT_UNDO,
-            SWAP_CONTENT_TOGGLE_SILENT,
-            SWAP_CONTENT_BLOCK,
+    @IntDef(prefix = { "ACTION_" }, value = {
+            ACTION_NONE,
+            ACTION_UNDO,
+            ACTION_TOGGLE_SILENT,
+            ACTION_BLOCK,
     })
-    @interface SwapContentAction {}
+    public @interface NotificationInfoAction {
+    }
 
-    private static final int SWAP_CONTENT_UNDO = 0;
-    private static final int SWAP_CONTENT_TOGGLE_SILENT = 1;
-    private static final int SWAP_CONTENT_BLOCK = 2;
+    public static final int ACTION_NONE = 0;
+    public static final int ACTION_UNDO = 1;
+    public static final int ACTION_TOGGLE_SILENT = 2;
+    public static final int ACTION_BLOCK = 3;
 
     private INotificationManager mINotificationManager;
     private PackageManager mPm;
@@ -123,8 +126,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
 
     private OnClickListener mOnToggleSilent = v -> {
         Runnable saveImportance = () -> {
-            mExitReason = NotificationCounters.BLOCKING_HELPER_TOGGLE_SILENT;
-            swapContent(SWAP_CONTENT_TOGGLE_SILENT);
+            swapContent(ACTION_TOGGLE_SILENT, true /* animate */);
         };
         if (mCheckSaveListener != null) {
             mCheckSaveListener.checkSave(saveImportance, mSbn);
@@ -135,8 +137,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
 
     private OnClickListener mOnStopOrMinimizeNotifications = v -> {
         Runnable saveImportance = () -> {
-            mExitReason = NotificationCounters.BLOCKING_HELPER_STOP_NOTIFICATIONS;
-            swapContent(SWAP_CONTENT_BLOCK);
+            swapContent(ACTION_BLOCK, true /* animate */);
         };
         if (mCheckSaveListener != null) {
             mCheckSaveListener.checkSave(saveImportance, mSbn);
@@ -149,7 +150,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         // Reset exit counter that we'll log and record an undo event separately (not an exit event)
         mExitReason = NotificationCounters.BLOCKING_HELPER_DISMISSED;
         logBlockingHelperCounter(NotificationCounters.BLOCKING_HELPER_UNDO);
-        swapContent(SWAP_CONTENT_UNDO);
+        swapContent(ACTION_UNDO, true /* animate */);
     };
 
     public NotificationInfo(Context context, AttributeSet attrs) {
@@ -185,13 +186,14 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
             boolean isDeviceProvisioned,
             boolean isNonblockable,
             boolean isNoisy,
-            int importance)
+            int importance,
+            @NotificationInfoAction int action)
             throws RemoteException {
         bindNotification(pm, iNotificationManager, pkg, notificationChannel,
                 numUniqueChannelsInRow, sbn, checkSaveListener, onSettingsClick,
                 onAppSettingsClick, isDeviceProvisioned, isNonblockable,
                 false /* isBlockingHelper */, false /* isUserSentimentNegative */, isNoisy,
-                importance);
+                importance, action);
     }
 
     public void bindNotification(
@@ -209,7 +211,8 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
             boolean isForBlockingHelper,
             boolean isUserSentimentNegative,
             boolean isNoisy,
-            int importance)
+            int importance,
+            @NotificationInfoAction int action)
             throws RemoteException {
         mINotificationManager = iNotificationManager;
         mMetricsLogger = Dependency.get(MetricsLogger.class);
@@ -250,6 +253,10 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         bindHeader();
         bindPrompt();
         bindButtons();
+
+        if (action != ACTION_NONE) {
+            swapContent(action, false /* don't animate */);
+        }
     }
 
     private void bindHeader() throws RemoteException {
@@ -351,7 +358,8 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
     }
 
     private void saveImportance() {
-        if (!mIsNonblockable) {
+        if (!mIsNonblockable
+                || mExitReason != NotificationCounters.BLOCKING_HELPER_STOP_NOTIFICATIONS) {
             updateImportance();
         }
     }
@@ -421,7 +429,7 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         }
     }
 
-    private void swapContent(@SwapContentAction int action) {
+    private void swapContent(@NotificationInfoAction int action, boolean animate) {
         if (mExpandAnimation != null) {
             mExpandAnimation.cancel();
         }
@@ -432,10 +440,11 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
         View header = findViewById(R.id.header);
 
         switch (action) {
-            case SWAP_CONTENT_UNDO:
+            case ACTION_UNDO:
                 mChosenImportance = mStartingChannelImportance;
                 break;
-            case SWAP_CONTENT_TOGGLE_SILENT:
+            case ACTION_TOGGLE_SILENT:
+                mExitReason = NotificationCounters.BLOCKING_HELPER_TOGGLE_SILENT;
                 if (mStartingChannelOrNotificationImportance >= IMPORTANCE_DEFAULT) {
                     mChosenImportance = IMPORTANCE_LOW;
                     confirmationText.setText(R.string.notification_channel_silenced);
@@ -444,7 +453,8 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
                     confirmationText.setText(R.string.notification_channel_unsilenced);
                 }
                 break;
-            case SWAP_CONTENT_BLOCK:
+            case ACTION_BLOCK:
+                mExitReason = NotificationCounters.BLOCKING_HELPER_STOP_NOTIFICATIONS;
                 if (mIsForeground) {
                     mChosenImportance = IMPORTANCE_MIN;
                     confirmationText.setText(R.string.notification_channel_minimized);
@@ -457,38 +467,41 @@ public class NotificationInfo extends LinearLayout implements NotificationGuts.G
                 throw new IllegalArgumentException();
         }
 
-        boolean isUndo = action == SWAP_CONTENT_UNDO;
-        ObjectAnimator promptAnim = ObjectAnimator.ofFloat(prompt, View.ALPHA,
-                prompt.getAlpha(), isUndo ? 1f : 0f);
-        promptAnim.setInterpolator(isUndo ? Interpolators.ALPHA_IN : Interpolators.ALPHA_OUT);
-        ObjectAnimator confirmAnim = ObjectAnimator.ofFloat(confirmation, View.ALPHA,
-                confirmation.getAlpha(), isUndo ? 0f : 1f);
-        confirmAnim.setInterpolator(isUndo ? Interpolators.ALPHA_OUT : Interpolators.ALPHA_IN);
+        boolean isUndo = action == ACTION_UNDO;
 
         prompt.setVisibility(isUndo ? VISIBLE : GONE);
         confirmation.setVisibility(isUndo ? GONE : VISIBLE);
         header.setVisibility(isUndo ? VISIBLE : GONE);
 
-        mExpandAnimation = new AnimatorSet();
-        mExpandAnimation.playTogether(promptAnim, confirmAnim);
-        mExpandAnimation.setDuration(150);
-        mExpandAnimation.addListener(new AnimatorListenerAdapter() {
-            boolean cancelled = false;
+        if (animate) {
+            ObjectAnimator promptAnim = ObjectAnimator.ofFloat(prompt, View.ALPHA,
+                    prompt.getAlpha(), isUndo ? 1f : 0f);
+            promptAnim.setInterpolator(isUndo ? Interpolators.ALPHA_IN : Interpolators.ALPHA_OUT);
+            ObjectAnimator confirmAnim = ObjectAnimator.ofFloat(confirmation, View.ALPHA,
+                    confirmation.getAlpha(), isUndo ? 0f : 1f);
+            confirmAnim.setInterpolator(isUndo ? Interpolators.ALPHA_OUT : Interpolators.ALPHA_IN);
 
-            @Override
-            public void onAnimationCancel(Animator animation) {
-                cancelled = true;
-            }
+            mExpandAnimation = new AnimatorSet();
+            mExpandAnimation.playTogether(promptAnim, confirmAnim);
+            mExpandAnimation.setDuration(150);
+            mExpandAnimation.addListener(new AnimatorListenerAdapter() {
+                boolean mCancelled = false;
 
-            @Override
-            public void onAnimationEnd(Animator animation) {
-                if (!cancelled) {
-                    prompt.setVisibility(isUndo ? VISIBLE : GONE);
-                    confirmation.setVisibility(isUndo ? GONE : VISIBLE);
+                @Override
+                public void onAnimationCancel(Animator animation) {
+                    mCancelled = true;
                 }
-            }
-        });
-        mExpandAnimation.start();
+
+                @Override
+                public void onAnimationEnd(Animator animation) {
+                    if (!mCancelled) {
+                        prompt.setVisibility(isUndo ? VISIBLE : GONE);
+                        confirmation.setVisibility(isUndo ? GONE : VISIBLE);
+                    }
+                }
+            });
+            mExpandAnimation.start();
+        }
 
         // Since we're swapping/update the content, reset the timeout so the UI can't close
         // immediately after the update.
