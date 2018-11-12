@@ -136,6 +136,14 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"Wi-Fi <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Panggilan WiFi | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"VoWifi <xliff:g id="SPN">%s</xliff:g>"</string>
+    <!-- no translation found for wfcSpnFormat_wifi_calling (4990486735013125329) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_wifi (1892673884655959773) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_wifi_calling_wo_hyphen (1336669776254502831) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_vowifi (1765176406171272629) -->
+    <skip />
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Nonaktif"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi dipilih"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Seluler dipilih"</string>
@@ -417,10 +425,10 @@
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Memungkinkan aplikasi mengakses perintah penyedia lokasi ekstra. Tindakan ini memungkinkan aplikasi mengganggu pengoperasian GPS atau sumber lokasi lain."</string>
     <string name="permlab_accessFineLocation" msgid="6265109654698562427">"akses lokasi pasti hanya saat di latar depan"</string>
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"Aplikasi ini bisa mendapatkan lokasi pasti Anda ketika aplikasi berada di latar depan. Fitur layanan lokasi ini harus diaktifkan dan tersedia di ponsel agar dapat digunakan oleh aplikasi. Fitur ini dapat meningkatkan konsumsi baterai."</string>
-    <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"akses perkiraan lokasi (berbasis jaringan)"</string>
-    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Aplikasi ini dapat memperoleh lokasi Anda berdasarkan sumber jaringan seperti menara seluler dan jaringan Wi-Fi. Layanan lokasi ini harus diaktifkan dan tersedia di tablet agar aplikasi dapat menggunakannya."</string>
-    <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"Aplikasi ini dapat memperoleh lokasi Anda berdasarkan sumber jaringan seperti menara seluler dan jaringan Wi-Fi. Layanan lokasi ini harus diaktifkan dan tersedia di TV agar aplikasi dapat menggunakannya."</string>
-    <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"Aplikasi ini dapat memperoleh lokasi Anda berdasarkan sumber jaringan seperti menara seluler dan jaringan Wi-Fi. Layanan lokasi ini harus diaktifkan dan tersedia di ponsel agar aplikasi dapat menggunakannya."</string>
+    <string name="permlab_accessCoarseLocation" msgid="3707180371693213469">"akses perkiraan lokasi (berbasis jaringan) hanya di latar depan"</string>
+    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="8594719010575779120">"Aplikasi ini dapat mengetahui lokasi berdasarkan sumber jaringan seperti menara seluler dan jaringan Wi-Fi, namun hanya jika aplikasi berada di latar depan. Layanan lokasi tersebut harus diaktifkan dan tersedia di tablet agar aplikasi dapat menggunakannya."</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="3027871910200890806">"Aplikasi ini dapat mengetahui lokasi berdasarkan sumber jaringan seperti menara seluler dan jaringan Wi-Fi, namun hanya jika aplikasi berada di latar depan. Layanan lokasi tersebut harus diaktifkan dan tersedia di TV agar aplikasi dapat menggunakannya."</string>
+    <string name="permdesc_accessCoarseLocation" product="default" msgid="854896049371048754">"Aplikasi ini dapat mengetahui lokasi berdasarkan sumber jaringan seperti menara seluler dan jaringan Wi-Fi, namun hanya jika aplikasi berada di latar depan. Layanan lokasi tersebut harus diaktifkan dan tersedia di ponsel agar aplikasi dapat menggunakannya."</string>
     <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"akses lokasi di latar belakang"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"Jika aplikasi diberi izin tambahan ke akses lokasi perkiraan atau akurat, aplikasi dapat mengakses lokasi saat bekerja di latar belakang."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"ubah setelan audio Anda"</string>
@@ -644,19 +652,19 @@
     <string name="permdesc_access_notification_policy" msgid="3296832375218749580">"Mengizinkan aplikasi membaca dan menulis konfigurasi status Jangan Ganggu."</string>
     <string name="policylab_limitPassword" msgid="4497420728857585791">"Setel aturan sandi"</string>
     <string name="policydesc_limitPassword" msgid="2502021457917874968">"Mengontrol panjang dan karakter yang diizinkan dalam sandi dan PIN kunci layar."</string>
-    <string name="policylab_watchLogin" msgid="5091404125971980158">"Memantau upaya pembukaan kunci layar"</string>
-    <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Memantau jumlah sandi yang salah ketik saat membuka kunci layar, dan mengunci tablet atau menghapus semua data tablet jika sandi yang salah ketik terlalu banyak."</string>
-    <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"Memantau banyaknya sandi salah yang diketikkan saat membuka kunci layar, dan mengunci TV atau menghapus semua data TV jika terlalu banyak sandi salah diketikkan."</string>
-    <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Memantau jumlah sandi salah ketik saat membuka kunci layar, dan mengunci ponsel atau menghapus semua data ponsel jika sandi yang salah ketik terlalu banyak."</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Memantau banyaknya sandi salah yang diketikkan saat membuka kunci layar, dan mengunci tablet atau menghapus semua data pengguna ini jika terlalu banyak sandi salah diketikkan."</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Memantau banyaknya sandi salah yang diketikkan saat membuka kunci layar, dan mengunci TV atau menghapus semua data pengguna ini jika terlalu banyak sandi salah diketikkan."</string>
-    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Memantau banyaknya sandi salah yang diketikkan saat membuka kunci layar, dan mengunci ponsel atau menghapus semua data pengguna ini jika terlalu banyak sandi salah diketikkan."</string>
+    <string name="policylab_watchLogin" msgid="5091404125971980158">"Pantau upaya pembukaan kunci layar"</string>
+    <string name="policydesc_watchLogin" product="tablet" msgid="3215729294215070072">"Memantau berapa kali sandi yang dimasukkan salah saat ingin membuka kunci layar, dan mengunci tablet atau menghapus semua data tablet jika terjadi terlalu banyak kesalahan memasukkan sandi."</string>
+    <string name="policydesc_watchLogin" product="TV" msgid="2707817988309890256">"Memantau berapa kali sandi yang dimasukkan salah saat ingin membuka kunci layar, dan mengunci TV atau menghapus semua data TV jika terjadi terlalu banyak kesalahan memasukkan sandi."</string>
+    <string name="policydesc_watchLogin" product="default" msgid="5712323091846761073">"Memantau berapa kali sandi yang dimasukkan salah saat ingin membuka kunci layar, dan mengunci ponsel atau menghapus semua data ponsel jika terjadi terlalu banyak kesalahan memasukkan sandi."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="tablet" msgid="4280246270601044505">"Memantau berapa kali sandi yang dimasukkan salah saat ingin membuka kunci layar, dan mengunci tablet atau menghapus semua data pengguna ini jika terjadi terlalu banyak kesalahan memasukkan sandi."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="TV" msgid="3484832653564483250">"Memantau berapa kali sandi yang dimasukkan salah saat ingin membuka kunci layar, dan mengunci TV atau menghapus semua data pengguna ini jika terjadi terlalu banyak kesalahan memasukkan sandi."</string>
+    <string name="policydesc_watchLogin_secondaryUser" product="default" msgid="2185480427217127147">"Memantau berapa kali sandi yang dimasukkan salah saat ingin membuka kunci layar, dan mengunci ponsel atau menghapus semua data pengguna ini jika terjadi terlalu banyak kesalahan memasukkan sandi."</string>
     <string name="policylab_resetPassword" msgid="4934707632423915395">"Mengubah kunci layar"</string>
     <string name="policydesc_resetPassword" msgid="1278323891710619128">"Mengubah kunci layar."</string>
     <string name="policylab_forceLock" msgid="2274085384704248431">"Mengunci layar"</string>
     <string name="policydesc_forceLock" msgid="1141797588403827138">"Mengontrol cara dan kapan layar mengunci."</string>
     <string name="policylab_wipeData" msgid="3910545446758639713">"Menghapus semua data"</string>
-    <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Hapus data tablet tanpa peringatan dengan menyetel ulang data pabrik."</string>
+    <string name="policydesc_wipeData" product="tablet" msgid="4306184096067756876">"Menghapus data tablet tanpa peringatan dengan mereset ke setelan pabrik."</string>
     <string name="policydesc_wipeData" product="tv" msgid="5816221315214527028">"Menghapus data TV tanpa peringatan dengan mengembalikan ke setelan pabrik."</string>
     <string name="policydesc_wipeData" product="default" msgid="5096895604574188391">"Menghapus data ponsel tanpa peringatan dengan melakukan reset ke setelan pabrik."</string>
     <string name="policylab_wipeData_secondaryUser" msgid="8362863289455531813">"Menghapus data pengguna"</string>
@@ -665,13 +673,13 @@
     <string name="policydesc_wipeData_secondaryUser" product="default" msgid="6787904546711590238">"Menghapus data pengguna ini di ponsel ini tanpa peringatan."</string>
     <string name="policylab_setGlobalProxy" msgid="2784828293747791446">"Setel proxy global perangkat"</string>
     <string name="policydesc_setGlobalProxy" msgid="8459859731153370499">"Menyetel proxy global perangkat yang akan digunakan jika kebijakan diaktifkan. Hanya pemilik perangkat yang dapat menyetel proxy global."</string>
-    <string name="policylab_expirePassword" msgid="5610055012328825874">"Menyetel berakhirnya sandi kunci layar"</string>
+    <string name="policylab_expirePassword" msgid="5610055012328825874">"Setel akhir masa berlaku sandi kunci layar"</string>
     <string name="policydesc_expirePassword" msgid="5367525762204416046">"Mengubah seberapa sering sandi, PIN, atau pola kunci layar harus diubah."</string>
     <string name="policylab_encryptedStorage" msgid="8901326199909132915">"Setel enkripsi penyimpanan"</string>
     <string name="policydesc_encryptedStorage" msgid="2637732115325316992">"Mengharuskan data apl yang disimpan untuk dienkripsi."</string>
     <string name="policylab_disableCamera" msgid="6395301023152297826">"Nonaktifkan kamera"</string>
     <string name="policydesc_disableCamera" msgid="2306349042834754597">"Mencegah penggunaan semua kamera perangkat."</string>
-    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Menonaktifkan beberapa fitur kunci layar"</string>
+    <string name="policylab_disableKeyguardFeatures" msgid="8552277871075367771">"Nonaktifkan beberapa fitur kunci layar"</string>
     <string name="policydesc_disableKeyguardFeatures" msgid="2044755691354158439">"Mencegah penggunaan beberapa fitur kunci layar."</string>
   <string-array name="phoneTypes">
     <item msgid="8901098336658710359">"Rumah"</item>
@@ -824,7 +832,7 @@
     <string name="lockscreen_transport_stop_description" msgid="5907083260651210034">"Berhenti"</string>
     <string name="lockscreen_transport_rew_description" msgid="6944412838651990410">"Putar Ulang"</string>
     <string name="lockscreen_transport_ffw_description" msgid="42987149870928985">"Maju cepat"</string>
-    <string name="emergency_calls_only" msgid="6733978304386365407">"Telepon urgen saja"</string>
+    <string name="emergency_calls_only" msgid="6733978304386365407">"Panggilan darurat saja"</string>
     <string name="lockscreen_network_locked_message" msgid="143389224986028501">"Jaringan terkunci"</string>
     <string name="lockscreen_sim_puk_locked_message" msgid="7441797339976230">"Kartu SIM terkunci PUK."</string>
     <string name="lockscreen_sim_puk_locked_instructions" msgid="8127916255245181063">"Lihatlah Panduan Pengguna atau hubungi Layanan Pelanggan."</string>
@@ -1825,6 +1833,8 @@
     <string name="stk_cc_ss_to_ussd" msgid="5614626512855868785">"Permintaan SS diubah ke permintaan USSD"</string>
     <string name="stk_cc_ss_to_ss" msgid="7716729801537709054">"Diubah ke permintaan SS baru"</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Profil kerja"</string>
+    <!-- no translation found for notification_alerted_content_description (1296617716556420585) -->
+    <skip />
     <string name="expand_button_content_description_collapsed" msgid="3609784019345534652">"Luaskan"</string>
     <string name="expand_button_content_description_expanded" msgid="8520652707158554895">"Ciutkan"</string>
     <string name="expand_action_accessibility" msgid="5307730695723718254">"beralih ke perluasan"</string>

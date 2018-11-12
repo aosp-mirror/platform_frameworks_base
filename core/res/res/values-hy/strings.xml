@@ -136,6 +136,14 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"<xliff:g id="SPN">%s</xliff:g> Wi-Fi"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Զանգեր Wi-Fi-ի միջոցով | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"<xliff:g id="SPN">%s</xliff:g> VoWifi"</string>
+    <!-- no translation found for wfcSpnFormat_wifi_calling (4990486735013125329) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_wifi (1892673884655959773) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_wifi_calling_wo_hyphen (1336669776254502831) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_vowifi (1765176406171272629) -->
+    <skip />
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Անջատված է"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Wi-Fi, նախընտրելի"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Նախընտրելի է բջջային ցանցը"</string>
@@ -417,10 +425,10 @@
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Ծրագրին թույլ է տալիս օգտագործել տեղադրության մասին տվյալների աղբյուրների կառավարման լրացուցիչ հրահանգներ: Սա կարող է ծրագրին թույլ տալ միջամտել GPS-ի կամ տեղադրության մասին տվյալների այլ աղբյուրների գործառույթներին:"</string>
     <string name="permlab_accessFineLocation" msgid="6265109654698562427">"Տեղադրության ճշգրիտ տվյալների հասանելիություն միայն ֆոնային ռեժիմում"</string>
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"Հավելվածը կարող է ստանալ ձեր տեղադրության տվյալները ֆոնային ռեժիմում։ Այս տեղորոշման ծառայությունները պետք է միացված և հասանելի լինեն ձեր հեռախոսում, որպեսզի հավելվածը կարողանա օգտագործել դրանք: Սա կարող է արագացնել մարտկոցի լիցքի սպառումը:"</string>
-    <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"օգտագործել մոտավոր տեղադրությունը (ցանցային)"</string>
-    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Այս հավելվածը կարող է ստանալ ձեր տեղադրության տվյալները ցանցային տարբեր աղբյուրներից, օրինակ՝ բջջային աշտարակներից և Wi-Fi ցանցերից: Այս տեղորոշման ծառայությունները պետք է միացված և հասանելի լինեն ձեր պլանշետում, որպեսզի հավելվածը կարողանա օգտագործել դրանք:"</string>
-    <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"Այս հավելվածը կարող է ստանալ ձեր տեղադրության տվյալները ցանցային տարբեր աղբյուրներից, օրինակ՝ բջջային աշտարակներից և Wi-Fi ցանցերից: Այս տեղորոշման ծառայությունները պետք է միացված և հասանելի լինեն ձեր հեռուստացույցում, որպեսզի հավելվածը կարողանա օգտագործել դրանք:"</string>
-    <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"Այս հավելվածը կարող է ստանալ ձեր տեղադրության տվյալները ցանցային տարբեր աղբյուրներից, օրինակ՝ բջջային աշտարակներից և Wi-Fi ցանցերից: Այս տեղորոշման ծառայությունները պետք է միացված և հասանելի լինեն ձեր հեռախոսում, որպեսզի հավելվածը կարողանա օգտագործել դրանք:"</string>
+    <string name="permlab_accessCoarseLocation" msgid="3707180371693213469">"Մոտավոր տեղադրությունը (ցանցային) հասանելի է միայն ֆոնային ռեժիմում"</string>
+    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="8594719010575779120">"Այս հավելվածը կարող է ստանալ ձեր տեղադրության տվյալները ցանցային տարբեր աղբյուրներից, օրինակ՝ բջջային աշտարակներից և Wi-Fi ցանցերից, սակայն միայն երբ հավելվածն աշխատում է ֆոնային ռեժիմում: Այս տեղորոշման ծառայությունները պետք է միացված և հասանելի լինեն ձեր պլանշետում, որպեսզի հավելվածը կարողանա օգտագործել դրանք:"</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="3027871910200890806">"Այս հավելվածը կարող է ստանալ ձեր տեղադրության տվյալները ցանցային տարբեր աղբյուրներից, օրինակ՝ բջջային աշտարակներից և Wi-Fi ցանցերից, սակայն միայն երբ հավելվածն աշխատում է ֆոնային ռեժիմում: Այս տեղորոշման ծառայությունները պետք է միացված և հասանելի լինեն ձեր հեռուստացույցում, որպեսզի հավելվածը կարողանա օգտագործել դրանք:"</string>
+    <string name="permdesc_accessCoarseLocation" product="default" msgid="854896049371048754">"Այս հավելվածը կարող է ստանալ ձեր տեղադրության տվյալները ցանցային տարբեր աղբյուրներից, օրինակ՝ բջջային աշտարակներից և Wi-Fi ցանցերից, սակայն միայն երբ հավելվածն աշխատում է ֆոնային ռեժիմում: Այս տեղորոշման ծառայությունները պետք է միացված և հասանելի լինեն ձեր հեռախոսում, որպեսզի հավելվածը կարողանա օգտագործել դրանք:"</string>
     <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"տեղադրության մասին տվյալների հասանելիություն ֆոնային ռեժիմում"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"Եթե բացի մոտավոր կամ ճշգրիտ տեղորոշման տվյալների հասանելիությունից հավելվածին տրամադրեք այս թույլտվությունը, հավելվածին տեղադրության մասին տվյալները հասանելի կլինեն ֆոնային ռեժիմում։"</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"փոխել ձեր աուդիո կարգավորումները"</string>
@@ -1139,8 +1147,8 @@
     <string name="noApplications" msgid="2991814273936504689">"Ոչ մի հավելված չի կարող կատարել այս գործողությունը:"</string>
     <string name="aerr_application" msgid="250320989337856518">"<xliff:g id="APPLICATION">%1$s</xliff:g> – աշխատանքն ընդհատվեց"</string>
     <string name="aerr_process" msgid="6201597323218674729">"<xliff:g id="PROCESS">%1$s</xliff:g> գործընթացն ընդհատվել է"</string>
-    <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g> հավելվածի աշխատանքը շարունակաբար ընդհատվում է"</string>
-    <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g> գործընթացը շարունակաբար ընդհատվում է"</string>
+    <string name="aerr_application_repeated" msgid="3146328699537439573">"<xliff:g id="APPLICATION">%1$s</xliff:g>-ն էլի ընդհատվեց"</string>
+    <string name="aerr_process_repeated" msgid="6235302956890402259">"<xliff:g id="PROCESS">%1$s</xliff:g>՝ նորից ընդհատվեց"</string>
     <string name="aerr_restart" msgid="7581308074153624475">"Կրկին բացել հավելվածը"</string>
     <string name="aerr_report" msgid="5371800241488400617">"Հաղորդել"</string>
     <string name="aerr_close" msgid="2991640326563991340">"Փակել"</string>
@@ -1825,6 +1833,8 @@
     <string name="stk_cc_ss_to_ussd" msgid="5614626512855868785">"SS հարցումը փոխվել է USSD հարցման"</string>
     <string name="stk_cc_ss_to_ss" msgid="7716729801537709054">"Փոխվել է նոր SS հարցման"</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Աշխատանքային պրոֆիլ"</string>
+    <!-- no translation found for notification_alerted_content_description (1296617716556420585) -->
+    <skip />
     <string name="expand_button_content_description_collapsed" msgid="3609784019345534652">"Ընդարձակել"</string>
     <string name="expand_button_content_description_expanded" msgid="8520652707158554895">"Կոծկել"</string>
     <string name="expand_action_accessibility" msgid="5307730695723718254">"Կոծկել/Ընդարձակել"</string>

@@ -136,6 +136,14 @@
     <string name="wfcSpnFormat_spn_wifi" msgid="6546481665561961938">"Wi-Fi от <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_wifi_calling_bar_spn" msgid="1726178784338466265">"Обаждания през Wi-Fi | <xliff:g id="SPN">%s</xliff:g>"</string>
     <string name="wfcSpnFormat_spn_vowifi" msgid="4444638298656953681">"VoWi-Fi от <xliff:g id="SPN">%s</xliff:g>"</string>
+    <!-- no translation found for wfcSpnFormat_wifi_calling (4990486735013125329) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_wifi (1892673884655959773) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_wifi_calling_wo_hyphen (1336669776254502831) -->
+    <skip />
+    <!-- no translation found for wfcSpnFormat_vowifi (1765176406171272629) -->
+    <skip />
     <string name="wifi_calling_off_summary" msgid="8720659586041656098">"Изключено"</string>
     <string name="wfc_mode_wifi_preferred_summary" msgid="1994113411286935263">"Предпочита се Wi-Fi"</string>
     <string name="wfc_mode_cellular_preferred_summary" msgid="1988279625335345908">"Предпочитат се мобилни данни"</string>
@@ -417,10 +425,10 @@
     <string name="permdesc_accessLocationExtraCommands" msgid="6078307221056649927">"Разрешава на приложението достъп до допълнителни команди на доставчика на местоположение. Това може да позволи на приложението да смущава работата на GPS или на другите източници на местоположение."</string>
     <string name="permlab_accessFineLocation" msgid="6265109654698562427">"достъп до точното местоположение само на преден план"</string>
     <string name="permdesc_accessFineLocation" msgid="3520508381065331098">"Приложението може да получава данни за точното ви местоположение само когато работи на преден план. Тези услуги за местоположение трябва да са включени и налице на телефона ви, за да могат да се използват от приложението. Това може да увеличи потреблението на батерията."</string>
-    <string name="permlab_accessCoarseLocation" msgid="7715277613928539434">"достъп до приблизителното местоположение (въз основа на мрежата)"</string>
-    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="3373266766487862426">"Приложението може да получава данни за местоположението ви въз основа на мрежови източници, като клетъчни кули и Wi-Fi. Тези услуги за местоположение трябва да са включени и налице на таблета ви, за да могат да се използват от приложението."</string>
-    <string name="permdesc_accessCoarseLocation" product="tv" msgid="1884022719818788511">"Приложението може да получава данни за местоположението ви въз основа на мрежови източници, като клетъчни кули и Wi-Fi. Тези услуги за местоположение трябва да са включени и налице на телевизора ви, за да могат да се използват от приложението."</string>
-    <string name="permdesc_accessCoarseLocation" product="default" msgid="7788009094906196995">"Приложението може да получава данни за местоположението ви въз основа на мрежови източници, като клетъчни кули и Wi-Fi. Тези услуги за местоположение трябва да са включени и налице на телефона ви, за да могат да се използват от приложението."</string>
+    <string name="permlab_accessCoarseLocation" msgid="3707180371693213469">"достъп до приблизителното местоположение (основано на мрежи) само на преден план"</string>
+    <string name="permdesc_accessCoarseLocation" product="tablet" msgid="8594719010575779120">"Приложението може да получава данни за местоположението ви въз основа на мрежови източници, като клетъчни базови станции и Wi-Fi мрежи, само когато работи на преден план. Тези услуги за местоположение трябва да са включени и налице на таблета ви, за да могат да се използват от приложението."</string>
+    <string name="permdesc_accessCoarseLocation" product="tv" msgid="3027871910200890806">"Приложението може да получава данни за местоположението ви въз основа на мрежови източници, като клетъчни базови станции и Wi-Fi мрежи, само когато работи на преден план. Тези услуги за местоположение трябва да са включени и налице на телевизора ви, за да могат да се използват от приложението."</string>
+    <string name="permdesc_accessCoarseLocation" product="default" msgid="854896049371048754">"Приложението може да получава данни за местоположението ви въз основа на мрежови източници, като клетъчни базови станции и Wi-Fi мрежи, само когато работи на преден план. Тези услуги за местоположение трябва да са включени и налице на телефона ви, за да могат да се използват от приложението."</string>
     <string name="permlab_accessBackgroundLocation" msgid="3965397804300661062">"достъп до местоположението на заден план"</string>
     <string name="permdesc_accessBackgroundLocation" msgid="1096394429579210251">"Ако разрешението бъде предоставено в допълнение към достъпа до приблизителното или точното местоположение, приложението може да осъществява достъп до местоположението, докато се изпълнява на заден план."</string>
     <string name="permlab_modifyAudioSettings" msgid="6095859937069146086">"промяна на настройките ви за звука"</string>
@@ -1825,6 +1833,8 @@
     <string name="stk_cc_ss_to_ussd" msgid="5614626512855868785">"SS заявката е променена на USSD заявка"</string>
     <string name="stk_cc_ss_to_ss" msgid="7716729801537709054">"Променено на нова SS заявка"</string>
     <string name="notification_work_profile_content_description" msgid="4600554564103770764">"Служебен потребителски профил"</string>
+    <!-- no translation found for notification_alerted_content_description (1296617716556420585) -->
+    <skip />
     <string name="expand_button_content_description_collapsed" msgid="3609784019345534652">"Разгъване"</string>
     <string name="expand_button_content_description_expanded" msgid="8520652707158554895">"Свиване"</string>
     <string name="expand_action_accessibility" msgid="5307730695723718254">"превключване на разгъването"</string>
