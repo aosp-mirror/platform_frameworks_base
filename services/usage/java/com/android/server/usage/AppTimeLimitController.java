@@ -118,9 +118,14 @@ public class AppTimeLimitController {
         void removeUsageGroup(UsageGroup group) {
             final int size = group.mObserved.length;
             for (int i = 0; i < size; i++) {
-                final ArrayList<UsageGroup> list = observedMap.get(group.mObserved[i]);
+                final String observed = group.mObserved[i];
+                final ArrayList<UsageGroup> list = observedMap.get(observed);
                 if (list != null) {
                     list.remove(group);
+                    if (list.isEmpty()) {
+                        // No more observers for this observed entity, remove from map
+                        observedMap.remove(observed);
+                    }
                 }
             }
         }
@@ -137,7 +142,7 @@ public class AppTimeLimitController {
             }
             pw.println();
             pw.print(" Observed Entities:");
-            final int nEntities = currentlyActive.size();
+            final int nEntities = observedMap.size();
             for (int i = 0; i < nEntities; i++) {
                 pw.print(observedMap.keyAt(i));
                 pw.print(", ");
@@ -183,7 +188,7 @@ public class AppTimeLimitController {
                 pw.println();
             }
             pw.println("    Session Usage Groups:");
-            final int nSessionUsageGroups = appUsageGroups.size();
+            final int nSessionUsageGroups = sessionUsageGroups.size();
             for (int i = 0; i < nSessionUsageGroups; i++) {
                 sessionUsageGroups.valueAt(i).dump(pw);
                 pw.println();
@@ -616,7 +621,7 @@ public class AppTimeLimitController {
             AppUsageGroup group = observerApp.appUsageGroups.get(observerId);
             if (group != null) {
                 // Remove previous app usage group associated with observerId
-                observerApp.appUsageGroups.get(observerId).remove();
+                group.remove();
             }
 
             final int observerIdCount = observerApp.appUsageGroups.size();
@@ -646,8 +651,12 @@ public class AppTimeLimitController {
      */
     public void removeAppUsageObserver(int requestingUid, int observerId, @UserIdInt int userId) {
         synchronized (mLock) {
-            ObserverAppData observerApp = getOrCreateObserverAppDataLocked(requestingUid);
-            observerApp.appUsageGroups.get(observerId).remove();
+            final ObserverAppData observerApp = getOrCreateObserverAppDataLocked(requestingUid);
+            final AppUsageGroup group = observerApp.appUsageGroups.get(observerId);
+            if (group != null) {
+                // Remove previous app usage group associated with observerId
+                group.remove();
+            }
         }
     }
 
@@ -668,8 +677,8 @@ public class AppTimeLimitController {
             ObserverAppData observerApp = getOrCreateObserverAppDataLocked(requestingUid);
             SessionUsageGroup group = observerApp.sessionUsageGroups.get(observerId);
             if (group != null) {
-                // Remove previous app usage group associated with observerId
-                observerApp.sessionUsageGroups.get(observerId).remove();
+                // Remove previous session usage group associated with observerId
+                group.remove();
             }
 
             final int observerIdCount = observerApp.sessionUsageGroups.size();
@@ -696,8 +705,12 @@ public class AppTimeLimitController {
     public void removeUsageSessionObserver(int requestingUid, int observerId,
             @UserIdInt int userId) {
         synchronized (mLock) {
-            ObserverAppData observerApp = getOrCreateObserverAppDataLocked(requestingUid);
-            observerApp.sessionUsageGroups.get(observerId).remove();
+            final ObserverAppData observerApp = getOrCreateObserverAppDataLocked(requestingUid);
+            final SessionUsageGroup group = observerApp.sessionUsageGroups.get(observerId);
+            if (group != null) {
+                // Remove previous app usage group associated with observerId
+                group.remove();
+            }
         }
     }
 
