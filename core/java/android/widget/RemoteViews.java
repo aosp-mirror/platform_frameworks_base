@@ -196,12 +196,6 @@ public class RemoteViews implements Parcelable, Filter {
     private boolean mIsRoot = true;
 
     /**
-     * Optional theme resource id applied in inflateView(). When 0, Theme.DeviceDefault will be
-     * used.
-     */
-    private int mApplyThemeResId;
-
-    /**
      * Whether reapply is disallowed on this remoteview. This maybe be true if some actions modify
      * the layout in a way that isn't recoverable, since views are being removed.
      */
@@ -3262,14 +3256,6 @@ public class RemoteViews implements Parcelable, Filter {
     }
 
     /**
-     * Set the theme used in apply() and applyASync().
-     * @hide
-     */
-    public void setApplyTheme(@StyleRes int themeResId) {
-        mApplyThemeResId = themeResId;
-    }
-
-    /**
      * Inflates the view hierarchy represented by this object and applies
      * all of the actions.
      *
@@ -3290,11 +3276,25 @@ public class RemoteViews implements Parcelable, Filter {
 
         View result = inflateView(context, rvToApply, parent);
         rvToApply.performApply(result, parent, handler);
+        return result;
+    }
 
+    /** @hide */
+    public View applyWithTheme(Context context, ViewGroup parent, OnClickHandler handler,
+            @StyleRes int applyThemeResId) {
+        RemoteViews rvToApply = getRemoteViewsToApply(context);
+
+        View result = inflateView(context, rvToApply, parent, applyThemeResId);
+        rvToApply.performApply(result, parent, handler);
         return result;
     }
 
     private View inflateView(Context context, RemoteViews rv, ViewGroup parent) {
+        return inflateView(context, rv, parent, 0);
+    }
+
+    private View inflateView(Context context, RemoteViews rv, ViewGroup parent,
+            @StyleRes int applyThemeResId) {
         // RemoteViews may be built by an application installed in another
         // user. So build a context that loads resources from that user but
         // still returns the current users userId so settings like data / time formats
@@ -3303,8 +3303,8 @@ public class RemoteViews implements Parcelable, Filter {
         Context inflationContext = new RemoteViewsContextWrapper(context, contextForResources);
 
         // If mApplyThemeResId is not given, Theme.DeviceDefault will be used.
-        if (mApplyThemeResId != 0) {
-            inflationContext = new ContextThemeWrapper(inflationContext, mApplyThemeResId);
+        if (applyThemeResId != 0) {
+            inflationContext = new ContextThemeWrapper(inflationContext, applyThemeResId);
         }
         LayoutInflater inflater = (LayoutInflater)
                 context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);

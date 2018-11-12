@@ -218,8 +218,8 @@ final class FillUi {
             ViewGroup container = decor.findViewById(R.id.autofill_dataset_picker);
             final View content;
             try {
-                response.getPresentation().setApplyTheme(mThemeId);
-                content = response.getPresentation().apply(mContext, decor, interceptionHandler);
+                content = response.getPresentation().applyWithTheme(
+                        mContext, decor, interceptionHandler, mThemeId);
                 container.addView(content);
             } catch (RuntimeException e) {
                 callback.onCanceled();
@@ -259,8 +259,7 @@ final class FillUi {
             RemoteViews.OnClickHandler clickBlocker = null;
             if (headerPresentation != null) {
                 clickBlocker = newClickBlocker();
-                headerPresentation.setApplyTheme(mThemeId);
-                mHeader = headerPresentation.apply(mContext, null, clickBlocker);
+                mHeader = headerPresentation.applyWithTheme(mContext, null, clickBlocker, mThemeId);
                 final LinearLayout headerContainer =
                         decor.findViewById(R.id.autofill_dataset_header);
                 if (sVerbose) Slog.v(TAG, "adding header");
@@ -277,8 +276,8 @@ final class FillUi {
                     if (clickBlocker == null) { // already set for header
                         clickBlocker = newClickBlocker();
                     }
-                    footerPresentation.setApplyTheme(mThemeId);
-                    mFooter = footerPresentation.apply(mContext, null, clickBlocker);
+                    mFooter = footerPresentation.applyWithTheme(
+                            mContext, null, clickBlocker, mThemeId);
                     // Footer not supported on some platform e.g. TV
                     if (sVerbose) Slog.v(TAG, "adding footer");
                     footerContainer.addView(mFooter);
@@ -304,8 +303,8 @@ final class FillUi {
                     final View view;
                     try {
                         if (sVerbose) Slog.v(TAG, "setting remote view for " + focusedViewId);
-                        presentation.setApplyTheme(mThemeId);
-                        view = presentation.apply(mContext, null, interceptionHandler);
+                        view = presentation.applyWithTheme(
+                                mContext, null, interceptionHandler, mThemeId);
                     } catch (RuntimeException e) {
                         Slog.e(TAG, "Error inflating remote views", e);
                         continue;
