@@ -158,11 +158,11 @@ public class AccessPoint implements Comparable<AccessPoint> {
      * These values are matched in string arrays -- changes must be kept in sync
      */
     public static final int SECURITY_NONE = 0;
-    public static final int SECURITY_OWE = 1;
-    public static final int SECURITY_WEP = 2;
-    public static final int SECURITY_PSK = 3;
-    public static final int SECURITY_SAE = 4;
-    public static final int SECURITY_EAP = 5;
+    public static final int SECURITY_WEP = 1;
+    public static final int SECURITY_PSK = 2;
+    public static final int SECURITY_EAP = 3;
+    public static final int SECURITY_OWE = 4;
+    public static final int SECURITY_SAE = 5;
     public static final int SECURITY_EAP_SUITE_B = 6;
 
     private static final int PSK_UNKNOWN = 0;
