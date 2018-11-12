@@ -89,6 +89,7 @@ import com.android.server.emergency.EmergencyAffordanceService;
 import com.android.server.hdmi.HdmiControlService;
 import com.android.server.input.InputManagerService;
 import com.android.server.inputmethod.InputMethodManagerService;
+import com.android.server.inputmethod.MultiClientInputMethodManagerService;
 import com.android.server.job.JobSchedulerService;
 import com.android.server.lights.LightsService;
 import com.android.server.media.MediaResourceMonitorService;
@@ -1016,7 +1017,12 @@ public final class SystemServer {
         // Bring up services needed for UI.
         if (mFactoryTestMode != FactoryTest.FACTORY_TEST_LOW_LEVEL) {
             traceBeginAndSlog("StartInputMethodManagerLifecycle");
-            mSystemServiceManager.startService(InputMethodManagerService.Lifecycle.class);
+            if (MultiClientInputMethodManagerService.isConfiguredToUse()) {
+                mSystemServiceManager.startService(
+                        MultiClientInputMethodManagerService.Lifecycle.class);
+            } else {
+                mSystemServiceManager.startService(InputMethodManagerService.Lifecycle.class);
+            }
             traceEnd();
 
             traceBeginAndSlog("StartAccessibilityManagerService");
