@@ -118,7 +118,7 @@ interface IActivityTaskManager {
     int startActivityAsCaller(in IApplicationThread caller, in String callingPackage,
             in Intent intent, in String resolvedType, in IBinder resultTo, in String resultWho,
             int requestCode, int flags, in ProfilerInfo profilerInfo, in Bundle options,
-            boolean ignoreTargetSecurity, int userId);
+            IBinder permissionToken, boolean ignoreTargetSecurity, int userId);
 
     void unhandledBack();
     boolean finishActivity(in IBinder token, int code, in Intent data, int finishTask);
@@ -193,6 +193,20 @@ interface IActivityTaskManager {
             in ActivityManager.TaskDescription description, in Bitmap thumbnail);
     Point getAppTaskThumbnailSize();
     boolean releaseActivityInstance(in IBinder token);
+    /**
+     * Only callable from the system. This token grants a temporary permission to call
+     * #startActivityAsCallerWithToken. The token will time out after
+     * START_AS_CALLER_TOKEN_TIMEOUT if it is not used.
+     *
+     * @param delegatorToken The Binder token referencing the system Activity that wants to delegate
+     *        the #startActivityAsCaller to another app. The "caller" will be the caller of this
+     *        activity's token, not the delegate's caller (which is probably the delegator itself).
+     *
+     * @return Returns a token that can be given to a "delegate" app that may call
+     *         #startActivityAsCaller
+     */
+    IBinder requestStartActivityPermissionToken(in IBinder delegatorToken);
+
     void releaseSomeActivities(in IApplicationThread app);
     Bitmap getTaskDescriptionIcon(in String filename, int userId);
     void startInPlaceAnimationOnFrontMostApplication(in Bundle opts);
