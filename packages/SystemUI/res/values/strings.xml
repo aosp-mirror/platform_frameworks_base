@@ -2067,12 +2067,7 @@
     <string name="high_temp_notif_message">Some features limited while phone cools down</string>
     <!-- Text body for dialog alerting user that their phone has reached a certain temperature and may start to slow down in order to cool down. [CHAR LIMIT=300] -->
     <string name="high_temp_dialog_message">Your phone will automatically try to cool down. You can still use your phone, but it may run slower.\n\nOnce your phone has cooled down, it will run normally.</string>
-    <!-- Title for alarm dialog alerting user the usb adapter has reached a certain temperature that should disconnect charging cable immediately. [CHAR LIMIT=30] -->
-    <string name="high_temp_alarm_title">Unplug charger</string>
-    <!-- Text body for alarm dialog notify user dialog could dismissible after temperature cool down . [CHAR LIMIT=300] -->
-    <string name="high_temp_alarm_notify_unplug_message">Once you unplug the cable, your device needs to cool down before you can start using it. This may take a few minutes.\n\n</string>
-    <!-- Text body for dialog alerting user the usb adapter has reached a certain temperature that should disconnect charging cable immediately. [CHAR LIMIT=300] -->
-    <string name="high_temp_alarm_notify_message">There\u2019s an issue charging this device. Please disconnect the charging cable immediately to prevent possible damage.\n\n‎‏‎‎‏‏‎<xliff:g id="substr" example="Once you unplug the cable, your device needs to cool down before you can start using it. This may take a few minutes.">%1$s</xliff:g>‎‏‎‎‏‏‏‎Make sure both the charging cable connector and the phone\u2019s charging port are dry and clear of any objects. If this issue persists, please call customer support. Do not attempt to repair the port or charger.</string>
+
     <!-- SysUI Tuner: Button to select lock screen shortcut [CHAR LIMIT=60] -->
     <string name="lockscreen_shortcut_left">Left shortcut</string>
 
