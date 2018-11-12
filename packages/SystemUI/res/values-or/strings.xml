@@ -70,6 +70,22 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="3637758096565605541">"ପୁଣିଥରେ ସ୍କ୍ରୀନ୍‌ଶଟ୍ ନେବାକୁ ଚେଷ୍ଟା କରନ୍ତୁ"</string>
     <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"ସୀମିତ ଷ୍ଟୋରେଜ୍‍ ସ୍ପେସ୍‍ ହେତୁ ସ୍କ୍ରୀନଶଟ୍‍ ସେଭ୍‍ ହୋଇପାରିବ ନାହିଁ"</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"ଆପ୍‍ କିମ୍ବା ସଂସ୍ଥା ଦ୍ୱାରା ସ୍କ୍ରୀନଶଟ୍‍ ନେବାକୁ ଅନୁମତି ଦିଆଯାଇ ନାହିଁ"</string>
+    <string name="screenrecord_name" msgid="4196719243134204796">"ସ୍କ୍ରିନ୍‍ ରେକର୍ଡିଂ"</string>
+    <string name="screenrecord_channel_description" msgid="4630777331970993858">"ଏକ ସ୍କ୍ରି‍ନ୍‍ ରେକର୍ଡ୍‍ ସେସନ୍‍ ପାଇଁ ଚାଲୁଥିବା ବିଜ୍ଞପ୍ତି"</string>
+    <string name="screenrecord_start_label" msgid="5177739269492196055">"ରେକର୍ଡିଂ ଆରମ୍ଭ କରନ୍ତୁ"</string>
+    <string name="screenrecord_mic_label" msgid="4522870600914810019">"ଭଏସ୍‍‍‍‍‍‍‍‍‍ଓଭର୍‍ ରେକର୍ଡ କରନ୍ତୁ"</string>
+    <string name="screenrecord_taps_label" msgid="1776467076607964790">"ଟାପ୍‌ ଦେଖାନ୍ତୁ"</string>
+    <string name="screenrecord_stop_label" msgid="2544887572381260038">"ବନ୍ଦ କରନ୍ତୁ"</string>
+    <string name="screenrecord_pause_label" msgid="7162476078856786227">"ବିରତି କରନ୍ତୁ"</string>
+    <string name="screenrecord_resume_label" msgid="3605818317015993314">"ପୁଣି ଚାଲୁ କରନ୍ତୁ"</string>
+    <string name="screenrecord_cancel_label" msgid="3385204992871088609">"ବାତିଲ୍‌ କରନ୍ତୁ"</string>
+    <string name="screenrecord_share_label" msgid="4197867360204019389">"ସେୟାର୍‍ କରନ୍ତୁ"</string>
+    <string name="screenrecord_delete_label" msgid="7893716870917824013">"ଡିଲିଟ୍ କରନ୍ତୁ"</string>
+    <string name="screenrecord_cancel_success" msgid="7768976011702614782">"ସ୍କ୍ରିନ୍‍ ରେକର୍ଡିଂ ବାତିଲ୍‌ କରିଦିଆଯାଇଛି"</string>
+    <string name="screenrecord_save_message" msgid="4733982661301846778">"ସ୍କ୍ରିନ୍‍ ରେକର୍ଡିଂ ସେଭ୍‍ ହୋଇଛି, ଦେଖିବାକୁ ଟାପ୍‍ କରନ୍ତୁ"</string>
+    <string name="screenrecord_delete_description" msgid="5743190456090354585">"ସ୍କ୍ରିନ୍‍ ରେକର୍ଡିଂ ଡିଲିଟ୍‍ କରିଦିଆଯାଇଛି"</string>
+    <string name="screenrecord_delete_error" msgid="8154904464563560282">"ସ୍କ୍ରିନ୍‍ ରେକର୍ଡିଂ ଡିଲିଟ୍‍ କରିବାରେ ତ୍ରୁଟି"</string>
+    <string name="screenrecord_permission_error" msgid="1526755299469001000">"ଅନୁମତି ପାଇବାରେ ଅସଫଳ ହେଲା।"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB ଫାଇଲ୍‌ ଟ୍ରାନ୍ସଫର୍‌ର ବିକଳ୍ପ"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"ଏକ ମିଡିଆ ପ୍ଲେୟାର୍‍ (MTP) ଭାବରେ ଭର୍ତ୍ତି କରନ୍ତୁ"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"ଏକ କ୍ୟାମେରା (PTP) ଭାବରେ ଭର୍ତ୍ତି କରନ୍ତୁ"</string>
@@ -582,15 +598,21 @@
     <string name="notification_header_default_channel" msgid="7506845022070889909">"ବିଜ୍ଞପ୍ତି"</string>
     <string name="notification_channel_disabled" msgid="344536703863700565">"ଏହି ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକ ଆପଣ ଆଉ ଦେଖିବାକୁ ପାଇବେନାହିଁ।"</string>
     <string name="notification_channel_minimized" msgid="1664411570378910931">"ଏହି ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକ ମିନିମାଇଜ୍ ହୋଇଯିବ"</string>
+    <!-- no translation found for notification_channel_silenced (2877199534497961942) -->
+    <skip />
+    <!-- no translation found for notification_channel_unsilenced (4790904571552394137) -->
+    <skip />
     <string name="inline_blocking_helper" msgid="3055064577771478591">"ସାଧାରଣତଃ ଆପଣ ଏହି ବିଜ୍ଞପ୍ତିକୁ ଖାରଜ କରିଦିଅନ୍ତି। \n ସେଗୁଡ଼ିକୁ ଦେଖାଇବା ଜାରି ରଖିବେ?"</string>
     <string name="inline_keep_showing" msgid="8945102997083836858">"ଏହି ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକୁ ଦେଖାଇବା ଜାରି ରଖିବେ?"</string>
     <string name="inline_stop_button" msgid="4172980096860941033">"ବିଜ୍ଞପ୍ତିକୁ ଦେଖାଇବା ବନ୍ଦ କରନ୍ତୁ"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"ଦେଖାଇବା ଜାରି ରଖନ୍ତୁ"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"ଛୋଟ କରନ୍ତୁ"</string>
+    <!-- no translation found for inline_silent_button_silent (4411510650503783646) -->
+    <skip />
+    <!-- no translation found for inline_silent_button_alert (2967599358027208807) -->
+    <skip />
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"ଏହି ଆପ୍‌ରୁ ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକୁ ଦେଖାଇବା ଜାରି ରଖିବେ?"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"ଏହି ବିଜ୍ଞପ୍ତିଗୁଡ଼ିକ ବନ୍ଦ କରିହେବ ନାହିଁ"</string>
-    <!-- no translation found for notification_delegate_header (9167022191405284627) -->
-    <skip />
     <string name="appops_camera" msgid="8100147441602585776">"ଏହି ଆପ୍ କ୍ୟାମେରା ବ୍ୟବହାର କରୁଛି।"</string>
     <string name="appops_microphone" msgid="741508267659494555">"ଏହି ଆପ୍, ମାଇକ୍ରୋଫୋନ୍‍ ବ୍ୟବହାର କରୁଛି।"</string>
     <string name="appops_overlay" msgid="6165912637560323464">"ଏହି ଆପ୍, ଆପଣଙ୍କର ସ୍କ୍ରୀନ୍ ଉପରେ ଥିବା ଅନ୍ୟ ଆପ୍ ଉପରେ ପ୍ରଦର୍ଶିତ ହେଉଛି।"</string>
@@ -725,8 +747,7 @@
     <item msgid="2139628951880142927">"ଚାର୍ଜ କରାଯିବାବେଳେ ଶତକଡ଼ା ଦେଖାନ୍ତୁ (ଡିଫଲ୍ଟ)"</item>
     <item msgid="3327323682209964956">"ଏହି ଆଇକନ୍‍ ଦେଖାନ୍ତୁ ନାହିଁ"</item>
   </string-array>
-    <!-- no translation found for tuner_low_priority (1325884786608312358) -->
-    <skip />
+    <string name="tuner_low_priority" msgid="1325884786608312358">"କମ୍‍-ଅଗ୍ରାଧିକାର ବିଜ୍ଞପ୍ତି ଆଇକନ୍‍ ଦେଖାନ୍ତୁ"</string>
     <string name="other" msgid="4060683095962566764">"ଅନ୍ୟାନ୍ୟ"</string>
     <string name="accessibility_divider" msgid="5903423481953635044">"ସ୍ପ୍ଲିଟ୍‍-ସ୍କ୍ରୀନ ବିଭାଜକ"</string>
     <string name="accessibility_action_divider_left_full" msgid="2801570521881574972">"ବାମ ପଟକୁ ପୂର୍ଣ୍ଣ ସ୍କ୍ରୀନ୍‍ କରନ୍ତୁ"</string>
@@ -806,7 +827,7 @@
     <string name="instant_apps_message" msgid="1183313016396018086">"ଇନ୍‍ଷ୍ଟଲ୍‍ ନହୋଇ ଆପ୍‍ ଖୋଲିଛି।"</string>
     <string name="instant_apps_message_with_help" msgid="6179830437630729747">"ଇନ୍‍ଷ୍ଟଲ୍‍ ନହୋଇ ଆପ୍‍ ଖୋଲିଛି। ଅଧିକ ଜାଣିବା ପାଇଁ ଟାପ୍‍ କରନ୍ତୁ।"</string>
     <string name="app_info" msgid="6856026610594615344">"ଆପ୍‍ ସୂଚନା"</string>
-    <string name="go_to_web" msgid="1106022723459948514">"ୱେବକୁ ଯାଆନ୍ତୁ"</string>
+    <string name="go_to_web" msgid="2650669128861626071">"ବ୍ରାଉଜର୍‌କୁ ଯାଆନ୍ତୁ"</string>
     <string name="mobile_data" msgid="7094582042819250762">"ମୋବାଇଲ୍‌ ଡାଟା"</string>
     <string name="mobile_data_text_format" msgid="3526214522670876454">"<xliff:g id="ID_1">%1$s</xliff:g> — <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"ୱାଇ-ଫାଇ ଅଫ୍‍ ଅଛି"</string>
@@ -838,4 +859,16 @@
     <string name="open_saver_setting_action" msgid="8314624730997322529">"ସେଟିଙ୍ଗ"</string>
     <string name="auto_saver_okay_action" msgid="2701221740227683650">"ବୁଝିଲି"</string>
     <string name="heap_dump_tile_name" msgid="9141031328971226374">"SysUI ହିପ୍ ଡମ୍ପ୍ କରନ୍ତୁ"</string>
+    <string name="ongoing_privacy_chip_content_single_app" msgid="4479560741898690064">"<xliff:g id="APP">%1$s</xliff:g> ଆପଣଙ୍କ <xliff:g id="TYPES_LIST">%2$s</xliff:g> ବ୍ୟବହାର କରୁଛନ୍ତି।"</string>
+    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8640691753867990511">"ଆପ୍ଲିକେସନ୍‍ଗୁଡିକ ଆପଣଙ୍କ <xliff:g id="TYPES_LIST">%s</xliff:g> ବ୍ୟବହାର କରୁଛନ୍ତି।"</string>
+    <string name="ongoing_privacy_dialog_open_app" msgid="2483886665314567948">"ଆପ୍‌ ଖୋଲନ୍ତୁ"</string>
+    <string name="ongoing_privacy_dialog_cancel" msgid="5479124524931216790">"ବାତିଲ୍‌"</string>
+    <string name="ongoing_privacy_dialog_okay" msgid="5823914553907253532">"ଠିକ୍ ଅଛି"</string>
+    <string name="ongoing_privacy_dialog_open_settings" msgid="6382622467527049074">"ସେଟିଂସ୍‍"</string>
+    <string name="ongoing_privacy_dialog_app_item" msgid="486085465491760739">"<xliff:g id="APP">%1$s</xliff:g> ବିଗତ <xliff:g id="TIME">%3$d</xliff:g> ମିନିଟ୍‍ ହେବ ଆପଣଙ୍କ <xliff:g id="TYPE">%2$s</xliff:g> ବ୍ୟବହାର କରୁଛନ୍ତି।"</string>
+    <string name="ongoing_privacy_dialog_apps_item" msgid="9207187236823950491">"<xliff:g id="APPS">%1$s</xliff:g> ଆପଣଙ୍କ <xliff:g id="TYPE">%2$s</xliff:g> ବ୍ୟବହାର କରୁଛନ୍ତି"</string>
+    <string name="ongoing_privacy_dialog_single_app" msgid="3884812469179810924">"<xliff:g id="APP">%1$s</xliff:g> ଆପଣଙ୍କ <xliff:g id="TYPES_LIST">%2$s</xliff:g> ବ୍ୟବହାର କରୁଛନ୍ତି"</string>
+    <string name="privacy_type_camera" msgid="1676604631892420333">"କ୍ୟାମେରା"</string>
+    <string name="privacy_type_location" msgid="6435497989657286700">"ଲୋକେସନ୍‍"</string>
+    <string name="privacy_type_microphone" msgid="4153045784928554506">"ମାଇକ୍ରୋଫୋନ୍"</string>
 </resources>

@@ -70,6 +70,22 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="3637758096565605541">"ກະລຸນາລອງຖ່າຍຮູບໜ້າຈໍອີກຄັ້ງ"</string>
     <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"ບໍ່ສາມາດຖ່າຍຮູບໜ້າຈໍໄດ້ເນື່ອງຈາກພື້ນທີ່ຈັດເກັບຂໍ້ມູນມີຈຳກັດ"</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"ແອັບ ຫຼື ອົງກອນຂອງທ່ານບໍ່ອະນຸຍາດໃຫ້ຖ່າຍຮູບໜ້າຈໍ"</string>
+    <string name="screenrecord_name" msgid="4196719243134204796">"ການບັນທຶກໜ້າຈໍ"</string>
+    <string name="screenrecord_channel_description" msgid="4630777331970993858">"ການແຈ້ງເຕືອນສຳລັບເຊດຊັນການບັນທຶກໜ້າຈໍໃດໜຶ່ງ"</string>
+    <string name="screenrecord_start_label" msgid="5177739269492196055">"ເລີ່ມການບັນທຶກ"</string>
+    <string name="screenrecord_mic_label" msgid="4522870600914810019">"ບັນທຶກສຽງພາກ"</string>
+    <string name="screenrecord_taps_label" msgid="1776467076607964790">"ສະແດງການແຕະ"</string>
+    <string name="screenrecord_stop_label" msgid="2544887572381260038">"ຢຸດ"</string>
+    <string name="screenrecord_pause_label" msgid="7162476078856786227">"ຢຸດຊົ່ວຄາວ"</string>
+    <string name="screenrecord_resume_label" msgid="3605818317015993314">"ສືບຕໍ່"</string>
+    <string name="screenrecord_cancel_label" msgid="3385204992871088609">"ຍົກເລີກ"</string>
+    <string name="screenrecord_share_label" msgid="4197867360204019389">"ແບ່ງປັນ"</string>
+    <string name="screenrecord_delete_label" msgid="7893716870917824013">"ລຶບ"</string>
+    <string name="screenrecord_cancel_success" msgid="7768976011702614782">"ຍົກເລີກການບັນທຶກໜ້າຈໍແລ້ວ"</string>
+    <string name="screenrecord_save_message" msgid="4733982661301846778">"ຈັດເກັບການບັນທຶກໜ້າຈໍ, ແຕະເພື່ອເບິ່ງ"</string>
+    <string name="screenrecord_delete_description" msgid="5743190456090354585">"ລຶບການບັນທຶກໜ້າຈໍອອກແລ້ວ"</string>
+    <string name="screenrecord_delete_error" msgid="8154904464563560282">"ເກີດຄວາມຜິດພາດໃນການລຶບການບັນທຶກໜ້າຈໍ"</string>
+    <string name="screenrecord_permission_error" msgid="1526755299469001000">"ໂຫຼດສິດອະນຸຍາດບໍ່ສຳເລັດ"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB ໂຕເລືອກການຍ້າຍໄຟລ໌"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"ເຊື່ອມຕໍ່ເປັນ media player (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"ເຊື່ອມຕໍ່ເປັນກ້ອງຖ່າຍຮູບ (PTP)"</string>
@@ -582,15 +598,17 @@
     <string name="notification_header_default_channel" msgid="7506845022070889909">"ການແຈ້ງເຕືອນ"</string>
     <string name="notification_channel_disabled" msgid="344536703863700565">"ທ່ານຈະບໍ່ໄດ້ຮັບການແຈ້ງເຕືອນເຫຼົ່ານີ້ອີກຕໍ່ໄປ"</string>
     <string name="notification_channel_minimized" msgid="1664411570378910931">"ການແຈ້ງເຕືອນເຫຼົ່ານີ້ຈະຖືກຫຍໍ້ໄວ້"</string>
+    <string name="notification_channel_silenced" msgid="2877199534497961942">"ການແຈ້ງເຕືອນເຫຼົ່ານີ້ຈະສະແດງແບບງຽບໆ"</string>
+    <string name="notification_channel_unsilenced" msgid="4790904571552394137">"ການແຈ້ງເຕືອນເຫຼົ່ານີ້ຈະເຕືອນທ່ານ"</string>
     <string name="inline_blocking_helper" msgid="3055064577771478591">"ໂດຍປົກກະຕິທ່ານປິດການແຈ້ງເຕືອນເຫຼົ່ານີ້ໄວ້. \nສືບຕໍ່ສະແດງພວກມັນບໍ?"</string>
     <string name="inline_keep_showing" msgid="8945102997083836858">"ສະແດງການແຈ້ງເຕືອນເຫຼົ່ານີ້ຕໍ່ໄປບໍ?"</string>
     <string name="inline_stop_button" msgid="4172980096860941033">"ຢຸດການແຈ້ງເຕືອນ"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"ສະແດງຕໍ່ໄປ"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"ຫຍໍ້"</string>
+    <string name="inline_silent_button_silent" msgid="4411510650503783646">"ສະແດງແບບງຽບໆ"</string>
+    <string name="inline_silent_button_alert" msgid="2967599358027208807">"ສະແດງ ແລະ ເຕືອນ"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"ສະແດງການແຈ້ງເຕືອນຈາກແອັບນີ້ຕໍ່ໄປບໍ?"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"ບໍ່ສາມາດປິດການແຈ້ງເຕືອນເຫຼົ່ານີ້ໄດ້"</string>
-    <!-- no translation found for notification_delegate_header (9167022191405284627) -->
-    <skip />
     <string name="appops_camera" msgid="8100147441602585776">"ແອັບນີ້ກຳລັງໃຊ້ກ້ອງຢູ່."</string>
     <string name="appops_microphone" msgid="741508267659494555">"ແອັບນີ້ກຳລັງໃຊ້ໄມໂຄຣໂຟນຢູ່."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"ແອັບນີ້ກຳລັງສະແດງຜົນບັງແອັບອື່ນຢູ່ໜ້າຈໍຂອງທ່ານ."</string>
@@ -725,8 +743,7 @@
     <item msgid="2139628951880142927">"ສະແດງເປີເຊັນເມື່ອກຳລັງສາກໄຟ (ຄ່າເລີ່ມຕົ້ນ)"</item>
     <item msgid="3327323682209964956">"ຢ່າສະແດງໄອຄອນນີ້"</item>
   </string-array>
-    <!-- no translation found for tuner_low_priority (1325884786608312358) -->
-    <skip />
+    <string name="tuner_low_priority" msgid="1325884786608312358">"ສະແດງໄອຄອນການແຈ້ງເຕືອນຄວາມສຳຄັນຕ່ຳ"</string>
     <string name="other" msgid="4060683095962566764">"ອື່ນໆ"</string>
     <string name="accessibility_divider" msgid="5903423481953635044">"ຕົວຂັ້ນການແບ່ງໜ້າຈໍ"</string>
     <string name="accessibility_action_divider_left_full" msgid="2801570521881574972">"ເຕັມໜ້າຈໍຊ້າຍ"</string>
@@ -806,7 +823,7 @@
     <string name="instant_apps_message" msgid="1183313016396018086">"ເປີດແອັບໂດຍບໍ່ມີການຕິດຕັ້ງແລ້ວ."</string>
     <string name="instant_apps_message_with_help" msgid="6179830437630729747">"ເປີດແອັບໂດຍບໍ່ມີການຕິດຕັ້ງແລ້ວ. ແຕະເພື່ອສຶກສາເພີ່ມເຕີມ."</string>
     <string name="app_info" msgid="6856026610594615344">"ຂໍ້ມູນແອັບ"</string>
-    <string name="go_to_web" msgid="1106022723459948514">"ໄປທີ່ເວັບ"</string>
+    <string name="go_to_web" msgid="2650669128861626071">"ໄປທີ່ໂປຣແກຣມທ່ອງເວັບ"</string>
     <string name="mobile_data" msgid="7094582042819250762">"ອິນເຕີເນັດມືຖື"</string>
     <string name="mobile_data_text_format" msgid="3526214522670876454">"<xliff:g id="ID_1">%1$s</xliff:g> — <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"Wi-Fi ປິດຢູ່"</string>
@@ -838,4 +855,16 @@
     <string name="open_saver_setting_action" msgid="8314624730997322529">"ການຕັ້ງຄ່າ"</string>
     <string name="auto_saver_okay_action" msgid="2701221740227683650">"ເຂົ້າໃຈແລ້ວ"</string>
     <string name="heap_dump_tile_name" msgid="9141031328971226374">"Dump SysUI Heap"</string>
+    <string name="ongoing_privacy_chip_content_single_app" msgid="4479560741898690064">"<xliff:g id="APP">%1$s</xliff:g> ກຳລັງໃຊ້ <xliff:g id="TYPES_LIST">%2$s</xliff:g> ຂອງທ່ານ."</string>
+    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8640691753867990511">"ແອັບພລິເຄຊັນກຳລັງໃຊ້ <xliff:g id="TYPES_LIST">%s</xliff:g> ຂອງທ່ານ."</string>
+    <string name="ongoing_privacy_dialog_open_app" msgid="2483886665314567948">"ເປີດແອັບ"</string>
+    <string name="ongoing_privacy_dialog_cancel" msgid="5479124524931216790">"ຍົກເລີກ"</string>
+    <string name="ongoing_privacy_dialog_okay" msgid="5823914553907253532">"ຕົກລົງ"</string>
+    <string name="ongoing_privacy_dialog_open_settings" msgid="6382622467527049074">"ການຕັ້ງຄ່າ"</string>
+    <string name="ongoing_privacy_dialog_app_item" msgid="486085465491760739">"<xliff:g id="APP">%1$s</xliff:g> ກຳລັງໃຊ້ <xliff:g id="TYPE">%2$s</xliff:g> ຂອງທ່ານ <xliff:g id="TIME">%3$d</xliff:g> ນທ ທີ່ຜ່ານມາ"</string>
+    <string name="ongoing_privacy_dialog_apps_item" msgid="9207187236823950491">"<xliff:g id="APPS">%1$s</xliff:g> ກຳລັງໃຊ້ <xliff:g id="TYPE">%2$s</xliff:g> ຂອງທ່ານ"</string>
+    <string name="ongoing_privacy_dialog_single_app" msgid="3884812469179810924">"<xliff:g id="APP">%1$s</xliff:g> ກຳລັງໃຊ້ <xliff:g id="TYPES_LIST">%2$s</xliff:g> ຂອງທ່ານ"</string>
+    <string name="privacy_type_camera" msgid="1676604631892420333">"ກ້ອງຖ່າຍຮູບ"</string>
+    <string name="privacy_type_location" msgid="6435497989657286700">"ສະຖານທີ່"</string>
+    <string name="privacy_type_microphone" msgid="4153045784928554506">"ໄມໂຄຣໂຟນ"</string>
 </resources>

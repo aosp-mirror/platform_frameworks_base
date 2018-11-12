@@ -70,6 +70,22 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="3637758096565605541">"স্ক্ৰীণশ্বট আকৌ ল\'বলৈ চেষ্টা কৰক"</string>
     <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"সঞ্চয়াগাৰত সীমিত খালী ঠাই থকাৰ বাবে স্ক্ৰীণশ্বট ছেভ কৰিব পৰা নগ\'ল"</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"এপটোৱে বা আপোনাৰ প্ৰতিষ্ঠানে স্ক্ৰীণশ্বট ল\'বলৈ অনুমতি নিদিয়ে"</string>
+    <string name="screenrecord_name" msgid="4196719243134204796">"স্ক্রীণ ৰেকৰ্ডিং"</string>
+    <string name="screenrecord_channel_description" msgid="4630777331970993858">"স্ক্রীণ ৰেকৰ্ডিং ছেশ্বন চলি থকা সময়ত পোৱা জাননী"</string>
+    <string name="screenrecord_start_label" msgid="5177739269492196055">"ৰেকৰ্ডিং কৰা আৰম্ভ কৰক"</string>
+    <string name="screenrecord_mic_label" msgid="4522870600914810019">"পাৰ্শ্ব-ধ্বনি ৰেকৰ্ড কৰক"</string>
+    <string name="screenrecord_taps_label" msgid="1776467076607964790">"টিপা ঠাইসমূহ দেখুৱাওক"</string>
+    <string name="screenrecord_stop_label" msgid="2544887572381260038">"বন্ধ কৰক"</string>
+    <string name="screenrecord_pause_label" msgid="7162476078856786227">"প\'জ কৰক"</string>
+    <string name="screenrecord_resume_label" msgid="3605818317015993314">"ৰখোৱাৰ পৰা পুনৰ আৰম্ভ কৰক"</string>
+    <string name="screenrecord_cancel_label" msgid="3385204992871088609">"বাতিল কৰক"</string>
+    <string name="screenrecord_share_label" msgid="4197867360204019389">"শ্বেয়াৰ কৰক"</string>
+    <string name="screenrecord_delete_label" msgid="7893716870917824013">"মচক"</string>
+    <string name="screenrecord_cancel_success" msgid="7768976011702614782">"স্ক্রীণ ৰেকৰ্ড কৰাটো বাতিল কৰা হ\'ল"</string>
+    <string name="screenrecord_save_message" msgid="4733982661301846778">"স্ক্রীণ ৰেকৰ্ডিং ছেভ কৰা হ\'ল, চাবলৈ টিপক"</string>
+    <string name="screenrecord_delete_description" msgid="5743190456090354585">"স্ক্রীণ ৰেকৰ্ডিং মচা হ\'ল"</string>
+    <string name="screenrecord_delete_error" msgid="8154904464563560282">"স্ক্রীণ ৰেকৰ্ডিং মচি থাকোঁতে কিবা আসোঁৱাহ হ\'ল"</string>
+    <string name="screenrecord_permission_error" msgid="1526755299469001000">"অনুমতি পাব পৰা নগ\'ল"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"ইউএছবিৰে ফাইল স্থানান্তৰণৰ বিকল্পসমূহ"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"মিডিয়া প্লেয়াৰ (এমটিপি) হিচাপে সংলগ্ন কৰক"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"কেমেৰা (পিটিপি) হিচাপে সংলগ্ন কৰক"</string>
@@ -582,15 +598,21 @@
     <string name="notification_header_default_channel" msgid="7506845022070889909">"জাননীসমূহ"</string>
     <string name="notification_channel_disabled" msgid="344536703863700565">"আপোনাক এই জাননীসমূহ আৰু দেখুওৱা নহ\'ব"</string>
     <string name="notification_channel_minimized" msgid="1664411570378910931">"এই জাননীসমূহ মিনিমাইজ কৰি থোৱা হ\'ব"</string>
+    <!-- no translation found for notification_channel_silenced (2877199534497961942) -->
+    <skip />
+    <!-- no translation found for notification_channel_unsilenced (4790904571552394137) -->
+    <skip />
     <string name="inline_blocking_helper" msgid="3055064577771478591">"আপুনি সাধাৰণতে এই জাননীসমূহ অগ্ৰাহ্য কৰে। \nসেইবোৰ দেখুওৱাই থাকিব লাগিবনে?"</string>
     <string name="inline_keep_showing" msgid="8945102997083836858">"এই জাননীসমূহ দেখুওৱাই থাকিব লাগিবনে?"</string>
     <string name="inline_stop_button" msgid="4172980096860941033">"জাননী বন্ধ কৰক"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"দেখুওৱাই থাকক"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"সৰু কৰক"</string>
+    <!-- no translation found for inline_silent_button_silent (4411510650503783646) -->
+    <skip />
+    <!-- no translation found for inline_silent_button_alert (2967599358027208807) -->
+    <skip />
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"এই এপটোৰ জাননী দেখুওৱাই থাকিব লাগিবনে?"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"এই জাননীসমূহ বন্ধ কৰিব নোৱাৰি"</string>
-    <!-- no translation found for notification_delegate_header (9167022191405284627) -->
-    <skip />
     <string name="appops_camera" msgid="8100147441602585776">"এই এপে কেমেৰা ব্য়ৱহাৰ কৰি আছে।"</string>
     <string name="appops_microphone" msgid="741508267659494555">"এই এপে মাইক্ৰ\'ফ\'ন ব্য়ৱহাৰ কৰি আছে।"</string>
     <string name="appops_overlay" msgid="6165912637560323464">"এই এপটো আপোনাৰ স্ক্ৰীণত থকা অন্য় এপৰ ওপৰত প্ৰদৰ্শিত হৈ আছে।"</string>
@@ -725,8 +747,7 @@
     <item msgid="2139628951880142927">"চ্চাৰ্জ কৰি থকাৰ সময়ত শতাংশ দেখুৱাওক (ডিফ\'ল্ট)"</item>
     <item msgid="3327323682209964956">"এই আইকনটো নেদেখুৱাব"</item>
   </string-array>
-    <!-- no translation found for tuner_low_priority (1325884786608312358) -->
-    <skip />
+    <string name="tuner_low_priority" msgid="1325884786608312358">"কম গুৰুত্বপূৰ্ণ জাননীৰ আইকনসমূহ দেখুৱাওক"</string>
     <string name="other" msgid="4060683095962566764">"অন্যান্য"</string>
     <string name="accessibility_divider" msgid="5903423481953635044">"স্প্লিট স্ক্ৰীণৰ বিভাজক"</string>
     <string name="accessibility_action_divider_left_full" msgid="2801570521881574972">"বাওঁফালৰ স্ক্ৰীণখন সম্পূৰ্ণ স্ক্ৰীণ কৰক"</string>
@@ -806,7 +827,7 @@
     <string name="instant_apps_message" msgid="1183313016396018086">"ইনষ্ট\'ল নকৰাকৈয়েই এপটো খোলা হৈছে।"</string>
     <string name="instant_apps_message_with_help" msgid="6179830437630729747">"ইনষ্ট\'ল নকৰাকৈয়েই এপটো খোলা হৈছে। অধিক জানিবলৈ টিপক।"</string>
     <string name="app_info" msgid="6856026610594615344">"এপ্ সম্পৰ্কীয় তথ্য"</string>
-    <string name="go_to_web" msgid="1106022723459948514">"ৱেবলৈ যাওক"</string>
+    <string name="go_to_web" msgid="2650669128861626071">"ব্ৰাউজাৰলৈ যাওক"</string>
     <string name="mobile_data" msgid="7094582042819250762">"ম\'বাইল ডেটা"</string>
     <string name="mobile_data_text_format" msgid="3526214522670876454">"<xliff:g id="ID_1">%1$s</xliff:g> — <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"ৱাই-ফাই অফ অৱস্থাত আছে"</string>
@@ -838,4 +859,16 @@
     <string name="open_saver_setting_action" msgid="8314624730997322529">"ছেটিংবোৰ"</string>
     <string name="auto_saver_okay_action" msgid="2701221740227683650">"বুজি পালোঁ"</string>
     <string name="heap_dump_tile_name" msgid="9141031328971226374">"SysUI হীপ ডাম্প কৰক"</string>
+    <string name="ongoing_privacy_chip_content_single_app" msgid="4479560741898690064">"<xliff:g id="APP">%1$s</xliff:g>এ আপোনাৰ <xliff:g id="TYPES_LIST">%2$s</xliff:g> ব্যৱহাৰ কৰি আছে।"</string>
+    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8640691753867990511">"এপ্লিকেশ্বনসমূহে আপোনাৰ <xliff:g id="TYPES_LIST">%s</xliff:g> ব্যৱহাৰ কৰি আছে।"</string>
+    <string name="ongoing_privacy_dialog_open_app" msgid="2483886665314567948">"এপ্ খোলক"</string>
+    <string name="ongoing_privacy_dialog_cancel" msgid="5479124524931216790">"বাতিল কৰক"</string>
+    <string name="ongoing_privacy_dialog_okay" msgid="5823914553907253532">"ঠিক আছে"</string>
+    <string name="ongoing_privacy_dialog_open_settings" msgid="6382622467527049074">"ছেটিংসমূহ"</string>
+    <string name="ongoing_privacy_dialog_app_item" msgid="486085465491760739">"<xliff:g id="APP">%1$s</xliff:g>এ যোৱা <xliff:g id="TIME">%3$d</xliff:g> মিনিটৰ পৰা আপোনাৰ <xliff:g id="TYPE">%2$s</xliff:g> ব্যৱহাৰ কৰি আছে"</string>
+    <string name="ongoing_privacy_dialog_apps_item" msgid="9207187236823950491">"<xliff:g id="APPS">%1$s</xliff:g>এ আপোনাৰ <xliff:g id="TYPE">%2$s</xliff:g> ব্যৱহাৰ কৰি আছে"</string>
+    <string name="ongoing_privacy_dialog_single_app" msgid="3884812469179810924">"<xliff:g id="APP">%1$s</xliff:g>এ আপোনাৰ <xliff:g id="TYPES_LIST">%2$s</xliff:g> ব্যৱহাৰ কৰি আছে"</string>
+    <string name="privacy_type_camera" msgid="1676604631892420333">"কেমেৰা"</string>
+    <string name="privacy_type_location" msgid="6435497989657286700">"অৱস্থান"</string>
+    <string name="privacy_type_microphone" msgid="4153045784928554506">"মাইক্ৰ\'ফ\'ন"</string>
 </resources>

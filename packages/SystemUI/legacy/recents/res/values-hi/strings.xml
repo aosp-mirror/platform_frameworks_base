@@ -37,7 +37,7 @@
     <string name="recents_multistack_add_stack_dialog_split_horizontal" msgid="488987777874979435">"क्षैतिज रूप से दो हिस्सों में बाँटें (स्प्लिट करें)"</string>
     <string name="recents_multistack_add_stack_dialog_split_vertical" msgid="2498375296906391117">"लम्बवत रूप से दो हिस्सों में बाँटें (स्प्लिट करें)"</string>
     <string name="recents_multistack_add_stack_dialog_split_custom" msgid="7368405969130304811">"अपने मुताबिक दो हिस्सों में बाँटें (स्प्लिट स्क्रीन करें)"</string>
-    <string name="recents_accessibility_split_screen_top" msgid="8773505308411722524">"ऊपर की ओर दो स्क्रीन बनाएं"</string>
-    <string name="recents_accessibility_split_screen_left" msgid="722594718192007972">"बाईं ओर दो स्क्रीन बनाएं"</string>
-    <string name="recents_accessibility_split_screen_right" msgid="2479764030969301514">"दाईं ओर दो स्क्रीन बनाएं"</string>
+    <string name="recents_accessibility_split_screen_top" msgid="8773505308411722524">"ऊपर की ओर दूसरी स्क्रीन बनाएं"</string>
+    <string name="recents_accessibility_split_screen_left" msgid="722594718192007972">"बाईं ओर दूसरी स्क्रीन बनाएं"</string>
+    <string name="recents_accessibility_split_screen_right" msgid="2479764030969301514">"दाईं ओर दूसरी स्क्रीन बनाएं"</string>
 </resources>

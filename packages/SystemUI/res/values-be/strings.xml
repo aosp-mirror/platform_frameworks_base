@@ -70,6 +70,22 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="3637758096565605541">"Паспрабуйце зрабіць здымак экрана яшчэ раз"</string>
     <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"Немагчыма захаваць здымак экрана, бо мала месца ў сховішчы"</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"Рабіць здымкі экрана не дазваляе праграма ці ваша арганізацыя"</string>
+    <string name="screenrecord_name" msgid="4196719243134204796">"Запіс экрана"</string>
+    <string name="screenrecord_channel_description" msgid="4630777331970993858">"Бягучае апавяшчэнне для сеанса запісу экрана"</string>
+    <string name="screenrecord_start_label" msgid="5177739269492196055">"Пачаць запіс"</string>
+    <string name="screenrecord_mic_label" msgid="4522870600914810019">"Закадравае агучванне запісу"</string>
+    <string name="screenrecord_taps_label" msgid="1776467076607964790">"Паказваць дотыкі"</string>
+    <string name="screenrecord_stop_label" msgid="2544887572381260038">"Спыніць"</string>
+    <string name="screenrecord_pause_label" msgid="7162476078856786227">"Прыпыніць"</string>
+    <string name="screenrecord_resume_label" msgid="3605818317015993314">"Узнавіць"</string>
+    <string name="screenrecord_cancel_label" msgid="3385204992871088609">"Скасаваць"</string>
+    <string name="screenrecord_share_label" msgid="4197867360204019389">"Абагуліць"</string>
+    <string name="screenrecord_delete_label" msgid="7893716870917824013">"Выдаліць"</string>
+    <string name="screenrecord_cancel_success" msgid="7768976011702614782">"Запіс экрана скасаваны"</string>
+    <string name="screenrecord_save_message" msgid="4733982661301846778">"Запіс экрана захаваны. Націсніце, каб прагледзець"</string>
+    <string name="screenrecord_delete_description" msgid="5743190456090354585">"Запіс экрана выдалены"</string>
+    <string name="screenrecord_delete_error" msgid="8154904464563560282">"Памылка выдалення запісу экрана"</string>
+    <string name="screenrecord_permission_error" msgid="1526755299469001000">"Не ўдалося атрымаць дазволы"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Парам. перадачы файлаў па USB"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Падлучыць як медыяпрайгравальнік (ССП)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Падлучыць як камеру (PTP)"</string>
@@ -590,15 +606,21 @@
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Апавяшчэнні"</string>
     <string name="notification_channel_disabled" msgid="344536703863700565">"Вы больш не будзеце бачыць гэтыя апавяшчэнні"</string>
     <string name="notification_channel_minimized" msgid="1664411570378910931">"Апавяшчэнні будуць згорнуты"</string>
+    <!-- no translation found for notification_channel_silenced (2877199534497961942) -->
+    <skip />
+    <!-- no translation found for notification_channel_unsilenced (4790904571552394137) -->
+    <skip />
     <string name="inline_blocking_helper" msgid="3055064577771478591">"Звычайна вы адхіляеце гэтыя апавяшчэнні. \nПаказваць іх?"</string>
     <string name="inline_keep_showing" msgid="8945102997083836858">"Працягваць паказваць гэтыя апавяшчэнні?"</string>
     <string name="inline_stop_button" msgid="4172980096860941033">"Спыніць апавяшчэнні"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"Працягваць паказваць"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"Згарнуць"</string>
+    <!-- no translation found for inline_silent_button_silent (4411510650503783646) -->
+    <skip />
+    <!-- no translation found for inline_silent_button_alert (2967599358027208807) -->
+    <skip />
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Працягваць паказваць апавяшчэнні гэтай праграмы?"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"Немагчыма адключыць гэтыя апавяшчэнні"</string>
-    <!-- no translation found for notification_delegate_header (9167022191405284627) -->
-    <skip />
     <string name="appops_camera" msgid="8100147441602585776">"Гэта праграма выкарыстоўвае камеру."</string>
     <string name="appops_microphone" msgid="741508267659494555">"Гэта праграма выкарыстоўвае мікрафон."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"Гэта праграма паказваецца на экране паверх іншых праграм."</string>
@@ -737,8 +759,7 @@
     <item msgid="2139628951880142927">"Паказваць працэнты падчас зарадкі (стандартна)"</item>
     <item msgid="3327323682209964956">"Не паказваць гэты значок"</item>
   </string-array>
-    <!-- no translation found for tuner_low_priority (1325884786608312358) -->
-    <skip />
+    <string name="tuner_low_priority" msgid="1325884786608312358">"Паказваць значкі апавяшчэнняў з нізкім прыярытэтам"</string>
     <string name="other" msgid="4060683095962566764">"Іншае"</string>
     <string name="accessibility_divider" msgid="5903423481953635044">"Раздзяляльнік падзеленага экрана"</string>
     <string name="accessibility_action_divider_left_full" msgid="2801570521881574972">"Левы экран – поўнаэкранны рэжым"</string>
@@ -818,7 +839,7 @@
     <string name="instant_apps_message" msgid="1183313016396018086">"Праграма адкрыта без усталёўкі."</string>
     <string name="instant_apps_message_with_help" msgid="6179830437630729747">"Праграма адкрыта без усталёўкі. Націсніце, каб даведацца больш."</string>
     <string name="app_info" msgid="6856026610594615344">"Інфармацыя пра праграму"</string>
-    <string name="go_to_web" msgid="1106022723459948514">"Перайсці ў інтэрнэт"</string>
+    <string name="go_to_web" msgid="2650669128861626071">"Перайсці ў браўзер"</string>
     <string name="mobile_data" msgid="7094582042819250762">"Маб. перадача даных"</string>
     <string name="mobile_data_text_format" msgid="3526214522670876454">"<xliff:g id="ID_1">%1$s</xliff:g> — <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"Wi-Fi выключаны"</string>
@@ -850,4 +871,16 @@
     <string name="open_saver_setting_action" msgid="8314624730997322529">"Налады"</string>
     <string name="auto_saver_okay_action" msgid="2701221740227683650">"Зразумела"</string>
     <string name="heap_dump_tile_name" msgid="9141031328971226374">"Дамп кучы SysUI"</string>
+    <string name="ongoing_privacy_chip_content_single_app" msgid="4479560741898690064">"Праграма \"<xliff:g id="APP">%1$s</xliff:g>\" выкарыстоўвае: <xliff:g id="TYPES_LIST">%2$s</xliff:g>."</string>
+    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8640691753867990511">"Праграмы выкарыстоўваюць: <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
+    <string name="ongoing_privacy_dialog_open_app" msgid="2483886665314567948">"Адкрыць"</string>
+    <string name="ongoing_privacy_dialog_cancel" msgid="5479124524931216790">"Скасаваць"</string>
+    <string name="ongoing_privacy_dialog_okay" msgid="5823914553907253532">"ОК"</string>
+    <string name="ongoing_privacy_dialog_open_settings" msgid="6382622467527049074">"Налады"</string>
+    <string name="ongoing_privacy_dialog_app_item" msgid="486085465491760739">"Праграма \"<xliff:g id="APP">%1$s</xliff:g>\" на працягу апошніх <xliff:g id="TIME">%3$d</xliff:g> хв. выкарыстоўвае: <xliff:g id="TYPE">%2$s</xliff:g>"</string>
+    <string name="ongoing_privacy_dialog_apps_item" msgid="9207187236823950491">"Праграма \"<xliff:g id="APPS">%1$s</xliff:g>\" выкарыстоўвае: <xliff:g id="TYPE">%2$s</xliff:g>"</string>
+    <string name="ongoing_privacy_dialog_single_app" msgid="3884812469179810924">"Праграма \"<xliff:g id="APP">%1$s</xliff:g>\" выкарыстоўвае: <xliff:g id="TYPES_LIST">%2$s</xliff:g>"</string>
+    <string name="privacy_type_camera" msgid="1676604631892420333">"камера"</string>
+    <string name="privacy_type_location" msgid="6435497989657286700">"геалакацыя"</string>
+    <string name="privacy_type_microphone" msgid="4153045784928554506">"мікрафон"</string>
 </resources>

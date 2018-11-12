@@ -70,6 +70,22 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="3637758096565605541">"स्क्रिनसट फेरि लिएर हेर्नुहोस्"</string>
     <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"भण्डारण ठाउँ सीमित भएका कारण स्क्रिनसट सुरक्षित गर्न सकिएन"</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"उक्त अनुप्रयोग वा तपाईंको संगठनले स्क्रिनसटहरू लिन दिँदैन"</string>
+    <string name="screenrecord_name" msgid="4196719243134204796">"स्क्रिनको रेकर्डिङ"</string>
+    <string name="screenrecord_channel_description" msgid="4630777331970993858">"कुनै स्क्रिन रेकर्ड गर्ने सत्रका लागि चलिरहेको सूचना"</string>
+    <string name="screenrecord_start_label" msgid="5177739269492196055">"रेकर्डिङ सुरु गर्नुहोस्"</string>
+    <string name="screenrecord_mic_label" msgid="4522870600914810019">"भ्वाइसओवर रेकर्ड गर्नुहोस्"</string>
+    <string name="screenrecord_taps_label" msgid="1776467076607964790">"ट्यापहरू देखाउनुहोस्"</string>
+    <string name="screenrecord_stop_label" msgid="2544887572381260038">"रोक्नुहोस्"</string>
+    <string name="screenrecord_pause_label" msgid="7162476078856786227">"पज गर्नुहोस्"</string>
+    <string name="screenrecord_resume_label" msgid="3605818317015993314">"जारी राख्नुहोस्"</string>
+    <string name="screenrecord_cancel_label" msgid="3385204992871088609">"रद्द गर्नुहोस्"</string>
+    <string name="screenrecord_share_label" msgid="4197867360204019389">"आदान प्रदान गर्नुहोस्"</string>
+    <string name="screenrecord_delete_label" msgid="7893716870917824013">"मेट्नुहोस्"</string>
+    <string name="screenrecord_cancel_success" msgid="7768976011702614782">"स्क्रिन रेकर्ड गर्ने कार्य रद्द गरियो"</string>
+    <string name="screenrecord_save_message" msgid="4733982661301846778">"स्क्रिन रेकर्डिङ सुरक्षित गरियो, हेर्न ट्याप गर्नुहोस्‌"</string>
+    <string name="screenrecord_delete_description" msgid="5743190456090354585">"स्क्रिनको रेकर्डिङ मेटाइयो"</string>
+    <string name="screenrecord_delete_error" msgid="8154904464563560282">"स्क्रिनको रेकर्डिङ मेट्ने क्रममा त्रुटि"</string>
+    <string name="screenrecord_permission_error" msgid="1526755299469001000">"अनुमति प्राप्त गर्न सकिएन"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB फाइल सार्ने विकल्पहरू"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"मिडिया प्लेयर(MTP)को रूपमा माउन्ट गर्नुहोस्"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"क्यामेराको रूपमा माउन्ट गर्नुहोस् (PTP)"</string>
@@ -582,15 +598,21 @@
     <string name="notification_header_default_channel" msgid="7506845022070889909">"सूचनाहरू"</string>
     <string name="notification_channel_disabled" msgid="344536703863700565">"तपाईं अब उप्रान्त यी सूचनाहरू देख्नु हुने छैन"</string>
     <string name="notification_channel_minimized" msgid="1664411570378910931">"यी सूचनाहरू सानो बनाइने छ"</string>
+    <!-- no translation found for notification_channel_silenced (2877199534497961942) -->
+    <skip />
+    <!-- no translation found for notification_channel_unsilenced (4790904571552394137) -->
+    <skip />
     <string name="inline_blocking_helper" msgid="3055064577771478591">"तपाईं सामान्यतया यी सूचनाहरूलाई खारेज गर्ने गर्नुहुन्छ। \nतिनलाई देखाइरहने हो?"</string>
     <string name="inline_keep_showing" msgid="8945102997083836858">"यी सूचनाहरू देखाउने क्रम जारी राख्ने हो?"</string>
     <string name="inline_stop_button" msgid="4172980096860941033">"सूचनाहरू देखाउन छाड्नुहोस्"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"देखाउने क्रम जारी राख्नुहोस्"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"सानो बनाउनुहोस्"</string>
+    <!-- no translation found for inline_silent_button_silent (4411510650503783646) -->
+    <skip />
+    <!-- no translation found for inline_silent_button_alert (2967599358027208807) -->
+    <skip />
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"यो अनुप्रयोगका सूचनाहरू देखाउने क्रम जारी राख्ने हो?"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"यी सूचनाहरूलाई निष्क्रिय पार्न सकिँदैन"</string>
-    <!-- no translation found for notification_delegate_header (9167022191405284627) -->
-    <skip />
     <string name="appops_camera" msgid="8100147441602585776">"यो अनुप्रयोगले क्यामेराको प्रयोग गर्दै छ।"</string>
     <string name="appops_microphone" msgid="741508267659494555">"यो अनुप्रयोगले माइक्रोफोनको प्रयोग गर्दै छ।"</string>
     <string name="appops_overlay" msgid="6165912637560323464">"यो अनुप्रयोगले तपाईंको स्क्रिनका अन्य अनुप्रयोगहरूमाथि प्रदर्शन गर्दै छ।"</string>
@@ -725,8 +747,7 @@
     <item msgid="2139628951880142927">"चार्ज गर्दा प्रतिशत देखाउनुहोस् (पूर्वनिर्धारित)"</item>
     <item msgid="3327323682209964956">"यो आइकन नदेखाउनुहोस्"</item>
   </string-array>
-    <!-- no translation found for tuner_low_priority (1325884786608312358) -->
-    <skip />
+    <string name="tuner_low_priority" msgid="1325884786608312358">"कम प्राथमिकताका सूचना आइकनहरू देखाउनुहोस्"</string>
     <string name="other" msgid="4060683095962566764">"अन्य"</string>
     <string name="accessibility_divider" msgid="5903423481953635044">"विभाजित-स्क्रिन छुट्याउने"</string>
     <string name="accessibility_action_divider_left_full" msgid="2801570521881574972">"बायाँ भाग पूर्ण स्क्रिन"</string>
@@ -806,7 +827,7 @@
     <string name="instant_apps_message" msgid="1183313016396018086">"स्थापना नगरिकनै अनुप्रयोग खोलियो।"</string>
     <string name="instant_apps_message_with_help" msgid="6179830437630729747">"स्थापना नगरिकनै अनुप्रयोग खोलियो। थप जान्न ट्याप गर्नुहोस्।"</string>
     <string name="app_info" msgid="6856026610594615344">"अनुप्रयोगका बारे जानकारी"</string>
-    <string name="go_to_web" msgid="1106022723459948514">"वेबमा जानुहोस्"</string>
+    <string name="go_to_web" msgid="2650669128861626071">"ब्राउजरमा जानुहोस्"</string>
     <string name="mobile_data" msgid="7094582042819250762">"मोबाइल डेटा"</string>
     <string name="mobile_data_text_format" msgid="3526214522670876454">"<xliff:g id="ID_1">%1$s</xliff:g> — <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"Wi‑Fi निष्क्रिय छ"</string>
@@ -838,4 +859,16 @@
     <string name="open_saver_setting_action" msgid="8314624730997322529">"सेटिङहरू"</string>
     <string name="auto_saver_okay_action" msgid="2701221740227683650">"बुझेँ"</string>
     <string name="heap_dump_tile_name" msgid="9141031328971226374">"Dump SysUI Heap"</string>
+    <string name="ongoing_privacy_chip_content_single_app" msgid="4479560741898690064">"<xliff:g id="APP">%1$s</xliff:g> ले तपाईंको <xliff:g id="TYPES_LIST">%2$s</xliff:g> प्रयोग गर्दै छ।"</string>
+    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8640691753867990511">"अनुप्रयोगहरूले तपाईंको <xliff:g id="TYPES_LIST">%s</xliff:g> प्रयोग गर्दै छन्‌।"</string>
+    <string name="ongoing_privacy_dialog_open_app" msgid="2483886665314567948">"अनुप्रयोग खोल्नुहोस्"</string>
+    <string name="ongoing_privacy_dialog_cancel" msgid="5479124524931216790">"रद्द गर्नु…"</string>
+    <string name="ongoing_privacy_dialog_okay" msgid="5823914553907253532">"ठिक छ"</string>
+    <string name="ongoing_privacy_dialog_open_settings" msgid="6382622467527049074">"सेटिङहरू"</string>
+    <string name="ongoing_privacy_dialog_app_item" msgid="486085465491760739">"<xliff:g id="APP">%1$s</xliff:g> ले विगत <xliff:g id="TIME">%3$d</xliff:g> मिनेट देखि तपाईंको <xliff:g id="TYPE">%2$s</xliff:g> प्रयोग गर्दै छन्‌"</string>
+    <string name="ongoing_privacy_dialog_apps_item" msgid="9207187236823950491">"<xliff:g id="APPS">%1$s</xliff:g> ले तपाईंको <xliff:g id="TYPE">%2$s</xliff:g> प्रयोग गर्दै छन्‌"</string>
+    <string name="ongoing_privacy_dialog_single_app" msgid="3884812469179810924">"<xliff:g id="APP">%1$s</xliff:g> ले तपाईंको <xliff:g id="TYPES_LIST">%2$s</xliff:g> प्रयोग गर्दै छ"</string>
+    <string name="privacy_type_camera" msgid="1676604631892420333">"क्यामेरा"</string>
+    <string name="privacy_type_location" msgid="6435497989657286700">"स्थान"</string>
+    <string name="privacy_type_microphone" msgid="4153045784928554506">"माइक्रोफोन"</string>
 </resources>

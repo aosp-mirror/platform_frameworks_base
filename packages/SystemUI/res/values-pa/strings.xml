@@ -70,6 +70,22 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="3637758096565605541">"ਸਕ੍ਰੀਨਸ਼ਾਟ ਦੁਬਾਰਾ ਲੈ ਕੇ ਦੇਖੋ"</string>
     <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"ਸੀਮਿਤ ਸਟੋਰੇਜ ਹੋਣ ਕਾਰਨ ਸਕ੍ਰੀਨਸ਼ਾਟ ਰੱਖਿਅਤ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਦਾ"</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"ਐਪ ਜਾਂ ਤੁਹਾਡੀ ਸੰਸਥਾ ਵੱਲੋਂ ਸਕ੍ਰੀਨਸ਼ਾਟ ਲੈਣ ਦੀ ਇਜਾਜ਼ਤ ਨਹੀਂ ਦਿੱਤੀ ਗਈ ਹੈ"</string>
+    <string name="screenrecord_name" msgid="4196719243134204796">"ਸਕ੍ਰੀਨ ਰਿਕਾਰਡਿੰਗ"</string>
+    <string name="screenrecord_channel_description" msgid="4630777331970993858">"ਕਿਸੇ ਸਕ੍ਰੀਨ ਰਿਕਾਰਡ ਸੈਸ਼ਨ ਲਈ ਚੱਲ ਰਹੀ ਸੂਚਨਾ"</string>
+    <string name="screenrecord_start_label" msgid="5177739269492196055">"ਰਿਕਾਰਡਿੰਗ ਸ਼ੁਰੂ ਕਰੋ"</string>
+    <string name="screenrecord_mic_label" msgid="4522870600914810019">"ਅਵਾਜ਼ ਰਿਕਾਰਡ ਕਰੋ"</string>
+    <string name="screenrecord_taps_label" msgid="1776467076607964790">"ਟੈਪਾਂ ਦਿਖਾਓ"</string>
+    <string name="screenrecord_stop_label" msgid="2544887572381260038">"ਬੰਦ ਕਰੋ"</string>
+    <string name="screenrecord_pause_label" msgid="7162476078856786227">"ਰੋਕੋ"</string>
+    <string name="screenrecord_resume_label" msgid="3605818317015993314">"ਮੁੜ-ਚਾਲੂ ਕਰੋ"</string>
+    <string name="screenrecord_cancel_label" msgid="3385204992871088609">"ਰੱਦ ਕਰੋ"</string>
+    <string name="screenrecord_share_label" msgid="4197867360204019389">"ਸਾਂਝਾ ਕਰੋ"</string>
+    <string name="screenrecord_delete_label" msgid="7893716870917824013">"ਮਿਟਾਓ"</string>
+    <string name="screenrecord_cancel_success" msgid="7768976011702614782">"ਸਕ੍ਰੀਨ ਦੀ ਰਿਕਾਰਡਿੰਗ ਰੱਦ ਕੀਤੀ ਗਈ"</string>
+    <string name="screenrecord_save_message" msgid="4733982661301846778">"ਸਕ੍ਰੀਨ ਰਿਕਾਰਡਿੰਗ ਰੱਖਿਅਤ ਕੀਤੀ ਗਈ, ਦੇਖਣ ਲਈ ਟੈਪ ਕਰੋ"</string>
+    <string name="screenrecord_delete_description" msgid="5743190456090354585">"ਸਕ੍ਰੀਨ ਰਿਕਾਰਡਿੰਗ ਨੂੰ ਮਿਟਾਇਆ ਗਿਆ"</string>
+    <string name="screenrecord_delete_error" msgid="8154904464563560282">"ਸਕ੍ਰੀਨ ਰਿਕਾਰਡਿੰਗ ਨੂੰ ਮਿਟਾਉਣ ਦੌਰਾਨ ਗੜਬੜ ਹੋਈ"</string>
+    <string name="screenrecord_permission_error" msgid="1526755299469001000">"ਇਜਾਜ਼ਤਾਂ ਪ੍ਰਾਪਤ ਕਰਨਾ ਅਸਫਲ ਰਿਹਾ"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB ਫਾਈਲ ਟ੍ਰਾਂਸਫਰ ਚੋਣਾਂ"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"ਇੱਕ ਮੀਡੀਆ ਪਲੇਅਰ (MTP) ਦੇ ਤੌਰ ਤੇ ਮਾਊਂਟ ਕਰੋ"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"ਇੱਕ ਕੈਮਰੇ (PTP) ਦੇ ਤੌਰ ਤੇ ਮਾਊਂਟ ਕਰੋ"</string>
@@ -582,15 +598,21 @@
     <string name="notification_header_default_channel" msgid="7506845022070889909">"ਸੂਚਨਾਵਾਂ"</string>
     <string name="notification_channel_disabled" msgid="344536703863700565">"ਤੁਹਾਨੂੰ ਹੁਣ ਇਹ ਸੂਚਨਾਵਾਂ ਦਿਖਾਈ ਨਹੀਂ ਦੇਣਗੀਆਂ"</string>
     <string name="notification_channel_minimized" msgid="1664411570378910931">"ਇਹਨਾਂ ਸੂਚਨਾਵਾਂ ਨੂੰ ਛੋਟਾ ਕੀਤਾ ਜਾਵੇਗਾ"</string>
+    <!-- no translation found for notification_channel_silenced (2877199534497961942) -->
+    <skip />
+    <!-- no translation found for notification_channel_unsilenced (4790904571552394137) -->
+    <skip />
     <string name="inline_blocking_helper" msgid="3055064577771478591">"ਤੁਸੀਂ ਇਹਨਾਂ ਸੂਚਨਾਵਾਂ ਨੂੰ ਆਮ ਤੌਰ \'ਤੇ ਖਾਰਜ ਕਰਦੇ ਹੋ। \nਕੀ ਇਹਨਾਂ ਸੂਚਨਾਵਾਂ ਨੂੰ ਦਿਖਾਉਣਾ ਜਾਰੀ ਰੱਖਣਾ ਹੈ?"</string>
     <string name="inline_keep_showing" msgid="8945102997083836858">"ਕੀ ਇਨ੍ਹਾਂ ਸੂਚਨਾਵਾਂ ਨੂੰ ਦਿਖਾਉਣਾ ਜਾਰੀ ਰੱਖਣਾ ਹੈ?"</string>
     <string name="inline_stop_button" msgid="4172980096860941033">"ਸੂਚਨਾਵਾਂ ਬੰਦ ਕਰੋ"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"ਦਿਖਾਉਣਾ ਜਾਰੀ ਰੱਖੋ"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"ਛੋਟਾ ਕਰੋ"</string>
+    <!-- no translation found for inline_silent_button_silent (4411510650503783646) -->
+    <skip />
+    <!-- no translation found for inline_silent_button_alert (2967599358027208807) -->
+    <skip />
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"ਕੀ ਇਸ ਐਪ ਤੋਂ ਸੂਚਨਾਵਾਂ ਨੂੰ ਦਿਖਾਉਣਾ ਜਾਰੀ ਰੱਖਣਾ ਹੈ?"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"ਇਨ੍ਹਾਂ ਸੂਚਨਾਵਾਂ ਨੂੰ ਬੰਦ ਨਹੀਂ ਕੀਤਾ ਜਾ ਸਕਦਾ"</string>
-    <!-- no translation found for notification_delegate_header (9167022191405284627) -->
-    <skip />
     <string name="appops_camera" msgid="8100147441602585776">"ਇਹ ਐਪ ਕੈਮਰੇ ਦੀ ਵਰਤੋਂ ਕਰ ਰਹੀ ਹੈ।"</string>
     <string name="appops_microphone" msgid="741508267659494555">"ਇਹ ਐਪ ਮਾਈਕ੍ਰੋਫ਼ੋਨ ਦੀ ਵਰਤੋਂ ਕਰ ਰਹੀ ਹੈ।"</string>
     <string name="appops_overlay" msgid="6165912637560323464">"ਇਹ ਐਪ ਤੁਹਾਡੀ ਸਕ੍ਰੀਨ \'ਤੇ ਹੋਰਾਂ ਐਪਾਂ ਉੱਪਰ ਦਿਖਾਈ ਜਾ ਰਹੀ ਹੈ।"</string>
@@ -725,8 +747,7 @@
     <item msgid="2139628951880142927">"ਚਾਰਜਿੰਗ ਦੌਰਾਨ ਪ੍ਰਤੀਸ਼ਤਤਾ ਦਿਖਾਓ (ਪੂਰਵ-ਨਿਰਧਾਰਤ)"</item>
     <item msgid="3327323682209964956">"ਇਸ ਪ੍ਰਤੀਕ ਨੂੰ ਨਾ ਦਿਖਾਓ"</item>
   </string-array>
-    <!-- no translation found for tuner_low_priority (1325884786608312358) -->
-    <skip />
+    <string name="tuner_low_priority" msgid="1325884786608312358">"ਘੱਟ ਤਰਜੀਹ ਵਾਲੇ ਸੂਚਨਾ ਪ੍ਰਤੀਕਾਂ ਨੂੰ ਦਿਖਾਓ"</string>
     <string name="other" msgid="4060683095962566764">"ਹੋਰ"</string>
     <string name="accessibility_divider" msgid="5903423481953635044">"ਸਪਲਿਟ-ਸਕ੍ਰੀਨ ਡਿਵਾਈਡਰ"</string>
     <string name="accessibility_action_divider_left_full" msgid="2801570521881574972">"ਖੱਬੇ ਪੂਰੀ ਸਕ੍ਰੀਨ"</string>
@@ -806,7 +827,7 @@
     <string name="instant_apps_message" msgid="1183313016396018086">"ਸਥਾਪਤ ਕੀਤੇ ਬਿਨਾਂ ਐਪ ਖੋਲ੍ਹੀ ਗਈ।"</string>
     <string name="instant_apps_message_with_help" msgid="6179830437630729747">"ਸਥਾਪਤ ਕੀਤੇ ਬਿਨਾਂ ਐਪ ਖੋਲ੍ਹੀ ਗਈ। ਹੋਰ ਜਾਣਨ ਲਈ ਟੈਪ ਕਰੋ।"</string>
     <string name="app_info" msgid="6856026610594615344">"ਐਪ ਜਾਣਕਾਰੀ"</string>
-    <string name="go_to_web" msgid="1106022723459948514">"ਵੈੱਬ \'ਤੇ ਜਾਓ"</string>
+    <string name="go_to_web" msgid="2650669128861626071">"ਬ੍ਰਾਊਜ਼ਰ \'ਤੇ ਜਾਓ"</string>
     <string name="mobile_data" msgid="7094582042819250762">"ਮੋਬਾਈਲ ਡਾਟਾ"</string>
     <string name="mobile_data_text_format" msgid="3526214522670876454">"<xliff:g id="ID_1">%1$s</xliff:g> — <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"ਵਾਈ-ਫਾਈ ਬੰਦ ਹੈ"</string>
@@ -838,4 +859,16 @@
     <string name="open_saver_setting_action" msgid="8314624730997322529">"ਸੈਟਿੰਗਾਂ"</string>
     <string name="auto_saver_okay_action" msgid="2701221740227683650">"ਸਮਝ ਲਿਆ"</string>
     <string name="heap_dump_tile_name" msgid="9141031328971226374">"SysUI ਹੀਪ ਡੰਪ ਕਰੋ"</string>
+    <string name="ongoing_privacy_chip_content_single_app" msgid="4479560741898690064">"<xliff:g id="APP">%1$s</xliff:g> ਤੁਹਾਡੇ <xliff:g id="TYPES_LIST">%2$s</xliff:g> ਦੀ ਵਰਤੋਂ ਕਰ ਰਹੀ ਹੈ।"</string>
+    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8640691753867990511">"ਐਪਲੀਕੇਸ਼ਨਾਂ ਤੁਹਾਡੇ <xliff:g id="TYPES_LIST">%s</xliff:g> ਦੀ ਵਰਤੋਂ ਕਰ ਰਹੀਆਂ ਹਨ।"</string>
+    <string name="ongoing_privacy_dialog_open_app" msgid="2483886665314567948">"ਐਪ ਖੋਲ੍ਹੋ"</string>
+    <string name="ongoing_privacy_dialog_cancel" msgid="5479124524931216790">"ਰੱਦ ਕਰੋ"</string>
+    <string name="ongoing_privacy_dialog_okay" msgid="5823914553907253532">"ਠੀਕ ਹੈ"</string>
+    <string name="ongoing_privacy_dialog_open_settings" msgid="6382622467527049074">"ਸੈਟਿੰਗਾਂ"</string>
+    <string name="ongoing_privacy_dialog_app_item" msgid="486085465491760739">"<xliff:g id="APP">%1$s</xliff:g> ਪਿਛਲੇ <xliff:g id="TIME">%3$d</xliff:g> ਮਿੰਟ ਤੋਂ ਤੁਹਾਡੇ <xliff:g id="TYPE">%2$s</xliff:g> ਦੀ ਵਰਤੋਂ ਕਰ ਰਹੀ ਹੈ"</string>
+    <string name="ongoing_privacy_dialog_apps_item" msgid="9207187236823950491">"<xliff:g id="APPS">%1$s</xliff:g> ਤੁਹਾਡੇ <xliff:g id="TYPE">%2$s</xliff:g> ਦੀ ਵਰਤੋਂ ਕਰ ਰਹੀਆਂ ਹਨ"</string>
+    <string name="ongoing_privacy_dialog_single_app" msgid="3884812469179810924">"<xliff:g id="APP">%1$s</xliff:g> ਤੁਹਾਡੇ <xliff:g id="TYPES_LIST">%2$s</xliff:g> ਦੀ ਵਰਤੋਂ ਕਰ ਰਹੀ ਹੈ"</string>
+    <string name="privacy_type_camera" msgid="1676604631892420333">"ਕੈਮਰਾ"</string>
+    <string name="privacy_type_location" msgid="6435497989657286700">"ਟਿਕਾਣਾ"</string>
+    <string name="privacy_type_microphone" msgid="4153045784928554506">"ਮਾਈਕ੍ਰੋਫ਼ੋਨ"</string>
 </resources>

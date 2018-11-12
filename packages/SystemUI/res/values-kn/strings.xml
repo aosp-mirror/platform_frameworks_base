@@ -70,6 +70,22 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="3637758096565605541">"ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಅನ್ನು ಪುನಃ ತೆಗೆದುಕೊಳ್ಳಲು ಪ್ರಯತ್ನಿಸಿ"</string>
     <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"ಪರಿಮಿತ ಸಂಗ್ರಹಣೆ ಸ್ಥಳದ ಕಾರಣದಿಂದಾಗಿ ಸ್ಕ್ರೀನ್‌ಶಾಟ್ ಉಳಿಸಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"ಅಪ್ಲಿಕೇಶನ್ ಅಥವಾ ಸಂಸ್ಥೆಯು ಸ್ಕ್ರೀನ್‌ಶಾಟ್‌ಗಳನ್ನು ತೆಗೆಯುವುದನ್ನು ಅನುಮತಿಸುವುದಿಲ್ಲ"</string>
+    <string name="screenrecord_name" msgid="4196719243134204796">"ಸ್ಕ್ರೀನ್ ರೆಕಾರ್ಡಿಂಗ್"</string>
+    <string name="screenrecord_channel_description" msgid="4630777331970993858">"ಸ್ಕ್ರೀನ್ ರೆಕಾರ್ಡಿಂಗ್ ಸೆಶನ್‌ಗಾಗಿ ಚಾಲ್ತಿಯಲ್ಲಿರುವ ಅಧಿಸೂಚನೆ"</string>
+    <string name="screenrecord_start_label" msgid="5177739269492196055">"ರೆಕಾರ್ಡಿಂಗ್ ಆರಂಭಿಸಿ"</string>
+    <string name="screenrecord_mic_label" msgid="4522870600914810019">"voiceover ಅನ್ನು ರೆಕಾರ್ಡ್ ಮಾಡಿ"</string>
+    <string name="screenrecord_taps_label" msgid="1776467076607964790">"ಟ್ಯಾಪ್‌ಗಳನ್ನು ತೋರಿಸಿ"</string>
+    <string name="screenrecord_stop_label" msgid="2544887572381260038">"ನಿಲ್ಲಿಸಿ"</string>
+    <string name="screenrecord_pause_label" msgid="7162476078856786227">"ವಿರಾಮಗೊಳಿಸಿ"</string>
+    <string name="screenrecord_resume_label" msgid="3605818317015993314">"ಮುಂದುವರಿಸಿ"</string>
+    <string name="screenrecord_cancel_label" msgid="3385204992871088609">"ರದ್ದುಮಾಡಿ"</string>
+    <string name="screenrecord_share_label" msgid="4197867360204019389">"ಹಂಚಿಕೊಳ್ಳಿ"</string>
+    <string name="screenrecord_delete_label" msgid="7893716870917824013">"ಅಳಿಸಿ"</string>
+    <string name="screenrecord_cancel_success" msgid="7768976011702614782">"ಸ್ಕ್ರೀನ್ ರೆಕಾರ್ಡಿಂಗ್ ಅನ್ನು ರದ್ದುಮಾಡಲಾಗಿದೆ"</string>
+    <string name="screenrecord_save_message" msgid="4733982661301846778">"ಸ್ಕ್ರೀನ್ ರೆಕಾರ್ಡಿಂಗ್ ಅನ್ನು ಉಳಿಸಲಾಗಿದೆ, ವೀಕ್ಷಿಸಲು ಟ್ಯಾಪ್ ಮಾಡಿ"</string>
+    <string name="screenrecord_delete_description" msgid="5743190456090354585">"ಸ್ಕ್ರೀನ್ ರೆಕಾರ್ಡಿಂಗ್ ಅಳಿಸಲಾಗಿದೆ"</string>
+    <string name="screenrecord_delete_error" msgid="8154904464563560282">"ಸ್ಕ್ರೀನ್ ರೆಕಾರ್ಡಿಂಗ್ ಅಳಿಸುವಾಗ ದೋಷ ಕಂಡುಬಂದಿದೆ"</string>
+    <string name="screenrecord_permission_error" msgid="1526755299469001000">"ಅನುಮತಿಗಳನ್ನು ಪಡೆಯುವಲ್ಲಿ ವಿಫಲವಾಗಿದೆ"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB ಫೈಲ್ ವರ್ಗಾವಣೆ ಆಯ್ಕೆಗಳು"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"ಮೀಡಿಯಾ ಪ್ಲೇಯರ್ ರೂಪದಲ್ಲಿ ಅಳವಡಿಸಿ (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"ಕ್ಯಾಮರಾ ರೂಪದಲ್ಲಿ ಅಳವಡಿಸಿ (PTP)"</string>
@@ -582,15 +598,21 @@
     <string name="notification_header_default_channel" msgid="7506845022070889909">"ಅಧಿಸೂಚನೆಗಳು"</string>
     <string name="notification_channel_disabled" msgid="344536703863700565">"ನೀವು ಈ ಅಧಿಸೂಚನೆಗಳನ್ನು ಇನ್ನು ಮುಂದೆ ನೋಡುವುದಿಲ್ಲ"</string>
     <string name="notification_channel_minimized" msgid="1664411570378910931">"ಈ ಅಧಿಸೂಚನೆಗಳನ್ನು ಕಿರಿದುಗೊಳಿಸಲಾಗುತ್ತದೆ"</string>
+    <!-- no translation found for notification_channel_silenced (2877199534497961942) -->
+    <skip />
+    <!-- no translation found for notification_channel_unsilenced (4790904571552394137) -->
+    <skip />
     <string name="inline_blocking_helper" msgid="3055064577771478591">"ನೀವು ಸಾಮಾನ್ಯವಾಗಿ ಈ ಅಧಿಸೂಚನೆಗಳನ್ನು ವಜಾಗೊಳಿಸಿದ್ದೀರಿ. \nಅವುಗಳನ್ನು ತೋರಿಸುತ್ತಲೇ ಇರಬೇಕೆ?"</string>
     <string name="inline_keep_showing" msgid="8945102997083836858">"ಈ ಅಧಿಸೂಚನೆಗಳನ್ನು ತೋರಿಸುತ್ತಲೇ ಇರಬೇಕೆ?"</string>
     <string name="inline_stop_button" msgid="4172980096860941033">"ಅಧಿಸೂಚನೆಗಳನ್ನು ನಿಲ್ಲಿಸಿ"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"ತೋರಿಸುತ್ತಲಿರಿ"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"ಕಿರಿದುಗೊಳಿಸಿ"</string>
+    <!-- no translation found for inline_silent_button_silent (4411510650503783646) -->
+    <skip />
+    <!-- no translation found for inline_silent_button_alert (2967599358027208807) -->
+    <skip />
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"ಈ ಅಪ್ಲಿಕೇಶನ್‌ನಿಂದ ಅಧಿಸೂಚನೆಗಳನ್ನು ತೋರಿಸುತ್ತಲೇ ಇರಬೇಕೆ?"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"ಈ ಅಧಿಸೂಚನೆಗಳನ್ನು ಆಫ್ ಮಾಡಲು ಸಾಧ್ಯವಿಲ್ಲ"</string>
-    <!-- no translation found for notification_delegate_header (9167022191405284627) -->
-    <skip />
     <string name="appops_camera" msgid="8100147441602585776">"ಈ ಅಪ್ಲಿಕೇಶನ್ ಕ್ಯಾಮರಾವನ್ನು ಬಳಸುತ್ತಿದೆ."</string>
     <string name="appops_microphone" msgid="741508267659494555">"ಈ ಅಪ್ಲಿಕೇಶನ್ ಮೈಕ್ರೊಫೋನ್ ಅನ್ನು ಬಳಸುತ್ತಿದೆ."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"ಈ ಅಪ್ಲಿಕೇಶನ್ ನಿಮ್ಮ ಸ್ಕ್ರೀನ್‌ನಲ್ಲಿ ಇತರ ಅಪ್ಲಿಕೇಶನ್‌ಗಳ ಮೇಲಿಂದ ಪ್ರದರ್ಶಿಸುತ್ತಿದೆ."</string>
@@ -725,8 +747,7 @@
     <item msgid="2139628951880142927">"ಚಾರ್ಜ್‌ ಮಾಡುವಾಗ ಪ್ರತಿಶತವನ್ನು ತೋರಿಸು (ಡಿಫಾಲ್ಟ್‌)"</item>
     <item msgid="3327323682209964956">"ಈ ಐಕಾನ್ ತೋರಿಸಬೇಡ"</item>
   </string-array>
-    <!-- no translation found for tuner_low_priority (1325884786608312358) -->
-    <skip />
+    <string name="tuner_low_priority" msgid="1325884786608312358">"ಕಡಿಮೆ-ಆದ್ಯತೆ ಸೂಚನೆಯ ಐಕಾನ್‌ಗಳನ್ನು ತೋರಿಸಿ"</string>
     <string name="other" msgid="4060683095962566764">"ಇತರ"</string>
     <string name="accessibility_divider" msgid="5903423481953635044">"ಸ್ಪ್ಲಿಟ್-ಪರದೆ ಡಿವೈಡರ್"</string>
     <string name="accessibility_action_divider_left_full" msgid="2801570521881574972">"ಎಡ ಪೂರ್ಣ ಪರದೆ"</string>
@@ -806,7 +827,7 @@
     <string name="instant_apps_message" msgid="1183313016396018086">"ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡದೆ ಆ್ಯಪ್‌ ತೆರೆಯಲಾಗಿದೆ."</string>
     <string name="instant_apps_message_with_help" msgid="6179830437630729747">"ಇನ್‌ಸ್ಟಾಲ್‌ ಮಾಡದೆ ಆ್ಯಪ್‌ ತೆರೆಯಲಾಗಿದೆ. ಇನ್ನಷ್ಟು ತಿಳಿಯಲು ಟ್ಯಾಪ್ ಮಾಡಿ."</string>
     <string name="app_info" msgid="6856026610594615344">"ಅಪ್ಲಿಕೇಶನ್ ಮಾಹಿತಿ"</string>
-    <string name="go_to_web" msgid="1106022723459948514">"ವೆಬ್‌ಗೆ ಹೋಗಿ"</string>
+    <string name="go_to_web" msgid="2650669128861626071">"ಬ್ರೌಸರ್‌ಗೆ ಹೋಗಿ"</string>
     <string name="mobile_data" msgid="7094582042819250762">"ಮೊಬೈಲ್ ಡೇಟಾ"</string>
     <string name="mobile_data_text_format" msgid="3526214522670876454">"<xliff:g id="ID_1">%1$s</xliff:g> — <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"ವೈ-ಫೈ ಆಫ್ ಆಗಿದೆ"</string>
@@ -838,4 +859,16 @@
     <string name="open_saver_setting_action" msgid="8314624730997322529">"ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
     <string name="auto_saver_okay_action" msgid="2701221740227683650">"ಅರ್ಥವಾಯಿತು"</string>
     <string name="heap_dump_tile_name" msgid="9141031328971226374">"SysUI ಹೀಪ್ ಡಂಪ್ ಮಾಡಿ"</string>
+    <string name="ongoing_privacy_chip_content_single_app" msgid="4479560741898690064">"ನಿಮ್ಮ <xliff:g id="TYPES_LIST">%2$s</xliff:g> ಅನ್ನು <xliff:g id="APP">%1$s</xliff:g> ಬಳಸುತ್ತಿದೆ."</string>
+    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8640691753867990511">"ನಿಮ್ಮ <xliff:g id="TYPES_LIST">%s</xliff:g> ಅನ್ನು ಆ್ಯಪ್‌ಗಳು ಬಳಸುತ್ತಿವೆ."</string>
+    <string name="ongoing_privacy_dialog_open_app" msgid="2483886665314567948">"ಆ್ಯಪ್ ತೆರೆ"</string>
+    <string name="ongoing_privacy_dialog_cancel" msgid="5479124524931216790">"ರದ್ದುಮಾಡಿ"</string>
+    <string name="ongoing_privacy_dialog_okay" msgid="5823914553907253532">"ಸರಿ"</string>
+    <string name="ongoing_privacy_dialog_open_settings" msgid="6382622467527049074">"ಸೆಟ್ಟಿಂಗ್‌ಗಳು"</string>
+    <string name="ongoing_privacy_dialog_app_item" msgid="486085465491760739">"ಕೊನೆಯ <xliff:g id="TIME">%3$d</xliff:g> ನಿಮಿಷಕ್ಕಾಗಿ ನಿಮ್ಮ <xliff:g id="TYPE">%2$s</xliff:g> ಅನ್ನು <xliff:g id="APP">%1$s</xliff:g> ಬಳಸುತ್ತಿದೆ"</string>
+    <string name="ongoing_privacy_dialog_apps_item" msgid="9207187236823950491">"ನಿಮ್ಮ <xliff:g id="TYPE">%2$s</xliff:g> ಅನ್ನು <xliff:g id="APPS">%1$s</xliff:g> ಬಳಸುತ್ತಿದೆ"</string>
+    <string name="ongoing_privacy_dialog_single_app" msgid="3884812469179810924">"ನಿಮ್ಮ <xliff:g id="TYPES_LIST">%2$s</xliff:g> ಅನ್ನು <xliff:g id="APP">%1$s</xliff:g> ಬಳಸುತ್ತಿದೆ"</string>
+    <string name="privacy_type_camera" msgid="1676604631892420333">"ಕ್ಯಾಮರಾ"</string>
+    <string name="privacy_type_location" msgid="6435497989657286700">"ಸ್ಥಳ"</string>
+    <string name="privacy_type_microphone" msgid="4153045784928554506">"ಮೈಕ್ರೋಫೋನ್‌"</string>
 </resources>

@@ -70,6 +70,22 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="3637758096565605541">"Skrinşotu yenidən çəkin"</string>
     <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"Yaddaş ehtiyatının az olması səbəbindən skrinşotu yadda saxlamaq olmur"</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"Skrinşot çəkməyə tətbiq və ya təşkilat tərəfindən icazə verilmir"</string>
+    <string name="screenrecord_name" msgid="4196719243134204796">"Ekranın Video Çəkimi"</string>
+    <string name="screenrecord_channel_description" msgid="4630777331970993858">"Ekranın video çəkimi ərzində silinməyən bildiriş"</string>
+    <string name="screenrecord_start_label" msgid="5177739269492196055">"Ekranın Video Çəkimini Başladın"</string>
+    <string name="screenrecord_mic_label" msgid="4522870600914810019">"Ekranın səsli video çəkimi"</string>
+    <string name="screenrecord_taps_label" msgid="1776467076607964790">"Klikləmələri göstərin"</string>
+    <string name="screenrecord_stop_label" msgid="2544887572381260038">"Dayandırın"</string>
+    <string name="screenrecord_pause_label" msgid="7162476078856786227">"Dayandırın"</string>
+    <string name="screenrecord_resume_label" msgid="3605818317015993314">"Davam edin"</string>
+    <string name="screenrecord_cancel_label" msgid="3385204992871088609">"Ləğv edin"</string>
+    <string name="screenrecord_share_label" msgid="4197867360204019389">"Paylaşın"</string>
+    <string name="screenrecord_delete_label" msgid="7893716870917824013">"Silin"</string>
+    <string name="screenrecord_cancel_success" msgid="7768976011702614782">"Ekranın video çəkimi ləğv edildi"</string>
+    <string name="screenrecord_save_message" msgid="4733982661301846778">"Ekranın video çəkimi yadda saxlanıldı. Baxmaq üçün klikləyin"</string>
+    <string name="screenrecord_delete_description" msgid="5743190456090354585">"Ekranın video çəkimi silindi"</string>
+    <string name="screenrecord_delete_error" msgid="8154904464563560282">"Ekranın video çəkiminin silinməsi zamanı xəta baş verdi"</string>
+    <string name="screenrecord_permission_error" msgid="1526755299469001000">"İcazələr əldə edilmədi"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB fayl transferi seçimləri"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Media pleyer (MTP) kimi montaj edin"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Kamera kimi birləşdir (PTP)"</string>
@@ -582,14 +598,17 @@
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Bildirişlər"</string>
     <string name="notification_channel_disabled" msgid="344536703863700565">"Artıq bu bildirişləri görməyəcəkəsiniz"</string>
     <string name="notification_channel_minimized" msgid="1664411570378910931">"Bu bildirişlər kiçildiləcək"</string>
+    <string name="notification_channel_silenced" msgid="2877199534497961942">"Bu bildirişlər səssiz görünəcək"</string>
+    <string name="notification_channel_unsilenced" msgid="4790904571552394137">"Bu bildirişlər Sizi xəbərdar edəcək"</string>
     <string name="inline_blocking_helper" msgid="3055064577771478591">"Adətən bu bildirişləri rədd edirsiniz. \nBildirişlər göstərilsin?"</string>
     <string name="inline_keep_showing" msgid="8945102997083836858">"Bu bildirişlər göstərilməyə davam edilsin?"</string>
     <string name="inline_stop_button" msgid="4172980096860941033">"Bildirişləri dayandırın"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"Göstərməyə davam edin"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"Kiçildin"</string>
+    <string name="inline_silent_button_silent" msgid="4411510650503783646">"Səssiz göstərin"</string>
+    <string name="inline_silent_button_alert" msgid="2967599358027208807">"Göstərin və xəbərdar edin"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Bu tətbiqin bildirişləri göstərilməyə davam edilsin?"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"Bu bildirişlər deaktiv edilə bilməz"</string>
-    <string name="notification_delegate_header" msgid="9167022191405284627">"<xliff:g id="APP_NAME">%1$s</xliff:g> vasitəsilə"</string>
     <string name="appops_camera" msgid="8100147441602585776">"Bu tətbiq kameradan istifadə edir."</string>
     <string name="appops_microphone" msgid="741508267659494555">"Bu tətbiq mikrofondan istifadə edir."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"Bu tətbiqdə ekranda digər tətbiqlərin üzərində göstərilir."</string>
@@ -804,7 +823,7 @@
     <string name="instant_apps_message" msgid="1183313016396018086">"Quraşdırılmadan açılan tətbiq."</string>
     <string name="instant_apps_message_with_help" msgid="6179830437630729747">"Quraşdırılmadan açılan tətbiq. Ətraflı məlumat üçün klikləyin."</string>
     <string name="app_info" msgid="6856026610594615344">"Tətbiq məlumatı"</string>
-    <string name="go_to_web" msgid="1106022723459948514">"Vebə keçin"</string>
+    <string name="go_to_web" msgid="2650669128861626071">"Brauzerə daxil edin"</string>
     <string name="mobile_data" msgid="7094582042819250762">"Mobil data"</string>
     <string name="mobile_data_text_format" msgid="3526214522670876454">"<xliff:g id="ID_1">%1$s</xliff:g> — <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"Wi-Fi deaktivdir"</string>
@@ -836,4 +855,16 @@
     <string name="open_saver_setting_action" msgid="8314624730997322529">"Ayarlar"</string>
     <string name="auto_saver_okay_action" msgid="2701221740227683650">"Anladım"</string>
     <string name="heap_dump_tile_name" msgid="9141031328971226374">"Dump SysUI Heap"</string>
+    <string name="ongoing_privacy_chip_content_single_app" msgid="4479560741898690064">"<xliff:g id="APP">%1$s</xliff:g> <xliff:g id="TYPES_LIST">%2$s</xliff:g> tətbiqlərindən istifadə edir."</string>
+    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8640691753867990511">"Tətbiqlər <xliff:g id="TYPES_LIST">%s</xliff:g> istifadə edir."</string>
+    <string name="ongoing_privacy_dialog_open_app" msgid="2483886665314567948">"Tətbiqi açın"</string>
+    <string name="ongoing_privacy_dialog_cancel" msgid="5479124524931216790">"Ləğv edin"</string>
+    <string name="ongoing_privacy_dialog_okay" msgid="5823914553907253532">"Oldu"</string>
+    <string name="ongoing_privacy_dialog_open_settings" msgid="6382622467527049074">"Ayarlar"</string>
+    <string name="ongoing_privacy_dialog_app_item" msgid="486085465491760739">"<xliff:g id="APP">%1$s</xliff:g> son <xliff:g id="TIME">%3$d</xliff:g> dəqiqədir ki, <xliff:g id="TYPE">%2$s</xliff:g> tətbiqindən istifadə edir"</string>
+    <string name="ongoing_privacy_dialog_apps_item" msgid="9207187236823950491">"<xliff:g id="APPS">%1$s</xliff:g> <xliff:g id="TYPE">%2$s</xliff:g> tətbiqindən istifadə edir"</string>
+    <string name="ongoing_privacy_dialog_single_app" msgid="3884812469179810924">"<xliff:g id="APP">%1$s</xliff:g> <xliff:g id="TYPES_LIST">%2$s</xliff:g> tətbiqlərindən istifadə edir"</string>
+    <string name="privacy_type_camera" msgid="1676604631892420333">"kamera"</string>
+    <string name="privacy_type_location" msgid="6435497989657286700">"məkan"</string>
+    <string name="privacy_type_microphone" msgid="4153045784928554506">"mikrofon"</string>
 </resources>

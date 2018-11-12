@@ -70,6 +70,22 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="3637758096565605541">"Qayta skrinshot olib ko‘ring"</string>
     <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"Xotirada joy kamligi uchun skrinshot saqlanmadi"</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"Ilova yoki tashkilotingiz skrinshot olishni taqiqlagan"</string>
+    <string name="screenrecord_name" msgid="4196719243134204796">"Ekrandan video yozib olish"</string>
+    <string name="screenrecord_channel_description" msgid="4630777331970993858">"Ekrandan yozib olish seansi uchun joriy bildirishnoma"</string>
+    <string name="screenrecord_start_label" msgid="5177739269492196055">"Yozuvni boshlash"</string>
+    <string name="screenrecord_mic_label" msgid="4522870600914810019">"Kadrorti nutqini yozib olish"</string>
+    <string name="screenrecord_taps_label" msgid="1776467076607964790">"Bosishlarni ko‘rsatish"</string>
+    <string name="screenrecord_stop_label" msgid="2544887572381260038">"To‘xtatish"</string>
+    <string name="screenrecord_pause_label" msgid="7162476078856786227">"Pauza"</string>
+    <string name="screenrecord_resume_label" msgid="3605818317015993314">"Davom etish"</string>
+    <string name="screenrecord_cancel_label" msgid="3385204992871088609">"Bekor qilish"</string>
+    <string name="screenrecord_share_label" msgid="4197867360204019389">"Ulashish"</string>
+    <string name="screenrecord_delete_label" msgid="7893716870917824013">"O‘chirish"</string>
+    <string name="screenrecord_cancel_success" msgid="7768976011702614782">"Ekrandan yozib olish bekor qilindi"</string>
+    <string name="screenrecord_save_message" msgid="4733982661301846778">"Ekrandan yozib olingan video saqlandi. Uni ochish uchun bildirishnomani bosing."</string>
+    <string name="screenrecord_delete_description" msgid="5743190456090354585">"Ekrandan yozib olingan video o‘chirib tashlandi"</string>
+    <string name="screenrecord_delete_error" msgid="8154904464563560282">"Ekrandan yozib olingan vi olib tashlanmadi"</string>
+    <string name="screenrecord_permission_error" msgid="1526755299469001000">"Zarur ruxsatlar olinmadi"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB fayl ko‘chirish moslamalari"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Media pleyer sifatida ulash (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Kamera sifatida ulash (PTP)"</string>
@@ -582,15 +598,17 @@
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Bildirishnomalar"</string>
     <string name="notification_channel_disabled" msgid="344536703863700565">"Bu bildirishnomalar endi chiqmaydi"</string>
     <string name="notification_channel_minimized" msgid="1664411570378910931">"Bu bildirishnomalar kichraytiriladi"</string>
+    <string name="notification_channel_silenced" msgid="2877199534497961942">"Bu bildirishnomalar ovozsiz chiqariladi"</string>
+    <string name="notification_channel_unsilenced" msgid="4790904571552394137">"Bu bildirishnomalar sizni ogohlantiradi"</string>
     <string name="inline_blocking_helper" msgid="3055064577771478591">"Odatda bunday bildirishnomalarni yopasiz. \nUlar ochiq tursinmi?"</string>
     <string name="inline_keep_showing" msgid="8945102997083836858">"Mazkur bildirishnomalar chiqaversinmi?"</string>
     <string name="inline_stop_button" msgid="4172980096860941033">"Chiqmasin"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"Ha"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"Kichraytirish"</string>
+    <string name="inline_silent_button_silent" msgid="4411510650503783646">"Ovozsiz"</string>
+    <string name="inline_silent_button_alert" msgid="2967599358027208807">"Chiqarish va ogohlantirish"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Bu ilovadan keladigan bildirishnomalar chiqaversinmi?"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"Bu bildirishnomalarni chiqmaydigan qilish imkonsiz"</string>
-    <!-- no translation found for notification_delegate_header (9167022191405284627) -->
-    <skip />
     <string name="appops_camera" msgid="8100147441602585776">"Bu ilova kameradan foydalanmoqda."</string>
     <string name="appops_microphone" msgid="741508267659494555">"Bu ilova mikrofondan foydalanmoqda."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"Bu ilova ekranda boshqa ilovalar ustidan ochilgan."</string>
@@ -725,8 +743,7 @@
     <item msgid="2139628951880142927">"Quvvat olayotganda foizda ko‘rsatilsin (birlamchi)"</item>
     <item msgid="3327323682209964956">"Bu belgi boshqa ko‘rsatilmasin"</item>
   </string-array>
-    <!-- no translation found for tuner_low_priority (1325884786608312358) -->
-    <skip />
+    <string name="tuner_low_priority" msgid="1325884786608312358">"Muhim boʻlmagan bildirishnoma ikonkalarini koʻrsatish"</string>
     <string name="other" msgid="4060683095962566764">"Boshqa"</string>
     <string name="accessibility_divider" msgid="5903423481953635044">"Ekranni ikkiga bo‘lish chizig‘i"</string>
     <string name="accessibility_action_divider_left_full" msgid="2801570521881574972">"Chapda to‘liq ekran"</string>
@@ -806,7 +823,7 @@
     <string name="instant_apps_message" msgid="1183313016396018086">"Ilova o‘rnatilmasdan ochildi."</string>
     <string name="instant_apps_message_with_help" msgid="6179830437630729747">"Ilova o‘rnatilmasdan ochildi. Batafsil axborot uchun bu yerga bosing."</string>
     <string name="app_info" msgid="6856026610594615344">"Ilova haqida"</string>
-    <string name="go_to_web" msgid="1106022723459948514">"Brauzerga o‘tish"</string>
+    <string name="go_to_web" msgid="2650669128861626071">"Brauzerni ochish"</string>
     <string name="mobile_data" msgid="7094582042819250762">"Mobil internet"</string>
     <string name="mobile_data_text_format" msgid="3526214522670876454">"<xliff:g id="ID_1">%1$s</xliff:g> – <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"Wi-Fi o‘chiq"</string>
@@ -838,4 +855,16 @@
     <string name="open_saver_setting_action" msgid="8314624730997322529">"Sozlamalar"</string>
     <string name="auto_saver_okay_action" msgid="2701221740227683650">"OK"</string>
     <string name="heap_dump_tile_name" msgid="9141031328971226374">"Dump SysUI Heap"</string>
+    <string name="ongoing_privacy_chip_content_single_app" msgid="4479560741898690064">"<xliff:g id="APP">%1$s</xliff:g> ishlatmoqda: <xliff:g id="TYPES_LIST">%2$s</xliff:g>."</string>
+    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8640691753867990511">"Ilovalarda ishlatilmoqda: <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
+    <string name="ongoing_privacy_dialog_open_app" msgid="2483886665314567948">"Ilovani ochish"</string>
+    <string name="ongoing_privacy_dialog_cancel" msgid="5479124524931216790">"Bekor qilish"</string>
+    <string name="ongoing_privacy_dialog_okay" msgid="5823914553907253532">"OK"</string>
+    <string name="ongoing_privacy_dialog_open_settings" msgid="6382622467527049074">"Sozlamalar"</string>
+    <string name="ongoing_privacy_dialog_app_item" msgid="486085465491760739">"<xliff:g id="APP">%1$s</xliff:g> oxirgi <xliff:g id="TIME">%3$d</xliff:g> daqiqadan beri ishlatmoqda: <xliff:g id="TYPE">%2$s</xliff:g>"</string>
+    <string name="ongoing_privacy_dialog_apps_item" msgid="9207187236823950491">"<xliff:g id="APPS">%1$s</xliff:g> ishlatmoqda: <xliff:g id="TYPE">%2$s</xliff:g>"</string>
+    <string name="ongoing_privacy_dialog_single_app" msgid="3884812469179810924">"<xliff:g id="APP">%1$s</xliff:g> ishlatmoqda: <xliff:g id="TYPES_LIST">%2$s</xliff:g>"</string>
+    <string name="privacy_type_camera" msgid="1676604631892420333">"kamera"</string>
+    <string name="privacy_type_location" msgid="6435497989657286700">"joylashuv"</string>
+    <string name="privacy_type_microphone" msgid="4153045784928554506">"mikrofon"</string>
 </resources>

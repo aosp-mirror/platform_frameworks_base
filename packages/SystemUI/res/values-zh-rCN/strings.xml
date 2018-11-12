@@ -70,6 +70,22 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="3637758096565605541">"请再次尝试截屏"</string>
     <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"由于存储空间有限，无法保存屏幕截图"</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"此应用或您所在的单位不允许进行屏幕截图"</string>
+    <string name="screenrecord_name" msgid="4196719243134204796">"屏幕录制"</string>
+    <string name="screenrecord_channel_description" msgid="4630777331970993858">"持续显示屏幕录制会话通知"</string>
+    <string name="screenrecord_start_label" msgid="5177739269492196055">"开始录制"</string>
+    <string name="screenrecord_mic_label" msgid="4522870600914810019">"录制旁白"</string>
+    <string name="screenrecord_taps_label" msgid="1776467076607964790">"显示点按操作反馈"</string>
+    <string name="screenrecord_stop_label" msgid="2544887572381260038">"停止"</string>
+    <string name="screenrecord_pause_label" msgid="7162476078856786227">"暂停"</string>
+    <string name="screenrecord_resume_label" msgid="3605818317015993314">"继续"</string>
+    <string name="screenrecord_cancel_label" msgid="3385204992871088609">"取消"</string>
+    <string name="screenrecord_share_label" msgid="4197867360204019389">"分享"</string>
+    <string name="screenrecord_delete_label" msgid="7893716870917824013">"删除"</string>
+    <string name="screenrecord_cancel_success" msgid="7768976011702614782">"已取消录制屏幕"</string>
+    <string name="screenrecord_save_message" msgid="4733982661301846778">"屏幕录制内容已保存，点按即可查看"</string>
+    <string name="screenrecord_delete_description" msgid="5743190456090354585">"已删除屏幕录制内容"</string>
+    <string name="screenrecord_delete_error" msgid="8154904464563560282">"删除屏幕录制内容时出错"</string>
+    <string name="screenrecord_permission_error" msgid="1526755299469001000">"无法获取权限"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"USB文件传输选项"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"作为媒体播放器(MTP)装载"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"作为相机(PTP)装载"</string>
@@ -582,15 +598,21 @@
     <string name="notification_header_default_channel" msgid="7506845022070889909">"通知"</string>
     <string name="notification_channel_disabled" msgid="344536703863700565">"您将不会再看到这些通知"</string>
     <string name="notification_channel_minimized" msgid="1664411570378910931">"系统将会最小化这些通知"</string>
+    <!-- no translation found for notification_channel_silenced (2877199534497961942) -->
+    <skip />
+    <!-- no translation found for notification_channel_unsilenced (4790904571552394137) -->
+    <skip />
     <string name="inline_blocking_helper" msgid="3055064577771478591">"您通常会关闭这些通知。\n是否继续显示通知？"</string>
     <string name="inline_keep_showing" msgid="8945102997083836858">"要继续显示这些通知吗？"</string>
     <string name="inline_stop_button" msgid="4172980096860941033">"停止通知"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"继续显示"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"最小化"</string>
+    <!-- no translation found for inline_silent_button_silent (4411510650503783646) -->
+    <skip />
+    <!-- no translation found for inline_silent_button_alert (2967599358027208807) -->
+    <skip />
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"要继续显示来自此应用的通知吗？"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"无法关闭这些通知"</string>
-    <!-- no translation found for notification_delegate_header (9167022191405284627) -->
-    <skip />
     <string name="appops_camera" msgid="8100147441602585776">"此应用正在使用摄像头。"</string>
     <string name="appops_microphone" msgid="741508267659494555">"此应用正在使用麦克风。"</string>
     <string name="appops_overlay" msgid="6165912637560323464">"此应用正显示在屏幕上其他应用的上层。"</string>
@@ -725,8 +747,7 @@
     <item msgid="2139628951880142927">"充电时显示百分比（默认）"</item>
     <item msgid="3327323682209964956">"不显示此图标"</item>
   </string-array>
-    <!-- no translation found for tuner_low_priority (1325884786608312358) -->
-    <skip />
+    <string name="tuner_low_priority" msgid="1325884786608312358">"显示低优先级的通知图标"</string>
     <string name="other" msgid="4060683095962566764">"其他"</string>
     <string name="accessibility_divider" msgid="5903423481953635044">"分屏分隔线"</string>
     <string name="accessibility_action_divider_left_full" msgid="2801570521881574972">"左侧全屏"</string>
@@ -806,7 +827,7 @@
     <string name="instant_apps_message" msgid="1183313016396018086">"已打开免安装应用。"</string>
     <string name="instant_apps_message_with_help" msgid="6179830437630729747">"已打开免安装应用。点按即可了解详情。"</string>
     <string name="app_info" msgid="6856026610594615344">"应用信息"</string>
-    <string name="go_to_web" msgid="1106022723459948514">"转到网页版"</string>
+    <string name="go_to_web" msgid="2650669128861626071">"转到浏览器"</string>
     <string name="mobile_data" msgid="7094582042819250762">"移动数据"</string>
     <string name="mobile_data_text_format" msgid="3526214522670876454">"<xliff:g id="ID_1">%1$s</xliff:g> - <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"WLAN 已关闭"</string>
@@ -838,4 +859,16 @@
     <string name="open_saver_setting_action" msgid="8314624730997322529">"设置"</string>
     <string name="auto_saver_okay_action" msgid="2701221740227683650">"知道了"</string>
     <string name="heap_dump_tile_name" msgid="9141031328971226374">"转储 SysUI 堆"</string>
+    <string name="ongoing_privacy_chip_content_single_app" msgid="4479560741898690064">"<xliff:g id="APP">%1$s</xliff:g>正在使用您的<xliff:g id="TYPES_LIST">%2$s</xliff:g>。"</string>
+    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8640691753867990511">"有多个应用正在使用您的<xliff:g id="TYPES_LIST">%s</xliff:g>。"</string>
+    <string name="ongoing_privacy_dialog_open_app" msgid="2483886665314567948">"打开应用"</string>
+    <string name="ongoing_privacy_dialog_cancel" msgid="5479124524931216790">"取消"</string>
+    <string name="ongoing_privacy_dialog_okay" msgid="5823914553907253532">"确定"</string>
+    <string name="ongoing_privacy_dialog_open_settings" msgid="6382622467527049074">"设置"</string>
+    <string name="ongoing_privacy_dialog_app_item" msgid="486085465491760739">"<xliff:g id="APP">%1$s</xliff:g>在过去 <xliff:g id="TIME">%3$d</xliff:g> 分钟内一直在使用您的<xliff:g id="TYPE">%2$s</xliff:g>"</string>
+    <string name="ongoing_privacy_dialog_apps_item" msgid="9207187236823950491">"<xliff:g id="APPS">%1$s</xliff:g>正在使用您的<xliff:g id="TYPE">%2$s</xliff:g>"</string>
+    <string name="ongoing_privacy_dialog_single_app" msgid="3884812469179810924">"<xliff:g id="APP">%1$s</xliff:g>正在使用您的<xliff:g id="TYPES_LIST">%2$s</xliff:g>"</string>
+    <string name="privacy_type_camera" msgid="1676604631892420333">"相机"</string>
+    <string name="privacy_type_location" msgid="6435497989657286700">"位置信息"</string>
+    <string name="privacy_type_microphone" msgid="4153045784928554506">"麦克风"</string>
 </resources>

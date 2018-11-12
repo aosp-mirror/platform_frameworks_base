@@ -70,6 +70,22 @@
     <string name="screenshot_failed_to_save_unknown_text" msgid="3637758096565605541">"Coba ambil screenshot lagi"</string>
     <string name="screenshot_failed_to_save_text" msgid="3041612585107107310">"Tidak dapat menyimpan screenshot karena ruang penyimpanan terbatas"</string>
     <string name="screenshot_failed_to_capture_text" msgid="173674476457581486">"Mengambil screenshot tidak diizinkan oleh aplikasi atau organisasi"</string>
+    <string name="screenrecord_name" msgid="4196719243134204796">"Rekaman Layar"</string>
+    <string name="screenrecord_channel_description" msgid="4630777331970993858">"Notifikasi yang sedang berjalan untuk sesi rekaman layar"</string>
+    <string name="screenrecord_start_label" msgid="5177739269492196055">"Mulai Merekam"</string>
+    <string name="screenrecord_mic_label" msgid="4522870600914810019">"Rekam voiceover"</string>
+    <string name="screenrecord_taps_label" msgid="1776467076607964790">"Tampilkan sentuhan"</string>
+    <string name="screenrecord_stop_label" msgid="2544887572381260038">"Stop"</string>
+    <string name="screenrecord_pause_label" msgid="7162476078856786227">"Jeda"</string>
+    <string name="screenrecord_resume_label" msgid="3605818317015993314">"Lanjutkan"</string>
+    <string name="screenrecord_cancel_label" msgid="3385204992871088609">"Batal"</string>
+    <string name="screenrecord_share_label" msgid="4197867360204019389">"Bagikan"</string>
+    <string name="screenrecord_delete_label" msgid="7893716870917824013">"Hapus"</string>
+    <string name="screenrecord_cancel_success" msgid="7768976011702614782">"Rekaman layar dibatalkan"</string>
+    <string name="screenrecord_save_message" msgid="4733982661301846778">"Rekaman layar disimpan, tap untuk melihat"</string>
+    <string name="screenrecord_delete_description" msgid="5743190456090354585">"Rekaman layar dihapus"</string>
+    <string name="screenrecord_delete_error" msgid="8154904464563560282">"Error saat menghapus rekaman layar"</string>
+    <string name="screenrecord_permission_error" msgid="1526755299469001000">"Gagal mendapatkan izin"</string>
     <string name="usb_preference_title" msgid="6551050377388882787">"Opsi transfer file USB"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Pasang sebagai pemutar media (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Pasang sebagai kamera (PTP)"</string>
@@ -287,7 +303,7 @@
     <string name="quick_settings_location_off_label" msgid="7464544086507331459">"Lokasi Nonaktif"</string>
     <string name="quick_settings_media_device_label" msgid="1302906836372603762">"Perangkat media"</string>
     <string name="quick_settings_rssi_label" msgid="7725671335550695589">"RSSI"</string>
-    <string name="quick_settings_rssi_emergency_only" msgid="2713774041672886750">"Telepon urgen saja"</string>
+    <string name="quick_settings_rssi_emergency_only" msgid="2713774041672886750">"Panggilan Darurat Saja"</string>
     <string name="quick_settings_settings_label" msgid="5326556592578065401">"Setelan"</string>
     <string name="quick_settings_time_label" msgid="4635969182239736408">"Waktu"</string>
     <string name="quick_settings_user_label" msgid="5238995632130897840">"Saya"</string>
@@ -582,14 +598,17 @@
     <string name="notification_header_default_channel" msgid="7506845022070889909">"Notifikasi"</string>
     <string name="notification_channel_disabled" msgid="344536703863700565">"Anda tidak akan melihat notifikasi ini lagi"</string>
     <string name="notification_channel_minimized" msgid="1664411570378910931">"Notifikasi ini akan diperkecil"</string>
+    <string name="notification_channel_silenced" msgid="2877199534497961942">"Notifikasi ini akan ditampilkan tanpa suara"</string>
+    <string name="notification_channel_unsilenced" msgid="4790904571552394137">"Notifikasi ini akan mengingatkan Anda"</string>
     <string name="inline_blocking_helper" msgid="3055064577771478591">"Anda biasanya menutup notifikasi ini. \nTerus tampilkan?"</string>
     <string name="inline_keep_showing" msgid="8945102997083836858">"Terus tampilkan notifikasi ini?"</string>
     <string name="inline_stop_button" msgid="4172980096860941033">"Hentikan notifikasi"</string>
     <string name="inline_keep_button" msgid="6665940297019018232">"Terus tampilkan"</string>
     <string name="inline_minimize_button" msgid="966233327974702195">"Perkecil"</string>
+    <string name="inline_silent_button_silent" msgid="4411510650503783646">"Tampilkan tanpa suara"</string>
+    <string name="inline_silent_button_alert" msgid="2967599358027208807">"Tampilkan dan ingatkan"</string>
     <string name="inline_keep_showing_app" msgid="1723113469580031041">"Terus tampilkan notifikasi dari aplikasi ini?"</string>
     <string name="notification_unblockable_desc" msgid="1037434112919403708">"Notifikasi ini tidak dapat dinonaktifkan"</string>
-    <string name="notification_delegate_header" msgid="9167022191405284627">"melalui <xliff:g id="APP_NAME">%1$s</xliff:g>"</string>
     <string name="appops_camera" msgid="8100147441602585776">"Aplikasi ini sedang menggunakan kamera."</string>
     <string name="appops_microphone" msgid="741508267659494555">"Aplikasi ini sedang menggunakan mikrofon."</string>
     <string name="appops_overlay" msgid="6165912637560323464">"Aplikasi ini ditampilkan di atas aplikasi lain di layar."</string>
@@ -804,7 +823,7 @@
     <string name="instant_apps_message" msgid="1183313016396018086">"Aplikasi dapat dibuka tanpa perlu diinstal."</string>
     <string name="instant_apps_message_with_help" msgid="6179830437630729747">"Aplikasi dapat dibuka tanpa perlu diinstal. Tap untuk mempelajari lebih lanjut."</string>
     <string name="app_info" msgid="6856026610594615344">"Info aplikasi"</string>
-    <string name="go_to_web" msgid="1106022723459948514">"Buka di web"</string>
+    <string name="go_to_web" msgid="2650669128861626071">"Buka browser"</string>
     <string name="mobile_data" msgid="7094582042819250762">"Data seluler"</string>
     <string name="mobile_data_text_format" msgid="3526214522670876454">"<xliff:g id="ID_1">%1$s</xliff:g> — <xliff:g id="ID_2">%2$s</xliff:g>"</string>
     <string name="wifi_is_off" msgid="1838559392210456893">"Wi-Fi nonaktif"</string>
@@ -836,4 +855,16 @@
     <string name="open_saver_setting_action" msgid="8314624730997322529">"Setelan"</string>
     <string name="auto_saver_okay_action" msgid="2701221740227683650">"OK"</string>
     <string name="heap_dump_tile_name" msgid="9141031328971226374">"Hapus Heap SysUI"</string>
+    <string name="ongoing_privacy_chip_content_single_app" msgid="4479560741898690064">"<xliff:g id="APP">%1$s</xliff:g> menggunakan <xliff:g id="TYPES_LIST">%2$s</xliff:g>."</string>
+    <string name="ongoing_privacy_chip_content_multiple_apps" msgid="8640691753867990511">"Aplikasi menggunakan <xliff:g id="TYPES_LIST">%s</xliff:g>."</string>
+    <string name="ongoing_privacy_dialog_open_app" msgid="2483886665314567948">"Buka apl"</string>
+    <string name="ongoing_privacy_dialog_cancel" msgid="5479124524931216790">"Batal"</string>
+    <string name="ongoing_privacy_dialog_okay" msgid="5823914553907253532">"Oke"</string>
+    <string name="ongoing_privacy_dialog_open_settings" msgid="6382622467527049074">"Setelan"</string>
+    <string name="ongoing_privacy_dialog_app_item" msgid="486085465491760739">"<xliff:g id="APP">%1$s</xliff:g> menggunakan <xliff:g id="TYPE">%2$s</xliff:g> selama <xliff:g id="TIME">%3$d</xliff:g> menit terakhir"</string>
+    <string name="ongoing_privacy_dialog_apps_item" msgid="9207187236823950491">"<xliff:g id="APPS">%1$s</xliff:g> menggunakan <xliff:g id="TYPE">%2$s</xliff:g>"</string>
+    <string name="ongoing_privacy_dialog_single_app" msgid="3884812469179810924">"<xliff:g id="APP">%1$s</xliff:g> menggunakan <xliff:g id="TYPES_LIST">%2$s</xliff:g>"</string>
+    <string name="privacy_type_camera" msgid="1676604631892420333">"kamera"</string>
+    <string name="privacy_type_location" msgid="6435497989657286700">"lokasi"</string>
+    <string name="privacy_type_microphone" msgid="4153045784928554506">"mikrofon"</string>
 </resources>
