@@ -347,7 +347,7 @@ public final class BluetoothDevice implements Parcelable {
      * device are requested to be fetched using Service Discovery Protocol
      * <p> Always contains the extra field {@link #EXTRA_DEVICE}
      * <p> Always contains the extra field {@link #EXTRA_UUID}
-     * <p>Requires {@link android.Manifest.permission#BLUETOOTH} to receive.
+     * <p>Requires {@link android.Manifest.permission#BLUETOOTH_ADMIN} to receive.
      */
     @SdkConstant(SdkConstantType.BROADCAST_INTENT_ACTION)
     public static final String ACTION_UUID =
