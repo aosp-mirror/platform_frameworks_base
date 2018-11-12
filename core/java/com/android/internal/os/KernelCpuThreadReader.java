@@ -173,7 +173,7 @@ public class KernelCpuThreadReader {
                 }
             }
         } catch (IOException e) {
-            Slog.w(TAG, "Failed to iterate over thread paths", e);
+            // Expected when a process finishes
             return null;
         }
 
