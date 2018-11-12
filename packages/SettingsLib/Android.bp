@@ -9,6 +9,7 @@ android_library {
         "androidx.preference_preference",
         "androidx.appcompat_appcompat",
         "androidx.lifecycle_lifecycle-runtime",
+        "androidx.mediarouter_mediarouter-nodeps",
 
         "SettingsLibHelpUtils",
         "SettingsLibRestrictedLockUtils",
