@@ -115,16 +115,16 @@ final class ConnectionRecord {
                 && (binding.service.appInfo.uid != clientUid
                         || !binding.service.processName.equals(clientProcessName))) {
             ProcessStats.ProcessStateHolder holder = binding.service.app.pkgList.get(
-                    binding.service.name.getPackageName());
+                    binding.service.instanceName.getPackageName());
             if (holder == null) {
                 Slog.wtf(TAG_AM, "No package in referenced service "
-                        + binding.service.name.toShortString() + ": proc=" + binding.service.app);
+                        + binding.service.shortInstanceName + ": proc=" + binding.service.app);
             } else if (holder.pkg == null) {
                 Slog.wtf(TAG_AM, "Inactive holder in referenced service "
-                        + binding.service.name.toShortString() + ": proc=" + binding.service.app);
+                        + binding.service.shortInstanceName + ": proc=" + binding.service.app);
             } else {
                 association = holder.pkg.getAssociationStateLocked(holder.state,
-                        binding.service.name.getClassName()).startSource(clientUid,
+                        binding.service.instanceName.getClassName()).startSource(clientUid,
                         clientProcessName);
 
             }
@@ -202,7 +202,7 @@ final class ConnectionRecord {
         if (serviceDead) {
             sb.append("DEAD ");
         }
-        sb.append(binding.service.shortName);
+        sb.append(binding.service.shortInstanceName);
         sb.append(":@");
         sb.append(Integer.toHexString(System.identityHashCode(conn.asBinder())));
         sb.append('}');
@@ -223,7 +223,7 @@ final class ConnectionRecord {
             proto.write(ConnectionRecordProto.FLAGS, ConnectionRecordProto.DEAD);
         }
         if (binding.service != null) {
-            proto.write(ConnectionRecordProto.SERVICE_NAME, binding.service.shortName);
+            proto.write(ConnectionRecordProto.SERVICE_NAME, binding.service.shortInstanceName);
         }
         proto.end(token);
     }

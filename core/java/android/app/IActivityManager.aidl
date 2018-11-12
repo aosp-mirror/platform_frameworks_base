@@ -133,9 +133,13 @@ interface IActivityManager {
             in String resolvedType, boolean requireForeground, in String callingPackage, int userId);
     int stopService(in IApplicationThread caller, in Intent service,
             in String resolvedType, int userId);
+    // Currently keeping old bindService because it is on the greylist
     int bindService(in IApplicationThread caller, in IBinder token, in Intent service,
             in String resolvedType, in IServiceConnection connection, int flags,
             in String callingPackage, int userId);
+    int bindIsolatedService(in IApplicationThread caller, in IBinder token, in Intent service,
+            in String resolvedType, in IServiceConnection connection, int flags,
+            in String instanceName, in String callingPackage, int userId);
     boolean unbindService(in IServiceConnection connection);
     void publishService(in IBinder token, in Intent intent, in IBinder service);
     void setDebugApp(in String packageName, boolean waitForDebugger, boolean persistent);

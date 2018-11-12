@@ -31,6 +31,7 @@ package android.test.mock {
 
   public class MockContext extends android.content.Context {
     ctor public MockContext();
+    method public boolean bindIsolatedService(android.content.Intent, android.content.ServiceConnection, int, java.lang.String);
     method public boolean bindService(android.content.Intent, android.content.ServiceConnection, int);
     method public int checkCallingOrSelfPermission(java.lang.String);
     method public int checkCallingOrSelfUriPermission(android.net.Uri, int);
