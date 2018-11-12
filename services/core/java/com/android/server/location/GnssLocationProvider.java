@@ -24,7 +24,6 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.database.Cursor;
 import android.hardware.location.GeofenceHardware;
 import android.hardware.location.GeofenceHardwareImpl;
 import android.location.Criteria;
@@ -42,12 +41,6 @@ import android.location.LocationListener;
 import android.location.LocationManager;
 import android.location.LocationProvider;
 import android.location.LocationRequest;
-import android.net.ConnectivityManager;
-import android.net.Network;
-import android.net.NetworkCapabilities;
-import android.net.NetworkInfo;
-import android.net.NetworkRequest;
-import android.net.Uri;
 import android.os.AsyncTask;
 import android.os.BatteryStats;
 import android.os.Binder;
@@ -67,7 +60,6 @@ import android.os.UserHandle;
 import android.os.WorkSource;
 import android.os.WorkSource.WorkChain;
 import android.provider.Settings;
-import android.provider.Telephony.Carriers;
 import android.telephony.CarrierConfigManager;
 import android.telephony.SubscriptionManager;
 import android.telephony.SubscriptionManager.OnSubscriptionsChangedListener;
@@ -92,8 +84,6 @@ import java.io.FileDescriptor;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -134,14 +124,6 @@ public class GnssLocationProvider implements LocationProviderInterface, InjectNt
     private static final int GPS_STATUS_SESSION_END = 2;
     private static final int GPS_STATUS_ENGINE_ON = 3;
     private static final int GPS_STATUS_ENGINE_OFF = 4;
-
-    // these need to match AGnssStatusValue enum in IAGnssCallback.hal
-    /** AGPS status event values. */
-    private static final int GPS_REQUEST_AGPS_DATA_CONN = 1;
-    private static final int GPS_RELEASE_AGPS_DATA_CONN = 2;
-    private static final int GPS_AGPS_DATA_CONNECTED = 3;
-    private static final int GPS_AGPS_DATA_CONN_DONE = 4;
-    private static final int GPS_AGPS_DATA_CONN_FAILED = 5;
 
     // these need to match GnssLocationFlags enum in types.hal
     private static final int LOCATION_INVALID = 0;
@@ -187,17 +169,6 @@ public class GnssLocationProvider implements LocationProviderInterface, InjectNt
     // these need to match AGnssType enum in IAGnssCallback.hal
     private static final int AGPS_TYPE_SUPL = 1;
     private static final int AGPS_TYPE_C2K = 2;
-
-    // these must match the ApnIpType enum in IAGnss.hal
-    private static final int APN_INVALID = 0;
-    private static final int APN_IPV4 = 1;
-    private static final int APN_IPV6 = 2;
-    private static final int APN_IPV4V6 = 3;
-
-    // for mAGpsDataConnectionState
-    private static final int AGPS_DATA_CONNECTION_CLOSED = 0;
-    private static final int AGPS_DATA_CONNECTION_OPENING = 1;
-    private static final int AGPS_DATA_CONNECTION_OPEN = 2;
 
     // Handler messages
     private static final int CHECK_LOCATION = 1;
@@ -254,9 +225,6 @@ public class GnssLocationProvider implements LocationProviderInterface, InjectNt
     private static final long LOCATION_UPDATE_MIN_TIME_INTERVAL_MILLIS = 1000;
     // Default update duration in milliseconds for REQUEST_LOCATION.
     private static final long LOCATION_UPDATE_DURATION_MILLIS = 10 * 1000;
-    // Default time limit in milliseconds for the ConnectivityManager to find a suitable
-    // network with SUPL connectivity or report an error.
-    private static final int SUPL_NETWORK_REQUEST_TIMEOUT_MILLIS = 10 * 1000;
 
     /** simpler wrapper for ProviderRequest + Worksource */
     private static class GpsRequest {
@@ -427,12 +395,7 @@ public class GnssLocationProvider implements LocationProviderInterface, InjectNt
     // Handler for processing events
     private Handler mHandler;
 
-    /** It must be accessed only inside {@link #mHandler}. */
-    private int mAGpsDataConnectionState;
-    /** It must be accessed only inside {@link #mHandler}. */
-    private InetAddress mAGpsDataConnectionIpAddr;
-
-    private final ConnectivityManager mConnMgr;
+    private final GnssNetworkConnectivityHandler mNetworkConnectivityHandler;
     private final GpsNetInitiatedHandler mNIHandler;
 
     // Wakelocks
@@ -507,60 +470,6 @@ public class GnssLocationProvider implements LocationProviderInterface, InjectNt
     public GnssNavigationMessageProvider getGnssNavigationMessageProvider() {
         return mGnssNavigationMessageProvider;
     }
-
-    /**
-     * Callback used to listen for data connectivity changes.
-     */
-    private final ConnectivityManager.NetworkCallback mNetworkConnectivityCallback =
-            new ConnectivityManager.NetworkCallback() {
-                @Override
-                public void onAvailable(Network network) {
-                    mNtpTimeHelper.onNetworkAvailable();
-                    if (mDownloadXtraDataPending == STATE_PENDING_NETWORK) {
-                        if (mSupportsXtra) {
-                            // Download only if supported, (prevents an unneccesary on-boot
-                            // download)
-                            xtraDownloadRequest();
-                        }
-                    }
-                    // Always on, notify HAL so it can get data it needs
-                    sendMessage(UPDATE_NETWORK_STATE, 0 /*arg*/, network);
-                }
-
-                @Override
-                public void onLost(Network network) {
-                    sendMessage(UPDATE_NETWORK_STATE, 0 /*arg*/, network);
-                }
-            };
-
-    /**
-     * Callback used to listen for availability of a requested SUPL connection.
-     * It is kept as a separate instance from {@link #mNetworkConnectivityCallback} to be able to
-     * manage the registration/un-registration lifetimes separate.
-     */
-    private final ConnectivityManager.NetworkCallback mSuplConnectivityCallback =
-            new ConnectivityManager.NetworkCallback() {
-                @Override
-                public void onAvailable(Network network) {
-                    if (DEBUG) Log.d(TAG, "SUPL network connection available.");
-                    // Specific to a change to a SUPL enabled network becoming ready
-                    sendMessage(UPDATE_NETWORK_STATE, 0 /*arg*/, network);
-                }
-
-                @Override
-                public void onLost(Network network) {
-                    Log.i(TAG, "SUPL network connection lost.");
-                    releaseSuplConnection(GPS_RELEASE_AGPS_DATA_CONN);
-                }
-
-                @Override
-                public void onUnavailable() {
-                    Log.i(TAG, "SUPL network connection request timed out.");
-                    // Could not setup the connection to the network in the specified time duration.
-                    releaseSuplConnection(GPS_AGPS_DATA_CONN_FAILED);
-                }
-            };
-
     private final BroadcastReceiver mBroadcastReceiver = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
@@ -793,7 +702,10 @@ public class GnssLocationProvider implements LocationProviderInterface, InjectNt
         mWakeupIntent = PendingIntent.getBroadcast(mContext, 0, new Intent(ALARM_WAKEUP), 0);
         mTimeoutIntent = PendingIntent.getBroadcast(mContext, 0, new Intent(ALARM_TIMEOUT), 0);
 
-        mConnMgr = (ConnectivityManager) context.getSystemService(Context.CONNECTIVITY_SERVICE);
+        mNetworkConnectivityHandler = new GnssNetworkConnectivityHandler(
+                context,
+                GnssLocationProvider.this::onNetworkAvailable,
+                looper);
 
         // App ops service to keep track of who is accessing the GPS
         mAppOps = mContext.getSystemService(AppOpsManager.class);
@@ -843,8 +755,8 @@ public class GnssLocationProvider implements LocationProviderInterface, InjectNt
                 return isEnabled();
             }
         };
-        mGnssMetrics = new GnssMetrics(mBatteryStats);
 
+        mGnssMetrics = new GnssMetrics(mBatteryStats);
         mNtpTimeHelper = new NtpTimeHelper(mContext, looper, this);
         mGnssSatelliteBlacklistHelper = new GnssSatelliteBlacklistHelper(mContext,
                 looper, this);
@@ -866,7 +778,6 @@ public class GnssLocationProvider implements LocationProviderInterface, InjectNt
         return PROPERTIES;
     }
 
-
     /**
      * Implements {@link InjectNtpTimeCallback#injectTime}
      */
@@ -875,124 +786,17 @@ public class GnssLocationProvider implements LocationProviderInterface, InjectNt
         native_inject_time(time, timeReference, uncertainty);
     }
 
-    private void handleUpdateNetworkState(Network network) {
-        // retrieve NetworkInfo for this UID
-        NetworkInfo info = mConnMgr.getNetworkInfo(network);
-
-        boolean networkAvailable = false;
-        boolean isConnected = false;
-        int type = ConnectivityManager.TYPE_NONE;
-        boolean isRoaming = false;
-        String apnName = null;
-
-        if (info != null) {
-            networkAvailable = info.isAvailable() && TelephonyManager.getDefault().getDataEnabled();
-            isConnected = info.isConnected();
-            type = info.getType();
-            isRoaming = info.isRoaming();
-            apnName = info.getExtraInfo();
-        }
-
-        if (DEBUG) {
-            String message = String.format(
-                    "UpdateNetworkState, state=%s, connected=%s, info=%s, capabilities=%S",
-                    agpsDataConnStateAsString(),
-                    isConnected,
-                    info,
-                    mConnMgr.getNetworkCapabilities(network));
-            Log.d(TAG, message);
-        }
-
-        if (native_is_agps_ril_supported()) {
-            String defaultApn = getSelectedApn();
-            if (defaultApn == null) {
-                defaultApn = "dummy-apn";
+    /**
+     * Implements {@link GnssNetworkConnectivityHandler.GnssNetworkListener#onNetworkAvailable()}
+     */
+    private void onNetworkAvailable() {
+        mNtpTimeHelper.onNetworkAvailable();
+        if (mDownloadXtraDataPending == STATE_PENDING_NETWORK) {
+            if (mSupportsXtra) {
+                // Download only if supported, (prevents an unneccesary on-boot
+                // download)
+                xtraDownloadRequest();
             }
-
-            native_update_network_state(
-                    isConnected,
-                    type,
-                    isRoaming,
-                    networkAvailable,
-                    apnName,
-                    defaultApn);
-        } else if (DEBUG) {
-            Log.d(TAG, "Skipped network state update because GPS HAL AGPS-RIL is not  supported");
-        }
-
-        if (mAGpsDataConnectionState == AGPS_DATA_CONNECTION_OPENING) {
-            if (isConnected) {
-                if (apnName == null) {
-                    // assign a dummy value in the case of C2K as otherwise we will have a runtime
-                    // exception in the following call to native_agps_data_conn_open
-                    apnName = "dummy-apn";
-                }
-                int apnIpType = getApnIpType(apnName);
-                setRouting();
-                if (DEBUG) {
-                    String message = String.format(
-                            "native_agps_data_conn_open: mAgpsApn=%s, mApnIpType=%s",
-                            apnName,
-                            apnIpType);
-                    Log.d(TAG, message);
-                }
-                native_agps_data_conn_open(apnName, apnIpType);
-                mAGpsDataConnectionState = AGPS_DATA_CONNECTION_OPEN;
-            } else {
-                handleReleaseSuplConnection(GPS_AGPS_DATA_CONN_FAILED);
-            }
-        }
-    }
-
-    private void handleRequestSuplConnection(InetAddress address) {
-        if (DEBUG) {
-            String message = String.format(
-                    "requestSuplConnection, state=%s, address=%s",
-                    agpsDataConnStateAsString(),
-                    address);
-            Log.d(TAG, message);
-        }
-
-        if (mAGpsDataConnectionState != AGPS_DATA_CONNECTION_CLOSED) {
-            return;
-        }
-        mAGpsDataConnectionIpAddr = address;
-        mAGpsDataConnectionState = AGPS_DATA_CONNECTION_OPENING;
-
-        NetworkRequest.Builder requestBuilder = new NetworkRequest.Builder();
-        requestBuilder.addTransportType(NetworkCapabilities.TRANSPORT_CELLULAR);
-        requestBuilder.addCapability(NetworkCapabilities.NET_CAPABILITY_SUPL);
-        NetworkRequest request = requestBuilder.build();
-        mConnMgr.requestNetwork(
-                request,
-                mSuplConnectivityCallback,
-                SUPL_NETWORK_REQUEST_TIMEOUT_MILLIS);
-    }
-
-    private void handleReleaseSuplConnection(int agpsDataConnStatus) {
-        if (DEBUG) {
-            String message = String.format(
-                    "releaseSuplConnection, state=%s, status=%s",
-                    agpsDataConnStateAsString(),
-                    agpsDataConnStatusAsString(agpsDataConnStatus));
-            Log.d(TAG, message);
-        }
-
-        if (mAGpsDataConnectionState == AGPS_DATA_CONNECTION_CLOSED) {
-            return;
-        }
-        mAGpsDataConnectionState = AGPS_DATA_CONNECTION_CLOSED;
-
-        mConnMgr.unregisterNetworkCallback(mSuplConnectivityCallback);
-        switch (agpsDataConnStatus) {
-            case GPS_AGPS_DATA_CONN_FAILED:
-                native_agps_data_conn_failed();
-                break;
-            case GPS_RELEASE_AGPS_DATA_CONN:
-                native_agps_data_conn_closed();
-                break;
-            default:
-                Log.e(TAG, "Invalid status to release SUPL connection: " + agpsDataConnStatus);
         }
     }
 
@@ -1091,7 +895,7 @@ public class GnssLocationProvider implements LocationProviderInterface, InjectNt
             // already downloading data
             return;
         }
-        if (!isDataNetworkConnected()) {
+        if (!mNetworkConnectivityHandler.isDataNetworkConnected()) {
             // try again when network is up
             mDownloadXtraDataPending = STATE_PENDING_NETWORK;
             return;
@@ -1822,41 +1626,7 @@ public class GnssLocationProvider implements LocationProviderInterface, InjectNt
      * called from native code to update AGPS status
      */
     private void reportAGpsStatus(int type, int status, byte[] ipaddr) {
-        switch (status) {
-            case GPS_REQUEST_AGPS_DATA_CONN:
-                if (DEBUG) Log.d(TAG, "GPS_REQUEST_AGPS_DATA_CONN");
-                Log.v(TAG, "Received SUPL IP addr[]: " + Arrays.toString(ipaddr));
-                InetAddress connectionIpAddress = null;
-                if (ipaddr != null) {
-                    try {
-                        connectionIpAddress = InetAddress.getByAddress(ipaddr);
-                        if (DEBUG) Log.d(TAG, "IP address converted to: " + connectionIpAddress);
-                    } catch (UnknownHostException e) {
-                        Log.e(TAG, "Bad IP Address: " + ipaddr, e);
-                    }
-                }
-                sendMessage(REQUEST_SUPL_CONNECTION, 0 /*arg*/, connectionIpAddress);
-                break;
-            case GPS_RELEASE_AGPS_DATA_CONN:
-                if (DEBUG) Log.d(TAG, "GPS_RELEASE_AGPS_DATA_CONN");
-                releaseSuplConnection(GPS_RELEASE_AGPS_DATA_CONN);
-                break;
-            case GPS_AGPS_DATA_CONNECTED:
-                if (DEBUG) Log.d(TAG, "GPS_AGPS_DATA_CONNECTED");
-                break;
-            case GPS_AGPS_DATA_CONN_DONE:
-                if (DEBUG) Log.d(TAG, "GPS_AGPS_DATA_CONN_DONE");
-                break;
-            case GPS_AGPS_DATA_CONN_FAILED:
-                if (DEBUG) Log.d(TAG, "GPS_AGPS_DATA_CONN_FAILED");
-                break;
-            default:
-                if (DEBUG) Log.d(TAG, "Received Unknown AGPS status: " + status);
-        }
-    }
-
-    private void releaseSuplConnection(int connStatus) {
-        sendMessage(RELEASE_SUPL_CONNECTION, connStatus, null /*obj*/);
+        mNetworkConnectivityHandler.onReportAGpsStatus(type, status, ipaddr);
     }
 
     /**
@@ -2332,15 +2102,6 @@ public class GnssLocationProvider implements LocationProviderInterface, InjectNt
                     GpsRequest gpsRequest = (GpsRequest) msg.obj;
                     handleSetRequest(gpsRequest.request, gpsRequest.source);
                     break;
-                case UPDATE_NETWORK_STATE:
-                    handleUpdateNetworkState((Network) msg.obj);
-                    break;
-                case REQUEST_SUPL_CONNECTION:
-                    handleRequestSuplConnection((InetAddress) msg.obj);
-                    break;
-                case RELEASE_SUPL_CONNECTION:
-                    handleReleaseSuplConnection(msg.arg1);
-                    break;
                 case INJECT_NTP_TIME:
                     mNtpTimeHelper.retrieveAndInjectNtpTime();
                     break;
@@ -2426,14 +2187,7 @@ public class GnssLocationProvider implements LocationProviderInterface, InjectNt
             intentFilter.addAction(SIM_STATE_CHANGED);
             mContext.registerReceiver(mBroadcastReceiver, intentFilter, null, this);
 
-            // register for connectivity change events, this is equivalent to the deprecated way of
-            // registering for CONNECTIVITY_ACTION broadcasts
-            NetworkRequest.Builder networkRequestBuilder = new NetworkRequest.Builder();
-            networkRequestBuilder.addCapability(NetworkCapabilities.NET_CAPABILITY_INTERNET);
-            networkRequestBuilder.addCapability(NetworkCapabilities.NET_CAPABILITY_VALIDATED);
-            networkRequestBuilder.removeCapability(NetworkCapabilities.NET_CAPABILITY_NOT_VPN);
-            NetworkRequest networkRequest = networkRequestBuilder.build();
-            mConnMgr.registerNetworkCallback(networkRequest, mNetworkConnectivityCallback);
+            mNetworkConnectivityHandler.registerNetworkCallbacks();
 
             // listen for PASSIVE_PROVIDER updates
             LocationManager locManager =
@@ -2491,160 +2245,6 @@ public class GnssLocationProvider implements LocationProviderInterface, InjectNt
         }
     }
 
-    private String getSelectedApn() {
-        Uri uri = Uri.parse("content://telephony/carriers/preferapn");
-        Cursor cursor = null;
-        try {
-            cursor = mContext.getContentResolver().query(
-                    uri,
-                    new String[]{"apn"},
-                    null /* selection */,
-                    null /* selectionArgs */,
-                    Carriers.DEFAULT_SORT_ORDER);
-            if (cursor != null && cursor.moveToFirst()) {
-                return cursor.getString(0);
-            } else {
-                Log.e(TAG, "No APN found to select.");
-            }
-        } catch (Exception e) {
-            Log.e(TAG, "Error encountered on selecting the APN.", e);
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
-        }
-
-        return null;
-    }
-
-    private int getApnIpType(String apn) {
-        ensureInHandlerThread();
-        if (apn == null) {
-            return APN_INVALID;
-        }
-        TelephonyManager phone = (TelephonyManager)
-                mContext.getSystemService(Context.TELEPHONY_SERVICE);
-        // Carrier configuration may override framework roaming state, we need to use the actual
-        // modem roaming state instead of the framework roaming state.
-        boolean isDataRoamingFromRegistration = phone.getServiceState().
-                getDataRoamingFromRegistration();
-        String projection = isDataRoamingFromRegistration ? Carriers.ROAMING_PROTOCOL :
-                Carriers.PROTOCOL;
-        String selection = String.format("current = 1 and apn = '%s' and carrier_enabled = 1", apn);
-        Cursor cursor = null;
-        try {
-            cursor = mContext.getContentResolver().query(
-                    Carriers.CONTENT_URI,
-                    new String[]{projection},
-                    selection,
-                    null,
-                    Carriers.DEFAULT_SORT_ORDER);
-
-            if (null != cursor && cursor.moveToFirst()) {
-                return translateToApnIpType(cursor.getString(0), apn);
-            } else {
-                Log.e(TAG, "No entry found in query for APN: " + apn);
-            }
-        } catch (Exception e) {
-            Log.e(TAG, "Error encountered on APN query for: " + apn, e);
-        } finally {
-            if (cursor != null) {
-                cursor.close();
-            }
-        }
-
-        return APN_INVALID;
-    }
-
-    private int translateToApnIpType(String ipProtocol, String apn) {
-        if ("IP".equals(ipProtocol)) {
-            return APN_IPV4;
-        }
-        if ("IPV6".equals(ipProtocol)) {
-            return APN_IPV6;
-        }
-        if ("IPV4V6".equals(ipProtocol)) {
-            return APN_IPV4V6;
-        }
-
-        // we hit the default case so the ipProtocol is not recognized
-        String message = String.format("Unknown IP Protocol: %s, for APN: %s", ipProtocol, apn);
-        Log.e(TAG, message);
-        return APN_INVALID;
-    }
-
-    private void setRouting() {
-        if (mAGpsDataConnectionIpAddr == null) {
-            return;
-        }
-
-        // TODO: replace the use of this deprecated API
-        boolean result = mConnMgr.requestRouteToHostAddress(
-                ConnectivityManager.TYPE_MOBILE_SUPL,
-                mAGpsDataConnectionIpAddr);
-
-        if (!result) {
-            Log.e(TAG, "Error requesting route to host: " + mAGpsDataConnectionIpAddr);
-        } else if (DEBUG) {
-            Log.d(TAG, "Successfully requested route to host: " + mAGpsDataConnectionIpAddr);
-        }
-    }
-
-    /**
-     * @return {@code true} if there is a data network available for outgoing connections,
-     * {@code false} otherwise.
-     */
-    private boolean isDataNetworkConnected() {
-        NetworkInfo activeNetworkInfo = mConnMgr.getActiveNetworkInfo();
-        return activeNetworkInfo != null && activeNetworkInfo.isConnected();
-    }
-
-    /**
-     * Ensures the calling function is running in the thread associated with {@link #mHandler}.
-     */
-    private void ensureInHandlerThread() {
-        if (mHandler != null && Looper.myLooper() == mHandler.getLooper()) {
-            return;
-        }
-        throw new RuntimeException("This method must run on the Handler thread.");
-    }
-
-    /**
-     * @return A string representing the current state stored in {@link #mAGpsDataConnectionState}.
-     */
-    private String agpsDataConnStateAsString() {
-        switch (mAGpsDataConnectionState) {
-            case AGPS_DATA_CONNECTION_CLOSED:
-                return "CLOSED";
-            case AGPS_DATA_CONNECTION_OPEN:
-                return "OPEN";
-            case AGPS_DATA_CONNECTION_OPENING:
-                return "OPENING";
-            default:
-                return "<Unknown>";
-        }
-    }
-
-    /**
-     * @return A string representing the given GPS_AGPS_DATA status.
-     */
-    private String agpsDataConnStatusAsString(int agpsDataConnStatus) {
-        switch (agpsDataConnStatus) {
-            case GPS_AGPS_DATA_CONNECTED:
-                return "CONNECTED";
-            case GPS_AGPS_DATA_CONN_DONE:
-                return "DONE";
-            case GPS_AGPS_DATA_CONN_FAILED:
-                return "FAILED";
-            case GPS_RELEASE_AGPS_DATA_CONN:
-                return "RELEASE";
-            case GPS_REQUEST_AGPS_DATA_CONN:
-                return "REQUEST";
-            default:
-                return "<Unknown>";
-        }
-    }
-
     /**
      * @return A string representing the given message ID.
      */
@@ -2654,12 +2254,6 @@ public class GnssLocationProvider implements LocationProviderInterface, InjectNt
                 return "ENABLE";
             case SET_REQUEST:
                 return "SET_REQUEST";
-            case UPDATE_NETWORK_STATE:
-                return "UPDATE_NETWORK_STATE";
-            case REQUEST_SUPL_CONNECTION:
-                return "REQUEST_SUPL_CONNECTION";
-            case RELEASE_SUPL_CONNECTION:
-                return "RELEASE_SUPL_CONNECTION";
             case INJECT_NTP_TIME:
                 return "INJECT_NTP_TIME";
             case REQUEST_LOCATION:
@@ -2682,7 +2276,6 @@ public class GnssLocationProvider implements LocationProviderInterface, InjectNt
                 return "<Unknown>";
         }
     }
-
 
     @Override
     public void dump(FileDescriptor fd, PrintWriter pw, String[] args) {
@@ -2722,8 +2315,6 @@ public class GnssLocationProvider implements LocationProviderInterface, InjectNt
     private static native void class_init_native();
 
     private static native boolean native_is_supported();
-
-    private static native boolean native_is_agps_ril_supported();
 
     private static native boolean native_is_gnss_configuration_supported();
 
@@ -2770,12 +2361,6 @@ public class GnssLocationProvider implements LocationProviderInterface, InjectNt
     private native String native_get_internal_state();
 
     // AGPS Support
-    private native void native_agps_data_conn_open(String apn, int apnIpType);
-
-    private native void native_agps_data_conn_closed();
-
-    private native void native_agps_data_conn_failed();
-
     private native void native_agps_ni_message(byte[] msg, int length);
 
     private native void native_set_agps_server(int type, String hostname, int port);
@@ -2783,14 +2368,11 @@ public class GnssLocationProvider implements LocationProviderInterface, InjectNt
     // Network-initiated (NI) Support
     private native void native_send_ni_response(int notificationId, int userResponse);
 
-    // AGPS ril suport
+    // AGPS ril support
     private native void native_agps_set_ref_location_cellid(int type, int mcc, int mnc,
             int lac, int cid);
 
     private native void native_agps_set_id(int type, String setid);
-
-    private native void native_update_network_state(boolean connected, int type,
-            boolean roaming, boolean available, String extraInfo, String defaultAPN);
 
     // GNSS Configuration
     private static native boolean native_set_supl_version(int version);
