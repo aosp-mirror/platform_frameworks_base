@@ -34,7 +34,8 @@ namespace statsd {
 struct ValueBucket {
     int64_t mBucketStartNs;
     int64_t mBucketEndNs;
-    Value value;
+    std::vector<int> valueIndex;
+    std::vector<Value> values;
 };
 
 class ValueMetricProducer : public virtual MetricProducer, public virtual PullDataReceiver {
@@ -97,7 +98,8 @@ private:
 
     sp<StatsPullerManager> mPullerManager;
 
-    const FieldMatcher mValueField;
+    // Value fields for matching.
+    std::vector<Matcher> mFieldMatchers;
 
     // tagId for pulled data. -1 if this is not pulled
     const int mPullTagId;
@@ -105,10 +107,10 @@ private:
     // if this is pulled metric
     const bool mIsPulled;
 
-    int mField;
-
-    // internal state of a bucket.
+    // internal state of an ongoing aggregation bucket.
     typedef struct {
+        // Index in multi value aggregation.
+        int valueIndex;
         // Holds current base value of the dimension. Take diff and update if necessary.
         Value base;
         // Whether there is a base to diff to.
@@ -122,7 +124,7 @@ private:
         bool hasValue;
     } Interval;
 
-    std::unordered_map<MetricDimensionKey, Interval> mCurrentSlicedBucket;
+    std::unordered_map<MetricDimensionKey, std::vector<Interval>> mCurrentSlicedBucket;
 
     std::unordered_map<MetricDimensionKey, int64_t> mCurrentFullBucket;
 

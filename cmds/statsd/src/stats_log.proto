@@ -108,11 +108,21 @@ message ValueBucketInfo {
 
   optional int64 value = 3 [deprecated = true];
 
-  oneof values {
-      int64 value_long = 7;
+  oneof single_value {
+      int64 value_long = 7 [deprecated = true];
 
-      double value_double = 8;
+      double value_double = 8 [deprecated = true];
   }
+
+  message Value {
+      optional int32 index = 1;
+      oneof value {
+          int64 value_long = 2;
+          double value_double = 3;
+      }
+  }
+
+  repeated Value values = 9;
 
   optional int64 bucket_num = 4;
 

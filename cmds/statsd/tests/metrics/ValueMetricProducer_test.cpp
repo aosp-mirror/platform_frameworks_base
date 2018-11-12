@@ -140,7 +140,7 @@ TEST(ValueMetricProducerTest, TestPulledEventsNoCondition) {
     valueProducer.onDataPulled(allData);
     // has one slice
     EXPECT_EQ(1UL, valueProducer.mCurrentSlicedBucket.size());
-    ValueMetricProducer::Interval curInterval = valueProducer.mCurrentSlicedBucket.begin()->second;
+    ValueMetricProducer::Interval curInterval = valueProducer.mCurrentSlicedBucket.begin()->second[0];
 
     EXPECT_EQ(true, curInterval.hasBase);
     EXPECT_EQ(11, curInterval.base.long_value);
@@ -157,7 +157,7 @@ TEST(ValueMetricProducerTest, TestPulledEventsNoCondition) {
     valueProducer.onDataPulled(allData);
     // has one slice
     EXPECT_EQ(1UL, valueProducer.mCurrentSlicedBucket.size());
-    curInterval = valueProducer.mCurrentSlicedBucket.begin()->second;
+    curInterval = valueProducer.mCurrentSlicedBucket.begin()->second[0];
 
     EXPECT_EQ(true, curInterval.hasBase);
     EXPECT_EQ(23, curInterval.base.long_value);
@@ -165,7 +165,7 @@ TEST(ValueMetricProducerTest, TestPulledEventsNoCondition) {
     EXPECT_EQ(12, curInterval.value.long_value);
     EXPECT_EQ(1UL, valueProducer.mPastBuckets.size());
     EXPECT_EQ(1UL, valueProducer.mPastBuckets.begin()->second.size());
-    EXPECT_EQ(8, valueProducer.mPastBuckets.begin()->second.back().value.long_value);
+    EXPECT_EQ(8, valueProducer.mPastBuckets.begin()->second.back().values[0].long_value);
 
     allData.clear();
     event = make_shared<LogEvent>(tagId, bucket4StartTimeNs + 1);
@@ -175,7 +175,7 @@ TEST(ValueMetricProducerTest, TestPulledEventsNoCondition) {
     allData.push_back(event);
     valueProducer.onDataPulled(allData);
     EXPECT_EQ(1UL, valueProducer.mCurrentSlicedBucket.size());
-    curInterval = valueProducer.mCurrentSlicedBucket.begin()->second;
+    curInterval = valueProducer.mCurrentSlicedBucket.begin()->second[0];
 
     EXPECT_EQ(true, curInterval.hasBase);
     EXPECT_EQ(36, curInterval.base.long_value);
@@ -183,7 +183,7 @@ TEST(ValueMetricProducerTest, TestPulledEventsNoCondition) {
     EXPECT_EQ(13, curInterval.value.long_value);
     EXPECT_EQ(1UL, valueProducer.mPastBuckets.size());
     EXPECT_EQ(2UL, valueProducer.mPastBuckets.begin()->second.size());
-    EXPECT_EQ(12, valueProducer.mPastBuckets.begin()->second.back().value.long_value);
+    EXPECT_EQ(12, valueProducer.mPastBuckets.begin()->second.back().values[0].long_value);
 }
 
 /*
@@ -217,7 +217,7 @@ TEST(ValueMetricProducerTest, TestPulledEventsTakeAbsoluteValueOnReset) {
     valueProducer.onDataPulled(allData);
     // has one slice
     EXPECT_EQ(1UL, valueProducer.mCurrentSlicedBucket.size());
-    ValueMetricProducer::Interval curInterval = valueProducer.mCurrentSlicedBucket.begin()->second;
+    ValueMetricProducer::Interval curInterval = valueProducer.mCurrentSlicedBucket.begin()->second[0];
 
     EXPECT_EQ(true, curInterval.hasBase);
     EXPECT_EQ(11, curInterval.base.long_value);
@@ -233,7 +233,7 @@ TEST(ValueMetricProducerTest, TestPulledEventsTakeAbsoluteValueOnReset) {
     valueProducer.onDataPulled(allData);
     // has one slice
     EXPECT_EQ(1UL, valueProducer.mCurrentSlicedBucket.size());
-    curInterval = valueProducer.mCurrentSlicedBucket.begin()->second;
+    curInterval = valueProducer.mCurrentSlicedBucket.begin()->second[0];
     EXPECT_EQ(true, curInterval.hasBase);
     EXPECT_EQ(10, curInterval.base.long_value);
     EXPECT_EQ(true, curInterval.hasValue);
@@ -248,14 +248,14 @@ TEST(ValueMetricProducerTest, TestPulledEventsTakeAbsoluteValueOnReset) {
     allData.push_back(event);
     valueProducer.onDataPulled(allData);
     EXPECT_EQ(1UL, valueProducer.mCurrentSlicedBucket.size());
-    curInterval = valueProducer.mCurrentSlicedBucket.begin()->second;
+    curInterval = valueProducer.mCurrentSlicedBucket.begin()->second[0];
     EXPECT_EQ(true, curInterval.hasBase);
     EXPECT_EQ(36, curInterval.base.long_value);
     EXPECT_EQ(true, curInterval.hasValue);
     EXPECT_EQ(26, curInterval.value.long_value);
     EXPECT_EQ(1UL, valueProducer.mPastBuckets.size());
     EXPECT_EQ(1UL, valueProducer.mPastBuckets.begin()->second.size());
-    EXPECT_EQ(10, valueProducer.mPastBuckets.begin()->second.back().value.long_value);
+    EXPECT_EQ(10, valueProducer.mPastBuckets.begin()->second.back().values[0].long_value);
 }
 
 /*
@@ -288,7 +288,7 @@ TEST(ValueMetricProducerTest, TestPulledEventsTakeZeroOnReset) {
     valueProducer.onDataPulled(allData);
     // has one slice
     EXPECT_EQ(1UL, valueProducer.mCurrentSlicedBucket.size());
-    ValueMetricProducer::Interval curInterval = valueProducer.mCurrentSlicedBucket.begin()->second;
+    ValueMetricProducer::Interval curInterval = valueProducer.mCurrentSlicedBucket.begin()->second[0];
 
     EXPECT_EQ(true, curInterval.hasBase);
     EXPECT_EQ(11, curInterval.base.long_value);
@@ -304,7 +304,7 @@ TEST(ValueMetricProducerTest, TestPulledEventsTakeZeroOnReset) {
     valueProducer.onDataPulled(allData);
     // has one slice
     EXPECT_EQ(1UL, valueProducer.mCurrentSlicedBucket.size());
-    curInterval = valueProducer.mCurrentSlicedBucket.begin()->second;
+    curInterval = valueProducer.mCurrentSlicedBucket.begin()->second[0];
     EXPECT_EQ(true, curInterval.hasBase);
     EXPECT_EQ(10, curInterval.base.long_value);
     EXPECT_EQ(false, curInterval.hasValue);
@@ -318,7 +318,7 @@ TEST(ValueMetricProducerTest, TestPulledEventsTakeZeroOnReset) {
     allData.push_back(event);
     valueProducer.onDataPulled(allData);
     EXPECT_EQ(1UL, valueProducer.mCurrentSlicedBucket.size());
-    curInterval = valueProducer.mCurrentSlicedBucket.begin()->second;
+    curInterval = valueProducer.mCurrentSlicedBucket.begin()->second[0];
     EXPECT_EQ(true, curInterval.hasBase);
     EXPECT_EQ(36, curInterval.base.long_value);
     EXPECT_EQ(true, curInterval.hasValue);
@@ -370,7 +370,7 @@ TEST(ValueMetricProducerTest, TestEventsWithNonSlicedCondition) {
 
     // has one slice
     EXPECT_EQ(1UL, valueProducer.mCurrentSlicedBucket.size());
-    ValueMetricProducer::Interval curInterval = valueProducer.mCurrentSlicedBucket.begin()->second;
+    ValueMetricProducer::Interval curInterval = valueProducer.mCurrentSlicedBucket.begin()->second[0];
     // startUpdated:false sum:0 start:100
     EXPECT_EQ(true, curInterval.hasBase);
     EXPECT_EQ(100, curInterval.base.long_value);
@@ -388,7 +388,7 @@ TEST(ValueMetricProducerTest, TestEventsWithNonSlicedCondition) {
 
     // has one slice
     EXPECT_EQ(1UL, valueProducer.mCurrentSlicedBucket.size());
-    curInterval = valueProducer.mCurrentSlicedBucket.begin()->second;
+    curInterval = valueProducer.mCurrentSlicedBucket.begin()->second[0];
     EXPECT_EQ(true, curInterval.hasBase);
     EXPECT_EQ(110, curInterval.base.long_value);
     EXPECT_EQ(true, curInterval.hasValue);
@@ -399,7 +399,7 @@ TEST(ValueMetricProducerTest, TestEventsWithNonSlicedCondition) {
 
     // has one slice
     EXPECT_EQ(1UL, valueProducer.mCurrentSlicedBucket.size());
-    curInterval = valueProducer.mCurrentSlicedBucket.begin()->second;
+    curInterval = valueProducer.mCurrentSlicedBucket.begin()->second[0];
     EXPECT_EQ(true, curInterval.hasValue);
     EXPECT_EQ(10, curInterval.value.long_value);
     EXPECT_EQ(false, curInterval.hasBase);
@@ -486,7 +486,7 @@ TEST(ValueMetricProducerTest, TestPulledValueWithUpgrade) {
     valueProducer.notifyAppUpgrade(bucket2StartTimeNs + 150, "ANY.APP", 1, 1);
     EXPECT_EQ(1UL, valueProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY].size());
     EXPECT_EQ(bucket2StartTimeNs + 150, valueProducer.mCurrentBucketStartTimeNs);
-    EXPECT_EQ(20L, valueProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY][0].value.long_value);
+    EXPECT_EQ(20L, valueProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY][0].values[0].long_value);
 
     allData.clear();
     event = make_shared<LogEvent>(tagId, bucket3StartTimeNs + 1);
@@ -497,7 +497,7 @@ TEST(ValueMetricProducerTest, TestPulledValueWithUpgrade) {
     valueProducer.onDataPulled(allData);
     EXPECT_EQ(1UL, valueProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY].size());
     EXPECT_EQ(bucket2StartTimeNs + 150, valueProducer.mCurrentBucketStartTimeNs);
-    EXPECT_EQ(20L, valueProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY][0].value.long_value);
+    EXPECT_EQ(20L, valueProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY][0].values[0].long_value);
 }
 
 TEST(ValueMetricProducerTest, TestPulledValueWithUpgradeWhileConditionFalse) {
@@ -545,7 +545,7 @@ TEST(ValueMetricProducerTest, TestPulledValueWithUpgradeWhileConditionFalse) {
     EXPECT_EQ(bucket2StartTimeNs-50, valueProducer.mCurrentBucketStartTimeNs);
     EXPECT_EQ(1UL, valueProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY].size());
     EXPECT_EQ(bucketStartTimeNs, valueProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY][0].mBucketStartNs);
-    EXPECT_EQ(20L, valueProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY][0].value.long_value);
+    EXPECT_EQ(20L, valueProducer.mPastBuckets[DEFAULT_METRIC_DIMENSION_KEY][0].values[0].long_value);
     EXPECT_FALSE(valueProducer.mCondition);
 }
 
@@ -573,7 +573,7 @@ TEST(ValueMetricProducerTest, TestPushedEventsWithoutCondition) {
     valueProducer.onMatchedLogEvent(1 /*log matcher index*/, *event1);
     // has one slice
     EXPECT_EQ(1UL, valueProducer.mCurrentSlicedBucket.size());
-    ValueMetricProducer::Interval curInterval = valueProducer.mCurrentSlicedBucket.begin()->second;
+    ValueMetricProducer::Interval curInterval = valueProducer.mCurrentSlicedBucket.begin()->second[0];
     EXPECT_EQ(10, curInterval.value.long_value);
     EXPECT_EQ(true, curInterval.hasValue);
 
@@ -581,13 +581,13 @@ TEST(ValueMetricProducerTest, TestPushedEventsWithoutCondition) {
 
     // has one slice
     EXPECT_EQ(1UL, valueProducer.mCurrentSlicedBucket.size());
-    curInterval = valueProducer.mCurrentSlicedBucket.begin()->second;
+    curInterval = valueProducer.mCurrentSlicedBucket.begin()->second[0];
     EXPECT_EQ(30, curInterval.value.long_value);
 
     valueProducer.flushIfNeededLocked(bucket3StartTimeNs);
     EXPECT_EQ(1UL, valueProducer.mPastBuckets.size());
     EXPECT_EQ(1UL, valueProducer.mPastBuckets.begin()->second.size());
-    EXPECT_EQ(30, valueProducer.mPastBuckets.begin()->second.back().value.long_value);
+    EXPECT_EQ(30, valueProducer.mPastBuckets.begin()->second.back().values[0].long_value);
 }
 
 TEST(ValueMetricProducerTest, TestPushedEventsWithCondition) {
@@ -620,8 +620,8 @@ TEST(ValueMetricProducerTest, TestPushedEventsWithCondition) {
 
     // has one slice
     EXPECT_EQ(1UL, valueProducer.mCurrentSlicedBucket.size());
-    ValueMetricProducer::Interval curInterval = valueProducer.mCurrentSlicedBucket.begin()->second;
-    curInterval = valueProducer.mCurrentSlicedBucket.begin()->second;
+    ValueMetricProducer::Interval curInterval = valueProducer.mCurrentSlicedBucket.begin()->second[0];
+    curInterval = valueProducer.mCurrentSlicedBucket.begin()->second[0];
     EXPECT_EQ(20, curInterval.value.long_value);
 
     shared_ptr<LogEvent> event3 = make_shared<LogEvent>(tagId, bucketStartTimeNs + 30);
@@ -632,7 +632,7 @@ TEST(ValueMetricProducerTest, TestPushedEventsWithCondition) {
 
     // has one slice
     EXPECT_EQ(1UL, valueProducer.mCurrentSlicedBucket.size());
-    curInterval = valueProducer.mCurrentSlicedBucket.begin()->second;
+    curInterval = valueProducer.mCurrentSlicedBucket.begin()->second[0];
     EXPECT_EQ(50, curInterval.value.long_value);
 
     valueProducer.onConditionChangedLocked(false, bucketStartTimeNs + 35);
@@ -644,13 +644,13 @@ TEST(ValueMetricProducerTest, TestPushedEventsWithCondition) {
 
     // has one slice
     EXPECT_EQ(1UL, valueProducer.mCurrentSlicedBucket.size());
-    curInterval = valueProducer.mCurrentSlicedBucket.begin()->second;
+    curInterval = valueProducer.mCurrentSlicedBucket.begin()->second[0];
     EXPECT_EQ(50, curInterval.value.long_value);
 
     valueProducer.flushIfNeededLocked(bucket3StartTimeNs);
     EXPECT_EQ(1UL, valueProducer.mPastBuckets.size());
     EXPECT_EQ(1UL, valueProducer.mPastBuckets.begin()->second.size());
-    EXPECT_EQ(50, valueProducer.mPastBuckets.begin()->second.back().value.long_value);
+    EXPECT_EQ(50, valueProducer.mPastBuckets.begin()->second.back().values[0].long_value);
 }
 
 TEST(ValueMetricProducerTest, TestAnomalyDetection) {
@@ -765,7 +765,7 @@ TEST(ValueMetricProducerTest, TestBucketBoundaryNoCondition) {
     valueProducer.onDataPulled(allData);
     // has one slice
     EXPECT_EQ(1UL, valueProducer.mCurrentSlicedBucket.size());
-    ValueMetricProducer::Interval curInterval = valueProducer.mCurrentSlicedBucket.begin()->second;
+    ValueMetricProducer::Interval curInterval = valueProducer.mCurrentSlicedBucket.begin()->second[0];
 
     // startUpdated:true sum:0 start:11
     EXPECT_EQ(true, curInterval.hasBase);
@@ -783,7 +783,7 @@ TEST(ValueMetricProducerTest, TestBucketBoundaryNoCondition) {
     valueProducer.onDataPulled(allData);
     // has one slice
     EXPECT_EQ(1UL, valueProducer.mCurrentSlicedBucket.size());
-    curInterval = valueProducer.mCurrentSlicedBucket.begin()->second;
+    curInterval = valueProducer.mCurrentSlicedBucket.begin()->second[0];
     // tartUpdated:false sum:12
     EXPECT_EQ(true, curInterval.hasBase);
     EXPECT_EQ(23, curInterval.base.long_value);
@@ -803,14 +803,14 @@ TEST(ValueMetricProducerTest, TestBucketBoundaryNoCondition) {
     allData.push_back(event);
     valueProducer.onDataPulled(allData);
     EXPECT_EQ(1UL, valueProducer.mCurrentSlicedBucket.size());
-    curInterval = valueProducer.mCurrentSlicedBucket.begin()->second;
+    curInterval = valueProducer.mCurrentSlicedBucket.begin()->second[0];
     // startUpdated:false sum:12
     EXPECT_EQ(true, curInterval.hasBase);
     EXPECT_EQ(36, curInterval.base.long_value);
     EXPECT_EQ(false, curInterval.hasValue);
     EXPECT_EQ(1UL, valueProducer.mPastBuckets.size());
     EXPECT_EQ(1UL, valueProducer.mPastBuckets.begin()->second.size());
-    EXPECT_EQ(12, valueProducer.mPastBuckets.begin()->second.back().value.long_value);
+    EXPECT_EQ(12, valueProducer.mPastBuckets.begin()->second.back().values[0].long_value);
 }
 
 /*
@@ -860,7 +860,7 @@ TEST(ValueMetricProducerTest, TestBucketBoundaryWithCondition) {
 
     // has one slice
     EXPECT_EQ(1UL, valueProducer.mCurrentSlicedBucket.size());
-    ValueMetricProducer::Interval curInterval = valueProducer.mCurrentSlicedBucket.begin()->second;
+    ValueMetricProducer::Interval curInterval = valueProducer.mCurrentSlicedBucket.begin()->second[0];
     EXPECT_EQ(true, curInterval.hasBase);
     EXPECT_EQ(100, curInterval.base.long_value);
     EXPECT_EQ(false, curInterval.hasValue);
@@ -868,7 +868,7 @@ TEST(ValueMetricProducerTest, TestBucketBoundaryWithCondition) {
 
     // pull on bucket boundary come late, condition change happens before it
     valueProducer.onConditionChanged(false, bucket2StartTimeNs + 1);
-    curInterval = valueProducer.mCurrentSlicedBucket.begin()->second;
+    curInterval = valueProducer.mCurrentSlicedBucket.begin()->second[0];
     EXPECT_EQ(false, curInterval.hasBase);
     EXPECT_EQ(true, curInterval.hasValue);
     EXPECT_EQ(20, curInterval.value.long_value);
@@ -885,7 +885,7 @@ TEST(ValueMetricProducerTest, TestBucketBoundaryWithCondition) {
     allData.push_back(event);
     valueProducer.onDataPulled(allData);
 
-    curInterval = valueProducer.mCurrentSlicedBucket.begin()->second;
+    curInterval = valueProducer.mCurrentSlicedBucket.begin()->second[0];
     EXPECT_EQ(false, curInterval.hasBase);
     EXPECT_EQ(true, curInterval.hasValue);
     EXPECT_EQ(20, curInterval.value.long_value);
@@ -950,7 +950,7 @@ TEST(ValueMetricProducerTest, TestBucketBoundaryWithCondition2) {
 
     // has one slice
     EXPECT_EQ(1UL, valueProducer.mCurrentSlicedBucket.size());
-    ValueMetricProducer::Interval curInterval = valueProducer.mCurrentSlicedBucket.begin()->second;
+    ValueMetricProducer::Interval curInterval = valueProducer.mCurrentSlicedBucket.begin()->second[0];
     // startUpdated:false sum:0 start:100
     EXPECT_EQ(true, curInterval.hasBase);
     EXPECT_EQ(100, curInterval.base.long_value);
@@ -959,7 +959,7 @@ TEST(ValueMetricProducerTest, TestBucketBoundaryWithCondition2) {
 
     // pull on bucket boundary come late, condition change happens before it
     valueProducer.onConditionChanged(false, bucket2StartTimeNs + 1);
-    curInterval = valueProducer.mCurrentSlicedBucket.begin()->second;
+    curInterval = valueProducer.mCurrentSlicedBucket.begin()->second[0];
     EXPECT_EQ(false, curInterval.hasBase);
     EXPECT_EQ(true, curInterval.hasValue);
     EXPECT_EQ(20, curInterval.value.long_value);
@@ -967,7 +967,7 @@ TEST(ValueMetricProducerTest, TestBucketBoundaryWithCondition2) {
 
     // condition changed to true again, before the pull alarm is delivered
     valueProducer.onConditionChanged(true, bucket2StartTimeNs + 25);
-    curInterval = valueProducer.mCurrentSlicedBucket.begin()->second;
+    curInterval = valueProducer.mCurrentSlicedBucket.begin()->second[0];
     EXPECT_EQ(true, curInterval.hasBase);
     EXPECT_EQ(130, curInterval.base.long_value);
     EXPECT_EQ(true, curInterval.hasValue);
@@ -984,7 +984,7 @@ TEST(ValueMetricProducerTest, TestBucketBoundaryWithCondition2) {
     allData.push_back(event);
     valueProducer.onDataPulled(allData);
 
-    curInterval = valueProducer.mCurrentSlicedBucket.begin()->second;
+    curInterval = valueProducer.mCurrentSlicedBucket.begin()->second[0];
     EXPECT_EQ(true, curInterval.hasBase);
     EXPECT_EQ(130, curInterval.base.long_value);
     EXPECT_EQ(true, curInterval.hasValue);
@@ -1017,7 +1017,7 @@ TEST(ValueMetricProducerTest, TestPushedAggregateMin) {
     valueProducer.onMatchedLogEvent(1 /*log matcher index*/, *event1);
     // has one slice
     EXPECT_EQ(1UL, valueProducer.mCurrentSlicedBucket.size());
-    ValueMetricProducer::Interval curInterval = valueProducer.mCurrentSlicedBucket.begin()->second;
+    ValueMetricProducer::Interval curInterval = valueProducer.mCurrentSlicedBucket.begin()->second[0];
     EXPECT_EQ(10, curInterval.value.long_value);
     EXPECT_EQ(true, curInterval.hasValue);
 
@@ -1025,13 +1025,13 @@ TEST(ValueMetricProducerTest, TestPushedAggregateMin) {
 
     // has one slice
     EXPECT_EQ(1UL, valueProducer.mCurrentSlicedBucket.size());
-    curInterval = valueProducer.mCurrentSlicedBucket.begin()->second;
+    curInterval = valueProducer.mCurrentSlicedBucket.begin()->second[0];
     EXPECT_EQ(10, curInterval.value.long_value);
 
     valueProducer.flushIfNeededLocked(bucket3StartTimeNs);
     EXPECT_EQ(1UL, valueProducer.mPastBuckets.size());
     EXPECT_EQ(1UL, valueProducer.mPastBuckets.begin()->second.size());
-    EXPECT_EQ(10, valueProducer.mPastBuckets.begin()->second.back().value.long_value);
+    EXPECT_EQ(10, valueProducer.mPastBuckets.begin()->second.back().values[0].long_value);
 }
 
 TEST(ValueMetricProducerTest, TestPushedAggregateMax) {
@@ -1059,7 +1059,7 @@ TEST(ValueMetricProducerTest, TestPushedAggregateMax) {
     valueProducer.onMatchedLogEvent(1 /*log matcher index*/, *event1);
     // has one slice
     EXPECT_EQ(1UL, valueProducer.mCurrentSlicedBucket.size());
-    ValueMetricProducer::Interval curInterval = valueProducer.mCurrentSlicedBucket.begin()->second;
+    ValueMetricProducer::Interval curInterval = valueProducer.mCurrentSlicedBucket.begin()->second[0];
     EXPECT_EQ(10, curInterval.value.long_value);
     EXPECT_EQ(true, curInterval.hasValue);
 
@@ -1067,13 +1067,13 @@ TEST(ValueMetricProducerTest, TestPushedAggregateMax) {
 
     // has one slice
     EXPECT_EQ(1UL, valueProducer.mCurrentSlicedBucket.size());
-    curInterval = valueProducer.mCurrentSlicedBucket.begin()->second;
+    curInterval = valueProducer.mCurrentSlicedBucket.begin()->second[0];
     EXPECT_EQ(20, curInterval.value.long_value);
 
     valueProducer.flushIfNeededLocked(bucket3StartTimeNs);
     EXPECT_EQ(1UL, valueProducer.mPastBuckets.size());
     EXPECT_EQ(1UL, valueProducer.mPastBuckets.begin()->second.size());
-    EXPECT_EQ(20, valueProducer.mPastBuckets.begin()->second.back().value.long_value);
+    EXPECT_EQ(20, valueProducer.mPastBuckets.begin()->second.back().values[0].long_value);
 }
 
 TEST(ValueMetricProducerTest, TestPushedAggregateAvg) {
@@ -1102,7 +1102,7 @@ TEST(ValueMetricProducerTest, TestPushedAggregateAvg) {
     // has one slice
     EXPECT_EQ(1UL, valueProducer.mCurrentSlicedBucket.size());
     ValueMetricProducer::Interval curInterval;
-    curInterval = valueProducer.mCurrentSlicedBucket.begin()->second;
+    curInterval = valueProducer.mCurrentSlicedBucket.begin()->second[0];
     EXPECT_EQ(10, curInterval.value.long_value);
     EXPECT_EQ(true, curInterval.hasValue);
     EXPECT_EQ(1, curInterval.sampleSize);
@@ -1111,14 +1111,14 @@ TEST(ValueMetricProducerTest, TestPushedAggregateAvg) {
 
     // has one slice
     EXPECT_EQ(1UL, valueProducer.mCurrentSlicedBucket.size());
-    curInterval = valueProducer.mCurrentSlicedBucket.begin()->second;
+    curInterval = valueProducer.mCurrentSlicedBucket.begin()->second[0];
     EXPECT_EQ(25, curInterval.value.long_value);
     EXPECT_EQ(2, curInterval.sampleSize);
 
     valueProducer.flushIfNeededLocked(bucket3StartTimeNs);
     EXPECT_EQ(1UL, valueProducer.mPastBuckets.size());
     EXPECT_EQ(1UL, valueProducer.mPastBuckets.begin()->second.size());
-    EXPECT_TRUE(std::abs(valueProducer.mPastBuckets.begin()->second.back().value.double_value - 12.5) < epsilon);
+    EXPECT_TRUE(std::abs(valueProducer.mPastBuckets.begin()->second.back().values[0].double_value - 12.5) < epsilon);
 }
 
 TEST(ValueMetricProducerTest, TestPushedAggregateSum) {
@@ -1146,7 +1146,7 @@ TEST(ValueMetricProducerTest, TestPushedAggregateSum) {
     valueProducer.onMatchedLogEvent(1 /*log matcher index*/, *event1);
     // has one slice
     EXPECT_EQ(1UL, valueProducer.mCurrentSlicedBucket.size());
-    ValueMetricProducer::Interval curInterval = valueProducer.mCurrentSlicedBucket.begin()->second;
+    ValueMetricProducer::Interval curInterval = valueProducer.mCurrentSlicedBucket.begin()->second[0];
     EXPECT_EQ(10, curInterval.value.long_value);
     EXPECT_EQ(true, curInterval.hasValue);
 
@@ -1154,13 +1154,13 @@ TEST(ValueMetricProducerTest, TestPushedAggregateSum) {
 
     // has one slice
     EXPECT_EQ(1UL, valueProducer.mCurrentSlicedBucket.size());
-    curInterval = valueProducer.mCurrentSlicedBucket.begin()->second;
+    curInterval = valueProducer.mCurrentSlicedBucket.begin()->second[0];
     EXPECT_EQ(25, curInterval.value.long_value);
 
     valueProducer.flushIfNeededLocked(bucket3StartTimeNs);
     EXPECT_EQ(1UL, valueProducer.mPastBuckets.size());
     EXPECT_EQ(1UL, valueProducer.mPastBuckets.begin()->second.size());
-    EXPECT_EQ(25, valueProducer.mPastBuckets.begin()->second.back().value.long_value);
+    EXPECT_EQ(25, valueProducer.mPastBuckets.begin()->second.back().values[0].long_value);
 }
 
 TEST(ValueMetricProducerTest, TestSkipZeroDiffOutput) {
@@ -1189,7 +1189,7 @@ TEST(ValueMetricProducerTest, TestSkipZeroDiffOutput) {
     valueProducer.onMatchedLogEvent(1 /*log matcher index*/, *event1);
     // has one slice
     EXPECT_EQ(1UL, valueProducer.mCurrentSlicedBucket.size());
-    ValueMetricProducer::Interval curInterval = valueProducer.mCurrentSlicedBucket.begin()->second;
+    ValueMetricProducer::Interval curInterval = valueProducer.mCurrentSlicedBucket.begin()->second[0];
     EXPECT_EQ(true, curInterval.hasBase);
     EXPECT_EQ(10, curInterval.base.long_value);
     EXPECT_EQ(false, curInterval.hasValue);
@@ -1198,7 +1198,7 @@ TEST(ValueMetricProducerTest, TestSkipZeroDiffOutput) {
 
     // has one slice
     EXPECT_EQ(1UL, valueProducer.mCurrentSlicedBucket.size());
-    curInterval = valueProducer.mCurrentSlicedBucket.begin()->second;
+    curInterval = valueProducer.mCurrentSlicedBucket.begin()->second[0];
     EXPECT_EQ(true, curInterval.hasValue);
     EXPECT_EQ(5, curInterval.value.long_value);
 
@@ -1209,7 +1209,7 @@ TEST(ValueMetricProducerTest, TestSkipZeroDiffOutput) {
     event3->init();
     valueProducer.onMatchedLogEvent(1 /*log matcher index*/, *event3);
     EXPECT_EQ(1UL, valueProducer.mCurrentSlicedBucket.size());
-    curInterval = valueProducer.mCurrentSlicedBucket.begin()->second;
+    curInterval = valueProducer.mCurrentSlicedBucket.begin()->second[0];
     EXPECT_EQ(true, curInterval.hasBase);
     EXPECT_EQ(15, curInterval.base.long_value);
     EXPECT_EQ(true, curInterval.hasValue);
@@ -1220,7 +1220,7 @@ TEST(ValueMetricProducerTest, TestSkipZeroDiffOutput) {
     event4->init();
     valueProducer.onMatchedLogEvent(1 /*log matcher index*/, *event4);
     EXPECT_EQ(1UL, valueProducer.mCurrentSlicedBucket.size());
-    curInterval = valueProducer.mCurrentSlicedBucket.begin()->second;
+    curInterval = valueProducer.mCurrentSlicedBucket.begin()->second[0];
     EXPECT_EQ(true, curInterval.hasBase);
     EXPECT_EQ(15, curInterval.base.long_value);
     EXPECT_EQ(true, curInterval.hasValue);
@@ -1228,7 +1228,7 @@ TEST(ValueMetricProducerTest, TestSkipZeroDiffOutput) {
     valueProducer.flushIfNeededLocked(bucket3StartTimeNs);
     EXPECT_EQ(1UL, valueProducer.mPastBuckets.size());
     EXPECT_EQ(1UL, valueProducer.mPastBuckets.begin()->second.size());
-    EXPECT_EQ(5, valueProducer.mPastBuckets.begin()->second.back().value.long_value);
+    EXPECT_EQ(5, valueProducer.mPastBuckets.begin()->second.back().values[0].long_value);
 }
 
 }  // namespace statsd
