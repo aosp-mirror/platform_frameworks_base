@@ -19,6 +19,7 @@ package android.service.carrier;
 import android.annotation.Nullable;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.telephony.TelephonyManager;
 
 import com.android.internal.telephony.uicc.IccUtils;
 
@@ -26,7 +27,10 @@ import java.util.Objects;
 
 /**
  * Used to pass info to CarrierConfigService implementations so they can decide what values to
- * return.
+ * return. Instead of passing mcc, mnc, gid1, gid2, spn, imsi to locate carrier information,
+ * CarrierIdentifier also include carrier id {@link TelephonyManager#getSimCarrierId()},
+ * a platform-wide unique identifier for each carrier. CarrierConfigService can directly use
+ * carrier id as the key to look up the carrier info.
  */
 public class CarrierIdentifier implements Parcelable {
 
@@ -49,15 +53,40 @@ public class CarrierIdentifier implements Parcelable {
     private @Nullable String mImsi;
     private @Nullable String mGid1;
     private @Nullable String mGid2;
+    private int mCarrierId = TelephonyManager.UNKNOWN_CARRIER_ID;
+    private int mPreciseCarrierId = TelephonyManager.UNKNOWN_CARRIER_ID;
 
     public CarrierIdentifier(String mcc, String mnc, @Nullable String spn, @Nullable String imsi,
             @Nullable String gid1, @Nullable String gid2) {
+        this(mcc, mnc, spn, imsi, gid1, gid2, TelephonyManager.UNKNOWN_CARRIER_ID,
+                TelephonyManager.UNKNOWN_CARRIER_ID);
+    }
+
+    /**
+     * @param mcc mobile country code
+     * @param mnc mobile network code
+     * @param spn service provider name
+     * @param imsi International Mobile Subscriber Identity {@link TelephonyManager#getSubscriberId()}
+     * @param gid1 group id level 1 {@link TelephonyManager#getGroupIdLevel1()}
+     * @param gid2 group id level 2
+     * @param carrierid carrier unique identifier {@link TelephonyManager#getSimCarrierId()}, used
+     *                  to uniquely identify the carrier and look up the carrier configurations.
+     * @param preciseCarrierId precise carrier identifier {@link TelephonyManager#getSimPreciseCarrierId()}
+     * @hide
+     *
+     * TODO: expose this to public API
+     */
+    public CarrierIdentifier(String mcc, String mnc, @Nullable String spn,
+                             @Nullable String imsi, @Nullable String gid1, @Nullable String gid2,
+                             int carrierid, int preciseCarrierId) {
         mMcc = mcc;
         mMnc = mnc;
         mSpn = spn;
         mImsi = imsi;
         mGid1 = gid1;
         mGid2 = gid2;
+        mCarrierId = carrierid;
+        mPreciseCarrierId = preciseCarrierId;
     }
 
     /**
@@ -125,6 +154,22 @@ public class CarrierIdentifier implements Parcelable {
         return mGid2;
     }
 
+    /**
+     * Get the carrier id {@link TelephonyManager#getSimCarrierId() }
+     * @hide
+     */
+    public int getCarrierId() {
+        return mCarrierId;
+    }
+
+    /**
+     * Get the precise carrier id {@link TelephonyManager#getSimPreciseCarrierId()}
+     * @hide
+     */
+    public int getPreciseCarrierId() {
+        return mPreciseCarrierId;
+    }
+
     @Override
     public boolean equals(Object obj) {
         if (this == obj) {
@@ -140,19 +185,14 @@ public class CarrierIdentifier implements Parcelable {
                 && Objects.equals(mSpn, that.mSpn)
                 && Objects.equals(mImsi, that.mImsi)
                 && Objects.equals(mGid1, that.mGid1)
-                && Objects.equals(mGid2, that.mGid2);
+                && Objects.equals(mGid2, that.mGid2)
+                && Objects.equals(mCarrierId, that.mCarrierId)
+                && Objects.equals(mPreciseCarrierId, that.mPreciseCarrierId);
     }
 
     @Override
-    public int hashCode() {
-        int result = 1;
-        result = 31 * result + Objects.hashCode(mMcc);
-        result = 31 * result + Objects.hashCode(mMnc);
-        result = 31 * result + Objects.hashCode(mSpn);
-        result = 31 * result + Objects.hashCode(mImsi);
-        result = 31 * result + Objects.hashCode(mGid1);
-        result = 31 * result + Objects.hashCode(mGid2);
-        return result;
+    public int hashCode(){
+        return Objects.hash(mMcc, mMnc, mSpn, mImsi, mGid1, mGid2, mCarrierId, mPreciseCarrierId);
     }
 
     @Override
@@ -168,18 +208,22 @@ public class CarrierIdentifier implements Parcelable {
         out.writeString(mImsi);
         out.writeString(mGid1);
         out.writeString(mGid2);
+        out.writeInt(mCarrierId);
+        out.writeInt(mPreciseCarrierId);
     }
 
     @Override
     public String toString() {
       return "CarrierIdentifier{"
-          + "mcc=" + mMcc
-          + ",mnc=" + mMnc
-          + ",spn=" + mSpn
-          + ",imsi=" + mImsi
-          + ",gid1=" + mGid1
-          + ",gid2=" + mGid2
-          + "}";
+              + "mcc=" + mMcc
+              + ",mnc=" + mMnc
+              + ",spn=" + mSpn
+              + ",imsi=" + mImsi
+              + ",gid1=" + mGid1
+              + ",gid2=" + mGid2
+              + ",carrierid=" + mCarrierId
+              + ",mPreciseCarrierId=" + mPreciseCarrierId
+              + "}";
     }
 
     /** @hide */
@@ -190,6 +234,8 @@ public class CarrierIdentifier implements Parcelable {
         mImsi = in.readString();
         mGid1 = in.readString();
         mGid2 = in.readString();
+        mCarrierId = in.readInt();
+        mPreciseCarrierId = in.readInt();
     }
 
     /** @hide */
