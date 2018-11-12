@@ -41,7 +41,7 @@
     <string name="unknown_apps_user_restriction_dlg_text" msgid="151020786933988344">"Este utilizador não pode instalar aplicações desconhecidas."</string>
     <string name="install_apps_user_restriction_dlg_text" msgid="2154119597001074022">"Este utilizador não tem autorização para instalar aplicações."</string>
     <string name="ok" msgid="7871959885003339302">"OK"</string>
-    <string name="manage_applications" msgid="5400164782453975580">"Gerir aplic."</string>
+    <string name="manage_applications" msgid="5400164782453975580">"Gerir app"</string>
     <string name="out_of_space_dlg_title" msgid="4156690013884649502">"Sem espaço"</string>
     <string name="out_of_space_dlg_text" msgid="8727714096031856231">"Não foi possível instalar a aplicação <xliff:g id="APP_NAME">%1$s</xliff:g>. Liberte algum espaço e tente novamente."</string>
     <string name="app_not_found_dlg_title" msgid="5107924008597470285">"Aplicação não encontrada"</string>
@@ -70,7 +70,7 @@
     <string name="uninstall_failed_device_policy_manager_of_user" msgid="4813104025494168064">"Não é possível desinstalar a aplicação de administração de dispositivos ativa para <xliff:g id="USERNAME">%1$s</xliff:g>."</string>
     <string name="uninstall_all_blocked_profile_owner" msgid="2009393666026751501">"Esta aplicação é necessária para alguns utilizadores ou perfis e foi desinstalada para outros."</string>
     <string name="uninstall_blocked_profile_owner" msgid="6373897407002404848">"O perfil necessita desta aplicação e não é possível desinstalá-la."</string>
-    <string name="uninstall_blocked_device_owner" msgid="6724602931761073901">"Esta aplic. é exigida pelo administrador do disp. e não pode ser desinstalada."</string>
+    <string name="uninstall_blocked_device_owner" msgid="6724602931761073901">"Esta app é exigida pelo administrador do disp. e não pode ser desinstalada."</string>
     <string name="manage_device_administrators" msgid="3092696419363842816">"Gerir aplicações de administração de dispositivos"</string>
     <string name="manage_users" msgid="1243995386982560813">"Gerir utilizadores"</string>
     <string name="uninstall_failed_msg" msgid="2176744834786696012">"Não foi possível desinstalar a aplicação <xliff:g id="APP_NAME">%1$s</xliff:g>."</string>
