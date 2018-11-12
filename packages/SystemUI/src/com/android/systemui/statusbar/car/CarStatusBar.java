@@ -21,7 +21,6 @@ import android.car.drivingstate.CarDrivingStateEvent;
 import android.graphics.PixelFormat;
 import android.graphics.drawable.Drawable;
 import android.util.Log;
-import android.view.Display;
 import android.view.Gravity;
 import android.view.View;
 import android.view.ViewGroup;
@@ -269,13 +268,7 @@ public class CarStatusBar extends StatusBar implements
         buildNavBarContent();
         attachNavBarWindows();
 
-        // Add external navigation bars if more than one displays exist.
-        final Display[] displays = mDisplayManager.getDisplays();
-
-        for (Display display : displays) {
-            // TODO(115978725): Add phone navigationBar for now
-            addExternalNavigationBar(display);
-        }
+        mNavigationBarController.createNavigationBars();
     }
 
     private void buildNavBarContent() {
