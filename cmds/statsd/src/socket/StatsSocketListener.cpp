@@ -40,7 +40,6 @@ namespace os {
 namespace statsd {
 
 static const int kLogMsgHeaderSize = 28;
-static const int kLibLogTag = 1006;
 
 StatsSocketListener::StatsSocketListener(const sp<LogListener>& listener)
     : SocketListener(getLogSocket(), false /*start listen*/), mListener(listener) {
@@ -109,10 +108,11 @@ bool StatsSocketListener::onDataAvailable(SocketClient* cli) {
     // TODO(b/80538532): In addition to log it in StatsdStats, we should properly reset the config.
     if (n == sizeof(android_log_event_int_t)) {
         android_log_event_int_t* int_event = reinterpret_cast<android_log_event_int_t*>(ptr);
-        if (int_event->header.tag == kLibLogTag && int_event->payload.type == EVENT_TYPE_INT) {
-            ALOGE("Found dropped events: %d", int_event->payload.data);
+        if (int_event->payload.type == EVENT_TYPE_INT) {
+            ALOGE("Found dropped events: %d error %d", int_event->payload.data,
+                  int_event->header.tag);
             StatsdStats::getInstance().noteLogLost((int32_t)getWallClockSec(),
-                                                   int_event->payload.data);
+                                                   int_event->payload.data, int_event->header.tag);
             return true;
         }
     }

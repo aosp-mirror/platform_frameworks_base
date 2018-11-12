@@ -398,4 +398,11 @@ message StatsdStatsReport {
     repeated int64 log_loss_stats = 14;
 
     repeated int32 system_restart_sec = 15;
+
+    message LogLossStats {
+        optional int32 detected_time_sec = 1;
+        optional int32 count = 2;
+        optional int32 last_error = 3;
+    }
+    repeated LogLossStats detected_log_loss = 16;
 }
