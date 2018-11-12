@@ -8322,6 +8322,28 @@ public class TelephonyManager {
     }
 
     /**
+     * Returns MNO carrier id of the current subscription’s MCCMNC.
+     * <p>MNO carrier id can be solely identified by subscription mccmnc. This is mainly used
+     * for MNO fallback when exact carrier id {@link #getSimCarrierId()}
+     * configurations are not found.
+     *
+     * @return MNO carrier id of the current subscription. Return the value same as carrier id
+     * {@link #getSimCarrierId()}, if MNO carrier id cannot be identified.
+     * @hide
+     */
+    public int getSimMNOCarrierId() {
+        try {
+            ITelephony service = getITelephony();
+            if (service != null) {
+                return service.getSubscriptionMNOCarrierId(getSubId());
+            }
+        } catch (RemoteException ex) {
+            // This could happen if binder process crashes.
+        }
+        return UNKNOWN_CARRIER_ID;
+    }
+
+    /**
      * Return the application ID for the uicc application type like {@link #APPTYPE_CSIM}.
      * All uicc applications are uniquely identified by application ID. See ETSI 102.221 and 101.220
      * <p>Requires Permission:
