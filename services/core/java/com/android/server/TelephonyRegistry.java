@@ -47,7 +47,6 @@ import android.telephony.ServiceState;
 import android.telephony.SignalStrength;
 import android.telephony.SubscriptionManager;
 import android.telephony.TelephonyManager;
-import android.telephony.VoLteServiceState;
 import android.util.LocalLog;
 import android.util.StatsLog;
 
@@ -196,7 +195,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     private ArrayList<List<PhysicalChannelConfig>> mPhysicalChannelConfigs;
 
-    private VoLteServiceState mVoLteServiceState = new VoLteServiceState();
+    private int[] mSrvccState;
 
     private int mDefaultSubId = SubscriptionManager.INVALID_SUBSCRIPTION_ID;
 
@@ -230,8 +229,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
 
     static final int ENFORCE_PHONE_STATE_PERMISSION_MASK =
                 PhoneStateListener.LISTEN_CALL_FORWARDING_INDICATOR |
-                PhoneStateListener.LISTEN_MESSAGE_WAITING_INDICATOR |
-                PhoneStateListener.LISTEN_VOLTE_STATE;
+                PhoneStateListener.LISTEN_MESSAGE_WAITING_INDICATOR;
 
     static final int PRECISE_PHONE_STATE_PERMISSION_MASK =
                 PhoneStateListener.LISTEN_PRECISE_CALL_STATE |
@@ -356,6 +354,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
         mCallForwarding = new boolean[numPhones];
         mCellLocation = new Bundle[numPhones];
         mCellInfo = new ArrayList<List<CellInfo>>();
+        mSrvccState = new int[numPhones];
         mPhysicalChannelConfigs = new ArrayList<List<PhysicalChannelConfig>>();
         for (int i = 0; i < numPhones; i++) {
             mCallState[i] =  TelephonyManager.CALL_STATE_IDLE;
@@ -371,6 +370,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             mCallForwarding[i] =  false;
             mCellLocation[i] = new Bundle();
             mCellInfo.add(i, null);
+            mSrvccState[i] = TelephonyManager.SRVCC_STATE_HANDOVER_NONE;
             mPhysicalChannelConfigs.add(i, new ArrayList<PhysicalChannelConfig>());
         }
 
@@ -768,6 +768,13 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                     if ((events & PhoneStateListener.LISTEN_RADIO_POWER_STATE_CHANGED) != 0) {
                         try {
                             r.callback.onRadioPowerStateChanged(mRadioPowerState);
+                        } catch (RemoteException ex) {
+                            remove(r.binder);
+                        }
+                    }
+                    if ((events & PhoneStateListener.LISTEN_SRVCC_STATE_CHANGED) != 0) {
+                        try {
+                            r.callback.onSrvccStateChanged(mSrvccState[phoneId]);
                         } catch (RemoteException ex) {
                             remove(r.binder);
                         }
@@ -1522,19 +1529,30 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
                 TelephonyManager.NETWORK_TYPE_UNKNOWN, apnType, apn, reason, null, failCause);
     }
 
-    public void notifyVoLteServiceStateChanged(VoLteServiceState lteState) {
-        if (!checkNotifyPermission("notifyVoLteServiceStateChanged()")) {
+    @Override
+    public void notifySrvccStateChanged(int subId, @TelephonyManager.SrvccState int state) {
+        if (!checkNotifyPermission("notifySrvccStateChanged()")) {
             return;
         }
+        if (VDBG) {
+            log("notifySrvccStateChanged: subId=" + subId + " srvccState=" + state);
+        }
+        int phoneId = SubscriptionManager.getPhoneId(subId);
         synchronized (mRecords) {
-            mVoLteServiceState = lteState;
-            for (Record r : mRecords) {
-                if (r.matchPhoneStateListenerEvent(PhoneStateListener.LISTEN_VOLTE_STATE)) {
-                    try {
-                        r.callback.onVoLteServiceStateChanged(
-                                new VoLteServiceState(mVoLteServiceState));
-                    } catch (RemoteException ex) {
-                        mRemoveList.add(r.binder);
+            if (validatePhoneId(phoneId)) {
+                mSrvccState[phoneId]  = state;
+                for (Record r : mRecords) {
+                    if (r.matchPhoneStateListenerEvent(
+                            PhoneStateListener.LISTEN_SRVCC_STATE_CHANGED) &&
+                            idMatch(r.subId, subId, phoneId)) {
+                        try {
+                            if (DBG_LOC) {
+                                log("notifySrvccStateChanged: mSrvccState=" + state + " r=" + r);
+                            }
+                            r.callback.onSrvccStateChanged(state);
+                        } catch (RemoteException ex) {
+                            mRemoveList.add(r.binder);
+                        }
                     }
                 }
             }
@@ -1679,7 +1697,7 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             pw.println("mRingingCallState=" + mRingingCallState);
             pw.println("mForegroundCallState=" + mForegroundCallState);
             pw.println("mBackgroundCallState=" + mBackgroundCallState);
-            pw.println("mVoLteServiceState=" + mVoLteServiceState);
+            pw.println("mSrvccState=" + mSrvccState);
             pw.println("mPhoneCapability=" + mPhoneCapability);
             pw.println("mPreferredDataSubId=" + mPreferredDataSubId);
             pw.println("mRadioPowerState=" + mRadioPowerState);
@@ -1929,6 +1947,12 @@ public class TelephonyRegistry extends ITelephonyRegistry.Stub {
             mContext.enforceCallingOrSelfPermission(
                     android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, null);
         }
+
+        if ((events & PhoneStateListener.LISTEN_SRVCC_STATE_CHANGED) != 0) {
+            mContext.enforceCallingOrSelfPermission(
+                    android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE, null);
+        }
+
 
         return true;
     }
