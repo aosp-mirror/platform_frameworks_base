@@ -18,7 +18,6 @@ package android.media;
 
 import android.annotation.IntDef;
 import android.annotation.NonNull;
-import android.annotation.TestApi;
 import android.icu.util.ULocale;
 
 import java.lang.annotation.Retention;
@@ -172,6 +171,10 @@ public final class AudioPresentation {
         return localeLabels;
     }
 
+    private Map<ULocale, String> getULabels() {
+        return mLabels;
+    }
+
     /**
      * @return the locale corresponding to audio presentation's ISO 639-1/639-2 language code.
      */
@@ -231,17 +234,24 @@ public final class AudioPresentation {
         AudioPresentation obj = (AudioPresentation) o;
         return mPresentationId == obj.getPresentationId()
                 && mProgramId == obj.getProgramId()
-                && mLanguage == obj.getULocale()
+                && mLanguage.equals(obj.getULocale())
                 && mMasteringIndication == obj.getMasteringIndication()
                 && mAudioDescriptionAvailable == obj.hasAudioDescription()
                 && mSpokenSubtitlesAvailable == obj.hasSpokenSubtitles()
                 && mDialogueEnhancementAvailable == obj.hasDialogueEnhancement()
-                && mLabels.equals(obj.getLabels());
+                && mLabels.equals(obj.getULabels());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hashCode(mPresentationId);
+        return Objects.hash(mPresentationId,
+                mProgramId,
+                mLanguage.hashCode(),
+                mMasteringIndication,
+                mAudioDescriptionAvailable,
+                mSpokenSubtitlesAvailable,
+                mDialogueEnhancementAvailable,
+                mLabels.hashCode());
     }
 
     /**
