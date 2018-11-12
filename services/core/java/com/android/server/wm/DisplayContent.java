@@ -2132,7 +2132,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         if (density == mInitialDisplayDensity) {
             density = 0;
         }
-        mService.mDisplaySettings.setForcedDensity(this, density, userId);
+        mService.mDisplayWindowSettings.setForcedDensity(this, density, userId);
     }
 
     /** @param mode {@link #FORCE_SCALING_MODE_AUTO} or {@link #FORCE_SCALING_MODE_DISABLED}. */
@@ -2145,7 +2145,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         Slog.i(TAG_WM, "Using display scaling mode: " + (mDisplayScalingDisabled ? "off" : "auto"));
         mService.reconfigureDisplayLocked(this);
 
-        mService.mDisplaySettings.setForcedScalingMode(this, mode);
+        mService.mDisplayWindowSettings.setForcedScalingMode(this, mode);
     }
 
     /** If the given width and height equal to initial size, the setting will be cleared. */
@@ -2167,7 +2167,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         if (clear) {
             width = height = 0;
         }
-        mService.mDisplaySettings.setForcedSize(this, width, height);
+        mService.mDisplayWindowSettings.setForcedSize(this, width, height);
     }
 
     void getStableRect(Rect out) {

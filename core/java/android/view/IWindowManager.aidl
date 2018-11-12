@@ -432,4 +432,120 @@ interface IWindowManager
      * @param displayId The id of the display.
      */
     void dontOverrideDisplayInfo(int displayId);
+
+    /**
+     * Gets the windowing mode of the display.
+     *
+     * @param displayId The id of the display.
+     * @return {@link WindowConfiguration.WindowingMode}
+     */
+    int getWindowingMode(int displayId);
+
+    /**
+     * Sets the windowing mode of the display.
+     *
+     * @param displayId The id of the display.
+     * @param mode {@link WindowConfiguration.WindowingMode}
+     */
+    void setWindowingMode(int displayId, int mode);
+
+    /**
+     * Gets current remove content mode of the display.
+     * <p>
+     * What actions should be performed with the display's content when it is removed. Default
+     * behavior for public displays in this case is to move all activities to the primary display
+     * and make it focused. For private display is to destroy all activities.
+     * </p>
+     *
+     * @param displayId The id of the display.
+     * @return The remove content mode of the display.
+     * @see WindowManager#REMOVE_CONTENT_MODE_MOVE_TO_PRIMARY
+     * @see WindowManager#REMOVE_CONTENT_MODE_DESTROY
+     */
+    int getRemoveContentMode(int displayId);
+
+    /**
+     * Sets the remove content mode of the display.
+     * <p>
+     * This mode indicates what actions should be performed with the display's content when it is
+     * removed.
+     * </p>
+     *
+     * @param displayId The id of the display.
+     * @param mode Remove content mode.
+     * @see WindowManager#REMOVE_CONTENT_MODE_MOVE_TO_PRIMARY
+     * @see WindowManager#REMOVE_CONTENT_MODE_DESTROY
+     */
+    void setRemoveContentMode(int displayId, int mode);
+
+    /**
+     * Indicates that the display should show its content when non-secure keyguard is shown.
+     * <p>
+     * This flag identifies secondary displays that will continue showing content if keyguard can be
+     * dismissed without entering credentials.
+     * </p><p>
+     * An example of usage is a virtual display which content is displayed on external hardware
+     * display that is not visible to the system directly.
+     * </p>
+     *
+     * @param displayId The id of the display.
+     * @return {@code true} if the display should show its content when non-secure keyguard is
+     *         shown.
+     * @see KeyguardManager#isDeviceSecure()
+     * @see KeyguardManager#isDeviceLocked()
+     */
+    boolean shouldShowWithInsecureKeyguard(int displayId);
+
+    /**
+     * Sets that the display should show its content when non-secure keyguard is shown.
+     *
+     * @param displayId The id of the display.
+     * @param shouldShow Indicates that the display should show its content when non-secure keyguard
+     *                  is shown.
+     * @see KeyguardManager#isDeviceSecure()
+     * @see KeyguardManager#isDeviceLocked()
+     */
+    void setShouldShowWithInsecureKeyguard(int displayId, boolean shouldShow);
+
+    /**
+     * Indicates the display should show system decors.
+     * <p>
+     * System decors include status bar, navigation bar, launcher.
+     * </p>
+     *
+     * @param displayId The id of the display.
+     * @return {@code true} if the display should show system decors.
+     */
+    boolean shouldShowSystemDecors(int displayId);
+
+    /**
+     * Sets that the display should show system decors.
+     * <p>
+     * System decors include status bar, navigation bar, launcher.
+     * </p>
+     *
+     * @param displayId The id of the display.
+     * @param shouldShow Indicates that the display should show system decors.
+     */
+    void setShouldShowSystemDecors(int displayId, boolean shouldShow);
+
+    /**
+     * Indicates that the display should show IME.
+     *
+     * @param displayId The id of the display.
+     * @return {@code true} if the display should show IME.
+     * @see KeyguardManager#isDeviceSecure()
+     * @see KeyguardManager#isDeviceLocked()
+     */
+    boolean shouldShowIme(int displayId);
+
+    /**
+     * Sets that the display should show IME.
+     *
+     * @param displayId The id of the display.
+     * @param shouldShow Indicates that the display should show IME.
+     * @see KeyguardManager#isDeviceSecure()
+     * @see KeyguardManager#isDeviceLocked()
+     */
+    void setShouldShowIme(int displayId, boolean shouldShow);
 }

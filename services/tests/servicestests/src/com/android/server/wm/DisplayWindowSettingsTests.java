@@ -16,6 +16,9 @@
 
 package com.android.server.wm;
 
+import static android.view.WindowManager.REMOVE_CONTENT_MODE_DESTROY;
+import static android.view.WindowManager.REMOVE_CONTENT_MODE_MOVE_TO_PRIMARY;
+
 import static androidx.test.platform.app.InstrumentationRegistry.getInstrumentation;
 
 import static org.junit.Assert.assertEquals;
@@ -43,20 +46,23 @@ import org.junit.Test;
 import java.io.File;
 
 /**
- * Tests for the {@link DisplaySettings} class.
+ * Tests for the {@link DisplayWindowSettings} class.
  *
  * Build/Install/Run:
- *  atest FrameworksServicesTests:DisplaySettingsTests
+ *  atest FrameworksServicesTests:DisplayWindowSettingsTests
  */
 @SmallTest
 @Presubmit
-public class DisplaySettingsTests extends WindowTestsBase {
+public class DisplayWindowSettingsTests extends WindowTestsBase {
 
     private static final File TEST_FOLDER = getInstrumentation().getTargetContext().getCacheDir();
-    private DisplaySettings mTarget;
+    private DisplayWindowSettings mTarget;
+
+    DisplayInfo mPrivateDisplayInfo;
 
     private DisplayContent mPrimaryDisplay;
     private DisplayContent mSecondaryDisplay;
+    private DisplayContent mPrivateDisplay;
 
     @Before
     public void setUp() throws Exception {
@@ -66,11 +72,17 @@ public class DisplaySettingsTests extends WindowTestsBase {
         mWm.setIsPc(false);
         mWm.setForceDesktopModeOnExternalDisplays(false);
 
-        mTarget = new DisplaySettings(mWm, TEST_FOLDER);
+        mTarget = new DisplayWindowSettings(mWm, TEST_FOLDER);
 
         mPrimaryDisplay = mWm.getDefaultDisplayContentLocked();
         mSecondaryDisplay = mDisplayContent;
         assertNotEquals(Display.DEFAULT_DISPLAY, mSecondaryDisplay.getDisplayId());
+
+        mPrivateDisplayInfo = new DisplayInfo(mDisplayInfo);
+        mPrivateDisplayInfo.flags |= Display.FLAG_PRIVATE;
+        mPrivateDisplay = createNewDisplay(mPrivateDisplayInfo);
+        assertNotEquals(Display.DEFAULT_DISPLAY, mPrivateDisplay.getDisplayId());
+        assertNotEquals(mSecondaryDisplay.getDisplayId(), mPrivateDisplay.getDisplayId());
     }
 
     @After
@@ -261,6 +273,67 @@ public class DisplaySettingsTests extends WindowTestsBase {
     }
 
     @Test
+    public void testPrivateDisplayDefaultToDestroyContent() {
+        assertEquals(REMOVE_CONTENT_MODE_DESTROY,
+                mTarget.getRemoveContentModeLocked(mPrivateDisplay));
+    }
+
+    @Test
+    public void testPublicDisplayDefaultToMoveToPrimary() {
+        assertEquals(REMOVE_CONTENT_MODE_MOVE_TO_PRIMARY,
+                mTarget.getRemoveContentModeLocked(mSecondaryDisplay));
+    }
+
+    @Test
+    public void testDefaultToNotShowWithInsecureKeyguard() {
+        assertFalse(mTarget.shouldShowWithInsecureKeyguardLocked(mPrivateDisplay));
+        assertFalse(mTarget.shouldShowWithInsecureKeyguardLocked(mSecondaryDisplay));
+    }
+
+    @Test
+    public void testPublicDisplayNotAllowSetShouldShowWithInsecureKeyguard() {
+        mTarget.setShouldShowWithInsecureKeyguardLocked(mSecondaryDisplay, true);
+
+        assertFalse(mTarget.shouldShowWithInsecureKeyguardLocked(mSecondaryDisplay));
+    }
+
+    @Test
+    public void testPrivateDisplayAllowSetShouldShowWithInsecureKeyguard() {
+        mTarget.setShouldShowWithInsecureKeyguardLocked(mPrivateDisplay, true);
+
+        assertTrue(mTarget.shouldShowWithInsecureKeyguardLocked(mPrivateDisplay));
+    }
+
+    @Test
+    public void testPrimaryDisplayShouldShowSystemDecors() {
+        assertTrue(mTarget.shouldShowSystemDecorsLocked(mPrimaryDisplay));
+
+        mTarget.setShouldShowSystemDecorsLocked(mPrimaryDisplay, false);
+
+        // Default display should show system decors
+        assertTrue(mTarget.shouldShowSystemDecorsLocked(mPrimaryDisplay));
+    }
+
+    @Test
+    public void testSecondaryDisplayDefaultToNotShowSystemDecors() {
+        assertFalse(mTarget.shouldShowSystemDecorsLocked(mSecondaryDisplay));
+    }
+
+    @Test
+    public void testPrimaryDisplayShouldShowIme() {
+        assertTrue(mTarget.shouldShowImeLocked(mPrimaryDisplay));
+
+        mTarget.setShouldShowImeLocked(mPrimaryDisplay, false);
+
+        assertTrue(mTarget.shouldShowImeLocked(mPrimaryDisplay));
+    }
+
+    @Test
+    public void testSecondaryDisplayDefaultToNotShowIme() {
+        assertFalse(mTarget.shouldShowImeLocked(mSecondaryDisplay));
+    }
+
+    @Test
     public void testPersistUserRotationModeInSameInstance() {
         mTarget.setUserRotation(mSecondaryDisplay, WindowManagerPolicy.USER_ROTATION_LOCKED,
                 Surface.ROTATION_90);
@@ -317,11 +390,11 @@ public class DisplaySettingsTests extends WindowTestsBase {
 
     /**
      * This method helps to ensure read and write persistent settings successfully because the
-     * constructor of {@link DisplaySettings} should read the persistent file from the given path
-     * that also means the previous state must be written correctly.
+     * constructor of {@link DisplayWindowSettings} should read the persistent file from the given
+     * path that also means the previous state must be written correctly.
      */
     private void applySettingsToDisplayByNewInstance(DisplayContent display) {
-        new DisplaySettings(mWm, TEST_FOLDER).applySettingsToDisplayLocked(display);
+        new DisplayWindowSettings(mWm, TEST_FOLDER).applySettingsToDisplayLocked(display);
     }
 
     private static boolean deleteRecursively(File file) {

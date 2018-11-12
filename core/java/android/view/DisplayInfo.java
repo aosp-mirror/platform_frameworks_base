@@ -266,6 +266,7 @@ public final class DisplayInfo implements Parcelable {
      *
      * @see Display#getRemoveMode()
      */
+    // TODO (b/114338689): Remove the flag and use IWindowManager#getRemoveContentMode
     public int removeMode = Display.REMOVE_MODE_MOVE_CONTENT_TO_PRIMARY;
 
     public static final Creator<DisplayInfo> CREATOR = new Creator<DisplayInfo>() {

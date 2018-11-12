@@ -95,12 +95,14 @@ final class DisplayDeviceInfo {
     /**
      * Flag: This display can show its content when non-secure keyguard is shown.
      */
+    // TODO (b/114338689): Remove the flag and use IWindowManager#shouldShowWithInsecureKeyguard
     public static final int FLAG_CAN_SHOW_WITH_INSECURE_KEYGUARD = 1 << 9;
 
     /**
      * Flag: This display will destroy its content on removal.
      * @hide
      */
+    // TODO (b/114338689): Remove the flag and use WindowManager#REMOVE_CONTENT_MODE_DESTROY
     public static final int FLAG_DESTROY_CONTENT_ON_REMOVAL = 1 << 10;
 
     /**
@@ -114,6 +116,7 @@ final class DisplayDeviceInfo {
      * status bar, navigation bar, home activity or IME.
      * @hide
      */
+    // TODO (b/114338689): Remove the flag and use IWindowManager#setShouldShowSystemDecors
     public static final int FLAG_SHOULD_SHOW_SYSTEM_DECORATIONS = 1 << 12;
 
     /**
