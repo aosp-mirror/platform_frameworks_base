@@ -95,6 +95,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
     private float mFirstElementRoundness;
     private Rect mClipRect = new Rect();
     private int mCutoutHeight;
+    private int mGapHeight;
 
     private final StateListener mStateListener = this::setStatusBarState;
 
@@ -154,6 +155,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
         mScrollFastThreshold = res.getDimensionPixelOffset(R.dimen.scroll_fast_threshold);
         mShowNotificationShelf = res.getBoolean(R.bool.config_showNotificationShelf);
         mIconSize = res.getDimensionPixelSize(com.android.internal.R.dimen.status_bar_icon_size);
+        mGapHeight = res.getDimensionPixelSize(R.dimen.qs_notification_padding);
 
         if (!mShowNotificationShelf) {
             setVisibility(GONE);
@@ -276,6 +278,7 @@ public class NotificationShelf extends ActivatableNotificationView implements
         int baseZHeight = mAmbientState.getBaseZHeight();
         int backgroundTop = 0;
         float firstElementRoundness = 0.0f;
+        ExpandableNotificationRow previousRow = null;
 
         for (int i = 0; i < mHostLayout.getChildCount(); i++) {
             ExpandableView child = (ExpandableView) mHostLayout.getChildAt(i);
@@ -343,8 +346,27 @@ public class NotificationShelf extends ActivatableNotificationView implements
                             + " \n number of notifications: " + mHostLayout.getChildCount() );
                 }
             }
+            if (row.isFirstInSection() && previousRow != null && previousRow.isLastInSection()) {
+                // If the top of the shelf is between the view before a gap and the view after a gap
+                // then we need to adjust the shelf's top roundness.
+                float distanceToGapBottom = row.getTranslationY() - getTranslationY();
+                float distanceToGapTop = getTranslationY()
+                        - (previousRow.getTranslationY() + previousRow.getActualHeight());
+                if (distanceToGapTop > 0) {
+                    // We interpolate our top roundness so that it's fully rounded if we're at the
+                    // bottom of the gap, and not rounded at all if we're at the top of the gap
+                    // (directly up against the bottom of previousRow)
+                    // Then we apply the same roundness to the bottom of previousRow so that the
+                    // corners join together as the shelf approaches previousRow.
+                    firstElementRoundness = (float) Math.min(1.0, distanceToGapTop / mGapHeight);
+                    previousRow.setBottomRoundness(firstElementRoundness,
+                            false /* don't animate */);
+                    backgroundTop = (int) distanceToGapBottom;
+                }
+            }
             notGoneIndex++;
             previousColor = ownColorUntinted;
+            previousRow = row;
         }
 
         clipTransientViews();

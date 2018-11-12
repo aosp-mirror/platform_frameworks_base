@@ -21,13 +21,14 @@ import android.content.res.Resources;
 import android.util.Log;
 import android.view.View;
 import android.view.ViewGroup;
+
 import com.android.systemui.R;
 import com.android.systemui.statusbar.EmptyShadeView;
+import com.android.systemui.statusbar.NotificationShelf;
+import com.android.systemui.statusbar.notification.NotificationUtils;
 import com.android.systemui.statusbar.notification.row.ExpandableNotificationRow;
 import com.android.systemui.statusbar.notification.row.ExpandableView;
 import com.android.systemui.statusbar.notification.row.FooterView;
-import com.android.systemui.statusbar.NotificationShelf;
-import com.android.systemui.statusbar.notification.NotificationUtils;
 
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -44,6 +45,7 @@ public class StackScrollAlgorithm {
 
     private int mPaddingBetweenElements;
     private int mIncreasedPaddingBetweenElements;
+    private int mGapHeight;
     private int mCollapsedSize;
 
     private StackScrollAlgorithmState mTempAlgorithmState = new StackScrollAlgorithmState();
@@ -74,6 +76,7 @@ public class StackScrollAlgorithm {
                 R.dimen.heads_up_status_bar_padding);
         mPinnedZTranslationExtra = res.getDimensionPixelSize(
                 R.dimen.heads_up_pinned_elevation);
+        mGapHeight = res.getDimensionPixelSize(R.dimen.notification_section_divider_height);
     }
 
     public void getStackScrollState(AmbientState ambientState, StackScrollState resultState) {
@@ -387,6 +390,9 @@ public class StackScrollAlgorithm {
         childViewState.location = ExpandableViewState.LOCATION_UNKNOWN;
         int paddingAfterChild = getPaddingAfterChild(algorithmState, child);
         int childHeight = getMaxAllowedChildHeight(child);
+        if (ambientState.beginsNewSection(i)) {
+            currentYPosition += mGapHeight;
+        }
         childViewState.yTranslation = currentYPosition;
         boolean isFooterView = child instanceof FooterView;
         boolean isEmptyShadeView = child instanceof EmptyShadeView;

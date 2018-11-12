@@ -46,6 +46,8 @@ public class NotificationBackgroundView extends View {
     private int mTintColor;
     private float[] mCornerRadii = new float[8];
     private boolean mBottomIsRounded;
+    private boolean mLastInSection;
+    private boolean mFirstInSection;
     private int mBackgroundTop;
     private boolean mBottomAmountClips = true;
     private boolean mExpandAnimationRunning;
@@ -79,7 +81,10 @@ public class NotificationBackgroundView extends View {
         if (drawable != null) {
             int top = mBackgroundTop;
             int bottom = mActualHeight;
-            if (mBottomIsRounded && mBottomAmountClips && !mExpandAnimationRunning) {
+            if (mBottomIsRounded
+                    && mBottomAmountClips
+                    && !mExpandAnimationRunning
+                    && !mLastInSection) {
                 bottom -= mClipBottomAmount;
             }
             int left = 0;
@@ -90,8 +95,10 @@ public class NotificationBackgroundView extends View {
             }
             if (mTopAmountRounded) {
                 int clipTop = (int) (mClipTopAmount - mDistanceToTopRoundness);
-                top += clipTop;
-                if (clipTop >= 0) {
+                if (clipTop >= 0 || !mFirstInSection) {
+                    top += clipTop;
+                }
+                if (clipTop >= 0 && !mLastInSection) {
                     bottom += clipTop;
                 }
             }
@@ -216,19 +223,23 @@ public class NotificationBackgroundView extends View {
         mBackground.setAlpha(drawableAlpha);
     }
 
-    public void setRoundness(float topRoundness, float bottomRoundNess) {
-        if (topRoundness == mCornerRadii[0] && bottomRoundNess == mCornerRadii[4]) {
+    /**
+     * Sets the current top and bottom roundness amounts for this background, between 0.0 (not
+     * rounded) and 1.0 (maximally rounded).
+     */
+    public void setRoundness(float topRoundness, float bottomRoundness) {
+        if (topRoundness == mCornerRadii[0] && bottomRoundness == mCornerRadii[4]) {
             return;
         }
-        mBottomIsRounded = bottomRoundNess != 0.0f;
+        mBottomIsRounded = bottomRoundness != 0.0f;
         mCornerRadii[0] = topRoundness;
         mCornerRadii[1] = topRoundness;
         mCornerRadii[2] = topRoundness;
         mCornerRadii[3] = topRoundness;
-        mCornerRadii[4] = bottomRoundNess;
-        mCornerRadii[5] = bottomRoundNess;
-        mCornerRadii[6] = bottomRoundNess;
-        mCornerRadii[7] = bottomRoundNess;
+        mCornerRadii[4] = bottomRoundness;
+        mCornerRadii[5] = bottomRoundness;
+        mCornerRadii[6] = bottomRoundness;
+        mCornerRadii[7] = bottomRoundness;
         updateBackgroundRadii();
     }
 
@@ -237,6 +248,18 @@ public class NotificationBackgroundView extends View {
             mBottomAmountClips = clips;
             invalidate();
         }
+    }
+
+    /** Sets whether this background belongs to the last notification in a section. */
+    public void setLastInSection(boolean lastInSection) {
+        mLastInSection = lastInSection;
+        invalidate();
+    }
+
+    /** Sets whether this background belongs to the first notification in a section. */
+    public void setFirstInSection(boolean firstInSection) {
+        mFirstInSection = firstInSection;
+        invalidate();
     }
 
     private void updateBackgroundRadii() {

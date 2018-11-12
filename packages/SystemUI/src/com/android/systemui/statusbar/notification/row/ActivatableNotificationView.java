@@ -40,9 +40,9 @@ import com.android.systemui.classifier.FalsingManager;
 import com.android.systemui.statusbar.NotificationShelf;
 import com.android.systemui.statusbar.notification.FakeShadowView;
 import com.android.systemui.statusbar.notification.NotificationUtils;
-import com.android.systemui.statusbar.phone.DoubleTapHelper;
 import com.android.systemui.statusbar.notification.stack.NotificationStackScrollLayout;
 import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
+import com.android.systemui.statusbar.phone.DoubleTapHelper;
 
 /**
  * Base class for both {@link ExpandableNotificationRow} and {@link NotificationShelf}
@@ -134,6 +134,8 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
     private float mAppearAnimationFraction = -1.0f;
     private float mAppearAnimationTranslation;
     private int mNormalColor;
+    private boolean mLastInSection;
+    private boolean mFirstInSection;
     private boolean mIsBelowSpeedBump;
     private FalsingManager mFalsingManager;
 
@@ -531,6 +533,32 @@ public abstract class ActivatableNotificationView extends ExpandableOutlineView 
         super.setDistanceToTopRoundness(distanceToTopRoundness);
         mBackgroundNormal.setDistanceToTopRoundness(distanceToTopRoundness);
         mBackgroundDimmed.setDistanceToTopRoundness(distanceToTopRoundness);
+    }
+
+    public boolean isLastInSection() {
+        return mLastInSection;
+    }
+
+    public boolean isFirstInSection() {
+        return mFirstInSection;
+    }
+
+    /** Sets whether this view is the last notification in a section. */
+    public void setLastInSection(boolean lastInSection) {
+        if (lastInSection != mLastInSection) {
+            mLastInSection = lastInSection;
+            mBackgroundNormal.setLastInSection(lastInSection);
+            mBackgroundDimmed.setLastInSection(lastInSection);
+        }
+    }
+
+    /** Sets whether this view is the first notification in a section. */
+    public void setFirstInSection(boolean firstInSection) {
+        if (firstInSection != mFirstInSection) {
+            mFirstInSection = firstInSection;
+            mBackgroundNormal.setFirstInSection(firstInSection);
+            mBackgroundDimmed.setFirstInSection(firstInSection);
+        }
     }
 
     /**
