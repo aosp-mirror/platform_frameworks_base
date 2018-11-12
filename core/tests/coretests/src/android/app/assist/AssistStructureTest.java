@@ -133,8 +133,6 @@ public class AssistStructureTest {
     private void assertStructureWithManySmallViews(AssistStructure structure, int expectedSize) {
         int i = 0;
         try {
-            assertPackageName(structure);
-
             assertThat(structure.getWindowNodeCount()).isEqualTo(1);
 
             ViewNode rootView = structure.getWindowNodeAt(0).getRootViewNode();
@@ -188,8 +186,6 @@ public class AssistStructureTest {
 
     private void assertStructureWithOneBigView(AssistStructure structure) {
         try {
-            assertPackageName(structure);
-
             assertThat(structure.getWindowNodeCount()).isEqualTo(1);
 
             ViewNode rootView = structure.getWindowNodeAt(0).getRootViewNode();
@@ -273,12 +269,6 @@ public class AssistStructureTest {
         assertThat(hint.length()).isEqualTo(BIG_VIEW_SIZE);
         assertThat(hint.charAt(0)).isEqualTo(BIG_VIEW_CHAR);
         assertThat(hint.charAt(BIG_VIEW_SIZE - 1)).isEqualTo(BIG_VIEW_CHAR);
-    }
-
-    private void assertPackageName(AssistStructure structure) {
-        assertThat(structure.getActivityComponent()).isEqualTo(
-                new ComponentName("com.android.frameworks.coretests",
-                        "android.app.assist.EmptyLayoutActivity"));
     }
 
     private AssistStructure cloneThroughParcel(AssistStructure structure) {

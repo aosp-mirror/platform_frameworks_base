@@ -16,7 +16,7 @@
 
 package com.android.server.wm;
 
-import static android.graphics.Bitmap.CompressFormat.*;
+import static android.graphics.Bitmap.CompressFormat.JPEG;
 
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME;
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
@@ -321,6 +321,7 @@ class TaskSnapshotPersister {
             proto.windowingMode = mSnapshot.getWindowingMode();
             proto.systemUiVisibility = mSnapshot.getSystemUiVisibility();
             proto.isTranslucent = mSnapshot.isTranslucent();
+            proto.topActivityComponent = mSnapshot.getTopActivityComponent().flattenToString();
             final byte[] bytes = TaskSnapshotProto.toByteArray(proto);
             final File file = getProtoFile(mTaskId, mUserId);
             final AtomicFile atomicFile = new AtomicFile(file);

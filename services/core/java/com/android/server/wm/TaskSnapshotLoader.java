@@ -21,6 +21,7 @@ import static com.android.server.wm.WindowManagerDebugConfig.TAG_WITH_CLASS_NAME
 import static com.android.server.wm.WindowManagerDebugConfig.TAG_WM;
 
 import android.app.ActivityManager.TaskSnapshot;
+import android.content.ComponentName;
 import android.graphics.Bitmap;
 import android.graphics.Bitmap.Config;
 import android.graphics.BitmapFactory;
@@ -87,7 +88,9 @@ class TaskSnapshotLoader {
                         + bitmapFile.getPath());
                 return null;
             }
-            return new TaskSnapshot(buffer, proto.orientation,
+            ComponentName topActivityComponent = ComponentName.unflattenFromString(
+                    proto.topActivityComponent);
+            return new TaskSnapshot(topActivityComponent, buffer, proto.orientation,
                     new Rect(proto.insetLeft, proto.insetTop, proto.insetRight, proto.insetBottom),
                     reducedResolution, reducedResolution ? REDUCED_SCALE : 1f,
                     proto.isRealSnapshot, proto.windowingMode, proto.systemUiVisibility,

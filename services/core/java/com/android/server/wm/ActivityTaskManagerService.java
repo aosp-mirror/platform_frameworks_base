@@ -2745,6 +2745,9 @@ public class ActivityTaskManagerService extends IActivityTaskManager.Stub {
                 pae.extras.putParcelable(Intent.EXTRA_REFERRER, referrer);
             }
             if (structure != null) {
+                // Pre-fill the task/activity component for all assist data receivers
+                structure.setTaskId(pae.activity.getTask().taskId);
+                structure.setActivityComponent(pae.activity.realActivity);
                 structure.setHomeActivity(pae.isHome);
             }
             pae.haveResult = true;
