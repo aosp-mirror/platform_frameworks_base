@@ -126,6 +126,16 @@ public class KeyguardClockSwitch extends FrameLayout {
         mClockView.setFormat24Hour(format);
     }
 
+    /**
+     * Set the amount (ratio) that the device has transitioned to doze.
+     * @param darkAmount Amount of transition to doze: 1f for doze and 0f for awake.
+     */
+    public void setDarkAmount(float darkAmount) {
+        if (mClockPlugin != null) {
+            mClockPlugin.setDarkAmount(darkAmount);
+        }
+    }
+
     public Paint getPaint() {
         return mClockView.getPaint();
     }

@@ -385,6 +385,7 @@ public class KeyguardStatusView extends GridLayout implements
             return;
         }
         mDarkAmount = darkAmount;
+        mClockView.setDarkAmount(darkAmount);
         updateDark();
     }
 

@@ -49,4 +49,10 @@ public interface ClockPlugin extends Plugin {
      * Notifies that time tick alarm from doze service fired.
      */
     default void dozeTimeTick() { }
+
+    /**
+     * Set the amount (ratio) that the device has transitioned to doze.
+     * @param darkAmount Amount of transition to doze: 1f for doze and 0f for awake.
+     */
+    default void setDarkAmount(float darkAmount) {}
 }
