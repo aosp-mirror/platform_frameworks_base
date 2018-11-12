@@ -25,7 +25,6 @@ import android.content.ContentResolver;
 import android.content.Context;
 import android.content.Intent;
 import android.content.IntentFilter;
-import android.graphics.drawable.Icon;
 import android.icu.text.DateFormat;
 import android.icu.text.DisplayContext;
 import android.net.Uri;
@@ -34,6 +33,13 @@ import android.os.Trace;
 import android.provider.Settings;
 import android.service.notification.ZenModeConfig;
 import android.text.TextUtils;
+
+import androidx.core.graphics.drawable.IconCompat;
+import androidx.slice.Slice;
+import androidx.slice.SliceProvider;
+import androidx.slice.builders.ListBuilder;
+import androidx.slice.builders.ListBuilder.RowBuilder;
+import androidx.slice.builders.SliceAction;
 
 import com.android.internal.annotations.VisibleForTesting;
 import com.android.systemui.R;
@@ -45,13 +51,6 @@ import com.android.systemui.statusbar.policy.ZenModeControllerImpl;
 import java.util.Date;
 import java.util.Locale;
 import java.util.concurrent.TimeUnit;
-
-import androidx.core.graphics.drawable.IconCompat;
-import androidx.slice.Slice;
-import androidx.slice.SliceProvider;
-import androidx.slice.builders.ListBuilder;
-import androidx.slice.builders.ListBuilder.RowBuilder;
-import androidx.slice.builders.SliceAction;
 
 /**
  * Simple Slice provider that shows the current date.
@@ -226,7 +225,7 @@ public class KeyguardSliceProvider extends SliceProvider implements
     private void updateNextAlarm() {
         if (withinNHours(mNextAlarmInfo, ALARM_VISIBILITY_HOURS)) {
             String pattern = android.text.format.DateFormat.is24HourFormat(getContext(),
-                    ActivityManager.getCurrentUser()) ? "H:mm" : "h:mm";
+                    ActivityManager.getCurrentUser()) ? "HH:mm" : "h:mm";
             mNextAlarm = android.text.format.DateFormat.format(pattern,
                     mNextAlarmInfo.getTriggerTime()).toString();
         } else {
