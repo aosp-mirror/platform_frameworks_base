@@ -81,7 +81,7 @@
     <string name="usb_preference_title" msgid="6551050377388882787">"Opções de transm. de fich. USB"</string>
     <string name="use_mtp_button_title" msgid="4333504413563023626">"Montar como leitor de multimédia (MTP)"</string>
     <string name="use_ptp_button_title" msgid="7517127540301625751">"Montar como câmara (PTP)"</string>
-    <string name="installer_cd_button_title" msgid="2312667578562201583">"Inst. aplic. Transf. Ficheiros do Android para Mac"</string>
+    <string name="installer_cd_button_title" msgid="2312667578562201583">"Inst. app Transf. Ficheiros do Android para Mac"</string>
     <string name="accessibility_back" msgid="567011538994429120">"Anterior"</string>
     <string name="accessibility_home" msgid="8217216074895377641">"Página inicial"</string>
     <string name="accessibility_menu" msgid="316839303324695949">"Menu"</string>
@@ -478,7 +478,7 @@
     <string name="monitoring_description_personal_profile_named_vpn" msgid="3133980926929069283">"O seu perfil pessoal está ligado à rede <xliff:g id="VPN_APP">%1$s</xliff:g>, que pode monitorizar a sua atividade de rede, incluindo emails, aplicações e Sites."</string>
     <string name="monitoring_description_do_header_generic" msgid="96588491028288691">"O seu dispositivo é gerido pelo <xliff:g id="DEVICE_OWNER_APP">%1$s</xliff:g>."</string>
     <string name="monitoring_description_do_header_with_name" msgid="5511133708978206460">"A <xliff:g id="ORGANIZATION_NAME">%1$s</xliff:g> utiliza o <xliff:g id="DEVICE_OWNER_APP">%2$s</xliff:g> para gerir o seu dispositivo."</string>
-    <string name="monitoring_description_do_body" msgid="3639594537660975895">"O administ. pode monitorizar e gerir definições, acesso empresarial, aplic. e dados associados ao dispositivo, bem como inf. de localiz. do disp."</string>
+    <string name="monitoring_description_do_body" msgid="3639594537660975895">"O administ. pode monitorizar e gerir definições, acesso empresarial, app e dados associados ao dispositivo, bem como inf. de localiz. do disp."</string>
     <string name="monitoring_description_do_learn_more_separator" msgid="3785251953067436862">" "</string>
     <string name="monitoring_description_do_learn_more" msgid="1849514470437907421">"Saiba mais"</string>
     <string name="monitoring_description_do_body_vpn" msgid="8255218762488901796">"Está ligado à rede <xliff:g id="VPN_APP">%1$s</xliff:g>, que pode monitorizar a sua atividade de rede, incluindo emails, aplicações e Sites."</string>
