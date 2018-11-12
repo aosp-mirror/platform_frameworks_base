@@ -300,11 +300,10 @@ final class UiModeManagerService extends SystemService {
 
         @Override
         public void setNightMode(int mode) {
-            if (isNightModeLocked() &&  (getContext().checkCallingOrSelfPermission(
+            if (isNightModeLocked() && (getContext().checkCallingOrSelfPermission(
                     android.Manifest.permission.MODIFY_DAY_NIGHT_MODE)
                     != PackageManager.PERMISSION_GRANTED)) {
-                Slog.e(TAG,
-                        "Night mode locked, requires MODIFY_DAY_NIGHT_MODE permission");
+                Slog.e(TAG, "Night mode locked, requires MODIFY_DAY_NIGHT_MODE permission");
                 return;
             }
             switch (mode) {
