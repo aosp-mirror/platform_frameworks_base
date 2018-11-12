@@ -917,9 +917,9 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
         @Override
         public void close() throws IOException {
             try {
-                mPfd.close();
-            } finally {
                 super.close();
+            } finally {
+                mPfd.close();
             }
         }
 
@@ -968,9 +968,9 @@ public class ParcelFileDescriptor implements Parcelable, Closeable {
         @Override
         public void close() throws IOException {
             try {
-                mPfd.close();
-            } finally {
                 super.close();
+            } finally {
+                mPfd.close();
             }
         }
     }
