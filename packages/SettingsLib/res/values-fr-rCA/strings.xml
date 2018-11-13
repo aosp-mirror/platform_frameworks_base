@@ -21,7 +21,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"Impossible de rechercher des réseaux."</string>
-    <string name="wifi_security_none" msgid="7985461072596594400">"Aucune"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"Enregistré"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"Désactivés"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"Échec de configuration de l\'adresse IP"</string>
@@ -227,7 +226,7 @@
     <string name="bluetooth_select_a2dp_codec_ldac_playback_quality_dialog_title" msgid="6893955536658137179">"Déclencher le codec audio Bluetooth LDAC\nSélection : qualité de lecture"</string>
     <string name="bluetooth_select_a2dp_codec_streaming_label" msgid="5347862512596240506">"Diffusion : <xliff:g id="STREAMING_PARAMETER">%1$s</xliff:g>"</string>
     <string name="select_private_dns_configuration_title" msgid="3700456559305263922">"DNS privé"</string>
-    <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"Sélectionnez le mode DNS privé"</string>
+    <string name="select_private_dns_configuration_dialog_title" msgid="9221994415765826811">"Sélectionner le mode DNS privé"</string>
     <string name="private_dns_mode_off" msgid="8236575187318721684">"Désactivé"</string>
     <string name="private_dns_mode_opportunistic" msgid="8314986739896927399">"Automatique"</string>
     <string name="private_dns_mode_provider" msgid="8354935160639360804">"Nom d\'hôte du fournisseur DNS privé"</string>

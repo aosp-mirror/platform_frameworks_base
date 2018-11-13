@@ -21,7 +21,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"اسکن شبکه‌ها امکان‌پذیر نیست"</string>
-    <string name="wifi_security_none" msgid="7985461072596594400">"هیچ‌کدام"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"ذخیره‌شده"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"غیرفعال شد"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"‏پیکربندی IP انجام نشد"</string>

@@ -21,7 +21,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"No es poden cercar xarxes"</string>
-    <string name="wifi_security_none" msgid="7985461072596594400">"Cap"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"Desat"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"Desactivat"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"Error de configuració d\'IP"</string>
@@ -70,7 +69,7 @@
     <string name="bluetooth_active_no_battery_level" msgid="8380223546730241956">"Actiu"</string>
     <string name="bluetooth_profile_a2dp" msgid="2031475486179830674">"Àudio multimèdia"</string>
     <string name="bluetooth_profile_headset" msgid="7815495680863246034">"Trucades telefòniques"</string>
-    <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Transferència del fitxer"</string>
+    <string name="bluetooth_profile_opp" msgid="9168139293654233697">"Transferència de fitxers"</string>
     <string name="bluetooth_profile_hid" msgid="3680729023366986480">"Dispositiu d\'entrada"</string>
     <string name="bluetooth_profile_pan" msgid="3391606497945147673">"Accés a Internet"</string>
     <string name="bluetooth_profile_pbap" msgid="5372051906968576809">"Compartir contactes"</string>
@@ -393,7 +392,7 @@
     <string name="battery_info_status_charging_lower" msgid="8689770213898117994">"s\'està carregant"</string>
     <string name="battery_info_status_discharging" msgid="310932812698268588">"No s\'està carregant"</string>
     <string name="battery_info_status_not_charging" msgid="8523453668342598579">"El dispositiu està endollat però en aquests moments no es pot carregar"</string>
-    <string name="battery_info_status_full" msgid="2824614753861462808">"Plena"</string>
+    <string name="battery_info_status_full" msgid="2824614753861462808">"Completa"</string>
     <string name="disabled_by_admin_summary_text" msgid="6750513964908334617">"Controlat per l\'administrador"</string>
     <string name="disabled" msgid="9206776641295849915">"Desactivat"</string>
     <string name="external_source_trusted" msgid="2707996266575928037">"Amb permís"</string>

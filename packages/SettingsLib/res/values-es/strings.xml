@@ -21,7 +21,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"No se puede buscar redes."</string>
-    <string name="wifi_security_none" msgid="7985461072596594400">"Ninguna"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"Guardado"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"Inhabilitado"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"Error de configuración de IP"</string>

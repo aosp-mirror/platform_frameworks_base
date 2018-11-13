@@ -21,7 +21,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"નેટવર્ક્સ માટે સ્કૅન કરી શકતા નથી"</string>
-    <string name="wifi_security_none" msgid="7985461072596594400">"કોઈ નહીં"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"સાચવેલા"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"અક્ષમ કર્યો"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP કન્ફિગરેશન નિષ્ફળ"</string>
