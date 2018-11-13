@@ -664,6 +664,18 @@ public final class NotificationRecord {
                             .addTaggedData(MetricsEvent.ADJUSTMENT_KEY_SMART_REPLIES,
                                     getSmartReplies().size()));
                 }
+            }
+            applyImportanceFromAdjustments();
+        }
+    }
+
+    /**
+     * Update importance from the adjustment.
+     */
+    public void applyImportanceFromAdjustments() {
+        synchronized (mAdjustments) {
+            for (Adjustment adjustment : mAdjustments) {
+                Bundle signals = adjustment.getSignals();
                 if (signals.containsKey(Adjustment.KEY_IMPORTANCE)) {
                     int importance = signals.getInt(Adjustment.KEY_IMPORTANCE);
                     importance = Math.max(IMPORTANCE_UNSPECIFIED, importance);
