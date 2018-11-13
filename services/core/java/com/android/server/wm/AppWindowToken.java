@@ -362,6 +362,10 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                 if (controller != null) {
                     controller.reportWindowsDrawn();
                 }
+            } else {
+                if (controller != null) {
+                    controller.reportWindowsNotDrawn();
+                }
             }
             reportedDrawn = nowDrawn;
         }

@@ -81,6 +81,7 @@ public class AppWindowContainerController
     private final class H extends Handler {
         public static final int NOTIFY_WINDOWS_DRAWN = 1;
         public static final int NOTIFY_STARTING_WINDOW_DRAWN = 2;
+        public static final int NOTIFY_WINDOWS_NOTDRAWN = 3;
 
         public H(Looper looper) {
             super(looper);
@@ -95,15 +96,23 @@ public class AppWindowContainerController
                     }
                     if (DEBUG_VISIBILITY) Slog.v(TAG_WM, "Reporting drawn in "
                             + AppWindowContainerController.this.mToken);
-                    mListener.onWindowsDrawn(msg.getWhen());
+                    mListener.onWindowsDrawn(true /* drawn */, msg.getWhen());
                     break;
                 case NOTIFY_STARTING_WINDOW_DRAWN:
                     if (mListener == null) {
                         return;
                     }
-                    if (DEBUG_VISIBILITY) Slog.v(TAG_WM, "Reporting drawn in "
+                    if (DEBUG_VISIBILITY) Slog.v(TAG_WM, "Reporting starting window drawn in "
                             + AppWindowContainerController.this.mToken);
                     mListener.onStartingWindowDrawn(msg.getWhen());
+                    break;
+                case NOTIFY_WINDOWS_NOTDRAWN:
+                    if (mListener == null) {
+                        return;
+                    }
+                    if (DEBUG_VISIBILITY) Slog.v(TAG_WM, "Reporting not drawn in "
+                            + AppWindowContainerController.this.mToken);
+                    mListener.onWindowsDrawn(false /* drawn */, msg.getWhen());
                     break;
                 default:
                     break;
@@ -757,6 +766,10 @@ public class AppWindowContainerController
 
     void reportWindowsDrawn() {
         mHandler.sendMessage(mHandler.obtainMessage(H.NOTIFY_WINDOWS_DRAWN));
+    }
+
+    void reportWindowsNotDrawn() {
+        mHandler.sendMessage(mHandler.obtainMessage(H.NOTIFY_WINDOWS_NOTDRAWN));
     }
 
     void reportWindowsVisible() {
