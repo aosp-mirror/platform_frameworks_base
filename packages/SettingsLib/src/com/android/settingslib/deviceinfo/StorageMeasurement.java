@@ -152,7 +152,8 @@ public class StorageMeasurement {
         final MeasurementDetails details = new MeasurementDetails();
         if (mVolume == null) return details;
 
-        if (mVolume.getType() == VolumeInfo.TYPE_PUBLIC) {
+        if (mVolume.getType() == VolumeInfo.TYPE_PUBLIC
+                || mVolume.getType() == VolumeInfo.TYPE_STUB) {
             details.totalSize = mVolume.getPath().getTotalSpace();
             details.availSize = mVolume.getPath().getUsableSpace();
             return details;

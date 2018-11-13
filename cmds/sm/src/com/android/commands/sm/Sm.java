@@ -127,6 +127,8 @@ public final class Sm {
             filterType = VolumeInfo.TYPE_PRIVATE;
         } else if ("emulated".equals(filter)) {
             filterType = VolumeInfo.TYPE_EMULATED;
+        } else if ("stub".equals(filter)) {
+            filterType = VolumeInfo.TYPE_STUB;
         } else {
             filterType = -1;
         }
@@ -314,7 +316,7 @@ public final class Sm {
 
     private static int showUsage() {
         System.err.println("usage: sm list-disks [adoptable]");
-        System.err.println("       sm list-volumes [public|private|emulated|all]");
+        System.err.println("       sm list-volumes [public|private|emulated|stub|all]");
         System.err.println("       sm has-adoptable");
         System.err.println("       sm get-primary-storage-uuid");
         System.err.println("       sm set-force-adoptable [on|off|default]");
