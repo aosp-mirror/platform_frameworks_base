@@ -23,6 +23,7 @@ java_library {
         "services.companion",
         "services.coverage",
         "services.devicepolicy",
+        "services.intelligence",
         "services.midi",
         "services.net",
         "services.print",
