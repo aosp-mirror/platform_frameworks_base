@@ -2695,6 +2695,11 @@ public class WebView extends AbsoluteLayout
     }
 
     @Override
+    public boolean onProvideContentCaptureStructure(ViewStructure structure, int flags) {
+        return mProvider.getViewDelegate().onProvideContentCaptureStructure(structure, flags);
+    }
+
+    @Override
     public void autofill(SparseArray<AutofillValue>values) {
         mProvider.getViewDelegate().autofill(values);
     }
