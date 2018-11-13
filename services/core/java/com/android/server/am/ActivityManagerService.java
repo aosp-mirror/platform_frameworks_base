@@ -2676,8 +2676,10 @@ public class ActivityManagerService extends IActivityManager.Stub
     }
 
     void updateUsageStats(ComponentName activity, int uid, int userId, boolean resumed) {
-        if (DEBUG_SWITCH) Slog.d(TAG_SWITCH,
-                "updateUsageStats: comp=" + activity + "res=" + resumed);
+        if (DEBUG_SWITCH) {
+            Slog.d(TAG_SWITCH,
+                    "updateUsageStats: comp=" + activity + "res=" + resumed);
+        }
         final BatteryStatsImpl stats = mBatteryStatsService.getActiveStatistics();
         StatsLog.write(StatsLog.ACTIVITY_FOREGROUND_STATE_CHANGED,
             uid, activity.getPackageName(),
@@ -2700,6 +2702,20 @@ public class ActivityManagerService extends IActivityManager.Stub
             }
             synchronized (stats) {
                 stats.noteActivityPausedLocked(uid);
+            }
+        }
+    }
+
+    void updateForegroundServiceUsageStats(ComponentName service, int userId, boolean started) {
+        if (DEBUG_SWITCH) {
+            Slog.d(TAG_SWITCH, "updateForegroundServiceUsageStats: comp="
+                    + service + "started=" + started);
+        }
+        synchronized (this) {
+            if (mUsageStatsService != null) {
+                mUsageStatsService.reportEvent(service, userId,
+                        started ? UsageEvents.Event.FOREGROUND_SERVICE_START
+                                : UsageEvents.Event.FOREGROUND_SERVICE_STOP);
             }
         }
     }

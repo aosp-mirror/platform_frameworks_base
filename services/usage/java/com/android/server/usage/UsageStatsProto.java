@@ -21,13 +21,12 @@ import android.app.usage.UsageEvents;
 import android.app.usage.UsageStats;
 import android.content.res.Configuration;
 import android.util.ArrayMap;
-
 import android.util.Slog;
 import android.util.proto.ProtoInputStream;
 import android.util.proto.ProtoOutputStream;
 
-import java.io.InputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ProtocolException;
 import java.util.ArrayList;
@@ -105,6 +104,7 @@ final class UsageStatsProto {
                     stats = tempPackageIndex;
                     break;
                 case (int) IntervalStatsProto.UsageStats.LAST_TIME_ACTIVE_MS:
+                    // Time attributes stored is an offset of the beginTime.
                     stats.mLastTimeUsed = statsOut.beginTime + proto.readLong(
                             IntervalStatsProto.UsageStats.LAST_TIME_ACTIVE_MS);
                     break;
@@ -113,7 +113,8 @@ final class UsageStatsProto {
                             IntervalStatsProto.UsageStats.TOTAL_TIME_ACTIVE_MS);
                     break;
                 case (int) IntervalStatsProto.UsageStats.LAST_EVENT:
-                    stats.mLastEvent = proto.readInt(IntervalStatsProto.UsageStats.LAST_EVENT);
+                    stats.mLastEvent =
+                            proto.readInt(IntervalStatsProto.UsageStats.LAST_EVENT);
                     break;
                 case (int) IntervalStatsProto.UsageStats.APP_LAUNCH_COUNT:
                     stats.mAppLaunchCount = proto.readInt(
@@ -124,6 +125,15 @@ final class UsageStatsProto {
                             IntervalStatsProto.UsageStats.CHOOSER_ACTIONS);
                     loadChooserCounts(proto, stats);
                     proto.end(chooserToken);
+                    break;
+                case (int) IntervalStatsProto.UsageStats.LAST_TIME_SERVICE_USED_MS:
+                    // Time attributes stored is an offset of the beginTime.
+                    stats.mLastTimeForegroundServiceUsed = statsOut.beginTime + proto.readLong(
+                            IntervalStatsProto.UsageStats.LAST_TIME_SERVICE_USED_MS);
+                    break;
+                case (int) IntervalStatsProto.UsageStats.TOTAL_TIME_SERVICE_USED_MS:
+                    stats.mTotalTimeForegroundServiceUsed = proto.readLong(
+                            IntervalStatsProto.UsageStats.TOTAL_TIME_SERVICE_USED_MS);
                     break;
             }
         }
@@ -315,11 +325,18 @@ final class UsageStatsProto {
                     + ") not found in IntervalStats string cache");
             proto.write(IntervalStatsProto.UsageStats.PACKAGE, usageStats.mPackageName);
         }
+        // Time attributes stored as an offset of the beginTime.
         proto.write(IntervalStatsProto.UsageStats.LAST_TIME_ACTIVE_MS,
                 usageStats.mLastTimeUsed - stats.beginTime);
         proto.write(IntervalStatsProto.UsageStats.TOTAL_TIME_ACTIVE_MS,
                 usageStats.mTotalTimeInForeground);
-        proto.write(IntervalStatsProto.UsageStats.LAST_EVENT, usageStats.mLastEvent);
+        proto.write(IntervalStatsProto.UsageStats.LAST_EVENT,
+                usageStats.mLastEvent);
+        // Time attributes stored as an offset of the beginTime.
+        proto.write(IntervalStatsProto.UsageStats.LAST_TIME_SERVICE_USED_MS,
+                usageStats.mLastTimeForegroundServiceUsed - stats.beginTime);
+        proto.write(IntervalStatsProto.UsageStats.TOTAL_TIME_SERVICE_USED_MS,
+                usageStats.mTotalTimeForegroundServiceUsed);
         proto.write(IntervalStatsProto.UsageStats.APP_LAUNCH_COUNT, usageStats.mAppLaunchCount);
         writeChooserCounts(proto, usageStats);
         proto.end(token);
@@ -471,6 +488,14 @@ final class UsageStatsProto {
                     statsOut.endTime = statsOut.beginTime + proto.readLong(
                             IntervalStatsProto.END_TIME_MS);
                     break;
+                case (int) IntervalStatsProto.MAJOR_VERSION:
+                    statsOut.majorVersion = proto.readInt(
+                            IntervalStatsProto.MAJOR_VERSION);
+                    break;
+                case (int) IntervalStatsProto.MINOR_VERSION:
+                    statsOut.minorVersion = proto.readInt(
+                            IntervalStatsProto.MINOR_VERSION);
+                    break;
                 case (int) IntervalStatsProto.INTERACTIVE:
                     loadCountAndTime(proto, IntervalStatsProto.INTERACTIVE,
                             statsOut.interactiveTracker);
@@ -505,6 +530,7 @@ final class UsageStatsProto {
                         // endTime not assigned, assume default value of 0 plus beginTime
                         statsOut.endTime = statsOut.beginTime;
                     }
+                    statsOut.upgradeIfNeeded();
                     return;
             }
         }
@@ -519,6 +545,8 @@ final class UsageStatsProto {
     public static void write(OutputStream out, IntervalStats stats) throws IOException {
         final ProtoOutputStream proto = new ProtoOutputStream(out);
         proto.write(IntervalStatsProto.END_TIME_MS, stats.endTime - stats.beginTime);
+        proto.write(IntervalStatsProto.MAJOR_VERSION, stats.majorVersion);
+        proto.write(IntervalStatsProto.MINOR_VERSION, stats.minorVersion);
         // String pool should be written before the rest of the usage stats
         writeStringPool(proto, stats);
 

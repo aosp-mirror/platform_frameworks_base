@@ -45,11 +45,15 @@ message IntervalStatsProto {
     optional string package = 1;
     // package_index contains the index + 1 of the package name in the string pool
     optional int32 package_index = 2;
+    // Time attributes stored as an offset of the IntervalStats's beginTime.
     optional int64 last_time_active_ms = 3;
     optional int64 total_time_active_ms = 4;
     optional int32 last_event = 5;
     optional int32 app_launch_count = 6;
     repeated ChooserAction chooser_actions = 7;
+    // Time attributes stored as an offset of the IntervalStats's beginTime.
+    optional int64 last_time_service_used_ms = 8;
+    optional int64 total_time_service_used_ms = 9;
   }
 
   // Stores the relevant information an IntervalStats will have about a Configuration
@@ -86,6 +90,8 @@ message IntervalStatsProto {
   // stringpool contains all the package and class names used by UsageStats and Event
   // They will hold a number that is equal to the index + 1 of their string in the pool
   optional StringPool stringpool = 2;
+  optional int32 major_version = 3;
+  optional int32 minor_version = 4;
 
   // The following fields contain aggregated usage stats data
   optional CountAndTime interactive = 10;
