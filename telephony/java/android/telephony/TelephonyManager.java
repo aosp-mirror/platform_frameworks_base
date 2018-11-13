@@ -9224,7 +9224,7 @@ public class TelephonyManager {
     public static final int NETWORK_TYPE_BITMASK_LTE_CA = (1 << NETWORK_TYPE_LTE_CA);
 
     /**
-     * @return Modem supported radio access family bitmask {@link NetworkTypeBitMask}
+     * @return Modem supported radio access family bitmask
      *
      * <p>Requires permission: {@link android.Manifest.permission#READ_PRIVILEGED_PHONE_STATE} or
      * that the calling app has carrier privileges (see {@link #hasCarrierPrivileges}).
