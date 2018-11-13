@@ -16,8 +16,9 @@
 
 package com.android.systemui.power;
 
-import static com.google.common.truth.Truth.assertThat;
+import static android.test.MoreAsserts.assertNotEqual;
 
+import static junit.framework.Assert.assertEquals;
 import static junit.framework.Assert.assertFalse;
 import static junit.framework.Assert.assertTrue;
 
@@ -25,8 +26,6 @@ import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.anyString;
 import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.spy;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 
@@ -39,7 +38,7 @@ import com.android.internal.messages.nano.SystemMessageProto.SystemMessage;
 import com.android.systemui.SysuiTestCase;
 import com.android.systemui.util.NotificationChannels;
 
-import org.junit.After;
+import java.util.concurrent.TimeUnit;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -52,26 +51,13 @@ public class PowerNotificationWarningsTest extends SysuiTestCase {
     public static final String FORMATTED_45M = "0h 45m";
     public static final String FORMATTED_HOUR = "1h 0m";
     private final NotificationManager mMockNotificationManager = mock(NotificationManager.class);
-    private PowerNotificationWarnings mPowerNotificationWarnings, mSpyPowerNotificationWarnings;
+    private PowerNotificationWarnings mPowerNotificationWarnings;
 
     @Before
     public void setUp() throws Exception {
         // Test Instance.
         mContext.addMockSystemService(NotificationManager.class, mMockNotificationManager);
         mPowerNotificationWarnings = new PowerNotificationWarnings(mContext);
-        mSpyPowerNotificationWarnings = spy(mPowerNotificationWarnings);
-    }
-
-    @After
-    public void tearDown() throws Exception {
-        if (mSpyPowerNotificationWarnings.mAlarmDialog != null) {
-            mSpyPowerNotificationWarnings.mAlarmDialog.dismiss();
-            mSpyPowerNotificationWarnings.mAlarmDialog = null;
-        }
-        if (mSpyPowerNotificationWarnings.mAlarmDialogAllowDismiss != null) {
-            mSpyPowerNotificationWarnings.mAlarmDialogAllowDismiss.dismiss();
-            mSpyPowerNotificationWarnings.mAlarmDialogAllowDismiss = null;
-        }
     }
 
     @Test
@@ -164,144 +150,5 @@ public class PowerNotificationWarningsTest extends SysuiTestCase {
         mPowerNotificationWarnings.dismissThermalShutdownWarning();
         verify(mMockNotificationManager, times(1)).cancelAsUser(anyString(),
                 eq(SystemMessage.NOTE_THERMAL_SHUTDOWN), any());
-    }
-
-    @Test
-    public void testSetUndismissibleDialogShowing_Overheat_ShouldShowing() {
-        boolean overheat = true;
-        mContext.getMainThreadHandler().post(
-                () -> mSpyPowerNotificationWarnings.notifyHighTemperatureAlarm(overheat));
-        waitForIdleSync();
-        verify(mSpyPowerNotificationWarnings, times(1)).setUndismissibleDialogShowing(overheat);
-    }
-
-    @Test
-    public void testSetDismissibleDialogShowing_Overheat_ShouldNotShowing() {
-        boolean overheat = true;
-        mContext.getMainThreadHandler().post(
-                () -> mSpyPowerNotificationWarnings.notifyHighTemperatureAlarm(overheat));
-        waitForIdleSync();
-        verify(mSpyPowerNotificationWarnings, times(1)).setDismissibleDialogShowing(!overheat);
-    }
-
-    @Test
-    public void testSetAlarmShouldSound_Overheat_ShouldSound() {
-        boolean overheat = true;
-        mContext.getMainThreadHandler().post(
-                () -> mSpyPowerNotificationWarnings.notifyHighTemperatureAlarm(overheat));
-        waitForIdleSync();
-        verify(mSpyPowerNotificationWarnings, times(1)).setAlarmShouldSound(overheat);
-    }
-
-    @Test
-    public void testSetUndismissibleDialogShowing_NotOverheat_ShouldNotShowing() {
-        boolean overheat = false;
-        mContext.getMainThreadHandler().post(
-                () -> mSpyPowerNotificationWarnings.notifyHighTemperatureAlarm(overheat));
-        waitForIdleSync();
-        verify(mSpyPowerNotificationWarnings, never()).setUndismissibleDialogShowing(
-                overheat);
-    }
-
-    @Test
-    public void testSetDismissibleDialogShowing_NotOverheat_ShouldShowing() {
-        boolean overheat = false;
-        mContext.getMainThreadHandler().post(
-                () -> mSpyPowerNotificationWarnings.notifyHighTemperatureAlarm(overheat));
-        waitForIdleSync();
-        verify(mSpyPowerNotificationWarnings, never()).setDismissibleDialogShowing(!overheat);
-    }
-
-    @Test
-    public void testSetAlarmShouldSound_NotOverheat_ShouldNotSound() {
-        boolean overheat = false;
-        mContext.getMainThreadHandler().post(
-                () -> mSpyPowerNotificationWarnings.notifyHighTemperatureAlarm(overheat));
-        waitForIdleSync();
-        verify(mSpyPowerNotificationWarnings, never()).setAlarmShouldSound(overheat);
-    }
-
-    @Test
-    public void testSetAlarmShouldSound_Overheat_CoolDown_ShouldNotSound() {
-        boolean overheat = true;
-        mContext.getMainThreadHandler().post(
-                () -> mSpyPowerNotificationWarnings.notifyHighTemperatureAlarm(overheat));
-        waitForIdleSync();
-        // First time overheat, show UndismissibleDialog and alarm beep sound
-        verify(mSpyPowerNotificationWarnings, times(1)).setUndismissibleDialogShowing(overheat);
-        verify(mSpyPowerNotificationWarnings, times(1)).setDismissibleDialogShowing(!overheat);
-        verify(mSpyPowerNotificationWarnings, times(1)).setAlarmShouldSound(overheat);
-
-        // After disconnected cable and cooler temperature
-        mContext.getMainThreadHandler().post(
-                () -> mSpyPowerNotificationWarnings.notifyHighTemperatureAlarm(!overheat));
-        waitForIdleSync();
-        verify(mSpyPowerNotificationWarnings, times(1)).setUndismissibleDialogShowing(!overheat);
-        verify(mSpyPowerNotificationWarnings, times(1)).setDismissibleDialogShowing(overheat);
-        verify(mSpyPowerNotificationWarnings, times(1)).setAlarmShouldSound(!overheat);
-    }
-
-    @Test
-    public void testSetAlarmShouldSound_Overheat_Twice_ShouldShowUndismissibleDialog() {
-        boolean overheat = true;
-        // First time overheat, show mAlarmDialog and alarm beep sound
-        mContext.getMainThreadHandler().post(
-                () -> mSpyPowerNotificationWarnings.notifyHighTemperatureAlarm(overheat));
-        waitForIdleSync();
-        verify(mSpyPowerNotificationWarnings, times(1)).setUndismissibleDialogShowing(overheat);
-        verify(mSpyPowerNotificationWarnings, times(1)).setDismissibleDialogShowing(!overheat);
-        verify(mSpyPowerNotificationWarnings, times(1)).setAlarmShouldSound(overheat);
-
-        // After disconnected cable, cooler temperature, switch to mAlarmDialogAllowDismiss
-        mContext.getMainThreadHandler().post(
-                () -> mSpyPowerNotificationWarnings.notifyHighTemperatureAlarm(!overheat));
-        waitForIdleSync();
-        verify(mSpyPowerNotificationWarnings, times(1)).setUndismissibleDialogShowing(!overheat);
-        verify(mSpyPowerNotificationWarnings, times(1)).setDismissibleDialogShowing(overheat);
-        verify(mSpyPowerNotificationWarnings, times(1)).setAlarmShouldSound(!overheat);
-
-        // Overheat again, switch to mAlarmDialog again, 3 functions should go through twice,
-        mContext.getMainThreadHandler().post(
-                () -> mSpyPowerNotificationWarnings.notifyHighTemperatureAlarm(overheat));
-        waitForIdleSync();
-        verify(mSpyPowerNotificationWarnings, times(2)).setUndismissibleDialogShowing(overheat);
-        verify(mSpyPowerNotificationWarnings, times(2)).setDismissibleDialogShowing(!overheat);
-        verify(mSpyPowerNotificationWarnings, times(2)).setAlarmShouldSound(overheat);
-    }
-
-    @Test
-    public void testUndismissibleDialogShowing_ShouldShow() {
-        boolean showing = true;
-        mContext.getMainThreadHandler().post(
-                () -> mSpyPowerNotificationWarnings.setUndismissibleDialogShowing(showing));
-        waitForIdleSync();
-        assertThat(mSpyPowerNotificationWarnings.mAlarmDialog).isNotNull();
-    }
-
-    @Test
-    public void testUndismissibleDialogShowing_ShouldNotShow() {
-        boolean showing = false;
-        mContext.getMainThreadHandler().post(
-                () -> mSpyPowerNotificationWarnings.setUndismissibleDialogShowing(showing));
-        waitForIdleSync();
-        assertThat(mSpyPowerNotificationWarnings.mAlarmDialog).isNull();
-    }
-
-    @Test
-    public void testDismissibleDialogShowing_ShouldShow() {
-        boolean showing = true;
-        mContext.getMainThreadHandler().post(
-                () -> mSpyPowerNotificationWarnings.setDismissibleDialogShowing(showing));
-        waitForIdleSync();
-        assertThat(mSpyPowerNotificationWarnings.mAlarmDialogAllowDismiss).isNotNull();
-    }
-
-    @Test
-    public void testDismissibleDialogShowing_ShouldNotShow() {
-        boolean showing = false;
-        mContext.getMainThreadHandler().post(
-                () -> mSpyPowerNotificationWarnings.setDismissibleDialogShowing(showing));
-        waitForIdleSync();
-        assertThat(mSpyPowerNotificationWarnings.mAlarmDialogAllowDismiss).isNull();
     }
 }
