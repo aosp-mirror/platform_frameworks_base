@@ -34,6 +34,8 @@ import "frameworks/base/core/proto/android/stats/launcher/launcher.proto";
 import "frameworks/base/core/proto/android/telecomm/enums.proto";
 import "frameworks/base/core/proto/android/telephony/enums.proto";
 import "frameworks/base/core/proto/android/view/enums.proto";
+import "frameworks/base/core/proto/android/stats/devicepolicy/device_policy_enums.proto";
+import "frameworks/base/core/proto/android/stats/devicepolicy/device_policy.proto";
 
 /**
  * The master atom class. This message defines all of the available
@@ -156,6 +158,7 @@ message Atom {
         ServiceLaunchReported service_launch_reported = 100;
         PhenotypeFlagStateChanged phenotype_flag_state_changed = 101;
         BinaryPushStateChanged binary_push_state_changed = 102;
+        DevicePolicyEvent device_policy_event = 103;
     }
 
     // Pulled events will start at field 10000.
@@ -3388,4 +3391,26 @@ message DeviceCalculatedPowerBlameOther {
     // Power used by this item in mAh, as computed by BatteryStats, since BatteryStats last reset
     // (i.e. roughly since device was last significantly charged).
     optional float power_milli_amp_hours = 2;
+}
+
+/**
+ * Logs device policy features.
+ *
+ * Logged from:
+ *   frameworks/base/services/devicepolicy/java/com/android/server/devicepolicy/DevicePolicyManagerService.java
+ *   packages/apps/ManagedProvisioning/src/com/android/managedprovisioning/
+ */
+message DevicePolicyEvent {
+    // The event id - unique for each event.
+    optional android.stats.devicepolicy.EventId event_id = 1;
+    // The admin package name.
+    optional string admin_package_name = 2;
+    // A generic integer parameter.
+    optional int32 integer_value = 3;
+    // A generic boolean parameter.
+    optional bool boolean_value = 4;
+    // A parameter specifying a time period in milliseconds.
+    optional uint64 time_period_millis = 5;
+    // A parameter specifying a list of package names, bundle extras or string parameters.
+    optional android.stats.devicepolicy.StringList string_list_value = 6 [(log_mode) = MODE_BYTES];
 }
