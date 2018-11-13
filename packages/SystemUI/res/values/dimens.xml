@@ -215,6 +215,9 @@
     <!-- The width of the view containing navigation buttons -->
     <dimen name="navigation_key_width">70dp</dimen>
 
+    <!-- The width/height of the icon of a navigation button -->
+    <dimen name="navigation_icon_size">32dp</dimen>
+
     <dimen name="navigation_key_padding">0dp</dimen>
 
     <!-- The width of the view containing the menu/ime navigation bar icons -->
@@ -861,7 +864,6 @@
     <dimen name="nav_content_padding">0dp</dimen>
     <dimen name="nav_quick_scrub_track_edge_padding">24dp</dimen>
     <dimen name="nav_quick_scrub_track_thickness">10dp</dimen>
-    <dimen name="nav_home_back_gesture_drag_limit">40dp</dimen>
 
     <!-- Navigation bar shadow params. -->
     <dimen name="nav_key_button_shadow_offset_x">0dp</dimen>
