@@ -979,6 +979,87 @@ public final class MediaDrm implements AutoCloseable {
             throws DeniedByServerException;
 
     /**
+     * The keys in an offline license allow protected content to be played even
+     * if the device is not connected to a network. Offline licenses are stored
+     * on the device after a key request/response exchange when the key request
+     * KeyType is OFFLINE. Normally each app is responsible for keeping track of
+     * the keySetIds it has created. If an app loses the keySetId for any stored
+     * licenses that it created, however, it must be able to recover the stored
+     * keySetIds so those licenses can be removed when they expire or when the
+     * app is uninstalled.
+     * <p>
+     * This method returns a list of the keySetIds for all offline licenses.
+     * The offline license keySetId may be used to query the status of an
+     * offline license with {@link #getOfflineLicenseState} or remove it with
+     * {@link #removeOfflineLicense}.
+     *
+     * @return a list of offline license keySetIds
+     */
+    @NonNull
+    public native List<byte[]> getOfflineLicenseKeySetIds();
+
+    /**
+     * Normally offline licenses are released using a key request/response
+     * exchange using {@link #getKeyRequest} where the key type is
+     * KEY_TYPE_RELEASE, followed by {@link #provideKeyResponse}. This allows
+     * the server to cryptographically confirm that the license has been removed
+     * and then adjust the count of offline licenses allocated to the device.
+     * <p>
+     * In some exceptional situations it may be necessary to directly remove
+     * offline licenses without notifying the server, which may be performed
+     * using this method.
+     *
+     * @param keySetId the id of the offline license to remove
+     * @throws IllegalArgumentException if the keySetId does not refer to an
+     * offline license.
+     */
+    public native void removeOfflineLicense(@NonNull byte[] keySetId);
+
+    /**
+     * Offline license state is unknown, an error occurred while trying
+     * to access it.
+     */
+    public static final int OFFLINE_LICENSE_STATE_UNKNOWN = 0;
+
+    /**
+     * Offline license state is usable, the keys may be used for decryption.
+     */
+    public static final int OFFLINE_LICENSE_USABLE = 1;
+
+    /**
+     * Offline license state is inactive, the keys have been marked for
+     * release using {@link #getKeyRequest} with KEY_TYPE_RELEASE but the
+     * key response has not been received.
+     */
+    public static final int OFFLINE_LICENSE_INACTIVE = 2;
+
+    /** @hide */
+    @IntDef({
+        OFFLINE_LICENSE_STATE_UNKNOWN,
+        OFFLINE_LICENSE_USABLE,
+        OFFLINE_LICENSE_INACTIVE,
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface OfflineLicenseState {}
+
+    /**
+     * Request the state of an offline license. An offline license may be usable
+     * or inactive. The keys in a usable offline license are available for
+     * decryption. When the offline license state is inactive, the keys have
+     * been marked for release using {@link #getKeyRequest} with
+     * KEY_TYPE_RELEASE but the key response has not been received. The keys in
+     * an inactive offline license are not usable for decryption.
+     *
+     * @param keySetId selects the offline license
+     * @return the offline license state, one of {@link #OFFLINE_LICENSE_USABLE},
+     * {@link #OFFLINE_LICENSE_INACTIVE} or {@link #OFFLINE_LICENSE_STATE_UNKNOWN}.
+     * @throws IllegalArgumentException if the keySetId does not refer to an
+     * offline license.
+     */
+    @OfflineLicenseState
+    public native int getOfflineLicenseState(@NonNull byte[] keySetId);
+
+    /**
      * Secure stops are a way to enforce limits on the number of concurrent
      * streams per subscriber across devices. They provide secure monitoring of
      * the lifetime of content decryption keys in MediaDrm sessions.
