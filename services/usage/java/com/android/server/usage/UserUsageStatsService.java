@@ -915,8 +915,12 @@ class UserUsageStatsService {
                 return "SCREEN_INTERACTIVE";
             case UsageEvents.Event.SCREEN_NON_INTERACTIVE:
                 return "SCREEN_NON_INTERACTIVE";
+            case UsageEvents.Event.KEYGUARD_SHOWN:
+                return "KEYGUARD_SHOWN";
+            case UsageEvents.Event.KEYGUARD_HIDDEN:
+                return "KEYGUARD_HIDDEN";
             default:
-                return "UNKNOWN";
+                return "UNKNOWN_TYPE_" + eventType;
         }
     }
 
