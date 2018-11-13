@@ -21,7 +21,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"Netzwerkscan nicht möglich"</string>
-    <string name="wifi_security_none" msgid="7985461072596594400">"Keine"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"Gespeichert"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"Deaktiviert"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP-Konfigurationsfehler"</string>
@@ -231,7 +230,7 @@
     <string name="private_dns_mode_off" msgid="8236575187318721684">"Aus"</string>
     <string name="private_dns_mode_opportunistic" msgid="8314986739896927399">"Automatisch"</string>
     <string name="private_dns_mode_provider" msgid="8354935160639360804">"Hostname des privaten DNS-Anbieters"</string>
-    <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Hostnamen des DNS-Anbieters eingeben"</string>
+    <string name="private_dns_mode_provider_hostname_hint" msgid="2487492386970928143">"Hostname des DNS-Anbieters eingeben"</string>
     <string name="private_dns_mode_provider_failure" msgid="231837290365031223">"Verbindung nicht möglich"</string>
     <string name="wifi_display_certification_summary" msgid="1155182309166746973">"Optionen zur Zertifizierung für kabellose Übertragung anzeigen"</string>
     <string name="wifi_verbose_logging_summary" msgid="6615071616111731958">"Level für WLAN-Protokollierung erhöhen, in WiFi Picker pro SSID-RSSI anzeigen"</string>

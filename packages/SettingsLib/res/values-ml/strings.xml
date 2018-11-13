@@ -21,7 +21,6 @@
 <resources xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:xliff="urn:oasis:names:tc:xliff:document:1.2">
     <string name="wifi_fail_to_scan" msgid="1265540342578081461">"നെ‌റ്റ്‌വർക്കുകൾക്കായി സ്കാൻ ചെയ്യാനായില്ല"</string>
-    <string name="wifi_security_none" msgid="7985461072596594400">"ഒന്നുമില്ല"</string>
     <string name="wifi_remembered" msgid="4955746899347821096">"സംരക്ഷിച്ചു"</string>
     <string name="wifi_disabled_generic" msgid="4259794910584943386">"പ്രവർത്തനരഹിതമാക്കി"</string>
     <string name="wifi_disabled_network_failure" msgid="2364951338436007124">"IP കോൺഫിഗറേഷൻ പരാജയം"</string>
