@@ -46,7 +46,8 @@ import com.android.systemui.statusbar.policy.NetworkController.SignalCallback;
  * and keyguard state. Also manages lifecycle to make sure the views it contains are being
  * updated by the StatusBarIconController and DarkIconManager while it is attached.
  */
-public class CollapsedStatusBarFragment extends Fragment implements CommandQueue.Callbacks {
+public class CollapsedStatusBarFragment extends Fragment implements CommandQueue.Callbacks,
+        StatusBarStateController.StateListener {
 
     public static final String TAG = "CollapsedStatusBarFragment";
     private static final String EXTRA_PANEL_STATE = "panel_state";
@@ -120,12 +121,14 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
     public void onResume() {
         super.onResume();
         mCommandQueue.addCallbacks(this);
+        mStatusBarStateController.addListener(this);
     }
 
     @Override
     public void onPause() {
         super.onPause();
         mCommandQueue.removeCallbacks(this);
+        mStatusBarStateController.removeListener(this);
     }
 
     @Override
@@ -350,5 +353,15 @@ public class CollapsedStatusBarFragment extends Fragment implements CommandQueue
             ViewStub stub = mStatusBar.findViewById(R.id.operator_name);
             mOperatorNameFrame = stub.inflate();
         }
+    }
+
+    @Override
+    public void onStateChanged(int newState) {
+
+    }
+
+    @Override
+    public void onDozingChanged(boolean isDozing) {
+        disable(mDisabled1, mDisabled1, false /* animate */);
     }
 }
