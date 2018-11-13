@@ -19,12 +19,13 @@ package com.android.server.usage;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 import android.app.PendingIntent;
 import android.os.HandlerThread;
 import android.os.Looper;
 
-import androidx.test.filters.MediumTest;
+import androidx.test.filters.LargeTest;
 import androidx.test.runner.AndroidJUnit4;
 
 import org.junit.After;
@@ -32,11 +33,13 @@ import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 
+import java.io.PrintWriter;
+import java.io.StringWriter;
 import java.util.concurrent.CountDownLatch;
 import java.util.concurrent.TimeUnit;
 
 @RunWith(AndroidJUnit4.class)
-@MediumTest
+@LargeTest
 public class AppTimeLimitControllerTests {
 
     private static final String PKG_SOC1 = "package.soc1";
@@ -159,7 +162,6 @@ public class AppTimeLimitControllerTests {
         assertTrue("Observer wasn't added", hasUsageSessionObserver(UID, OBS_ID1));
         addUsageSessionObserver(OBS_ID2, GROUP_GAME, TIME_30_MIN, TIME_1_MIN);
         assertTrue("Observer wasn't added", hasUsageSessionObserver(UID, OBS_ID2));
-        assertTrue("Observer wasn't added", hasUsageSessionObserver(UID, OBS_ID1));
     }
 
     /** Verify app usage observer is removed */
@@ -178,6 +180,42 @@ public class AppTimeLimitControllerTests {
         assertTrue("Observer wasn't added", hasUsageSessionObserver(UID, OBS_ID1));
         mController.removeUsageSessionObserver(UID, OBS_ID1, USER_ID);
         assertFalse("Observer wasn't removed", hasUsageSessionObserver(UID, OBS_ID1));
+    }
+
+    /** Verify nothing happens when a nonexistent app usage observer is removed */
+    @Test
+    public void testAppUsageObserver_RemoveMissingObserver() {
+        assertFalse("Observer should not exist", hasAppUsageObserver(UID, OBS_ID1));
+        try {
+            mController.removeAppUsageObserver(UID, OBS_ID1, USER_ID);
+        } catch (Exception e) {
+            StringWriter sw = new StringWriter();
+            sw.write("Hit exception trying to remove nonexistent observer:\n");
+            sw.write(e.toString());
+            PrintWriter pw = new PrintWriter(sw);
+            e.printStackTrace(pw);
+            sw.write("\nTest Failed!");
+            fail(sw.toString());
+        }
+        assertFalse("Observer should not exist", hasAppUsageObserver(UID, OBS_ID1));
+    }
+
+    /** Verify nothing happens when a nonexistent usage session observer is removed */
+    @Test
+    public void testUsageSessionObserver_RemoveMissingObserver() {
+        assertFalse("Observer should not exist", hasUsageSessionObserver(UID, OBS_ID1));
+        try {
+            mController.removeUsageSessionObserver(UID, OBS_ID1, USER_ID);
+        } catch (Exception e) {
+            StringWriter sw = new StringWriter();
+            sw.write("Hit exception trying to remove nonexistent observer:");
+            sw.write(e.toString());
+            PrintWriter pw = new PrintWriter(sw);
+            e.printStackTrace(pw);
+            sw.write("\nTest Failed!");
+            fail(sw.toString());
+        }
+        assertFalse("Observer should not exist", hasUsageSessionObserver(UID, OBS_ID1));
     }
 
     /** Re-adding an observer should result in only one copy */
