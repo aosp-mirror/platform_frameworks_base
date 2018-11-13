@@ -154,11 +154,7 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
         ContextHubServiceUtil.checkPermissions(mContext);
 
         int result;
-        IContextHubClientCallback callback = null;
-        synchronized (this) {
-            callback = mCallbackInterface;
-        }
-        if (callback != null) {
+        if (isRegistered()) {
             ContextHubMsg messageToNanoApp =
                     ContextHubServiceUtil.createHidlContextHubMessage(mHostEndPointId, message);
 
@@ -383,5 +379,12 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
                 }
             }
         }
+    }
+
+    /**
+     * @return true if the client is still registered with the service, false otherwise
+     */
+    private synchronized boolean isRegistered() {
+        return mRegistered;
     }
 }
