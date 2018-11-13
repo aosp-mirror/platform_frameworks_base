@@ -48,6 +48,9 @@ import java.util.Set;
 
 /**
  * Interface for providing text classification related features.
+ * <p>
+ * The TextClassifier may be used to understand the meaning of text, as well as generating predicted
+ * next actions based on the text.
  *
  * <p><strong>NOTE: </strong>Unless otherwise stated, methods of this interface are blocking
  * operations. Call on a worker thread.
