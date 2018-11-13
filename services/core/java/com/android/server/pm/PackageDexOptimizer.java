@@ -49,7 +49,7 @@ import java.util.Map;
 
 import dalvik.system.DexFile;
 
-import static android.content.pm.ApplicationInfo.HIDDEN_API_ENFORCEMENT_NONE;
+import static android.content.pm.ApplicationInfo.HIDDEN_API_ENFORCEMENT_DISABLED;
 
 import static com.android.server.pm.Installer.DEXOPT_BOOTCOMPLETE;
 import static com.android.server.pm.Installer.DEXOPT_DEBUGGABLE;
@@ -548,7 +548,7 @@ public class PackageDexOptimizer {
         // Some apps are executed with restrictions on hidden API usage. If this app is one
         // of them, pass a flag to dexopt to enable the same restrictions during compilation.
         // TODO we should pass the actual flag value to dexopt, rather than assuming blacklist
-        int hiddenApiFlag = info.getHiddenApiEnforcementPolicy() == HIDDEN_API_ENFORCEMENT_NONE
+        int hiddenApiFlag = info.getHiddenApiEnforcementPolicy() == HIDDEN_API_ENFORCEMENT_DISABLED
                 ? 0
                 : DEXOPT_ENABLE_HIDDEN_API_CHECKS;
         // Avoid generating CompactDex for modes that are latency critical.

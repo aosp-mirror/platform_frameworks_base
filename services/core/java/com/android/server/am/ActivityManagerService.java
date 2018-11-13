@@ -2055,8 +2055,7 @@ public class ActivityManagerService extends IActivityManager.Stub
         private String mExemptionsStr;
         private List<String> mExemptions = Collections.emptyList();
         private int mLogSampleRate = -1;
-        @HiddenApiEnforcementPolicy private int mPolicyPreP = HIDDEN_API_ENFORCEMENT_DEFAULT;
-        @HiddenApiEnforcementPolicy private int mPolicyP = HIDDEN_API_ENFORCEMENT_DEFAULT;
+        @HiddenApiEnforcementPolicy private int mPolicy = HIDDEN_API_ENFORCEMENT_DEFAULT;
 
         public HiddenApiSettings(Handler handler, Context context) {
             super(handler);
@@ -2073,11 +2072,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                     false,
                     this);
             mContext.getContentResolver().registerContentObserver(
-                    Settings.Global.getUriFor(Settings.Global.HIDDEN_API_POLICY_PRE_P_APPS),
-                    false,
-                    this);
-            mContext.getContentResolver().registerContentObserver(
-                    Settings.Global.getUriFor(Settings.Global.HIDDEN_API_POLICY_P_APPS),
+                    Settings.Global.getUriFor(Settings.Global.HIDDEN_API_POLICY),
                     false,
                     this);
             update();
@@ -2112,8 +2107,7 @@ public class ActivityManagerService extends IActivityManager.Stub
                 mLogSampleRate = logSampleRate;
                 zygoteProcess.setHiddenApiAccessLogSampleRate(mLogSampleRate);
             }
-            mPolicyPreP = getValidEnforcementPolicy(Settings.Global.HIDDEN_API_POLICY_PRE_P_APPS);
-            mPolicyP = getValidEnforcementPolicy(Settings.Global.HIDDEN_API_POLICY_P_APPS);
+            mPolicy = getValidEnforcementPolicy(Settings.Global.HIDDEN_API_POLICY);
         }
 
         private @HiddenApiEnforcementPolicy int getValidEnforcementPolicy(String settingsKey) {
@@ -2130,12 +2124,8 @@ public class ActivityManagerService extends IActivityManager.Stub
             return mBlacklistDisabled;
         }
 
-        @HiddenApiEnforcementPolicy int getPolicyForPrePApps() {
-            return mPolicyPreP;
-        }
-
-        @HiddenApiEnforcementPolicy int getPolicyForPApps() {
-            return mPolicyP;
+        @HiddenApiEnforcementPolicy int getPolicy() {
+            return mPolicy;
         }
 
         public void onChange(boolean selfChange) {

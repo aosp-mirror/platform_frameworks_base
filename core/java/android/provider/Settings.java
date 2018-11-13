@@ -12636,27 +12636,14 @@ public final class Settings {
                 "hidden_api_access_log_sampling_rate";
 
         /**
-         * Hidden API enforcement policy for apps targeting SDK versions prior to the latest
-         * version.
+         * Hidden API enforcement policy for apps.
          *
          * Values correspond to @{@link
          * android.content.pm.ApplicationInfo.HiddenApiEnforcementPolicy}
          *
          * @hide
          */
-        public static final String HIDDEN_API_POLICY_PRE_P_APPS =
-                "hidden_api_policy_pre_p_apps";
-
-        /**
-         * Hidden API enforcement policy for apps targeting the current SDK version.
-         *
-         * Values correspond to @{@link
-         * android.content.pm.ApplicationInfo.HiddenApiEnforcementPolicy}
-         *
-         * @hide
-         */
-        public static final String HIDDEN_API_POLICY_P_APPS =
-                "hidden_api_policy_p_apps";
+        public static final String HIDDEN_API_POLICY = "hidden_api_policy";
 
         /**
          * Timeout for a single {@link android.media.soundtrigger.SoundTriggerDetectionService}

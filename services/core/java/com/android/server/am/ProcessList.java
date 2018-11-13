@@ -1363,8 +1363,7 @@ public final class ProcessList {
 
             if (!disableHiddenApiChecks && !mService.mHiddenApiBlacklist.isDisabled()) {
                 app.info.maybeUpdateHiddenApiEnforcementPolicy(
-                        mService.mHiddenApiBlacklist.getPolicyForPrePApps(),
-                        mService.mHiddenApiBlacklist.getPolicyForPApps());
+                        mService.mHiddenApiBlacklist.getPolicy());
                 @ApplicationInfo.HiddenApiEnforcementPolicy int policy =
                         app.info.getHiddenApiEnforcementPolicy();
                 int policyBits = (policy << Zygote.API_ENFORCEMENT_POLICY_SHIFT);
