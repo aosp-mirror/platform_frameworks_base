@@ -298,7 +298,8 @@ public class StatusBarStateController {
     public interface StateListener {
 
         /**
-         * Callback before the new state is applied, for those who need to preempt the change
+         * Callback before the new state is applied, for those who need to preempt the change.
+         *
          * @param oldState state before the change
          * @param newState new state to be applied in {@link #onStateChanged}
          */
@@ -314,21 +315,26 @@ public class StatusBarStateController {
         /**
          * Required callback. Get the new state and do what you will with it. Keep in mind that
          * other listeners are typically unordered and don't rely on your work being done before
-         * other peers
+         * other peers.
          *
-         * Only called if the state is actually different
+         * Only called if the state is actually different.
+         *
          * @param newState the new {@link StatusBarState}
          */
         public void onStateChanged(int newState);
 
         /**
          * Callback to be notified when Dozing changes. Dozing is stored separately from state.
+         *
          * @param isDozing {@code true} if dozing according to {@link StatusBar}
          */
         public default void onDozingChanged(boolean isDozing) {}
 
         /**
          * Callback to be notified when the doze amount changes. Useful for animations.
+         * Note: this will be called for each animation frame. Please be careful to avoid
+         * performance regressions.
+         *
          * @param linear A number from 0 to 1, where 1 means that the device is dozing.
          * @param eased Same as {@code linear} but transformed by an interpolator.
          */
