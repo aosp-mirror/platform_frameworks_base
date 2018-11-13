@@ -79,7 +79,10 @@ public class MetricsFeatureProvider {
         }
     }
 
-    public void action(Context context, int category, Pair<Integer, Object>... taggedData) {
+    /**
+     * Logs a simple action without page id or attribution
+     */
+    public void action(Context context, int category,  Pair<Integer, Object>... taggedData) {
         for (LogWriter writer : mLoggerWriters) {
             writer.action(context, category, taggedData);
         }
@@ -88,10 +91,9 @@ public class MetricsFeatureProvider {
     /**
      * Logs a generic Settings event.
      */
-    public void action(Context context, int category, String pkg,
-            Pair<Integer, Object>... taggedData) {
+    public void action(Context context, int category, String pkg) {
         for (LogWriter writer : mLoggerWriters) {
-            writer.action(context, category, pkg, taggedData);
+            writer.action(context, category, pkg);
         }
     }
 
@@ -135,16 +137,22 @@ public class MetricsFeatureProvider {
                 // Not loggable
                 return;
             }
-            action(context, MetricsEvent.ACTION_SETTINGS_TILE_CLICK, action,
-                    Pair.create(MetricsEvent.FIELD_CONTEXT, sourceMetricsCategory));
+            action(sourceMetricsCategory,
+                    MetricsEvent.ACTION_SETTINGS_TILE_CLICK,
+                    SettingsEnums.PAGE_UNKNOWN,
+                    action,
+                    0);
             return;
         } else if (TextUtils.equals(cn.getPackageName(), context.getPackageName())) {
             // Going to a Setting internal page, skip click logging in favor of page's own
             // visibility logging.
             return;
         }
-        action(context, MetricsEvent.ACTION_SETTINGS_TILE_CLICK, cn.flattenToString(),
-                Pair.create(MetricsEvent.FIELD_CONTEXT, sourceMetricsCategory));
+        action(sourceMetricsCategory,
+                MetricsEvent.ACTION_SETTINGS_TILE_CLICK,
+                SettingsEnums.PAGE_UNKNOWN,
+                cn.flattenToString(),
+                0);
     }
 
 }

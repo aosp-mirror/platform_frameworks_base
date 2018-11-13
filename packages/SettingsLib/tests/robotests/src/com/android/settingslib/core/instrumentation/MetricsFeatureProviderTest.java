@@ -17,8 +17,6 @@ package com.android.settingslib.core.instrumentation;
 
 import static com.google.common.truth.Truth.assertThat;
 
-import static org.mockito.Matchers.anyString;
-import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 
@@ -27,7 +25,6 @@ import android.app.settings.SettingsEnums;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
-import android.util.Pair;
 
 import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 import com.android.settingslib.SettingsLibRobolectricTestRunner;
@@ -77,10 +74,11 @@ public class MetricsFeatureProviderTest {
         mProvider.logDashboardStartIntent(mContext, intent, MetricsEvent.SETTINGS_GESTURES);
 
         verify(mLogWriter).action(
-                eq(mContext),
-                eq(MetricsEvent.ACTION_SETTINGS_TILE_CLICK),
-                anyString(),
-                eq(Pair.create(MetricsEvent.FIELD_CONTEXT, MetricsEvent.SETTINGS_GESTURES)));
+                MetricsEvent.SETTINGS_GESTURES,
+                MetricsEvent.ACTION_SETTINGS_TILE_CLICK,
+                SettingsEnums.PAGE_UNKNOWN,
+                Intent.ACTION_ASSIST,
+                0);
     }
 
     @Test
@@ -90,10 +88,11 @@ public class MetricsFeatureProviderTest {
         mProvider.logDashboardStartIntent(mContext, intent, MetricsEvent.SETTINGS_GESTURES);
 
         verify(mLogWriter).action(
-                eq(mContext),
-                eq(MetricsEvent.ACTION_SETTINGS_TILE_CLICK),
-                anyString(),
-                eq(Pair.create(MetricsEvent.FIELD_CONTEXT, MetricsEvent.SETTINGS_GESTURES)));
+                MetricsEvent.SETTINGS_GESTURES,
+                MetricsEvent.ACTION_SETTINGS_TILE_CLICK,
+                SettingsEnums.PAGE_UNKNOWN,
+                "pkg/cls",
+                0);
     }
 
     @Test

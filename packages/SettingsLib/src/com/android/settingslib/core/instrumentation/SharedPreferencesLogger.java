@@ -15,6 +15,7 @@
 package com.android.settingslib.core.instrumentation;
 
 import android.annotation.Nullable;
+import android.app.settings.SettingsEnums;
 import android.content.ComponentName;
 import android.content.Context;
 import android.content.SharedPreferences;
@@ -22,11 +23,8 @@ import android.content.pm.PackageManager;
 import android.os.AsyncTask;
 import android.text.TextUtils;
 import android.util.Log;
-import android.util.Pair;
 
 import androidx.annotation.VisibleForTesting;
-
-import com.android.internal.logging.nano.MetricsProto.MetricsEvent;
 
 import java.util.Map;
 import java.util.Set;
@@ -117,10 +115,9 @@ public class SharedPreferencesLogger implements SharedPreferences {
             return;
         }
 
-        final Pair<Integer, Object> valueData;
+        final int intVal;
         if (value instanceof Long) {
             final Long longVal = (Long) value;
-            final int intVal;
             if (longVal > Integer.MAX_VALUE) {
                 intVal = Integer.MAX_VALUE;
             } else if (longVal < Integer.MIN_VALUE) {
@@ -128,45 +125,43 @@ public class SharedPreferencesLogger implements SharedPreferences {
             } else {
                 intVal = longVal.intValue();
             }
-            valueData = Pair.create(MetricsEvent.FIELD_SETTINGS_PREFERENCE_CHANGE_INT_VALUE,
-                    intVal);
         } else if (value instanceof Integer) {
-            valueData = Pair.create(MetricsEvent.FIELD_SETTINGS_PREFERENCE_CHANGE_INT_VALUE,
-                    value);
+            intVal = (int) value;
         } else if (value instanceof Boolean) {
-            valueData = Pair.create(MetricsEvent.FIELD_SETTINGS_PREFERENCE_CHANGE_INT_VALUE,
-                    (Boolean) value ? 1 : 0);
+            intVal = (Boolean) value ? 1 : 0;
         } else if (value instanceof Float) {
-            valueData = Pair.create(MetricsEvent.FIELD_SETTINGS_PREFERENCE_CHANGE_FLOAT_VALUE,
-                    value);
-        } else if (value instanceof String) {
-            Log.d(LOG_TAG, "Tried to log string preference " + prefKey + " = " + value);
-            valueData = null;
+            final float floatValue = (float) value;
+            if (floatValue > Integer.MAX_VALUE) {
+                intVal = Integer.MAX_VALUE;
+            } else if (floatValue < Integer.MIN_VALUE) {
+                intVal = Integer.MIN_VALUE;
+            } else {
+                intVal = (int) floatValue;
+            }
         } else {
             Log.w(LOG_TAG, "Tried to log unloggable object" + value);
-            valueData = null;
+            return;
         }
-        if (valueData != null) {
-            // Pref key exists in set, log it's change in metrics.
-            mMetricsFeature.action(mContext, MetricsEvent.ACTION_SETTINGS_PREFERENCE_CHANGE,
-                    Pair.create(MetricsEvent.FIELD_SETTINGS_PREFERENCE_CHANGE_NAME, prefKey),
-                    valueData);
-        }
+        // Pref key exists in set, log it's change in metrics.
+        mMetricsFeature.action(SettingsEnums.PAGE_UNKNOWN,
+                SettingsEnums.ACTION_SETTINGS_PREFERENCE_CHANGE,
+                SettingsEnums.PAGE_UNKNOWN,
+                prefKey,
+                intVal);
     }
 
     @VisibleForTesting
     void logPackageName(String key, String value) {
         final String prefKey = mTag + "/" + key;
-        mMetricsFeature.action(mContext, MetricsEvent.ACTION_SETTINGS_PREFERENCE_CHANGE, value,
-                Pair.create(MetricsEvent.FIELD_SETTINGS_PREFERENCE_CHANGE_NAME, prefKey));
+        mMetricsFeature.action(SettingsEnums.PAGE_UNKNOWN,
+                SettingsEnums.ACTION_SETTINGS_PREFERENCE_CHANGE,
+                SettingsEnums.PAGE_UNKNOWN,
+                prefKey + ":" + value,
+                0);
     }
 
     private void safeLogValue(String key, String value) {
         new AsyncPackageCheck().executeOnExecutor(AsyncTask.THREAD_POOL_EXECUTOR, key, value);
-    }
-
-    public static String buildCountName(String prefKey, Object value) {
-        return prefKey + "|" + value;
     }
 
     public static String buildPrefKey(String tag, String key) {
