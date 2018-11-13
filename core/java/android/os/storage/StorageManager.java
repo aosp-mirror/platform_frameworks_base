@@ -774,7 +774,7 @@ public class StorageManager {
         try {
             for (VolumeInfo vol : mStorageManager.getVolumes(0)) {
                 if (vol.path != null && FileUtils.contains(vol.path, pathString)
-                        && vol.type != VolumeInfo.TYPE_PUBLIC) {
+                        && vol.type != VolumeInfo.TYPE_PUBLIC && vol.type != VolumeInfo.TYPE_STUB) {
                     // TODO: verify that emulated adopted devices have UUID of
                     // underlying volume
                     try {
