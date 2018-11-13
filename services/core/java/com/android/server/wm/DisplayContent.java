@@ -2011,9 +2011,7 @@ class DisplayContent extends WindowContainer<DisplayContent.DisplayChildWindowCo
         mDisplay.getDisplayInfo(mDisplayInfo);
         mDisplay.getMetrics(mDisplayMetrics);
 
-        for (int i = mTaskStackContainers.getChildCount() - 1; i >= 0; --i) {
-            mTaskStackContainers.getChildAt(i).updateDisplayInfo(null);
-        }
+        onDisplayChanged(this);
     }
 
     void initializeDisplayBaseInfo() {
