@@ -19,7 +19,6 @@ package com.android.server.wm;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_HOME;
 import static android.app.WindowConfiguration.ACTIVITY_TYPE_STANDARD;
 import static android.app.WindowConfiguration.WINDOWING_MODE_FREEFORM;
-import static android.app.WindowConfiguration.WINDOWING_MODE_FULLSCREEN;
 import static android.app.WindowConfiguration.WINDOW_CONFIG_ALWAYS_ON_TOP;
 import static android.app.WindowConfiguration.WINDOW_CONFIG_APP_BOUNDS;
 import static android.app.WindowConfiguration.WINDOW_CONFIG_ROTATION;
@@ -174,70 +173,4 @@ public class WindowConfigurationTests extends WindowTestsBase {
         assertEquals(appBounds.width(), info.appWidth);
         assertEquals(appBounds.height(), info.appHeight);
     }
-
-    /** Ensures that bounds are clipped to their parent. */
-    @Test
-    public void testAppBounds_BoundsClipping() {
-        final Rect shiftedBounds = new Rect(mParentBounds);
-        shiftedBounds.offset(10, 10);
-        final Rect expectedBounds = new Rect(mParentBounds);
-        expectedBounds.intersect(shiftedBounds);
-        testStackBoundsConfiguration(WINDOWING_MODE_FULLSCREEN, mParentBounds, shiftedBounds,
-                expectedBounds);
-    }
-
-    /** Ensures that empty bounds are not propagated to the configuration. */
-    @Test
-    public void testAppBounds_EmptyBounds() {
-        final Rect emptyBounds = new Rect();
-        testStackBoundsConfiguration(WINDOWING_MODE_FULLSCREEN, mParentBounds, emptyBounds,
-                null /*ExpectedBounds*/);
-    }
-
-    /** Ensures that bounds on freeform stacks are not clipped. */
-    @Test
-    public void testAppBounds_FreeFormBounds() {
-        final Rect freeFormBounds = new Rect(mParentBounds);
-        freeFormBounds.offset(10, 10);
-        testStackBoundsConfiguration(WINDOWING_MODE_FREEFORM, mParentBounds, freeFormBounds,
-                freeFormBounds);
-    }
-
-    /** Ensures that fully contained bounds are not clipped. */
-    @Test
-    public void testAppBounds_ContainedBounds() {
-        final Rect insetBounds = new Rect(mParentBounds);
-        insetBounds.inset(5, 5, 5, 5);
-        testStackBoundsConfiguration(
-                WINDOWING_MODE_FULLSCREEN, mParentBounds, insetBounds, insetBounds);
-    }
-
-    /** Ensures that full screen free form bounds are clipped */
-    @Test
-    public void testAppBounds_FullScreenFreeFormBounds() {
-        final Rect fullScreenBounds = new Rect(0, 0, mDisplayInfo.logicalWidth,
-                mDisplayInfo.logicalHeight);
-        testStackBoundsConfiguration(WINDOWING_MODE_FULLSCREEN, mParentBounds, fullScreenBounds,
-                mParentBounds);
-    }
-
-    private void testStackBoundsConfiguration(int windowingMode, Rect parentBounds, Rect bounds,
-            Rect expectedConfigBounds) {
-        final StackWindowController stackController = createStackControllerOnStackOnDisplay(
-                        windowingMode, ACTIVITY_TYPE_STANDARD, mDisplayContent);
-
-        final Configuration parentConfig = mDisplayContent.getConfiguration();
-        parentConfig.windowConfiguration.setAppBounds(parentBounds);
-
-        final Configuration config = new Configuration();
-        final WindowConfiguration winConfig = config.windowConfiguration;
-        stackController.adjustConfigurationForBounds(bounds,
-                new Rect() /*nonDecorBounds*/, new Rect() /*stableBounds*/, false /*overrideWidth*/,
-                false /*overrideHeight*/, mDisplayInfo.logicalDensityDpi, config, parentConfig,
-                windowingMode);
-        // Assert that both expected and actual are null or are equal to each other
-
-        assertEquals(expectedConfigBounds, winConfig.getAppBounds());
-    }
-
 }

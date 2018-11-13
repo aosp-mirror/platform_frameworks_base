@@ -19,11 +19,6 @@ package com.android.server.wm;
 import static android.app.AppOpsManager.OP_NONE;
 import static android.content.pm.ActivityInfo.RESIZE_MODE_UNRESIZEABLE;
 
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.any;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyBoolean;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyFloat;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.anyInt;
-import static com.android.dx.mockito.inline.extended.ExtendedMockito.doAnswer;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.mock;
 import static com.android.dx.mockito.inline.extended.ExtendedMockito.when;
 import static com.android.server.wm.WindowContainer.POSITION_TOP;
@@ -34,8 +29,6 @@ import static org.mockito.Mockito.when;
 import android.app.ActivityManager;
 import android.content.ComponentName;
 import android.content.Context;
-import android.content.res.Configuration;
-import android.graphics.Rect;
 import android.os.Binder;
 import android.os.IBinder;
 import android.view.Display;
@@ -44,8 +37,6 @@ import android.view.IWindow;
 import android.view.Surface;
 import android.view.SurfaceControl.Transaction;
 import android.view.WindowManager;
-
-import org.mockito.invocation.InvocationOnMock;
 
 /**
  * A collection of static functions that can be referenced by other test packages to provide access
@@ -116,17 +107,6 @@ public class WindowTestUtils {
     public static StackWindowController createMockStackWindowContainerController() {
         StackWindowController controller = mock(StackWindowController.class);
         controller.mContainer = mock(TestTaskStack.class);
-
-        // many components rely on the {@link StackWindowController#adjustConfigurationForBounds}
-        // to properly set bounds values in the configuration. We must mimick those actions here.
-        doAnswer((InvocationOnMock invocationOnMock) -> {
-            final Configuration config = invocationOnMock.<Configuration>getArgument(6);
-            final Rect bounds = invocationOnMock.<Rect>getArgument(0);
-            config.windowConfiguration.setBounds(bounds);
-            return null;
-        }).when(controller).adjustConfigurationForBounds(any(), any(), any(),
-                anyBoolean(), anyBoolean(), anyFloat(), any(), any(), anyInt());
-
         return controller;
     }
 

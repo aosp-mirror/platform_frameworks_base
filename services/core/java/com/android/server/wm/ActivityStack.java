@@ -294,13 +294,6 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     // stack and the new stack will be on top of all stacks.
     static final int REMOVE_TASK_MODE_MOVING_TO_TOP = 2;
 
-    // The height/width divide used when fitting a task within a bounds with method
-    // {@link #fitWithinBounds}.
-    // We always want the task to to be visible in the bounds without affecting its size when
-    // fitting. To make sure this is the case, we don't adjust the task left or top side pass
-    // the input bounds right or bottom side minus the width or height divided by this value.
-    private static final int FIT_WITHIN_BOUNDS_DIVIDER = 3;
-
     final ActivityTaskManagerService mService;
     private final WindowManagerService mWindowManager;
     T mWindowContainerController;
@@ -365,9 +358,9 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
 
     private boolean mUpdateBoundsDeferred;
     private boolean mUpdateBoundsDeferredCalled;
+    private boolean mUpdateDisplayedBoundsDeferredCalled;
     private final Rect mDeferredBounds = new Rect();
-    private final Rect mDeferredTaskBounds = new Rect();
-    private final Rect mDeferredTaskInsetBounds = new Rect();
+    private final Rect mDeferredDisplayedBounds = new Rect();
 
     int mCurrentUser;
 
@@ -605,7 +598,9 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             if (getRequestedOverrideWindowingMode() == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY) {
                 getStackDockedModeBounds(null, null, mTmpRect2, mTmpRect3);
                 // immediately resize so docked bounds are available in onSplitScreenModeActivated
-                resize(mTmpRect2, null /* tempTaskBounds */, null /* tempTaskInsetBounds */);
+                setTaskDisplayedBounds(null);
+                setTaskBounds(mTmpRect2);
+                setBounds(mTmpRect2);
             } else if (
                     getRequestedOverrideWindowingMode() == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY) {
                 Rect dockedBounds = display.getSplitScreenPrimaryStack().getBounds();
@@ -949,17 +944,19 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
      * be resized to that bounds.
      */
     void continueUpdateBounds() {
-        final boolean wasDeferred = mUpdateBoundsDeferred;
-        mUpdateBoundsDeferred = false;
-        if (wasDeferred && mUpdateBoundsDeferredCalled) {
-            resize(mDeferredBounds.isEmpty() ? null : mDeferredBounds,
-                    mDeferredTaskBounds.isEmpty() ? null : mDeferredTaskBounds,
-                    mDeferredTaskInsetBounds.isEmpty() ? null : mDeferredTaskInsetBounds);
+        if (mUpdateBoundsDeferred) {
+            mUpdateBoundsDeferred = false;
+            if (mUpdateBoundsDeferredCalled) {
+                setTaskBounds(mDeferredBounds);
+                setBounds(mDeferredBounds);
+            }
+            if (mUpdateDisplayedBoundsDeferredCalled) {
+                setTaskDisplayedBounds(mDeferredDisplayedBounds);
+            }
         }
     }
 
-    boolean updateBoundsAllowed(Rect bounds, Rect tempTaskBounds,
-            Rect tempTaskInsetBounds) {
+    boolean updateBoundsAllowed(Rect bounds) {
         if (!mUpdateBoundsDeferred) {
             return true;
         }
@@ -968,17 +965,20 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         } else {
             mDeferredBounds.setEmpty();
         }
-        if (tempTaskBounds != null) {
-            mDeferredTaskBounds.set(tempTaskBounds);
-        } else {
-            mDeferredTaskBounds.setEmpty();
-        }
-        if (tempTaskInsetBounds != null) {
-            mDeferredTaskInsetBounds.set(tempTaskInsetBounds);
-        } else {
-            mDeferredTaskInsetBounds.setEmpty();
-        }
         mUpdateBoundsDeferredCalled = true;
+        return false;
+    }
+
+    boolean updateDisplayedBoundsAllowed(Rect bounds) {
+        if (!mUpdateBoundsDeferred) {
+            return true;
+        }
+        if (bounds != null) {
+            mDeferredDisplayedBounds.set(bounds);
+        } else {
+            mDeferredDisplayedBounds.setEmpty();
+        }
+        mUpdateDisplayedBoundsDeferredCalled = true;
         return false;
     }
 
@@ -4912,7 +4912,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
     // TODO: Can only be called from special methods in ActivityStackSupervisor.
     // Need to consolidate those calls points into this resize method so anyone can call directly.
     void resize(Rect bounds, Rect tempTaskBounds, Rect tempTaskInsetBounds) {
-        if (!updateBoundsAllowed(bounds, tempTaskBounds, tempTaskInsetBounds)) {
+        if (!updateBoundsAllowed(bounds)) {
             return;
         }
 
@@ -4926,20 +4926,7 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
         for (int i = mTaskHistory.size() - 1; i >= 0; i--) {
             final TaskRecord task = mTaskHistory.get(i);
             if (task.isResizeable()) {
-                if (inFreeformWindowingMode()) {
-                    // TODO(b/71028874): Can be removed since each freeform task is its own
-                    //                   stack.
-                    // For freeform stack we don't adjust the size of the tasks to match that
-                    // of the stack, but we do try to make sure the tasks are still contained
-                    // with the bounds of the stack.
-                    if (task.getRequestedOverrideBounds() != null) {
-                        mTmpRect2.set(task.getRequestedOverrideBounds());
-                        fitWithinBounds(mTmpRect2, bounds);
-                        task.updateOverrideConfiguration(mTmpRect2);
-                    }
-                } else {
-                    task.updateOverrideConfiguration(taskBounds, insetBounds);
-                }
+                task.updateOverrideConfiguration(taskBounds, insetBounds);
             }
 
             if (task.hasDisplayedBounds()) {
@@ -4951,7 +4938,6 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
             }
         }
 
-        mWindowContainerController.resize(bounds, mTmpBounds, mTmpInsetBounds);
         setBounds(bounds);
     }
 
@@ -4961,41 +4947,37 @@ class ActivityStack<T extends StackWindowController> extends ConfigurationContai
 
 
     /**
-     * Adjust bounds to stay within stack bounds.
-     *
-     * Since bounds might be outside of stack bounds, this method tries to move the bounds in a way
-     * that keep them unchanged, but be contained within the stack bounds.
-     *
-     * @param bounds Bounds to be adjusted.
-     * @param stackBounds Bounds within which the other bounds should remain.
+     * Until we can break this "set task bounds to same as stack bounds" behavior, this
+     * basically resizes both stack and task bounds to the same bounds.
      */
-    private static void fitWithinBounds(Rect bounds, Rect stackBounds) {
-        if (stackBounds == null || stackBounds.isEmpty() || stackBounds.contains(bounds)) {
+    void setTaskBounds(Rect bounds) {
+        if (!updateBoundsAllowed(bounds)) {
             return;
         }
 
-        if (bounds.left < stackBounds.left || bounds.right > stackBounds.right) {
-            final int maxRight = stackBounds.right
-                    - (stackBounds.width() / FIT_WITHIN_BOUNDS_DIVIDER);
-            int horizontalDiff = stackBounds.left - bounds.left;
-            if ((horizontalDiff < 0 && bounds.left >= maxRight)
-                    || (bounds.left + horizontalDiff >= maxRight)) {
-                horizontalDiff = maxRight - bounds.left;
+        for (int i = mTaskHistory.size() - 1; i >= 0; i--) {
+            final TaskRecord task = mTaskHistory.get(i);
+            if (task.isResizeable()) {
+                task.setBounds(bounds);
+            } else {
+                task.setBounds(null);
             }
-            bounds.left += horizontalDiff;
-            bounds.right += horizontalDiff;
+        }
+    }
+
+    /** Helper to setDisplayedBounds on all child tasks */
+    void setTaskDisplayedBounds(Rect bounds) {
+        if (!updateDisplayedBoundsAllowed(bounds)) {
+            return;
         }
 
-        if (bounds.top < stackBounds.top || bounds.bottom > stackBounds.bottom) {
-            final int maxBottom = stackBounds.bottom
-                    - (stackBounds.height() / FIT_WITHIN_BOUNDS_DIVIDER);
-            int verticalDiff = stackBounds.top - bounds.top;
-            if ((verticalDiff < 0 && bounds.top >= maxBottom)
-                    || (bounds.top + verticalDiff >= maxBottom)) {
-                verticalDiff = maxBottom - bounds.top;
+        for (int i = mTaskHistory.size() - 1; i >= 0; i--) {
+            final TaskRecord task = mTaskHistory.get(i);
+            if (bounds == null || bounds.isEmpty()) {
+                task.setDisplayedBounds(null);
+            } else if (task.isResizeable()) {
+                task.setDisplayedBounds(bounds);
             }
-            bounds.top += verticalDiff;
-            bounds.bottom += verticalDiff;
         }
     }
 

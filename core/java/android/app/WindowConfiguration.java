@@ -673,6 +673,15 @@ public class WindowConfiguration implements Parcelable, Comparable<WindowConfigu
     }
 
     /**
+     * Returns true if the windowingMode represents a split window.
+     * @hide
+     */
+    public static boolean isSplitScreenWindowingMode(int windowingMode) {
+        return windowingMode == WINDOWING_MODE_SPLIT_SCREEN_PRIMARY
+                || windowingMode == WINDOWING_MODE_SPLIT_SCREEN_SECONDARY;
+    }
+
+    /**
      * Returns true if the windows associated with this window configuration can receive input keys.
      * @hide
      */
