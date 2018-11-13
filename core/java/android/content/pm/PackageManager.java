@@ -220,6 +220,12 @@ public abstract class PackageManager {
 
     /** @hide */
     @IntDef(flag = true, prefix = { "GET_", "MATCH_" }, value = {
+    })
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface ModuleInfoFlags {}
+
+    /** @hide */
+    @IntDef(flag = true, prefix = { "GET_", "MATCH_" }, value = {
             GET_META_DATA,
     })
     @Retention(RetentionPolicy.SOURCE)
@@ -3428,6 +3434,35 @@ public abstract class PackageManager {
      */
     public abstract ProviderInfo getProviderInfo(ComponentName component,
             @ComponentInfoFlags int flags) throws NameNotFoundException;
+
+    /**
+     * Retrieve information for a particular module.
+     *
+     * @param packageName The name of the module.
+     * @param flags Additional option flags to modify the data returned.
+     * @return A {@link ModuleInfo} object containing information about the
+     *         module.
+     * @throws NameNotFoundException if a module with the given name cannot be
+     *             found on the system.
+     */
+    public ModuleInfo getModuleInfo(String packageName, @ModuleInfoFlags int flags)
+            throws NameNotFoundException {
+        throw new UnsupportedOperationException(
+                "getModuleInfo not implemented in subclass");
+    }
+
+    /**
+     * Return a List of all modules that are installed.
+     *
+     * @param flags Additional option flags to modify the data returned.
+     * @return A {@link List} of {@link ModuleInfo} objects, one for each installed
+     *         module, containing information about the module. In the unlikely case
+     *         there are no installed modules, an empty list is returned.
+     */
+    public @NonNull List<ModuleInfo> getInstalledModules(@ModuleInfoFlags int flags) {
+        throw new UnsupportedOperationException(
+                "getInstalledModules not implemented in subclass");
+    }
 
     /**
      * Return a List of all packages that are installed for the current user.

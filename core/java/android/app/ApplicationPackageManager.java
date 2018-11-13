@@ -44,6 +44,7 @@ import android.content.pm.InstantAppInfo;
 import android.content.pm.InstrumentationInfo;
 import android.content.pm.IntentFilterVerificationInfo;
 import android.content.pm.KeySet;
+import android.content.pm.ModuleInfo;
 import android.content.pm.PackageInfo;
 import android.content.pm.PackageInstaller;
 import android.content.pm.PackageItemInfo;
@@ -789,6 +790,16 @@ public class ApplicationPackageManager extends PackageManager {
             throw e.rethrowFromSystemServer();
         }
         throw new NameNotFoundException("No shared userid for user:"+sharedUserName);
+    }
+
+    @Override
+    public List<ModuleInfo> getInstalledModules(int flags) {
+        return null;
+    }
+
+    @Override
+    public ModuleInfo getModuleInfo(String packageName, int flags) throws NameNotFoundException {
+        return null;
     }
 
     @SuppressWarnings("unchecked")
