@@ -78,8 +78,6 @@ import java.util.Map;
 public class Assistant extends NotificationAssistantService {
     private static final String TAG = "ExtAssistant";
     private static final boolean DEBUG = Log.isLoggable(TAG, Log.DEBUG);
-    public static final boolean AUTO_DEMOTE_NOTIFICATIONS = SystemProperties.getBoolean(
-            "debug.demote_notifs", false);
     public static final boolean AGE_NOTIFICATIONS = SystemProperties.getBoolean(
             "debug.age_notifs", false);
 
@@ -242,7 +240,8 @@ public class Assistant extends NotificationAssistantService {
         if (!smartReplies.isEmpty()) {
             signals.putCharSequenceArrayList(Adjustment.KEY_SMART_REPLIES, smartReplies);
         }
-        if (AUTO_DEMOTE_NOTIFICATIONS) {
+        if (Settings.Secure.getInt(getContentResolver(),
+                Settings.Secure.NOTIFICATION_NEW_INTERRUPTION_MODEL, 0) == 1) {
             if (mNotificationCategorizer.shouldSilence(entry)) {
                 final int importance = entry.getImportance() < IMPORTANCE_LOW
                         ? entry.getImportance() : IMPORTANCE_LOW;
