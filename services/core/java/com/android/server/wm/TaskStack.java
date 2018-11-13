@@ -32,6 +32,7 @@ import static android.view.WindowManager.DOCKED_INVALID;
 import static android.view.WindowManager.DOCKED_LEFT;
 import static android.view.WindowManager.DOCKED_RIGHT;
 import static android.view.WindowManager.DOCKED_TOP;
+
 import static com.android.server.wm.DragResizeMode.DRAG_RESIZE_MODE_DOCKED_DIVIDER;
 import static com.android.server.wm.StackProto.ADJUSTED_BOUNDS;
 import static com.android.server.wm.StackProto.ADJUSTED_FOR_IME;
@@ -63,10 +64,12 @@ import android.util.proto.ProtoOutputStream;
 import android.view.DisplayInfo;
 import android.view.Surface;
 import android.view.SurfaceControl;
+
 import com.android.internal.policy.DividerSnapAlgorithm;
 import com.android.internal.policy.DividerSnapAlgorithm.SnapTarget;
 import com.android.internal.policy.DockedDividerUtils;
 import com.android.server.EventLogTags;
+
 import java.io.PrintWriter;
 
 public class TaskStack extends WindowContainer<Task> implements
@@ -256,6 +259,7 @@ public class TaskStack extends WindowContainer<Task> implements
         final Rect stackBounds = getBounds();
         getPendingTransaction()
                 .setSize(mAnimationBackgroundSurface, mTmpRect.width(), mTmpRect.height())
+                .setWindowCrop(mAnimationBackgroundSurface, mTmpRect.width(), mTmpRect.height())
                 .setPosition(mAnimationBackgroundSurface, mTmpRect.left - stackBounds.left,
                         mTmpRect.top - stackBounds.top);
         scheduleAnimation();
@@ -795,6 +799,7 @@ public class TaskStack extends WindowContainer<Task> implements
             return;
         }
         transaction.setSize(mSurfaceControl, width, height);
+        transaction.setWindowCrop(mSurfaceControl, width, height);
         mLastSurfaceSize.set(width, height);
     }
 

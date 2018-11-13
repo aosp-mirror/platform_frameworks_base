@@ -1738,6 +1738,7 @@ class AppWindowToken extends WindowToken implements WindowManagerService.AppFree
                 .setName(getSurfaceControl() + " - animation-bounds")
                 .setSize(getSurfaceWidth(), getSurfaceHeight());
         final SurfaceControl boundsLayer = builder.build();
+        t.setWindowCrop(boundsLayer, getSurfaceWidth(), getSurfaceHeight());
         t.show(boundsLayer);
         return boundsLayer;
     }
