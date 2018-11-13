@@ -16337,17 +16337,6 @@ public class PackageManagerService extends IPackageManager.Stub
                                         + oldPackage.mSharedUserId);
                     }
 
-                    // check if the new package supports all of the abis which the old package
-                    // supports
-                    boolean oldPkgSupportMultiArch =
-                            oldPackage.applicationInfo.secondaryCpuAbi != null;
-                    boolean newPkgSupportMultiArch = pkg.applicationInfo.secondaryCpuAbi != null;
-                    if (isSystemApp(oldPackage) && oldPkgSupportMultiArch
-                            && !newPkgSupportMultiArch) {
-                        throw new PrepareFailure(INSTALL_FAILED_UPDATE_INCOMPATIBLE,
-                                "Update to package " + pkgName11 + " doesn't support multi arch");
-                    }
-
                     // In case of rollback, remember per-user/profile install state
                     allUsers = sUserManager.getUserIds();
                     installedUsers = ps.queryInstalledUsers(allUsers, true);
