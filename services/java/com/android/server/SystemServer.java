@@ -118,6 +118,7 @@ import com.android.server.power.PowerManagerService;
 import com.android.server.power.ShutdownThread;
 import com.android.server.power.ThermalManagerService;
 import com.android.server.restrictions.RestrictionsManagerService;
+import com.android.server.role.RoleManagerService;
 import com.android.server.security.KeyAttestationApplicationIdProviderService;
 import com.android.server.security.KeyChainSystemService;
 import com.android.server.soundtrigger.SoundTriggerService;
@@ -1909,6 +1910,11 @@ public final class SystemServer {
             } catch (Throwable e) {
                 reportWtf("observing native crashes", e);
             }
+            traceEnd();
+
+            // Grants default permissions and defines roles
+            traceBeginAndSlog("StartRoleManagerService");
+            mSystemServiceManager.startService(RoleManagerService.class);
             traceEnd();
 
             // No dependency on Webview preparation in system server. But this should
