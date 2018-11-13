@@ -5064,15 +5064,21 @@ package android.telecom {
     method public int getAllPhoneAccountsCount();
     method public int getCallState();
     method public android.telecom.PhoneAccountHandle getConnectionManager();
+    method public int getCurrentTtyMode();
     method public deprecated android.content.ComponentName getDefaultPhoneApp();
     method public java.util.List<android.telecom.PhoneAccountHandle> getPhoneAccountsForPackage();
     method public java.util.List<android.telecom.PhoneAccountHandle> getPhoneAccountsSupportingScheme(java.lang.String);
     method public boolean isInEmergencyCall();
     method public boolean isRinging();
     method public boolean isTtySupported();
+    method public boolean setDefaultDialer(java.lang.String);
     field public static final java.lang.String EXTRA_CALL_BACK_INTENT = "android.telecom.extra.CALL_BACK_INTENT";
     field public static final java.lang.String EXTRA_CLEAR_MISSED_CALLS_INTENT = "android.telecom.extra.CLEAR_MISSED_CALLS_INTENT";
     field public static final java.lang.String EXTRA_CONNECTION_SERVICE = "android.telecom.extra.CONNECTION_SERVICE";
+    field public static final int TTY_MODE_FULL = 1; // 0x1
+    field public static final int TTY_MODE_HCO = 2; // 0x2
+    field public static final int TTY_MODE_OFF = 0; // 0x0
+    field public static final int TTY_MODE_VCO = 3; // 0x3
   }
 
 }

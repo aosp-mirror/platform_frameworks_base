@@ -15,6 +15,7 @@
 package android.telecom;
 
 import android.Manifest;
+import android.annotation.IntDef;
 import android.annotation.NonNull;
 import android.annotation.RequiresPermission;
 import android.annotation.SuppressAutoDoc;
@@ -36,6 +37,8 @@ import android.util.Log;
 
 import com.android.internal.telecom.ITelecomService;
 
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -413,8 +416,10 @@ public class TelecomManager {
      * <p>
      * The phone number of the call used by Telecom to determine which call should be handed over.
      * @hide
+     * @deprecated Use the public handover APIs.  See
+     * {@link Call#handoverTo(PhoneAccountHandle, int, Bundle)} for more information.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 119305590)
     public static final String EXTRA_IS_HANDOVER = "android.telecom.extra.IS_HANDOVER";
 
     /**
@@ -528,11 +533,19 @@ public class TelecomManager {
     public static final char DTMF_CHARACTER_WAIT = ';';
 
     /**
+     * @hide
+     */
+    @IntDef(prefix = { "TTY_MODE_" },
+            value = {TTY_MODE_OFF, TTY_MODE_FULL, TTY_MODE_HCO, TTY_MODE_VCO})
+    @Retention(RetentionPolicy.SOURCE)
+    public @interface TtyMode {}
+
+    /**
      * TTY (teletypewriter) mode is off.
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @SystemApi
     public static final int TTY_MODE_OFF = 0;
 
     /**
@@ -541,6 +554,7 @@ public class TelecomManager {
      *
      * @hide
      */
+    @SystemApi
     public static final int TTY_MODE_FULL = 1;
 
     /**
@@ -550,6 +564,7 @@ public class TelecomManager {
      *
      * @hide
      */
+    @SystemApi
     public static final int TTY_MODE_HCO = 2;
 
     /**
@@ -559,6 +574,7 @@ public class TelecomManager {
      *
      * @hide
      */
+    @SystemApi
     public static final int TTY_MODE_VCO = 3;
 
     /**
@@ -827,8 +843,9 @@ public class TelecomManager {
      * @return The phone account handle of the current sim call manager.
      *
      * @hide
+     * @deprecated Use {@link #getSimCallManager()}.
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 119305590)
     public PhoneAccountHandle getSimCallManager(int userId) {
         try {
             if (isServiceConnected()) {
@@ -929,10 +946,12 @@ public class TelecomManager {
      * Returns a list of {@link PhoneAccountHandle}s including those which have not been enabled
      * by the user.
      *
+     * @param includeDisabledAccounts When {@code true}, disabled phone accounts will be included,
+     *                                when {@code false}, only
      * @return A list of {@code PhoneAccountHandle} objects.
      * @hide
      */
-    @UnsupportedAppUsage
+    @UnsupportedAppUsage(maxTargetSdk = Build.VERSION_CODES.P, trackingBug = 119305590)
     public List<PhoneAccountHandle> getCallCapablePhoneAccounts(boolean includeDisabledAccounts) {
         try {
             if (isServiceConnected()) {
@@ -1155,7 +1174,7 @@ public class TelecomManager {
     /**
      * Used to set the default dialer package.
      *
-     * @param packageName to set the default dialer to..
+     * @param packageName to set the default dialer to.
      *
      * @result {@code true} if the default dialer was successfully changed, {@code false} if
      *         the specified package does not correspond to an installed dialer, or is already
@@ -1166,7 +1185,10 @@ public class TelecomManager {
      *
      * @hide
      */
-    @UnsupportedAppUsage
+    @SystemApi
+    @RequiresPermission(allOf = {
+            android.Manifest.permission.MODIFY_PHONE_STATE,
+            android.Manifest.permission.WRITE_SECURE_SETTINGS})
     public boolean setDefaultDialer(String packageName) {
         try {
             if (isServiceConnected()) {
@@ -1179,12 +1201,10 @@ public class TelecomManager {
     }
 
     /**
-     * Used to determine the dialer package that is preloaded on the system partition.
+     * Determines the package name of the system-provided default phone app.
      *
      * @return package name for the system dialer package or null if no system dialer is preloaded.
-     * @hide
      */
-    @UnsupportedAppUsage
     public String getSystemDialerPackage() {
         try {
             if (isServiceConnected()) {
@@ -1545,8 +1565,9 @@ public class TelecomManager {
      * - {@link TelecomManager#TTY_MODE_VCO}
      * @hide
      */
-    @UnsupportedAppUsage
-    public int getCurrentTtyMode() {
+    @SystemApi
+    @RequiresPermission(android.Manifest.permission.READ_PRIVILEGED_PHONE_STATE)
+    public @TtyMode int getCurrentTtyMode() {
         try {
             if (isServiceConnected()) {
                 return getTelecomService().getCurrentTtyMode(mContext.getOpPackageName());
