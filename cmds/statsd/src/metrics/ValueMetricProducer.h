@@ -23,6 +23,7 @@
 #include "../condition/ConditionTracker.h"
 #include "../external/PullDataReceiver.h"
 #include "../external/StatsPullerManager.h"
+#include "../matchers/EventMatcherWizard.h"
 #include "../stats_log_util.h"
 #include "MetricProducer.h"
 #include "frameworks/base/cmds/statsd/src/statsd_config.pb.h"
@@ -41,7 +42,9 @@ struct ValueBucket {
 class ValueMetricProducer : public virtual MetricProducer, public virtual PullDataReceiver {
 public:
     ValueMetricProducer(const ConfigKey& key, const ValueMetric& valueMetric,
-                        const int conditionIndex, const sp<ConditionWizard>& wizard,
+                        const int conditionIndex, const sp<ConditionWizard>& conditionWizard,
+                        const int whatMatcherIndex,
+                        const sp<EventMatcherWizard>& matcherWizard,
                         const int pullTagId, const int64_t timeBaseNs, const int64_t startTimeNs,
                         const sp<StatsPullerManager>& pullerManager);
 
@@ -55,7 +58,7 @@ public:
                           const int64_t version) override {
         std::lock_guard<std::mutex> lock(mMutex);
         if (mIsPulled && mCondition) {
-            pullLocked(eventTimeNs - 1);
+            pullAndMatchEventsLocked(eventTimeNs - 1);
         }
         flushCurrentBucketLocked(eventTimeNs);
         mCurrentBucketStartTimeNs = eventTimeNs;
@@ -95,6 +98,10 @@ private:
 
     // Calculate previous bucket end time based on current time.
     int64_t calcPreviousBucketEndTime(const int64_t currentTimeNs);
+
+    const int mWhatMatcherIndex;
+
+    sp<EventMatcherWizard> mEventMatcherWizard;
 
     sp<StatsPullerManager> mPullerManager;
 
@@ -139,7 +146,7 @@ private:
     // Util function to check whether the specified dimension hits the guardrail.
     bool hitGuardRailLocked(const MetricDimensionKey& newKey);
 
-    void pullLocked(const int64_t timestampNs);
+    void pullAndMatchEventsLocked(const int64_t timestampNs);
 
     static const size_t kBucketSize = sizeof(ValueBucket{});
 
@@ -158,6 +165,7 @@ private:
     const bool mSkipZeroDiffOutput;
 
     FRIEND_TEST(ValueMetricProducerTest, TestPulledEventsNoCondition);
+  FRIEND_TEST(ValueMetricProducerTest, TestPulledEventsWithFiltering);
     FRIEND_TEST(ValueMetricProducerTest, TestPulledEventsTakeAbsoluteValueOnReset);
     FRIEND_TEST(ValueMetricProducerTest, TestPulledEventsTakeZeroOnReset);
     FRIEND_TEST(ValueMetricProducerTest, TestEventsWithNonSlicedCondition);
