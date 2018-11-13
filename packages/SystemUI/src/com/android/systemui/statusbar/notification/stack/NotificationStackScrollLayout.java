@@ -2312,7 +2312,7 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
             View child = getChildAt(i);
             if (child.getVisibility() != View.GONE && child instanceof ExpandableNotificationRow) {
                 ExpandableNotificationRow row = (ExpandableNotificationRow) child;
-                if (mEntryManager.getNotificationData().isHighPriority(
+                if (!mEntryManager.getNotificationData().isHighPriority(
                         row.getStatusBarNotification())) {
                     break;
                 } else {
