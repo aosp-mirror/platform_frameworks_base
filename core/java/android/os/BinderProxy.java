@@ -314,7 +314,8 @@ public final class BinderProxy implements IBinder {
                 new ArrayList[MAIN_INDEX_SIZE];
     }
 
-    private static ProxyMap sProxyMap = new ProxyMap();
+    @GuardedBy("sProxyMap")
+    private static final ProxyMap sProxyMap = new ProxyMap();
 
     /**
      * Simple pair-value class to store number of binder proxy interfaces live in this process.
@@ -364,8 +365,6 @@ public final class BinderProxy implements IBinder {
 
     /**
      * Return a BinderProxy for IBinder.
-     * This method is thread-hostile!  The (native) caller serializes getInstance() calls using
-     * gProxyLock.
      * If we previously returned a BinderProxy bp for the same iBinder, and bp is still
      * in use, then we return the same bp.
      *
@@ -377,21 +376,23 @@ public final class BinderProxy implements IBinder {
      */
     private static BinderProxy getInstance(long nativeData, long iBinder) {
         BinderProxy result;
-        try {
-            result = sProxyMap.get(iBinder);
-            if (result != null) {
-                return result;
+        synchronized (sProxyMap) {
+            try {
+                result = sProxyMap.get(iBinder);
+                if (result != null) {
+                    return result;
+                }
+                result = new BinderProxy(nativeData);
+            } catch (Throwable e) {
+                // We're throwing an exception (probably OOME); don't drop nativeData.
+                NativeAllocationRegistry.applyFreeFunction(NoImagePreloadHolder.sNativeFinalizer,
+                        nativeData);
+                throw e;
             }
-            result = new BinderProxy(nativeData);
-        } catch (Throwable e) {
-            // We're throwing an exception (probably OOME); don't drop nativeData.
-            NativeAllocationRegistry.applyFreeFunction(NoImagePreloadHolder.sNativeFinalizer,
-                    nativeData);
-            throw e;
+            NoImagePreloadHolder.sRegistry.registerNativeAllocation(result, nativeData);
+            // The registry now owns nativeData, even if registration threw an exception.
+            sProxyMap.set(iBinder, result);
         }
-        NoImagePreloadHolder.sRegistry.registerNativeAllocation(result, nativeData);
-        // The registry now owns nativeData, even if registration threw an exception.
-        sProxyMap.set(iBinder, result);
         return result;
     }
 
@@ -572,12 +573,11 @@ public final class BinderProxy implements IBinder {
         }
     }
 
-    private static final void sendDeathNotice(DeathRecipient recipient) {
+    private static void sendDeathNotice(DeathRecipient recipient) {
         if (false) Log.v("JavaBinder", "sendDeathNotice to " + recipient);
         try {
             recipient.binderDied();
-        }
-        catch (RuntimeException exc) {
+        } catch (RuntimeException exc) {
             Log.w("BinderNative", "Uncaught exception from death notification",
                     exc);
         }
