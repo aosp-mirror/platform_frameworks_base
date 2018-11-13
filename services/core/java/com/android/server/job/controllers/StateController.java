@@ -53,20 +53,29 @@ public abstract class StateController {
      * preexisting tasks.
      */
     public abstract void maybeStartTrackingJobLocked(JobStatus jobStatus, JobStatus lastJob);
+
     /**
      * Optionally implement logic here to prepare the job to be executed.
      */
     public void prepareForExecutionLocked(JobStatus jobStatus) {
     }
+
     /**
      * Remove task - this will happen if the task is cancelled, completed, etc.
      */
     public abstract void maybeStopTrackingJobLocked(JobStatus jobStatus, JobStatus incomingJob,
             boolean forUpdate);
+
     /**
      * Called when a new job is being created to reschedule an old failed job.
      */
     public void rescheduleForFailureLocked(JobStatus newJob, JobStatus failureToReschedule) {
+    }
+
+    /**
+     * Called when the JobScheduler.Constants are updated.
+     */
+    public void onConstantsUpdatedLocked() {
     }
 
     public abstract void dumpControllerStateLocked(IndentingPrintWriter pw,
