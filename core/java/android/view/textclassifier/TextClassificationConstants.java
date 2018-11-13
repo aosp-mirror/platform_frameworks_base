@@ -90,6 +90,10 @@ public final class TextClassificationConstants {
             "entity_list_not_editable";
     private static final String ENTITY_LIST_EDITABLE =
             "entity_list_editable";
+    private static final String IN_APP_CONVERSATION_ACTION_TYPES_DEFAULT =
+            "in_app_conversation_action_types_default";
+    private static final String NOTIFICATION_CONVERSATION_ACTION_TYPES_DEFAULT =
+            "notification_conversation_action_types_default";
 
     private static final boolean LOCAL_TEXT_CLASSIFIER_ENABLED_DEFAULT = true;
     private static final boolean SYSTEM_TEXT_CLASSIFIER_ENABLED_DEFAULT = true;
@@ -111,6 +115,18 @@ public final class TextClassificationConstants {
             .add(TextClassifier.TYPE_DATE)
             .add(TextClassifier.TYPE_DATE_TIME)
             .add(TextClassifier.TYPE_FLIGHT_NUMBER).toString();
+    private static final String CONVERSATION_ACTIONS_TYPES_DEFAULT_VALUES =
+            new StringJoiner(ENTITY_LIST_DELIMITER)
+                    .add(ConversationActions.TYPE_TEXT_REPLY)
+                    .add(ConversationActions.TYPE_CREATE_REMINDER)
+                    .add(ConversationActions.TYPE_CALL_PHONE)
+                    .add(ConversationActions.TYPE_OPEN_URL)
+                    .add(ConversationActions.TYPE_SEND_EMAIL)
+                    .add(ConversationActions.TYPE_SEND_SMS)
+                    .add(ConversationActions.TYPE_TRACK_FLIGHT)
+                    .add(ConversationActions.TYPE_VIEW_CALENDAR)
+                    .add(ConversationActions.TYPE_VIEW_MAP)
+                    .toString();
 
     private final boolean mSystemTextClassifierEnabled;
     private final boolean mLocalTextClassifierEnabled;
@@ -126,6 +142,8 @@ public final class TextClassificationConstants {
     private final List<String> mEntityListDefault;
     private final List<String> mEntityListNotEditable;
     private final List<String> mEntityListEditable;
+    private final List<String> mInAppConversationActionTypesDefault;
+    private final List<String> mNotificationConversationActionTypesDefault;
 
     private TextClassificationConstants(@Nullable String settings) {
         final KeyValueListParser parser = new KeyValueListParser(',');
@@ -177,6 +195,12 @@ public final class TextClassificationConstants {
         mEntityListEditable = parseEntityList(parser.getString(
                 ENTITY_LIST_EDITABLE,
                 ENTITY_LIST_DEFAULT_VALUE));
+        mInAppConversationActionTypesDefault = parseEntityList(parser.getString(
+                IN_APP_CONVERSATION_ACTION_TYPES_DEFAULT,
+                CONVERSATION_ACTIONS_TYPES_DEFAULT_VALUES));
+        mNotificationConversationActionTypesDefault = parseEntityList(parser.getString(
+                NOTIFICATION_CONVERSATION_ACTION_TYPES_DEFAULT,
+                CONVERSATION_ACTIONS_TYPES_DEFAULT_VALUES));
     }
 
     /** Load from a settings string. */
@@ -240,6 +264,14 @@ public final class TextClassificationConstants {
         return mEntityListEditable;
     }
 
+    public List<String> getInAppConversationActionTypes() {
+        return mInAppConversationActionTypesDefault;
+    }
+
+    public List<String> getNotificationConversationActionTypes() {
+        return mNotificationConversationActionTypesDefault;
+    }
+
     private static List<String> parseEntityList(String listStr) {
         return Collections.unmodifiableList(Arrays.asList(listStr.split(ENTITY_LIST_DELIMITER)));
     }
@@ -261,6 +293,9 @@ public final class TextClassificationConstants {
         pw.printPair("getEntityListDefault", mEntityListDefault);
         pw.printPair("getEntityListNotEditable", mEntityListNotEditable);
         pw.printPair("getEntityListEditable", mEntityListEditable);
+        pw.printPair("getInAppConversationActionTypes", mInAppConversationActionTypesDefault);
+        pw.printPair("getNotificationConversationActionTypes",
+                mNotificationConversationActionTypesDefault);
         pw.decreaseIndent();
         pw.println();
     }

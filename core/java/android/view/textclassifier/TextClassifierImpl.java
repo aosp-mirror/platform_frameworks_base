@@ -40,11 +40,13 @@ import android.os.UserManager;
 import android.provider.Browser;
 import android.provider.CalendarContract;
 import android.provider.ContactsContract;
+import android.text.TextUtils;
 
 import com.android.internal.annotations.GuardedBy;
 import com.android.internal.util.IndentingPrintWriter;
 import com.android.internal.util.Preconditions;
 
+import com.google.android.textclassifier.ActionsSuggestionsModel;
 import com.google.android.textclassifier.AnnotatorModel;
 import com.google.android.textclassifier.LangIdModel;
 
@@ -90,6 +92,11 @@ public final class TextClassifierImpl implements TextClassifier {
     private static final File UPDATED_LANG_ID_MODEL_FILE =
             new File("/data/misc/textclassifier/lang_id.model");
 
+    // Actions
+    private static final String ACTIONS_FACTORY_MODEL_FILENAME_REGEX = "actions_suggestions.model";
+    private static final File UPDATED_ACTIONS_MODEL =
+            new File("/data/misc/textclassifier/actions_suggestions.model");
+
     private final Context mContext;
     private final TextClassifier mFallback;
     private final GenerateLinksLogger mGenerateLinksLogger;
@@ -101,6 +108,8 @@ public final class TextClassifierImpl implements TextClassifier {
     private AnnotatorModel mAnnotatorImpl;
     @GuardedBy("mLock") // Do not access outside this lock.
     private LangIdModel mLangIdImpl;
+    @GuardedBy("mLock") // Do not access outside this lock.
+    private ActionsSuggestionsModel mActionsImpl;
 
     private final Object mLoggerLock = new Object();
     @GuardedBy("mLoggerLock") // Do not access outside this lock.
@@ -110,6 +119,7 @@ public final class TextClassifierImpl implements TextClassifier {
 
     private final ModelFileManager mAnnotatorModelFileManager;
     private final ModelFileManager mLangIdModelFileManager;
+    private final ModelFileManager mActionsModelFileManager;
 
     public TextClassifierImpl(
             Context context, TextClassificationConstants settings, TextClassifier fallback) {
@@ -131,6 +141,13 @@ public final class TextClassifierImpl implements TextClassifier {
                         UPDATED_LANG_ID_MODEL_FILE,
                         fd -> -1, // TODO: Replace this with LangIdModel.getVersion(fd)
                         fd -> ModelFileManager.ModelFile.LANGUAGE_INDEPENDENT));
+        mActionsModelFileManager = new ModelFileManager(
+                new ModelFileManager.ModelFileSupplierImpl(
+                        FACTORY_MODEL_DIR,
+                        ACTIONS_FACTORY_MODEL_FILENAME_REGEX,
+                        UPDATED_ACTIONS_MODEL,
+                        ActionsSuggestionsModel::getVersion,
+                        ActionsSuggestionsModel::getLocales));
     }
 
     public TextClassifierImpl(Context context, TextClassificationConstants settings) {
@@ -346,10 +363,69 @@ public final class TextClassifierImpl implements TextClassifier {
         return mFallback.detectLanguage(request);
     }
 
+    @Override
+    public ConversationActions suggestConversationActions(ConversationActions.Request request) {
+        Preconditions.checkNotNull(request);
+        Utils.checkMainThread();
+        try {
+            ActionsSuggestionsModel actionsImpl = getActionsImpl();
+            if (actionsImpl == null) {
+                // Actions model is optional, fallback if it is not available.
+                return mFallback.suggestConversationActions(request);
+            }
+            List<ActionsSuggestionsModel.ConversationMessage> nativeMessages = new ArrayList<>();
+            for (ConversationActions.Message message : request.getConversation()) {
+                if (TextUtils.isEmpty(message.getText())) {
+                    continue;
+                }
+                // TODO: We need to map the Person object to user id.
+                int userId = 1;
+                nativeMessages.add(
+                        new ActionsSuggestionsModel.ConversationMessage(
+                                userId, message.getText().toString()));
+            }
+            ActionsSuggestionsModel.Conversation nativeConversation =
+                    new ActionsSuggestionsModel.Conversation(nativeMessages.toArray(
+                            new ActionsSuggestionsModel.ConversationMessage[0]));
+
+            ActionsSuggestionsModel.ActionSuggestion[] nativeSuggestions =
+                    actionsImpl.suggestActions(nativeConversation, null);
+
+            Collection<String> expectedTypes = resolveActionTypesFromRequest(request);
+            List<ConversationActions.ConversationAction> conversationActions = new ArrayList<>();
+            int maxSuggestions = Math.min(request.getMaxSuggestions(), nativeSuggestions.length);
+            for (int i = 0; i < maxSuggestions; i++) {
+                ActionsSuggestionsModel.ActionSuggestion nativeSuggestion = nativeSuggestions[i];
+                String actionType = nativeSuggestion.getActionType();
+                if (!expectedTypes.contains(actionType)) {
+                    continue;
+                }
+                conversationActions.add(
+                        new ConversationActions.ConversationAction.Builder(actionType)
+                                .setTextReply(nativeSuggestion.getResponseText())
+                                .setConfidenceScore(nativeSuggestion.getScore())
+                                .build());
+            }
+            return new ConversationActions(conversationActions);
+        } catch (Throwable t) {
+            // Avoid throwing from this method. Log the error.
+            Log.e(LOG_TAG, "Error suggesting conversation actions.", t);
+        }
+        return mFallback.suggestConversationActions(request);
+    }
+
+    private Collection<String> resolveActionTypesFromRequest(ConversationActions.Request request) {
+        List<String> defaultActionTypes =
+                request.getHints().contains(ConversationActions.HINT_FOR_NOTIFICATION)
+                        ? mSettings.getNotificationConversationActionTypes()
+                        : mSettings.getInAppConversationActionTypes();
+        return request.getTypeConfig().resolveTypes(defaultActionTypes);
+    }
+
     private AnnotatorModel getAnnotatorImpl(LocaleList localeList)
             throws FileNotFoundException {
         synchronized (mLock) {
-            localeList = localeList == null ? LocaleList.getEmptyLocaleList() : localeList;
+            localeList = localeList == null ? LocaleList.getDefault() : localeList;
             final ModelFileManager.ModelFile bestModel =
                     mAnnotatorModelFileManager.findBestModelFile(localeList);
             if (bestModel == null) {
@@ -386,7 +462,7 @@ public final class TextClassifierImpl implements TextClassifier {
         synchronized (mLock) {
             if (mLangIdImpl == null) {
                 final ModelFileManager.ModelFile bestModel =
-                        mLangIdModelFileManager.findBestModelFile(LocaleList.getEmptyLocaleList());
+                        mLangIdModelFileManager.findBestModelFile(null);
                 if (bestModel == null) {
                     throw new FileNotFoundException("No LangID model is found");
                 }
@@ -401,6 +477,30 @@ public final class TextClassifierImpl implements TextClassifier {
                 }
             }
             return mLangIdImpl;
+        }
+    }
+
+    @Nullable
+    private ActionsSuggestionsModel getActionsImpl() throws FileNotFoundException {
+        synchronized (mLock) {
+            if (mActionsImpl == null) {
+                // TODO: Use LangID to determine the locale we should use here?
+                final ModelFileManager.ModelFile bestModel =
+                        mActionsModelFileManager.findBestModelFile(LocaleList.getDefault());
+                if (bestModel == null) {
+                    return null;
+                }
+                final ParcelFileDescriptor pfd = ParcelFileDescriptor.open(
+                        new File(bestModel.getPath()), ParcelFileDescriptor.MODE_READ_ONLY);
+                try {
+                    if (pfd != null) {
+                        mActionsImpl = new ActionsSuggestionsModel(pfd.getFd());
+                    }
+                } finally {
+                    maybeCloseAndLogError(pfd);
+                }
+            }
+            return mActionsImpl;
         }
     }
 
@@ -471,8 +571,16 @@ public final class TextClassifierImpl implements TextClassifier {
             }
             printWriter.decreaseIndent();
             printWriter.println("LangID model file(s):");
+            printWriter.increaseIndent();
             for (ModelFileManager.ModelFile modelFile :
                     mLangIdModelFileManager.listModelFiles()) {
+                printWriter.println(modelFile.toString());
+            }
+            printWriter.decreaseIndent();
+            printWriter.println("Actions model file(s):");
+            printWriter.increaseIndent();
+            for (ModelFileManager.ModelFile modelFile :
+                    mActionsModelFileManager.listModelFiles()) {
                 printWriter.println(modelFile.toString());
             }
             printWriter.decreaseIndent();
