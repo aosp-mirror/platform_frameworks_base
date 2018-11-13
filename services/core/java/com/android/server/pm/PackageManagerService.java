@@ -9483,7 +9483,7 @@ public class PackageManagerService extends IPackageManager.Stub
         }
     }
 
-    private SharedLibraryInfo getSharedLibraryInfoLPr(String name, long version) {
+    private @Nullable SharedLibraryInfo getSharedLibraryInfoLPr(String name, long version) {
         LongSparseArray<SharedLibraryInfo> versionedLib = mSharedLibraries.get(name);
         if (versionedLib == null) {
             return null;
@@ -9728,16 +9728,26 @@ public class PackageManagerService extends IPackageManager.Stub
     private void applyDefiningSharedLibraryUpdateLocked(
             PackageParser.Package pkg, SharedLibraryInfo libInfo,
             BiConsumer<SharedLibraryInfo, SharedLibraryInfo> action) {
+        // Note that libraries defined by this package may be null if:
+        // - Package manager was unable to create the shared library. The package still
+        //   gets installed, but the shared library does not get created.
+        // Or:
+        // - Package manager is in a state where package isn't scanned yet. This will
+        //   get called again after scanning to fix the dependencies.
         if (pkg.isLibrary()) {
             if (pkg.staticSharedLibName != null) {
                 SharedLibraryInfo definedLibrary = getSharedLibraryInfoLPr(
                         pkg.staticSharedLibName, pkg.staticSharedLibVersion);
-                action.accept(definedLibrary, libInfo);
+                if (definedLibrary != null) {
+                    action.accept(definedLibrary, libInfo);
+                }
             } else {
                 for (String libraryName : pkg.libraryNames) {
                     SharedLibraryInfo definedLibrary = getSharedLibraryInfoLPr(
                             libraryName, SharedLibraryInfo.VERSION_UNDEFINED);
-                    action.accept(definedLibrary, libInfo);
+                    if (definedLibrary != null) {
+                        action.accept(definedLibrary, libInfo);
+                    }
                 }
             }
         }
