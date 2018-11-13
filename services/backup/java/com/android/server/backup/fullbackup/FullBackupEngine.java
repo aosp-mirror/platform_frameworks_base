@@ -164,18 +164,15 @@ public class FullBackupEngine {
         }
 
         /**
-         * Don't write apks for forward-locked apps or system-bundled apps that are not upgraded.
+         * Don't write apks for system-bundled apps that are not upgraded.
          */
         private boolean shouldWriteApk(
                 ApplicationInfo applicationInfo, boolean includeApks, boolean isSharedStorage) {
-            boolean isForwardLocked =
-                    (applicationInfo.privateFlags & ApplicationInfo.PRIVATE_FLAG_FORWARD_LOCK) != 0;
             boolean isSystemApp = (applicationInfo.flags & ApplicationInfo.FLAG_SYSTEM) != 0;
             boolean isUpdatedSystemApp =
                     (applicationInfo.flags & ApplicationInfo.FLAG_UPDATED_SYSTEM_APP) != 0;
             return includeApks
                     && !isSharedStorage
-                    && !isForwardLocked
                     && (!isSystemApp || isUpdatedSystemApp);
         }
     }

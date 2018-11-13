@@ -455,12 +455,6 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                         + "to use the PackageManager.INSTALL_GRANT_RUNTIME_PERMISSIONS flag");
             }
 
-            if ((params.installFlags & PackageManager.INSTALL_FORWARD_LOCK) != 0
-                    || (params.installFlags & PackageManager.INSTALL_EXTERNAL) != 0) {
-                throw new IllegalArgumentException(
-                        "New installs into ASEC containers no longer supported");
-            }
-
             // Defensively resize giant app icons
             if (params.appIcon != null) {
                 final ActivityManager am = (ActivityManager) mContext.getSystemService(
@@ -487,21 +481,10 @@ public class PackageInstallerService extends IPackageInstaller.Stub implements
                 if (!PackageHelper.fitsOnInternal(mContext, params)) {
                     throw new IOException("No suitable internal storage available");
                 }
-
-            } else if ((params.installFlags & PackageManager.INSTALL_EXTERNAL) != 0) {
-                if (!PackageHelper.fitsOnExternal(mContext, params)) {
-                    throw new IOException("No suitable external storage available");
-                }
-
-            } else if ((params.installFlags & PackageManager.INSTALL_FORCE_VOLUME_UUID) != 0) {
-                // For now, installs to adopted media are treated as internal from
-                // an install flag point-of-view.
-                params.setInstallFlagsInternal();
-
             } else {
                 // For now, installs to adopted media are treated as internal from
                 // an install flag point-of-view.
-                params.setInstallFlagsInternal();
+                params.installFlags |= PackageManager.INSTALL_INTERNAL;
 
                 // Resolve best location for install, based on combination of
                 // requested install flags, delta size, and manifest settings.
