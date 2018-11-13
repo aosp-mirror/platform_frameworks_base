@@ -50,7 +50,7 @@
     <color name="car_headline4_dark">@android:color/black</color>
     <color name="car_headline4">@color/car_headline4_light</color>
 
-    <color name="car_body1_light">@color/car_grey_100</color>
+    <color name="car_body1_light">@color/car_grey_50</color>
     <color name="car_body1_dark">@color/car_grey_900</color>
     <color name="car_body1">@color/car_body1_light</color>
 
@@ -58,7 +58,7 @@
     <color name="car_body2_dark">@color/car_grey_700</color>
     <color name="car_body2">@color/car_body2_light</color>
 
-    <color name="car_body3_light">@android:color/white</color>
+    <color name="car_body3_light">@color/car_grey_400</color>
     <color name="car_body3_dark">@android:color/black</color>
     <color name="car_body3">@color/car_body3_light</color>
 
@@ -137,7 +137,7 @@
     <color name="car_toast_background">#E6282a2d</color>
 
     <!-- Misc colors -->
-    <color name="car_highlight_light">@color/car_teal_700</color>
+    <color name="car_highlight_light">@color/car_teal_200</color>
     <color name="car_highlight_dark">@color/car_teal_200</color>
     <color name="car_highlight">@color/car_highlight_dark</color>
     <color name="car_accent_light">@color/car_highlight_light</color>
@@ -148,6 +148,7 @@
     <color name="car_user_switcher_user_image_fgcolor">@color/car_grey_900</color>
 
     <!-- Color palette for cars -->
+    <color name="car_grey_972">#ff090A0C</color>
     <color name="car_grey_958">#ff0e1013</color>
     <color name="car_grey_928">#ff17181b</color>
     <color name="car_grey_900">#ff202124</color>
