@@ -697,7 +697,7 @@ public class NotificationInflater {
                         && newView.getPackage() != null
                         && newView.getPackage().equals(oldView.getPackage())
                         && newView.getLayoutId() == oldView.getLayoutId()
-                        && !oldView.isReapplyDisallowed());
+                        && !oldView.hasFlags(RemoteViews.FLAG_REAPPLY_DISALLOWED));
     }
 
     public void setInflationCallback(InflationCallback callback) {
