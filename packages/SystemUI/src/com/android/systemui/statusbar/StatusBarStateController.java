@@ -18,11 +18,17 @@ package com.android.systemui.statusbar;
 
 import static java.lang.annotation.RetentionPolicy.SOURCE;
 
+import android.animation.ObjectAnimator;
+import android.animation.ValueAnimator;
 import android.annotation.IntDef;
-import android.util.ArraySet;
-import android.util.Log;
+import android.util.FloatProperty;
+import android.view.animation.Interpolator;
+
 import com.android.internal.annotations.GuardedBy;
+import com.android.systemui.Interpolators;
+import com.android.systemui.statusbar.notification.stack.StackStateAnimator;
 import com.android.systemui.statusbar.phone.StatusBar;
+
 import java.lang.annotation.Retention;
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -38,13 +44,50 @@ public class StatusBarStateController {
 
     private static final Comparator <RankedListener> mComparator
             = (o1, o2) -> Integer.compare(o1.rank, o2.rank);
+    private static final FloatProperty<StatusBarStateController> SET_DARK_AMOUNT_PROPERTY =
+            new FloatProperty<StatusBarStateController>("mDozeAmount") {
+
+                @Override
+                public void setValue(StatusBarStateController object, float value) {
+                    object.setDozeAmountInternal(value);
+                }
+
+                @Override
+                public Float get(StatusBarStateController object) {
+                    return object.mDozeAmount;
+                }
+            };
 
     private final ArrayList<RankedListener> mListeners = new ArrayList<>();
-    private boolean mIsDozing;
     private int mState;
     private int mLastState;
     private boolean mLeaveOpenOnKeyguardHide;
     private boolean mKeyguardRequested;
+
+    /**
+     * If the device is currently dozing or not.
+     */
+    private boolean mIsDozing;
+
+    /**
+     * Current {@link #mDozeAmount} animator.
+     */
+    private ValueAnimator mDarkAnimator;
+
+    /**
+     * Current doze amount in this frame.
+     */
+    private float mDozeAmount;
+
+    /**
+     * Where the animator will stop.
+     */
+    private float mDozeAmountTarget;
+
+    /**
+     * The type of interpolator that should be used to the doze animation.
+     */
+    private Interpolator mDozeInterpolator = Interpolators.FAST_OUT_SLOW_IN;
 
     // TODO: b/115739177 (remove this explicit ordering if we can)
     @Retention(SOURCE)
@@ -94,6 +137,14 @@ public class StatusBarStateController {
         return mIsDozing;
     }
 
+    public float getDozeAmount() {
+        return mDozeAmount;
+    }
+
+    public float getInterpolatedDozeAmount() {
+        return mDozeInterpolator.getInterpolation(mDozeAmount);
+    }
+
     /**
      * Update the dozing state from {@link StatusBar}'s perspective
      * @param isDozing well, are we dozing?
@@ -114,6 +165,51 @@ public class StatusBarStateController {
         }
 
         return true;
+    }
+
+    /**
+     * Changes the current doze amount.
+     *
+     * @param dozeAmount New doze/dark amount.
+     * @param animated If change should be animated or not. This will cancel current animations.
+     */
+    public void setDozeAmount(float dozeAmount, boolean animated) {
+        if (mDarkAnimator != null && mDarkAnimator.isRunning()) {
+            if (animated && mDozeAmountTarget == dozeAmount) {
+                return;
+            } else {
+                mDarkAnimator.cancel();
+            }
+        }
+
+        mDozeAmountTarget = dozeAmount;
+        if (animated) {
+            startDozeAnimation();
+        } else {
+            setDozeAmountInternal(dozeAmount);
+        }
+    }
+
+    private void startDozeAnimation() {
+        if (mDozeAmount == 0f || mDozeAmount == 1f) {
+            mDozeInterpolator = mIsDozing
+                    ? Interpolators.FAST_OUT_SLOW_IN
+                    : Interpolators.TOUCH_RESPONSE_REVERSE;
+        }
+        mDarkAnimator = ObjectAnimator.ofFloat(this, SET_DARK_AMOUNT_PROPERTY, mDozeAmountTarget);
+        mDarkAnimator.setInterpolator(Interpolators.LINEAR);
+        mDarkAnimator.setDuration(StackStateAnimator.ANIMATION_DURATION_WAKEUP);
+        mDarkAnimator.start();
+    }
+
+    private void setDozeAmountInternal(float dozeAmount) {
+        mDozeAmount = dozeAmount;
+        float interpolatedAmount = mDozeInterpolator.getInterpolation(dozeAmount);
+        synchronized (mListeners) {
+            for (RankedListener rl : new ArrayList<>(mListeners)) {
+                rl.listener.onDozeAmountChanged(mDozeAmount, interpolatedAmount);
+            }
+        }
     }
 
     public boolean goingToFullShade() {
@@ -230,5 +326,12 @@ public class StatusBarStateController {
          * @param isDozing {@code true} if dozing according to {@link StatusBar}
          */
         public default void onDozingChanged(boolean isDozing) {}
+
+        /**
+         * Callback to be notified when the doze amount changes. Useful for animations.
+         * @param linear A number from 0 to 1, where 1 means that the device is dozing.
+         * @param eased Same as {@code linear} but transformed by an interpolator.
+         */
+        default void onDozeAmountChanged(float linear, float eased) {}
     }
 }
