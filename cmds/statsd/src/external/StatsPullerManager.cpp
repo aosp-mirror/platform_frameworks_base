@@ -26,6 +26,7 @@
 #include "../logd/LogEvent.h"
 #include "../stats_log_util.h"
 #include "../statscompanion_util.h"
+#include "PowerStatsPuller.h"
 #include "ResourceHealthManagerPuller.h"
 #include "ResourceThermalManagerPuller.h"
 #include "StatsCompanionServicePuller.h"
@@ -86,6 +87,9 @@ const std::map<int, PullAtomInfo> StatsPullerManager::kAllPullAtomInfo = {
         // subsystem_sleep_state
         {android::util::SUBSYSTEM_SLEEP_STATE,
          {{}, {}, 1 * NS_PER_SEC, new SubsystemSleepStatePuller()}},
+        // on_device_power_measurement
+        {android::util::ON_DEVICE_POWER_MEASUREMENT,
+         {{}, {}, 1 * NS_PER_SEC, new PowerStatsPuller()}},
         // cpu_time_per_freq
         {android::util::CPU_TIME_PER_FREQ,
          {{3},
