@@ -93,6 +93,9 @@ import java.util.Set;
 @UiThread
 public class ResolverActivity extends Activity {
 
+    // Temporary flag for new chooser delegate behavior.
+    boolean mEnableChooserDelegate = false;
+
     protected ResolveListAdapter mAdapter;
     private boolean mSafeForwardingMode;
     private AbsListView mAdapterView;
@@ -1216,7 +1219,13 @@ public class ResolverActivity extends Activity {
 
         @Override
         public boolean startAsCaller(ResolverActivity activity, Bundle options, int userId) {
-            return activity.startAsCallerImpl(mResolvedIntent, options, false, userId);
+
+            if (mEnableChooserDelegate) {
+                return activity.startAsCallerImpl(mResolvedIntent, options, false, userId);
+            } else {
+                activity.startActivityAsCaller(mResolvedIntent, options, null, false, userId);
+                return true;
+            }
         }
 
         @Override
