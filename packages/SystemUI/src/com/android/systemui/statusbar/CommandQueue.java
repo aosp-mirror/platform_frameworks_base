@@ -27,9 +27,9 @@ import android.os.Handler;
 import android.os.IBinder;
 import android.os.Looper;
 import android.os.Message;
+import android.util.Pair;
 
 import androidx.annotation.VisibleForTesting;
-import android.util.Pair;
 
 import com.android.internal.os.SomeArgs;
 import com.android.internal.statusbar.IStatusBar;
@@ -164,7 +164,7 @@ public class CommandQueue extends IStatusBar.Stub {
         default void onRotationProposal(int rotation, boolean isValid) { }
 
         default void showBiometricDialog(Bundle bundle, IBiometricPromptReceiver receiver,
-                int type, boolean requireConfirmation) { }
+                int type, boolean requireConfirmation, int userId) { }
         default void onBiometricAuthenticated() { }
         default void onBiometricHelp(String message) { }
         default void onBiometricError(String error) { }
@@ -524,13 +524,14 @@ public class CommandQueue extends IStatusBar.Stub {
 
     @Override
     public void showBiometricDialog(Bundle bundle, IBiometricPromptReceiver receiver, int type,
-            boolean requireConfirmation) {
+            boolean requireConfirmation, int userId) {
         synchronized (mLock) {
             SomeArgs args = SomeArgs.obtain();
             args.arg1 = bundle;
             args.arg2 = receiver;
             args.argi1 = type;
             args.arg3 = requireConfirmation;
+            args.argi2 = userId;
             mHandler.obtainMessage(MSG_BIOMETRIC_SHOW, args)
                     .sendToTarget();
         }
@@ -774,8 +775,9 @@ public class CommandQueue extends IStatusBar.Stub {
                         mCallbacks.get(i).showBiometricDialog(
                                 (Bundle) someArgs.arg1,
                                 (IBiometricPromptReceiver) someArgs.arg2,
-                                someArgs.argi1,
-                                (boolean) someArgs.arg3);
+                                someArgs.argi1 /* type */,
+                                (boolean) someArgs.arg3 /* requireConfirmation */,
+                                someArgs.argi2 /* userId */);
                     }
                     someArgs.recycle();
                     break;

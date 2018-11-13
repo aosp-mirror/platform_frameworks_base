@@ -140,7 +140,7 @@ public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callba
 
     @Override
     public void showBiometricDialog(Bundle bundle, IBiometricPromptReceiver receiver, int type,
-            boolean requireConfirmation) {
+            boolean requireConfirmation, int userId) {
         if (DEBUG) Log.d(TAG, "showBiometricDialog, type: " + type);
         // Remove these messages as they are part of the previous client
         mHandler.removeMessages(MSG_BIOMETRIC_ERROR);
@@ -151,6 +151,7 @@ public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callba
         args.arg2 = receiver;
         args.argi1 = type;
         args.arg3 = requireConfirmation;
+        args.argi2 = userId;
         mHandler.obtainMessage(MSG_SHOW_DIALOG, args).sendToTarget();
     }
 
@@ -194,7 +195,8 @@ public class BiometricDialogImpl extends SystemUI implements CommandQueue.Callba
         }
         mReceiver = (IBiometricPromptReceiver) args.arg2;
         mCurrentDialog.setBundle((Bundle)args.arg1);
-        mCurrentDialog.setRequireConfirmation((boolean)args.arg3);
+        mCurrentDialog.setRequireConfirmation((boolean) args.arg3);
+        mCurrentDialog.setUserId(args.argi2);
         mCurrentDialog.setSkipIntro(skipAnimation);
         mWindowManager.addView(mCurrentDialog, mCurrentDialog.getLayoutParams());
         mDialogShowing = true;
