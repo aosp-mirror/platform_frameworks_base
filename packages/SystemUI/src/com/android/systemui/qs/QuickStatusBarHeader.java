@@ -39,12 +39,15 @@ import android.text.format.DateUtils;
 import android.util.AttributeSet;
 import android.util.Log;
 import android.util.Pair;
+import android.view.DisplayCutout;
 import android.view.View;
 import android.view.WindowInsets;
 import android.view.WindowManager;
 import android.widget.FrameLayout;
 import android.widget.ImageView;
+import android.widget.LinearLayout;
 import android.widget.RelativeLayout;
+import android.widget.Space;
 import android.widget.TextView;
 
 import androidx.annotation.VisibleForTesting;
@@ -57,6 +60,8 @@ import com.android.systemui.R;
 import com.android.systemui.plugins.ActivityStarter;
 import com.android.systemui.privacy.OngoingPrivacyChip;
 import com.android.systemui.privacy.OngoingPrivacyDialog;
+import com.android.systemui.privacy.PrivacyItem;
+import com.android.systemui.privacy.PrivacyItemController;
 import com.android.systemui.qs.QSDetail.Callback;
 import com.android.systemui.statusbar.phone.PhoneStatusBarView;
 import com.android.systemui.statusbar.phone.StatusBarIconController;
@@ -70,6 +75,7 @@ import com.android.systemui.statusbar.policy.DateView;
 import com.android.systemui.statusbar.policy.NextAlarmController;
 import com.android.systemui.statusbar.policy.ZenModeController;
 
+import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
 
@@ -125,9 +131,11 @@ public class QuickStatusBarHeader extends RelativeLayout implements
     private Clock mClockView;
     private DateView mDateView;
     private OngoingPrivacyChip mPrivacyChip;
+    private Space mSpace;
 
     private NextAlarmController mAlarmController;
     private ZenModeController mZenController;
+    private PrivacyItemController mPrivacyItemController;
     /** Counts how many times the long press tooltip has been shown to the user. */
     private int mShownCount;
 
@@ -138,16 +146,26 @@ public class QuickStatusBarHeader extends RelativeLayout implements
             updateStatusText();
         }
     };
+    private boolean mHasTopCutout = false;
 
     /**
      * Runnable for automatically fading out the long press tooltip (as if it were animating away).
      */
     private final Runnable mAutoFadeOutTooltipRunnable = () -> hideLongPressTooltip(false);
 
+    private PrivacyItemController.Callback mPICCallback = new PrivacyItemController.Callback() {
+        @Override
+        public void privacyChanged(List<PrivacyItem> privacyItems) {
+            mPrivacyChip.setPrivacyList(privacyItems);
+            setChipVisibility(!privacyItems.isEmpty());
+        }
+    };
+
     public QuickStatusBarHeader(Context context, AttributeSet attrs) {
         super(context, attrs);
         mAlarmController = Dependency.get(NextAlarmController.class);
         mZenController = Dependency.get(ZenModeController.class);
+        mPrivacyItemController = new PrivacyItemController(context, mPICCallback);
         mShownCount = getStoredShownCount();
     }
 
@@ -194,6 +212,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements
         mDateView = findViewById(R.id.date);
         mPrivacyChip = findViewById(R.id.privacy_chip);
         mPrivacyChip.setOnClickListener(this);
+        mSpace = findViewById(R.id.space);
     }
 
     private void updateStatusText() {
@@ -205,6 +224,16 @@ public class QuickStatusBarHeader extends RelativeLayout implements
             mStatusSeparator.setVisibility(alarmVisible && ringerVisible ? View.VISIBLE
                     : View.GONE);
             updateTooltipShow();
+        }
+    }
+
+    private void setChipVisibility(boolean chipVisible) {
+        mBatteryMeterView.setVisibility(View.VISIBLE);
+        if (chipVisible) {
+            mPrivacyChip.setVisibility(View.VISIBLE);
+            if (mHasTopCutout) mBatteryMeterView.setVisibility(View.GONE);
+        } else {
+            mPrivacyChip.setVisibility(View.GONE);
         }
     }
 
@@ -411,8 +440,9 @@ public class QuickStatusBarHeader extends RelativeLayout implements
 
     @Override
     public WindowInsets onApplyWindowInsets(WindowInsets insets) {
+        DisplayCutout cutout = insets.getDisplayCutout();
         Pair<Integer, Integer> padding = PhoneStatusBarView.cornerCutoutMargins(
-                insets.getDisplayCutout(), getDisplay());
+                cutout, getDisplay());
         if (padding == null) {
             mSystemIconsView.setPaddingRelative(
                     getResources().getDimensionPixelSize(R.dimen.status_bar_padding_start), 0,
@@ -421,6 +451,22 @@ public class QuickStatusBarHeader extends RelativeLayout implements
             mSystemIconsView.setPadding(padding.first, 0, padding.second, 0);
 
         }
+        LinearLayout.LayoutParams lp = (LinearLayout.LayoutParams) mSpace.getLayoutParams();
+        if (cutout != null) {
+            Rect topCutout = cutout.getBoundingRectTop();
+            if (topCutout.isEmpty()) {
+                mHasTopCutout = false;
+                lp.width = 0;
+                mSpace.setVisibility(View.GONE);
+            } else {
+                mHasTopCutout = true;
+                lp.width = topCutout.width();
+                mSpace.setVisibility(View.VISIBLE);
+            }
+        }
+        mSpace.setLayoutParams(lp);
+        // Decide whether to show BatteryMeterView
+        setChipVisibility(mPrivacyChip.getVisibility() == View.VISIBLE);
         return super.onApplyWindowInsets(insets);
     }
 
@@ -437,7 +483,7 @@ public class QuickStatusBarHeader extends RelativeLayout implements
             return;
         }
         mHeaderQsPanel.setListening(listening);
-        mPrivacyChip.setListening(listening);
+        mPrivacyItemController.setListening(listening);
         mListening = listening;
 
         if (listening) {
