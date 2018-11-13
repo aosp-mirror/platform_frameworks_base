@@ -985,10 +985,10 @@ public final class PhoneAccount implements Parcelable {
     /**
      * Generates a string representation of a capabilities bitmask.
      *
-     * @param capabilities The capabilities bitmask.
      * @return String representation of the capabilities bitmask.
+     * @hide
      */
-    private String capabilitiesToString() {
+    public String capabilitiesToString() {
         StringBuilder sb = new StringBuilder();
         if (hasCapabilities(CAPABILITY_SELF_MANAGED)) {
             sb.append("SelfManaged ");
