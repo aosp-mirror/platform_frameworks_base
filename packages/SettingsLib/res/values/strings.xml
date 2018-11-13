@@ -39,8 +39,8 @@
     <!-- Do not translate.  Concise terminology for wifi with 802.1x EAP Suite-B security -->
     <string name="wifi_security_short_eap_suiteb" translatable="false">Suite-B</string>
 
-    <!-- Used in Wi-Fi settings dialogs when Wi-Fi does not have any security. -->
-    <string name="wifi_security_none" translatable="false">None</string>
+    <!-- Used in Wi-Fi settings dialogs when Wi-Fi does not have any security. [CHAR LIMIT=40] -->
+    <string name="wifi_security_none">None</string>
 
     <!-- Do not translate.  Terminology for wifi with WEP security -->
     <string name="wifi_security_wep" translatable="false">WEP</string>
