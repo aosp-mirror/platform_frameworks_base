@@ -54,6 +54,7 @@ import java.math.BigInteger;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.security.InvalidKeyException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
@@ -303,13 +304,14 @@ public class KeyStore {
     }
 
     /**
-     * List uids of all keys that are auth bound to the current user. 
+     * List uids of all keys that are auth bound to the current user.
      * Only system is allowed to call this method.
      */
     @UnsupportedAppUsage
     public int[] listUidsOfAuthBoundKeys() {
-        final int MAX_RESULT_SIZE = 100;
-        int[] uidsOut = new int[MAX_RESULT_SIZE];
+        // uids are returned as a list of strings because list of integers
+        // as an output parameter is not supported by aidl-cpp.
+        List<String> uidsOut = new ArrayList<>();
         try {
             int rc = mBinder.listUidsOfAuthBoundKeys(uidsOut);
             if (rc != NO_ERROR) {
@@ -323,8 +325,8 @@ public class KeyStore {
             Log.w(TAG, "KeyStore exception", e);
             return null;
         }
-        // Remove any 0 entries
-        return Arrays.stream(uidsOut).filter(x -> x > 0).toArray();
+        // Turn list of strings into an array of uid integers.
+        return uidsOut.stream().mapToInt(Integer::parseInt).toArray();
    }
 
     public String[] list(String prefix) {
