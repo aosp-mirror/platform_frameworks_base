@@ -225,6 +225,8 @@ public class StorageManager {
     public static final int DEBUG_SDCARDFS_FORCE_OFF = 1 << 4;
     /** {@hide} */
     public static final int DEBUG_VIRTUAL_DISK = 1 << 5;
+    /** {@hide} */
+    public static final int DEBUG_ISOLATED_STORAGE = 1 << 6;
 
     /** {@hide} */
     public static final int FLAG_STORAGE_DE = IInstalld.FLAG_STORAGE_DE;

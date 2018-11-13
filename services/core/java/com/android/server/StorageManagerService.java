@@ -2097,6 +2097,26 @@ class StorageManagerService extends IStorageManager.Stub
                 Binder.restoreCallingIdentity(token);
             }
         }
+
+        if ((mask & StorageManager.DEBUG_ISOLATED_STORAGE) != 0) {
+            final boolean enabled = (flags & StorageManager.DEBUG_ISOLATED_STORAGE) != 0;
+
+            final long token = Binder.clearCallingIdentity();
+            try {
+                SystemProperties.set(StorageManager.PROP_ISOLATED_STORAGE,
+                        Boolean.toString(enabled));
+
+                // Some of the storage related permissions get fiddled with during
+                // package scanning. So, delete the package cache to force PackageManagerService
+                // to do package scanning.
+                FileUtils.deleteContents(Environment.getPackageCacheDirectory());
+
+                // Perform hard reboot to kick policy into place
+                mContext.getSystemService(PowerManager.class).reboot(null);
+            } finally {
+                Binder.restoreCallingIdentity(token);
+            }
+        }
     }
 
     @Override

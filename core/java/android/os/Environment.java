@@ -468,6 +468,14 @@ public class Environment {
     }
 
     /**
+     * Returns location of packages cache directory.
+     * {@hide}
+     */
+    public static File getPackageCacheDirectory() {
+        return new File(getDataSystemDirectory(), "package_cache");
+    }
+
+    /**
      * Return the primary shared/external storage directory. This directory may
      * not currently be accessible if it has been mounted by the user on their
      * computer, has been removed from the device, or some other problem has
