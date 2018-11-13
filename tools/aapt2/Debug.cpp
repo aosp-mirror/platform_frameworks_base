@@ -431,7 +431,7 @@ void Debug::DumpHex(const void* data, size_t len) {
 
 void Debug::DumpResStringPool(const android::ResStringPool* pool, text::Printer* printer) {
   using namespace android;
-  
+
   if (pool->getError() == NO_INIT) {
     printer->Print("String pool is unitialized.\n");
     return;
@@ -460,7 +460,7 @@ void Debug::DumpResStringPool(const android::ResStringPool* pool, text::Printer*
   const size_t NS = pool->size();
   for (size_t s=0; s<NS; s++) {
     String8 str = pool->string8ObjectAt(s);
-    printer->Print(StringPrintf("String #%zd : %s\n", s, str.string()));
+    printer->Print(StringPrintf("String #%zd: %s\n", s, str.string()));
   }
 }
 

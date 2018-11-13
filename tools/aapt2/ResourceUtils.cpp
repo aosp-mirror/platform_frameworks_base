@@ -718,7 +718,7 @@ std::unique_ptr<Item> ParseBinaryResValue(const ResourceType& type, const Config
           // This must be a FileReference.
           std::unique_ptr<FileReference> file_ref =
               util::make_unique<FileReference>(dst_pool->MakeRef(
-                  str, StringPool::Context(StringPool::Context::kHighPriority, config)));
+                  str, StringPool::Context(StringPool::Context::kHighPriority, config), data));
           if (type == ResourceType::kRaw) {
             file_ref->type = ResourceFile::Type::kUnknown;
           } else if (util::EndsWith(*file_ref->path, ".xml")) {
@@ -730,7 +730,7 @@ std::unique_ptr<Item> ParseBinaryResValue(const ResourceType& type, const Config
         }
 
         // There are no styles associated with this string, so treat it as a simple string.
-        return util::make_unique<String>(dst_pool->MakeRef(str, StringPool::Context(config)));
+        return util::make_unique<String>(dst_pool->MakeRef(str, StringPool::Context(config), data));
       }
     } break;
 
