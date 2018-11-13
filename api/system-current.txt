@@ -4845,6 +4845,7 @@ package android.service.euicc {
     method public abstract void onStartOtaIfNecessary(int, android.service.euicc.EuiccService.OtaStatusChangedCallback);
     method public abstract int onSwitchToSubscription(int, java.lang.String, boolean);
     method public abstract int onUpdateSubscriptionNickname(int, java.lang.String, java.lang.String);
+    field public static final java.lang.String ACTION_BIND_CARRIER_PROVISIONING_SERVICE = "android.service.euicc.action.BIND_CARRIER_PROVISIONING_SERVICE";
     field public static final java.lang.String ACTION_MANAGE_EMBEDDED_SUBSCRIPTIONS = "android.service.euicc.action.MANAGE_EMBEDDED_SUBSCRIPTIONS";
     field public static final java.lang.String ACTION_PROVISION_EMBEDDED_SUBSCRIPTION = "android.service.euicc.action.PROVISION_EMBEDDED_SUBSCRIPTION";
     field public static final java.lang.String ACTION_RESOLVE_CONFIRMATION_CODE = "android.service.euicc.action.RESOLVE_CONFIRMATION_CODE";
@@ -5964,6 +5965,7 @@ package android.telephony.euicc {
     field public static final int EUICC_OTA_STATUS_UNAVAILABLE = 5; // 0x5
     field public static final int EUICC_OTA_SUCCEEDED = 3; // 0x3
     field public static final java.lang.String EXTRA_EMBEDDED_SUBSCRIPTION_DOWNLOADABLE_SUBSCRIPTIONS = "android.telephony.euicc.extra.EMBEDDED_SUBSCRIPTION_DOWNLOADABLE_SUBSCRIPTIONS";
+    field public static final java.lang.String EXTRA_FORCE_PROVISION = "android.telephony.euicc.extra.FORCE_PROVISION";
   }
 
   public static abstract class EuiccManager.OtaStatus implements java.lang.annotation.Annotation {
