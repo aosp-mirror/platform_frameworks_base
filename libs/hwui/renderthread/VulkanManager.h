@@ -38,7 +38,8 @@ class RenderThread;
 
 class VulkanSurface {
 public:
-    VulkanSurface(ColorMode colorMode) : mColorMode(colorMode) {}
+    VulkanSurface(ColorMode colorMode, ANativeWindow* window)
+            : mColorMode(colorMode), mNativeWindow(window) {}
 
     sk_sp<SkSurface> getBackBufferSurface() { return mBackbuffer; }
 
@@ -75,6 +76,9 @@ private:
     ImageInfo* mImageInfos;
     uint16_t mCurrentTime = 0;
     ColorMode mColorMode;
+    ANativeWindow* mNativeWindow;
+    int mWindowWidth = 0;
+    int mWindowHeight = 0;
 };
 
 // This class contains the shared global Vulkan objects, such as VkInstance, VkDevice and VkQueue,
@@ -109,7 +113,7 @@ public:
     // Returns an SkSurface which wraps the next image returned from vkAcquireNextImageKHR. It also
     // will transition the VkImage from a present layout to color attachment so that it can be used
     // by the client for drawing.
-    SkSurface* getBackbufferSurface(VulkanSurface* surface);
+    SkSurface* getBackbufferSurface(VulkanSurface** surface);
 
     // Presents the current VkImage.
     void swapBuffers(VulkanSurface* surface);

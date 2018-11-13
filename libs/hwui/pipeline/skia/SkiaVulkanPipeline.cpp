@@ -51,7 +51,7 @@ Frame SkiaVulkanPipeline::getFrame() {
     LOG_ALWAYS_FATAL_IF(mVkSurface == nullptr,
                         "drawRenderNode called on a context with no surface!");
 
-    SkSurface* backBuffer = mVkManager.getBackbufferSurface(mVkSurface);
+    SkSurface* backBuffer = mVkManager.getBackbufferSurface(&mVkSurface);
     if (backBuffer == nullptr) {
         SkDebugf("failed to get backbuffer");
         return Frame(-1, -1, 0);

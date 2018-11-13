@@ -16,6 +16,8 @@
 
 #include "VulkanManager.h"
 
+#include <gui/Surface.h>
+
 #include "Properties.h"
 #include "RenderThread.h"
 #include "renderstate/RenderState.h"
@@ -452,7 +454,20 @@ VulkanSurface::BackbufferInfo* VulkanManager::getAvailableBackbuffer(VulkanSurfa
     return backbuffer;
 }
 
-SkSurface* VulkanManager::getBackbufferSurface(VulkanSurface* surface) {
+SkSurface* VulkanManager::getBackbufferSurface(VulkanSurface** surfaceOut) {
+    // Recreate VulkanSurface, if ANativeWindow has been resized.
+    VulkanSurface* surface = *surfaceOut;
+    int windowWidth = 0, windowHeight = 0;
+    ANativeWindow* window = surface->mNativeWindow;
+    window->query(window, NATIVE_WINDOW_WIDTH, &windowWidth);
+    window->query(window, NATIVE_WINDOW_HEIGHT, &windowHeight);
+    if (windowWidth != surface->mWindowWidth || windowHeight != surface->mWindowHeight) {
+        ColorMode colorMode = surface->mColorMode;
+        destroySurface(surface);
+        *surfaceOut = createSurface(window, colorMode);
+        surface = *surfaceOut;
+    }
+
     VulkanSurface::BackbufferInfo* backbuffer = getAvailableBackbuffer(surface);
     SkASSERT(backbuffer);
 
@@ -717,6 +732,8 @@ bool VulkanManager::createSwapchain(VulkanSurface* surface) {
         extent.height = caps.minImageExtent.height;
     }
     SkASSERT(extent.height <= caps.maxImageExtent.height);
+    surface->mWindowWidth = extent.width;
+    surface->mWindowHeight = extent.height;
 
     uint32_t imageCount = caps.minImageCount + 2;
     if (caps.maxImageCount > 0 && imageCount > caps.maxImageCount) {
@@ -814,7 +831,7 @@ VulkanSurface* VulkanManager::createSurface(ANativeWindow* window, ColorMode col
         return nullptr;
     }
 
-    VulkanSurface* surface = new VulkanSurface(colorMode);
+    VulkanSurface* surface = new VulkanSurface(colorMode, window);
 
     VkAndroidSurfaceCreateInfoKHR surfaceCreateInfo;
     memset(&surfaceCreateInfo, 0, sizeof(VkAndroidSurfaceCreateInfoKHR));
