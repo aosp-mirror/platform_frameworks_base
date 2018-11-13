@@ -598,20 +598,6 @@ android_media_MediaPlayer2_pause(JNIEnv *env, jobject thiz)
     process_media_player_call( env, thiz, mp->pause(), NULL, NULL );
 }
 
-static jboolean
-android_media_MediaPlayer2_isPlaying(JNIEnv *env, jobject thiz)
-{
-    sp<MediaPlayer2> mp = getMediaPlayer(env, thiz);
-    if (mp == NULL ) {
-        jniThrowException(env, "java/lang/IllegalStateException", NULL);
-        return JNI_FALSE;
-    }
-    const jboolean is_playing = mp->isPlaying();
-
-    ALOGV("isPlaying: %d", is_playing);
-    return is_playing;
-}
-
 static void
 android_media_MediaPlayer2_setPlaybackParams(JNIEnv *env, jobject thiz, jobject params)
 {
@@ -1447,7 +1433,6 @@ static const JNINativeMethod gMethods[] = {
     {"getSyncParams",     "()Landroid/media/SyncParams;",   (void *)android_media_MediaPlayer2_getSyncParams},
     {"_seekTo",             "(JI)V",                            (void *)android_media_MediaPlayer2_seekTo},
     {"_pause",              "()V",                              (void *)android_media_MediaPlayer2_pause},
-    {"isPlaying",           "()Z",                              (void *)android_media_MediaPlayer2_isPlaying},
     {"getCurrentPosition",  "()J",                              (void *)android_media_MediaPlayer2_getCurrentPosition},
     {"getDuration",         "()J",                              (void *)android_media_MediaPlayer2_getDuration},
     {"_release",            "()V",                              (void *)android_media_MediaPlayer2_release},
