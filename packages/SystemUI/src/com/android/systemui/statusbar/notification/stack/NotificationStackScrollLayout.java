@@ -4399,16 +4399,6 @@ public class NotificationStackScrollLayout extends ViewGroup implements ScrollAd
     }
 
     @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
-    public long getDarkAnimationDuration(boolean dark) {
-        long duration = StackStateAnimator.ANIMATION_DURATION_WAKEUP;
-        // Longer animation when sleeping with more than 1 notification
-        if (dark && getNotGoneChildCount() > 2) {
-            duration *= 1.2f;
-        }
-        return duration;
-    }
-
-    @ShadeViewRefactor(RefactorComponent.STATE_RESOLVER)
     private int findDarkAnimationOriginIndex(@Nullable PointF screenLocation) {
         if (screenLocation == null || screenLocation.y < mTopPadding) {
             return AnimationEvent.DARK_ANIMATION_ORIGIN_INDEX_ABOVE;
