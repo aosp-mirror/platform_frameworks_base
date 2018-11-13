@@ -1202,6 +1202,11 @@ i     * Verify that a call to cancel WPS immediately returns a failure.
                 mock(INetworkRequestUserSelectionCallback.class);
 
         assertEquals(0, mLooper.dispatchAll());
+
+        callbackCaptor.getValue().onAbort();
+        assertEquals(1, mLooper.dispatchAll());
+        verify(mNetworkRequestMatchCallback).onAbort();
+
         callbackCaptor.getValue().onMatch(new ArrayList<ScanResult>());
         assertEquals(1, mLooper.dispatchAll());
         verify(mNetworkRequestMatchCallback).onMatch(anyList());

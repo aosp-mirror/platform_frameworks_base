@@ -1267,6 +1267,15 @@ public class WifiManager {
                 @NonNull NetworkRequestUserSelectionCallback userSelectionCallback);
 
         /**
+         * Invoked when the active network request is aborted, either because
+         * <li> The app released the request, OR</li>
+         * <li> Request was overridden by a new request</li>
+         * This signals the end of processing for the current request and should stop the UI
+         * component. No subsequent calls from the UI component will be handled by the platform.
+         */
+        void onAbort();
+
+        /**
          * Invoked when a network request initiated by an app matches some networks in scan results.
          * This may be invoked multiple times for a single network request as the platform finds new
          * matching networks in scan results.
@@ -1359,6 +1368,16 @@ public class WifiManager {
             mHandler.post(() -> {
                 mCallback.onUserSelectionCallbackRegistration(
                         new NetworkRequestUserSelectionCallbackProxy(userSelectionCallback));
+            });
+        }
+
+        @Override
+        public void onAbort() {
+            if (mVerboseLoggingEnabled) {
+                Log.v(TAG, "NetworkRequestMatchCallbackProxy: onAbort");
+            }
+            mHandler.post(() -> {
+                mCallback.onAbort();
             });
         }
 

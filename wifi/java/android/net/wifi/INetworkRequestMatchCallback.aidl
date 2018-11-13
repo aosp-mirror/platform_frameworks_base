@@ -29,6 +29,8 @@ oneway interface INetworkRequestMatchCallback
 {
    void onUserSelectionCallbackRegistration(in INetworkRequestUserSelectionCallback userSelectionCallback);
 
+   void onAbort();
+
    void onMatch(in List<ScanResult> scanResults);
 
    void onUserSelectionConnectSuccess(in WifiConfiguration wificonfiguration);
