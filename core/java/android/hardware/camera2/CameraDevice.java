@@ -357,7 +357,7 @@ public abstract class CameraDevice implements AutoCloseable {
      * </p>
      *
      * <p>MONOCHROME-capability ({@link CameraCharacteristics#REQUEST_AVAILABLE_CAPABILITIES}
-     * includes {@link CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_MONOCHROME MONOCHROME})
+     * includes {@link CameraMetadata#REQUEST_AVAILABLE_CAPABILITIES_MONOCHROME MONOCHROME}) devices
      * supporting {@link android.graphics.ImageFormat#Y8 Y8} support substituting {@code YUV}
      * streams with {@code Y8} in all guaranteed stream combinations for the device's hardware level
      * and capabilities.</p>

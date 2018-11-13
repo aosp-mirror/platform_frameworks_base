@@ -28,8 +28,8 @@ import android.hardware.camera2.utils.ArrayUtils;
 import android.hardware.camera2.utils.TypeReference;
 import android.util.Rational;
 
-import java.util.Arrays;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
@@ -2668,7 +2668,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
     /**
      * <p>The arrangement of color filters on sensor;
      * represents the colors in the top-left 2x2 section of
-     * the sensor, in reading order.</p>
+     * the sensor, in reading order, for a Bayer camera, or the
+     * light spectrum it captures for MONOCHROME camera.</p>
      * <p><b>Possible values:</b>
      * <ul>
      *   <li>{@link #SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_RGGB RGGB}</li>
@@ -2676,6 +2677,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      *   <li>{@link #SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_GBRG GBRG}</li>
      *   <li>{@link #SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_BGGR BGGR}</li>
      *   <li>{@link #SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_RGB RGB}</li>
+     *   <li>{@link #SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_MONO MONO}</li>
+     *   <li>{@link #SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_NIR NIR}</li>
      * </ul></p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      * <p><b>Full capability</b> -
@@ -2688,6 +2691,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * @see #SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_GBRG
      * @see #SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_BGGR
      * @see #SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_RGB
+     * @see #SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_MONO
+     * @see #SENSOR_INFO_COLOR_FILTER_ARRANGEMENT_NIR
      */
     @PublicKey
     public static final Key<Integer> SENSOR_INFO_COLOR_FILTER_ARRANGEMENT =
@@ -2919,6 +2924,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>Some devices may choose to provide a second set of calibration
      * information for improved quality, including
      * {@link CameraCharacteristics#SENSOR_REFERENCE_ILLUMINANT2 android.sensor.referenceIlluminant2} and its corresponding matrices.</p>
+     * <p>Starting from Android Q, this key will not be present for a MONOCHROME camera, even if
+     * the camera device has RAW capability.</p>
      * <p><b>Possible values:</b>
      * <ul>
      *   <li>{@link #SENSOR_REFERENCE_ILLUMINANT1_DAYLIGHT DAYLIGHT}</li>
@@ -2981,6 +2988,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * <p>If this key is present, then {@link CameraCharacteristics#SENSOR_COLOR_TRANSFORM2 android.sensor.colorTransform2},
      * {@link CameraCharacteristics#SENSOR_CALIBRATION_TRANSFORM2 android.sensor.calibrationTransform2}, and
      * {@link CameraCharacteristics#SENSOR_FORWARD_MATRIX2 android.sensor.forwardMatrix2} will also be present.</p>
+     * <p>Starting from Android Q, this key will not be present for a MONOCHROME camera, even if
+     * the camera device has RAW capability.</p>
      * <p><b>Range of valid values:</b><br>
      * Any value listed in {@link CameraCharacteristics#SENSOR_REFERENCE_ILLUMINANT1 android.sensor.referenceIlluminant1}</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
@@ -3006,6 +3015,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * colorspace) into this camera device's native sensor color
      * space under the first reference illuminant
      * ({@link CameraCharacteristics#SENSOR_REFERENCE_ILLUMINANT1 android.sensor.referenceIlluminant1}).</p>
+     * <p>Starting from Android Q, this key will not be present for a MONOCHROME camera, even if
+     * the camera device has RAW capability.</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      * <p><b>Permission {@link android.Manifest.permission#CAMERA } is needed to access this property</b></p>
      *
@@ -3029,6 +3040,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * ({@link CameraCharacteristics#SENSOR_REFERENCE_ILLUMINANT2 android.sensor.referenceIlluminant2}).</p>
      * <p>This matrix will only be present if the second reference
      * illuminant is present.</p>
+     * <p>Starting from Android Q, this key will not be present for a MONOCHROME camera, even if
+     * the camera device has RAW capability.</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      * <p><b>Permission {@link android.Manifest.permission#CAMERA } is needed to access this property</b></p>
      *
@@ -3053,6 +3066,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * and the CIE XYZ colorspace when calculating this transform will
      * match the standard white point for the first reference illuminant
      * (i.e. no chromatic adaptation will be applied by this transform).</p>
+     * <p>Starting from Android Q, this key will not be present for a MONOCHROME camera, even if
+     * the camera device has RAW capability.</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      * <p><b>Permission {@link android.Manifest.permission#CAMERA } is needed to access this property</b></p>
      *
@@ -3079,6 +3094,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * (i.e. no chromatic adaptation will be applied by this transform).</p>
      * <p>This matrix will only be present if the second reference
      * illuminant is present.</p>
+     * <p>Starting from Android Q, this key will not be present for a MONOCHROME camera, even if
+     * the camera device has RAW capability.</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      * <p><b>Permission {@link android.Manifest.permission#CAMERA } is needed to access this property</b></p>
      *
@@ -3101,6 +3118,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * this matrix is chosen so that the standard white point for this reference
      * illuminant in the reference sensor colorspace is mapped to D50 in the
      * CIE XYZ colorspace.</p>
+     * <p>Starting from Android Q, this key will not be present for a MONOCHROME camera, even if
+     * the camera device has RAW capability.</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      * <p><b>Permission {@link android.Manifest.permission#CAMERA } is needed to access this property</b></p>
      *
@@ -3125,6 +3144,8 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * CIE XYZ colorspace.</p>
      * <p>This matrix will only be present if the second reference
      * illuminant is present.</p>
+     * <p>Starting from Android Q, this key will not be present for a MONOCHROME camera, even if
+     * the camera device has RAW capability.</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
      * <p><b>Permission {@link android.Manifest.permission#CAMERA } is needed to access this property</b></p>
      *
@@ -3153,6 +3174,7 @@ public final class CameraCharacteristics extends CameraMetadata<CameraCharacteri
      * level values. For raw capture in particular, it is recommended to use
      * pixels from {@link CameraCharacteristics#SENSOR_OPTICAL_BLACK_REGIONS android.sensor.opticalBlackRegions} to calculate black
      * level values for each frame.</p>
+     * <p>For a MONOCHROME camera device, all of the 2x2 channels must have the same values.</p>
      * <p><b>Range of valid values:</b><br>
      * &gt;= 0 for each.</p>
      * <p><b>Optional</b> - This value may be {@code null} on some devices.</p>
