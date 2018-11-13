@@ -48,6 +48,8 @@ interface IPowerManager
     boolean isPowerSaveMode();
     PowerSaveState getPowerSaveState(int serviceType);
     boolean setPowerSaveMode(boolean mode);
+    boolean setDynamicPowerSavings(boolean dynamicPowerSavingsEnabled, int disableThreshold);
+    int getPowerSaveMode();
     boolean isDeviceIdleMode();
     boolean isLightDeviceIdleMode();
 

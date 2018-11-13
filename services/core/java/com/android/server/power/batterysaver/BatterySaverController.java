@@ -93,8 +93,8 @@ public class BatterySaverController implements BatterySaverPolicyListener {
      */
     private final Plugin[] mPlugins;
 
-    public static final int REASON_AUTOMATIC_ON = 0;
-    public static final int REASON_AUTOMATIC_OFF = 1;
+    public static final int REASON_PERCENTAGE_AUTOMATIC_ON = 0;
+    public static final int REASON_PERCENTAGE_AUTOMATIC_OFF = 1;
     public static final int REASON_MANUAL_ON = 2;
     public static final int REASON_MANUAL_OFF = 3;
     public static final int REASON_STICKY_RESTORE = 4;
@@ -102,6 +102,8 @@ public class BatterySaverController implements BatterySaverPolicyListener {
     public static final int REASON_POLICY_CHANGED = 6;
     public static final int REASON_PLUGGED_IN = 7;
     public static final int REASON_SETTING_CHANGED = 8;
+    public static final int REASON_DYNAMIC_POWER_SAVINGS_AUTOMATIC_ON = 9;
+    public static final int REASON_DYNAMIC_POWER_SAVINGS_AUTOMATIC_OFF = 10;
 
     /**
      * Plugin interface. All methods are guaranteed to be called on the same (handler) thread.
