@@ -110,7 +110,6 @@ static struct binderproxy_offsets_t
     jclass mClass;
     jmethodID mGetInstance;
     jmethodID mSendDeathNotice;
-    jmethodID mDumpProxyDebugInfo;
 
     // Object state.
     jfieldID mNativeData;  // Field holds native pointer to BinderProxyNativeData.
@@ -1038,18 +1037,6 @@ static void android_os_BinderInternal_handleGc(JNIEnv* env, jobject clazz)
 static void android_os_BinderInternal_proxyLimitcallback(int uid)
 {
     JNIEnv *env = AndroidRuntime::getJNIEnv();
-    {
-        // Calls into BinderProxy must be serialized
-        AutoMutex _l(gProxyLock);
-        env->CallStaticObjectMethod(gBinderProxyOffsets.mClass,
-                                    gBinderProxyOffsets.mDumpProxyDebugInfo);
-    }
-    if (env->ExceptionCheck()) {
-        ScopedLocalRef<jthrowable> excep(env, env->ExceptionOccurred());
-        report_exception(env, excep.get(),
-            "*** Uncaught exception in dumpProxyDebugInfo");
-    }
-
     env->CallStaticVoidMethod(gBinderInternalOffsets.mClass,
                               gBinderInternalOffsets.mProxyLimitCallback,
                               uid);
@@ -1439,8 +1426,6 @@ static int int_register_android_os_BinderProxy(JNIEnv* env)
             "(JJ)Landroid/os/BinderProxy;");
     gBinderProxyOffsets.mSendDeathNotice = GetStaticMethodIDOrDie(env, clazz, "sendDeathNotice",
             "(Landroid/os/IBinder$DeathRecipient;)V");
-    gBinderProxyOffsets.mDumpProxyDebugInfo = GetStaticMethodIDOrDie(env, clazz, "dumpProxyDebugInfo",
-            "()V");
     gBinderProxyOffsets.mNativeData = GetFieldIDOrDie(env, clazz, "mNativeData", "J");
 
     clazz = FindClassOrDie(env, "java/lang/Class");
