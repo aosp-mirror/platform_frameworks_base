@@ -846,56 +846,29 @@ android_media_MediaPlayer2_reset(JNIEnv *env, jobject thiz)
 }
 
 static jboolean
-android_media_MediaPlayer2_setParameter(JNIEnv *env, jobject thiz, jint key, jobject)
+android_media_MediaPlayer2_setAudioAttributes(JNIEnv *env, jobject thiz, jobject attributes)
 {
-    ALOGV("setParameter: key %d", key);
+    ALOGV("setAudioAttributes");
     sp<MediaPlayer2> mp = getMediaPlayer(env, thiz);
     if (mp == NULL ) {
         jniThrowException(env, "java/lang/IllegalStateException", NULL);
         return false;
     }
-
-    return false;
-    // TODO: set/getParameter is temporarily disabled to remove android_runtime.so dependency.
-    //       Once JAudioTrack migration is done, the AudioAttribute jobject
-    //       should be directly passed to AudioTrack without native parcel conversion.
-    /*
-    Parcel *request = parcelForJavaObject(env, java_request);
-    status_t err = mp->setParameter(key, *request);
-    if (err == OK) {
-        return true;
-    } else {
-        return false;
-    }
-    */
+    status_t err = mp->setAudioAttributes(attributes);
+    return err == OK;
 }
 
 static jobject
-android_media_MediaPlayer2_getParameter(JNIEnv *env, jobject thiz, jint key)
+android_media_MediaPlayer2_getAudioAttributes(JNIEnv *env, jobject thiz)
 {
-    ALOGV("getParameter: key %d", key);
+    ALOGV("getAudioAttributes");
     sp<MediaPlayer2> mp = getMediaPlayer(env, thiz);
     if (mp == NULL) {
         jniThrowException(env, "java/lang/IllegalStateException", NULL);
         return NULL;
     }
 
-    return NULL;
-    // TODO: set/getParameter is temporarily disabled to remove android_runtime.so dependency.
-    //       Once JAudioTrack migration is done, the AudioAttribute jobject
-    //       should be directly passed to AudioTrack without native parcel conversion.
-    /*
-    jobject jParcel = createJavaParcelObject(env);
-    if (jParcel != NULL) {
-        Parcel* nativeParcel = parcelForJavaObject(env, jParcel);
-        status_t err = mp->getParameter(key, nativeParcel);
-        if (err != OK) {
-            env->DeleteLocalRef(jParcel);
-            return NULL;
-        }
-    }
-    return jParcel;
-    */
+    return mp->getAudioAttributes();
 }
 
 static void
@@ -1428,17 +1401,17 @@ static const JNINativeMethod gMethods[] = {
     {"native_getState",     "()I",                              (void *)android_media_MediaPlayer2_getState},
     {"native_getMetrics",   "()Landroid/os/PersistableBundle;", (void *)android_media_MediaPlayer2_native_getMetrics},
     {"_setPlaybackParams", "(Landroid/media/PlaybackParams;)V", (void *)android_media_MediaPlayer2_setPlaybackParams},
-    {"getPlaybackParams", "()Landroid/media/PlaybackParams;", (void *)android_media_MediaPlayer2_getPlaybackParams},
-    {"_setSyncParams",     "(Landroid/media/SyncParams;)V",  (void *)android_media_MediaPlayer2_setSyncParams},
-    {"getSyncParams",     "()Landroid/media/SyncParams;",   (void *)android_media_MediaPlayer2_getSyncParams},
+    {"getPlaybackParams", "()Landroid/media/PlaybackParams;",   (void *)android_media_MediaPlayer2_getPlaybackParams},
+    {"_setSyncParams",     "(Landroid/media/SyncParams;)V",     (void *)android_media_MediaPlayer2_setSyncParams},
+    {"getSyncParams",     "()Landroid/media/SyncParams;",       (void *)android_media_MediaPlayer2_getSyncParams},
     {"_seekTo",             "(JI)V",                            (void *)android_media_MediaPlayer2_seekTo},
     {"_pause",              "()V",                              (void *)android_media_MediaPlayer2_pause},
     {"getCurrentPosition",  "()J",                              (void *)android_media_MediaPlayer2_getCurrentPosition},
     {"getDuration",         "()J",                              (void *)android_media_MediaPlayer2_getDuration},
     {"_release",            "()V",                              (void *)android_media_MediaPlayer2_release},
     {"_reset",              "()V",                              (void *)android_media_MediaPlayer2_reset},
-    {"setParameter",        "(ILjava/lang/Object;)Z",          (void *)android_media_MediaPlayer2_setParameter},
-    {"getParameter",        "(I)Ljava/lang/Object;",           (void *)android_media_MediaPlayer2_getParameter},
+    {"native_setAudioAttributes", "(Landroid/media/AudioAttributes;)Z", (void *)android_media_MediaPlayer2_setAudioAttributes},
+    {"native_getAudioAttributes", "()Landroid/media/AudioAttributes;", (void *)android_media_MediaPlayer2_getAudioAttributes},
     {"setLooping",          "(Z)V",                             (void *)android_media_MediaPlayer2_setLooping},
     {"isLooping",           "()Z",                              (void *)android_media_MediaPlayer2_isLooping},
     {"native_setVolume",    "(F)V",                             (void *)android_media_MediaPlayer2_setVolume},

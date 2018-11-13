@@ -246,15 +246,14 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
                     final String msg = "Cannot set AudioAttributes to null";
                     throw new IllegalArgumentException(msg);
                 }
-                setParameter(KEY_PARAMETER_AUDIO_ATTRIBUTES, attributes);
+                native_setAudioAttributes(attributes);
             }
         });
     }
 
     @Override
     public @NonNull AudioAttributes getAudioAttributes() {
-        AudioAttributes attributes = (AudioAttributes) getParameter(KEY_PARAMETER_AUDIO_ATTRIBUTES);
-        return attributes;
+        return native_getAudioAttributes();
     }
 
     @Override
@@ -1102,14 +1101,12 @@ public final class MediaPlayer2Impl extends MediaPlayer2 {
     // Keep KEY_PARAMETER_* in sync with include/media/mediaplayer2.h
     private final static int KEY_PARAMETER_AUDIO_ATTRIBUTES = 1400;
     /**
-     * Sets the parameter indicated by key.
-     * @param key key indicates the parameter to be set.
+     * Sets the audio attributes.
      * @param value value of the parameter to be set.
      * @return true if the parameter is set successfully, false otherwise
      */
-    private native boolean setParameter(int key, Object value);
-
-    private native Object getParameter(int key);
+    private native boolean native_setAudioAttributes(AudioAttributes audioAttributes);
+    private native AudioAttributes native_getAudioAttributes();
 
 
     /**
