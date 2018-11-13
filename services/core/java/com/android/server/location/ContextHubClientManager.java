@@ -24,6 +24,7 @@ import android.hardware.location.ContextHubInfo;
 import android.hardware.location.IContextHubClient;
 import android.hardware.location.IContextHubClientCallback;
 import android.hardware.location.NanoAppMessage;
+import android.os.RemoteException;
 import android.util.Log;
 
 import java.util.concurrent.ConcurrentHashMap;
@@ -68,7 +69,7 @@ import java.util.function.Consumer;
     /*
      * The next host endpoint ID to start iterating for the next available host endpoint ID.
      */
-    private int mNextHostEndpointId = 0;
+    private int mNextHostEndPointId = 0;
 
     /* package */ ContextHubClientManager(
             Context context, IContexthub contextHubProxy) {
@@ -88,9 +89,22 @@ import java.util.function.Consumer;
      */
     /* package */ IContextHubClient registerClient(
             IContextHubClientCallback clientCallback, ContextHubInfo contextHubInfo) {
-        ContextHubClientBroker broker = createNewClientBroker(contextHubInfo);
-        if (!broker.setCallback(clientCallback)) {
-            return null; // Client process has died, so we return null
+        ContextHubClientBroker broker;
+        synchronized (this) {
+            short hostEndPointId = getHostEndPointId();
+            broker = new ContextHubClientBroker(
+                    mContext, mContextHubProxy, this /* clientManager */, contextHubInfo,
+                    hostEndPointId, clientCallback);
+            mHostEndPointIdToClientMap.put(hostEndPointId, broker);
+        }
+
+        try {
+            broker.attachDeathRecipient();
+        } catch (RemoteException e) {
+            // The client process has died, so we close the connection and return null
+            Log.e(TAG, "Failed to attach death recipient to client");
+            broker.close();
+            return null;
         }
 
         Log.d(TAG, "Registered client with host endpoint ID " + broker.getHostEndPointId());
@@ -187,36 +201,28 @@ import java.util.function.Consumer;
     }
 
     /**
-     * Creates a new ContextHubClientBroker object for a client and registers it with the client
-     * manager.
+     * Returns an available host endpoint ID.
      *
-     * @param contextHubInfo the object describing the hub this client is attached to
-     *
-     * @return the ContextHubClientBroker object
+     * @returns an available host endpoint ID
      *
      * @throws IllegalStateException if max number of clients have already registered
      */
-    private synchronized ContextHubClientBroker createNewClientBroker(
-            ContextHubInfo contextHubInfo) {
+    private short getHostEndPointId() {
         if (mHostEndPointIdToClientMap.size() == MAX_CLIENT_ID + 1) {
             throw new IllegalStateException("Could not register client - max limit exceeded");
         }
 
-        ContextHubClientBroker broker = null;
-        int id = mNextHostEndpointId;
+        int id = mNextHostEndPointId;
         for (int i = 0; i <= MAX_CLIENT_ID; i++) {
             if (!mHostEndPointIdToClientMap.containsKey((short) id)) {
-                broker = new ContextHubClientBroker(
-                        mContext, mContextHubProxy, this, contextHubInfo, (short) id);
-                mHostEndPointIdToClientMap.put((short) id, broker);
-                mNextHostEndpointId = (id == MAX_CLIENT_ID) ? 0 : id + 1;
+                mNextHostEndPointId = (id == MAX_CLIENT_ID) ? 0 : id + 1;
                 break;
             }
 
             id = (id == MAX_CLIENT_ID) ? 0 : id + 1;
         }
 
-        return broker;
+        return (short) id;
     }
 
     /**

@@ -134,12 +134,14 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
 
     /* package */ ContextHubClientBroker(
             Context context, IContexthub contextHubProxy, ContextHubClientManager clientManager,
-            ContextHubInfo contextHubInfo, short hostEndPointId) {
+            ContextHubInfo contextHubInfo, short hostEndPointId,
+            IContextHubClientCallback callback) {
         mContext = context;
         mContextHubProxy = contextHubProxy;
         mClientManager = clientManager;
         mAttachedContextHubInfo = contextHubInfo;
         mHostEndPointId = hostEndPointId;
+        mCallbackInterface = callback;
     }
 
     /**
@@ -197,37 +199,6 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
     @Override
     public void binderDied() {
         close();
-    }
-
-    /**
-     * Sets the callback interface for this client, only if the callback is currently unregistered.
-     *
-     * Also attaches a death recipient to a ContextHubClientBroker object. If unsuccessful, the
-     * connection is closed.
-     *
-     * @param callback the callback interface
-     * @return true if the callback was successfully set, false otherwise
-     *
-     * @throws IllegalStateException if the client has already been registered to a callback
-     */
-    /* package */
-    synchronized boolean setCallback(IContextHubClientCallback callback) {
-        boolean success = false;
-        if (mCallbackInterface != null) {
-            throw new IllegalStateException("Client is already registered with a callback");
-        } else {
-            mCallbackInterface = callback;
-            try {
-                mCallbackInterface.asBinder().linkToDeath(this, 0 /* flags */);
-                success = true;
-            } catch (RemoteException e) {
-                // The client process has died, so we close the connection.
-                Log.e(TAG, "Failed to attach death recipient to client");
-                close();
-            }
-        }
-
-        return success;
     }
 
     /**
@@ -311,6 +282,17 @@ public class ContextHubClientBroker extends IContextHubClient.Stub
             pendingIntent = mPendingIntentRequest.getPendingIntent();
         }
         return (pendingIntent != null) && pendingIntent.equals(intent);
+    }
+
+    /**
+     * Attaches the death recipient to the callback interface object, if any.
+     *
+     * @throws RemoteException if the client process already died
+     */
+    /* package */ void attachDeathRecipient() throws RemoteException {
+        if (mCallbackInterface != null) {
+            mCallbackInterface.asBinder().linkToDeath(this, 0 /* flags */);
+        }
     }
 
     /**
