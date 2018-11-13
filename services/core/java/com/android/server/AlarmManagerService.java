@@ -1122,8 +1122,6 @@ class AlarmManagerService extends SystemService {
         rescheduleKernelAlarmsLocked();
         updateNextAlarmClockLocked();
 
-        // And send a TIME_TICK right now, since it is important to get the UI updated.
-        mHandler.post(() ->  getContext().sendBroadcastAsUser(mTimeTickIntent, UserHandle.ALL));
     }
 
     static final class InFlight {
@@ -1297,7 +1295,7 @@ class AlarmManagerService extends SystemService {
         mInjector.init();
 
         synchronized (mLock) {
-            mHandler = new AlarmHandler(Looper.myLooper());
+            mHandler = new AlarmHandler();
             mConstants = new Constants(mHandler);
 
             mNextWakeup = mNextNonWakeup = 0;
@@ -3045,6 +3043,9 @@ class AlarmManagerService extends SystemService {
                         mNonInteractiveTime = dur;
                     }
                 }
+                // And send a TIME_TICK right now, since it is important to get the UI updated.
+                mHandler.post(() ->
+                        getContext().sendBroadcastAsUser(mTimeTickIntent, UserHandle.ALL));
             } else {
                 mNonInteractiveStartTime = nowELAPSED;
             }
@@ -3833,7 +3834,8 @@ class AlarmManagerService extends SystemService {
         mWakeLock.setWorkSource(null);
     }
 
-    private class AlarmHandler extends Handler {
+    @VisibleForTesting
+    class AlarmHandler extends Handler {
         public static final int ALARM_EVENT = 1;
         public static final int SEND_NEXT_ALARM_CLOCK_CHANGED = 2;
         public static final int LISTENER_TIMEOUT = 3;
@@ -3842,8 +3844,8 @@ class AlarmManagerService extends SystemService {
         public static final int APP_STANDBY_PAROLE_CHANGED = 6;
         public static final int REMOVE_FOR_STOPPED = 7;
 
-        AlarmHandler(Looper looper) {
-            super(looper);
+        AlarmHandler() {
+            super(Looper.myLooper());
         }
 
         public void postRemoveForStopped(int uid) {
@@ -3956,8 +3958,8 @@ class AlarmManagerService extends SystemService {
 
             final WorkSource workSource = null; // Let system take blame for time tick events.
             setImpl(ELAPSED_REALTIME, mInjector.getElapsedRealtime() + tickEventDelay, 0,
-                    0, null, mTimeTickTrigger, null, AlarmManager.FLAG_STANDALONE, workSource,
-                    null, Process.myUid(), "android");
+                    0, null, mTimeTickTrigger, "TIME_TICK", AlarmManager.FLAG_STANDALONE,
+                    workSource, null, Process.myUid(), "android");
 
             // Finally, remember when we set the tick alarm
             synchronized (mLock) {
