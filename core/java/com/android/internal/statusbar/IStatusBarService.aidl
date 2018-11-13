@@ -92,7 +92,7 @@ interface IStatusBarService
 
     // Used to show the dialog when BiometricService starts authentication
     void showBiometricDialog(in Bundle bundle, IBiometricPromptReceiver receiver, int type,
-            boolean requireConfirmation);
+            boolean requireConfirmation, int userId);
     // Used to hide the dialog when a biometric is authenticated
     void onBiometricAuthenticated();
     // Used to set a temporary message, e.g. fingerprint not recognized, finger moved too fast, etc

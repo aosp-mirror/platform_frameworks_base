@@ -16,15 +16,19 @@
 
 package com.android.systemui.biometrics;
 
+import android.app.admin.DevicePolicyManager;
 import android.content.Context;
 import android.content.res.TypedArray;
 import android.graphics.PixelFormat;
+import android.graphics.PorterDuff;
+import android.graphics.drawable.Drawable;
 import android.hardware.biometrics.BiometricPrompt;
 import android.os.Binder;
 import android.os.Bundle;
 import android.os.Handler;
 import android.os.IBinder;
 import android.os.Message;
+import android.os.UserManager;
 import android.text.TextUtils;
 import android.util.DisplayMetrics;
 import android.util.Log;
@@ -64,6 +68,8 @@ public abstract class BiometricDialogView extends LinearLayout {
     private final IBinder mWindowToken = new Binder();
     private final Interpolator mLinearOutSlowIn;
     private final WindowManager mWindowManager;
+    private final UserManager mUserManager;
+    private final DevicePolicyManager mDevicePolicyManager;
     private final float mAnimationTranslationOffset;
     private final int mErrorColor;
     private final int mTextColor;
@@ -79,6 +85,7 @@ public abstract class BiometricDialogView extends LinearLayout {
     private boolean mWasForceRemoved;
     private boolean mSkipIntro;
     protected boolean mRequireConfirmation;
+    private int mUserId; // used to determine if we should show work background
 
     protected abstract void updateIcon(int lastState, int newState);
     protected abstract int getHintStringResourceId();
@@ -121,7 +128,9 @@ public abstract class BiometricDialogView extends LinearLayout {
         super(context);
         mCallback = callback;
         mLinearOutSlowIn = Interpolators.LINEAR_OUT_SLOW_IN;
-        mWindowManager = (WindowManager) mContext.getSystemService(Context.WINDOW_SERVICE);
+        mWindowManager = mContext.getSystemService(WindowManager.class);
+        mUserManager = mContext.getSystemService(UserManager.class);
+        mDevicePolicyManager = mContext.getSystemService(DevicePolicyManager.class);
         mAnimationTranslationOffset = getResources()
                 .getDimension(R.dimen.biometric_dialog_animation_translation_offset);
 
@@ -199,6 +208,18 @@ public abstract class BiometricDialogView extends LinearLayout {
         final TextView description = mLayout.findViewById(R.id.description);
         final Button negative = mLayout.findViewById(R.id.button2);
         final Button positive = mLayout.findViewById(R.id.button1);
+        final ImageView backgroundView = mLayout.findViewById(R.id.background);
+
+        if (mUserManager.isManagedProfile(mUserId)) {
+            final Drawable image = getResources().getDrawable(R.drawable.work_challenge_background,
+                    mContext.getTheme());
+            image.setColorFilter(mDevicePolicyManager.getOrganizationColorForUser(mUserId),
+                    PorterDuff.Mode.DARKEN);
+            backgroundView.setImageDrawable(image);
+        } else {
+            backgroundView.setImageDrawable(null);
+            backgroundView.setBackgroundColor(R.color.biometric_dialog_dim_color);
+        }
 
         if (RotationUtils.getRotation(mContext) != RotationUtils.ROTATION_NONE) {
             mDialog.getLayoutParams().width = (int) mDialogWidth;
@@ -327,6 +348,10 @@ public abstract class BiometricDialogView extends LinearLayout {
     public void showConfirmationButton() {
         final Button positive = mLayout.findViewById(R.id.button1);
         positive.setVisibility(View.VISIBLE);
+    }
+
+    public void setUserId(int userId) {
+        mUserId = userId;
     }
 
     public ViewGroup getLayout() {
