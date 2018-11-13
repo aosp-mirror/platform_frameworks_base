@@ -19183,6 +19183,9 @@ public class ActivityManagerService extends IActivityManager.Stub
             if (!SystemProperties.getBoolean(StorageManager.PROP_ISOLATED_STORAGE, false)) {
                 return false;
             }
+            if (uid == SHELL_UID || uid == ROOT_UID) {
+                return false;
+            }
             synchronized (mPidsSelfLocked) {
                 final ProcessRecord pr = mPidsSelfLocked.get(pid);
                 return pr == null || pr.mountMode != Zygote.MOUNT_EXTERNAL_FULL;
