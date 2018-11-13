@@ -1697,9 +1697,8 @@ public class HdmiControlService extends SystemService {
                         } else {
                             Slog.e(TAG, "Can't get the correct local device to handle routing.");
                         }
-                    } else {
-                        sendCecCommand(setStreamPath);
                     }
+                    sendCecCommand(setStreamPath);
                 }
             });
         }
