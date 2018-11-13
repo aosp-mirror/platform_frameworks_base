@@ -1009,7 +1009,7 @@ public class Instrumentation {
      * from its event processing, though it may <em>not</em> have completely
      * finished reacting from the event -- for example, if it needs to update
      * its display as a result, it may still be in the process of doing that.
-     * 
+     *
      * @param event The event to send to the current focus.
      */
     public void sendKeySync(KeyEvent event) {
@@ -1017,14 +1017,7 @@ public class Instrumentation {
 
         long downTime = event.getDownTime();
         long eventTime = event.getEventTime();
-        int action = event.getAction();
-        int code = event.getKeyCode();
-        int repeatCount = event.getRepeatCount();
-        int metaState = event.getMetaState();
-        int deviceId = event.getDeviceId();
-        int scancode = event.getScanCode();
         int source = event.getSource();
-        int flags = event.getFlags();
         if (source == InputDevice.SOURCE_UNKNOWN) {
             source = InputDevice.SOURCE_KEYBOARD;
         }
@@ -1034,12 +1027,14 @@ public class Instrumentation {
         if (downTime == 0) {
             downTime = eventTime;
         }
-        KeyEvent newEvent = new KeyEvent(downTime, eventTime, action, code, repeatCount, metaState,
-                deviceId, scancode, flags | KeyEvent.FLAG_FROM_SYSTEM, source);
+        KeyEvent newEvent = new KeyEvent(event);
+        newEvent.setTime(downTime, eventTime);
+        newEvent.setSource(source);
+        newEvent.setFlags(event.getFlags() | KeyEvent.FLAG_FROM_SYSTEM);
         InputManager.getInstance().injectInputEvent(newEvent,
                 InputManager.INJECT_INPUT_EVENT_MODE_WAIT_FOR_FINISH);
     }
-    
+
     /**
      * Sends an up and down key event sync to the currently focused window.
      * 
