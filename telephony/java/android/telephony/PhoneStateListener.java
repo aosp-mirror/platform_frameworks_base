@@ -438,11 +438,11 @@ public class PhoneStateListener {
                         PhoneStateListener.this.onPhoneCapabilityChanged(
                                 (PhoneCapability) msg.obj);
                         break;
-                    case LISTEN_RADIO_POWER_STATE_CHANGED:
-                        PhoneStateListener.this.onRadioPowerStateChanged((int) msg.obj);
-                        break;
                     case LISTEN_PREFERRED_DATA_SUBID_CHANGE:
                         PhoneStateListener.this.onPreferredDataSubIdChanged((int) msg.obj);
+                        break;
+                    case LISTEN_RADIO_POWER_STATE_CHANGED:
+                        PhoneStateListener.this.onRadioPowerStateChanged((int) msg.obj);
                         break;
                 }
             }
@@ -684,17 +684,6 @@ public class PhoneStateListener {
     }
 
     /**
-     * Callback invoked when modem radio power state changes. Requires
-     * the READ_PRIVILEGED_PHONE_STATE permission.
-     * @param state the modem radio power state
-     * @hide
-     */
-    @SystemApi
-    public void onRadioPowerStateChanged(@TelephonyManager.RadioPowerState int state) {
-        // default implementation empty
-    }
-
-    /**
      * Callback invoked when preferred data subId changes. Requires
      * the READ_PRIVILEGED_PHONE_STATE permission.
      * @param subId the new preferred data subId. If it's INVALID_SUBSCRIPTION_ID,
@@ -703,6 +692,17 @@ public class PhoneStateListener {
      * @hide
      */
     public void onPreferredDataSubIdChanged(int subId) {
+        // default implementation empty
+    }
+
+    /**
+     * Callback invoked when modem radio power state changes. Requires
+     * the READ_PRIVILEGED_PHONE_STATE permission.
+     * @param state the modem radio power state
+     * @hide
+     */
+    @SystemApi
+    public void onRadioPowerStateChanged(@TelephonyManager.RadioPowerState int state) {
         // default implementation empty
     }
 
@@ -838,13 +838,14 @@ public class PhoneStateListener {
             send(LISTEN_PHONE_CAPABILITY_CHANGE, 0, 0, capability);
         }
 
+        public void onPreferredDataSubIdChanged(int subId) {
+            send(LISTEN_PREFERRED_DATA_SUBID_CHANGE, 0, 0, subId);
+        }
+
         public void onRadioPowerStateChanged(@TelephonyManager.RadioPowerState int state) {
             send(LISTEN_RADIO_POWER_STATE_CHANGED, 0, 0, state);
         }
 
-        public void onPreferredDataSubIdChanged(int subId) {
-            send(LISTEN_PREFERRED_DATA_SUBID_CHANGE, 0, 0, subId);
-        }
     }
 
     /**
