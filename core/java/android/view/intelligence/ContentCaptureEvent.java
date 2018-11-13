@@ -16,12 +16,17 @@
 package android.view.intelligence;
 
 import android.annotation.IntDef;
+import android.annotation.NonNull;
 import android.annotation.Nullable;
 import android.annotation.SystemApi;
 import android.os.Parcel;
 import android.os.Parcelable;
+import android.os.SystemClock;
 import android.view.autofill.AutofillId;
 
+import com.android.internal.util.Preconditions;
+
+import java.io.PrintWriter;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 
@@ -60,14 +65,14 @@ public final class ContentCaptureEvent implements Parcelable {
      *
      * <p>The metadata of the node is available through {@link #getViewNode()}.
      */
-    public static final int TYPE_VIEW_ADDED = 5;
+    public static final int TYPE_VIEW_APPEARED = 5;
 
     /**
      * Called when a node has been removed from the screen and is not visible to the user anymore.
      *
      * <p>The id of the node is available through {@link #getId()}.
      */
-    public static final int TYPE_VIEW_REMOVED = 6;
+    public static final int TYPE_VIEW_DISAPPEARED = 6;
 
     /**
      * Called when the text of a node has been changed.
@@ -85,8 +90,8 @@ public final class ContentCaptureEvent implements Parcelable {
             TYPE_ACTIVITY_PAUSED,
             TYPE_ACTIVITY_RESUMED,
             TYPE_ACTIVITY_STOPPED,
-            TYPE_VIEW_ADDED,
-            TYPE_VIEW_REMOVED,
+            TYPE_VIEW_APPEARED,
+            TYPE_VIEW_DISAPPEARED,
             TYPE_VIEW_TEXT_CHANGED
     })
     @Retention(RetentionPolicy.SOURCE)
@@ -95,7 +100,9 @@ public final class ContentCaptureEvent implements Parcelable {
     private final int mType;
     private final long mEventTime;
     private final int mFlags;
-
+    private @Nullable AutofillId mId;
+    private @Nullable ViewNode mNode;
+    private @Nullable CharSequence mText;
 
     /** @hide */
     public ContentCaptureEvent(int type, long eventTime, int flags) {
@@ -104,12 +111,42 @@ public final class ContentCaptureEvent implements Parcelable {
         mFlags = flags;
     }
 
+
+    /** @hide */
+    public ContentCaptureEvent(int type, int flags) {
+        this(type, SystemClock.uptimeMillis(), flags);
+    }
+
+    /** @hide */
+    public ContentCaptureEvent(int type) {
+        this(type, /* flags= */ 0);
+    }
+
+    /** @hide */
+    public ContentCaptureEvent setAutofillId(@NonNull AutofillId id) {
+        mId = Preconditions.checkNotNull(id);
+        return this;
+    }
+
+    /** @hide */
+    public ContentCaptureEvent setViewNode(@NonNull ViewNode node) {
+        mNode = Preconditions.checkNotNull(node);
+        return this;
+    }
+
+    /** @hide */
+    public ContentCaptureEvent setText(@Nullable CharSequence text) {
+        mText = text;
+        return this;
+    }
+
     /**
      * Gets the type of the event.
      *
      * @return one of {@link #TYPE_ACTIVITY_STARTED}, {@link #TYPE_ACTIVITY_RESUMED},
      * {@link #TYPE_ACTIVITY_PAUSED}, {@link #TYPE_ACTIVITY_STOPPED},
-     * {@link #TYPE_VIEW_ADDED}, {@link #TYPE_VIEW_REMOVED}, or {@link #TYPE_VIEW_TEXT_CHANGED}.
+     * {@link #TYPE_VIEW_APPEARED}, {@link #TYPE_VIEW_DISAPPEARED},
+     * or {@link #TYPE_VIEW_TEXT_CHANGED}.
      */
     public @EventType int getType() {
         return mType;
@@ -135,21 +172,21 @@ public final class ContentCaptureEvent implements Parcelable {
     /**
      * Gets the whole metadata of the node associated with the event.
      *
-     * <p>Only set on {@link #TYPE_VIEW_ADDED} events.
+     * <p>Only set on {@link #TYPE_VIEW_APPEARED} events.
      */
     @Nullable
     public ViewNode getViewNode() {
-        return null;
+        return mNode;
     }
 
     /**
      * Gets the {@link AutofillId} of the node associated with the event.
      *
-     * <p>Only set on {@link #TYPE_VIEW_REMOVED} and {@link #TYPE_VIEW_TEXT_CHANGED} events.
+     * <p>Only set on {@link #TYPE_VIEW_DISAPPEARED} and {@link #TYPE_VIEW_TEXT_CHANGED} events.
      */
     @Nullable
     public AutofillId getId() {
-        return null;
+        return mId;
     }
 
     /**
@@ -159,15 +196,40 @@ public final class ContentCaptureEvent implements Parcelable {
      */
     @Nullable
     public CharSequence getText() {
-        return null;
+        return mText;
+    }
+
+    /** @hide */
+    public void dump(@NonNull PrintWriter pw) {
+        pw.print("type="); pw.print(getTypeAsString(mType));
+        pw.print(", time="); pw.print(mEventTime);
+        if (mFlags > 0) {
+            pw.print(", flags="); pw.print(mFlags);
+        }
+        if (mId != null) {
+            pw.print(", id="); pw.print(mId);
+        }
+        if (mNode != null) {
+            pw.print(", id="); pw.print(mNode.getAutofillId());
+        }
     }
 
     @Override
     public String toString() {
         final StringBuilder string = new StringBuilder("ContentCaptureEvent[type=")
-                .append(getTypeAsString(mType)).append(", time=").append(mEventTime);
+                .append(getTypeAsString(mType));
         if (mFlags > 0) {
             string.append(", flags=").append(mFlags);
+        }
+        if (mId != null) {
+            string.append(", id=").append(mId);
+        }
+        if (mNode != null) {
+            final String className = mNode.getClassName();
+            if (mNode != null) {
+                string.append(", class=").append(className);
+            }
+            string.append(", id=").append(mNode.getAutofillId());
         }
         return string.append(']').toString();
     }
@@ -182,6 +244,9 @@ public final class ContentCaptureEvent implements Parcelable {
         parcel.writeInt(mType);
         parcel.writeLong(mEventTime);
         parcel.writeInt(mFlags);
+        parcel.writeParcelable(mId, flags);
+        ViewNode.writeToParcel(parcel, mNode, flags);
+        parcel.writeCharSequence(mText);
     }
 
     public static final Parcelable.Creator<ContentCaptureEvent> CREATOR =
@@ -192,7 +257,17 @@ public final class ContentCaptureEvent implements Parcelable {
             final int type = parcel.readInt();
             final long eventTime  = parcel.readLong();
             final int flags = parcel.readInt();
-            return new ContentCaptureEvent(type, eventTime, flags);
+            final ContentCaptureEvent event = new ContentCaptureEvent(type, eventTime, flags);
+            final AutofillId id = parcel.readParcelable(null);
+            if (id != null) {
+                event.setAutofillId(id);
+            }
+            final ViewNode node = ViewNode.readFromParcel(parcel);
+            if (node != null) {
+                event.setViewNode(node);
+            }
+            event.setText(parcel.readCharSequence());
+            return event;
         }
 
         @Override
@@ -200,7 +275,6 @@ public final class ContentCaptureEvent implements Parcelable {
             return new ContentCaptureEvent[size];
         }
     };
-
 
     /** @hide */
     public static String getTypeAsString(@EventType int type) {
@@ -213,10 +287,10 @@ public final class ContentCaptureEvent implements Parcelable {
                 return "ACTIVITY_PAUSED";
             case TYPE_ACTIVITY_STOPPED:
                 return "ACTIVITY_STOPPED";
-            case TYPE_VIEW_ADDED:
-                return "VIEW_ADDED";
-            case TYPE_VIEW_REMOVED:
-                return "VIEW_REMOVED";
+            case TYPE_VIEW_APPEARED:
+                return "VIEW_APPEARED";
+            case TYPE_VIEW_DISAPPEARED:
+                return "VIEW_DISAPPEARED";
             case TYPE_VIEW_TEXT_CHANGED:
                 return "VIEW_TEXT_CHANGED";
             default:

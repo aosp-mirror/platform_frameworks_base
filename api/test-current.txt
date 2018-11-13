@@ -1643,9 +1643,9 @@ package android.view {
   }
 
   public abstract interface WindowManager implements android.view.ViewManager {
-    method public abstract void setShouldShowIme(int, boolean);
-    method public abstract void setShouldShowWithInsecureKeyguard(int, boolean);
-    method public abstract void setShouldShowSystemDecors(int, boolean);
+    method public default void setShouldShowIme(int, boolean);
+    method public default void setShouldShowSystemDecors(int, boolean);
+    method public default void setShouldShowWithInsecureKeyguard(int, boolean);
   }
 
   public static class WindowManager.LayoutParams extends android.view.ViewGroup.LayoutParams implements android.os.Parcelable {

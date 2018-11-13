@@ -166,6 +166,7 @@ import android.view.inputmethod.ExtractedText;
 import android.view.inputmethod.ExtractedTextRequest;
 import android.view.inputmethod.InputConnection;
 import android.view.inputmethod.InputMethodManager;
+import android.view.intelligence.IntelligenceManager;
 import android.view.textclassifier.TextClassification;
 import android.view.textclassifier.TextClassificationContext;
 import android.view.textclassifier.TextClassificationManager;
@@ -947,6 +948,9 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         // TextView is important by default, unless app developer overrode attribute.
         if (getImportantForAutofill() == IMPORTANT_FOR_AUTOFILL_AUTO) {
             setImportantForAutofill(IMPORTANT_FOR_AUTOFILL_YES);
+        }
+        if (getImportantForContentCapture() == IMPORTANT_FOR_CONTENT_CAPTURE_AUTO) {
+            setImportantForContentCapture(IMPORTANT_FOR_CONTENT_CAPTURE_YES);
         }
 
         setTextInternal("");
@@ -6072,7 +6076,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         if (needEditableForNotification) {
             sendAfterTextChanged((Editable) text);
         } else {
-            notifyAutoFillManagerAfterTextChanged();
+            notifyManagersAfterTextChanged();
         }
 
         // SelectionModifierCursorController depends on textCanBeSelected, which depends on text
@@ -10121,23 +10125,33 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
         }
 
         // Always notify AutoFillManager - it will return right away if autofill is disabled.
-        notifyAutoFillManagerAfterTextChanged();
+        notifyManagersAfterTextChanged();
 
         hideErrorIfUnchanged();
     }
 
-    private void notifyAutoFillManagerAfterTextChanged() {
-        // It is important to not check whether the view is important for autofill
-        // since the user can trigger autofill manually on not important views.
-        if (!isAutofillable()) {
-            return;
-        }
-        final AutofillManager afm = mContext.getSystemService(AutofillManager.class);
-        if (afm != null) {
-            if (android.view.autofill.Helper.sVerbose) {
-                Log.v(LOG_TAG, "notifyAutoFillManagerAfterTextChanged");
+    private void notifyManagersAfterTextChanged() {
+
+        // Autofill
+        if (isAutofillable()) {
+            // It is important to not check whether the view is important for autofill
+            // since the user can trigger autofill manually on not important views.
+            final AutofillManager afm = mContext.getSystemService(AutofillManager.class);
+            if (afm != null) {
+                if (android.view.autofill.Helper.sVerbose) {
+                    Log.v(LOG_TAG, "notifyAutoFillManagerAfterTextChanged");
+                }
+                afm.notifyValueChanged(TextView.this);
             }
-            afm.notifyValueChanged(TextView.this);
+        }
+
+        // ContentCapture
+        if (isImportantForContentCapture() && isTextEditable()) {
+            final IntelligenceManager im = mContext.getSystemService(IntelligenceManager.class);
+            if (im != null && im.isContentCaptureEnabled()) {
+                // TODO(b/111276913): pass flags when edited by user / add CTS test
+                im.notifyViewTextChanged(getAutofillId(), getText(), /* flags= */ 0);
+            }
         }
     }
 
@@ -10900,21 +10914,33 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
     @Override
     public void onProvideStructure(ViewStructure structure) {
         super.onProvideStructure(structure);
-        onProvideAutoStructureForAssistOrAutofill(structure, false);
+        onProvideStructureForAssistOrAutofillOrViewCapture(structure, /* forAutofill = */ false,
+                /* forViewCapture= */ false);
     }
 
     @Override
     public void onProvideAutofillStructure(ViewStructure structure, int flags) {
         super.onProvideAutofillStructure(structure, flags);
-        onProvideAutoStructureForAssistOrAutofill(structure, true);
+        onProvideStructureForAssistOrAutofillOrViewCapture(structure, /* forAutofill = */ true,
+                /* forViewCapture= */ false);
     }
 
-    private void onProvideAutoStructureForAssistOrAutofill(ViewStructure structure,
-            boolean forAutofill) {
+    @Override
+    public boolean onProvideContentCaptureStructure(ViewStructure structure, int flags) {
+        final boolean notifyManager = super.onProvideContentCaptureStructure(structure, flags);
+        onProvideStructureForAssistOrAutofillOrViewCapture(structure, /* forAutofill = */ false,
+                /* forViewCapture= */ true);
+        return notifyManager;
+    }
+
+    private void onProvideStructureForAssistOrAutofillOrViewCapture(ViewStructure structure,
+            boolean forAutofill, boolean forViewCapture) {
         final boolean isPassword = hasPasswordTransformationMethod()
                 || isPasswordInputType(getInputType());
-        if (forAutofill) {
-            structure.setDataIsSensitive(!mTextSetFromXmlOrResourceId);
+        if (forAutofill || forViewCapture) {
+            if (forAutofill) {
+                structure.setDataIsSensitive(!mTextSetFromXmlOrResourceId);
+            }
             if (mTextId != ResourceId.ID_NULL) {
                 try {
                     structure.setTextIdEntry(getResources().getResourceEntryName(mTextId));
@@ -10927,7 +10953,7 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
             }
         }
 
-        if (!isPassword || forAutofill) {
+        if (!isPassword || forAutofill || forViewCapture) {
             if (mLayout == null) {
                 assumeLayout();
             }
@@ -11043,7 +11069,8 @@ public class TextView extends View implements ViewTreeObserver.OnPreDrawListener
                 // of the View (and can be any drawable) or a BackgroundColorSpan inside the text.
                 structure.setTextStyle(getTextSize(), getCurrentTextColor(),
                         AssistStructure.ViewNode.TEXT_COLOR_UNDEFINED /* bgColor */, style);
-            } else {
+            }
+            if (forAutofill || forViewCapture) {
                 structure.setMinTextEms(getMinEms());
                 structure.setMaxTextEms(getMaxEms());
                 int maxLength = -1;

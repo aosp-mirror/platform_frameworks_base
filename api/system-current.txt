@@ -7005,8 +7005,8 @@ package android.view.intelligence {
     field public static final int TYPE_ACTIVITY_RESUMED = 2; // 0x2
     field public static final int TYPE_ACTIVITY_STARTED = 1; // 0x1
     field public static final int TYPE_ACTIVITY_STOPPED = 4; // 0x4
-    field public static final int TYPE_VIEW_ADDED = 5; // 0x5
-    field public static final int TYPE_VIEW_REMOVED = 6; // 0x6
+    field public static final int TYPE_VIEW_APPEARED = 5; // 0x5
+    field public static final int TYPE_VIEW_DISAPPEARED = 6; // 0x6
     field public static final int TYPE_VIEW_TEXT_CHANGED = 7; // 0x7
   }
 
