@@ -211,29 +211,30 @@ public class ServiceState implements Parcelable {
             ROAMING_TYPE_INTERNATIONAL
     })
     public @interface RoamingType {}
+
     /**
-     * Roaming type
-     * HOME : in home network
+     * Not roaming, registered in home network.
      * @hide
      */
+    @SystemApi
     public static final int ROAMING_TYPE_NOT_ROAMING = 0;
     /**
-     * Roaming type
-     * UNKNOWN : in a roaming network, but we can not tell if it's domestic or international
+     * registered in a roaming network, but can not tell if it's domestic or international.
      * @hide
      */
+    @SystemApi
     public static final int ROAMING_TYPE_UNKNOWN = 1;
     /**
-     * Roaming type
-     * DOMESTIC : in domestic roaming network
+     * registered in a domestic roaming network
      * @hide
      */
+    @SystemApi
     public static final int ROAMING_TYPE_DOMESTIC = 2;
     /**
-     * Roaming type
-     * INTERNATIONAL : in international roaming network
+     * registered in an international roaming network
      * @hide
      */
+    @SystemApi
     public static final int ROAMING_TYPE_INTERNATIONAL = 3;
 
     /**
