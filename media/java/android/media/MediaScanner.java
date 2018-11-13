@@ -1632,7 +1632,7 @@ public class MediaScanner implements AutoCloseable {
             selectionArgs = new String[] { path };
             c = mMediaProvider.query(mFilesUriNoNotify, FILES_PRESCAN_PROJECTION,
                     where, selectionArgs, null, null);
-            if (c.moveToFirst()) {
+            if (c != null && c.moveToFirst()) {
                 long rowId = c.getLong(FILES_PRESCAN_ID_COLUMN_INDEX);
                 long lastModified = c.getLong(FILES_PRESCAN_DATE_MODIFIED_COLUMN_INDEX);
                 int format = c.getInt(FILES_PRESCAN_FORMAT_COLUMN_INDEX);
