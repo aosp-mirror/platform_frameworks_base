@@ -175,7 +175,7 @@ public abstract class AutofillFieldClassificationService extends Service {
     public float[][] onGetScores(@Nullable String algorithm,
             @Nullable Bundle algorithmOptions, @NonNull List<AutofillValue> actualValues,
             @NonNull List<String> userDataValues) {
-        Log.e(TAG, "service implementation (" + getClass() + " does not implement onGetScore()");
+        Log.e(TAG, "service implementation (" + getClass() + " does not implement onGetScores()");
         return null;
     }
 

@@ -84,6 +84,7 @@ public final class FillResponse implements Parcelable {
     private final @Nullable AutofillId[] mFieldClassificationIds;
     private final int mFlags;
     private int mRequestId;
+    private final @Nullable UserData mUserData;
 
     private FillResponse(@NonNull Builder builder) {
         mDatasets = (builder.mDatasets != null) ? new ParceledListSlice<>(builder.mDatasets) : null;
@@ -99,6 +100,7 @@ public final class FillResponse implements Parcelable {
         mFieldClassificationIds = builder.mFieldClassificationIds;
         mFlags = builder.mFlags;
         mRequestId = INVALID_REQUEST_ID;
+        mUserData = builder.mUserData;
     }
 
     /** @hide */
@@ -157,6 +159,11 @@ public final class FillResponse implements Parcelable {
     }
 
     /** @hide */
+    public @Nullable UserData getUserData() {
+        return mUserData;
+    }
+
+    /** @hide */
     @TestApi
     public int getFlags() {
         return mFlags;
@@ -198,6 +205,7 @@ public final class FillResponse implements Parcelable {
         private AutofillId[] mFieldClassificationIds;
         private int mFlags;
         private boolean mDestroyed;
+        private UserData mUserData;
 
         /**
          * Triggers a custom UI before before autofilling the screen with any data set in this
@@ -506,6 +514,21 @@ public final class FillResponse implements Parcelable {
         }
 
         /**
+         * Sets a specific {@link UserData} for field classification for this request only.
+         *
+         * @return this builder
+         * @throws IllegalStateException if the FillResponse
+         * {@link #setAuthentication(AutofillId[], IntentSender, RemoteViews)
+         * requires authentication}.
+         */
+        public Builder setUserData(@NonNull UserData userData) {
+            throwIfDestroyed();
+            throwIfAuthenticationCalled();
+            mUserData = Preconditions.checkNotNull(userData);
+            return this;
+        }
+
+        /**
          * Builds a new {@link FillResponse} instance.
          *
          * @throws IllegalStateException if any of the following conditions occur:
@@ -599,6 +622,9 @@ public final class FillResponse implements Parcelable {
         if (mFieldClassificationIds != null) {
             builder.append(Arrays.toString(mFieldClassificationIds));
         }
+        if (mUserData != null) {
+            builder.append(", userData=").append(mUserData);
+        }
         return builder.append("]").toString();
     }
 
@@ -621,6 +647,7 @@ public final class FillResponse implements Parcelable {
         parcel.writeParcelable(mPresentation, flags);
         parcel.writeParcelable(mHeader, flags);
         parcel.writeParcelable(mFooter, flags);
+        parcel.writeParcelable(mUserData, flags);
         parcel.writeParcelableArray(mIgnoredIds, flags);
         parcel.writeLong(mDisableDuration);
         parcel.writeParcelableArray(mFieldClassificationIds, flags);
@@ -660,6 +687,10 @@ public final class FillResponse implements Parcelable {
             final RemoteViews footer = parcel.readParcelable(null);
             if (footer != null) {
                 builder.setFooter(footer);
+            }
+            final UserData userData = parcel.readParcelable(null);
+            if (userData != null) {
+                builder.setUserData(userData);
             }
 
             builder.setIgnoredIds(parcel.readParcelableArray(null, AutofillId.class));
