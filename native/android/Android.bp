@@ -81,6 +81,8 @@ cc_library_shared {
     export_static_lib_headers: ["libarect"],
 
     include_dirs: ["bionic/libc/dns/include"],
+
+    version_script: "libandroid.map.txt",
 }
 
 // Network library.
