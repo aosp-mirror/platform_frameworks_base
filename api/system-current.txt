@@ -4109,6 +4109,7 @@ package android.os {
   }
 
   public final class PowerManager {
+    method public void dream(long);
     method public int getPowerSaveMode();
     method public boolean setDynamicPowerSavings(boolean, int);
     method public boolean setPowerSaveMode(boolean);
