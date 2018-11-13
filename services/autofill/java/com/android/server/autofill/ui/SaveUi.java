@@ -339,8 +339,8 @@ final class SaveUi {
 
         try {
             // Create the remote view peer.
-            template.setApplyTheme(mThemeId);
-            final View customSubtitleView = template.apply(context, null, handler);
+            final View customSubtitleView = template.applyWithTheme(
+                    context, null, handler, mThemeId);
 
             // Apply batch updates (if any).
             final ArrayList<Pair<InternalValidator, BatchUpdates>> updates =
